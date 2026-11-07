@@ -61,10 +61,10 @@ struct FrameApplierBatchTests {
         applier.applyInstant(w2, rect, setSize: true)
         applier.applyInstant(w1, rect, setSize: false)
         await drain()
-        #expect(log.all == ["off", "frame", "frame", "position", "on"])
+        expectEqual(log.all, ["off", "frame", "frame", "position", "on"])
         applier.applyInstant(w1, rect, setSize: true)
         await drain()
-        #expect(log.all.suffix(3) == ["off", "frame", "on"])
+        expectEqual(log.all.suffix(3), ["off", "frame", "on"])
     }
 
     @Test("An app the loop has not warmed is never toggled")
@@ -75,7 +75,7 @@ struct FrameApplierBatchTests {
         applier.applyInstant(w1, rect, setSize: true)
         applier.endAnimating(w2)
         await drain()
-        #expect(log.all == ["frame"])
+        expectEqual(log.all, ["frame"])
     }
 
     @Test("An animation's hold outlasts the instant batch inside it")
@@ -85,10 +85,10 @@ struct FrameApplierBatchTests {
         applier.beginAnimating(w2)
         applier.applyInstant(w1, rect, setSize: true)
         await drain()
-        #expect(log.all == ["off", "frame"])
+        expectEqual(log.all, ["off", "frame"])
         applier.endAnimating(w2)
         await drain()
-        #expect(log.all == ["off", "frame", "on"])
+        expectEqual(log.all, ["off", "frame", "on"])
     }
 
     /// An animation ending and the next starting in one main
@@ -104,7 +104,7 @@ struct FrameApplierBatchTests {
         applier.beginAnimating(w2)
         applier.endAnimating(w2)
         await drain()
-        #expect(log.all == ["off", "on", "off", "on"])
+        expectEqual(log.all, ["off", "on", "off", "on"])
     }
 
     @Test("A hold open across a retirement restores what the loop left")
@@ -117,7 +117,7 @@ struct FrameApplierBatchTests {
             applier.retireApp(getpid(), leftOn: leftOn)
             applier.endAnimating(w2)
             await drain()
-            #expect(log.all == (leftOn ? ["off", "on"] : ["off"]))
+            expectEqual(log.all, (leftOn ? ["off", "on"] : ["off"]))
         }
     }
 
@@ -135,14 +135,14 @@ struct FrameApplierBatchTests {
         core.eventLoop.writeEnhancedUI = { _, _ in }
         applier.applyInstant(w1, rect, setSize: true)
         await drain()
-        #expect(log.all == ["frame"])
+        expectEqual(log.all, ["frame"])
         core.eventLoop.enhancedUIBaselines[pid] = false
         applier.beginAnimating(w2)
         await drain()
         core.eventLoop.detach(pid: pid, restoreEnhancedUI: true)
         applier.endAnimating(w2)
         await drain()
-        #expect(log.all == ["frame", "off"])
+        expectEqual(log.all, ["frame", "off"])
         // `stop` retires every baseline the same way.
         core.eventLoop.enhancedUIBaselines[pid] = false
         applier.beginAnimating(w2)
@@ -151,7 +151,7 @@ struct FrameApplierBatchTests {
         core.eventLoop.stop()
         applier.endAnimating(w2)
         await drain()
-        #expect(log.all == ["frame", "off", "off"])
+        expectEqual(log.all, ["frame", "off", "off"])
     }
 
     /// The consumer: a Space switch's park through the real
@@ -193,8 +193,8 @@ struct FrameApplierBatchTests {
     func rightParkIsPositionOnly() async {
         let log = await switchCounts(neighbor: false)
         // w2 is placed (sized); w1 leaves view and parks.
-        #expect(log.count("frame") == 1)
-        #expect(log.count("position") == 1)
+        expectEqual(log.count("frame"), 1)
+        expectEqual(log.count("position"), 1)
     }
 
     @Test(
@@ -203,7 +203,7 @@ struct FrameApplierBatchTests {
     )
     func leftParkIsSized() async {
         let log = await switchCounts(neighbor: true)
-        #expect(log.count("frame") == 2)
-        #expect(log.count("position") == 0)
+        expectEqual(log.count("frame"), 2)
+        expectEqual(log.count("position"), 0)
     }
 }

@@ -91,7 +91,7 @@ struct ProfileSaveAsymmetryTests {
         try core.persistProfile(named: "Work", modes: nil)
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.layers == layersOverride)
+        expectEqual(saved.layers, layersOverride)
     }
 
     @Test("Live-adopt preserves the profile's app-rule override")
@@ -106,7 +106,7 @@ struct ProfileSaveAsymmetryTests {
         try core.persistProfile(named: "Work", modes: nil)
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.appRules == rules)
+        expectEqual(saved.appRules, rules)
     }
 
     @Test("Live-adopt preserves float and ignore overrides")
@@ -128,8 +128,8 @@ struct ProfileSaveAsymmetryTests {
         try core.persistProfile(named: "Work", modes: nil)
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.floatRules == floats)
-        #expect(saved.ignoreRules == ignores)
+        expectEqual(saved.floatRules, floats)
+        expectEqual(saved.ignoreRules, ignores)
     }
 
     @Test("buildProfile never fabricates the override diffs")

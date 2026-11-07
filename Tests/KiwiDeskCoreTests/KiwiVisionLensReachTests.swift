@@ -62,11 +62,11 @@ struct KiwiVisionLensReachTests {
         var heard: [VisionChangeCause?] = []
         core.vision.onChange = { _, cause in heard.append(cause) }
         load(core, "Studio")
-        #expect(core.kiwiVisionActive == .off)
-        #expect(heard == [.outOfReach(lens: "Writing", profile: "Studio")])
+        expectEqual(core.kiwiVisionActive, .off)
+        expectEqual(heard, [.outOfReach(lens: "Writing", profile: "Studio")])
         // A switch back is no press (ruling 16).
         load(core, "Laptop")
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
     }
 
     @Test("a switch the lens reaches keeps it on, silently")
@@ -77,8 +77,8 @@ struct KiwiVisionLensReachTests {
         var heard = 0
         core.vision.onChange = { _, _ in heard += 1 }
         load(core, "Desk")
-        #expect(core.kiwiVisionActive == .lens("Writing"))
-        #expect(heard == 0)
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
+        expectEqual(heard, 0)
     }
 
     @Test("plain KiwiVision stays on across every switch")
@@ -87,7 +87,7 @@ struct KiwiVisionLensReachTests {
         load(core, "Laptop")
         core.setKiwiVision(.plain)
         load(core, "Studio")
-        #expect(core.kiwiVisionActive == .plain)
+        expectEqual(core.kiwiVisionActive, .plain)
     }
 
     /// Ruling 38: an "Applies to" edit writes the live file, and the
@@ -98,7 +98,7 @@ struct KiwiVisionLensReachTests {
         load(core, "Laptop")
         core.setKiwiVision(.lens("Writing"))
         try core.profiles.write(profile("Laptop", leavesOut: "Writing"))
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
     }
 
     @Test("the pick, the toggle and the chips refuse out of reach")
@@ -106,13 +106,13 @@ struct KiwiVisionLensReachTests {
         let core = try makeCore()
         load(core, "Studio")
         core.setKiwiVision(.lens("Writing"))
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
         let toggle = core.execute(
             "kiwivision.toggle",
             args: [.string("Writing")]
         )
         #expect(!toggle.isSuccess)
-        #expect(toggle.error == "Writing does not reach Studio")
+        expectEqual(toggle.error, "Writing does not reach Studio")
         #expect(
             core.kiwiVisionLensChoices == [
                 VisionLensChoice(
@@ -132,9 +132,9 @@ struct KiwiVisionLensReachTests {
         var heard = 0
         core.vision.onReachChange = { heard += 1 }
         try core.profiles.write(profile("Desk", leavesOut: "Writing"))
-        #expect(heard == 0)
+        expectEqual(heard, 0)
         try core.profiles.write(profile("Laptop", leavesOut: "Writing"))
-        #expect(heard == 1)
+        expectEqual(heard, 1)
     }
 
     /// Ruling 40: a load that hands a Lua-owned setup to the GUI
@@ -157,13 +157,13 @@ struct KiwiVisionLensReachTests {
         #expect(!core.isGuiManaged)
         load(core, "Studio")
         core.setKiwiVision(.lens("Writing"))
-        #expect(core.kiwiVisionActive == .lens("Writing"))
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
         let before = core.appWide
         try FileManager.default.removeItem(at: core.configURL)
         core.loadConfig()
         #expect(core.isGuiManaged)
-        #expect(core.appWide == before)
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.appWide, before)
+        expectEqual(core.kiwiVisionActive, .off)
     }
 
     /// Rulings 38 and 40: nothing is stored for a built-in, and a
@@ -172,10 +172,10 @@ struct KiwiVisionLensReachTests {
     func reachEverything() throws {
         let fresh = try makeCore()
         fresh.setKiwiVision(.lens("Writing"))
-        #expect(fresh.kiwiVisionActive == .lens("Writing"))
+        expectEqual(fresh.kiwiVisionActive, .lens("Writing"))
         let lua = try makeCore(guiManaged: false)
         load(lua, "Studio")
         lua.setKiwiVision(.lens("Writing"))
-        #expect(lua.kiwiVisionActive == .lens("Writing"))
+        expectEqual(lua.kiwiVisionActive, .lens("Writing"))
     }
 }

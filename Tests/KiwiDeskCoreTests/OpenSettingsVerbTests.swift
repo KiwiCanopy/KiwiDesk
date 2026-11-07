@@ -40,6 +40,6 @@ struct OpenSettingsVerbTests {
         // verb into a reporting no-op rather than a Lua error,
         // so dropping the registration still runs clean
         // (guard-prover, 2026-08-12).
-        #expect(fired == 1)
+        expectEqual(fired, 1)
     }
 }

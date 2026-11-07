@@ -18,8 +18,8 @@ struct PythonSourceIsolationTests {
         )
         #expect(run.status == 0, "\(run.stderr)")
         let lines = run.stdout.split(separator: "\n").map(String.init)
-        #expect(lines.count == 2)
-        #expect(lines.last == #"["script.py"]"#)
+        expectEqual(lines.count, 2)
+        expectEqual(lines.last, #"["script.py"]"#)
         // And it is gone once the run returns.
         if let directory = lines.first {
             #expect(!FileManager.default.fileExists(atPath: directory))

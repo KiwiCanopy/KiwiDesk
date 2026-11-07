@@ -49,8 +49,8 @@ struct BarPeekMorphTests {
             edge: .top,
             room: room
         )
-        #expect(list.maxY == topPill.maxY)
-        #expect(list.midX == topPill.midX)
+        expectEqual(list.maxY, topPill.maxY)
+        expectEqual(list.midX, topPill.midX)
         #expect(list.contains(topPill))
     }
 
@@ -63,8 +63,8 @@ struct BarPeekMorphTests {
             edge: .bottom,
             room: room
         )
-        #expect(list.minY == pill.minY)
-        #expect(list.midX == pill.midX)
+        expectEqual(list.minY, pill.minY)
+        expectEqual(list.midX, pill.midX)
         #expect(!BarPeekMorph.headerAtTop(.bottom))
     }
 
@@ -79,15 +79,15 @@ struct BarPeekMorphTests {
             edge: .top,
             room: room
         )
-        #expect(list.minX == room.minX)
+        expectEqual(list.minX, room.minX)
         let count = BarPeekMorph.count(
             width: pill.width,
             pill: pill,
             list: list,
             edge: .top
         )
-        #expect(count.minX + list.minX == pill.minX)
-        #expect(count.maxY == list.height)
+        expectEqual(count.minX + list.minX, pill.minX)
+        expectEqual(count.maxY, list.height)
     }
 
     /// The header sits on the pill on a side end too, so the count
@@ -102,15 +102,15 @@ struct BarPeekMorphTests {
             edge: .right,
             room: room
         )
-        #expect(list.maxX == pill.maxX)
-        #expect(list.maxY == pill.maxY)
+        expectEqual(list.maxX, pill.maxX)
+        expectEqual(list.maxY, pill.maxY)
         let count = BarPeekMorph.count(
             width: pill.width,
             pill: pill,
             list: list,
             edge: .right
         )
-        #expect(count.offsetBy(dx: list.minX, dy: list.minY) == pill)
+        expectEqual(count.offsetBy(dx: list.minX, dy: list.minY), pill)
         let left = CGRect(x: 100, y: 391, width: 18, height: 18)
         #expect(
             BarPeekMorph.listFrame(
@@ -161,7 +161,7 @@ struct BarPeekMorphTests {
             edge: .right,
             room: room
         )
-        #expect(list.maxY == pill.maxY)
+        expectEqual(list.maxY, pill.maxY)
         #expect(list.minY >= room.minY)
     }
 

@@ -22,7 +22,7 @@ struct StackFlipLifetimeTests {
             _ = core.execute(verb, args: [.string("1")])
             _ = core.execute(verb, args: [.string("2")])
         }
-        #expect(flips(core) == 4)
+        expectEqual(flips(core), 4)
         return core
     }
 
@@ -34,7 +34,7 @@ struct StackFlipLifetimeTests {
     func globalSetterClears() throws {
         let core = try flipped()
         _ = core.execute("stack.set_stack_position", args: [.string("left")])
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     @Test("the override setter ends one Space's, on every Desktop")
@@ -44,10 +44,10 @@ struct StackFlipLifetimeTests {
             "stack.set_stack_position_override",
             args: [.string("1"), .string("bottom")]
         )
-        #expect(flips(core) == 2)
+        expectEqual(flips(core), 2)
         for desktop: SkyLight.SpaceID in [10, 11] {
             #expect(core.desktopMemory.stackFlips[desktop]?["1"] == nil)
-            #expect(core.desktopMemory.stackFlips[desktop]?["2"] == .left)
+            expectEqual(core.desktopMemory.stackFlips[desktop]?["2"], .left)
         }
     }
 
@@ -58,14 +58,14 @@ struct StackFlipLifetimeTests {
             "stack.set_master_count_override",
             args: [.string("1"), .number(2)]
         )
-        #expect(flips(core) == 4)
+        expectEqual(flips(core), 4)
     }
 
     @Test("load_profile ends every flip")
     func loadClears() throws {
         let core = try flipped()
         KeepFixture.load("Work", core)
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     @Test("an in-effect re-apply ends every flip; an event keeps it")
@@ -73,11 +73,11 @@ struct StackFlipLifetimeTests {
         let core = try flipped()
         let work = try core.profiles.read(name: "Work")
         core.apply(profile: work, cause: .event)
-        #expect(flips(core) == 4)
+        expectEqual(flips(core), 4)
         core.apply(profile: work, cause: .monitorChange)
-        #expect(flips(core) == 4)
+        expectEqual(flips(core), 4)
         core.apply(profile: work, cause: .explicit)
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     /// An in-effect edit's re-apply forces like a load (#2921's
@@ -86,7 +86,7 @@ struct StackFlipLifetimeTests {
     func editCauseForces() throws {
         let core = try flipped()
         core.reapplyIfInEffect("Work")
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     @Test("a forced Standard apply ends every flip; an unforced keeps")
@@ -102,14 +102,14 @@ struct StackFlipLifetimeTests {
         core.apply(composed: composed, forceRetile: false)
         #expect(flips(core) > 0)
         core.apply(composed: composed, forceRetile: true)
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     @Test("a Settings save of the live profile ends every flip")
     func settingsSaveClears() throws {
         let core = try flipped()
         core.applyProfileScopedState(from: core.loadGuiConfig())
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     @Test("a config reload ends every flip")
@@ -122,7 +122,7 @@ struct StackFlipLifetimeTests {
         core.loadConfig()
         #expect(core.profiles.currentName == nil)
         #expect(core.profiles.currentStandard == nil)
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 
     @Test("a mode change and reset_layout_sizing keep it")
@@ -130,18 +130,18 @@ struct StackFlipLifetimeTests {
         let core = try flipped()
         _ = core.execute("set_mode", args: [.string("bsp")])
         _ = core.execute("reset_layout_sizing", args: [.string("all")])
-        #expect(flips(core) == 4)
+        expectEqual(flips(core), 4)
     }
 
     @Test("a renumber carries the flip; the drop ends it")
     func renumberAndDrop() throws {
         let core = try flipped()
         core.rekeyStackFlips("2", to: "7")
-        #expect(core.desktopMemory.stackFlips[10]?["7"] == .left)
+        expectEqual(core.desktopMemory.stackFlips[10]?["7"], .left)
         #expect(core.desktopMemory.stackFlips[10]?["2"] == nil)
         core.state.workspaces.ensureSpace("7", mode: .stack)
         core.forwardWindows(of: "7", to: "1")
-        #expect(flips(core) == 2)
+        expectEqual(flips(core), 2)
         #expect(core.desktopMemory.stackFlips[11]?["7"] == nil)
     }
 
@@ -149,6 +149,6 @@ struct StackFlipLifetimeTests {
     func resetClears() throws {
         let core = try flipped()
         core.discardSavedArrangement()
-        #expect(flips(core) == 0)
+        expectEqual(flips(core), 0)
     }
 }

@@ -67,13 +67,13 @@ struct ActivationReReportTests {
     func reReportSuppressed() {
         let core = makeCore()
         seedHiddenSibling(core)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
         core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         // No focus-follow scheduled, focus stays reverted.
         #expect(core.deferred.task(for: .focusFollow) == nil)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
     }
 
     /// Stamps are never consumed (#887), so "not our raise" is
@@ -92,7 +92,7 @@ struct ActivationReReportTests {
         core.selfRaiseStamps[WindowID(1)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) != nil)
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     @Test("A sibling raise newer than the report's own distrusts")
@@ -106,7 +106,7 @@ struct ActivationReReportTests {
         core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     /// Control: with no recent same-app raise, the same report
@@ -158,7 +158,7 @@ struct ActivationReReportTests {
         // Both on the active space; 2 focused and stamped.
         core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     /// Spaces 1 (active) and 2 shown on two different fake
@@ -204,8 +204,8 @@ struct ActivationReReportTests {
         core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
     }
 
     /// The click discriminator (#496): the same other-display
@@ -229,7 +229,7 @@ struct ActivationReReportTests {
             nil
         )
         core.handle(.windowFocused(WindowID(1)))
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
         #expect(core.deferred.task(for: .focusFollow) != nil)
     }
 
@@ -260,6 +260,6 @@ struct ActivationReReportTests {
         core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(3)))
         // Honored: the sticky becomes the real focus.
-        #expect(core.state.workspaces.lastFocused == WindowID(3))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(3))
     }
 }

@@ -52,7 +52,7 @@ struct GuessedAppsTests {
     func guessesFile() {
         let fixed = loop(.regular)
         recheck(fixed, .fixedSize)
-        #expect(apps(fixed) == [Self.steam])
+        expectEqual(apps(fixed), [Self.steam])
         for reason: AutoFloatReason? in [.panel, .rule, nil] {
             let other = loop(.regular)
             recheck(other, reason)
@@ -71,11 +71,11 @@ struct GuessedAppsTests {
             guess: FloatGuess(tileRules: [Self.steam])
         )
         recheck(ruled, nil)
-        #expect(apps(ruled) == [Self.steam])
+        expectEqual(apps(ruled), [Self.steam])
         let off = loop(.accessory)
         off.floatRules = FloatRules([], guess: FloatGuess(enabled: false))
         recheck(off, nil)
-        #expect(apps(off) == [Self.steam])
+        expectEqual(apps(off), [Self.steam])
     }
 
     /// A fixed size is read only where the live guess asks, so an
@@ -97,11 +97,11 @@ struct GuessedAppsTests {
         guessed.note(bundleID: "A.App", name: "A")
         guessed.note(bundleID: "b.app", name: "B")
         guessed.note(bundleID: "a.app", name: "A")
-        #expect(guessed.entries.map(\.bundleID) == ["a.app", "b.app"])
+        expectEqual(guessed.entries.map(\.bundleID), ["a.app", "b.app"])
         for index in 0..<GuessedApps.cap {
             guessed.note(bundleID: "app\(index)", name: "\(index)")
         }
-        #expect(guessed.entries.count == GuessedApps.cap)
+        expectEqual(guessed.entries.count, GuessedApps.cap)
         #expect(!guessed.entries.contains { $0.bundleID == "b.app" })
         #expect(guessed.entries.first?.bundleID == "app\(GuessedApps.cap - 1)")
     }
@@ -126,11 +126,11 @@ struct GuessedAppsTests {
         )
         core.eventLoop.detectedFloating[id] = .floats(.accessoryApp)
         let apps = core.guessedFloatApps()
-        #expect(apps.map(\.bundleID) == [Self.steam, "gone.app", "old.app"])
-        #expect(apps.first?.titles == ["Steam"])
+        expectEqual(apps.map(\.bundleID), [Self.steam, "gone.app", "old.app"])
+        expectEqual(apps.first?.titles, ["Steam"])
         #expect(apps.dropFirst().allSatisfy { $0.titles.isEmpty })
         core.eventLoop.detectedFloating[id] = .floats(.panel)
-        #expect(core.guessedFloatApps().first?.bundleID == "gone.app")
+        expectEqual(core.guessedFloatApps().first?.bundleID, "gone.app")
     }
 
     /// The cap drops only the store's record: a window still
@@ -163,8 +163,8 @@ struct GuessedAppsTests {
         core.eventLoop.guessedApps.note(bundleID: "kept.app", name: "Kept")
         let apps = core.guessedFloatApps()
         // The recorded open app leads; the evicted one follows it.
-        #expect(apps.map(\.bundleID) == ["kept.app", Self.steam])
-        #expect(apps.last?.name == "Steam Helper")
-        #expect(apps.last?.titles == ["Steam"])
+        expectEqual(apps.map(\.bundleID), ["kept.app", Self.steam])
+        expectEqual(apps.last?.name, "Steam Helper")
+        expectEqual(apps.last?.titles, ["Steam"])
     }
 }

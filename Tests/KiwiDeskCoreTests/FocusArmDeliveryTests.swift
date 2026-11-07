@@ -178,7 +178,7 @@ struct FocusArmDeliveryTests {
         // loop-side contract is that ONLY a stamp drops.
         #expect(loop.lastCommandedFocus == nil)
         box.drainOne()
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
     }
 
     @Test("A command before the report leaves it standing")
@@ -187,6 +187,6 @@ struct FocusArmDeliveryTests {
         loop.lastCommandedFocus = .now
         report(loop)
         box.drainOne()
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
     }
 }

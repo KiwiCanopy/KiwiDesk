@@ -85,7 +85,7 @@ struct PaletteHighlightRoleTests {
     @Test("The shipped defaults carry one accent")
     func shippedDefaultsAgree() {
         let shelf = TilingSettings().kiwishelf
-        #expect(shelf.highlightColor == shelf.activeItemColor)
+        expectEqual(shelf.highlightColor, shelf.activeItemColor)
     }
 
     /// The instrument, before the measurement that uses it.

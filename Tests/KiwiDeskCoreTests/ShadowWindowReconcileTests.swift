@@ -148,7 +148,7 @@ struct ShadowWindowReconcileTests {
         let (loop, box) = makeLoop([host, twin])
         loop.elements[pid] = [host.id: element(0), twin.id: element(1)]
         #expect(retire(loop, box, [0, 1]))
-        #expect(box.hidden == [twin.id])
+        expectEqual(box.hidden, [twin.id])
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[twin.id] == nil)
         #expect(loop.elements[pid]?[host.id] != nil)
@@ -168,7 +168,7 @@ struct ShadowWindowReconcileTests {
         ]
         #expect(retire(loop, box, [0, 1, 2]))
         #expect(box.hidden.isEmpty)
-        #expect(loop.elements[pid]?.count == 3)
+        expectEqual(loop.elements[pid]?.count, 3)
     }
 
     @Test("only a tracked window the pass listed is read, once")
@@ -179,7 +179,7 @@ struct ShadowWindowReconcileTests {
         let (loop, box) = makeLoop([host, away, untracked])
         loop.elements[pid] = [host.id: element(0), away.id: element(1)]
         #expect(retire(loop, box, [0, 2]))
-        #expect(box.traitReads == [host.id])
+        expectEqual(box.traitReads, [host.id])
         #expect(box.hidden.isEmpty)
     }
 
@@ -210,13 +210,13 @@ struct ShadowWindowReconcileTests {
         }
         loop.bootScan.stepBudget = .milliseconds(500)
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.traitReads.count == 1)
+        expectEqual(box.traitReads.count, 1)
         #expect(loop.takeDeferredBootApps().keys.contains(pid))
         // Outside a queued step the same reads never defer.
         loop.bootScan.stepBudget = nil
         box.traitReads = []
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.traitReads.count == 2)
+        expectEqual(box.traitReads.count, 2)
         #expect(loop.takeDeferredBootApps().isEmpty)
     }
 

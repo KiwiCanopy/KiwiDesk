@@ -43,16 +43,16 @@ struct TemporarySpaceScopeTests {
             ).isSuccess
         )
         #expect(!core.isTemporary(SpaceID(7)))
-        #expect(told == [true])
+        expectEqual(told, [true])
         let stored = try core.profiles.read(name: "desk")
-        #expect(stored.spaces == (1...4).map { SpaceID($0) } + [SpaceID(7)])
-        #expect(stored.spaceModes[SpaceID(7)] == .monocle)
+        expectEqual(stored.spaces, (1...4).map { SpaceID($0) } + [SpaceID(7)])
+        expectEqual(stored.spaceModes[SpaceID(7)], .monocle)
         let set = try #require(
             stored.set(matching: core.liveFingerprints)
         )
-        #expect(set.spaceMonitorMap[SpaceID(7)] == desk.dell.fingerprint)
+        expectEqual(set.spaceMonitorMap[SpaceID(7)], desk.dell.fingerprint)
         let declared = core.profiles.active?.declaredSpaces
-        #expect(declared?.contains(SpaceID(7)) == true)
+        expectEqual(declared?.contains(SpaceID(7)), true)
     }
 
     @Test("a Space made with profile never becomes temporary")
@@ -62,10 +62,10 @@ struct TemporarySpaceScopeTests {
             "create_space",
             args: [.string("8"), .string("stack"), .string("profile")]
         )
-        #expect(core.state.workspaces[SpaceID(8)]?.mode == .stack)
+        expectEqual(core.state.workspaces[SpaceID(8)]?.mode, .stack)
         #expect(!core.isTemporary(SpaceID(8)))
         let stored = try core.profiles.read(name: "desk")
-        #expect(stored.spaceModes[SpaceID(8)] == .stack)
+        expectEqual(stored.spaceModes[SpaceID(8)], .stack)
     }
 
     @Test("profile refuses a Space another source declares, naming it")
@@ -77,7 +77,7 @@ struct TemporarySpaceScopeTests {
             args: [.string("8"), .string("profile")]
         )
         #expect(!reply.isSuccess)
-        #expect(reply.error?.contains("init.lua") == true)
+        expectEqual(reply.error?.contains("init.lua"), true)
         #expect(core.state.workspaces[SpaceID(8)] == nil)
     }
 
@@ -141,7 +141,7 @@ struct TemporarySpaceScopeTests {
         draft.spaces = (1...4).map { SpaceID($0) }
         core.onLiveProfileWritten = { edit, _ in draft.apply(edit) }
         #expect(core.addSpaceToProfile(SpaceID(7)))
-        #expect(draft.spaces.last == SpaceID(7))
+        expectEqual(draft.spaces.last, SpaceID(7))
         #expect(!core.addSpaceToProfile(SpaceID(7)), "no longer temporary")
     }
 
@@ -176,8 +176,8 @@ struct TemporarySpaceScopeTests {
             profile.apply(edit, monitors: ["DELL:1920x1080"])
             draft.apply(edit)
         }
-        #expect(profile.spaces == draft.spaces)
-        #expect(profile.spaces == [SpaceID(1), SpaceID(7)])
+        expectEqual(profile.spaces, draft.spaces)
+        expectEqual(profile.spaces, [SpaceID(1), SpaceID(7)])
         #expect(profile.spaceModes[SpaceID(7)] == draft.spaceModes[SpaceID(7)])
         #expect(
             profile.monitorSets.first?.spaceMonitorMap[SpaceID(7)]

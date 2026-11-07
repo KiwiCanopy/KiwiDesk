@@ -97,10 +97,10 @@ struct DesktopMoveAwayLandingTests {
                 args: [.number(1), .string("mail"), id]
             ).isSuccess
         )
-        #expect(core.state.rememberedSpace(of: away) == mail)
+        expectEqual(core.state.rememberedSpace(of: away), mail)
         #expect(core.pendingSpace.isEmpty)
         arrive(core)
-        #expect(core.state.workspaces.space(of: away) == mail)
+        expectEqual(core.state.workspaces.space(of: away), mail)
     }
 
     /// A move ends the restored provenance, or the #1010 net would
@@ -120,7 +120,7 @@ struct DesktopMoveAwayLandingTests {
                 args: [.number(1), .null, id]
             ).isSuccess
         )
-        #expect(core.state.rememberedSpaces[away] == .departed("1"))
+        expectEqual(core.state.rememberedSpaces[away], .departed("1"))
         #expect(core.state.restoredFrames[away] == nil)
     }
 
@@ -139,9 +139,9 @@ struct DesktopMoveAwayLandingTests {
                 args: [.number(1), .null, id]
             ).isSuccess
         )
-        #expect(core.state.rememberedSpaces[away] == .departed("1"))
+        expectEqual(core.state.rememberedSpaces[away], .departed("1"))
         arrive(core)
-        #expect(core.state.windows[away]?.isFloating == true)
+        expectEqual(core.state.windows[away]?.isFloating, true)
     }
 
     /// Filed into the Space shown, it is a return and no new window,
@@ -159,7 +159,7 @@ struct DesktopMoveAwayLandingTests {
         )
         #expect(core.state.rememberedSpace(of: away) != nil)
         arrive(core)
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.focusedWindowID, focused)
     }
 
     /// The reveal activates that Desktop's own Space, which the Space
@@ -188,7 +188,7 @@ struct DesktopMoveAwayLandingTests {
                 args: [.number(1), .string("mail"), id]
             ).isSuccess
         )
-        #expect(core.state.rememberedSpace(of: away) == mail)
+        expectEqual(core.state.rememberedSpace(of: away), mail)
     }
 
     /// Separate Spaces: the parse compares with the Desktop's screen,
@@ -203,7 +203,7 @@ struct DesktopMoveAwayLandingTests {
             "move_to_desktop",
             args: [.number(1), .string("mail"), id]
         )
-        #expect(response.error?.contains("another screen") == true)
+        expectEqual(response.error?.contains("another screen"), true)
         #expect(DesktopVerbBridge.moves.isEmpty)
     }
 
@@ -258,7 +258,7 @@ struct DesktopMoveAwayLandingTests {
                 args: [.number(3), .string("mail"), id]
             ).isSuccess
         )
-        #expect(core.state.rememberedSpace(of: away) == mail)
+        expectEqual(core.state.rememberedSpace(of: away), mail)
     }
 
     /// The frame is what the arrival reads, so it outranks the

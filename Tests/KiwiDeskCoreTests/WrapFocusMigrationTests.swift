@@ -57,7 +57,7 @@ struct WrapFocusMigrationTests {
         let out = try #require(ConfigMigration.migrated(profile()))
         #expect(!mentionsKey(out))
         let migrated = try root(out)
-        #expect(migrated["format"] as? Int == Profile.currentFormat)
+        expectEqual(migrated["format"] as? Int, Profile.currentFormat)
         // No override: the profile follows the base, All screens.
         #expect(migrated["focus_wrap"] == nil)
         let settings = try JSONSerialization.data(
@@ -82,7 +82,7 @@ struct WrapFocusMigrationTests {
         #expect(!mentionsKey(out))
         #expect(try root(out)["format"] as? Int == GuiConfig.currentFormat)
         let config = try JSONDecoder().decode(GuiConfig.self, from: out)
-        #expect(config.focusWrap == .allScreens)
+        expectEqual(config.focusWrap, .allScreens)
     }
 
     @Test("a backup's inline profiles cross too")
@@ -104,12 +104,12 @@ struct WrapFocusMigrationTests {
         let out = try #require(ConfigMigration.migrated(bundle))
         #expect(!mentionsKey(out))
         let migrated = try root(out)
-        #expect(migrated["format"] as? Int == SetupBundle.currentFormat)
+        expectEqual(migrated["format"] as? Int, SetupBundle.currentFormat)
         // Each inline profile follows the base too, All screens.
         let profiles = try #require(
             migrated["profiles"] as? [[String: Any]]
         )
-        #expect(profiles.count == 1)
+        expectEqual(profiles.count, 1)
         #expect(profiles.allSatisfy { $0["focus_wrap"] == nil })
     }
 
@@ -127,10 +127,10 @@ struct WrapFocusMigrationTests {
             String(decoding: data, as: UTF8.self)
                 .split(separator: "\n", omittingEmptySubsequences: false)
         }
-        #expect(lines(data).count - lines(out).count == 3)
+        expectEqual(lines(data).count - lines(out).count, 3)
         #expect(!mentionsKey(out))
         let edited = try root(out)
-        #expect(edited["format"] as? Int == 29)
+        expectEqual(edited["format"] as? Int, 29)
         #expect(edited["settings"] != nil)
     }
 

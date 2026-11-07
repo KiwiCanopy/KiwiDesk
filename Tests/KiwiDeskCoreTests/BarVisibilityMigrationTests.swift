@@ -77,9 +77,9 @@ struct BarVisibilityMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(data))
         let settings = try decoded(out)
-        #expect(settings.spaceBarStyle.visibility == .hidden)
-        #expect(settings.monocle.appBar.visibility == .always)
-        #expect(settings.scrolling.appBar.visibility == .hidden)
+        expectEqual(settings.spaceBarStyle.visibility, .hidden)
+        expectEqual(settings.monocle.appBar.visibility, .always)
+        expectEqual(settings.scrolling.appBar.visibility, .hidden)
         // No bar keeps an `enabled`; the drag ghost's, off for a
         // fresh setup (#2797), is the one left.
         let text = try #require(String(data: out, encoding: .utf8))
@@ -94,9 +94,9 @@ struct BarVisibilityMigrationTests {
         let settings = try decoded(
             try #require(ConfigMigration.migrated(data))
         )
-        #expect(settings.spaceBarStyle.visibility == .always)
-        #expect(settings.monocle.appBar.visibility == .always)
-        #expect(settings.scrolling.appBar.visibility == .always)
+        expectEqual(settings.spaceBarStyle.visibility, .always)
+        expectEqual(settings.monocle.appBar.visibility, .always)
+        expectEqual(settings.scrolling.appBar.visibility, .always)
     }
 
     @Test("a global App Bar value moves onto each layout that was on")
@@ -111,8 +111,8 @@ struct BarVisibilityMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(data))
         let settings = try decoded(out)
-        #expect(settings.monocle.appBar.visibility == .auto)
-        #expect(settings.scrolling.appBar.visibility == .hidden)
+        expectEqual(settings.monocle.appBar.visibility, .auto)
+        expectEqual(settings.scrolling.appBar.visibility, .hidden)
         let root = try #require(
             JSONSerialization.jsonObject(with: out) as? [String: Any]
         )
@@ -136,8 +136,8 @@ struct BarVisibilityMigrationTests {
         settings["layout"] = layouts
         let out = try #require(ConfigMigration.migrated(profile(settings)))
         let migrated = try decoded(out)
-        #expect(migrated.scrolling.appBar.visibility == .auto)
-        #expect(migrated.monocle.appBar.visibility == .auto)
+        expectEqual(migrated.scrolling.appBar.visibility, .auto)
+        expectEqual(migrated.monocle.appBar.visibility, .auto)
     }
 
     @Test("a backup's inline profiles cross too")
@@ -171,7 +171,7 @@ struct BarVisibilityMigrationTests {
                 withJSONObject: try #require(profiles.first?["settings"])
             )
         )
-        #expect(settings.spaceBarStyle.visibility == .hidden)
+        expectEqual(settings.spaceBarStyle.visibility, .hidden)
     }
 
     /// A build without #761 stamped profiles 25 and bundles 32
@@ -208,7 +208,7 @@ struct BarVisibilityMigrationTests {
                 withJSONObject: try #require(profiles.first?["settings"])
             )
         )
-        #expect(settings.spaceBarStyle.visibility == .hidden)
+        expectEqual(settings.spaceBarStyle.visibility, .hidden)
     }
 
     @Test("a current file is left alone")

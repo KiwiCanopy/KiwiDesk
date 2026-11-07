@@ -100,9 +100,9 @@ struct DesktopMoveAwayTests {
             DesktopVerbBridge.moves.map { $0.0 }
                 == [[NSNumber(value: away.raw)]]
         )
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.focusedWindowID, focused)
         #expect(core.state.windows[away] == nil)
-        #expect(core.desktopMemory.moveReapPIDs == [pid])
+        expectEqual(core.desktopMemory.moveReapPIDs, [pid])
         #expect(core.deferred.isScheduled(.desktopMoveReap))
     }
 
@@ -115,7 +115,7 @@ struct DesktopMoveAwayTests {
             args: [.string("1"), .string(""), .string("\(away.raw)")]
         )
         #expect(response.isSuccess)
-        #expect(DesktopVerbBridge.moves.count == 1)
+        expectEqual(DesktopVerbBridge.moves.count, 1)
     }
 
     @Test("an id nobody knows stays unknown, and only this verb reaches")
@@ -148,7 +148,7 @@ struct DesktopMoveAwayTests {
                 args: [.number(4), .null, id]
             ).isSuccess
         )
-        #expect(core.state.awayWindows[away]?.nativeSpace == 11)
+        expectEqual(core.state.awayWindows[away]?.nativeSpace, 11)
         core.desktopMemory.readCensus = { [away, pid] _ in
             DesktopCensus(
                 hosts: [
@@ -162,7 +162,7 @@ struct DesktopMoveAwayTests {
             )
         }
         await core.deferred.task(for: .desktopMoveReap)?.value
-        #expect(core.state.awayWindows[away]?.nativeSpace == 21)
+        expectEqual(core.state.awayWindows[away]?.nativeSpace, 21)
     }
 
     /// A census read 400 ms after the move must not read a window
@@ -227,7 +227,7 @@ struct DesktopMoveAwayTests {
         let core = makeCore()
         defer { teardown() }
         core.execute("toggle_pocket_window")
-        #expect(core.state.pocketPhase(of: focused) == .out)
+        expectEqual(core.state.pocketPhase(of: focused), .out)
         vanish(core, focused)
         #expect(
             core.execute(
@@ -243,7 +243,7 @@ struct DesktopMoveAwayTests {
         let core = makeCore()
         defer { teardown() }
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: focused) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: focused), .pocketed)
         vanish(core, focused)
         #expect(
             core.execute(
@@ -297,7 +297,7 @@ struct DesktopMoveAwayTests {
                 ]
             ).isSuccess
         )
-        #expect(core.state.workspaces.space(of: focused) == mail)
+        expectEqual(core.state.workspaces.space(of: focused), mail)
     }
 
     @Test("a refused bridge files nothing")
@@ -312,7 +312,7 @@ struct DesktopMoveAwayTests {
             "move_to_desktop",
             args: [.number(1), .string("mail"), id]
         )
-        #expect(response.error?.contains("bridge") == true)
+        expectEqual(response.error?.contains("bridge"), true)
         #expect(core.state.rememberedSpace(of: away) == nil)
         #expect(core.state.workspaces[mail] == nil)
     }

@@ -73,7 +73,7 @@ struct FollowSwitchFloatRaiseTests {
     }
 
     private func expectRaised(_ core: KiwiCore) {
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
         #expect(core.zOrderRaiseEchoes[WindowID(3)] != nil)
     }
 
@@ -171,8 +171,8 @@ struct FollowSwitchFloatRaiseTests {
         core.eventLoop.elements[absent] = [
             WindowID(50): AXUIElementCreateApplication(absent)
         ]
-        #expect(core.activeSpace?.focused == WindowID(1))
-        #expect(core.focusedWindowID == WindowID(50))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(50))
     }
 
     /// The closing hand-back asks the focus anchor: the traveler

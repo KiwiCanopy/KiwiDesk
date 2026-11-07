@@ -74,8 +74,8 @@ struct ShelfSplitDriverTests {
         #expect(top.isVisible && bottom.isVisible)
         let space = try #require(core.spaceBars.shownStrips.first)
         let app = try #require(core.appBars.shownStrips.first)
-        #expect(space.edge == .top)
-        #expect(app.edge == .bottom)
+        expectEqual(space.edge, .top)
+        expectEqual(app.edge, .bottom)
         #expect(app.strip.minY > space.strip.maxY)
         // Each shelf carries only its own bar's section.
         #expect(

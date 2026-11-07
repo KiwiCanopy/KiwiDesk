@@ -32,13 +32,13 @@ struct SpaceOverrideResetTests {
     @Test("Field count sums every layout and the gaps for the space")
     func totalCount() {
         var s = populated()
-        #expect(s.spaceOverrideCount(for: space) == 4)
-        #expect(s.overrideFieldCount(.bsp, for: space) == 1)
-        #expect(s.overrideFieldCount(.grid, for: space) == 0)
-        #expect(s.spaceOverrideCount(for: SpaceID("nope")) == 0)
+        expectEqual(s.spaceOverrideCount(for: space), 4)
+        expectEqual(s.overrideFieldCount(.bsp, for: space), 1)
+        expectEqual(s.overrideFieldCount(.grid, for: space), 0)
+        expectEqual(s.spaceOverrideCount(for: SpaceID("nope")), 0)
         // The gaps count once, whatever the layout (#1775).
         s.gapsOverride[space] = nil
-        #expect(s.spaceOverrideCount(for: space) == 3)
+        expectEqual(s.spaceOverrideCount(for: space), 3)
     }
 
     @Test("Dormant list excludes the active layout")
@@ -46,7 +46,7 @@ struct SpaceOverrideResetTests {
         let s = populated()
         // Active = bsp → stack + scrolling are dormant.
         let fromBsp = s.dormantOverrides(for: space, active: .bsp)
-        #expect(fromBsp.map(\.mode) == [.stack, .scrolling])
+        expectEqual(fromBsp.map(\.mode), [.stack, .scrolling])
         #expect(fromBsp.allSatisfy { $0.count == 1 })
         // Active = grid (no override here) → all three dormant.
         #expect(
@@ -67,19 +67,19 @@ struct SpaceOverrideResetTests {
         // The other layers survive.
         #expect(s.stack.override[space] != nil)
         #expect(s.scrolling.override[space] != nil)
-        #expect(s.spaceOverrideCount(for: space) == 3)
+        expectEqual(s.spaceOverrideCount(for: space), 3)
     }
 
     @Test("Reset all clears every layer but keeps gap override")
     func resetAll() {
         var s = populated()
         s.resetAllLayoutOverrides(for: space)
-        #expect(s.spaceOverrideCount(for: space) == 1)
+        expectEqual(s.spaceOverrideCount(for: space), 1)
         #expect(s.bsp.override[space] == nil)
         #expect(s.stack.override[space] == nil)
         #expect(s.scrolling.override[space] == nil)
         // Gap override is not a layout override — reset leaves it.
-        #expect(s.gapsOverride[space] == .uniform(6))
+        expectEqual(s.gapsOverride[space], .uniform(6))
     }
 
     @Test("Reset is scoped to the one space")

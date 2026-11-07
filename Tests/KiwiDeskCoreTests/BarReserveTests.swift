@@ -80,8 +80,8 @@ struct BarReserveTests {
             on: nil,
             pocketAtRest: false
         )
-        #expect(bounds.minY == visible.minY)
-        #expect(bounds.maxY == visible.maxY - 32)
+        expectEqual(bounds.minY, visible.minY)
+        expectEqual(bounds.maxY, visible.maxY - 32)
     }
 
     @Test("Every shown edge stays in the drawn list")

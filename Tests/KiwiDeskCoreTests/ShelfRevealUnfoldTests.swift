@@ -40,18 +40,18 @@ struct ShelfRevealUnfoldTests {
     @Test("The stretch runs the plate's length at the mark's depth")
     func stretchesAlongTheEdge() throws {
         let stretch = try #require(stretch(entering: true))
-        #expect(stretch.mark == hovered)
-        #expect(stretch.along.minX == Self.plate.minX)
-        #expect(stretch.along.width == Self.plate.width)
-        #expect(stretch.along.minY == hovered.minY)
-        #expect(stretch.along.height == hovered.height)
+        expectEqual(stretch.mark, hovered)
+        expectEqual(stretch.along.minX, Self.plate.minX)
+        expectEqual(stretch.along.width, Self.plate.width)
+        expectEqual(stretch.along.minY, hovered.minY)
+        expectEqual(stretch.along.height, hovered.height)
         let side = ShelfUnfold.along(
             mark: hovered,
             plate: Self.plate,
             horizontal: false
         )
-        #expect(side.height == Self.plate.height)
-        #expect(side.width == hovered.width)
+        expectEqual(side.height, Self.plate.height)
+        expectEqual(side.width, hovered.width)
     }
 
     @Test("The mark lands with an unfold's retract")
@@ -69,7 +69,7 @@ struct ShelfRevealUnfoldTests {
 
     @Test("A spring's overshoot grows the room, a critical one none")
     func roomHoldsTheSwing() {
-        #expect(ShelfUnfold.overshoot(bounce: 0) == 0)
+        expectEqual(ShelfUnfold.overshoot(bounce: 0), 0)
         #expect(ShelfUnfold.overshoot(bounce: 0.15) > 0)
         #expect(
             ShelfUnfold.overshoot(bounce: 0.3)
@@ -134,10 +134,10 @@ struct ShelfRevealUnfoldTests {
         )
         let along = try #require(spring(clip, "bounds.size.width"))
         let deep = try #require(spring(clip, "bounds.size.height"))
-        #expect(along.fromValue as? CGFloat == hovered.width)
-        #expect(along.toValue as? CGFloat == Self.plate.width)
-        #expect(deep.fromValue as? CGFloat == hovered.height)
-        #expect(deep.toValue as? CGFloat == Self.plate.height)
+        expectEqual(along.fromValue as? CGFloat, hovered.width)
+        expectEqual(along.toValue as? CGFloat, Self.plate.width)
+        expectEqual(deep.fromValue as? CGFloat, hovered.height)
+        expectEqual(deep.toValue as? CGFloat, Self.plate.height)
         #expect(deep.beginTime > along.beginTime)
         let items = try #require(
             overlay.stripView.layer?.animation(forKey: BarMotion.revealKey)
@@ -168,8 +168,8 @@ struct ShelfRevealUnfoldTests {
             ($0 as? NSValue)?.rectValue
         }
         let stretch = try #require(stretch(entering: false))
-        #expect(values.dropFirst().first == stretch.along)
-        #expect(values.last == hovered)
+        expectEqual(values.dropFirst().first, stretch.along)
+        expectEqual(values.last, hovered)
         let items = try #require(
             overlay.stripView.layer?.animation(forKey: BarMotion.revealKey)
         )

@@ -65,9 +65,9 @@ struct BorderTravelerFocusTests {
         let focusColor = core.tiler.settings.borderStyle.focusedColor
         // The lone ring (unfocused borders default off) is the
         // traveler, in the focused colour.
-        #expect(specs.count == 1)
-        #expect(specs.first?.window == WindowID(50))
-        #expect(specs.first?.colorHex == focusColor)
+        expectEqual(specs.count, 1)
+        expectEqual(specs.first?.window, WindowID(50))
+        expectEqual(specs.first?.colorHex, focusColor)
     }
 
     @Test("A focused local keeps the ring on the local window")
@@ -77,8 +77,8 @@ struct BorderTravelerFocusTests {
         core.state.workspaces.focus(WindowID(50), in: "2")
         core.state.workspaces.focus(WindowID(1), in: "1")
         let specs = core.desiredBorderSpecs()
-        #expect(specs.count == 1)
-        #expect(specs.first?.window == WindowID(1))
+        expectEqual(specs.count, 1)
+        expectEqual(specs.first?.window, WindowID(1))
     }
 
     /// #2259: the anchor admits a FLOATING sticky window visiting
@@ -95,9 +95,9 @@ struct BorderTravelerFocusTests {
         core.state.workspaces.focus(WindowID(60), in: "2")
         let specs = core.desiredBorderSpecs()
         let focusColor = core.tiler.settings.borderStyle.focusedColor
-        #expect(specs.count == 1)
-        #expect(specs.first?.window == WindowID(60))
-        #expect(specs.first?.colorHex == focusColor)
+        expectEqual(specs.count, 1)
+        expectEqual(specs.first?.window, WindowID(60))
+        expectEqual(specs.first?.colorHex, focusColor)
     }
 
     /// #2259, the unfocused arm: a floating sticky visitor is a float,
@@ -118,7 +118,7 @@ struct BorderTravelerFocusTests {
                 ($0.window, $0.colorHex)
             }
         )
-        #expect(drawn[WindowID(1)] == style.focusedColor)
-        #expect(drawn[WindowID(60)] == style.unfocusedColor)
+        expectEqual(drawn[WindowID(1)], style.focusedColor)
+        expectEqual(drawn[WindowID(60)], style.unfocusedColor)
     }
 }

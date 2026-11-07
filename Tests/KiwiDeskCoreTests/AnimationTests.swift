@@ -56,7 +56,7 @@ struct SpringTests {
             spring: Spring()
         )
         let elapsed = settle(&animation)
-        #expect(animation.frame == frameB)
+        expectEqual(animation.frame, frameB)
         #expect(elapsed < 5)
     }
 
@@ -72,9 +72,9 @@ struct SpringTests {
         }
         let midFlight = animation.frame
         animation.retarget(to: frameC, sizing: .mayInstantSize)
-        #expect(animation.frame == midFlight)
+        expectEqual(animation.frame, midFlight)
         _ = settle(&animation)
-        #expect(animation.frame == frameC)
+        expectEqual(animation.frame, frameC)
     }
 
     @Test("Zero-distance animation settles immediately")
@@ -95,13 +95,13 @@ struct AnimationEngineTests {
     @Test("Duration is clamped to 50-1000 ms")
     func durationClamping() {
         let engine = AnimationEngine()
-        #expect(engine.durationMS == 150)
+        expectEqual(engine.durationMS, 150)
         engine.durationMS = 10
-        #expect(engine.durationMS == 50)
+        expectEqual(engine.durationMS, 50)
         engine.durationMS = 5000
-        #expect(engine.durationMS == 1000)
+        expectEqual(engine.durationMS, 1000)
         engine.durationMS = 300
-        #expect(engine.durationMS == 300)
+        expectEqual(engine.durationMS, 300)
     }
 
     @Test("Reduce Motion snaps to the target with no animation")
@@ -122,15 +122,15 @@ struct AnimationEngineTests {
         )
         // Instant placement: one apply of the exact target, and
         // no animation left running.
-        #expect(engine.activeCount == 0)
-        #expect(applies.count == 1)
-        #expect(applies.first?.frame == to)
-        #expect(applies.first?.setSize == true)
+        expectEqual(engine.activeCount, 0)
+        expectEqual(applies.count, 1)
+        expectEqual(applies.first?.frame, to)
+        expectEqual(applies.first?.setSize, true)
     }
 
     @Test("reduceMotion seam defaults to false (host can't skew)")
     func reduceMotionDefaultsFalse() {
-        #expect(AnimationEngine().reduceMotion() == false)
+        expectEqual(AnimationEngine().reduceMotion(), false)
     }
 
     @Test("Reduce Motion flipping on tears down an in-flight anim")
@@ -150,7 +150,7 @@ struct AnimationEngineTests {
             to: CGRect(x: 0, y: 0, width: 400, height: 400)
         )
         engine.tick(display: display, dt: 1.0 / 120.0)
-        #expect(engine.activeCount == 1)
+        expectEqual(engine.activeCount, 1)
         // System flag flips on; the next animate snaps instantly and
         // the guard's cancel tears down the running animation.
         engine.reduceMotion = { true }
@@ -161,9 +161,9 @@ struct AnimationEngineTests {
             from: .zero,
             to: target
         )
-        #expect(engine.activeCount == 0)
-        #expect(applies.last?.frame == target)
-        #expect(applies.last?.setSize == true)
+        expectEqual(engine.activeCount, 0)
+        expectEqual(applies.last?.frame, target)
+        expectEqual(applies.last?.setSize, true)
     }
 }
 
@@ -201,7 +201,7 @@ struct AnimationEngineSizingTests {
             engine.tick(display: display, dt: 1.0 / 120.0)
             steps += 1
         }
-        #expect(engine.activeCount == 0)
+        expectEqual(engine.activeCount, 0)
         return applies
     }
 
@@ -223,8 +223,8 @@ struct AnimationEngineSizingTests {
                 policy: .midSlide
             )
         else { return }
-        #expect(applies.last?.frame == to)
-        #expect(applies.last?.setSize == true)
+        expectEqual(applies.last?.frame, to)
+        expectEqual(applies.last?.setSize, true)
         // The grow lands before the final settle frame.
         #expect(applies.dropLast().contains { $0.setSize })
         #expect(applies.filter(\.setSize).count <= 2)
@@ -240,8 +240,8 @@ struct AnimationEngineSizingTests {
         let to = CGRect(x: 10, y: 20, width: 900, height: 800)
         guard let applies = recordApplies(from: from, to: to)
         else { return }
-        #expect(applies.last?.frame == to)
-        #expect(applies.last?.setSize == true)
+        expectEqual(applies.last?.frame, to)
+        expectEqual(applies.last?.setSize, true)
         // Many size-sets across the grow, not a single mid-slide
         // jump — the whole point of the smooth policy.
         #expect(applies.filter(\.setSize).count > 5)
@@ -256,9 +256,9 @@ struct AnimationEngineSizingTests {
         let to = CGRect(x: 10, y: 20, width: 400, height: 300)
         guard let applies = recordApplies(from: from, to: to)
         else { return }
-        #expect(applies.first?.setSize == true)
-        #expect(applies.first?.frame.size == to.size)
-        #expect(applies.last?.frame == to)
+        expectEqual(applies.first?.setSize, true)
+        expectEqual(applies.first?.frame.size, to.size)
+        expectEqual(applies.last?.frame, to)
         #expect(applies.filter(\.setSize).count <= 2)
     }
 
@@ -321,8 +321,8 @@ struct AnimationEngineSizingTests {
             engine.tick(display: display, dt: 1.0 / 120.0)
             steps += 1
         }
-        #expect(engine.activeCount == 0)
-        #expect(applies.last?.frame == final)
-        #expect(applies.last?.setSize == true)
+        expectEqual(engine.activeCount, 0)
+        expectEqual(applies.last?.frame, final)
+        expectEqual(applies.last?.setSize, true)
     }
 }

@@ -102,7 +102,7 @@ struct TeardownRestackTests {
         recorder.unbeatable = WindowID(2)
         let circles = [(display: UInt32(1), order: ids([3, 2, 1]))]
         restack(recorder).run(circles)
-        #expect(recorder.runs.map(\.order) == [ids([3, 1])])
+        expectEqual(recorder.runs.map(\.order), [ids([3, 1])])
     }
 
     /// Nil is the ordinary answer — no frontmost app, an ignored
@@ -113,7 +113,7 @@ struct TeardownRestackTests {
         let recorder = Recorder()
         let circles = [(display: UInt32(1), order: ids([3, 2, 1]))]
         restack(recorder).run(circles)
-        #expect(recorder.runs.map(\.order) == [ids([3, 2, 1])])
+        expectEqual(recorder.runs.map(\.order), [ids([3, 2, 1])])
     }
 
     /// A group whose every member is the dropped window has nothing
@@ -128,7 +128,7 @@ struct TeardownRestackTests {
             (display: UInt32(2), order: ids([5, 4])),
         ]
         restack(recorder).run(circles)
-        #expect(recorder.runs.map(\.order) == [ids([5, 4])])
+        expectEqual(recorder.runs.map(\.order), [ids([5, 4])])
     }
 
     // MARK: - The wall clock
@@ -183,7 +183,7 @@ struct TeardownRestackTests {
         // Two groups exhaust it, so the loop must end at the third.
         restack(recorder, raising: [], costing: budget * 0.6)
             .run(circles)
-        #expect(recorder.runs.count == 2)
+        expectEqual(recorder.runs.count, 2)
         let partial =
             "gatherWindows: raise budget exceeded — "
             + "stacking left partial"
@@ -191,8 +191,8 @@ struct TeardownRestackTests {
         // shortfall before this, so the whole log is not the
         // discriminator — the COUNT is: a `continue` would reach
         // displays 3 and 4 and emit this line three times.
-        #expect(recorder.logs.filter { $0 == partial }.count == 1)
-        #expect(recorder.logs.last == partial)
+        expectEqual(recorder.logs.filter { $0 == partial }.count, 1)
+        expectEqual(recorder.logs.last, partial)
     }
 
     /// A restack that fits inside its budget says nothing.
@@ -206,7 +206,7 @@ struct TeardownRestackTests {
         // the second, an empty `run` passes this test
         // (guard-prover, 2026-08-03).
         #expect(recorder.logs.isEmpty)
-        #expect(recorder.runs.count == 1)
+        expectEqual(recorder.runs.count, 1)
     }
 
     /// The false positive `!raised.isEmpty` exists to remove, with
@@ -232,7 +232,7 @@ struct TeardownRestackTests {
         // order, so `plan` is empty and `run` raises nothing.
         restack(recorder, raising: ids([1, 2]), costing: budget)
             .run([(display: UInt32(1), order: circle)])
-        #expect(recorder.runs.count == 1)
+        expectEqual(recorder.runs.count, 1)
         #expect(recorder.logs.isEmpty)
     }
 }

@@ -56,10 +56,10 @@ struct ShelfSplitGeometryTests {
                 on: nil,
                 pocketAtRest: false
             )
-        #expect(bsp.minY == visible.minY + 32)
-        #expect(bsp.maxY == visible.maxY)
-        #expect(monocle.minY == visible.minY + 32)
-        #expect(monocle.maxY == visible.maxY - 32)
+        expectEqual(bsp.minY, visible.minY + 32)
+        expectEqual(bsp.maxY, visible.maxY)
+        expectEqual(monocle.minY, visible.minY + 32)
+        expectEqual(monocle.maxY, visible.maxY - 32)
     }
 
     @Test("At a corner the Space Bar runs the edge and the App Bar yields")
@@ -71,18 +71,18 @@ struct ShelfSplitGeometryTests {
             edges: [.top, .left],
             shelf: shelf
         )
-        #expect(strips.count == 2)
-        #expect(strips[0].width == visible.width)
-        #expect(strips[0].minY == visible.minY)
-        #expect(strips[1].minX == visible.minX)
-        #expect(strips[1].minY == visible.minY + 32)
-        #expect(strips[1].maxY == visible.maxY)
+        expectEqual(strips.count, 2)
+        expectEqual(strips[0].width, visible.width)
+        expectEqual(strips[0].minY, visible.minY)
+        expectEqual(strips[1].minX, visible.minX)
+        expectEqual(strips[1].minY, visible.minY + 32)
+        expectEqual(strips[1].maxY, visible.maxY)
         #expect(!strips[0].intersects(strips[1]))
     }
 
     @Test("sharedBarEdge names the one edge, or nil while split")
     func sharedEdge() {
-        #expect(settings(space: .top, app: .top).sharedBarEdge == .top)
+        expectEqual(settings(space: .top, app: .top).sharedBarEdge, .top)
         #expect(settings(space: .top, app: .left).sharedBarEdge == nil)
     }
 }
@@ -157,7 +157,7 @@ struct ShelfSplitPlanTests {
             pocket: false,
             drawn: { $0.drawnAtRest }
         )
-        #expect(plans.count == 2)
+        expectEqual(plans.count, 2)
         let bounds =
             settings.layoutBounds(
                 from: visible,
@@ -173,9 +173,9 @@ struct ShelfSplitPlanTests {
     @Test("Fused bars share one plan")
     func fusedIsOnePlan() throws {
         let plans = plans(space: .bottom, app: .bottom)
-        #expect(plans.count == 1)
+        expectEqual(plans.count, 1)
         let plan = try #require(plans.first)
-        #expect(plan.edge == .bottom)
+        expectEqual(plan.edge, .bottom)
         #expect(plan.arrangement.space != nil)
         #expect(plan.arrangement.app != nil)
     }
@@ -183,7 +183,7 @@ struct ShelfSplitPlanTests {
     @Test("Split bars take a plan each, the Space Bar's first")
     func splitIsTwoPlans() throws {
         let plans = plans(space: .top, app: .right)
-        #expect(plans.map(\.edge) == [.top, .right])
+        expectEqual(plans.map(\.edge), [.top, .right])
         let space = try #require(plans.first)
         let app = try #require(plans.last)
         #expect(space.arrangement.space != nil)
@@ -193,6 +193,6 @@ struct ShelfSplitPlanTests {
         #expect(app.arrangement.space == nil)
         #expect(!app.horizontal)
         // The App Bar yields at the corner the two edges share.
-        #expect(app.strip.minY == space.strip.maxY)
+        expectEqual(app.strip.minY, space.strip.maxY)
     }
 }

@@ -132,12 +132,12 @@ struct CarriedDestroyArmTests {
             pid: own,
             app: AppRef(bundleID: nil, name: "Own")
         )
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
         #expect(loop.elements[own]?[WindowID(12)] == nil)
         // EAGER, not deferred: the eager arm releases the element
         // before its reconcile, so the sweep finds nothing vanished
         // and reads no census; a deferral's sweep reads one.
-        #expect(box.censusReads == 0)
+        expectEqual(box.censusReads, 0)
     }
 
     @Test("a carried window's destroyed element defers to the sweep")
@@ -159,7 +159,7 @@ struct CarriedDestroyArmTests {
         // the carried vanish and kept the registration.
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
 }

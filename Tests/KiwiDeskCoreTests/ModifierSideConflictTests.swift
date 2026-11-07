@@ -21,7 +21,7 @@ struct ModifierSideConflictTests {
             in: [left, right],
             distinguishingSides: false
         )
-        #expect(off?.target == .sideCollapse(right))
+        expectEqual(off?.target, .sideCollapse(right))
         let on = KeybindingConflicts.conflict(
             for: left,
             in: [left, right],
@@ -48,7 +48,7 @@ struct ModifierSideConflictTests {
             in: [a, b],
             distinguishingSides: true
         )
-        #expect(on?.target == .otherBinding(b))
+        expectEqual(on?.target, .otherBinding(b))
     }
 
     @Test("a sided chord meets the system shortcut on its keys")

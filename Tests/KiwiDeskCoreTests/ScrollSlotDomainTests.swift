@@ -47,7 +47,7 @@ struct ScrollSlotDomainTests {
             appMax: 825
         )
         #expect(outcome.write == nil)
-        #expect(outcome.refusal == .ownMaximum)
+        expectEqual(outcome.refusal, .ownMaximum)
     }
 
     @Test("A grow measures forward: never below the store")
@@ -88,7 +88,7 @@ struct ScrollSlotDomainTests {
             globalMin: 300
         )
         #expect(outcome.write == nil)
-        #expect(outcome.refusal == .ownMinimum)
+        expectEqual(outcome.refusal, .ownMinimum)
     }
 
     @Test("A grow on an oversize store refuses wordlessly")
@@ -113,7 +113,7 @@ struct ScrollSlotDomainTests {
             drawnFocused: 400,
             appMin: 400
         )
-        #expect(outcome.write == 450)
+        expectEqual(outcome.write, 450)
         #expect(outcome.refusal == nil)
     }
 
@@ -124,14 +124,14 @@ struct ScrollSlotDomainTests {
             stored: 600,
             appMax: 715
         )
-        #expect(outcome.write == 715)
-        #expect(outcome.refusal == .ownMaximum)
+        expectEqual(outcome.write, 715)
+        expectEqual(outcome.refusal, .ownMaximum)
     }
 
     @Test("A viewport-truncated grow writes and stays wordless")
     func viewportTruncationStaysSilent() {
         let outcome = decide(delta: 4000, stored: 600)
-        #expect(outcome.write == 1160)
+        expectEqual(outcome.write, 1160)
         #expect(outcome.refusal == nil)
     }
 
@@ -151,7 +151,7 @@ struct ScrollSlotDomainTests {
             appMax: 1200
         )
         #expect(outcome.write == nil)
-        #expect(outcome.refusal == .ownMaximum)
+        expectEqual(outcome.refusal, .ownMaximum)
     }
 
     @Test("A shrink into the floor writes the part that fits")
@@ -162,8 +162,8 @@ struct ScrollSlotDomainTests {
         // — refuse-in-place is only for a window already AT a
         // bound.
         let outcome = decide(delta: -350, stored: 600)
-        #expect(outcome.write == 300)
-        #expect(outcome.refusal == .ownMinimum)
+        expectEqual(outcome.write, 300)
+        expectEqual(outcome.refusal, .ownMinimum)
     }
 
     @Test("The tolerance band above the minimum still refuses")
@@ -180,7 +180,7 @@ struct ScrollSlotDomainTests {
             appMin: 500
         )
         #expect(outcome.write == nil)
-        #expect(outcome.refusal == .ownMinimum)
+        expectEqual(outcome.refusal, .ownMinimum)
     }
 
     @Test("A shrink at the window's minimum refuses in place")
@@ -195,7 +195,7 @@ struct ScrollSlotDomainTests {
             appMin: 825
         )
         #expect(below.write == nil)
-        #expect(below.refusal == .ownMinimum)
+        expectEqual(below.refusal, .ownMinimum)
         let above = decide(
             delta: -50,
             stored: 850,
@@ -203,7 +203,7 @@ struct ScrollSlotDomainTests {
             appMin: 825
         )
         #expect(above.write == nil)
-        #expect(above.refusal == .ownMinimum)
+        expectEqual(above.refusal, .ownMinimum)
     }
 
     @Test("A shrink on an oversize store starts from the drawn")
@@ -212,7 +212,7 @@ struct ScrollSlotDomainTests {
         // effect, and the store is rewritten only now — the
         // moment the user deliberately resizes here.
         let outcome = decide(delta: -400, stored: 3000)
-        #expect(outcome.write == 760)
+        expectEqual(outcome.write, 760)
         #expect(outcome.refusal == nil)
     }
 
@@ -220,7 +220,7 @@ struct ScrollSlotDomainTests {
     func shrinkAtGlobalFloorCues() {
         let outcome = decide(delta: -50, stored: 300)
         #expect(outcome.write == nil)
-        #expect(outcome.refusal == .ownMinimum)
+        expectEqual(outcome.refusal, .ownMinimum)
     }
 
     @Test("The floor wins a narrower-display contradiction")
@@ -234,7 +234,7 @@ struct ScrollSlotDomainTests {
             drawnArea: 180
         )
         #expect(outcome.write == nil)
-        #expect(outcome.refusal == .ownMinimum)
+        expectEqual(outcome.refusal, .ownMinimum)
     }
 
     @Test("Ordinary presses pass through unclamped")

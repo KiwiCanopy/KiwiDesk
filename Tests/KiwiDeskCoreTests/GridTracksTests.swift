@@ -18,7 +18,7 @@ struct GridTracksTests {
             floors: [],
             minimum: 0
         )
-        #expect(widths == [200, 100, 100])
+        expectEqual(widths, [200, 100, 100])
     }
 
     @Test("Only the first n weights apply")
@@ -30,7 +30,7 @@ struct GridTracksTests {
             floors: [],
             minimum: 0
         )
-        #expect(widths == [300, 100])
+        expectEqual(widths, [300, 100])
     }
 
     @Test("A track under its floor is lifted from the others")
@@ -42,7 +42,7 @@ struct GridTracksTests {
             floors: [0, 200, 0],
             minimum: 0
         )
-        #expect(widths[1] == 200)
+        expectEqual(widths[1], 200)
         // The rest share what is left by weight, 8 : 1.
         #expect(abs(widths[0] - 711.11) < 0.01)
         #expect(abs(widths[2] - 88.89) < 0.01)
@@ -57,7 +57,7 @@ struct GridTracksTests {
             floors: [300, 300],
             minimum: 100
         )
-        #expect(widths == [100, 300])
+        expectEqual(widths, [100, 300])
     }
 
     @Test("Past the configured floor the weights alone decide")
@@ -69,7 +69,7 @@ struct GridTracksTests {
             floors: [],
             minimum: 300
         )
-        #expect(widths == [100, 300])
+        expectEqual(widths, [100, 300])
     }
 
     /// The render with no floors, for the edge-move cases.
@@ -100,7 +100,7 @@ struct GridTracksTests {
         #expect(abs(step.weights[0] - 1.2) < 0.000_01)
         #expect(abs(step.weights[1] - 0.8) < 0.000_01)
         try #require(step.weights.count == 3)
-        #expect(step.weights[2] == 1)
+        expectEqual(step.weights[2], 1)
         #expect(!step.clamped)
     }
 
@@ -149,7 +149,7 @@ struct GridTracksTests {
                 minimum: 0
             )
         }
-        #expect(draw([]) == [700, 550, 550])
+        expectEqual(draw([]), [700, 550, 550])
         let step = try #require(
             GridTracks.moveEdge(
                 weights: [],
@@ -207,15 +207,15 @@ struct GridTracksTests {
                 draw: plain(2)
             )
         )
-        #expect(step.weights.count == 4)
-        #expect(Array(step.weights[2...]) == [3, 2])
+        expectEqual(step.weights.count, 4)
+        expectEqual(Array(step.weights[2...]), [3, 2])
     }
 
     @Test("Trailing equal shares leave the stored list")
     func trimmedDropsTrailingOnes() {
-        #expect(GridTracks.trimmed([2, 1, 1]) == [2])
-        #expect(GridTracks.trimmed([1, 1]) == [])
-        #expect(GridTracks.trimmed([1, 2]) == [1, 2])
+        expectEqual(GridTracks.trimmed([2, 1, 1]), [2])
+        expectEqual(GridTracks.trimmed([1, 1]), [])
+        expectEqual(GridTracks.trimmed([1, 2]), [1, 2])
     }
 
     @Test("A filling last cell spans the rest of its row")
@@ -228,7 +228,7 @@ struct GridTracksTests {
             rowMajor: true,
             fillLast: true
         )
-        #expect(cell.columns == .init(first: 1, last: 2))
-        #expect(cell.rows == .init(first: 1, last: 1))
+        expectEqual(cell.columns, .init(first: 1, last: 2))
+        expectEqual(cell.rows, .init(first: 1, last: 1))
     }
 }

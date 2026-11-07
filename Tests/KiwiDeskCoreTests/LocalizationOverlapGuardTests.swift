@@ -41,7 +41,7 @@ struct LocalizationOverlapGuardTests {
                 "it": Self.translated("it"),
             ]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// Sibling languages really do coincide on short UI labels —
@@ -58,7 +58,7 @@ struct LocalizationOverlapGuardTests {
             english: Self.english(),
             catalogs: ["fr": shared, "it": italian]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// `zh-Hans` and `zh-Hant` are one language in two scripts and
@@ -71,7 +71,7 @@ struct LocalizationOverlapGuardTests {
             english: Self.english(),
             catalogs: ["zh-Hans": chinese, "zh-Hant": chinese]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// Two locales agreeing on an *untranslated* string is the
@@ -84,7 +84,7 @@ struct LocalizationOverlapGuardTests {
             english: english,
             catalogs: ["fr": english, "it": english]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// A one-word label ("Lua", "Monitor") coincides innocently,
@@ -101,7 +101,7 @@ struct LocalizationOverlapGuardTests {
             english: english,
             catalogs: ["fr": shared, "it": shared]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// The **ratio** branch, which the fixtures above never reach.
@@ -134,7 +134,7 @@ struct LocalizationOverlapGuardTests {
             english: english,
             catalogs: ["fr": french, "it": italian]
         )
-        #expect((result.status == 0) == passes)
+        expectEqual((result.status == 0), passes)
         if !passes {
             #expect(result.stderr.contains("identical"))
         }

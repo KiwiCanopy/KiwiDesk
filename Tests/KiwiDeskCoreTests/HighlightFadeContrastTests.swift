@@ -116,7 +116,7 @@ struct HighlightFadeContrastTests {
                 }
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 4)
+        expectEqual(measured, PaletteCatalog.bundled().count * 4)
     }
 
     /// The floor is a floor and not a pin: under Increase Contrast,

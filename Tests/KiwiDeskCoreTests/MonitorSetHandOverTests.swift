@@ -85,7 +85,7 @@ struct MonitorSetHandOverTests {
         )
         try core.claimMonitorSet(pair, for: "Solo")
         let solo = try core.profiles.read(name: "Solo")
-        #expect(solo.set(matching: pair)?.spaceMonitorMap == [:])
+        expectEqual(solo.set(matching: pair)?.spaceMonitorMap, [:])
         try core.claimMonitorSet(pair, for: "Work")
         #expect(
             try core.profiles.read(name: "Work")
@@ -101,14 +101,14 @@ struct MonitorSetHandOverTests {
         try core.loadProfile(named: "Work")
         #expect(!core.profiles.isDirty)
         try core.claimMonitorSet(pair, for: "Home")
-        #expect(core.profiles.currentName == "Work")
+        expectEqual(core.profiles.currentName, "Work")
         #expect(core.profiles.isDirty)
         // Picked back onto the live profile, it fits again and its
         // pins are live at once — its next save cannot drop them.
         core.spacePins = [:]
         try core.claimMonitorSet(pair, for: "Work")
         #expect(!core.profiles.isDirty)
-        #expect(core.spacePins == ["2": "B:100x100"])
+        expectEqual(core.spacePins, ["2": "B:100x100"])
     }
 
     @Test("A pick of a disconnected set leaves the live fit alone")
@@ -145,8 +145,8 @@ struct MonitorSetHandOverTests {
         connect(core, ["D"])
         try core.persistProfile(named: "Mid", modes: nil)
         let choices = core.claimableMonitorSets(for: "Home")
-        #expect(choices.map(\.owner) == ["Mid", "Alpha", "Zed"])
-        #expect(choices.map(\.isConnected) == [true, false, false])
+        expectEqual(choices.map(\.owner), ["Mid", "Alpha", "Zed"])
+        expectEqual(choices.map(\.isConnected), [true, false, false])
     }
 
     @Test("A dormant profile cannot be made the default")
@@ -159,7 +159,7 @@ struct MonitorSetHandOverTests {
         #expect(throws: ProfileError.self) {
             try core.profiles.setDefault(name: "Work")
         }
-        #expect(core.profiles.defaultProfile(count: 1)?.name == "Home")
+        expectEqual(core.profiles.defaultProfile(count: 1)?.name, "Home")
     }
 
     @Test("A deleted default's heir is never a dormant profile")

@@ -74,7 +74,7 @@ struct WakeFocusRestoreTests {
         // log: Claude honored one second before the replay).
         core.state.workspaces.focus(WindowID(2), in: space)
         core.sleepWake.restoreState(snapshot)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(core.wakeFocusHealArmedAt != nil)
     }
 
@@ -114,7 +114,7 @@ struct WakeFocusRestoreTests {
         }
         core.trustedFrontmostProvider = { WindowID(2) }
         core.restoreAndSettleAfterWake(snapshot)
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
     }
 
     @Test(
@@ -141,7 +141,7 @@ struct WakeFocusRestoreTests {
         core.wakeFocusHealArmedAt = Date()
         let response = core.execute("make_floating")
         #expect(response.isSuccess)
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
         #expect(core.wakeFocusHealArmedAt == nil)
     }
 
@@ -162,7 +162,7 @@ struct WakeFocusRestoreTests {
         core.trustedFrontmostProvider = { WindowID(2) }
         let response = core.execute("make_floating")
         #expect(!response.isSuccess)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
     }
 
     @Test(
@@ -209,7 +209,7 @@ struct WakeFocusRestoreTests {
         )
         let response = core.execute("make_floating")
         #expect(!response.isSuccess)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(core.wakeFocusHealArmedAt == nil)
     }
 

@@ -85,7 +85,7 @@ struct AppBarBoxHostTests {
         )
 
         let hosts = overlay.boxGlasses.compactMap { GlassBox.host(of: $0) }
-        #expect(hosts.count == 2)
+        expectEqual(hosts.count, 2)
         let hostWrites = writes.filter { write in
             hosts.contains { $0 === write.view }
         }
@@ -93,7 +93,7 @@ struct AppBarBoxHostTests {
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(GlassBox.host(of: glass))
             #expect(tint.isDescendant(of: glass))
-            #expect(glass.frame == host.bounds)
+            expectEqual(glass.frame, host.bounds)
         }
     }
 
@@ -114,7 +114,7 @@ struct AppBarBoxHostTests {
 
         let glass = try #require(overlay.boxGlasses.first)
         let host = try #require(GlassBox.host(of: glass))
-        #expect(host.alphaValue == 0)
+        expectEqual(host.alphaValue, 0)
     }
 
     @Test("A run turning bare fades a leaving view outside its box")

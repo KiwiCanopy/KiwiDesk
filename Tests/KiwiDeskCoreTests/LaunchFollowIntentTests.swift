@@ -27,7 +27,7 @@ struct LaunchFollowIntentTests {
         let inside = t0.addingTimeInterval(
             LaunchFollowIntent.drainWindow - 0.01
         )
-        #expect(intent.owed(at: inside) == "app.a")
+        expectEqual(intent.owed(at: inside), "app.a")
         let past = t0.addingTimeInterval(
             LaunchFollowIntent.drainWindow + 0.01
         )
@@ -48,7 +48,7 @@ struct LaunchFollowIntentTests {
         intent.record("app.a", at: t0)
         intent.record("app.b", at: t0)
         #expect(!intent.claim("app.a", at: t0))
-        #expect(intent.owed(at: t0) == "app.b")
+        expectEqual(intent.owed(at: t0), "app.b")
         intent.forget()
         #expect(intent.owed(at: t0) == nil)
     }

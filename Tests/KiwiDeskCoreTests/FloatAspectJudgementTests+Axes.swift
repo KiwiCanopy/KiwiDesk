@@ -58,7 +58,7 @@ extension FloatAspectJudgementTests {
                 core.execute("resize", args: [.string(axis), .number(-50)])
                     .isSuccess
             )
-            #expect(refusals.count == 1)
+            expectEqual(refusals.count, 1)
             guard case .ownMinimum = refusals.first else {
                 Issue.record("expected the window's own minimum")
                 continue
@@ -103,7 +103,7 @@ extension FloatAspectJudgementTests {
             ),
             live: start
         )
-        #expect(core.tiler.recentInstantTarget(id) == split)
+        expectEqual(core.tiler.recentInstantTarget(id), split)
     }
 
     /// A cell grid answers short of the ask, and the write put its
@@ -189,7 +189,7 @@ extension FloatAspectJudgementTests {
         answer(core, start.size)
         press(core, 50)
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.state.floatAspectFlight == .probing(id))
+        expectEqual(core.state.floatAspectFlight, .probing(id))
         focus(core, other)
         press(core, 50)
         #expect(core.tiler.recentInstantTarget(other) != nil)
@@ -208,7 +208,7 @@ extension FloatAspectJudgementTests {
         #expect(armed != nil)
         focus(core, other)
         pressY(core, 50)
-        #expect(core.deferred.task(for: .floatAspect) == armed)
+        expectEqual(core.deferred.task(for: .floatAspect), armed)
         core.deferred.cancel(.floatAspect)
         core.state.floatAspectFlight = nil
     }
@@ -231,7 +231,7 @@ extension FloatAspectJudgementTests {
         press(core, 50)
         let armed = core.deferred.task(for: .floatAspect)
         press(core, 50)
-        #expect(core.deferred.task(for: .floatAspect) == armed)
+        expectEqual(core.deferred.task(for: .floatAspect), armed)
         core.deferred.cancel(.floatAspect)
         core.state.floatAspectFlight = nil
     }
@@ -305,7 +305,7 @@ extension FloatAspectJudgementTests {
             succeeded: true
         )
         glide.endFire(id: 1)
-        #expect(glide.heldID == 1)
+        expectEqual(glide.heldID, 1)
         #expect(!glide.isGliding)
         answer(core, start.size)
         core.judgeFloatAspect(ask("x", 50, to: grow))

@@ -29,7 +29,7 @@ struct LocalizationPreferenceTests {
         let (defaults, cleanup) = makeDefaults()
         defer { cleanup() }
         LocalizationPreference.write("de", to: defaults)
-        #expect(LocalizationPreference.read(from: defaults) == "de")
+        expectEqual(LocalizationPreference.read(from: defaults), "de")
     }
 
     @Test("writing nil removes the key (back to System default)")
@@ -49,6 +49,6 @@ struct LocalizationPreferenceTests {
     func storageKeyIsStable() {
         // Pinned: changing this key would silently reset every
         // existing user's language pick back to System default.
-        #expect(LocalizationPreference.key == "language")
+        expectEqual(LocalizationPreference.key, "language")
     }
 }

@@ -51,8 +51,8 @@ struct SizeBoundCorroborationProbeTests {
         // A floor probes SMALLER, one point past the bar, on the
         // refusing axis alone. Derived from the constant so a
         // retune moves both.
-        #expect(issue.size.width == 500 - bar - 1)
-        #expect(issue.size.height == 800)
+        expectEqual(issue.size.width, 500 - bar - 1)
+        expectEqual(issue.size.height, 800)
 
         // The ceiling mirror probes LARGER.
         var ceiling = SizeBoundLearner()
@@ -66,7 +66,7 @@ struct SizeBoundCorroborationProbeTests {
         let mirrored = try #require(
             take(&ceiling, current: snapped, target: snapped)
         )
-        #expect(mirrored.size.width == 1000 + bar + 1)
+        expectEqual(mirrored.size.width, 1000 + bar + 1)
     }
 
     @Test("The expected answer corroborates in one settled read")
@@ -75,7 +75,7 @@ struct SizeBoundCorroborationProbeTests {
         let issue = try #require(take(&learner))
         // The anchor's confirming read was settled, so the
         // pre-ask frame is a trusted first observation.
-        #expect(issue.baseline == held)
+        expectEqual(issue.baseline, held)
         learner.recordAsk(
             w,
             size: issue.size,
@@ -89,7 +89,7 @@ struct SizeBoundCorroborationProbeTests {
         #expect(confirmed)
         // Two asks a real step apart agreeing: the floor every
         // consumer reads.
-        #expect(learner.bound(for: w)?.minWidth == 720)
+        expectEqual(learner.bound(for: w)?.minWidth, 720)
         // The question is closed — nothing further is asked.
         let again = take(&learner)
         #expect(again == nil)
@@ -120,7 +120,7 @@ struct SizeBoundCorroborationProbeTests {
         }
         // The probe's own ask is believed like any refusal…
         let entries = learner.bound(for: w)?.width ?? []
-        #expect(entries.count == 2)
+        expectEqual(entries.count, 2)
         // …and corroborates nothing.
         #expect(learner.bound(for: w)?.maxWidth == nil)
         // The probe's confirmation armed no probe of its own: the
@@ -179,7 +179,7 @@ struct SizeBoundCorroborationProbeTests {
             settledFrom: held
         )
         learner.observe(w, currentSize: held, settledRead: true)
-        #expect(learner.bound(for: w)?.minWidth == 720)
+        expectEqual(learner.bound(for: w)?.minWidth, 720)
         let issue = take(&learner)
         #expect(issue == nil)
     }
@@ -243,7 +243,7 @@ struct SizeBoundCorroborationProbeTests {
             learner.observe(w, currentSize: capped, settledRead: true)
         }
         let fresh = take(&learner, current: capped, target: wider)
-        #expect(fresh?.size.width == 900 + bar + 1)
+        expectEqual(fresh?.size.width, 900 + bar + 1)
     }
 
 }

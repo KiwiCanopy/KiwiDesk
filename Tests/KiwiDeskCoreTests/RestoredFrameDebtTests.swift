@@ -142,7 +142,7 @@ struct RestoredFrameDebtTests {
         let first = core.state.apply(
             .windowCreated(window(Self.late, frame: Self.tile))
         )
-        #expect(first.restoredFrame == Self.owed)
+        expectEqual(first.restoredFrame, Self.owed)
         #expect(core.state.restoredFrames[Self.late] == nil)
         core.state.apply(
             .windowDestroyed(Self.late, wasMinimized: false)
@@ -183,9 +183,9 @@ struct RestoredFrameDebtTests {
             )
         )
         core.handle(.windowCreated(window(Self.late, frame: Self.tile)))
-        #expect(core.state.workspaces.space(of: Self.late) == "2")
-        #expect(core.tiler.stashOriginal(Self.late) == Self.owed)
-        #expect(core.tiler.recentInstantTarget(Self.late) == Self.owed)
+        expectEqual(core.state.workspaces.space(of: Self.late), "2")
+        expectEqual(core.tiler.stashOriginal(Self.late), Self.owed)
+        expectEqual(core.tiler.recentInstantTarget(Self.late), Self.owed)
     }
 
     /// The park keeps the seed — its capture guard is nil-only —
@@ -206,8 +206,8 @@ struct RestoredFrameDebtTests {
             )
         )
         core.handle(.windowCreated(window(Self.late, frame: Self.tile)))
-        #expect(core.state.workspaces.space(of: Self.late) == "2")
-        #expect(core.tiler.stashOriginal(Self.late) == Self.owed)
+        expectEqual(core.state.workspaces.space(of: Self.late), "2")
+        expectEqual(core.tiler.stashOriginal(Self.late), Self.owed)
         // Parked, not delivered, while its Space is unshown (the
         // park picks the REAL screen, so the corner itself is the
         // host's — tests.md's half-pinned fixture).
@@ -215,10 +215,10 @@ struct RestoredFrameDebtTests {
             core.tiler.recentInstantTarget(Self.late)
         )
         #expect(parked != Self.owed)
-        #expect(parked.size == Self.tile.size)
+        expectEqual(parked.size, Self.tile.size)
         core.state.workspaces.activate("2")
         core.retile(pass: .apply)
-        #expect(core.tiler.recentInstantTarget(Self.late) == Self.owed)
+        expectEqual(core.tiler.recentInstantTarget(Self.late), Self.owed)
     }
 
     /// A tiled Space's layout outranks the seed: the debt is a

@@ -212,7 +212,7 @@ struct SpaceBarGlyphCellTests {
         #expect(
             image.frame.size == CGSize(width: Self.cell, height: Self.cell)
         )
-        #expect(image.frame.midX == Self.depth / 2)
+        expectEqual(image.frame.midX, Self.depth / 2)
     }
 
     @Test("the front-app glyph takes the same framing")

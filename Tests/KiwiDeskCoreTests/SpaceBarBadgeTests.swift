@@ -88,9 +88,9 @@ struct SpaceBarBadgeTests {
                 style: SpaceBarLook()
             ).first
         )
-        #expect(split.apps.map(\.name) == ["Web", "Web"])
-        #expect(split.apps.map(\.sticky) == [true, false])
-        #expect(split.apps.map(\.floating) == [false, true])
+        expectEqual(split.apps.map(\.name), ["Web", "Web"])
+        expectEqual(split.apps.map(\.sticky), [true, false])
+        expectEqual(split.apps.map(\.floating), [false, true])
     }
 
     @Test("Sticky glyphs travel with the current space")
@@ -105,8 +105,8 @@ struct SpaceBarBadgeTests {
                 style: SpaceBarLook()
             ).first { $0.space == SpaceID("1") }
         )
-        #expect(home.apps.map(\.name) == ["Web", "Mail"])
-        #expect(home.apps.map(\.sticky) == [true, false])
+        expectEqual(home.apps.map(\.name), ["Web", "Mail"])
+        expectEqual(home.apps.map(\.sticky), [true, false])
         // Switch to space 2: the sticky glyph moves — it joins
         // the current item and is pruned from the home item
         // (one glyph, always where the user is).
@@ -118,12 +118,12 @@ struct SpaceBarBadgeTests {
         let second = try #require(
             items.first { $0.space == SpaceID("2") }
         )
-        #expect(second.apps.map(\.name) == ["Web"])
-        #expect(second.apps.map(\.sticky) == [true])
+        expectEqual(second.apps.map(\.name), ["Web"])
+        expectEqual(second.apps.map(\.sticky), [true])
         let first = try #require(
             items.first { $0.space == SpaceID("1") }
         )
-        #expect(first.apps.map(\.name) == ["Mail"])
+        expectEqual(first.apps.map(\.name), ["Mail"])
         // Unsticky: the glyph returns home.
         core.state.setSticky(WindowID(1), .none)
         let after = core.spaceBarItems(
@@ -181,9 +181,9 @@ struct SpaceBarBadgeTests {
         // The traveler is among the hidden (a disc hides two
         // groups or more, #2052), and it holds the system focus
         // while the Space's own slot stays on a visible member.
-        #expect(item.apps.map(\.name) == ["Note", "Zed"])
-        #expect(item.after.windows == [WindowID(3), WindowID(6)])
-        #expect(core.state.workspaces[SpaceID("2")]?.focused == WindowID(4))
+        expectEqual(item.apps.map(\.name), ["Note", "Zed"])
+        expectEqual(item.after.windows, [WindowID(3), WindowID(6)])
+        expectEqual(core.state.workspaces[SpaceID("2")]?.focused, WindowID(4))
         #expect(item.after.holdsFocus)
     }
 
@@ -204,8 +204,8 @@ struct SpaceBarBadgeTests {
                 style: SpaceBarLook()
             ).first
         )
-        #expect(item.apps.map(\.name) == ["Web", "Mail"])
-        #expect(item.apps.map(\.count) == [1, 2])
-        #expect(item.apps.map(\.floating) == [false, false])
+        expectEqual(item.apps.map(\.name), ["Web", "Mail"])
+        expectEqual(item.apps.map(\.count), [1, 2])
+        expectEqual(item.apps.map(\.floating), [false, false])
     }
 }

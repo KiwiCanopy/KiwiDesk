@@ -30,11 +30,11 @@ struct StarterCompactShelfTests {
 
     @Test("the main screen decides, for every screen's shelf")
     func mainScreenDecides() {
-        #expect(thickness([air13]) == compact)
-        #expect(thickness([air13, screen27]) == compact)
-        #expect(thickness([screen27, air13]) == standard)
-        #expect(thickness([laptop16]) == standard)
-        #expect(thickness([screen27]) == standard)
+        expectEqual(thickness([air13]), compact)
+        expectEqual(thickness([air13, screen27]), compact)
+        expectEqual(thickness([screen27, air13]), standard)
+        expectEqual(thickness([laptop16]), standard)
+        expectEqual(thickness([screen27]), standard)
     }
 
     @Test("the cut-off is exclusive")
@@ -55,7 +55,7 @@ struct StarterCompactShelfTests {
             style: LookCatalog.defaultLook(sizes: [air13]).style,
             colors: [:]
         ).worn(over: TilingSettings())
-        #expect(worn.kiwishelf.thickness == compact)
+        expectEqual(worn.kiwishelf.thickness, compact)
     }
 
     @Test("no preset thins its shelf")
@@ -96,6 +96,6 @@ struct StarterCompactShelfTests {
             look.worn(over: TilingSettings()).kiwishelf.thickness
                 == compact
         )
-        #expect(core.tiler.settings.kiwishelf.thickness == compact)
+        expectEqual(core.tiler.settings.kiwishelf.thickness, compact)
     }
 }

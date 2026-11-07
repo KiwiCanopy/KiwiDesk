@@ -33,11 +33,11 @@ struct GridHealTests {
     func fixedGridLosesAColumn() throws {
         var ctx = context()
         let before = try #require(GridLayout.shape(for: ids, in: ctx))
-        #expect(before.columns == 3)
+        expectEqual(before.columns, 3)
         ctx.sizeBounds[ids[4]] = EffectiveSizeBound(width: floor(900))
         let healed = try #require(GridLayout.shape(for: ids, in: ctx))
-        #expect(healed.columns == 2)
-        #expect(healed.rows == 2)
+        expectEqual(healed.columns, 2)
+        expectEqual(healed.rows, 2)
         #expect(healed.scrolls)
     }
 
@@ -48,7 +48,7 @@ struct GridHealTests {
         ctx.sizeBounds[ids[0]] = EffectiveSizeBound(height: floor(600))
         let healed = try #require(GridLayout.shape(for: ids, in: ctx))
         #expect(healed.rows < before.rows)
-        #expect(healed.rows == 1)
+        expectEqual(healed.rows, 1)
     }
 
     @Test("the grid grows back once the wide window leaves")
@@ -56,19 +56,19 @@ struct GridHealTests {
         var ctx = context()
         ctx.sizeBounds[ids[4]] = EffectiveSizeBound(width: floor(900))
         let shape = try #require(GridLayout.shape(for: ids, in: ctx))
-        #expect(shape.columns == 2)
+        expectEqual(shape.columns, 2)
         let rest = ids.filter { $0 != ids[4] }
         let back = try #require(GridLayout.shape(for: rest, in: ctx))
-        #expect(back.columns == 3)
+        expectEqual(back.columns, 3)
     }
 
     @Test("the overflow run scrolls what the healed cells drop")
     func runFollows() throws {
         var ctx = context()
-        #expect(GridLayout.zones(for: ids, in: ctx) == [])
+        expectEqual(GridLayout.zones(for: ids, in: ctx), [])
         ctx.sizeBounds[ids[4]] = EffectiveSizeBound(width: floor(900))
         let zones = try #require(GridLayout.zones(for: ids, in: ctx))
-        #expect(zones.count == 1)
+        expectEqual(zones.count, 1)
     }
 
     @Test("a forced pass probes past the floor at the full grid")
@@ -78,8 +78,8 @@ struct GridHealTests {
         ctx.sizeBounds[ids[0]] = EffectiveSizeBound(height: floor(600))
         ctx.probesBeyondBounds = true
         let shape = try #require(GridLayout.shape(for: ids, in: ctx))
-        #expect(shape.columns == 3)
-        #expect(shape.rows == 2)
+        expectEqual(shape.columns, 3)
+        expectEqual(shape.rows, 2)
     }
 
     @Test("the drawn cells follow the healed shape")

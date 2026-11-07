@@ -43,7 +43,7 @@ struct MenuBarRemeasureTests {
         defer { core.eventLoop.isRunning = false }
         core.scheduleMenuBarRemeasure()
         await drain(core)
-        #expect(reads.count == 2)
+        expectEqual(reads.count, 2)
     }
 
     @Test("a stopped loop re-reads nothing")
@@ -52,7 +52,7 @@ struct MenuBarRemeasureTests {
         let core = makeCore(reads: reads)
         core.scheduleMenuBarRemeasure()
         await drain(core)
-        #expect(reads.count == 0)
+        expectEqual(reads.count, 0)
     }
 }
 

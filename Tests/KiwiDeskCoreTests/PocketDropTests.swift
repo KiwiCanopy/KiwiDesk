@@ -86,7 +86,7 @@ struct PocketDropTests {
         #expect(!shown.dropHovered)
         // Hovered, the empty pocket shows full (#2776).
         core.pocketHovered(shown.display, true)
-        #expect(core.pocketPlate.specs.values.first?.faded == false)
+        expectEqual(core.pocketPlate.specs.values.first?.faded, false)
         core.pocketHovered(shown.display, false)
         end(core, one)
         #expect(core.pocketPlate.specs.values.first == nil)
@@ -111,7 +111,7 @@ struct PocketDropTests {
         #expect(lit.dropHovered)
         #expect(!lit.faded)
         end(core, one)
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(core.pocketPlate.dragging == nil)
     }
 
@@ -130,7 +130,7 @@ struct PocketDropTests {
         try #require(core.dragOverlay.isDropZoneVisible)
         point(core, onPlate: true)
         move(core, one)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+        expectEqual(core.pocketPlate.specs.values.first?.dropHovered, true)
         #expect(!core.dragOverlay.isDropZoneVisible)
     }
 
@@ -151,10 +151,10 @@ struct PocketDropTests {
         move(core, two)
         point(core, onPlate: true)
         move(core, two)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        expectEqual(core.pocketPlate.specs.values.first?.dropHovered, false)
         end(core, two)
         #expect(core.state.pocketPhase(of: two) == nil)
-        #expect(core.state.pocketedWindows == [one])
+        expectEqual(core.state.pocketedWindows, [one])
         // Refused, the ordinary drop took it: the plate is done.
         #expect(core.pocketPlate.dragging == nil)
     }
@@ -173,10 +173,10 @@ struct PocketDropTests {
         move(core, two)
         point(core, onPlate: true)
         move(core, two)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        expectEqual(core.pocketPlate.specs.values.first?.dropHovered, false)
         end(core, two)
-        #expect(core.state.pocketPhase(of: two) == .out)
-        #expect(asked == ["app.two"])
+        expectEqual(core.state.pocketPhase(of: two), .out)
+        expectEqual(asked, ["app.two"])
     }
 
     @Test("a resize latches off the plate it began as a move")
@@ -219,9 +219,9 @@ struct PocketDropTests {
             start: before,
             frame: before.offsetBy(dx: 300, dy: 300)
         )
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         let filed = core.state.pocketSlot(of: one)?.frames.values
-        #expect(filed.map { Array($0) } == [before])
+        expectEqual(filed.map { Array($0) }, [before])
     }
 
     @Test("a first frame with no delta, or a shrink, shows no plate")
@@ -234,7 +234,7 @@ struct PocketDropTests {
         shrunk.size.width -= 50
         core.handleDragMove(one, start: start, frame: shrunk)
         #expect(core.pocketPlate.specs.values.first == nil)
-        #expect(core.pocketPlate.resizing == one)
+        expectEqual(core.pocketPlate.resizing, one)
     }
 
     @Test("an unlit plate takes no drop, even with the pointer on it")
@@ -265,7 +265,7 @@ struct PocketDropTests {
         core.execute("pocket", args: [.number(Double(one.raw))])
         point(core, onPlate: false)
         move(core, two)
-        #expect(core.pocketPlate.specs.values.first?.faded == false)
+        expectEqual(core.pocketPlate.specs.values.first?.faded, false)
     }
 
     @Test("a cancelled drag hides the plate it showed")
@@ -296,7 +296,7 @@ struct PocketDropTests {
         // A title bar under the pocket: the drag lights nothing and
         // its drop pockets nothing (#2793).
         move(core, one)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        expectEqual(core.pocketPlate.specs.values.first?.dropHovered, false)
         end(core, one)
         #expect(core.state.pocketPhase(of: one) == nil)
         // Off the pocket once, it arms.
@@ -305,7 +305,7 @@ struct PocketDropTests {
         move(core, one)
         pointer.onPocket = true
         move(core, one)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+        expectEqual(core.pocketPlate.specs.values.first?.dropHovered, true)
     }
 
     @Test("a drag that starts on a taken pocket is refused only once off it")
@@ -333,6 +333,6 @@ struct PocketDropTests {
         pointer.onPocket = true
         move(core, two)
         end(core, two)
-        #expect(spoken.count == 1)
+        expectEqual(spoken.count, 1)
     }
 }

@@ -94,7 +94,7 @@ struct GuiSpaceReconcileTests {
         // (a fresh StateCoordinator holds space "1").
         let seeded = [SpaceID("7"), SpaceID("8")]
         let ids = core.state.workspaces.allSpaces.map(\.id)
-        #expect(ids.filter { seeded.contains($0) } == seeded)
+        expectEqual(ids.filter { seeded.contains($0) }, seeded)
     }
 
     @Test("Seeding only adds — a live-only space is not dropped")
@@ -121,7 +121,7 @@ struct GuiSpaceReconcileTests {
         core.state.workspaces.ensureSpace(SpaceID("2"))
         core.syncGuiSpacesToLive()
         let saved = try #require(core.guiConfigStore.load())
-        #expect(saved.spaces == [SpaceID("1"), SpaceID("2")])
+        expectEqual(saved.spaces, [SpaceID("1"), SpaceID("2")])
     }
 
     @Test("Mirror is a no-op with no sidecar (not GUI-managed)")
@@ -200,7 +200,7 @@ struct GuiSpaceReconcileTests {
         // "B" pruned from live and the sidecar now mirrors [A].
         #expect(core.state.workspaces[SpaceID("B")] == nil)
         let saved = try #require(core.guiConfigStore.load())
-        #expect(saved.spaces == [SpaceID("A")])
+        expectEqual(saved.spaces, [SpaceID("A")])
     }
 
     @Test("Deleting a space under one profile leaves others intact")

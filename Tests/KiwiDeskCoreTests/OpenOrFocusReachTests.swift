@@ -180,8 +180,8 @@ struct OpenOrFocusReachTests {
         defer { teardown() }
         park(core, touches, 7, rank: 0)
         press(core)
-        #expect(Bridge.switches.map(\.0) == [11])
-        #expect(core.followFocus.owed() == WindowID(7))
+        expectEqual(Bridge.switches.map(\.0), [11])
+        expectEqual(core.followFocus.owed(), WindowID(7))
         #expect(touches.restored.isEmpty)
         #expect(touches.activated.isEmpty)
         #expect(core.deferred.isScheduled(.awayReachReap))
@@ -195,8 +195,8 @@ struct OpenOrFocusReachTests {
         press(core)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
-        #expect(touches.restored == [WindowID(9)])
-        #expect(touches.activated == [pid])
+        expectEqual(touches.restored, [WindowID(9)])
+        expectEqual(touches.activated, [pid])
     }
 
     /// A stale entry the census has since re-homed onto a shown
@@ -214,12 +214,12 @@ struct OpenOrFocusReachTests {
             isUp: true
         )
         press(core)
-        #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 10)
+        expectEqual(core.state.awayWindows[WindowID(7)]?.nativeSpace, 10)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
         // Not away ⇒ nothing up anywhere ⇒ the un-park runs.
-        #expect(touches.restored == [WindowID(9)])
-        #expect(touches.activated == [pid])
+        expectEqual(touches.restored, [WindowID(9)])
+        expectEqual(touches.activated, [pid])
     }
 
     @Test("without the bridge the pre-#1146 path runs")
@@ -232,7 +232,7 @@ struct OpenOrFocusReachTests {
         #expect(core.followFocus.owed() == nil)
         // A window UP away still counts as up: no un-park.
         #expect(touches.restored.isEmpty)
-        #expect(touches.activated == [pid])
+        expectEqual(touches.activated, [pid])
     }
 
     @Test("with a window up here the away one waits")
@@ -245,7 +245,7 @@ struct OpenOrFocusReachTests {
         park(core, touches, 7, rank: 0)
         press(core)
         #expect(Bridge.switches.isEmpty)
-        #expect(touches.activated == [pid])
+        expectEqual(touches.activated, [pid])
     }
 
     private func trackTwo(_ core: KiwiCore) {
@@ -275,8 +275,8 @@ struct OpenOrFocusReachTests {
         press(core)
         // 1 → 2: the away window is next by rank, so the press
         // reaches it rather than focusing 3.
-        #expect(Bridge.switches.map(\.0) == [11])
-        #expect(core.followFocus.owed() == WindowID(2))
+        expectEqual(Bridge.switches.map(\.0), [11])
+        expectEqual(core.followFocus.owed(), WindowID(2))
         #expect(touches.activated.isEmpty)
     }
 
@@ -296,8 +296,8 @@ struct OpenOrFocusReachTests {
         press(core)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
-        #expect(core.state.workspaces["1"]?.focused == WindowID(1))
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces["1"]?.focused, WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
         #expect(touches.activated.isEmpty)
     }
 
@@ -308,7 +308,7 @@ struct OpenOrFocusReachTests {
         trackTwo(core)
         park(core, touches, 2, rank: 1)
         press(core)
-        #expect(core.state.workspaces["1"]?.focused == WindowID(3))
+        expectEqual(core.state.workspaces["1"]?.focused, WindowID(3))
         #expect(core.followFocus.owed() == nil)
     }
 }

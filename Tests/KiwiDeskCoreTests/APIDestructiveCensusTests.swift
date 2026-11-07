@@ -94,13 +94,13 @@ struct APIDestructiveCensusTests {
             Issue.record("expected an object payload")
             return
         }
-        #expect(entry["destructive"] == .bool(true))
+        expectEqual(entry["destructive"], .bool(true))
         let safe = APIReference.helpResponse(for: "focus")
         guard case .object(let other)? = safe.data else {
             Issue.record("expected an object payload")
             return
         }
-        #expect(other["destructive"] == .bool(false))
+        expectEqual(other["destructive"], .bool(false))
         // A Lua spelling resolves to its command's entry, which is
         // what every reader of the flag asks.
         let alias = try #require(

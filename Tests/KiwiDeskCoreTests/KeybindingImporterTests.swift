@@ -103,8 +103,8 @@ struct KeyComboInstanceTests {
     func roundTrip() throws {
         let combo = try #require(KeyCombo.parse("cmd+shift+left"))
         let text = try #require(combo.comboString())
-        #expect(text == "shift+command+left")
-        #expect(KeyCombo.parse(text) == combo)
+        expectEqual(text, "shift+command+left")
+        expectEqual(KeyCombo.parse(text), combo)
     }
 }
 
@@ -134,8 +134,8 @@ struct KeybindingMergeTests {
             recovered: [layer("resize", [row("h", "x()")])],
             into: &config
         )
-        #expect(config.layers.map(\.name) == ["default", "resize"])
-        #expect(config.layers[1].bindings.count == 1)
+        expectEqual(config.layers.map(\.name), ["default", "resize"])
+        expectEqual(config.layers[1].bindings.count, 1)
     }
 
     @Test("Same combo is replaced, a free combo appended")
@@ -157,10 +157,10 @@ struct KeybindingMergeTests {
             into: &config
         )
         let rows = config.layers[0].bindings
-        #expect(rows.count == 2)
+        expectEqual(rows.count, 2)
         let updated = rows.first { $0.combo == "alt+h" }
-        #expect(updated?.lua == "new()")
-        #expect(updated?.kind == .navigation)
+        expectEqual(updated?.lua, "new()")
+        expectEqual(updated?.kind, .navigation)
         #expect(rows.contains { $0.combo == "alt+j" })
     }
 
@@ -168,8 +168,8 @@ struct KeybindingMergeTests {
     func ignoresComboless() {
         var bindings = [row("alt+h", "keep()")]
         KeybindingMerge.upsert(row("", "noop()"), into: &bindings)
-        #expect(bindings.count == 1)
-        #expect(bindings[0].lua == "keep()")
+        expectEqual(bindings.count, 1)
+        expectEqual(bindings[0].lua, "keep()")
     }
 
     @Test("An existing layer keeps its icon unless it had none")
@@ -186,8 +186,8 @@ struct KeybindingMergeTests {
             ],
             into: &config
         )
-        #expect(config.layers[0].icon == "📐")
-        #expect(config.layers[1].icon == "🆕")
+        expectEqual(config.layers[0].icon, "📐")
+        expectEqual(config.layers[1].icon, "🆕")
     }
 }
 
@@ -253,8 +253,8 @@ struct KeybindingImporterIntegrationTests {
             layers.first { $0.name == KeyLayer.defaultName }
         )
         let row = try #require(defaultLayer.bindings.first)
-        #expect(row.combo == "option+h")
-        #expect(row.lua == "KiwiDesk.focus(\"left\")")
-        #expect(row.kind == .custom)
+        expectEqual(row.combo, "option+h")
+        expectEqual(row.lua, "KiwiDesk.focus(\"left\")")
+        expectEqual(row.kind, .custom)
     }
 }

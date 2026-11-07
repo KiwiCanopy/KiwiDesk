@@ -79,8 +79,8 @@ struct DesktopSwitchCueProfileTests {
         let core = try makeCore(binding: "Work")
         defer { teardown() }
         let shown = switchToDesktop2(core)
-        #expect(core.profiles.currentName == "Work")
-        #expect(shown.map(\.loadedProfile) == ["Work"])
+        expectEqual(core.profiles.currentName, "Work")
+        expectEqual(shown.map(\.loadedProfile), ["Work"])
     }
 
     @Test("a binding to the live profile names nothing")
@@ -88,8 +88,8 @@ struct DesktopSwitchCueProfileTests {
         let core = try makeCore(binding: "Other")
         defer { teardown() }
         let shown = switchToDesktop2(core)
-        #expect(core.profiles.currentName == "Other")
-        #expect(shown.count == 1)
+        expectEqual(core.profiles.currentName, "Other")
+        expectEqual(shown.count, 1)
         #expect(shown.map(\.loadedProfile) == [nil])
     }
 }

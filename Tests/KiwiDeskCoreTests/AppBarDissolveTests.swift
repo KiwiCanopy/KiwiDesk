@@ -50,10 +50,10 @@ struct AppBarDissolveTests {
             glass: false,
             dissolving: true
         )
-        #expect(glide.departures.count == 2)
+        expectEqual(glide.departures.count, 2)
         #expect(glide.departures.allSatisfy { $0.into == nil })
         #expect(old.allSatisfy { $0.superview === overlay.itemRun })
-        #expect(glide.arrivals.count == 3)
+        expectEqual(glide.arrivals.count, 3)
         #expect(glide.arrivals.allSatisfy { $0.from == .zero })
         // A dissolve arrival slides under no glass, so it is not
         // held bare until it lands.
@@ -173,16 +173,16 @@ struct AppBarDissolveTests {
         #expect(oldGlasses.allSatisfy { $0.alphaValue == 1 })
         // The arriving box is a fresh one, hosting its view, its
         // host standing transparent for the fade in.
-        #expect(overlay.boxGlasses.count == 1)
+        expectEqual(overlay.boxGlasses.count, 1)
         let arriving = try #require(overlay.boxGlasses.first)
         #expect(!oldGlasses.contains { $0 === arriving })
-        #expect(arriving.alphaValue == 1)
+        expectEqual(arriving.alphaValue, 1)
         #expect(arriving.frame.width > 0)
         #expect(GlassPlate.holds(arriving, overlay.itemViews[0]))
         let arrivingHost = try #require(
             GlassBox.host(of: arriving)
         )
-        #expect(arrivingHost.alphaValue == 1)
+        expectEqual(arrivingHost.alphaValue, 1)
         for _ in 0..<150
         where oldHosts.contains(where: { $0.superview != nil }) {
             try await Task.sleep(for: .milliseconds(20))
@@ -221,7 +221,7 @@ struct AppBarDissolveTests {
             let hit = overlay.itemRun.hitTest(
                 parent.convert(centre, from: view)
             )
-            #expect(hit?.isDescendant(of: view) == true)
+            expectEqual(hit?.isDescendant(of: view), true)
         }
     }
 }

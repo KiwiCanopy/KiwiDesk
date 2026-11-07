@@ -24,7 +24,7 @@ struct WindowStrokeTests {
         )
         // The same clamp the ring draws with.
         settings.borderStyle.width = 99
-        #expect(settings.windowStroke.width == BorderStyle.maxWidth)
+        expectEqual(settings.windowStroke.width, BorderStyle.maxWidth)
     }
 
     /// A pre-#1742 file's per-stroke values are no longer read —
@@ -70,8 +70,8 @@ struct WindowStrokeTests {
         let core = makeTestCore()
         let response = core.execute(verb, args: [.number(4)])
         #expect(!response.isSuccess)
-        #expect(response.error?.contains(message) == true)
-        #expect(core.tiler.settings == TilingSettings())
+        expectEqual(response.error?.contains(message), true)
+        expectEqual(core.tiler.settings, TilingSettings())
     }
 
     /// A drag marker stores no stroke of its own, so no path can

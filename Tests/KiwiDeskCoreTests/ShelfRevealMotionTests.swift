@@ -73,7 +73,7 @@ struct ShelfRevealMotionTests {
                 : CGRect(x: 100, y: 100, width: 8, height: 60)
             let spec = spec(hovered: true, label: label, edge: edge, at: frame)
             let room = ShelfHandle.room(of: spec)
-            #expect(screenSide(room, edge) == screenSide(frame, edge))
+            expectEqual(screenSide(room, edge), screenSide(frame, edge))
             #expect(room.contains(frame), "\(edge)")
             let motion = BarMotion.revealMotion(
                 entering: true,
@@ -88,7 +88,7 @@ struct ShelfRevealMotionTests {
                 Issue.record("\(edge): no grow")
                 continue
             }
-            #expect(screenSide(morph.mark, edge) == screenSide(frame, edge))
+            expectEqual(screenSide(morph.mark, edge), screenSide(frame, edge))
         }
     }
 
@@ -113,7 +113,7 @@ struct ShelfRevealMotionTests {
                 depth: depth,
                 gap: gap
             )
-            #expect(found == offset)
+            expectEqual(found, offset)
             #expect(
                 BarMotion.revealMotion(entering: true, path: slide(found))
                     == .slide(offset: offset, length: BarMotion.revealSlide)
@@ -135,7 +135,7 @@ struct ShelfRevealMotionTests {
         #expect(back.delay > 0)
         #expect(abs(back.delay + back.length - BarMotion.revealSlide) < 1e-9)
         let out = BarMotion.markFade(showing: false, reveal: .slide)
-        #expect(out.delay == 0)
+        expectEqual(out.delay, 0)
     }
 
     /// The owner's ruling (2026-10-21): the mark keeps time with
@@ -210,14 +210,14 @@ struct ShelfRevealMotionTests {
             of: spec(hovered: false),
             in: view.bounds
         )
-        #expect(view.plate.frame == resting)
-        #expect(drawnMark(view) == resting)
-        #expect(view.rim.alphaValue == 0)
+        expectEqual(view.plate.frame, resting)
+        expectEqual(drawnMark(view), resting)
+        expectEqual(view.rim.alphaValue, 0)
         view.render(spec(hovered: true), animated: false)
-        #expect(view.plate.frame == view.bounds)
-        #expect(view.rim.frame == view.bounds)
-        #expect(drawnMark(view).midY == view.plate.frame.midY)
-        #expect(view.rim.alphaValue == 1)
+        expectEqual(view.plate.frame, view.bounds)
+        expectEqual(view.rim.frame, view.bounds)
+        expectEqual(drawnMark(view).midY, view.plate.frame.midY)
+        expectEqual(view.rim.alphaValue, 1)
     }
 
     /// The size is content, and the growth is motion the owner
@@ -230,10 +230,10 @@ struct ShelfRevealMotionTests {
         let view = view()
         view.render(spec(hovered: false), animated: false)
         view.render(spec(hovered: true), animated: true)
-        #expect(view.plate.frame == view.bounds)
-        #expect(view.rim.frame == view.plate.frame)
-        #expect(view.rim.alphaValue == 1)
-        #expect(view.plate.layer?.animationKeys()?.isEmpty == false)
+        expectEqual(view.plate.frame, view.bounds)
+        expectEqual(view.rim.frame, view.plate.frame)
+        expectEqual(view.rim.alphaValue, 1)
+        expectEqual(view.plate.layer?.animationKeys()?.isEmpty, false)
     }
 
     /// A label narrower than the current dot widens nothing, yet
@@ -250,7 +250,7 @@ struct ShelfRevealMotionTests {
         )
         let view = view()
         view.render(spec(hovered: true, label: label), animated: true)
-        #expect(spec(hovered: true, label: label).labelExtra == 0)
-        #expect(view.plate.frame == view.bounds)
+        expectEqual(spec(hovered: true, label: label).labelExtra, 0)
+        expectEqual(view.plate.frame, view.bounds)
     }
 }

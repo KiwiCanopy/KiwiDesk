@@ -87,7 +87,7 @@ struct LoginSessionGateTests {
             let dropped = logged.contains {
                 $0.contains("\(kind) snapshot is from another login")
             }
-            #expect(dropped == !restores)
+            expectEqual(dropped, !restores)
         }
     }
 
@@ -118,7 +118,7 @@ struct LoginSessionGateTests {
         blind.captureState = { other }
         blind.autosave()
         let after = try Data(contentsOf: crash)
-        #expect(after == kept)
+        expectEqual(after, kept)
         blind.shutdownCleanly()
         let session = dir.appendingPathComponent(".session_snapshot")
         let wroteSession = FileManager.default.fileExists(
@@ -128,7 +128,7 @@ struct LoginSessionGateTests {
         let refusals = logged.filter {
             $0.contains("login session unreadable")
         }
-        #expect(refusals.count == 2)
+        expectEqual(refusals.count, 2)
     }
 
     /// An older build stamps nothing. Its autosave and its plain
@@ -168,11 +168,11 @@ struct LoginSessionGateTests {
         let dir = try makeDir()
         defer { try? FileManager.default.removeItem(at: dir) }
         let live = try #require(LoginSession.current())
-        #expect(LoginSession.current() == live)
+        expectEqual(LoginSession.current(), live)
         let fresh = CrashRecovery(directory: dir)
         fresh.onLog = { _ in }
         fresh.workspaceCenter = NotificationCenter()
-        #expect(fresh.loginSession() == live)
+        expectEqual(fresh.loginSession(), live)
         fresh.captureState = { self.desk() }
         fresh.autosave()
         let data = try Data(
@@ -182,6 +182,6 @@ struct LoginSessionGateTests {
             StateSnapshot.self,
             from: data
         )
-        #expect(written.loginSession == live)
+        expectEqual(written.loginSession, live)
     }
 }

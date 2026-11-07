@@ -73,7 +73,7 @@ struct DragLookMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         #expect(!mentionsRetired(out))
         let migrated = try root(out)
-        #expect(migrated["format"] as? Int == Profile.currentFormat)
+        expectEqual(migrated["format"] as? Int, Profile.currentFormat)
         let settings = try #require(migrated["settings"] as? [String: Any])
         let drag = try #require(settings["drag"] as? [String: Any])
         for marker in ["ghost", "drop_zone"] {
@@ -98,10 +98,10 @@ struct DragLookMigrationTests {
         let out = try #require(ConfigMigration.migrated(gui))
         #expect(!mentionsRetired(out))
         let migrated = try root(out)
-        #expect(migrated["format"] as? Int == GuiConfig.currentFormat)
+        expectEqual(migrated["format"] as? Int, GuiConfig.currentFormat)
         let look = try #require(migrated["look"] as? [String: Any])
         let colors = try #require(look["colors"] as? [String: String])
-        #expect(colors == ["border.focused_color": "#4A9816"])
+        expectEqual(colors, ["border.focused_color": "#4A9816"])
     }
 
     @Test("a backup's profiles, palettes and looks cross")
@@ -143,7 +143,7 @@ struct DragLookMigrationTests {
             let migrated = try root(out)
             let entries = try #require(migrated[key] as? [[String: Any]])
             let colors = entries.first?["colors"] as? [String: String]
-            #expect(colors == ["border.focused_color": "#4A9816"])
+            expectEqual(colors, ["border.focused_color": "#4A9816"])
         }
         let palettes = try root(
             try #require(
@@ -154,7 +154,7 @@ struct DragLookMigrationTests {
                 )
             )
         )
-        #expect(palettes["format"] as? Int == PaletteDocument.currentFormat)
+        expectEqual(palettes["format"] as? Int, PaletteDocument.currentFormat)
     }
 
     /// A shared look exported before the retirement crosses in

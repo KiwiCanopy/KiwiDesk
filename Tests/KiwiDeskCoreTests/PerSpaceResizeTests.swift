@@ -68,7 +68,7 @@ struct PerSpaceResizeTests {
         // session layer (#764) — while the override keeps the
         // authored number and the shared global stays put, so
         // other spaces are untouched.
-        #expect(over?.masterRatio == 0.7)
+        expectEqual(over?.masterRatio, 0.7)
         let space = try #require(core.state.workspaces[SpaceID("1")])
         #expect(
             core.tiler.settings.resolvedStack(
@@ -78,7 +78,7 @@ struct PerSpaceResizeTests {
             )
             .masterRatio > 0.7
         )
-        #expect(core.tiler.settings.stack.masterRatio == globalBefore)
+        expectEqual(core.tiler.settings.stack.masterRatio, globalBefore)
     }
 
     @Test("Resize in an unoverridden space edits its session layer")
@@ -91,7 +91,7 @@ struct PerSpaceResizeTests {
         // no-override space stays put — and no override is
         // silently authored either; the value lives in the
         // space's session layer.
-        #expect(core.tiler.settings.stack.masterRatio == before)
+        expectEqual(core.tiler.settings.stack.masterRatio, before)
         #expect(core.tiler.settings.stack.override.isEmpty)
         let space = core.state.workspaces[SpaceID("1")]
         #expect(core.sessionRatios(of: SpaceID("1")).masterRatio != nil)
@@ -131,7 +131,7 @@ struct PerSpaceResizeTests {
                 flip: nil
             ).masterRatio
         }
-        #expect(value == 0.9)
+        expectEqual(value, 0.9)
     }
 
     @Test("bsp resize moves what the space displays, not its override")
@@ -148,7 +148,7 @@ struct PerSpaceResizeTests {
         let globalBefore = core.tiler.settings.bsp.splitRatioH
         core.execute("resize", args: [.string("x"), .number(500)])
         let over = core.tiler.settings.bsp.override[SpaceID("1")]
-        #expect(over?.splitRatioH == 0.7)
+        expectEqual(over?.splitRatioH, 0.7)
         let space = try #require(core.state.workspaces[SpaceID("1")])
         #expect(
             core.tiler.settings.resolvedBsp(
@@ -176,7 +176,7 @@ struct PerSpaceResizeTests {
             core.sessionRatios(of: SpaceID("1"))
         #expect(session.splitRatioV != nil)
         #expect(session.splitRatioH == nil)
-        #expect(core.tiler.settings.bsp.splitRatioV == 0.5)
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
+        expectEqual(core.tiler.settings.bsp.splitRatioV, 0.5)
+        expectEqual(core.tiler.settings.bsp.splitRatioH, 0.5)
     }
 }

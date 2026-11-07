@@ -67,7 +67,7 @@ struct TrackResizeFoldTests {
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: w1)?.minWidth == 650)
+        expectEqual(core.tiler.sizeBound(for: w1)?.minWidth, 650)
         core.state.workspaces.withSpace(space) {
             $0.trackWeights[w1] = 2
             $0.trackWeights[w2] = 1
@@ -77,7 +77,7 @@ struct TrackResizeFoldTests {
         core.retile()
         // The render's fold: w2 and w3 share one column.
         let frames = core.tiler.calculatedFrames(state: core.state)
-        #expect(frames[w2]?.minX == frames[w3]?.minX)
+        expectEqual(frames[w2]?.minX, frames[w3]?.minX)
         return (core, space)
     }
 

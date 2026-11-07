@@ -89,8 +89,8 @@ struct FloatingStickyAnchorTests {
     func anchorIsFloatingSticky() {
         let core = makeCore()
         seed(core, localPID: 100, travelerPID: getpid())
-        #expect(core.focusedWindowID == WindowID(50))
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(50))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("An inactive space still yields its own focus")

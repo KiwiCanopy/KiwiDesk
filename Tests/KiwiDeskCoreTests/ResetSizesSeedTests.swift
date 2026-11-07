@@ -21,10 +21,10 @@ struct ResetSizesSeedTests {
     @Test("⌃⌥R resets the active Space's sizes in the base seed")
     func seedsReset() {
         let row = DefaultKeybindings.resetSizesRow()
-        #expect(row.combo == "control+option+r")
-        #expect(row.lua == "KiwiDesk.reset_layout_sizing()")
-        #expect(row.kind == .navigation)
-        #expect(seeded.filter { $0.lua == row.lua } == [row])
+        expectEqual(row.combo, "control+option+r")
+        expectEqual(row.lua, "KiwiDesk.reset_layout_sizing()")
+        expectEqual(row.kind, .navigation)
+        expectEqual(seeded.filter { $0.lua == row.lua }, [row])
     }
 
     /// An install already topped up to 3.0.0's generation gets
@@ -32,7 +32,7 @@ struct ResetSizesSeedTests {
     @Test("an install past generation 4 gets ⌃⌥R alone")
     func joinsTheGeneration() {
         let row = DefaultKeybindings.resetSizesRow()
-        #expect(DefaultKeybindings.rows(ofGeneration: 5) == [row])
+        expectEqual(DefaultKeybindings.rows(ofGeneration: 5), [row])
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: [],
@@ -84,7 +84,7 @@ struct ResetSizesSeedTests {
     @Test("the switch carries ⌃⌥R to ✦R")
     func movesWithTheLadder() {
         let row = DefaultKeybindings.resetSizesRow()
-        #expect(ShortcutBase.hyper.rebased(row).combo == "hyper+r")
+        expectEqual(ShortcutBase.hyper.rebased(row).combo, "hyper+r")
     }
 
     /// A 3.0.0 layer — the seed without the reset — on the Hyper
@@ -109,7 +109,7 @@ struct ResetSizesSeedTests {
             above: 4,
             base: .hyper
         )
-        #expect(added.map(\.combo) == ["hyper+r"])
+        expectEqual(added.map(\.combo), ["hyper+r"])
     }
 
     /// ✦R registers as a bare R while Hyper is held, so a row
@@ -140,6 +140,6 @@ struct ResetSizesSeedTests {
             above: 4,
             base: .standard
         )
-        #expect(added == [reset])
+        expectEqual(added, [reset])
     }
 }

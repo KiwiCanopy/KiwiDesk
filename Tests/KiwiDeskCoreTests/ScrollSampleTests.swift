@@ -27,8 +27,8 @@ struct ScrollSampleTests {
 
     @Test("the system's inversion is undone")
     func naturalConvention() {
-        #expect(sample(inverted: true).delta == CGVector(dx: 3, dy: -7))
-        #expect(sample(inverted: false).delta == CGVector(dx: -3, dy: 7))
+        expectEqual(sample(inverted: true).delta, CGVector(dx: 3, dy: -7))
+        expectEqual(sample(inverted: false).delta, CGVector(dx: -3, dy: 7))
     }
 
     @Test("only ⌃⌥⌘⇧ count as the chord")
@@ -54,7 +54,7 @@ struct ScrollSampleTests {
             8: .cancelled, 128: .mayBegin, 99: .none,
         ]
         for (raw, phase) in phases {
-            #expect(sample(inverted: true, phase: raw).phase == phase)
+            expectEqual(sample(inverted: true, phase: raw).phase, phase)
         }
         let momenta: [Int64: ScrollSample.Momentum] = [
             0: .none, 1: .began, 2: .changed, 3: .ended, 9: .none,
@@ -74,8 +74,8 @@ struct ScrollSampleTests {
 struct ScrollTapEventReadingTests {
     @Test("the tap listens to the scroll wheel and nothing else")
     func maskIsScrollOnly() {
-        #expect(ScrollGestureTap.mask == 1 << 22)
-        #expect(CGEventType.scrollWheel.rawValue == 22)
+        expectEqual(ScrollGestureTap.mask, 1 << 22)
+        expectEqual(CGEventType.scrollWheel.rawValue, 22)
     }
 
     @Test("axes, phases and flags come off the event")
@@ -97,11 +97,11 @@ struct ScrollTapEventReadingTests {
             value: 2
         )
         let sample = ScrollGestureTap.sample(of: event)
-        #expect(sample.chord == [.control, .option])
-        #expect(sample.phase == .ended)
-        #expect(sample.momentum == .changed)
+        expectEqual(sample.chord, [.control, .option])
+        expectEqual(sample.phase, .ended)
+        expectEqual(sample.momentum, .changed)
         // A synthetic event is not inverted by the system, so the
         // natural convention negates both axes.
-        #expect(sample.delta == CGVector(dx: 3, dy: -7))
+        expectEqual(sample.delta, CGVector(dx: 3, dy: -7))
     }
 }

@@ -31,7 +31,7 @@ struct FloatStrandSeamTests {
             let record = capture()?.windows.first {
                 $0.windowID == F.window
             }
-            #expect(record?.frame == original)
+            expectEqual(record?.frame, original)
         }
     }
 
@@ -47,7 +47,7 @@ struct FloatStrandSeamTests {
         // #930) has the recovery seed a centred capture first.
         // The record must still outrank it.
         core.retile()
-        #expect(core.tiler.stashOriginal(F.window) == F.centred)
+        expectEqual(core.tiler.stashOriginal(F.window), F.centred)
         let original = F.original
         core.restore(
             StateSnapshot(
@@ -61,7 +61,7 @@ struct FloatStrandSeamTests {
                 activeSpace: nil
             )
         )
-        #expect(core.tiler.stashOriginal(F.window) == original)
+        expectEqual(core.tiler.stashOriginal(F.window), original)
         // Seeded, not set: the state frame still reads the
         // corner, which is what the forced park that follows
         // would otherwise have overwritten the set with.
@@ -69,7 +69,7 @@ struct FloatStrandSeamTests {
             core.state.windows[F.window]?.frame == F.parked()
         )
         core.retile()
-        #expect(core.tiler.stashOriginal(F.window) == original)
+        expectEqual(core.tiler.stashOriginal(F.window), original)
     }
 
     @Test(
@@ -116,7 +116,7 @@ struct FloatStrandSeamTests {
         core.tiler.seedStash(away, frame: original)
         core.tiler.seedStash(departed, frame: original)
         core.retile()
-        #expect(core.tiler.stashOriginal(away) == original)
+        expectEqual(core.tiler.stashOriginal(away), original)
         // Neither tracked nor away: gone for good, swept.
         #expect(core.tiler.stashOriginal(departed) == nil)
     }
@@ -134,7 +134,7 @@ struct FloatStrandSeamTests {
         // No frame set was issued, so the applier's grace does
         // not vouch for this echo: only the corner test can.
         core.handle(.windowMoved(F.window, F.parked(lift: 4)))
-        #expect(core.tiler.stashOriginal(F.window) == original)
+        expectEqual(core.tiler.stashOriginal(F.window), original)
         core.handle(
             .windowMoved(
                 F.window,

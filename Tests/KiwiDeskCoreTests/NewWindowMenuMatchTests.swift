@@ -115,7 +115,7 @@ struct NewWindowMenuMatchTests {
     @Test("a disabled row is still the match")
     func disabledStillMatches() {
         let items = [item("New Window", "N", 0, enabled: false)]
-        #expect(AXWindowActions.newWindowItem(in: items) == 0)
+        expectEqual(AXWindowActions.newWindowItem(in: items), 0)
     }
 
     @Test("only ⌘N and ⇧⌘N count")

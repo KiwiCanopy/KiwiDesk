@@ -24,11 +24,11 @@ struct WindowManagerTests {
         var manager = WindowManager()
         manager.upsert(makeWindow(1))
         manager.upsert(makeWindow(2))
-        #expect(manager.count == 2)
+        expectEqual(manager.count, 2)
         #expect(manager[WindowID(1)] != nil)
         manager.remove(WindowID(1))
         #expect(manager[WindowID(1)] == nil)
-        #expect(manager.count == 1)
+        expectEqual(manager.count, 1)
     }
 
     @Test("RemoveAll drops every window of a pid")
@@ -38,8 +38,8 @@ struct WindowManagerTests {
         manager.upsert(makeWindow(2, pid: 100))
         manager.upsert(makeWindow(3, pid: 200))
         let removed = manager.removeAll(pid: 100)
-        #expect(Set(removed) == [WindowID(1), WindowID(2)])
-        #expect(manager.count == 1)
+        expectEqual(Set(removed), [WindowID(1), WindowID(2)])
+        expectEqual(manager.count, 1)
     }
 
     @Test("Frame and title updates")
@@ -49,8 +49,8 @@ struct WindowManagerTests {
         let frame = CGRect(x: 10, y: 20, width: 30, height: 40)
         manager.updateFrame(WindowID(1), frame: frame)
         manager.updateTitle(WindowID(1), title: "Hello")
-        #expect(manager[WindowID(1)]?.frame == frame)
-        #expect(manager[WindowID(1)]?.title == "Hello")
+        expectEqual(manager[WindowID(1)]?.frame, frame)
+        expectEqual(manager[WindowID(1)]?.title, "Hello")
     }
 }
 
@@ -61,7 +61,7 @@ struct WorkspaceManagerTests {
         var manager = WorkspaceManager()
         manager.ensureSpace("code")
         manager.ensureSpace("mail")
-        #expect(manager.activeSpace == SpaceID("code"))
+        expectEqual(manager.activeSpace, SpaceID("code"))
     }
 
     @Test("A window lives in at most one space")
@@ -70,8 +70,8 @@ struct WorkspaceManagerTests {
         let w = WindowID(1)
         manager.add(w, to: "code")
         manager.add(w, to: "mail")
-        #expect(manager.space(of: w) == SpaceID("mail"))
-        #expect(manager["code"]?.windows.isEmpty == true)
+        expectEqual(manager.space(of: w), SpaceID("mail"))
+        expectEqual(manager["code"]?.windows.isEmpty, true)
     }
 
     @Test("Display assignment and removal")
@@ -84,8 +84,8 @@ struct WorkspaceManagerTests {
         )
         manager.upsertDisplay(display)
         manager.assign("code", to: display.id)
-        #expect(manager.display(of: "code") == display.id)
-        #expect(manager.spaces(on: display.id) == ["code"])
+        expectEqual(manager.display(of: "code"), display.id)
+        expectEqual(manager.spaces(on: display.id), ["code"])
         manager.removeDisplay(display.id)
         #expect(manager.display(of: "code") == nil)
     }
@@ -102,8 +102,8 @@ struct WorkspaceManagerTests {
         manager.activate("main2")
         // The active space wins on its own display; the other
         // display shows its first-assigned space.
-        #expect(manager.currentSpace(on: main) == "main2")
-        #expect(manager.currentSpace(on: side) == "web")
+        expectEqual(manager.currentSpace(on: main), "main2")
+        expectEqual(manager.currentSpace(on: side), "web")
     }
 
     @Test("currentSpace falls back to the first assigned space")
@@ -116,7 +116,7 @@ struct WorkspaceManagerTests {
         // the side display shows its first-assigned space.
         manager.assign("elsewhere", to: DisplayID(9))
         manager.activate("elsewhere")
-        #expect(manager.currentSpace(on: side) == "a")
+        expectEqual(manager.currentSpace(on: side), "a")
         // No space assigned → nil.
         #expect(manager.currentSpace(on: DisplayID(3)) == nil)
     }

@@ -28,7 +28,7 @@ struct CrossSessionFloatTests: CrossSessionFixture {
         let core = try #require(boot([window(10, "app.zen", "Zen Browser")]))
         leave(floated(), in: core)
         arrange(core)
-        #expect(space(core, 10) == F.hidden)
+        expectEqual(space(core, 10), F.hidden)
         #expect(core.state.userFloated.contains(WindowID(10)))
     }
 
@@ -53,10 +53,10 @@ struct CrossSessionFloatTests: CrossSessionFixture {
         arrange(core)
         #expect(!core.state.userFloated.contains(WindowID(20)))
         core.crossSessionSettlePass()
-        #expect(space(core, 20) == F.hidden)
+        expectEqual(space(core, 20), F.hidden)
         #expect(core.state.userFloated.contains(WindowID(20)))
         #expect(!core.state.userFloated.contains(WindowID(21)))
-        #expect(core.tiler.stashOriginal(WindowID(20)) == Self.recorded)
+        expectEqual(core.tiler.stashOriginal(WindowID(20)), Self.recorded)
     }
 
     /// A title pair already in its recorded Space is re-filed by
@@ -85,7 +85,7 @@ struct CrossSessionFloatTests: CrossSessionFixture {
         core.state.workspaces.focus(user, in: F.shown)
         #expect(!core.state.userFloated.contains(WindowID(20)))
         core.crossSessionSettlePass()
-        #expect(space(core, 20) == F.shown)
+        expectEqual(space(core, 20), F.shown)
         #expect(core.state.userFloated.contains(WindowID(20)))
         let seeded = core.tiler.stashOriginal(WindowID(20))
         #expect(seeded == (focused ? nil : Self.recorded))
@@ -100,8 +100,8 @@ struct CrossSessionFloatTests: CrossSessionFixture {
         leave(floated(), in: core)
         arrange(core)
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(space(core, 30) == F.hidden)
+        expectEqual(space(core, 30), F.hidden)
         #expect(core.state.userFloated.contains(WindowID(30)))
-        #expect(core.tiler.stashOriginal(WindowID(30)) == Self.recorded)
+        expectEqual(core.tiler.stashOriginal(WindowID(30)), Self.recorded)
     }
 }

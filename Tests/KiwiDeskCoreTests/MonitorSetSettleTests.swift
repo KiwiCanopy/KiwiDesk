@@ -68,7 +68,7 @@ struct MonitorSetSettleTests {
 
         let lines = try core.profiles.settleSharedSets()
 
-        #expect(lines.count == 1)
+        expectEqual(lines.count, 1)
         let work = try core.profiles.read(name: "Work")
         #expect(work.set(matching: vision) == nil)
         #expect(work.set(matching: desk) != nil)
@@ -89,7 +89,7 @@ struct MonitorSetSettleTests {
         let beta = try core.profiles.read(name: "Beta")
         #expect(beta.isDormant)
         #expect(!beta.isDefault)
-        #expect(beta.monitorCount == 2)
+        expectEqual(beta.monitorCount, 2)
         // The fallback for an unknown two-screen setup moved, and
         // the log says so.
         #expect(lines.contains { $0.contains("'Alpha' is now the default") })

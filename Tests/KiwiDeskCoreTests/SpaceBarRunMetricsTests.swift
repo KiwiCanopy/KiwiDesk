@@ -30,11 +30,11 @@ struct SpaceBarRunMetricsTests {
             alignment: .start,
             pad: 4
         )
-        #expect(m.itemFrames.map(\.minX) == [4, 28, 52])
+        expectEqual(m.itemFrames.map(\.minX), [4, 28, 52])
         #expect(m.itemFrames.allSatisfy { $0.width == 20 })
         #expect(m.itemFrames.allSatisfy { $0.height == 32 })
         // Trailing cursor is one gap past the last item.
-        #expect(m.frontStart == 76)
+        expectEqual(m.frontStart, 76)
     }
 
     @Test("Center alignment splits the slack both sides")
@@ -50,7 +50,7 @@ struct SpaceBarRunMetricsTests {
             alignment: .center,
             pad: 4
         )
-        #expect(m.itemFrames.map(\.minX) == [66, 90, 114])
+        expectEqual(m.itemFrames.map(\.minX), [66, 90, 114])
     }
 
     @Test("End alignment right-justifies, front extent included")
@@ -71,14 +71,14 @@ struct SpaceBarRunMetricsTests {
             alignment: .end,
             pad: 4
         )
-        #expect(m.itemFrames.first?.minX == 112)
+        expectEqual(m.itemFrames.first?.minX, 112)
         // The cursor advances a gap after every item (including
         // the last), so the front segment starts one gap past
         // the last item: start 112 + 3 items (60) + 3 gaps (12)
         // = 184, and the front segment ends a gap short of the
         // viewport edge — its breathing room.
-        #expect(m.frontStart == 184)
-        #expect(m.frontStart + 12 + 4 == 200)
+        expectEqual(m.frontStart, 184)
+        expectEqual(m.frontStart + 12 + 4, 200)
     }
 
     @Test("Vertical strip lays the run down the y axis")
@@ -94,10 +94,10 @@ struct SpaceBarRunMetricsTests {
             alignment: .start,
             pad: 4
         )
-        #expect(m.itemFrames.map(\.minY) == [4, 28, 52])
+        expectEqual(m.itemFrames.map(\.minY), [4, 28, 52])
         #expect(m.itemFrames.allSatisfy { $0.minX == 0 })
         #expect(m.itemFrames.allSatisfy { $0.width == 32 })
-        #expect(m.itemFrames.map(\.height) == [20, 20, 20])
+        expectEqual(m.itemFrames.map(\.height), [20, 20, 20])
     }
 
     @Test("An overflowing run starts at the run's origin")
@@ -114,6 +114,6 @@ struct SpaceBarRunMetricsTests {
             alignment: .center,
             pad: 4
         )
-        #expect(m.itemFrames.map(\.minX) == [0, 204])
+        expectEqual(m.itemFrames.map(\.minX), [0, 204])
     }
 }

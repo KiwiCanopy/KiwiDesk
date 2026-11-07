@@ -69,9 +69,9 @@ struct PeekMotionTests {
             listRadius: 11,
             opening: true
         )
-        #expect(span == 0)
-        #expect(panel.alphaValue == 1)
-        #expect(anchor.alphaValue == 0)
+        expectEqual(span, 0)
+        expectEqual(panel.alphaValue, 1)
+        expectEqual(anchor.alphaValue, 0)
         #expect(parts.stage.animationKeys() == nil)
     }
 
@@ -87,7 +87,7 @@ struct PeekMotionTests {
         let data = try JSONEncoder().encode(off)
         let json =
             try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        #expect(json?["on_peek"] as? Bool == false)
+        expectEqual(json?["on_peek"] as? Bool, false)
         #expect(
             !(try JSONDecoder().decode(AnimationSettings.self, from: data))
                 .onPeek

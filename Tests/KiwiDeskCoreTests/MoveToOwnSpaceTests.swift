@@ -55,7 +55,7 @@ struct MoveToOwnSpaceTests {
             args: [.string("1"), .number(1)]
         )
         #expect(!response.isSuccess)
-        #expect(row(core, "1") == before)
+        expectEqual(row(core, "1"), before)
         #expect(logs().contains("\(Self.reason): w1"))
     }
 
@@ -67,7 +67,7 @@ struct MoveToOwnSpaceTests {
             args: [.string("2"), .number(1)]
         )
         #expect(response.isSuccess)
-        #expect(row(core, "2") == [WindowID(1)])
+        expectEqual(row(core, "2"), [WindowID(1)])
         #expect(!logs().contains { $0.hasPrefix(Self.reason) })
     }
 
@@ -87,8 +87,8 @@ struct MoveToOwnSpaceTests {
             args: [.string("1"), .number(1)]
         )
         #expect(follow.isSuccess)
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(row(core, "1") == before)
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(row(core, "1"), before)
     }
 
     /// The pill may draw on the focused window rather than the
@@ -97,7 +97,7 @@ struct MoveToOwnSpaceTests {
     func sentenceNamesTheWindow() {
         LocalizationManager.shared.select("en")
         let pill = WindowActionRefusal.alreadyIn(window: "App1")
-        #expect(pill.sentence == "“App1” is already in that Space")
+        expectEqual(pill.sentence, "“App1” is already in that Space")
     }
 
     @Test("a sticky window keeps the sticky gate's answer")

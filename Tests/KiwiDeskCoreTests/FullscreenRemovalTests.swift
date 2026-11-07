@@ -152,10 +152,10 @@ struct FullscreenRemovalTests {
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
         #expect(loop.pendingRemovalRecheck.contains(pid))
-        #expect(box.recheckFires == 1)
-        #expect(fullscreenLines(box) == 1)
+        expectEqual(box.recheckFires, 1)
+        expectEqual(fullscreenLines(box), 1)
     }
 
     @Test("the enter beat is refused on the compositor's word")
@@ -173,8 +173,8 @@ struct FullscreenRemovalTests {
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
-        #expect(fullscreenLines(box) == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
+        expectEqual(fullscreenLines(box), 1)
     }
 
     @Test("a window no arm expects is a close")
@@ -190,8 +190,8 @@ struct FullscreenRemovalTests {
         box.census = [:]
         loop.lastDesktopChange = .distantPast
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.recheckFires == 0)
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
+        expectEqual(box.recheckFires, 0)
     }
 
     @Test("the arm never reads the switch grace")
@@ -207,7 +207,7 @@ struct FullscreenRemovalTests {
         loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     @Test("the census-blind budget is the episode's recheck budget")
@@ -220,18 +220,18 @@ struct FullscreenRemovalTests {
         for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
-            #expect(loop.removalDistrusted[WindowID(12)]?.arms == arm)
-            #expect(box.recheckFires == arm)
+            expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, arm)
+            expectEqual(box.recheckFires, arm)
             _ = loop.drainPendingRemovalRecheck()
         }
         // Past the cap: a window closed WHILE fullscreen takes its
         // ordinary removal, late by the budget.
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
         #expect(loop.elements[pid]?[WindowID(12)] == nil)
         #expect(loop.removalDistrusted[WindowID(12)] == nil)
         #expect(loop.detectedFullscreen[WindowID(12)] == nil)
-        #expect(fullscreenLines(box) == 1)
+        expectEqual(fullscreenLines(box), 1)
     }
 
     @Test("a census that shows the window refuses past the budget")
@@ -263,9 +263,9 @@ struct FullscreenRemovalTests {
         #expect(box.created.isEmpty)
         // The recheck re-reads the element out of fullscreen:
         // #670's exit path re-places the kept slot.
-        #expect(box.fullscreenChanges.map(\.id) == [WindowID(12)])
-        #expect(box.fullscreenChanges.map(\.isFullscreen) == [false])
-        #expect(loop.detectedFullscreen[WindowID(12)] == false)
+        expectEqual(box.fullscreenChanges.map(\.id), [WindowID(12)])
+        expectEqual(box.fullscreenChanges.map(\.isFullscreen), [false])
+        expectEqual(loop.detectedFullscreen[WindowID(12)], false)
     }
 
     @Test("a re-listed window enters fullscreen as a change, not a create")
@@ -283,9 +283,9 @@ struct FullscreenRemovalTests {
         #expect(loop.removalDistrusted[WindowID(12)] == nil)
         #expect(box.destroyed.isEmpty)
         #expect(box.created.isEmpty)
-        #expect(box.fullscreenChanges.map(\.id) == [WindowID(12)])
-        #expect(box.fullscreenChanges.map(\.isFullscreen) == [true])
-        #expect(loop.detectedFullscreen[WindowID(12)] == true)
+        expectEqual(box.fullscreenChanges.map(\.id), [WindowID(12)])
+        expectEqual(box.fullscreenChanges.map(\.isFullscreen), [true])
+        expectEqual(loop.detectedFullscreen[WindowID(12)], true)
     }
 
     @Test("a hide outranks the arm")
@@ -297,8 +297,8 @@ struct FullscreenRemovalTests {
         box.hidden = true
         box.census = [pid: [WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.censusReads == 0)
-        #expect(box.hiddenEvents == [WindowID(12)])
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.hiddenEvents, [WindowID(12)])
         #expect(loop.removalDistrusted.isEmpty)
     }
 
@@ -317,7 +317,7 @@ struct FullscreenRemovalTests {
             minimized: [WindowID(12)],
             coalesceTabs: false
         )
-        #expect(box.censusReads == 0)
-        #expect(box.destroyed.map(\.wasMinimized) == [true])
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.destroyed.map(\.wasMinimized), [true])
     }
 }

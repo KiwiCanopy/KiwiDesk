@@ -65,10 +65,10 @@ struct StandardPartitioningTests {
         core.state.workspaces.add(WindowID(2), to: "1")
 
         core.apply(profile: starter, cause: .event)
-        #expect(members(core, "2") == [WindowID(2)])
+        expectEqual(members(core, "2"), [WindowID(2)])
 
         core.apply(composed: standard, forceRetile: false)
-        #expect(members(core, "1") == [WindowID(1), WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1), WindowID(2)])
         #expect(members(core, "2").isEmpty)
     }
 
@@ -85,7 +85,7 @@ struct StandardPartitioningTests {
         core.state.workspaces.add(WindowID(1), to: "2")
 
         core.apply(composed: standard, forceRetile: false)
-        #expect(members(core, "2") == [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(1)])
     }
 
     /// The Standard's record rides the snapshot beside the
@@ -124,6 +124,6 @@ struct StandardPartitioningTests {
         core.state.workspaces.add(WindowID(1), to: "2")
 
         let records = core.sessionSnapshot().arrangementRecords?.records
-        #expect(records?[.standard("Starter")]?["2"] == [WindowID(1)])
+        expectEqual(records?[.standard("Starter")]?["2"], [WindowID(1)])
     }
 }

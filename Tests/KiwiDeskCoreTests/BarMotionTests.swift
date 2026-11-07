@@ -22,7 +22,7 @@ struct BarMotionTests {
 
     @Test("A layout group has no duration under Reduce Motion")
     func groupCollapses() {
-        #expect(BarMotion.duration(reduceMotion: true) == 0)
+        expectEqual(BarMotion.duration(reduceMotion: true), 0)
         #expect(BarMotion.duration(reduceMotion: false) > 0)
     }
 
@@ -91,9 +91,9 @@ struct BarMotionTests {
                 reduceMotion: true
             ) as? CABasicAnimation
         )
-        #expect(mark.fromValue as? Double == 0)
-        #expect(mark.toValue as? Double == 0)
-        #expect(mark.duration == 0.5)
+        expectEqual(mark.fromValue as? Double, 0)
+        expectEqual(mark.toValue as? Double, 0)
+        expectEqual(mark.duration, 0.5)
         // The layer's own `strokeEnd` is 1, so the ring appears
         // whole the moment this expires — removal IS the step.
         #expect(mark.isRemovedOnCompletion)
@@ -108,11 +108,11 @@ struct BarMotionTests {
                 reduceMotion: false
             ) as? CABasicAnimation
         )
-        #expect(sweep.fromValue as? Double == 0)
-        #expect(sweep.toValue as? Double == 1)
-        #expect(sweep.duration == 1)
+        expectEqual(sweep.fromValue as? Double, 0)
+        expectEqual(sweep.toValue as? Double, 1)
+        expectEqual(sweep.duration, 1)
         #expect(sweep.beginTime > CACurrentMediaTime())
-        #expect(sweep.fillMode == .both)
+        expectEqual(sweep.fillMode, .both)
         #expect(!sweep.isRemovedOnCompletion)
     }
 
@@ -122,7 +122,7 @@ struct BarMotionTests {
     /// 21).
     @Test("A strip walk step is additive, and absent reduced")
     func walkStepIsAdditive() throws {
-        #expect(BarMotion.walkDuration(reduceMotion: true) == 0)
+        expectEqual(BarMotion.walkDuration(reduceMotion: true), 0)
         let span = BarMotion.walkDuration(reduceMotion: false)
         #expect(span > 0)
         #expect(
@@ -142,8 +142,8 @@ struct BarMotionTests {
             ) as? CABasicAnimation
         )
         #expect(step.isAdditive)
-        #expect(step.fromValue as? Float == -1)
-        #expect(step.toValue as? Float == 0)
-        #expect(step.duration == span)
+        expectEqual(step.fromValue as? Float, -1)
+        expectEqual(step.toValue as? Float, 0)
+        expectEqual(step.duration, span)
     }
 }

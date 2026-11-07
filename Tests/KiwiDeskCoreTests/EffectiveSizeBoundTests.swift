@@ -15,9 +15,9 @@ struct EffectiveSizeBoundTests {
 
     @Test("A consumed span answers only the refused ask")
     func consumedSpanMatchesAskOnly() {
-        #expect(bound.consumedWidth(asking: 900) == 715)
+        expectEqual(bound.consumedWidth(asking: 900), 715)
         // Within the tolerance still counts as the same ask.
-        #expect(bound.consumedWidth(asking: 901) == 715)
+        expectEqual(bound.consumedWidth(asking: 901), 715)
         // A NEW ask must be probed, not silently swapped: a
         // user who widens the slot past a stale bound must be
         // heard by the app, not by the ledger.
@@ -86,7 +86,7 @@ struct EffectiveSizeBoundTests {
                 .init(asked: 900, answered: 715),
             ]
         )
-        #expect(corroborated.maxWidth == 715)
+        expectEqual(corroborated.maxWidth, 715)
         #expect(corroborated.maxHeight == nil)
 
         // A single refused ask is grid noise as often as a
@@ -126,7 +126,7 @@ struct EffectiveSizeBoundTests {
             ]
         )
         #expect(floors.maxWidth == nil)
-        #expect(floors.minWidth == 500)
+        expectEqual(floors.minWidth, 500)
     }
 
     @Test("A floor explains like a ceiling")
@@ -142,6 +142,6 @@ struct EffectiveSizeBoundTests {
                 targetSize: CGSize(width: 300, height: 800)
             )
         )
-        #expect(floor.consumedWidth(asking: 300) == 480)
+        expectEqual(floor.consumedWidth(asking: 300), 480)
     }
 }

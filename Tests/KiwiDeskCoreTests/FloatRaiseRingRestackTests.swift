@@ -73,10 +73,10 @@ struct FloatRaiseRingRestackTests {
         let core = makeCore(orders)
         defer { core.borders.clear() }
         seed(core)
-        #expect(orders.counts == [1: 1, 2: 1])
+        expectEqual(orders.counts, [1: 1, 2: 1])
         let generation = core.zOrderRaiseGeneration.bump()
         core.landFloatRaise(thenFocus: WindowID(1), generation: generation)
-        #expect(orders.counts == [1: 2, 2: 1])
+        expectEqual(orders.counts, [1: 2, 2: 1])
     }
 
     @Test("A stale sequence's landing re-stacks nothing")
@@ -88,7 +88,7 @@ struct FloatRaiseRingRestackTests {
         let stale = core.zOrderRaiseGeneration.bump()
         _ = core.zOrderRaiseGeneration.bump()
         core.landFloatRaise(thenFocus: WindowID(1), generation: stale)
-        #expect(orders.counts == [1: 1, 2: 1])
+        expectEqual(orders.counts, [1: 1, 2: 1])
     }
 
     @Test("A landing for a focus that moved on re-stacks nothing")
@@ -99,7 +99,7 @@ struct FloatRaiseRingRestackTests {
         seed(core)
         let generation = core.zOrderRaiseGeneration.bump()
         core.landFloatRaise(thenFocus: WindowID(2), generation: generation)
-        #expect(orders.counts == [1: 1, 2: 1])
+        expectEqual(orders.counts, [1: 1, 2: 1])
     }
 }
 

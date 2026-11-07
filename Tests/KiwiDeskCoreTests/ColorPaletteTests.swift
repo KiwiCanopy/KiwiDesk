@@ -85,8 +85,8 @@ struct ColorPaletteTests {
                 "floating.color": "#4A9816",
             ]
         ).apply(to: &settings)
-        #expect(settings.stickyStyle.color == "#8B5E3C")
-        #expect(settings.floatingStyle.color == "#4A9816")
+        expectEqual(settings.stickyStyle.color, "#8B5E3C")
+        expectEqual(settings.floatingStyle.color, "#4A9816")
 
         PaletteCatalog.defaultPalette().apply(to: &settings)
         #expect(settings.stickyStyle.color.isEmpty)
@@ -104,7 +104,7 @@ struct ColorPaletteTests {
             name: "E",
             colors: ["kiwishelf.fill_color": ""]
         ).apply(to: &settings)
-        #expect(settings.kiwishelf.fillColor == before)
+        expectEqual(settings.kiwishelf.fillColor, before)
         #expect(!before.isEmpty)
     }
 
@@ -133,14 +133,14 @@ struct ColorPaletteTests {
     @Test("The default palette equals the shipped color defaults")
     func defaultPaletteIsDefaults() {
         let def = PaletteCatalog.defaultPalette()
-        #expect(def.name == PaletteCatalog.defaultName)
+        expectEqual(def.name, PaletteCatalog.defaultName)
         #expect(
             def.colors
                 == ColorPaletteKeys.extract(
                     from: TilingSettings()
                 )
         )
-        #expect(def.colors.count == ColorPaletteKeys.all.count)
+        expectEqual(def.colors.count, ColorPaletteKeys.all.count)
     }
 
     @Test("Applying the default palette restores default colors")
@@ -151,7 +151,7 @@ struct ColorPaletteTests {
         settings.borderStyle.focusedColor = "#ABCDEF"
         PaletteCatalog.defaultPalette().apply(to: &settings)
         let fresh = TilingSettings()
-        #expect(settings.kiwishelf.fillColor == fresh.kiwishelf.fillColor)
+        expectEqual(settings.kiwishelf.fillColor, fresh.kiwishelf.fillColor)
         #expect(
             settings.kiwishelf.itemColor
                 == fresh.kiwishelf.itemColor
@@ -170,9 +170,9 @@ struct ColorPaletteTests {
             name: "S",
             colors: ["kiwishelf.fill_color": "#111111"]
         ).apply(to: &settings)
-        #expect(settings.kiwishelf.fillColor == "#111111")
+        expectEqual(settings.kiwishelf.fillColor, "#111111")
         // An untouched key keeps its value.
-        #expect(settings.kiwishelf.itemColor == before)
+        expectEqual(settings.kiwishelf.itemColor, before)
     }
 
     @Test("An invalid hex or unknown path is skipped, not fatal")
@@ -187,15 +187,15 @@ struct ColorPaletteTests {
                 "made_up.path.deep": "#333333",
             ]
         ).apply(to: &settings)
-        #expect(settings.kiwishelf.fillColor == before)
+        expectEqual(settings.kiwishelf.fillColor, before)
     }
 
     @Test("The bundled catalog decodes, default first, names unique")
     func bundledCatalog() {
         let all = PaletteCatalog.bundled()
-        #expect(all.first?.name == PaletteCatalog.defaultName)
+        expectEqual(all.first?.name, PaletteCatalog.defaultName)
         let names = all.map(\.name)
-        #expect(Set(names).count == names.count)
+        expectEqual(Set(names).count, names.count)
         #expect(names.allSatisfy { !$0.isEmpty })
         // The authored palettes decode all-or-nothing, so an
         // empty list is a resource that stopped decoding.
@@ -262,6 +262,6 @@ struct ColorPaletteTests {
             ColorPalette.self,
             from: data
         )
-        #expect(back == palette)
+        expectEqual(back, palette)
     }
 }

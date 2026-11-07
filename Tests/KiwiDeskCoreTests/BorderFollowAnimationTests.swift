@@ -43,7 +43,7 @@ struct BorderFollowAnimationTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(border.lastFrame(WindowID(1)) == tick)
+        expectEqual(border.lastFrame(WindowID(1)), tick)
         // And with both suppressors down (a teardown snap, the
         // no-display fallback): the tick still applies — pins
         // the unconditional branch of `applies`.
@@ -56,7 +56,7 @@ struct BorderFollowAnimationTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(border.lastFrame(WindowID(1)) == snap)
+        expectEqual(border.lastFrame(WindowID(1)), snap)
     }
 
     @Test("AX echo stands down while our animation drives it")
@@ -85,7 +85,7 @@ struct BorderFollowAnimationTests {
             source: .axEcho,
             pin: nil
         )
-        #expect(border.lastFrame(WindowID(1)) == echo)
+        expectEqual(border.lastFrame(WindowID(1)), echo)
     }
 
     @Test("AX echo stands down while the WindowServer tracks it")
@@ -147,14 +147,14 @@ struct BorderReconcileAnimationTests {
         // Mid-animation: no bounds re-read, no sticky tee, and
         // the ring keeps the frame the tick last applied.
         border.watch.handle(.move, window: WindowID(1))
-        #expect(reads == 0)
+        expectEqual(reads, 0)
         #expect(border.lastFrame(WindowID(1)) != real)
         #expect(teed.isEmpty)
         // Settled: the WS bounds own the ring again.
         border.watch.isAnimating = { _ in false }
         border.watch.handle(.move, window: WindowID(1))
-        #expect(reads == 1)
-        #expect(border.lastFrame(WindowID(1)) == real)
-        #expect(teed == [real])
+        expectEqual(reads, 1)
+        expectEqual(border.lastFrame(WindowID(1)), real)
+        expectEqual(teed, [real])
     }
 }

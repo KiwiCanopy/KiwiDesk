@@ -70,7 +70,7 @@ struct SpaceBarChipEndsTests {
                 lone: nil
             )
             #expect(ends.leading > 0)
-            #expect(ends.leading == ends.trailing)
+            expectEqual(ends.leading, ends.trailing)
         }
         #expect(
             Self.ends(look, leads: false, trails: false, lone: nil) == .zero
@@ -96,7 +96,7 @@ struct SpaceBarChipEndsTests {
             lone: Self.square
         )
         #expect(ends.leading > 0)
-        #expect(ends.leading == ends.trailing)
+        expectEqual(ends.leading, ends.trailing)
     }
 
     /// Through the live overlay: an empty symbol Space is as long

@@ -105,9 +105,9 @@ struct BarHoverFillTests {
             }(),
         ] {
             #expect(!backdrop.isHidden)
-            #expect(layerAlpha(view) == 0)
+            expectEqual(layerAlpha(view), 0)
             let alphas = try ends(backdrop)
-            #expect(alphas.count == 2)
+            expectEqual(alphas.count, 2)
             #expect(abs(alphas[0] - 0.5) < 0.01)
             #expect(abs(alphas[1] - 0.5 * far) < 0.01)
         }
@@ -180,7 +180,7 @@ struct BarHoverFillTests {
         view.layout()
         let item = try #require(view.layer?.maskedCorners)
         #expect(item != CACornerMask.allCorners)
-        #expect(view.hoverFill.gradient?.maskedCorners == item)
+        expectEqual(view.hoverFill.gradient?.maskedCorners, item)
     }
 }
 

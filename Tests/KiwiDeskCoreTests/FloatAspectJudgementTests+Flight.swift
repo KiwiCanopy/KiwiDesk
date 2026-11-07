@@ -17,7 +17,7 @@ extension FloatAspectJudgementTests {
         // A press in flight replaces nothing: a probe already written
         // must get its answer.
         press(core, 50)
-        #expect(core.deferred.task(for: .floatAspect) == armed)
+        expectEqual(core.deferred.task(for: .floatAspect), armed)
         core.deferred.cancel(.floatAspect)
     }
 
@@ -87,7 +87,7 @@ extension FloatAspectJudgementTests {
         core.tiler.placements.stamp(id, target: walked)
         core.windowServer.readWindowBounds = { _ in walked }
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.tiler.recentInstantTarget(id)?.size == probed)
+        expectEqual(core.tiler.recentInstantTarget(id)?.size, probed)
         core.deferred.cancel(.floatAspect)
         core.state.floatAspectFlight = nil
     }
@@ -125,10 +125,10 @@ extension FloatAspectJudgementTests {
         core.judgeFloatAspect(ask("x", 50, to: grow))
         let probing = core.deferred.task(for: .floatAspect)
         let written = core.tiler.recentInstantTarget(id)
-        #expect(written?.size == probed)
+        expectEqual(written?.size, probed)
         press(core, 50)
-        #expect(core.tiler.recentInstantTarget(id) == written)
-        #expect(core.deferred.task(for: .floatAspect) == probing)
+        expectEqual(core.tiler.recentInstantTarget(id), written)
+        expectEqual(core.deferred.task(for: .floatAspect), probing)
         core.deferred.cancel(.floatAspect)
         core.state.floatAspectFlight = nil
     }
@@ -139,7 +139,7 @@ extension FloatAspectJudgementTests {
         answer(core, start.size)
         press(core, 50)
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.state.floatAspectFlight == .probing(id))
+        expectEqual(core.state.floatAspectFlight, .probing(id))
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
         #expect(core.state.floatAspectFlight == nil)
     }
@@ -156,7 +156,7 @@ extension FloatAspectJudgementTests {
             core.execute("resize", args: [.string("y"), .number(50)])
                 .isSuccess
         )
-        #expect(core.deferred.task(for: .floatAspect) == probing)
+        expectEqual(core.deferred.task(for: .floatAspect), probing)
         core.deferred.cancel(.floatAspect)
         core.state.floatAspectFlight = nil
     }
@@ -167,10 +167,10 @@ extension FloatAspectJudgementTests {
         answer(core, start.size)
         press(core, 50)
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.state.floatAspectFlight == .probing(id))
+        expectEqual(core.state.floatAspectFlight, .probing(id))
         core.deferred.cancelAll()
         press(core, 50)
-        #expect(core.tiler.recentInstantTarget(id)?.width == 850)
+        expectEqual(core.tiler.recentInstantTarget(id)?.width, 850)
         core.deferred.cancel(.floatAspect)
     }
 
@@ -186,7 +186,7 @@ extension FloatAspectJudgementTests {
         answer(core, CGSize(width: 900, height: 450))
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
         #expect(core.state.floatAspects[id] == nil)
-        #expect(core.tiler.recentInstantTarget(id) == probe)
+        expectEqual(core.tiler.recentInstantTarget(id), probe)
         #expect(!core.deferred.isScheduled(.floatAspect))
         #expect(core.state.floatAspectFlight == nil)
     }
@@ -248,10 +248,10 @@ extension FloatAspectJudgementTests {
         }
         core.state.floatAspects[id] = .init(pid: 900_001, ratio: nil)
         press(core, 50)
-        #expect(reads == 0)
+        expectEqual(reads, 0)
         core.state.floatAspects[id] = .init(pid: 900_001, ratio: ratio)
         press(core, 50)
-        #expect(reads == 1)
+        expectEqual(reads, 1)
     }
 
     @Test("A held key waits: no verdict, no probe, the slot kept")

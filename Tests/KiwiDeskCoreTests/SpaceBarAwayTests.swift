@@ -75,8 +75,8 @@ struct SpaceBarAwayTests {
         let overflow = content.before.windows + content.after.windows
         // Same app name: a merged away member would group with
         // the present one and read `count == 2` here.
-        #expect(apps.map(\.name) == ["Safari"])
-        #expect(apps.first?.count == 1)
+        expectEqual(apps.map(\.name), ["Safari"])
+        expectEqual(apps.first?.count, 1)
         #expect(overflow.isEmpty)
     }
 
@@ -97,8 +97,8 @@ struct SpaceBarAwayTests {
             in: core.state.workspaces["2"]!,
             style: core.tiler.settings.spaceBarLook
         ).apps
-        #expect(apps.map(\.name) == ["Safari"])
-        #expect(apps.map(\.count) == [2])
+        expectEqual(apps.map(\.name), ["Safari"])
+        expectEqual(apps.map(\.count), [2])
     }
 
     @Test("hide_empty drops an all-away Space")
@@ -125,7 +125,7 @@ struct SpaceBarAwayTests {
         // pass on a bar that drew nothing (guard-prover,
         // 2026-09-03).
         let items = core.spaceBarItems(display: DisplayID(1), style: style)
-        #expect(items.map(\.space) == ["1", "2"])
+        expectEqual(items.map(\.space), ["1", "2"])
         #expect(
             items.first { $0.space == "2" }?.apps.map(\.name) == ["Safari"]
         )

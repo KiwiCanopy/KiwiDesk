@@ -56,8 +56,8 @@ struct HoldGlideRunTests {
         h.applySucceeds = false
         try h.frame()
         #expect(h.glideEngine.heldID == nil)
-        #expect(h.frameStops == 1)
-        #expect(h.isTicking == false)
+        expectEqual(h.frameStops, 1)
+        expectEqual(h.isTicking, false)
     }
 
     @Test("A glide that outlives its bound is force-ended")
@@ -77,13 +77,13 @@ struct HoldGlideRunTests {
             frames += 1
             try #require(frames < 1_000_000)
         }
-        #expect(h.overruns == 1)
-        #expect(h.frameStops == 1)
+        expectEqual(h.overruns, 1)
+        expectEqual(h.frameStops, 1)
         #expect(Double(frames) * dt >= HoldGlide.maxRunSeconds)
         // The rescue is one recovery shape: a fresh press arms a
         // fresh run.
         h.press(id: 9)
-        #expect(h.glideEngine.heldID == 9)
+        expectEqual(h.glideEngine.heldID, 9)
     }
 
     @Test("A stalled clock ages the glide by what it moved")
@@ -103,7 +103,7 @@ struct HoldGlideRunTests {
         second.press(id: 1)
         try second.beginGlide()
         try second.frame(1.0 / 60)
-        #expect(second.steps[0].scale == firstScale)
+        expectEqual(second.steps[0].scale, firstScale)
         // And a clamped long frame simply moves further for that
         // one frame rather than being discounted.
         try h.frame(1.0 / 30)
@@ -185,15 +185,15 @@ struct HoldGlideRunTests {
         h.press(id: 1)
         try h.beginGlide()
         for _ in 0..<20 { try h.frame() }
-        #expect(h.glideEnds == 0)
+        expectEqual(h.glideEnds, 0)
         h.glideEngine.released(id: 1)
-        #expect(h.glideEnds == 1)
+        expectEqual(h.glideEnds, 1)
 
         // A tap that armed but never glided pays nothing.
         let tap = HoldGlideHarness()
         tap.press(id: 2)
         tap.glideEngine.released(id: 2)
-        #expect(tap.glideEnds == 0)
+        expectEqual(tap.glideEnds, 0)
 
         // And every other way a glide ends pays it exactly once:
         // a refusal, and a failing step.
@@ -202,14 +202,14 @@ struct HoldGlideRunTests {
         try refused.beginGlide()
         try refused.frame()
         refused.glideEngine.noteRefusal()
-        #expect(refused.glideEnds == 1)
+        expectEqual(refused.glideEnds, 1)
 
         let failing = HoldGlideHarness()
         failing.press(id: 4)
         try failing.beginGlide()
         failing.applySucceeds = false
         try failing.frame()
-        #expect(failing.glideEnds == 1)
+        expectEqual(failing.glideEnds, 1)
     }
 
     @Test("A frozen frame clock still ends the hold")
@@ -231,8 +231,8 @@ struct HoldGlideRunTests {
         let backstop = h.ticks.popLast()
         try #require(backstop).work()
         #expect(h.glideEngine.heldID == nil)
-        #expect(h.glideEngine.isGliding == false)
-        #expect(h.overruns == 1)
-        #expect(h.glideEnds == 1)
+        expectEqual(h.glideEngine.isGliding, false)
+        expectEqual(h.overruns, 1)
+        expectEqual(h.glideEnds, 1)
     }
 }

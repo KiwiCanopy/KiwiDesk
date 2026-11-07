@@ -126,7 +126,7 @@ extension CiInstructionLaneTests {
         let arms = changes.split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { $0.hasSuffix(")") && $0.contains(".claude") }
-        #expect(arms == [".claude/*|AGENTS.md)"])
+        expectEqual(arms, [".claude/*|AGENTS.md)"])
         #expect(
             changes.contains(
                 "AGENTS.md)\n"
@@ -171,7 +171,7 @@ extension CiInstructionLaneTests {
         // The release build stays off the lane: nothing it builds
         // reads an instruction file.
         let release = CiPathFilterTests.jobGate("release-build", in: yaml)
-        #expect(release?.contains("light") == false)
+        expectEqual(release?.contains("light"), false)
     }
 
 }

@@ -35,7 +35,7 @@ struct DefaultKeybindingsTests {
             base: .standard
         )
         let combos = rows.map(\.combo)
-        #expect(Set(combos).count == combos.count)
+        expectEqual(Set(combos).count, combos.count)
     }
 
     @Test("all rows are navigation kind with a label and lua")
@@ -46,7 +46,7 @@ struct DefaultKeybindingsTests {
             base: .standard
         )
         for row in rows {
-            #expect(row.kind == .navigation)
+            expectEqual(row.kind, .navigation)
             #expect(!row.label.isEmpty)
             // A KiwiDesk verb, or a namespaced one (#2103).
             let table = row.lua.prefix { $0 != "." }
@@ -71,8 +71,8 @@ struct DefaultKeybindingsTests {
             $0.lua.hasPrefix("KiwiDesk.move_to_space(")
         }
         // Ten digit rows per tier — 1…9 then 0 for the tenth.
-        #expect(goTo.count == 10)
-        #expect(move.count == 10)
+        expectEqual(goTo.count, 10)
+        expectEqual(move.count, 10)
         #expect(
             rows.contains {
                 $0.combo == "control+option+0"
@@ -102,8 +102,8 @@ struct DefaultKeybindingsTests {
         let web = rows.first {
             $0.lua == "KiwiDesk.focus_space(\"web\")"
         }
-        #expect(mail?.combo == "control+option+1")
-        #expect(web?.combo == "control+option+2")
+        expectEqual(mail?.combo, "control+option+1")
+        expectEqual(web?.combo, "control+option+2")
     }
 
     @Test("space names quote through the canonical escaper")
@@ -173,10 +173,10 @@ struct DefaultKeybindingsTests {
         // The shared helper the GUI's addMode reuses for every
         // new mode — one authority for the combo/lua/label.
         let row = DefaultKeybindings.showShortcutsRow()
-        #expect(row.combo == "control+option+k")
-        #expect(row.lua == "kiwihub.show(\"shortcuts\")")
-        #expect(row.kind == .navigation)
-        #expect(row.label == "Show shortcuts panel")
+        expectEqual(row.combo, "control+option+k")
+        expectEqual(row.lua, "kiwihub.show(\"shortcuts\")")
+        expectEqual(row.kind, .navigation)
+        expectEqual(row.label, "Show shortcuts panel")
     }
 
     /// The one thing the generic nets above cannot see: that the

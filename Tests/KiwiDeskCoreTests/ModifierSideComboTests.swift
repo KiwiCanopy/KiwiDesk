@@ -61,7 +61,7 @@ struct ModifierSideComboTests {
     @Test("Carbon registers a sided chord either-side")
     func carbonReadsEitherSide() throws {
         let sided = try parse("rcmd+h").modifiers
-        #expect(sided.carbonMask == HotkeyModifiers.command.rawValue)
+        expectEqual(sided.carbonMask, HotkeyModifiers.command.rawValue)
     }
 
     @Test("device flags name the held side")
@@ -71,7 +71,7 @@ struct ModifierSideComboTests {
         )
         let held = HotkeyModifiers.held(by: right)
         #expect(held.contains(.command))
-        #expect(held.side(of: .command) == .right)
+        expectEqual(held.side(of: .command), .right)
         let leftOpt = CGEventFlags(
             rawValue: CGEventFlags.maskAlternate.rawValue | 0x20
         )
@@ -134,8 +134,8 @@ struct ModifierSideComboTests {
                 rawValue: CGEventFlags.maskCommand.rawValue | 0x08
             )
         )
-        #expect(SideTapRow.match(rows, keyCode: 4, held: right)?.id == 2)
-        #expect(SideTapRow.match(rows, keyCode: 4, held: left)?.id == 1)
+        expectEqual(SideTapRow.match(rows, keyCode: 4, held: right)?.id, 2)
+        expectEqual(SideTapRow.match(rows, keyCode: 4, held: left)?.id, 1)
         #expect(SideTapRow.match(rows, keyCode: 5, held: left) == nil)
     }
 
@@ -161,6 +161,6 @@ struct ModifierSideComboTests {
         let first = SideTapRow.match([a, b], keyCode: 4, held: held)?.id
         let second = SideTapRow.match([b, a], keyCode: 4, held: held)?.id
         #expect(first != nil)
-        #expect(first == second)
+        expectEqual(first, second)
     }
 }

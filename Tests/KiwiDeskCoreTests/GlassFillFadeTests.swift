@@ -89,7 +89,7 @@ struct GlassFillFadeTests {
 
     @Test("A surface's own colour keeps today's fade")
     func ownColourKeepsTheFade() {
-        #expect(GlassFill(hex: "#FF0000").fade == 100)
+        expectEqual(GlassFill(hex: "#FF0000").fade, 100)
     }
 
     @Test(
@@ -102,8 +102,8 @@ struct GlassFillFadeTests {
             KiwiShelf.self,
             from: Data(json.utf8)
         )
-        #expect(shelf.fillFade == CGFloat(kept))
-        #expect(KiwiShelf().fillFade == 100)
+        expectEqual(shelf.fillFade, CGFloat(kept))
+        expectEqual(KiwiShelf().fillFade, 100)
     }
 
     @Test(
@@ -117,7 +117,7 @@ struct GlassFillFadeTests {
         ).get()
         var shelf = KiwiShelf()
         setting.apply(to: &shelf)
-        #expect(shelf.fillFade == CGFloat(kept))
+        expectEqual(shelf.fillFade, CGFloat(kept))
     }
 
     /// The consumer: the shelf's plate paints the shelf's fade.

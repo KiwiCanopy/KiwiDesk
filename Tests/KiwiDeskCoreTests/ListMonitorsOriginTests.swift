@@ -67,12 +67,12 @@ struct ListMonitorsOriginTests {
         )
         let seen = try origins([above, main, left])
         let top = Double(GeometryUtils.primaryHeight)
-        #expect(seen[1]?.x == 0)
-        #expect(seen[1]?.y == top - 1080)
-        #expect(seen[2]?.x == 200)
-        #expect(seen[2]?.y == top - 1980)
-        #expect(seen[3]?.x == -1440)
-        #expect(seen[3]?.y == top - 900)
+        expectEqual(seen[1]?.x, 0)
+        expectEqual(seen[1]?.y, top - 1080)
+        expectEqual(seen[2]?.x, 200)
+        expectEqual(seen[2]?.y, top - 1980)
+        expectEqual(seen[3]?.x, -1440)
+        expectEqual(seen[3]?.y, top - 900)
         // Above is above: its top sits higher than the main's.
         #expect((seen[2]?.y ?? 0) < (seen[1]?.y ?? 0))
     }

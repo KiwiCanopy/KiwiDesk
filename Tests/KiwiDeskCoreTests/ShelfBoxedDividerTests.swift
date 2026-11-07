@@ -42,11 +42,11 @@ struct ShelfBoxedDividerTests {
         boxed.backgroundStyle = .boxed
         let box = shown(boxed)
         let clear = try #require(box.divider.layer?.backgroundColor)
-        #expect(clear.alpha == 0)
+        expectEqual(clear.alpha, 0)
         box.hide()
         let plate = shown(KiwiShelf())
         let ink = try #require(plate.divider.layer?.backgroundColor)
-        #expect(ink.alpha == BarDivider.sectionAlpha)
+        expectEqual(ink.alpha, BarDivider.sectionAlpha)
         plate.hide()
     }
 

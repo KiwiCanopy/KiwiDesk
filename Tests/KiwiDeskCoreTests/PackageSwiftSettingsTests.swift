@@ -58,11 +58,11 @@ struct PackageSwiftSettingsTests {
             .macro(name: "M"),
             """
         let scan = Self.scan(manifest)
-        #expect(scan.targets == 4)
+        expectEqual(scan.targets, 4)
         #expect(
             scan.missing.map { $0.prefix(30) }.joined()
                 .contains("Tool")
         )
-        #expect(scan.missing.count == 2)
+        expectEqual(scan.missing.count, 2)
     }
 }

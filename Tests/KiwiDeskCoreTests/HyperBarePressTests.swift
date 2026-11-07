@@ -87,10 +87,10 @@ struct HyperBarePressTests {
         keys.onBareHyper = { reports += 1 }
         registrar.press(f18)
         registrar.press(f18)  // key repeat inside one hold
-        #expect(reports == 1)
+        expectEqual(reports, 1)
         registrar.release(f18)
         registrar.press(f18)
-        #expect(reports == 2)
+        expectEqual(reports, 2)
     }
 
     @Test("a recorder's suspend leaves the answer alone")
@@ -116,15 +116,15 @@ struct HyperBarePressTests {
             icons: [:],
             preferredLayer: layer
         )
-        #expect(flips == 1)
+        expectEqual(flips, 1)
         keys.replaceLayers(
             [layer: [hyperH: 1]],
             icons: [:],
             preferredLayer: layer
         )
-        #expect(flips == 1)
+        expectEqual(flips, 1)
         keys.reset()
-        #expect(flips == 2)
+        expectEqual(flips, 2)
         #expect(!keys.hyperHasShortcuts)
     }
 
@@ -136,7 +136,7 @@ struct HyperBarePressTests {
         keys.onBareHyper = { reports += 1 }
         #expect(keys.hyperHasShortcuts)
         registrar.press(f18)
-        #expect(reports == 0)
+        expectEqual(reports, 0)
     }
 }
 
@@ -177,7 +177,7 @@ struct HyperBarePressWiringTests {
     @Test("the cue's pills announce and never sound")
     func silentAndAnnounced() throws {
         let cue = try Self.source("App/KiwiCore+HyperBarePress.swift")
-        #expect(cue.components(separatedBy: "announce: true").count == 3)
+        expectEqual(cue.components(separatedBy: "announce: true").count, 3)
         #expect(!cue.contains("announce: false"))
         #expect(!cue.contains("soundIfDrawn"))
         #expect(!cue.contains("soundRefusal"))
@@ -196,7 +196,7 @@ struct HyperBarePressCueTests {
         var spoken: [String] = []
         core.borders.announceRefusal = { spoken.append($0) }
         core.cueBareHyper()
-        #expect(spoken == ["No active shortcut uses Hyper"])
+        expectEqual(spoken, ["No active shortcut uses Hyper"])
     }
 
     @Test("the pill door speaks only when its caller says so")
@@ -216,6 +216,6 @@ struct HyperBarePressCueTests {
             symbol: "nosign",
             announce: true
         )
-        #expect(spoken == ["spoken"])
+        expectEqual(spoken, ["spoken"])
     }
 }

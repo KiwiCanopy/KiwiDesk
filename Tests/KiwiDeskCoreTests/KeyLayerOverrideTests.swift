@@ -74,7 +74,7 @@ struct KeyLayerOverrideTests {
             KeyLayerOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     // MARK: - Sparse encoding (O3)
@@ -85,7 +85,7 @@ struct KeyLayerOverrideTests {
         let json = try #require(
             String(data: data, encoding: .utf8)
         )
-        #expect(json == "[]")
+        expectEqual(json, "[]")
     }
 
     @Test("Non-empty override encodes as bare array of layers")
@@ -109,7 +109,7 @@ struct KeyLayerOverrideTests {
         let base = [
             layer("default", combos: [("alt+h", "focus")])
         ]
-        #expect(KeyLayerOverride().resolved(onto: base) == base)
+        expectEqual(KeyLayerOverride().resolved(onto: base), base)
     }
 
     @Test("Override combo wins; unmentioned base combos survive")
@@ -129,17 +129,17 @@ struct KeyLayerOverrideTests {
             ]
         )
         let result = over.resolved(onto: base)
-        #expect(result.count == 1)
+        expectEqual(result.count, 1)
         let bindings = result[0].bindings
         // Override wins for alt+h.
         let h = bindings.first { $0.combo == "alt+h" }
-        #expect(h?.lua == "CUSTOM")
+        expectEqual(h?.lua, "CUSTOM")
         // Unmentioned alt+j survives from base.
         let j = bindings.first { $0.combo == "alt+j" }
-        #expect(j?.lua == "focus_down")
+        expectEqual(j?.lua, "focus_down")
         // In-place merge: base row order survives (the GUI
         // renders resolved layers — rows must not jump).
-        #expect(bindings.map(\.combo) == ["alt+h", "alt+j"])
+        expectEqual(bindings.map(\.combo), ["alt+h", "alt+j"])
     }
 
     @Test("Duplicate base combo: override wins over every copy")
@@ -169,7 +169,7 @@ struct KeyLayerOverrideTests {
         #expect(hRows.allSatisfy { $0.lua == "WIN" })
         // The unrelated row is untouched.
         let j = result[0].bindings.first { $0.combo == "alt+j" }
-        #expect(j?.lua == "keep")
+        expectEqual(j?.lua, "keep")
     }
 
     @Test("Override icon replaces base icon when non-nil")
@@ -185,7 +185,7 @@ struct KeyLayerOverrideTests {
             layers: [layer("resize", icon: "📐")]
         )
         let result = over.resolved(onto: base)
-        #expect(result[0].icon == "📐")
+        expectEqual(result[0].icon, "📐")
     }
 
     @Test("Nil override icon keeps base icon")
@@ -202,7 +202,7 @@ struct KeyLayerOverrideTests {
             layers: [layer("resize")]
         )
         let result = over.resolved(onto: base)
-        #expect(result[0].icon == "🔧")
+        expectEqual(result[0].icon, "🔧")
     }
 
     @Test("Override layer absent from base is appended")
@@ -216,10 +216,10 @@ struct KeyLayerOverrideTests {
             ]
         )
         let result = over.resolved(onto: base)
-        #expect(result.count == 2)
-        #expect(result[0].name == "default")
-        #expect(result[1].name == "custom")
-        #expect(result[1].bindings[0].combo == "alt+x")
+        expectEqual(result.count, 2)
+        expectEqual(result[0].name, "default")
+        expectEqual(result[1].name, "custom")
+        expectEqual(result[1].bindings[0].combo, "alt+x")
     }
 
     @Test("Base layer absent from override passes through")
@@ -233,10 +233,10 @@ struct KeyLayerOverrideTests {
             layers: [layer("default", combos: [("alt+h", "X")])]
         )
         let result = over.resolved(onto: base)
-        #expect(result.count == 2)
+        expectEqual(result.count, 2)
         // "other" layer is preserved exactly.
-        #expect(result[1].name == "other")
-        #expect(result[1].bindings[0].combo == "alt+y")
-        #expect(result[1].bindings[0].lua == "swap")
+        expectEqual(result[1].name, "other")
+        expectEqual(result[1].bindings[0].combo, "alt+y")
+        expectEqual(result[1].bindings[0].lua, "swap")
     }
 }

@@ -15,10 +15,10 @@ struct KiwiHubRetiredVerbTests {
 
     @Test("each old verb names kiwihub.show", arguments: retired)
     func retiredNamesTheReplacement(verb: String) {
-        #expect(APIReference.retired[verb] == "kiwihub.show")
+        expectEqual(APIReference.retired[verb], "kiwihub.show")
         #expect(!APIReference.allCommands.contains(verb))
         let response = APIReference.helpResponse(for: verb)
-        #expect(response.error?.contains("kiwihub.show") == true)
+        expectEqual(response.error?.contains("kiwihub.show"), true)
     }
 
     @Test("init.lua's old call is an issue naming the new verb")

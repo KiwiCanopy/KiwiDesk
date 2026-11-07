@@ -64,9 +64,9 @@ struct SpaceBarGroupingTests {
     func offDrawsOneGlyphPerWindow() {
         let core = core(apps: ["Zed", "Zed", "Finder"])
         let drawn = apps(core, grouping: false)
-        #expect(drawn.map(\.name) == ["Zed", "Zed", "Finder"])
-        #expect(drawn.map(\.count) == [1, 1, 1])
-        #expect(drawn.map(\.focused) == [false, true, false])
+        expectEqual(drawn.map(\.name), ["Zed", "Zed", "Finder"])
+        expectEqual(drawn.map(\.count), [1, 1, 1])
+        expectEqual(drawn.map(\.focused), [false, true, false])
     }
 
     @Test("the verb writes the setting")
@@ -79,6 +79,6 @@ struct SpaceBarGroupingTests {
         setting.apply(to: &style)
         var expected = SpaceBarStyle()
         expected.groupAdjacentWindows = false
-        #expect(style == expected)
+        expectEqual(style, expected)
     }
 }

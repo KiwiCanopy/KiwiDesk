@@ -52,8 +52,8 @@ struct KiwiVisionLeavingTests {
         let leaving = try #require(
             core.visionLeaving(from: w1.raw, to: w2.raw)
         )
-        #expect(leaving.duration == 0.3)
-        #expect(leaving.curve == .easeIn)
+        expectEqual(leaving.duration, 0.3)
+        expectEqual(leaving.curve, .easeIn)
     }
 
     @Test("off, a duration of 0 or the same window owe nothing")
@@ -106,16 +106,16 @@ struct KiwiVisionLeavingTests {
         #expect(!plates.isEmpty)
         let before = plates.flatMap(\.fades).count
         core.state.apply(.windowFocused(w2))
-        #expect(core.visionTarget().target == w2.raw)
+        expectEqual(core.visionTarget().target, w2.raw)
         core.updateVision()
         let fades = plates.flatMap(\.fades)
-        #expect(fades.count == before + 1)
-        #expect(fades.last?.window == w1.raw)
+        expectEqual(fades.count, before + 1)
+        expectEqual(fades.last?.window, w1.raw)
 
         _ = core.execute("move_to_space", args: [.string("9")])
         _ = core.execute("focus_space", args: [.string("9")])
         let after = plates.flatMap(\.fades)
-        #expect(after.count == fades.count)
+        expectEqual(after.count, fades.count)
     }
 
     /// The wiring reads the hold before the settle that may end it.
@@ -141,15 +141,15 @@ struct KiwiVisionLeavingTests {
         core.vision.hold = VisionHold(window: w1)
         core.state.apply(.windowFocused(w2))
         core.updateVision()
-        #expect(plates.flatMap(\.fades).count == before)
+        expectEqual(plates.flatMap(\.fades).count, before)
     }
 
     @Test("a non-finite duration reads as the default")
     func nonFiniteDuration() {
         let fallback = AppWideSettings().visionFadeDuration
-        #expect(AppWideSettings.clampedFade(.nan) == fallback)
-        #expect(AppWideSettings.clampedFade(.infinity) == fallback)
-        #expect(AppWideSettings.clampedFade(450.4) == 450)
+        expectEqual(AppWideSettings.clampedFade(.nan), fallback)
+        expectEqual(AppWideSettings.clampedFade(.infinity), fallback)
+        expectEqual(AppWideSettings.clampedFade(450.4), 450)
     }
 
     @Test("a window a lens held was hazed already: no fade")
@@ -169,7 +169,7 @@ struct KiwiVisionLeavingTests {
             core.execute("kiwivision.set_fade_duration", args: [.number(1000)])
                 .isSuccess
         )
-        #expect(core.appWide.visionFadeDuration == 1000)
+        expectEqual(core.appWide.visionFadeDuration, 1000)
         #expect(
             !core.execute(
                 "kiwivision.set_fade_duration",
@@ -193,7 +193,7 @@ struct KiwiVisionLeavingTests {
                 args: [.string("linear")]
             ).isSuccess
         )
-        #expect(core.appWide.visionFadeCurve == .linear)
+        expectEqual(core.appWide.visionFadeCurve, .linear)
         #expect(
             !core.execute(
                 "kiwivision.set_fade_curve",
@@ -210,8 +210,8 @@ struct KiwiVisionLeavingTests {
             VisionLens.self,
             from: Data(json.utf8)
         )
-        #expect(lens.overrides.fadeDuration == 1000)
-        #expect(lens.overrides.fadeCurve == .easeIn)
+        expectEqual(lens.overrides.fadeDuration, 1000)
+        expectEqual(lens.overrides.fadeCurve, .easeIn)
     }
 
     @Test("the stored group clamps the duration and keeps the curve")
@@ -226,19 +226,19 @@ struct KiwiVisionLeavingTests {
                 vision: group
             )
         )
-        #expect(settings.visionFadeDuration == 1000)
-        #expect(settings.visionFadeCurve == .easeInOut)
+        expectEqual(settings.visionFadeDuration, 1000)
+        expectEqual(settings.visionFadeCurve, .easeInOut)
         let data = try JSONEncoder().encode(settings.vision)
         let back = try JSONDecoder().decode(
             AppWideSettings.Vision.self,
             from: data
         )
-        #expect(back.fadeDuration == 1000)
-        #expect(back.fadeCurve == .easeInOut)
+        expectEqual(back.fadeDuration, 1000)
+        expectEqual(back.fadeCurve, .easeInOut)
         let keys = try #require(
             try JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         #expect(keys["fade_duration"] != nil)
-        #expect(keys["fade_curve"] as? String == "ease_in_out")
+        expectEqual(keys["fade_curve"] as? String, "ease_in_out")
     }
 }

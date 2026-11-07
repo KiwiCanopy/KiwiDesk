@@ -38,7 +38,7 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(plates.map(\.id) == [WindowID(1)])
+        expectEqual(plates.map(\.id), [WindowID(1)])
         #expect(
             plates.first?.frame
                 == CGRect(x: 0, y: 0, width: 300, height: 800)
@@ -60,8 +60,8 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(Set(plates.map(\.pile)).count == 2)
-        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2])
+        expectEqual(Set(plates.map(\.pile)).count, 2)
+        expectEqual(plates.compactMap(\.iconPid).sorted(), [1, 2])
     }
 
     /// Overlapping plates share a pile, draw the focus last, and
@@ -77,9 +77,9 @@ struct SpaceSlidePlanTests {
             stack: [2: 0, 1: 1],
             in: page
         )
-        #expect(plates.map(\.pile) == [0, 0])
-        #expect(plates.last?.id == WindowID(1))
-        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2])
+        expectEqual(plates.map(\.pile), [0, 0])
+        expectEqual(plates.last?.id, WindowID(1))
+        expectEqual(plates.compactMap(\.iconPid).sorted(), [1, 2])
     }
 
     @Test("without the focus, the server's front-most draws last")
@@ -92,7 +92,7 @@ struct SpaceSlidePlanTests {
             stack: [1: 0, 2: 1],
             in: page
         )
-        #expect(plates.map(\.id) == [WindowID(2), WindowID(1)])
+        expectEqual(plates.map(\.id), [WindowID(2), WindowID(1)])
     }
 
     /// A float over the tiled focus's centre: both icons draw, the
@@ -110,8 +110,8 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(plates.last?.id == WindowID(2))
-        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2])
+        expectEqual(plates.last?.id, WindowID(2))
+        expectEqual(plates.compactMap(\.iconPid).sorted(), [1, 2])
     }
 
     /// A float grazing the edges of two tiles chains them into one
@@ -131,8 +131,8 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(Set(plates.map(\.pile)).count == 1)
-        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2, 3])
+        expectEqual(Set(plates.map(\.pile)).count, 1)
+        expectEqual(plates.compactMap(\.iconPid).sorted(), [1, 2, 3])
     }
 
     /// A plate too small for an icon carries no pid (#2837).
@@ -144,7 +144,7 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(plates.count == 1)
+        expectEqual(plates.count, 1)
         #expect(plates.first?.iconPid == nil)
     }
 
@@ -177,7 +177,7 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(plates.map(\.id) == [WindowID(2), WindowID(1)])
+        expectEqual(plates.map(\.id), [WindowID(2), WindowID(1)])
     }
 
     /// Monocle's stacked members, and any exact repeat: a plate
@@ -190,8 +190,8 @@ struct SpaceSlidePlanTests {
             stack: [:],
             in: page
         )
-        #expect(plates.map(\.id) == [WindowID(2)])
-        #expect(plates.first?.iconPid == 2)
+        expectEqual(plates.map(\.id), [WindowID(2)])
+        expectEqual(plates.first?.iconPid, 2)
     }
 
     @Test("an icon smaller than its floor is dropped")
@@ -244,9 +244,9 @@ struct SpaceSlidePlanTests {
 
     @Test("a side Space Bar slides the strip vertically")
     func axis() {
-        #expect(SpaceSlidePlan.axis(spaceBarEdge: .top) == .horizontal)
-        #expect(SpaceSlidePlan.axis(spaceBarEdge: .bottom) == .horizontal)
-        #expect(SpaceSlidePlan.axis(spaceBarEdge: .left) == .vertical)
-        #expect(SpaceSlidePlan.axis(spaceBarEdge: .right) == .vertical)
+        expectEqual(SpaceSlidePlan.axis(spaceBarEdge: .top), .horizontal)
+        expectEqual(SpaceSlidePlan.axis(spaceBarEdge: .bottom), .horizontal)
+        expectEqual(SpaceSlidePlan.axis(spaceBarEdge: .left), .vertical)
+        expectEqual(SpaceSlidePlan.axis(spaceBarEdge: .right), .vertical)
     }
 }

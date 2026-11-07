@@ -16,12 +16,12 @@ struct PanelHighlightTests {
         shelf.hoverFillColor = "#44556680"
         shelf.hoverItemColor = "#EEEEEE"
         let paint = shelf.panelHighlight
-        #expect(paint.selection == "#112233")
-        #expect(paint.selectionInk == "#FFFFFF")
-        #expect(paint.hover == "#44556680")
-        #expect(paint.hoverInk == "#EEEEEE")
+        expectEqual(paint.selection, "#112233")
+        expectEqual(paint.selectionInk, "#FFFFFF")
+        expectEqual(paint.hover, "#44556680")
+        expectEqual(paint.hoverInk, "#EEEEEE")
         shelf.highlightColor = "#F0F0F0"
-        #expect(shelf.panelHighlight.selectionInk == "#000000")
+        expectEqual(shelf.panelHighlight.selectionInk, "#000000")
     }
 
     /// The selection's ink holds the bars' ink floor on every

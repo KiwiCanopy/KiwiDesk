@@ -15,7 +15,7 @@ struct SpaceRunHeadsTests {
         var space = Space(id: "1", mode: .stack, windows: ids)
         space.runHeads = [ids[1]]
         space.remove(ids[1])
-        #expect(space.runHeads == [ids[2]])
+        expectEqual(space.runHeads, [ids[2]])
     }
 
     @Test("The last window removed as head leaves no head")
@@ -31,7 +31,7 @@ struct SpaceRunHeadsTests {
         var space = Space(id: "1", mode: .stack, windows: ids)
         space.runHeads = [ids[2]]
         space.remove(ids[0])
-        #expect(space.runHeads == [ids[2]])
+        expectEqual(space.runHeads, [ids[2]])
     }
 
     @Test("A removed tail hands its place to its predecessor")
@@ -39,7 +39,7 @@ struct SpaceRunHeadsTests {
         var space = Space(id: "1", mode: .stack, windows: ids)
         space.runTails = [ids[2]]
         space.remove(ids[2])
-        #expect(space.runTails == [ids[1]])
+        expectEqual(space.runTails, [ids[1]])
     }
 
     @Test("The first window removed as tail leaves no tail")
@@ -59,7 +59,7 @@ struct SpaceRunHeadsTests {
             $0.runTails = [WindowID(9)]
         }
         manager.setMode("1", .track)
-        #expect(manager["1"]?.runHeads.isEmpty == true)
-        #expect(manager["1"]?.runTails.isEmpty == true)
+        expectEqual(manager["1"]?.runHeads.isEmpty, true)
+        expectEqual(manager["1"]?.runTails.isEmpty, true)
     }
 }

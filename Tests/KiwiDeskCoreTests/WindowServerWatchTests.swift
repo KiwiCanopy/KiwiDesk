@@ -71,7 +71,7 @@ struct WindowServerWatchTests {
         let (hide, hidden) = recordingWatch()
         hide.request([w1], for: .ring)
         hide.handle(.hide, window: w1)
-        #expect(hidden() == ["ring.hide"])
+        expectEqual(hidden(), ["ring.hide"])
     }
 
     @Test("only the window's own hearers hear it; stale ones drop")
@@ -80,9 +80,9 @@ struct WindowServerWatchTests {
         watch.request([w1], for: .vision)
         watch.request([WindowID(2)], for: .ring)
         watch.handle(.reorder, window: w1)
-        #expect(calls() == ["vision.restack"])
+        expectEqual(calls(), ["vision.restack"])
         watch.handle(.reorder, window: WindowID(9))
-        #expect(calls() == ["vision.restack"])
+        expectEqual(calls(), ["vision.restack"])
     }
 
     @Test("kept windows are requested and never delivered")
@@ -95,7 +95,7 @@ struct WindowServerWatchTests {
         }
         watch.request([WindowID(2)], for: .ring, keeping: [w1])
         watch.request([WindowID(3)], for: .mark)
-        #expect(requested == [w1, WindowID(2), WindowID(3)])
+        expectEqual(requested, [w1, WindowID(2), WindowID(3)])
         watch.handle(.reorder, window: w1)
         #expect(calls().isEmpty)
     }
@@ -112,12 +112,12 @@ struct WindowServerWatchTests {
         watch.request([w1], for: .ring)
         watch.isAnimating = { _ in true }
         watch.handle(.move, window: w1)
-        #expect(reads == 0)
+        expectEqual(reads, 0)
         #expect(calls().isEmpty)
         watch.isAnimating = { _ in false }
         watch.handle(.move, window: w1)
-        #expect(reads == 1)
-        #expect(calls() == ["mark.frame", "ring.frame"])
+        expectEqual(reads, 1)
+        expectEqual(calls(), ["mark.frame", "ring.frame"])
         // A window only the plate hears costs no read at all.
         let (plate, _) = recordingWatch()
         var plateReads = 0
@@ -127,7 +127,7 @@ struct WindowServerWatchTests {
         }
         plate.request([w1], for: .vision)
         plate.handle(.move, window: w1)
-        #expect(plateReads == 0)
+        expectEqual(plateReads, 0)
     }
 
     @Test("hears answers per consumer, only on a live stream")
@@ -178,7 +178,7 @@ struct WindowServerWatchTests {
         watch.trackingDisabled = true
         watch.start()
         watch.request([w1], for: .mark)
-        #expect(lines.count == 1)
+        expectEqual(lines.count, 1)
         lines = []
         watch.stop()
         #expect(lines.isEmpty)

@@ -85,7 +85,7 @@ struct OpenOrFocusCycleTests {
             core.state.workspaces.lastFocused == WindowID(21)
         )
         let focused = core.tiler.settings.borderStyle.focusedColor
-        #expect(ring(core, 21)?.colorHex == focused)
+        expectEqual(ring(core, 21)?.colorHex, focused)
         #expect(ring(core, 20) == nil)
     }
 
@@ -100,13 +100,13 @@ struct OpenOrFocusCycleTests {
         core.state.workspaces.focus(WindowID(20), in: "1")
         core.frontmostPIDProvider = { 100 }
         #expect(press(core).isSuccess)
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(
             core.state.workspaces.lastFocused == WindowID(21)
         )
         // The ring rides the switch (#636's regression class).
         let focused = core.tiler.settings.borderStyle.focusedColor
-        #expect(ring(core, 21)?.colorHex == focused)
+        expectEqual(ring(core, 21)?.colorHex, focused)
     }
 
     /// A sticky successor is visible right here (#414): its
@@ -123,7 +123,7 @@ struct OpenOrFocusCycleTests {
         core.state.workspaces.focus(WindowID(20), in: "1")
         core.frontmostPIDProvider = { 100 }
         #expect(press(core).isSuccess)
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
         #expect(
             core.state.workspaces.lastFocused == WindowID(21)
         )

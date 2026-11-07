@@ -35,7 +35,7 @@ struct ScrollingOverrideTests {
         // mirroring it here (or marking it not-overridable) and
         // this fails — the guard discovers fields, never a hand
         // list that can itself drift.
-        #expect(mirror == params.subtracting(Self.notOverridable))
+        expectEqual(mirror, params.subtracting(Self.notOverridable))
     }
 
     @Test("Resolve applies every set field onto the global")
@@ -45,9 +45,9 @@ struct ScrollingOverrideTests {
         over.anchor = .end
         over.orientation = .vertical
         let resolved = over.resolved(onto: ScrollingParams())
-        #expect(resolved.slotSize == .points(320))
-        #expect(resolved.anchor == .end)
-        #expect(resolved.orientation == .vertical)
+        expectEqual(resolved.slotSize, .points(320))
+        expectEqual(resolved.anchor, .end)
+        expectEqual(resolved.orientation, .vertical)
     }
 
     @Test("Unset fields inherit the global, per field")
@@ -79,7 +79,7 @@ struct ScrollingOverrideTests {
             ScrollingOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("An empty override is sparse and inert")
@@ -87,7 +87,7 @@ struct ScrollingOverrideTests {
         let over = ScrollingOverride()
         #expect(over.isEmpty)
         let data = try JSONEncoder().encode(over)
-        #expect(String(data: data, encoding: .utf8) == "{}")
+        expectEqual(String(data: data, encoding: .utf8), "{}")
         #expect(
             over.resolved(onto: ScrollingParams())
                 == ScrollingParams()
@@ -157,6 +157,6 @@ struct ScrollingOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(back.scrolling.override == settings.scrolling.override)
+        expectEqual(back.scrolling.override, settings.scrolling.override)
     }
 }

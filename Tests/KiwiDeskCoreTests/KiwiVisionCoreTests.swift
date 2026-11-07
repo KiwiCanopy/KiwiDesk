@@ -52,7 +52,7 @@ struct KiwiVisionCoreTests {
         #expect(core.kiwiVisionIsOn)
         _ = core.execute("kiwivision.toggle")
         #expect(!core.kiwiVisionIsOn)
-        #expect(heard == [.plain, .off])
+        expectEqual(heard, [.plain, .off])
     }
 
     /// A ring backend reporting an ordered-in panel, so
@@ -82,9 +82,9 @@ struct KiwiVisionCoreTests {
     func anchorRingIsBelow() {
         let core = ringedCore()
         let request = core.visionRequest()
-        #expect(request.target == w1.raw)
-        #expect(request.below == 4242)
-        #expect(request.dim == 0.6)
+        expectEqual(request.target, w1.raw)
+        expectEqual(request.below, 4242)
+        expectEqual(request.dim, 0.6)
     }
 
     @Test("a front ring sits above its window, so the plate takes it")
@@ -101,7 +101,7 @@ struct KiwiVisionCoreTests {
         core.eventLoop.ownKeyWindow = {
             OwnKeyWindowReading(number: 999_999, isDialog: false)
         }
-        #expect(core.visionRequest().target == 999_999)
+        expectEqual(core.visionRequest().target, 999_999)
         #expect(core.visionRequest().below == nil)
     }
 
@@ -111,8 +111,8 @@ struct KiwiVisionCoreTests {
         core.eventLoop.ownKeyWindow = { [w1] in
             OwnKeyWindowReading(number: Int(w1.raw), isDialog: false)
         }
-        #expect(core.visionRequest().target == w1.raw)
-        #expect(core.visionRequest().below == 4242)
+        expectEqual(core.visionRequest().target, w1.raw)
+        expectEqual(core.visionRequest().below, 4242)
     }
 
     @Test("the target is watched with borders off, and its event tees")
@@ -129,9 +129,9 @@ struct KiwiVisionCoreTests {
         }
         core.vision.active = .plain
         core.updateBorders()
-        #expect(watched == [w1])
+        expectEqual(watched, [w1])
         #expect(core.borders.overlays.isEmpty)
-        #expect(core.windowServer.requested(by: .vision) == [w1])
+        expectEqual(core.windowServer.requested(by: .vision), [w1])
         // The watch's own fan-out reaches the plate.
         core.vision.sync(
             VisionManager.Request(
@@ -151,7 +151,7 @@ struct KiwiVisionCoreTests {
         )
         let before = plate.orders.count
         core.windowServer.handle(.reorder, window: w1)
-        #expect(plate.orders.count == before + 1)
+        expectEqual(plate.orders.count, before + 1)
         core.vision.active = .off
         core.updateBorders()
         #expect(core.windowServer.requested(by: .vision).isEmpty)
@@ -180,9 +180,9 @@ struct KiwiVisionCoreTests {
             reassert: false
         )
         core.visionWindowRestacked(w2)
-        #expect(plate.orders == [w1.raw])
+        expectEqual(plate.orders, [w1.raw])
         core.visionWindowRestacked(w1)
-        #expect(plate.orders == [w1.raw, w1.raw])
+        expectEqual(plate.orders, [w1.raw, w1.raw])
     }
 
     @Test("updateBorders re-draws the plates for the anchor")
@@ -190,7 +190,7 @@ struct KiwiVisionCoreTests {
         let core = makeCore()
         core.vision.active = .plain
         core.updateBorders()
-        #expect(core.vision.target == w1.raw)
+        expectEqual(core.vision.target, w1.raw)
     }
 
     @Test("the shelf's verdict reaches the plates")
@@ -198,7 +198,7 @@ struct KiwiVisionCoreTests {
         let core = makeCore()
         core.vision.active = .plain
         core.noteVisionStandDown([DisplayID(77)])
-        #expect(core.visionRequest().standDown == [DisplayID(77)])
+        expectEqual(core.visionRequest().standDown, [DisplayID(77)])
     }
 
     @Test("stopping the core turns KiwiVision off, unannounced")

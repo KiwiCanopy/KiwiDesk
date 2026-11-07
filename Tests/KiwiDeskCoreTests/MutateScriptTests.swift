@@ -75,7 +75,7 @@ struct MutateScriptTests {
             encoding: .utf8
         )
         let result = try run(repo, testCmd: "grep -q {filter} a.txt")
-        #expect(result.status == 2)
+        expectEqual(result.status, 2)
         #expect(result.stderr.contains("refusing to mutate"))
         #expect(try contents(repo) == "alpha\nwork in progress\n")
     }
@@ -93,7 +93,7 @@ struct MutateScriptTests {
     func greenGuardFails() throws {
         let repo = try makeRepo()
         let result = try run(repo, testCmd: "true")
-        #expect(result.status == 1)
+        expectEqual(result.status, 1)
         #expect(result.stdout.contains("alpha off  GREEN"))
         #expect(try contents(repo) == "alpha\n")
     }
@@ -120,7 +120,7 @@ struct MutateScriptTests {
     func redBaselineRefuses() throws {
         let repo = try makeRepo()
         let result = try run(repo, testCmd: "false")
-        #expect(result.status == 3)
+        expectEqual(result.status, 3)
         #expect(try contents(repo) == "alpha\n")
     }
 }

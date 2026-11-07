@@ -55,7 +55,7 @@ struct PocketEmptyPeekTests {
         let core = core()
         bind(core)
         let state = try empty(core)
-        #expect(state.title == "Your Pocket is empty")
+        expectEqual(state.title, "Your Pocket is empty")
         #expect(
             state.lines.map(\.drawn) == [
                 "Drag a window here, or press ⌃⌥P to pocket the focused "
@@ -65,8 +65,8 @@ struct PocketEmptyPeekTests {
             ]
         )
         let spoken = state.lines.map(\.spoken)
-        #expect(spoken.first?.contains("Control Option P") == true)
-        #expect(spoken.last?.contains("Control Option Shift P") == true)
+        expectEqual(spoken.first?.contains("Control Option P"), true)
+        expectEqual(spoken.last?.contains("Control Option Shift P"), true)
         #expect(state.rows.map(\.landing) == [.pocketShortcuts, .pocketKeys])
         #expect(state.spoken.hasPrefix("Your Pocket is empty\n"))
     }
@@ -81,7 +81,7 @@ struct PocketEmptyPeekTests {
         core.execute("toggle_pocket_window")
         core.execute("pocket")
         core.execute("pocket")
-        #expect(core.state.pocketPutBackNext(focused: window) == window)
+        expectEqual(core.state.pocketPutBackNext(focused: window), window)
         let state = try empty(core)
         #expect(
             state.lines.first?.drawn
@@ -132,15 +132,15 @@ struct PocketEmptyPeekTests {
         let point = CGPoint(x: first.frame.midX, y: first.frame.midY)
         body.press(at: point)
         body.release(at: point)
-        #expect(landed == [.pocketShortcuts])
+        expectEqual(landed, [.pocketShortcuts])
         let info = try #require(body.emptyInfo)
         #expect(info.isAccessibilityElement())
-        #expect(info.accessibilityLabel() == content.empty?.spoken)
+        expectEqual(info.accessibilityLabel(), content.empty?.spoken)
         let rows = body.labels.compactMap { $0 as? BarPeekPressLabel }
-        #expect(rows.count == 2)
+        expectEqual(rows.count, 2)
         #expect(rows.allSatisfy { $0.accessibilityRole() == .button })
-        #expect(rows.last?.accessibilityPerformPress() == true)
-        #expect(landed == [.pocketShortcuts, .pocketKeys])
-        #expect(body.rules.count == 1)
+        expectEqual(rows.last?.accessibilityPerformPress(), true)
+        expectEqual(landed, [.pocketShortcuts, .pocketKeys])
+        expectEqual(body.rules.count, 1)
     }
 }

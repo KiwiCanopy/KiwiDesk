@@ -54,7 +54,7 @@ struct SetupBundleTests {
         // look rides gui.json — while the saved library lives in
         // palettes.json and would be left behind. The issue's own
         // bundle table guessed the opposite.
-        #expect(bundle.palettes.map(\.name) == ["Mine"])
+        expectEqual(bundle.palettes.map(\.name), ["Mine"])
     }
 
     @Test("Every profile travels")
@@ -64,7 +64,7 @@ struct SetupBundleTests {
         try core.profiles.save(profile("Laptop"))
 
         let names = Set(try core.exportSetup().profiles.map(\.name))
-        #expect(names == ["Desk", "Laptop"])
+        expectEqual(names, ["Desk", "Laptop"])
     }
 
     @Test("A Lua-owned config still backs up what it has")
@@ -77,7 +77,7 @@ struct SetupBundleTests {
 
         let bundle = try core.exportSetup()
         #expect(bundle.config == nil)
-        #expect(bundle.profiles.count == 1)
+        expectEqual(bundle.profiles.count, 1)
         // And it is not "empty", so a restore of it is offered
         // rather than refused.
         #expect(!bundle.isEmpty)
@@ -204,7 +204,7 @@ struct SetupBundleTests {
         // header must not cost: identical input, identical bytes.
         let first = try #require(core.encodedBackup())
         let second = try #require(core.encodedBackup())
-        #expect(first == second)
+        expectEqual(first, second)
         // And the subtree really is sorted, not merely stable.
         let text = String(decoding: first, as: UTF8.self)
         let appRules = try #require(text.range(of: "\"app_rules\""))
@@ -255,6 +255,6 @@ struct SetupBundleTests {
             SetupBundle.self,
             from: data
         )
-        #expect(decoded == original)
+        expectEqual(decoded, original)
     }
 }

@@ -27,8 +27,8 @@ struct BatchSizingTests {
             elapsed: 0,
             dt: 1.0 / 120.0
         )
-        #expect(step.size == spring)
-        #expect(step.elapsed == 0)
+        expectEqual(step.size, spring)
+        expectEqual(step.elapsed, 0)
     }
 
     /// The shrink honours the same throttle the grow arm does:
@@ -51,8 +51,8 @@ struct BatchSizingTests {
             elapsed: 0,
             dt: dt
         )
-        #expect(step.size == big)
-        #expect(step.elapsed == dt)
+        expectEqual(step.size, big)
+        expectEqual(step.elapsed, dt)
     }
 
     /// `.midSlide` is deaf to the intent by definition: its whole
@@ -73,7 +73,7 @@ struct BatchSizingTests {
                 elapsed: 0,
                 dt: 1.0 / 120.0
             )
-            #expect(shrink.size == small)
+            expectEqual(shrink.size, small)
             let grow = SizeStep.step(
                 policy: .midSlide,
                 sizing: sizing,
@@ -85,7 +85,7 @@ struct BatchSizingTests {
                 elapsed: 0,
                 dt: 1.0 / 120.0
             )
-            #expect(grow.size == small)
+            expectEqual(grow.size, small)
         }
     }
 
@@ -126,8 +126,8 @@ struct BatchSizingEngineTests {
         // Many size-sets across the shrink, not one, and the
         // final frame is still the exact target.
         #expect(applies.dropLast().filter(\.setSize).count > 5)
-        #expect(applies.last?.frame == Self.to)
-        #expect(applies.last?.setSize == true)
+        expectEqual(applies.last?.frame, Self.to)
+        expectEqual(applies.last?.setSize, true)
     }
 
     /// The contrast, and #45's invariant end to end: the same
@@ -135,8 +135,8 @@ struct BatchSizingEngineTests {
     @Test("A .mayInstantSize shrink still snaps on the first frame")
     func reflowShrinkSnaps() throws {
         guard let applies = drive(sizing: .mayInstantSize) else { return }
-        #expect(applies.first?.setSize == true)
-        #expect(applies.first?.frame.size == Self.to.size)
+        expectEqual(applies.first?.setSize, true)
+        expectEqual(applies.first?.frame.size, Self.to.size)
         #expect(applies.filter(\.setSize).count <= 2)
     }
 
@@ -149,7 +149,7 @@ struct BatchSizingEngineTests {
         guard let first = interrupt(from: .allSpringSized, to: .mayInstantSize)
         else { return }
         #expect(first.setSize)
-        #expect(first.frame.size == Self.smaller.size)
+        expectEqual(first.frame.size, Self.smaller.size)
     }
 
     @Test("A .allSpringSized interrupt keeps the shrink sliding")
@@ -260,7 +260,7 @@ struct BatchSizingEngineTests {
             engine.tick(display: display, dt: Self.tick)
             steps += 1
         }
-        #expect(engine.activeCount == 0)
+        expectEqual(engine.activeCount, 0)
         return applies
     }
 

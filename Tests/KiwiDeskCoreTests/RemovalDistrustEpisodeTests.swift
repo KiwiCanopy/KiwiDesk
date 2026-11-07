@@ -122,22 +122,22 @@ struct RemovalDistrustEpisodeTests {
         box.listed = []
         box.census = [pid: [WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
-        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        expectEqual(loop.drainPendingRemovalRecheck(), [pid])
         // The follow-up pass still refuses: it re-queues — the
         // first queue may have ridden a part-spent deadline, so
         // the episode is owed one full-delay pass — but never
         // re-logs.
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.recheckFires == 2)
-        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        expectEqual(box.recheckFires, 2)
+        expectEqual(loop.drainPendingRemovalRecheck(), [pid])
         // Past the cap the episode goes quiet: a permanently
         // mismatched app costs a bounded number of follow-ups,
         // never a per-delay reconcile loop for the session.
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(box.recheckFires == 2)
+        expectEqual(box.recheckFires, 2)
         #expect(loop.pendingRemovalRecheck.isEmpty)
-        #expect(distrustLines(box) == 1)
+        expectEqual(distrustLines(box), 1)
     }
 
     @Test("a window back in the AX list re-opens the episode")
@@ -157,8 +157,8 @@ struct RemovalDistrustEpisodeTests {
         box.listed = []
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(box.recheckFires == 2)
-        #expect(distrustLines(box) == 2)
+        expectEqual(box.recheckFires, 2)
+        expectEqual(distrustLines(box), 2)
     }
 
     @Test("a true close converges once the census drops it")
@@ -173,7 +173,7 @@ struct RemovalDistrustEpisodeTests {
         // queued follow-up's reconcile now removes it.
         box.census = [:]
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
         #expect(loop.removalDistrusted.isEmpty)
     }
 
@@ -206,17 +206,17 @@ struct RemovalDistrustEpisodeTests {
         loop.reconcile(pid: pid, app: ref)
         // Un-drained: the next refusal rides the armed one-shot.
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.recheckFires == 1)
-        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        expectEqual(box.recheckFires, 1)
+        expectEqual(loop.drainPendingRemovalRecheck(), [pid])
         // The ride spent nothing, so a second full-delay arm is
         // still owed…
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.recheckFires == 2)
-        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        expectEqual(box.recheckFires, 2)
+        expectEqual(loop.drainPendingRemovalRecheck(), [pid])
         // …and only then is the episode out of arms.
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.recheckFires == 2)
+        expectEqual(box.recheckFires, 2)
         #expect(loop.pendingRemovalRecheck.isEmpty)
-        #expect(distrustLines(box) == 1)
+        expectEqual(distrustLines(box), 1)
     }
 }

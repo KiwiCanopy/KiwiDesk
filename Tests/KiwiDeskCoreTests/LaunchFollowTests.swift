@@ -43,7 +43,7 @@ struct LaunchFollowTests {
         core.state.workspaces.ensureSpace(ruled)
         core.state.appRules[bundle] = ruled
         core.launchFollow.pressAge = { pressAge }
-        #expect(core.state.workspaces.activeSpace == home)
+        expectEqual(core.state.workspaces.activeSpace, home)
         return core
     }
 
@@ -96,7 +96,7 @@ struct LaunchFollowTests {
         #expect(
             core.state.workspaces.space(of: WindowID(window)) == ruled
         )
-        #expect(core.state.workspaces.activeSpace == home)
+        expectEqual(core.state.workspaces.activeSpace, home)
     }
 
     @Test("A launch follows the ruled window there, as a full switch")
@@ -104,9 +104,9 @@ struct LaunchFollowTests {
         let core = Self.makeCore()
         Self.activate(core)
         Self.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Self.ruled)
-        #expect(core.state.workspaces[Self.ruled]?.focused == WindowID(9))
-        #expect(core.focusedWindowID == WindowID(9))
+        expectEqual(core.state.workspaces.activeSpace, Self.ruled)
+        expectEqual(core.state.workspaces[Self.ruled]?.focused, WindowID(9))
+        expectEqual(core.focusedWindowID, WindowID(9))
         // The switch's settle is armed — `followSwitch`, not a
         // bare hand-off with no native switch behind it.
         #expect(core.deferred.task(for: .spaceSettle) != nil)
@@ -138,7 +138,7 @@ struct LaunchFollowTests {
         )
         Self.activate(core)
         Self.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Self.ruled)
+        expectEqual(core.state.workspaces.activeSpace, Self.ruled)
     }
 
     @Test("A running app already showing a window is no open")
@@ -157,7 +157,7 @@ struct LaunchFollowTests {
         let core = Self.makeCore()
         Self.activate(core, launchedAgo: LaunchFollowIntent.launchGrace)
         Self.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Self.ruled)
+        expectEqual(core.state.workspaces.activeSpace, Self.ruled)
     }
 
     @Test("A window remembered in the ruled Space is no launch")
@@ -170,7 +170,7 @@ struct LaunchFollowTests {
         Self.arrive(9, on: core)
         Self.expectStayed(core)
         // Unspent: the next ruled window of the app still follows.
-        #expect(core.launchFollow.owed() == Self.bundle)
+        expectEqual(core.launchFollow.owed(), Self.bundle)
     }
 
     @Test("A rule naming the Space you are in switches nothing")
@@ -179,8 +179,8 @@ struct LaunchFollowTests {
         core.state.appRules[Self.bundle] = Self.home
         Self.activate(core)
         Self.arrive(9, on: core)
-        #expect(core.state.workspaces.space(of: WindowID(9)) == Self.home)
-        #expect(core.launchFollow.owed() == Self.bundle)
+        expectEqual(core.state.workspaces.space(of: WindowID(9)), Self.home)
+        expectEqual(core.launchFollow.owed(), Self.bundle)
     }
 
     @Test("A transient overlay never spends the follow")
@@ -190,7 +190,7 @@ struct LaunchFollowTests {
         Self.arrive(8, on: core, overlay: true)
         Self.expectStayed(core, window: 8)
         Self.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Self.ruled)
+        expectEqual(core.state.workspaces.activeSpace, Self.ruled)
     }
 
     /// A raised-layer popup is no rule's to file (#1602), so it
@@ -204,10 +204,10 @@ struct LaunchFollowTests {
         #expect(
             core.state.workspaces.space(of: WindowID(8)) == Self.home
         )
-        #expect(core.state.workspaces.activeSpace == Self.home)
-        #expect(core.launchFollow.owed() == Self.bundle)
+        expectEqual(core.state.workspaces.activeSpace, Self.home)
+        expectEqual(core.launchFollow.owed(), Self.bundle)
         Self.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Self.ruled)
+        expectEqual(core.state.workspaces.activeSpace, Self.ruled)
     }
 
     @Test("The follow is paid once")
@@ -217,7 +217,7 @@ struct LaunchFollowTests {
         Self.arrive(9, on: core)
         #expect(core.launchFollow.owed() == nil)
         _ = core.execute("focus_space", args: [.string(Self.home.raw)])
-        #expect(core.state.workspaces.activeSpace == Self.home)
+        expectEqual(core.state.workspaces.activeSpace, Self.home)
         Self.arrive(10, on: core)
         Self.expectStayed(core, window: 10)
     }

@@ -53,8 +53,8 @@ struct DesktopMoveNamedFocusTests {
         let core = makeCore()
         defer { teardown() }
         parkNamed(core)
-        #expect(core.state.workspaces.space(of: named) == SpaceID("2"))
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.state.workspaces.space(of: named), SpaceID("2"))
+        expectEqual(core.focusedWindowID, focused)
         let active = core.state.workspaces.activeSpace
         core.eventLoop.lastCommandedFocus = nil
         let response = core.execute(
@@ -62,8 +62,8 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(1), .string(active?.raw ?? ""), id]
         )
         #expect(response.isSuccess)
-        #expect(core.state.workspaces.space(of: named) == active)
-        #expect(core.focusedWindowID == named)
+        expectEqual(core.state.workspaces.space(of: named), active)
+        expectEqual(core.focusedWindowID, named)
         // The filing moved the state focus alone: only the raise,
         // told the anchor it left, stamps the command.
         #expect(core.eventLoop.lastCommandedFocus != nil)
@@ -76,7 +76,7 @@ struct DesktopMoveNamedFocusTests {
         // `lastFocused` stays on the window a switch left behind.
         core.execute("focus_space", args: [.string("3")])
         #expect(core.focusedWindowID == nil)
-        #expect(core.state.workspaces.lastFocused == focused)
+        expectEqual(core.state.workspaces.lastFocused, focused)
         // The raise asks its gate; the filing alone never does.
         var asked: [WindowID] = []
         core.windowIsOnScreen = {
@@ -90,7 +90,7 @@ struct DesktopMoveNamedFocusTests {
             ]
         )
         #expect(response.isSuccess)
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.focusedWindowID, focused)
         #expect(asked.contains(focused))
     }
 
@@ -119,9 +119,9 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(3), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(core.state.workspaces.space(of: named) == SpaceID("5"))
-        #expect(core.focusedWindowID == focused)
-        #expect(core.state.workspaces.lastFocused == focused)
+        expectEqual(core.state.workspaces.space(of: named), SpaceID("5"))
+        expectEqual(core.focusedWindowID, focused)
+        expectEqual(core.state.workspaces.lastFocused, focused)
     }
 
     @Test("a shown Desktop's move that files nothing keeps the focus")
@@ -133,7 +133,7 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(1), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.focusedWindowID, focused)
     }
 
     @Test("a hidden Desktop's move keeps the focus")
@@ -146,7 +146,7 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(2), .string(active?.raw ?? ""), id]
         )
         #expect(response.isSuccess)
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.focusedWindowID, focused)
     }
 
     // MARK: - The follow
@@ -160,7 +160,7 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(2), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(core.followFocus.claim(if: { $0 == named }) == named)
+        expectEqual(core.followFocus.claim(if: { $0 == named }), named)
     }
 
     @Test("a refused follow of a named window owes its bookkeeping")
@@ -192,7 +192,7 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(1), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(core.focusedWindowID == named)
+        expectEqual(core.focusedWindowID, named)
     }
 
     @Test("an already-shown follow into a parked Space switches there")
@@ -200,15 +200,15 @@ struct DesktopMoveNamedFocusTests {
         let core = makeCore()
         defer { teardown() }
         parkNamed(core)
-        #expect(core.state.workspaces.space(of: named) == SpaceID("2"))
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.state.workspaces.space(of: named), SpaceID("2"))
+        expectEqual(core.focusedWindowID, focused)
         let response = core.execute(
             "move_to_desktop_and_follow",
             args: [.number(1), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-        #expect(core.focusedWindowID == named)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+        expectEqual(core.focusedWindowID, named)
         #expect(core.deferred.isScheduled(.spaceSettle))
     }
 
@@ -222,8 +222,8 @@ struct DesktopMoveNamedFocusTests {
             args: [.number(1), .string("3")]
         )
         #expect(response.isSuccess)
-        #expect(core.state.workspaces.activeSpace == SpaceID("3"))
-        #expect(core.focusedWindowID == focused)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("3"))
+        expectEqual(core.focusedWindowID, focused)
         #expect(core.deferred.isScheduled(.spaceSettle))
     }
 }

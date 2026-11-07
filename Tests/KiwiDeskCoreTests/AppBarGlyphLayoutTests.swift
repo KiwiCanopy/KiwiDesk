@@ -81,7 +81,7 @@ struct AppBarGlyphLayoutTests {
             style: AppBarLook()
         )
         view.layout()
-        #expect(view.label.stringValue == "Downloads")
+        expectEqual(view.label.stringValue, "Downloads")
     }
 
     /// Every title draws in one slot as long as the title cap in
@@ -118,8 +118,8 @@ struct AppBarGlyphLayoutTests {
         let upper = AppBarStyle.cappedTitle("CLAUDE AGENT LANE", to: cap)
         // Two items each, so the run's end insets match.
         let slot = width([lower, "zsh"])
-        #expect(width([upper, "zsh"]) == slot)
-        #expect(width(["Mail", "TanStack Start: Full-Stack React"]) == slot)
+        expectEqual(width([upper, "zsh"]), slot)
+        expectEqual(width(["Mail", "TanStack Start: Full-Stack React"]), slot)
         let titleSlot = AppBarOverlay.titleSlot(style, thickness: thickness)
         let drawn = {
             (text: String, seen: BarVisibility) -> AppBarItemView in
@@ -143,7 +143,7 @@ struct AppBarGlyphLayoutTests {
         let views = [lower, upper, "Mail"].map { drawn($0, .visible) }
         for view in views {
             let placed = view.horizontalPlacement(in: view.bounds.size)
-            #expect(placed.text.width == titleSlot)
+            expectEqual(placed.text.width, titleSlot)
             let start = placed.x + placed.moon + placed.side + placed.spacing
             #expect(view.label.frame.minX >= start - 0.5)
             #expect(view.label.frame.maxX <= start + titleSlot + 0.5)
@@ -179,8 +179,8 @@ struct AppBarGlyphLayoutTests {
         // The half-moon hangs outside the centring: drawing it
         // moves neither the icon nor the title.
         let partly = drawn("Mail", .partly(shown: .left))
-        #expect(partly.glyphLabel.frame == short.glyphLabel.frame)
-        #expect(partly.label.frame == short.label.frame)
+        expectEqual(partly.glyphLabel.frame, short.glyphLabel.frame)
+        expectEqual(partly.label.frame, short.label.frame)
     }
 
     /// A REUSED view that flips to a vertical bar hides its

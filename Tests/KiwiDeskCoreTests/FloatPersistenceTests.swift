@@ -33,7 +33,7 @@ struct FloatPersistenceTests {
         // Reopened: the OS handed out a new WindowID and
         // detection classified it tiled again.
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     /// A Tile leaves nothing to remember (#1810): the reopened
@@ -50,7 +50,7 @@ struct FloatPersistenceTests {
         state.apply(
             .windowCreated(makeWindow(2, floating: true))
         )
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
         #expect(state.userFloated.isEmpty)
     }
 
@@ -63,7 +63,7 @@ struct FloatPersistenceTests {
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2, title: "B")))
-        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, false)
     }
 
     @Test("Minimize keeps the float intent for deminiaturize")
@@ -77,7 +77,7 @@ struct FloatPersistenceTests {
         // Deminiaturize re-tracks under the same WindowID with
         // a fresh (tiled) detection verdict.
         state.apply(.windowCreated(makeWindow(1)))
-        #expect(state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(1)]?.isFloating, true)
     }
 
     @Test("App termination remembers overrides for relaunch")
@@ -87,7 +87,7 @@ struct FloatPersistenceTests {
         state.setFloating(WindowID(1), true)
         state.apply(.appTerminated(pid: 100))
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     @Test("A user float outlives detection verdict flips")
@@ -103,12 +103,12 @@ struct FloatPersistenceTests {
                 isFloating: false
             )
         )
-        #expect(state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(1)]?.isFloating, true)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     @Test("Detection verdicts apply to unoverridden windows")
@@ -118,7 +118,7 @@ struct FloatPersistenceTests {
         state.apply(
             .windowFloatChanged(WindowID(1), isFloating: true)
         )
-        #expect(state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(1)]?.isFloating, true)
     }
 
     @Test("Detection self-heal clears a stale overlay flag (#300)")
@@ -138,7 +138,7 @@ struct FloatPersistenceTests {
         state.apply(
             .windowFloatChanged(WindowID(1), isFloating: false)
         )
-        #expect(state.windows[WindowID(1)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(1)]?.isFloating, false)
         #expect(
             state.windows[WindowID(1)]?.isTransientOverlay == false
         )
@@ -185,11 +185,11 @@ struct FloatPersistenceTests {
         // Electron/WebKit reopen: tracked before the title
         // arrives, so the create-time identity match misses.
         state.apply(.windowCreated(makeWindow(2, title: "")))
-        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, false)
         state.apply(
             .windowTitleChanged(WindowID(2), "Doc")
         )
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     @Test("The remembered identity uses the latest title")
@@ -204,7 +204,7 @@ struct FloatPersistenceTests {
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2, title: "B")))
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     @Test("Empty titles carry no identity to remember")
@@ -216,7 +216,7 @@ struct FloatPersistenceTests {
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2, title: "")))
-        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, false)
     }
 
     @Test("The restored override re-arms for the next cycle")
@@ -232,7 +232,7 @@ struct FloatPersistenceTests {
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(3)))
-        #expect(state.windows[WindowID(3)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(3)]?.isFloating, true)
     }
 
     @Test("Untracked ids never record an override")
@@ -240,7 +240,7 @@ struct FloatPersistenceTests {
         var state = StateCoordinator()
         state.setFloating(WindowID(9), true)
         state.apply(.windowCreated(makeWindow(9)))
-        #expect(state.windows[WindowID(9)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(9)]?.isFloating, false)
     }
 
     @Test("A Tile returns detection control")
@@ -253,13 +253,13 @@ struct FloatPersistenceTests {
         state.apply(
             .windowFloatChanged(WindowID(1), isFloating: true)
         )
-        #expect(state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(1)]?.isFloating, true)
         // ... and reopen restores nothing (#164).
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, false)
     }
 }
 

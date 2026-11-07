@@ -29,7 +29,7 @@ struct HeldSpaceTests {
     func unplugHolds() throws {
         let core = try docked()
         core.handle(.displaysChanged([builtIn]))
-        #expect(core.profiles.currentName == "solo")
+        expectEqual(core.profiles.currentName, "solo")
         // The DELL's 3 collides with solo's 3: past solo's last
         // live number (4) it is 5. Its 4 is free but would sit
         // below the 5, so it follows as 6 (#1664).
@@ -42,12 +42,12 @@ struct HeldSpaceTests {
                     arrangement: .profile("desk")
                 )
         )
-        #expect(core.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
-        #expect(members(core, 5) == ids([10, 11]))
-        #expect(members(core, 6) == ids([12]))
+        expectEqual(core.state.heldSpaces[SpaceID(6)]?.name, SpaceID(4))
+        expectEqual(members(core, 5), ids([10, 11]))
+        expectEqual(members(core, 6), ids([12]))
         #expect(members(core, 4).isEmpty)
         #expect(members(core, 3).isEmpty)
-        #expect(members(core, 1) == ids([13]))
+        expectEqual(members(core, 1), ids([13]))
     }
 
     @Test("a replug sends everything home and the held Spaces retire")
@@ -55,11 +55,11 @@ struct HeldSpaceTests {
         let core = try docked()
         core.handle(.displaysChanged([builtIn]))
         core.handle(.displaysChanged([builtIn, dell]))
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(core.state.heldSpaces.isEmpty)
         #expect(core.state.workspaces[SpaceID(5)] == nil)
-        #expect(Set(members(core, 3)) == Set(ids([10, 11])))
-        #expect(members(core, 4) == ids([12]))
+        expectEqual(Set(members(core, 3)), Set(ids([10, 11])))
+        expectEqual(members(core, 4), ids([12]))
     }
 
     @Test("a held Space retires when its last window leaves")
@@ -79,9 +79,9 @@ struct HeldSpaceTests {
         let core = try docked()
         core.handle(.displaysChanged([builtIn]))
         core.execute("load_profile", args: [.string("solo")])
-        #expect(core.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
-        #expect(Set(members(core, 5)) == Set(ids([10, 11])))
-        #expect(members(core, 6) == ids([12]))
+        expectEqual(core.state.heldSpaces[SpaceID(5)]?.name, SpaceID(3))
+        expectEqual(Set(members(core, 5)), Set(ids([10, 11])))
+        expectEqual(members(core, 6), ids([12]))
     }
 
     @Test("an empty Space of the gone screen is not held")
@@ -94,7 +94,7 @@ struct HeldSpaceTests {
         #expect(
             !core.state.heldSpaces.values.contains { $0.name == SpaceID(4) }
         )
-        #expect(core.state.heldSpaces[SpaceID(4)]?.name == SpaceID(3))
+        expectEqual(core.state.heldSpaces[SpaceID(4)]?.name, SpaceID(3))
     }
 
     /// Every switch holds what it does not name (#1790).
@@ -109,7 +109,7 @@ struct HeldSpaceTests {
         let held = try #require(
             core.state.heldSpaces.first { $0.value.name == SpaceID(4) }
         )
-        #expect(members(core, Int(held.key.raw) ?? 0) == ids([12]))
+        expectEqual(members(core, Int(held.key.raw) ?? 0), ids([12]))
     }
 
     @Test("Keep and the partitioning record never capture a held Space")
@@ -139,7 +139,7 @@ struct HeldSpaceTests {
         core.tiler.settings.spaceIcons[SpaceID(4)] = "book"
         core.handle(.displaysChanged([builtIn]))
         #expect(core.state.heldSpaces[SpaceID(5)]?.icon == nil)
-        #expect(core.state.heldSpaces[SpaceID(6)]?.icon == "book")
+        expectEqual(core.state.heldSpaces[SpaceID(6)]?.icon, "book")
     }
 
     @Test("an unpinned Space of the gone screen is held too")
@@ -152,7 +152,7 @@ struct HeldSpaceTests {
         #expect(
             core.state.heldSpaces[SpaceID(6)]?.screen == dell.fingerprint
         )
-        #expect(members(core, 6) == ids([12]))
+        expectEqual(members(core, 6), ids([12]))
         #expect(core.state.settlingScreens.isEmpty)
     }
 
@@ -168,8 +168,8 @@ struct HeldSpaceTests {
         #expect(core.state.heldSpaces[SpaceID(4)] == nil)
         #expect(core.state.heldSpaces[SpaceID(5)] == nil)
         let held = core.state.heldSpaces
-        #expect(held.count == 2)
-        #expect(Set(held.values.map(\.name)) == [SpaceID(3), SpaceID(4)])
+        expectEqual(held.count, 2)
+        expectEqual(Set(held.values.map(\.name)), [SpaceID(3), SpaceID(4)])
         for id in held.keys {
             #expect(!members(core, Int(id.raw)!).isEmpty)
         }
@@ -184,7 +184,7 @@ struct HeldSpaceTests {
         core.state.workspaces.upsertDisplay(dell)
         core.apply(profile: other, cause: .event)
         #expect(core.state.heldSpaces[SpaceID(5)] != nil)
-        #expect(core.spacePins[SpaceID(5)] == dell.fingerprint)
+        expectEqual(core.spacePins[SpaceID(5)], dell.fingerprint)
     }
 
     @Test("a config reload keeps a held Space's mode")
@@ -193,7 +193,7 @@ struct HeldSpaceTests {
         core.handle(.displaysChanged([builtIn]))
         core.setSpaceMode(SpaceID(5), .monocle, keepingSizes: false)
         core.execute("reload_config")
-        #expect(core.state.workspaces[SpaceID(5)]?.mode == .monocle)
+        expectEqual(core.state.workspaces[SpaceID(5)]?.mode, .monocle)
     }
 
     @Test("delete_space ends a hold")
@@ -231,8 +231,8 @@ struct HeldSpaceTests {
         config.spaces = core.capturedSpaces.map(\.id)
         core.applyProfileScopedState(from: config)
         #expect(core.state.heldSpaces[SpaceID(5)] != nil)
-        #expect(members(core, 5) == ids([10, 11]))
-        #expect(core.state.workspaces[SpaceID(5)]?.mode == .monocle)
+        expectEqual(members(core, 5), ids([10, 11]))
+        expectEqual(core.state.workspaces[SpaceID(5)]?.mode, .monocle)
     }
 
     @Test("Keep never saves a held Space's home pin")
@@ -269,7 +269,7 @@ struct HeldSpaceTests {
         let follower = try #require(
             items.first { $0.identity == .space(SpaceID(6)) }
         )
-        #expect(follower.held?.originName == SpaceID(4))
+        expectEqual(follower.held?.originName, SpaceID(4))
         let own = try #require(
             items.first { $0.identity == .space(SpaceID(1)) }
         )

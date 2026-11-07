@@ -45,7 +45,7 @@ struct PocketHandleTests {
         let share = BriefPocketPlan.markSide / BriefPocketPlan.side
         let mark = { KiwiCore.pocketRiseSide(thickness: $0) * share }
         // A section's on that bar, its mark alike (#2776).
-        #expect(KiwiCore.pocketRiseSide(thickness: 40) == 40)
+        expectEqual(KiwiCore.pocketRiseSide(thickness: 40), 40)
         #expect(abs(mark(60) - KiwiCore.pocketRiseMarkCap) < 0.001)
         #expect(abs(mark(20) - PocketHandleView.markSide) < 0.001)
     }
@@ -59,24 +59,24 @@ struct PocketHandleTests {
             position: 50,
             depth: 16
         )
-        #expect(mid.midX == 500)
-        #expect(mid.maxY == visible.maxY)
-        #expect(mid.height == 16)
+        expectEqual(mid.midX, 500)
+        expectEqual(mid.maxY, visible.maxY)
+        expectEqual(mid.height, 16)
         let end = KiwiCore.pocketHandleFrame(
             visible: visible,
             edge: .bottom,
             position: 100,
             depth: 16
         )
-        #expect(end.maxX == visible.maxX)
+        expectEqual(end.maxX, visible.maxX)
         let side = KiwiCore.pocketHandleFrame(
             visible: visible,
             edge: .right,
             position: 0,
             depth: 16
         )
-        #expect(side.minY == visible.minY)
-        #expect(side.maxX == visible.maxX)
+        expectEqual(side.minY, visible.minY)
+        expectEqual(side.maxX, visible.maxX)
     }
 
     @Test("an edge no bar shows takes the handle at rest")
@@ -84,14 +84,14 @@ struct PocketHandleTests {
         let core = try makeCore()
         core.tiler.settings.kiwishelf.outerMargin = 8
         let shown = try #require(spec(core))
-        #expect(shown.handle == core.tiler.settings.kiwishelf.pocketEdge)
+        expectEqual(shown.handle, core.tiler.settings.kiwishelf.pocketEdge)
         #expect(!shown.risen)
         let depth =
             shown.handle?.isHorizontal == false
             ? shown.frame.width : shown.frame.height
         // It reaches the edge across the outer margin and draws
         // past it, as the bars' handles sit.
-        #expect(depth == PocketHandleView.restDepth + 8)
+        expectEqual(depth, PocketHandleView.restDepth + 8)
     }
 
     @Test("a push raises the pocket out of its handle, and leaving sinks it")
@@ -104,7 +104,7 @@ struct PocketHandleTests {
         #expect(risen.risen)
         #expect(risen.frame.height > shown.frame.height)
         core.pocketHovered(shown.display, false)
-        #expect(core.pocketPlate.specs[shown.display]?.risen == false)
+        expectEqual(core.pocketPlate.specs[shown.display]?.risen, false)
     }
 
     @Test("a window drag raises the pocket on every display")
@@ -128,7 +128,7 @@ struct PocketHandleTests {
         let panel = try #require(
             core.pocketPlate.panelForTesting(on: shown.display)
         )
-        #expect(panel.level == BarPanel.aboveLevel)
+        expectEqual(panel.level, BarPanel.aboveLevel)
     }
 
     @Test("a bar edge's slot keeps the section, never the handle")
@@ -158,6 +158,6 @@ struct PocketHandleTests {
         // A later pass keeps it lit, so the empty pocket stays full.
         core.updatePocketPlate(slots: [display: slot])
         #expect(core.pocketPlate.hovered.contains(display))
-        #expect(core.pocketPlate.specs[display]?.faded == false)
+        expectEqual(core.pocketPlate.specs[display]?.faded, false)
     }
 }

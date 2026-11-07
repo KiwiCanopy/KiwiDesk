@@ -50,7 +50,7 @@ struct LocaleWorksheetLocationTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
 
         // Present where it belongs — asserted before the absence
         // below, so a run that wrote no worksheet at all cannot
@@ -147,7 +147,7 @@ struct LocaleWorksheetLocationTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(
             fx.worksheetExists("missing_de.json", site: true),
             "no site worksheet was written"

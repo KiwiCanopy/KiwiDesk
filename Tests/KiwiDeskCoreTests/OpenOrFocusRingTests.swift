@@ -81,7 +81,7 @@ struct OpenOrFocusRingTests {
         core.applyFocusedSpaceSwitch(to: "2")
 
         let focused = core.tiler.settings.borderStyle.focusedColor
-        #expect(ring(core, 20)?.colorHex == focused)
+        expectEqual(ring(core, 20)?.colorHex, focused)
         #expect(ring(core, 30) == nil)
     }
 
@@ -159,7 +159,7 @@ struct OpenOrFocusRingTests {
             core.state.workspaces.lastFocused == WindowID(20)
         )
         let focused = core.tiler.settings.borderStyle.focusedColor
-        #expect(ring(core, 20)?.colorHex == focused)
+        expectEqual(ring(core, 20)?.colorHex, focused)
         #expect(ring(core, 30) == nil)
     }
 

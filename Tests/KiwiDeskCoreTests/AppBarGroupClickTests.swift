@@ -118,7 +118,7 @@ struct AppBarGroupClickTests {
         try click(group)
         #expect(selected.isEmpty)
         #expect(rig.peek.shown?.view === group)
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         #expect(rig.peek.holdsOpen(group))
         #expect(group.isHovered, "lit while its list shows")
         rig.peek.dismiss()
@@ -145,7 +145,7 @@ struct AppBarGroupClickTests {
         var selected: [WindowID] = []
         single.onSelect = { selected.append($0) }
         try click(single)
-        #expect(selected == [WindowID(1)])
+        expectEqual(selected, [WindowID(1)])
         #expect(rig.peek.shown == nil)
     }
 

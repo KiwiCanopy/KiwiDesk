@@ -112,7 +112,7 @@ struct ConfigMigrationWiringTests {
         )
         #expect(!onDisk.contains("icon_and_name"))
         #expect(onDisk.contains(stamp(Profile.currentFormat)))
-        #expect(manager.allProfiles().map(\.name) == ["Starter"])
+        expectEqual(manager.allProfiles().map(\.name), ["Starter"])
     }
 
     /// A BACKUP from an older build restores with its values.
@@ -171,7 +171,7 @@ struct ConfigMigrationWiringTests {
 
         let core = makeTestCore(configDirectory: dir)
         let read = try core.readBackup(at: file)
-        #expect(read.profiles.count == 1)
+        expectEqual(read.profiles.count, 1)
         #expect(
             read.profiles.first?.settings.spaceBarStyle.glyphSpan == 8
         )
@@ -270,9 +270,9 @@ struct ConfigMigrationWiringTests {
             omittingEmptySubsequences: false
         )
         .filter { $0 != #"  "look" : "own","# }
-        #expect(before.count == after.count)
+        expectEqual(before.count, after.count)
         let changed = zip(before, after).filter { $0 != $1 }
-        #expect(changed.count == 2)
+        expectEqual(changed.count, 2)
         #expect(
             changed.contains {
                 $0.1.contains("\"limit\" : \(TrackParams().limit)")
@@ -309,7 +309,7 @@ struct ConfigMigrationWiringTests {
         )
         try legacy.write(to: file, atomically: true, encoding: .utf8)
         let loaded = store.load()
-        #expect(loaded?.spaces == [SpaceID("code")])
-        #expect(loaded?.format == GuiConfig.currentFormat)
+        expectEqual(loaded?.spaces, [SpaceID("code")])
+        expectEqual(loaded?.format, GuiConfig.currentFormat)
     }
 }

@@ -162,8 +162,8 @@ struct RoundedItemEndPadChipTests {
                 )
                 // Both ends clear the curve alike (#1856, owner
                 // 2026-10-01).
-                #expect(ends.leading == AppBarItemView.edgePadding + e)
-                #expect(ends.trailing == AppBarItemView.edgePadding + e)
+                expectEqual(ends.leading, AppBarItemView.edgePadding + e)
+                expectEqual(ends.trailing, AppBarItemView.edgePadding + e)
                 // Read apart from the layout, which clamps to any width.
                 let slot = Self.slot(look, depth: depth)
                 #expect(abs(slot - square - 2 * e) < 1e-9)
@@ -239,9 +239,9 @@ struct RoundedItemEndPadChipTests {
             manager.overlayForTesting(barTitleDisplay)
         )
         let views = overlay.itemViews.filter { !$0.isHidden }
-        #expect(views.count == 3)
-        #expect(views.map(\.isFirstInRun) == [true, false, false])
-        #expect(views.map(\.isLastInRun) == [false, false, true])
+        expectEqual(views.count, 3)
+        expectEqual(views.map(\.isFirstInRun), [true, false, false])
+        expectEqual(views.map(\.isLastInRun), [false, false, true])
     }
 
     /// On a plate a middle slot draws no rounded end; the run's
@@ -273,7 +273,7 @@ struct RoundedItemEndPadChipTests {
                 first: first,
                 last: last
             )
-            #expect(ends == expected)
+            expectEqual(ends, expected)
             let view = appItem(
                 width: slot,
                 look: look,

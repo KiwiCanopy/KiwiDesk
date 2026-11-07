@@ -95,7 +95,7 @@ struct ZOrderScrollingArmTests {
     /// of the arm answering for it.
     private func report(_ core: KiwiCore, _ raw: UInt32) {
         core.handle(.windowFocused(WindowID(raw)))
-        #expect(core.activeSpace?.focused == WindowID(raw))
+        expectEqual(core.activeSpace?.focused, WindowID(raw))
     }
 
     // MARK: - A commanded move
@@ -117,7 +117,7 @@ struct ZOrderScrollingArmTests {
         let before = offset(core)
         try startDummyPan(core)
         core.focusWindow(WindowID(3), warp: false)
-        #expect(offset(core) == before)
+        expectEqual(offset(core), before)
         #expect(!core.pendingZOrderRestore)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }

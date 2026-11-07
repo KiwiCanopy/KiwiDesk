@@ -111,7 +111,7 @@ struct ProfileSpaceReconcileTests {
             cause: .explicit
         )
         #expect(core.state.workspaces[SpaceID("stale")] == nil)
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
     }
 
     // MARK: - Stored-order rehome (#75)
@@ -176,7 +176,7 @@ struct ProfileSpaceReconcileTests {
             core.state.workspaces.space(of: WindowID(42))
                 == SpaceID("2")
         )
-        #expect(core.fallbackSpace == SpaceID("2"))
+        expectEqual(core.fallbackSpace, SpaceID("2"))
     }
 
     @Test("Dangling fallback falls back to the stored order")

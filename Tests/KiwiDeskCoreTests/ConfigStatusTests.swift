@@ -80,7 +80,7 @@ struct ConfigStatusTests {
         for (issue, (_, expected)) in zip(listed, cases) {
             var expected = expected
             expected["source"] = .string("init.lua")
-            #expect(issue == expected)
+            expectEqual(issue, expected)
         }
     }
 
@@ -93,7 +93,7 @@ struct ConfigStatusTests {
             (.unreadable, "unreadable"),
             (.newerFormat, "newer_format"),
         ]
-        #expect(causes.count == ProfileBrokenCause.allCases.count)
+        expectEqual(causes.count, ProfileBrokenCause.allCases.count)
         core.configIssues = causes.map {
             ConfigIssue(
                 source: "Work.json",
@@ -104,9 +104,9 @@ struct ConfigStatusTests {
         let listed = try issues(core)
         try #require(listed.count == causes.count)
         for (issue, (_, name)) in zip(listed, causes) {
-            #expect(issue["kind"] == .string("profile_broken"))
-            #expect(issue["cause"] == .string(name))
-            #expect(issue["profile"] == .string("Work"))
+            expectEqual(issue["kind"], .string("profile_broken"))
+            expectEqual(issue["cause"], .string(name))
+            expectEqual(issue["profile"], .string("Work"))
         }
     }
 
@@ -169,8 +169,8 @@ struct ConfigStatusTests {
         try Self.restamp(core.guiConfigStore.url)
         let again = KeepFixture.report(core, "border.set_width", [.number(8)])
         let leaf = KeepFixture.leaf(again, "/settings/border/width")
-        #expect(leaf?.owner == .sharedLook)
-        #expect(leaf?.notKeepable == .newerFormat)
+        expectEqual(leaf?.owner, .sharedLook)
+        expectEqual(leaf?.notKeepable, .newerFormat)
         #expect(
             try Self.refusal(core, width, "/settings/border/width")
                 == "newer_format"

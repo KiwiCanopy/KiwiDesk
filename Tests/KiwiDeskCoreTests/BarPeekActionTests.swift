@@ -30,7 +30,7 @@ struct BarPeekActionTests {
             "held in the gap"
         )
         #expect(rig.peek.holding)
-        #expect(rig.dwells.last == BarPeek.Timing.holdPoll)
+        expectEqual(rig.dwells.last, BarPeek.Timing.holdPoll)
         rig.step()
         #expect(
             rig.shownTitles == ["Window 1", "Window 2"],
@@ -117,7 +117,7 @@ struct BarPeekActionTests {
         defer { rig.close() }
         click(rig)
         #expect(!rig.dwells.contains(BarPeek.Timing.dwell), "no dwell")
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         rig.pointer = CGPoint(x: -1e6, y: -1e6)
         rig.hover(nil)
         rig.step()
@@ -137,7 +137,7 @@ struct BarPeekActionTests {
         defer { rig.close() }
         click(rig)
         click(rig, count: 2)
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         rig.clock += 0.1
         click(rig)
         #expect(rig.shownTitles == ["Window 1", "Window 2"], "too soon")
@@ -173,7 +173,7 @@ struct BarPeekActionTests {
                 edge: .top
             )
         }
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
     }
 
     /// A dismissed item stays shut to hover until the pointer
@@ -193,7 +193,7 @@ struct BarPeekActionTests {
             space: SpaceID("1"),
             edge: .top
         )
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
     }
 
     // MARK: - The rows
@@ -246,7 +246,7 @@ struct BarPeekActionTests {
         try send(.leftMouseDown, at: second, to: body)
         #expect(rig.picks.isEmpty, "the press does not pick")
         try send(.leftMouseUp, at: second, to: body)
-        #expect(rig.picks.map(\.0) == [WindowID(2)])
+        expectEqual(rig.picks.map(\.0), [WindowID(2)])
         #expect(rig.picks.map(\.1) == [SpaceID("1")], "the chip's Space")
         #expect(rig.peek.panel.drawn == nil, "a pick closes the peek")
     }
@@ -283,7 +283,7 @@ struct BarPeekActionTests {
         try send(.leftMouseDown, at: first, to: body)
         try send(.leftMouseUp, at: off, to: body)
         #expect(rig.picks.isEmpty)
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
     }
 
     /// The row under the pointer wears the shelf's own item hover,
@@ -302,18 +302,18 @@ struct BarPeekActionTests {
         rig.step()
         let body = rig.peek.panel.body
         let label = try #require(body.targets[1].inks.first as? NSTextField)
-        #expect(label.textColor == NSColor(kiwiHex: shelf.itemColor))
+        expectEqual(label.textColor, NSColor(kiwiHex: shelf.itemColor))
         body.setHovered(1)
         #expect(!body.highlight.isHidden)
-        #expect(body.highlight.frame == body.targets[1].frame)
+        expectEqual(body.highlight.frame, body.targets[1].frame)
         #expect(
             body.highlight.layer?.backgroundColor
                 == NSColor(kiwiHex: shelf.hoverFillColor).cgColor
         )
-        #expect(label.textColor == NSColor(kiwiHex: shelf.hoverItemColor))
+        expectEqual(label.textColor, NSColor(kiwiHex: shelf.hoverItemColor))
         body.setHovered(nil)
         #expect(body.highlight.isHidden)
-        #expect(label.textColor == NSColor(kiwiHex: shelf.itemColor))
+        expectEqual(label.textColor, NSColor(kiwiHex: shelf.itemColor))
     }
 
     /// "N more" is the menu's button: its release opens the menu of
@@ -337,9 +337,9 @@ struct BarPeekActionTests {
         let point = centre(body.targets[more].frame)
         body.press(at: point)
         body.release(at: point)
-        #expect(opened == 1)
+        expectEqual(opened, 1)
         // The shown peek's own button reaches its menu.
         rig.peek.panel.body.onMore()
-        #expect(rig.menusOpened == [.space([WindowID(1), WindowID(2)])])
+        expectEqual(rig.menusOpened, [.space([WindowID(1), WindowID(2)])])
     }
 }

@@ -34,8 +34,8 @@ struct SpaceScrollTransitionTests {
     func storedShape() throws {
         let root = try encoded { $0.spaceScrollTransition = .show }
         let group = try #require(root["space"] as? [String: Any])
-        #expect(group["scroll_transition"] as? String == "show")
-        #expect(group["transition"] as? String == "slide")
+        expectEqual(group["scroll_transition"] as? String, "show")
+        expectEqual(group["transition"] as? String, "slide")
         #expect(try decoded(root).appWide?.spaceScrollTransition == .show)
     }
 
@@ -48,8 +48,8 @@ struct SpaceScrollTransitionTests {
         var root = try encoded { _ in }
         root["space"] = ["transition": stored]
         let back = try #require(try decoded(root).appWide)
-        #expect(back.spaceTransition.rawValue == stored)
-        #expect(back.spaceScrollTransition == .slide)
+        expectEqual(back.spaceTransition.rawValue, stored)
+        expectEqual(back.spaceScrollTransition, .slide)
     }
 
     /// Below the #2524 floor too: the cue crosses to the transition
@@ -67,15 +67,15 @@ struct SpaceScrollTransitionTests {
         let back = try #require(
             JSONDecoder().decode(GuiConfig.self, from: out).appWide
         )
-        #expect(back.spaceTransition == SpaceTransition.none)
-        #expect(back.spaceScrollTransition == .slide)
+        expectEqual(back.spaceTransition, SpaceTransition.none)
+        expectEqual(back.spaceScrollTransition, .slide)
     }
 
     /// A current file carrying the key is not rewritten.
     @Test("a current file with the key needs no migration")
     func currentFileIsLeftAlone() throws {
         let root = try encoded { $0.spaceScrollTransition = .none }
-        #expect(root["format"] as? Int == GuiConfig.currentFormat)
+        expectEqual(root["format"] as? Int, GuiConfig.currentFormat)
         let data = try JSONSerialization.data(withJSONObject: root)
         #expect(ConfigMigration.migrated(data) == nil)
     }
@@ -89,8 +89,8 @@ struct SpaceScrollTransitionTests {
                 args: [.string(style.rawValue)]
             )
             #expect(reply.isSuccess)
-            #expect(core.appWide.spaceScrollTransition == style)
-            #expect(core.appWide.spaceTransition == .slide)
+            expectEqual(core.appWide.spaceScrollTransition, style)
+            expectEqual(core.appWide.spaceTransition, .slide)
         }
         #expect(
             !core.execute(
@@ -104,8 +104,8 @@ struct SpaceScrollTransitionTests {
     func otherVerbLeavesIt() {
         let core = makeTestCore()
         core.execute("set_space_transition", args: [.string("none")])
-        #expect(core.appWide.spaceTransition == SpaceTransition.none)
-        #expect(core.appWide.spaceScrollTransition == .slide)
+        expectEqual(core.appWide.spaceTransition, SpaceTransition.none)
+        expectEqual(core.appWide.spaceScrollTransition, .slide)
     }
 
     @Test("the intent's input picks which value is read")

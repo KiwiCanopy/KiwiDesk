@@ -184,14 +184,14 @@ struct CiStampOnlyTests {
             + #"&& bash -c "$stamp_check" ci-stamp-only "#
             + #""$HEAD_REF" "$base"; then"#
         let gateAt = try #require(lines.firstIndex(of: gate))
-        #expect(lines[gateAt + 1] == read)
+        expectEqual(lines[gateAt + 1], read)
         let judgeAt = try #require(
             lines.firstIndex(of: judge),
             "the changes step does not judge by the base script"
         )
         #expect(judgeAt > gateAt + 1)
         let next = lines[(judgeAt + 1)...].first { !$0.isEmpty }
-        #expect(next == #"echo "run=false" >> "$GITHUB_OUTPUT""#)
+        expectEqual(next, #"echo "run=false" >> "$GITHUB_OUTPUT""#)
         #expect(!step.contains("scripts/ci-stamp-only \""))
     }
 }

@@ -30,7 +30,7 @@ struct DrawnMenuBarsTests {
             screens: [(1, builtIn), (3, dell)],
             primaryHeight: 1117
         )
-        #expect(bottoms == [1: 1084, 3: 1246])
+        expectEqual(bottoms, [1: 1084, 3: 1246])
     }
 
     @Test("a screen drawing no bar gets no entry")
@@ -65,7 +65,7 @@ struct DrawnMenuBarsTests {
                 screens: [(1, builtIn), (3, dell)],
                 primaryHeight: 1117
             )
-            #expect(bottoms[3] == 1236)
+            expectEqual(bottoms[3], 1236)
         }
     }
 
@@ -77,8 +77,8 @@ struct DrawnMenuBarsTests {
             stale,
             barBottom: 1246
         )
-        #expect(cleared.maxY == 1246)
-        #expect(cleared.minY == stale.minY)
+        expectEqual(cleared.maxY, 1246)
+        expectEqual(cleared.minY, stale.minY)
     }
 
     @Test("a correct top is never raised or moved")

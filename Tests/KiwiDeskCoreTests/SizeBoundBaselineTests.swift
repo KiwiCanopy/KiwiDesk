@@ -137,8 +137,8 @@ struct SizeBoundBaselineTests {
         // still wants two distinct asks (#933) — the arm buys
         // the entry a cycle earlier, never the corroboration.
         let entries = learner.bound(for: w)?.width ?? []
-        #expect(entries.count == 1)
-        #expect(entries.first?.answered == 715)
+        expectEqual(entries.count, 1)
+        expectEqual(entries.first?.answered, 715)
     }
 
     @Test("Without a baseline the ladder still needs two reads")

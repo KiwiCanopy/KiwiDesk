@@ -30,10 +30,10 @@ struct ScrollStepLatchTests {
         let steps = (0..<40).compactMap {
             _ in latch.feed(event(.changed, dx: 10))
         }
-        #expect(steps == [1])
+        expectEqual(steps, [1])
         _ = latch.feed(event(.ended))
         _ = latch.feed(event(.began))
-        #expect(latch.feed(event(.changed, dx: -30)) == -1)
+        expectEqual(latch.feed(event(.changed, dx: -30)), -1)
     }
 
     @Test("trackpad drift under the threshold does not step")
@@ -42,16 +42,16 @@ struct ScrollStepLatchTests {
         _ = latch.feed(event(.began))
         let under = ScrollStepLatch.trackpadThreshold - 1
         #expect(latch.feed(event(.changed, dy: under)) == nil)
-        #expect(latch.feed(event(.changed, dy: 1)) == 1)
+        expectEqual(latch.feed(event(.changed, dy: 1)), 1)
     }
 
     @Test("the axis with the larger travel picks the way")
     func dominantAxis() {
         var latch = ScrollStepLatch()
         _ = latch.feed(event(.began))
-        #expect(latch.feed(event(.changed, dx: -20, dy: 30)) == 1)
+        expectEqual(latch.feed(event(.changed, dx: -20, dy: 30)), 1)
         _ = latch.feed(event(.ended))
         _ = latch.feed(event(.began))
-        #expect(latch.feed(event(.changed, dx: -30, dy: 20)) == -1)
+        expectEqual(latch.feed(event(.changed, dx: -30, dy: 20)), -1)
     }
 }

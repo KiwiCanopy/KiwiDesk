@@ -27,10 +27,10 @@ struct ConfigMigrationStampTests {
         let out = try #require(ConfigMigration.migrated(legacy))
         let root =
             try JSONSerialization.jsonObject(with: out) as? [String: Any]
-        #expect(root?["format"] as? Int == PaletteDocument.currentFormat)
+        expectEqual(root?["format"] as? Int, PaletteDocument.currentFormat)
         let palettes = root?["palettes"] as? [[String: Any]]
-        #expect(palettes?.count == 1)
-        #expect(palettes?.first?["name"] as? String == "Mine")
+        expectEqual(palettes?.count, 1)
+        expectEqual(palettes?.first?["name"] as? String, "Mine")
     }
 
     /// A file that needed migration is stamped with current format
@@ -47,8 +47,8 @@ struct ConfigMigrationStampTests {
         let out = try #require(ConfigMigration.migrated(unversionedOld))
         let root =
             try JSONSerialization.jsonObject(with: out) as? [String: Any]
-        #expect(root?["format"] as? Int == Profile.currentFormat)
-        #expect(ConfigMigration.needsMigration(out) == false)
+        expectEqual(root?["format"] as? Int, Profile.currentFormat)
+        expectEqual(ConfigMigration.needsMigration(out), false)
         #expect(ConfigMigration.migrated(out) == nil)
     }
 
@@ -85,12 +85,12 @@ struct ConfigMigrationStampTests {
         let root =
             try JSONSerialization.jsonObject(with: out)
             as? [String: Any]
-        #expect(root?["format"] as? Int == GuiConfig.currentFormat)
+        expectEqual(root?["format"] as? Int, GuiConfig.currentFormat)
         #expect(
             root?["gap"] != nil,
             "the stamp may not drop the payload"
         )
-        #expect(ConfigMigration.needsMigration(out) == false)
+        expectEqual(ConfigMigration.needsMigration(out), false)
         #expect(ConfigMigration.migrated(out) == nil)
     }
 

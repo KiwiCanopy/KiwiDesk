@@ -53,7 +53,7 @@ struct ResetLayoutSizingZOrderTests {
             core.state.apply(.windowMoved(id, frame))
         }
         core.tiler.animation.cancelAll(snapToTargets: false)
-        #expect(core.tiler.animation.activeCount == 0)
+        expectEqual(core.tiler.animation.activeCount, 0)
     }
 
     @Test("A piled track keeps the restore pending past the retile")

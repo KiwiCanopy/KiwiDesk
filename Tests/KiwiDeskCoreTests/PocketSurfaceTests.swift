@@ -48,7 +48,7 @@ struct PocketSurfaceTests {
         let core = makeCore()
         core.execute("pocket")
         core.execute("pocket")
-        #expect(spec(core)?.glyphs == [.pocket()])
+        expectEqual(spec(core)?.glyphs, [.pocket()])
     }
 
     @Test("pocketed it wears no mark")
@@ -63,9 +63,9 @@ struct PocketSurfaceTests {
         let core = makeCore()
         core.execute("pocket")
         let entries = core.jumpEntries()
-        #expect(entries.last?.target == .window(one))
-        #expect(entries.last?.status == .pocketed)
-        #expect(entries.filter(\.isPocketed).count == 1)
+        expectEqual(entries.last?.target, .window(one))
+        expectEqual(entries.last?.status, .pocketed)
+        expectEqual(entries.filter(\.isPocketed).count, 1)
     }
 
     @Test("a switcher pick takes it out")
@@ -73,7 +73,7 @@ struct PocketSurfaceTests {
         let core = makeCore()
         core.execute("pocket")
         core.jump(to: .window(one))
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
     }
 
     @Test("KiwiVision keeps the pocket and its window clear")
@@ -83,7 +83,7 @@ struct PocketSurfaceTests {
         #expect(core.visionPocketPair().isEmpty)
         core.state.apply(.windowFocused(two))
         core.execute("pocket")
-        #expect(core.visionPocketPair() == [one, two])
+        expectEqual(core.visionPocketPair(), [one, two])
     }
 
     @Test("an in-place restart keeps the window pocketed")
@@ -96,11 +96,11 @@ struct PocketSurfaceTests {
         )
         let data = try JSONEncoder().encode(snapshot)
         let read = try JSONDecoder().decode(StateSnapshot.self, from: data)
-        #expect(read.pocket.first?.window == one)
+        expectEqual(read.pocket.first?.window, one)
         let next = makeCore()
         #expect(next.state.workspaces.space(of: one) != nil)
         next.state.adopt(read)
-        #expect(next.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(next.state.pocketPhase(of: one), .pocketed)
         #expect(next.state.workspaces.space(of: one) == nil)
     }
 

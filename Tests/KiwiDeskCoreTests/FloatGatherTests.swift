@@ -233,6 +233,6 @@ struct FloatGatherTests {
             targets[WindowID(2)]
                 == CGRect(x: 640, y: 552.5, width: 1280, height: 527.5)
         )
-        #expect(targets[WindowID(5)]?.width == 640)
+        expectEqual(targets[WindowID(5)]?.width, 640)
     }
 }

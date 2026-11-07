@@ -42,7 +42,7 @@ struct LaunchFollowRetireTests {
         core.oweLaunchFollow(F.bundle, at: F.ahead)
         F.activate(core)
         F.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == F.ruled)
+        expectEqual(core.state.workspaces.activeSpace, F.ruled)
     }
 
     @Test("Another app's ruled window does not claim the debt")
@@ -53,7 +53,7 @@ struct LaunchFollowRetireTests {
         F.arrive(8, on: core, bundleID: "app.other")
         F.expectStayed(core, window: 8)
         F.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == F.ruled)
+        expectEqual(core.state.workspaces.activeSpace, F.ruled)
     }
 
     @Test("An activation inside a Desktop switch owes nothing")
@@ -69,7 +69,7 @@ struct LaunchFollowRetireTests {
     func desktopSwitchRetires() {
         let core = F.makeCore()
         F.activate(core)
-        #expect(core.launchFollow.owed() == F.bundle)
+        expectEqual(core.launchFollow.owed(), F.bundle)
         core.handleDesktopChange()
         #expect(core.launchFollow.owed() == nil)
     }
@@ -85,7 +85,7 @@ struct LaunchFollowRetireTests {
                 args: [.string(F.bundle)]
             ).isSuccess
         )
-        #expect(launched.launchFollow.owed() == F.bundle)
+        expectEqual(launched.launchFollow.owed(), F.bundle)
         // Running: the activate branch owes only where nothing of
         // the app is up here — one showing is merely focused.
         for (visible, owes) in [(0, true), (1, false)] {
@@ -101,7 +101,7 @@ struct LaunchFollowRetireTests {
                     args: [.string(F.bundle)]
                 ).isSuccess
             )
-            #expect((pulled.launchFollow.owed() == F.bundle) == owes)
+            expectEqual((pulled.launchFollow.owed() == F.bundle), owes)
         }
     }
 }

@@ -67,10 +67,10 @@ struct FloatFrameMemoryTests {
         var frames: [WindowID: CGRect] = [:]
         let core = setup { frames[$0] = $1 }
         floatMoveAndTile(core, to: placed)
-        #expect(core.state.floatFrames[float]?.frame == placed)
+        expectEqual(core.state.floatFrames[float]?.frame, placed)
         frames = [:]
         #expect(core.execute("toggle_floating").isSuccess)
-        #expect(frames[float] == placed)
+        expectEqual(frames[float], placed)
         // Consumed: the next float without one takes the default.
         #expect(core.state.floatFrames[float] == nil)
     }
@@ -84,7 +84,7 @@ struct FloatFrameMemoryTests {
         frames = [:]
         #expect(core.execute("make_floating").isSuccess)
         #expect(frames[float] != elsewhere)
-        #expect(frames[float]?.width == FloatPlacement.longFloor)
+        expectEqual(frames[float]?.width, FloatPlacement.longFloor)
         // Consumed on the fallback path too.
         #expect(core.state.floatFrames[float] == nil)
     }
@@ -97,7 +97,7 @@ struct FloatFrameMemoryTests {
         let core = setup { _, _ in }
         floatMoveAndTile(core, to: placed)
         core.handle(.windowDestroyed(float, wasMinimized: true))
-        #expect(core.state.floatFrames[float]?.frame == placed)
+        expectEqual(core.state.floatFrames[float]?.frame, placed)
         core.state.floatFrames[float] = .init(pid: 1, frame: placed)
         core.state.apply(
             .windowCreated(
@@ -174,7 +174,7 @@ struct FloatFrameMemoryTests {
         let core = setup { _, _ in }
         floatMoveAndTile(core, to: placed)
         core.state.apply(.windowHidden(float))
-        #expect(core.state.floatFrames[float]?.frame == placed)
+        expectEqual(core.state.floatFrames[float]?.frame, placed)
     }
 
     @Test("tiling a window that is already tiled remembers nothing")
@@ -195,7 +195,7 @@ struct FloatFrameMemoryTests {
         let commanded = try #require(core.tiler.recentInstantTarget(float))
         #expect(core.state.windows[float]?.frame != commanded)
         #expect(core.execute("make_tiled").isSuccess)
-        #expect(core.state.floatFrames[float]?.frame == commanded)
+        expectEqual(core.state.floatFrames[float]?.frame, commanded)
     }
 
     @Test("a tab re-key carries the remembered frame's value")
@@ -204,7 +204,7 @@ struct FloatFrameMemoryTests {
         floatMoveAndTile(core, to: placed)
         let new = WindowID(77)
         core.state.rekey(float, to: new)
-        #expect(core.state.floatFrames[new]?.frame == placed)
+        expectEqual(core.state.floatFrames[new]?.frame, placed)
         #expect(core.state.floatFrames[float] == nil)
     }
 }

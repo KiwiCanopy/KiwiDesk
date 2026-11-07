@@ -35,7 +35,7 @@ struct ResetLayoutSizingScopeTests {
                 $0.stackWeights[WindowID(9)] = 2
             }
         }
-        #expect(core.state.workspaces.activeSpace == one)
+        expectEqual(core.state.workspaces.activeSpace, one)
         return core
     }
 
@@ -85,7 +85,7 @@ struct ResetLayoutSizingScopeTests {
             args: [.string("9")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("unknown space") == true)
+        expectEqual(response.error?.contains("unknown space"), true)
         #expect(!isReset(one, on: core))
         #expect(!isReset(two, on: core))
     }

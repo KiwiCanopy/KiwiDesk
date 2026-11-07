@@ -43,7 +43,7 @@ struct FocusRaiseFlightGuardTests {
                 ManagedWindow(id: anchor, pid: own, appName: "Anchor")
             )
         )
-        #expect(core.focusedWindow?.id == anchor)
+        expectEqual(core.focusedWindow?.id, anchor)
         guard let observer = AXApplicationObserver(pid: own) else {
             Issue.record("could not create a self AX observer")
             return core
@@ -96,7 +96,7 @@ struct FocusRaiseFlightGuardTests {
     @Test("No raise in flight: focus is refused")
     func noRaiseRefuses() {
         let core = makeCore()
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     @Test("A raise of another window does not count")
@@ -104,14 +104,14 @@ struct FocusRaiseFlightGuardTests {
         let core = makeCore()
         raise(core, to: previous)
         core.pendingFocusRaise = previous
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     @Test("A stale raise is refused")
     func staleRaiseRefuses() {
         let core = makeCore()
         raise(core, to: anchor, age: KiwiCore.selfRaiseEchoWindow)
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     @Test("Every other focused verb stays refused")
@@ -144,9 +144,9 @@ struct FocusRaiseFlightGuardTests {
         )
         let home = core.state.workspaces.space(of: anchor)
         if let home { core.state.workspaces.focus(anchor, in: home) }
-        #expect(core.focusedWindow?.id == anchor)
+        expectEqual(core.focusedWindow?.id, anchor)
         core.frontmostPIDProvider = { third }
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     @Test("A raise that left an unmanaged app is refused")
@@ -158,7 +158,7 @@ struct FocusRaiseFlightGuardTests {
             leftPID: 777,
             issuedAt: core.wallClock()
         )
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     @Test("An ignored panel latched on either app refuses")
@@ -179,7 +179,7 @@ struct FocusRaiseFlightGuardTests {
         let core = makeCore()
         raise(core, to: anchor)
         core.eventLoop.observers[getpid()] = nil
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     @Test("The bypass rides the real dispatch")
@@ -214,7 +214,7 @@ struct FocusRaiseFlightGuardTests {
             .zero,
             nil
         )
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
         core.lastLeftClick = (
             core.wallClock().addingTimeInterval(-0.1),
             .zero,
@@ -237,6 +237,6 @@ struct FocusRaiseFlightGuardTests {
         )
         core.pendingFocusRaise = anchor
         core.runPendingFocusRaise()
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 }

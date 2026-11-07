@@ -114,7 +114,7 @@ struct BatchSizingCommandTests {
                 args: [.number(0.6)]
             ).isSuccess
         )
-        #expect(core.commandSizing == .allSpringSized)
+        expectEqual(core.commandSizing, .allSpringSized)
         // Garbage argument: parses nothing, returns .fail, never
         // reaches the retile.
         #expect(
@@ -123,6 +123,6 @@ struct BatchSizingCommandTests {
                 args: [.string("nonsense")]
             ).isSuccess
         )
-        #expect(core.commandSizing == .mayInstantSize)
+        expectEqual(core.commandSizing, .mayInstantSize)
     }
 }

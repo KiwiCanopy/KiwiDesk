@@ -17,7 +17,7 @@ struct PocketAppTests {
     func unknownApp() {
         let fixture = Fixture()
         let response = fixture.press("app.nope")
-        #expect(response.error == "app not found: app.nope")
+        expectEqual(response.error, "app not found: app.nope")
         #expect(fixture.core.arrivals.pocketClaims.isEmpty)
     }
 
@@ -25,13 +25,13 @@ struct PocketAppTests {
     func firstPressArrivesOut() {
         let fixture = Fixture()
         #expect(fixture.press("App.Test").isSuccess)
-        #expect(fixture.opened == [Fixture.app])
+        expectEqual(fixture.opened, [Fixture.app])
         fixture.arrive(9)
         let state = fixture.core.state
-        #expect(state.pocketPhase(of: mine) == .out)
-        #expect(state.pocketKeyOwner(of: mine) == Fixture.app)
-        #expect(state.windows[mine]?.isFloating == true)
-        #expect(fixture.claim?.spent == true)
+        expectEqual(state.pocketPhase(of: mine), .out)
+        expectEqual(state.pocketKeyOwner(of: mine), Fixture.app)
+        expectEqual(state.windows[mine]?.isFloating, true)
+        expectEqual(fixture.claim?.spent, true)
     }
 
     @Test("later presses put it away and take it out")
@@ -42,8 +42,8 @@ struct PocketAppTests {
         fixture.press()
         #expect(fixture.core.state.isPocketed(mine))
         fixture.press()
-        #expect(fixture.core.state.pocketPhase(of: mine) == .out)
-        #expect(fixture.opened.count == 1)
+        expectEqual(fixture.core.state.pocketPhase(of: mine), .out)
+        expectEqual(fixture.opened.count, 1)
     }
 
     @Test("a running app with windows gets its New Window pressed")
@@ -52,7 +52,7 @@ struct PocketAppTests {
         fixture.running = Fixture.pid
         fixture.visible = 1
         fixture.press()
-        #expect(fixture.pressed == [Fixture.pid])
+        expectEqual(fixture.pressed, [Fixture.pid])
         #expect(fixture.opened.isEmpty)
         #expect(fixture.claim != nil)
     }
@@ -63,7 +63,7 @@ struct PocketAppTests {
         fixture.running = Fixture.pid
         fixture.minimized = [WindowID(30)]
         fixture.press()
-        #expect(fixture.pressed == [Fixture.pid])
+        expectEqual(fixture.pressed, [Fixture.pid])
         #expect(fixture.opened.isEmpty)
     }
 
@@ -72,7 +72,7 @@ struct PocketAppTests {
         let fixture = Fixture()
         fixture.press()
         #expect(fixture.press().isSuccess)
-        #expect(fixture.opened.count == 1)
+        expectEqual(fixture.opened.count, 1)
     }
 
     @Test("pocket with the keyed window focused is refused")
@@ -82,7 +82,7 @@ struct PocketAppTests {
         fixture.arrive(9)
         fixture.core.state.apply(.windowFocused(mine))
         let response = fixture.core.execute("pocket")
-        #expect(response.error == "this window has a Pocket key of its own")
+        expectEqual(response.error, "this window has a Pocket key of its own")
     }
 
     @Test("a press that opened nothing drops the claim")
@@ -100,7 +100,7 @@ struct PocketAppTests {
         let fixture = Fixture(row: false)
         fixture.press()
         fixture.arrive(9)
-        #expect(fixture.core.state.pocketPhase(of: mine) == .out)
+        expectEqual(fixture.core.state.pocketPhase(of: mine), .out)
         #expect(fixture.core.state.pocketKeyOwner(of: mine) == nil)
     }
 
@@ -109,7 +109,7 @@ struct PocketAppTests {
         let fixture = Fixture(row: false)
         #expect(fixture.core.execute("toggle_pocket_window").isSuccess)
         let response = fixture.press()
-        #expect(response.error == "another window is the pocket window")
+        expectEqual(response.error, "another window is the pocket window")
         #expect(fixture.opened.isEmpty)
     }
 
@@ -120,7 +120,7 @@ struct PocketAppTests {
         fixture.arrive(9)
         fixture.core.state.apply(.windowFocused(WindowID(1)))
         #expect(fixture.core.execute("toggle_pocket_window").isSuccess)
-        #expect(fixture.core.state.pocketPhase(of: WindowID(1)) == .out)
+        expectEqual(fixture.core.state.pocketPhase(of: WindowID(1)), .out)
     }
 
     @Test("a general verb on the keyed window is refused")
@@ -130,10 +130,10 @@ struct PocketAppTests {
         fixture.arrive(9)
         fixture.core.state.apply(.windowFocused(mine))
         let toggle = fixture.core.execute("toggle_pocket_window")
-        #expect(toggle.error == "this window has a Pocket key of its own")
+        expectEqual(toggle.error, "this window has a Pocket key of its own")
         let named = fixture.core.execute("pocket", args: [.number(9)])
-        #expect(named.error == "this window has a Pocket key of its own")
-        #expect(fixture.core.state.pocketPhase(of: mine) == .out)
+        expectEqual(named.error, "this window has a Pocket key of its own")
+        expectEqual(fixture.core.state.pocketPhase(of: mine), .out)
     }
 
     @Test("the keyed refusal draws the chord and speaks its words")

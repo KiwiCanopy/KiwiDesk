@@ -107,7 +107,7 @@ struct LocaleWorksheetCarryTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(rerun.status == 0)
+        expectEqual(rerun.status, 0)
 
         let sheet = try worksheet(fx)
         #expect(
@@ -118,9 +118,9 @@ struct LocaleWorksheetCarryTests {
         // The new key arrived, and the untouched one stayed
         // blank — so the carry-over did not simply copy the old
         // file over the top of a fresh computation.
-        #expect(sheet["edge.hint"]?["translation"] == "")
-        #expect(sheet["bar.hint"]?["translation"] == "")
-        #expect(sheet.count == 3)
+        expectEqual(sheet["edge.hint"]?["translation"], "")
+        expectEqual(sheet["bar.hint"]?["translation"], "")
+        expectEqual(sheet.count, 3)
     }
 
     /// A draft is carried only while it still translates the
@@ -158,7 +158,7 @@ struct LocaleWorksheetCarryTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(rerun.status == 0)
+        expectEqual(rerun.status, 0)
 
         let sheet = try worksheet(fx)
         #expect(

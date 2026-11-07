@@ -151,7 +151,7 @@ struct ProfileSpaceOrderTests {
         // The LIVE save path must capture the display order.
         try core.persistProfile(named: "reordered", modes: nil)
         let saved = try core.profiles.read(name: "reordered")
-        #expect(saved.spaces == config.spaces)
+        expectEqual(saved.spaces, config.spaces)
     }
 
     /// `WorkspaceManager.reorder` semantics: spaces in
@@ -270,6 +270,6 @@ struct ProfileSpaceOrderTests {
         let profileSpaces = [
             SpaceID("z"), SpaceID("m"), SpaceID("a"),
         ]
-        #expect(cfg.spaces == profileSpaces)
+        expectEqual(cfg.spaces, profileSpaces)
     }
 }

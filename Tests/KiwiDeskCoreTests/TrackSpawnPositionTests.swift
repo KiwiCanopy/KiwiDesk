@@ -34,9 +34,9 @@ struct TrackSpawnPositionTests {
             position: .first,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[2], w[0], w[1]])
+        expectEqual(space.windows, [w[2], w[0], w[1]])
         // The demoted old first head becomes an explicit break.
-        #expect(space.trackBreaks == [w[0], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[0], w[1], w[2]])
     }
 
     @Test("own_track last opens a new track at the far edge")
@@ -55,8 +55,8 @@ struct TrackSpawnPositionTests {
             position: .last,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[1], w[2]])
-        #expect(space.trackBreaks == [w[1], w[2]])
+        expectEqual(space.windows, [w[0], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[1], w[2]])
     }
 
     @Test("own_track before_focused opens a track ahead of it")
@@ -77,8 +77,8 @@ struct TrackSpawnPositionTests {
             isTiled: allTiled
         )
         // New track sits just before the focused (third) track.
-        #expect(space.windows == [w[0], w[1], w[3], w[2]])
-        #expect(space.trackBreaks == [w[1], w[2], w[3]])
+        expectEqual(space.windows, [w[0], w[1], w[3], w[2]])
+        expectEqual(space.trackBreaks, [w[1], w[2], w[3]])
     }
 
     // MARK: focused_track — position among the track's windows
@@ -101,8 +101,8 @@ struct TrackSpawnPositionTests {
             isTiled: allTiled
         )
         // Still one track, but w3 is now its head.
-        #expect(space.windows == [w[3], w[0], w[1], w[2]])
-        #expect(space.trackBreaks == [w[3]])
+        expectEqual(space.windows, [w[3], w[0], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[3]])
     }
 
     @Test("focused_track last appends to the track")
@@ -121,8 +121,8 @@ struct TrackSpawnPositionTests {
             position: .last,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[1], w[2], w[3]])
-        #expect(space.trackBreaks == [])
+        expectEqual(space.windows, [w[0], w[1], w[2], w[3]])
+        expectEqual(space.trackBreaks, [])
     }
 
     @Test("focused_track before_focused inserts ahead of focus")
@@ -141,8 +141,8 @@ struct TrackSpawnPositionTests {
             position: .beforeFocused,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[3], w[1], w[2]])
-        #expect(space.trackBreaks == [])
+        expectEqual(space.windows, [w[0], w[3], w[1], w[2]])
+        expectEqual(space.trackBreaks, [])
     }
 
     @Test("Taking the head transfers the track's weight")
@@ -167,9 +167,9 @@ struct TrackSpawnPositionTests {
         )
         // w3 heads the second track now and carries its weight;
         // the demoted w1 keeps neither marker nor weight.
-        #expect(space.windows == [w[0], w3, w[1], w[2]])
-        #expect(space.trackBreaks == [w3])
-        #expect(space.trackWeights[w3] == 3.0)
+        expectEqual(space.windows, [w[0], w3, w[1], w[2]])
+        expectEqual(space.trackBreaks, [w3])
+        expectEqual(space.trackWeights[w3], 3.0)
         #expect(space.trackWeights[w[1]] == nil)
     }
 }

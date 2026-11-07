@@ -56,10 +56,10 @@ struct RuleReachKeyLeftOutTests {
             removal: .here,
             editing: "Work"
         )
-        #expect(t.base[key] == "ctrl+alt+t")
+        expectEqual(t.base[key], "ctrl+alt+t")
         #expect(t.resolved(key, for: "Work") == nil)
         #expect(t.follows(key, "Home"))
-        #expect(t.leftOut(key) == ["Work", "Travel"])
+        expectEqual(t.leftOut(key), ["Work", "Travel"])
         #expect(t.touched["Home"] == nil)
     }
 
@@ -74,15 +74,15 @@ struct RuleReachKeyLeftOutTests {
             editing: "Work"
         )
         let newBase = t.keyLayerBase(original: base, templates: templates)
-        #expect(RuleReachTable<String>.combos(newBase)[key] == "ctrl+alt+t")
+        expectEqual(RuleReachTable<String>.combos(newBase)[key], "ctrl+alt+t")
         let work = t.keyLayerOverride(
             for: "Work",
             original: nil,
             newBase: newBase,
             templates: templates
         )
-        #expect(work?.removed == ["default": ["ctrl+alt+t"]])
-        #expect(work?.layers == [])
+        expectEqual(work?.removed, ["default": ["ctrl+alt+t"]])
+        expectEqual(work?.layers, [])
         let resolved = work?.resolved(onto: newBase) ?? newBase
         #expect(RuleReachTable<String>.combos(resolved)[key] == nil)
     }
@@ -103,14 +103,14 @@ struct RuleReachKeyLeftOutTests {
             base: base,
             overrides: [("Work", moved), ("Home", nil)]
         )
-        #expect(t.reach(of: key, editing: "Work") == .listed(["Work"]))
+        expectEqual(t.reach(of: key, editing: "Work"), .listed(["Work"]))
         t.applyKey(
             key,
             value: "ctrl+alt+y",
             reach: .listed(["Work"]),
             editing: "Work"
         )
-        #expect(t.base[key] == "ctrl+alt+t")
+        expectEqual(t.base[key], "ctrl+alt+t")
         #expect(t.follows(key, "Home"))
         let newBase = t.keyLayerBase(original: base, templates: templates)
         let work = t.keyLayerOverride(
@@ -119,9 +119,9 @@ struct RuleReachKeyLeftOutTests {
             newBase: newBase,
             templates: templates
         )
-        #expect(work?.removed == ["default": ["ctrl+alt+t"]])
+        expectEqual(work?.removed, ["default": ["ctrl+alt+t"]])
         let resolved = work?.resolved(onto: newBase) ?? newBase
-        #expect(resolved[0].bindings.map(\.combo) == ["ctrl+alt+y"])
+        expectEqual(resolved[0].bindings.map(\.combo), ["ctrl+alt+y"])
     }
 
     @Test("Remove here on the loaded page keeps the shared row")
@@ -143,7 +143,7 @@ struct RuleReachKeyLeftOutTests {
             storedBase: base,
             templates: templates
         )
-        #expect(RuleReachTable<String>.combos(shared)[key] == "ctrl+alt+t")
+        expectEqual(RuleReachTable<String>.combos(shared)[key], "ctrl+alt+t")
     }
 
     @Test("A combo the page's profile left out stays in the base")
@@ -165,7 +165,7 @@ struct RuleReachKeyLeftOutTests {
             storedBase: base,
             templates: templates
         )
-        #expect(RuleReachTable<String>.combos(shared)[key] == "ctrl+alt+t")
+        expectEqual(RuleReachTable<String>.combos(shared)[key], "ctrl+alt+t")
     }
 
     @Test("A shared move keeps a profile's removal on the new combo")
@@ -175,14 +175,14 @@ struct RuleReachKeyLeftOutTests {
             base: base,
             overrides: [("Work", work), ("Home", nil)]
         )
-        #expect(t.leftOut(key) == ["Work"])
+        expectEqual(t.leftOut(key), ["Work"])
         t.applyKey(
             key,
             value: "ctrl+alt+y",
             reach: .shared(joining: []),
             editing: "Home"
         )
-        #expect(t.leftOut(key) == ["Work"])
+        expectEqual(t.leftOut(key), ["Work"])
         let newBase = t.keyLayerBase(original: base, templates: templates)
         let encoded = t.keyLayerOverride(
             for: "Work",
@@ -190,7 +190,7 @@ struct RuleReachKeyLeftOutTests {
             newBase: newBase,
             templates: templates
         )
-        #expect(encoded?.removed == ["default": ["ctrl+alt+y"]])
+        expectEqual(encoded?.removed, ["default": ["ctrl+alt+y"]])
         let resolved = encoded?.resolved(onto: newBase) ?? newBase
         #expect(RuleReachTable<String>.combos(resolved)[key] == nil)
     }

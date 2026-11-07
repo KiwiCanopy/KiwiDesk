@@ -88,16 +88,16 @@ struct AppcastStructuredNotesTests {
         )
         let notes = try decoded(doc)
         #expect(notes["format"] as? Int == (try Self.notesFormat()))
-        #expect(notes["summary"] as? String == "A summary.")
-        #expect(notes["heads"] as? String == "Settings carry over.")
+        expectEqual(notes["summary"] as? String, "A summary.")
+        expectEqual(notes["heads"] as? String, "Settings carry over.")
         let sections = notes["sections"] as? [[String: Any]] ?? []
         #expect(
             sections.map { $0["type"] as? String } == ["new", "scripting"]
         )
-        #expect(sections.first?["items"] as? [String] == ["**A**."])
+        expectEqual(sections.first?["items"] as? [String], ["**A**."])
         // The HTML stays for every 1.x client.
         let description = try doc.nodes(forXPath: "//item/description")
-        #expect(description.count == 1)
+        expectEqual(description.count, 1)
     }
 
     /// The spotlight rides as an optional key (#2038): a shipped
@@ -115,7 +115,7 @@ struct AppcastStructuredNotesTests {
             ]
         )
         let notes = try decoded(doc)
-        #expect(notes["format"] as? Int == 1)
+        expectEqual(notes["format"] as? Int, 1)
         let rows = notes["spotlight"] as? [[String: String]]
         #expect(
             rows == [
@@ -158,6 +158,6 @@ struct AppcastStructuredNotesTests {
             ]
         )
         let sections = try decoded(doc)["sections"] as? [[String: Any]]
-        #expect(sections?.first?["items"] as? [String] == ["a ]]> b"])
+        expectEqual(sections?.first?["items"] as? [String], ["a ]]> b"])
     }
 }

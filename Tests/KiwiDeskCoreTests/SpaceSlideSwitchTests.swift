@@ -83,9 +83,9 @@ struct SpaceSlideSwitchTests {
         #expect(core.tiler.applier.held.isStaged(w3))
         #expect(!core.tiler.applier.held.isHeld(w1, now: t0))
         #expect(!core.tiler.applier.held.isStaged(w1))
-        #expect(core.tiler.animation.activeCount == 0)
+        expectEqual(core.tiler.animation.activeCount, 0)
         // One page out, one in.
-        #expect(core.spaceSlide.play?.pages.count == 2)
+        expectEqual(core.spaceSlide.play?.pages.count, 2)
     }
 
     @Test(
@@ -163,7 +163,7 @@ struct SpaceSlideSwitchTests {
         try #require(core.tiler.applier.held.isHeld(w3, now: t0))
         core.tiler.settings.spaceBarStyle.edge = .left
         core.execute("focus_space", args: [.string("1")])
-        #expect(core.spaceSlide.play?.axis == .vertical)
+        expectEqual(core.spaceSlide.play?.axis, .vertical)
         #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
         #expect(core.tiler.applier.held.isHeld(w1, now: t0))
     }
@@ -241,9 +241,9 @@ struct SpaceSlideSwitchTests {
         }
         let instant = try #require(counts[false])
         let slide = try #require(counts[true])
-        #expect(slide.0.parksIssued == instant.0.parksIssued)
-        #expect(slide.0.parksSkipped == instant.0.parksSkipped)
-        #expect(slide.1 == instant.1)
+        expectEqual(slide.0.parksIssued, instant.0.parksIssued)
+        expectEqual(slide.0.parksSkipped, instant.0.parksSkipped)
+        expectEqual(slide.1, instant.1)
         #expect(!slide.1.isEmpty)
     }
 
@@ -256,7 +256,7 @@ struct SpaceSlideSwitchTests {
         core.tiler.settings.spaceBarStyle.edge = .left
         core.execute("focus_space", args: [.string("2")])
         defer { core.spaceSlide.end() }
-        #expect(core.spaceSlide.play?.axis == .vertical)
+        expectEqual(core.spaceSlide.play?.axis, .vertical)
     }
 
     @Test(
@@ -282,7 +282,7 @@ struct SpaceSlideSwitchTests {
         let page = CGRect(x: -5000, y: -5000, width: 10_000, height: 10_000)
         let ids = core.slidePlates(of: SpaceID(1), stack: [:], in: page)
             .map(\.id)
-        #expect(Set(ids) == [w1, w2])
+        expectEqual(Set(ids), [w1, w2])
     }
 
     /// A floating-mode Space's members are all floats (#1178): the
@@ -314,9 +314,9 @@ struct SpaceSlideSwitchTests {
             core.slidePlates(of: SpaceID(1), stack: [:], in: page)
                 .map(\.id).filter { $0 == self.w1 || $0 == float }
         }
-        #expect(order(core) == [w1, float])
+        expectEqual(order(core), [w1, float])
         core.state.workspaces.setMode(SpaceID(1), .floating)
-        #expect(order(core) == [float, w1])
+        expectEqual(order(core), [float, w1])
     }
 
     @Test(

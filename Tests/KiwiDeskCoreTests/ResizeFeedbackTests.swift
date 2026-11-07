@@ -74,7 +74,7 @@ struct ResizeFeedbackTests {
             args: [.string("x"), .number(50)]
         )
         #expect(!response.isSuccess)
-        #expect(response.error == "resize not supported in monocle")
+        expectEqual(response.error, "resize not supported in monocle")
     }
 
     @Test("The hotkey-origin flag is off outside a fire")

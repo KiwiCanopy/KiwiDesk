@@ -65,7 +65,7 @@ struct FloatPlacementCommandTests {
             abs(frame.height - region.height * FloatPlacement.shortShare)
                 < 0.001
         )
-        #expect(frame.width == FloatPlacement.longFloor)
+        expectEqual(frame.width, FloatPlacement.longFloor)
     }
 
     @Test("make_floating places too")
@@ -73,7 +73,7 @@ struct FloatPlacementCommandTests {
         var frames: [WindowID: CGRect] = [:]
         let core = setup(mode: "stack") { frames[$0] = $1 }
         #expect(core.execute("make_floating").isSuccess)
-        #expect(frames[WindowID(2)]?.width == FloatPlacement.longFloor)
+        expectEqual(frames[WindowID(2)]?.width, FloatPlacement.longFloor)
     }
 
     /// A verb naming a window on a Space no screen shows (#1518)
@@ -93,7 +93,7 @@ struct FloatPlacementCommandTests {
         #expect(!placed)
         let seed = try #require(core.tiler.stashedFrames[WindowID(1)])
         #expect(abs(seed.midX - region.midX) < 0.001)
-        #expect(seed.width == FloatPlacement.longFloor)
+        expectEqual(seed.width, FloatPlacement.longFloor)
     }
 
     /// A native-fullscreen window has its own macOS Space and is
@@ -109,7 +109,7 @@ struct FloatPlacementCommandTests {
         #expect(
             core.execute("make_floating", args: [.number(1)]).isSuccess
         )
-        #expect(core.tiler.stashedFrames[WindowID(1)] == before)
+        expectEqual(core.tiler.stashedFrames[WindowID(1)], before)
     }
 
     @Test("keep leaves the frame where the layout had it")
@@ -122,7 +122,7 @@ struct FloatPlacementCommandTests {
                 args: [.string("keep")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.floatPlacement == .keep)
+        expectEqual(core.tiler.settings.floatPlacement, .keep)
         #expect(core.execute("toggle_floating").isSuccess)
         #expect(frames[WindowID(2)] == nil)
     }
@@ -132,7 +132,7 @@ struct FloatPlacementCommandTests {
         var frames: [WindowID: CGRect] = [:]
         let core = setup(mode: "floating") { frames[$0] = $1 }
         #expect(core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(core.state.windows[WindowID(2)]?.isFloating, true)
         #expect(frames[WindowID(2)] == nil)
     }
 
@@ -153,7 +153,7 @@ struct FloatPlacementCommandTests {
             args: [.string("nudge")]
         )
         #expect(!response.isSuccess)
-        #expect(core.tiler.settings.floatPlacement == .center)
+        expectEqual(core.tiler.settings.floatPlacement, .center)
     }
 
     /// Seeds a corroborated bound for w2 on both axes: two
@@ -182,11 +182,11 @@ struct FloatPlacementCommandTests {
             width: ([300, 500], 900),
             height: ([300, 500], 800)
         )
-        #expect(core.tiler.sizeBound(for: WindowID(2))?.minWidth == 900)
+        expectEqual(core.tiler.sizeBound(for: WindowID(2))?.minWidth, 900)
         #expect(core.execute("toggle_floating").isSuccess)
         let frame = try #require(frames[WindowID(2)])
-        #expect(frame.width == 900)
-        #expect(frame.height == 800)
+        expectEqual(frame.width, 900)
+        expectEqual(frame.height, 800)
     }
 
     @Test("a learned app maximum caps the derived size, still centred")
@@ -201,8 +201,8 @@ struct FloatPlacementCommandTests {
         #expect(core.execute("toggle_floating").isSuccess)
         let frame = try #require(frames[WindowID(2)])
         let region = try #require(core.floatGrowBounds(of: WindowID(2)))
-        #expect(frame.width == 400)
-        #expect(frame.height == 300)
+        expectEqual(frame.width, 400)
+        expectEqual(frame.height, 300)
         #expect(abs(frame.midX - region.midX) < 0.001)
     }
 
@@ -230,10 +230,10 @@ struct FloatPlacementCommandTests {
         core.state.workspaces.ensureSpace(second)
         core.state.workspaces.setMode(second, .floating)
         core.state.workspaces.activate(second)
-        #expect(core.focusedWindowID == traveler)
-        #expect(core.floatPlacementSpace(of: traveler) == second)
+        expectEqual(core.focusedWindowID, traveler)
+        expectEqual(core.floatPlacementSpace(of: traveler), second)
         #expect(core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[traveler]?.isFloating == true)
+        expectEqual(core.state.windows[traveler]?.isFloating, true)
         #expect(frames[traveler] == nil)
     }
 

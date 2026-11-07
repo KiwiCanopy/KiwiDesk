@@ -23,19 +23,19 @@ struct SpaceTransitionStoredShapeTests {
                 as? [String: Any]
         )
         let group = try #require(root["space"] as? [String: Any])
-        #expect(group["transition"] as? String == "none")
-        #expect(group["slide_duration"] as? Int == 600)
+        expectEqual(group["transition"] as? String, "none")
+        expectEqual(group["slide_duration"] as? Int, 600)
         #expect(group["cue"] == nil)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.spaceTransition == SpaceTransition.none)
-        #expect(back.appWide?.spaceSlideDuration == 600)
+        expectEqual(back.appWide?.spaceTransition, SpaceTransition.none)
+        expectEqual(back.appWide?.spaceSlideDuration, 600)
         var older = root
         older["space"] = nil
         let legacy = try JSONDecoder().decode(
             GuiConfig.self,
             from: JSONSerialization.data(withJSONObject: older)
         )
-        #expect(legacy.appWide?.spaceTransition == .slide)
+        expectEqual(legacy.appWide?.spaceTransition, .slide)
         #expect(
             legacy.appWide?.spaceSlideDuration
                 == AppWideSettings.spaceSlideDefaultMS
@@ -46,10 +46,10 @@ struct SpaceTransitionStoredShapeTests {
     @Test("Slide under Reduce Motion draws Show; nothing else moves")
     func drawnFallback() {
         for style in SpaceTransition.allCases {
-            #expect(style.drawn(reduceMotion: false) == style)
+            expectEqual(style.drawn(reduceMotion: false), style)
         }
-        #expect(SpaceTransition.slide.drawn(reduceMotion: true) == .show)
-        #expect(SpaceTransition.show.drawn(reduceMotion: true) == .show)
+        expectEqual(SpaceTransition.slide.drawn(reduceMotion: true), .show)
+        expectEqual(SpaceTransition.show.drawn(reduceMotion: true), .show)
         #expect(
             SpaceTransition.none.drawn(reduceMotion: true)
                 == SpaceTransition.none
@@ -65,7 +65,7 @@ struct SpaceTransitionStoredShapeTests {
             GuiConfig.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.appWide?.spaceSlideDuration == band.upperBound)
+        expectEqual(decoded.appWide?.spaceSlideDuration, band.upperBound)
     }
 
     @Test("the verbs write, clamp and refuse")
@@ -78,7 +78,7 @@ struct SpaceTransitionStoredShapeTests {
                     args: [.string(style.rawValue)]
                 ).isSuccess
             )
-            #expect(core.appWide.spaceTransition == style)
+            expectEqual(core.appWide.spaceTransition, style)
         }
         #expect(
             !core.execute("set_space_transition", args: [.string("fade")])
@@ -88,7 +88,7 @@ struct SpaceTransitionStoredShapeTests {
             core.execute("set_space_slide_duration", args: [.number(450)])
                 .isSuccess
         )
-        #expect(core.appWide.spaceSlideDuration == 450)
+        expectEqual(core.appWide.spaceSlideDuration, 450)
         core.execute("set_space_slide_duration", args: [.number(1)])
         #expect(
             core.appWide.spaceSlideDuration

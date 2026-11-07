@@ -117,10 +117,10 @@ struct MonocleGroupingTests {
     func moveSingle() {
         let core = makeNamedCore(["A", "B", "C"])
         core.moveBarItem(space: SpaceID(1), from: 0, to: 2)
-        #expect(core.activeSpace?.windows == [w2, w3, w1])
+        expectEqual(core.activeSpace?.windows, [w2, w3, w1])
         // Out-of-range moves are ignored.
         core.moveBarItem(space: SpaceID(1), from: 0, to: 9)
-        #expect(core.activeSpace?.windows == [w2, w3, w1])
+        expectEqual(core.activeSpace?.windows, [w2, w3, w1])
     }
 
     @Test("Dragging a group moves all its members together")
@@ -128,6 +128,6 @@ struct MonocleGroupingTests {
         let core = makeNamedCore(["Zed", "Zed", "Finder"])
         // Items: [Zed ×2] [Finder] — swap their slots.
         core.moveBarItem(space: SpaceID(1), from: 0, to: 1)
-        #expect(core.activeSpace?.windows == [w3, w1, w2])
+        expectEqual(core.activeSpace?.windows, [w3, w1, w2])
     }
 }

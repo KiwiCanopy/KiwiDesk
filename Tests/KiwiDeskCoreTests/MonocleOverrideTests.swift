@@ -37,7 +37,7 @@ struct MonocleOverrideTests {
             Mirror(reflecting: MonocleOverride())
                 .children.compactMap(\.label)
         )
-        #expect(mirror == params.subtracting(Self.notOverridable))
+        expectEqual(mirror, params.subtracting(Self.notOverridable))
     }
 
     @Test("Sparse encode: only set fields, round-trips")
@@ -52,7 +52,7 @@ struct MonocleOverrideTests {
             MonocleOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("An empty override is sparse and inert")
@@ -60,7 +60,7 @@ struct MonocleOverrideTests {
         let over = MonocleOverride()
         #expect(over.isEmpty)
         let data = try JSONEncoder().encode(over)
-        #expect(String(data: data, encoding: .utf8) == "{}")
+        expectEqual(String(data: data, encoding: .utf8), "{}")
         #expect(
             over.resolved(onto: MonocleParams()) == MonocleParams()
         )
@@ -97,7 +97,7 @@ struct MonocleOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(back.monocle.override == settings.monocle.override)
+        expectEqual(back.monocle.override, settings.monocle.override)
     }
 }
 
@@ -125,7 +125,7 @@ struct MonocleOverrideCommandTests {
         )
         let over =
             core.tiler.settings.monocle.override[SpaceID("2")]
-        #expect(over?.orientation == .vertical)
+        expectEqual(over?.orientation, .vertical)
         // The global params are untouched.
         #expect(
             core.tiler.settings.monocle.orientation == .horizontal
@@ -171,13 +171,13 @@ struct MonocleOverrideCommandTests {
         #expect(
             core.execute("focus", args: [.string("up")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         // Left/right are now the cross axis — they fall through
         // and find no geometric neighbor (one shared frame).
         #expect(
             !core.execute("focus", args: [.string("left")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Invalid value is rejected and writes nothing")

@@ -46,6 +46,6 @@ struct BriefPocketPanelGlassTests {
         )
         let active = panel as? ActiveGlassPanel
         #expect(active != nil, "the plate's panel answers the question")
-        #expect(active?.wearsActiveLook == tinted)
+        expectEqual(active?.wearsActiveLook, tinted)
     }
 }

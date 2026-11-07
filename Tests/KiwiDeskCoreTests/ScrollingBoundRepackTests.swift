@@ -52,15 +52,15 @@ struct ScrollingBoundRepackTests {
         let first = try #require(frames[w1])
         let bounded = try #require(frames[w2])
         let third = try #require(frames[w3])
-        #expect(first.minX == area.minX)
-        #expect(first.width == 600)
-        #expect(bounded.minX == area.minX + 610)
-        #expect(bounded.width == 400)
+        expectEqual(first.minX, area.minX)
+        expectEqual(first.width, 600)
+        expectEqual(bounded.minX, area.minX + 610)
+        expectEqual(bounded.width, 400)
         // The whole point: w3 packs against the ANSWERED span,
         // not the reserved 600 pt slot (which would put it at
         // minX + 1220 and leave a 200 pt hole).
-        #expect(third.minX == area.minX + 1020)
-        #expect(third.width == 600)
+        expectEqual(third.minX, area.minX + 1020)
+        expectEqual(third.width, 600)
     }
 
     @Test("The mirror case packs apart instead of overlapping")
@@ -79,8 +79,8 @@ struct ScrollingBoundRepackTests {
         let area = context.usable
         let bounded = try #require(frames[w1])
         let second = try #require(frames[w2])
-        #expect(bounded.width == 800)
-        #expect(second.minX == area.minX + 810)
+        expectEqual(bounded.width, 800)
+        expectEqual(second.minX, area.minX + 810)
     }
 
     @Test("An unmatched ask does not consume")
@@ -119,7 +119,7 @@ struct ScrollingBoundRepackTests {
             in: context
         )
         let focused = try #require(frames[w2])
-        #expect(focused.width == 400)
+        expectEqual(focused.width, 400)
         // Centered by its OWN span — the reserved ask would
         // rest it 100 pt off center.
         #expect(
@@ -168,11 +168,11 @@ struct ScrollingBoundRepackTests {
         )
         let bounded = try #require(frames[w2])
         let third = try #require(frames[w3])
-        #expect(bounded.width == 400)
+        expectEqual(bounded.width, 400)
         // And the row re-packs against the consumed span, the
         // same #677 mechanics as an exact-ask consume.
         let first = try #require(frames[w1])
-        #expect(third.minX == first.maxX + 10 + 400 + 10)
+        expectEqual(third.minX, first.maxX + 10 + 400 + 10)
     }
 
     @Test("A probing pass asks past the corroborated ceiling")
@@ -196,7 +196,7 @@ struct ScrollingBoundRepackTests {
             in: context
         )
         let bounded = try #require(frames[w2])
-        #expect(bounded.width == 700)
+        expectEqual(bounded.width, 700)
     }
 
     @Test("A probing pass reaches the lone window's center too")
@@ -223,7 +223,7 @@ struct ScrollingBoundRepackTests {
         )
         // The probe emits the real area, not the bound.
         let lone = try #require(frames[w1])
-        #expect(lone.width == area.width)
+        expectEqual(lone.width, area.width)
     }
 
     @Test("A lone refused window centers in the area")
@@ -238,9 +238,9 @@ struct ScrollingBoundRepackTests {
             in: context
         )
         let lone = try #require(frames[w1])
-        #expect(lone.width == 700)
+        expectEqual(lone.width, 700)
         #expect(abs(lone.midX - area.midX) < 0.01)
         // The unconsumed axis keeps the full extent.
-        #expect(lone.height == area.height)
+        expectEqual(lone.height, area.height)
     }
 }

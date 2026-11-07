@@ -202,7 +202,7 @@ struct TrackFloorHealTests {
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: w1)?.minWidth == 700)
+        expectEqual(core.tiler.sizeBound(for: w1)?.minWidth, 700)
         // The write is observed on the log seam: a re-share
         // round-trips its values bit-exactly, so value equality
         // cannot see a second write.

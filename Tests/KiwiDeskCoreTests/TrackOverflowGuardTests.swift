@@ -21,7 +21,7 @@ struct TrackOverflowGuardTests {
             geoCap: .max
         )
         #expect(out.overflows)
-        #expect(out.effectiveCap == 3)
+        expectEqual(out.effectiveCap, 3)
     }
 
     @Test("effectiveCap: geometric fit caps auto tracks")
@@ -33,7 +33,7 @@ struct TrackOverflowGuardTests {
             geoCap: 2
         )
         #expect(out.overflows)
-        #expect(out.effectiveCap == 2)
+        expectEqual(out.effectiveCap, 2)
     }
 
     @Test("effectiveCap: geometry clamps a fixed limit too")
@@ -46,7 +46,7 @@ struct TrackOverflowGuardTests {
             geoCap: 2
         )
         #expect(out.overflows)
-        #expect(out.effectiveCap == 2)
+        expectEqual(out.effectiveCap, 2)
     }
 
     @Test("effectiveCap: nothing folds when all tracks fit")
@@ -57,7 +57,7 @@ struct TrackOverflowGuardTests {
             geoCap: 5
         )
         #expect(!out.overflows)
-        #expect(out.effectiveCap == 2)
+        expectEqual(out.effectiveCap, 2)
     }
 
     @Test("geometricCap reads the axis span and inner gap")

@@ -55,9 +55,9 @@ struct ProfileManagerTests {
             modes: ["code": .bsp, "music": .floating]
         )
         try manager.save(profile)
-        #expect(manager.list() == ["Developer Rig"])
+        expectEqual(manager.list(), ["Developer Rig"])
         // `save` is the adopting write (profiles.md ▸ API shape).
-        #expect(manager.currentName == "Developer Rig")
+        expectEqual(manager.currentName, "Developer Rig")
         #expect(!manager.isDirty)
 
         let loaded = try manager.read(name: "Developer Rig")
@@ -65,7 +65,7 @@ struct ProfileManagerTests {
         #expect(loaded.isDefault)
         var expected = profile
         expected.isDefault = true
-        #expect(loaded == expected)
+        expectEqual(loaded, expected)
     }
 
     /// `read` is the one load door since #1249 deleted `load`,
@@ -85,7 +85,7 @@ struct ProfileManagerTests {
         manager.markDirty()
 
         _ = try manager.read(name: "other")
-        #expect(manager.currentName == "live")
+        expectEqual(manager.currentName, "live")
         #expect(manager.isDirty)
     }
 
@@ -112,7 +112,7 @@ struct ProfileManagerTests {
             Issue.record("expected exact match, got \(match)")
             return
         }
-        #expect(profile.name == "docked")
+        expectEqual(profile.name, "docked")
     }
 
     @Test("Unknown monitors fall back to the count default")
@@ -131,7 +131,7 @@ struct ProfileManagerTests {
             Issue.record("expected default, got \(match)")
             return
         }
-        #expect(profile.name == "dual")
+        expectEqual(profile.name, "dual")
         // No profile of that count at all -> none.
         #expect(
             manager.match(fingerprints: ["C:3x3"]) == .none
@@ -163,7 +163,7 @@ struct ProfileManagerTests {
             makeProfile(name: "beta", monitors: ["B:2x2"])
         )
         try manager.delete(name: "alpha")
-        #expect(manager.list() == ["beta"])
+        expectEqual(manager.list(), ["beta"])
         #expect(
             manager.defaultProfile(count: 1)?.name == "beta"
         )
@@ -189,7 +189,7 @@ struct ProfileManagerTests {
     @Test("freeName suffixes to the next free number")
     func freeName() throws {
         let manager = makeManager()
-        #expect(manager.freeName(base: "Developer") == "Developer")
+        expectEqual(manager.freeName(base: "Developer"), "Developer")
         try manager.save(
             makeProfile(name: "Developer", monitors: ["A:1x1"])
         )
@@ -237,11 +237,11 @@ struct ProfileManagerTests {
             atomically: true,
             encoding: .utf8
         )
-        #expect(manager.list() == ["bad", "good"])
-        #expect(manager.allProfiles().map(\.name) == ["good"])
+        expectEqual(manager.list(), ["bad", "good"])
+        expectEqual(manager.allProfiles().map(\.name), ["good"])
         // The same file `allProfiles()` skips is the one the GUI
         // greys out and offers a Reveal and a Delete for (#246).
-        #expect(manager.brokenProfiles().map(\.name) == ["bad"])
+        expectEqual(manager.brokenProfiles().map(\.name), ["bad"])
         // "not json" is not JSON, so the row may promise that
         // opening the file shows the damage (#678 Phase 4 pass 9).
         #expect(
@@ -281,8 +281,8 @@ struct ProfileManagerTests {
                 ($0.name, $0.cause)
             }
         )
-        #expect(causes["shape"] == .unexpectedShape)
-        #expect(causes["syntax"] == .malformedJSON)
+        expectEqual(causes["shape"], .unexpectedShape)
+        expectEqual(causes["syntax"], .malformedJSON)
     }
 
     @Test("Delete repairs a count left without a default")

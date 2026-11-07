@@ -115,15 +115,15 @@ struct StartupWarmupSkipTests {
         // The skip half: attached (observer installed), but no
         // window query and no warmup ran.
         #expect(loop.observes(pid: pid))
-        #expect(windowQueries() == 0)
+        expectEqual(windowQueries(), 0)
         #expect(euiWrites().isEmpty)
         // The promise half: the next reconcile of the attached
         // regular app warms it — and the attach + reconcile
         // pair cost exactly one window snapshot, which is the
         // #672 scan dedup's mechanism.
         loop.reconcile(pid: pid, app: ref)
-        #expect(euiWrites() == [true])
-        #expect(windowQueries() == 1)
+        expectEqual(euiWrites(), [true])
+        expectEqual(windowQueries(), 1)
     }
 
     @Test("a visible app is warmed at attach, not deferred")
@@ -135,7 +135,7 @@ struct StartupWarmupSkipTests {
             ref: ref,
             scanWindowsAtAttach: true
         )
-        #expect(euiWrites() == [true])
+        expectEqual(euiWrites(), [true])
     }
 
     @Test("the Chromium warmup fires once across reconciles")
@@ -153,7 +153,7 @@ struct StartupWarmupSkipTests {
         )
         loop.reconcile(pid: pid, app: ref)
         loop.reconcile(pid: pid, app: ref)
-        #expect(manualWrites() == 1)
+        expectEqual(manualWrites(), 1)
         #expect(euiWrites().isEmpty)
     }
 
@@ -177,8 +177,8 @@ struct StartupWarmupSkipTests {
         loop.onScreenNormalWindowIDs = { [self.pid: [WindowID(1)]] }
         loop.reconcileAll()
         #expect(loop.observes(pid: pid))
-        #expect(windowQueries() == 1)
-        #expect(euiWrites() == [true])
+        expectEqual(windowQueries(), 1)
+        expectEqual(euiWrites(), [true])
     }
 
     @Test("attach before start is inert (#672)")
@@ -198,7 +198,7 @@ struct StartupWarmupSkipTests {
             scanWindowsAtAttach: true
         )
         #expect(!loop.observes(pid: pid))
-        #expect(windowQueries() == 0)
+        expectEqual(windowQueries(), 0)
         #expect(euiWrites().isEmpty)
     }
 }

@@ -38,15 +38,15 @@ struct KiwiVisionLensPickTests {
         var heard: [VisionActive] = []
         core.vision.onChange = { active, _ in heard.append(active) }
         core.setKiwiVision(.lens("writing"))
-        #expect(core.kiwiVisionActive == .lens("Writing"))
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
         // A pick of the lens on is no toggle.
         core.setKiwiVision(.lens("Writing"))
-        #expect(core.kiwiVisionActive == .lens("Writing"))
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
         core.setKiwiVision(.plain)
-        #expect(core.kiwiVisionActive == .plain)
+        expectEqual(core.kiwiVisionActive, .plain)
         core.setKiwiVision(.lens("Writing"))
-        #expect(core.kiwiVisionActive == .lens("Writing"))
-        #expect(heard == [.lens("Writing"), .plain, .lens("Writing")])
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
+        expectEqual(heard, [.lens("Writing"), .plain, .lens("Writing")])
     }
 
     /// The pickers read Core's verdict rather than judging a lens.
@@ -66,9 +66,9 @@ struct KiwiVisionLensPickTests {
         let core = makeCore()
         core.setKiwiVision(.lens("Empty"))
         core.setKiwiVision(.lens("Nope"))
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
         core.setKiwiVision(.lens("Writing"))
         core.setKiwiVision(.lens("Empty"))
-        #expect(core.kiwiVisionActive == .lens("Writing"))
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
     }
 }

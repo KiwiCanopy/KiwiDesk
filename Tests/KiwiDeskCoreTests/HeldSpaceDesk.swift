@@ -69,7 +69,7 @@ struct HeldSpaceDesk {
         )
         core.handle(.displaysChanged([builtIn, dell]))
         core.execute("load_profile", args: [.string("desk")])
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         for (id, space) in [(13, 1), (10, 3), (11, 3), (12, 4)] {
             let window = WindowID(UInt32(id))
             core.state.windows.upsert(
@@ -110,7 +110,7 @@ struct HeldSpaceDesk {
             )
             core.state.workspaces.add(window, to: space)
         }
-        #expect(core.profiles.currentName == "wide")
+        expectEqual(core.profiles.currentName, "wide")
         return core
     }
 

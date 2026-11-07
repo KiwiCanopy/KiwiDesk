@@ -100,7 +100,7 @@ struct LocalizationOrphanTests {
             locales: fixture.locales
         )
         // Orphans alone must never fail the gate.
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(result.stdout.contains("long.gone"))
         #expect(result.stdout.contains("de.json"))
     }
@@ -133,7 +133,7 @@ struct LocalizationOrphanTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
 
         let deData = try Data(
             contentsOf: fixture.locales
@@ -143,7 +143,7 @@ struct LocalizationOrphanTests {
             [String: String].self,
             from: deData
         )
-        #expect(de == ["still.used": "Wird noch verwendet"])
+        expectEqual(de, ["still.used": "Wird noch verwendet"])
 
         let frData = try Data(
             contentsOf: fixture.locales
@@ -153,7 +153,7 @@ struct LocalizationOrphanTests {
             [String: String].self,
             from: frData
         )
-        #expect(fr == ["still.used": "Encore utilisé"])
+        expectEqual(fr, ["still.used": "Encore utilisé"])
     }
 
     @Test("--prune is a no-op when there are no orphans")
@@ -179,7 +179,7 @@ struct LocalizationOrphanTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(result.stdout.contains("no orphan keys"))
     }
 

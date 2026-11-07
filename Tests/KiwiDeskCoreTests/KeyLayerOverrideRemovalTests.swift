@@ -39,8 +39,8 @@ struct KeyLayerOverrideRemovalTests {
     func removedDropsRow() {
         let over = KeyLayerOverride(removed: ["default": ["alt+t"]])
         let resolved = over.resolved(onto: base)
-        #expect(resolved[0].bindings.map(\.combo) == ["alt+r"])
-        #expect(resolved[1] == base[1])
+        expectEqual(resolved[0].bindings.map(\.combo), ["alt+r"])
+        expectEqual(resolved[1], base[1])
     }
 
     @Test("A removed combo and a row on another combo resolve together")
@@ -52,7 +52,7 @@ struct KeyLayerOverrideRemovalTests {
             removed: ["default": ["alt+t"]]
         )
         let combos = over.resolved(onto: base)[0].bindings.map(\.combo)
-        #expect(combos == ["alt+r", "alt+y"])
+        expectEqual(combos, ["alt+r", "alt+y"])
     }
 
     @Test("A removal the base no longer holds is inert")
@@ -60,7 +60,7 @@ struct KeyLayerOverrideRemovalTests {
         let over = KeyLayerOverride(
             removed: ["default": ["alt+q"], "gone": ["alt+g"]]
         )
-        #expect(over.resolved(onto: base) == base)
+        expectEqual(over.resolved(onto: base), base)
         // And the next diff drops it, so a stale mark never persists.
         #expect(
             KeyLayerOverride.diff(
@@ -74,7 +74,7 @@ struct KeyLayerOverrideRemovalTests {
     func removalsCount() {
         let over = KeyLayerOverride(removed: ["default": ["alt+t", "alt+r"]])
         #expect(!over.isEmpty)
-        #expect(over.overrideCount == 2)
+        expectEqual(over.overrideCount, 2)
         #expect(KeyLayerOverride(removed: ["default": []]).isEmpty)
     }
 
@@ -87,8 +87,8 @@ struct KeyLayerOverrideRemovalTests {
             removed: ["default": ["alt+t"], "resize": ["alt+l"]]
         )
         let back = try roundTrip(over)
-        #expect(back == over)
-        #expect(back.resolved(onto: base) == over.resolved(onto: base))
+        expectEqual(back, over)
+        expectEqual(back.resolved(onto: base), over.resolved(onto: base))
     }
 
     @Test("A removal-only entry is stored in the layer array")
@@ -99,13 +99,13 @@ struct KeyLayerOverrideRemovalTests {
         let json = try #require(
             JSONSerialization.jsonObject(with: data) as? [[String: Any]]
         )
-        #expect(json.count == 1)
-        #expect(json[0]["name"] as? String == "resize")
-        #expect(json[0]["removed"] as? [String] == ["alt+l"])
+        expectEqual(json.count, 1)
+        expectEqual(json[0]["name"] as? String, "resize")
+        expectEqual(json[0]["removed"] as? [String], ["alt+l"])
         // No diverging layer of its own: the icon stays the base's.
         let back = try JSONDecoder().decode(KeyLayerOverride.self, from: data)
         #expect(back.layers.isEmpty)
-        #expect(back.resolved(onto: base)[1].icon == "📐")
+        expectEqual(back.resolved(onto: base)[1].icon, "📐")
     }
 
     @Test("An override stored before removals decodes with none")
@@ -116,7 +116,7 @@ struct KeyLayerOverrideRemovalTests {
         )
         let over = try JSONDecoder().decode(KeyLayerOverride.self, from: data)
         #expect(over.removed.isEmpty)
-        #expect(over.layers.map(\.name) == ["default"])
+        expectEqual(over.layers.map(\.name), ["default"])
     }
 
     @Test("A profile carrying removals survives its own file")
@@ -133,7 +133,7 @@ struct KeyLayerOverrideRemovalTests {
             Profile.self,
             from: JSONEncoder().encode(profile)
         )
-        #expect(back.layers == profile.layers)
+        expectEqual(back.layers, profile.layers)
     }
 
     /// `removed` shares the JSON object `KeyLayer` encodes into, so
@@ -147,7 +147,7 @@ struct KeyLayerOverrideRemovalTests {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         #expect(json["removed"] == nil)
-        #expect(Set(json.keys) == ["name", "icon", "bindings"])
+        expectEqual(Set(json.keys), ["name", "icon", "bindings"])
         // An optional field encodes nothing while nil; reflection
         // sees it anyway.
         let fields = Mirror(reflecting: KeyLayer(name: "x")).children

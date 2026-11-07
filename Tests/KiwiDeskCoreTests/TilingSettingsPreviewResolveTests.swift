@@ -22,7 +22,7 @@ struct TilingSettingsPreviewResolveTests {
     func activeModeOverlaysOverride() {
         let s = settingsWithBspOverride()
         let resolved = s.resolved(for: SpaceID("a"), activeMode: .bsp)
-        #expect(resolved.bsp.splitRatioH == 0.7)
+        expectEqual(resolved.bsp.splitRatioH, 0.7)
     }
 
     /// A space whose ACTIVE layout is Stack must see the global BSP
@@ -36,14 +36,14 @@ struct TilingSettingsPreviewResolveTests {
             for: SpaceID("a"),
             activeMode: .stack
         )
-        #expect(resolved.bsp.splitRatioH == 0.5)
+        expectEqual(resolved.bsp.splitRatioH, 0.5)
     }
 
     @Test("a space with no override resolves the global values")
     func noOverrideResolvesGlobal() {
         let s = settingsWithBspOverride()
         let resolved = s.resolved(for: SpaceID("b"), activeMode: .bsp)
-        #expect(resolved.bsp.splitRatioH == 0.5)
+        expectEqual(resolved.bsp.splitRatioH, 0.5)
     }
 
     @Test("Floating returns the settings untouched")
@@ -53,6 +53,6 @@ struct TilingSettingsPreviewResolveTests {
             for: SpaceID("a"),
             activeMode: .floating
         )
-        #expect(resolved.bsp.splitRatioH == 0.5)
+        expectEqual(resolved.bsp.splitRatioH, 0.5)
     }
 }

@@ -22,7 +22,7 @@ struct BarTitleCapTests {
     @Test("The cap is inclusive")
     func exactlyAtCapUnchanged() {
         let title = String(repeating: "a", count: 25)
-        #expect(AppBarStyle.cappedTitle(title, to: 25) == title)
+        expectEqual(AppBarStyle.cappedTitle(title, to: 25), title)
         #expect(
             AppBarStyle.cappedTitle(title + "b", to: 25)
                 == title + "…"
@@ -38,8 +38,8 @@ struct BarTitleCapTests {
             "TanStack Start: Full-Stack React Framework",
             to: 25
         )
-        #expect(capped == "TanStack Start: Full-Stac…")
-        #expect(capped.dropLast().count == 25)
+        expectEqual(capped, "TanStack Start: Full-Stac…")
+        expectEqual(capped.dropLast().count, 25)
     }
 
     /// Characters, not UTF-16 units. A ghostty tab titled
@@ -55,7 +55,7 @@ struct BarTitleCapTests {
             "ten graphemes must fit a cap of ten"
         )
         let capped = AppBarStyle.cappedTitle(emoji, to: 3)
-        #expect(capped.dropLast().count == 3)
+        expectEqual(capped.dropLast().count, 3)
     }
 
     /// The shipped default, pinned on both bars and pinned as
@@ -82,8 +82,8 @@ struct BarTitleCapTests {
     /// prose copies together, which is the point of the pin.
     @Test("Both bars default to the same cap")
     func bothBarsDefaultAlike() {
-        #expect(AppBarStyle().titleCap == 10)
-        #expect(SpaceBarStyle().frontAppTitleCap == 10)
+        expectEqual(AppBarStyle().titleCap, 10)
+        expectEqual(SpaceBarStyle().frontAppTitleCap, 10)
         #expect(
             AppBarStyle().titleCap == SpaceBarStyle().frontAppTitleCap,
             "the same window must not read two lengths"
@@ -109,13 +109,13 @@ struct BarTitleCapTests {
             app.resolvedTitleCap
                 == AppBarStyle.titleCapRange.upperBound
         )
-        #expect(space.resolvedFrontAppTitleCap == app.resolvedTitleCap)
+        expectEqual(space.resolvedFrontAppTitleCap, app.resolvedTitleCap)
         app.titleCap = 0
         space.frontAppTitleCap = 0
         #expect(
             app.resolvedTitleCap
                 == AppBarStyle.titleCapRange.lowerBound
         )
-        #expect(space.resolvedFrontAppTitleCap == app.resolvedTitleCap)
+        expectEqual(space.resolvedFrontAppTitleCap, app.resolvedTitleCap)
     }
 }

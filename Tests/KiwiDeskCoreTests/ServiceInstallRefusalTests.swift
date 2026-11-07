@@ -13,7 +13,7 @@ struct ServiceInstallRefusalTests {
         #expect(ServiceManager.installRefusal(for: .bundled) == nil)
         #expect(ServiceManager.installRefusal(for: .bare) == nil)
         let refusal = ServiceManager.installRefusal(for: .translocated)
-        #expect(refusal?.contains("/Applications") == true)
+        expectEqual(refusal?.contains("/Applications"), true)
     }
 
     /// The plist writer asks the running copy's verdict before it

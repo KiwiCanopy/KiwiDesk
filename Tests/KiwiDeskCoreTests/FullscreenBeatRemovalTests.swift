@@ -136,8 +136,8 @@ struct FullscreenBeatRemovalTests {
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
-        #expect(fullscreenLines(box) == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
+        expectEqual(fullscreenLines(box), 1)
     }
 
     @Test("a close a census refusal watched ends at the recheck")
@@ -166,7 +166,7 @@ struct FullscreenBeatRemovalTests {
         // The recheck, past it: the close lands.
         now += 0.2
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
     }
 
     @Test("a census episode with no sweep in the beat ends past it")
@@ -181,14 +181,14 @@ struct FullscreenBeatRemovalTests {
         box.census = [pid: [WindowID(12)]]
         loop.lastDesktopChange = .distantPast
         loop.reconcile(pid: pid, app: ref)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
         _ = loop.drainPendingRemovalRecheck()
         loop.compositorHostsNowhere = { _ in true }
         box.census = [:]
         // With arms left, only the beat can end it.
         now += EventLoop.hostedNowhereBeat
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
     }
 
     @Test("an entry's longest measured beat is still believed")
@@ -224,7 +224,7 @@ struct FullscreenBeatRemovalTests {
         _ = loop.drainPendingRemovalRecheck()
         now += EventLoop.hostedNowhereBeat
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
     }
 
     @Test("the fullscreen Space's host outlives the beat")
@@ -258,7 +258,7 @@ struct FullscreenBeatRemovalTests {
         loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     /// The close the beat holds ends at the first recheck only
@@ -286,7 +286,7 @@ struct FullscreenBeatRemovalTests {
         // recheck: the episode the arm opened keeps it open.
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     @Test("a hide and a minimize outrank the nowhere read")
@@ -305,9 +305,9 @@ struct FullscreenBeatRemovalTests {
             minimized: [WindowID(13)],
             coalesceTabs: false
         )
-        #expect(box.destroyed.map(\.wasMinimized) == [true])
+        expectEqual(box.destroyed.map(\.wasMinimized), [true])
         box.hidden = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.hiddenEvents == [WindowID(12)])
+        expectEqual(box.hiddenEvents, [WindowID(12)])
     }
 }

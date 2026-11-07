@@ -72,7 +72,7 @@ struct LocalizationModeNameGuardTests {
             value: value,
             locale: locale
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// The locales that keep the English mode names — `de`, `ru`,
@@ -87,7 +87,7 @@ struct LocalizationModeNameGuardTests {
             picker: "Floating",
             value: "Floating hat keine Überschreibungen."
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// **Case is the referential/descriptive discriminator**, and
@@ -115,7 +115,7 @@ struct LocalizationModeNameGuardTests {
             picker: picker,
             value: value
         )
-        #expect(result.status == expected)
+        expectEqual(result.status, expected)
     }
 
     /// Whole-word matching, so a mode name embedded in a longer
@@ -128,7 +128,7 @@ struct LocalizationModeNameGuardTests {
             value: "Il valore Stackoverflow non è un nome.",
             english: "Stack"
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 }
 

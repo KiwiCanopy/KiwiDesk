@@ -39,17 +39,17 @@ struct ShelfScrollWiringTests {
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )
-        #expect(overlay.scrollOffset == 0)
+        expectEqual(overlay.scrollOffset, 0)
         let item = try #require(overlay.itemViews.first)
         item.scrollWheel(with: try wheel(-3))
         let scrolled = overlay.scrollOffset
         #expect(scrolled > 0)
         // A refresh keeps the scroll, as it keeps a page.
         manager.sync([paintedSpaceBar(front: nil, spaces: 60)])
-        #expect(overlay.scrollOffset == scrolled)
+        expectEqual(overlay.scrollOffset, scrolled)
         // Back up past the start: clamped, never negative.
         item.scrollWheel(with: try wheel(40))
-        #expect(overlay.scrollOffset == 0)
+        expectEqual(overlay.scrollOffset, 0)
     }
 
     @Test("A wheel over a window scrolls the App Bar and holds")
@@ -62,13 +62,13 @@ struct ShelfScrollWiringTests {
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )
-        #expect(overlay.scrollOffset == 0)
+        expectEqual(overlay.scrollOffset, 0)
         let item = try #require(overlay.itemViews.first)
         item.scrollWheel(with: try wheel(-3))
         let scrolled = overlay.scrollOffset
         #expect(scrolled > 0)
         manager.sync([bar])
-        #expect(overlay.scrollOffset == scrolled)
+        expectEqual(overlay.scrollOffset, scrolled)
     }
 
     /// Nothing hidden, nothing taken: the section declines, so a
@@ -82,7 +82,7 @@ struct ShelfScrollWiringTests {
         )
         let delta = ShelfScrollInput.Delta(x: 0, y: -3, precise: false)
         #expect(!overlay.root.onScroll(delta))
-        #expect(overlay.scrollOffset == 0)
+        expectEqual(overlay.scrollOffset, 0)
     }
 
     /// A wheel notch travels about an item, a trackpad exactly its
@@ -124,9 +124,9 @@ struct ShelfScrollWiringTests {
         let spy = Spy()
         spy.addSubview(short.root)
         short.root.scrollWheel(with: try wheel(-1))
-        #expect(spy.scrolls == 1)
+        expectEqual(spy.scrolls, 1)
         spaces.sync([paintedSpaceBar(front: nil, spaces: 60)])
         short.root.scrollWheel(with: try wheel(-1))
-        #expect(spy.scrolls == 1)
+        expectEqual(spy.scrolls, 1)
     }
 }

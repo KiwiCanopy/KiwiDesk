@@ -79,7 +79,7 @@ struct ScrollingFixedSpanCueTests {
         )
         let asked = core.tiler.boundLearner
             .lastAsks[WindowID(1)]?.size.width
-        #expect(asked == 1000)
+        expectEqual(asked, 1000)
     }
 
     @Test("A grow at the span pills first press, moves nothing")
@@ -157,7 +157,7 @@ struct ScrollingFixedSpanCueTests {
             .slotSize
             // A points store: the pitch gap is inert (#1382).
             .editablePoints(along: 1200, gap: 0, horizontal: true)
-        #expect(stored == 300)
+        expectEqual(stored, 300)
     }
 
     @Test("A refused shrink never raises the shared slot")
@@ -231,7 +231,7 @@ struct ScrollingFixedSpanCueTests {
             .slotSize
             // A points store: the pitch gap is inert (#1382).
             .editablePoints(along: 1200, gap: 0, horizontal: true)
-        #expect(stored == 300)
+        expectEqual(stored, 300)
         #expect(
             refusals == [
                 .ownMinimum(WindowID(1), axis: "x", appBound: true)
@@ -317,6 +317,6 @@ struct ScrollingFixedSpanCueTests {
             .slotSize
             // A points store: the pitch gap is inert (#1382).
             .editablePoints(along: 1200, gap: 0, horizontal: true)
-        #expect(stored == 850)
+        expectEqual(stored, 850)
     }
 }

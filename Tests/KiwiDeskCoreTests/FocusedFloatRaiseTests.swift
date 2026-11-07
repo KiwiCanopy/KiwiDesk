@@ -43,7 +43,7 @@ struct FocusedFloatRaiseTests {
         }
         core.state.workspaces.focus(float, in: "1")
         core.floatRaiseDebt.restoresInFlight = 1
-        #expect(core.focusedWindowID == float)
+        expectEqual(core.focusedWindowID, float)
         return core
     }
 
@@ -52,7 +52,7 @@ struct FocusedFloatRaiseTests {
         let core = makeCore()
         core.floatRaiseDebt.owed = tile
         core.runPendingFloatRaise()
-        #expect(core.floatRaiseDebt.owed == float)
+        expectEqual(core.floatRaiseDebt.owed, float)
     }
 
     /// The timer's arm: the float's focus lands inside the tile's
@@ -65,7 +65,7 @@ struct FocusedFloatRaiseTests {
         let task = try #require(core.deferred.task(for: .floatRaise))
         core.state.workspaces.focus(float, in: "1")
         await task.value
-        #expect(core.floatRaiseDebt.owed == float)
+        expectEqual(core.floatRaiseDebt.owed, float)
     }
 
     @Test("A plane at rest takes the raise rather than owing it")

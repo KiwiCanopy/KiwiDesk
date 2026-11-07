@@ -50,14 +50,14 @@ struct DropKeyTests {
         ])
         defer { fixture.cleanup() }
         let result = try run(["gap.hint"], fixture: fixture)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
 
         let en = try fixture.decodeLocale("en.json")
-        #expect(en["gap.hint"] == "New meaning")
+        expectEqual(en["gap.hint"], "New meaning")
         let de = try fixture.decodeLocale("de.json")
-        #expect(de == ["menu.quit": "Ende"])
+        expectEqual(de, ["menu.quit": "Ende"])
         let fr = try fixture.decodeLocale("fr.json")
-        #expect(fr == [:])
+        expectEqual(fr, [:])
     }
 
     @Test("fails atomically when any key exists nowhere")
@@ -80,7 +80,7 @@ struct DropKeyTests {
         #expect(result.status != 0)
         #expect(result.stderr.contains("no.such.key"))
         let de = try fixture.decodeLocale("de.json")
-        #expect(de["gap.hint"] == "Alte Bedeutung")
+        expectEqual(de["gap.hint"], "Alte Bedeutung")
     }
 
     @Test("key present only in en.json counts as nowhere")
@@ -121,11 +121,11 @@ struct DropKeyTests {
             ["a.key", "a.key", "b.key"],
             fixture: fixture
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let de = try fixture.decodeLocale("de.json")
-        #expect(de == [:])
+        expectEqual(de, [:])
         let fr = try fixture.decodeLocale("fr.json")
-        #expect(fr == [:])
+        expectEqual(fr, [:])
     }
 
     @Test("drops multiple keys, including empty-string values")
@@ -143,9 +143,9 @@ struct DropKeyTests {
             ["a.key", "b.key"],
             fixture: fixture
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let de = try fixture.decodeLocale("de.json")
-        #expect(de == ["menu.quit": "Ende"])
+        expectEqual(de, ["menu.quit": "Ende"])
     }
 
     /// `--locale` exists for the other reason a translation gets
@@ -173,11 +173,11 @@ struct DropKeyTests {
             ["--locale", "ja", "--locale", "ko", "a.key"],
             fixture: fixture
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fixture.decodeLocale("ja.json") == [:])
         #expect(try fixture.decodeLocale("ko.json") == [:])
         let de = try fixture.decodeLocale("de.json")
-        #expect(de == ["a.key": "Fenster hinzufügen"])
+        expectEqual(de, ["a.key": "Fenster hinzufügen"])
     }
 
     /// The typo guard still applies inside the narrowed scope: a
@@ -195,10 +195,10 @@ struct DropKeyTests {
             ["--locale", "ja", "a.key"],
             fixture: fixture
         )
-        #expect(result.status == 1)
+        expectEqual(result.status, 1)
         #expect(result.stderr.contains("not present in any of ja"))
         let de = try fixture.decodeLocale("de.json")
-        #expect(de == ["a.key": "Ah"])
+        expectEqual(de, ["a.key": "Ah"])
     }
 
     @Test("an unknown --locale is an error, not a no-op")
@@ -212,9 +212,9 @@ struct DropKeyTests {
             ["--locale", "xx", "a.key"],
             fixture: fixture
         )
-        #expect(result.status == 1)
+        expectEqual(result.status, 1)
         let de = try fixture.decodeLocale("de.json")
-        #expect(de == ["a.key": "Ah"])
+        expectEqual(de, ["a.key": "Ah"])
     }
 
     @Test("--locale without a value is rejected")
@@ -225,7 +225,7 @@ struct DropKeyTests {
         ])
         defer { fixture.cleanup() }
         let result = try run(["--locale"], fixture: fixture)
-        #expect(result.status == 1)
+        expectEqual(result.status, 1)
         #expect(result.stderr.contains("needs a locale code"))
     }
 }

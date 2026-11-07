@@ -77,7 +77,7 @@ struct MoveToSpaceAnimationGateTests {
             "focus_space",
             args: [.string("2")]
         )
-        #expect((animatedApplies[WindowID(1)] ?? 0) == 0)
+        expectEqual((animatedApplies[WindowID(1)] ?? 0), 0)
     }
 
     /// Issue #11: `on_scrolling` gates the layout slide as focus
@@ -111,7 +111,7 @@ struct MoveToSpaceAnimationGateTests {
         core.tiler.settings.animations.onScrolling = false
         animatedApplies = 0
         core.focusWindow(WindowID(3), warp: false)
-        #expect(animatedApplies == 0)
+        expectEqual(animatedApplies, 0)
     }
 
     /// Issue #11 follow-up: `on_window_swap` gates the swap
@@ -139,7 +139,7 @@ struct MoveToSpaceAnimationGateTests {
         core.tiler.settings.animations.onWindowSwap = false
         animatedApplies = 0
         core.execute("swap", args: [.string("left")])
-        #expect(animatedApplies == 0)
+        expectEqual(animatedApplies, 0)
 
         // On: swapping back animates.
         core.tiler.settings.animations.onWindowSwap = true
@@ -174,7 +174,7 @@ struct MoveToSpaceAnimationGateTests {
             "set_mode",
             args: [.string("1"), .string("stack")]
         )
-        #expect(animatedApplies == 0)
+        expectEqual(animatedApplies, 0)
 
         // On: the next mode switch animates.
         core.tiler.settings.animations.onRelayout = true

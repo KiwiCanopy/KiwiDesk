@@ -68,8 +68,8 @@ struct AppBarVisibilityTests {
         )
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try verdicts(core)
-        #expect(seen[WindowID(1)] == .visible)
-        #expect(seen[WindowID(2)] == .hidden)
+        expectEqual(seen[WindowID(1)], .visible)
+        expectEqual(seen[WindowID(2)], .hidden)
     }
 
     @Test("A float over a tile leaves the tile lit")
@@ -82,8 +82,8 @@ struct AppBarVisibilityTests {
         )
         core.state.apply(.windowFocused(WindowID(3)))
         let seen = try verdicts(core)
-        #expect(seen[WindowID(1)] == .visible)
-        #expect(seen[WindowID(3)] == .visible)
+        expectEqual(seen[WindowID(1)], .visible)
+        expectEqual(seen[WindowID(3)], .visible)
     }
 
     @Test("Scrolling: a column past the edge shows its near side")
@@ -95,10 +95,10 @@ struct AppBarVisibilityTests {
         core.execute("scroll.set_slot_size", args: [.number(700)])
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try verdicts(core)
-        #expect(seen[WindowID(1)] == .visible)
-        #expect(seen[WindowID(2)] == .partly(shown: .left))
+        expectEqual(seen[WindowID(1)], .visible)
+        expectEqual(seen[WindowID(2)], .partly(shown: .left))
         // Past it, the row's edge sliver is no part worth a moon.
-        #expect(seen[WindowID(3)] == .hidden)
+        expectEqual(seen[WindowID(3)], .hidden)
     }
 
     /// Monocle reads its front member, not frames: the held member
@@ -115,8 +115,8 @@ struct AppBarVisibilityTests {
         core.retile()
         core.state.apply(.windowFocused(WindowID(3)))
         let seen = try verdicts(core)
-        #expect(seen[WindowID(1)] == .hidden)
-        #expect(seen[WindowID(2)] == .visible)
+        expectEqual(seen[WindowID(1)], .hidden)
+        expectEqual(seen[WindowID(2)], .visible)
     }
 
     /// The focused window sits above every float (#2284): a float it
@@ -143,13 +143,13 @@ struct AppBarVisibilityTests {
         core.execute("scroll.set_slot_size", args: [.number(700)])
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try verdicts(core)
-        #expect(seen[WindowID(3)] == .hidden)
+        expectEqual(seen[WindowID(3)], .hidden)
         #expect(seen[WindowID(4)] == .partly(shown: nil))
-        #expect(seen[WindowID(5)] == .visible)
-        #expect(seen[WindowID(6)] == .hidden)
+        expectEqual(seen[WindowID(5)], .visible)
+        expectEqual(seen[WindowID(6)], .hidden)
         // No float counts against a tile: float 3 sits wholly inside
         // tile 1, which stays lit.
-        #expect(seen[WindowID(1)] == .visible)
+        expectEqual(seen[WindowID(1)], .visible)
     }
 
     /// A focused float sits above the other floats; on a Space no
@@ -167,8 +167,8 @@ struct AppBarVisibilityTests {
         )
         core.state.apply(.windowFocused(WindowID(3)))
         let seen = try verdicts(core)
-        #expect(seen[WindowID(3)] == .visible)
-        #expect(seen[WindowID(4)] == .hidden)
+        expectEqual(seen[WindowID(3)], .visible)
+        expectEqual(seen[WindowID(4)], .hidden)
     }
 
     @Test("A float's own move refreshes the bars")

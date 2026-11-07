@@ -44,15 +44,15 @@ struct GridCellFramesTests {
     @Test("A row-filling last cell spans the column gaps it covers")
     func rowFillSpansColumnGaps() {
         let placed = cells(7, rowMajor: true, fillLast: true)
-        #expect(placed[6] == CGRect(x: 0, y: 440, width: 1020, height: 200))
+        expectEqual(placed[6], CGRect(x: 0, y: 440, width: 1020, height: 200))
     }
 
     @Test("A column-filling last cell spans the row gaps it covers")
     func columnFillSpansRowGaps() {
         let full = cells(7, rowMajor: false, fillLast: true)
-        #expect(full[6] == CGRect(x: 700, y: 0, width: 320, height: 640))
+        expectEqual(full[6], CGRect(x: 700, y: 0, width: 320, height: 640))
         let two = cells(8, rowMajor: false, fillLast: true)
-        #expect(two[7] == CGRect(x: 700, y: 220, width: 320, height: 420))
+        expectEqual(two[7], CGRect(x: 700, y: 220, width: 320, height: 420))
     }
 
     @Test("The Grid layout's second row starts one row gap down")
@@ -69,7 +69,7 @@ struct GridCellFramesTests {
         )
         let row = (usable.height - 10) / 2
         let third = try #require(frames[WindowID(3)])
-        #expect(third.minY == usable.minY + row + 10)
-        #expect(third.height == row)
+        expectEqual(third.minY, usable.minY + row + 10)
+        expectEqual(third.height, row)
     }
 }

@@ -60,8 +60,8 @@ struct AwayFullScreenTests {
         core.desktopMemory.readWindowSpace = { _ in .hosted(9) }
         core.desktopMemory.readCensus = { _ in self.emptyCensus }
         core.refreshAwayWindows()
-        #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 9)
-        #expect(count() == 0)
+        expectEqual(core.state.awayWindows[WindowID(7)]?.nativeSpace, 9)
+        expectEqual(count(), 0)
         // Open or Focus finds it listed, so it activates, never
         // opens a fresh window.
         #expect(core.awayReach(bundleID: "com.apple.finder")?.listsAny == true)
@@ -95,24 +95,24 @@ struct AwayFullScreenTests {
         let core = makeCore()
         core.state.awayWindows[WindowID(7)]?.nativeSpace = 9
         let row = core.jumpEntries().first
-        #expect(row?.status == .fullscreen)
-        #expect(row?.swapBlock == .fullScreen)
-        #expect(row?.moveBlock == .fullScreen)
-        #expect(row?.movesHere == false)
-        #expect(core.swapRefusal(.window(WindowID(7))) == .fullScreen)
-        #expect(core.moveHereRefusal(.window(WindowID(7))) == .fullScreen)
+        expectEqual(row?.status, .fullscreen)
+        expectEqual(row?.swapBlock, .fullScreen)
+        expectEqual(row?.moveBlock, .fullScreen)
+        expectEqual(row?.movesHere, false)
+        expectEqual(core.swapRefusal(.window(WindowID(7))), .fullScreen)
+        expectEqual(core.moveHereRefusal(.window(WindowID(7))), .fullScreen)
         var logs: [String] = []
         core.onLog = { logs.append($0) }
-        #expect(core.moveHere(.window(WindowID(7))) == false)
+        expectEqual(core.moveHere(.window(WindowID(7))), false)
         let cue = WindowActionRefusal.cannotMoveHereFullScreen.logReason
         #expect(logs.contains { $0.contains(cue) })
         // On a user Desktop it is the other-Desktop row it was.
         core.state.awayWindows[WindowID(7)]?.nativeSpace = 4
         let desk = core.jumpEntries().first
-        #expect(desk?.status == .away(desktop: 2))
-        #expect(desk?.swapBlock == .otherDesktop(2))
+        expectEqual(desk?.status, .away(desktop: 2))
+        expectEqual(desk?.swapBlock, .otherDesktop(2))
         #expect(desk?.moveBlock == nil)
-        #expect(desk?.movesHere == true)
+        expectEqual(desk?.movesHere, true)
         #expect(core.moveHereRefusal(.window(WindowID(7))) == nil)
     }
 
@@ -131,12 +131,12 @@ struct AwayFullScreenTests {
         mine.isFullscreen = true
         core.eventLoop.onEvent(.windowCreated(mine))
         _ = core.focusWindow(WindowID(5), warp: false)
-        #expect(core.jumpSwapPartner(in: "1") == WindowID(5))
+        expectEqual(core.jumpSwapPartner(in: "1"), WindowID(5))
         let away = core.jumpEntries().first {
             $0.target == .window(WindowID(7))
         }
-        #expect(away?.swapBlock == .yoursFullScreen)
-        #expect(core.swapRefusal(.window(WindowID(7))) == .yoursFullScreen)
+        expectEqual(away?.swapBlock, .yoursFullScreen)
+        expectEqual(core.swapRefusal(.window(WindowID(7))), .yoursFullScreen)
         // Row and press agree on every row, a tracked one included,
         // which keeps the verb's own verdict.
         let tiled = ManagedWindow(
@@ -157,9 +157,9 @@ struct AwayFullScreenTests {
             )
         }
         let notes = rows.first { $0.target == .window(WindowID(6)) }
-        #expect(notes?.swapBlock == .unfiled)
+        expectEqual(notes?.swapBlock, .unfiled)
         // Not yours: the row's own place again.
         core.state.windows.setFullscreen(WindowID(5), false)
-        #expect(core.swapRefusal(.window(WindowID(7))) == .otherDesktop(2))
+        expectEqual(core.swapRefusal(.window(WindowID(7))), .otherDesktop(2))
     }
 }

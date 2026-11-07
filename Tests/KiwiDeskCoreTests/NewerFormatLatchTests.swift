@@ -64,7 +64,7 @@ struct NewerFormatLatchTests {
         func newer(_ json: String) -> Int? {
             NewerFormatOnDisk.newerFormat(of: Data(json.utf8), knows: 3)
         }
-        #expect(newer(#"{"format": 4}"#) == 4)
+        expectEqual(newer(#"{"format": 4}"#), 4)
         #expect(newer(#"{"format": 3}"#) == nil)
         #expect(newer(#"{"format": 1}"#) == nil)
         #expect(newer(#"{"format": "4"}"#) == nil)
@@ -159,7 +159,7 @@ struct NewerFormatLatchTests {
                 ($0.name, $0.cause)
             }
         )
-        #expect(causes == ["Desk": .newerFormat])
+        expectEqual(causes, ["Desk": .newerFormat])
         #expect(
             core.profileConfigIssues().map(\.kind)
                 == [.profileBroken(.newerFormat)]
@@ -197,7 +197,7 @@ struct NewerFormatLatchTests {
             let core = makeTestCore()
             try core.guiConfigStore.saveIncludingBindings(GuiConfig())
             try restamp(core.url(of: artifact), to: format + 1)
-            #expect(core.guiConfigWriteLatch()?.artifact == artifact)
+            expectEqual(core.guiConfigWriteLatch()?.artifact, artifact)
             // A greyed Save always has its Config Issue beside it.
             #expect(
                 core.newerFormatIssues().map(\.kind)
@@ -214,7 +214,7 @@ struct NewerFormatLatchTests {
         let core = makeTestCore()
         for artifact in ConfigArtifact.allCases {
             guard let name = artifact.fileName else { continue }
-            #expect(name == core.url(of: artifact).lastPathComponent)
+            expectEqual(name, core.url(of: artifact).lastPathComponent)
         }
         #expect(
             NewerFormatOnDisk(artifact: .profiles, profile: "Desk", format: 9)

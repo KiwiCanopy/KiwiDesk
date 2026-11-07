@@ -38,11 +38,11 @@ struct DesktopCensusTests {
         )
         #expect(census.isAway(WindowID(7)))
         #expect(!census.isAway(WindowID(8)))
-        #expect(census.hosts[WindowID(7)]?.space == 4)
-        #expect(census.shown == [1, 20])
+        expectEqual(census.hosts[WindowID(7)]?.space, 4)
+        expectEqual(census.shown, [1, 20])
         // The non-user Spaces, whose windows `hosts` never lists
         // (#2930).
-        #expect(census.fullScreen == [9, 30])
+        expectEqual(census.fullScreen, [9, 30])
     }
 
     @Test("parked is hosted but not up")
@@ -54,7 +54,7 @@ struct DesktopCensusTests {
                 list: lister([4: ([7], [])])
             )
         )
-        #expect(census.hosts[WindowID(7)]?.isUp == false)
+        expectEqual(census.hosts[WindowID(7)]?.isUp, false)
         #expect(census.isAway(WindowID(7)))
     }
 
@@ -94,7 +94,7 @@ struct DesktopCensusTests {
             )
         )
         #expect(!census.isAway(WindowID(7)))
-        #expect(census.hosts[WindowID(7)]?.space == 20)
+        expectEqual(census.hosts[WindowID(7)]?.space, 20)
     }
 
     /// The mirror fixture: the SHOWN space listed first, so a
@@ -109,7 +109,7 @@ struct DesktopCensusTests {
             )
         )
         #expect(!census.isAway(WindowID(7)))
-        #expect(census.hosts[WindowID(7)]?.space == 1)
+        expectEqual(census.hosts[WindowID(7)]?.space, 1)
     }
 
     @Test("an unreadable space list is no census at all")

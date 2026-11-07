@@ -31,7 +31,7 @@ struct BorderOrderModeTests {
             cornerStyle: .rounded,
             order: .above
         )
-        #expect(backend.lastGeometry == expected)
+        expectEqual(backend.lastGeometry, expected)
     }
 
     @Test("The injected corner radius drives the arc")
@@ -64,7 +64,7 @@ struct BorderOrderModeTests {
             order: .above,
             systemRadius: 16
         )
-        #expect(backend.lastGeometry?.cornerRadius == atTen.cornerRadius)
+        expectEqual(backend.lastGeometry?.cornerRadius, atTen.cornerRadius)
         #expect(atTen.cornerRadius != atDefault.cornerRadius)
     }
 

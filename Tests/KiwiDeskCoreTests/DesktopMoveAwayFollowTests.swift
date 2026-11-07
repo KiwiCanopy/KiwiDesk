@@ -96,7 +96,7 @@ struct DesktopMoveAwayFollowTests {
             args: [.number(4), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(core.followFocus.owed() == away)
+        expectEqual(core.followFocus.owed(), away)
     }
 
     /// No reveal comes: the Space switches at the command, whole, and
@@ -113,12 +113,12 @@ struct DesktopMoveAwayFollowTests {
         )
         #expect(response.isSuccess)
         #expect(core.followFocus.owed() == nil)
-        #expect(core.state.workspaces.activeSpace == mail)
-        #expect(core.desktopMemory.moveReapPIDs == [pid])
+        expectEqual(core.state.workspaces.activeSpace, mail)
+        expectEqual(core.desktopMemory.moveReapPIDs, [pid])
         #expect(core.deferred.isScheduled(.desktopMoveReap))
         arrive(core)
-        #expect(core.state.workspaces.space(of: away) == mail)
-        #expect(core.focusedWindowID == away)
+        expectEqual(core.state.workspaces.space(of: away), mail)
+        expectEqual(core.focusedWindowID, away)
     }
 
     /// A Space that holds a focus grants the arrival nothing, so only
@@ -144,9 +144,9 @@ struct DesktopMoveAwayFollowTests {
                 args: [.number(1), .string("mail"), id]
             ).isSuccess
         )
-        #expect(core.state.workspaces.activeSpace == mail)
+        expectEqual(core.state.workspaces.activeSpace, mail)
         arrive(core)
-        #expect(core.focusedWindowID == away)
+        expectEqual(core.focusedWindowID, away)
     }
 
     /// The window moved and only the switch was refused, so it still
@@ -164,7 +164,7 @@ struct DesktopMoveAwayFollowTests {
             args: [.number(4), .null, id]
         )
         #expect(!response.isSuccess)
-        #expect(DesktopVerbBridge.moves.count == 1)
+        expectEqual(DesktopVerbBridge.moves.count, 1)
         #expect(core.followFocus.owed() == nil)
         #expect(core.deferred.isScheduled(.desktopMoveReap))
     }
@@ -188,9 +188,9 @@ struct DesktopMoveAwayFollowTests {
                 args: [.number(1), .string("mail"), id]
             ).isSuccess
         )
-        #expect(core.state.workspaces.activeSpace == mail)
+        expectEqual(core.state.workspaces.activeSpace, mail)
         arrive(core)
-        #expect(core.state.workspaces.space(of: away) == mail)
+        expectEqual(core.state.workspaces.space(of: away), mail)
     }
 
     /// A shown Desktop on another screen than its filing: the follow
@@ -209,7 +209,7 @@ struct DesktopMoveAwayFollowTests {
                 args: [.number(3), .null, id]
             ).isSuccess
         )
-        #expect(core.state.workspaces.activeSpace == "other")
+        expectEqual(core.state.workspaces.activeSpace, "other")
     }
 
     /// The ledger can lag the 60 s backstop: the refusal reads a fresh
@@ -276,7 +276,7 @@ struct DesktopMoveAwayFollowTests {
             ).isSuccess
         )
         // A filing here would undo a #1010 re-home across screens.
-        #expect(core.jump.take(arrived: away)?.relocates == false)
+        expectEqual(core.jump.take(arrived: away)?.relocates, false)
     }
 
     @Test("a hidden Desktop owes no raise")

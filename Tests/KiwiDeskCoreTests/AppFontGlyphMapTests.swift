@@ -50,8 +50,8 @@ struct AppFontGlyphMapTests {
             """
         )
         let map = try #require(AppFontGlyphMap.load(fontData: data))
-        #expect(map.ligature(for: "Zed Preview") == ":zed:")
-        #expect(map.ligatures == [":zed:"])
+        expectEqual(map.ligature(for: "Zed Preview"), ":zed:")
+        expectEqual(map.ligatures, [":zed:"])
     }
 
     @Test("A different data map tag or schema version is refused")
@@ -105,8 +105,8 @@ struct AppFontGlyphMapTests {
     @Test("A trailing star matches by prefix, case-sensitively")
     func prefixMatch() {
         let map = AppFontGlyphMap(["Adobe Photoshop*": ":photoshop:"])
-        #expect(map.ligature(for: "Adobe Photoshop 2026") == ":photoshop:")
-        #expect(map.ligature(for: "Adobe Photoshop") == ":photoshop:")
+        expectEqual(map.ligature(for: "Adobe Photoshop 2026"), ":photoshop:")
+        expectEqual(map.ligature(for: "Adobe Photoshop"), ":photoshop:")
         #expect(map.ligature(for: "adobe photoshop 2026") == nil)
     }
 
@@ -117,9 +117,9 @@ struct AppFontGlyphMapTests {
             (name: "Adobe Bridge*", ligature: ":bridge:"),
             (name: "Adobe Bridge Beta", ligature: ":beta:"),
         ])
-        #expect(map.ligature(for: "Adobe Bridge 2026") == ":bridge:")
-        #expect(map.ligature(for: "Adobe Bridge Beta") == ":beta:")
-        #expect(map.ligature(for: "Adobe XD") == ":adobe:")
+        expectEqual(map.ligature(for: "Adobe Bridge 2026"), ":bridge:")
+        expectEqual(map.ligature(for: "Adobe Bridge Beta"), ":beta:")
+        expectEqual(map.ligature(for: "Adobe XD"), ":adobe:")
     }
 
     @Test("Degenerate entries are dropped, not served")
@@ -133,6 +133,6 @@ struct AppFontGlyphMapTests {
         #expect(map.ligature(for: "Ghost") == nil)
         #expect(map.ligature(for: "") == nil)
         #expect(map.ligature(for: "Anything") == nil)
-        #expect(map.ligature(for: "Real") == ":ok:")
+        expectEqual(map.ligature(for: "Real"), ":ok:")
     }
 }

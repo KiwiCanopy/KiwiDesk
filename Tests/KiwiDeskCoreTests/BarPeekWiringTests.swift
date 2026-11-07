@@ -119,10 +119,10 @@ struct BarPeekWiringTests {
         defer { close(core) }
         _ = try hovered(core, steps: steps)
         #expect(titles(core) == nil, "nothing before the dwell")
-        #expect(steps.queue.count == 1)
+        expectEqual(steps.queue.count, 1)
         steps.run()
-        #expect(titles(core) == ["Doc"])
-        #expect(core.shelves.peek.panel.drawn?.groups.map(\.app) == ["Web"])
+        expectEqual(titles(core), ["Doc"])
+        expectEqual(core.shelves.peek.panel.drawn?.groups.map(\.app), ["Web"])
     }
 
     @Test("The pointer leaving the item closes the peek")
@@ -167,8 +167,8 @@ struct BarPeekWiringTests {
         #expect(core.activeSpace?.id == one, "the press does not pick")
         web.mouseUp(with: try #require(event(.leftMouseUp)))
         #expect(titles(core) == nil, "the pick closes it")
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(4))
     }
 
     /// A shelf the bars stop drawing on — a fullscreen stand-down,
@@ -182,7 +182,7 @@ struct BarPeekWiringTests {
         defer { close(core) }
         _ = try hovered(core, steps: steps)
         steps.run()
-        #expect(titles(core) == ["Doc"])
+        expectEqual(titles(core), ["Doc"])
         core.shelves.sync([])
         #expect(titles(core) == nil)
     }
@@ -210,6 +210,6 @@ struct BarPeekWiringTests {
         _ = try hovered(core, steps: steps)
         steps.run()
         render(core)
-        #expect(titles(core) == ["Doc"])
+        expectEqual(titles(core), ["Doc"])
     }
 }

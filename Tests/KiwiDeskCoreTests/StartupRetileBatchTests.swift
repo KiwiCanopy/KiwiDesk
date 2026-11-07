@@ -44,11 +44,11 @@ struct StartupRetileBatchTests {
             )
         )
         // The burst itself placed nothing — that is the batch.
-        #expect(applied == 0)
+        expectEqual(applied, 0)
 
         core.defersEventRetiles = false
         core.retile()
         // The one trailing pass placed both windows.
-        #expect(applied == 2)
+        expectEqual(applied, 2)
     }
 }

@@ -33,7 +33,7 @@ struct OsVisibilityFloorTests {
     func stashWidthIsCornerSliver() {
         // Below the single-edge floor on purpose: a corner (two
         // edge) overhang escapes it horizontally (#410).
-        #expect(TilingEngine.stashPeekX == 1)
+        expectEqual(TilingEngine.stashPeekX, 1)
     }
 
     @Test("The scrolling edge peek is an achievable ask")

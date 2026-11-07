@@ -27,13 +27,13 @@ struct AppWideSettingsTests {
         let root = try object(JSONEncoder().encode(config))
         let refusal = try #require(root["refusal"] as? [String: Any])
         let quit = try #require(root["quit"] as? [String: Any])
-        #expect(refusal["sound"] as? Bool == true)
-        #expect(quit["grid_target_depth"] as? Int == 9)
+        expectEqual(refusal["sound"] as? Bool, true)
+        expectEqual(quit["grid_target_depth"] as? Int, 9)
         let back = try JSONDecoder().decode(
             GuiConfig.self,
             from: JSONEncoder().encode(config)
         )
-        #expect(back.appWide == wide)
+        expectEqual(back.appWide, wide)
     }
 
     /// Absence is the crossing's signal, so it must survive a
@@ -67,8 +67,8 @@ struct AppWideSettingsTests {
             ConfigMigration.legacyAppWide(inProfile: both)
         )
         #expect(read.refusalSound)
-        #expect(read.quitGridTargetDepth == 3)
-        #expect(read.quitLayout == .grid)
+        expectEqual(read.quitGridTargetDepth, 3)
+        expectEqual(read.quitLayout, .grid)
         // `layout` alone is a retired value too.
         let layoutOnly = Data(
             #"{"settings":{"quit":{"layout":"grid"}}}"#.utf8
@@ -111,7 +111,7 @@ struct AppWideSettingsTests {
         stale.appWide?.quitGridTargetDepth = 2
         try core.guiConfigStore.save(stale)
         let saved = try #require(core.guiConfigStore.load())
-        #expect(saved.appWide?.quitGridTargetDepth == 11)
+        expectEqual(saved.appWide?.quitGridTargetDepth, 11)
     }
 
     /// General's rows apply immediately: the value is in the file
@@ -131,7 +131,7 @@ struct AppWideSettingsTests {
         core.setAppWide(persisting: true) { $0.quitGridTargetDepth = 6 }
         let saved = try #require(core.guiConfigStore.load()?.appWide)
         #expect(!saved.refusalSound, "a verb rode the row's write")
-        #expect(saved.quitGridTargetDepth == 6)
+        expectEqual(saved.quitGridTargetDepth, 6)
     }
 
     private func tempDirectory() -> URL {

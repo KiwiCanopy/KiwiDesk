@@ -61,7 +61,7 @@ struct LayerReachSnapshotTests {
         var snapshot = try #require(core.ruleReachSnapshot())
         try snapshot.rewriteLayers(["Desk": dropping("Gaming")])
         #expect(snapshot.isEdited)
-        #expect(snapshot.layerTable.leftOut("Gaming") == ["Desk"])
+        expectEqual(snapshot.layerTable.leftOut("Gaming"), ["Desk"])
         try core.saveRuleReach(snapshot)
         #expect(
             try core.profiles.read(name: "Desk").layers?.leftOut
@@ -103,7 +103,7 @@ struct LayerReachSnapshotTests {
         )
         try core.saveRuleReach(snapshot)
         let desk = try core.profiles.read(name: "Desk")
-        #expect(desk.layers?.layers == [gaming])
+        expectEqual(desk.layers?.layers, [gaming])
         #expect(try core.profiles.read(name: "Travel").layers == nil)
         let table = try #require(core.ruleReachSnapshot()).layerTable
         #expect(
@@ -184,7 +184,7 @@ struct LayerReachSnapshotTests {
             storedBase: base,
             templates: [:]
         )
-        #expect(derived.map(\.name) == ["default", "Gaming"])
+        expectEqual(derived.map(\.name), ["default", "Gaming"])
     }
 
     /// Nor does the page put a layer INTO the base, even one a
@@ -202,7 +202,7 @@ struct LayerReachSnapshotTests {
             storedBase: [base[0]],
             templates: [:]
         )
-        #expect(derived.map(\.name) == ["default"])
+        expectEqual(derived.map(\.name), ["default"])
     }
 
     /// The loaded page lacks a shared layer its profile leaves out;
@@ -221,6 +221,6 @@ struct LayerReachSnapshotTests {
             storedBase: base,
             templates: [:]
         )
-        #expect(derived == base)
+        expectEqual(derived, base)
     }
 }

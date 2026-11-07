@@ -81,10 +81,10 @@ struct WindowVisibilityReadTests {
         }
         #expect(read(false, false) == nil)
         #expect(read(nil, true) == nil)
-        #expect(asked == 0)
+        expectEqual(asked, 0)
         #expect(read(true, nil) == nil)
-        #expect(read(true, false) == false)
-        #expect(read(true, true) == true)
+        expectEqual(read(true, false), false)
+        expectEqual(read(true, true), true)
     }
 
     @Test("a window the server does not know reads nothing")

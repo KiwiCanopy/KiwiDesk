@@ -90,7 +90,7 @@ struct SyncFolderTakeTests {
         let live = core.state.workspaces.allSpaces.map(\.id)
         #expect(!live.contains(SpaceID("sidecar-only")))
         let lua = try String(contentsOf: core.configURL, encoding: .utf8)
-        #expect(lua == foreign)
+        expectEqual(lua, foreign)
         #expect(!core.isGuiManaged)
     }
 
@@ -98,7 +98,7 @@ struct SyncFolderTakeTests {
     func noSettingsRefused() throws {
         let core = try guiCore()
         let source = try filled(lua: "-- theirs", gui: false)
-        #expect(core.keepFolderRefusal(source) == .folderUnreadable)
+        expectEqual(core.keepFolderRefusal(source), .folderUnreadable)
         #expect(throws: SyncRefusal.folderUnreadable) {
             try core.keepFoldersSetup(from: source, trash: remove)
         }
@@ -121,11 +121,11 @@ struct SyncFolderTakeTests {
             "{ not json",
             to: source.appendingPathComponent("profiles/Broken.json")
         )
-        #expect(core.keepFolderRefusal(source) == .folderUnreadable)
+        expectEqual(core.keepFolderRefusal(source), .folderUnreadable)
         #expect(throws: SyncRefusal.self) {
             try core.keepFoldersSetup(from: source, trash: remove)
         }
-        #expect(core.profiles.allProfiles().map(\.name) == ["Mine"])
+        expectEqual(core.profiles.allProfiles().map(\.name), ["Mine"])
     }
 
     @Test("the take leaves this Mac's bindings file alone")
@@ -173,9 +173,9 @@ struct SyncFolderTakeTests {
             at: inside,
             withIntermediateDirectories: true
         )
-        #expect(core.syncFolderRefusal(inside) == .sameFolder)
+        expectEqual(core.syncFolderRefusal(inside), .sameFolder)
         let parent = core.configDirectory.deletingLastPathComponent()
-        #expect(core.syncFolderRefusal(parent) == .sameFolder)
+        expectEqual(core.syncFolderRefusal(parent), .sameFolder)
     }
 
     @Test("a copy that cannot stage leaves the folder as it was")
@@ -200,7 +200,7 @@ struct SyncFolderTakeTests {
         let names = try files.contentsOfDirectory(
             atPath: target.appendingPathComponent("profiles").path
         )
-        #expect(names == ["Theirs.json"])
+        expectEqual(names, ["Theirs.json"])
     }
 
     @Test("a take whose write fails still lands init.lua and reloads")
@@ -219,6 +219,6 @@ struct SyncFolderTakeTests {
             try core.keepFoldersSetup(from: source, trash: remove)
         }
         let lua = try String(contentsOf: core.configURL, encoding: .utf8)
-        #expect(lua == "-- theirs")
+        expectEqual(lua, "-- theirs")
     }
 }

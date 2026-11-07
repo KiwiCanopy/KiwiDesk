@@ -194,7 +194,7 @@ struct TrackWeightHealTests {
             for: input.tiled,
             in: input.context
         )
-        #expect(frames.count == 3)
+        expectEqual(frames.count, 3)
         #expect(framesAreDisjoint(frames))
     }
 
@@ -210,7 +210,7 @@ struct TrackWeightHealTests {
         // major; the #944 symptom surviving the first fix).
         let space = makeTrackSpace(core, windows: 5)
         let before = trackFeasibility(core, space: space)
-        #expect(before.tracks == 3)
+        expectEqual(before.tracks, 3)
         core.state.workspaces.withSpace(space) {
             $0.trackWeights[WindowID(1)] = 10
         }
@@ -303,7 +303,7 @@ struct TrackWeightHealTests {
             for: input.tiled,
             in: input.context
         )
-        #expect(frames.count == 3)
+        expectEqual(frames.count, 3)
         #expect(framesAreDisjoint(frames))
     }
 }

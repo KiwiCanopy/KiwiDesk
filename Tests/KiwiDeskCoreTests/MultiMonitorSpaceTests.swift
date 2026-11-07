@@ -51,9 +51,9 @@ struct MultiMonitorSpaceTests {
         let w = twoMonitorState()
         // Focused display A shows the focused active space; B
         // falls back to its only assigned space.
-        #expect(w.activeSpace == SpaceID("1"))
-        #expect(w.activeSpace(on: displayA) == SpaceID("1"))
-        #expect(w.activeSpace(on: displayB) == SpaceID("5"))
+        expectEqual(w.activeSpace, SpaceID("1"))
+        expectEqual(w.activeSpace(on: displayA), SpaceID("1"))
+        expectEqual(w.activeSpace(on: displayB), SpaceID("5"))
     }
 
     @Test("Both displays' spaces are visible at once")
@@ -73,9 +73,9 @@ struct MultiMonitorSpaceTests {
         w.activate(SpaceID("2"))
         w.activate(SpaceID("5"))
         // Focus moved to B; A keeps showing space 2 (not stashed).
-        #expect(w.activeSpace == SpaceID("5"))
-        #expect(w.activeSpace(on: displayA) == SpaceID("2"))
-        #expect(w.activeSpace(on: displayB) == SpaceID("5"))
+        expectEqual(w.activeSpace, SpaceID("5"))
+        expectEqual(w.activeSpace(on: displayA), SpaceID("2"))
+        expectEqual(w.activeSpace(on: displayB), SpaceID("5"))
         #expect(
             w.visibleSpaces == Set([SpaceID("2"), SpaceID("5")])
         )
@@ -87,9 +87,9 @@ struct MultiMonitorSpaceTests {
         w.activate(SpaceID("2"))  // A -> space 2 (same display)
         w.activate(SpaceID("5"))  // focus to B
         w.activate(SpaceID("2"))  // focus back to A
-        #expect(w.activeSpace == SpaceID("2"))
+        expectEqual(w.activeSpace, SpaceID("2"))
         // B still remembers it was showing space 5.
-        #expect(w.activeSpace(on: displayB) == SpaceID("5"))
+        expectEqual(w.activeSpace(on: displayB), SpaceID("5"))
         #expect(
             w.visibleSpaces == Set([SpaceID("2"), SpaceID("5")])
         )
@@ -100,8 +100,8 @@ struct MultiMonitorSpaceTests {
         var w = twoMonitorState()
         w.activate(SpaceID("2"))
         // Only A's shown space changed; B untouched.
-        #expect(w.activeSpace(on: displayA) == SpaceID("2"))
-        #expect(w.activeSpace(on: displayB) == SpaceID("5"))
+        expectEqual(w.activeSpace(on: displayA), SpaceID("2"))
+        expectEqual(w.activeSpace(on: displayB), SpaceID("5"))
     }
 
     @Test("Single monitor keeps the one-active-space behavior")
@@ -119,11 +119,11 @@ struct MultiMonitorSpaceTests {
         w.assign(SpaceID("1"), to: displayA)
         w.assign(SpaceID("2"), to: displayA)
         w.activate(SpaceID("1"))
-        #expect(w.visibleSpaces == Set([SpaceID("1")]))
+        expectEqual(w.visibleSpaces, Set([SpaceID("1")]))
         w.activate(SpaceID("2"))
         // One monitor: switching replaces the single visible space.
-        #expect(w.visibleSpaces == Set([SpaceID("2")]))
-        #expect(w.activeSpace == SpaceID("2"))
+        expectEqual(w.visibleSpaces, Set([SpaceID("2")]))
+        expectEqual(w.activeSpace, SpaceID("2"))
     }
 
     @Test("No displays yet: visibleSpaces is just the active one")
@@ -131,7 +131,7 @@ struct MultiMonitorSpaceTests {
         var w = WorkspaceManager()
         w.ensureSpace(SpaceID("1"))
         w.activate(SpaceID("1"))
-        #expect(w.visibleSpaces == Set([SpaceID("1")]))
+        expectEqual(w.visibleSpaces, Set([SpaceID("1")]))
     }
 
     @Test("Removing a display drops its secondary-shown entry")
@@ -142,7 +142,7 @@ struct MultiMonitorSpaceTests {
         w.activate(SpaceID("2"))  // B parked as secondary
         w.removeDisplay(displayB)
         // B is gone; only A's space is visible.
-        #expect(w.visibleSpaces == Set([SpaceID("2")]))
+        expectEqual(w.visibleSpaces, Set([SpaceID("2")]))
     }
 
     @Test("Removing a shown space clears its secondary entry")
@@ -152,7 +152,7 @@ struct MultiMonitorSpaceTests {
         w.activate(SpaceID("5"))  // A parked showing space 2
         w.removeSpace(SpaceID("2"))
         // A falls back to its first remaining assigned space (1).
-        #expect(w.activeSpace(on: displayA) == SpaceID("1"))
+        expectEqual(w.activeSpace(on: displayA), SpaceID("1"))
     }
 
     @Test("Reassigning a shown space never lays it on two displays")
@@ -164,8 +164,8 @@ struct MultiMonitorSpaceTests {
         // reassign). A's stale secondary pick at 2 must not keep
         // showing it — 2 lives on B now.
         w.assign(SpaceID("2"), to: displayB)
-        #expect(w.activeSpace(on: displayA) == SpaceID("1"))
-        #expect(w.activeSpace(on: displayB) == SpaceID("5"))
+        expectEqual(w.activeSpace(on: displayA), SpaceID("1"))
+        expectEqual(w.activeSpace(on: displayB), SpaceID("5"))
         // No space is claimed by two displays at once.
         let a = w.activeSpace(on: displayA)
         let b = w.activeSpace(on: displayB)

@@ -130,7 +130,7 @@ struct RunAskedFloorTests {
     @Test("The refusal never consumes a fresh ask")
     func refusalNeverEmits() {
         let bound = refusal(300, 600)
-        #expect(bound.refusedFloor(horizontal: false) == 600)
+        expectEqual(bound.refusedFloor(horizontal: false), 600)
         #expect(bound.consumedHeight(asking: 450) == nil)
         #expect(bound.minHeight == nil)
     }
@@ -184,7 +184,7 @@ struct RunAskedFloorTests {
         let refused = try #require(
             GridLayout.shape(for: members, in: ctx)
         )
-        #expect(refused.columns == plain.columns)
-        #expect(refused.rows == plain.rows)
+        expectEqual(refused.columns, plain.columns)
+        expectEqual(refused.rows, plain.rows)
     }
 }

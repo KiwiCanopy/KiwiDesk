@@ -21,7 +21,7 @@ struct ReadingContrastTests {
 
     @Test("The default is the reading floor")
     func defaultIsTheFloor() {
-        #expect(KiwiShelf().readingContrast == KiwiShelf.readingInkFloor)
+        expectEqual(KiwiShelf().readingContrast, KiwiShelf.readingInkFloor)
         #expect(
             KiwiShelf().readingFloor(increaseContrast: true)
                 == KiwiShelf.increasedReadingInkFloor
@@ -42,7 +42,7 @@ struct ReadingContrastTests {
             #expect(read(none).minShare < 0.001)
             #expect(read(base).minShare > 0)
             #expect(read(base).minShare < 1)
-            #expect(read(flat).minShare == 1)
+            expectEqual(read(flat).minShare, 1)
         }
         let low = none.highlightFadeShare(increaseContrast: false)
         let high = flat.highlightFadeShare(increaseContrast: false)
@@ -55,8 +55,8 @@ struct ReadingContrastTests {
             shelf(1).readingFloor(increaseContrast: true)
                 == KiwiShelf.increasedReadingInkFloor
         )
-        #expect(shelf(4).readingFloor(increaseContrast: true) == 4)
-        #expect(shelf(1).readingFloor(increaseContrast: false) == 1)
+        expectEqual(shelf(4).readingFloor(increaseContrast: true), 4)
+        expectEqual(shelf(1).readingFloor(increaseContrast: false), 1)
         #expect(
             shelf(1).panelGlassFill(increaseContrast: true).minShare
                 == shelf(KiwiShelf.readingInkFloor)
@@ -72,7 +72,7 @@ struct ReadingContrastTests {
                 field: "reading_contrast",
                 args: [.number(value)]
             ).get().apply(to: &shelf)
-            #expect(shelf.readingContrast == expected)
+            expectEqual(shelf.readingContrast, expected)
         }
         #expect(
             (try? KiwiShelfCommandSetting.parse(
@@ -98,7 +98,7 @@ struct ReadingContrastTests {
                 args: [.number(3)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.readingContrast == 3)
+        expectEqual(core.tiler.settings.kiwishelf.readingContrast, 3)
     }
 
     @Test("A stored value decodes clamped")
@@ -107,6 +107,6 @@ struct ReadingContrastTests {
             KiwiShelf.self,
             from: Data(#"{"reading_contrast": 0}"#.utf8)
         )
-        #expect(shelf.readingContrast == 1)
+        expectEqual(shelf.readingContrast, 1)
     }
 }

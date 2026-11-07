@@ -55,7 +55,7 @@ struct WindowServerHealPullTests {
         // completion clears the handle: on a loaded runner it can
         // be gone before this line, so the read count is the proof.
         await core.deferred.task(for: .adoptionHealWake)?.value
-        #expect(reads.total == 1)
+        expectEqual(reads.total, 1)
         #expect(!core.deferred.isScheduled(.adoptionHealWake))
         // The heal's own cadence is not this pull's to move.
         #expect(!core.deferred.isScheduled(.adoptionHeal))

@@ -80,7 +80,7 @@ struct StarterBarEdgeTests {
                     mainID: DisplayID(1)
                 )
             )
-            #expect(fallback.settings.appBarStyle.edge == .top)
+            expectEqual(fallback.settings.appBarStyle.edge, .top)
         }
     }
 
@@ -89,8 +89,8 @@ struct StarterBarEdgeTests {
     /// without the crossing #1369 demands.
     @Test("the type default stays top, so no profile moves")
     func typeDefaultUnchanged() {
-        #expect(AppBarStyle().edge == .top)
-        #expect(TilingSettings().appBarStyle.edge == .top)
+        expectEqual(AppBarStyle().edge, .top)
+        expectEqual(TilingSettings().appBarStyle.edge, .top)
     }
 
     @Test("a stored App Bar with no edge still loads on top")
@@ -99,6 +99,6 @@ struct StarterBarEdgeTests {
             AppBarStyle.self,
             from: Data(#"{"title_cap": 12}"#.utf8)
         )
-        #expect(decoded.edge == .top)
+        expectEqual(decoded.edge, .top)
     }
 }

@@ -51,8 +51,8 @@ struct SwitchResyncFoldTests {
             departAll(core)
             passesDuring = meter.snapshot(reset: false).counts.retiles
         }
-        #expect(passesDuring == 0)
-        #expect(meter.snapshot(reset: false).counts.retiles == 1)
+        expectEqual(passesDuring, 0)
+        expectEqual(meter.snapshot(reset: false).counts.retiles, 1)
         #expect(ids.allSatisfy { core.state.windows[$0] == nil })
     }
 
@@ -69,7 +69,7 @@ struct SwitchResyncFoldTests {
     func emptyFoldRunsNothing() {
         let (core, meter) = makeCore()
         core.foldingSwitchResync {}
-        #expect(meter.snapshot(reset: false).counts.retiles == 0)
+        expectEqual(meter.snapshot(reset: false).counts.retiles, 0)
     }
 
     @Test("A nested fold folds into the outer one")
@@ -77,9 +77,9 @@ struct SwitchResyncFoldTests {
         let (core, meter) = makeCore()
         core.foldingSwitchResync {
             core.foldingSwitchResync { departAll(core) }
-            #expect(meter.snapshot(reset: false).counts.retiles == 0)
+            expectEqual(meter.snapshot(reset: false).counts.retiles, 0)
         }
-        #expect(meter.snapshot(reset: false).counts.retiles == 1)
+        expectEqual(meter.snapshot(reset: false).counts.retiles, 1)
     }
 
     /// The close-return raise and the z-order arms ride the
@@ -100,7 +100,7 @@ struct SwitchResyncFoldTests {
                 passesSeen.append(meter.snapshot(reset: false).counts.retiles)
             }
         }
-        #expect(passesSeen == [1, 1])
+        expectEqual(passesSeen, [1, 1])
     }
 
     @Test("Outside a fold after-pass work runs at once")
@@ -118,6 +118,6 @@ struct SwitchResyncFoldTests {
     func eventLoopSeamIsWired() {
         let (core, meter) = makeCore()
         core.eventLoop.foldsSwitchResync { departAll(core) }
-        #expect(meter.snapshot(reset: false).counts.retiles == 1)
+        expectEqual(meter.snapshot(reset: false).counts.retiles, 1)
     }
 }

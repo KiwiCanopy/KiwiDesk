@@ -126,7 +126,7 @@ struct BootAppBudgetTests {
         // event stream, or its windows would never arrive at all.
         #expect(loop.observes(pid: pids[0]))
         #expect(loop.observes(pid: pids[1]))
-        #expect(box.deferrals.count == 2)
+        expectEqual(box.deferrals.count, 2)
         // Named, because the outlier stays diagnosable from a
         // field syslog with no Instruments attached (#672).
         #expect(
@@ -137,7 +137,7 @@ struct BootAppBudgetTests {
         // And recorded for the post-boot completion, exactly
         // once: the driver takes them and clears the ledger.
         let deferred = loop.takeDeferredBootApps()
-        #expect(Set(deferred.keys) == Set(pids))
+        expectEqual(Set(deferred.keys), Set(pids))
         #expect(loop.takeDeferredBootApps().isEmpty)
     }
 
@@ -158,7 +158,7 @@ struct BootAppBudgetTests {
         #expect(loop.takeDeferredBootApps().isEmpty)
         // The work it bounds actually ran: one window query per
         // visible app.
-        #expect(box.windowQueries == pids.count)
+        expectEqual(box.windowQueries, pids.count)
     }
 
     /// The budget is scoped to a queued STEP, not to a pass being
@@ -223,7 +223,7 @@ struct BootAppBudgetTests {
 
         loop.scanChunk(budget: nil)
 
-        #expect(box.deferrals.count == 2)
+        expectEqual(box.deferrals.count, 2)
         // Attached even so — the observer is installed, so the
         // app's windows still arrive by event. Deferral drops the
         // WORK, never the event stream.
@@ -263,7 +263,7 @@ struct BootAppBudgetTests {
         // about the abort rather than about the fixture.
         loop.reconcile(pid: pids[0], app: ref(1))
 
-        #expect(box.destroyed == [tracked])
+        expectEqual(box.destroyed, [tracked])
         #expect(loop.elements[pids[0]]?[tracked] == nil)
     }
 

@@ -98,14 +98,14 @@ struct ShelfScrollRunTests {
         item.scrollWheel(with: try trackpad(-300))
         let offset = overlay.scrollOffset
         #expect(offset > first)
-        #expect(overlay.itemViews.map(\.frame) == frames)
-        #expect(overlay.itemRun.frame.minX == -offset)
-        #expect(renders == 0)
+        expectEqual(overlay.itemViews.map(\.frame), frames)
+        expectEqual(overlay.itemRun.frame.minX, -offset)
+        expectEqual(renders, 0)
         let scrolled = drawn(overlay)
         #expect(scrolled.before > 0)
         overlay.render(followingFocus: false)
-        #expect(overlay.scrollOffset == offset)
-        #expect(drawn(overlay) == scrolled)
+        expectEqual(overlay.scrollOffset, offset)
+        expectEqual(drawn(overlay), scrolled)
     }
 
     @Test("An App Bar page takes the scroll door")
@@ -119,10 +119,10 @@ struct ShelfScrollRunTests {
         overlay.onRendered = { renders += 1 }
         overlay.forwardCount.onPage()
         #expect(overlay.scrollOffset > first)
-        #expect(renders == 0)
+        expectEqual(renders, 0)
         let paged = drawn(overlay)
         overlay.render(followingFocus: false)
-        #expect(drawn(overlay) == paged)
+        expectEqual(drawn(overlay), paged)
     }
 
     @Test("A Space Bar scroll moves the run and draws a render's answer")
@@ -138,9 +138,9 @@ struct ShelfScrollRunTests {
         item.scrollWheel(with: try trackpad(-300))
         let offset = overlay.scrollOffset
         #expect(offset > first)
-        #expect(overlay.itemViews.map(\.frame) == frames)
-        #expect(overlay.itemRun.frame.minX == -offset)
-        #expect(renders == 0)
+        expectEqual(overlay.itemViews.map(\.frame), frames)
+        expectEqual(overlay.itemRun.frame.minX, -offset)
+        expectEqual(renders, 0)
         // A target still whole on both sides of the scroll moved
         // back by exactly the travel.
         let travel = offset - first
@@ -151,8 +151,8 @@ struct ShelfScrollRunTests {
         let scrolled = drawn(overlay)
         #expect(scrolled.before > 0)
         overlay.render(followingActive: false)
-        #expect(overlay.scrollOffset == offset)
-        #expect(drawn(overlay) == scrolled)
+        expectEqual(overlay.scrollOffset, offset)
+        expectEqual(drawn(overlay), scrolled)
     }
 
     /// A front segment too long to pin scrolls with the run (#409):
@@ -210,7 +210,7 @@ struct ShelfScrollRunTests {
         ])
         #expect(name.frame == scrolled, "the content redraw kept it")
         overlay.render(followingActive: false)
-        #expect(name.frame == scrolled)
+        expectEqual(name.frame, scrolled)
     }
 
     @Test("A Space Bar page and autoscroll step take the scroll door")
@@ -227,10 +227,10 @@ struct ShelfScrollRunTests {
         let paged = overlay.scrollOffset
         #expect(paged > 0)
         overlay.scroll(by: -40)
-        #expect(overlay.scrollOffset == paged - 40)
-        #expect(renders == 0)
+        expectEqual(overlay.scrollOffset, paged - 40)
+        expectEqual(renders, 0)
         let stepped = drawn(overlay)
         overlay.render(followingActive: false)
-        #expect(drawn(overlay) == stepped)
+        expectEqual(drawn(overlay), stepped)
     }
 }

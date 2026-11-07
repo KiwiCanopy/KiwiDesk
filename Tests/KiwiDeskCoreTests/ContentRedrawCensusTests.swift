@@ -115,8 +115,8 @@ struct ContentRedrawCensusTests {
                 pocket: "#ffffff"
             )
         )
-        #expect(Self.labels(shown) == Set(self.shown.keys))
-        #expect(Self.labels(item) == Set(self.item.keys))
+        expectEqual(Self.labels(shown), Set(self.shown.keys))
+        expectEqual(Self.labels(item), Set(self.item.keys))
     }
 
     /// A content redraw lands every frame where a fresh overlay's
@@ -134,7 +134,7 @@ struct ContentRedrawCensusTests {
                 o.frontIcon.frame, o.frontName.frame,
             ] + o.itemViews.map(\.frame)
         }
-        #expect(frames(redrawn) == frames(fresh))
+        expectEqual(frames(redrawn), frames(fresh))
         #expect(redrawn.frontName.stringValue == fresh.frontName.stringValue)
         #expect(
             redrawn.itemViews.map(\.apps) == fresh.itemViews.map(\.apps)

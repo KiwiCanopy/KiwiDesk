@@ -86,7 +86,7 @@ struct TransientOverlayFocusTests {
         let effects = core.state.apply(
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
-        #expect(effects.removedWindow?.focusLost == false)
+        expectEqual(effects.removedWindow?.focusLost, false)
         #expect(
             core.state.workspaces["1"]?.focused == WindowID(1)
         )

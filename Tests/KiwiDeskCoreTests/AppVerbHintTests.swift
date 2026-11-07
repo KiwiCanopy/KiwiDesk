@@ -52,13 +52,13 @@ struct AppVerbHintTests {
             "focus_or_spawn",
             args: [.string("Nonesuch")]
         )
-        #expect(unknown.error == "app not found: nonesuch")
+        expectEqual(unknown.error, "app not found: nonesuch")
         core.openOrFocus.bundleIDNamed = { _ in "com.apple.Safari" }
         let id = core.execute(
             "spawn_new",
             args: [.string("com.apple.Safari")]
         )
-        #expect(id.error == "app not found: com.apple.safari")
+        expectEqual(id.error, "app not found: com.apple.safari")
     }
 
     @Test("a success is never rewritten")

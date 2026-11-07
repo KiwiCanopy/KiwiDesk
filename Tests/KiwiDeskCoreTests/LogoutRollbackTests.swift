@@ -94,7 +94,7 @@ struct LogoutRollbackTests {
     @Test("A burst of closes before the freeze rolls back")
     func closesRollBack() throws {
         let read = try logout([true, true, true])
-        #expect(read == Array(1...10))
+        expectEqual(read, Array(1...10))
     }
 
     @Test(
@@ -103,13 +103,13 @@ struct LogoutRollbackTests {
     )
     func nonClosesHoldTheFile(_ closed: [Bool]) throws {
         let read = try logout(closed)
-        #expect(read == [1, 2])
+        expectEqual(read, [1, 2])
     }
 
     @Test("A quiet freeze rolls nothing back")
     func quietFreezeKeepsTheFile() throws {
         let read = try logout([])
-        #expect(read == [1, 2])
+        expectEqual(read, [1, 2])
     }
 
     /// The window is the burst's: a close older than it is the
@@ -118,9 +118,9 @@ struct LogoutRollbackTests {
     func oldCloseIsNotTheBurst() throws {
         let window = LogoutRollback.burstWindow
         let inside = try logoutWithGap(window - 2)
-        #expect(inside == Array(1...10))
+        expectEqual(inside, Array(1...10))
         let stale = try logoutWithGap(window + 1)
-        #expect(stale == [1, 2])
+        expectEqual(stale, [1, 2])
     }
 
     /// One close, then `gap` seconds before the freeze.
@@ -154,7 +154,7 @@ struct LogoutRollbackTests {
         recovery.autosave()
         clock.advance(1)
         recovery.freezeForLogout()
-        #expect(autosaved(in: dir) == [1, 2])
+        expectEqual(autosaved(in: dir), [1, 2])
     }
 
     /// The wiring: the gone handler hands its own verdict to the
@@ -175,21 +175,21 @@ struct LogoutRollbackTests {
             wasMinimized: true,
             effects: AppliedEffects()
         )
-        #expect(minimized == .minimized)
-        #expect(core.crash.rollback.departures.last?.closed == false)
+        expectEqual(minimized, .minimized)
+        expectEqual(core.crash.rollback.departures.last?.closed, false)
         let reason = core.handleWindowGone(
             id,
             wasMinimized: false,
             effects: AppliedEffects()
         )
         // Hosted nowhere and no Desktop switch: a close.
-        #expect(reason == .closed)
-        #expect(core.crash.rollback.departures.last?.closed == true)
+        expectEqual(reason, .closed)
+        expectEqual(core.crash.rollback.departures.last?.closed, true)
         core.handle(.windowCreated(window))
         let before = core.crash.rollback.departures.count
         core.handle(.windowHidden(id))
-        #expect(core.crash.rollback.departures.count == before + 1)
-        #expect(core.crash.rollback.departures.last?.closed == false)
+        expectEqual(core.crash.rollback.departures.count, before + 1)
+        expectEqual(core.crash.rollback.departures.last?.closed, false)
     }
 
     /// A logout quits whole apps: their windows leave through the
@@ -223,8 +223,8 @@ struct LogoutRollbackTests {
         core.crash.freezeForLogout()
         core.crash.bootTime = { .distantPast }
         let read = core.crash.takeBootSnapshot()
-        #expect(read?.windows.map(\.id) == Array(1...10))
-        #expect(read?.frozenForLogout == true)
+        expectEqual(read?.windows.map(\.id), Array(1...10))
+        expectEqual(read?.frozenForLogout, true)
     }
 
     /// The freeze marks the file it keeps, rolled back or not; an
@@ -240,15 +240,15 @@ struct LogoutRollbackTests {
         reader.bootTime = { .distantPast }
         recovery.captureState = { self.desk([1, 2]) }
         recovery.autosave()
-        #expect(reader.takeBootSnapshot()?.frozenForLogout == false)
+        expectEqual(reader.takeBootSnapshot()?.frozenForLogout, false)
         recovery.autosave()
         recovery.shutdownCleanly()
-        #expect(reader.takeBootSnapshot()?.frozenForLogout == false)
+        expectEqual(reader.takeBootSnapshot()?.frozenForLogout, false)
         recovery.autosave()
         recovery.freezeForLogout()
         let frozen = reader.takeBootSnapshot()
-        #expect(frozen?.frozenForLogout == true)
-        #expect(frozen?.windows.map(\.id) == [1, 2])
+        expectEqual(frozen?.frozenForLogout, true)
+        expectEqual(frozen?.windows.map(\.id), [1, 2])
     }
 
     /// A cancelled logout: the freeze lifts past its bound, and the

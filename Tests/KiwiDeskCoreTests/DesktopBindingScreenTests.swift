@@ -194,10 +194,10 @@ struct DesktopBindingScreenTests {
         let screens = core.desktopScreens(
             in: NativeSpaces.desktopSnapshot()
         )
-        #expect(screens[.identity(stampA)] == "Built-in")
-        #expect(screens[.number(1)] == "Built-in")
-        #expect(screens[.identity(stampB)] == "LG UltraFine")
-        #expect(screens[.number(2)] == "LG UltraFine")
+        expectEqual(screens[.identity(stampA)], "Built-in")
+        expectEqual(screens[.number(1)], "Built-in")
+        expectEqual(screens[.identity(stampB)], "LG UltraFine")
+        expectEqual(screens[.number(2)], "LG UltraFine")
     }
 
     /// Additive on the wire: a record written before #1438

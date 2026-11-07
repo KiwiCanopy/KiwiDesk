@@ -25,10 +25,10 @@ struct BarPeekTests {
         let rig = Rig()
         defer { rig.close() }
         rig.hover(rig.first)
-        #expect(rig.dwells == [BarPeek.Timing.dwell])
+        expectEqual(rig.dwells, [BarPeek.Timing.dwell])
         #expect(rig.peek.panel.drawn == nil)
         rig.step()
-        #expect(rig.shownTitles == ["Window 1"])
+        expectEqual(rig.shownTitles, ["Window 1"])
         #expect(rig.peek.panel.isShown)
     }
 
@@ -50,8 +50,8 @@ struct BarPeekTests {
         rig.step()
         rig.hover(rig.second, 2)
         // No second dwell: the swap is immediate.
-        #expect(rig.dwells.count == 1)
-        #expect(rig.shownTitles == ["Window 2"])
+        expectEqual(rig.dwells.count, 1)
+        expectEqual(rig.shownTitles, ["Window 2"])
         #expect(rig.peek.shown?.view === rig.second)
     }
 
@@ -66,8 +66,8 @@ struct BarPeekTests {
         #expect(rig.peek.panel.drawn == nil)
         rig.clock += BarPeek.Timing.coolDown / 2
         rig.hover(rig.second, 2)
-        #expect(rig.dwells.count == 1)
-        #expect(rig.shownTitles == ["Window 2"])
+        expectEqual(rig.dwells.count, 1)
+        expectEqual(rig.shownTitles, ["Window 2"])
         rig.hover(nil)
         rig.clock += BarPeek.Timing.coolDown * 2
         rig.hover(rig.first)
@@ -92,7 +92,7 @@ struct BarPeekTests {
         rig.hover(nil)
         rig.hover(rig.first)
         rig.step()
-        #expect(rig.shownTitles == ["Window 1"])
+        expectEqual(rig.shownTitles, ["Window 1"])
     }
 
     /// An App Bar item anchoring the peek closes it on a press — the
@@ -171,7 +171,7 @@ struct BarPeekTests {
         rig.hover(rig.first, 1)
         rig.step()
         rig.hover(rig.first, 7)
-        #expect(rig.shownTitles == ["Window 7"])
+        expectEqual(rig.shownTitles, ["Window 7"])
     }
 
     /// The panel takes the mouse for its rows yet never activates
@@ -188,7 +188,7 @@ struct BarPeekTests {
         #expect(panel.styleMask.contains(.nonactivatingPanel))
         #expect(!panel.canBecomeKey)
         #expect(!panel.canBecomeMain)
-        #expect(panel.level == BarPanel.aboveLevel)
+        expectEqual(panel.level, BarPanel.aboveLevel)
         #expect(!panel.isAccessibilityElement())
         #expect(
             rig.peek.panel.body.labels.allSatisfy {
@@ -210,7 +210,7 @@ struct BarPeekTests {
         #expect(panel.ignoresMouseEvents, "the fade takes no click")
         rig.hover(rig.first)
         #expect(rig.peek.panel.panel === panel)
-        #expect(rig.shownTitles == ["Window 1"])
+        expectEqual(rig.shownTitles, ["Window 1"])
         #expect(!panel.ignoresMouseEvents, "a re-show takes clicks")
     }
 }

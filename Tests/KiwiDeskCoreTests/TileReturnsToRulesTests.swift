@@ -54,7 +54,7 @@ struct TileReturnsToRulesTests {
         // A rule added later floats it: no manual tile holds it.
         core.eventLoop.detectedFloating[id] = .floats(.rule)
         core.state.apply(.windowFloatChanged(id, isFloating: true))
-        #expect(floats(core) == true)
+        expectEqual(floats(core), true)
     }
 
     @Test("a user float outranks detection until tiled")
@@ -63,8 +63,8 @@ struct TileReturnsToRulesTests {
         track(core)
         #expect(core.execute("make_floating").isSuccess)
         core.state.apply(.windowFloatChanged(id, isFloating: false))
-        #expect(floats(core) == true)
-        #expect(core.state.userFloated == [id])
+        expectEqual(floats(core), true)
+        expectEqual(core.state.userFloated, [id])
     }
 
     @Test(
@@ -78,14 +78,14 @@ struct TileReturnsToRulesTests {
         track(core, .floats(reason))
         var cued: [AutoFloatReason] = []
         core.borders.onTileRefusal = { window, reason in
-            #expect(window == id)
+            expectEqual(window, id)
             cued.append(reason)
         }
         let response = core.execute("make_tiled")
-        #expect(response == .fail(reason.failure))
-        #expect(floats(core) == true)
-        #expect(core.tileRefusal(of: id) == reason)
-        #expect(cued == [reason])
+        expectEqual(response, .fail(reason.failure))
+        expectEqual(floats(core), true)
+        expectEqual(core.tileRefusal(of: id), reason)
+        expectEqual(cued, [reason])
     }
 
     @Test("a toggle towards tiled refuses the same way")
@@ -98,8 +98,8 @@ struct TileReturnsToRulesTests {
             core.execute("toggle_floating")
                 == .fail(AutoFloatReason.panel.failure)
         )
-        #expect(floats(core) == true)
-        #expect(cued == 1)
+        expectEqual(floats(core), true)
+        expectEqual(cued, 1)
     }
 
     /// Where detection floats the window no record stands, from
@@ -116,7 +116,7 @@ struct TileReturnsToRulesTests {
         #expect(!core.execute("make_tiled").isSuccess)
         core.eventLoop.detectedFloating[id] = .tiles
         core.state.apply(.windowFloatChanged(id, isFloating: false))
-        #expect(floats(core) == false)
+        expectEqual(floats(core), false)
     }
 
     /// A stop's carried float obeys it too (#1864): adopted only
@@ -136,7 +136,7 @@ struct TileReturnsToRulesTests {
         let tiled = makeCore()
         track(tiled)
         tiled.state.adoptStopFloat(of: record)
-        #expect(tiled.state.userFloated == [id])
+        expectEqual(tiled.state.userFloated, [id])
         // The encoder's own record, its session given the old key.
         var plain = record
         plain.floating = nil
@@ -158,7 +158,7 @@ struct TileReturnsToRulesTests {
         track(legacy)
         legacy.state.adoptStopFloat(of: old)
         #expect(legacy.state.userFloated.isEmpty)
-        #expect(floats(legacy) == false)
+        expectEqual(floats(legacy), false)
     }
 
     /// The reopen memory obeys the same rule: a window detection
@@ -169,7 +169,7 @@ struct TileReturnsToRulesTests {
         track(core)
         #expect(core.execute("make_floating").isSuccess)
         core.state.apply(.windowDestroyed(id, wasMinimized: false))
-        #expect(core.state.rememberedFloating.count == 1)
+        expectEqual(core.state.rememberedFloating.count, 1)
         track(core, .floats(.rule))
         #expect(core.state.userFloated.isEmpty)
         #expect(core.state.rememberedFloating.isEmpty)
@@ -184,7 +184,7 @@ struct TileReturnsToRulesTests {
         // So a rule removed later tiles the window.
         core.eventLoop.detectedFloating[id] = .tiles
         core.state.apply(.windowFloatChanged(id, isFloating: false))
-        #expect(floats(core) == false)
+        expectEqual(floats(core), false)
     }
 
     /// A memory filed by a same-identity twin that closed floated
@@ -210,7 +210,7 @@ struct TileReturnsToRulesTests {
             core.execute("make_floating", args: [.number(1)]).isSuccess
         )
         core.state.apply(.windowDestroyed(id, wasMinimized: false))
-        #expect(core.state.rememberedFloating.count == 1)
+        expectEqual(core.state.rememberedFloating.count, 1)
         let twinArgs: [JSONValue] = [.number(2)]
         #expect(core.execute("make_floating", args: twinArgs).isSuccess)
         #expect(core.execute("make_tiled", args: twinArgs).isSuccess)

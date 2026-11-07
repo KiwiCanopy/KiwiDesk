@@ -248,7 +248,7 @@ struct CommandDispatchReachTests {
                 seen.insert(spelling)
             }
         }
-        #expect(seen == Set(Self.noArm))
+        expectEqual(seen, Set(Self.noArm))
     }
 
     // MARK: - Source reads, off the actor

@@ -66,7 +66,7 @@ struct OwnFrontEchoTests {
         _ = core.stampZOrderRaise([chrome], excluding: settings)
         clock.advance(0.1)
         core.handle(.windowFocused(chrome))
-        #expect(core.activeSpace?.focused == chrome)
+        expectEqual(core.activeSpace?.focused, chrome)
     }
 
     @Test("Without the front, the same report is reverted")
@@ -75,7 +75,7 @@ struct OwnFrontEchoTests {
         _ = core.stampZOrderRaise([chrome], excluding: settings)
         clock.advance(0.1)
         core.handle(.windowFocused(chrome))
-        #expect(core.activeSpace?.focused == settings)
+        expectEqual(core.activeSpace?.focused, settings)
     }
 
     @Test("A front older than its window no longer vetoes")
@@ -86,7 +86,7 @@ struct OwnFrontEchoTests {
         _ = core.stampZOrderRaise([chrome], excluding: settings)
         clock.advance(0.05)
         core.handle(.windowFocused(chrome))
-        #expect(core.activeSpace?.focused == settings)
+        expectEqual(core.activeSpace?.focused, settings)
     }
 
     /// The user going to another app ends the front: a later
@@ -98,12 +98,12 @@ struct OwnFrontEchoTests {
         core.noteOwnFront(number: Int(chrome.raw))
         clock.advance(0.1)
         core.handle(.windowFocused(other))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
         clock.advance(0.1)
         _ = core.stampZOrderRaise([chrome], excluding: other)
         clock.advance(0.1)
         core.handle(.windowFocused(chrome))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 
     /// A shuffle among our own windows keeps it: the window a
@@ -118,7 +118,7 @@ struct OwnFrontEchoTests {
         _ = core.stampZOrderRaise([chrome], excluding: settings)
         clock.advance(0.1)
         core.handle(.windowFocused(chrome))
-        #expect(core.activeSpace?.focused == chrome)
+        expectEqual(core.activeSpace?.focused, chrome)
     }
 
     @Test("A native tab switch carries the front to the new id")

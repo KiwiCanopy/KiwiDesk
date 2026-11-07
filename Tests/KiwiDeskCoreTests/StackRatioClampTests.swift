@@ -66,8 +66,8 @@ struct StackRatioClampTests {
         )
         let a = try #require(frames[w1])
         let b = try #require(frames[w2])
-        #expect(a.minX == b.minX)
-        #expect(b.minY - a.minY == OverlapStack.offset)
+        expectEqual(a.minX, b.minX)
+        expectEqual(b.minY - a.minY, OverlapStack.offset)
     }
 
     @Test("An in-range ratio is untouched by the clamp")

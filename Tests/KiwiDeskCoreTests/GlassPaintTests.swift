@@ -33,7 +33,7 @@ struct GlassPaintTests {
         let even = try #require(
             GlassTint.paint(GlassFill(hex: "#FF0000FF", fade: 0), edge: .top)
         )
-        #expect(even.anchorAlpha == even.farAlpha)
+        expectEqual(even.anchorAlpha, even.farAlpha)
     }
 
     /// SwiftUI's unit points grow DOWN; a top fade starts at y 0.
@@ -43,14 +43,14 @@ struct GlassPaintTests {
         let paint = try #require(
             GlassTint.paint(GlassFill(hex: "#14201CB3"), edge: .top)
         )
-        #expect(paint.start == CGPoint(x: 0.5, y: 0))
-        #expect(paint.end == CGPoint(x: 0.5, y: 1))
-        #expect(paint.pin == .dark)
+        expectEqual(paint.start, CGPoint(x: 0.5, y: 0))
+        expectEqual(paint.end, CGPoint(x: 0.5, y: 1))
+        expectEqual(paint.pin, .dark)
         // A light Fill pins SwiftUI glass light (#2569 ▸ Ruling).
         let light = try #require(
             GlassTint.paint(GlassFill(hex: "#F2F2F7B3"), edge: .top)
         )
-        #expect(light.pin == .light)
+        expectEqual(light.pin, .light)
     }
 
     @Test("No colour, no paint")
@@ -70,9 +70,9 @@ struct GlassPaintTests {
         var shelf = KiwiShelf()
         shelf.itemColor = "#FF9F43"
         let ink = shelf.panelInk(increaseContrast: false)
-        #expect(ink.primary == "#FF9F43")
-        #expect(ink.secondary == shelf.peekHeaderColor)
-        #expect(ink.tertiary == shelf.idleItemColor)
+        expectEqual(ink.primary, "#FF9F43")
+        expectEqual(ink.secondary, shelf.peekHeaderColor)
+        expectEqual(ink.tertiary, shelf.idleItemColor)
         #expect(
             shelf.panelInks(increaseContrast: false).map(\.ink).prefix(3)
                 == [ink.primary, ink.secondary, ink.tertiary]

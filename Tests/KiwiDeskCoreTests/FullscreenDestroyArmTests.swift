@@ -108,7 +108,7 @@ struct FullscreenDestroyArmTests {
         // the vanish and kept the registration.
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     @Test("a window the compositor hosts on a fullscreen Space defers too")
@@ -129,7 +129,7 @@ struct FullscreenDestroyArmTests {
         )
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     @Test("a window hosted nowhere defers too (#2935)")
@@ -150,7 +150,7 @@ struct FullscreenDestroyArmTests {
         )
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     @Test("a window no arm expects destroys eagerly")
@@ -168,10 +168,10 @@ struct FullscreenDestroyArmTests {
             pid: pid,
             app: own
         )
-        #expect(box.destroyed == [WindowID(12)])
+        expectEqual(box.destroyed, [WindowID(12)])
         #expect(loop.elements[pid]?[WindowID(12)] == nil)
         // EAGER: the registration went before the reconcile, so
         // the sweep found nothing vanished and read no census.
-        #expect(box.censusReads == 0)
+        expectEqual(box.censusReads, 0)
     }
 }

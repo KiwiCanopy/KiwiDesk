@@ -34,13 +34,13 @@ struct StackFlipDesktopTests {
         // managed-display id, which names no screen's UUID.
         show(core, ["Main": 10])
         #expect(core.execute(verb).isSuccess)
-        #expect(core.drawnStackPosition(of: "1") == .left)
+        expectEqual(core.drawnStackPosition(of: "1"), .left)
         show(core, ["Main": 11])
         #expect(core.stackFlip(of: "1") == nil)
-        #expect(core.drawnStackPosition(of: "1") == .right)
+        expectEqual(core.drawnStackPosition(of: "1"), .right)
         show(core, ["Main": 10])
-        #expect(core.drawnStackPosition(of: "1") == .left)
-        #expect(core.desktopMemory.stackFlips[10]?["1"] == .left)
+        expectEqual(core.drawnStackPosition(of: "1"), .left)
+        expectEqual(core.desktopMemory.stackFlips[10]?["1"], .left)
         #expect(core.desktopMemory.stackFlips[11] == nil)
     }
 
@@ -53,7 +53,7 @@ struct StackFlipDesktopTests {
         _ = core.execute(verb)
         _ = core.execute(verb)
         #expect(core.desktopMemory.stackFlips[11] == nil)
-        #expect(core.desktopMemory.stackFlips[10]?["1"] == .left)
+        expectEqual(core.desktopMemory.stackFlips[10]?["1"], .left)
     }
 
     @Test("separate Spaces: the Space's own screen names the Desktop")
@@ -64,11 +64,11 @@ struct StackFlipDesktopTests {
         NativeSpaces.displayUUIDOverride = { $0 == display ? "UUID-A" : nil }
         defer { NativeSpaces.displayUUIDOverride = nil }
         show(core, ["UUID-A": 20, "UUID-B": 30])
-        #expect(core.shownDesktop(of: "1") == .shown(20))
+        expectEqual(core.shownDesktop(of: "1"), .shown(20))
         #expect(core.execute(verb).isSuccess)
-        #expect(core.desktopMemory.stackFlips[20]?["1"] == .left)
+        expectEqual(core.desktopMemory.stackFlips[20]?["1"], .left)
         show(core, ["UUID-A": 21, "UUID-B": 30])
-        #expect(core.drawnStackPosition(of: "1") == .right)
+        expectEqual(core.drawnStackPosition(of: "1"), .right)
     }
 
     @Test("a screen showing no user Desktop refuses the toggle")
@@ -95,7 +95,7 @@ struct StackFlipDesktopTests {
         let core = try core()
         show(core, ["Main": 10])
         _ = core.execute(verb)
-        #expect(core.tiler.stackFlip("1") == .left)
+        expectEqual(core.tiler.stackFlip("1"), .left)
         let space = try #require(core.state.workspaces["1"])
         let context = core.tiler.settings.context(
             bounds: CGRect(x: 0, y: 0, width: 100, height: 100),
@@ -104,7 +104,7 @@ struct StackFlipDesktopTests {
             session: SessionRatios(),
             stackFlip: core.tiler.stackFlip("1")
         )
-        #expect(context.stack.stackPosition == .left)
+        expectEqual(context.stack.stackPosition, .left)
         show(core, ["Main": 11])
         #expect(core.tiler.stackFlip("1") == nil)
     }

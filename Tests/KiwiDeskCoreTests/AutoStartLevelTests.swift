@@ -78,14 +78,14 @@ struct AutoStartLevelTests {
             login: .unavailable(.translocated),
             service: idle
         )
-        #expect(translocated.unavailable == .translocated)
+        expectEqual(translocated.unavailable, .translocated)
         #expect(!translocated.registerable)
 
         let bare = AutoStartManager.status(
             login: .unavailable(.notBundled),
             service: idle
         )
-        #expect(bare.unavailable == .notBundled)
+        expectEqual(bare.unavailable, .notBundled)
         #expect(!bare.registerable)
 
         // A registerable copy leaves both upper levels selectable.
@@ -107,7 +107,7 @@ struct AutoStartLevelTests {
             login: .requiresApproval,
             service: idle
         )
-        #expect(status.level == .atLogin)
+        expectEqual(status.level, .atLogin)
         #expect(status.requiresApproval)
         // Enabled is on without the approval nag.
         #expect(

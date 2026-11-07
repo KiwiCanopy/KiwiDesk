@@ -32,18 +32,18 @@ struct HeldSpaceMemoryTests {
         let core = try dockedWithHidden()
         let rank = core.state.departedSlots[hidden]?.rank
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
+        expectEqual(core.state.heldSpaces[SpaceID(5)]?.name, SpaceID(3))
         #expect(core.state.rememberedSpaces[hidden] == .departed(SpaceID(5)))
         // The row moved intact, so the slot rank still names it.
         #expect(rank != nil)
-        #expect(core.state.departedSlots[hidden]?.rank == rank)
+        expectEqual(core.state.departedSlots[hidden]?.rank, rank)
         for live in [10, 11] {
             core.state.workspaces.add(WindowID(UInt32(live)), to: SpaceID(1))
         }
         core.retile()
         #expect(core.state.heldSpaces[SpaceID(5)] != nil)
         core.handle(.windowCreated(window))
-        #expect(core.state.workspaces.space(of: hidden) == SpaceID(5))
+        expectEqual(core.state.workspaces.space(of: hidden), SpaceID(5))
     }
 
     @Test("a reclaim's renumber re-points a hidden window too")
@@ -58,7 +58,7 @@ struct HeldSpaceMemoryTests {
             core.state.heldSpaces.first { $0.value.name == SpaceID(3) }?.key
         )
         #expect(held != SpaceID(5))
-        #expect(core.state.rememberedSpaces[hidden] == .departed(held))
+        expectEqual(core.state.rememberedSpaces[hidden], .departed(held))
     }
 
     @Test("an up away window keeps its rank and loses its break")
@@ -75,11 +75,11 @@ struct HeldSpaceMemoryTests {
         core.state.rememberedSpaces[away] = .departed(SpaceID(3))
         core.state.departedSlots[away] = .init(rank: 2, trackBreak: .head)
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.state.rememberedSpaces[away] == .departed(SpaceID(5)))
-        #expect(core.state.departedSlots[away]?.rank == 2)
+        expectEqual(core.state.rememberedSpaces[away], .departed(SpaceID(5)))
+        expectEqual(core.state.departedSlots[away]?.rank, 2)
         // The move drops the live members' breaks; a returning head
         // must not rebuild half of them.
-        #expect(core.state.departedSlots[away]?.trackBreak == .member)
+        expectEqual(core.state.departedSlots[away]?.trackBreak, .member)
     }
 
     @Test("a renumber skips a number a stale memory still names")
@@ -88,7 +88,7 @@ struct HeldSpaceMemoryTests {
         core.state.remember(WindowID(23), in: SpaceID(5))
         core.handle(.displaysChanged([desk.builtIn]))
         #expect(core.state.heldSpaces[SpaceID(5)] == nil)
-        #expect(core.state.heldSpaces[SpaceID(6)]?.name == SpaceID(3))
+        expectEqual(core.state.heldSpaces[SpaceID(6)]?.name, SpaceID(3))
     }
 
     @Test("a reclaim skips a number a stale memory still names")
@@ -101,7 +101,7 @@ struct HeldSpaceMemoryTests {
         solo.spaceModes[SpaceID(5)] = .bsp
         core.apply(profile: solo, cause: .event)
         #expect(core.state.heldSpaces[SpaceID(7)] == nil)
-        #expect(core.state.heldSpaces[SpaceID(8)]?.name == SpaceID(3))
+        expectEqual(core.state.heldSpaces[SpaceID(8)]?.name, SpaceID(3))
     }
 
     @Test("a Space holding only a remembered window is not held")
@@ -121,6 +121,6 @@ struct HeldSpaceMemoryTests {
         let filed = WindowID(21)
         core.state.remember(filed, in: SpaceID(3))
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.state.rememberedSpaces[filed] == .restored(SpaceID(5)))
+        expectEqual(core.state.rememberedSpaces[filed], .restored(SpaceID(5)))
     }
 }

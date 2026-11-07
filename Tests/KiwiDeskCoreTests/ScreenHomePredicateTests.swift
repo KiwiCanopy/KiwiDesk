@@ -88,7 +88,7 @@ struct ScreenHomePredicateTests {
     ) -> StateCoordinator {
         var state = twoScreens()
         state.apply(.windowCreated(window))
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         return state
     }
 
@@ -121,7 +121,7 @@ struct ScreenHomePredicateTests {
         var state = twoScreens()
         state.workspaces.activate(SpaceID("6"))
         state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("6"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("6"))
         #expect(
             state.screenHome(
                 of: window(),

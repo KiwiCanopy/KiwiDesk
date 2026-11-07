@@ -43,9 +43,9 @@ struct ShelfPlateGlassHostTests {
         let host = try #require(GlassBox.host(of: glass))
         #expect(tint.isDescendant(of: glass))
         #expect(host.superview === overlay.content)
-        #expect(glass.frame == host.bounds)
-        #expect(tint.frame == host.bounds)
-        #expect(overlay.plateBorder.frame == host.frame)
+        expectEqual(glass.frame, host.bounds)
+        expectEqual(tint.frame, host.bounds)
+        expectEqual(overlay.plateBorder.frame, host.frame)
     }
 
     /// The plate's own call travels its host on a glide, so the
@@ -128,14 +128,14 @@ struct ShelfPlateGlassHostTests {
         }
         place(CGRect(x: 10, y: 0, width: 80, height: 30))
         // A fresh host lands rather than gliding from nowhere.
-        #expect(writes.last.map { $0.view === host && !$0.travels } == true)
+        expectEqual(writes.last.map { $0.view === host && !$0.travels }, true)
         writes.removeAll()
         place(CGRect(x: 120, y: 0, width: 60, height: 30))
         #expect(writes.contains { $0.view === host && $0.travels })
         #expect(!writes.contains { $0.view !== host })
         #expect(box.tint.isDescendant(of: box.glass))
-        #expect(box.glass.frame == host.bounds)
-        #expect(box.tint.frame == host.bounds)
+        expectEqual(box.glass.frame, host.bounds)
+        expectEqual(box.tint.frame, host.bounds)
     }
 
     /// Auto Layout rounds the glass to the backing, and rewriting
@@ -164,7 +164,7 @@ struct ShelfPlateGlassHostTests {
             animated: true,
             move: { _, _, _ in }
         )
-        #expect(box.glass.frame == rounded)
+        expectEqual(box.glass.frame, rounded)
         // A glass a whole point off its host is still laid out, by
         // the place's own write: the host's size does not change.
         box.glass.frame = CGRect(x: 0, y: 0, width: 961, height: 40)
@@ -179,7 +179,7 @@ struct ShelfPlateGlassHostTests {
             animated: true,
             move: { _, _, _ in }
         )
-        #expect(box.glass.frame == host.bounds)
+        expectEqual(box.glass.frame, host.bounds)
     }
 
     /// On the device autoresizing never reached a hosted glass once
@@ -206,7 +206,7 @@ struct ShelfPlateGlassHostTests {
         box.glass.autoresizingMask = []
         box.tint.autoresizingMask = []
         host.frame = CGRect(x: 594.5, y: 0, width: 539, height: 40)
-        #expect(box.glass.frame == host.bounds)
-        #expect(box.tint.frame == host.bounds)
+        expectEqual(box.glass.frame, host.bounds)
+        expectEqual(box.tint.frame, host.bounds)
     }
 }

@@ -57,7 +57,7 @@ struct PanelDividerContrastTests {
                 )
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 2)
+        expectEqual(measured, PaletteCatalog.bundled().count * 2)
         #expect(measured > 0)
     }
 

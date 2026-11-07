@@ -55,8 +55,8 @@ struct FocusWindowCommandTests {
         seed(core)
         let response = core.execute("focus_window", args: [.number(2)])
         #expect(response.isSuccess)
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("A window on another Space switches there")
@@ -65,8 +65,8 @@ struct FocusWindowCommandTests {
         seed(core)
         let response = core.execute("focus_window", args: [.number(3)])
         #expect(response.isSuccess)
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     /// The flight names the app in front BEFORE the focus ran, so
@@ -80,8 +80,8 @@ struct FocusWindowCommandTests {
         }
         _ = core.execute("focus_window", args: [.number(2)])
         let flight = try #require(core.raiseFlight)
-        #expect(flight.target == WindowID(2))
-        #expect(flight.leftPID == 11)
+        expectEqual(flight.target, WindowID(2))
+        expectEqual(flight.leftPID, 11)
         core.raiseFlight = nil
         _ = core.execute("focus_window", args: [.number(2)])
         #expect(core.raiseFlight == nil)
@@ -98,7 +98,7 @@ struct FocusWindowCommandTests {
         #expect(
             !core.execute("focus_window", args: [.number(2)]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     /// The #1345 gate's verdict, stated on the instance: a raise of
@@ -111,7 +111,7 @@ struct FocusWindowCommandTests {
         #expect(
             !core.execute("focus_window", args: [.number(2)]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("An unknown or missing id is refused, never the focus")
@@ -122,6 +122,6 @@ struct FocusWindowCommandTests {
             !core.execute("focus_window", args: [.number(99)]).isSuccess
         )
         #expect(!core.execute("focus_window").isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 }

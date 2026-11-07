@@ -68,15 +68,15 @@ struct ScrollingColumnCapDoorTests {
         let narrow = CGRect(x: 0, y: 0, width: 1440, height: 900)
         let wide = CGRect(x: 1440, y: 0, width: 2560, height: 1440)
         let twin = CGRect(x: -2560, y: 100, width: 2560, height: 1080)
-        #expect(KiwiCore.widest(of: [narrow, wide]) == 1)
-        #expect(KiwiCore.widest(of: [wide, narrow]) == 0)
+        expectEqual(KiwiCore.widest(of: [narrow, wide]), 1)
+        expectEqual(KiwiCore.widest(of: [wide, narrow]), 0)
         // Equal widths: the leftmost, whatever order they arrive in;
         // equal lefts: the lower.
-        #expect(KiwiCore.widest(of: [narrow, wide, twin]) == 2)
-        #expect(KiwiCore.widest(of: [twin, wide, narrow]) == 0)
+        expectEqual(KiwiCore.widest(of: [narrow, wide, twin]), 2)
+        expectEqual(KiwiCore.widest(of: [twin, wide, narrow]), 0)
         let above = CGRect(x: -2560, y: 1200, width: 2560, height: 1080)
-        #expect(KiwiCore.widest(of: [above, twin]) == 1)
-        #expect(KiwiCore.widest(of: [twin, above]) == 0)
+        expectEqual(KiwiCore.widest(of: [above, twin]), 1)
+        expectEqual(KiwiCore.widest(of: [twin, above]), 0)
         #expect(KiwiCore.widest(of: []) == nil)
     }
 }

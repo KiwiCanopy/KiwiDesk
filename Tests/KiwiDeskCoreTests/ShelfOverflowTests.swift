@@ -59,9 +59,9 @@ struct ShelfOverflowPagingTests {
             viewport: 320
         )
         // 0, 100 and the cut 200…300 are before.
-        #expect(counts.before == 3)
+        expectEqual(counts.before, 3)
         // The cut 500…600 and everything past are after.
-        #expect(counts.after == 5)
+        expectEqual(counts.after, 5)
         let none = ShelfOverflow.hiddenCounts(
             lengths: [100, 100],
             gap: 0,
@@ -76,7 +76,7 @@ struct ShelfOverflowPagingTests {
             offset: 0,
             viewport: 199.5
         )
-        #expect(rounding.after == 0)
+        expectEqual(rounding.after, 0)
     }
 
     /// Ten 100 pt entries, no gap (run 1000), a 400 viewport,
@@ -101,11 +101,11 @@ struct ShelfOverflowPagingTests {
         // From 0 the clear view ends at 350: entry 3 (300…400) is
         // the first not wholly clear, so it arrives just past the
         // near fade — offset 250.
-        #expect(page(from: 0, forward: true) == 250)
+        expectEqual(page(from: 0, forward: true), 250)
         // Back from 450: clear view starts at 500, entry 4
         // (400…500) is the last not clear, its end arrives just
         // before the far fade — 500 - 400 + 50.
-        #expect(page(from: 450, forward: false) == 150)
+        expectEqual(page(from: 450, forward: false), 150)
     }
 
     /// The owner's report: a page that stopped a few points short
@@ -114,15 +114,15 @@ struct ShelfOverflowPagingTests {
     func pagesReachTheEnds() {
         // The run's last offset is 600; forward from 250 lands on
         // 550, less than an entry short — so it goes to 600.
-        #expect(page(from: 250, forward: true) == 600)
-        #expect(page(from: 600, forward: true) == 600)
+        expectEqual(page(from: 250, forward: true), 600)
+        expectEqual(page(from: 600, forward: true), 600)
         // Back from 90 would land under an entry from the start.
-        #expect(page(from: 90, forward: false) == 0)
+        expectEqual(page(from: 90, forward: false), 0)
         // Back from 350 aligns to 50, less than an entry from the
         // start — so it goes to the start (the clamp alone would
         // leave 50).
-        #expect(page(from: 350, forward: false) == 0)
-        #expect(page(from: 0, forward: false) == 0)
+        expectEqual(page(from: 350, forward: false), 0)
+        expectEqual(page(from: 0, forward: false), 0)
     }
 
     @Test("An entry wider than the clear view still moves a view")

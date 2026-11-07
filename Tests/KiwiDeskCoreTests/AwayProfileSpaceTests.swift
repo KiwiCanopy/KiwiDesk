@@ -108,7 +108,7 @@ struct AwayProfileSpaceTests {
         core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1)])
+        expectEqual(members(core, "1"), [WindowID(1)])
 
         // It goes away to another Desktop, then the profile
         // switches to B while it is gone.
@@ -125,7 +125,7 @@ struct AwayProfileSpaceTests {
 
         bringBack(core, WindowID(1))
         // B's own record wants it in Space 2.
-        #expect(members(core, "2") == [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(1)])
         #expect(members(core, "1").isEmpty)
     }
 
@@ -155,7 +155,7 @@ struct AwayProfileSpaceTests {
         core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "2") == [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(1)])
 
         // Away it goes, and stays away across both switches.
         sendAway(core, WindowID(1))
@@ -169,7 +169,7 @@ struct AwayProfileSpaceTests {
         bringBack(core, WindowID(1))
         // Only A's record — taken while the window was away —
         // can carry it back to Space 2.
-        #expect(members(core, "2") == [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(1)])
         #expect(members(core, "1").isEmpty)
     }
 
@@ -199,7 +199,7 @@ struct AwayProfileSpaceTests {
         // has anything to re-point.
         core.apply(profile: b, cause: .event)
         core.apply(profile: a, cause: .event)
-        #expect(core.state.departedSlots[WindowID(2)] == rank)
+        expectEqual(core.state.departedSlots[WindowID(2)], rank)
 
         bringBack(core, WindowID(2))
         #expect(

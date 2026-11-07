@@ -83,6 +83,6 @@ struct KiwiVisionHoldPillTests {
         #expect(core.vision.hold == nil)
         core.noteVisionStandDown([])
         F.focus(core, F.other)
-        #expect(core.vision.hold?.window == F.other)
+        expectEqual(core.vision.hold?.window, F.other)
     }
 }

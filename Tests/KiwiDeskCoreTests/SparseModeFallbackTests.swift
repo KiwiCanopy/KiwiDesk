@@ -193,7 +193,7 @@ struct SparseModeFallbackTests {
             )
         }
         for shape in [ScreenClass.ultrawide, .superUltrawide] {
-            #expect(layout.mode(of: SpaceID("2"), on: shape) == .stack)
+            expectEqual(layout.mode(of: SpaceID("2"), on: shape), .stack)
         }
     }
 }

@@ -55,7 +55,7 @@ struct ShelfFadeTests {
         #expect(overlay.isVisible)
         overlay.hide()
         #expect(!overlay.isVisible)
-        #expect(left == 1)
+        expectEqual(left, 1)
     }
 
     @Test("A fading hide keeps the panel until the fade lands")
@@ -67,10 +67,10 @@ struct ShelfFadeTests {
         show(overlay, Self.section())
         overlay.hide(animated: true)
         #expect(overlay.isVisible)
-        #expect(left == 0)
+        expectEqual(left, 0)
         try await settle { left == 1 }
         #expect(!overlay.isVisible)
-        #expect(left == 1)
+        expectEqual(left, 1)
     }
 
     @Test("A show during the fade-out keeps the shelf")
@@ -85,7 +85,7 @@ struct ShelfFadeTests {
         show(overlay, section)
         try await Task.sleep(for: .milliseconds(300))
         #expect(overlay.isVisible)
-        #expect(left == 0)
+        expectEqual(left, 0)
     }
 
     /// Every bar refresh inside the glide asks the unwanted shelf
@@ -102,7 +102,7 @@ struct ShelfFadeTests {
         // Asked again mid-fade, the running fade is kept.
         #expect(!overlay.hide(animated: true))
         try await settle { left == 1 }
-        #expect(left == 1)
+        expectEqual(left, 1)
         #expect(!overlay.isVisible)
     }
 
@@ -191,7 +191,7 @@ struct ShelfFadeTests {
         // The first leave's landing leaves the view to the second.
         landings[0]()
         #expect(app.view.superview === overlay.stripView)
-        #expect(overlay.leavingViews[app.view] == second)
+        expectEqual(overlay.leavingViews[app.view], second)
         landings[2]()
         #expect(app.view.superview == nil)
         #expect(overlay.leavingViews.isEmpty)

@@ -51,8 +51,8 @@ struct ZOrderScrollingRestoreTests {
             [(1, left), (2, left), (3, left), (4, right)],
             focus: 3
         )
-        #expect(result.raise == ids([3]))
-        #expect(result.floor == ids([1, 2]))
+        expectEqual(result.raise, ids([3]))
+        expectEqual(result.floor, ids([1, 2]))
     }
 
     /// The owner's picture: the wrap to the first window, whose
@@ -63,8 +63,8 @@ struct ZOrderScrollingRestoreTests {
             [(1, left), (2, right), (3, right), (4, right), (5, right)],
             focus: 0
         )
-        #expect(result.raise == ids([2]))
-        #expect(result.floor == ids([5, 4, 3]))
+        expectEqual(result.raise, ids([2]))
+        expectEqual(result.floor, ids([5, 4, 3]))
     }
 
     @Test("Focus mid-row raises each side's top, in raise order")
@@ -74,8 +74,8 @@ struct ZOrderScrollingRestoreTests {
             [(1, left), (2, left), (3, middle), (4, right), (5, right)],
             focus: 2
         )
-        #expect(result.raise == ids([2, 4]))
-        #expect(result.floor == ids([1, 5]))
+        expectEqual(result.raise, ids([2, 4]))
+        expectEqual(result.floor, ids([1, 5]))
     }
 
     /// A buried window wider than the pile's top shows past it, so
@@ -88,7 +88,7 @@ struct ZOrderScrollingRestoreTests {
             [(1, wide), (2, left), (3, right)],
             focus: 2
         )
-        #expect(result.raise == ids([1, 2]))
+        expectEqual(result.raise, ids([1, 2]))
         #expect(result.floor.isEmpty)
     }
 
@@ -108,8 +108,8 @@ struct ZOrderScrollingRestoreTests {
             [(1, sliver), (2, sliver), (3, neighbour)],
             focus: 2
         )
-        #expect(result.raise == ids([2]))
-        #expect(result.floor == ids([1]))
+        expectEqual(result.raise, ids([2]))
+        expectEqual(result.floor, ids([1]))
         #expect(result.shown.isEmpty)
     }
 
@@ -120,8 +120,8 @@ struct ZOrderScrollingRestoreTests {
             [(1, sliver), (2, sliver), (3, left), (4, right)],
             focus: 3
         )
-        #expect(result.raise == ids([3]))
-        #expect(result.floor == ids([1, 2]))
+        expectEqual(result.raise, ids([3]))
+        expectEqual(result.floor, ids([1, 2]))
     }
 
     @Test("A window off the area is buried")
@@ -129,7 +129,7 @@ struct ZOrderScrollingRestoreTests {
         let off = CGRect(x: -800, y: 0, width: 700, height: 800)
         let result = plan([(1, off), (2, left), (3, right)], focus: 2)
         #expect(result.raise.isEmpty)
-        #expect(result.floor == ids([1]))
+        expectEqual(result.floor, ids([1]))
     }
 
     @Test("The focus is never raised nor in the floor")
@@ -147,7 +147,7 @@ struct ZOrderScrollingRestoreTests {
             [(1, left), (2, left), (3, right)],
             focus: 2
         )
-        #expect(result.shown == ids([2]))
+        expectEqual(result.shown, ids([2]))
     }
 
     /// The row's far strip on a 48% slot: cut by the screen with a
@@ -160,7 +160,7 @@ struct ZOrderScrollingRestoreTests {
             [(1, sliver), (2, strip), (3, neighbour)],
             focus: 2
         )
-        #expect(result.raise == ids([2]))
+        expectEqual(result.raise, ids([2]))
         #expect(result.shown.isEmpty)
     }
 
@@ -169,8 +169,8 @@ struct ZOrderScrollingRestoreTests {
     func coveredStripIsNotShown() {
         let wide = CGRect(x: 0, y: 0, width: 720, height: 800)
         let result = plan([(1, wide), (2, left), (3, right)], focus: 2)
-        #expect(result.raise == ids([1, 2]))
-        #expect(result.shown == ids([2]))
+        expectEqual(result.raise, ids([1, 2]))
+        expectEqual(result.shown, ids([2]))
     }
 
     // MARK: - The drain's wait on the focus
@@ -186,9 +186,9 @@ struct ZOrderScrollingRestoreTests {
             front: WindowID(4)
         )
         _ = drain.run(ids([3]))
-        #expect(server.raised == ids([3]))
-        #expect(server.raisedAt.first.map { $0 >= 0.03 } == true)
-        #expect(server.stacking() == ids([3, 4, 1]))
+        expectEqual(server.raised, ids([3]))
+        expectEqual(server.raisedAt.first.map { $0 >= 0.03 }, true)
+        expectEqual(server.stacking(), ids([3, 4, 1]))
     }
 
     @Test("A focus that never lands costs one landing limit")
@@ -214,7 +214,7 @@ struct ZOrderScrollingRestoreTests {
             front: WindowID(4)
         )
         _ = drain.run(ids([3]))
-        #expect(server.raisedAt == [0])
+        expectEqual(server.raisedAt, [0])
     }
 
     @Test("A superseded drain stops waiting")
@@ -235,6 +235,6 @@ struct ZOrderScrollingRestoreTests {
     func noFrontNoWait() {
         let server = FakeWindowServer(order: ids([1, 3, 4]))
         _ = server.restoreDrain(above: ids([1])).run(ids([3]))
-        #expect(server.raisedAt == [0])
+        expectEqual(server.raisedAt, [0])
     }
 }

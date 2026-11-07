@@ -127,8 +127,8 @@ struct ReconcileOffMainCloseTests {
         // a skipped close is left for the read (#1888).
         #expect(box.listReads == 0, "list read inline (#1888)")
         box.drain()
-        #expect(box.listReads == 1)
-        #expect(box.destroyed == [id])
+        expectEqual(box.listReads, 1)
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a deferred tab-carrier close reconciles at once")
@@ -141,8 +141,8 @@ struct ReconcileOffMainCloseTests {
             pid: pid,
             app: ref
         )
-        #expect(box.listReads == 1)
-        #expect(box.destroyed == [id])
+        expectEqual(box.listReads, 1)
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a close beside a tab carrier reconciles at once")
@@ -156,7 +156,7 @@ struct ReconcileOffMainCloseTests {
             pid: pid,
             app: ref
         )
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
         #expect(box.destroyed.contains(id))
     }
 
@@ -169,11 +169,11 @@ struct ReconcileOffMainCloseTests {
             pid: pid,
             app: ref
         )
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
         #expect(box.listReads == 0, "list read inline (#1888)")
         box.drain()
-        #expect(box.listReads == 1)
-        #expect(box.destroyed == [id])
+        expectEqual(box.listReads, 1)
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a minimize reports at once, its list read off main")
@@ -185,9 +185,9 @@ struct ReconcileOffMainCloseTests {
             pid: pid,
             app: ref
         )
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
         #expect(box.listReads == 0, "list read inline (#1888)")
         box.drain()
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 }

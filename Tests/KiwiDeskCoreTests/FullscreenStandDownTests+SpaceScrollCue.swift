@@ -21,9 +21,9 @@ extension FullscreenStandDownTests {
             $0.spaceScrollTransition = .show
         }
         core.stepSpace(on: display, by: 1, warp: false, scrolled: true)
-        #expect(box.cues.map(\.space) == ["2"])
+        expectEqual(box.cues.map(\.space), ["2"])
         core.stepSpace(on: display, by: -1, warp: false, scrolled: false)
-        #expect(box.cues.map(\.space) == ["2"])
+        expectEqual(box.cues.map(\.space), ["2"])
     }
 
     /// A Slide on the scroll step under Reduce Motion draws the plate
@@ -38,8 +38,8 @@ extension FullscreenStandDownTests {
         let (core, box, display) = try #require(
             makeSpaceCueCore(transition: .none)
         )
-        #expect(core.appWide.spaceScrollTransition == .slide)
+        expectEqual(core.appWide.spaceScrollTransition, .slide)
         core.stepSpace(on: display, by: 1, warp: false, scrolled: true)
-        #expect(box.cues.map(\.space) == ["2"])
+        expectEqual(box.cues.map(\.space), ["2"])
     }
 }

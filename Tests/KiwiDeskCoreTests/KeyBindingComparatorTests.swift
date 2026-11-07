@@ -40,7 +40,7 @@ struct KeyBindingComparatorTests {
         label.label = "Other"
         #expect(label != row)
 
-        #expect(row == row)
+        expectEqual(row, row)
     }
 
     @Test("sameAction distinguishes exactly combo + lua")
@@ -77,6 +77,6 @@ struct KeyBindingComparatorTests {
     func storedPropertyCount() {
         let children = Mirror(reflecting: row).children
         // id + combo + lua + kind + label + desc + group + symbol
-        #expect(children.count == 8)
+        expectEqual(children.count, 8)
     }
 }

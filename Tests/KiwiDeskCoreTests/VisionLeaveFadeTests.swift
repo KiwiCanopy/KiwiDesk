@@ -73,14 +73,14 @@ struct VisionLeaveFadeTests {
         vision.sync(request(target: 7), reassert: false)
         vision.sync(request(target: 8, leaving: leaving()), reassert: false)
         let plates = made()
-        #expect(plates.count == 2)
+        expectEqual(plates.count, 2)
         let fades = plates.map(\.fades)
-        #expect(fades[0].count == 1)
+        expectEqual(fades[0].count, 1)
         #expect(fades[1].isEmpty)
         let fade = try #require(fades[0].first)
-        #expect(fade.window == 9)
-        #expect(fade.duration == 0.6)
-        #expect(fade.curve == .linear)
+        expectEqual(fade.window, 9)
+        expectEqual(fade.duration, 0.6)
+        expectEqual(fade.curve, .linear)
         // The plate's own coordinates: the screen's origin is 100.
         #expect(
             fade.region.boundingBox

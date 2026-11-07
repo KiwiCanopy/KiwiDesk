@@ -144,6 +144,6 @@ struct QuitCrossingTests {
         writer.freezeForLogout()
         let frozen = try read()
         #expect(frozen.frozenForLogout)
-        #expect(frozen.windows[0].floating == true)
+        expectEqual(frozen.windows[0].floating, true)
     }
 }

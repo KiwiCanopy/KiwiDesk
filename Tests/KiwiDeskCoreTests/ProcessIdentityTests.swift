@@ -112,8 +112,8 @@ struct ProcessIdentityTests {
         box.census = [child: [WindowID(830_336)]]
         loop.healSweep()
         #expect(loop.observes(pid: child))
-        #expect(box.windowQueries == [child])
-        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+        expectEqual(box.windowQueries, [child])
+        expectEqual(loop.processIdentity.unlisted[child], Self.bundle)
     }
 
     @Test("a pid of zero or below never attaches")
@@ -256,9 +256,9 @@ struct ProcessIdentityTests {
         box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
         loop.healSweep()
         loop.processIdentity.frontmostApp = { self.app(-1) }
-        #expect(loop.frontmostProcess() == child)
+        expectEqual(loop.frontmostProcess(), child)
         loop.processIdentity.frontmostApp = { self.app(parent) }
-        #expect(loop.frontmostProcess() == parent)
+        expectEqual(loop.frontmostProcess(), parent)
         // An unnamed app KiwiDesk knows no process of: no reading.
         loop.processIdentity.frontmostApp = {
             self.app(-1, bundle: "test.kiwi.unknown")

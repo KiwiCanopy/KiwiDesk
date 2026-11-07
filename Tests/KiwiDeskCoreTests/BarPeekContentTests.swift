@@ -45,12 +45,12 @@ struct BarPeekContentTests {
                 row(3, app: "Code", title: "Bar.swift"),
             ]
         )
-        #expect(content.groups.count == 1)
+        expectEqual(content.groups.count, 1)
         #expect(
             content.groups[0].titles
                 == ["AGENTS.md", "Untitled Window", "Bar.swift"]
         )
-        #expect(content.groups[0].windowCount == 3)
+        expectEqual(content.groups[0].windowCount, 3)
     }
 
     /// A lone window titled as its app keeps its row under the
@@ -62,20 +62,20 @@ struct BarPeekContentTests {
         let same = BarPeekContent(
             rows: [row(1, app: "Claude", title: "Claude")]
         )
-        #expect(same.groups.map(\.app) == ["Claude"])
-        #expect(same.groups.map(\.titles) == [["Claude"]])
-        #expect(same.groups.map(\.windowCount) == [1])
+        expectEqual(same.groups.map(\.app), ["Claude"])
+        expectEqual(same.groups.map(\.titles), [["Claude"]])
+        expectEqual(same.groups.map(\.windowCount), [1])
         let body = BarPeekBody()
         _ = body.build(same, shelf: KiwiShelf())
         // The faint header above a full-ink row, which is a button.
-        #expect(body.labels.map(\.stringValue) == ["Claude", "Claude"])
+        expectEqual(body.labels.map(\.stringValue), ["Claude", "Claude"])
         let header = try #require(body.labels.first)
         let title = try #require(body.labels.last)
         #expect(
             header.textColor == NSColor(kiwiHex: KiwiShelf().peekHeaderColor)
         )
-        #expect(title.textColor == NSColor(kiwiHex: KiwiShelf().itemColor))
-        #expect(body.targets.map(\.action) == [.window(WindowID(1))])
+        expectEqual(title.textColor, NSColor(kiwiHex: KiwiShelf().itemColor))
+        expectEqual(body.targets.map(\.action), [.window(WindowID(1))])
     }
 
     /// `+n` mixes apps: one group each, in first-seen order, with
@@ -90,12 +90,12 @@ struct BarPeekContentTests {
                 row(3, app: "Figma", title: "Canvas", icon: icon),
             ]
         )
-        #expect(content.groups.map(\.app) == ["Messages", "Figma"])
+        expectEqual(content.groups.map(\.app), ["Messages", "Figma"])
         #expect(
             content.groups.map(\.titles)
                 == [["Book club"], ["Hover peek", "Canvas"]]
         )
-        #expect(content.groups.map(\.windowCount) == [1, 2])
+        expectEqual(content.groups.map(\.windowCount), [1, 2])
         #expect(content.groups.allSatisfy { $0.icon === icon })
     }
 
@@ -111,7 +111,7 @@ struct BarPeekContentTests {
                 row(2, app: "Figma", title: "B", icon: icon),
             ]
         )
-        #expect(content.groups.count == 1)
+        expectEqual(content.groups.count, 1)
         #expect(content.groups[0].icon === icon)
     }
 
@@ -128,11 +128,11 @@ struct BarPeekContentTests {
                 row(3, app: "Orion", title: "Mail", icon: icon, pid: 10),
             ]
         )
-        #expect(content.groups.map(\.app) == ["Orion"])
+        expectEqual(content.groups.map(\.app), ["Orion"])
         #expect(
             content.groups.map(\.titles) == [["Work", "Home", "Mail"]]
         )
-        #expect(content.groups.map(\.windowCount) == [3])
+        expectEqual(content.groups.map(\.windowCount), [3])
         #expect(content.groups[0].icon === icon)
     }
 
@@ -158,16 +158,16 @@ struct BarPeekContentTests {
             shelf: shelf
         )
         // Two headers, four titles.
-        #expect(body.labels.count == 6)
+        expectEqual(body.labels.count, 6)
         let header = try #require(body.labels.first)
-        #expect(header.stringValue == "A")
+        expectEqual(header.stringValue, "A")
         // The derived step under the titles (owner ruling).
         #expect(shelf.peekHeaderColor != shelf.itemColor)
         #expect(
             header.textColor == NSColor(kiwiHex: shelf.peekHeaderColor)
         )
         let one = try #require(body.labels.dropFirst().first)
-        #expect(one.textColor == NSColor(kiwiHex: shelf.itemColor))
+        expectEqual(one.textColor, NSColor(kiwiHex: shelf.itemColor))
         // No count beside a header: the bar's glyph already shows
         // it. The body draws its labels, hairlines and hover fill.
         let drawn: [NSView] = body.labels + body.rules + [body.highlight]
@@ -177,7 +177,7 @@ struct BarPeekContentTests {
             }
         )
         // Two between A's three windows, one between the apps.
-        #expect(body.rules.count == 3)
+        expectEqual(body.rules.count, 3)
         #expect(
             body.rules.allSatisfy {
                 $0.frame.height == BarDivider.ruleThickness
@@ -193,7 +193,7 @@ struct BarPeekContentTests {
         var shelf = KiwiShelf()
         shelf.itemColor = "#5A5A5A"
         shelf.fillColor = "#3A3A3CB3"
-        #expect(shelf.peekHeaderColor == shelf.itemColor)
+        expectEqual(shelf.peekHeaderColor, shelf.itemColor)
         // The default palette holds the step.
         let kiwi = KiwiShelf()
         #expect(
@@ -218,7 +218,7 @@ struct BarPeekContentTests {
         )
         #expect(size.width <= BarPeekBody.Metrics.maxWidth)
         let title = try #require(body.labels.last)
-        #expect(title.stringValue == long)
+        expectEqual(title.stringValue, long)
         let line = BarPeekBody.lineHeight(title.font)
         #expect(title.frame.height > 2 * line, "it wraps, not cuts")
         #expect(title.frame.maxY < size.height)
@@ -242,7 +242,7 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(below.y + size.height <= top.minY)
-        #expect(below.x + size.width / 2 == anchor.midX)
+        expectEqual(below.x + size.width / 2, anchor.midX)
         let bottom = CGRect(x: 0, y: 0, width: 1440, height: 40)
         let above = BarPeekPanel.origin(
             size: size,
@@ -252,7 +252,7 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(above.y >= bottom.maxY)
-        #expect(above.x + size.width / 2 == 310)
+        expectEqual(above.x + size.width / 2, 310)
         let left = CGRect(x: 0, y: 0, width: 40, height: 900)
         let beside = BarPeekPanel.origin(
             size: size,
@@ -262,7 +262,7 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(beside.x >= left.maxX)
-        #expect(beside.y + size.height / 2 == 410)
+        expectEqual(beside.y + size.height / 2, 410)
         // An item at the screen's end keeps the peek on screen.
         let edge = BarPeekPanel.origin(
             size: size,

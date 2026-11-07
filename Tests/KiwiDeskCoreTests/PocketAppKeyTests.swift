@@ -20,8 +20,8 @@ struct PocketAppKeyTests {
         fixture.press()
         fixture.arrive(9)
         let workspaces = fixture.core.state.workspaces
-        #expect(workspaces.space(of: mine) == workspaces.activeSpace)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(workspaces.space(of: mine), workspaces.activeSpace)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
     }
 
     @Test("a window WindowServer reported created is claimed at once")
@@ -31,7 +31,7 @@ struct PocketAppKeyTests {
         fixture.press()
         fixture.core.windowServerChanged(.created, id: mine)
         fixture.arrive(9)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
     }
 
     @Test("a candidate keeps its rule, earns no follow, and comes out")
@@ -49,9 +49,9 @@ struct PocketAppKeyTests {
         fixture.core.windowServerChanged(.created, id: mine)
         await fixture.core.deferred.task(for: .arrivalCreated)?.value
         let window = try #require(fixture.core.state.windows[mine])
-        #expect(fixture.core.state.renderSpace(of: window) == active)
+        expectEqual(fixture.core.state.renderSpace(of: window), active)
         #expect(window.isFloating)
-        #expect(fixture.core.state.workspaces.activeSpace == active)
+        expectEqual(fixture.core.state.workspaces.activeSpace, active)
     }
 
     @Test("a window the boot adopts is never claimed")
@@ -72,12 +72,12 @@ struct PocketAppKeyTests {
         fixture.press()
         fixture.arrive(9)
         #expect(fixture.core.state.pocketPhase(of: mine) == nil)
-        #expect(fixture.claim?.candidate == mine)
+        expectEqual(fixture.claim?.candidate, mine)
         fixture.core.windowServerChanged(.created, id: mine)
         let hop = fixture.core.deferred.task(for: .arrivalCreated)
         #expect(hop != nil)
         await hop?.value
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
     }
 
     @Test("no create in the bound frees the claim for the real window")
@@ -104,10 +104,10 @@ struct PocketAppKeyTests {
         fixture.core.windowCreates.isLive = true
         fixture.press()
         fixture.arrive(9)
-        #expect(fixture.claim?.candidate == mine)
+        expectEqual(fixture.claim?.candidate, mine)
         fixture.core.windowServerChanged(.created, id: WindowID(10))
         fixture.arrive(10)
-        #expect(fixture.owner(of: WindowID(10)) == Fixture.app)
+        expectEqual(fixture.owner(of: WindowID(10)), Fixture.app)
         #expect(fixture.core.state.pocketPhase(of: mine) == nil)
     }
 
@@ -148,8 +148,8 @@ struct PocketAppKeyTests {
         fixture.installRow(false)
         let workspaces = fixture.core.state.workspaces
         #expect(fixture.core.state.pocketPhase(of: mine) == nil)
-        #expect(workspaces.space(of: mine) == workspaces.activeSpace)
-        #expect(fixture.core.state.windows[mine]?.isFloating == false)
+        expectEqual(workspaces.space(of: mine), workspaces.activeSpace)
+        expectEqual(fixture.core.state.windows[mine]?.isFloating, false)
     }
 
     @Test("closing the window frees the key; the next press opens anew")
@@ -162,7 +162,7 @@ struct PocketAppKeyTests {
         )
         #expect(fixture.core.state.pocket.isEmpty)
         fixture.press()
-        #expect(fixture.opened.count == 2)
+        expectEqual(fixture.opened.count, 2)
     }
 
     @Test("the row's stored Lua is the ruled shape")

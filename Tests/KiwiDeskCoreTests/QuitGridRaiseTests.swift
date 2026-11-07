@@ -37,7 +37,7 @@ struct QuitGridRaiseTests {
             targetDepth: depth
         )
         let expected: [UInt32] = [0, 6, 1, 7, 2, 8, 3, 9, 4, 5]
-        #expect(order == expected.map(WindowID.init))
+        expectEqual(order, expected.map(WindowID.init))
     }
 
     @Test("tiles raise in arrangement order")
@@ -47,7 +47,7 @@ struct QuitGridRaiseTests {
             in: axFrame,
             targetDepth: depth
         )
-        #expect(order == ids(0..<5))
+        expectEqual(order, ids(0..<5))
     }
 
     @Test(
@@ -78,8 +78,8 @@ struct QuitGridRaiseTests {
             in: region,
             targetDepth: depth
         )
-        #expect(order.count == placed.count)
-        #expect(Set(order) == Set(placed.keys))
+        expectEqual(order.count, placed.count)
+        expectEqual(Set(order), Set(placed.keys))
         let origins = placed.values.map(\.origin)
         func isPileTop(_ frame: CGRect) -> Bool {
             !origins.contains(
@@ -102,8 +102,8 @@ struct QuitGridRaiseTests {
             let top = try #require(placed[above])
             let next = try #require(placed[below])
             if !isPileTop(next) {
-                #expect(next.minX == top.minX)
-                #expect(next.minY == top.minY + OverlapStack.offset)
+                expectEqual(next.minX, top.minX)
+                expectEqual(next.minY, top.minY + OverlapStack.offset)
             }
         }
         let columnFirst = region.height > region.width

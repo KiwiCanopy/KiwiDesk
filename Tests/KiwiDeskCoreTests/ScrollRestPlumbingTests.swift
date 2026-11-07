@@ -60,7 +60,7 @@ struct ScrollRestPlumbingTests {
             $0.scrollRest = ScrollRest(offset: -400)
         }
         manager.setMode("1", .bsp)
-        #expect(manager["1"]?.mode == .bsp)
+        expectEqual(manager["1"]?.mode, .bsp)
         #expect(manager["1"]?.scrollRest == nil)
     }
 
@@ -114,6 +114,6 @@ struct ScrollRestPlumbingTests {
             $0.scrollRest = ScrollRest(offset: -400)
         }
         manager.setMode("1", .scrolling)
-        #expect(manager["1"]?.scrollRest == ScrollRest(offset: -400))
+        expectEqual(manager["1"]?.scrollRest, ScrollRest(offset: -400))
     }
 }

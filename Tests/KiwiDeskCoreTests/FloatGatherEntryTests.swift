@@ -98,7 +98,7 @@ struct FloatGatherEntryTests {
         core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let expected = Self.expected(core)
-        #expect(expected.count == 3)
+        expectEqual(expected.count, 3)
         #expect(
             core.tiler.stashOriginal(Self.inside) == expected[Self.inside]
         )
@@ -146,9 +146,9 @@ struct FloatGatherEntryTests {
             targetDepth: core.appWide.quitGridTargetDepth,
             placingLast: core.state.workspaces[Self.space]?.focused
         )
-        #expect(grid.count == 3)
+        expectEqual(grid.count, 3)
         for id in members {
-            #expect(core.tiler.stashOriginal(id) == grid[id])
+            expectEqual(core.tiler.stashOriginal(id), grid[id])
         }
     }
 
@@ -188,7 +188,7 @@ struct FloatGatherEntryTests {
         )
         let centred = FloatRecovery.centred(Self.size, in: Self.bounds)
         for id in members {
-            #expect(core.tiler.stashOriginal(id) == grid[id])
+            expectEqual(core.tiler.stashOriginal(id), grid[id])
             #expect(core.tiler.stashOriginal(id) != centred)
         }
     }
@@ -201,7 +201,7 @@ struct FloatGatherEntryTests {
         let core = try #require(makeCore(mode: .bsp))
         #expect(core.drawnSpaceModes[Self.space] == nil)
         core.retile()
-        #expect(core.drawnSpaceModes[Self.space] == .bsp)
+        expectEqual(core.drawnSpaceModes[Self.space], .bsp)
     }
 
     @Test(
@@ -212,7 +212,7 @@ struct FloatGatherEntryTests {
         let core = try #require(makeCore(mode: .floating))
         core.retile()
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
-        #expect(core.drawnSpaceModes[Self.space] == .floating)
+        expectEqual(core.drawnSpaceModes[Self.space], .floating)
     }
 
     @Test(
@@ -251,7 +251,7 @@ struct FloatGatherEntryTests {
                 activeSpace: Self.space.raw
             )
         )
-        #expect(core.state.workspaces[Self.space]?.mode == .floating)
+        expectEqual(core.state.workspaces[Self.space]?.mode, .floating)
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
     }
@@ -291,7 +291,7 @@ struct FloatGatherEntryTests {
         core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         for (id, capture) in captures {
-            #expect(core.tiler.stashOriginal(id) == capture)
+            expectEqual(core.tiler.stashOriginal(id), capture)
         }
     }
 
@@ -342,6 +342,6 @@ struct FloatGatherEntryTests {
         // … and delivered by the activation's pass.
         core.state.workspaces.activate(Self.space)
         core.retile(pass: .apply)
-        #expect(core.tiler.recentInstantTarget(Self.inside) == target)
+        expectEqual(core.tiler.recentInstantTarget(Self.inside), target)
     }
 }

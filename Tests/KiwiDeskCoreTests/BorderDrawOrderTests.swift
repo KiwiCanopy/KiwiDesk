@@ -24,12 +24,12 @@ struct BorderDrawOrderTests {
         let manager = BorderManager()
         manager.movePanel = { _, _ in false }
         manager.sync([spec(41)])
-        #expect(manager.borderedWindows == [WindowID(41)])
+        expectEqual(manager.borderedWindows, [WindowID(41)])
         // behind (default) → front: overlays retired, rebuilt next sync.
         manager.setDrawOrder(.front)
         #expect(manager.borderedWindows.isEmpty)
         manager.sync([spec(41)])
-        #expect(manager.borderedWindows == [WindowID(41)])
+        expectEqual(manager.borderedWindows, [WindowID(41)])
     }
 
     @Test("Setting the same order keeps rings intact")
@@ -39,6 +39,6 @@ struct BorderDrawOrderTests {
         manager.sync([spec(41)])
         // Default is behind; setting behind again must not retire.
         manager.setDrawOrder(.behind)
-        #expect(manager.borderedWindows == [WindowID(41)])
+        expectEqual(manager.borderedWindows, [WindowID(41)])
     }
 }

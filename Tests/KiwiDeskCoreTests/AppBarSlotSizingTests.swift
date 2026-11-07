@@ -53,13 +53,13 @@ struct AppBarSlotSizingTests {
         // shared with the slot measurement and the GUI scene);
         // the default style's `fontSize` 0 is the auto arm.
         let auto = AppBarLook()
-        #expect(auto.fontSize == 0)
+        expectEqual(auto.fontSize, 0)
         let slim = auto.resolvedFontSize(forContentDepth: 20)
         let fat = auto.resolvedFontSize(forContentDepth: 48)
         #expect(slim < fat)
         // Extremes stay readable and inside the strip.
-        #expect(auto.resolvedFontSize(forContentDepth: 4) == 9)
-        #expect(auto.resolvedFontSize(forContentDepth: 400) == 28)
+        expectEqual(auto.resolvedFontSize(forContentDepth: 4), 9)
+        expectEqual(auto.resolvedFontSize(forContentDepth: 400), 28)
         // An explicit `font_size` wins over the ladder.
         var pinned = AppBarLook()
         pinned.fontSize = 13

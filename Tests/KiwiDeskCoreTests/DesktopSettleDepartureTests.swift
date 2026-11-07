@@ -119,7 +119,7 @@ struct DesktopSettleDepartureTests {
         core.handle(.windowDestroyed(focused, wasMinimized: false))
         swipeToEmptyDesktop(core)
         relist(core)
-        #expect(core.state.workspaces[home]?.focused == focused)
+        expectEqual(core.state.workspaces[home]?.focused, focused)
         settle(core, box)
         #expect(stoodDown(box))
         #expect(!reachedTheRaise(box))

@@ -63,7 +63,7 @@ struct SpaceBarItemLabelTests {
 
     @Test("The identifier is the default")
     func identifierIsTheDefault() {
-        #expect(SpaceBarStyle().itemLabel == .identifier)
+        expectEqual(SpaceBarStyle().itemLabel, .identifier)
         let core = seededCore()
         #expect(
             labels(core) == [
@@ -81,7 +81,7 @@ struct SpaceBarItemLabelTests {
             args: [.string("layout")]
         )
         #expect(response.isSuccess)
-        #expect(core.tiler.settings.spaceBarStyle.itemLabel == .layout)
+        expectEqual(core.tiler.settings.spaceBarStyle.itemLabel, .layout)
         #expect(
             labels(core) == [
                 SpaceID("1"): .symbol(LayoutMode.bsp.symbol),
@@ -96,7 +96,7 @@ struct SpaceBarItemLabelTests {
         let mail = try #require(
             built.first { $0.space == SpaceID("mail") }
         )
-        #expect(mail.apps.map(\.name) == ["Mail"])
+        expectEqual(mail.apps.map(\.name), ["Mail"])
     }
 
     @Test("The label follows a layout change")
@@ -138,7 +138,7 @@ struct SpaceBarItemLabelTests {
             )
         }
         let symbols = LayoutMode.allCases.map(\.symbol)
-        #expect(Set(symbols).count == symbols.count)
+        expectEqual(Set(symbols).count, symbols.count)
     }
 
     @Test("The label survives a JSON round trip under item_label")
@@ -149,11 +149,11 @@ struct SpaceBarItemLabelTests {
         let json = try #require(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
-        #expect(json["item_label"] as? String == "layout")
+        expectEqual(json["item_label"] as? String, "layout")
         let back = try JSONDecoder().decode(
             SpaceBarStyle.self,
             from: data
         )
-        #expect(back.itemLabel == .layout)
+        expectEqual(back.itemLabel, .layout)
     }
 }

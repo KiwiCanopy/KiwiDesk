@@ -129,7 +129,7 @@ struct FloatFlickDropTests {
             pressAt: CGPoint(x: start.midX, y: start.minY + 10)
         )
 
-        #expect(core.state.workspaces.space(of: Self.window) == home)
+        expectEqual(core.state.workspaces.space(of: Self.window), home)
     }
 
     @Test(
@@ -262,6 +262,6 @@ struct FloatFlickDropTests {
 
         core.handle(.windowMoved(Self.window, flicked))
 
-        #expect(core.drag.hasGesture(Self.window) == flick)
+        expectEqual(core.drag.hasGesture(Self.window), flick)
     }
 }

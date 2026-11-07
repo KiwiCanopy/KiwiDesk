@@ -61,17 +61,17 @@ struct LayerChangeEventTests {
 
         core.keys.switchLayer("resize")
         let payloads = layerEvents(events)
-        #expect(payloads.count == 1)
-        #expect(payloads.first?["from_layer"] == .string("default"))
-        #expect(payloads.first?["to_layer"] == .string("resize"))
-        #expect(core.lua?.global("seen") == .string("default>resize"))
+        expectEqual(payloads.count, 1)
+        expectEqual(payloads.first?["from_layer"], .string("default"))
+        expectEqual(payloads.first?["to_layer"], .string("resize"))
+        expectEqual(core.lua?.global("seen"), .string("default>resize"))
 
         core.keys.switchLayer("default")
-        #expect(layerEvents(events).count == 2)
+        expectEqual(layerEvents(events).count, 2)
         #expect(
             layerEvents(events).last?["to_layer"] == .string("default")
         )
-        #expect(core.lua?.global("seen") == .string("resize>default"))
+        expectEqual(core.lua?.global("seen"), .string("resize>default"))
     }
 
     /// No change, no event: a switch to the layer already active
@@ -87,7 +87,7 @@ struct LayerChangeEventTests {
         #expect(layerEvents(events).isEmpty)
         core.keys.switchLayer("nope")
         #expect(layerEvents(events).isEmpty)
-        #expect(core.keys.currentLayer == "default")
+        expectEqual(core.keys.currentLayer, "default")
     }
 
     /// A config reload drops the layers and returns to `default`
@@ -104,11 +104,11 @@ struct LayerChangeEventTests {
 
         core.keys.reset()
         let payloads = layerEvents(events)
-        #expect(payloads.count == 1)
-        #expect(payloads.first?["from_layer"] == .string("resize"))
-        #expect(payloads.first?["to_layer"] == .string("default"))
+        expectEqual(payloads.count, 1)
+        expectEqual(payloads.first?["from_layer"], .string("resize"))
+        expectEqual(payloads.first?["to_layer"], .string("default"))
         // …and a reset already on `default` reports nothing.
         core.keys.reset()
-        #expect(layerEvents(events).count == 1)
+        expectEqual(layerEvents(events).count, 1)
     }
 }

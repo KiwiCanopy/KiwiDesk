@@ -81,10 +81,10 @@ struct AppBarContentMigrationTests {
         )
         let migrated = try root(out)
         let bars = try bars(in: migrated["settings"])
-        #expect(bars.count == 3)
+        expectEqual(bars.count, 3)
         #expect(bars.allSatisfy { $0["content"] == nil })
         #expect(bars.allSatisfy { !$0.isEmpty })
-        #expect(migrated["format"] as? Int == Profile.currentFormat)
+        expectEqual(migrated["format"] as? Int, Profile.currentFormat)
         let settings = try JSONSerialization.data(
             withJSONObject: try #require(migrated["settings"])
         )
@@ -117,7 +117,7 @@ struct AppBarContentMigrationTests {
         )
         let bars = try bars(in: profiles.first?["settings"])
         #expect(bars.allSatisfy { $0["content"] == nil })
-        #expect(migrated["format"] as? Int == SetupBundle.currentFormat)
+        expectEqual(migrated["format"] as? Int, SetupBundle.currentFormat)
     }
 
     /// The textual edit itself, not the envelope: the fixture's
@@ -136,8 +136,8 @@ struct AppBarContentMigrationTests {
                 .split(separator: "\n", omittingEmptySubsequences: false)
         }
         let kept = lines(data).filter { !$0.contains("\"content\"") }
-        #expect(lines(data).count - kept.count == 3)
-        #expect(lines(out) == kept)
+        expectEqual(lines(data).count - kept.count, 3)
+        expectEqual(lines(out), kept)
     }
 
     /// Scoped to an `app_bar` parent: `content` is a common word,
@@ -158,7 +158,7 @@ struct AppBarContentMigrationTests {
         )
         let migrated = try #require(root(out)["settings"] as? [String: Any])
         let other = try #require(migrated["elsewhere"] as? [String: Any])
-        #expect(other["content"] as? String == "kept")
+        expectEqual(other["content"] as? String, "kept")
         #expect(try bars(in: migrated).allSatisfy { $0["content"] == nil })
     }
 

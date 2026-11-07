@@ -22,7 +22,7 @@ struct PendingSpaceAssignmentTests {
     func recordedNameIsClaimedOnce() {
         let ledger = PendingSpaceAssignment()
         ledger.record(moved, space: mail, at: t0)
-        #expect(ledger.claim(moved, at: t0) == mail)
+        expectEqual(ledger.claim(moved, at: t0), mail)
         #expect(ledger.claim(moved, at: t0) == nil)
         #expect(ledger.isEmpty)
     }
@@ -46,8 +46,8 @@ struct PendingSpaceAssignmentTests {
         let ledger = PendingSpaceAssignment()
         ledger.record(moved, space: mail, at: t0)
         ledger.record(other, space: SpaceID("2"), at: t0)
-        #expect(ledger.claim(other, at: t0) == SpaceID("2"))
-        #expect(ledger.claim(moved, at: t0) == mail)
+        expectEqual(ledger.claim(other, at: t0), SpaceID("2"))
+        expectEqual(ledger.claim(moved, at: t0), mail)
     }
 
     @Test("a re-key carries the name to the new id")
@@ -56,6 +56,6 @@ struct PendingSpaceAssignmentTests {
         ledger.record(moved, space: mail, at: t0)
         ledger.rekey(old: moved, new: other)
         #expect(ledger.claim(moved, at: t0) == nil)
-        #expect(ledger.claim(other, at: t0) == mail)
+        expectEqual(ledger.claim(other, at: t0), mail)
     }
 }

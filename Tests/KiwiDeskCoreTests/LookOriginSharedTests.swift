@@ -62,8 +62,8 @@ struct LookOriginSharedTests {
         )
         core.tiler.settings.lookOrigin = origin
         try core.persistProfile(named: "Work", modes: nil)
-        #expect(core.sharedLook?.origin == origin)
+        expectEqual(core.sharedLook?.origin, origin)
         let stored = try core.profiles.read(name: "Home")
-        #expect(stored.settings.lookOrigin == origin)
+        expectEqual(stored.settings.lookOrigin, origin)
     }
 }

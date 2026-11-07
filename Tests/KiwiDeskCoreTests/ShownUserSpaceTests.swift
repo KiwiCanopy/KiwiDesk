@@ -37,8 +37,8 @@ struct ShownUserSpaceTests {
         )
         let memory = DesktopMemory()
         memory.seed(snapshot())
-        #expect(memory.shownUserSpaces == ["MAIN": false, "SIDE": true])
-        #expect(memory.shownSpaces == ["MAIN": 9, "SIDE": 7])
+        expectEqual(memory.shownUserSpaces, ["MAIN": false, "SIDE": true])
+        expectEqual(memory.shownSpaces, ["MAIN": 9, "SIDE": 7])
     }
 
     @Test("a filed verdict answers without the live read")
@@ -50,8 +50,8 @@ struct ShownUserSpaceTests {
             reads += 1
             return true
         }
-        #expect(answer == false)
-        #expect(reads == 0)
+        expectEqual(answer, false)
+        expectEqual(reads, 0)
     }
 
     /// Shared Spaces key the one managed display by a synthetic
@@ -65,8 +65,8 @@ struct ShownUserSpaceTests {
             reads += 1
             return true
         }
-        #expect(answer == false)
-        #expect(reads == 0)
+        expectEqual(answer, false)
+        expectEqual(reads, 0)
     }
 
     /// Separate Spaces with one screen filed: another screen's
@@ -83,7 +83,7 @@ struct ShownUserSpaceTests {
             return true
         }
         #expect(answer)
-        #expect(reads == 1)
+        expectEqual(reads, 1)
     }
 
     @Test("a screen no reading named reads live")
@@ -94,8 +94,8 @@ struct ShownUserSpaceTests {
             asked.append($0)
             return false
         }
-        #expect(answer == false)
-        #expect(asked == ["NEW"])
+        expectEqual(answer, false)
+        expectEqual(asked, ["NEW"])
     }
 
     @Test("an unknown screen stays a user Space")
@@ -106,7 +106,7 @@ struct ShownUserSpaceTests {
             return false
         }
         #expect(answer)
-        #expect(reads == 0)
+        expectEqual(reads, 0)
     }
 
     @Test("a display change drops the filed verdicts")

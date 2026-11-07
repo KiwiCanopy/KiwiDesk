@@ -71,9 +71,9 @@ struct JumpSwapHereTests {
         core.eventLoop.observers[getpid()] = observer
         core.frontmostPIDProvider = { getpid() }
         core.swapHere(.window(WindowID(2)))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "2")
+        expectEqual(core.state.workspaces.activeSpace, "1")
     }
 
     /// The control: the preflight refuses another app in front, so
@@ -86,7 +86,7 @@ struct JumpSwapHereTests {
         core.eventLoop.observers[getpid()] = observer
         core.frontmostPIDProvider = { 1 }
         core.swapHere(.window(WindowID(2)))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "2")
         #expect(recorder.logs.contains { $0.contains("denied swap_here") })
     }
 
@@ -96,7 +96,7 @@ struct JumpSwapHereTests {
         pair(core)
         track(core, 3, in: "2", floating: true)
         core.swapHere(.window(WindowID(3)))
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), "2")
         #expect(cued(recorder, .cannotSwapFloating))
     }
 
@@ -106,7 +106,7 @@ struct JumpSwapHereTests {
         pair(core)
         track(core, 3, in: "2", fullscreen: true)
         core.swapHere(.window(WindowID(3)))
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), "2")
         #expect(cued(recorder, .cannotSwapFullScreen(window: "")))
     }
 
@@ -119,7 +119,7 @@ struct JumpSwapHereTests {
         let (empty, emptyLog) = makeCore()
         track(empty, 2, in: "2")
         empty.swapHere(.window(WindowID(2)))
-        #expect(empty.state.workspaces.space(of: WindowID(2)) == "2")
+        expectEqual(empty.state.workspaces.space(of: WindowID(2)), "2")
         #expect(cued(emptyLog, .nothingHereToSwap))
     }
 
@@ -133,7 +133,7 @@ struct JumpSwapHereTests {
         recorder.logs = []
         core.swapHere(.hiddenApp(900_009))
         #expect(cued(recorder, .cannotSwapHiddenApp))
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
     }
 
     /// A pocketed window is the verb's own refusal, CLI included.
@@ -148,7 +148,7 @@ struct JumpSwapHereTests {
         core.state.workspaces.focus(WindowID(1), in: "1")
         recorder.logs = []
         let response = core.execute("swap_here", args: [.number(3)])
-        #expect(response.error == "pocketed window 3 cannot be swapped")
+        expectEqual(response.error, "pocketed window 3 cannot be swapped")
         #expect(cued(recorder, .cannotSwapPocketed))
     }
 
@@ -167,7 +167,7 @@ struct JumpSwapHereTests {
         )
         recorder.logs = []
         let response = core.execute("swap_here", args: [.number(3)])
-        #expect(response.error == "window 3 is in no Space")
+        expectEqual(response.error, "window 3 is in no Space")
         #expect(cued(recorder, .cannotSwapUnfiled))
         #expect(!cued(recorder, .cannotSwapPocketed))
     }
@@ -197,19 +197,19 @@ struct JumpSwapHereTests {
             )
         }
         var seen = blocks()
-        #expect(seen[.window(WindowID(3))] == .floating)
-        #expect(seen[.window(WindowID(4))] == .fullScreen)
+        expectEqual(seen[.window(WindowID(3))], .floating)
+        expectEqual(seen[.window(WindowID(4))], .fullScreen)
         #expect(seen[.window(WindowID(2))] == .some(nil))
         // Your own window floats: every row names yours.
         var mine = core.state.windows[WindowID(1)]
         mine?.isFloating = true
         if let mine { core.state.windows.upsert(mine) }
         seen = blocks()
-        #expect(seen[.window(WindowID(2))] == .yoursFloating)
+        expectEqual(seen[.window(WindowID(2))], .yoursFloating)
         let moves = core.jumpSnapshot().entries.first {
             $0.target == .window(WindowID(4))
         }
-        #expect(moves?.moveBlock == .fullScreen)
+        expectEqual(moves?.moveBlock, .fullScreen)
     }
 
     @Test("the row says whether it swaps")
@@ -222,7 +222,7 @@ struct JumpSwapHereTests {
                 ($0.target, $0.swapsHere)
             }
         )
-        #expect(swaps[.window(WindowID(2))] == true)
-        #expect(swaps[.window(WindowID(3))] == false)
+        expectEqual(swaps[.window(WindowID(2))], true)
+        expectEqual(swaps[.window(WindowID(3))], false)
     }
 }

@@ -76,7 +76,7 @@ struct QuitGridShapeTests {
     )
     func tileShapes(region: CGRect, expected: [[Int]]) {
         for (index, shape) in expected.enumerated() {
-            #expect(dims(index + 1, in: region) == shape)
+            expectEqual(dims(index + 1, in: region), shape)
         }
     }
 
@@ -88,47 +88,47 @@ struct QuitGridShapeTests {
         let wide = frame(0, 0, 2000, 1000)
         let tall = frame(0, 0, 1000, 2000)
         let square = frame(0, 0, 1000, 1000)
-        #expect(dims(4, in: wide) == [4, 1])
-        #expect(dims(4, in: tall) == [1, 4])
-        #expect(dims(2, in: square) == [2, 1])
+        expectEqual(dims(4, in: wide), [4, 1])
+        expectEqual(dims(4, in: tall), [1, 4])
+        expectEqual(dims(2, in: square), [2, 1])
     }
 
     @Test("the ladder at depth 5: 3×2, 4×2, 4×3, then 4×4")
     func ladderAtDefaultDepth() {
-        #expect(dims(7) == [3, 2])
-        #expect(dims(30) == [3, 2])
-        #expect(dims(31) == [4, 2])
-        #expect(dims(40) == [4, 2])
-        #expect(dims(41) == [4, 3])
-        #expect(dims(60) == [4, 3])
-        #expect(dims(61) == [4, 4])
+        expectEqual(dims(7), [3, 2])
+        expectEqual(dims(30), [3, 2])
+        expectEqual(dims(31), [4, 2])
+        expectEqual(dims(40), [4, 2])
+        expectEqual(dims(41), [4, 3])
+        expectEqual(dims(60), [4, 3])
+        expectEqual(dims(61), [4, 4])
         // Past 4×4 the piles just deepen.
-        #expect(dims(500) == [4, 4])
+        expectEqual(dims(500), [4, 4])
     }
 
     @Test("a portrait region mirrors the ladder")
     func portraitLadder() {
-        #expect(dims(7, in: portraitFrame) == [2, 3])
-        #expect(dims(31, in: portraitFrame) == [2, 4])
-        #expect(dims(41, in: portraitFrame) == [3, 4])
-        #expect(dims(61, in: portraitFrame) == [4, 4])
+        expectEqual(dims(7, in: portraitFrame), [2, 3])
+        expectEqual(dims(31, in: portraitFrame), [2, 4])
+        expectEqual(dims(41, in: portraitFrame), [3, 4])
+        expectEqual(dims(61, in: portraitFrame), [4, 4])
     }
 
     @Test("the ladder at depth 1 takes the rung that holds all")
     func ladderAtDepthOne() {
-        #expect(dims(7, target: 1) == [4, 2])
-        #expect(dims(8, target: 1) == [4, 2])
-        #expect(dims(9, target: 1) == [4, 3])
-        #expect(dims(13, target: 1) == [4, 4])
-        #expect(dims(10_000, target: 1) == [4, 4])
+        expectEqual(dims(7, target: 1), [4, 2])
+        expectEqual(dims(8, target: 1), [4, 2])
+        expectEqual(dims(9, target: 1), [4, 3])
+        expectEqual(dims(13, target: 1), [4, 4])
+        expectEqual(dims(10_000, target: 1), [4, 4])
     }
 
     @Test("a custom target moves every threshold")
     func customTargetThresholds() {
-        #expect(dims(60, target: 10) == [3, 2])
-        #expect(dims(61, target: 10) == [4, 2])
-        #expect(dims(81, target: 10) == [4, 3])
-        #expect(dims(121, target: 10) == [4, 4])
+        expectEqual(dims(60, target: 10), [3, 2])
+        expectEqual(dims(61, target: 10), [4, 2])
+        expectEqual(dims(81, target: 10), [4, 3])
+        expectEqual(dims(121, target: 10), [4, 4])
     }
 
     private func dims(
@@ -154,14 +154,14 @@ struct QuitGridTileTests {
 
     @Test("a single window fills the region")
     func singleWindowFills() {
-        #expect(frames(1)[WindowID(0)] == axFrame)
+        expectEqual(frames(1)[WindowID(0)], axFrame)
     }
 
     @Test("two windows sit side by side as halves")
     func twoHalves() {
         let placed = frames(2)
-        #expect(placed[WindowID(0)] == frame(0, 25, 960, 1055))
-        #expect(placed[WindowID(1)] == frame(960, 25, 960, 1055))
+        expectEqual(placed[WindowID(0)], frame(0, 25, 960, 1055))
+        expectEqual(placed[WindowID(1)], frame(960, 25, 960, 1055))
     }
 
     @Test("three windows share one row")
@@ -178,7 +178,7 @@ struct QuitGridTileTests {
     @Test("four windows take 2×2")
     func fourAsTwoByTwo() {
         let placed = frames(4)
-        #expect(placed[WindowID(0)] == frame(0, 25, 960, 527.5))
+        expectEqual(placed[WindowID(0)], frame(0, 25, 960, 527.5))
         #expect(
             placed[WindowID(3)] == frame(960, 552.5, 960, 527.5)
         )
@@ -187,8 +187,8 @@ struct QuitGridTileTests {
     @Test("five windows: 3 + 2, the last filling its row")
     func fiveFillsTheShortRow() {
         let placed = frames(5)
-        #expect(placed[WindowID(2)] == frame(1280, 25, 640, 527.5))
-        #expect(placed[WindowID(3)] == frame(0, 552.5, 640, 527.5))
+        expectEqual(placed[WindowID(2)], frame(1280, 25, 640, 527.5))
+        expectEqual(placed[WindowID(3)], frame(0, 552.5, 640, 527.5))
         #expect(
             placed[WindowID(4)] == frame(640, 552.5, 1280, 527.5)
         )
@@ -205,7 +205,7 @@ struct QuitGridTileTests {
     @Test("a portrait region stacks two windows top and bottom")
     func portraitTwo() {
         let placed = frames(2, in: portraitFrame)
-        #expect(placed[WindowID(0)] == frame(0, 25, 1080, 947.5))
+        expectEqual(placed[WindowID(0)], frame(0, 25, 1080, 947.5))
         #expect(
             placed[WindowID(1)] == frame(0, 972.5, 1080, 947.5)
         )
@@ -220,10 +220,10 @@ struct QuitGridTileTests {
         let f2 = try #require(placed[WindowID(2)])
         let f3 = try #require(placed[WindowID(3)])
         let f4 = try #require(placed[WindowID(4)])
-        #expect(f2.minX == 0)
+        expectEqual(f2.minX, 0)
         #expect(abs(f2.minY - (25 + 2 * row)) < 0.001)
-        #expect(f3.origin == CGPoint(x: 540, y: 25))
-        #expect(f4.minX == 540)
+        expectEqual(f3.origin, CGPoint(x: 540, y: 25))
+        expectEqual(f4.minX, 540)
         #expect(abs(f4.minY - (25 + row)) < 0.001)
         #expect(abs(f4.height - 2 * row) < 0.001)
     }
@@ -234,7 +234,7 @@ struct QuitGridTileTests {
         let placed = frames(2, in: small)
         // Halves would be 200 wide — floored to 300.
         let f0 = try #require(placed[WindowID(0)])
-        #expect(f0.size == CGSize(width: 300, height: 400))
+        expectEqual(f0.size, CGSize(width: 300, height: 400))
     }
 }
 
@@ -246,12 +246,12 @@ struct QuitGridPileTests {
         let f0 = try #require(placed[WindowID(0)])
         let f5 = try #require(placed[WindowID(5)])
         let f6 = try #require(placed[WindowID(6)])
-        #expect(f0.origin == CGPoint(x: 0, y: 25))
-        #expect(f5.origin == CGPoint(x: 1280, y: 552.5))
+        expectEqual(f0.origin, CGPoint(x: 0, y: 25))
+        expectEqual(f5.origin, CGPoint(x: 1280, y: 552.5))
         #expect(
             f6.origin == CGPoint(x: 0, y: 25 + OverlapStack.offset)
         )
-        #expect(f6.width == 640)
+        expectEqual(f6.width, 640)
     }
 
     @Test("every cell cascades, not only the last")
@@ -265,7 +265,7 @@ struct QuitGridPileTests {
             let second = try #require(
                 placed[WindowID(UInt32(cell + 6))]
             )
-            #expect(second.minX == first.minX)
+            expectEqual(second.minX, first.minX)
             #expect(
                 second.minY == first.minY + OverlapStack.offset
             )
@@ -275,19 +275,19 @@ struct QuitGridPileTests {
     @Test("31 windows grow the grid to 4×2")
     func growsToFourByTwo() throws {
         let placed = frames(31)
-        #expect(placed.count == 31)
+        expectEqual(placed.count, 31)
         let f1 = try #require(placed[WindowID(1)])
         let f4 = try #require(placed[WindowID(4)])
-        #expect(f1.minX == 480)
+        expectEqual(f1.minX, 480)
         // Row two opens with the fifth window.
-        #expect(f4.origin == CGPoint(x: 0, y: 552.5))
+        expectEqual(f4.origin, CGPoint(x: 0, y: 552.5))
     }
 
     @Test("depth 1 deals seven into 4×2 as 4 + 3, the last filling")
     func depthOneFillsBeforeItPiles() {
         let placed = frames(7, target: 1)
-        #expect(placed[WindowID(3)] == frame(1440, 25, 480, 527.5))
-        #expect(placed[WindowID(4)] == frame(0, 552.5, 480, 527.5))
+        expectEqual(placed[WindowID(3)], frame(1440, 25, 480, 527.5))
+        expectEqual(placed[WindowID(4)], frame(0, 552.5, 480, 527.5))
         #expect(
             placed[WindowID(6)] == frame(960, 552.5, 960, 527.5)
         )
@@ -300,10 +300,10 @@ struct QuitGridPileTests {
         let placed = frames(8, in: portraitFrame)
         let f1 = try #require(placed[WindowID(1)])
         let f7 = try #require(placed[WindowID(7)])
-        #expect(f1.minX == 0)
+        expectEqual(f1.minX, 0)
         #expect(abs(f1.minY - (25 + 1895.0 / 3)) < 0.001)
-        #expect(f7.minX == f1.minX)
-        #expect(f7.minY == f1.minY + OverlapStack.offset)
+        expectEqual(f7.minX, f1.minX)
+        expectEqual(f7.minY, f1.minY + OverlapStack.offset)
     }
 
     @Test("deep bottom-row piles stay pinned on screen")
@@ -311,7 +311,7 @@ struct QuitGridPileTests {
         // 160 windows → 4×4 with 10-deep piles; unpinned,
         // bottom-row cascades would run off the display.
         let placed = frames(160)
-        #expect(placed.count == 160)
+        expectEqual(placed.count, 160)
         for frame in placed.values {
             #expect(frame.minX >= axFrame.minX)
             #expect(frame.minY >= axFrame.minY)
@@ -330,6 +330,6 @@ struct QuitGridPileTests {
         let f6 = try #require(placed[WindowID(6)])
         #expect(f6.maxY <= 552.5)
         let f3 = try #require(placed[WindowID(3)])
-        #expect(f3.minY == 552.5)
+        expectEqual(f3.minY, 552.5)
     }
 }

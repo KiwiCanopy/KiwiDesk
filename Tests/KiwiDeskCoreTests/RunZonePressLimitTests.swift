@@ -49,7 +49,7 @@ struct RunZonePressLimitTests {
         let press = try #require(
             three.press(ids[0], by: -50, toward: .end, in: sized)
         )
-        #expect(press.visible == 0..<3)
+        expectEqual(press.visible, 0..<3)
         #expect(press.movesRun)
     }
 
@@ -116,7 +116,7 @@ struct RunZonePressLimitTests {
         let share = try #require(press.sizes[ids[0]] ?? nil)
         #expect(abs(share * 900 - (drawn + 5)) < 0.01)
         // The length replaces the weight.
-        #expect(press.weight == 1)
+        expectEqual(press.weight, 1)
     }
 
     @Test("A hold's stop beside a sized mate sets that mate to its floor")
@@ -130,7 +130,7 @@ struct RunZonePressLimitTests {
         let stop = try #require(
             three.stopShortOfPush(ids[1], toward: .start, in: sized)
         )
-        #expect(stop.sizes[ids[0]] == .some(0.3))
+        expectEqual(stop.sizes[ids[0]], .some(0.3))
         let share = try #require(stop.sizes[ids[1]] ?? nil)
         #expect(abs(share - 0.69) < 0.001)
         #expect(!stop.movesRun)
@@ -164,7 +164,7 @@ struct RunZonePressLimitTests {
             two.press(ids[0], by: 5, toward: .end, in: whole)
         )
         #expect(press.movesRun)
-        #expect(press.visible == 0..<1)
+        expectEqual(press.visible, 0..<1)
         #expect(press.cue == nil)
     }
 }

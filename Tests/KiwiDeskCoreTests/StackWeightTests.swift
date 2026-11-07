@@ -67,7 +67,7 @@ struct StackWeightTests {
             for: [w1, w2, w3],
             in: makeContext(weights: [w2: 3])
         )
-        #expect(even[w1] == weighted[w1])
+        expectEqual(even[w1], weighted[w1])
     }
 
     @Test("A weighted share below min falls back to overflow")
@@ -102,7 +102,7 @@ struct StackWeightTests {
         )
         space.remove(w1)
         #expect(space.stackWeights[w1] == nil)
-        #expect(space.stackWeights[w2] == 3)
+        expectEqual(space.stackWeights[w2], 3)
     }
 
     @Test("A cross-space move prunes the weight too")
@@ -136,8 +136,8 @@ struct StackPartitionTests {
             [w1, w2, w3],
             masterCount: 1
         )
-        #expect(Array(master) == [w1])
-        #expect(stack.map(Array.init) == [w2, w3])
+        expectEqual(Array(master), [w1])
+        expectEqual(stack.map(Array.init), [w2, w3])
     }
 
     @Test("Everything fits in master → single column")
@@ -146,7 +146,7 @@ struct StackPartitionTests {
             [w1, w2],
             masterCount: 5
         )
-        #expect(Array(master) == [w1, w2])
+        expectEqual(Array(master), [w1, w2])
         #expect(stack == nil)
     }
 
@@ -156,8 +156,8 @@ struct StackPartitionTests {
             [w1, w2],
             masterCount: 0
         )
-        #expect(Array(master) == [w1])
-        #expect(stack.map(Array.init) == [w2])
+        expectEqual(Array(master), [w1])
+        expectEqual(stack.map(Array.init), [w2])
     }
 
     @Test("column(containing:) picks the member's zone")
@@ -168,13 +168,13 @@ struct StackPartitionTests {
             in: windows,
             masterCount: 1
         )
-        #expect(master.map(Array.init) == [w1])
+        expectEqual(master.map(Array.init), [w1])
         let stack = StackLayout.column(
             containing: w3,
             in: windows,
             masterCount: 1
         )
-        #expect(stack.map(Array.init) == [w2, w3])
+        expectEqual(stack.map(Array.init), [w2, w3])
         #expect(
             StackLayout.column(
                 containing: WindowID(99),
@@ -213,8 +213,8 @@ struct StackPartitionTests {
         let stackXs = Set(
             (stack ?? []).compactMap { frames[$0]?.minX }
         )
-        #expect(masterXs.count == 1)
-        #expect(stackXs.count == 1)
+        expectEqual(masterXs.count, 1)
+        expectEqual(stackXs.count, 1)
         #expect(masterXs != stackXs)
     }
 }

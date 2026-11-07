@@ -76,10 +76,10 @@ struct SpaceBarCentredStripTests {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(5)))
         let built = try item(core, one)
-        #expect(drawn(built) == (3...7).map { WindowID($0) })
-        #expect(built.before.windows == [WindowID(1), WindowID(2)])
-        #expect(built.after.windows == [WindowID(8), WindowID(9)])
-        #expect(built.discs == 2)
+        expectEqual(drawn(built), (3...7).map { WindowID($0) })
+        expectEqual(built.before.windows, [WindowID(1), WindowID(2)])
+        expectEqual(built.after.windows, [WindowID(8), WindowID(9)])
+        expectEqual(built.discs, 2)
     }
 
     @Test("near an end the strip clamps and one disc remains")
@@ -87,10 +87,10 @@ struct SpaceBarCentredStripTests {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(9)))
         let built = try item(core, one)
-        #expect(drawn(built) == (4...9).map { WindowID($0) })
-        #expect(built.before.windows.count == 3)
+        expectEqual(drawn(built), (4...9).map { WindowID($0) })
+        expectEqual(built.before.windows.count, 3)
         #expect(built.after.windows.isEmpty)
-        #expect(built.discs == 1)
+        expectEqual(built.discs, 1)
     }
 
     /// Seven groups at span 5 fill the cells a disc would take:
@@ -109,11 +109,11 @@ struct SpaceBarCentredStripTests {
         }
         core.state.apply(.windowFocused(WindowID(1)))
         let built = try item(core, one)
-        #expect(built.apps.count == 7)
-        #expect(built.apps.last?.windows == [WindowID(7), WindowID(8)])
+        expectEqual(built.apps.count, 7)
+        expectEqual(built.apps.last?.windows, [WindowID(7), WindowID(8)])
         #expect(built.before.windows.isEmpty)
         #expect(built.after.windows.isEmpty)
-        #expect(built.discs == 0)
+        expectEqual(built.discs, 0)
     }
 
     /// The chip's measured length is the same wherever the focus
@@ -134,7 +134,7 @@ struct SpaceBarCentredStripTests {
                 )[0]
             )
         }
-        #expect(lengths.count == 1)
+        expectEqual(lengths.count, 1)
     }
 
     /// An inactive Space centres on the window it remembers, not
@@ -148,8 +148,8 @@ struct SpaceBarCentredStripTests {
         // memory still names window 8.
         core.state.apply(.windowCreated(window(20, app: "Other")))
         core.state.apply(.windowFocused(WindowID(20)))
-        #expect(core.state.workspaces.lastFocused == WindowID(20))
-        #expect(core.state.workspaces[one]?.focused == WindowID(8))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(20))
+        expectEqual(core.state.workspaces[one]?.focused, WindowID(8))
         let built = try item(core, one)
         #expect(drawn(built).contains(WindowID(8)))
         #expect(built.after.windows.isEmpty)
@@ -170,7 +170,7 @@ struct SpaceBarCentredStripTests {
         core.state.workspaces.activate(one)
         core.state.apply(.windowFocused(WindowID(2)))
         core.state.workspaces.activate(two)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
         let built = try item(core, two)
         #expect(drawn(built).contains(WindowID(17)))
         #expect(built.after.windows.isEmpty)
@@ -184,7 +184,7 @@ struct SpaceBarCentredStripTests {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(2)))
         core.state.workspaces.activate(two)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
         core.spaceBars.stripHover(
             one,
             .init(window: 3..<9, count: 9),
@@ -210,11 +210,11 @@ struct SpaceBarCentredStripTests {
         core.state.apply(.windowFocused(WindowID(8)))
         #expect(drawn(try item(core, one)) == drawn(before))
         core.spaceBars.stripHover(one, strip, inside: false)
-        #expect(released == 1)
+        expectEqual(released, 1)
         #expect(drawn(try item(core, one)).contains(WindowID(8)))
         // Leaving a chip that held nothing asks for nothing.
         core.spaceBars.stripHover(two, nil, inside: false)
-        #expect(released == 1)
+        expectEqual(released, 1)
     }
 
     /// A held strip on a row that lost a group — a window closed
@@ -232,7 +232,7 @@ struct SpaceBarCentredStripTests {
         )
         core.state.apply(.windowDestroyed(WindowID(1), wasMinimized: false))
         let built = try item(core, one)
-        #expect(built.drawn == .init(window: 2..<8, count: 8))
+        expectEqual(built.drawn, .init(window: 2..<8, count: 8))
         #expect(drawn(built).contains(WindowID(9)))
     }
 }

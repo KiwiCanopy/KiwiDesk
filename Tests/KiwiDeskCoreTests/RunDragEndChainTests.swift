@@ -212,7 +212,7 @@ struct RunDragEndChainTests {
         core.borders.onResizeRefusal = { refusals.append($0) }
         try drop(core, first, vertical: false, leading: true, by: 60)
         #expect(try frame(core, first) == slot)
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, true)
         #expect(refusals.isEmpty)
     }
 }

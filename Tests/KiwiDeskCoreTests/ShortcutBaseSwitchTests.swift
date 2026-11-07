@@ -43,7 +43,7 @@ struct ShortcutBaseSwitchTests {
             ShortcutBaseSwitch.kept(config.layers[0], onto: .hyper).isEmpty
         )
         ShortcutBaseSwitch.apply(.hyper, to: &config)
-        #expect(config.shortcutBase == .hyper)
+        expectEqual(config.shortcutBase, .hyper)
         let moved = combos(config, KeyLayer.defaultName)
         #expect(
             moved == seeded.map { ShortcutBase.hyper.rebased($0).combo }
@@ -67,11 +67,11 @@ struct ShortcutBaseSwitchTests {
             ShortcutBaseSwitch.kept($0, onto: .hyper)
         }
         ShortcutBaseSwitch.apply(.hyper, to: &config)
-        #expect(combos(config, KeyLayer.defaultName) == ["hyper+f"])
-        #expect(combos(config, "work") == ["control+option+f", "f"])
-        #expect(kept.map(\.layer) == ["work"])
-        #expect(kept.first?.holder.lua == "holder()")
-        #expect(kept.first?.target == "hyper+f")
+        expectEqual(combos(config, KeyLayer.defaultName), ["hyper+f"])
+        expectEqual(combos(config, "work"), ["control+option+f", "f"])
+        expectEqual(kept.map(\.layer), ["work"])
+        expectEqual(kept.first?.holder.lua, "holder()")
+        expectEqual(kept.first?.target, "hyper+f")
     }
 
     /// `✦F` registers as a bare F while Hyper is held, so a row on
@@ -106,8 +106,8 @@ struct ShortcutBaseSwitchTests {
         var config = config([KeyLayer.defaultName: seeded])
         ShortcutBaseSwitch.apply(.hyper, to: &config)
         ShortcutBaseSwitch.apply(.standard, to: &config)
-        #expect(config.shortcutBase == .standard)
-        #expect(combos(config, KeyLayer.defaultName) == seeded.map(\.combo))
+        expectEqual(config.shortcutBase, .standard)
+        expectEqual(combos(config, KeyLayer.defaultName), seeded.map(\.combo))
     }
 
     @Test("gui.json carries the base; absence is the seed's")
@@ -118,12 +118,12 @@ struct ShortcutBaseSwitchTests {
         let text = String(decoding: data, as: UTF8.self)
         #expect(text.contains("\"shortcut_base\":\"hyper\""))
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.shortcutBase == .hyper)
+        expectEqual(back.shortcutBase, .hyper)
         let bare = try JSONDecoder().decode(
             GuiConfig.self,
             from: Data("{}".utf8)
         )
-        #expect(bare.shortcutBase == .standard)
+        expectEqual(bare.shortcutBase, .standard)
         #expect(throws: DecodingError.self) {
             try JSONDecoder().decode(
                 GuiConfig.self,
@@ -140,14 +140,14 @@ struct ShortcutBaseSwitchTests {
             above: 0,
             base: .hyper
         )
-        #expect(rows.map(\.combo) == ["hyper+option+1", "hyper+option+2"])
+        expectEqual(rows.map(\.combo), ["hyper+option+1", "hyper+option+2"])
         let taken = DefaultKeybindings.desktopTopUp(
             existing: [row("hyper+option+1", "hs.x()")],
             desktops: [1, 2],
             above: 0,
             base: .hyper
         )
-        #expect(taken.map(\.lua) == ["KiwiDesk.focus_desktop(2)"])
+        expectEqual(taken.map(\.lua), ["KiwiDesk.focus_desktop(2)"])
     }
 
     @Test("a moved row's change is the switch's, any other is not")
@@ -177,6 +177,6 @@ struct ShortcutBaseSwitchTests {
             ]
         ])
         ShortcutBaseSwitch.apply(.hyper, to: &config)
-        #expect(combos(config, KeyLayer.defaultName).count == 1)
+        expectEqual(combos(config, KeyLayer.defaultName).count, 1)
     }
 }

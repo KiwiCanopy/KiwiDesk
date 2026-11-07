@@ -28,13 +28,13 @@ struct BarPeekLabelHeaderTests {
     func sourcesStateTheirHeader() {
         let one = [WindowID(1)]
         let two = [WindowID(1), WindowID(2)]
-        #expect(BarPeekSource.appItem(one).header == .none)
-        #expect(BarPeekSource.glyph(one).header == .name)
-        #expect(BarPeekSource.appItem(two).header == .full)
-        #expect(BarPeekSource.glyph(two).header == .full)
-        #expect(BarPeekSource.overflow(one).header == .full)
-        #expect(BarPeekSource.space(one).header == .full)
-        #expect(BarPeekSource.run(one).header == .full)
+        expectEqual(BarPeekSource.appItem(one).header, .none)
+        expectEqual(BarPeekSource.glyph(one).header, .name)
+        expectEqual(BarPeekSource.appItem(two).header, .full)
+        expectEqual(BarPeekSource.glyph(two).header, .full)
+        expectEqual(BarPeekSource.overflow(one).header, .full)
+        expectEqual(BarPeekSource.space(one).header, .full)
+        expectEqual(BarPeekSource.run(one).header, .full)
     }
 
     @Test("An App Bar label draws its title row alone")
@@ -43,14 +43,14 @@ struct BarPeekLabelHeaderTests {
             rows: [row(1, title: "Hover peek")],
             header: .none
         )
-        #expect(content.header == .none)
+        expectEqual(content.header, .none)
         // A peek cut to fit keeps its header.
-        #expect(content.keeping(1).header == .none)
+        expectEqual(content.keeping(1).header, .none)
         let body = BarPeekBody()
         _ = body.build(content, shelf: KiwiShelf())
-        #expect(body.labels.map(\.stringValue) == ["Hover peek"])
+        expectEqual(body.labels.map(\.stringValue), ["Hover peek"])
         #expect(body.icons.isEmpty)
-        #expect(body.targets.map(\.action) == [.window(WindowID(1))])
+        expectEqual(body.targets.map(\.action), [.window(WindowID(1))])
     }
 
     @Test("A Space Bar label keeps the name, not the icon")
@@ -61,7 +61,7 @@ struct BarPeekLabelHeaderTests {
         )
         let body = BarPeekBody()
         _ = body.build(content, shelf: KiwiShelf())
-        #expect(body.labels.map(\.stringValue) == ["Brave", "Hover peek"])
+        expectEqual(body.labels.map(\.stringValue), ["Brave", "Hover peek"])
         #expect(body.icons.isEmpty)
     }
 
@@ -74,8 +74,8 @@ struct BarPeekLabelHeaderTests {
         )
         let body = BarPeekBody()
         _ = body.build(content, shelf: KiwiShelf())
-        #expect(body.labels.first?.stringValue == "Brave")
-        #expect(body.icons.count == 1)
+        expectEqual(body.labels.first?.stringValue, "Brave")
+        expectEqual(body.icons.count, 1)
     }
 
     /// Core hands each source's header to the content it builds.
@@ -88,10 +88,10 @@ struct BarPeekLabelHeaderTests {
         let app = try #require(
             core.barPeekContent(.appItem([WindowID(1)]), on: nil)
         )
-        #expect(app.header == .none)
+        expectEqual(app.header, .none)
         let glyph = try #require(
             core.barPeekContent(.glyph([WindowID(1)]), on: nil)
         )
-        #expect(glyph.header == .name)
+        expectEqual(glyph.header, .name)
     }
 }

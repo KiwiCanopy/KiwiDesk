@@ -31,14 +31,14 @@ struct SpaceBarStripTests {
 
     @Test("an even span puts its extra glyph after the focus")
     func evenSpanLeansTrailing() {
-        #expect(SpaceBarStrip.window(count: 9, span: 4, anchor: 4) == 3..<7)
+        expectEqual(SpaceBarStrip.window(count: 9, span: 4, anchor: 4), 3..<7)
     }
 
     @Test("a row that fits draws whole, with no anchor from the start")
     func fitsAndDefaults() {
-        #expect(SpaceBarStrip.window(count: 6, span: 5, anchor: 5) == 0..<6)
+        expectEqual(SpaceBarStrip.window(count: 6, span: 5, anchor: 5), 0..<6)
         // span + 2 groups fill the cells the discs would take.
-        #expect(SpaceBarStrip.window(count: 7, span: 5, anchor: 3) == 0..<7)
+        expectEqual(SpaceBarStrip.window(count: 7, span: 5, anchor: 3), 0..<7)
         #expect(SpaceBarStrip.window(count: 0, span: 5, anchor: nil) == 0..<0)
         #expect(SpaceBarStrip.window(count: 9, span: 5, anchor: nil) == 0..<6)
     }
@@ -189,7 +189,7 @@ struct SpaceBarStripTests {
     func discAppears() throws {
         let step = try #require(walk(0..<6, to: 2..<7))
         let cells = Self.cellCount
-        #expect(step == .init(cells: 1, leavingFront: 2, enteringBack: 1))
+        expectEqual(step, .init(cells: 1, leavingFront: 2, enteringBack: 1))
         // Carried off: groups 0 and 1, resting at cells -1 and 0.
         #expect(
             step.travel(resting: -1, cellCount: cells) == .init(from: 0, to: 0)
@@ -209,7 +209,7 @@ struct SpaceBarStripTests {
     func discLeavesTheEnd() throws {
         let step = try #require(walk(2..<7, to: 3..<9))
         let cells = Self.cellCount
-        #expect(step == .init(cells: 1, leavingFront: 1, enteringBack: 2))
+        expectEqual(step, .init(cells: 1, leavingFront: 1, enteringBack: 2))
         #expect(
             step.travel(resting: 6, cellCount: cells) == .init(from: 6, to: 6)
         )

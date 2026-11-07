@@ -32,8 +32,8 @@ struct ShelfBorderContrastTests {
 
     @Test("A dark plate's home is black, a light one's white")
     func homeFollowsThePlate() {
-        #expect(Self.home(fill: "#14201CB3") == "#000000")
-        #expect(Self.home(fill: "#F2F2F7B3") == "#FFFFFF")
+        expectEqual(Self.home(fill: "#14201CB3"), "#000000")
+        expectEqual(Self.home(fill: "#F2F2F7B3"), "#FFFFFF")
     }
 
     @Test("Every bundled palette's border clears the floor at home")
@@ -71,6 +71,6 @@ struct ShelfBorderContrastTests {
             )
             measured += 1
         }
-        #expect(measured == PaletteCatalog.bundled().count)
+        expectEqual(measured, PaletteCatalog.bundled().count)
     }
 }

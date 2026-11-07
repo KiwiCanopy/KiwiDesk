@@ -68,7 +68,7 @@ struct BorderCommandTests {
                 args: [.number(7)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.glowSize == 7)
+        expectEqual(core.tiler.settings.borderStyle.glowSize, 7)
         // Over the renderable ceiling clamps silently, like the
         // other border magnitudes (#551).
         #expect(
@@ -89,7 +89,7 @@ struct BorderCommandTests {
                 args: [.number(0)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+        expectEqual(core.tiler.settings.borderStyle.glowSize, 0)
         // …but a negative REJECTS instead of clamping: max(0,…)
         // would flip into the automatic regime, which can make
         // the glow bigger — the opposite of probing downward.
@@ -99,7 +99,7 @@ struct BorderCommandTests {
                 args: [.number(-3)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+        expectEqual(core.tiler.settings.borderStyle.glowSize, 0)
         // A non-numeric argument is rejected, state unchanged.
         #expect(
             !core.execute(
@@ -107,7 +107,7 @@ struct BorderCommandTests {
                 args: [.string("big")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+        expectEqual(core.tiler.settings.borderStyle.glowSize, 0)
     }
 
     @Test("set_width clamps out-of-range silently, rejects type")
@@ -119,7 +119,7 @@ struct BorderCommandTests {
                 args: [.number(6)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.width == 6)
+        expectEqual(core.tiler.settings.borderStyle.width, 6)
         // Above max → clamped, still success.
         #expect(
             core.execute(
@@ -219,7 +219,7 @@ struct BorderCommandTests {
             core.execute("border.fit_gaps", args: []).isSuccess
         )
         // Hidden overlap is excluded: visible reach = width = 10.
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 10)
         #expect(
             core.tiler.settings.gapsGlobal.inner.horizontal == 10
         )
@@ -232,7 +232,7 @@ struct BorderCommandTests {
         #expect(
             core.tiler.settings.gapsGlobal.inner.horizontal == 20
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 10)
     }
 
     @Test("fit_gaps keeps an optional remaining gap (#295)")
@@ -246,7 +246,7 @@ struct BorderCommandTests {
                 args: [.number(6)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 16)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 16)
         #expect(
             core.tiler.settings.gapsGlobal.inner.horizontal
                 == 16
@@ -262,7 +262,7 @@ struct BorderCommandTests {
             core.tiler.settings.gapsGlobal.inner.horizontal
                 == 26
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 16)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 16)
         // A non-numeric argument fails; a negative one clamps
         // to the plain fit.
         #expect(
@@ -275,7 +275,7 @@ struct BorderCommandTests {
             "border.fit_gaps",
             args: [.number(-3)]
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 10)
     }
 
     @Test("Unknown border setter fails")

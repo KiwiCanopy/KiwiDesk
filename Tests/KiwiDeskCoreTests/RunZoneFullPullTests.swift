@@ -106,7 +106,7 @@ struct RunZoneFullPullTests {
         let press = try #require(
             three.press(ids[0], by: -250, toward: .end, in: sized)
         )
-        #expect(press.visible == 0..<3)
+        expectEqual(press.visible, 0..<3)
         let after = written(press, of: ids[0], over: sized, in: three)
         let frame = try #require(three.frames(in: after)[ids[0]])
         #expect(abs(frame.width - 250) < 1)
@@ -127,7 +127,7 @@ struct RunZoneFullPullTests {
         let press = try #require(
             three.press(ids[0], by: -400, toward: .end, in: sized)
         )
-        #expect(press.visible == 0..<3)
+        expectEqual(press.visible, 0..<3)
         let after = written(press, of: ids[0], over: sized, in: three)
         let frame = try #require(three.frames(in: after)[ids[0]])
         #expect(abs(frame.width - 100) < 15)
@@ -141,11 +141,11 @@ struct RunZoneFullPullTests {
             vertical: false
         )
         let sized = context(sizes: [2: 600], tails: [2])
-        #expect(three.run(in: sized)?.visible == 0..<2)
+        expectEqual(three.run(in: sized)?.visible, 0..<2)
         let press = try #require(
             three.press(ids[1], by: -250, toward: .end, in: sized)
         )
-        #expect(press.visible == 0..<3)
+        expectEqual(press.visible, 0..<3)
         #expect(press.sizes[ids[1]] == .some(nil))
         let after = written(press, of: ids[1], over: sized, in: three)
         let frame = try #require(three.frames(in: after)[ids[1]])

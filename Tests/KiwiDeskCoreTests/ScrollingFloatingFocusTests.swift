@@ -55,7 +55,7 @@ struct ScrollingFloatingFocusTests {
             for: [w1, w2, w3],
             in: makeContext(focused: w9, offset: -300)
         ).offset
-        #expect(offset == -300)
+        expectEqual(offset, -300)
     }
 
     @Test("No focus at all keeps the scrolled offset")
@@ -64,7 +64,7 @@ struct ScrollingFloatingFocusTests {
             for: [w1, w2, w3],
             in: makeContext(focused: nil, offset: -300)
         ).offset
-        #expect(offset == -300)
+        expectEqual(offset, -300)
     }
 
     @Test("A never-scrolled space rests at the row start")
@@ -73,7 +73,7 @@ struct ScrollingFloatingFocusTests {
             for: [w1, w2, w3],
             in: makeContext(focused: w9, offset: nil)
         ).offset
-        #expect(offset == 0)
+        expectEqual(offset, 0)
     }
 
     @Test("The kept offset still respects the row boundary")
@@ -88,7 +88,7 @@ struct ScrollingFloatingFocusTests {
         let context = makeContext(focused: w9, offset: nil)
         let area = context.usable
         let rowLength = 3 * CGFloat(800) + 2 * 10
-        #expect(offset == area.width - rowLength)
+        expectEqual(offset, area.width - rowLength)
     }
 
     @Test("Focusing a floating window does not pan home")
@@ -160,8 +160,8 @@ struct ScrollingFloatingFocusTests {
             for: [w1, w2, w3],
             in: context
         )
-        #expect(rest.offset == -300)
-        #expect(rest.slot == Self.measured.slot)
+        expectEqual(rest.offset, -300)
+        expectEqual(rest.slot, Self.measured.slot)
     }
 
     @Test("Coming back from a float still re-anchors")
@@ -186,6 +186,6 @@ struct ScrollingFloatingFocusTests {
         )
         let lead =
             try #require(frames[w2]).minX - context.usable.minX
-        #expect(lead == 510)
+        expectEqual(lead, 510)
     }
 }

@@ -92,7 +92,7 @@ struct ApplyHealPassTests {
         core.execute("stack.set_master_ratio", args: [.number(0.6)])
         // The apply's own pass drew the reseeded ratio: the heal
         // stood down on its probe.
-        #expect(ratio(core, space) == 0.6)
+        expectEqual(ratio(core, space), 0.6)
         try await payOwedPass(core)
         #expect(ratio(core, space) < 0.6)
         let frame = try #require(
@@ -124,10 +124,10 @@ struct ApplyHealPassTests {
         // Moving, then the first quiet look: neither runs it.
         core.payApplyHealPass(until: later, restedAtLastLook: true)
         #expect(core.deferred.isScheduled(.applyHealPass))
-        #expect(ratio(core, space) == 0.6)
+        expectEqual(ratio(core, space), 0.6)
         core.tiler.animation.cancel(window: WindowID(1))
         core.payApplyHealPass(until: later, restedAtLastLook: false)
-        #expect(ratio(core, space) == 0.6)
+        expectEqual(ratio(core, space), 0.6)
         core.payApplyHealPass(until: later, restedAtLastLook: true)
         #expect(ratio(core, space) < 0.6)
         // The hour-long sleeps the pass's tail scheduled.

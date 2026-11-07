@@ -45,7 +45,7 @@ struct PocketNamedTests {
     func namedGoesIn() {
         let core = makeCore()
         #expect(pocket(core, one))
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(core.state.pocketPhase(of: three) == nil)
     }
 
@@ -54,11 +54,11 @@ struct PocketNamedTests {
         let core = makeCore()
         #expect(pocket(core, one))
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         #expect(pocket(core, one))
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(pocket(core, one))
-        #expect(core.state.pocketedWindows == [one])
+        expectEqual(core.state.pocketedWindows, [one])
     }
 
     @Test("One window refuses a second named window; Several takes it")
@@ -70,18 +70,18 @@ struct PocketNamedTests {
             "pocket",
             args: [.number(Double(two.raw))]
         )
-        #expect(refused.error == "another window is the pocket window")
+        expectEqual(refused.error, "another window is the pocket window")
         #expect(core.state.pocketPhase(of: two) == nil)
         core.execute("pocket.set_capacity", args: [.string("several")])
         #expect(pocket(core, two))
-        #expect(core.state.pocketedWindows == [one, two])
+        expectEqual(core.state.pocketedWindows, [one, two])
     }
 
     @Test("an id no tracked window carries is refused")
     func unknownRefused() {
         let core = makeCore()
         let refused = core.execute("pocket", args: [.number(77)])
-        #expect(refused.error == "unknown window: 77")
+        expectEqual(refused.error, "unknown window: 77")
         #expect(core.state.pocket.isEmpty)
     }
 
@@ -99,11 +99,11 @@ struct PocketNamedTests {
             return
         }
         perform()
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         // Out again, the pocket window's own row stays live.
         core.execute("pocket")
         let out = core.windowRows([one], movable: false)
-        #expect(out.first { $0.title == "Pocket Window" }?.enabled == true)
+        expectEqual(out.first { $0.title == "Pocket Window" }?.enabled, true)
         // Taken under One window: the next window's row greys.
         let next = core.windowRows([two], movable: false)
         #expect(next.first { $0.title == "Pocket Window" }?.enabled == false)

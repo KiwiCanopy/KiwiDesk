@@ -30,7 +30,7 @@ struct TravelerRehomeTests {
                     scaleSize: true
                 )
         )
-        #expect(target.map { right.contains($0) } == true)
+        expectEqual(target.map { right.contains($0) }, true)
     }
 
     @Test("a frame already on the destination moves nothing")
@@ -93,14 +93,14 @@ struct TravelerRehomeTests {
             destination: right,
             scaleSize: false
         )
-        #expect(kept?.size == frame.size)
+        expectEqual(kept?.size, frame.size)
         let scaled = TravelerRehome.target(
             frame: frame,
             screens: [left, right],
             destination: right,
             scaleSize: true
         )
-        #expect(scaled?.width == 200)
-        #expect(scaled?.height == 100)
+        expectEqual(scaled?.width, 200)
+        expectEqual(scaled?.height, 100)
     }
 }

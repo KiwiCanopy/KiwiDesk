@@ -78,7 +78,7 @@ struct BspRatioClampTests {
         let b = try #require(frames[w2])
         // OverlapStack cascades from a shared origin, so the two
         // frames overlap rather than sitting side by side.
-        #expect(a.minX == b.minX)
+        expectEqual(a.minX, b.minX)
     }
 
     @Test("The clamp holds at depth: a deep V split can't pile")

@@ -87,13 +87,13 @@ struct TitleArmRouteTests {
         notify(loop)
         // Nothing inline: the read is scheduled, not performed,
         // and no round-trip resolved the id.
-        #expect(box.asked == 0)
+        expectEqual(box.asked, 0)
         #expect(box.titles.isEmpty, "delivered inline")
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         box.drainOne()
-        #expect(box.titles.count == 1)
-        #expect(box.titles.first?.0 == id)
-        #expect(box.titles.first?.1 == "Hello")
+        expectEqual(box.titles.count, 1)
+        expectEqual(box.titles.first?.0, id)
+        expectEqual(box.titles.first?.1, "Hello")
     }
 
     @Test("A dead element's failed copy is dropped at delivery")
@@ -119,8 +119,8 @@ struct TitleArmRouteTests {
         box.title = ""
         notify(loop)
         box.drainOne()
-        #expect(box.titles.count == 1)
-        #expect(box.titles.first?.1 == "")
+        expectEqual(box.titles.count, 1)
+        expectEqual(box.titles.first?.1, "")
     }
 
     @Test("An untracked window is dropped without asking")
@@ -133,7 +133,7 @@ struct TitleArmRouteTests {
         let (loop, box) = makeLoop()
         loop.elements[pid] = [:]
         notify(loop)
-        #expect(box.asked == 0)
+        expectEqual(box.asked, 0)
         #expect(box.work.isEmpty)
         #expect(box.titles.isEmpty)
     }
@@ -145,9 +145,9 @@ struct TitleArmRouteTests {
         let (loop, box) = makeLoop()
         loop.elements[pid] = [id: element, WindowID(43): element]
         notify(loop)
-        #expect(box.asked == 1)
+        expectEqual(box.asked, 1)
         box.drainOne()
-        #expect(box.titles.first?.0 == id)
+        expectEqual(box.titles.first?.0, id)
     }
 
     @Test("A storm coalesces to one read plus one re-read")
@@ -159,13 +159,13 @@ struct TitleArmRouteTests {
             box.title = "Page \(n)"
             notify(loop)
         }
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         box.drainOne()
         #expect(box.work.count == 1, "no dirty re-read queued")
         box.drainOne()
         #expect(box.work.isEmpty)
-        #expect(box.titles.count == 2)
-        #expect(box.titles.last?.1 == "Page 10")
+        expectEqual(box.titles.count, 2)
+        expectEqual(box.titles.last?.1, "Page 10")
     }
 
     @Test("A read completing after detach delivers nothing")

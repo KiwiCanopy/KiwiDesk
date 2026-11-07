@@ -179,7 +179,7 @@ struct CiInstructionLaneTests {
         let list = try listed()
         try #require(pattern.hasPrefix("\\.(") && pattern.hasSuffix(")/"))
         let body = pattern.dropFirst(3).dropLast(2)
-        #expect(Set(body.split(separator: "|").map(String.init)) == list)
+        expectEqual(Set(body.split(separator: "|").map(String.init)), list)
         let regex = try Regex(pattern)
         #expect(
             "KiwiDeskCoreTests.RuleCitationTests/citations()"

@@ -101,9 +101,9 @@ struct RestoreTests {
         )
         core.restore(snapshot)
         let space = core.state.workspaces[SpaceID(1)]
-        #expect(space?.mode == .track)
-        #expect(space?.trackBreaks == Set([WindowID(1)]))
-        #expect(space?.trackWeights == [WindowID(1): 2.0])
+        expectEqual(space?.mode, .track)
+        expectEqual(space?.trackBreaks, Set([WindowID(1)]))
+        expectEqual(space?.trackWeights, [WindowID(1): 2.0])
     }
 
     @Test("A single-track space restores without the entry seed")
@@ -145,8 +145,8 @@ struct RestoreTests {
         )
         core.restore(snapshot)
         let space = core.state.workspaces[SpaceID(1)]
-        #expect(space?.mode == .track)
-        #expect(space?.trackBreaks == [])
-        #expect(space?.trackWeights == [:])
+        expectEqual(space?.mode, .track)
+        expectEqual(space?.trackBreaks, [])
+        expectEqual(space?.trackWeights, [:])
     }
 }

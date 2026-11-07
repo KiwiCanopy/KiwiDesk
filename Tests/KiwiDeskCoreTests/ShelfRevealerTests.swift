@@ -88,10 +88,10 @@ struct ShelfRevealerTests {
     func bandRevealsAfterDelay() {
         let (revealer, timers, pointer) = make()
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
-        #expect(revealer.reveal(of: Self.key) == .hidden)
-        #expect(timers.delays == [ShelfReveal.revealDelay])
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
+        expectEqual(timers.delays, [ShelfReveal.revealDelay])
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("Moving inside the band does not restart the delay")
@@ -100,7 +100,7 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         move(revealer, pointer, to: CGPoint(x: 503, y: 771))
         move(revealer, pointer, to: CGPoint(x: 498, y: 769))
-        #expect(timers.delays.count == 1)
+        expectEqual(timers.delays.count, 1)
     }
 
     @Test("Leaving the band cancels the reveal")
@@ -109,7 +109,7 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         move(revealer, pointer, to: CGPoint(x: 500, y: 400))
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("A pointer passing below the band never reveals")
@@ -124,7 +124,7 @@ struct ShelfRevealerTests {
     func pushRevealsAtOnce() {
         let (revealer, timers, pointer) = make(Self.flush)
         move(revealer, pointer, to: CGPoint(x: 500, y: 800))
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
         #expect(timers.delays.isEmpty)
     }
 
@@ -134,9 +134,9 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         timers.fireAll()
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
-        #expect(timers.delays == [ShelfReveal.retractDelay])
+        expectEqual(timers.delays, [ShelfReveal.retractDelay])
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("Coming back inside the retract delay keeps the shelf")
@@ -147,7 +147,7 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         move(revealer, pointer, to: CGPoint(x: 500, y: 750))
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("The retract reads a pointer the monitor could not hear")
@@ -159,7 +159,7 @@ struct ShelfRevealerTests {
         // Back over the shelf, unheard: over our own panel.
         pointer.point = CGPoint(x: 500, y: 750)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("The action pins until the next press")
@@ -172,22 +172,22 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 10, y: 10))
         #expect(revealer.reveal(of: Self.key).isShown)
         revealer.toggle(Self.key, duration: 0)
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("A timed pin hides by itself, or at once on a press")
     func timedPin() {
         let (revealer, timers, pointer) = make()
         revealer.toggle(Self.key, duration: 10)
-        #expect(timers.delays == [10])
+        expectEqual(timers.delays, [10])
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         revealer.toggle(Self.key, duration: 10)
         pointer.now = pointer.now.addingTimeInterval(5)
         revealer.toggle(Self.key, duration: 10)
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("A timed pin under the pointer becomes a hover reveal")
@@ -196,7 +196,7 @@ struct ShelfRevealerTests {
         revealer.toggle(Self.key, duration: 3)
         pointer.point = CGPoint(x: 500, y: 750)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("A press hiding the shelf under the pointer holds the hover")
@@ -205,12 +205,12 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         timers.fireAll()
         revealer.toggle(Self.key, duration: 0)
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         move(revealer, pointer, to: CGPoint(x: 501, y: 770))
         #expect(timers.delays.isEmpty)
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
-        #expect(timers.delays == [ShelfReveal.revealDelay])
+        expectEqual(timers.delays, [ShelfReveal.revealDelay])
     }
 
     @Test("A show reports a change; a shelf that stops hiding forgets")
@@ -218,9 +218,9 @@ struct ShelfRevealerTests {
         let (revealer, _, pointer) = make()
         revealer.onChange = { pointer.changes += 1 }
         revealer.toggle(Self.key, duration: 0)
-        #expect(pointer.changes == 1)
+        expectEqual(pointer.changes, 1)
         revealer.sync([:])
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         #expect(revealer.targets.isEmpty)
         #expect(!revealer.toggle(Self.key, duration: 0))
     }
@@ -240,7 +240,7 @@ struct ShelfRevealerTests {
         #expect(revealer.isListening)
         revealer.sync([:])
         #expect(!revealer.isListening)
-        #expect(installs == 1)
+        expectEqual(installs, 1)
     }
 
     @Test("A pointer resting on the screen's last row keeps the shelf")
@@ -249,7 +249,7 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 800))
         move(revealer, pointer, to: CGPoint(x: 520, y: 800))
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("A press that shows the shelf ends an earlier suppression")
@@ -261,9 +261,9 @@ struct ShelfRevealerTests {
         revealer.toggle(Self.key, duration: 2)
         pointer.point = CGPoint(x: 500, y: 750)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
-        #expect(timers.delays == [ShelfReveal.retractDelay])
+        expectEqual(timers.delays, [ShelfReveal.retractDelay])
     }
 
     @Test("Stopping ends every reveal, silently")
@@ -272,11 +272,11 @@ struct ShelfRevealerTests {
         revealer.onChange = { pointer.changes += 1 }
         revealer.toggle(Self.key, duration: 5)
         revealer.stop()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         // The core is tearing its bars down; no redraw rides it.
-        #expect(pointer.changes == 1)
+        expectEqual(pointer.changes, 1)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("A timed pin under an open menu waits for it")
@@ -285,10 +285,10 @@ struct ShelfRevealerTests {
         revealer.holds = { _ in pointer.holding }
         revealer.toggle(Self.key, duration: 3)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
         pointer.holding = false
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("An open bar menu or peek holds a retract")
@@ -299,23 +299,23 @@ struct ShelfRevealerTests {
         timers.fireAll()
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
         pointer.holding = false
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
     }
 
     @Test("The band arms the mark's hover until the reveal or a leave")
     func armingShowsTheHover() {
         let (revealer, timers, pointer) = make()
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
-        #expect(revealer.arming == [Self.key])
+        expectEqual(revealer.arming, [Self.key])
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         #expect(revealer.arming.isEmpty)
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         timers.fireAll()
         #expect(revealer.arming.isEmpty)
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("Near the mark lights its cue; only the band opens the shelf")
@@ -328,10 +328,10 @@ struct ShelfRevealerTests {
         )
         let (revealer, timers, pointer) = make(target)
         move(revealer, pointer, to: CGPoint(x: 500, y: 720))
-        #expect(revealer.arming == [Self.key])
+        expectEqual(revealer.arming, [Self.key])
         #expect(timers.delays.isEmpty)
         timers.fireAll()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         #expect(revealer.arming.isEmpty)
     }

@@ -46,7 +46,7 @@ struct MonocleGeometryTests {
             in: context
         )
         for id in ids(3) {
-            #expect(frames[id] == context.usable)
+            expectEqual(frames[id], context.usable)
         }
     }
 
@@ -81,7 +81,7 @@ struct MonocleSettingsTests {
             TilingSettings.self,
             from: data
         )
-        #expect(decoded.monocle == settings.monocle)
+        expectEqual(decoded.monocle, settings.monocle)
     }
 
     @Test("Global style and per-layout overrides split in JSON")
@@ -96,7 +96,7 @@ struct MonocleSettingsTests {
         let global = try #require(
             json["app_bar"] as? [String: Any]
         )
-        #expect(global["title_cap"] as? Int == 10)
+        expectEqual(global["title_cap"] as? Int, 10)
         // The per-layout bar under monocle only carries its
         // own visibility until a field is overridden.
         let layout = try #require(
@@ -108,7 +108,7 @@ struct MonocleSettingsTests {
         let bar = try #require(
             monocle["app_bar"] as? [String: Any]
         )
-        #expect(bar["visibility"] as? String == "always")
+        expectEqual(bar["visibility"] as? String, "always")
         #expect(bar["title_cap"] == nil)
     }
 
@@ -119,11 +119,11 @@ struct MonocleSettingsTests {
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.monocle == MonocleParams())
-        #expect(decoded.monocle.appBar.visibility == .always)
+        expectEqual(decoded.monocle, MonocleParams())
+        expectEqual(decoded.monocle.appBar.visibility, .always)
         // Nothing is overridden, so every look field inherits.
         #expect(decoded.monocle.appBar.titleCap == nil)
-        #expect(decoded.monocle.orientation == .horizontal)
+        expectEqual(decoded.monocle.orientation, .horizontal)
     }
 
     @Test("Partial bar objects override only the listed fields")
@@ -137,9 +137,9 @@ struct MonocleSettingsTests {
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.monocle.appBar.titleCap == 30)
+        expectEqual(decoded.monocle.appBar.titleCap, 30)
         // Unlisted fields stay nil (inherit the global style).
         #expect(decoded.monocle.appBar.activeIndicator == nil)
-        #expect(decoded.monocle.appBar.visibility == .always)
+        expectEqual(decoded.monocle.appBar.visibility, .always)
     }
 }

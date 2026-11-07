@@ -87,22 +87,22 @@ struct PocketMarkColorTests {
     @Test("pocket.set_color stores a hex, empty resets, junk refused")
     func setColor() {
         let core = makeCore()
-        #expect(PocketStyle().color == "")
+        expectEqual(PocketStyle().color, "")
         #expect(
             core.execute("pocket.set_color", args: [.string(amber)])
                 .isSuccess
         )
-        #expect(core.tiler.settings.pocketStyle.color == amber)
+        expectEqual(core.tiler.settings.pocketStyle.color, amber)
         #expect(
             !core.execute("pocket.set_color", args: [.string("red")])
                 .isSuccess
         )
-        #expect(core.tiler.settings.pocketStyle.color == amber)
+        expectEqual(core.tiler.settings.pocketStyle.color, amber)
         #expect(
             core.execute("pocket.set_color", args: [.string("")])
                 .isSuccess
         )
-        #expect(core.tiler.settings.pocketStyle.color == "")
+        expectEqual(core.tiler.settings.pocketStyle.color, "")
     }
 
     @Test("a palette paints the pocket and reads it back")
@@ -111,7 +111,7 @@ struct PocketMarkColorTests {
         var settings = TilingSettings()
         ColorPalette(name: "P", colors: ["pocket.color": amber])
             .apply(to: &settings)
-        #expect(settings.pocketStyle.color == amber)
+        expectEqual(settings.pocketStyle.color, amber)
         #expect(
             ColorPaletteKeys.extract(from: settings)["pocket.color"]
                 == amber
@@ -127,9 +127,9 @@ struct PocketMarkColorTests {
         core.execute("pocket")
         let glyphs = core.stickyMarkSpecs()
             .first { $0.window == WindowID(1) }?.glyphs
-        #expect(glyphs == [.pocket(color: amber)])
+        expectEqual(glyphs, [.pocket(color: amber)])
         // The pocket fills itself; its plate stays untinted.
-        #expect(glyphs?.first?.symbolHex == "")
+        expectEqual(glyphs?.first?.symbolHex, "")
     }
 
     /// A mark wearing `glyphs` on a window wide enough for two
@@ -155,7 +155,7 @@ struct PocketMarkColorTests {
         let tint = try #require(outer.symbol.contentTintColor)
         #expect(try hex(tint) == amber)
         let floating = plate([.sticky(), .floating(color: amber)])
-        #expect(floating.slotCount == 2)
+        expectEqual(floating.slotCount, 2)
         let innerTint = try #require(floating.innerSymbol.contentTintColor)
         #expect(try hex(innerTint) == amber)
     }
@@ -164,13 +164,13 @@ struct PocketMarkColorTests {
     func markDrawsTheColor() throws {
         let image = StickyMarkOverlay.pocketImage(hex: amber)
         let pixel = try pocketPixel(image)
-        #expect(pixel.alphaComponent == 1)
+        expectEqual(pixel.alphaComponent, 1)
         #expect(try hex(pixel) == amber)
         // The outline takes the colour itself, never its
         // contrasting glyph ink (#2704). (4, 15) is on the
         // pocket's left edge.
         let edge = try pocketPixel(image, at: (4, 15))
-        #expect(edge.alphaComponent == 1)
+        expectEqual(edge.alphaComponent, 1)
         #expect(try hex(edge) == amber)
     }
 
@@ -197,8 +197,8 @@ struct PocketMarkColorTests {
             StickyMarkOverlay.pocketImage(hex: ""),
             appearance: .darkAqua
         )
-        #expect(light.alphaComponent == 1)
-        #expect(dark.alphaComponent == 1)
+        expectEqual(light.alphaComponent, 1)
+        expectEqual(dark.alphaComponent, 1)
         // Near-black in light, near-white in dark: the label ink.
         #expect(light.redComponent < 0.2)
         #expect(dark.redComponent > 0.8)
@@ -209,8 +209,8 @@ struct PocketMarkColorTests {
         let core = makeCore()
         core.tiler.settings.floatingStyle.color = "#112233"
         core.tiler.settings.pocketStyle.color = amber
-        #expect(core.stateMarkColors.pocket == amber)
-        #expect(core.stateMarkColors.floating == "#112233")
+        expectEqual(core.stateMarkColors.pocket, amber)
+        expectEqual(core.stateMarkColors.floating, "#112233")
     }
 
     @Test("the Space Bar's pocket badge fills its pocket in the colour")
@@ -243,7 +243,7 @@ struct PocketMarkColorTests {
         )
         view.layout()
         let badge = try #require(view.pocketBadgeViews.first ?? nil)
-        #expect(badge.symbolName == StateBadgeView.pocketName)
+        expectEqual(badge.symbolName, StateBadgeView.pocketName)
         // The pocket takes the colour; the disc stays the count
         // badge's own, as the window mark's plate stays untinted.
         #expect(try hex(badge.ink) == amber)
@@ -303,6 +303,6 @@ struct PocketMarkColorTests {
             )
         }
         // Light and dark resolved two inks, or one was measured twice.
-        #expect(inks.count == 2)
+        expectEqual(inks.count, 2)
     }
 }

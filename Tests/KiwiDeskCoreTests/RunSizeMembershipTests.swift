@@ -29,6 +29,6 @@ struct RunSizeMembershipTests {
     func tradeCarriesTheSize() {
         var space = space()
         space.replace(a, with: c)
-        #expect(space.runSizes == [c: RunSize(share: 0.6, zone: 1)])
+        expectEqual(space.runSizes, [c: RunSize(share: 0.6, zone: 1)])
     }
 }

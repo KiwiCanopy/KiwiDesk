@@ -65,11 +65,11 @@ struct MergeKeysContentGuardTests {
             in: fixture,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
 
         let merged = try fixture.decodeLocale("ja.json")
-        #expect(merged["a.good"] == "コピーを保存")
-        #expect(merged["a.kept"] == "既存")
+        expectEqual(merged["a.good"], "コピーを保存")
+        expectEqual(merged["a.kept"], "既存")
         #expect(merged["a.script"] == nil)
         #expect(merged["a.stub"] == nil)
         #expect(merged["a.residue"] == nil)
@@ -133,20 +133,20 @@ struct MergeKeysContentGuardTests {
             in: fixture,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
 
         let merged = try fixture.decodeLocale("de.json")
         #expect(merged["b.renamed"] == nil)
-        #expect(merged["b.kept"] == "Vorhanden")
+        expectEqual(merged["b.kept"], "Vorhanden")
         // German compounds a two-word proper noun onto the next
         // noun with hyphens, so this IS keeping the name.
-        #expect(merged["b.compound"] == "Space-Bar-Farben")
+        expectEqual(merged["b.compound"], "Space-Bar-Farben")
         // Presence, not parity: the English names the bar twice,
         // one mention satisfies the guard. Pinned here as well as
         // in `LocalizationProductNameGuardTests` because a merge
         // that silently dropped this row would push a translator
         // toward a literal, worse sentence.
-        #expect(merged["b.fewer"] == "Die App Bar listet Fenster.")
+        expectEqual(merged["b.fewer"], "Die App Bar listet Fenster.")
 
         #expect(
             run.stderr.contains("feature name(s) App Bar")
@@ -201,13 +201,13 @@ struct MergeKeysContentGuardTests {
             in: fixture,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
 
         let merged = try fixture.decodeLocale("ja.json")
         // The picker lands; the prose that contradicts it does not.
-        #expect(merged["layout.monocle.name"] == "モノクル")
+        expectEqual(merged["layout.monocle.name"], "モノクル")
         #expect(merged["b.prose"] == nil)
-        #expect(merged["b.kept"] == "既存")
+        expectEqual(merged["b.kept"], "既存")
         #expect(run.stderr.contains("mode name(s) Monocle"))
     }
 

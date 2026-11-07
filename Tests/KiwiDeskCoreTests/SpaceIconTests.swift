@@ -58,7 +58,7 @@ struct SpaceIconTests {
             TilingSettings.self,
             from: data
         )
-        #expect(decoded.spaceIcons == settings.spaceIcons)
+        expectEqual(decoded.spaceIcons, settings.spaceIcons)
     }
 
     @Test("absent space group decodes to no icons")

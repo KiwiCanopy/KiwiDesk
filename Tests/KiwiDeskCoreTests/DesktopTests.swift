@@ -25,9 +25,9 @@ struct NativeSpaceNumberingTests {
             space(10), space(11),
             space(20, display: "B"),
         ]
-        #expect(NativeSpaces.number(of: 10, in: spaces) == 1)
-        #expect(NativeSpaces.number(of: 11, in: spaces) == 2)
-        #expect(NativeSpaces.number(of: 20, in: spaces) == 3)
+        expectEqual(NativeSpaces.number(of: 10, in: spaces), 1)
+        expectEqual(NativeSpaces.number(of: 11, in: spaces), 2)
+        expectEqual(NativeSpaces.number(of: 20, in: spaces), 3)
     }
 
     @Test("Fullscreen spaces are not counted or numbered")
@@ -37,7 +37,7 @@ struct NativeSpaceNumberingTests {
             space(11, isUser: false),
             space(12),
         ]
-        #expect(NativeSpaces.number(of: 12, in: spaces) == 2)
+        expectEqual(NativeSpaces.number(of: 12, in: spaces), 2)
         #expect(NativeSpaces.number(of: 11, in: spaces) == nil)
     }
 
@@ -72,14 +72,14 @@ struct StashFrameTests {
         )
         let peekX = TilingEngine.stashPeekX
         let peekY = TilingEngine.stashPeekY
-        #expect(stashed.origin.x == bounds.maxX - peekX)
-        #expect(stashed.origin.y == bounds.maxY - peekY)
-        #expect(stashed.size == frame.size)
+        expectEqual(stashed.origin.x, bounds.maxX - peekX)
+        expectEqual(stashed.origin.y, bounds.maxY - peekY)
+        expectEqual(stashed.size, frame.size)
         // Only the peek tab overlaps the screen: 1 pt wide,
         // floor-tall.
         let visible = stashed.intersection(bounds)
-        #expect(visible.width == peekX)
-        #expect(visible.height == peekY)
+        expectEqual(visible.width, peekX)
+        expectEqual(visible.height, peekY)
     }
 
     @Test("Bottom-left park anchors the window's right edge")
@@ -106,9 +106,9 @@ struct StashFrameTests {
         #expect(
             stashed.maxX == bounds.minX + TilingEngine.stashPeekX
         )
-        #expect(stashed.origin.y == bounds.maxY - TilingEngine.stashPeekY)
+        expectEqual(stashed.origin.y, bounds.maxY - TilingEngine.stashPeekY)
         let visible = stashed.intersection(bounds)
-        #expect(visible.width == TilingEngine.stashPeekX)
+        expectEqual(visible.width, TilingEngine.stashPeekX)
     }
 }
 

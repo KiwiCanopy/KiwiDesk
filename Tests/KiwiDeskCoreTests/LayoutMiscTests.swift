@@ -33,7 +33,7 @@ struct SimpleLayoutTests {
             in: context
         )
         for frame in frames.values {
-            #expect(frame == context.usable)
+            expectEqual(frame, context.usable)
         }
     }
 
@@ -96,10 +96,10 @@ struct GapsGeometryTests {
     @Test("Uniform helper sets all six gaps")
     func uniform() throws {
         let gaps = Gaps.uniform(8)
-        #expect(gaps.outer.top == 8)
-        #expect(gaps.outer.right == 8)
-        #expect(gaps.inner.horizontal == 8)
-        #expect(gaps.inner.vertical == 8)
+        expectEqual(gaps.outer.top, 8)
+        expectEqual(gaps.outer.right, 8)
+        expectEqual(gaps.inner.horizontal, 8)
+        expectEqual(gaps.inner.vertical, 8)
     }
 
     @Test("Coordinate flip is its own inverse")
@@ -109,11 +109,11 @@ struct GapsGeometryTests {
             rect,
             primaryHeight: 1080
         )
-        #expect(flipped.minY == 1080 - rect.maxY)
+        expectEqual(flipped.minY, 1080 - rect.maxY)
         let back = GeometryUtils.flip(
             flipped,
             primaryHeight: 1080
         )
-        #expect(back == rect)
+        expectEqual(back, rect)
     }
 }

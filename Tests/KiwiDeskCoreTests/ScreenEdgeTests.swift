@@ -41,9 +41,9 @@ struct ScreenEdgeTests {
             on: Self.studio,
             among: ScreenEdgeScope(screens: [Self.laptop])
         )
-        #expect(style.edge(on: Self.studio) == .left)
-        #expect(style.edge(on: Self.laptop) == .top)
-        #expect(style.edge(on: "Unknown:640x480") == .top)
+        expectEqual(style.edge(on: Self.studio), .left)
+        expectEqual(style.edge(on: Self.laptop), .top)
+        expectEqual(style.edge(on: "Unknown:640x480"), .top)
         #expect(style.edge(on: nil) == .top)
         #expect(style.screensDiffer)
     }
@@ -63,7 +63,7 @@ struct ScreenEdgeTests {
             on: Self.studio,
             among: ScreenEdgeScope(screens: both)
         )
-        #expect(style.edgeOverride == [Self.studio: .right])
+        expectEqual(style.edgeOverride, [Self.studio: .right])
         style.setEdge(
             .top,
             on: Self.studio,
@@ -87,7 +87,7 @@ struct ScreenEdgeTests {
             among: ScreenEdgeScope(screens: all)
         )
         style.setEdge(.bottom)
-        #expect(style.edge == .bottom)
+        expectEqual(style.edge, .bottom)
         #expect(style.edgeOverride.isEmpty)
     }
 
@@ -104,14 +104,14 @@ struct ScreenEdgeTests {
             among: ScreenEdgeScope(screens: both)
         )
         // The laptop still follows the bar: nothing collapses.
-        #expect(style.edge == .top)
-        #expect(style.edgeOverride == [Self.studio: .left])
+        expectEqual(style.edge, .top)
+        expectEqual(style.edgeOverride, [Self.studio: .left])
         style.setEdge(
             .left,
             on: Self.laptop,
             among: ScreenEdgeScope(screens: both)
         )
-        #expect(style.edge == .left)
+        expectEqual(style.edge, .left)
         #expect(style.edgeOverride.isEmpty)
         // A screen of the set beyond the entries blocks it.
         let three = both.union([Self.away])
@@ -125,8 +125,8 @@ struct ScreenEdgeTests {
             on: Self.laptop,
             among: ScreenEdgeScope(screens: three)
         )
-        #expect(style.edge == .left)
-        #expect(style.edgeOverride.count == 2)
+        expectEqual(style.edge, .left)
+        expectEqual(style.edgeOverride.count, 2)
         // With no other screen known, the one entry decides.
         var lone = SpaceBarStyle()
         lone.setEdge(
@@ -134,7 +134,7 @@ struct ScreenEdgeTests {
             on: Self.studio,
             among: ScreenEdgeScope(screens: [])
         )
-        #expect(lone.edge == .left)
+        expectEqual(lone.edge, .left)
         #expect(lone.edgeOverride.isEmpty)
         // Disagreeing entries never collapse.
         style.setEdge(
@@ -142,7 +142,7 @@ struct ScreenEdgeTests {
             on: Self.away,
             among: ScreenEdgeScope(screens: three)
         )
-        #expect(style.edgeOverride.count == 3)
+        expectEqual(style.edgeOverride.count, 3)
     }
 
     @Test("A look keeps every screen's own, even one it equals")
@@ -150,7 +150,7 @@ struct ScreenEdgeTests {
         var style = SpaceBarStyle()
         style.edgeOverride = [Self.studio: .left, Self.laptop: .right]
         style.setEdgeKeepingScreens(.left)
-        #expect(style.edge == .left)
+        expectEqual(style.edge, .left)
         #expect(
             style.edgeOverride == [Self.studio: .left, Self.laptop: .right]
         )
@@ -159,8 +159,8 @@ struct ScreenEdgeTests {
     @Test("The reserved edges are each screen's own")
     func reservationPerScreen() {
         let settings = settings(studioEdge: .left)
-        #expect(settings.shelfEdges(in: .bsp, on: Self.studio) == [.left])
-        #expect(settings.shelfEdges(in: .bsp, on: Self.laptop) == [.top])
+        expectEqual(settings.shelfEdges(in: .bsp, on: Self.studio), [.left])
+        expectEqual(settings.shelfEdges(in: .bsp, on: Self.laptop), [.top])
         #expect(settings.shelfEdges(in: .bsp, on: nil) == [.top])
         let studio = settings.layoutBounds(
             from: visible,
@@ -174,10 +174,10 @@ struct ScreenEdgeTests {
             on: Self.laptop,
             pocketAtRest: false
         )
-        #expect(studio.minX == visible.minX + 32)
-        #expect(studio.minY == visible.minY)
-        #expect(laptop.minX == visible.minX)
-        #expect(laptop.minY == visible.minY + 32)
+        expectEqual(studio.minX, visible.minX + 32)
+        expectEqual(studio.minY, visible.minY)
+        expectEqual(laptop.minX, visible.minX)
+        expectEqual(laptop.minY, visible.minY + 32)
     }
 
     /// The App Bar fuses with the Space Bar on one screen and
@@ -197,12 +197,12 @@ struct ScreenEdgeTests {
         )
         #expect(settings.shelfEdges(in: .monocle, on: Self.laptop) == [.top])
         let studio = settings.onScreen(Self.studio)
-        #expect(studio.spaceBarStyle.edge == .top)
-        #expect(studio.appBarStyle.edge == .bottom)
+        expectEqual(studio.spaceBarStyle.edge, .top)
+        expectEqual(studio.appBarStyle.edge, .bottom)
         // A resolved copy holds no entry: resolving it again is
         // a fixed point.
         #expect(!studio.hasScreenEdges)
-        #expect(studio.onScreen(Self.laptop) == studio)
+        expectEqual(studio.onScreen(Self.laptop), studio)
     }
 
     /// A pin a look left equal to the bar's edge draws that edge:
@@ -219,15 +219,15 @@ struct ScreenEdgeTests {
         // A look sets top and keeps the studio's pin.
         settings.spaceBarStyle.setEdgeKeepingScreens(.top)
         settings.appBarStyle.setEdgeKeepingScreens(.top)
-        #expect(settings.spaceBarStyle.edgeOverride == [Self.studio: .top])
-        #expect(settings.uniformBarEdge == .top)
+        expectEqual(settings.spaceBarStyle.edgeOverride, [Self.studio: .top])
+        expectEqual(settings.uniformBarEdge, .top)
         // The laptop's write of the bar's edge stores nothing, and
         // every screen drawing top collapses the pin.
         settings.spaceBarStyle.setEdge(.top, on: Self.laptop, among: both)
-        #expect(settings.spaceBarStyle.edge == .top)
+        expectEqual(settings.spaceBarStyle.edge, .top)
         #expect(settings.spaceBarStyle.edgeOverride.isEmpty)
         for screen in [Self.studio, Self.laptop] {
-            #expect(settings.spaceBarStyle.edge(on: screen) == .top)
+            expectEqual(settings.spaceBarStyle.edge(on: screen), .top)
         }
     }
 
@@ -239,9 +239,9 @@ struct ScreenEdgeTests {
         var style = SpaceBarStyle()
         style.edgeOverride = [Self.studio: .left]
         style.setEdge(.top, on: Self.laptop, among: both)
-        #expect(style.edgeOverride == [Self.studio: .left])
+        expectEqual(style.edgeOverride, [Self.studio: .left])
         style.setEdgeKeepingScreens(.bottom)
-        #expect(style.edge(on: Self.laptop) == .bottom)
+        expectEqual(style.edge(on: Self.laptop), .bottom)
     }
 
     /// A write that clears its own entry outside the scope still
@@ -257,9 +257,9 @@ struct ScreenEdgeTests {
             on: Self.away,
             among: ScreenEdgeScope(screens: [Self.studio])
         )
-        #expect(style.edge == .bottom)
-        #expect(style.edgeOverride == [Self.studio: .top])
-        #expect(style.edge(on: Self.away) == .bottom)
+        expectEqual(style.edge, .bottom)
+        expectEqual(style.edgeOverride, [Self.studio: .top])
+        expectEqual(style.edge(on: Self.away), .bottom)
     }
 
     /// The Position master selects an edge only while the bars
@@ -268,13 +268,13 @@ struct ScreenEdgeTests {
     func uniformEdge() {
         var settings = TilingSettings()
         settings.barEdge = .left
-        #expect(settings.uniformBarEdge == .left)
+        expectEqual(settings.uniformBarEdge, .left)
         settings.appBarStyle.setEdge(
             .right,
             on: Self.studio,
             among: ScreenEdgeScope(screens: [Self.studio, Self.laptop])
         )
-        #expect(settings.sharedBarEdge == .left)
+        expectEqual(settings.sharedBarEdge, .left)
         #expect(settings.uniformBarEdge == nil)
     }
 }

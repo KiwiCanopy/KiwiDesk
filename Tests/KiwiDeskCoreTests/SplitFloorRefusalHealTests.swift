@@ -89,7 +89,7 @@ struct SplitFloorRefusalHealTests {
             .init(asked: width, answered: width + margin)
         ])
         core.retile()
-        #expect(ratio(core, space) == before)
+        expectEqual(ratio(core, space), before)
     }
 
     /// A master grow press stops where the stack zone would fall

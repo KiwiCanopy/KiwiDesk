@@ -103,8 +103,8 @@ struct DesktopFollowAcrossScreensTests {
         core.desktopMemory.readWindowSpace = { _ in .hosted(21) }
         #expect(follow(core, [.number(4)]))
         #expect(!core.state.closedDepartures.contains(moved))
-        #expect(core.state.rememberedSpaces[moved] == .departed("1"))
-        #expect(core.state.awayWindows[moved]?.nativeSpace == 21)
+        expectEqual(core.state.rememberedSpaces[moved], .departed("1"))
+        expectEqual(core.state.awayWindows[moved]?.nativeSpace, 21)
         #expect(!lines.contains { $0.contains("still hosted") })
     }
 
@@ -116,9 +116,9 @@ struct DesktopFollowAcrossScreensTests {
         core.desktopMemory.readWindowSpace = { _ in .hosted(21) }
         #expect(follow(core, [.number(4)]))
         arrive(core)
-        #expect(core.state.workspaces.space(of: moved) == there)
-        #expect(core.state.workspaces.activeSpace == there)
-        #expect(core.focusedWindowID == moved)
+        expectEqual(core.state.workspaces.space(of: moved), there)
+        expectEqual(core.state.workspaces.activeSpace, there)
+        expectEqual(core.focusedWindowID, moved)
     }
 
     /// No departure to misread, so only the frame can fail it.
@@ -140,9 +140,9 @@ struct DesktopFollowAcrossScreensTests {
         let id = JSONValue.number(Double(moved.raw))
         #expect(follow(core, [.number(4), .null, id]))
         arrive(core)
-        #expect(core.state.workspaces.space(of: moved) == there)
-        #expect(core.state.workspaces.activeSpace == there)
-        #expect(core.focusedWindowID == moved)
+        expectEqual(core.state.workspaces.space(of: moved), there)
+        expectEqual(core.state.workspaces.activeSpace, there)
+        expectEqual(core.focusedWindowID, moved)
     }
 
     /// The verb's word is about its own window: a window its app
@@ -211,21 +211,21 @@ struct DesktopFollowAcrossScreensTests {
             appName: "App",
             frame: stale
         )
-        #expect(core.arrivalFrame(of: window) == stale)
-        #expect(reads == 0)
+        expectEqual(core.arrivalFrame(of: window), stale)
+        expectEqual(reads, 0)
         core.state.rememberedSpaces[window.id] = .restored("1")
-        #expect(core.arrivalFrame(of: window) == stale)
-        #expect(reads == 0)
+        expectEqual(core.arrivalFrame(of: window), stale)
+        expectEqual(reads, 0)
         core.state.rememberedSpaces[window.id] = .departed("1")
-        #expect(core.arrivalFrame(of: window) == frame)
+        expectEqual(core.arrivalFrame(of: window), frame)
         core.state.workspaces.removeDisplay(farScreen)
         let oneScreen = reads
-        #expect(core.arrivalFrame(of: window) == stale)
-        #expect(reads == oneScreen)
+        expectEqual(core.arrivalFrame(of: window), stale)
+        expectEqual(reads, oneScreen)
         core.state.workspaces.upsertDisplay(
             Display(id: farScreen, name: "Far", frame: stale)
         )
         core.windowServer.readWindowBounds = { _ in nil }
-        #expect(core.arrivalFrame(of: window) == stale)
+        expectEqual(core.arrivalFrame(of: window), stale)
     }
 }

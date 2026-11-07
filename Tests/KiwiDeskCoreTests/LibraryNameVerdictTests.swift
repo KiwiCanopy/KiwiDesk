@@ -18,18 +18,18 @@ struct LibraryNameVerdictTests {
         let core = makeTestCore()
         let palette = try #require(core.bundledPalettes.first).name
         _ = try core.savePalette(named: "Mine", from: TilingSettings())
-        #expect(core.paletteNameVerdict("Free") == .free)
-        #expect(core.paletteNameVerdict(" Mine ") == .overwrites)
+        expectEqual(core.paletteNameVerdict("Free"), .free)
+        expectEqual(core.paletteNameVerdict(" Mine "), .overwrites)
         #expect(core.paletteNameVerdict("Mine").isAllowed)
-        #expect(core.paletteNameVerdict("  ") == .blank)
-        #expect(core.paletteNameVerdict(palette) == .bundled)
+        expectEqual(core.paletteNameVerdict("  "), .blank)
+        expectEqual(core.paletteNameVerdict(palette), .bundled)
         let look = try bundledLook(core)
         _ = try core.saveLook(named: "Mine", from: TilingSettings())
-        #expect(core.lookNameVerdict("Free") == .free)
-        #expect(core.lookNameVerdict("Mine") == .overwrites)
+        expectEqual(core.lookNameVerdict("Free"), .free)
+        expectEqual(core.lookNameVerdict("Mine"), .overwrites)
         #expect(core.lookNameVerdict("Mine").isAllowed)
-        #expect(core.lookNameVerdict("") == .blank)
-        #expect(core.lookNameVerdict(look) == .bundled)
+        expectEqual(core.lookNameVerdict(""), .blank)
+        expectEqual(core.lookNameVerdict(look), .bundled)
     }
 
     @Test("a rename keeps its own name and refuses another's")
@@ -37,9 +37,9 @@ struct LibraryNameVerdictTests {
         let core = makeTestCore()
         _ = try core.saveLook(named: "Mine", from: TilingSettings())
         _ = try core.saveLook(named: "Ours", from: TilingSettings())
-        #expect(core.lookNameVerdict("Mine", renaming: "Mine") == .free)
-        #expect(core.lookNameVerdict("Ours", renaming: "Mine") == .taken)
-        #expect(core.lookNameVerdict("New", renaming: "Mine") == .free)
+        expectEqual(core.lookNameVerdict("Mine", renaming: "Mine"), .free)
+        expectEqual(core.lookNameVerdict("Ours", renaming: "Mine"), .taken)
+        expectEqual(core.lookNameVerdict("New", renaming: "Mine"), .free)
         _ = try core.savePalette(named: "Mine", from: TilingSettings())
         _ = try core.savePalette(named: "Ours", from: TilingSettings())
         #expect(
@@ -80,7 +80,7 @@ struct LibraryNameVerdictTests {
             try core.renameLook(from: "Mine", to: " ")
         }
         try core.renameLook(from: "Mine", to: "New")
-        #expect(core.userLooks.map(\.name).sorted() == ["New", "Ours"])
+        expectEqual(core.userLooks.map(\.name).sorted(), ["New", "Ours"])
     }
 
     /// A door judges and stores one trimmed name, so a padded name
@@ -91,11 +91,11 @@ struct LibraryNameVerdictTests {
         let settings = TilingSettings()
         _ = try core.savePalette(named: "Mine", from: settings)
         _ = try core.savePalette(named: " Mine ", from: settings)
-        #expect(core.userPalettes.map(\.name) == ["Mine"])
+        expectEqual(core.userPalettes.map(\.name), ["Mine"])
         _ = try core.saveLook(named: " Mine ", from: settings)
         try core.renameLook(from: "Mine", to: " New ")
-        #expect(core.userLooks.map(\.name) == ["New"])
-        #expect(core.freeLookName(base: " New ") == "New 2")
-        #expect(core.freePaletteName(base: " Mine ") == "Mine 2")
+        expectEqual(core.userLooks.map(\.name), ["New"])
+        expectEqual(core.freeLookName(base: " New "), "New 2")
+        expectEqual(core.freePaletteName(base: " Mine "), "Mine 2")
     }
 }

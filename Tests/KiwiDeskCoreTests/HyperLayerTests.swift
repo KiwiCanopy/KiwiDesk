@@ -171,7 +171,7 @@ struct HyperLayerTests {
         keys.hyperEnabled = true
         registrar.press(f18)
         #expect(registrar.has(h))
-        #expect(delay == HyperLayer.maxHoldSeconds)
+        expectEqual(delay, HyperLayer.maxHoldSeconds)
         let work = try #require(fire)
         work()
         #expect(!registrar.has(h))
@@ -204,7 +204,7 @@ struct HyperLayerTests {
     @Test("Carbon never sees the hyper bit")
     func maskIsStripped() {
         let mods: HotkeyModifiers = [.hyper, .shift]
-        #expect(mods.carbonMask == UInt32(shiftKey))
+        expectEqual(mods.carbonMask, UInt32(shiftKey))
     }
 }
 

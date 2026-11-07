@@ -27,8 +27,8 @@ struct MenuBarReclaimTests {
             screen: frame,
             safeTop: 0
         )
-        #expect(result.maxY == frame.maxY)
-        #expect(result.minY == visible.minY)
+        expectEqual(result.maxY, frame.maxY)
+        expectEqual(result.minY, visible.minY)
     }
 
     @Test("The notch housing stays reserved")
@@ -44,7 +44,7 @@ struct MenuBarReclaimTests {
             screen: frame,
             safeTop: 32
         )
-        #expect(result.maxY == frame.maxY - 32)
+        expectEqual(result.maxY, frame.maxY - 32)
     }
 
     @Test("No menu bar inset means no change")
@@ -62,6 +62,6 @@ struct MenuBarReclaimTests {
             screen: frame,
             safeTop: 0
         )
-        #expect(result == visible)
+        expectEqual(result, visible)
     }
 }

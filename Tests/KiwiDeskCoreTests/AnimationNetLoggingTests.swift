@@ -57,7 +57,7 @@ struct AnimationNetLoggingTests {
 
         #expect(log.count == 1, "\(log)")
         #expect(log.first?.contains("window#7") == true, "\(log)")
-        #expect(log.first?.contains("did not settle") == true)
+        expectEqual(log.first?.contains("did not settle"), true)
     }
 
     @Test("The non-finite net reports itself exactly once")
@@ -88,7 +88,7 @@ struct AnimationNetLoggingTests {
 
         let seconds = drain(engine)
 
-        #expect(engine.activeCount == 0)
+        expectEqual(engine.activeCount, 0)
         #expect(log.count == 1, "\(log)")
         #expect(log.first?.contains("window#3") == true, "\(log)")
         #expect(log.first?.contains("non-finite") == true, "\(log)")

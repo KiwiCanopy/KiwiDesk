@@ -88,7 +88,7 @@ struct SparkleKeyDerivationTests {
         let run = try derive(
             Self.rfc8032Seed.base64EncodedString()
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(
             run.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
                 == Self.rfc8032Public.base64EncodedString()
@@ -102,7 +102,7 @@ struct SparkleKeyDerivationTests {
     func handlesLegacyKey() throws {
         let legacy = Self.rfc8032Seed + Self.rfc8032Public
         let run = try derive(legacy.base64EncodedString())
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(
             run.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
                 == Self.rfc8032Public.base64EncodedString()
@@ -153,6 +153,6 @@ struct SparkleKeyDerivationTests {
         }
         let raw = Data(base64Encoded: shipped)
         #expect(raw != nil, "SUPublicEDKey is not base64")
-        #expect(raw?.count == 32)
+        expectEqual(raw?.count, 32)
     }
 }

@@ -65,7 +65,7 @@ struct SpaceBarCountBadgeHoverTests {
         let badge = try #require(view.badgeViews.first)
         #expect(!badge.isHidden)
         #expect(abs(badge.inkAlpha - dim) < 0.01)
-        #expect(view.appViews[0].alphaValue == 1)
+        expectEqual(view.appViews[0].alphaValue, 1)
     }
 
     @Test("Hovering the glyph brings its badge to full")
@@ -74,7 +74,7 @@ struct SpaceBarCountBadgeHoverTests {
         let target = try #require(view.glyphTargets.first)
         view.hoveredTarget = target
         view.restyle()
-        #expect(view.badgeViews.first?.inkAlpha == 1)
+        expectEqual(view.badgeViews.first?.inkAlpha, 1)
     }
 
     @Test("An unfocused app and another Space keep their ladder")
@@ -96,11 +96,11 @@ struct SpaceBarCountBadgeHoverTests {
         let view = item(active: true)
         view.isDragHovered = true
         view.restyle()
-        #expect(view.badgeViews.first?.inkAlpha == 1)
+        expectEqual(view.badgeViews.first?.inkAlpha, 1)
         // A drag over another glyph lifts it too.
         view.hoveredTarget = view.glyphTargets.last
         view.restyle()
-        #expect(view.badgeViews.first?.inkAlpha == 1)
+        expectEqual(view.badgeViews.first?.inkAlpha, 1)
     }
 
     /// A `+n` disc holding the focus keeps full strength: only a
@@ -112,7 +112,7 @@ struct SpaceBarCountBadgeHoverTests {
         disc.holdsFocus = true
         let view = item(active: true, after: disc)
         #expect(!view.overflowBadge.isHidden)
-        #expect(view.overflowBadge.inkAlpha == 1)
+        expectEqual(view.overflowBadge.inkAlpha, 1)
     }
 
     /// The disc never fades with the ladder; only its number does,
@@ -125,8 +125,8 @@ struct SpaceBarCountBadgeHoverTests {
         let count = try #require(view.badgeViews.first)
         for badge in [count, view.overflowBadge] {
             #expect(badge.inkAlpha < 1)
-            #expect(badge.alphaValue == 1)
-            #expect(badge.layer?.borderWidth == BarBadgeFace.rimWidth)
+            expectEqual(badge.alphaValue, 1)
+            expectEqual(badge.layer?.borderWidth, BarBadgeFace.rimWidth)
         }
     }
 
@@ -155,8 +155,8 @@ struct SpaceBarCountBadgeHoverTests {
         view.layout()
         view.restyle()
         let badge = try #require(view.floatingBadgeViews.first ?? nil)
-        #expect(badge.alphaValue == 1)
+        expectEqual(badge.alphaValue, 1)
         #expect(abs(badge.symbol.alphaValue - view.style.dimFactor) < 0.01)
-        #expect(badge.layer?.borderWidth == BarBadgeFace.rimWidth)
+        expectEqual(badge.layer?.borderWidth, BarBadgeFace.rimWidth)
     }
 }

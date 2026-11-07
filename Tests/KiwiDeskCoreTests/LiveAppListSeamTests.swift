@@ -92,7 +92,7 @@ struct LiveAppListSeamTests {
         }
         // The set would run on the app's own queue: drain it.
         core.tiler.applier.queue(for: pid).sync {}
-        #expect(writes.total == 0)
+        expectEqual(writes.total, 0)
     }
 
     /// The control: a fixture pid names no running process, so
@@ -104,6 +104,6 @@ struct LiveAppListSeamTests {
         let core = core(framing: pid, into: writes)
         core.tiler.applier.apply(WindowID(1), Self.frame, setSize: true)
         core.tiler.applier.queue(for: pid).sync {}
-        #expect(writes.total == 1)
+        expectEqual(writes.total, 1)
     }
 }

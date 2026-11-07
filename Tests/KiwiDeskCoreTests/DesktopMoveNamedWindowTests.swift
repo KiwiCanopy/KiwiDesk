@@ -67,8 +67,8 @@ struct DesktopMoveNamedWindowTests {
             args: [.number(2), .null, id]
         )
         #expect(response.isSuccess)
-        #expect(movedWindows() == moved(named))
-        #expect(core.focusedWindowID == focused)
+        expectEqual(movedWindows(), moved(named))
+        expectEqual(core.focusedWindowID, focused)
         #expect(core.moveLatch.isLatched(named, at: now))
         #expect(!core.moveLatch.isLatched(focused, at: now))
     }
@@ -78,7 +78,7 @@ struct DesktopMoveNamedWindowTests {
         let core = makeCore()
         defer { teardown() }
         #expect(core.execute("move_to_desktop", args: [.number(2)]).isSuccess)
-        #expect(movedWindows() == moved(focused))
+        expectEqual(movedWindows(), moved(focused))
     }
 
     @Test("the capability answers a named call first")
@@ -103,7 +103,7 @@ struct DesktopMoveNamedWindowTests {
             "move_to_desktop",
             args: [.number(9), .null, .number(99)]
         )
-        #expect(response.error == "no Desktop 9")
+        expectEqual(response.error, "no Desktop 9")
     }
 
     @Test("an empty Space is skipped only ahead of a window")
@@ -115,12 +115,12 @@ struct DesktopMoveNamedWindowTests {
             args: [.string("2"), .string(""), .string("\(named.raw)")]
         )
         #expect(response.isSuccess)
-        #expect(movedWindows() == moved(named))
+        expectEqual(movedWindows(), moved(named))
         let bare = core.execute(
             "move_to_desktop",
             args: [.string("2"), .string("")]
         )
-        #expect(bare.error == "expected space id")
+        expectEqual(bare.error, "expected space id")
     }
 
     @Test("Lua skips the Space with nil")
@@ -131,7 +131,7 @@ struct DesktopMoveNamedWindowTests {
         _ = core.lua?.run(
             "KiwiDesk.move_to_desktop(2, nil, \(named.raw))"
         )
-        #expect(movedWindows() == moved(named))
+        expectEqual(movedWindows(), moved(named))
     }
 
     @Test("a named Space is pending for the named window")
@@ -186,7 +186,7 @@ struct DesktopMoveNamedWindowTests {
             "move_to_desktop",
             args: [.number(1), .string("mail"), .number(Double(window.raw))]
         )
-        #expect(response.error == "a pocketed window cannot change Desktop")
+        expectEqual(response.error, "a pocketed window cannot change Desktop")
         #expect(core.state.workspaces.space(of: window) == nil)
         #expect(spoken.isEmpty)
         #expect(movedWindows().isEmpty)
@@ -197,18 +197,18 @@ struct DesktopMoveNamedWindowTests {
         let core = makeCore()
         defer { teardown() }
         core.execute("toggle_pocket_window")
-        #expect(core.state.pocketPhase(of: focused) == .out)
+        expectEqual(core.state.pocketPhase(of: focused), .out)
         var spoken: [String] = []
         core.borders.announceRefusal = { spoken.append($0) }
         let refusal = "a pocket window cannot change Desktop"
         let unnamed = core.execute("move_to_desktop", args: [.number(2)])
-        #expect(unnamed.error == refusal)
+        expectEqual(unnamed.error, refusal)
         let named = core.execute(
             "move_to_desktop_and_follow",
             args: [.number(2), .null, .number(Double(focused.raw))]
         )
-        #expect(named.error == refusal)
-        #expect(spoken.count == 2)
+        expectEqual(named.error, refusal)
+        expectEqual(spoken.count, 2)
         #expect(movedWindows().isEmpty)
     }
 
@@ -220,7 +220,7 @@ struct DesktopMoveNamedWindowTests {
         defer { teardown() }
         core.execute("move_to_desktop", args: [.number(2), .null, id])
         core.execute("move_to_desktop", args: [.number(2)])
-        #expect(core.desktopMemory.moveReapPIDs == [1, 2])
+        expectEqual(core.desktopMemory.moveReapPIDs, [1, 2])
         #expect(core.deferred.isScheduled(.desktopMoveReap))
     }
 }

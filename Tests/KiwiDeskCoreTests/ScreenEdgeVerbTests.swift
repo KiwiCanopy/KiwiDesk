@@ -68,16 +68,16 @@ struct ScreenEdgeVerbTests {
                 Self.away: .bottom,
             ]
         )
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .top)
         for screen in ["Nope", "X:-5x0", "X:0x10", ":10x10"] {
             let refused = edge(core, verb, .string("left"), .string(screen))
             #expect(!refused.isSuccess, Comment(rawValue: screen))
-            #expect(refused.error == KiwiCore.unknownScreen)
+            expectEqual(refused.error, KiwiCore.unknownScreen)
         }
         // A bad edge answers as one, whatever the screen.
         let badEdge = edge(core, verb, .string("diagonal"), .string("Nope"))
-        #expect(badEdge.error?.hasPrefix("expected top") == true)
-        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 3)
+        expectEqual(badEdge.error?.hasPrefix("expected top"), true)
+        expectEqual(core.tiler.settings.spaceBarStyle.edgeOverride.count, 3)
     }
 
     @Test("The bar's own edge follows; a screen-less edge clears all")
@@ -96,7 +96,7 @@ struct ScreenEdgeVerbTests {
         #expect(core.tiler.settings.appBarStyle.edgeOverride.isEmpty)
         #expect(edge(core, verb, .string("bottom"), left).isSuccess)
         #expect(edge(core, verb, .string("right")).isSuccess)
-        #expect(core.tiler.settings.appBarStyle.edge == .right)
+        expectEqual(core.tiler.settings.appBarStyle.edge, .right)
         #expect(core.tiler.settings.appBarStyle.edgeOverride.isEmpty)
     }
 
@@ -109,11 +109,11 @@ struct ScreenEdgeVerbTests {
         #expect(
             edge(core, verb, .string("left"), .string("Left")).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .top)
         #expect(
             edge(core, verb, .string("left"), .string("Right")).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.edge == .left)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .left)
         #expect(core.tiler.settings.spaceBarStyle.edgeOverride.isEmpty)
     }
 
@@ -148,8 +148,8 @@ struct ScreenEdgeVerbTests {
                     .isSuccess
             )
         }
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
-        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .top)
+        expectEqual(core.tiler.settings.spaceBarStyle.edgeOverride.count, 2)
     }
 
     /// A set the live profile claims without an apply joins the
@@ -182,8 +182,8 @@ struct ScreenEdgeVerbTests {
                     .isSuccess
             )
         }
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
-        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .top)
+        expectEqual(core.tiler.settings.spaceBarStyle.edgeOverride.count, 2)
     }
 
     /// Before the first display is published — `init.lua` at
@@ -233,8 +233,8 @@ struct ScreenEdgeVerbTests {
                 to: &settings
             )
         }
-        #expect(settings.spaceBarStyle.edge == .bottom)
-        #expect(settings.appBarStyle.edge == .bottom)
+        expectEqual(settings.spaceBarStyle.edge, .bottom)
+        expectEqual(settings.appBarStyle.edge, .bottom)
         // Untouched, the entry the look's edge now equals too.
         #expect(
             settings.spaceBarStyle.edgeOverride == [

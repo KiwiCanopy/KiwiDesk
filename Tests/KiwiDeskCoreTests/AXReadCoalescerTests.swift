@@ -74,17 +74,17 @@ struct AXReadCoalescerTests {
         }
         // Ten notifications while the app is busy: exactly one
         // read was scheduled.
-        #expect(pump.work.count == 1)
+        expectEqual(pump.work.count, 1)
         // The app answers; the window has moved on meanwhile.
         pump.drainOne()
-        #expect(delivered.count == 1)
+        expectEqual(delivered.count, 1)
         // Dirty: one re-read was scheduled so the final frame
         // lands too.
-        #expect(pump.work.count == 1)
+        expectEqual(pump.work.count, 1)
         reported.frame = CGRect(x: 0, y: 0, width: 563, height: 600)
         pump.drainOne()
-        #expect(delivered.count == 2)
-        #expect(delivered.last?.width == 563)
+        expectEqual(delivered.count, 2)
+        expectEqual(delivered.last?.width, 563)
         // Drained: nothing further is in flight.
         #expect(pump.work.isEmpty)
     }
@@ -102,7 +102,7 @@ struct AXReadCoalescerTests {
             pid: 7
         ) { delivered.append($0) }
         pump.drainOne()
-        #expect(delivered == [answer])
+        expectEqual(delivered, [answer])
         #expect(pump.work.isEmpty)
     }
 
@@ -131,11 +131,11 @@ struct AXReadCoalescerTests {
             element: element,
             pid: 7
         ) { _ in count += 1 }
-        #expect(pump.work.count == 3)
+        expectEqual(pump.work.count, 3)
         pump.drainOne()
         pump.drainOne()
         pump.drainOne()
-        #expect(count == 3)
+        expectEqual(count, 3)
         #expect(pump.work.isEmpty)
     }
 
@@ -172,18 +172,18 @@ struct AXReadCoalescerTests {
         )
         // Nothing inline: the read is scheduled, not performed.
         #expect(events.isEmpty)
-        #expect(pump.work.count == 1)
+        expectEqual(pump.work.count, 1)
         pump.drainOne()
-        #expect(events.count == 1)
+        expectEqual(events.count, 1)
         if case .windowResized(let got, let frame) = events
             .first
         {
-            #expect(got == id)
-            #expect(frame == answer)
+            expectEqual(got, id)
+            expectEqual(frame, answer)
         } else {
             Issue.record("expected a windowResized event")
         }
-        #expect(loop.trackedFrames[id] == answer)
+        expectEqual(loop.trackedFrames[id], answer)
     }
 
     @Test("A read completing after detach delivers nothing")
@@ -213,7 +213,7 @@ struct AXReadCoalescerTests {
             pid: pid,
             app: AppRef(bundleID: nil, name: "Test")
         )
-        #expect(pump.work.count == 1)
+        expectEqual(pump.work.count, 1)
         // The app detaches while the read is in flight.
         loop.observers[pid] = nil
         pump.drainOne()
@@ -254,8 +254,8 @@ struct AXReadCoalescerTests {
         // must answer the NEWEST request, never replay the
         // superseded middle ones.
         pump.drainOne()
-        #expect(winner == "first")
+        expectEqual(winner, "first")
         pump.drainOne()
-        #expect(winner == "second")
+        expectEqual(winner, "second")
     }
 }

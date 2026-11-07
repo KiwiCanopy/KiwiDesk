@@ -61,9 +61,9 @@ struct JumpFocusedRowTests {
         track(core, 2, title: "b")
         core.frontmostPIDProvider = { 100 }
         core.state.workspaces.focus(WindowID(2), in: "1")
-        #expect(windows(core.jumpEntries()) == [1])
+        expectEqual(windows(core.jumpEntries()), [1])
         core.state.workspaces.focus(WindowID(1), in: "1")
-        #expect(windows(core.jumpEntries()) == [2])
+        expectEqual(windows(core.jumpEntries()), [2])
     }
 
     /// The last tracked focus is no longer the window the user is
@@ -76,7 +76,7 @@ struct JumpFocusedRowTests {
         track(core, 2, title: "b")
         core.state.workspaces.focus(WindowID(2), in: "1")
         core.frontmostPIDProvider = { 999 }
-        #expect(Set(windows(core.jumpEntries())) == [1, 2])
+        expectEqual(Set(windows(core.jumpEntries())), [1, 2])
     }
 
     /// A sibling process announced in front (#1785) is the same
@@ -99,6 +99,6 @@ struct JumpFocusedRowTests {
         )
         core.frontmostPIDProvider = { sibling }
         core.state.workspaces.focus(WindowID(2), in: "1")
-        #expect(windows(core.jumpEntries()) == [1])
+        expectEqual(windows(core.jumpEntries()), [1])
     }
 }

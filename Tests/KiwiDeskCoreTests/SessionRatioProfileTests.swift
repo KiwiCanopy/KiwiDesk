@@ -21,7 +21,7 @@ struct SessionRatioProfileTests {
         let core = try KeepFixture.core()
         let other = KeepFixture.profile("Play")
         _ = try core.profiles.write(other)
-        #expect(core.liveArrangement == work)
+        expectEqual(core.liveArrangement, work)
         return (core, other)
     }
 
@@ -45,8 +45,8 @@ struct SessionRatioProfileTests {
         show(core, 10)
         core.writeSplitRatioH(0.7, for: space)
         core.apply(profile: other, cause: .event)
-        #expect(core.liveArrangement == play)
-        #expect(core.sessionRatios(of: space) == SessionRatios())
+        expectEqual(core.liveArrangement, play)
+        expectEqual(core.sessionRatios(of: space), SessionRatios())
         core.writeSplitRatioH(0.3, for: space)
         // The apply's own pass draws the incoming sizes, ahead of
         // the name moving (#1249).
@@ -61,8 +61,8 @@ struct SessionRatioProfileTests {
         core.apply(profile: back, cause: .event)
         #expect(!drawn.isEmpty)
         #expect(drawn.allSatisfy { $0 == 0.7 })
-        #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
-        #expect(stored(core, 10, play) == 0.3)
+        expectEqual(core.sessionRatios(of: space).splitRatioH, 0.7)
+        expectEqual(stored(core, 10, play), 0.3)
     }
 
     @Test("a load starts the Desktops shown fresh, no other")
@@ -76,7 +76,7 @@ struct SessionRatioProfileTests {
         core.desktopMemory.sessionRatios[10]?[play] = [space: sized]
         KeepFixture.load("Play", core)
         #expect(core.desktopMemory.sessionRatios[10] == nil)
-        #expect(stored(core, 11, work) == 0.4)
+        expectEqual(stored(core, 11, work), 0.4)
     }
 
     @Test("a save of a profile ends its sizes on every Desktop")
@@ -91,7 +91,7 @@ struct SessionRatioProfileTests {
         core.reapplyIfInEffect("Work")
         #expect(stored(core, 10, work) == nil)
         #expect(stored(core, 11, work) == nil)
-        #expect(stored(core, 11, play) == 0.7)
+        expectEqual(stored(core, 11, play), 0.7)
     }
 
     @Test("a named reset of a Space with no screen is every Desktop's")
@@ -119,7 +119,7 @@ struct SessionRatioProfileTests {
         show(core, 10)
         core.writeSplitRatioH(0.7, for: space)
         core.setSpaceMode(space, .stack, keepingSizes: true)
-        #expect(stored(core, 10, work) == 0.7)
+        expectEqual(stored(core, 10, work), 0.7)
         core.setSpaceMode(space, .bsp, keepingSizes: false)
         #expect(stored(core, 10, work) == nil)
     }
@@ -185,7 +185,7 @@ struct SessionRatioProfileTests {
         show(core, 10)
         core.writeSplitRatioH(0.7, for: space)
         try core.renameProfile(from: "Work", to: "Desk")
-        #expect(stored(core, 10, .profile("Desk")) == 0.7)
+        expectEqual(stored(core, 10, .profile("Desk")), 0.7)
         #expect(stored(core, 10, work) == nil)
         _ = core.execute("delete_profile", args: [.string("Desk")])
         #expect(core.desktopMemory.sessionRatios.isEmpty)
@@ -238,6 +238,6 @@ struct SessionRatioProfileTests {
         core.writeSplitRatioH(0.7, for: space)
         core.apply(profile: stacked, cause: .event)
         try #require(core.state.workspaces[space]?.mode == .stack)
-        #expect(stored(core, 10, work) == 0.7)
+        expectEqual(stored(core, 10, work), 0.7)
     }
 }

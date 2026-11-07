@@ -22,19 +22,19 @@ struct BarVisibilityTests {
             judge(CGRect(x: 10, y: 10, width: 400, height: 400))
                 == .visible
         )
-        #expect(judge(screen.insetBy(dx: -0.5, dy: -0.5)) == .visible)
+        expectEqual(judge(screen.insetBy(dx: -0.5, dy: -0.5)), .visible)
     }
 
     @Test("A cut window names the side still on screen")
     func cutNamesTheSide() {
         let right = CGRect(x: 800, y: 0, width: 400, height: 800)
-        #expect(judge(right) == .partly(shown: .left))
+        expectEqual(judge(right), .partly(shown: .left))
         let left = CGRect(x: -300, y: 0, width: 400, height: 800)
-        #expect(judge(left) == .partly(shown: .right))
+        expectEqual(judge(left), .partly(shown: .right))
         let below = CGRect(x: 0, y: 600, width: 1000, height: 400)
-        #expect(judge(below) == .partly(shown: .top))
+        expectEqual(judge(below), .partly(shown: .top))
         let above = CGRect(x: 0, y: -300, width: 1000, height: 400)
-        #expect(judge(above) == .partly(shown: .bottom))
+        expectEqual(judge(above), .partly(shown: .bottom))
     }
 
     @Test("A window past the screen or unknown is hidden")
@@ -51,16 +51,16 @@ struct BarVisibilityTests {
         let window = CGRect(x: 0, y: 0, width: 600, height: 600)
         let float = CGRect(x: 400, y: 400, width: 400, height: 300)
         #expect(judge(window, above: [float]) == .partly(shown: nil))
-        #expect(judge(window, above: [screen]) == .hidden)
+        expectEqual(judge(window, above: [screen]), .hidden)
         let touching = CGRect(x: 600, y: 0, width: 400, height: 600)
-        #expect(judge(window, above: [touching]) == .visible)
+        expectEqual(judge(window, above: [touching]), .visible)
     }
 
     @Test("A cover that contains the window hides it, in any order")
     func containingCoverWins() {
         let window = CGRect(x: 0, y: 0, width: 600, height: 600)
         let corner = CGRect(x: 400, y: 400, width: 400, height: 300)
-        #expect(judge(window, above: [corner, screen]) == .hidden)
+        expectEqual(judge(window, above: [corner, screen]), .hidden)
     }
 
     @Test("A window cut at both ends of an axis names no side")
@@ -75,12 +75,12 @@ struct BarVisibilityTests {
     func slivAndBuriedReadHidden() {
         let peek = ScrollingLayout.edgePeek
         let sliver = CGRect(x: 1000 - peek, y: 0, width: 200, height: 800)
-        #expect(judge(sliver) == .hidden)
+        expectEqual(judge(sliver), .hidden)
         let past = CGRect(x: 1000 - peek - 10, y: 0, width: 700, height: 800)
-        #expect(judge(past) == .partly(shown: .left))
+        expectEqual(judge(past), .partly(shown: .left))
         let window = CGRect(x: 0, y: 0, width: 400, height: 400)
         let mostly = CGRect(x: 0, y: 0, width: 400, height: 330)
-        #expect(judge(window, above: [mostly]) == .hidden)
+        expectEqual(judge(window, above: [mostly]), .hidden)
         let half = CGRect(x: 0, y: 0, width: 400, height: 200)
         #expect(judge(window, above: [half]) == .partly(shown: nil))
     }
@@ -124,7 +124,7 @@ struct BarVisibilityTests {
             float(CGRect(x: 900, y: 650, width: 300, height: 100)) == .hidden
         )
         let wide = CGRect(x: -100, y: 650, width: 1200, height: 100)
-        #expect(float(wide) == .hidden)
+        expectEqual(float(wide), .hidden)
         #expect(
             BarVisibility.judgeFloat(
                 CGRect(x: 100, y: 100, width: 200, height: 200),

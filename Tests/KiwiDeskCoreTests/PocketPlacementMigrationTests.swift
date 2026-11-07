@@ -64,8 +64,8 @@ struct PocketPlacementMigrationTests {
             )
         )
         let settings = try decoded(out)
-        #expect(settings.kiwishelf.pocketEdge == .left)
-        #expect(settings.kiwishelf.pocketPosition == 30)
+        expectEqual(settings.kiwishelf.pocketEdge, .left)
+        expectEqual(settings.kiwishelf.pocketPosition, 30)
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(!text.contains("\"position\""))
     }
@@ -89,7 +89,7 @@ struct PocketPlacementMigrationTests {
             )
         )
         let settings = try decoded(out)
-        #expect(settings.kiwishelf.pocketEdge == .right)
+        expectEqual(settings.kiwishelf.pocketEdge, .right)
         #expect(
             settings.kiwishelf.pocketPosition
                 == KiwiShelf().pocketPosition
@@ -135,7 +135,7 @@ struct PocketPlacementMigrationTests {
             (profiles.first?["settings"] as? [String: Any])?["kiwishelf"]
                 as? [String: Any]
         )
-        #expect(shelf["pocket_edge"] as? String == "left")
-        #expect(shelf["pocket_position"] as? Double == 5)
+        expectEqual(shelf["pocket_edge"] as? String, "left")
+        expectEqual(shelf["pocket_position"] as? Double, 5)
     }
 }

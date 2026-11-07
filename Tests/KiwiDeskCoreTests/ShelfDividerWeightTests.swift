@@ -56,7 +56,7 @@ struct ShelfDividerWeightTests {
                 measured += 1
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 2)
+        expectEqual(measured, PaletteCatalog.bundled().count * 2)
     }
 
     /// The consumers take the ladder's alphas, not a copy: the
@@ -96,8 +96,8 @@ struct ShelfDividerWeightTests {
             ]
         )
         let ink = try #require(overlay.divider.layer?.backgroundColor)
-        #expect(ink.alpha == BarDivider.sectionAlpha)
-        #expect(overlay.divider.frame.width == BarDivider.sectionThickness)
+        expectEqual(ink.alpha, BarDivider.sectionAlpha)
+        expectEqual(overlay.divider.frame.width, BarDivider.sectionThickness)
         #expect(
             overlay.divider.frame.height
                 == strip.height * BarDivider.sectionLengthShare
@@ -119,9 +119,9 @@ struct ShelfDividerWeightTests {
         )
         let item = try #require(overlay.itemViews.first)
         let rule = try #require(item.identifierDivider.layer?.backgroundColor)
-        #expect(rule.alpha == BarDivider.ruleAlpha)
+        expectEqual(rule.alpha, BarDivider.ruleAlpha)
         let front = try #require(overlay.frontDivider.layer?.backgroundColor)
-        #expect(front.alpha == BarDivider.ruleAlpha)
+        expectEqual(front.alpha, BarDivider.ruleAlpha)
     }
 
     /// The App Bar's float break (#1826) is drawn at the in-item
@@ -151,10 +151,10 @@ struct ShelfDividerWeightTests {
         let rule = overlay.floatRule
         #expect(!rule.isHidden)
         let ink = try #require(rule.layer?.backgroundColor)
-        #expect(ink.alpha == BarDivider.ruleAlpha)
-        #expect(rule.frame.width == BarDivider.ruleThickness)
+        expectEqual(ink.alpha, BarDivider.ruleAlpha)
+        expectEqual(rule.frame.width, BarDivider.ruleThickness)
         #expect(rule.frame.width < BarDivider.sectionThickness)
-        #expect(rule.frame.height == depth * BarDivider.ruleLengthShare)
+        expectEqual(rule.frame.height, depth * BarDivider.ruleLengthShare)
     }
 
     /// Owner 2026-09-25: a draggable divider must show it can be
@@ -201,11 +201,11 @@ struct ShelfDividerWeightTests {
             divider: full
         )
         let rest = overlay.divider.frame
-        #expect(rest.width == BarDivider.sectionThickness)
+        expectEqual(rest.width, BarDivider.sectionThickness)
         overlay.handle.setHovered(true)
         // Ink only: the resize cursor carries the rest (owner
         // 2026-09-25), so the line keeps its weight.
-        #expect(overlay.divider.frame == rest)
+        expectEqual(overlay.divider.frame, rest)
         // A relayout while hovered keeps the weight too.
         overlay.show(
             strip: strip,
@@ -215,15 +215,15 @@ struct ShelfDividerWeightTests {
             sections: sections,
             divider: full
         )
-        #expect(overlay.divider.frame == rest)
+        expectEqual(overlay.divider.frame, rest)
         #expect(overlay.handle.isHovered)
         let ink = try #require(overlay.divider.layer?.backgroundColor)
-        #expect(ink.alpha == 1)
+        expectEqual(ink.alpha, 1)
         #expect(
             NSColor(cgColor: ink)?.usingColorSpace(.sRGB)?.redComponent == 1
         )
         overlay.handle.setHovered(false)
-        #expect(overlay.divider.frame == rest)
+        expectEqual(overlay.divider.frame, rest)
         #expect(
             overlay.divider.layer?.backgroundColor?.alpha
                 == BarDivider.sectionAlpha

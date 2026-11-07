@@ -34,8 +34,8 @@ struct SizeBoundLearnerTests {
         #expect(learner.bound(for: w) == nil)
         refused(&learner, asked: asked, answered: answered)
         let bound = learner.bound(for: w)
-        #expect(bound?.width.first?.asked == 900)
-        #expect(bound?.width.first?.answered == 715)
+        expectEqual(bound?.width.first?.asked, 900)
+        expectEqual(bound?.width.first?.answered, 715)
         // The complied axis learns nothing.
         #expect(bound?.height.isEmpty != false)
     }
@@ -63,7 +63,7 @@ struct SizeBoundLearnerTests {
             asked: asked,
             answered: CGSize(width: 780, height: 800)
         )
-        #expect(learner.bound(for: w)?.width.first?.answered == 780)
+        expectEqual(learner.bound(for: w)?.width.first?.answered, 780)
     }
 
     @Test("Axes learn independently")
@@ -74,8 +74,8 @@ struct SizeBoundLearnerTests {
         refused(&learner, asked: asked, answered: answered)
         refused(&learner, asked: asked, answered: answered)
         let bound = learner.bound(for: w)
-        #expect(bound?.width.first?.answered == 715)
-        #expect(bound?.height.first?.answered == 600)
+        expectEqual(bound?.width.first?.answered, 715)
+        expectEqual(bound?.height.first?.answered, 600)
     }
 
     @Test("Interleaved asks ladder independently")
@@ -103,8 +103,8 @@ struct SizeBoundLearnerTests {
             answered: monocleAnswer
         )
         let bound = learner.bound(for: w)
-        #expect(bound?.consumedWidth(asking: 900) == 715)
-        #expect(bound?.consumedWidth(asking: 1900) == 715)
+        expectEqual(bound?.consumedWidth(asking: 900), 715)
+        expectEqual(bound?.consumedWidth(asking: 1900), 715)
         #expect(bound?.consumedHeight(asking: 1060) == nil)
     }
 
@@ -127,9 +127,9 @@ struct SizeBoundLearnerTests {
         let oldest = bound?.width.contains {
             EffectiveSizeBound.matches($0.asked, asks[0])
         }
-        #expect(oldest == false)
-        #expect(bound?.consumedWidth(asking: asks[0]) == 715)
-        #expect(bound?.consumedWidth(asking: asks[1]) == 715)
+        expectEqual(oldest, false)
+        expectEqual(bound?.consumedWidth(asking: asks[0]), 715)
+        expectEqual(bound?.consumedWidth(asking: asks[1]), 715)
         #expect(
             bound?.consumedWidth(asking: asks[count - 1])
                 == 715

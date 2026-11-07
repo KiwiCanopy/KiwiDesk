@@ -23,7 +23,7 @@ struct KeyLayerOverrideFollowTests {
     @Test("a tombstone on the old chord takes the new one")
     func tombstoneMoves() {
         let over = KeyLayerOverride(removed: [main: ["control+option+f"]])
-        #expect(over.following(moves).removed == [main: ["hyper+f"]])
+        expectEqual(over.following(moves).removed, [main: ["hyper+f"]])
     }
 
     @Test("a tombstone already on the new chord is not doubled")
@@ -31,7 +31,7 @@ struct KeyLayerOverrideFollowTests {
         let over = KeyLayerOverride(
             removed: [main: ["control+option+f", "hyper+f"]]
         )
-        #expect(over.following(moves).removed == [main: ["hyper+f"]])
+        expectEqual(over.following(moves).removed, [main: ["hyper+f"]])
     }
 
     @Test("an own row on the old chord leaves the moved row out")
@@ -51,7 +51,7 @@ struct KeyLayerOverrideFollowTests {
             )
         ]
         let followed = over.following(moves)
-        #expect(followed.removed == [main: ["hyper+f"]])
+        expectEqual(followed.removed, [main: ["hyper+f"]])
         #expect(
             followed.resolved(onto: base).first?.bindings.map(\.lua)
                 == ["hs.x()"]
@@ -70,7 +70,7 @@ struct KeyLayerOverrideFollowTests {
         let followed = over.following([
             "work": ["control+option+w": row("hyper+w", "w()")]
         ])
-        #expect(followed == over)
+        expectEqual(followed, over)
     }
 
     /// The mirror case: the profile's own row already held the new
@@ -90,7 +90,7 @@ struct KeyLayerOverrideFollowTests {
         #expect(followed.removed.isEmpty)
         let resolved =
             followed.resolved(onto: base).first?.bindings ?? []
-        #expect(Set(resolved.map(\.lua)) == ["hs.x()", floating])
+        expectEqual(Set(resolved.map(\.lua)), ["hs.x()", floating])
         #expect(
             resolved.first { $0.lua == floating }?.combo
                 == "control+option+f"
@@ -115,9 +115,9 @@ struct KeyLayerOverrideFollowTests {
             onto: .hyper,
             liveSpaces: []
         ) { _ in false }
-        #expect(first.moves.count == 1)
+        expectEqual(first.moves.count, 1)
         #expect(second.moves.isEmpty)
-        #expect(second.layer == first.layer)
+        expectEqual(second.layer, first.layer)
     }
 
     /// A moved row the dedupe drops is no move: a profile following
@@ -136,7 +136,7 @@ struct KeyLayerOverrideFollowTests {
             onto: .hyper,
             liveSpaces: []
         ) { _ in false }
-        #expect(result.layer.bindings.map(\.combo) == ["hyper+g"])
+        expectEqual(result.layer.bindings.map(\.combo), ["hyper+g"])
         #expect(result.moves.isEmpty)
     }
 }

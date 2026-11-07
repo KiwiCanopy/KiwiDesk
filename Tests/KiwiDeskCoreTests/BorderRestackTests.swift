@@ -41,10 +41,10 @@ struct BorderRestackTests {
         #expect(ring.isOrderedIn)
         ring.order(relativeTo: 7)
         ring.order(relativeTo: 8)
-        #expect(ring.appKitOrders == 3)
+        expectEqual(ring.appKitOrders, 3)
         ring.hide()
         #expect(!ring.isOrderedIn)
         ring.order(relativeTo: 7)
-        #expect(ring.appKitOrders == 4)
+        expectEqual(ring.appKitOrders, 4)
     }
 }

@@ -17,9 +17,9 @@ struct FloatPlacementTests {
         // A 14" MacBook's float region.
         let region = CGRect(x: 0, y: 30, width: 1718, height: 1035)
         let frame = FloatPlacement.centered(in: region)
-        #expect(frame.height == 690)
+        expectEqual(frame.height, 690)
         // 1718 / 3 is under the floor, and the cap is above it.
-        #expect(frame.width == FloatPlacement.longFloor)
+        expectEqual(frame.width, FloatPlacement.longFloor)
         #expect(isCentered(frame, in: region))
     }
 
@@ -27,8 +27,8 @@ struct FloatPlacementTests {
     func capOutranksFloor() {
         let region = CGRect(x: 0, y: 30, width: 1440, height: 870)
         let frame = FloatPlacement.centered(in: region)
-        #expect(frame.height == 580)
-        #expect(frame.width == 580 * FloatPlacement.longCap)
+        expectEqual(frame.height, 580)
+        expectEqual(frame.width, 580 * FloatPlacement.longCap)
         #expect(frame.width < FloatPlacement.longFloor)
     }
 
@@ -49,8 +49,8 @@ struct FloatPlacementTests {
     func portraitTurns() {
         let region = CGRect(x: 0, y: 0, width: 1440, height: 2520)
         let frame = FloatPlacement.centered(in: region)
-        #expect(frame.width == 960)
-        #expect(frame.height == 840)
+        expectEqual(frame.width, 960)
+        expectEqual(frame.height, 840)
         #expect(frame.width > frame.height)
         #expect(isCentered(frame, in: region))
     }
@@ -62,8 +62,8 @@ struct FloatPlacementTests {
             in: region,
             minimum: CGSize(width: 900, height: 700)
         )
-        #expect(frame.width == 900)
-        #expect(frame.height == 700)
+        expectEqual(frame.width, 900)
+        expectEqual(frame.height, 700)
         #expect(isCentered(frame, in: region))
     }
 
@@ -84,16 +84,16 @@ struct FloatPlacementTests {
             in: region,
             minimum: CGSize(width: 800, height: 600)
         )
-        #expect(frame.size == CGSize(width: 800, height: 600))
-        #expect(frame.minX == region.minX)
-        #expect(frame.minY == region.minY)
+        expectEqual(frame.size, CGSize(width: 800, height: 600))
+        expectEqual(frame.minX, region.minX)
+        expectEqual(frame.minY, region.minY)
     }
 
     @Test("A remembered frame inside the region comes back as it was")
     func restoredInside() {
         let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
         let frame = CGRect(x: 200, y: 100, width: 700, height: 500)
-        #expect(FloatPlacement.restored(frame, in: region) == frame)
+        expectEqual(FloatPlacement.restored(frame, in: region), frame)
     }
 
     @Test("A remembered frame past the region is shrunk and confined")
@@ -101,7 +101,7 @@ struct FloatPlacementTests {
         let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
         let frame = CGRect(x: 1200, y: 100, width: 1800, height: 500)
         let restored = FloatPlacement.restored(frame, in: region)
-        #expect(restored.width == region.width)
+        expectEqual(restored.width, region.width)
         #expect(region.contains(restored))
     }
 
@@ -114,7 +114,7 @@ struct FloatPlacementTests {
             in: region,
             minimum: CGSize(width: 1700, height: 0)
         )
-        #expect(restored.width == 1700)
+        expectEqual(restored.width, 1700)
     }
 
     @Test("A remembered frame too tall for the region is shrunk too")
@@ -122,7 +122,7 @@ struct FloatPlacementTests {
         let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
         let frame = CGRect(x: 200, y: 0, width: 500, height: 1400)
         let restored = FloatPlacement.restored(frame, in: region)
-        #expect(restored.height == region.height)
+        expectEqual(restored.height, region.height)
         #expect(region.contains(restored))
     }
 

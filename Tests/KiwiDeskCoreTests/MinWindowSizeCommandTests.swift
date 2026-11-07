@@ -30,7 +30,7 @@ struct MinWindowSizeCommandTests {
         )
         var expected = MinWindowSizes()
         expected.grid = MinSize(width: 220, height: 160)
-        #expect(core.tiler.settings.minWindowSizes == expected)
+        expectEqual(core.tiler.settings.minWindowSizes, expected)
     }
 
     @Test("a layout in the height's place takes the width for both")
@@ -42,8 +42,8 @@ struct MinWindowSizeCommandTests {
                 args: [.number(480), .string("scrolling")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.minWindowSizes.scrolling == 480)
-        #expect(core.tiler.settings.minWindowSizes.stack == 300)
+        expectEqual(core.tiler.settings.minWindowSizes.scrolling, 480)
+        expectEqual(core.tiler.settings.minWindowSizes.stack, 300)
     }
 
     @Test("a CLI call's string height and layout are read (#2918)")
@@ -57,7 +57,7 @@ struct MinWindowSizeCommandTests {
         )
         var expected = MinWindowSizes()
         expected.grid = MinSize(width: 220, height: 160)
-        #expect(core.tiler.settings.minWindowSizes == expected)
+        expectEqual(core.tiler.settings.minWindowSizes, expected)
     }
 
     @Test("an unknown layout is refused and writes nothing")
@@ -69,7 +69,7 @@ struct MinWindowSizeCommandTests {
                 args: [.number(480), .string("monocle")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes())
+        expectEqual(core.tiler.settings.minWindowSizes, MinWindowSizes())
     }
 
     @Test("an argument it cannot read is refused, not ignored")
@@ -84,6 +84,6 @@ struct MinWindowSizeCommandTests {
                     .isSuccess
             )
         }
-        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes())
+        expectEqual(core.tiler.settings.minWindowSizes, MinWindowSizes())
     }
 }

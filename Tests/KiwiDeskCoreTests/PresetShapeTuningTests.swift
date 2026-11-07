@@ -33,7 +33,7 @@ struct PresetShapeTuningTests {
     func minimalistOnPortrait() throws {
         let minimalist = try preset("Minimalist")
         let settings = minimalist.settings(sizes: [portrait])
-        #expect(settings.scrolling.orientation == .vertical)
+        expectEqual(settings.scrolling.orientation, .vertical)
         #expect(
             minimalist.settings(sizes: [screen27])
                 .scrolling.orientation == .horizontal
@@ -43,8 +43,8 @@ struct PresetShapeTuningTests {
     @Test("a preset's Stack takes an ultrawide's main count")
     func stackOnUltrawides() throws {
         let focus = try preset("Focus Stack")
-        #expect(focus.settings(sizes: [ultrawide]).stack.masterCount == 2)
-        #expect(focus.settings(sizes: [superWide]).stack.masterCount == 3)
+        expectEqual(focus.settings(sizes: [ultrawide]).stack.masterCount, 2)
+        expectEqual(focus.settings(sizes: [superWide]).stack.masterCount, 3)
         #expect(
             focus.settings(sizes: [screen27]).stack.masterCount
                 == TilingSettings().stack.masterCount
@@ -58,7 +58,7 @@ struct PresetShapeTuningTests {
     func declaredLeafWins() throws {
         let minimalist = try preset("Minimalist")
         let onLaptop = minimalist.settings(sizes: [laptop])
-        #expect(onLaptop.gapsGlobal == .uniform(20))
+        expectEqual(onLaptop.gapsGlobal, .uniform(20))
         #expect(
             minimalist.settings(sizes: [screen27]).scrolling.anchor
                 == .center
@@ -66,7 +66,7 @@ struct PresetShapeTuningTests {
         // An undeclared leaf is the shape tuning's: a laptop's
         // Grid is two by two.
         let developer = try preset("Developer")
-        #expect(developer.settings(sizes: [laptop]).grid.rows == 2)
+        expectEqual(developer.settings(sizes: [laptop]).grid.rows, 2)
     }
 
     /// The host is the screen the layout's FIRST space sits on in
@@ -83,9 +83,9 @@ struct PresetShapeTuningTests {
             tuning: .preset(PresetTuning())
         )
         let settings = layout.settings(sizes: [laptop, ultrawide])
-        #expect(settings.stack.masterCount == 2)
-        #expect(settings.grid.columns == 2)
-        #expect(settings.grid.rows == 2)
+        expectEqual(settings.stack.masterCount, 2)
+        expectEqual(settings.grid.columns, 2)
+        expectEqual(settings.grid.rows, 2)
         // The floor is seeded from the MAIN screen's width, never
         // the ultrawide's (#2237).
         #expect(
@@ -108,7 +108,7 @@ struct PresetShapeTuningTests {
             tuning: .preset(PresetTuning())
         )
         let settings = layout.settings(sizes: [laptop, ultrawide])
-        #expect(settings.stack.masterCount == 2)
+        expectEqual(settings.stack.masterCount, 2)
     }
 
     /// Stack on the laptop main: the starter hosts it on the
@@ -125,7 +125,7 @@ struct PresetShapeTuningTests {
             tuning: .preset(PresetTuning())
         )
         let sizes = [laptop, ultrawide]
-        #expect(StarterSetup.hosts(sizes)[.stack] == .ultrawide)
+        expectEqual(StarterSetup.hosts(sizes)[.stack], .ultrawide)
         #expect(
             layout.settings(sizes: sizes).stack.masterCount
                 == TilingSettings().stack.masterCount
@@ -147,7 +147,7 @@ struct PresetShapeTuningTests {
             tuning: .preset(PresetTuning())
         )
         let sizes = [laptop, ultrawide]
-        #expect(StarterSetup.scrollingHost(sizes) == .ultrawide)
+        expectEqual(StarterSetup.scrollingHost(sizes), .ultrawide)
         let scrolling = layout.settings(sizes: sizes).scrolling
         #expect(
             scrolling.slotSize
@@ -164,7 +164,7 @@ struct PresetShapeTuningTests {
         let settings = center.settings(
             sizes: [screen27, screen27, portrait]
         )
-        #expect(settings.scrolling.orientation == .horizontal)
+        expectEqual(settings.scrolling.orientation, .horizontal)
         #expect(
             settings.scrolling.override["9"]?.orientation == .vertical
         )
@@ -204,6 +204,6 @@ struct PresetShapeTuningTests {
         #expect(
             composed.settings == minimalist.settings(sizes: [portrait])
         )
-        #expect(composed.settings.scrolling.orientation == .vertical)
+        expectEqual(composed.settings.scrolling.orientation, .vertical)
     }
 }

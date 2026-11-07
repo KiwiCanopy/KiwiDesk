@@ -36,7 +36,7 @@ struct DesktopBindingsFileTests {
                 .utf8
         ).write(to: store.url)
         let loaded = try #require(store.load())
-        #expect(loaded.profileBindings[.number(2)]?.names == ["Work"])
+        expectEqual(loaded.profileBindings[.number(2)]?.names, ["Work"])
         let gui = try #require(
             JSONSerialization.jsonObject(
                 with: Data(contentsOf: store.url)
@@ -69,8 +69,8 @@ struct DesktopBindingsFileTests {
             SetupBundle.self,
             from: migrated
         )
-        #expect(decoded.profileBindings?[.number(2)]?.names == ["Work"])
-        #expect(decoded.config?.profileBindings.isEmpty == true)
+        expectEqual(decoded.profileBindings?[.number(2)]?.names, ["Work"])
+        expectEqual(decoded.config?.profileBindings.isEmpty, true)
     }
 
     /// The bindings travel with the backup and land in this Mac's
@@ -84,7 +84,7 @@ struct DesktopBindingsFileTests {
         ]
         try source.guiConfigStore.saveIncludingBindings(config)
         let bundle = try source.exportSetup()
-        #expect(bundle.profileBindings?[.number(2)]?.names == ["Away"])
+        expectEqual(bundle.profileBindings?[.number(2)]?.names, ["Away"])
 
         let target = makeTestCore()
         try target.guiConfigStore.saveIncludingBindings(GuiConfig())
@@ -177,6 +177,6 @@ struct DesktopBindingsFileTests {
         var stale = GuiConfig()
         stale.profileBindings = [:]
         try store.save(stale)
-        #expect(store.bindingsFile.load().profileBindings == kept)
+        expectEqual(store.bindingsFile.load().profileBindings, kept)
     }
 }

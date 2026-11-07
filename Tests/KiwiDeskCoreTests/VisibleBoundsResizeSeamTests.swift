@@ -38,7 +38,7 @@ struct VisibleBoundsResizeSeamTests {
         // only reaches the layout in `.layout` mode, and the caps
         // every span feeds derive from the minimum.
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
-        #expect(core.tiler.settings.mouseResize == .layout)
+        expectEqual(core.tiler.settings.mouseResize, .layout)
         core.execute(
             "set_mode",
             args: [.string("1"), .string("bsp")]

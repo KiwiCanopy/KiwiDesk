@@ -116,7 +116,7 @@ struct FullscreenStandDownTests {
         // proving the gate, not a broken settle body.
         NativeSpaces.activeSpaceIsUserOverride = true
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == w1)
+        expectEqual(core.state.workspaces.lastFocused, w1)
     }
 
     @Test("The settle never re-asserts a fullscreen focus slot")

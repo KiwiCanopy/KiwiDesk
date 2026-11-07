@@ -45,12 +45,12 @@ struct ShelfRevealHoldTests {
     @Test("a hold shows every hiding bar and redraws once")
     func holdShowsHidingBars() {
         let (revealer, counter) = make()
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         revealer.heldOpen = true
         #expect(revealer.reveal(of: Self.key).isShown)
-        #expect(counter.changes == 1)
+        expectEqual(counter.changes, 1)
         revealer.heldOpen = true
-        #expect(counter.changes == 1)
+        expectEqual(counter.changes, 1)
     }
 
     /// A bar that does not hide has no target, and the hold
@@ -59,7 +59,7 @@ struct ShelfRevealHoldTests {
     func holdSkipsNonTargets() {
         let (revealer, _) = make()
         revealer.heldOpen = true
-        #expect(revealer.reveal(of: Self.other) == .hidden)
+        expectEqual(revealer.reveal(of: Self.other), .hidden)
     }
 
     @Test("a release returns what the pointer and shortcut left")
@@ -67,8 +67,8 @@ struct ShelfRevealHoldTests {
         let (revealer, counter) = make()
         revealer.heldOpen = true
         revealer.heldOpen = false
-        #expect(revealer.reveal(of: Self.key) == .hidden)
-        #expect(counter.changes == 2)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
+        expectEqual(counter.changes, 2)
         revealer.toggle(Self.key, duration: 0)
         revealer.heldOpen = true
         revealer.heldOpen = false
@@ -83,7 +83,7 @@ struct ShelfRevealHoldTests {
         let before = counter.changes
         revealer.stop()
         #expect(!revealer.heldOpen)
-        #expect(counter.changes == before)
+        expectEqual(counter.changes, before)
     }
 
     /// Under a hold the bar reads shown whatever its phase, so a

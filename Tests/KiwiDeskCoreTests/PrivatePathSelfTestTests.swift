@@ -99,8 +99,8 @@ struct PrivatePathSelfTestTests {
             }
         )
         let reply = run([probe])
-        #expect(verdicts(reply) == ["absent"])
-        #expect(asked == 0)
+        expectEqual(verdicts(reply), ["absent"])
+        expectEqual(asked, 0)
         #expect(
             PrivatePathSelfTest.detail(of: .absent, .symbol)
                 .contains("fallback")
@@ -148,8 +148,8 @@ struct PrivatePathSelfTestTests {
         defer { WMBridge.classResolverOverride = nil }
         let bridge = PrivatePathSelfTest.catalog(.empty)
             .filter { $0.kind == .bridgeClass }
-        #expect(bridge.count == WMBridge.Operation.allCases.count)
-        #expect(Set(verdicts(run(bridge))) == ["absent"])
+        expectEqual(bridge.count, WMBridge.Operation.allCases.count)
+        expectEqual(Set(verdicts(run(bridge))), ["absent"])
     }
 
     /// The operations that only read, stated apart from `isRead`
@@ -166,7 +166,7 @@ struct PrivatePathSelfTestTests {
     func readRosterIsPinned() {
         let classed = WMBridge.Operation.allCases
             .filter(\.isRead).map(\.rawValue)
-        #expect(Set(classed) == Self.reads)
+        expectEqual(Set(classed), Self.reads)
     }
 
     /// Every read's `verify` RUNS — reads resolve to a stub that
@@ -208,8 +208,8 @@ struct PrivatePathSelfTestTests {
                 == writes.count
         )
         // Non-vacuous: every read was dispatched and verified.
-        #expect(ReadStub.performed == Self.reads.count)
-        #expect(WriteTripwire.touched == 0)
+        expectEqual(ReadStub.performed, Self.reads.count)
+        expectEqual(WriteTripwire.touched, 0)
     }
 
     @Test("self_test answers through the dispatcher")
@@ -222,7 +222,7 @@ struct PrivatePathSelfTestTests {
             return
         }
         let found = verdicts(reply)
-        #expect(found.count == PrivatePathSelfTest.catalog(.empty).count)
+        expectEqual(found.count, PrivatePathSelfTest.catalog(.empty).count)
         #expect(Set(found).isSubset(of: PrivatePathVerdict.labels))
     }
 }

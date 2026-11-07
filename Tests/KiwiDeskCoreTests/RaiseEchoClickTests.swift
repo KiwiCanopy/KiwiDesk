@@ -79,7 +79,7 @@ struct RaiseEchoClickTests {
         let core = makeCore()
         let (intended, top, _) = makePile(core)
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
         // NOT consumed: lazy apps re-report a raised window,
         // and an unstamped duplicate was honored as deliberate
         // focus — the snap-back of #689's device trace. The
@@ -87,7 +87,7 @@ struct RaiseEchoClickTests {
         #expect(core.zOrderRaiseEchoes[top] != nil)
         // The duplicate report inside the window reverts too.
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 
     /// The veto is age-bounded (#689 device trace): a STALE
@@ -107,7 +107,7 @@ struct RaiseEchoClickTests {
                 -KiwiCore.selfRaiseEchoWindow - 1
             )
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 
     /// The veto is ORDER, not freshness (#887): a self stamp
@@ -118,7 +118,7 @@ struct RaiseEchoClickTests {
         let (intended, top, _) = makePile(core)
         core.selfRaiseStamps[top] = core.wallClock().addingTimeInterval(-0.5)
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 
     /// The #431 arm the order keeps: a keyboard focus landing
@@ -130,7 +130,7 @@ struct RaiseEchoClickTests {
         let (_, top, _) = makePile(core)
         core.selfRaiseStamps[top] = core.wallClock().addingTimeInterval(0.1)
         core.handle(.windowFocused(top))
-        #expect(focused(core) == top)
+        expectEqual(focused(core), top)
     }
 
     @Test("A click that reached the window escapes the revert")
@@ -139,7 +139,7 @@ struct RaiseEchoClickTests {
         let (_, top, _) = makePile(core)
         core.lastLeftClick = (core.wallClock(), overlapPoint, top)
         core.handle(.windowFocused(top))
-        #expect(focused(core) == top)
+        expectEqual(focused(core), top)
         // The stamp survives the escape: the raise's real echo
         // may still be in flight, and if focus has moved on by
         // then, that echo must still be reverted.
@@ -157,7 +157,7 @@ struct RaiseEchoClickTests {
         let (intended, top, under) = makePile(core)
         core.lastLeftClick = (core.wallClock(), overlapPoint, top)
         core.handle(.windowFocused(under))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 
     @Test("A click that reached another window is no provenance")
@@ -168,7 +168,7 @@ struct RaiseEchoClickTests {
             core.wallClock(), CGPoint(x: 100, y: 100), intended
         )
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 
     @Test("A click older than the echo window is no provenance")
@@ -183,7 +183,7 @@ struct RaiseEchoClickTests {
             top
         )
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 
     /// A press the stamp could not resolve (unwired provider,
@@ -195,7 +195,7 @@ struct RaiseEchoClickTests {
         let (intended, top, _) = makePile(core)
         core.lastLeftClick = (core.wallClock(), overlapPoint, nil)
         core.handle(.windowFocused(top))
-        #expect(focused(core) == intended)
+        expectEqual(focused(core), intended)
     }
 }
 

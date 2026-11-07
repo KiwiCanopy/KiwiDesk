@@ -46,10 +46,10 @@ struct PocketReservationTests {
                 == hidden.kiwishelf.hiddenReservation
         )
         // No pocket at rest: a Hidden edge reserves nothing.
-        #expect(reserved(hidden, at: .top, resting: false) == 0)
+        expectEqual(reserved(hidden, at: .top, resting: false), 0)
         // The bar's reserve off turns the strip off.
         hidden.spaceBarStyle.reserve = false
-        #expect(reserved(hidden, at: .top) == 0)
+        expectEqual(reserved(hidden, at: .top), 0)
     }
 
     @Test("an Auto edge takes the deeper of the sliver and the handle")
@@ -57,7 +57,7 @@ struct PocketReservationTests {
         let auto = settings(space: .auto, pocket: .top)
         let shelf = auto.kiwishelf
         // The kiwi handle rests as deep as the bars' handles (#2784).
-        #expect(PocketMarkGeometry.handleDepth == KiwiShelf.hiddenDepth)
+        expectEqual(PocketMarkGeometry.handleDepth, KiwiShelf.hiddenDepth)
         #expect(
             reserved(auto, at: .top)
                 == max(shelf.hiddenReservation, shelf.hiddenReservation)
@@ -72,7 +72,7 @@ struct PocketReservationTests {
     func shownEdgeIsASection() {
         let shown = settings(space: .always, pocket: .top)
         #expect(shown.pocketRest(in: .bsp, on: nil) == .section)
-        #expect(reserved(shown, at: .top) == shown.kiwishelf.reservation)
+        expectEqual(reserved(shown, at: .top), shown.kiwishelf.reservation)
     }
 
     @Test("an edge no bar shows follows the bars' Show")
@@ -92,7 +92,7 @@ struct PocketReservationTests {
         // layout does not host holding nothing.
         var free = always
         free.spaceBarStyle.reserve = false
-        #expect(reserved(free, at: .bottom) == 0)
+        expectEqual(reserved(free, at: .bottom), 0)
         // The layout bounds take exactly what the strips reserve.
         let bounds = always.layoutBounds(
             from: visible,

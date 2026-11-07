@@ -48,7 +48,7 @@ struct AppBarManagerTests {
             bar(display: 2, space: "web"),
         ])
         manager.sync([bar(display: 1, space: "1")])
-        #expect(manager.shownDisplays == [DisplayID(1)])
+        expectEqual(manager.shownDisplays, [DisplayID(1)])
     }
 
     @Test("syncing an empty set retires every bar")
@@ -108,9 +108,9 @@ struct AppBarManagerTests {
             bar(display: 1, space: "1", edge: .top, strip: strip)
         ])
         let strips = manager.strips(forSpace: SpaceID("1"))
-        #expect(strips.count == 1)
-        #expect(strips.first?.strip == strip)
-        #expect(strips.first?.edge == .top)
+        expectEqual(strips.count, 1)
+        expectEqual(strips.first?.strip, strip)
+        expectEqual(strips.first?.edge, .top)
     }
 
     @Test("strips carries every edge, not just top")
@@ -128,8 +128,8 @@ struct AppBarManagerTests {
         // Floats nudge off every edge (QA 2026-07-19), so a
         // left bar's strip is part of the contract surface.
         let strips = manager.strips(forSpace: SpaceID("1"))
-        #expect(strips.first?.edge == .left)
-        #expect(strips.first?.strip == strip)
+        expectEqual(strips.first?.edge, .left)
+        expectEqual(strips.first?.strip, strip)
     }
 
     @Test("strips is empty for a space showing no bar")
@@ -159,7 +159,7 @@ struct AppBarManagerTests {
             bar(display: 2, space: "web", edge: .bottom, strip: b),
         ])
         let spaces = Set(manager.shownStrips.map(\.space))
-        #expect(spaces == [SpaceID("1"), SpaceID("web")])
+        expectEqual(spaces, [SpaceID("1"), SpaceID("web")])
     }
 
     @Test("a drag routes to the bar's own space")
@@ -177,8 +177,8 @@ struct AppBarManagerTests {
             bar(display: 2, space: "web"),
         ])
         manager.overlayForTesting(DisplayID(2))?.onMove(0, 3)
-        #expect(moved?.0 == SpaceID("web"))
-        #expect(moved?.1 == 0)
-        #expect(moved?.2 == 3)
+        expectEqual(moved?.0, SpaceID("web"))
+        expectEqual(moved?.1, 0)
+        expectEqual(moved?.2, 3)
     }
 }

@@ -138,7 +138,7 @@ struct KeypadKeysTests {
     @Test("A keypad digit names itself as its digit")
     func keypadDigitNamesAsTheDigit() {
         let pad = UInt32(kVK_ANSI_Keypad4)
-        #expect(KeyCombo.keyName(for: pad) == "4")
+        expectEqual(KeyCombo.keyName(for: pad), "4")
     }
 
     /// The recorder captures a raw key code, so a keypad press
@@ -155,9 +155,9 @@ struct KeypadKeysTests {
                 shift: false
             )
         )
-        #expect(text == "control+option+4")
+        expectEqual(text, "control+option+4")
         let combo = try #require(KeyCombo.parse(text))
-        #expect(combo.keyCode == KeyCombo.keyCodes["4"])
+        expectEqual(combo.keyCode, KeyCombo.keyCodes["4"])
     }
 
     /// `names` gives every digit a second spelling, so without
@@ -178,17 +178,17 @@ struct KeypadKeysTests {
     @Test("keypadN parses to the number-row code")
     func keypadAliasParsesToRowCode() throws {
         let alias = try #require(KeyCombo.parse("keypad4"))
-        #expect(alias.keyCode == KeyCombo.keyCodes["4"])
+        expectEqual(alias.keyCode, KeyCombo.keyCodes["4"])
         #expect(KeyCombo.equivalent("control+keypad4", "control+4"))
     }
 
     @Test("A non-digit keypad key is its own bindable key")
     func nonDigitKeypadKeysStandAlone() throws {
         let enter = try #require(KeyCombo.parse("keypadenter"))
-        #expect(enter.keyCode == UInt32(kVK_ANSI_KeypadEnter))
+        expectEqual(enter.keyCode, UInt32(kVK_ANSI_KeypadEnter))
         #expect(KeypadKeys.rowTwin(of: enter.keyCode) == nil)
         let plus = try #require(KeyCombo.parse("keypadplus"))
-        #expect(plus.keyCode == UInt32(kVK_ANSI_KeypadPlus))
+        expectEqual(plus.keyCode, UInt32(kVK_ANSI_KeypadPlus))
     }
 
     // MARK: - Registration
@@ -202,10 +202,10 @@ struct KeypadKeysTests {
 
         let row = try #require(KeyCombo.keyCodes["4"])
         let pad = try #require(KeypadKeys.keypadTwin(of: row))
-        #expect(registrar.liveCodes == [row, pad])
+        expectEqual(registrar.liveCodes, [row, pad])
         // Both registrations answer to the SAME binding, or the
         // keypad press would fire nothing.
-        #expect(manager.activeBindings.count == 2)
+        expectEqual(manager.activeBindings.count, 2)
         #expect(
             Set(manager.activeBindings.values.map(\.ref)) == [1]
         )
@@ -218,8 +218,8 @@ struct KeypadKeysTests {
         let combo = try #require(KeyCombo.parse("control+j"))
         manager.bind(combo, ref: 1)
 
-        #expect(registrar.liveCodes.count == 1)
-        #expect(manager.activeBindings.count == 1)
+        expectEqual(registrar.liveCodes.count, 1)
+        expectEqual(manager.activeBindings.count, 1)
     }
 
     /// The shortcut still works from the number row, so cueing a
@@ -236,7 +236,7 @@ struct KeypadKeysTests {
         manager.bind(combo, ref: 1)
 
         #expect(manager.activationFailures.isEmpty)
-        #expect(registrar.liveCodes == [row])
+        expectEqual(registrar.liveCodes, [row])
     }
 
     /// The authored key is the one the user wrote and can see,
@@ -252,7 +252,7 @@ struct KeypadKeysTests {
         let combo = try #require(KeyCombo.parse("control+4"))
         manager.bind(combo, ref: 1)
 
-        #expect(manager.activationFailures == [combo])
+        expectEqual(manager.activationFailures, [combo])
         #expect(registrar.liveCodes.isEmpty)
     }
 

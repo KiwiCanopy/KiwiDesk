@@ -50,12 +50,12 @@ struct SpaceTransitionMigrationTests {
         let root = try object(out)
         let space = try #require(root["space"] as? [String: Any])
         #expect(space["cue"] == nil)
-        #expect(space["transition"] as? String == expected.rawValue)
-        #expect(root["format"] as? Int == GuiConfig.currentFormat)
+        expectEqual(space["transition"] as? String, expected.rawValue)
+        expectEqual(root["format"] as? Int, GuiConfig.currentFormat)
         #expect((root["desktop"] as? [String: Any])?["cue"] != nil)
         #expect((root["mode"] as? [String: Any])?["cue"] != nil)
         let back = try JSONDecoder().decode(GuiConfig.self, from: out)
-        #expect(back.appWide?.spaceTransition == expected)
+        expectEqual(back.appWide?.spaceTransition, expected)
     }
 
     /// Compact input: the tree fallback re-encodes pretty-printed,

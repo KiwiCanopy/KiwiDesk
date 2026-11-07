@@ -23,10 +23,10 @@ struct StateCoordinatorTests {
     func windowCreated() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        #expect(state.windows.count == 1)
+        expectEqual(state.windows.count, 1)
         let space = state.workspaces[SpaceID(1)]
-        #expect(space?.windows == [WindowID(1)])
-        #expect(space?.focused == WindowID(1))
+        expectEqual(space?.windows, [WindowID(1)])
+        expectEqual(space?.focused, WindowID(1))
     }
 
     @Test("Window destruction cleans both managers")
@@ -36,7 +36,7 @@ struct StateCoordinatorTests {
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
-        #expect(state.windows.count == 0)
+        expectEqual(state.windows.count, 0)
         #expect(
             state.workspaces[SpaceID(1)]?.windows.isEmpty
                 == true
@@ -71,7 +71,7 @@ struct StateCoordinatorTests {
         state.apply(.windowCreated(makeWindow(2, pid: 100)))
         state.apply(.windowCreated(makeWindow(3, pid: 200)))
         state.apply(.appTerminated(pid: 100))
-        #expect(state.windows.count == 1)
+        expectEqual(state.windows.count, 1)
         #expect(
             state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(3)]
@@ -84,9 +84,9 @@ struct StateCoordinatorTests {
         let a = Display(id: DisplayID(1), name: "A", frame: .zero)
         let b = Display(id: DisplayID(2), name: "B", frame: .zero)
         state.apply(.displaysChanged([a, b]))
-        #expect(state.workspaces.allDisplays.count == 2)
+        expectEqual(state.workspaces.allDisplays.count, 2)
         state.apply(.displaysChanged([b]))
-        #expect(state.workspaces.allDisplays.count == 1)
+        expectEqual(state.workspaces.allDisplays.count, 1)
         #expect(
             state.workspaces.allDisplays.first?.id
                 == DisplayID(2)

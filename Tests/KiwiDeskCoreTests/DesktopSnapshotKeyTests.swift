@@ -57,7 +57,7 @@ struct DesktopSnapshotKeyTests {
 
     @Test("a stamped Desktop keys by its identity")
     func stampedKeysByIdentity() {
-        #expect(snapshot().key(of: 1) == .identity(stamp))
+        expectEqual(snapshot().key(of: 1), .identity(stamp))
     }
 
     /// The fallback is the pre-#1147 key and means exactly what
@@ -66,7 +66,7 @@ struct DesktopSnapshotKeyTests {
     /// array and the SECOND Desktop.
     @Test("an unstamped Desktop keys by its number")
     func bareKeysByNumber() {
-        #expect(snapshot().key(of: 4) == .number(2))
+        expectEqual(snapshot().key(of: 4), .number(2))
     }
 
     /// A fullscreen or system space is no Desktop, so it files
@@ -84,8 +84,8 @@ struct DesktopSnapshotKeyTests {
     @Test("a key resolves back to its Desktop, both shapes")
     func resolvesBack() {
         let snap = snapshot()
-        #expect(snap.space(for: .identity(stamp))?.id == 1)
-        #expect(snap.space(for: .number(2))?.id == 4)
+        expectEqual(snap.space(for: .identity(stamp))?.id, 1)
+        expectEqual(snap.space(for: .number(2))?.id, 4)
     }
 
     /// Absence is not proof: an unplugged display's Desktop and
@@ -106,8 +106,8 @@ struct DesktopSnapshotKeyTests {
     @Test("each display answers with the Desktop it shows")
     func currentKeyIsPerDisplay() {
         let snap = snapshot()
-        #expect(snap.currentKey(on: "MAIN") == .identity(stamp))
-        #expect(snap.currentKey(on: "SIDE") == .number(3))
+        expectEqual(snap.currentKey(on: "MAIN"), .identity(stamp))
+        expectEqual(snap.currentKey(on: "SIDE"), .number(3))
         #expect(snap.currentKey(on: "GONE") == nil)
     }
 }

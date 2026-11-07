@@ -75,7 +75,7 @@ struct SpaceMapParityTests {
         // SpaceID; a new one that the population list misses
         // shows up as a dict without the probe entry.
         #expect(!dicts.isEmpty)
-        #expect(holding.count == dicts.count)
+        expectEqual(holding.count, dicts.count)
     }
 
     @Test("renameSpace migrates every per-space map")

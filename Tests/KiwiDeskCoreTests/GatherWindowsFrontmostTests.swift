@@ -86,7 +86,7 @@ struct GatherWindowsFrontmostTests {
             placingLast: WindowID(2)
         )
         let group = try #require(groups.first)
-        #expect(group.windows == ids([1, 3, 4, 2]))
+        expectEqual(group.windows, ids([1, 3, 4, 2]))
     }
 
     /// It is a MOVE, not a copy or an append: the window must not
@@ -103,9 +103,9 @@ struct GatherWindowsFrontmostTests {
             placingLast: WindowID(1)
         )
         let group = try #require(groups.first)
-        #expect(group.windows.count == 3)
-        #expect(Set(group.windows).count == 3)
-        #expect(group.windows.last == WindowID(1))
+        expectEqual(group.windows.count, 3)
+        expectEqual(Set(group.windows).count, 3)
+        expectEqual(group.windows.last, WindowID(1))
     }
 
     /// Nil, and an id that is not on this display or not managed at
@@ -123,7 +123,7 @@ struct GatherWindowsFrontmostTests {
                 placingLast: candidate
             )
             let group = try #require(groups.first)
-            #expect(group.windows == ids([1, 2, 3]))
+            expectEqual(group.windows, ids([1, 2, 3]))
         }
     }
 
@@ -170,14 +170,14 @@ struct GatherWindowsFrontmostTests {
             .filter { $0.offset % cells == mine % cells }
             .map(\.element)
         #expect(mates.count > 1)
-        #expect(mates.last == WindowID(2))
+        expectEqual(mates.last, WindowID(2))
         let circle = QuitGridLayout.raiseOrder(
             for: group.windows,
             in: group.axFrame,
             targetDepth: depth
         )
         let positions = mates.compactMap(circle.firstIndex(of:))
-        #expect(positions.max() == circle.firstIndex(of: WindowID(2)))
+        expectEqual(positions.max(), circle.firstIndex(of: WindowID(2)))
     }
 
     /// And when the count fills the grid evenly it is also the last
@@ -198,8 +198,8 @@ struct GatherWindowsFrontmostTests {
             in: group.axFrame,
             targetDepth: 5  // the depth these counts assume (#660)
         )
-        #expect(circle.count == 4)
-        #expect(circle.last == WindowID(2))
+        expectEqual(circle.count, 4)
+        expectEqual(circle.last, WindowID(2))
     }
 
     /// Placed last, the frontmost window is the one the short row's
@@ -223,7 +223,7 @@ struct GatherWindowsFrontmostTests {
         )
         // Every other window keeps a single cell's width.
         for id in [1, 3, 4, 5].map(WindowID.init) {
-            #expect(frames[id]?.width == 640)
+            expectEqual(frames[id]?.width, 640)
         }
     }
 }

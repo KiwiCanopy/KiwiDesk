@@ -64,7 +64,7 @@ struct GlassActiveAppearanceTests {
     @Test("self_test finds every panel answering")
     func selfTestFindsTheAnswers() {
         let probes = GlassActiveAppearance.selfTestProbes()
-        #expect(probes.count == 1)
+        expectEqual(probes.count, 1)
         for probe in probes {
             guard case .answered = probe.check() else {
                 Issue.record("\(probe.check())")

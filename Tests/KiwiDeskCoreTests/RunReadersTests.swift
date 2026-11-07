@@ -65,14 +65,14 @@ struct RunReadersTests {
         let placements = core.windowPlacements(of: space, floats: [])
         // Window 3 is the edge slot the hidden ones share; it is
         // not focused, which is #2547's case.
-        #expect(placements[WindowID(3)]?.visibility == .visible)
+        expectEqual(placements[WindowID(3)]?.visibility, .visible)
         for hidden in 4...6 {
             #expect(
                 placements[WindowID(UInt32(hidden))]?.visibility
                     == .hidden
             )
         }
-        #expect(placements[WindowID(2)]?.visibility == .visible)
+        expectEqual(placements[WindowID(2)]?.visibility, .visible)
     }
 
     @Test("A weight press in a run divides the span its floors leave")
@@ -85,7 +85,7 @@ struct RunReadersTests {
                 $0.shown.contains(WindowID(2))
             }
         )
-        #expect(Array(run.shown) == [WindowID(2), WindowID(3)])
+        expectEqual(Array(run.shown), [WindowID(2), WindowID(3)])
         #expect(run.extra > 0)
         // The run's step: the shown pair over the span their
         // floors leave, with no minimum of its own.

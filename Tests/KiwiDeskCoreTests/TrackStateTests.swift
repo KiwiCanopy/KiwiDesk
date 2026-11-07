@@ -37,8 +37,8 @@ struct TrackStateTests {
             position: .afterFocused,
             isTiled: allTiled
         )
-        #expect(space.windows == ids(1))
-        #expect(space.trackBreaks == [ids(1)[0]])
+        expectEqual(space.windows, ids(1))
+        expectEqual(space.trackBreaks, [ids(1)[0]])
     }
 
     @Test("own_track opens a track right after the focused one")
@@ -57,8 +57,8 @@ struct TrackStateTests {
             position: .afterFocused,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[2], w[1]])
-        #expect(space.trackBreaks == [w[1], w[2]])
+        expectEqual(space.windows, [w[0], w[2], w[1]])
+        expectEqual(space.trackBreaks, [w[1], w[2]])
     }
 
     @Test("focused_track joins right after the focused window")
@@ -77,8 +77,8 @@ struct TrackStateTests {
             position: .afterFocused,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[3], w[1], w[2]])
-        #expect(space.trackBreaks == [w[2]])
+        expectEqual(space.windows, [w[0], w[3], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[2]])
     }
 
     @Test("own_track always opens a new track (#192)")
@@ -100,8 +100,8 @@ struct TrackStateTests {
         // No spawn cap (#192): the third window opens its own
         // track after the focused one; the overflow track is a
         // read-time view, so spawn never folds windows together.
-        #expect(space.trackBreaks == [w[1], w[2]])
-        #expect(space.windows == [w[0], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[1], w[2]])
+        expectEqual(space.windows, [w[0], w[1], w[2]])
     }
 
     @Test("Floating windows do not anchor the partition")
@@ -121,8 +121,8 @@ struct TrackStateTests {
             position: .afterFocused,
             isTiled: { $0 != w[1] }
         )
-        #expect(space.windows == [w[0], w[1], w[2], w[3]])
-        #expect(space.trackBreaks == [w[2], w[3]])
+        expectEqual(space.windows, [w[0], w[1], w[2], w[3]])
+        expectEqual(space.trackBreaks, [w[2], w[3]])
     }
 
     @Test("Removing a head hands its break to the successor")
@@ -137,8 +137,8 @@ struct TrackStateTests {
         )
         space.remove(w[1])
         // w[2] inherits the break and the track weight.
-        #expect(space.trackBreaks == [w[2]])
-        #expect(space.trackWeights == [w[2]: 3])
+        expectEqual(space.trackBreaks, [w[2]])
+        expectEqual(space.trackWeights, [w[2]: 3])
     }
 
     @Test("Removing a lone head collapses its track")
@@ -154,7 +154,7 @@ struct TrackStateTests {
         space.remove(w[1])
         // w[2] already starts a track: no transfer, the middle
         // track (and its weight) is gone.
-        #expect(space.trackBreaks == [w[2]])
+        expectEqual(space.trackBreaks, [w[2]])
         #expect(space.trackWeights[w[2]] == nil)
     }
 
@@ -171,9 +171,9 @@ struct TrackStateTests {
         space.swap(w[1], w[2])
         // Order [w0, w2, w1]: the boundary stays at slot 1,
         // now held by w2, with the weight following it.
-        #expect(space.windows == [w[0], w[2], w[1]])
-        #expect(space.trackBreaks == [w[2]])
-        #expect(space.trackWeights[w[2]] == 2)
+        expectEqual(space.windows, [w[0], w[2], w[1]])
+        expectEqual(space.trackBreaks, [w[2]])
+        expectEqual(space.trackWeights[w[2]], 2)
         #expect(space.trackWeights[w[1]] == nil)
     }
 
@@ -192,8 +192,8 @@ struct TrackStateTests {
         space.swap(w[0], w[1])
         // Order [w1, w0, w2]: the head weight stays at slot 0,
         // now held by w1 — it must not travel with w0.
-        #expect(space.windows == [w[1], w[0], w[2]])
-        #expect(space.trackWeights[w[1]] == 3)
+        expectEqual(space.windows, [w[1], w[0], w[2]])
+        expectEqual(space.trackWeights[w[1]], 3)
         #expect(space.trackWeights[w[0]] == nil)
     }
 
@@ -237,16 +237,16 @@ struct TrackStateTests {
             manager.withSpace("1") { $0.append(id) }
         }
         manager.setMode("1", .track)
-        #expect(manager["1"]?.trackBreaks == Set(w))
+        expectEqual(manager["1"]?.trackBreaks, Set(w))
         // Leaving clears the markers and weights.
         manager.setMode("1", .bsp)
-        #expect(manager["1"]?.trackBreaks.isEmpty == true)
-        #expect(manager["1"]?.trackWeights.isEmpty == true)
+        expectEqual(manager["1"]?.trackBreaks.isEmpty, true)
+        expectEqual(manager["1"]?.trackWeights.isEmpty, true)
         // A same-mode set does not reseed (profile re-applies).
         manager.setMode("1", .track)
         manager.withSpace("1") { $0.trackBreaks = [w[0]] }
         manager.setMode("1", .track)
-        #expect(manager["1"]?.trackBreaks == [w[0]])
+        expectEqual(manager["1"]?.trackBreaks, [w[0]])
     }
 }
 
@@ -265,8 +265,8 @@ struct TrackSpawnTests {
         for id in w {
             state.apply(.windowCreated(window(id)))
         }
-        #expect(state.workspaces["1"]?.windows == w)
-        #expect(state.workspaces["1"]?.trackBreaks == Set(w))
+        expectEqual(state.workspaces["1"]?.windows, w)
+        expectEqual(state.workspaces["1"]?.trackBreaks, Set(w))
     }
 
     @Test("focused_track keeps one track growing")
@@ -279,7 +279,7 @@ struct TrackSpawnTests {
         for id in w {
             state.apply(.windowCreated(window(id)))
         }
-        #expect(state.workspaces["1"]?.trackBreaks == [w[0]])
+        expectEqual(state.workspaces["1"]?.trackBreaks, [w[0]])
     }
 
     @Test("A per-space override caps the normal tracks (#192)")
@@ -302,8 +302,8 @@ struct TrackSpawnTests {
         // (#1354): the third window opens that third track rather
         // than joining an existing one — one marker each.
         let space = state.workspaces["1"]
-        #expect(space?.trackBreaks == Set(w))
-        #expect(space?.windows == w)
+        expectEqual(space?.trackBreaks, Set(w))
+        expectEqual(space?.windows, w)
     }
 
     @Test("A floating window takes the placement path")
@@ -316,7 +316,7 @@ struct TrackSpawnTests {
         )
         // The floating window is in the space but gained no
         // break marker.
-        #expect(state.workspaces["1"]?.windows.count == 2)
+        expectEqual(state.workspaces["1"]?.windows.count, 2)
         #expect(
             state.workspaces["1"]?.trackBreaks == [ids(1)[0]]
         )

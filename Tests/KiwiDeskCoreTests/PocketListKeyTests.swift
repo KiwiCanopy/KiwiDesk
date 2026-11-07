@@ -95,11 +95,11 @@ struct PocketListKeyTests {
         #expect(core.execute("pocket.toggle_list").error == nil)
         let view = try #require(core.pocketPlate.view(on: display))
         #expect(core.shelves.peek.shown?.view === view)
-        #expect(core.shelves.peek.shown?.edge == .bottom)
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.shelves.peek.shown?.edge, .bottom)
+        expectEqual(core.pocketListDisplay, display)
         #expect(core.pocketStands)
         // The bars' plan stays capacity-only: no slot, no reservation.
-        #expect(core.shelfReservations == held)
+        expectEqual(core.shelfReservations, held)
         #expect(core.execute("pocket.toggle_list").error == nil)
         #expect(core.shelves.peek.shown == nil)
         #expect(!core.pocketStands)
@@ -115,7 +115,7 @@ struct PocketListKeyTests {
         core.tiler.settings.spaceBarStyle.visibility = .always
         core.updateBars()
         core.execute("pocket.toggle_list")
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.pocketListDisplay, display)
         #expect(core.pocketPlate.slots[display] == nil)
         // The bar pass placed it, on the strip it stands inside.
         let inside = try #require(core.pocketInsideFrame(on: display))
@@ -134,7 +134,7 @@ struct PocketListKeyTests {
         let (core, display) = (fixture.core, fixture.display)
         defer { fixture.tearDown() }
         core.execute("pocket.toggle_list")
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.pocketListDisplay, display)
         let second = DisplayID(900_777)
         core.state.workspaces.upsertDisplay(
             Display(
@@ -162,7 +162,7 @@ struct PocketListKeyTests {
         #expect(core.shelves.peek.shown != nil)
         #expect(core.execute("pocket.toggle_list").isSuccess)
         let counts = meter.snapshot(reset: false).counts
-        #expect(counts.retiles + counts.passesHeld == 0)
+        expectEqual(counts.retiles + counts.passesHeld, 0)
         // Opening does owe the bar pass that places the pocket.
         #expect(counts.barRenders > 0)
     }
@@ -181,10 +181,10 @@ struct PocketListKeyTests {
             )
         )
         core.execute("pocket.toggle_list")
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.pocketListDisplay, display)
         #expect(core.pocketStands(on: display))
         #expect(!core.pocketStands(on: second))
-        #expect(Set(core.pocketPlate.specs.keys) == [display])
+        expectEqual(Set(core.pocketPlate.specs.keys), [display])
     }
 
     @Test("on a bar's edge the list opens off its section, the bar kept")
@@ -200,10 +200,10 @@ struct PocketListKeyTests {
         let slot = try #require(core.pocketPlate.slots[display])
         let strips = core.spaceBars.shownStrips.map(\.strip)
         core.execute("pocket.toggle_list")
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.pocketListDisplay, display)
         #expect(core.pocketPlate.specs[display]?.handle == nil)
-        #expect(core.pocketPlate.slots[display] == slot)
-        #expect(core.spaceBars.shownStrips.map(\.strip) == strips)
+        expectEqual(core.pocketPlate.slots[display], slot)
+        expectEqual(core.spaceBars.shownStrips.map(\.strip), strips)
         core.execute("pocket.toggle_list")
         #expect(core.shelves.peek.shown == nil)
     }
@@ -224,8 +224,8 @@ struct PocketListKeyTests {
         core.execute("pocket.toggle_list")
         let panel = core.shelves.peek.panel
         #expect(panel.drawn?.empty == nil)
-        #expect(panel.drawn?.groups.last?.keyed == true)
-        #expect(panel.drawn?.groups.last?.rows.map(\.window) == [one])
+        expectEqual(panel.drawn?.groups.last?.keyed, true)
+        expectEqual(panel.drawn?.groups.last?.rows.map(\.window), [one])
     }
 
     @Test("the list closes when an app's own window leaves it")
@@ -264,7 +264,7 @@ struct PocketListKeyTests {
         core.eventLoop.switchReads.batch = nil
         try #require(owed.count == 1)
         owed.forEach { $0() }
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.pocketListDisplay, display)
     }
 
     @Test("a handle's pocket rises for the key's list and sinks after it")
@@ -273,7 +273,7 @@ struct PocketListKeyTests {
         let (core, display) = (fixture.core, fixture.display)
         defer { fixture.tearDown() }
         fixture.pocket([one])
-        #expect(core.pocketPlate.specs[display]?.risen == false)
+        expectEqual(core.pocketPlate.specs[display]?.risen, false)
         // Risen before the list reads its content, so it grows out of
         // the risen pocket, and held there by the open list after.
         let content = core.shelves.peek.content
@@ -283,12 +283,12 @@ struct PocketListKeyTests {
             return content(source, space)
         }
         core.execute("pocket.toggle_list")
-        #expect(risenAtOpen == true)
-        #expect(core.pocketListDisplay == display)
+        expectEqual(risenAtOpen, true)
+        expectEqual(core.pocketListDisplay, display)
         core.updatePocketPlate()
-        #expect(core.pocketPlate.specs[display]?.risen == true)
+        expectEqual(core.pocketPlate.specs[display]?.risen, true)
         core.execute("pocket.toggle_list")
-        #expect(core.pocketPlate.specs[display]?.risen == false)
+        expectEqual(core.pocketPlate.specs[display]?.risen, false)
     }
 
     @Test("a stand-down refuses with no list and no pocket")
@@ -337,7 +337,7 @@ struct PocketListKeyTests {
         core.execute("pocket")
         #expect(core.state.isPocketed(one))
         core.execute("pocket.toggle_list")
-        #expect(core.pocketListDisplay == display)
+        expectEqual(core.pocketListDisplay, display)
         core.state.apply(.windowDestroyed(one, wasMinimized: false))
         core.updatePocketPlate()
         #expect(core.shelves.peek.shown == nil)

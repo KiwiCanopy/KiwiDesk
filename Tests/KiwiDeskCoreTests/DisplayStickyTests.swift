@@ -78,7 +78,7 @@ struct DisplayStickyRenderTests {
         let s5 = state.workspaces[SpaceID("5")]!
         let tiled = state.effectiveTiledMembers(of: s5)
         #expect(!tiled.contains(WindowID(1)))
-        #expect(tiled == [WindowID(9)])
+        expectEqual(tiled, [WindowID(9)])
     }
 
     @Test("Follows its home display when that display switches space")
@@ -118,7 +118,7 @@ struct DisplayStickyRenderTests {
         // predicate answering the FOCUSED space would say 5.
         state.workspaces.activate(SpaceID("5"))
         let window = state.windows[WindowID(1)]!
-        #expect(state.stickyRenderSpace(of: window) == "1")
+        expectEqual(state.stickyRenderSpace(of: window), "1")
         let s1 = state.workspaces[SpaceID("1")]!
         #expect(
             state.effectiveTiledMembers(of: s1)
@@ -216,9 +216,9 @@ struct StickyMoveGuardTests {
         seed(core, scope: .global)
         core.moveWindow(WindowID(1), to: SpaceID("2"), follow: false)
         // Same display, other display — refused either way.
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
         core.moveWindow(WindowID(1), to: SpaceID("5"), follow: false)
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
     }
 
     @Test("A display sticky refuses a same-display target")
@@ -227,7 +227,7 @@ struct StickyMoveGuardTests {
         seed(core, scope: .display)
         // Space 2 is on the same monitor (A) as home space 1.
         core.moveWindow(WindowID(1), to: SpaceID("2"), follow: false)
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
     }
 
     @Test("A display sticky accepts a cross-display target, re-homes")
@@ -236,7 +236,7 @@ struct StickyMoveGuardTests {
         seed(core, scope: .display)
         // Space 5 is on the other monitor (B) — allowed, re-homes.
         core.moveWindow(WindowID(1), to: SpaceID("5"), follow: false)
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "5")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "5")
         // Still a display sticky, now homed on display B.
         #expect(
             core.state.windows[WindowID(1)]?.stickyScope == .display
@@ -255,12 +255,12 @@ struct StickyMoveGuardTests {
         // false (so `fire` records no `sprungSpace`), no re-home,
         // and no visible space switch happened.
         #expect(!core.spaceBarDrop.spring(SpaceID("2"), WindowID(1)))
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
         // A cross-display spring is allowed, matching moveWindow —
         // it reports true.
         #expect(core.spaceBarDrop.spring(SpaceID("5"), WindowID(1)))
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "5")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "5")
     }
 
     @Test("The Space-Bar spring path refuses a global sticky")
@@ -270,8 +270,8 @@ struct StickyMoveGuardTests {
         core.wireSpaceBarDrop()
         #expect(!core.spaceBarDrop.spring(SpaceID("2"), WindowID(1)))
         #expect(!core.spaceBarDrop.spring(SpaceID("5"), WindowID(1)))
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
     }
 
     @Test("On a single monitor a display sticky refuses like global")
@@ -292,6 +292,6 @@ struct StickyMoveGuardTests {
         )
         core.state.workspaces.add(WindowID(1), to: SpaceID("1"))
         core.moveWindow(WindowID(1), to: SpaceID("2"), follow: false)
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
     }
 }

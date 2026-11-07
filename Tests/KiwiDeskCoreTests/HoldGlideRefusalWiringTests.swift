@@ -52,7 +52,7 @@ struct HoldGlideRefusalWiringTests {
         f.core.borders.onResizeRefusal = { refusals.append($0) }
 
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(f.hits == .number(1))
+        expectEqual(f.hits, .number(1))
         #expect(f.heldID != nil)
         try f.beginGlide()
 
@@ -77,11 +77,11 @@ struct HoldGlideRefusalWiringTests {
             Double(frames) * dt < HoldGlide.maxRunSeconds / 10
         )
         #expect(f.frameTick == nil)
-        #expect(f.core.keys.isGliding == false)
+        expectEqual(f.core.keys.isGliding, false)
 
         f.registrar.release(keyCode: f.combo.keyCode)
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
     }
 
     @Test("A press during a glide still cues its refusal (#3017)")
@@ -106,7 +106,7 @@ struct HoldGlideRefusalWiringTests {
             presses += 1
             try #require(presses < 20)
         }
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
     }
 
     @Test("A retile's cue during a glide still draws (#3017)")
@@ -125,7 +125,7 @@ struct HoldGlideRefusalWiringTests {
             anchor: WindowID(2),
             axis: "x"
         )
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
         #expect(f.core.keys.isGliding)
     }
 
@@ -163,7 +163,7 @@ struct HoldGlideRefusalWiringTests {
         f.core.state.workspaces.focus(WindowID(1), in: space)
 
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(f.hits == .number(1))
+        expectEqual(f.hits, .number(1))
         #expect(f.heldID == nil)
         #expect(f.ticks.isEmpty)
     }

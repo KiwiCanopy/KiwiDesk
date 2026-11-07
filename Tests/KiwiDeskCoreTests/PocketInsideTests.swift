@@ -19,7 +19,7 @@ struct PocketInsideTests {
             position: 82,
             inner: 6
         )
-        #expect(frame == CGRect(x: 806, y: 38, width: 28, height: 28))
+        expectEqual(frame, CGRect(x: 806, y: 38, width: 28, height: 28))
     }
 
     @Test("on the bottom it stands above the strip")
@@ -31,7 +31,7 @@ struct PocketInsideTests {
             position: 50,
             inner: 6
         )
-        #expect(frame == CGRect(x: 486, y: 834, width: 28, height: 28))
+        expectEqual(frame, CGRect(x: 486, y: 834, width: 28, height: 28))
     }
 
     @Test("on a side edge it stands toward the windows")
@@ -42,7 +42,7 @@ struct PocketInsideTests {
             position: 0,
             inner: 6
         )
-        #expect(frame == CGRect(x: 38, y: 0, width: 28, height: 28))
+        expectEqual(frame, CGRect(x: 38, y: 0, width: 28, height: 28))
         let right = CGRect(x: 1408, y: 0, width: 28, height: 800)
         let other = KiwiCore.pocketInsideFrame(
             strip: right,
@@ -50,7 +50,7 @@ struct PocketInsideTests {
             position: 100,
             inner: 4
         )
-        #expect(other == CGRect(x: 1376, y: 772, width: 28, height: 28))
+        expectEqual(other, CGRect(x: 1376, y: 772, width: 28, height: 28))
     }
 
     @Test("Position past either end keeps it within the strip")
@@ -61,14 +61,14 @@ struct PocketInsideTests {
             position: 100,
             inner: 0
         )
-        #expect(end.maxX == top.maxX)
+        expectEqual(end.maxX, top.maxX)
         let start = KiwiCore.pocketInsideFrame(
             strip: top,
             edge: .top,
             position: -20,
             inner: 0
         )
-        #expect(start.minX == top.minX)
+        expectEqual(start.minX, top.minX)
     }
 }
 
@@ -89,11 +89,11 @@ struct PocketEntranceTests {
 
     @Test("it starts past its edge, toward the edge")
     func startsPastTheEdge() {
-        #expect(start(.top, flipped: true) == CGPoint(x: 0, y: -30))
-        #expect(start(.top, flipped: false) == CGPoint(x: 0, y: 30))
-        #expect(start(.bottom, flipped: false) == CGPoint(x: 0, y: -30))
-        #expect(start(.left, flipped: true) == CGPoint(x: -30, y: 0))
-        #expect(start(.right, flipped: true) == CGPoint(x: 30, y: 0))
+        expectEqual(start(.top, flipped: true), CGPoint(x: 0, y: -30))
+        expectEqual(start(.top, flipped: false), CGPoint(x: 0, y: 30))
+        expectEqual(start(.bottom, flipped: false), CGPoint(x: 0, y: -30))
+        expectEqual(start(.left, flipped: true), CGPoint(x: -30, y: 0))
+        expectEqual(start(.right, flipped: true), CGPoint(x: 30, y: 0))
     }
 
     @Test("Reduce Motion stands it at once; the leave is quicker")
@@ -114,7 +114,7 @@ struct PocketEntranceTests {
             entering: false,
             reduceMotion: false
         )
-        #expect(leave?.duration == BarMotion.pocketLeave)
+        expectEqual(leave?.duration, BarMotion.pocketLeave)
         #expect(BarMotion.pocketLeave < BarMotion.revealSlide)
     }
 }

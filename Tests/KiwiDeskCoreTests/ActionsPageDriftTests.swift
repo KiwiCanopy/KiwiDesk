@@ -55,14 +55,14 @@ struct ActionsPageDriftTests {
         let names = ActionsPage.groups.flatMap(\.entries)
         #expect(!names.isEmpty)
         for entry in names {
-            #expect(APIReference.kind(of: entry) == .action)
+            expectEqual(APIReference.kind(of: entry), .action)
             #expect(entry.channel != .cli, "\(entry.qualifiedName)")
         }
         let listed = Set(names.map(\.qualifiedName))
         let bindable = APIReference.entries.filter {
             APIReference.kind(of: $0) == .action && $0.channel != .cli
         }
-        #expect(listed == Set(bindable.map(\.qualifiedName)))
+        expectEqual(listed, Set(bindable.map(\.qualifiedName)))
     }
 
     @Test("a pending summary refuses the render")
@@ -74,7 +74,7 @@ struct ActionsPageDriftTests {
                 pending: ["focus"]
             )
         }
-        #expect(refusal == .pendingSummary("focus"))
+        expectEqual(refusal, .pendingSummary("focus"))
     }
 
     @Test("a row whose heading is gone refuses the render")
@@ -84,7 +84,7 @@ struct ActionsPageDriftTests {
         let refusal = #expect(throws: ActionsPage.Refusal.self) {
             try ActionsPage.render(luaReference: reference)
         }
-        #expect(refusal == .noHeading(["focus"]))
+        expectEqual(refusal, .noHeading(["focus"]))
     }
 
     @Test("a page the release strip swept still matches")
@@ -99,8 +99,8 @@ struct ActionsPageDriftTests {
         #expect(!ActionsPage.isUnreleased(swept))
         // The release's own sweep, run on the marked page.
         let release = try sweepFixtureCorpus(["commands.md": marked])
-        #expect(release.run.status == 0)
-        #expect(release.pages["commands.md"] == swept)
+        expectEqual(release.run.status, 0)
+        expectEqual(release.pages["commands.md"], swept)
     }
 
     @Test("anchors follow the site's slugger")
@@ -118,9 +118,9 @@ struct ActionsPageDriftTests {
             anchors["focus_space_next"]
                 == "focus_space_previous--focus_space_next"
         )
-        #expect(anchors["stack.promote"] == "stackpromote")
-        #expect(anchors["exec"] == "kiwideskexec")
-        #expect(anchors["load_profile"] == "save_profile-load_profile")
+        expectEqual(anchors["stack.promote"], "stackpromote")
+        expectEqual(anchors["exec"], "kiwideskexec")
+        expectEqual(anchors["load_profile"], "save_profile-load_profile")
         #expect(anchors["Examples"] == nil)
     }
 }

@@ -47,7 +47,7 @@ struct ScrollRunLayoutTests {
         #expect(abs(last.maxY - 790) < 0.01)
         // w5 shares the zone with w6; w2…w4 wait parked.
         let edge = try #require(frames[ids[4]])
-        #expect(edge.maxY + 10 == last.minY)
+        expectEqual(edge.maxY + 10, last.minY)
         #expect(isParked(frames[ids[1]]))
         #expect(isParked(frames[ids[3]]))
         #expect(!isParked(edge))
@@ -63,10 +63,10 @@ struct ScrollRunLayoutTests {
             for: tiled,
             in: context(focused: ids[0])
         )
-        #expect(held[ids[3]]?.minY == 10)
-        #expect(fresh[ids[1]]?.minY == 10)
+        expectEqual(held[ids[3]]?.minY, 10)
+        expectEqual(fresh[ids[1]]?.minY, 10)
         // The master never moves for the run.
-        #expect(held[ids[0]] == fresh[ids[0]])
+        expectEqual(held[ids[0]], fresh[ids[0]])
     }
 
     @Test("A learned floor larger than the zone is shown alone")
@@ -139,7 +139,7 @@ struct ScrollRunLayoutTests {
         let frames = TrackLayout().calculateGeometry(for: tiled, in: ctx)
         // The first track rests at its head; the second ends at
         // its focus.
-        #expect(frames[ids[0]]?.minY == 10)
+        expectEqual(frames[ids[0]]?.minY, 10)
         #expect(isParked(frames[ids[2]]))
         #expect(!isParked(frames[ids[1]]))
         #expect(abs((frames[ids[5]]?.maxY ?? 0) - 790) < 0.01)
@@ -157,9 +157,9 @@ struct ScrollRunLayoutTests {
                 in: context(focused: ids[5])
             )
         )
-        #expect(cover.heads == [ids[4]])
-        #expect(cover.behind[ids[1]] == ids[4])
-        #expect(cover.behind[ids[3]] == ids[4])
+        expectEqual(cover.heads, [ids[4]])
+        expectEqual(cover.behind[ids[1]], ids[4])
+        expectEqual(cover.behind[ids[3]], ids[4])
         #expect(cover.behind[ids[5]] == nil)
     }
 

@@ -25,23 +25,23 @@ struct StateMarkColorTests {
         // Empty = "Automatic": the fallback itself, NEVER the
         // accent-color path `NSColor(kiwiHex:)` takes on a bad
         // parse — an empty mark means "adapt", not "broken".
-        #expect(NSColor.mark(hex: "", fallback: .labelColor) == .labelColor)
+        expectEqual(NSColor.mark(hex: "", fallback: .labelColor), .labelColor)
     }
 
     @Test("mark resolves a hex to that color")
     func resolverHex() {
         let red = NSColor.mark(hex: "#FF0000", fallback: .labelColor)
         let srgb = red.usingColorSpace(.sRGB)
-        #expect(srgb?.redComponent == 1)
-        #expect(srgb?.greenComponent == 0)
+        expectEqual(srgb?.redComponent, 1)
+        expectEqual(srgb?.greenComponent, 0)
         #expect(red != NSColor.labelColor)
     }
 
     @Test("contrastingGlyph picks a legible black/white")
     func contrastGlyph() {
         // Light fill → black glyph; dark fill → white glyph.
-        #expect(NSColor.white.contrastingGlyph == .black)
-        #expect(NSColor.black.contrastingGlyph == .white)
+        expectEqual(NSColor.white.contrastingGlyph, .black)
+        expectEqual(NSColor.black.contrastingGlyph, .white)
         // A mid/dark brand hue biases to white (threshold 0.6).
         #expect(
             NSColor(kiwiHex: "#4E9F3D").contrastingGlyph == .white
@@ -50,8 +50,8 @@ struct StateMarkColorTests {
 
     @Test("styles default to the Automatic sentinel")
     func defaultsAutomatic() {
-        #expect(StickyStyle().color == "")
-        #expect(FloatingStyle().color == "")
+        expectEqual(StickyStyle().color, "")
+        expectEqual(FloatingStyle().color, "")
     }
 
     @Test("sticky.set_color stores a valid hex, unclamped")
@@ -93,7 +93,7 @@ struct StateMarkColorTests {
                 args: [.string("")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.stickyStyle.color == "")
+        expectEqual(core.tiler.settings.stickyStyle.color, "")
         // A non-empty non-hex is rejected and leaves the value.
         #expect(
             !core.execute(
@@ -101,7 +101,7 @@ struct StateMarkColorTests {
                 args: [.string("bright green")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.stickyStyle.color == "")
+        expectEqual(core.tiler.settings.stickyStyle.color, "")
         #expect(
             !core.execute(
                 "floating.set_color",

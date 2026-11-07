@@ -87,9 +87,9 @@ struct FocusWrapScreensTests {
     func hopsToTheNextScreen() {
         guard let core = twoScreens() else { return }
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
         // The window nearest the entering edge: the left one.
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     @Test("past the last screen focus wraps back to the first")
@@ -99,8 +99,8 @@ struct FocusWrapScreensTests {
         #expect(right(core))
         core.state.apply(.windowFocused(WindowID(22)))
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(core.state.workspaces.lastFocused == WindowID(11))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(11))
     }
 
     @Test("a screen showing no window is skipped")
@@ -108,8 +108,8 @@ struct FocusWrapScreensTests {
         guard let core = twoScreens(emptyMain: true) else { return }
         #expect(right(core))
         // Nothing to land on there: the wrap stays on this screen.
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(core.state.workspaces.lastFocused == WindowID(11))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(11))
     }
 
     /// A third screen past the empty one: two screens cannot tell
@@ -127,8 +127,8 @@ struct FocusWrapScreensTests {
         core.state.workspaces.activate(SpaceID("1"))
         core.state.apply(.windowFocused(WindowID(12)))
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("5"))
-        #expect(core.state.workspaces.lastFocused == WindowID(51))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("5"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(51))
     }
 
     @Test("This screen keeps a key on an empty Space")
@@ -138,7 +138,7 @@ struct FocusWrapScreensTests {
         core.state.workspaces.activate(SpaceID("4"))
         core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(!right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("4"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("4"))
     }
 
     @Test("This screen never leaves the screen")
@@ -146,8 +146,8 @@ struct FocusWrapScreensTests {
         guard let core = twoScreens() else { return }
         core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(core.state.workspaces.lastFocused == WindowID(11))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(11))
     }
 
     @Test("Off stops at the screen edge")
@@ -155,7 +155,7 @@ struct FocusWrapScreensTests {
         guard let core = twoScreens() else { return }
         core.execute("set_focus_wrap", args: [.string("off")])
         #expect(!right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
     }
 
     @Test("a Scrolling row walks its whole order before it crosses")
@@ -167,10 +167,10 @@ struct FocusWrapScreensTests {
         )
         core.state.apply(.windowFocused(WindowID(11)))
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(core.state.workspaces.lastFocused == WindowID(12))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(12))
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
     }
 
     @Test("a Scrolling Space is entered at its end of order")
@@ -181,7 +181,7 @@ struct FocusWrapScreensTests {
             args: [.string("2"), .string("scrolling")]
         )
         #expect(right(core))
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     @Test("an empty Space still crosses to the next screen")
@@ -190,8 +190,8 @@ struct FocusWrapScreensTests {
         core.state.workspaces.assign(SpaceID("4"), to: left)
         core.state.workspaces.activate(SpaceID("4"))
         #expect(right(core))
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     /// The #292 preflight lets that press through only where the hop
@@ -205,13 +205,13 @@ struct FocusWrapScreensTests {
         core.frontmostPIDProvider = { 1 }
         core.ignoredPanel.active.insert(1)
         let latched = core.execute("focus", args: [.string("right")])
-        #expect(latched.error?.contains("is empty") == true)
-        #expect(core.state.workspaces.activeSpace == SpaceID("4"))
+        expectEqual(latched.error?.contains("is empty"), true)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("4"))
         core.ignoredPanel.active.remove(1)
         let hop = core.execute("focus", args: [.string("right")])
         #expect(hop.isSuccess)
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     /// A Stack run on the main screen hides windows behind its edge
@@ -236,7 +236,7 @@ struct FocusWrapScreensTests {
         #expect(
             core.navigate([.string("left")], swapping: false).isSuccess
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
         let landed = try #require(core.state.workspaces.lastFocused)
         #expect(!hidden.contains(landed))
     }

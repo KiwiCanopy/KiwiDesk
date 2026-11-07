@@ -35,7 +35,7 @@ struct VisionLensTests {
             VisionLens.self,
             from: JSONEncoder().encode(lens)
         )
-        #expect(back == lens)
+        expectEqual(back, lens)
     }
 
     @Test("a sparse lens follows every default, and decode clamps")
@@ -47,10 +47,10 @@ struct VisionLensTests {
             VisionLens.self,
             from: Data(json.utf8)
         )
-        #expect(lens.apps == ["com.apple.safari"])
+        expectEqual(lens.apps, ["com.apple.safari"])
         #expect(lens.keepFocus)
-        #expect(lens.clearDelay == 0)
-        #expect(lens.overrides.dim == 100)
+        expectEqual(lens.clearDelay, 0)
+        expectEqual(lens.overrides.dim, 100)
         #expect(lens.overrides.blur == nil)
         #expect(lens.reminder == nil)
         let strict = #"{"name":"R","appearance":"sepia"}"#
@@ -68,7 +68,7 @@ struct VisionLensTests {
     func overrideParity() {
         let plain = fieldNames(AppWideSettings().vision)
             .subtracting(["neverDimmed", "lenses"])
-        #expect(fieldNames(VisionLens.Overrides()) == plain)
+        expectEqual(fieldNames(VisionLens.Overrides()), plain)
     }
 
     @Test("the resolver applies every override, and plain otherwise")
@@ -84,8 +84,8 @@ struct VisionLensTests {
             covered: fieldNames(VisionLens.Overrides())
                 .union(["lens"])
         )
-        #expect(lensed.neverDimmed == plain.neverDimmed)
-        #expect(settings.look(lens: "Nope") == plain)
+        expectEqual(lensed.neverDimmed, plain.neverDimmed)
+        expectEqual(settings.look(lens: "Nope"), plain)
     }
 
     /// An override is spelled in JSON as the plain setting it
@@ -121,7 +121,7 @@ struct VisionLensTests {
             VisionLens(name: String(repeating: "a", count: 60)),
         ])
         let lens = try #require(settings.lens(named: " writing\n"))
-        #expect(lens.titles == ["com.apple.preview": ["notes"]])
+        expectEqual(lens.titles, ["com.apple.preview": ["notes"]])
         #expect(
             settings.visionLenses.last?.name.count
                 == AppWideSettings.lensNameLimit
@@ -144,6 +144,6 @@ struct VisionLensTests {
         #expect(
             back.appWide?.visionLenses.map(\.name) == ["Writing", "Reading"]
         )
-        #expect(back.appWide?.visionLenses.first == lensWithEverything())
+        expectEqual(back.appWide?.visionLenses.first, lensWithEverything())
     }
 }

@@ -22,7 +22,7 @@ struct KeepPointerTests {
             "gap": object(["inner": .number(6), "outer": .number(8)]),
             "list": .array([.number(1), .number(2)]),
         ])
-        #expect(KeepPointer.diff(old, new) == [["gap", "inner"], ["list"]])
+        expectEqual(KeepPointer.diff(old, new), [["gap", "inner"], ["list"]])
         #expect(KeepPointer.diff(old, old).isEmpty)
     }
 
@@ -30,16 +30,16 @@ struct KeepPointerTests {
     func omittedGroupYieldsLeaves() {
         let old = object([:])
         let new = object(["gap": object(["inner": .number(6)])])
-        #expect(KeepPointer.diff(old, new) == [["gap", "inner"]])
-        #expect(KeepPointer.diff(new, old) == [["gap", "inner"]])
+        expectEqual(KeepPointer.diff(old, new), [["gap", "inner"]])
+        expectEqual(KeepPointer.diff(new, old), [["gap", "inner"]])
     }
 
     @Test("a pointer round-trips a dot, a slash and a tilde")
     func pointerEscapes() {
         let path = ["settings", "edge_override", "A:1.5/x~y"]
         let pointer = KeepPointer.string(path)
-        #expect(pointer == "/settings/edge_override/A:1.5~1x~0y")
-        #expect(KeepPointer.path(pointer) == path)
+        expectEqual(pointer, "/settings/edge_override/A:1.5~1x~0y")
+        expectEqual(KeepPointer.path(pointer), path)
         #expect(KeepPointer.path("settings") == nil)
     }
 
@@ -51,7 +51,7 @@ struct KeepPointerTests {
             at: ["a", "b"],
             in: root
         )
-        #expect(KeepPointer.value(at: ["a", "b"], in: set) == .number(3))
+        expectEqual(KeepPointer.value(at: ["a", "b"], in: set), .number(3))
         let removed = KeepPointer.setting(nil, at: ["a", "b"], in: set)
         #expect(KeepPointer.value(at: ["a", "b"], in: removed) == nil)
     }
@@ -68,7 +68,7 @@ struct KeepPointerTests {
             leaves[path] = .some(KeepPointer.value(at: path, in: root))
         }
         let patched = try #require(TilingSettings().patched(leaves))
-        #expect(patched.borderStyle.width == 7)
-        #expect(patched == live)
+        expectEqual(patched.borderStyle.width, 7)
+        expectEqual(patched, live)
     }
 }

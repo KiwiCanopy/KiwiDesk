@@ -45,12 +45,12 @@ struct LaunchFollowSpawnTests {
     }
 
     static func expectFollowed(_ core: KiwiCore, window: UInt32 = 9) {
-        #expect(core.state.workspaces.activeSpace == Base.ruled)
+        expectEqual(core.state.workspaces.activeSpace, Base.ruled)
         #expect(
             core.state.workspaces[Base.ruled]?.focused
                 == WindowID(window)
         )
-        #expect(core.focusedWindowID == WindowID(window))
+        expectEqual(core.focusedWindowID, WindowID(window))
     }
 
     @Test("An old process's new window follows, as a full switch")
@@ -174,7 +174,7 @@ struct LaunchFollowSpawnTests {
         core.defersEventRetiles = true
         Self.created(9, on: core)
         Base.arrive(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Base.home)
+        expectEqual(core.state.workspaces.activeSpace, Base.home)
     }
 
     @Test("Another app's standing launch debt holds the follow")
@@ -184,7 +184,7 @@ struct LaunchFollowSpawnTests {
         Self.created(9, on: core)
         Base.arrive(9, on: core)
         Base.expectStayed(core)
-        #expect(core.launchFollow.owed() == "app.other")
+        expectEqual(core.launchFollow.owed(), "app.other")
     }
 
     @Test("A window just after a Desktop switch is the switch's")

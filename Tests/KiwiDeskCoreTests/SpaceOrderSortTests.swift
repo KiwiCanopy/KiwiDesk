@@ -26,7 +26,7 @@ struct SpaceOrderSortTests {
         let ids: Set = [SpaceID(8), SpaceID(6), SpaceID(1)]
         let moved = w.sortInPlace(ids)
         #expect(moved)
-        #expect(w.spaces(on: a).map(\.raw) == ["1", "3", "6", "8"])
+        expectEqual(w.spaces(on: a).map(\.raw), ["1", "3", "6", "8"])
         let again = w.sortInPlace(ids)
         #expect(!again, "a sorted order reports no move")
     }
@@ -40,7 +40,7 @@ struct SpaceOrderSortTests {
         ])
         let moved = w.sortInPlace([SpaceID(9), SpaceID(7)])
         #expect(!moved)
-        #expect(w.spaces(on: a).map(\.raw) == ["1", "9", "20"])
-        #expect(w.spaces(on: b).map(\.raw) == ["4", "7"])
+        expectEqual(w.spaces(on: a).map(\.raw), ["1", "9", "20"])
+        expectEqual(w.spaces(on: b).map(\.raw), ["4", "7"])
     }
 }

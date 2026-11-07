@@ -100,7 +100,7 @@ struct LocaleWorksheetDiscardTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         let lines = try #require(
             echoed(run, under: "malformed"),
             "malformed drafts vanished silently: \(run.stderr)"
@@ -110,7 +110,7 @@ struct LocaleWorksheetDiscardTests {
         // `contains` checks all pass while a fourth arm has gone
         // quiet, and an unreached arm is one a later edit can
         // delete for free.
-        #expect(lines.count == 4)
+        expectEqual(lines.count, 4)
         for (key, text) in [
             ("gap.hint", "Abstand von Hand"),
             ("bar.hint", "Balkendicke"),
@@ -157,7 +157,7 @@ struct LocaleWorksheetDiscardTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         let lines = try #require(
             echoed(run, under: "malformed"),
             "a mistyped field name ate the draft: \(run.stderr)"
@@ -206,12 +206,12 @@ struct LocaleWorksheetDiscardTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         let translated = try #require(
             echoed(run, under: "already translates"),
             "the merged draft was not reported: \(run.stderr)"
         )
-        #expect(translated.count == 1)
+        expectEqual(translated.count, 1)
         #expect(translated[0].contains("gap.hint"))
         #expect(translated[0].contains("Abstand"))
 
@@ -219,7 +219,7 @@ struct LocaleWorksheetDiscardTests {
             echoed(run, under: "left en.json"),
             "the deleted key's draft was not reported"
         )
-        #expect(departed.count == 1)
+        expectEqual(departed.count, 1)
         #expect(departed[0].contains("ghost.key"))
         #expect(departed[0].contains("Weg"))
     }
@@ -256,7 +256,7 @@ struct LocaleWorksheetDiscardTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         let lines = try #require(
             echoed(run, under: "already translates"),
             """

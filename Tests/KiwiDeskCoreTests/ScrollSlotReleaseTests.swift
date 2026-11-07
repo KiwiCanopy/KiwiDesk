@@ -39,7 +39,7 @@ struct ScrollSlotReleaseTests {
             space.windows == [1, 2, 4, 3].map { WindowID(UInt32($0)) }
         )
         #expect(space.scrollRest?.slot == nil)
-        #expect(space.scrollRest?.offset == -500)
+        expectEqual(space.scrollRest?.offset, -500)
     }
 
     @Test("a swap of two other windows releases it as well")
@@ -82,21 +82,21 @@ struct ScrollSlotReleaseTests {
     func insertKeepsTheSlot() {
         var space = space()
         space.insert(WindowID(9), after: WindowID(3))
-        #expect(space.scrollRest?.slot?.window == WindowID(3))
+        expectEqual(space.scrollRest?.slot?.window, WindowID(3))
     }
 
     @Test("a neighbour closing ahead of the focus keeps the slot")
     func removeKeepsTheSlot() {
         var space = space()
         space.remove(WindowID(1))
-        #expect(space.scrollRest?.slot?.window == WindowID(3))
-        #expect(space.scrollRest?.slot?.position == 1600)
+        expectEqual(space.scrollRest?.slot?.window, WindowID(3))
+        expectEqual(space.scrollRest?.slot?.position, 1600)
     }
 
     @Test("a swap that matches no window releases nothing")
     func missingWindowIsANoOp() {
         var space = space()
         space.swap(WindowID(3), WindowID(9))
-        #expect(space.scrollRest?.slot?.window == WindowID(3))
+        expectEqual(space.scrollRest?.slot?.window, WindowID(3))
     }
 }

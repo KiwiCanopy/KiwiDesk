@@ -58,8 +58,8 @@ struct ProfileBindingMigrationTests {
         )
         let map = try bindings(out)
         let entry = try #require(map["2"] as? [String: Any])
-        #expect(entry["profiles"] as? [String] == ["Work"])
-        #expect(entry["desktop"] as? Int == 2)
+        expectEqual(entry["profiles"] as? [String], ["Work"])
+        expectEqual(entry["desktop"] as? Int, 2)
     }
 
     /// The whole file has to survive, not just the binding — that
@@ -80,8 +80,8 @@ struct ProfileBindingMigrationTests {
             GuiConfig.self,
             from: out
         )
-        #expect(config.spaces == [SpaceID("work"), SpaceID("play")])
-        #expect(config.floatRules == ["Calculator"])
+        expectEqual(config.spaces, [SpaceID("work"), SpaceID("play")])
+        expectEqual(config.floatRules, ["Calculator"])
         #expect(
             try stored(out)[.number(3)]
                 == DesktopBinding(profile: "Studio", desktop: 3)
@@ -104,7 +104,7 @@ struct ProfileBindingMigrationTests {
         )
         let map = try bindings(out, at: ["config"])
         let entry = try #require(map["1"] as? [String: Any])
-        #expect(entry["profiles"] as? [String] == ["Desk"])
+        expectEqual(entry["profiles"] as? [String], ["Desk"])
     }
 
     /// The STEP's own idempotence, called directly.

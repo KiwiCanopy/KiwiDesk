@@ -68,22 +68,22 @@ struct ScrollGestureRouterTests {
         var router = router()
         let began = router.route(sample(Self.pan, .began), now: 0)
         #expect(began.consume)
-        #expect(began.events.map(\.kind) == [.began])
+        expectEqual(began.events.map(\.kind), [.began])
         let moved = router.route(sample([], dy: 4, .changed), now: 0.01)
         #expect(moved.consume)
-        #expect(moved.events.map(\.kind) == [.changed])
-        #expect(moved.events.first?.chord == Self.pan)
+        expectEqual(moved.events.map(\.kind), [.changed])
+        expectEqual(moved.events.first?.chord, Self.pan)
         #expect(router.route(sample([], .ended), now: 0.02).consume)
         let glide = router.route(
             sample([], dy: 9, momentum: .began),
             now: 0.03
         )
         #expect(glide.consume)
-        #expect(glide.events.first?.momentum == true)
+        expectEqual(glide.events.first?.momentum, true)
         #expect(router.expire(now: 5).isEmpty)
         let done = router.route(sample([], momentum: .ended), now: 0.5)
         #expect(done.consume)
-        #expect(done.events.map(\.kind) == [.ended])
+        expectEqual(done.events.map(\.kind), [.ended])
     }
 
     @Test("a lift with no momentum ends at the grace deadline")
@@ -91,10 +91,10 @@ struct ScrollGestureRouterTests {
         var router = router()
         _ = router.route(sample(Self.pan, .began), now: 0)
         _ = router.route(sample(Self.pan, .ended), now: 1)
-        #expect(router.deadline == 1 + ScrollGestureRouter.momentumGrace)
+        expectEqual(router.deadline, 1 + ScrollGestureRouter.momentumGrace)
         #expect(router.expire(now: 1.01).isEmpty)
         let ended = router.expire(now: 1.2)
-        #expect(ended.map(\.kind) == [.ended])
+        expectEqual(ended.map(\.kind), [.ended])
         #expect(router.deadline == nil)
     }
 
@@ -130,9 +130,9 @@ struct ScrollGestureRouterTests {
         var router = router()
         _ = router.route(sample(Self.pan, .mayBegin), now: 0)
         let moved = router.route(sample(Self.pan, dy: 3, .changed), now: 0)
-        #expect(moved.events.map(\.kind) == [.began, .changed])
+        expectEqual(moved.events.map(\.kind), [.began, .changed])
         let cancel = router.route(sample(Self.pan, .cancelled), now: 0.1)
-        #expect(cancel.events.map(\.kind) == [.ended])
+        expectEqual(cancel.events.map(\.kind), [.ended])
     }
 
     @Test("a plain gesture ends the chorded one still gliding, and passes")
@@ -143,7 +143,7 @@ struct ScrollGestureRouterTests {
         _ = router.route(sample([], dy: 5, momentum: .began), now: 0.1)
         let plain = router.route(sample([], .began), now: 0.2)
         #expect(!plain.consume)
-        #expect(plain.events.map(\.kind) == [.ended])
+        expectEqual(plain.events.map(\.kind), [.ended])
         let next = router.route(sample([], dy: 4, .changed), now: 0.3)
         #expect(!next.consume)
         #expect(next.events.isEmpty)
@@ -154,8 +154,8 @@ struct ScrollGestureRouterTests {
         var router = router()
         _ = router.route(sample(Self.pan, .began), now: 0)
         let wheel = router.route(sample(Self.pan, dy: 10), now: 0.1)
-        #expect(wheel.events.map(\.kind) == [.ended, .began, .changed])
-        #expect(wheel.events.last?.input == .wheel)
+        expectEqual(wheel.events.map(\.kind), [.ended, .began, .changed])
+        expectEqual(wheel.events.last?.input, .wheel)
         let glide = router.route(
             sample(Self.pan, dy: 3, momentum: .changed),
             now: 0.15
@@ -171,8 +171,8 @@ struct ScrollGestureRouterTests {
         _ = router.route(sample(Self.pan, .ended), now: 0.1)
         _ = router.route(sample([], dy: 5, momentum: .began), now: 0.1)
         let next = router.route(sample(Self.step, .began), now: 0.2)
-        #expect(next.events.map(\.kind) == [.ended, .began])
-        #expect(next.events.map(\.chord) == [Self.pan, Self.step])
+        expectEqual(next.events.map(\.kind), [.ended, .began])
+        expectEqual(next.events.map(\.chord), [Self.pan, Self.step])
     }
 
     @Test("a touch passed through stays the app's once the chord is down")
@@ -204,8 +204,8 @@ struct ScrollGestureRouterTests {
     func beganTravelIsReported() {
         var router = router()
         let began = router.route(sample(Self.pan, dy: 6, .began), now: 0)
-        #expect(began.events.map(\.kind) == [.began, .changed])
-        #expect(began.events.last?.delta.dy == 6)
+        expectEqual(began.events.map(\.kind), [.began, .changed])
+        expectEqual(began.events.last?.delta.dy, 6)
     }
 
     @Test("an expired gesture ends where it last was")
@@ -217,7 +217,7 @@ struct ScrollGestureRouterTests {
         last.location = CGPoint(x: 900, y: 40)
         _ = router.route(first, now: 0)
         _ = router.route(last, now: 0.1)
-        #expect(router.expire(now: 5).first?.location == last.location)
+        expectEqual(router.expire(now: 5).first?.location, last.location)
     }
 
     @Test("a wheel burst ends at a pause")
@@ -225,14 +225,14 @@ struct ScrollGestureRouterTests {
         var router = router()
         let first = router.route(sample(Self.pan, dy: 10), now: 0)
         #expect(first.consume)
-        #expect(first.events.map(\.kind) == [.began, .changed])
-        #expect(first.events.map(\.input) == [.wheel, .wheel])
-        #expect(first.events.first?.delta == .zero)
+        expectEqual(first.events.map(\.kind), [.began, .changed])
+        expectEqual(first.events.map(\.input), [.wheel, .wheel])
+        expectEqual(first.events.first?.delta, .zero)
         let second = router.route(sample(Self.pan, dy: 10), now: 0.1)
-        #expect(second.events.map(\.kind) == [.changed])
-        #expect(router.deadline == 0.1 + ScrollGestureRouter.wheelPause)
+        expectEqual(second.events.map(\.kind), [.changed])
+        expectEqual(router.deadline, 0.1 + ScrollGestureRouter.wheelPause)
         #expect(router.expire(now: 0.2).isEmpty)
-        #expect(router.expire(now: 1).map(\.kind) == [.ended])
+        expectEqual(router.expire(now: 1).map(\.kind), [.ended])
     }
 
     @Test("a wheel burst ends the moment its chord stops matching")
@@ -241,11 +241,11 @@ struct ScrollGestureRouterTests {
         _ = router.route(sample(Self.pan, dy: 10), now: 0)
         let plain = router.route(sample([], dy: 10), now: 0.05)
         #expect(!plain.consume)
-        #expect(plain.events.map(\.kind) == [.ended])
+        expectEqual(plain.events.map(\.kind), [.ended])
         let other = router.route(sample(Self.step, dy: 10), now: 0.06)
         #expect(other.consume)
-        #expect(other.events.map(\.kind) == [.began, .changed])
-        #expect(other.events.first?.chord == Self.step)
+        expectEqual(other.events.map(\.kind), [.began, .changed])
+        expectEqual(other.events.first?.chord, Self.step)
     }
 
     @Test("a gesture whose chord is unbound mid-flight is released")
@@ -255,7 +255,7 @@ struct ScrollGestureRouterTests {
         router.chords = [Self.step]
         let next = router.route(sample([], dy: 3, .changed), now: 0.1)
         #expect(!next.consume)
-        #expect(next.events.map(\.kind) == [.ended])
+        expectEqual(next.events.map(\.kind), [.ended])
         let glide = router.route(
             sample([], dy: 3, momentum: .changed),
             now: 0.2
@@ -269,10 +269,10 @@ struct ScrollGestureRouterTests {
     func stampsTheClock() {
         var router = router()
         let first = router.route(sample(Self.step, dy: -3), now: 4)
-        #expect(first.events.map(\.time) == [4, 4])
+        expectEqual(first.events.map(\.time), [4, 4])
         let next = router.route(sample(Self.step, dy: -3), now: 4.1)
-        #expect(next.events.map(\.time) == [4.1])
-        #expect(router.expire(now: 4.5).map(\.time) == [4.5])
+        expectEqual(next.events.map(\.time), [4.1])
+        expectEqual(router.expire(now: 4.5).map(\.time), [4.5])
     }
 
     @Test("orphan momentum and changes pass")

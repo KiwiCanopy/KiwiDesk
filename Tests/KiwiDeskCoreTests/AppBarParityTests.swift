@@ -131,10 +131,10 @@ struct AppBarCommandParityTests {
             // bar alone, never the global style.
             if case .visibility = setting {
                 #expect(onStyle.isEmpty)
-                #expect(onBar == ["visibility"])
+                expectEqual(onBar, ["visibility"])
                 continue
             }
-            #expect(onStyle.count == 1)
+            expectEqual(onStyle.count, 1)
             // A layout-fixed field writes the style alone.
             #expect(
                 onStyle.isSubset(of: AppBarParityTests.layoutFixed)
@@ -146,7 +146,7 @@ struct AppBarCommandParityTests {
         // a future field is intentionally not command-settable,
         // give it an exclusion set here (cf. the override tests'
         // `notOverridable`) rather than dropping the assert.
-        #expect(touched == fieldNames(AppBarStyle()))
+        expectEqual(touched, fieldNames(AppBarStyle()))
     }
 
     /// The third leg, mirroring `SpaceBarParityTests`: the verb
@@ -222,7 +222,7 @@ struct AppBarCommandParityTests {
         let hosting = APIReference.namespaces.filter { _, verbs in
             verbs.contains { $0.hasPrefix("set_app_bar_") }
         }
-        #expect(Set(hosting.keys) == ["monocle", "scroll"])
+        expectEqual(Set(hosting.keys), ["monocle", "scroll"])
         for layout in ["monocle", "scroll"] {
             let verbs = Set(
                 (APIReference.namespaces[layout] ?? [])

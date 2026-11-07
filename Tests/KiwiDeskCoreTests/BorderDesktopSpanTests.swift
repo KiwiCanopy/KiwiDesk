@@ -66,7 +66,7 @@ struct BorderDesktopSpanTests {
         let behavior = try #require(backend.panelBehavior)
         #expect(!behavior.contains(.canJoinAllSpaces))
         backend.setSpansDesktops(true)
-        #expect(backend.panelBehavior?.contains(.canJoinAllSpaces) == true)
+        expectEqual(backend.panelBehavior?.contains(.canJoinAllSpaces), true)
     }
 
     @Test("An order on the same Desktop costs no re-home")
@@ -76,7 +76,7 @@ struct BorderDesktopSpanTests {
         syncOrder(overlay, on: 1)
         // A reorder event orders with the facts `sync` left.
         overlay.order(relativeTo: 7)
-        #expect(backend.calls == ["order", "order", "order"])
+        expectEqual(backend.calls, ["order", "order", "order"])
     }
 
     @Test("An order on another Desktop re-homes first")
@@ -86,7 +86,7 @@ struct BorderDesktopSpanTests {
         overlay.retire()
         syncOrder(overlay, on: 2)
         syncOrder(overlay, on: 2)
-        #expect(backend.calls == ["order", "hide", "order", "order"])
+        expectEqual(backend.calls, ["order", "hide", "order", "order"])
     }
 
     /// A ring that stays wanted across a Desktop change is a
@@ -100,7 +100,7 @@ struct BorderDesktopSpanTests {
         overlay.place(spansDesktops: false, desktop: 2)
         #expect(!overlay.needsOrder)
         overlay.order(relativeTo: 7)
-        #expect(backend.calls == ["order", "order"])
+        expectEqual(backend.calls, ["order", "order"])
     }
 
     @Test("A hidden ring re-homes without a second order-out")
@@ -110,7 +110,7 @@ struct BorderDesktopSpanTests {
         overlay.hide()
         overlay.place(spansDesktops: false, desktop: 1)
         overlay.order(relativeTo: 7)
-        #expect(backend.calls == ["order", "hide", "order"])
+        expectEqual(backend.calls, ["order", "hide", "order"])
     }
 
     @Test("An unknown Desktop never re-homes")
@@ -118,7 +118,7 @@ struct BorderDesktopSpanTests {
         let (overlay, backend) = ring()
         syncOrder(overlay, on: 1)
         syncOrder(overlay, on: nil)
-        #expect(backend.calls == ["order", "order"])
+        expectEqual(backend.calls, ["order", "order"])
     }
 
     @Test("A spanning ring is never re-homed by Desktop")
@@ -127,7 +127,7 @@ struct BorderDesktopSpanTests {
         syncOrder(overlay, on: 1, spans: true)
         #expect(backend.spans)
         syncOrder(overlay, on: 2, spans: true)
-        #expect(backend.calls == ["order", "order"])
+        expectEqual(backend.calls, ["order", "order"])
     }
 
     @Test("A ring that stops spanning owes one re-home")
@@ -139,7 +139,7 @@ struct BorderDesktopSpanTests {
         #expect(overlay.needsOrder)
         overlay.order(relativeTo: 7)
         syncOrder(overlay, on: 2)
-        #expect(backend.calls == ["order", "hide", "order", "order"])
+        expectEqual(backend.calls, ["order", "hide", "order", "order"])
     }
 
     @Test("A never-ordered ring is not ordered out")
@@ -148,6 +148,6 @@ struct BorderDesktopSpanTests {
         overlay.place(spansDesktops: true, desktop: nil)
         overlay.place(spansDesktops: false, desktop: nil)
         syncOrder(overlay, on: 1)
-        #expect(backend.calls == ["order"])
+        expectEqual(backend.calls, ["order"])
     }
 }

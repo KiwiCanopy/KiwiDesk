@@ -83,10 +83,10 @@ struct ScreenEdgeCoreTests {
         core.tiler.screenFingerprint = { _ in "B:1x1" }
         let onB = core.tiler.layoutBounds(on: screen, for: space)
         let reserve = core.tiler.settings.kiwishelf.reservation
-        #expect(onA.minX == visible.minX + reserve)
-        #expect(onA.minY == visible.minY)
-        #expect(onB.minX == visible.minX)
-        #expect(onB.minY == visible.minY + reserve)
+        expectEqual(onA.minX, visible.minX + reserve)
+        expectEqual(onA.minY, visible.minY)
+        expectEqual(onB.minX, visible.minX)
+        expectEqual(onB.minY, visible.minY + reserve)
     }
 
     @Test(
@@ -101,15 +101,15 @@ struct ScreenEdgeCoreTests {
             "Other:1x1": .left
         ]
         core.updateBars()
-        #expect(core.spaceBars.shownStrips.first?.edge == .top)
+        expectEqual(core.spaceBars.shownStrips.first?.edge, .top)
         core.tiler.settings.spaceBarStyle.edgeOverride = [
             display.fingerprint: .left
         ]
         core.updateBars()
         let space = try #require(core.spaceBars.shownStrips.first)
         let app = try #require(core.appBars.shownStrips.first)
-        #expect(space.edge == .left)
-        #expect(app.edge == .top)
+        expectEqual(space.edge, .left)
+        expectEqual(app.edge, .top)
         #expect(
             core.shelves.overlayForTesting(display.id, edge: .left)
                 != nil
@@ -139,7 +139,7 @@ struct ScreenEdgeCoreTests {
             core.state.workspaces.space(of: Self.window)
         )
         let strip = try #require(core.spaceBars.shownStrips.first)
-        #expect(strip.edge == .left)
+        expectEqual(strip.edge, .left)
         let region = try #require(core.floatBounds(on: space))
         #expect(region.minX >= strip.strip.maxX)
     }
@@ -153,7 +153,7 @@ struct ScreenEdgeCoreTests {
     func engineIdentityIsTheDisplays() throws {
         let (core, display, screen) = try #require(makeCore(mode: .bsp))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(core.tiler.screenFingerprint(screen) == display.fingerprint)
+        expectEqual(core.tiler.screenFingerprint(screen), display.fingerprint)
         core.state.apply(.displaysChanged([]))
         #expect(core.tiler.screenFingerprint(screen) == nil)
     }
@@ -167,11 +167,11 @@ struct ScreenEdgeCoreTests {
     func slideAxisPerScreen() throws {
         let (core, display, _) = try #require(makeCore(mode: .bsp))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(core.spaceSlideAxis(on: display.id) == .horizontal)
+        expectEqual(core.spaceSlideAxis(on: display.id), .horizontal)
         core.tiler.settings.spaceBarStyle.edgeOverride = [
             display.fingerprint: .left
         ]
-        #expect(core.spaceSlideAxis(on: display.id) == .vertical)
+        expectEqual(core.spaceSlideAxis(on: display.id), .vertical)
     }
 
     private func passes(_ meter: WorkMeter) -> Int {
@@ -200,14 +200,14 @@ struct ScreenEdgeCoreTests {
                 args: [.string("right"), .string("Elsewhere:640x480")]
             ).isSuccess
         )
-        #expect(passes(meter) == 0)
+        expectEqual(passes(meter), 0)
         #expect(
             core.execute(
                 "space_bar.set_edge",
                 args: [.string("left"), .string(display.fingerprint)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
-        #expect(passes(meter) == 1)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .top)
+        expectEqual(passes(meter), 1)
     }
 }

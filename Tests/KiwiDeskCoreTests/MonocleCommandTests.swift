@@ -90,7 +90,7 @@ struct MonocleCommandTests {
             args: [.string("gap")]
         )
         #expect(!gap.isSuccess)
-        #expect(gap.error?.contains("edge_mark") == true)
+        expectEqual(gap.error?.contains("edge_mark"), true)
     }
 
     @Test("A shared field's override is retired, naming the shelf")

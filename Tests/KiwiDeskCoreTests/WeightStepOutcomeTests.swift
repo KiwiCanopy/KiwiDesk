@@ -41,7 +41,7 @@ struct WeightStepOutcomeTests {
             span: 1200,
             minSizes: [300, 500]
         )
-        #expect(outcome.blockedByOther == 1)
+        expectEqual(outcome.blockedByOther, 1)
         #expect(!outcome.hitOwnMinimum)
         // Truncated, not refused outright — and the blocking
         // share keeps its own minimum.
@@ -64,8 +64,8 @@ struct WeightStepOutcomeTests {
             span: 1200,
             minSizes: [300, 500, 300]
         )
-        #expect(outcome.blockedByOther == 1)
-        #expect(outcome.value == 0.5)
+        expectEqual(outcome.blockedByOther, 1)
+        expectEqual(outcome.value, 0.5)
     }
 
     @Test("An unblocked step reports no refusal")
@@ -98,7 +98,7 @@ struct WeightStepOutcomeTests {
             span: 1400,
             minSizes: [300, 300, 300]
         )
-        #expect(old == new.value)
+        expectEqual(old, new.value)
     }
 
     @Test("A min-clamped write clears the cascade check")
@@ -131,7 +131,7 @@ struct WeightStepOutcomeTests {
             minLow: 200,
             minHigh: 300
         )
-        #expect(range == 0.2...0.7)
+        expectEqual(range, 0.2...0.7)
         #expect(
             SplitDomain.effectiveRatioRange(
                 available: 450,
@@ -163,7 +163,7 @@ struct WeightStepOutcomeTests {
             minLow: 200,
             minHigh: 300
         )
-        #expect(clamped.value == 0.2)
+        expectEqual(clamped.value, 0.2)
         #expect(clamped.clamped)
         let free = SplitDomain.cappedRatioWrite(
             0.45,
@@ -172,7 +172,7 @@ struct WeightStepOutcomeTests {
             minLow: 200,
             minHigh: 300
         )
-        #expect(free.value == 0.45)
+        expectEqual(free.value, 0.45)
         #expect(!free.clamped)
         // The nil-range span stays uncapped and unreported —
         // there is no visible bound to stop at.
@@ -183,7 +183,7 @@ struct WeightStepOutcomeTests {
             minLow: 200,
             minHigh: 300
         )
-        #expect(unsplittable.value == 0.05)
+        expectEqual(unsplittable.value, 0.05)
         #expect(!unsplittable.clamped)
     }
 }

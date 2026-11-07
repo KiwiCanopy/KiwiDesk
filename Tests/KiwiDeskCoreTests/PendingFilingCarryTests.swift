@@ -42,7 +42,7 @@ struct PendingFilingCarryTests {
         next.workspaces.ensureSpace(SpaceID(1))
         next.workspaces.ensureSpace(SpaceID(2))
         next.adopt(decoded)
-        #expect(next.rememberedSpace(of: late) == SpaceID(2))
+        expectEqual(next.rememberedSpace(of: late), SpaceID(2))
     }
 
     @Test("a held Space carries its filings on the hold alone")
@@ -56,7 +56,7 @@ struct PendingFilingCarryTests {
         )
         let space = try record(2, in: state.snapshot())
         #expect(space.pending.isEmpty)
-        #expect(space.held?.remembered == [late.raw])
+        expectEqual(space.held?.remembered, [late.raw])
     }
 
     @Test("a closed departure is not carried")

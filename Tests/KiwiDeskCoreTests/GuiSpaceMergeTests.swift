@@ -33,7 +33,7 @@ struct GuiSpaceMergeTests {
             into: &config,
             seededWith: [SpaceID("1")]
         )
-        #expect(config.spaces == [SpaceID("1"), SpaceID("2")])
+        expectEqual(config.spaces, [SpaceID("1"), SpaceID("2")])
     }
 
     @Test("A staged deletion is not resurrected")
@@ -48,7 +48,7 @@ struct GuiSpaceMergeTests {
             into: &config,
             seededWith: [SpaceID("1"), SpaceID("2")]
         )
-        #expect(config.spaces == [SpaceID("1")])
+        expectEqual(config.spaces, [SpaceID("1")])
     }
 
     @Test("An appended space carries its live layout mode")
@@ -63,7 +63,7 @@ struct GuiSpaceMergeTests {
             into: &config,
             seededWith: [SpaceID("1")]
         )
-        #expect(config.spaceModes[SpaceID("3")] == .monocle)
+        expectEqual(config.spaceModes[SpaceID("3")], .monocle)
     }
 
     @Test("Staged order and additions survive the merge")
@@ -100,6 +100,6 @@ struct GuiSpaceMergeTests {
             into: &config,
             seededWith: [SpaceID("1")]
         )
-        #expect(config == before)
+        expectEqual(config, before)
     }
 }

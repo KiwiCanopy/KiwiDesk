@@ -50,7 +50,7 @@ struct ShortcutBaseTopUpWiringTests {
         let combo = rows(core).first {
             $0.lua == "KiwiDesk.focus_space(\"3\")"
         }?.combo
-        #expect(combo == "hyper+3")
+        expectEqual(combo, "hyper+3")
     }
 
     @Test("a later generation's rows land on the stored base")
@@ -59,7 +59,7 @@ struct ShortcutBaseTopUpWiringTests {
         core.topUpGenerationShortcuts()
         let reset = DefaultKeybindings.resetSizesRow()
         let combo = rows(core).first { $0.lua == reset.lua }?.combo
-        #expect(combo == "hyper+r")
+        expectEqual(combo, "hyper+r")
     }
 
     @Test("a new Desktop's row lands on the stored base")
@@ -69,6 +69,6 @@ struct ShortcutBaseTopUpWiringTests {
         let combo = rows(core).first {
             $0.lua == "KiwiDesk.focus_desktop(1)"
         }?.combo
-        #expect(combo == "hyper+option+1")
+        expectEqual(combo, "hyper+option+1")
     }
 }

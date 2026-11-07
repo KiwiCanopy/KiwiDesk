@@ -14,12 +14,12 @@ struct DesktopScreenNumberTests {
     func screenNumber() {
         defer { resetAuthorityOverrides() }
         let snapshot = authoritySnapshot()
-        #expect(snapshot.screenNumber(of: 10) == 1)
-        #expect(snapshot.screenNumber(of: 11) == 2)
-        #expect(snapshot.screenNumber(of: 20) == 1)
-        #expect(snapshot.screenNumber(of: 21) == 2)
+        expectEqual(snapshot.screenNumber(of: 10), 1)
+        expectEqual(snapshot.screenNumber(of: 11), 2)
+        expectEqual(snapshot.screenNumber(of: 20), 1)
+        expectEqual(snapshot.screenNumber(of: 21), 2)
         // Verbs keep counting globally.
-        #expect(snapshot.number(of: 21) == 4)
+        expectEqual(snapshot.number(of: 21), 4)
         #expect(snapshot.screenNumber(of: 99) == nil)
     }
 
@@ -30,7 +30,7 @@ struct DesktopScreenNumberTests {
             authoritySpace(30, display: "B", isUser: false),
             authoritySpace(21, display: "B"),
         ]
-        #expect(NativeSpaces.screenNumber(of: 21, in: spaces) == 2)
+        expectEqual(NativeSpaces.screenNumber(of: 21, in: spaces), 2)
         #expect(NativeSpaces.screenNumber(of: 30, in: spaces) == nil)
     }
 
@@ -39,9 +39,9 @@ struct DesktopScreenNumberTests {
         defer { resetAuthorityOverrides() }
         let snapshot = authoritySnapshot()
         let numbers = snapshot.screenNumbersByKey
-        #expect(numbers[.number(4)] == 2)
-        #expect(numbers[.number(3)] == 1)
-        #expect(numbers[.number(1)] == 1)
+        expectEqual(numbers[.number(4)], 2)
+        expectEqual(numbers[.number(3)], 1)
+        expectEqual(numbers[.number(1)], 1)
     }
 
     private func makeCore() -> KiwiCore {
@@ -91,7 +91,7 @@ struct DesktopScreenNumberTests {
         track(core, 1, in: "1")
         track(core, 2, in: "5")
         let dell = ScreenLabel(name: "DELL U2723")
-        #expect(row(core, 2, on: DisplayID(1))?.screen == dell)
+        expectEqual(row(core, 2, on: DisplayID(1))?.screen, dell)
         #expect(row(core, 1, on: DisplayID(1))?.screen == nil)
         #expect(
             row(core, 1, on: DisplayID(2))?.screen
@@ -123,8 +123,8 @@ struct DesktopScreenNumberTests {
             )
         }
         let away = row(core, 7, on: DisplayID(1))
-        #expect(away?.status == .away(desktop: 2))
-        #expect(away?.screen == ScreenLabel(name: "DELL U2723"))
+        expectEqual(away?.status, .away(desktop: 2))
+        expectEqual(away?.screen, ScreenLabel(name: "DELL U2723"))
     }
 
     @Test("a global number says where it lands")
@@ -133,9 +133,9 @@ struct DesktopScreenNumberTests {
         defer { resetAuthorityOverrides() }
         let landings = core.desktopLandings(in: NativeSpaces.desktopSnapshot())
         let dell = ScreenLabel(name: "DELL U2723")
-        #expect(landings[3] == DesktopLanding(screen: dell, number: 1))
-        #expect(landings[4] == DesktopLanding(screen: dell, number: 2))
-        #expect(landings[1]?.number == 1)
+        expectEqual(landings[3], DesktopLanding(screen: dell, number: 1))
+        expectEqual(landings[4], DesktopLanding(screen: dell, number: 2))
+        expectEqual(landings[1]?.number, 1)
         #expect(landings[5] == nil)
     }
 
@@ -151,7 +151,7 @@ struct DesktopScreenNumberTests {
             core.screenLabel(of: DisplayID(1))
                 == ScreenLabel(name: "Built-in", twinPlace: 0)
         )
-        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == 1)
+        expectEqual(core.screenLabel(of: DisplayID(2))?.twinPlace, 1)
         _ = core.state.workspaces.removeDisplay(DisplayID(2))
         #expect(core.screenLabel(of: DisplayID(1)) == nil)
     }

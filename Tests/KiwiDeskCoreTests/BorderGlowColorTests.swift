@@ -43,13 +43,13 @@ struct BorderGlowColorTests {
             )
             #expect(c != nil)
             guard let c else { continue }
-            #expect(c.red == c.green)
-            #expect(c.green == c.blue)
+            expectEqual(c.red, c.green)
+            expectEqual(c.green, c.blue)
         }
     }
 
     @Test("Unparseable input passes through unchanged")
     func parseFailPassthrough() {
-        #expect(BorderStyle.glowColor(from: "not-a-hex") == "not-a-hex")
+        expectEqual(BorderStyle.glowColor(from: "not-a-hex"), "not-a-hex")
     }
 }

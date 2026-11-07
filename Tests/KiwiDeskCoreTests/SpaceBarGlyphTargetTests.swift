@@ -164,14 +164,14 @@ struct SpaceBarGlyphTargetTests {
         actions.accessibilityPress = { pressed.append($0) }
         let more = try #require(item.overflowTarget)
         #expect(more.accessibilityPerformPress())
-        #expect(picks.map(\.kind) == [.glyph])
-        #expect(picks.map(\.windows) == [[WindowID(2), WindowID(3)]])
-        #expect(pressed.map(\.kind) == [.overflow])
-        #expect(pressed.map(\.windows) == [[WindowID(5), WindowID(6)]])
+        expectEqual(picks.map(\.kind), [.glyph])
+        expectEqual(picks.map(\.windows), [[WindowID(2), WindowID(3)]])
+        expectEqual(pressed.map(\.kind), [.overflow])
+        expectEqual(pressed.map(\.windows), [[WindowID(5), WindowID(6)]])
         #expect((picks + pressed).allSatisfy { $0.space == SpaceID("2") })
         #expect(switched.isEmpty)
         item.mouseDown(with: Self.click)
-        #expect(switched == [SpaceID("2")])
+        expectEqual(switched, [SpaceID("2")])
     }
 
     /// A menu popped on the press read the release as a miss and
@@ -189,7 +189,7 @@ struct SpaceBarGlyphTargetTests {
         more.mouseDown(with: Self.click)
         #expect(picks == 0, "the press picked")
         more.mouseUp(with: Self.release)
-        #expect(picks == 1)
+        expectEqual(picks, 1)
         more.mouseUp(with: Self.release)
         #expect(picks == 1, "one press picked twice")
     }
@@ -232,7 +232,7 @@ struct SpaceBarGlyphTargetTests {
         #expect(item.overflowTarget === before)
         rerender([6])
         #expect(item.overflowTarget !== before)
-        #expect(item.overflowTarget?.members == [WindowID(6)])
+        expectEqual(item.overflowTarget?.members, [WindowID(6)])
     }
 
     @Test("Every target is a VoiceOver button named by its app")
@@ -243,13 +243,13 @@ struct SpaceBarGlyphTargetTests {
             $0.isAccessibilityElement()
                 && $0.accessibilityRole() == .button
         }
-        #expect(buttons.count == item.glyphTargets.count)
+        expectEqual(buttons.count, item.glyphTargets.count)
         #expect(
             item.glyphTargets.map { $0.accessibilityLabel() }
                 == ["Mail, windows: 2", "Web"]
         )
         let more = try #require(item.overflowTarget)
-        #expect(more.accessibilityLabel() == "Later windows not shown: 1")
+        expectEqual(more.accessibilityLabel(), "Later windows not shown: 1")
     }
 
     @Test("A render with the same windows keeps its targets")
@@ -269,7 +269,7 @@ struct SpaceBarGlyphTargetTests {
                 pocket: "#ffffff"
             )
         )
-        #expect(item.glyphTargets.map(ObjectIdentifier.init) == before)
+        expectEqual(item.glyphTargets.map(ObjectIdentifier.init), before)
         item.configure(
             identity: .space(SpaceID("2")),
             spaceGlyph: .text("2", tinted: true),
@@ -283,7 +283,7 @@ struct SpaceBarGlyphTargetTests {
                 pocket: "#ffffff"
             )
         )
-        #expect(item.glyphTargets.map(\.members) == [[WindowID(4)]])
+        expectEqual(item.glyphTargets.map(\.members), [[WindowID(4)]])
         #expect(item.subviews.filter { $0 is SpaceBarGlyphTarget }.count == 1)
         // Same app and count, another window: a new target.
         item.configure(
@@ -299,6 +299,6 @@ struct SpaceBarGlyphTargetTests {
                 pocket: "#ffffff"
             )
         )
-        #expect(item.glyphTargets.map(\.members) == [[WindowID(6)]])
+        expectEqual(item.glyphTargets.map(\.members), [[WindowID(6)]])
     }
 }

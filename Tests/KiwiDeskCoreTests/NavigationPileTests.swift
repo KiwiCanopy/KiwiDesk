@@ -62,7 +62,7 @@ struct NavigationPileTests {
         let ids = (1...9).map { id(UInt32($0)) }
         let slots = cascade(ids)
         let mates = Navigation.pileMates(of: id(1), among: slots)
-        #expect(mates == Set(ids.dropFirst()))
+        expectEqual(mates, Set(ids.dropFirst()))
     }
 
     @Test("A separate pile is not the focused window's")
@@ -78,7 +78,7 @@ struct NavigationPileTests {
             among: left + right
         )
         // Only the left column's mate, never the right pile.
-        #expect(mates == [id(2)])
+        expectEqual(mates, [id(2)])
     }
 
     @Test("A tiled window beside a pile is excluded")
@@ -127,14 +127,14 @@ struct SwapSkipsCascadeCommandTests {
     @Test("Defaults on, and the setter flips it")
     func toggle() {
         let core = makeCore()
-        #expect(core.tiler.settings.swapSkipsCascade == true)
+        expectEqual(core.tiler.settings.swapSkipsCascade, true)
         #expect(
             core.execute(
                 "set_swap_skips_cascade",
                 args: [.bool(false)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.swapSkipsCascade == false)
+        expectEqual(core.tiler.settings.swapSkipsCascade, false)
     }
 
     @Test("A non-boolean argument is rejected")

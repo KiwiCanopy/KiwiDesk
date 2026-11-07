@@ -98,12 +98,12 @@ struct BootScanEligibilityTests {
         // The total IS the narrated number (`BootPhase` reads
         // it), so the filter has to land at queue build, not
         // inside the step.
-        #expect(loop.bootScan.total == 2)
+        expectEqual(loop.bootScan.total, 2)
 
         let progress = loop.scanChunk(budget: nil)
         #expect(progress.finished)
-        #expect(progress.scanned == 2)
-        #expect(box.attached == [600_001, 600_002])
+        expectEqual(progress.scanned, 2)
+        expectEqual(box.attached, [600_001, 600_002])
         // The summary reports attaches of ELIGIBLE apps — the
         // same population the count row narrated.
         #expect(
@@ -137,7 +137,7 @@ struct BootScanEligibilityTests {
         // second net under the same app, and without this
         // clause the admission's observer arm was inert
         // (guard-prover, 2026-08-27).
-        #expect(loop.bootScan.total == 1)
+        expectEqual(loop.bootScan.total, 1)
         #expect(
             loop.bootScan.pending.first?.name == "test.kiwi.app1"
         )
@@ -160,6 +160,6 @@ struct BootScanEligibilityTests {
         // One reconcile step: the helper has no observer to
         // repair, nothing tracked to remove, and can never
         // attach — a step for it is inert queue length.
-        #expect(loop.bootScan.total == 1)
+        expectEqual(loop.bootScan.total, 1)
     }
 }

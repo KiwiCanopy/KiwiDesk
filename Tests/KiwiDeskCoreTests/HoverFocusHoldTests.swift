@@ -30,7 +30,7 @@ struct HoverFocusHoldTests {
         #expect(rest.held.isEmpty, "a rest's own focus holds nothing")
         focus = WindowID(2)  // a shortcut moved it; pointer over A
         rest.moved(to: CGPoint(x: 30, y: 10))
-        #expect(rest.held == [WindowID(1)])
+        expectEqual(rest.held, [WindowID(1)])
         rest.moved(to: CGPoint(x: 50, y: 10))
         #expect(rest.held == [WindowID(1)], "still inside A")
         rest.moved(to: CGPoint(x: 150, y: 10))
@@ -103,7 +103,7 @@ struct HoverFocusHoldTests {
         core.mouse.rest.moved(to: CGPoint(x: cocoa.x - 40, y: cocoa.y))
         focus = WindowID(9)
         core.mouse.rest.moved(to: cocoa)
-        #expect(core.mouse.rest.held == [WindowID(2)])
+        expectEqual(core.mouse.rest.held, [WindowID(2)])
         core.focusUnderRestingPointer(at: cocoa, armedFocus: WindowID(1))
         #expect(core.focusedWindowID == WindowID(1), "held: stands down")
         core.mouse.rest.windowsAt = { _ in [] }

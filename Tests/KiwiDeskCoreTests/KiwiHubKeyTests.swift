@@ -32,11 +32,11 @@ struct KiwiHubKeyTests {
     func storesAndClears() {
         let core = core()
         let keys = { core.appWide.kiwiHubKeys }
-        #expect(keys() == KiwiHubKeys())
+        expectEqual(keys(), KiwiHubKeys())
         #expect(set(core, "down", "ctrl+n").isSuccess)
         #expect(set(core, "page_up", "cmd+alt+u").isSuccess)
-        #expect(keys().down == "control+n")
-        #expect(keys().pageUp == "option+command+u")
+        expectEqual(keys().down, "control+n")
+        expectEqual(keys().pageUp, "option+command+u")
         #expect(set(core, "down", "").isSuccess)
         #expect(keys().down == nil)
         #expect(set(core, "page_up").isSuccess)
@@ -48,7 +48,7 @@ struct KiwiHubKeyTests {
         let core = core()
         #expect(set(core, "down", "ctrl+n").isSuccess)
         core.tiler.settings = TilingSettings()
-        #expect(core.appWide.kiwiHubKeys.down == "control+n")
+        expectEqual(core.appWide.kiwiHubKeys.down, "control+n")
     }
 
     @Test("an unknown key or an unreadable chord is refused")
@@ -56,7 +56,7 @@ struct KiwiHubKeyTests {
         let core = core()
         #expect(!set(core, "next", "ctrl+n").isSuccess)
         #expect(!set(core, "down", "ctrl+nope").isSuccess)
-        #expect(core.appWide.kiwiHubKeys == KiwiHubKeys())
+        expectEqual(core.appWide.kiwiHubKeys, KiwiHubKeys())
     }
 
     @Test("each refusal names its reason")
@@ -86,7 +86,7 @@ struct KiwiHubKeyTests {
                 "\(combo)"
             )
         }
-        #expect(core.appWide.kiwiHubKeys == KiwiHubKeys())
+        expectEqual(core.appWide.kiwiHubKeys, KiwiHubKeys())
         // A ⌘ chord the panel does not keep is fine.
         #expect(set(core, "down", "cmd+j").isSuccess)
     }
@@ -96,7 +96,7 @@ struct KiwiHubKeyTests {
         let core = core()
         #expect(set(core, "down", "ctrl+n").isSuccess)
         let taken = set(core, "up", "ctrl+n")
-        #expect(taken.error == KiwiHubKeyRefusal.taken(.down).message)
+        expectEqual(taken.error, KiwiHubKeyRefusal.taken(.down).message)
         #expect(set(core, "down", "control+n").isSuccess)
     }
 
@@ -135,7 +135,7 @@ struct KiwiHubKeyTests {
             Set(stored.keys) == Set(KiwiHubKey.allCases.map(\.rawValue))
         )
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.kiwiHubKeys == value.kiwiHubKeys)
+        expectEqual(back.appWide?.kiwiHubKeys, value.kiwiHubKeys)
     }
 
     @Test("a gui.json without the group reads as no alternatives")
@@ -151,7 +151,7 @@ struct KiwiHubKeyTests {
             GuiConfig.self,
             from: JSONSerialization.data(withJSONObject: root)
         )
-        #expect(back.appWide?.kiwiHubKeys == KiwiHubKeys())
+        expectEqual(back.appWide?.kiwiHubKeys, KiwiHubKeys())
     }
 
     @Test("a Lua-owned reload reads the keys init.lua sets now")
@@ -171,11 +171,11 @@ struct KiwiHubKeyTests {
         }
         try write("kiwihub.set_key(\"down\", \"ctrl+n\")\n")
         #expect(!core.isGuiManaged)
-        #expect(core.appWide.kiwiHubKeys.down == "control+n")
+        expectEqual(core.appWide.kiwiHubKeys.down, "control+n")
         try write("kiwihub.set_key(\"up\", \"ctrl+n\")\n")
-        #expect(core.appWide.kiwiHubKeys.up == "control+n")
+        expectEqual(core.appWide.kiwiHubKeys.up, "control+n")
         #expect(core.appWide.kiwiHubKeys.down == nil)
         try write("-- no keys\n")
-        #expect(core.appWide.kiwiHubKeys == KiwiHubKeys())
+        expectEqual(core.appWide.kiwiHubKeys, KiwiHubKeys())
     }
 }

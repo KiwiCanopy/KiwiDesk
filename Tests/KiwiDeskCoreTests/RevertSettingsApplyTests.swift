@@ -41,14 +41,14 @@ struct RevertSettingsApplyTests {
             $0.splitRatioV = 0.4
         }
         let ids = try #require(core.unsavedLiveSettings()).leaves.keys
-        #expect(ids.count == 1)
-        #expect(ids.first?.hasSuffix("/ratio_h") == true)
+        expectEqual(ids.count, 1)
+        expectEqual(ids.first?.hasSuffix("/ratio_h"), true)
         let outcome = core.revertUnsavedLive(Array(ids))
         #expect(outcome.refused.isEmpty)
-        #expect(outcome.reverted.count == 1)
+        expectEqual(outcome.reverted.count, 1)
         let ratios = core.sessionRatios(of: space)
         #expect(ratios.splitRatioH == nil)
-        #expect(ratios.splitRatioV == 0.4)
+        expectEqual(ratios.splitRatioV, 0.4)
     }
 
     /// Every field, set, for a clear to find.
@@ -80,17 +80,17 @@ struct RevertSettingsApplyTests {
     func everyFieldHasAnEntry() {
         let all = setLabels(fullRatios())
         let fields = Mirror(reflecting: SessionRatios()).children.count
-        #expect(all.count == fields)
+        expectEqual(all.count, fields)
         var cleared: [String] = []
         for shadow in KiwiCore.sizingShadows {
             var ratios = fullRatios()
             shadow.clear(&ratios)
             let gone = all.subtracting(setLabels(ratios))
-            #expect(gone.count == 1)
+            expectEqual(gone.count, 1)
             cleared += gone
         }
-        #expect(cleared.count == Set(cleared).count)
-        #expect(Set(cleared) == all)
+        expectEqual(cleared.count, Set(cleared).count)
+        expectEqual(Set(cleared), all)
     }
 
     /// Each entry reads the leaf its field shadows: a global write
@@ -106,7 +106,7 @@ struct RevertSettingsApplyTests {
             "gridRowWeights": { $0.grid.rowWeights = [2, 1] },
         ]
         let all = setLabels(fullRatios())
-        #expect(Set(writes.keys) == all)
+        expectEqual(Set(writes.keys), all)
         let old = TilingSettings()
         for (label, write) in writes {
             var new = old
@@ -118,7 +118,7 @@ struct RevertSettingsApplyTests {
             guard let shadow = moved.first else { continue }
             var ratios = fullRatios()
             shadow.clear(&ratios)
-            #expect(all.subtracting(setLabels(ratios)) == [label])
+            expectEqual(all.subtracting(setLabels(ratios)), [label])
         }
     }
 }

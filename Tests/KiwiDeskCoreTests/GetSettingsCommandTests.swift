@@ -31,13 +31,13 @@ struct GetSettingsCommandTests {
     @Test("no pointer answers the whole keep document")
     func wholeDocument() {
         let core = core()
-        #expect(get(core, []) == core.keepDocument)
+        expectEqual(get(core, []), core.keepDocument)
     }
 
     @Test("a pointer answers its leaf")
     func leaf() {
         let core = core()
-        #expect(get(core, [.string(position)]) == .string("right"))
+        expectEqual(get(core, [.string(position)]), .string("right"))
         #expect(
             get(core, [.string("/focus_wrap")])
                 == .string(core.focusWrap.mode.rawValue)
@@ -48,7 +48,7 @@ struct GetSettingsCommandTests {
     func rawOverride() {
         let core = core()
         let override = "/settings/layout/stack/override/2/stack_position"
-        #expect(get(core, [.string(override)]) == .string("left"))
+        expectEqual(get(core, [.string(override)]), .string("left"))
         let none = core.execute(
             KiwiCore.getSettingsCommand,
             args: [.string("/settings/layout/stack/override/1")]
@@ -114,9 +114,9 @@ struct GetSettingsCommandTests {
         track.limit = 7
         settings.track.override[space] = track
         let own = settings.resolved(for: space)
-        #expect(own.gapsGlobal == .uniform(7))
+        expectEqual(own.gapsGlobal, .uniform(7))
         for layout in MinWindowSizes.Layout.allCases {
-            #expect(own.minWindowSizes[layout] == .square(123))
+            expectEqual(own.minWindowSizes[layout], .square(123))
         }
         // Named here, not read from `spawnPlacementPaths`, so a row
         // dropped from that table reds; `.beforeFocused` is no
@@ -128,19 +128,19 @@ struct GetSettingsCommandTests {
             own.grid.newWindowPlacement,
             own.monocle.newWindowPlacement,
         ] {
-            #expect(placement == .beforeFocused)
+            expectEqual(placement, .beforeFocused)
         }
-        #expect(own.spaceIcons == [space: "globe"])
-        #expect(own.bsp.splitRatioH == 0.31)
-        #expect(own.stack.stackPosition == .left)
-        #expect(own.scrolling.orientation == .vertical)
-        #expect(own.grid.columns == 9)
-        #expect(own.monocle.orientation == .vertical)
-        #expect(own.track.limit == 7)
+        expectEqual(own.spaceIcons, [space: "globe"])
+        expectEqual(own.bsp.splitRatioH, 0.31)
+        expectEqual(own.stack.stackPosition, .left)
+        expectEqual(own.scrolling.orientation, .vertical)
+        expectEqual(own.grid.columns, 9)
+        expectEqual(own.monocle.orientation, .vertical)
+        expectEqual(own.track.limit, 7)
         let other = settings.resolved(for: SpaceID("1"))
-        #expect(other.bsp.splitRatioH == settings.bsp.splitRatioH)
-        #expect(other.track.limit == settings.track.limit)
-        #expect(other.minWindowSizes == settings.minWindowSizes)
+        expectEqual(other.bsp.splitRatioH, settings.bsp.splitRatioH)
+        expectEqual(other.track.limit, settings.track.limit)
+        expectEqual(other.minWindowSizes, settings.minWindowSizes)
         #expect(
             other.stack.stackPosition == settings.stack.stackPosition
         )
@@ -172,7 +172,7 @@ struct GetSettingsCommandTests {
     @Test("an empty pointer names the whole document")
     func emptyPointer() {
         let core = core()
-        #expect(get(core, [.string("")]) == core.keepDocument)
+        expectEqual(get(core, [.string("")]), core.keepDocument)
     }
 
     @Test("a missing leaf, a non-pointer and an unknown Space refuse")

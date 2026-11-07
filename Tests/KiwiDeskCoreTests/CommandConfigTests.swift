@@ -42,7 +42,7 @@ struct ConfigTests {
         #expect(
             core.tiler.settings.gapsGlobal == .uniform(16)
         )
-        #expect(core.tiler.settings.stack.masterCount == 3)
+        expectEqual(core.tiler.settings.stack.masterCount, 3)
         #expect(
             core.state.appRules["spotify"]
                 == SpaceID("music")
@@ -79,7 +79,7 @@ struct ConfigTests {
         let result = core.lua?.run(
             "KiwiDesk.focsu('left')"
         )
-        #expect(result?.succeeded == true)
+        expectEqual(result?.succeeded, true)
         #expect(
             logs.contains {
                 $0.contains("focsu")
@@ -109,7 +109,7 @@ struct APIReferenceTests {
 
     @Test("Edit distance is symmetric and exact")
     func editDistance() {
-        #expect(APIReference.editDistance("", "abc") == 3)
+        expectEqual(APIReference.editDistance("", "abc"), 3)
         #expect(
             APIReference.editDistance("focus", "focus") == 0
         )

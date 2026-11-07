@@ -57,7 +57,7 @@ struct FirstRunSeedTests {
         #expect(core.isGuiManaged)
         let config = core.guiConfigStore.load()
         let base = config?.layers.first { $0.isDefault }
-        #expect(base?.bindings.isEmpty == false)
+        expectEqual(base?.bindings.isEmpty, false)
         // Every seeded per-space row targets a space that is
         // in the seeded list — no dead rows (#91).
         let spaces = Set((config?.spaces ?? []).map(\.raw))
@@ -168,7 +168,7 @@ struct FirstRunSeedTests {
 
         let loaded = core.guiConfigStore.load()
         let base = loaded?.layers.first { $0.isDefault }
-        #expect(base?.bindings.count == 1)
+        expectEqual(base?.bindings.count, 1)
         #expect(
             base?.bindings.first?.lua
                 == "KiwiDesk.reload_config()"
@@ -192,7 +192,7 @@ struct FirstRunSeedTests {
         let base = seed.layers.first { $0.isDefault }
         // The recovered Lua bind is the only row — the seed
         // guard saw an authored binding and stayed out.
-        #expect(base?.bindings.count == 1)
+        expectEqual(base?.bindings.count, 1)
         #expect(
             !(base?.bindings ?? []).contains {
                 $0.lua == "KiwiDesk.focus(\"left\")"

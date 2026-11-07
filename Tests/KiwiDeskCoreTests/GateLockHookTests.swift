@@ -100,8 +100,8 @@ struct GateLockHookTests {
         let updated = try #require(
             specific["updatedInput"] as? [String: Any]
         )
-        #expect(updated["timeout"] as? Int == 600_000)
-        #expect(updated["run_in_background"] as? Bool == true)
+        expectEqual(updated["timeout"] as? Int, 600_000)
+        expectEqual(updated["run_in_background"] as? Bool, true)
         return updated["command"] as? String
     }
 

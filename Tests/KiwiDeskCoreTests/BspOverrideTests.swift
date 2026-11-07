@@ -26,7 +26,7 @@ struct BspOverrideTests {
             Mirror(reflecting: BspOverride())
                 .children.compactMap(\.label)
         )
-        #expect(mirror == params.subtracting(Self.notOverridable))
+        expectEqual(mirror, params.subtracting(Self.notOverridable))
     }
 
     @Test("Resolve applies every set field onto the global")
@@ -36,9 +36,9 @@ struct BspOverrideTests {
         over.splitRatioH = 0.7
         over.splitRatioV = 0.25
         let resolved = over.resolved(onto: BspParams())
-        #expect(resolved.strategy == .alternating)
-        #expect(resolved.splitRatioH == 0.7)
-        #expect(resolved.splitRatioV == 0.25)
+        expectEqual(resolved.strategy, .alternating)
+        expectEqual(resolved.splitRatioH, 0.7)
+        expectEqual(resolved.splitRatioV, 0.25)
     }
 
     @Test("Unset fields inherit the global, per field")
@@ -69,7 +69,7 @@ struct BspOverrideTests {
             BspOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("An empty override is sparse and inert")
@@ -77,8 +77,8 @@ struct BspOverrideTests {
         let over = BspOverride()
         #expect(over.isEmpty)
         let data = try JSONEncoder().encode(over)
-        #expect(String(data: data, encoding: .utf8) == "{}")
-        #expect(over.resolved(onto: BspParams()) == BspParams())
+        expectEqual(String(data: data, encoding: .utf8), "{}")
+        expectEqual(over.resolved(onto: BspParams()), BspParams())
     }
 
     @Test("override map nests under layout.bsp and round-trips")
@@ -95,7 +95,7 @@ struct BspOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(back.bsp.override == settings.bsp.override)
+        expectEqual(back.bsp.override, settings.bsp.override)
     }
 }
 
@@ -127,9 +127,9 @@ struct BspOverrideCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.bsp.override[SpaceID("2")]
-        #expect(over?.strategy == .alternating)
+        expectEqual(over?.strategy, .alternating)
         // The global params are untouched.
-        #expect(core.tiler.settings.bsp.strategy == .longestSide)
+        expectEqual(core.tiler.settings.bsp.strategy, .longestSide)
         // Resolution reflects it for that space only.
         #expect(
             core.tiler.settings.resolvedBsp(for: "2").strategy
@@ -158,7 +158,7 @@ struct BspOverrideCommandTests {
         )
         let over = core.tiler.settings.bsp.override[SpaceID("7")]
         #expect(over?.splitRatioH == 0.9)  // clamped ceiling
-        #expect(over?.splitRatioV == 0.2)
+        expectEqual(over?.splitRatioV, 0.2)
     }
 
     @Test("Invalid value is rejected and writes nothing")

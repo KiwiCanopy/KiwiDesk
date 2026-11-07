@@ -63,7 +63,7 @@ struct PocketLandingTests {
         // Only the take-out's own raise counts from here.
         core.selfRaiseStamps[one] = nil
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         #expect(!raised(core, one))
         return left
     }

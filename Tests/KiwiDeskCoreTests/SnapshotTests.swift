@@ -44,14 +44,14 @@ struct SnapshotTests {
     @Test("Snapshot captures windows, spaces, and focus")
     func captureContents() {
         let snapshot = populatedState().snapshot()
-        #expect(snapshot.windows.count == 2)
-        #expect(snapshot.spaces.count == 1)
-        #expect(snapshot.activeSpace == "code")
+        expectEqual(snapshot.windows.count, 2)
+        expectEqual(snapshot.spaces.count, 1)
+        expectEqual(snapshot.activeSpace, "code")
         let space = snapshot.spaces[0]
-        #expect(space.windows == [1, 2])
-        #expect(space.focused == 2)
+        expectEqual(space.windows, [1, 2])
+        expectEqual(space.focused, 2)
         let first = snapshot.windows.first { $0.id == 1 }
-        #expect(first?.frame.width == 800)
+        expectEqual(first?.frame.width, 800)
     }
 
     @Test("Snapshot survives a Codable round-trip")
@@ -62,7 +62,7 @@ struct SnapshotTests {
             StateSnapshot.self,
             from: data
         )
-        #expect(decoded == original)
+        expectEqual(decoded, original)
     }
 
     @Test("Window record exposes a typed WindowID")
@@ -71,7 +71,7 @@ struct SnapshotTests {
             id: WindowID(7),
             frame: .zero
         )
-        #expect(record.windowID == WindowID(7))
+        expectEqual(record.windowID, WindowID(7))
     }
 
     @Test("Adopt restores order, membership, and focus")
@@ -119,8 +119,8 @@ struct SnapshotTests {
         }
         state.adopt(snapshot)
         let one = state.workspaces[SpaceID(1)]
-        #expect(one?.windows == [WindowID(2), WindowID(1)])
-        #expect(one?.focused == WindowID(2))
+        expectEqual(one?.windows, [WindowID(2), WindowID(1)])
+        expectEqual(one?.focused, WindowID(2))
         #expect(
             state.workspaces.space(of: WindowID(3))
                 == SpaceID("mail")
@@ -222,7 +222,7 @@ struct SnapshotTests {
             space?.trackBreaks
                 == Set([WindowID(1), WindowID(2), WindowID(3)])
         )
-        #expect(space?.trackWeights == [WindowID(2): 2.5])
+        expectEqual(space?.trackWeights, [WindowID(2): 2.5])
     }
 
     @Test("Older snapshots without track fields still decode")
@@ -238,8 +238,8 @@ struct SnapshotTests {
             StateSnapshot.self,
             from: Data(json.utf8)
         )
-        #expect(snapshot.spaces.first?.trackBreaks == [])
-        #expect(snapshot.spaces.first?.trackWeights == [:])
+        expectEqual(snapshot.spaces.first?.trackBreaks, [])
+        expectEqual(snapshot.spaces.first?.trackWeights, [:])
     }
 
     @Test("Adopt never creates a space the config dropped")
@@ -279,6 +279,6 @@ struct SnapshotTests {
             state.workspaces.space(of: WindowID(1))
                 == SpaceID(1)
         )
-        #expect(state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(state.workspaces.activeSpace, SpaceID(1))
     }
 }

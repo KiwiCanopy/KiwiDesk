@@ -65,9 +65,9 @@ struct TrackLimitMigrationTests {
         let data = try profile(limit: 2)
         let migrated = try #require(ConfigMigration.migrated(data))
         let after = try decoded(migrated)
-        #expect(after.settings.track.limit == 3)
-        #expect(after.settings.track.axis == TrackParams().axis)
-        #expect(after.format == Profile.currentFormat)
+        expectEqual(after.settings.track.limit, 3)
+        expectEqual(after.settings.track.axis, TrackParams().axis)
+        expectEqual(after.format, Profile.currentFormat)
     }
 
     @Test("a stored 1 lands on the floor")
@@ -85,8 +85,8 @@ struct TrackLimitMigrationTests {
         let data = try profile(limit: 3, override: (SpaceID(2), 4))
         let migrated = try #require(ConfigMigration.migrated(data))
         let after = try decoded(migrated)
-        #expect(after.settings.track.limit == 4)
-        #expect(after.settings.track.override[SpaceID(2)]?.limit == 5)
+        expectEqual(after.settings.track.limit, 4)
+        expectEqual(after.settings.track.override[SpaceID(2)]?.limit, 5)
     }
 
     /// The step ENDS on its own: a lifted 3 is the same bytes as
@@ -172,6 +172,6 @@ struct TrackLimitMigrationTests {
             SetupBundle.self,
             from: migrated
         )
-        #expect(after.profiles.first?.settings.track.limit == 3)
+        expectEqual(after.profiles.first?.settings.track.limit, 3)
     }
 }

@@ -71,8 +71,8 @@ struct InstantLeadLapseTests {
         let (core, hands) = written()
         try #require(core.borders.lastFrame(id) == asked)
         passGrace(hands)
-        #expect(hands.lapses == 1)
-        #expect(core.borders.lastFrame(id) == real)
+        expectEqual(hands.lapses, 1)
+        expectEqual(core.borders.lastFrame(id), real)
     }
 
     /// The control: an echo answered first, so no lapse is owed.
@@ -81,7 +81,7 @@ struct InstantLeadLapseTests {
         let (core, hands) = written()
         core.tiler.clearInstantTarget(id)
         passGrace(hands)
-        #expect(hands.lapses == 0)
+        expectEqual(hands.lapses, 0)
     }
 
     /// A newer write owns the lead: the first sweep finds it still
@@ -93,11 +93,11 @@ struct InstantLeadLapseTests {
         core.tiler.setFrame(id, asked.offsetBy(dx: 20, dy: 0))
         hands.now += 0.6
         fire(hands)
-        #expect(hands.lapses == 0)
+        expectEqual(hands.lapses, 0)
         passGrace(hands)
-        #expect(hands.lapses == 1)
+        expectEqual(hands.lapses, 1)
         passGrace(hands)
-        #expect(hands.lapses == 1)
+        expectEqual(hands.lapses, 1)
     }
 
     /// Several leads lapsing together cost one sync, not one each.
@@ -106,9 +106,9 @@ struct InstantLeadLapseTests {
         let (core, hands) = written()
         core.tiler.setFrame(WindowID(2), asked)
         core.tiler.setFrame(WindowID(3), asked)
-        #expect(hands.owed.count == 1)
+        expectEqual(hands.owed.count, 1)
         passGrace(hands)
-        #expect(hands.lapses == 1)
+        expectEqual(hands.lapses, 1)
     }
 
     /// A reader's expiry of the lead between the grace and the
@@ -119,8 +119,8 @@ struct InstantLeadLapseTests {
         hands.now += 1.02
         #expect(core.tiler.recentInstantTarget(id) == nil)
         fire(hands)
-        #expect(hands.lapses == 1)
-        #expect(core.borders.lastFrame(id) == real)
+        expectEqual(hands.lapses, 1)
+        expectEqual(core.borders.lastFrame(id), real)
     }
 
     /// Inside the grace nothing lapses.
@@ -129,7 +129,7 @@ struct InstantLeadLapseTests {
         let (core, hands) = written()
         hands.now += 0.5
         fire(hands)
-        #expect(hands.lapses == 0)
-        #expect(core.borders.lastFrame(id) == asked)
+        expectEqual(hands.lapses, 0)
+        expectEqual(core.borders.lastFrame(id), asked)
     }
 }

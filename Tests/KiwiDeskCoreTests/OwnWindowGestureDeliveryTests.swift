@@ -117,15 +117,15 @@ struct OwnWindowGestureDeliveryTests {
             at: CGPoint(x: 3, y: 4),
             from: .ownWindow
         )
-        #expect(seen.count == 2)
-        #expect(seen.first?.1 == .otherApp)
-        #expect(seen.last?.1 == .ownWindow)
-        #expect(seen.last?.0 == CGPoint(x: 3, y: 4))
+        expectEqual(seen.count, 2)
+        expectEqual(seen.first?.1, .otherApp)
+        expectEqual(seen.last?.1, .ownWindow)
+        expectEqual(seen.last?.0, CGPoint(x: 3, y: 4))
         // The STORE delivers nothing (#1281): a press reaches the
         // consumers through `deliverPress` alone, so a consumer
         // standing down for an own press gates on the ORIGIN.
         tracker.recordDown(at: .zero, from: .otherApp, clickCount: 1)
-        #expect(seen.count == 2)
+        expectEqual(seen.count, 2)
     }
 
     @Test("A release closes only the press its own arm opened")
@@ -167,8 +167,8 @@ struct OwnWindowGestureDeliveryTests {
         // one-second window, and a Space Bar click is itself a
         // retile (review, 2026-08-24).
         tracker.recordUp(from: .ownWindow)
-        #expect(tracker.press?.upAt == closed)
+        expectEqual(tracker.press?.upAt, closed)
         tracker.recordUp(from: .otherApp)
-        #expect(tracker.press?.upAt == closed)
+        expectEqual(tracker.press?.upAt, closed)
     }
 }

@@ -47,8 +47,8 @@ struct PocketArrangementTests {
     func endPinned() throws {
         let placed = arrange(pocket: .init(need: 50, leadsEnd: true))
         let pocket = try #require(placed.pocket)
-        #expect(pocket.offset == 950)
-        #expect(pocket.length == 50)
+        expectEqual(pocket.offset, 950)
+        expectEqual(pocket.length, 50)
         let app = try #require(placed.app)
         #expect(app.offset + app.length <= 1000 - 50)
     }
@@ -66,7 +66,7 @@ struct PocketArrangementTests {
             pocket: .init(need: 50, leadsEnd: false)
         )
         let pocket = try #require(placed.pocket)
-        #expect(pocket.offset == 0)
+        expectEqual(pocket.offset, 0)
         let first = min(
             try #require(placed.space).offset,
             try #require(placed.app).offset
@@ -82,7 +82,7 @@ struct PocketArrangementTests {
             app: 900,
             pocket: .init(need: 50, leadsEnd: true)
         )
-        #expect(full.pocket == roomy.pocket)
+        expectEqual(full.pocket, roomy.pocket)
         let app = try #require(full.app)
         #expect(app.offset + app.length <= 1000 - 50)
         #expect(full.divider != nil)
@@ -95,9 +95,9 @@ struct PocketArrangementTests {
             pocket: .init(need: 50, leadsEnd: true)
         )
         let app = try #require(placed.app)
-        #expect(app.offset == 0)
-        #expect(app.length == CGFloat(1000 - 50))
-        #expect(placed.pocket?.offset == 950)
+        expectEqual(app.offset, 0)
+        expectEqual(app.length, CGFloat(1000 - 50))
+        expectEqual(placed.pocket?.offset, 950)
     }
 
     @Test("50 % and above lean to the end")

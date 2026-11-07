@@ -44,11 +44,11 @@ extension SpaceSlideSwitchTests {
         }
         swipe(core, on: display)
         defer { core.spaceSlide.end() }
-        #expect(core.state.workspaces.activeSpace == SpaceID(2))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(2))
         #expect(core.spaceSlide.isPlaying)
         core.spaceSlide.end()
         core.execute("focus_space_previous")
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
         #expect(!core.spaceSlide.isPlaying)
     }
 
@@ -65,10 +65,10 @@ extension SpaceSlideSwitchTests {
         }
         swipe(core, on: display)
         defer { core.spaceSlide.end() }
-        #expect(core.state.workspaces.activeSpace == SpaceID(2))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(2))
         #expect(!core.spaceSlide.isPlaying)
         core.execute("focus_space_previous")
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
         #expect(core.spaceSlide.isPlaying)
     }
 }

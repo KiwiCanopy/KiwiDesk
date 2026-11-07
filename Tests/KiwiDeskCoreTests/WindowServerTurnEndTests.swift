@@ -60,13 +60,13 @@ struct WindowServerTurnEndTests {
         watch.handle(.reorder, window: w1)
         #expect(calls().isEmpty)
         endTurn()
-        #expect(calls() == ["ring.restack w1", "vision.restack w1"])
+        expectEqual(calls(), ["ring.restack w1", "vision.restack w1"])
         endTurn()
-        #expect(calls().count == 2)
+        expectEqual(calls().count, 2)
         // A later turn owes and pays again.
         watch.handle(.reorder, window: w1)
         endTurn()
-        #expect(calls().count == 4)
+        expectEqual(calls().count, 4)
     }
 
     @Test("windows restack in the order their events arrived")
@@ -77,7 +77,7 @@ struct WindowServerTurnEndTests {
         watch.handle(.reorder, window: w1)
         watch.handle(.reorder, window: w2)
         endTurn()
-        #expect(calls() == ["ring.restack w2", "ring.restack w1"])
+        expectEqual(calls(), ["ring.restack w2", "ring.restack w1"])
     }
 
     @Test("a hide after a reorder ends the turn hidden")
@@ -87,9 +87,9 @@ struct WindowServerTurnEndTests {
         watch.handle(.reorder, window: w1)
         watch.handle(.reorder, window: w2)
         watch.handle(.hide, window: w1)
-        #expect(calls() == ["ring.hide w1"])
+        expectEqual(calls(), ["ring.hide w1"])
         endTurn()
-        #expect(calls() == ["ring.hide w1", "ring.restack w2"])
+        expectEqual(calls(), ["ring.hide w1", "ring.restack w2"])
     }
 
     /// The mark and overflow mark take no hide: a reorder then a
@@ -102,7 +102,7 @@ struct WindowServerTurnEndTests {
         watch.handle(.reorder, window: w1)
         watch.handle(.hide, window: w1)
         endTurn()
-        #expect(calls() == ["ring.hide w1", "mark.restack w1"])
+        expectEqual(calls(), ["ring.hide w1", "mark.restack w1"])
     }
 
     @Test("a reorder after a hide in the turn re-owes every consumer")
@@ -113,7 +113,7 @@ struct WindowServerTurnEndTests {
         watch.handle(.hide, window: w1)
         watch.handle(.reorder, window: w1)
         endTurn()
-        #expect(calls() == ["ring.hide w1", "ring.restack w1"])
+        expectEqual(calls(), ["ring.hide w1", "ring.restack w1"])
     }
 
     @Test("an unhide after a hide still restacks")
@@ -123,7 +123,7 @@ struct WindowServerTurnEndTests {
         watch.handle(.hide, window: w1)
         watch.handle(.unhide, window: w1)
         endTurn()
-        #expect(calls() == ["ring.hide w1", "ring.restack w1"])
+        expectEqual(calls(), ["ring.hide w1", "ring.restack w1"])
     }
 
     @Test("a window no longer heard at the turn's end restacks nothing")
@@ -168,6 +168,6 @@ struct MainRunLoopTurnEndTests {
         let tick = Timer(timeInterval: 0.01, repeats: false) { _ in }
         RunLoop.main.add(tick, forMode: .default)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-        #expect(box.ran == ["first", "nested"])
+        expectEqual(box.ran, ["first", "nested"])
     }
 }

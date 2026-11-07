@@ -59,7 +59,7 @@ struct GlyphSpanMigrationTests {
         #expect(try span(in: migrated["settings"]) == 8)
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(!text.contains("\"glyph_cap\""))
-        #expect(migrated["format"] as? Int == Profile.currentFormat)
+        expectEqual(migrated["format"] as? Int, Profile.currentFormat)
     }
 
     @Test("a backup's inline profiles cross too")

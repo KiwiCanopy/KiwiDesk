@@ -59,7 +59,7 @@ struct CommandedFrameRetileTests {
         core.tiler.meter = meter
         core.tiler.retile(state: core.state, animated: true)
         #expect(core.tiler.animation.targetFrame(window: w1) == nil)
-        #expect(meter.snapshot(reset: false).counts.framesSkipped == 1)
+        expectEqual(meter.snapshot(reset: false).counts.framesSkipped, 1)
     }
 
     @Test(
@@ -104,6 +104,6 @@ struct CommandedFrameRetileTests {
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         core.tiler.retile(state: core.state, animated: false)
-        #expect(meter.snapshot(reset: false).counts.framesIssued == 1)
+        expectEqual(meter.snapshot(reset: false).counts.framesIssued, 1)
     }
 }

@@ -20,7 +20,7 @@ struct HeldSpaceRestartTests {
     func unplugged() throws -> KiwiCore {
         let core = try desk.docked()
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.state.heldSpaces.count == 2)
+        expectEqual(core.state.heldSpaces.count, 2)
         return core
     }
 
@@ -73,17 +73,17 @@ struct HeldSpaceRestartTests {
     }
 
     func expectHeldAsLeft(_ b: KiwiCore, _ a: KiwiCore) {
-        #expect(b.state.heldSpaces == a.state.heldSpaces)
-        #expect(desk.members(b, 5) == desk.ids([10, 11]))
-        #expect(desk.members(b, 6) == desk.ids([12]))
-        #expect(desk.members(b, 1) == desk.ids([13]))
+        expectEqual(b.state.heldSpaces, a.state.heldSpaces)
+        expectEqual(desk.members(b, 5), desk.ids([10, 11]))
+        expectEqual(desk.members(b, 6), desk.ids([12]))
+        expectEqual(desk.members(b, 1), desk.ids([13]))
     }
 
     @Test("a quit and relaunch keeps the held Spaces and their origin")
     func plainRestartKeepsHolds() throws {
         let a = try unplugged()
         let session = try crossed(a.sessionSnapshot())
-        #expect(heldCount(session) == 2)
+        expectEqual(heldCount(session), 2)
         let b = boot(
             from: a,
             screens: [desk.builtIn],
@@ -118,9 +118,9 @@ struct HeldSpaceRestartTests {
         reader.bootTime = { .distantPast }
         reader.onLog = { _ in }
         writer.autosave()
-        #expect(heldCount(reader.takeBootSnapshot()) == 2)
+        expectEqual(heldCount(reader.takeBootSnapshot()), 2)
         writer.shutdownCleanly()
-        #expect(heldCount(reader.takeBootSnapshot()) == 2)
+        expectEqual(heldCount(reader.takeBootSnapshot()), 2)
     }
 
     @Test("booting with the origin screen connected sends them home")
@@ -135,8 +135,8 @@ struct HeldSpaceRestartTests {
         #expect(b.state.heldSpaces.isEmpty)
         #expect(b.state.workspaces[SpaceID(5)] == nil)
         #expect(b.state.workspaces[SpaceID(6)] == nil)
-        #expect(desk.members(b, 3) == desk.ids([10, 11]))
-        #expect(desk.members(b, 4) == desk.ids([12]))
+        expectEqual(desk.members(b, 3), desk.ids([10, 11]))
+        expectEqual(desk.members(b, 4), desk.ids([12]))
     }
 
     @Test("a held id the booting arrangement declares is renumbered")
@@ -151,11 +151,11 @@ struct HeldSpaceRestartTests {
         )
         // Past every live number (5) and every held one (6), in
         // the batch's order (#1664).
-        #expect(b.state.heldSpaces[SpaceID(7)]?.name == SpaceID(3))
-        #expect(b.state.heldSpaces[SpaceID(8)]?.name == SpaceID(4))
+        expectEqual(b.state.heldSpaces[SpaceID(7)]?.name, SpaceID(3))
+        expectEqual(b.state.heldSpaces[SpaceID(8)]?.name, SpaceID(4))
         #expect(b.state.heldSpaces[SpaceID(5)] == nil)
-        #expect(desk.members(b, 7) == desk.ids([10, 11]))
-        #expect(desk.members(b, 8) == desk.ids([12]))
+        expectEqual(desk.members(b, 7), desk.ids([10, 11]))
+        expectEqual(desk.members(b, 8), desk.ids([12]))
         #expect(desk.members(b, 5).isEmpty)
     }
 
@@ -175,18 +175,18 @@ struct HeldSpaceRestartTests {
             windows: [13, 10, 11, 12, 14],
             session: try crossed(a.sessionSnapshot())
         )
-        #expect(b.state.heldSpaces[SpaceID(8)]?.name == SpaceID(3))
-        #expect(b.state.heldSpaces[SpaceID(9)]?.name == SpaceID(4))
-        #expect(desk.members(b, 8) == desk.ids([10, 11]))
-        #expect(b.state.workspaces.space(of: WindowID(14)) == SpaceID(1))
+        expectEqual(b.state.heldSpaces[SpaceID(8)]?.name, SpaceID(3))
+        expectEqual(b.state.heldSpaces[SpaceID(9)]?.name, SpaceID(4))
+        expectEqual(desk.members(b, 8), desk.ids([10, 11]))
+        expectEqual(b.state.workspaces.space(of: WindowID(14)), SpaceID(1))
     }
 
     @Test("a record going home under its own name files into its Space")
     func ownNameGoesHome() throws {
         let a = try desk.docked(dellSpaces: [SpaceID(4), SpaceID(5)])
         a.handle(.displaysChanged([desk.builtIn]))
-        #expect(a.state.heldSpaces[SpaceID(4)]?.name == SpaceID(4))
-        #expect(a.state.heldSpaces[SpaceID(5)]?.name == SpaceID(5))
+        expectEqual(a.state.heldSpaces[SpaceID(4)]?.name, SpaceID(4))
+        expectEqual(a.state.heldSpaces[SpaceID(5)]?.name, SpaceID(5))
         var wide = try a.profiles.read(name: "wide")
         wide.spaceModes[SpaceID(4)] = .stack
         try a.profiles.write(wide)
@@ -199,12 +199,12 @@ struct HeldSpaceRestartTests {
             session: try crossed(a.sessionSnapshot())
         )
         #expect(b.state.heldSpaces.isEmpty)
-        #expect(desk.members(b, 4) == desk.ids([100]))
-        #expect(desk.members(b, 5) == desk.ids([101]))
+        expectEqual(desk.members(b, 4), desk.ids([100]))
+        expectEqual(desk.members(b, 5), desk.ids([101]))
         // The profile's mode, not the held Space's record, and
         // the declared Spaces keep their place in the bar.
-        #expect(b.state.workspaces[SpaceID(4)]?.mode == .stack)
-        #expect(b.state.workspaces.allSpaces.map(\.id) == order)
+        expectEqual(b.state.workspaces[SpaceID(4)]?.mode, .stack)
+        expectEqual(b.state.workspaces.allSpaces.map(\.id), order)
     }
 
     /// Quit under `solo` (3 floating, 1 stack), boot docked under
@@ -221,9 +221,9 @@ struct HeldSpaceRestartTests {
         deskProfile.spaceModes[SpaceID(3)] = .scrolling
         try core.profiles.save(deskProfile)
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.state.workspaces[SpaceID(3)]?.mode == .floating)
+        expectEqual(core.state.workspaces[SpaceID(3)]?.mode, .floating)
         let session = try crossed(core.sessionSnapshot())
-        #expect(session.arrangement == .profile("solo"))
+        expectEqual(session.arrangement, .profile("solo"))
         let b = boot(
             from: core,
             screens: [desk.builtIn, desk.dell],
@@ -231,9 +231,9 @@ struct HeldSpaceRestartTests {
             session: session
         )
         #expect(b.state.heldSpaces.isEmpty)
-        #expect(desk.members(b, 3) == desk.ids([10, 11]))
-        #expect(b.state.workspaces[SpaceID(3)]?.mode == .scrolling)
-        #expect(b.state.workspaces[SpaceID(1)]?.mode == .bsp)
+        expectEqual(desk.members(b, 3), desk.ids([10, 11]))
+        expectEqual(b.state.workspaces[SpaceID(3)]?.mode, .scrolling)
+        expectEqual(b.state.workspaces[SpaceID(1)]?.mode, .bsp)
     }
 
     /// The negative control: under the SAME arrangement a runtime
@@ -248,6 +248,6 @@ struct HeldSpaceRestartTests {
             profile: "solo",
             session: try crossed(a.sessionSnapshot())
         )
-        #expect(b.state.workspaces[SpaceID(1)]?.mode == .monocle)
+        expectEqual(b.state.workspaces[SpaceID(1)]?.mode, .monocle)
     }
 }

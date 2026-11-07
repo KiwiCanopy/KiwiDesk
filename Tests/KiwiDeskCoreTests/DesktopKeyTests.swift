@@ -11,10 +11,10 @@ struct DesktopKeyTests {
     @Test("the stored spelling round-trips both ways")
     func storedRoundTrips() {
         let id = DesktopIdentity.mint()
-        #expect(DesktopKey.identity(id).stored == id.raw)
-        #expect(DesktopKey.number(3).stored == "3")
-        #expect(DesktopKey(stored: id.raw) == .identity(id))
-        #expect(DesktopKey(stored: "3") == .number(3))
+        expectEqual(DesktopKey.identity(id).stored, id.raw)
+        expectEqual(DesktopKey.number(3).stored, "3")
+        expectEqual(DesktopKey(stored: id.raw), .identity(id))
+        expectEqual(DesktopKey(stored: "3"), .number(3))
     }
 
     /// Parsed by SHAPE, so the two can never collide: a Mission
@@ -25,7 +25,7 @@ struct DesktopKeyTests {
         for _ in 0..<50 {
             #expect(Int(DesktopIdentity.mint().raw) == nil)
         }
-        #expect(DesktopKey(stored: "12").number == 12)
+        expectEqual(DesktopKey(stored: "12").number, 12)
         #expect(DesktopKey(stored: "not-a-number").number == nil)
     }
 
@@ -42,13 +42,13 @@ struct DesktopKeyTests {
         let data = try JSONEncoder().encode(map)
         let json = try JSONSerialization.jsonObject(with: data)
         let object = try #require(json as? [String: Any])
-        #expect(object["DD641782-6F24"] as? String == "Work")
-        #expect(object["3"] as? String == "Media")
+        expectEqual(object["DD641782-6F24"] as? String, "Work")
+        expectEqual(object["3"] as? String, "Media")
         let back = try JSONDecoder().decode(
             [DesktopKey: String].self,
             from: data
         )
-        #expect(back == map)
+        expectEqual(back, map)
     }
 
     /// The key is also a value in its own right — #1230 stores
@@ -56,7 +56,7 @@ struct DesktopKeyTests {
     @Test("it encodes as a bare string on its own")
     func encodesAsAString() throws {
         let data = try JSONEncoder().encode(DesktopKey.number(2))
-        #expect(String(data: data, encoding: .utf8) == "\"2\"")
+        expectEqual(String(data: data, encoding: .utf8), "\"2\"")
         #expect(
             try JSONDecoder().decode(DesktopKey.self, from: data)
                 == .number(2)

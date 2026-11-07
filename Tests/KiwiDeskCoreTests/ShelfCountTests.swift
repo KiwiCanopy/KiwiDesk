@@ -116,16 +116,16 @@ struct ShelfCountTests {
         let chip = try #require(
             count.subviews.first { !($0 is GlassBackdrop) }
         )
-        #expect(label.textColor == .white)
+        expectEqual(label.textColor, .white)
         #expect(chip.isHidden)
         count.setHovered(true)
-        #expect(label.textColor == .red)
+        expectEqual(label.textColor, .red)
         // The chip makes the hover visible where the two inks
         // match (owner 2026-09-25).
         #expect(!chip.isHidden)
         #expect(count.bounds.contains(chip.frame))
         count.setHovered(false)
-        #expect(label.textColor == .white)
+        expectEqual(label.textColor, .white)
         #expect(chip.isHidden)
     }
 
@@ -145,10 +145,10 @@ struct ShelfCountTests {
             edge: .top
         )
         #expect(!view.isHidden)
-        #expect(view.accessibilityRole() == .button)
-        #expect(view.accessibilityLabel()?.contains("4") == true)
+        expectEqual(view.accessibilityRole(), .button)
+        expectEqual(view.accessibilityLabel()?.contains("4"), true)
         #expect(view.accessibilityPerformPress())
-        #expect(paged == 1)
+        expectEqual(paged, 1)
         view.configure(
             count: 0,
             horizontal: true,

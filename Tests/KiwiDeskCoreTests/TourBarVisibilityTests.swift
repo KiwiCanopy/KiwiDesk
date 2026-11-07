@@ -34,7 +34,7 @@ struct TourBarVisibilityTests {
     func pickWritesThrough() throws {
         let core = makeCore()
         #expect(core.setBarVisibility(.hidden))
-        #expect(core.tiler.settings.uniformBarVisibility == .hidden)
+        expectEqual(core.tiler.settings.uniformBarVisibility, .hidden)
         #expect(try stored(core).uniformBarVisibility == .hidden)
     }
 
@@ -44,9 +44,9 @@ struct TourBarVisibilityTests {
         var writes = 0
         core.onLiveProfileWritten = { _, _ in writes += 1 }
         #expect(!core.setBarVisibility(.always))
-        #expect(writes == 0)
+        expectEqual(writes, 0)
         #expect(core.setBarVisibility(.auto))
-        #expect(writes == 1)
+        expectEqual(writes, 1)
     }
 
     @Test("restore returns the visibility live and in the file")
@@ -55,7 +55,7 @@ struct TourBarVisibilityTests {
         let baseline = core.tourBaseline()
         core.setBarVisibility(.auto)
         #expect(core.restoreBarVisibility(baseline))
-        #expect(core.tiler.settings.uniformBarVisibility == .always)
+        expectEqual(core.tiler.settings.uniformBarVisibility, .always)
         #expect(try stored(core).uniformBarVisibility == .always)
     }
 
@@ -69,7 +69,7 @@ struct TourBarVisibilityTests {
         core.restoreBarVisibility(baseline)
         #expect(taskbar.isApplied(to: core.tiler.settings))
         #expect(taskbar.isApplied(to: try stored(core)))
-        #expect(core.tiler.settings.uniformBarVisibility == .always)
+        expectEqual(core.tiler.settings.uniformBarVisibility, .always)
     }
 
     @Test("the looks' revert leaves a visibility picked since alone")
@@ -79,7 +79,7 @@ struct TourBarVisibilityTests {
         core.paintShelf(look: try look("Taskbar"), palette: nil)
         core.setBarVisibility(.hidden)
         core.restoreShelf(baseline)
-        #expect(core.tiler.settings.uniformBarVisibility == .hidden)
+        expectEqual(core.tiler.settings.uniformBarVisibility, .hidden)
         #expect(try stored(core).uniformBarVisibility == .hidden)
     }
 
@@ -91,14 +91,14 @@ struct TourBarVisibilityTests {
         _ = core.execute("save_profile", args: [.string("Second")])
         #expect(!core.restoreBarVisibility(baseline))
         let second = try core.profiles.read(name: "Second").settings
-        #expect(second.uniformBarVisibility == .hidden)
+        expectEqual(second.uniformBarVisibility, .hidden)
     }
 
     @Test("with no saved profile live, the pick is live only")
     func noProfileIsLiveOnly() {
         let core = makeCore(saving: nil)
         core.setBarVisibility(.auto)
-        #expect(core.tiler.settings.uniformBarVisibility == .auto)
+        expectEqual(core.tiler.settings.uniformBarVisibility, .auto)
         #expect(core.profiles.list().isEmpty)
     }
 

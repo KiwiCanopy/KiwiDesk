@@ -30,7 +30,7 @@ struct StickyChipWindowServerTeeTests {
         // Window 7 wears a mark but no ring — mark-tracked only.
         watch.request([WindowID(7)], for: .mark)
         watch.handle(.reorder, window: WindowID(7))
-        #expect(reasserted() == [WindowID(7)])
+        expectEqual(reasserted(), [WindowID(7)])
     }
 
     @Test("Unhide (followAndReorder) also re-asserts the mark")
@@ -39,7 +39,7 @@ struct StickyChipWindowServerTeeTests {
         watch.readWindowBounds = { _ in nil }
         watch.request([WindowID(3)], for: .mark)
         watch.handle(.unhide, window: WindowID(3))
-        #expect(reasserted() == [WindowID(3)])
+        expectEqual(reasserted(), [WindowID(3)])
     }
 
     @Test("A stale delivery no consumer hears is dropped")
@@ -55,7 +55,7 @@ struct StickyChipWindowServerTeeTests {
         let watch = WindowServerWatch()
         watch.override = { _ in true }
         watch.request([WindowID(7)], for: .mark)
-        #expect(watch.requested(by: .mark) == [WindowID(7)])
+        expectEqual(watch.requested(by: .mark), [WindowID(7)])
         #expect(watch.hears(WindowID(7), as: .mark))
         // A window the mark did not ask for stays on the AX echo,
         // even one the ring hears.
@@ -104,7 +104,7 @@ struct StickyMarkCoreWiringTests {
         core.windowServer.request([], for: .ring)
         core.windowServer.request([window], for: .mark)
         core.windowServer.handle(.move, window: window)
-        #expect(core.stickyMarks.lastFrame(window) == frame)
+        expectEqual(core.stickyMarks.lastFrame(window), frame)
     }
 }
 
@@ -152,7 +152,7 @@ struct StickyChipManagerEntryPointTests {
         #expect(manager.lastFrame(WindowID(1)) != moved)
         // The unguarded WS path always advances it.
         manager.reposition(WindowID(1), windowFrame: moved)
-        #expect(manager.lastFrame(WindowID(1)) == moved)
+        expectEqual(manager.lastFrame(WindowID(1)), moved)
         // And untracked, the AX echo is free to move it again.
         manager.isWindowServerTracked = { _ in false }
         let axFrame = CGRect(x: 5, y: 5, width: 5, height: 5)
@@ -162,7 +162,7 @@ struct StickyChipManagerEntryPointTests {
             source: .axEcho,
             pin: nil
         )
-        #expect(manager.lastFrame(WindowID(1)) == axFrame)
+        expectEqual(manager.lastFrame(WindowID(1)), axFrame)
     }
 
     @Test("Animation tick drives the mark even under WS tracking")
@@ -181,7 +181,7 @@ struct StickyChipManagerEntryPointTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(manager.lastFrame(WindowID(1)) == tick)
+        expectEqual(manager.lastFrame(WindowID(1)), tick)
         // And with both suppressors down: the tick still
         // applies — pins the unconditional branch of `applies`.
         manager.isWindowServerTracked = { _ in false }
@@ -193,7 +193,7 @@ struct StickyChipManagerEntryPointTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(manager.lastFrame(WindowID(1)) == snap)
+        expectEqual(manager.lastFrame(WindowID(1)), snap)
     }
 
     @Test("AX echo stands down while our animation drives it")
@@ -221,6 +221,6 @@ struct StickyChipManagerEntryPointTests {
             source: .axEcho,
             pin: nil
         )
-        #expect(manager.lastFrame(WindowID(1)) == echo)
+        expectEqual(manager.lastFrame(WindowID(1)), echo)
     }
 }

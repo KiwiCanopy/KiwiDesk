@@ -75,9 +75,9 @@ struct BriefPocketTests {
         let core = makeCore()
         let applies = countApplies(core)
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketedWindows == [one])
+        expectEqual(core.state.pocketedWindows, [one])
         #expect(core.briefPocket.isPlaying)
-        #expect(applies() == 0)
+        expectEqual(applies(), 0)
     }
 
     /// The play takes the stored placement and the gated looks.
@@ -98,7 +98,7 @@ struct BriefPocketTests {
         #expect(core.execute("pocket").isSuccess)
         let request = try #require(core.briefPocket.playing)
         // The one door for where the pocket is (#2678 review 5)…
-        #expect(request.pocket == core.pocketLanding(on: request.display))
+        expectEqual(request.pocket, core.pocketLanding(on: request.display))
         // …at the stored placement: the whole mark, no handle under
         // One window (#2793), on the right edge 30 % down it.
         let visible = GeometryUtils.axVisibleFrame(of: request.screen)
@@ -133,14 +133,14 @@ struct BriefPocketTests {
         // The restore's one write is staged, not sent ahead of it.
         #expect(core.tiler.applier.held.isStaged(one))
         // Its ring waits with it, and lets go at the landing.
-        #expect(core.borders.stateChange?.window == one)
+        expectEqual(core.borders.stateChange?.window, one)
         core.borders.stateChangeSettled(one)
         core.borders.noteStateChangeReport(
             one,
             frame: core.tiler.commandedFrame(of: one) ?? .zero
         )
         #expect(core.borders.stateChange == nil)
-        #expect(applies() == 0)
+        expectEqual(applies(), 0)
     }
 
     @Test("off under the toggle or Reduce Motion: nothing plays or holds")
@@ -154,7 +154,7 @@ struct BriefPocketTests {
             // Nothing plays, so nothing waits: the raise is now.
             let next = core.state.workspaces.lastFocused
             #expect(next != nil && next != one)
-            #expect(next.map { raised(core, $0) } == true)
+            expectEqual(next.map { raised(core, $0) }, true)
             #expect(core.execute("pocket").isSuccess)
             #expect(!core.briefPocket.isPlaying)
             #expect(!core.tiler.applier.held.isHeld(one))
@@ -174,9 +174,9 @@ struct BriefPocketTests {
         #expect(core.briefPocket.isPlaying)
         let next = core.activeSpace?.focused
         #expect(next != nil && next != one)
-        #expect(next.map { !raised(core, $0) } == true)
+        expectEqual(next.map { !raised(core, $0) }, true)
         await core.deferred.task(for: .pocketFocus)?.value
-        #expect(next.map { raised(core, $0) } == true)
+        expectEqual(next.map { raised(core, $0) }, true)
     }
 
     @Test("taking out raises the window once the plate flies")
@@ -219,8 +219,8 @@ struct BriefPocketTests {
         // landing, the pocket's hold for the play's end. A second
         // key sleeping either length reds this without a defect.
         let all = waits.all
-        #expect(all.filter { $0 == .seconds(timeline.handOff) }.count == 1)
-        #expect(all.filter { $0 == .seconds(timeline.end) }.count == 1)
+        expectEqual(all.filter { $0 == .seconds(timeline.handOff) }.count, 1)
+        expectEqual(all.filter { $0 == .seconds(timeline.end) }.count, 1)
         #expect(raised(core, one))
     }
 
@@ -235,9 +235,9 @@ struct BriefPocketTests {
         #expect(core.execute("pocket").isSuccess)
         await first?.value
         await core.deferred.task(for: .pocketFocus)?.value
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         #expect(raised(core, one))
-        #expect(next.map { !raised(core, $0) } == true)
+        expectEqual(next.map { !raised(core, $0) }, true)
         // State focus moved at the put-in, so it came out over it.
         #expect(next != nil && core.state.pocket.first?.cameFrom == next)
     }
@@ -258,11 +258,11 @@ struct BriefPocketTests {
         #expect(core.execute("pocket").isSuccess)
         await core.deferred.task(for: .pocketFocus)?.value
         core.briefPocket.end()
-        #expect(core.state.pocket.first?.cameFrom == two)
-        #expect(core.activeSpace?.windows.last == one)
+        expectEqual(core.state.pocket.first?.cameFrom, two)
+        expectEqual(core.activeSpace?.windows.last, one)
         core.selfRaiseStamps = [:]
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.focusedWindowID == two)
+        expectEqual(core.focusedWindowID, two)
         #expect(!raised(core, two))
         core.eventLoop.lastCommandedFocus = nil
         await core.deferred.task(for: .pocketFocus)?.value
@@ -292,7 +292,7 @@ struct BriefPocketTests {
         core.selfRaiseStamps[one] = nil
         flight.landed = true
         await landing?.value
-        #expect(core.focusedWindowID == three)
+        expectEqual(core.focusedWindowID, three)
         #expect(!raised(core, one))
     }
 
@@ -313,7 +313,7 @@ struct BriefPocketTests {
         core.selfRaiseStamps = [:]
         flight.landed = true
         await landing?.value
-        #expect(next.map { !raised(core, $0) } == true)
+        expectEqual(next.map { !raised(core, $0) }, true)
     }
 
     /// A core whose windows have elements, so a raise is stamped.

@@ -31,7 +31,7 @@ struct UndeclaredSpaceDisplayTests {
             "move_to_space",
             args: [.string(scratch.raw), .number(13)]
         )
-        #expect(core.state.workspaces[scratch]?.windows == [WindowID(13)])
+        expectEqual(core.state.workspaces[scratch]?.windows, [WindowID(13)])
         #expect(try hasChip(core))
     }
 
@@ -43,7 +43,7 @@ struct UndeclaredSpaceDisplayTests {
         let display = try #require(
             core.state.workspaces.display(of: scratch)
         )
-        #expect(core.state.workspaces.activeSpace(on: display) == scratch)
+        expectEqual(core.state.workspaces.activeSpace(on: display), scratch)
     }
 
     /// The net at the head of `retile`: a door with no placement of
@@ -100,7 +100,7 @@ struct UndeclaredSpaceDisplayTests {
         #expect(core.execute("make_display_sticky").isSuccess)
         core.execute("move_to_space", args: [.string(scratch.raw)])
         #expect(core.state.workspaces[scratch] == nil)
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(core.state.workspaces.space(of: window), origin)
     }
 
     /// One screen, Space 1 shown with one window — the plate
@@ -147,7 +147,7 @@ struct UndeclaredSpaceDisplayTests {
         let (core, display) = try slideCore()
         core.execute("focus_space", args: [.string(scratch.raw)])
         defer { core.spaceSlide.end() }
-        #expect(core.state.workspaces.display(of: scratch) == display)
+        expectEqual(core.state.workspaces.display(of: scratch), display)
         #expect(core.spaceSlide.isPlaying)
     }
 
@@ -164,7 +164,7 @@ struct UndeclaredSpaceDisplayTests {
             args: [.string(scratch.raw), .number(2)]
         )
         defer { core.spaceSlide.end() }
-        #expect(core.state.workspaces.display(of: scratch) == display)
+        expectEqual(core.state.workspaces.display(of: scratch), display)
         #expect(core.spaceSlide.isPlaying)
     }
 
@@ -181,7 +181,7 @@ struct UndeclaredSpaceDisplayTests {
         #expect(core.state.workspaces.display(of: scratch) == nil)
         core.followSwitch(to: scratch, focusing: WindowID(2))
         defer { core.spaceSlide.end() }
-        #expect(core.state.workspaces.display(of: scratch) == display)
+        expectEqual(core.state.workspaces.display(of: scratch), display)
         #expect(core.spaceSlide.isPlaying)
     }
 }

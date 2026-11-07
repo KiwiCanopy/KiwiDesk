@@ -38,7 +38,7 @@ struct ScrollingLayoutTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 
     @Test("Center anchor centers the focused column")
@@ -52,7 +52,7 @@ struct ScrollingLayoutTests {
         )
         let focused = try #require(frames[w2])
         #expect(abs(focused.midX - context.usable.midX) < 0.01)
-        #expect(focused.width == 800)
+        expectEqual(focused.width, 800)
     }
 
     @Test("A fixed anchor re-seats an already-visible focus (#239)")
@@ -91,7 +91,7 @@ struct ScrollingLayoutTests {
             in: context
         )
         let first = try #require(frames[w1])
-        #expect(first.minX == context.usable.minX)
+        expectEqual(first.minX, context.usable.minX)
     }
 
     @Test("Last column snaps to the right edge on first scroll")
@@ -115,8 +115,8 @@ struct ScrollingLayoutTests {
             in: context
         )
         for frame in frames.values {
-            #expect(frame.width == 800)
-            #expect(frame.height == context.usable.height)
+            expectEqual(frame.width, 800)
+            expectEqual(frame.height, context.usable.height)
         }
     }
 
@@ -147,7 +147,7 @@ struct ScrollingLayoutTests {
             in: context
         )
         let first = try #require(frames[w1])
-        #expect(first.minX == context.usable.minX)
+        expectEqual(first.minX, context.usable.minX)
     }
 
     @Test("Auto slot size resolves to the orientation standard")
@@ -248,7 +248,7 @@ struct ScrollingLayoutTests {
         // trailing edge (an inward displacement would still
         // satisfy a <= check, so assert equality).
         let focused = try #require(frames[w5])
-        #expect(focused.maxX == context.usable.maxX)
+        expectEqual(focused.maxX, context.usable.maxX)
     }
 
     @Test("Slots far past the right edge pin at a sliver (#142)")
@@ -318,6 +318,6 @@ struct ScrollingLayoutTests {
         )
         let fromFrame =
             try #require(frames[w1]).minX - context.usable.minX
-        #expect(fromFrame == ideal.offset)
+        expectEqual(fromFrame, ideal.offset)
     }
 }

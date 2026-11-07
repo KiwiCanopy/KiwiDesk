@@ -38,7 +38,7 @@ struct FallbackSpaceTests {
             args: [.string("mail")]
         )
         #expect(ok.isSuccess)
-        #expect(core.fallbackSpace == SpaceID("mail"))
+        expectEqual(core.fallbackSpace, SpaceID("mail"))
 
         let cleared = core.execute(
             "set_fallback_space",
@@ -59,7 +59,7 @@ struct FallbackSpaceTests {
         )
         core.execute("save_profile", args: [.string("p")])
         let saved = try core.profiles.read(name: "p")
-        #expect(saved.fallbackSpace == SpaceID("b"))
+        expectEqual(saved.fallbackSpace, SpaceID("b"))
     }
 
     @Test("load_profile adopts the stored fallback space")
@@ -82,7 +82,7 @@ struct FallbackSpaceTests {
             args: [.string("p")]
         )
         #expect(load.isSuccess)
-        #expect(core.fallbackSpace == SpaceID("b"))
+        expectEqual(core.fallbackSpace, SpaceID("b"))
     }
 
     @Test("profile JSON uses the fallback_space key")
@@ -106,7 +106,7 @@ struct FallbackSpaceTests {
             Profile.self,
             from: data
         )
-        #expect(decoded.fallbackSpace == SpaceID("a"))
+        expectEqual(decoded.fallbackSpace, SpaceID("a"))
     }
 
     @Test("absent key decodes to nil (legacy profiles)")

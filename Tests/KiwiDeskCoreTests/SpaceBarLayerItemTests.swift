@@ -26,7 +26,7 @@ struct SpaceBarLayerItemTests {
     @Test("the default layer builds no item")
     func defaultLayerBuildsNothing() {
         let core = Self.makeCore()
-        #expect(core.keys.currentLayer == "default")
+        expectEqual(core.keys.currentLayer, "default")
         #expect(core.spaceBarLayerItem() == nil)
     }
 
@@ -40,8 +40,8 @@ struct SpaceBarLayerItemTests {
         )
         core.keys.switchLayer("resize")
         let item = try #require(core.spaceBarLayerItem())
-        #expect(item.identity == .layer("resize"))
-        #expect(item.spaceGlyph == .symbol("arrow.left.and.right"))
+        expectEqual(item.identity, .layer("resize"))
+        expectEqual(item.spaceGlyph, .symbol("arrow.left.and.right"))
         #expect(item.space == nil)
         #expect(item.apps.isEmpty)
         #expect(!item.active)
@@ -53,7 +53,7 @@ struct SpaceBarLayerItemTests {
         core.keys.defineLayer("service", bindings: [:], icon: "⚙️")
         core.keys.switchLayer("service")
         let item = try #require(core.spaceBarLayerItem())
-        #expect(item.spaceGlyph == .text("⚙️", tinted: false))
+        expectEqual(item.spaceGlyph, .text("⚙️", tinted: false))
     }
 
     @Test("an icon-less layer takes the Space monogram's cut")
@@ -62,7 +62,7 @@ struct SpaceBarLayerItemTests {
         core.keys.defineLayer("resize", bindings: [:])
         core.keys.switchLayer("resize")
         let item = try #require(core.spaceBarLayerItem())
-        #expect(item.spaceGlyph == .text("RE", tinted: true))
+        expectEqual(item.spaceGlyph, .text("RE", tinted: true))
     }
 
     @Test("switching back to default drops the item")

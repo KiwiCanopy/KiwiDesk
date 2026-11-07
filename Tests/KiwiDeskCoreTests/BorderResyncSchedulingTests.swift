@@ -77,7 +77,7 @@ struct BorderResyncSchedulingTests {
     func dropReconcileSchedulesWhileAnimating() {
         let core = makeTestCore()
         startAnimation(core)
-        #expect(core.tiler.animation.activeCount == 1)
+        expectEqual(core.tiler.animation.activeCount, 1)
         // Deliberately early: `sync`'s trailing `order` is what
         // un-hides a ring, and `FollowSource.syncFrame` keeps it
         // from moving an animating window's geometry — so landing
@@ -114,7 +114,7 @@ struct BorderResyncSchedulingTests {
         // app-wide forever, #599).
         startAnimation(core)
         core.runBorderResync()
-        #expect(core.borders.lastFrame(id) == commanded)
+        expectEqual(core.borders.lastFrame(id), commanded)
     }
 
     @Test("The re-sync re-glues a stranded ring to real state")
@@ -128,10 +128,10 @@ struct BorderResyncSchedulingTests {
         // app never applied — the #596 item 2 strand.
         let stranded = CGRect(x: 900, y: 900, width: 500, height: 400)
         core.borders.apply(id, windowFrame: stranded)
-        #expect(core.borders.lastFrame(id) == stranded)
+        expectEqual(core.borders.lastFrame(id), stranded)
         core.runBorderResync()
         // Back onto the frame the window actually has.
-        #expect(core.borders.lastFrame(id) == real)
+        expectEqual(core.borders.lastFrame(id), real)
     }
 
     @Test("The re-sync heals the sticky mark too")
@@ -143,11 +143,11 @@ struct BorderResyncSchedulingTests {
         core.updateStickyMarks()
         let stranded = CGRect(x: 900, y: 900, width: 500, height: 400)
         core.stickyMarks.reposition(id, windowFrame: stranded)
-        #expect(core.stickyMarks.lastFrame(id) == stranded)
+        expectEqual(core.stickyMarks.lastFrame(id), stranded)
         // Deleting `updateStickyMarks()` from the body leaves the
         // ring's heal green and the mark stranded forever.
         core.runBorderResync()
-        #expect(core.stickyMarks.lastFrame(id) == real)
+        expectEqual(core.stickyMarks.lastFrame(id), real)
     }
 
     @Test("The re-sync re-stacks a tracked mark (#2026)")
@@ -163,11 +163,11 @@ struct BorderResyncSchedulingTests {
         core.updateStickyMarks()
         core.updateStickyMarks()
         let mark = try #require(core.stickyMarks.overlays[id])
-        #expect(mark.orderCount == 1)
+        expectEqual(mark.orderCount, 1)
         // A steady sync leaves a tracked mark to the reorder events;
         // the settle pass is the one that re-stacks it.
         core.runBorderResync()
-        #expect(mark.orderCount == 2)
+        expectEqual(mark.orderCount, 2)
     }
 
     @Test("The drop's visibility pass re-stacks a tracked mark too")
@@ -182,14 +182,14 @@ struct BorderResyncSchedulingTests {
         core.stickyMarks.isWindowServerTracked = { _ in true }
         core.updateStickyMarks()
         let mark = try #require(core.stickyMarks.overlays[id])
-        #expect(mark.orderCount == 1)
+        expectEqual(mark.orderCount, 1)
 
         core.scheduleBorderDropReconcile()
         let pass = core.deferred.task(for: .borderDropSettle)
         #expect(pass != nil)
         await pass?.value
 
-        #expect(mark.orderCount == 2)
+        expectEqual(mark.orderCount, 2)
     }
 
     @Test("The grace outlasts a slow app's post-settle catch-up")

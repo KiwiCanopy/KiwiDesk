@@ -96,17 +96,17 @@ struct SplitFloorCueTests {
             for: core.state.workspaces[space]!,
             session: core.sessionRatios(of: space)
         ).splitRatioH
-        #expect(ratio == 0.5)
+        expectEqual(ratio, 0.5)
         // Once per episode: a retile storm says nothing more.
         core.retile()
         core.retile()
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
         // The neighbour's bound is forgotten: the split now fits
         // w1's floor, the heal moves the ratio and the episode
         // ends.
         core.tiler.forgetSizeBound(w2)
         core.retile()
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
         let healed = core.tiler.settings.resolvedBsp(
             for: core.state.workspaces[space]!,
             session: core.sessionRatios(of: space)
@@ -120,7 +120,7 @@ struct SplitFloorCueTests {
         core.execute("bsp.set_ratio_h", args: [.number(0.5)])
         seed(core, window: w2, minWidth: 700)
         core.retile()
-        #expect(refusals.count == 2)
+        expectEqual(refusals.count, 2)
         #expect(
             refusals.last
                 == .neighborMinimum(
@@ -148,7 +148,7 @@ struct SplitFloorCueTests {
         }
         core.retile(animated: true)
         let right = try #require(issued[w2])
-        #expect(right.width == 700)
+        expectEqual(right.width, 700)
         #expect(abs(right.maxX - 1190) < 0.01)
     }
 
@@ -167,9 +167,9 @@ struct SplitFloorCueTests {
         let slots = core.tiler.calculatedFrames(state: core.state)
         #expect(try #require(slots[WindowID(1)]).width < 600)
         let right = try #require(frames[WindowID(2)])
-        #expect(left.width == 700)
-        #expect(left.minX == 10)
-        #expect(right.width == 700)
+        expectEqual(left.width, 700)
+        expectEqual(left.minX, 10)
+        expectEqual(right.width, 700)
         #expect(abs(right.maxX - 1190) < 0.01)
     }
 
@@ -206,7 +206,7 @@ struct SplitFloorCueTests {
         let frame = try #require(
             core.tiler.placedFrames(state: core.state)[w2]
         )
-        #expect(frame.width == 700)
+        expectEqual(frame.width, 700)
         #expect(abs(frame.maxX - 1190) < 0.01)
     }
 
@@ -228,14 +228,14 @@ struct SplitFloorCueTests {
         // episode.
         core.execute("focus_space", args: [.string(space.raw)])
         core.retile()
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
         // Hidden again with the episode said: nothing, and
         // nothing again on the return either.
         core.execute("focus_space", args: [.string("2")])
         core.retile()
         core.execute("focus_space", args: [.string(space.raw)])
         core.retile()
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
     }
 
     @Test("A native-tab re-key keeps the episode said")
@@ -248,12 +248,12 @@ struct SplitFloorCueTests {
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.retile()
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
         // The overhanging window switches tab: same slot, fresh
         // id, same learned bound (#308/#677).
         let fresh = WindowID(11)
         core.handle(.windowRekeyed(w1, fresh))
         core.retile()
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
     }
 }

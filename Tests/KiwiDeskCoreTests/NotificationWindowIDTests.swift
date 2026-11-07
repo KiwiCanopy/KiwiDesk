@@ -84,7 +84,7 @@ struct NotificationWindowIDTests {
         // The whole fix: no round-trip for a window we track.
         // Inverting the resolver's order reds here, and the
         // frame clock starves again on device.
-        #expect(asked == 0)
+        expectEqual(asked, 0)
     }
 
     @Test("A dead element's zero frame never reaches state")
@@ -154,7 +154,7 @@ struct NotificationWindowIDTests {
             pid: pid,
             app: AppRef(bundleID: nil, name: "Test")
         )
-        #expect(asked == 1)
+        expectEqual(asked, 1)
     }
 
     @Test("A destroy for an unknown element never asks")
@@ -180,7 +180,7 @@ struct NotificationWindowIDTests {
             pid: pid,
             app: AppRef(bundleID: nil, name: "Test")
         )
-        #expect(asked == 0)
+        expectEqual(asked, 0)
     }
 
     @Test("An unknown window still asks — the map is not a wall")
@@ -201,6 +201,6 @@ struct NotificationWindowIDTests {
             pid: pid,
             app: AppRef(bundleID: nil, name: "Test")
         )
-        #expect(asked == 1)
+        expectEqual(asked, 1)
     }
 }

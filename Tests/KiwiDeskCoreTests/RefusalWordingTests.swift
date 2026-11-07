@@ -165,7 +165,7 @@ struct RefusalWordingTests {
         track(core, 1, pid: getpid())
         #expect(core.execute("pocket", args: [.number(1)]).isSuccess)
         core.state.windows.remove(id)
-        #expect(core.execute("pocket").error == KiwiCore.pocketAppHidden)
+        expectEqual(core.execute("pocket").error, KiwiCore.pocketAppHidden)
     }
 
     @Test("an out window its app's hiding took says so")
@@ -176,7 +176,7 @@ struct RefusalWordingTests {
         let marked = core.state.markPocketWindow(id)
         #expect(marked)
         core.state.windows.remove(id)
-        #expect(core.execute("pocket").error == KiwiCore.pocketAppHidden)
+        expectEqual(core.execute("pocket").error, KiwiCore.pocketAppHidden)
     }
 
     @Test("every take-out door names no active Space")
@@ -254,7 +254,7 @@ struct RefusalWordingTests {
             (.cannotSwapGone, "That window is no longer here"),
         ]
         for (refusal, sentence) in sentences {
-            #expect(refusal.sentence == sentence)
+            expectEqual(refusal.sentence, sentence)
         }
         #expect(
             PocketRefusal.markedElsewhereSentence
@@ -324,7 +324,7 @@ struct RefusalWordingTests {
 
     @Test("the logged call stays short and leaves a bare call bare")
     func loggedCallShape() {
-        #expect(KiwiCore.loggedCall("focus", []) == "focus")
+        expectEqual(KiwiCore.loggedCall("focus", []), "focus")
         #expect(
             KiwiCore.loggedCall("swap", [.string("left"), .number(2)])
                 == "swap [\"left\",2]"

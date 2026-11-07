@@ -121,7 +121,7 @@ struct ReconcileAllPrefilterTests {
         )
         // 1 tracks, 2 shows; 3 does neither and 4's census
         // entry is empty — the same "shows nothing".
-        #expect(targets == [1, 2])
+        expectEqual(targets, [1, 2])
     }
 
     @Test("the gate keeps the caller's order")
@@ -131,7 +131,7 @@ struct ReconcileAllPrefilterTests {
             census: [:],
             tracks: { _ in true }
         )
-        #expect(targets == [9, 7, 8])
+        expectEqual(targets, [9, 7, 8])
     }
 
     // MARK: - reconcileAll reads the gate
@@ -142,7 +142,7 @@ struct ReconcileAllPrefilterTests {
         defer { loop.stop() }
         box.census = [showing: [WindowID(1)]]
         loop.reconcileAll()
-        #expect(box.queried == [showing])
+        expectEqual(box.queried, [showing])
     }
 
     @Test("reconcileAll reaches an app that tracks a window")
@@ -153,7 +153,7 @@ struct ReconcileAllPrefilterTests {
         // switch, which the pass exists to remove.
         loop.elements[napping] = [WindowID(5): dummyElement(napping)]
         loop.reconcileAll()
-        #expect(box.queried == [napping])
+        expectEqual(box.queried, [napping])
     }
 
     // MARK: - The settle's arrival sweep
@@ -170,7 +170,7 @@ struct ReconcileAllPrefilterTests {
         // A second id landed after the switch pass: read.
         box.census = [showing: [WindowID(1), WindowID(2)]]
         loop.reconcileOnScreenArrivals()
-        #expect(box.queried == [showing])
+        expectEqual(box.queried, [showing])
     }
 
     @Test("the arrival sweep leaves an unobserved app to the heal")
@@ -196,7 +196,7 @@ struct ReconcileAllPrefilterTests {
         // `stop()` empties `observers`, so an emptied filter would
         // pass `queried` too; what the guard uniquely spares is
         // the census read itself — a live CGWindowList call.
-        #expect(box.censusReads == 0)
+        expectEqual(box.censusReads, 0)
         #expect(box.queried.isEmpty)
     }
 }

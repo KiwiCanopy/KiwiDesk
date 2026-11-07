@@ -110,6 +110,6 @@ struct BarSettingChoiceTests {
             Issue.record("expected a decoded edge")
             return
         }
-        #expect(edge == .left)
+        expectEqual(edge, .left)
     }
 }

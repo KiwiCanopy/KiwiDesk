@@ -55,8 +55,8 @@ struct SpaceBarDropCoordinatorTests {
         )
         coord.moved(win, cursor: cursor)
         #expect(coord.isArmed)
-        #expect(rec.hovered.last == SpaceID("B"))
-        #expect(rec.sweeps == [SpaceID("B")])
+        expectEqual(rec.hovered.last, SpaceID("B"))
+        expectEqual(rec.sweeps, [SpaceID("B")])
         // Released before the (long) dwell → relocate, no spring.
         #expect(
             coord.ended(win, cursor: cursor)
@@ -76,7 +76,7 @@ struct SpaceBarDropCoordinatorTests {
         coord.moved(win, cursor: cursor)
         #expect(!coord.isArmed)
         #expect(rec.sweeps.isEmpty)
-        #expect(coord.ended(win, cursor: cursor) == .none)
+        expectEqual(coord.ended(win, cursor: cursor), .none)
     }
 
     @Test("Dropping off any bar item falls through")
@@ -84,7 +84,7 @@ struct SpaceBarDropCoordinatorTests {
         let (coord, _) = make(current: SpaceID("A"), hit: nil)
         coord.moved(win, cursor: cursor)
         #expect(!coord.isArmed)
-        #expect(coord.ended(win, cursor: cursor) == .none)
+        expectEqual(coord.ended(win, cursor: cursor), .none)
     }
 
     @Test("Leaving the item cancels the pending spring")
@@ -128,9 +128,9 @@ struct SpaceBarDropCoordinatorTests {
         let dwell = coord.dwellTask
         #expect(dwell != nil, "arming scheduled no dwell")
         await dwell?.value
-        #expect(rec.sprang.map(\.0) == [SpaceID("B")])
-        #expect(rec.sprang.first?.1 == win)
-        #expect(coord.sprungSpace == SpaceID("B"))
+        expectEqual(rec.sprang.map(\.0), [SpaceID("B")])
+        expectEqual(rec.sprang.first?.1, win)
+        expectEqual(coord.sprungSpace, SpaceID("B"))
         // The window is now on the visible target: the drop places
         // it there rather than relocating.
         #expect(
@@ -154,7 +154,7 @@ struct SpaceBarDropCoordinatorTests {
         coord.hitTest = { _ in SpaceID("C") }
         coord.moved(win, cursor: cursor)
         #expect(rec.clears > clearsAfterFirst)
-        #expect(rec.sweeps == [SpaceID("B"), SpaceID("C")])
+        expectEqual(rec.sweeps, [SpaceID("B"), SpaceID("C")])
     }
 
     @Test("reset cancels a pending spring (abandoned drag)")
@@ -166,7 +166,7 @@ struct SpaceBarDropCoordinatorTests {
         )
         coord.moved(win, cursor: cursor)
         #expect(coord.isArmed)
-        #expect(coord.draggingWindow == win)
+        expectEqual(coord.draggingWindow, win)
         let dwell = coord.dwellTask
         #expect(dwell != nil, "arming scheduled no dwell")
         coord.reset()
@@ -176,7 +176,7 @@ struct SpaceBarDropCoordinatorTests {
         // dwell and hope: `isCancelled` is the fact itself, and
         // awaiting the handle afterwards says the spring never
         // fired instead of that it had not fired *yet*.
-        #expect(dwell?.isCancelled == true)
+        expectEqual(dwell?.isCancelled, true)
         await dwell?.value
         // No gap sleep here, deliberately: this gesture arms
         // ONCE, so its one timeline is the only thing that could
@@ -202,7 +202,7 @@ struct SpaceBarDropCoordinatorTests {
         // space the drag moved off seconds ago.
         coord.hitTest = { _ in SpaceID("C") }
         coord.moved(win, cursor: cursor)
-        #expect(first?.isCancelled == true)
+        expectEqual(first?.isCancelled, true)
         #expect(coord.dwellTask != first)
         coord.reset()
         // The gap belongs here rather than beside the other

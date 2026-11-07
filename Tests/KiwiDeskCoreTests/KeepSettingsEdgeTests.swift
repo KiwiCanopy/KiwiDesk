@@ -76,7 +76,7 @@ struct KeepSettingsEdgeTests {
             [.string("9"), .string("star")]
         )
         let leaf = KeepFixture.leaf(icon, "/settings/space/icon/9")
-        #expect(leaf?.notKeepable == .temporarySpace)
+        expectEqual(leaf?.notKeepable, .temporarySpace)
         let declared = KeepFixture.report(
             core,
             "set_space_icon",
@@ -93,8 +93,8 @@ struct KeepSettingsEdgeTests {
         var writes = 0
         core.onLiveProfileWritten = { _, _ in writes += 1 }
         let response = keep(core, ["/settings/border/width"])
-        #expect(ids(response.data, "kept") == ["/settings/border/width"])
-        #expect(writes == 0)
+        expectEqual(ids(response.data, "kept"), ["/settings/border/width"])
+        expectEqual(writes, 0)
     }
 
     @Test("keeping one look leaf leaves another pending live")
@@ -111,7 +111,7 @@ struct KeepSettingsEdgeTests {
         let response = keep(core, (width.changes?.touched ?? []).map(\.id))
         #expect(!ids(response.data, "kept").isEmpty)
         let still = core.answer(.reporting("version", watch: glowIDs))
-        #expect(still.changes?.watched.allSatisfy { !$0.stored } == true)
+        expectEqual(still.changes?.watched.allSatisfy { !$0.stored }, true)
     }
 
     @Test("a path no side holds is unknown, never kept")
@@ -139,10 +139,10 @@ struct KeepSettingsEdgeTests {
             core,
             (width.changes?.touched ?? []).map(\.id) + [gap]
         )
-        #expect(ids(response.data, "kept") == ["/settings/border/width"])
-        #expect(ids(response.data, "not_keepable") == [gap])
+        expectEqual(ids(response.data, "kept"), ["/settings/border/width"])
+        expectEqual(ids(response.data, "not_keepable"), [gap])
         let stored = try core.profiles.read(name: "Odd")
-        #expect(stored.settings.borderStyle.width == 9)
+        expectEqual(stored.settings.borderStyle.width, 9)
     }
 
     @Test("half of a new map entry is refused as conflicting")

@@ -91,14 +91,14 @@ struct SpaceBarStripViewTests {
         let leading = try #require(view.leadingTarget)
         let trailing = try #require(view.overflowTarget)
         // Nearest the glyphs first: the leading disc mirrors the row.
-        #expect(leading.members == [WindowID(2), WindowID(1)])
-        #expect(trailing.members == [WindowID(8), WindowID(9)])
+        expectEqual(leading.members, [WindowID(2), WindowID(1)])
+        expectEqual(trailing.members, [WindowID(8), WindowID(9)])
         let first = try #require(view.appViews.first)
         // Within the half point a glyph's backing-aligned frame
         // rounds by, beside the disc's unrounded target.
         #expect(leading.frame.maxX <= first.frame.minX + 0.5)
         #expect(!view.leadingBadge.isHidden)
-        #expect(view.leadingBadge.stringValue == "+2")
+        expectEqual(view.leadingBadge.stringValue, "+2")
         #expect(
             leading.accessibilityLabel() == "Earlier windows not shown: 2"
         )
@@ -115,7 +115,7 @@ struct SpaceBarStripViewTests {
         LocalizationManager.shared.select("en")
         let view = makeView()
         configure(view, drawn: 3...7)
-        #expect(view.heldWindows == 9)
+        expectEqual(view.heldWindows, 9)
         #expect(
             view.accessibilityLabel() == "Space 1, windows: 9, current"
         )
@@ -130,11 +130,11 @@ struct SpaceBarStripViewTests {
         configure(view, drawn: 3...7)
         let carried = view.appViews[0]
         configure(view, drawn: 4...8)
-        #expect(view.leavingViews.count == 1)
+        expectEqual(view.leavingViews.count, 1)
         #expect(view.leavingViews.first === carried)
         #expect(carried.superview === view)
         #expect(view.pendingWalk == nil)
-        #expect(view.appViews.count == 5)
+        expectEqual(view.appViews.count, 5)
     }
 
     /// A step back carries the trailing glyph off instead.
@@ -144,7 +144,7 @@ struct SpaceBarStripViewTests {
         configure(view, drawn: 4...8)
         let carried = view.appViews[4]
         configure(view, drawn: 3...7)
-        #expect(view.leavingViews.count == 1)
+        expectEqual(view.leavingViews.count, 1)
         #expect(view.leavingViews.first === carried)
     }
 
@@ -240,8 +240,8 @@ struct SpaceBarStripViewTests {
         view.setPointerInside(true)
         view.setPointerInside(true)
         view.setPointerInside(false)
-        #expect(reports.map(\.2) == [true, false])
-        #expect(reports.first?.1 == .init(window: 2..<7, count: 9))
+        expectEqual(reports.map(\.2), [true, false])
+        expectEqual(reports.first?.1, .init(window: 2..<7, count: 9))
     }
 
     /// Item views are reused by index: a slot that starts drawing
@@ -255,8 +255,8 @@ struct SpaceBarStripViewTests {
         view.onPointerInside = { reports.append(($0, $2)) }
         view.setPointerInside(true)
         configure(view, drawn: 3...7, space: SpaceID("2"))
-        #expect(reports.map(\.0) == [SpaceID("1"), SpaceID("1")])
-        #expect(reports.map(\.1) == [true, false])
+        expectEqual(reports.map(\.0), [SpaceID("1"), SpaceID("1")])
+        expectEqual(reports.map(\.1), [true, false])
         #expect(!view.pointerInside)
     }
 }

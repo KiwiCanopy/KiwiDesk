@@ -44,7 +44,7 @@ struct AppBarOverrideTests {
             let stored = (appBar as? [String: Any])?[
                 "group_adjacent_windows"
             ]
-            #expect(stored as? Bool == value)
+            expectEqual(stored as? Bool, value)
         }
     }
 
@@ -54,8 +54,8 @@ struct AppBarOverrideTests {
         global.activeIndicator = .outline
         global.titleCap = 7
         let resolved = LayoutAppBar().resolved(with: global)
-        #expect(resolved.activeIndicator == .outline)
-        #expect(resolved.titleCap == 7)
+        expectEqual(resolved.activeIndicator, .outline)
+        expectEqual(resolved.titleCap, 7)
     }
 
     @Test("Set fields override just themselves")
@@ -67,8 +67,8 @@ struct AppBarOverrideTests {
         bar.activeIndicator = .edgeMark
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
-        #expect(resolved.activeIndicator == .edgeMark)
-        #expect(resolved.titleCap == 7)
+        expectEqual(resolved.activeIndicator, .edgeMark)
+        expectEqual(resolved.titleCap, 7)
     }
 
     @Test("The shelf's edge is absolute, orientation aside")
@@ -106,7 +106,7 @@ struct AppBarOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(decoded.appBarStyle == settings.appBarStyle)
+        expectEqual(decoded.appBarStyle, settings.appBarStyle)
         #expect(
             decoded.scrolling.appBar == settings.scrolling.appBar
         )
@@ -148,10 +148,10 @@ struct ScrollingBarGeometryTests {
         off.scrolling.slotSize = .points(300)
         let shown = layout.calculateGeometry(for: [w1, w2], in: on)
         let hidden = layout.calculateGeometry(for: [w1, w2], in: off)
-        #expect(shown == hidden)
+        expectEqual(shown, hidden)
         let first = try #require(shown[w1])
-        #expect(first.minX == on.usable.minX)
-        #expect(first.minY == on.usable.minY)
+        expectEqual(first.minX, on.usable.minX)
+        expectEqual(first.minY, on.usable.minY)
     }
 
     @Test("Vertical orientation stacks windows into rows")
@@ -168,10 +168,10 @@ struct ScrollingBarGeometryTests {
         let first = try #require(frames[w1])
         let second = try #require(frames[w2])
         // Rows: full width, fixed height, stacked down the y.
-        #expect(first.width == context.usable.width)
-        #expect(first.height == 300)
+        expectEqual(first.width, context.usable.width)
+        expectEqual(first.height, 300)
         #expect(second.minY > first.minY)
-        #expect(first.minX == context.usable.minX)
+        expectEqual(first.minX, context.usable.minX)
     }
 }
 
@@ -187,7 +187,7 @@ struct AppBarCommandTests {
                 args: [.number(44)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.thickness == 44)
+        expectEqual(core.tiler.settings.kiwishelf.thickness, 44)
         #expect(
             core.execute(
                 "kiwishelf.set_background_style",
@@ -272,7 +272,7 @@ struct AppBarCommandTests {
             )
         }
         core.moveBarItem(space: SpaceID(1), from: 0, to: 2)
-        #expect(core.activeSpace?.windows == [w2, w3, w1])
+        expectEqual(core.activeSpace?.windows, [w2, w3, w1])
     }
 
     @Test("Invalid global bar values are rejected")

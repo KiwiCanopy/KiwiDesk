@@ -49,7 +49,7 @@ struct VisionMaskPlateTests {
         let (vision, made) = manager()
         vision.sync(request(clear: false), reassert: false)
         let plate = try #require(made().first)
-        #expect(plate.shapes.count == 1)
+        expectEqual(plate.shapes.count, 1)
         #expect(plate.shapes.first == .some(nil))
     }
 
@@ -75,9 +75,9 @@ struct VisionMaskPlateTests {
         #expect(plate.shapes.count == 1, "same windows, no new mask")
         let b = a.offsetBy(dx: 50, dy: 0)
         vision.sync(request(clear: true, windows: [b]), reassert: false)
-        #expect(plate.shapes.count == 2)
+        expectEqual(plate.shapes.count, 2)
         vision.reshapeShown(request(clear: true, windows: [a]))
-        #expect(plate.shapes.count == 3)
+        expectEqual(plate.shapes.count, 3)
         let built = vision.shapeBuilds
         vision.reshapeShown(request(clear: true, windows: [a]))
         #expect(vision.shapeBuilds == built, "an unchanged input builds none")

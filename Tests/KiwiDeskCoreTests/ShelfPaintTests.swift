@@ -57,7 +57,7 @@ struct ShelfPaintTests {
         core.paintShelf(look: nil, palette: sunset)
 
         // The shape stays; the look now wears colours not its own.
-        #expect(taskbar.match(core.tiler.settings) == .otherColors)
+        expectEqual(taskbar.match(core.tiler.settings), .otherColors)
         #expect(sunset.isApplied(to: core.tiler.settings))
         #expect(try stored(core) == core.tiler.settings)
     }
@@ -75,7 +75,7 @@ struct ShelfPaintTests {
 
         core.restoreShelf(baseline)
 
-        #expect(core.tiler.settings == before)
+        expectEqual(core.tiler.settings, before)
         #expect(try stored(core) == before)
     }
 
@@ -134,7 +134,7 @@ struct ShelfPaintTests {
 
         core.restoreShelf(baseline)
 
-        #expect(core.tiler.settings.resizeStep == step)
+        expectEqual(core.tiler.settings.resizeStep, step)
         #expect(try stored(core).resizeStep == step)
         #expect(!(try look("Taskbar")).isApplied(to: core.tiler.settings))
     }
@@ -155,8 +155,8 @@ struct ShelfPaintTests {
         core.restoreShelf(baseline)
 
         for settings in [core.tiler.settings, try stored(core)] {
-            #expect(settings.stickyStyle.liquidGlass == !glass)
-            #expect(settings.monocle.appBar.activeIndicator == .outline)
+            expectEqual(settings.stickyStyle.liquidGlass, !glass)
+            expectEqual(settings.monocle.appBar.activeIndicator, .outline)
         }
     }
 
@@ -176,6 +176,6 @@ struct ShelfPaintTests {
         core.paintShelf(look: taskbar, palette: nil)
         core.restoreShelf(baseline)
         // Told after the write landed, live and in the file.
-        #expect(told == [true, false])
+        expectEqual(told, [true, false])
     }
 }

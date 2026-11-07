@@ -53,7 +53,7 @@ struct LookReachTests {
     func reachReadsTheSwitches() throws {
         let core = try crossedCore()
         try core.profiles.save(profile("Odd", fill: odd))
-        #expect(core.lookReach() == ["Work": true, "Odd": false])
+        expectEqual(core.lookReach(), ["Work": true, "Odd": false])
     }
 
     @Test("going own freezes the shared look into the file")
@@ -62,9 +62,9 @@ struct LookReachTests {
         try core.profiles.save(profile("Stale", fill: odd, look: nil))
         try core.saveLookReach(["Stale": false])
         let stale = try core.profiles.read(name: "Stale")
-        #expect(stale.look == .own)
+        expectEqual(stale.look, .own)
         #expect(stale.settings.kiwishelf.fillColor != odd)
-        #expect(core.sharedLook?.isWorn(by: stale.settings) == true)
+        expectEqual(core.sharedLook?.isWorn(by: stale.settings), true)
     }
 
     /// The copy is re-stamped to the shared look it now wears
@@ -99,10 +99,10 @@ struct LookReachTests {
         let core = try crossedCore()
         try core.profiles.save(profile("Odd", fill: odd))
         load("Odd", core)
-        #expect(core.tiler.settings.kiwishelf.fillColor == odd)
+        expectEqual(core.tiler.settings.kiwishelf.fillColor, odd)
         try core.saveLookReach(["Odd": true])
         #expect(core.tiler.settings.kiwishelf.fillColor != odd)
-        #expect(core.profiles.currentName == "Odd")
+        expectEqual(core.profiles.currentName, "Odd")
     }
 
     @Test("with no shared look yet, opting in seeds it")
@@ -115,8 +115,8 @@ struct LookReachTests {
         try core.guiConfigStore.save(GuiConfig())
         try core.profiles.save(profile("Odd", fill: odd))
         try core.saveLookReach(["Odd": true])
-        #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
-        #expect(core.guiConfigStore.load()?.look == core.sharedLook)
+        expectEqual(core.sharedLook?.colors["kiwishelf.fill_color"], odd)
+        expectEqual(core.guiConfigStore.load()?.look, core.sharedLook)
     }
 
     /// #2820: "Make this the shared look" — the profile's own look
@@ -132,11 +132,11 @@ struct LookReachTests {
             ["Odd": true],
             sharing: ("Odd", shown)
         )
-        #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
+        expectEqual(core.sharedLook?.colors["kiwishelf.fill_color"], odd)
         #expect(try core.profiles.read(name: "Odd").look == nil)
         let work = try core.profiles.read(name: "Work")
-        #expect(work.settings.kiwishelf.fillColor == odd)
-        #expect(core.tiler.settings.kiwishelf.fillColor == odd)
+        expectEqual(work.settings.kiwishelf.fillColor, odd)
+        expectEqual(core.tiler.settings.kiwishelf.fillColor, odd)
     }
 
     @Test("without sharing, going shared takes the shared look")
@@ -145,7 +145,7 @@ struct LookReachTests {
         let before = core.sharedLook
         try core.profiles.save(profile("Odd", fill: odd))
         try core.saveLookReach(["Odd": true])
-        #expect(core.sharedLook == before)
+        expectEqual(core.sharedLook, before)
         let odd = try core.profiles.read(name: "Odd")
         #expect(odd.look == nil)
         #expect(odd.settings.kiwishelf.fillColor != self.odd)

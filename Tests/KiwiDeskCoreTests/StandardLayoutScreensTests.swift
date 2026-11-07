@@ -39,9 +39,9 @@ struct StandardLayoutScreensTests {
             spaces: 3,
             screensBySpace: ["3": 1]
         )
-        #expect(plan.screen(of: "1", screens: 2) == 0)
-        #expect(plan.screen(of: "2", screens: 2) == 0)
-        #expect(plan.screen(of: "3", screens: 2) == 1)
+        expectEqual(plan.screen(of: "1", screens: 2), 0)
+        expectEqual(plan.screen(of: "2", screens: 2), 0)
+        expectEqual(plan.screen(of: "3", screens: 2), 1)
     }
 
     @Test("an unlisted mode is bsp")
@@ -68,11 +68,11 @@ struct StandardLayoutScreensTests {
             spaces: 2,
             screensBySpace: ["1": 9, "2": -4]
         )
-        #expect(plan.screen(of: "1", screens: 2) == 1)
-        #expect(plan.screen(of: "2", screens: 2) == 0)
+        expectEqual(plan.screen(of: "1", screens: 2), 1)
+        expectEqual(plan.screen(of: "2", screens: 2), 0)
         // Degenerate: no screens at all resolves to 0 rather
         // than to a negative index.
-        #expect(plan.screen(of: "1", screens: 0) == 0)
+        expectEqual(plan.screen(of: "1", screens: 0), 0)
     }
 
     @Test("a screen with no spaces has no opening mode")

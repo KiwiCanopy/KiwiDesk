@@ -32,11 +32,11 @@ struct ShelfLookApplyTests {
             colors: [:]
         )
         named.apply(to: &settings)
-        #expect(settings.spaceBarStyle.edge == .bottom)
-        #expect(settings.appBarStyle.edge == .left)
-        #expect(settings.borderStyle.sheen == 0)
-        #expect(settings.spaceBarStyle.activeIndicator == .edgeMark)
-        #expect(settings.kiwishelf.cornerRoundness == 80)
+        expectEqual(settings.spaceBarStyle.edge, .bottom)
+        expectEqual(settings.appBarStyle.edge, .left)
+        expectEqual(settings.borderStyle.sheen, 0)
+        expectEqual(settings.spaceBarStyle.activeIndicator, .edgeMark)
+        expectEqual(settings.kiwishelf.cornerRoundness, 80)
         // A look without colours of its own moves none.
         #expect(
             ColorPaletteKeys.extract(from: settings)
@@ -48,7 +48,7 @@ struct ShelfLookApplyTests {
         settings.borderStyle.sheen = before.borderStyle.sheen
         settings.spaceBarStyle.activeIndicator =
             before.spaceBarStyle.activeIndicator
-        #expect(settings == before)
+        expectEqual(settings, before)
     }
 
     @Test("values clamp exactly as their commands clamp")
@@ -59,12 +59,12 @@ struct ShelfLookApplyTests {
             "kiwishelf.border_width": .number(40),
             "border.sheen": .number(9),
         ]).apply(to: &settings)
-        #expect(settings.kiwishelf.thickness == KiwiShelf.minThickness)
+        expectEqual(settings.kiwishelf.thickness, KiwiShelf.minThickness)
         #expect(
             settings.kiwishelf.borderWidth
                 == KiwiShelf.borderWidthRange.upperBound
         )
-        #expect(settings.borderStyle.sheen == 1)
+        expectEqual(settings.borderStyle.sheen, 1)
     }
 
     @Test("an unknown path or a refused value is skipped")
@@ -76,7 +76,7 @@ struct ShelfLookApplyTests {
             "app_bar.title_cap": .number(7),
             "nonsense": .bool(true),
         ]).apply(to: &settings)
-        #expect(settings == TilingSettings())
+        expectEqual(settings, TilingSettings())
     }
 
     @Test("a look paints its own colours after the styling")
@@ -85,8 +85,8 @@ struct ShelfLookApplyTests {
         var named = look(["app_bar.edge": .string("left")])
         named.colors = ["kiwishelf.fill_color": "#112233"]
         named.apply(to: &settings)
-        #expect(settings.kiwishelf.fillColor == "#112233")
-        #expect(settings.appBarStyle.edge == .left)
+        expectEqual(settings.kiwishelf.fillColor, "#112233")
+        expectEqual(settings.appBarStyle.edge, .left)
     }
 
     /// Colours compare by parsed value, the palette rule (#757):
@@ -116,11 +116,11 @@ struct ShelfLookApplyTests {
             style: LookKeys.extract(from: settings),
             colors: ColorPaletteKeys.extract(from: settings)
         )
-        #expect(named.match(settings) == .applied)
+        expectEqual(named.match(settings), .applied)
         settings.kiwishelf.fillColor = "#010203"
-        #expect(named.match(settings) == .otherColors)
+        expectEqual(named.match(settings), .otherColors)
         settings.spaceBarStyle.edge = .left
-        #expect(named.match(settings) == .none)
+        expectEqual(named.match(settings), .none)
     }
 
     /// A saved look captures the config's wire spellings and
@@ -221,7 +221,7 @@ struct ShelfLookApplyTests {
         #expect(TilingSettings.liquidGlassLeaves.count > 1)
         look(["kiwishelf.liquid_glass": .bool(false)]).apply(to: &settings)
         for leaf in TilingSettings.liquidGlassLeaves {
-            #expect(settings[keyPath: leaf] == false)
+            expectEqual(settings[keyPath: leaf], false)
         }
     }
 
@@ -230,7 +230,7 @@ struct ShelfLookApplyTests {
         var settings = TilingSettings()
         // The two layouts cleared are every host there is; a third
         // host reds here until the look clears it too.
-        #expect(settings.appBarHosts.count == 2)
+        expectEqual(settings.appBarHosts.count, 2)
         settings.monocle.appBar.activeIndicator = .outline
         settings.scrolling.appBar.activeIndicator = .outline
         let edge = look(["app_bar.active_indicator": .string("edge_mark")])
@@ -266,9 +266,9 @@ struct ShelfLookApplyTests {
             "space_bar.edge": .string("left"),
             "app_bar.edge": .string("bottom"),
         ]).apply(to: &settings)
-        #expect(settings.spaceBarStyle.visibility == .hidden)
-        #expect(settings.monocle.appBar.visibility == .hidden)
-        #expect(settings.spaceBarStyle.edge == .left)
-        #expect(settings.appBarStyle.edge == .bottom)
+        expectEqual(settings.spaceBarStyle.visibility, .hidden)
+        expectEqual(settings.monocle.appBar.visibility, .hidden)
+        expectEqual(settings.spaceBarStyle.edge, .left)
+        expectEqual(settings.appBarStyle.edge, .bottom)
     }
 }

@@ -104,7 +104,7 @@ struct ConfigWriteTests {
             contentsOf: core.configURL,
             encoding: .utf8
         )
-        #expect(after == hooks)
+        expectEqual(after, hooks)
     }
 
     @Test("round-trip: write, reload, live state matches")
@@ -117,7 +117,7 @@ struct ConfigWriteTests {
         try core.saveGuiConfig(config)
         core.applyProfileScopedState(from: config)
 
-        #expect(core.tiler.settings == config.settings)
+        expectEqual(core.tiler.settings, config.settings)
         #expect(
             core.eventLoop.ignoreRules.matches(
                 bundleID: "io.tailscale.ipn.macos"
@@ -130,11 +130,11 @@ struct ConfigWriteTests {
             core.state.workspaces[SpaceID("music")]?.mode
                 == .floating
         )
-        #expect(core.state.appRules["spotify"] == SpaceID("music"))
+        expectEqual(core.state.appRules["spotify"], SpaceID("music"))
         #expect(
             core.desktopBindings[.number(2)]?.names == ["Studio"]
         )
-        #expect(core.keys.icon(for: "resize") == "📐")
+        expectEqual(core.keys.icon(for: "resize"), "📐")
         let combo = KeyCombo.parse("alt+h")
         #expect(combo != nil)
         if let combo {
@@ -157,7 +157,7 @@ struct ConfigWriteTests {
         // first makes the round-trip lossless.
         core.applyProfileScopedState(from: config)
         let reloaded = core.loadGuiConfig()
-        #expect(reloaded == config)
+        expectEqual(reloaded, config)
     }
 
     @Test("deleting entries clears them on reload")
@@ -201,8 +201,8 @@ struct ConfigWriteTests {
         core.applyProfileScopedState(from: config)
         try core.persistProfile(named: "ratios", modes: nil)
         let saved = try core.profiles.read(name: "ratios")
-        #expect(saved.settings.bsp.splitRatioH == 1.0 / 3.0)
-        #expect(saved.settings.bsp.splitRatioV == 1.0 / 6.0)
+        expectEqual(saved.settings.bsp.splitRatioH, 1.0 / 3.0)
+        expectEqual(saved.settings.bsp.splitRatioV, 1.0 / 6.0)
         #expect(
             saved.settings.stack.masterRatio == 2.0 / 7.0
         )
@@ -240,7 +240,7 @@ struct ConfigWriteTests {
         #expect(core.isGuiManaged)
         #expect(core.guiConfigStore.exists)
         // Executed settings carried into the adopted state.
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 7)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 7)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .stack
         )

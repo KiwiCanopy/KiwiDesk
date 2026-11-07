@@ -110,9 +110,9 @@ struct HoverFocusStandDownTests {
         let core = try makeCore()
         let point = GeometryUtils.axPoint(try overW2(core))
         core.focusUnderRestingPointer(at: point, armedFocus: WindowID(2))
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
     }
 
     @Test("A rest just after a Desktop switch stands down")
@@ -121,7 +121,7 @@ struct HoverFocusStandDownTests {
         let point = GeometryUtils.axPoint(try overW2(core))
         core.lastDesktopSwitch = core.wallClock()
         core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
     }
 
     /// KiwiHub, a panel floating over every window, holds the key:
@@ -140,12 +140,12 @@ struct HoverFocusStandDownTests {
             )
         }
         core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         core.eventLoop.ownKeyWindow = {
             OwnKeyWindowReading(number: 900_001, isDialog: false)
         }
         core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
     }
 
     @Test("The focused window is still reached while its app is not")
@@ -154,7 +154,7 @@ struct HoverFocusStandDownTests {
         let overW1 = CGPoint(x: 20, y: 400)
         #expect(core.hoverTarget(at: overW1) == nil)
         core.frontmostPIDProvider = { 99 }
-        #expect(core.hoverTarget(at: overW1)?.id == WindowID(1))
+        expectEqual(core.hoverTarget(at: overW1)?.id, WindowID(1))
     }
 
     @Test("A full-screen window stands down")
@@ -181,8 +181,8 @@ struct HoverFocusStandDownTests {
         }
         core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
         let flight = try #require(core.raiseFlight)
-        #expect(flight.target == WindowID(2))
-        #expect(flight.leftPID == 11)
+        expectEqual(flight.target, WindowID(2))
+        expectEqual(flight.leftPID, 11)
     }
 
     /// The focused window under the pointer while another app is
@@ -195,7 +195,7 @@ struct HoverFocusStandDownTests {
             at: GeometryUtils.axPoint(CGPoint(x: 20, y: 400)),
             armedFocus: WindowID(1)
         )
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(core.raiseFlight == nil)
     }
 }

@@ -128,7 +128,7 @@ struct VisionMaskTests {
             CGPoint(x: 280, y: 180), CGPoint(x: 150, y: 150),
             CGPoint(x: 600, y: 500),
         ] {
-            #expect(path.contains(point) == walked.contains(point))
+            expectEqual(path.contains(point), walked.contains(point))
         }
     }
 
@@ -167,7 +167,7 @@ struct VisionMaskTests {
     @Test("the hole walk stops at the last clear window")
     func walkedCountStopsAtTheLastHole() {
         let r = CGRect(x: 1100, y: 100, width: 50, height: 50)
-        #expect(VisionMask.walkedCount([window(r), window(r)]) == 0)
+        expectEqual(VisionMask.walkedCount([window(r), window(r)]), 0)
         #expect(
             VisionMask.walkedCount([
                 window(r), window(r, clear: true), window(r), window(r),

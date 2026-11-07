@@ -48,7 +48,7 @@ struct TrackLearnedCapTests {
             minSize: 300,
             gap: 10
         )
-        #expect(plain == 3)
+        expectEqual(plain, 3)
         #expect(
             TrackLayout.geometricCap(
                 for: context,
@@ -208,6 +208,6 @@ struct TrackLearnedCapTests {
         // Two tracks: the second and third windows share the
         // overflow track's column instead of each taking one.
         #expect(f1.minX != f2.minX)
-        #expect(f2.minX == f3.minX)
+        expectEqual(f2.minX, f3.minX)
     }
 }

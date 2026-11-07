@@ -35,7 +35,7 @@ struct CoreInitPathTests {
     @Test("an explicit directory is taken verbatim")
     func explicitDirectoryWins() {
         let named = URL(fileURLWithPath: "/tmp/kiwi-init-probe")
-        #expect(KiwiCore.resolveConfigDirectory(named) == named)
+        expectEqual(KiwiCore.resolveConfigDirectory(named), named)
     }
 
     /// The machine-local half never follows the config folder,
@@ -46,7 +46,7 @@ struct CoreInitPathTests {
         let support = home.appendingPathComponent(
             "Library/Application Support/KiwiDesk"
         )
-        #expect(MachineLocation.directory == support)
+        expectEqual(MachineLocation.directory, support)
         #expect(
             MachineLocation.socketPath
                 == support.appendingPathComponent("KiwiDesk.sock").path
@@ -125,8 +125,8 @@ struct CoreInitPathTests {
         let config = root.appendingPathComponent("config")
         let machine = root.appendingPathComponent("machine")
         let resolved = KiwiCore.resolveDirectories(config, machine)
-        #expect(resolved.config == config)
-        #expect(resolved.machine == machine)
+        expectEqual(resolved.config, config)
+        expectEqual(resolved.machine, machine)
         #expect(FileManager.default.fileExists(atPath: machine.path))
         let manager = KiwiCore.makeProfileManager(config, machine)
         #expect(

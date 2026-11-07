@@ -81,7 +81,7 @@ struct KiwiVisionHoldExemptionTests {
         F.focus(core, F.other)
         #expect(core.vision.hold == nil)
         F.focus(core, extra)
-        #expect(core.vision.hold?.window == extra)
+        expectEqual(core.vision.hold?.window, extra)
     }
 
     @Test("KiwiDesk's own window lands clear")
@@ -101,8 +101,8 @@ struct KiwiVisionHoldExemptionTests {
         core.vision.onHold = { heard.append($0) }
         F.focus(core, F.stranger)
         core.updateVision()
-        #expect(heard == ["Stay here"])
-        #expect(core.visionReminder == "Stay here")
+        expectEqual(heard, ["Stay here"])
+        expectEqual(core.visionReminder, "Stay here")
     }
 
     @Test("a blank reminder shows the default")
@@ -113,7 +113,7 @@ struct KiwiVisionHoldExemptionTests {
         core.vision.onHold = { heard.append($0) }
         F.focus(core, F.stranger)
         #expect(heard == [nil])
-        #expect(core.visionReminder == "🥝 Keep the vision juicy 🥝")
+        expectEqual(core.visionReminder, "🥝 Keep the vision juicy 🥝")
     }
 
     @Test("at a delay of 0 nothing is heard")

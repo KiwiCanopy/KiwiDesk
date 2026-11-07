@@ -40,10 +40,10 @@ struct HeldSpaceRestoreTests {
     func memoryPlacesRememberedWindows() throws {
         let core = try dockedWithMemory()
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.profiles.currentName == "solo")
-        #expect(desk.members(core, 1) == desk.ids([10, 11]))
-        #expect(core.state.rememberedSpaces[away] == .departed(SpaceID(1)))
-        #expect(desk.members(core, 2) == desk.ids([13]))
+        expectEqual(core.profiles.currentName, "solo")
+        expectEqual(desk.members(core, 1), desk.ids([10, 11]))
+        expectEqual(core.state.rememberedSpaces[away], .departed(SpaceID(1)))
+        expectEqual(desk.members(core, 2), desk.ids([13]))
         // What `solo` never saw stays held; the emptied one retires.
         #expect(
             !core.state.heldSpaces.values.contains { $0.name == SpaceID(3) }
@@ -61,10 +61,10 @@ struct HeldSpaceRestoreTests {
         let core = try dockedWithMemory()
         core.handle(.displaysChanged([desk.builtIn]))
         core.handle(.displaysChanged([desk.builtIn, desk.dell]))
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(core.state.heldSpaces.isEmpty)
-        #expect(Set(desk.members(core, 3)) == Set(desk.ids([10, 11])))
-        #expect(desk.members(core, 4) == desk.ids([12]))
-        #expect(core.state.rememberedSpaces[away] == .departed(SpaceID(3)))
+        expectEqual(Set(desk.members(core, 3)), Set(desk.ids([10, 11])))
+        expectEqual(desk.members(core, 4), desk.ids([12]))
+        expectEqual(core.state.rememberedSpaces[away], .departed(SpaceID(3)))
     }
 }

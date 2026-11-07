@@ -58,7 +58,7 @@ struct ScrollExpiryTimerTests {
         defer { loop.stop() }
         for _ in 0..<3 {
             loop.arm(in: 0.01)
-            #expect(loop.fired.wait(timeout: .now() + 30) == .success)
+            expectEqual(loop.fired.wait(timeout: .now() + 30), .success)
         }
     }
 
@@ -69,6 +69,6 @@ struct ScrollExpiryTimerTests {
         defer { loop.stop() }
         loop.arm(in: 0.01)
         _ = loop.fired.wait(timeout: .now() + 30)
-        #expect(loop.fired.wait(timeout: .now() + 0.2) == .timedOut)
+        expectEqual(loop.fired.wait(timeout: .now() + 0.2), .timedOut)
     }
 }

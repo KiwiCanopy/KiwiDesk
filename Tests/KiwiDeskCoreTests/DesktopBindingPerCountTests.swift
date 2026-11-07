@@ -138,7 +138,7 @@ struct DesktopBindingPerCountTests {
         let core = try seeded(screens: 1)
         bind(core, "Dual")
         bind(core, "Laptop")
-        #expect(core.profiles.currentName == "Laptop")
+        expectEqual(core.profiles.currentName, "Laptop")
         let binding = try #require(
             core.desktopBindings[.identity(stamp)]
         )
@@ -150,7 +150,7 @@ struct DesktopBindingPerCountTests {
             try core.boundProfile(of: binding).get().profile.name == "Dual"
         )
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Dual")
+        expectEqual(core.profiles.currentName, "Dual")
     }
 
     /// No entry fits: the refusal carries every readable count,
@@ -175,13 +175,13 @@ struct DesktopBindingPerCountTests {
             Issue.record("expected .screenCount, got \(refusal)")
             return
         }
-        #expect(saved.map(\.name) == ["Laptop", "Dual"])
-        #expect(saved.map(\.count) == [1, 2])
-        #expect(connected == 3)
+        expectEqual(saved.map(\.name), ["Laptop", "Dual"])
+        expectEqual(saved.map(\.count), [1, 2])
+        expectEqual(connected, 3)
         let line = refusal.narrative(binding: binding)
         #expect(line.contains("'Laptop' for 1, 'Dual' for 2 screen(s)"))
         #expect(line.contains("3 connected"))
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
     }
 
     /// Two entries of one count — a profile re-saved at a
@@ -261,7 +261,7 @@ struct DesktopBindingPerCountTests {
             desktop: 1,
             reading: .init(name: "Laptop", setup: nil, over: "Other")
         )
-        #expect(verdict.verdict == over)
+        expectEqual(verdict.verdict, over)
     }
 
     /// A rename follows into the list, in memory and in the
@@ -300,21 +300,21 @@ struct DesktopBindingPerCountTests {
         record.bind(.init(name: "A1")) { counts[$0.name] }
         record.bind(.init(name: "C2")) { counts[$0.name] }
         record.bind(.init(name: "B1")) { counts[$0.name] }
-        #expect(record.names == ["C2", "B1"])
+        expectEqual(record.names, ["C2", "B1"])
         record.bind(.init(name: "Unsaved")) { counts[$0.name] }
         record.bind(.init(name: "Unsaved too")) { counts[$0.name] }
-        #expect(record.names == ["C2", "B1", "Unsaved too"])
+        expectEqual(record.names, ["C2", "B1", "Unsaved too"])
         // "Unsaved too" is saved at 1 screen: two on one count
         // until the next bind of either evicts the other.
         counts["Unsaved too"] = 1
         record.bind(.init(name: "B1")) { counts[$0.name] }
-        #expect(record.names == ["C2", "B1"])
+        expectEqual(record.names, ["C2", "B1"])
         record.relabel(nil, from: "C2", to: "Docked")
-        #expect(record.names == ["Docked", "B1"])
+        expectEqual(record.names, ["Docked", "B1"])
         counts["Docked"] = 2
         let stillBound = record.unbind(count: 2) { counts[$0.name] }
         #expect(!stillBound)
-        #expect(record.names == ["B1"])
+        expectEqual(record.names, ["B1"])
         let emptied = record.unbind(.pending("B1"))
         #expect(emptied)
         #expect(record.names.isEmpty)
@@ -330,7 +330,7 @@ struct DesktopBindingPerCountTests {
         pinTopology()
         let core = try seeded(screens: 1)
         bind(core, "Laptop")
-        #expect(core.profiles.currentName == "Laptop")
+        expectEqual(core.profiles.currentName, "Laptop")
         try FileManager.default.removeItem(
             at: core.profiles.directory
                 .appendingPathComponent("Laptop.json")
@@ -338,7 +338,7 @@ struct DesktopBindingPerCountTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
-        #expect(core.profiles.currentName == "Laptop")
+        expectEqual(core.profiles.currentName, "Laptop")
         #expect(!log.contains { $0.contains("no longer exist") })
         // The stand-down is for a live profile that FITS: with
         // the screens changed under it, the gate re-judges.

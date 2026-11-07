@@ -76,16 +76,16 @@ struct ScrollGestureDeadEndTests {
         let (core, session, bumps) = makeCore(mode, focus: WindowID(3))
         // Fingers left: the NEXT window, past the last.
         swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(3))
-        #expect(bumps().map(\.window) == [WindowID(3)])
-        #expect(bumps().map(\.direction) == [.right])
+        expectEqual(core.activeSpace?.focused, WindowID(3))
+        expectEqual(bumps().map(\.window), [WindowID(3)])
+        expectEqual(bumps().map(\.direction), [.right])
     }
 
     @Test("a step that moves bumps nothing")
     func movedIsSilent() {
         let (core, session, bumps) = makeCore("scrolling", focus: WindowID(2))
         swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         #expect(bumps().isEmpty)
     }
 
@@ -97,7 +97,7 @@ struct ScrollGestureDeadEndTests {
             focus: WindowID(1)
         )
         swipe(core, session, dx: 80)
-        #expect(bumps().map(\.direction) == [.left])
+        expectEqual(bumps().map(\.direction), [.left])
     }
 
     /// A long swipe asking for several windows past the end bumps
@@ -127,8 +127,8 @@ struct ScrollGestureDeadEndTests {
             )
         }
         // The first window moved; the next twenty had nowhere.
-        #expect(core.activeSpace?.focused == WindowID(3))
-        #expect(bumps().count == 1)
+        expectEqual(core.activeSpace?.focused, WindowID(3))
+        expectEqual(bumps().count, 1)
     }
 
     /// The arrow keys' own path: a floating focus on a row reaches
@@ -159,11 +159,11 @@ struct ScrollGestureDeadEndTests {
         var warps = 0
         gesture.pointerWarp = { _ in warps += 1 }
         swipe(gesture, session, dx: -80)
-        #expect(warps == 0)
+        expectEqual(warps, 0)
         #expect(
             gesture.activeSpace?.focused == keys.activeSpace?.focused
         )
-        #expect(bumps().count == keyBumps().count)
+        expectEqual(bumps().count, keyBumps().count)
         #expect(gesture.activeSpace?.focused != WindowID(3))
     }
 
@@ -190,10 +190,10 @@ struct ScrollGestureDeadEndTests {
         let (keys, _, _) = setUp()
         keys.execute("focus", args: [.string("right")])
         // The fixture reaches the tier at all: the keys land on it.
-        #expect(keys.activeSpace?.focused == WindowID(3))
+        expectEqual(keys.activeSpace?.focused, WindowID(3))
         let (gesture, session, bumps) = setUp()
         swipe(gesture, session, dx: -80)
-        #expect(gesture.activeSpace?.focused == WindowID(3))
+        expectEqual(gesture.activeSpace?.focused, WindowID(3))
         #expect(bumps().isEmpty)
     }
 }

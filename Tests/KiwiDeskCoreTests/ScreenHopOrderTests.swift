@@ -40,15 +40,15 @@ struct ScreenHopOrderTests {
 
     @Test("the nearest screen that way comes first")
     func nearestFirst() {
-        #expect(order(Self.w, .right) == [Self.c, Self.e])
-        #expect(order(Self.c, .right) == [Self.e, Self.w])
+        expectEqual(order(Self.w, .right), [Self.c, Self.e])
+        expectEqual(order(Self.c, .right), [Self.e, Self.w])
     }
 
     @Test("past the last screen the far side wraps, farthest first")
     func wrapsFarthestFirst() {
         // → from east lands on west; ↑ from north on south.
-        #expect(order(Self.e, .right) == [Self.w, Self.c])
-        #expect(order(Self.n, .up) == [Self.s, Self.c])
+        expectEqual(order(Self.e, .right), [Self.w, Self.c])
+        expectEqual(order(Self.n, .up), [Self.s, Self.c])
     }
 
     @Test("a diagonal screen is no neighbour")

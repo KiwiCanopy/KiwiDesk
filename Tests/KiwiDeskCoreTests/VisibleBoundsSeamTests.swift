@@ -54,7 +54,7 @@ struct VisibleBoundsSeamTests {
         ] {
             core.execute(verb, args: [.string("hidden")])
         }
-        #expect(core.tiler.settings.spaceBarStyle.visibility == .hidden)
+        expectEqual(core.tiler.settings.spaceBarStyle.visibility, .hidden)
         #expect(!core.tiler.settings.anyAppBarCanShow)
         // Pin the default this fixture reasons from, the rule
         // this change set wrote into §5: the pile threshold
@@ -88,7 +88,7 @@ struct VisibleBoundsSeamTests {
         let frames = core.tiler.calculatedFrames(
             state: core.state
         )
-        #expect(frames[WindowID(1)] == Self.display)
+        expectEqual(frames[WindowID(1)], Self.display)
     }
 
     @Test("The split lands at the injected rect's midpoint")
@@ -153,7 +153,7 @@ struct VisibleBoundsSeamTests {
         let inside = CGRect(x: 0, y: 0, width: 500, height: 900)
             .insetBy(dx: 2, dy: 2)
         let shown = [first, second].filter { inside.intersects($0) }
-        #expect(shown.count == 1)
+        expectEqual(shown.count, 1)
         #expect(shown.allSatisfy { abs($0.width - 500) < 1 })
     }
 }

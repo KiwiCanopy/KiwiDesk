@@ -31,8 +31,8 @@ private func makeTrackRow() -> StateCoordinator {
     for id in [d, c, b, a] {
         state.apply(.windowCreated(makeWindow(id)))
     }
-    #expect(state.workspaces[home]?.windows == [a, b, c, d])
-    #expect(state.workspaces[home]?.trackBreaks == [a, b, c, d])
+    expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+    expectEqual(state.workspaces[home]?.trackBreaks, [a, b, c, d])
     return state
 }
 
@@ -53,15 +53,15 @@ struct HandedBreakEnderTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a, b] }
         depart(&state, [b])
-        #expect(state.workspaces[home]?.handedBreaks == [c])
+        expectEqual(state.workspaces[home]?.handedBreaks, [c])
         state.forgetAway(b)
-        #expect(state.workspaces[home]?.handedBreaks == [])
-        #expect(state.workspaces[home]?.trackBreaks == [a, c])
+        expectEqual(state.workspaces[home]?.handedBreaks, [])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, c])
         depart(&state, [c])
-        #expect(state.departedSlots[c]?.trackBreak == .head)
+        expectEqual(state.departedSlots[c]?.trackBreak, .head)
         state.apply(.windowCreated(makeWindow(c)))
-        #expect(state.workspaces[home]?.windows == [a, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [a, c])
+        expectEqual(state.workspaces[home]?.windows, [a, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, c])
     }
 
     /// The promotion goes to the holder the record NAMES, never to
@@ -74,13 +74,13 @@ struct HandedBreakEnderTests {
         state.workspaces.withSpace(home) { $0.trackBreaks = [a, b] }
         depart(&state, [b, a, c, d])
         #expect(state.departedSlots[a]?.handedTo == nil)
-        #expect(state.departedSlots[c]?.trackBreak == .handed)
+        expectEqual(state.departedSlots[c]?.trackBreak, .handed)
         state.forgetAway(a)
-        #expect(state.departedSlots[c]?.trackBreak == .handed)
+        expectEqual(state.departedSlots[c]?.trackBreak, .handed)
         for id in [b, c, d] {
             state.apply(.windowCreated(makeWindow(id)))
         }
-        #expect(state.workspaces[home]?.trackBreaks == [b])
+        expectEqual(state.workspaces[home]?.trackBreaks, [b])
     }
 
     /// A holder that dropped the break at its own departure is
@@ -92,12 +92,12 @@ struct HandedBreakEnderTests {
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a, b, c])
         state.forgetAway(a)
-        #expect(state.departedSlots[b]?.trackBreak == .head)
-        #expect(state.departedSlots[c]?.trackBreak == .member)
+        expectEqual(state.departedSlots[b]?.trackBreak, .head)
+        expectEqual(state.departedSlots[c]?.trackBreak, .member)
         state.apply(.windowCreated(makeWindow(c)))
         state.apply(.windowCreated(makeWindow(b)))
-        #expect(state.workspaces[home]?.windows == [b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [b])
+        expectEqual(state.workspaces[home]?.windows, [b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [b])
     }
 
     /// The enders of a head's record, each promoting its holder
@@ -114,8 +114,8 @@ struct HandedBreakEnderTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a])
-        #expect(state.departedSlots[a]?.handedTo == b)
-        #expect(state.workspaces[home]?.handedBreaks == [b])
+        expectEqual(state.departedSlots[a]?.handedTo, b)
+        expectEqual(state.workspaces[home]?.handedBreaks, [b])
         state.workspaces.ensureSpace(SpaceID("2"))
         switch ender {
         case .redirect:
@@ -136,8 +136,8 @@ struct HandedBreakEnderTests {
         case .close:
             state.forgetAway(a)
         }
-        #expect(state.workspaces[home]?.handedBreaks == [])
-        #expect(state.workspaces[home]?.trackBreaks == [b])
+        expectEqual(state.workspaces[home]?.handedBreaks, [])
+        expectEqual(state.workspaces[home]?.trackBreaks, [b])
     }
 
     /// The same enders promote a holder that is AWAY, on its
@@ -147,9 +147,9 @@ struct HandedBreakEnderTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a, b])
-        #expect(state.departedSlots[b]?.trackBreak == .handed)
+        expectEqual(state.departedSlots[b]?.trackBreak, .handed)
         state.redirectDeparture(of: a, to: home)
-        #expect(state.departedSlots[b]?.trackBreak == .head)
+        expectEqual(state.departedSlots[b]?.trackBreak, .head)
         #expect(state.departedSlots[a] == nil)
     }
 
@@ -160,10 +160,10 @@ struct HandedBreakEnderTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a])
-        #expect(state.workspaces[home]?.trackBreaks == [b])
+        expectEqual(state.workspaces[home]?.trackBreaks, [b])
         state.apply(.appTerminated(pid: pid_t(b.raw)))
-        #expect(state.workspaces[home]?.windows == [c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [])
+        expectEqual(state.workspaces[home]?.windows, [c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [])
     }
 
     /// A link the head's return could not spend in a non-track
@@ -175,17 +175,17 @@ struct HandedBreakEnderTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a])
-        #expect(state.departedSlots[a]?.handedTo == b)
+        expectEqual(state.departedSlots[a]?.handedTo, b)
         state.workspaces.setMode(home, .bsp)
         state.apply(.windowCreated(makeWindow(a)))
         #expect(state.departedSlots[a]?.handedTo == nil)
         state.workspaces.setMode(home, .track)
-        #expect(state.workspaces[home]?.trackBreaks == [a, b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, b, c, d])
         state.apply(.windowDestroyed(a, wasMinimized: true))
-        #expect(state.workspaces[home]?.handedBreaks == [])
+        expectEqual(state.workspaces[home]?.handedBreaks, [])
         depart(&state, [b])
         state.apply(.windowCreated(makeWindow(b)))
-        #expect(state.workspaces[home]?.trackBreaks == [b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [b, c, d])
     }
 
     /// A restore re-files an away window `.restored`, so its
@@ -203,7 +203,7 @@ struct HandedBreakEnderTests {
         state.workspaces.setMode(home, .bsp)
         state.workspaces.setMode(home, .track)
         state.apply(.windowDestroyed(a, wasMinimized: true))
-        #expect(state.workspaces[home]?.handedBreaks == [])
+        expectEqual(state.workspaces[home]?.handedBreaks, [])
         depart(&state, [b])
         state.apply(.windowCreated(makeWindow(b)))
         #expect(
@@ -233,11 +233,11 @@ struct HandedBreakEnderTests {
         default:
             state.apply(.windowDestroyed(b, wasMinimized: true))
         }
-        #expect(state.workspaces[home]?.trackBreaks == [a, c])
-        #expect(state.workspaces[home]?.handedBreaks == [])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, c])
+        expectEqual(state.workspaces[home]?.handedBreaks, [])
         depart(&state, [c])
         state.apply(.windowCreated(makeWindow(c)))
-        #expect(state.workspaces[home]?.trackBreaks == [a, c])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, c])
     }
 
 }

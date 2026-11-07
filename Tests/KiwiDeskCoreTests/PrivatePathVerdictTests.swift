@@ -54,8 +54,8 @@ struct PrivatePathVerdictTests {
             PrivatePathVerify.currentSpaces({ _ in 2 }, in: spaces)
                 .label == "failed"
         )
-        #expect(PrivatePathVerify.connection(0).label == "failed")
-        #expect(PrivatePathVerify.connection(42).label == "answered")
+        expectEqual(PrivatePathVerify.connection(0).label, "failed")
+        expectEqual(PrivatePathVerify.connection(42).label, "answered")
     }
 
     @Test("the bridge's answers are held against the C reads")
@@ -120,7 +120,7 @@ struct PrivatePathVerdictTests {
             hosts: [WindowID(8): .init(space: 3, pid: 1, isUp: true)],
             shown: [3]
         )
-        #expect(PrivatePathVerify.census(listed, of: own).label == "works")
+        expectEqual(PrivatePathVerify.census(listed, of: own).label, "works")
         #expect(
             PrivatePathVerify.census(other, of: own).label
                 == "inconclusive"

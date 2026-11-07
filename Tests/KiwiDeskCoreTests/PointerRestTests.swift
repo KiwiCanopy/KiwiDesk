@@ -38,16 +38,16 @@ struct PointerRestTests {
         #expect(!rest.isListening, "not started yet")
         rest.start()
         #expect(rest.isListening)
-        #expect(counter.installs == 1)
+        expectEqual(counter.installs, 1)
         rest.setEnabled(true)
         #expect(counter.installs == 1, "no second monitor")
         rest.setEnabled(false)
         #expect(!rest.isListening)
-        #expect(counter.removals == 1)
+        expectEqual(counter.removals, 1)
         rest.setEnabled(true)
         rest.stop()
         #expect(!rest.isListening)
-        #expect(counter.removals == 2)
+        expectEqual(counter.removals, 2)
     }
 
     @Test("A move arms the dwell; the rest reports where it is")
@@ -61,7 +61,7 @@ struct PointerRestTests {
         #expect(rest.isArmed)
         rest.rest()
         #expect(!rest.isArmed)
-        #expect(rests == [CGPoint(x: 101, y: 50)])
+        expectEqual(rests, [CGPoint(x: 101, y: 50)])
     }
 
     @Test("Jitter around the last rest does not re-arm")
@@ -111,7 +111,7 @@ extension PointerRestTests {
         rest.moved(to: CGPoint(x: 10, y: 10))
         rest.location = { CGPoint(x: 60, y: 10) }
         rest.rest()
-        #expect(rests == 0)
+        expectEqual(rests, 0)
         #expect(rest.isArmed)
         rest.rest()
         #expect(rests == 1, "still where the re-arm heard it")
@@ -128,7 +128,7 @@ extension PointerRestTests {
         rest.moved(to: CGPoint(x: 10, y: 10))
         focus = WindowID(2)
         rest.rest()
-        #expect(armed == [WindowID(1)])
+        expectEqual(armed, [WindowID(1)])
     }
 }
 
@@ -148,6 +148,6 @@ extension PointerRestTests {
         rest.rest()
         #expect(armed.isEmpty, "re-armed, not fired")
         rest.rest()
-        #expect(armed == [WindowID(1)])
+        expectEqual(armed, [WindowID(1)])
     }
 }

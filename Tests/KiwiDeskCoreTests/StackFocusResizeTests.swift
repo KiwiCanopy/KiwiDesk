@@ -86,7 +86,7 @@ struct StackFocusResizeTests {
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(resolvedMaster(core) > before)
         // The global never moves for a no-override space (#458).
-        #expect(core.tiler.settings.stack.masterRatio == before)
+        expectEqual(core.tiler.settings.stack.masterRatio, before)
     }
 
     @Test("x with a stack window focused lowers the master ratio")
@@ -117,7 +117,7 @@ struct StackFocusResizeTests {
         // The column mate keeps its implicit even share.
         #expect(space?.stackWeights[WindowID(1)] == nil)
         // Config is untouched: weights are session state.
-        #expect(core.tiler.settings.stack.masterRatio == 0.6)
+        expectEqual(core.tiler.settings.stack.masterRatio, 0.6)
     }
 
     @Test("y shrinks below the even share on a negative delta")
@@ -144,7 +144,7 @@ struct StackFocusResizeTests {
         )
         #expect(!response.isSuccess)
         let space = core.state.workspaces[SpaceID("1")]
-        #expect(space?.stackWeights.isEmpty == true)
+        expectEqual(space?.stackWeights.isEmpty, true)
     }
 
     @Test("y with no focused window fails cleanly")
@@ -175,7 +175,7 @@ struct StackFocusResizeTests {
             args: [.string("x"), .number(500)]
         )
         #expect(response.isSuccess)
-        #expect(core.tiler.settings.stack.masterRatio == before)
+        expectEqual(core.tiler.settings.stack.masterRatio, before)
     }
 
     @Test("y works inside a multi-window master column")
@@ -225,8 +225,8 @@ struct StackFocusResizeTests {
             )
         }
         let space = core.state.workspaces[SpaceID("1")]
-        #expect(space?.runTails == [WindowID(2)])
-        #expect(space?.runHeads.isEmpty == true)
+        expectEqual(space?.runTails, [WindowID(2)])
+        expectEqual(space?.runHeads.isEmpty, true)
         #expect(space?.stackWeights[WindowID(2)] == nil)
         #expect((space?.runSizes[WindowID(2)]?.share ?? 0) > 0.5)
         #expect(

@@ -41,7 +41,7 @@ struct FixedSizeLatchTests {
         let core = makeTestCore()
         core.eventLoop.detectedFloating[id] = .tiles
         let events = recheck(core, .fixedSize)
-        #expect(core.eventLoop.detectedFloating[id] == .tiles)
+        expectEqual(core.eventLoop.detectedFloating[id], .tiles)
         #expect(events.isEmpty)
     }
 
@@ -50,7 +50,7 @@ struct FixedSizeLatchTests {
         let core = makeTestCore()
         core.eventLoop.detectedFloating[id] = .floats(.fixedSize)
         let events = recheck(core, .fixedSize)
-        #expect(core.eventLoop.detectedFloating[id] == .floats(.fixedSize))
+        expectEqual(core.eventLoop.detectedFloating[id], .floats(.fixedSize))
         #expect(events.isEmpty)
     }
 }

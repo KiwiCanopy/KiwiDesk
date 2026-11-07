@@ -84,9 +84,9 @@ struct KiwiVisionLensGestureTests {
     )
     func swipeSkips(mode: String) {
         let (core, session) = makeCore(mode)
-        #expect(swipeNext(core, session) == WindowID(2))
+        expectEqual(swipeNext(core, session), WindowID(2))
         core.setKiwiVision(.lens("Writing"))
-        #expect(swipeNext(core, session) == WindowID(3))
+        expectEqual(swipeNext(core, session), WindowID(3))
     }
 
     /// The gesture follows the same switch as the keys (ruling 45).
@@ -97,6 +97,6 @@ struct KiwiVisionLensGestureTests {
     func switchOffSkipsNothing(mode: String) {
         let (core, session) = makeCore(mode, keepFocus: false)
         core.setKiwiVision(.lens("Writing"))
-        #expect(swipeNext(core, session) == WindowID(2))
+        expectEqual(swipeNext(core, session), WindowID(2))
     }
 }

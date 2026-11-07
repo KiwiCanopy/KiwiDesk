@@ -53,7 +53,7 @@ struct EmptySwitchYieldVisibilityTests {
         var yields = 0
         core.desktopFocusYield = { yields += 1 }
         core.execute("focus_space", args: [.string("2")])
-        #expect(yields == 1)
+        expectEqual(yields, 1)
     }
 
     @Test("One drawn float beside an undrawn one stands it down")
@@ -62,6 +62,6 @@ struct EmptySwitchYieldVisibilityTests {
         var yields = 0
         core.desktopFocusYield = { yields += 1 }
         core.execute("focus_space", args: [.string("2")])
-        #expect(yields == 0)
+        expectEqual(yields, 0)
     }
 }

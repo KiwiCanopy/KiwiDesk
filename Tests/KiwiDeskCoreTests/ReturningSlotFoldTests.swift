@@ -26,7 +26,7 @@ private func makeDepartedRow() -> StateCoordinator {
         state.apply(.windowCreated(makeWindow(id)))
         state.apply(.windowFocused(id))
     }
-    #expect(state.workspaces[home]?.windows == [a, b, c, d])
+    expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
     for id in [a, b, c, d] {
         state.apply(.windowDestroyed(id, wasMinimized: false))
     }
@@ -38,7 +38,7 @@ struct ReturningSlotFoldTests {
     @Test("the departure records each window's slot")
     func departureRecordsSlots() {
         let state = makeDepartedRow()
-        #expect(state.departedRanks == [a: 0, b: 1, c: 2, d: 3])
+        expectEqual(state.departedRanks, [a: 0, b: 1, c: 2, d: 3])
     }
 
     @Test("a scrambled re-track rebuilds the order it left")
@@ -47,7 +47,7 @@ struct ReturningSlotFoldTests {
         for id in [d, b, c, a] {
             state.apply(.windowCreated(makeWindow(id)))
         }
-        #expect(state.workspaces[home]?.windows == [a, b, c, d])
+        expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
     }
 
     /// The rank insertion, not the index: with only `d` back, `c`
@@ -57,7 +57,7 @@ struct ReturningSlotFoldTests {
         var state = makeDepartedRow()
         state.apply(.windowCreated(makeWindow(d)))
         state.apply(.windowCreated(makeWindow(c)))
-        #expect(state.workspaces[home]?.windows == [c, d])
+        expectEqual(state.workspaces[home]?.windows, [c, d])
     }
 
     @Test("a member with no rank is passed over")
@@ -90,7 +90,7 @@ struct ReturningSlotFoldTests {
         }
         state.apply(.windowCreated(makeWindow(b)))
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.windows == [stayer, a, b])
+        expectEqual(state.workspaces[home]?.windows, [stayer, a, b])
     }
 
     /// Ranks are as fresh as the space's last departure: a row
@@ -105,7 +105,7 @@ struct ReturningSlotFoldTests {
         state.workspaces.withSpace(home) { $0.windows = [b, a, c, d] }
         state.apply(.windowDestroyed(a, wasMinimized: false))
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.windows == [b, a, c, d])
+        expectEqual(state.workspaces[home]?.windows, [b, a, c, d])
     }
 
     @Test("a minimize records no slot")
@@ -127,7 +127,7 @@ struct ReturningSlotFoldTests {
     func rekeyCarriesTheSlot() {
         var state = makeDepartedRow()
         state.apply(.windowRekeyed(c, WindowID(9)))
-        #expect(state.departedSlots[WindowID(9)]?.rank == 2)
+        expectEqual(state.departedSlots[WindowID(9)]?.rank, 2)
         #expect(state.departedSlots[c] == nil)
     }
 }

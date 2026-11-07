@@ -151,6 +151,6 @@ struct EventBundleIDTests {
         core.eventLoop.onEvent(
             .windowCreated(window(12, bundleID: nil))
         )
-        #expect(lua.global("created_bundle") == .string(""))
+        expectEqual(lua.global("created_bundle"), .string(""))
     }
 }

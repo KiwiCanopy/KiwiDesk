@@ -97,9 +97,9 @@ struct DesktopBindingScopeGateTests {
         pinTopology()
         let core = try seeded()
         _ = bind(core, "Starter")
-        #expect(core.profiles.currentName == "Starter")
+        expectEqual(core.profiles.currentName, "Starter")
         _ = bind(core, "Vision", screens: here)
-        #expect(core.profiles.currentName == "Vision")
+        expectEqual(core.profiles.currentName, "Vision")
         let reading = try #require(
             core.mainDesktopBinding(in: snapshot)
                 .flatMap(core.boundReading(of:))
@@ -118,13 +118,13 @@ struct DesktopBindingScopeGateTests {
         pinTopology()
         let core = try seeded()
         _ = bind(core, "Starter")
-        #expect(core.profiles.currentName == "Starter")
+        expectEqual(core.profiles.currentName, "Starter")
         let key = try #require(snapshot.mainCurrentKey)
         core.desktopBindings[key]?.bind(
             .init(name: "Vision", setup: here)
         ) { _ in 1 }
         core.applyDesktopBinding(in: snapshot)
-        #expect(core.profiles.currentName == "Vision")
+        expectEqual(core.profiles.currentName, "Vision")
         // Live AND the pick: stands down with no file read.
         try FileManager.default.removeItem(
             at: core.profiles.directory
@@ -224,7 +224,7 @@ struct DesktopBindingScopeGateTests {
         defer { reset() }
         pinTopology()
         let core = try seeded()
-        #expect(bind(core, "Vision", screens: here) == .ok())
+        expectEqual(bind(core, "Vision", screens: here), .ok())
         #expect(
             core.desktopBindings[.identity(stamp)]?.entries
                 .map { [$0.name] + ($0.setup ?? []) } == [["Vision"] + here]

@@ -83,8 +83,8 @@ struct FloatingModeRingTests {
         seed(core, mode: .floating)
         let style = core.tiler.settings.borderStyle
         let drawn = rings(core)
-        #expect(drawn[WindowID(1)] == style.focusedColor)
-        #expect(drawn[WindowID(2)] == style.unfocusedColor)
+        expectEqual(drawn[WindowID(1)], style.focusedColor)
+        expectEqual(drawn[WindowID(2)], style.unfocusedColor)
     }
 
     @Test("The same two windows under bsp both wear a ring")
@@ -93,8 +93,8 @@ struct FloatingModeRingTests {
         seed(core, mode: .bsp)
         let style = core.tiler.settings.borderStyle
         let drawn = rings(core)
-        #expect(drawn[WindowID(1)] == style.focusedColor)
-        #expect(drawn[WindowID(2)] == style.unfocusedColor)
+        expectEqual(drawn[WindowID(1)], style.focusedColor)
+        expectEqual(drawn[WindowID(2)], style.unfocusedColor)
     }
 
     /// The flag arm: a flag-float on a bsp space rings unfocused
@@ -105,7 +105,7 @@ struct FloatingModeRingTests {
         seed(core, mode: .bsp)
         core.state.setFloating(WindowID(2), true)
         let style = core.tiler.settings.borderStyle
-        #expect(rings(core)[WindowID(2)] == style.unfocusedColor)
+        expectEqual(rings(core)[WindowID(2)], style.unfocusedColor)
     }
 
     /// A tiled sticky homed elsewhere renders into the floating
@@ -119,7 +119,7 @@ struct FloatingModeRingTests {
         core.state.windows.upsert(window(50, sticky: .global))
         core.state.workspaces.add(WindowID(50), to: "2")
         let style = core.tiler.settings.borderStyle
-        #expect(rings(core)[WindowID(50)] == style.unfocusedColor)
+        expectEqual(rings(core)[WindowID(50)], style.unfocusedColor)
     }
 
     /// Monocle stays focused-only (#278): only one window shows.

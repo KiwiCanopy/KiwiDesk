@@ -67,7 +67,7 @@ struct AppBarLandingTests {
             strip: CGRect(x: 0, y: 0, width: 300, height: 30),
             style: AppBarLook()
         )
-        #expect(runMoves == [false])
+        expectEqual(runMoves, [false])
         // The same slot again travels, as a scroll-follow does.
         runMoves = []
         overlay.show(
@@ -76,7 +76,7 @@ struct AppBarLandingTests {
             strip: CGRect(x: 0, y: 0, width: 300, height: 30),
             style: AppBarLook()
         )
-        #expect(runMoves == [true])
+        expectEqual(runMoves, [true])
     }
 
     /// Its items snap too: a re-centred row gliding inside the

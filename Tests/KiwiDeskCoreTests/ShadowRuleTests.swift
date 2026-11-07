@@ -36,14 +36,14 @@ struct ShadowRuleTests {
     @Test("a button or a child is content, whatever else failed")
     func contentNeedsOneAnswer() {
         #expect(ShellReading.of(button: true, children: nil) == .furnished)
-        #expect(ShellReading.of(button: true, children: 0) == .furnished)
-        #expect(ShellReading.of(button: false, children: 3) == .furnished)
+        expectEqual(ShellReading.of(button: true, children: 0), .furnished)
+        expectEqual(ShellReading.of(button: false, children: 3), .furnished)
         #expect(ShellReading.of(button: nil, children: 3) == .furnished)
     }
 
     @Test("a shell needs both reads answered")
     func shellNeedsBothAnswers() {
-        #expect(ShellReading.of(button: false, children: 0) == .shell)
+        expectEqual(ShellReading.of(button: false, children: 0), .shell)
         #expect(ShellReading.of(button: nil, children: 0) == .unread)
         #expect(ShellReading.of(button: false, children: nil) == .unread)
         #expect(ShellReading.of(button: nil, children: nil) == .unread)
@@ -58,11 +58,11 @@ struct ShadowRuleTests {
     func titleChildIsNoContent() {
         let title = AXUIElementCreateApplication(900_101)
         let content = AXUIElementCreateApplication(900_102)
-        #expect(AXHelper.contentChildren([title], title: title) == 0)
+        expectEqual(AXHelper.contentChildren([title], title: title), 0)
         #expect(
             AXHelper.contentChildren([title, content], title: title) == 1
         )
-        #expect(AXHelper.contentChildren([content], title: title) == 1)
+        expectEqual(AXHelper.contentChildren([content], title: title), 1)
         #expect(AXHelper.contentChildren([title], title: nil) == 1)
         #expect(
             AXHelper.contentChildren([title], title: kCFNull) == 1

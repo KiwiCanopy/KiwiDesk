@@ -47,7 +47,7 @@ struct MachineConfigTests {
         let fields = Set(fieldNames(MachineConfig()))
             .union(fieldNames(DesktopBindingsFile()))
             .subtracting(["format"])
-        #expect(fields == GuiConfig.machineLocalFields)
+        expectEqual(fields, GuiConfig.machineLocalFields)
         let gui = Set(fieldNames(GuiConfig()))
         #expect(GuiConfig.machineLocalFields.isSubset(of: gui))
     }
@@ -74,7 +74,7 @@ struct MachineConfigTests {
         try store.saveIncludingBindings(remembering)
         #expect(try root(store.url)["desktop_spaces"] == nil)
         #expect(try root(store.machine.url)["desktop_spaces"] != nil)
-        #expect(store.load()?.desktopSpaces == remembering.desktopSpaces)
+        expectEqual(store.load()?.desktopSpaces, remembering.desktopSpaces)
         #expect(try root(store.url)["profile_bindings"] == nil)
         #expect(try root(store.bindingsFile.url)["profile_bindings"] != nil)
         #expect(
@@ -114,10 +114,10 @@ struct MachineConfigTests {
         let store = store(dir)
         try writeLegacy(remembering, to: store)
         let loaded = try #require(store.load())
-        #expect(loaded.desktopSpaces == remembering.desktopSpaces)
+        expectEqual(loaded.desktopSpaces, remembering.desktopSpaces)
         let gui = try root(store.url)
         #expect(gui["desktop_spaces"] == nil)
-        #expect(gui["format"] as? Int == GuiConfig.currentFormat)
+        expectEqual(gui["format"] as? Int, GuiConfig.currentFormat)
         #expect(
             store.machine.load().desktopSpaces
                 == remembering.desktopSpaces
@@ -135,7 +135,7 @@ struct MachineConfigTests {
         own.desktopSpaces = [.identity(stamp): SpaceID("9")]
         try store.machine.save(own, backups: nil)
         try writeLegacy(remembering, to: store)
-        #expect(store.load()?.desktopSpaces == own.desktopSpaces)
+        expectEqual(store.load()?.desktopSpaces, own.desktopSpaces)
     }
 
     /// A carry that cannot land must not let the migration strip
@@ -154,7 +154,7 @@ struct MachineConfigTests {
         try Data(#"{"format":999}"#.utf8).write(to: store.machine.url)
         let loaded = try #require(store.load())
         // Composed in memory, so the session still has it.
-        #expect(loaded.desktopSpaces == remembering.desktopSpaces)
+        expectEqual(loaded.desktopSpaces, remembering.desktopSpaces)
         #expect(try root(store.url)["desktop_spaces"] != nil)
         // A save refuses before the shared file is rewritten.
         #expect(throws: NewerFormatOnDisk.self) {
@@ -189,7 +189,7 @@ struct MachineConfigTests {
             )
         }
         let loaded = try #require(store.load())
-        #expect(loaded.desktopSpaces == own.desktopSpaces)
+        expectEqual(loaded.desktopSpaces, own.desktopSpaces)
         #expect(try root(store.url)["desktop_spaces"] != nil)
         #expect(throws: (any Error).self) { try store.save(loaded) }
         #expect(try root(store.url)["desktop_spaces"] != nil)
@@ -224,7 +224,7 @@ struct MachineConfigTests {
         let migrated = try #require(
             ConfigMigration.migrated(Data(legacy.utf8))
         )
-        #expect(String(decoding: migrated, as: UTF8.self) == current)
+        expectEqual(String(decoding: migrated, as: UTF8.self), current)
     }
 
     /// Another Mac's memory never travels: an old backup's copy is
@@ -249,6 +249,6 @@ struct MachineConfigTests {
         )
         let config = try #require(out["config"] as? [String: Any])
         #expect(config["desktop_spaces"] == nil)
-        #expect(config["spaces"] as? [String] == ["1"])
+        expectEqual(config["spaces"] as? [String], ["1"])
     }
 }

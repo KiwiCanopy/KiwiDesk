@@ -197,7 +197,7 @@ struct DuplicateSpaceChordMigrationTests {
                 Data(before.utf8)
             )
         )
-        #expect(String(decoding: out, as: UTF8.self) == file(keep))
+        expectEqual(String(decoding: out, as: UTF8.self), file(keep))
     }
 
     @Test("each shape stands down at its own floor")

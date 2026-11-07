@@ -128,9 +128,9 @@ struct ReconcileOffMainTests {
         #expect(box.focusReads == 0, "focus read inline")
         #expect(box.focused.isEmpty, "reported inline")
         box.drain()
-        #expect(box.listReads == 1)
-        #expect(box.focusReads == 1)
-        #expect(box.focused == [id])
+        expectEqual(box.listReads, 1)
+        expectEqual(box.focusReads, 1)
+        expectEqual(box.focused, [id])
     }
 
     @Test("an activation's reconcile lands after its read")
@@ -139,7 +139,7 @@ struct ReconcileOffMainTests {
         loop.appActivated(app(pid), launchedAt: nil)
         #expect(box.destroyed.isEmpty, "reconciled inline")
         box.drain()
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("the app left is reconciled off the main actor too")
@@ -149,7 +149,7 @@ struct ReconcileOffMainTests {
         loop.appActivated(app(other), launchedAt: nil)
         #expect(box.listReads == 0, "read inline")
         box.drain()
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a focus change reads the list off the main actor")
@@ -163,7 +163,7 @@ struct ReconcileOffMainTests {
         #expect(box.listReads == 0, "read inline")
         #expect(box.destroyed.isEmpty, "reconciled inline")
         box.drain()
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 
     @Test("a window tracked during the read stays tracked")
@@ -176,7 +176,7 @@ struct ReconcileOffMainTests {
         let late = WindowID(22)
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.drain()
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
         #expect(loop.elements[pid]?[late] != nil)
     }
 
@@ -194,7 +194,7 @@ struct ReconcileOffMainTests {
         #expect(box.focused.isEmpty)
         // The activation's own read had landed: it settled
         // tracking, so no second read is asked.
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 
     @Test("a later activation supersedes a waiting report")
@@ -233,7 +233,7 @@ struct ReconcileOffMainTests {
         loop.appActivated(app(pid), launchedAt: nil)
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.drain()
-        #expect(box.focused == [late])
+        expectEqual(box.focused, [late])
     }
 }
 
@@ -256,7 +256,7 @@ struct PrefetchedWindowsFlightTests {
             live: &live,
             appeared: &appeared
         )
-        #expect(live == [WindowID(2)])
+        expectEqual(live, [WindowID(2)])
     }
 
     @Test("a window gone during the read is not re-adopted")

@@ -25,14 +25,14 @@ struct WindowRekeyTests {
         )
         space.runSizes[old] = RunSize(share: 0.6, zone: 1)
         space.rekey(old, to: new)
-        #expect(space.windows == [WindowID(1), new, WindowID(3)])
-        #expect(space.runSizes == [new: RunSize(share: 0.6, zone: 1)])
-        #expect(space.focused == new)
-        #expect(space.stackWeights[new] == 2.0)
+        expectEqual(space.windows, [WindowID(1), new, WindowID(3)])
+        expectEqual(space.runSizes, [new: RunSize(share: 0.6, zone: 1)])
+        expectEqual(space.focused, new)
+        expectEqual(space.stackWeights[new], 2.0)
         #expect(space.stackWeights[old] == nil)
         #expect(space.trackBreaks.contains(new))
         #expect(!space.trackBreaks.contains(old))
-        #expect(space.trackWeights[new] == 1.5)
+        expectEqual(space.trackWeights[new], 1.5)
         #expect(space.trackWeights[old] == nil)
     }
 
@@ -40,7 +40,7 @@ struct WindowRekeyTests {
     func spaceRekeyNoOp() {
         var space = Space(id: SpaceID(1), windows: [WindowID(1)])
         space.rekey(old, to: new)
-        #expect(space.windows == [WindowID(1)])
+        expectEqual(space.windows, [WindowID(1)])
         #expect(!space.windows.contains(new))
     }
 
@@ -52,7 +52,7 @@ struct WindowRekeyTests {
             focused: WindowID(1)
         )
         space.rekey(old, to: new)
-        #expect(space.focused == WindowID(1))
+        expectEqual(space.focused, WindowID(1))
     }
 
     @Test("withID preserves every field but the id")
@@ -79,7 +79,7 @@ struct WindowRekeyTests {
         // changed field below (silent-data-loss guard, AGENTS.md §5).
         expectAllChanged(window, from: base)
         let renamed = window.withID(new)
-        #expect(changedFields(renamed, from: window) == ["id"])
+        expectEqual(changedFields(renamed, from: window), ["id"])
     }
 
     @Test("WindowManager.rekey moves the entry under the new id")
@@ -90,8 +90,8 @@ struct WindowRekeyTests {
         )
         manager.rekey(old, to: new)
         #expect(manager[old] == nil)
-        #expect(manager[new]?.pid == 7)
-        #expect(manager.count == 1)
+        expectEqual(manager[new]?.pid, 7)
+        expectEqual(manager.count, 1)
     }
 
     @Test("apply(.windowRekeyed) swaps the id end to end")
@@ -109,9 +109,9 @@ struct WindowRekeyTests {
         )
         state.apply(.windowRekeyed(old, new))
         #expect(state.windows[old] == nil)
-        #expect(state.windows[new]?.pid == 7)
+        expectEqual(state.windows[new]?.pid, 7)
         let space = state.workspaces[SpaceID(1)]
-        #expect(space?.windows == [WindowID(1), new])
-        #expect(space?.focused == new)
+        expectEqual(space?.windows, [WindowID(1), new])
+        expectEqual(space?.focused, new)
     }
 }

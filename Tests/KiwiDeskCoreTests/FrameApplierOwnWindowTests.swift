@@ -46,9 +46,9 @@ struct FrameApplierOwnWindowTests {
         let moves = Moves()
         let applier = makeApplier(pid: getpid(), moves)
         applier.applyInstant(w, frame, setSize: false)
-        #expect(moves.all.count == 1)
-        #expect(moves.all.first?.1 == frame)
-        #expect(moves.all.first?.2 == false)
+        expectEqual(moves.all.count, 1)
+        expectEqual(moves.all.first?.1, frame)
+        expectEqual(moves.all.first?.2, false)
     }
 
     /// The AppKit move stamps its own echo after the set, as the
@@ -87,7 +87,7 @@ struct FrameApplierOwnWindowTests {
         for _ in 0..<500 where moves.all.isEmpty {
             try await Task.sleep(for: .milliseconds(10))
         }
-        #expect(moves.all.count == 1)
-        #expect(moves.all.first?.2 == true)
+        expectEqual(moves.all.count, 1)
+        expectEqual(moves.all.first?.2, true)
     }
 }

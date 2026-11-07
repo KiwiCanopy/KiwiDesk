@@ -79,12 +79,12 @@ struct SpaceBarInactiveContentTests {
 
     @Test("Apps is the default and collapses nothing")
     func appsIsTheDefault() throws {
-        #expect(SpaceBarStyle().inactiveContent == .apps)
+        expectEqual(SpaceBarStyle().inactiveContent, .apps)
         let built = items(seededCore(), .apps)
         let other = try #require(built[SpaceID("2")])
         #expect(other.collapse == nil)
         // The floating Mail closes the chip (#1826).
-        #expect(other.apps.map(\.name) == ["Mail", "Web", "Mail"])
+        expectEqual(other.apps.map(\.name), ["Mail", "Web", "Mail"])
     }
 
     @Test("Window count keeps the identifier and the count")
@@ -92,16 +92,16 @@ struct SpaceBarInactiveContentTests {
         let built = items(seededCore(), .count)
         let other = try #require(built[SpaceID("2")])
         // The peek's ids are `SpaceBarCollapsedPeekTests`'.
-        #expect(other.collapse?.windows == 3)
+        expectEqual(other.collapse?.windows, 3)
         // The glyphs and their state badges go; the count is
         // windows, and `overflow` keeps its one meaning.
         #expect(other.apps.isEmpty)
-        #expect(other.after.windows.count == 0)
+        expectEqual(other.after.windows.count, 0)
         let empty = try #require(built[SpaceID("3")])
-        #expect(empty.collapse == .init(windows: 0))
+        expectEqual(empty.collapse, .init(windows: 0))
         let shown = try #require(built[SpaceID("1")])
         #expect(shown.collapse == nil)
-        #expect(shown.apps.map(\.name) == ["Notes"])
+        expectEqual(shown.apps.map(\.name), ["Notes"])
     }
 
     /// The disc stays a disc past one digit; the label keeps the
@@ -110,7 +110,7 @@ struct SpaceBarInactiveContentTests {
     func discCapsItsText() {
         typealias Collapse = SpaceBarItemView.Collapse
         let cap = Collapse.discCap
-        #expect(Collapse(windows: 1).discText == "1")
+        expectEqual(Collapse(windows: 1).discText, "1")
         #expect(Collapse(windows: cap).discText == "\(cap)")
         #expect(Collapse(windows: cap + 1).discText == "\(cap)+")
     }
@@ -140,8 +140,8 @@ struct SpaceBarInactiveContentTests {
             ),
             drawn: .init(window: 1..<3, count: 4)
         ).collapsed(to: .count)
-        #expect(item.collapse?.windows == 6)
-        #expect(item.after.windows.count == 0)
+        expectEqual(item.collapse?.windows, 6)
+        expectEqual(item.after.windows.count, 0)
         #expect(!item.after.holdsFocus)
         #expect(item.before.windows.isEmpty)
         // A collapsed chip draws no strip, so the pointer on it
@@ -156,8 +156,8 @@ struct SpaceBarInactiveContentTests {
         let built = items(seededCore(), .count)
         let once = try #require(built[SpaceID("2")])
         let twice = once.collapsed(to: .count)
-        #expect(twice.collapse == once.collapse)
-        #expect(twice.collapse?.windows == 3)
+        expectEqual(twice.collapse, once.collapse)
+        expectEqual(twice.collapse?.windows, 3)
     }
 
     /// The layer item is never a Space, so it never collapses.
@@ -194,7 +194,7 @@ struct SpaceBarInactiveContentTests {
             items(core, .count, display: dell)[SpaceID("3")]
         )
         #expect(away.collapse == nil)
-        #expect(away.apps.map(\.name) == ["Note"])
+        expectEqual(away.apps.map(\.name), ["Note"])
     }
 
     @Test("A switch glides the items only where others collapse")

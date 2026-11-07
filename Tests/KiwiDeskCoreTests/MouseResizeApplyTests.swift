@@ -61,9 +61,9 @@ struct MouseResizeApplyTests {
         )
         let bsp = resolvedBsp(core)
         #expect(abs(bsp.splitRatioH - 0.6) < 1e-9)
-        #expect(bsp.splitRatioV == 0.5)
+        expectEqual(bsp.splitRatioV, 0.5)
         // The stored global is untouched (#458).
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
+        expectEqual(core.tiler.settings.bsp.splitRatioH, 0.5)
     }
 
     @Test("bspRatioV writes only the V ratio")
@@ -79,7 +79,7 @@ struct MouseResizeApplyTests {
         )
         let bsp = resolvedBsp(core)
         #expect(abs(bsp.splitRatioV - 0.6) < 1e-9)
-        #expect(bsp.splitRatioH == 0.5)
+        expectEqual(bsp.splitRatioH, 0.5)
     }
 
     @Test("bspRatioH drag caps at the effective range (#383)")

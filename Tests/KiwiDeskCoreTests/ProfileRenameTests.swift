@@ -32,12 +32,12 @@ struct ProfileRenameTests {
         save(core, "desk")
         let declared = core.currentDeclaredSpaces()
         try core.renameProfile(from: "desk", to: "studio")
-        #expect(core.profiles.list() == ["studio"])
-        #expect(core.profiles.currentName == "studio")
+        expectEqual(core.profiles.list(), ["studio"])
+        expectEqual(core.profiles.currentName, "studio")
         // The name and the declared Spaces are ONE value, so a
         // rename moves the name and keeps the Spaces — it cannot
         // drop them or leave the old name answering (#1245).
-        #expect(core.currentDeclaredSpaces() == declared)
+        expectEqual(core.currentDeclaredSpaces(), declared)
         #expect(declared != nil)
     }
 
@@ -46,9 +46,9 @@ struct ProfileRenameTests {
         let core = makeCore()
         save(core, "work")
         try core.renameProfile(from: "work", to: "Work")
-        #expect(core.profiles.list() == ["Work"])
+        expectEqual(core.profiles.list(), ["Work"])
         let renamed = try core.profiles.read(name: "Work")
-        #expect(renamed.name == "Work")
+        expectEqual(renamed.name, "Work")
     }
 
     @Test("rename onto an existing profile is rejected")
@@ -59,7 +59,7 @@ struct ProfileRenameTests {
         #expect(throws: ProfileError.self) {
             try core.renameProfile(from: "a", to: "b")
         }
-        #expect(core.profiles.list() == ["a", "b"])
+        expectEqual(core.profiles.list(), ["a", "b"])
     }
 
     @Test("case-variant collision is rejected, not clobbered")
@@ -70,7 +70,7 @@ struct ProfileRenameTests {
         #expect(throws: ProfileError.self) {
             try core.renameProfile(from: "A", to: "b")
         }
-        #expect(core.profiles.list() == ["A", "B"])
+        expectEqual(core.profiles.list(), ["A", "B"])
     }
 
     @Test("same-name rename is a no-op")
@@ -78,8 +78,8 @@ struct ProfileRenameTests {
         let core = makeCore()
         save(core, "desk")
         try core.renameProfile(from: "desk", to: "desk")
-        #expect(core.profiles.list() == ["desk"])
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.list(), ["desk"])
+        expectEqual(core.profiles.currentName, "desk")
     }
 
     /// The suite's bindings, spelled the way it reads them:
@@ -150,7 +150,7 @@ struct ProfileRenameTests {
                 .mapValues(\.names) == bound((2, "studio")).mapValues(\.names)
         )
         // The runtime map follows the edited key alone (#2324).
-        #expect(core.desktopBindings[.number(3)]?.names == ["luaOnly"])
+        expectEqual(core.desktopBindings[.number(3)]?.names, ["luaOnly"])
     }
 
     /// In a hybrid config the runtime map is init.lua's: a rename
@@ -186,8 +186,8 @@ struct ProfileRenameTests {
         #expect(throws: ProfileError.self) {
             try core.renameProfile(from: "desk", to: "a/b")
         }
-        #expect(core.profiles.list() == ["desk"])
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.list(), ["desk"])
+        expectEqual(core.profiles.currentName, "desk")
     }
 
     @Test("rename of a missing profile throws")
@@ -218,7 +218,7 @@ struct ProfileRenameTests {
         core.desktopBindings = bound((2, "other"))
         try core.renameProfile(from: "desk", to: "studio")
         let sidecar = core.guiConfigStore.load()
-        #expect(sidecar?.profileBindings == bound((2, "other")))
-        #expect(sidecar?.spaces == [SpaceID("zed")])
+        expectEqual(sidecar?.profileBindings, bound((2, "other")))
+        expectEqual(sidecar?.spaces, [SpaceID("zed")])
     }
 }

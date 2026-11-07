@@ -67,7 +67,7 @@ struct MinimizeOrderTests {
             state.lastMinimized(bundleID: "com.test.a")
                 == WindowID(1)
         )
-        #expect(state.minimizeOrder.count == 2)
+        expectEqual(state.minimizeOrder.count, 2)
     }
 
     @Test("Each app answers with its own window")
@@ -168,7 +168,7 @@ struct MinimizeOrderTests {
             state.lastMinimized(bundleID: "com.test.a")
                 == WindowID(9)
         )
-        #expect(state.minimizeOrder.count == 1)
+        expectEqual(state.minimizeOrder.count, 1)
     }
 
     /// The one route to a live `windows[id]` that does NOT pass
@@ -182,13 +182,13 @@ struct MinimizeOrderTests {
         var state = StateCoordinator()
         state.apply(.windowCreated(window(1)))
         minimize(&state, 1)
-        #expect(state.minimizeOrder.count == 1)
+        expectEqual(state.minimizeOrder.count, 1)
         // Window 1 is gone; its record is stale. A native tab
         // switch now re-keys a live window onto that id.
         state.apply(.windowCreated(window(2)))
         state.apply(.windowRekeyed(WindowID(2), WindowID(1)))
         minimize(&state, 1)
-        #expect(state.minimizeOrder.count == 1)
+        expectEqual(state.minimizeOrder.count, 1)
         #expect(
             state.lastMinimized(bundleID: "com.test.a")
                 == WindowID(1)
@@ -203,7 +203,7 @@ struct MinimizeOrderTests {
         var state = StateCoordinator()
         state.apply(.windowCreated(window(1, bundleID: nil)))
         minimize(&state, 1)
-        #expect(state.minimizeOrder.count == 1)
+        expectEqual(state.minimizeOrder.count, 1)
         #expect(state.lastMinimized(bundleID: "com.test.a") == nil)
     }
 }

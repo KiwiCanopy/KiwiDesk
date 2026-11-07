@@ -171,7 +171,7 @@ struct ResetEscapeHatchTests {
             ) == luaMarker
         )
         let sidecar = core.guiConfigStore.load()
-        #expect(sidecar?.spaces.isEmpty == false)
+        expectEqual(sidecar?.spaces.isEmpty, false)
         #expect(
             Set(sidecar?.spaces ?? []) == Set(spaces)
         )
@@ -245,8 +245,8 @@ struct ResetEscapeHatchTests {
         // Byte-equal: both files came from the same encoder on
         // the same host displays, so any field-level leak is a
         // diff.
-        #expect(resetData == virginData)
-        #expect(core.profiles.list() == virgin.profiles.list())
+        expectEqual(resetData, virginData)
+        expectEqual(core.profiles.list(), virgin.profiles.list())
     }
 
     @Test("A Lua-owned reset never grafts the starter ladder")
@@ -304,13 +304,13 @@ struct ResetEscapeHatchTests {
         // field — so a hand-clear the reset forgets shows up
         // as an inequality against the virgin twin, not as a
         // silently narrower hand-pin list.
-        #expect(core.guiConfigSeed() == virgin.guiConfigSeed())
+        expectEqual(core.guiConfigSeed(), virgin.guiConfigSeed())
         let spaces = core.state.workspaces.allSpaces.map(\.id)
         #expect(!spaces.contains(SpaceID("poison")))
         // First launch of this config is the single default
         // space — five-per-display starter spaces would be a
         // state no first launch ever shows.
-        #expect(spaces == [SpaceID(1)])
+        expectEqual(spaces, [SpaceID(1)])
         #expect(!core.guiConfigStore.exists)
         #expect(
             try String(

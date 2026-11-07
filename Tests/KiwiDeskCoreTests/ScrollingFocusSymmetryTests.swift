@@ -109,7 +109,7 @@ struct ScrollingFocusSymmetryTests {
             // exact reverse, and the range is the anchor's own —
             // `start` keeps the row's leading edge in reach,
             // `end` its trailing one, `center` neither.
-            #expect(up == Array(down.reversed()))
+            expectEqual(up, Array(down.reversed()))
             // 1000 pt viewport, 400 pt slots: the first slot
             // rests at 0 / 300 / 600 and the fifth at -1600 /
             // -1300 / -1000, the anchor reaching past the row's
@@ -120,8 +120,8 @@ struct ScrollingFocusSymmetryTests {
                 case .center: (300, -1300)
                 default: (600, -1000)
                 }
-            #expect(down.first == ends.first)
-            #expect(down.last == ends.last)
+            expectEqual(down.first, ends.first)
+            expectEqual(down.last, ends.last)
         }
     }
 
@@ -207,6 +207,6 @@ struct ScrollingFocusSymmetryTests {
             for: windows,
             in: context
         )
-        #expect(after.offset == seed.offset)
+        expectEqual(after.offset, seed.offset)
     }
 }

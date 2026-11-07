@@ -41,7 +41,7 @@ struct LogExportTests {
             last.contains("subsystem == \"\(KiwiLog.subsystem)\"")
         )
         #expect(last.contains("compact"))
-        #expect(last.suffix(2) == ["--last", "15m"])
+        expectEqual(last.suffix(2), ["--last", "15m"])
         // Seconds round UP to whole minutes, never to zero.
         #expect(
             LogExport.arguments(for: .last(61)).suffix(2)
@@ -75,7 +75,7 @@ struct LogExportTests {
         defer { try? FileManager.default.removeItem(at: url) }
         let export = fake(Self.header + "a\nb\nc\n")
         let outcome = try export.export(.last(60), to: url)
-        #expect(outcome == .written(lines: 3))
+        expectEqual(outcome, .written(lines: 3))
         let text = try String(contentsOf: url, encoding: .utf8)
         #expect(text.contains("Timestamp"))
         #expect(text.hasSuffix("c\n"))
@@ -100,8 +100,8 @@ struct LogExportTests {
         do {
             _ = try refused.export(.last(60), to: url)
         } catch let LogExport.Failure.toolFailed(status, stderr) {
-            #expect(status == 64)
-            #expect(stderr == "bad predicate")
+            expectEqual(status, 64)
+            expectEqual(stderr, "bad predicate")
         } catch {
             Issue.record("unexpected \(error)")
         }

@@ -81,7 +81,7 @@ struct FloatRegionBoundsTests {
         let region = try #require(
             core.floatGrowBounds(of: WindowID(1))
         )
-        #expect(region == Self.bounds.insetBy(dx: reach, dy: reach))
+        expectEqual(region, Self.bounds.insetBy(dx: reach, dy: reach))
         // ...and it is zero with rings off, which is the escape:
         // nothing is reserved for chrome that is not drawn.
         core.tiler.settings.borderStyle.enabled = false
@@ -106,8 +106,8 @@ struct FloatRegionBoundsTests {
         let grow = try #require(
             core.floatGrowBounds(of: WindowID(1))
         )
-        #expect(fit == Self.bounds)
-        #expect(grow == fit.insetBy(dx: reach, dy: reach))
+        expectEqual(fit, Self.bounds)
+        expectEqual(grow, fit.insetBy(dx: reach, dy: reach))
     }
 
     @Test(
@@ -136,16 +136,16 @@ struct FloatRegionBoundsTests {
         )
         // The correctness bound stops AT the strip: a window
         // there is reachable, only its ring is covered.
-        #expect(fit.minY == barTitleStrip.maxY)
+        expectEqual(fit.minY, barTitleStrip.maxY)
         // The grow bound reserves exactly one reach past it —
         // not two, which is what a carve here plus the uniform
         // inset would give.
-        #expect(grow.minY == barTitleStrip.maxY + reach)
+        expectEqual(grow.minY, barTitleStrip.maxY + reach)
         // And the screen edges of the same rects, so the two
         // axes cannot drift apart.
-        #expect(fit.maxY == Self.bounds.maxY)
-        #expect(grow.maxY == Self.bounds.maxY - reach)
-        #expect(grow.minX == Self.bounds.minX + reach)
+        expectEqual(fit.maxY, Self.bounds.maxY)
+        expectEqual(grow.maxY, Self.bounds.maxY - reach)
+        expectEqual(grow.minX, Self.bounds.minX + reach)
     }
 
     @Test(
@@ -168,7 +168,7 @@ struct FloatRegionBoundsTests {
             WindowID(1),
             frame: under
         )
-        #expect(clamped.minY == barTitleStrip.maxY + reach)
-        #expect(clamped.size == under.size)
+        expectEqual(clamped.minY, barTitleStrip.maxY + reach)
+        expectEqual(clamped.size, under.size)
     }
 }

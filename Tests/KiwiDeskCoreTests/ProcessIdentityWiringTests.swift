@@ -104,7 +104,7 @@ struct ProcessIdentityWiringTests {
         // deferral the activation would report it.
         loop.shadows.focusedWindow = { _ in WindowID(1) }
         loop.appActivated(app(parent), launchedAt: nil)
-        #expect(loop.lastActivePid == parent)
+        expectEqual(loop.lastActivePid, parent)
         #expect(box.focused.isEmpty)
         #expect(
             box.logs.contains {
@@ -124,10 +124,10 @@ struct ProcessIdentityWiringTests {
         // activation does (the AX list answers nothing).
         box.census = [:]
         loop.appActivated(app(-1), launchedAt: nil)
-        #expect(loop.lastActivePid == child)
+        expectEqual(loop.lastActivePid, child)
         // The launch follow reads this process's windows by it.
-        #expect(activated == [child])
-        #expect(Set(box.destroyed) == [WindowID(1), WindowID(2)])
+        expectEqual(activated, [child])
+        expectEqual(Set(box.destroyed), [WindowID(1), WindowID(2)])
         #expect(box.focused.isEmpty)
     }
 
@@ -146,7 +146,7 @@ struct ProcessIdentityWiringTests {
             launchedAt: nil
         )
         #expect(loop.lastActivePid == nil)
-        #expect(activated == [-1])
+        expectEqual(activated, [-1])
         #expect(box.focused.isEmpty)
     }
 
@@ -157,7 +157,7 @@ struct ProcessIdentityWiringTests {
         loop.appTerminated(pid: -1)
         #expect(!loop.observes(pid: child))
         #expect(loop.observes(pid: parent))
-        #expect(box.terminated == [child])
+        expectEqual(box.terminated, [child])
     }
 
     @Test("a named exit keeps today's path")
@@ -166,13 +166,13 @@ struct ProcessIdentityWiringTests {
         loop.appTerminated(pid: parent)
         #expect(!loop.observes(pid: parent))
         #expect(loop.observes(pid: child))
-        #expect(box.terminated == [parent])
+        expectEqual(box.terminated, [parent])
     }
 
     @Test("stop forgets the unlisted processes")
     func stopClearsTheUnlistedMap() {
         let (loop, _) = makeLoop()
-        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+        expectEqual(loop.processIdentity.unlisted[child], Self.bundle)
         loop.stop()
         #expect(loop.processIdentity.unlisted.isEmpty)
     }

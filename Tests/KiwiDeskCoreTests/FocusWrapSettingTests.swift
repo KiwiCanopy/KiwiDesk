@@ -36,14 +36,14 @@ struct FocusWrapSettingTests {
             GuiConfig.self,
             from: Data(#"{"format": 1}"#.utf8)
         )
-        #expect(bare.focusWrap == .allScreens)
+        expectEqual(bare.focusWrap, .allScreens)
         var config = GuiConfig()
         config.focusWrap = .off
         let data = try JSONEncoder().encode(config)
         let text = String(decoding: data, as: UTF8.self)
         #expect(text.contains(#""focus_wrap":"off""#))
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.focusWrap == .off)
+        expectEqual(back.focusWrap, .off)
     }
 
     @Test("a profile writes the key only where it diverges")
@@ -63,7 +63,7 @@ struct FocusWrapSettingTests {
         )
         #expect(written.contains(#""focus_wrap""#))
         let reread = try core.profiles.read(name: "Work")
-        #expect(reread.focusWrap == .off)
+        expectEqual(reread.focusWrap, .off)
     }
 
     @Test("the table writes a listed value to the profile alone")
@@ -80,9 +80,9 @@ struct FocusWrapSettingTests {
         #expect(snapshot.isEdited)
         try core.saveRuleReach(snapshot)
         let work = try core.profiles.read(name: "Work")
-        #expect(work.focusWrap == .off)
+        expectEqual(work.focusWrap, .off)
         #expect(try core.profiles.read(name: "Home").focusWrap == nil)
-        #expect(core.guiConfigStore.load()?.focusWrap == .allScreens)
+        expectEqual(core.guiConfigStore.load()?.focusWrap, .allScreens)
     }
 
     @Test("a shared value moves the base, and the live resolve")
@@ -96,8 +96,8 @@ struct FocusWrapSettingTests {
             editing: "Home"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.focusWrap == .off)
-        #expect(core.focusWrap.mode == .off)
+        expectEqual(core.guiConfigStore.load()?.focusWrap, .off)
+        expectEqual(core.focusWrap.mode, .off)
     }
 
     @Test("a stored page resolves the override and diffs it back")
@@ -107,7 +107,7 @@ struct FocusWrapSettingTests {
         work.focusWrap = .off
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.focusWrap == .off)
+        expectEqual(page.focusWrap, .off)
         page.focusWrap = .allScreens
         try core.overwriteProfile(
             named: "Work",
@@ -142,8 +142,8 @@ struct FocusWrapSettingTests {
         var work = try core.profiles.read(name: "Work")
         work.focusWrap = .off
         core.reapplyStructuredOverrides(work)
-        #expect(core.focusWrap.mode == .off)
+        expectEqual(core.focusWrap.mode, .off)
         core.reapplyStructuredOverrides(nil)
-        #expect(core.focusWrap.mode == .allScreens)
+        expectEqual(core.focusWrap.mode, .allScreens)
     }
 }

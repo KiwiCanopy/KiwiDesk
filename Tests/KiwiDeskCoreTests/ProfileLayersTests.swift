@@ -88,7 +88,7 @@ struct ProfileModesTests {
         let profile = baseProfile(layers: override)
         let data = try encoder.encode(profile)
         let back = try decoder.decode(Profile.self, from: data)
-        #expect(back.layers == override)
+        expectEqual(back.layers, override)
     }
 
     // MARK: - JSON shape pin (SettingsCodingTests vocabulary rule)

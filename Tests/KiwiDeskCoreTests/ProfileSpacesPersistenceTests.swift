@@ -80,7 +80,7 @@ struct ProfileSpacesPersistenceTests {
             Profile.self,
             from: Data(json.utf8)
         )
-        #expect(profile.spaces == [])
+        expectEqual(profile.spaces, [])
     }
 
     @Test("Profile JSON encodes a spaces key")
@@ -178,7 +178,7 @@ struct ProfileSpacesPersistenceTests {
         )
         let ordered = profile.orderedSpaces
         // "1" and "2" first (stored order); "3" appended.
-        #expect(ordered.prefix(2) == [SpaceID("1"), SpaceID("2")])
+        expectEqual(ordered.prefix(2), [SpaceID("1"), SpaceID("2")])
         #expect(ordered.contains(SpaceID("3")))
     }
 }

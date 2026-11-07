@@ -124,7 +124,7 @@ struct SpaceBarGlyphHoverTests {
         #expect(item.hoveredTarget === web)
         #expect(item.isHovered)
         let dim = SpaceBarLook().dimFactor
-        #expect(item.appViews[0].alphaValue == 1)
+        expectEqual(item.appViews[0].alphaValue, 1)
         #expect(abs(item.appViews[1].alphaValue - dim) < 0.001)
         // Off the glyphs but on the chip: the chip's own hover
         // lifts every glyph, as before.
@@ -156,7 +156,7 @@ struct SpaceBarGlyphHoverTests {
             kind: .overflow
         ) { _ in }
         let item = menu.items[0]
-        #expect(item.image?.size == NSSize(width: 16, height: 16))
+        expectEqual(item.image?.size, NSSize(width: 16, height: 16))
         let key = "setPreferredImageVisibility:"
         guard item.responds(to: NSSelectorFromString(key)) else {
             return

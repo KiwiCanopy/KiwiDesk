@@ -54,7 +54,7 @@ struct PartitioningPendingFilingTests {
         fileUnderA(core)
         core.apply(profile: b, cause: .event)
         _ = core.state.refileAway(of: w1, to: "1")
-        #expect(core.state.rememberedSpace(of: w1) == "1")
+        expectEqual(core.state.rememberedSpace(of: w1), "1")
         core.apply(profile: a, cause: .event)
     }
 
@@ -62,7 +62,7 @@ struct PartitioningPendingFilingTests {
     func restoredFilingIsKept() {
         let core = makeCore()
         roundTrip(core) { $0.state.remember(w1, in: "2") }
-        #expect(core.state.rememberedSpace(of: w1) == "2")
+        expectEqual(core.state.rememberedSpace(of: w1), "2")
     }
 
     @Test("a parked away window comes back to its Space")
@@ -79,7 +79,7 @@ struct PartitioningPendingFilingTests {
                 isUp: false
             )
         }
-        #expect(core.state.rememberedSpace(of: w1) == "2")
+        expectEqual(core.state.rememberedSpace(of: w1), "2")
     }
 
     @Test("the record and the snapshot carry the same set")
@@ -88,8 +88,8 @@ struct PartitioningPendingFilingTests {
         core.apply(profile: profile("A"), cause: .event)
         core.state.remember(w1, in: "2")
         let pending = core.state.pendingFilings(in: "2")
-        #expect(pending == [w1])
+        expectEqual(pending, [w1])
         let records = core.partitioningForSnapshot()?.records
-        #expect(records?[.profile("A")]?["2"] == pending)
+        expectEqual(records?[.profile("A")]?["2"], pending)
     }
 }

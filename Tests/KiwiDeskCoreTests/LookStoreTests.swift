@@ -28,7 +28,7 @@ struct LookStoreTests {
     func lifecycle() throws {
         let store = store()
         try store.save(look("Mine"))
-        #expect(store.userLooks().map(\.name) == ["Mine"])
+        expectEqual(store.userLooks().map(\.name), ["Mine"])
         try store.rename(from: "Mine", to: "Ours")
         #expect(store.hasUserLook("Ours"))
         try store.delete("Ours")
@@ -51,8 +51,8 @@ struct LookStoreTests {
         let refused = try store.replaceUserLooks(
             with: [foreign, look("A"), look("Taskbar")]
         )
-        #expect(refused == 2)
-        #expect(store.userLooks().map(\.name) == ["A"])
+        expectEqual(refused, 2)
+        expectEqual(store.userLooks().map(\.name), ["A"])
         #expect(store.userLooks()[0].style["app_bar.title_cap"] == nil)
     }
 
@@ -67,9 +67,9 @@ struct LookStoreTests {
         exported.style["app_bar.title_cap"] = .number(7)
         try store.export(LookExport(look: exported), to: url)
         let back = try store.importLook(from: url)
-        #expect(back.style == look("A").style)
+        expectEqual(back.style, look("A").style)
         #expect(back.colors["bogus"] == nil)
-        #expect(back.colors["kiwishelf.fill_color"] == "#112233")
+        expectEqual(back.colors["kiwishelf.fill_color"], "#112233")
     }
 
     /// A look saved before a colour path existed reads with that
@@ -79,8 +79,8 @@ struct LookStoreTests {
         let store = store()
         try store.save(look("A"))
         let back = try #require(store.userLooks().first)
-        #expect(Set(back.colors.keys) == Set(ColorPaletteKeys.all))
-        #expect(back.colors["kiwishelf.fill_color"] == "#112233")
+        expectEqual(Set(back.colors.keys), Set(ColorPaletteKeys.all))
+        expectEqual(back.colors["kiwishelf.fill_color"], "#112233")
     }
 
     /// A rewrite reads the library raw, so a key this build does
@@ -107,7 +107,7 @@ struct LookStoreTests {
             .appendingPathComponent("look-\(UUID().uuidString).json")
         try store.export(LookExport(look: look("A")), to: url)
         let back = try store.importLook(from: url)
-        #expect(Set(back.colors.keys) == Set(ColorPaletteKeys.all))
+        expectEqual(Set(back.colors.keys), Set(ColorPaletteKeys.all))
         #expect(
             back.colors
                 == ColorPalette(name: "", colors: look("A").colors)

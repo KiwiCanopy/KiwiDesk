@@ -57,11 +57,11 @@ struct RaisedLayerLatchTests {
     @Test("the layer alone is a raised layer; a subrole is a panel")
     func reasonNamesTheCause() {
         let standard = kAXStandardWindowSubrole
-        #expect(reason(facts(standard, layer: 999)) == .raisedLayer)
-        #expect(reason(facts(standard, layer: 3)) == .raisedLayer)
+        expectEqual(reason(facts(standard, layer: 999)), .raisedLayer)
+        expectEqual(reason(facts(standard, layer: 3)), .raisedLayer)
         #expect(reason(facts(standard, layer: 0)) == nil)
-        #expect(reason(facts(kAXDialogSubrole, layer: 999)) == .panel)
-        #expect(reason(facts(kAXDialogSubrole, layer: 0)) == .panel)
+        expectEqual(reason(facts(kAXDialogSubrole, layer: 999)), .panel)
+        expectEqual(reason(facts(kAXDialogSubrole, layer: 0)), .panel)
     }
 
     /// Structure outranks a Float rule, so a raised window a rule
@@ -77,7 +77,7 @@ struct RaisedLayerLatchTests {
             bundleID: "com.brave.Browser",
             rules: FloatRules(["com.brave.Browser"])
         )
-        #expect(verdict == .floats(.raisedLayer))
+        expectEqual(verdict, .floats(.raisedLayer))
         #expect(
             EventLoop.isOverlay(verdict, ownProcess: false, structural: false)
         )
@@ -105,7 +105,7 @@ struct RaisedLayerLatchTests {
         var events: [KiwiEvent] = []
         for read: AutoFloatReason? in [.raisedLayer, nil, .raisedLayer] {
             events += recheck(core, read)
-            #expect(core.eventLoop.detectedFloating[id] == .tiles)
+            expectEqual(core.eventLoop.detectedFloating[id], .tiles)
         }
         #expect(events.isEmpty)
     }
@@ -118,7 +118,7 @@ struct RaisedLayerLatchTests {
         let core = makeTestCore()
         core.eventLoop.detectedFloating[id] = nil
         let events = recheck(core, .raisedLayer)
-        #expect(core.eventLoop.detectedFloating[id] == .tiles)
+        expectEqual(core.eventLoop.detectedFloating[id], .tiles)
         #expect(
             !events.contains {
                 if case .windowFloatChanged(_, true) = $0 { return true }
@@ -146,7 +146,7 @@ struct RaisedLayerLatchTests {
         let core = makeTestCore()
         core.eventLoop.detectedFloating[id] = .floats(.panel)
         _ = recheck(core, .raisedLayer)
-        #expect(core.eventLoop.detectedFloating[id]?.floats == true)
+        expectEqual(core.eventLoop.detectedFloating[id]?.floats, true)
     }
 
     @Test("a subrole that floats still floats a tiled window")
@@ -154,6 +154,6 @@ struct RaisedLayerLatchTests {
         let core = makeTestCore()
         core.eventLoop.detectedFloating[id] = .tiles
         _ = recheck(core, .panel)
-        #expect(core.eventLoop.detectedFloating[id] == .floats(.panel))
+        expectEqual(core.eventLoop.detectedFloating[id], .floats(.panel))
     }
 }

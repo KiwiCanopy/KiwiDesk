@@ -122,11 +122,11 @@ struct BarRenderEnvironmentTests {
         answer = NSImage(size: CGSize(width: 1, height: 1))
         #expect(BarIconCache.icon(pid: pid) === answer)
         #expect(BarIconCache.icon(pid: pid) === answer)
-        #expect(reads == 2)
+        expectEqual(reads, 2)
         // The exit arrives through the event flow.
         let core = makeTestCore()
         core.handle(.appTerminated(pid: pid))
         _ = BarIconCache.icon(pid: pid)
-        #expect(reads == 3)
+        expectEqual(reads, 3)
     }
 }

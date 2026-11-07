@@ -63,15 +63,15 @@ struct MonocleParkLayoutTests {
             in: context
         )
         let area = context.usable
-        #expect(frames[w2] == area)
+        expectEqual(frames[w2], area)
         // No neighbors: the default corner is bottom-right.
         let parked = parkFrame(
             of: area.size,
             in: context.bounds,
             left: false
         )
-        #expect(frames[w1] == parked)
-        #expect(frames[w3] == parked)
+        expectEqual(frames[w1], parked)
+        expectEqual(frames[w3], parked)
     }
 
     @Test("A right neighbor flips the park to the free left corner")
@@ -118,7 +118,7 @@ struct MonocleParkLayoutTests {
                     left: true
                 )
         )
-        #expect(parked.minX == parked.minX.rounded())
+        expectEqual(parked.minX, parked.minX.rounded())
     }
 
     @Test("A parked refused-width window parks its OWN size")
@@ -138,7 +138,7 @@ struct MonocleParkLayoutTests {
             in: context
         )
         let parked = try #require(frames[w2])
-        #expect(parked.width == 715)
+        expectEqual(parked.width, 715)
         // Bottom-right anchor: the LEFT edge sits at the peek
         // offset whatever the width, so the sliver stays on
         // screen.
@@ -155,7 +155,7 @@ struct MonocleParkLayoutTests {
                 in: context
             )[w2]
         )
-        #expect(shown.width == 715)
+        expectEqual(shown.width, 715)
         #expect(abs(shown.midX - area.midX) < 0.01)
     }
 
@@ -169,7 +169,7 @@ struct MonocleParkLayoutTests {
             for: [w1, w2],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
         #expect(frames[w1] != frames[w2])
     }
 
@@ -203,8 +203,8 @@ struct MonocleParkLayoutTests {
             for: [w1, w2],
             in: context
         )
-        #expect(frames[w1] == context.usable)
-        #expect(frames[w2] == context.usable)
+        expectEqual(frames[w1], context.usable)
+        expectEqual(frames[w2], context.usable)
     }
 }
 

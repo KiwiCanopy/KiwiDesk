@@ -94,11 +94,11 @@ struct BorderPanelMoveTests {
         let room = exactFrame(at: start).insetBy(dx: -1000, dy: -1000)
         render(ring, at: moved, room: room)
         try #require(topLeft(at: moved) != exactFrame(at: moved).origin)
-        #expect(spy.moves == [topLeft(at: moved)])
-        #expect(ring.frameSets == 1)
-        #expect(ring.skyLightMoves == 1)
+        expectEqual(spy.moves, [topLeft(at: moved)])
+        expectEqual(ring.frameSets, 1)
+        expectEqual(ring.skyLightMoves, 1)
         // The panel stays exact, so the ring sits at its origin.
-        #expect(ring.ringFrameInPanel.origin == .zero)
+        expectEqual(ring.ringFrameInPanel.origin, .zero)
     }
 
     @Test("A ring moved away and back moves twice")
@@ -107,8 +107,8 @@ struct BorderPanelMoveTests {
         let ring = shownRing(spy)
         render(ring, at: moved)
         render(ring, at: start)
-        #expect(spy.moves == [topLeft(at: moved), topLeft(at: start)])
-        #expect(ring.frameSets == 1)
+        expectEqual(spy.moves, [topLeft(at: moved), topLeft(at: start)])
+        expectEqual(ring.frameSets, 1)
     }
 
     @Test("An animation's first render leaves an unmoved ring exact")
@@ -117,9 +117,9 @@ struct BorderPanelMoveTests {
         let ring = shownRing(spy)
         let room = exactFrame(at: start).insetBy(dx: -1000, dy: -1000)
         render(ring, at: start, room: room)
-        #expect(ring.frameSets == 1)
+        expectEqual(ring.frameSets, 1)
         #expect(spy.moves.isEmpty)
-        #expect(ring.panelFrame == exactFrame(at: start))
+        expectEqual(ring.panelFrame, exactFrame(at: start))
     }
 
     @Test("A ring that changes size takes AppKit")
@@ -128,7 +128,7 @@ struct BorderPanelMoveTests {
         let ring = shownRing(spy)
         render(ring, at: moved, size: CGSize(width: 420, height: 300))
         #expect(spy.moves.isEmpty)
-        #expect(ring.frameSets == 2)
+        expectEqual(ring.frameSets, 2)
     }
 
     /// A deferred panel has no window number until AppKit first
@@ -141,7 +141,7 @@ struct BorderPanelMoveTests {
         spy.pass += 1
         render(ring, at: moved)
         #expect(spy.moves.isEmpty)
-        #expect(ring.frameSets == 2)
+        expectEqual(ring.frameSets, 2)
     }
 
     @Test("A hidden panel keeps its window and still moves")
@@ -150,8 +150,8 @@ struct BorderPanelMoveTests {
         let ring = shownRing(spy)
         ring.hide()
         render(ring, at: moved)
-        #expect(spy.moves == [topLeft(at: moved)])
-        #expect(ring.frameSets == 1)
+        expectEqual(spy.moves, [topLeft(at: moved)])
+        expectEqual(ring.frameSets, 1)
     }
 
     @Test("AppKit keeps the frame for the rest of a pass it set it in")
@@ -161,10 +161,10 @@ struct BorderPanelMoveTests {
         render(ring, at: moved, size: CGSize(width: 420, height: 300))
         render(ring, at: start, size: CGSize(width: 420, height: 300))
         #expect(spy.moves.isEmpty)
-        #expect(ring.frameSets == 3)
+        expectEqual(ring.frameSets, 3)
         spy.pass += 1
         render(ring, at: moved, size: CGSize(width: 420, height: 300))
-        #expect(spy.moves.count == 1)
+        expectEqual(spy.moves.count, 1)
     }
 
     /// Placed a pass earlier, so only the order-in's own stamp
@@ -178,7 +178,7 @@ struct BorderPanelMoveTests {
         ring.order(relativeTo: 7)
         render(ring, at: moved)
         #expect(spy.moves.isEmpty)
-        #expect(ring.frameSets == 2)
+        expectEqual(ring.frameSets, 2)
     }
 
     @Test("A missing symbol keeps the room for an animating ring")
@@ -188,9 +188,9 @@ struct BorderPanelMoveTests {
         let ring = shownRing(spy)
         let room = exactFrame(at: start).insetBy(dx: -1000, dy: -1000)
         render(ring, at: moved, room: room)
-        #expect(spy.moves.count == 1)
-        #expect(ring.skyLightMoves == 0)
-        #expect(ring.frameSets == 2)
-        #expect(ring.panelFrame == room)
+        expectEqual(spy.moves.count, 1)
+        expectEqual(ring.skyLightMoves, 0)
+        expectEqual(ring.frameSets, 2)
+        expectEqual(ring.panelFrame, room)
     }
 }

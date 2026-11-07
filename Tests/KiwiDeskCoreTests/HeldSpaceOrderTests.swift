@@ -32,7 +32,7 @@ struct HeldSpaceOrderTests {
     func holdKeepsTheOrder() throws {
         let core = try desk.docked()
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(heldInOrder(core) == ["5←3", "6←4"])
+        expectEqual(heldInOrder(core), ["5←3", "6←4"])
     }
 
     /// Six held Spaces, so a batch placed in the dictionary's hash
@@ -53,16 +53,16 @@ struct HeldSpaceOrderTests {
             heldInOrder(core)
                 == ["15←3", "10←4", "11←5", "12←6", "13←7", "14←8"]
         )
-        #expect(desk.members(core, 14) == desk.ids([105]))
+        expectEqual(desk.members(core, 14), desk.ids([105]))
     }
 
     @Test("a named Space the walk keeps sits after a renumbered one")
     func namedSpaceFollowsTheBatch() throws {
         let core = try desk.docked(dellSpaces: [SpaceID(3), SpaceID("Mail")])
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(heldInOrder(core) == ["4←3", "Mail←Mail"])
+        expectEqual(heldInOrder(core), ["4←3", "Mail←Mail"])
         try reapply(core, declaring: [SpaceID(4)])
-        #expect(heldInOrder(core) == ["5←3", "Mail←Mail"])
+        expectEqual(heldInOrder(core), ["5←3", "Mail←Mail"])
     }
 
     @Test("a held Space whose name is free and in order keeps it")
@@ -75,7 +75,7 @@ struct HeldSpaceOrderTests {
             )
         }
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(heldInOrder(core) == ["4←4"])
+        expectEqual(heldInOrder(core), ["4←4"])
         let item = try #require(
             core.spaceBarItems(
                 display: desk.builtIn.id,
@@ -95,12 +95,12 @@ struct HeldSpaceOrderTests {
             ),
             mustMove: { $0 == SpaceID("3") }
         )
-        #expect(names.map(\.raw) == ["13", "14", "15", "Mail", "16"])
+        expectEqual(names.map(\.raw), ["13", "14", "15", "Mail", "16"])
         let kept = KiwiCore.orderedHeldNames(
             ["7", "9"].map { SpaceID($0) },
             taken: Set(["1", "7", "9"].map { SpaceID($0) }),
             mustMove: { _ in false }
         )
-        #expect(kept.map(\.raw) == ["7", "9"])
+        expectEqual(kept.map(\.raw), ["7", "9"])
     }
 }

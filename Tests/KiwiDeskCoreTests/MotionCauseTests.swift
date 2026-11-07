@@ -24,15 +24,15 @@ struct MotionCauseTests {
 
     @Test("Unlabelled motion is ambient")
     func unsetIsAmbient() {
-        #expect(makeCore().motionCause == .ambient)
+        expectEqual(makeCore().motionCause, .ambient)
     }
 
     @Test("A control's call is user motion, and only inside it")
     func userScopeIsScoped() {
         let core = makeCore()
         let inside = core.withUserMotion { core.motionCause }
-        #expect(inside == .user(pressedAt: pressed, late: false))
-        #expect(core.motionCause == .ambient)
+        expectEqual(inside, .user(pressedAt: pressed, late: false))
+        expectEqual(core.motionCause, .ambient)
     }
 
     @Test("A nested opener keeps the outer press time")
@@ -42,7 +42,7 @@ struct MotionCauseTests {
             core.wallClock = { Date(timeIntervalSinceReferenceDate: 9) }
             return core.withUserMotion { core.motionCause }
         }
-        #expect(inner == .user(pressedAt: pressed, late: false))
+        expectEqual(inner, .user(pressedAt: pressed, late: false))
     }
 
     /// A command finishing its own motion from inside a late tail
@@ -56,7 +56,7 @@ struct MotionCauseTests {
         ) {
             core.withUserMotion { core.motionCause }
         }
-        #expect(inner == .user(pressedAt: pressed, late: false))
+        expectEqual(inner, .user(pressedAt: pressed, late: false))
     }
 
     @Test("A hold-glide step is a press of its own")
@@ -64,7 +64,7 @@ struct MotionCauseTests {
         let core = makeCore()
         core.keys.holdGlide.isApplyingGlideStep = true
         defer { core.keys.holdGlide.isApplyingGlideStep = false }
-        #expect(core.motionCause == .user(pressedAt: pressed, late: false))
+        expectEqual(core.motionCause, .user(pressedAt: pressed, late: false))
     }
 
     @Test("A hotkey's fire is user motion")
@@ -72,7 +72,7 @@ struct MotionCauseTests {
         let core = makeCore()
         var seen: MotionCause?
         core.keys.simulatingFire { seen = core.motionCause }
-        #expect(seen == .user(pressedAt: pressed, late: false))
+        expectEqual(seen, .user(pressedAt: pressed, late: false))
     }
 
     /// The frame applier reads the same full cause the reader
@@ -82,8 +82,8 @@ struct MotionCauseTests {
         let core = makeCore()
         var seen: MotionCause?
         core.keys.simulatingFire { seen = core.tiler.applier.cause() }
-        #expect(seen == .user(pressedAt: pressed, late: false))
-        #expect(core.tiler.applier.cause() == .ambient)
+        expectEqual(seen, .user(pressedAt: pressed, late: false))
+        expectEqual(core.tiler.applier.cause(), .ambient)
     }
 
     /// A burst past its bound runs inside the caller's own call:
@@ -105,8 +105,8 @@ struct MotionCauseTests {
                 maxWait: .zero
             ) { uncarried = core.motionCause }
         }
-        #expect(carried == .user(pressedAt: pressed, late: false))
-        #expect(uncarried == .ambient)
+        expectEqual(carried, .user(pressedAt: pressed, late: false))
+        expectEqual(uncarried, .ambient)
     }
 
     @Test("A tail a control's call schedules is user motion, late")
@@ -119,8 +119,8 @@ struct MotionCauseTests {
             }
         }
         await core.deferred.task(for: .spaceSettle)?.value
-        #expect(seen == .user(pressedAt: pressed, late: true))
-        #expect(core.motionCause == .ambient)
+        expectEqual(seen, .user(pressedAt: pressed, late: true))
+        expectEqual(core.motionCause, .ambient)
     }
 
     @Test("A slot no one press owns runs ambient, whoever scheduled it")
@@ -133,7 +133,7 @@ struct MotionCauseTests {
             }
         }
         await core.deferred.task(for: .adoptionHeal)?.value
-        #expect(seen == .ambient)
+        expectEqual(seen, .ambient)
     }
 
     @Test("An ambient caller's tail stays ambient")
@@ -144,6 +144,6 @@ struct MotionCauseTests {
             seen = core.motionCause
         }
         await core.deferred.task(for: .spaceSettle)?.value
-        #expect(seen == .ambient)
+        expectEqual(seen, .ambient)
     }
 }

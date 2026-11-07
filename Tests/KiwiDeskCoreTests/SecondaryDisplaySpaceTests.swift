@@ -75,7 +75,7 @@ struct SecondaryDisplaySpaceTests {
                 == SpaceID(4)
         )
         // The main screen is untouched.
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
     }
 
     /// The Space it was showing is filed under the Desktop it
@@ -138,7 +138,7 @@ struct SecondaryDisplaySpaceTests {
             ),
             in: arriving
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
     }
 
     /// Swiping the display that holds the ACTIVE Space moves it
@@ -150,7 +150,7 @@ struct SecondaryDisplaySpaceTests {
         let core = makeCore()
         // Focus sits on display B.
         core.state.workspaces.activate(SpaceID(3))
-        #expect(core.state.workspaces.activeSpace == SpaceID(3))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(3))
         let arriving = snapshot(secondaryCurrent: 21)
         core.moveSwitchedDisplaySpaces(
             DisplaySwitch(
@@ -159,7 +159,7 @@ struct SecondaryDisplaySpaceTests {
             ),
             in: arriving
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID(4))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(4))
         #expect(
             core.state.workspaces.secondaryShown[DisplayID(2)]
                 == nil

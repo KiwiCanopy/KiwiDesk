@@ -127,14 +127,14 @@ struct DesktopMoveSpaceTargetTests {
         )
         // Not a member yet — the reveal reconcile owns the
         // arrival, and an eager write would fight it.
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(core.state.workspaces.space(of: window), origin)
         #expect(
             box.lines.contains { $0.contains("will join space mail") }
         )
         // The reap's departure: the fold records the origin and
         // the gone handler re-files it under the name.
         core.handle(.windowDestroyed(window, wasMinimized: false))
-        #expect(core.state.rememberedSpace(of: window) == mail)
+        expectEqual(core.state.rememberedSpace(of: window), mail)
         // …and the arrival lands there through the ordinary
         // remembered-space rule.
         core.handle(
@@ -142,7 +142,7 @@ struct DesktopMoveSpaceTargetTests {
                 ManagedWindow(id: window, pid: 1, appName: "App")
             )
         )
-        #expect(core.state.workspaces.space(of: window) == mail)
+        expectEqual(core.state.workspaces.space(of: window), mail)
     }
 
     @Test("A shown target's Space is joined now")
@@ -155,7 +155,7 @@ struct DesktopMoveSpaceTargetTests {
                 args: [.number(1), .string("mail")]
             ).isSuccess
         )
-        #expect(core.state.workspaces.space(of: window) == mail)
+        expectEqual(core.state.workspaces.space(of: window), mail)
         #expect(core.pendingSpace.isEmpty)
     }
 
@@ -172,7 +172,7 @@ struct DesktopMoveSpaceTargetTests {
         // The eager departure ran synchronously (#1023), and the
         // name was paid into it.
         #expect(core.state.windows[window] == nil)
-        #expect(core.state.rememberedSpace(of: window) == mail)
+        expectEqual(core.state.rememberedSpace(of: window), mail)
         #expect(core.pendingSpace.isEmpty)
     }
 
@@ -188,7 +188,7 @@ struct DesktopMoveSpaceTargetTests {
                 .isSuccess
         )
         core.handle(.windowDestroyed(window, wasMinimized: false))
-        #expect(core.state.rememberedSpace(of: window) == origin)
+        expectEqual(core.state.rememberedSpace(of: window), origin)
     }
 
     /// The Space is created only once the bridge accepted the
@@ -207,9 +207,9 @@ struct DesktopMoveSpaceTargetTests {
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("bridge") == true)
+        expectEqual(response.error?.contains("bridge"), true)
         #expect(core.state.workspaces[mail] == nil)
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(core.state.workspaces.space(of: window), origin)
         #expect(core.pendingSpace.isEmpty)
     }
 
@@ -229,7 +229,7 @@ struct DesktopMoveSpaceTargetTests {
             )
         )
         core.handle(.windowDestroyed(window, wasMinimized: false))
-        #expect(core.state.rememberedSpace(of: window) == origin)
+        expectEqual(core.state.rememberedSpace(of: window), origin)
         #expect(core.state.workspaces[mail] == nil)
     }
 
@@ -261,7 +261,7 @@ struct DesktopMoveSpaceTargetTests {
         core.state.workspaces.assign(mail, to: DisplayID(2))
         core.state.apply(.windowDestroyed(window, wasMinimized: false))
         core.state.redirectDeparture(of: window, to: mail)
-        #expect(core.state.rememberedSpace(of: window) == mail)
+        expectEqual(core.state.rememberedSpace(of: window), mail)
         // `mail` exists, so the name is OUTRANKED below rather
         // than dropped by `livingRememberedSpace` — the fold's
         // fallback is the origin too, and only this tells the
@@ -275,6 +275,6 @@ struct DesktopMoveSpaceTargetTests {
                 ManagedWindow(id: window, pid: 1, appName: "App")
             )
         )
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(core.state.workspaces.space(of: window), origin)
     }
 }

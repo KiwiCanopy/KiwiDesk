@@ -92,7 +92,7 @@ struct GridResizeTests {
     func pressMovesTheSharedEdge() {
         let core = makeCore()
         let space = grid(core, count: 3)
-        #expect(width(core, 1) == width(core, 2))
+        expectEqual(width(core, 1), width(core, 2))
         let third = width(core, 3)
         let response = core.execute(
             "resize",
@@ -223,7 +223,7 @@ struct GridResizeTests {
             .gridColumnWeights
         let kept = try #require(after)
         try #require(kept.count == 3)
-        #expect(kept[2] == third)
+        expectEqual(kept[2], third)
     }
 
     @Test("reset_layout_sizing returns to the authored weights")
@@ -236,7 +236,7 @@ struct GridResizeTests {
             core.sessionRatios(of: space)
                 .gridColumnWeights == nil
         )
-        #expect(width(core, 1) == width(core, 2))
+        expectEqual(width(core, 1), width(core, 2))
     }
 
     /// Two rows: the lower row's top edge is its only inner one,

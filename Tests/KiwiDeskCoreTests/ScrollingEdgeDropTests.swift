@@ -196,7 +196,7 @@ struct ScrollingEdgeDropTests {
                 bounds: bounds
             )
         }
-        #expect(translate(vertical: true) == .scrollSlot(150))
+        expectEqual(translate(vertical: true), .scrollSlot(150))
         #expect(translate(vertical: false) == nil)
     }
 

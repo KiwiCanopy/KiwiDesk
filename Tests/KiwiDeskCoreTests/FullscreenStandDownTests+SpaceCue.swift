@@ -183,7 +183,7 @@ extension FullscreenStandDownTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, _) = try #require(makeSpaceCueCore())
         core.applyFocusedSpaceSwitch(to: "2")
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(box.cues.isEmpty)
     }
 
@@ -198,8 +198,8 @@ extension FullscreenStandDownTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, display) = try #require(makeSpaceCueCore())
         _ = core.execute("focus_space", args: [.string("6")])
-        #expect(core.state.workspaces.display(of: "6") == display)
-        #expect(box.cues.map(\.space) == ["6"])
+        expectEqual(core.state.workspaces.display(of: "6"), display)
+        expectEqual(box.cues.map(\.space), ["6"])
     }
 
     /// The filing places the Space before the follow reads its
@@ -221,8 +221,8 @@ extension FullscreenStandDownTests {
             "move_to_space_and_follow",
             args: [.string("6"), .number(9)]
         )
-        #expect(core.state.workspaces.display(of: "6") == display)
-        #expect(box.cues.map(\.space) == ["6"])
+        expectEqual(core.state.workspaces.display(of: "6"), display)
+        expectEqual(box.cues.map(\.space), ["6"])
     }
 
     /// The create fold files a launch's window into its rule's
@@ -241,7 +241,7 @@ extension FullscreenStandDownTests {
         core.state.workspaces.add(window, to: "6")
         #expect(core.state.workspaces.display(of: "6") == nil)
         core.followSwitch(to: "6", focusing: window)
-        #expect(core.state.workspaces.display(of: "6") == display)
-        #expect(box.cues.map(\.space) == ["6"])
+        expectEqual(core.state.workspaces.display(of: "6"), display)
+        expectEqual(box.cues.map(\.space), ["6"])
     }
 }

@@ -194,10 +194,10 @@ struct ShadowWindowFocusTests {
         )
         loop.shadows.focusedWindow = { _ in twin.id }
         // None tracked: the host it was judged against.
-        #expect(loop.focusedWindowID(pid: pid) == first.id)
+        expectEqual(loop.focusedWindowID(pid: pid), first.id)
         // One tracked: that one.
         loop.elements[pid] = [second.id: element(1)]
-        #expect(loop.focusedWindowID(pid: pid) == second.id)
+        expectEqual(loop.focusedWindowID(pid: pid), second.id)
         // Several: the front-most TRACKED one of this process —
         // never the shadow in front of it, nor another's window.
         loop.elements[pid] = [first.id: element(0), second.id: element(1)]
@@ -205,10 +205,10 @@ struct ShadowWindowFocusTests {
             (twin.id, pid), (WindowID(9), pid + 1), (second.id, pid),
             (first.id, pid),
         ]
-        #expect(loop.focusedWindowID(pid: pid) == second.id)
+        expectEqual(loop.focusedWindowID(pid: pid), second.id)
         // A real window names itself.
         loop.shadows.focusedWindow = { _ in first.id }
-        #expect(loop.focusedWindowID(pid: pid) == first.id)
+        expectEqual(loop.focusedWindowID(pid: pid), first.id)
     }
 
     // MARK: - Tabs
@@ -237,7 +237,7 @@ struct ShadowWindowFocusTests {
             coalesceTabs: true
         )
         #expect(box.rekeyed.isEmpty)
-        #expect(box.destroyed == [host.id])
+        expectEqual(box.destroyed, [host.id])
         #expect(loop.elements[pid]?[twin.id] == nil)
     }
 }

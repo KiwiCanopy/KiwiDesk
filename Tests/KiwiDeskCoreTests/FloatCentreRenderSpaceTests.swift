@@ -73,9 +73,9 @@ struct FloatCentreRenderSpaceTests {
         core.resolveSpaceDisplays(mainID: display.id)
         core.state.workspaces.activate(shown)
         core.updateBars()
-        #expect(core.focusedWindowID == one)
-        #expect(core.state.workspaces.space(of: one) == home)
-        #expect(core.floatPlacementSpace(of: one) == shown)
+        expectEqual(core.focusedWindowID, one)
+        expectEqual(core.state.workspaces.space(of: one), home)
+        expectEqual(core.floatPlacementSpace(of: one), shown)
         let region = try #require(core.floatBounds(on: shown))
         #expect(region != core.floatBounds(of: one))
         #expect(core.floatRingInset > 0)
@@ -94,8 +94,8 @@ struct FloatCentreRenderSpaceTests {
         core.execute("make_sticky")
         let region = try arrive(core)
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.midY == region.midY)
-        #expect(core.state.workspaces.space(of: one) == home)
+        expectEqual(frames[one]?.midY, region.midY)
+        expectEqual(core.state.workspaces.space(of: one), home)
     }
 
     /// An axis filling the region reaches the clamp, whose push is
@@ -113,7 +113,7 @@ struct FloatCentreRenderSpaceTests {
         core.execute("make_sticky")
         let region = try arrive(core)
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.minY == region.minY + core.floatRingInset)
+        expectEqual(frames[one]?.minY, region.minY + core.floatRingInset)
     }
 
     /// A window filling the region under a bottom bar: the clamp's
@@ -132,7 +132,7 @@ struct FloatCentreRenderSpaceTests {
         core.execute("make_sticky")
         let region = try arrive(core)
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.minY == region.minY)
+        expectEqual(frames[one]?.minY, region.minY)
     }
 
     @Test(
@@ -145,12 +145,12 @@ struct FloatCentreRenderSpaceTests {
         let frame = CGRect(x: 10, y: 200, width: 300, height: 200)
         let core = try #require(makeCore(frame: frame) { frames[$0] = $1 })
         core.execute("toggle_pocket_window")
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         let region = try arrive(core)
         frames.removeAll()
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.midY == region.midY)
-        #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.workspaces.space(of: one) == home)
+        expectEqual(frames[one]?.midY, region.midY)
+        expectEqual(core.state.pocketPhase(of: one), .out)
+        expectEqual(core.state.workspaces.space(of: one), home)
     }
 }

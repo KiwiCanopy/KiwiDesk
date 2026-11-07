@@ -22,9 +22,9 @@ struct FloatClampTests {
             edge: .top
         )
         // Top edge snaps to the strip's bottom; size and x unchanged.
-        #expect(clamped.minY == strip.maxY)
-        #expect(clamped.origin.x == 100)
-        #expect(clamped.size == frame.size)
+        expectEqual(clamped.minY, strip.maxY)
+        expectEqual(clamped.origin.x, 100)
+        expectEqual(clamped.size, frame.size)
     }
 
     @Test("A float already clear of the strip is untouched")
@@ -35,7 +35,7 @@ struct FloatClampTests {
             of: strip,
             edge: .top
         )
-        #expect(clamped == frame)
+        expectEqual(clamped, frame)
     }
 
     @Test("A float flush at the strip's bottom is untouched")
@@ -51,7 +51,7 @@ struct FloatClampTests {
             of: strip,
             edge: .top
         )
-        #expect(clamped == frame)
+        expectEqual(clamped, frame)
     }
 
     @Test("A float only partly under the strip is still pushed")
@@ -63,7 +63,7 @@ struct FloatClampTests {
             of: strip,
             edge: .top
         )
-        #expect(clamped.minY == strip.maxY)
+        expectEqual(clamped.minY, strip.maxY)
     }
 
     @Test("A float within tolerance of clear is left alone")
@@ -82,7 +82,7 @@ struct FloatClampTests {
             of: strip,
             edge: .top
         )
-        #expect(clamped == frame)
+        expectEqual(clamped, frame)
     }
 
     @Test("The inset holds a float clear by the ring's width")
@@ -99,7 +99,7 @@ struct FloatClampTests {
             edge: .top,
             inset: 5
         )
-        #expect(clamped.minY == strip.maxY + 5)
+        expectEqual(clamped.minY, strip.maxY + 5)
         // And a window already clear by MORE than the inset is
         // still untouched — the inset moves the wall, it does not
         // start pulling windows toward it.
@@ -126,7 +126,7 @@ struct FloatClampTests {
             edge: .top,
             inset: 5
         )
-        #expect(carved.minY == strip.maxY + 5)
-        #expect(carved.maxY == region.maxY)
+        expectEqual(carved.minY, strip.maxY + 5)
+        expectEqual(carved.maxY, region.maxY)
     }
 }

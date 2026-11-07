@@ -93,7 +93,7 @@ struct BspFocusResizeTests {
         core.execute("resize", args: [.string("x"), .number(200)])
         #expect(resolvedBsp(core).splitRatioH > before)
         // The global never moves for a no-override space (#458).
-        #expect(core.tiler.settings.bsp.splitRatioH == before)
+        expectEqual(core.tiler.settings.bsp.splitRatioH, before)
     }
 
     @Test("x with the right window focused lowers the H ratio")
@@ -165,7 +165,7 @@ struct BspFocusResizeTests {
             args: [.string("x"), .number(200)]
         )
         #expect(response.isSuccess)
-        #expect(resolvedBsp(core).splitRatioH == before)
+        expectEqual(resolvedBsp(core).splitRatioH, before)
     }
 
     @Test("right focus moves the space's own value (#17)")
@@ -184,7 +184,7 @@ struct BspFocusResizeTests {
         // The flipped sign lands on the space's resolved value
         // (the session layer, #764), the authored override keeps
         // its number and the shared global stays put.
-        #expect(over?.splitRatioH == 0.5)
+        expectEqual(over?.splitRatioH, 0.5)
         #expect(resolvedBsp(core).splitRatioH < 0.5)
         #expect(
             core.tiler.settings.bsp.splitRatioH == globalBefore

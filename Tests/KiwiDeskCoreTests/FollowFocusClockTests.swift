@@ -23,7 +23,7 @@ struct FollowFocusClockTests {
                     FollowFocusIntent.drainWindow - 1
                 )
             }
-            #expect(debt.owed() == window)
+            expectEqual(debt.owed(), window)
             core.wallClock = {
                 start.addingTimeInterval(FollowFocusIntent.drainWindow)
             }

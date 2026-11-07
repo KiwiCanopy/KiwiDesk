@@ -135,8 +135,8 @@ struct SwitchReconcileTests {
         #expect(box.destroyed.isEmpty, "applied before the batch")
         #expect(loop.switchReads.isPending)
         box.runOne()
-        #expect(Set(box.destroyed) == [firstID, secondID])
-        #expect(box.folds == 1)
+        expectEqual(Set(box.destroyed), [firstID, secondID])
+        expectEqual(box.folds, 1)
         #expect(!loop.switchReads.isPending)
         #expect(loop.switchReads.batch == nil)
     }
@@ -146,18 +146,18 @@ struct SwitchReconcileTests {
         let (loop, box) = makeLoop()
         switchDesktop(loop)
         box.runOne()
-        #expect(box.bounds.count == 1)
+        expectEqual(box.bounds.count, 1)
         box.bounds.removeFirst()()
         #expect(box.destroyed.count == 1, "the landed read")
-        #expect(box.folds == 1)
+        expectEqual(box.folds, 1)
         #expect(!loop.switchReads.isPending)
         #expect(loop.switchReads.isOutstanding(second))
         box.runOne()
-        #expect(box.destroyed.count == 2)
+        expectEqual(box.destroyed.count, 2)
         #expect(box.folds == 2, "the straggler's own fold")
         #expect(!loop.switchReads.isOutstanding(second))
         // The straggler's lone apply is a late read, not a reveal.
-        #expect(box.foldedDestroys == [firstID])
+        expectEqual(box.foldedDestroys, [firstID])
     }
 
     @Test("a superseded switch's reads apply nothing")
@@ -172,8 +172,8 @@ struct SwitchReconcileTests {
         box.runOne()
         box.listed = [:]
         box.drain()
-        #expect(box.folds == 1)
-        #expect(Set(box.destroyed) == [firstID, secondID])
+        expectEqual(box.folds, 1)
+        expectEqual(Set(box.destroyed), [firstID, secondID])
         for bound in box.bounds { bound() }
         #expect(box.folds == 1, "a stale bound applied")
     }
@@ -194,7 +194,7 @@ struct SwitchReconcileTests {
         box.runLast()
         #expect(box.destroyed.isEmpty)
         box.drain()
-        #expect(box.destroyed == [secondID])
+        expectEqual(box.destroyed, [secondID])
         #expect(loop.elements[first]?[firstID] != nil)
     }
 
@@ -212,8 +212,8 @@ struct SwitchReconcileTests {
         box.runLast()
         #expect(box.destroyed.isEmpty, "applied outside the fold")
         box.drain()
-        #expect(box.folds == 1)
-        #expect(Set(box.foldedDestroys) == [firstID, secondID])
+        expectEqual(box.folds, 1)
+        expectEqual(Set(box.foldedDestroys), [firstID, secondID])
     }
 
     @Test("a queued read is ordered by when it ran, not when asked")
@@ -256,7 +256,7 @@ struct SwitchReconcileTests {
         // …and the batch's newer reads list both windows.
         box.listed = [first: firstID, second: secondID]
         box.drain()
-        #expect(box.folds == 1)
+        expectEqual(box.folds, 1)
         #expect(box.destroyed.isEmpty)
     }
 
@@ -271,7 +271,7 @@ struct SwitchReconcileTests {
         #expect(ran.isEmpty)
         box.drain()
         // The held bars are paid ahead of the owed work.
-        #expect(ran == [-1, 2, 9])
+        expectEqual(ran, [-1, 2, 9])
         loop.afterSwitchReads { ran.append(3) }
         #expect(ran == [-1, 2, 9, 3], "no batch pending: at once")
     }
@@ -286,7 +286,7 @@ struct SwitchReconcileTests {
         loop.settleAfterSwitchReads { settled.append(2) }
         #expect(settled.isEmpty, "settled before the fold")
         box.drain()
-        #expect(settled == [2])
+        expectEqual(settled, [2])
         loop.settleAfterSwitchReads { settled.append(3) }
         #expect(settled == [2, 3], "no batch pending: settle at once")
     }

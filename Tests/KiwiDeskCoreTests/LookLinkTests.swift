@@ -11,7 +11,7 @@ struct LookLinkTests {
     func parses() throws {
         let url = try #require(URL(string: "kiwidesk://look/purple-neon"))
         let link = try #require(LookLink(url))
-        #expect(link.id == "purple-neon")
+        expectEqual(link.id, "purple-neon")
         #expect(
             link.download.absoluteString
                 == "https://github.com/KiwiCanopy/KiwiDesk-Looks"
@@ -77,8 +77,8 @@ struct LookLinkTests {
             asked = request.url
             return try await answer(200)(request)
         }
-        #expect(data == Data("{}".utf8))
-        #expect(asked == link.download)
+        expectEqual(data, Data("{}".utf8))
+        expectEqual(asked, link.download)
     }
 
     @Test("a 404 is a look the gallery no longer has")
@@ -92,7 +92,7 @@ struct LookLinkTests {
     func limitIsInclusive() async throws {
         let edge = Data(count: LookLink.byteLimit)
         let data = try await link.fetch(using: answer(200, edge))
-        #expect(data.count == LookLink.byteLimit)
+        expectEqual(data.count, LookLink.byteLimit)
     }
 
     @Test("another status or an oversized body is no look file")

@@ -84,7 +84,7 @@ struct AppcastModeTests {
             Self.mixed(),
             arguments: ["--release", Self.goodTag, "--check"]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(run.stderr.contains("is offerable"))
     }
 
@@ -136,7 +136,7 @@ struct AppcastModeTests {
             Self.mixed(),
             arguments: ["--release", Self.goodTag]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(
             run.stdout.contains(
                 "<sparkle:version>9999.1.0</sparkle:version>"
@@ -190,7 +190,7 @@ struct AppcastModeTests {
             [AppcastFixture.release(tag: Self.goodTag)],
             arguments: ["--all", "--notes", file.path]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(
             run.stdout.contains(summary),
             "the feed must quote the notes, not copy them"

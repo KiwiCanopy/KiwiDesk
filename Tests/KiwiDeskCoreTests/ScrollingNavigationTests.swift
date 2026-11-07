@@ -71,13 +71,13 @@ struct ScrollingNavigationTests {
                 core.execute("focus", args: [.string("left")])
                     .isSuccess
             )
-            #expect(core.activeSpace?.focused == WindowID(2))
+            expectEqual(core.activeSpace?.focused, WindowID(2))
             core.state.workspaces.focus(WindowID(3), in: space)
             #expect(
                 core.execute("focus", args: [.string("right")])
                     .isSuccess
             )
-            #expect(core.activeSpace?.focused == WindowID(4))
+            expectEqual(core.activeSpace?.focused, WindowID(4))
         }
     }
 
@@ -100,7 +100,7 @@ struct ScrollingNavigationTests {
             core.state.workspaces[space]?.windows
                 == [1, 3, 2, 4, 5].map { WindowID($0) }
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         #expect(
             core.execute("swap", args: [.string("right")])
                 .isSuccess
@@ -127,12 +127,12 @@ struct ScrollingNavigationTests {
             core.execute("focus", args: [.string("up")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         #expect(
             core.execute("focus", args: [.string("down")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         #expect(
             core.execute("swap", args: [.string("down")])
                 .isSuccess
@@ -159,7 +159,7 @@ struct ScrollingNavigationTests {
             core.execute("focus", args: [.string("up")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Cross-axis directions fall through geometrically")
@@ -171,7 +171,7 @@ struct ScrollingNavigationTests {
         // array step claimed the direction, it would move focus.
         let up = core.execute("focus", args: [.string("up")])
         #expect(!up.isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("Row ends do not wrap")
@@ -186,7 +186,7 @@ struct ScrollingNavigationTests {
         core.execute("set_focus_wrap", args: [.string("off")])
         let left = core.execute("focus", args: [.string("left")])
         #expect(!left.isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         core.state.workspaces.focus(WindowID(3), in: space)
         let right = core.execute(
             "swap",
@@ -209,7 +209,7 @@ struct ScrollingNavigationTests {
         // The array step must not claim it (it is not tiled).
         let left = core.execute("focus", args: [.string("left")])
         #expect(!left.isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("Focus steps tiled adjacency across a floater")
@@ -228,7 +228,7 @@ struct ScrollingNavigationTests {
             core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Swap trades raw positions across a floater")
@@ -251,7 +251,7 @@ struct ScrollingNavigationTests {
             core.state.workspaces[space]?.windows
                 == [3, 2, 1].map { WindowID($0) }
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     @Test("Monocle wraps under This screen")
@@ -285,6 +285,6 @@ struct ScrollingNavigationTests {
             core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 }

@@ -12,13 +12,13 @@ extension OverflowMarkClickTests {
         defer { rig.close() }
         try rig.click()
         let panel = rig.peek.panel
-        #expect(panel.panel?.canBecomeKey == true)
+        expectEqual(panel.panel?.canBecomeKey, true)
         #expect(panel.morphKey(125))
-        #expect(panel.body.hovered == 0)
+        expectEqual(panel.body.hovered, 0)
         #expect(panel.morphKey(125))
-        #expect(panel.body.hovered == 1)
+        expectEqual(panel.body.hovered, 1)
         #expect(panel.morphKey(126))
-        #expect(panel.body.hovered == 0)
+        expectEqual(panel.body.hovered, 0)
         #expect(panel.morphKey(53))
         #expect(rig.peek.shown == nil)
     }

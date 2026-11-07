@@ -154,7 +154,7 @@ struct CommandedFocusFloatRaiseTests {
         core.raiseFloatsAbove(afterFocusing: WindowID(1))
         let first = try #require(core.deferred.task(for: .floatRaise))
         await first.value
-        #expect(core.floatRaiseDebt.owed == WindowID(1))
+        expectEqual(core.floatRaiseDebt.owed, WindowID(1))
         core.floatRaiseDebt.restoresInFlight = 0
         core.runPendingFloatRaise()
         #expect(core.floatRaiseDebt.owed == nil)
@@ -177,7 +177,7 @@ struct CommandedFocusFloatRaiseTests {
         core.floatRaiseDebt.owed = WindowID(1)
         core.runPendingFloatRaise()
         #expect(core.floatRaiseDebt.owed == nil)
-        #expect(core.deferred.task(for: .floatRaise) == fresh)
+        expectEqual(core.deferred.task(for: .floatRaise), fresh)
         core.deferred.cancel(.floatRaise)
     }
 

@@ -122,6 +122,6 @@ struct PlacementLedgerTests {
         ledger.forgetAll()
         #expect(ledger.recent(id) == nil)
         clock.now = 42
-        #expect(ledger.clock() == 42)
+        expectEqual(ledger.clock(), 42)
     }
 }

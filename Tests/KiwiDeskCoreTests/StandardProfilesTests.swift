@@ -29,7 +29,7 @@ struct PositionalDisplaysTests {
             displays,
             mainID: DisplayID(2)
         )
-        #expect(ordered.map(\.name) == ["Center", "Left", "Right"])
+        expectEqual(ordered.map(\.name), ["Center", "Left", "Right"])
     }
 
     @Test("Unknown main falls back to leftmost-first")
@@ -42,7 +42,7 @@ struct PositionalDisplaysTests {
             displays,
             mainID: nil
         )
-        #expect(ordered.map(\.name) == ["Left", "Right"])
+        expectEqual(ordered.map(\.name), ["Left", "Right"])
     }
 
     @Test("Identical coordinates order by fingerprint")
@@ -55,7 +55,7 @@ struct PositionalDisplaysTests {
             displays,
             mainID: nil
         )
-        #expect(ordered.map(\.name) == ["A", "B"])
+        expectEqual(ordered.map(\.name), ["A", "B"])
     }
 }
 
@@ -89,7 +89,7 @@ struct StandardCatalogTests {
                 sizes: catalogSizes(count)
             )
             .filter(\.isStandard)
-            #expect(standards.count == 1)
+            expectEqual(standards.count, 1)
         }
     }
 
@@ -155,12 +155,12 @@ struct ProfileCompositionTests {
                 mainID: DisplayID(1)
             )
         )
-        #expect(composed.sourceName == "Developer")
-        #expect(composed.spaces.count == 4)
-        #expect(composed.spaceModes[SpaceID(1)] == .grid)
-        #expect(composed.spaceModes[SpaceID(2)] == .stack)
+        expectEqual(composed.sourceName, "Developer")
+        expectEqual(composed.spaces.count, 4)
+        expectEqual(composed.spaceModes[SpaceID(1)], .grid)
+        expectEqual(composed.spaceModes[SpaceID(2)], .stack)
         for space in composed.spaces {
-            #expect(composed.assignment[space] == DisplayID(1))
+            expectEqual(composed.assignment[space], DisplayID(1))
         }
     }
 
@@ -201,12 +201,12 @@ struct ProfileCompositionTests {
             )
         )
         // 3-screen Standard (10 spaces) + screens 4 and 5.
-        #expect(composed.sourceName == "Command Center")
-        #expect(composed.spaces.count == 12)
-        #expect(composed.spaceModes[SpaceID(11)] == .monocle)
-        #expect(composed.spaceModes[SpaceID(12)] == .monocle)
-        #expect(composed.assignment[SpaceID(11)] == DisplayID(4))
-        #expect(composed.assignment[SpaceID(12)] == DisplayID(5))
+        expectEqual(composed.sourceName, "Command Center")
+        expectEqual(composed.spaces.count, 12)
+        expectEqual(composed.spaceModes[SpaceID(11)], .monocle)
+        expectEqual(composed.spaceModes[SpaceID(12)], .monocle)
+        expectEqual(composed.assignment[SpaceID(11)], DisplayID(4))
+        expectEqual(composed.assignment[SpaceID(12)], DisplayID(5))
     }
 
     @Test("Positional mapping follows the main display")
@@ -223,8 +223,8 @@ struct ProfileCompositionTests {
                 mainID: DisplayID(2)
             )
         )
-        #expect(composed.assignment[SpaceID(1)] == DisplayID(2))
-        #expect(composed.assignment[SpaceID(5)] == DisplayID(1))
+        expectEqual(composed.assignment[SpaceID(1)], DisplayID(2))
+        expectEqual(composed.assignment[SpaceID(5)], DisplayID(1))
     }
 
     @Test("No displays composes nothing")

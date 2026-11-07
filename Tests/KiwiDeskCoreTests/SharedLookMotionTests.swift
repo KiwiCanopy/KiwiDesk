@@ -80,7 +80,7 @@ struct SharedLookMotionTests {
         load("Fast", core)
         #expect(!core.sharedLookLedger.motionOwed)
         let shared = core.guiConfigStore.load()?.look
-        #expect(shared?.style["animations.duration"] == .number(100))
+        expectEqual(shared?.style["animations.duration"], .number(100))
         #expect(try stored("Fast", core).look == nil)
         // Another follower that differs keeps its own, and its speed.
         #expect(try stored("Calm", core).look == .own)
@@ -114,12 +114,12 @@ struct SharedLookMotionTests {
         core.prepareSharedLook()
         load("Work", core)
         let stale = try stored("Stale", core)
-        #expect(stale.look == .own)
+        expectEqual(stale.look, .own)
         #expect(
             stale.settings.kiwishelf.fillColor
                 == TilingSettings().kiwishelf.fillColor
         )
-        #expect(stale.settings.animations.durationMS == 100)
+        expectEqual(stale.settings.animations.durationMS, 100)
     }
 
     /// The real write shape with the crossing still owed: the file
@@ -142,7 +142,7 @@ struct SharedLookMotionTests {
         #expect(try stored("Work", core).look == nil)
         let calm = try stored("Calm", core)
         #expect(calm.look == nil)
-        #expect(calm.settings.kiwishelf.fillColor == "#102030")
+        expectEqual(calm.settings.kiwishelf.fillColor, "#102030")
         #expect(try stored("Fast", core).look == .own)
         #expect(try duration("Fast", core) == 100)
     }
@@ -235,7 +235,7 @@ struct SharedLookMotionTests {
         #expect(core.sharedLookLedger.motionOwed)
         load("Work", core)
         let shared = try #require(core.guiConfigStore.load()?.look)
-        #expect(shared.style["animations.expand_duration"] == .number(900))
+        expectEqual(shared.style["animations.expand_duration"], .number(900))
         #expect(
             shared.style["animations.duration"]
                 == .number(Double(TilingSettings().animations.durationMS))

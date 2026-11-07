@@ -78,8 +78,8 @@ struct DesktopBindingRuleSweepTests {
         NativeSpaces.activeSpaceIDOverride = 11
         let before = bulkReconciles
         core.handleDesktopChange()
-        #expect(core.profiles.currentName == "Work")
-        #expect(bulkReconciles - before == 0)
+        expectEqual(core.profiles.currentName, "Work")
+        expectEqual(bulkReconciles - before, 0)
         #expect(!core.defersRuleSweepToSwitchPass)
     }
 
@@ -89,7 +89,7 @@ struct DesktopBindingRuleSweepTests {
         let core = try makeCore()
         let before = bulkReconciles
         core.execute("load_profile", args: [.string("Work")])
-        #expect(core.profiles.currentName == "Work")
-        #expect(bulkReconciles - before == 1)
+        expectEqual(core.profiles.currentName, "Work")
+        expectEqual(bulkReconciles - before, 1)
     }
 }

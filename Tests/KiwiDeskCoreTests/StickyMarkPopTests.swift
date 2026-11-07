@@ -55,7 +55,7 @@ struct StickyMarkPopTests {
         let bounds = CGRect(origin: .zero, size: panel)
         // A transform about the centre, never a bare scale: an
         // NSNumber is an NSValue too, and decodes to no transform.
-        #expect(pop.keyPath == "transform")
+        expectEqual(pop.keyPath, "transform")
         let transforms = (pop.values ?? []).compactMap {
             value -> CATransform3D? in
             guard let value = value as? NSValue,

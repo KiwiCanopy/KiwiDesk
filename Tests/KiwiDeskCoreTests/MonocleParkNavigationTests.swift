@@ -69,7 +69,7 @@ struct MonocleParkNavigationTests {
             !core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w3)
+        expectEqual(core.activeSpace?.focused, w3)
     }
 
     @Test("Wrap on: focus wraps the carousel")
@@ -83,7 +83,7 @@ struct MonocleParkNavigationTests {
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w1)
+        expectEqual(core.activeSpace?.focused, w1)
     }
 
     @Test("Cross-axis focus finds no parked window either")
@@ -103,6 +103,6 @@ struct MonocleParkNavigationTests {
             !core.execute("focus", args: [.string("down")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w3)
+        expectEqual(core.activeSpace?.focused, w3)
     }
 }

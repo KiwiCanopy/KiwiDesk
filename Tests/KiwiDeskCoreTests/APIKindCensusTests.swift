@@ -51,21 +51,21 @@ struct APIKindCensusTests {
 
     @Test("the name reads the kind")
     func derivation() {
-        #expect(APIReference.derivedKind(of: "set_gaps") == .setting)
-        #expect(APIReference.derivedKind(of: "get_state") == .query)
-        #expect(APIReference.derivedKind(of: "list") == .query)
-        #expect(APIReference.derivedKind(of: "list_groups") == .query)
-        #expect(APIReference.derivedKind(of: "current") == .query)
-        #expect(APIReference.derivedKind(of: "focus") == .action)
+        expectEqual(APIReference.derivedKind(of: "set_gaps"), .setting)
+        expectEqual(APIReference.derivedKind(of: "get_state"), .query)
+        expectEqual(APIReference.derivedKind(of: "list"), .query)
+        expectEqual(APIReference.derivedKind(of: "list_groups"), .query)
+        expectEqual(APIReference.derivedKind(of: "current"), .query)
+        expectEqual(APIReference.derivedKind(of: "focus"), .action)
         // A prefix is a whole word, never a stem.
-        #expect(APIReference.derivedKind(of: "settle") == .action)
-        #expect(APIReference.derivedKind(of: "listen") == .action)
+        expectEqual(APIReference.derivedKind(of: "settle"), .action)
+        expectEqual(APIReference.derivedKind(of: "listen"), .action)
     }
 
     @Test("each kind is used")
     func everyKindIsUsed() {
         let kinds = APIReference.entries.map(APIReference.kind(of:))
-        #expect(Set(kinds) == Set(APIKind.allCases))
+        expectEqual(Set(kinds), Set(APIKind.allCases))
     }
 
     @Test("a name that reads either way is ruled")
@@ -141,7 +141,7 @@ struct APIKindCensusTests {
             Issue.record("expected an object payload")
             return
         }
-        #expect(entry["kind"] == .string("action"))
+        expectEqual(entry["kind"], .string("action"))
         for kind in APIKind.allCases {
             let listing = APIReference.helpResponse(kind: kind)
             guard case .object(let root)? = listing.data,
@@ -158,7 +158,7 @@ struct APIKindCensusTests {
                 }
                 #expect(!rows.isEmpty)
                 for case .object(let row) in rows {
-                    #expect(row["kind"] == .string(kind.rawValue))
+                    expectEqual(row["kind"], .string(kind.rawValue))
                 }
             }
         }

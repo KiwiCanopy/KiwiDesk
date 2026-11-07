@@ -37,7 +37,7 @@ struct SpaceBarParityTests {
             SpaceBarStyle.self,
             from: data
         )
-        #expect(decoded == style)
+        expectEqual(decoded, style)
     }
 
     @Test("Missing keys decode to defaults")
@@ -46,7 +46,7 @@ struct SpaceBarParityTests {
             SpaceBarStyle.self,
             from: Data("{}".utf8)
         )
-        #expect(decoded == SpaceBarStyle())
+        expectEqual(decoded, SpaceBarStyle())
     }
 }
 
@@ -93,10 +93,10 @@ struct SpaceBarCommandParityTests {
                 style,
                 from: SpaceBarStyle()
             )
-            #expect(changed.count == 1)
+            expectEqual(changed.count, 1)
             touched.formUnion(changed)
         }
-        #expect(touched == fieldNames(SpaceBarStyle()))
+        expectEqual(touched, fieldNames(SpaceBarStyle()))
     }
 
     @Test("Parse accepts every field's spelling")

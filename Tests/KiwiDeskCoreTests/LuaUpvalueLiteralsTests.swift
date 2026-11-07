@@ -47,8 +47,8 @@ struct LuaUpvalueLiteralsTests {
             resolve("f(s)", ["s": .string("a\"b\\\n\u{1}")])
                 == "f(\"a\\\"b\\\\\\n\\001\")"
         )
-        #expect(resolve("f(b)", ["b": .bool(true)]) == "f(true)")
-        #expect(resolve("f(x)", ["x": .number(0.5)]) == "f(0.5)")
+        expectEqual(resolve("f(b)", ["b": .bool(true)]), "f(true)")
+        expectEqual(resolve("f(x)", ["x": .number(0.5)]), "f(0.5)")
     }
 
     @Test("A non-scalar or non-finite upvalue keeps the raw body")
@@ -57,8 +57,8 @@ struct LuaUpvalueLiteralsTests {
         let upvalues: [String: LuaValue?] = [
             "helper": nil, "i": .number(3),
         ]
-        #expect(resolve(raw, upvalues) == raw)
-        #expect(resolve("f(n)", ["n": .number(.nan)]) == "f(n)")
+        expectEqual(resolve(raw, upvalues), raw)
+        expectEqual(resolve("f(n)", ["n": .number(.nan)]), "f(n)")
     }
 
     @Test("Fields, strings, comments and labels are left alone")
@@ -81,14 +81,14 @@ struct LuaUpvalueLiteralsTests {
 
     @Test("A literal that would fuse with its neighbour is wrapped")
     func adjoiningLiteralsWrap() {
-        #expect(resolve("f(i..x)", ["i": .number(3)]) == "f((3)..x)")
+        expectEqual(resolve("f(i..x)", ["i": .number(3)]), "f((3)..x)")
         #expect(
             resolve("s:upper()", ["s": .string("a")])
                 == "(\"a\"):upper()"
         )
-        #expect(resolve("f(x-i)", ["i": .number(-1)]) == "f(x-(-1))")
-        #expect(resolve("f(i)", ["i": .number(-1)]) == "f(-1)")
-        #expect(resolve("f(i^2)", ["i": .number(-2)]) == "f((-2)^2)")
+        expectEqual(resolve("f(x-i)", ["i": .number(-1)]), "f(x-(-1))")
+        expectEqual(resolve("f(i)", ["i": .number(-1)]), "f(-1)")
+        expectEqual(resolve("f(i^2)", ["i": .number(-2)]), "f((-2)^2)")
     }
 
     @Test("A name the body declares keeps the raw body")
@@ -100,7 +100,7 @@ struct LuaUpvalueLiteralsTests {
             "global i\nf(i)",
             "local <const> i = 2 f(i)",
         ] {
-            #expect(resolve(body, ["i": .number(3)]) == body)
+            expectEqual(resolve(body, ["i": .number(3)]), body)
         }
     }
 
@@ -117,7 +117,7 @@ struct LuaUpvalueLiteralsTests {
             "-- note\r\nlocal mode = 1\r\nmode = 2\r\n",
             "-- note\rlocal mode = 1\rmode = 2",
         ] {
-            #expect(resolve(body, upvalues, file: file) == body)
+            expectEqual(resolve(body, upvalues, file: file), body)
         }
     }
 
@@ -163,7 +163,7 @@ struct SpaceCatalogSpellingTests {
             "KiwiDesk.focus(\"left\")",
             "KiwiDesk.focus_space(i)",
         ] {
-            #expect(SpaceLuaArg.catalogSpelling(of: kept) == kept)
+            expectEqual(SpaceLuaArg.catalogSpelling(of: kept), kept)
         }
     }
 }
@@ -247,12 +247,12 @@ struct LuaUpvalueReadingTests {
         for name in ["nul", "bad", "big", "whole", "edge"] {
             #expect(values[name] == .some(nil), "\(name)")
         }
-        #expect(values["n"] == .some(.number(3)))
-        #expect(values["x"] == .some(.number(0.5)))
-        #expect(values["s"] == .some(.string("ok")))
-        #expect(values["b"] == .some(.bool(true)))
-        #expect(values["under"] == .some(.number(9_007_199_254_740_991)))
-        #expect(values["bom"] == .some(.string("\u{FEFF}a")))
+        expectEqual(values["n"], .some(.number(3)))
+        expectEqual(values["x"], .some(.number(0.5)))
+        expectEqual(values["s"], .some(.string("ok")))
+        expectEqual(values["b"], .some(.bool(true)))
+        expectEqual(values["under"], .some(.number(9_007_199_254_740_991)))
+        expectEqual(values["bom"], .some(.string("\u{FEFF}a")))
     }
 }
 

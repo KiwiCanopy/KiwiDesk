@@ -177,7 +177,7 @@ struct DefaultKeybindingLadderTests {
             )
         }
         // Every ruled pair is seeded, or the register outgrew it.
-        #expect(reversed == Self.relatedVariants.count)
+        expectEqual(reversed, Self.relatedVariants.count)
     }
 
     @Test("sticky seeds ⌃⌥S global; ⌃⌥P is Pocket, pin unseeded")
@@ -198,7 +198,7 @@ struct DefaultKeybindingLadderTests {
             byLua["KiwiDesk.toggle_sticky()"]
                 == "control+option+s"
         )
-        #expect(byLua["KiwiDesk.pocket()"] == "control+option+p")
+        expectEqual(byLua["KiwiDesk.pocket()"], "control+option+p")
         #expect(byLua["KiwiDesk.toggle_display_sticky()"] == nil)
     }
 }

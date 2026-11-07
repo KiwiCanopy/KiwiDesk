@@ -43,7 +43,7 @@ struct FocusRaiseFlightRecordTests {
                 ManagedWindow(id: anchor, pid: own, appName: "Anchor")
             )
         )
-        #expect(core.focusedWindow?.id == anchor)
+        expectEqual(core.focusedWindow?.id, anchor)
         guard let observer = AXApplicationObserver(pid: own) else {
             Issue.record("could not create a self AX observer")
             return core
@@ -92,7 +92,7 @@ struct FocusRaiseFlightRecordTests {
         let core = makeCore()
         raise(core, to: anchor)
         core.handleWindowRekeyed(old: anchor, new: WindowID(9))
-        #expect(core.raiseFlight?.target == WindowID(9))
+        expectEqual(core.raiseFlight?.target, WindowID(9))
     }
 
     /// The raise landed and the user went back to the app it
@@ -110,7 +110,7 @@ struct FocusRaiseFlightRecordTests {
             )
         )
         #expect(core.raiseFlight == nil)
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 
     /// The write site: a `focus` press that moved the anchor
@@ -131,9 +131,9 @@ struct FocusRaiseFlightRecordTests {
         #expect(
             core.execute("focus", args: [.string("left")]).isSuccess
         )
-        #expect(core.focusedWindow?.id == previous)
-        #expect(core.raiseFlight?.target == previous)
-        #expect(core.raiseFlight?.leftPID == getpid())
+        expectEqual(core.focusedWindow?.id, previous)
+        expectEqual(core.raiseFlight?.target, previous)
+        expectEqual(core.raiseFlight?.leftPID, getpid())
     }
 
     /// A `focusWindow` re-assert after the user switched apps —
@@ -158,6 +158,6 @@ struct FocusRaiseFlightRecordTests {
         )
         core.focusWindow(anchor, warp: false)
         #expect(core.raiseFlight == nil)
-        #expect(preflight(core, "focus")?.error == Self.anotherApp)
+        expectEqual(preflight(core, "focus")?.error, Self.anotherApp)
     }
 }

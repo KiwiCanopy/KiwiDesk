@@ -43,7 +43,7 @@ struct FloatPlacementCascadeTests {
             in: region
         )
         #expect(placed.minX - frame.minX > step)
-        #expect(placed.minX - frame.minX == placed.minY - frame.minY)
+        expectEqual(placed.minX - frame.minX, placed.minY - frame.minY)
         #expect(!FloatGather.isPiled(placed, among: [larger]))
     }
 
@@ -84,7 +84,7 @@ struct FloatPlacementCascadeTests {
             avoiding: [big, frame],
             in: region
         )
-        #expect(placed == frame.offsetBy(dx: step, dy: step))
+        expectEqual(placed, frame.offsetBy(dx: step, dy: step))
     }
 
     @Test("a step off the region prices the pile at the centre")

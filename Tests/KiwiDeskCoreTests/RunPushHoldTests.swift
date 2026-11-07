@@ -28,7 +28,7 @@ extension RunPushCommandTests {
         #expect(abs(mate.height - 300) < 1)
         // The press after it pushes.
         press(core, "y", 5)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
         #expect(refusals.isEmpty)
     }
 
@@ -50,21 +50,21 @@ extension RunPushCommandTests {
         core.borders.onResizeRefusal = { refusals.append($0) }
         press(core, "y", 5)
         #expect(refusals.isEmpty)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
     }
 
     @Test("A hold in a run that hides stops on a length, mates at floors")
     func holdInAHidingRunStopsOnALength() throws {
         // Three windows in the stack zone: two fit, one waits.
         let (core, id) = makeSpace("stack", windows: 4, focus: 2)
-        #expect(hidden(core, id) == [w(4)])
+        expectEqual(hidden(core, id), [w(4)])
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.keys.holdGlide.isGliding = true
         core.keys.holdGlide.isApplyingGlideStep = true
         press(core, "y", 300)
         core.keys.holdGlide.isApplyingGlideStep = false
-        #expect(hidden(core, id) == [w(4)])
+        expectEqual(hidden(core, id), [w(4)])
         #expect(!core.keys.isGliding)
         #expect(refusals.isEmpty)
         #expect(core.state.workspaces[id]?.runSizes[w(2)] != nil)

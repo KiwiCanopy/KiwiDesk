@@ -71,7 +71,7 @@ struct StashRefusedSizeTests {
         let record = core.sessionSnapshot().windows.first {
             $0.windowID == window
         }
-        #expect(record?.frame == real)
+        expectEqual(record?.frame, real)
     }
 
     /// An answer away from the asked origin is a set that did not
@@ -90,14 +90,14 @@ struct StashRefusedSizeTests {
         core.handle(.windowMoved(window, elsewhere))
         passGrace(core, seen)
         core.retile(pass: .apply)
-        #expect(core.tiler.stashOriginal(window) == asked)
-        #expect(seen.sends == 1)
+        expectEqual(core.tiler.stashOriginal(window), asked)
+        expectEqual(seen.sends, 1)
         core.handle(.windowMoved(window, elsewhere))
         passGrace(core, seen)
         core.retile(pass: .apply)
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(window) == nil)
-        #expect(seen.sends == 1)
+        expectEqual(seen.sends, 1)
         #expect(seen.lines.contains { $0.contains("\(window) refused") })
     }
 
@@ -109,8 +109,8 @@ struct StashRefusedSizeTests {
         let (core, asked) = try followed()
         let seen = watch(core, asked)
         for _ in 1...3 { core.retile(pass: .apply) }
-        #expect(core.tiler.stashOriginal(window) == asked)
-        #expect(seen.sends == 0)
+        expectEqual(core.tiler.stashOriginal(window), asked)
+        expectEqual(seen.sends, 0)
         #expect(seen.lines.isEmpty)
     }
 
@@ -130,8 +130,8 @@ struct StashRefusedSizeTests {
             passGrace(core, seen)
             core.retile(pass: .apply)
         }
-        #expect(core.tiler.stashOriginal(window) == asked)
-        #expect(seen.sends == 3)
+        expectEqual(core.tiler.stashOriginal(window), asked)
+        expectEqual(seen.sends, 3)
         #expect(seen.lines.isEmpty)
     }
 
@@ -174,7 +174,7 @@ struct StashRefusedSizeTests {
         smaller.size.height -= 100
         core.tiler.seedStash(window, frame: smaller)
         core.retile(pass: .apply)
-        #expect(core.tiler.recentInstantTarget(window) == smaller)
-        #expect(core.tiler.stashOriginal(window) == smaller)
+        expectEqual(core.tiler.recentInstantTarget(window), smaller)
+        expectEqual(core.tiler.stashOriginal(window), smaller)
     }
 }

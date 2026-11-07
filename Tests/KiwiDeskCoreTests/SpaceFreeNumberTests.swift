@@ -14,12 +14,12 @@ struct SpaceFreeNumberTests {
         #expect(
             SpaceID.smallestFreeNumber(among: [1, 2, 3]) == SpaceID(4)
         )
-        #expect(SpaceID.smallestFreeNumber(among: []) == SpaceID(1))
+        expectEqual(SpaceID.smallestFreeNumber(among: []), SpaceID(1))
     }
 
     @Test("named Spaces take no number")
     func namesAreIgnored() {
         let ids: [SpaceID] = ["Work", "3a", 1]
-        #expect(SpaceID.smallestFreeNumber(among: ids) == SpaceID(2))
+        expectEqual(SpaceID.smallestFreeNumber(among: ids), SpaceID(2))
     }
 }

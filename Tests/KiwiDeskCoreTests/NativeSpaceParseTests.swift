@@ -38,7 +38,7 @@ struct NativeSpaceParseTests {
                 ]
             )
         ])
-        #expect(spaces.count == 2)
+        expectEqual(spaces.count, 2)
         #expect(spaces[0].identity == nil)
         #expect(spaces[0].isCurrent)
         #expect(
@@ -106,9 +106,9 @@ struct NativeSpaceParseTests {
                 ]
             )
         ])
-        #expect(spaces.map(\.id) == [1, 4, 9, 3])
-        #expect(spaces.map(\.isUser) == [true, true, false, true])
-        #expect(NativeSpaces.number(of: 3, in: spaces) == 3)
+        expectEqual(spaces.map(\.id), [1, 4, 9, 3])
+        expectEqual(spaces.map(\.isUser), [true, true, false, true])
+        expectEqual(NativeSpaces.number(of: 3, in: spaces), 3)
         #expect(NativeSpaces.number(of: 9, in: spaces) == nil)
     }
 
@@ -122,6 +122,6 @@ struct NativeSpaceParseTests {
                 spaces: [["type": 0], ["id64": UInt64(2), "type": 0]]
             )
         ])
-        #expect(spaces.map(\.id) == [2])
+        expectEqual(spaces.map(\.id), [2])
     }
 }

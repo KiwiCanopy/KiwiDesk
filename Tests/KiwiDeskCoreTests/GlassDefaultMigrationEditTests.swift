@@ -176,8 +176,8 @@ struct GlassDefaultMigrationEditTests {
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(text.contains("\n"))
         let s = try settings(out)
-        #expect(leaf(s, "space_bar") == false)
-        #expect(leaf(s, "shortcut_panel") == false)
+        expectEqual(leaf(s, "space_bar"), false)
+        expectEqual(leaf(s, "shortcut_panel"), false)
     }
 
     /// A string value holding a brace is a body the scan cannot
@@ -273,6 +273,6 @@ struct GlassDefaultMigrationEditTests {
         let edited = ConfigMigration.surgicallyFilledGlassLeaves(on)
             .flatMap { String(data: $0, encoding: .utf8) }
         let panelOn = #""shortcut_panel":{"liquid_glass":true}"#
-        #expect(edited?.contains(panelOn) == true)
+        expectEqual(edited?.contains(panelOn), true)
     }
 }

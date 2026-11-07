@@ -95,7 +95,7 @@ struct RunPushCommandTests {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)
         #expect(hidden(core, id).isEmpty)
         press(core, "y", 300)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
         let grown = try #require(
             core.tiler.calculatedFrames(state: core.state)[w(2)]
         )
@@ -109,10 +109,10 @@ struct RunPushCommandTests {
         #expect(abs(back.height - 300) < 1)
         #expect(kept.height > back.height)
         #expect(hidden(core, id).isEmpty)
-        #expect(core.state.workspaces[id]?.runTails.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.runTails.isEmpty, true)
         // Every window shows again, so the length plans nothing and
         // the store drops it.
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, true)
     }
 
     @Test("Stack: dragging the leading edge pushes the window before it")
@@ -127,8 +127,8 @@ struct RunPushCommandTests {
         dragged.size.height += 300
         core.handleResizeEnd(w(3), slot: slot, frame: dragged, in: space)
         core.retile(animated: false)
-        #expect(hidden(core, id) == [w(2)])
-        #expect(core.state.workspaces[id]?.runHeads == [w(3)])
+        expectEqual(hidden(core, id), [w(2)])
+        expectEqual(core.state.workspaces[id]?.runHeads, [w(3)])
     }
 
     @Test("Track: a grow along the track pushes the track mate in")
@@ -145,8 +145,8 @@ struct RunPushCommandTests {
         let vertical =
             core.tiler.settings.resolvedTrack(for: id).axis == .vertical
         press(core, vertical ? "y" : "x", 400)
-        #expect(hidden(core, id) == [w(3)])
-        #expect(core.state.workspaces[id]?.trackWeights.isEmpty == true)
+        expectEqual(hidden(core, id), [w(3)])
+        expectEqual(core.state.workspaces[id]?.trackWeights.isEmpty, true)
     }
 
     @Test("Auto-sized Grid: a grow along the last row pushes its mate")
@@ -166,7 +166,7 @@ struct RunPushCommandTests {
         let shown = run.shown.count
         press(core, "x", 400)
         let after = try #require(core.tiler.runCovers[id]?.runs.first)
-        #expect(after.shown.count == shown - 1)
+        expectEqual(after.shown.count, shown - 1)
         #expect(after.shown.contains(w(5)))
         #expect(core.state.workspaces[id]?.runSizes[w(5)] != nil)
     }
@@ -235,8 +235,8 @@ struct RunPushCommandTests {
         let before = try #require(core.tiler.runCovers[id]?.runs.first)
         press(core, "x", 400)
         let after = try #require(core.tiler.runCovers[id]?.runs.first)
-        #expect(after.shown == before.shown)
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+        expectEqual(after.shown, before.shown)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, true)
     }
 
     @Test("BSP: a grow along the chain pushes the chain mate in")
@@ -268,7 +268,7 @@ struct RunPushCommandTests {
         #expect(written.runTails.contains(focus))
         core.retile(animated: false)
         let after = try #require(core.tiler.runCovers[id]?.runs.first)
-        #expect(after.shown.count == shown - 1)
+        expectEqual(after.shown.count, shown - 1)
         #expect(after.shown.contains(focus))
         // The halved part keeps its ratio.
         #expect(
@@ -283,9 +283,9 @@ struct RunPushCommandTests {
     func modeWriteClearsRunSizes() throws {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)
         press(core, "y", 300)
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == false)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, false)
         // The mode write itself, ahead of any pass's persist.
         core.state.workspaces.setMode(id, .track)
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, true)
     }
 }

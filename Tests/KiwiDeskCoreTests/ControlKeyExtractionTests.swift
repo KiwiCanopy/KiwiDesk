@@ -98,9 +98,9 @@ struct ControlKeyExtractionTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let mapping = try extracted(fixture.locales)
-        #expect(mapping["gaps.title"] == "Gaps")
+        expectEqual(mapping["gaps.title"], "Gaps")
         #expect(
             mapping["app_bar.global_colors.title"]
                 == "App Bar colors"
@@ -130,10 +130,10 @@ struct ControlKeyExtractionTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let mapping = try extracted(fixture.locales)
-        #expect(mapping["gaps.per_edge"] == "Per-edge…")
-        #expect(mapping["bars.style"] == "Style")
+        expectEqual(mapping["gaps.per_edge"], "Per-edge…")
+        expectEqual(mapping["bars.style"], "Style")
     }
 
     /// The drift guard must reach across call shapes: one key
@@ -179,9 +179,9 @@ struct ControlKeyExtractionTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let mapping = try extracted(fixture.locales)
-        #expect(mapping == ["gaps.title": "Gaps"])
+        expectEqual(mapping, ["gaps.title": "Gaps"])
     }
 
     /// A doc-comment example must not mint a phantom key — the
@@ -200,8 +200,8 @@ struct ControlKeyExtractionTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let mapping = try extracted(fixture.locales)
-        #expect(mapping == ["real.key": "Real value"])
+        expectEqual(mapping, ["real.key": "Real value"])
     }
 }

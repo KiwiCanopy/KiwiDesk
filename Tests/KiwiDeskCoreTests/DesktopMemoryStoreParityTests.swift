@@ -34,7 +34,7 @@ struct DesktopMemoryStoreParityTests {
             else { continue }
             roster.insert(label)
         }
-        #expect(roster == Self.register)
+        expectEqual(roster, Self.register)
     }
 
     /// Every registered store, and the return debt, naming `old`.

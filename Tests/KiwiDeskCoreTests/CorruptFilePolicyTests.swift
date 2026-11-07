@@ -64,7 +64,7 @@ struct CorruptFilePolicyTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("kept")]
         try core.guiConfigStore.saveIncludingBindings(config)
-        #expect(core.guiConfigStore.load()?.spaces == [SpaceID("kept")])
+        expectEqual(core.guiConfigStore.load()?.spaces, [SpaceID("kept")])
         for artifact in files {
             let file = core.url(of: artifact)
             #expect(copy(of: file, in: core) == corrupt, "\(artifact)")
@@ -80,7 +80,7 @@ struct CorruptFilePolicyTests {
         let file = try core.profiles.fileURL(name: "Desk")
         try spoil(file)
         try core.profiles.write(profile("Desk"))
-        #expect(copy(of: file, in: core) == corrupt)
+        expectEqual(copy(of: file, in: core), corrupt)
         #expect(try core.profiles.read(name: "Desk").name == "Desk")
     }
 
@@ -97,10 +97,10 @@ struct CorruptFilePolicyTests {
         try core.lookLibrary.save(
             ShelfLook(name: "Mine", style: [:], colors: [:])
         )
-        #expect(core.paletteLibrary.userPalettes().map(\.name) == ["Mine"])
-        #expect(core.lookLibrary.userLooks().map(\.name) == ["Mine"])
-        #expect(copy(of: core.paletteLibrary.url, in: core) == corrupt)
-        #expect(copy(of: core.lookLibrary.url, in: core) == corrupt)
+        expectEqual(core.paletteLibrary.userPalettes().map(\.name), ["Mine"])
+        expectEqual(core.lookLibrary.userLooks().map(\.name), ["Mine"])
+        expectEqual(copy(of: core.paletteLibrary.url, in: core), corrupt)
+        expectEqual(copy(of: core.lookLibrary.url, in: core), corrupt)
     }
 
     @Test("a profile's copy never shares a store file's name")
@@ -115,8 +115,8 @@ struct CorruptFilePolicyTests {
         try other.write(to: profileFile)
         try core.guiConfigStore.save(GuiConfig())
         try core.profiles.write(profile("gui"))
-        #expect(copy(of: core.url(of: .guiConfig), in: core) == corrupt)
-        #expect(copy(of: profileFile, in: core) == other)
+        expectEqual(copy(of: core.url(of: .guiConfig), in: core), corrupt)
+        expectEqual(copy(of: profileFile, in: core), other)
     }
 
     @Test("a readable file leaves no copy")

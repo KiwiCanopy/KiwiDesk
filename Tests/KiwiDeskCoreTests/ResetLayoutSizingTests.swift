@@ -129,25 +129,25 @@ struct ResetLayoutSizingTests {
                 .isSuccess
         )
         for space in core.state.workspaces.allSpaces {
-            #expect(core.sessionRatios(of: space.id) == SessionRatios())
+            expectEqual(core.sessionRatios(of: space.id), SessionRatios())
             #expect(space.stackWeights.isEmpty)
             #expect(space.trackWeights.isEmpty)
         }
         let settings = core.tiler.settings
         let bsp = try #require(settings.bsp.override[SpaceID("1")])
-        #expect(bsp.strategy == .longestSide)
-        #expect(bsp.splitRatioV == 0.3)
+        expectEqual(bsp.strategy, .longestSide)
+        expectEqual(bsp.splitRatioV, 0.3)
         let stack = try #require(
             settings.stack.override[SpaceID("2")]
         )
-        #expect(stack.masterCount == 2)
-        #expect(stack.masterRatio == 0.7)
+        expectEqual(stack.masterCount, 2)
+        expectEqual(stack.masterRatio, 0.7)
         let scrolling = try #require(
             settings.scrolling.override[SpaceID("3")]
         )
-        #expect(scrolling.anchor == .start)
-        #expect(scrolling.slotSize == .points(400))
-        #expect(settings.track.override[SpaceID("4")]?.limit == 3)
+        expectEqual(scrolling.anchor, .start)
+        expectEqual(scrolling.slotSize, .points(400))
+        expectEqual(settings.track.override[SpaceID("4")]?.limit, 3)
         #expect(
             core.state.workspaces[SpaceID("4")]?.trackBreaks == [w1]
         )
@@ -197,8 +197,8 @@ struct ResetLayoutSizingTests {
                 == 0.3
         )
         let reset = core.tiler.calculatedFrames(state: core.state)
-        #expect(reset[w1] == authored[w1])
-        #expect(reset[w2] == authored[w2])
+        expectEqual(reset[w1], authored[w1])
+        expectEqual(reset[w2], authored[w2])
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -214,10 +214,10 @@ struct ResetLayoutSizingTests {
         #expect(resized[w1]?.width != configured[w1]?.width)
         #expect(core.execute("reset_layout_sizing").isSuccess)
         // Never the shipped 0.5: the user's global is the floor.
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.4)
+        expectEqual(core.tiler.settings.bsp.splitRatioH, 0.4)
         let reset = core.tiler.calculatedFrames(state: core.state)
-        #expect(reset[w1] == configured[w1])
-        #expect(reset[w2] == configured[w2])
+        expectEqual(reset[w1], configured[w1])
+        expectEqual(reset[w2], configured[w2])
         // The trailing retile issued the configured frames —
         // `onRelayout` animates, so the target is the frame.
         #expect(

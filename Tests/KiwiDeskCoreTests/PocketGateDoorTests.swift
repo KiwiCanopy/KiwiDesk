@@ -51,8 +51,8 @@ struct PocketGateDoorTests {
     func barePress() {
         for (sentence, change) in cases {
             let core = makeCore(change)
-            #expect(core.focusedWindowID == id)
-            #expect(core.execute("pocket").error == sentence)
+            expectEqual(core.focusedWindowID, id)
+            expectEqual(core.execute("pocket").error, sentence)
             #expect(core.state.pocketPhase(of: id) == nil)
         }
     }
@@ -65,7 +65,7 @@ struct PocketGateDoorTests {
                 "toggle_pocket_window",
                 args: [.number(Double(id.raw))]
             )
-            #expect(response.error == sentence)
+            expectEqual(response.error, sentence)
             #expect(core.state.pocketPhase(of: id) == nil)
         }
     }

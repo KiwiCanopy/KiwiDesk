@@ -18,7 +18,7 @@ struct PaletteLibraryDoorTests {
         #expect(
             palette.colors == ColorPaletteKeys.extract(from: settings)
         )
-        #expect(core.paletteLibrary.userPalettes() == [palette])
+        expectEqual(core.paletteLibrary.userPalettes(), [palette])
         #expect(core.lookLibrary.userLooks().isEmpty)
     }
 
@@ -26,16 +26,16 @@ struct PaletteLibraryDoorTests {
     func freeName() throws {
         let core = makeTestCore()
         let builtin = try #require(core.bundledPalettes.first)
-        #expect(core.paletteNameVerdict(builtin.name) == .bundled)
+        expectEqual(core.paletteNameVerdict(builtin.name), .bundled)
         #expect(
             core.freePaletteName(base: builtin.name)
                 == "\(builtin.name) 2"
         )
         _ = try core.savePalette(named: "Mine", from: TilingSettings())
-        #expect(core.paletteNameVerdict("Mine") == .overwrites)
-        #expect(core.freePaletteName(base: "Mine") == "Mine 2")
-        #expect(core.freePaletteName(base: "Free") == "Free")
-        #expect(core.userPalettes.map(\.name) == ["Mine"])
+        expectEqual(core.paletteNameVerdict("Mine"), .overwrites)
+        expectEqual(core.freePaletteName(base: "Mine"), "Mine 2")
+        expectEqual(core.freePaletteName(base: "Free"), "Free")
+        expectEqual(core.userPalettes.map(\.name), ["Mine"])
     }
 
     @Test("a palette is deleted through the door")
@@ -57,8 +57,8 @@ struct PaletteLibraryDoorTests {
             .appendingPathComponent("palette-\(UUID().uuidString).json")
         try core.exportPalette(saved, to: url)
         let imported = try core.importPalette(from: url)
-        #expect(imported.name == "Mine 2")
-        #expect(imported.colors == saved.colors)
+        expectEqual(imported.name, "Mine 2")
+        expectEqual(imported.colors, saved.colors)
         #expect(
             core.paletteLibrary.userPalettes().map(\.name)
                 == ["Mine", "Mine 2"]

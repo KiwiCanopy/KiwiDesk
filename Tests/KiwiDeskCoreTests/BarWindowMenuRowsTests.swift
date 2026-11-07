@@ -53,7 +53,7 @@ struct BarWindowMenuRowsTests {
         for raw in [2.0, 3.0] {
             core.execute("move_to_space", args: [.string("2"), .number(raw)])
         }
-        #expect(core.state.workspaces.space(of: WindowID(2)) == two)
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), two)
         return core
     }
 
@@ -116,7 +116,7 @@ struct BarWindowMenuRowsTests {
         let move = core.barMenuRows(.glyph([WindowID(2)]))[2]
         #expect(move.enabled)
         perform(move)
-        #expect(core.state.workspaces.space(of: WindowID(2)) == one)
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), one)
     }
 
     @Test("Move is greyed for a window already in the focused Space")
@@ -131,12 +131,12 @@ struct BarWindowMenuRowsTests {
         let core = seededCore()
         let float = core.barMenuRows(.appItem([WindowID(1)]))[2]
         perform(float)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == true)
-        #expect(core.state.windows[WindowID(2)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, true)
+        expectEqual(core.state.windows[WindowID(2)]?.isFloating, false)
         let tile = core.barMenuRows(.appItem([WindowID(1)]))[2]
-        #expect(tile.title == "Tile Window")
+        expectEqual(tile.title, "Tile Window")
         perform(tile)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, false)
     }
 
     /// Where detection floats the window, a Tile would refuse: the
@@ -150,19 +150,19 @@ struct BarWindowMenuRowsTests {
             .windowFloatChanged(WindowID(1), isFloating: true)
         )
         let tile = core.barMenuRows(.appItem([WindowID(1)]))[2]
-        #expect(tile.title == "Tile Window")
+        expectEqual(tile.title, "Tile Window")
         #expect(!tile.enabled)
-        #expect(tile.subtitle == AutoFloatReason.rule.sentence)
-        #expect(tile.subtitle == "An App Rule floats this window")
+        expectEqual(tile.subtitle, AutoFloatReason.rule.sentence)
+        expectEqual(tile.subtitle, "An App Rule floats this window")
         core.eventLoop.detectedFloating[WindowID(3)] = .floats(.panel)
         core.state.apply(
             .windowFloatChanged(WindowID(3), isFloating: true)
         )
         let rows = core.barMenuRows(.glyph([WindowID(2), WindowID(3)]))
         let float = submenu(rows[3])
-        #expect(float.map(\.enabled) == [true, false])
-        #expect(float.map(\.checked) == [false, true])
-        #expect(float[1].subtitle == AutoFloatReason.panel.sentence)
+        expectEqual(float.map(\.enabled), [true, false])
+        expectEqual(float.map(\.checked), [false, true])
+        expectEqual(float[1].subtitle, AutoFloatReason.panel.sentence)
     }
 
     /// A glyph standing for several windows names each one: the
@@ -174,18 +174,18 @@ struct BarWindowMenuRowsTests {
         let windows = [WindowID(2), WindowID(3)]
         let rows = core.barMenuRows(.glyph(windows))
         let move = submenu(rows[2])
-        #expect(titles(move) == ["Page 2", "Page 3"])
+        expectEqual(titles(move), ["Page 2", "Page 3"])
         #expect(move.allSatisfy { $0.enabled })
         perform(move[1])
-        #expect(core.state.workspaces.space(of: WindowID(3)) == one)
-        #expect(core.state.workspaces.space(of: WindowID(2)) == two)
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), one)
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), two)
         let float = submenu(rows[3])
-        #expect(float.map(\.checked) == [false, false])
+        expectEqual(float.map(\.checked), [false, false])
         perform(float[0])
-        #expect(core.state.windows[WindowID(2)]?.isFloating == true)
-        #expect(core.state.windows[WindowID(3)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(2)]?.isFloating, true)
+        expectEqual(core.state.windows[WindowID(3)]?.isFloating, false)
         let again = submenu(core.barMenuRows(.glyph(windows))[3])
-        #expect(again.map(\.checked) == [true, false])
+        expectEqual(again.map(\.checked), [true, false])
     }
 
     @Test("a collapsed App Bar group opens a float submenu, no move")
@@ -195,7 +195,7 @@ struct BarWindowMenuRowsTests {
         #expect(
             titles(rows).prefix(3) == ["Safari", "New Window", "Float Window"]
         )
-        #expect(titles(submenu(rows[2])) == ["Page 2", "Page 3"])
+        expectEqual(titles(submenu(rows[2])), ["Page 2", "Page 3"])
     }
 
     private func quitRow(_ core: KiwiCore, _ id: WindowID) -> BarMenuRow? {
@@ -212,7 +212,7 @@ struct BarWindowMenuRowsTests {
         let row = try #require(quitRow(core, WindowID(1)))
         #expect(row.enabled)
         perform(row)
-        #expect(quit == [41])
+        expectEqual(quit, [41])
         let own = ProcessInfo.processInfo.processIdentifier
         for (raw, pid, bundle) in [
             (UInt32(8), pid_t(7), "com.apple.finder"),
@@ -251,11 +251,11 @@ struct BarWindowMenuRowsTests {
         )
         core.state.workspaces.assign(two, to: other)
         core.state.workspaces.show(two, on: other)
-        #expect(core.state.workspaces.currentSpace(on: other) == two)
+        expectEqual(core.state.workspaces.currentSpace(on: other), two)
         let move = core.barMenuRows(.glyph([WindowID(2)]))[2]
         #expect(move.enabled)
         perform(move)
-        #expect(core.state.workspaces.space(of: WindowID(2)) == one)
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), one)
     }
 
     @Test("Move is greyed where the sticky gate would refuse it")
@@ -308,7 +308,7 @@ struct BarWindowMenuRowsTests {
             style: AppBarLook(),
             visibility: [:]
         )
-        #expect(item.members == [WindowID(2), WindowID(3)])
+        expectEqual(item.members, [WindowID(2), WindowID(3)])
     }
 
     /// App Rules… lands on that app's rule by its bundle id, and
@@ -322,20 +322,20 @@ struct BarWindowMenuRowsTests {
         let row = try #require(rows.first { $0.title == "App Rules…" })
         #expect(row.enabled)
         perform(row)
-        #expect(landed == [.appRule("com.apple.safari")])
+        expectEqual(landed, [.appRule("com.apple.safari")])
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: WindowID(7), pid: 70, appName: "Tool")
             )
         )
         let bare = core.barMenuRows(.appItem([WindowID(7)]))
-        #expect(bare.first { $0.title == "App Rules…" }?.enabled == false)
+        expectEqual(bare.first { $0.title == "App Rules…" }?.enabled, false)
     }
 
     @Test("a window gone since the render offers only the shelf")
     func goneWindowOffersShelf() {
         let core = seededCore()
         let rows = core.barMenuRows(.appItem([WindowID(99)]))
-        #expect(titles(rows) == shelf)
+        expectEqual(titles(rows), shelf)
     }
 }

@@ -38,7 +38,7 @@ struct BspLayoutTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 
     @Test("Two windows split side by side on a wide screen")
@@ -108,7 +108,7 @@ struct BspLayoutTests {
         let b = try #require(frames[w2])
         // Depth 0 splits side by side even on a portrait
         // screen.
-        #expect(a.minY == b.minY)
+        expectEqual(a.minY, b.minY)
         #expect(a.minX < b.minX)
     }
 
@@ -183,7 +183,7 @@ struct BspLayoutTests {
             for: [w1, w2],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
         let parked = try #require(frames[w2])
         #expect(!parked.intersects(context.usable))
     }
@@ -202,9 +202,9 @@ struct BspLayoutTests {
         let a = try #require(frames[w1])
         let b = try #require(frames[w2])
         // Cascaded, not split: same x, offset y.
-        #expect(a.minX == b.minX)
-        #expect(b.minY - a.minY == OverlapStack.offset)
-        #expect(a.size == b.size)
+        expectEqual(a.minX, b.minX)
+        expectEqual(b.minY - a.minY, OverlapStack.offset)
+        expectEqual(a.size, b.size)
     }
 
     @Test("Directional inner gaps are respected")

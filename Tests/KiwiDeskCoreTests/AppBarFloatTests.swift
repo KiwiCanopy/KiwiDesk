@@ -63,9 +63,9 @@ struct AppBarFloatTests {
     func floatsTrailTheRow() throws {
         let (core, space) = try makeCore()
         let app = try content(core, space)
-        #expect(app.groups == [[WindowID(1)], [WindowID(2)]])
-        #expect(app.items.map(\.id) == [1, 2, 3].map(WindowID.init))
-        #expect(app.items.map(\.floating) == [false, false, true])
+        expectEqual(app.groups, [[WindowID(1)], [WindowID(2)]])
+        expectEqual(app.items.map(\.id), [1, 2, 3].map(WindowID.init))
+        expectEqual(app.items.map(\.floating), [false, false, true])
     }
 
     @Test("A focused float takes the highlight, not the anchor")
@@ -74,10 +74,10 @@ struct AppBarFloatTests {
         core.state.apply(.windowFocused(WindowID(1)))
         core.state.apply(.windowFocused(WindowID(3)))
         let app = try content(core, try #require(core.activeSpace))
-        #expect(core.appBarActiveIndex(of: app) == 2)
+        expectEqual(core.appBarActiveIndex(of: app), 2)
         core.state.apply(.windowFocused(WindowID(2)))
         let tiled = try content(core, try #require(core.activeSpace))
-        #expect(core.appBarActiveIndex(of: tiled) == 1)
+        expectEqual(core.appBarActiveIndex(of: tiled), 1)
     }
 
     /// The bar the shelf places carries that highlight — the
@@ -100,7 +100,7 @@ struct AppBarFloatTests {
         let bar = try #require(
             core.placedBar(app, display: DisplayID(7), plan: plan)
         )
-        #expect(bar.activeIndex == 2)
+        expectEqual(bar.activeIndex, 2)
     }
 
     @Test("A Space of floats alone still shows its bar")
@@ -111,7 +111,7 @@ struct AppBarFloatTests {
         }
         let app = try content(core, try #require(core.activeSpace))
         #expect(app.groups.isEmpty)
-        #expect(app.items.map(\.id) == [WindowID(3)])
+        expectEqual(app.items.map(\.id), [WindowID(3)])
     }
 
     @Test("A Space Bar chip draws its floats last")
@@ -119,7 +119,7 @@ struct AppBarFloatTests {
         let (core, space) = try makeCore()
         let apps = core.spaceBarApps(in: space, style: SpaceBarLook())
             .apps
-        #expect(apps.map(\.name) == ["A", "B", "F"])
-        #expect(apps.map(\.floating) == [false, false, true])
+        expectEqual(apps.map(\.name), ["A", "B", "F"])
+        expectEqual(apps.map(\.floating), [false, false, true])
     }
 }

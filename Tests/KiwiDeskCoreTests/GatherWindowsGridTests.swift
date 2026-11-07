@@ -108,8 +108,8 @@ struct GatherMultiDisplayTests {
         let f2 = try #require(frames[WindowID(2)])
         // Both are lone → each fills its own display.
         // No cross-monitor pull.
-        #expect(f1 == axVisible1)
-        #expect(f2 == axVisible2)
+        expectEqual(f1, axVisible1)
+        expectEqual(f2, axVisible2)
     }
 
     @Test("displays size their grids independently")
@@ -126,11 +126,11 @@ struct GatherMultiDisplayTests {
         // its fifth opens row two; display 2's lone window
         // fills the display.
         let f2 = try #require(frames[WindowID(2)])
-        #expect(f2.minX == 480)
+        expectEqual(f2.minX, 480)
         let f5 = try #require(frames[WindowID(5)])
-        #expect(f5.origin == CGPoint(x: 0, y: 25 + 527.5))
+        expectEqual(f5.origin, CGPoint(x: 0, y: 25 + 527.5))
         let f100 = try #require(frames[WindowID(100)])
-        #expect(f100 == axVisible2)
+        expectEqual(f100, axVisible2)
     }
 
     @Test("round-robin wraps into a cascade per display")
@@ -144,8 +144,8 @@ struct GatherMultiDisplayTests {
         let f7 = try #require(frames[WindowID(7)])
         // Past the six 3×2 tiles, window 7 wraps back onto
         // window 1's cell, offset down by the cascade step.
-        #expect(f7.minX == f1.minX)
-        #expect(f7.minY == f1.minY + OverlapStack.offset)
+        expectEqual(f7.minX, f1.minX)
+        expectEqual(f7.minY, f1.minY + OverlapStack.offset)
     }
 
     @Test("unassigned space falls back to lowest-ID display")

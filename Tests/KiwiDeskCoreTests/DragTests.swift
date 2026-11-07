@@ -52,11 +52,11 @@ struct DragCoordinatorTests {
         await settle?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
-        #expect(ended.count == 1)
+        expectEqual(ended.count, 1)
         // The end frame is the last move, the start frame the
         // first one of the gesture.
-        #expect(ended.first?.2.minX == 300)
-        #expect(ended.first?.1.minX == 100)
+        expectEqual(ended.first?.2.minX, 300)
+        expectEqual(ended.first?.1.minX, 100)
     }
 
     @Test("Mouse-up moves never start a gesture")
@@ -73,7 +73,7 @@ struct DragCoordinatorTests {
             frame: CGRect(x: 100, y: 0, width: 10, height: 10)
         )
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(ended == 0)
+        expectEqual(ended, 0)
     }
 
     @Test("A validated trail starts a gesture after release")
@@ -98,7 +98,7 @@ struct DragCoordinatorTests {
         await settle?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
-        #expect(ended == [frame])
+        expectEqual(ended, [frame])
     }
 
     @Test("A gesture's start comes from the pre-event frame")
@@ -131,8 +131,8 @@ struct DragCoordinatorTests {
         let settle = drag.settleTask(for: WindowID(1))
         #expect(settle != nil, "the move scheduled no settle")
         await settle?.value
-        #expect(ended.first?.0.width == 400)
-        #expect(ended.first?.1.width == 700)
+        expectEqual(ended.first?.0.width, 400)
+        expectEqual(ended.first?.1.width, 700)
     }
 
     @Test("Trailing moves after release join the gesture")
@@ -157,9 +157,9 @@ struct DragCoordinatorTests {
         let settle = drag.settleTask(for: WindowID(1))
         #expect(settle != nil, "the move scheduled no settle")
         await settle?.value
-        #expect(ended.count == 1)
-        #expect(ended.first?.start == first)
-        #expect(ended.first?.end == trailing)
+        expectEqual(ended.count, 1)
+        expectEqual(ended.first?.start, first)
+        expectEqual(ended.first?.end, trailing)
     }
 
     @Test("Animation-driven moves never count as drags")
@@ -171,7 +171,7 @@ struct DragCoordinatorTests {
         drag.onDragEnd = { _, _, _ in ended += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(ended == 0)
+        expectEqual(ended, 0)
     }
 
     @Test("Cancel drops a pending drag (window closed)")
@@ -186,7 +186,7 @@ struct DragCoordinatorTests {
         mouse.isPressed = false
         drag.cancel(WindowID(1))
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(ended == 0)
+        expectEqual(ended, 0)
     }
 
     @Test("Moves with the button down fire live drag moves")
@@ -200,11 +200,11 @@ struct DragCoordinatorTests {
         }
         let frame = CGRect(x: 50, y: 0, width: 10, height: 10)
         drag.windowMoved(WindowID(1), frame: frame)
-        #expect(moves == [frame])
+        expectEqual(moves, [frame])
         // Trailing AX events after the release: no feedback.
         mouse.isPressed = false
         drag.windowMoved(WindowID(1), frame: .zero)
-        #expect(moves == [frame])
+        expectEqual(moves, [frame])
     }
 
     @Test("Animation-driven moves fire no live drag moves")
@@ -215,7 +215,7 @@ struct DragCoordinatorTests {
         var moves = 0
         drag.onDragMove = { _, _, _ in moves += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
-        #expect(moves == 0)
+        expectEqual(moves, 0)
     }
 
     @Test("No settle while the mouse button is held")
@@ -244,6 +244,6 @@ struct DragCoordinatorTests {
         let settle = drag.settleTask(for: WindowID(1))
         #expect(settle != nil, "the release poll stopped early")
         await settle?.value
-        #expect(ended == [frame])
+        expectEqual(ended, [frame])
     }
 }

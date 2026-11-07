@@ -61,11 +61,11 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         // The stale translation must NOT reach the shipped file.
         let de = try fx.decodeLocale("de.json")
         #expect(de["gap.hint"] == nil)
-        #expect(de == ["menu.quit": "Ende"])
+        expectEqual(de, ["menu.quit": "Ende"])
         #expect(result.stderr.contains("gap.hint"))
         #expect(result.stderr.contains("English changed"))
     }
@@ -83,9 +83,9 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let de = try fx.decodeLocale("de.json")
-        #expect(de == ["gap.hint": "Gleiche Bedeutung"])
+        expectEqual(de, ["gap.hint": "Gleiche Bedeutung"])
     }
 
     @Test("skips a key that left en.json entirely")
@@ -102,7 +102,7 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let de = try fx.decodeLocale("de.json")
         #expect(de.isEmpty)
         #expect(result.stderr.contains("gone.key"))
@@ -122,7 +122,7 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json").isEmpty)
         #expect(result.stderr.contains("gap.hint"))
     }
@@ -145,7 +145,7 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json").isEmpty)
         #expect(result.stderr.contains("gone.key"))
     }
@@ -163,7 +163,7 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json").isEmpty)
     }
 
@@ -202,7 +202,7 @@ struct MergeKeysTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json") == ["b.key": "Be"])
     }
 
@@ -242,7 +242,7 @@ struct MergeKeysTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(extract.status == 0)
+        expectEqual(extract.status, 0)
 
         let worksheet =
             try JSONSerialization.jsonObject(
@@ -250,7 +250,7 @@ struct MergeKeysTests {
             ) as? [String: [String: String]]
         // Back on the to-translate list, carrying the NEW
         // English — not the one the translator worked from.
-        #expect(worksheet?["gap.hint"]?["source"] == "New meaning")
-        #expect(worksheet?["gap.hint"]?["translation"] == "")
+        expectEqual(worksheet?["gap.hint"]?["source"], "New meaning")
+        expectEqual(worksheet?["gap.hint"]?["translation"], "")
     }
 }

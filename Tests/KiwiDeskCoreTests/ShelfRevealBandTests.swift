@@ -67,8 +67,8 @@ struct ShelfRevealBandTests {
             shelf: shelf
         )
         let half = length / 2
-        #expect(apart.bars[.space] == (500 - half)...(500 + half))
-        #expect(apart.pocket == (1000 - length)...1000)
+        expectEqual(apart.bars[.space], (500 - half)...(500 + half))
+        expectEqual(apart.pocket, (1000 - length)...1000)
         // Meeting the row: it joins it at the end it leans to, where
         // its slot stands.
         shelf.alignment = .start
@@ -79,8 +79,8 @@ struct ShelfRevealBandTests {
             length: 1000,
             shelf: shelf
         )
-        #expect(start.pocket == 0...length)
-        #expect(start.bars[.space] == length...(2 * length))
+        expectEqual(start.pocket, 0...length)
+        expectEqual(start.bars[.space], length...(2 * length))
         let none = ShelfMarkPlacement.row(
             for: [.space],
             pocket: nil,
@@ -110,8 +110,8 @@ struct ShelfRevealBandTests {
             shelf: shelf
         )
         // Edge to edge, meeting at the middle of the edge.
-        #expect(pair.bars[.space]?.upperBound == 500)
-        #expect(pair.bars[.app]?.lowerBound == 500)
+        expectEqual(pair.bars[.space]?.upperBound, 500)
+        expectEqual(pair.bars[.app]?.lowerBound, 500)
         shelf.order = .appsFirst
         let swapped = ShelfMarkPlacement.row(
             for: [.space, .app],
@@ -119,7 +119,7 @@ struct ShelfRevealBandTests {
             length: 1000,
             shelf: shelf
         )
-        #expect(swapped.bars[.app]?.upperBound == 500)
+        expectEqual(swapped.bars[.app]?.upperBound, 500)
         shelf.alignment = .start
         let start = ShelfMarkPlacement.row(
             for: [.space, .app],
@@ -127,7 +127,7 @@ struct ShelfRevealBandTests {
             length: 1000,
             shelf: shelf
         )
-        #expect(start.bars[.app]?.lowerBound == 0)
+        expectEqual(start.bars[.app]?.lowerBound, 0)
         shelf.alignment = .end
         let end = ShelfMarkPlacement.row(
             for: [.space, .app],
@@ -135,14 +135,14 @@ struct ShelfRevealBandTests {
             length: 1000,
             shelf: shelf
         )
-        #expect(end.bars[.space]?.upperBound == 1000)
+        expectEqual(end.bars[.space]?.upperBound, 1000)
     }
 
     @Test("the band is the mark's, never the whole edge")
     func bandIsTheMarks() {
         let band = ShelfReveal.band(of: Self.strip, edge: .top)
-        #expect(band.width == ShelfMarkPlacement.bandLength)
-        #expect(band.midX == Self.strip.midX)
+        expectEqual(band.width, ShelfMarkPlacement.bandLength)
+        expectEqual(band.midX, Self.strip.midX)
         let (revealer, box) = make(
             .hovering(edge: .top, strip: Self.strip, screen: Self.screen)
         )
@@ -152,7 +152,7 @@ struct ShelfRevealBandTests {
         #expect(revealer.arming.isEmpty)
         // Over the mark: the reveal delay runs.
         move(revealer, box, 500, 795)
-        #expect(box.delays == [ShelfReveal.revealDelay])
+        expectEqual(box.delays, [ShelfReveal.revealDelay])
     }
 
     @Test("a push counts only inside the band")
@@ -162,10 +162,10 @@ struct ShelfRevealBandTests {
         )
         // Pressed against the screen's top in a corner: no reveal.
         move(revealer, box, 5, 800)
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         // Pressed against it over the mark: at once.
         move(revealer, box, 500, 800)
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
     }
 
     @Test("no push where a menu bar stands between")
@@ -199,13 +199,13 @@ struct ShelfRevealBandTests {
             )
         )
         move(revealer, box, 500, 800)
-        #expect(revealer.reveal(of: Self.key) == .hover)
+        expectEqual(revealer.reveal(of: Self.key), .hover)
         // Along the open bar, past its band: still held.
         move(revealer, box, 320, 780)
         #expect(box.delays.isEmpty)
         // Along the edge past the bar: the retract runs.
         move(revealer, box, 900, 780)
-        #expect(box.delays == [ShelfReveal.retractDelay])
+        expectEqual(box.delays, [ShelfReveal.retractDelay])
     }
 
     /// Two marks on one edge, the Space Bar's band left of the
@@ -242,7 +242,7 @@ struct ShelfRevealBandTests {
         #expect(!revealer.arming.contains(Self.key))
         // The delay it had armed reveals nothing.
         box.timers.forEach { $0() }
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        expectEqual(revealer.reveal(of: Self.key), .hidden)
         #expect(!revealer.arming.contains(Self.key))
         #expect(!revealer.yields(app))
     }
@@ -254,6 +254,6 @@ struct ShelfRevealBandTests {
         let shown = [Self.key, app].filter {
             revealer.reveal(of: $0).isShown
         }
-        #expect(shown.count == 1)
+        expectEqual(shown.count, 1)
     }
 }

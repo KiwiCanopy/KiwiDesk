@@ -77,7 +77,7 @@ struct FocusWrapRunTests {
         focus(core, first)
         try #require(core.runHidden.contains(last))
         #expect(core.navigate([.string("up")], swapping: false).isSuccess)
-        #expect(core.state.workspaces.lastFocused == last)
+        expectEqual(core.state.workspaces.lastFocused, last)
     }
 
     /// All screens on one screen wraps through This screen's path.
@@ -89,7 +89,7 @@ struct FocusWrapRunTests {
         focus(core, first)
         try #require(core.runHidden.contains(last))
         #expect(core.navigate([.string("up")], swapping: false).isSuccess)
-        #expect(core.state.workspaces.lastFocused == last)
+        expectEqual(core.state.workspaces.lastFocused, last)
     }
 
     /// A lens on the other app's last window: the wrap skips it to
@@ -114,7 +114,7 @@ struct FocusWrapRunTests {
         focus(core, first)
         try #require(core.runHidden.contains(kept))
         #expect(core.navigate([.string("up")], swapping: false).isSuccess)
-        #expect(core.state.workspaces.lastFocused == kept)
+        expectEqual(core.state.workspaces.lastFocused, kept)
     }
 
     @Test("↓ at the run's end wraps to its hidden first window")
@@ -125,7 +125,7 @@ struct FocusWrapRunTests {
         focus(core, last)
         try #require(core.runHidden.contains(first))
         #expect(core.navigate([.string("down")], swapping: false).isSuccess)
-        #expect(core.state.workspaces.lastFocused == first)
+        expectEqual(core.state.workspaces.lastFocused, first)
     }
 
     /// The control: → from the stack column wraps out of the run to
@@ -140,7 +140,7 @@ struct FocusWrapRunTests {
         let first = try #require(zone.members.first)
         focus(core, first)
         #expect(core.navigate([.string("right")], swapping: false).isSuccess)
-        #expect(core.state.workspaces.lastFocused == master)
+        expectEqual(core.state.workspaces.lastFocused, master)
     }
 
     /// Six alternating BSP windows: 1 on the left, 2 top right, and
@@ -165,6 +165,6 @@ struct FocusWrapRunTests {
         let last = try #require(zone.members.last)
         focus(core, last)
         #expect(core.navigate([.string("right")], swapping: false).isSuccess)
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 }

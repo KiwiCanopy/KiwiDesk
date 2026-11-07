@@ -36,9 +36,9 @@ struct PocketListKeyedTests {
     @Test("the plate lists the general list, then the keyed window")
     func plateListsBoth() {
         let fixture = fixture()
-        #expect(fixture.core.pocketPlateWindows == [general, mine])
+        expectEqual(fixture.core.pocketPlateWindows, [general, mine])
         // The general list leaves the keyed window out.
-        #expect(fixture.core.state.generalPocket.map(\.window) == [general])
+        expectEqual(fixture.core.state.generalPocket.map(\.window), [general])
     }
 
     @Test("the list draws the keyed window last, with its key")
@@ -53,9 +53,9 @@ struct PocketListKeyedTests {
         let content = try #require(
             core.barPeekContent(.pocket(core.pocketPlateWindows), on: nil)
         )
-        #expect(content.groups.map(\.keyed) == [false, true])
-        #expect(content.groups.last?.rows.map(\.window) == [mine])
-        #expect(content.groups.last?.rows.first?.chord == "⌃⌥T")
+        expectEqual(content.groups.map(\.keyed), [false, true])
+        expectEqual(content.groups.last?.rows.map(\.window), [mine])
+        expectEqual(content.groups.last?.rows.first?.chord, "⌃⌥T")
         #expect(content.groups.first?.rows.first?.chord == nil)
         // No other list keys a row.
         let glyph = try #require(
@@ -86,7 +86,7 @@ struct PocketListKeyedTests {
         core.updatePocketPlate()
         let spec = try #require(fixture.core.pocketPlate.specs.values.first)
         #expect(!spec.faded)
-        #expect(spec.windows == [mine])
+        expectEqual(spec.windows, [mine])
     }
 
     /// "Nothing changes under One window" (▸ 2): a drag or a play
@@ -95,7 +95,7 @@ struct PocketListKeyedTests {
     func oneWindowCountsGeneral() {
         let fixture = fixture()
         fixture.core.execute("pocket.set_capacity", args: [.string("one")])
-        #expect(fixture.core.pocketPlateWindows == [general])
+        expectEqual(fixture.core.pocketPlateWindows, [general])
     }
 
     /// The pocket's VoiceOver menu: the keyed window last, keyed.
@@ -119,10 +119,10 @@ struct PocketListKeyedTests {
         let header = try #require(
             menu.items.first { $0.isSectionHeader }
         )
-        #expect(menu.index(of: header) == 1)
+        expectEqual(menu.index(of: header), 1)
         let last = try #require(menu.items.last)
         if #available(macOS 14.4, *) {
-            #expect(last.subtitle == "⌃⌥T")
+            expectEqual(last.subtitle, "⌃⌥T")
             #expect(menu.items.first?.subtitle == nil)
         }
         #expect(
@@ -136,8 +136,8 @@ struct PocketListKeyedTests {
     func rowTakesOut() {
         let fixture = fixture()
         fixture.core.pickBarRow(mine, on: nil)
-        #expect(fixture.core.state.pocketPhase(of: mine) == .out)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.core.state.pocketPhase(of: mine), .out)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
         #expect(fixture.core.state.isPocketed(general))
     }
 }

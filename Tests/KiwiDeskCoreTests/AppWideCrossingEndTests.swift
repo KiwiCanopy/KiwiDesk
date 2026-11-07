@@ -80,7 +80,7 @@ struct AppWideCrossingEndTests {
         try core.profiles.write(profile(named: "Work"))
         load("Work", core)
         #expect(core.appWide.refusalSound)
-        #expect(core.appWide.quitGridTargetDepth == 9)
+        expectEqual(core.appWide.quitGridTargetDepth, 9)
     }
 
     @Test("adoption strips the retired keys from every profile")
@@ -131,7 +131,7 @@ struct AppWideCrossingEndTests {
               }
             }
             """
-        #expect(String(data: out, encoding: .utf8) == expected)
+        expectEqual(String(data: out, encoding: .utf8), expected)
     }
 
     /// Nothing stored yet (the crossing still owed): a row write
@@ -148,10 +148,10 @@ struct AppWideCrossingEndTests {
             $0.quitGridTargetDepth = 6
         }
         let stored = try #require(core.guiConfigStore.load()?.appWide)
-        #expect(stored.quitGridTargetDepth == 6)
+        expectEqual(stored.quitGridTargetDepth, 6)
         #expect(!stored.refusalSound)
         // Ending the crossing, the engine runs what was stored.
-        #expect(core.appWide == stored)
+        expectEqual(core.appWide, stored)
     }
 
     /// A row written while the crossing is owed ends it through the
@@ -165,10 +165,10 @@ struct AppWideCrossingEndTests {
             $0.quitGridTargetDepth = 6
         }
         let stored = try #require(core.guiConfigStore.load()?.appWide)
-        #expect(stored.quitGridTargetDepth == 6)
+        expectEqual(stored.quitGridTargetDepth, 6)
         // "Work" is live (a save adopts it), so its captured sound
         // is what the row's crossing adopts beside the row's depth.
-        #expect(core.profiles.currentName == "Work")
+        expectEqual(core.profiles.currentName, "Work")
         #expect(stored.refusalSound)
         #expect(!(try text("Work", core)).contains("grid_target_depth"))
         #expect(core.appWideLedger.owed == nil)
@@ -213,7 +213,7 @@ struct AppWideCrossingEndTests {
                 args: [.number(12)]
             ).isSuccess
         )
-        #expect(core.appWide.quitGridTargetDepth == 12)
+        expectEqual(core.appWide.quitGridTargetDepth, 12)
         let config = try #require(core.guiConfigStore.load())
         try core.guiConfigStore.save(config)
         #expect(
@@ -240,7 +240,7 @@ struct AppWideCrossingEndTests {
         // executed value may reach gui.json.
         try saveLegacy("Work", depth: 9, sound: false, in: core)
         try core.adoptConfigIntoGui { _ in }
-        #expect(core.guiConfigStore.load()?.appWide?.refusalSound == true)
+        expectEqual(core.guiConfigStore.load()?.appWide?.refusalSound, true)
         #expect(core.appWide.refusalSound)
         // The crossing ends in the files on this door too.
         #expect(!(try text("Work", core)).contains("grid_target_depth"))

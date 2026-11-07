@@ -11,7 +11,7 @@ struct LuaTests {
         let lua = try #require(LuaInterpreter())
         let result = lua.run("answer = 21 * 2")
         #expect(result.succeeded)
-        #expect(lua.global("answer") == .number(42))
+        expectEqual(lua.global("answer"), .number(42))
     }
 
     @Test("Syntax errors are reported, not fatal")
@@ -59,8 +59,8 @@ struct LuaTests {
             "back = KiwiDesk.set_gap(12, 'space')"
         )
         #expect(result.succeeded)
-        #expect(received == [.number(12), .string("space")])
-        #expect(lua.global("back") == .number(99))
+        expectEqual(received, [.number(12), .string("space")])
+        expectEqual(lua.global("back"), .number(99))
     }
 
     @Test("Lua callbacks are captured and callable")
@@ -84,7 +84,7 @@ struct LuaTests {
         #expect(
             lua.call(ref: ref, args: [.number(4)]).succeeded
         )
-        #expect(lua.global("result") == .number(40))
+        expectEqual(lua.global("result"), .number(40))
         lua.release(ref: ref)
     }
 
@@ -111,7 +111,7 @@ struct LuaTests {
                     .string("Finder:Get Info"),
                 ])
         )
-        #expect(lua.global("ok") == .bool(true))
+        expectEqual(lua.global("ok"), .bool(true))
     }
 
     @Test("Runtime errors carry the Lua message")

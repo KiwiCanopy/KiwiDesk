@@ -102,8 +102,8 @@ struct GlassOverlayMigrationTests {
                 withJSONObject: try #require(root["settings"])
             )
         )
-        #expect(decoded.dragLiquidGlass == expected)
-        #expect(decoded.stickyStyle.liquidGlass == expected)
+        expectEqual(decoded.dragLiquidGlass, expected)
+        expectEqual(decoded.stickyStyle.liquidGlass, expected)
     }
 
     /// The edit only INSERTS: take the inserted leaves back out and

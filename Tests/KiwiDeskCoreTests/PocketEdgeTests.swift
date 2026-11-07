@@ -52,7 +52,7 @@ struct PocketEdgeTests {
         core.execute("pocket")
         core.state.apply(.windowHidden(one))
         #expect(!core.execute("pocket").isSuccess)
-        #expect(core.state.pocket.first?.window == one)
+        expectEqual(core.state.pocket.first?.window, one)
     }
 
     @Test("an exited app's slot empties, and that press ends there")
@@ -93,7 +93,7 @@ struct PocketEdgeTests {
                     "owner",
                 ]
         )
-        #expect(object["phase"] as? String == "out")
+        expectEqual(object["phase"] as? String, "out")
     }
 
     @Test("focus_window on the pocketed window takes it out")
@@ -105,7 +105,7 @@ struct PocketEdgeTests {
             args: [.number(Double(one.raw))]
         )
         #expect(response.isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
     }
 
     @Test("an explicit move never files the pocketed window")
@@ -130,7 +130,7 @@ struct PocketEdgeTests {
         core.execute("pocket")
         core.frontmostPIDProvider = { 1 }
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
     }
 
     @Test("an in-place slot waits for a window not yet tracked")
@@ -140,13 +140,13 @@ struct PocketEdgeTests {
         var snapshot = core.state.snapshot()
         snapshot.pocket = [PocketSlot(window: late, phase: .pocketed)]
         core.state.adopt(snapshot)
-        #expect(core.state.pocket.first?.window == late)
+        expectEqual(core.state.pocket.first?.window, late)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: late, pid: 900_007, appName: "Late")
             )
         )
-        #expect(core.state.pocketPhase(of: late) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: late), .pocketed)
         #expect(core.state.workspaces.space(of: late) == nil)
     }
 }

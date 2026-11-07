@@ -69,14 +69,14 @@ struct DesktopBindingApplyOnWriteTests {
             try core.profiles.save(profile(name))
         }
         core.execute("load_profile", args: [.string("Other")])
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         try core.rewriteSidecarBindings { map in
             map[.identity(stamp)] = DesktopBinding(
                 entries: [core.bindingEntry(named: "Laptop")],
                 desktop: 1
             )
         }
-        #expect(core.profiles.currentName == "Laptop")
+        expectEqual(core.profiles.currentName, "Laptop")
     }
 
     /// A paused cold boot has no engine yet: the write files the
@@ -92,14 +92,14 @@ struct DesktopBindingApplyOnWriteTests {
         for name in ["Laptop", "Other"] {
             try core.profiles.save(profile(name))
         }
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         try core.rewriteSidecarBindings { map in
             map[.identity(stamp)] = DesktopBinding(
                 entries: [core.bindingEntry(named: "Laptop")],
                 desktop: 1
             )
         }
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         #expect(
             core.guiConfigStore.bindingsFile.load()
                 .profileBindings[.identity(stamp)] != nil

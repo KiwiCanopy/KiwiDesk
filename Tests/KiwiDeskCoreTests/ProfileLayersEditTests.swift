@@ -124,10 +124,10 @@ struct ProfileModesEditTests {
 
         let saved = try core.profiles.read(name: "Work")
         let stored = try #require(saved.layers)
-        #expect(stored.layers.count == 1)
-        #expect(stored.layers[0].bindings.count == 1)
-        #expect(stored.layers[0].bindings[0].combo == "alt+h")
-        #expect(stored.layers[0].bindings[0].lua == "OVERRIDE")
+        expectEqual(stored.layers.count, 1)
+        expectEqual(stored.layers[0].bindings.count, 1)
+        expectEqual(stored.layers[0].bindings[0].combo, "alt+h")
+        expectEqual(stored.layers[0].bindings[0].lua, "OVERRIDE")
     }
 
     @Test("Unchanged edit session preserves the override")
@@ -144,7 +144,7 @@ struct ProfileModesEditTests {
         )
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.layers == override)
+        expectEqual(saved.layers, override)
     }
 
     @Test("Reverting to base clears the override (nil, sparse)")
@@ -192,6 +192,6 @@ struct ProfileModesEditTests {
         )
 
         let after = try Data(contentsOf: sidecarURL)
-        #expect(after == before)
+        expectEqual(after, before)
     }
 }

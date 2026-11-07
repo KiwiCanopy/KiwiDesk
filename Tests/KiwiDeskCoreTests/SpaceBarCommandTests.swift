@@ -29,14 +29,14 @@ struct SpaceBarCommandTests {
                 args: [.string("hidden")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.visibility == .hidden)
+        expectEqual(core.tiler.settings.spaceBarStyle.visibility, .hidden)
         #expect(
             core.execute(
                 "space_bar.set_edge",
                 args: [.string("bottom")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.edge == .bottom)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .bottom)
         #expect(
             core.execute(
                 "space_bar.set_focused_item_color",

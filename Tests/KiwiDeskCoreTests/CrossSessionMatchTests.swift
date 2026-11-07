@@ -84,7 +84,7 @@ struct CrossSessionMatchTests {
             live(1, "com.ghostty", "~/unixporn"),
             live(2, "com.settings", ""),
         ])
-        #expect(spaces(pairs) == [1: "1", 2: "5"])
+        expectEqual(spaces(pairs), [1: "1", 2: "5"])
     }
 
     @Test("A title pairs only once titles settle")
@@ -99,7 +99,7 @@ struct CrossSessionMatchTests {
         ]
         #expect(m.pairs(windows).isEmpty)
         m.settle()
-        #expect(spaces(m.pairs(windows)) == [1: "4", 2: "1"])
+        expectEqual(spaces(m.pairs(windows)), [1: "4", 2: "1"])
     }
 
     /// Three windows share one title: each lands in a Space of its
@@ -112,8 +112,8 @@ struct CrossSessionMatchTests {
             ("5", "app.zen", "Zen Browser"),
         ])
         let pairs = m.pairs((1...3).map { live($0, "app.zen", "Zen Browser") })
-        #expect(pairs.count == 3)
-        #expect(spaces(pairs).values.sorted() == ["1", "5", "5"])
+        expectEqual(pairs.count, 3)
+        expectEqual(spaces(pairs).values.sorted(), ["1", "5", "5"])
     }
 
     /// Claude reopened one of two windows: the title takes its
@@ -129,16 +129,16 @@ struct CrossSessionMatchTests {
         let pairs = m.pairs([
             live(1, "com.claude", "Claude"), live(2, "com.other", "X"),
         ])
-        #expect(pairs.map(\.record.id.raw).sorted() == [500, 502])
-        #expect(spaces(pairs) == [1: "5", 2: "2"])
+        expectEqual(pairs.map(\.record.id.raw).sorted(), [500, 502])
+        expectEqual(spaces(pairs), [1: "5", 2: "2"])
     }
 
     @Test("A closed match pairs nothing")
     func closedPairsNothing() {
         var m = match([("2", "com.late", "Late")])
         let window = [live(9, "com.late", "Late")]
-        #expect(m.pairs(window).count == 1)
-        #expect(m.close() == 1)
+        expectEqual(m.pairs(window).count, 1)
+        expectEqual(m.close(), 1)
         #expect(m.pairs(window).isEmpty)
     }
 
@@ -147,7 +147,7 @@ struct CrossSessionMatchTests {
         var m = settled([("2", "com.a", "A"), ("3", "com.a", "A")])
         let first = m.pairs([live(1, "com.a", "A")])
         m.commit(first)
-        #expect(m.pending.count == 1)
+        expectEqual(m.pending.count, 1)
         #expect(m.pairs([live(1, "com.a", "A")]).isEmpty)
         m.placed.insert(WindowID(2))
         #expect(m.pairs([live(2, "com.a", "A")]).isEmpty)
@@ -161,6 +161,6 @@ struct CrossSessionMatchTests {
             [("1", nil, "Old"), ("9", "com.a", "Gone"), ("2", "com.a", "")],
             exists: { $0 != SpaceID("9") }
         )
-        #expect(m.pending.map(\.space.raw) == ["2"])
+        expectEqual(m.pending.map(\.space.raw), ["2"])
     }
 }

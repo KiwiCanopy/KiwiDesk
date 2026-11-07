@@ -111,8 +111,8 @@ struct LockedRemovalTests {
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[id] != nil)
-        #expect(loop.lockedRemovals.refused == [pid])
-        #expect(lockLines(box) == 1)
+        expectEqual(loop.lockedRemovals.refused, [pid])
+        expectEqual(lockLines(box), 1)
     }
 
     @Test("an unlocked sweep removes the same window")
@@ -120,7 +120,7 @@ struct LockedRemovalTests {
         let (loop, box) = makeLoop()
         box.locked = false
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
         #expect(loop.lockedRemovals.refused.isEmpty)
     }
 
@@ -132,7 +132,7 @@ struct LockedRemovalTests {
         // Nothing asked: a read now would only re-learn the lock.
         #expect(box.reads.isEmpty)
         box.drain()
-        #expect(loop.lockedRemovals.refused == [pid])
+        expectEqual(loop.lockedRemovals.refused, [pid])
         #expect(box.destroyed.isEmpty)
     }
 
@@ -156,7 +156,7 @@ struct LockedRemovalTests {
         box.locked = false
         loop.sessionDidReturn()
         box.drain()
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a heal tick pays a debt the return could not")
@@ -168,7 +168,7 @@ struct LockedRemovalTests {
         loop.healSweep(census: [:])
         box.drain()
         #expect(loop.lockedRemovals.refused.isEmpty)
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a destroyed element under the lock defers to the sweep")
@@ -189,7 +189,7 @@ struct LockedRemovalTests {
         // Nothing eager; the refusal is the off-main sweep's
         // (#1888): one list read queued, none run on main.
         #expect(box.destroyed.isEmpty)
-        #expect(box.reads.count == 1)
+        expectEqual(box.reads.count, 1)
         box.drain()
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[id] != nil)

@@ -173,13 +173,13 @@ struct BarReserveCoreTests {
             #expect(renders(meter) > before, "\(verb) did not repaint")
         }
         #expect(!core.spaceBars.shownStrips.isEmpty)
-        #expect(passes(meter) == 0)
+        expectEqual(passes(meter), 0)
         // Reserving moves the edge, so it is an explicit apply.
         #expect(
             core.execute("space_bar.set_reserve", args: [.bool(true)])
                 .isSuccess
         )
-        #expect(passes(meter) == 1)
+        expectEqual(passes(meter), 1)
     }
 
     @Test(
@@ -210,7 +210,7 @@ struct BarReserveCoreTests {
             core.execute("space_bar.set_glyph_span", args: [.number(8)])
                 .isSuccess
         )
-        #expect(passes(meter) == 0)
+        expectEqual(passes(meter), 0)
         let commanded = try #require(
             core.tiler.recentInstantTarget(Self.window),
             "the skipped pass never re-clamped the float"

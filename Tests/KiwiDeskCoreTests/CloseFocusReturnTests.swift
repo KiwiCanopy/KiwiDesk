@@ -51,10 +51,10 @@ struct CloseFocusReturnTests {
             .windowDestroyed(c, wasMinimized: false)
         )
         let home = state.workspaces.space(of: a)!
-        #expect(state.workspaces[home]?.focused == a)
+        expectEqual(state.workspaces[home]?.focused, a)
         // The erased fact the close handler re-derives the
         // restack jump from (#674): c sat at tiled index 2.
-        #expect(effects.removedWindow?.tiledSlot == 2)
+        expectEqual(effects.removedWindow?.tiledSlot, 2)
     }
 
     @Test("A dead candidate falls through to the successor slot")
@@ -72,7 +72,7 @@ struct CloseFocusReturnTests {
         #expect(state.workspaces.focusReturnCandidate == nil)
         state.apply(.windowDestroyed(b, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
-        #expect(state.workspaces[home]?.focused == c)
+        expectEqual(state.workspaces[home]?.focused, c)
     }
 
     @Test("A minimized candidate falls through to the successor")
@@ -86,7 +86,7 @@ struct CloseFocusReturnTests {
         state.apply(.windowDestroyed(a, wasMinimized: true))
         state.apply(.windowDestroyed(b, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
-        #expect(state.workspaces[home]?.focused == c)
+        expectEqual(state.workspaces[home]?.focused, c)
     }
 
     @Test("A candidate in another space is never returned to")
@@ -105,7 +105,7 @@ struct CloseFocusReturnTests {
         state.apply(.windowFocused(s))
         state.apply(.windowFocused(b))
         state.apply(.windowDestroyed(b, wasMinimized: false))
-        #expect(state.workspaces[homeOfA]?.focused == c)
+        expectEqual(state.workspaces[homeOfA]?.focused, c)
     }
 
     @Test("A transient-overlay candidate falls to the successor")
@@ -123,7 +123,7 @@ struct CloseFocusReturnTests {
         state.apply(.windowFocused(b))
         state.apply(.windowDestroyed(b, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
-        #expect(state.workspaces[home]?.focused == c)
+        expectEqual(state.workspaces[home]?.focused, c)
     }
 
     @Test("A fullscreen candidate falls to the successor")
@@ -140,7 +140,7 @@ struct CloseFocusReturnTests {
         // pins the behavior, not which net caught it.
         state.apply(.windowDestroyed(b, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
-        #expect(state.workspaces[home]?.focused == c)
+        expectEqual(state.workspaces[home]?.focused, c)
     }
 
     @Test("Closing the first window with no history stays first")
@@ -153,7 +153,7 @@ struct CloseFocusReturnTests {
         state.apply(.windowDestroyed(c, wasMinimized: false))
         state.apply(.windowDestroyed(a, wasMinimized: false))
         let home = state.workspaces.space(of: b)!
-        #expect(state.workspaces[home]?.focused == b)
+        expectEqual(state.workspaces[home]?.focused, b)
     }
 
     @Test("Closing an unfocused window moves no focus")
@@ -161,8 +161,8 @@ struct CloseFocusReturnTests {
         var state = makeState()
         state.apply(.windowDestroyed(a, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
-        #expect(state.workspaces[home]?.focused == c)
-        #expect(state.workspaces.focusReturnCandidate == b)
+        expectEqual(state.workspaces[home]?.focused, c)
+        expectEqual(state.workspaces.focusReturnCandidate, b)
     }
 
     @Test("A re-focus of the same window keeps the history")
@@ -173,7 +173,7 @@ struct CloseFocusReturnTests {
         state.apply(.windowFocused(c))
         state.apply(.windowDestroyed(c, wasMinimized: false))
         let home = state.workspaces.space(of: a)!
-        #expect(state.workspaces[home]?.focused == a)
+        expectEqual(state.workspaces[home]?.focused, a)
     }
 
     @Test("A native-tab rekey retargets the candidate (#308)")
@@ -185,6 +185,6 @@ struct CloseFocusReturnTests {
         state.apply(.windowRekeyed(a, a2))
         state.apply(.windowDestroyed(c, wasMinimized: false))
         let home = state.workspaces.space(of: a2)!
-        #expect(state.workspaces[home]?.focused == a2)
+        expectEqual(state.workspaces[home]?.focused, a2)
     }
 }

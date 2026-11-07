@@ -245,6 +245,6 @@ struct ProfileListRulesApplyTests {
                 title: ""
             )
         )
-        #expect(core.state.appRules[target] == SpaceID(2))
+        expectEqual(core.state.appRules[target], SpaceID(2))
     }
 }

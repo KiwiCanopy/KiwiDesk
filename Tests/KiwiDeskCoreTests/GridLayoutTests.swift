@@ -47,8 +47,8 @@ struct GridDimensionTests {
             params: params,
             cap: looseCap
         )
-        #expect(dims.columns == spec.cols)
-        #expect(dims.rows == spec.rows)
+        expectEqual(dims.columns, spec.cols)
+        expectEqual(dims.rows, spec.rows)
     }
 
     @Test(
@@ -66,8 +66,8 @@ struct GridDimensionTests {
             params: params,
             cap: looseCap
         )
-        #expect(dims.columns == spec.cols)
-        #expect(dims.rows == spec.rows)
+        expectEqual(dims.columns, spec.cols)
+        expectEqual(dims.rows, spec.rows)
     }
 
     @Test("Dynamic clamps the balanced arrangement to the cap")
@@ -83,8 +83,8 @@ struct GridDimensionTests {
             params: params,
             cap: (3, 2)
         )
-        #expect(dims.columns == 3)
-        #expect(dims.rows == 2)
+        expectEqual(dims.columns, 3)
+        expectEqual(dims.rows, 2)
     }
 
     @Test("Dynamic grows the unpinned axis to fill the cap")
@@ -99,8 +99,8 @@ struct GridDimensionTests {
             params: params,
             cap: (2, 3)
         )
-        #expect(dims.columns == 2)
-        #expect(dims.rows == 3)
+        expectEqual(dims.columns, 2)
+        expectEqual(dims.rows, 3)
     }
 
     @Test("Rigid uses the cap verbatim")
@@ -112,8 +112,8 @@ struct GridDimensionTests {
             params: params,
             cap: (4, 2)
         )
-        #expect(dims.columns == 4)
-        #expect(dims.rows == 2)
+        expectEqual(dims.columns, 4)
+        expectEqual(dims.rows, 2)
     }
 
     @Test("Auto-size fits more columns than rows on landscape")
@@ -129,8 +129,8 @@ struct GridDimensionTests {
             gapV: 10,
             minSize: 300
         )
-        #expect(cap.columns == 6)
-        #expect(cap.rows == 3)
+        expectEqual(cap.columns, 6)
+        expectEqual(cap.rows, 3)
     }
 }
 
@@ -196,9 +196,9 @@ struct GridLayoutTests {
         let heights = Set(
             frames.values.map { Int($0.height) }
         )
-        #expect(heights.count == 1)
+        expectEqual(heights.count, 1)
         let sorted = frames.values.map(\.minX).sorted()
-        #expect(sorted.count == 4)
+        expectEqual(sorted.count, 4)
         #expect(sorted[0] < sorted[3])
     }
 
@@ -261,7 +261,7 @@ struct GridLayoutTests {
             frames.values.filter { context.usable.intersects($0) }
                 .map { "\(Int($0.minX)),\(Int($0.minY))" }
         )
-        #expect(cells.count == 2)
+        expectEqual(cells.count, 2)
     }
 
     @Test("Auto-size lifts the dynamic cap from the screen")
@@ -276,14 +276,14 @@ struct GridLayoutTests {
             for: ids(12),
             in: context
         )
-        #expect(frames.count == 12)
+        expectEqual(frames.count, 12)
         // 12 distinct cells: no cascade (a cascade shares minX).
         let cells = Set(
             frames.values.map {
                 "\(Int($0.minX)),\(Int($0.minY))"
             }
         )
-        #expect(cells.count == 12)
+        expectEqual(cells.count, 12)
     }
 
     @Test("A screen with room for one cell scrolls the rest (#2541)")
@@ -298,8 +298,8 @@ struct GridLayoutTests {
         let shown = frames.values.filter {
             context.usable.intersects($0)
         }
-        #expect(shown.count == 1)
-        #expect(shown.first == context.usable)
+        expectEqual(shown.count, 1)
+        expectEqual(shown.first, context.usable)
     }
 
     @Test("A screen under the minimum size piles (#44)")
@@ -312,7 +312,7 @@ struct GridLayoutTests {
             in: context
         )
         let xs = Set(frames.values.map(\.minX))
-        #expect(xs.count == 1)
+        expectEqual(xs.count, 1)
         // The grid itself declines: not even one cell fits.
         #expect(GridLayout.shape(for: ids(4), in: context) == nil)
     }

@@ -127,7 +127,7 @@ struct RunPushVisitorTests {
                 == "a tiled sticky window can be resized only "
                 + "in its home Space"
         )
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, true)
     }
 
     @Test("BSP: a visitor in a chain that fits whole takes no weight")

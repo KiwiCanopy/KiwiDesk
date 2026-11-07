@@ -26,33 +26,33 @@ struct FloatResizeAspectTests {
 
     @Test("Both axes moving at the ratio reads as fitted")
     func shrinkIsFitted() {
-        #expect(answer(679, 382) == .fitted)
-        #expect(answer(586, 330, horizontal: false) == .fitted)
+        expectEqual(answer(679, 382), .fitted)
+        expectEqual(answer(586, 330, horizontal: false), .fitted)
     }
 
     @Test("Staying put reads as unchanged, within an app's rounding")
     func growIsUnchanged() {
-        #expect(answer(800, 450) == .unchanged)
-        #expect(answer(799, 450) == .unchanged)
+        expectEqual(answer(800, 450), .unchanged)
+        expectEqual(answer(799, 450), .unchanged)
     }
 
     @Test("Only the pressed axis moving reads as a free window")
     func freeWindow() {
-        #expect(answer(920, 450) == .complied)
-        #expect(answer(800, 570, horizontal: false) == .complied)
+        expectEqual(answer(920, 450), .complied)
+        expectEqual(answer(800, 570, horizontal: false), .complied)
     }
 
     @Test("A short answer on the pressed axis alone proves no lock")
     func snappedIsNoFit() {
         // A cell-grid app stopping short: ratio drift 0.011, inside the
         // tolerance, and still not a lock, since the height never moved.
-        #expect(answer(795, 450) == .complied)
+        expectEqual(answer(795, 450), .complied)
     }
 
     @Test("A broken ratio, or the other axis alone, is no fit")
     func brokenRatio() {
-        #expect(answer(860, 400) == .other)
-        #expect(answer(800, 400) == .other)
+        expectEqual(answer(860, 400), .other)
+        expectEqual(answer(800, 400), .other)
     }
 
     @Test("An ask is readable once a lock would move the other axis")
@@ -80,8 +80,8 @@ struct FloatResizeAspectTests {
             minSize: floor,
             bounds: screen
         )
-        #expect(wide.frame.size == CGSize(width: 880, height: 495))
-        #expect(wide.frame.midX == frame.midX)
+        expectEqual(wide.frame.size, CGSize(width: 880, height: 495))
+        expectEqual(wide.frame.midX, frame.midX)
         #expect(abs(wide.frame.midY - frame.midY) <= 0.5)
         #expect(wide.refusal == nil)
         let tall = FloatResize.scaled(
@@ -92,7 +92,7 @@ struct FloatResizeAspectTests {
             minSize: floor,
             bounds: screen
         )
-        #expect(tall.frame.size == CGSize(width: 880, height: 495))
+        expectEqual(tall.frame.size, CGSize(width: 880, height: 495))
     }
 
     @Test("The first boundary stops both axes and refuses the rest")
@@ -111,7 +111,7 @@ struct FloatResizeAspectTests {
             abs(outcome.frame.width / outcome.frame.height - ratio)
                 <= FloatResize.ratioTolerance
         )
-        #expect(outcome.refusal == .truncated)
+        expectEqual(outcome.refusal, .truncated)
     }
 
     @Test("A window at its boundary is left exactly as it stands")
@@ -127,8 +127,8 @@ struct FloatResizeAspectTests {
             minSize: floor,
             bounds: CGRect(x: 400, y: 0, width: 800, height: 1000)
         )
-        #expect(outcome.frame == tall)
-        #expect(outcome.refusal == .blocked)
+        expectEqual(outcome.frame, tall)
+        expectEqual(outcome.refusal, .blocked)
     }
 
     /// mpv fits itself inside a ratio's height and shrinks (#3018).
@@ -151,7 +151,7 @@ struct FloatResizeAspectTests {
                     minSize: CGSize(width: 300, height: 192),
                     bounds: nil
                 )
-                #expect(outcome.frame == drifted)
+                expectEqual(outcome.frame, drifted)
             }
         }
     }
@@ -186,13 +186,13 @@ struct FloatResizeAspectTests {
             minSize: CGSize(width: 200, height: 225),
             bounds: screen
         )
-        #expect(outcome.frame.size == CGSize(width: 400, height: 225))
+        expectEqual(outcome.frame.size, CGSize(width: 400, height: 225))
     }
 
     @Test("The other axis alone never reads as a fit, whatever its ratio")
     func otherAxisAlone() {
         // Drift 0.012: inside the tolerance, so only the pressed axis tells.
-        #expect(answer(800, 447) == .other)
+        expectEqual(answer(800, 447), .other)
     }
 
     @Test("A y ask is carried at the ratio, and a zero base reads nothing")
@@ -232,7 +232,7 @@ struct FloatResizeAspectTests {
             minSize: floor,
             bounds: screen
         )
-        #expect(grow.frame.width == 800)
+        expectEqual(grow.frame.width, 800)
         // A height floor above the window's own never lifts it.
         let shrink = FloatResize.scaled(
             CGRect(x: 400, y: 200, width: 700, height: 450),
@@ -242,7 +242,7 @@ struct FloatResizeAspectTests {
             minSize: CGSize(width: 100, height: 500),
             bounds: screen
         )
-        #expect(shrink.frame.width == 700)
+        expectEqual(shrink.frame.width, 700)
     }
 
     @Test("A width floor stops both axes when it is the higher")
@@ -255,13 +255,13 @@ struct FloatResizeAspectTests {
             minSize: CGSize(width: 600, height: 100),
             bounds: screen
         )
-        #expect(outcome.frame.width == 600)
+        expectEqual(outcome.frame.width, 600)
         #expect(abs(outcome.frame.height - 600 / ratio) < 0.01)
     }
 
     @Test("Rounding keeps the held ratio, and a new video replaces it")
     func heldRatio() {
-        #expect(FloatResize.heldRatio(1.778, measured: 1.759) == 1.778)
-        #expect(FloatResize.heldRatio(1.778, measured: 2.39) == 2.39)
+        expectEqual(FloatResize.heldRatio(1.778, measured: 1.759), 1.778)
+        expectEqual(FloatResize.heldRatio(1.778, measured: 2.39), 2.39)
     }
 }

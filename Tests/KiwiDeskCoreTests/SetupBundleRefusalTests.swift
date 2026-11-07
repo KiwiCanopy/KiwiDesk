@@ -110,8 +110,8 @@ struct SetupBundleRefusalTests {
         // reports the CURRENT format — the file on disk is a
         // backup and stays untouched, but what this build holds
         // has crossed.
-        #expect(bundle.format == SetupBundle.currentFormat)
-        #expect(bundle.palettes.count == 1)
+        expectEqual(bundle.format, SetupBundle.currentFormat)
+        expectEqual(bundle.palettes.count, 1)
     }
 
     /// The palettes twin of `unreadableSettings` (#945 review):
@@ -167,9 +167,9 @@ struct SetupBundleRefusalTests {
         try core.writeBackup(to: url)
         let read = try core.readBackup(at: url)
 
-        #expect(read.profiles.map(\.name) == ["Desk"])
-        #expect(read.format == SetupBundle.currentFormat)
-        #expect(read.writtenBy == KiwiDeskVersion.semantic)
+        expectEqual(read.profiles.map(\.name), ["Desk"])
+        expectEqual(read.format, SetupBundle.currentFormat)
+        expectEqual(read.writtenBy, KiwiDeskVersion.semantic)
     }
 
     @Test("A corrupt settings file refuses the export")

@@ -44,8 +44,8 @@ struct LaunchFollowColdStartTests {
     func coldStartFollows(press: Double, launched: Double) {
         let core = Self.makeCore(pressAge: press)
         Self.launch(core, launchedAgo: launched)
-        #expect(core.state.workspaces.activeSpace == F.ruled)
-        #expect(core.focusedWindowID == WindowID(9))
+        expectEqual(core.state.workspaces.activeSpace, F.ruled)
+        expectEqual(core.focusedWindowID, WindowID(9))
     }
 
     @Test("The lead bound is inclusive at the press grace")
@@ -55,7 +55,7 @@ struct LaunchFollowColdStartTests {
             core,
             launchedAgo: 6 - LaunchFollowIntent.pressGrace
         )
-        #expect(core.state.workspaces.activeSpace == F.ruled)
+        expectEqual(core.state.workspaces.activeSpace, F.ruled)
     }
 
     @Test("A lead just past the press grace stays put")
@@ -73,7 +73,7 @@ struct LaunchFollowColdStartTests {
         let grace = LaunchFollowIntent.coldStartGrace
         let at = Self.makeCore(pressAge: grace + 0.2)
         Self.launch(at, launchedAgo: grace)
-        #expect(at.state.workspaces.activeSpace == F.ruled)
+        expectEqual(at.state.workspaces.activeSpace, F.ruled)
         let past = Self.makeCore(pressAge: grace + 0.3)
         Self.launch(past, launchedAgo: grace + 0.1)
         F.expectStayed(past)

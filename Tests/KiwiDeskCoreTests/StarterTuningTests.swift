@@ -21,11 +21,11 @@ struct StarterTuningTests {
             mainShape: .desktop,
             hosts: [:]
         )
-        #expect(settings.stack.masterRatio == 0.8)
-        #expect(settings.track.newWindow == .ownTrack)
+        expectEqual(settings.stack.masterRatio, 0.8)
+        expectEqual(settings.track.newWindow, .ownTrack)
         // At 2560 pt a three-column grid gives 850 pt cells.
-        #expect(settings.grid.columns == 2)
-        #expect(settings.grid.rows == 2)
+        expectEqual(settings.grid.columns, 2)
+        expectEqual(settings.grid.rows, 2)
         // Every shape keeps the shipped gaps, which clear the
         // default ring and so Glass's (#1739).
         for shape in ScreenClass.allCases {
@@ -43,23 +43,23 @@ struct StarterTuningTests {
             mainShape: .pivoted,
             hosts: [:]
         )
-        #expect(tall.stack.stackPosition == .bottom)
-        #expect(tall.scrolling.orientation == .vertical)
-        #expect(tall.grid.splitDirection == .vertical)
+        expectEqual(tall.stack.stackPosition, .bottom)
+        expectEqual(tall.scrolling.orientation, .vertical)
+        expectEqual(tall.grid.splitDirection, .vertical)
         // A laptop alone takes Grid through the main-shape
         // fallback, so one row would pile the third window (#2171).
         let laptop = StarterTuning.settings(
             mainShape: .laptop,
             hosts: [:]
         )
-        #expect(laptop.grid.columns == 2)
-        #expect(laptop.grid.rows == 2)
+        expectEqual(laptop.grid.columns, 2)
+        expectEqual(laptop.grid.rows, 2)
         // One master on a 3440 pt screen is an absurd pane.
         let wide = StarterTuning.settings(
             mainShape: .ultrawide,
             hosts: [:]
         )
-        #expect(wide.stack.masterCount == 2)
+        expectEqual(wide.stack.masterCount, 2)
         #expect(wide.track.autoTracks)
         // The Scrolling slot is the one tuning value that
         // shipped without a row here (#1018): `.auto` resolves
@@ -127,8 +127,8 @@ struct StarterTuningTests {
         let settings = StarterSetup.settings(
             sizes: [CGSize(width: 1728, height: 1117)]
         )
-        #expect(settings.spaceBarStyle.visibility == .auto)
-        #expect(settings.monocle.appBar.visibility == .auto)
-        #expect(settings.scrolling.appBar.visibility == .auto)
+        expectEqual(settings.spaceBarStyle.visibility, .auto)
+        expectEqual(settings.monocle.appBar.visibility, .auto)
+        expectEqual(settings.scrolling.appBar.visibility, .auto)
     }
 }

@@ -68,10 +68,10 @@ struct KiwiVisionClearWallpaperTests {
                 as? [String: Any]
         )
         let group = try #require(root["kiwivision"] as? [String: Any])
-        #expect(group["clear_wallpaper"] as? Bool == true)
+        expectEqual(group["clear_wallpaper"] as? Bool, true)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.visionClearWallpaper == true)
-        #expect(AppWideSettings().visionClearWallpaper == false)
+        expectEqual(back.appWide?.visionClearWallpaper, true)
+        expectEqual(AppWideSettings().visionClearWallpaper, false)
     }
 
     @Test("the verb is a session value")
@@ -192,8 +192,8 @@ struct KiwiVisionClearWallpaperTests {
             targetPid: nil,
             refreshingList: true
         )
-        #expect(first.map(\.cornerRadius) == [24, 40])
-        #expect(Set(reads) == [2, 99])
+        expectEqual(first.map(\.cornerRadius), [24, 40])
+        expectEqual(Set(reads), [2, 99])
         reads = []
         // A member the ring never read: a pass takes the system
         // radius rather than reading it.
@@ -228,7 +228,7 @@ struct KiwiVisionClearWallpaperTests {
         }
         core.setKiwiVision(.plain)
         core.visionListedWindowChanged(w2, frame: nil)
-        #expect(core.vision.listed?.count == 1)
+        expectEqual(core.vision.listed?.count, 1)
     }
 
     @Test("the list is read at a settle pass or when nothing is cached")
@@ -282,19 +282,19 @@ struct KiwiVisionClearWallpaperTests {
         core.handle(.appTerminated(pid: 5))
         #expect(core.vision.listOwed)
         core.reshapeVision()
-        #expect(reads == 2)
+        expectEqual(reads, 2)
         #expect(!core.vision.listOwed)
         #expect(
             core.windowServer.requested(by: .vision).contains(WindowID(99))
         )
         let moved = other.offsetBy(dx: 30, dy: 0)
         core.visionListedWindowChanged(WindowID(99), frame: moved)
-        #expect(core.vision.listed?.first?.frame == moved)
+        expectEqual(core.vision.listed?.first?.frame, moved)
         core.visionWindowRestacked(WindowID(99))
         #expect(core.vision.listOwed, "an order change re-reads, never orders")
         core.vision.listOwed = false
         core.visionListedWindowChanged(WindowID(99), frame: nil)
-        #expect(core.vision.listed?.isEmpty == true)
-        #expect(reads == 2)
+        expectEqual(core.vision.listed?.isEmpty, true)
+        expectEqual(reads, 2)
     }
 }

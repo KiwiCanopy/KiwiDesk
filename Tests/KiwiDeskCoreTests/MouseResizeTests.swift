@@ -59,7 +59,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: 100),
             bounds: bounds
         )
-        #expect(adjustment == .masterRatio(0.1))
+        expectEqual(adjustment, .masterRatio(0.1))
     }
 
     @Test("Growing a stack window shrinks the master ratio")
@@ -75,7 +75,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: 100),
             bounds: bounds
         )
-        #expect(adjustment == .masterRatio(-0.1))
+        expectEqual(adjustment, .masterRatio(-0.1))
     }
 
     @Test("Stack height changes move the zone share (#941)")
@@ -91,7 +91,7 @@ struct MouseResizeTests {
             frame: grown(slot, dh: 100),
             bounds: bounds
         )
-        #expect(adjustment == .stackWeight(100))
+        expectEqual(adjustment, .stackWeight(100))
     }
 
     /// A corner drag is decided by the dominant delta, as bsp
@@ -109,7 +109,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: 40, dh: -90),
             bounds: bounds
         )
-        #expect(heightWins == .stackWeight(-90))
+        expectEqual(heightWins, .stackWeight(-90))
         let widthWins = MouseResize.translate(
             mode: .stack,
             isMaster: false,
@@ -120,7 +120,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: 100, dh: 100),
             bounds: bounds
         )
-        #expect(widthWins == .masterRatio(-0.1))
+        expectEqual(widthWins, .masterRatio(-0.1))
         let underThreshold = MouseResize.translate(
             mode: .stack,
             isMaster: false,
@@ -147,7 +147,7 @@ struct MouseResizeTests {
             frame: grown(slot, dh: 80),
             bounds: bounds
         )
-        #expect(adjustment == .masterRatio(0.1))
+        expectEqual(adjustment, .masterRatio(0.1))
     }
 
     @Test("A vertical split's width drag moves the zone share")
@@ -163,7 +163,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: 100),
             bounds: bounds
         )
-        #expect(adjustment == .stackWeight(100))
+        expectEqual(adjustment, .stackWeight(100))
     }
 
     @Test("BSP grows toward the dragged side")
@@ -247,7 +247,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: -150),
             bounds: bounds
         )
-        #expect(adjustment == .scrollSlot(-150))
+        expectEqual(adjustment, .scrollSlot(-150))
     }
 
     @Test("Track translates width/height drag by axis")
@@ -321,7 +321,7 @@ struct MouseResizeTests {
                 bounds: bounds
             )
         }
-        #expect(translate(left) == .gridColumn(60, leading: true))
+        expectEqual(translate(left), .gridColumn(60, leading: true))
         #expect(
             translate(grown(slot, dw: 80))
                 == .gridColumn(80, leading: false)

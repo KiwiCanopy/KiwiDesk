@@ -45,7 +45,7 @@ struct SwapWindowTradeTests {
         for raw in [UInt32(900_005), 900_006] {
             file(core, raw, in: Self.three)
         }
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(core.focusedWindowID, WindowID(900_002))
         return core
     }
 
@@ -75,16 +75,16 @@ struct SwapWindowTradeTests {
         let core = makeCore()
         let response = core.execute("swap", args: [.number(900_003)])
         #expect(response.isSuccess)
-        #expect(row(core, Self.one) == [900_001, 900_003])
-        #expect(row(core, Self.two) == [900_002, 900_004])
+        expectEqual(row(core, Self.one), [900_001, 900_003])
+        expectEqual(row(core, Self.two), [900_002, 900_004])
         #expect(
             core.state.workspaces.space(of: WindowID(900_002))
                 == Self.two
         )
         // Focus goes with your window, as a direction swap's does:
         // its Space becomes the one you are on.
-        #expect(core.state.workspaces.activeSpace == Self.two)
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(core.state.workspaces.activeSpace, Self.two)
+        expectEqual(core.focusedWindowID, WindowID(900_002))
     }
 
     @Test("two ids trade between Spaces nobody shows, focus untouched")
@@ -95,10 +95,10 @@ struct SwapWindowTradeTests {
             args: [.number(900_004), .number(900_005)]
         )
         #expect(response.isSuccess)
-        #expect(row(core, Self.two) == [900_003, 900_005])
-        #expect(row(core, Self.three) == [900_004, 900_006])
-        #expect(row(core, Self.one) == [900_001, 900_002])
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(row(core, Self.two), [900_003, 900_005])
+        expectEqual(row(core, Self.three), [900_004, 900_006])
+        expectEqual(row(core, Self.one), [900_001, 900_002])
+        expectEqual(core.focusedWindowID, WindowID(900_002))
     }
 
     /// #1518's ruling for a named move: a window filed into the
@@ -110,9 +110,9 @@ struct SwapWindowTradeTests {
             "swap",
             args: [.number(900_001), .number(900_006)]
         )
-        #expect(row(core, Self.one) == [900_006, 900_002])
-        #expect(row(core, Self.three) == [900_005, 900_001])
-        #expect(core.focusedWindowID == WindowID(900_006))
+        expectEqual(row(core, Self.one), [900_006, 900_002])
+        expectEqual(row(core, Self.three), [900_005, 900_001])
+        expectEqual(core.focusedWindowID, WindowID(900_006))
     }
 
     @Test("swap_here brings the window into your slot and focus")
@@ -123,10 +123,10 @@ struct SwapWindowTradeTests {
             args: [.number(900_003)]
         )
         #expect(response.isSuccess)
-        #expect(row(core, Self.one) == [900_001, 900_003])
-        #expect(row(core, Self.two) == [900_002, 900_004])
-        #expect(core.state.workspaces.activeSpace == Self.one)
-        #expect(core.focusedWindowID == WindowID(900_003))
+        expectEqual(row(core, Self.one), [900_001, 900_003])
+        expectEqual(row(core, Self.two), [900_002, 900_004])
+        expectEqual(core.state.workspaces.activeSpace, Self.one)
+        expectEqual(core.focusedWindowID, WindowID(900_003))
         #expect(
             core.state.workspaces[Self.two]?.focused
                 == WindowID(900_002)
@@ -137,12 +137,12 @@ struct SwapWindowTradeTests {
     func swapHereSameSpace() {
         let core = makeCore()
         core.execute("swap_here", args: [.number(900_001)])
-        #expect(row(core, Self.one) == [900_002, 900_001])
-        #expect(core.focusedWindowID == WindowID(900_001))
+        expectEqual(row(core, Self.one), [900_002, 900_001])
+        expectEqual(core.focusedWindowID, WindowID(900_001))
         let direction = core.execute("swap_here", args: [.string("left")])
-        #expect(direction.error == "expected window id")
+        expectEqual(direction.error, "expected window id")
         let unknown = core.execute("swap_here", args: [.number(99)])
-        #expect(unknown.error == "unknown window: 99")
+        expectEqual(unknown.error, "unknown window: 99")
     }
 
     @Test("each window takes the other's track break and weight")
@@ -154,9 +154,9 @@ struct SwapWindowTradeTests {
         }
         core.execute("swap", args: [.number(900_004)])
         let two = core.state.workspaces[Self.two]
-        #expect(two?.windows.map(\.raw) == [900_003, 900_002])
-        #expect(two?.trackBreaks == [WindowID(900_002)])
-        #expect(two?.trackWeights == [WindowID(900_002): 2])
+        expectEqual(two?.windows.map(\.raw), [900_003, 900_002])
+        expectEqual(two?.trackBreaks, [WindowID(900_002)])
+        expectEqual(two?.trackWeights, [WindowID(900_002): 2])
     }
 
     @Test("a sticky window keeps its move refusal")
@@ -164,13 +164,13 @@ struct SwapWindowTradeTests {
         let core = makeCore()
         file(core, 900_007, in: Self.two, sticky: .global)
         core.execute("swap", args: [.number(900_007)])
-        #expect(row(core, Self.one) == [900_001, 900_002])
-        #expect(row(core, Self.two) == [900_003, 900_004, 900_007])
+        expectEqual(row(core, Self.one), [900_001, 900_002])
+        expectEqual(row(core, Self.two), [900_003, 900_004, 900_007])
         core.execute(
             "swap",
             args: [.number(900_007), .number(900_005)]
         )
-        #expect(row(core, Self.three) == [900_005, 900_006])
+        expectEqual(row(core, Self.three), [900_005, 900_006])
     }
 
     /// Two screens, each showing its Space: the windows cross
@@ -197,14 +197,14 @@ struct SwapWindowTradeTests {
         core.state.workspaces.show(Self.two, on: DisplayID(2))
         try #require(core.state.workspaces.visibleSpaces.contains(Self.two))
         core.execute("swap", args: [.number(900_003)])
-        #expect(row(core, Self.one) == [900_001, 900_003])
-        #expect(row(core, Self.two) == [900_002, 900_004])
+        expectEqual(row(core, Self.one), [900_001, 900_003])
+        expectEqual(row(core, Self.two), [900_002, 900_004])
         let home = try #require(
             core.state.workspaces.space(of: WindowID(900_002))
         )
-        #expect(core.state.workspaces.display(of: home) == DisplayID(2))
-        #expect(core.state.workspaces.activeSpace == Self.two)
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(core.state.workspaces.display(of: home), DisplayID(2))
+        expectEqual(core.state.workspaces.activeSpace, Self.two)
+        expectEqual(core.focusedWindowID, WindowID(900_002))
         // Both screens still show a Space: the one you left stays
         // up on its screen. Frames are not compared — every fake
         // display resolves to the one host screen.
@@ -236,15 +236,15 @@ struct SpaceReplaceTests {
             trackWeights: [b: 1.5]
         )
         space.replace(b, with: c)
-        #expect(space.windows == [a, c])
-        #expect(space.focused == c)
-        #expect(space.trackBreaks == [c])
+        expectEqual(space.windows, [a, c])
+        expectEqual(space.focused, c)
+        expectEqual(space.trackBreaks, [c])
         #expect(space.handedBreaks.isEmpty)
-        #expect(space.trackWeights == [c: 1.5])
-        #expect(space.stackWeights == [c: 0.4])
+        expectEqual(space.trackWeights, [c: 1.5])
+        expectEqual(space.stackWeights, [c: 0.4])
         #expect(space.scrollRest?.slot == nil)
         // A member never takes a slot twice.
         space.replace(a, with: c)
-        #expect(space.windows == [a, c])
+        expectEqual(space.windows, [a, c])
     }
 }

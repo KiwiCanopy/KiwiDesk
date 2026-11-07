@@ -107,7 +107,7 @@ struct DesktopBindingIdentityTests {
         // A Desktop appears before it: the bound desk is now 3.
         pin(topologyB(current: 20), current: 20)
         core.handleDesktopChange()
-        #expect(core.profiles.currentName == "Work")
+        expectEqual(core.profiles.currentName, "Work")
         // ...and the row's label followed the desk.
         #expect(
             core.desktopBindings[.identity(stampB)]?.desktop == 3
@@ -131,7 +131,7 @@ struct DesktopBindingIdentityTests {
         // Switch to the NEW Desktop now numbered 2 (id 30).
         pin(topologyB(current: 30), current: 30)
         core.handleDesktopChange()
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
     }
 
     /// A Desktop with no stamp keys by its number, exactly as it
@@ -241,7 +241,7 @@ struct DesktopBindingIdentityTests {
                 == ["Work"]
         )
         // The live space list never entered the file.
-        #expect(after.spaces == [SpaceID("stored-only")])
+        expectEqual(after.spaces, [SpaceID("stored-only")])
     }
 
     /// A record whose Desktop is not in the topology is DORMANT:

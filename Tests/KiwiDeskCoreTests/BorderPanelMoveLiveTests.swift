@@ -34,8 +34,8 @@ struct BorderPanelMoveLiveTests {
         // A pass ends, so AppKit's own placement has been sent.
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         render(ring, at: moved)
-        #expect(ring.skyLightMoves == 1)
-        #expect(ring.frameSets == 1)
+        expectEqual(ring.skyLightMoves, 1)
+        expectEqual(ring.frameSets, 1)
         let expected = exactFrame(at: moved)
         let topLeft = GeometryUtils.flip(
             expected,
@@ -49,7 +49,7 @@ struct BorderPanelMoveLiveTests {
     @Test("The pass counter holds within a pass and moves after it")
     func passCounterTracksTheRunLoop() {
         let first = MainRunLoopPass.current()
-        #expect(MainRunLoopPass.current() == first)
+        expectEqual(MainRunLoopPass.current(), first)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         #expect(MainRunLoopPass.current() != first)
     }
@@ -74,11 +74,11 @@ struct BorderPanelMoveLiveTests {
             )
         }
         border.sync([spec(-9_000)], alive: nil, reassertOrder: false)
-        #expect(moves == 0)
+        expectEqual(moves, 0)
         // A pass ends, so AppKit's own placement has been sent.
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         border.sync([spec(-8_900)], alive: nil, reassertOrder: false)
-        #expect(moves == 1)
+        expectEqual(moves, 1)
     }
 
     private func render(_ ring: AppKitBorderOverlay, at origin: CGPoint) {

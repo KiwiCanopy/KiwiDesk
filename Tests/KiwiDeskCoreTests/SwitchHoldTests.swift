@@ -35,12 +35,12 @@ struct SwitchHoldTests {
         for id in [SpaceID(3), SpaceID(4)] {
             #expect(core.state.heldSpaces[id]?.arrangement == .profile("desk"))
         }
-        #expect(desk.members(core, 3) == desk.ids([10, 11]))
+        expectEqual(desk.members(core, 3), desk.ids([10, 11]))
         #expect(!core.isTemporary(SpaceID(3)))
         core.execute("load_profile", args: [.string("desk")])
         #expect(core.state.heldSpaces.isEmpty)
-        #expect(desk.members(core, 3) == desk.ids([10, 11]))
-        #expect(desk.members(core, 4) == desk.ids([12]))
+        expectEqual(desk.members(core, 3), desk.ids([10, 11]))
+        expectEqual(desk.members(core, 4), desk.ids([12]))
     }
 
     @Test("a Load ends an empty hold and keeps one with windows")
@@ -79,18 +79,18 @@ struct SwitchHoldTests {
         #expect(!composed.spaces.contains(mail))
         core.apply(composed: composed, forceRetile: true)
         let origin = try #require(core.state.heldSpaces[mail])
-        #expect(origin.arrangement == .profile("wide"))
-        #expect(origin.screen == desk.dell.fingerprint)
-        #expect(core.state.workspaces[mail]?.windows == [WindowID(100)])
+        expectEqual(origin.arrangement, .profile("wide"))
+        expectEqual(origin.screen, desk.dell.fingerprint)
+        expectEqual(core.state.workspaces[mail]?.windows, [WindowID(100)])
         let display = try #require(core.state.workspaces.display(of: mail))
         let item = try #require(
             core.spaceBarItems(display: display, style: SpaceBarLook())
                 .first { $0.identity == .space(mail) }
         )
-        #expect(item.held?.profileName == "wide")
+        expectEqual(item.held?.profileName, "wide")
         core.execute("load_profile", args: [.string("wide")])
         #expect(core.state.heldSpaces[mail] == nil)
-        #expect(core.state.workspaces[mail]?.windows == [WindowID(100)])
+        expectEqual(core.state.workspaces[mail]?.windows, [WindowID(100)])
     }
 
     @Test("a held Space's sentence names its profile and screen")
@@ -134,7 +134,7 @@ struct SwitchHoldTests {
             args: [.string("7"), .string(desk.dell.fingerprint)]
         )
         core.handle(.displaysChanged([desk.builtIn, desk.dell]))
-        #expect(core.spacePins[SpaceID(7)] == desk.dell.fingerprint)
+        expectEqual(core.spacePins[SpaceID(7)], desk.dell.fingerprint)
     }
 
     /// The door's own retile reads the outgoing adoption; the bar
@@ -178,7 +178,7 @@ struct SwitchHoldTests {
         let held = try #require(
             core.state.heldSpaces.first { $0.value.name == SpaceID(3) }
         )
-        #expect(held.value.screen == desk.dell.fingerprint)
+        expectEqual(held.value.screen, desk.dell.fingerprint)
     }
 
     /// No return could take a Space the outgoing profile never
@@ -208,7 +208,7 @@ struct SwitchHoldTests {
             [desk.builtIn.fingerprint, desk.dell.fingerprint],
             for: "desk"
         )
-        #expect(core.spacePins[SpaceID(7)] == desk.dell.fingerprint)
+        expectEqual(core.spacePins[SpaceID(7)], desk.dell.fingerprint)
     }
 
     @Test("a Standard's planned Space is never published as temporary")
@@ -243,8 +243,8 @@ struct SwitchHoldTests {
         let rows = { core.guiConfigStore.load()?.layers.first?.bindings }
         let before = rows()
         core.execute("load_profile", args: [.string("pair")])
-        #expect(core.state.heldSpaces[SpaceID(7)]?.name == SpaceID(7))
-        #expect(rows() == before)
+        expectEqual(core.state.heldSpaces[SpaceID(7)]?.name, SpaceID(7))
+        expectEqual(rows(), before)
         // Vacuity: a top-up here does write.
         core.topUpDigitShortcuts()
         #expect(rows() != before)
@@ -288,10 +288,10 @@ struct SwitchHoldTests {
         // Still alive when the second hold renumbers into it.
         core.state.workspaces.setMode(SpaceID(6), .monocle)
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(core.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
-        #expect(desk.members(core, 5) == desk.ids([10, 11]))
+        expectEqual(core.state.heldSpaces[SpaceID(5)]?.name, SpaceID(3))
+        expectEqual(desk.members(core, 5), desk.ids([10, 11]))
         // The held Space wears its own mode, not the emptied one's.
-        #expect(core.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
-        #expect(core.state.workspaces[SpaceID(6)]?.mode == .bsp)
+        expectEqual(core.state.heldSpaces[SpaceID(6)]?.name, SpaceID(4))
+        expectEqual(core.state.workspaces[SpaceID(6)]?.mode, .bsp)
     }
 }

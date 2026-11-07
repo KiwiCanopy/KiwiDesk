@@ -99,7 +99,7 @@ struct KiwiVisionNeverDimmedTests {
                 as? [String: Any]
         )
         let group = try #require(root["kiwivision"] as? [String: Any])
-        #expect(group["never_dimmed"] as? [String] == ["sketchybar"])
+        expectEqual(group["never_dimmed"] as? [String], ["sketchybar"])
         #expect(
             AppWideSettings.neverDimmedEntries([
                 " SketchyBar ", "com.Apple.Music", "", "sketchybar",
@@ -129,14 +129,14 @@ struct KiwiVisionNeverDimmedTests {
             args: [.array([.string("sketchybar"), .string("Com.X")])]
         )
         #expect(table.isSuccess)
-        #expect(core.appWide.visionNeverDimmed == ["sketchybar", "com.x"])
+        expectEqual(core.appWide.visionNeverDimmed, ["sketchybar", "com.x"])
         #expect(
             core.execute(
                 "kiwivision.set_never_dimmed",
                 args: [.string("a"), .string("b")]
             ).isSuccess
         )
-        #expect(core.appWide.visionNeverDimmed == ["a", "b"])
+        expectEqual(core.appWide.visionNeverDimmed, ["a", "b"])
         #expect(
             !core.execute(
                 "kiwivision.set_never_dimmed",
@@ -165,7 +165,7 @@ struct KiwiVisionNeverDimmedTests {
             targetPid: 900_010,
             refreshingList: true
         )
-        #expect(windows.map(\.clear) == [true, false, true])
+        expectEqual(windows.map(\.clear), [true, false, true])
         core.setAppWide(persisting: false) { $0.visionNeverDimmed = [] }
         #expect(!core.visionMasks)
     }
@@ -190,11 +190,11 @@ struct KiwiVisionNeverDimmedTests {
         #expect(
             apps.map(\.key) == ["test.kiwi.music", "other", "sketchybar"]
         )
-        #expect(apps.map(\.name) == ["Music", "Other", "sketchybar"])
-        #expect(apps.first?.bundleID == "test.kiwi.music")
+        expectEqual(apps.map(\.name), ["Music", "Other", "sketchybar"])
+        expectEqual(apps.first?.bundleID, "test.kiwi.music")
         #expect(apps.last?.bundleID == nil)
         let normal = core.appsOnScreen(beneathNormal: false)
-        #expect(normal.map(\.key) == ["test.kiwi.music", "other"])
+        expectEqual(normal.map(\.key), ["test.kiwi.music", "other"])
     }
 
     /// A list read asks LaunchServices nothing while the list is
@@ -226,7 +226,7 @@ struct KiwiVisionNeverDimmedTests {
                 refreshingList: true
             )
         }
-        #expect(Set(lookups) == [stranger, bare])
+        expectEqual(Set(lookups), [stranger, bare])
         #expect(lookups.count == 2, "a seen process is asked once")
         core.setAppWide(persisting: false) {
             $0.visionNeverDimmed = ["sketchybar", "other"]

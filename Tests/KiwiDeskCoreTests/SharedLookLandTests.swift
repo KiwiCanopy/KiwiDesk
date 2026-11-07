@@ -91,8 +91,8 @@ struct SharedLookLandTests {
             writingRules: true
         )
         core.commitSharedLook(ofProfile: "Twin")
-        #expect(core.profiles.currentName == "Work")
-        #expect(core.tiler.settings.kiwishelf.fillColor == odd)
+        expectEqual(core.profiles.currentName, "Work")
+        expectEqual(core.tiler.settings.kiwishelf.fillColor, odd)
     }
 
     @Test("a restore takes the bundle's shared look")
@@ -110,8 +110,8 @@ struct SharedLookLandTests {
                 palettes: []
             )
         ) { _ in }
-        #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
-        #expect(core.guiConfigStore.load()?.look == config.look)
+        expectEqual(core.sharedLook?.colors["kiwishelf.fill_color"], odd)
+        expectEqual(core.guiConfigStore.load()?.look, config.look)
     }
 
     /// A pre-#1752 backup carries no shared look, so its restore
@@ -129,7 +129,7 @@ struct SharedLookLandTests {
                 palettes: []
             )
         ) { _ in }
-        #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
+        expectEqual(core.sharedLook?.colors["kiwishelf.fill_color"], odd)
         #expect(try core.profiles.read(name: "Work").look == nil)
     }
 

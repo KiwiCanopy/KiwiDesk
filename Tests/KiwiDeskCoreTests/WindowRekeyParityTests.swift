@@ -134,7 +134,7 @@ struct WindowRekeyParityTests {
     @Test("the fixture populates every discoverable id-keyed map")
     func fixtureCoversEveryContainer() {
         let containers = windowContainers(trackedFixture())
-        #expect(containers.count == expectedContainerCount)
+        expectEqual(containers.count, expectedContainerCount)
         // Every discovered container holds the old id — a new map
         // the fixture forgot would show up without it.
         #expect(
@@ -150,7 +150,7 @@ struct WindowRekeyParityTests {
         let containers = windowContainers(state)
         #expect(!hasOld(state))
         #expect(hasNew(state))
-        #expect(containers.count == expectedContainerCount)
+        expectEqual(containers.count, expectedContainerCount)
         #expect(
             containers.allSatisfy { !$0.contains(old.description) }
         )

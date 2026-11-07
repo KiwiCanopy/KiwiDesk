@@ -75,7 +75,7 @@ struct ShelfPanelRoomTests {
         let plate = CGRect(x: 200, y: 0, width: 300, height: 40)
         show(overlay, [Self.section(plate: plate)])
         let panel = try #require(overlay.panel)
-        #expect(panel.frame == Self.onScreen(plate))
+        expectEqual(panel.frame, Self.onScreen(plate))
         let whole = CGRect(origin: .zero, size: Self.strip.size)
         #expect(try drawn(overlay) == Self.onScreen(whole))
     }
@@ -102,7 +102,7 @@ struct ShelfPanelRoomTests {
         )
         let panel = try #require(overlay.panel)
         let inStrip = CGRect(x: 200, y: 0, width: 500, height: 40)
-        #expect(panel.frame == Self.onScreen(inStrip))
+        expectEqual(panel.frame, Self.onScreen(inStrip))
         let root = try #require(panel.contentView)
         for x in [1, root.bounds.midX, root.bounds.maxX - 1] {
             #expect(root.hitTest(CGPoint(x: x, y: 20)) != nil)
@@ -122,7 +122,7 @@ struct ShelfPanelRoomTests {
         )
         let panel = try #require(overlay.panel)
         let span = CGRect(x: 50, y: 0, width: 750, height: 40)
-        #expect(panel.frame == Self.onScreen(span))
+        expectEqual(panel.frame, Self.onScreen(span))
     }
 
     @Test("A side shelf's panel takes its plate down the edge")
@@ -137,7 +137,7 @@ struct ShelfPanelRoomTests {
             edge: .left
         )
         let panel = try #require(overlay.panel)
-        #expect(panel.frame == Self.onScreen(plate, in: Self.side))
+        expectEqual(panel.frame, Self.onScreen(plate, in: Self.side))
         let whole = CGRect(origin: .zero, size: Self.side.size)
         #expect(try drawn(overlay) == Self.onScreen(whole, in: Self.side))
     }
@@ -168,7 +168,7 @@ struct ShelfPanelRoomTests {
             [.init(view: view, slot: Self.strip, plate: plate, content: inner)]
         )
         let panel = try #require(overlay.panel)
-        #expect(panel.frame == Self.onScreen(plate))
+        expectEqual(panel.frame, Self.onScreen(plate))
         #expect(landings.isEmpty)
     }
 }

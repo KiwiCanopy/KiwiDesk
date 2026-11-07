@@ -155,7 +155,7 @@ struct StickyReachDispatchStampTests {
         // The ∞ window renders on the active space's screen (A);
         // the pinned-off 📌 window, the plain window and B's 📌
         // window are not this switch's to carry.
-        #expect(core.eventLoop.carriedWindows() == [w1])
+        expectEqual(core.eventLoop.carriedWindows(), [w1])
         // The dispatch's OWN stamp: no carry has run — the
         // handler fires on the OS notification, which no test
         // sends — so nothing was moved.
@@ -202,7 +202,7 @@ struct StickyReachDispatchStampTests {
         #expect(
             core.execute("focus_desktop", args: [.number(4)]).isSuccess
         )
-        #expect(core.eventLoop.carriedWindows() == [w4])
+        expectEqual(core.eventLoop.carriedWindows(), [w4])
     }
 
     @Test("a refused set promises nothing")
@@ -243,7 +243,7 @@ struct StickyReachDispatchStampTests {
         #expect(
             core.execute("focus_desktop", args: [.number(2)]).isSuccess
         )
-        #expect(core.eventLoop.carriedWindows() == [w2])
+        expectEqual(core.eventLoop.carriedWindows(), [w2])
     }
 
     @Test("reach switched off promises nothing")

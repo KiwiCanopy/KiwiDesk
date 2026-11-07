@@ -69,7 +69,7 @@ struct KiwiShelfMigrationSourceTests {
         #expect(text.contains("\"active_dim_factor\" : 0.4,"))
         #expect(text.contains("\"kiwishelf\":{"))
         let shelf = try shelf(out)
-        #expect(shelf["thickness"] as? Double == 30)
+        expectEqual(shelf["thickness"] as? Double, 30)
         #expect(try barEdge(out) == "left")
     }
 
@@ -104,7 +104,7 @@ struct KiwiShelfMigrationSourceTests {
         )
         // The App Bar keeps its old bottom (#1731).
         let app = try #require(settings["app_bar"] as? [String: Any])
-        #expect(app["edge"] as? String == "bottom")
+        expectEqual(app["edge"] as? String, "bottom")
     }
 
     /// Both hosts' shared overrides drop — the scrolling one is
@@ -128,7 +128,7 @@ struct KiwiShelfMigrationSourceTests {
         let bar = try #require(scroll["app_bar"] as? [String: Any])
         #expect(bar["edge"] == nil)
         #expect(bar["thickness"] == nil)
-        #expect(bar["title_cap"] as? Int == 7)
+        expectEqual(bar["title_cap"] as? Int, 7)
     }
 
     /// At or above the formats the step introduced, an absent

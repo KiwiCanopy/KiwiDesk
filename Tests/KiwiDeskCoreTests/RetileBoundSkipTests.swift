@@ -94,7 +94,7 @@ struct RetileBoundSkipTests {
                 == 715
         )
         let placed = try #require(applied.frames[w])
-        #expect(placed.width == 715)
+        expectEqual(placed.width, 715)
         #expect(abs(placed.midX - target.midX) < 0.01)
 
         // Settled: the app "performs" the centered ask and the
@@ -141,7 +141,7 @@ struct RetileBoundSkipTests {
 
         core.retile(pass: .reissue)
         let issued = try #require(applied.frames[w])
-        #expect(issued == placed)
+        expectEqual(issued, placed)
     }
 
     @Test("A moved slot still issues")
@@ -171,7 +171,7 @@ struct RetileBoundSkipTests {
         applied.frames = [:]
         core.retile()
         let reissued = try #require(applied.frames[w])
-        #expect(reissued == moved)
+        expectEqual(reissued, moved)
     }
 
     @Test("A slot translated at the same size still issues")
@@ -200,7 +200,7 @@ struct RetileBoundSkipTests {
         applied.frames = [:]
         core.retile()
         let reissued = try #require(applied.frames[w])
-        #expect(reissued == moved)
+        expectEqual(reissued, moved)
     }
 
 }

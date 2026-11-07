@@ -133,7 +133,7 @@ struct AdoptionHealScheduleTests {
         #expect(read != nil)
         await read?.value
         // The fired task really swept (the census was read) …
-        #expect(box.censusReads == 1)
+        expectEqual(box.censusReads, 1)
         // … and re-armed itself: the slot now holds a NEW task,
         // not the finished one.
         let rearmed = core.deferred.task(for: .adoptionHeal)
@@ -173,7 +173,7 @@ struct AdoptionHealScheduleTests {
         let read = core.deferred.task(for: .adoptionHealRead)
         #expect(read != nil)
         await read?.value
-        #expect(recorder.onMain == [false])
+        expectEqual(recorder.onMain, [false])
     }
 
     /// A semaphore wait, kept out of the async context.
@@ -209,7 +209,7 @@ struct AdoptionHealScheduleTests {
         core.deferred.cancelAll()
         release.signal()
         await read?.value
-        #expect(box.censusReads == 1)
+        expectEqual(box.censusReads, 1)
         #expect(core.deferred.task(for: .adoptionHeal) == nil)
     }
 
@@ -243,6 +243,6 @@ struct AdoptionHealScheduleTests {
         #expect(core.eventLoop.drainPendingRetrack().isEmpty)
         #expect(box.windowQueries == 0, "list read inline (#2027)")
         box.drain()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
     }
 }

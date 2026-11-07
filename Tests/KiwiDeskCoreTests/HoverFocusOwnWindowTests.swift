@@ -83,7 +83,7 @@ struct HoverFocusOwnWindowTests {
         let (core, fronts) = makeCore(marked: false)
         #expect(core.hoverTarget(at: overRight) == nil)
         rest(core, at: overRight)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(fronts.numbers.isEmpty)
     }
 
@@ -93,11 +93,11 @@ struct HoverFocusOwnWindowTests {
         let target = try #require(core.hoverTarget(at: overRight))
         #expect(target.own)
         rest(core, at: overRight)
-        #expect(core.focusedWindowID == WindowID(3))
-        #expect(fronts.numbers == [3])
-        #expect(fronts.focusAtFront == [WindowID(3)])
+        expectEqual(core.focusedWindowID, WindowID(3))
+        expectEqual(fronts.numbers, [3])
+        expectEqual(fronts.focusAtFront, [WindowID(3)])
         // The flight names the app the hover left (#1812).
-        #expect(core.raiseFlight?.leftPID == 11)
+        expectEqual(core.raiseFlight?.leftPID, 11)
     }
 
     /// A focus the Desktop raise gate refuses (#1345) moves
@@ -108,7 +108,7 @@ struct HoverFocusOwnWindowTests {
         let (core, fronts) = makeCore(marked: true)
         core.windowIsOnScreen = { $0 == WindowID(3) ? false : nil }
         rest(core, at: overRight)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(fronts.numbers.isEmpty)
     }
 
@@ -118,7 +118,7 @@ struct HoverFocusOwnWindowTests {
         core.focusWindow(WindowID(3), warp: false)
         core.frontmostPIDProvider = { getpid() }
         rest(core, at: CGPoint(x: 300, y: 400))
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(fronts.numbers.isEmpty)
     }
 
@@ -155,9 +155,9 @@ struct HoverFocusOwnWindowTests {
         core.focusWindow(WindowID(1), warp: false)
         try #require(core.state.workspaces.visibleSpaces.contains(there))
         rest(core, at: overRight)
-        #expect(core.state.workspaces.activeSpace == there)
-        #expect(core.focusedWindowID == WindowID(3))
-        #expect(fronts.numbers == [3])
+        expectEqual(core.state.workspaces.activeSpace, there)
+        expectEqual(core.focusedWindowID, WindowID(3))
+        expectEqual(fronts.numbers, [3])
     }
 }
 

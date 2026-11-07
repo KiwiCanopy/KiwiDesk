@@ -97,7 +97,7 @@ struct TravelerRehomeConsumerTests {
             f.core.tiler.recentInstantTarget(Self.traveler),
             "the retile never wrote a frame — the traveler stayed"
         )
-        #expect(commanded == expected(f))
+        expectEqual(commanded, expected(f))
         #expect(f.home.contains(commanded))
     }
 
@@ -189,7 +189,7 @@ struct TravelerRehomeConsumerTests {
                 includingHeldGlide: false
             )
         )
-        #expect(first == expected(f))
+        expectEqual(first, expected(f))
         // An in-flight echo one tenth of the way: still mostly on
         // the SOURCE screen, so an echo-fed base would compute a
         // second, smaller target.

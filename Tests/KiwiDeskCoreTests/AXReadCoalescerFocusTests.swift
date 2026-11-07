@@ -60,10 +60,10 @@ struct AXReadCoalescerFocusTests {
         }
         #expect(pump.work.count == 1, "one focus read per app")
         pump.drainOne()
-        #expect(delivered == ["A"])
+        expectEqual(delivered, ["A"])
         #expect(pump.work.count == 1, "the newest window re-reads")
         pump.drainOne()
-        #expect(delivered == ["A", "B"])
+        expectEqual(delivered, ["A", "B"])
         #expect(pump.work.isEmpty)
     }
 

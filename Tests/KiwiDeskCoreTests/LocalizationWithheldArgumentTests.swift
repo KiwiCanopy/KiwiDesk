@@ -64,7 +64,7 @@ struct LocalizationWithheldArgumentTests {
             english: "A sentence. %2$@",
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// And the rule is scoped to the register: every other key in
@@ -79,7 +79,7 @@ struct LocalizationWithheldArgumentTests {
             english: "Open %1$@",
             value: "%1$@ öffnen"
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// A dropped specifier is `placeholder_drift`'s to report, so

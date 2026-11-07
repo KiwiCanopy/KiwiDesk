@@ -26,7 +26,7 @@ struct GridOverrideTests {
             Mirror(reflecting: GridOverride())
                 .children.compactMap(\.label)
         )
-        #expect(mirror == params.subtracting(Self.notOverridable))
+        expectEqual(mirror, params.subtracting(Self.notOverridable))
     }
 
     @Test("Resolve applies every set field onto the global")
@@ -41,14 +41,14 @@ struct GridOverrideTests {
         over.columnWeights = [2, 1]
         over.rowWeights = [3]
         let resolved = over.resolved(onto: GridParams())
-        #expect(resolved.type == .rigid)
-        #expect(resolved.fillEmptyCells == false)
-        #expect(resolved.splitDirection == .vertical)
-        #expect(resolved.columns == 5)
-        #expect(resolved.rows == 4)
-        #expect(resolved.autoSize == true)
-        #expect(resolved.columnWeights == [2, 1])
-        #expect(resolved.rowWeights == [3])
+        expectEqual(resolved.type, .rigid)
+        expectEqual(resolved.fillEmptyCells, false)
+        expectEqual(resolved.splitDirection, .vertical)
+        expectEqual(resolved.columns, 5)
+        expectEqual(resolved.rows, 4)
+        expectEqual(resolved.autoSize, true)
+        expectEqual(resolved.columnWeights, [2, 1])
+        expectEqual(resolved.rowWeights, [3])
     }
 
     @Test("Unset fields inherit the global, per field")
@@ -79,7 +79,7 @@ struct GridOverrideTests {
             GridOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("An empty override is sparse and inert")
@@ -87,8 +87,8 @@ struct GridOverrideTests {
         let over = GridOverride()
         #expect(over.isEmpty)
         let data = try JSONEncoder().encode(over)
-        #expect(String(data: data, encoding: .utf8) == "{}")
-        #expect(over.resolved(onto: GridParams()) == GridParams())
+        expectEqual(String(data: data, encoding: .utf8), "{}")
+        expectEqual(over.resolved(onto: GridParams()), GridParams())
     }
 
     @Test("TilingSettings resolves grid per space")
@@ -98,8 +98,8 @@ struct GridOverrideTests {
         var over = GridOverride()
         over.type = .rigid
         settings.grid.override[SpaceID("2")] = over
-        #expect(settings.resolvedGrid(for: "2").type == .rigid)
-        #expect(settings.resolvedGrid(for: "1").type == .dynamic)
+        expectEqual(settings.resolvedGrid(for: "2").type, .rigid)
+        expectEqual(settings.resolvedGrid(for: "1").type, .dynamic)
     }
 
     @Test("override map nests under layout.grid and round-trips")
@@ -117,7 +117,7 @@ struct GridOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(back.grid.override == settings.grid.override)
+        expectEqual(back.grid.override, settings.grid.override)
     }
 }
 
@@ -144,9 +144,9 @@ struct GridOverrideCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.grid.override[SpaceID("2")]
-        #expect(over?.type == .rigid)
+        expectEqual(over?.type, .rigid)
         // The global params are untouched.
-        #expect(core.tiler.settings.grid.type == .dynamic)
+        expectEqual(core.tiler.settings.grid.type, .dynamic)
     }
 
     @Test("dimensions override sets columns + rows, floored")
@@ -159,11 +159,11 @@ struct GridOverrideCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.grid.override[SpaceID("7")]
-        #expect(over?.columns == 5)
+        expectEqual(over?.columns, 5)
         #expect(over?.rows == 1)  // 0 floored to 1
         // The global dimensions are untouched.
-        #expect(core.tiler.settings.grid.columns == 3)
-        #expect(core.tiler.settings.grid.rows == 2)
+        expectEqual(core.tiler.settings.grid.columns, 3)
+        expectEqual(core.tiler.settings.grid.rows, 2)
     }
 
     @Test("auto_size override writes only that space")
@@ -176,9 +176,9 @@ struct GridOverrideCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.grid.override[SpaceID("4")]
-        #expect(over?.autoSize == true)
+        expectEqual(over?.autoSize, true)
         // Global stays off.
-        #expect(core.tiler.settings.grid.autoSize == false)
+        expectEqual(core.tiler.settings.grid.autoSize, false)
     }
 
     @Test("global auto_size sets the flag")
@@ -190,7 +190,7 @@ struct GridOverrideCommandTests {
                 args: [.bool(true)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.grid.autoSize == true)
+        expectEqual(core.tiler.settings.grid.autoSize, true)
     }
 
     @Test("Invalid value is rejected and writes nothing")

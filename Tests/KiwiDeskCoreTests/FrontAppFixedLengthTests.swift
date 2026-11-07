@@ -120,13 +120,13 @@ struct FrontAppFixedLengthTests {
                 title: "A much longer window title than the cap"
             )
         )
-        #expect(frames(overlay) == before)
+        expectEqual(frames(overlay), before)
         #expect(Self.redraws == counted + 1, "content alone")
         #expect(
             overlay.frontName.stringValue
                 == "A much longer window title than the cap"
         )
-        #expect(overlay.itemViews[0].apps.map(\.focused) == [false, true])
+        expectEqual(overlay.itemViews[0].apps.map(\.focused), [false, true])
         #expect(renders == 2, "the shelf still re-reads its hover")
     }
 

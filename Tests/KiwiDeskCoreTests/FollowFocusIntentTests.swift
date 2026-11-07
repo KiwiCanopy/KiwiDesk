@@ -48,7 +48,7 @@ struct FollowFocusIntentTests {
     func payableDebtIsPaidOnce() {
         let (intent, _) = make()
         intent.record(moved)
-        #expect(intent.claim(if: payable) == moved)
+        expectEqual(intent.claim(if: payable), moved)
         #expect(intent.claim(if: payable) == nil)
     }
 
@@ -61,7 +61,7 @@ struct FollowFocusIntentTests {
         let (intent, _) = make()
         intent.record(moved)
         #expect(intent.claim(if: unpayable) == nil)
-        #expect(intent.claim(if: payable) == moved)
+        expectEqual(intent.claim(if: payable), moved)
     }
 
     /// The other direction, and the one that keeps a follow macOS
@@ -87,8 +87,8 @@ struct FollowFocusIntentTests {
         let (intent, _) = make()
         #expect(intent.owed() == nil)
         intent.record(moved)
-        #expect(intent.owed() == moved)
-        #expect(intent.claim(if: payable) == moved)
+        expectEqual(intent.owed(), moved)
+        expectEqual(intent.claim(if: payable), moved)
         #expect(intent.owed() == nil)
     }
 
@@ -119,7 +119,7 @@ struct FollowFocusIntentTests {
         let (intent, _) = make()
         intent.record(WindowID(7))
         intent.retire(WindowID(8))
-        #expect(intent.owed() == WindowID(7))
+        expectEqual(intent.owed(), WindowID(7))
         intent.retire(WindowID(7))
         #expect(intent.owed() == nil)
     }
@@ -142,7 +142,7 @@ struct FollowFocusIntentTests {
         let (intent, _) = make()
         intent.record(moved)
         intent.rekey(old: other, new: WindowID(11))
-        #expect(intent.claim(if: payable) == moved)
+        expectEqual(intent.claim(if: payable), moved)
     }
 
     /// The drain is keyed to the arriving window, so an
@@ -157,6 +157,6 @@ struct FollowFocusIntentTests {
         let (intent, _) = make()
         intent.record(moved)
         #expect(intent.claim(if: { $0 == self.other }) == nil)
-        #expect(intent.claim(if: { $0 == self.moved }) == moved)
+        expectEqual(intent.claim(if: { $0 == self.moved }), moved)
     }
 }

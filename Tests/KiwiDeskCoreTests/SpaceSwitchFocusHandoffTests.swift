@@ -60,11 +60,11 @@ struct SpaceSwitchFocusHandoffTests {
         var yields = 0
         core.desktopFocusYield = { yields += 1 }
         addWindow(core, 1)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         core.execute("focus_space", args: [.string("2")])
         // Window 1 is stashed offscreen yet still key — the
         // desktop must take over instead (#463).
-        #expect(yields == 1)
+        expectEqual(yields, 1)
     }
 
     @Test("Switching to a space with a focus does not yield")
@@ -81,8 +81,8 @@ struct SpaceSwitchFocusHandoffTests {
         )
         yields = 0
         core.execute("focus_space", args: [.string("2")])
-        #expect(yields == 0)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(yields, 0)
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     /// The yield keys on the stashed window's app still being
@@ -98,7 +98,7 @@ struct SpaceSwitchFocusHandoffTests {
         core.frontmostPIDProvider = { 42 }
         addWindow(core, 1, pid: 7)
         core.execute("focus_space", args: [.string("2")])
-        #expect(yields == 0)
+        expectEqual(yields, 0)
     }
 
     /// A space holding members but no stamped focus (#463's
@@ -123,7 +123,7 @@ struct SpaceSwitchFocusHandoffTests {
             core.state.workspaces[SpaceID(2)]?.focused
                 == WindowID(1)
         )
-        #expect(yields == 0)
+        expectEqual(yields, 0)
     }
 
     /// The yield leg with the seam wired AND agreeing: the
@@ -136,7 +136,7 @@ struct SpaceSwitchFocusHandoffTests {
         core.frontmostPIDProvider = { 7 }
         addWindow(core, 1, pid: 7)
         core.execute("focus_space", args: [.string("2")])
-        #expect(yields == 1)
+        expectEqual(yields, 1)
     }
 
     /// A floating sticky (visible on every space) is a
@@ -156,7 +156,7 @@ struct SpaceSwitchFocusHandoffTests {
         // but the sticky travels there — no desktop yield.
         core.state.apply(.windowFocused(WindowID(1)))
         core.execute("focus_space", args: [.string("2")])
-        #expect(yields == 0)
+        expectEqual(yields, 0)
     }
 
     /// The #431 hazard, pinned: a floating-sticky traveler that
@@ -185,7 +185,7 @@ struct SpaceSwitchFocusHandoffTests {
         #expect(
             core.state.workspaces[SpaceID(2)]?.focused == nil
         )
-        #expect(yields == 0)
+        expectEqual(yields, 0)
         // Settle-side: the traveler's app frontmost = agreement.
         logs = []
         core.frontmostPIDProvider = { 6 }
@@ -277,6 +277,6 @@ struct SpaceSwitchFocusHandoffTests {
             priorFrontmost: 5,
             context: "space settle"
         )
-        #expect(logs.count == 1)
+        expectEqual(logs.count, 1)
     }
 }

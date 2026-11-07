@@ -48,7 +48,7 @@ struct SpaceBarWindowMenuTests {
         }
         let item = menu.items[0]
         #expect(item.title.hasSuffix("…"))
-        #expect(item.toolTip == long)
+        expectEqual(item.toolTip, long)
         #expect(!item.isEnabled)
         let short = SpaceBarWindowMenu.make(
             [
@@ -63,7 +63,7 @@ struct SpaceBarWindowMenuTests {
             kind: .overflow
         ) { _ in }
         #expect(short.items[0].isEnabled)
-        #expect(short.items[0].title == "Web")
+        expectEqual(short.items[0].title, "Web")
         #expect(short.items[0].toolTip == nil)
         let titled = SpaceBarWindowMenu.make(
             [
@@ -95,7 +95,7 @@ struct SpaceBarWindowMenuTests {
             ],
             kind: .glyph
         ) { _ in }
-        #expect(menu.items.map(\.title) == ["Web", "Untitled Window"])
+        expectEqual(menu.items.map(\.title), ["Web", "Untitled Window"])
         #expect(menu.items[1].image == nil)
     }
 
@@ -119,7 +119,7 @@ struct SpaceBarWindowMenuTests {
             kind: .glyph
         ) { _ in }
         #expect(menu.items[1].title.hasSuffix("…"))
-        #expect(menu.items[1].toolTip == long)
+        expectEqual(menu.items[1].toolTip, long)
     }
 
     private final class FlippedView: NSView {
@@ -147,11 +147,11 @@ struct SpaceBarWindowMenuTests {
         let event = try #require(
             SpaceBarGlyphActions.contextEvent(at: cell)
         )
-        #expect(event.type == .rightMouseDown)
-        #expect(event.windowNumber == window.windowNumber)
-        #expect(event.locationInWindow == NSPoint(x: 30, y: 8))
+        expectEqual(event.type, .rightMouseDown)
+        expectEqual(event.windowNumber, window.windowNumber)
+        expectEqual(event.locationInWindow, NSPoint(x: 30, y: 8))
         let corner = SpaceBarGlyphActions.contextEvent(at: flipped)
-        #expect(corner?.locationInWindow == NSPoint(x: 60, y: 8))
+        expectEqual(corner?.locationInWindow, NSPoint(x: 60, y: 8))
         #expect(
             SpaceBarGlyphActions.contextEvent(at: NSView()) == nil
         )

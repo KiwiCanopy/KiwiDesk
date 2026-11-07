@@ -126,9 +126,9 @@ struct BootScanChunkTests {
         // More than one chunk IS the fix: a single call would be
         // the synchronous scan again, whatever it is named.
         #expect(chunks > 1)
-        #expect(box.attached.count == 5)
-        #expect(progress.scanned == 5)
-        #expect(progress.total == 5)
+        expectEqual(box.attached.count, 5)
+        expectEqual(progress.scanned, 5)
+        expectEqual(progress.total, 5)
     }
 
     /// The honest count is apps VISITED of apps queued, never
@@ -152,9 +152,9 @@ struct BootScanChunkTests {
 
         // Two of the four attached; all four were visited, and
         // the count the menu row reads reaches its total.
-        #expect(box.attached.count == 2)
-        #expect(progress.scanned == 4)
-        #expect(progress.total == 4)
+        expectEqual(box.attached.count, 2)
+        expectEqual(progress.scanned, 4)
+        expectEqual(progress.total, 4)
         // The summary line keeps BOTH numbers — attaches of
         // running — which is what a field report is read against.
         #expect(
@@ -172,7 +172,7 @@ struct BootScanChunkTests {
 
         let first = loop.scanChunk(budget: .milliseconds(15))
         #expect(!first.finished)
-        #expect(first.total == 4)
+        expectEqual(first.total, 4)
         // The count the quick menu's row reads has to move, and
         // has to stay short of the total until the pass ends —
         // both halves of "honest" (#802).
@@ -193,14 +193,14 @@ struct BootScanChunkTests {
         // Mid-pass: nothing summarised, nothing published — a
         // per-chunk epilogue would re-publish the displays several
         // times per boot and log a summary that is not one.
-        #expect(box.summaries == 0)
-        #expect(box.displayPublishes == 0)
+        expectEqual(box.summaries, 0)
+        expectEqual(box.displayPublishes, 0)
         while !progress.finished {
             progress = loop.scanChunk(budget: .milliseconds(15))
         }
 
-        #expect(box.summaries == 1)
-        #expect(box.displayPublishes == 1)
+        expectEqual(box.summaries, 1)
+        expectEqual(box.displayPublishes, 1)
         // The line still reports attaches of RUNNING apps, which
         // is what a field report is read against (#672).
         #expect(
@@ -229,8 +229,8 @@ struct BootScanChunkTests {
         // not double-end the signpost interval, log a second
         // summary or re-publish the displays.
         #expect(extra.finished)
-        #expect(box.summaries == 1)
-        #expect(box.displayPublishes == 1)
+        expectEqual(box.summaries, 1)
+        expectEqual(box.displayPublishes, 1)
     }
 
     @Test("a nil budget drains the whole queue in one call")
@@ -248,7 +248,7 @@ struct BootScanChunkTests {
         // means no yield point, which is the contract every suite
         // that drives a whole scan in one turn rests on.
         #expect(progress.finished)
-        #expect(box.attached.count == 6)
+        expectEqual(box.attached.count, 6)
     }
 
     @Test("stop drops a pass in flight")
@@ -264,7 +264,7 @@ struct BootScanChunkTests {
         // start must re-derive it rather than resume a dead one.
         #expect(loop.bootScan.pending.isEmpty)
         #expect(loop.beginScan())
-        #expect(loop.bootScan.total == 5)
+        expectEqual(loop.bootScan.total, 5)
         loop.stop()
     }
 }

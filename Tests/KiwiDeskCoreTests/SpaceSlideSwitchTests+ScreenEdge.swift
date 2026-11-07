@@ -20,9 +20,9 @@ extension SpaceSlideSwitchTests {
         core.tiler.settings.spaceBarStyle.edgeOverride = [
             display.fingerprint: .left
         ]
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .top)
         core.execute("focus_space", args: [.string("2")])
         defer { core.spaceSlide.end() }
-        #expect(core.spaceSlide.play?.axis == .vertical)
+        expectEqual(core.spaceSlide.play?.axis, .vertical)
     }
 }

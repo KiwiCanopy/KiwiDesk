@@ -136,7 +136,7 @@ struct InPlaceRestartTests {
                 ".session_snapshot"
             )
             let text = try String(contentsOf: url, encoding: .utf8)
-            #expect(text.contains("\"session\"") == announced)
+            expectEqual(text.contains("\"session\""), announced)
             #expect(
                 lines.contains { $0.contains("windows left in place") }
                     == announced
@@ -175,7 +175,7 @@ struct InPlaceRestartTests {
             )
             let text = try? String(contentsOf: url, encoding: .utf8)
             if announced {
-                #expect(text?.contains("\"session\"") == true)
+                expectEqual(text?.contains("\"session\""), true)
             } else {
                 #expect(text == nil)
             }
@@ -198,7 +198,7 @@ struct CodeIdentityTests {
     )
     func selfIsAdmitted() throws {
         let path = try #require(InPlaceRestartTests.selfPath)
-        #expect(CodeIdentity.running().admits(path) == .admitted)
+        expectEqual(CodeIdentity.running().admits(path), .admitted)
     }
 
     @Test("another signed app is refused")
@@ -228,13 +228,13 @@ struct CodeIdentityTests {
                 == "/Applications/KiwiDesk.app"
         )
         let bare = URL(fileURLWithPath: "/usr/local/bin/kiwidesk")
-        #expect(CodeIdentity.bundle(containing: bare) == bare)
+        expectEqual(CodeIdentity.bundle(containing: bare), bare)
         // A tool that merely lives under some bundle is its own
         // code — the test runner itself sits inside Xcode.app.
         let tool = URL(
             fileURLWithPath: "/Applications/Xcode.app/Contents/"
                 + "Developer/usr/bin/xctest"
         )
-        #expect(CodeIdentity.bundle(containing: tool) == tool)
+        expectEqual(CodeIdentity.bundle(containing: tool), tool)
     }
 }

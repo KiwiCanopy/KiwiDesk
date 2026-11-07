@@ -14,8 +14,8 @@ struct SpaceSlideStripTests {
     @Test("the strip holds until it begins")
     func holdsBeforeBegin() {
         let strip = SpaceSlideStrip(from: 0, to: page, velocity: 0, begin: 10)
-        #expect(strip.state(at: 9.9).offset == 0)
-        #expect(strip.state(at: 9.9).velocity == 0)
+        expectEqual(strip.state(at: 9.9).offset, 0)
+        expectEqual(strip.state(at: 9.9).velocity, 0)
     }
 
     @Test("it is within 2 % of rest at its landing, and never past it")
@@ -40,7 +40,7 @@ struct SpaceSlideStripTests {
             begin: at + 0.12,
             response: strip.response
         )
-        #expect(next.begin == at)
+        expectEqual(next.begin, at)
         #expect(abs(next.from - before.offset) < 0.001)
         #expect(abs(next.velocity - before.velocity) < 0.001)
         #expect(next.velocity > 0)
@@ -57,8 +57,8 @@ struct SpaceSlideStripTests {
             begin: 5.12,
             response: strip.response
         )
-        #expect(next.begin == 5.12)
-        #expect(next.velocity == 0)
+        expectEqual(next.begin, 5.12)
+        expectEqual(next.velocity, 0)
         #expect(abs(next.from - page) < 0.5)
     }
 
@@ -82,9 +82,9 @@ struct SpaceSlideStripTests {
             velocity: 1000,
             begin: 0
         )
-        #expect(strip.normalizedVelocity == 2)
+        expectEqual(strip.normalizedVelocity, 2)
         let flat = SpaceSlideStrip(from: 5, to: 5, velocity: 1000, begin: 0)
-        #expect(flat.normalizedVelocity == 0)
+        expectEqual(flat.normalizedVelocity, 0)
     }
 
     /// The spring the strip plays is `BarMotion.slideSpring`'s, so
@@ -112,9 +112,9 @@ struct SpaceSlideStripTests {
         #expect(abs(omega - strip.omega) < 0.0001)
         #expect(abs(omega - 2 * .pi / 0.5) < 0.0001)
         #expect(abs(spring.damping - 2 * omega * spring.mass) < 0.0001)
-        #expect(spring.fromValue as? CGFloat == 0)
-        #expect(spring.toValue as? CGFloat == page)
-        #expect(spring.initialVelocity == strip.normalizedVelocity)
-        #expect(spring.beginTime == 7)
+        expectEqual(spring.fromValue as? CGFloat, 0)
+        expectEqual(spring.toValue as? CGFloat, page)
+        expectEqual(spring.initialVelocity, strip.normalizedVelocity)
+        expectEqual(spring.beginTime, 7)
     }
 }

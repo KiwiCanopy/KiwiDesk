@@ -9,8 +9,8 @@ import Testing
 struct ColorVisionLumaTests {
     @Test("luma weighs the encoded channels")
     func lumaWeighsEncodedChannels() throws {
-        #expect(ColorVision.luma("#FFFFFF") == 0.2126 + 0.7152 + 0.0722)
-        #expect(ColorVision.luma("#000000") == 0)
+        expectEqual(ColorVision.luma("#FFFFFF"), 0.2126 + 0.7152 + 0.0722)
+        expectEqual(ColorVision.luma("#000000"), 0)
         let green = try #require(ColorVision.luma("#00FF00"))
         #expect(abs(green - 0.7152) < 1e-12)
         #expect(ColorVision.luma("nope") == nil)

@@ -80,7 +80,7 @@ struct EmptyDisplayHealTests {
         let core = twoScreenCore()
         var log: [String] = []
         core.onLog = { log.append($0) }
-        #expect(spaces(core, on: Self.displayB) == ["mail"])
+        expectEqual(spaces(core, on: Self.displayB), ["mail"])
         core.execute(
             "pin_space_to_display",
             args: [.string("mail"), .string("A")]
@@ -88,9 +88,9 @@ struct EmptyDisplayHealTests {
         #expect(
             spaces(core, on: Self.displayA) == ["1", "work", "mail"]
         )
-        #expect(spaces(core, on: Self.displayB) == ["2"])
-        #expect(core.spacePins["2"] == Self.displayB.fingerprint)
-        #expect(core.state.workspaces["2"]?.mode == leadOfB())
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
+        expectEqual(core.spacePins["2"], Self.displayB.fingerprint)
+        expectEqual(core.state.workspaces["2"]?.mode, leadOfB())
         #expect(log.contains { $0.hasPrefix("heal: display 'B'") })
     }
 
@@ -99,7 +99,7 @@ struct EmptyDisplayHealTests {
         let core = twoScreenCore()
         let before = core.state.workspaces.allSpaces.map(\.id)
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
-        #expect(core.state.workspaces.allSpaces.map(\.id) == before)
+        expectEqual(core.state.workspaces.allSpaces.map(\.id), before)
         #expect(core.healedSpaces.isEmpty)
     }
 
@@ -112,8 +112,8 @@ struct EmptyDisplayHealTests {
         )
         let once = core.state.workspaces.allSpaces.map(\.id)
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
-        #expect(core.state.workspaces.allSpaces.map(\.id) == once)
-        #expect(spaces(core, on: Self.displayB) == ["2"])
+        expectEqual(core.state.workspaces.allSpaces.map(\.id), once)
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
     }
 
     @Test("Deleting a screen's last space heals it back")
@@ -121,7 +121,7 @@ struct EmptyDisplayHealTests {
         let core = twoScreenCore()
         core.execute("delete_space", args: [.string("mail")])
         #expect(core.state.workspaces["mail"] == nil)
-        #expect(spaces(core, on: Self.displayB) == ["2"])
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
     }
 
     /// One screen, `work` pinned to A, saved as `Solo`; then B
@@ -141,9 +141,9 @@ struct EmptyDisplayHealTests {
     func profileDoorSeeds() {
         let core = soloCore()
         core.execute("load_profile", args: [.string("Solo")])
-        #expect(spaces(core, on: Self.displayA) == ["1", "work"])
-        #expect(spaces(core, on: Self.displayB) == ["2"])
-        #expect(core.spacePins["2"] == Self.displayB.fingerprint)
+        expectEqual(spaces(core, on: Self.displayA), ["1", "work"])
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
+        expectEqual(core.spacePins["2"], Self.displayB.fingerprint)
         // An explicit reload prunes what the profile does not
         // declare — its own contract — and the heal seeds B
         // again rather than leaving it empty.
@@ -152,7 +152,7 @@ struct EmptyDisplayHealTests {
             core.state.workspaces.allSpaces.map(\.id)
                 == ["1", "work", "2"]
         )
-        #expect(spaces(core, on: Self.displayB) == ["2"])
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
     }
 
     @Test("An un-pruned re-apply re-pins the same seed, windows kept")
@@ -180,10 +180,10 @@ struct EmptyDisplayHealTests {
             core.state.workspaces.allSpaces.map(\.id)
                 == ["1", "work", "2"]
         )
-        #expect(spaces(core, on: Self.displayB) == ["2"])
-        #expect(core.spacePins["2"] == Self.displayB.fingerprint)
-        #expect(core.state.workspaces["2"]?.mode == leadOfB())
-        #expect(core.state.workspaces.space(of: WindowID(7)) == "2")
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
+        expectEqual(core.spacePins["2"], Self.displayB.fingerprint)
+        expectEqual(core.state.workspaces["2"]?.mode, leadOfB())
+        expectEqual(core.state.workspaces.space(of: WindowID(7)), "2")
     }
 
     @Test("A moved-away last space heals the screen it left")
@@ -195,8 +195,8 @@ struct EmptyDisplayHealTests {
             "move_space_to_display",
             args: [.string("mail"), .string("A")]
         )
-        #expect(spaces(core, on: Self.displayB) == ["2"])
-        #expect(core.spacePins["2"] == Self.displayB.fingerprint)
+        expectEqual(spaces(core, on: Self.displayB), ["2"])
+        expectEqual(core.spacePins["2"], Self.displayB.fingerprint)
     }
 
     @Test("A seed the config declares is the user's, not the ledger's")
@@ -212,12 +212,12 @@ struct EmptyDisplayHealTests {
             "pin_space_to_display",
             args: [.string("2"), .string("A")]
         )
-        #expect(spaces(core, on: Self.displayB) == ["3"])
+        expectEqual(spaces(core, on: Self.displayB), ["3"])
         core.execute("save_profile", args: [.string("Duo")])
         core.execute("load_profile", args: [.string("Duo")])
         #expect(core.healedSpaces.isEmpty)
-        #expect(spaces(core, on: Self.displayA) == ["1", "work", "2"])
-        #expect(spaces(core, on: Self.displayB) == ["3"])
+        expectEqual(spaces(core, on: Self.displayA), ["1", "work", "2"])
+        expectEqual(spaces(core, on: Self.displayB), ["3"])
     }
 
     @Test("Twins mint once, never per resolve")
@@ -245,11 +245,11 @@ struct EmptyDisplayHealTests {
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
         let once = core.state.workspaces.allSpaces.map(\.id)
         // Non-vacuity: the heal DID fire once for the pair.
-        #expect(core.healedSpaces[Self.displayA.fingerprint] == "2")
-        #expect(once == ["1", "work", "2"])
+        expectEqual(core.healedSpaces[Self.displayA.fingerprint], "2")
+        expectEqual(once, ["1", "work", "2"])
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
-        #expect(core.state.workspaces.allSpaces.map(\.id) == once)
+        expectEqual(core.state.workspaces.allSpaces.map(\.id), once)
     }
 
     @Test("A seed moved off by hand leaves its screen a fresh one")
@@ -262,7 +262,7 @@ struct EmptyDisplayHealTests {
             "move_space_to_display",
             args: [.string("2"), .string("A")]
         )
-        #expect(spaces(core, on: Self.displayB) == ["3"])
-        #expect(core.healedSpaces[Self.displayB.fingerprint] == "3")
+        expectEqual(spaces(core, on: Self.displayB), ["3"])
+        expectEqual(core.healedSpaces[Self.displayB.fingerprint], "3")
     }
 }

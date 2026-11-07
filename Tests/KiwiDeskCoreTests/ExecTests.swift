@@ -45,7 +45,7 @@ struct ExecTests {
         // system() would sit in a kernel wait for 2s; the
         // async replacement returns right away.
         #expect(elapsed < 1.0)
-        #expect(lua.global("ok") == .bool(true))
+        expectEqual(lua.global("ok"), .bool(true))
     }
 
     @Test("os.execute() without a command reports a shell")
@@ -55,7 +55,7 @@ struct ExecTests {
         #expect(
             lua.run("has_shell = os.execute()").succeeded
         )
-        #expect(lua.global("has_shell") == .bool(true))
+        expectEqual(lua.global("has_shell"), .bool(true))
     }
 
     @Test("exec delivers exit code, stdout, and stderr")
@@ -75,9 +75,9 @@ struct ExecTests {
         )
         #expect(result.succeeded)
         await core.exec.untilIdle()
-        #expect(lua.global("got_code") == .number(3))
-        #expect(lua.global("got_out") == .string("hello"))
-        #expect(lua.global("got_err") == .string("oops"))
+        expectEqual(lua.global("got_code"), .number(3))
+        expectEqual(lua.global("got_out"), .string("hello"))
+        expectEqual(lua.global("got_err"), .string("oops"))
     }
 
     @Test("exec without callback returns a pid and reaps")
@@ -96,7 +96,7 @@ struct ExecTests {
         #expect(pid > 0)
         // The launcher lets go of the Process once reaped.
         await core.exec.untilIdle()
-        #expect(core.exec.runningCount == 0)
+        expectEqual(core.exec.runningCount, 0)
     }
 
     @Test("config reload drops pending exec callbacks")
@@ -124,11 +124,11 @@ struct ExecTests {
         #expect(oldVM == nil)
         let lua2 = try #require(core.lua)
         await core.exec.untilIdle()
-        #expect(core.exec.runningCount == 0)
-        #expect(lua2.global("hit") == .none)
+        expectEqual(core.exec.runningCount, 0)
+        expectEqual(lua2.global("hit"), .none)
         // The fresh VM is fully functional afterwards.
         #expect(lua2.run("sane = 1").succeeded)
-        #expect(lua2.global("sane") == .number(1))
+        expectEqual(lua2.global("sane"), .number(1))
     }
 
     @Test("io.popen is disabled with a pointer to exec")
@@ -140,7 +140,7 @@ struct ExecTests {
                 "h, msg = io.popen('ls')"
             ).succeeded
         )
-        #expect(lua.global("h") == .none)
+        expectEqual(lua.global("h"), .none)
         guard
             case .string(let message) = lua.global("msg")
         else {
@@ -209,7 +209,7 @@ struct ExecTests {
         #expect(code != .none)
         #expect(code != .number(0))
         // Process was reaped after termination.
-        #expect(core.exec.runningCount == 0)
+        expectEqual(core.exec.runningCount, 0)
     }
 
     @Test("Timeout with an early-exiting child reaps once")
@@ -229,9 +229,9 @@ struct ExecTests {
             """
         #expect(lua.run(script).succeeded)
         await core.exec.untilIdle()
-        #expect(lua.global("_code") == .number(0))
-        #expect(core.exec.runningCount == 0)
-        #expect(lua.global("_calls") == .number(1))
+        expectEqual(lua.global("_code"), .number(0))
+        expectEqual(core.exec.runningCount, 0)
+        expectEqual(lua.global("_calls"), .number(1))
     }
 
     @Test("get_state includes exec_running count")
@@ -243,7 +243,7 @@ struct ExecTests {
             Issue.record("expected state object")
             return
         }
-        #expect(b["exec_running"] == .number(0))
+        expectEqual(b["exec_running"], .number(0))
         // While a child runs, count is 1.
         core.exec.launch("sleep 5")
         let during = core.execute("get_state")
@@ -251,7 +251,7 @@ struct ExecTests {
             Issue.record("expected state object")
             return
         }
-        #expect(d["exec_running"] == .number(1))
+        expectEqual(d["exec_running"], .number(1))
     }
 
     @Test("Every luaOnly name is a real KiwiDesk function")
@@ -266,7 +266,7 @@ struct ExecTests {
             .map { "type(KiwiDesk.\($0)) == 'function'" }
             .joined(separator: "\n    and ")
         #expect(lua.run("_ok = (\(checks))").succeeded)
-        #expect(lua.global("_ok") == .bool(true))
+        expectEqual(lua.global("_ok"), .bool(true))
     }
 
     @Test("did-you-mean never suggests a Lua-only command")

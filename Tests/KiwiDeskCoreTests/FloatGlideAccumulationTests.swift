@@ -80,7 +80,7 @@ struct FloatGlideAccumulationTests {
         // press. Stated as its own expectation so a regression
         // reads as "it crawled" rather than as a bare number
         // mismatch.
-        #expect(f.core.state.windows[WindowID(1)]?.frame.width == 500)
+        expectEqual(f.core.state.windows[WindowID(1)]?.frame.width, 500)
         #expect(
             Double(width)
                 > Self.expectedWidth(after: 1) + 100
@@ -108,7 +108,7 @@ struct FloatGlideAccumulationTests {
         f.registrar.press(keyCode: f.combo.keyCode)
         // The press animated: without this the assertion below
         // asserts nothing.
-        #expect(f.core.tiler.animation.activeCount == 1)
+        expectEqual(f.core.tiler.animation.activeCount, 1)
         try f.beginGlide()
         let frames = 20
         for _ in 0..<frames {
@@ -126,7 +126,7 @@ struct FloatGlideAccumulationTests {
         // And a glide frame left no animation resident: the
         // floating path writes instantly now, like every tiled
         // one, so it generates no #611 retarget storm.
-        #expect(f.core.tiler.animation.activeCount == 0)
+        expectEqual(f.core.tiler.animation.activeCount, 0)
     }
 
     @Test("A stale record from an earlier press is not read")
@@ -156,7 +156,7 @@ struct FloatGlideAccumulationTests {
             "resize",
             args: [.string("x"), .number(50)]
         )
-        #expect(f.commandedWidth(3) == 550)
+        expectEqual(f.commandedWidth(3), 550)
 
         // A later hold, armed on a TILED window.
         f.focus(1)
@@ -205,7 +205,7 @@ struct FloatGlideAccumulationTests {
         )
         // The record IS there — it just cannot be read from
         // outside a glide.
-        #expect(f.commandedWidth() == 550)
+        expectEqual(f.commandedWidth(), 550)
         #expect(
             f.core.tiler.animation.commandedFrame(
                 window: WindowID(1),
@@ -219,7 +219,7 @@ struct FloatGlideAccumulationTests {
         var base = GlideCommandedBase()
         let frame = CGRect(x: 0, y: 0, width: 800, height: 600)
         base.record(WindowID(1), frame: frame)
-        #expect(base.frame(for: WindowID(1)) == frame)
+        expectEqual(base.frame(for: WindowID(1)), frame)
         // One hold at a time (a new press ends any previous run),
         // so a second window's entry could only be a leak — and
         // a focus change mid-hold correctly finds nothing and

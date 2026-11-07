@@ -57,9 +57,9 @@ struct RevertSettingsTests {
             _ = core.execute("border.set_width", args: [.number(9)])
             let response = revert(core, [width])
             #expect(response.isSuccess)
-            #expect(ids(response.data, "reverted") == [width])
+            expectEqual(ids(response.data, "reverted"), [width])
             #expect(refusals(response.data).isEmpty)
-            #expect(core.tiler.settings.borderStyle.width == stored)
+            expectEqual(core.tiler.settings.borderStyle.width, stored)
             #expect(core.unsavedLiveSettings() == nil)
         }
     }
@@ -79,9 +79,9 @@ struct RevertSettingsTests {
         )
         #expect(revert(core, [icon]).isSuccess)
         #expect(core.tiler.settings.spaceIcons[SpaceID("1")] == nil)
-        #expect(core.tiler.settings.borderStyle.width == 9)
+        expectEqual(core.tiler.settings.borderStyle.width, 9)
         #expect(core.tiler.settings.borderStyle.width != stored)
-        #expect(core.unsavedLiveSettings()?.leaves.keys.sorted() == [width])
+        expectEqual(core.unsavedLiveSettings()?.leaves.keys.sorted(), [width])
     }
 
     @Test("a leaf already stored is reverted without a write")
@@ -89,8 +89,8 @@ struct RevertSettingsTests {
         let core = try ownLookCore()
         let before = core.tiler.settings
         let response = revert(core, [width])
-        #expect(ids(response.data, "reverted") == [width])
-        #expect(core.tiler.settings == before)
+        expectEqual(ids(response.data, "reverted"), [width])
+        expectEqual(core.tiler.settings, before)
     }
 
     /// The refusals: outside `settings`, no pointer at all, and a
@@ -118,7 +118,7 @@ struct RevertSettingsTests {
                 temporary: "not_keepable",
             ]
         )
-        #expect(core.tiler.settings.spaceIcons[SpaceID("8")] == "star")
+        expectEqual(core.tiler.settings.spaceIcons[SpaceID("8")], "star")
     }
 
     @Test("the verb needs leaf ids")

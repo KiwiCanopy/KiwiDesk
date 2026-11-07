@@ -62,7 +62,7 @@ struct ShortcutOfferTests {
         #expect(!baseLua(second).contains(desktop2))
         #expect(!baseLua(second).contains(generationRow))
         #expect(baseLua(second).contains("KiwiDesk.focus_desktop(4)"))
-        #expect(offered(second)?.desktop == 4)
+        expectEqual(offered(second)?.desktop, 4)
     }
 
     @Test("This Mac's pre-#2324 marks cross into the file once")
@@ -88,7 +88,7 @@ struct ShortcutOfferTests {
         let before = baseLua(core)
         core.topUpDesktopShortcuts(desktops: [1, 2, 3])
         core.topUpGenerationShortcuts()
-        #expect(baseLua(core) == before)
+        expectEqual(baseLua(core), before)
     }
 
     @Test("Uncrossed marks still raise what the file records")
@@ -114,9 +114,9 @@ struct ShortcutOfferTests {
         var stale = GuiConfig()
         stale.shortcutOffer = ShortcutOffer(desktop: 2, generation: 4)
         try core.guiConfigStore.save(stale)
-        #expect(offered(core) == ShortcutOffer(desktop: 5, generation: 4))
+        expectEqual(offered(core), ShortcutOffer(desktop: 5, generation: 4))
         try core.guiConfigStore.save(GuiConfig())
-        #expect(offered(core) == ShortcutOffer(desktop: 5, generation: 4))
+        expectEqual(offered(core), ShortcutOffer(desktop: 5, generation: 4))
     }
 
     @Test("gui.json carries the offer under its key")
@@ -129,7 +129,7 @@ struct ShortcutOfferTests {
             ) as? [String: Any]
         )
         let offer = try #require(root["shortcut_offer"] as? [String: Int])
-        #expect(offer == ["desktop": 2, "generation": 1])
+        expectEqual(offer, ["desktop": 2, "generation": 1])
         #expect(
             try JSONDecoder().decode(GuiConfig.self, from: Data("{}".utf8))
                 .shortcutOffer == nil

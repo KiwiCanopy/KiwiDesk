@@ -61,9 +61,9 @@ struct SwapWindowGuardTests {
     func departingWindowIsLatched() {
         let core = makeCore()
         let mine = WindowID(900_002)
-        #expect(core.focusedWindowID == mine)
+        expectEqual(core.focusedWindowID, mine)
         core.execute("swap_here", args: [.number(900_101)])
-        #expect(core.state.workspaces.space(of: mine) == Self.two)
+        expectEqual(core.state.workspaces.space(of: mine), Self.two)
         // The latch ages on the wall clock, so ask at a fixed past
         // instant: only a stamp's presence answers, never how long
         // the runner took to get here (tests.md, #1456).

@@ -84,11 +84,11 @@ struct SpaceBarOpenListTests {
         #expect(rig.peek.holdsOpen(more))
         #expect(view.hoveredTarget === more, "lit with the pointer away")
         #expect(view.isHovered)
-        #expect(view.overflowBadge.stringValue == "+2")
+        expectEqual(view.overflowBadge.stringValue, "+2")
         rig.peek.dismiss()
         #expect(view.hoveredTarget == nil)
         #expect(!view.isHovered)
-        #expect(view.overflowBadge.stringValue == "+2")
+        expectEqual(view.overflowBadge.stringValue, "+2")
     }
 
     @Test("An open glyph stays lit over a neighbour the pointer rests on")

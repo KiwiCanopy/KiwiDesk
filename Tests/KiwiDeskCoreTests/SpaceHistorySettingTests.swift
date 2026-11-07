@@ -36,14 +36,14 @@ struct SpaceHistorySettingTests {
             GuiConfig.self,
             from: Data(#"{"format": 1}"#.utf8)
         )
-        #expect(bare.spaceHistory == .perScreen)
+        expectEqual(bare.spaceHistory, .perScreen)
         var config = GuiConfig()
         config.spaceHistory = .allScreens
         let data = try JSONEncoder().encode(config)
         let text = String(decoding: data, as: UTF8.self)
         #expect(text.contains(#""space_history":"all_screens""#))
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.spaceHistory == .allScreens)
+        expectEqual(back.spaceHistory, .allScreens)
     }
 
     @Test("a profile writes the key only where it diverges")
@@ -63,7 +63,7 @@ struct SpaceHistorySettingTests {
         )
         #expect(written.contains(#""space_history""#))
         let reread = try core.profiles.read(name: "Work")
-        #expect(reread.spaceHistory == .allScreens)
+        expectEqual(reread.spaceHistory, .allScreens)
     }
 
     @Test("the table writes a listed value to the profile alone")
@@ -80,9 +80,9 @@ struct SpaceHistorySettingTests {
         #expect(snapshot.isEdited)
         try core.saveRuleReach(snapshot)
         let work = try core.profiles.read(name: "Work")
-        #expect(work.spaceHistory == .allScreens)
+        expectEqual(work.spaceHistory, .allScreens)
         #expect(try core.profiles.read(name: "Home").spaceHistory == nil)
-        #expect(core.guiConfigStore.load()?.spaceHistory == .perScreen)
+        expectEqual(core.guiConfigStore.load()?.spaceHistory, .perScreen)
     }
 
     @Test("a shared value moves the base, and the live resolve")
@@ -96,8 +96,8 @@ struct SpaceHistorySettingTests {
             editing: "Home"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.spaceHistory == .allScreens)
-        #expect(core.spaceHistory.kind == .allScreens)
+        expectEqual(core.guiConfigStore.load()?.spaceHistory, .allScreens)
+        expectEqual(core.spaceHistory.kind, .allScreens)
     }
 
     @Test("a stored page resolves the override and diffs it back")
@@ -107,7 +107,7 @@ struct SpaceHistorySettingTests {
         work.spaceHistory = .allScreens
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.spaceHistory == .allScreens)
+        expectEqual(page.spaceHistory, .allScreens)
         page.spaceHistory = .perScreen
         try core.overwriteProfile(
             named: "Work",
@@ -124,9 +124,9 @@ struct SpaceHistorySettingTests {
         var work = try core.profiles.read(name: "Work")
         work.spaceHistory = .allScreens
         core.reapplyStructuredOverrides(work)
-        #expect(core.spaceHistory.kind == .allScreens)
+        expectEqual(core.spaceHistory.kind, .allScreens)
         core.reapplyStructuredOverrides(nil)
-        #expect(core.spaceHistory.kind == .perScreen)
+        expectEqual(core.spaceHistory.kind, .perScreen)
     }
 
     @Test("one screen greys the choice; more, or unknown, offer it")

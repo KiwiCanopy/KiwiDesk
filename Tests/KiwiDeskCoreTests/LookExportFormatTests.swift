@@ -30,12 +30,12 @@ struct LookExportFormatTests {
         credited.basedOn = LookCredit(name: "Night", author: "Maya")
         let data = try JSONEncoder().encode(LookExport(look: credited))
         let root = try object(data)
-        #expect(root["format"] as? Int == LookDocument.currentFormat)
-        #expect(root["author"] as? String == "Anna")
+        expectEqual(root["format"] as? Int, LookDocument.currentFormat)
+        expectEqual(root["author"] as? String, "Anna")
         let based = try #require(root["based_on"] as? [String: Any])
-        #expect(based["name"] as? String == "Night")
+        expectEqual(based["name"] as? String, "Night")
         let body = try #require(root["look"] as? [String: Any])
-        #expect(Set(body.keys) == ["name", "style", "colors"])
+        expectEqual(Set(body.keys), ["name", "style", "colors"])
     }
 
     @Test("every field of a credited look survives export")
@@ -50,12 +50,12 @@ struct LookExportFormatTests {
         )
         let data = try JSONEncoder().encode(LookExport(look: credited))
         let back = try LookStore.importLook(data: data)
-        #expect(back == credited.admitted)
+        expectEqual(back, credited.admitted)
         credited.basedOn = LookCredit(removed: true)
         let removed = try LookStore.importLook(
             data: JSONEncoder().encode(LookExport(look: credited))
         )
-        #expect(removed.basedOn?.removed == true)
+        expectEqual(removed.basedOn?.removed, true)
     }
 
     @Test("a gallery file imports with its credit")
@@ -69,9 +69,9 @@ struct LookExportFormatTests {
                       "colors": {}}}
             """
         let back = try LookStore.importLook(data: Data(file.utf8))
-        #expect(back.author == "Anna")
-        #expect(back.basedOn?.id == "night")
-        #expect(back.style["kiwishelf.thickness"] == .number(30))
+        expectEqual(back.author, "Anna")
+        expectEqual(back.basedOn?.id, "night")
+        expectEqual(back.style["kiwishelf.thickness"], .number(30))
     }
 
     @Test("a credit survives the library round trip")
@@ -82,8 +82,8 @@ struct LookExportFormatTests {
             LookDocument(looks: [credited])
         )
         let back = try JSONDecoder().decode(LookDocument.self, from: data)
-        #expect(back.looks.first?.author == "Anna")
-        #expect(back.looks.first?.admitted.author == "Anna")
+        expectEqual(back.looks.first?.author, "Anna")
+        expectEqual(back.looks.first?.admitted.author, "Anna")
     }
 
     @Test("a file without a format crosses the look-path steps")
@@ -94,7 +94,7 @@ struct LookExportFormatTests {
                       "colors": {}}}
             """
         let back = try LookStore.importLook(data: Data(file.utf8))
-        #expect(back.style["animations.on_expand"] == .bool(false))
+        expectEqual(back.style["animations.on_expand"], .bool(false))
         #expect(back.style["animations.on_shelf"] == nil)
     }
 
@@ -123,7 +123,7 @@ struct LookExportFormatTests {
     func bareExportImports() throws {
         let data = try JSONEncoder().encode(["look": look()])
         let back = try LookStore.importLook(data: data)
-        #expect(back.name == "Dusk")
+        expectEqual(back.name, "Dusk")
         #expect(back.author == nil)
     }
 }

@@ -106,8 +106,8 @@ struct InPlaceRestartNoMotionTests {
                 "\(mode): w\(id.raw) issued \(frame), left at \(left[id]!)"
             )
         }
-        #expect(b.state.workspaces[F.shown]?.mode == mode)
-        #expect(b.state.windows[WindowID(13)]?.isFloating == true)
+        expectEqual(b.state.workspaces[F.shown]?.mode, mode)
+        expectEqual(b.state.windows[WindowID(13)]?.isFloating, true)
     }
 
     @Test("bsp", .enabled(if: NSScreen.main != nil))
@@ -157,7 +157,7 @@ struct InPlaceRestartNoMotionTests {
         _ = F.settle(a)
         a.state.workspaces.focus(float, in: F.shown)
         let left = F.settle(a)
-        #expect(a.tiler.monocleShownMembers[F.shown] == WindowID(3))
+        expectEqual(a.tiler.monocleShownMembers[F.shown], WindowID(3))
         let session = try F.crossed(
             try #require(a.crash.stopCapture(inPlace: true))
         )
@@ -182,7 +182,7 @@ struct InPlaceRestartNoMotionTests {
                 "w\(id.raw) issued \(frame), left at \(left[id]!)"
             )
         }
-        #expect(b.tiler.monocleShownMembers[F.shown] == WindowID(3))
+        expectEqual(b.tiler.monocleShownMembers[F.shown], WindowID(3))
     }
 
     @Test("a floating Space", .enabled(if: NSScreen.main != nil))
@@ -235,12 +235,12 @@ struct InPlaceRestartNoMotionTests {
                 "w\(id.raw) issued \(frame), left at \(left[id]!)"
             )
         }
-        #expect(b.state.heldSpaces[held] == origin)
+        expectEqual(b.state.heldSpaces[held], origin)
         #expect(
             b.state.workspaces[held]?.windows
                 == [WindowID(21), WindowID(22)]
         )
-        #expect(b.state.workspaces[F.shown]?.windows == Self.shownIDs)
+        expectEqual(b.state.workspaces[F.shown]?.windows, Self.shownIDs)
     }
 
     /// The negative control: the same boot from a PLAIN snapshot

@@ -147,11 +147,11 @@ struct ReconcileOffMainRecheckTests {
         #expect(settled == 0, "ran on the skipped list")
         box.drain()
         #expect(box.idle)
-        #expect(settled == 1)
+        expectEqual(settled, 1)
         #expect(box.hiddenEvents.isEmpty)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[id] != nil)
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 
     @Test("a skipped list meeting an unhide sweeps nothing")
@@ -175,8 +175,8 @@ struct ReconcileOffMainRecheckTests {
         #expect(!box.reads.isEmpty, "no listing read owed")
         box.drain()
         #expect(box.idle, "the read chain did not end")
-        #expect(box.listReads == 1)
-        #expect(settled == 1)
+        expectEqual(box.listReads, 1)
+        expectEqual(settled, 1)
         #expect(loop.elements[pid]?[id] != nil)
         #expect(box.destroyed.isEmpty)
     }
@@ -279,7 +279,7 @@ struct ReconcileOffMainRecheckTests {
         box.deliver()
         #expect(box.hiddenEvents.isEmpty, "a stale read hid it")
         box.drain()
-        #expect(box.hiddenEvents == [id])
+        expectEqual(box.hiddenEvents, [id])
         #expect(box.destroyed.isEmpty)
     }
 
@@ -301,9 +301,9 @@ struct ReconcileOffMainRecheckTests {
         await core.deferred.task(for: .removalRecheck)?.value
         #expect(loop.drainPendingRemovalRecheck().isEmpty)
         #expect(box.listReads == 0, "list read inline (#2027)")
-        #expect(loop.offMain.next[pid]?.coalesceTabs == false)
+        expectEqual(loop.offMain.next[pid]?.coalesceTabs, false)
         box.drain()
-        #expect(box.listReads == 2)
+        expectEqual(box.listReads, 2)
         #expect(loop.offMain.next[pid] == nil)
     }
 }

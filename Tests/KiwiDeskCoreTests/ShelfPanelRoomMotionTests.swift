@@ -70,9 +70,9 @@ struct ShelfPanelRoomMotionTests {
         show(overlay, Self.section(view, plate: Self.plate(at: 600)))
         try #require(landings.count == 1)
         let both = Self.plate(at: 200).union(Self.plate(at: 600))
-        #expect(panel.frame == Self.onScreen(both))
+        expectEqual(panel.frame, Self.onScreen(both))
         landings[0]()
-        #expect(panel.frame == Self.onScreen(Self.plate(at: 600)))
+        expectEqual(panel.frame, Self.onScreen(Self.plate(at: 600)))
     }
 
     @Test("A slide opens the room to the usable edge until it lands")
@@ -95,9 +95,9 @@ struct ShelfPanelRoomMotionTests {
             width: 300,
             height: 40 + Self.margin
         )
-        #expect(panel.frame == Self.onScreen(travel))
+        expectEqual(panel.frame, Self.onScreen(travel))
         landings[0]()
-        #expect(panel.frame == Self.onScreen(Self.plate(at: 200)))
+        expectEqual(panel.frame, Self.onScreen(Self.plate(at: 200)))
     }
 
     /// A reveal a non-sliding fade-out cut short lands nowhere; the
@@ -126,7 +126,7 @@ struct ShelfPanelRoomMotionTests {
         for landing in glides { landing() }
         show(overlay, Self.section(view, plate: Self.plate(at: 200)))
         let panel = try #require(overlay.panel)
-        #expect(panel.frame == Self.onScreen(Self.plate(at: 200)))
+        expectEqual(panel.frame, Self.onScreen(Self.plate(at: 200)))
     }
 
     @Test("A slide starts the content wholly past the screen side")
@@ -148,9 +148,9 @@ struct ShelfPanelRoomMotionTests {
             overlay.content.layer?.animation(forKey: BarMotion.revealKey)
                 as? CABasicAnimation
         )
-        #expect(held.keyPath == "position")
+        expectEqual(held.keyPath, "position")
         #expect(held.isAdditive)
-        #expect(held.speed == 0)
+        expectEqual(held.speed, 0)
         try #require(commits.count == 1)
         commits[0]()
         let moving = try #require(

@@ -45,16 +45,16 @@ struct BorderSteadySyncTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(border.lastFrame(WindowID(1)) == tick)
+        expectEqual(border.lastFrame(WindowID(1)), tick)
         // ...and a retile burst / focus change mid-flight must
         // not drag it back to the frame state still holds.
         border.sync([spec(1, frame: stale)])
-        #expect(border.lastFrame(WindowID(1)) == tick)
+        expectEqual(border.lastFrame(WindowID(1)), tick)
         // Settled, the same sync owns the ring again — this is
         // the pass that heals a window whose app never moved.
         border.isAnimating = { _ in false }
         border.sync([spec(1, frame: stale)])
-        #expect(border.lastFrame(WindowID(1)) == stale)
+        expectEqual(border.lastFrame(WindowID(1)), stale)
     }
 
     @Test("Only geometry stands down — sync still recolors")
@@ -73,8 +73,8 @@ struct BorderSteadySyncTests {
         // Held frame, new colour: the recolor rode the same
         // `overlay.update` call the frame guard sits inside, so a
         // guard placed one level too high would have eaten it.
-        #expect(border.lastFrame(WindowID(1)) == tick)
-        #expect(border.lastColorHex(WindowID(1)) == "#00FF00")
+        expectEqual(border.lastFrame(WindowID(1)), tick)
+        expectEqual(border.lastColorHex(WindowID(1)), "#00FF00")
     }
 
     @Test("A ring created mid-animation takes the spec frame")
@@ -84,7 +84,7 @@ struct BorderSteadySyncTests {
         border.isAnimating = { _ in true }
         // No held frame to prefer — one tick behind beats no ring.
         border.sync([spec(2, frame: stale)])
-        #expect(border.lastFrame(WindowID(2)) == stale)
+        expectEqual(border.lastFrame(WindowID(2)), stale)
     }
 
     @Test("Retirement is unaffected mid-animation")
@@ -94,7 +94,7 @@ struct BorderSteadySyncTests {
         border.sync([spec(1, frame: start), spec(2, frame: stale)])
         border.isAnimating = { _ in true }
         border.sync([spec(1, frame: start)])
-        #expect(border.borderedWindows == [WindowID(1)])
+        expectEqual(border.borderedWindows, [WindowID(1)])
     }
 }
 
@@ -123,7 +123,7 @@ struct StickyMarkSteadySyncTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(marks.lastFrame(WindowID(1)) == tick)
+        expectEqual(marks.lastFrame(WindowID(1)), tick)
         marks.sync([
             StickyMarkManager.Spec(
                 window: WindowID(1),
@@ -131,7 +131,7 @@ struct StickyMarkSteadySyncTests {
                 glass: false
             )
         ])
-        #expect(marks.lastFrame(WindowID(1)) == tick)
+        expectEqual(marks.lastFrame(WindowID(1)), tick)
         marks.isAnimating = { _ in false }
         marks.sync([
             StickyMarkManager.Spec(
@@ -140,7 +140,7 @@ struct StickyMarkSteadySyncTests {
                 glass: false
             )
         ])
-        #expect(marks.lastFrame(WindowID(1)) == stale)
+        expectEqual(marks.lastFrame(WindowID(1)), stale)
     }
 
     @Test("Idle and WS-tracked, sync still moves the mark")
@@ -182,6 +182,6 @@ struct StickyMarkSteadySyncTests {
                 glass: false
             )
         ])
-        #expect(marks.lastFrame(WindowID(1)) == stale)
+        expectEqual(marks.lastFrame(WindowID(1)), stale)
     }
 }

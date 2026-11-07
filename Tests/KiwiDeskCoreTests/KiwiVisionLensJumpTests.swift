@@ -59,12 +59,12 @@ struct KiwiVisionLensJumpTests {
     func membersLead() {
         let core = makeCore()
         defer { resetAuthorityOverrides() }
-        #expect(windows(core.jumpEntries()) == [3, 2, 1])
+        expectEqual(windows(core.jumpEntries()), [3, 2, 1])
         #expect(core.jumpEntries().allSatisfy { !$0.isOtherApp })
         core.setKiwiVision(.lens("Writing"))
         let rows = core.jumpEntries()
-        #expect(windows(rows) == [2, 3, 1])
-        #expect(rows.map(\.isOtherApp) == [false, true, true])
+        expectEqual(windows(rows), [2, 3, 1])
+        expectEqual(rows.map(\.isOtherApp), [false, true, true])
     }
 
     @Test("a search keeps the lens's apps ahead")
@@ -74,7 +74,7 @@ struct KiwiVisionLensJumpTests {
         core.setKiwiVision(.lens("Writing"))
         // "mail" matches Mail by name, Notes only by a title.
         let found = JumpSearch.matches(core.jumpEntries(), query: "mail")
-        #expect(windows(found.map(\.entry)).first == 2)
+        expectEqual(windows(found.map(\.entry)).first, 2)
     }
 
     /// A blank query sorts by section too: a minimized member row
@@ -100,6 +100,6 @@ struct KiwiVisionLensJumpTests {
             row(1, .minimized, other: false), row(2, .shown, other: true),
         ]
         let found = JumpSearch.matches(rows, query: "")
-        #expect(windows(found.map(\.entry)) == [1, 2])
+        expectEqual(windows(found.map(\.entry)), [1, 2])
     }
 }

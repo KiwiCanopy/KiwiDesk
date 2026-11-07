@@ -234,7 +234,7 @@ struct FullscreenResizeTiledTests {
             .windowFullscreenChanged(focused, isFullscreen: true)
         )
         core.handleDragEnd(focused, start: slot, frame: frame)
-        #expect(Stores(core) == written)
+        expectEqual(Stores(core), written)
     }
 
     /// The layouts with no resize at all cue the window's case
@@ -253,7 +253,7 @@ struct FullscreenResizeTiledTests {
                 args: [.string("x"), .number(100)]
             ).isSuccess
         )
-        #expect(cues == [.layoutHasNoResize(focused)])
+        expectEqual(cues, [.layoutHasNoResize(focused)])
 
         cues = []
         core.state.apply(
@@ -266,6 +266,6 @@ struct FullscreenResizeTiledTests {
         #expect(
             response.error == "the focused window is fullscreen"
         )
-        #expect(cues == [.windowIsFullscreen(focused)])
+        expectEqual(cues, [.windowIsFullscreen(focused)])
     }
 }

@@ -38,13 +38,13 @@ struct KeybindingConflictFilterTests {
             disabledSystemShortcuts: [],
             distinguishingSides: false
         )
-        #expect(all.count == 2)
+        expectEqual(all.count, 2)
         let filtered = KeybindingConflicts.actionable(
             in: layers,
             disabledSystemShortcuts: [.invertColors],
             distinguishingSides: false
         )
-        #expect(filtered.count == 1)
+        expectEqual(filtered.count, 1)
         #expect(
             filtered.first?.target
                 == .systemShortcut(.spotlight)
@@ -78,6 +78,6 @@ struct KeybindingConflictFilterTests {
             ),
             distinguishingSides: false
         )
-        #expect(conflicts.count == 2)
+        expectEqual(conflicts.count, 2)
     }
 }

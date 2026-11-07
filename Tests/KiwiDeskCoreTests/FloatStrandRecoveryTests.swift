@@ -85,10 +85,10 @@ struct StashCornerLiftTests {
             CGSize(width: 900, height: 300),
             in: region
         )
-        #expect(frame.width == 500)
-        #expect(frame.height == 300)
-        #expect(frame.midX == region.midX)
-        #expect(frame.midY == region.midY)
+        expectEqual(frame.width, 500)
+        expectEqual(frame.height, 300)
+        expectEqual(frame.midX, region.midX)
+        expectEqual(frame.midY, region.midY)
     }
 }
 
@@ -111,7 +111,7 @@ struct FloatStrandRecoveryTests {
             F.makeCore(mode: .floating, frame: F.parked(lift: 4))
         )
         core.retile()
-        #expect(core.tiler.stashOriginal(F.window) == F.centred)
+        expectEqual(core.tiler.stashOriginal(F.window), F.centred)
     }
 
     @Test(
@@ -123,7 +123,7 @@ struct FloatStrandRecoveryTests {
             F.makeCore(mode: .bsp, frame: F.parked(), floating: true)
         )
         core.recoverStrandedFloats()
-        #expect(core.tiler.stashOriginal(F.window) == F.centred)
+        expectEqual(core.tiler.stashOriginal(F.window), F.centred)
     }
 
     @Test(
@@ -149,7 +149,7 @@ struct FloatStrandRecoveryTests {
         let original = F.original
         core.tiler.seedStash(F.window, frame: original)
         core.recoverStrandedFloats()
-        #expect(core.tiler.stashOriginal(F.window) == original)
+        expectEqual(core.tiler.stashOriginal(F.window), original)
     }
 
     @Test(
@@ -185,7 +185,7 @@ struct FloatStrandRecoveryTests {
         let record = core.sessionSnapshot().windows.first {
             $0.windowID == F.window
         }
-        #expect(record?.frame == original)
+        expectEqual(record?.frame, original)
         // The state itself still holds the corner: the
         // substitution is the snapshot's, not a state write.
         #expect(

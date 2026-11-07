@@ -58,7 +58,7 @@ struct KiwiShelfRetiredVerbTests {
             args: [.number(80)]
         )
         #expect(!space.isSuccess)
-        #expect(space.error?.contains("follows its content") == true)
+        expectEqual(space.error?.contains("follows its content"), true)
         #expect(APIReference.retired["space_bar.set_item_size"] == .some(nil))
     }
 
@@ -71,7 +71,7 @@ struct KiwiShelfRetiredVerbTests {
             APIReference.retired.filter { $0.value == nil }.keys
         )
         #expect(!bare.isEmpty)
-        #expect(bare == Set(APIReference.retiredReasons.keys))
+        expectEqual(bare, Set(APIReference.retiredReasons.keys))
     }
 
     @Test("the front-app title length names its new verb")
@@ -93,7 +93,7 @@ struct KiwiShelfRetiredVerbTests {
                 args: [.number(20)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.frontAppTitleCap == 20)
+        expectEqual(core.tiler.settings.spaceBarStyle.frontAppTitleCap, 20)
     }
 
     /// The Lua channel: a retired call in init.lua is its own
@@ -147,7 +147,7 @@ struct KiwiShelfRetiredVerbTests {
     func helpNamesTheReplacement() {
         let response = APIReference.helpResponse(for: "kiwishelf.set_edge")
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("space_bar.set_edge") == true)
+        expectEqual(response.error?.contains("space_bar.set_edge"), true)
     }
 
     /// A replacement that is not itself a live verb would send

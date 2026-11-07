@@ -47,14 +47,14 @@ struct MaximizeWindowEndTests {
         let core = makeCore()
         let response = core.execute("swap", args: [.string("left")])
         #expect(!response.isSuccess)
-        #expect(maximized(core) == w1)
+        expectEqual(maximized(core), w1)
     }
 
     @Test("A layout change of the Space ends it; an unchanged one not")
     func modeWriteEnds() {
         let core = makeCore()
         core.execute("set_mode", args: [.string("1"), .string("bsp")])
-        #expect(maximized(core) == w1)
+        expectEqual(maximized(core), w1)
         core.execute("set_mode", args: [.string("1"), .string("stack")])
         #expect(maximized(core) == nil)
     }
@@ -63,7 +63,7 @@ struct MaximizeWindowEndTests {
     func otherSpaceModeKeeps() {
         let core = makeCore()
         core.execute("set_mode", args: [.string("9"), .string("stack")])
-        #expect(maximized(core) == w1)
+        expectEqual(maximized(core), w1)
     }
 
     @Test("A dialog closing over it hands focus back to it")
@@ -72,9 +72,9 @@ struct MaximizeWindowEndTests {
         core.state.windows.setFloating(w3, true)
         core.state.workspaces.focus(w3, in: space)
         core.state.apply(.windowDestroyed(w3, wasMinimized: false))
-        #expect(core.state.workspaces[space]?.focused == w1)
+        expectEqual(core.state.workspaces[space]?.focused, w1)
         core.retile()
-        #expect(maximized(core) == w1)
+        expectEqual(maximized(core), w1)
     }
 
     @Test("A closing window hands focus to the maximized one")
@@ -83,7 +83,7 @@ struct MaximizeWindowEndTests {
         model.maximized = w1
         model.focused = w3
         model.remove(w3)
-        #expect(model.focused == w1)
+        expectEqual(model.focused, w1)
     }
 
     @Test("A whole Desktop leaving walks focus off, never back")
@@ -103,13 +103,13 @@ struct MaximizeWindowEndTests {
         core.state.apply(.windowDestroyed(w1, wasMinimized: false))
         #expect(maximized(core) == nil)
         core.retile()
-        #expect(core.state.workspaces[space]?.maximized == w1)
+        expectEqual(core.state.workspaces[space]?.maximized, w1)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: w1, pid: 900_001, appName: "A")
             )
         )
-        #expect(core.state.workspaces[space]?.maximized == w1)
+        expectEqual(core.state.workspaces[space]?.maximized, w1)
     }
 
     @Test("A close while away ends it for good")
@@ -182,8 +182,8 @@ struct MaximizeWindowEndTests {
         let second = core.state.workspaces[other].flatMap {
             core.state.maximizedWindow(of: $0)
         }
-        #expect(second == w4)
-        #expect(maximized(core) == w1)
+        expectEqual(second, w4)
+        expectEqual(maximized(core), w1)
         #expect(core.showsMaximized(on: DisplayID(1)))
         #expect(core.showsMaximized(on: DisplayID(2)))
     }
@@ -196,7 +196,7 @@ struct MaximizeWindowEndTests {
         core.execute("move_to_space", args: [.string("2")])
         #expect(core.state.workspaces[space]?.maximized == nil)
         #expect(core.state.workspaces[SpaceID("2")]?.maximized == nil)
-        #expect(core.state.workspaces.space(of: w1) == SpaceID("2"))
+        expectEqual(core.state.workspaces.space(of: w1), SpaceID("2"))
     }
 
     @Test("The focused ring stands down over it")

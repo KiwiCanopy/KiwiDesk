@@ -74,7 +74,7 @@ struct GridHealResizeTests {
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: WindowID(2))?.minWidth == 500)
+        expectEqual(core.tiler.sizeBound(for: WindowID(2))?.minWidth, 500)
         core.state.workspaces.focus(WindowID(1), in: space)
         core.retile()
         return space

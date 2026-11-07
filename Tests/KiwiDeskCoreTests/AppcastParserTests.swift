@@ -75,7 +75,7 @@ struct AppcastParserTests {
     @Test("a signed, notarized, published release is offered")
     func validReleaseIsOffered() throws {
         let run = try render([Self.release()])
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(run.stdout.contains("<item>"))
         #expect(
             run.stdout.contains(
@@ -153,7 +153,7 @@ struct AppcastParserTests {
     @Test("no version is special-cased")
     func noVersionCutoff() throws {
         let run = try render([Self.release(tag: "v9999.0.2")])
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(
             run.stdout.contains(
                 "<sparkle:version>9999.0.2</sparkle:version>"

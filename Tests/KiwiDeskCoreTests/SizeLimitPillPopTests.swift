@@ -104,7 +104,7 @@ struct SizeLimitPillPopTests {
             scales: SizeLimitOverlay.popKeyframes.map(\.scale)
         )
         let plate = PopRoom.plateFrame(plate: pill, in: panel)
-        #expect(plate.offsetBy(dx: panel.minX, dy: panel.minY) == pill)
+        expectEqual(plate.offsetBy(dx: panel.minX, dy: panel.minY), pill)
     }
 
     /// The overlay's own call site: a pill `flash` shows sits in

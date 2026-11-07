@@ -76,9 +76,9 @@ struct GlassDefaultMigrationTests {
             )
             let out = try #require(migratedThroughGlass(data))
             let s = try settings(out)
-            #expect(leaf(s, "shortcut_panel") == bars)
-            #expect(leaf(s, "app_bar") == bars)
-            #expect(leaf(s, "space_bar") == bars)
+            expectEqual(leaf(s, "shortcut_panel"), bars)
+            expectEqual(leaf(s, "app_bar"), bars)
+            expectEqual(leaf(s, "space_bar"), bars)
             #expect(
                 (s["app_bar"] as? [String: Any])?["thickness"]
                     as? Double == 32
@@ -116,9 +116,9 @@ struct GlassDefaultMigrationTests {
                 migratedThroughGlass(profile(body))
             )
             let s = try settings(out)
-            #expect(leaf(s, "app_bar") == false)
-            #expect(leaf(s, "space_bar") == false)
-            #expect(leaf(s, "shortcut_panel") == false)
+            expectEqual(leaf(s, "app_bar"), false)
+            expectEqual(leaf(s, "space_bar"), false)
+            expectEqual(leaf(s, "shortcut_panel"), false)
         }
     }
 
@@ -135,9 +135,9 @@ struct GlassDefaultMigrationTests {
         )
         let out = try #require(migratedThroughGlass(data))
         let s = try settings(out)
-        #expect(leaf(s, "app_bar") == true)
-        #expect(leaf(s, "space_bar") == true)
-        #expect(leaf(s, "shortcut_panel") == false)
+        expectEqual(leaf(s, "app_bar"), true)
+        expectEqual(leaf(s, "space_bar"), true)
+        expectEqual(leaf(s, "shortcut_panel"), false)
     }
 
     /// A per-layout `app_bar` override lives under `layout`, the
@@ -162,7 +162,7 @@ struct GlassDefaultMigrationTests {
             monocle["app_bar"] as? [String: Any]
         )
         #expect(override["liquid_glass"] == nil)
-        #expect(leaf(s, "shortcut_panel") == false)
+        expectEqual(leaf(s, "shortcut_panel"), false)
     }
 
     /// The floor is what runs the crossing: a file at the new
@@ -216,7 +216,7 @@ struct GlassDefaultMigrationTests {
             let s = try #require(p["settings"] as? [String: Any])
             panels.append(leaf(s, "shortcut_panel"))
         }
-        #expect(panels == [false, true])
+        expectEqual(panels, [false, true])
         #expect(
             try root(out)["format"] as? Int
                 == SetupBundle.currentFormat

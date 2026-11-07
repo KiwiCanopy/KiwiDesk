@@ -58,7 +58,7 @@ struct ShelfPanelInertTests {
         // The bars did render: the count below is not vacuous.
         #expect(core.spaceBars.shownOverlay(on: display) != nil)
         #expect(core.appBars.shownOverlay(on: display) != nil)
-        #expect(core.shelves.orderedPanelCount == 0)
+        expectEqual(core.shelves.orderedPanelCount, 0)
         // The shelf still placed its section: only the order-in
         // is held back.
         let shelf = try #require(core.shelves.overlayForTesting(display))
@@ -75,7 +75,7 @@ struct ShelfPanelInertTests {
     func optInDrawsThePanel() throws {
         let (core, display) = try #require(makeCore(draws: true))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(core.shelves.orderedPanelCount == 1)
+        expectEqual(core.shelves.orderedPanelCount, 1)
         let shelf = try #require(core.shelves.overlayForTesting(display))
         _ = shelf.hide(animated: false)
     }

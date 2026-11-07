@@ -23,7 +23,7 @@ struct KiwiHubShowVerbTests {
             Issue.record("\(side.lua) failed")
             return
         }
-        #expect(opened == [side])
+        expectEqual(opened, [side])
     }
 
     @Test("the dispatcher reaches it, so the CLI does too")
@@ -36,7 +36,7 @@ struct KiwiHubShowVerbTests {
             args: [.string("view")]
         )
         #expect(response.error == nil)
-        #expect(opened == [.view])
+        expectEqual(opened, [.view])
     }
 
     @Test("an unknown or missing side is refused, the hook untouched")
@@ -51,7 +51,7 @@ struct KiwiHubShowVerbTests {
                     == CommandResponse.expected(KiwiHubSide.self).error
             )
         }
-        #expect(opened == 0)
+        expectEqual(opened, 0)
     }
 
     @Test("the seed opens each side through the verb")
@@ -61,6 +61,6 @@ struct KiwiHubShowVerbTests {
             DefaultKeybindings.showShortcutsRow(),
             DefaultKeybindings.layoutPickerRow(),
         ].map(\.lua)
-        #expect(seed == KiwiHubSide.allCases.map(\.lua))
+        expectEqual(seed, KiwiHubSide.allCases.map(\.lua))
     }
 }

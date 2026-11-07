@@ -46,15 +46,15 @@ struct AnimationAgeAccountingTests {
         // must age by at most that too.
         var animation = wedge()
         _ = animation.step(dt: 5.0)
-        #expect(animation.age == Spring.maxIntegratedStep)
+        expectEqual(animation.age, Spring.maxIntegratedStep)
         // Ten minutes of display sleep is still one frame of age.
         _ = animation.step(dt: 600)
-        #expect(animation.age == 2 * Spring.maxIntegratedStep)
+        expectEqual(animation.age, 2 * Spring.maxIntegratedStep)
         // And an ordinary interval ages exactly itself, so the
         // clamp is not quietly rewriting normal motion.
         var normal = wedge()
         _ = normal.step(dt: 1.0 / 60)
-        #expect(normal.age == 1.0 / 60)
+        expectEqual(normal.age, 1.0 / 60)
     }
 
     @Test("An interval the integrator refuses ages nothing")
@@ -67,7 +67,7 @@ struct AnimationAgeAccountingTests {
         for dt in [Double.infinity, .nan, 0, -1] {
             _ = animation.step(dt: dt)
         }
-        #expect(animation.age == 0)
+        expectEqual(animation.age, 0)
         #expect(!animation.isOverdue)
     }
 
@@ -86,7 +86,7 @@ struct AnimationAgeAccountingTests {
             to: CGRect(x: 1, y: 2, width: 30, height: 40),
             sizing: .mayInstantSize
         )
-        #expect(animation.age == 0)
+        expectEqual(animation.age, 0)
         // Still under the bound a full second past where the
         // un-retargeted animation would have fired.
         for _ in 0..<(60 * 2) {
@@ -125,13 +125,13 @@ struct AnimationAgeAccountingTests {
             response: 0.35,
             dampingFraction: .infinity
         )
-        #expect(frozen.maxStableStep == 0)
+        expectEqual(frozen.maxStableStep, 0)
         var animation = wedge(damping: .infinity)
         for _ in 0..<(60 * 6) {
             _ = animation.step(dt: 1.0 / 60)
         }
         // Motionless, as `Spring.step` promises...
-        #expect(animation.frame == start)
+        expectEqual(animation.frame, start)
         // ...and aged anyway, so the watchdog can reach it.
         #expect(animation.isOverdue)
     }

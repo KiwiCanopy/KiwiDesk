@@ -78,7 +78,7 @@ struct DetectedFloatPlacementTests {
         var frames: [WindowID: CGRect] = [:]
         let core = setup { frames[$0] = $1 }
         flip(core, true)
-        #expect(core.state.windows[window]?.isFloating == true)
+        expectEqual(core.state.windows[window]?.isFloating, true)
         #expect(isCentred(frames[window], in: core))
     }
 
@@ -154,10 +154,10 @@ struct DetectedFloatPlacementTests {
         // Moved by hand while floating, then tiled by detection.
         core.state.apply(.windowMoved(window, moved))
         flip(core, false)
-        #expect(core.state.floatFrames[window]?.frame == moved)
+        expectEqual(core.state.floatFrames[window]?.frame, moved)
         frames = [:]
         flip(core, true)
-        #expect(frames[window] == moved)
+        expectEqual(frames[window], moved)
     }
 
     /// A tile verdict the fold refuses — a user float, a
@@ -170,7 +170,7 @@ struct DetectedFloatPlacementTests {
         let moved = CGRect(x: 300, y: 200, width: 700, height: 500)
         core.state.apply(.windowMoved(window, moved))
         flip(core, false)
-        #expect(core.state.windows[window]?.isFloating == true)
+        expectEqual(core.state.windows[window]?.isFloating, true)
         #expect(core.state.floatFrames[window] == nil)
         let member = setup(mode: "floating") { _, _ in }
         flip(member, false)
@@ -189,7 +189,7 @@ struct DetectedFloatPlacementTests {
         flip(core, true)
         #expect(frames[window] == nil)
         let seed = try #require(core.tiler.stashedFrames[window])
-        #expect(seed.width == FloatPlacement.longFloor)
+        expectEqual(seed.width, FloatPlacement.longFloor)
     }
 
     /// One Save floats several windows, one event each: the later
@@ -218,6 +218,6 @@ struct DetectedFloatPlacementTests {
         flip(core, false)
         let slot = core.tiler.calculatedFrames(state: core.state)[window]
         #expect(slot != nil)
-        #expect(frames[window] == slot)
+        expectEqual(frames[window], slot)
     }
 }

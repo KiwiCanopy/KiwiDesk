@@ -54,11 +54,11 @@ struct TransientOverlayRuleTests {
     @Test("a window of the app still follows its rule")
     func windowFollowsTheRule() {
         var state = makeState()
-        #expect(state.workspaces.activeSpace == shown)
+        expectEqual(state.workspaces.activeSpace, shown)
         state.apply(
             .windowCreated(window(1, overlay: false, raised: false))
         )
-        #expect(state.workspaces.space(of: WindowID(1)) == ruled)
+        expectEqual(state.workspaces.space(of: WindowID(1)), ruled)
     }
 
     @Test("a raised-layer popup of the app opens where you are")
@@ -86,7 +86,7 @@ struct TransientOverlayRuleTests {
         state.apply(
             .windowCreated(window(3, overlay: true, raised: false))
         )
-        #expect(state.workspaces.space(of: WindowID(3)) == ruled)
+        expectEqual(state.workspaces.space(of: WindowID(3)), ruled)
     }
 
     /// A Chromium extension popup: layer 0, no title-bar button
@@ -120,7 +120,7 @@ struct TransientOverlayRuleTests {
                 window(5, overlay: true, raised: false, button: nil)
             )
         )
-        #expect(state.workspaces.space(of: WindowID(5)) == ruled)
+        expectEqual(state.workspaces.space(of: WindowID(5)), ruled)
     }
 
     /// The skip is a popup's: a window detection does not call an
@@ -133,7 +133,7 @@ struct TransientOverlayRuleTests {
                 window(6, overlay: false, raised: false, button: false)
             )
         )
-        #expect(state.workspaces.space(of: WindowID(6)) == ruled)
+        expectEqual(state.workspaces.space(of: WindowID(6)), ruled)
     }
 
     /// The tracker is where the layer is read, from a live element

@@ -88,7 +88,7 @@ struct ZOrderScheduleTests {
             targets,
             excluding: nil
         )
-        #expect(core.zOrderRaiseEchoes.count == 3)
+        expectEqual(core.zOrderRaiseEchoes.count, 3)
         core.releaseZOrderStamps(
             of: targets,
             keeping: [WindowID(2)],
@@ -119,7 +119,7 @@ struct ZOrderScheduleTests {
             keeping: [WindowID(2)],
             generation: stale
         )
-        #expect(core.zOrderRaiseEchoes.count == 3)
+        expectEqual(core.zOrderRaiseEchoes.count, 3)
     }
 
     @Test("A scrolling swap in an overflowing row arms a restore")
@@ -175,7 +175,7 @@ struct ZOrderScheduleTests {
             core.state.apply(.windowMoved(id, frame))
         }
         core.tiler.animation.cancelAll(snapToTargets: false)
-        #expect(core.tiler.animation.activeCount == 0)
+        expectEqual(core.tiler.animation.activeCount, 0)
         // Promote a stack-zone window: the reorder's retile flies
         // it into the master zone, starting animations.
         core.state.workspaces.focus(WindowID(4), in: space)

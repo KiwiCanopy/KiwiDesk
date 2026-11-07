@@ -59,12 +59,12 @@ struct BorderSheenTests {
 
     @Test("the strength clamps into -1...1 and snaps a hair to 0")
     func clamps() {
-        #expect(BorderStyle.clampSheen(3) == 1)
-        #expect(BorderStyle.clampSheen(-3) == -1)
-        #expect(BorderStyle.clampSheen(1e-12) == 0)
-        #expect(BorderStyle.clampSheen(0.00004) == 0)
-        #expect(BorderStyle.clampSheen(0.0001) == 0.0001)
-        #expect(BorderStyle.clampSheen(-0.35) == -0.35)
+        expectEqual(BorderStyle.clampSheen(3), 1)
+        expectEqual(BorderStyle.clampSheen(-3), -1)
+        expectEqual(BorderStyle.clampSheen(1e-12), 0)
+        expectEqual(BorderStyle.clampSheen(0.00004), 0)
+        expectEqual(BorderStyle.clampSheen(0.0001), 0.0001)
+        expectEqual(BorderStyle.clampSheen(-0.35), -0.35)
     }
 
     /// Reduce transparency and the glass switch leave it alone: a
@@ -79,7 +79,7 @@ struct BorderSheenTests {
         LiquidGlassGate.override = { true }
         #expect(LiquidGlassGate.rendered(settings.spaceBarLook).sheen == -0.4)
         let app = settings.appBarGlobalLook
-        #expect(LiquidGlassGate.rendered(app).sheen == -0.4)
+        expectEqual(LiquidGlassGate.rendered(app).sheen, -0.4)
     }
 
     /// The focused ring's spec asks the strength alone, through the
@@ -119,7 +119,7 @@ struct BorderSheenTests {
         core.tiler.settings.borderStyle.unfocusedEnabled = true
         core.tiler.settings.borderStyle.sheen = CGFloat(strength)
         let specs = core.desiredBorderSpecs()
-        #expect(specs.count == 2)
+        expectEqual(specs.count, 2)
         for spec in specs {
             #expect(
                 spec.sheen
@@ -155,16 +155,16 @@ struct BorderSheenTests {
             core.execute("border.set_sheen", args: [.number(-0.3)])
                 .isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.sheen == -0.3)
+        expectEqual(core.tiler.settings.borderStyle.sheen, -0.3)
         #expect(
             core.execute("border.set_sheen", args: [.number(4)])
                 .isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.sheen == 1)
+        expectEqual(core.tiler.settings.borderStyle.sheen, 1)
         #expect(
             !core.execute("border.set_sheen", args: [.bool(true)])
                 .isSuccess
         )
-        #expect(core.tiler.settings.borderStyle.sheen == 1)
+        expectEqual(core.tiler.settings.borderStyle.sheen, 1)
     }
 }

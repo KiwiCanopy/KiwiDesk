@@ -68,7 +68,7 @@ struct GoneReasonEventTests {
         })?.1 {
             desktop = payload["desktop"]
         }
-        #expect(desktop == .number(2))
+        expectEqual(desktop, .number(2))
     }
 
     @Test("a destroy of a window hosted nowhere is closed, switch or not")

@@ -57,8 +57,8 @@ struct GlassFillOnTopTests {
         #expect(Self.held(glass) === backdrop)
         #expect(content.superview === backdrop)
         #expect(GlassPlate.holds(glass, content))
-        #expect(backdrop.frame == glass.bounds)
-        #expect(content.frame == backdrop.bounds)
+        expectEqual(backdrop.frame, glass.bounds)
+        expectEqual(content.frame, backdrop.bounds)
     }
 
     @Test("Content set after the tint lands inside it")
@@ -71,7 +71,7 @@ struct GlassFillOnTopTests {
         GlassPlate.setContent(glass, first)
         GlassPlate.setContent(glass, second)
         #expect(Self.held(glass) === backdrop)
-        #expect(backdrop.subviews.map { $0 } == [second])
+        expectEqual(backdrop.subviews.map { $0 }, [second])
         #expect(first.superview == nil, "the displaced content stayed")
         #expect(GlassPlate.holds(glass, second))
         #expect(!GlassPlate.holds(glass, first))
@@ -105,8 +105,8 @@ struct GlassFillOnTopTests {
         Self.apply(backdrop, in: glass)
         let grown = CGRect(x: 0, y: 0, width: 200, height: 60)
         GlassPlate.update(glass, frame: grown, cornerRadius: 4)
-        #expect(backdrop.frame == glass.bounds)
-        #expect(content.frame == backdrop.bounds)
+        expectEqual(backdrop.frame, glass.bounds)
+        expectEqual(content.frame, backdrop.bounds)
     }
 
     /// A clear Fill clears the gradient; the wrapper stays shown,
@@ -138,9 +138,9 @@ struct GlassFillOnTopTests {
         Self.apply(backdrop, in: glass)
         Self.apply(backdrop, in: glass)
         #expect(Self.held(glass) === backdrop)
-        #expect(backdrop.subviews.map { $0 } == [content])
+        expectEqual(backdrop.subviews.map { $0 }, [content])
         // A re-wrap lands the same tree, so only the moves show it.
-        #expect(content.moves == settled)
+        expectEqual(content.moves, settled)
     }
 
     /// The shelf's plate hosts no view: its glass carries the tint

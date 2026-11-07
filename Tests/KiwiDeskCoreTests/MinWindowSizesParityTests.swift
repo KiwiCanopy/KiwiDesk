@@ -23,7 +23,7 @@ struct MinWindowSizesParityTests {
         )
         let layouts = Set(MinWindowSizes.Layout.allCases.map(\.rawValue))
         #expect(!layouts.isEmpty)
-        #expect(layouts == modes)
+        expectEqual(layouts, modes)
         for mode in Self.exempt.keys {
             #expect(MinWindowSizes.Layout(mode) == nil)
         }

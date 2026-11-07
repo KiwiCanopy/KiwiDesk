@@ -85,8 +85,8 @@ struct OpenOrFocusRestoreTests {
             pid: 7,
             bundleID: "com.test.a"
         )
-        #expect(recorder.calls.count == 1)
-        #expect(recorder.calls.first?.0 == 7)
+        expectEqual(recorder.calls.count, 1)
+        expectEqual(recorder.calls.first?.0, 7)
     }
 
     /// The rule's other half, and the one that matters most: a
@@ -131,7 +131,7 @@ struct OpenOrFocusRestoreTests {
             pid: 7,
             bundleID: "com.test.a"
         )
-        #expect(recorder.calls.count == 1)
+        expectEqual(recorder.calls.count, 1)
     }
 
     // MARK: - Which window comes back
@@ -168,7 +168,7 @@ struct OpenOrFocusRestoreTests {
         )
         // Window 3 went down last — not window 1, which the
         // kAXWindows fallback would have picked.
-        #expect(recorder.calls.first?.1 == WindowID(3))
+        expectEqual(recorder.calls.first?.1, WindowID(3))
     }
 
     /// The cold-start path, and not an edge case: a KiwiDesk
@@ -182,7 +182,7 @@ struct OpenOrFocusRestoreTests {
             pid: 7,
             bundleID: "com.test.a"
         )
-        #expect(recorder.calls.first?.1 == WindowID(5))
+        expectEqual(recorder.calls.first?.1, WindowID(5))
     }
 
     /// A record can also be stale — a window closed while
@@ -213,7 +213,7 @@ struct OpenOrFocusRestoreTests {
             pid: 7,
             bundleID: "com.test.a"
         )
-        #expect(recorder.calls.first?.1 == WindowID(5))
+        expectEqual(recorder.calls.first?.1, WindowID(5))
     }
 
     /// Another app's record must not select this app's window.
@@ -238,7 +238,7 @@ struct OpenOrFocusRestoreTests {
             pid: 7,
             bundleID: "com.test.a"
         )
-        #expect(recorder.calls.first?.1 == WindowID(5))
+        expectEqual(recorder.calls.first?.1, WindowID(5))
     }
 
     // MARK: - The command path
@@ -253,8 +253,8 @@ struct OpenOrFocusRestoreTests {
                 args: [.string("com.test.a")]
             ).isSuccess
         )
-        #expect(recorder.calls.count == 1)
-        #expect(recorder.calls.first?.1 == WindowID(1))
+        expectEqual(recorder.calls.count, 1)
+        expectEqual(recorder.calls.first?.1, WindowID(1))
     }
 
     /// The restore runs BEFORE the activate, so the app comes
@@ -289,7 +289,7 @@ struct OpenOrFocusRestoreTests {
             "focus_or_spawn",
             args: [.string("com.test.a")]
         )
-        #expect(recorder.log == [.activate(7)])
+        expectEqual(recorder.log, [.activate(7)])
     }
 
     /// An app that is not running takes the LaunchServices path

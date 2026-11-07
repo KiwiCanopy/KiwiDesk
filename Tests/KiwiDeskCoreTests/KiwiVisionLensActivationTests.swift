@@ -121,19 +121,19 @@ struct KiwiVisionLensActivationTests {
         var heard: [VisionActive] = []
         core.vision.onChange = { active, _ in heard.append(active) }
         #expect(toggle(core, "writing").isSuccess)
-        #expect(core.kiwiVisionActive == .lens("Writing"))
-        #expect(core.visionLook.dim == 30)
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
+        expectEqual(core.visionLook.dim, 30)
         // Another lens switches without an off between.
         #expect(toggle(core, "Calls").isSuccess)
-        #expect(core.kiwiVisionActive == .lens("Calls"))
+        expectEqual(core.kiwiVisionActive, .lens("Calls"))
         #expect(toggle(core, "Calls").isSuccess)
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
         // A bare toggle turns a lens off, and plain on from off.
         _ = toggle(core, "Writing")
         _ = toggle(core)
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
         _ = toggle(core)
-        #expect(core.kiwiVisionActive == .plain)
+        expectEqual(core.kiwiVisionActive, .plain)
         // Every change is heard, a lens switch included.
         #expect(
             heard == [
@@ -149,7 +149,7 @@ struct KiwiVisionLensActivationTests {
         define(core, ["name": .string("Empty")])
         #expect(!toggle(core, "Empty").isSuccess)
         #expect(!toggle(core, "Nowhere").isSuccess)
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
     }
 
     @Test("define replaces by name ignoring case; the CLI sends JSON")
@@ -157,7 +157,7 @@ struct KiwiVisionLensActivationTests {
         let core = makeCore()
         writing(core)
         define(core, ["name": .string("WRITING"), "dim": .number(70)])
-        #expect(core.appWide.visionLenses.map(\.name) == ["WRITING"])
+        expectEqual(core.appWide.visionLenses.map(\.name), ["WRITING"])
         #expect(
             core.execute(
                 "kiwivision.define_lens",
@@ -175,8 +175,8 @@ struct KiwiVisionLensActivationTests {
             core.execute("kiwivision.delete_lens", args: [.string("CALLS")])
                 .isSuccess
         )
-        #expect(core.appWide.visionLenses.map(\.name) == ["WRITING"])
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.appWide.visionLenses.map(\.name), ["WRITING"])
+        expectEqual(core.kiwiVisionActive, .off)
         #expect(
             !core.execute("kiwivision.delete_lens", args: [.string("Calls")])
                 .isSuccess
@@ -201,9 +201,9 @@ struct KiwiVisionLensActivationTests {
         _ = toggle(core)
         #expect(system.asked.isEmpty, "plain asks for no switch")
         _ = toggle(core, "Night")
-        #expect(system.asked == [true])
+        expectEqual(system.asked, [true])
         _ = toggle(core, "Night")
-        #expect(system.asked == [true, false])
+        expectEqual(system.asked, [true, false])
     }
 
     /// Ruling 32: a member's windows all stay clear, or only those
@@ -231,7 +231,7 @@ struct KiwiVisionLensActivationTests {
             refreshingList: true
         )
         // The two tracked notes windows, then music, then the stranger.
-        #expect(windows.map(\.clear) == [true, false, true, false])
+        expectEqual(windows.map(\.clear), [true, false, true, false])
         // The match is a Float rule's: case-sensitive.
         #expect(!VisionLensClear.titled(["Draft"]).clears(title: "draft"))
         // A title event re-masks: a browser's title follows its tab.
@@ -254,7 +254,7 @@ struct KiwiVisionLensActivationTests {
             core,
             ["name": .string("WRITING"), "apps": .array([.string("x")])]
         )
-        #expect(core.kiwiVisionActive == .lens("WRITING"))
+        expectEqual(core.kiwiVisionActive, .lens("WRITING"))
         define(core, ["name": .string("Writing")])
         #expect(core.kiwiVisionActive == .off, "an emptied lens turns off")
         _ = toggle(core, "Calls")
@@ -291,24 +291,24 @@ struct KiwiVisionLensActivationTests {
             )
         }
         _ = toggle(core, "Night")
-        #expect(system.asked == [true])
+        expectEqual(system.asked, [true])
         _ = toggle(core, "Day")
-        #expect(system.asked == [true, false])
+        expectEqual(system.asked, [true, false])
         _ = toggle(core, "Night")
-        #expect(system.asked == [true, false, true])
+        expectEqual(system.asked, [true, false, true])
         // Plain asks for no switch, so the system goes back.
         _ = toggle(core)
         _ = toggle(core)
-        #expect(core.kiwiVisionActive == .plain)
-        #expect(system.state.dark == false)
+        expectEqual(core.kiwiVisionActive, .plain)
+        expectEqual(system.state.dark, false)
         _ = toggle(core)
         _ = toggle(core, "Night")
-        #expect(system.state.dark == true)
+        expectEqual(system.state.dark, true)
         #expect(
             core.execute("kiwivision.delete_lens", args: [.string("Night")])
                 .isSuccess
         )
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
         #expect(system.state.dark == false, "a deleted lens pays back")
     }
 }

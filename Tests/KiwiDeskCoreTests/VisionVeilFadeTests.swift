@@ -48,14 +48,14 @@ struct VisionVeilFadeTests {
         #expect(veil.view.layer?.mask == nil)
         #expect(veil.dimLayer.mask === fade.dimMask)
         #expect(veil.blurHost.layer?.mask === fade.blurMask)
-        #expect(fade.regions.count == 1)
+        expectEqual(fade.regions.count, 1)
         let animated = try #require(
             fade.regions[1]?.dim.animation(forKey: "fade")
                 as? CABasicAnimation
         )
-        #expect(animated.fromValue as? Float == 0)
-        #expect(animated.toValue as? Float == 1)
-        #expect(animated.duration == 0.6)
+        expectEqual(animated.fromValue as? Float, 0)
+        expectEqual(animated.toValue as? Float, 1)
+        expectEqual(animated.duration, 0.6)
         #expect(
             fade.dimBase.path?.contains(CGPoint(x: 20, y: 20)) == false
         )
@@ -81,7 +81,7 @@ struct VisionVeilFadeTests {
         veil.mask(narrow)
         let fade = try #require(veil.fade)
         #expect(veil.view.layer?.mask == nil)
-        #expect(veil.restingPath == narrow)
+        expectEqual(veil.restingPath, narrow)
         #expect(
             fade.dimBase.path?.contains(CGPoint(x: 120, y: 50)) == false
         )
@@ -131,7 +131,7 @@ struct VisionVeilFadeTests {
         )
         #expect(try #require(veil.fade).regions.count == 2)
         #expect(fade.regions[1]?.dim === layer)
-        #expect(fade.dimMask.sublayers?.count == sublayers)
+        expectEqual(fade.dimMask.sublayers?.count, sublayers)
     }
 
     @Test("a fade's end restores the resting mask, a stale one waits")
@@ -165,6 +165,6 @@ struct VisionVeilFadeTests {
         #expect(veil.dimLayer.mask == nil)
         #expect(veil.blurHost.layer?.mask == nil)
         let root = try #require(veil.view.layer?.mask as? CAShapeLayer)
-        #expect(root.path == resting)
+        expectEqual(root.path, resting)
     }
 }

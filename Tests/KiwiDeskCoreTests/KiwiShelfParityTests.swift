@@ -91,10 +91,10 @@ struct KiwiShelfCommandParityTests {
             var shelf = KiwiShelf()
             setting.apply(to: &shelf)
             let changed = changedFields(shelf, from: KiwiShelf())
-            #expect(changed.count == 1)
+            expectEqual(changed.count, 1)
             touched.formUnion(changed)
         }
-        #expect(touched == fieldNames(KiwiShelf()))
+        expectEqual(touched, fieldNames(KiwiShelf()))
     }
 
     @Test("Parse accepts every field's spelling")
@@ -128,9 +128,9 @@ struct KiwiShelfCommandParityTests {
     func shareClamps() {
         var shelf = KiwiShelf()
         KiwiShelfCommandSetting.minimum(95).apply(to: &shelf)
-        #expect(shelf.minimum == KiwiShelf.minimumRange.upperBound)
+        expectEqual(shelf.minimum, KiwiShelf.minimumRange.upperBound)
         KiwiShelfCommandSetting.minimum(-5).apply(to: &shelf)
-        #expect(shelf.minimum == KiwiShelf.minimumRange.lowerBound)
+        expectEqual(shelf.minimum, KiwiShelf.minimumRange.lowerBound)
     }
 
     private func sampleArgs(

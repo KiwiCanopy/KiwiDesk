@@ -95,7 +95,7 @@ struct JumpFocusTests {
     /// The filing is the move the user asked for: paid whatever
     /// stood the focus down (#2883).
     private func expectFiledHere(_ core: KiwiCore) {
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(4)), "1")
     }
 
     /// Its app rule files it in Space 2: the arrival moves it here
@@ -107,8 +107,8 @@ struct JumpFocusTests {
         #expect(core.moveHere(.window(WindowID(4))))
         #expect(core.state.rememberedSpaces[WindowID(4)] == nil)
         arrive(core)
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        expectEqual(core.state.workspaces.space(of: WindowID(4)), "1")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(4))
         #expect(log.paid)
         #expect(core.jump.owed == nil)
     }
@@ -118,8 +118,8 @@ struct JumpFocusTests {
         let core = makeCore()
         core.jump(to: .window(WindowID(4)))
         arrive(core)
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        expectEqual(core.state.workspaces.space(of: WindowID(4)), "1")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(4))
         #expect(log.paid)
     }
 
@@ -131,7 +131,7 @@ struct JumpFocusTests {
         core.state.appRules[bundle] = "2"
         core.jump(to: .window(WindowID(4)))
         arrive(core)
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(4)), "2")
         expectStoodDown(core)
     }
 
@@ -142,9 +142,9 @@ struct JumpFocusTests {
         core.state.workspaces.activate("2")
         core.state.workspaces.focus(WindowID(2), in: "2")
         arrive(core)
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         expectStoodDown(core)
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(4)), "1")
     }
 
     @Test("an arrival past the bound stands the focus down")
@@ -157,7 +157,7 @@ struct JumpFocusTests {
         arrive(core)
         expectStoodDown(core)
         // Past the bound nothing is paid, the filing included.
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(4)), "2")
     }
 
     @Test("a press since the move stands the focus down")
@@ -197,12 +197,12 @@ struct JumpFocusTests {
         let core = makeCore()
         #expect(core.moveHere(.window(WindowID(4))))
         core.handle(.windowRekeyed(WindowID(4), WindowID(9)))
-        #expect(core.jump.owed?.window == WindowID(9))
+        expectEqual(core.jump.owed?.window, WindowID(9))
     }
 
     @Test("an empty WindowServer reading keeps every record")
     func emptyReadingAbstains() {
         #expect(JumpState.known([:]) == nil)
-        #expect(JumpState.known([WindowID(3): 1]) == [WindowID(3)])
+        expectEqual(JumpState.known([WindowID(3): 1]), [WindowID(3)])
     }
 }

@@ -47,9 +47,9 @@ struct LayoutBoundsResizeSeamTests {
         // suite measures.
         core.execute("set_min_window_size", args: [.number(200)])
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 200))
-        #expect(core.tiler.settings.mouseResize == .layout)
-        #expect(core.tiler.settings.spaceBarStyle.visibility == .always)
-        #expect(core.tiler.settings.kiwishelf.thickness == 400)
+        expectEqual(core.tiler.settings.mouseResize, .layout)
+        expectEqual(core.tiler.settings.spaceBarStyle.visibility, .always)
+        expectEqual(core.tiler.settings.kiwishelf.thickness, 400)
         core.execute(
             "set_mode",
             args: [.string("1"), .string("bsp")]
@@ -152,7 +152,7 @@ struct LayoutBoundsResizeSeamTests {
         // vertical axis would measure the (bar-unaffected)
         // height and red this test for an unrelated reason.
         #expect(scrolling.axisIsHorizontal)
-        #expect(scrolling.slotSize == .points(810))
+        expectEqual(scrolling.slotSize, .points(810))
     }
 
     @Test("A finished mouse resize divides by the region")

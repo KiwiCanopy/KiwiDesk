@@ -104,9 +104,9 @@ struct SpaceSlidePlateAppearanceTests {
         guard Self.drawsGlass else { return }
         let glass = try plateGlass(under: .darkAqua)
         // One container and one plate, or the clause reads nothing.
-        #expect(glass.count == 2)
+        expectEqual(glass.count, 2)
         for view in glass {
-            #expect(view.appearance?.name == .darkAqua)
+            expectEqual(view.appearance?.name, .darkAqua)
         }
     }
 
@@ -114,7 +114,7 @@ struct SpaceSlidePlateAppearanceTests {
     func lightPickPinsNothing() throws {
         guard Self.drawsGlass else { return }
         let glass = try plateGlass(under: .aqua)
-        #expect(glass.count == 2)
+        expectEqual(glass.count, 2)
         for view in glass {
             #expect(view.appearance == nil)
         }
@@ -139,7 +139,7 @@ struct SpaceSlidePlateAppearanceTests {
         let plate = try #require(
             glass.compactMap { $0 as? NSGlassEffectView }.first
         )
-        #expect(plate.style == (tinted ? .clear : .regular))
+        expectEqual(plate.style, (tinted ? .clear : .regular))
         let backdrop = plate.contentView as? GlassBackdrop
         #expect((backdrop?.gradient?.colors != nil) == tinted)
     }
@@ -172,7 +172,7 @@ struct SpaceSlidePlateAppearanceTests {
         let dark = try #require(NSAppearance(named: .darkAqua))
         let light = try #require(NSAppearance(named: .aqua))
         GlassTint.followPick(view, host: dark)
-        #expect(view.appearance?.name == .darkAqua)
+        expectEqual(view.appearance?.name, .darkAqua)
         GlassTint.followPick(view, host: light)
         #expect(view.appearance == nil)
     }

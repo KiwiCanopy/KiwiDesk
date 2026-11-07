@@ -38,9 +38,9 @@ struct TrackCommandsTests {
             ).isSuccess
         )
         let track = core.tiler.settings.track
-        #expect(track.axis == .horizontal)
-        #expect(track.limit == 3)
-        #expect(track.newWindow == .focusedTrack)
+        expectEqual(track.axis, .horizontal)
+        expectEqual(track.limit, 3)
+        expectEqual(track.newWindow, .focusedTrack)
     }
 
     @Test("new_window_position set (#188)")
@@ -69,21 +69,21 @@ struct TrackCommandsTests {
         let core = makeCore()
         // Default is automatic (dynamic) — cap 0.
         #expect(core.tiler.settings.track.autoTracks)
-        #expect(core.tiler.settings.track.trackCap == 0)
+        expectEqual(core.tiler.settings.track.trackCap, 0)
         // A positive count pins the cap and turns auto off, so
         // it takes effect without a second call.
         core.execute("track.set_limit", args: [.number(3)])
-        #expect(core.tiler.settings.track.limit == 3)
+        expectEqual(core.tiler.settings.track.limit, 3)
         #expect(!core.tiler.settings.track.autoTracks)
         // The cap IS the limit (#1354): two normal tracks plus
         // the overflow track that catches the surplus.
-        #expect(core.tiler.settings.track.trackCap == 3)
-        #expect(core.tiler.settings.track.normalCap == 2)
+        expectEqual(core.tiler.settings.track.trackCap, 3)
+        expectEqual(core.tiler.settings.track.normalCap, 2)
         // 0 restores automatic, leaving the remembered count.
         core.execute("track.set_limit", args: [.number(0)])
         #expect(core.tiler.settings.track.autoTracks)
-        #expect(core.tiler.settings.track.limit == 3)
-        #expect(core.tiler.settings.track.trackCap == 0)
+        expectEqual(core.tiler.settings.track.limit, 3)
+        expectEqual(core.tiler.settings.track.trackCap, 0)
     }
 
     @Test("a limit below the floor is refused, naming the floor")
@@ -101,7 +101,7 @@ struct TrackCommandsTests {
         #expect(
             global.error?.contains("\(TrackParams.minLimit)") == true
         )
-        #expect(core.tiler.settings.track == before)
+        expectEqual(core.tiler.settings.track, before)
         let override = core.execute(
             "track.set_limit_override",
             args: [.string("2"), .number(1)]
@@ -126,8 +126,8 @@ struct TrackCommandsTests {
         )
         #expect(core.tiler.settings.track.autoTracks)
         // The remembered cap survives for when auto goes off again.
-        #expect(core.tiler.settings.track.limit == 4)
-        #expect(core.tiler.settings.track.trackCap == 0)
+        expectEqual(core.tiler.settings.track.limit, 4)
+        expectEqual(core.tiler.settings.track.trackCap, 0)
         // A non-boolean is rejected.
         #expect(
             !core.execute(
@@ -150,8 +150,8 @@ struct TrackCommandsTests {
         let over = core.tiler.settings.track.override[
             SpaceID("2")
         ]
-        #expect(over?.limit == 3)
-        #expect(over?.autoTracks == false)
+        expectEqual(over?.limit, 3)
+        expectEqual(over?.autoTracks, false)
         // The cap is the limit, the overflow track inside it
         // (#1354).
         #expect(
@@ -186,7 +186,7 @@ struct TrackCommandsTests {
                 args: [.string("nowhere")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.track == TrackParams())
+        expectEqual(core.tiler.settings.track, TrackParams())
     }
 
     @Test("Overrides write only that space")
@@ -207,10 +207,10 @@ struct TrackCommandsTests {
         let over = core.tiler.settings.track.override[
             SpaceID("2")
         ]
-        #expect(over?.axis == .horizontal)
-        #expect(over?.limit == 2)
+        expectEqual(over?.axis, .horizontal)
+        expectEqual(over?.limit, 2)
         // The global params are untouched.
-        #expect(core.tiler.settings.track.axis == .vertical)
+        expectEqual(core.tiler.settings.track.axis, .vertical)
         #expect(
             core.tiler.settings.resolvedTrack(for: "2").limit
                 == 2

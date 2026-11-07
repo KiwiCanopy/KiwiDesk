@@ -26,11 +26,11 @@ struct ScrollGestureReachTests {
     @Test("a profile's override reads as its own value")
     func overrideIsOwn() {
         let t = table
-        #expect(t.resolved(natural, for: "Work") == .flag(false))
-        #expect(t.resolved(natural, for: "Home") == .flag(true))
+        expectEqual(t.resolved(natural, for: "Work"), .flag(false))
+        expectEqual(t.resolved(natural, for: "Home"), .flag(true))
         #expect(t.reach(of: natural, editing: "Home").isShared)
         #expect(!t.reach(of: natural, editing: "Work").isShared)
-        #expect(t.differing(natural, editing: "Home") == ["Work"])
+        expectEqual(t.differing(natural, editing: "Home"), ["Work"])
     }
 
     @Test("a listed value is the profile's override; the base stays")
@@ -43,7 +43,7 @@ struct ScrollGestureReachTests {
             editing: "Home"
         )
         #expect(t.baseTouched.isEmpty)
-        #expect(t.scrollGestureBase(original: .defaults) == .defaults)
+        expectEqual(t.scrollGestureBase(original: .defaults), .defaults)
         #expect(
             t.scrollGestureOverride(for: "Home", original: .defaults)
                 == ScrollGestureOverride(pan: [.command, .option])
@@ -65,7 +65,7 @@ struct ScrollGestureReachTests {
         )
         var expected = ScrollGestureBase.defaults
         expected.naturalMouse = false
-        #expect(t.scrollGestureBase(original: .defaults) == expected)
+        expectEqual(t.scrollGestureBase(original: .defaults), expected)
         // Work's own `false` now equals the base: it follows.
         #expect(
             t.scrollGestureOverride(for: "Work", original: .defaults)
@@ -113,7 +113,7 @@ struct ScrollGestureReachTests {
             work.scrollGesture
                 == ScrollGestureOverride(pan: [.command, .option])
         )
-        #expect(core.guiConfigStore.load()?.scrollGesture == .defaults)
+        expectEqual(core.guiConfigStore.load()?.scrollGesture, .defaults)
         #expect(
             try Data(contentsOf: core.profiles.fileURL(name: "Home"))
                 == homeBefore
@@ -142,7 +142,7 @@ struct ScrollGestureReachTests {
         work.scrollGesture = ScrollGestureOverride(stepDistance: 90)
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.scrollGesture.stepDistance == 90)
+        expectEqual(page.scrollGesture.stepDistance, 90)
         page.scrollGesture.naturalTrackpad = false
         try core.overwriteProfile(
             named: "Work",
@@ -184,8 +184,8 @@ struct ScrollGestureReachTests {
             ScrollChordRefusal.of(chord, other: step, heldBy: .step)
         }
         #expect(of([]) == nil)
-        #expect(of([.control]) == .singleModifier)
-        #expect(of(step) == .otherGesture(.step))
+        expectEqual(of([.control]), .singleModifier)
+        expectEqual(of(step), .otherGesture(.step))
         #expect(of([.control, .shift]) == nil)
     }
 
@@ -203,15 +203,15 @@ struct ScrollGestureReachTests {
         core.applyScrollGestures(base: base, profile: nil)
         #expect(core.mouse.scroll.resolved.pan.isEmpty)
         let range = ScrollGestureBase.stepDistanceRange
-        #expect(core.mouse.scroll.resolved.stepDistance == range.lowerBound)
+        expectEqual(core.mouse.scroll.resolved.stepDistance, range.lowerBound)
         base.stepDistance = range.upperBound * 5
         core.applyScrollGestures(base: base, profile: nil)
-        #expect(core.mouse.scroll.resolved.stepDistance == range.upperBound)
+        expectEqual(core.mouse.scroll.resolved.stepDistance, range.upperBound)
         base.stepDistance = 1
         base.pan = [.control, .option]
         base.spaceStep = [.control, .option]
         core.applyScrollGestures(base: base, profile: nil)
-        #expect(core.mouse.scroll.resolved.pan == [.control, .option])
+        expectEqual(core.mouse.scroll.resolved.pan, [.control, .option])
         #expect(core.mouse.scroll.resolved.spaceStep.isEmpty)
     }
 
@@ -267,7 +267,7 @@ struct ScrollGestureReloadTests {
             encoding: .utf8
         )
         core.loadConfig()
-        #expect(core.mouse.scroll.resolved.pan == [.command, .shift])
+        expectEqual(core.mouse.scroll.resolved.pan, [.command, .shift])
         #expect(core.mouse.scroll.settings.chords[.pan] == [.command, .shift])
         try "-- nothing\n".write(
             to: core.configURL,
@@ -275,7 +275,7 @@ struct ScrollGestureReloadTests {
             encoding: .utf8
         )
         core.loadConfig()
-        #expect(core.mouse.scroll.resolved.pan == [.control, .option])
+        expectEqual(core.mouse.scroll.resolved.pan, [.control, .option])
         #expect(
             core.mouse.scroll.settings.chords[.pan] == [.control, .option]
         )

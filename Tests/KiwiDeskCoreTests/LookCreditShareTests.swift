@@ -28,7 +28,7 @@ struct LookCreditShareTests {
 
     @Test("the look itself keeps every setting")
     func fullShare() {
-        #expect(original().keptShare(in: wearing(original())) == 1)
+        expectEqual(original().keptShare(in: wearing(original())), 1)
     }
 
     @Test("each changed setting lowers the share")
@@ -36,10 +36,10 @@ struct LookCreditShareTests {
         var settings = wearing(original())
         settings.kiwishelf.thickness = 30
         settings.borderStyle.width = 2
-        #expect(original().keptShare(in: settings) == 0.5)
+        expectEqual(original().keptShare(in: settings), 0.5)
         #expect(original().stillCredited(by: settings))
         settings.borderStyle.cornerStyle = .rounded
-        #expect(original().keptShare(in: settings) == 0.25)
+        expectEqual(original().keptShare(in: settings), 0.25)
         #expect(!original().stillCredited(by: settings))
     }
 
@@ -47,19 +47,19 @@ struct LookCreditShareTests {
     func onlyItsOwnSettingsCount() {
         var settings = wearing(original())
         settings.kiwishelf.itemGap = 99
-        #expect(original().keptShare(in: settings) == 1)
+        expectEqual(original().keptShare(in: settings), 1)
     }
 
     @Test("a colour counts by value, not spelling")
     func colourByValue() {
         var look = original()
         look.colors["border.focused_color"] = "#564ab6ff"
-        #expect(look.keptShare(in: wearing(original())) == 1)
+        expectEqual(look.keptShare(in: wearing(original())), 1)
     }
 
     @Test("a look naming nothing credits nothing")
     func emptyLook() {
         let empty = ShelfLook(name: "E", style: [:], colors: [:])
-        #expect(empty.keptShare(in: TilingSettings()) == 0)
+        expectEqual(empty.keptShare(in: TilingSettings()), 0)
     }
 }

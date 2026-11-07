@@ -17,13 +17,13 @@ struct LineBufferTests {
         #expect(
             lines == ["{\"command\":\"focus\"}", "{\"a\":1}"]
         )
-        #expect(buffer.append(Data("\n".utf8)) == ["partial"])
+        expectEqual(buffer.append(Data("\n".utf8)), ["partial"])
     }
 
     @Test("Empty lines are skipped")
     func emptyLines() {
         var buffer = LineBuffer()
-        #expect(buffer.append(Data("\n\nx\n".utf8)) == ["x"])
+        expectEqual(buffer.append(Data("\n\nx\n".utf8)), ["x"])
     }
 }
 
@@ -38,8 +38,8 @@ struct CodecTests {
             CommandRequest.self,
             from: Data(json.utf8)
         )
-        #expect(request.command == "focus")
-        #expect(request.args == [.string("left")])
+        expectEqual(request.command, "focus")
+        expectEqual(request.args, [.string("left")])
     }
 
     @Test("Args accept mixed types")
@@ -51,7 +51,7 @@ struct CodecTests {
             CommandRequest.self,
             from: Data(json.utf8)
         )
-        #expect(request.args?.first?.intValue == 3)
+        expectEqual(request.args?.first?.intValue, 3)
     }
 
     @Test("Responses round-trip")
@@ -64,7 +64,7 @@ struct CodecTests {
             CommandResponse.self,
             from: data
         )
-        #expect(decoded == response)
+        expectEqual(decoded, response)
     }
 }
 

@@ -140,20 +140,20 @@ struct BarPeekClickTests {
         core.shelves.peek.shelf = { _ in KiwiShelf() }
         try click(try webTarget(core))
         #expect(core.activeSpace?.id == one, "nothing switches")
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
         close(core)
         // A row's pick lands Space 2 on Doc; the list opens there.
         core.pickBarRow(WindowID(4), on: two)
         let web = try webTarget(core)
         try click(web)
-        #expect(menus == 0)
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        expectEqual(menus, 0)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(4))
         #expect(core.shelves.peek.shown?.view === web)
         #expect(
             core.shelves.peek.panel.drawn?.groups.flatMap(\.titles)
                 == ["Doc", "Mail"]
         )
-        #expect(checked() == [WindowID(4)])
+        expectEqual(checked(), [WindowID(4)])
         #expect(core.shelves.peek.panel.body.check != nil)
         // A focus moved while it stays open — a key, a click on the
         // window — reaches it through the relayout's re-read; the
@@ -165,7 +165,7 @@ struct BarPeekClickTests {
         clock.now += 1
         try click(after)
         #expect(core.shelves.peek.shown == nil, "a second click closes")
-        #expect(core.state.workspaces.lastFocused == WindowID(5))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(5))
     }
 
     /// `+n` focuses nothing (#2571): a click opens its list, and the
@@ -194,7 +194,7 @@ struct BarPeekClickTests {
         clock.now += 1
         try click(disc, count: 2)
         #expect(core.shelves.peek.shown?.view === disc, "still open")
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     @Test("VoiceOver's press on a list glyph opens the menu once")
@@ -208,8 +208,8 @@ struct BarPeekClickTests {
         }
         let web = try webTarget(core)
         #expect(web.accessibilityPerformPress())
-        #expect(shown.count == 1)
-        #expect(shown.first?.items.map(\.title) == ["Web", "Doc", "Mail"])
+        expectEqual(shown.count, 1)
+        expectEqual(shown.first?.items.map(\.title), ["Web", "Doc", "Mail"])
         #expect(core.shelves.peek.panel.drawn == nil, "no peek for it")
     }
 
@@ -220,8 +220,8 @@ struct BarPeekClickTests {
         let web = try webTarget(core)
         showPeek(core, web)
         core.shelves.peek.panel.body.onPick(WindowID(5))
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces.lastFocused == WindowID(5))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(5))
         #expect(core.shelves.peek.panel.drawn == nil)
     }
 

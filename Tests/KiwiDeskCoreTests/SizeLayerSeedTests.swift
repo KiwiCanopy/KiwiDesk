@@ -112,7 +112,7 @@ struct SizeLayerSeedTests {
         )
         #expect(arrows.count == 4, "arrow key names moved")
         let rows = sizeRows()
-        #expect(rows.count == 4)
+        expectEqual(rows.count, 4)
         for row in rows {
             let combo = try #require(KeyCombo.parse(row.combo))
             #expect(
@@ -135,7 +135,7 @@ struct SizeLayerSeedTests {
         let combos = try rows.map {
             try #require(KeyCombo.parse($0.combo))
         }
-        #expect(Set(combos).count == combos.count)
+        expectEqual(Set(combos).count, combos.count)
     }
 
     /// "⌥⌘ is free" is a claim about macOS, not about the seed,

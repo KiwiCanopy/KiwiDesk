@@ -21,7 +21,7 @@ struct FocusOrSpawnRetiredVerbTests {
             args: [.string("com.test.a")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("focus_or_spawn") == true)
+        expectEqual(response.error?.contains("focus_or_spawn"), true)
         #expect(!APIReference.dispatchable.contains("pull_or_spawn"))
         #expect(APIReference.dispatchable.contains("focus_or_spawn"))
     }
@@ -56,6 +56,6 @@ struct FocusOrSpawnRetiredVerbTests {
     func helpNamesTheReplacement() {
         let response = APIReference.helpResponse(for: "pull_or_spawn")
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("focus_or_spawn") == true)
+        expectEqual(response.error?.contains("focus_or_spawn"), true)
     }
 }

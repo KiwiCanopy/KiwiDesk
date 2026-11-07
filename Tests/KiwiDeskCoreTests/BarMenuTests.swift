@@ -40,16 +40,16 @@ struct BarMenuTests {
         #expect(
             menu.items.map(\.title) == ["Layout", "Greyed", "", "Looks…"]
         )
-        #expect(menu.items[1].isEnabled == false)
+        expectEqual(menu.items[1].isEnabled, false)
         #expect(menu.items[2].isSeparatorItem)
         let layout = try #require(menu.items[0].submenu)
         #expect(!layout.autoenablesItems)
-        #expect(layout.items.map(\.state) == [.on, .off])
+        expectEqual(layout.items.map(\.state), [.on, .off])
         let grid = layout.items[1]
         let target = try #require(grid.target as? NSObject)
         let action = try #require(grid.action)
         target.perform(action, with: grid)
-        #expect(fired == ["grid"])
+        expectEqual(fired, ["grid"])
     }
 
     /// VoiceOver lists what the menu offers, a nested row named
@@ -67,7 +67,7 @@ struct BarMenuTests {
                 ]
         )
         let looks = try #require(actions.last)
-        #expect(looks.handler?() == true)
-        #expect(fired == ["looks"])
+        expectEqual(looks.handler?(), true)
+        expectEqual(fired, ["looks"])
     }
 }

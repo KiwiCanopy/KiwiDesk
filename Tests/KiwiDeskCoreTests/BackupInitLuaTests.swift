@@ -86,8 +86,8 @@ struct BackupInitLuaTests {
                 try FileManager.default.removeItem(at: url)
             }
         )
-        #expect(outcome.initLua == .leftAlone)
-        #expect(lua(of: core) == Self.guiLua)
+        expectEqual(outcome.initLua, .leftAlone)
+        expectEqual(lua(of: core), Self.guiLua)
         #expect(!trashed.contains("init.lua"))
     }
 
@@ -103,8 +103,8 @@ struct BackupInitLuaTests {
                 try FileManager.default.removeItem(at: url)
             }
         )
-        #expect(outcome.initLua == .replaced)
-        #expect(lua(of: core) == "-- theirs\n")
+        expectEqual(outcome.initLua, .replaced)
+        expectEqual(lua(of: core), "-- theirs\n")
         #expect(trashed.contains("init.lua"))
     }
 
@@ -116,8 +116,8 @@ struct BackupInitLuaTests {
             replacingInitLua: true,
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect(outcome.initLua == .notCarried)
-        #expect(lua(of: core) == Self.guiLua)
+        expectEqual(outcome.initLua, .notCarried)
+        expectEqual(lua(of: core), Self.guiLua)
     }
 
     @Test("a Lua-owned Mac refuses a plain restore, takes one with init.lua")
@@ -141,13 +141,13 @@ struct BackupInitLuaTests {
                 )
             }
         )
-        #expect(lua(of: core) == Self.foreignLua)
+        expectEqual(lua(of: core), Self.foreignLua)
         try core.restoreSetup(
             from: carried,
             replacingInitLua: true,
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect(lua(of: core) == Self.guiLua)
+        expectEqual(lua(of: core), Self.guiLua)
         #expect(core.isGuiManaged)
     }
 
@@ -192,7 +192,7 @@ struct BackupInitLuaTests {
             replacingInitLua: true,
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect((core.tiler.settings.resizeStep == 77) == guiOwned)
+        expectEqual((core.tiler.settings.resizeStep == 77), guiOwned)
     }
 
     /// Once init.lua is replaced, a failed write still reloads, so
@@ -227,7 +227,7 @@ struct BackupInitLuaTests {
                 )
             }
         )
-        #expect(lua(of: core) == broken)
+        expectEqual(lua(of: core), broken)
         #expect(!core.configIssues.isEmpty)
     }
 
@@ -274,6 +274,6 @@ struct BackupInitLuaTests {
             trash: { try FileManager.default.removeItem(at: $0) }
         )
         #expect(core.profiles.allProfiles().isEmpty)
-        #expect(lua(of: core) == Self.guiLua)
+        expectEqual(lua(of: core), Self.guiLua)
     }
 }

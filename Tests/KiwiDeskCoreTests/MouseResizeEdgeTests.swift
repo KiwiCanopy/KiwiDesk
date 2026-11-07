@@ -135,8 +135,8 @@ struct MouseResizeEdgeTests {
             neighbors: [],
             shrinkTrades: { _ in true }
         )
-        #expect(kept.height == 700)
-        #expect(kept.width == 580)
+        expectEqual(kept.height, 700)
+        expectEqual(kept.width, 580)
     }
 
     @Test("Near-edge band detects resize start points")

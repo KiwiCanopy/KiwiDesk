@@ -139,8 +139,8 @@ struct RemovalDistrustTests {
         // still compositing at sweep time is re-read rather than
         // waiting for the next incidental reconcile.
         #expect(loop.pendingRemovalRecheck.contains(pid))
-        #expect(box.recheckFires == 1)
-        #expect(distrustLines(box) == 1)
+        expectEqual(box.recheckFires, 1)
+        expectEqual(distrustLines(box), 1)
     }
 
     @Test("an unlisted vanished window is removed as before")
@@ -153,9 +153,9 @@ struct RemovalDistrustTests {
         box.listed = [WindowID(11)]
         box.census = [pid: [WindowID(11)]]
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.destroyed.map(\.wasMinimized) == [false])
-        #expect(box.recheckFires == 0)
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
+        expectEqual(box.destroyed.map(\.wasMinimized), [false])
+        expectEqual(box.recheckFires, 0)
     }
 
     @Test("the hidden drop never consults the census")
@@ -173,7 +173,7 @@ struct RemovalDistrustTests {
         // path never pays the read.
         box.census = [pid: [WindowID(11), WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.censusReads == 0)
+        expectEqual(box.censusReads, 0)
         #expect(
             box.hiddenEvents.sorted { $0.raw < $1.raw }
                 == [WindowID(11), WindowID(12)]
@@ -199,9 +199,9 @@ struct RemovalDistrustTests {
             minimized: [WindowID(12)],
             coalesceTabs: false
         )
-        #expect(box.censusReads == 0)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.destroyed.map(\.wasMinimized) == [true])
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
+        expectEqual(box.destroyed.map(\.wasMinimized), [true])
     }
 
     @Test("one census read serves every candidate in a sweep")
@@ -217,7 +217,7 @@ struct RemovalDistrustTests {
         #expect(box.destroyed.isEmpty)
         // The gate's cost bound: a sweep pays the WindowServer
         // once however many candidates it checks.
-        #expect(box.censusReads == 1)
+        expectEqual(box.censusReads, 1)
     }
 
     @Test("the gate stands down inside the Desktop-switch grace")
@@ -232,9 +232,9 @@ struct RemovalDistrustTests {
         box.census = [pid: [WindowID(12)]]
         loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.censusReads == 0)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.recheckFires == 0)
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
+        expectEqual(box.recheckFires, 0)
     }
 
 }

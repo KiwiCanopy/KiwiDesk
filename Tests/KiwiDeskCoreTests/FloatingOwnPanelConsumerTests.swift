@@ -60,9 +60,9 @@ struct FloatingOwnPanelConsumerTests {
         let core = makeCore()
         core.eventLoop.ownKeyWindow = { reading(floats: true) }
         let beneath = core.visionTarget()
-        #expect(beneath.0 == w1.raw)
-        #expect(beneath.1 == 1)
+        expectEqual(beneath.0, w1.raw)
+        expectEqual(beneath.1, 1)
         core.eventLoop.ownKeyWindow = { reading(floats: false) }
-        #expect(core.visionTarget().0 == 999_999)
+        expectEqual(core.visionTarget().0, 999_999)
     }
 }

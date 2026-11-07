@@ -59,9 +59,9 @@ struct ShelfArrangementTests {
             alignment: alignment
         )
         let space = arrange(300, nil, shelf)
-        #expect(space == ShelfArrangement(space: whole))
+        expectEqual(space, ShelfArrangement(space: whole))
         let app = arrange(nil, 2000, shelf)
-        #expect(app == ShelfArrangement(app: whole))
+        expectEqual(app, ShelfArrangement(app: whole))
     }
 
     @Test("Two that fit are one plate, each section its need")
@@ -87,8 +87,8 @@ struct ShelfArrangementTests {
     )
     func joinedAtAlignment(alignment: KiwiShelf.Alignment, lead: CGFloat) {
         let placed = arrange(300, 200, shelf(alignment: alignment))
-        #expect(placed.space?.offset == lead)
-        #expect(placed.app?.offset == lead + 300)
+        expectEqual(placed.space?.offset, lead)
+        expectEqual(placed.app?.offset, lead + 300)
     }
 
     @Test("Full: the Space section shrinks to the App Bar's need")
@@ -107,7 +107,7 @@ struct ShelfArrangementTests {
     @Test("Full: never below the minimum; the App Bar takes the rest")
     func minimumHolds() {
         let placed = arrange(700, 800, shelf())
-        #expect(placed.space?.length == 400)
+        expectEqual(placed.space?.length, 400)
         #expect(
             placed.app
                 == Slot(offset: 400, length: 600, alignment: .start)
@@ -119,7 +119,7 @@ struct ShelfArrangementTests {
     @Test("A Space Bar needing less than its minimum keeps its need")
     func underMinimumKeepsItsNeed() {
         let placed = arrange(100, 950, shelf())
-        #expect(placed.space?.length == 100)
+        expectEqual(placed.space?.length, 100)
         #expect(
             placed.app
                 == Slot(offset: 100, length: 900, alignment: .start)
@@ -144,9 +144,9 @@ struct ShelfArrangementTests {
         let placed = arrange(700, 800, shelf(gap: 10))
         let space = try #require(placed.space)
         let app = try #require(placed.app)
-        #expect(space.length == 396)
-        #expect(app.offset == 406)
-        #expect(app.offset + app.length == 1000)
+        expectEqual(space.length, 396)
+        expectEqual(app.offset, 406)
+        expectEqual(app.offset + app.length, 1000)
     }
 
     /// A minimum below the hard floor would cut the Space the
@@ -161,8 +161,8 @@ struct ShelfArrangementTests {
             shelf: shelf(minimum: 20),
             pocket: nil
         )
-        #expect(placed.space?.length == 300)
-        #expect(placed.app?.length == 700)
+        expectEqual(placed.space?.length, 300)
+        expectEqual(placed.app?.length, 700)
     }
 
     @Test("The minimum's range runs from the floor to the need")
@@ -214,7 +214,7 @@ struct ShelfArrangementTests {
     @Test("The minimum is clamped to its range")
     func minimumClamped() {
         let placed = arrange(700, 800, shelf(minimum: 5))
-        #expect(placed.space?.length == 200)
+        expectEqual(placed.space?.length, 200)
     }
 
     @Test("The Space Bar moves only when joining puts it elsewhere")

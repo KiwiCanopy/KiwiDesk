@@ -30,12 +30,12 @@ struct StickyMarkOrderTests {
         manager.isWindowServerTracked = { _ in true }
 
         manager.sync([spec(1)])
-        #expect(orders(manager) == 1)
+        expectEqual(orders(manager), 1)
         manager.sync([spec(1)])
         manager.sync([spec(1)])
-        #expect(orders(manager) == 1)
+        expectEqual(orders(manager), 1)
         manager.sync([spec(1)], reassertOrder: true)
-        #expect(orders(manager) == 2)
+        expectEqual(orders(manager), 2)
     }
 
     @Test("an untracked mark is stacked on every sync")
@@ -46,7 +46,7 @@ struct StickyMarkOrderTests {
 
         manager.sync([spec(1)])
         manager.sync([spec(1)])
-        #expect(orders(manager) == 2)
+        expectEqual(orders(manager), 2)
     }
 
     @Test("a mark brought back on screen is stacked again")
@@ -56,12 +56,12 @@ struct StickyMarkOrderTests {
         manager.isWindowServerTracked = { _ in true }
         manager.sync([spec(1)])
         let mark = try #require(manager.overlays[WindowID(1)])
-        #expect(mark.orderCount == 1)
+        expectEqual(mark.orderCount, 1)
 
         mark.orderOutForTest()
         manager.sync([spec(1)])
 
-        #expect(mark.orderCount == 2)
+        expectEqual(mark.orderCount, 2)
     }
 
     @Test("a carried mark is owed a stack at the next sync")
@@ -75,6 +75,6 @@ struct StickyMarkOrderTests {
         manager.oweOrder(WindowID(1))
         manager.sync([spec(1)])
 
-        #expect(mark.orderCount == 2)
+        expectEqual(mark.orderCount, 2)
     }
 }

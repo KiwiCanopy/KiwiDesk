@@ -115,7 +115,7 @@ struct SizeBoundCorroborationProbeLifecycleTests {
             settledRead: false
         )
         #expect(revoke.confirmed)
-        #expect(raw.bound(for: w)?.minWidth == 720)
+        expectEqual(raw.bound(for: w)?.minWidth, 720)
 
         // An ordinary compliance performs no probe and wants no
         // read.
@@ -166,10 +166,10 @@ struct SizeBoundCorroborationProbeLifecycleTests {
         let second = try #require(
             take(&learner, current: capped, target: wider)
         )
-        #expect(second.size.width == 900 + bar + 1)
+        expectEqual(second.size.width, 900 + bar + 1)
         learner.recordAsk(w, size: second.size, settledFrom: second.baseline)
         learner.observe(w, currentSize: capped, settledRead: true)
-        #expect(learner.bound(for: w)?.maxWidth == 800)
+        expectEqual(learner.bound(for: w)?.maxWidth, 800)
         // Back to the first anchor, re-confirmed after its sweep:
         // no second probe for it.
         learner.recordAsk(w, size: ask, settledFrom: held)

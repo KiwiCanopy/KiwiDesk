@@ -78,10 +78,10 @@ struct EffectiveTiledMembersTests {
 
         // Active space1: the traveler tiles in at home index 0.
         let s1Tiled = state.effectiveTiledMembers(of: s1)
-        #expect(s1Tiled == [WindowID(2), WindowID(1)])
+        expectEqual(s1Tiled, [WindowID(2), WindowID(1)])
         // The injection is derived, never stored: the space's
         // own array is untouched.
-        #expect(s1.windows == [WindowID(1)])
+        expectEqual(s1.windows, [WindowID(1)])
 
         // A global sticky RENDERS on the focused space (space1),
         // so its inactive home space2 drops it from its own tiled
@@ -91,8 +91,8 @@ struct EffectiveTiledMembersTests {
         // (derivation only); its home INDEX still derives from the
         // full local list, so the space1 injection above is intact.
         let s2Tiled = state.effectiveTiledMembers(of: s2)
-        #expect(s2Tiled == [])
-        #expect(s2.windows == [WindowID(2)])
+        expectEqual(s2Tiled, [])
+        expectEqual(s2.windows, [WindowID(2)])
     }
 
     @Test("Floating sticky never joins the tiled members")
@@ -116,7 +116,7 @@ struct EffectiveTiledMembersTests {
             return
         }
         let tiled = state.effectiveTiledMembers(of: s1)
-        #expect(tiled == [WindowID(1)])
+        expectEqual(tiled, [WindowID(1)])
     }
 
     @Test("Effective members handles traveling sticky windows across spaces")
@@ -150,7 +150,7 @@ struct EffectiveTiledMembersTests {
 
         // Active space1: sticky w2 homed elsewhere travels to space1
         let s1Members = state.effectiveMembers(of: s1)
-        #expect(s1Members == [WindowID(1), WindowID(3), WindowID(2)])
+        expectEqual(s1Members, [WindowID(1), WindowID(3), WindowID(2)])
 
         // Inactive space2: sticky w2 is pruned (traveled to space1)
         let s2Members = state.effectiveMembers(of: s2)

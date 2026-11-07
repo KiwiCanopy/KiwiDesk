@@ -27,21 +27,21 @@ struct FocusWrapKeepTests {
     @Test("a verb's change is reported unkept and keeps to gui.json")
     func focusWrapKeeps() throws {
         let core = try KeepFixture.core()
-        #expect(core.guiConfigStore.load()?.focusWrap == .allScreens)
+        expectEqual(core.guiConfigStore.load()?.focusWrap, .allScreens)
         let set = KeepFixture.report(
             core,
             "set_focus_wrap",
             [.string("off")]
         )
         let leaf = try #require(KeepFixture.leaf(set, "/focus_wrap"))
-        #expect(leaf.owner == .sharedRules)
+        expectEqual(leaf.owner, .sharedRules)
         #expect(!leaf.stored)
         let response = core.execute(
             KiwiCore.keepSettingsCommand,
             args: ids(set).map(JSONValue.string)
         )
-        #expect(kept(response) == ["/focus_wrap"])
-        #expect(core.guiConfigStore.load()?.focusWrap == .off)
+        expectEqual(kept(response), ["/focus_wrap"])
+        expectEqual(core.guiConfigStore.load()?.focusWrap, .off)
     }
 
     /// The owner is `focus_wrap`'s own reach, never its twin's: with
@@ -60,6 +60,6 @@ struct FocusWrapKeepTests {
             [.string("off")]
         )
         let leaf = try #require(KeepFixture.leaf(set, "/focus_wrap"))
-        #expect(leaf.owner == .sharedRules)
+        expectEqual(leaf.owner, .sharedRules)
     }
 }

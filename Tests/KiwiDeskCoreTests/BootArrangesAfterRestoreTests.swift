@@ -68,7 +68,7 @@ struct BootArrangesAfterRestoreTests {
             )
         }
         for id in Self.hiddenIDs {
-            #expect(b.state.workspaces.space(of: id) == F.hidden)
+            expectEqual(b.state.workspaces.space(of: id), F.hidden)
         }
     }
 
@@ -87,7 +87,7 @@ struct BootArrangesAfterRestoreTests {
         )
         // Not `recoverStrandedFloats`' centred seed, which a
         // retile over the scan's filing would have planted.
-        #expect(b.tiler.stashOriginal(float) == capture)
+        expectEqual(b.tiler.stashOriginal(float), capture)
     }
 
     @Test(

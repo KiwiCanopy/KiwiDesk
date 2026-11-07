@@ -79,7 +79,7 @@ struct LocalizationDriftGuardTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let enJSON = fixture.locales.appendingPathComponent(
             "en.json"
         )
@@ -88,8 +88,8 @@ struct LocalizationDriftGuardTests {
             [String: String].self,
             from: data
         )
-        #expect(decoded["greeting"] == "Hello")
-        #expect(decoded["farewell"] == "Goodbye")
+        expectEqual(decoded["greeting"], "Hello")
+        expectEqual(decoded["farewell"], "Goodbye")
     }
 
     @Test(
@@ -130,7 +130,7 @@ struct LocalizationDriftGuardTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     @Test("a doc-comment example call site is not extracted")
@@ -147,7 +147,7 @@ struct LocalizationDriftGuardTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let enJSON = fixture.locales.appendingPathComponent(
             "en.json"
         )
@@ -156,7 +156,7 @@ struct LocalizationDriftGuardTests {
             [String: String].self,
             from: data
         )
-        #expect(decoded == ["real.key": "Real value"])
+        expectEqual(decoded, ["real.key": "Real value"])
         #expect(decoded["key"] == nil)
         #expect(decoded["menu.quit"] == nil)
     }
@@ -173,7 +173,7 @@ struct LocalizationDriftGuardTests {
             sources: fixture.sources,
             locales: fixture.locales
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         let enJSON = fixture.locales.appendingPathComponent(
             "en.json"
         )

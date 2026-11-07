@@ -43,20 +43,20 @@ struct KiwiVisionStoredTests {
                 as? [String: Any]
         )
         let group = try #require(root["kiwivision"] as? [String: Any])
-        #expect(group["dim"] as? Double == 35)
-        #expect(group["blur"] as? Bool == false)
-        #expect(group["appearance"] as? String == "opposite")
+        expectEqual(group["dim"] as? Double, 35)
+        expectEqual(group["blur"] as? Bool, false)
+        expectEqual(group["appearance"] as? String, "opposite")
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide == value)
+        expectEqual(back.appWide, value)
         var older = root
         older["kiwivision"] = nil
         let legacy = try JSONDecoder().decode(
             GuiConfig.self,
             from: JSONSerialization.data(withJSONObject: older)
         )
-        #expect(legacy.appWide?.visionDim == 60)
-        #expect(legacy.appWide?.visionBlur == true)
-        #expect(legacy.appWide?.visionAppearance == .unchanged)
+        expectEqual(legacy.appWide?.visionDim, 60)
+        expectEqual(legacy.appWide?.visionBlur, true)
+        expectEqual(legacy.appWide?.visionAppearance, .unchanged)
     }
 
     @Test("a stored dim past 0–100 clamps on decode")
@@ -69,7 +69,7 @@ struct KiwiVisionStoredTests {
                 GuiConfig.self,
                 from: Data(json.utf8)
             )
-            #expect(config.appWide?.visionDim == dim)
+            expectEqual(config.appWide?.visionDim, dim)
         }
     }
 
@@ -81,11 +81,11 @@ struct KiwiVisionStoredTests {
             core.execute("kiwivision.set_dim", args: [.number(25)])
                 .isSuccess
         )
-        #expect(core.appWide.visionDim == 25)
+        expectEqual(core.appWide.visionDim, 25)
         #expect(core.guiConfigStore.load()?.appWide == nil)
         core.setAppWide(persisting: true) { $0.visionBlur = false }
         let stored = try #require(core.guiConfigStore.load()?.appWide)
-        #expect(stored.visionBlur == false)
+        expectEqual(stored.visionBlur, false)
         #expect(stored.visionDim == 60, "the verb's 25 stays session")
     }
 
@@ -93,7 +93,7 @@ struct KiwiVisionStoredTests {
     func requestReadsAppWide() {
         let core = makeCore()
         core.setAppWide(persisting: false) { $0.visionDim = 30 }
-        #expect(core.visionRequest().dim == 0.3)
+        expectEqual(core.visionRequest().dim, 0.3)
     }
 
     @Test("a row changing the appearance while on switches at once")
@@ -103,7 +103,7 @@ struct KiwiVisionStoredTests {
         core.setKiwiVision(.plain)
         #expect(system.asked.isEmpty)
         core.setAppWide(persisting: true) { $0.visionAppearance = .dark }
-        #expect(system.asked == [true])
+        expectEqual(system.asked, [true])
     }
 
     @Test("a reset while on takes the appearance home")
@@ -117,8 +117,8 @@ struct KiwiVisionStoredTests {
         core.setKiwiVision(.plain)
         #expect(system.state.dark)
         core.resetAppWide()
-        #expect(core.appWide.visionAppearance == .unchanged)
-        #expect(system.asked == [true, false])
+        expectEqual(core.appWide.visionAppearance, .unchanged)
+        expectEqual(system.asked, [true, false])
         #expect(!system.state.dark)
         #expect(system.debt == nil)
     }
@@ -135,8 +135,8 @@ struct KiwiVisionStoredTests {
         core.setKiwiVision(.plain)
         #expect(system.asked.isEmpty, "the live ask is still unchanged")
         core.prepareAppWide()
-        #expect(core.appWide.visionAppearance == .dark)
-        #expect(system.asked == [true])
+        expectEqual(core.appWide.visionAppearance, .dark)
+        expectEqual(system.asked, [true])
     }
 
     /// A shown plate takes a new dim or blur at once, whether a
@@ -168,11 +168,11 @@ struct KiwiVisionStoredTests {
         core.setKiwiVision(.plain)
         try #require(plate.dim == 0.6)
         _ = core.execute("kiwivision.set_dim", args: [.number(25)])
-        #expect(plate.dim == 0.25)
+        expectEqual(plate.dim, 0.25)
         core.setAppWide(persisting: false) { $0.visionBlur = false }
-        #expect(plate.blur == false)
+        expectEqual(plate.blur, false)
         core.resetAppWide()
-        #expect(plate.dim == 0.6)
-        #expect(plate.blur == true)
+        expectEqual(plate.dim, 0.6)
+        expectEqual(plate.blur, true)
     }
 }

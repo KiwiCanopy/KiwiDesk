@@ -131,7 +131,7 @@ struct SeamWalkReachTests {
         // Walking the levels must not enter the same object
         // twice, or every inherited seam would be probed once per
         // level and the routing assertion would see duplicates.
-        #expect(walk.seams.count == 1)
+        expectEqual(walk.seams.count, 1)
         #expect(walk.unconformed.isEmpty)
         #expect(walk.gaps.isEmpty)
     }
@@ -143,7 +143,7 @@ struct SeamWalkReachTests {
         // A root that is not itself a seam owner, so nothing here
         // is hidden by the sink exemption.
         let walk = SeamWalk.over(BehindComputed())
-        #expect(walk.seams.map(\.path) == ["core.stored"])
+        expectEqual(walk.seams.map(\.path), ["core.stored"])
         // The point of the test: it is not merely missed, it is
         // missed *quietly*. Nothing here would tell an author the
         // walk stopped covering a seam, which is why
@@ -183,7 +183,7 @@ struct SeamWalkReachTests {
         let walk = SeamWalk.over(Root())
         // By identity: the root drops out, a second instance of
         // a seam-owning type held by it does not.
-        #expect(walk.seams.map(\.path) == ["core.sibling"])
+        expectEqual(walk.seams.map(\.path), ["core.sibling"])
         #expect(walk.unconformed.isEmpty)
     }
 
@@ -198,7 +198,7 @@ struct SeamWalkReachTests {
 
         let walk = SeamWalk.over(Root())
         #expect(walk.seams.isEmpty)
-        #expect(walk.unconformed.count == 1)
+        expectEqual(walk.unconformed.count, 1)
         #expect(
             walk.unconformed.first?.contains("Unconformed") == true,
             "\(walk.unconformed)"

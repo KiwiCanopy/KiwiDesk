@@ -203,7 +203,7 @@ struct StashRestoreTests {
         engine.allScreenBounds = { [far] }
         engine.stashedFrames[WindowID(1)] = original
         engine.restoreStashed(state: state, frames: [:])
-        #expect(engine.stashedFrames[WindowID(1)] == original)
+        expectEqual(engine.stashedFrames[WindowID(1)], original)
         engine.allScreenBounds = {
             [CGRect(x: 0, y: 0, width: 1_000, height: 1_000)]
         }
@@ -221,7 +221,7 @@ struct StashRestoreTests {
         engine.allScreenBounds = { [] }
         engine.stashedFrames[WindowID(1)] = original
         engine.restoreStashed(state: state, frames: [:])
-        #expect(engine.stashedFrames[WindowID(1)] == original)
+        expectEqual(engine.stashedFrames[WindowID(1)], original)
     }
 
     @Test("A user move consumes the capture (forgetStash)")

@@ -23,10 +23,10 @@ struct SizeBoundGeneralizationTests {
 
     @Test("A corroborated ceiling answers asks above it")
     func ceilingAnswersAbove() {
-        #expect(ceiling.consumedWidth(asking: 1200) == 715)
+        expectEqual(ceiling.consumedWidth(asking: 1200), 715)
         // Every ask above the ceiling is answered — the entry
         // asks are not special once the bound is corroborated.
-        #expect(ceiling.consumedWidth(asking: 750) == 715)
+        expectEqual(ceiling.consumedWidth(asking: 750), 715)
         // An ask BELOW the ceiling is unlearned range — it
         // must be probed, not silently swapped (#677's rule,
         // kept): the app may accept it.
@@ -134,7 +134,7 @@ struct SizeBoundGeneralizationTests {
                 .init(asked: 700 + bar + 1, answered: 690),
             ]
         )
-        #expect(apart.maxWidth == 690)
+        expectEqual(apart.maxWidth, 690)
         // The FLOOR side is a separate copy of the clause
         // (guard-prover, 2026-08-28) — weaken one and not the
         // other and the wider copy passes for the wrong
@@ -157,7 +157,7 @@ struct SizeBoundGeneralizationTests {
                 .init(asked: 500 - bar - 1, answered: 510),
             ]
         )
-        #expect(apartFloors.minWidth == 510)
+        expectEqual(apartFloors.minWidth, 510)
     }
 
     @Test("Forcing the probe stands the generalization down")
@@ -197,7 +197,7 @@ struct SizeBoundGeneralizationTests {
                 .init(asked: 240, answered: 480),
             ]
         )
-        #expect(floor.consumedWidth(asking: 100) == 480)
+        expectEqual(floor.consumedWidth(asking: 100), 480)
         #expect(floor.consumedWidth(asking: 490) == nil)
     }
 
@@ -216,8 +216,8 @@ struct SizeBoundGeneralizationTests {
                 .init(asked: 800, answered: 825),
             ]
         )
-        #expect(fixed.maxWidth == 825)
-        #expect(fixed.minWidth == 825)
+        expectEqual(fixed.maxWidth, 825)
+        expectEqual(fixed.minWidth, 825)
 
         // The mirror: a corroborated floor lends the single
         // ceiling entry.
@@ -228,8 +228,8 @@ struct SizeBoundGeneralizationTests {
                 .init(asked: 900, answered: 825),
             ]
         )
-        #expect(mirrored.minWidth == 825)
-        #expect(mirrored.maxWidth == 825)
+        expectEqual(mirrored.minWidth, 825)
+        expectEqual(mirrored.maxWidth, 825)
     }
 
     @Test("Two single entries cannot bootstrap each other")
@@ -292,7 +292,7 @@ struct SizeBoundGeneralizationTests {
         // instead of probing every new slot size.
         let slot = CGRect(x: 0, y: 0, width: 1201, height: 600)
         let frame = ceiling.centered(in: slot)
-        #expect(frame?.width == 715)
-        #expect(frame?.midX == slot.midX)
+        expectEqual(frame?.width, 715)
+        expectEqual(frame?.midX, slot.midX)
     }
 }

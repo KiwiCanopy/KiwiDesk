@@ -51,7 +51,7 @@ struct StartupAXTimeoutTests {
         // the bound, and 1.0 is an argued number (EventLoop.
         // axMessagingTimeoutSeconds' doc), so a drift should be
         // a conscious edit here too.
-        #expect(order.first == "timeout 1.0")
+        expectEqual(order.first, "timeout 1.0")
         #expect(order.contains("prefilter"))
         #expect(order.contains("scan"))
     }
@@ -69,6 +69,6 @@ struct StartupAXTimeoutTests {
         // would have replaced, so a driver that read `true` here
         // would restart a scan already in flight (#801).
         #expect(!loop.beginScan())
-        #expect(applications == 1)
+        expectEqual(applications, 1)
     }
 }

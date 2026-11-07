@@ -84,8 +84,8 @@ struct FixedSizeWindowWiringTests {
             press(core, "x", delta)
             await drain()
             await drain()
-            #expect(app.now == start)
-            #expect(seen().count == n + 1)
+            expectEqual(app.now, start)
+            expectEqual(seen().count, n + 1)
         }
         guard seen().count >= 2 else { return }
         guard case .ownMaximum(_, _, atBoundary: false) = seen()[0] else {
@@ -135,7 +135,7 @@ struct FixedSizeWindowWiringTests {
         await drain()
         await drain()
         #expect(core.tiler.animation.targetFrame(window: id) == nil)
-        #expect(seen().count == 1)
+        expectEqual(seen().count, 1)
     }
 
     private func report(serial: Int, pressed: Bool = false) -> FixedSizeReport
@@ -157,12 +157,12 @@ struct FixedSizeWindowWiringTests {
         let app = answering(core, .free)
         let seen = refusals(core)
         core.handleFixedSize(report(serial: 1))
-        #expect(seen().count == 1)
+        expectEqual(seen().count, 1)
         press(core, "x", 50)
         await drain()
         await drain()
-        #expect(app.now.width == 550)
-        #expect(seen().count == 1)
+        expectEqual(app.now.width, 550)
+        expectEqual(seen().count, 1)
     }
 
     @Test("A write already out when the cue drew does not cue again")
@@ -175,10 +175,10 @@ struct FixedSizeWindowWiringTests {
         core.handleFixedSize(report(serial: 3))
         core.handleFixedSize(report(serial: 4))
         core.handleFixedSize(report(serial: 5))
-        #expect(seen().count == 1)
+        expectEqual(seen().count, 1)
         door.serial = 6
         core.handleFixedSize(report(serial: 6))
-        #expect(seen().count == 2)
+        expectEqual(seen().count, 2)
     }
 
     @Test("A report for a window no longer focused draws nothing")
@@ -214,7 +214,7 @@ struct FixedSizeWindowWiringTests {
         press(core, "x", 50)
         await drain()
         await drain()
-        #expect(heard.map(\.pressed) == [false, false])
+        expectEqual(heard.map(\.pressed), [false, false])
         guard heard.count == 2 else { return }
         #expect(heard[0].serial < heard[1].serial)
     }
@@ -229,7 +229,7 @@ struct FixedSizeWindowWiringTests {
         #expect(core.state.floatAspectFlight == nil)
         core.state.floatAspectFlight = .probing(id)
         core.endFloatAspectAsk(of: id)
-        #expect(core.state.floatAspectFlight == .probing(id))
+        expectEqual(core.state.floatAspectFlight, .probing(id))
     }
 
     private func reports(
@@ -260,9 +260,9 @@ struct FixedSizeWindowWiringTests {
     func onlyTheStatementReports() {
         let tall = CGRect(x: 100, y: 100, width: 500, height: 408)
         let taller = CGRect(x: 100, y: 98, width: 500, height: 413)
-        #expect(reports(.grid, anchor: tall, asked: taller) == 0)
-        #expect(reports(.fixed, anchor: tall, asked: taller) == 1)
-        #expect(reports(.free, anchor: tall, asked: taller) == 0)
+        expectEqual(reports(.grid, anchor: tall, asked: taller), 0)
+        expectEqual(reports(.fixed, anchor: tall, asked: taller), 1)
+        expectEqual(reports(.free, anchor: tall, asked: taller), 0)
         // An answer away from the anchor asks macOS nothing.
         let stale = tall.offsetBy(dx: 0, dy: 0).insetBy(dx: 0, dy: 20)
         #expect(reports(.fixed, anchor: stale, asked: taller, seed: tall) == 0)
@@ -272,7 +272,7 @@ struct FixedSizeWindowWiringTests {
         )
         // Nor does an ask within a point of the window.
         let same = CGRect(x: 100, y: 100, width: 500.5, height: 408)
-        #expect(reports(.fixed, anchor: tall, asked: same) == 0)
+        expectEqual(reports(.fixed, anchor: tall, asked: same), 0)
     }
 
     /// The report lands in the key-repeat wait, ahead of the glide.
@@ -291,9 +291,9 @@ struct FixedSizeWindowWiringTests {
         f.registrar.press(keyCode: f.combo.keyCode)
         await drain()
         await drain()
-        #expect(seen().count == 1)
+        expectEqual(seen().count, 1)
         #expect(f.core.keys.holdGlide.heldID == nil)
-        #expect(app.now == start)
+        expectEqual(app.now, start)
     }
 
     /// The residue: macOS calls this window sizable, so its asks climb
@@ -317,7 +317,7 @@ struct FixedSizeWindowWiringTests {
             try f.frame(1.0 / 60)
             frames += 1
             await drain()
-            #expect(app.now == start)
+            expectEqual(app.now, start)
         }
         #expect(frames > 1)
     }

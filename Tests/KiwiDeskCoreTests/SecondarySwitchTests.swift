@@ -47,7 +47,7 @@ struct SecondarySwitchTests {
     func secondaryNeverSelects() {
         defer { resetAuthorityOverrides() }
         let core = makeSeparateCore()
-        #expect(core.profiles.currentName == "Loaded")
+        expectEqual(core.profiles.currentName, "Loaded")
         // B swipes 20 → 21; the main display stays on Desktop 1.
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
@@ -56,7 +56,7 @@ struct SecondarySwitchTests {
         core.handleDesktopChange()
         // Without the #888 arm, applyDesktopBinding would
         // snap the manually-loaded profile back to "Bound".
-        #expect(core.profiles.currentName == "Loaded")
+        expectEqual(core.profiles.currentName, "Loaded")
         // The MAIN Desktop's memory is untouched. B's own left
         // Desktop IS remembered — #1230 ruling 3, since the #1175
         // heal gives B a Space where this fixture left it none —
@@ -78,7 +78,7 @@ struct SecondarySwitchTests {
             secondaryCurrent: 20
         )
         core.handleDesktopChange()
-        #expect(core.profiles.currentName == "Bound")
+        expectEqual(core.profiles.currentName, "Bound")
         // And the outgoing Desktop remembered its Space, keyed
         // under the main display.
         #expect(

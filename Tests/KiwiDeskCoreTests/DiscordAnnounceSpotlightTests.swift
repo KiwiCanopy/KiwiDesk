@@ -84,7 +84,7 @@ struct DiscordAnnounceSpotlightTests {
                 """
         )
         let paragraphs = text.components(separatedBy: "\n\n")
-        #expect(paragraphs.first == "KiwiDesk 9999.4.0 is about one thing.")
+        expectEqual(paragraphs.first, "KiwiDesk 9999.4.0 is about one thing.")
         #expect(
             paragraphs.dropFirst().first
                 == "**Fast switches** — Switching keeps up.\n"

@@ -62,7 +62,7 @@ struct OverflowStyleMigrationTests {
         let out = try #require(ConfigMigration.migrated(profile()))
         #expect(!mentionsKey(out))
         let migrated = try root(out)
-        #expect(migrated["format"] as? Int == Profile.currentFormat)
+        expectEqual(migrated["format"] as? Int, Profile.currentFormat)
         let settings = try JSONSerialization.data(
             withJSONObject: try #require(migrated["settings"])
         )
@@ -71,8 +71,8 @@ struct OverflowStyleMigrationTests {
             TilingSettings.self,
             from: settings
         )
-        #expect(decoded.stack.override["3"]?.masterCount == 2)
-        #expect(decoded.track.override["3"]?.limit == 2)
+        expectEqual(decoded.stack.override["3"]?.masterCount, 2)
+        expectEqual(decoded.track.override["3"]?.limit, 2)
     }
 
     @Test("gui.json drops it too")
@@ -127,10 +127,10 @@ struct OverflowStyleMigrationTests {
         }
         // Four lines go, and only they: what is left still parses,
         // the comma a last entry leaves dangling dropped with it.
-        #expect(lines(data).count - lines(out).count == 4)
+        expectEqual(lines(data).count - lines(out).count, 4)
         #expect(!mentionsKey(out))
         let edited = try root(out)
-        #expect(edited["format"] as? Int == 28)
+        expectEqual(edited["format"] as? Int, 28)
         #expect(edited["settings"] != nil)
     }
 

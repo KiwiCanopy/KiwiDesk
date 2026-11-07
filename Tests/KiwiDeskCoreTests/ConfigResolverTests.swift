@@ -37,7 +37,7 @@ struct ConfigResolverTests {
             base: base,
             profile: nil
         )
-        #expect(result == base)
+        expectEqual(result, base)
     }
 
     @Test("Empty override returns base unchanged")
@@ -46,7 +46,7 @@ struct ConfigResolverTests {
             base: base,
             profile: KeyLayerOverride()
         )
-        #expect(result == base)
+        expectEqual(result, base)
     }
 
     @Test("Present override produces merged result")
@@ -62,7 +62,7 @@ struct ConfigResolverTests {
         )
         let lua = result.first?.bindings
             .first { $0.combo == "alt+h" }?.lua
-        #expect(lua == "override")
+        expectEqual(lua, "override")
     }
 
     @Test("Empty base + profile modes returns profile modes")
@@ -74,7 +74,7 @@ struct ConfigResolverTests {
             base: [],
             profile: over
         )
-        #expect(result.count == 1)
-        #expect(result[0].name == "nav")
+        expectEqual(result.count, 1)
+        expectEqual(result[0].name, "nav")
     }
 }

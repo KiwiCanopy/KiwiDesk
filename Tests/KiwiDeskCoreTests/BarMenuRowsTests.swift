@@ -69,8 +69,8 @@ struct BarMenuRowsTests {
     func shelfSectionEndsEveryMenu() {
         LocalizationManager.shared.select("en")
         let core = seededCore()
-        #expect(titles(core.barMenuRows(.empty)) == shelf)
-        #expect(titles(core.barMenuRows(.count)) == shelf)
+        expectEqual(titles(core.barMenuRows(.empty)), shelf)
+        expectEqual(titles(core.barMenuRows(.count)), shelf)
         for hit in [BarHit.space(one), .disc(one), .divider] {
             let rows = titles(core.barMenuRows(hit))
             #expect(Array(rows.suffix(4)) == ["—"] + shelf, "\(hit)")
@@ -84,10 +84,10 @@ struct BarMenuRowsTests {
         var landed: [SettingsLanding] = []
         core.barMenuHooks.openSettings = { landed.append($0) }
         core.barMenuRows(.empty).forEach(perform)
-        #expect(landed == [.shelf, .looks, .colorsAndGlass])
+        expectEqual(landed, [.shelf, .looks, .colorsAndGlass])
         let chip = core.barMenuRows(.space(two))
         perform(chip[1])
-        #expect(landed.last == .space(two))
+        expectEqual(landed.last, .space(two))
     }
 
     /// A Space chip's Layout menu is the status item's rows, and a
@@ -97,9 +97,9 @@ struct BarMenuRowsTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let chip = core.barMenuRows(.space(two))
-        #expect(titles(chip).prefix(2) == ["Layout", "Space Settings…"])
+        expectEqual(titles(chip).prefix(2), ["Layout", "Space Settings…"])
         let layout = try submenu(chip[0])
-        #expect(layout.count == LayoutMode.allCases.count)
+        expectEqual(layout.count, LayoutMode.allCases.count)
         let live = try #require(core.state.workspaces[two]?.mode)
         #expect(
             layout.filter(\.checked).map(\.title)
@@ -107,8 +107,8 @@ struct BarMenuRowsTests {
         )
         let grid = try #require(layout.first { $0.title == "Grid" })
         perform(grid)
-        #expect(core.state.workspaces[two]?.mode == .grid)
-        #expect(core.state.workspaces[one]?.mode == live)
+        expectEqual(core.state.workspaces[two]?.mode, .grid)
+        expectEqual(core.state.workspaces[one]?.mode, live)
     }
 
     /// With a live profile the Layout menu keeps its Keep row,
@@ -118,7 +118,7 @@ struct BarMenuRowsTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         try core.persistProfile(named: "Desk", modes: nil)
-        #expect(core.profiles.currentName == "Desk")
+        expectEqual(core.profiles.currentName, "Desk")
         let keep = { () throws -> BarMenuRow in
             let layout = try self.submenu(core.barMenuRows(.space(one))[0])
             return try #require(layout.last)
@@ -141,11 +141,11 @@ struct BarMenuRowsTests {
         // Keep saves the whole profile, so a shown Space's drift arms
         // it on a hidden Space's chip too.
         let hidden = try submenu(core.barMenuRows(.space(two))[0])
-        #expect(hidden.last?.enabled == true)
+        expectEqual(hidden.last?.enabled, true)
         var kept = 0
         core.barMenuHooks.keepLayout = { kept += 1 }
         perform(try keep())
-        #expect(kept == 1)
+        expectEqual(kept, 1)
     }
 
     /// The `+N` picker writes the live setting through its setter,
@@ -157,7 +157,7 @@ struct BarMenuRowsTests {
         let core = seededCore()
         try core.persistProfile(named: "Desk", modes: nil)
         let disc = core.barMenuRows(.disc(one))
-        #expect(disc[0].title == "Glyphs per Space")
+        expectEqual(disc[0].title, "Glyphs per Space")
         let spans = try submenu(disc[0])
         #expect(
             spans.map(\.title)
@@ -173,11 +173,11 @@ struct BarMenuRowsTests {
         }
         let pick = current == 3 ? 4 : 3
         perform(spans[pick - SpaceBarStyle.glyphSpanRange.lowerBound])
-        #expect(core.tiler.settings.spaceBarStyle.glyphSpan == pick)
-        #expect(draft.spaceBarStyle.glyphSpan == pick)
+        expectEqual(core.tiler.settings.spaceBarStyle.glyphSpan, pick)
+        expectEqual(draft.spaceBarStyle.glyphSpan, pick)
         #expect(persisted)
         let stored = try core.profiles.read(name: "Desk")
-        #expect(stored.settings.spaceBarStyle.glyphSpan == pick)
+        expectEqual(stored.settings.spaceBarStyle.glyphSpan, pick)
     }
 
     /// With no profile live the pick lasts the session: the draft
@@ -190,8 +190,8 @@ struct BarMenuRowsTests {
         var told: [Bool] = []
         core.onLiveProfileWritten = { _, persisted in told.append(persisted) }
         core.setGlyphSpanFromBar(4)
-        #expect(core.tiler.settings.spaceBarStyle.glyphSpan == 4)
-        #expect(told == [false])
+        expectEqual(core.tiler.settings.spaceBarStyle.glyphSpan, 4)
+        expectEqual(told, [false])
     }
 
     /// With no profile live nothing is known saved, so no Space
@@ -211,8 +211,8 @@ struct BarMenuRowsTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let reset = { core.barMenuRows(.divider)[0] }
-        #expect(reset().title == "Reset Space Bar Minimum")
-        #expect(reset().enabled == false)
+        expectEqual(reset().title, "Reset Space Bar Minimum")
+        expectEqual(reset().enabled, false)
         core.tiler.settings.kiwishelf.minimum = KiwiShelf.resetMinimum + 10
         #expect(reset().enabled)
         perform(reset())

@@ -91,7 +91,7 @@ struct ScreenHandoffTests {
                 screen: scr
             )
         }
-        #expect(frame(a, b, a, win) == win)
+        expectEqual(frame(a, b, a, win), win)
         #expect(frame(a, b, a, nil) == scr)
         #expect(frame(a, b, nil, win) == win)
         #expect(frame(a, b, b, win) == nil)
@@ -113,7 +113,7 @@ struct ScreenHandoffTests {
                 WindowID(2)
             ]
         )
-        #expect(warped == [slot])
+        expectEqual(warped, [slot])
     }
 
     @Test("an empty Space on another screen takes its centre")
@@ -123,8 +123,8 @@ struct ScreenHandoffTests {
         var warped: [CGRect] = []
         core.pointerWarp = { warped.append($0) }
         core.execute("focus_space", args: [.string("3")])
-        #expect(core.handoffScreenFrame(of: main) == Self.mainFrame)
-        #expect(warped == [Self.mainFrame])
+        expectEqual(core.handoffScreenFrame(of: main), Self.mainFrame)
+        expectEqual(warped, [Self.mainFrame])
     }
 
     @Test("a pointer already on the target screen stays")
@@ -134,7 +134,7 @@ struct ScreenHandoffTests {
         var warps = 0
         core.pointerWarp = { _ in warps += 1 }
         core.execute("focus_space", args: [.string("2")])
-        #expect(warps == 0)
+        expectEqual(warps, 0)
     }
 
     @Test("a same-screen switch is the setting's, a held button none")
@@ -144,15 +144,15 @@ struct ScreenHandoffTests {
         var warps = 0
         core.pointerWarp = { _ in warps += 1 }
         core.execute("focus_space", args: [.string("2")])
-        #expect(warps == 1)
+        expectEqual(warps, 1)
         // Space 2 → 3 stays on the main screen: setting off.
         core.execute("focus_space", args: [.string("3")])
-        #expect(warps == 1)
+        expectEqual(warps, 1)
         core.execute("focus_space", args: [.string("1")])
-        #expect(warps == 1)
+        expectEqual(warps, 1)
         core.mouse.pressedButtons = { 1 }
         core.execute("focus_space", args: [.string("2")])
-        #expect(warps == 1)
+        expectEqual(warps, 1)
     }
 
     /// The pointer and frame reads run only where the focus crossed
@@ -167,10 +167,10 @@ struct ScreenHandoffTests {
         }
         core.pointerWarp = { _ in }
         core.execute("focus_space", args: [.string("2")])
-        #expect(reads == 1)
+        expectEqual(reads, 1)
         reads = 0
         core.execute("focus_space", args: [.string("3")])
-        #expect(reads == 0)
+        expectEqual(reads, 0)
     }
 
     /// A follow whose focus the #1345 gate refuses moves no pointer.
@@ -185,7 +185,7 @@ struct ScreenHandoffTests {
             "move_to_space_and_follow",
             args: [.string("3")]
         )
-        #expect(warps == 0)
+        expectEqual(warps, 0)
     }
 
     @Test("the scroll step never hands off")
@@ -195,7 +195,7 @@ struct ScreenHandoffTests {
         var warps = 0
         core.pointerWarp = { _ in warps += 1 }
         core.switchSpace(to: SpaceID("2"), warp: false)
-        #expect(warps == 0)
+        expectEqual(warps, 0)
     }
 
     @Test("a move-and-follow onto another screen hands off")
@@ -208,8 +208,8 @@ struct ScreenHandoffTests {
             "move_to_space_and_follow",
             args: [.string("3")]
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID("3"))
-        #expect(warps == 1)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("3"))
+        expectEqual(warps, 1)
     }
 
     /// The display follow (#446) and the AX focus follow's landing
@@ -231,8 +231,8 @@ struct ScreenHandoffTests {
                 var warps = 0
                 core.pointerWarp = { _ in warps += 1 }
                 door(core)
-                #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-                #expect(warps == (onTarget ? 0 : 1))
+                expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+                expectEqual(warps, (onTarget ? 0 : 1))
             }
         }
     }

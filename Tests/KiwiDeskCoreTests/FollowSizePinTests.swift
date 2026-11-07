@@ -110,7 +110,7 @@ struct FollowSizePinTests {
             source: .axEcho,
             pin: pin
         )
-        #expect(border.lastFrame(WindowID(1)) == echo)
+        expectEqual(border.lastFrame(WindowID(1)), echo)
     }
 
     @Test("The production tee threads the pin to the ring")

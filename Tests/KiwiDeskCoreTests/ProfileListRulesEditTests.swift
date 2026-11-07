@@ -107,7 +107,7 @@ struct ProfileListRulesEditTests {
         )
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.ignoreRules == ignoreOverride)
+        expectEqual(saved.ignoreRules, ignoreOverride)
     }
 
     @Test("Hidden ignore override survives profile copy")
@@ -123,7 +123,7 @@ struct ProfileListRulesEditTests {
         )
 
         let copy = try core.profiles.read(name: name)
-        #expect(copy.ignoreRules == ignoreOverride)
+        expectEqual(copy.ignoreRules, ignoreOverride)
     }
 
     @Test("Rename preserves both list-rule overrides")
@@ -134,8 +134,8 @@ struct ProfileListRulesEditTests {
         try core.renameProfile(from: "Work", to: "Studio")
 
         let renamed = try core.profiles.read(name: "Studio")
-        #expect(renamed.floatRules == floatOverride)
-        #expect(renamed.ignoreRules == ignoreOverride)
+        expectEqual(renamed.floatRules, floatOverride)
+        expectEqual(renamed.ignoreRules, ignoreOverride)
     }
 
     @Test("Global base save never rewrites profile overrides")
@@ -152,10 +152,10 @@ struct ProfileListRulesEditTests {
         try core.saveGuiConfig(global)
 
         let after = try Data(contentsOf: profileURL)
-        #expect(after == before)
+        expectEqual(after, before)
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.floatRules == floatOverride)
-        #expect(saved.ignoreRules == ignoreOverride)
+        expectEqual(saved.floatRules, floatOverride)
+        expectEqual(saved.ignoreRules, ignoreOverride)
     }
 
     @Test("Profile JSON uses bare sparse rule objects")
@@ -174,9 +174,9 @@ struct ProfileListRulesEditTests {
         let ignores = try #require(
             root["ignore_rules"] as? [String: Any]
         )
-        #expect(floats["profile.float"] as? Bool == true)
+        expectEqual(floats["profile.float"] as? Bool, true)
         #expect(floats["base.float"] is NSNull)
-        #expect(ignores["profile.ignore"] as? Bool == true)
+        expectEqual(ignores["profile.ignore"] as? Bool, true)
         #expect(ignores["stale.ignore"] is NSNull)
     }
 }

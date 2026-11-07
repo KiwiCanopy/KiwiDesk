@@ -78,11 +78,11 @@ struct JumpMovesHereTests {
         track(core, 2, in: "2")
         track(core, 3, in: "2") { $0.isFullscreen = true }
         track(core, 4, in: "2") { $0.stickyScope = .global }
-        #expect(movesHere(core, 1) == false)
-        #expect(movesHere(core, 2) == true)
-        #expect(movesHere(core, 3) == false)
+        expectEqual(movesHere(core, 1), false)
+        expectEqual(movesHere(core, 2), true)
+        expectEqual(movesHere(core, 3), false)
         // A ∞ window is drawn here already: Move here only focuses.
-        #expect(movesHere(core, 4) == false)
+        expectEqual(movesHere(core, 4), false)
     }
 
     @Test("a minimized window moves here")
@@ -96,7 +96,7 @@ struct JumpMovesHereTests {
             wasMinimized: true,
             effects: &effects
         )
-        #expect(movesHere(core, 5) == true)
+        expectEqual(movesHere(core, 5), true)
     }
 
     @Test("an away window moves here only with the Desktop bridge")
@@ -112,8 +112,8 @@ struct JumpMovesHereTests {
                 nativeSpace: 11
             )
             core.state.rememberedSpaces[WindowID(7)] = .departed("2")
-            #expect(core.canDriveDesktops == bridge)
-            #expect(movesHere(core, 7) == bridge)
+            expectEqual(core.canDriveDesktops, bridge)
+            expectEqual(movesHere(core, 7), bridge)
         }
     }
 
@@ -149,6 +149,6 @@ struct JumpMovesHereTests {
             nativeSpace: 11
         )
         core.state.rememberedSpaces[WindowID(8)] = .departed("2")
-        #expect(movesHere(core, 8) == false)
+        expectEqual(movesHere(core, 8), false)
     }
 }

@@ -95,15 +95,15 @@ struct AnimationSettleWatchdogTests {
         // The property three subsystems arm behind. Without the
         // watchdog this loop runs to its hang guard and every one
         // of these fails.
-        #expect(engine.activeCount == 0)
+        expectEqual(engine.activeCount, 0)
         #expect(ended)
-        #expect(animationEnded == [window])
+        expectEqual(animationEnded, [window])
         // Snapped to the exact target, not abandoned mid-flight —
         // the same recovery shape as the non-finite net, which is
         // the shape already proven to release the signal.
-        #expect(settledOn[window] == target)
-        #expect(applied.last?.1 == target)
-        #expect(applied.last?.2 == true)
+        expectEqual(settledOn[window], target)
+        expectEqual(applied.last?.1, target)
+        expectEqual(applied.last?.2, true)
         // Long enough that no real motion could reach it, short
         // enough to be a blip rather than a dead session.
         #expect(seconds > 4 && seconds < 7, "fired at \(seconds)s")
@@ -167,7 +167,7 @@ struct AnimationSettleWatchdogTests {
             WindowID(1): wedge(response: 1_000_000)
         ]
         let seconds = drain(engine)
-        #expect(engine.activeCount == 0)
+        expectEqual(engine.activeCount, 0)
         #expect(seconds < 70, "fired at \(seconds)s")
         #expect(log.count == 1, "\(log)")
     }

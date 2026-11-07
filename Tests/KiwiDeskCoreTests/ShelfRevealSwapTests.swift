@@ -64,11 +64,11 @@ struct ShelfRevealSwapTests {
             for landing in pending { landing() }
         }
         #expect(space.superview === overlay.stripView)
-        #expect(space.alphaValue == 1)
+        expectEqual(space.alphaValue, 1)
         #expect(app.superview == nil)
         #expect(overlay.revealing == nil)
         #expect(overlay.leaving == nil)
-        #expect(left == 0)
+        expectEqual(left, 0)
         #expect(overlay.isVisible)
         let panel = try #require(overlay.panel)
         let rest = CGRect(x: 200, y: 0, width: 300, height: 40)

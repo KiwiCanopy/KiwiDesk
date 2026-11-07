@@ -52,8 +52,8 @@ struct FocusWrapTests {
 
     @Test("All screens is the default")
     func defaultMode() {
-        #expect(FocusWrap.defaultMode == .allScreens)
-        #expect(makeCore().focusWrap.mode == .allScreens)
+        expectEqual(FocusWrap.defaultMode, .allScreens)
+        expectEqual(makeCore().focusWrap.mode, .allScreens)
     }
 
     @Test("Off stops at the last window with the dead end")
@@ -62,7 +62,7 @@ struct FocusWrapTests {
         core.execute("set_focus_wrap", args: [.string("off")])
         let response = core.navigate([.string("right")], swapping: false)
         #expect(!response.isSuccess)
-        #expect(focused(core) == WindowID(2))
+        expectEqual(focused(core), WindowID(2))
     }
 
     @Test("This screen wraps BSP to the window at the far edge")
@@ -70,9 +70,9 @@ struct FocusWrapTests {
         let core = pair()
         core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(core.navigate([.string("right")], swapping: false).isSuccess)
-        #expect(focused(core) == WindowID(1))
+        expectEqual(focused(core), WindowID(1))
         #expect(core.navigate([.string("left")], swapping: false).isSuccess)
-        #expect(focused(core) == WindowID(2))
+        expectEqual(focused(core), WindowID(2))
     }
 
     /// Three BSP windows: 1 full height on the left, 2 above 3 on
@@ -90,19 +90,19 @@ struct FocusWrapTests {
         let bottom = top == WindowID(2) ? WindowID(3) : WindowID(2)
         core.state.workspaces.focus(bottom, in: "1")
         #expect(core.navigate([.string("down")], swapping: false).isSuccess)
-        #expect(focused(core) == top)
+        expectEqual(focused(core), top)
         #expect(core.navigate([.string("up")], swapping: false).isSuccess)
-        #expect(focused(core) == bottom)
+        expectEqual(focused(core), bottom)
         core.state.workspaces.focus(WindowID(1), in: "1")
         #expect(!core.navigate([.string("up")], swapping: false).isSuccess)
-        #expect(focused(core) == WindowID(1))
+        expectEqual(focused(core), WindowID(1))
     }
 
     @Test("All screens with one screen wraps like This screen")
     func oneScreenAllScreensWraps() {
         let core = pair()
         #expect(core.navigate([.string("right")], swapping: false).isSuccess)
-        #expect(focused(core) == WindowID(1))
+        expectEqual(focused(core), WindowID(1))
     }
 
     @Test("A swap never wraps")
@@ -124,7 +124,7 @@ struct FocusWrapTests {
                 core.execute("set_focus_wrap", args: [.string(mode.rawValue)])
                     .isSuccess
             )
-            #expect(core.focusWrap.mode == mode)
+            expectEqual(core.focusWrap.mode, mode)
         }
     }
 
@@ -132,11 +132,11 @@ struct FocusWrapTests {
     func profileOverrideWins() {
         let core = makeCore()
         core.applyFocusWrap(base: .thisScreen, profile: .off)
-        #expect(core.focusWrap.mode == .off)
+        expectEqual(core.focusWrap.mode, .off)
         core.execute("set_focus_wrap", args: [.string("all_screens")])
-        #expect(core.focusWrap.mode == .off)
+        expectEqual(core.focusWrap.mode, .off)
         core.applyFocusWrap(profile: nil)
-        #expect(core.focusWrap.mode == .allScreens)
+        expectEqual(core.focusWrap.mode, .allScreens)
     }
 
     @Test("the per-layout verbs retired for set_focus_wrap")
@@ -151,8 +151,8 @@ struct FocusWrapTests {
 
     @Test("the scroll gesture reads All screens as This screen")
     func gestureStaysOnItsScreen() {
-        #expect(FocusWrap.allScreens.withinScreen == .thisScreen)
-        #expect(FocusWrap.thisScreen.withinScreen == .thisScreen)
-        #expect(FocusWrap.off.withinScreen == .off)
+        expectEqual(FocusWrap.allScreens.withinScreen, .thisScreen)
+        expectEqual(FocusWrap.thisScreen.withinScreen, .thisScreen)
+        expectEqual(FocusWrap.off.withinScreen, .off)
     }
 }

@@ -83,7 +83,7 @@ struct BarFontSiteTests {
     func spaceIdentifier() throws {
         try #require(BarFont.isInstalled(Self.family))
         let font = try #require(spaceItem().identifierLabel.font)
-        #expect(font.familyName == Self.family)
+        expectEqual(font.familyName, Self.family)
     }
 
     @Test("The Space Bar's overflow count draws the family")
@@ -91,7 +91,7 @@ struct BarFontSiteTests {
         try #require(BarFont.isInstalled(Self.family))
         let view = spaceItem(overflow: 3)
         let font = try #require(view.overflowBadge.font)
-        #expect(font.familyName == Self.family)
+        expectEqual(font.familyName, Self.family)
     }
 
     /// The App Font is the glyph, never bar text.
@@ -100,21 +100,21 @@ struct BarFontSiteTests {
         let view = spaceItem(glyph: ":safari:")
         let field = try #require(view.appViews.first as? NSTextField)
         try #require(AppFont.font(size: 12) != nil, "no App Font")
-        #expect(field.font?.fontName == AppFont.fontName)
+        expectEqual(field.font?.fontName, AppFont.fontName)
     }
 
     @Test("The App Bar's title draws the family")
     func appTitle() throws {
         try #require(BarFont.isInstalled(Self.family))
         let font = try #require(appItem().label.font)
-        #expect(font.familyName == Self.family)
+        expectEqual(font.familyName, Self.family)
     }
 
     @Test("The App Bar's group count draws the family")
     func appBadge() throws {
         try #require(BarFont.isInstalled(Self.family))
         let font = try #require(appItem(count: 3).badge.font)
-        #expect(font.familyName == Self.family)
+        expectEqual(font.familyName, Self.family)
     }
 
     /// The slot width is measured in the face the item draws, or a
@@ -151,7 +151,7 @@ struct BarFontSiteTests {
         try #require(BarFont.isInstalled(Self.family))
         let view = spaceItem()
         let badge = try #require(view.badgeViews.first)
-        #expect(badge.font?.familyName == Self.family)
+        expectEqual(badge.font?.familyName, Self.family)
     }
 
     /// The front-app segment's name, drawn and measured: a measure
@@ -194,7 +194,7 @@ struct BarFontSiteTests {
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )
-        #expect(overlay.frontName.font?.familyName == Self.family)
+        expectEqual(overlay.frontName.font?.familyName, Self.family)
         func extent(_ shelf: KiwiShelf) -> CGFloat {
             var style = SpaceBarLook(
                 shelf: shelf,
@@ -242,7 +242,7 @@ struct BarFontSiteTests {
         let label = try #require(
             view.subviews.first { $0 is NSTextField } as? NSTextField
         )
-        #expect(label.font?.familyName == Self.family)
+        expectEqual(label.font?.familyName, Self.family)
     }
 
     /// The peek's header and titles all draw the
@@ -265,9 +265,9 @@ struct BarFontSiteTests {
             ),
             shelf: Self.shelf
         )
-        #expect(body.labels.count == 3)
+        expectEqual(body.labels.count, 3)
         for field in body.labels {
-            #expect(field.font?.familyName == Self.family)
+            expectEqual(field.font?.familyName, Self.family)
         }
         let titles = body.labels.dropFirst()
         #expect(
@@ -286,9 +286,9 @@ struct BarFontSiteTests {
         settings.kiwishelf.fontFamily = Self.family
         let name = KiwiCore.HidingShelves.markNameFont(settings)
         let count = KiwiCore.HidingShelves.markCountFont(settings)
-        #expect(name.familyName == Self.family)
-        #expect(count.familyName == Self.family)
-        #expect(name.pointSize == count.pointSize)
+        expectEqual(name.familyName, Self.family)
+        expectEqual(count.familyName, Self.family)
+        expectEqual(name.pointSize, count.pointSize)
         // The count takes the badge face, heavier than the name's.
         #expect(
             NSFontManager.shared.weight(of: count)

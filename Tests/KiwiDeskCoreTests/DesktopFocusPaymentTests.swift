@@ -148,7 +148,7 @@ struct DesktopFocusPaymentTests {
         // The user's focus sits on the secondary screen.
         NativeSpaces.activeSpaceIDOverride = 20
         core.handle(.desktopChanged)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
     }
 
     /// Shared mode ("Displays have separate Spaces" off): the main
@@ -163,7 +163,7 @@ struct DesktopFocusPaymentTests {
         leaveDesktop1(core)
         NativeSpaces.mainDisplayUUIDOverride = "UUID-X"
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
     }
 
     /// Two Desktops showing one space keep their own entries: the
@@ -202,7 +202,7 @@ struct DesktopFocusPaymentTests {
         defer { teardown() }
         leaveDesktop1(core)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
         arrive(first, in: core)
         core.handle(.windowFocused(first))
         #expect(core.desktopMemory.returnFocus.owed() == nil)
@@ -210,7 +210,7 @@ struct DesktopFocusPaymentTests {
             box.lines.contains { $0.contains("debt to w1 retired") }
         )
         arrive(focused, in: core)
-        #expect(core.state.workspaces[home]?.focused == first)
+        expectEqual(core.state.workspaces[home]?.focused, first)
         #expect(!box.lines.contains { $0.contains("focus paid") })
     }
 
@@ -226,7 +226,7 @@ struct DesktopFocusPaymentTests {
         #expect(!box.lines.contains { $0.contains("focus paid") })
         // The owed window's own arrival is the payment.
         arrive(focused, in: core)
-        #expect(core.state.workspaces[home]?.focused == focused)
+        expectEqual(core.state.workspaces[home]?.focused, focused)
         #expect(
             box.lines.contains { $0.contains("focus paid to w1") }
         )
@@ -299,7 +299,7 @@ struct DesktopFocusPaymentTests {
         returnToDesktop1(core)
         let fresh = WindowID(9)
         core.handle(.windowRekeyed(focused, fresh))
-        #expect(core.desktopMemory.honoredFocus[home]?[10] == fresh)
-        #expect(core.desktopMemory.returnFocus.owed() == fresh)
+        expectEqual(core.desktopMemory.honoredFocus[home]?[10], fresh)
+        expectEqual(core.desktopMemory.returnFocus.owed(), fresh)
     }
 }

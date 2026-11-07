@@ -58,6 +58,6 @@ struct ShelfExpandReducedMotionTests {
             )
         }
         #expect(!moving(framed))
-        #expect(framed.frame.width == 40)
+        expectEqual(framed.frame.width, 40)
     }
 }

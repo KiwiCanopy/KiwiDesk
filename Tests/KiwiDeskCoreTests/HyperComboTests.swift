@@ -9,23 +9,23 @@ struct HyperComboTests {
     @Test("hyper parses and round-trips")
     func roundTrips() throws {
         let combo = try #require(KeyCombo.parse("hyper+shift+h"))
-        #expect(combo.modifiers == [.hyper, .shift])
-        #expect(combo.comboString() == "hyper+shift+h")
+        expectEqual(combo.modifiers, [.hyper, .shift])
+        expectEqual(combo.comboString(), "hyper+shift+h")
         #expect(KeyCombo.parse("hyper+h") != KeyCombo.parse("h"))
     }
 
     @Test("Hyper combines with every modifier")
     func combinesWithAll() throws {
         let combo = try #require(KeyCombo.parse("hyper+cmd+ctrl+x"))
-        #expect(combo.modifiers == [.hyper, .command, .control])
-        #expect(combo.comboString() == "hyper+control+command+x")
+        expectEqual(combo.modifiers, [.hyper, .command, .control])
+        expectEqual(combo.comboString(), "hyper+control+command+x")
         #expect(ComboSymbols.modifierSymbols(combo.modifiers) == "✦⌃⌘")
-        #expect(combo.registered == KeyCombo.parse("cmd+ctrl+x"))
+        expectEqual(combo.registered, KeyCombo.parse("cmd+ctrl+x"))
     }
 
     @Test("✦ leads the modifier glyphs")
     func glyphLeads() {
-        #expect(ComboSymbols.modifierSymbols([.hyper]) == "✦")
+        expectEqual(ComboSymbols.modifierSymbols([.hyper]), "✦")
         #expect(
             ComboSymbols.modifierSymbols([.shift, .hyper]) == "✦⇧"
         )
@@ -45,7 +45,7 @@ struct HyperConflictTests {
             in: [hyper, plain],
             distinguishingSides: false
         )
-        #expect(hit?.target == .otherBinding(plain))
+        expectEqual(hit?.target, .otherBinding(plain))
     }
 
     @Test("a Hyper row meets the system chord it registers as")

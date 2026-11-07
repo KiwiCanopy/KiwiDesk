@@ -73,14 +73,14 @@ struct ScrollGesturesTests {
         gestures.start()
         #expect(made().isEmpty)
         gestures.setHandler(.pan) { _ in }
-        #expect(made().count == 1)
-        #expect(made().first?.chords == [Self.pan])
+        expectEqual(made().count, 1)
+        expectEqual(made().first?.chords, [Self.pan])
         gestures.setHandler(.step) { _ in }
         gestures.configure(settings())
-        #expect(made().count == 1)
-        #expect(made().first?.chords == [Self.pan, Self.step])
+        expectEqual(made().count, 1)
+        expectEqual(made().first?.chords, [Self.pan, Self.step])
         gestures.configure(settings(pan: nil, step: nil))
-        #expect(made().first?.stopped == true)
+        expectEqual(made().first?.stopped, true)
         #expect(!gestures.isTapped)
     }
 
@@ -92,10 +92,10 @@ struct ScrollGesturesTests {
         gestures.configure(settings(step: nil))
         gestures.start()
         gestures.stop()
-        #expect(made().first?.stopped == true)
+        expectEqual(made().first?.stopped, true)
         #expect(!gestures.isTapped)
         gestures.receive([event(Self.pan, .began)])
-        #expect(heard == 0)
+        expectEqual(heard, 0)
     }
 
     @Test("a stop ends a gesture in flight")
@@ -107,10 +107,10 @@ struct ScrollGesturesTests {
         gestures.start()
         gestures.receive([event(Self.pan, .began)])
         gestures.stop()
-        #expect(heard == [.began, .ended])
+        expectEqual(heard, [.began, .ended])
         gestures.start()
         gestures.receive([event(Self.pan, .changed)])
-        #expect(heard == [.began, .ended])
+        expectEqual(heard, [.began, .ended])
     }
 
     @Test("a plain scroll can never be configured")
@@ -133,7 +133,7 @@ struct ScrollGesturesTests {
         gestures.start()
         gestures.receive([event(Self.pan, .began)])
         gestures.receive([event(Self.step, .began)])
-        #expect(heard == [.pan, .step])
+        expectEqual(heard, [.pan, .step])
     }
 
     @Test("a chord both gestures hold reaches the pan, never a coin flip")
@@ -145,7 +145,7 @@ struct ScrollGesturesTests {
         gestures.configure(settings(step: Self.pan))
         gestures.start()
         gestures.receive([event(Self.pan, .began)])
-        #expect(heard == [.pan])
+        expectEqual(heard, [.pan])
     }
 
     @Test("two gestures trading chords land in one configure")
@@ -157,10 +157,10 @@ struct ScrollGesturesTests {
         gestures.configure(settings())
         gestures.start()
         gestures.configure(settings(pan: Self.step, step: Self.pan))
-        #expect(made().last?.chords == [Self.pan, Self.step])
+        expectEqual(made().last?.chords, [Self.pan, Self.step])
         gestures.receive([event(Self.step, .began)])
         gestures.receive([event(Self.pan, .began)])
-        #expect(heard == [.pan, .step])
+        expectEqual(heard, [.pan, .step])
     }
 
     @Test("a changed chord ends the gesture and strands the rest")
@@ -177,8 +177,8 @@ struct ScrollGesturesTests {
         gestures.receive([
             event(Self.pan, .changed), event(Self.pan, .ended),
         ])
-        #expect(panHeard.map(\.kind) == [.began, .ended])
-        #expect(panHeard.last?.location == CGPoint(x: 7, y: 9))
+        expectEqual(panHeard.map(\.kind), [.began, .ended])
+        expectEqual(panHeard.last?.location, CGPoint(x: 7, y: 9))
         #expect(stepHeard.isEmpty)
     }
 
@@ -193,7 +193,7 @@ struct ScrollGesturesTests {
         gestures.receive([event(Self.step, .began)])
         gestures.configure(settings(pan: [.control, .command]))
         gestures.receive([event(Self.step, .changed)])
-        #expect(heard == [.began, .changed])
+        expectEqual(heard, [.began, .changed])
     }
 
     @Test("re-applying the same settings keeps a live gesture")
@@ -207,7 +207,7 @@ struct ScrollGesturesTests {
         gestures.configure(settings())
         gestures.configure(settings(natural: false))
         gestures.receive([event(Self.pan, .changed)])
-        #expect(heard == [.began, .changed])
+        expectEqual(heard, [.began, .changed])
     }
 
     @Test("Natural scrolling off flips the delta, once, here")
@@ -247,7 +247,7 @@ struct ScrollGesturesTests {
         gestures.receive([ended])
         gestures.receive([event(Self.pan, .began)])
         gestures.receive([event(Self.pan, .changed, dx: 5)])
-        #expect(deltas == [0, -5, 0, 0, 5])
+        expectEqual(deltas, [0, -5, 0, 0, 5])
     }
 
     @Test("what the tap routes reaches the consumer on the main queue")
@@ -261,7 +261,7 @@ struct ScrollGesturesTests {
         await withCheckedContinuation { done in
             DispatchQueue.main.async { done.resume() }
         }
-        #expect(heard == [.began])
+        expectEqual(heard, [.began])
     }
 
     @Test("the pointer tracker's start and stop carry the tap")
@@ -275,12 +275,12 @@ struct ScrollGesturesTests {
         tracker.scroll.onLog = { _ in }
         tracker.scroll.setHandler(.pan) { _ in }
         tracker.scroll.configure(settings())
-        #expect(made == 0)
+        expectEqual(made, 0)
         tracker.start()
         #expect(tracker.scroll.isTapped)
         tracker.stop()
         #expect(!tracker.scroll.isTapped)
-        #expect(made == 1)
+        expectEqual(made, 1)
     }
 
     @Test("a refused tap is retried on the next change")
@@ -296,7 +296,7 @@ struct ScrollGesturesTests {
         gestures.setHandler(.pan) { _ in }
         gestures.configure(settings())
         gestures.setHandler(.step) { _ in }
-        #expect(attempts == 2)
+        expectEqual(attempts, 2)
         #expect(!gestures.isTapped)
     }
 }

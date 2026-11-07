@@ -41,6 +41,6 @@ struct DisplayLinkStallTests {
             gap: 0.607,
             displayID: 7
         )
-        #expect(line == "frame clock stalled 607ms on display 7")
+        expectEqual(line, "frame clock stalled 607ms on display 7")
     }
 }

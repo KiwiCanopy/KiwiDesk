@@ -61,10 +61,10 @@ struct MonitorSetClaimTests {
             named: "Home",
             modes: nil
         )
-        #expect(released == ["Work"])
+        expectEqual(released, ["Work"])
         let work = try core.profiles.read(name: "Work")
         #expect(work.isDormant)
-        #expect(work.monitorCount == 2)
+        expectEqual(work.monitorCount, 2)
         let home = try core.profiles.read(name: "Home")
         #expect(home.set(matching: fingerprints(["A", "B"])) != nil)
     }
@@ -79,7 +79,7 @@ struct MonitorSetClaimTests {
         try core.persistProfile(named: "Home", modes: nil)
         let work = try core.profiles.read(name: "Work")
         #expect(!work.isDormant)
-        #expect(work.monitorSets.map(\.monitors) == [["A:100x100"]])
+        expectEqual(work.monitorSets.map(\.monitors), [["A:100x100"]])
     }
 
     @Test("A profile of another screen count is never stripped")
@@ -107,12 +107,12 @@ struct MonitorSetClaimTests {
         try core.loadProfile(named: "Work")
         // "Work" now holds A and V; loading "Vision" on V takes V.
         let released = try core.loadProfile(named: "Vision")
-        #expect(released == ["Work"])
+        expectEqual(released, ["Work"])
         #expect(
             try core.profiles.read(name: "Work")
                 .set(matching: ["V:100x100"]) == nil
         )
-        #expect(core.profiles.currentName == "Vision")
+        expectEqual(core.profiles.currentName, "Vision")
         #expect(!core.profiles.isDirty)
     }
 
@@ -157,7 +157,7 @@ struct MonitorSetClaimTests {
         try core.persistProfile(named: "Alpha", modes: nil)
         try core.loadProfile(named: "Beta")
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Beta")
+        expectEqual(core.profiles.currentName, "Beta")
     }
 
     @Test("Boot matching never strips a doubly-held set")
@@ -195,7 +195,7 @@ struct MonitorSetClaimTests {
             ["A:100x100"],
             for: "Home"
         )
-        #expect(released == ["Work"])
+        expectEqual(released, ["Work"])
         #expect(try core.profiles.read(name: "Work").isDormant)
         #expect(throws: (any Error).self) {
             try core.claimMonitorSet(
@@ -213,7 +213,7 @@ struct MonitorSetClaimTests {
             "save_profile",
             args: [.string("Work")]
         )
-        #expect(first == .ok())
+        expectEqual(first, .ok())
         let second = core.execute(
             "save_profile",
             args: [.string("Home")]
@@ -222,8 +222,8 @@ struct MonitorSetClaimTests {
             Issue.record("no payload: \(second)")
             return
         }
-        #expect(payload["taken_from"] == .array([.string("Work")]))
-        #expect(payload["reason"]?.stringValue?.isEmpty == false)
+        expectEqual(payload["taken_from"], .array([.string("Work")]))
+        expectEqual(payload["reason"]?.stringValue?.isEmpty, false)
         let load = core.execute(
             "load_profile",
             args: [.string("Work")]
@@ -232,6 +232,6 @@ struct MonitorSetClaimTests {
             Issue.record("no payload: \(load)")
             return
         }
-        #expect(back["taken_from"] == .array([.string("Home")]))
+        expectEqual(back["taken_from"], .array([.string("Home")]))
     }
 }

@@ -107,21 +107,21 @@ struct DesktopCommandTests {
         // The other half of the discriminator, through the same
         // consumer: presence-vs-absence must never come back as
         // the way a caller tells the two apart (#1336).
-        #expect(SwitchOutcomeReading.switched(moved) == true)
-        #expect(Bridge.switches.map(\.0) == [11])
-        #expect(Bridge.switches.map(\.1) == ["UUID-A"])
+        expectEqual(SwitchOutcomeReading.switched(moved), true)
+        expectEqual(Bridge.switches.map(\.0), [11])
+        expectEqual(Bridge.switches.map(\.1), ["UUID-A"])
         #expect(core.lastDesktopSwitch > before)
         // The transition's missing half (#1023): the origin that
         // display showed is hidden, AFTER the accepted set.
-        #expect(Bridge.events == ["set 11 UUID-A", "hide [10]"])
+        expectEqual(Bridge.events, ["set 11 UUID-A", "hide [10]"])
         // The honest re-query is armed.
         #expect(core.deferred.isScheduled(.desktopSwitchVerify))
         // A Desktop on the secondary display switches THAT display
         // — and hides THAT display's current space, not the main's.
         #expect(core.execute("focus_desktop", args: [.number(4)]).isSuccess)
-        #expect(Bridge.switches.last?.0 == 21)
-        #expect(Bridge.switches.last?.1 == "UUID-B")
-        #expect(Bridge.hides.last == [20])
+        expectEqual(Bridge.switches.last?.0, 21)
+        expectEqual(Bridge.switches.last?.1, "UUID-B")
+        expectEqual(Bridge.hides.last, [20])
     }
 
     @Test("A Desktop its display already shows: no switch, still a move")
@@ -132,7 +132,7 @@ struct DesktopCommandTests {
         #expect(shown.isSuccess)
         // Success alone is what a bare `.ok()` also satisfies, so
         // read the field the Lua and CLI callers read (#1336).
-        #expect(SwitchOutcomeReading.switched(shown) == false)
+        expectEqual(SwitchOutcomeReading.switched(shown), false)
         #expect(Bridge.switches.isEmpty)
         // The move cannot know the window is there already — it
         // may sit on another display — so it dispatches; only
@@ -144,8 +144,8 @@ struct DesktopCommandTests {
         #expect(followed.isSuccess)
         // The follow's own consumer, which returns the outcome's
         // response after doing the most work of any arm.
-        #expect(SwitchOutcomeReading.switched(followed) == false)
-        #expect(Bridge.moves.map(\.1) == [10])
+        expectEqual(SwitchOutcomeReading.switched(followed), false)
+        expectEqual(Bridge.moves.map(\.1), [10])
         #expect(Bridge.switches.isEmpty)
         // No switch dispatched means nothing to hide either — a
         // hide without a set blanks the visible Desktop.
@@ -160,8 +160,8 @@ struct DesktopCommandTests {
         let core = makeCore()
         defer { teardown() }
         #expect(core.execute("move_to_desktop", args: [.number(2)]).isSuccess)
-        #expect(Bridge.moves.map(\.1) == [11])
-        #expect(Bridge.moves.first?.0 == [7])
+        expectEqual(Bridge.moves.map(\.1), [11])
+        expectEqual(Bridge.moves.first?.0, [7])
         #expect(Bridge.switches.isEmpty)
         // Follow to a Desktop its display does NOT show: the
         // move, then that display's switch.
@@ -169,10 +169,10 @@ struct DesktopCommandTests {
             core.execute("move_to_desktop_and_follow", args: [.number(4)])
                 .isSuccess
         )
-        #expect(Bridge.moves.last?.1 == 21)
-        #expect(Bridge.switches.map(\.0) == [21])
-        #expect(Bridge.switches.map(\.1) == ["UUID-B"])
-        #expect(Bridge.hides == [[20]])
+        expectEqual(Bridge.moves.last?.1, 21)
+        expectEqual(Bridge.switches.map(\.0), [21])
+        expectEqual(Bridge.switches.map(\.1), ["UUID-B"])
+        expectEqual(Bridge.hides, [[20]])
         // A follow onto a HIDDEN Desktop folds the departure
         // eagerly (#1023's second half): the window must be OUT
         // of state before the switch's retile can re-place it
@@ -266,6 +266,6 @@ struct DesktopCommandTests {
             args: [.string("nonsense")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("bridge") == true)
+        expectEqual(response.error?.contains("bridge"), true)
     }
 }

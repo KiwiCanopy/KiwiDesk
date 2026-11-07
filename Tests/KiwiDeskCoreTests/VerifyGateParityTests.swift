@@ -37,7 +37,7 @@ struct VerifyGateParityTests {
             steps.count >= 4,
             "scraped too few steps — has SKILL.md's list changed?"
         )
-        #expect(steps.first == "swift build")
+        expectEqual(steps.first, "swift build")
 
         let script = try String(
             contentsOf: Self.repoRoot

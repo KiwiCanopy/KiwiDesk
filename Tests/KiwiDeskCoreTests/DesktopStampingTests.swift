@@ -90,14 +90,14 @@ struct DesktopStampingTests {
         let core = makeCore()
         withBridge {
             let snapshot = core.stampedDesktopSnapshot()
-            #expect(Written.values.count == 2)
+            expectEqual(Written.values.count, 2)
             #expect(
                 snapshot.spaces.allSatisfy { $0.identity == nil }
             )
             // …so every consumer keys by the number for exactly
             // this reading, the same fallback a bridgeless host
             // lives on permanently.
-            #expect(snapshot.key(of: 1) == .number(1))
+            expectEqual(snapshot.key(of: 1), .number(1))
             // The pass hands over the BARE key and the wrapper
             // namespaces it (#889), so what actually lands is the
             // very key the plist read door looks for — the two
@@ -134,7 +134,7 @@ struct DesktopStampingTests {
         let core = makeCore()
         withBridge {
             _ = core.stampedDesktopSnapshot()
-            #expect(Written.values.count == 1)
+            expectEqual(Written.values.count, 1)
         }
     }
 
@@ -165,13 +165,13 @@ struct DesktopStampingTests {
         core.onLog = { logged.append($0) }
         withBridge {
             _ = core.stampedDesktopSnapshot()
-            #expect(Written.values.count == 1)
+            expectEqual(Written.values.count, 1)
             // The topology still lacks it: the write was dropped.
             _ = core.stampedDesktopSnapshot()
-            #expect(Written.values.count == 1)
+            expectEqual(Written.values.count, 1)
             // …and a third call does not try again either.
             _ = core.stampedDesktopSnapshot()
-            #expect(Written.values.count == 1)
+            expectEqual(Written.values.count, 1)
         }
         #expect(
             logged.contains { $0.contains("did not keep its stamp") }
@@ -187,7 +187,7 @@ struct DesktopStampingTests {
         let core = makeCore()
         withBridge {
             _ = core.stampedDesktopSnapshot()
-            #expect(core.desktopMemory.stampAttempts == [1])
+            expectEqual(core.desktopMemory.stampAttempts, [1])
             // The WindowServer took it; the next read sees it.
             NativeSpaces.spacesOverride = [
                 space(1, identity: DesktopIdentity(raw: "LANDED"))
@@ -195,7 +195,7 @@ struct DesktopStampingTests {
             _ = core.stampedDesktopSnapshot()
             #expect(core.desktopMemory.stampAttempts.isEmpty)
             #expect(core.desktopMemory.unstampable.isEmpty)
-            #expect(Written.values.count == 1)
+            expectEqual(Written.values.count, 1)
         }
     }
 }

@@ -53,7 +53,7 @@ struct ZOrderTeardownDrainTests {
         let kept = settle(circle)
         // 4 never moves, so the three windows the circle puts
         // above it all fail, one `landingLimit` each.
-        #expect(kept.stacking == ids([4, 1, 2, 3, 5]))
+        expectEqual(kept.stacking, ids([4, 1, 2, 3, 5]))
         #expect(kept.spent >= 3 * ZOrderDrain.landingLimit)
 
         let dropped = settle(circle.filter { $0 != pinned })

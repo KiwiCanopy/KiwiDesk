@@ -88,7 +88,7 @@ struct NavigationTieEdgeTests {
         #expect(
             core.execute("focus", args: [.string("left")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     @Test("A wrap back into the stack returns where it came from")
@@ -99,7 +99,7 @@ struct NavigationTieEdgeTests {
         #expect(
             core.execute("focus", args: [.string("left")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("A Floating Space keeps the nearest by position")
@@ -135,7 +135,7 @@ struct NavigationTieEdgeTests {
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     /// Space 1 on a screen left of the main one, Space 2 on the
@@ -177,7 +177,7 @@ struct NavigationTieEdgeTests {
         #expect(
             core.navigate([.string("right")], swapping: false).isSuccess
         )
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     @Test("A hop back onto a screen returns where it came from")
@@ -213,7 +213,7 @@ struct NavigationTieEdgeTests {
         #expect(
             core.navigate([.string("right")], swapping: false).isSuccess
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 }

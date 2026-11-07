@@ -39,8 +39,8 @@ struct ShelfRevealGrowTests {
             edge: .top,
             hovered: true
         )
-        #expect(morph.mark == mark)
-        #expect(morph.plate == Self.plate)
+        expectEqual(morph.mark, mark)
+        expectEqual(morph.plate, Self.plate)
         #expect(morph.itemsStart > morph.plateStart)
         #expect(morph.itemsStart < morph.plateStart + morph.plateLength)
     }
@@ -64,17 +64,17 @@ struct ShelfRevealGrowTests {
         )
         var shelf = KiwiShelf()
         shelf.revealStyle = .grow
-        #expect(BarMotion.RevealKind(shelf) == .grow)
+        expectEqual(BarMotion.RevealKind(shelf), .grow)
         shelf.revealStyle = .unfold
-        #expect(BarMotion.RevealKind(shelf) == .unfold)
+        expectEqual(BarMotion.RevealKind(shelf), .unfold)
         shelf.backgroundStyle = .boxed
-        #expect(BarMotion.RevealKind(shelf) == .spread)
+        expectEqual(BarMotion.RevealKind(shelf), .spread)
         shelf.revealStyle = .grow
-        #expect(BarMotion.RevealKind(shelf) == .spread)
+        expectEqual(BarMotion.RevealKind(shelf), .spread)
         shelf.revealStyle = .slide
-        #expect(BarMotion.RevealKind(shelf) == .slide)
+        expectEqual(BarMotion.RevealKind(shelf), .slide)
         shelf.revealStyle = .fade
-        #expect(BarMotion.RevealKind(shelf) == .fade)
+        expectEqual(BarMotion.RevealKind(shelf), .fade)
     }
 
     @Test("The mark lands with a grow's retract")
@@ -133,13 +133,13 @@ struct ShelfRevealGrowTests {
             hovered: true
         )
         // Out of the hovered mark onto the plate, never the reverse.
-        #expect((bounds.fromValue as? NSValue)?.rectValue == hovered)
-        #expect((bounds.toValue as? NSValue)?.rectValue == Self.plate)
+        expectEqual((bounds.fromValue as? NSValue)?.rectValue, hovered)
+        expectEqual((bounds.toValue as? NSValue)?.rectValue, Self.plate)
         let items = try #require(
             overlay.stripView.layer?.animation(forKey: BarMotion.revealKey)
                 as? CABasicAnimation
         )
-        #expect(items.keyPath == "opacity")
+        expectEqual(items.keyPath, "opacity")
         #expect(items.beginTime > clip.beginTime)
         // The room holds the plate and the mark, never the strip.
         let panel = try #require(overlay.panel)
@@ -194,7 +194,7 @@ struct ShelfRevealGrowTests {
         let panel = try #require(overlay.panel)
         let held = panel.frame
         show(Self.plate.offsetBy(dx: 400, dy: 0))
-        #expect(panel.frame == held)
+        expectEqual(panel.frame, held)
         for landing in landings { landing() }
         #expect(panel.frame != held)
     }

@@ -79,10 +79,10 @@ struct MoveHereCommandTests {
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(2))
         #expect(run(core).isSuccess)
-        #expect(space(core, 2) == "1")
-        #expect(space(core, 1) == "2")
+        expectEqual(space(core, 2), "1")
+        expectEqual(space(core, 1), "2")
         #expect(run(core).isSuccess)
-        #expect(space(core, 1) == "1")
+        expectEqual(space(core, 1), "1")
     }
 
     @Test("every window already here refuses, moving nothing")
@@ -91,7 +91,7 @@ struct MoveHereCommandTests {
         addWindow(core, 1, space: "1")
         #expect(!run(core).isSuccess)
         #expect(recorder.opened.isEmpty)
-        #expect(space(core, 1) == "1")
+        expectEqual(space(core, 1), "1")
         #expect(refused(recorder, .allHere(app: "")))
     }
 
@@ -108,7 +108,7 @@ struct MoveHereCommandTests {
         let (core, recorder) = makeCore()
         addWindow(core, 1, space: "2", title: "Drafts")
         #expect(!run(core, "inbox").isSuccess)
-        #expect(space(core, 1) == "2")
+        expectEqual(space(core, 1), "2")
         #expect(recorder.opened.isEmpty)
         #expect(refused(recorder, .noTitleMatch(app: "", text: "")))
         let (bare, bareRecorder) = makeCore(running: false)
@@ -125,8 +125,8 @@ struct MoveHereCommandTests {
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(2))
         #expect(run(core, "inbox").isSuccess)
-        #expect(space(core, 1) == "1")
-        #expect(space(core, 2) == "3")
+        expectEqual(space(core, 1), "1")
+        expectEqual(space(core, 2), "3")
     }
 
     @Test("a hidden app owes its returning window the text")
@@ -134,8 +134,8 @@ struct MoveHereCommandTests {
         let (core, recorder) = makeCore()
         core.eventLoop.appIsHidden = { _ in true }
         #expect(run(core, "inbox").isSuccess)
-        #expect(recorder.activated == [100])
-        #expect(core.jump.owedApp?.matching == "inbox")
-        #expect(core.jump.owedApp?.space == "1")
+        expectEqual(recorder.activated, [100])
+        expectEqual(core.jump.owedApp?.matching, "inbox")
+        expectEqual(core.jump.owedApp?.space, "1")
     }
 }

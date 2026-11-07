@@ -118,7 +118,7 @@ struct GatherTests {
         #expect(
             active == [WindowID(1), WindowID(2), WindowID(4), WindowID(3)]
         )
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "3")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "3")
     }
 
     @Test("a native fullscreen window keeps its own Space")
@@ -128,8 +128,8 @@ struct GatherTests {
         window(core, 2, in: "2")
         window(core, 3, in: "3", fullscreen: true)
         #expect(core.execute("gather", args: [.string(bundle)]).isSuccess)
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "3")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), "3")
     }
 
     @Test("nothing to gather refuses and launches nothing")
@@ -176,9 +176,9 @@ struct GatherTests {
         defer { teardown() }
         park(core)
         #expect(core.execute("gather", args: [.string(bundle)]).isSuccess)
-        #expect(Bridge.moves.map(\.1) == [10])
-        #expect(Bridge.moves.first?.0 == [NSNumber(value: 7)])
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("1"))
+        expectEqual(Bridge.moves.map(\.1), [10])
+        expectEqual(Bridge.moves.first?.0, [NSNumber(value: 7)])
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("1"))
         #expect(core.deferred.isScheduled(.gatherReap))
         // The arrival, through the real fold, lands in the
         // gathered Space.
@@ -192,7 +192,7 @@ struct GatherTests {
                 )
             )
         )
-        #expect(core.state.workspaces.space(of: WindowID(7)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(7)), "1")
     }
 
     /// A bridge that refuses the move leaves the memory as it was.
@@ -207,8 +207,8 @@ struct GatherTests {
         park(core)
         let response = core.execute("gather", args: [.string(bundle)])
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("could not move") == true)
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        expectEqual(response.error?.contains("could not move"), true)
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("2"))
     }
 
     /// Another screen's Desktop (20, on `UUID-B`): its arrival's
@@ -240,7 +240,7 @@ struct GatherTests {
         let response = core.execute("gather", args: [.string(bundle)])
         #expect(!response.isSuccess)
         #expect(Bridge.moves.isEmpty)
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("2"))
     }
 
     @Test("the first gathered window takes the focus")
@@ -252,6 +252,6 @@ struct GatherTests {
         window(core, 2, in: "2")
         window(core, 3, in: "3")
         #expect(core.execute("gather", args: [.string(bundle)]).isSuccess)
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 }

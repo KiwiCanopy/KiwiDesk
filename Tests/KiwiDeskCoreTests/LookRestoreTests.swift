@@ -38,7 +38,7 @@ struct LookRestoreTests {
             from: bundle(looks: [look("There")]),
             trash: hardDelete
         )
-        #expect(core.lookLibrary.userLooks().map(\.name) == ["There"])
+        expectEqual(core.lookLibrary.userLooks().map(\.name), ["There"])
     }
 
     @Test("an older bundle, without looks, leaves them alone")
@@ -46,7 +46,7 @@ struct LookRestoreTests {
         let core = makeTestCore()
         try core.lookLibrary.save(look("Here"))
         try core.restoreSetup(from: bundle(looks: nil), trash: hardDelete)
-        #expect(core.lookLibrary.userLooks().map(\.name) == ["Here"])
+        expectEqual(core.lookLibrary.userLooks().map(\.name), ["Here"])
     }
 
     @Test("an empty looks list replaces the library with none")
@@ -64,6 +64,6 @@ struct LookRestoreTests {
         let url = core.configDirectory.appendingPathComponent("b.json")
         try core.writeBackup(to: url)
         let read = try core.readBackup(at: url)
-        #expect(read.looks?.map(\.name) == ["Mine"])
+        expectEqual(read.looks?.map(\.name), ["Mine"])
     }
 }

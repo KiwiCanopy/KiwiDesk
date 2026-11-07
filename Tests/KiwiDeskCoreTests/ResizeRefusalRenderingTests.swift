@@ -166,7 +166,7 @@ struct ResizeRefusalRenderingTests {
             .moveNeedsFloat(window),
             .moveAtBoundary(window, direction: .up),
         ].map(\.pillText)
-        #expect(Set(texts).count == texts.count)
+        expectEqual(Set(texts).count, texts.count)
         #expect(texts.allSatisfy { !$0.isEmpty })
     }
 
@@ -292,7 +292,7 @@ struct ResizeRefusalRenderingTests {
             appBound: false
         )
         let second = paired.secondPill
-        #expect(second?.window == other)
+        expectEqual(second?.window, other)
         #expect(
             second?.text
                 == ResizeRefusal.ownMinimum(

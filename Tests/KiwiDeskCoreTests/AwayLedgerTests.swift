@@ -55,12 +55,12 @@ struct AwayLedgerTests {
             .windowDestroyed(WindowID(7), wasMinimized: false)
         )
         let entry = core.state.awayWindows[WindowID(7)]
-        #expect(entry?.pid == 100)
-        #expect(entry?.appName == "App100")
-        #expect(entry?.appBundleID == "app.test.100")
-        #expect(entry?.nativeSpace == 4)
-        #expect(core.state.rememberedSpace(of: WindowID(7)) == "1")
-        #expect(core.awayMembers(of: "1") == [WindowID(7)])
+        expectEqual(entry?.pid, 100)
+        expectEqual(entry?.appName, "App100")
+        expectEqual(entry?.appBundleID, "app.test.100")
+        expectEqual(entry?.nativeSpace, 4)
+        expectEqual(core.state.rememberedSpace(of: WindowID(7)), "1")
+        expectEqual(core.awayMembers(of: "1"), [WindowID(7)])
     }
 
     @Test("a close files nothing")
@@ -126,16 +126,16 @@ struct AwayLedgerTests {
         #expect(core.state.awayWindows[WindowID(8)] != nil)
         #expect(core.state.rememberedSpace(of: WindowID(7)) == nil)
         let destroyed = events.filter { $0.0 == .windowDestroyed }
-        #expect(destroyed.count == 1)
+        expectEqual(destroyed.count, 1)
         if case .object(let payload)? = destroyed.first?.1 {
-            #expect(payload["window_id"] == .number(7))
-            #expect(payload["reason"] == .string("closed"))
-            #expect(payload["space_id"] == .string("1"))
-            #expect(payload["app"] == .string("App100"))
+            expectEqual(payload["window_id"], .number(7))
+            expectEqual(payload["reason"], .string("closed"))
+            expectEqual(payload["space_id"], .string("1"))
+            expectEqual(payload["app"], .string("App100"))
         }
         // A second refresh finds nothing to report.
         core.refreshAwayWindows()
-        #expect(events.filter { $0.0 == .windowDestroyed }.count == 1)
+        expectEqual(events.filter { $0.0 == .windowDestroyed }.count, 1)
     }
 
     @Test("no census leaves the ledger as it is and disarms the task")
@@ -147,7 +147,7 @@ struct AwayLedgerTests {
             .windowDestroyed(WindowID(7), wasMinimized: false)
         )
         core.desktopMemory.readCensus = { _ in nil }
-        #expect(core.refreshAwayWindows() == false)
+        expectEqual(core.refreshAwayWindows(), false)
         #expect(core.state.awayWindows[WindowID(7)] != nil)
     }
 
@@ -177,8 +177,8 @@ struct AwayLedgerTests {
             shown: parked.shown
         )
         core.desktopMemory.readCensus = { _ in parked }
-        #expect(core.refreshAwayWindows() == true)
-        #expect(core.state.awayWindows[WindowID(7)]?.isUp == false)
+        expectEqual(core.refreshAwayWindows(), true)
+        expectEqual(core.state.awayWindows[WindowID(7)]?.isUp, false)
         // Parked: known, but not a row the reach walks.
         #expect(core.awayMembers(of: "1").isEmpty)
         // Pruned: gone from the #1207 focus memory too.
@@ -202,7 +202,7 @@ struct AwayLedgerTests {
         core.refreshAwayWindows()
         #expect(core.followFocus.owed() == nil)
         // The other window's debt is untouched.
-        #expect(core.desktopMemory.returnFocus.owed() == WindowID(8))
+        expectEqual(core.desktopMemory.returnFocus.owed(), WindowID(8))
     }
 
     @Test("an exiting app's away windows retire their debts")
@@ -249,7 +249,7 @@ struct AwayLedgerTests {
         )
         core.state.rekey(WindowID(7), to: WindowID(70))
         #expect(core.state.awayWindows[WindowID(7)] == nil)
-        #expect(core.state.awayWindows[WindowID(70)]?.id == WindowID(70))
+        expectEqual(core.state.awayWindows[WindowID(70)]?.id, WindowID(70))
     }
 
     @Test("away members merge into a row by the rank they left at")
@@ -264,7 +264,7 @@ struct AwayLedgerTests {
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
         let row = core.state.workspaces["1"]?.windows ?? []
-        #expect(row == [WindowID(1), WindowID(3)])
+        expectEqual(row, [WindowID(1), WindowID(3)])
         #expect(
             core.withAwayMembers(row, of: "1")
                 == [WindowID(1), WindowID(2), WindowID(3)]
@@ -277,7 +277,7 @@ struct AwayLedgerTests {
             appBundleID: "app.test.100",
             nativeSpace: 4
         )
-        #expect(core.awayMembers(of: "1") == [WindowID(2)])
+        expectEqual(core.awayMembers(of: "1"), [WindowID(2)])
         #expect(
             core.awayWindows(bundleID: "app.test.100").map(\.id)
                 == [WindowID(2), WindowID(50)]

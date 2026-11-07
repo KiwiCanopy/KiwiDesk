@@ -71,7 +71,7 @@ struct LayoutParamsCodingParityTests {
             T.self,
             from: Data("{}".utf8)
         )
-        #expect(decoded == defaults)
+        expectEqual(decoded, defaults)
     }
 
     private static func bsp() -> BspParams {

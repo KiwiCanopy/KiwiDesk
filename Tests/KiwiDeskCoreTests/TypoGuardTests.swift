@@ -44,7 +44,7 @@ struct TypoGuardTests {
         var logs: [String] = []
         core.onLog = { logs.append($0) }
         core.loadConfig()
-        #expect(core.lua?.global("marker") == .number(42))
+        expectEqual(core.lua?.global("marker"), .number(42))
         #expect(
             logs.contains {
                 $0.contains("set_width")
@@ -90,7 +90,7 @@ struct TypoGuardTests {
                 """
         )
         core.loadConfig()
-        #expect(core.lua?.global("marker") == .number(1))
+        expectEqual(core.lua?.global("marker"), .number(1))
         #expect(
             core.configIssues.contains {
                 guard let hit = unknownCall($0) else {
@@ -112,7 +112,7 @@ struct TypoGuardTests {
                 """
         )
         core.loadConfig()
-        #expect(core.configIssues.count == 1)
+        expectEqual(core.configIssues.count, 1)
     }
 
     @Test("A runtime typo logs but records no ConfigIssue")

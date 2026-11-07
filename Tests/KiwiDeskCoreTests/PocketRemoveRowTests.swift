@@ -35,7 +35,7 @@ struct PocketRemoveRowTests {
         let fixture = Fixture()
         fixture.press()
         fixture.arrive(9)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
         return fixture
     }
 
@@ -50,7 +50,7 @@ struct PocketRemoveRowTests {
             args: [.number(Double(other.raw))]
         )
         #expect(response.isSuccess)
-        #expect(core.state.pocketPhase(of: other) == .out)
+        expectEqual(core.state.pocketPhase(of: other), .out)
         #expect(core.state.pocketKeyOwner(of: other) == nil)
     }
 
@@ -61,7 +61,7 @@ struct PocketRemoveRowTests {
             "toggle_pocket_window",
             args: [.number(77)]
         )
-        #expect(response.error == "unknown window: 77")
+        expectEqual(response.error, "unknown window: 77")
         #expect(core.state.pocket.isEmpty)
     }
 
@@ -79,11 +79,11 @@ struct PocketRemoveRowTests {
         #expect(remove != nil && pocket == remove.map { $0 + 1 })
         #expect(!titles.contains("Tile Window"))
         let row = row("Remove from Pocket", of: other, in: core)
-        #expect(row?.enabled == true)
+        expectEqual(row?.enabled, true)
         #expect(row?.subtitle == nil)
         perform(row)
         #expect(core.state.pocketPhase(of: other) == nil)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
     }
 
     @Test("a group gives its pocket window a Remove submenu")
@@ -99,9 +99,9 @@ struct PocketRemoveRowTests {
             Issue.record("Remove from Pocket is no submenu")
             return
         }
-        #expect(items.count == 2)
-        #expect(items.map(\.enabled) == [true, false])
-        #expect(items[1].subtitle == KiwiCore.pocketKeyKeepsIt)
+        expectEqual(items.count, 2)
+        expectEqual(items.map(\.enabled), [true, false])
+        expectEqual(items[1].subtitle, KiwiCore.pocketKeyKeepsIt)
     }
 
     @Test("an unmarked window keeps its float row")
@@ -119,15 +119,15 @@ struct PocketRemoveRowTests {
         let fixture = keyedFixture()
         let core = fixture.core
         let remove = row("Remove from Pocket", of: mine, in: core)
-        #expect(remove?.enabled == false)
-        #expect(remove?.subtitle == KiwiCore.pocketKeyKeepsIt)
-        #expect(remove?.subtitle?.hasPrefix("Its Pocket key") == true)
-        #expect(row("Pocket Window", of: mine, in: core)?.enabled == false)
+        expectEqual(remove?.enabled, false)
+        expectEqual(remove?.subtitle, KiwiCore.pocketKeyKeepsIt)
+        expectEqual(remove?.subtitle?.hasPrefix("Its Pocket key"), true)
+        expectEqual(row("Pocket Window", of: mine, in: core)?.enabled, false)
         let response = core.execute(
             "toggle_pocket_window",
             args: [.number(Double(mine.raw))]
         )
-        #expect(response.error == "this window has a Pocket key of its own")
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(response.error, "this window has a Pocket key of its own")
+        expectEqual(fixture.owner(of: mine), Fixture.app)
     }
 }

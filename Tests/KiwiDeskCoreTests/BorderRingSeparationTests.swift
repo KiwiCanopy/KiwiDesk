@@ -148,7 +148,7 @@ struct BorderRingSeparationTests {
             )
             measured += 1
         }
-        #expect(measured == palettes.count - Self.bandExempt.count)
+        expectEqual(measured, palettes.count - Self.bandExempt.count)
     }
 
     @Test("Every bundled ring pair survives red-green vision loss")
@@ -190,7 +190,7 @@ struct BorderRingSeparationTests {
                 measured += 1
             }
         }
-        #expect(measured == palettes.count * Self.wallpapers.count)
+        expectEqual(measured, palettes.count * Self.wallpapers.count)
     }
 
     /// The invariant the retune was made against: on the
@@ -233,7 +233,7 @@ struct BorderRingSeparationTests {
             }
             measured += 1
         }
-        #expect(measured == palettes.count)
+        expectEqual(measured, palettes.count)
     }
 
     @Test("Every unfocused ring is seen on the palette's home backdrop")
@@ -263,7 +263,7 @@ struct BorderRingSeparationTests {
             )
             measured += 1
         }
-        #expect(measured == palettes.count)
+        expectEqual(measured, palettes.count)
     }
 
     /// The negative control for Sunset's "not lifted" ruling: the

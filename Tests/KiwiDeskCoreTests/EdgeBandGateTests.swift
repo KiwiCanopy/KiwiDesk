@@ -98,7 +98,7 @@ struct EdgeBandGateTests {
             for: window(x: 500, y: 641),
             separateSpaces: false
         )
-        #expect(bands.first { $0.screen == laptop }?.bottom == true)
+        expectEqual(bands.first { $0.screen == laptop }?.bottom, true)
     }
 
     /// Not measured: the covering screen does not excuse another.
@@ -109,13 +109,13 @@ struct EdgeBandGateTests {
             for: window(x: 16, y: 641),
             separateSpaces: false
         )
-        #expect(bands.first { $0.screen == laptop }?.bottom == true)
+        expectEqual(bands.first { $0.screen == laptop }?.bottom, true)
         let right = EdgeBandWrite.bands(
             of: [laptop, other(1728, 0), other(0, 1117)],
             for: window(x: 1012, y: 50),
             separateSpaces: false
         )
-        #expect(right.first { $0.screen == laptop }?.right == true)
+        expectEqual(right.first { $0.screen == laptop }?.right, true)
     }
 
     /// Only a screen touching the edge covers: this one leaves a gap.
@@ -208,7 +208,7 @@ struct EdgeBandGateTests {
             screens: [laptop, other(1000, 1117)],
             separateSpaces: false
         )
-        #expect(calls == ["read", "position", "frame"])
+        expectEqual(calls, ["read", "position", "frame"])
     }
 
     @Test("The applier writes plainly on one screen")
@@ -217,7 +217,7 @@ struct EdgeBandGateTests {
             screens: [laptop],
             separateSpaces: false
         )
-        #expect(calls == ["frame"])
+        expectEqual(calls, ["frame"])
     }
 
     @Test("The applier writes plainly where a screen covers the span")
@@ -226,7 +226,7 @@ struct EdgeBandGateTests {
             screens: [laptop, other(0, 1117)],
             separateSpaces: false
         )
-        #expect(calls == ["frame"])
+        expectEqual(calls, ["frame"])
     }
 
     @Test("The applier writes plainly under separate Spaces")
@@ -235,6 +235,6 @@ struct EdgeBandGateTests {
             screens: [laptop, other(1000, 1117)],
             separateSpaces: true
         )
-        #expect(calls == ["frame"])
+        expectEqual(calls, ["frame"])
     }
 }

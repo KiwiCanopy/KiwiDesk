@@ -110,18 +110,18 @@ struct RunPushMateTests {
     @Test("Stack: a drag pushes the neighbour on the edge it moved")
     func dragPushesTheMovedSide() throws {
         let (top, topID) = try dragMiddle(leading: true)
-        #expect(hidden(top, topID) == [w(2)])
-        #expect(top.state.workspaces[topID]?.runSizes[w(3)]?.zone == 1)
-        #expect(top.state.workspaces[topID]?.runHeads == [w(3)])
+        expectEqual(hidden(top, topID), [w(2)])
+        expectEqual(top.state.workspaces[topID]?.runSizes[w(3)]?.zone, 1)
+        expectEqual(top.state.workspaces[topID]?.runHeads, [w(3)])
         let (bottom, bottomID) = try dragMiddle(leading: false)
-        #expect(hidden(bottom, bottomID) == [w(4)])
-        #expect(bottom.state.workspaces[bottomID]?.runTails == [w(3)])
+        expectEqual(hidden(bottom, bottomID), [w(4)])
+        expectEqual(bottom.state.workspaces[bottomID]?.runTails, [w(3)])
     }
 
     @Test("Stack: a press beside a sized mate moves the mate's length")
     func pressBesideASizedMate() throws {
         let (core, id) = try dragMiddle(leading: true)
-        #expect(core.state.workspaces[id]?.runSizes.keys.first == w(3))
+        expectEqual(core.state.workspaces[id]?.runSizes.keys.first, w(3))
         core.state.workspaces.focus(w(4), in: id)
         let before = try #require(
             core.tiler.calculatedFrames(state: core.state)[w(4)]
@@ -134,7 +134,7 @@ struct RunPushMateTests {
         // length, and w2 stays in the run.
         #expect(abs(after.height - before.height - 50) < 1)
         #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
-        #expect(hidden(core, id) == [w(2)])
+        expectEqual(hidden(core, id), [w(2)])
     }
 
     @Test("Stack: a shrink beside a sized mate grows the mate, never pulls")
@@ -145,14 +145,14 @@ struct RunPushMateTests {
             core.tiler.calculatedFrames(state: core.state)[w(3)]
         )
         press(core, "y", -20)
-        #expect(hidden(core, id) == [w(2)])
+        expectEqual(hidden(core, id), [w(2)])
         let grown = try #require(
             core.tiler.calculatedFrames(state: core.state)[w(3)]
         )
         #expect(abs(grown.height - mate.height - 20) < 1)
         // Past its own floor the window stops; nothing joins the run.
         press(core, "y", -400)
-        #expect(hidden(core, id) == [w(2)])
+        expectEqual(hidden(core, id), [w(2)])
         let floor = try #require(
             core.tiler.calculatedFrames(state: core.state)[w(4)]
         )
@@ -174,7 +174,7 @@ struct RunPushMateTests {
             $0.runTails = [self.w(3)]
         }
         core.retile(animated: false)
-        #expect(hidden(core, id) == [w(4)])
+        expectEqual(hidden(core, id), [w(4)])
         let before = try #require(
             core.tiler.calculatedFrames(state: core.state)[w(3)]
         )
@@ -182,7 +182,7 @@ struct RunPushMateTests {
         let after = try #require(
             core.tiler.calculatedFrames(state: core.state)[w(3)]
         )
-        #expect(hidden(core, id) == [w(4)])
+        expectEqual(hidden(core, id), [w(4)])
         #expect(abs(after.height - before.height - 140) < 1)
     }
 
@@ -192,10 +192,10 @@ struct RunPushMateTests {
         core.state.workspaces.focus(w(4), in: id)
         press(core, "y", 500)
         // w3 gives all it has and goes into the run; w4 fills.
-        #expect(hidden(core, id) == [w(2), w(3)])
+        expectEqual(hidden(core, id), [w(2), w(3)])
         let sizes = core.state.workspaces[id]?.runSizes ?? [:]
         #expect(sizes[w(3)] == nil)
-        #expect((sizes[w(4)]?.share ?? 0) == 1)
+        expectEqual((sizes[w(4)]?.share ?? 0), 1)
     }
 
     @Test("Stack: presses in a run of sized windows move the step they ask")
@@ -214,7 +214,7 @@ struct RunPushMateTests {
             $0.runHeads = [self.w(3)]
         }
         core.retile(animated: false)
-        #expect(hidden(core, id) == [w(2)])
+        expectEqual(hidden(core, id), [w(2)])
         func height(_ id: UInt32) -> CGFloat {
             core.tiler.calculatedFrames(state: core.state)[w(id)]?.height
                 ?? 0
@@ -227,7 +227,7 @@ struct RunPushMateTests {
         let rest = height(4)
         press(core, "y", -30)
         #expect(abs(height(4) - rest + 30) < 1)
-        #expect(hidden(core, id) == [w(2)])
+        expectEqual(hidden(core, id), [w(2)])
         // w4 holds what it draws, so a later scroll does not move it.
         let share = core.state.workspaces[id]?.runSizes[w(4)]?.share ?? 0
         #expect(abs(share * 1000 - height(4)) < 1)
@@ -266,7 +266,7 @@ struct RunPushMateTests {
             $0.runTails = [self.w(5)]
         }
         core.retile(animated: false)
-        #expect(hidden(core, id) == [w(2), w(6)])
+        expectEqual(hidden(core, id), [w(2), w(6)])
         press(core, "y", 300)
         let sizes = core.state.workspaces[id]?.runSizes ?? [:]
         #expect(hidden(core, id).contains(w(3)))
@@ -277,13 +277,13 @@ struct RunPushMateTests {
     @Test("A push survives a reorder inside its zone")
     func reorderKeepsThePush() throws {
         let (core, id) = try dragMiddle(leading: true)
-        #expect(hidden(core, id) == [w(2)])
+        expectEqual(hidden(core, id), [w(2)])
         core.state.workspaces.withSpace(id) {
             $0.windows = [self.w(1), self.w(3), self.w(2), self.w(4)]
         }
         core.retile(animated: false)
         #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
-        #expect(hidden(core, id).count == 1)
+        expectEqual(hidden(core, id).count, 1)
     }
 
     @Test("A length given in a zone of another role is dropped")
@@ -296,12 +296,12 @@ struct RunPushMateTests {
             focus: 3,
             height: 1020
         )
-        #expect(hidden(core, id).count == 1)
+        expectEqual(hidden(core, id).count, 1)
         core.state.workspaces.withSpace(id) {
             $0.runSizes[self.w(3)] = RunSize(share: 0.6, zone: 7)
         }
         core.retile(animated: false)
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.runSizes.isEmpty, true)
     }
 
     @Test("Track: a push survives an earlier track closing")
@@ -317,10 +317,10 @@ struct RunPushMateTests {
         let vertical =
             core.tiler.settings.resolvedTrack(for: id).axis == .vertical
         press(core, vertical ? "y" : "x", 400)
-        #expect(hidden(core, id) == [w(4)])
+        expectEqual(hidden(core, id), [w(4)])
         core.state.workspaces.withSpace(id) { $0.remove(self.w(1)) }
         core.retile(animated: false)
         #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
-        #expect(hidden(core, id) == [w(4)])
+        expectEqual(hidden(core, id), [w(4)])
     }
 }

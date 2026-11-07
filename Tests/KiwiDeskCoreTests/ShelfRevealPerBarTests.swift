@@ -30,13 +30,13 @@ struct ShelfRevealPerBarTests {
         ]
         for (space, app, edge) in pairs {
             let folded = settings.barEdges(space: space, app: app)
-            #expect(folded.count == 1)
-            #expect(folded.first?.visibility == edge)
+            expectEqual(folded.count, 1)
+            expectEqual(folded.first?.visibility, edge)
         }
         let mixed = settings.barEdges(space: .always, app: .auto)[0]
-        #expect(mixed.shown(.app) == .always)
+        expectEqual(mixed.shown(.app), .always)
         let quiet = settings.barEdges(space: .auto, app: .hidden)[0]
-        #expect(quiet.shown(.app) == .hidden)
+        expectEqual(quiet.shown(.app), .hidden)
         #expect(quiet.drawnAtRest.isEmpty)
     }
 
@@ -59,7 +59,7 @@ struct ShelfRevealPerBarTests {
             pocketAtRest: false
         )
         #expect(auto.edges.isEmpty)
-        #expect(auto.hiding == [.top])
+        expectEqual(auto.hiding, [.top])
     }
 
     @Test("the App Bar's value is its layout's own")
@@ -67,8 +67,8 @@ struct ShelfRevealPerBarTests {
         var settings = TilingSettings()
         settings.monocle.appBar.visibility = .always
         settings.scrolling.appBar.visibility = .hidden
-        #expect(settings.appBarVisibility(in: .monocle) == .always)
-        #expect(settings.appBarVisibility(in: .scrolling) == .hidden)
+        expectEqual(settings.appBarVisibility(in: .monocle), .always)
+        expectEqual(settings.appBarVisibility(in: .scrolling), .hidden)
         #expect(settings.appBarVisibility(in: .bsp) == nil)
         #expect(settings.revealActionLive(.app, in: .scrolling))
         #expect(!settings.revealActionLive(.app, in: .monocle))
@@ -98,7 +98,7 @@ struct ShelfRevealPerBarTests {
         revealer.start()
         defer { revealer.stop() }
         revealer.moved(to: CGPoint(x: 500, y: 799))
-        #expect(revealer.reveal(of: key) == .hidden)
+        expectEqual(revealer.reveal(of: key), .hidden)
         #expect(!revealer.isListening)
         #expect(revealer.toggle(key, duration: 0))
         #expect(revealer.reveal(of: key) == .pinned(until: nil))
@@ -142,14 +142,14 @@ struct ShelfRevealPerBarTests {
         }
         #expect(revealer.toggle(key, duration: 2))
         fire()
-        #expect(revealer.reveal(of: key) == .hidden)
+        expectEqual(revealer.reveal(of: key), .hidden)
         hold.on = true
         #expect(revealer.toggle(key, duration: 2))
         fire()
         #expect(revealer.reveal(of: key).isShown)
         hold.on = false
         fire()
-        #expect(revealer.reveal(of: key) == .hidden)
+        expectEqual(revealer.reveal(of: key), .hidden)
     }
 
     /// A hidden bar's `reserve` never reserves: an edge's strip is
@@ -198,7 +198,7 @@ struct ShelfRevealPerBarTests {
                 on: nil,
                 pocketAtRest: false
             )
-            #expect(reserved.edges == [.top])
+            expectEqual(reserved.edges, [.top])
             #expect(reserved.hiding.isEmpty)
         }
     }
@@ -271,7 +271,7 @@ struct ShelfRevealPerBarTests {
         #expect(core.execute("space_bar.toggle_reveal", args: []).isSuccess)
         #expect(!core.spaceBars.shownStrips.isEmpty)
         let counts = meter.snapshot(reset: false).counts
-        #expect(counts.retiles + counts.passesHeld == 0)
+        expectEqual(counts.retiles + counts.passesHeld, 0)
     }
 
     @Test(
@@ -300,8 +300,8 @@ struct ShelfRevealPerBarTests {
         // The refusal names its reason: an `always` bar has no target
         // either, so a bare failure would not tell the gate apart.
         let refused = core.execute("space_bar.toggle_reveal", args: [])
-        #expect(refused.error == "the Space Bar is set to always")
-        #expect(core.tiler.settings == before)
+        expectEqual(refused.error, "the Space Bar is set to always")
+        expectEqual(core.tiler.settings, before)
         // The Always Space Bar draws; its hidden sibling joins it on
         // its own shortcut.
         #expect(core.appBars.shownStrips.isEmpty)

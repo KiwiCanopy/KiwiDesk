@@ -57,7 +57,7 @@ struct RefusalSoundMigrationTests {
         #expect(resize["feedback"] == nil)
         // The sibling survives: this drops one key, never the
         // group it sat in.
-        #expect(resize["step"] as? Double == 75)
+        expectEqual(resize["step"] as? Double, 75)
     }
 
     /// The value is NOT carried across, and that is the ruling
@@ -95,7 +95,7 @@ struct RefusalSoundMigrationTests {
         let other = try #require(
             root(out)["other"] as? [String: Any]
         )
-        #expect(other["feedback"] as? Bool == true)
+        expectEqual(other["feedback"] as? Bool, true)
     }
 
     /// The trap `ConfigMigration`'s own docstring names: a step

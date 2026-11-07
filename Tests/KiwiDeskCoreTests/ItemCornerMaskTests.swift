@@ -43,7 +43,7 @@ struct ItemCornerMaskTests {
                     items: Fixture.items(3, numbered: numbered)
                 )
                 let views = Array(overlay.itemViews.prefix(3))
-                #expect(views.count == 3)
+                expectEqual(views.count, 3)
                 for (index, view) in views.enumerated() {
                     view.restyle()
                     let round = try Self.rounds(view.layer)
@@ -70,7 +70,7 @@ struct ItemCornerMaskTests {
         let look = Fixture.spaceLook(100, boxed: false, outlined: true)
         let overlay = try Fixture.spaceBar(look, items: Fixture.items(3))
         let views = Array(overlay.itemViews.prefix(3))
-        #expect(views.count == 3)
+        expectEqual(views.count, 3)
         for (index, view) in views.enumerated() {
             view.restyle()
             let note = Comment(rawValue: "#\(index)")
@@ -105,7 +105,7 @@ struct ItemCornerMaskTests {
                 manager.overlayForTesting(barTitleDisplay)
             )
             let views = overlay.itemViews.filter { !$0.isHidden }
-            #expect(views.count == 3)
+            expectEqual(views.count, 3)
             for (index, view) in views.enumerated() {
                 view.layoutSubtreeIfNeeded()
                 view.applyCornerRadius()
@@ -145,7 +145,7 @@ struct ItemCornerMaskTests {
                 manager.overlayForTesting(barTitleDisplay)
             )
             let views = overlay.itemViews.filter { !$0.isHidden }
-            #expect(views.count == 3)
+            expectEqual(views.count, 3)
             let outlined = indicator == .outline
             for (index, view) in views.enumerated() {
                 view.layoutSubtreeIfNeeded()

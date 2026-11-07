@@ -27,7 +27,7 @@ struct TrackOverrideTests {
             Mirror(reflecting: TrackOverride())
                 .children.compactMap(\.label)
         )
-        #expect(mirror == params.subtracting(Self.notOverridable))
+        expectEqual(mirror, params.subtracting(Self.notOverridable))
     }
 
     @Test("Resolve applies every set field onto the global")
@@ -36,8 +36,8 @@ struct TrackOverrideTests {
         over.axis = .horizontal
         over.limit = 3
         let resolved = over.resolved(onto: TrackParams())
-        #expect(resolved.axis == .horizontal)
-        #expect(resolved.limit == 3)
+        expectEqual(resolved.axis, .horizontal)
+        expectEqual(resolved.limit, 3)
     }
 
     @Test("Unset fields inherit the global, per field")
@@ -65,7 +65,7 @@ struct TrackOverrideTests {
             TrackOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("An empty override is sparse and inert")
@@ -73,7 +73,7 @@ struct TrackOverrideTests {
         let over = TrackOverride()
         #expect(over.isEmpty)
         let data = try JSONEncoder().encode(over)
-        #expect(String(data: data, encoding: .utf8) == "{}")
+        expectEqual(String(data: data, encoding: .utf8), "{}")
         #expect(
             over.resolved(onto: TrackParams()) == TrackParams()
         )
@@ -86,8 +86,8 @@ struct TrackOverrideTests {
         var over = TrackOverride()
         over.limit = 3
         settings.track.override[SpaceID("2")] = over
-        #expect(settings.resolvedTrack(for: "2").limit == 3)
-        #expect(settings.resolvedTrack(for: "1").limit == 0)
+        expectEqual(settings.resolvedTrack(for: "2").limit, 3)
+        expectEqual(settings.resolvedTrack(for: "1").limit, 0)
     }
 
     @Test("override map nests under layout.track and round-trips")
@@ -104,6 +104,6 @@ struct TrackOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(back.track.override == settings.track.override)
+        expectEqual(back.track.override, settings.track.override)
     }
 }

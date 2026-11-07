@@ -119,7 +119,7 @@ struct GlassTintFadeTests {
             !tint.isHiddenOrHasHiddenAncestor,
             "the shelf's tint was not painted"
         )
-        #expect(tint.gradient?.startPoint == Self.anchor(edge))
+        expectEqual(tint.gradient?.startPoint, Self.anchor(edge))
     }
 
     @Test("A boxed Space Bar's boxes and front segment fade from the edge")
@@ -147,11 +147,11 @@ struct GlassTintFadeTests {
         }
         try #require(!tints.isEmpty, "no box was tinted")
         for tint in tints {
-            #expect(tint.gradient?.startPoint == Self.anchor(edge))
+            expectEqual(tint.gradient?.startPoint, Self.anchor(edge))
         }
         // The front-app segment's box is the fourth call site.
         let front = try #require(overlay.frontTint, "no front glass")
-        #expect(front.gradient?.startPoint == Self.anchor(edge))
+        expectEqual(front.gradient?.startPoint, Self.anchor(edge))
     }
 
     @Test("A boxed App Bar's boxes fade from the shelf's edge")
@@ -184,7 +184,7 @@ struct GlassTintFadeTests {
         }
         try #require(!tints.isEmpty, "no box was tinted")
         for tint in tints {
-            #expect(tint.gradient?.startPoint == Self.anchor(edge))
+            expectEqual(tint.gradient?.startPoint, Self.anchor(edge))
         }
     }
 
@@ -250,7 +250,7 @@ struct GlassTintFadeTests {
             !tint.isHiddenOrHasHiddenAncestor,
             "the peek's tint was not painted"
         )
-        #expect(tint.gradient?.startPoint == Self.anchor(.bottom))
+        expectEqual(tint.gradient?.startPoint, Self.anchor(.bottom))
         let alphas = Self.alphas(tint)
         try #require(alphas.count == 2, "\(alphas)")
         #expect(alphas[0] >= alphas[1], "\(alphas)")

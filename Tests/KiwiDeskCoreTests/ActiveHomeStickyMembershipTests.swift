@@ -101,8 +101,8 @@ struct ActiveHomeStickyMembershipTests {
             }
             state.workspaces.activate(SpaceID("2"))
             let window = state.windows[Self.sticky]!
-            #expect(state.stickyRenderSpace(of: window) == "2")
-            #expect(homeTiled(state) == [Self.sticky, WindowID(2)])
+            expectEqual(state.stickyRenderSpace(of: window), "2")
+            expectEqual(homeTiled(state), [Self.sticky, WindowID(2)])
         }
     }
 
@@ -114,16 +114,16 @@ struct ActiveHomeStickyMembershipTests {
         // filtering. Global: the focus on B is where it renders.
         var global = twoMonitorState(scope: .global)
         global.workspaces.activate(SpaceID("5"))
-        #expect(homeTiled(global) == [WindowID(2)])
+        expectEqual(homeTiled(global), [WindowID(2)])
         // Display: the home display showing another Space while
         // B holds the focus.
         var display = twoMonitorState(scope: .display)
         display.workspaces.activate(SpaceID("5"))
         display.workspaces.show(SpaceID("1"), on: Self.displayA)
-        #expect(homeTiled(display) == [WindowID(2)])
+        expectEqual(homeTiled(display), [WindowID(2)])
         // And with the home display simply switched away.
         var switched = twoMonitorState(scope: .display)
         switched.workspaces.activate(SpaceID("1"))
-        #expect(homeTiled(switched) == [WindowID(2)])
+        expectEqual(homeTiled(switched), [WindowID(2)])
     }
 }

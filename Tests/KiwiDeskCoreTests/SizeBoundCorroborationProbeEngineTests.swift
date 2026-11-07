@@ -118,9 +118,9 @@ struct SizeBoundCorroborationProbeEngineTests {
         // corroborates, and the layout's own span goes out.
         captured.frames = [:]
         core.runSizeBoundProbe(w)
-        #expect(core.tiler.sizeBound(for: w)?.maxWidth == 715)
+        expectEqual(core.tiler.sizeBound(for: w)?.maxWidth, 715)
         let residue = try #require(captured.frames[w])
-        #expect(residue.width == 715)
+        expectEqual(residue.width, 715)
         #expect(abs(residue.midX - target.midX) < 0.01)
     }
 
@@ -154,7 +154,7 @@ struct SizeBoundCorroborationProbeEngineTests {
         // the probe instead: a floor, so narrower.
         let placed = try #require(captured.frames[w])
         #expect(abs(placed.width - (slot.width - probeDistance)) < 0.01)
-        #expect(placed.origin == slot.origin)
+        expectEqual(placed.origin, slot.origin)
     }
 
     @Test("A placement pass is bounded and leaves no flag standing")
@@ -185,13 +185,13 @@ struct SizeBoundCorroborationProbeEngineTests {
         // anchor, placement one issued the probe and confirmed
         // it, placement two placed the residue — the centred
         // answer, not the probe's frame — and the flag is clear.
-        #expect(core.tiler.sizeBound(for: w)?.maxWidth == 715)
+        expectEqual(core.tiler.sizeBound(for: w)?.maxWidth, 715)
         let placements = captured.log.filter {
             $0.contains("confirmed during retile")
         }
-        #expect(placements.count == 2)
+        expectEqual(placements.count, 2)
         let residue = try #require(captured.frames[w])
-        #expect(residue.width == 715)
+        expectEqual(residue.width, 715)
         #expect(abs(residue.midX - target.midX) < 0.01)
         #expect(!core.tiler.takePendingBoundPlacement())
     }
@@ -229,7 +229,7 @@ struct SizeBoundCorroborationProbeEngineTests {
         captured.frames = [:]
         core.retile(pass: .apply)
         let forced = try #require(captured.frames[w])
-        #expect(forced.width == 715)
+        expectEqual(forced.width, 715)
         captured.frames = [:]
         core.retile()
         let probed = try #require(captured.frames[w])

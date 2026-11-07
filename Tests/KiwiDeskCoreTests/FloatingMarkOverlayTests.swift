@@ -35,13 +35,13 @@ struct FloatingMarkOverlayTests {
         let manager = StickyMarkManager()
         manager.sync([spec(width: 400, [.sticky(), .floating()])])
         let wide = try overlay(manager)
-        #expect(wide.plate.slotCount == 2)
+        expectEqual(wide.plate.slotCount, 2)
         #expect(!wide.plate.innerSymbol.isHidden)
-        #expect(wide.currentWidth == StickyMarkPlate.size * 2)
+        expectEqual(wide.currentWidth, StickyMarkPlate.size * 2)
         manager.sync([spec(width: 100, [.sticky(), .floating()])])
-        #expect(wide.plate.slotCount == 1)
+        expectEqual(wide.plate.slotCount, 1)
         #expect(wide.plate.innerSymbol.isHidden)
-        #expect(wide.currentWidth == StickyMarkPlate.size)
+        expectEqual(wide.currentWidth, StickyMarkPlate.size)
     }
 
     @Test("A glyph joining a live plate is drawn on the next sync")
@@ -49,20 +49,20 @@ struct FloatingMarkOverlayTests {
         let manager = StickyMarkManager()
         manager.sync([spec(width: 400, [.sticky()])])
         let live = try overlay(manager)
-        #expect(live.plate.slotCount == 1)
+        expectEqual(live.plate.slotCount, 1)
         manager.sync([spec(width: 400, [.sticky(), .floating()])])
         #expect(try overlay(manager) === live)
-        #expect(live.plate.slotCount == 2)
+        expectEqual(live.plate.slotCount, 2)
         #expect(!live.plate.innerSymbol.isHidden)
         manager.sync([spec(width: 400, [.floating()])])
-        #expect(live.plate.slotCount == 1)
+        expectEqual(live.plate.slotCount, 1)
         #expect(!live.isSticky)
     }
 
     @Test("A spec orders its glyphs sticky first, whatever it is handed")
     func specOrdersGlyphs() {
         let spec = spec(width: 400, [.floating(), .sticky()])
-        #expect(spec.glyphs.map(\.kind) == [.sticky, .floating])
+        expectEqual(spec.glyphs.map(\.kind), [.sticky, .floating])
     }
 
     /// Each slot inks its own symbol on the flat finish (#2831).
@@ -81,7 +81,7 @@ struct FloatingMarkOverlayTests {
                 == NSColor(kiwiHex: "#00FF00")
         )
         plate.setInner(image, hex: "")
-        #expect(plate.innerSymbol.contentTintColor == .labelColor)
+        expectEqual(plate.innerSymbol.contentTintColor, .labelColor)
         #expect(plate.symbol.contentTintColor == NSColor(kiwiHex: "#FF0000"))
     }
 
@@ -100,7 +100,7 @@ struct FloatingMarkOverlayTests {
         plate.setMarkColor("#FF0000")
         plate.setGlass(true)
         try #require(plate.glass != nil, "no glass hosted")
-        #expect(plate.markHex == "#FF0000")
+        expectEqual(plate.markHex, "#FF0000")
         #expect(plate.tint.gradient?.colors == nil)
         #expect(plate.symbol.contentTintColor == NSColor(kiwiHex: "#FF0000"))
         #expect(
@@ -126,7 +126,7 @@ struct FloatingMarkOverlayTests {
         )
         core.state.setFloating(WindowID(1), true)
         core.updateStickyMarks()
-        #expect(core.windowServer.requested(by: .mark) == [WindowID(1)])
-        #expect(core.stickyMarks.markedWindows == [WindowID(1)])
+        expectEqual(core.windowServer.requested(by: .mark), [WindowID(1)])
+        expectEqual(core.stickyMarks.markedWindows, [WindowID(1)])
     }
 }

@@ -58,7 +58,7 @@ struct SyncDoorTests {
         let before = gui(core)
         core.sync.adopting = 1
         runEveryWriter(core)
-        #expect(gui(core) == before)
+        expectEqual(gui(core), before)
         core.sync.adopting = 0
     }
 
@@ -76,7 +76,7 @@ struct SyncDoorTests {
             let before = gui(inside)
             inside.sync.adopting = 1
             writer(inside)
-            #expect(gui(inside) == before)
+            expectEqual(gui(inside), before)
             let outside = try eagerCore()
             let untouched = gui(outside)
             writer(outside)
@@ -90,7 +90,7 @@ struct SyncDoorTests {
         core.state.owedShortcutDrops = [SpaceID("9")]
         core.sync.adopting = 1
         core.payOwedShortcutDrops()
-        #expect(core.state.owedShortcutDrops == [SpaceID("9")])
+        expectEqual(core.state.owedShortcutDrops, [SpaceID("9")])
         core.sync.adopting = 0
         core.payOwedShortcutDrops()
         #expect(core.state.owedShortcutDrops.isEmpty)
@@ -104,7 +104,7 @@ struct SyncDoorTests {
             seen.append(core?.sync.adopting ?? -1)
         }
         core.adoptSyncedChange(SyncedChange(paths: ["gui.json"], mac: nil))
-        #expect(seen == [1])
-        #expect(core.sync.adopting == 0)
+        expectEqual(seen, [1])
+        expectEqual(core.sync.adopting, 0)
     }
 }

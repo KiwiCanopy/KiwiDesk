@@ -90,8 +90,8 @@ struct KiwiHubMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         let config = try decoder.decode(GuiConfig.self, from: out)
         let layer = try #require(config.layers.first)
-        #expect(layer.bindings.map(\.lua) == migratedRows)
-        #expect(config.format == GuiConfig.currentFormat)
+        expectEqual(layer.bindings.map(\.lua), migratedRows)
+        expectEqual(config.format, GuiConfig.currentFormat)
     }
 
     @Test("a profile's layer override crosses")
@@ -100,7 +100,7 @@ struct KiwiHubMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         let migrated = try decoder.decode(Profile.self, from: out)
         let layer = try #require(migrated.layers?.layers.first)
-        #expect(layer.bindings.map(\.lua) == migratedRows)
+        expectEqual(layer.bindings.map(\.lua), migratedRows)
     }
 
     @Test("a bundle's config and inline profiles cross")
@@ -117,11 +117,11 @@ struct KiwiHubMigrationTests {
         )
         let migrated = try decoder.decode(SetupBundle.self, from: out)
         let config = try #require(migrated.config?.layers.first)
-        #expect(config.bindings.map(\.lua) == migratedRows)
+        expectEqual(config.bindings.map(\.lua), migratedRows)
         let inline = try #require(
             migrated.profiles.first?.layers?.layers.first
         )
-        #expect(inline.bindings.map(\.lua) == migratedRows)
+        expectEqual(inline.bindings.map(\.lua), migratedRows)
     }
 
     /// Unsorted keys, a four-space indent and `0.40` — what the
@@ -173,13 +173,13 @@ struct KiwiHubMigrationTests {
             ConfigMigration.migrated(try encoder.encode(config))
         )
         let migrated = try decoder.decode(GuiConfig.self, from: gui)
-        #expect(migrated.layers.first?.bindings.map(\.lua) == view)
+        expectEqual(migrated.layers.first?.bindings.map(\.lua), view)
 
         let file = try #require(
             ConfigMigration.migrated(try encoder.encode(stored))
         )
         let profile = try decoder.decode(Profile.self, from: file)
-        #expect(profile.layers?.layers.first?.bindings.map(\.lua) == view)
+        expectEqual(profile.layers?.layers.first?.bindings.map(\.lua), view)
 
         let bundle = SetupBundle(
             format: 26,

@@ -52,7 +52,7 @@ struct BarTitleRefreshOutputTests {
         let before = try #require(
             core.appBars.shownBarsForTesting.first?.items.first
         )
-        #expect(before.text == "Downloads")
+        expectEqual(before.text, "Downloads")
 
         core.state.apply(
             .windowTitleChanged(WindowID(1), "Projects")
@@ -62,7 +62,7 @@ struct BarTitleRefreshOutputTests {
         let after = try #require(
             core.appBars.shownBarsForTesting.first?.items.first
         )
-        #expect(after.text == "Projects")
+        expectEqual(after.text, "Projects")
     }
 
     /// The #937 chain's middle link: on a vertical, icon-only bar
@@ -81,7 +81,7 @@ struct BarTitleRefreshOutputTests {
         let before = try #require(
             core.appBars.shownBarsForTesting.first?.items.first
         )
-        #expect(before.text == "Downloads")
+        expectEqual(before.text, "Downloads")
 
         core.state.apply(
             .windowTitleChanged(WindowID(1), "Projects")
@@ -91,6 +91,6 @@ struct BarTitleRefreshOutputTests {
         let after = try #require(
             core.appBars.shownBarsForTesting.first?.items.first
         )
-        #expect(after.text == "Projects")
+        expectEqual(after.text, "Projects")
     }
 }

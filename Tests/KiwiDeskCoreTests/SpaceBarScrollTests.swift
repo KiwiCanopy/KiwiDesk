@@ -89,7 +89,7 @@ struct SpaceBarScrollTests {
             viewport: 100,
             margin: 0
         )
-        #expect(offset == 0)
+        expectEqual(offset, 0)
     }
 
     @Test("Following the active item scrolls it into view")
@@ -105,7 +105,7 @@ struct SpaceBarScrollTests {
             viewport: 100,
             margin: 0
         )
-        #expect(offset == 150)
+        expectEqual(offset, 150)
     }
 
     @Test("Following a leading item scrolls back to it")
@@ -119,7 +119,7 @@ struct SpaceBarScrollTests {
             viewport: 100,
             margin: 0
         )
-        #expect(offset == 0)
+        expectEqual(offset, 0)
     }
 
     @Test("A nil active index only clamps the current offset")
@@ -133,7 +133,7 @@ struct SpaceBarScrollTests {
             viewport: 100,
             margin: 0
         )
-        #expect(over == 150)
+        expectEqual(over, 150)
         let under = SpaceBarOverlay.scrollOffset(
             current: -20,
             lengths: [50, 50, 50, 50, 50],
@@ -143,7 +143,7 @@ struct SpaceBarScrollTests {
             viewport: 100,
             margin: 0
         )
-        #expect(under == 0)
+        expectEqual(under, 0)
     }
 
     @Test("The autoscroll step is the average item length plus a gap")
@@ -152,7 +152,7 @@ struct SpaceBarScrollTests {
             lengths: [10, 20, 30],
             gap: 4
         )
-        #expect(step == 24)
+        expectEqual(step, 24)
     }
 
     @Test("A fade hit maps the ends of an overflowing strip")

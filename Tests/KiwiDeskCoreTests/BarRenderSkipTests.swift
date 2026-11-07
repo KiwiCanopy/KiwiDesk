@@ -65,7 +65,7 @@ struct BarRenderSkipTests {
         let first = renders
         #expect(first > 0)
         show("A")
-        #expect(renders == first)
+        expectEqual(renders, first)
         show("B")
         #expect(renders > first)
         let second = renders
@@ -93,7 +93,7 @@ struct BarRenderSkipTests {
         let first = renders
         #expect(first > 0)
         show("1")
-        #expect(renders == first)
+        expectEqual(renders, first)
         show("2")
         #expect(renders > first)
         let second = renders
@@ -124,14 +124,14 @@ struct BarRenderSkipTests {
         }
         show()
         let laid = overlay.stripView.frame
-        #expect(laid.size == Self.strip.size)
+        expectEqual(laid.size, Self.strip.size)
         // A lay-out would put the strip view back where it was.
         overlay.stripView.frame = .zero
         show()
-        #expect(overlay.stripView.frame == .zero)
+        expectEqual(overlay.stripView.frame, .zero)
         BarFont.invalidate()
         show()
-        #expect(overlay.stripView.frame == laid)
+        expectEqual(overlay.stripView.frame, laid)
     }
 
     @Test("A drop whose refresh repeats its input snaps the row back")
@@ -159,11 +159,11 @@ struct BarRenderSkipTests {
         dragged.origin.x = Self.strip.width - home.width
         mover.frame = dragged
         overlay.dragEnded(view)
-        #expect(mover.frame == home)
+        expectEqual(mover.frame, home)
         // And a drop nothing refreshes after snaps back too.
         overlay.onMove = { _, _ in }
         mover.frame = dragged
         overlay.dragEnded(view)
-        #expect(mover.frame == home)
+        expectEqual(mover.frame, home)
     }
 }

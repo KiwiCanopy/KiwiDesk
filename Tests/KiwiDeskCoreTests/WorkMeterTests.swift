@@ -38,21 +38,21 @@ struct WorkMeterTests {
         m.ax(isMain: false) {}
         m.ax(isMain: false) {}
         let c = m.snapshot(reset: false).counts
-        #expect(answer == 7)
-        #expect(c.axMainCalls == 1)
-        #expect(c.axOffMainCalls == 2)
+        expectEqual(answer, 7)
+        expectEqual(c.axMainCalls, 1)
+        expectEqual(c.axOffMainCalls, 2)
         // One clock read before the call and one after: 1 ms.
-        #expect(c.axMainNanos == 1_000_000)
-        #expect(c.axMainMaxNanos == 1_000_000)
-        #expect(c.axOffMainNanos == 2_000_000)
+        expectEqual(c.axMainNanos, 1_000_000)
+        expectEqual(c.axMainMaxNanos, 1_000_000)
+        expectEqual(c.axOffMainNanos, 2_000_000)
     }
 
     @Test("A reset starts a new window")
     func resetZeroes() {
         let m = meter()
         m.add(\.retiles, 3)
-        #expect(m.snapshot(reset: true).counts.retiles == 3)
-        #expect(m.snapshot(reset: false).counts == .init())
+        expectEqual(m.snapshot(reset: true).counts.retiles, 3)
+        expectEqual(m.snapshot(reset: false).counts, .init())
     }
 
     @Test("The report derives the per-switch and per-retile rates")
@@ -69,11 +69,11 @@ struct WorkMeterTests {
             Issue.record("report is not an object")
             return
         }
-        #expect(r["ax_calls_per_switch"] == .number(3))
-        #expect(r["events_per_retile"] == .number(1.5))
+        expectEqual(r["ax_calls_per_switch"], .number(3))
+        expectEqual(r["events_per_retile"], .number(1.5))
         // One step-clock millisecond per call, in µs.
-        #expect(r["ax_main_us_mean"] == .number(1000))
-        #expect(r["queue_wait_us_mean"] == .null)
+        expectEqual(r["ax_main_us_mean"], .number(1000))
+        expectEqual(r["queue_wait_us_mean"], .null)
     }
 
     @Test("The production meter reports its AX columns")
@@ -96,9 +96,9 @@ struct WorkMeterTests {
             Issue.record("report is not an object")
             return
         }
-        #expect(r["ax_main_calls"] == .null)
-        #expect(r["ax_calls_per_switch"] == .null)
-        #expect(r["retiles"] == .number(0))
+        expectEqual(r["ax_main_calls"], .null)
+        expectEqual(r["ax_calls_per_switch"], .null)
+        expectEqual(r["retiles"], .number(0))
     }
 
     @Test("A park counts issued, already-parked and forced")
@@ -131,8 +131,8 @@ struct WorkMeterTests {
         park(force: false)
         park(force: true)
         let c = m.snapshot(reset: false).counts
-        #expect(c.parksIssued == 2)
-        #expect(c.parksSkipped == 1)
+        expectEqual(c.parksIssued, 2)
+        expectEqual(c.parksSkipped, 1)
     }
 
     @Test("Events and explicit switches are counted where they enter")
@@ -146,9 +146,9 @@ struct WorkMeterTests {
         // restore) is no switch.
         core.spaceSwitchRetile(asSwitch: true)
         let c = m.snapshot(reset: false).counts
-        #expect(c.events == 1)
-        #expect(c.spaceSwitches == 1)
-        #expect(c.reissuePasses == 2)
+        expectEqual(c.events, 1)
+        expectEqual(c.spaceSwitches, 1)
+        expectEqual(c.reissuePasses, 2)
     }
 
     @Test("A bar render and a ring sync are counted and timed")
@@ -160,8 +160,8 @@ struct WorkMeterTests {
         core.updateBorders()
         core.updateBorders()
         let c = m.snapshot(reset: false).counts
-        #expect(c.barRenders == 1)
-        #expect(c.borderSyncs == 2)
+        expectEqual(c.barRenders, 1)
+        expectEqual(c.borderSyncs, 2)
         // The step clock reads once at each end of each pass.
         #expect(c.barNanos >= 1_000_000)
         #expect(c.borderMaxNanos >= 1_000_000)
@@ -175,7 +175,7 @@ struct WorkMeterTests {
         m.add(\.retiles, 5)
         // A read without `true` leaves the window running.
         _ = core.execute("get_work_counters")
-        #expect(m.snapshot(reset: false).counts.retiles == 5)
+        expectEqual(m.snapshot(reset: false).counts.retiles, 5)
         let first = core.execute(
             "get_work_counters",
             args: [.bool(true)]
@@ -184,7 +184,7 @@ struct WorkMeterTests {
             Issue.record("no report")
             return
         }
-        #expect(r["retiles"] == .number(5))
-        #expect(m.snapshot(reset: false).counts.retiles == 0)
+        expectEqual(r["retiles"], .number(5))
+        expectEqual(m.snapshot(reset: false).counts.retiles, 0)
     }
 }

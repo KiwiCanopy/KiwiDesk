@@ -34,8 +34,8 @@ struct ModeNormalizationTests {
             layer("resize", combo: "alt+r"),
             layer("resize", combo: "alt+x"),
         ])
-        #expect(result.map(\.name) == ["default", "resize"])
-        #expect(result[1].bindings.first?.combo == "alt+r")
+        expectEqual(result.map(\.name), ["default", "resize"])
+        expectEqual(result[1].bindings.first?.combo, "alt+r")
     }
 
     @Test("Second 'default' entry is dropped, its icon lost")
@@ -44,10 +44,10 @@ struct ModeNormalizationTests {
             layer("default", combo: "alt+h"),
             layer("default", icon: "gear"),
         ])
-        #expect(result.count == 1)
+        expectEqual(result.count, 1)
         #expect(result[0].isDefault)
         #expect(result[0].icon == nil)
-        #expect(result[0].bindings.first?.combo == "alt+h")
+        expectEqual(result[0].bindings.first?.combo, "alt+h")
     }
 
     @Test("Icon on the default layer is stripped")
@@ -58,7 +58,7 @@ struct ModeNormalizationTests {
         ])
         #expect(result[0].icon == nil)
         // Non-default layers keep their icon untouched.
-        #expect(result[1].icon == "arrow.left.and.right")
+        expectEqual(result[1].icon, "arrow.left.and.right")
     }
 
     @Test("Empty-named layers are dropped")
@@ -67,7 +67,7 @@ struct ModeNormalizationTests {
             layer("default"),
             layer("", combo: "alt+z"),
         ])
-        #expect(result.map(\.name) == ["default"])
+        expectEqual(result.map(\.name), ["default"])
     }
 
     @Test("Valid input passes through untouched")
@@ -76,8 +76,8 @@ struct ModeNormalizationTests {
             layer("default", combo: "alt+h"),
             layer("resize", icon: "📐", combo: "alt+r"),
         ]
-        #expect(KeyLayer.normalized(full: layers) == layers)
-        #expect(KeyLayer.normalized(sparse: layers) == layers)
+        expectEqual(KeyLayer.normalized(full: layers), layers)
+        expectEqual(KeyLayer.normalized(sparse: layers), layers)
     }
 
     // MARK: - Full flavor (GuiConfig.layers)
@@ -85,7 +85,7 @@ struct ModeNormalizationTests {
     @Test("Empty list falls back to [KeyLayer.defaultLayer]")
     func emptyFallsBackToDefault() {
         let result = KeyLayer.normalized(full: [])
-        #expect(result == [KeyLayer.defaultLayer])
+        expectEqual(result, [KeyLayer.defaultLayer])
     }
 
     @Test("Missing default layer is inserted first")
@@ -93,7 +93,7 @@ struct ModeNormalizationTests {
         let result = KeyLayer.normalized(full: [
             layer("resize", combo: "alt+r")
         ])
-        #expect(result.map(\.name) == ["default", "resize"])
+        expectEqual(result.map(\.name), ["default", "resize"])
     }
 
     @Test("A default layer not first is moved to the front")
@@ -102,8 +102,8 @@ struct ModeNormalizationTests {
             layer("resize", combo: "alt+r"),
             layer("default", combo: "alt+h"),
         ])
-        #expect(result.map(\.name) == ["default", "resize"])
-        #expect(result[0].bindings.first?.combo == "alt+h")
+        expectEqual(result.map(\.name), ["default", "resize"])
+        expectEqual(result[0].bindings.first?.combo, "alt+h")
     }
 
     @Test("Whitespace-only names are dropped like empty ones")
@@ -112,7 +112,7 @@ struct ModeNormalizationTests {
             layer("default"),
             layer("  ", combo: "alt+z"),
         ])
-        #expect(result.map(\.name) == ["default"])
+        expectEqual(result.map(\.name), ["default"])
     }
 
     @Test("Composite: later default dropped, first moved front")
@@ -125,8 +125,8 @@ struct ModeNormalizationTests {
             layer("default", combo: "alt+h"),
             layer("default", icon: "gear", combo: "alt+z"),
         ])
-        #expect(result.map(\.name) == ["default", "resize"])
-        #expect(result[0].bindings.map(\.combo) == ["alt+h"])
+        expectEqual(result.map(\.name), ["default", "resize"])
+        expectEqual(result[0].bindings.map(\.combo), ["alt+h"])
         #expect(result[0].icon == nil)
     }
 
@@ -137,7 +137,7 @@ struct ModeNormalizationTests {
         let result = KeyLayer.normalized(sparse: [
             layer("resize", combo: "alt+r")
         ])
-        #expect(result.map(\.name) == ["resize"])
+        expectEqual(result.map(\.name), ["resize"])
         #expect(KeyLayer.normalized(sparse: []).isEmpty)
     }
 
@@ -149,8 +149,8 @@ struct ModeNormalizationTests {
             layer("resize", combo: "alt+x"),
         ])
         // Order preserved as stored — never reordered.
-        #expect(result.map(\.name) == ["resize", "default"])
-        #expect(result[0].bindings.first?.combo == "alt+r")
+        expectEqual(result.map(\.name), ["resize", "default"])
+        expectEqual(result[0].bindings.first?.combo, "alt+r")
         #expect(result[1].icon == nil)
     }
 }
@@ -187,7 +187,7 @@ struct ModeNormalizationDecodeTests {
                 GuiConfig.self,
                 from: Data(json.utf8)
             )
-            #expect(config.layers == [KeyLayer.defaultLayer])
+            expectEqual(config.layers, [KeyLayer.defaultLayer])
         }
     }
 
@@ -208,8 +208,8 @@ struct ModeNormalizationDecodeTests {
             GuiConfig.self,
             from: data
         )
-        #expect(second.layers == first.layers)
-        #expect(second.layers == [KeyLayer.defaultLayer])
+        expectEqual(second.layers, first.layers)
+        expectEqual(second.layers, [KeyLayer.defaultLayer])
     }
 
     @Test("KeyLayerOverride decode normalizes, stays sparse")

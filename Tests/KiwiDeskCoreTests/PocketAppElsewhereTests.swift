@@ -22,7 +22,7 @@ struct PocketAppElsewhereTests {
     func pressesNewWindow() {
         let fixture = runningWithNoWindowHere()
         #expect(fixture.press().isSuccess)
-        #expect(fixture.pressed == [Fixture.pid])
+        expectEqual(fixture.pressed, [Fixture.pid])
         #expect(fixture.opened.isEmpty)
         #expect(fixture.activated.isEmpty)
         #expect(fixture.claim != nil)
@@ -33,7 +33,7 @@ struct PocketAppElsewhereTests {
         let fixture = runningWithNoWindowHere()
         fixture.pressAnswers = false
         fixture.press()
-        #expect(fixture.opened == [Fixture.app])
+        expectEqual(fixture.opened, [Fixture.app])
         #expect(fixture.claim != nil)
     }
 
@@ -42,7 +42,7 @@ struct PocketAppElsewhereTests {
         let fixture = runningWithNoWindowHere()
         fixture.visible = 1
         fixture.press()
-        #expect(fixture.activated == [Fixture.pid])
-        #expect(fixture.pressed == [Fixture.pid])
+        expectEqual(fixture.activated, [Fixture.pid])
+        expectEqual(fixture.pressed, [Fixture.pid])
     }
 }

@@ -83,7 +83,7 @@ struct AppcastNotesTests {
                 "--release", Self.tag, "--notes", file.path,
             ]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(run.stdout.contains(marker))
     }
 
@@ -138,7 +138,7 @@ struct AppcastNotesTests {
             [AppcastFixture.release(tag: Self.tag)],
             arguments: ["--all"]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(run.stdout.contains("<item>"))
     }
 }

@@ -55,7 +55,7 @@ struct BarPeekGrownPanelTests {
         let panel = try #require(rig.peek.panel.panel)
         #expect(panel.takesKey)
         #expect(panel.canBecomeKey)
-        #expect(rig.peek.panel.morph?.growth == .outOfItem)
+        expectEqual(rig.peek.panel.morph?.growth, .outOfItem)
         #expect(rig.peek.panel.morph?.item === rig.first)
         #expect(rig.peek.panel.header.isHidden)
         rig.peek.dismiss()
@@ -74,11 +74,11 @@ struct BarPeekGrownPanelTests {
         rig.item.addSubview(pill)
         clickList(rig)
         clickPill(rig, pill)
-        #expect(rig.peek.panel.morph?.growth == .fromPill)
+        expectEqual(rig.peek.panel.morph?.growth, .fromPill)
         #expect(pill.morphed, "the pill hides as its list opens")
         #expect(!rig.peek.panel.header.isHidden)
         clickList(rig)
-        #expect(rig.peek.panel.morph?.growth == .outOfItem)
+        expectEqual(rig.peek.panel.morph?.growth, .outOfItem)
         #expect(!pill.morphed, "the pill comes back")
         #expect(rig.peek.panel.header.isHidden)
     }
@@ -108,7 +108,7 @@ struct BarPeekGrownPanelTests {
             )
         }
         rig.peek.reread()
-        #expect(rig.shownTitles == ["Moved 1", "Moved 2"])
+        expectEqual(rig.shownTitles, ["Moved 1", "Moved 2"])
         clickList(rig)
         #expect(rig.peek.panel.drawn == nil, "past the interval: closes")
     }

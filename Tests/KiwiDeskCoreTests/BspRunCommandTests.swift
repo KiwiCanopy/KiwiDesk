@@ -113,7 +113,7 @@ struct BspRunCommandTests {
         #expect(
             core.execute("focus", args: [.string(key)]).isSuccess
         )
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     @Test("A press along the chain moves its weights, not a ratio")
@@ -151,7 +151,7 @@ struct BspRunCommandTests {
         // move the stacked ratio for a window no ratio places.
         let w4 = WindowID(4)
         seed(core, w4, height: 370)
-        #expect(core.tiler.sizeBound(for: w4)?.minHeight == 370)
+        expectEqual(core.tiler.sizeBound(for: w4)?.minHeight, 370)
         core.retile(animated: false)
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(run.hiddenAfter.contains(w4))
@@ -170,7 +170,7 @@ struct BspRunCommandTests {
         // 1100 tall: the chain w2…w4 fits whole, so no run hides
         // and the line is shared by weight alone.
         let (core, id) = makeCore(focus: 2, height: 1100)
-        #expect(core.tiler.runCovers[id]?.runs.isEmpty == true)
+        expectEqual(core.tiler.runCovers[id]?.runs.isEmpty, true)
         let before = try #require(core.state.workspaces[id])
         let ratio = core.tiler.settings.resolvedBsp(
             for: before,
@@ -231,7 +231,7 @@ struct BspRunCommandTests {
         let (core, id) = makeCore(focus: 2, height: 1100)
         seed(core, WindowID(3), height: 450)
         core.retile(animated: false)
-        #expect(core.tiler.runCovers[id]?.runs.isEmpty == true)
+        expectEqual(core.tiler.runCovers[id]?.runs.isEmpty, true)
         let before = try #require(core.state.workspaces[id])
         let ratio = core.tiler.settings.resolvedBsp(
             for: before,
@@ -265,7 +265,7 @@ struct BspRunCommandTests {
         // chain yields so the line can hold it.
         let w4 = WindowID(4)
         seed(core, w4, width: 600)
-        #expect(core.tiler.sizeBound(for: w4)?.minWidth == 600)
+        expectEqual(core.tiler.sizeBound(for: w4)?.minWidth, 600)
         core.retile(animated: false)
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(!run.shown.contains(w4))

@@ -85,11 +85,11 @@ struct GlassHandBackTests {
                 fresh.overlayForTesting(barTitleDisplay)
             )
             #expect(after.boxGlasses.isEmpty)
-            #expect(after.itemViews.count == 2)
+            expectEqual(after.itemViews.count, 2)
             for (item, expected) in zip(after.itemViews, plain.itemViews) {
                 #expect(item.superview === after.itemRun)
                 #expect(item.translatesAutoresizingMaskIntoConstraints)
-                #expect(item.frame == expected.frame)
+                expectEqual(item.frame, expected.frame)
             }
         }
     }
@@ -119,7 +119,7 @@ struct GlassHandBackTests {
             for (item, expected) in zip(after.itemViews, plain.itemViews) {
                 #expect(item.superview === after.itemRun)
                 #expect(item.translatesAutoresizingMaskIntoConstraints)
-                #expect(item.frame == expected.frame)
+                expectEqual(item.frame, expected.frame)
             }
         }
     }

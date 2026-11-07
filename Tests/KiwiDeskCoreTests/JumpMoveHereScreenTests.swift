@@ -128,9 +128,9 @@ struct JumpMoveHereScreenTests {
         core.state.workspaces.focus(WindowID(1), in: "1")
         track(core, 2, in: "2")
         #expect(core.moveHere(.window(WindowID(2)), on: DisplayID(2)))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
-        #expect(core.state.workspaces.activeSpace == "5")
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "5")
+        expectEqual(core.state.workspaces.activeSpace, "5")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     /// A refusal switches nothing: the gate runs before the switch.
@@ -144,8 +144,8 @@ struct JumpMoveHereScreenTests {
         core.state.apply(.windowCreated(fullscreen))
         core.state.workspaces.add(WindowID(3), to: "2")
         #expect(!core.moveHere(.window(WindowID(3)), on: DisplayID(2)))
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), "2")
     }
 
     /// Read at the pick: screen 2 now shows Space 6, so that is
@@ -159,8 +159,8 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         track(core, 2, in: "2")
         #expect(core.moveHere(.window(WindowID(2)), on: DisplayID(2)))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "6")
-        #expect(core.state.workspaces.activeSpace == "6")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "6")
+        expectEqual(core.state.workspaces.activeSpace, "6")
     }
 
     /// The list names the Space the pick lands in, and judges its
@@ -174,15 +174,15 @@ struct JumpMoveHereScreenTests {
         track(core, 2, in: "1")
         track(core, 3, in: "5")
         let snapshot = core.jumpSnapshot(on: DisplayID(2))
-        #expect(snapshot.here == "5")
+        expectEqual(snapshot.here, "5")
         let moves = Dictionary(
             uniqueKeysWithValues: snapshot.entries.map {
                 ($0.target, $0.movesHere)
             }
         )
-        #expect(moves[.window(WindowID(2))] == true)
-        #expect(moves[.window(WindowID(3))] == false)
-        #expect(core.jumpSnapshot().here == "1")
+        expectEqual(moves[.window(WindowID(2))], true)
+        expectEqual(moves[.window(WindowID(3))], false)
+        expectEqual(core.jumpSnapshot().here, "1")
     }
 
     /// The pocket's take-out reads the active Space, so the panel's
@@ -194,10 +194,10 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.apply(.windowFocused(WindowID(1)))
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: WindowID(1)) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: WindowID(1)), .pocketed)
         #expect(core.moveHere(.window(WindowID(1)), on: DisplayID(2)))
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "5")
-        #expect(core.state.workspaces.activeSpace == "5")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "5")
+        expectEqual(core.state.workspaces.activeSpace, "5")
     }
 
     /// The hop lands on screen 2's shown Desktop, and the focus
@@ -210,12 +210,12 @@ struct JumpMoveHereScreenTests {
         core.state.workspaces.focus(WindowID(1), in: "1")
         park(core)
         #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
-        #expect(Bridge.moves.map(\.1) == [20])
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("5"))
-        #expect(core.jump.owed?.space == "5")
+        expectEqual(Bridge.moves.map(\.1), [20])
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("5"))
+        expectEqual(core.jump.owed?.space, "5")
         core.handle(.windowCreated(window(7)))
-        #expect(core.state.workspaces.space(of: WindowID(7)) == "5")
-        #expect(core.state.workspaces.lastFocused == WindowID(7))
+        expectEqual(core.state.workspaces.space(of: WindowID(7)), "5")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(7))
     }
 
     /// Swap here from KiwiHub on screen 2 trades with screen 2's
@@ -233,13 +233,13 @@ struct JumpMoveHereScreenTests {
         let row = core.jumpSnapshot(on: DisplayID(2)).entries.first {
             $0.target == .window(WindowID(2))
         }
-        #expect(row?.swapsHere == true)
+        expectEqual(row?.swapsHere, true)
         core.swapHere(.window(WindowID(2)), on: DisplayID(2))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
-        #expect(core.state.workspaces.activeSpace == "5")
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "5")
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
+        expectEqual(core.state.workspaces.activeSpace, "5")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     /// An empty Space on the panel's screen falls back to the
@@ -251,10 +251,10 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         track(core, 2, in: "2")
-        #expect(core.jumpSnapshot(on: DisplayID(2)).swapsInHere == false)
+        expectEqual(core.jumpSnapshot(on: DisplayID(2)).swapsInHere, false)
         core.swapHere(.window(WindowID(2)), on: DisplayID(2))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "2")
+        expectEqual(core.state.workspaces.activeSpace, "1")
     }
 }

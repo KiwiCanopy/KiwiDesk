@@ -69,7 +69,7 @@ struct SpaceSwitchReissueTests {
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: w1)?.minWidth == 700)
+        expectEqual(core.tiler.sizeBound(for: w1)?.minWidth, 700)
         core.state.workspaces.focus(w1, in: space)
         core.retile()
         return core
@@ -90,7 +90,7 @@ struct SpaceSwitchReissueTests {
         let floored = try #require(issued(w1))
         #expect(floored.width >= 700 - 0.5)
         // The fold: w2 and w3 came back in one column.
-        #expect(issued(w2)?.minX == issued(w3)?.minX)
+        expectEqual(issued(w2)?.minX, issued(w3)?.minX)
     }
 
     @Test("Coming back re-issues frames the echoes already report")

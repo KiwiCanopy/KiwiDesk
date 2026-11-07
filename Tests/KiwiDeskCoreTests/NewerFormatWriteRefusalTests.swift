@@ -88,7 +88,7 @@ struct NewerFormatWriteRefusalTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("kept")]
         try store.save(config)
-        #expect(store.load()?.spaces == [SpaceID("kept")])
+        expectEqual(store.load()?.spaces, [SpaceID("kept")])
     }
 
     @Test("A profile write keeps a newer file of that name")

@@ -149,19 +149,19 @@ struct ReachDepartureRemovalTests {
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[window] != nil)
-        #expect(loop.removalDistrusted[window]?.arms == 1)
+        expectEqual(loop.removalDistrusted[window]?.arms, 1)
         #expect(loop.pendingRemovalRecheck.contains(pid))
-        #expect(box.recheckFires == 1)
-        #expect(awaitingLines(box) == 1)
+        expectEqual(box.recheckFires, 1)
+        expectEqual(awaitingLines(box), 1)
     }
 
     @Test("a window the seam does not name is a close")
     func unawaitedVanishIsAClose() {
         let (loop, box) = makeLoop(awaits: false)
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [window])
+        expectEqual(box.destroyed.map(\.id), [window])
         #expect(loop.elements[pid]?[window] == nil)
-        #expect(box.recheckFires == 0)
+        expectEqual(box.recheckFires, 0)
     }
 
     @Test("the arm never reads the switch grace, and joins it closed")
@@ -173,15 +173,15 @@ struct ReachDepartureRemovalTests {
         open.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         open.reconcile(pid: pid, app: ref)
         #expect(openBox.destroyed.isEmpty)
-        #expect(open.removalDistrusted[window]?.arms == 1)
+        expectEqual(open.removalDistrusted[window]?.arms, 1)
         // Closed inside the grace: the census clause stands down
         // and no arm refuses — a vanish nothing expects is removed.
         let (closed, closedBox) = makeLoop(awaits: false)
         closed.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         closedBox.census = [pid: [window]]
         closed.reconcile(pid: pid, app: ref)
-        #expect(closedBox.destroyed.map(\.id) == [window])
-        #expect(closedBox.censusReads == 0)
+        expectEqual(closedBox.destroyed.map(\.id), [window])
+        expectEqual(closedBox.censusReads, 0)
     }
 
     @Test("the census-blind budget is the episode's recheck budget")
@@ -190,16 +190,16 @@ struct ReachDepartureRemovalTests {
         for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
-            #expect(loop.removalDistrusted[window]?.arms == arm)
-            #expect(box.recheckFires == arm)
+            expectEqual(loop.removalDistrusted[window]?.arms, arm)
+            expectEqual(box.recheckFires, arm)
             _ = loop.drainPendingRemovalRecheck()
         }
         // Past the cap the carry never came: the departure lands.
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [window])
+        expectEqual(box.destroyed.map(\.id), [window])
         #expect(loop.elements[pid]?[window] == nil)
         #expect(loop.removalDistrusted[window] == nil)
-        #expect(awaitingLines(box) == 1)
+        expectEqual(awaitingLines(box), 1)
     }
 
     @Test("a census that shows the window refuses past the budget")
@@ -213,7 +213,7 @@ struct ReachDepartureRemovalTests {
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[window] != nil)
         // #1157's own refusal, not this arm's line.
-        #expect(awaitingLines(box) == 0)
+        expectEqual(awaitingLines(box), 0)
     }
 
     @Test("a hide outranks the arm")
@@ -221,8 +221,8 @@ struct ReachDepartureRemovalTests {
         let (loop, box) = makeLoop(awaits: true)
         box.hidden = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.censusReads == 0)
-        #expect(box.hiddenEvents == [window])
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.hiddenEvents, [window])
         #expect(loop.removalDistrusted.isEmpty)
     }
 
@@ -237,8 +237,8 @@ struct ReachDepartureRemovalTests {
             minimized: [window],
             coalesceTabs: false
         )
-        #expect(box.censusReads == 0)
-        #expect(box.destroyed.map(\.wasMinimized) == [true])
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.destroyed.map(\.wasMinimized), [true])
     }
 
     // MARK: - The destroy notification's half
@@ -274,7 +274,7 @@ struct ReachDepartureRemovalTests {
         // the vanish and kept the registration.
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[window] != nil)
-        #expect(loop.removalDistrusted[window]?.arms == 1)
+        expectEqual(loop.removalDistrusted[window]?.arms, 1)
     }
 
     @Test("an unawaited window's destroyed element is eager")
@@ -288,10 +288,10 @@ struct ReachDepartureRemovalTests {
             pid: own,
             app: AppRef(bundleID: nil, name: "Own")
         )
-        #expect(box.destroyed.map(\.id) == [window])
+        expectEqual(box.destroyed.map(\.id), [window])
         #expect(loop.elements[own]?[window] == nil)
         // The eager arm releases the element before its reconcile,
         // so the sweep finds nothing vanished and reads no census.
-        #expect(box.censusReads == 0)
+        expectEqual(box.censusReads, 0)
     }
 }

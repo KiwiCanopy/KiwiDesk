@@ -86,8 +86,8 @@ struct BarMenuViewTests {
         let trailing = try #require(chip.overflowTarget)
         #expect(title(leading.menu(for: rightClick)) == "\(BarHit.disc(one))")
         #expect(title(trailing.menu(for: rightClick)) == "\(BarHit.disc(one))")
-        #expect(title(overlay.backCount.menu(for: rightClick)) == "count")
-        #expect(title(overlay.root.menu(for: rightClick)) == "empty")
+        expectEqual(title(overlay.backCount.menu(for: rightClick)), "count")
+        expectEqual(title(overlay.root.menu(for: rightClick)), "empty")
     }
 
     /// A glyph asks for its own window rows, naming the windows
@@ -99,8 +99,8 @@ struct BarMenuViewTests {
         let chip = try #require(overlay.itemViews.first)
         let glyph = try #require(chip.glyphTargets.first)
         let hit = "\(BarHit.glyph([WindowID(2)]))"
-        #expect(title(glyph.menu(for: rightClick)) == hit)
-        #expect(glyph.accessibilityCustomActions()?.map(\.name) == [hit])
+        expectEqual(title(glyph.menu(for: rightClick)), hit)
+        expectEqual(glyph.accessibilityCustomActions()?.map(\.name), [hit])
     }
 
     /// An App Bar item hands its menu the windows the RENDER gave
@@ -127,8 +127,8 @@ struct BarMenuViewTests {
         )
         let item = try #require(appBar.itemViews.first)
         let hit = "\(BarHit.appItem([WindowID(2), WindowID(3)]))"
-        #expect(title(item.menu(for: rightClick)) == hit)
-        #expect(item.accessibilityCustomActions()?.map(\.name) == [hit])
+        expectEqual(title(item.menu(for: rightClick)), hit)
+        expectEqual(item.accessibilityCustomActions()?.map(\.name), [hit])
     }
 
     @Test("VoiceOver's actions on a chip are its menu's rows")
@@ -153,13 +153,13 @@ struct BarMenuViewTests {
         shelf.contextMenus = menus
         // The panel build hosts the grip in the strip; no panel here.
         shelf.stripView.addSubview(shelf.handle)
-        #expect(title(shelf.content.menu(for: rightClick)) == "empty")
-        #expect(title(shelf.stripView.menu(for: rightClick)) == "empty")
-        #expect(title(shelf.handle.menu(for: rightClick)) == "divider")
+        expectEqual(title(shelf.content.menu(for: rightClick)), "empty")
+        expectEqual(title(shelf.stripView.menu(for: rightClick)), "empty")
+        expectEqual(title(shelf.handle.menu(for: rightClick)), "divider")
         let appBar = AppBarOverlay()
         appBar.contextMenus = menus
-        #expect(title(appBar.root.menu(for: rightClick)) == "empty")
-        #expect(title(appBar.forwardCount.menu(for: rightClick)) == "count")
+        expectEqual(title(appBar.root.menu(for: rightClick)), "empty")
+        expectEqual(title(appBar.forwardCount.menu(for: rightClick)), "count")
     }
 
     private func click(_ flags: NSEvent.ModifierFlags) -> NSEvent {
@@ -244,7 +244,7 @@ struct BarMenuViewTests {
             overlay.frontIcon.accessibilityCustomActions()
         // The chip speaks its window's rows (#2024).
         let front = "\(BarHit.appItem([WindowID(9)]))"
-        #expect(actions?.map { $0.name } == [front])
+        expectEqual(actions?.map { $0.name }, [front])
         // A text glyph fronts the chip where the app has one.
         var glyph = app(9)
         glyph = SpaceBarItemView.App(
@@ -268,6 +268,6 @@ struct BarMenuViewTests {
         )
         let spoken: [NSAccessibilityCustomAction]? =
             overlay.frontGlyph.accessibilityCustomActions()
-        #expect(spoken?.map { $0.name } == [front])
+        expectEqual(spoken?.map { $0.name }, [front])
     }
 }

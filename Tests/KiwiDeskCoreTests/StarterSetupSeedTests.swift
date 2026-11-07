@@ -62,7 +62,7 @@ struct StarterSetupSeedTests {
 
     @Test("the fixture screen is the class this suite assumes")
     func expectedDesktopClass() {
-        #expect(ScreenClass.of(fixture) == .desktop)
+        expectEqual(ScreenClass.of(fixture), .desktop)
     }
 
     // MARK: - Pure generator
@@ -72,11 +72,11 @@ struct StarterSetupSeedTests {
         // The retired ladder gave five per display. The budget
         // grows sub-linearly instead: eight spaces on day one is
         // eight keys to learn, most of them empty.
-        #expect(StarterSetup.spaceCount(sizes: sizes(1)) == 3)
-        #expect(StarterSetup.spaceCount(sizes: sizes(2)) == 5)
-        #expect(StarterSetup.spaceCount(sizes: sizes(3)) == 7)
+        expectEqual(StarterSetup.spaceCount(sizes: sizes(1)), 3)
+        expectEqual(StarterSetup.spaceCount(sizes: sizes(2)), 5)
+        expectEqual(StarterSetup.spaceCount(sizes: sizes(3)), 7)
         // Floored at one screen.
-        #expect(StarterSetup.spaceCount(sizes: []) == 3)
+        expectEqual(StarterSetup.spaceCount(sizes: []), 3)
     }
 
     @Test("modes are the screen's own list, behind its lead")
@@ -88,14 +88,14 @@ struct StarterSetupSeedTests {
         // Monocle to the later one — so it leads Scrolling and
         // takes Grid, the head of the desktop list, plus the one
         // Floating space.
-        #expect(modes[SpaceID("1")] == .scrolling)
-        #expect(modes[SpaceID("2")] == .grid)
-        #expect(modes[SpaceID("3")] == .floating)
+        expectEqual(modes[SpaceID("1")], .scrolling)
+        expectEqual(modes[SpaceID("2")], .grid)
+        expectEqual(modes[SpaceID("3")], .floating)
         // The second screen is the smallest by tie-break, so it
         // leads Monocle, then continues down the same list
         // rather than repeating what the first took.
-        #expect(modes[SpaceID("4")] == .monocle)
-        #expect(modes[SpaceID("5")] == .stack)
+        expectEqual(modes[SpaceID("4")], .monocle)
+        expectEqual(modes[SpaceID("5")], .stack)
     }
 
     @Test("screens are positional, main omitted")
@@ -103,8 +103,8 @@ struct StarterSetupSeedTests {
         let screens = StarterSetup.spaceScreens(sizes: sizes(2))
         #expect(screens[SpaceID("1")] == nil)  // main ⇒ omitted
         #expect(screens[SpaceID("3")] == nil)
-        #expect(screens[SpaceID("4")] == 1)
-        #expect(screens[SpaceID("5")] == 1)
+        expectEqual(screens[SpaceID("4")], 1)
+        expectEqual(screens[SpaceID("5")], 1)
     }
 
     @Test("every space is pinned or on main, none unaccounted")
@@ -115,19 +115,19 @@ struct StarterSetupSeedTests {
         // no space names a screen that does not exist — the
         // blocks are no longer equal, so `(n - 1) / 5` cannot
         // stand in for this.
-        #expect(all.count == 7)
+        expectEqual(all.count, 7)
         for space in all {
             let screen = screens[space] ?? 0
             #expect(screen >= 0 && screen < 3)
         }
-        #expect(Set(screens.values) == [1, 2])
+        expectEqual(Set(screens.values), [1, 2])
         // The map's SIZE, not just one nil: "main ⇒ omitted"
         // rested on a single `== nil`, and a pin drift that kept
         // every secondary index correct passed everything else
         // (guard-prover, 2026-08-11).
         let offMain = StarterSetup.slots(sizes(3))
             .filter { $0.screen >= 1 }
-        #expect(screens.count == offMain.count)
+        expectEqual(screens.count, offMain.count)
         #expect(offMain.count < all.count)
     }
 
@@ -146,7 +146,7 @@ struct StarterSetupSeedTests {
                 "Starter not first for \(count) screens"
             )
             let starter = layouts.first { $0.name == "Starter" }
-            #expect(starter?.isStandard == false)
+            expectEqual(starter?.isStandard, false)
             #expect(
                 starter?.spaceCount
                     == StarterAllocation.budget(screenCount: count)
@@ -164,8 +164,8 @@ struct StarterSetupSeedTests {
         let live = sizes(2)
         let catalog = StandardProfiles.all(sizes: live)
         let starters = catalog.filter { $0.name == "Starter" }
-        #expect(starters.count == 1)
-        #expect(starters.first?.screenCount == 2)
+        expectEqual(starters.count, 1)
+        expectEqual(starters.first?.screenCount, 2)
         // A count you are not running has no screen shapes to
         // choose layouts from, so it offers none.
         #expect(
@@ -223,7 +223,7 @@ struct StarterSetupSeedTests {
         let core = makeCore()
         seedDisplays(core, count: 1)
         let config = core.guiConfigSeed()
-        #expect(config.spaces.count == 3)
+        expectEqual(config.spaces.count, 3)
         let base = config.layers.first { $0.isDefault }
         let combos = Set((base?.bindings ?? []).map(\.combo))
         #expect(combos.contains("control+option+3"))
@@ -241,11 +241,11 @@ struct StarterSetupSeedTests {
             uniqueKeysWithValues: core.state.workspaces.allSpaces
                 .map { ($0.id, $0.mode) }
         )
-        #expect(modes[SpaceID("1")] == .scrolling)
-        #expect(modes[SpaceID("2")] == .grid)
-        #expect(modes[SpaceID("3")] == .floating)
-        #expect(modes[SpaceID("4")] == .monocle)
-        #expect(modes[SpaceID("5")] == .stack)
+        expectEqual(modes[SpaceID("1")], .scrolling)
+        expectEqual(modes[SpaceID("2")], .grid)
+        expectEqual(modes[SpaceID("3")], .floating)
+        expectEqual(modes[SpaceID("4")], .monocle)
+        expectEqual(modes[SpaceID("5")], .stack)
 
         // The second screen's block is pinned to it; the first
         // block holds the Main role.
@@ -254,29 +254,29 @@ struct StarterSetupSeedTests {
             name: "D1",
             x: fixture.width
         ).fingerprint
-        #expect(core.spacePins[SpaceID("4")] == secondFingerprint)
+        expectEqual(core.spacePins[SpaceID("4")], secondFingerprint)
         #expect(core.spacePins[SpaceID("1")] == nil)
         #expect(core.mainSpaces.contains(SpaceID("1")))
 
         // Tuning applied, from the main screen's class.
-        #expect(core.tiler.settings.stack.masterRatio == 0.8)
-        #expect(core.tiler.settings.track.newWindow == .ownTrack)
-        #expect(core.tiler.settings.grid.columns == 2)
+        expectEqual(core.tiler.settings.stack.masterRatio, 0.8)
+        expectEqual(core.tiler.settings.track.newWindow, .ownTrack)
+        expectEqual(core.tiler.settings.grid.columns, 2)
 
         // Persisted and adopted under the setup's title (#1662),
         // so a reload re-applies it.
         let name = StarterTitle(shape: .desktop, otherScreens: 1)
             .profileName
-        #expect(name == "Widescreen + 1")
-        #expect(core.profiles.currentName == name)
+        expectEqual(name, "Widescreen + 1")
+        expectEqual(core.profiles.currentName, name)
         let saved = try core.profiles.read(name: name)
         #expect(saved.isStarterSetup)
-        #expect(saved.spaceModes[SpaceID("2")] == .grid)
-        #expect(saved.spaceModes[SpaceID("4")] == .monocle)
+        expectEqual(saved.spaceModes[SpaceID("2")], .grid)
+        expectEqual(saved.spaceModes[SpaceID("4")], .monocle)
         // The saved profile carries a real monitor set — both
         // displays — or the first monitor change couldn't match
         // it and would drop it for a composed Standard.
-        #expect(saved.monitorSets.first?.monitors.count == 2)
+        expectEqual(saved.monitorSets.first?.monitors.count, 2)
     }
 
     @Test("empty state falls back to NSScreen for the setup")

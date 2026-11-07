@@ -146,7 +146,7 @@ struct FocusReportOrderTests {
             app: ref
         )
         box.run(1)
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.listed = [id, late]
         box.drain()
@@ -165,7 +165,7 @@ struct FocusReportOrderTests {
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.listed = [id, late]
         box.drain()
-        #expect(box.focused == [late])
+        expectEqual(box.focused, [late])
     }
 
     @Test("a newer report that was dropped supersedes nothing")
@@ -208,7 +208,7 @@ struct FocusReportOrderTests {
         loop.appActivated(app(pid), launchedAt: nil)
         // Queued: liveness(21), list, focus(22).
         box.run(2)
-        #expect(box.focused == [second])
+        expectEqual(box.focused, [second])
         box.drain()
         #expect(box.focused == [second], "reported \(box.focused)")
         #expect(box.logs.contains { $0.contains("superseded") })
@@ -235,7 +235,7 @@ struct FocusReportOrderTests {
         loop.appActivated(app(pid), launchedAt: nil)
         // Queued: list, focus(21).
         box.run(1)
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.listed = [id, late]
         box.drain()
@@ -260,7 +260,7 @@ struct FocusReportOrderTests {
         box.focus = id
         loop.appActivated(app(pid), launchedAt: nil)
         box.run(1)
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
         // The window stays untracked, so only the closure's own
         // gate stands between the stale report and a panel verdict.
         box.drain()

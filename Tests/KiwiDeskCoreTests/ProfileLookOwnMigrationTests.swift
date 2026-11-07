@@ -73,7 +73,7 @@ struct ProfileLookOwnMigrationTests {
             of: "{\n",
             with: "{\n  \"look\" : \"own\",\n"
         )
-        #expect(stampless(result) == stampless(expected))
+        expectEqual(stampless(result), stampless(expected))
     }
 
     private func stampless(_ text: String) -> String {
@@ -120,6 +120,6 @@ struct ProfileLookOwnMigrationTests {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let back = try decoder.decode(SetupBundle.self, from: migrated)
-        #expect(back.profiles.map(\.look) == [.own])
+        expectEqual(back.profiles.map(\.look), [.own])
     }
 }

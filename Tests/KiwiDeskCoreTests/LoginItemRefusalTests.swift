@@ -38,7 +38,7 @@ struct LoginItemRefusalTests {
                 read: { .enabled }
             )
             #expect(writes.isEmpty, "\(url.path) was written")
-            #expect(state == .unavailable(reason))
+            expectEqual(state, .unavailable(reason))
         }
     }
 
@@ -54,7 +54,7 @@ struct LoginItemRefusalTests {
             write: { writes.append($0) },
             read: { .requiresApproval }
         )
-        #expect(writes == [enabled])
-        #expect(state == .requiresApproval)
+        expectEqual(writes, [enabled])
+        expectEqual(state, .requiresApproval)
     }
 }

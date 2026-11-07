@@ -66,16 +66,16 @@ struct KiwiVisionCurrentTests {
         run(core, "kiwivision.set_dim", [.number(30)])
         run(core, "kiwivision.set_clear_app", [.bool(true)])
         let fields = current(core)
-        #expect(fields["on"] == .bool(false))
-        #expect(fields["lens"] == .null)
+        expectEqual(fields["on"], .bool(false))
+        expectEqual(fields["lens"], .null)
         guard case .object(let settings)? = fields["settings"] else {
             Issue.record("no settings")
             return
         }
-        #expect(settings["dim"] == .number(30))
-        #expect(settings["clear_app"] == .bool(true))
+        expectEqual(settings["dim"], .number(30))
+        expectEqual(settings["clear_app"], .bool(true))
         #expect(settings["lenses"] == nil)
-        #expect(fields["lenses"] == .array([]))
+        expectEqual(fields["lenses"], .array([]))
     }
 
     @Test("a lens on is named, and each lens is its table")
@@ -92,14 +92,14 @@ struct KiwiVisionCurrentTests {
         define(core, ["name": .string("Calls")])
         run(core, "kiwivision.toggle", [.string("writing")])
         let fields = current(core)
-        #expect(fields["on"] == .bool(true))
-        #expect(fields["lens"] == .string("Writing"))
+        expectEqual(fields["on"], .bool(true))
+        expectEqual(fields["lens"], .string("Writing"))
         let rows = lenses(fields)
         let writing = table(rows["Writing"])
-        #expect(writing["apps"] == .array([.string("test.kiwi.notes")]))
-        #expect(writing["dim"] == .number(80))
+        expectEqual(writing["apps"], .array([.string("test.kiwi.notes")]))
+        expectEqual(writing["dim"], .number(80))
         #expect(rows["Writing"]?["refusal"] == nil)
-        #expect(rows["Writing"]?["saved"] == .bool(false))
+        expectEqual(rows["Writing"]?["saved"], .bool(false))
         #expect(
             rows["Calls"]?["refusal"]
                 == .object(["reason": .string("no_apps")])
@@ -115,10 +115,10 @@ struct KiwiVisionCurrentTests {
             Issue.record("toggle answered nothing")
             return
         }
-        #expect(answer == ["on": .bool(true), "lens": .null])
+        expectEqual(answer, ["on": .bool(true), "lens": .null])
         let fields = current(core)
-        #expect(fields["on"] == .bool(true))
-        #expect(fields["lens"] == .null)
+        expectEqual(fields["on"], .bool(true))
+        expectEqual(fields["lens"], .null)
     }
 
     @Test("a lens the live profile leaves out names that profile")
@@ -156,7 +156,7 @@ struct KiwiVisionCurrentTests {
         var lens = VisionLens(name: "Writing")
         lens.apps = ["test.kiwi.notes"]
         core.setAppWide(persisting: true) { $0.visionLenses = [lens] }
-        #expect(lenses(current(core))["Writing"]?["saved"] == .bool(true))
+        expectEqual(lenses(current(core))["Writing"]?["saved"], .bool(true))
         define(
             core,
             [
@@ -205,6 +205,6 @@ struct KiwiVisionCurrentTests {
         let object = try JSONSerialization.jsonObject(with: data)
         let keys = (object as? [String: Any])?.keys.sorted() ?? []
         #expect(!keys.isEmpty)
-        #expect(VisionLens.tableKeys.sorted() == keys)
+        expectEqual(VisionLens.tableKeys.sorted(), keys)
     }
 }

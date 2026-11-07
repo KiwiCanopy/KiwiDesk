@@ -82,7 +82,7 @@ struct RunZoneSizesTests {
         )
         let sized = context(sizes: [2: 350], tails: [3])
         #expect(three.sizedMembers(in: sized).isEmpty)
-        #expect(zone.sizedMembers(in: middle()) == [ids[1]])
+        expectEqual(zone.sizedMembers(in: middle()), [ids[1]])
     }
 
     @Test("A length given in another zone plans nothing here")
@@ -97,7 +97,7 @@ struct RunZoneSizesTests {
     @Test("A run showing only sized windows lets its last take the rest")
     func allSizedLastAbsorbs() throws {
         let both = context(sizes: [2: 450, 3: 450], heads: [2], tails: [3])
-        #expect(zone.run(in: both)?.visible == 1..<3)
+        expectEqual(zone.run(in: both)?.visible, 1..<3)
         let frames = zone.frames(in: both)
         let first = try #require(frames[ids[1]])
         let last = try #require(frames[ids[2]])
@@ -118,9 +118,9 @@ struct RunZoneSizesTests {
     @Test("A lone window fills its zone whatever length it holds")
     func loneWindowFills() throws {
         let lone = context(focus: 1, sizes: [1: 600], tails: [1])
-        #expect(zone.run(in: lone)?.visible == 0..<1)
+        expectEqual(zone.run(in: lone)?.visible, 0..<1)
         let frame = try #require(zone.frames(in: lone)[ids[0]])
-        #expect(frame.width == 1000)
+        expectEqual(frame.width, 1000)
     }
 
     @Test("A lone window's shrink gives up only what the next one needs")
@@ -129,7 +129,7 @@ struct RunZoneSizesTests {
         let press = try #require(
             zone.press(ids[0], by: -1, toward: .end, in: lone)
         )
-        #expect(press.visible == 0..<2)
+        expectEqual(press.visible, 0..<2)
         let share = try #require(press.sizes[ids[0]] ?? nil)
         #expect(share > 0.65)
         #expect(share < 0.7)
@@ -171,11 +171,11 @@ struct RunZoneSizesTests {
             sizes: [1: 400, 2: 500],
             tails: [2]
         )
-        #expect(three.run(in: sized)?.visible == 0..<2)
+        expectEqual(three.run(in: sized)?.visible, 0..<2)
         let press = try #require(
             three.press(ids[0], by: -50, toward: .end, in: sized)
         )
-        #expect(press.visible == 0..<2)
+        expectEqual(press.visible, 0..<2)
         #expect(!press.movesRun)
     }
 
@@ -188,8 +188,8 @@ struct RunZoneSizesTests {
         let press = try #require(
             zone.press(ids[0], by: -150, toward: .end, in: lone)
         )
-        #expect(press.refusal == .alone)
-        #expect(press.cue == .nothingToDivide)
+        expectEqual(press.refusal, .alone)
+        expectEqual(press.cue, .nothingToDivide)
     }
 
     @Test("A zone that piles answers no press")
@@ -243,6 +243,6 @@ struct RunZoneSizesTests {
             span: Double(extra),
             minSizes: [0, 0, 0]
         ).value
-        #expect(press.weight == expected)
+        expectEqual(press.weight, expected)
     }
 }

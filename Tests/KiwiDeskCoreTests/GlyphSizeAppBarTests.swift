@@ -69,7 +69,7 @@ struct GlyphSizeAppBarTests {
         #expect(abs(view.iconView.frame.midY - Self.depth / 2) <= 0.5)
         let size = look.resolvedFontSize(forContentDepth: Self.content)
         #expect(size < look.resolvedFontSize(forContentDepth: Self.depth))
-        #expect(view.label.font?.pointSize == size)
+        expectEqual(view.label.font?.pointSize, size)
     }
 
     @Test("The group badge follows the content depth")
@@ -141,7 +141,7 @@ struct GlyphSizeAppBarTests {
         )
         #expect(!overlay.itemViews.isEmpty)
         for view in overlay.itemViews where !view.isHidden {
-            #expect(view.frame.height == Self.depth)
+            expectEqual(view.frame.height, Self.depth)
         }
     }
 
@@ -196,6 +196,6 @@ struct GlyphSizeAppBarTests {
             overlay.floatMark.frame.size
                 == CGSize(width: side, height: side)
         )
-        #expect(overlay.floatMark.frame.midY == Self.depth / 2)
+        expectEqual(overlay.floatMark.frame.midY, Self.depth / 2)
     }
 }

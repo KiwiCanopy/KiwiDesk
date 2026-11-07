@@ -87,11 +87,11 @@ struct ClosedReturnFocusTests {
         // The gone handler classified a close and marked it —
         // fail-open guard for every clause below.
         #expect(core.state.closedDepartures.contains(target))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(
             log.lines.contains {
                 $0.contains("close return: w1 re-shown — placed as new")
@@ -123,7 +123,7 @@ struct ClosedReturnFocusTests {
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(!core.state.closedDepartures.contains(target))
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 
     /// A construction net for the CALL site: `classify` answers
@@ -191,11 +191,11 @@ struct ClosedReturnFocusTests {
         // The debt ages on the core's frozen clock (#2341), so a
         // starved runner cannot let it lapse before the arrival.
         core.desktopMemory.returnFocus.record(owed)
-        #expect(core.desktopMemory.returnFocus.owed() == owed)
+        expectEqual(core.desktopMemory.returnFocus.owed(), owed)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.state.closedDepartures.contains(target))
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     @Test("The mark rides a re-key with the departed memory")

@@ -81,13 +81,13 @@ struct ChangelogDownloadTests {
                 "--all", "--releases", file.path, "--output", "-",
             ]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         let data = Data(run.stdout.utf8)
         let object =
             try JSONSerialization
             .jsonObject(with: data) as? [String: Any]
         let releases = object?["releases"] as? [[String: Any]]
-        #expect(releases?.count == 1)
+        expectEqual(releases?.count, 1)
         return try #require(releases?.first)
     }
 

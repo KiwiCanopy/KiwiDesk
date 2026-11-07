@@ -41,9 +41,9 @@ struct ToggleFloatingCommandTests {
     func tiledToFloating() {
         let core = makeCore()
         addWindow(core, 1)
-        #expect(isFloating(core) == false)
+        expectEqual(isFloating(core), false)
         #expect(core.execute("toggle_floating").isSuccess)
-        #expect(isFloating(core) == true)
+        expectEqual(isFloating(core), true)
     }
 
     @Test("a floating window toggles to tiled")
@@ -51,9 +51,9 @@ struct ToggleFloatingCommandTests {
         let core = makeCore()
         addWindow(core, 1)
         #expect(core.execute("make_floating").isSuccess)
-        #expect(isFloating(core) == true)
+        expectEqual(isFloating(core), true)
         #expect(core.execute("toggle_floating").isSuccess)
-        #expect(isFloating(core) == false)
+        expectEqual(isFloating(core), false)
     }
 
     /// A toggle back to tiled leaves no manual tile behind: a
@@ -67,7 +67,7 @@ struct ToggleFloatingCommandTests {
         core.state.apply(
             .windowFloatChanged(WindowID(1), isFloating: true)
         )
-        #expect(isFloating(core) == true)
+        expectEqual(isFloating(core), true)
     }
 
     @Test("toggle without a focused window fails")

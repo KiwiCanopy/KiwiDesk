@@ -198,9 +198,9 @@ struct OverflowMarkClickTests {
             source: .glyph([WindowID(1), WindowID(2)]),
             edge: .bottom
         )
-        #expect(rig.peek.shown?.source.opensOnClick == true)
+        expectEqual(rig.peek.shown?.source.opensOnClick, true)
         rig.peek.pointer(in: item, on: nil, source: nil, edge: .bottom)
-        #expect(rig.peek.shown?.source.opensOnClick == true)
+        expectEqual(rig.peek.shown?.source.opensOnClick, true)
     }
 
     /// The second press of the double-click that opened it lands on
@@ -298,7 +298,7 @@ struct OverflowMarkClickTests {
         #expect(rig.peek.shown == nil)
         #expect(view.window?.isVisible != true)
         #expect(!rig.stageMorphs)
-        #expect(rig.peek.panel.panel?.ignoresMouseEvents == true)
+        expectEqual(rig.peek.panel.panel?.ignoresMouseEvents, true)
     }
 
     /// The pill comes back only as the shrink lands, taking the
@@ -316,7 +316,7 @@ struct OverflowMarkClickTests {
         #expect(rig.peek.panel.morph != nil)
         rig.land()
         #expect(!markPanel.ignoresMouseEvents)
-        #expect(markPanel.alphaValue == 1)
+        expectEqual(markPanel.alphaValue, 1)
         #expect(rig.peek.panel.morph == nil)
         #expect(rig.peek.panel.panel?.isVisible != true)
     }

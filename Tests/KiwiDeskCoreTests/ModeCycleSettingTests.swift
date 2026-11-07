@@ -59,7 +59,7 @@ struct ModeCycleSettingTests {
         )
         #expect(written.contains(#""mode_cycle""#))
         let reread = try core.profiles.read(name: "Work")
-        #expect(reread.modeCycle == [.stack, .monocle])
+        expectEqual(reread.modeCycle, [.stack, .monocle])
     }
 
     @Test("a profile's list the cycle cannot walk fails the file")
@@ -82,7 +82,7 @@ struct ModeCycleSettingTests {
         root["mode_cycle"] = ["grid", "bsp"]
         let good = try JSONSerialization.data(withJSONObject: root)
         let decoded = try JSONDecoder().decode(Profile.self, from: good)
-        #expect(decoded.modeCycle == [.grid, .bsp])
+        expectEqual(decoded.modeCycle, [.grid, .bsp])
     }
 
     @Test("the table writes a listed value to the profile alone")
@@ -98,7 +98,7 @@ struct ModeCycleSettingTests {
         #expect(snapshot.isEdited)
         try core.saveRuleReach(snapshot)
         let work = try core.profiles.read(name: "Work")
-        #expect(work.modeCycle == [.stack, .monocle])
+        expectEqual(work.modeCycle, [.stack, .monocle])
         #expect(try core.profiles.read(name: "Home").modeCycle == nil)
         #expect(
             core.guiConfigStore.load()?.modeCycle == ModeCycle.defaultList
@@ -116,8 +116,8 @@ struct ModeCycleSettingTests {
             editing: "Home"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.modeCycle == [.grid, .track])
-        #expect(core.modeCycle.list == [.grid, .track])
+        expectEqual(core.guiConfigStore.load()?.modeCycle, [.grid, .track])
+        expectEqual(core.modeCycle.list, [.grid, .track])
     }
 
     @Test("a stored page resolves the override and diffs it back")
@@ -127,7 +127,7 @@ struct ModeCycleSettingTests {
         work.modeCycle = [.stack, .monocle]
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.modeCycle == [.stack, .monocle])
+        expectEqual(page.modeCycle, [.stack, .monocle])
         page.modeCycle = ModeCycle.defaultList
         try core.overwriteProfile(
             named: "Work",
@@ -161,9 +161,9 @@ struct ModeCycleSettingTests {
     func profileApplyResolves() throws {
         let core = try makeCore()
         reapply(core, cycle: [.stack, .monocle])
-        #expect(core.modeCycle.list == [.stack, .monocle])
+        expectEqual(core.modeCycle.list, [.stack, .monocle])
         reapply(core, cycle: nil)
-        #expect(core.modeCycle.list == ModeCycle.defaultList)
+        expectEqual(core.modeCycle.list, ModeCycle.defaultList)
     }
 
     @Test("the verb writes the base, so an override still wins")
@@ -174,8 +174,8 @@ struct ModeCycleSettingTests {
             "set_mode_cycle",
             args: [.array([.string("grid"), .string("track")])]
         )
-        #expect(core.modeCycle.base == [.grid, .track])
-        #expect(core.modeCycle.list == [.stack, .monocle])
+        expectEqual(core.modeCycle.base, [.grid, .track])
+        expectEqual(core.modeCycle.list, [.stack, .monocle])
     }
 
     @Test("Lua-owned: a profile apply keeps init.lua's base")
@@ -191,9 +191,9 @@ struct ModeCycleSettingTests {
             args: [.array([.string("grid"), .string("track")])]
         )
         reapply(core, cycle: [.stack, .monocle])
-        #expect(core.modeCycle.list == [.stack, .monocle])
+        expectEqual(core.modeCycle.list, [.stack, .monocle])
         reapply(core, cycle: nil)
-        #expect(core.modeCycle.list == [.grid, .track])
+        expectEqual(core.modeCycle.list, [.grid, .track])
     }
 
     @Test("a config load drops the profile override with the base")
@@ -209,7 +209,7 @@ struct ModeCycleSettingTests {
         core.modeCycle.base = [.grid, .track]
         core.loadConfig()
         #expect(core.modeCycle.profileOverride == nil)
-        #expect(core.modeCycle.base == ModeCycle.defaultList)
+        expectEqual(core.modeCycle.base, ModeCycle.defaultList)
     }
 
     @Test("loading a profile, then reloading, walks its own list")
@@ -219,10 +219,10 @@ struct ModeCycleSettingTests {
         work.modeCycle = [.stack, .monocle]
         try core.profiles.write(work)
         try core.loadProfile(named: "Work")
-        #expect(core.modeCycle.list == [.stack, .monocle])
+        expectEqual(core.modeCycle.list, [.stack, .monocle])
         core.loadConfig()
-        #expect(core.modeCycle.list == [.stack, .monocle])
+        expectEqual(core.modeCycle.list, [.stack, .monocle])
         try core.loadProfile(named: "Home")
-        #expect(core.modeCycle.list == ModeCycle.defaultList)
+        expectEqual(core.modeCycle.list, ModeCycle.defaultList)
     }
 }

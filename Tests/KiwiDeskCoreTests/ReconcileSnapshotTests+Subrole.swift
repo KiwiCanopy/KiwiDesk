@@ -42,7 +42,7 @@ extension ReconcileSnapshotTests {
             )
         }
         #expect(!box.events.contains { $0.hasPrefix("subrole") })
-        #expect(loop.detectedSubroles[first] == "AXUnknown")
+        expectEqual(loop.detectedSubroles[first], "AXUnknown")
     }
 
     /// The fabricated elements answer no subrole: neither reconcile
@@ -61,7 +61,7 @@ extension ReconcileSnapshotTests {
                 !box.events.contains { $0.hasPrefix("subrole") },
                 "\(offMain)"
             )
-            #expect(loop.detectedSubroles[first] == "AXStandardWindow")
+            expectEqual(loop.detectedSubroles[first], "AXStandardWindow")
         }
     }
 }

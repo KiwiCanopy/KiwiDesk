@@ -50,7 +50,7 @@ struct BorderMovingRoomTests {
     func panelFrameRule() {
         let room = CGRect(x: 0, y: 0, width: 2000, height: 1200)
         let ring = CGRect(x: 100, y: 100, width: 400, height: 300)
-        #expect(PanelPlacement.panelFrame(for: ring, room: room) == room)
+        expectEqual(PanelPlacement.panelFrame(for: ring, room: room), room)
         #expect(PanelPlacement.panelFrame(for: ring, room: nil) == ring)
         // Straddling the room's edge is outside it.
         let outside = ring.offsetBy(dx: 1800, dy: 0)
@@ -93,10 +93,10 @@ struct BorderMovingRoomTests {
                 dx: ring.panelFrame?.minX ?? 0,
                 dy: ring.panelFrame?.minY ?? 0
             )
-            #expect(drawn == exact.panelFrame)
+            expectEqual(drawn, exact.panelFrame)
         }
-        #expect(ring.frameSets == 1)
-        #expect(ring.panelFrame == room)
+        expectEqual(ring.frameSets, 1)
+        expectEqual(ring.panelFrame, room)
     }
 
     @Test("A settled render resizes the panel back to the ring")
@@ -108,11 +108,11 @@ struct BorderMovingRoomTests {
             movePanel: { _, _ in false }
         )
         render(ring, at: start, room: room)
-        #expect(ring.panelFrame == room)
+        expectEqual(ring.panelFrame, room)
         render(ring, at: CGPoint(x: 140, y: 200), room: nil)
-        #expect(ring.frameSets == 2)
-        #expect(ring.ringFrameInPanel.origin == .zero)
-        #expect(ring.panelFrame?.size == ring.ringFrameInPanel.size)
+        expectEqual(ring.frameSets, 2)
+        expectEqual(ring.ringFrameInPanel.origin, .zero)
+        expectEqual(ring.panelFrame?.size, ring.ringFrameInPanel.size)
     }
 
     @Test("Both writers offer the room only mid-animation")
@@ -138,9 +138,9 @@ struct BorderMovingRoomTests {
         border.isAnimating = { _ in true }
         let room = BorderManager.room(around: screen, scale: 2)
         border.sync([spec], alive: nil, reassertOrder: false)
-        #expect(backend.rooms.last == room)
+        expectEqual(backend.rooms.last, room)
         border.apply(WindowID(9), windowFrame: frame)
-        #expect(backend.rooms.last == room)
+        expectEqual(backend.rooms.last, room)
         border.isAnimating = { _ in false }
         border.apply(WindowID(9), windowFrame: frame)
         #expect(backend.rooms.last == .some(nil))
@@ -219,7 +219,7 @@ struct BorderMovingRoomTests {
                 raised, clear,
             ]
         ) { pid, number in pid == 42 && number == 5 }
-        #expect(frames.map(\.minX) == [200, 400])
+        expectEqual(frames.map(\.minX), [200, 400])
     }
 }
 

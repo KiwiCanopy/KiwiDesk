@@ -75,7 +75,7 @@ struct GridRunTests {
         #expect(!isParked(frames[ids[6]]))
         // The rows above never move for the run.
         let rest = GridLayout().calculateGeometry(for: ids, in: context())
-        #expect(frames[ids[0]] == rest[ids[0]])
+        expectEqual(frames[ids[0]], rest[ids[0]])
     }
 
     @Test("Rows first scrolls the last column")
@@ -83,8 +83,8 @@ struct GridRunTests {
         let ctx = context(rowsFirst: true)
         let zone = try #require(GridLayout.zones(for: ids, in: ctx)?.first)
         #expect(zone.vertical)
-        #expect(zone.members == Array(ids[4...]))
-        #expect(zone.region.maxX == ctx.usable.maxX)
+        expectEqual(zone.members, Array(ids[4...]))
+        expectEqual(zone.region.maxX, ctx.usable.maxX)
     }
 
     @Test("RunCover reads a grid's run")
@@ -92,9 +92,9 @@ struct GridRunTests {
         let cover = try #require(
             RunCover.of(space: "1", mode: .grid, tiled: ids, in: context())
         )
-        #expect(cover.runs.count == 1)
-        #expect(Set(cover.behind.keys) == Set(ids[6...]))
-        #expect(cover.tails == [ids[5]])
+        expectEqual(cover.runs.count, 1)
+        expectEqual(Set(cover.behind.keys), Set(ids[6...]))
+        expectEqual(cover.tails, [ids[5]])
     }
 
     @Test("A grid that fits scrolls nothing")
@@ -112,9 +112,9 @@ struct GridRunTests {
         let fit = { (span: CGFloat) in
             Int((span / (300 + 10)).rounded(.down))
         }
-        #expect(ctx.minWindowSize == 300)
-        #expect(shape.columns == fit(ctx.usable.width))
-        #expect(shape.rows == fit(ctx.usable.height))
+        expectEqual(ctx.minWindowSize, 300)
+        expectEqual(shape.columns, fit(ctx.usable.width))
+        expectEqual(shape.rows, fit(ctx.usable.height))
         #expect(shape.columns < 9 && shape.rows < 9)
     }
 
@@ -130,11 +130,11 @@ struct GridRunTests {
         let run = try #require(auto.run(in: ctx))
         // As many 300 pt floors as the row holds with its gaps.
         let fits = Int(((ctx.usable.width + 10) / 310).rounded(.down))
-        #expect(run.visible.count == fits)
+        expectEqual(run.visible.count, fits)
         let fixed = try #require(
             GridLayout.zones(for: ids, in: context())?.first
         )
-        #expect(fixed.slots?.count == 3)
+        expectEqual(fixed.slots?.count, 3)
     }
 
     @Test("Last-row cells line up with resized columns")
@@ -187,8 +187,8 @@ struct GridRunTests {
             horizontal: false,
             context: ctx
         )
-        #expect(floors.last?.size == 700)
-        #expect(floors.last?.carrier == ids[8])
+        expectEqual(floors.last?.size, 700)
+        expectEqual(floors.last?.carrier, ids[8])
         // Along the run, no member lifts a column.
         let columns = GridLayout.trackFloors(
             windows: ids,
@@ -205,7 +205,7 @@ struct GridRunTests {
             horizontal: true,
             context: ctx
         )
-        #expect(lifted[1].carrier == ids[1])
+        expectEqual(lifted[1].carrier, ids[1])
     }
 
     @Test("A resize finds a shown run member's cell, not a hidden one")
@@ -213,10 +213,10 @@ struct GridRunTests {
         let ctx = context(focused: ids[8])
         let shape = try #require(GridLayout.shape(for: ids, in: ctx))
         let cells = GridLayout.cellIndices(of: ids, shape: shape, in: ctx)
-        #expect(cells[ids[8]] == 5)
-        #expect(cells[ids[6]] == 3)
+        expectEqual(cells[ids[8]], 5)
+        expectEqual(cells[ids[6]], 3)
         #expect(cells[ids[3]] == nil)
-        #expect(cells[ids[0]] == 0)
+        expectEqual(cells[ids[0]], 0)
     }
 
     @Test("Only BSP and Stack take the inward post-pass")

@@ -75,7 +75,7 @@ struct ClaudePluginSyncWorkflowTests {
             yaml.components(
                 separatedBy: "secrets.CLAUDE_PLUGIN_DEPLOY_KEY"
             ).count - 1
-        #expect(uses == 2)
+        expectEqual(uses, 2)
         let push = try workflowStep("Commit and push", in: yaml)
         #expect(push.contains("git -C marketplace push origin HEAD:main"))
     }

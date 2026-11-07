@@ -23,25 +23,25 @@ struct HoldGlideWiringTests {
         let idle = f.ratio
 
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(f.hits == .number(1))
+        expectEqual(f.hits, .number(1))
         let afterPress = f.ratio
         #expect(afterPress > idle)
         #expect(f.heldID != nil)
-        #expect(f.ticks.map(\.delay) == [0.5])
+        expectEqual(f.ticks.map(\.delay), [0.5])
 
         // The wait starts the frame clock and nothing else: the
         // `#require`s are load-bearing (guard-prover, #1056) —
         // an arming regression must fail HERE, not trap the
         // runner on an empty array.
         try f.beginGlide()
-        #expect(f.ratio == afterPress)
+        expectEqual(f.ratio, afterPress)
 
         // A frame moves the ratio further WITHOUT re-running the
         // Lua body — `hits` is the whole point: the glide
         // re-issues the captured `resize`, so an implementation
         // that went back to re-firing the binding reads 2 here.
         try f.frame()
-        #expect(f.hits == .number(1))
+        expectEqual(f.hits, .number(1))
         #expect(f.ratio > afterPress)
         let afterFrame = f.ratio
 
@@ -53,9 +53,9 @@ struct HoldGlideWiringTests {
         // delivered, and the glide state is clear.
         f.registrar.release(keyCode: f.combo.keyCode)
         #expect(f.heldID == nil)
-        #expect(f.core.keys.isGliding == false)
+        expectEqual(f.core.keys.isGliding, false)
         #expect(f.frameTick == nil)
-        #expect(f.hits == .number(1))
+        expectEqual(f.hits, .number(1))
     }
 
     @Test("A glide step writes instantly, never springing")
@@ -93,7 +93,7 @@ struct HoldGlideWiringTests {
         #expect(f.ratio > before)
         // ...and animated nothing: an animated pass would leave
         // the resized windows resident in the engine.
-        #expect(f.core.tiler.animation.activeCount == 0)
+        expectEqual(f.core.tiler.animation.activeCount, 0)
 
         // And the policy is untouched once the hold ends — the
         // scope cannot outlive the write it describes.
@@ -112,7 +112,7 @@ struct HoldGlideWiringTests {
         )
         two.seedBspPair()
         two.registrar.press(keyCode: two.combo.keyCode)
-        #expect(two.hits == .number(1))
+        expectEqual(two.hits, .number(1))
         #expect(two.heldID == nil)
         #expect(two.ticks.isEmpty)
 
@@ -160,7 +160,7 @@ struct HoldGlideWiringTests {
         )
         f.seedBspPair()
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(f.hits == .number(1))
+        expectEqual(f.hits, .number(1))
         #expect(f.heldID == nil)
         #expect(f.ticks.isEmpty)
         #expect(f.frameTick == nil)

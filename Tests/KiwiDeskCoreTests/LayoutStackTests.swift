@@ -30,7 +30,7 @@ struct StackLayoutTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 
     @Test("Master zone takes masterRatio of the width")
@@ -43,8 +43,8 @@ struct StackLayoutTests {
         let stack = try #require(frames[w2])
         #expect(abs(master.width - 1890 * 0.6) < 0.01)
         #expect(abs(stack.minX - master.maxX - 10) < 0.01)
-        #expect(master.height == 1060)
-        #expect(stack.height == 1060)
+        expectEqual(master.height, 1060)
+        expectEqual(stack.height, 1060)
     }
 
     @Test("Stack zone distributes windows evenly")
@@ -72,7 +72,7 @@ struct StackLayoutTests {
         )
         let m1 = try #require(frames[w1])
         let m2 = try #require(frames[w2])
-        #expect(m1.minY == m2.minY)
+        expectEqual(m1.minY, m2.minY)
         #expect(m2.minX > m1.minX)
         #expect(frames[w3]?.minX ?? 0 > m2.maxX)
     }
@@ -88,7 +88,7 @@ struct StackLayoutTests {
         )
         let m1 = try #require(frames[w1])
         let m2 = try #require(frames[w2])
-        #expect(m1.minX == m2.minX)
+        expectEqual(m1.minX, m2.minX)
         #expect(m2.minY > m1.minY)
         #expect(frames[w3]?.minX ?? 0 > m1.maxX)
     }
@@ -132,44 +132,44 @@ struct StackLayoutTests {
             StackParams.self,
             from: Data(old.utf8)
         )
-        #expect(params.masterCount == 2)
-        #expect(params.masterRatio == 0.7)
-        #expect(params.stackPosition == .right)
+        expectEqual(params.masterCount, 2)
+        expectEqual(params.masterRatio, 0.7)
+        expectEqual(params.stackPosition, .right)
     }
 
     @Test("Promote swaps with the last master window")
     func promote() throws {
         var space = Space(id: "s", windows: [w1, w2, w3])
         space.promote(w3, masterCount: 1)
-        #expect(space.windows == [w3, w2, w1])
+        expectEqual(space.windows, [w3, w2, w1])
         // Already master: no-op.
         space.promote(w3, masterCount: 1)
-        #expect(space.windows == [w3, w2, w1])
+        expectEqual(space.windows, [w3, w2, w1])
     }
 
     @Test("Demote swaps with the first stack window")
     func demote() throws {
         var space = Space(id: "s", windows: [w1, w2, w3])
         space.demote(w1, masterCount: 1)
-        #expect(space.windows == [w2, w1, w3])
+        expectEqual(space.windows, [w2, w1, w3])
         // Already in stack: no-op.
         space.demote(w1, masterCount: 1)
-        #expect(space.windows == [w2, w1, w3])
+        expectEqual(space.windows, [w2, w1, w3])
     }
 
     @Test("Spawn placements insert at the right position")
     func spawnPlacement() throws {
         var space = Space(id: "s", windows: [w1, w2])
         space.insert(w3, placement: .first)
-        #expect(space.windows == [w3, w1, w2])
+        expectEqual(space.windows, [w3, w1, w2])
         space.insert(w4, placement: .last)
-        #expect(space.windows == [w3, w1, w2, w4])
+        expectEqual(space.windows, [w3, w1, w2, w4])
         // Relative placements anchor on the focused window
         // and fall back to appending without one.
         space.focused = w1
         space.insert(w5, placement: .beforeFocused)
-        #expect(space.windows == [w3, w5, w1, w2, w4])
+        expectEqual(space.windows, [w3, w5, w1, w2, w4])
         space.insert(w6, placement: .afterFocused)
-        #expect(space.windows == [w3, w5, w1, w6, w2, w4])
+        expectEqual(space.windows, [w3, w5, w1, w6, w2, w4])
     }
 }

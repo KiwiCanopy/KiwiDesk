@@ -25,9 +25,9 @@ struct NavigationChordsTests {
             row("control+option+5", "KiwiDesk.focus_space(5)"),
         ]
         let result = NavigationChords.deduplicated(rows, liveSpaces: live)
-        #expect(result.rows.map(\.combo) == ["control+option+5"])
-        #expect(result.dropped.first?.kept.combo == "control+option+5")
-        #expect(result.dropped.first?.dropped.combo == "control+option+f5")
+        expectEqual(result.rows.map(\.combo), ["control+option+5"])
+        expectEqual(result.dropped.first?.kept.combo, "control+option+5")
+        expectEqual(result.dropped.first?.dropped.combo, "control+option+f5")
     }
 
     @Test("any other navigation action keeps its first chord")
@@ -58,7 +58,7 @@ struct NavigationChordsTests {
             ),
         ]
         let result = NavigationChords.deduplicated(rows, liveSpaces: live)
-        #expect(result.rows.count == 4)
+        expectEqual(result.rows.count, 4)
         #expect(result.dropped.isEmpty)
     }
 
@@ -69,7 +69,7 @@ struct NavigationChordsTests {
             row("control+option+keypad5", "KiwiDesk.focus_space(\"5\")"),
         ]
         let result = NavigationChords.deduplicated(rows, liveSpaces: live)
-        #expect(result.rows.map(\.combo) == ["control+option+keypad5"])
+        expectEqual(result.rows.map(\.combo), ["control+option+keypad5"])
     }
 
     @Test("a dedupe touching one Space leaves the rest")
@@ -85,7 +85,7 @@ struct NavigationChordsTests {
             liveSpaces: live,
             touching: SpaceID("5")
         )
-        #expect(result.rows.count == 3)
+        expectEqual(result.rows.count, 3)
         #expect(result.dropped.map(\.dropped.combo) == ["control+option+f5"])
     }
 }

@@ -152,11 +152,11 @@ struct CarriedRemovalTests {
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
         // The refusal rides the distrust's own convergence.
         #expect(loop.pendingRemovalRecheck.contains(pid))
-        #expect(box.recheckFires == 1)
-        #expect(carriedLines(box) == 1)
+        expectEqual(box.recheckFires, 1)
+        expectEqual(carriedLines(box), 1)
     }
 
     @Test("a carried window not in flight is a close")
@@ -171,8 +171,8 @@ struct CarriedRemovalTests {
         box.census = [:]
         loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.recheckFires == 0)
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
+        expectEqual(box.recheckFires, 0)
     }
 
     @Test("the arm never reads the switch grace")
@@ -188,7 +188,7 @@ struct CarriedRemovalTests {
         loop.lastDesktopChange = .distantPast
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, 1)
     }
 
     @Test("an uncarried vanish inside the grace keeps the old gate")
@@ -208,8 +208,8 @@ struct CarriedRemovalTests {
         // depend on the runner's pace (#1456's class).
         loop.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.censusReads == 0)
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
+        expectEqual(box.censusReads, 0)
     }
 
     @Test("the census-blind budget is the episode's recheck budget")
@@ -225,16 +225,16 @@ struct CarriedRemovalTests {
         for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
-            #expect(loop.removalDistrusted[WindowID(12)]?.arms == arm)
-            #expect(box.recheckFires == arm)
+            expectEqual(loop.removalDistrusted[WindowID(12)]?.arms, arm)
+            expectEqual(box.recheckFires, arm)
             _ = loop.drainPendingRemovalRecheck()
         }
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        expectEqual(box.destroyed.map(\.id), [WindowID(12)])
         #expect(loop.elements[pid]?[WindowID(12)] == nil)
         #expect(loop.removalDistrusted[WindowID(12)] == nil)
         // One episode, one line.
-        #expect(carriedLines(box) == 1)
+        expectEqual(carriedLines(box), 1)
     }
 
     @Test("a census that shows the window refuses past the budget")
@@ -276,7 +276,7 @@ struct CarriedRemovalTests {
         box.hidden = true
         box.census = [pid: [WindowID(11), WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.censusReads == 0)
+        expectEqual(box.censusReads, 0)
         #expect(
             box.hiddenEvents.sorted { $0.raw < $1.raw }
                 == [WindowID(11), WindowID(12)]
@@ -298,8 +298,8 @@ struct CarriedRemovalTests {
             minimized: [WindowID(12)],
             coalesceTabs: false
         )
-        #expect(box.censusReads == 0)
-        #expect(box.destroyed.map(\.wasMinimized) == [true])
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.destroyed.map(\.wasMinimized), [true])
     }
 
     @Test("a re-listed window is re-elemented, never re-created")
@@ -320,7 +320,7 @@ struct CarriedRemovalTests {
                 CFEqual($0, reborn)
             } == true
         )
-        #expect(observer?.observed.count == 1)
+        expectEqual(observer?.observed.count, 1)
         #expect(box.created.isEmpty)
         #expect(box.destroyed.isEmpty)
     }

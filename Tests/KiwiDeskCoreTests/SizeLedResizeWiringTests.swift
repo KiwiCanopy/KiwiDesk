@@ -79,7 +79,7 @@ struct SizeLedResizeWiringTests {
         ] {
             press(core, axis, delta)
             await drain()
-            #expect(app.now == start)
+            expectEqual(app.now, start)
         }
     }
 
@@ -112,7 +112,7 @@ struct SizeLedResizeWiringTests {
         )
         #expect(core.tiler.applier.sizeLedRuns[WindowID(1)] == nil)
         await drain()
-        #expect(app.now.minX == asked.minX)
+        expectEqual(app.now.minX, asked.minX)
     }
 
     @Test(
@@ -131,7 +131,7 @@ struct SizeLedResizeWiringTests {
             animated: true,
             sizeLedFrom: SizeLedRun(anchor: start, pressed: false)
         )
-        #expect(core.tiler.applier.sizeLedRuns[id]?.anchor == start)
+        expectEqual(core.tiler.applier.sizeLedRuns[id]?.anchor, start)
         core.tiler.applyFrame(id, from: start, to: asked, animated: true)
         #expect(core.tiler.applier.sizeLedRuns[id] == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
@@ -157,7 +157,7 @@ struct SizeLedResizeWiringTests {
         }
         await drain()
         #expect(!app.writes.withLock { $0.isEmpty })
-        #expect(app.now == start)
+        expectEqual(app.now, start)
     }
 
     /// A window at its maximum takes #2973's probe and refuses the
@@ -181,7 +181,7 @@ struct SizeLedResizeWiringTests {
         )
         await drain()
         #expect(!app.writes.withLock { $0.isEmpty })
-        #expect(app.now.origin == start.origin)
+        expectEqual(app.now.origin, start.origin)
     }
 
     /// The newest write says whether it leads, whatever waited.
@@ -202,7 +202,7 @@ struct SizeLedResizeWiringTests {
         }
         await drain()
         #expect(!app.writes.withLock { $0.isEmpty })
-        #expect(app.now == start)
+        expectEqual(app.now, start)
     }
 
     /// Its own target's origin is what the app may have refused.
@@ -264,7 +264,7 @@ struct SizeLedResizeWiringTests {
             sizeLedFrom: SizeLedRun(anchor: start, pressed: false)
         )
         await drain()
-        #expect(app.now == start)
+        expectEqual(app.now, start)
     }
 
     @Test("An instant write spends its anchor, a spring keeps it to the end")
@@ -279,14 +279,14 @@ struct SizeLedResizeWiringTests {
         applier.applyInstant(id, asked, setSize: true)
         #expect(applier.sizeLedRuns[id] == nil)
         await drain()
-        #expect(app.now == start)
+        expectEqual(app.now, start)
 
         applier.beginAnimating(id)
         applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.apply(id, asked, setSize: true)
-        #expect(applier.sizeLedRuns[id]?.anchor == start)
+        expectEqual(applier.sizeLedRuns[id]?.anchor, start)
         await drain()
-        #expect(app.now == start)
+        expectEqual(app.now, start)
         applier.endAnimating(id)
         #expect(applier.sizeLedRuns[id] == nil)
     }
@@ -309,9 +309,9 @@ struct SizeLedResizeWiringTests {
             resend: true
         )
         await drain()
-        #expect(owed.count == 1)
+        expectEqual(owed.count, 1)
         owed.forEach { $0() }
         await drain()
-        #expect(app.now == start)
+        expectEqual(app.now, start)
     }
 }

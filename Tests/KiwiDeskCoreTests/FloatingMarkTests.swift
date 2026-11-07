@@ -50,7 +50,7 @@ struct FloatingMarkDriverTests {
         addWindow(core, 1)
         addWindow(core, 2)
         core.state.setFloating(WindowID(1), true)
-        #expect(kinds(core, 1) == [.floating])
+        expectEqual(kinds(core, 1), [.floating])
         #expect(kinds(core, 2) == nil)
     }
 
@@ -63,7 +63,7 @@ struct FloatingMarkDriverTests {
         core.state.workspaces.setMode(space, .floating)
         core.state.setFloating(WindowID(2), true)
         #expect(kinds(core, 1) == nil)
-        #expect(kinds(core, 2) == [.floating])
+        expectEqual(kinds(core, 2), [.floating])
     }
 
     @Test("An overlay or a fullscreen float wears no floating glyph")
@@ -111,11 +111,11 @@ struct FloatingMarkDriverTests {
         addWindow(core, 1)
         core.state.setFloating(WindowID(1), true)
         core.state.setSticky(WindowID(1), .global)
-        #expect(kinds(core, 1) == [.sticky, .floating])
+        expectEqual(kinds(core, 1), [.sticky, .floating])
         // Sticky shows everywhere, so its floating glyph does too.
         core.state.workspaces.ensureSpace(SpaceID(2))
         core.state.workspaces.activate(SpaceID(2))
-        #expect(kinds(core, 1) == [.sticky, .floating])
+        expectEqual(kinds(core, 1), [.sticky, .floating])
     }
 
     @Test("Each switch retires only its own glyph")
@@ -125,10 +125,10 @@ struct FloatingMarkDriverTests {
         core.state.setFloating(WindowID(1), true)
         core.state.setSticky(WindowID(1), .global)
         core.tiler.settings.floatingStyle.mark = false
-        #expect(kinds(core, 1) == [.sticky])
+        expectEqual(kinds(core, 1), [.sticky])
         core.tiler.settings.floatingStyle.mark = true
         core.tiler.settings.stickyStyle.mark = false
-        #expect(kinds(core, 1) == [.floating])
+        expectEqual(kinds(core, 1), [.floating])
     }
 
     @Test("The floating glyph takes floating.color")
@@ -138,7 +138,7 @@ struct FloatingMarkDriverTests {
         core.state.setFloating(WindowID(1), true)
         core.tiler.settings.floatingStyle.color = "#E8A33D"
         let glyph = core.stickyMarkSpecs().first?.glyphs.first
-        #expect(glyph == .floating(color: "#E8A33D"))
+        expectEqual(glyph, .floating(color: "#E8A33D"))
     }
 
     @Test("floating.set_mark writes the switch")
@@ -198,16 +198,16 @@ struct FloatingMarkPlateTests {
         let wide = StickyMarkPlate.fittingSlots(2, windowWidth: 400)
         let narrow = StickyMarkPlate.fittingSlots(2, windowWidth: 100)
         let tiny = StickyMarkPlate.fittingSlots(2, windowWidth: 10)
-        #expect(wide == 2)
-        #expect(narrow == 1)
-        #expect(tiny == 1)
-        #expect(StickyMarkPlate.fittingSlots(1, windowWidth: 400) == 1)
+        expectEqual(wide, 2)
+        expectEqual(narrow, 1)
+        expectEqual(tiny, 1)
+        expectEqual(StickyMarkPlate.fittingSlots(1, windowWidth: 400), 1)
         // The band edge, derived: two squares beside the traffic
         // lights fit, a point less does not.
         let both =
             StickyMarkPlate.size * 2 + StickyMarkOverlay.inset * 2
             + StickyMarkPlate.trafficLightClearance
-        #expect(StickyMarkPlate.fittingSlots(2, windowWidth: both) == 2)
+        expectEqual(StickyMarkPlate.fittingSlots(2, windowWidth: both), 2)
         #expect(
             StickyMarkPlate.fittingSlots(2, windowWidth: both - 1) == 1
         )
@@ -239,6 +239,6 @@ struct FloatingMarkPlateTests {
             hex: ""
         )
         let two = plate.prepare(format: "%1$@", mark: .text("Work"))
-        #expect(two == one + StickyMarkPlate.size)
+        expectEqual(two, one + StickyMarkPlate.size)
     }
 }

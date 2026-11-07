@@ -55,10 +55,10 @@ struct RenameSpaceTests {
             to: SpaceID("main")
         )
         #expect(ok)
-        #expect(config.spaces == [SpaceID("main"), SpaceID("mail")])
-        #expect(config.spaceModes[SpaceID("main")] == .stack)
+        expectEqual(config.spaces, [SpaceID("main"), SpaceID("mail")])
+        expectEqual(config.spaceModes[SpaceID("main")], .stack)
         #expect(config.spaceModes[SpaceID("2")] == nil)
-        #expect(config.appRules["Spotify"] == SpaceID("main"))
+        expectEqual(config.appRules["Spotify"], SpaceID("main"))
         #expect(
             config.spacePins[SpaceID("main")]
                 == "LG:2560x1440"
@@ -156,8 +156,8 @@ struct RenameSpaceTests {
         )
         #expect(!ok)
         // Untouched.
-        #expect(config.spaces == [SpaceID("2"), SpaceID("mail")])
-        #expect(config.spaceModes[SpaceID("2")] == .stack)
+        expectEqual(config.spaces, [SpaceID("2"), SpaceID("mail")])
+        expectEqual(config.spaceModes[SpaceID("2")], .stack)
     }
 
     @Test("rename of an unknown space is a no-op")
@@ -168,7 +168,7 @@ struct RenameSpaceTests {
             to: SpaceID("x")
         )
         #expect(!ok)
-        #expect(config.spaces == [SpaceID("2"), SpaceID("mail")])
+        expectEqual(config.spaces, [SpaceID("2"), SpaceID("mail")])
     }
 
     @Test("rename to an empty name is rejected")
@@ -179,7 +179,7 @@ struct RenameSpaceTests {
             to: SpaceID("")
         )
         #expect(!ok)
-        #expect(config.spaces == [SpaceID("2"), SpaceID("mail")])
+        expectEqual(config.spaces, [SpaceID("2"), SpaceID("mail")])
     }
 
     @Test("decode drops empty-named spaces and their entries")
@@ -192,7 +192,7 @@ struct RenameSpaceTests {
             GuiConfig.self,
             from: data
         )
-        #expect(decoded.spaces == [SpaceID("1")])
+        expectEqual(decoded.spaces, [SpaceID("1")])
         #expect(decoded.appRules.isEmpty)
     }
 
@@ -215,7 +215,7 @@ struct RenameSpaceTests {
             to: SpaceID("2")
         )
         #expect(ok)
-        #expect(config.spaceModes[SpaceID("2")] == .stack)
+        expectEqual(config.spaceModes[SpaceID("2")], .stack)
     }
 }
 
@@ -235,7 +235,7 @@ struct GuiConfigSpaceOrderTests {
             to: SpaceID("c")
         )
         #expect(ok)
-        #expect(config.fallbackSpace == SpaceID("c"))
+        expectEqual(config.fallbackSpace, SpaceID("c"))
     }
 
     @Test("rename of another space keeps the fallback")
@@ -248,7 +248,7 @@ struct GuiConfigSpaceOrderTests {
             to: SpaceID("c")
         )
         #expect(ok)
-        #expect(config.fallbackSpace == SpaceID("b"))
+        expectEqual(config.fallbackSpace, SpaceID("b"))
     }
 
     @Test("deduplicated preserves insertion order, no sort")

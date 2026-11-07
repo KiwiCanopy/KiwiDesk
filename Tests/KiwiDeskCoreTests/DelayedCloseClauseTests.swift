@@ -23,7 +23,7 @@ struct DelayedCloseClauseTests {
         fx.keySuccessor(core)
         core.handle(.windowFocused(fx.successor))
         core.deferred.cancel(.focusFollow)
-        #expect(core.delayedCloseDebt?.followed == true)
+        expectEqual(core.delayedCloseDebt?.followed, true)
         fx.confirmClose(core)
         fx.expectReturned(core, log)
     }
@@ -40,7 +40,7 @@ struct DelayedCloseClauseTests {
             blind: .fullscreen
         )
         let cause = core.eventLoop.removalDistrusted[fx.closing]?.cause
-        #expect(cause == .fullscreen)
+        expectEqual(cause, .fullscreen)
         fx.keySuccessor(core)
         #expect(core.delayedCloseDebt == nil)
     }
@@ -81,7 +81,7 @@ struct DelayedCloseClauseTests {
         fx.keySuccessor(core)
         core.state.workspaces.focus(bystander, in: "2")
         fx.confirmClose(core)
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(!log.has("close-return: raising"))
         #expect(log.has("return stood down (focus moved on)"))
     }
@@ -93,7 +93,7 @@ struct DelayedCloseClauseTests {
         fx.refuse(core)
         fx.keySuccessor(core)
         fx.confirmClose(core, minimized: true)
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(!log.has("confirmed late"))
         #expect(core.delayedCloseDebt == nil)
     }
@@ -106,7 +106,7 @@ struct DelayedCloseClauseTests {
         fx.keySuccessor(core)
         core.state.workspaces.add(fx.closing, to: "3")
         fx.confirmClose(core)
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(!log.has("confirmed late"))
         #expect(!log.has("close-return: raising"))
     }

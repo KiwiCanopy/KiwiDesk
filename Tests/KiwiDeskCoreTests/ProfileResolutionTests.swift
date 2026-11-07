@@ -66,7 +66,7 @@ struct MonitorChangeTests {
         )
 
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(!core.profiles.isDirty)
         #expect(core.profiles.currentStandard == nil)
     }
@@ -83,7 +83,7 @@ struct MonitorChangeTests {
         connect(core, [display(2, "OTHER")])
 
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "known")
+        expectEqual(core.profiles.currentName, "known")
         #expect(core.profiles.isDirty)
     }
 
@@ -107,7 +107,7 @@ struct MonitorChangeTests {
         core.state.workspaces.removeDisplay(DisplayID(2))
         connect(core, [display(1, "A")])
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(!core.profiles.isDirty)
     }
 
@@ -118,7 +118,7 @@ struct MonitorChangeTests {
 
         core.handleMonitorChange()
         #expect(core.profiles.currentName == nil)
-        #expect(core.profiles.currentStandard == "Developer")
+        expectEqual(core.profiles.currentStandard, "Developer")
         #expect(core.profiles.isDirty)
         // The Developer Standard: 4 spaces, stack on 2.
         #expect(
@@ -127,9 +127,9 @@ struct MonitorChangeTests {
         let developer = try #require(
             StandardProfiles.standard(for: 1)
         ).settings(sizes: [CGSize(width: 100, height: 100)])
-        #expect(core.tiler.settings == developer)
+        expectEqual(core.tiler.settings, developer)
         // Tuned for the 100 pt laptop (#1663, #2171): Grid 2×2.
-        #expect(core.tiler.settings.grid.rows == 2)
+        expectEqual(core.tiler.settings.grid.rows, 2)
         #expect(
             core.state.workspaces.display(of: SpaceID(1))
                 == DisplayID(1)
@@ -176,7 +176,7 @@ struct MonitorChangeTests {
         // live monitors.
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(core.profiles.currentStandard == nil)
         #expect(core.profiles.isDirty)
     }
@@ -230,7 +230,7 @@ struct MonitorChangeTests {
         )
 
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Desk Two")
+        expectEqual(core.profiles.currentName, "Desk Two")
     }
 }
 
@@ -305,7 +305,7 @@ struct SpacePlacementTests {
             args: [.string("sparse")]
         )
         let workspaces = core.state.workspaces
-        #expect(workspaces[SpaceID(1)]?.mode == .stack)
+        expectEqual(workspaces[SpaceID(1)]?.mode, .stack)
         // Undeclared by the (hand-edited, sparse) profile, so the
         // explicit load drops it — no stale grid mode lingers.
         #expect(workspaces[SpaceID(2)] == nil)
@@ -340,8 +340,8 @@ struct SpacePlacementTests {
             "load_profile",
             args: [.string("pinned")]
         )
-        #expect(core.spacePins == [SpaceID(1): "B:100x100"])
-        #expect(core.mainSpaces == [SpaceID(2)])
+        expectEqual(core.spacePins, [SpaceID(1): "B:100x100"])
+        expectEqual(core.mainSpaces, [SpaceID(2)])
         #expect(
             core.state.workspaces.display(of: SpaceID(1))
                 == DisplayID(2)

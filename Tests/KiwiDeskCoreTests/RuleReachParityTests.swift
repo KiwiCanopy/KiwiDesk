@@ -51,7 +51,7 @@ struct RuleReachParityTests {
             reach: .listed(["Home"]),
             editing: "Home"
         )
-        #expect(table.touched["Home"]?.contains("zoom") == true)
+        expectEqual(table.touched["Home"]?.contains("zoom"), true)
         let base = table.floatRuleBase(original: ["zoom", "com.calc"])
         for (name, original) in [("Work", nil), ("Home", home)] {
             let encoded = table.floatRuleOverride(
@@ -84,9 +84,9 @@ struct RuleReachParityTests {
             reach: .listed(["Travel"]),
             editing: "Travel"
         )
-        #expect(table.resolved("mail", for: "Travel") == 3)
+        expectEqual(table.resolved("mail", for: "Travel"), 3)
         #expect(table.resolved("mail", for: "Home") == nil)
-        #expect(table.leftOut("mail") == ["Home"])
+        expectEqual(table.leftOut("mail"), ["Home"])
     }
 
     @Test("A shared move takes an entry equal to the old base along")
@@ -104,7 +104,7 @@ struct RuleReachParityTests {
             reach: .shared(joining: []),
             editing: "Work"
         )
-        #expect(table.resolved("mail", for: "Home") == 2)
+        expectEqual(table.resolved("mail", for: "Home"), 2)
     }
 
     @Test("An untouched Space rule keeps its stored spelling")
@@ -114,7 +114,7 @@ struct RuleReachParityTests {
             base: original,
             overrides: [("Work", nil)]
         )
-        #expect(table.appRuleBase(original: original) == original)
+        expectEqual(table.appRuleBase(original: original), original)
         table.apply(
             "zoom",
             value: 3,
@@ -160,7 +160,7 @@ struct OverwriteProfileRulesTests {
             writingRules: false
         )
         let stored = try core.profiles.read(name: "Home")
-        #expect(stored.appRules == own)
-        #expect(stored.floatRules == floats)
+        expectEqual(stored.appRules, own)
+        expectEqual(stored.floatRules, floats)
     }
 }

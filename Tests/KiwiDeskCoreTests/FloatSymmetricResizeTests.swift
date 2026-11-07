@@ -54,44 +54,44 @@ struct FloatSymmetricResizeTests {
     @Test("Free on both sides: the delta splits evenly")
     func middleSplitsEvenly() {
         let grown = grow(rect(800, 400))
-        #expect(grown.frame == rect(750, 500))
+        expectEqual(grown.frame, rect(750, 500))
         #expect(grown.refusal == nil)
         // ...and back.
-        #expect(shrink(grown.frame).frame == rect(800, 400))
+        expectEqual(shrink(grown.frame).frame, rect(800, 400))
     }
 
     @Test("A pinned edge sends the whole delta the other way")
     func pinnedEdgeSendsTheWholeDelta() {
         // Right edge exactly on 1728.
         let grown = grow(rect(1328, 400))
-        #expect(grown.frame == rect(1228, 500))
+        expectEqual(grown.frame, rect(1228, 500))
         #expect(grown.refusal == nil)
         // The pin holds on the way back too, which is the half
         // of the rule easiest to drop: shrink pinned on the
         // right must come entirely off the LEFT, or the window
         // walks away from the edge it was parked against.
-        #expect(shrink(grown.frame).frame == rect(1328, 400))
+        expectEqual(shrink(grown.frame).frame, rect(1328, 400))
     }
 
     @Test("The left edge pins the same way")
     func leftEdgePins() {
         let grown = grow(rect(0, 400))
-        #expect(grown.frame == rect(0, 500))
-        #expect(shrink(grown.frame).frame == rect(0, 400))
+        expectEqual(grown.frame, rect(0, 500))
+        expectEqual(shrink(grown.frame).frame, rect(0, 400))
     }
 
     @Test("Both edges pinned: a grow refuses, a shrink does not")
     func bothPinned() {
         let wall = rect(0, 1728)
         let grown = grow(wall)
-        #expect(grown.refusal == .blocked)
-        #expect(grown.frame == wall)
+        expectEqual(grown.refusal, .blocked)
+        expectEqual(grown.frame, wall)
         // A shrink always has somewhere to go — refusing it
         // would strand a wall-to-wall window at a size it could
         // never leave.
         let shrunk = shrink(wall)
         #expect(shrunk.refusal == nil)
-        #expect(shrunk.frame == rect(50, 1628))
+        expectEqual(shrunk.frame, rect(50, 1628))
     }
 
     @Test("A refused grow is the ONLY thing that reports one")
@@ -122,10 +122,10 @@ struct FloatSymmetricResizeTests {
         // window nearly filling the region — flush left, 40 pt
         // of room right, asked 100.
         let grown = grow(rect(0, 1688))
-        #expect(grown.refusal == .truncated)
+        expectEqual(grown.refusal, .truncated)
         // Truncated is not blocked: it still moved, by the 40 it
         // had.
-        #expect(grown.frame == rect(0, 1728))
+        expectEqual(grown.frame, rect(0, 1728))
         // And the merely-pinned grow is NOT truncated, which is
         // the distinction the cue rests on.
         #expect(grow(rect(1300, 400)).refusal == nil)
@@ -138,13 +138,13 @@ struct FloatSymmetricResizeTests {
         // gives that side its 28 and spills the remaining 22
         // leftward, which pins the right edge.
         let grown = grow(rect(1300, 400))
-        #expect(grown.frame == rect(1228, 500))
+        expectEqual(grown.frame, rect(1228, 500))
         // The following shrink now comes entirely off the left,
         // landing 28 pt right of the start — half a step is the
         // ceiling, and this is what must not grow.
         let back = shrink(grown.frame).frame
-        #expect(back == rect(1328, 400))
-        #expect(back.minX - 1300 == 28)
+        expectEqual(back, rect(1328, 400))
+        expectEqual(back.minX - 1300, 28)
         // The CEILING, swept rather than asserted at one
         // fixture. The single `<= step / 2` clause beside the
         // `== 28` above was implied by it and could not fail
@@ -207,8 +207,8 @@ struct FloatSymmetricResizeTests {
             minSize: minSize,
             bounds: region
         )
-        #expect(grown.frame.minY == 617)
-        #expect(grown.frame.height == 500)
+        expectEqual(grown.frame.minY, 617)
+        expectEqual(grown.frame.height, 500)
         // And the pin holds on the way back.
         let back = FloatResize.resized(
             grown.frame,
@@ -217,7 +217,7 @@ struct FloatSymmetricResizeTests {
             minSize: minSize,
             bounds: region
         )
-        #expect(back.frame == tall)
+        expectEqual(back.frame, tall)
     }
 
     @Test("A y grow with both edges pinned refuses too")
@@ -230,8 +230,8 @@ struct FloatSymmetricResizeTests {
             minSize: minSize,
             bounds: region
         )
-        #expect(grown.refusal == .blocked)
-        #expect(grown.frame == wall)
+        expectEqual(grown.refusal, .blocked)
+        expectEqual(grown.frame, wall)
     }
 
     @Test("A bar-carved region pins at the bar, not the screen")
@@ -249,7 +249,7 @@ struct FloatSymmetricResizeTests {
             of: CGRect(x: 1628, y: 0, width: 100, height: 1117),
             edge: .right
         )
-        #expect(carved == CGRect(x: 0, y: 40, width: 1628, height: 1077))
+        expectEqual(carved, CGRect(x: 0, y: 40, width: 1628, height: 1077))
         // A float whose right edge sits on the carved boundary
         // is pinned there, 100 pt short of the screen edge.
         let grown = FloatResize.resized(
@@ -259,7 +259,7 @@ struct FloatSymmetricResizeTests {
             minSize: minSize,
             bounds: carved
         )
-        #expect(grown.frame == rect(1128, 500))
+        expectEqual(grown.frame, rect(1128, 500))
     }
 
     @Test("Two strips on one edge leave the deeper carve")
@@ -282,7 +282,7 @@ struct FloatSymmetricResizeTests {
             of: shallow,
             edge: .top
         )
-        #expect(a == b)
-        #expect(a.minY == 70)
+        expectEqual(a, b)
+        expectEqual(a.minY, 70)
     }
 }

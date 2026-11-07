@@ -20,7 +20,7 @@ struct LocalizationContentGuardTests {
             english: ["a.save": "Save copy"],
             catalogs: ["ja": ["a.save": "コピーを保存"]]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     @Test("Cyrillic in a Japanese value fails")
@@ -40,7 +40,7 @@ struct LocalizationContentGuardTests {
             english: ["a.focus": "Focus here"],
             catalogs: ["ru": ["a.focus": "Фокус здесь"]]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// Han cannot separate Japanese from either Chinese script, so
@@ -65,7 +65,7 @@ struct LocalizationContentGuardTests {
             english: ["a.add": "Add window"],
             catalogs: [locale: ["a.add": value]]
         )
-        #expect((result.status == 0) == passes)
+        expectEqual((result.status == 0), passes)
         // Not just "some failure": a bare non-zero exit is also
         // what a traceback or a different guard would produce.
         if !passes {
@@ -96,7 +96,7 @@ struct LocalizationContentGuardTests {
                 "ko": ["a.name": "KiwiDesk"],
             ]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     @Test("a generated en.json is script-checked too")
@@ -150,7 +150,7 @@ struct LocalizationContentGuardTests {
             english: ["a.lang": "German (DE)"],
             catalogs: ["es": ["a.lang": "Alemán (DE)"]]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// Placeholder parity is the one guard protecting a *runtime*
@@ -185,7 +185,7 @@ struct LocalizationContentGuardTests {
             english: ["a.two": "%1$@ before %2$@"],
             catalogs: ["ja": ["a.two": "%2$@ の前に %1$@"]]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// `%%` renders a literal percent and carries no argument, so a
@@ -197,7 +197,7 @@ struct LocalizationContentGuardTests {
             english: ["a.pct": "ratio %1$d percent"],
             catalogs: ["ja": ["a.pct": "比率 %1$d%%"]]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 }
 

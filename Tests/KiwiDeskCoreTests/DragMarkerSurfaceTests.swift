@@ -47,7 +47,7 @@ struct DragMarkerSurfaceTests {
     private static func expectRim(_ marker: DragOverlay.Marker) {
         #expect(DragMarkerView.rimWidth > 0, "no rim drawn")
         let layer = marker.view.layer
-        #expect(layer?.borderWidth == DragMarkerView.rimWidth)
+        expectEqual(layer?.borderWidth, DragMarkerView.rimWidth)
         #expect((Self.white(layer?.borderColor) ?? 0) > 0.5)
         #expect(marker.view.line.isHidden && marker.view.halo.isHidden)
     }
@@ -72,10 +72,10 @@ struct DragMarkerSurfaceTests {
         #expect(!glass.isHidden)
         try #require(DragMarkerView.glassOpacity < 1)
         try #require(DragMarkerView.glassOpacity > 0)
-        #expect(glass.alphaValue == DragMarkerView.glassOpacity)
+        expectEqual(glass.alphaValue, DragMarkerView.glassOpacity)
         #expect(marker.tint.gradient?.colors == nil, "the glass is tinted")
         #expect(marker.view.material?.isHidden ?? true)
-        #expect(marker.view.layer?.backgroundColor?.alpha == 0)
+        expectEqual(marker.view.layer?.backgroundColor?.alpha, 0)
         Self.expectRim(marker)
     }
 
@@ -96,9 +96,9 @@ struct DragMarkerSurfaceTests {
         let marker = try #require(overlay.dropZone)
         let material = try #require(marker.view.material)
         #expect(!material.isHidden)
-        #expect(material.alphaValue == DragMarkerView.glassOpacity)
+        expectEqual(material.alphaValue, DragMarkerView.glassOpacity)
         #expect(marker.glass?.isHidden ?? true)
-        #expect(marker.view.layer?.backgroundColor?.alpha == 0)
+        expectEqual(marker.view.layer?.backgroundColor?.alpha, 0)
         Self.expectRim(marker)
     }
 
@@ -120,7 +120,7 @@ struct DragMarkerSurfaceTests {
         )
         let marker = try #require(overlay.dropZone)
         let ground = marker.view.layer?.backgroundColor
-        #expect(ground?.alpha == DragMarkerView.flatColor.alphaComponent)
+        expectEqual(ground?.alpha, DragMarkerView.flatColor.alphaComponent)
         #expect((ground?.alpha ?? 1) < 0.5, "an opaque drop zone")
         #expect(marker.view.material?.isHidden ?? true)
         #expect(marker.glass?.isHidden ?? true)
@@ -148,13 +148,13 @@ struct DragMarkerSurfaceTests {
         let halo = try #require(Self.white(view.halo.strokeColor))
         #expect(line < 0.5 && halo > 0.5, "not dark inside light")
         #expect(view.line.fillColor == nil && view.halo.fillColor == nil)
-        #expect(view.layer?.backgroundColor?.alpha == 0)
-        #expect(view.layer?.borderWidth == 0)
+        expectEqual(view.layer?.backgroundColor?.alpha, 0)
+        expectEqual(view.layer?.borderWidth, 0)
         #expect(view.glass?.isHidden ?? true)
         #expect(view.material?.isHidden ?? true)
         // Inside the slot: the halo's outer edge meets the bounds.
         let box = try #require(view.halo.path?.boundingBox)
-        #expect(box.minX == DragMarkerView.haloWidth / 2)
+        expectEqual(box.minX, DragMarkerView.haloWidth / 2)
     }
 
     /// Every marker sits BENEATH the dragged window at window
@@ -205,7 +205,7 @@ struct DragMarkerSurfaceTests {
             )
             #expect(at > draggedAt, "a marker is above the window")
             #expect(at < otherAt, "a marker stayed buried")
-            #expect(panel.level == .normal)
+            expectEqual(panel.level, .normal)
         }
     }
 }

@@ -21,12 +21,12 @@ struct StarterAllocationTests {
 
     @Test("the budget ladder is 3 · 5 · 7 · 8 · 9, then +1")
     func budgetLadder() {
-        #expect(StarterAllocation.budget(screenCount: 1) == 3)
-        #expect(StarterAllocation.budget(screenCount: 2) == 5)
-        #expect(StarterAllocation.budget(screenCount: 3) == 7)
-        #expect(StarterAllocation.budget(screenCount: 4) == 8)
-        #expect(StarterAllocation.budget(screenCount: 5) == 9)
-        #expect(StarterAllocation.budget(screenCount: 6) == 10)
+        expectEqual(StarterAllocation.budget(screenCount: 1), 3)
+        expectEqual(StarterAllocation.budget(screenCount: 2), 5)
+        expectEqual(StarterAllocation.budget(screenCount: 3), 7)
+        expectEqual(StarterAllocation.budget(screenCount: 4), 8)
+        expectEqual(StarterAllocation.budget(screenCount: 5), 9)
+        expectEqual(StarterAllocation.budget(screenCount: 6), 10)
     }
 
     @Test("the cap holds, and min-one-per-screen outranks it")
@@ -37,8 +37,8 @@ struct StarterAllocationTests {
         )
         // The cap is on SPACES, so a screen never ends up with
         // nowhere for a window to resolve to.
-        #expect(StarterAllocation.budget(screenCount: 11) == 11)
-        #expect(StarterAllocation.budget(screenCount: 0) == 3)
+        expectEqual(StarterAllocation.budget(screenCount: 11), 11)
+        expectEqual(StarterAllocation.budget(screenCount: 0), 3)
     }
 
     // MARK: - Shares
@@ -51,8 +51,8 @@ struct StarterAllocationTests {
         )
         // 15b's own worked example: the laptop takes two, the
         // 27" takes three.
-        #expect(shares == [2, 3])
-        #expect(shares.reduce(0, +) == 5)
+        expectEqual(shares, [2, 3])
+        expectEqual(shares.reduce(0, +), 5)
     }
 
     @Test("every supported screen count apportions exactly")
@@ -130,7 +130,7 @@ struct StarterAllocationTests {
                     + "wider one: \(clamped)"
             )
         )
-        #expect(clamped.reduce(0, +) == 10)
+        expectEqual(clamped.reduce(0, +), 10)
 
         // Five identical screens split as evenly as the budget
         // allows — never [3,3,1,1,1].
@@ -177,8 +177,8 @@ struct StarterAllocationTests {
             widths: widths,
             budget: 7
         )
-        #expect(first == second)
-        #expect(first.reduce(0, +) == 7)
+        expectEqual(first, second)
+        expectEqual(first.reduce(0, +), 7)
     }
 
     // MARK: - Modes
@@ -188,7 +188,7 @@ struct StarterAllocationTests {
         let sizes = [laptop, bigDesk, screen27]
         let modes = StarterAllocation.modes(sizes: sizes)
         let floats = modes.flatMap { $0 }.filter { $0 == .floating }
-        #expect(floats.count == 1)
+        expectEqual(floats.count, 1)
         #expect(modes[1].contains(.floating))
         #expect(!modes[0].contains(.floating))
         #expect(!modes[2].contains(.floating))
@@ -204,7 +204,7 @@ struct StarterAllocationTests {
             count: 11
         )
         let modes = StarterAllocation.modes(sizes: sizes)
-        #expect(modes.count == 11)
+        expectEqual(modes.count, 11)
         #expect(modes.allSatisfy { $0.count == 1 })
         #expect(!modes.flatMap { $0 }.contains(.floating))
     }
@@ -213,7 +213,7 @@ struct StarterAllocationTests {
     func singleScreenKeepsFloating() {
         for size in [laptop, screen27, ultrawide, pivoted] {
             let modes = StarterAllocation.modes(sizes: [size])
-            #expect(modes[0].count == 3)
+            expectEqual(modes[0].count, 3)
             #expect(
                 modes[0].last == .floating,
                 "\(size) lost its Floating space"
@@ -309,6 +309,6 @@ struct StarterAllocationTests {
     @Test("no screens in, no screens out")
     func emptyIsEmpty() {
         #expect(StarterAllocation.modes(sizes: []).isEmpty)
-        #expect(StarterAllocation.shares(widths: [], budget: 3) == [])
+        expectEqual(StarterAllocation.shares(widths: [], budget: 3), [])
     }
 }

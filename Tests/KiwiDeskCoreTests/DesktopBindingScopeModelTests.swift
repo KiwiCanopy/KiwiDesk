@@ -43,7 +43,7 @@ struct DesktopBindingScopeModelTests {
         )
         // Another count never overlaps.
         record.bind(.init(name: "Dual")) { counts[$0.name] }
-        #expect(record.entries.count == 4)
+        expectEqual(record.entries.count, 4)
     }
 
     @Test("an unbind of one scope leaves the others")
@@ -55,7 +55,7 @@ struct DesktopBindingScopeModelTests {
             counts[$0.name]
         }
         #expect(!scopedEmptied)
-        #expect(record.entries == [.init(name: "Starter")])
+        expectEqual(record.entries, [.init(name: "Starter")])
         record.bind(.init(name: "Vision", setup: vision)) { counts[$0.name] }
         let allEmptied = record.unbind(count: 1) { counts[$0.name] }
         #expect(!allEmptied)
@@ -78,7 +78,7 @@ struct DesktopBindingScopeModelTests {
                 .init(name: "AVP"),
             ]
         )
-        #expect(record.names == ["AVP"])
+        expectEqual(record.names, ["AVP"])
     }
 
     @Test("the rank: this setup's entries, then all setups'")
@@ -119,10 +119,10 @@ struct DesktopBindingScopeModelTests {
                 as? [String: Any]
         )
         let entries = try #require(object["profiles"] as? [Any])
-        #expect(entries.first as? String == "Starter")
+        expectEqual(entries.first as? String, "Starter")
         let scoped = try #require(entries.last as? [String: Any])
-        #expect(scoped["profile"] as? String == "Vision")
-        #expect(scoped["setup"] as? [String] == ["A:1x1", "B:1x1"])
+        expectEqual(scoped["profile"] as? String, "Vision")
+        expectEqual(scoped["setup"] as? [String], ["A:1x1", "B:1x1"])
         #expect(
             try JSONDecoder().decode(DesktopBinding.self, from: data)
                 == record

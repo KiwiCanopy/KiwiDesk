@@ -124,7 +124,7 @@ struct JumpActionsTests {
         track(core, 2, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         core.jump(to: .window(WindowID(2)))
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     @Test("a window on another Space switches there")
@@ -134,8 +134,8 @@ struct JumpActionsTests {
         track(core, 1, in: "1")
         track(core, 2, in: "2")
         core.jump(to: .window(WindowID(2)))
-        #expect(core.state.workspaces.activeSpace == "2")
-        #expect(core.state.workspaces["2"]?.focused == WindowID(2))
+        expectEqual(core.state.workspaces.activeSpace, "2")
+        expectEqual(core.state.workspaces["2"]?.focused, WindowID(2))
     }
 
     @Test("a minimized window is restored, then its app brought forward")
@@ -155,7 +155,7 @@ struct JumpActionsTests {
         core.jump(to: .window(WindowID(4)))
         #expect(calls == ["restore 4", "activate \(pid)"])
         // An un-minimize is an open: the launch follow is owed.
-        #expect(core.launchFollow.owed() == bundle)
+        expectEqual(core.launchFollow.owed(), bundle)
     }
 
     @Test("a hidden app is brought forward")
@@ -165,7 +165,7 @@ struct JumpActionsTests {
         var activated: [pid_t] = []
         core.openOrFocus.activate = { activated.append($0) }
         core.jump(to: .hiddenApp(300))
-        #expect(activated == [300])
+        expectEqual(activated, [300])
     }
 
     @Test("Move here moves a window into this Space and focuses it")
@@ -175,9 +175,9 @@ struct JumpActionsTests {
         track(core, 1, in: "1")
         track(core, 2, in: "2")
         #expect(core.moveHere(.window(WindowID(2))))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     @Test("Move here refuses a full-screen window and moves nothing")
@@ -186,7 +186,7 @@ struct JumpActionsTests {
         defer { teardown() }
         track(core, 2, in: "2", fullscreen: true)
         #expect(!core.moveHere(.window(WindowID(2))))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "2")
     }
 
     /// Up on Desktop 2: hopped onto the shown Desktop 1, filed
@@ -197,10 +197,10 @@ struct JumpActionsTests {
         defer { teardown() }
         park(core)
         #expect(core.moveHere(.window(WindowID(7))))
-        #expect(Bridge.moves.map(\.1) == [10])
-        #expect(Bridge.moves.first?.0 == [NSNumber(value: 7)])
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("1"))
-        #expect(core.jump.owed?.window == WindowID(7))
+        expectEqual(Bridge.moves.map(\.1), [10])
+        expectEqual(Bridge.moves.first?.0, [NSNumber(value: 7)])
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("1"))
+        expectEqual(core.jump.owed?.window, WindowID(7))
         #expect(core.followFocus.owed() == nil)
     }
 
@@ -211,7 +211,7 @@ struct JumpActionsTests {
         park(core)
         #expect(!core.moveHere(.window(WindowID(7))))
         #expect(Bridge.moves.isEmpty)
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("2"))
     }
 
     private func minimize(_ core: KiwiCore, _ id: UInt32) {
@@ -244,8 +244,8 @@ struct JumpActionsTests {
         var activated: [pid_t] = []
         core.openOrFocus.activate = { activated.append($0) }
         core.jump(to: .window(WindowID(3)))
-        #expect(activated == [pid])
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(activated, [pid])
+        expectEqual(core.state.workspaces.activeSpace, "1")
     }
 
     /// No bridge to reach the Desktop: the app comes forward
@@ -258,7 +258,7 @@ struct JumpActionsTests {
         var activated: [pid_t] = []
         core.openOrFocus.activate = { activated.append($0) }
         core.jump(to: .window(WindowID(7)))
-        #expect(activated == [pid])
+        expectEqual(activated, [pid])
     }
 
     @Test("Move here on a hidden app brings it forward")
@@ -268,7 +268,7 @@ struct JumpActionsTests {
         var activated: [pid_t] = []
         core.openOrFocus.activate = { activated.append($0) }
         #expect(core.moveHere(.hiddenApp(300)))
-        #expect(activated == [300])
+        expectEqual(activated, [300])
     }
 
     /// The hop's arrival pays the focus, with no Space switch.
@@ -281,9 +281,9 @@ struct JumpActionsTests {
         park(core)
         #expect(core.moveHere(.window(WindowID(7))))
         arrive(core, 7)
-        #expect(core.state.workspaces.space(of: WindowID(7)) == "1")
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(core.state.workspaces.lastFocused == WindowID(7))
+        expectEqual(core.state.workspaces.space(of: WindowID(7)), "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(7))
     }
 
     /// The bridge resolves but refuses the move: nothing is owed
@@ -299,7 +299,7 @@ struct JumpActionsTests {
         park(core)
         #expect(!core.moveHere(.window(WindowID(7))))
         #expect(core.jump.owed == nil)
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("2"))
     }
 
     /// A ∞ window already renders here: focused, never moved.
@@ -310,7 +310,7 @@ struct JumpActionsTests {
         track(core, 1, in: "1")
         track(core, 2, in: "2", sticky: .global)
         #expect(core.moveHere(.window(WindowID(2))))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "2")
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "2")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 }

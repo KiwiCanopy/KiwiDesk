@@ -58,7 +58,7 @@ struct DesktopRaiseGateTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.focusWindow(WindowID(1), warp: true)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         #expect(core.tiler.placements.recent(WindowID(2)) == nil)
         #expect(log.contains { $0.contains(Self.refusalNeedle) })
     }
@@ -70,7 +70,7 @@ struct DesktopRaiseGateTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.focusWindow(WindowID(1), warp: false)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         #expect(!log.contains { $0.contains(Self.refusalNeedle) })
     }
 

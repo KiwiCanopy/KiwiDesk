@@ -130,9 +130,9 @@ struct ScrollSpaceStepTests {
         core.applyScrollGestures(base: base, profile: nil)
         // Fingers left: content left, the NEXT Space comes in.
         swipe(core, session, dx: -80, events: 6)
-        #expect(shown(core) == "2")
+        expectEqual(shown(core), "2")
         swipe(core, session, dx: 80)
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
     }
 
     @Test("the glide after a lift never steps")
@@ -147,24 +147,24 @@ struct ScrollSpaceStepTests {
                 session: session
             )
         }
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
     }
 
     @Test("a wheel steps once per notch clicked one at a time")
     func onePerNotch() {
         let (core, session) = makeCore(shown: "1")
         notches(core, session, at: [0, 0.2])
-        #expect(shown(core) == "3")
+        expectEqual(shown(core), "3")
     }
 
     @Test("a fast roll or a spinning wheel steps once")
     func spinStepsOnce() {
         let (core, session) = makeCore(shown: "1")
         notches(core, session, at: stride(from: 0, to: 1, by: 0.02).map { $0 })
-        #expect(shown(core) == "2")
+        expectEqual(shown(core), "2")
         // A new burst after the wheel rested steps again.
         notches(core, session, at: [2])
-        #expect(shown(core) == "3")
+        expectEqual(shown(core), "3")
     }
 
     @Test("Wrap focus Off stops the step at the ends, with a bump")
@@ -174,15 +174,15 @@ struct ScrollSpaceStepTests {
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
         swipe(core, session, dx: -80)
-        #expect(shown(core) == "3")
-        #expect(bumps == [.right])
+        expectEqual(shown(core), "3")
+        expectEqual(bumps, [.right])
         let (first, firstSession) = makeCore(shown: "1")
         first.execute("set_focus_wrap", args: [.string("off")])
         var firstBumps: [Direction] = []
         first.borders.deadEndProbe = { firstBumps.append($1) }
         swipe(first, firstSession, dx: 80)
-        #expect(shown(first) == "1")
-        #expect(firstBumps == [.left])
+        expectEqual(shown(first), "1")
+        expectEqual(firstBumps, [.left])
     }
 
     @Test("an empty Space at the end has no ring, and says nothing")
@@ -193,8 +193,8 @@ struct ScrollSpaceStepTests {
         var bumps = 0
         core.borders.deadEndProbe = { _, _ in bumps += 1 }
         swipe(core, session, dx: -80)
-        #expect(shown(core) == "3")
-        #expect(bumps == 0)
+        expectEqual(shown(core), "3")
+        expectEqual(bumps, 0)
     }
 
     /// The gesture wraps as the keys do (#2592), on the screen under
@@ -209,10 +209,10 @@ struct ScrollSpaceStepTests {
         var bumps = 0
         core.borders.deadEndProbe = { _, _ in bumps += 1 }
         swipe(core, session, dx: -80)
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
         swipe(core, session, dx: 80)
-        #expect(shown(core) == "3")
-        #expect(bumps == 0)
+        expectEqual(shown(core), "3")
+        expectEqual(bumps, 0)
         let (other, otherSession) = makeCore(shown: "8", under: Self.displayB)
         other.execute("set_focus_wrap", args: [.string(mode)])
         swipe(other, otherSession, dx: -80)
@@ -223,8 +223,8 @@ struct ScrollSpaceStepTests {
     func screenUnderPointer() {
         let (core, session) = makeCore(shown: "2", under: Self.displayB)
         swipe(core, session, dx: -80)
-        #expect(shown(core) == "8")
-        #expect(core.state.workspaces.activeSpace(on: Self.displayA) == "2")
+        expectEqual(shown(core), "8")
+        expectEqual(core.state.workspaces.activeSpace(on: Self.displayA), "2")
     }
 
     @Test("no step moves the pointer, where focus_space does")
@@ -234,11 +234,11 @@ struct ScrollSpaceStepTests {
         var warps = 0
         core.pointerWarp = { _ in warps += 1 }
         swipe(core, session, dx: -80)
-        #expect(shown(core) == "2")
-        #expect(warps == 0)
+        expectEqual(shown(core), "2")
+        expectEqual(warps, 0)
         // The negative control: the command's own switch warps.
         core.execute("focus_space", args: [.string("3")])
-        #expect(warps == 1)
+        expectEqual(warps, 1)
     }
 
     /// Bootstrap wires the consumer, so the tap takes its chord;
@@ -252,7 +252,7 @@ struct ScrollSpaceStepTests {
         base.pan = []
         core.applyScrollGestures(base: base, profile: nil)
         core.mouse.scroll.start()
-        #expect(tap.chords == [Self.chord])
+        expectEqual(tap.chords, [Self.chord])
     }
 }
 

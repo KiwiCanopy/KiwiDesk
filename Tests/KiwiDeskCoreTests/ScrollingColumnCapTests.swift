@@ -12,18 +12,18 @@ import Testing
 struct ScrollingColumnCapTests {
     @Test("a share is a count at the wire's precision")
     func countOfShare() {
-        #expect(ScrollSize.count(of: 0.5) == 2)
-        #expect(ScrollSize.count(of: 1.0 / 3) == 3)
-        #expect(ScrollSize.count(of: 0.3333) == 3)
-        #expect(ScrollSize.count(of: 0.25) == 4)
-        #expect(ScrollSize.count(of: 1) == 1)
+        expectEqual(ScrollSize.count(of: 0.5), 2)
+        expectEqual(ScrollSize.count(of: 1.0 / 3), 3)
+        expectEqual(ScrollSize.count(of: 0.3333), 3)
+        expectEqual(ScrollSize.count(of: 0.25), 4)
+        expectEqual(ScrollSize.count(of: 1), 1)
         // Off-count: the shipped 95%, and a hair off a third.
         #expect(ScrollSize.count(of: 0.95) == nil)
         #expect(ScrollSize.count(of: 0.34) == nil)
         #expect(ScrollSize.count(of: 0) == nil)
         // Round-trip: the count writes a share that reads back.
         for n in 1...20 {
-            #expect(ScrollSize.count(of: 1 / Double(n)) == n)
+            expectEqual(ScrollSize.count(of: 1 / Double(n)), n)
         }
     }
 
@@ -35,7 +35,7 @@ struct ScrollingColumnCapTests {
         // The gap counts: at 37 pt only 5 fit.
         #expect(ScrollSize.maxCount(along: 1920, gap: 37, minimum: 300) == 5)
         // Never below one slot.
-        #expect(ScrollSize.maxCount(along: 200, gap: 10, minimum: 300) == 1)
+        expectEqual(ScrollSize.maxCount(along: 200, gap: 10, minimum: 300), 1)
         // Never past the share's own floor, which the write clamps
         // to: a 100 pt minimum on a wide screen would fit 25. The
         // ceiling is derived — the last count whose share is legal.
@@ -52,21 +52,21 @@ struct ScrollingColumnCapTests {
         // What the stepper writes is what the wire decodes, so a
         // stored third re-read from disk is the same value.
         for n in 1...20 {
-            #expect(ScrollSize.count(of: ScrollSize.share(of: n)) == n)
+            expectEqual(ScrollSize.count(of: ScrollSize.share(of: n)), n)
         }
-        #expect(ScrollSize.share(of: 3) == 0.3333)
-        #expect(ScrollSize.share(of: 2) == 0.5)
+        expectEqual(ScrollSize.share(of: 3), 0.3333)
+        expectEqual(ScrollSize.share(of: 2), 0.5)
         // From the shipped 95%: ▲ the first whole count above,
         // ▼ the first below — never "nearest".
-        #expect(ScrollSize.countAbove(0.95) == 2)
-        #expect(ScrollSize.countBelow(0.95) == 1)
-        #expect(ScrollSize.countAbove(0.3) == 4)
-        #expect(ScrollSize.countBelow(0.3) == 3)
+        expectEqual(ScrollSize.countAbove(0.95), 2)
+        expectEqual(ScrollSize.countBelow(0.95), 1)
+        expectEqual(ScrollSize.countAbove(0.3), 4)
+        expectEqual(ScrollSize.countBelow(0.3), 3)
         // 1/0.15 = 6.67: ▼ floors to 6, never rounds to 7.
-        #expect(ScrollSize.countBelow(0.15) == 6)
+        expectEqual(ScrollSize.countBelow(0.15), 6)
         // A whole share is its own count both ways.
-        #expect(ScrollSize.countAbove(0.25) == 4)
-        #expect(ScrollSize.countBelow(0.25) == 4)
+        expectEqual(ScrollSize.countAbove(0.25), 4)
+        expectEqual(ScrollSize.countBelow(0.25), 4)
     }
 
     @Test("the door derives from the layout's own carve")

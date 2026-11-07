@@ -122,7 +122,7 @@ struct RunPressFloorTests {
         let run = try #require(zone.run(in: context))
         let extra = zone.runExtra(in: context) ?? 0
         #expect(extra > 0)
-        #expect(run.visible.count == 2)
+        expectEqual(run.visible.count, 2)
         let expected = StackLayout.weightStep(
             weights: [1, 1],
             at: 0,

@@ -40,7 +40,7 @@ struct GridWeightCommandTests {
             args: [.number(3), .number(2)]
         )
         #expect(response.isSuccess)
-        #expect(core.tiler.settings.grid.columnWeights == [1, 1, 2])
+        expectEqual(core.tiler.settings.grid.columnWeights, [1, 1, 2])
     }
 
     @Test("Setting every share back to 1 empties the list")
@@ -103,7 +103,7 @@ struct GridWeightCommandTests {
             core.tiler.settings.grid.override[SpaceID("1")]?
                 .columnWeights == [3, 2]
         )
-        #expect(core.tiler.settings.grid.columnWeights == [3])
+        expectEqual(core.tiler.settings.grid.columnWeights, [3])
     }
 
     @Test("The weights encode under the Lua-derived keys")
@@ -120,9 +120,9 @@ struct GridWeightCommandTests {
         let object =
             try JSONSerialization.jsonObject(with: data)
             as? [String: Any]
-        #expect(object?["column_weight"] as? [Double] == [2, 1])
-        #expect(object?["row_weight"] as? [Double] == [1, 3])
+        expectEqual(object?["column_weight"] as? [Double], [2, 1])
+        expectEqual(object?["row_weight"] as? [Double], [1, 3])
         let back = try JSONDecoder().decode(GridParams.self, from: data)
-        #expect(back == grid)
+        expectEqual(back, grid)
     }
 }

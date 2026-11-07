@@ -100,7 +100,7 @@ struct SpaceSizingCensusTests {
         // The census is not vacuous: the sizing stores are the
         // three `resize` writes into inside the Space — the session
         // ratios live per Desktop, outside it (#2921).
-        #expect(cleared == ["stackWeights", "runSizes", "trackWeights"])
+        expectEqual(cleared, ["stackWeights", "runSizes", "trackWeights"])
         #expect(
             Set(structure.keys).union(cleared) == Set(after.keys)
         )

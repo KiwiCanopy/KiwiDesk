@@ -63,8 +63,8 @@ struct FloatNudgeRenderSpaceTests {
         core.resolveSpaceDisplays(mainID: display.id)
         core.state.workspaces.activate(shown)
         core.updateBars()
-        #expect(core.focusedWindowID == one)
-        #expect(core.floatPlacementSpace(of: one) == shown)
+        expectEqual(core.focusedWindowID, one)
+        expectEqual(core.floatPlacementSpace(of: one), shown)
         let region = try #require(core.floatBounds(on: shown))
         #expect(region != core.floatBounds(of: one))
         #expect(core.floatRingInset > 0)
@@ -81,9 +81,9 @@ struct FloatNudgeRenderSpaceTests {
         )
         #expect(response.isSuccess)
         let landed = core.tiler.recentInstantTarget(one)
-        #expect(landed?.minY == region.minY + core.floatRingInset)
-        #expect(cues == [.moveAtBoundary(one, direction: .up)])
-        #expect(core.state.workspaces.space(of: one) == home)
+        expectEqual(landed?.minY, region.minY + core.floatRingInset)
+        expectEqual(cues, [.moveAtBoundary(one, direction: .up)])
+        expectEqual(core.state.workspaces.space(of: one), home)
     }
 
     /// One point at a time into the bar: the clamp only pushes past
@@ -139,6 +139,6 @@ struct FloatNudgeRenderSpaceTests {
         let core = try #require(makeCore())
         core.execute("toggle_pocket_window")
         try stopsAtTheShownBar(core)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
     }
 }

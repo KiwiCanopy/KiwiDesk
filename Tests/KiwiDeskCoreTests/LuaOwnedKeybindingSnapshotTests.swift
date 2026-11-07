@@ -69,9 +69,9 @@ struct LuaOwnedKeybindingSnapshotTests {
 
         let snapshot = try #require(core.liveKeybindingSnapshot())
         #expect(snapshot.isLuaOwned)
-        #expect(bodies(snapshot) == ["KiwiDesk.focus(\"left\")"])
+        expectEqual(bodies(snapshot), ["KiwiDesk.focus(\"left\")"])
         let unread = snapshot.unreadChords(in: snapshot.activeLayerName)
-        #expect(unread.count == 1)
+        expectEqual(unread.count, 1)
         #expect(
             unread.first.flatMap { KeyCombo.parse($0.chord) }
                 == KeyCombo.parse("ctrl+alt+u")
@@ -85,7 +85,7 @@ struct LuaOwnedKeybindingSnapshotTests {
         core.loadConfig()
 
         let rows = core.recoverKeybindings().flatMap(\.bindings)
-        #expect(rows.map(\.lua) == ["KiwiDesk.focus(\"left\")"])
+        expectEqual(rows.map(\.lua), ["KiwiDesk.focus(\"left\")"])
         #expect(rows.allSatisfy { !$0.lua.isEmpty })
     }
 
@@ -99,7 +99,7 @@ struct LuaOwnedKeybindingSnapshotTests {
         #expect(core.isGuiManaged)
         let snapshot = try #require(core.liveKeybindingSnapshot())
         #expect(snapshot.isLuaOwned)
-        #expect(bodies(snapshot) == ["KiwiDesk.focus(\"left\")"])
+        expectEqual(bodies(snapshot), ["KiwiDesk.focus(\"left\")"])
     }
 
     @Test("a GUI load stays GUI-owned after init.lua gains a bind")
@@ -112,6 +112,6 @@ struct LuaOwnedKeybindingSnapshotTests {
         #expect(!core.isGuiManaged)
         let snapshot = try #require(core.liveKeybindingSnapshot())
         #expect(!snapshot.isLuaOwned)
-        #expect(bodies(snapshot) == ["KiwiDesk.focus(\"down\")"])
+        expectEqual(bodies(snapshot), ["KiwiDesk.focus(\"down\")"])
     }
 }

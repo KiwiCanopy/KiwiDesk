@@ -110,7 +110,7 @@ struct AnimationEngineStabilityTests {
             from: CGRect(x: 0, y: 0, width: 100, height: 100),
             to: CGRect(x: 0, y: 0, width: CGFloat.nan, height: 100)
         )
-        #expect(engine.activeCount == 0)
+        expectEqual(engine.activeCount, 0)
         #expect(applied.isEmpty)
     }
 }

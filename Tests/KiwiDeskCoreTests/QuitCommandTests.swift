@@ -22,14 +22,14 @@ struct QuitCommandTests {
     @Test("quit.set_layout stores a valid style")
     func storesValidStyle() {
         let core = makeCore()
-        #expect(core.appWide.quitLayout == .grid)
+        expectEqual(core.appWide.quitLayout, .grid)
         #expect(
             core.execute(
                 "quit.set_layout",
                 args: [.string("grid")]
             ).isSuccess
         )
-        #expect(core.appWide.quitLayout == .grid)
+        expectEqual(core.appWide.quitLayout, .grid)
     }
 
     @Test("an unknown style fails and lists accepted values")
@@ -40,8 +40,8 @@ struct QuitCommandTests {
             args: [.string("stagger")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error == "expected grid")
-        #expect(core.appWide.quitLayout == .grid)
+        expectEqual(response.error, "expected grid")
+        expectEqual(core.appWide.quitLayout, .grid)
     }
 
     @Test("a missing argument fails")
@@ -93,7 +93,7 @@ struct QuitCommandTests {
                 args: [bad]
             )
             #expect(!response.isSuccess)
-            #expect(response.error == "expected 1-20")
+            expectEqual(response.error, "expected 1-20")
         }
         #expect(
             core.appWide.quitGridTargetDepth

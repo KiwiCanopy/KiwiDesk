@@ -78,8 +78,8 @@ struct SharedLookWriteTests {
         let core = try crossedCore()
         core.tiler.settings.kiwishelf.fillColor = odd
         try core.persistProfile(named: "Work", modes: nil)
-        #expect(sharedFill(core) == odd)
-        #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
+        expectEqual(sharedFill(core), odd)
+        expectEqual(core.sharedLook?.colors["kiwishelf.fill_color"], odd)
     }
 
     @Test("an own profile's Keep leaves the shared look alone")
@@ -90,7 +90,7 @@ struct SharedLookWriteTests {
         let before = sharedFill(core)
         core.tiler.settings.kiwishelf.fillColor = "#112233"
         try core.persistProfile(named: "Odd", modes: nil)
-        #expect(sharedFill(core) == before)
+        expectEqual(sharedFill(core), before)
     }
 
     @Test("a Save as copies the live profile's switch")
@@ -131,7 +131,7 @@ struct SharedLookWriteTests {
         #expect(sharedFill(core) != odd)
         core.commitSharedLook(ofProfile: "Work")
         // …its look half does.
-        #expect(sharedFill(core) == odd)
+        expectEqual(sharedFill(core), odd)
     }
 
     @Test("a copy with an edited look keeps it as its own")
@@ -160,7 +160,7 @@ struct SharedLookWriteTests {
         try core.profiles.save(profile("Stale", fill: odd, look: nil))
         let draft = try core.loadGuiConfig(editing: "Stale")
         #expect(draft.settings.kiwishelf.fillColor != odd)
-        #expect(core.sharedLook?.isWorn(by: draft.settings) == true)
+        expectEqual(core.sharedLook?.isWorn(by: draft.settings), true)
     }
 
     @Test("a built-in layout wears the shared look")
@@ -176,6 +176,6 @@ struct SharedLookWriteTests {
             )
         )
         core.apply(composed: composed, forceRetile: true)
-        #expect(core.tiler.settings.kiwishelf.fillColor == odd)
+        expectEqual(core.tiler.settings.kiwishelf.fillColor, odd)
     }
 }

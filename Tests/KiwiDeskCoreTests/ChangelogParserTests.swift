@@ -90,7 +90,7 @@ struct ChangelogParserTests {
     @Test("the shipped form parses")
     func validBodyParses() throws {
         let run = try parse(Self.valid)
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         #expect(run.stdout.contains("2 section(s)"))
         #expect(run.stdout.contains("3 entr(ies)"))
     }

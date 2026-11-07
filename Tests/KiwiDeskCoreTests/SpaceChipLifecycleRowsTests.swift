@@ -99,7 +99,7 @@ struct SpaceChipLifecycleRowsTests {
         for untouched in ["4", "5", "7"] {
             #expect(core.state.workspaces[SpaceID(untouched)] == nil)
         }
-        #expect(core.spacePins[minted] == side.fingerprint)
+        expectEqual(core.spacePins[minted], side.fingerprint)
     }
 
     /// The number is read at the click, not when the menu opened.
@@ -110,14 +110,14 @@ struct SpaceChipLifecycleRowsTests {
         core.execute("create_space", args: [.string("4")])
         perform(new)
         #expect(core.state.workspaces[SpaceID("5")] != nil)
-        #expect(core.spacePins[SpaceID("5")] == side.fingerprint)
+        expectEqual(core.spacePins[SpaceID("5")], side.fingerprint)
     }
 
     @Test("Delete Space deletes an empty Space")
     func deleteEmpty() {
         let core = seededCore()
         let delete = row(core, two, "Delete Space")
-        #expect(delete?.enabled == true)
+        expectEqual(delete?.enabled, true)
         #expect(delete?.subtitle == nil)
         perform(delete)
         #expect(core.state.workspaces[two] == nil)
@@ -131,7 +131,7 @@ struct SpaceChipLifecycleRowsTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         // A member.
-        #expect(row(core, one, "Delete Space")?.enabled == false)
+        expectEqual(row(core, one, "Delete Space")?.enabled, false)
         #expect(
             row(core, one, "Delete Space")?.subtitle == "Still has windows"
         )
@@ -144,10 +144,10 @@ struct SpaceChipLifecycleRowsTests {
             nativeSpace: 4
         )
         core.state.rememberedSpaces[WindowID(5)] = .departed(two)
-        #expect(row(core, two, "Delete Space")?.enabled == true)
+        expectEqual(row(core, two, "Delete Space")?.enabled, true)
         core.state.awayWindows[WindowID(5)] = nil
         core.state.rememberedSpaces[WindowID(5)] = nil
-        #expect(row(core, two, "Delete Space")?.enabled == true)
+        expectEqual(row(core, two, "Delete Space")?.enabled, true)
         // A held Space.
         core.state.heldSpaces[two] = HeldOrigin(
             name: SpaceID("3"),
@@ -155,7 +155,7 @@ struct SpaceChipLifecycleRowsTests {
             icon: nil,
             arrangement: .profile("Desk")
         )
-        #expect(row(core, two, "Delete Space")?.enabled == false)
+        expectEqual(row(core, two, "Delete Space")?.enabled, false)
         #expect(
             row(core, two, "Delete Space")?.subtitle == "Goes back to Desk"
         )
@@ -167,8 +167,8 @@ struct SpaceChipLifecycleRowsTests {
     func lastOnScreen() {
         LocalizationManager.shared.select("en")
         let core = seededCore()
-        #expect(core.state.workspaces[three]?.windows.isEmpty == true)
-        #expect(row(core, three, "Delete Space")?.enabled == false)
+        expectEqual(core.state.workspaces[three]?.windows.isEmpty, true)
+        expectEqual(row(core, three, "Delete Space")?.enabled, false)
         #expect(
             row(core, three, "Delete Space")?.subtitle
                 == "The only Space on this screen"
@@ -181,7 +181,7 @@ struct SpaceChipLifecycleRowsTests {
     func hiddenWindowDoesNotBlock() {
         let core = seededCore()
         core.state.rememberedSpaces[WindowID(6)] = .departed(two)
-        #expect(row(core, two, "Delete Space")?.enabled == true)
+        expectEqual(row(core, two, "Delete Space")?.enabled, true)
     }
 
     @Test("a declared Space's Delete says it comes back")
@@ -212,7 +212,7 @@ struct SpaceChipLifecycleRowsTests {
         let profile = core.buildProfile(name: "p", modes: nil)
         try core.profiles.save(profile)
         core.profiles.becameLive(profile, fits: true)
-        #expect(keep(core)?.enabled == false)
+        expectEqual(keep(core)?.enabled, false)
         perform(row(core, one, "New Space"))
         let minted = try #require(
             core.state.workspaces.allSpaces.map(\.id).first {
@@ -220,21 +220,21 @@ struct SpaceChipLifecycleRowsTests {
             }
         )
         #expect(core.isTemporary(minted))
-        #expect(keep(core)?.enabled == false)
+        expectEqual(keep(core)?.enabled, false)
         core.execute(
             "set_mode",
             args: [.string(minted.raw), .string("monocle")]
         )
         core.state.workspaces.activate(minted)
-        #expect(keep(core)?.enabled == false)
+        expectEqual(keep(core)?.enabled, false)
         core.state.workspaces.activate(one)
         core.execute("set_mode", args: [.string(one.raw), .string("stack")])
-        #expect(keep(core)?.enabled == true)
+        expectEqual(keep(core)?.enabled, true)
         try core.keepLayouts()
         let stored = try core.profiles.read(name: "p")
-        #expect(stored.spaceModes[one] == .stack)
-        #expect(stored.spaces == profile.spaces)
+        expectEqual(stored.spaceModes[one], .stack)
+        expectEqual(stored.spaces, profile.spaces)
         #expect(!stored.declaredSpaces.contains(minted))
-        #expect(keep(core)?.enabled == false)
+        expectEqual(keep(core)?.enabled, false)
     }
 }

@@ -69,10 +69,10 @@ struct KeyLayerDiffTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.layers.count == 1)
-        #expect(over.layers[0].name == "default")
-        #expect(over.layers[0].bindings.count == 1)
-        #expect(over.layers[0].bindings[0].lua == "CUSTOM")
+        expectEqual(over.layers.count, 1)
+        expectEqual(over.layers[0].name, "default")
+        expectEqual(over.layers[0].bindings.count, 1)
+        expectEqual(over.layers[0].bindings[0].lua, "CUSTOM")
         // Untouched layer/icon carry nothing.
         #expect(over.layers[0].icon == nil)
     }
@@ -86,8 +86,8 @@ struct KeyLayerDiffTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.layers.count == 1)
-        #expect(over.layers[0].name == "nav")
+        expectEqual(over.layers.count, 1)
+        expectEqual(over.layers[0].name, "nav")
     }
 
     @Test("Changed icon alone produces an icon-only override")
@@ -97,9 +97,9 @@ struct KeyLayerDiffTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.layers.count == 1)
-        #expect(over.layers[0].name == "resize")
-        #expect(over.layers[0].icon == "📐")
+        expectEqual(over.layers.count, 1)
+        expectEqual(over.layers[0].name, "resize")
+        expectEqual(over.layers[0].icon, "📐")
         #expect(over.layers[0].bindings.isEmpty)
     }
 
@@ -144,8 +144,8 @@ struct KeyLayerDiffTests {
             KeyLayerOverride.diff(base: base, edited: edited)
         )
         #expect(over.layers.isEmpty)
-        #expect(over.removed == ["default": ["alt+h"]])
-        #expect(over.resolved(onto: base) == edited)
+        expectEqual(over.removed, ["default": ["alt+h"]])
+        expectEqual(over.resolved(onto: base), edited)
     }
 
     @Test("A base row moved to another combo removes the old one")
@@ -155,8 +155,8 @@ struct KeyLayerDiffTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.removed == ["default": ["alt+h"]])
-        #expect(over.resolved(onto: base) == edited)
+        expectEqual(over.removed, ["default": ["alt+h"]])
+        expectEqual(over.resolved(onto: base), edited)
     }
 
     /// A dropped base layer is left out whole (#2022) — it used
@@ -167,8 +167,8 @@ struct KeyLayerDiffTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.leftOut == [base[1].name])
-        #expect(over.resolved(onto: base) == edited)
+        expectEqual(over.leftOut, [base[1].name])
+        expectEqual(over.resolved(onto: base), edited)
     }
 
     // MARK: - Round-trip properties
@@ -187,7 +187,7 @@ struct KeyLayerDiffTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.resolved(onto: base) == edited)
+        expectEqual(over.resolved(onto: base), edited)
     }
 
     @Test("diff(base, over.resolved(onto: base)) == over")

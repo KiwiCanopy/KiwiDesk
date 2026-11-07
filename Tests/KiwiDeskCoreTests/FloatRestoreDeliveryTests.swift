@@ -49,7 +49,7 @@ struct FloatRestoreDeliveryTests {
         let (engine, state) = makeEngine()
         engine.restoreStashed(state: state, frames: [:])
         #expect(engine.animation.targetFrame(window: id) == nil)
-        #expect(engine.recentInstantTarget(id) == original)
+        expectEqual(engine.recentInstantTarget(id), original)
     }
 
     @Test(
@@ -66,6 +66,6 @@ struct FloatRestoreDeliveryTests {
         core.tiler.stashedFrames[id] = original
         core.spaceSwitchRetile(asSwitch: false)
         #expect(core.tiler.animation.targetFrame(window: id) == nil)
-        #expect(core.tiler.recentInstantTarget(id) == original)
+        expectEqual(core.tiler.recentInstantTarget(id), original)
     }
 }

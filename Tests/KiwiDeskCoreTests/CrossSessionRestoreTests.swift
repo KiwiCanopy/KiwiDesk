@@ -29,8 +29,8 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
             in: core
         )
         arrange(core)
-        #expect(space(core, 10) == F.hidden)
-        #expect(space(core, 11) == F.shown)
+        expectEqual(space(core, 10), F.hidden)
+        expectEqual(space(core, 11), F.shown)
         #expect(!core.state.crossSession.isOpen)
     }
 
@@ -46,8 +46,8 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         )
         leave(previous([(F.hidden, "com.a", "A")], first: 10), in: core)
         arrange(core)
-        #expect(space(core, 10) == F.shown)
-        #expect(space(core, 11) == F.hidden)
+        expectEqual(space(core, 10), F.shown)
+        expectEqual(space(core, 11), F.hidden)
     }
 
     /// The in-place path: this session's own file is replayed by
@@ -85,7 +85,7 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         core.crash.shutdownCleanly(inPlace: true)
         leave(refused, in: core)
         arrange(core)
-        #expect(space(core, 10) == F.shown)
+        expectEqual(space(core, 10), F.shown)
         #expect(!core.state.crossSession.isOpen)
     }
 
@@ -113,8 +113,8 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         leave(quit, in: core)
         core.crash.shutdownCleanly()
         arrange(core)
-        #expect(space(core, 10) == (late ? F.shown : F.hidden))
-        #expect(core.state.crossSession.isOpen == false)
+        expectEqual(space(core, 10), (late ? F.shown : F.hidden))
+        expectEqual(core.state.crossSession.isOpen, false)
     }
 
     @Test(
@@ -125,7 +125,7 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         let core = try #require(boot([window(10, "com.a", "A")]))
         leave(previous([(F.hidden, "com.a", "A")], frozen: false), in: core)
         arrange(core)
-        #expect(space(core, 10) == F.shown)
+        expectEqual(space(core, 10), F.shown)
         #expect(!core.state.crossSession.isOpen)
     }
 
@@ -139,7 +139,7 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         let core = try #require(boot([window(10, "com.a", "A")]))
         leave(previous([(F.hidden, "com.a", "A")]), in: core)
         arrange(core)
-        #expect(space(core, 10) == F.hidden)
+        expectEqual(space(core, 10), F.hidden)
         // The next launch reads the same directory: nothing is left.
         _ = core.crash.takeBootSnapshot()
         #expect(core.crash.takeCrossSessionCandidate() == nil)
@@ -173,12 +173,12 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         )
         core.deferred.sleep = { _ in }
         arrange(core)
-        #expect(space(core, 20) == F.shown)
+        expectEqual(space(core, 20), F.shown)
         core.wallClock = { .distantPast }
         await core.deferred.task(for: .crossSessionSettle)?.value
-        #expect(space(core, 20) == F.hidden)
-        #expect(space(core, 21) == F.shown)
-        #expect(moves == 0)
+        expectEqual(space(core, 20), F.hidden)
+        expectEqual(space(core, 21), F.shown)
+        expectEqual(moves, 0)
         await core.deferred.task(for: .crossSessionClose)?.value
         #expect(!core.state.crossSession.isOpen)
     }
@@ -213,10 +213,10 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         core.insertDropped(WindowID(23), onto: WindowID(22), into: F.shown)
         core.state.workspaces.focus(WindowID(22), in: F.shown)
         core.crossSessionSettlePass()
-        #expect(space(core, 20) == F.hidden)
-        #expect(space(core, 21) == F.hidden)
-        #expect(space(core, 22) == F.shown)
-        #expect(space(core, 23) == F.shown)
+        expectEqual(space(core, 20), F.hidden)
+        expectEqual(space(core, 21), F.hidden)
+        expectEqual(space(core, 22), F.shown)
+        expectEqual(space(core, 23), F.shown)
     }
 
     @Test(
@@ -230,10 +230,10 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         arrange(core)
         if closed { core.closeCrossSessionMatch() }
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(space(core, 30) == (closed ? F.shown : F.hidden))
+        expectEqual(space(core, 30), (closed ? F.shown : F.hidden))
         if !closed {
             let seeded = core.tiler.stashOriginal(WindowID(30))
-            #expect(seeded == Self.recorded)
+            expectEqual(seeded, Self.recorded)
         }
     }
 
@@ -263,8 +263,8 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         core.profiles.becameLive(other, fits: true)
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
         core.crossSessionSettlePass()
-        #expect(space(core, 30) == F.shown)
-        #expect(space(core, 20) == F.shown)
+        expectEqual(space(core, 30), F.shown)
+        expectEqual(space(core, 20), F.shown)
         #expect(!core.state.crossSession.isOpen)
     }
 
@@ -327,7 +327,7 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
                     ($0.id, "\($0.app ?? "-")|\($0.title ?? "-")")
                 }
             )
-            #expect(keys == [10: "com.a|Alpha", 11: "com.b|Beta"])
+            expectEqual(keys, [10: "com.a|Alpha", 11: "com.b|Beta"])
         }
     }
 }

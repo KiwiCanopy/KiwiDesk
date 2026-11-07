@@ -115,11 +115,11 @@ struct JumpMoveHereCrossScreenTests {
         defer { teardown() }
         park(core, on: 11)
         #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
-        #expect(Bridge.moves.map(\.1) == [20])
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("5"))
-        #expect(core.jump.owed?.space == "5")
-        #expect(core.jump.owed?.hopped == true)
-        #expect(core.state.workspaces.activeSpace == "5")
+        expectEqual(Bridge.moves.map(\.1), [20])
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("5"))
+        expectEqual(core.jump.owed?.space, "5")
+        expectEqual(core.jump.owed?.hopped, true)
+        expectEqual(core.state.workspaces.activeSpace, "5")
     }
 
     /// `gather` keeps its screen: another screen's Desktop is not
@@ -132,7 +132,7 @@ struct JumpMoveHereCrossScreenTests {
         park(core, on: 11)
         _ = core.execute("gather", args: [.string(bundle)])
         #expect(Bridge.moves.isEmpty)
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("2"))
     }
 
     /// "Displays have separate Spaces" off: every Desktop is filed
@@ -146,8 +146,8 @@ struct JumpMoveHereCrossScreenTests {
         defer { teardown() }
         park(core, on: 11)
         #expect(core.moveHere(.window(WindowID(7))))
-        #expect(Bridge.moves.map(\.1) == [10])
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("1"))
+        expectEqual(Bridge.moves.map(\.1), [10])
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("1"))
     }
 
     /// Landed off `target`'s screen — the net re-homed it, or one
@@ -170,8 +170,8 @@ struct JumpMoveHereCrossScreenTests {
                 )
             )
         )
-        #expect(core.state.workspaces.space(of: WindowID(7)) == "5")
-        #expect(core.state.workspaces.lastFocused == WindowID(7))
+        expectEqual(core.state.workspaces.space(of: WindowID(7)), "5")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(7))
     }
 
     /// A click or a key-down before a wrong-screen arrival stands
@@ -199,7 +199,7 @@ struct JumpMoveHereCrossScreenTests {
                 )
             )
         )
-        #expect(core.state.workspaces.space(of: WindowID(7)) == "5")
+        expectEqual(core.state.workspaces.space(of: WindowID(7)), "5")
         #expect(
             lines.contains { $0.contains("w7 arrived — focus stood down") }
         )
@@ -224,15 +224,15 @@ struct JumpMoveHereCrossScreenTests {
             )
         }
         let two = snapshot(["UUID-A": 10, "UUID-B": 20], main: "UUID-A")
-        #expect(core.hopDisplayKey(for: "5", in: two) == "UUID-B")
+        expectEqual(core.hopDisplayKey(for: "5", in: two), "UUID-B")
         // Screen 2 dropped from the reading: no landing on screen 1.
         let one = snapshot(["UUID-A": 10], main: "UUID-A")
         #expect(core.hopDisplayKey(for: "5", in: one) == nil)
         // A Space with no screen yet lands on the main one.
-        #expect(core.hopDisplayKey(for: "9", in: two) == "UUID-A")
+        expectEqual(core.hopDisplayKey(for: "9", in: two), "UUID-A")
         // One shared Desktop set, under an id no screen answers to.
         let shared = snapshot(["Main": 10], main: "UUID-A")
-        #expect(core.hopDisplayKey(for: "5", in: shared) == "Main")
+        expectEqual(core.hopDisplayKey(for: "5", in: shared), "Main")
         // A screen not tracked yet is the main one, not a shared set.
         let untracked = snapshot(["UUID-C": 30], main: "UUID-C")
         #expect(core.hopDisplayKey(for: "5", in: untracked) == nil)

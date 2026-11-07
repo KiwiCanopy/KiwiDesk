@@ -71,11 +71,11 @@ struct ShortcutBaseMigrationTests {
             ConfigMigration.migrated(try gui(rows, old: "hyper"))
         )
         let config = try decoded(out)
-        #expect(config.shortcutBase == .hyper)
+        expectEqual(config.shortcutBase, .hyper)
         let combos = try #require(config.layers.first).bindings
             .filter { $0.lua.hasPrefix("KiwiDesk.focus_desktop") }
             .map(\.combo)
-        #expect(combos == ["hyper+option+1", "hyper+option+0"])
+        expectEqual(combos, ["hyper+option+1", "hyper+option+0"])
     }
 
     @Test("letters and the Desktop base on ⌃⌥ read as ⌃⌥")
@@ -90,7 +90,7 @@ struct ShortcutBaseMigrationTests {
             )
         )
         let config = try decoded(out)
-        #expect(config.shortcutBase == .standard)
+        expectEqual(config.shortcutBase, .standard)
         #expect(
             try #require(config.layers.first).bindings.last?.combo
                 == "control+option+shift+command+2"
@@ -106,7 +106,7 @@ struct ShortcutBaseMigrationTests {
             ConfigMigration.migrated(try gui(rows, old: "hyper"))
         )
         let config = try decoded(out)
-        #expect(config.shortcutBase == .hyper)
+        expectEqual(config.shortcutBase, .hyper)
         #expect(
             try #require(config.layers.first).bindings.last?.combo
                 == "hyper+option+2"
@@ -175,7 +175,7 @@ struct ShortcutBaseMigrationTests {
         let migrated = try decoder.decode(Profile.self, from: out)
         let bindings = try #require(migrated.layers?.layers.first)
             .bindings
-        #expect(bindings.map(\.combo) == ["hyper+option+2"])
+        expectEqual(bindings.map(\.combo), ["hyper+option+2"])
     }
 
     @Test("a bundle's config and its profiles cross")
@@ -244,7 +244,7 @@ struct ShortcutBaseMigrationTests {
             #"shortcut_base": "control+option"#,
             "hyper+option+3"
         )
-        #expect(String(decoding: out, as: UTF8.self) == after)
+        expectEqual(String(decoding: out, as: UTF8.self), after)
     }
 
     /// A meaning change: at its own format the step stands down,

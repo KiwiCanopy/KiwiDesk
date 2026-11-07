@@ -37,12 +37,12 @@ struct ToggleFloatingFlagTests {
     @Test("each press flips the flag in a floating-mode Space")
     func pressesFlipTheFlag() {
         let core = setup()
-        #expect(core.state.windows[window]?.isFloating == false)
+        expectEqual(core.state.windows[window]?.isFloating, false)
         #expect(core.execute("toggle_floating").isSuccess)
-        #expect(core.state.windows[window]?.isFloating == true)
-        #expect(core.state.userFloated == [window])
+        expectEqual(core.state.windows[window]?.isFloating, true)
+        expectEqual(core.state.userFloated, [window])
         #expect(core.execute("toggle_floating").isSuccess)
-        #expect(core.state.windows[window]?.isFloating == false)
+        expectEqual(core.state.windows[window]?.isFloating, false)
         #expect(core.state.userFloated.isEmpty)
     }
 
@@ -53,7 +53,7 @@ struct ToggleFloatingFlagTests {
         let core = setup()
         #expect(core.execute("toggle_floating").isSuccess)
         core.execute("set_mode", args: [.string("1"), .string("bsp")])
-        #expect(core.state.windows[window]?.isFloating == true)
+        expectEqual(core.state.windows[window]?.isFloating, true)
         #expect(
             core.tiler.calculatedFrames(state: core.state)[window] == nil
         )

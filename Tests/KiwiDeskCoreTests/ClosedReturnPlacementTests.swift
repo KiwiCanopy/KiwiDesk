@@ -77,8 +77,8 @@ struct ClosedReturnPlacementTests {
             )
         }
         core.state.workspaces.focus(id, in: space)
-        #expect(core.state.workspaces.space(of: id) == space)
-        #expect(core.state.workspaces[space]?.focused == id)
+        expectEqual(core.state.workspaces.space(of: id), space)
+        expectEqual(core.state.workspaces[space]?.focused, id)
     }
 
     /// The placement half (#1561): a close return is a NEW window
@@ -92,14 +92,14 @@ struct ClosedReturnPlacementTests {
         let elsewhere = SpaceID("2")
         core.state.workspaces.ensureSpace(elsewhere)
         core.state.workspaces.activate(elsewhere)
-        #expect(core.state.workspaces.activeSpace == elsewhere)
+        expectEqual(core.state.workspaces.activeSpace, elsewhere)
         // A focused resident, so the focus clause proves the
         // new-window grant and not the vacancy arm (guard-prover).
         seat(WindowID(5), in: elsewhere, on: core)
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.state.workspaces.space(of: target) == elsewhere)
-        #expect(core.state.workspaces[elsewhere]?.focused == target)
-        #expect(core.state.workspaces[SpaceID("1")]?.focused == other)
+        expectEqual(core.state.workspaces.space(of: target), elsewhere)
+        expectEqual(core.state.workspaces[elsewhere]?.focused, target)
+        expectEqual(core.state.workspaces[SpaceID("1")]?.focused, other)
         // Consumed, and the departed memory with it.
         #expect(!core.state.closedDepartures.contains(target))
         #expect(core.state.rememberedSpaces[target] == nil)
@@ -126,8 +126,8 @@ struct ClosedReturnPlacementTests {
                 )
             )
         )
-        #expect(core.state.workspaces.space(of: target) == ruled)
-        #expect(core.state.workspaces[ruled]?.focused == target)
+        expectEqual(core.state.workspaces.space(of: target), ruled)
+        expectEqual(core.state.workspaces[ruled]?.focused, target)
     }
 
     /// A session restore filed OVER the mark — the window captured,
@@ -153,8 +153,8 @@ struct ClosedReturnPlacementTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.state.workspaces.space(of: target) == SpaceID("1"))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.state.workspaces.space(of: target), SpaceID("1"))
+        expectEqual(core.activeSpace?.focused, target)
         // The frame is spent with the memory: its consumer never
         // seeds it (the store empties on every arrival, so the
         // consumer's log is the observable).
@@ -200,7 +200,7 @@ struct ClosedReturnPlacementTests {
         )
         core.state.workspaces.focus(other, in: SpaceID("1"))
         let before = core.state.workspaces[SpaceID("1")]?.windows
-        #expect(before?.first == target)
+        expectEqual(before?.first, target)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         core.handle(.windowCreated(reshown(target)))
         let after = core.state.workspaces[SpaceID("1")]?.windows ?? []

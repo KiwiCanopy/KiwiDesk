@@ -17,7 +17,7 @@ struct RunSizeCodingTests {
         let object = try #require(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
-        #expect(Set(object.keys) == ["share", "zone"])
+        expectEqual(Set(object.keys), ["share", "zone"])
         #expect(
             try JSONDecoder().decode(RunSize.self, from: data)
                 == RunSize(share: 0.5, zone: 7)

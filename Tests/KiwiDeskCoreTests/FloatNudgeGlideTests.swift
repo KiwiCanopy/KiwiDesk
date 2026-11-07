@@ -33,7 +33,7 @@ struct FloatNudgeGlideTests {
     func accumulates() throws {
         let f = try fixture()
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(commandedX(f) == 110)
+        expectEqual(commandedX(f), 110)
         try f.beginGlide()
         var expected = 110.0
         var elapsed = 0.0
@@ -46,7 +46,7 @@ struct FloatNudgeGlideTests {
         let x = try #require(commandedX(f))
         #expect(abs(Double(x) - expected) < 0.5)
         #expect(Double(x) > 120)
-        #expect(f.core.state.windows[WindowID(1)]?.frame.minX == 100)
+        expectEqual(f.core.state.windows[WindowID(1)]?.frame.minX, 100)
     }
 
     @Test("the stop at the region ends the run, with no cue")
@@ -62,7 +62,7 @@ struct FloatNudgeGlideTests {
             try f.frame(Self.dt)
         }
         #expect(!f.core.keys.isGliding)
-        #expect(commandedX(f) == 700)
+        expectEqual(commandedX(f), 700)
         #expect(
             f.core.tiler.recentInstantTarget(WindowID(1))?.minX == 700
         )
@@ -95,7 +95,7 @@ struct FloatNudgeGlideTests {
         let f = try fixture(step: 700)
         f.core.borders.onResizeRefusal = { cues.append($0) }
         f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(commandedX(f) == 700)
+        expectEqual(commandedX(f), 700)
         #expect(
             cues == [.moveAtBoundary(WindowID(1), direction: .right)]
         )

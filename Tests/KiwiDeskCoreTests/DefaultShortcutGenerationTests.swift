@@ -48,7 +48,7 @@ struct DefaultShortcutGenerationTests {
             above: 0,
             base: .standard
         )
-        #expect(rows.map(\.lua) == [back, forward] + layoutKeys)
+        expectEqual(rows.map(\.lua), [back, forward] + layoutKeys)
     }
 
     @Test("KiwiVision is generation 4, alone")
@@ -62,10 +62,10 @@ struct DefaultShortcutGenerationTests {
     @Test("The Pocket's list is generation 10, on ⌃⌥⌘P or ✦⌘P")
     func pocketListGeneration() {
         let row = DefaultKeybindings.pocketListRow()
-        #expect(DefaultKeybindings.rows(ofGeneration: 10) == [row])
-        #expect(row.lua == "pocket.toggle_list()")
+        expectEqual(DefaultKeybindings.rows(ofGeneration: 10), [row])
+        expectEqual(row.lua, "pocket.toggle_list()")
         let combo = KeyCombo.parse(row.combo)
-        #expect(combo == KeyCombo.parse("control+option+command+p"))
+        expectEqual(combo, KeyCombo.parse("control+option+command+p"))
         #expect(
             KeyCombo.parse(ShortcutBase.hyper.rebased(row).combo)?.modifiers
                 == [.hyper, .command]
@@ -183,7 +183,7 @@ struct DefaultShortcutGenerationTests {
             }
         )
         #expect(!actions.isEmpty)
-        #expect(actions == seededBeforeGenerations.union(generations))
+        expectEqual(actions, seededBeforeGenerations.union(generations))
     }
 
     private func offered(_ core: KiwiCore) -> ShortcutOffer {
@@ -250,7 +250,7 @@ struct DefaultShortcutGenerationTests {
             reason: "test",
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect(cleared == 2)
+        expectEqual(cleared, 2)
         #expect(core.desktopMemory.knownShortcutOffer == nil)
     }
 
@@ -294,7 +294,7 @@ struct DefaultShortcutGenerationTests {
         )
         #expect(!core.isGuiManaged)
         core.topUpGenerationShortcuts()
-        #expect(offered(core).generation == 0)
+        expectEqual(offered(core).generation, 0)
         #expect(!baseLua(core).contains(back))
     }
 }

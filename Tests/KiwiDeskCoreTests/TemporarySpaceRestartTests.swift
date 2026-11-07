@@ -62,8 +62,8 @@ struct TemporarySpaceRestartTests {
             let record = try #require(
                 session.spaces.first { $0.id == scratch.raw }
             )
-            #expect(record.temporary?.armed == true)
-            #expect(record.temporary?.pin == desk.dell.fingerprint)
+            expectEqual(record.temporary?.armed, true)
+            expectEqual(record.temporary?.pin, desk.dell.fingerprint)
             let declared = session.spaces.first { $0.id == "1" }
             #expect(declared?.temporary == nil)
         }
@@ -79,7 +79,7 @@ struct TemporarySpaceRestartTests {
             from: Data(json.utf8)
         )
         #expect(record.temporary == nil)
-        #expect(record.windows == [12])
+        expectEqual(record.windows, [12])
     }
 
     @Test("a restart under the same arrangement brings it back")
@@ -91,10 +91,10 @@ struct TemporarySpaceRestartTests {
             session: try crossed(a.sessionSnapshot())
         )
         #expect(b.isTemporary(scratch))
-        #expect(b.state.workspaces[scratch]?.windows == [WindowID(12)])
-        #expect(b.spacePins[scratch] == desk.dell.fingerprint)
+        expectEqual(b.state.workspaces[scratch]?.windows, [WindowID(12)])
+        expectEqual(b.spacePins[scratch], desk.dell.fingerprint)
         // Laid out on its pinned screen, so the bar draws it (#1994).
-        #expect(b.state.workspaces.display(of: scratch) == desk.dell.id)
+        expectEqual(b.state.workspaces.display(of: scratch), desk.dell.id)
     }
 
     /// No pin: nothing in the replay names a screen, so the boot
@@ -142,7 +142,7 @@ struct TemporarySpaceRestartTests {
         #expect(held.value.isTemporary)
         #expect(!core.isTemporary(held.key), "never both")
         core.handle(.displaysChanged([desk.builtIn, desk.dell]))
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(core.state.heldSpaces.isEmpty)
         let back = try #require(
             core.state.workspaces.allSpaces.first {
@@ -150,7 +150,7 @@ struct TemporarySpaceRestartTests {
             }
         )
         #expect(core.isTemporary(back.id))
-        #expect(core.spacePins[back.id] == desk.dell.fingerprint)
+        expectEqual(core.spacePins[back.id], desk.dell.fingerprint)
     }
 
     @Test("an empty one on a departing screen is dropped")

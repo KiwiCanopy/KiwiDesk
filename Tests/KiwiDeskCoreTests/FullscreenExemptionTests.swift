@@ -47,13 +47,13 @@ struct FullscreenLayoutExemptionTests {
         let space = state.workspaces[
             state.workspaces.activeSpace!
         ]!
-        #expect(state.localTiledMembers(of: space) == [w1, w3])
+        expectEqual(state.localTiledMembers(of: space), [w1, w3])
         #expect(
             state.effectiveTiledMembers(of: space) == [w1, w3]
         )
         // The slot itself survives — fullscreen is not a
         // destroy, and the exit retile re-places from it.
-        #expect(space.windows == [w1, w2, w3])
+        expectEqual(space.windows, [w1, w2, w3])
     }
 
     @Test("Leaving fullscreen re-enters the tiled member lists")
@@ -86,7 +86,7 @@ struct FullscreenLayoutExemptionTests {
         // is still a member of this space, so its glyph stays —
         // and the tiled-cursor merge must not drain past the
         // exempt id (which would duplicate every later member).
-        #expect(state.effectiveMembers(of: space) == [w1, w2, w3])
+        expectEqual(state.effectiveMembers(of: space), [w1, w2, w3])
     }
 
     @Test("A fullscreen sticky keeps its one glyph at home")
@@ -159,7 +159,7 @@ struct FullscreenCloseFallbackTests {
         state.apply(.windowDestroyed(w1, wasMinimized: false))
         // The slot neighbor is w2 (fullscreen) — the fold must
         // step past it to the first surfaceable member.
-        #expect(state.workspaces[space]?.focused == w3)
+        expectEqual(state.workspaces[space]?.focused, w3)
     }
 
     @Test("The plain slot-neighbor fallback is untouched")
@@ -170,7 +170,7 @@ struct FullscreenCloseFallbackTests {
         let space = state.workspaces.activeSpace!
         state.workspaces.focus(w1, in: space)
         state.apply(.windowDestroyed(w1, wasMinimized: false))
-        #expect(state.workspaces[space]?.focused == w2)
+        expectEqual(state.workspaces[space]?.focused, w2)
     }
 
     @Test("The re-pick steps forward, not to the array head")
@@ -189,7 +189,7 @@ struct FullscreenCloseFallbackTests {
         // [w1, w3fs, w4] with the removed slot at index 1:
         // forward past the fullscreen member lands w4 — the
         // array head (w1) would be the #11 cross-row yank.
-        #expect(state.workspaces[space]?.focused == w4)
+        expectEqual(state.workspaces[space]?.focused, w4)
     }
 
     @Test("The re-pick falls back to the backward neighbor")
@@ -206,7 +206,7 @@ struct FullscreenCloseFallbackTests {
         state.apply(.windowDestroyed(w3, wasMinimized: false))
         // Nothing forward of the removed last slot: backward
         // past the fullscreen member lands w1.
-        #expect(state.workspaces[space]?.focused == w1)
+        expectEqual(state.workspaces[space]?.focused, w1)
     }
 
     @Test("A close elsewhere never moves a held fullscreen focus")
@@ -223,7 +223,7 @@ struct FullscreenCloseFallbackTests {
         // unrelated window must not silently reassign the
         // focused slot behind them.
         state.apply(.windowDestroyed(w1, wasMinimized: false))
-        #expect(state.workspaces[space]?.focused == w2)
+        expectEqual(state.workspaces[space]?.focused, w2)
     }
 }
 

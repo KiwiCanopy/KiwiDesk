@@ -23,15 +23,15 @@ struct PocketBareMarkTests {
     func lightsByTheEdge() {
         let view = pocket()
         view.setLook(.lit)
-        #expect(view.edgeOpacity == BriefPocketView.lineOpacity)
-        #expect(view.liftScale == PocketMarkGeometry.lift)
+        expectEqual(view.edgeOpacity, BriefPocketView.lineOpacity)
+        expectEqual(view.liftScale, PocketMarkGeometry.lift)
         // A window just in or out keeps the edge, never the lift.
         view.setLook(.active)
-        #expect(view.edgeOpacity == BriefPocketView.lineOpacity)
-        #expect(view.liftScale == 1)
+        expectEqual(view.edgeOpacity, BriefPocketView.lineOpacity)
+        expectEqual(view.liftScale, 1)
         view.setLook(.rest)
-        #expect(view.edgeOpacity == 0)
-        #expect(view.liftScale == 1)
+        expectEqual(view.edgeOpacity, 0)
+        expectEqual(view.liftScale, 1)
     }
 
     /// The pixel at grid point `at` of `image` drawn at 2x.
@@ -82,10 +82,10 @@ struct PocketBareMarkTests {
             )
         ])
         let holder = try #require(overlay.sectionMount(on: display))
-        #expect(holder.alphaValue == PocketPlateOverlay.fadedAlpha)
+        expectEqual(holder.alphaValue, PocketPlateOverlay.fadedAlpha)
         overlay.light(display, for: 60, nods: false)
-        #expect(overlay.view(on: display)?.flashing == true)
-        #expect(holder.alphaValue == 1)
+        expectEqual(overlay.view(on: display)?.flashing, true)
+        expectEqual(holder.alphaValue, 1)
     }
 
     @Test("the light and the nod stand down under Reduce Motion")
@@ -152,7 +152,7 @@ struct PocketBareMarkTests {
         // a higher level keeps the pocket over it (#2776).
         let panel = try #require(overlay.pocket.panel)
         let shelf = try #require(overlay.panel)
-        #expect(panel.level == BarPanel.aboveLevel)
+        expectEqual(panel.level, BarPanel.aboveLevel)
         #expect(panel.level > shelf.level)
         overlay.hide()
     }

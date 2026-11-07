@@ -36,7 +36,7 @@ struct WindowExplicitCommandTests {
                 )
             )
         }
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
         return core
     }
 
@@ -64,10 +64,10 @@ struct WindowExplicitCommandTests {
     func floatNamed() {
         let core = makeTwo()
         #expect(core.execute("make_floating", args: [.number(1)]).isSuccess)
-        #expect(floats(core, 1) == true)
-        #expect(floats(core, 2) == false)
+        expectEqual(floats(core, 1), true)
+        expectEqual(floats(core, 2), false)
         #expect(core.execute("make_tiled", args: [.number(1)]).isSuccess)
-        #expect(floats(core, 1) == false)
+        expectEqual(floats(core, 1), false)
     }
 
     @Test("toggle_floating flips the named window, not the focus")
@@ -77,8 +77,8 @@ struct WindowExplicitCommandTests {
             core.execute("toggle_floating", args: [.string("1")])
                 .isSuccess
         )
-        #expect(floats(core, 1) == true)
-        #expect(floats(core, 2) == false)
+        expectEqual(floats(core, 1), true)
+        expectEqual(floats(core, 2), false)
     }
 
     @Test("move_to_space moves the named window, not the focus")
@@ -101,13 +101,13 @@ struct WindowExplicitCommandTests {
     func unknownRefused() {
         let core = makeTwo()
         let float = core.execute("make_floating", args: [.number(99)])
-        #expect(float.error == "unknown window: 99")
-        #expect(floats(core, 2) == false)
+        expectEqual(float.error, "unknown window: 99")
+        expectEqual(floats(core, 2), false)
         let move = core.execute(
             "move_to_space",
             args: [.string("2"), .string("nope")]
         )
-        #expect(move.error == "unknown window: nope")
+        expectEqual(move.error, "unknown window: nope")
         #expect(core.state.workspaces[SpaceID(2)]?.windows ?? [] == [])
     }
 
@@ -118,11 +118,11 @@ struct WindowExplicitCommandTests {
             "make_floating",
             args: [.number(1.5)]
         )
-        #expect(fractional.error == "unknown window: 1.5")
+        expectEqual(fractional.error, "unknown window: 1.5")
         let table = core.execute("make_floating", args: [.bool(true)])
-        #expect(table.error == "expected window id")
-        #expect(floats(core, 1) == false)
-        #expect(floats(core, 2) == false)
+        expectEqual(table.error, "expected window id")
+        expectEqual(floats(core, 1), false)
+        expectEqual(floats(core, 2), false)
     }
 
     /// A move from a Space nobody shows, of a window that held no
@@ -147,7 +147,7 @@ struct WindowExplicitCommandTests {
         )
         #expect(core.pendingMouseWarp == nil)
         // KiwiDesk still believes the focus is where macOS keeps it.
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
         #expect(
             core.state.workspaces[SpaceID(3)]?.focused == WindowID(1)
         )
@@ -160,7 +160,7 @@ struct WindowExplicitCommandTests {
     func namedMoveIntoActiveFocuses() {
         let core = makeTwo()
         core.execute("move_to_space", args: [.string("2"), .number(1)])
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
         core.tiler.settings.mouse.followsFocus = true
         core.zOrderRestoresInFlight = 1
         defer { core.zOrderRestoresInFlight = 0 }
@@ -171,17 +171,17 @@ struct WindowExplicitCommandTests {
                 args: [.string("1"), .number(1)]
             ).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
-        #expect(core.pendingMouseWarp == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
+        expectEqual(core.pendingMouseWarp, WindowID(1))
     }
 
     @Test("without the argument the focused window is still the one")
     func focusedFallback() {
         let core = makeTwo()
         #expect(core.execute("make_floating").isSuccess)
-        #expect(floats(core, 2) == true)
-        #expect(floats(core, 1) == false)
+        expectEqual(floats(core, 2), true)
+        expectEqual(floats(core, 1), false)
     }
 
     @Test("a named window skips the foreground preflight")
@@ -190,9 +190,9 @@ struct WindowExplicitCommandTests {
         // Another app is frontmost: a focused call is denied ...
         core.frontmostPIDProvider = { 999 }
         #expect(!core.execute("make_floating").isSuccess)
-        #expect(floats(core, 2) == false)
+        expectEqual(floats(core, 2), false)
         // ... and a call naming its window is not.
         #expect(core.execute("make_floating", args: [.number(1)]).isSuccess)
-        #expect(floats(core, 1) == true)
+        expectEqual(floats(core, 1), true)
     }
 }

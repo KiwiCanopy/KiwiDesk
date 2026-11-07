@@ -63,8 +63,8 @@ struct DeadShortcutIssueTests {
         ]
         try core.saveGuiConfig(config)
         let issue = try #require(dead(core).first)
-        #expect(dead(core).count == 1)
-        #expect(issue.source == "gui.json")
+        expectEqual(dead(core).count, 1)
+        expectEqual(issue.source, "gui.json")
         guard
             case .deadShortcut(let name, let chord, .luaError(let message)) =
                 issue.kind
@@ -72,8 +72,8 @@ struct DeadShortcutIssueTests {
             Issue.record("expected a Lua error, got \(issue.kind)")
             return
         }
-        #expect(name == KeyLayer.defaultName)
-        #expect(chord == "alt+j")
+        expectEqual(name, KeyLayer.defaultName)
+        expectEqual(chord, "alt+j")
         #expect(message.contains("syntax error"))
     }
 
@@ -103,7 +103,7 @@ struct DeadShortcutIssueTests {
         config.layers = [layer(KeyBinding(combo: "alt+j", lua: "test "))]
         try core.saveGuiConfig(config)
         core.syncDerivedIssues()
-        #expect(dead(core).count == 1)
+        expectEqual(dead(core).count, 1)
         config.layers = [layer(Self.good)]
         try core.saveGuiConfig(config)
         core.syncDerivedIssues()
@@ -128,7 +128,7 @@ struct DeadShortcutIssueTests {
             Issue.record("expected one dead shortcut")
             return
         }
-        #expect(name == "resize")
+        expectEqual(name, "resize")
     }
 
     /// The install's skips follow a rename of the profile it
@@ -142,9 +142,9 @@ struct DeadShortcutIssueTests {
             profile: profile(),
             lua: lua
         )
-        #expect(dead(core).map(\.source) == ["Work.json"])
+        expectEqual(dead(core).map(\.source), ["Work.json"])
         core.renameInstalledProfile("Work", to: "Home")
-        #expect(dead(core).map(\.source) == ["Home.json"])
+        expectEqual(dead(core).map(\.source), ["Home.json"])
     }
 
     /// A chord another row of the layer installs still fires, and a
@@ -164,13 +164,13 @@ struct DeadShortcutIssueTests {
             layer(bad, KeyBinding(combo: "alt+h", lua: "also bad "))
         ]
         try core.saveGuiConfig(config)
-        #expect(dead(core).count == 1)
+        expectEqual(dead(core).count, 1)
         // One key spelled two ways is still one issue.
         config.layers = [
             layer(bad, KeyBinding(combo: "option+h", lua: "also bad "))
         ]
         try core.saveGuiConfig(config)
-        #expect(dead(core).count == 1)
+        expectEqual(dead(core).count, 1)
     }
 
     /// The issue is derived, so a republish that hands in only the
@@ -182,9 +182,9 @@ struct DeadShortcutIssueTests {
         config.layers = [layer(KeyBinding(combo: "alt+j", lua: "test "))]
         try core.saveGuiConfig(config)
         core.syncDerivedIssues()
-        #expect(dead(core).count == 1)
+        expectEqual(dead(core).count, 1)
         core.setConfigIssues([])
-        #expect(dead(core).count == 1)
+        expectEqual(dead(core).count, 1)
     }
 
     /// `get_config_status` spells it as a machine contract.
@@ -216,12 +216,12 @@ struct DeadShortcutIssueTests {
             Issue.record("issues are objects")
             return
         }
-        #expect(luaFields["kind"] == .string("dead_shortcut"))
-        #expect(luaFields["layer"] == .string("default"))
-        #expect(luaFields["chord"] == .string("alt+j"))
-        #expect(luaFields["reason"] == .string("lua_error"))
-        #expect(luaFields["message"] == .string("boom"))
-        #expect(chordFields["reason"] == .string("invalid_chord"))
+        expectEqual(luaFields["kind"], .string("dead_shortcut"))
+        expectEqual(luaFields["layer"], .string("default"))
+        expectEqual(luaFields["chord"], .string("alt+j"))
+        expectEqual(luaFields["reason"], .string("lua_error"))
+        expectEqual(luaFields["message"], .string("boom"))
+        expectEqual(chordFields["reason"], .string("invalid_chord"))
         #expect(chordFields["message"] == nil)
     }
 
@@ -234,6 +234,6 @@ struct DeadShortcutIssueTests {
             profile: profile(),
             lua: lua
         )
-        #expect(dead(core).map(\.source) == ["Work.json"])
+        expectEqual(dead(core).map(\.source), ["Work.json"])
     }
 }

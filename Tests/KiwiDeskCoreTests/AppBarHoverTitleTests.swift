@@ -38,9 +38,9 @@ struct AppBarHoverTitleTests {
         let content = try #require(
             core.barPeekContent(.appItem([WindowID(1)]), on: nil)
         )
-        #expect(content.groups.map(\.titles) == [["Downloads"]])
+        expectEqual(content.groups.map(\.titles), [["Downloads"]])
         // A one-window label draws its title alone (#2649).
-        #expect(content.header == .none)
+        expectEqual(content.header, .none)
         #expect(core.barPeekContent(.appItem([WindowID(99)]), on: nil) == nil)
     }
 
@@ -101,8 +101,8 @@ struct AppBarHoverTitleTests {
         #expect(shown.drawsTextInFull)
         #expect(shown.peekSource == nil)
         let cut = try item(core, titleCut: true)
-        #expect(cut.peekSource == .appItem([WindowID(1)]))
-        #expect(titles(core, cut.peekSource) == ["Downloads"])
+        expectEqual(cut.peekSource, .appItem([WindowID(1)]))
+        expectEqual(titles(core, cut.peekSource), ["Downloads"])
         // A group peeks its windows even with its name drawn whole,
         // as a multi-window glyph does (owner, #1946).
         core.state.apply(
@@ -127,7 +127,7 @@ struct AppBarHoverTitleTests {
         let group = try #require(overlay.itemViews.first)
         group.layout()
         #expect(group.drawsTextInFull)
-        #expect(group.peekSource == .appItem([WindowID(1), WindowID(2)]))
+        expectEqual(group.peekSource, .appItem([WindowID(1), WindowID(2)]))
     }
 
     @Test("A vertical bar's item draws no label and owes the title")
@@ -135,7 +135,7 @@ struct AppBarHoverTitleTests {
         let core = core(title: "Downloads")
         let view = try item(core, edge: .left)
         #expect(!view.drawsTextInFull)
-        #expect(titles(core, view.peekSource) == ["Downloads"])
+        expectEqual(titles(core, view.peekSource), ["Downloads"])
     }
 
     @Test("A narrow item's layout truncates its label")
@@ -158,9 +158,9 @@ struct AppBarHoverTitleTests {
         let core = core(title: "Downloads")
         let view = try item(core, edge: .left)
         let source = view.peekSource
-        #expect(titles(core, source) == ["Downloads"])
+        expectEqual(titles(core, source), ["Downloads"])
         core.state.windows.updateTitle(WindowID(1), title: "Desktop")
-        #expect(titles(core, view.peekSource) == ["Desktop"])
+        expectEqual(titles(core, view.peekSource), ["Desktop"])
     }
 
     /// A collapsed group draws its app name, so where it hides that
@@ -192,13 +192,13 @@ struct AppBarHoverTitleTests {
         )
         let view = try #require(overlay.itemViews.first)
         view.layout()
-        #expect(view.peekSource == .appItem([WindowID(1), WindowID(2)]))
+        expectEqual(view.peekSource, .appItem([WindowID(1), WindowID(2)]))
         let content = try #require(
             view.peekSource.flatMap { core.barPeekContent($0, on: nil) }
         )
-        #expect(content.groups.map(\.app) == ["Finder"])
-        #expect(content.groups.map(\.titles) == [["Downloads", "Desktop"]])
-        #expect(content.groups.map(\.windowCount) == [2])
+        expectEqual(content.groups.map(\.app), ["Finder"])
+        expectEqual(content.groups.map(\.titles), [["Downloads", "Desktop"]])
+        expectEqual(content.groups.map(\.windowCount), [2])
     }
 
     @Test("An item reports its hover to the shelf's one peek")

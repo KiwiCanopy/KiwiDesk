@@ -39,8 +39,8 @@ struct TrackLayoutTests {
         let f3 = frames[w[2]]!
         // Full height, side by side, separated by the gap.
         #expect(f1.height == f2.height && f2.height == f3.height)
-        #expect(f1.maxX + 10 == f2.minX)
-        #expect(f2.maxX + 10 == f3.minX)
+        expectEqual(f1.maxX + 10, f2.minX)
+        expectEqual(f2.maxX + 10, f3.minX)
         // Even weights: equal widths.
         #expect(abs(f1.width - f3.width) < 0.001)
     }
@@ -56,8 +56,8 @@ struct TrackLayoutTests {
         )
         let f1 = frames[w[0]]!
         let f2 = frames[w[1]]!
-        #expect(f1.width == f2.width)
-        #expect(f1.maxY + 10 == f2.minY)
+        expectEqual(f1.width, f2.width)
+        expectEqual(f1.maxY + 10, f2.minY)
     }
 
     @Test("A head weight widens exactly that track")
@@ -86,7 +86,7 @@ struct TrackLayoutTests {
         let f2 = frames[w[1]]!
         let f3 = frames[w[2]]!
         // Same column: stacked vertically, weighted 3:1.
-        #expect(f2.minX == f3.minX)
+        expectEqual(f2.minX, f3.minX)
         #expect(abs(f2.height - 3 * f3.height) < 0.001)
     }
 
@@ -145,12 +145,12 @@ struct TrackLayoutTests {
         let shown = w.filter { !parked.contains($0) }
         let xs = shown.map { frames[$0]!.minX }
         // Five normal columns + one overflow column = six x's.
-        #expect(Set(xs).count == 6)
+        expectEqual(Set(xs).count, 6)
         // The overflow track is the far edge and holds the tail.
         let overflowX = xs.max()!
         let inOverflow = shown.filter { frames[$0]!.minX == overflowX }
         #expect(!parked.isEmpty)
-        #expect(Set(inOverflow + parked) == Set(w[5...]))
+        expectEqual(Set(inOverflow + parked), Set(w[5...]))
         // Each leading track holds exactly one window.
         for lead in w[..<5] {
             #expect(
@@ -160,7 +160,7 @@ struct TrackLayoutTests {
         // The overflow track scrolls (#2235): each shown window
         // draws its own slot, the last window waits parked.
         let oy = Set(inOverflow.map { frames[$0]!.minY })
-        #expect(oy.count == inOverflow.count)
+        expectEqual(oy.count, inOverflow.count)
         #expect(parked.contains(w[w.count - 1]))
     }
 
@@ -187,7 +187,7 @@ struct TrackLayoutTests {
         // Every window gets the full usable width (the
         // whole-region OverlapStack), none tiled narrow.
         let widths = Set(w.map { frames[$0]!.width })
-        #expect(widths.count == 1)
+        expectEqual(widths.count, 1)
         #expect(widths.first! >= 300)
     }
 
@@ -217,7 +217,7 @@ struct TrackLayoutTests {
         let shown = w.filter {
             !TilingEngine.looksStashed(frames[$0]!, in: screen)
         }
-        #expect(Set(shown.map { frames[$0]!.minX }).count == 1)
+        expectEqual(Set(shown.map { frames[$0]!.minX }).count, 1)
         #expect(shown.count > 1)
         #expect(shown.count < w.count)
         #expect(w.allSatisfy { frames[$0]!.height >= 300 })
@@ -248,8 +248,8 @@ struct TrackLayoutTests {
         let xs = Set(w.map { frames[$0]!.minX })
         #expect(xs.count > 1)
         #expect(xs.count < w.count)
-        #expect(Set(w.map { frames[$0]!.height }).count == 1)
-        #expect(frames[w[9]] == frames[w[8]])
+        expectEqual(Set(w.map { frames[$0]!.height }).count, 1)
+        expectEqual(frames[w[9]], frames[w[8]])
     }
 
     @Test("Empty window list yields no frames")

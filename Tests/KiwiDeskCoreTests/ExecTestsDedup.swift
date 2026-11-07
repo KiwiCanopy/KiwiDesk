@@ -42,7 +42,7 @@ struct ExecTestsDedup {
         #expect(first != nil)
         let second = core.exec.launch("sleep 5", dedup: true)
         #expect(second == nil)
-        #expect(core.exec.runningCount == 1)
+        expectEqual(core.exec.runningCount, 1)
     }
 
     @Test("dedup:false lets identical commands run in parallel")
@@ -50,7 +50,7 @@ struct ExecTestsDedup {
         let core = makeCore()
         core.exec.launch("sleep 5", dedup: false)
         core.exec.launch("sleep 5", dedup: false)
-        #expect(core.exec.runningCount == 2)
+        expectEqual(core.exec.runningCount, 2)
     }
 
     @Test("dedup clears once the in-flight child is reaped")
@@ -76,8 +76,8 @@ struct ExecTestsDedup {
         } else {
             Issue.record("expected a pid for the first exec")
         }
-        #expect(lua.global("p2") == .none)
-        #expect(core.exec.runningCount == 1)
+        expectEqual(lua.global("p2"), .none)
+        expectEqual(core.exec.runningCount, 1)
     }
 
     @Test("dedup=false via the fourth arg runs both")
@@ -94,7 +94,7 @@ struct ExecTestsDedup {
                 "KiwiDesk.exec('sleep 5', nil, nil, false)"
             ).succeeded
         )
-        #expect(core.exec.runningCount == 2)
+        expectEqual(core.exec.runningCount, 2)
     }
 
     @Test("launcher warns once the outstanding count crosses 20")
@@ -105,7 +105,7 @@ struct ExecTestsDedup {
         for _ in 0..<20 {
             core.exec.launch("sleep 5", dedup: false)
         }
-        #expect(core.exec.runningCount == 20)
+        expectEqual(core.exec.runningCount, 20)
         #expect(
             logs.contains { $0.contains("children outstanding") }
         )
@@ -125,7 +125,7 @@ struct ExecTestsDedup {
         let script =
             "z = KiwiDesk.exec('sleep \(execStarvationGap)', nil, 0)"
         #expect(lua.run(script).succeeded)
-        #expect(core.exec.runningCount == 1)
+        expectEqual(core.exec.runningCount, 1)
         guard case .number(let pid) = lua.global("z") else {
             Issue.record("expected a pid for an accepted exec")
             return
@@ -133,6 +133,6 @@ struct ExecTestsDedup {
         #expect(pid > 0)
         defer { kill(pid_t(pid), SIGTERM) }
         try await Task.sleep(nanoseconds: 2_500_000_000)
-        #expect(core.exec.runningCount == 1)
+        expectEqual(core.exec.runningCount, 1)
     }
 }

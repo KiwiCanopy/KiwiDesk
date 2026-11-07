@@ -105,9 +105,9 @@ struct FixedSizeReportTests {
         core.handleFixedSize(report())
         var issued = 0
         applier.issued = { _, _ in issued += 1 }
-        #expect(owed.count == 1)
+        expectEqual(owed.count, 1)
         owed.forEach { $0() }
-        #expect(issued == 1)
+        expectEqual(issued, 1)
     }
 
     @Test("A newer move's stamp is not the report's to clear")
@@ -119,7 +119,7 @@ struct FixedSizeReportTests {
         let moved = start.offsetBy(dx: 40, dy: 0)
         applier.applyInstant(id, moved, setSize: false)
         core.handleFixedSize(report())
-        #expect(applier.instantTarget(id) == moved)
+        expectEqual(applier.instantTarget(id), moved)
     }
 
     @Test("The cue names the axis the ask moved")
@@ -131,7 +131,7 @@ struct FixedSizeReportTests {
             if case .ownMaximum(_, let axis, _) = refusal { axes.append(axis) }
         }
         core.handleFixedSize(report(asked: CGSize(width: 500, height: 460)))
-        #expect(axes == ["y"])
+        expectEqual(axes, ["y"])
     }
 
     /// Through the real hotkey fire, past `wireFixedSizeAnswer`.
@@ -151,7 +151,7 @@ struct FixedSizeReportTests {
         f.registrar.press(keyCode: f.combo.keyCode)
         await drain()
         await drain()
-        #expect(heard.map(\.pressed) == [true])
+        expectEqual(heard.map(\.pressed), [true])
     }
 
     /// A slow app's report for the arming press lands past the
@@ -175,7 +175,7 @@ struct FixedSizeReportTests {
                     pressed: pressed
                 )
             )
-            #expect(cues == (pressed ? 1 : 0))
+            expectEqual(cues, (pressed ? 1 : 0))
             #expect(!f.core.keys.isGliding)
         }
     }
@@ -219,6 +219,6 @@ struct FixedSizeReportTests {
         core.handleFixedSize(report(serial: 1, pressed: true))
         #expect(!door.reportingPress)
         core.handleFixedSize(report(serial: 2, pressed: false))
-        #expect(owed == [true, false])
+        expectEqual(owed, [true, false])
     }
 }

@@ -53,22 +53,22 @@ struct ScreenFocusTests {
     func twoScreensToggle() {
         let core = makeCore(screens: 2)
         #expect(core.execute("focus_display_last").isSuccess)
-        #expect(screen(core) == Self.b)
+        expectEqual(screen(core), Self.b)
         #expect(core.execute("focus_display_last").isSuccess)
-        #expect(screen(core) == Self.a)
+        expectEqual(screen(core), Self.a)
     }
 
     @Test("with three it returns to the one before, and refuses at first")
     func threeScreensReturn() {
         let core = makeCore(screens: 3)
         #expect(!core.execute("focus_display_last").isSuccess)
-        #expect(screen(core) == Self.a)
+        expectEqual(screen(core), Self.a)
         core.execute("focus_space", args: [.string("2")])
         core.execute("focus_space", args: [.string("3")])
         #expect(core.execute("focus_display_last").isSuccess)
-        #expect(screen(core) == Self.b)
+        expectEqual(screen(core), Self.b)
         #expect(core.execute("focus_display_last").isSuccess)
-        #expect(screen(core) == Self.c)
+        expectEqual(screen(core), Self.c)
     }
 
     /// A recorded screen since unplugged is passed over for the one
@@ -82,7 +82,7 @@ struct ScreenFocusTests {
         let left = Self.frames.filter { $0.id != Self.b }
         core.tiler.displayFrames = { left }
         #expect(core.execute("focus_display_last").isSuccess)
-        #expect(screen(core) == Self.a)
+        expectEqual(screen(core), Self.a)
     }
 
     /// Each refusal bumps the focused window toward the edge it met
@@ -105,7 +105,7 @@ struct ScreenFocusTests {
         core.borders.deadEndProbe = { bumps.append($1) }
         core.execute("focus_display_last")
         core.execute("focus_display", args: [.string("up")])
-        #expect(bumps == [.right, .up])
+        expectEqual(bumps, [.right, .up])
     }
 
     @Test("one screen has no other")
@@ -113,7 +113,7 @@ struct ScreenFocusTests {
         let core = makeCore(screens: 1)
         let response = core.execute("focus_display_last")
         #expect(!response.isSuccess)
-        #expect(response.error == "no other screen")
+        expectEqual(response.error, "no other screen")
     }
 
     @Test("a direction takes the nearest screen that way and stops")
@@ -123,35 +123,35 @@ struct ScreenFocusTests {
             core.execute("focus_display", args: [.string("right")])
                 .isSuccess
         )
-        #expect(screen(core) == Self.b)
+        expectEqual(screen(core), Self.b)
         #expect(
             core.execute("focus_display", args: [.string("down")])
                 .isSuccess
         )
-        #expect(screen(core) == Self.d)
+        expectEqual(screen(core), Self.d)
         // C sits up and to the right of D: a diagonal, no neighbour.
         #expect(
             !core.execute("focus_display", args: [.string("right")])
                 .isSuccess
         )
-        #expect(screen(core) == Self.d)
+        expectEqual(screen(core), Self.d)
         core.execute("focus_display", args: [.string("up")])
         core.execute("focus_display", args: [.string("right")])
         #expect(
             !core.execute("focus_display", args: [.string("right")])
                 .isSuccess
         )
-        #expect(screen(core) == Self.c)
+        expectEqual(screen(core), Self.c)
     }
 
     @Test("a screen keeps the Space it shows, an empty one included")
     func showsNoOtherSpace() {
         let core = makeCore(screens: 2)
         core.state.workspaces.assign(SpaceID("5"), to: Self.b)
-        #expect(core.state.workspaces.activeSpace(on: Self.b) == "2")
+        expectEqual(core.state.workspaces.activeSpace(on: Self.b), "2")
         core.execute("focus_display", args: [.string("right")])
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-        #expect(core.state.workspaces.activeSpace(on: Self.a) == "1")
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace(on: Self.a), "1")
     }
 
     @Test("the direction is read from the type")

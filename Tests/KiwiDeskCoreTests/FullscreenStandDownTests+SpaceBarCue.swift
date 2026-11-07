@@ -36,11 +36,11 @@ extension FullscreenStandDownTests {
             makeSpaceCueCore(spaceBar: true)
         )
         core.spaceBars.onSelectSpace("2")
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(box.cues.isEmpty)
         // The scope ends with the pick: the next switch is named.
         _ = core.execute("focus_space", args: [.string("1")])
-        #expect(box.cues.map(\.space) == ["1"])
+        expectEqual(box.cues.map(\.space), ["1"])
     }
 
     @Test(
@@ -58,7 +58,7 @@ extension FullscreenStandDownTests {
                 anchor: NSView()
             )
         )
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(box.cues.isEmpty)
     }
 
@@ -72,14 +72,14 @@ extension FullscreenStandDownTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, window) = try #require(coreWithWindowOn2())
         core.shelves.peek.pick(window, "2")
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(box.cues.isEmpty)
 
         let (control, controlBox, controlWindow) = try #require(
             coreWithWindowOn2()
         )
         control.pickBarRow(controlWindow, on: "2")
-        #expect(controlBox.cues.map(\.space) == ["2"])
+        expectEqual(controlBox.cues.map(\.space), ["2"])
     }
 
     @Test(

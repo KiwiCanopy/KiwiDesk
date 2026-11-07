@@ -68,7 +68,7 @@ struct DesktopFirstVisitTests {
         let core = core()
         let snapshot = authoritySnapshot()
         // One Space, and it is the active one — nothing is free.
-        #expect(core.state.workspaces.allSpaces.count == 1)
+        expectEqual(core.state.workspaces.allSpaces.count, 1)
         #expect(
             core.virtualSpaceTarget(for: .number(4), in: snapshot)
                 != nil
@@ -159,12 +159,12 @@ struct DesktopFirstVisitTests {
             settings: TilingSettings()
         )
         try core.profiles.save(stored)
-        #expect(core.currentDeclaredSpaces() == [SpaceID(1)])
+        expectEqual(core.currentDeclaredSpaces(), [SpaceID(1)])
 
         try FileManager.default.removeItem(
             at: core.profiles.fileURL(name: "P")
         )
-        #expect(core.currentDeclaredSpaces() == [SpaceID(1)])
+        expectEqual(core.currentDeclaredSpaces(), [SpaceID(1)])
         // And the pick still steps over the undeclared Space 2.
         #expect(
             core.virtualSpaceTarget(
@@ -257,6 +257,6 @@ struct DesktopFirstVisitTests {
             for: .number(4),
             in: snapshot
         )
-        #expect(target == SpaceID(1))
+        expectEqual(target, SpaceID(1))
     }
 }

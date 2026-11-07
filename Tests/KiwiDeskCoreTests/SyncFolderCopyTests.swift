@@ -70,7 +70,7 @@ struct SyncFolderCopyTests {
             trashed.append(url.lastPathComponent)
             try FileManager.default.removeItem(at: url)
         }
-        #expect(profileNames(in: target) == ["Mine"])
+        expectEqual(profileNames(in: target), ["Mine"])
         #expect(
             !files.fileExists(
                 atPath: target.appendingPathComponent("looks.json").path
@@ -80,7 +80,7 @@ struct SyncFolderCopyTests {
             contentsOf: target.appendingPathComponent("init.lua"),
             encoding: .utf8
         )
-        #expect(lua == "-- mine")
+        expectEqual(lua, "-- mine")
         #expect(Set(trashed).isSuperset(of: ["profiles", "init.lua"]))
         #expect(
             files.fileExists(
@@ -105,9 +105,9 @@ struct SyncFolderCopyTests {
             trashed.append(url.lastPathComponent)
             try FileManager.default.removeItem(at: url)
         }
-        #expect(Set(core.profiles.allProfiles().map(\.name)) == ["Theirs"])
+        expectEqual(Set(core.profiles.allProfiles().map(\.name)), ["Theirs"])
         let lua = try String(contentsOf: core.configURL, encoding: .utf8)
-        #expect(lua == "-- theirs")
+        expectEqual(lua, "-- theirs")
         #expect(trashed.contains("init.lua"))
         #expect(
             core.guiConfigStore.bindingsFile.load()
@@ -123,9 +123,9 @@ struct SyncFolderCopyTests {
         let stamp = try JSONEncoder().encode(SyncStamp(mac: "Studio"))
         try stamp.write(to: target.appendingPathComponent("sync.json"))
         let comparison = core.compareSync(with: target)
-        #expect(comparison.thisMac.profileCount == 1)
-        #expect(comparison.folder.profileCount == 1)
-        #expect(comparison.folder.mac == "Studio")
+        expectEqual(comparison.thisMac.profileCount, 1)
+        expectEqual(comparison.folder.profileCount, 1)
+        expectEqual(comparison.folder.mac, "Studio")
         #expect(!comparison.folder.isEmpty)
         #expect(comparison.keepThisMacRefusal == nil)
         #expect(comparison.keepFolderRefusal == nil)
@@ -136,7 +136,7 @@ struct SyncFolderCopyTests {
         let core = try guiCore()
         let comparison = core.compareSync(with: try folder())
         #expect(comparison.folder.isEmpty)
-        #expect(comparison.keepFolderRefusal == .folderEmpty)
+        expectEqual(comparison.keepFolderRefusal, .folderEmpty)
         #expect(comparison.keepThisMacRefusal == nil)
     }
 
@@ -157,7 +157,7 @@ struct SyncFolderCopyTests {
             try core.keepThisMacsSetup(in: target) { _ in }
         }
         let text = try String(contentsOf: gui, encoding: .utf8)
-        #expect(text == "{\"format\": 9999}")
+        expectEqual(text, "{\"format\": 9999}")
     }
 
     @Test("the config folder itself is refused")

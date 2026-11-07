@@ -83,20 +83,20 @@ struct SpaceBarStickyScreenTests {
         // Space, so its item lists its own window and nothing
         // else.
         let away = try item(core, dell, "3")
-        #expect(away.apps.map(\.name) == ["Note"])
+        expectEqual(away.apps.map(\.name), ["Note"])
         #expect(away.apps.allSatisfy { !$0.sticky })
         let here = try item(core, built, "1")
-        #expect(here.apps.map(\.name) == ["Web", "Mail"])
-        #expect(here.apps.map(\.sticky) == [true, false])
+        expectEqual(here.apps.map(\.name), ["Web", "Mail"])
+        expectEqual(here.apps.map(\.sticky), [true, false])
         // Focus the Dell: the one glyph crosses with the user —
         // injected at its home index, so ahead of Note — and
         // leaves the screen it came from.
         core.state.workspaces.activate(SpaceID("3"))
         let moved = try item(core, dell, "3")
-        #expect(moved.apps.map(\.name) == ["Web", "Note"])
-        #expect(moved.apps.map(\.sticky) == [true, false])
+        expectEqual(moved.apps.map(\.name), ["Web", "Note"])
+        expectEqual(moved.apps.map(\.sticky), [true, false])
         let left = try item(core, built, "1")
-        #expect(left.apps.map(\.name) == ["Mail"])
+        expectEqual(left.apps.map(\.name), ["Mail"])
     }
 
     /// The other half of the same verdict, and the arm that
@@ -114,10 +114,10 @@ struct SpaceBarStickyScreenTests {
         // on, and never joins the Dell's item.
         core.state.workspaces.activate(SpaceID("3"))
         let home = try item(core, built, "1")
-        #expect(home.apps.map(\.name) == ["Web", "Mail"])
-        #expect(home.apps.map(\.sticky) == [true, false])
+        expectEqual(home.apps.map(\.name), ["Web", "Mail"])
+        expectEqual(home.apps.map(\.sticky), [true, false])
         let away = try item(core, dell, "3")
-        #expect(away.apps.map(\.name) == ["Note"])
+        expectEqual(away.apps.map(\.name), ["Note"])
         // Switch the built-in to Space 2: the glyph travels
         // within its own screen, and still not across.
         core.state.workspaces.activate(SpaceID("2"))
@@ -158,12 +158,12 @@ struct SpaceBarStickyScreenTests {
             inside: true
         )
         let away = try item(core, dell, "3", style)
-        #expect(away.after.windows == [WindowID(8), WindowID(5)])
+        expectEqual(away.after.windows, [WindowID(8), WindowID(5)])
         #expect(!away.after.holdsFocus)
         // Nor does the active screen claim it: the focus is not
         // behind ITS badge either, so neither bar tints.
         let here = try item(core, built, "1", style)
-        #expect(here.discs == 1)
+        expectEqual(here.discs, 1)
         #expect(!here.after.holdsFocus && !here.before.holdsFocus)
         // Follow the focus back to the Dell: now that Space is
         // the active one and the badge does carry the signal.

@@ -43,7 +43,7 @@ struct ScrollDurationMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(data))
         let knobs = try animations(out)
-        #expect(knobs["scroll_duration"] as? Int == 420)
+        expectEqual(knobs["scroll_duration"] as? Int, 420)
         #expect(knobs["scroll_speed"] == nil)
         // ...and the whole point: decoding it back gives the
         // tuned value rather than the 150 ms default.
@@ -59,7 +59,7 @@ struct ScrollDurationMigrationTests {
                 )
             )
         )
-        #expect(settings.animations.scrollDurationMS == 420)
+        expectEqual(settings.animations.scrollDurationMS, 420)
     }
 
     /// The bump is what RUNS the crossing.
@@ -141,7 +141,7 @@ struct ScrollDurationMigrationTests {
         let knobs = try #require(
             settings?["animations"] as? [String: Any]
         )
-        #expect(knobs["scroll_duration"] as? Int == 420)
+        expectEqual(knobs["scroll_duration"] as? Int, 420)
         #expect(knobs["scroll_speed"] == nil)
     }
 
@@ -173,7 +173,7 @@ struct ScrollDurationMigrationTests {
         let root =
             try JSONSerialization.jsonObject(with: out)
             as? [String: Any]
-        #expect(root?["spaces"] as? [String] == ["scroll_speed"])
+        expectEqual(root?["spaces"] as? [String], ["scroll_speed"])
         #expect(
             try animations(out)["scroll_duration"] as? Int == 420
         )
@@ -196,7 +196,7 @@ struct ScrollDurationMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(data))
         let knobs = try animations(out)
-        #expect(knobs["scroll_duration"] as? Int == 420)
+        expectEqual(knobs["scroll_duration"] as? Int, 420)
         #expect(knobs["scroll_speed"] == nil)
     }
 
@@ -239,7 +239,7 @@ struct ScrollDurationMigrationTests {
         )
         #expect(!text.contains("\"scroll_speed\""))
         let knobs = try animations(out)
-        #expect(knobs["scroll_duration"] as? Int == 420)
+        expectEqual(knobs["scroll_duration"] as? Int, 420)
     }
 
     /// The surgical edit exists so a one-key migration does not

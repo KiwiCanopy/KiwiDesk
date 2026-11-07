@@ -51,7 +51,7 @@ struct RenameKeyTests {
             ["menu.quit", "menu.exit"],
             fixture: fixture
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
 
         for (name, expected) in [
             ("en.json", "Quit KiwiDesk"),
@@ -59,7 +59,7 @@ struct RenameKeyTests {
         ] {
             let decoded = try fixture.decodeLocale(name)
             #expect(decoded["menu.quit"] == nil)
-            #expect(decoded["menu.exit"] == expected)
+            expectEqual(decoded["menu.exit"], expected)
         }
     }
 
@@ -97,8 +97,8 @@ struct RenameKeyTests {
 
         // Nothing was touched on failure.
         let decoded = try fixture.decodeLocale("en.json")
-        #expect(decoded["menu.quit"] == "Quit KiwiDesk")
-        #expect(decoded["menu.exit"] == "Already taken")
+        expectEqual(decoded["menu.quit"], "Quit KiwiDesk")
+        expectEqual(decoded["menu.exit"], "Already taken")
     }
 
     @Test("only renames in locales that actually have the key")
@@ -116,11 +116,11 @@ struct RenameKeyTests {
             ["menu.quit", "menu.exit"],
             fixture: fixture
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
 
         let fr = try fixture.decodeLocale("fr.json")
         // fr.json never had menu.quit — untouched, no
         // spurious menu.exit key created.
-        #expect(fr == ["menu.settings": "Réglages…"])
+        expectEqual(fr, ["menu.settings": "Réglages…"])
     }
 }

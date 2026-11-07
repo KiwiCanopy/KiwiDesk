@@ -80,8 +80,8 @@ struct DragCrossingTests {
         )
         // The focused display followed the drag (#446); the
         // moved window is the destination's focus.
-        #expect(core.activeSpace?.id == SpaceID("2"))
-        #expect(core.activeSpace?.focused == id)
+        expectEqual(core.activeSpace?.id, SpaceID("2"))
+        expectEqual(core.activeSpace?.focused, id)
         // The gesture knows it crossed — the drop path's
         // resize-gate bypass reads exactly this.
         #expect(core.dragCrossing.hasCrossed(id))
@@ -89,10 +89,10 @@ struct DragCrossingTests {
             core.dragCrossing.origin(for: id)?.space
                 == SpaceID(1)
         )
-        #expect(core.dragCrossing.origin(for: id)?.index == 0)
+        expectEqual(core.dragCrossing.origin(for: id)?.index, 0)
         // The window stays pinned under the cursor: exempt from
         // re-framing for the rest of the gesture.
-        #expect(core.tiler.dragExemptWindow == id)
+        expectEqual(core.tiler.dragExemptWindow, id)
     }
 
     @Test("A release during the dwell leaves membership alone")
@@ -106,7 +106,7 @@ struct DragCrossingTests {
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )
-        #expect(core.dragCrossing.hasCrossed(id) == false)
+        expectEqual(core.dragCrossing.hasCrossed(id), false)
     }
 
     @Test("An abnormal cancel restores the origin space + index")
@@ -129,7 +129,7 @@ struct DragCrossingTests {
         )
         // Bookkeeping is gone — a reused id starts clean.
         #expect(core.dragCrossing.origin(for: id) == nil)
-        #expect(core.dragCrossing.hasCrossed(id) == false)
+        expectEqual(core.dragCrossing.hasCrossed(id), false)
     }
 
     @Test("The drop ends the gesture and reports the crossing")
@@ -145,7 +145,7 @@ struct DragCrossingTests {
             start: CGRect(x: 0, y: 0, width: 500, height: 500),
             frame: CGRect(x: 1400, y: 50, width: 400, height: 400)
         )
-        #expect(core.dragCrossing.hasCrossed(id) == false)
+        expectEqual(core.dragCrossing.hasCrossed(id), false)
         #expect(core.dragCrossing.origin(for: id) == nil)
         // Size changed mid-gesture (the smaller-display clamp),
         // yet the window stays MOVED — never re-interpreted as
@@ -167,7 +167,7 @@ struct DragCrossingTests {
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )
-        #expect(core.dragCrossing.hasCrossed(id) == false)
+        expectEqual(core.dragCrossing.hasCrossed(id), false)
     }
 
     @Test("An armed Space Bar target blocks the dwell fire")
@@ -186,7 +186,7 @@ struct DragCrossingTests {
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )
-        #expect(core.dragCrossing.hasCrossed(id) == false)
+        expectEqual(core.dragCrossing.hasCrossed(id), false)
     }
 
     @Test("A native-tab rekey reverts under the new id")

@@ -101,11 +101,11 @@ struct AwayBootSeedTests {
             )
         }
         core.seedAwayWindows()
-        #expect(Set(core.state.awayWindows.keys) == [WindowID(7)])
+        expectEqual(Set(core.state.awayWindows.keys), [WindowID(7)])
         let entry = core.state.awayWindows[WindowID(7)]
-        #expect(entry?.appName == "Observed")
-        #expect(entry?.appBundleID == "app.test.observed")
-        #expect(entry?.nativeSpace == 4)
+        expectEqual(entry?.appName, "Observed")
+        expectEqual(entry?.appBundleID, "app.test.observed")
+        expectEqual(entry?.nativeSpace, 4)
         // No snapshot, no Desktop memory: unfiled.
         #expect(core.state.rememberedSpace(of: WindowID(7)) == nil)
         #expect(core.deferred.isScheduled(.awayCensus))
@@ -131,7 +131,7 @@ struct AwayBootSeedTests {
         core.seedAwayWindows()
         // The UP sibling proves the fixture reaches the seed at
         // all, so the skip is a decision rather than an empty run.
-        #expect(Set(core.state.awayWindows.keys) == [WindowID(8)])
+        expectEqual(Set(core.state.awayWindows.keys), [WindowID(8)])
     }
 
     @Test("an all-parked census leaves the task unarmed")
@@ -174,8 +174,8 @@ struct AwayBootSeedTests {
             )
         }
         core.seedAwayWindows()
-        #expect(core.state.rememberedSpace(of: WindowID(7)) == "2")
-        #expect(core.state.rememberedSpace(of: WindowID(9)) == "1")
+        expectEqual(core.state.rememberedSpace(of: WindowID(7)), "2")
+        expectEqual(core.state.rememberedSpace(of: WindowID(9)), "1")
     }
 
     /// The carried filing resumes as the departure it was, so its
@@ -205,10 +205,10 @@ struct AwayBootSeedTests {
             )
         }
         core.seedAwayWindows()
-        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
-        #expect(core.state.rememberedSpaces[WindowID(8)] == .departed("2"))
-        #expect(core.state.rememberedSpaces[WindowID(6)] == .restored("2"))
-        #expect(core.state.rememberedSpaces[WindowID(9)] == .restored("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(7)], .departed("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(8)], .departed("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(6)], .restored("2"))
+        expectEqual(core.state.rememberedSpaces[WindowID(9)], .restored("2"))
     }
 
     @Test("no census seeds nothing")

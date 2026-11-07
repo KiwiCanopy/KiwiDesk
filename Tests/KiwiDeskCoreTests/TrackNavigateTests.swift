@@ -75,7 +75,7 @@ struct TrackNavigateTests {
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("Along-axis focus steps within the track")
@@ -94,7 +94,7 @@ struct TrackNavigateTests {
             core.execute("focus", args: [.string("down")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         // At the track's end without wrap: falls through and
         // fails (nothing below the track).
         #expect(
@@ -119,7 +119,7 @@ struct TrackNavigateTests {
         )
         // Past the track's last (3) lands on its first (2) —
         // not on another track.
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("Wrap: across the axis wraps last to first track")
@@ -131,7 +131,7 @@ struct TrackNavigateTests {
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("swap never wraps")
@@ -279,6 +279,6 @@ struct MoveToTrackTests {
             args: [.string("down")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error == "expected prev|next")
+        expectEqual(response.error, "expected prev|next")
     }
 }

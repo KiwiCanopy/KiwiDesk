@@ -38,8 +38,8 @@ struct SizeBoundGestureResizeTests {
     @Test("A larger size keeps the floor and drops the ceiling")
     func growKeepsTheFloor() {
         var learner = learned()
-        #expect(learner.bound(for: w)?.minWidth == 500)
-        #expect(learner.bound(for: w)?.maxHeight == 600)
+        expectEqual(learner.bound(for: w)?.minWidth, 500)
+        expectEqual(learner.bound(for: w)?.maxHeight, 600)
         learner.recordAsk(w, size: CGSize(width: 300, height: 600))
         var candidate = SizeBoundLearner.Ledger()
         candidate.width = [
@@ -51,7 +51,7 @@ struct SizeBoundGestureResizeTests {
             to: CGSize(width: 700, height: 700)
         )
         #expect(dropped)
-        #expect(learner.bound(for: w)?.minWidth == 500)
+        expectEqual(learner.bound(for: w)?.minWidth, 500)
         #expect(learner.bound(for: w)?.maxHeight == nil)
         #expect(learner.lastAsks[w] == nil)
         #expect(learner.candidates[w] == nil)
@@ -65,8 +65,8 @@ struct SizeBoundGestureResizeTests {
             to: CGSize(width: 600, height: 500)
         )
         #expect(!dropped)
-        #expect(learner.bound(for: w)?.minWidth == 500)
-        #expect(learner.bound(for: w)?.maxHeight == 600)
+        expectEqual(learner.bound(for: w)?.minWidth, 500)
+        expectEqual(learner.bound(for: w)?.maxHeight, 600)
     }
 
     @Test("A size inside the match tolerance keeps the floor")
@@ -74,7 +74,7 @@ struct SizeBoundGestureResizeTests {
         var learner = learned()
         let width = 500 - EffectiveSizeBound.matchTolerance / 2
         learner.gestureResized(w, to: CGSize(width: width, height: 600))
-        #expect(learner.bound(for: w)?.minWidth == 500)
+        expectEqual(learner.bound(for: w)?.minWidth, 500)
     }
 
     @Test("A pending probe is re-sent later, untrusted")
@@ -93,12 +93,12 @@ struct SizeBoundGestureResizeTests {
         learner.probes[w]?.width.pending?.baselineTrusted = true
         learner.gestureResized(w, to: CGSize(width: 700, height: 600))
         let pending = learner.probes[w]?.width.pending
-        #expect(pending?.baselineTrusted == false)
+        expectEqual(pending?.baselineTrusted, false)
         // Out and unanswered, but no longer the last ask: the
         // take door re-sends it at its span's next ask (#2758).
         #expect(learner.lastAsks[w] == nil)
-        #expect(pending?.issues == 1)
-        #expect(pending?.answeredIssues == 0)
+        expectEqual(pending?.issues, 1)
+        expectEqual(pending?.answeredIssues, 0)
     }
 
     @Test("A size under the floor drops it")
@@ -106,7 +106,7 @@ struct SizeBoundGestureResizeTests {
         var learner = learned()
         learner.gestureResized(w, to: CGSize(width: 420, height: 600))
         #expect(learner.bound(for: w)?.minWidth == nil)
-        #expect(learner.bound(for: w)?.maxHeight == 600)
+        expectEqual(learner.bound(for: w)?.maxHeight, 600)
     }
 
     private func makeCore() -> KiwiCore {
@@ -195,7 +195,7 @@ struct SizeBoundGestureResizeTests {
                 )
             )
         )
-        #expect(core.tiler.sizeBound(for: w)?.minWidth == 500)
+        expectEqual(core.tiler.sizeBound(for: w)?.minWidth, 500)
         // Three 386-pt columns would be the forgotten floor's shape.
         #expect(abs(width(core, 1) - half) < 0.5)
     }

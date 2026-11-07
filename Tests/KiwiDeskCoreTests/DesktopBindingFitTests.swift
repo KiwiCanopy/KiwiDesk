@@ -123,7 +123,7 @@ struct DesktopBindingFitTests {
                 profile("Desk", monitors: live(core)),
             ]
         )
-        #expect(core.profiles.currentName == "Desk")
+        expectEqual(core.profiles.currentName, "Desk")
         return core
     }
 
@@ -136,7 +136,7 @@ struct DesktopBindingFitTests {
         core.onLog = { log.append($0) }
         bind(core, "Golden")
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Desk")
+        expectEqual(core.profiles.currentName, "Desk")
         #expect(
             log.contains {
                 $0.contains(
@@ -156,9 +156,9 @@ struct DesktopBindingFitTests {
         core.onLog = { log.append($0) }
         // The verb itself takes the binding door.
         bind(core, "Golden")
-        #expect(core.profiles.currentName == "Desk")
+        expectEqual(core.profiles.currentName, "Desk")
         core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
-        #expect(core.profiles.currentName == "Desk")
+        expectEqual(core.profiles.currentName, "Desk")
         #expect(
             log.contains {
                 $0.contains(
@@ -203,13 +203,13 @@ struct DesktopBindingFitTests {
         }
         let other = try core.profiles.read(name: "Other")
         core.apply(profile: other, cause: .event)
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         bind(core, "Duo")
-        #expect(core.profiles.currentName == "Duo")
+        expectEqual(core.profiles.currentName, "Duo")
         #expect(!core.profiles.isDirty)
         core.apply(profile: other, cause: .event)
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Duo")
+        expectEqual(core.profiles.currentName, "Duo")
         #expect(!core.profiles.isDirty)
     }
 
@@ -231,12 +231,12 @@ struct DesktopBindingFitTests {
         )
         #expect(!core.profiles.isDirty)
         bind(core, "Away")
-        #expect(core.profiles.currentName == "Away")
+        expectEqual(core.profiles.currentName, "Away")
         #expect(core.profiles.isDirty)
         core.execute("load_profile", args: [.string("Other")])
         #expect(!core.profiles.isDirty)
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Away")
+        expectEqual(core.profiles.currentName, "Away")
         #expect(core.profiles.isDirty)
     }
 
@@ -255,11 +255,11 @@ struct DesktopBindingFitTests {
                 profile("Other", monitors: ["Z:1x1"]),
             ]
         )
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         var log: [String] = []
         core.onLog = { log.append($0) }
         bind(core, "Golden")
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         #expect(
             log.contains {
                 $0.contains(
@@ -269,7 +269,7 @@ struct DesktopBindingFitTests {
         )
         connect(core, 1)
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Golden")
+        expectEqual(core.profiles.currentName, "Golden")
     }
 
     /// The boot door: `loadConfig` runs before any display is
@@ -289,9 +289,9 @@ struct DesktopBindingFitTests {
             ]
         )
         bind(core, "Golden")
-        #expect(core.profiles.currentName == "Other")
+        expectEqual(core.profiles.currentName, "Other")
         core.handle(.displaysChanged([display(1, "D1")]))
-        #expect(core.profiles.currentName == "Golden")
+        expectEqual(core.profiles.currentName, "Golden")
     }
 
     /// An in-effect edit's hot-reload asks the same gate: a

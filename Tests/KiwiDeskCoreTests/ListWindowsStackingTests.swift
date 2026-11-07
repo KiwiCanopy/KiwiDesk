@@ -106,10 +106,10 @@ struct ListWindowsStackingTests {
         // 99 is no tracked window: it covers, and is never counted.
         core.frontStack = { self.listed([99, 2, 3, 4, 1]) }
         let seen = try entries(core)
-        #expect(seen[2]?["z"] == .number(0))
-        #expect(seen[4]?["z"] == .number(1))
-        #expect(seen[1]?["z"] == .number(2))
-        #expect(seen[3]?["z"] == .number(0))
+        expectEqual(seen[2]?["z"], .number(0))
+        expectEqual(seen[4]?["z"], .number(1))
+        expectEqual(seen[1]?["z"], .number(2))
+        expectEqual(seen[3]?["z"], .number(0))
     }
 
     /// A sticky window of Space 3 draws on the main screen, so it
@@ -123,8 +123,8 @@ struct ListWindowsStackingTests {
         core.state.workspaces.add(WindowID(6), to: "3")
         core.frontStack = { self.listed([6, 4, 1, 2]) }
         let all = try entries(core)
-        #expect(all[6]?["z"] == .number(0))
-        #expect(all[4]?["z"] == .number(1))
+        expectEqual(all[6]?["z"], .number(0))
+        expectEqual(all[4]?["z"], .number(1))
         let response = core.execute("list_windows", args: [.string("1")])
         guard case .array(let list)? = response.data else {
             Issue.record("list_windows answered \(response)")
@@ -132,9 +132,9 @@ struct ListWindowsStackingTests {
         }
         for case .object(let entry) in list {
             let id = try #require(entry["id"]?.numberValue)
-            #expect(entry["z"] == all[UInt32(id)]?["z"])
+            expectEqual(entry["z"], all[UInt32(id)]?["z"])
         }
-        #expect(list.count == 3)
+        expectEqual(list.count, 3)
     }
 
     /// A Space no screen shows sits parked, and a parked window is
@@ -144,10 +144,10 @@ struct ListWindowsStackingTests {
         let core = makeCore()
         core.frontStack = { self.listed([5, 3, 1, 2]) }
         let seen = try entries(core)
-        #expect(seen[5]?["z"] == .null)
-        #expect(seen[3]?["z"] == .number(0))
-        #expect(seen[1]?["z"] == .number(0))
-        #expect(seen[2]?["z"] == .number(1))
+        expectEqual(seen[5]?["z"], .null)
+        expectEqual(seen[3]?["z"], .number(0))
+        expectEqual(seen[1]?["z"], .number(0))
+        expectEqual(seen[2]?["z"], .number(1))
     }
 
     /// A monocle's back member is parked behind the front one, on
@@ -166,9 +166,9 @@ struct ListWindowsStackingTests {
         core.state.apply(.windowFocused(WindowID(1)))
         core.frontStack = { self.listed([2, 1, 4]) }
         let seen = try entries(core)
-        #expect(seen[2]?["frame"] == .null)
-        #expect(seen[2]?["z"] == .null)
-        #expect(seen[1]?["z"] == .number(0))
+        expectEqual(seen[2]?["frame"], .null)
+        expectEqual(seen[2]?["z"], .null)
+        expectEqual(seen[1]?["z"], .number(0))
     }
 
     /// `visibility` is the App Bar's verdict over KiwiDesk's own
@@ -183,10 +183,10 @@ struct ListWindowsStackingTests {
         core.state.apply(.windowFocused(WindowID(1)))
         core.frontStack = { self.listed([2, 1]) }
         let seen = try entries(core)
-        #expect(seen[2]?["visibility"] == .string("hidden"))
-        #expect(seen[2]?["z"] == .number(0))
-        #expect(seen[1]?["visibility"] == .string("visible"))
-        #expect(seen[1]?["z"] == .number(1))
+        expectEqual(seen[2]?["visibility"], .string("hidden"))
+        expectEqual(seen[2]?["z"], .number(0))
+        expectEqual(seen[1]?["visibility"], .string("visible"))
+        expectEqual(seen[1]?["z"], .number(1))
     }
 
     @Test("A window listed twice takes one rank")
@@ -194,8 +194,8 @@ struct ListWindowsStackingTests {
         let core = makeCore()
         core.frontStack = { self.listed([2, 2, 1]) }
         let seen = try entries(core)
-        #expect(seen[2]?["z"] == .number(0))
-        #expect(seen[1]?["z"] == .number(1))
+        expectEqual(seen[2]?["z"], .number(0))
+        expectEqual(seen[1]?["z"], .number(1))
     }
 
     @Test("A window the WindowServer does not list has no z")
@@ -203,9 +203,9 @@ struct ListWindowsStackingTests {
         let core = makeCore()
         core.frontStack = { self.listed([2]) }
         let seen = try entries(core)
-        #expect(seen[2]?["z"] == .number(0))
-        #expect(seen[1]?["z"] == .null)
-        #expect(seen[3]?["z"] == .null)
+        expectEqual(seen[2]?["z"], .number(0))
+        expectEqual(seen[1]?["z"], .null)
+        expectEqual(seen[3]?["z"], .null)
     }
 
     /// Without a tracked window on screen there is nothing to rank,
@@ -222,21 +222,21 @@ struct ListWindowsStackingTests {
             return []
         }
         _ = try entries(core)
-        #expect(reads == 0)
+        expectEqual(reads, 0)
     }
 
     @Test("app, pid and index: the window's place in its Space's row")
     func appPidAndIndex() throws {
         let core = makeCore()
         let seen = try entries(core)
-        #expect(seen[1]?["app"] == .string("App1"))
-        #expect(seen[1]?["pid"] == .number(920_001))
+        expectEqual(seen[1]?["app"], .string("App1"))
+        expectEqual(seen[1]?["pid"], .number(920_001))
         let row = try #require(core.state.workspaces["1"]?.windows)
-        #expect(row.count == 3)
+        expectEqual(row.count, 3)
         for (offset, id) in row.enumerated() {
-            #expect(seen[id.raw]?["index"] == .number(Double(offset + 1)))
+            expectEqual(seen[id.raw]?["index"], .number(Double(offset + 1)))
         }
-        #expect(seen[3]?["index"] == .number(1))
+        expectEqual(seen[3]?["index"], .number(1))
     }
 
     @Test("A window no Space holds has no index")
@@ -244,7 +244,7 @@ struct ListWindowsStackingTests {
         let core = makeCore()
         core.state.workspaces.remove(WindowID(2))
         let entry = try #require(try entries(core)[2])
-        #expect(entry["space_id"] == .null)
-        #expect(entry["index"] == .null)
+        expectEqual(entry["space_id"], .null)
+        expectEqual(entry["index"], .null)
     }
 }

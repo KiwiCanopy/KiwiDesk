@@ -17,7 +17,7 @@ struct ServiceStatusTests {
             + "\tpid = 4271\n"
             + "\tprogram = /usr/local/bin/KiwiDesk\n"
             + "}"
-        #expect(ServiceManager.parsePID(from: output) == 4271)
+        expectEqual(ServiceManager.parsePID(from: output), 4271)
     }
 
     @Test("Ignores a pid substring that isn't its own line")
@@ -29,7 +29,7 @@ struct ServiceStatusTests {
     @Test("Skips a malformed pid line and keeps scanning")
     func skipsMalformedPIDLine() {
         let output = "\tpid = \n\tpid = 88\n"
-        #expect(ServiceManager.parsePID(from: output) == 88)
+        expectEqual(ServiceManager.parsePID(from: output), 88)
     }
 
     @Test("Returns nil when no pid line is present")
@@ -85,7 +85,7 @@ struct ServiceStatusTests {
             printExit: 0,
             output: output
         )
-        #expect(status == ServiceStatus(isLoaded: true, pid: 4271))
+        expectEqual(status, ServiceStatus(isLoaded: true, pid: 4271))
         #expect(status.isRunning)
     }
 

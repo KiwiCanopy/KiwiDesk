@@ -21,8 +21,8 @@ struct TestCoreStartTripwireTests {
         core.boot.publishRestore(.placing(placed: 0, total: 1))
         withKnownIssue { core.start() }
         #expect(!core.boot.reachedReady)
-        #expect(core.restorePhase == .none)
-        #expect(core.bootPhase == .idle)
+        expectEqual(core.restorePhase, .none)
+        expectEqual(core.bootPhase, .idle)
         #expect(!core.eventLoop.isRunning)
     }
 

@@ -57,10 +57,10 @@ struct MaximizeWindowTests {
         let core = makeCore()
         let slot = slots(core)[w1]
         #expect(core.execute("toggle_maximized").isSuccess)
-        #expect(maximized(core) == w1)
-        #expect(issued(core)[w1] == bounds)
-        #expect(slots(core)[w1] == slot)
-        #expect(issued(core)[w2] == slots(core)[w2])
+        expectEqual(maximized(core), w1)
+        expectEqual(issued(core)[w1], bounds)
+        expectEqual(slots(core)[w1], slot)
+        expectEqual(issued(core)[w2], slots(core)[w2])
     }
 
     @Test("A second press puts the window back in its slot")
@@ -69,7 +69,7 @@ struct MaximizeWindowTests {
         core.execute("toggle_maximized")
         core.execute("toggle_maximized")
         #expect(maximized(core) == nil)
-        #expect(issued(core)[w1] == slots(core)[w1])
+        expectEqual(issued(core)[w1], slots(core)[w1])
     }
 
     @Test("Focus onto another tiled window ends it, for good")
@@ -81,7 +81,7 @@ struct MaximizeWindowTests {
         #expect(core.state.workspaces[space]?.maximized == nil)
         core.focusWindow(w1, warp: false)
         #expect(maximized(core) == nil)
-        #expect(issued(core)[w1] == slots(core)[w1])
+        expectEqual(issued(core)[w1], slots(core)[w1])
     }
 
     @Test("Focus onto a float of the Space keeps it")
@@ -91,7 +91,7 @@ struct MaximizeWindowTests {
         core.state.windows.setFloating(w3, true)
         core.state.workspaces.focus(w3, in: space)
         core.state.retireEndedMaximize()
-        #expect(maximized(core) == w1)
+        expectEqual(maximized(core), w1)
     }
 
     @Test("Closing the window ends it")
@@ -118,7 +118,7 @@ struct MaximizeWindowTests {
         core.execute("toggle_maximized")
         core.execute("swap", args: [.string("right")])
         #expect(maximized(core) == nil)
-        #expect(issued(core)[w1] == slots(core)[w1])
+        expectEqual(issued(core)[w1], slots(core)[w1])
     }
 
     @Test("Dragging the window ends it")
@@ -151,9 +151,9 @@ struct MaximizeWindowTests {
     @Test("⌃⌥M is the seeded Maximize, generation 7")
     func seedsMaximize() {
         let row = DefaultKeybindings.maximizeRow()
-        #expect(row.combo == "control+option+m")
-        #expect(row.lua == "KiwiDesk.toggle_maximized()")
-        #expect(DefaultKeybindings.rows(ofGeneration: 7) == [row])
+        expectEqual(row.combo, "control+option+m")
+        expectEqual(row.lua, "KiwiDesk.toggle_maximized()")
+        expectEqual(DefaultKeybindings.rows(ofGeneration: 7), [row])
     }
 
     @Test("A rekey carries the maximized window")
@@ -161,10 +161,10 @@ struct MaximizeWindowTests {
         var model = Space(id: space, windows: [w1, w2])
         model.maximized = w1
         model.rekey(w1, to: w3)
-        #expect(model.maximized == w3)
+        expectEqual(model.maximized, w3)
         // A removal keeps the id for a Desktop return; the state
         // fold and the retire end every other departure.
         model.remove(w3)
-        #expect(model.maximized == w3)
+        expectEqual(model.maximized, w3)
     }
 }

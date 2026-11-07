@@ -59,8 +59,8 @@ struct PlaceholderSpaceTests {
         let named = try namedSetup(in: dir)
         let core = makeTestCore(configDirectory: dir)
         core.loadConfig()
-        #expect(liveSpaces(core) == named)
-        #expect(core.state.workspaces.activeSpace == SpaceID("W0"))
+        expectEqual(liveSpaces(core), named)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("W0"))
     }
 
     @Test("a placeholder holding a window is kept")
@@ -84,7 +84,7 @@ struct PlaceholderSpaceTests {
             core
         )
         core.loadConfig()
-        #expect(liveSpaces(core) == ["1", "Work"])
+        expectEqual(liveSpaces(core), ["1", "Work"])
     }
 
     @Test("a display resolve inside the script declares nothing")
@@ -101,7 +101,7 @@ struct PlaceholderSpaceTests {
             core
         )
         core.loadConfig()
-        #expect(liveSpaces(core) == ["Work"])
+        expectEqual(liveSpaces(core), ["Work"])
         #expect(
             !core.state.workspaces.spaces(on: Self.display.id).isEmpty
         )
@@ -115,7 +115,7 @@ struct PlaceholderSpaceTests {
         // can give the screen a Space.
         try writeLua("KiwiDesk.set_mode(\"Work\", \"stack\")", core)
         core.loadConfig()
-        #expect(liveSpaces(core) == ["Work"])
+        expectEqual(liveSpaces(core), ["Work"])
         #expect(
             core.state.workspaces.spaces(on: Self.display.id)
                 == [SpaceID("Work")]
@@ -127,9 +127,9 @@ struct PlaceholderSpaceTests {
         let core = makeTestCore(configDirectory: directory())
         try writeLua("KiwiDesk.set_mode(\"Work\", \"stack\")", core)
         core.loadConfig()
-        #expect(liveSpaces(core) == ["Work"])
+        expectEqual(liveSpaces(core), ["Work"])
         core.resetAllSettings(trash: { _ in })
-        #expect(liveSpaces(core) == ["Work"])
+        expectEqual(liveSpaces(core), ["Work"])
     }
 
     @Test("a declared `1` survives the boot")
@@ -144,7 +144,7 @@ struct PlaceholderSpaceTests {
         let core = makeTestCore(configDirectory: directory())
         try writeLua("KiwiDesk.set_gap_global(4)", core)
         core.loadConfig()
-        #expect(liveSpaces(core) == ["1"])
+        expectEqual(liveSpaces(core), ["1"])
     }
 
     @Test("the ruling is once: a reload leaves a later `1` alone")

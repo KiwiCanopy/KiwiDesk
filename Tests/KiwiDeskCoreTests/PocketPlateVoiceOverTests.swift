@@ -92,7 +92,7 @@ struct PocketPlateVoiceOverTests {
         let display = try #require(core.pocketPlate.specs.keys.first)
         let view = try #require(core.pocketPlate.view(on: display))
         #expect(view.accessibilityPerformPress())
-        #expect(asked == [.pocket([general, mine])])
+        expectEqual(asked, [.pocket([general, mine])])
     }
 
     /// A press while the click's list is open closes it, so the
@@ -122,7 +122,7 @@ struct PocketPlateVoiceOverTests {
         #expect(core.shelves.peek.shown?.view === view)
         #expect(view.accessibilityPerformPress())
         #expect(core.shelves.peek.shown == nil)
-        #expect(menus == 1)
+        expectEqual(menus, 1)
     }
 
     /// The click keeps its list; only the press takes the menu.
@@ -149,6 +149,6 @@ struct PocketPlateVoiceOverTests {
         let view = try #require(core.pocketPlate.view(on: display))
         core.pocketPlate.onClick(view)
         #expect(core.shelves.peek.shown?.view === view)
-        #expect(menus == 0)
+        expectEqual(menus, 0)
     }
 }

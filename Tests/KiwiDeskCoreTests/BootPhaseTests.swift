@@ -122,7 +122,7 @@ struct BootPhaseTests {
                 .ready,
             ]
         )
-        #expect(run.phase == .ready)
+        expectEqual(run.phase, .ready)
     }
 
     @Test("only scanning counts as starting")
@@ -181,7 +181,7 @@ struct BootPhaseTests {
             }
             return scanned
         }
-        #expect(counts == counts.sorted())
+        expectEqual(counts, counts.sorted())
         #expect(!counts.isEmpty)
         #expect(counts.allSatisfy { $0 < 5 })
     }
@@ -215,7 +215,7 @@ struct BootPhaseTests {
 
         // One app per turn: completing them back to back would
         // re-block the run loop the boot just freed.
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         #expect(
             box.lines.contains {
                 $0.hasPrefix("deferred app: slow.one")
@@ -229,7 +229,7 @@ struct BootPhaseTests {
 
         await core.deferred.task(for: .deferredBootApps)?.value
 
-        #expect(box.windowQueries == 2)
+        expectEqual(box.windowQueries, 2)
         #expect(
             box.lines.contains {
                 $0.hasPrefix("deferred app: slow.two")
@@ -267,25 +267,25 @@ struct BootPhaseTests {
         ])
         await core.deferred.task(for: .deferredBootApps)?.value
         // Asked, not read: the main actor never waited on the app.
-        #expect(box.reads.count == 1)
-        #expect(box.windowQueries == 0)
-        #expect(core.eventLoop.bootScan.pendingDrain.count == 1)
+        expectEqual(box.reads.count, 1)
+        expectEqual(box.windowQueries, 0)
+        expectEqual(core.eventLoop.bootScan.pendingDrain.count, 1)
 
         core.drainDeferredBootApps([
             (second, AppRef(bundleID: "slow.two", name: "Two"))
         ])
         await core.deferred.task(for: .deferredBootApps)?.value
         // Queued behind the read in flight; no second read asked.
-        #expect(core.eventLoop.bootScan.pendingDrain.count == 2)
-        #expect(box.reads.count == 1)
+        expectEqual(core.eventLoop.bootScan.pendingDrain.count, 2)
+        expectEqual(box.reads.count, 1)
 
         box.reads.removeFirst()()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         #expect(
             box.lines.contains { $0.hasPrefix("deferred app: slow.one") }
         )
-        #expect(core.eventLoop.bootScan.pendingDrain.count == 1)
+        expectEqual(core.eventLoop.bootScan.pendingDrain.count, 1)
         await core.deferred.task(for: .deferredBootApps)?.value
-        #expect(box.reads.count == 1)
+        expectEqual(box.reads.count, 1)
     }
 }

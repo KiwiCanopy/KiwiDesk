@@ -78,7 +78,7 @@ struct EmptyItemInkTests {
                 // Dropped: no share fits, measured independently,
                 // and the empty ink is the idle one.
                 #expect(!anyShareFits(shelf), name)
-                #expect(shelf.emptyItemColor == shelf.idleItemColor)
+                expectEqual(shelf.emptyItemColor, shelf.idleItemColor)
                 continue
             }
             #expect(share < KiwiShelf.idleItemAlpha, name)
@@ -112,7 +112,7 @@ struct EmptyItemInkTests {
         shelf.fillColor = "#606060"
         #expect(shelf.emptyItemAlpha == nil)
         #expect(!anyShareFits(shelf))
-        #expect(shelf.emptyItemColor == shelf.idleItemColor)
+        expectEqual(shelf.emptyItemColor, shelf.idleItemColor)
     }
 
     /// The share the search should find, measured on ColorVision:

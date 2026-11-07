@@ -48,7 +48,7 @@ struct SpaceBarPocketBadgeCornerTests {
         let item = view(pocket: true, floating: true)
         let float = try #require(item.floatingBadgeViews.first ?? nil)
         let pocket = try #require(item.pocketBadgeViews.first ?? nil)
-        #expect(pocket.symbolName == StateBadgeView.pocketName)
+        expectEqual(pocket.symbolName, StateBadgeView.pocketName)
         #expect(float.symbolName != StateBadgeView.pocketName)
         // Same bottom edge, the pocket on the right.
         #expect(abs(pocket.frame.maxY - float.frame.maxY) < 1)

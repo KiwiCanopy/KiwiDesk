@@ -104,10 +104,10 @@ struct MoveHerePickTests {
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(2))
         #expect(run(core).isSuccess)
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(3)), "2")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     @Test("another app's window is never chosen")
@@ -117,7 +117,7 @@ struct MoveHerePickTests {
         addWindow(core, 9, pid: 300, space: "3")
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(9))
-        #expect(pick(core) == WindowID(1))
+        expectEqual(pick(core), WindowID(1))
     }
 
     @Test("an open window outranks a more recent minimized one")
@@ -133,7 +133,7 @@ struct MoveHerePickTests {
             wasMinimized: true,
             effects: &effects
         )
-        #expect(pick(core) == WindowID(1))
+        expectEqual(pick(core), WindowID(1))
     }
 
     @Test("a minimized window is restored once no open one is left")
@@ -149,9 +149,9 @@ struct MoveHerePickTests {
             wasMinimized: true,
             effects: &effects
         )
-        #expect(pick(core) == WindowID(4))
+        expectEqual(pick(core), WindowID(4))
         #expect(run(core).isSuccess)
-        #expect(recorder.restored == [4])
+        expectEqual(recorder.restored, [4])
     }
 
     @Test("with no focus on record, the first in Space order moves")
@@ -159,15 +159,15 @@ struct MoveHerePickTests {
         let (core, _) = makeCore()
         addWindow(core, 5, space: "3")
         addWindow(core, 6, space: "2")
-        #expect(pick(core) == WindowID(6))
+        expectEqual(pick(core), WindowID(6))
     }
 
     @Test("an app with no window takes Open or Focus's path")
     func noWindowOpens() {
         let (core, recorder) = makeCore(running: false)
         #expect(run(core).isSuccess)
-        #expect(recorder.opened == [Self.bundle])
-        #expect(core.launchFollow.owed() == Self.bundle)
+        expectEqual(recorder.opened, [Self.bundle])
+        expectEqual(core.launchFollow.owed(), Self.bundle)
     }
 
     @Test("a full-screen window is passed over for the next one")
@@ -178,8 +178,8 @@ struct MoveHerePickTests {
         core.state.stampFocusRecency(WindowID(2))
         core.state.stampFocusRecency(WindowID(1))
         #expect(run(core).isSuccess)
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "1")
     }
 
     @Test("a fresh KiwiDesk takes the app's own focused window")
@@ -188,7 +188,7 @@ struct MoveHerePickTests {
         addWindow(core, 5, space: "2")
         addWindow(core, 6, space: "3")
         core.eventLoop.shadows.focusedWindow = { _ in WindowID(6) }
-        #expect(pick(core) == WindowID(6))
+        expectEqual(pick(core), WindowID(6))
     }
 
     @Test("an away window is a candidate only with the Desktop bridge")
@@ -207,7 +207,7 @@ struct MoveHerePickTests {
                 resetAuthorityOverrides()
             }
             let (core, _) = makeCore()
-            #expect(core.canDriveDesktops == bridge)
+            expectEqual(core.canDriveDesktops, bridge)
             addWindow(core, 1, space: "2")
             // Stamped while tracked, then gone with its Desktop.
             addWindow(core, 7, space: "3")
@@ -223,7 +223,7 @@ struct MoveHerePickTests {
                 nativeSpace: 11
             )
             core.state.rememberedSpaces[WindowID(7)] = .departed("3")
-            #expect(pick(core) == WindowID(bridge ? 7 : 1))
+            expectEqual(pick(core), WindowID(bridge ? 7 : 1))
         }
     }
 
@@ -232,10 +232,10 @@ struct MoveHerePickTests {
         let (core, recorder) = makeCore()
         core.eventLoop.appIsHidden = { _ in true }
         #expect(run(core).isSuccess)
-        #expect(recorder.activated == [100])
+        expectEqual(recorder.activated, [100])
         #expect(recorder.opened.isEmpty)
         // The window it brings back focused is owed the move.
-        #expect(core.jump.owedApp?.pid == 100)
+        expectEqual(core.jump.owedApp?.pid, 100)
     }
 
     @Test("no bundle id is refused")
@@ -252,7 +252,7 @@ struct MoveHerePickTests {
         core.state.stampFocusRecency(WindowID(2))
         core.state.stampFocusRecency(WindowID(1))
         #expect(core.stickyMoveBlock(WindowID(1), to: "1") != nil)
-        #expect(pick(core) == WindowID(2))
+        expectEqual(pick(core), WindowID(2))
     }
 
     @Test("a ∞ window, already drawn here, counts as here")
@@ -262,7 +262,7 @@ struct MoveHerePickTests {
         addWindow(core, 2, space: "3")
         core.state.stampFocusRecency(WindowID(2))
         core.state.stampFocusRecency(WindowID(1))
-        #expect(pick(core) == WindowID(2))
+        expectEqual(pick(core), WindowID(2))
     }
 
     @Test("a window already here is skipped for the next one")
@@ -272,7 +272,7 @@ struct MoveHerePickTests {
         addWindow(core, 2, space: "3")
         core.state.stampFocusRecency(WindowID(2))
         core.state.stampFocusRecency(WindowID(1))
-        #expect(pick(core) == WindowID(2))
+        expectEqual(pick(core), WindowID(2))
     }
 
     @Test("text narrows to titles containing it, any case or accent")
@@ -282,8 +282,8 @@ struct MoveHerePickTests {
         addWindow(core, 2, space: "3", title: "Drafts")
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(2))
-        #expect(pick(core, text: "ínbox") == WindowID(1))
-        #expect(pick(core, text: "MESSAGES") == WindowID(1))
+        expectEqual(pick(core, text: "ínbox"), WindowID(1))
+        expectEqual(pick(core, text: "MESSAGES"), WindowID(1))
         #expect(pick(core, text: "trash") == nil)
     }
 
@@ -299,7 +299,7 @@ struct MoveHerePickTests {
                 effects: &effects
             )
         }
-        #expect(pick(core) == WindowID(5))
+        expectEqual(pick(core), WindowID(5))
     }
 
     @Test("no pid LaunchServices names is asked for its focus")
@@ -317,7 +317,7 @@ struct MoveHerePickTests {
             asked.append(pid)
             return nil
         }
-        #expect(pick(core) == WindowID(4))
+        expectEqual(pick(core), WindowID(4))
         #expect(asked.allSatisfy { $0 > 0 })
     }
 }

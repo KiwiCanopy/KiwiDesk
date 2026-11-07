@@ -144,7 +144,7 @@ struct FocusFloatTierTests {
             from: WindowID(1),
             "right"
         )
-        #expect(landed == WindowID(2))
+        expectEqual(landed, WindowID(2))
     }
 
     @Test("BSP: a float above a tile is reachable via up")

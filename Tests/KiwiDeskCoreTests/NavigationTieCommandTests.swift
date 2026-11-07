@@ -95,7 +95,7 @@ struct NavigationTieCommandTests {
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     @Test("A step back into the stack returns where it came from")
@@ -106,7 +106,7 @@ struct NavigationTieCommandTests {
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("A swap takes the first window, never the last step")
@@ -158,12 +158,12 @@ struct NavigationTieCommandTests {
         #expect(
             bottom.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(bottom.activeSpace?.focused == WindowID(5))
+        expectEqual(bottom.activeSpace?.focused, WindowID(5))
         let top = trackCore(windows: 5, heads: heads, focus: WindowID(1))
         #expect(
             top.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(top.activeSpace?.focused == WindowID(3))
+        expectEqual(top.activeSpace?.focused, WindowID(3))
     }
 
     @Test("A lone track enters the next at its first window")
@@ -174,7 +174,7 @@ struct NavigationTieCommandTests {
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("A lone track's step back returns where it came from")
@@ -186,6 +186,6 @@ struct NavigationTieCommandTests {
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
     }
 }

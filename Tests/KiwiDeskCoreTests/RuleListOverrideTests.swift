@@ -13,7 +13,7 @@ struct RuleListOverrideTests {
             onto: ["Mail", "Mail", "Music"],
             normalizing: identity
         )
-        #expect(result == ["Mail", "Music"])
+        expectEqual(result, ["Mail", "Music"])
     }
 
     @Test("Adds sorted rules and removes inherited rules")
@@ -27,7 +27,7 @@ struct RuleListOverrideTests {
             onto: ["Mail", "Music"],
             normalizing: identity
         )
-        #expect(result == ["Mail", "Alpha", "Zulu"])
+        expectEqual(result, ["Mail", "Alpha", "Zulu"])
     }
 
     @Test("Normalizer supplies case-insensitive identity")
@@ -38,7 +38,7 @@ struct RuleListOverrideTests {
             onto: ["Mail", "Safari"],
             normalizing: { $0.lowercased() }
         )
-        #expect(result == ["safari", "terminal"])
+        expectEqual(result, ["safari", "terminal"])
     }
 
     @Test("Float normalizer can preserve title case")
@@ -78,7 +78,7 @@ struct RuleListOverrideTests {
             RuleListOverride.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.rules["Terminal"] == true)
+        expectEqual(decoded.rules["Terminal"], true)
         #expect(decoded.rules["Music"] == .some(nil))
 
         let data = try JSONEncoder().encode(decoded)
@@ -86,13 +86,13 @@ struct RuleListOverrideTests {
             JSONSerialization.jsonObject(with: data)
                 as? [String: Any]
         )
-        #expect(object["Terminal"] as? Bool == true)
+        expectEqual(object["Terminal"] as? Bool, true)
         #expect(object["Music"] is NSNull)
         let roundTrip = try JSONDecoder().decode(
             RuleListOverride.self,
             from: data
         )
-        #expect(roundTrip == decoded)
+        expectEqual(roundTrip, decoded)
     }
 
     @Test("False and empty entries are sanitized")
@@ -101,7 +101,7 @@ struct RuleListOverrideTests {
             RuleListOverride.self,
             from: Data(#"{"":true,"No":false,"Yes":true}"#.utf8)
         )
-        #expect(decoded.rules == ["Yes": true])
+        expectEqual(decoded.rules, ["Yes": true])
 
         var mutated = RuleListOverride(rules: [
             "": true,
@@ -139,8 +139,8 @@ struct RuleListOverrideTests {
             )
         )
         #expect(override.rules["Music"] == .some(nil))
-        #expect(override.rules["Safari"] == true)
-        #expect(override.rules["Calendar"] == true)
+        expectEqual(override.rules["Safari"], true)
+        expectEqual(override.rules["Calendar"], true)
         #expect(
             override.resolved(
                 onto: base,

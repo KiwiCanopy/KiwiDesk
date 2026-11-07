@@ -55,7 +55,7 @@ struct BorderOwnKeyWindowTests {
             focusedRingSuppressed: true,
             sheen: 0
         )
-        #expect(result.count == 2)
+        expectEqual(result.count, 2)
         #expect(
             result.allSatisfy {
                 $0.colorHex == style.unfocusedColor

@@ -60,7 +60,7 @@ struct JumpListTests {
         track(core, 3, title: "c")
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(3))
-        #expect(windows(core.jumpEntries()) == [3, 1, 2])
+        expectEqual(windows(core.jumpEntries()), [3, 1, 2])
     }
 
     /// Tracked and away rows rank together as the open tier, by
@@ -91,7 +91,7 @@ struct JumpListTests {
             wasMinimized: true,
             effects: &effects
         )
-        #expect(windows(core.jumpEntries()) == [7, 1, 4])
+        expectEqual(windows(core.jumpEntries()), [7, 1, 4])
     }
 
     @Test("the snapshot names the Space the user is in")
@@ -100,8 +100,8 @@ struct JumpListTests {
         defer { resetAuthorityOverrides() }
         core.tiler.settings.spaceIcons[SpaceID("1")] = "house"
         let snapshot = core.jumpSnapshot()
-        #expect(snapshot.here == "1")
-        #expect(snapshot.hereIcon == .symbol("house"))
+        expectEqual(snapshot.here, "1")
+        expectEqual(snapshot.hereIcon, .symbol("house"))
     }
 
     /// The bar chip's reading: a held Space keeps its icon.
@@ -116,7 +116,7 @@ struct JumpListTests {
             arrangement: .profile("Desk")
         )
         track(core, 1, title: "held", in: "2")
-        #expect(core.jumpEntries().first?.spaceIcon == .symbol("star"))
+        expectEqual(core.jumpEntries().first?.spaceIcon, .symbol("star"))
     }
 
     @Test("a row names its Space, its icon and its state")
@@ -129,12 +129,12 @@ struct JumpListTests {
         let rows = core.jumpEntries()
         let plain = rows.first { $0.title == "plain" }
         let full = rows.first { $0.title == "full" }
-        #expect(plain?.space == "1")
+        expectEqual(plain?.space, "1")
         #expect(plain?.spaceIcon == nil)
-        #expect(plain?.status == .shown)
-        #expect(full?.space == "2")
-        #expect(full?.spaceIcon == .symbol("terminal"))
-        #expect(full?.status == .fullscreen)
+        expectEqual(plain?.status, .shown)
+        expectEqual(full?.space, "2")
+        expectEqual(full?.spaceIcon, .symbol("terminal"))
+        expectEqual(full?.status, .fullscreen)
     }
 
     @Test("a transient overlay is never listed")
@@ -161,9 +161,9 @@ struct JumpListTests {
         core.state.windows.remove(WindowID(7))
         core.state.workspaces.remove(WindowID(7))
         let row = core.jumpEntries().first
-        #expect(row?.title == "draft")
-        #expect(row?.space == "2")
-        #expect(row?.status == .away(desktop: 2))
+        expectEqual(row?.title, "draft")
+        expectEqual(row?.space, "2")
+        expectEqual(row?.status, .away(desktop: 2))
     }
 
     @Test("an away window parked on its Desktop is not listed")
@@ -194,10 +194,10 @@ struct JumpListTests {
             effects: &effects
         )
         let row = core.jumpEntries().first
-        #expect(row?.target == .window(WindowID(4)))
-        #expect(row?.title == "parked")
-        #expect(row?.app == "Notes")
-        #expect(row?.status == .minimized)
+        expectEqual(row?.target, .window(WindowID(4)))
+        expectEqual(row?.title, "parked")
+        expectEqual(row?.app, "Notes")
+        expectEqual(row?.status, .minimized)
     }
 
     /// A window closed while minimized fires no event: the record
@@ -217,9 +217,9 @@ struct JumpListTests {
             )
         }
         core.jump.knownWindows = { [WindowID(4)] }
-        #expect(windows(core.jumpEntries()) == [4])
+        expectEqual(windows(core.jumpEntries()), [4])
         core.jump.knownWindows = { nil }
-        #expect(Set(windows(core.jumpEntries())) == [4, 5])
+        expectEqual(Set(windows(core.jumpEntries())), [4, 5])
     }
 
     @Test("hidden regular apps come last, one row each, by name")
@@ -248,11 +248,11 @@ struct JumpListTests {
         }
         track(core, 1, title: "a")
         let rows = core.jumpEntries()
-        #expect(windows(rows) == [1])
+        expectEqual(windows(rows), [1])
         #expect(
             rows.dropFirst().map(\.target)
                 == [.hiddenApp(303), .hiddenApp(300)]
         )
-        #expect(rows.last?.app == "Spotify")
+        expectEqual(rows.last?.app, "Spotify")
     }
 }

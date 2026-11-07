@@ -53,7 +53,7 @@ struct WarningGateTests {
     @Test("An unpromoted isolation warning reds the gate")
     func isolationWarningFails() throws {
         let run = try gate(over: "Compiling\n\(Self.isolation)\n")
-        #expect(run.status == 1)
+        expectEqual(run.status, 1)
         #expect(run.stderr.contains("A.swift:145:26"))
     }
 
@@ -74,7 +74,7 @@ struct WarningGateTests {
 
             """
         let run = try gate(over: log)
-        #expect(run.status == 1)
+        expectEqual(run.status, 1)
         #expect(run.stderr.contains("macro expansion #expect:2:6"))
     }
 
@@ -126,7 +126,7 @@ struct WarningGateTests {
             "/bin/bash",
             [Self.script.path, "/bin/sh", "-c", "exit 3"]
         )
-        #expect(run.status == 3)
+        expectEqual(run.status, 3)
         #expect(!run.stderr.contains("warning-gate:"))
     }
 

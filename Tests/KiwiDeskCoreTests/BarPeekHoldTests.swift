@@ -61,15 +61,15 @@ struct BarPeekHoldTests {
         rig.pointer = try rig.gap()
         rig.hover(nil)
         #expect(rig.steps.count == 1, "polling the gap")
-        #expect(rig.dwells.last == BarPeek.Timing.holdPoll)
+        expectEqual(rig.dwells.last, BarPeek.Timing.holdPoll)
         let peek = try #require(rig.peek.panel.panel?.frame)
         rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
         rig.peek.panel.body.onPointerInside(true)
         rig.step()
         #expect(rig.steps.count == 1, "a slow re-read inside")
-        #expect(rig.dwells.last == BarPeek.Timing.insideRecheck)
+        expectEqual(rig.dwells.last, BarPeek.Timing.insideRecheck)
         #expect(BarPeek.Timing.insideRecheck > BarPeek.Timing.holdPoll)
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         rig.pointer = try rig.gap()
         rig.peek.panel.body.onPointerInside(false)
         #expect(rig.dwells.last == BarPeek.Timing.holdPoll, "fast again")
@@ -95,7 +95,7 @@ struct BarPeekHoldTests {
         rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
         rig.peek.panel.body.onPointerInside(true)
         rig.step()
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         // The pointer leaves the hull and no exit arrives.
         rig.pointer = CGPoint(x: peek.maxX + 200, y: peek.midY)
         rig.step()
@@ -120,7 +120,7 @@ struct BarPeekHoldTests {
         rig.hover(nil)
         #expect(rig.peek.holding)
         #expect(rig.steps.count == 1, "the hold re-reads")
-        #expect(rig.dwells.last == BarPeek.Timing.insideRecheck)
+        expectEqual(rig.dwells.last, BarPeek.Timing.insideRecheck)
         // The pointer leaves the hull and no exit arrives.
         rig.pointer = CGPoint(x: peek.maxX + 200, y: peek.midY)
         rig.step()
@@ -137,7 +137,7 @@ struct BarPeekHoldTests {
         rig.step()
         rig.pointer = try rig.gap()
         rig.hover(nil)
-        #expect(rig.dwells.last == BarPeek.Timing.holdPoll)
+        expectEqual(rig.dwells.last, BarPeek.Timing.holdPoll)
         let peek = try #require(rig.peek.panel.panel?.frame)
         rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
         let entered = try #require(
@@ -155,7 +155,7 @@ struct BarPeekHoldTests {
         )
         rig.peek.panel.body.mouseEntered(with: entered)
         rig.step()
-        #expect(rig.steps.count == 1)
+        expectEqual(rig.steps.count, 1)
         #expect(
             rig.dwells.last == BarPeek.Timing.insideRecheck,
             "the enter slowed the re-read"
@@ -185,7 +185,7 @@ struct BarPeekHoldTests {
             )
         )
         body.mouseExited(with: event)
-        #expect(reports == [false])
+        expectEqual(reports, [false])
         rig.hover(rig.first, 1, 2)
         rig.step()
         rig.pointer = try rig.gap()
@@ -212,7 +212,7 @@ struct BarPeekHoldTests {
             label: "App"
         )
         rig.peek.pressed(on: glyph, type: .leftMouseDown)
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         rig.peek.pressed(on: NSView(), type: .leftMouseDown)
         #expect(rig.peek.panel.drawn == nil)
         rig.hover(rig.first, 1, 2)
@@ -227,7 +227,7 @@ struct BarPeekHoldTests {
         defer { rig.close() }
         rig.hover(rig.first, 1, 2)
         rig.step()
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        expectEqual(rig.shownTitles, ["Window 1", "Window 2"])
         let glyph = SpaceBarGlyphTarget(
             space: SpaceID("1"),
             windows: [WindowID(1), WindowID(2)],

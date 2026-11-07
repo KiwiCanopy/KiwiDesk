@@ -66,9 +66,9 @@ struct BarAutoHideFoldTests {
     func valuesAreNotLinked() {
         var shared = settings(space: .always, app: .always)
         shared.monocle.appBar.visibility = .auto
-        #expect(shared.spaceBarStyle.visibility == .always)
-        #expect(shared.appBarVisibility(in: .monocle) == .auto)
-        #expect(shared.appBarVisibility(in: .scrolling) == .always)
+        expectEqual(shared.spaceBarStyle.visibility, .always)
+        expectEqual(shared.appBarVisibility(in: .monocle), .auto)
+        expectEqual(shared.appBarVisibility(in: .scrolling), .always)
     }
 
     @Test("Split bars hide on their own edges")
@@ -130,13 +130,13 @@ struct BarAutoHideFoldTests {
         let monocle = try #require(layouts["monocle"] as? [String: Any])
         let app = try #require(monocle["app_bar"] as? [String: Any])
         let shelf = try #require(root["kiwishelf"] as? [String: Any])
-        #expect(space["visibility"] as? String == "auto")
-        #expect(app["visibility"] as? String == "auto")
-        #expect(shelf["reveal_timeout"] as? Double == 5)
+        expectEqual(space["visibility"] as? String, "auto")
+        expectEqual(app["visibility"] as? String, "auto")
+        expectEqual(shelf["reveal_timeout"] as? Double, 5)
         let back = try JSONDecoder().decode(TilingSettings.self, from: data)
-        #expect(back.spaceBarStyle.visibility == .auto)
-        #expect(back.monocle.appBar.visibility == .auto)
-        #expect(back.kiwishelf.revealTimeout == 5)
+        expectEqual(back.spaceBarStyle.visibility, .auto)
+        expectEqual(back.monocle.appBar.visibility, .auto)
+        expectEqual(back.kiwishelf.revealTimeout, 5)
     }
 
     @Test("An absent key keeps today's behaviour")
@@ -145,12 +145,12 @@ struct BarAutoHideFoldTests {
             SpaceBarStyle.self,
             from: Data("{}".utf8)
         )
-        #expect(style.visibility == .always)
+        expectEqual(style.visibility, .always)
         let shelf = try JSONDecoder().decode(
             KiwiShelf.self,
             from: Data(#"{"reveal_timeout": 500}"#.utf8)
         )
-        #expect(shelf.revealTimeout == 60)
+        expectEqual(shelf.revealTimeout, 60)
     }
 
     @Test("The visibility mode is functionality, never a look's")

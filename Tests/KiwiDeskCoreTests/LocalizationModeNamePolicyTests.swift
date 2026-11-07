@@ -110,7 +110,7 @@ struct LocalizationModeNamePolicyTests {
             }
             if differs { native.insert(locale) }
         }
-        #expect(native == Self.nativeLocales)
+        expectEqual(native, Self.nativeLocales)
     }
 
     /// A locale on the English side keeps **every** mode name, not

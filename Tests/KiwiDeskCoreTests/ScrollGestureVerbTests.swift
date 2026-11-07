@@ -22,8 +22,8 @@ struct ScrollGestureVerbTests {
                 args: [.string("command+shift")]
             ).isSuccess
         )
-        #expect(core.mouse.scroll.base.pan == [.command, .shift])
-        #expect(tapChords(core).chords[.pan] == [.command, .shift])
+        expectEqual(core.mouse.scroll.base.pan, [.command, .shift])
+        expectEqual(tapChords(core).chords[.pan], [.command, .shift])
     }
 
     @Test("empty turns a gesture off")
@@ -53,7 +53,7 @@ struct ScrollGestureVerbTests {
                 args: [.string("control+option+command")]
             ).isSuccess
         )
-        #expect(core.mouse.scroll.base == .defaults)
+        expectEqual(core.mouse.scroll.base, .defaults)
     }
 
     @Test("Natural scrolling is a boolean on the base")
@@ -102,8 +102,8 @@ struct ScrollGestureVerbTests {
                 args: [.string("command+option")]
             ).isSuccess
         )
-        #expect(core.mouse.scroll.base.pan == [.command, .option])
-        #expect(tapChords(core).chords[.pan] == [.control, .shift])
+        expectEqual(core.mouse.scroll.base.pan, [.command, .option])
+        expectEqual(tapChords(core).chords[.pan], [.control, .shift])
     }
 
     @Test("a profile apply keeps the base and swaps the override")

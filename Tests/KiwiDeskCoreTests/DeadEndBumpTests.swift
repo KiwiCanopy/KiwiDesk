@@ -42,7 +42,7 @@ struct DeadEndBumpTests {
         var bump = DeadEndBump(
             offset: DeadEndBump.impulse(for: .right)
         )
-        #expect(bump.offset.dx == DeadEndBump.defaultAmplitude)
+        expectEqual(bump.offset.dx, DeadEndBump.defaultAmplitude)
 
         // Step ~1s at 120 Hz — well past the ~350 ms settle window.
         var settled = false
@@ -50,7 +50,7 @@ struct DeadEndBumpTests {
             settled = bump.step(dt: 1.0 / 120.0)
         }
         #expect(settled)
-        #expect(bump.offset == .zero)
+        expectEqual(bump.offset, .zero)
     }
 
     @Test("Overshoots the wall before settling (rubber-band, not creep)")
@@ -77,7 +77,7 @@ struct DeadEndBumpTests {
         for _ in 0..<10 { _ = bump.step(dt: 1.0 / 120.0) }
         let decayed = bump.offset.dx
         bump.reimpulse(offset: DeadEndBump.impulse(for: .right))
-        #expect(bump.offset.dx == DeadEndBump.defaultAmplitude)
+        expectEqual(bump.offset.dx, DeadEndBump.defaultAmplitude)
         #expect(bump.offset.dx > decayed)
     }
 }

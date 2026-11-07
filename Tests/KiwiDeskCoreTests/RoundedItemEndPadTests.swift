@@ -133,10 +133,10 @@ struct RoundedItemEndPadTests {
 
     @Test("The clearance puts the content corner on the arc")
     func clearanceMeetsTheArc() {
-        #expect(KiwiShelf.endClearance(radius: 0, crossOffset: 4) == 0)
+        expectEqual(KiwiShelf.endClearance(radius: 0, crossOffset: 4), 0)
         // A square starting past the radius never meets the curve.
-        #expect(KiwiShelf.endClearance(radius: 10, crossOffset: 10) == 0)
-        #expect(KiwiShelf.endClearance(radius: 10, crossOffset: 12) == 0)
+        expectEqual(KiwiShelf.endClearance(radius: 10, crossOffset: 10), 0)
+        expectEqual(KiwiShelf.endClearance(radius: 10, crossOffset: 12), 0)
         for (r, y) in [(20.0, 4.0), (40.0, 4.0), (14.0, 6.0), (10.0, 1.0)] {
             let e = KiwiShelf.endClearance(radius: r, crossOffset: y)
             #expect(e > 0 && e < r)
@@ -200,7 +200,7 @@ struct RoundedItemEndPadTests {
                 let view = try #require(overlay.itemViews.first)
                 let cell = view.cellLength
                 let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
-                #expect(view.frame.width == flat + 2 * e)
+                expectEqual(view.frame.width, flat + 2 * e)
                 let first = try #require(view.appViews.first).frame
                 let last = try #require(view.appViews.last).frame
                 let leading = first.minX - (cell + pad + 1 + pad)
@@ -225,7 +225,7 @@ struct RoundedItemEndPadTests {
         )
         let view = try #require(overlay.itemViews.first)
         let radius = view.cornerRadius
-        #expect(radius == depth / 2)
+        expectEqual(radius, depth / 2)
         let identifier = view.cellRect(
             at: view.appViews[0].frame.minX
                 - (view.cellLength + 2 * SpaceBarItemView.pad + 1),
@@ -260,10 +260,10 @@ struct RoundedItemEndPadTests {
             ItemEnds(leading: 0, trailing: e),
         ]
         for (view, ends) in zip(views, expected) {
-            #expect(view.ends == ends)
+            expectEqual(view.ends, ends)
             let cell = view.cellLength
             let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
-            #expect(view.frame.width == flat + ends.total)
+            expectEqual(view.frame.width, flat + ends.total)
             let first = try #require(view.appViews.first).frame
             let last = try #require(view.appViews.last).frame
             let leading = first.minX - (cell + pad + 1 + pad)
@@ -288,10 +288,10 @@ struct RoundedItemEndPadTests {
             front: Self.app("Claude")
         )
         let view = try #require(overlay.itemViews.first)
-        #expect(view.ends == ItemEnds(leading: e, trailing: 0))
+        expectEqual(view.ends, ItemEnds(leading: e, trailing: 0))
         let cell = view.cellLength
         let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
-        #expect(view.frame.width == flat + e)
+        expectEqual(view.frame.width, flat + e)
         let last = try #require(view.appViews.last).frame
         #expect(abs(view.bounds.width - last.maxX - pad) <= 0.5)
     }

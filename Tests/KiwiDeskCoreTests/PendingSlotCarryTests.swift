@@ -46,15 +46,15 @@ struct PendingSlotCarryTests {
         let record = try #require(
             departedDesk().snapshot().spaces.first { $0.id == "2" }
         )
-        #expect(record.pending == (row + [unranked]).map(\.raw))
+        expectEqual(record.pending, (row + [unranked]).map(\.raw))
     }
 
     @Test("the start gives each carried window its slot back")
     func startRestoresTheSlots() throws {
         let next = try restarted()
         for (rank, id) in (row + [unranked]).enumerated() {
-            #expect(next.rememberedSpaces[id] == .restored(space))
-            #expect(next.departedSlots[id]?.rank == rank)
+            expectEqual(next.rememberedSpaces[id], .restored(space))
+            expectEqual(next.departedSlots[id]?.rank, rank)
         }
     }
 
@@ -65,7 +65,7 @@ struct PendingSlotCarryTests {
             let resumed = next.resumeCarriedDeparture(id)
             #expect(resumed)
         }
-        #expect(next.rememberedSpaces[row[0]] == .departed(space))
+        expectEqual(next.rememberedSpaces[row[0]], .departed(space))
         next.workspaces.activate(space)
         // macOS re-lists the windows in its own order.
         for id in row.sorted(by: { $0.raw < $1.raw }) {
@@ -75,7 +75,7 @@ struct PendingSlotCarryTests {
                 )
             )
         }
-        #expect(next.workspaces[space]?.windows == row)
+        expectEqual(next.workspaces[space]?.windows, row)
     }
 
     /// The device case (2026-11-02): the other Desktop's windows
@@ -123,7 +123,7 @@ struct PendingSlotCarryTests {
         }
         arrive(row[2])
         arrive(row[1])
-        #expect(next.workspaces[space]?.windows == row)
+        expectEqual(next.workspaces[space]?.windows, row)
     }
 
     /// A stop on one Desktop and a start on the other: the row the
@@ -148,7 +148,7 @@ struct PendingSlotCarryTests {
         next.workspaces.ensureSpace(space)
         next.adopt(snapshot)
         let ranks = (members + row).map { next.departedSlots[$0]?.rank }
-        #expect(ranks == [0, 1, 2, 3, 4])
+        expectEqual(ranks, [0, 1, 2, 3, 4])
     }
 
     @Test("only a carried filing resumes as a departure")
@@ -159,7 +159,7 @@ struct PendingSlotCarryTests {
         let plain = state.resumeCarriedDeparture(unranked)
         let unknown = state.resumeCarriedDeparture(WindowID(99))
         #expect(!plain && !unknown)
-        #expect(state.rememberedSpaces[unranked] == .restored(space))
+        expectEqual(state.rememberedSpaces[unranked], .restored(space))
     }
 
     @Test("a filing judged gone takes its slot with it")

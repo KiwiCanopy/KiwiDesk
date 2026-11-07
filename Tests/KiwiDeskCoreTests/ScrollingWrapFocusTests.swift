@@ -76,7 +76,7 @@ struct ScrollingWrapFocusTests {
                 .isSuccess
         )
         // Past the last (3) lands on the first (1).
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Focus wraps backward past the first window")
@@ -89,7 +89,7 @@ struct ScrollingWrapFocusTests {
                 .isSuccess
         )
         // Past the first (1) lands on the last (3).
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     @Test("Swap never wraps, even with the toggle on")
@@ -127,7 +127,7 @@ struct ScrollingWrapFocusTests {
             args: [.string("right")]
         )
         #expect(!right.isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Wrapping forward defers the raise (backward pan)")
@@ -175,8 +175,8 @@ struct ScrollingWrapFocusTests {
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
-        #expect(core.pendingFocusRaise == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
+        expectEqual(core.pendingFocusRaise, WindowID(1))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -193,7 +193,7 @@ struct ScrollingWrapFocusTests {
             core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
@@ -208,6 +208,6 @@ struct ScrollingWrapFocusTests {
             args: [.string("right")]
         )
         #expect(!right.isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 }

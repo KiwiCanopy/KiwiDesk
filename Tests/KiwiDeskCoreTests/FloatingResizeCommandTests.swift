@@ -84,8 +84,8 @@ struct FloatingResizeCommandTests {
             args: [.string("x"), .number(200)]
         )
         #expect(response.isSuccess)
-        #expect(frames[WindowID(2)]?.width == 800)
-        #expect(frames[WindowID(2)]?.height == 500)
+        expectEqual(frames[WindowID(2)]?.width, 800)
+        expectEqual(frames[WindowID(2)]?.height, 500)
         // Symmetric since #1091: the delta splits between both
         // edges, so the origin moves back by half. It used to
         // expect an unchanged origin, which was the mouse-drag
@@ -100,7 +100,7 @@ struct FloatingResizeCommandTests {
         // rather than pinned at 5 — `border.width` is feel and
         // the owner's to retune (#1021).
         let reach = core.floatRingInset
-        #expect(frames[WindowID(2)]?.origin.x == reach)
+        expectEqual(frames[WindowID(2)]?.origin.x, reach)
         #expect(
             core.tiler.settings.bsp.splitRatioH == ratioBefore
         )
@@ -120,8 +120,8 @@ struct FloatingResizeCommandTests {
             args: [.string("y"), .number(-10_000)]
         )
         #expect(response.isSuccess)
-        #expect(frames[WindowID(2)]?.height == 300)
-        #expect(frames[WindowID(2)]?.width == 600)
+        expectEqual(frames[WindowID(2)]?.height, 300)
+        expectEqual(frames[WindowID(2)]?.width, 600)
     }
 
     @Test("works in the floating layout too")
@@ -136,7 +136,7 @@ struct FloatingResizeCommandTests {
             args: [.string("y"), .number(150)]
         )
         #expect(response.isSuccess)
-        #expect(frames[WindowID(2)]?.height == 650)
+        expectEqual(frames[WindowID(2)]?.height, 650)
     }
 
     @Test("animations off routes through the instant path")
@@ -180,7 +180,7 @@ struct FloatingResizeCommandTests {
             args: [.string("y"), .number(150)]
         )
         #expect(response.isSuccess)
-        #expect(frames[WindowID(2)]?.height == 650)
+        expectEqual(frames[WindowID(2)]?.height, 650)
     }
 
     /// A floating space still refuses where there is no focus

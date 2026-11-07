@@ -103,7 +103,7 @@ struct ArrivalScreenStandDownTests {
         let departing = departing ?? window()
         state.workspaces.activate(space)
         state.apply(.windowCreated(departing))
-        #expect(state.workspaces.space(of: mover) == space)
+        expectEqual(state.workspaces.space(of: mover), space)
         state.apply(
             .windowDestroyed(mover, wasMinimized: false)
         )
@@ -121,7 +121,7 @@ struct ArrivalScreenStandDownTests {
         let effects = state.apply(
             .windowCreated(window(isFloating: true))
         )
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -140,7 +140,7 @@ struct ArrivalScreenStandDownTests {
         let effects = state.apply(
             .windowCreated(window(sticky: .global))
         )
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -156,7 +156,7 @@ struct ArrivalScreenStandDownTests {
         let effects = state.apply(
             .windowCreated(window(sticky: .display))
         )
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -171,7 +171,7 @@ struct ArrivalScreenStandDownTests {
         state.remember(mover, in: SpaceID("5"))
         state.arrivalDisplay = displayA
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("5"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("5"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -186,8 +186,8 @@ struct ArrivalScreenStandDownTests {
         depart(&state, from: SpaceID("1"))
         state.arrivalDisplay = displayB
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("6"))
-        #expect(effects.rehomedToScreenSpace == SpaceID("6"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("6"))
+        expectEqual(effects.rehomedToScreenSpace, SpaceID("6"))
     }
 
     @Test("The arrival's screen is consumed, never carried on")

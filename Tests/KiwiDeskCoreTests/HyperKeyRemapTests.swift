@@ -127,7 +127,7 @@ struct HyperKeyRemapTests {
             10000090e   UserKeyMapping   (
             )
             """
-        #expect(HyperKeyRemap.pairs(inHidutilOutput: listing) == [caps])
+        expectEqual(HyperKeyRemap.pairs(inHidutilOutput: listing), [caps])
         // macOS 27's own order alone, with no Src-first twin.
         let dstFirst = """
             1   UserKeyMapping   (
@@ -137,7 +137,7 @@ struct HyperKeyRemapTests {
                 }
             )
             """
-        #expect(HyperKeyRemap.pairs(inHidutilOutput: dstFirst) == [caps])
+        expectEqual(HyperKeyRemap.pairs(inHidutilOutput: dstFirst), [caps])
         #expect(
             HyperKeyRemap.pairs(
                 inHidutilOutput: "1   UserKeyMapping   (null)"
@@ -158,7 +158,7 @@ struct HyperKeyRemapTests {
             "HIDKeyboardModifierMappingSrc": 0x7_0000_0039,
             "HIDKeyboardModifierMappingDst": 0x7_0000_006D,
         ]
-        #expect(root["UserKeyMapping"] == [entry])
+        expectEqual(root["UserKeyMapping"], [entry])
         #expect(
             HyperKeyRemap.setArgument(for: .clear)
                 == #"{"UserKeyMapping":[]}"#
@@ -169,11 +169,11 @@ struct HyperKeyRemapTests {
     @Test("every source names its key code and back")
     func keyCodesRoundTrip() {
         for key in HyperSourceKey.allCases {
-            #expect(HyperSourceKey(keyCode: key.keyCode) == key)
+            expectEqual(HyperSourceKey(keyCode: key.keyCode), key)
         }
         #expect(HyperSourceKey(keyCode: 4) == nil)  // H types
-        #expect(HyperSourceKey.rightCommand.kind == .modifier(right: true))
-        #expect(HyperSourceKey.f13.kind == .spare)
+        expectEqual(HyperSourceKey.rightCommand.kind, .modifier(right: true))
+        expectEqual(HyperSourceKey.f13.kind, .spare)
     }
 }
 
@@ -186,7 +186,7 @@ struct HyperKeyRemapRecordTests {
     @Test("a record from this boot names its entry")
     func sameBootReads() {
         let stored = HyperKeyRemap.record(caps, boot: "A")
-        #expect(HyperKeyRemap.recorded(stored, boot: "A") == caps)
+        expectEqual(HyperKeyRemap.recorded(stored, boot: "A"), caps)
     }
 
     @Test("a record from another boot names nothing")
@@ -200,6 +200,6 @@ struct HyperKeyRemapRecordTests {
 
     @Test("this boot has a session id")
     func bootSessionReads() {
-        #expect(HyperKeyRemap.bootSession()?.isEmpty == false)
+        expectEqual(HyperKeyRemap.bootSession()?.isEmpty, false)
     }
 }

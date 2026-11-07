@@ -94,9 +94,9 @@ struct HoverFocusTests {
     @Test("A rest over another window focuses it")
     func restFocuses() {
         let core = makeCore()
-        #expect(focused(core) == WindowID(1))
+        expectEqual(focused(core), WindowID(1))
         rest(core, at: overRight)
-        #expect(focused(core) == WindowID(2))
+        expectEqual(focused(core), WindowID(2))
     }
 
     @Test("Off, nothing moves")
@@ -104,7 +104,7 @@ struct HoverFocusTests {
         let core = makeCore()
         core.tiler.settings.mouse.hoverFocus = false
         rest(core, at: overRight)
-        #expect(focused(core) == WindowID(1))
+        expectEqual(focused(core), WindowID(1))
     }
 
     @Test("A held button stands it down")
@@ -112,10 +112,10 @@ struct HoverFocusTests {
         let core = makeCore()
         core.mouse.pressedButtons = { 1 }
         rest(core, at: overRight)
-        #expect(focused(core) == WindowID(1))
+        expectEqual(focused(core), WindowID(1))
         core.mouse.pressedButtons = { 0 }
         rest(core, at: overRight)
-        #expect(focused(core) == WindowID(2))
+        expectEqual(focused(core), WindowID(2))
     }
 
     @Test("Something untracked in front stands it down")
@@ -132,14 +132,14 @@ struct HoverFocusTests {
         #expect(core.hoverTarget(at: overRight) == nil)
         // Beside the menu, the window under it is reached.
         let beside = CGPoint(x: 800, y: 700)
-        #expect(core.hoverTarget(at: beside)?.id == WindowID(2))
+        expectEqual(core.hoverTarget(at: beside)?.id, WindowID(2))
     }
 
     @Test("The window already focused owes nothing")
     func focusedOwesNothing() {
         let core = makeCore()
         #expect(core.hoverTarget(at: CGPoint(x: 300, y: 400)) == nil)
-        #expect(core.hoverTarget(at: overRight)?.id == WindowID(2))
+        expectEqual(core.hoverTarget(at: overRight)?.id, WindowID(2))
     }
 
     @Test("A point over no window owes nothing")
@@ -172,7 +172,7 @@ struct HoverFocusTests {
                 listed(number: 2, pid: 12, frame: right),
             ]
         }
-        #expect(core.hoverTarget(at: overRight)?.id == WindowID(3))
+        expectEqual(core.hoverTarget(at: overRight)?.id, WindowID(3))
         #expect(
             core.hoverTarget(at: CGPoint(x: 800, y: 800))?.id
                 == WindowID(2)

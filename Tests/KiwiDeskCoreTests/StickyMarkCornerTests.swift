@@ -47,7 +47,7 @@ struct StickyMarkCornerTests {
                 mark.plate.glass as? NSGlassEffectView,
                 "no glass hosted"
             )
-            #expect(glass.style == .regular)
+            expectEqual(glass.style, .regular)
         }
     }
 
@@ -59,7 +59,7 @@ struct StickyMarkCornerTests {
         defer { pocket.hide() }
         let a = try #require(pinned.panelFrameForTest)
         let b = try #require(pocket.panelFrameForTest)
-        #expect(a.maxX == b.maxX)
-        #expect(a.maxY == b.maxY)
+        expectEqual(a.maxX, b.maxX)
+        expectEqual(a.maxY, b.maxY)
     }
 }

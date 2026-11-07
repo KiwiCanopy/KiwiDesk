@@ -70,12 +70,12 @@ struct ScrollPanLayoutTests {
     func otherLayoutsStep(mode: String) {
         let (core, session) = makeCore(mode, focus: WindowID(2))
         swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         swipe(core, session, dx: -80)
         swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         swipe(core, session, dx: 80)
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
     }
 
     /// A fullscreen member sits on a Desktop nobody shows, where
@@ -87,7 +87,7 @@ struct ScrollPanLayoutTests {
             .windowFullscreenChanged(WindowID(3), isFullscreen: true)
         )
         swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
     }
 
     @Test(
@@ -101,7 +101,7 @@ struct ScrollPanLayoutTests {
         core.pointerWarp = { _ in warps += 1 }
         #expect(core.mouseWarpEligible(WindowID(4)))
         swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(4))
-        #expect(warps == 0)
+        expectEqual(core.activeSpace?.focused, WindowID(4))
+        expectEqual(warps, 0)
     }
 }

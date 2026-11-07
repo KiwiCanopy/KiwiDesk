@@ -36,8 +36,8 @@ struct BarPeekPocketKeysTests {
         let body = BarPeekBody()
         _ = body.layout(content(keyed: true), shelf: KiwiShelf(), hidden: 0)
         let header = try #require(body.sectionHeader)
-        #expect(header.stringValue == "Pocket Keys")
-        #expect(body.chords.map(\.stringValue) == ["⌃⌥T"])
+        expectEqual(header.stringValue, "Pocket Keys")
+        expectEqual(body.chords.map(\.stringValue), ["⌃⌥T"])
         let titles = body.labels.filter { $0.stringValue.hasPrefix("Window") }
         let ghostty = try #require(
             titles.first { $0.stringValue == "Window 9" }
@@ -51,7 +51,7 @@ struct BarPeekPocketKeysTests {
         // The key stands past its title, inside the wrap width.
         let key = try #require(body.chords.first)
         #expect(key.frame.minX >= ghostty.frame.maxX)
-        #expect(key.frame.minY == ghostty.frame.minY)
+        expectEqual(key.frame.minY, ghostty.frame.minY)
     }
 
     /// Short rows leave the header the widest line: it keeps one.
@@ -108,7 +108,7 @@ struct BarPeekPocketKeysTests {
             shelf: shelf,
             hidden: 0
         )
-        #expect(body.chords.count == 2)
+        expectEqual(body.chords.count, 2)
         let titles = body.labels.filter {
             ["Shopping list", "W"].contains($0.stringValue)
         }
@@ -119,7 +119,7 @@ struct BarPeekPocketKeysTests {
         #expect(first.font != system)
         // One trailing edge, clear of the longest title by the gap.
         let ends = Set(body.chords.map(\.frame.maxX))
-        #expect(ends.count == 1)
+        expectEqual(ends.count, 1)
         let longest =
             titles.map {
                 $0.frame.minX + BarPeekBody.natural($0)

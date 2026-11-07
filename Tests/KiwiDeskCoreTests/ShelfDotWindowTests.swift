@@ -78,13 +78,13 @@ struct ShelfDotWindowTests {
             Issue.record("Spaces draw dots")
             return
         }
-        #expect(shown.count == ShelfDotWindow.cap)
-        #expect(shown.first?.small == true)
-        #expect(shown.last?.small == true)
+        expectEqual(shown.count, ShelfDotWindow.cap)
+        expectEqual(shown.first?.small, true)
+        expectEqual(shown.last?.small, true)
         #expect(shown.dropFirst().dropLast().allSatisfy { !$0.small })
-        #expect(shown.filter(\.current).count == 1)
-        #expect(dots.position == .init(index: 7, count: 10))
-        #expect(dots.label?.glyph == .text("7", tinted: true))
+        expectEqual(shown.filter(\.current).count, 1)
+        expectEqual(dots.position, .init(index: 7, count: 10))
+        expectEqual(dots.label?.glyph, .text("7", tinted: true))
         let built3 = hiding.spaceDots(
             items(3, active: 1),
             key: Self.key,
@@ -92,7 +92,7 @@ struct ShelfDotWindowTests {
         )
         let few = try #require(built3)
         guard case .dots(let all) = few.mark else { return }
-        #expect(all.count == 3)
+        expectEqual(all.count, 3)
         #expect(all.allSatisfy { !$0.small })
     }
 

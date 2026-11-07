@@ -47,13 +47,13 @@ struct ConfigIssuesTests {
         #expect(
             core.configIssues.map(\.source) == ["init.lua"]
         )
-        #expect(seen.count == 1)
+        expectEqual(seen.count, 1)
         // Fixing the file clears the badge on the next load.
         try write("-- fine now", to: core.configURL)
         core.loadConfig()
         #expect(core.configIssues.isEmpty)
-        #expect(seen.count == 2)
-        #expect(seen.last?.isEmpty == true)
+        expectEqual(seen.count, 2)
+        expectEqual(seen.last?.isEmpty, true)
     }
 
     @Test("unchanged issues do not re-fire the callback")
@@ -64,7 +64,7 @@ struct ConfigIssuesTests {
         core.onConfigIssuesChange = { _ in fired += 1 }
         core.loadConfig()
         core.loadConfig()
-        #expect(fired == 1)
+        expectEqual(fired, 1)
     }
 
     @Test("invalid profile JSON becomes an issue")

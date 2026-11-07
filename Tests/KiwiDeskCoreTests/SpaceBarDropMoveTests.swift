@@ -40,17 +40,17 @@ struct SpaceBarDropMoveTests {
         addWindow(core, 1)
         addWindow(core, 2)
         // Window 2 is the active-space focus; drag window 1.
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
 
         core.moveWindow(WindowID(1), to: SpaceID("2"), follow: false)
 
         // Stay on space 1; window 1 relocated; focus untouched.
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
         #expect(
             core.state.workspaces[SpaceID(2)]?.windows
                 == [WindowID(1)]
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(2)]
@@ -63,11 +63,11 @@ struct SpaceBarDropMoveTests {
         addWindow(core, 1)
         core.tiler.dragExemptWindow = WindowID(1)
         core.spaceBarDrop.moved(WindowID(1), cursor: .zero)
-        #expect(core.spaceBarDrop.draggingWindow == WindowID(1))
+        expectEqual(core.spaceBarDrop.draggingWindow, WindowID(1))
         // A cancel for a different window leaves the gesture alone.
         core.cancelDrag(WindowID(2))
-        #expect(core.tiler.dragExemptWindow == WindowID(1))
-        #expect(core.spaceBarDrop.draggingWindow == WindowID(1))
+        expectEqual(core.tiler.dragExemptWindow, WindowID(1))
+        expectEqual(core.spaceBarDrop.draggingWindow, WindowID(1))
         // A cancel for the dragged window clears both — no leaked
         // exemption, no stale spring target for the next drag.
         core.cancelDrag(WindowID(1))
@@ -102,7 +102,7 @@ struct SpaceBarDropMoveTests {
     func springEagerMovesWindow() {
         let core = makeCore()
         addWindow(core, 1)
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
 
         // Fire the spring the dwell would trigger (the coordinator
         // calls this closure). Eager membership: the window moves
@@ -112,13 +112,13 @@ struct SpaceBarDropMoveTests {
             core.spaceBarDrop.spring(SpaceID("2"), WindowID(1))
         )
 
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
         #expect(
             core.state.workspaces[SpaceID("2")]?.windows
                 == [WindowID(1)]
         )
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         // Pinned against stashInactive for the rest of the drag.
-        #expect(core.tiler.dragExemptWindow == WindowID(1))
+        expectEqual(core.tiler.dragExemptWindow, WindowID(1))
     }
 }

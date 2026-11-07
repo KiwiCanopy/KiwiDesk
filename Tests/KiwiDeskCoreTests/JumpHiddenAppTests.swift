@@ -74,7 +74,7 @@ struct JumpHiddenAppTests {
         core.moveHere(.hiddenApp(100))
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "1")
         #expect(core.jump.owedApp == nil)
     }
 
@@ -85,7 +85,7 @@ struct JumpHiddenAppTests {
         core.moveHiddenApp(100, into: "1", matching: "inbox")
         returns(core, title: "Drafts")
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
         #expect(lines.contain("no title match"))
         // Logged, never drawn: the follow switches away from it.
         let cue = WindowActionRefusal.noTitleMatch(app: "", text: "")
@@ -98,7 +98,7 @@ struct JumpHiddenAppTests {
         core.moveHiddenApp(100, into: "1", matching: "INBOX")
         returns(core, title: "Inbox — 3 new")
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "1")
     }
 
     @Test("a press since the move stands it down")
@@ -107,7 +107,7 @@ struct JumpHiddenAppTests {
         oweThenReport(core, pressAge: 1)
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
         #expect(core.jump.owedApp == nil)
     }
 
@@ -118,7 +118,7 @@ struct JumpHiddenAppTests {
         oweThenReport(core, pressAge: 3)
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "1")
     }
 
     @Test("a commanded focus since the move stands it down")
@@ -129,7 +129,7 @@ struct JumpHiddenAppTests {
         core.eventLoop.lastCommandedFocus = .now.advanced(by: .seconds(1))
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
     }
 
     @Test("a full-screen window stays where it returned")
@@ -138,7 +138,7 @@ struct JumpHiddenAppTests {
         core.moveHere(.hiddenApp(100))
         returns(core, fullscreen: true)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
     }
 
     @Test("a window the sticky gate holds stays where it returned")
@@ -148,7 +148,7 @@ struct JumpHiddenAppTests {
         returns(core, sticky: .global)
         #expect(core.stickyMoveBlock(WindowID(5), to: "1") != nil)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
     }
 
     @Test("a window already here owes nothing and moves nothing")
@@ -158,7 +158,7 @@ struct JumpHiddenAppTests {
         core.moveHere(.hiddenApp(100))
         returns(core, to: "1")
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "1")
         #expect(lines.contain("move stood down"))
         #expect(core.jump.owedApp == nil)
     }
@@ -169,8 +169,8 @@ struct JumpHiddenAppTests {
         core.moveHere(.hiddenApp(100))
         returns(core)
         core.handle(.windowFocused(WindowID(5)))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
         #expect(core.jump.owedApp == nil)
     }
 
@@ -181,7 +181,7 @@ struct JumpHiddenAppTests {
         core.state.workspaces.activate("2")
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
     }
 
     @Test("past the follow's bound, nothing moves")
@@ -194,7 +194,7 @@ struct JumpHiddenAppTests {
         core.wallClock = { late }
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "2")
     }
 
     /// One pass places the filed window: the handler's own, in a
@@ -211,8 +211,8 @@ struct JumpHiddenAppTests {
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         core.handle(.windowFocused(WindowID(5)))
-        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
-        #expect(meter.snapshot(reset: false).counts.retiles == 1)
+        expectEqual(core.state.workspaces.space(of: WindowID(5)), "1")
+        expectEqual(meter.snapshot(reset: false).counts.retiles, 1)
     }
 
     @Test("the honored focus report pays the debt")

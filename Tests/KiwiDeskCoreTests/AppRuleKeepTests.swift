@@ -41,12 +41,12 @@ struct AppRuleKeepTests {
             [.string("com.x"), .string("1")]
         )
         let response = keep(core, ids(set))
-        #expect(kept(response) == ["/app_rules/com.x"])
-        #expect(core.guiConfigStore.load()?.appRules["com.x"] == "1")
+        expectEqual(kept(response), ["/app_rules/com.x"])
+        expectEqual(core.guiConfigStore.load()?.appRules["com.x"], "1")
         #expect(try core.profiles.read(name: "Work").appRules == nil)
-        #expect(told == 1)
+        expectEqual(told, 1)
         guard case .object(let fields)? = response.data else { return }
-        #expect(fields["rule_profiles"] == .array([.string("Work")]))
+        expectEqual(fields["rule_profiles"], .array([.string("Work")]))
     }
 
     @Test("a profile's own rule is kept in its file")
@@ -61,7 +61,7 @@ struct AppRuleKeepTests {
             "app_rule.remove_space",
             [.string("com.x")]
         )
-        #expect(kept(keep(core, ids(removed))) == ["/app_rules/com.x"])
+        expectEqual(kept(keep(core, ids(removed))), ["/app_rules/com.x"])
         let stored = try core.profiles.read(name: "Odd")
         #expect(stored.appRules?.normalizedRules["com.x"] == nil)
         #expect(core.guiConfigStore.load()?.appRules["com.x"] == nil)
@@ -81,7 +81,7 @@ struct AppRuleKeepTests {
         let watched = core.answer(
             .reporting("version", watch: ["/float_rules/com.y"])
         )
-        #expect(watched.changes?.watched.first?.stored == false)
+        expectEqual(watched.changes?.watched.first?.stored, false)
         #expect(
             core.guiConfigStore.load()?.floatRules.contains("com.y")
                 == false
@@ -96,8 +96,8 @@ struct AppRuleKeepTests {
             "app_rule.set_float",
             [.string("com.x"), .string("Info")]
         )
-        #expect(kept(keep(core, ids(set))) == ["/float_rules/com.x:Info"])
-        #expect(core.guiConfigStore.load()?.floatRules == ["com.x:Info"])
+        expectEqual(kept(keep(core, ids(set))), ["/float_rules/com.x:Info"])
+        expectEqual(core.guiConfigStore.load()?.floatRules, ["com.x:Info"])
         #expect(core.eventLoop.floatRules.rawRules.contains("com.x:Info"))
     }
 
@@ -108,7 +108,7 @@ struct AppRuleKeepTests {
         base.appRules = ["com.x": "1"]
         try core.guiConfigStore.save(base)
         KeepFixture.load("Work", core)
-        #expect(core.state.appRules["com.x"] == "1")
+        expectEqual(core.state.appRules["com.x"], "1")
         let removed = KeepFixture.report(
             core,
             "app_rule.remove_space",
@@ -117,7 +117,7 @@ struct AppRuleKeepTests {
         #expect(
             KeepFixture.leaf(removed, "/app_rules/")?.owner == .sharedRules
         )
-        #expect(kept(keep(core, ids(removed))) == ["/app_rules/com.x"])
+        expectEqual(kept(keep(core, ids(removed))), ["/app_rules/com.x"])
         #expect(core.guiConfigStore.load()?.appRules["com.x"] == nil)
     }
 
@@ -132,9 +132,9 @@ struct AppRuleKeepTests {
             [.bool(flipped)]
         )
         let leaf = KeepFixture.leaf(set, "/float_automatically")
-        #expect(leaf?.owner == .sharedRules)
-        #expect(kept(keep(core, ids(set))) == ["/float_automatically"])
-        #expect(core.guiConfigStore.load()?.floatAutomatically == flipped)
+        expectEqual(leaf?.owner, .sharedRules)
+        expectEqual(kept(keep(core, ids(set))), ["/float_automatically"])
+        expectEqual(core.guiConfigStore.load()?.floatAutomatically, flipped)
     }
 
     /// A rule the page leaves out is a new one there: the report
@@ -159,15 +159,15 @@ struct AppRuleKeepTests {
             "app_rule.set_space",
             [.string("com.x"), .string("1")]
         )
-        #expect(KeepFixture.leaf(set, "/app_rules/")?.owner == .sharedRules)
+        expectEqual(KeepFixture.leaf(set, "/app_rules/")?.owner, .sharedRules)
         let response = keep(core, ids(set))
-        #expect(kept(response) == ["/app_rules/com.x"])
+        expectEqual(kept(response), ["/app_rules/com.x"])
         guard case .object(let fields)? = response.data else { return }
         #expect(
             fields["rule_profiles"]
                 == .array([.string("Odd"), .string("Work")])
         )
-        #expect(core.guiConfigStore.load()?.appRules["com.x"] == "1")
+        expectEqual(core.guiConfigStore.load()?.appRules["com.x"], "1")
         #expect(
             try core.profiles.read(name: "Odd").appRules?
                 .normalizedRules["com.x"] == nil
@@ -186,11 +186,11 @@ struct AppRuleKeepTests {
             "app_rule.set_float",
             [.string("com.x"), .string("B")]
         )
-        #expect(KeepFixture.leaf(set, "/float_rules/")?.owner == .profile)
-        #expect(kept(keep(core, ids(set))) == ["/float_rules/com.x:B"])
+        expectEqual(KeepFixture.leaf(set, "/float_rules/")?.owner, .profile)
+        expectEqual(kept(keep(core, ids(set))), ["/float_rules/com.x:B"])
         let stored = try core.profiles.read(name: "Odd")
-        #expect(stored.floatRules?.rules["com.x:B"] == .some(true))
-        #expect(core.guiConfigStore.load()?.floatRules.isEmpty == true)
+        expectEqual(stored.floatRules?.rules["com.x:B"], .some(true))
+        expectEqual(core.guiConfigStore.load()?.floatRules.isEmpty, true)
     }
 
     @Test("keeping one of an app's float rules leaves the other unkept")
@@ -206,8 +206,8 @@ struct AppRuleKeepTests {
             "app_rule.set_float",
             [.string("com.x"), .string("B")]
         )
-        #expect(kept(keep(core, ids(first))) == ["/float_rules/com.x:A"])
-        #expect(core.guiConfigStore.load()?.floatRules == ["com.x:A"])
+        expectEqual(kept(keep(core, ids(first))), ["/float_rules/com.x:A"])
+        expectEqual(core.guiConfigStore.load()?.floatRules, ["com.x:A"])
         #expect(core.eventLoop.floatRules.rawRules.contains("com.x:B"))
     }
 }

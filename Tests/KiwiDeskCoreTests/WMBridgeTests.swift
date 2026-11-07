@@ -182,7 +182,7 @@ struct WMBridgeTests {
     @Test("Absent classes: every entry point degrades, none traps")
     func absentCapabilityDegrades() {
         resolving([:]) {
-            #expect(WMBridge.isAvailable == false)
+            expectEqual(WMBridge.isAvailable, false)
             #expect(WMBridge.managedDisplaySpaces() == nil)
             #expect(WMBridge.name(of: 1) == nil)
             #expect(WMBridge.values(of: 1) == nil)
@@ -193,9 +193,9 @@ struct WMBridgeTests {
                     == false
             )
             #expect(WMBridge.createSpace() == nil)
-            #expect(WMBridge.destroySpace(1) == false)
-            #expect(WMBridge.setName("x", of: 1) == false)
-            #expect(WMBridge.setValues(["k": 1], of: 1) == false)
+            expectEqual(WMBridge.destroySpace(1), false)
+            expectEqual(WMBridge.setName("x", of: 1), false)
+            expectEqual(WMBridge.setValues(["k": 1], of: 1), false)
             #expect(
                 WMBridge.moveWindows([WindowID(1)], to: 1) == false
             )
@@ -206,7 +206,7 @@ struct WMBridgeTests {
                 WMBridge.removeWindows([WindowID(1)], from: [1])
                     == false
             )
-            #expect(WMBridge.hideSpaces([1]) == false)
+            expectEqual(WMBridge.hideSpaces([1]), false)
         }
     }
 
@@ -214,16 +214,16 @@ struct WMBridgeTests {
     func lookupsUseShortNames() {
         resolving([:]) {
             _ = WMBridge.createSpace()
-            #expect(Seen.requested == ["SpaceCreateOperation"])
+            expectEqual(Seen.requested, ["SpaceCreateOperation"])
         }
     }
 
     @Test("A synchronous result is read by its declared key")
     func synchronousResultIsReadByKey() {
         resolving(["SpaceCopyNameOperation": FakeCopyName.self]) {
-            #expect(WMBridge.name(of: 9) == "Work")
-            #expect(Seen.spaceID == 9)
-            #expect(Seen.performed == 1)
+            expectEqual(WMBridge.name(of: 9), "Work")
+            expectEqual(Seen.spaceID, 9)
+            expectEqual(Seen.performed, 1)
         }
     }
 
@@ -246,9 +246,9 @@ struct WMBridgeTests {
                 to: 3
             )
             #expect(moved)
-            #expect(Seen.windows == [7, 9])
-            #expect(Seen.spaceID == 3)
-            #expect(Seen.performed == 1)
+            expectEqual(Seen.windows, [7, 9])
+            expectEqual(Seen.spaceID, 3)
+            expectEqual(Seen.performed, 1)
         }
     }
 
@@ -256,8 +256,8 @@ struct WMBridgeTests {
     func hideSpacesPassesIds() {
         resolving(["HideSpacesOperation": FakeHideSpaces.self]) {
             #expect(WMBridge.hideSpaces([3, 9]))
-            #expect(Seen.windows == [3, 9])
-            #expect(Seen.performed == 1)
+            expectEqual(Seen.windows, [3, 9])
+            expectEqual(Seen.performed, 1)
         }
     }
 
@@ -268,9 +268,9 @@ struct WMBridgeTests {
                 FakeCopySpacesForWindows.self
         ]) {
             let spaces = WMBridge.spaces(for: [WindowID(4)])
-            #expect(spaces == [1, 5])
-            #expect(Seen.windows == [4])
-            #expect(Seen.spaceID == 7)
+            expectEqual(spaces, [1, 5])
+            expectEqual(Seen.windows, [4])
+            expectEqual(Seen.spaceID, 7)
         }
     }
 
@@ -281,14 +281,14 @@ struct WMBridgeTests {
                 FakeCopyManagedDisplaySpaces.self
         ]) {
             #expect(WMBridge.isAvailable)
-            #expect(WMBridge.managedDisplaySpaces()?.count == 1)
+            expectEqual(WMBridge.managedDisplaySpaces()?.count, 1)
         }
         resolving([
             "CopyManagedDisplaySpacesOperation":
                 FakeDeafCopyManagedDisplaySpaces.self
         ]) {
             #expect(WMBridge.managedDisplaySpaces() == nil)
-            #expect(WMBridge.isAvailable == false)
+            expectEqual(WMBridge.isAvailable, false)
         }
     }
 
@@ -300,12 +300,12 @@ struct WMBridgeTests {
                 of: 5
             )
             #expect(written)
-            #expect(Seen.spaceID == 5)
+            expectEqual(Seen.spaceID, 5)
             #expect(
                 Seen.values.keys.sorted()
                     == ["kiwidesk.nested.key", "kiwidesk.stamp"]
             )
-            #expect(Seen.values["kiwidesk.stamp"] as? Int == 1)
+            expectEqual(Seen.values["kiwidesk.stamp"] as? Int, 1)
         }
     }
 
@@ -313,13 +313,13 @@ struct WMBridgeTests {
     func stampsRoundTrip() {
         resolving(["SpaceCopyValuesOperation": FakeCopyValues.self]) {
             let stamps = WMBridge.stamps(of: 5)
-            #expect(Seen.spaceID == 5)
-            #expect(stamps?.keys.sorted() == ["stamp"])
-            #expect(stamps?["stamp"] as? Int == 1)
+            expectEqual(Seen.spaceID, 5)
+            expectEqual(stamps?.keys.sorted(), ["stamp"])
+            expectEqual(stamps?["stamp"] as? Int, 1)
             // The whole store stays Apple's shape, prefixed.
             let values = WMBridge.values(of: 5)
-            #expect(values?["kiwidesk.stamp"] as? Int == 1)
-            #expect(values?["type"] as? Int == 0)
+            expectEqual(values?["kiwidesk.stamp"] as? Int, 1)
+            expectEqual(values?["type"] as? Int, 0)
         }
     }
 }

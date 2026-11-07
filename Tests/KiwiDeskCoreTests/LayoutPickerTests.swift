@@ -22,20 +22,20 @@ struct LayoutPickerTests {
     func stateReadsTheSpace() throws {
         let core = makeCore()
         let state = try #require(core.layoutPickerState(for: "3"))
-        #expect(state.space == "3")
-        #expect(state.live == .grid)
+        expectEqual(state.space, "3")
+        expectEqual(state.live, .grid)
         #expect(core.layoutPickerState(for: "nope") == nil)
         // A Space not shown answers for itself, not the active one.
         core.state.workspaces.ensureSpace("4")
         core.state.workspaces.setMode("4", .monocle)
-        #expect(core.layoutPickerState(for: "4")?.live == .monocle)
+        expectEqual(core.layoutPickerState(for: "4")?.live, .monocle)
     }
 
     @Test("a pick sets the Space's layout")
     func pickSetsTheLayout() {
         let core = makeCore()
         core.applyLayout(.monocle, to: "3")
-        #expect(core.state.workspaces[SpaceID("3")]?.mode == .monocle)
+        expectEqual(core.state.workspaces[SpaceID("3")]?.mode, .monocle)
     }
 
     /// The pointer names the screen, the screen names the Space:

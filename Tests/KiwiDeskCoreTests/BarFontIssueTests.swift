@@ -33,7 +33,7 @@ struct BarFontIssueTests {
                 .missingFontFamily(name: Self.missing)
             )
         )
-        #expect(core.tiler.settings.kiwishelf.fontFamily == Self.missing)
+        expectEqual(core.tiler.settings.kiwishelf.fontFamily, Self.missing)
         #expect(
             core.execute(
                 "kiwishelf.set_font_family",

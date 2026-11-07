@@ -79,10 +79,10 @@ struct AppWideAdoptionTests {
         prepare(core)
         load("Work", core)
         #expect(core.appWide.refusalSound)
-        #expect(core.appWide.quitGridTargetDepth == 9)
+        expectEqual(core.appWide.quitGridTargetDepth, 9)
         let stored = try #require(core.guiConfigStore.load()?.appWide)
         #expect(stored.refusalSound)
-        #expect(stored.quitGridTargetDepth == 9)
+        expectEqual(stored.quitGridTargetDepth, 9)
     }
 
     /// A preset saved and adopted by `applyStandard` is a first
@@ -121,8 +121,8 @@ struct AppWideAdoptionTests {
         load("Work", core)
         load("Home", core)
         #expect(core.appWide.refusalSound)
-        #expect(core.appWide.quitGridTargetDepth == 9)
-        #expect(core.guiConfigStore.load()?.appWide?.refusalSound == true)
+        expectEqual(core.appWide.quitGridTargetDepth, 9)
+        expectEqual(core.guiConfigStore.load()?.appWide?.refusalSound, true)
     }
 
     /// A gui.json that already carries them outranks every
@@ -135,7 +135,7 @@ struct AppWideAdoptionTests {
         prepare(core)
         load("Work", core)
         #expect(!core.appWide.refusalSound)
-        #expect(core.appWide.quitGridTargetDepth == 4)
+        expectEqual(core.appWide.quitGridTargetDepth, 4)
     }
 
     /// A profile file carrying neither key keeps the settled
@@ -157,7 +157,7 @@ struct AppWideAdoptionTests {
         prepare(core)
         load("Fresh", core)
         let stored = core.guiConfigStore.load()?.appWide
-        #expect(stored?.quitGridTargetDepth == 4)
+        expectEqual(stored?.quitGridTargetDepth, 4)
     }
 
     /// A Lua-owned config has no gui.json store: init.lua is the
@@ -222,7 +222,7 @@ struct AppWideAdoptionTests {
         core.setAppWide(persisting: true) {
             $0.quitGridTargetDepth = 6
         }
-        #expect(core.appWide.quitGridTargetDepth == 6)
+        expectEqual(core.appWide.quitGridTargetDepth, 6)
         #expect(core.guiConfigStore.load()?.appWide == nil)
     }
 }

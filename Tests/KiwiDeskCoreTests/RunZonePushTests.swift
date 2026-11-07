@@ -72,7 +72,7 @@ struct RunZonePushTests {
 
     @Test("At rest the run shows the first three and hides the fourth")
     func restingRun() {
-        #expect(zone.run(in: context())?.visible == 0..<3)
+        expectEqual(zone.run(in: context())?.visible, 0..<3)
     }
 
     @Test("A grow toward the end pushes the end neighbour")
@@ -81,10 +81,10 @@ struct RunZonePushTests {
         let press = try #require(
             zone.press(ids[1], by: 200, toward: .end, in: context())
         )
-        #expect(press.visible == 0..<2)
+        expectEqual(press.visible, 0..<2)
         #expect(press.movesRun)
         let after = writing(press, over: context())
-        #expect(zone.run(in: after)?.visible == 0..<2)
+        expectEqual(zone.run(in: after)?.visible, 0..<2)
         let frame = try #require(zone.frames(in: after)[ids[1]])
         #expect(abs(frame.width - size(press, 2) * 1000) < 0.5)
         // Window 2 takes window 3's room: window 1 keeps what it
@@ -100,9 +100,9 @@ struct RunZonePushTests {
         let press = try #require(
             zone.press(ids[1], by: 200, toward: .start, in: context())
         )
-        #expect(press.visible == 1..<3)
+        expectEqual(press.visible, 1..<3)
         let after = writing(press, over: context())
-        #expect(zone.run(in: after)?.visible == 1..<3)
+        expectEqual(zone.run(in: after)?.visible, 1..<3)
     }
 
     @Test("A grow squeezing both sides sends the last in order")
@@ -110,7 +110,7 @@ struct RunZonePushTests {
         let press = try #require(
             zone.press(ids[1], by: 200, toward: .both, in: context())
         )
-        #expect(press.visible == 0..<2)
+        expectEqual(press.visible, 0..<2)
     }
 
     @Test("A grow the neighbours can still give is the weight step")
@@ -132,7 +132,7 @@ struct RunZonePushTests {
 
     @Test("A middle run hides one window at each end")
     func middleRun() {
-        #expect(zone.run(in: middle())?.visible == 1..<3)
+        expectEqual(zone.run(in: middle())?.visible, 1..<3)
     }
 
     /// Window 2 alone in the run, filling the zone, with window 1
@@ -143,21 +143,21 @@ struct RunZonePushTests {
 
     @Test("A lone window's shrink pulls back the one past the moved edge")
     func shrinkPullsTheMovedSide() throws {
-        #expect(zone.run(in: lone())?.visible == 1..<2)
+        expectEqual(zone.run(in: lone())?.visible, 1..<2)
         let start = try #require(
             zone.press(ids[1], by: -1, toward: .start, in: lone())
         )
-        #expect(start.visible == 0..<2)
+        expectEqual(start.visible, 0..<2)
         let end = try #require(
             zone.press(ids[1], by: -1, toward: .end, in: lone())
         )
-        #expect(end.visible == 1..<3)
+        expectEqual(end.visible, 1..<3)
         let both = try #require(
             zone.press(ids[1], by: -1, toward: .both, in: lone())
         )
-        #expect(both.visible == 1..<3)
+        expectEqual(both.visible, 1..<3)
         let after = writing(start, over: lone())
-        #expect(zone.run(in: after)?.visible == 0..<2)
+        expectEqual(zone.run(in: after)?.visible, 0..<2)
     }
 
     @Test("With nothing waiting past its edge a lone shrink pulls the other")
@@ -166,12 +166,12 @@ struct RunZonePushTests {
         let first = try #require(
             zone.press(ids[0], by: -1, toward: .start, in: head)
         )
-        #expect(first.visible == 0..<2)
+        expectEqual(first.visible, 0..<2)
         let tail = context(focus: 4, sizes: [4: 1000], heads: [4])
         let last = try #require(
             zone.press(ids[3], by: -1, toward: .end, in: tail)
         )
-        #expect(last.visible == 2..<4)
+        expectEqual(last.visible, 2..<4)
     }
 
     @Test("A lone pull stops at a window that does not fit, never skipping")
@@ -198,7 +198,7 @@ struct RunZonePushTests {
         let press = try #require(
             zone.press(ids[1], by: -1, toward: .start, in: held)
         )
-        #expect(press.visible == 0..<2)
+        expectEqual(press.visible, 0..<2)
         #expect(press.sizes[ids[0]] == .some(nil))
     }
 
@@ -209,7 +209,7 @@ struct RunZonePushTests {
         let press = try #require(
             zone.press(ids[1], by: -300, toward: .end, in: middle())
         )
-        #expect(press.visible == 1..<3)
+        expectEqual(press.visible, 1..<3)
         #expect(!press.movesRun)
         #expect(abs(size(press, 2) - 0.3) < 1e-9)
     }
@@ -220,7 +220,7 @@ struct RunZonePushTests {
         let grown = try #require(
             zone.press(ids[0], by: 900, toward: .both, in: rest)
         )
-        #expect(grown.visible == 0..<1)
+        expectEqual(grown.visible, 0..<1)
         let shrunk = try #require(
             zone.press(
                 ids[0],
@@ -229,7 +229,7 @@ struct RunZonePushTests {
                 in: writing(grown, over: rest)
             )
         )
-        #expect(shrunk.visible == 0..<2)
+        expectEqual(shrunk.visible, 0..<2)
     }
 
     @Test("A grow squeezes the window taking the rest before it pushes")
@@ -245,7 +245,7 @@ struct RunZonePushTests {
         let press = try #require(
             three.press(ids[0], by: 100, toward: .end, in: sized)
         )
-        #expect(press.visible == 0..<2)
+        expectEqual(press.visible, 0..<2)
         #expect(!press.movesRun)
     }
 
@@ -254,7 +254,7 @@ struct RunZonePushTests {
         // The run rests pinned at two windows where three would fit:
         // window 2's shrink hands its room to window 1 instead.
         let pinned = context(tails: [2])
-        #expect(zone.run(in: pinned)?.visible == 0..<2)
+        expectEqual(zone.run(in: pinned)?.visible, 0..<2)
         let press = try #require(
             zone.press(ids[1], by: -150, toward: .end, in: pinned)
         )
@@ -268,7 +268,7 @@ struct RunZonePushTests {
         let press = try #require(
             zone.press(ids[1], by: -400, toward: .end, in: middle())
         )
-        #expect(press.cue == .ownMinimum)
+        expectEqual(press.cue, .ownMinimum)
         #expect(abs(size(press, 2) - 0.3) < 1e-9)
     }
 

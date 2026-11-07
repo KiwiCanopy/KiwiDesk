@@ -39,11 +39,11 @@ struct ReduceTransparencyTests {
     /// hue and loses its alpha, a transparent one stays no plate.
     @Test("the Fill renders opaque, a transparent one stays absent")
     func fillRendersOpaque() {
-        #expect(LiquidGlassGate.opaque("#14201CB3") == "#14201C")
-        #expect(LiquidGlassGate.opaque("#14201C") == "#14201C")
-        #expect(LiquidGlassGate.opaque("14201C40") == "#14201C")
-        #expect(LiquidGlassGate.opaque("#00000000") == "#00000000")
-        #expect(LiquidGlassGate.opaque("not a colour") == "not a colour")
+        expectEqual(LiquidGlassGate.opaque("#14201CB3"), "#14201C")
+        expectEqual(LiquidGlassGate.opaque("#14201C"), "#14201C")
+        expectEqual(LiquidGlassGate.opaque("14201C40"), "#14201C")
+        expectEqual(LiquidGlassGate.opaque("#00000000"), "#00000000")
+        expectEqual(LiquidGlassGate.opaque("not a colour"), "not a colour")
     }
 
     /// Glass off and BOTH fills opaque — the hover fill replaces
@@ -70,17 +70,17 @@ struct ReduceTransparencyTests {
             expectedApp.liquidGlass = false
             expectedApp.fillColor = "#020202"
             expectedApp.hoverFillColor = "#060606"
-            #expect(LiquidGlassGate.rendered(app) == expectedApp)
+            expectEqual(LiquidGlassGate.rendered(app), expectedApp)
             var expectedSpace = space
             expectedSpace.liquidGlass = false
             expectedSpace.fillColor = "#030303"
             expectedSpace.hoverFillColor = "#070707"
-            #expect(LiquidGlassGate.rendered(space) == expectedSpace)
+            expectEqual(LiquidGlassGate.rendered(space), expectedSpace)
             #expect(!LiquidGlassGate.drawsGlass)
         }
         reducing(false) {
-            #expect(LiquidGlassGate.rendered(app) == app)
-            #expect(LiquidGlassGate.rendered(space) == space)
+            expectEqual(LiquidGlassGate.rendered(app), app)
+            expectEqual(LiquidGlassGate.rendered(space), space)
             #expect(
                 LiquidGlassGate.drawsGlass
                     == AppBarStyle.glassAvailable
@@ -221,7 +221,7 @@ struct ReduceTransparencyTests {
                 .accessibilityDisplayOptionsDidChangeNotification,
             object: NSWorkspace.shared
         )
-        #expect(fired == 1)
+        expectEqual(fired, 1)
         NotificationCenter.default.post(
             name: NSWorkspace
                 .accessibilityDisplayOptionsDidChangeNotification,

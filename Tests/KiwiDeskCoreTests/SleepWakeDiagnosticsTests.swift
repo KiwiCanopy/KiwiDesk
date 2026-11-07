@@ -235,7 +235,7 @@ struct SessionPresenceTests {
         let presence = SessionPresence(
             session: [kCGSessionOnConsoleKey: NSNumber(value: 1)]
         )
-        #expect(presence.onConsole == true)
+        expectEqual(presence.onConsole, true)
         #expect(presence.screenLocked == nil)
         #expect(
             presence.summary
@@ -248,12 +248,12 @@ struct SessionPresenceTests {
         let locked = SessionPresence(
             session: [lockedKey: NSNumber(value: 1)]
         )
-        #expect(locked.screenLocked == true)
-        #expect(locked.summary == "screen locked, console unknown")
+        expectEqual(locked.screenLocked, true)
+        expectEqual(locked.summary, "screen locked, console unknown")
         let unlocked = SessionPresence(
             session: [lockedKey: NSNumber(value: 0)]
         )
-        #expect(unlocked.screenLocked == false)
+        expectEqual(unlocked.screenLocked, false)
         #expect(
             unlocked.summary == "screen unlocked, console unknown"
         )

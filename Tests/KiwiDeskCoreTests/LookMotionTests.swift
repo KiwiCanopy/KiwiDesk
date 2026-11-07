@@ -28,7 +28,7 @@ struct LookMotionTests {
                 )
         )
         #expect(Set(LookKeys.motion).isDisjoint(with: LookKeys.styling))
-        #expect(LookKeys.all == LookKeys.styling + LookKeys.motion)
+        expectEqual(LookKeys.all, LookKeys.styling + LookKeys.motion)
     }
 
     @Test("no bundled look carries motion")
@@ -56,7 +56,7 @@ struct LookMotionTests {
         var settings = tuned
         glass.apply(to: &settings)
         #expect(glass.isStyleApplied(to: settings))
-        #expect(settings.animations.durationMS == 400)
+        expectEqual(settings.animations.durationMS, 400)
     }
 
     @Test("a saved look carries motion and applies it")
@@ -64,7 +64,7 @@ struct LookMotionTests {
         let look = LookBody(of: tuned).named("Mine")
         var settings = TilingSettings()
         look.admitted.apply(to: &settings)
-        #expect(settings.animations == tuned.animations)
+        expectEqual(settings.animations, tuned.animations)
     }
 
     @MainActor
@@ -72,9 +72,9 @@ struct LookMotionTests {
     func tourLeavesMotion() {
         let mine = LookBody(of: TilingSettings()).named("Mine")
         let painted = KiwiCore.painted(tuned, look: mine, palette: nil)
-        #expect(painted.animations == tuned.animations)
+        expectEqual(painted.animations, tuned.animations)
         let reverted = KiwiCore.unpainted(tuned, to: TilingSettings())
-        #expect(reverted.animations == tuned.animations)
+        expectEqual(reverted.animations, tuned.animations)
     }
 
     @Test("a motion value is read by the config's own decoder")
@@ -94,9 +94,9 @@ struct LookMotionTests {
         settings.animations.scrollDurationMS = 400
         look.apply(to: &settings)
         // Clamped as a stored file would be; a wrong type skipped.
-        #expect(settings.animations.durationMS == 1000)
+        expectEqual(settings.animations.durationMS, 1000)
         #expect(!settings.animations.onExpand)
         #expect(!settings.animations.onWindowSwap)
-        #expect(settings.animations.scrollDurationMS == 400)
+        expectEqual(settings.animations.scrollDurationMS, 400)
     }
 }

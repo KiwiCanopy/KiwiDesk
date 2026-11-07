@@ -75,7 +75,7 @@ struct SplitOverflowTests {
         let right = try #require(frames[w2])
         // The 585 pt right slot widens to 700 and pulls back so
         // its trailing edge stays at the usable edge (1190).
-        #expect(right.width == 700)
+        expectEqual(right.width, 700)
         #expect(abs(right.maxX - 1190) < 0.01)
         #expect(right.minX >= 10)
         #expect(try #require(frames[w1]).width < 600)
@@ -90,7 +90,7 @@ struct SplitOverflowTests {
             context(bounds: [ids[2]: heightFloor(450)])
         )
         let bottom = try #require(frames[ids[2]])
-        #expect(bottom.height == 450)
+        expectEqual(bottom.height, 450)
         #expect(abs(bottom.maxY - 790) < 0.01)
     }
 
@@ -104,7 +104,7 @@ struct SplitOverflowTests {
             context(bounds: [w2: floor(700)])
         )
         let stack = try #require(frames[w2])
-        #expect(stack.width == 700)
+        expectEqual(stack.width, 700)
         #expect(abs(stack.maxX - 1190) < 0.01)
     }
 
@@ -118,8 +118,8 @@ struct SplitOverflowTests {
             context(bounds: [w2: floor(1300)])
         )
         let right = try #require(frames[w2])
-        #expect(right.width == 1300)
-        #expect(right.minX == 10)
+        expectEqual(right.width, 1300)
+        expectEqual(right.minX, 10)
     }
 
     @Test("A learned ceiling is left to the app")

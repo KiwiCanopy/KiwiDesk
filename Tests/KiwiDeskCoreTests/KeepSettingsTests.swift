@@ -48,13 +48,13 @@ struct KeepSettingsTests {
             + (mode.changes?.touched ?? [])
         let response = keep(core, ids.map(\.id))
         #expect(response.isSuccess)
-        #expect(told == [true])
+        expectEqual(told, [true])
         let stored = try core.profiles.read(name: "Odd")
-        #expect(stored.settings.borderStyle.width == 9)
-        #expect(stored.spaceModes["1"] == .monocle)
-        #expect(draft.settings.borderStyle.width == 9)
-        #expect(draft.spaceModes["1"] == .monocle)
-        #expect(Set(members(response.data, "kept")) == Set(ids.map(\.id)))
+        expectEqual(stored.settings.borderStyle.width, 9)
+        expectEqual(stored.spaceModes["1"], .monocle)
+        expectEqual(draft.settings.borderStyle.width, 9)
+        expectEqual(draft.spaceModes["1"], .monocle)
+        expectEqual(Set(members(response.data, "kept")), Set(ids.map(\.id)))
     }
 
     @Test("a follower's look leaf lands in the shared look")
@@ -65,7 +65,7 @@ struct KeepSettingsTests {
         let response = keep(core, ids)
         #expect(response.isSuccess)
         let shared = core.guiConfigStore.load()?.look?.style["border.width"]
-        #expect(shared == .number(9))
+        expectEqual(shared, .number(9))
         guard case .object(let fields)? = response.data,
             case .array(let followers)? = fields["followers"]
         else {
@@ -84,7 +84,7 @@ struct KeepSettingsTests {
         _ = core.execute("border.set_width", args: [.number(3)])
         _ = keep(core, (width.changes?.touched ?? []).map(\.id))
         let stored = try core.profiles.read(name: "Odd")
-        #expect(stored.settings.borderStyle.width == 3)
+        expectEqual(stored.settings.borderStyle.width, 3)
     }
 
     @Test("a Lua-owned config refuses every leaf and writes nothing")
@@ -99,7 +99,7 @@ struct KeepSettingsTests {
             members(response.data, "not_keepable")
                 == ["/settings/border/width"]
         )
-        #expect(told == 0)
+        expectEqual(told, 0)
     }
 
     @Test("ids that are not leaf pointers are refused")

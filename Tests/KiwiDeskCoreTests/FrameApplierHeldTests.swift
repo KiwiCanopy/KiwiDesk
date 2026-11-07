@@ -60,7 +60,7 @@ struct FrameApplierHeldTests {
         try await waitForWrite(counts)
         try await Task.sleep(for: .milliseconds(100))
         #expect(owed.isEmpty)
-        #expect(counts.withLock { $0.frames } == 1)
+        expectEqual(counts.withLock { $0.frames }, 1)
     }
 
     @Test("an instant write leaves once, at the landing, under one EUI drop")
@@ -71,14 +71,14 @@ struct FrameApplierHeldTests {
         applier.applyInstant(w, frame, setSize: false)
         applier.applyInstant(w, frame, setSize: true)
         #expect(applier.held.isStaged(w))
-        #expect(counts.withLock { $0.frames + $0.positions } == 0)
+        expectEqual(counts.withLock { $0.frames + $0.positions }, 0)
         try await waitForWrite(counts)
         try await Task.sleep(for: .milliseconds(100))
         let final = counts.withLock { $0 }
         // Merged: one set, the size kept.
-        #expect(final.frames == 1)
-        #expect(final.positions == 0)
-        #expect(final.eui == [false, true])
+        expectEqual(final.frames, 1)
+        expectEqual(final.positions, 0)
+        expectEqual(final.eui, [false, true])
         #expect(!applier.held.isStaged(w))
     }
 
@@ -90,7 +90,7 @@ struct FrameApplierHeldTests {
         applier.apply(w, frame, setSize: false)
         #expect(applier.held.isStaged(w))
         try await waitForWrite(counts)
-        #expect(counts.withLock { $0.positions } == 1)
+        expectEqual(counts.withLock { $0.positions }, 1)
     }
 
     /// A burst holds a staged window again past its first landing:
@@ -105,10 +105,10 @@ struct FrameApplierHeldTests {
         let later = DispatchTime.now() + 0.2
         applier.holdWrites([w], until: later)
         try await waitForWrite(counts)
-        #expect(counts.withLock { $0.positions } == 1)
+        expectEqual(counts.withLock { $0.positions }, 1)
         #expect(DispatchTime.now() >= later)
         try await Task.sleep(for: .milliseconds(100))
-        #expect(counts.withLock { $0.positions } == 1)
+        expectEqual(counts.withLock { $0.positions }, 1)
     }
 
     /// The loop let go of the app before the landing: the write
@@ -121,7 +121,7 @@ struct FrameApplierHeldTests {
         applier.applyInstant(w, frame, setSize: false)
         applier.retireApp(1, leftOn: true)
         try await waitForWrite(counts)
-        #expect(counts.withLock { $0.positions } == 1)
+        expectEqual(counts.withLock { $0.positions }, 1)
         #expect(counts.withLock { $0.eui }.isEmpty)
     }
 
@@ -133,7 +133,7 @@ struct FrameApplierHeldTests {
         applier.applyInstant(w, frame, setSize: false)
         applier.releaseAllHolds()
         try await waitForWrite(counts)
-        #expect(counts.withLock { $0.positions } == 1)
+        expectEqual(counts.withLock { $0.positions }, 1)
     }
 
     @Test("a quit drops every held write")

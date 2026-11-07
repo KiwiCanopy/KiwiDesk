@@ -85,8 +85,8 @@ struct ShelfDriverTests {
         let lead = space.strip.minX - strip.minX
         let trail = strip.maxX - app.strip.maxX
         #expect(abs(lead - trail) <= 1)
-        #expect(space.strip.height == strip.height)
-        #expect(app.strip.height == strip.height)
+        expectEqual(space.strip.height, strip.height)
+        expectEqual(app.strip.height, strip.height)
     }
 
     @Test(
@@ -102,7 +102,7 @@ struct ShelfDriverTests {
         // Alone, the Space Bar spans the whole strip.
         let strip = try #require(alone.spaceBars.shownStrips.first)
         let screen = try #require(NSScreen.screens.first)
-        #expect(strip.strip.width == screen.visibleFrame.width)
+        expectEqual(strip.strip.width, screen.visibleFrame.width)
     }
 
     @Test(

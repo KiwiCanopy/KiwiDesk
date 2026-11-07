@@ -40,12 +40,12 @@ struct StackArrangementTests {
         let master = try #require(frames[w1])
         let stack = try #require(frames[w2])
         // available = 1900 - 10 gap = 1890
-        #expect(stack.minX == context.usable.minX)
+        expectEqual(stack.minX, context.usable.minX)
         #expect(abs(stack.width - 1890 * 0.4) < 0.01)
         #expect(abs(master.minX - stack.maxX - 10) < 0.01)
         #expect(abs(master.width - 1890 * 0.6) < 0.01)
-        #expect(master.height == context.usable.height)
-        #expect(stack.height == context.usable.height)
+        expectEqual(master.height, context.usable.height)
+        expectEqual(stack.height, context.usable.height)
     }
 
     @Test("stack_position top splits the height, stack first")
@@ -60,12 +60,12 @@ struct StackArrangementTests {
         let master = try #require(frames[w1])
         let stack = try #require(frames[w2])
         // available = 1060 - 10 gap = 1050
-        #expect(stack.minY == context.usable.minY)
+        expectEqual(stack.minY, context.usable.minY)
         #expect(abs(stack.height - 1050 * 0.4) < 0.01)
         #expect(abs(master.minY - stack.maxY - 10) < 0.01)
         #expect(abs(master.height - 1050 * 0.6) < 0.01)
-        #expect(master.width == context.usable.width)
-        #expect(stack.width == context.usable.width)
+        expectEqual(master.width, context.usable.width)
+        expectEqual(stack.width, context.usable.width)
     }
 
     @Test("stack_position bottom keeps the master on top")
@@ -79,7 +79,7 @@ struct StackArrangementTests {
         )
         let master = try #require(frames[w1])
         let stack = try #require(frames[w2])
-        #expect(master.minY == context.usable.minY)
+        expectEqual(master.minY, context.usable.minY)
         #expect(abs(master.height - 1050 * 0.6) < 0.01)
         #expect(abs(stack.minY - master.maxY - 10) < 0.01)
     }
@@ -95,8 +95,8 @@ struct StackArrangementTests {
         )
         let first = try #require(frames[w2])
         let second = try #require(frames[w3])
-        #expect(first.minY == second.minY)
-        #expect(first.height == second.height)
+        expectEqual(first.minY, second.minY)
+        expectEqual(first.height, second.height)
         #expect(abs(second.minX - first.maxX - 10) < 0.01)
         #expect(abs(first.width - second.width) < 0.01)
     }
@@ -112,8 +112,8 @@ struct StackArrangementTests {
         )
         let first = try #require(frames[w2])
         let second = try #require(frames[w3])
-        #expect(first.minX == second.minX)
-        #expect(first.width == second.width)
+        expectEqual(first.minX, second.minX)
+        expectEqual(first.width, second.width)
         #expect(abs(second.minY - first.maxY - 10) < 0.01)
     }
 
@@ -129,8 +129,8 @@ struct StackArrangementTests {
         )
         let first = try #require(frames[w1])
         let second = try #require(frames[w2])
-        #expect(first.minY == second.minY)
-        #expect(first.height == second.height)
+        expectEqual(first.minY, second.minY)
+        expectEqual(first.height, second.height)
         #expect(abs(second.minX - first.maxX - 10) < 0.01)
         #expect(abs(first.width - second.width) < 0.01)
         // The stack column is untouched on the right.
@@ -150,9 +150,9 @@ struct StackArrangementTests {
         )
         let first = try #require(frames[w1])
         let second = try #require(frames[w2])
-        #expect(first.minX == context.usable.minX)
+        expectEqual(first.minX, context.usable.minX)
         #expect(abs(second.maxX - context.usable.maxX) < 0.01)
-        #expect(first.height == context.usable.height)
+        expectEqual(first.height, context.usable.height)
         #expect(abs(second.minX - first.maxX - 10) < 0.01)
     }
 
@@ -169,7 +169,7 @@ struct StackArrangementTests {
         let heavy = try #require(frames[w2])
         let light = try #require(frames[w3])
         #expect(abs(heavy.width - 2 * light.width) < 0.01)
-        #expect(heavy.height == light.height)
+        expectEqual(heavy.height, light.height)
     }
 
     @MainActor
@@ -276,8 +276,8 @@ struct StackArrangementCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.stack.override[SpaceID("3")]
-        #expect(over?.masterOrientation == .vertical)
-        #expect(over?.stackPosition == .left)
+        expectEqual(over?.masterOrientation, .vertical)
+        expectEqual(over?.stackPosition, .left)
         // Globals stay at their defaults.
         #expect(
             core.tiler.settings.stack.masterOrientation

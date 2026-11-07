@@ -17,11 +17,11 @@ struct HoldGlideTests {
     func armsWaitsAndGlides() throws {
         let h = HoldGlideHarness()
         h.press(id: 7)
-        #expect(h.glideEngine.heldID == 7)
+        expectEqual(h.glideEngine.heldID, 7)
         // Exactly one scheduled wait, at the system delay — the
         // glide itself never rides the scheduler.
-        #expect(h.ticks.map(\.delay) == [0.5])
-        #expect(h.glideEngine.isGliding == false)
+        expectEqual(h.ticks.map(\.delay), [0.5])
+        expectEqual(h.glideEngine.isGliding, false)
         #expect(h.steps.isEmpty)
 
         try h.beginGlide()
@@ -38,10 +38,10 @@ struct HoldGlideTests {
         #expect(h.steps.isEmpty)
 
         try h.frame()
-        #expect(h.steps.count == 1)
+        expectEqual(h.steps.count, 1)
         // The press's own arguments are re-issued verbatim — the
         // glide scales the delta, it does not invent one.
-        #expect(h.steps[0].args == [.string("x"), .number(50)])
+        expectEqual(h.steps[0].args, [.string("x"), .number(50)])
     }
 
     @Test("Ineligible presses never arm")
@@ -100,9 +100,9 @@ struct HoldGlideTests {
         try run.frame()
         run.glideEngine.noteRefusal()
         #expect(run.glideEngine.heldID == nil)
-        #expect(run.glideEngine.isGliding == false)
-        #expect(run.frameStops == 1)
-        #expect(run.isTicking == false)
+        expectEqual(run.glideEngine.isGliding, false)
+        expectEqual(run.frameStops, 1)
+        expectEqual(run.isTicking, false)
     }
 
     @Test("Release ends the run; a stale release is ignored")
@@ -113,11 +113,11 @@ struct HoldGlideTests {
         // A release for some OTHER id (a run already replaced)
         // must not touch this one.
         h.glideEngine.released(id: 99)
-        #expect(h.glideEngine.heldID == 3)
+        expectEqual(h.glideEngine.heldID, 3)
         #expect(h.isTicking)
         h.glideEngine.released(id: 3)
         #expect(h.glideEngine.heldID == nil)
-        #expect(h.frameStops == 1)
+        expectEqual(h.frameStops, 1)
     }
 
     @Test("A new press replaces the previous run")
@@ -126,15 +126,15 @@ struct HoldGlideTests {
         h.press(id: 4)
         try h.beginGlide()
         h.press(id: 5)
-        #expect(h.glideEngine.heldID == 5)
+        expectEqual(h.glideEngine.heldID, 5)
         // The first run's frame clock was torn down — one active
         // hold at a time, and two live clocks would double every
         // step.
-        #expect(h.frameStops == 1)
-        #expect(h.glideEngine.isGliding == false)
+        expectEqual(h.frameStops, 1)
+        expectEqual(h.glideEngine.isGliding, false)
         // The old release arriving later is stale and ignored.
         h.glideEngine.released(id: 4)
-        #expect(h.glideEngine.heldID == 5)
+        expectEqual(h.glideEngine.heldID, 5)
     }
 
     @Test("Teardown cancels — no release can arrive")
@@ -143,13 +143,13 @@ struct HoldGlideTests {
         h.press(id: 6)
         h.glideEngine.cancelRun()
         #expect(h.glideEngine.heldID == nil)
-        #expect(h.cancels == 1)
+        expectEqual(h.cancels, 1)
         // A cancelled run's wait firing late is inert: it must
         // not start a frame clock nobody can stop.
         let lateTick = h.ticks.popLast()
         try #require(lateTick).work()
-        #expect(h.glideEngine.isGliding == false)
-        #expect(h.isTicking == false)
+        expectEqual(h.glideEngine.isGliding, false)
+        expectEqual(h.isTicking, false)
         #expect(h.steps.isEmpty)
     }
 
@@ -180,7 +180,7 @@ struct HoldGlideTests {
             succeeded: true
         )
         h.glideEngine.endFire(id: 2)
-        #expect(h.glideEngine.heldID == 2)
+        expectEqual(h.glideEngine.heldID, 2)
         h.glideEngine.restoreTally(saved)
 
         // The outer press closes on its own tally — one focus,

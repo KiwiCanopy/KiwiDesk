@@ -20,9 +20,9 @@ struct JumpToWindowSeedTests {
     @Test("⌃⌥J opens Jump to window in the base seed")
     func seedsJump() {
         let row = DefaultKeybindings.jumpToWindowRow()
-        #expect(row.combo == "control+option+j")
-        #expect(row.lua == "kiwihub.show(\"windows\")")
-        #expect(row.kind == .navigation)
+        expectEqual(row.combo, "control+option+j")
+        expectEqual(row.lua, "kiwihub.show(\"windows\")")
+        expectEqual(row.kind, .navigation)
         #expect(
             seeded.filter { $0.lua == row.lua } == [row]
         )
@@ -34,7 +34,7 @@ struct JumpToWindowSeedTests {
     @Test("an install past generation 2 still gets ⌃⌥J")
     func joinsTheGeneration() {
         let row = DefaultKeybindings.jumpToWindowRow()
-        #expect(DefaultKeybindings.rows(ofGeneration: 3) == [row])
+        expectEqual(DefaultKeybindings.rows(ofGeneration: 3), [row])
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: [],

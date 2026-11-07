@@ -75,9 +75,9 @@ struct SessionRatioDesktopTests {
             core.execute("reset_layout_sizing", args: [.string("1")])
                 .isSuccess
         )
-        #expect(core.sessionRatios(of: space) == SessionRatios())
+        expectEqual(core.sessionRatios(of: space), SessionRatios())
         show(core, ["Main": 10])
-        #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
+        expectEqual(core.sessionRatios(of: space).splitRatioH, 0.7)
         // A Desktop other than the shown one holds sizes too, so
         // only a reset of every Desktop empties the store.
         show(core, ["Main": 11])
@@ -98,9 +98,9 @@ struct SessionRatioDesktopTests {
         #expect(stored(core, nil) != nil)
         // A screen no switch has filed names no Desktop either.
         show(core, ["6F1C1E9A-0000-4000-8000-000000000001": 30])
-        #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
+        expectEqual(core.sessionRatios(of: space).splitRatioH, 0.7)
         show(core, ["Main": 10])
-        #expect(core.sessionRatios(of: space) == SessionRatios())
+        expectEqual(core.sessionRatios(of: space), SessionRatios())
     }
 
     @Test("an override setter and a mode change clear every Desktop")
@@ -118,7 +118,7 @@ struct SessionRatioDesktopTests {
         for desktop in [10, 11] as [SkyLight.SpaceID] {
             let ratios = stored(core, desktop)
             #expect(ratios?.splitRatioH == nil)
-            #expect(ratios?.masterRatio == 0.6)
+            expectEqual(ratios?.masterRatio, 0.6)
         }
         core.setSpaceMode(space, .stack, keepingSizes: false)
         #expect(core.desktopMemory.sessionRatios.isEmpty)

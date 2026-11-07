@@ -40,16 +40,16 @@ struct StarterUltrawideAllocationTests {
         let twins = StarterAllocation.modes(
             sizes: [screen27, screen27, ultrawide]
         )
-        #expect(twins[0] == [.monocle, .bsp, .floating])
-        #expect(twins[1] == [.monocle, .bsp, .floating])
+        expectEqual(twins[0], [.monocle, .bsp, .floating])
+        expectEqual(twins[1], [.monocle, .bsp, .floating])
         let three = [laptop, portrait, superWide]
         let modes = StarterAllocation.modes(sizes: three)
-        #expect(modes[0] == [.monocle, .grid, .floating])
-        #expect(modes[1] == [.monocle, .grid, .floating])
-        #expect(modes[2] == [.scrolling, .stack, .floating])
+        expectEqual(modes[0], [.monocle, .grid, .floating])
+        expectEqual(modes[1], [.monocle, .grid, .floating])
+        expectEqual(modes[2], [.scrolling, .stack, .floating])
         let settings = StarterSetup.settings(sizes: three)
-        #expect(settings.stack.masterCount == 3)
-        #expect(settings.stack.stackPosition == .right)
+        expectEqual(settings.stack.masterCount, 3)
+        expectEqual(settings.stack.stackPosition, .right)
         // A narrow ultrawide no wider than the widescreen beside it
         // (2560 x 1080) still takes Stack; the widescreen BSP.
         let narrow = CGSize(width: 2560, height: 1080)
@@ -79,7 +79,7 @@ struct StarterUltrawideAllocationTests {
             CGSize(width: 1440, height: 900),
             CGSize(width: 1024, height: 768),
         ]
-        #expect(StarterSetup.scrollingHost(sizes) == .pivoted)
+        expectEqual(StarterSetup.scrollingHost(sizes), .pivoted)
     }
 
     @Test("Scrolling stays on the ultrawides, others lead Monocle")
@@ -107,8 +107,8 @@ struct StarterUltrawideAllocationTests {
 
     @Test("three spaces a screen, capped at the digit keys")
     func budget() {
-        #expect(StarterAllocation.ultrawideBudget(screenCount: 2) == 6)
-        #expect(StarterAllocation.ultrawideBudget(screenCount: 3) == 9)
+        expectEqual(StarterAllocation.ultrawideBudget(screenCount: 2), 6)
+        expectEqual(StarterAllocation.ultrawideBudget(screenCount: 3), 9)
         #expect(
             StarterAllocation.ultrawideBudget(screenCount: 4)
                 == StarterAllocation.softCap
@@ -125,15 +125,15 @@ struct StarterUltrawideAllocationTests {
     @Test("a companion Grid is tuned for the screen it sits on")
     func companionGridShape() {
         let tall = StarterSetup.settings(sizes: [ultrawide, portrait])
-        #expect(tall.grid.columns == 1)
-        #expect(tall.grid.rows == 3)
-        #expect(tall.grid.splitDirection == .vertical)
+        expectEqual(tall.grid.columns, 1)
+        expectEqual(tall.grid.rows, 3)
+        expectEqual(tall.grid.splitDirection, .vertical)
         let pair = StarterSetup.settings(sizes: [laptop, ultrawide])
-        #expect(pair.grid.columns == 2)
-        #expect(pair.grid.rows == 2)
+        expectEqual(pair.grid.columns, 2)
+        expectEqual(pair.grid.rows, 2)
         // Scrolling lives on the ultrawide, so it is tuned there
         // and needs no per-space override.
-        #expect(pair.scrolling.anchor == .center)
+        expectEqual(pair.scrolling.anchor, .center)
         #expect(pair.scrolling.override.isEmpty)
     }
 }

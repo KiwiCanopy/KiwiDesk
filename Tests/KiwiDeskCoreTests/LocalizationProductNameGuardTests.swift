@@ -82,7 +82,7 @@ struct LocalizationProductNameGuardTests {
             english: english,
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// **Presence, not parity** — the semantics every other pass
@@ -126,7 +126,7 @@ struct LocalizationProductNameGuardTests {
             english: english,
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// The complementary half: presence is per **name**, so a value
@@ -160,7 +160,7 @@ struct LocalizationProductNameGuardTests {
             english: "Show app bar",
             value: "App bar anzeigen"
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// The shape that nearly made this guard fight correct German.
@@ -188,7 +188,7 @@ struct LocalizationProductNameGuardTests {
             english: english,
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// And the normalisation must not have blunted the rule:
@@ -267,7 +267,7 @@ struct LocalizationProductNameGuardTests {
             english: "Space Bar colors",
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// A key whose English never mentions a feature name cannot be
@@ -279,7 +279,7 @@ struct LocalizationProductNameGuardTests {
             english: "Outer gap",
             value: "Äußerer Abstand"
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 }
 

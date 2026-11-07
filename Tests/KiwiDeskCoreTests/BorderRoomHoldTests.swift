@@ -43,11 +43,11 @@ struct BorderRoomHoldTests {
         border.isAnimating = { _ in true }
         border.apply(WindowID(9), windowFrame: frame)
         let room = BorderManager.room(around: screen, scale: 2)
-        #expect(backend.rooms.last == room)
+        expectEqual(backend.rooms.last, room)
         border.isAnimating = { _ in false }
         border.roomsHeld = true
         border.apply(WindowID(9), windowFrame: frame.offsetBy(dx: 40, dy: 0))
-        #expect(backend.rooms.last == room)
+        expectEqual(backend.rooms.last, room)
         border.roomsHeld = false
         border.apply(WindowID(9), windowFrame: frame)
         #expect(backend.rooms.last == .some(nil))
@@ -69,7 +69,7 @@ struct BorderRoomHoldTests {
         let before = backend.rooms.count
         border.sync([spec(9)], alive: nil, reassertOrder: true)
         #expect(backend.rooms.count > before)
-        #expect(backend.rooms.last == room)
+        expectEqual(backend.rooms.last, room)
     }
 
     @Test("A ring that never animated takes no held room")

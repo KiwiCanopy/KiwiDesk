@@ -24,20 +24,20 @@ struct CommandBehaviorTests {
             "set_wake_restore_delay",
             args: [.number(2500)]
         )
-        #expect(core.sleepWake.restoreDelayMS == 2500)
+        expectEqual(core.sleepWake.restoreDelayMS, 2500)
         // Duration: the namespaced command clamps to 50–1000.
         core.execute(
             "animations.set_duration",
             args: [.number(5000)]
         )
-        #expect(core.tiler.animation.durationMS == 1000)
+        expectEqual(core.tiler.animation.durationMS, 1000)
         core.execute(
             "animations.set_duration",
             args: [.number(300)]
         )
-        #expect(core.tiler.animation.durationMS == 300)
+        expectEqual(core.tiler.animation.durationMS, 300)
         // Defaults: the slide (#2524), scrolling on (#11).
-        #expect(core.appWide.spaceTransition == .slide)
+        expectEqual(core.appWide.spaceTransition, .slide)
         #expect(core.tiler.settings.animations.onScrolling)
         // #2228's toggle, the 2.x toggle and #2143's picker retire,
         // naming the picker; the slide's glass leaf with a reason.
@@ -46,13 +46,13 @@ struct CommandBehaviorTests {
             "animations.set_space_change",
         ] {
             let retired = core.execute(verb, args: [.bool(true)])
-            #expect(retired.error?.contains("set_space_transition") == true)
+            expectEqual(retired.error?.contains("set_space_transition"), true)
         }
         let glass = core.execute(
             "set_space_switch_liquid_glass",
             args: [.bool(true)]
         )
-        #expect(glass.error?.contains("KiwiHub") == true)
+        expectEqual(glass.error?.contains("KiwiHub"), true)
         core.execute(
             "animations.set_on_scrolling",
             args: [.bool(false)]
@@ -82,12 +82,12 @@ struct CommandBehaviorTests {
             args: [.bool(false)]
         )
         #expect(!core.tiler.settings.animations.onRelayout)
-        #expect(core.tiler.settings.mouseResize == .layout)
+        expectEqual(core.tiler.settings.mouseResize, .layout)
         core.execute(
             "set_mouse_resize",
             args: [.string("snap_back")]
         )
-        #expect(core.tiler.settings.mouseResize == .snapBack)
+        expectEqual(core.tiler.settings.mouseResize, .snapBack)
         #expect(
             !core.execute(
                 "set_mouse_resize",
@@ -123,7 +123,7 @@ struct CommandBehaviorTests {
             args: [.string("right")]
         )
         #expect(response.isSuccess)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("set_new_window_placement updates and validates")

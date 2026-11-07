@@ -90,7 +90,7 @@ struct DigitTopUpOverrideTests {
         core.topUpDigitShortcuts()
         core.topUpDigitShortcuts()
 
-        #expect(baseRows(core).count == before)
+        expectEqual(baseRows(core).count, before)
     }
 
     @Test("a verb another profile's override binds is not topped up")

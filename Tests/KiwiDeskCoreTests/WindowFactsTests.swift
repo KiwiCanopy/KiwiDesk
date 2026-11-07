@@ -34,7 +34,7 @@ struct WindowFactsTests {
             bundleID: "com.example.app",
             rules: FloatRules(["com.example.app"])
         )
-        #expect(reason == .panel)
+        expectEqual(reason, .panel)
         #expect(!asked)
     }
 
@@ -48,7 +48,7 @@ struct WindowFactsTests {
             bundleID: "com.example.app",
             rules: FloatRules(["com.example.app:Title"])
         )
-        #expect(reason == .rule)
+        expectEqual(reason, .rule)
         #expect(asked)
     }
 
@@ -59,7 +59,7 @@ struct WindowFactsTests {
             bundleID: nil,
             rules: FloatRules()
         )
-        #expect(reason == .raisedLayer)
+        expectEqual(reason, .raisedLayer)
     }
 
     @Test("a forced float asks detection nothing")
@@ -77,7 +77,7 @@ struct WindowFactsTests {
             bundleID: "com.example.app",
             rules: FloatRules(["com.example.app:Title"])
         )
-        #expect(verdict == .floats(.accessoryApp))
+        expectEqual(verdict, .floats(.accessoryApp))
         #expect(!asked)
     }
 
@@ -91,7 +91,7 @@ struct WindowFactsTests {
             bundleID: nil,
             rules: FloatRules()
         )
-        #expect(verdict == .tiles)
+        expectEqual(verdict, .tiles)
         #expect(
             EventLoop.composeVerdict(
                 .read(.rule),

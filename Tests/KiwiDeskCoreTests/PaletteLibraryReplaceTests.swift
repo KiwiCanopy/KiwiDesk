@@ -72,7 +72,7 @@ struct PaletteLibraryReplaceTests {
         // The count is the method's only way of saying it silently
         // refused something; a caller that ever wants to tell the
         // user needs it to be true.
-        #expect(dropped == 1)
+        expectEqual(dropped, 1)
         #expect(
             core.paletteLibrary.userPalettes().map(\.name)
                 == ["Fine"]

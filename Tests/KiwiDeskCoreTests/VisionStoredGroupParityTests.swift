@@ -46,7 +46,7 @@ struct VisionStoredGroupParityTests {
         }
         let carried = try keys(of: group)
         let stored = try keys(of: Self.settings.vision)
-        #expect(carried == stored.subtracting(["lenses"]))
+        expectEqual(carried, stored.subtracting(["lenses"]))
     }
 
     private func keys(of value: some Encodable) throws -> Set<String> {

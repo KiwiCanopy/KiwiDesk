@@ -70,7 +70,7 @@ struct QuitFloatReplayEdgeTests: CrossSessionFixture {
         let index = try #require(
             session.windows.firstIndex { $0.windowID == Self.float }
         )
-        #expect(session.windows[index].floating == true)
+        expectEqual(session.windows[index].floating, true)
         session.windows[index].frame = try corner(left[Self.float]!, in: a)
         let early = Self.windows.filter { $0.id != Self.float }
         let (b, _) = try #require(
@@ -97,11 +97,11 @@ struct QuitFloatReplayEdgeTests: CrossSessionFixture {
         leave(desk, in: core)
         arrange(core)
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(space(core, 30) == F.hidden)
+        expectEqual(space(core, 30), F.hidden)
         #expect(core.state.userFloated.contains(WindowID(30)))
         // Parked on its hidden Space at the frame it arrived with,
         // never at the record's corner.
-        #expect(core.tiler.stashOriginal(WindowID(30)) == Self.frame)
+        expectEqual(core.tiler.stashOriginal(WindowID(30)), Self.frame)
         #expect(core.tiler.stashOriginal(WindowID(30)) != parked)
     }
 
@@ -117,7 +117,7 @@ struct QuitFloatReplayEdgeTests: CrossSessionFixture {
         a.onLog = { _ in }
         a.setSpaceMode(F.hidden, .floating, keepingSizes: false)
         _ = F.settle(a)
-        #expect(a.state.windows[Self.hiddenTile]?.isFloating == false)
+        expectEqual(a.state.windows[Self.hiddenTile]?.isFloating, false)
         let capture = try #require(a.tiler.stashOriginal(Self.hiddenTile))
         var left = F.settle(a)
         let grid = WindowGather.targets(
@@ -136,7 +136,7 @@ struct QuitFloatReplayEdgeTests: CrossSessionFixture {
         let (b, _) = try #require(
             F.processB(Self.windows, left: left, session: session)
         )
-        #expect(b.state.workspaces[F.hidden]?.mode == .floating)
-        #expect(b.tiler.stashOriginal(Self.hiddenTile) == capture)
+        expectEqual(b.state.workspaces[F.hidden]?.mode, .floating)
+        expectEqual(b.tiler.stashOriginal(Self.hiddenTile), capture)
     }
 }

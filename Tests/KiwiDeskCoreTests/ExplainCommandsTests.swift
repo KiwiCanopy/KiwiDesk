@@ -67,9 +67,9 @@ struct ExplainCommandsTests {
         let core = makeCore()
         track(core)
         let floating = explain(core)["float"]
-        #expect(field(floating, "effective_float") == .bool(false))
-        #expect(field(floating, "cause") == .null)
-        #expect(field(floating, "detection") == .null)
+        expectEqual(field(floating, "effective_float"), .bool(false))
+        expectEqual(field(floating, "cause"), .null)
+        expectEqual(field(floating, "detection"), .null)
     }
 
     @Test(
@@ -83,10 +83,10 @@ struct ExplainCommandsTests {
         let core = makeCore()
         track(core, .floats(reason))
         let floating = explain(core)["float"]
-        #expect(field(floating, "cause") == .string("detection"))
+        expectEqual(field(floating, "cause"), .string("detection"))
         let detection = field(floating, "detection")
-        #expect(field(detection, "reason") == .string(reason.wireName))
-        #expect(field(detection, "is_guess") == .bool(reason.isGuess))
+        expectEqual(field(detection, "reason"), .string(reason.wireName))
+        expectEqual(field(detection, "is_guess"), .bool(reason.isGuess))
         #expect(
             field(detection, "escapes")
                 == .array(reason.escapes.map(JSONValue.string))
@@ -119,11 +119,11 @@ struct ExplainCommandsTests {
     /// The reasons' wire spellings are a machine contract.
     @Test("each reason keeps its wire spelling")
     func wireNamesAreFrozen() {
-        #expect(AutoFloatReason.rule.wireName == "rule")
-        #expect(AutoFloatReason.panel.wireName == "panel")
-        #expect(AutoFloatReason.raisedLayer.wireName == "raised_layer")
-        #expect(AutoFloatReason.accessoryApp.wireName == "accessory_app")
-        #expect(AutoFloatReason.fixedSize.wireName == "fixed_size")
+        expectEqual(AutoFloatReason.rule.wireName, "rule")
+        expectEqual(AutoFloatReason.panel.wireName, "panel")
+        expectEqual(AutoFloatReason.raisedLayer.wireName, "raised_layer")
+        expectEqual(AutoFloatReason.accessoryApp.wireName, "accessory_app")
+        expectEqual(AutoFloatReason.fixedSize.wireName, "fixed_size")
     }
 
     @Test("a flag with no verdict is the user's float")
@@ -131,8 +131,8 @@ struct ExplainCommandsTests {
         let core = makeCore()
         track(core, .tiles, flag: true)
         let floating = explain(core)["float"]
-        #expect(field(floating, "cause") == .string("user"))
-        #expect(explain(core)["floating"] == .bool(true))
+        expectEqual(field(floating, "cause"), .string("user"))
+        expectEqual(explain(core)["floating"], .bool(true))
     }
 
     @Test("a floating-mode Space floats a window with no flag")
@@ -143,10 +143,10 @@ struct ExplainCommandsTests {
         core.state.workspaces.setMode(space, .floating)
         let answer = explain(core)
         let floating = answer["float"]
-        #expect(field(floating, "cause") == .string("space_mode"))
-        #expect(field(floating, "effective_float") == .bool(true))
-        #expect(answer["floating"] == .bool(false))
-        #expect(answer["mode"] == .string("floating"))
+        expectEqual(field(floating, "cause"), .string("space_mode"))
+        expectEqual(field(floating, "effective_float"), .bool(true))
+        expectEqual(answer["floating"], .bool(false))
+        expectEqual(answer["mode"], .string("floating"))
     }
 
     @Test("the app's rules are its own slice, and the title is told")
@@ -162,13 +162,13 @@ struct ExplainCommandsTests {
         )
         let answer = explain(core)
         let rule = answer["app_rule"]
-        #expect(field(rule, "space") == .string("3"))
+        expectEqual(field(rule, "space"), .string("3"))
         #expect(
             field(rule, "float_rules")
                 == .array([.string("\(bundle):Info")])
         )
-        #expect(field(rule, "tile_rule") == .bool(true))
-        #expect(answer["title"] == .string("Secret title"))
+        expectEqual(field(rule, "tile_rule"), .bool(true))
+        expectEqual(answer["title"], .string("Secret title"))
     }
 
     @Test("an unknown window is refused")
@@ -206,9 +206,9 @@ struct ExplainCommandsTests {
             Issue.record("no answer: \(response.error ?? "")")
             return
         }
-        #expect(answer["bundle_id"] == .string(bundle))
-        #expect(field(answer["ignored"], "by_rule") == .bool(true))
-        #expect(field(answer["ignored"], "built_in") == .bool(false))
+        expectEqual(answer["bundle_id"], .string(bundle))
+        expectEqual(field(answer["ignored"], "by_rule"), .bool(true))
+        expectEqual(field(answer["ignored"], "built_in"), .bool(false))
         // Each list names its windows by id and title (#2895).
         #expect(
             answer["windows"]
@@ -225,12 +225,12 @@ struct ExplainCommandsTests {
             Issue.record("no process listed")
             return
         }
-        #expect(field(process, "pid") == .number(4242))
+        expectEqual(field(process, "pid"), .number(4242))
         // An unobserved pid's policy is LaunchServices' answer,
         // read through `policy(of:)` over the pinned seam.
-        #expect(field(process, "policy") == .string("accessory"))
-        #expect(field(process, "observed") == .bool(false))
-        #expect(field(process, "hidden") == .bool(true))
+        expectEqual(field(process, "policy"), .string("accessory"))
+        expectEqual(field(process, "observed"), .bool(false))
+        expectEqual(field(process, "hidden"), .bool(true))
     }
 
     /// A minimized or away window is named by the title it left
@@ -269,8 +269,8 @@ struct ExplainCommandsTests {
             minimized
                 == [.object(["id": .number(8), "title": .string("Folded")])]
         )
-        #expect(field(away.first, "id") == .number(9))
-        #expect(field(away.first, "title") == .string("Elsewhere"))
+        expectEqual(field(away.first, "id"), .number(9))
+        expectEqual(field(away.first, "title"), .string("Elsewhere"))
     }
 
     @Test("a raised-layer app is read off the built-in table")

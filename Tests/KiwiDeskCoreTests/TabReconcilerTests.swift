@@ -25,7 +25,7 @@ struct TabReconcilerTests {
             vanished: [win(1, frame: frame)],
             appeared: [win(2, frame: frame)]
         )
-        #expect(rekeys == [.init(from: WindowID(1), to: WindowID(2))])
+        expectEqual(rekeys, [.init(from: WindowID(1), to: WindowID(2))])
     }
 
     @Test("close 2→1: carrier vanishes, single tab appears → re-key")
@@ -37,7 +37,7 @@ struct TabReconcilerTests {
             vanished: [win(1, frame: frame)],
             appeared: [win(2, frame: frame, tabGroup: false)]
         )
-        #expect(rekeys == [.init(from: WindowID(1), to: WindowID(2))])
+        expectEqual(rekeys, [.init(from: WindowID(1), to: WindowID(2))])
     }
 
     @Test("open 1→2: single tab vanishes, carrier appears → re-key")
@@ -46,7 +46,7 @@ struct TabReconcilerTests {
             vanished: [win(1, frame: frame, tabGroup: false)],
             appeared: [win(2, frame: frame)]
         )
-        #expect(rekeys == [.init(from: WindowID(1), to: WindowID(2))])
+        expectEqual(rekeys, [.init(from: WindowID(1), to: WindowID(2))])
     }
 
     @Test("no tab group on either side → no merge")
@@ -75,7 +75,7 @@ struct TabReconcilerTests {
             vanished: [win(1, frame: frame)],
             appeared: [win(2, frame: nudged)]
         )
-        #expect(rekeys.count == 1)
+        expectEqual(rekeys.count, 1)
     }
 
     @Test("whole-group close: vanish with no appear → no re-key")
@@ -103,7 +103,7 @@ struct TabReconcilerTests {
             vanished: [win(1, frame: frame), win(3, frame: other)],
             appeared: [win(4, frame: other), win(2, frame: frame)]
         )
-        #expect(rekeys.count == 2)
+        expectEqual(rekeys.count, 2)
         #expect(
             rekeys.contains(
                 .init(
@@ -130,6 +130,6 @@ struct TabReconcilerTests {
             vanished: [win(5, frame: frame), win(1, frame: frame)],
             appeared: [win(9, frame: frame)]
         )
-        #expect(rekeys == [.init(from: WindowID(1), to: WindowID(9))])
+        expectEqual(rekeys, [.init(from: WindowID(1), to: WindowID(9))])
     }
 }

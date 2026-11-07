@@ -31,12 +31,12 @@ struct SocketTests {
             .reporting("version", watch: ["/settings/border/width"]),
             over: path
         )
-        #expect(response.changes?.profile == "asked")
+        expectEqual(response.changes?.profile, "asked")
         #expect(
             response.changes?.watched.map(\.id)
                 == ["/settings/border/width"]
         )
-        #expect(response.changes?.watched.first?.stored == true)
+        expectEqual(response.changes?.watched.first?.stored, true)
     }
 
     @Test("Client command reaches the server handler")
@@ -105,8 +105,8 @@ struct SocketTests {
                     "unknown": .array([.string("space_chnage")])
                 ])
         )
-        #expect(logs.count == 1)
-        #expect(logs.last?.contains("space_chnage") == true)
+        expectEqual(logs.count, 1)
+        expectEqual(logs.last?.contains("space_chnage"), true)
         // Every name unknown leaves an empty filter, which is
         // not the no-filter request and so streams nothing.
         #expect(
@@ -135,8 +135,8 @@ struct SocketTests {
                     ])
                 ])
         )
-        #expect(logs.count == 2)
-        #expect(logs.last?.contains("ignored") == true)
+        expectEqual(logs.count, 2)
+        expectEqual(logs.last?.contains("ignored"), true)
     }
 
     /// The log is capped and the wire list is not, deliberately
@@ -167,8 +167,8 @@ struct SocketTests {
                     "unknown": .array(names.map(JSONValue.string))
                 ])
         )
-        #expect(logs.last?.contains("nope5, …") == true)
-        #expect(logs.last?.contains("nope6") == false)
+        expectEqual(logs.last?.contains("nope5, …"), true)
+        expectEqual(logs.last?.contains("nope6"), false)
     }
 
     /// An empty filter is not the no-filter request: a subscribe
@@ -230,9 +230,9 @@ struct SocketTests {
         }.value
 
         #expect(run.0.data != nil)
-        #expect(run.1?.contains("\"status\"") == true)
-        #expect(run.1?.contains("space_change") == false)
-        #expect(run.2?.contains("\"space_change\"") == true)
+        expectEqual(run.1?.contains("\"status\""), true)
+        expectEqual(run.1?.contains("space_change"), false)
+        expectEqual(run.2?.contains("\"space_change\""), true)
     }
 
     @Test("A known subscribe event is silent and bare")

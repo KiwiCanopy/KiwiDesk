@@ -121,7 +121,7 @@ struct WindowServerWakeUpTests {
         #expect(box.listReads == 0, "read inline")
         #expect(box.destroyed.isEmpty, "reconciled inline")
         box.drain()
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
     }
 
     @Test("a destroy of an untracked window costs no read")
@@ -129,7 +129,7 @@ struct WindowServerWakeUpTests {
         let (loop, box) = makeLoop()
         loop.windowServerDestroyed(fresh)
         box.drain()
-        #expect(box.listReads == 0)
+        expectEqual(box.listReads, 0)
         #expect(!box.logs.contains { $0.hasPrefix("wake-up") })
     }
 
@@ -142,7 +142,7 @@ struct WindowServerWakeUpTests {
         loop.observers[pid] = FakeObserver()
         loop.windowServerDestroyed(id)
         box.drain()
-        #expect(box.listReads == 0)
+        expectEqual(box.listReads, 0)
     }
 
     @Test("a wake sweep re-reads an app showing an untracked window")
@@ -151,7 +151,7 @@ struct WindowServerWakeUpTests {
         loop.wakeSweep(census: [pid: [id, fresh]])
         #expect(box.listReads == 0, "read inline")
         box.drain()
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 
     @Test("a wake sweep that adopts nothing quiets nothing")
@@ -170,7 +170,7 @@ struct WindowServerWakeUpTests {
         loop.healQuiet[pid] = [fresh]
         loop.wakeSweep(census: [pid: [id, fresh]])
         box.drain()
-        #expect(box.listReads == 0)
+        expectEqual(box.listReads, 0)
     }
 
     /// Our own panels (rings, shelf) are on screen and untracked;
@@ -182,7 +182,7 @@ struct WindowServerWakeUpTests {
         loop.observers[own] = FakeObserver()
         loop.wakeSweep(census: [own: [fresh]])
         box.drain()
-        #expect(box.listReads == 0)
+        expectEqual(box.listReads, 0)
         #expect(!box.logs.contains { $0.hasPrefix("wake-up") })
     }
 
@@ -191,7 +191,7 @@ struct WindowServerWakeUpTests {
         let (loop, box) = makeLoop()
         loop.wakeSweep(census: [pid: [id]])
         box.drain()
-        #expect(box.listReads == 0)
+        expectEqual(box.listReads, 0)
     }
 
     @Test("the payload carries the window id at offset 8")
@@ -203,7 +203,7 @@ struct WindowServerWakeUpTests {
                 length: $0.count
             )
         }
-        #expect(read == WindowID(220_134))
+        expectEqual(read, WindowID(220_134))
         let short = bytes.withUnsafeMutableBytes {
             SkyLightWindowLifecycle.windowID(
                 in: $0.baseAddress,

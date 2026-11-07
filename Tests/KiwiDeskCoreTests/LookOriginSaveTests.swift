@@ -24,7 +24,7 @@ struct LookOriginSaveTests {
         try core.lookLibrary.save(authored())
         let response = core.execute("look.apply", args: [.string("Dusk")])
         #expect(response.isSuccess)
-        #expect(core.tiler.settings.lookOrigin?.author == "Anna")
+        expectEqual(core.tiler.settings.lookOrigin?.author, "Anna")
     }
 
     @Test("a save keeps the credit the origin still earns")
@@ -33,11 +33,11 @@ struct LookOriginSaveTests {
         var settings = TilingSettings()
         authored().pick(into: &settings)
         let saved = try core.saveLook(named: "Mine", from: settings)
-        #expect(saved.basedOn == LookCredit(name: "Dusk", author: "Anna"))
+        expectEqual(saved.basedOn, LookCredit(name: "Dusk", author: "Anna"))
         #expect(saved.author == nil)
         let stored = try core.lookLibrary.libraryLooks()
             .first { $0.name == "Mine" }
-        #expect(stored?.basedOn == saved.basedOn)
+        expectEqual(stored?.basedOn, saved.basedOn)
     }
 
     @Test("a save from settings with no origin credits no one")

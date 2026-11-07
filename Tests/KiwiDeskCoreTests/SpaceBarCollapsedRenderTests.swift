@@ -40,7 +40,7 @@ struct SpaceBarCollapsedRenderTests {
             glyphGap: 0,
             ends: view.ends
         )
-        #expect(view.frame.width == bare)
+        expectEqual(view.frame.width, bare)
         let disc = view.overflowBadge.frame
         #expect(!view.overflowBadge.isHidden)
         #expect(disc.maxX <= view.bounds.width)
@@ -115,7 +115,7 @@ struct SpaceBarCollapsedRenderTests {
         let overlay = try render(.count)
         let other = overlay.itemViews[1]
         #expect(!other.overflowBadge.isHidden)
-        #expect(other.overflowBadge.stringValue == "3")
+        expectEqual(other.overflowBadge.stringValue, "3")
         // The state badges go with the glyphs.
         #expect(other.stickyBadgeViews.isEmpty)
         #expect(other.floatingBadgeViews.isEmpty)
@@ -158,8 +158,8 @@ struct SpaceBarCollapsedRenderTests {
         let empty = try #require(
             overlay.itemViews[2].identifierLabel.textColor
         )
-        #expect(occupied == NSColor(kiwiHex: style.idleItemColor))
-        #expect(empty == NSColor(kiwiHex: style.emptyItemColor))
+        expectEqual(occupied, NSColor(kiwiHex: style.idleItemColor))
+        expectEqual(empty, NSColor(kiwiHex: style.emptyItemColor))
         #expect(empty != occupied)
     }
 }

@@ -89,9 +89,9 @@ struct KiwiVisionFloatLandingTests {
         let shown = core.vision.plates.values.filter(\.isShown).count
         #expect(shown > 0)
         core.windowServer.handle(.reorder, window: float)
-        #expect(plate.orders.count == platesBefore + shown)
-        #expect(plate.orders.last == 4242)
-        #expect(rings.map(\.orders).reduce(0, +) == ringsBefore + 1)
+        expectEqual(plate.orders.count, platesBefore + shown)
+        expectEqual(plate.orders.last, 4242)
+        expectEqual(rings.map(\.orders).reduce(0, +), ringsBefore + 1)
     }
 
     @Test("off, the plate hears no float")
@@ -121,8 +121,8 @@ struct KiwiVisionFloatLandingTests {
         let before = plate.orders.count
         let ringsBefore = rings.map(\.orders).reduce(0, +)
         core.visionWindowRestacked(float)
-        #expect(plate.orders.count == before)
-        #expect(rings.map(\.orders).reduce(0, +) == ringsBefore)
+        expectEqual(plate.orders.count, before)
+        expectEqual(rings.map(\.orders).reduce(0, +), ringsBefore)
         #expect(core.windowServer.requested(by: .vision).contains(float))
     }
 }

@@ -45,7 +45,7 @@ struct StateChangeRingTests {
         _ border: BorderManager
     ) throws -> AppKitBorderOverlay {
         let panel = try heldRingSpec(border)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
         border.holdStateChange(of: WindowID(1), target: rest)
         return panel
     }
@@ -82,12 +82,12 @@ struct StateChangeRingTests {
         let border = manager(clock)
         defer { border.clear() }
         let panel = try heldRing(border)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         report(border, rest)
         #expect(panel.panelAlpha == 0, "the spring has not ended")
         border.stateChangeSettled(WindowID(1))
         #expect(panel.panelAlpha == 0, "an early report is no arrival")
-        #expect(border.stateChange?.arrived == false)
+        expectEqual(border.stateChange?.arrived, false)
     }
 
     @Test("after the settle a report near the target reveals it")
@@ -100,7 +100,7 @@ struct StateChangeRingTests {
         report(border, away)
         #expect(panel.panelAlpha == 0, "a report off target")
         report(border, rest)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
         #expect(border.stateChange == nil)
     }
 
@@ -112,9 +112,9 @@ struct StateChangeRingTests {
         let panel = try heldRing(border)
         border.stateChangeSettled(WindowID(1))
         clock.advance(to: 100 + BorderManager.arrivalCap / 2)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         clock.advance(to: 100 + BorderManager.arrivalCap)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 
     @Test("an order while held does not show the ring")
@@ -124,7 +124,7 @@ struct StateChangeRingTests {
         defer { border.clear() }
         let panel = try heldRing(border)
         border.overlays[WindowID(1)]?.order(relativeTo: 1)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
     }
 
     @Test("a hold no spring end reaches lets go at the backstop")
@@ -136,7 +136,7 @@ struct StateChangeRingTests {
         clock.advance(to: 100 + BorderManager.arrivalCap)
         #expect(panel.panelAlpha == 0, "the spring may still run")
         clock.advance(to: 100 + BorderManager.stateChangeBackstop)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 
     /// The real door: a window our spring moves is held, and the
@@ -194,9 +194,9 @@ struct StateChangeRingTests {
         defer { border.clear() }
         border.holdStateChange(of: WindowID(1), target: rest)
         let panel = try heldRingSpec(border)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         border.stateChangeSettled(WindowID(1))
         report(border, rest)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 }

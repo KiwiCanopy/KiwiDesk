@@ -47,7 +47,7 @@ struct DesktopShortcutMarkTests {
         try core.guiConfigStore.save(config)
 
         core.topUpDesktopShortcuts(desktops: [1, 2, 3])
-        #expect(offered(core).desktop == 4)
+        expectEqual(offered(core).desktop, 4)
         core.topUpDesktopShortcuts(desktops: [1, 2, 3, 4])
         #expect(!desktopRows(core).contains(lua(4)))
     }
@@ -76,6 +76,6 @@ struct DesktopShortcutMarkTests {
         ])
         try core.profiles.write(profile)
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(desktopRows(core) == [lua(1)])
+        expectEqual(desktopRows(core), [lua(1)])
     }
 }

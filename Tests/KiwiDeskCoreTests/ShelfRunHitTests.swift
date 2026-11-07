@@ -62,7 +62,7 @@ struct ShelfRunHitTests {
             container: overlay.itemContainer,
             run: overlay.itemRun
         )
-        #expect(hit?.isDescendant(of: last) == true)
+        expectEqual(hit?.isDescendant(of: last), true)
     }
 
     @Test("The Space Bar's last entry takes a click and hover once scrolled")
@@ -100,6 +100,6 @@ struct ShelfRunHitTests {
             container: overlay.itemContainer,
             run: overlay.itemRun
         )
-        #expect(hit?.isDescendant(of: last) == true)
+        expectEqual(hit?.isDescendant(of: last), true)
     }
 }

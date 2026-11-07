@@ -47,7 +47,7 @@ struct ResizeRefusalTargetingTests {
         // FIRST split is side-by-side whatever the display's
         // shape, so the dwindle head spans the whole height and
         // the vertical ratio divides only what is beside it.
-        #expect(core.tiler.settings.bsp.strategy == .alternating)
+        expectEqual(core.tiler.settings.bsp.strategy, .alternating)
         return core
     }
 
@@ -149,7 +149,7 @@ struct ResizeRefusalTargetingTests {
         // degenerates into the one above and would pass for the
         // wrong reason.
         let seeded = core.tiler.sizeBound(for: WindowID(1))
-        #expect(seeded?.minHeight == 450)
+        expectEqual(seeded?.minHeight, 450)
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.execute("resize", args: [.string("y"), .number(-200)])
@@ -188,7 +188,7 @@ struct ResizeRefusalTargetingTests {
         // FIRST press. Gated on the clamp instead, this press
         // says nothing and the next few silently walk the ratio.
         core.execute("resize", args: [.string("y"), .number(-10)])
-        #expect(refusals == [.noAxisHere(WindowID(1), axis: "y")])
+        expectEqual(refusals, [.noAxisHere(WindowID(1), axis: "y")])
     }
 
     @Test("A space that divides neither axis names no axis")

@@ -75,14 +75,14 @@ struct BarGlyphClickTests {
         let core = seededCore()
         core.pickFromSpaceBar(pick())
         core.pickFromSpaceBar(pick())
-        #expect(core.activeSpace?.id == one)
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.activeSpace?.id, one)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     @Test("The focus counts only on the active Space")
     func focusGatedOnTheActiveSpace() {
         let core = seededCore()
-        #expect(core.barFocus(on: one) == WindowID(1))
+        expectEqual(core.barFocus(on: one), WindowID(1))
         #expect(core.barFocus(on: two) == nil)
         #expect(core.barFocus(on: nil) == WindowID(1), "an App Bar list")
     }
@@ -92,8 +92,8 @@ struct BarGlyphClickTests {
         let core = seededCore()
         core.pickFromSpaceBar(pick(.overflow, [5]))
         core.pickFromSpaceBar(pick(.overflow, [4, 5]))
-        #expect(core.activeSpace?.id == one)
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.activeSpace?.id, one)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     @Test("A list's peek checks the focused window's row, a label none")
@@ -111,7 +111,7 @@ struct BarGlyphClickTests {
         #expect(
             here.groups.flatMap(\.rows).map(\.focused) == [true, false, false]
         )
-        #expect(here.order == [2, 3, 4].map(WindowID.init))
+        expectEqual(here.order, [2, 3, 4].map(WindowID.init))
         let label = try #require(
             core.barPeekContent(.glyph([WindowID(2)]), on: two)
         )
@@ -128,6 +128,6 @@ struct BarGlyphClickTests {
         core.spaceBars.glyphActions.present = { menu, _ in shown = menu }
         core.pressSpaceBarGlyph(pick())
         let menu = try #require(shown)
-        #expect(menu.items.dropFirst().map(\.state) == [.on, .off, .off])
+        expectEqual(menu.items.dropFirst().map(\.state), [.on, .off, .off])
     }
 }

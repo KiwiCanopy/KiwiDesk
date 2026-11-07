@@ -152,7 +152,7 @@ struct RunDragEndTests {
     func stackLonePulls(leading: Bool) throws {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)
         press(core, "y", 300)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         try drop(core, w(2), vertical: true, leading: leading, by: 20)
@@ -166,14 +166,14 @@ struct RunDragEndTests {
         // Two 300-pt floors and a gap overflow the 600-pt zone, so w2
         // shows alone with w3 waiting.
         let (core, id) = makeSpace("stack", windows: 3, focus: 2, height: 620)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
         let slot = try frame(core, w(2))
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         try drop(core, w(2), vertical: true, leading: false, by: 20)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
         #expect(try frame(core, w(2)) == slot)
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
     }
 
     @Test("Stack: a zone of one with none waiting snaps back and cues nothing")
@@ -231,8 +231,8 @@ struct RunDragEndTests {
         core.borders.onResizeRefusal = { refusals.append($0) }
         try drop(core, w(2), vertical: true, leading: false, by: -60)
         #expect(try frame(core, w(2)) == slot)
-        #expect(hidden(core, id) == [w(3)])
-        #expect(core.state.workspaces[id]?.runSizes == before)
+        expectEqual(hidden(core, id), [w(3)])
+        expectEqual(core.state.workspaces[id]?.runSizes, before)
         #expect(refusals.isEmpty)
     }
 
@@ -270,7 +270,7 @@ struct RunDragEndTests {
         let vertical =
             core.tiler.settings.resolvedTrack(for: id).axis == .vertical
         press(core, vertical ? "y" : "x", 400)
-        #expect(hidden(core, id) == [w(3)])
+        expectEqual(hidden(core, id), [w(3)])
         try drop(core, w(2), vertical: vertical, leading: false, by: 20)
         #expect(hidden(core, id).isEmpty)
     }
@@ -298,6 +298,6 @@ struct RunDragEndTests {
         let slot = try frame(core, w(1))
         try drop(core, w(1), vertical: !vertical, leading: true, by: 60)
         #expect(try frame(core, w(1)) == slot)
-        #expect(core.state.workspaces[id]?.trackWeights.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.trackWeights.isEmpty, true)
     }
 }

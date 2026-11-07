@@ -52,7 +52,7 @@ extension SpaceBarGlyphCellTests {
             "the fixture fits the pad"
         )
         #expect(font.pointSize < view.identifierFont)
-        #expect(font.familyName == ladder.familyName)
+        expectEqual(font.familyName, ladder.familyName)
         let ink = BarTextGlyph.metrics("WW", font: font).ink
         #expect(ink.width <= Self.cell + slack + 0.01)
     }
@@ -109,7 +109,7 @@ extension SpaceBarGlyphCellTests {
         view.layout()
         let field = view.identifierLabel
         let font = try #require(field.font)
-        #expect(font.pointSize == view.identifierFont)
+        expectEqual(font.pointSize, view.identifierFont)
         let ink = BarTextGlyph.metrics("100", font: font).ink
         try #require(ink.width > Self.cell, "the fixture fits the cell")
         #expect(ink.width <= Self.cell + SpaceBarItemView.pad * 2)

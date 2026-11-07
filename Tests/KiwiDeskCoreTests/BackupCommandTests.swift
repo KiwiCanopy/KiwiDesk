@@ -48,7 +48,7 @@ struct BackupCommandTests {
             args: [.string(plain.path)]
         )
         #expect(reply.isSuccess)
-        #expect(field(reply, "init_lua") == .string("not_asked"))
+        expectEqual(field(reply, "init_lua"), .string("not_asked"))
         #expect(try core.readBackup(at: plain).initLua == nil)
 
         let carried = file(core)
@@ -60,7 +60,7 @@ struct BackupCommandTests {
             ]
         )
         #expect(flagged.isSuccess)
-        #expect(field(flagged, "init_lua") == .string("included"))
+        expectEqual(field(flagged, "init_lua"), .string("included"))
         #expect(
             try core.readBackup(at: carried).initLua == "print('mine')\n"
         )
@@ -104,7 +104,7 @@ struct BackupCommandTests {
             args: [.string(url.path)]
         )
         #expect(plain.isSuccess)
-        #expect(field(plain, "init_lua") == .string("left_alone"))
+        expectEqual(field(plain, "init_lua"), .string("left_alone"))
         #expect(
             try String(contentsOf: target.configURL, encoding: .utf8)
                 == "print('mine')\n"
@@ -114,12 +114,12 @@ struct BackupCommandTests {
             args: [.string(url.path), .string(KiwiCore.initLuaFlag)]
         )
         #expect(flagged.isSuccess)
-        #expect(field(flagged, "init_lua") == .string("replaced"))
+        expectEqual(field(flagged, "init_lua"), .string("replaced"))
         #expect(
             try String(contentsOf: target.configURL, encoding: .utf8)
                 == "print('theirs')\n"
         )
-        #expect(reloads == 2)
+        expectEqual(reloads, 2)
     }
 
     @Test("a refused restore leaves an open Settings draft alone")
@@ -132,7 +132,7 @@ struct BackupCommandTests {
             args: [.string(file(core).path)]
         )
         #expect(!reply.isSuccess)
-        #expect(reloads == 0)
+        expectEqual(reloads, 0)
     }
 
     @Test("an init.lua-only backup points the plain restore at the flag")
@@ -154,6 +154,6 @@ struct BackupCommandTests {
             args: [.string(url.path)]
         )
         #expect(!reply.isSuccess)
-        #expect(reply.error?.contains(KiwiCore.initLuaFlag) == true)
+        expectEqual(reply.error?.contains(KiwiCore.initLuaFlag), true)
     }
 }

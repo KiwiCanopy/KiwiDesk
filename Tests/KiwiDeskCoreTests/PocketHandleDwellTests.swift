@@ -51,7 +51,7 @@ struct PocketHandleDwellTests {
         #expect(peeked.peeking)
         #expect(!peeked.risen)
         // The handle's panel makes room for the peek.
-        #expect(depth(peeked) == depth(rest) + PocketHandleView.peekDepth)
+        expectEqual(depth(peeked), depth(rest) + PocketHandleView.peekDepth)
         let dwell = core.deferred.task(for: .pocketDwell)
         #expect(dwell != nil)
         await dwell?.value
@@ -62,7 +62,7 @@ struct PocketHandleDwellTests {
         let sunk = try #require(core.pocketPlate.specs[rest.display])
         #expect(!sunk.risen)
         #expect(!sunk.peeking)
-        #expect(depth(sunk) == depth(rest))
+        expectEqual(depth(sunk), depth(rest))
     }
 
     @Test("leaving before the dwell raises nothing")
@@ -75,7 +75,7 @@ struct PocketHandleDwellTests {
         core.pocketHovered(rest.display, false)
         await dwell?.value
         #expect(core.pocketPlate.dwelled.isEmpty)
-        #expect(core.pocketPlate.specs[rest.display]?.risen == false)
+        expectEqual(core.pocketPlate.specs[rest.display]?.risen, false)
     }
 
     @Test("a push rises at once, and one off the handle does nothing")
@@ -83,10 +83,10 @@ struct PocketHandleDwellTests {
         let core = try makeCore()
         let rest = try #require(spec(core))
         core.pocketPushed(rest.display)
-        #expect(core.pocketPlate.specs[rest.display]?.risen == false)
+        expectEqual(core.pocketPlate.specs[rest.display]?.risen, false)
         core.pocketHovered(rest.display, true)
         core.pocketPushed(rest.display)
-        #expect(core.pocketPlate.specs[rest.display]?.risen == true)
+        expectEqual(core.pocketPlate.specs[rest.display]?.risen, true)
     }
 
     @Test("a dwell ends with its hover, an order-out's included")
@@ -95,12 +95,12 @@ struct PocketHandleDwellTests {
         let rest = try #require(spec(core))
         core.pocketHovered(rest.display, true)
         await core.deferred.task(for: .pocketDwell)?.value
-        #expect(core.pocketPlate.dwelled == [rest.display])
+        expectEqual(core.pocketPlate.dwelled, [rest.display])
         // An ordered-out handle hears no exit; its hover goes alone.
         core.pocketPlate.hovered.remove(rest.display)
         #expect(core.pocketPlate.dwelled.isEmpty)
         core.updatePocketPlate(slots: [:])
-        #expect(core.pocketPlate.specs[rest.display]?.risen == false)
+        expectEqual(core.pocketPlate.specs[rest.display]?.risen, false)
     }
 
     @Test("a section's hover arms no dwell")
@@ -125,9 +125,9 @@ struct PocketHandleDwellTests {
             view.trackingAreas.contains { $0.options.contains(.mouseMoved) }
         )
         view.setHovered(true)
-        #expect(core.pocketPlate.specs[rest.display]?.peeking == true)
+        expectEqual(core.pocketPlate.specs[rest.display]?.peeking, true)
         view.onPush()
-        #expect(core.pocketPlate.specs[rest.display]?.risen == true)
+        expectEqual(core.pocketPlate.specs[rest.display]?.risen, true)
     }
 
     @Test("a peek taken back keeps its room until the kiwis are in")
@@ -145,13 +145,13 @@ struct PocketHandleDwellTests {
         let peeked = panel.frame
         core.pocketHovered(rest.display, false)
         let resting = try #require(core.pocketPlate.specs[rest.display])
-        #expect(panel.frame == peeked)
+        expectEqual(panel.frame, peeked)
         #expect(panel.frame.size != resting.frame.size)
-        #expect(landings.count == 1)
+        expectEqual(landings.count, 1)
         // Once the kiwis are in, the panel takes the resting frame.
         landings.forEach { $0() }
         // AppKit rounds the panel's origin; the depth is what moves.
-        #expect(panel.frame.size == resting.frame.size)
+        expectEqual(panel.frame.size, resting.frame.size)
     }
 
     @Test("a later show drops a held peek's landing")
@@ -170,7 +170,7 @@ struct PocketHandleDwellTests {
         let peeked = panel.frame
         // The first leave's landing finds a newer show and stands down.
         landings.forEach { $0() }
-        #expect(panel.frame == peeked)
+        expectEqual(panel.frame, peeked)
     }
 
     @Test("the peek is the stated depth, and none under Reduce Motion")

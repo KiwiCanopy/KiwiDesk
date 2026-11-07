@@ -12,7 +12,7 @@ import Testing
 struct GlyphGapTests {
     @Test("The default abuts the cells, as before the setting")
     func defaultAbuts() {
-        #expect(SpaceBarStyle().resolvedGlyphGap == 0)
+        expectEqual(SpaceBarStyle().resolvedGlyphGap, 0)
     }
 
     @Test(
@@ -25,7 +25,7 @@ struct GlyphGapTests {
             SpaceBarStyle.self,
             from: Data(json.utf8)
         )
-        #expect(style.glyphGap == CGFloat(drawn))
+        expectEqual(style.glyphGap, CGFloat(drawn))
     }
 
     @Test(
@@ -39,7 +39,7 @@ struct GlyphGapTests {
         ).get()
         var style = SpaceBarStyle()
         setting.apply(to: &style)
-        #expect(style.glyphGap == CGFloat(stored))
+        expectEqual(style.glyphGap, CGFloat(stored))
     }
 
     /// The parser already raises every number to 0, so this
@@ -48,16 +48,16 @@ struct GlyphGapTests {
     func applyFloors() {
         var style = SpaceBarStyle()
         SpaceBarCommandSetting.glyphGap(-4).apply(to: &style)
-        #expect(style.glyphGap == SpaceBarStyle.minGlyphGap)
+        expectEqual(style.glyphGap, SpaceBarStyle.minGlyphGap)
     }
 
     @Test("A reader floors whatever wrote the value")
     func readerFloors() {
         var style = SpaceBarStyle()
         style.glyphGap = -3
-        #expect(style.resolvedGlyphGap == 0)
+        expectEqual(style.resolvedGlyphGap, 0)
         style.glyphGap = 90
-        #expect(style.resolvedGlyphGap == 90)
+        expectEqual(style.resolvedGlyphGap, 90)
     }
 
     /// One gap between each pair of neighbouring slots — three
@@ -81,7 +81,7 @@ struct GlyphGapTests {
         )
         // Three glyphs and the badge: four slots, three gaps.
         let gaps: CGFloat = 3 * 5
-        #expect(spaced - flush == gaps)
+        expectEqual(spaced - flush, gaps)
         #expect(
             SpaceBarItemView.autoLength(
                 appCount: 1,
@@ -178,7 +178,7 @@ struct GlyphGapDrawingTests {
         let view = item()
         let pitch = view.cellLength + Self.gap
         let mids = view.appViews.map(\.frame.midX)
-        #expect(mids.count == 3)
+        expectEqual(mids.count, 3)
         for (a, b) in zip(mids, mids.dropFirst()) {
             #expect(abs(b - a - pitch) < 0.5)
         }
@@ -345,6 +345,6 @@ struct GlyphGapPlanTests {
     @Test("The planned length grows by the items' gaps")
     func planCountsGaps() {
         let gaps: CGFloat = 2 * 2 * 5
-        #expect(spaceSegment(gap: 5) - spaceSegment(gap: 0) == gaps)
+        expectEqual(spaceSegment(gap: 5) - spaceSegment(gap: 0), gaps)
     }
 }

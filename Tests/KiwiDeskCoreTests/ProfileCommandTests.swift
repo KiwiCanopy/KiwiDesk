@@ -105,10 +105,10 @@ struct ProfileCommandTests {
             args: [.string("desk")]
         )
         let updated = try core.profiles.read(name: "desk")
-        #expect(updated.settings.gapsGlobal == .uniform(4))
-        #expect(updated.monitorSets.count == 1)
+        expectEqual(updated.settings.gapsGlobal, .uniform(4))
+        expectEqual(updated.monitorSets.count, 1)
         // Still one profile, still the count's default.
-        #expect(core.profiles.list() == ["desk"])
+        expectEqual(core.profiles.list(), ["desk"])
         #expect(updated.isDefault)
     }
 
@@ -128,7 +128,7 @@ struct ProfileCommandTests {
             args: [.string("laptop")]
         )
         let profile = try core.profiles.read(name: "laptop")
-        #expect(profile.monitorSets.count == 2)
+        expectEqual(profile.monitorSets.count, 2)
     }
 
     @Test("Updating with a different screen count fails")
@@ -189,7 +189,7 @@ struct ProfileCommandTests {
             "load_profile",
             args: [.string("desk")]
         )
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
         #expect(core.profiles.isDirty)
     }
 
@@ -254,7 +254,7 @@ struct ProfileCommandTests {
         #expect(
             core.tiler.settings.gapsGlobal == .uniform(30)
         )
-        #expect(core.profiles.currentName == "desk")
+        expectEqual(core.profiles.currentName, "desk")
     }
 
     @Test("get_profile_status reports name, standard, dirty")

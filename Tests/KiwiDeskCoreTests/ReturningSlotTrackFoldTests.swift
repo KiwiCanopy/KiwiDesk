@@ -31,8 +31,8 @@ private func makeTrackRow() -> StateCoordinator {
     for id in [d, c, b, a] {
         state.apply(.windowCreated(makeWindow(id)))
     }
-    #expect(state.workspaces[home]?.windows == [a, b, c, d])
-    #expect(state.workspaces[home]?.trackBreaks == [a, b, c, d])
+    expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+    expectEqual(state.workspaces[home]?.trackBreaks, [a, b, c, d])
     return state
 }
 
@@ -52,7 +52,7 @@ struct ReturningSlotTrackFoldTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a, c] }
         depart(&state, [a])
-        #expect(state.workspaces[home]?.trackBreaks == [b, c])
+        expectEqual(state.workspaces[home]?.trackBreaks, [b, c])
         depart(&state, [b, c, d])
         #expect(
             state.departedSlots == [
@@ -71,12 +71,12 @@ struct ReturningSlotTrackFoldTests {
     func scrambledReturnRebuildsTheColumns() {
         var state = makeTrackRow()
         depart(&state, [a, b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [])
+        expectEqual(state.workspaces[home]?.trackBreaks, [])
         for id in [d, b, c, a] {
             state.apply(.windowCreated(makeWindow(id)))
         }
-        #expect(state.workspaces[home]?.windows == [a, b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [a, b, c, d])
+        expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, b, c, d])
     }
 
     /// A partition with members: the heads take their breaks back
@@ -89,8 +89,8 @@ struct ReturningSlotTrackFoldTests {
         for id in [c, a, d, b] {
             state.apply(.windowCreated(makeWindow(id)))
         }
-        #expect(state.workspaces[home]?.windows == [a, b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [a, c])
+        expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, c])
     }
 
     /// `Space.remove` hands a departing head's break AND weight to
@@ -113,15 +113,15 @@ struct ReturningSlotTrackFoldTests {
             $0.trackWeights = [a: 1.5]
         }
         depart(&state, [a])
-        #expect(state.workspaces[home]?.trackBreaks == [stayer])
-        #expect(state.workspaces[home]?.handedBreaks == [stayer])
-        #expect(state.workspaces[home]?.trackWeights == [stayer: 1.5])
-        #expect(state.departedSlots[a]?.handedTo == stayer)
+        expectEqual(state.workspaces[home]?.trackBreaks, [stayer])
+        expectEqual(state.workspaces[home]?.handedBreaks, [stayer])
+        expectEqual(state.workspaces[home]?.trackWeights, [stayer: 1.5])
+        expectEqual(state.departedSlots[a]?.handedTo, stayer)
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.windows == [a, stayer])
-        #expect(state.workspaces[home]?.trackBreaks == [a])
-        #expect(state.workspaces[home]?.handedBreaks == [])
-        #expect(state.workspaces[home]?.trackWeights == [a: 1.5])
+        expectEqual(state.workspaces[home]?.windows, [a, stayer])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a])
+        expectEqual(state.workspaces[home]?.handedBreaks, [])
+        expectEqual(state.workspaces[home]?.trackWeights, [a: 1.5])
         // The link is spent.
         #expect(state.departedSlots[a]?.handedTo == nil)
     }
@@ -135,14 +135,14 @@ struct ReturningSlotTrackFoldTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a, b])
-        #expect(state.workspaces[home]?.trackBreaks == [])
+        expectEqual(state.workspaces[home]?.trackBreaks, [])
         #expect(state.departedSlots[b]?.handedTo == nil)
-        #expect(state.departedSlots[c]?.trackBreak == .member)
+        expectEqual(state.departedSlots[c]?.trackBreak, .member)
         state.apply(.windowCreated(makeWindow(b)))
-        #expect(state.workspaces[home]?.trackBreaks == [])
+        expectEqual(state.workspaces[home]?.trackBreaks, [])
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.windows == [a, b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [a])
+        expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a])
     }
 
     @Test("the head returning first takes the break back too")
@@ -151,10 +151,10 @@ struct ReturningSlotTrackFoldTests {
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a, b])
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.trackBreaks == [a])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a])
         state.apply(.windowCreated(makeWindow(b)))
-        #expect(state.workspaces[home]?.windows == [a, b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [a])
+        expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a])
     }
 
     /// A departing member whose successor already heads a track
@@ -165,11 +165,11 @@ struct ReturningSlotTrackFoldTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a, c] }
         depart(&state, [a, b])
-        #expect(state.workspaces[home]?.trackBreaks == [c])
-        #expect(state.departedSlots[c]?.trackBreak == .head)
-        #expect(state.departedSlots[a]?.handedTo == b)
+        expectEqual(state.workspaces[home]?.trackBreaks, [c])
+        expectEqual(state.departedSlots[c]?.trackBreak, .head)
+        expectEqual(state.departedSlots[a]?.handedTo, b)
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.trackBreaks == [a, c])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a, c])
     }
 
     /// A member that departed before its head and returned before
@@ -180,11 +180,11 @@ struct ReturningSlotTrackFoldTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [b, a])
-        #expect(state.workspaces[home]?.trackBreaks == [c])
+        expectEqual(state.workspaces[home]?.trackBreaks, [c])
         state.apply(.windowCreated(makeWindow(b)))
         state.apply(.windowCreated(makeWindow(a)))
-        #expect(state.workspaces[home]?.windows == [a, b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [a])
+        expectEqual(state.workspaces[home]?.windows, [a, b, c, d])
+        expectEqual(state.workspaces[home]?.trackBreaks, [a])
     }
 
     @Test("a re-key carries the provenance with the slot")
@@ -199,6 +199,6 @@ struct ReturningSlotTrackFoldTests {
         )
         // A link naming the old id follows it too.
         state.apply(.windowRekeyed(b, WindowID(8)))
-        #expect(state.departedSlots[a]?.handedTo == WindowID(8))
+        expectEqual(state.departedSlots[a]?.handedTo, WindowID(8))
     }
 }

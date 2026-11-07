@@ -64,7 +64,7 @@ struct SpaceBarOverlayFilterTests {
                 style: style
             ).first
         )
-        #expect(before.apps.map(\.name) == ["Chat", "Mail"])
+        expectEqual(before.apps.map(\.name), ["Chat", "Mail"])
         // The context menu and its submenu surface as AX windows
         // of the same app — members of the space, but never the
         // user's idea of "the app's windows".
@@ -80,10 +80,10 @@ struct SpaceBarOverlayFilterTests {
                 style: style
             ).first
         )
-        #expect(item.apps.map(\.name) == ["Chat", "Mail"])
+        expectEqual(item.apps.map(\.name), ["Chat", "Mail"])
         // Nor do they earn the floating badge they used to wear.
-        #expect(item.apps.map(\.floating) == [false, false])
-        #expect(item.after.windows.count == 0)
+        expectEqual(item.apps.map(\.floating), [false, false])
+        expectEqual(item.after.windows.count, 0)
     }
 
     @Test("An overlay neither splits a run nor eats a cap slot")
@@ -113,9 +113,9 @@ struct SpaceBarOverlayFilterTests {
             core.spaceBarItems(display: display, style: style)
                 .first
         )
-        #expect(item.apps.map(\.name) == ["Web", "Mail"])
-        #expect(item.apps.map(\.count) == [2, 1])
-        #expect(item.after.windows.count == 0)
+        expectEqual(item.apps.map(\.name), ["Web", "Mail"])
+        expectEqual(item.apps.map(\.count), [2, 1])
+        expectEqual(item.after.windows.count, 0)
     }
 
     @Test("The +n badge never counts an undrawn overlay")
@@ -136,10 +136,10 @@ struct SpaceBarOverlayFilterTests {
                 .first
         )
         // Span 1 at the row's start draws two (#1528 item 20).
-        #expect(item.apps.map(\.name) == ["Web", "Term"])
+        expectEqual(item.apps.map(\.name), ["Web", "Term"])
         // Mail and Pad are hidden: the overlay is not a window
         // the "+n" promises the user can reach.
-        #expect(item.after.windows == [WindowID(2), WindowID(5)])
+        expectEqual(item.after.windows, [WindowID(2), WindowID(5)])
     }
 
     /// The two sides of what the filter does to focus, ruled
@@ -159,7 +159,7 @@ struct SpaceBarOverlayFilterTests {
             core.spaceBarItems(display: display, style: style)
                 .first
         )
-        #expect(lit.apps.map(\.focused) == [true])
+        expectEqual(lit.apps.map(\.focused), [true])
         core.state.apply(
             .windowCreated(window(2, app: "Chat", overlay: true))
         )
@@ -170,11 +170,11 @@ struct SpaceBarOverlayFilterTests {
         )
         // Drawn, but no longer the focus: the tint stands down
         // rather than moving to a glyph the bar does not draw.
-        #expect(item.apps.map(\.name) == ["Chat"])
-        #expect(item.apps.map(\.focused) == [false])
+        expectEqual(item.apps.map(\.name), ["Chat"])
+        expectEqual(item.apps.map(\.focused), [false])
         // The segment still names the app the user is in.
         let front = core.frontApp(display: display, style: style)
-        #expect(front?.app.name == "Chat")
+        expectEqual(front?.app.name, "Chat")
     }
 
     @Test("A space holding only overlays reads as empty")
@@ -193,6 +193,6 @@ struct SpaceBarOverlayFilterTests {
             display: display,
             style: style
         ).map(\.space)
-        #expect(spaces == [SpaceID("1")])
+        expectEqual(spaces, [SpaceID("1")])
     }
 }

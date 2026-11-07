@@ -62,7 +62,7 @@ struct IdleItemContrastTests {
                 measured += 1
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 2)
+        expectEqual(measured, PaletteCatalog.bundled().count * 2)
     }
 
     /// Under Reduce transparency the plate is opaque
@@ -91,7 +91,7 @@ struct IdleItemContrastTests {
             #expect(idle >= Self.floor, name)
             measured += 1
         }
-        #expect(measured == PaletteCatalog.bundled().count)
+        expectEqual(measured, PaletteCatalog.bundled().count)
     }
 
     /// The idle ink is relative to the colour's own alpha, so a
@@ -108,12 +108,12 @@ struct IdleItemContrastTests {
         }
         var shelf = KiwiShelf()
         shelf.itemColor = "#EAF3EE"
-        #expect(shelf.idleItemColor == "#EAF3EE" + idle(255))
+        expectEqual(shelf.idleItemColor, "#EAF3EE" + idle(255))
         shelf.itemColor = "#eaf3ee80"
-        #expect(shelf.idleItemColor == "#EAF3EE" + idle(0x80))
+        expectEqual(shelf.idleItemColor, "#EAF3EE" + idle(0x80))
         #expect(idle(0x80) != idle(255))
         shelf.itemColor = "not a colour"
-        #expect(shelf.idleItemColor == "not a colour")
+        expectEqual(shelf.idleItemColor, "not a colour")
     }
 
     /// The consumer: an idle text identifier on the live bar is
@@ -160,6 +160,6 @@ struct IdleItemContrastTests {
         )
         let expected = NSColor(kiwiHex: idle.style.idleItemColor)
         let drawn = try #require(idle.identifierLabel.textColor)
-        #expect(drawn == expected)
+        expectEqual(drawn, expected)
     }
 }

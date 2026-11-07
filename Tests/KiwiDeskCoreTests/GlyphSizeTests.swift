@@ -15,9 +15,9 @@ struct GlyphSizeTests {
     @Test("Automatic sizes content at the full depth")
     func automaticFillsTheDepth() {
         let shelf = KiwiShelf()
-        #expect(shelf.glyphSize == 0)
+        expectEqual(shelf.glyphSize, 0)
         for depth: CGFloat in [20, 40, 80] {
-            #expect(shelf.contentDepth(forDepth: depth) == depth)
+            expectEqual(shelf.contentDepth(forDepth: depth), depth)
         }
     }
 
@@ -25,7 +25,7 @@ struct GlyphSizeTests {
     func sizeDrawsAsTyped() {
         var shelf = KiwiShelf()
         shelf.glyphSize = 28
-        #expect(shelf.contentDepth(forDepth: 40) == 28)
+        expectEqual(shelf.contentDepth(forDepth: 40), 28)
     }
 
     /// Content never goes thinner than the thinnest shelf draws
@@ -46,9 +46,9 @@ struct GlyphSizeTests {
     func sizePastTheThicknessWaits() {
         var shelf = KiwiShelf()
         shelf.glyphSize = 50
-        #expect(shelf.contentDepth(forDepth: 40) == 40)
-        #expect(shelf.glyphSize == 50)
-        #expect(shelf.contentDepth(forDepth: 60) == 50)
+        expectEqual(shelf.contentDepth(forDepth: 40), 40)
+        expectEqual(shelf.glyphSize, 50)
+        expectEqual(shelf.contentDepth(forDepth: 60), 50)
     }
 
     @Test("Content is never deeper than a strip below the floor")
@@ -56,7 +56,7 @@ struct GlyphSizeTests {
         var shelf = KiwiShelf()
         shelf.glyphSize = 28
         let depth = KiwiShelf.minContentDepth - 4
-        #expect(shelf.contentDepth(forDepth: depth) == depth)
+        expectEqual(shelf.contentDepth(forDepth: depth), depth)
     }
 
     /// A live bar hands the looks the STRIP depth; the ladders
@@ -68,7 +68,7 @@ struct GlyphSizeTests {
         space.glyphSize = 28
         var app = AppBarLook()
         app.glyphSize = 28
-        #expect(space.contentDepth(forDepth: 40) == 28)
+        expectEqual(space.contentDepth(forDepth: 40), 28)
         #expect(
             space.identifierFontSize(forDepth: 40)
                 == space.identifierFontSize(forContentDepth: 28)
@@ -95,7 +95,7 @@ struct GlyphSizeTests {
     func readerTreatsNegativeAsAutomatic() {
         var shelf = KiwiShelf()
         shelf.glyphSize = -10
-        #expect(shelf.contentDepth(forDepth: 40) == 40)
+        expectEqual(shelf.contentDepth(forDepth: 40), 40)
     }
 
     @Test(
@@ -108,7 +108,7 @@ struct GlyphSizeTests {
             KiwiShelf.self,
             from: Data(json.utf8)
         )
-        #expect(shelf.glyphSize == CGFloat(drawn))
+        expectEqual(shelf.glyphSize, CGFloat(drawn))
     }
 
     /// `item_padding` never shipped (#1713): a development file
@@ -119,7 +119,7 @@ struct GlyphSizeTests {
             KiwiShelf.self,
             from: Data(#"{"item_padding": 6}"#.utf8)
         )
-        #expect(shelf.glyphSize == 0)
+        expectEqual(shelf.glyphSize, 0)
     }
 
     /// Parse floors every length at 0 already, so the apply arm's
@@ -128,7 +128,7 @@ struct GlyphSizeTests {
     func applyFloors() {
         var shelf = KiwiShelf()
         KiwiShelfCommandSetting.glyphSize(-3).apply(to: &shelf)
-        #expect(shelf.glyphSize == 0)
+        expectEqual(shelf.glyphSize, 0)
     }
 
     @Test(
@@ -142,6 +142,6 @@ struct GlyphSizeTests {
         ).get()
         var shelf = KiwiShelf()
         setting.apply(to: &shelf)
-        #expect(shelf.glyphSize == CGFloat(stored))
+        expectEqual(shelf.glyphSize, CGFloat(stored))
     }
 }

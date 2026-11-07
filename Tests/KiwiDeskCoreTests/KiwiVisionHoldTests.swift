@@ -96,9 +96,9 @@ struct KiwiVisionHoldTests {
         let (core, plate) = F.core()
         #expect(core.vision.hold == nil)
         F.focus(core, F.stranger)
-        #expect(core.vision.hold?.window == F.stranger)
-        #expect(plate.ordersAbove.last == F.stranger.raw)
-        #expect(core.visionRequest().holding == F.stranger.raw)
+        expectEqual(core.vision.hold?.window, F.stranger)
+        expectEqual(plate.ordersAbove.last, F.stranger.raw)
+        expectEqual(core.visionRequest().holding, F.stranger.raw)
         #expect(core.deferred.isScheduled(.visionHold))
     }
 
@@ -108,7 +108,7 @@ struct KiwiVisionHoldTests {
         F.focus(core, F.stranger)
         F.focus(core, F.member)
         #expect(core.vision.hold == nil)
-        #expect(plate.orders.last == F.member.raw)
+        expectEqual(plate.orders.last, F.member.raw)
         #expect(!core.deferred.isScheduled(.visionHold))
     }
 
@@ -117,7 +117,7 @@ struct KiwiVisionHoldTests {
         let (core, _) = F.core()
         F.focus(core, F.stranger)
         F.focus(core, F.other)
-        #expect(core.vision.hold?.window == F.other)
+        expectEqual(core.vision.hold?.window, F.other)
     }
 
     @Test("the held window's reorder re-orders the plate above it")
@@ -130,8 +130,8 @@ struct KiwiVisionHoldTests {
         let shown = core.vision.plates.values.filter(\.isShown).count
         #expect(shown > 0)
         core.visionWindowRestacked(F.stranger)
-        #expect(plate.ordersAbove.count == above + shown)
-        #expect(plate.orders.count == below)
+        expectEqual(plate.ordersAbove.count, above + shown)
+        expectEqual(plate.orders.count, below)
     }
 
     @Test("a click on the held window clears it; elsewhere does not")
@@ -144,7 +144,7 @@ struct KiwiVisionHoldTests {
         core.lastLeftClick = (core.wallClock(), .zero, F.stranger)
         core.visionPressed()
         #expect(core.vision.hold == nil)
-        #expect(plate.orders.last == F.stranger.raw)
+        expectEqual(plate.orders.last, F.stranger.raw)
         #expect(!core.deferred.isScheduled(.visionHold))
     }
 
@@ -165,7 +165,7 @@ struct KiwiVisionHoldTests {
         #expect(deadline != nil)
         await deadline?.value
         #expect(core.vision.hold == nil)
-        #expect(plate.orders.last == F.stranger.raw)
+        expectEqual(plate.orders.last, F.stranger.raw)
     }
 
     @Test("turning the lens off ends the hold")
@@ -216,8 +216,8 @@ struct KiwiVisionHoldTests {
             core.state.windows[F.stranger]!.frame,
             primaryHeight: GeometryUtils.primaryHeight
         )
-        #expect(windows.first?.frame == held)
-        #expect(windows.first?.clear == false)
+        expectEqual(windows.first?.frame, held)
+        expectEqual(windows.first?.clear, false)
     }
 
     @Test("turning a lens on over a left-out window holds nothing")
@@ -244,6 +244,6 @@ struct KiwiVisionHoldTests {
             )
         )
         F.focus(core, late)
-        #expect(core.vision.hold?.window == late)
+        expectEqual(core.vision.hold?.window, late)
     }
 }

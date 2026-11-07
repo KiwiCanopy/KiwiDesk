@@ -115,7 +115,7 @@ struct DesktopRaiseGateHostTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.focusWindow(WindowID(1), warp: false)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         #expect(log.contains { $0.contains(Self.refusalNeedle) })
         #expect(log.contains { $0.contains(Self.gestureNeedle) })
     }

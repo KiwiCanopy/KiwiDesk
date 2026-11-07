@@ -87,7 +87,7 @@ struct ShelfBorderDrawingTests {
         let shelf = Border.bordered(Border.boxed(glass: glass))
         let space = spaceItem(shelf)
         Border.expectStroke(space.boxBorder, frame: space.bounds, "space")
-        #expect(space.boxBorder.layer?.cornerRadius == space.cornerRadius)
+        expectEqual(space.boxBorder.layer?.cornerRadius, space.cornerRadius)
         let app = appItem(shelf)
         Border.expectStroke(app.boxBorder, frame: app.bounds, "app")
         #expect(
@@ -162,10 +162,10 @@ struct ShelfBorderDrawingTests {
     func outlineHugsTheBox(glass: Bool) {
         let shelf = Border.bordered(Border.boxed(glass: glass))
         let space = spaceItem(shelf, indicator: .outline)
-        #expect(space.accent.frame == space.bounds)
-        #expect(space.accent.layer?.cornerRadius == space.cornerRadius)
+        expectEqual(space.accent.frame, space.bounds)
+        expectEqual(space.accent.layer?.cornerRadius, space.cornerRadius)
         let app = appItem(shelf, indicator: .outline)
-        #expect(app.accent.frame == app.bounds)
+        expectEqual(app.accent.frame, app.bounds)
         var plain = shelf
         plain.backgroundStyle = .plain
         let onPlate = spaceItem(plain, indicator: .outline)
@@ -195,7 +195,7 @@ struct ShelfBorderDrawingTests {
         )
         let marked = try frontOverlay(shelf, indicator: .edgeMark)
         #expect(!marked.frontBorder.isHidden)
-        #expect(marked.frontBorder.layer?.borderWidth == Border.width)
+        expectEqual(marked.frontBorder.layer?.borderWidth, Border.width)
     }
 
     // MARK: - The front-app chip

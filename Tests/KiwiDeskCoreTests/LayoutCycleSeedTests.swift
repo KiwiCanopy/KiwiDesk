@@ -23,11 +23,11 @@ struct LayoutCycleSeedTests {
     @Test("⌃⌥C runs Next layout in the base seed")
     func seedsNextLayout() {
         let row = DefaultKeybindings.nextLayoutRow()
-        #expect(row.combo == "control+option+c")
-        #expect(row.lua == "KiwiDesk.cycle_mode()")
-        #expect(row.kind == .navigation)
-        #expect(row.label == "Next layout")
-        #expect(seeded.filter { $0 == row }.count == 1)
+        expectEqual(row.combo, "control+option+c")
+        expectEqual(row.lua, "KiwiDesk.cycle_mode()")
+        expectEqual(row.kind, .navigation)
+        expectEqual(row.label, "Next layout")
+        expectEqual(seeded.filter { $0 == row }.count, 1)
     }
 
     /// `⇧` reverses its twin (#1655, widened by #453); the
@@ -35,9 +35,9 @@ struct LayoutCycleSeedTests {
     @Test("⌃⌥⇧C runs Previous layout in the base seed")
     func seedsPreviousLayout() {
         let row = DefaultKeybindings.previousLayoutRow()
-        #expect(row.combo == "control+option+shift+c")
-        #expect(row.lua == "KiwiDesk.cycle_mode(\"prev\")")
-        #expect(row.label == "Previous layout")
+        expectEqual(row.combo, "control+option+shift+c")
+        expectEqual(row.lua, "KiwiDesk.cycle_mode(\"prev\")")
+        expectEqual(row.label, "Previous layout")
         #expect(
             seeded.filter { $0.lua.contains("cycle_mode") } == [
                 DefaultKeybindings.nextLayoutRow(),
@@ -50,11 +50,11 @@ struct LayoutCycleSeedTests {
     @Test("⌃⌥L runs the layout picker in the base seed")
     func seedsLayoutPicker() {
         let row = DefaultKeybindings.layoutPickerRow()
-        #expect(row.combo == "control+option+l")
-        #expect(row.lua == "kiwihub.show(\"view\")")
-        #expect(row.kind == .navigation)
-        #expect(row.label == "Show view picker")
-        #expect(seeded.filter { $0 == row }.count == 1)
+        expectEqual(row.combo, "control+option+l")
+        expectEqual(row.lua, "kiwihub.show(\"view\")")
+        expectEqual(row.kind, .navigation)
+        expectEqual(row.label, "Show view picker")
+        expectEqual(seeded.filter { $0 == row }.count, 1)
     }
 
     /// A layout verb, not app chrome: a GUI-created layer

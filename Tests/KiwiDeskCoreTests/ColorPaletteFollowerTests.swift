@@ -36,7 +36,7 @@ struct ColorPaletteFollowerTests {
                 ColorPaletteKeys.resolved(follower, in: colors)
                     == draws(settings)
             )
-            #expect(draws(settings) == "#ABCDEF")
+            expectEqual(draws(settings), "#ABCDEF")
         }
     }
 

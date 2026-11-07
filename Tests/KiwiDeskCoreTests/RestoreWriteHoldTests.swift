@@ -118,10 +118,10 @@ struct RestoreWriteHoldTests {
     @Test("a replay under a moving mouse is owed, then written at rest")
     func movingMouseOwes() {
         let desk = held()
-        #expect(desk.sends(saved, to: window) == 0)
-        #expect(desk.gate.owedWrites[window] == [.restore])
+        expectEqual(desk.sends(saved, to: window), 0)
+        expectEqual(desk.gate.owedWrites[window], [.restore])
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 1)
+        expectEqual(desk.sends(saved, to: window), 1)
         #expect(desk.gate.owedWrites.isEmpty)
         #expect(desk.core.restoreDebt == nil)
     }
@@ -130,7 +130,7 @@ struct RestoreWriteHoldTests {
     func restingHandWrites() {
         let desk = Desk(window: window, start: start)
         desk.core.restore(desk.snapshot(window, at: saved))
-        #expect(desk.sends(saved, to: window) == 1)
+        expectEqual(desk.sends(saved, to: window), 1)
         #expect(desk.gate.owedWrites.isEmpty)
         #expect(desk.core.restoreDebt == nil)
     }
@@ -139,7 +139,7 @@ struct RestoreWriteHoldTests {
     func userPassPays() {
         let desk = held()
         desk.core.withUserMotion { desk.core.retile() }
-        #expect(desk.sends(saved, to: window) == 1)
+        expectEqual(desk.sends(saved, to: window), 1)
         #expect(desk.gate.owedWrites.isEmpty)
     }
 
@@ -150,8 +150,8 @@ struct RestoreWriteHoldTests {
         let newer = CGRect(x: 700, y: 100, width: 400, height: 300)
         desk.core.restore(desk.snapshot(window, at: newer))
         desk.rest()
-        #expect(desk.sends(newer, to: window) == 1)
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(newer, to: window), 1)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 
     /// A float's seed rides the held pass (#1864): its payment
@@ -159,10 +159,10 @@ struct RestoreWriteHoldTests {
     @Test("a held float is delivered once, by its seed")
     func heldFloatSendsOnce() {
         let desk = heldFloat()
-        #expect(desk.sends(saved, to: window) == 0)
-        #expect(desk.gate.owedWrites[window] == [.restore])
+        expectEqual(desk.sends(saved, to: window), 0)
+        expectEqual(desk.gate.owedWrites[window], [.restore])
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 1)
+        expectEqual(desk.sends(saved, to: window), 1)
     }
 
     /// A move that forgets the seed (#412) is not paid over.
@@ -172,7 +172,7 @@ struct RestoreWriteHoldTests {
         let moved = CGRect(x: 500, y: 300, width: 640, height: 480)
         desk.core.handle(.windowMoved(window, moved))
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 
     @Test("a tab switch while owed carries the debt to the new id")
@@ -180,9 +180,9 @@ struct RestoreWriteHoldTests {
         let desk = held()
         let tab = WindowID(7)
         desk.core.handle(.windowRekeyed(window, tab))
-        #expect(desk.gate.owedWrites[tab] == [.restore])
+        expectEqual(desk.gate.owedWrites[tab], [.restore])
         desk.rest()
-        #expect(desk.sends(saved, to: tab) == 1)
+        expectEqual(desk.sends(saved, to: tab), 1)
     }
 
     @Test("a newer replay without the window drops the owed write")
@@ -192,7 +192,7 @@ struct RestoreWriteHoldTests {
         desk.core.restore(desk.snapshot(other, at: saved))
         #expect(desk.gate.owedWrites[window] == nil)
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 
     /// What supersedes the replay voids what it owed: a new rest,
@@ -215,7 +215,7 @@ struct RestoreWriteHoldTests {
         #expect(desk.gate.owedWrites[window] == nil)
         #expect(desk.core.restoreDebt == nil)
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 
     /// The user's own act owns the frame: a drag from its first
@@ -245,7 +245,7 @@ struct RestoreWriteHoldTests {
         }
         #expect(desk.gate.owedWrites[window] == nil)
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 
     /// The frame is re-read at payment: a changed screen set
@@ -261,7 +261,7 @@ struct RestoreWriteHoldTests {
             )
         )
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
         #expect(desk.gate.owedWrites.isEmpty)
     }
 
@@ -280,7 +280,7 @@ struct RestoreWriteHoldTests {
         desk.core.state.workspaces.ensureSpace(SpaceID(2))
         desk.core.state.workspaces.add(window, to: SpaceID(2))
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 
     @Test("a window closed while owed is not written")
@@ -288,6 +288,6 @@ struct RestoreWriteHoldTests {
         let desk = held()
         desk.core.state.apply(.windowDestroyed(window, wasMinimized: false))
         desk.rest()
-        #expect(desk.sends(saved, to: window) == 0)
+        expectEqual(desk.sends(saved, to: window), 0)
     }
 }

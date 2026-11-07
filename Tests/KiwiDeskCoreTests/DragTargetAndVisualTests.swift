@@ -61,8 +61,8 @@ struct DragVisualCommandTests {
                 #expect(!reply.isSuccess, "\(verb)")
             }
         }
-        #expect(core.tiler.settings.dragGhost == .ghostDefault)
-        #expect(core.tiler.settings.dragDropZone == .dropZoneDefault)
+        expectEqual(core.tiler.settings.dragGhost, .ghostDefault)
+        expectEqual(core.tiler.settings.dragDropZone, .dropZoneDefault)
     }
 
     @Test("Bad arguments and unknown settings are rejected")
@@ -214,13 +214,13 @@ struct DragTargetTests {
             )
         }
         // Inside the top window's exposed strip.
-        #expect(target(centerY: 20) == WindowID(2))
+        expectEqual(target(centerY: 20), WindowID(2))
         // Two slots contain this point; the middle window's
         // strip is the visible one.
-        #expect(target(centerY: 60) == WindowID(3))
+        expectEqual(target(centerY: 60), WindowID(3))
         // All three contain this point; the last window is
         // raised on top of the whole cascade.
-        #expect(target(centerY: 90) == WindowID(4))
+        expectEqual(target(centerY: 90), WindowID(4))
     }
 
     @Test("Identical slots pick a deterministic target")

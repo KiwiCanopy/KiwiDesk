@@ -61,7 +61,7 @@ struct TemporarySpaceSettleTests {
             liveAtWrite = core.state.workspaces[SpaceID(2)] != nil
         }
         core.execute("delete_space", args: [.string("2"), .string("profile")])
-        #expect(liveAtWrite == false)
+        expectEqual(liveAtWrite, false)
     }
 
     @Test("an add writes the file with the Space already the profile's")
@@ -73,7 +73,7 @@ struct TemporarySpaceSettleTests {
             temporaryAtWrite = core.isTemporary(SpaceID(7))
         }
         #expect(core.addSpaceToProfile(SpaceID(7)))
-        #expect(temporaryAtWrite == false)
+        expectEqual(temporaryAtWrite, false)
     }
 
     @Test("a confirmed Delete re-checks that the Space is still empty")

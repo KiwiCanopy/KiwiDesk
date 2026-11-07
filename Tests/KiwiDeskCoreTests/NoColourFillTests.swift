@@ -20,10 +20,10 @@ struct NoColourFillTests {
         ]
     )
     func predicate(hex: String, has: Bool) {
-        #expect(KiwiShelf.hasColour(hex) == has)
+        expectEqual(KiwiShelf.hasColour(hex), has)
         var shelf = KiwiShelf()
         shelf.fillColor = hex
-        #expect(shelf.hasFill == has)
+        expectEqual(shelf.hasFill, has)
     }
 
     /// The solid path reads a Fill through `kiwiFill`, which is
@@ -33,8 +33,8 @@ struct NoColourFillTests {
         arguments: ["", "nope", "#FF000000"]
     )
     func solidFillIsClear(hex: String) {
-        #expect(NSColor(kiwiFill: hex).alphaComponent == 0)
-        #expect(NSColor(kiwiFill: "#FF0000").alphaComponent == 1)
+        expectEqual(NSColor(kiwiFill: hex).alphaComponent, 0)
+        expectEqual(NSColor(kiwiFill: "#FF0000").alphaComponent, 1)
     }
 
     @Test("Glass paints no colour for an unparseable Fill")
@@ -76,6 +76,6 @@ struct NoColourFillTests {
             shelves.overlayForTesting(barTitleDisplay)
         )
         let plate = try #require(overlay.solidPlate)
-        #expect(plate.layer?.backgroundColor?.alpha == 0)
+        expectEqual(plate.layer?.backgroundColor?.alpha, 0)
     }
 }

@@ -99,7 +99,7 @@ struct MonitorSetDormantTests {
         #expect(try core.profiles.read(name: "Work").isDefault)
         try core.persistProfile(named: "Home", modes: nil)
         #expect(try !core.profiles.read(name: "Work").isDefault)
-        #expect(core.profiles.defaultProfile(count: 1)?.name == "Home")
+        expectEqual(core.profiles.defaultProfile(count: 1)?.name, "Home")
     }
 
     @Test("A dormant profile re-claims a set on its next load")
@@ -109,7 +109,7 @@ struct MonitorSetDormantTests {
         try core.persistProfile(named: "Work", modes: nil)
         try core.persistProfile(named: "Home", modes: nil)
         let released = try core.loadProfile(named: "Work")
-        #expect(released == ["Home"])
+        expectEqual(released, ["Home"])
         #expect(try !core.profiles.read(name: "Work").isDormant)
         #expect(try core.profiles.read(name: "Home").isDormant)
     }
@@ -126,7 +126,7 @@ struct MonitorSetDormantTests {
         )
         let copy = try core.profiles.read(name: name)
         #expect(copy.isDormant)
-        #expect(copy.monitorCount == 1)
+        expectEqual(copy.monitorCount, 1)
         #expect(try !core.profiles.read(name: "Work").isDormant)
     }
 }

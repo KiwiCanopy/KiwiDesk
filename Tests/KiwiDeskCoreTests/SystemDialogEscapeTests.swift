@@ -88,7 +88,7 @@ struct SystemDialogEscapeTests {
             bundleID: "com.example.app",
             subrole: subrole()
         )
-        #expect(reads == 0)
+        expectEqual(reads, 0)
         #expect(
             FloatDetection.needsTitlebarButton(
                 layer: 8,
@@ -97,6 +97,6 @@ struct SystemDialogEscapeTests {
                 subrole: subrole()
             )
         )
-        #expect(reads == 1)
+        expectEqual(reads, 1)
     }
 }

@@ -58,10 +58,10 @@ struct PocketEmptyPlateTests {
         #expect(view.accessibilityPerformPress())
         #expect(core.shelves.peek.shown?.view === view)
         #expect(core.shelves.peek.panel.drawn?.empty != nil)
-        #expect(menus == 0)
+        expectEqual(menus, 0)
         // The empty state speaks, so its panel is reachable.
         let panel = core.shelves.peek.panel.panel
-        #expect(panel?.isAccessibilityElement() == true)
+        expectEqual(panel?.isAccessibilityElement(), true)
         // A hover peek the same panel shows next stays hidden.
         core.shelves.peek.dismiss()
         let area = CGRect(x: 0, y: 0, width: 1440, height: 900)
@@ -74,7 +74,7 @@ struct PocketEmptyPlateTests {
             visible: area,
             fades: false
         )
-        #expect(panel?.isAccessibilityElement() == false)
+        expectEqual(panel?.isAccessibilityElement(), false)
     }
 
     @Test(
@@ -90,7 +90,7 @@ struct PocketEmptyPlateTests {
         core.pocketPlate.onClick(view)
         #expect(core.shelves.peek.shown?.view === view)
         core.shelves.peek.panel.body.act(.landing(.pocketKeys))
-        #expect(landed == [.pocketKeys])
+        expectEqual(landed, [.pocketKeys])
         #expect(core.shelves.peek.shown == nil)
     }
 }

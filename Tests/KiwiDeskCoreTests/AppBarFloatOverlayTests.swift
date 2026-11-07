@@ -52,10 +52,10 @@ struct AppBarFloatOverlayTests {
         #expect(overlay.runContent.minX <= mark.frame.minX + 0.5)
         let m = try #require(overlay.lastMetrics)
         #expect(m.markLead > 0)
-        #expect(m.lengths[0] == m.slot + m.markLead)
-        #expect(m.lengths[1] == m.slot)
+        expectEqual(m.lengths[0], m.slot + m.markLead)
+        expectEqual(m.lengths[1], m.slot)
         // The first float's frame keeps the lead outside it.
-        #expect(overlay.itemViews[0].frame.width == m.slot)
+        expectEqual(overlay.itemViews[0].frame.width, m.slot)
         // A tiled row leading takes no lead.
         show(overlay, [item(3), item(4, floating: true)])
         #expect(try #require(overlay.lastMetrics).markLead == 0)
@@ -104,13 +104,13 @@ struct AppBarFloatOverlayTests {
                 == NSColor(kiwiHex: shelf.idleItemColor)
         )
         let halo = try #require(boxed.floatMark.layer)
-        #expect(halo.shadowOpacity == FloatBreakMark.haloAlpha)
+        expectEqual(halo.shadowOpacity, FloatBreakMark.haloAlpha)
         #expect(
             halo.shadowColor
                 == NSColor(kiwiHex: shelf.fillColor)
                 .withAlphaComponent(1).cgColor
         )
-        #expect((plain.floatMark.layer?.shadowOpacity ?? 0) == 0)
+        expectEqual((plain.floatMark.layer?.shadowOpacity ?? 0), 0)
     }
 
     /// A hairline symbol at idle ink vanished on a light plate
@@ -178,7 +178,7 @@ struct AppBarFloatOverlayTests {
         #expect(mark.frame.maxX < float.minX)
         // Every item keeps the one slot length; the mark widens
         // the run, not an item.
-        #expect(tiled.width == float.width)
+        expectEqual(tiled.width, float.width)
     }
 
     /// A tiled row alone draws neither; floats alone keep the mark
@@ -215,8 +215,8 @@ struct AppBarFloatOverlayTests {
         let first = overlay.itemViews[0]
         first.frame.origin.x = overlay.itemViews[2].frame.midX
         overlay.dragEnded(first)
-        #expect(moves.map(\.0) == [0])
-        #expect(moves.map(\.1) == [1])
+        expectEqual(moves.map(\.0), [0])
+        expectEqual(moves.map(\.1), [1])
     }
 
     @Test("The bar scrolls to a focused float past its end")
@@ -271,7 +271,7 @@ struct AppBarFloatOverlayTests {
             default: view.mouseUp(with: event)
             }
         }
-        #expect(selected == [WindowID(3)])
+        expectEqual(selected, [WindowID(3)])
     }
 
     /// English resolves `L()` to its inline text, so a swapped
@@ -291,8 +291,8 @@ struct AppBarFloatOverlayTests {
         )
         show(overlay, [item(1), item(3, floating: true), titled])
         let labels = overlay.itemViews.map { $0.accessibilityLabel() }
-        #expect(labels[1] == "App3, schwebendes Fenster")
-        #expect(labels[2] == "Notes, schwebendes Fenster Groceries")
+        expectEqual(labels[1], "App3, schwebendes Fenster")
+        expectEqual(labels[2], "Notes, schwebendes Fenster Groceries")
     }
 
     @Test("VoiceOver says the item floats")

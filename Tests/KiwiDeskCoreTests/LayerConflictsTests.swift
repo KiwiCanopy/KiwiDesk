@@ -60,9 +60,9 @@ struct LayerConflictsTests {
             of: layer,
             distinguishingSides: true
         )
-        #expect(all[layer[2].id]?.target == .otherBinding(layer[0]))
-        #expect(all[layer[0].id]?.target == .otherBinding(layer[1]))
-        #expect(all[layer[8].id]?.target == .unrecognized)
+        expectEqual(all[layer[2].id]?.target, .otherBinding(layer[0]))
+        expectEqual(all[layer[0].id]?.target, .otherBinding(layer[1]))
+        expectEqual(all[layer[8].id]?.target, .unrecognized)
         #expect(all[layer[9].id] == nil)
     }
 
@@ -96,7 +96,7 @@ struct LayerConflictsTests {
                 in: layers,
                 distinguishingSides: sides
             )
-            #expect(all == rowByRow(layers, sides: sides))
+            expectEqual(all, rowByRow(layers, sides: sides))
             #expect(all.count > 3)
         }
     }

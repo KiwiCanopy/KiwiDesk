@@ -82,7 +82,7 @@ struct AutoFloatSettingTests {
         #expect(text.contains(#""tile_rules":["com.valvesoftware.steam"]"#))
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
         #expect(!back.floatAutomatically)
-        #expect(back.tileRules == [Self.steam])
+        expectEqual(back.tileRules, [Self.steam])
     }
 
     @Test("a profile writes the keys only where it diverges")
@@ -99,7 +99,7 @@ struct AutoFloatSettingTests {
             )
         )
         let back = try JSONDecoder().decode(Profile.self, from: data)
-        #expect(back.floatAutomatically == false)
+        expectEqual(back.floatAutomatically, false)
         #expect(back.tileRules == RuleListOverride(rules: [Self.mail: true]))
     }
 
@@ -126,10 +126,10 @@ struct AutoFloatSettingTests {
             into: core
         )
         #expect(!guess(core).enabled)
-        #expect(guess(core).tileRules == [Self.mail])
+        expectEqual(guess(core).tileRules, [Self.mail])
         try load(profile("Home"), into: core)
         #expect(guess(core).enabled)
-        #expect(guess(core).tileRules == [Self.steam])
+        expectEqual(guess(core).tileRules, [Self.steam])
     }
 
     @Test("init.lua declares both, and a reload resets them")
@@ -141,7 +141,7 @@ struct AutoFloatSettingTests {
                 """
         )
         #expect(!guess(core).enabled)
-        #expect(guess(core).tileRules == [Self.steam])
+        expectEqual(guess(core).tileRules, [Self.steam])
         try "-- nothing".write(
             to: core.configURL,
             atomically: true,
@@ -161,7 +161,7 @@ struct AutoFloatSettingTests {
                 .isSuccess
         )
         #expect(!guess(core).enabled)
-        #expect(guess(core).tileRules == [Self.steam])
+        expectEqual(guess(core).tileRules, [Self.steam])
         #expect(
             !core.execute("set_float_automatically", args: [.string("x")])
                 .isSuccess
@@ -178,6 +178,6 @@ struct AutoFloatSettingTests {
         )
         let seed = core.guiConfigSeed()
         #expect(!seed.floatAutomatically)
-        #expect(seed.tileRules == [Self.steam])
+        expectEqual(seed.tileRules, [Self.steam])
     }
 }

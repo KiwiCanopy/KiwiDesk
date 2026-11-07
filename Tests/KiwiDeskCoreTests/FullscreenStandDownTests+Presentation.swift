@@ -245,14 +245,14 @@ extension FullscreenStandDownTests {
             in: NativeSpaces.desktopSnapshot(),
             loadedProfile: nil
         )
-        #expect(shown == 1)
+        expectEqual(shown, 1)
         core.frontStack = { [screen, editor].map { listed(frame: $0) } }
         owe()
         core.payDesktopCue(
             in: NativeSpaces.desktopSnapshot(),
             loadedProfile: nil
         )
-        #expect(shown == 1)
+        expectEqual(shown, 1)
         #expect(core.desktopCue.owed == nil)
     }
 }

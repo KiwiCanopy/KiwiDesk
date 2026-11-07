@@ -53,10 +53,10 @@ struct PocketListTests {
         let core = makeCore()
         markTwo(core)
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: two) == .pocketed)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: two), .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         core.execute("pocket")
-        #expect(core.state.pocketedWindows == [two, one])
+        expectEqual(core.state.pocketedWindows, [two, one])
     }
 
     @Test("a focus report on an out window makes it the one used last")
@@ -66,8 +66,8 @@ struct PocketListTests {
         core.handle(.windowFocused(one))
         core.state.apply(.windowFocused(three))
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
-        #expect(core.state.pocketPhase(of: two) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
+        expectEqual(core.state.pocketPhase(of: two), .out)
     }
 
     @Test("the focused out window goes back whatever the order")
@@ -76,8 +76,8 @@ struct PocketListTests {
         markTwo(core)
         core.state.apply(.windowFocused(one))
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
-        #expect(core.state.pocketPhase(of: two) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
+        expectEqual(core.state.pocketPhase(of: two), .out)
     }
 
     @Test("with every window in, the one put in last comes out")
@@ -86,10 +86,10 @@ struct PocketListTests {
         markTwo(core)
         core.execute("pocket")
         core.execute("pocket")
-        #expect(core.state.pocketTakeOutNext == one)
+        expectEqual(core.state.pocketTakeOutNext, one)
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.pocketPhase(of: two) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .out)
+        expectEqual(core.state.pocketPhase(of: two), .pocketed)
     }
 
     @Test("a window put back becomes the one put in last")
@@ -98,15 +98,15 @@ struct PocketListTests {
         markTwo(core)
         core.execute("pocket")
         core.execute("pocket")
-        #expect(core.state.pocketedWindows == [two, one])
+        expectEqual(core.state.pocketedWindows, [two, one])
         // Out by another door: `two`, put in first.
         #expect(core.takePocketOut(two))
         core.state.apply(.windowFocused(three))
         core.execute("pocket")
-        #expect(core.state.pocketedWindows == [one, two])
+        expectEqual(core.state.pocketedWindows, [one, two])
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: two) == .out)
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: two), .out)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
     }
 
     @Test("a press that clears a gone app's slot still acts")
@@ -118,8 +118,8 @@ struct PocketListTests {
         core.state.apply(.windowHidden(one))
         core.eventLoop.processIdentity.runs = { _ in false }
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [two])
-        #expect(core.state.pocketPhase(of: two) == .out)
+        expectEqual(core.state.pocket.map(\.window), [two])
+        expectEqual(core.state.pocketPhase(of: two), .out)
     }
 
     @Test("a second mark is still refused in One window")
@@ -129,7 +129,7 @@ struct PocketListTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [one])
+        expectEqual(core.state.pocket.map(\.window), [one])
     }
 
     @Test("Several windows takes a second mark, and One refuses again")
@@ -145,11 +145,11 @@ struct PocketListTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [one, two])
+        expectEqual(core.state.pocket.map(\.window), [one, two])
         core.execute("pocket.set_capacity", args: [.string("one")])
         core.state.apply(.windowFocused(three))
         #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [one, two])
+        expectEqual(core.state.pocket.map(\.window), [one, two])
     }
 
     @Test("a quit files every pocketed window into the active Space")
@@ -161,8 +161,8 @@ struct PocketListTests {
         core.releasePocketForQuit()
         #expect(core.state.pocket.isEmpty)
         let active = core.state.workspaces.activeSpace
-        #expect(core.state.workspaces.space(of: one) == active)
-        #expect(core.state.workspaces.space(of: two) == active)
+        expectEqual(core.state.workspaces.space(of: one), active)
+        expectEqual(core.state.workspaces.space(of: two), active)
     }
 
     @Test("minimizing one window empties its slot alone")
@@ -170,6 +170,6 @@ struct PocketListTests {
         let core = makeCore()
         markTwo(core)
         core.state.apply(.windowDestroyed(one, wasMinimized: true))
-        #expect(core.state.pocket.map(\.window) == [two])
+        expectEqual(core.state.pocket.map(\.window), [two])
     }
 }

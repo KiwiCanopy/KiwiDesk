@@ -50,7 +50,7 @@ struct ScrollingBlockedEdgeTests {
         // Far slots stop AT the border — no sliver past it.
         for id in [w4, w5] {
             let frame = try #require(frames[id])
-            #expect(frame.maxX == context.usable.maxX)
+            expectEqual(frame.maxX, context.usable.maxX)
         }
         // A partially visible slot whose body would cross the
         // wall clamps flush too: the excess becomes underlap
@@ -62,8 +62,8 @@ struct ScrollingBlockedEdgeTests {
         // The wall never resizes: position and z-order are the
         // whole mechanism.
         for frame in frames.values {
-            #expect(frame.width == 400)
-            #expect(frame.height == context.usable.height)
+            expectEqual(frame.width, 400)
+            expectEqual(frame.height, context.usable.height)
         }
         // The focused slot is untouched at the leading edge.
         #expect(
@@ -82,7 +82,7 @@ struct ScrollingBlockedEdgeTests {
         )
         for id in [w1, w2, w3] {
             let frame = try #require(frames[id])
-            #expect(frame.minX == context.usable.minX)
+            expectEqual(frame.minX, context.usable.minX)
         }
         // w4 (lead 200) crosses no edge and must not move.
         #expect(
@@ -108,7 +108,7 @@ struct ScrollingBlockedEdgeTests {
         )
         for id in [w1, w2] {
             let frame = try #require(frames[id])
-            #expect(frame.minX == context.usable.minX)
+            expectEqual(frame.minX, context.usable.minX)
         }
         #expect(
             try #require(frames[w5]).maxX == context.usable.maxX
@@ -173,9 +173,9 @@ struct ScrollingBlockedEdgeTests {
         )
         for id in [w1, w2, w3] {
             let frame = try #require(frames[id])
-            #expect(frame.minX == context.usable.minX)
-            #expect(frame.maxX == context.usable.maxX)
-            #expect(frame.width == context.usable.width)
+            expectEqual(frame.minX, context.usable.minX)
+            expectEqual(frame.maxX, context.usable.maxX)
+            expectEqual(frame.width, context.usable.width)
         }
     }
 

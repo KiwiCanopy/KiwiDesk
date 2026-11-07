@@ -91,7 +91,7 @@ struct FloatFlickHeldTests {
 
         core.handle(.windowMoved(Self.window, frame.offsetBy(dx: 0, dy: -20)))
 
-        #expect(core.drag.hasGesture(Self.window) == opens)
+        expectEqual(core.drag.hasGesture(Self.window), opens)
     }
 
     /// Every held move of the gesture answers the press, not only
@@ -155,6 +155,6 @@ struct FloatFlickHeldTests {
 
         core.handle(.windowMoved(Self.window, frame.offsetBy(dx: 0, dy: -20)))
 
-        #expect(core.drag.hasGesture(Self.window) == opens)
+        expectEqual(core.drag.hasGesture(Self.window), opens)
     }
 }

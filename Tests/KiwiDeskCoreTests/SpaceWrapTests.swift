@@ -74,15 +74,15 @@ struct SpaceWrapTests {
         core.borders.deadEndProbe = { _, _ in bumps += 1 }
         // 5 is the last on its screen: next goes to 1, never to 6.
         #expect(run(core, "focus_space_next"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
         #expect(run(core, "focus_space_previous"))
-        #expect(shown(core) == "5")
-        #expect(core.state.workspaces.activeSpace(on: Self.displayB) == "3")
+        expectEqual(shown(core), "5")
+        expectEqual(core.state.workspaces.activeSpace(on: Self.displayB), "3")
         // The other screen goes round its own two.
         core.execute("focus_space", args: [.string("6")])
         #expect(run(core, "focus_space_next"))
-        #expect(shown(core) == "3")
-        #expect(bumps == 0)
+        expectEqual(shown(core), "3")
+        expectEqual(bumps, 0)
     }
 
     @Test("the default wraps")
@@ -90,7 +90,7 @@ struct SpaceWrapTests {
         let core = makeCore(shown: "5")
         #expect(core.focusWrap.mode != .off)
         #expect(run(core, "focus_space_next"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
     }
 
     @Test("Off stops at the last Space with the bump")
@@ -100,8 +100,8 @@ struct SpaceWrapTests {
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
         #expect(!run(core, "focus_space_next"))
-        #expect(shown(core) == "5")
-        #expect(bumps == [.right])
+        expectEqual(shown(core), "5")
+        expectEqual(bumps, [.right])
     }
 
     @Test("a screen with one Space does not wrap onto itself")
@@ -111,8 +111,8 @@ struct SpaceWrapTests {
         var bumps = 0
         core.borders.deadEndProbe = { _, _ in bumps += 1 }
         #expect(!run(core, "focus_space_next"))
-        #expect(shown(core) == "6")
-        #expect(bumps == 1)
+        expectEqual(shown(core), "6")
+        expectEqual(bumps, 1)
     }
 
     /// The slide follows the key, never the order: last → first is a
@@ -124,13 +124,13 @@ struct SpaceWrapTests {
         let forward = try #require(
             core.spaceSlideIntent(to: SpaceID("1"), step: 1)
         )
-        #expect(forward.direction(to: SpaceID("1"), order: order) == 1)
+        expectEqual(forward.direction(to: SpaceID("1"), order: order), 1)
         let backward = try #require(
             core.spaceSlideIntent(to: SpaceID("1"), step: -1)
         )
-        #expect(backward.direction(to: SpaceID("1"), order: order) == -1)
+        expectEqual(backward.direction(to: SpaceID("1"), order: order), -1)
         // No step: the order decides, as a click on the bar does.
         let picked = try #require(core.spaceSlideIntent(to: SpaceID("1")))
-        #expect(picked.direction(to: SpaceID("1"), order: order) == -1)
+        expectEqual(picked.direction(to: SpaceID("1"), order: order), -1)
     }
 }

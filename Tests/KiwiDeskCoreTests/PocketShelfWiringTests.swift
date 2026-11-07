@@ -62,13 +62,13 @@ struct PocketShelfWiringTests {
             core.shelves.overlayForTesting(display, edge: .bottom)
         )
         let mount = try #require(overlay.pocket.mount)
-        #expect(mount.slot == slot)
+        expectEqual(mount.slot, slot)
         #expect(mount.view === core.pocketPlate.sectionMount(on: display))
         // The pocket's panel is the shelf's for the peek's look.
         let panel = try #require(overlay.pocket.panel)
         #expect(core.shelves.shelf(drawnIn: panel) != nil)
         // A level above the shelf and the drag's ghost (#2776).
-        #expect(panel.level == BarPanel.aboveLevel)
+        expectEqual(panel.level, BarPanel.aboveLevel)
     }
 
     @Test("under One window a drag stands the pocket inside the strip")
@@ -95,9 +95,9 @@ struct PocketShelfWiringTests {
             spec.frame,
             primaryHeight: GeometryUtils.primaryHeight
         )
-        #expect(drawn == inside)
+        expectEqual(drawn, inside)
         #expect(spec.outer == 0 && spec.slides)
-        #expect(core.pocketLanding(on: display) == inside)
+        expectEqual(core.pocketLanding(on: display), inside)
         #expect(core.pocketPlate.sectionMount(on: display) == nil)
         core.endPocketDrag()
         #expect(core.pocketPlate.specs[display] == nil)
@@ -129,7 +129,7 @@ struct PocketShelfWiringTests {
         let a = CGRect(x: 1400, y: 860, width: 40, height: 40)
         let b = CGRect(x: 2840, y: 860, width: 40, height: 40)
         core.updatePocketPlate(slots: [display: a, second: b])
-        #expect(Set(core.pocketPlate.specs.keys) == [display, second])
+        expectEqual(Set(core.pocketPlate.specs.keys), [display, second])
         #expect(core.pocketPlate.sectionMount(on: display) != nil)
         #expect(core.pocketPlate.sectionMount(on: second) != nil)
         #expect(
@@ -167,7 +167,7 @@ struct PocketShelfWiringTests {
         // The pointer leaves the handle for the list.
         core.pocketHovered(display, false)
         #expect(core.shelves.peek.shown?.view === view)
-        #expect(core.pocketPlate.specs[display]?.risen == true)
+        expectEqual(core.pocketPlate.specs[display]?.risen, true)
     }
 
     private func spec(

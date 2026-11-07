@@ -75,8 +75,8 @@ struct ProfileAppRulesApplyTests {
         )
         #expect(result.isSuccess)
 
-        #expect(core.state.appRules["mail"] == SpaceID(3))
-        #expect(core.state.appRules["safari"] == SpaceID(4))
+        expectEqual(core.state.appRules["mail"], SpaceID(3))
+        expectEqual(core.state.appRules["safari"], SpaceID(4))
         // Tombstone: the base pin is gone in this profile.
         #expect(core.state.appRules["music"] == nil)
     }
@@ -90,11 +90,11 @@ struct ProfileAppRulesApplyTests {
         try core.profiles.save(profile(named: "Plain"))
 
         _ = core.execute("load_profile", args: [.string("Work")])
-        #expect(core.state.appRules["mail"] == SpaceID(3))
+        expectEqual(core.state.appRules["mail"], SpaceID(3))
 
         _ = core.execute("load_profile", args: [.string("Plain")])
-        #expect(core.state.appRules["mail"] == SpaceID(1))
-        #expect(core.state.appRules["music"] == SpaceID(2))
+        expectEqual(core.state.appRules["mail"], SpaceID(1))
+        expectEqual(core.state.appRules["music"], SpaceID(2))
         #expect(core.state.appRules["safari"] == nil)
     }
 
@@ -111,7 +111,7 @@ struct ProfileAppRulesApplyTests {
         // the structured base apply must not clobber it.
         core.loadConfig()
 
-        #expect(core.state.appRules["mail"] == SpaceID(3))
+        expectEqual(core.state.appRules["mail"], SpaceID(3))
         #expect(core.state.appRules["music"] == nil)
     }
 
@@ -146,8 +146,8 @@ struct ProfileAppRulesApplyTests {
 
         _ = core.execute("load_profile", args: [.string("Work")])
 
-        #expect(core.state.appRules["mail"] == SpaceID(3))
-        #expect(core.state.appRules["safari"] == SpaceID(4))
+        expectEqual(core.state.appRules["mail"], SpaceID(3))
+        expectEqual(core.state.appRules["safari"], SpaceID(4))
     }
 
     @Test("GUI base tombstone matches bundle id case-insensitively")
@@ -161,7 +161,7 @@ struct ProfileAppRulesApplyTests {
         _ = core.execute("load_profile", args: [.string("Work")])
 
         #expect(core.state.appRules["mail"] == nil)
-        #expect(core.state.appRules["music"] == SpaceID(2))
+        expectEqual(core.state.appRules["music"], SpaceID(2))
     }
 
     @Test("Lua base tombstone matches bundle id case-insensitively")

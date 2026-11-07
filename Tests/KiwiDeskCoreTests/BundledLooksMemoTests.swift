@@ -34,7 +34,7 @@ struct BundledLooksMemoTests {
         let (core, _) = core(on: Self.desktop)
         #expect(!core.bundledLooks.isEmpty)
         _ = core.bundledLooks
-        #expect(core.bundledLooksMemo.builds == 1)
+        expectEqual(core.bundledLooksMemo.builds, 1)
     }
 
     @Test("new screens build again, for those screens")
@@ -46,9 +46,9 @@ struct BundledLooksMemoTests {
             core.bundledLooks
                 == LookCatalog.bundled(sizes: core.starterSizes())
         )
-        #expect(core.bundledLooksMemo.builds == 2)
+        expectEqual(core.bundledLooksMemo.builds, 2)
         _ = core.bundledLooks
-        #expect(core.bundledLooksMemo.builds == 2)
+        expectEqual(core.bundledLooksMemo.builds, 2)
     }
 
     @Test("the memo answers what the build answered, per sizes")
@@ -62,12 +62,12 @@ struct BundledLooksMemoTests {
             for: [Self.laptop, Self.desktop],
             build: build
         )
-        #expect(one.map(\.name) == ["1"])
-        #expect(two.map(\.name) == ["2"])
-        #expect(memo.builds == 2)
+        expectEqual(one.map(\.name), ["1"])
+        expectEqual(two.map(\.name), ["2"])
+        expectEqual(memo.builds, 2)
         // The main screen comes first, and it decides the compact
         // shelf (#1952), so an order is a key of its own.
         _ = memo.looks(for: [Self.desktop, Self.laptop], build: build)
-        #expect(memo.builds == 3)
+        expectEqual(memo.builds, 3)
     }
 }

@@ -89,9 +89,9 @@ struct TrackOverflowStyleTests {
         let overflowX = shown.map { frames[$0]!.minX }.max()!
         let overflow = shown.filter { frames[$0]!.minX == overflowX }
         // Two shown in their own slots; the five hidden parked.
-        #expect(overflow.count == 2)
-        #expect(hidden.count == 5)
-        #expect(Set(overflow.map { frames[$0]!.minY }).count == 2)
+        expectEqual(overflow.count, 2)
+        expectEqual(hidden.count, 5)
+        expectEqual(Set(overflow.map { frames[$0]!.minY }).count, 2)
         #expect(hidden.contains(w[7]))
     }
 
@@ -109,9 +109,9 @@ struct TrackOverflowStyleTests {
         )
         let hidden = parked(frames, on: screen)
         let shown0 = w[0..<6].filter { !hidden.contains($0) }
-        #expect(shown0.count == 2)
-        #expect(Set(shown0.map { frames[$0]!.minY }).count == 2)
-        #expect(hidden == Set(w[2..<6]))
+        expectEqual(shown0.count, 2)
+        expectEqual(Set(shown0.map { frames[$0]!.minY }).count, 2)
+        expectEqual(hidden, Set(w[2..<6]))
     }
 
     @Test("A fixed limit shows N tracks, the last the overflow")
@@ -143,7 +143,7 @@ struct TrackOverflowStyleTests {
         let overflowX = xs.max()!
         let inOverflow = shown.filter { frames[$0]!.minX == overflowX }
         // Two fit in 880 pt; the third waits parked.
-        #expect(Set(inOverflow) == [w[2], w[3]])
-        #expect(hidden == [w[4]])
+        expectEqual(Set(inOverflow), [w[2], w[3]])
+        expectEqual(hidden, [w[4]])
     }
 }

@@ -69,7 +69,7 @@ struct ShelfAutoHideCoreTests {
             Issue.record("a Space Bar shelf draws Space dots")
             return
         }
-        #expect(dots.filter(\.current).count == 1)
+        expectEqual(dots.filter(\.current).count, 1)
         #expect(dots.contains { $0.current && $0.occupied })
         #expect(!spec.shown)
     }
@@ -93,7 +93,7 @@ struct ShelfAutoHideCoreTests {
         #expect(!core.spaceBars.shownStrips.isEmpty)
         // The reveal redraws the bars and runs no layout pass.
         let counts = meter.snapshot(reset: false).counts
-        #expect(counts.retiles + counts.passesHeld == 0)
+        expectEqual(counts.retiles + counts.passesHeld, 0)
         #expect(counts.barRenders > 0)
         let spec = try #require(
             core.shelves.handles.handleForTesting(
@@ -134,7 +134,7 @@ struct ShelfAutoHideCoreTests {
                 args: [.string("auto")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.visibility == .auto)
+        expectEqual(core.tiler.settings.spaceBarStyle.visibility, .auto)
         #expect(core.shelfReservations != shown)
         #expect(
             !core.execute(
@@ -148,7 +148,7 @@ struct ShelfAutoHideCoreTests {
                 args: [.string("hidden")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.visibility == .hidden)
+        expectEqual(core.tiler.settings.spaceBarStyle.visibility, .hidden)
     }
 
     @Test(
@@ -164,7 +164,7 @@ struct ShelfAutoHideCoreTests {
                 args: [.number(90)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.revealTimeout == 60)
+        expectEqual(core.tiler.settings.kiwishelf.revealTimeout, 60)
         #expect(
             !core.execute(
                 "monocle.set_app_bar_visibility",
@@ -190,7 +190,7 @@ struct ShelfAutoHideCoreTests {
             core.execute("kiwishelf.set_glyph_size", args: [.number(12)])
                 .isSuccess
         )
-        #expect(passes() == 0)
+        expectEqual(passes(), 0)
         let depth = core.tiler.settings.kiwishelf.thickness
         #expect(
             core.execute(

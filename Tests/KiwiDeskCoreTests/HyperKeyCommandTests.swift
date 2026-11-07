@@ -58,13 +58,13 @@ struct HyperKeyCommandTests {
         let reply = core.execute("set_hyper_key", args: [.string("caps_lock")])
         #expect(reply.isSuccess)
         #expect(core.keys.hyperEnabled)
-        #expect(core.keys.hyperStatus == .on)
-        #expect(fake.written == HyperKeyRemap.pair(for: .capsLock))
+        expectEqual(core.keys.hyperStatus, .on)
+        expectEqual(fake.written, HyperKeyRemap.pair(for: .capsLock))
         core.retireHyperKey()
         #expect(!core.keys.hyperEnabled)
         #expect(fake.mapping.isEmpty)
         #expect(fake.written == nil)
-        #expect(core.appWide.hyperKey == .capsLock)
+        expectEqual(core.appWide.hyperKey, .capsLock)
     }
 
     @Test("a mapping KiwiDesk did not write is refused")
@@ -86,11 +86,11 @@ struct HyperKeyCommandTests {
                     )
                 )
         )
-        #expect(reply.error?.contains("(caps_lock -> f18)") == true)
+        expectEqual(reply.error?.contains("(caps_lock -> f18)"), true)
         // Off takes the no-spawn return and still clears the
         // status the row reads.
         _ = core.execute("set_hyper_key", args: [.string("off")])
-        #expect(core.keys.hyperStatus == .off)
+        expectEqual(core.keys.hyperStatus, .off)
         core.retireHyperKey()
         #expect(!fake.mapping.isEmpty)  // never cleared
     }
@@ -106,7 +106,7 @@ struct HyperKeyCommandTests {
         core.hyperRemapHost = fake.host
         let reply = core.execute("set_hyper_key", args: [.string("f13")])
         #expect(core.keys.hyperStatus == .refused(nil))
-        #expect(reply.error?.contains("(") == false)
+        expectEqual(reply.error?.contains("("), false)
         // Two entries name no one mapping, even when both are keys.
         fake.mapping = [
             HyperKeyRemap.pair(for: .capsLock),
@@ -119,12 +119,12 @@ struct HyperKeyCommandTests {
     @Test("a HID usage names a key on the keyboard page alone")
     func usageNamesKey() {
         let usage = HyperKeyRemap.usage(0x39)
-        #expect(HyperKeyRemap.key(atUsage: usage) == .capsLock)
+        expectEqual(HyperKeyRemap.key(atUsage: usage), .capsLock)
         #expect(HyperKeyRemap.key(atUsage: usage & 0xFF) == nil)
         #expect(HyperKeyRemap.key(atUsage: 0xFF_0000_0039) == nil)
         for key in HyperSourceKey.allCases {
             let full = HyperKeyRemap.usage(key.hidUsage)
-            #expect(HyperKeyRemap.key(atUsage: full) == key)
+            expectEqual(HyperKeyRemap.key(atUsage: full), key)
         }
     }
 
@@ -140,8 +140,8 @@ struct HyperKeyCommandTests {
         #expect(fake.mapping.isEmpty)
         let bad = core.execute("set_hyper_key", args: [.string("a")])
         #expect(!bad.isSuccess)
-        #expect(bad.error?.contains("caps_lock") == true)
-        #expect(bad.error?.contains("off") == true)
+        expectEqual(bad.error?.contains("caps_lock"), true)
+        expectEqual(bad.error?.contains("off"), true)
     }
 
     @Test("a silent hidutil leaves Hyper off")
@@ -176,8 +176,8 @@ struct HyperKeyCommandTests {
         let fake = FakeHost()
         core.hyperRemapHost = fake.host
         core.applyHyperKey()
-        #expect(fake.runs == 0)
-        #expect(core.keys.hyperStatus == .off)
+        expectEqual(fake.runs, 0)
+        expectEqual(core.keys.hyperStatus, .off)
     }
 
     @Test("off with another tool's mapping in place is still off")
@@ -189,7 +189,7 @@ struct HyperKeyCommandTests {
         core.hyperRemapHost = fake.host
         let off = core.execute("set_hyper_key", args: [.string("off")])
         #expect(off.isSuccess)
-        #expect(core.keys.hyperStatus == .off)
+        expectEqual(core.keys.hyperStatus, .off)
         #expect(!fake.mapping.isEmpty)  // never touched
     }
 
@@ -211,10 +211,10 @@ struct HyperKeyCommandTests {
         core.hyperRemapHost = FakeHost().host
         core.setAppWide(persisting: true) { $0.hyperKey = .f13 }
         _ = core.execute("set_hyper_key", args: [.string("f14")])
-        #expect(core.appWide.hyperKey == .f14)
+        expectEqual(core.appWide.hyperKey, .f14)
         let config = try #require(core.guiConfigStore.load())
         try core.guiConfigStore.save(config)
-        #expect(core.guiConfigStore.load()?.appWide?.hyperKey == .f13)
+        expectEqual(core.guiConfigStore.load()?.appWide?.hyperKey, .f13)
     }
 
     @Test("a changed value remaps once, after it settles")
@@ -242,7 +242,7 @@ struct HyperKeyCommandTests {
         core.hyperRemapHost = fake.host
         core.setAppWide(persisting: false) { $0.hyperKey = .capsLock }
         #expect(core.deferred.task(for: .hyperRemap) == nil)
-        #expect(fake.runs == 0)
+        expectEqual(fake.runs, 0)
         core.applyHyperKey()  // what start() calls
         #expect(core.keys.hyperEnabled)
     }

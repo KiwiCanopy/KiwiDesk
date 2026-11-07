@@ -52,7 +52,7 @@ struct AutoFloatLiveTests {
             app: app,
             reading: fixedSizeReading()
         )
-        #expect(loop.detectedFloating[Self.id] == .tiles)
+        expectEqual(loop.detectedFloating[Self.id], .tiles)
         #expect(box.floats.isEmpty)
         let off = FloatGuess(enabled: false)
         loop.floatRules = FloatRules([], guess: FloatGuess())
@@ -64,8 +64,8 @@ struct AutoFloatLiveTests {
             app: app,
             reading: fixedSizeReading()
         )
-        #expect(loop.detectedFloating[Self.id] == .floats(.fixedSize))
-        #expect(box.floats == [true])
+        expectEqual(loop.detectedFloating[Self.id], .floats(.fixedSize))
+        expectEqual(box.floats, [true])
     }
 
     @Test("an unchanged guess forgets nothing")
@@ -76,7 +76,7 @@ struct AutoFloatLiveTests {
         ]
         loop.detectedFloating[Self.id] = .tiles
         loop.rejudgeGuesses(from: loop.floatRules.guess)
-        #expect(loop.detectedFloating[Self.id] == .tiles)
+        expectEqual(loop.detectedFloating[Self.id], .tiles)
     }
 
     /// A Dock-less app's window is an overlay — no ring, no bar row
@@ -136,11 +136,11 @@ struct AutoFloatLiveTests {
             guess: FloatGuess(tileRules: ["com.valvesoftware.steam"])
         )
         loop.recheckFloat(id: Self.id, pid: Self.pid, app: app, reading: tiled)
-        #expect(box.log == ["float false", "overlay false"])
+        expectEqual(box.log, ["float false", "overlay false"])
         box.log = []
         loop.floatRules = FloatRules([], guess: FloatGuess())
         loop.recheckFloat(id: Self.id, pid: Self.pid, app: app, reading: tiled)
-        #expect(box.log == ["float true", "overlay true"])
+        expectEqual(box.log, ["float true", "overlay true"])
     }
 
     /// The event lands in state, and the retile it earns redraws
@@ -160,9 +160,9 @@ struct AutoFloatLiveTests {
             )
         )
         state.apply(.windowOverlayChanged(Self.id, isOverlay: false))
-        #expect(state.windows[Self.id]?.isTransientOverlay == false)
+        expectEqual(state.windows[Self.id]?.isTransientOverlay, false)
         state.apply(.windowOverlayChanged(Self.id, isOverlay: true))
-        #expect(state.windows[Self.id]?.isTransientOverlay == true)
+        expectEqual(state.windows[Self.id]?.isTransientOverlay, true)
         #expect(
             TilingEngine.shouldRetile(
                 after: .windowOverlayChanged(Self.id, isOverlay: true)
@@ -194,7 +194,7 @@ struct AutoFloatLiveTests {
                 traits: nil
             )
         )
-        #expect(loop.detectedFloating[Self.id] == .floats(.panel))
+        expectEqual(loop.detectedFloating[Self.id], .floats(.panel))
         #expect(box.log.isEmpty)
     }
 
@@ -208,7 +208,7 @@ struct AutoFloatLiveTests {
         ]
         core.eventLoop.detectedFloating[Self.id] = .tiles
         core.installFloatRules(FloatRules([], guess: FloatGuess()))
-        #expect(core.eventLoop.detectedFloating[Self.id] == .tiles)
+        expectEqual(core.eventLoop.detectedFloating[Self.id], .tiles)
         core.installFloatRules(
             FloatRules([], guess: FloatGuess(enabled: false))
         )
@@ -282,7 +282,7 @@ struct AutoFloatLiveTests {
             core.execute("set_float_automatically", args: [.bool(false)])
                 .isSuccess
         )
-        #expect(core.globalRuleBase.floatAutomatically == false)
+        expectEqual(core.globalRuleBase.floatAutomatically, false)
         #expect(core.eventLoop.floatRules.guess.enabled)
     }
 
@@ -313,7 +313,7 @@ struct AutoFloatLiveTests {
                 families.insert(label)
             }
         }
-        #expect(families == fieldNames(WindowRuleOverrides()))
+        expectEqual(families, fieldNames(WindowRuleOverrides()))
         let resolved = fieldValues(WindowRuleOverrides(profile))
         let stored = fieldValues(profile)
         for family in families {

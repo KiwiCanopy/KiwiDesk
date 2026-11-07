@@ -39,8 +39,8 @@ struct SwapWindowIDTests {
         for raw in [UInt32(900_003), 900_004] {
             file(core, raw, in: Self.two)
         }
-        #expect(core.state.workspaces.activeSpace == Self.one)
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(core.state.workspaces.activeSpace, Self.one)
+        expectEqual(core.focusedWindowID, WindowID(900_002))
         return core
     }
 
@@ -71,8 +71,8 @@ struct SwapWindowIDTests {
     func recordTakesAWindow() {
         let arguments =
             APIReference.entry(named: "swap")?.record.arguments ?? []
-        #expect(APIReference.windowArgumentIndex("swap") == 1)
-        #expect(arguments.last?.isOptional == true)
+        expectEqual(APIReference.windowArgumentIndex("swap"), 1)
+        expectEqual(arguments.last?.isOptional, true)
         let core = makeCore()
         // One id acts on the focus and keeps the #292 preflight;
         // a second names both windows and skips it.
@@ -99,8 +99,8 @@ struct SwapWindowIDTests {
         let core = makeCore()
         let response = core.execute("swap", args: [.number(900_001)])
         #expect(response.isSuccess)
-        #expect(row(core, Self.one) == [900_002, 900_001])
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(row(core, Self.one), [900_002, 900_001])
+        expectEqual(core.focusedWindowID, WindowID(900_002))
     }
 
     @Test("two ids swap two windows neither of which is focused")
@@ -111,37 +111,37 @@ struct SwapWindowIDTests {
             args: [.string("900003"), .string("900004")]
         )
         #expect(response.isSuccess)
-        #expect(row(core, Self.two) == [900_004, 900_003])
-        #expect(row(core, Self.one) == [900_001, 900_002])
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(row(core, Self.two), [900_004, 900_003])
+        expectEqual(row(core, Self.one), [900_001, 900_002])
+        expectEqual(core.focusedWindowID, WindowID(900_002))
     }
 
     @Test("a direction still swaps the focused window's neighbour")
     func directionIsUnchanged() {
         let core = makeCore()
         #expect(core.execute("swap", args: [.string("left")]).isSuccess)
-        #expect(row(core, Self.one) == [900_002, 900_001])
+        expectEqual(row(core, Self.one), [900_002, 900_001])
         let bad = core.execute("swap", args: [.string("sideways")])
-        #expect(bad.error == "expected left|right|up|down or a window id")
+        expectEqual(bad.error, "expected left|right|up|down or a window id")
     }
 
     @Test("an id no tracked window carries is refused, either place")
     func unknownRefused() {
         let core = makeCore()
         let first = core.execute("swap", args: [.number(99)])
-        #expect(first.error == "unknown window: 99")
+        expectEqual(first.error, "unknown window: 99")
         let second = core.execute(
             "swap",
             args: [.number(900_001), .number(98)]
         )
-        #expect(second.error == "unknown window: 98")
+        expectEqual(second.error, "unknown window: 98")
         let direction = core.execute(
             "swap",
             args: [.string("left"), .number(97)]
         )
-        #expect(direction.error == "unknown window: 97")
-        #expect(row(core, Self.one) == [900_001, 900_002])
-        #expect(row(core, Self.two) == [900_003, 900_004])
+        expectEqual(direction.error, "unknown window: 97")
+        expectEqual(row(core, Self.one), [900_001, 900_002])
+        expectEqual(row(core, Self.two), [900_003, 900_004])
     }
 
     @Test("a direction and an id swap that window with its neighbour")
@@ -152,9 +152,9 @@ struct SwapWindowIDTests {
             args: [.string("right"), .number(900_001)]
         )
         #expect(response.isSuccess)
-        #expect(row(core, Self.one) == [900_002, 900_001])
+        expectEqual(row(core, Self.one), [900_002, 900_001])
         // The named window moved; the focus did not.
-        #expect(core.focusedWindowID == WindowID(900_002))
+        expectEqual(core.focusedWindowID, WindowID(900_002))
         let away = core.execute(
             "swap",
             args: [.string("left"), .number(900_003)]
@@ -164,14 +164,14 @@ struct SwapWindowIDTests {
                 == "a directional swap takes only a window "
                 + "in the active Space"
         )
-        #expect(row(core, Self.two) == [900_003, 900_004])
+        expectEqual(row(core, Self.two), [900_003, 900_004])
     }
 
     @Test("a window is never swapped with itself")
     func selfRefused() {
         let core = makeCore()
         let response = core.execute("swap", args: [.number(900_002)])
-        #expect(response.error == "cannot swap a window with itself")
+        expectEqual(response.error, "cannot swap a window with itself")
     }
 
     /// A float has no slot to trade: refused on either side, the
@@ -181,15 +181,15 @@ struct SwapWindowIDTests {
         let core = makeCore()
         file(core, 900_005, in: Self.two, floating: true)
         let flagged = core.execute("swap", args: [.number(900_005)])
-        #expect(flagged.error == "floating window 900005 cannot be swapped")
+        expectEqual(flagged.error, "floating window 900005 cannot be swapped")
         core.state.workspaces.setMode(Self.two, .floating)
         let member = core.execute(
             "swap",
             args: [.number(900_001), .number(900_003)]
         )
-        #expect(member.error == "floating window 900003 cannot be swapped")
-        #expect(row(core, Self.one) == [900_001, 900_002])
-        #expect(row(core, Self.two) == [900_003, 900_004, 900_005])
+        expectEqual(member.error, "floating window 900003 cannot be swapped")
+        expectEqual(row(core, Self.one), [900_001, 900_002])
+        expectEqual(row(core, Self.two), [900_003, 900_004, 900_005])
     }
 
     @Test("a native full-screen window is refused")
@@ -201,6 +201,6 @@ struct SwapWindowIDTests {
             response.error
                 == "full-screen window 900006 cannot be swapped"
         )
-        #expect(row(core, Self.one) == [900_001, 900_002])
+        expectEqual(row(core, Self.one), [900_001, 900_002])
     }
 }

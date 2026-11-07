@@ -41,12 +41,12 @@ struct BackupExportRefusalTests {
                 )
             ]
         )
-        #expect(reply.error?.contains("newer") == true)
+        expectEqual(reply.error?.contains("newer"), true)
     }
 
     @Test("a broken gui.json stays unreadable")
     func brokenIsUnreadable() throws {
         let core = try core(gui: "not json")
-        #expect(core.settingsExportRefusal() == .unreadableSettings)
+        expectEqual(core.settingsExportRefusal(), .unreadableSettings)
     }
 }

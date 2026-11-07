@@ -103,7 +103,7 @@ struct ShelfFadeManagerTests {
         var left = 0
         overlay.onLeft = { left += 1 }
         overlay.hide(animated: true)
-        #expect(left == 1)
+        expectEqual(left, 1)
         #expect(!overlay.isVisible)
     }
 
@@ -175,7 +175,7 @@ struct ShelfFadeManagerTests {
         #expect(shelves.overlayForTesting(barTitleDisplay) === overlay)
         // Its display is spared by the bar managers' retire
         // while the fade runs.
-        #expect(shelves.leavingDisplays == [barTitleDisplay])
+        expectEqual(shelves.leavingDisplays, [barTitleDisplay])
         try await settle { shelves.overlayForTesting(barTitleDisplay) == nil }
         #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
         #expect(shelves.leavingDisplays.isEmpty)

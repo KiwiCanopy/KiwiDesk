@@ -51,10 +51,10 @@ struct MoveToSpaceDesktopYieldTests {
         var yields = 0
         core.desktopFocusYield = { yields += 1 }
         addWindow(core, 1)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
         core.execute("move_to_space", args: [.string("2")])
         // Space 1 is now empty and the moved window held focus.
-        #expect(yields == 1)
+        expectEqual(yields, 1)
     }
 
     /// A neighbor remaining on the origin space is refocused
@@ -67,10 +67,10 @@ struct MoveToSpaceDesktopYieldTests {
         addWindow(core, 1)
         addWindow(core, 2)
         // Window 2 is the focus; move it away, 1 remains.
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.execute("move_to_space", args: [.string("3")])
-        #expect(yields == 0)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(yields, 0)
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     /// Issue #446 (review): the yield keys on system key focus
@@ -89,14 +89,14 @@ struct MoveToSpaceDesktopYieldTests {
         // Park window 1 on space 2; the move re-stamps it as the
         // system focus while active space 1 is left empty.
         core.execute("move_to_space", args: [.string("2")])
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
         #expect(core.activeSpace?.focused == nil)
         // Move it again off the NON-active space 2. Still orphaned
         // offscreen with no active-space neighbor → yields anyway.
         yields = 0
         core.moveWindow(WindowID(1), to: SpaceID(3), follow: false)
-        #expect(yields == 1)
+        expectEqual(yields, 1)
     }
 
     /// Following the move switches to the target, so the origin
@@ -111,8 +111,8 @@ struct MoveToSpaceDesktopYieldTests {
             "move_to_space_and_follow",
             args: [.string("2")]
         )
-        #expect(yields == 0)
-        #expect(core.state.workspaces.activeSpace == SpaceID(2))
+        expectEqual(yields, 0)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(2))
     }
 
     @Test("Moving to the current space refuses and keeps focus")
@@ -121,7 +121,7 @@ struct MoveToSpaceDesktopYieldTests {
         addWindow(core, 1)
         addWindow(core, 2)
         // Window 2 is space 1's focus; move it into space 1 again.
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         let response = core.execute(
             "move_to_space",
             args: [.string("1")]
@@ -133,6 +133,6 @@ struct MoveToSpaceDesktopYieldTests {
             core.state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(1), WindowID(2)]
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 }

@@ -121,7 +121,7 @@ struct SessionRatioCarryTests {
         )
         #expect(b.desktopMemory.sessionRatios[desktop] == nil)
         #expect(b.desktopMemory.sessionRatios[nil] == nil)
-        #expect(b.sessionRatios(of: space).masterRatio == 0.58)
+        expectEqual(b.sessionRatios(of: space).masterRatio, 0.58)
     }
 
     /// A current capture holding only the shared entry still writes
@@ -199,6 +199,6 @@ struct SessionRatioCarryTests {
         let session = try #require(
             read.spaces.first { $0.id == space.raw }?.session
         )
-        #expect(session.ratios.masterRatio == 0.33)
+        expectEqual(session.ratios.masterRatio, 0.33)
     }
 }

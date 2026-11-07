@@ -52,9 +52,9 @@ struct StartupFocusSeedTests {
         add(core, 2)
         // Discovery left focus on the last-scanned window (2),
         // but the user is looking at window 1.
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
         core.seedStartupFocus(frontmost: WindowID(1))
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
     }
 
     /// The seed is OS truth, so the Desktop focus memory takes it
@@ -93,12 +93,12 @@ struct StartupFocusSeedTests {
         add(core, 1)
         add(core, 2)
         core.seedStartupFocus(frontmost: nil)
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
         // A frontmost id that is not on the active space (an
         // unmanaged window resolved to a stale id) is a guess,
         // not OS truth — it must not reroute focus either.
         core.seedStartupFocus(frontmost: WindowID(99))
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
     }
 
     @Test("Fallback seeds the first tiled member when nil")
@@ -108,7 +108,7 @@ struct StartupFocusSeedTests {
         add(core, 2)
         wipeFocus(core)
         core.seedStartupFocus(frontmost: nil)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
@@ -123,7 +123,7 @@ struct StartupFocusSeedTests {
         add(core, 2)
         wipeFocus(core)
         core.seedStartupFocus(frontmost: nil)
-        #expect(core.focusedWindowID == WindowID(2))
+        expectEqual(core.focusedWindowID, WindowID(2))
     }
 
     @Test("All-floating space seeds its first window")
@@ -133,7 +133,7 @@ struct StartupFocusSeedTests {
         #expect(core.execute("make_floating").isSuccess)
         wipeFocus(core)
         core.seedStartupFocus(frontmost: nil)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
     }
 
     @Test("Empty space stays unfocused without crashing")
@@ -169,7 +169,7 @@ struct StartupFocusSeedTests {
             core.state.workspaces[SpaceID(2)]?.focused
                 == WindowID(9)
         )
-        #expect(core.focusedWindowID == WindowID(9))
+        expectEqual(core.focusedWindowID, WindowID(9))
     }
 
     @Test("A non-sticky fold never surfaces on the active space")
@@ -193,7 +193,7 @@ struct StartupFocusSeedTests {
             core.state.workspaces[SpaceID(2)]?.focused
                 == WindowID(9)
         )
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
     }
 
     @Test("Frontmost seed satisfies the #292 guard")
@@ -207,6 +207,6 @@ struct StartupFocusSeedTests {
         core.seedStartupFocus(frontmost: WindowID(1))
         // pid matches, but observation is still required — the
         // seed only fills the anchor half of the guard.
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
     }
 }

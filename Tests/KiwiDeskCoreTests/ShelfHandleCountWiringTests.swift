@@ -52,8 +52,8 @@ struct ShelfHandleCountWiringTests {
         let drawn =
             Set(app.groups.flatMap { $0 })
             .union(app.items.filter(\.floating).map(\.id))
-        #expect(app.windowCount == drawn.count)
-        #expect(app.windowCount == 3)
+        expectEqual(app.windowCount, drawn.count)
+        expectEqual(app.windowCount, 3)
     }
 
     @Test(
@@ -103,8 +103,8 @@ struct ShelfHandleCountWiringTests {
         let app = try #require(
             core.appBarContent(space: shown, settings: core.tiler.settings)
         )
-        #expect(app.windowCount == 3)
-        #expect(view.spec?.count?.windows == app.windowCount)
+        expectEqual(app.windowCount, 3)
+        expectEqual(view.spec?.count?.windows, app.windowCount)
         // The count is handed the badge face, not the name's.
         #expect(
             view.spec?.count?.font
@@ -221,6 +221,6 @@ struct ShelfHandleCountWiringTests {
         let overlay = try #require(
             core.shelves.overlayForTesting(display.id, edge: .top)
         )
-        #expect(overlay.revealMark?.growth == spec.growth)
+        expectEqual(overlay.revealMark?.growth, spec.growth)
     }
 }

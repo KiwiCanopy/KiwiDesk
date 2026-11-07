@@ -48,8 +48,8 @@ struct ShelfHandleFillBehindTests {
         #expect(!(glass.contentView is GlassBackdrop))
         let below = host.subviews.firstIndex(of: box.tint)
         let above = host.subviews.firstIndex(of: glass)
-        #expect(below.map { $0 + 1 } == above)
-        #expect(box.tint.frame == glass.frame)
-        #expect(box.tint.gradient?.colors?.count == 2)
+        expectEqual(below.map { $0 + 1 }, above)
+        expectEqual(box.tint.frame, glass.frame)
+        expectEqual(box.tint.gradient?.colors?.count, 2)
     }
 }

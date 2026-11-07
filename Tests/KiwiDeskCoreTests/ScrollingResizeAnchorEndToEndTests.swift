@@ -97,7 +97,7 @@ struct ScrollingResizeAnchorEndToEndTests {
 
         let after = try #require(core.activeSpace?.scrollRest)
         let position = try #require(after.slot?.position)
-        #expect(after.slot?.window == focus)
+        expectEqual(after.slot?.window, focus)
         // The row really did move underneath the focus...
         #expect(position < seeded)
         // ...and the focused window did not.
@@ -124,7 +124,7 @@ struct ScrollingResizeAnchorEndToEndTests {
         )
         let after = try #require(core.activeSpace?.scrollRest)
         let position = try #require(after.slot?.position)
-        #expect(after.slot?.window == focus)
+        expectEqual(after.slot?.window, focus)
         // The window moved one slot further along the row...
         #expect(position > seeded)
         // ...and moved on screen with it: forward by a slot where
@@ -148,7 +148,7 @@ struct ScrollingResizeAnchorEndToEndTests {
 
         let after = try #require(core.activeSpace?.scrollRest)
         let position = try #require(after.slot?.position)
-        #expect(after.slot?.window == focus)
+        expectEqual(after.slot?.window, focus)
         #expect(position > seeded)
         #expect(after.offset + position - 40 > 1)
         #expect(after.offset <= before.offset)

@@ -69,20 +69,20 @@ struct SpaceStepVerbTests {
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
         #expect(run(core, "focus_space_next"))
-        #expect(shown(core) == "3")
+        expectEqual(shown(core), "3")
         #expect(!run(core, "focus_space_next"))
-        #expect(shown(core) == "3")
-        #expect(bumps == [.right])
+        expectEqual(shown(core), "3")
+        expectEqual(bumps, [.right])
         #expect(run(core, "focus_space_previous"))
         #expect(run(core, "focus_space_previous"))
         #expect(!run(core, "focus_space_previous"))
-        #expect(shown(core) == "1")
-        #expect(bumps == [.right, .left])
+        expectEqual(shown(core), "1")
+        expectEqual(bumps, [.right, .left])
         // The focused screen's order, never the other screen's.
         core.execute("focus_space", args: [.string("7")])
         #expect(run(core, "focus_space_next"))
-        #expect(shown(core) == "8")
-        #expect(core.state.workspaces.activeSpace(on: Self.displayA) == "1")
+        expectEqual(shown(core), "8")
+        expectEqual(core.state.workspaces.activeSpace(on: Self.displayA), "1")
     }
 
     @Test("back and forward walk the visits, per screen")
@@ -90,21 +90,21 @@ struct SpaceStepVerbTests {
         let core = makeCore(shown: "1")
         core.execute("focus_space", args: [.string("3")])
         core.execute("focus_space", args: [.string("2")])
-        #expect(core.spaceHistory.kind == .perScreen)
+        expectEqual(core.spaceHistory.kind, .perScreen)
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "3")
+        expectEqual(shown(core), "3")
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
         #expect(!run(core, "focus_space_back"))
-        #expect(bumps == [.left])
+        expectEqual(bumps, [.left])
         #expect(run(core, "focus_space_forward"))
-        #expect(shown(core) == "3")
+        expectEqual(shown(core), "3")
         // Another arrival clears the forward half.
         core.execute("focus_space", args: [.string("1")])
         #expect(!run(core, "focus_space_forward"))
-        #expect(bumps == [.left, .right])
+        expectEqual(bumps, [.left, .right])
     }
 
     @Test("per screen stays on the screen; all screens crosses")
@@ -114,14 +114,14 @@ struct SpaceStepVerbTests {
         perScreen.execute("focus_space", args: [.string("7")])
         // Display B's own trail holds 7 alone; A's is untouched.
         #expect(!run(perScreen, "focus_space_back"))
-        #expect(shown(perScreen) == "7")
+        expectEqual(shown(perScreen), "7")
 
         let all = makeCore(shown: "1")
         all.execute("set_space_history", args: [.string("all_screens")])
         all.execute("focus_space", args: [.string("2")])
         all.execute("focus_space", args: [.string("7")])
         #expect(run(all, "focus_space_back"))
-        #expect(shown(all) == "2")
+        expectEqual(shown(all), "2")
     }
 
     @Test("a move-and-follow is a visit")
@@ -131,9 +131,9 @@ struct SpaceStepVerbTests {
             "move_to_space_and_follow",
             args: [.string("3"), .number(1)]
         )
-        #expect(shown(core) == "3")
+        expectEqual(shown(core), "3")
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
     }
 
     @Test("a gone Space is skipped, and none is ever created")
@@ -144,9 +144,9 @@ struct SpaceStepVerbTests {
         core.execute("delete_space", args: [.string("2")])
         let before = core.state.workspaces.allSpaces.map(\.id)
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
         #expect(core.state.workspaces[SpaceID("2")] == nil)
-        #expect(core.state.workspaces.allSpaces.map(\.id) == before)
+        expectEqual(core.state.workspaces.allSpaces.map(\.id), before)
     }
 
     @Test("set_space_history refuses a value it does not know")
@@ -163,11 +163,11 @@ struct SpaceStepVerbTests {
     func profileOverrideWins() {
         let core = makeTestCore()
         core.applySpaceHistory(base: .perScreen, profile: .allScreens)
-        #expect(core.spaceHistory.kind == .allScreens)
+        expectEqual(core.spaceHistory.kind, .allScreens)
         // The verb writes the base, which the override still beats.
         core.execute("set_space_history", args: [.string("per_screen")])
-        #expect(core.spaceHistory.kind == .allScreens)
+        expectEqual(core.spaceHistory.kind, .allScreens)
         core.applySpaceHistory(profile: nil)
-        #expect(core.spaceHistory.kind == .perScreen)
+        expectEqual(core.spaceHistory.kind, .perScreen)
     }
 }

@@ -91,7 +91,7 @@ struct StackMirrorTests {
         // The boundary master (last master, w2) renders at the
         // stack seam — left of its zone — not the far edge.
         #expect(m2.minX < m1.minX)
-        #expect(m2.minY == m1.minY)
+        expectEqual(m2.minY, m1.minY)
     }
 
     @Test("top stack: the boundary master sits at the seam")
@@ -110,7 +110,7 @@ struct StackMirrorTests {
         #expect(s.minY < m1.minY)
         #expect(s.minY < m2.minY)
         #expect(m2.minY < m1.minY)
-        #expect(m2.minX == m1.minX)
+        expectEqual(m2.minX, m1.minX)
     }
 
     @Test("right stack stays unmirrored (seam already adjacent)")
@@ -145,7 +145,7 @@ struct StackMirrorTests {
         // Column reads top to bottom in array order; both
         // masters touch the seam already.
         #expect(m1.minY < m2.minY)
-        #expect(m1.minX == m2.minX)
+        expectEqual(m1.minX, m2.minX)
     }
 
     @Test("promotion lands beside the stack, not across the zone")

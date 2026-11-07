@@ -66,8 +66,8 @@ struct DesktopEventTests {
         )
         emit(core)
         let payload = data(in: events())
-        #expect(payload?["monitor"] == .number(2))
-        #expect(payload?["desktop"] == .number(4))
+        expectEqual(payload?["monitor"], .number(2))
+        expectEqual(payload?["desktop"], .number(4))
     }
 
     @Test("A main switch is monitor 1")
@@ -80,8 +80,8 @@ struct DesktopEventTests {
         )
         emit(core)
         let payload = data(in: events())
-        #expect(payload?["monitor"] == .number(1))
-        #expect(payload?["desktop"] == .number(2))
+        expectEqual(payload?["monitor"], .number(1))
+        expectEqual(payload?["desktop"], .number(2))
     }
 
     @Test("A repeated notification reports the main display")
@@ -94,8 +94,8 @@ struct DesktopEventTests {
         )
         emit(core)
         let payload = data(in: events())
-        #expect(payload?["monitor"] == .number(1))
-        #expect(payload?["desktop"] == .number(1))
+        expectEqual(payload?["monitor"], .number(1))
+        expectEqual(payload?["desktop"], .number(1))
     }
 
     /// A display arriving on a fullscreen space emits NOTHING —

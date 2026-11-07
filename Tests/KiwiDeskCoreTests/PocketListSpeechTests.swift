@@ -95,22 +95,22 @@ struct PocketListSpeechTests {
         let view = try #require(core.pocketPlate.view(on: display))
         let peek = core.shelves.peek
         core.pocketPlate.onClick(view)
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
+        expectEqual(peek.panel.panel?.isAccessibilityElement(), false)
         #expect(peek.panel.body.rowButtons.isEmpty)
         peek.dismiss()
         core.execute("pocket.toggle_list")
-        #expect(peek.panel.panel?.isAccessibilityElement() == true)
+        expectEqual(peek.panel.panel?.isAccessibilityElement(), true)
         let body = peek.panel.body
         let buttons = body.rowButtons
         try #require(buttons.count == 2)
         for (button, target) in zip(buttons, body.targets) {
             #expect(button.superview === body)
-            #expect(button.frame == target.frame)
+            expectEqual(button.frame, target.frame)
             #expect(button.isAccessibilityElement())
             #expect(target.inks.allSatisfy { !$0.isAccessibilityElement() })
         }
         #expect(buttons.allSatisfy { $0.accessibilityRole() == .button })
-        #expect(buttons[0].accessibilityLabel() == "Window 1")
+        expectEqual(buttons[0].accessibilityLabel(), "Window 1")
         #expect(
             BarPeekBody.spokenRow(
                 .init(
@@ -124,12 +124,12 @@ struct PocketListSpeechTests {
         var moved: [NSView] = []
         body.moveVoiceOver = { moved.append($0) }
         #expect(peek.panel.morphKey(Self.down))
-        #expect(moved == [buttons[1]])
+        expectEqual(moved, [buttons[1]])
         var picked: [WindowID] = []
         peek.pick = { id, _ in picked.append(id) }
         #expect(buttons[1].accessibilityPerformPress())
-        #expect(picked == [two])
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
+        expectEqual(picked, [two])
+        expectEqual(peek.panel.panel?.isAccessibilityElement(), false)
     }
 
     @Test("an app's own row speaks its key in words")
@@ -178,7 +178,7 @@ struct PocketListSpeechTests {
             edge: .bottom
         )
         #expect(core.shelves.peek.shown?.view === other)
-        #expect(core.shelves.peek.shown?.keyed == false)
+        expectEqual(core.shelves.peek.shown?.keyed, false)
         #expect(core.shelves.peek.panel.body.rowButtons.isEmpty)
     }
 
@@ -202,9 +202,9 @@ struct PocketListSpeechTests {
         var asked: [BarPeekSource] = []
         core.shelves.peek.openMenu = { source, _, _ in asked.append(source) }
         let view = try #require(core.pocketPlate.view(on: display))
-        #expect(view.accessibilityLabel() == "Pocket, windows inside: 1")
+        expectEqual(view.accessibilityLabel(), "Pocket, windows inside: 1")
         #expect(view.accessibilityPerformPress())
-        #expect(asked == [.pocket([one])])
+        expectEqual(asked, [.pocket([one])])
         #expect(core.shelves.peek.shown == nil)
     }
 
@@ -218,7 +218,7 @@ struct PocketListSpeechTests {
         var moved: [NSView] = []
         body.moveVoiceOver = { moved.append($0) }
         core.execute("pocket.toggle_list")
-        #expect(moved == [body.rowButtons[0]])
+        expectEqual(moved, [body.rowButtons[0]])
     }
 
     /// The panel is one: every other show door takes the keyed state
@@ -244,8 +244,8 @@ struct PocketListSpeechTests {
         )
         #expect(!peek.panel.body.keyed)
         #expect(peek.panel.body.rowButtons.isEmpty)
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
-        #expect(peek.panel.panel?.walksHeldKeys == false)
+        expectEqual(peek.panel.panel?.isAccessibilityElement(), false)
+        expectEqual(peek.panel.panel?.walksHeldKeys, false)
         // The pill's list, the other door.
         peek.dismiss()
         core.execute("pocket.toggle_list")
@@ -259,8 +259,8 @@ struct PocketListSpeechTests {
         )
         #expect(!peek.panel.body.keyed)
         #expect(peek.panel.body.rowButtons.isEmpty)
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
-        #expect(peek.panel.panel?.walksHeldKeys == false)
+        expectEqual(peek.panel.panel?.isAccessibilityElement(), false)
+        expectEqual(peek.panel.panel?.walksHeldKeys, false)
     }
 }
 

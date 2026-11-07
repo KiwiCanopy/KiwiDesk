@@ -40,7 +40,7 @@ struct HeldSpaceRestartRecordTests {
             StateSnapshot.self,
             from: JSONSerialization.data(withJSONObject: json)
         )
-        #expect(decoded.spaces.map(\.id) == snapshot.spaces.map(\.id))
+        expectEqual(decoded.spaces.map(\.id), snapshot.spaces.map(\.id))
         #expect(decoded.spaces[index].held == nil)
         #expect(
             decoded.spaces[index].windows == snapshot.spaces[index].windows
@@ -48,7 +48,7 @@ struct HeldSpaceRestartRecordTests {
         #expect(
             decoded.spaces.filter { $0.held != nil }.map(\.id) == ["6"]
         )
-        #expect(decoded.windows == snapshot.windows)
+        expectEqual(decoded.windows, snapshot.windows)
         // An older build's record has no hold at all.
         for i in spaces.indices { spaces[i]["held"] = nil }
         json["spaces"] = spaces
@@ -83,15 +83,15 @@ struct HeldSpaceRestartRecordTests {
             ) as? [String: Any]
         )
         let held = try #require(json["held"] as? [String: Any])
-        #expect(Set(held.keys) == ["origin", "remembered"])
-        #expect(held["remembered"] as? [Int] == [20])
+        expectEqual(Set(held.keys), ["origin", "remembered"])
+        expectEqual(held["remembered"] as? [Int], [20])
         let origin = try #require(held["origin"] as? [String: Any])
         #expect(Set(origin.keys) == ["name", "screen", "icon", "arrangement"])
-        #expect(origin["name"] as? String == "4")
+        expectEqual(origin["name"] as? String, "4")
         let arrangement = try #require(
             origin["arrangement"] as? [String: String]
         )
-        #expect(arrangement == ["kind": "standard", "name": "Dual"])
+        expectEqual(arrangement, ["kind": "standard", "name": "Dual"])
         let profile = try JSONSerialization.jsonObject(
             with: JSONEncoder().encode(HeldOrigin.Arrangement.profile("desk"))
         )
@@ -109,12 +109,12 @@ struct HeldSpaceRestartRecordTests {
         a.crash.captureState = { [weak a] in a?.sessionSnapshot() }
         a.crash.bootTime = { .distantPast }
         a.crash.autosave()
-        #expect(t.heldCount(a.crash.takeBootSnapshot()) == 2)
+        expectEqual(t.heldCount(a.crash.takeBootSnapshot()), 2)
         a.crash.autosave()
         a.crash.shutdownCleanly()
         a.discardSavedArrangement()
         #expect(a.crash.takeBootSnapshot() == nil)
-        #expect(a.state.heldSpaces.count == 2)
+        expectEqual(a.state.heldSpaces.count, 2)
     }
 
     /// The outcome only: the reset's prune empties every held
@@ -126,7 +126,7 @@ struct HeldSpaceRestartRecordTests {
         a.onLog = { _ in }
         a.resetAllSettings(trash: { _ in })
         #expect(a.state.heldSpaces.isEmpty)
-        #expect(t.heldCount(a.sessionSnapshot()) == 0)
+        expectEqual(t.heldCount(a.sessionSnapshot()), 0)
     }
 
     @Test("with no arrangement live, a hold stays held and unpinned")
@@ -140,9 +140,9 @@ struct HeldSpaceRestartRecordTests {
             directory: freshDirectory()
         )
         try #require(b.liveHome == nil)
-        #expect(b.state.heldSpaces == a.state.heldSpaces)
+        expectEqual(b.state.heldSpaces, a.state.heldSpaces)
         #expect(b.spacePins[SpaceID(5)] == nil)
-        #expect(desk.members(b, 5) == desk.ids([10, 11]))
+        expectEqual(desk.members(b, 5), desk.ids([10, 11]))
     }
 
     /// A Standard is not the profile the holds left, so nothing
@@ -168,9 +168,9 @@ struct HeldSpaceRestartRecordTests {
             b.state.heldSpaces.first { $0.value.name == SpaceID(3) }
         )
         #expect(!home.declared.contains(held.key))
-        #expect(b.spacePins[held.key] == desk.dell.fingerprint)
+        expectEqual(b.spacePins[held.key], desk.dell.fingerprint)
         #expect(desk.members(b, Int(held.key.raw) ?? 0) == desk.ids([10, 11]))
-        #expect(b.state.heldSpaces.count == 2)
+        expectEqual(b.state.heldSpaces.count, 2)
     }
 
     /// The snapshot's own arrangement stamp decodes on its own: an
@@ -192,14 +192,14 @@ struct HeldSpaceRestartRecordTests {
             from: JSONSerialization.data(withJSONObject: json)
         )
         #expect(decoded.arrangement == nil)
-        #expect(decoded.spaces.map(\.id) == snapshot.spaces.map(\.id))
+        expectEqual(decoded.spaces.map(\.id), snapshot.spaces.map(\.id))
         let b = t.boot(
             from: a,
             screens: [desk.builtIn],
             profile: "solo",
             session: decoded
         )
-        #expect(b.state.workspaces[SpaceID(1)]?.mode == .monocle)
+        expectEqual(b.state.workspaces[SpaceID(1)]?.mode, .monocle)
     }
 
     /// A snapshot an older build wrote carries no stamp, so its
@@ -232,7 +232,7 @@ struct HeldSpaceRestartRecordTests {
             profile: "desk",
             session: older
         )
-        #expect(b.state.workspaces[SpaceID(3)]?.mode == .floating)
+        expectEqual(b.state.workspaces[SpaceID(3)]?.mode, .floating)
     }
 
     /// The unjudged mark ends with the filing it qualifies: at the

@@ -188,7 +188,7 @@ struct HiddenAppWindowTests {
         box.listed = [WindowID(11)]
         box.hidden = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.hiddenEvents == [WindowID(11)])
+        expectEqual(box.hiddenEvents, [WindowID(11)])
 
         var state = StateCoordinator()
         state.apply(
@@ -222,7 +222,7 @@ struct HiddenAppWindowTests {
         box.listed = [WindowID(11)]
         box.hidden = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.windowQueries == 0)
+        expectEqual(box.windowQueries, 0)
     }
 
     @Test("a visible app still reads its window list")
@@ -234,7 +234,7 @@ struct HiddenAppWindowTests {
         loop.elements[pid] = [WindowID(11): dummyElement]
         box.listed = [WindowID(11)]
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         #expect(box.destroyed.isEmpty)
     }
 
@@ -247,7 +247,7 @@ struct HiddenAppWindowTests {
         box.hidden = true
         attach(loop, scanWindowsAtAttach: true)
         #expect(loop.observes(pid: pid))
-        #expect(box.windowQueries == 0)
+        expectEqual(box.windowQueries, 0)
     }
 
     @Test("a hidden app is warmed even though it is not adopted")
@@ -262,15 +262,15 @@ struct HiddenAppWindowTests {
         let (loop, box) = makeLoop()
         box.hidden = true
         attach(loop, scanWindowsAtAttach: true)
-        #expect(box.euiReads == 1)
-        #expect(box.windowQueries == 0)
+        expectEqual(box.euiReads, 1)
+        expectEqual(box.windowQueries, 0)
     }
 
     @Test("attach still scans a visible app")
     func attachScansAVisibleApp() {
         let (loop, box) = makeLoop()
         attach(loop, scanWindowsAtAttach: true)
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
     }
 
     @Test("a hide or unhide reconciles the app off main")
@@ -298,13 +298,13 @@ struct HiddenAppWindowTests {
         loop.appHideChanged(pid: pid, ref: ref)
         #expect(box.windowQueries == 0, "list read inline (#2027)")
         drain()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         #expect(box.hiddenEvents.isEmpty)
         box.hidden = true
         loop.appHideChanged(pid: pid, ref: ref)
         #expect(box.hiddenEvents.isEmpty, "hide read inline (#2027)")
         drain()
-        #expect(box.hiddenEvents == [WindowID(11)])
+        expectEqual(box.hiddenEvents, [WindowID(11)])
         #expect(box.windowQueries == 1, "a hide listed (#2027)")
     }
 
@@ -317,6 +317,6 @@ struct HiddenAppWindowTests {
         // test read in draft.
         let (loop, box) = makeLoop()
         loop.appHideChanged(pid: pid, ref: ref)
-        #expect(box.policyReads == 0)
+        expectEqual(box.policyReads, 0)
     }
 }

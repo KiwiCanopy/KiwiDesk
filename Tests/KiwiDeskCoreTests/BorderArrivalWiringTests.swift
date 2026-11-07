@@ -51,7 +51,7 @@ struct BorderArrivalWiringTests {
     func switchHoldsTheParkedAnchor() throws {
         let core = try makeCore()
         core.execute("focus_space", args: [.string("2")])
-        #expect(core.borders.arrival?.window == WindowID(2))
+        expectEqual(core.borders.arrival?.window, WindowID(2))
     }
 
     /// A focus follow onto a Space already shown sends the window
@@ -75,6 +75,6 @@ struct BorderArrivalWiringTests {
         core.execute("focus_space", args: [.string("2")])
         let lift = try #require(core.spaceSlide.play?.liftAt)
         let hold = try #require(core.borders.arrival)
-        #expect(hold.notBefore() == lift)
+        expectEqual(hold.notBefore(), lift)
     }
 }

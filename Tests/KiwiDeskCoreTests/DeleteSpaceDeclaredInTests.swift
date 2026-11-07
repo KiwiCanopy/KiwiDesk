@@ -200,7 +200,7 @@ struct DeleteSpaceDeclaredInTests {
         )
         core.loadConfig()
         #expect(core.state.workspaces[SpaceID("scratch")] != nil)
-        #expect(declaredIn(deleting: "scratch", on: core) == ["init.lua"])
+        expectEqual(declaredIn(deleting: "scratch", on: core), ["init.lua"])
     }
 
     /// The case a before/after diff of the space set misses: on a
@@ -218,7 +218,7 @@ struct DeleteSpaceDeclaredInTests {
         )
         core.state.workspaces.ensureSpace(SpaceID("scratch"))
         core.loadConfig()
-        #expect(declaredIn(deleting: "scratch", on: core) == ["init.lua"])
+        expectEqual(declaredIn(deleting: "scratch", on: core), ["init.lua"])
     }
 
     @Test("the ledger is the last run's, not the session's")
@@ -291,6 +291,6 @@ struct DeleteSpaceDeclaredInTests {
         workspaces.ensureSpace(SpaceID("a"))
         workspaces.referenced = []
         workspaces.ensureSpace(SpaceID("a"))
-        #expect(workspaces.referenced == [SpaceID("a")])
+        expectEqual(workspaces.referenced, [SpaceID("a")])
     }
 }

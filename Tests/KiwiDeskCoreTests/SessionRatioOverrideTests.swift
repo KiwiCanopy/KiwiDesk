@@ -102,8 +102,8 @@ struct SessionRatioOverrideTests {
         session.slotSize = .points(500)
         let space = Space(id: SpaceID("1"))
         let resolved = over.resolvedBsp(for: space, session: session)
-        #expect(resolved.splitRatioH == 0.8)
-        #expect(resolved.splitRatioV == 0.7)
+        expectEqual(resolved.splitRatioH, 0.8)
+        expectEqual(resolved.splitRatioV, 0.7)
         #expect(
             over.resolvedStack(for: space, session: session, flip: nil)
                 .masterRatio == 0.6

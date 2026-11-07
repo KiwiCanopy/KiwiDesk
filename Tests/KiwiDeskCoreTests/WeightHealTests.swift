@@ -110,7 +110,7 @@ struct WeightHealTests {
         )
         #expect(abs(healed.reduce(0, +) - target) < 0.0001)
         // The smallest weight is never shaved.
-        #expect(healed[2] == 1.0)
+        expectEqual(healed[2], 1.0)
     }
 
     @Test("the waterline shaves only the extremes")
@@ -125,9 +125,9 @@ struct WeightHealTests {
                 minSize: 300
             )
         )
-        #expect(healed[2] == 1)
-        #expect(healed[3] == 1)
-        #expect(healed[0] == healed[1])
+        expectEqual(healed[2], 1)
+        expectEqual(healed[3], 1)
+        expectEqual(healed[0], healed[1])
         #expect(healed[0] < 10)
         // Relative order survives: nothing shaved below a
         // weight it was above.

@@ -52,7 +52,7 @@ struct MonocleRaiseTests {
             AnimationSettings.self,
             from: Data(stored.utf8)
         )
-        #expect(decoded.durationMS == 220)
+        expectEqual(decoded.durationMS, 220)
         #expect(!decoded.onExpand)
         let written = try String(
             decoding: JSONEncoder().encode(decoded),
@@ -85,12 +85,12 @@ struct MonocleRaiseTests {
                 args: [.string(space.raw), .string("monocle")]
             ).isSuccess
         )
-        #expect(core.activeSpace?.mode == .monocle)
+        expectEqual(core.activeSpace?.mode, .monocle)
         core.state.workspaces.focus(WindowID(1), in: space)
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(2))
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 }

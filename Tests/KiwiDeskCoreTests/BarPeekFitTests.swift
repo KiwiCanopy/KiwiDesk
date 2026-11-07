@@ -61,7 +61,7 @@ struct BarPeekFitTests {
             more.textColor == NSColor(kiwiHex: KiwiShelf().idleItemColor)
         )
         // The chevron points down at the rows cut below.
-        #expect(body.moreChevron?.identifier?.rawValue == "chevron.down")
+        expectEqual(body.moreChevron?.identifier?.rawValue, "chevron.down")
         #expect(more.frame.maxY <= size.height)
         let lastTitle = try #require(body.labels.last)
         #expect(more.frame.minY > lastTitle.frame.maxY, "the cut is below")
@@ -92,7 +92,7 @@ struct BarPeekFitTests {
         #expect(titles == (first...14).map { "Note \($0)" })
         let more = try #require(body.moreLabel)
         #expect(more.stringValue == "More windows: \(first - 1)")
-        #expect(body.moreChevron?.identifier?.rawValue == "chevron.up")
+        expectEqual(body.moreChevron?.identifier?.rawValue, "chevron.up")
         let header = try #require(body.labels.first)
         #expect(more.frame.maxY < header.frame.minY, "the cut is above")
     }
@@ -110,13 +110,13 @@ struct BarPeekFitTests {
             ]
         )
         let kept = content.keeping(3)
-        #expect(kept.groups.map(\.titles) == [["1", "2"], ["3"]])
-        #expect(kept.groups.map(\.windowCount) == [2, 2])
-        #expect(kept.windowCount == 4)
-        #expect(content.keeping(1).groups.map(\.app) == ["A"])
+        expectEqual(kept.groups.map(\.titles), [["1", "2"], ["3"]])
+        expectEqual(kept.groups.map(\.windowCount), [2, 2])
+        expectEqual(kept.windowCount, 4)
+        expectEqual(content.keeping(1).groups.map(\.app), ["A"])
         let tail = content.keeping(3, fromEnd: true)
-        #expect(tail.groups.map(\.titles) == [["2"], ["3", "4"]])
-        #expect(tail.groups.map(\.windowCount) == [2, 2])
+        expectEqual(tail.groups.map(\.titles), [["2"], ["3", "4"]])
+        expectEqual(tail.groups.map(\.windowCount), [2, 2])
     }
 
     /// A peek taller than the usable room on its side is cut to it,
@@ -133,7 +133,7 @@ struct BarPeekFitTests {
             strip: top,
             visible: visible
         )
-        #expect(capped.width == tall.width)
+        expectEqual(capped.width, tall.width)
         #expect(capped.height < tall.height)
         let origin = BarPeekPanel.origin(
             size: capped,

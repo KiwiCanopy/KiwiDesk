@@ -47,27 +47,27 @@ struct StickyCommandTests {
         let core = makeCore()
         addWindow(core, 1)
         #expect(core.execute("make_display_sticky").isSuccess)
-        #expect(scope(core) == .display)
-        #expect(isSticky(core) == true)
+        expectEqual(scope(core), .display)
+        expectEqual(isSticky(core), true)
     }
 
     @Test("each make_* verb overrides the other scope")
     func scopeOverride() {
         let core = makeCore()
         addWindow(core, 1)
-        #expect(isSticky(core) == false)
+        expectEqual(isSticky(core), false)
         #expect(core.execute("make_sticky").isSuccess)
-        #expect(scope(core) == .global)
-        #expect(isSticky(core) == true)
+        expectEqual(scope(core), .global)
+        expectEqual(isSticky(core), true)
         // make_display_sticky on a global sticky → display.
         #expect(core.execute("make_display_sticky").isSuccess)
-        #expect(scope(core) == .display)
+        expectEqual(scope(core), .display)
         // make_sticky on a display sticky → global.
         #expect(core.execute("make_sticky").isSuccess)
-        #expect(scope(core) == .global)
+        expectEqual(scope(core), .global)
         #expect(core.execute("make_unsticky").isSuccess)
-        #expect(scope(core) == StickyScope.none)
-        #expect(isSticky(core) == false)
+        expectEqual(scope(core), StickyScope.none)
+        expectEqual(isSticky(core), false)
     }
 
     @Test("toggle_display_sticky flips display against off")
@@ -75,9 +75,9 @@ struct StickyCommandTests {
         let core = makeCore()
         addWindow(core, 1)
         #expect(core.execute("toggle_display_sticky").isSuccess)
-        #expect(scope(core) == .display)
+        expectEqual(scope(core), .display)
         #expect(core.execute("toggle_display_sticky").isSuccess)
-        #expect(scope(core) == StickyScope.none)
+        expectEqual(scope(core), StickyScope.none)
     }
 
     @Test("toggle_display_sticky on a global sticky switches scope")
@@ -87,10 +87,10 @@ struct StickyCommandTests {
         #expect(core.execute("make_sticky").isSuccess)
         // Toggling the OTHER scope switches, never turns off.
         #expect(core.execute("toggle_display_sticky").isSuccess)
-        #expect(scope(core) == .display)
+        expectEqual(scope(core), .display)
         // And toggle_sticky on a display sticky switches to global.
         #expect(core.execute("toggle_sticky").isSuccess)
-        #expect(scope(core) == .global)
+        expectEqual(scope(core), .global)
     }
 
     @Test("two toggles return to the original state")
@@ -98,9 +98,9 @@ struct StickyCommandTests {
         let core = makeCore()
         addWindow(core, 1)
         #expect(core.execute("toggle_sticky").isSuccess)
-        #expect(isSticky(core) == true)
+        expectEqual(isSticky(core), true)
         #expect(core.execute("toggle_sticky").isSuccess)
-        #expect(isSticky(core) == false)
+        expectEqual(isSticky(core), false)
     }
 
     @Test("sticky leaves the float state untouched")
@@ -110,8 +110,8 @@ struct StickyCommandTests {
         #expect(core.execute("make_floating").isSuccess)
         #expect(core.execute("make_sticky").isSuccess)
         let window = core.state.windows[WindowID(1)]
-        #expect(window?.isFloating == true)
-        #expect(window?.isSticky == true)
+        expectEqual(window?.isFloating, true)
+        expectEqual(window?.isSticky, true)
         #expect(core.execute("make_tiled").isSuccess)
         #expect(
             core.state.windows[WindowID(1)]?.isSticky == true

@@ -23,14 +23,14 @@ struct SpaceDeleteGateTests {
 
     @Test("Bare space (name only) needs no confirm")
     func bareSpace() {
-        #expect(config().carriesOverrides(space) == false)
+        expectEqual(config().carriesOverrides(space), false)
     }
 
     @Test("A bare layout mode alone does not trip the gate")
     func modeOnly() {
         var c = config()
         c.spaceModes[space] = .scrolling
-        #expect(c.carriesOverrides(space) == false)
+        expectEqual(c.carriesOverrides(space), false)
     }
 
     @Test("A monitor pin trips the gate")
@@ -66,6 +66,6 @@ struct SpaceDeleteGateTests {
         var c = config()
         c.spaces = [space, SpaceID("2")]
         c.spacePins[space] = "MONITOR-A"
-        #expect(c.carriesOverrides(SpaceID("2")) == false)
+        expectEqual(c.carriesOverrides(SpaceID("2")), false)
     }
 }

@@ -88,9 +88,9 @@ struct ShelfRevealPairTests {
         #expect(abs(app.frame.midX - space.frame.midX - length) < 0.5)
         let spaceBand = try #require(target(core, shelf, .space)?.band)
         let appBand = try #require(target(core, shelf, .app)?.band)
-        #expect(spaceBand.width == length)
-        #expect(appBand.width == length)
-        #expect(spaceBand.maxX == appBand.minX)
+        expectEqual(spaceBand.width, length)
+        expectEqual(appBand.width, length)
+        expectEqual(spaceBand.maxX, appBand.minX)
         #expect(!spaceBand.intersects(appBand))
         let middle = (space.frame.midX + app.frame.midX) / 2
         #expect(abs(spaceBand.maxX - middle) < 0.5)
@@ -101,7 +101,7 @@ struct ShelfRevealPairTests {
         #expect(appNear.minX >= spaceBand.maxX)
         // A top edge's Space mark names its Space on hover.
         #expect(space.label != nil)
-        #expect(space.position?.count == 1)
+        expectEqual(space.position?.count, 1)
     }
 
     @Test(
@@ -127,7 +127,7 @@ struct ShelfRevealPairTests {
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         #expect(!core.spaceBars.shownStrips.isEmpty)
         #expect(!core.appBars.shownStrips.isEmpty)
-        #expect(spec(core, shelf, .app)?.yields == false)
+        expectEqual(spec(core, shelf, .app)?.yields, false)
         #expect(!core.shelves.reveal.yields(.init(shelf: shelf, bar: .app)))
     }
 

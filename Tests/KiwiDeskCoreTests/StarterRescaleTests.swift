@@ -71,7 +71,7 @@ struct StarterRescaleTests {
         // rescale keys on is the flag, never the file name.
         let name = StarterTitle(shape: .laptop, otherScreens: 0)
             .profileName
-        #expect(core.profiles.currentName == name)
+        expectEqual(core.profiles.currentName, name)
         #expect(try core.profiles.read(name: name).isStarterSetup)
         #expect(core.isOnStarterBaseline)
     }
@@ -123,20 +123,20 @@ struct StarterRescaleTests {
         // eight-space Dual Developer workflow Standard. The
         // fixtures are 100 pt wide, so both screens are
         // `ScreenClass.laptop` and take that class's list.
-        #expect(core.profiles.currentStandard == "Starter")
+        expectEqual(core.profiles.currentStandard, "Starter")
         // The recomposed Standard carries its title (#1662), and
         // the live title reads it.
         let title = StarterTitle(shape: .laptop, otherScreens: 1)
-        #expect(core.profiles.currentStandardTitle == title)
-        #expect(core.liveStarterTitle() == title)
+        expectEqual(core.profiles.currentStandardTitle, title)
+        expectEqual(core.liveStarterTitle(), title)
         // The which-loads verdict names it by the same title.
         let verdict = core.profileVerdict(activeBinding: nil).verdict
         guard case .builtInStandard(_, let named) = verdict else {
             Issue.record("expected the built-in Starter: \(verdict)")
             return
         }
-        #expect(named == title)
-        #expect(core.state.workspaces.allSpaces.count == 5)
+        expectEqual(named, title)
+        expectEqual(core.state.workspaces.allSpaces.count, 5)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .scrolling
         )
@@ -153,8 +153,8 @@ struct StarterRescaleTests {
         // the widest screen takes the larger share.
         let blockOne = displaysOf(core, 1...3)
         let blockTwo = displaysOf(core, 4...5)
-        #expect(blockOne.count == 1)
-        #expect(blockTwo.count == 1)
+        expectEqual(blockOne.count, 1)
+        expectEqual(blockTwo.count, 1)
         #expect(blockOne != blockTwo)
     }
 
@@ -180,8 +180,8 @@ struct StarterRescaleTests {
         // not a workflow Standard.
         connect(core, [display(3, "C", x: 200)])
         core.handleMonitorChange()
-        #expect(core.profiles.currentStandard == "Starter")
-        #expect(core.state.workspaces.allSpaces.count == 7)
+        expectEqual(core.profiles.currentStandard, "Starter")
+        expectEqual(core.state.workspaces.allSpaces.count, 7)
         // Space 6 opens the third display's block, so it is that
         // screen's LEAD (#1018) rather than the head of its list.
         #expect(
@@ -195,7 +195,7 @@ struct StarterRescaleTests {
             displaysOf(core, 6...7),
         ]
         #expect(blocks.allSatisfy { $0.count == 1 })
-        #expect(Set(blocks.flatMap { $0 }).count == 3)
+        expectEqual(Set(blocks.flatMap { $0 }).count, 3)
     }
 
     @Test("a non-ladder baseline still falls to a Standard")
@@ -208,7 +208,7 @@ struct StarterRescaleTests {
         // and isn't the ladder, so the workflow Standard resolves.
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        #expect(core.profiles.currentStandard == "Dual Developer")
+        expectEqual(core.profiles.currentStandard, "Dual Developer")
         #expect(!core.isOnStarterBaseline)
     }
 
@@ -218,7 +218,7 @@ struct StarterRescaleTests {
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
         // A transient Starter Standard is on screen (5 spaces).
-        #expect(core.profiles.currentStandard == "Starter")
+        expectEqual(core.profiles.currentStandard, "Starter")
         // The user saves it under a new name.
         core.execute("save_profile", args: [.string("Both")])
         // buildProfile tags it from currentStandard, so the saved
@@ -233,15 +233,15 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        #expect(core.state.workspaces.allSpaces.count == 5)
+        expectEqual(core.state.workspaces.allSpaces.count, 5)
         // The profile re-apply a config reload performs must keep
         // the starter setup, not recompose the workflow Standard
         // (#485, the second recompose site).
         core.reapplyActiveProfileState()
-        #expect(core.profiles.currentStandard == "Starter")
-        #expect(core.state.workspaces.allSpaces.count == 5)
+        expectEqual(core.profiles.currentStandard, "Starter")
+        expectEqual(core.state.workspaces.allSpaces.count, 5)
         let blockTwo = displaysOf(core, 4...5)
-        #expect(blockTwo.count == 1)
+        expectEqual(blockTwo.count, 1)
         #expect(displaysOf(core, 1...3) != blockTwo)
     }
 
@@ -280,7 +280,7 @@ struct StarterRescaleTests {
             (core.persistedGuiConfig()?.layers
             .first { $0.isDefault }?.bindings ?? [])
             .filter { $0.combo == "control+option+5" }
-        #expect(goToFive.count == 1)
+        expectEqual(goToFive.count, 1)
         #expect(
             goToFive.first?.lua == "KiwiDesk.focus_space(\"5\")"
         )
@@ -313,14 +313,14 @@ struct StarterRescaleTests {
 
         // Vacuity: the change must actually have reached a fifth
         // space, or the top-up had no reason to want this digit.
-        #expect(core.state.workspaces.allSpaces.count == 5)
+        expectEqual(core.state.workspaces.allSpaces.count, 5)
         let claimed =
             (core.persistedGuiConfig()?.layers
             .first { $0.isDefault }?.bindings ?? [])
             .filter { $0.combo == contested }
         // Still exactly one ⌃⌥5 — the user's, not overwritten by
         // the default focus_space row.
-        #expect(claimed.count == 1)
-        #expect(claimed.first?.lua == "KiwiDesk.toggle_floating()")
+        expectEqual(claimed.count, 1)
+        expectEqual(claimed.first?.lua, "KiwiDesk.toggle_floating()")
     }
 }

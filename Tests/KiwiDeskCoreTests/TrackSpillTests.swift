@@ -36,7 +36,7 @@ struct TrackSpillTests {
             minWindowSize: 200,
             track: vTrack
         )
-        #expect(TrackLayout.trackCapacity(for: vertical) == 3)
+        expectEqual(TrackLayout.trackCapacity(for: vertical), 3)
 
         var hTrack = TrackParams()
         hTrack.axis = .horizontal
@@ -46,7 +46,7 @@ struct TrackSpillTests {
             minWindowSize: 200,
             track: hTrack
         )
-        #expect(TrackLayout.trackCapacity(for: horizontal) == 6)
+        expectEqual(TrackLayout.trackCapacity(for: horizontal), 6)
     }
 
     @Test("No minimum makes the track unbounded (never spills)")
@@ -56,7 +56,7 @@ struct TrackSpillTests {
             gaps: zeroGaps,
             minWindowSize: 0
         )
-        #expect(TrackLayout.trackCapacity(for: context) == .max)
+        expectEqual(TrackLayout.trackCapacity(for: context), .max)
     }
 
     @Test("fillSeed packs the tiled list into tracks of capacity")
@@ -99,7 +99,7 @@ struct TrackSpillTests {
             isTiled: allTiled
         )
         space.focused = w[1]
-        #expect(space.trackBreaks == [w[0]])
+        expectEqual(space.trackBreaks, [w[0]])
         // Track now holds 2 >= 2 → w2 spills into a NEW track.
         space.insertIntoTrack(
             w[2],
@@ -109,8 +109,8 @@ struct TrackSpillTests {
             trackCap: 0,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[1], w[2]])
-        #expect(space.trackBreaks == [w[0], w[2]])
+        expectEqual(space.windows, [w[0], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[0], w[2]])
     }
 
     @Test("After a spill the new track fills next (recursion)")
@@ -133,7 +133,7 @@ struct TrackSpillTests {
             isTiled: allTiled
         )
         space.focused = w[2]
-        #expect(space.trackBreaks == [w[0], w[2]])
+        expectEqual(space.trackBreaks, [w[0], w[2]])
         // The new track holds 1 < 2 → w3 fills it, no spill.
         space.insertIntoTrack(
             w[3],
@@ -143,8 +143,8 @@ struct TrackSpillTests {
             trackCap: 0,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[1], w[2], w[3]])
-        #expect(space.trackBreaks == [w[0], w[2]])
+        expectEqual(space.windows, [w[0], w[1], w[2], w[3]])
+        expectEqual(space.trackBreaks, [w[0], w[2]])
     }
 
     @Test("A fixed cap with no room piles instead of spilling")
@@ -167,8 +167,8 @@ struct TrackSpillTests {
             trackCap: 1,
             isTiled: allTiled
         )
-        #expect(space.windows == [w[0], w[1], w[2]])
-        #expect(space.trackBreaks == [w[0]])
+        expectEqual(space.windows, [w[0], w[1], w[2]])
+        expectEqual(space.trackBreaks, [w[0]])
     }
 
     @Test("A traveler (nil capacity) always joins, never spills")
@@ -191,7 +191,7 @@ struct TrackSpillTests {
             trackCap: 0,
             isTiled: allTiled
         )
-        #expect(space.trackBreaks == [w[0]])
+        expectEqual(space.trackBreaks, [w[0]])
     }
 
     // MARK: Mode-entry seed
@@ -209,6 +209,6 @@ struct TrackSpillTests {
             .track,
             trackSeed: TrackLayout.fillSeed(tiled: w, capacity: 2)
         )
-        #expect(manager["1"]?.trackBreaks == [w[0], w[2]])
+        expectEqual(manager["1"]?.trackBreaks, [w[0], w[2]])
     }
 }

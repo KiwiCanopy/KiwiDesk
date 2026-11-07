@@ -24,8 +24,8 @@ struct AppRuleCommandsTests {
             run(core, "app_rule.set_space", ["Com.Spotify.Client", "1"])
                 .isSuccess
         )
-        #expect(core.state.appRules["com.spotify.client"] == "1")
-        #expect(core.guiConfigStore.load()?.appRules == before)
+        expectEqual(core.state.appRules["com.spotify.client"], "1")
+        expectEqual(core.guiConfigStore.load()?.appRules, before)
         #expect(try core.profiles.read(name: "Work").appRules == nil)
         #expect(
             run(core, "app_rule.remove_space", ["com.spotify.client"])
@@ -66,7 +66,7 @@ struct AppRuleCommandsTests {
         #expect(!run(core, "app_rule.set_space", ["", "1"]).isSuccess)
         #expect(!run(core, "app_rule.set_space", ["a:b", "1"]).isSuccess)
         let unknown = run(core, "app_rule.set_space", ["com.x", "9"])
-        #expect(unknown.error == "unknown space: 9")
+        expectEqual(unknown.error, "unknown space: 9")
         #expect(!run(core, "app_rule.remove_space", ["com.x"]).isSuccess)
         #expect(!run(core, "app_rule.remove_float", ["com.x"]).isSuccess)
         #expect(core.state.appRules["com.x"] == nil)
@@ -82,7 +82,7 @@ struct AppRuleCommandsTests {
             Issue.record("no list")
             return
         }
-        #expect(fields["app_rules"] == .object(["com.x": .string("1")]))
+        expectEqual(fields["app_rules"], .object(["com.x": .string("1")]))
         guard case .array(let floats)? = fields["float_rules"] else {
             Issue.record("no floats")
             return
@@ -91,8 +91,8 @@ struct AppRuleCommandsTests {
         // The lists take the Lua globals' names (#2963).
         #expect(fields["tile_rules"] != nil)
         #expect(fields["ignore_rules"] != nil)
-        #expect(fields["owner"] == .string("gui"))
-        #expect(fields["profile"] == .string("Work"))
+        expectEqual(fields["owner"], .string("gui"))
+        expectEqual(fields["profile"], .string("Work"))
     }
 
     @Test("a new rule reports the shared rules as its owner")
@@ -104,8 +104,8 @@ struct AppRuleCommandsTests {
             [.string("com.x"), .string("1")]
         )
         let leaf = KeepFixture.leaf(set, "/app_rules/")
-        #expect(leaf?.id == "/app_rules/com.x")
-        #expect(leaf?.owner == .sharedRules)
+        expectEqual(leaf?.id, "/app_rules/com.x")
+        expectEqual(leaf?.owner, .sharedRules)
         let float = KeepFixture.report(
             core,
             "app_rule.set_float",
@@ -129,7 +129,7 @@ struct AppRuleCommandsTests {
             "app_rule.remove_space",
             [.string("com.x")]
         )
-        #expect(KeepFixture.leaf(set, "/app_rules/")?.owner == .profile)
+        expectEqual(KeepFixture.leaf(set, "/app_rules/")?.owner, .profile)
     }
 
     @Test("a Space the profile does not declare cannot be kept")
@@ -142,7 +142,7 @@ struct AppRuleCommandsTests {
             [.string("com.x"), .string("2")]
         )
         let leaf = KeepFixture.leaf(set, "/app_rules/")
-        #expect(leaf?.notKeepable == .temporarySpace)
+        expectEqual(leaf?.notKeepable, .temporarySpace)
     }
 
     @Test("an init.lua config owns its rules")
@@ -154,6 +154,6 @@ struct AppRuleCommandsTests {
             [.string("com.x")]
         )
         let leaf = KeepFixture.leaf(set, "/float_rules/")
-        #expect(leaf?.notKeepable == .luaOwned)
+        expectEqual(leaf?.notKeepable, .luaOwned)
     }
 }

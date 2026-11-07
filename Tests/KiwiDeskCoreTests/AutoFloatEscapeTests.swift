@@ -43,12 +43,12 @@ struct AutoFloatEscapeTests {
         #expect(!tiled.applies(to: Self.app))
         #expect(tiled.applies(to: "com.apple.mail"))
         #expect(!FloatGuess(enabled: false).applies(to: "com.apple.mail"))
-        #expect(tiled.tileRules == [Self.app])
+        expectEqual(tiled.tileRules, [Self.app])
     }
 
     @Test("a fixed size floats on the guess, and tiles without it")
     func fixedSizeIsAGuess() {
-        #expect(reason(facts(), FloatRules()) == .fixedSize)
+        expectEqual(reason(facts(), FloatRules()), .fixedSize)
         let tiled = FloatRules(guess: FloatGuess(tileRules: [Self.app]))
         #expect(reason(facts(), tiled) == nil)
         let off = FloatRules(guess: FloatGuess(enabled: false))
@@ -65,12 +65,12 @@ struct AutoFloatEscapeTests {
                 == .panel
         )
         let ruled = FloatRules(["\(Self.app):Friends"], guess: tiled)
-        #expect(reason(facts(), ruled) == .rule)
+        expectEqual(reason(facts(), ruled), .rule)
         let off = FloatRules(
             ["\(Self.app):Friends"],
             guess: FloatGuess(enabled: false)
         )
-        #expect(reason(facts(), off) == .rule)
+        expectEqual(reason(facts(), off), .rule)
     }
 
     /// No Dock icon is a guess too: with a Tile rule the app's
@@ -90,15 +90,15 @@ struct AutoFloatEscapeTests {
             )
         }
         let resizable = facts(zoomable: true)
-        #expect(verdict(resizable, FloatRules()) == .floats(.accessoryApp))
+        expectEqual(verdict(resizable, FloatRules()), .floats(.accessoryApp))
         let tiled = FloatRules(guess: FloatGuess(tileRules: [Self.app]))
-        #expect(verdict(resizable, tiled) == .tiles)
+        expectEqual(verdict(resizable, tiled), .tiles)
         #expect(
             verdict(facts(kAXDialogSubrole), tiled) == .floats(.panel)
         )
         let off = FloatRules(guess: FloatGuess(enabled: false))
-        #expect(verdict(resizable, off) == .tiles)
-        #expect(verdict(facts(), off) == .tiles)
+        expectEqual(verdict(resizable, off), .tiles)
+        expectEqual(verdict(facts(), off), .tiles)
     }
 
     /// Own chrome is structure, never a guess.
@@ -113,7 +113,7 @@ struct AutoFloatEscapeTests {
             bundleID: Self.app,
             rules: FloatRules(guess: FloatGuess(enabled: false))
         )
-        #expect(verdict == .floats(.panel))
+        expectEqual(verdict, .floats(.panel))
     }
 
     /// The pill and the bar menu's subtitle: a guess names App

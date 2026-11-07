@@ -70,10 +70,10 @@ struct AwayDestroyPruneTests {
         }
         core.deferred.sleep = { _ in }
         core.windowServerChanged(.destroyed, id: WindowID(7))
-        #expect(reads == 0)
+        expectEqual(reads, 0)
         #expect(core.state.awayWindows[WindowID(7)] != nil)
         await core.deferred.task(for: .awayDestroyCheck)?.value
-        #expect(reads == 1)
+        expectEqual(reads, 1)
         #expect(core.state.awayWindows[WindowID(7)] == nil)
         #expect(logs().contains { $0.hasPrefix("away: w7 (App100) closed") })
     }
@@ -124,6 +124,6 @@ struct AwayDestroyPruneTests {
         let expected =
             live
             ? KiwiCore.awayBackstopInterval : KiwiCore.awayCensusInterval
-        #expect(sleeps.all == [expected])
+        expectEqual(sleeps.all, [expected])
     }
 }

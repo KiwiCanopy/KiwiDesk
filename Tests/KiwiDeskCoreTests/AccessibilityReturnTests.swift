@@ -68,7 +68,7 @@ struct AccessibilityReturnTests {
     func yieldIsReturned() {
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        #expect(core.accessibilityReturn?.victim == WindowID(1))
+        expectEqual(core.accessibilityReturn?.victim, WindowID(1))
         // The yield: a clickless focus report for the foreign
         // regular app, inside the grace.
         var log: [String] = []
@@ -257,7 +257,7 @@ struct AccessibilityReturnTests {
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
         let at = core.accessibilityReturn?.at
         #expect(at != nil)
-        #expect(at == core.wallClock())
+        expectEqual(at, core.wallClock())
     }
 
     @Test("A lazy panel re-report never renews the grace")
@@ -271,7 +271,7 @@ struct AccessibilityReturnTests {
         let aged = core.wallClock().addingTimeInterval(-5)
         core.accessibilityReturn?.at = aged
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        #expect(core.accessibilityReturn?.at == aged)
+        expectEqual(core.accessibilityReturn?.at, aged)
     }
 
     @Test("A foreign focused window is not a victim")

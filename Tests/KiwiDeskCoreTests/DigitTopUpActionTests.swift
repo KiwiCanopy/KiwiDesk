@@ -34,7 +34,7 @@ struct DigitTopUpActionTests {
             base: .standard
         )
         let five = added.filter { $0.lua.contains("(\"5\")") }
-        #expect(five.count == 3)
+        expectEqual(five.count, 3)
         #expect(five.allSatisfy { $0.combo.hasSuffix("+5") })
         let six = added.filter { $0.lua.contains("(\"6\")") }
         #expect(six.allSatisfy { $0.combo.hasSuffix("+6") })
@@ -78,10 +78,10 @@ struct DigitTopUpActionTests {
             base: .standard
         )
         let combos = added.map(\.combo)
-        #expect(combos.count == Set(combos).count)
+        expectEqual(combos.count, Set(combos).count)
         let five = added.filter { $0.lua.contains("(\"5\")") }
         #expect(five.map(\.combo).allSatisfy { $0.hasSuffix("+5") })
-        #expect(five.count == 3)
+        expectEqual(five.count, 3)
         #expect(!added.contains { $0.lua.contains("(\"Mail\")") })
     }
 

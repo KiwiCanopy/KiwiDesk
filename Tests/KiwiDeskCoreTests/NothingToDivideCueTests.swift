@@ -97,7 +97,7 @@ struct NothingToDivideCueTests {
                 args: [.string("x"), .number(-300)]
             )
         }
-        #expect(seen == [])
+        expectEqual(seen, [])
         // The write lands in the space's session ratio (#458).
         let written =
             core.sessionRatios(of: sp.id).masterRatio
@@ -108,7 +108,7 @@ struct NothingToDivideCueTests {
                 args: [.string("y"), .number(-300)]
             )
         }
-        #expect(cross == [.noAxisHere(WindowID(1), axis: "y")])
+        expectEqual(cross, [.noAxisHere(WindowID(1), axis: "y")])
     }
 
     @Test("A stack window alone in its column says so")

@@ -54,13 +54,13 @@ struct GlassBoxContentFitTests {
             box.tint,
             at: CGRect(x: 10, y: 0, width: 107, height: 30)
         )
-        #expect(box.content.frame.size == box.glass.bounds.size)
+        expectEqual(box.content.frame.size, box.glass.bounds.size)
         place(
             box.glass,
             box.tint,
             at: CGRect(x: 80, y: 0, width: 63, height: 30)
         )
-        #expect(box.content.frame.size == box.glass.bounds.size)
+        expectEqual(box.content.frame.size, box.glass.bounds.size)
     }
 
     /// A glass no box hosts — the hover peek's, the sticky mark's —
@@ -82,7 +82,7 @@ struct GlassBoxContentFitTests {
             frame: CGRect(x: 0, y: 0, width: 200, height: 260),
             cornerRadius: 8
         )
-        #expect(content.frame == glass.bounds)
+        expectEqual(content.frame, glass.bounds)
     }
 
     /// The device state: the box already has its size, so the
@@ -100,7 +100,7 @@ struct GlassBoxContentFitTests {
             box.tint,
             at: CGRect(x: 10, y: 0, width: 107, height: 30)
         )
-        #expect(box.content.frame == box.glass.bounds)
+        expectEqual(box.content.frame, box.glass.bounds)
     }
 
     /// The device state after an animated grow: the host has its
@@ -118,7 +118,7 @@ struct GlassBoxContentFitTests {
         box.content.frame = box.glass.bounds
         GlassBox.settle(box.glass)
         let host = try #require(GlassBox.host(of: box.glass))
-        #expect(box.glass.frame == host.bounds)
+        expectEqual(box.glass.frame, host.bounds)
         // The content rides in the tint, which Auto Layout rounds
         // to the backing (#2569).
         #expect(GlassPlate.fills(box.content.frame, box.glass.bounds))
@@ -146,8 +146,8 @@ struct GlassBoxContentFitTests {
         #expect(landing.0 > BarMotion.slide)
         box.glass.frame = CGRect(x: 0, y: 0, width: 62.5, height: 30)
         landing.1()
-        #expect(box.glass.frame == host.bounds)
-        #expect(box.content.frame == box.glass.bounds)
+        expectEqual(box.glass.frame, host.bounds)
+        expectEqual(box.content.frame, box.glass.bounds)
     }
 
     /// A landing a newer glide has superseded writes nothing, so a
@@ -169,12 +169,12 @@ struct GlassBoxContentFitTests {
                 at: CGRect(x: 10, y: 0, width: width, height: 30)
             )
         }
-        #expect(landings.count == 2)
+        expectEqual(landings.count, 2)
         let stranded = CGRect(x: 0, y: 0, width: 107.5, height: 30)
         box.glass.frame = stranded
         landings.first?()
-        #expect(box.glass.frame == stranded)
+        expectEqual(box.glass.frame, stranded)
         landings.last?()
-        #expect(box.glass.frame == host.bounds)
+        expectEqual(box.glass.frame, host.bounds)
     }
 }

@@ -118,10 +118,10 @@ struct AdoptionHealTests {
     func untrackedIDFiresAReconcile() {
         let (loop, box) = makeLoop()
         attach(loop)
-        #expect(box.windowQueries == 0)
+        expectEqual(box.windowQueries, 0)
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
     }
 
     @Test("an empty census stays free of AX reads")
@@ -129,8 +129,8 @@ struct AdoptionHealTests {
         let (loop, box) = makeLoop()
         attach(loop)
         loop.healSweep()
-        #expect(box.censusReads == 1)
-        #expect(box.windowQueries == 0)
+        expectEqual(box.censusReads, 1)
+        expectEqual(box.windowQueries, 0)
     }
 
     @Test("a tracked overlay cannot shadow a missed window")
@@ -145,7 +145,7 @@ struct AdoptionHealTests {
         loop.elements[pid] = [WindowID(5): dummyElement]
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
     }
 
     @Test("a fully tracked census stays free of AX reads")
@@ -155,7 +155,7 @@ struct AdoptionHealTests {
         loop.elements[pid] = [WindowID(9): dummyElement]
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.windowQueries == 0)
+        expectEqual(box.windowQueries, 0)
     }
 
     @Test("a fruitless heal quiets those ids until a new one")
@@ -167,16 +167,16 @@ struct AdoptionHealTests {
         attach(loop)
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         loop.healSweep()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         // A NEW id is new evidence: the gate re-opens once,
         // while the old id stays hushed.
         box.census = [pid: [WindowID(9), WindowID(10)]]
         loop.healSweep()
-        #expect(box.windowQueries == 2)
+        expectEqual(box.windowQueries, 2)
         loop.healSweep()
-        #expect(box.windowQueries == 2)
+        expectEqual(box.windowQueries, 2)
     }
 
     @Test("the sweep repairs a broken registration")
@@ -188,10 +188,10 @@ struct AdoptionHealTests {
         // the deaf-observer case IS a window nobody adopted.
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.observer.repairs == 1)
+        expectEqual(box.observer.repairs, 1)
         // Healthy again: the next pass leaves it alone.
         loop.healSweep()
-        #expect(box.observer.repairs == 1)
+        expectEqual(box.observer.repairs, 1)
     }
 
     @Test("a reconcile repairs a broken registration")
@@ -202,7 +202,7 @@ struct AdoptionHealTests {
         attach(loop)
         box.observer.needsRegistrationRepair = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.observer.repairs == 1)
+        expectEqual(box.observer.repairs, 1)
     }
 
     @Test("an app whose launch-time attach failed is attached")
@@ -215,7 +215,7 @@ struct AdoptionHealTests {
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
         #expect(loop.observes(pid: pid))
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
     }
 
     @Test("a sweep before start is inert")
@@ -223,8 +223,8 @@ struct AdoptionHealTests {
         let (loop, box) = makeLoop(started: false)
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.censusReads == 0)
-        #expect(box.windowQueries == 0)
+        expectEqual(box.censusReads, 0)
+        expectEqual(box.windowQueries, 0)
     }
 
     @Test("detach clears the quiet gate for a reused pid")
@@ -237,12 +237,12 @@ struct AdoptionHealTests {
         attach(loop)
         box.census = [pid: [WindowID(9)]]
         loop.healSweep()
-        #expect(box.windowQueries == 1)
+        expectEqual(box.windowQueries, 1)
         loop.detach(pid: pid, restoreEnhancedUI: false)
         // Same census ids, fresh process: the missed-attach
         // branch must fire, not inherit the hush.
         loop.healSweep()
-        #expect(box.windowQueries == 2)
+        expectEqual(box.windowQueries, 2)
     }
 
     @Test("a transient drop queues one re-track per window")
@@ -251,25 +251,25 @@ struct AdoptionHealTests {
         let id = WindowID(42)
         loop.markTransientDrop(pid: pid, id: id)
         loop.markTransientDrop(pid: pid, id: id)
-        #expect(box.drops == 1)
+        expectEqual(box.drops, 1)
         // A further DISTINCT drop rides the already-armed
         // one-shot instead of pushing its deadline back.
         loop.markTransientDrop(pid: pid, id: WindowID(43))
-        #expect(box.drops == 1)
-        #expect(loop.drainPendingRetrack() == [pid])
+        expectEqual(box.drops, 1)
+        expectEqual(loop.drainPendingRetrack(), [pid])
         // Drained: nothing left for the scheduled task, and the
         // next drop re-arms from idle.
         #expect(loop.drainPendingRetrack().isEmpty)
         loop.markTransientDrop(pid: pid, id: WindowID(44))
-        #expect(box.drops == 2)
+        expectEqual(box.drops, 2)
         // The ledger clears with its app, so a relaunch reusing
         // the pid gets a fresh retry.
         _ = loop.drainPendingRetrack()
         loop.markTransientDrop(pid: pid, id: id)
-        #expect(box.drops == 2)
+        expectEqual(box.drops, 2)
         loop.detach(pid: pid, restoreEnhancedUI: false)
         loop.markTransientDrop(pid: pid, id: id)
-        #expect(box.drops == 3)
+        expectEqual(box.drops, 3)
     }
 
     @Test("the transient retry ledger is capped per app")
@@ -290,9 +290,9 @@ struct AdoptionHealTests {
         // pass this test as 0 == 0. Derived from the constant,
         // never restated.
         let fires = box.drops
-        #expect(fires == EventLoop.transientRetryCap)
+        expectEqual(fires, EventLoop.transientRetryCap)
         loop.markTransientDrop(pid: pid, id: WindowID(1))
-        #expect(box.drops == fires)
+        expectEqual(box.drops, fires)
         #expect(loop.drainPendingRetrack().isEmpty)
     }
 }

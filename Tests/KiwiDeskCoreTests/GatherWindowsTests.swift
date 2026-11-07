@@ -91,7 +91,7 @@ struct GatherTargetsTests {
         let frames = targets(state)
         let frame = try #require(frames[WindowID(42)])
         // One tile: the whole visible frame (#1709).
-        #expect(frame == axVisible)
+        expectEqual(frame, axVisible)
     }
 
     @Test("windows are resized to the cell, not kept")
@@ -104,8 +104,8 @@ struct GatherTargetsTests {
         )
         let frames = targets(state)
         let frame = try #require(frames[WindowID(1)])
-        #expect(frame.width == 1920)
-        #expect(frame.height == 1055)
+        expectEqual(frame.width, 1920)
+        expectEqual(frame.height, 1055)
     }
 
     /// Every Space's floats join the grid (#1864): a stop carries
@@ -123,7 +123,7 @@ struct GatherTargetsTests {
             primaryHeight: primaryH
         )
         let group = try #require(groups.first)
-        #expect(groups.count == 1)
+        expectEqual(groups.count, 1)
         #expect(group.windows == [WindowID(98), WindowID(99), WindowID(100)])
         let frames = targets(state)
         for id in group.windows {
@@ -209,9 +209,9 @@ struct GatherTargetsTests {
             state: state,
             primaryHeight: primaryH
         )
-        #expect(groups.count == 1)
+        expectEqual(groups.count, 1)
         let group = try #require(groups.first)
-        #expect(group.windows.count == 12)
+        expectEqual(group.windows.count, 12)
         // And the grid over it fills every cell twice.
         let frames = targets(state)
         var counts: [String: Int] = [:]
@@ -223,7 +223,7 @@ struct GatherTargetsTests {
             counts["\(col),\(row)", default: 0] += 1
         }
         #expect(counts.values.allSatisfy { $0 == 2 })
-        #expect(counts.count == 6)
+        expectEqual(counts.count, 6)
     }
 
     @Test("windows across spaces share one display-wide grid")
@@ -251,7 +251,7 @@ struct GatherTargetsTests {
         let f1 = try #require(frames[WindowID(1)])
         let f2 = try #require(frames[WindowID(2)])
         // Two halves — no overlap, same row.
-        #expect(f1.origin == CGPoint(x: 0, y: 25))
-        #expect(f2.origin == CGPoint(x: 960, y: 25))
+        expectEqual(f1.origin, CGPoint(x: 0, y: 25))
+        expectEqual(f2.origin, CGPoint(x: 960, y: 25))
     }
 }

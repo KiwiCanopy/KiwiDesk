@@ -118,7 +118,7 @@ struct FirstRunKeymapTests {
         let parsed = seededBindings().compactMap {
             KeyCombo.parse($0.combo)
         }
-        #expect(parsed.count == seededBindings().count)
-        #expect(parsed.count == Set(parsed).count)
+        expectEqual(parsed.count, seededBindings().count)
+        expectEqual(parsed.count, Set(parsed).count)
     }
 }

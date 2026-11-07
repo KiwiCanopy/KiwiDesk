@@ -70,13 +70,13 @@ struct FloatDropRefileTests {
         let core = makeCore()
         core.state.setFloating(float, true)
         dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
+        expectEqual(core.state.workspaces.space(of: float), SpaceID("2"))
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows == [WindowID(2)]
         )
         // The display follows the drop, as a tiled one's does.
-        #expect(core.activeSpace?.id == SpaceID("2"))
-        #expect(core.state.windows[float]?.isFloating == true)
+        expectEqual(core.activeSpace?.id, SpaceID("2"))
+        expectEqual(core.state.windows[float]?.isFloating, true)
     }
 
     /// The retile the re-file runs judges the state frame, so the
@@ -88,7 +88,7 @@ struct FloatDropRefileTests {
         let stale = CGRect(x: 100, y: 50, width: 400, height: 400)
         core.state.apply(.windowMoved(float, stale))
         dropFloat(core)
-        #expect(core.state.windows[float]?.frame == drop)
+        expectEqual(core.state.windows[float]?.frame, drop)
     }
 
     @Test("a drop on the same display keeps its Space")
@@ -96,7 +96,7 @@ struct FloatDropRefileTests {
         let core = makeCore(cursorX: 500)
         core.state.setFloating(float, true)
         dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID(1))
+        expectEqual(core.state.workspaces.space(of: float), SpaceID(1))
     }
 
     @Test("a sticky float is not re-filed, either scope")
@@ -118,10 +118,10 @@ struct FloatDropRefileTests {
     func floatingModeMemberJoinsTiled() {
         let core = makeCore()
         core.state.workspaces.setMode(SpaceID(1), .floating)
-        #expect(core.state.windows[float]?.isFloating == false)
+        expectEqual(core.state.windows[float]?.isFloating, false)
         dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
-        #expect(core.state.windows[float]?.isFloating == true)
+        expectEqual(core.state.workspaces.space(of: float), SpaceID("2"))
+        expectEqual(core.state.windows[float]?.isFloating, true)
         // A USER float, as the float verb writes: detection
         // cannot re-tile it, and it reopens floating (owner
         // ruling 2026-09-26).
@@ -134,8 +134,8 @@ struct FloatDropRefileTests {
         core.state.workspaces.setMode(SpaceID(1), .floating)
         core.state.workspaces.setMode("2", .floating)
         dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
-        #expect(core.state.windows[float]?.isFloating == false)
+        expectEqual(core.state.workspaces.space(of: float), SpaceID("2"))
+        expectEqual(core.state.windows[float]?.isFloating, false)
         #expect(!core.state.userFloated.contains(float))
     }
 
@@ -147,7 +147,7 @@ struct FloatDropRefileTests {
         core.state.setFloating(float, true)
         core.state.workspaces.activate("2")
         dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
+        expectEqual(core.state.workspaces.space(of: float), SpaceID("2"))
     }
 
     @Test("the drop appends to a Space that holds windows")
@@ -171,10 +171,10 @@ struct FloatDropRefileTests {
             if event == .windowMovedToSpace { moves.append(data) }
         }
         dropFloat(core)
-        #expect(moves.count == 1)
+        expectEqual(moves.count, 1)
         if case .object(let payload)? = moves.first {
-            #expect(payload["from_space_id"] == .string("1"))
-            #expect(payload["to_space_id"] == .string("2"))
+            expectEqual(payload["from_space_id"], .string("1"))
+            expectEqual(payload["to_space_id"], .string("2"))
         }
     }
 }

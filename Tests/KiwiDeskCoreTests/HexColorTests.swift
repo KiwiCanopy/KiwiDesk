@@ -9,7 +9,7 @@ struct HexColorTests {
         let rgb = try #require(
             HexColor.parse("#4E9F3D")
         )
-        #expect(rgb.alpha == 1)
+        expectEqual(rgb.alpha, 1)
         #expect(abs(rgb.green - 0x9F / 255.0) < 0.001)
         let rgba = try #require(
             HexColor.parse("8B5E3C40")

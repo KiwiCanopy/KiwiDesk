@@ -62,8 +62,8 @@ struct SavedModesTests {
         let modes = core.savedModes(
             for: [SpaceID("1"), SpaceID("2")]
         )
-        #expect(modes[SpaceID("1")] == .grid)
-        #expect(modes[SpaceID("2")] == .monocle)
+        expectEqual(modes[SpaceID("1")], .grid)
+        expectEqual(modes[SpaceID("2")], .monocle)
     }
 
     @Test("An unlisted space in a readable profile is .bsp")
@@ -81,7 +81,7 @@ struct SavedModesTests {
         // the genuine `.bsp` default rather than "unknown". The
         // two conditions have to stay distinguishable, which is
         // the whole reason this returns a sparse dictionary.
-        #expect(modes[SpaceID("9")] == .bsp)
+        expectEqual(modes[SpaceID("9")], .bsp)
         #expect(modes.keys.contains(SpaceID("9")))
     }
 
@@ -137,7 +137,7 @@ struct SavedModesTests {
         // The reason this method exists rather than calling the
         // single-space one per screen: five answers, one decode.
         let modes = core.savedModes(for: spaces)
-        #expect(modes.count == spaces.count)
+        expectEqual(modes.count, spaces.count)
         #expect(modes.values.allSatisfy { $0 == .grid })
     }
 

@@ -33,11 +33,11 @@ struct HealReopenOnReturnTests {
         var returns = 0
         manager.onReturn = { returns += 1 }
         manager.systemDidReturn(.direct)
-        #expect(returns == 1)
+        expectEqual(returns, 1)
         // A rest leg past its guard announces nothing.
         manager.isEnabled = true
         manager.systemWillRest(.lock)
-        #expect(returns == 1)
+        expectEqual(returns, 1)
     }
 
     @Test("the core wires a return leg to the heal's ledger")

@@ -73,7 +73,7 @@ struct AppBarGroupGlideTests {
         )
         #expect(overlay.itemViews[0] === group)
         #expect(glide.departures.isEmpty)
-        #expect(glide.arrivals.count == 2)
+        expectEqual(glide.arrivals.count, 2)
         #expect(glide.arrivals.allSatisfy { $0.from == slot })
         #expect(
             glide.arrivals.map { ObjectIdentifier($0.view) }
@@ -102,9 +102,9 @@ struct AppBarGroupGlideTests {
         )
         overlay.standArrivals(glide.arrivals)
         let arrival = overlay.itemViews[1]
-        #expect(arrival.frame == slot)
-        #expect(arrival.alphaValue == 0)
-        #expect(overlay.itemViews[0].alphaValue == 1)
+        expectEqual(arrival.frame, slot)
+        expectEqual(arrival.alphaValue, 0)
+        expectEqual(overlay.itemViews[0].alphaValue, 1)
     }
 
     /// A boxed glass run keeps each item's glass with its view, so
@@ -147,7 +147,7 @@ struct AppBarGroupGlideTests {
             overlay.boxGlasses.map(ObjectIdentifier.init)
                 == [firstGlass, otherGlass].map(ObjectIdentifier.init)
         )
-        #expect(fold.departures.map(\.view) == [second])
+        expectEqual(fold.departures.map(\.view), [second])
         #expect(second.superview === overlay.itemRun)
         #expect(secondGlass.superview == nil)
         // Released again, the member travels bare: its glass is
@@ -157,7 +157,7 @@ struct AppBarGroupGlideTests {
         let arrival = overlay.itemViews[1]
         #expect(overlay.glidingIn.contains(WindowID(2)))
         #expect(arrival.superview === overlay.itemRun)
-        #expect(GlassBox.host(of: overlay.boxGlasses[1])?.isHidden == true)
+        expectEqual(GlassBox.host(of: overlay.boxGlasses[1])?.isHidden, true)
     }
 
     /// A released member's glass is paired by window, so no render
@@ -206,7 +206,7 @@ struct AppBarGroupGlideTests {
         let hosts = overlay.itemRun.subviews.filter {
             $0 is GlassBoxHost
         }
-        #expect(hosts.count == expanded.count)
+        expectEqual(hosts.count, expanded.count)
         #expect(
             hosts.allSatisfy {
                 $0.subviews.filter { $0 is NSGlassEffectView }.count == 1

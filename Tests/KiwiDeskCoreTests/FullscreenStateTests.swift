@@ -20,21 +20,21 @@ struct FullscreenStateTests {
     func foldAppliesVerdict() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        #expect(state.windows[WindowID(1)]?.isFullscreen == false)
+        expectEqual(state.windows[WindowID(1)]?.isFullscreen, false)
         state.apply(
             .windowFullscreenChanged(
                 WindowID(1),
                 isFullscreen: true
             )
         )
-        #expect(state.windows[WindowID(1)]?.isFullscreen == true)
+        expectEqual(state.windows[WindowID(1)]?.isFullscreen, true)
         state.apply(
             .windowFullscreenChanged(
                 WindowID(1),
                 isFullscreen: false
             )
         )
-        #expect(state.windows[WindowID(1)]?.isFullscreen == false)
+        expectEqual(state.windows[WindowID(1)]?.isFullscreen, false)
     }
 
     @Test("Float mutations leave the fullscreen flag alone")
@@ -51,10 +51,10 @@ struct FullscreenStateTests {
         // may drop the fullscreen verdict (unlike the overlay
         // flag, which is coupled to floating, #300).
         state.setFloating(WindowID(1), false)
-        #expect(state.windows[WindowID(1)]?.isFullscreen == true)
+        expectEqual(state.windows[WindowID(1)]?.isFullscreen, true)
         state.apply(
             .windowFloatChanged(WindowID(1), isFloating: false)
         )
-        #expect(state.windows[WindowID(1)]?.isFullscreen == true)
+        expectEqual(state.windows[WindowID(1)]?.isFullscreen, true)
     }
 }

@@ -36,7 +36,7 @@ struct DormantProfileModelTests {
             from: Data(json.utf8)
         )
         #expect(profile.isDormant)
-        #expect(profile.monitorCount == 2)
+        expectEqual(profile.monitorCount, 2)
     }
 
     @Test("A zero monitor_count does not make a dormant profile")
@@ -65,7 +65,7 @@ struct DormantProfileModelTests {
         let released = profile.release(["B:2x2", "A:1x1"])
         #expect(released)
         #expect(profile.isDormant)
-        #expect(profile.monitorCount == 2)
+        expectEqual(profile.monitorCount, 2)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let decoder = JSONDecoder()
@@ -74,7 +74,7 @@ struct DormantProfileModelTests {
             Profile.self,
             from: encoder.encode(profile)
         )
-        #expect(back == profile)
+        expectEqual(back, profile)
         let wrongCount = profile.upsert(
             MonitorSet(monitors: ["C:3x3"])
         )

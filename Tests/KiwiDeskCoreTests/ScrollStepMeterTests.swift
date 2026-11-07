@@ -48,42 +48,42 @@ struct ScrollStepMeterTests {
         let steps = (0..<10).map { _ in
             meter.feed(event(.changed, dx: stride))
         }
-        #expect(steps.reduce(0, +) == 1)
+        expectEqual(steps.reduce(0, +), 1)
         _ = meter.feed(event(.ended))
         _ = meter.feed(event(.began))
-        #expect(meter.feed(event(.changed, dx: -stride)) == -1)
+        expectEqual(meter.feed(event(.changed, dx: -stride)), -1)
     }
 
     @Test("long swipes, a stride of travel is one step and the rest carries")
     func strideCarries() {
         var meter = byLength()
-        #expect(meter.feed(event(.changed, dx: stride * 0.6)) == 0)
-        #expect(meter.feed(event(.changed, dx: stride * 0.6)) == 1)
-        #expect(meter.feed(event(.changed, dx: stride * 0.7)) == 0)
-        #expect(meter.feed(event(.changed, dx: stride * 0.2)) == 1)
+        expectEqual(meter.feed(event(.changed, dx: stride * 0.6)), 0)
+        expectEqual(meter.feed(event(.changed, dx: stride * 0.6)), 1)
+        expectEqual(meter.feed(event(.changed, dx: stride * 0.7)), 0)
+        expectEqual(meter.feed(event(.changed, dx: stride * 0.2)), 1)
     }
 
     @Test("long swipes, reversing unwinds the carried travel")
     func reverseUnwinds() {
         var meter = byLength()
-        #expect(meter.feed(event(.changed, dx: stride * 0.9)) == 0)
-        #expect(meter.feed(event(.changed, dx: -stride * 0.9)) == 0)
-        #expect(meter.feed(event(.changed, dx: -stride)) == -1)
+        expectEqual(meter.feed(event(.changed, dx: stride * 0.9)), 0)
+        expectEqual(meter.feed(event(.changed, dx: -stride * 0.9)), 0)
+        expectEqual(meter.feed(event(.changed, dx: -stride)), -1)
     }
 
     @Test("long swipes, several strides in one event are several steps")
     func manyAtOnce() {
         var meter = byLength()
-        #expect(meter.feed(event(.changed, dy: -stride * 3.5)) == -3)
+        expectEqual(meter.feed(event(.changed, dy: -stride * 3.5)), -3)
     }
 
     @Test("long swipes: the first window comes early, then one per distance")
     func firstEarlyThenDistance() {
         var meter = ScrollStepMeter(longSwipes: true, distance: 200)
         _ = meter.feed(event(.began))
-        #expect(meter.feed(event(.changed, dx: firstStep)) == 1)
-        #expect(meter.feed(event(.changed, dx: 199)) == 0)
-        #expect(meter.feed(event(.changed, dx: 1)) == 1)
+        expectEqual(meter.feed(event(.changed, dx: firstStep)), 1)
+        expectEqual(meter.feed(event(.changed, dx: 199)), 0)
+        expectEqual(meter.feed(event(.changed, dx: 1)), 1)
     }
 
     @Test("the glide never counts, either stepping")
@@ -109,7 +109,7 @@ struct ScrollStepMeterTests {
                 distance: stride
             )
             _ = meter.feed(event(.began, input: .wheel))
-            #expect(meter.feed(event(.changed, dy: 1, input: .wheel)) == 1)
+            expectEqual(meter.feed(event(.changed, dy: 1, input: .wheel)), 1)
             #expect(
                 meter.feed(
                     event(.changed, dy: -stride * 5, input: .wheel, time: 1)
@@ -124,8 +124,8 @@ struct ScrollStepMeterTests {
         _ = meter.feed(event(.changed, dx: stride * 0.9))
         _ = meter.feed(event(.ended))
         _ = meter.feed(event(.began))
-        #expect(meter.feed(event(.changed, dx: 5)) == 0)
-        #expect(meter.feed(event(.changed, dx: firstStep)) == 1)
+        expectEqual(meter.feed(event(.changed, dx: 5)), 0)
+        expectEqual(meter.feed(event(.changed, dx: firstStep)), 1)
     }
 
     @Test("the larger axis carries the step")
@@ -158,7 +158,7 @@ struct ScrollStepMeterTests {
         let steps = (0..<4).map {
             wheel(&meter, at: Double($0) * Self.quiet)
         }
-        #expect(steps == [-1, -1, -1, -1])
+        expectEqual(steps, [-1, -1, -1, -1])
     }
 
     @Test("a wheel steps a spin once, and re-arms on quiet")
@@ -170,8 +170,8 @@ struct ScrollStepMeterTests {
         let spin = (0..<50).map {
             wheel(&meter, at: Double($0) * Self.quiet / 5)
         }
-        #expect(spin.reduce(0, +) == -1)
-        #expect(wheel(&meter, at: 50 * Self.quiet) == -1)
+        expectEqual(spin.reduce(0, +), -1)
+        expectEqual(wheel(&meter, at: 50 * Self.quiet), -1)
     }
 
     @Test("a wheel re-arms when it turns the other way")
@@ -180,9 +180,9 @@ struct ScrollStepMeterTests {
             longSwipes: false,
             distance: 1
         )
-        #expect(wheel(&meter, at: 0) == -1)
-        #expect(wheel(&meter, at: 0.01) == 0)
-        #expect(wheel(&meter, dy: 10, at: 0.02) == 1)
+        expectEqual(wheel(&meter, at: 0), -1)
+        expectEqual(wheel(&meter, at: 0.01), 0)
+        expectEqual(wheel(&meter, dy: 10, at: 0.02), 1)
     }
 
     /// A retune past the router's pause would re-arm the latch at

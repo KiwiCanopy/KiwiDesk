@@ -60,7 +60,7 @@ struct KeybindingManagerTests {
             KiwiDesk.grab(function() resized = true end)
             """
         )
-        #expect(captured.count == 2)
+        expectEqual(captured.count, 2)
 
         let bindCombo = try #require(
             KeyCombo.parse("cmd+alt+h")
@@ -73,21 +73,21 @@ struct KeybindingManagerTests {
         )
 
         // Default layer: only the global bind is active.
-        #expect(registrar.registered.count == 1)
+        expectEqual(registrar.registered.count, 1)
         registrar.press(keyCode: bindCombo.keyCode)
-        #expect(lua.global("hits") == .number(1))
+        expectEqual(lua.global("hits"), .number(1))
 
         // Resize layer: only the layer bindings are active.
         manager.switchLayer("resize")
-        #expect(manager.currentLayer == "resize")
-        #expect(registrar.registered.count == 1)
+        expectEqual(manager.currentLayer, "resize")
+        expectEqual(registrar.registered.count, 1)
         registrar.press(keyCode: modeCombo.keyCode)
-        #expect(lua.global("resized") == .bool(true))
+        expectEqual(lua.global("resized"), .bool(true))
 
         // Back to default.
         manager.switchLayer("default")
         registrar.press(keyCode: bindCombo.keyCode)
-        #expect(lua.global("hits") == .number(2))
+        expectEqual(lua.global("hits"), .number(2))
     }
 
     @Test("Failing callbacks are disabled, not retried")
@@ -135,7 +135,7 @@ struct KeybindingManagerTests {
         )
         let combo = try #require(KeyCombo.parse("cmd+alt+h"))
         manager.bind(combo, ref: try #require(ref))
-        #expect(registrar.registered.count == 1)
+        expectEqual(registrar.registered.count, 1)
 
         // Armed recorder: nothing registered.
         manager.suspend()
@@ -148,12 +148,12 @@ struct KeybindingManagerTests {
         // Disarm: the same combo is live again and fires.
         manager.resume()
         #expect(!manager.isSuspended)
-        #expect(registrar.registered.count == 1)
+        expectEqual(registrar.registered.count, 1)
         registrar.press(keyCode: combo.keyCode)
-        #expect(lua.global("fired") == .number(1))
+        expectEqual(lua.global("fired"), .number(1))
         // Idempotent resume does not double-register.
         manager.resume()
-        #expect(registrar.registered.count == 1)
+        expectEqual(registrar.registered.count, 1)
     }
 
     @Test("A layer change during suspension registers on resume")
@@ -191,10 +191,10 @@ struct KeybindingManagerTests {
 
         manager.resume()
         // Resume registers the layer current *now*, not default.
-        #expect(registrar.registered.count == 1)
+        expectEqual(registrar.registered.count, 1)
         registrar.press(keyCode: modeCombo.keyCode)
-        #expect(lua.global("resized") == .bool(true))
-        #expect(lua.global("base") == LuaValue.none)
+        expectEqual(lua.global("resized"), .bool(true))
+        expectEqual(lua.global("base"), LuaValue.none)
     }
 
     @Test("Unknown layers are rejected")
@@ -205,7 +205,7 @@ struct KeybindingManagerTests {
         var logs: [String] = []
         manager.onLog = { logs.append($0) }
         manager.switchLayer("nope")
-        #expect(manager.currentLayer == "default")
+        expectEqual(manager.currentLayer, "default")
         #expect(logs.contains { $0.contains("nope") })
     }
 }

@@ -44,10 +44,10 @@ struct MonocleBoundCenterTests {
             in: context
         )
         let bounded = try #require(frames[w1])
-        #expect(bounded.size == CGSize(width: 715, height: 600))
+        expectEqual(bounded.size, CGSize(width: 715, height: 600))
         #expect(abs(bounded.midX - area.midX) < 0.01)
         #expect(abs(bounded.midY - area.midY) < 0.01)
-        #expect(frames[w2] == area)
+        expectEqual(frames[w2], area)
     }
 
     @Test("One consumed axis centers alone")
@@ -62,11 +62,11 @@ struct MonocleBoundCenterTests {
             in: context
         )
         let bounded = try #require(frames[w1])
-        #expect(bounded.width == 715)
+        expectEqual(bounded.width, 715)
         #expect(abs(bounded.midX - area.midX) < 0.01)
         // The unbounded axis keeps the full extent and origin.
-        #expect(bounded.height == area.height)
-        #expect(bounded.minY == area.minY)
+        expectEqual(bounded.height, area.height)
+        expectEqual(bounded.minY, area.minY)
     }
 
     @Test("An unmatched ask keeps the full frame")
@@ -81,6 +81,6 @@ struct MonocleBoundCenterTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 }

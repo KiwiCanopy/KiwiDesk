@@ -85,7 +85,7 @@ struct TrackSwapTests {
             ]
         )
         // Focus stays on the moved window.
-        #expect(after.focused == WindowID(2))
+        expectEqual(after.focused, WindowID(2))
     }
 
     @Test("Swaps tracks of different sizes, markers travel")
@@ -133,10 +133,10 @@ struct TrackSwapTests {
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
-        #expect(after.windows == [WindowID(2), WindowID(1)])
+        expectEqual(after.windows, [WindowID(2), WindowID(1)])
         // The weight is keyed by the head window and moved
         // with it — track [1] keeps its double share.
-        #expect(after.trackWeights[WindowID(1)] == 2)
+        expectEqual(after.trackWeights[WindowID(1)], 2)
     }
 
     @Test("Floating windows keep their array slots")
@@ -234,7 +234,7 @@ struct TrackSwapTests {
             args: [.string("prev")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error == "no prev track of focus")
+        expectEqual(response.error, "no prev track of focus")
     }
 
     @Test("A single track has no neighbor")
@@ -259,7 +259,7 @@ struct TrackSwapTests {
             args: [.string("down")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error == "expected prev|next")
+        expectEqual(response.error, "expected prev|next")
     }
 
     @Test("Non-track space and bad args fail cleanly")

@@ -65,9 +65,9 @@ struct SpaceBarDriverTests {
         )
         let first = try #require(items.first)
         #expect(first.active)
-        #expect(items[1].active == false)
-        #expect(first.apps.map(\.name) == ["Web", "Mail"])
-        #expect(first.apps.map(\.focused) == [false, true])
+        expectEqual(items[1].active, false)
+        expectEqual(first.apps.map(\.name), ["Web", "Mail"])
+        expectEqual(first.apps.map(\.focused), [false, true])
         #expect(items[1].apps.isEmpty)
     }
 
@@ -113,9 +113,9 @@ struct SpaceBarDriverTests {
         let apps = content.apps
         #expect(content.before.windows.isEmpty)
         #expect(content.after.windows.isEmpty)
-        #expect(apps.map(\.name) == ["Zed", "Finder", "Zed"])
-        #expect(apps.map(\.count) == [2, 1, 1])
-        #expect(apps.map(\.focused) == [true, false, false])
+        expectEqual(apps.map(\.name), ["Zed", "Finder", "Zed"])
+        expectEqual(apps.map(\.count), [2, 1, 1])
+        expectEqual(apps.map(\.focused), [true, false, false])
     }
 
     @Test("Groups past the span collapse into the +n overflow")
@@ -153,9 +153,9 @@ struct SpaceBarDriverTests {
             in: core.state.workspaces[SpaceID("1")]!,
             style: SpaceBarLook()
         )
-        #expect(content.apps.count == 6)
+        expectEqual(content.apps.count, 6)
         #expect(content.before.windows.isEmpty)
-        #expect(content.after.windows.count == 4)
+        expectEqual(content.after.windows.count, 4)
     }
 
     @Test("glyph_span drives the visible/overflow split (#376)")
@@ -177,8 +177,8 @@ struct SpaceBarDriverTests {
         var low = SpaceBarLook()
         low.glyphSpan = 2
         let capped = core.spaceBarApps(in: space, style: low)
-        #expect(capped.apps.count == 3)
-        #expect(capped.after.windows.count == 3)
+        expectEqual(capped.apps.count, 3)
+        expectEqual(capped.after.windows.count, 3)
         // An out-of-range span clamps via resolvedGlyphSpan:
         // 0 → 1, and a span past the group count shows all with
         // no badge.
@@ -191,7 +191,7 @@ struct SpaceBarDriverTests {
         var wide = SpaceBarLook()
         wide.glyphSpan = 99
         let all = core.spaceBarApps(in: space, style: wide)
-        #expect(all.apps.count == 6)
+        expectEqual(all.apps.count, 6)
         #expect(all.before.windows.isEmpty)
         #expect(all.after.windows.isEmpty)
     }
@@ -210,12 +210,12 @@ struct SpaceBarDriverTests {
         var style = SpaceBarLook()
         style.showFrontApp = true
         let front = core.frontApp(display: display, style: style)
-        #expect(front?.app.name == "Mail")
-        #expect(front?.app.count == 1)
+        expectEqual(front?.app.name, "Mail")
+        expectEqual(front?.app.count, 1)
         // The painted bar records WHICH window the segment is
         // about; the refresh gate reads exactly this
         // (`SpaceBarManager.showsTitle(of:)`).
-        #expect(front?.window == core.state.workspaces.lastFocused)
+        expectEqual(front?.window, core.state.workspaces.lastFocused)
     }
 
     @Test("Identifier ladder: icon, symbol probe, monogram")
@@ -314,7 +314,7 @@ struct CombinedClampTests {
         )
         let segments = [arrangement.space, arrangement.app]
             .compactMap { $0?.rect(in: strip, horizontal: true) }
-        #expect(segments.count == 2)
+        expectEqual(segments.count, 2)
         var clamped = CGRect(x: 10, y: 5, width: 400, height: 300)
         for segment in segments {
             clamped = AppBarGeometry.clampClear(
@@ -323,7 +323,7 @@ struct CombinedClampTests {
                 edge: .top
             )
         }
-        #expect(clamped.minY == 32)
-        #expect(clamped.size.width == 400)
+        expectEqual(clamped.minY, 32)
+        expectEqual(clamped.size.width, 400)
     }
 }

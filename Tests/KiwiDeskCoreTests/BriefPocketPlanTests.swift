@@ -14,19 +14,19 @@ struct BriefPocketPlanTests {
     )
     func intoTimeline() {
         let line = BriefPocketPlan.timeline(.into, flight: 0.3)
-        #expect(line.flightBegin == 0)
-        #expect(line.nodBegin == line.flightEnd)
+        expectEqual(line.flightBegin, 0)
+        expectEqual(line.nodBegin, line.flightEnd)
         #expect(line.liftBegin > line.nodBegin)
-        #expect(line.handOff == line.end)
+        expectEqual(line.handOff, line.end)
     }
 
     @Test("out of the pocket: the pocket nods, then the plate grows out")
     func outTimeline() {
         let line = BriefPocketPlan.timeline(.outOf, flight: 0.3)
-        #expect(line.nodBegin == line.flightBegin)
-        #expect(line.flightBegin == BriefPocketPlan.fadeIn)
+        expectEqual(line.nodBegin, line.flightBegin)
+        expectEqual(line.flightBegin, BriefPocketPlan.fadeIn)
         #expect(line.end >= line.flightEnd)
-        #expect(line.handOff == line.flightEnd)
+        expectEqual(line.handOff, line.flightEnd)
         #expect(line.handOff < line.end)
     }
 
@@ -42,7 +42,7 @@ struct BriefPocketPlanTests {
             pocket: pocket,
             timeline: line
         )
-        #expect(start == window)
+        expectEqual(start, window)
         let end = BriefPocketPlan.plateFrame(
             at: line.flightEnd,
             direction: .into,
@@ -50,7 +50,7 @@ struct BriefPocketPlanTests {
             pocket: pocket,
             timeline: line
         )
-        #expect(end.width == BriefPocketPlan.markSide)
+        expectEqual(end.width, BriefPocketPlan.markSide)
         #expect(end.midX == pocket.midX && end.midY == pocket.midY)
         let out = BriefPocketPlan.timeline(.outOf, flight: 0.3)
         let landed = BriefPocketPlan.plateFrame(
@@ -60,7 +60,7 @@ struct BriefPocketPlanTests {
             pocket: pocket,
             timeline: out
         )
-        #expect(landed == window)
+        expectEqual(landed, window)
     }
 
     @Test("the plate fades where it meets the pocket")
@@ -95,7 +95,7 @@ struct BriefPocketPlanTests {
     @Test("the pocket fades in and out and only swells during its nod")
     func pocketMotion() {
         let line = BriefPocketPlan.timeline(.into, flight: 0.3)
-        #expect(BriefPocketPlan.pocketOpacity(at: 0, timeline: line) == 0)
+        expectEqual(BriefPocketPlan.pocketOpacity(at: 0, timeline: line), 0)
         #expect(
             BriefPocketPlan.pocketOpacity(at: line.nodBegin, timeline: line)
                 == 1
@@ -115,13 +115,13 @@ struct BriefPocketPlanTests {
             timeline: line
         )
         #expect(swollen.width > side)
-        #expect(swollen.midX == pocket.midX)
+        expectEqual(swollen.midX, pocket.midX)
     }
 
     @Test("the flight follows the window duration, bounded")
     func flight() {
-        #expect(BriefPocketPlan.flight(durationMS: 150) == 0.3)
-        #expect(BriefPocketPlan.flight(durationMS: 50) == 0.2)
-        #expect(BriefPocketPlan.flight(durationMS: 1000) == 0.8)
+        expectEqual(BriefPocketPlan.flight(durationMS: 150), 0.3)
+        expectEqual(BriefPocketPlan.flight(durationMS: 50), 0.2)
+        expectEqual(BriefPocketPlan.flight(durationMS: 1000), 0.8)
     }
 }

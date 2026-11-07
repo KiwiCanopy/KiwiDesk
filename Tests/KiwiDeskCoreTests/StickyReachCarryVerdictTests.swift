@@ -142,13 +142,13 @@ struct StickyReachCarryVerdictTests {
         core.state.stickyReachOverrides[w1] = false
         core.refreshStickyReach()
         #expect(Bridge.targets(of: w1).isEmpty)
-        #expect(Bridge.targets(of: w2) == [10])
+        expectEqual(Bridge.targets(of: w2), [10])
         Bridge.reset()
         // Toggle off, one pin on: only the pinned window carries.
         core.tiler.settings.stickyStyle.desktopReach = false
         core.state.stickyReachOverrides[w1] = true
         core.refreshStickyReach()
-        #expect(Bridge.targets(of: w1) == [10])
+        expectEqual(Bridge.targets(of: w1), [10])
         #expect(Bridge.targets(of: w2).isEmpty)
         #expect(Bridge.targets(of: w4).isEmpty)
         // A pin on a window with no sticky scope carries nothing:
@@ -169,7 +169,7 @@ struct StickyReachCarryVerdictTests {
         )
         core.refreshStickyReach()
         #expect(Bridge.targets(of: w1).isEmpty)
-        #expect(Bridge.targets(of: w2) == [10])
+        expectEqual(Bridge.targets(of: w2), [10])
         #expect(!core.eventLoop.carriedWindows().contains(w1))
     }
 
@@ -183,8 +183,8 @@ struct StickyReachCarryVerdictTests {
                 args: [.bool(true)]
             ).isSuccess
         )
-        #expect(Bridge.targets(of: w1) == [10])
-        #expect(Bridge.targets(of: w4) == [20])
+        expectEqual(Bridge.targets(of: w1), [10])
+        expectEqual(Bridge.targets(of: w4), [20])
         Bridge.reset()
         #expect(
             core.execute(
@@ -210,8 +210,8 @@ struct StickyReachCarryVerdictTests {
                 .isSuccess
         )
         #expect(core.tiler.settings.stickyStyle.desktopReach)
-        #expect(Bridge.targets(of: w1) == [10])
-        #expect(Bridge.targets(of: w4) == [20])
+        expectEqual(Bridge.targets(of: w1), [10])
+        expectEqual(Bridge.targets(of: w4), [20])
     }
 
     @Test("a standard layout's apply carries at once too")
@@ -240,19 +240,19 @@ struct StickyReachCarryVerdictTests {
         defer { teardown() }
         // Sticky and enabled is not enough: nothing is in flight
         // until a pass MOVES it, so a switch alone opens no arm.
-        #expect(core.stickyReachCarried() == [w1, w2, w4])
+        expectEqual(core.stickyReachCarried(), [w1, w2, w4])
         #expect(core.eventLoop.carriedWindows().isEmpty)
         core.refreshStickyReach()
-        #expect(core.eventLoop.carriedWindows() == [w1, w2, w4])
+        expectEqual(core.eventLoop.carriedWindows(), [w1, w2, w4])
         // A pin flipped off leaves the flight: the gate must not
         // keep a window nothing will carry back.
         core.state.stickyReachOverrides[w1] = false
-        #expect(core.eventLoop.carriedWindows() == [w2, w4])
+        expectEqual(core.eventLoop.carriedWindows(), [w2, w4])
         // And the stamp ages out past the in-flight window.
         core.stickyReachInFlightAt[w2] = Date(
             timeIntervalSinceNow: -KiwiCore.inFlightWindow - 1
         )
-        #expect(core.eventLoop.carriedWindows() == [w4])
+        expectEqual(core.eventLoop.carriedWindows(), [w4])
     }
 
     @Test("a move the bridge could not dispatch leaves nothing in flight")

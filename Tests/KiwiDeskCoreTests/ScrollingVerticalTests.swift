@@ -43,7 +43,7 @@ struct ScrollingVerticalTests {
         )
         let focused = try #require(frames[w2])
         #expect(abs(focused.midY - context.usable.midY) < 0.01)
-        #expect(focused.height == 400)
+        expectEqual(focused.height, 400)
     }
 
     @Test("First row snaps to the top edge on first scroll")
@@ -56,7 +56,7 @@ struct ScrollingVerticalTests {
             in: context
         )
         let first = try #require(frames[w1])
-        #expect(first.minY == context.usable.minY)
+        expectEqual(first.minY, context.usable.minY)
     }
 
     @Test("Last row snaps to the bottom edge on first scroll")
@@ -82,7 +82,7 @@ struct ScrollingVerticalTests {
             in: context
         )
         let first = try #require(frames[w1])
-        #expect(first.minY == context.usable.minY)
+        expectEqual(first.minY, context.usable.minY)
     }
 
     @Test("Focus-up scrolls the viewport up (#66)")
@@ -139,8 +139,8 @@ struct ScrollingVerticalTests {
             in: context
         )
         let pinned = try #require(frames[w1])
-        #expect(pinned.minY == context.usable.minY)
-        #expect(pinned.height == 800)
+        expectEqual(pinned.minY, context.usable.minY)
+        expectEqual(pinned.height, 800)
         // The focused row is fully visible at the bottom edge.
         let focused = try #require(frames[w2])
         #expect(abs(focused.maxY - context.usable.maxY) < 0.01)
@@ -162,8 +162,8 @@ struct ScrollingVerticalTests {
         )
         let first = try #require(frames[w1])
         let second = try #require(frames[w2])
-        #expect(first.minY == context.usable.minY)
-        #expect(second.minY == context.usable.minY)
+        expectEqual(first.minY, context.usable.minY)
+        expectEqual(second.minY, context.usable.minY)
         // The focused row still lands fully in view.
         let focused = try #require(frames[w3])
         #expect(focused.minY >= context.usable.minY - 0.01)
@@ -192,6 +192,6 @@ struct ScrollingVerticalTests {
         )
         // The partially visible second row is NOT pinned.
         let second = try #require(frames[w2])
-        #expect(second.minY == context.usable.minY + 810)
+        expectEqual(second.minY, context.usable.minY + 810)
     }
 }

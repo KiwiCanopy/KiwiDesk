@@ -135,8 +135,8 @@ struct SpringStabilityTests {
         let h = 1.0 / 60
         v2 += (-s.stiffness * (p2 - 100) - s.damping * v2) * h
         p2 += v2 * h
-        #expect(p1 == p2)
-        #expect(v1 == v2)
+        expectEqual(p1, p2)
+        expectEqual(v1, v2)
         // Substepping engages below ~127 ms, not at the ~81 ms
         // instability threshold — so 90-120 ms was already stable
         // and now integrates differently (more accurately). The
@@ -180,7 +180,7 @@ struct SpringStabilityTests {
         _ = animation.step(dt: .nan)
         _ = animation.step(dt: 0)
         _ = animation.step(dt: -1)
-        #expect(animation.frame.minX == 0)
+        expectEqual(animation.frame.minX, 0)
     }
 
     @Test("A non-finite component is forced home, not left to run")

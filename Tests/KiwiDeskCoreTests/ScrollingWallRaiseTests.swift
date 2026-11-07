@@ -105,7 +105,7 @@ struct ScrollingWallRaiseTests {
                 .isSuccess
         )
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -129,7 +129,7 @@ struct ScrollingWallRaiseTests {
                 .isSuccess
         )
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -158,8 +158,8 @@ struct ScrollingWallRaiseTests {
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.pendingFocusRaise == WindowID(2))
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.pendingFocusRaise, WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.pendingFocusRaise == nil)
     }
@@ -193,7 +193,7 @@ struct ScrollingWallRaiseTests {
                 .isSuccess
         )
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -225,7 +225,7 @@ struct ScrollingWallRaiseTests {
                 .isSuccess
         )
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -251,8 +251,8 @@ struct ScrollingWallRaiseTests {
             core.execute("focus", args: [.string("up")])
                 .isSuccess
         )
-        #expect(core.pendingFocusRaise == WindowID(4))
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.pendingFocusRaise, WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -281,8 +281,8 @@ struct ScrollingWallRaiseTests {
             core.execute("focus", args: [.string("down")])
                 .isSuccess
         )
-        #expect(core.pendingFocusRaise == WindowID(2))
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.pendingFocusRaise, WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -313,7 +313,7 @@ struct ScrollingWallRaiseTests {
         // defers — the raise IS the visible focus change.
         core.execute("focus", args: [.string("right")])
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 }

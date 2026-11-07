@@ -35,7 +35,7 @@ struct RunZoneShrinkTakerTests {
         #expect(run.hides)
         #expect(run.visible.contains(0))
         #expect(!run.visible.contains(3))
-        #expect(zone.shrinkTaker(of: ids[0], in: context) == .shownMate)
+        expectEqual(zone.shrinkTaker(of: ids[0], in: context), .shownMate)
         #expect(zone.shrinkTaker(of: ids[3], in: context) == nil)
     }
 

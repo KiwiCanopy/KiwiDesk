@@ -64,7 +64,7 @@ struct LocalizationResidueGuardTests {
             english: english,
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// A weld — an English suffix fused to a translated stem,
@@ -97,7 +97,7 @@ struct LocalizationResidueGuardTests {
             english: "Editing",
             value: "編集ing"
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     @Test("an all-English value is not read as residue")
@@ -109,7 +109,7 @@ struct LocalizationResidueGuardTests {
             english: "Lua",
             value: "Lua"
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     @Test(
@@ -134,7 +134,7 @@ struct LocalizationResidueGuardTests {
             english: english,
             value: value
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// `Command` is stripped only where a modifier glyph precedes

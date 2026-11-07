@@ -53,7 +53,7 @@ struct SpaceBarCollapsedPeekTests {
     @Test("The collapse carries its Space's windows")
     func builderCarriesTheWindows() throws {
         let item = try collapsed()
-        #expect(item.collapse?.windows == 3)
+        expectEqual(item.collapse?.windows, 3)
         #expect(
             Set(item.collapse?.peek ?? [])
                 == Set([2, 3, 4].map(WindowID.init))
@@ -78,7 +78,7 @@ struct SpaceBarCollapsedPeekTests {
             before: .init(windows: [WindowID(4)]),
             after: .init(windows: [WindowID(6)])
         ).collapsed(to: .count)
-        #expect(item.collapse?.peek == [4, 5, 6].map(WindowID.init))
+        expectEqual(item.collapse?.peek, [4, 5, 6].map(WindowID.init))
     }
 
     /// The item holds its actions weakly, so the caller keeps them.
@@ -118,10 +118,10 @@ struct SpaceBarCollapsedPeekTests {
         let ids = [WindowID(2), WindowID(3)]
         let actions = SpaceBarGlyphActions()
         let view = chip(in: rig, actions: actions, peek: ids)
-        #expect(view.collapsedPeek == .space(ids))
+        expectEqual(view.collapsedPeek, .space(ids))
         view.applyHover(true, target: nil)
         rig.step()
-        #expect(rig.shownTitles == ["Window 2", "Window 3"])
+        expectEqual(rig.shownTitles, ["Window 2", "Window 3"])
     }
 
     @Test("A press on the chip closes its peek; the click switches")

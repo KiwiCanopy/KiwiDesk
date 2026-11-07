@@ -72,7 +72,7 @@ struct SpaceBarLayerOverlayTests {
     @Test("the layer item is no drop target")
     func noDropTarget() throws {
         let overlay = try Self.shown()
-        #expect(overlay.itemViews.count == 3)
+        expectEqual(overlay.itemViews.count, 3)
         #expect(
             overlay.hitFrames.map(\.space) == [
                 SpaceID("1"), SpaceID("2"),
@@ -112,7 +112,7 @@ struct SpaceBarLayerOverlayTests {
     func emojiLayerIsNotDimmed() throws {
         let overlay = try Self.shown(glyph: .text("⚙️", tinted: false))
         let layer = overlay.itemViews[0]
-        #expect(layer.identifierLabel.alphaValue == 1)
+        expectEqual(layer.identifierLabel.alphaValue, 1)
         // The control: a not-current Space's untinted glyph dims.
         let other = try Self.shown(withLayer: false)
         other.itemViews[1].configure(
@@ -211,7 +211,7 @@ struct SpaceBarLayerOverlayTests {
         #expect(selected.isEmpty)
         // The control: a Space item still selects.
         overlay.itemViews[2].mouseDown(with: down)
-        #expect(selected == [SpaceID("2")])
+        expectEqual(selected, [SpaceID("2")])
     }
 
     /// The rule between the layer item and the first Space is
@@ -226,16 +226,16 @@ struct SpaceBarLayerOverlayTests {
         let layer = overlay.itemViews[0].frame
         let first = overlay.itemViews[1].frame
         let gap = SpaceBarLook().itemGap
-        #expect(rule.frame.width == BarDivider.sectionThickness)
-        #expect(rule.layer?.backgroundColor?.alpha == BarDivider.ruleAlpha)
+        expectEqual(rule.frame.width, BarDivider.sectionThickness)
+        expectEqual(rule.layer?.backgroundColor?.alpha, BarDivider.ruleAlpha)
         // The section breaks' share of the depth, never all of it
         // (#1517 ladder).
         #expect(
             rule.frame.height
                 == barTitleStrip.height * BarDivider.sectionLengthShare
         )
-        #expect(rule.frame.minX == layer.maxX + gap)
-        #expect(first.minX == rule.frame.maxX + gap)
+        expectEqual(rule.frame.minX, layer.maxX + gap)
+        expectEqual(first.minX, rule.frame.maxX + gap)
         // The item keeps its own length: the rule rides the slot,
         // never the glyph cell.
         #expect(
@@ -260,10 +260,10 @@ struct SpaceBarLayerOverlayTests {
         let layer = overlay.itemViews[0].frame
         let first = overlay.itemViews[1].frame
         let gap = SpaceBarLook().itemGap
-        #expect(rule.frame.height == BarDivider.sectionThickness)
-        #expect(rule.frame.width == 28 * BarDivider.sectionLengthShare)
-        #expect(rule.frame.minY == layer.maxY + gap)
-        #expect(first.minY == rule.frame.maxY + gap)
+        expectEqual(rule.frame.height, BarDivider.sectionThickness)
+        expectEqual(rule.frame.width, 28 * BarDivider.sectionLengthShare)
+        expectEqual(rule.frame.minY, layer.maxY + gap)
+        expectEqual(first.minY, rule.frame.maxY + gap)
         #expect(
             layer.height
                 == SpaceBarItemView.autoLength(
@@ -273,14 +273,14 @@ struct SpaceBarLayerOverlayTests {
                     ends: overlay.itemViews[0].ends
                 )
         )
-        #expect(layer.width == 28)
+        expectEqual(layer.width, 28)
     }
 
     @Test("no layer item, no rule")
     func ruleHiddenWithoutALayer() throws {
         let overlay = try Self.shown(withLayer: false)
         #expect(overlay.layerDivider.isHidden)
-        #expect(overlay.itemViews.count == 2)
+        expectEqual(overlay.itemViews.count, 2)
     }
 
     @Test("the layer item announces its layer, not a Space")
@@ -289,8 +289,8 @@ struct SpaceBarLayerOverlayTests {
         let overlay = try Self.shown()
         let layer = overlay.itemViews[0]
         #expect(layer.isAccessibilityElement())
-        #expect(layer.accessibilityRole() == .image)
-        #expect(layer.accessibilityLabel() == "Shortcut layer resize")
-        #expect(overlay.itemViews[1].accessibilityRole() == .button)
+        expectEqual(layer.accessibilityRole(), .image)
+        expectEqual(layer.accessibilityLabel(), "Shortcut layer resize")
+        expectEqual(overlay.itemViews[1].accessibilityRole(), .button)
     }
 }

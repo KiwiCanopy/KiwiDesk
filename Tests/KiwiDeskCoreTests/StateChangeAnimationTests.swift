@@ -69,7 +69,7 @@ struct StateChangeAnimationTests {
             try JSONSerialization.jsonObject(
                 with: JSONEncoder().encode(AnimationSettings())
             ) as? [String: Any]
-        #expect(encoded?["on_state_change"] as? Bool == true)
+        expectEqual(encoded?["on_state_change"] as? Bool, true)
     }
 
     @Test("the Lua verb sets it")
@@ -97,14 +97,14 @@ struct StateChangeAnimationTests {
             pass: .event,
             sizing: .mayInstantSize
         )
-        #expect(older.merged(with: bare).stateChange == WindowID(1))
+        expectEqual(older.merged(with: bare).stateChange, WindowID(1))
         let newer = MotionGate.Owed(
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize,
             stateChange: WindowID(2)
         )
-        #expect(older.merged(with: newer).stateChange == WindowID(2))
+        expectEqual(older.merged(with: newer).stateChange, WindowID(2))
     }
 
     @Test("floating follows on_state_change, not on_relayout")
@@ -138,7 +138,7 @@ struct StateChangeAnimationTests {
         let applies = countApplies(core)
         #expect(core.execute("make_tiled").isSuccess)
         #expect((applies()[WindowID(1)] ?? 0) >= 1)
-        #expect((applies()[WindowID(2)] ?? 0) == 0)
+        expectEqual((applies()[WindowID(2)] ?? 0), 0)
     }
 
     @Test("maximizing follows on_state_change")
@@ -192,7 +192,7 @@ struct StateChangeAnimationTests {
         core.tiler.settings.animations.onWindowResize = true
         let applies = countApplies(core)
         core.focusWindow(WindowID(2), warp: false)
-        #expect((applies()[WindowID(1)] ?? 0) == 0)
+        expectEqual((applies()[WindowID(1)] ?? 0), 0)
         // The control: with the toggle on, the same end animates.
         core.focusWindow(WindowID(1), warp: false)
         #expect(core.execute("toggle_maximized").isSuccess)
@@ -257,7 +257,7 @@ struct StateChangeAnimationTests {
             )
         )
         #expect((applies()[WindowID(1)] ?? 0) >= 1)
-        #expect((applies()[WindowID(2)] ?? 0) == 0)
+        expectEqual((applies()[WindowID(2)] ?? 0), 0)
     }
 
     @Test("a newcomer's spring promises nothing for the state change")
@@ -278,7 +278,7 @@ struct StateChangeAnimationTests {
         let spring = try #require(
             core.tiler.animation.removeAnimation(for: WindowID(1))
         )
-        #expect(spring.sizing == .mayInstantSize)
+        expectEqual(spring.sizing, .mayInstantSize)
     }
 
     /// The OS focus report path (a click, ⌘-Tab), beside the

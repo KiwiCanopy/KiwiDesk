@@ -172,7 +172,7 @@ struct ResizeRefusalAppBoundTests {
             .slotSize
             // A points store: the pitch gap is inert (#1382).
             .editablePoints(along: 1200, gap: 0, horizontal: true)
-        #expect(stored == 100)
+        expectEqual(stored, 100)
         #expect(
             refusals == [
                 .ownMinimum(WindowID(1), axis: "x", appBound: false)

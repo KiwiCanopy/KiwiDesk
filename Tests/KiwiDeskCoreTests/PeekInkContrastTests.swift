@@ -99,7 +99,7 @@ struct PeekInkContrastTests {
                 }
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 12)
+        expectEqual(measured, PaletteCatalog.bundled().count * 12)
         #expect(measured > 0)
     }
 
@@ -188,6 +188,6 @@ struct PeekInkContrastTests {
         )
         #expect(stored >= Self.floor)
         #expect(tinted < Self.floor)
-        #expect(shelf.peekHeaderColor == shelf.itemColor)
+        expectEqual(shelf.peekHeaderColor, shelf.itemColor)
     }
 }

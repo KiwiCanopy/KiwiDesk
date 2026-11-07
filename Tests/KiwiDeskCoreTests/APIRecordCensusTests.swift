@@ -59,7 +59,7 @@ struct APIRecordCensusTests {
         let cli = Set(APIReference.cliOnly)
         #expect(lua.isDisjoint(with: cli))
         for name in cli {
-            #expect(APIReference.entry(named: name)?.channel == .cli)
+            expectEqual(APIReference.entry(named: name)?.channel, .cli)
         }
     }
 

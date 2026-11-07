@@ -138,8 +138,8 @@ struct SpaceBarGlyphWiringTests {
         let web = try target(core, on: two)
         web.mouseDown(with: Self.click)
         web.mouseUp(with: Self.release)
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(4))
     }
 
     /// The target hands the peek its WINDOWS, never a string, so
@@ -149,15 +149,15 @@ struct SpaceBarGlyphWiringTests {
         let core = seededCore()
         render(core)
         let web = try target(core, on: two)
-        #expect(web.peekSource == .glyph([WindowID(4)]))
+        expectEqual(web.peekSource, .glyph([WindowID(4)]))
         let titles = {
             core.barPeekContent(web.peekSource, on: nil)?.groups.flatMap(
                 \.titles
             )
         }
-        #expect(titles() == ["Doc"])
+        expectEqual(titles(), ["Doc"])
         core.state.windows.updateTitle(WindowID(4), title: "Renamed")
-        #expect(titles() == ["Renamed"])
+        expectEqual(titles(), ["Renamed"])
     }
 
     @Test("A traveler's glyph lands on the traveler, not its home")
@@ -188,8 +188,8 @@ struct SpaceBarGlyphWiringTests {
                 anchor: NSView()
             )
         )
-        #expect(core.activeSpace?.id == SpaceID("3"))
-        #expect(core.state.workspaces.lastFocused == WindowID(8))
+        expectEqual(core.activeSpace?.id, SpaceID("3"))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(8))
     }
 
     @Test("A menu pick whose window left the Space is dropped")
@@ -197,8 +197,8 @@ struct SpaceBarGlyphWiringTests {
         let core = seededCore()
         core.state.workspaces.add(WindowID(4), to: one)
         core.focusFromSpaceBar(WindowID(4), on: two)
-        #expect(core.activeSpace?.id == one)
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.activeSpace?.id, one)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     @Test("A glyph the raise gate refuses still hands the Space over")
@@ -211,8 +211,8 @@ struct SpaceBarGlyphWiringTests {
         core.state.apply(.windowFocused(WindowID(1)))
         core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
         core.focusFromSpaceBar(WindowID(4), on: two)
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces.lastFocused == WindowID(5))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces.lastFocused, WindowID(5))
     }
 
     @Test("A row the focus door would refuse is greyed, not hidden")
@@ -220,7 +220,7 @@ struct SpaceBarGlyphWiringTests {
         let core = seededCore()
         core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
         let rows = core.spaceBarMenuRows([WindowID(4), WindowID(1)], on: nil)
-        #expect(rows.map(\.row.window) == [WindowID(4), WindowID(1)])
-        #expect(rows.map(\.enabled) == [false, true])
+        expectEqual(rows.map(\.row.window), [WindowID(4), WindowID(1)])
+        expectEqual(rows.map(\.enabled), [false, true])
     }
 }

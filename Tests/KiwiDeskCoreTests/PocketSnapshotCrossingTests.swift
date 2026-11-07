@@ -45,7 +45,7 @@ struct PocketSnapshotCrossingTests {
             StateSnapshot.self,
             from: JSONEncoder().encode(snapshot())
         )
-        #expect(read.pocket == snapshot().pocket)
+        expectEqual(read.pocket, snapshot().pocket)
     }
 
     @Test("a 4.0.0 file's one slot is read as a list of one")
@@ -55,8 +55,8 @@ struct PocketSnapshotCrossingTests {
         legacy["pockets"] = nil
         legacy["pocket"] = slots.first
         let read = try decode(legacy)
-        #expect(read.pocket.map(\.window) == [one])
-        #expect(read.pocket.first?.phase == .pocketed)
+        expectEqual(read.pocket.map(\.window), [one])
+        expectEqual(read.pocket.first?.phase, .pocketed)
     }
 
     @Test("an unreadable slot costs only itself")

@@ -54,11 +54,11 @@ struct BspRunTests {
     func fittingLayoutIsUnchanged() throws {
         let ctx = context()
         let three = Array(ids.prefix(3))
-        #expect(BspLayout.zones(for: three, in: ctx)?.isEmpty == true)
+        expectEqual(BspLayout.zones(for: three, in: ctx)?.isEmpty, true)
         let frames = BspLayout().calculateGeometry(for: three, in: ctx)
-        #expect(frames[ids[0]] == rect(10, 10, 485, 700))
-        #expect(frames[ids[1]] == rect(505, 10, 485, 345))
-        #expect(frames[ids[2]] == rect(505, 365, 485, 345))
+        expectEqual(frames[ids[0]], rect(10, 10, 485, 700))
+        expectEqual(frames[ids[1]], rect(505, 10, 485, 345))
+        expectEqual(frames[ids[2]], rect(505, 365, 485, 345))
     }
 
     @Test("The last split's chain scrolls along it; the rest stay")
@@ -69,13 +69,13 @@ struct BspRunTests {
         let four = Array(ids.prefix(4))
         let zone = try #require(BspLayout.zones(for: four, in: ctx)?.first)
         #expect(zone.vertical)
-        #expect(zone.members == Array(ids[1..<4]))
-        #expect(zone.region == rect(505, 10, 485, 700))
+        expectEqual(zone.members, Array(ids[1..<4]))
+        expectEqual(zone.region, rect(505, 10, 485, 700))
         let frames = BspLayout().calculateGeometry(for: four, in: ctx)
-        #expect(frames[ids[0]] == rect(10, 10, 485, 700))
+        expectEqual(frames[ids[0]], rect(10, 10, 485, 700))
         let top = try #require(frames[ids[1]])
         let bottom = try #require(frames[ids[2]])
-        #expect(top.minY == 10)
+        expectEqual(top.minY, 10)
         #expect(abs(bottom.maxY - 710) < 0.01)
         #expect(isParked(frames[ids[3]], in: ctx))
     }
@@ -90,7 +90,7 @@ struct BspRunTests {
         #expect(isParked(frames[ids[1]], in: ctx))
         let last = try #require(frames[ids[3]])
         #expect(abs(last.maxY - 710) < 0.01)
-        #expect(frames[ids[0]]?.width == 485)
+        expectEqual(frames[ids[0]]?.width, 485)
     }
 
     @Test("The chain is as thick as its widest floor, hidden or not")
@@ -116,10 +116,10 @@ struct BspRunTests {
         let six = Array(ids.prefix(6))
         let zone = try #require(BspLayout.zones(for: six, in: ctx)?.first)
         #expect(!zone.vertical)
-        #expect(zone.members == Array(ids[2..<6]))
+        expectEqual(zone.members, Array(ids[2..<6]))
         let bounds = zone.markBounds(in: ctx)
         #expect(bounds.minX == zone.region.minX - 5 - OverflowMark.depth / 2)
-        #expect(bounds.maxX == ctx.bounds.maxX)
+        expectEqual(bounds.maxX, ctx.bounds.maxX)
         let cover = try #require(
             RunCover.of(space: SpaceID("1"), mode: .bsp, tiled: six, in: ctx)
         )
@@ -146,8 +146,8 @@ struct BspRunTests {
             BspLayout.zones(for: Array(ids.prefix(3)), in: ctx)?.first
         )
         #expect(!zone.vertical)
-        #expect(zone.members == Array(ids.prefix(3)))
-        #expect(zone.run(in: ctx)?.visible == 0..<1)
+        expectEqual(zone.members, Array(ids.prefix(3)))
+        expectEqual(zone.run(in: ctx)?.visible, 0..<1)
     }
 
     @Test("Any run's end inside the screen straddles; one at it, not")
@@ -162,13 +162,13 @@ struct BspRunTests {
             vertical: false
         )
         let bounds = inner.markBounds(in: ctx)
-        #expect(bounds.minX == ctx.bounds.minX)
+        expectEqual(bounds.minX, ctx.bounds.minX)
         #expect(bounds.maxX == usable.minX + 400 + 5 + OverflowMark.depth / 2)
         let column = RunZone(
             members: Array(ids.prefix(2)),
             region: usable,
             vertical: true
         )
-        #expect(column.markBounds(in: ctx) == ctx.bounds)
+        expectEqual(column.markBounds(in: ctx), ctx.bounds)
     }
 }

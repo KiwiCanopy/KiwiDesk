@@ -112,7 +112,7 @@ struct SpaceBarGlyphClickTests {
             built.apps.map(\.windows)
                 == [[WindowID(2), WindowID(3)], [WindowID(4)]]
         )
-        #expect(built.apps.map(\.count) == [2, 1])
+        expectEqual(built.apps.map(\.count), [2, 1])
     }
 
     @Test("each +n carries its side's windows, in row order")
@@ -135,22 +135,22 @@ struct SpaceBarGlyphClickTests {
             inside: true
         )
         let built = try item(core, two, cap: 1)
-        #expect(built.apps.map(\.windows) == [[WindowID(3)]])
+        expectEqual(built.apps.map(\.windows), [[WindowID(3)]])
         #expect(
             built.before.windows
                 == [WindowID(2), WindowID(5), WindowID(6)]
         )
-        #expect(built.after.windows == [WindowID(4), WindowID(7)])
-        #expect(built.discs == 2)
+        expectEqual(built.after.windows, [WindowID(4), WindowID(7)])
+        expectEqual(built.discs, 2)
     }
 
     @Test("A glyph on an inactive Space switches and lands on it")
     func inactiveGlyphSwitchesAndFocuses() {
         let core = seededCore()
         core.pickFromSpaceBar(pick([4], on: two))
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces[two]?.focused == WindowID(4))
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces[two]?.focused, WindowID(4))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(4))
     }
 
     @Test("A glyph on the active Space focuses without a switch")
@@ -159,8 +159,8 @@ struct SpaceBarGlyphClickTests {
         core.state.apply(.windowCreated(window(5, app: "Term")))
         core.state.apply(.windowFocused(WindowID(1)))
         core.pickFromSpaceBar(pick([5], on: one))
-        #expect(core.activeSpace?.id == one)
-        #expect(core.state.workspaces[one]?.focused == WindowID(5))
+        expectEqual(core.activeSpace?.id, one)
+        expectEqual(core.state.workspaces[one]?.focused, WindowID(5))
     }
 
     /// A click on a group glyph opens its list and focuses nothing
@@ -178,18 +178,18 @@ struct SpaceBarGlyphClickTests {
         }
         clicked.pickFromSpaceBar(pick([2, 3], on: two))
         core.pressSpaceBarGlyph(pick([2, 3], on: two))
-        #expect(core.activeSpace?.id == one)
+        expectEqual(core.activeSpace?.id, one)
         let shown = try #require(menu())
         // One app's rows: titles under an app header (#1947).
-        #expect(shown.items.map(\.title) == ["Mail", "Inbox", "Draft"])
+        expectEqual(shown.items.map(\.title), ["Mail", "Inbox", "Draft"])
         #expect(shown.items[0].isSectionHeader)
         // Icons stand down on glyph rows: `untitledGlyphRow`, since
         // this fixture's windows have no icon to drop.
         let enabled = shown.items.dropFirst().allSatisfy { $0.isEnabled }
         #expect(enabled)
         pickRow(shown, at: 2)
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces[two]?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces[two]?.focused, WindowID(3))
     }
 
     @Test("+n's VoiceOver menu lists even one window, switching nothing")
@@ -200,13 +200,13 @@ struct SpaceBarGlyphClickTests {
         core.pickFromSpaceBar(pick([4], on: two, .overflow))
         #expect(menu() == nil, "a click shows the peek instead")
         core.pressSpaceBarGlyph(pick([4], on: two, .overflow))
-        #expect(core.activeSpace?.id == one)
+        expectEqual(core.activeSpace?.id, one)
         let shown = try #require(menu())
         // Mixed apps: no header, each row names its app.
-        #expect(shown.items.map(\.title) == ["Web — Doc"])
+        expectEqual(shown.items.map(\.title), ["Web — Doc"])
         pickRow(shown, at: 0)
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces[two]?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.id, two)
+        expectEqual(core.state.workspaces[two]?.focused, WindowID(4))
     }
 
     @Test("The right-click names an untitled window as the glyph menu")
@@ -214,9 +214,9 @@ struct SpaceBarGlyphClickTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         core.state.apply(.windowCreated(window(8, app: "Web", title: "")))
-        #expect(core.windowRowName(WindowID(8)) == "Untitled Window")
+        expectEqual(core.windowRowName(WindowID(8)), "Untitled Window")
         // A pill names the window outside its app's menu.
-        #expect(core.windowTitle(WindowID(8)) == "Web")
+        expectEqual(core.windowTitle(WindowID(8)), "Web")
         // Every per-window submenu takes the row name: move, float,
         // pocket and close each list window 8 as the placeholder.
         let rows = core.barMenuRows(.glyph([WindowID(4), WindowID(8)]))
@@ -226,7 +226,7 @@ struct SpaceBarGlyphClickTests {
             else { return nil }
             return items[1].title
         }
-        #expect(untitled == Array(repeating: "Untitled Window", count: 4))
+        expectEqual(untitled, Array(repeating: "Untitled Window", count: 4))
     }
 
     /// Every window counts (#1946): an untitled one is a row named
@@ -238,13 +238,13 @@ struct SpaceBarGlyphClickTests {
         let mail = try #require(
             core.barPeekContent(.glyph([WindowID(2), WindowID(3)]), on: nil)
         )
-        #expect(mail.groups.map(\.app) == ["Mail"])
-        #expect(mail.groups.map(\.titles) == [["Inbox", "Draft"]])
-        #expect(mail.groups.map(\.windowCount) == [2])
+        expectEqual(mail.groups.map(\.app), ["Mail"])
+        expectEqual(mail.groups.map(\.titles), [["Inbox", "Draft"]])
+        expectEqual(mail.groups.map(\.windowCount), [2])
         let web = try #require(
             core.barPeekContent(.glyph([WindowID(4)]), on: nil)
         )
-        #expect(web.groups.map(\.titles) == [["Doc"]])
+        expectEqual(web.groups.map(\.titles), [["Doc"]])
         core.state.windows.updateTitle(WindowID(3), title: "")
         let untitled = try #require(
             core.barPeekContent(.glyph([WindowID(2), WindowID(3)]), on: nil)
@@ -259,7 +259,7 @@ struct SpaceBarGlyphClickTests {
     func bootstrapWiresThePick() throws {
         let core = seededCore()
         core.spaceBars.glyphActions.pick(pick([4], on: two))
-        #expect(core.activeSpace?.id == two)
+        expectEqual(core.activeSpace?.id, two)
         let peek = try #require(core.spaceBars.glyphActions.peek)
         #expect(
             peek.content(.glyph([WindowID(4)]), nil)?.groups.map(\.titles)

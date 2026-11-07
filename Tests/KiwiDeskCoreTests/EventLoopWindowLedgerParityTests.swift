@@ -157,7 +157,7 @@ struct EventLoopWindowLedgerParityTests {
 
     @Test("every window-keyed store is in the register")
     func registerIsTheReflectedRoster() {
-        #expect(Set(roster(EventLoop()).keys) == Self.register)
+        expectEqual(Set(roster(EventLoop()).keys), Self.register)
         for (door, stores) in Self.exempt {
             #expect(
                 Set(stores.keys).isSubset(of: Self.register),
@@ -208,7 +208,7 @@ struct EventLoopWindowLedgerParityTests {
             minimized: [],
             coalesceTabs: true
         )
-        #expect(rekeyed.count == 1)
+        expectEqual(rekeyed.count, 1)
         #expect(rekeyed.first?.0 == old && rekeyed.first?.1 == new)
         let after = roster(loop)
         for name in owed(.rekeyDrops) {

@@ -73,7 +73,7 @@ struct ShortcutCommandsTests {
                 .array([.string("down")]),
             ]
         )
-        #expect(core.state.appRules["com.x"] == "1")
+        expectEqual(core.state.appRules["com.x"], "1")
         #expect(core.guiConfigStore.load()?.appRules["com.x"] == nil)
     }
 
@@ -117,7 +117,7 @@ struct ShortcutCommandsTests {
             "shortcut.set",
             [.string("alt+ctrl+h"), .string("focus"), .array([.string("up")])]
         )
-        #expect(taken.error?.contains("remove it first") == true)
+        expectEqual(taken.error?.contains("remove it first"), true)
         let moved = run(
             core,
             "shortcut.set",
@@ -126,7 +126,7 @@ struct ShortcutCommandsTests {
                 .array([.string("left")]),
             ]
         )
-        #expect(moved.error?.contains("remove it first") == true)
+        expectEqual(moved.error?.contains("remove it first"), true)
         #expect(
             baseRows(core).filter { $0.lua == "KiwiDesk.focus(\"left\")" }
                 .count == 1
@@ -172,8 +172,8 @@ struct ShortcutCommandsTests {
         #expect(
             ShortcutCall.literal(.string("a\"b\\c\n")) == "\"a\\\"b\\\\c\\n\""
         )
-        #expect(ShortcutCall.literal(.number(3)) == "3")
-        #expect(ShortcutCall.literal(.bool(false)) == "false")
+        expectEqual(ShortcutCall.literal(.number(3)), "3")
+        expectEqual(ShortcutCall.literal(.bool(false)), "false")
         #expect(ShortcutCall.literal(.string("\u{07}")) == nil)
         #expect(ShortcutCall.literal(.array([])) == nil)
     }
@@ -205,8 +205,8 @@ struct ShortcutCommandsTests {
                 .array([.number(1)]),
             ]
         )
-        #expect(set.error?.contains("remove it first") == true)
-        #expect(baseRows(core).count == 1)
+        expectEqual(set.error?.contains("remove it first"), true)
+        expectEqual(baseRows(core).count, 1)
     }
 
     /// A base row every profile leaves out is still the shared one a
@@ -244,7 +244,7 @@ struct ShortcutCommandsTests {
                 .array([.string("left")]),
             ]
         )
-        #expect(set.error?.contains("remove it first") == true)
+        expectEqual(set.error?.contains("remove it first"), true)
     }
 
     /// A row written by hand keeps its own spelling; a chord is the
@@ -273,7 +273,7 @@ struct ShortcutCommandsTests {
                 .array([.string("left")]),
             ]
         )
-        #expect(set.error?.contains("remove it first") == true)
+        expectEqual(set.error?.contains("remove it first"), true)
         #expect(
             run(core, "shortcut.remove", [.string("alt+ctrl+h")]).isSuccess
         )

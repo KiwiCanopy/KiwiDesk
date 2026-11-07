@@ -18,7 +18,7 @@ struct BorderGeometryTests {
             cornerStyle: .rounded,
             systemRadius: 16
         )
-        #expect(g.overlayFrame == window.insetBy(dx: -2, dy: -2))
+        expectEqual(g.overlayFrame, window.insetBy(dx: -2, dy: -2))
         #expect(
             g.lineWidth
                 == 2 + BorderGeometry.hiddenOverlapCushion
@@ -46,7 +46,7 @@ struct BorderGeometryTests {
         )
         // Frame grows by the blur on every side so the halo has
         // room; the stroke geometry itself is unchanged (#358).
-        #expect(plain.glowMargin == 0)
+        expectEqual(plain.glowMargin, 0)
         #expect(
             glowing.glowMargin == BorderStyle.glowBlur(for: 2)
         )
@@ -63,15 +63,15 @@ struct BorderGeometryTests {
         // ratio, and the floor/cap keep a hairline ring's halo
         // present and a slab ring's overlay bounded. Prose cites
         // this test; do not restate the numbers elsewhere.
-        #expect(BorderStyle.glowBlur(for: 5) == 4)
-        #expect(BorderStyle.glowBlur(for: 1) == 2)
-        #expect(BorderStyle.glowBlur(for: 20) == 12)
-        #expect(glowing.lineWidth == plain.lineWidth)
-        #expect(glowing.cornerRadius == plain.cornerRadius)
+        expectEqual(BorderStyle.glowBlur(for: 5), 4)
+        expectEqual(BorderStyle.glowBlur(for: 1), 2)
+        expectEqual(BorderStyle.glowBlur(for: 20), 12)
+        expectEqual(glowing.lineWidth, plain.lineWidth)
+        expectEqual(glowing.cornerRadius, plain.cornerRadius)
         // The outward reach counts the bloom (#1378): with the
         // glow at 0 it is the stroke alone, with the glow on it
         // is the stroke plus the resolved blur — what Fit clears.
-        #expect(BorderGeometry.outwardReach(width: 2, glowBlur: 0) == 2)
+        expectEqual(BorderGeometry.outwardReach(width: 2, glowBlur: 0), 2)
         #expect(
             BorderGeometry.outwardReach(
                 width: 2,
@@ -92,18 +92,18 @@ struct BorderGeometryTests {
         // An explicit size wins verbatim below the cap (#551) —
         // no floor: Lua may go softer than the GUI band.
         style.glowSize = 7
-        #expect(style.resolvedGlowBlur == 7)
+        expectEqual(style.resolvedGlowBlur, 7)
         style.glowSize = 1
-        #expect(style.resolvedGlowBlur == 1)
+        expectEqual(style.resolvedGlowBlur, 1)
         // …and clamps at the renderable ceiling.
         style.glowSize = 100
         #expect(
             style.resolvedGlowBlur == BorderStyle.maxGlowSize
         )
-        #expect(BorderStyle.maxGlowSize == 40)
+        expectEqual(BorderStyle.maxGlowSize, 40)
         // Glow off silences the size entirely.
         style.glow = false
-        #expect(style.resolvedGlowBlur == 0)
+        expectEqual(style.resolvedGlowBlur, 0)
     }
 
     @Test("Thick width also keeps a fixed hidden overlap")
@@ -114,7 +114,7 @@ struct BorderGeometryTests {
             cornerStyle: .rounded,
             systemRadius: 16
         )
-        #expect(g.overlayFrame == window.insetBy(dx: -10, dy: -10))
+        expectEqual(g.overlayFrame, window.insetBy(dx: -10, dy: -10))
         #expect(
             g.lineWidth
                 == 10 + BorderGeometry.hiddenOverlapCushion
@@ -133,7 +133,7 @@ struct BorderGeometryTests {
             cornerStyle: .square,
             systemRadius: 16
         )
-        #expect(g.cornerRadius == 0)
+        expectEqual(g.cornerRadius, 0)
         #expect(
             g.overlayFrame == window.insetBy(dx: -10, dy: -10)
         )
@@ -154,7 +154,7 @@ struct BorderGeometryTests {
             cornerStyle: .square,
             systemRadius: 16
         )
-        #expect(g.overlayFrame == window.insetBy(dx: -2, dy: -2))
+        expectEqual(g.overlayFrame, window.insetBy(dx: -2, dy: -2))
         #expect(
             g.lineWidth
                 == 2
@@ -202,10 +202,10 @@ struct BorderGeometryTests {
         )
         // Outer reach unchanged (fit-gaps invariant); only the inner
         // edge moves onto the window by the capped lap.
-        #expect(g.overlayFrame == window.insetBy(dx: -4, dy: -4))
+        expectEqual(g.overlayFrame, window.insetBy(dx: -4, dy: -4))
         // min(4 / 2, 1) == 1 — the on-window lap, not the below tuck.
-        #expect(g.lineWidth == 5.0)
-        #expect(g.cornerRadius == 16 + 4 - g.lineWidth / 2)
+        expectEqual(g.lineWidth, 5.0)
+        expectEqual(g.cornerRadius, 16 + 4 - g.lineWidth / 2)
     }
 
     @Test("Above-order lap never exceeds half the visible width")
@@ -218,7 +218,7 @@ struct BorderGeometryTests {
             systemRadius: 16
         )
         // min(1 / 2, 1) == 0.5 — ring stays predominantly outside.
-        #expect(g.lineWidth == 1.5)
+        expectEqual(g.lineWidth, 1.5)
     }
 
     @Test("Above-order square uses the capped lap, not below tuck")
@@ -230,9 +230,9 @@ struct BorderGeometryTests {
             order: .above,
             systemRadius: 16
         )
-        #expect(g.cornerRadius == 0)
+        expectEqual(g.cornerRadius, 0)
         // The visible cap (1), never the below-order square tuck.
-        #expect(g.lineWidth == 11.0)
+        expectEqual(g.lineWidth, 11.0)
     }
 
     @Test("Width is clamped defensively into range")

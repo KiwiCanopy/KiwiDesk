@@ -31,7 +31,7 @@ struct MotionGateOwedWriteTests {
         #expect(resting.owedWrites.isEmpty)
         let moving = gate(moving: true)
         #expect(moving.owe(.reanchor, for: window))
-        #expect(moving.owedWrites[window] == [.reanchor])
+        expectEqual(moving.owedWrites[window], [.reanchor])
     }
 
     @Test("a write owed while nothing is owed holds a pass")
@@ -52,7 +52,7 @@ struct MotionGateOwedWriteTests {
             paid.append(write)
             return true
         }
-        #expect(paid == [.floatPlacement])
+        expectEqual(paid, [.floatPlacement])
         #expect(gate.owedWrites.isEmpty)
     }
 
@@ -66,7 +66,7 @@ struct MotionGateOwedWriteTests {
             paid.append(write)
             return write == .reanchor
         }
-        #expect(paid == [.floatPlacement, .reanchor])
+        expectEqual(paid, [.floatPlacement, .reanchor])
     }
 
     /// The replay's frame is a capture from before the rest: a
@@ -84,7 +84,7 @@ struct MotionGateOwedWriteTests {
             paid.append(write)
             return true
         }
-        #expect(paid == [.reanchor])
+        expectEqual(paid, [.reanchor])
     }
 
     @Test("forgetting one kind keeps the others owed")
@@ -95,7 +95,7 @@ struct MotionGateOwedWriteTests {
         _ = gate.owe(.reanchor, for: window)
         _ = gate.owe(.restore, for: other)
         gate.forgetWrites(.restore)
-        #expect(gate.owedWrites == [window: [.reanchor]])
+        expectEqual(gate.owedWrites, [window: [.reanchor]])
     }
 
     /// A payment re-enters its writer, which asks the gate again:

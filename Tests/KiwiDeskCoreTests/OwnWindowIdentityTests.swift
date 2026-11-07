@@ -37,7 +37,7 @@ struct OwnWindowIdentityTests {
         state.setFloating(WindowID(1), true)
         close(1, in: &state)
         state.apply(.windowCreated(settings(2, title: "Settings")))
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     @Test("A sticky closed on one area reopens sticky on Home")
@@ -47,7 +47,7 @@ struct OwnWindowIdentityTests {
         state.setSticky(WindowID(1), .global)
         close(1, in: &state)
         state.apply(.windowCreated(settings(2, title: "Settings")))
-        #expect(state.windows[WindowID(2)]?.stickyScope == .global)
+        expectEqual(state.windows[WindowID(2)]?.stickyScope, .global)
     }
 
     @Test("Navigating areas never re-triggers a float")
@@ -62,7 +62,7 @@ struct OwnWindowIdentityTests {
         state.setFloating(WindowID(2), false)
         for title in ["Shortcuts", "General", "Settings"] {
             state.apply(.windowTitleChanged(WindowID(2), title))
-            #expect(state.windows[WindowID(2)]?.isFloating == false)
+            expectEqual(state.windows[WindowID(2)]?.isFloating, false)
         }
     }
 
@@ -82,7 +82,7 @@ struct OwnWindowIdentityTests {
         state.apply(.windowCreated(settings(2, title: "Settings")))
         for title in ["Shortcuts", "Profiles", "Settings"] {
             state.apply(.windowTitleChanged(WindowID(2), title))
-            #expect(state.windows[WindowID(2)]?.isFloating == false)
+            expectEqual(state.windows[WindowID(2)]?.isFloating, false)
         }
     }
 
@@ -99,7 +99,7 @@ struct OwnWindowIdentityTests {
         state.apply(
             .windowCreated(settings(2, title: "B", marked: false))
         )
-        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, false)
     }
 
     /// The mark stands in for a title not yet read: a marked
@@ -117,7 +117,7 @@ struct OwnWindowIdentityTests {
         state.apply(
             .windowCreated(settings(2, title: reopenTitle))
         )
-        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        expectEqual(state.windows[WindowID(2)]?.isFloating, true)
     }
 
     @Test("The mark carries through a re-key")

@@ -18,10 +18,10 @@ struct BarFontTests {
     @Test("The default draws today's system font")
     func defaultIsTodaysLook() {
         let shelf = KiwiShelf()
-        #expect(shelf.fontFamily == KiwiShelf.systemFontFamily)
-        #expect(shelf.fontWeight == 400)
-        #expect(shelf.textFont(ofSize: 13) == .systemFont(ofSize: 13))
-        #expect(shelf.fontRendering == .exact)
+        expectEqual(shelf.fontFamily, KiwiShelf.systemFontFamily)
+        expectEqual(shelf.fontWeight, 400)
+        expectEqual(shelf.textFont(ofSize: 13), .systemFont(ofSize: 13))
+        expectEqual(shelf.fontRendering, .exact)
         // Counts keep today's proportional system digits too.
         #expect(
             shelf.badgeFont(ofSize: 12, emphasis: .bold)
@@ -43,7 +43,7 @@ struct BarFontTests {
             KiwiShelf.self,
             from: Data(json.utf8)
         )
-        #expect(shelf.fontWeight == weight)
+        expectEqual(shelf.fontWeight, weight)
     }
 
     @Test(
@@ -61,7 +61,7 @@ struct BarFontTests {
         ).get()
         var shelf = KiwiShelf()
         setting.apply(to: &shelf)
-        #expect(shelf.fontWeight == weight)
+        expectEqual(shelf.fontWeight, weight)
     }
 
     @Test("A weight neither number nor name is refused with the names")
@@ -115,13 +115,13 @@ struct BarFontTests {
         try #require(BarFont.isInstalled("Menlo"))
         let near400 = BarFont.font(family: "Menlo", weight: 540, size: 13)
         let near700 = BarFont.font(family: "Menlo", weight: 650, size: 13)
-        #expect(near400.fontName == "Menlo-Regular")
-        #expect(near700.fontName == "Menlo-Bold")
+        expectEqual(near400.fontName, "Menlo-Regular")
+        expectEqual(near700.fontName, "Menlo-Bold")
         #expect(
             BarFont.rendering(family: "Menlo", weight: 540)
                 == .nearestFace(weight: 400)
         )
-        #expect(BarFont.rendering(family: "Menlo", weight: 700) == .exact)
+        expectEqual(BarFont.rendering(family: "Menlo", weight: 700), .exact)
     }
 
     @Test("A family's chips are the weights it has")
@@ -130,7 +130,7 @@ struct BarFontTests {
         let offered = BarFontWeight.chips.filter {
             BarFont.offers(weight: $0.value, family: "Menlo")
         }
-        #expect(offered == [.regular, .bold])
+        expectEqual(offered, [.regular, .bold])
         #expect(
             BarFontWeight.chips.allSatisfy {
                 BarFont.offers(
@@ -145,7 +145,7 @@ struct BarFontTests {
     func missingFamily() {
         let family = "KiwiDesk No Such Family"
         #expect(!BarFont.isInstalled(family))
-        #expect(BarFont.rendering(family: family, weight: 400) == .missing)
+        expectEqual(BarFont.rendering(family: family, weight: 400), .missing)
         #expect(
             BarFont.font(family: family, weight: 400, size: 13)
                 == .systemFont(ofSize: 13)
@@ -161,7 +161,7 @@ struct BarFontTests {
         KiwiShelfCommandSetting.fontWeight(540).apply(to: &shelf)
         for family in ["Menlo", KiwiShelf.systemFontFamily] {
             KiwiShelfCommandSetting.fontFamily(family).apply(to: &shelf)
-            #expect(shelf.fontWeight == 540)
+            expectEqual(shelf.fontWeight, 540)
         }
     }
 
@@ -186,7 +186,7 @@ struct BarFontTests {
         let text = shelf.textFont(ofSize: 12)
         try #require(advances(text).count > 1, "fixture is tabular")
         let badge = shelf.badgeFont(ofSize: 12, emphasis: .bold)
-        #expect(advances(badge).count == 1)
+        expectEqual(advances(badge).count, 1)
     }
 
     /// Skia's axis speaks 0.48–3.2, not a weight number.
@@ -245,7 +245,7 @@ struct BarFontTests {
             Issue.record("SF Mono claimed to draw 100")
             return
         }
-        #expect(drawn == mono.clamp(100))
+        expectEqual(drawn, mono.clamp(100))
         #expect(
             BarFont.rendering(family: KiwiShelf.systemFontFamily, weight: 100)
                 == .exact

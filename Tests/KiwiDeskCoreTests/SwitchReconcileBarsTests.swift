@@ -19,12 +19,12 @@ struct SwitchReconcileBarsTests {
         core.eventLoop.beginSwitchReconcile()
         core.updateBars()
         core.updateBars()
-        #expect(meter.snapshot(reset: false).counts.barRenders == 0)
+        expectEqual(meter.snapshot(reset: false).counts.barRenders, 0)
         #expect(core.eventLoop.switchReads.barsOwed)
         // Nothing observed: the batch applies at once, and its
         // fold pays the held refresh.
         core.eventLoop.requestSwitchReads()
-        #expect(meter.snapshot(reset: false).counts.barRenders == 1)
+        expectEqual(meter.snapshot(reset: false).counts.barRenders, 1)
         #expect(!core.eventLoop.switchReads.barsOwed)
     }
 
@@ -34,7 +34,7 @@ struct SwitchReconcileBarsTests {
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         core.updateBars()
-        #expect(meter.snapshot(reset: false).counts.barRenders == 1)
+        expectEqual(meter.snapshot(reset: false).counts.barRenders, 1)
         #expect(!core.eventLoop.switchReads.barsOwed)
     }
 }

@@ -43,12 +43,12 @@ struct APIHelpResponseTests {
             Issue.record("expected an object payload")
             return
         }
-        #expect(entry["group"]?.stringValue == "scroll")
-        #expect(entry["name"]?.stringValue == "set_anchor")
+        expectEqual(entry["group"]?.stringValue, "scroll")
+        expectEqual(entry["name"]?.stringValue, "set_anchor")
         #expect(
             entry["command"]?.stringValue == "scroll.set_anchor"
         )
-        #expect(entry["channel"]?.stringValue == "both")
+        expectEqual(entry["channel"]?.stringValue, "both")
     }
 
     @Test("an enum argument carries its decoder's cases")
@@ -88,14 +88,14 @@ struct APIHelpResponseTests {
             Issue.record("expected one enum argument")
             return
         }
-        #expect(choice.type == "ScrollingParams.Anchor")
+        expectEqual(choice.type, "ScrollingParams.Anchor")
     }
 
     @Test("an unknown name fails with a suggestion")
     func unknownName() {
         let response = APIReference.helpResponse(for: "focsu")
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("focus") == true)
+        expectEqual(response.error?.contains("focus"), true)
     }
 
     @Test("help suggests Lua-only names, did-you-mean does not")
@@ -103,7 +103,7 @@ struct APIHelpResponseTests {
         // #37 keeps `suggestion` to what the caller's channel can
         // invoke; a help lookup has no such limit, and pointing
         // at `bind` is the useful answer.
-        #expect(APIReference.helpSuggestion(for: "bnid") == "bind")
+        expectEqual(APIReference.helpSuggestion(for: "bnid"), "bind")
         #expect(APIReference.suggestion(for: "bnid") != "bind")
     }
 
@@ -135,7 +135,7 @@ struct APIHelpResponseTests {
             Issue.record("expected an object payload")
             return
         }
-        #expect(entry["command"]?.stringValue == "help")
+        expectEqual(entry["command"]?.stringValue, "help")
     }
 
 }
@@ -169,6 +169,6 @@ struct APIHelpDispatchTests {
             Issue.record("expected one record")
             return
         }
-        #expect(entry["group"]?.stringValue == "scroll")
+        expectEqual(entry["group"]?.stringValue, "scroll")
     }
 }

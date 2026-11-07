@@ -48,7 +48,7 @@ struct MonitorChangeSpaceResolveTests {
             "save_profile",
             args: [.string("known")]
         )
-        #expect(core.profiles.currentName == "known")
+        expectEqual(core.profiles.currentName, "known")
 
         // The churn shape: the id changed, so the state fold
         // removed the old display — wiping `spaceDisplay` — and
@@ -59,7 +59,7 @@ struct MonitorChangeSpaceResolveTests {
         core.state.workspaces.removeDisplay(DisplayID(1))
         core.state.workspaces.upsertDisplay(display(7, "OTHER"))
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "known")
+        expectEqual(core.profiles.currentName, "known")
         #expect(core.profiles.isDirty)
 
         // The heal: every space resolved onto the live display,
@@ -109,7 +109,7 @@ struct MonitorChangeSpaceResolveTests {
             )
         }
         #expect(!first.isEmpty)
-        #expect(first.map(\.0) == second.map(\.0))
-        #expect(first.map(\.1) == second.map(\.1))
+        expectEqual(first.map(\.0), second.map(\.0))
+        expectEqual(first.map(\.1), second.map(\.1))
     }
 }

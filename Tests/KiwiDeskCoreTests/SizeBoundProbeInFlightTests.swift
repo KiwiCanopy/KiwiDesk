@@ -115,10 +115,10 @@ struct SizeBoundProbeInFlightTests {
         wireSettledRead(core, returning: refused)
         captured.frames = [:]
         core.runSizeBoundProbe(w)
-        #expect(core.tiler.sizeBound(for: w)?.maxWidth == 715)
+        expectEqual(core.tiler.sizeBound(for: w)?.maxWidth, 715)
         // Answered: the hold ends and the residue goes out.
         let residue = try #require(captured.frames[w])
-        #expect(residue.width == 715)
+        expectEqual(residue.width, 715)
         #expect(abs(residue.midX - target.midX) < 0.01)
     }
 
@@ -135,7 +135,7 @@ struct SizeBoundProbeInFlightTests {
         // A Space activation re-issues it, probe or not.
         core.retile(pass: .reissue)
         let reissued = try #require(captured.frames[w])
-        #expect(reissued.width == 715)
+        expectEqual(reissued.width, 715)
     }
 
     @Test("A forced pass keeps its own ask")

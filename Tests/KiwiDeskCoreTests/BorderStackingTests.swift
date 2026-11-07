@@ -53,7 +53,7 @@ struct BorderStackingTests {
         )
         if order == .above {
             #expect(coverIndex < ringIndex && ringIndex < targetIndex)
-            #expect(ring.panelLevel == level)
+            expectEqual(ring.panelLevel, level)
         } else {
             #expect(ringIndex > targetIndex)
         }
@@ -116,7 +116,7 @@ struct BorderStackingTests {
         render(ring, order: .above, glow: 0)
         defer { ring.hide() }
         ring.order(relativeTo: 7)
-        #expect(ring.panelLevel?.rawValue == 5)
+        expectEqual(ring.panelLevel?.rawValue, 5)
     }
 
     @Test("A front glow is cut out of its window")
@@ -128,7 +128,7 @@ struct BorderStackingTests {
         render(ring, order: .above, glow: 8)
         defer { ring.hide() }
         let masks = ring.glowMaskPaths
-        #expect(masks.count == 2)
+        expectEqual(masks.count, 2)
         for mask in masks {
             let path = try #require(mask)
             let box = path.boundingBox

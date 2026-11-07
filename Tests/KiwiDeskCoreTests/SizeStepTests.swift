@@ -27,7 +27,7 @@ struct SizeStepTests {
             elapsed: 0,
             dt: 1.0 / 120.0
         )
-        #expect(step.size == held)
+        expectEqual(step.size, held)
     }
 
     @Test("midSlide grows in one frame past halfway")
@@ -43,7 +43,7 @@ struct SizeStepTests {
             elapsed: 0,
             dt: 1.0 / 120.0
         )
-        #expect(step.size == target)
+        expectEqual(step.size, target)
     }
 
     /// #45's invariant: with no sizing promise — the default,
@@ -65,7 +65,7 @@ struct SizeStepTests {
                 elapsed: 0,
                 dt: 1.0 / 120.0
             )
-            #expect(step.size == held)
+            expectEqual(step.size, held)
         }
     }
 
@@ -85,8 +85,8 @@ struct SizeStepTests {
             elapsed: 0,
             dt: 1.0 / 120.0
         )
-        #expect(step.size == spring)
-        #expect(step.elapsed == 0)
+        expectEqual(step.size, spring)
+        expectEqual(step.elapsed, 0)
     }
 
     @Test("Below the interval a growing axis holds and accrues")
@@ -103,8 +103,8 @@ struct SizeStepTests {
             elapsed: 0,
             dt: dt
         )
-        #expect(step.size == held)
-        #expect(step.elapsed == dt)
+        expectEqual(step.size, held)
+        expectEqual(step.elapsed, dt)
     }
 
     @Test("At the interval it resamples the spring and resets")
@@ -121,8 +121,8 @@ struct SizeStepTests {
             elapsed: 0.039,  // + a 8.3 ms tick crosses 40 ms
             dt: 1.0 / 120.0
         )
-        #expect(step.size == spring)
-        #expect(step.elapsed == 0)
+        expectEqual(step.size, spring)
+        expectEqual(step.elapsed, 0)
     }
 
     @Test("A higher rate emits sooner (30 Hz vs 25 Hz band)")
@@ -141,7 +141,7 @@ struct SizeStepTests {
                 elapsed: 0.030,
                 dt: 1.0 / 120.0
             )
-            #expect((step.size != held) == shouldEmit)
+            expectEqual((step.size != held), shouldEmit)
         }
         args(30, true)
         args(25, false)
@@ -155,7 +155,7 @@ struct SizeDefaultsTests {
     @Test("Engine ships smooth per-tick")
     func shipsSmoothPerTick() {
         let engine = AnimationEngine()
-        #expect(engine.sizePolicy == .throttledSmooth)
+        expectEqual(engine.sizePolicy, .throttledSmooth)
         #expect(engine.sizeRateHz == nil)
     }
 
@@ -163,9 +163,9 @@ struct SizeDefaultsTests {
     func rateClamp() {
         let engine = AnimationEngine()
         engine.sizeRateHz = 500
-        #expect(engine.sizeRateHz == 120)
+        expectEqual(engine.sizeRateHz, 120)
         engine.sizeRateHz = -5
-        #expect(engine.sizeRateHz == 1)
+        expectEqual(engine.sizeRateHz, 1)
         engine.sizeRateHz = nil
         #expect(engine.sizeRateHz == nil)
     }

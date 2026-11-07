@@ -87,8 +87,8 @@ struct GlyphSizeGlyphTests {
         let padded = try glyphSizes(glyphSize: 28)
         let size = Self.look(glyphSize: 28)
             .glyphFontSize(forContentDepth: Self.content)
-        #expect(padded.item == size)
-        #expect(padded.front == size)
+        expectEqual(padded.item, size)
+        expectEqual(padded.front, size)
         #expect(padded.item < plain.item)
         #expect(padded.front < plain.front)
     }

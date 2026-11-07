@@ -89,7 +89,7 @@ struct FloatRaiseVisibilityTests {
     @Test("Only the undrawn float leaves the raise's targets")
     func filterIsPerWindow() {
         let core = makeCore(undrawn: [50])
-        #expect(core.drawnFloatTargets() == [WindowID(60)])
+        expectEqual(core.drawnFloatTargets(), [WindowID(60)])
         #expect(
             core.floatLayerTargets() == [WindowID(50), WindowID(60)]
         )
@@ -106,7 +106,7 @@ struct FloatRaiseVisibilityTests {
         ]
     )
     func verdict(bounds: CGRect, drawn: Bool) {
-        #expect(FloatDetection.drawsVisibly(bounds: bounds) == drawn)
+        expectEqual(FloatDetection.drawsVisibly(bounds: bounds), drawn)
     }
 
     @Test("A read with no answer keeps the window")

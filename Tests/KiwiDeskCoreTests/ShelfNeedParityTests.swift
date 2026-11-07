@@ -135,7 +135,7 @@ struct ShelfNeedParityTests {
             items: items,
             capAxis: 2000
         )
-        #expect(metrics.inset == 0)
+        expectEqual(metrics.inset, 0)
         let frames = AppBarOverlay.frames(
             lengths: Array(repeating: metrics.slot, count: items.count),
             in: strip,
@@ -154,7 +154,7 @@ struct ShelfNeedParityTests {
         )
         let slack =
             alignment == .start ? need - plate.maxX : plate.minX
-        #expect(slack == 0)
+        expectEqual(slack, 0)
     }
 }
 
@@ -200,7 +200,7 @@ struct ShelfFloorWiringTests {
             pocket: false,
             drawn: { $0.drawnAtRest }
         )
-        #expect(plans.count == 1)
+        expectEqual(plans.count, 1)
         let plan = try #require(plans.first)
         let slot = try #require(plan.arrangement.space)
         let floor = ShelfArrangement.hardFloor(

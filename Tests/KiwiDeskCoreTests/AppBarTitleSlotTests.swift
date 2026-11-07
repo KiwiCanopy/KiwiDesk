@@ -81,12 +81,12 @@ struct AppBarTitleSlotTests {
         let frames = overlay.itemViews.map(\.frame)
         let plate = overlay.plateFrame
         show(overlay, [item(1, upper), item(2, "zsh")])
-        #expect(overlay.draws == draws)
-        #expect(overlay.itemViews.map(\.frame) == frames)
-        #expect(overlay.plateFrame == plate)
+        expectEqual(overlay.draws, draws)
+        expectEqual(overlay.itemViews.map(\.frame), frames)
+        expectEqual(overlay.plateFrame, plate)
         overlay.itemViews[0].layout()
-        #expect(overlay.itemViews[0].label.stringValue == upper)
-        #expect(overlay.itemViews.map(\.frame) == frames)
+        expectEqual(overlay.itemViews[0].label.stringValue, upper)
+        expectEqual(overlay.itemViews.map(\.frame), frames)
     }
 
     @Test("Every stored field of a show is classified")
@@ -100,8 +100,8 @@ struct AppBarTitleSlotTests {
             capAxis: nil,
             space: nil
         )
-        #expect(Self.labels(state) == Set(self.state.keys))
-        #expect(Self.labels(one) == Set(fields.keys))
+        expectEqual(Self.labels(state), Set(self.state.keys))
+        expectEqual(Self.labels(one), Set(fields.keys))
     }
 
     /// A content redraw lands every frame where a fresh overlay's
@@ -121,8 +121,8 @@ struct AppBarTitleSlotTests {
                 + o.itemViews.map(\.label.frame)
                 + o.itemViews.map(\.glyphLabel.frame)
         }
-        #expect(redrawn.draws == 1)
-        #expect(frames(redrawn) == frames(fresh))
+        expectEqual(redrawn.draws, 1)
+        expectEqual(frames(redrawn), frames(fresh))
         #expect(
             redrawn.itemViews.map(\.label.stringValue)
                 == fresh.itemViews.map(\.label.stringValue)

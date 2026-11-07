@@ -92,8 +92,8 @@ struct DiscordAnnounceTests {
         #expect(result.status == 0, "\(result.stderr)")
         let embed = try embed(result)
         let text = try #require(embed["description"] as? String)
-        #expect(embed["title"] as? String == "KiwiDesk 9999.3.0")
-        #expect(embed["url"] as? String == Self.url)
+        expectEqual(embed["title"] as? String, "KiwiDesk 9999.3.0")
+        expectEqual(embed["url"] as? String, Self.url)
         #expect(text.hasPrefix("Both bars on one shelf."))
         #expect(text.contains("**Before you update:** your settings"))
         #expect(text.contains("**New · 2**\n- **One shelf** for both bars."))
@@ -116,7 +116,7 @@ struct DiscordAnnounceTests {
             try JSONSerialization
             .jsonObject(with: Data(result.stdout.utf8)) as? [String: Any]
         let mentions = object?["allowed_mentions"] as? [String: Any]
-        #expect(mentions?["parse"] as? [String] == [])
+        expectEqual(mentions?["parse"] as? [String], [])
     }
 
     /// Past the embed limit the post ends on a whole section and a
@@ -163,7 +163,7 @@ struct DiscordAnnounceTests {
         }
         // Whole sections only: every bullet shown is complete.
         let shown = text.components(separatedBy: "- **A change**").count - 1
-        #expect(shown % 12 == 0)
+        expectEqual(shown % 12, 0)
     }
 
     /// The head alone can pass the embed limit; it is clipped at

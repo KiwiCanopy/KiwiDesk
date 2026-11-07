@@ -99,17 +99,17 @@ struct ShelfRevealDurationTests {
     @Test("The reveal duration is stored, clamped and set by its verb")
     func storedAndClamped() throws {
         var animations = AnimationSettings()
-        #expect(animations.revealDurationMS == 300)
+        expectEqual(animations.revealDurationMS, 300)
         let band = AnimationSettings.revealDurationBand
         animations.revealDurationMS = band.upperBound + 1
-        #expect(animations.revealDurationMS == band.upperBound)
+        expectEqual(animations.revealDurationMS, band.upperBound)
         animations.revealDurationMS = band.lowerBound - 1
-        #expect(animations.revealDurationMS == band.lowerBound)
+        expectEqual(animations.revealDurationMS, band.lowerBound)
         let data = try JSONEncoder().encode(animations)
         let json = try #require(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
-        #expect(json["reveal_duration"] as? Int == band.lowerBound)
+        expectEqual(json["reveal_duration"] as? Int, band.lowerBound)
         let core = makeTestCore()
         #expect(
             core.execute(
@@ -117,7 +117,7 @@ struct ShelfRevealDurationTests {
                 args: [.number(500)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.animations.revealDurationMS == 500)
+        expectEqual(core.tiler.settings.animations.revealDurationMS, 500)
     }
 
     /// 0 is no animation (owner ruling, 2026-10-21): every style
@@ -129,14 +129,14 @@ struct ShelfRevealDurationTests {
         let reveal = AnimationSettings.revealDurationBand
         let expand = AnimationSettings.expandDurationBand
         animations.revealDurationMS = 0
-        #expect(animations.revealDurationMS == 0)
+        expectEqual(animations.revealDurationMS, 0)
         animations.revealDurationMS = 1
-        #expect(animations.revealDurationMS == reveal.lowerBound)
+        expectEqual(animations.revealDurationMS, reveal.lowerBound)
         animations.expandDurationMS = 0
-        #expect(animations.expandDurationMS == 0)
-        #expect(animations.expandSeconds == 0)
+        expectEqual(animations.expandDurationMS, 0)
+        expectEqual(animations.expandSeconds, 0)
         animations.expandDurationMS = expand.lowerBound - 1
-        #expect(animations.expandDurationMS == expand.lowerBound)
+        expectEqual(animations.expandDurationMS, expand.lowerBound)
         for kind in [BarMotion.RevealKind.slide, .grow, .unfold, .fade] {
             let content = NSView(frame: Self.plate)
             let items = NSView(frame: Self.plate)
@@ -146,7 +146,7 @@ struct ShelfRevealDurationTests {
                 path: path(kind, length: 0),
                 entering: true
             )
-            #expect(span == 0)
+            expectEqual(span, 0)
             #expect(content.layer?.animationKeys() == nil, "\(kind)")
         }
         let saved = BarMotion.revealLength
@@ -154,7 +154,7 @@ struct ShelfRevealDurationTests {
         defer { BarMotion.revealLength = saved }
         let mark = NSView()
         BarMotion.fadeMark(mark, showing: false, reveal: .slide)
-        #expect(mark.alphaValue == 0)
+        expectEqual(mark.alphaValue, 0)
         #expect(mark.layer?.animationKeys() == nil)
     }
 
@@ -172,10 +172,10 @@ struct ShelfRevealDurationTests {
                 step: step
             )
         }
-        #expect(next(step, 0) == band.lowerBound)
-        #expect(next(band.lowerBound - step, band.lowerBound) == 0)
-        #expect(next(band.lowerBound + step, band.lowerBound) == 200)
-        #expect(next(100, 300) == band.lowerBound)
-        #expect(next(0, 300) == 0)
+        expectEqual(next(step, 0), band.lowerBound)
+        expectEqual(next(band.lowerBound - step, band.lowerBound), 0)
+        expectEqual(next(band.lowerBound + step, band.lowerBound), 200)
+        expectEqual(next(100, 300), band.lowerBound)
+        expectEqual(next(0, 300), 0)
     }
 }

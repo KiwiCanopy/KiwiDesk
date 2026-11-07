@@ -301,7 +301,7 @@ struct ShelfDividerCentringTests {
             strip: Self.strip,
             horizontal: true
         )
-        #expect(frame?.midX == 403)
+        expectEqual(frame?.midX, 403)
         // A section after the divider, scrolled forward, reports a
         // run starting before its slot: clamped to the slot too.
         let scrolled = ShelfOverlay.dividerFrame(
@@ -313,6 +313,6 @@ struct ShelfDividerCentringTests {
             strip: Self.strip,
             horizontal: true
         )
-        #expect(scrolled?.midX == 403)
+        expectEqual(scrolled?.midX, 403)
     }
 }

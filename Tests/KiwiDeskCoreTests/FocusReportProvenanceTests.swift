@@ -117,7 +117,7 @@ struct FocusReportProvenanceTests {
         let (loop, box) = makeLoop()
         loop.lastActivePid = pid
         loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
-        #expect(box.focused == [WindowID(11)])
+        expectEqual(box.focused, [WindowID(11)])
     }
 
     /// Before the first activation notification the frontmost
@@ -131,7 +131,7 @@ struct FocusReportProvenanceTests {
         #expect(box.focused.isEmpty, "reported \(box.focused)")
         loop.frontmostPID = { self.pid }
         loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
-        #expect(box.focused == [WindowID(11)])
+        expectEqual(box.focused, [WindowID(11)])
     }
 
     /// Stated because it fails OPEN: with no activation and no
@@ -143,7 +143,7 @@ struct FocusReportProvenanceTests {
         loop.lastActivePid = nil
         loop.frontmostPID = { nil }
         loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
-        #expect(box.focused == [WindowID(11)])
+        expectEqual(box.focused, [WindowID(11)])
     }
 
     /// `stop()` forgets the last activation: the observers are

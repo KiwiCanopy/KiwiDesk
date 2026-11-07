@@ -66,7 +66,7 @@ struct MergeKeysOverrideRefusalTests {
             repoRoot: repoRoot,
             environment: [variable: redirect]
         )
-        #expect(run.status == 1)
+        expectEqual(run.status, 1)
         #expect(run.stderr.contains(variable))
         #expect(run.stderr.contains("honours no override"))
         // The refusal precedes every path read: the catalog is
@@ -95,7 +95,7 @@ struct MergeKeysOverrideRefusalTests {
                 "KIWIDESK_EXTRACT_LOCALES": redirect
             ]
         )
-        #expect(run.status == 1)
+        expectEqual(run.status, 1)
         #expect(
             run.stderr.contains("KIWIDESK_EXTRACT_LOCALES")
         )
@@ -117,9 +117,9 @@ struct MergeKeysOverrideRefusalTests {
             repoRoot: repoRoot,
             environment: ["KIWIDESK_EXTRACT_LOCALES": ""]
         )
-        #expect(run.status == 0)
+        expectEqual(run.status, 0)
         let merged = try fx.decodeLocale("de.json")
-        #expect(merged["a.key"] == "Hallo")
+        expectEqual(merged["a.key"], "Hallo")
         #expect(!fx.worksheetExists("missing_de.json"))
     }
 }

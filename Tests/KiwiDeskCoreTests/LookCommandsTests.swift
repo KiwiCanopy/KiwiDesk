@@ -43,14 +43,14 @@ struct LookCommandsTests {
         let response = core.execute("look.apply", args: [.string(name)])
         #expect(response.isSuccess)
         #expect(core.tiler.settings != settings)
-        #expect(files(core) == before)
+        expectEqual(files(core), before)
         let listed = rows(core.execute("look.list"))
         let worn = listed.first { $0["name"] == .string(name) }
-        #expect(worn?["worn"] == .string("applied"))
-        #expect(worn?["bundled"] == .bool(true))
+        expectEqual(worn?["worn"], .string("applied"))
+        expectEqual(worn?["bundled"], .bool(true))
         // Only the look worn is marked applied.
         let applied = listed.filter { $0["worn"] == .string("applied") }
-        #expect(applied.count == 1)
+        expectEqual(applied.count, 1)
     }
 
     @Test("a follower's wear is reported pending in the shared look")
@@ -91,10 +91,10 @@ struct LookCommandsTests {
             return
         }
         #expect(setters.count == (LookKeys.all + ColorPaletteKeys.all).count)
-        #expect(setters["border.width"] == .string("border.set_width"))
+        expectEqual(setters["border.width"], .string("border.set_width"))
         #expect(style["border.width"] != nil)
-        #expect(fields["follows_shared_look"] == .bool(true))
-        #expect(fields["followers"] == .array([.string("Work")]))
+        expectEqual(fields["follows_shared_look"], .bool(true))
+        expectEqual(fields["followers"], .array([.string("Work")]))
     }
 
     @Test("an own look is no shared look and names no followers")
@@ -107,9 +107,9 @@ struct LookCommandsTests {
             Issue.record("no look")
             return
         }
-        #expect(fields["profile"] == .string("Own"))
-        #expect(fields["follows_shared_look"] == .bool(false))
-        #expect(fields["followers"] == .array([]))
+        expectEqual(fields["profile"], .string("Own"))
+        expectEqual(fields["follows_shared_look"], .bool(false))
+        expectEqual(fields["followers"], .array([]))
     }
 
     @Test("a saved look wears back to the same settings")
@@ -141,10 +141,10 @@ struct LookCommandsTests {
             core.execute("look.apply", args: [.string("Mine")])
                 .isSuccess
         )
-        #expect(core.tiler.settings == settings)
+        expectEqual(core.tiler.settings, settings)
         let saved = rows(core.execute("look.list"))
             .first { $0["name"] == .string("Mine") }
-        #expect(saved?["bundled"] == .bool(false))
+        expectEqual(saved?["bundled"], .bool(false))
     }
 
     @Test("a save refuses an empty, bundled or taken name")
@@ -204,7 +204,7 @@ struct LookCommandsTests {
             "look.delete",
             args: [.string(LookCatalog.defaultName)]
         )
-        #expect(bundled.error == "a bundled look cannot be deleted")
+        expectEqual(bundled.error, "a bundled look cannot be deleted")
         #expect(APIReference.destructive.contains("look.delete"))
     }
 
@@ -215,11 +215,11 @@ struct LookCommandsTests {
         core.onLookLibraryChanged = { told += 1 }
         #expect(core.execute("look.save", args: [.string("Mine")]).isSuccess)
         #expect(core.execute("look.delete", args: [.string("Mine")]).isSuccess)
-        #expect(told == 2)
+        expectEqual(told, 2)
         #expect(
             !core.execute("look.delete", args: [.string("Mine")]).isSuccess
         )
-        #expect(told == 2)
+        expectEqual(told, 2)
     }
 
     @Test("an unreadable library says so rather than naming no look")
@@ -227,9 +227,9 @@ struct LookCommandsTests {
         let core = try KeepFixture.core()
         try Data("not json".utf8).write(to: core.lookLibrary.url)
         let apply = core.execute("look.apply", args: [.string("Mine")])
-        #expect(apply.error == "the look library cannot be read")
+        expectEqual(apply.error, "the look library cannot be read")
         let delete = core.execute("look.delete", args: [.string("Mine")])
-        #expect(delete.error == "the look library cannot be read")
+        expectEqual(delete.error, "the look library cannot be read")
         #expect(
             core.execute(
                 "look.apply",

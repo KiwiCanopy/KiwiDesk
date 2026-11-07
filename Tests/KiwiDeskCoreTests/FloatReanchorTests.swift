@@ -41,8 +41,8 @@ struct FloatReanchorTests {
             to: sideBounds
         )
         // 25% / 50% of the side display: center (2280, 542.5).
-        #expect(moved.origin == CGPoint(x: 2180, y: 492.5))
-        #expect(moved.size == frame.size)
+        expectEqual(moved.origin, CGPoint(x: 2180, y: 492.5))
+        expectEqual(moved.size, frame.size)
     }
 
     @Test("A corner window lands in the same corner")
@@ -61,10 +61,10 @@ struct FloatReanchorTests {
             from: mainBounds,
             to: sideBounds
         )
-        #expect(moved.maxX == sideBounds.maxX)
-        #expect(moved.maxY == sideBounds.maxY)
+        expectEqual(moved.maxX, sideBounds.maxX)
+        expectEqual(moved.maxY, sideBounds.maxY)
         #expect(sideBounds.contains(moved))
-        #expect(moved.size == frame.size)
+        expectEqual(moved.size, frame.size)
     }
 
     @Test("Confines into a smaller target display")
@@ -84,7 +84,7 @@ struct FloatReanchorTests {
             to: sideBounds
         )
         #expect(sideBounds.contains(moved))
-        #expect(moved.size == frame.size)
+        expectEqual(moved.size, frame.size)
     }
 
     @Test("An oversized window pins to the target's min edges")
@@ -95,8 +95,8 @@ struct FloatReanchorTests {
             from: mainBounds,
             to: sideBounds
         )
-        #expect(moved.origin == sideBounds.origin)
-        #expect(moved.size == frame.size)
+        expectEqual(moved.origin, sideBounds.origin)
+        expectEqual(moved.size, frame.size)
     }
 
     @Test("Same bounds is the identity")
@@ -107,7 +107,7 @@ struct FloatReanchorTests {
             from: mainBounds,
             to: mainBounds
         )
-        #expect(moved == frame)
+        expectEqual(moved, frame)
     }
 
     @Test("scaleSize shrinks an oversized float to fit (#502)")
@@ -129,7 +129,7 @@ struct FloatReanchorTests {
             scaleSize: true
         )
         // Width ratio 1440/1920 = 0.75 → 1350 (exact).
-        #expect(moved.width == 1350)
+        expectEqual(moved.width, 1350)
         #expect(moved.height < frame.height)
         #expect(sideBounds.contains(moved))
     }
@@ -169,7 +169,7 @@ struct FloatReanchorTests {
             to: sideBounds,
             scaleSize: true
         )
-        #expect(moved.width == frame.width)
+        expectEqual(moved.width, frame.width)
         // Height still scales by its own (valid) ratio.
         #expect(moved.height != frame.height)
     }
@@ -208,7 +208,7 @@ struct FloatReanchorSeedTests {
             force: true,
             capturesOriginal: window.isFloating
         )
-        #expect(engine.stashOriginal(WindowID(1)) == old)
+        expectEqual(engine.stashOriginal(WindowID(1)), old)
         let seeded = CGRect(
             x: 2020,
             y: 205,
@@ -216,7 +216,7 @@ struct FloatReanchorSeedTests {
             height: 600
         )
         engine.seedStash(WindowID(1), frame: seeded)
-        #expect(engine.stashOriginal(WindowID(1)) == seeded)
+        expectEqual(engine.stashOriginal(WindowID(1)), seeded)
     }
 
     @Test("A later stash keeps the seeded frame as original")
@@ -243,6 +243,6 @@ struct FloatReanchorSeedTests {
             force: true,
             capturesOriginal: window.isFloating
         )
-        #expect(engine.stashOriginal(WindowID(1)) == seeded)
+        expectEqual(engine.stashOriginal(WindowID(1)), seeded)
     }
 }

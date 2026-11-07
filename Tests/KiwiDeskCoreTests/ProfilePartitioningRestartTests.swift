@@ -80,7 +80,7 @@ struct ProfilePartitioningRestartTests {
         #expect(second.state.profilePartitioning.hasRecord(for: .profile("A")))
 
         second.apply(profile: a, cause: .event)
-        #expect(second.state.workspaces[dual]?.windows == arranged)
+        expectEqual(second.state.workspaces[dual]?.windows, arranged)
     }
 
     /// Quit under A, relaunch under B: A was LIVE at the quit, so
@@ -93,7 +93,7 @@ struct ProfilePartitioningRestartTests {
         for id in arranged { core.state.workspaces.add(id, to: dual) }
 
         let records = core.sessionSnapshot().arrangementRecords?.records
-        #expect(records?[.profile("A")]?[dual] == arranged)
+        expectEqual(records?[.profile("A")]?[dual], arranged)
         // A copy: the live record is written only at a switch.
         #expect(!core.state.profilePartitioning.hasRecord(for: .profile("A")))
     }
@@ -156,20 +156,20 @@ struct ProfilePartitioningRestartTests {
                 + "\(entry("standard", "S", #"{"3":[6]}"#))]"
         )
         let records = partial.arrangementRecords?.records
-        #expect(records?[.profile("A")]?[dual] == arranged)
+        expectEqual(records?[.profile("A")]?[dual], arranged)
         #expect(records?[.profile("B")] == nil)
-        #expect(records?[.standard("S")]?[dual] == [WindowID(6)])
-        #expect(partial.spaces.count == 1)
+        expectEqual(records?[.standard("S")]?[dual], [WindowID(6)])
+        expectEqual(partial.spaces.count, 1)
 
         // Two keys naming one Space: damaged, and still no trap.
         let twin = try decode(
             records: "[\(entry("profile", "A", #"{"3":[6],"03":[7]}"#))]"
         )
-        #expect(twin.arrangementRecords?.records[.profile("A")]?.count == 1)
+        expectEqual(twin.arrangementRecords?.records[.profile("A")]?.count, 1)
 
         let broken = try decode(records: #""garbage""#)
         #expect(broken.arrangementRecords == nil)
-        #expect(broken.spaces.count == 1)
+        expectEqual(broken.spaces.count, 1)
     }
 
     private func entry(

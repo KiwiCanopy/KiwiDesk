@@ -68,7 +68,7 @@ struct DesktopMoveSharedSpaceTests {
                 verb,
                 args: [.number(2), .string("mail")]
             )
-            #expect(response.error == refusal)
+            expectEqual(response.error, refusal)
         }
         #expect(DesktopVerbBridge.moves.isEmpty)
         #expect(core.pendingSpace.isEmpty)
@@ -85,7 +85,7 @@ struct DesktopMoveSharedSpaceTests {
                 args: [.number(2), .string("mail")]
             ).isSuccess
         )
-        #expect(DesktopVerbBridge.moves.count == 1)
+        expectEqual(DesktopVerbBridge.moves.count, 1)
     }
 
     @Test("a hidden Desktop with no Space named still moves")
@@ -93,7 +93,7 @@ struct DesktopMoveSharedSpaceTests {
         let core = makeCore()
         defer { teardown() }
         #expect(core.execute("move_to_desktop", args: [.number(2)]).isSuccess)
-        #expect(DesktopVerbBridge.moves.count == 1)
+        expectEqual(DesktopVerbBridge.moves.count, 1)
     }
 
     @Test("a shown Desktop crosses to a Space on another screen")
@@ -107,7 +107,7 @@ struct DesktopMoveSharedSpaceTests {
                 args: [.number(1), .string("mail")]
             ).isSuccess
         )
-        #expect(core.state.workspaces.space(of: window) == mail)
+        expectEqual(core.state.workspaces.space(of: window), mail)
     }
 
     /// One screen is never a crossing, whatever its frame reads: a

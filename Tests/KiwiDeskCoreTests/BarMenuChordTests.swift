@@ -100,9 +100,9 @@ struct BarMenuChordTests {
     @Test("the focused window's Float row carries the chord alone")
     func focusedFloatRow() {
         let core = seededCore()
-        #expect(chords(rows(core, [3])) == ["Float Window": floatChord])
+        expectEqual(chords(rows(core, [3])), ["Float Window": floatChord])
         core.execute("make_floating", args: [.number(3)])
-        #expect(chords(rows(core, [3])) == ["Tile Window": floatChord])
+        expectEqual(chords(rows(core, [3])), ["Tile Window": floatChord])
     }
 
     @Test("another window's menu shows no chord")
@@ -126,7 +126,7 @@ struct BarMenuChordTests {
         core.state.apply(.windowFocused(WindowID(3)))
         let menu = rows(core, [3])
         #expect(menu.contains { $0.title == "Pocket Window" })
-        #expect(chords(menu) == ["Remove from Pocket": pocketChord])
+        expectEqual(chords(menu), ["Remove from Pocket": pocketChord])
     }
 
     /// The pocket window of a mixed group, focused: its Remove
@@ -168,7 +168,7 @@ struct BarMenuChordTests {
         core.execute("move_to_space", args: [.string("2"), .number(1)])
         core.state.workspaces.focus(WindowID(1), in: two)
         #expect(core.barFocus(on: nil) == WindowID(1))
-        #expect(core.focusedWindowID == WindowID(3))
+        expectEqual(core.focusedWindowID, WindowID(3))
         #expect(chords(rows(core, [3])).isEmpty)
     }
 
@@ -211,8 +211,8 @@ struct BarMenuChordTests {
             let item = try #require(
                 menu.items.first { !$0.keyEquivalent.isEmpty }
             )
-            #expect(item.keyEquivalent == "f")
-            #expect(item.keyEquivalentModifierMask == [.control, .option])
+            expectEqual(item.keyEquivalent, "f")
+            expectEqual(item.keyEquivalentModifierMask, [.control, .option])
             let target = try #require(item.target as? NSObject)
             let action = try #require(item.action)
             current.event = event
@@ -220,13 +220,13 @@ struct BarMenuChordTests {
         }
         let floats = { core.state.windows[WindowID(3)]?.isFloating }
         try fire(press(3, [.control, .option]))
-        #expect(floats() == false)
+        expectEqual(floats(), false)
         try fire(press(3, [.control, .option, .shift]))
-        #expect(floats() == true)
+        expectEqual(floats(), true)
         try fire(press(36, []))
-        #expect(floats() == false)
+        expectEqual(floats(), false)
         try fire(nil)
-        #expect(floats() == true)
+        expectEqual(floats(), true)
     }
 
     /// A chord the column could not draw drops nothing: Carbon
@@ -244,7 +244,7 @@ struct BarMenuChordTests {
         let target = try #require(item.target as? NSObject)
         let action = try #require(item.action)
         target.perform(action, with: item)
-        #expect(fired == 1)
+        expectEqual(fired, 1)
     }
 
     @Test("a sided chord draws nothing, its unsided twin draws")
@@ -258,7 +258,7 @@ struct BarMenuChordTests {
             layoutChar: { _ in "f" },
             keyDown: { nil }
         )
-        #expect(menu.items.map(\.keyEquivalent) == ["", "f"])
+        expectEqual(menu.items.map(\.keyEquivalent), ["", "f"])
         let event = try #require(press(3, [.control, .option]))
         #expect(!sided.isPressed(by: event))
     }
@@ -270,6 +270,6 @@ struct BarMenuChordTests {
         let actions = BarMenu.accessibilityActions(
             [.action("Float Window", chord: floatChord) {}]
         )
-        #expect(actions.map(\.name) == ["Float Window"])
+        expectEqual(actions.map(\.name), ["Float Window"])
     }
 }

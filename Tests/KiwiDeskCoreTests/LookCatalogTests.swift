@@ -106,7 +106,7 @@ struct LookCatalogTests {
         let first = starter(sizes)
         let looks = LookCatalog.bundled(sizes: sizes)
         let glass = try #require(looks.first)
-        #expect(glass.name == LookCatalog.defaultName)
+        expectEqual(glass.name, LookCatalog.defaultName)
         #expect(glass.isApplied(to: first))
         #expect(
             KiwiCore.painted(first, look: glass, palette: nil) == first

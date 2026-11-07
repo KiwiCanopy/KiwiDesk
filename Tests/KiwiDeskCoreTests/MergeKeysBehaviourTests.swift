@@ -62,7 +62,7 @@ struct MergeKeysBehaviourTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json").isEmpty)
         #expect(result.stderr.contains("Ein wichtiger Text"))
     }
@@ -79,7 +79,7 @@ struct MergeKeysBehaviourTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json").isEmpty)
         // Malformed, not blank — saying "still had an empty
         // translation" would send the translator looking for
@@ -152,7 +152,7 @@ struct MergeKeysBehaviourTests {
         defer { fx.cleanup() }
 
         let result = try run(["de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json").isEmpty)
         #expect(result.stdout.contains("gap.hint"))
     }
@@ -285,7 +285,7 @@ struct MergeKeysBehaviourTests {
         defer { fx.cleanup() }
 
         let result = try run(["fr"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(
             try fx.decodeLocale("fr.json") == [
                 "gap.hint": "Sens"
@@ -316,7 +316,7 @@ struct MergeKeysBehaviourTests {
         defer { fx.cleanup() }
 
         let result = try run(["--site", "de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(
             try fx.decodeLocale("de.json", site: true) == [
                 "hero.title": "Seitentitel"
@@ -342,7 +342,7 @@ struct MergeKeysBehaviourTests {
         defer { fx.cleanup() }
 
         let result = try run(["--site", "de"], in: fx)
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
         #expect(try fx.decodeLocale("de.json", site: true).isEmpty)
         #expect(result.stderr.contains("hero.title"))
         #expect(result.stderr.contains("--site"))

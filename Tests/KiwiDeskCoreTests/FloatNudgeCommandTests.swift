@@ -63,10 +63,10 @@ struct FloatNudgeCommandTests {
     func moves() {
         let core = makeCore()
         #expect(move(core, "x", 30).isSuccess)
-        #expect(commanded(core) == start.offsetBy(dx: 30, dy: 0))
+        expectEqual(commanded(core), start.offsetBy(dx: 30, dy: 0))
         let again = makeCore()
         #expect(move(again, "y", -40).isSuccess)
-        #expect(commanded(again) == start.offsetBy(dx: 0, dy: -40))
+        expectEqual(commanded(again), start.offsetBy(dx: 0, dy: -40))
     }
 
     /// Gated: with no screen `applyFrame` is instant whatever it is
@@ -80,7 +80,7 @@ struct FloatNudgeCommandTests {
         core.tiler.settings.animations.onStateChange = true
         core.tiler.settings.animations.onWindowResize = true
         #expect(move(core, "x", 30).isSuccess)
-        #expect(commanded(core)?.minX == start.minX + 30)
+        expectEqual(commanded(core)?.minX, start.minX + 30)
         #expect(!core.tiler.animation.isAnimating(window: one))
     }
 
@@ -106,8 +106,8 @@ struct FloatNudgeCommandTests {
             let core = makeCore()
             core.borders.onResizeRefusal = { cues.append($0) }
             #expect(move(core, axis, delta).isSuccess)
-            #expect(commanded(core) == landing)
-            #expect(cues == [.moveAtBoundary(one, direction: direction)])
+            expectEqual(commanded(core), landing)
+            expectEqual(cues, [.moveAtBoundary(one, direction: direction)])
         }
     }
 
@@ -117,7 +117,7 @@ struct FloatNudgeCommandTests {
         let core = makeCore()
         core.borders.onResizeRefusal = { cues.append($0) }
         #expect(move(core, "x", 1100).isSuccess)
-        #expect(commanded(core)?.maxX == screen.maxX)
+        expectEqual(commanded(core)?.maxX, screen.maxX)
         #expect(cues.isEmpty)
     }
 
@@ -129,10 +129,10 @@ struct FloatNudgeCommandTests {
         core.borders.onResizeRefusal = { cues.append($0) }
         #expect(move(core, "x", 10).isSuccess)
         #expect(commanded(core) == nil)
-        #expect(cues == [.moveAtBoundary(one, direction: .right)])
+        expectEqual(cues, [.moveAtBoundary(one, direction: .right)])
         let back = makeCore(frame: past)
         #expect(move(back, "x", -10).isSuccess)
-        #expect(commanded(back)?.minX == past.minX - 10)
+        expectEqual(commanded(back)?.minX, past.minX - 10)
         // Past the left edge, the same two ways round.
         let left = past.offsetBy(dx: -1600, dy: 0)
         let out = makeCore(frame: left)
@@ -149,7 +149,7 @@ struct FloatNudgeCommandTests {
         let left = CGRect(x: -50, y: 0, width: 2000, height: 300)
         let inward = makeCore(frame: left)
         #expect(move(inward, "x", 10).isSuccess)
-        #expect(commanded(inward)?.minX == -40)
+        expectEqual(commanded(inward)?.minX, -40)
     }
 
     /// A step far under a point at a wall still counts as stopped, or
@@ -162,7 +162,7 @@ struct FloatNudgeCommandTests {
         core.borders.onResizeRefusal = { cues.append($0) }
         #expect(move(core, "x", 0.1).isSuccess)
         #expect(commanded(core) == nil)
-        #expect(cues == [.moveAtBoundary(one, direction: .right)])
+        expectEqual(cues, [.moveAtBoundary(one, direction: .right)])
     }
 
     @Test("a bar's push never sends a step back against the ask")
@@ -201,9 +201,9 @@ struct FloatNudgeCommandTests {
         let core = makeCore(floating: false)
         core.borders.onResizeRefusal = { cues.append($0) }
         #expect(!move(core, "x", 10).isSuccess)
-        #expect(cues == [.moveNeedsFloat(one)])
+        expectEqual(cues, [.moveNeedsFloat(one)])
         #expect(commanded(core) == nil)
-        #expect(core.state.windows[one]?.isFloating == false)
+        expectEqual(core.state.windows[one]?.isFloating, false)
     }
 
     @Test("full screen refuses first, tiled or floating")
@@ -214,7 +214,7 @@ struct FloatNudgeCommandTests {
             core.borders.onResizeRefusal = { cues.append($0) }
             core.state.apply(.windowFullscreenChanged(one, isFullscreen: true))
             #expect(!move(core, "x", 10).isSuccess)
-            #expect(cues == [.fullscreenCannotMove(one)])
+            expectEqual(cues, [.fullscreenCannotMove(one)])
             #expect(commanded(core) == nil)
         }
     }
@@ -227,7 +227,7 @@ struct FloatNudgeCommandTests {
             args: [.string("1"), .string("floating")]
         )
         #expect(move(core, "x", 30).isSuccess)
-        #expect(commanded(core)?.minX == start.minX + 30)
+        expectEqual(commanded(core)?.minX, start.minX + 30)
     }
 
     @Test("a drag or an aspect probe stands the verb down")
@@ -266,7 +266,7 @@ struct FloatNudgeCommandTests {
             $0.focused = one
         }
         #expect(move(core, "x", 30).isSuccess)
-        #expect(commanded(core)?.minX == start.minX + 30)
-        #expect(core.state.workspaces[space]?.maximized == tile)
+        expectEqual(commanded(core)?.minX, start.minX + 30)
+        expectEqual(core.state.workspaces[space]?.maximized, tile)
     }
 }

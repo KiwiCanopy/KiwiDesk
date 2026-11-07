@@ -58,7 +58,7 @@ struct ShelfHandleCountTests {
             let count = try #require(spec.count)
             #expect(count.showsNumber)
             // A top edge's plate grows along it, never deeper.
-            #expect(spec.growth.across == 0)
+            expectEqual(spec.growth.across, 0)
             #expect(count.glyph.height > 0)
             #expect(count.glyph.height <= spec.pillDepth - 2)
         }
@@ -68,10 +68,10 @@ struct ShelfHandleCountTests {
     func sideEdges() throws {
         let two = try #require(spec(windows: 99, edge: .left).count)
         #expect(two.showsNumber)
-        #expect(two.glyphName == ShelfHandleSpec.countGlyph)
+        expectEqual(two.glyphName, ShelfHandleSpec.countGlyph)
         let many = try #require(spec(windows: 128, edge: .left).count)
         #expect(!many.showsNumber)
-        #expect(many.glyphName == ShelfHandleSpec.manyGlyph)
+        expectEqual(many.glyphName, ShelfHandleSpec.manyGlyph)
         let wide = spec(windows: 99, edge: .left)
         let grown = BarMotion.hoverPlate(
             mark: wide.frame,
@@ -84,7 +84,7 @@ struct ShelfHandleCountTests {
             grown.width
                 > ShelfHandleSpec.depth + 2 * ShelfHandleSpec.hoverGrowth
         )
-        #expect(grown.minX == wide.frame.minX)
+        expectEqual(grown.minX, wide.frame.minX)
     }
 
     @Test("VoiceOver reads the count at rest, number last")
@@ -93,7 +93,7 @@ struct ShelfHandleCountTests {
         let view = ShelfHandleView()
         view.carriesSpaceBar = false
         view.render(spec(windows: 3, hovered: false), animated: false)
-        #expect(view.accessibilityLabel() == "App Bar")
+        expectEqual(view.accessibilityLabel(), "App Bar")
         #expect(view.accessibilityValue() as? String == "Hidden, windows: 3")
     }
 
@@ -128,10 +128,10 @@ struct ShelfHandleCountTests {
         // One capsule radius at both sizes: the grown plate's.
         let capsule = min(grown.width, grown.height) / 2
         let glass = try #require(box.glass as? NSGlassEffectView)
-        #expect(glass.cornerRadius == capsule)
+        expectEqual(glass.cornerRadius, capsule)
         view.render(grownSpec, animated: false)
-        #expect(host.frame == grown)
-        #expect(glass.cornerRadius == capsule)
+        expectEqual(host.frame, grown)
+        expectEqual(glass.cornerRadius, capsule)
         view.render(
             spec(windows: 42, hovered: true, glass: false),
             animated: false

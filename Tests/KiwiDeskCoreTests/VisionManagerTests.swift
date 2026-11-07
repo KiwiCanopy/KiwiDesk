@@ -63,12 +63,12 @@ struct VisionManagerTests {
         let (vision, made) = manager()
         vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
-        #expect(made().count == 2)
+        expectEqual(made().count, 2)
         for plate in made() {
             #expect(plate.isShown)
-            #expect(plate.orders == [7])
-            #expect(plate.dim == 0.4)
-            #expect(plate.blur == true)
+            expectEqual(plate.orders, [7])
+            expectEqual(plate.dim, 0.4)
+            expectEqual(plate.blur, true)
         }
         #expect(made().compactMap(\.frame).map(\.minX).sorted() == [100, 200])
     }
@@ -121,7 +121,7 @@ struct VisionManagerTests {
         let (vision, _) = manager()
         #expect(vision.noteStandDown([left]))
         #expect(!vision.noteStandDown([left]))
-        #expect(vision.standDown == [left])
+        expectEqual(vision.standDown, [left])
     }
 
     @Test("a screen standing down hides, and re-stacks on its return")
@@ -136,12 +136,12 @@ struct VisionManagerTests {
         let byFrame = Dictionary(
             uniqueKeysWithValues: made().map { ($0.frame?.minX ?? 0, $0) }
         )
-        #expect(byFrame[100]?.isShown == false)
-        #expect(byFrame[200]?.isShown == true)
+        expectEqual(byFrame[100]?.isShown, false)
+        expectEqual(byFrame[200]?.isShown, true)
         vision.sync(request(target: 7), reassert: false)
-        #expect(byFrame[100]?.isShown == true)
-        #expect(byFrame[100]?.orders == [7, 7])
-        #expect(byFrame[200]?.orders == [7])
+        expectEqual(byFrame[100]?.isShown, true)
+        expectEqual(byFrame[100]?.orders, [7, 7])
+        expectEqual(byFrame[200]?.orders, [7])
     }
 
     @Test("a screen that leaves drops its plate")
@@ -150,8 +150,8 @@ struct VisionManagerTests {
         vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
         vision.sync(request(target: 7, screens: [right]), reassert: false)
-        #expect(vision.plates.keys.sorted { $0.raw < $1.raw } == [right])
-        #expect(made().filter(\.isShown).count == 1)
+        expectEqual(vision.plates.keys.sorted { $0.raw < $1.raw }, [right])
+        expectEqual(made().filter(\.isShown).count, 1)
     }
 
     @Test("off fades every plate out")

@@ -144,7 +144,7 @@ struct StructuredConfigTests {
         try writeInitLua("", core: core)
         core.loadConfig()
 
-        #expect(core.keys.icon(for: "resize") == "📐")
+        expectEqual(core.keys.icon(for: "resize"), "📐")
     }
 
     // MARK: - Not GUI-managed: structured loader is no-op
@@ -227,7 +227,7 @@ struct StructuredConfigTests {
         // duplicates. The structured ref-reset guard lives in
         // `structuredReloadReleasesRefs` below.
         #expect(bindings[combo] != nil)
-        #expect(bindings.count == 1)
+        expectEqual(bindings.count, 1)
     }
 
     /// No-leak canary comparing a Lua-owned core (a `KiwiDesk.bind`
@@ -291,7 +291,7 @@ struct StructuredConfigTests {
         // never shifts up (a leak would). The second probes must
         // match exactly — that is the invariant.
         #expect(blockProbe <= bareProbe)
-        #expect(blockSecondProbe == bareSecondProbe)
+        expectEqual(blockSecondProbe, bareSecondProbe)
     }
 
     /// The structured loader's transactional reset: reloading a

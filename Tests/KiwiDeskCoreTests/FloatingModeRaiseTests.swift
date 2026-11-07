@@ -127,7 +127,7 @@ struct FloatingModeRaiseTests {
     func targetsStayTheFlags() {
         let core = makeCore()
         seed(core, mode: .floating)
-        #expect(core.floatLayerTargets() == [WindowID(50)])
+        expectEqual(core.floatLayerTargets(), [WindowID(50)])
         core.state.setFloating(WindowID(2), true)
         #expect(
             core.floatLayerTargets() == [WindowID(2), WindowID(50)]

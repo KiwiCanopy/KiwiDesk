@@ -61,10 +61,10 @@ struct PocketWindowTests {
     func marks() {
         let core = makeCore()
         #expect(core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
-        #expect(core.state.windows[one]?.isFloating == true)
-        #expect(core.state.windows[one]?.stickyScope == .global)
+        expectEqual(core.state.pocketPhase(of: one), .out)
+        expectEqual(core.state.workspaces.space(of: one), SpaceID("1"))
+        expectEqual(core.state.windows[one]?.isFloating, true)
+        expectEqual(core.state.windows[one]?.stickyScope, .global)
         #expect(core.state.pocketPhase(of: two) == nil)
     }
 
@@ -76,7 +76,7 @@ struct PocketWindowTests {
             core.floatGrowBounds(on: SpaceID("1"))
         )
         core.execute("toggle_pocket_window")
-        #expect(frames[one] == FloatPlacement.centered(in: region))
+        expectEqual(frames[one], FloatPlacement.centered(in: region))
     }
 
     /// A window already floating keeps its frame (owner, #2675).
@@ -88,7 +88,7 @@ struct PocketWindowTests {
         placed.removeAll()
         core.state.apply(.windowResized(one, slot))
         core.execute("toggle_pocket_window")
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         #expect(!placed.contains(one))
     }
 
@@ -98,10 +98,10 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(core.state.pocketPhase(of: two) == nil)
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
     }
 
     @Test("a second window is refused, and the mark stays put")
@@ -110,9 +110,9 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.first?.window == one)
-        #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.windows[two]?.isFloating == false)
+        expectEqual(core.state.pocket.first?.window, one)
+        expectEqual(core.state.pocketPhase(of: one), .out)
+        expectEqual(core.state.windows[two]?.isFloating, false)
     }
 
     /// The pill resolves the refusal's sentinel to the pocket
@@ -122,7 +122,7 @@ struct PocketWindowTests {
     func pillDrawsTheTakenGlyph() {
         let taken = SizeLimitPillPlate.image(for: PocketMark.takenName)
         #expect(taken != nil)
-        #expect(taken?.isTemplate == false)
+        expectEqual(taken?.isTemplate, false)
         #expect(SizeLimitPillPlate.image(for: "nosign") != nil)
     }
 
@@ -131,10 +131,10 @@ struct PocketWindowTests {
         let core = makeCore()
         core.execute("toggle_pocket_window")
         core.execute("pocket")
-        #expect(core.focusedWindowID == two)
+        expectEqual(core.focusedWindowID, two)
         #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.first?.window == one)
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocket.first?.window, one)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
     }
 
     /// Unmarking tiles the window, as a Tile does (owner, #2680).
@@ -144,10 +144,10 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         #expect(core.execute("toggle_pocket_window").isSuccess)
         #expect(core.state.pocket.isEmpty)
-        #expect(core.state.windows[one]?.isFloating == false)
-        #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
+        expectEqual(core.state.windows[one]?.isFloating, false)
+        expectEqual(core.state.windows[one]?.stickyScope, StickyScope.none)
         #expect(!core.state.userFloated.contains(one))
-        #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
+        expectEqual(core.state.workspaces.space(of: one), SpaceID("1"))
     }
 
     @Test("unmarked on another Space, it stays on that one")
@@ -158,11 +158,11 @@ struct PocketWindowTests {
         core.state.workspaces.activate(SpaceID("2"))
         core.state.workspaces.add(two, to: SpaceID("2"))
         core.state.apply(.windowFocused(one))
-        #expect(core.focusedWindowID == one)
+        expectEqual(core.focusedWindowID, one)
         var moved: [KiwiNotification] = []
         core.bus.addSink { event, _ in moved.append(event) }
         core.execute("toggle_pocket_window")
-        #expect(core.state.workspaces.space(of: one) == SpaceID("2"))
+        expectEqual(core.state.workspaces.space(of: one), SpaceID("2"))
         #expect(core.state.pocket.isEmpty)
         // Filed as a user move files a window, so it is announced.
         #expect(moved.contains(.windowMovedToSpace))
@@ -175,7 +175,7 @@ struct PocketWindowTests {
         let core = makeCore()
         core.state.pocketWindow(one)
         #expect(core.state.pocket.isEmpty)
-        #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
+        expectEqual(core.state.workspaces.space(of: one), SpaceID("1"))
     }
 
     @Test("with nothing marked, pocket marks and pockets the focus")
@@ -185,8 +185,8 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocket.first?.window == two)
-        #expect(core.state.pocketPhase(of: two) == .pocketed)
+        expectEqual(core.state.pocket.first?.window, two)
+        expectEqual(core.state.pocketPhase(of: two), .pocketed)
     }
 
     /// Puts Space 1 on the host's first screen and pins the layout
@@ -270,7 +270,7 @@ struct PocketWindowTests {
         let filed = try #require(
             core.state.pocket.first?.frames.values.first
         )
-        #expect(filed.size == hand.size)
+        expectEqual(filed.size, hand.size)
         // Parked off the corner, at a size of its own, so a take-out
         // centring the window's current size reads apart from one
         // restoring the filed frame.
@@ -282,7 +282,7 @@ struct PocketWindowTests {
         )
         core.state.apply(.windowResized(one, parked))
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         // The frame the take-out seeds: still pending, or already
         // sent and stood at.
         let back = try #require(
@@ -290,7 +290,7 @@ struct PocketWindowTests {
         )
         // The size: a delivered frame may be nudged into the grow
         // bounds, and a centring fallback keeps the parked size.
-        #expect(back.size == filed.size)
+        expectEqual(back.size, filed.size)
     }
 
     @Test("a slot whose app is gone frees the mark for the focus")
@@ -301,16 +301,16 @@ struct PocketWindowTests {
         core.eventLoop.processIdentity.runs = { _ in false }
         core.state.apply(.windowFocused(two))
         #expect(core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.first?.window == two)
-        #expect(core.state.pocketPhase(of: two) == .out)
+        expectEqual(core.state.pocket.first?.window, two)
+        expectEqual(core.state.pocketPhase(of: two), .out)
     }
 
     @Test("⌃⌥⇧P marks, seeded and offered as generation 9")
     func defaultRow() {
         let row = DefaultKeybindings.pocketWindowRow()
-        #expect(row.combo == "control+option+shift+p")
-        #expect(row.lua == "KiwiDesk.toggle_pocket_window()")
-        #expect(DefaultKeybindings.rows(ofGeneration: 9) == [row])
+        expectEqual(row.combo, "control+option+shift+p")
+        expectEqual(row.lua, "KiwiDesk.toggle_pocket_window()")
+        expectEqual(DefaultKeybindings.rows(ofGeneration: 9), [row])
         #expect(
             DefaultKeybindings.bindings(
                 spaces: [SpaceID("1")],

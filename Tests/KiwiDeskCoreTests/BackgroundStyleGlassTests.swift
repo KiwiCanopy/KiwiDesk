@@ -14,19 +14,19 @@ struct BackgroundStyleGlassTests {
     func glassGate() {
         var style = AppBarLook()
         style.liquidGlass = false
-        #expect(style.glassEnabled == false)
+        expectEqual(style.glassEnabled, false)
         style.liquidGlass = true
         // Effective only where the platform can render glass.
-        #expect(style.glassEnabled == AppBarStyle.glassAvailable)
+        expectEqual(style.glassEnabled, AppBarStyle.glassAvailable)
     }
 
     @Test("hasBox is the Boxed shape without the glass finish")
     func hasBox() {
         var style = AppBarLook()
         style.backgroundStyle = .boxed
-        #expect(style.hasBox == !style.glassEnabled)
+        expectEqual(style.hasBox, !style.glassEnabled)
         style.backgroundStyle = .plain
-        #expect(style.hasBox == false)
+        expectEqual(style.hasBox, false)
     }
 
     @Test("the shelf parser takes liquid_glass; the bars' do not")
@@ -41,7 +41,7 @@ struct BackgroundStyleGlassTests {
         }
         var value = KiwiShelf()
         setting.apply(to: &value)
-        #expect(value.liquidGlass == false)
+        expectEqual(value.liquidGlass, false)
         #expect(
             (try? AppBarCommandSetting.parse(
                 field: "liquid_glass",

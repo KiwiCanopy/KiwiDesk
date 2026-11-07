@@ -27,37 +27,37 @@ struct ZoneRunTests {
             head: 1,
             focus: nil
         )
-        #expect(all.visible == 0..<2)
+        expectEqual(all.visible, 0..<2)
         #expect(!all.hides)
     }
 
     @Test("A run takes windows from its head while they fit")
     func headLeads() {
-        #expect(run().visible == 0..<2)
-        #expect(run(head: 1).visible == 1..<3)
+        expectEqual(run().visible, 0..<2)
+        expectEqual(run(head: 1).visible, 1..<3)
     }
 
     @Test("Focus past the run scrolls by the smallest step")
     func focusForward() {
-        #expect(run(focus: 2).visible == 1..<3)
-        #expect(run(head: 0, focus: 3).visible == 2..<4)
+        expectEqual(run(focus: 2).visible, 1..<3)
+        expectEqual(run(head: 0, focus: 3).visible, 2..<4)
     }
 
     @Test("Focus before the run brings it back to the focus")
     func focusBackward() {
-        #expect(run(head: 2, focus: 0).visible == 0..<2)
+        expectEqual(run(head: 2, focus: 0).visible, 0..<2)
     }
 
     @Test("Focus inside the run moves nothing")
     func focusInside() {
-        #expect(run(head: 1, focus: 2).visible == 1..<3)
+        expectEqual(run(head: 1, focus: 2).visible, 1..<3)
     }
 
     @Test("A pass at rest adds no window, even with room")
     func restAddsNothing() {
         // A head on the last window shows it alone: pulling the
         // run back would reveal a window no focus asked for.
-        #expect(run(head: 3).visible == 3..<4)
+        expectEqual(run(head: 3).visible, 3..<4)
     }
 
     /// The device case (owner, 2026-10-22): a big window, then
@@ -81,35 +81,35 @@ struct ZoneRunTests {
     func stepRevealsOne() {
         // Shown 0 and 1; focus 2 drops the big one. Windows 1…3
         // would fit, but 3 waits until a step reaches it.
-        #expect(mixed(head: 0, tail: 1, focus: 2) == 1..<3)
+        expectEqual(mixed(head: 0, tail: 1, focus: 2), 1..<3)
         // The next step adds it while the shown ones still fit.
-        #expect(mixed(head: 1, tail: 2, focus: 3) == 1..<4)
+        expectEqual(mixed(head: 1, tail: 2, focus: 3), 1..<4)
     }
 
     @Test("A run at rest keeps both its ends")
     func restKeepsBothEnds() {
-        #expect(mixed(head: 1, tail: 2) == 1..<3)
-        #expect(mixed(head: 1, tail: 2, focus: 1) == 1..<3)
+        expectEqual(mixed(head: 1, tail: 2), 1..<3)
+        expectEqual(mixed(head: 1, tail: 2, focus: 1), 1..<3)
     }
 
     /// The one shown window closed: its head hands on, its tail
     /// back, so the tail sits before the head.
     @Test("A tail before the head shows the head alone")
     func staleTailRevealsNothing() {
-        #expect(mixed(head: 2, tail: 1) == 2..<3)
+        expectEqual(mixed(head: 2, tail: 1), 2..<3)
     }
 
     @Test("Focus before the run becomes its first window")
     func stepBackRevealsOne() {
-        #expect(mixed(head: 2, tail: 3, focus: 1) == 1..<4)
+        expectEqual(mixed(head: 2, tail: 3, focus: 1), 1..<4)
         // The big one joins only by dropping from the far end.
-        #expect(mixed(head: 1, tail: 3, focus: 0) == 0..<2)
+        expectEqual(mixed(head: 1, tail: 3, focus: 0), 0..<2)
     }
 
     @Test("A run that stops fitting gives up the end away from focus")
     func shrinkAwayFromFocus() {
-        #expect(mixed(head: 0, tail: 2, focus: 2) == 1..<3)
-        #expect(mixed(head: 0, tail: 2, focus: 0) == 0..<2)
+        expectEqual(mixed(head: 0, tail: 2, focus: 2), 1..<3)
+        expectEqual(mixed(head: 0, tail: 2, focus: 0), 0..<2)
     }
 
     @Test("A floor bigger than the zone is shown alone")
@@ -121,7 +121,7 @@ struct ZoneRunTests {
             head: nil,
             focus: 1
         )
-        #expect(alone.visible == 1..<2)
+        expectEqual(alone.visible, 1..<2)
     }
 
     @Test("A larger floor means fewer windows shown")
@@ -133,7 +133,7 @@ struct ZoneRunTests {
             head: nil,
             focus: nil
         )
-        #expect(fewer.visible == 0..<1)
+        expectEqual(fewer.visible, 0..<1)
     }
 
     @Test("Hidden windows are handed the edge slot RunZone parks")
@@ -146,10 +146,10 @@ struct ZoneRunTests {
             vertical: true,
             gap: 10
         )
-        #expect(rects[0] == rects[1])
-        #expect(rects[3] == rects[2])
-        #expect(rects[1].maxY + 10 == rects[2].minY)
-        #expect(rects[2].maxY == 780)
+        expectEqual(rects[0], rects[1])
+        expectEqual(rects[3], rects[2])
+        expectEqual(rects[1].maxY + 10, rects[2].minY)
+        expectEqual(rects[2].maxY, 780)
     }
 
     @Test("The last member a head set names is the zone's head")

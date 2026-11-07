@@ -47,10 +47,10 @@ struct AppRuleOverrideTests {
             "Music": nil,
         ])
         let resolved = over.resolved(onto: base)
-        #expect(resolved["mail"] == SpaceID(3))
-        #expect(resolved["safari"] == SpaceID(4))
+        expectEqual(resolved["mail"], SpaceID(3))
+        expectEqual(resolved["safari"], SpaceID(4))
         #expect(resolved["music"] == nil)
-        #expect(resolved.count == 2)
+        expectEqual(resolved.count, 2)
     }
 
     // MARK: - Diff (inverse of resolved)
@@ -72,9 +72,9 @@ struct AppRuleOverrideTests {
         )
         // Shape: sparse — one change, one add, one tombstone.
         let rules = try #require(over).rules
-        #expect(rules.count == 3)
-        #expect(rules["mail"] == SpaceID(3))
-        #expect(rules["safari"] == SpaceID(4))
+        expectEqual(rules.count, 3)
+        expectEqual(rules["mail"], SpaceID(3))
+        expectEqual(rules["safari"], SpaceID(4))
         #expect(rules["music"] == .some(nil))
     }
 
@@ -93,7 +93,7 @@ struct AppRuleOverrideTests {
         let resolved = over.resolved(onto: base)
 
         #expect(resolved["mail"] == nil)
-        #expect(resolved["music"] == SpaceID(2))
+        expectEqual(resolved["music"], SpaceID(2))
     }
 
     // MARK: - Coding
@@ -114,7 +114,7 @@ struct AppRuleOverrideTests {
             AppRuleOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("Decode drops empty app and space names (#31)")
@@ -124,7 +124,7 @@ struct AppRuleOverrideTests {
             AppRuleOverride.self,
             from: Data(json.utf8)
         )
-        #expect(over.rules.count == 1)
+        expectEqual(over.rules.count, 1)
         #expect(over.rules["Music"] == .some(nil))
     }
 
@@ -153,7 +153,7 @@ struct AppRuleOverrideTests {
             Profile.self,
             from: data
         )
-        #expect(back.appRules == profile.appRules)
+        expectEqual(back.appRules, profile.appRules)
     }
 
     @Test("No override: key absent, legacy profiles decode nil")

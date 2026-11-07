@@ -60,7 +60,7 @@ struct SpaceDisplayCommandTests {
             args: [.string("5"), .number(2)]
         )
         #expect(r.isSuccess)
-        #expect(core.state.workspaces.display(of: SpaceID("5")) == d2)
+        expectEqual(core.state.workspaces.display(of: SpaceID("5")), d2)
     }
 
     @Test("move_space_to_display resolves a display by name")
@@ -72,7 +72,7 @@ struct SpaceDisplayCommandTests {
             args: [.string("5"), .string("Right")]
         )
         #expect(r.isSuccess)
-        #expect(core.state.workspaces.display(of: SpaceID("5")) == d2)
+        expectEqual(core.state.workspaces.display(of: SpaceID("5")), d2)
     }
 
     @Test("move_space_to_display rejects an unknown display")
@@ -100,9 +100,9 @@ struct SpaceDisplayCommandTests {
             args: [.string("5"), .number(2)]
         )
         #expect(r.isSuccess)
-        #expect(core.spacePins[SpaceID("5")] == fingerprint)
+        expectEqual(core.spacePins[SpaceID("5")], fingerprint)
         // The pin resolves the space onto that display.
-        #expect(core.state.workspaces.display(of: SpaceID("5")) == d2)
+        expectEqual(core.state.workspaces.display(of: SpaceID("5")), d2)
     }
 
     @Test("pin overrides a prior Main-role assignment")
@@ -115,7 +115,7 @@ struct SpaceDisplayCommandTests {
             args: [.string("5"), .number(1)]
         )
         #expect(!core.mainSpaces.contains(SpaceID("5")))
-        #expect(core.state.workspaces.display(of: SpaceID("5")) == d1)
+        expectEqual(core.state.workspaces.display(of: SpaceID("5")), d1)
     }
 
     @Test("both verbs need a space id")

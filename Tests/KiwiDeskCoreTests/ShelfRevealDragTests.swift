@@ -100,7 +100,7 @@ struct ShelfRevealDragTests {
         let rig = make()
         defer { rig.revealer.stop() }
         rig.send(CGPoint(x: 500, y: 800), dragging: true)
-        #expect(rig.revealer.reveal(of: Self.space) == .hover)
+        expectEqual(rig.revealer.reveal(of: Self.space), .hover)
         #expect(rig.timers.isEmpty)
     }
 
@@ -109,10 +109,10 @@ struct ShelfRevealDragTests {
         let rig = make()
         defer { rig.revealer.stop() }
         rig.send(CGPoint(x: 500, y: 795), dragging: true)
-        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
-        #expect(rig.delays == [ShelfReveal.revealDelay])
+        expectEqual(rig.revealer.reveal(of: Self.space), .hidden)
+        expectEqual(rig.delays, [ShelfReveal.revealDelay])
         rig.fireAll()
-        #expect(rig.revealer.reveal(of: Self.space) == .hover)
+        expectEqual(rig.revealer.reveal(of: Self.space), .hover)
     }
 
     /// The control half: the same push without the button reveals
@@ -123,11 +123,11 @@ struct ShelfRevealDragTests {
         defer { rig.revealer.stop() }
         rig.send(CGPoint(x: 500, y: 2), dragging: true)
         rig.send(CGPoint(x: 500, y: 0), dragging: true)
-        #expect(rig.revealer.reveal(of: Self.app) == .hidden)
+        expectEqual(rig.revealer.reveal(of: Self.app), .hidden)
         #expect(rig.timers.isEmpty)
         #expect(!rig.revealer.arming.contains(Self.app))
         rig.send(CGPoint(x: 500, y: 0), dragging: false)
-        #expect(rig.revealer.reveal(of: Self.app) == .hover)
+        expectEqual(rig.revealer.reveal(of: Self.app), .hover)
     }
 
     @Test("a hidden Space Bar stays hidden under a drag")
@@ -143,7 +143,7 @@ struct ShelfRevealDragTests {
         rig.send(CGPoint(x: 500, y: 800), dragging: true)
         rig.send(CGPoint(x: 500, y: 795), dragging: true)
         rig.fireAll()
-        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
+        expectEqual(rig.revealer.reveal(of: Self.space), .hidden)
     }
 
     /// A drop on the bar keeps it, as a hover does; a drop or a
@@ -156,9 +156,9 @@ struct ShelfRevealDragTests {
         rig.send(CGPoint(x: 520, y: 780), dragging: true)
         #expect(rig.timers.isEmpty)
         rig.send(CGPoint(x: 500, y: 400), dragging: true)
-        #expect(rig.delays == [ShelfReveal.retractDelay])
+        expectEqual(rig.delays, [ShelfReveal.retractDelay])
         rig.fireAll()
-        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
+        expectEqual(rig.revealer.reveal(of: Self.space), .hidden)
     }
 
     @Test("a drag leaving a shown App Bar retracts it")
@@ -166,11 +166,11 @@ struct ShelfRevealDragTests {
         let rig = make()
         defer { rig.revealer.stop() }
         rig.send(CGPoint(x: 500, y: 0), dragging: false)
-        #expect(rig.revealer.reveal(of: Self.app) == .hover)
+        expectEqual(rig.revealer.reveal(of: Self.app), .hover)
         rig.send(CGPoint(x: 500, y: 400), dragging: true)
-        #expect(rig.delays == [ShelfReveal.retractDelay])
+        expectEqual(rig.delays, [ShelfReveal.retractDelay])
         rig.fireAll()
-        #expect(rig.revealer.reveal(of: Self.app) == .hidden)
+        expectEqual(rig.revealer.reveal(of: Self.app), .hidden)
     }
 
     /// A selection or a file dragged to the edge moves no window.
@@ -181,7 +181,7 @@ struct ShelfRevealDragTests {
         rig.moving = false
         rig.send(CGPoint(x: 500, y: 800), dragging: true)
         rig.send(CGPoint(x: 500, y: 795), dragging: true)
-        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
+        expectEqual(rig.revealer.reveal(of: Self.space), .hidden)
         #expect(rig.timers.isEmpty)
         #expect(!rig.revealer.arming.contains(Self.space))
     }
@@ -194,10 +194,10 @@ struct ShelfRevealDragTests {
         defer { rig.revealer.stop() }
         rig.moving = false
         rig.send(CGPoint(x: 500, y: 4), dragging: false)
-        #expect(rig.delays == [ShelfReveal.revealDelay])
+        expectEqual(rig.delays, [ShelfReveal.revealDelay])
         rig.moving = true
         rig.fireAll()
-        #expect(rig.revealer.reveal(of: Self.app) == .hidden)
+        expectEqual(rig.revealer.reveal(of: Self.app), .hidden)
     }
 
     /// A cancel straight on the coordinator skips the plate's

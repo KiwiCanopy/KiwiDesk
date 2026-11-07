@@ -79,7 +79,7 @@ struct LookKeysCensusTests {
     @Test("every register path extracts from the settings")
     func everyPathExtracts() {
         let extracted = LookKeys.extract(from: TilingSettings())
-        #expect(Set(extracted.keys) == Set(LookKeys.all))
+        expectEqual(Set(extracted.keys), Set(LookKeys.all))
     }
 
     /// Every stored look carries these wire paths as data (#2176):

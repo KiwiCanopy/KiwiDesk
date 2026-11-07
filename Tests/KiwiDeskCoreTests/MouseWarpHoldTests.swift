@@ -68,13 +68,13 @@ struct MouseWarpHoldTests {
         core.zOrderRestoresInFlight = 1
         core.warpMouseToFocused(id)
         // Held, not dropped — and not warped yet.
-        #expect(core.pendingMouseWarp == id)
+        expectEqual(core.pendingMouseWarp, id)
         #expect(warped.isEmpty)
         // The last drain ends: counter drops, the held warp
         // fires for the still-focused target.
         core.zOrderRestoresInFlight = 0
         core.runPendingMouseWarp()
-        #expect(warped.count == 1)
+        expectEqual(warped.count, 1)
         #expect(core.pendingMouseWarp == nil)
     }
 
@@ -109,7 +109,7 @@ struct MouseWarpHoldTests {
         core.pointerWarp = { warped.append($0) }
         core.zOrderRestoresInFlight = 1
         core.warpMouseToFocused(WindowID(1))
-        #expect(core.pendingMouseWarp == WindowID(1))
+        expectEqual(core.pendingMouseWarp, WindowID(1))
         // Focus moves on before the drain ends: the held warp
         // is stale and must not yank the pointer backwards.
         core.state.workspaces.focus(WindowID(2), in: space)
@@ -155,10 +155,10 @@ struct MouseWarpHoldTests {
         core.zOrderRestoresInFlight = 1
         core.runPendingMouseWarp()
         #expect(warped.isEmpty)
-        #expect(core.pendingMouseWarp == id)
+        expectEqual(core.pendingMouseWarp, id)
         core.zOrderRestoresInFlight = 0
         core.runPendingMouseWarp()
-        #expect(warped.count == 1)
+        expectEqual(warped.count, 1)
     }
 
     /// The reason `runPendingMouseWarp` checks the counter
@@ -198,7 +198,7 @@ struct MouseWarpHoldTests {
         core.pointerWarp = { warped.append($0) }
         core.zOrderRestoresInFlight = 2
         core.warpMouseToFocused(WindowID(1))
-        #expect(core.pendingMouseWarp == WindowID(1))
+        expectEqual(core.pendingMouseWarp, WindowID(1))
         // A drain's churn transiently moves focus off the
         // target while another drain still runs...
         core.state.workspaces.focus(WindowID(2), in: space)
@@ -209,7 +209,7 @@ struct MouseWarpHoldTests {
         core.state.workspaces.focus(WindowID(1), in: space)
         core.zOrderRestoresInFlight = 0
         core.runPendingMouseWarp()
-        #expect(warped.count == 1)
+        expectEqual(warped.count, 1)
         #expect(core.pendingMouseWarp == nil)
     }
 
@@ -268,7 +268,7 @@ struct MouseWarpHoldTests {
             nil
         )
         core.warpMouseToFocused(id)
-        #expect(core.pendingMouseWarp == id)
+        expectEqual(core.pendingMouseWarp, id)
     }
 
     /// A mouse-made focus needs no warp: the pointer is where

@@ -52,13 +52,13 @@ struct SpaceSlideBurstTests {
         let first = press(overlay)
         overlay.run(incoming: [], holes: [])
         let start = try #require(overlay.play?.motion.begin)
-        #expect(start == 100 + SpaceSlidePlan.stripDelay)
+        expectEqual(start, 100 + SpaceSlidePlan.stripDelay)
         clock.now = start + 0.1
         let second = press(overlay)
         let motion = try #require(overlay.play?.motion)
-        #expect(motion.begin == clock.now)
+        expectEqual(motion.begin, clock.now)
         #expect(motion.velocity > 0)
-        #expect(motion.to == 2000)
+        expectEqual(motion.to, 2000)
         #expect(second.landAt > first.landAt)
     }
 
@@ -73,8 +73,8 @@ struct SpaceSlideBurstTests {
         clock.now = first.landAt + 0.01
         _ = press(overlay)
         let motion = try #require(overlay.play?.motion)
-        #expect(motion.begin == clock.now + SpaceSlidePlan.stripDelay)
-        #expect(motion.velocity == 0)
+        expectEqual(motion.begin, clock.now + SpaceSlidePlan.stripDelay)
+        expectEqual(motion.velocity, 0)
     }
 
     /// Mid-flight the strip carries its speed into the next page,
@@ -90,7 +90,7 @@ struct SpaceSlideBurstTests {
         let second = press(overlay)
         let motion = try #require(overlay.play?.motion)
         #expect(motion.velocity != 0)
-        #expect(second.landAt == motion.begin + motion.settleTime())
+        expectEqual(second.landAt, motion.begin + motion.settleTime())
         let rest = SpaceSlideStrip(
             from: motion.from,
             to: motion.to,

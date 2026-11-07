@@ -60,7 +60,7 @@ struct HyperKeyTakeOverTests {
         fake.mapping = [Self.capsToF18]
         core.hyperRemapHost = fake.host
         _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
-        #expect(core.keys.hyperStatus == .refused(Self.offer))
+        expectEqual(core.keys.hyperStatus, .refused(Self.offer))
         // Caps Lock → F18 while Right ⌘ is chosen is not ours.
         _ = core.execute(
             "set_hyper_key",
@@ -83,11 +83,11 @@ struct HyperKeyTakeOverTests {
         _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
         let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
         #expect(reply.isSuccess)
-        #expect(core.keys.hyperStatus == .on)
+        expectEqual(core.keys.hyperStatus, .on)
         #expect(core.keys.hyperEnabled)
-        #expect(fake.written == Self.capsToF18)
-        #expect(fake.sets == 0)
-        #expect(fake.mapping == [Self.capsToF18])
+        expectEqual(fake.written, Self.capsToF18)
+        expectEqual(fake.sets, 0)
+        expectEqual(fake.mapping, [Self.capsToF18])
     }
 
     @Test("Hyperkey's identity entry is taken over and set")
@@ -101,14 +101,14 @@ struct HyperKeyTakeOverTests {
         fake.mapping = [Self.capsToF18, same]
         core.hyperRemapHost = fake.host
         _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
-        #expect(core.keys.hyperStatus == .refused(Self.offer))
+        expectEqual(core.keys.hyperStatus, .refused(Self.offer))
         let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
         #expect(reply.isSuccess)
-        #expect(core.keys.hyperStatus == .on)
-        #expect(fake.written == Self.capsToF18)
+        expectEqual(core.keys.hyperStatus, .on)
+        expectEqual(fake.written, Self.capsToF18)
         // The keyboard holding the identity gets the entry too.
-        #expect(fake.sets == 1)
-        #expect(fake.mapping == [Self.capsToF18])
+        expectEqual(fake.sets, 1)
+        expectEqual(fake.mapping, [Self.capsToF18])
     }
 
     @Test("a mapping changed before the click is still refused")
@@ -123,8 +123,8 @@ struct HyperKeyTakeOverTests {
         let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
         #expect(!reply.isSuccess)
         #expect(fake.written == nil)
-        #expect(fake.sets == 0)
-        #expect(fake.mapping == [other])
+        expectEqual(fake.sets, 0)
+        expectEqual(fake.mapping, [other])
         guard case .refused = core.keys.hyperStatus else {
             Issue.record("expected a refusal")
             return
@@ -142,7 +142,7 @@ struct HyperKeyTakeOverTests {
         let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
         #expect(!reply.isSuccess)
         #expect(fake.written == nil)
-        #expect(fake.sets == 0)
+        expectEqual(fake.sets, 0)
     }
 
     @Test("a record the host cannot keep fails the take-over")
@@ -155,7 +155,7 @@ struct HyperKeyTakeOverTests {
         _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
         let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
         #expect(!reply.isSuccess)
-        #expect(core.keys.hyperStatus == .failed)
+        expectEqual(core.keys.hyperStatus, .failed)
         #expect(!core.keys.hyperEnabled)
     }
 

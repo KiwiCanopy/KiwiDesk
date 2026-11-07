@@ -76,8 +76,8 @@ struct MinWindowSizeMigrationTests {
         let after = try #require(ConfigMigration.migrated(before))
         let profile = try JSONDecoder().decode(Profile.self, from: after)
         expectEveryLayout(profile.settings.minWindowSizes, is: 420)
-        #expect(profile.settings.stack.masterRatio == 0.4)
-        #expect(profile.format == Profile.currentFormat)
+        expectEqual(profile.settings.stack.masterRatio, 0.4)
+        expectEqual(profile.format, Profile.currentFormat)
     }
 
     @Test("a bundle's inline profiles cross")

@@ -80,10 +80,10 @@ struct ListWindowsLayoutTests {
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try entries(core)
         for id: UInt32 in [1, 2] {
-            #expect(seen[id]?["effective_float"] == .bool(true))
-            #expect(seen[id]?["visibility"] == .string("visible"))
+            expectEqual(seen[id]?["effective_float"], .bool(true))
+            expectEqual(seen[id]?["visibility"], .string("visible"))
         }
-        #expect(seen[2]?["frame"] == KiwiCore.json(rect: frame))
+        expectEqual(seen[2]?["frame"], KiwiCore.json(rect: frame))
     }
 
     @Test("Scrolling: a column past the edge names its side")
@@ -95,8 +95,8 @@ struct ListWindowsLayoutTests {
         core.execute("scroll.set_slot_size", args: [.number(700)])
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try entries(core)
-        #expect(seen[1]?["visibility"] == .string("visible"))
-        #expect(seen[2]?["visibility"] == .string("partly_left"))
+        expectEqual(seen[1]?["visibility"], .string("visible"))
+        expectEqual(seen[2]?["visibility"], .string("partly_left"))
     }
 
     /// Not even one minimum-size window fits, so bsp piles them,
@@ -110,8 +110,8 @@ struct ListWindowsLayoutTests {
         core.execute("set_min_window_size", args: [.number(1100)])
         core.state.apply(.windowFocused(WindowID(2)))
         let seen = try entries(core)
-        #expect(seen[1]?["visibility"] == .string("partly_top"))
-        #expect(seen[1]?["shown"] == .bool(true))
+        expectEqual(seen[1]?["visibility"], .string("partly_top"))
+        expectEqual(seen[1]?["shown"], .bool(true))
     }
 
     @Test("A monocle park reports no frame")
@@ -126,8 +126,8 @@ struct ListWindowsLayoutTests {
         core.execute("monocle.set_hide_style", args: [.string("park")])
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try entries(core)
-        #expect(seen[2]?["visibility"] == .string("hidden"))
-        #expect(seen[2]?["frame"] == .null)
+        expectEqual(seen[2]?["visibility"], .string("hidden"))
+        expectEqual(seen[2]?["frame"], .null)
         #expect(seen[1]?["frame"] != .null)
     }
 
@@ -138,8 +138,8 @@ struct ListWindowsLayoutTests {
             windows: [window(1), window(2, fullscreen: true)]
         )
         let entry = try #require(try entries(core)[2])
-        #expect(entry["fullscreen"] == .bool(true))
-        #expect(entry["visibility"] == .null)
+        expectEqual(entry["fullscreen"], .bool(true))
+        expectEqual(entry["visibility"], .null)
     }
 
     /// Scripts join the two answers, so a key they share must
@@ -182,7 +182,7 @@ struct ListWindowsLayoutTests {
         core.state.workspaces.add(WindowID(3), to: "1")
         core.state.workspaces.activate("2")
         let listed = try #require(try entries(core)[3])
-        #expect(listed["effective_float"] == .bool(true))
+        expectEqual(listed["effective_float"], .bool(true))
         let explained = core.execute("explain_window", args: [.number(3)])
         guard case .object(let explain)? = explained.data,
             case .object(let float)? = explain["float"]
@@ -190,6 +190,6 @@ struct ListWindowsLayoutTests {
             Issue.record("explain_window answered \(explained)")
             return
         }
-        #expect(float["effective_float"] == listed["effective_float"])
+        expectEqual(float["effective_float"], listed["effective_float"])
     }
 }

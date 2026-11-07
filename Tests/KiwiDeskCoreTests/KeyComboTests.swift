@@ -16,10 +16,10 @@ struct KeyComboTests {
                 shift: false
             )
         )
-        #expect(text == "control+option+r")
+        expectEqual(text, "control+option+r")
         let parsed = try #require(KeyCombo.parse(text))
-        #expect(parsed.modifiers == [.control, .option])
-        #expect(parsed.keyCode == 15)
+        expectEqual(parsed.modifiers, [.control, .option])
+        expectEqual(parsed.keyCode, 15)
     }
 
     @Test("word aliases for punctuation keys parse")
@@ -27,12 +27,12 @@ struct KeyComboTests {
         let combo = try #require(
             KeyCombo.parse("ctrl+alt+cmd+semicolon")
         )
-        #expect(combo.keyCode == 41)
+        expectEqual(combo.keyCode, 41)
         #expect(
             combo.modifiers == [.control, .option, .command]
         )
-        #expect(KeyCombo.parse("cmd+comma")?.keyCode == 43)
-        #expect(KeyCombo.parse("alt+period")?.keyCode == 47)
+        expectEqual(KeyCombo.parse("cmd+comma")?.keyCode, 43)
+        expectEqual(KeyCombo.parse("alt+period")?.keyCode, 47)
         // The symbol form still works and matches the word.
         #expect(
             KeyCombo.parse("cmd+;")?.keyCode
@@ -77,21 +77,21 @@ struct KeyComboTests {
         let combo = try #require(
             KeyCombo.parse("ctrl+alt+r")
         )
-        #expect(combo.modifiers == [.control, .option])
-        #expect(combo.keyCode == 15)
+        expectEqual(combo.modifiers, [.control, .option])
+        expectEqual(combo.keyCode, 15)
 
         let arrows = try #require(
             KeyCombo.parse("cmd+shift+left")
         )
-        #expect(arrows.modifiers == [.command, .shift])
-        #expect(arrows.keyCode == 123)
+        expectEqual(arrows.modifiers, [.command, .shift])
+        expectEqual(arrows.keyCode, 123)
     }
 
     @Test("Single keys work for modal modes")
     func bareKey() throws {
         let combo = try #require(KeyCombo.parse("escape"))
-        #expect(combo.modifiers == [])
-        #expect(combo.keyCode == 53)
+        expectEqual(combo.modifiers, [])
+        expectEqual(combo.keyCode, 53)
     }
 
     @Test("Authored aliases identify one physical combo")

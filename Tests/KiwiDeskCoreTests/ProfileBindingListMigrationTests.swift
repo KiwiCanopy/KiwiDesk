@@ -60,12 +60,12 @@ struct ProfileBindingListMigrationTests {
         let entry = try #require(
             try bindings(out)["STAMP-A"] as? [String: Any]
         )
-        #expect(entry["profiles"] as? [String] == ["Work"])
+        expectEqual(entry["profiles"] as? [String], ["Work"])
         #expect(entry["profile"] == nil)
-        #expect(entry["desktop"] as? Int == 2)
-        #expect(entry["screen"] as? String == "LG UltraFine")
+        expectEqual(entry["desktop"] as? Int, 2)
+        expectEqual(entry["screen"] as? String, "LG UltraFine")
         let config = try JSONDecoder().decode(GuiConfig.self, from: out)
-        #expect(config.spaces == [SpaceID("work")])
+        expectEqual(config.spaces, [SpaceID("work")])
         #expect(
             try stored(out)[
                 .identity(DesktopIdentity(raw: "STAMP-A"))
@@ -112,7 +112,7 @@ struct ProfileBindingListMigrationTests {
         let entry = try #require(
             try bindings(out, at: ["config"])["1"] as? [String: Any]
         )
-        #expect(entry["profiles"] as? [String] == ["Desk"])
+        expectEqual(entry["profiles"] as? [String], ["Desk"])
     }
 
     /// The STEP's own idempotence, called directly — through

@@ -40,7 +40,7 @@ struct OwnWindowFloatRuleTests {
             verdict(title: "Shortcuts & Gestures", rules: rule)
                 == .floats(.rule)
         )
-        #expect(verdict(title: "Settings", rules: rule) == .tiles)
+        expectEqual(verdict(title: "Settings", rules: rule), .tiles)
     }
 
     @Test("A bundle rule floats every area")
@@ -55,7 +55,7 @@ struct OwnWindowFloatRuleTests {
     @Test("Without a rule the marked window tiles on every area")
     func noRuleTiles() {
         for title in ["Settings", "Shortcuts & Gestures"] {
-            #expect(verdict(title: title, rules: []) == .tiles)
+            expectEqual(verdict(title: title, rules: []), .tiles)
         }
     }
 }

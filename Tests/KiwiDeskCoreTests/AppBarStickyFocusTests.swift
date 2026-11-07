@@ -55,8 +55,8 @@ struct AppBarStickyFocusTests {
         // the system focus, but never touches space1's slot.
         core.state.workspaces.focus(WindowID(50), in: "2")
         let s1 = try #require(core.state.workspaces["1"])
-        #expect(s1.focused == WindowID(1))
-        #expect(core.appBarFocused(of: s1) == WindowID(50))
+        expectEqual(s1.focused, WindowID(1))
+        expectEqual(core.appBarFocused(of: s1), WindowID(50))
     }
 
     @Test("A local focus keeps the space's own bar focus")
@@ -66,7 +66,7 @@ struct AppBarStickyFocusTests {
         core.state.workspaces.focus(WindowID(50), in: "2")
         core.state.workspaces.focus(WindowID(2), in: "1")
         let s1 = try #require(core.state.workspaces["1"])
-        #expect(core.appBarFocused(of: s1) == WindowID(2))
+        expectEqual(core.appBarFocused(of: s1), WindowID(2))
     }
 
     @Test("An inactive space keeps its own remembered focus")
@@ -80,6 +80,6 @@ struct AppBarStickyFocusTests {
         let s2 = try #require(core.state.workspaces["2"])
         // `lastFocused` is now window 1 on the active space, but
         // the inactive space's bar must still read its own slot.
-        #expect(core.appBarFocused(of: s2) == WindowID(50))
+        expectEqual(core.appBarFocused(of: s2), WindowID(50))
     }
 }

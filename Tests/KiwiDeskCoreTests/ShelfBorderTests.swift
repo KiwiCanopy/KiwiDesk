@@ -16,7 +16,7 @@ struct ShelfBorderTests {
     func defaultDrawsNone() {
         let shelf = KiwiShelf()
         #expect(!shelf.border)
-        #expect(shelf.drawnBorderWidth == 0)
+        expectEqual(shelf.drawnBorderWidth, 0)
     }
 
     /// The default border colour is the default item colour at
@@ -25,7 +25,7 @@ struct ShelfBorderTests {
     @Test("The default border is the item colour at 0x59")
     func defaultColourIsTheItemColour() {
         let shelf = KiwiShelf()
-        #expect(shelf.borderColor == shelf.itemColor + "59")
+        expectEqual(shelf.borderColor, shelf.itemColor + "59")
     }
 
     /// The width is the user's while the switch is off: turning
@@ -34,9 +34,9 @@ struct ShelfBorderTests {
     func widthIsKept() {
         var shelf = KiwiShelf()
         shelf.borderWidth = 3
-        #expect(shelf.drawnBorderWidth == 0)
+        expectEqual(shelf.drawnBorderWidth, 0)
         shelf.border = true
-        #expect(shelf.drawnBorderWidth == 3)
+        expectEqual(shelf.drawnBorderWidth, 3)
     }
 
     @Test("A drawing reads the width clamped, whoever wrote it")
@@ -66,8 +66,8 @@ struct ShelfBorderTests {
             from: Data(json.utf8)
         )
         #expect(shelf.border)
-        #expect(shelf.borderWidth == CGFloat(drawn))
-        #expect(shelf.borderColor == "#11223344")
+        expectEqual(shelf.borderWidth, CGFloat(drawn))
+        expectEqual(shelf.borderColor, "#11223344")
     }
 
     @Test(
@@ -81,7 +81,7 @@ struct ShelfBorderTests {
         ).get()
         var shelf = KiwiShelf()
         setting.apply(to: &shelf)
-        #expect(shelf.borderWidth == CGFloat(stored))
+        expectEqual(shelf.borderWidth, CGFloat(stored))
     }
 
     @Test("The switch and the colour set their fields")
@@ -96,7 +96,7 @@ struct ShelfBorderTests {
             args: [.string("#FFFFFF59")]
         ).get().apply(to: &shelf)
         #expect(shelf.border)
-        #expect(shelf.borderColor == "#FFFFFF59")
+        expectEqual(shelf.borderColor, "#FFFFFF59")
         let refused = KiwiShelfCommandSetting.parse(
             field: "border",
             args: [.string("yes")]

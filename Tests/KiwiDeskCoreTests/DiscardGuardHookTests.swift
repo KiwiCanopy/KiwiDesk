@@ -104,7 +104,7 @@ struct DiscardGuardHookTests {
             "--format=%(refname)",
             "refs/discard-backups/"
         )
-        #expect(refs.split(separator: "\n").count == 2)
+        expectEqual(refs.split(separator: "\n").count, 2)
     }
 
     @Test("a forced clean keeps every untracked file")

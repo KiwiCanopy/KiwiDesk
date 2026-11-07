@@ -46,8 +46,8 @@ struct DelayedCloseReturnTests {
         // which a starved main actor outlives (tests.md, #344).
         let follow = try #require(core.deferred.task(for: .focusFollow))
         await follow.value
-        #expect(core.state.workspaces.activeSpace == "2")
-        #expect(core.delayedCloseDebt?.followed == true)
+        expectEqual(core.state.workspaces.activeSpace, "2")
+        expectEqual(core.delayedCloseDebt?.followed, true)
         fx.confirmClose(core)
         fx.expectReturned(core, log)
     }
@@ -64,7 +64,7 @@ struct DelayedCloseReturnTests {
         fx.confirmClose(core)
         fx.expectReturned(core, log)
         // The destroy's own event pass, then the switch's.
-        #expect(meter.snapshot(reset: false).counts.retiles == 2)
+        expectEqual(meter.snapshot(reset: false).counts.retiles, 2)
     }
 
     @Test("An owed Space with no fallback stands the return down")
@@ -102,7 +102,7 @@ struct DelayedCloseReturnTests {
         fx.refuse(core)
         fx.keySuccessor(core)
         fx.confirmClose(core)
-        #expect(core.state.workspaces.activeSpace == "2")
+        expectEqual(core.state.workspaces.activeSpace, "2")
         #expect(!log.has("close-return: raising"))
         #expect(log.has("standsDown=true"))
     }
@@ -154,7 +154,7 @@ struct DelayedCloseReturnTests {
         fx.keySuccessor(core)
         core.switchSpace(to: "3", warp: false)
         fx.confirmClose(core)
-        #expect(core.state.workspaces.activeSpace == "3")
+        expectEqual(core.state.workspaces.activeSpace, "3")
         #expect(!log.has("close-return: raising"))
         #expect(log.has("return stood down (focus moved on)"))
     }

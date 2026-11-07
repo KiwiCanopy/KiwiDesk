@@ -92,8 +92,8 @@ struct SplitFloorHealWiringTests {
         let (core, space) = makeCore(windows: 2, mode: "bsp")
         let w2 = WindowID(2)
         seed(core, window: w2, minWidth: 700)
-        #expect(core.tiler.sizeBound(for: w2)?.minWidth == 700)
-        #expect(ratioH(core, space) == 0.5)
+        expectEqual(core.tiler.sizeBound(for: w2)?.minWidth, 700)
+        expectEqual(ratioH(core, space), 0.5)
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.retile()
@@ -109,7 +109,7 @@ struct SplitFloorHealWiringTests {
         // rewrites nothing.
         log.removeAll()
         core.retile()
-        #expect(ratioH(core, space) == healed)
+        expectEqual(ratioH(core, space), healed)
         #expect(!log.contains { $0.contains("split ratio healed") })
     }
 
@@ -121,7 +121,7 @@ struct SplitFloorHealWiringTests {
         let (core, space) = makeCore(windows: 3, mode: "bsp")
         let w3 = WindowID(3)
         seed(core, window: w3, minHeight: 400)
-        #expect(core.tiler.sizeBound(for: w3)?.minHeight == 400)
+        expectEqual(core.tiler.sizeBound(for: w3)?.minHeight, 400)
         // The stacked span the layout divides, read off the same
         // authorities the heal reads: the region less the Space
         // Bar's default strip (#660 — pinned, since the fixture
@@ -135,7 +135,7 @@ struct SplitFloorHealWiringTests {
         let span =
             bounds.height - gaps.outer.top - gaps.outer.bottom
             - gaps.inner.vertical
-        #expect(span == 730)
+        expectEqual(span, 730)
         core.retile()
         let bsp = core.tiler.settings.resolvedBsp(
             for: core.state.workspaces[space]!,
@@ -144,7 +144,7 @@ struct SplitFloorHealWiringTests {
         // The bottom draws 400.25; the horizontal ratio, which
         // no floor binds, stays.
         #expect(abs((1 - bsp.splitRatioV) * span - 400.25) < 0.01)
-        #expect(bsp.splitRatioH == 0.5)
+        expectEqual(bsp.splitRatioH, 0.5)
         let frame = try #require(
             core.tiler.calculatedFrames(state: core.state)[w3]
         )
@@ -179,7 +179,7 @@ struct SplitFloorHealWiringTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.retile(pass: .apply)
-        #expect(ratioH(core, space) == 0.5)
+        expectEqual(ratioH(core, space), 0.5)
         #expect(!log.contains { $0.contains("split ratio healed") })
         // The next ordinary pass heals.
         core.retile()
@@ -224,7 +224,7 @@ struct SplitFloorHealWiringTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.retile()
-        #expect(ratioH(core, space) == healed)
+        expectEqual(ratioH(core, space), healed)
         #expect(refusals.isEmpty)
         #expect(!log.contains { $0.contains("split floor unfit") })
     }

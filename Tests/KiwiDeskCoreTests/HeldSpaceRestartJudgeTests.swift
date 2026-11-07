@@ -37,12 +37,12 @@ struct HeldSpaceRestartJudgeTests {
         let b = try bootSolo(a, windows: [13, 10, 11])
         b.desktopMemory.readWindowSpace = t.hosting([12])
         b.retireGoneRestoredFilings()
-        #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
+        expectEqual(b.state.heldSpaces[SpaceID(6)]?.name, SpaceID(4))
         #expect(
             b.state.rememberedSpaces[WindowID(12)] == .restored(SpaceID(6))
         )
         b.handle(.windowCreated(desk.window(12)))
-        #expect(b.state.workspaces.space(of: WindowID(12)) == SpaceID(6))
+        expectEqual(b.state.workspaces.space(of: WindowID(12)), SpaceID(6))
     }
 
     @Test("a window on another Desktop keeps its held Space too")
@@ -65,7 +65,7 @@ struct HeldSpaceRestartJudgeTests {
         b.desktopMemory.readWindowSpace = t.hosting([12])
         b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(6)] != nil)
-        #expect(b.state.rememberedSpace(of: away) == SpaceID(6))
+        expectEqual(b.state.rememberedSpace(of: away), SpaceID(6))
     }
 
     /// A deferred app's windows: hosted, not yet adopted — the
@@ -76,9 +76,9 @@ struct HeldSpaceRestartJudgeTests {
         let b = try bootSolo(a, windows: [13, 12])
         b.desktopMemory.readWindowSpace = t.hosting([13, 10, 11, 12])
         b.retireGoneRestoredFilings()
-        #expect(b.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
+        expectEqual(b.state.heldSpaces[SpaceID(5)]?.name, SpaceID(3))
         b.handle(.windowCreated(desk.window(10)))
-        #expect(b.state.workspaces.space(of: WindowID(10)) == SpaceID(5))
+        expectEqual(b.state.workspaces.space(of: WindowID(10)), SpaceID(5))
     }
 
     /// The Desktop census lists user Desktops only, so a window on
@@ -93,7 +93,7 @@ struct HeldSpaceRestartJudgeTests {
         }
         b.desktopMemory.readWindowSpace = t.hosting([10, 11], on: 99)
         b.retireGoneRestoredFilings()
-        #expect(b.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
+        expectEqual(b.state.heldSpaces[SpaceID(5)]?.name, SpaceID(3))
     }
 
     @Test("a hold whose windows are gone ends once the read says so")
@@ -109,7 +109,7 @@ struct HeldSpaceRestartJudgeTests {
         b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(5)] == nil)
         #expect(b.state.workspaces[SpaceID(5)] == nil)
-        #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
+        expectEqual(b.state.heldSpaces[SpaceID(6)]?.name, SpaceID(4))
     }
 
     /// Without the read, a closed window's filing would be written
@@ -127,9 +127,9 @@ struct HeldSpaceRestartJudgeTests {
         let spaces = b.sessionSnapshot().spaces
         let record = spaces.first { $0.id == "5" }
         #expect(record?.held != nil)
-        #expect(record?.held?.remembered == [])
+        expectEqual(record?.held?.remembered, [])
         let later = spaces.first { $0.id == "6" }
-        #expect(later?.held?.remembered == [30])
+        expectEqual(later?.held?.remembered, [30])
         let c = t.boot(
             from: b,
             screens: [desk.builtIn],
@@ -156,9 +156,9 @@ struct HeldSpaceRestartJudgeTests {
             session: try t.crossed(a.sessionSnapshot())
         )
         #expect(b.state.heldSpaces.isEmpty)
-        #expect(b.state.rememberedSpace(of: WindowID(10)) == SpaceID(3))
+        expectEqual(b.state.rememberedSpace(of: WindowID(10)), SpaceID(3))
         b.handle(.windowCreated(desk.window(10)))
-        #expect(b.state.workspaces.space(of: WindowID(10)) == SpaceID(3))
+        expectEqual(b.state.workspaces.space(of: WindowID(10)), SpaceID(3))
         #expect(b.state.workspaces[SpaceID(5)] == nil)
         #expect(!b.capturedSpaces.map(\.id).contains(SpaceID(5)))
     }
@@ -175,7 +175,7 @@ struct HeldSpaceRestartJudgeTests {
             windows: [13, 10, 11],
             session: try t.crossed(a.sessionSnapshot())
         )
-        #expect(b.state.rememberedSpace(of: WindowID(12)) == SpaceID(4))
+        expectEqual(b.state.rememberedSpace(of: WindowID(12)), SpaceID(4))
         b.desktopMemory.readWindowSpace = t.hosting([13, 10, 11])
         b.retireGoneRestoredFilings()
         #expect(b.state.rememberedSpaces[WindowID(12)] == nil)

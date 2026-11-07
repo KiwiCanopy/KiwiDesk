@@ -90,7 +90,7 @@ struct ProfileRestoreOrderTests {
                 == [1, 2, 3, 4].map { WindowID(UInt32($0)) }
         )
         if mode == .track {
-            #expect(core.state.workspaces["1"]?.trackBreaks == breaks)
+            expectEqual(core.state.workspaces["1"]?.trackBreaks, breaks)
         }
     }
 

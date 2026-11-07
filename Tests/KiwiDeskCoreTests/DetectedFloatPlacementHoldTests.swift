@@ -221,7 +221,7 @@ struct DetectedFloatPlacementHoldTests {
         }
         #expect(desk.gate.owedWrites.isEmpty)
         let kept = try #require(desk.core.tiler.stashedFrames[window])
-        #expect(kept.width == FloatPlacement.longFloor)
+        expectEqual(kept.width, FloatPlacement.longFloor)
     }
 
     /// A frame that moves with no user act — our own echo, the app
@@ -287,7 +287,7 @@ struct DetectedFloatPlacementHoldTests {
         desk.flip(window, true)
         #expect(desk.gate.owedWrites.isEmpty)
         let seed = try #require(desk.core.tiler.stashedFrames[window])
-        #expect(seed.width == FloatPlacement.longFloor)
+        expectEqual(seed.width, FloatPlacement.longFloor)
     }
 
     @Test("stopping forgets the owed placements")

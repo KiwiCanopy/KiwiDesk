@@ -129,7 +129,7 @@ struct ConfigMigrationTests {
         // A v0.9.7 profile predates the shared look, so it arrives
         // wearing its own (#1752).
         original.look = .own
-        #expect(profile == original)
+        expectEqual(profile, original)
         #expect(
             !String(decoding: migrated, as: UTF8.self)
                 .contains("\"content\"")

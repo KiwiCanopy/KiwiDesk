@@ -83,7 +83,7 @@ struct TiledStickyInjectionTests {
             return
         }
         let tiled = state.effectiveTiledMembers(of: s1)
-        #expect(tiled == [WindowID(1), WindowID(50)])
+        expectEqual(tiled, [WindowID(1), WindowID(50)])
     }
 
     @Test("Multiple stickies insert in stable (index, id) order")
@@ -160,7 +160,7 @@ struct TiledStickyInjectionTests {
             return
         }
         let tiled = state.effectiveTiledMembers(of: s2)
-        #expect(tiled == [WindowID(2)])
+        expectEqual(tiled, [WindowID(2)])
     }
 
     @Test("localTiledMembers never injects")

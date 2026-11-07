@@ -27,7 +27,7 @@ struct StickyMarkManagerTests {
             manager.markedWindows == [WindowID(1), WindowID(2)]
         )
         manager.sync([spec(2)])
-        #expect(manager.markedWindows == [WindowID(2)])
+        expectEqual(manager.markedWindows, [WindowID(2)])
         manager.sync([])
         #expect(manager.markedWindows.isEmpty)
     }
@@ -59,7 +59,7 @@ struct StickyMarkManagerTests {
             mark: .symbol("star"),
             delay: 0
         )
-        #expect(manager.markedWindows == [WindowID(1)])
+        expectEqual(manager.markedWindows, [WindowID(1)])
     }
 }
 
@@ -93,7 +93,7 @@ struct StickyMarkPlateTests {
             format: "%1$@",
             mark: .text(String(repeating: "W", count: 120))
         )
-        #expect(width == StickyMarkPlate.maxWidth)
+        expectEqual(width, StickyMarkPlate.maxWidth)
     }
 }
 

@@ -23,22 +23,22 @@ struct KiwiShelfPocketPlacementTests {
             KiwiShelf.self,
             from: Data("{}".utf8)
         )
-        #expect(absent.pocketEdge == .bottom)
-        #expect(absent.pocketPosition == KiwiShelf().pocketPosition)
+        expectEqual(absent.pocketEdge, .bottom)
+        expectEqual(absent.pocketPosition, KiwiShelf().pocketPosition)
         let set = try JSONDecoder().decode(
             KiwiShelf.self,
             from: Data(
                 #"{"pocket_edge":"left","pocket_position":140}"#.utf8
             )
         )
-        #expect(set.pocketEdge == .left)
-        #expect(set.pocketPosition == 100)
+        expectEqual(set.pocketEdge, .left)
+        expectEqual(set.pocketPosition, 100)
         let encoded =
             try JSONSerialization.jsonObject(
                 with: JSONEncoder().encode(KiwiShelf())
             ) as? [String: Any]
-        #expect(encoded?["pocket_edge"] as? String == "bottom")
-        #expect(encoded?["pocket_position"] as? Double == 82)
+        expectEqual(encoded?["pocket_edge"] as? String, "bottom")
+        expectEqual(encoded?["pocket_position"] as? Double, 82)
     }
 
     @Test("the Lua verbs set them and refuse a bad value")
@@ -49,7 +49,7 @@ struct KiwiShelfPocketPlacementTests {
             args: [.string("top")]
         )
         #expect(top.isSuccess)
-        #expect(core.tiler.settings.kiwishelf.pocketEdge == .top)
+        expectEqual(core.tiler.settings.kiwishelf.pocketEdge, .top)
         let middle = core.execute(
             "kiwishelf.set_pocket_edge",
             args: [.string("middle")]
@@ -60,13 +60,13 @@ struct KiwiShelfPocketPlacementTests {
             args: [.number(30)]
         )
         #expect(thirty.isSuccess)
-        #expect(core.tiler.settings.kiwishelf.pocketPosition == 30)
+        expectEqual(core.tiler.settings.kiwishelf.pocketPosition, 30)
         let below = core.execute(
             "kiwishelf.set_pocket_position",
             args: [.number(-5)]
         )
         #expect(below.isSuccess)
-        #expect(core.tiler.settings.kiwishelf.pocketPosition == 0)
+        expectEqual(core.tiler.settings.kiwishelf.pocketPosition, 0)
         let word = core.execute(
             "kiwishelf.set_pocket_position",
             args: [.string("x")]

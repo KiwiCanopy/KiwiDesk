@@ -27,16 +27,16 @@ struct MinWindowSizeOverrideTests {
         let s = settings()
         let own = MinSize(width: 220, height: 160)
         for mode in [LayoutMode.grid, .bsp, .floating] {
-            #expect(s.minWindowSize(for: mode, in: mine) == own)
+            expectEqual(s.minWindowSize(for: mode, in: mine), own)
         }
-        #expect(s.minWindowSize(for: .monocle, in: mine) == .square(0))
+        expectEqual(s.minWindowSize(for: .monocle, in: mine), .square(0))
     }
 
     @Test("another Space and no Space take the layout's value")
     func othersTakeTheLayout() {
         let s = settings()
         let grid = MinSize(width: 300, height: 240)
-        #expect(s.minWindowSize(for: .grid, in: other) == grid)
+        expectEqual(s.minWindowSize(for: .grid, in: other), grid)
         #expect(s.minWindowSize(for: .grid, in: nil) == grid)
     }
 
@@ -50,7 +50,7 @@ struct MinWindowSizeOverrideTests {
         core.state.workspaces.ensureSpace(mine, mode: .grid)
         core.state.workspaces.add(window, to: mine)
         core.tiler.settings.minWindowSizeOverride[mine] = 180
-        #expect(core.minWindowSize(of: window) == 180)
+        expectEqual(core.minWindowSize(of: window), 180)
         core.tiler.settings.minWindowSizeOverride[mine] = nil
         #expect(
             core.minWindowSize(of: window)
@@ -79,7 +79,7 @@ struct MinWindowSizeOverrideTests {
                 SpaceID(3): 250,
             ]
         )
-        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes())
+        expectEqual(core.tiler.settings.minWindowSizes, MinWindowSizes())
     }
 
     @Test("a CLI call's string width and height are read (#2918)")
@@ -125,8 +125,8 @@ struct MinWindowSizeOverrideTests {
             root["min_window_size_override"] as? [String: Any]
         )
         let entry = try #require(map["monitoring"] as? [String: Any])
-        #expect(entry["width"] as? Double == 220)
-        #expect(entry["height"] as? Double == 160)
+        expectEqual(entry["width"] as? Double, 220)
+        expectEqual(entry["height"] as? Double, 160)
         let back = try JSONDecoder().decode(TilingSettings.self, from: data)
         #expect(back.minWindowSizeOverride == settings().minWindowSizeOverride)
         let bare = try JSONDecoder().decode(
@@ -157,7 +157,7 @@ struct MinWindowSizeOverrideTests {
             + "KiwiDesk.set_min_window_size_override(\"monitoring\", 220)\n")
             .write(to: core.configURL, atomically: true, encoding: .utf8)
         core.loadConfig()
-        #expect(core.tiler.settings.minWindowSizeOverride[mine] == 220)
+        expectEqual(core.tiler.settings.minWindowSizeOverride[mine], 220)
         try declare.write(
             to: core.configURL,
             atomically: true,
@@ -171,8 +171,8 @@ struct MinWindowSizeOverrideTests {
     @Test("it counts as one of the Space's overrides")
     func countsAsOne() {
         var s = TilingSettings()
-        #expect(s.spaceOverrideCount(for: mine) == 0)
+        expectEqual(s.spaceOverrideCount(for: mine), 0)
         s.minWindowSizeOverride[mine] = 200
-        #expect(s.spaceOverrideCount(for: mine) == 1)
+        expectEqual(s.spaceOverrideCount(for: mine), 1)
     }
 }

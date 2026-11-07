@@ -24,7 +24,7 @@ struct KeyLayerOverrideCountTests {
 
     @Test("an empty override counts nothing")
     func emptyCountsZero() {
-        #expect(KeyLayerOverride().overrideCount == 0)
+        expectEqual(KeyLayerOverride().overrideCount, 0)
         #expect(KeyLayerOverride().isEmpty)
     }
 
@@ -43,7 +43,7 @@ struct KeyLayerOverrideCountTests {
                 ]
             ),
         ])
-        #expect(over.overrideCount == 3)
+        expectEqual(over.overrideCount, 3)
     }
 
     /// The case that motivated the property. `diff` produces
@@ -55,7 +55,7 @@ struct KeyLayerOverrideCountTests {
             KeyLayer(name: "resize", icon: "arrow.up", bindings: [])
         ])
         #expect(!over.isEmpty)
-        #expect(over.overrideCount == 1)
+        expectEqual(over.overrideCount, 1)
     }
 
     /// Read off `diff` rather than a hand-built fixture, so the
@@ -100,7 +100,7 @@ struct KeyLayerOverrideCountTests {
             ]),
         ]
         for over in cases {
-            #expect(over.isEmpty == (over.overrideCount == 0))
+            expectEqual(over.isEmpty, (over.overrideCount == 0))
         }
     }
 }

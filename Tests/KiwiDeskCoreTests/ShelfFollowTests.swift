@@ -72,7 +72,7 @@ struct ShelfFollowTests {
         try #require(paged > 0, "the page moved nothing")
         // An unrelated refresh keeps the page.
         manager.sync([Self.bar(active: 1)])
-        #expect(overlay.scrollOffset == paged)
+        expectEqual(overlay.scrollOffset, paged)
         // A new active Space follows again.
         manager.sync([Self.bar(active: 2)])
         #expect(overlay.scrollOffset < paged)
@@ -107,7 +107,7 @@ struct ShelfFollowTests {
         let paged = overlay.scrollOffset
         try #require(paged > 0, "the page moved nothing")
         manager.sync([Self.appBar(active: 1)])
-        #expect(overlay.scrollOffset == paged)
+        expectEqual(overlay.scrollOffset, paged)
         manager.sync([Self.appBar(active: 2)])
         #expect(overlay.scrollOffset < paged)
     }

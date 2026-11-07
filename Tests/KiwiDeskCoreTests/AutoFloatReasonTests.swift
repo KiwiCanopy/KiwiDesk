@@ -76,7 +76,7 @@ struct AutoFloatReasonTests {
                 rules: FloatRules()
             )
         }
-        #expect(reason(facts(standard, zoomable: false)) == .fixedSize)
+        expectEqual(reason(facts(standard, zoomable: false)), .fixedSize)
         #expect(reason(facts(standard, zoomable: true)) == nil)
         #expect(reason(facts(standard, zoomable: nil)) == nil)
         #expect(
@@ -106,9 +106,9 @@ struct AutoFloatReasonTests {
                 rules: rules
             )
         }
-        #expect(reason(cancels: true) == .fixedSize)
+        expectEqual(reason(cancels: true), .fixedSize)
         #expect(reason(cancels: false) == nil)
-        #expect(reason(kAXDialogSubrole, cancels: true) == .panel)
+        expectEqual(reason(kAXDialogSubrole, cancels: true), .panel)
         let tiled = FloatRules(
             [],
             guess: FloatGuess(tileRules: ["com.apple.archiveutility"])
@@ -161,7 +161,7 @@ struct AutoFloatReasonTests {
         let loop = EventLoop()
         let id = WindowID(4243)
         loop.ownWindowIdentifier = { _ in nil }
-        #expect(loop.forceFloatReason(pid: getpid(), id: id) == .panel)
+        expectEqual(loop.forceFloatReason(pid: getpid(), id: id), .panel)
         loop.ownWindowIdentifier = { _ in OwnWindowTiling.identifier }
         #expect(loop.forceFloatReason(pid: getpid(), id: id) == nil)
     }
@@ -169,7 +169,7 @@ struct AutoFloatReasonTests {
     @Test("a verdict floats exactly when it carries a reason")
     func verdictShape() {
         #expect(!FloatVerdict(nil).floats)
-        #expect(FloatVerdict(.rule) == .floats(.rule))
-        #expect(FloatVerdict(.panel).reason == .panel)
+        expectEqual(FloatVerdict(.rule), .floats(.rule))
+        expectEqual(FloatVerdict(.panel).reason, .panel)
     }
 }

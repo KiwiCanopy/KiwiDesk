@@ -47,11 +47,11 @@ struct CrossSessionArrangementTests: CrossSessionFixture {
         leave(captured, in: core)
         arrange(core)
         // B declares the hidden Space: it keeps B's mode.
-        #expect(core.state.workspaces[F.hidden]?.mode == .bsp)
+        expectEqual(core.state.workspaces[F.hidden]?.mode, .bsp)
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(space(core, 30) == F.hidden)
+        expectEqual(space(core, 30), F.hidden)
         core.crossSessionSettlePass()
-        #expect(space(core, 20) == F.hidden)
-        #expect(space(core, 21) == F.shown)
+        expectEqual(space(core, 20), F.hidden)
+        expectEqual(space(core, 21), F.shown)
     }
 }

@@ -93,9 +93,9 @@ struct SpaceBarGlideWiringTests {
     @Test("A switch under Window count asks the run to travel")
     func switchTravels() throws {
         let (writes, overlay) = try secondPass(.count, from: 1, to: 2)
-        #expect(writes.count == 3)
+        expectEqual(writes.count, 3)
         #expect(writes.allSatisfy { $0.travels })
-        #expect(overlay.shownExpanded == SpaceID("2"))
+        expectEqual(overlay.shownExpanded, SpaceID("2"))
     }
 
     @Test("Apps and a steady render land")
@@ -107,7 +107,7 @@ struct SpaceBarGlideWiringTests {
         #expect(!steady.isEmpty)
         #expect(!steady.contains { $0.travels })
         // A steady pass writes the three hosts and nothing else.
-        #expect(steady.count == 3)
+        expectEqual(steady.count, 3)
     }
 
     /// A switch that also changes which items draw — a
@@ -149,7 +149,7 @@ struct SpaceBarGlideWiringTests {
             boxedGlass: true,
             applies: true
         ).overlay
-        #expect(overlay.boxGlasses.count == 3)
+        expectEqual(overlay.boxGlasses.count, 3)
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(glass.superview)
             // Within a point: autoresizing rounds each step to the
@@ -179,15 +179,15 @@ struct SpaceBarGlideWiringTests {
             to: 2,
             boxedGlass: true
         )
-        #expect(overlay.boxGlasses.count == 3)
+        expectEqual(overlay.boxGlasses.count, 3)
         #expect(!writes.contains { $0.view is SpaceBarItemView })
         let hosts = overlay.boxGlasses.compactMap(\.superview)
-        #expect(hosts.count == 3)
+        expectEqual(hosts.count, 3)
         #expect(hosts.allSatisfy { $0 is GlassBoxHost })
         let hostWrites = writes.filter { write in
             hosts.contains { $0 === write.view }
         }
-        #expect(hostWrites.count == 3)
+        expectEqual(hostWrites.count, 3)
         #expect(hostWrites.allSatisfy { $0.travels })
         // The pair's own writes never travel: `GlassPlate.update`
         // and `GlassTint.apply` take no motion input

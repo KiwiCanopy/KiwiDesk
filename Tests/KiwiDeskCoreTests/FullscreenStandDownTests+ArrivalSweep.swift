@@ -77,6 +77,6 @@ extension FullscreenStandDownTests {
         core.desktopSettle(ifStill: 9_999)
         #expect(box.queried.isEmpty)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(box.queried == [showing])
+        expectEqual(box.queried, [showing])
     }
 }

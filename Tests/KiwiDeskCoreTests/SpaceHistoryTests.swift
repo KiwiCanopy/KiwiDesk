@@ -36,8 +36,8 @@ struct SpaceHistoryTests {
     @Test("2 → 5 → 3: back is 5, back is 2, forward is 5")
     func browserWalk() {
         var history = trail(["2", "5", "3"])
-        #expect(back(&history, shown: "3") == "5")
-        #expect(back(&history, shown: "5") == "2")
+        expectEqual(back(&history, shown: "3"), "5")
+        expectEqual(back(&history, shown: "5"), "2")
         #expect(back(&history, shown: "2") == nil)
         let forward = history.step(
             under: key,
@@ -45,7 +45,7 @@ struct SpaceHistoryTests {
             shown: "2",
             reachable: { _ in true }
         )
-        #expect(forward?.space == "5")
+        expectEqual(forward?.space, "5")
     }
 
     @Test("a landing on the cursor's entry is no visit")
@@ -53,8 +53,8 @@ struct SpaceHistoryTests {
         var history = trail(["2", "5", "3"])
         _ = back(&history, shown: "3")
         history.visit("5", under: key)
-        #expect(history.entries(under: key).list == ["2", "5", "3"])
-        #expect(history.entries(under: key).cursor == 1)
+        expectEqual(history.entries(under: key).list, ["2", "5", "3"])
+        expectEqual(history.entries(under: key).cursor, 1)
     }
 
     @Test("another visit clears the forward half")
@@ -62,7 +62,7 @@ struct SpaceHistoryTests {
         var history = trail(["2", "5", "3"])
         _ = back(&history, shown: "3")
         history.visit("7", under: key)
-        #expect(history.entries(under: key).list == ["2", "5", "7"])
+        expectEqual(history.entries(under: key).list, ["2", "5", "7"])
         let forward = history.step(
             under: key,
             by: 1,
@@ -79,25 +79,25 @@ struct SpaceHistoryTests {
             back(&history, shown: "3", reachable: { $0 != "2" }) == "5"
         )
         var again = trail(["5", "3", "3"])
-        #expect(back(&again, shown: "3") == "5")
+        expectEqual(back(&again, shown: "3"), "5")
     }
 
     @Test("a renumbered Space keeps its visits")
     func rekey() {
         var history = trail(["2", "12", "3"])
         history.rekey("12", to: "14")
-        #expect(history.entries(under: key).list == ["2", "14", "3"])
+        expectEqual(history.entries(under: key).list, ["2", "14", "3"])
     }
 
     @Test("a dropped Space leaves the trail, the cursor kept")
     func forget() {
         var history = trail(["2", "6", "2", "3"])
         history.forget("6")
-        #expect(history.entries(under: key).list == ["2", "3"])
-        #expect(history.entries(under: key).cursor == 1)
+        expectEqual(history.entries(under: key).list, ["2", "3"])
+        expectEqual(history.entries(under: key).cursor, 1)
         history.forget("3")
-        #expect(history.entries(under: key).list == ["2"])
-        #expect(history.entries(under: key).cursor == 0)
+        expectEqual(history.entries(under: key).list, ["2"])
+        expectEqual(history.entries(under: key).cursor, 0)
     }
 
     @Test("a trail keeps its newest entries up to the capacity")
@@ -107,9 +107,9 @@ struct SpaceHistoryTests {
         }
         let history = trail(visits)
         let list = history.entries(under: key).list
-        #expect(list.count == SpaceHistory.capacity)
-        #expect(list.last == visits.last)
-        #expect(list.first == visits[5])
+        expectEqual(list.count, SpaceHistory.capacity)
+        expectEqual(list.last, visits.last)
+        expectEqual(list.first, visits[5])
     }
 
     @Test("a disconnected screen's trail goes")
@@ -118,7 +118,7 @@ struct SpaceHistoryTests {
         history.visit("1", under: .screen(DisplayID(1)))
         history.visit("7", under: .screen(DisplayID(2)))
         history.keepScreens([DisplayID(1)])
-        #expect(history.entries(under: .screen(DisplayID(2))).list == [])
-        #expect(history.entries(under: .screen(DisplayID(1))).list == ["1"])
+        expectEqual(history.entries(under: .screen(DisplayID(2))).list, [])
+        expectEqual(history.entries(under: .screen(DisplayID(1))).list, ["1"])
     }
 }

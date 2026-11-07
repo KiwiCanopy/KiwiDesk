@@ -120,7 +120,7 @@ struct FocusArmRouteTests {
         let (loop, box) = makeLoop()
         report(loop)
         box.drainOne()
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
         // The whole fix: no round-trip for a window we track.
         #expect(box.asked.isEmpty, "asked: \(box.asked)")
     }
@@ -136,10 +136,10 @@ struct FocusArmRouteTests {
         #expect(box.focused.isEmpty, "reported inline")
         // The liveness read, then the reconcile's list read
         // (#1930) — neither performed inline.
-        #expect(box.work.count == 2)
+        expectEqual(box.work.count, 2)
         box.drainOne()
-        #expect(box.focused == [id])
-        #expect(loop.trackedFrames[id] == box.frame)
+        expectEqual(box.focused, [id])
+        expectEqual(loop.trackedFrames[id], box.frame)
         #expect(
             box.logs.contains { $0.contains("liveness read") },
             "no proof line: \(box.logs)"
@@ -183,7 +183,7 @@ struct FocusArmRouteTests {
             "no ask: \(box.logs)"
         )
         box.drainOne()
-        #expect(box.focused == [id])
+        expectEqual(box.focused, [id])
     }
 
     @Test("An untracked window still asks, and classifies")
@@ -201,7 +201,7 @@ struct FocusArmRouteTests {
             box.asked.contains { $0.contains("(untracked) → w77") },
             "no ask: \(box.logs)"
         )
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         #expect(!box.logs.contains { $0.contains("untracked w77") })
         box.drainOne()
         #expect(

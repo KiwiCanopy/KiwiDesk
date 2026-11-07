@@ -49,13 +49,13 @@ struct FloatPlacementMigrationTests {
     @Test("a stored false becomes keep")
     func falseBecomesKeep() throws {
         let settings = try migratedSettings(profile(nudge: false))
-        #expect(settings.floatPlacement == .keep)
+        expectEqual(settings.floatPlacement, .keep)
     }
 
     @Test("a stored true is dropped onto the new default")
     func trueBecomesCenter() throws {
         let settings = try migratedSettings(profile(nudge: true))
-        #expect(settings.floatPlacement == .center)
+        expectEqual(settings.floatPlacement, .center)
     }
 
     @Test("an explicit float_placement beside the retired key wins")
@@ -98,7 +98,7 @@ struct FloatPlacementMigrationTests {
             let settings = try #require(
                 profile["settings"] as? [String: Any]
             )
-            #expect(settings["float_placement"] as? String == "keep")
+            expectEqual(settings["float_placement"] as? String, "keep")
         }
     }
 
@@ -123,7 +123,7 @@ struct FloatPlacementMigrationTests {
             of: #""float_nudge": false"#,
             with: #""float_placement": "keep""#
         )
-        #expect(stampless(result) == stampless(expected))
+        expectEqual(stampless(result), stampless(expected))
     }
 
     /// The textual drop of a stored `true`, mid-object and last,
@@ -151,7 +151,7 @@ struct FloatPlacementMigrationTests {
                 of: body,
                 with: kept
             )
-            #expect(stampless(result) == stampless(expected))
+            expectEqual(stampless(result), stampless(expected))
         }
     }
 

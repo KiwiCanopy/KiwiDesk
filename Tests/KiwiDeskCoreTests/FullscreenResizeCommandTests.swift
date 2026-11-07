@@ -151,7 +151,7 @@ struct FullscreenResizeCommandTests {
             response.error == "the focused window is fullscreen"
         )
         #expect(frames.isEmpty)
-        #expect(cues == [.windowIsFullscreen(WindowID(2))])
+        expectEqual(cues, [.windowIsFullscreen(WindowID(2))])
         #expect(
             core.sessionRatios(of: SpaceID("1")).splitRatioH == nil
         )
@@ -199,6 +199,6 @@ struct FullscreenResizeCommandTests {
         #expect(frames.isEmpty)
         // Named for the window, never for the layout: it is not
         // the layout that refused this one (#1298).
-        #expect(cues == [.windowIsFullscreen(WindowID(2))])
+        expectEqual(cues, [.windowIsFullscreen(WindowID(2))])
     }
 }

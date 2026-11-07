@@ -33,11 +33,11 @@ struct BorderDormantRingTests {
         border.sync([spec(2)])
         #expect(border.overlays[WindowID(1)] == nil)
         #expect(border.dormant[WindowID(1)] === ring)
-        #expect(ring?.isDormant == true)
+        expectEqual(ring?.isDormant, true)
         border.sync([spec(1), spec(2)])
         #expect(border.overlays[WindowID(1)] === ring)
         #expect(border.dormant[WindowID(1)] == nil)
-        #expect(ring?.isDormant == false)
+        expectEqual(ring?.isDormant, false)
     }
 
     @Test("A returning ring under animation starts from its spec")
@@ -48,7 +48,7 @@ struct BorderDormantRingTests {
         let rest = CGRect(x: 0, y: 0, width: 400, height: 300)
         let parked = CGRect(x: 1700, y: 1000, width: 400, height: 300)
         border.sync([spec(1)])
-        #expect(border.lastFrame(WindowID(1)) == rest)
+        expectEqual(border.lastFrame(WindowID(1)), rest)
         border.sync([])
         // The window comes back from the stash corner while our
         // animation drives it: the ring must ride from there, not
@@ -63,7 +63,7 @@ struct BorderDormantRingTests {
                 cornerStyle: .rounded
             )
         ])
-        #expect(border.lastFrame(WindowID(1)) == parked)
+        expectEqual(border.lastFrame(WindowID(1)), parked)
     }
 
     @Test("A dormant ring fades rather than ordering out")
@@ -74,11 +74,11 @@ struct BorderDormantRingTests {
         border.sync([spec(1)])
         let ring = try #require(border.overlays[WindowID(1)])
         let panel = try #require(ring.backend as? AppKitBorderOverlay)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
         border.sync([])
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         border.sync([spec(1)])
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 
     @Test("A switch leaves the WindowServer request unchanged")
@@ -95,7 +95,7 @@ struct BorderDormantRingTests {
         border.sync([spec(3)])
         border.sync([spec(1), spec(2)])
         let all: Set<WindowID> = [WindowID(1), WindowID(2), WindowID(3)]
-        #expect(requests == [[WindowID(1), WindowID(2)], all, all])
+        expectEqual(requests, [[WindowID(1), WindowID(2)], all, all])
     }
 
     @Test("Corner radius outlives dormancy and dies with the window")

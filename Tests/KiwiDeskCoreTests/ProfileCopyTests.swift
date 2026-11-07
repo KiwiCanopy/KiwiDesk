@@ -89,17 +89,17 @@ struct ProfileCopyTests {
             with: edited
         )
 
-        #expect(created == "Dock Copy")
+        expectEqual(created, "Dock Copy")
         let copy = try core.profiles.read(name: "Dock Copy")
         // A set belongs to one profile, so the copy takes none
         // and waits dormant at the source's count (#1530).
         #expect(copy.isDormant)
-        #expect(copy.monitorCount == 2)
+        expectEqual(copy.monitorCount, 2)
         // The sparse keybinding override survives.
-        #expect(copy.layers == sourceProfile().layers)
+        expectEqual(copy.layers, sourceProfile().layers)
         // Spaces and modes survive.
-        #expect(copy.spaces == sourceProfile().spaces)
-        #expect(copy.spaceModes[SpaceID("code")] == .stack)
+        expectEqual(copy.spaces, sourceProfile().spaces)
+        expectEqual(copy.spaceModes[SpaceID("code")], .stack)
         // The count-default flag must NOT be duplicated.
         #expect(!copy.isDefault)
     }
@@ -179,7 +179,7 @@ struct ProfileCopyTests {
                 )
             }
         }
-        #expect(core.profiles.list() == before)
+        expectEqual(core.profiles.list(), before)
     }
 
     // MARK: - Non-adopting
@@ -204,9 +204,9 @@ struct ProfileCopyTests {
             with: edited
         )
 
-        #expect(core.profiles.currentName == currentBefore)
+        expectEqual(core.profiles.currentName, currentBefore)
         let sidecarAfter = try Data(contentsOf: sidecarURL)
-        #expect(sidecarAfter == sidecarBefore)
+        expectEqual(sidecarAfter, sidecarBefore)
     }
 
     // MARK: - Naming
@@ -224,7 +224,7 @@ struct ProfileCopyTests {
             with: edited
         )
 
-        #expect(created == "Dock_1")
+        expectEqual(created, "Dock_1")
         #expect(core.profiles.list().contains("Dock_1"))
         // The source is untouched.
         let source = try core.profiles.read(name: "Dock")

@@ -37,7 +37,7 @@ struct CommandTests {
             Issue.record("no layout_change payload")
             return
         }
-        #expect(data["mode"] == .string("stack"))
+        expectEqual(data["mode"], .string("stack"))
     }
 
     @Test("set_gap_global updates tiling settings")
@@ -74,7 +74,7 @@ struct CommandTests {
                 args: [.number(2)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.stack.masterCount == 2)
+        expectEqual(core.tiler.settings.stack.masterCount, 2)
 
         #expect(
             core.execute(
@@ -92,8 +92,8 @@ struct CommandTests {
                 args: [.number(4), .number(2)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.grid.columns == 4)
-        #expect(core.tiler.settings.grid.rows == 2)
+        expectEqual(core.tiler.settings.grid.columns, 4)
+        expectEqual(core.tiler.settings.grid.rows, 2)
     }
 
     @Test("Unknown commands return an error with a hint")
@@ -101,8 +101,8 @@ struct CommandTests {
         let core = makeCore()
         let response = core.execute("frobnicate")
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("unknown") == true)
-        #expect(response.error?.contains("help") == true)
+        expectEqual(response.error?.contains("unknown"), true)
+        expectEqual(response.error?.contains("help"), true)
     }
 
     @Test("Typos get a did-you-mean suggestion")
@@ -139,10 +139,10 @@ struct CommandTests {
                 listed[name] = table
             }
         }
-        #expect(listed["focus"] == "KiwiDesk")
-        #expect(listed["stack.set_master_count"] == "stack")
-        #expect(listed["subscribe"] == "KiwiDesk")
-        #expect(listed["version"] == "KiwiDesk")
+        expectEqual(listed["focus"], "KiwiDesk")
+        expectEqual(listed["stack.set_master_count"], "stack")
+        expectEqual(listed["subscribe"], "KiwiDesk")
+        expectEqual(listed["version"], "KiwiDesk")
     }
 
     @Test("version reports the semantic version and commit")
@@ -180,13 +180,13 @@ struct CommandTests {
             Issue.record("expected object data")
             return
         }
-        #expect(data["active_space"] == .string("1"))
+        expectEqual(data["active_space"], .string("1"))
         guard case .array(let windows)? = data["windows"]
         else {
             Issue.record("expected windows array")
             return
         }
-        #expect(windows.count == 1)
+        expectEqual(windows.count, 1)
         // The bundle id is surfaced so a power user can read
         // off the value app rules / focus_or_spawn take (#262).
         guard case .object(let window)? = windows.first else {

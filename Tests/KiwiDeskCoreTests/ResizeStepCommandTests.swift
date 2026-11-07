@@ -23,7 +23,7 @@ struct ResizeStepCommandTests {
     func storesStep() {
         let core = makeCore()
         _ = core.execute("set_resize_step", args: [.number(75)])
-        #expect(core.tiler.settings.resizeStep == 75)
+        expectEqual(core.tiler.settings.resizeStep, 75)
     }
 
     @Test("Rounds a fractional step to whole points")
@@ -33,16 +33,16 @@ struct ResizeStepCommandTests {
             "set_resize_step",
             args: [.number(50.5)]
         )
-        #expect(core.tiler.settings.resizeStep == 51)
+        expectEqual(core.tiler.settings.resizeStep, 51)
     }
 
     @Test("Clamps a non-positive step up to 1")
     func clampsNonPositive() {
         let core = makeCore()
         _ = core.execute("set_resize_step", args: [.number(0)])
-        #expect(core.tiler.settings.resizeStep == 1)
+        expectEqual(core.tiler.settings.resizeStep, 1)
         _ = core.execute("set_resize_step", args: [.number(-9)])
-        #expect(core.tiler.settings.resizeStep == 1)
+        expectEqual(core.tiler.settings.resizeStep, 1)
     }
 
     @Test("Caps an enormous step instead of trapping the Int")
@@ -52,7 +52,7 @@ struct ResizeStepCommandTests {
             "set_resize_step",
             args: [.number(1e300)]
         )
-        #expect(core.tiler.settings.resizeStep == 10_000)
+        expectEqual(core.tiler.settings.resizeStep, 10_000)
     }
 
     @Test("Rejects a non-finite step, keeping the prior value")
@@ -63,6 +63,6 @@ struct ResizeStepCommandTests {
             "set_resize_step",
             args: [.number(.infinity)]
         )
-        #expect(core.tiler.settings.resizeStep == 75)
+        expectEqual(core.tiler.settings.resizeStep, 75)
     }
 }

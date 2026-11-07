@@ -49,9 +49,9 @@ struct PocketChordMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(data))
         let moved = try #require(try rows(out).first)
-        #expect(moved.lua == "KiwiDesk.pocket()")
-        #expect(moved.combo == "control+option+p")
-        #expect(moved.label == "Pocket this window")
+        expectEqual(moved.lua, "KiwiDesk.pocket()")
+        expectEqual(moved.combo, "control+option+p")
+        expectEqual(moved.label, "Pocket this window")
     }
 
     @Test("the seeded pin on ✦P runs Pocket")
@@ -119,8 +119,8 @@ struct PocketChordMigrationTests {
         )
         let out = ConfigMigration.migrated(data) ?? data
         let kept = try #require(try rows(out).first)
-        #expect(kept.lua == pin)
-        #expect(kept.combo == "control+option+x")
+        expectEqual(kept.lua, pin)
+        expectEqual(kept.combo, "control+option+x")
     }
 
     @Test("a file at the step's format keeps a pin on ⌃⌥P")
@@ -161,7 +161,7 @@ struct PocketChordMigrationTests {
         let migrated = try decoder.decode(Profile.self, from: out)
         let bindings = try #require(migrated.layers?.layers.first)
             .bindings
-        #expect(bindings.first?.lua == "KiwiDesk.pocket()")
+        expectEqual(bindings.first?.lua, "KiwiDesk.pocket()")
     }
 
     @Test("the rewrite is surgical: other bytes stay as written")
@@ -185,6 +185,6 @@ struct PocketChordMigrationTests {
         #expect(out.contains("KiwiDesk.toggle_floating()"))
         #expect(out.contains("\"Pocket this window\""))
         // The step takes the surgical edit, not a re-encode.
-        #expect(ConfigMigration.migratingPinChordOntoPocket(data) == edited)
+        expectEqual(ConfigMigration.migratingPinChordOntoPocket(data), edited)
     }
 }

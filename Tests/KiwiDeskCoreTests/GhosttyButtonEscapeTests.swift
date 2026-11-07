@@ -37,7 +37,7 @@ struct GhosttyButtonEscapeTests {
     /// level, which the quick terminal never takes (#2200).
     @Test("Ghostty's update alert is kept")
     func ghosttyKeepsItsAlert() {
-        #expect(FloatDetection.modalPanelLayer == 8)
+        expectEqual(FloatDetection.modalPanelLayer, 8)
         #expect(!ignored(Self.ghostty, layer: 8, button: false))
         #expect(ignored("com.raycast.macos", layer: 8, button: false))
     }

@@ -61,12 +61,12 @@ struct ProfileEditTests {
         )
 
         // Live state and current-profile tracking are untouched.
-        #expect(core.profiles.currentName == "active")
+        expectEqual(core.profiles.currentName, "active")
         #expect(!core.profiles.isDirty)
         // The edit landed in the stored profile's JSON.
         let read = try core.profiles.read(name: "stored")
-        #expect(read.settings.gapsGlobal == .uniform(42))
-        #expect(read.spaceModes[SpaceID(1)] == .grid)
+        expectEqual(read.settings.gapsGlobal, .uniform(42))
+        expectEqual(read.spaceModes[SpaceID(1)], .grid)
     }
 
     @Test("overwriteProfile round-trips the Main role")
@@ -80,7 +80,7 @@ struct ProfileEditTests {
         try core.overwriteProfile(named: "p", with: cfg, writingRules: true)
 
         let read = try core.profiles.read(name: "p")
-        #expect(read.mainSpaces == [SpaceID(2)])
+        expectEqual(read.mainSpaces, [SpaceID(2)])
     }
 
     @Test("overwriteProfile refreshes the matching set's pins")
@@ -105,9 +105,9 @@ struct ProfileEditTests {
         )
 
         let read = try core.profiles.read(name: "multi")
-        #expect(read.monitorSets.count == 2)
+        expectEqual(read.monitorSets.count, 2)
         let setA = read.set(matching: ["A:100x100"])
-        #expect(setA?.spaceMonitorMap[SpaceID(1)] == "A:100x100")
+        expectEqual(setA?.spaceMonitorMap[SpaceID(1)], "A:100x100")
     }
 
     @Test("overwriteProfile injects no set for absent monitors")
@@ -129,10 +129,10 @@ struct ProfileEditTests {
 
         let read = try core.profiles.read(name: "single")
         // The connected monitors were not grafted on.
-        #expect(read.monitorSets.count == 1)
+        expectEqual(read.monitorSets.count, 1)
         #expect(read.set(matching: ["A:100x100"]) != nil)
         #expect(read.set(matching: ["B:100x100"]) == nil)
-        #expect(read.settings.gapsGlobal == .uniform(9))
+        expectEqual(read.settings.gapsGlobal, .uniform(9))
     }
 
     @Test("loadGuiConfig(editing:) overlays stored, not live")
@@ -150,8 +150,8 @@ struct ProfileEditTests {
 
         let cfg = try core.loadGuiConfig(editing: "p")
         // Reflects the profile's saved tiling, not live's gap 2.
-        #expect(cfg.settings.gapsGlobal == .uniform(30))
-        #expect(cfg.spaceModes[SpaceID(1)] == .grid)
+        expectEqual(cfg.settings.gapsGlobal, .uniform(30))
+        expectEqual(cfg.spaceModes[SpaceID(1)], .grid)
     }
 
     @Test("isProfileInEffect true only for the active profile")
@@ -181,7 +181,7 @@ struct ProfileEditTests {
 
         // "stored" is not on screen — no live reapply.
         core.reapplyIfInEffect("stored")
-        #expect(core.tiler.settings.gapsGlobal == .uniform(30))
+        expectEqual(core.tiler.settings.gapsGlobal, .uniform(30))
     }
 
     @Test("Editing a profile never grafts live-only spaces")
@@ -214,7 +214,7 @@ struct ProfileEditTests {
 
         let after = try core.profiles.read(name: "small")
         #expect(after.spaceModes[SpaceID(9)] == nil)
-        #expect(after.settings.gapsGlobal == .uniform(5))
+        expectEqual(after.settings.gapsGlobal, .uniform(5))
     }
 
     @Test("Editing an absent-monitor profile drops stray pins")
@@ -238,7 +238,7 @@ struct ProfileEditTests {
         )
 
         let after = try core.profiles.read(name: "deskA")
-        #expect(after.monitorSets.count == 1)
+        expectEqual(after.monitorSets.count, 1)
         #expect(after.set(matching: ["B:100x100"]) == nil)
         #expect(
             after.set(matching: ["A:100x100"])?
@@ -257,9 +257,9 @@ struct ProfileEditTests {
         cfg.settings.gapsGlobal = .uniform(50)
         try core.overwriteProfile(named: "cur", with: cfg, writingRules: true)
         // The JSON changed but live state is still the old gap.
-        #expect(core.tiler.settings.gapsGlobal == .uniform(30))
+        expectEqual(core.tiler.settings.gapsGlobal, .uniform(30))
 
         core.reapplyIfInEffect("cur")
-        #expect(core.tiler.settings.gapsGlobal == .uniform(50))
+        expectEqual(core.tiler.settings.gapsGlobal, .uniform(50))
     }
 }

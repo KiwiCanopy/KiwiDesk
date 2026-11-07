@@ -15,22 +15,22 @@ struct ScreenClassTests {
     @Test("real hardware lands in the class it was written for")
     func realHardware() {
         // A 14" MacBook Pro reports this from NSScreen.frame.
-        #expect(ScreenClass.of(size(1728, 1117)) == .laptop)
+        expectEqual(ScreenClass.of(size(1728, 1117)), .laptop)
         // 2560 pt is a 27" at any pixel density — the whole
         // reason the verdict reads points.
-        #expect(ScreenClass.of(size(2560, 1440)) == .desktop)
-        #expect(ScreenClass.of(size(3440, 1440)) == .ultrawide)
-        #expect(ScreenClass.of(size(1440, 2560)) == .pivoted)
+        expectEqual(ScreenClass.of(size(2560, 1440)), .desktop)
+        expectEqual(ScreenClass.of(size(3440, 1440)), .ultrawide)
+        expectEqual(ScreenClass.of(size(1440, 2560)), .pivoted)
     }
 
     @Test("boundaries fall on the side the constants name")
     func boundaries() {
         let laptop = ScreenClass.laptopWidth
-        #expect(ScreenClass.of(size(laptop - 1, 1080)) == .laptop)
-        #expect(ScreenClass.of(size(laptop, 1080)) == .desktop)
+        expectEqual(ScreenClass.of(size(laptop - 1, 1080)), .laptop)
+        expectEqual(ScreenClass.of(size(laptop, 1080)), .desktop)
         let ultra = ScreenClass.ultrawideWidth
-        #expect(ScreenClass.of(size(ultra - 1, 1440)) == .desktop)
-        #expect(ScreenClass.of(size(ultra, 1440)) == .ultrawide)
+        expectEqual(ScreenClass.of(size(ultra - 1, 1440)), .desktop)
+        expectEqual(ScreenClass.of(size(ultra, 1440)), .ultrawide)
     }
 
     @Test("a short ultrawide is caught by aspect, not width")
@@ -38,7 +38,7 @@ struct ScreenClassTests {
         // 2560 × 1080 is under the width threshold and is still an
         // ultrawide; without the aspect arm it would be handed
         // desktop layouts including BSP.
-        #expect(ScreenClass.of(size(2560, 1080)) == .ultrawide)
+        expectEqual(ScreenClass.of(size(2560, 1080)), .ultrawide)
         let ratio = 2560.0 / 1080.0
         #expect(ratio >= ScreenClass.ultrawideAspect)
     }
@@ -48,14 +48,14 @@ struct ScreenClassTests {
         // Tall enough to pass the ultrawide ASPECT test if the
         // order were reversed, and wide enough to pass the width
         // one. Pivoted is checked first, so both are moot.
-        #expect(ScreenClass.of(size(3440, 3441)) == .pivoted)
-        #expect(ScreenClass.of(size(1080, 2560)) == .pivoted)
+        expectEqual(ScreenClass.of(size(3440, 3441)), .pivoted)
+        expectEqual(ScreenClass.of(size(1080, 2560)), .pivoted)
     }
 
     @Test("a degenerate size answers rather than dividing by zero")
     func degenerateSize() {
-        #expect(ScreenClass.of(size(0, 0)) == .desktop)
-        #expect(ScreenClass.of(size(1920, 0)) == .desktop)
+        expectEqual(ScreenClass.of(size(0, 0)), .desktop)
+        expectEqual(ScreenClass.of(size(1920, 0)), .desktop)
     }
 
     /// Floating belongs to the SETUP, not to a screen.

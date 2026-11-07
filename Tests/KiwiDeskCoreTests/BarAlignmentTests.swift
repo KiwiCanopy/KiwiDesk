@@ -25,8 +25,8 @@ struct BarAlignmentTests {
             horizontal: true,
             alignment: .start
         )
-        #expect(frames[0].minX == 0)
-        #expect(frames[1].minX == 110)
+        expectEqual(frames[0].minX, 0)
+        expectEqual(frames[1].minX, 110)
     }
 
     @Test("Fitting frames end at the axis for end alignment")
@@ -39,8 +39,8 @@ struct BarAlignmentTests {
             alignment: .end
         )
         // 210 used of 320: the group starts at 110.
-        #expect(frames[0].minX == 110)
-        #expect(frames[1].maxX == 320)
+        expectEqual(frames[0].minX, 110)
+        expectEqual(frames[1].maxX, 320)
     }
 
     @Test("Vertical end alignment seats the group at maxY")
@@ -52,8 +52,8 @@ struct BarAlignmentTests {
             horizontal: false,
             alignment: .end
         )
-        #expect(frames[0].minY == 20)
-        #expect(frames[1].maxY == 100)
+        expectEqual(frames[0].minY, 20)
+        expectEqual(frames[1].maxY, 100)
     }
 
     @Test("Overflow collapses every alignment to the run start")
@@ -66,7 +66,7 @@ struct BarAlignmentTests {
                 horizontal: true,
                 alignment: alignment
             )
-            #expect(frames[0].minX == 0)
+            expectEqual(frames[0].minX, 0)
         }
     }
 

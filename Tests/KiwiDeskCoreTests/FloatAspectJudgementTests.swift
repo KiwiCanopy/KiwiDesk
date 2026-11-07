@@ -77,7 +77,7 @@ struct FloatAspectJudgementTests {
         core.judgeFloatAspect(press)
         // The verdict is the probe's: a refused grow may be fixed size.
         #expect(core.state.floatAspects[id] == nil)
-        #expect(core.tiler.recentInstantTarget(id)?.size == probed)
+        expectEqual(core.tiler.recentInstantTarget(id)?.size, probed)
 
         answer(core, CGSize(width: 788, height: 443))
         core.judgeFloatAspectProbe(press, live: start)
@@ -148,7 +148,7 @@ struct FloatAspectJudgementTests {
         #expect(core.tiler.recentInstantTarget(id) == nil)
 
         press(core, 50)
-        #expect(core.tiler.recentInstantTarget(id)?.height == 450)
+        expectEqual(core.tiler.recentInstantTarget(id)?.height, 450)
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
 
@@ -206,7 +206,7 @@ struct FloatAspectJudgementTests {
         let core = makeCore()
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
         #expect(core.state.floatAspects[id] == nil)
-        #expect(core.tiler.recentInstantTarget(id) == start)
+        expectEqual(core.tiler.recentInstantTarget(id), start)
     }
 
     @Test("A window no longer floating is not judged")
@@ -270,7 +270,7 @@ struct FloatAspectJudgementTests {
         state.floatAspects[id] = .init(pid: 7, ratio: 1.5)
         state.rekey(id, to: other)
         #expect(state.floatAspects[id] == nil)
-        #expect(state.floatAspects[other]?.ratio == 1.5)
+        expectEqual(state.floatAspects[other]?.ratio, 1.5)
         state.apply(.appTerminated(pid: 7))
         #expect(state.floatAspects[other] == nil)
     }

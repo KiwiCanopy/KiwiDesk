@@ -91,14 +91,14 @@ struct ShadowWindowTests {
         let host = traits(889_401, buttons: true, children: 6)
         let twin = traits(889_398, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([host, twin])
-        #expect(verdict(loop, elements, box, 0) == .window)
-        #expect(verdict(loop, elements, box, 1) == .shadow)
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 0), .window)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         #expect(loop.shadows.holds(twin.id, pid: pid))
         #expect(!loop.shadows.holds(host.id, pid: pid))
         // Another process's same id is not this one's shadow.
         #expect(!loop.shadows.holds(twin.id, pid: pid + 1))
-        #expect(box.logs.filter { $0.hasPrefix("shadow:") }.count == 1)
+        expectEqual(box.logs.filter { $0.hasPrefix("shadow:") }.count, 1)
     }
 
     @Test("a window with a button or content reads no siblings")
@@ -106,22 +106,22 @@ struct ShadowWindowTests {
         let buttoned = traits(1, buttons: true, children: 6)
         let content = traits(2, buttons: false, children: 3)
         let (loop, elements, box) = makeLoop([buttoned, content])
-        #expect(verdict(loop, elements, box, 0) == .window)
-        #expect(verdict(loop, elements, box, 1) == .window)
-        #expect(box.siblingReads == 0)
-        #expect(box.traitReads == [buttoned.id, content.id])
+        expectEqual(verdict(loop, elements, box, 0), .window)
+        expectEqual(verdict(loop, elements, box, 1), .window)
+        expectEqual(box.siblingReads, 0)
+        expectEqual(box.traitReads, [buttoned.id, content.id])
     }
 
     @Test("a lone shell waits for a host, then tiles")
     func loneShellWaitsThenTiles() {
         let frameless = traits(1, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([frameless])
-        #expect(verdict(loop, elements, box, 0) == .deferred)
-        #expect(box.retracks == 1)
+        expectEqual(verdict(loop, elements, box, 0), .deferred)
+        expectEqual(box.retracks, 1)
         box.now = box.now.advanced(by: .seconds(2))
-        #expect(verdict(loop, elements, box, 0) == .deferred)
+        expectEqual(verdict(loop, elements, box, 0), .deferred)
         box.now = box.now.advanced(by: ShadowWindows.hostWait)
-        #expect(verdict(loop, elements, box, 0) == .window)
+        expectEqual(verdict(loop, elements, box, 0), .window)
         // Tracked: its own focus reports must not read as a
         // shadow's.
         #expect(!loop.shadows.holds(frameless.id, pid: pid))
@@ -135,9 +135,9 @@ struct ShadowWindowTests {
         // A decoration-less terminal's second window: its first
         // is already a tile, so nothing of its app lists late.
         loop.elements[pid] = [tracked.id: elements[0]]
-        #expect(verdict(loop, elements, box, 1) == .window)
+        expectEqual(verdict(loop, elements, box, 1), .window)
         #expect(!loop.shadows.holds(frameless.id, pid: pid))
-        #expect(box.retracks == 0)
+        expectEqual(box.retracks, 0)
     }
 
     @Test("a shell during a sibling's fullscreen transition never tiles")
@@ -149,27 +149,27 @@ struct ShadowWindowTests {
         // The exit: the sibling left the list in this very read,
         // ahead of the sweep that would open its episode.
         loop.detectedFullscreen[tracked.id] = true
-        #expect(verdict(loop, elements, box, 0) == .shadow)
+        expectEqual(verdict(loop, elements, box, 0), .shadow)
         // A shadow: never a tab, and its focus reports dropped.
         #expect(loop.shadows.holds(placeholder.id, pid: pid))
         // Asked again, or a real frameless window waits on an event.
-        #expect(box.retracks == 1)
+        expectEqual(box.retracks, 1)
         loop.shadows.clear(placeholder.id, pid: pid)
         // The sibling's budget is spent: it owes the shell nothing.
         loop.removalDistrusted[tracked.id] = RemovalEpisode(
             arms: EventLoop.removalRecheckCap
         )
-        #expect(verdict(loop, elements, box, 0) == .window)
+        expectEqual(verdict(loop, elements, box, 0), .window)
         loop.removalDistrusted[tracked.id] = nil
         loop.shadows.clear(placeholder.id, pid: pid)
         // The entry: hosted nowhere reads the same.
         loop.detectedFullscreen[tracked.id] = false
         loop.compositorHostsNowhere = { _ in true }
-        #expect(verdict(loop, elements, box, 0) == .shadow)
+        expectEqual(verdict(loop, elements, box, 0), .shadow)
         loop.shadows.clear(placeholder.id, pid: pid)
         // No arm open: a plain frameless window, it tiles at once.
         loop.compositorHostsNowhere = { _ in false }
-        #expect(verdict(loop, elements, box, 0) == .window)
+        expectEqual(verdict(loop, elements, box, 0), .window)
     }
 
     @Test("a sibling still listed is in no transition")
@@ -180,7 +180,7 @@ struct ShadowWindowTests {
         loop.elements[pid] = [tracked.id: elements[0]]
         // In full screen and listed: no beat to stand in for.
         loop.detectedFullscreen[tracked.id] = true
-        #expect(verdict(loop, elements, box, 1) == .window)
+        expectEqual(verdict(loop, elements, box, 1), .window)
     }
 
     @Test("an unanswered read beside a tracked window still waits")
@@ -191,8 +191,8 @@ struct ShadowWindowTests {
         loop.elements[pid] = [tracked.id: elements[0]]
         // Orion's fresh twin, its read timing out as it leaves the
         // list: no verdict, so no tile.
-        #expect(verdict(loop, elements, box, 1) == .deferred)
-        #expect(box.retracks == 1)
+        expectEqual(verdict(loop, elements, box, 1), .deferred)
+        expectEqual(box.retracks, 1)
     }
 
     @Test("a shell whose host lists late is a shadow on the re-track")
@@ -201,9 +201,9 @@ struct ShadowWindowTests {
         let twin = traits(2, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([twin, host])
         box.listed = [0]
-        #expect(verdict(loop, elements, box, 0) == .deferred)
+        expectEqual(verdict(loop, elements, box, 0), .deferred)
         box.listed = [0, 1]
-        #expect(verdict(loop, elements, box, 0) == .shadow)
+        expectEqual(verdict(loop, elements, box, 0), .shadow)
     }
 
     @Test("an unanswered read waits, never tiles a known shadow")
@@ -211,13 +211,13 @@ struct ShadowWindowTests {
         let host = traits(1, buttons: true, children: 6)
         let twin = traits(2, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([host, twin])
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         // The twin leaves the list mid-read, long after.
         box.windows[1] = traits(2, buttons: nil, children: nil)
         box.now = box.now.advanced(by: .seconds(60))
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         box.now = box.now.advanced(by: .seconds(60))
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
     }
 
     @Test("only readings with no verdict between them spend the wait")
@@ -226,24 +226,24 @@ struct ShadowWindowTests {
         let twin = traits(2, buttons: nil, children: nil)
         let (loop, elements, box) = makeLoop([host, twin])
         // Device, 02:34:36: unread once, as the twin left the list.
-        #expect(verdict(loop, elements, box, 1) == .deferred)
+        expectEqual(verdict(loop, elements, box, 1), .deferred)
         box.windows[1] = traits(2, buttons: false, children: 0)
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         // 02:34:44: unread again, eight seconds on. Forget the
         // record, so the wait alone decides.
         loop.shadows.clear(twin.id, pid: pid)
         box.windows[1] = traits(2, buttons: nil, children: nil)
         box.now = box.now.advanced(by: .seconds(8))
-        #expect(verdict(loop, elements, box, 1) == .deferred)
+        expectEqual(verdict(loop, elements, box, 1), .deferred)
     }
 
     @Test("an unanswered window with no verdict tiles after the wait")
     func unreadFailsOpen() {
         let lone = traits(1, buttons: nil, children: nil)
         let (loop, elements, box) = makeLoop([lone])
-        #expect(verdict(loop, elements, box, 0) == .deferred)
+        expectEqual(verdict(loop, elements, box, 0), .deferred)
         box.now = box.now.advanced(by: ShadowWindows.hostWait)
-        #expect(verdict(loop, elements, box, 0) == .window)
+        expectEqual(verdict(loop, elements, box, 0), .window)
     }
 
     @Test("a shadow that gains content becomes a window")
@@ -251,11 +251,11 @@ struct ShadowWindowTests {
         let host = traits(1, buttons: true, children: 6)
         let twin = traits(2, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([host, twin])
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         box.windows[1] = traits(2, buttons: false, children: 4)
-        #expect(verdict(loop, elements, box, 1) == .window)
+        expectEqual(verdict(loop, elements, box, 1), .window)
         #expect(!loop.shadows.holds(twin.id, pid: pid))
-        #expect(loop.hostOfShadow(twin.id, pid: pid) == twin.id)
+        expectEqual(loop.hostOfShadow(twin.id, pid: pid), twin.id)
     }
 
     @Test("a shadow that left the list keeps its record")
@@ -264,11 +264,11 @@ struct ShadowWindowTests {
         let twin = traits(2, buttons: false, children: 0)
         let other = traits(3, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([host, twin, other])
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         // The twin flickers out while another shell is judged: its
         // record survives, so its return costs no sibling read.
         box.listed = [0, 2]
-        #expect(verdict(loop, elements, box, 2) == .shadow)
+        expectEqual(verdict(loop, elements, box, 2), .shadow)
         #expect(loop.shadows.holds(twin.id, pid: pid))
         #expect(loop.shadows.holds(other.id, pid: pid))
     }
@@ -279,11 +279,11 @@ struct ShadowWindowTests {
         let twin = traits(2, buttons: false, children: 0)
         let lone = traits(3, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([host, twin, lone])
-        #expect(verdict(loop, elements, box, 1) == .shadow)
+        expectEqual(verdict(loop, elements, box, 1), .shadow)
         loop.detach(pid: pid, restoreEnhancedUI: false)
         #expect(!loop.shadows.holds(twin.id, pid: pid))
         box.listed = [2]
-        #expect(verdict(loop, elements, box, 2) == .deferred)
+        expectEqual(verdict(loop, elements, box, 2), .deferred)
         #expect(loop.shadows.holds(lone.id, pid: pid))
         loop.isRunning = true
         loop.stop()

@@ -139,7 +139,7 @@ struct RestoreKeyLogTests {
         // logs, so the silence above is the failed write's.
         let writable = dir.appendingPathComponent("writable")
         Self.recovery(at: writable, for: core).autosave()
-        #expect(Self.keyLines(lines) == Self.expected("autosave"))
+        expectEqual(Self.keyLines(lines), Self.expected("autosave"))
     }
 
     @Test("A window with no bundle id, filed in no Space")
@@ -204,7 +204,7 @@ struct RestoreKeyLogTests {
         core.onLog = { lines.append($0) }
         Self.file(core)
         core.crash.autosave()
-        #expect(Self.keyLines(lines) == Self.expected("autosave"))
+        expectEqual(Self.keyLines(lines), Self.expected("autosave"))
     }
 
     @Test("An unchanged autosave logs nothing; a retitle logs again")
@@ -238,6 +238,6 @@ struct RestoreKeyLogTests {
         core.onLog = { lines.append($0) }
         Self.file(core)
         core.arrangeBootDesk(session: nil)
-        #expect(Self.keyLines(lines) == Self.expected("boot"))
+        expectEqual(Self.keyLines(lines), Self.expected("boot"))
     }
 }

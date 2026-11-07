@@ -40,7 +40,7 @@ struct AppBarItemTextTests {
     @Test("A lone window draws its own title")
     func loneWindowDrawsTitle() {
         let core = seeded([titledWindow(1, title: "Downloads")])
-        #expect(text(core, [1]) == "Downloads")
+        expectEqual(text(core, [1]), "Downloads")
     }
 
     /// Two Finder windows have two titles and the group has
@@ -51,11 +51,11 @@ struct AppBarItemTextTests {
             titledWindow(1, title: "Downloads"),
             titledWindow(2, title: "Projects"),
         ])
-        #expect(text(core, [1, 2]) == "Finder")
+        expectEqual(text(core, [1, 2]), "Finder")
         // ...and each member still draws its own title once the
         // group expands.
-        #expect(text(core, [1]) == "Downloads")
-        #expect(text(core, [2]) == "Projects")
+        expectEqual(text(core, [1]), "Downloads")
+        expectEqual(text(core, [2]), "Projects")
     }
 
     /// Lazy-title apps (#160) are tracked before their title
@@ -65,7 +65,7 @@ struct AppBarItemTextTests {
         let core = seeded([
             titledWindow(1, app: "Telegram", title: "")
         ])
-        #expect(text(core, [1]) == "Telegram")
+        expectEqual(text(core, [1]), "Telegram")
     }
 
     @Test("A long title is capped")
@@ -80,7 +80,7 @@ struct AppBarItemTextTests {
         ])
         var style = AppBarLook()
         style.titleCap = 10
-        #expect(text(core, [1], style: style) == "TanStack S…")
+        expectEqual(text(core, [1], style: style), "TanStack S…")
     }
 
     /// The driver reads the CLAMPED cap, not the raw stored
@@ -150,7 +150,7 @@ struct AppBarItemTextTests {
             style: AppBarLook(),
             visibility: [:]
         )
-        #expect(item.text == "Downloads")
+        expectEqual(item.text, "Downloads")
         #expect(item.text != "Finder")
     }
 }
@@ -187,9 +187,9 @@ struct SpaceBarFrontTitleTests {
         let app = try #require(
             core.frontApp(display: display, style: style())
         ).app
-        #expect(app.title == "ToDo — Second_Brain")
+        expectEqual(app.title, "ToDo — Second_Brain")
         // The app name rides along: the glyph resolves from it.
-        #expect(app.name == "Obsidian")
+        expectEqual(app.name, "Obsidian")
     }
 
     @Test("The segment's title is capped")
@@ -198,7 +198,7 @@ struct SpaceBarFrontTitleTests {
         let app = try #require(
             core.frontApp(display: display, style: style(cap: 8))
         ).app
-        #expect(app.title == "ToDo — S…")
+        expectEqual(app.title, "ToDo — S…")
     }
 
     /// Nil, not empty: `layoutFrontName` reads `title ?? name`,
@@ -211,7 +211,7 @@ struct SpaceBarFrontTitleTests {
             core.frontApp(display: display, style: style())
         ).app
         #expect(app.title == nil)
-        #expect(app.name == "Obsidian")
+        expectEqual(app.name, "Obsidian")
     }
 
     /// Space ITEMS are runs of app glyphs with no text at all,

@@ -33,7 +33,7 @@ struct KeyLayerLeftOutTests {
         #expect(
             over.resolved(onto: base).map(\.name) == ["default", "Focus"]
         )
-        #expect(over.overrideCount == 2)
+        expectEqual(over.overrideCount, 2)
         #expect(!over.isEmpty)
     }
 
@@ -43,16 +43,16 @@ struct KeyLayerLeftOutTests {
         let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.leftOut == ["Gaming"])
+        expectEqual(over.leftOut, ["Gaming"])
         #expect(over.layers.isEmpty)
-        #expect(over.resolved(onto: base) == edited)
+        expectEqual(over.resolved(onto: base), edited)
     }
 
     @Test("the default layer is never left out")
     func defaultStays() {
         let over = KeyLayerOverride(leftOut: ["default", "Focus", "Focus"])
-        #expect(over.leftOut == ["Focus"])
-        #expect(over.resolved(onto: base).first?.name == "default")
+        expectEqual(over.leftOut, ["Focus"])
+        expectEqual(over.resolved(onto: base).first?.name, "default")
     }
 
     @Test("the mark round-trips as `left_out` on its own entry")
@@ -69,9 +69,9 @@ struct KeyLayerLeftOutTests {
             KeyLayerOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
         // The mark's entry is no diverging layer of its own.
-        #expect(back.layers.map(\.name) == ["default"])
+        expectEqual(back.layers.map(\.name), ["default"])
     }
 
     @Test("a profile created later still gets the shared layer")

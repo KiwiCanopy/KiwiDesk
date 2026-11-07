@@ -203,7 +203,7 @@ struct ScreenNeighborsPlumbingTests {
             session: SessionRatios(),
             stackFlip: nil
         )
-        #expect(context.screenNeighbors == ScreenNeighbors())
+        expectEqual(context.screenNeighbors, ScreenNeighbors())
     }
 
     @Test("context(bounds:space:) threads the verdicts")

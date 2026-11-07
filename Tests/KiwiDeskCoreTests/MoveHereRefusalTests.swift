@@ -77,7 +77,7 @@ struct MoveHereRefusalTests {
         addWindow(core, 2, space: "3", fullscreen: true)
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(2))
-        #expect(pick(core) == .unmovable(WindowID(2)))
+        expectEqual(pick(core), .unmovable(WindowID(2)))
         let response = core.execute(
             "move_here",
             args: [.string(Self.bundle)]
@@ -85,15 +85,15 @@ struct MoveHereRefusalTests {
         #expect(!response.isSuccess)
         #expect(refused(recorder, .cannotMoveHereFullScreen))
         #expect(!refused(recorder, .noTitleMatch(app: "", text: "")))
-        #expect(core.state.workspaces.space(of: WindowID(2)) == "3")
+        expectEqual(core.state.workspaces.space(of: WindowID(2)), "3")
     }
 
     @Test("a sticky window drawn here counts as here")
     func stickyDrawnHereIsHere() {
         let (core, recorder) = makeCore()
         addWindow(core, 1, space: "2", sticky: .display)
-        #expect(core.stickyMoveBlock(WindowID(1), to: "1") == .global)
-        #expect(pick(core) == .allHere)
+        expectEqual(core.stickyMoveBlock(WindowID(1), to: "1"), .global)
+        expectEqual(pick(core), .allHere)
         _ = core.execute("move_here", args: [.string(Self.bundle)])
         #expect(refused(recorder, .allHere(app: "")))
     }
@@ -103,7 +103,7 @@ struct MoveHereRefusalTests {
         let (core, _) = makeCore()
         addWindow(core, 1, space: "1")
         addWindow(core, 2, space: "2", fullscreen: true)
-        #expect(pick(core) == .unmovable(WindowID(2)))
+        expectEqual(pick(core), .unmovable(WindowID(2)))
     }
 
     @Test("a movable window outranks a more recent unmovable one")
@@ -113,14 +113,14 @@ struct MoveHereRefusalTests {
         addWindow(core, 2, space: "3", fullscreen: true)
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(2))
-        #expect(pick(core) == .window(WindowID(1)))
+        expectEqual(pick(core), .window(WindowID(1)))
     }
 
     @Test("no match is answered only to a text")
     func noMatchNeedsText() {
         let (core, _) = makeCore()
         addWindow(core, 1, space: "2", fullscreen: true)
-        #expect(pick(core, text: "inbox") == .noMatch(text: "inbox"))
-        #expect(pick(core) == .unmovable(WindowID(1)))
+        expectEqual(pick(core, text: "inbox"), .noMatch(text: "inbox"))
+        expectEqual(pick(core), .unmovable(WindowID(1)))
     }
 }

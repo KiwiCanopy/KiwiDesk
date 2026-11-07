@@ -68,7 +68,7 @@ struct SpaceHistoryReachTests {
         core.retile()
         core.state.workspaces.activate(SpaceID("3"))
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "2")
+        expectEqual(shown(core), "2")
     }
 
     @Test("Back skips a Space that left state")
@@ -80,7 +80,7 @@ struct SpaceHistoryReachTests {
         core.execute("focus_space", args: [.string("3")])
         core.state.workspaces.removeSpace(SpaceID("2"))
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
     }
 
     @Test("per screen, Back skips a Space now on another screen")
@@ -90,6 +90,6 @@ struct SpaceHistoryReachTests {
         core.execute("focus_space", args: [.string("3")])
         core.state.workspaces.assign(SpaceID("2"), to: Self.displayB)
         #expect(run(core, "focus_space_back"))
-        #expect(shown(core) == "1")
+        expectEqual(shown(core), "1")
     }
 }

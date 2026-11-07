@@ -17,8 +17,8 @@ struct StarterShapeTests {
 
     @Test("32:9 is super ultrawide, 21:9 stays ultrawide")
     func superUltrawideBoundary() {
-        #expect(ScreenClass.of(superWide) == .superUltrawide)
-        #expect(ScreenClass.of(ultrawide) == .ultrawide)
+        expectEqual(ScreenClass.of(superWide), .superUltrawide)
+        expectEqual(ScreenClass.of(ultrawide), .ultrawide)
         let edge = ScreenClass.superUltrawideAspect
         #expect(
             ScreenClass.of(CGSize(width: edge * 1000, height: 1000))
@@ -53,25 +53,25 @@ struct StarterShapeTests {
             mainShape: .superUltrawide,
             hosts: [:]
         )
-        #expect(wide.scrolling.anchor == .center)
+        expectEqual(wide.scrolling.anchor, .center)
         #expect(!wide.scrolling.fillWhenAlone)
-        #expect(wide.stack.masterCount == 3)
-        #expect(wide.stack.stackPosition == .right)
+        expectEqual(wide.stack.masterCount, 3)
+        expectEqual(wide.stack.stackPosition, .right)
         let ultra = StarterTuning.settings(
             mainShape: .ultrawide,
             hosts: [:]
         )
-        #expect(ultra.scrolling.anchor == .center)
+        expectEqual(ultra.scrolling.anchor, .center)
         #expect(!ultra.scrolling.fillWhenAlone)
-        #expect(ultra.stack.masterCount == 2)
+        expectEqual(ultra.stack.masterCount, 2)
         // A 16:9 keeps the defaults the ruling left alone.
         let desk = StarterTuning.settings(
             mainShape: .desktop,
             hosts: [:]
         )
-        #expect(desk.scrolling.anchor == .follow)
+        expectEqual(desk.scrolling.anchor, .follow)
         #expect(desk.scrolling.fillWhenAlone)
-        #expect(desk.stack.masterCount == 1)
+        expectEqual(desk.stack.masterCount, 1)
     }
 
     @Test("a layout is tuned for the screen it lands on")
@@ -79,15 +79,15 @@ struct StarterShapeTests {
         let sizes = [ultrawide, portrait]
         let hosts = StarterSetup.hosts(sizes)
         // Both lead their lists with Stack; the wider draws first.
-        #expect(hosts[.stack] == .ultrawide)
+        expectEqual(hosts[.stack], .ultrawide)
         let settings = StarterSetup.settings(sizes: sizes)
-        #expect(settings.stack.masterCount == 2)
-        #expect(settings.stack.stackPosition == .right)
+        expectEqual(settings.stack.masterCount, 2)
+        expectEqual(settings.stack.stackPosition, .right)
         // A portrait main beside a WIDER laptop (1728 against
         // 1440 pt) is the narrowest screen and leads Monocle, then
         // draws Stack — which is tuned for portrait.
         let tall = [portrait, laptop]
-        #expect(StarterSetup.hosts(tall)[.stack] == .pivoted)
+        expectEqual(StarterSetup.hosts(tall)[.stack], .pivoted)
         #expect(
             StarterSetup.settings(sizes: tall).stack.stackPosition
                 == .bottom
@@ -105,7 +105,7 @@ struct StarterShapeTests {
         let four = StarterSetup.settings(
             sizes: [screen27, screen27, screen27, portrait]
         )
-        #expect(four.stack.stackPosition == .right)
+        expectEqual(four.stack.stackPosition, .right)
     }
 
     @Test("Scrolling on a portrait secondary scrolls vertically")
@@ -119,8 +119,8 @@ struct StarterShapeTests {
             .filter { $0.screen == 1 && $0.mode == .scrolling }
         try #require(portraitScrolling.count == 1)
         let space = SpaceID(portraitScrolling[0].number)
-        #expect(Set(overrides.keys) == [space])
-        #expect(overrides[space]?.orientation == .vertical)
+        expectEqual(Set(overrides.keys), [space])
+        expectEqual(overrides[space]?.orientation, .vertical)
         #expect(
             StarterSetup.settings(sizes: sizes).scrolling
                 .override[space]?.orientation == .vertical
@@ -141,7 +141,7 @@ struct StarterShapeTests {
                     == ScreenClass.of(secondary)
             )
             let settings = StarterSetup.settings(sizes: sizes)
-            #expect(settings.scrolling.orientation == .horizontal)
+            expectEqual(settings.scrolling.orientation, .horizontal)
             #expect(settings.scrolling.override.isEmpty)
         }
         #expect(
@@ -156,11 +156,11 @@ struct StarterShapeTests {
             CGSize(width: 1512, height: 982), screen27,
             CGSize(width: 1024, height: 768),
         ]
-        #expect(StarterSetup.scrollingHost(pair) == .desktop)
+        expectEqual(StarterSetup.scrollingHost(pair), .desktop)
         let mixed = [CGSize(width: 1512, height: 982), ultrawide]
-        #expect(StarterSetup.scrollingHost(mixed) == .ultrawide)
+        expectEqual(StarterSetup.scrollingHost(mixed), .ultrawide)
         let tuned = StarterSetup.settings(sizes: mixed).scrolling
-        #expect(tuned.anchor == .center)
+        expectEqual(tuned.anchor, .center)
         #expect(!tuned.fillWhenAlone)
     }
 
@@ -216,14 +216,14 @@ struct StarterShapeTests {
     @Test("the setup is titled by its main screen, named Starter")
     func titles() {
         let one = StarterSetup.standardLayout(sizes: [superWide])
-        #expect(one.name == StarterSetup.name)
-        #expect(one.starterTitle?.profileName == "Super Ultrawide")
+        expectEqual(one.name, StarterSetup.name)
+        expectEqual(one.starterTitle?.profileName, "Super Ultrawide")
         let two = StarterSetup.standardLayout(
             sizes: [screen27, laptop]
         )
-        #expect(two.starterTitle?.profileName == "Widescreen + 1")
+        expectEqual(two.starterTitle?.profileName, "Widescreen + 1")
         let names = ScreenClass.allCases.map(StarterTitle.name(of:))
-        #expect(Set(names).count == ScreenClass.allCases.count)
+        expectEqual(Set(names).count, ScreenClass.allCases.count)
         #expect(!names.contains(StarterSetup.name))
         // Every shipped preset carries no title.
         #expect(

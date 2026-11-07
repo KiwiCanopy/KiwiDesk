@@ -50,8 +50,8 @@ struct OverlayPanelReleaseTests {
             )
             return overlay
         }
-        #expect(result.shown == 1)
-        #expect(result.left == 0)
+        expectEqual(result.shown, 1)
+        expectEqual(result.left, 0)
     }
 
     @Test("a sticky mark")
@@ -63,7 +63,7 @@ struct OverlayPanelReleaseTests {
             )
             return overlay
         }
-        #expect(result.shown == 1)
-        #expect(result.left == 0)
+        expectEqual(result.shown, 1)
+        expectEqual(result.left, 0)
     }
 }

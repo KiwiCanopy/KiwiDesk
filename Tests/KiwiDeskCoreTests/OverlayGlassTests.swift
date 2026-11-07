@@ -43,13 +43,13 @@ struct OverlayGlassTests {
             "the colour tinted the glass"
         )
         let ink = try #require(plate.symbol.contentTintColor)
-        #expect(ink == NSColor(kiwiHex: "#E0892BB3"))
+        expectEqual(ink, NSColor(kiwiHex: "#E0892BB3"))
         plate.setGlass(false)
         #expect(!plate.hud.isHidden)
         #expect(glass.isHidden)
         #expect(plate.tint.isHiddenOrHasHiddenAncestor)
         #expect(plate.content.superview === plate)
-        #expect(plate.symbol.contentTintColor == ink)
+        expectEqual(plate.symbol.contentTintColor, ink)
     }
 
     /// No colour is clear glass, not a tint of the empty string.
@@ -59,7 +59,7 @@ struct OverlayGlassTests {
         let plate = StickyMarkPlate()
         plate.setMarkColor("")
         plate.setGlass(true)
-        #expect(plate.glass?.isHidden == false)
+        expectEqual(plate.glass?.isHidden, false)
         #expect(plate.tint.gradient?.colors == nil)
     }
 
@@ -70,7 +70,7 @@ struct OverlayGlassTests {
         #expect(!LiquidGlassGate.rendered(glass: true))
         #expect(!LiquidGlassGate.rendered(glass: false))
         LiquidGlassGate.override = { false }
-        #expect(LiquidGlassGate.rendered(glass: true) == Self.drawsGlass)
+        expectEqual(LiquidGlassGate.rendered(glass: true), Self.drawsGlass)
     }
 
     @Test("The Lua setters write their leaves")
@@ -83,8 +83,8 @@ struct OverlayGlassTests {
         for on in [false, true] {
             core.execute("drag.set_liquid_glass", args: [.bool(on)])
             core.execute("sticky.set_liquid_glass", args: [.bool(on)])
-            #expect(core.tiler.settings.dragLiquidGlass == on)
-            #expect(core.tiler.settings.stickyStyle.liquidGlass == on)
+            expectEqual(core.tiler.settings.dragLiquidGlass, on)
+            expectEqual(core.tiler.settings.stickyStyle.liquidGlass, on)
         }
     }
 }

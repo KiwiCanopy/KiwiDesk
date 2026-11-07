@@ -93,8 +93,8 @@ struct GlyphSizeSpaceBarTests {
         let view = try #require(overlay.itemViews.first)
         view.layoutSubtreeIfNeeded()
         let cell = SpaceBarItemView.cell(contentDepth: Self.content)
-        #expect(cell == Self.content - 2 * SpaceBarItemView.pad)
-        #expect(view.frame.height == Self.depth)
+        expectEqual(cell, Self.content - 2 * SpaceBarItemView.pad)
+        expectEqual(view.frame.height, Self.depth)
         #expect(
             view.frame.width
                 == SpaceBarItemView.autoLength(
@@ -105,7 +105,7 @@ struct GlyphSizeSpaceBarTests {
                 )
         )
         for glyph in view.appViews {
-            #expect(glyph.frame.size == CGSize(width: cell, height: cell))
+            expectEqual(glyph.frame.size, CGSize(width: cell, height: cell))
             #expect(abs(glyph.frame.midY - Self.depth / 2) <= 0.5)
         }
     }
@@ -140,7 +140,7 @@ struct GlyphSizeSpaceBarTests {
         full.layoutSubtreeIfNeeded()
         empty.layoutSubtreeIfNeeded()
         #expect(empty.frame.width < Self.depth)
-        #expect(empty.cornerRadius == full.cornerRadius)
+        expectEqual(empty.cornerRadius, full.cornerRadius)
         #expect(
             full.cornerRadius
                 == Self.look().resolvedCornerRadius(forThickness: Self.depth)
@@ -159,9 +159,9 @@ struct GlyphSizeSpaceBarTests {
         let empty = overlay.itemViews[1]
         empty.layoutSubtreeIfNeeded()
         #expect(empty.frame.width < Self.depth)
-        #expect(empty.cornerRadius == empty.frame.width / 2)
+        expectEqual(empty.cornerRadius, empty.frame.width / 2)
         // What the layers draw, not only the computed value.
-        #expect(empty.layer?.cornerRadius == empty.frame.width / 2)
+        expectEqual(empty.layer?.cornerRadius, empty.frame.width / 2)
         #expect(
             empty.accentClip.layer?.cornerRadius
                 == empty.frame.width / 2
@@ -184,7 +184,7 @@ struct GlyphSizeSpaceBarTests {
         let look = Self.look()
         let size = look.identifierFontSize(forContentDepth: Self.content)
         #expect(size < look.identifierFontSize(forContentDepth: Self.depth))
-        #expect(view.identifierLabel.font?.pointSize == size)
+        expectEqual(view.identifierLabel.font?.pointSize, size)
     }
 
     @Test("The front-app segment draws at the content depth")
@@ -210,7 +210,7 @@ struct GlyphSizeSpaceBarTests {
         let manager = SpaceBarManager()
         let overlay = try overlay(Self.bar(boxed: true), in: manager)
         #expect(!overlay.frontBox.isHidden)
-        #expect(overlay.frontBox.frame.height == Self.depth)
+        expectEqual(overlay.frontBox.frame.height, Self.depth)
     }
 
     @Test("The overflow count's automatic size follows the content")

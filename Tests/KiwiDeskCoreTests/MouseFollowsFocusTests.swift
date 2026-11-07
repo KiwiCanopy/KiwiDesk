@@ -120,7 +120,7 @@ struct MouseFollowsFocusTests {
             frame: frame,
             cursor: CGPoint(x: 0, y: 0)
         )
-        #expect(target == CGPoint(x: 300, y: 350))
+        expectEqual(target, CGPoint(x: 300, y: 350))
     }
 
     @Test("A cursor already inside the frame skips the warp")
@@ -145,7 +145,7 @@ struct MouseFollowsFocusTests {
     func unknownCursor() {
         let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         let target = MouseWarp.target(frame: frame, cursor: nil)
-        #expect(target == CGPoint(x: 50, y: 50))
+        expectEqual(target, CGPoint(x: 50, y: 50))
     }
 
     @Test("An empty frame never warps")

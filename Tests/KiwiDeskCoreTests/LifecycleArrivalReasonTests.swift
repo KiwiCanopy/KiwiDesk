@@ -64,7 +64,7 @@ struct LifecycleArrivalReasonTests {
         let (core, events, _) = makeCore(live: false)
         core.eventLoop.bootScan.stepBudget = .seconds(1)
         core.eventLoop.onEvent(.windowCreated(window(4)))
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(reasons(events()), [.string("existing")])
     }
 
     @Test("a deferred boot app's completion is existing")
@@ -86,7 +86,7 @@ struct LifecycleArrivalReasonTests {
     func deadRouteIsNew() {
         let (core, events, _) = makeCore(live: false)
         core.eventLoop.onEvent(.windowCreated(window(4)))
-        #expect(reasons(events()) == [.string("new")])
+        expectEqual(reasons(events()), [.string("new")])
     }
 
     @Test("a create seen before the arrival is new at once")
@@ -94,7 +94,7 @@ struct LifecycleArrivalReasonTests {
         let (core, events, _) = makeCore()
         core.windowServerChanged(.created, id: WindowID(4))
         core.eventLoop.onEvent(.windowCreated(window(4)))
-        #expect(reasons(events()) == [.string("new")])
+        expectEqual(reasons(events()), [.string("new")])
     }
 
     @Test("a create after the adoption is held, then new")
@@ -111,7 +111,7 @@ struct LifecycleArrivalReasonTests {
         let hop = core.deferred.task(for: .arrivalCreated)
         #expect(hop != nil)
         await hop?.value
-        #expect(reasons(events()) == [.string("new")])
+        expectEqual(reasons(events()), [.string("new")])
         #expect(core.arrivals.waiting.isEmpty)
         #expect(core.arrivals.landed.isEmpty)
     }
@@ -124,7 +124,7 @@ struct LifecycleArrivalReasonTests {
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(4), wasMinimized: false)
         )
-        #expect(reasons(events()) == [.string("new")])
+        expectEqual(reasons(events()), [.string("new")])
         #expect(
             events().map(\.0).filter { $0 != .focusChange }
                 .prefix(2) == [.windowCreated, .windowDestroyed]
@@ -144,16 +144,16 @@ struct LifecycleArrivalReasonTests {
             )
         }
         core.resolveExpiredArrivals()
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(reasons(events()), [.string("existing")])
         let timeouts = lines().filter {
             $0.contains("no WindowServer create within")
         }
-        #expect(timeouts.count == 1)
-        #expect(timeouts.first?.contains("app.test") == true)
-        #expect(timeouts.first?.contains("AX create: yes") == true)
+        expectEqual(timeouts.count, 1)
+        expectEqual(timeouts.first?.contains("app.test"), true)
+        expectEqual(timeouts.first?.contains("AX create: yes"), true)
         // A create past the bound changes nothing.
         core.windowServerChanged(.created, id: WindowID(4))
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(reasons(events()), [.string("existing")])
     }
 
     @Test("a create past the bound, before the timer, is existing")
@@ -170,7 +170,7 @@ struct LifecycleArrivalReasonTests {
         // Settled on the hop, off the WindowServer drain.
         #expect(reasons(events()).isEmpty)
         await core.deferred.task(for: .arrivalCreated)?.value
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(reasons(events()), [.string("existing")])
         #expect(lines().contains { $0.contains("AX create: no") })
     }
 
@@ -202,7 +202,7 @@ struct LifecycleArrivalReasonTests {
         core.eventLoop.onEvent(
             .windowCreated(window(4, pid: getpid()))
         )
-        #expect(reasons(events()) == [.string("new")])
+        expectEqual(reasons(events()), [.string("new")])
         #expect(core.arrivals.waiting.isEmpty)
     }
 
@@ -213,7 +213,7 @@ struct LifecycleArrivalReasonTests {
         core.eventLoop.onEvent(.windowCreated(window(4)))
         core.state.apply(.windowFocused(WindowID(4)))
         core.execute("pocket")
-        #expect(core.state.pocketPhase(of: WindowID(4)) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: WindowID(4)), .pocketed)
         core.eventLoop.onEvent(.windowHidden(WindowID(4)))
         core.eventLoop.onEvent(.windowCreated(window(4)))
         #expect(
@@ -231,8 +231,8 @@ struct LifecycleArrivalReasonTests {
         let kinds = events().map(\.0).filter {
             $0 == .windowCreated || $0 == .windowDestroyed
         }
-        #expect(kinds == [.windowCreated, .windowDestroyed])
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(kinds, [.windowCreated, .windowDestroyed])
+        expectEqual(reasons(events()), [.string("existing")])
         guard case .object(let created)? = events().first?.1 else {
             Issue.record("expected window_created first")
             return
@@ -251,7 +251,7 @@ struct LifecycleArrivalReasonTests {
         )
         // The re-key emits nothing of its own; the old id's create
         // is sent at it, never later at the bound.
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(reasons(events()), [.string("existing")])
         #expect(core.arrivals.waiting.isEmpty)
     }
 
@@ -260,7 +260,7 @@ struct LifecycleArrivalReasonTests {
         let (core, events, _) = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(4)))
         core.eventLoop.onEvent(.appTerminated(pid: 900_007))
-        #expect(reasons(events()) == [.string("existing")])
+        expectEqual(reasons(events()), [.string("existing")])
         guard case .object(let created)? = events().first?.1 else {
             Issue.record("expected window_created")
             return
@@ -291,7 +291,7 @@ struct LifecycleArrivalReasonTests {
         core.eventLoop.arrivingFromAXCreate = true
         core.eventLoop.onEvent(.windowCreated(window(4)))
         core.eventLoop.arrivingFromAXCreate = false
-        #expect(reasons(events()) == [.string("new")])
+        expectEqual(reasons(events()), [.string("new")])
     }
 
     @Test("a stop drops a held create")

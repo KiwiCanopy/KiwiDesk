@@ -16,8 +16,8 @@ struct RunningCopyTests {
                 + "ABC/d/KiwiDesk.app"
         )
         let bare = URL(fileURLWithPath: "/Users/me/.build/release")
-        #expect(RunningCopy.location(of: app) == .bundled)
-        #expect(RunningCopy.location(of: translocated) == .translocated)
-        #expect(RunningCopy.location(of: bare) == .bare)
+        expectEqual(RunningCopy.location(of: app), .bundled)
+        expectEqual(RunningCopy.location(of: translocated), .translocated)
+        expectEqual(RunningCopy.location(of: bare), .bare)
     }
 }

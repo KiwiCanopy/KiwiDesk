@@ -91,7 +91,7 @@ struct PlacementDisplacementTests {
         let (target, other) = makeFixture(core)
         core.tiler.placements.noteDisplaced(target, frame: onscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     @Test("A displacement past the window is honored")
@@ -103,7 +103,7 @@ struct PlacementDisplacementTests {
             PlacementLedger.echoWindow + 0.1
         }
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     /// The pan that follows a step re-places the window it left;
@@ -115,7 +115,7 @@ struct PlacementDisplacementTests {
         core.tiler.placements.noteDisplaced(target, frame: onscreen)
         core.tiler.placements.stamp(target, target: onscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     @Test("A click on the displaced window escapes")
@@ -125,7 +125,7 @@ struct PlacementDisplacementTests {
         core.tiler.placements.noteDisplaced(target, frame: onscreen)
         core.lastLeftClick = (core.wallClock(), CGPoint(x: 10, y: 10), target)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     /// The wiring: the focus command records the window it left.

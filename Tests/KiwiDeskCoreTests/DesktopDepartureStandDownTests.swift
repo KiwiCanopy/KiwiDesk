@@ -132,8 +132,8 @@ struct DesktopDepartureStandDownTests {
         core.onLog = { log.append($0) }
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         let decision = log.first { $0.contains("close-return: removed") }
-        #expect(decision?.contains("departed=true") == true)
-        #expect(decision?.contains("standsDown=true") == true)
+        expectEqual(decision?.contains("departed=true"), true)
+        expectEqual(decision?.contains("standsDown=true"), true)
     }
 
     /// The same vanish after a move verb recorded it is the
@@ -148,8 +148,8 @@ struct DesktopDepartureStandDownTests {
         core.onLog = { log.append($0) }
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         let decision = log.first { $0.contains("close-return: removed") }
-        #expect(decision?.contains("departed=false") == true)
-        #expect(decision?.contains("standsDown=false") == true)
+        expectEqual(decision?.contains("departed=false"), true)
+        expectEqual(decision?.contains("standsDown=false"), true)
     }
 
     /// The fold's focus loss reads the slot, so a window beside a
@@ -172,15 +172,15 @@ struct DesktopDepartureStandDownTests {
         )
         core.state.workspaces.add(traveler, to: SpaceID("2"))
         core.state.workspaces.focus(traveler, in: SpaceID("2"))
-        #expect(core.focusedWindowID == traveler)
+        expectEqual(core.focusedWindowID, traveler)
         core.recordDesktopMoveDeparture(WindowID(1), targetIsCurrent: false)
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         let decision = log.first { $0.contains("close-return: removed") }
-        #expect(decision?.contains("departed=false") == true)
-        #expect(decision?.contains("standsDown=true") == true)
-        #expect(core.focusedWindowID == traveler)
+        expectEqual(decision?.contains("departed=false"), true)
+        expectEqual(decision?.contains("standsDown=true"), true)
+        expectEqual(core.focusedWindowID, traveler)
     }
 
     /// An earlier window of a burst hands the next one the focus
@@ -211,7 +211,7 @@ struct DesktopDepartureStandDownTests {
             .windowDestroyed(inherited ?? WindowID(2), wasMinimized: false)
         )
         let decision = log.first { $0.contains("close-return: removed") }
-        #expect(decision?.contains("standsDown=false") == true)
+        expectEqual(decision?.contains("standsDown=false"), true)
     }
 
     /// A window hosted nowhere is a close: the raise proceeds.
@@ -224,7 +224,7 @@ struct DesktopDepartureStandDownTests {
         core.onLog = { log.append($0) }
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         let decision = log.first { $0.contains("close-return: removed") }
-        #expect(decision?.contains("departed=false") == true)
-        #expect(decision?.contains("standsDown=false") == true)
+        expectEqual(decision?.contains("departed=false"), true)
+        expectEqual(decision?.contains("standsDown=false"), true)
     }
 }

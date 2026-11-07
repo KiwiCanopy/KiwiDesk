@@ -56,8 +56,8 @@ struct DelayedCloseLetOutTests {
         fx.keySuccessor(core, follow: false)
         #expect(core.delayedCloseDebt == nil)
         fx.confirmClose(core)
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(core.activeSpace?.focused == fx.successor)
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(core.activeSpace?.focused, fx.successor)
         #expect(!log.has("close-return: raising"))
         #expect(!log.has("confirmed late"))
     }

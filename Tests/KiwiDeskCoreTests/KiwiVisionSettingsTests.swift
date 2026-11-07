@@ -44,7 +44,7 @@ struct KiwiVisionSettingsTests {
     func defaults() {
         withTransparency(reduced: false) {
             let request = makeCore().visionRequest()
-            #expect(request.dim == 0.6)
+            expectEqual(request.dim, 0.6)
             #expect(request.blur)
         }
     }
@@ -59,7 +59,7 @@ struct KiwiVisionSettingsTests {
                     args: [.number(percent)]
                 ).isSuccess
             )
-            #expect(core.visionRequest().dim == CGFloat(dim))
+            expectEqual(core.visionRequest().dim, CGFloat(dim))
         }
         for bad: JSONValue in [.number(-1), .number(101), .bool(true)] {
             #expect(
@@ -67,7 +67,7 @@ struct KiwiVisionSettingsTests {
                     .isSuccess
             )
         }
-        #expect(core.visionRequest().dim == 1)
+        expectEqual(core.visionRequest().dim, 1)
     }
 
     @Test("set_blur switches the blur the request carries")
@@ -95,7 +95,7 @@ struct KiwiVisionSettingsTests {
             _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
             _ = core.execute("kiwivision.set_dim", args: [.number(50)])
             #expect(!core.visionRequest().blur)
-            #expect(core.visionRequest().dim == 0.5)
+            expectEqual(core.visionRequest().dim, 0.5)
         }
     }
 
@@ -121,10 +121,10 @@ struct KiwiVisionSettingsTests {
             core.noteVisionStandDown([])
             core.updateVision()
             try #require(!core.vision.plates.isEmpty)
-            #expect(plate.blur == true)
+            expectEqual(plate.blur, true)
             LiquidGlassGate.override = { true }
             core.reduceTransparencyDidChange()
-            #expect(plate.blur == false)
+            expectEqual(plate.blur, false)
         }
     }
 
@@ -133,13 +133,13 @@ struct KiwiVisionSettingsTests {
         let blur = VisionVeil.makeBlur()
         if #available(macOS 26.0, *) {
             let glass = try #require(blur as? NSGlassEffectView)
-            #expect(glass.style == .clear)
-            #expect(glass.cornerRadius == 0)
-            #expect(glass.appearance?.name == .darkAqua)
+            expectEqual(glass.style, .clear)
+            expectEqual(glass.cornerRadius, 0)
+            expectEqual(glass.appearance?.name, .darkAqua)
         } else {
             let hud = try #require(blur as? NSVisualEffectView)
-            #expect(hud.material == .hudWindow)
-            #expect(hud.blendingMode == .behindWindow)
+            expectEqual(hud.material, .hudWindow)
+            expectEqual(hud.blendingMode, .behindWindow)
         }
     }
 
@@ -148,11 +148,11 @@ struct KiwiVisionSettingsTests {
         let plate = AppKitVisionPlate()
         let frame = CGRect(x: 0, y: 0, width: 300, height: 200)
         plate.update(frame: frame, dim: 0.6, blur: false)
-        #expect(plate.blurShown == false)
+        expectEqual(plate.blurShown, false)
         plate.update(frame: frame, dim: 0.6, blur: true)
-        #expect(plate.blurShown == true)
+        expectEqual(plate.blurShown, true)
         #expect(plate.dimAboveBlur)
         plate.update(frame: frame, dim: 0.6, blur: false)
-        #expect(plate.blurShown == false)
+        expectEqual(plate.blurShown, false)
     }
 }

@@ -52,7 +52,7 @@ struct SessionRatioTests {
                 .splitRatioH == 0.5
             )
         }
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
+        expectEqual(core.tiler.settings.bsp.splitRatioH, 0.5)
     }
 
     @Test("A real mode change reseeds; a same-mode set keeps")
@@ -255,7 +255,7 @@ struct SessionRatioTests {
     @Test("SessionRatios carries exactly the mirrored fields")
     func fieldCountPinsTheMirrors() {
         let mirror = Mirror(reflecting: SessionRatios())
-        #expect(mirror.children.count == 6)
+        expectEqual(mirror.children.count, 6)
     }
 
     @Test("Scrolling slot resize stays per-space too")
@@ -293,6 +293,6 @@ struct SessionRatioTests {
         let session =
             core.sessionRatios(of: SpaceID("1"))
         #expect(session.splitRatioH != nil)
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
+        expectEqual(core.tiler.settings.bsp.splitRatioH, 0.5)
     }
 }

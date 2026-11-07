@@ -28,13 +28,13 @@ struct SettleWorkShareTests {
             meter.add(\.parksIssued)
         }
         let c = meter.snapshot(reset: false).counts
-        #expect(c.parksIssued == 4)
+        expectEqual(c.parksIssued, 4)
         #expect(c.settleParksIssued == 3, "an inner scope ended the outer")
-        #expect(c.settlePasses == 3)
-        #expect(c.settleFramesIssued == 1)
-        #expect(c.settleParksSkipped == 1)
-        #expect(c.framesSkipped == 1)
-        #expect(c.settleFramesSkipped == 0)
+        expectEqual(c.settlePasses, 3)
+        expectEqual(c.settleFramesIssued, 1)
+        expectEqual(c.settleParksSkipped, 1)
+        expectEqual(c.framesSkipped, 1)
+        expectEqual(c.settleFramesSkipped, 0)
     }
 
     /// One window in Space 1, one in Space 2, Space 1 shown.
@@ -68,8 +68,8 @@ struct SettleWorkShareTests {
         let (core, meter) = makeCore()
         core.execute("focus_space", args: [.string("2")])
         let switched = meter.snapshot(reset: false).counts
-        #expect(switched.settleParksIssued == 0)
-        #expect(switched.settleFramesIssued == 0)
+        expectEqual(switched.settleParksIssued, 0)
+        expectEqual(switched.settleFramesIssued, 0)
         let settle = core.deferred.task(for: .spaceSettle)
         #expect(settle != nil, "the switch scheduled no settle")
         await settle?.value
@@ -109,7 +109,7 @@ struct SettleWorkShareTests {
         for (n, (_, name)) in keys.enumerated() {
             #expect(r[name] == .number(Double(n + 1)), "\(name)")
         }
-        #expect(r["settle_passes"] == .number(1))
+        expectEqual(r["settle_passes"], .number(1))
     }
 
     /// A settle the motion gate holds issues nothing inside its
@@ -125,11 +125,11 @@ struct SettleWorkShareTests {
         core.tiler.motionGate.quiescence.sinceMouseMoved = { 0 }
         await core.deferred.task(for: .spaceSettle)?.value
         let c = meter.snapshot(reset: false).counts
-        #expect(c.settlePasses == 1)
-        #expect(c.settlePassesHeld == 1)
-        #expect(c.settlePassesMerged == 0)
-        #expect(c.settleParksIssued == 0)
-        #expect(c.parksIssued == switched.parksIssued)
+        expectEqual(c.settlePasses, 1)
+        expectEqual(c.settlePassesHeld, 1)
+        expectEqual(c.settlePassesMerged, 0)
+        expectEqual(c.settleParksIssued, 0)
+        expectEqual(c.parksIssued, switched.parksIssued)
     }
 
     /// A settle that pays a held debt runs that debt's work too, so
@@ -146,9 +146,9 @@ struct SettleWorkShareTests {
         quiet.sinceMouseMoved = { .infinity }
         await core.deferred.task(for: .spaceSettle)?.value
         let c = meter.snapshot(reset: false).counts
-        #expect(c.passesHeld == 1)
-        #expect(c.settlePassesHeld == 0)
-        #expect(c.settlePassesMerged == 1)
+        expectEqual(c.passesHeld, 1)
+        expectEqual(c.settlePassesHeld, 0)
+        expectEqual(c.settlePassesMerged, 1)
         #expect(core.tiler.motionGate.owed == nil)
     }
 }

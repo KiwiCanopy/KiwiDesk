@@ -34,8 +34,8 @@ struct StarterLeadTests {
         let modes = StarterAllocation.modes(
             sizes: [laptop, screen27]
         )
-        #expect(modes[0] == [.monocle, .scrolling])
-        #expect(modes[1] == [.scrolling, .grid, .floating])
+        expectEqual(modes[0], [.monocle, .scrolling])
+        expectEqual(modes[1], [.scrolling, .grid, .floating])
     }
 
     @Test("a solo screen leads Scrolling, whatever its size")
@@ -80,8 +80,8 @@ struct StarterLeadTests {
         let modes = StarterAllocation.modes(
             sizes: [screen27, screen27]
         )
-        #expect(modes[0].first == .scrolling)
-        #expect(modes[1].first == .monocle)
+        expectEqual(modes[0].first, .scrolling)
+        expectEqual(modes[1].first, .monocle)
     }
 
     @Test("the smallest screen leads Monocle even when wide")
@@ -97,7 +97,7 @@ struct StarterLeadTests {
         let modes = StarterAllocation.modes(
             sizes: [bigDesk, screen27]
         )
-        #expect(modes[1].first == .monocle)
+        expectEqual(modes[1].first, .monocle)
         #expect(!ScreenClass.of(screen27).layouts.contains(.monocle))
     }
 
@@ -122,7 +122,7 @@ struct StarterLeadTests {
         ]
         for sizes in fixtures {
             let modes = StarterAllocation.modes(sizes: sizes)
-            #expect(modes.count == sizes.count)
+            expectEqual(modes.count, sizes.count)
             #expect(modes.allSatisfy { !$0.isEmpty })
             for block in modes {
                 // Adjacency is the whole assertion, and that is a

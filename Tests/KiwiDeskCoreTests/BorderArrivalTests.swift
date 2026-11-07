@@ -84,12 +84,12 @@ struct BorderArrivalTests {
         let border = manager(clock)
         defer { border.clear() }
         let panel = try heldRing(border)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         #expect(panel.isOrderedIn)
         report(border, corner)
         #expect(panel.panelAlpha == 0, "a report off target is no arrival")
         report(border, rest.offsetBy(dx: 2, dy: -3))
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
         #expect(border.arrival == nil)
     }
 
@@ -119,9 +119,9 @@ struct BorderArrivalTests {
         let panel = try #require(ring.backend as? AppKitBorderOverlay)
         report(border, corner)
         clock.commanded = nil
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         report(border, rest)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 
     @Test("a window that never reports gets its ring at the cap")
@@ -131,9 +131,9 @@ struct BorderArrivalTests {
         defer { border.clear() }
         let panel = try heldRing(border)
         clock.advance(to: 100 + BorderManager.arrivalCap / 2)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         clock.advance(to: 100 + BorderManager.arrivalCap)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 
     @Test("an arrived window waits for the plates to lift")
@@ -144,13 +144,13 @@ struct BorderArrivalTests {
         clock.lift = 100.4
         let panel = try heldRing(border) { clock.lift }
         report(border, rest)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         // A burst press moves the lift later before it comes.
         clock.lift = 100.6
         clock.advance(to: 100.4)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         clock.advance(to: 100.6)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 
     /// The switch's own raise fires a reorder and an unhide; the
@@ -171,7 +171,7 @@ struct BorderArrivalTests {
         defer { border.clear() }
         let panel = try heldRing(border)
         border.watch.handle(kind, window: WindowID(1))
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
         #expect(panel.isOrderedIn)
     }
 
@@ -187,7 +187,7 @@ struct BorderArrivalTests {
             source: .animationTick,
             pin: nil
         )
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.panelAlpha, 0)
     }
 
     @Test("a ring already showing is never held")
@@ -200,7 +200,7 @@ struct BorderArrivalTests {
         border.sync([spec()])
         let ring = try #require(border.overlays[WindowID(1)])
         let panel = try #require(ring.backend as? AppKitBorderOverlay)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
         #expect(border.arrival == nil)
     }
 
@@ -217,10 +217,10 @@ struct BorderArrivalTests {
         let ordered = panel.appKitOrders
         border.sync([spec()], alive: nil, reassertOrder: false)
         border.sync([spec()], alive: nil, reassertOrder: false)
-        #expect(panel.appKitOrders == ordered)
-        #expect(panel.panelAlpha == 0)
+        expectEqual(panel.appKitOrders, ordered)
+        expectEqual(panel.panelAlpha, 0)
         #expect(border.arrival != nil)
         clock.advance(to: 100 + BorderManager.arrivalCap)
-        #expect(panel.panelAlpha == 1)
+        expectEqual(panel.panelAlpha, 1)
     }
 }

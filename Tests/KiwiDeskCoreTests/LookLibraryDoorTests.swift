@@ -15,9 +15,9 @@ struct LookLibraryDoorTests {
         var settings = TilingSettings()
         settings.kiwishelf.fillColor = "#123456"
         let look = try core.saveLook(named: "Mine", from: settings)
-        #expect(look.colors == ColorPaletteKeys.extract(from: settings))
+        expectEqual(look.colors, ColorPaletteKeys.extract(from: settings))
         #expect(core.paletteLibrary.userPalettes().isEmpty)
-        #expect(core.lookLibrary.userLooks() == [look])
+        expectEqual(core.lookLibrary.userLooks(), [look])
     }
 
     @Test("a look is renamed and deleted through the door")
@@ -25,7 +25,7 @@ struct LookLibraryDoorTests {
         let core = makeTestCore()
         _ = try core.saveLook(named: "Mine", from: TilingSettings())
         try core.renameLook(from: "Mine", to: "Ours")
-        #expect(core.lookLibrary.userLooks().map(\.name) == ["Ours"])
+        expectEqual(core.lookLibrary.userLooks().map(\.name), ["Ours"])
         try core.deleteLook("Ours")
         #expect(core.lookLibrary.userLooks().isEmpty)
     }
@@ -42,7 +42,7 @@ struct LookLibraryDoorTests {
         let settings = TilingSettings()
         let look = try core.saveLook(named: "Look", from: settings)
         try core.renamePalette(from: "Mine", to: "Ours")
-        #expect(core.lookLibrary.userLooks() == [look])
+        expectEqual(core.lookLibrary.userLooks(), [look])
         #expect(core.paletteLibrary.hasUserPalette("Ours"))
     }
 
@@ -60,8 +60,8 @@ struct LookLibraryDoorTests {
             )
         )
         let look = try core.importLook(from: url, fallbackName: "My Look")
-        #expect(look.name == "Mine 2")
-        #expect(look.colors["kiwishelf.fill_color"] == "#123456")
+        expectEqual(look.name, "Mine 2")
+        expectEqual(look.colors["kiwishelf.fill_color"], "#123456")
         #expect(core.paletteLibrary.userPalettes().isEmpty)
     }
 

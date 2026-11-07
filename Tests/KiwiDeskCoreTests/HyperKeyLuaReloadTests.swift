@@ -64,7 +64,7 @@ struct HyperKeyLuaReloadTests {
         )
         core.loadConfig()
         #expect(!core.isGuiManaged)
-        #expect(core.appWide.hyperKey == .capsLock)
+        expectEqual(core.appWide.hyperKey, .capsLock)
         #expect(!host.mapping.isEmpty)
         try managed.write(
             to: core.configURL,

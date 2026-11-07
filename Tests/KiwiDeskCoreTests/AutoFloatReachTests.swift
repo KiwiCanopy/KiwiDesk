@@ -50,7 +50,7 @@ struct AutoFloatReachTests {
                 == [Self.steam]
         )
         #expect(try core.profiles.read(name: "Home").tileRules == nil)
-        #expect(core.guiConfigStore.load()?.tileRules.isEmpty == true)
+        expectEqual(core.guiConfigStore.load()?.tileRules.isEmpty, true)
     }
 
     @Test("a shared Tile rule and switch move the base")
@@ -71,7 +71,7 @@ struct AutoFloatReachTests {
         )
         try core.saveRuleReach(snapshot)
         let sidecar = try #require(core.guiConfigStore.load())
-        #expect(sidecar.tileRules == [Self.steam])
+        expectEqual(sidecar.tileRules, [Self.steam])
         #expect(!sidecar.floatAutomatically)
         #expect(!core.eventLoop.floatRules.guess.enabled)
     }
@@ -91,7 +91,7 @@ struct AutoFloatReachTests {
             try core.profiles.read(name: "Work").floatAutomatically == false
         )
         #expect(try core.profiles.read(name: "Home").floatAutomatically == nil)
-        #expect(core.guiConfigStore.load()?.floatAutomatically == true)
+        expectEqual(core.guiConfigStore.load()?.floatAutomatically, true)
     }
 
     @Test("a stored page resolves both and diffs them back")
@@ -102,7 +102,7 @@ struct AutoFloatReachTests {
         work.floatAutomatically = false
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.tileRules == [Self.steam])
+        expectEqual(page.tileRules, [Self.steam])
         #expect(!page.floatAutomatically)
         page.tileRules = []
         page.floatAutomatically = true
@@ -130,6 +130,6 @@ struct AutoFloatReachTests {
         )
         let back = try core.profiles.read(name: "Work")
         #expect(back.tileRules == RuleListOverride(rules: [Self.steam: true]))
-        #expect(back.floatAutomatically == false)
+        expectEqual(back.floatAutomatically, false)
     }
 }

@@ -17,17 +17,17 @@ struct HoverFocusDelayTests {
             .appendingPathComponent("kiwidesk-delay-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         let mouse = { core.tiler.settings.mouse.hoverFocusDelayMS }
-        #expect(mouse() == MouseSettings.defaultHoverFocusDelayMS)
+        expectEqual(mouse(), MouseSettings.defaultHoverFocusDelayMS)
         #expect(
             core.execute("mouse.set_hover_focus_delay", args: [.number(50)])
                 .isSuccess
         )
-        #expect(mouse() == 50)
+        expectEqual(mouse(), 50)
         #expect(
             core.execute("mouse.set_hover_focus_delay", args: [.number(0)])
                 .isSuccess
         )
-        #expect(mouse() == 0)
+        expectEqual(mouse(), 0)
         #expect(
             !core.execute("mouse.set_hover_focus_delay", args: [.number(-1)])
                 .isSuccess
@@ -38,7 +38,7 @@ struct HoverFocusDelayTests {
                 args: [.string("fast")]
             ).isSuccess
         )
-        #expect(mouse() == 0)
+        expectEqual(mouse(), 0)
     }
 
     @Test("A stored delay decodes, missing is the default, negative is 0")
@@ -97,7 +97,7 @@ struct HoverFocusDelayTests {
         settings.hoverFocus = true
         settings.hoverFocusDelayMS = 75
         rest.apply(settings)
-        #expect(rest.dwell == .milliseconds(75))
+        expectEqual(rest.dwell, .milliseconds(75))
         #expect(rest.isEnabled)
         settings.hoverFocus = false
         rest.apply(settings)

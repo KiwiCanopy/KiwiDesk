@@ -40,7 +40,7 @@ struct AppBarAccessibilityTests {
     func itemIsAccessibleButton() {
         let view = makeView()
         #expect(view.isAccessibilityElement())
-        #expect(view.accessibilityRole() == .button)
+        expectEqual(view.accessibilityRole(), .button)
     }
 
     @Test("Internal drawing subviews stay silent to VoiceOver")
@@ -85,7 +85,7 @@ struct AppBarAccessibilityTests {
             text: "Safari",
             count: 1
         )
-        #expect(view.accessibilityLabel() == "Safari")
+        expectEqual(view.accessibilityLabel(), "Safari")
     }
 
     @Test("Empty title falls back to app name announcement")
@@ -95,7 +95,7 @@ struct AppBarAccessibilityTests {
             text: "",
             count: 1
         )
-        #expect(view.accessibilityLabel() == "Terminal")
+        expectEqual(view.accessibilityLabel(), "Terminal")
     }
 
     @Test("Collapsed group announces app and window count")
@@ -105,6 +105,6 @@ struct AppBarAccessibilityTests {
             text: "Safari",
             count: 3
         )
-        #expect(view.accessibilityLabel() == "Safari, windows: 3")
+        expectEqual(view.accessibilityLabel(), "Safari, windows: 3")
     }
 }

@@ -31,7 +31,7 @@ struct ProfileIDTests {
     @Test("A legacy id is the name's, the same everywhere, and no name")
     func legacyIsDeterministic() {
         let work = ProfileID.legacy(name: "Work")
-        #expect(work == ProfileID.legacy(name: "Work"))
+        expectEqual(work, ProfileID.legacy(name: "Work"))
         #expect(work != ProfileID.legacy(name: "Home"))
         #expect(UUID(uuidString: work.raw) != nil)
         #expect(work.raw != "Work")
@@ -64,7 +64,7 @@ struct ProfileIDTests {
         let root = try #require(
             JSONSerialization.jsonObject(with: migrated) as? [String: Any]
         )
-        #expect(root["id"] as? String == ProfileID.legacy(name: "Work").raw)
+        expectEqual(root["id"] as? String, ProfileID.legacy(name: "Work").raw)
         let bundle = Data(
             (#"{"format":28,"writtenBy":"t","palettes":[],"#
                 + #""profiles":[{"name":"A","monitor_sets":[]}]}"#)
@@ -75,7 +75,7 @@ struct ProfileIDTests {
             JSONSerialization.jsonObject(with: lifted) as? [String: Any]
         )
         let first = try #require((out["profiles"] as? [[String: Any]])?.first)
-        #expect(first["id"] as? String == ProfileID.legacy(name: "A").raw)
+        expectEqual(first["id"] as? String, ProfileID.legacy(name: "A").raw)
     }
 
     /// Every builder hands the door a fresh id; the file's own
@@ -85,7 +85,7 @@ struct ProfileIDTests {
         let profiles = manager()
         let first = try profiles.write(profile("Work"))
         let again = try profiles.write(profile("Work"))
-        #expect(again.id == first.id)
+        expectEqual(again.id, first.id)
         #expect(try profiles.read(name: "Work").id == first.id)
     }
 
@@ -97,8 +97,8 @@ struct ProfileIDTests {
         let work = try profiles.write(profile("Work"))
         let copy = try profiles.write(profile("Copy", id: work.id))
         #expect(copy.id != work.id)
-        #expect(profiles.profileName(withID: work.id) == "Work")
-        #expect(profiles.profileName(withID: copy.id) == "Copy")
+        expectEqual(profiles.profileName(withID: work.id), "Work")
+        expectEqual(profiles.profileName(withID: copy.id), "Copy")
     }
 
     @Test("A rename keeps the id")
@@ -107,7 +107,7 @@ struct ProfileIDTests {
         let work = try profiles.write(profile("Work"))
         try profiles.rename(from: "Work", to: "Office")
         #expect(try profiles.read(name: "Office").id == work.id)
-        #expect(profiles.profileName(withID: work.id) == "Office")
+        expectEqual(profiles.profileName(withID: work.id), "Office")
     }
 
     private func entry(
@@ -134,12 +134,12 @@ struct ProfileIDTests {
             entry("Backup", "Work", shared),
             entry("Work", "Work", shared),
         ])
-        #expect(index.holder(of: shared)?.file == "Work")
+        expectEqual(index.holder(of: shared)?.file, "Work")
         let tie = ProfileIndex([
             entry("B", "X", shared),
             entry("A", "Y", shared),
         ])
-        #expect(tie.holder(of: shared)?.file == "A")
+        expectEqual(tie.holder(of: shared)?.file, "A")
     }
 
     /// A file that will not decode still holds its id, read raw, so
@@ -153,8 +153,8 @@ struct ProfileIDTests {
         try Data(#"{"id":"\#(work.id.raw)","name":"Work"}"#.utf8)
             .write(to: url, options: .atomic)
         let holder = profiles.holder(of: work.id)
-        #expect(holder?.file == "Work")
-        #expect(holder?.readable == false)
+        expectEqual(holder?.file, "Work")
+        expectEqual(holder?.readable, false)
     }
 
     /// The doors update the index in place: a lookup after a write
@@ -165,7 +165,7 @@ struct ProfileIDTests {
         _ = profiles.currentIndex()
         let work = try profiles.write(profile("Work"))
         // Kept, not dropped: the next lookup reads no file.
-        #expect(profiles.idIndex?.index.holder(of: work.id)?.file == "Work")
+        expectEqual(profiles.idIndex?.index.holder(of: work.id)?.file, "Work")
         try profiles.rename(from: "Work", to: "Office")
         #expect(profiles.idIndex?.index.holder(of: work.id)?.file == "Office")
         try profiles.delete(name: "Office")

@@ -92,11 +92,11 @@ struct SpaceOverrideFieldCountTests {
     func partialCountsSetFields() {
         var grid = GridOverride()
         grid.columns = 3
-        #expect(grid.fieldCount == 1)
+        expectEqual(grid.fieldCount, 1)
         grid.rows = 2
-        #expect(grid.fieldCount == 2)
+        expectEqual(grid.fieldCount, 2)
         grid.autoSize = true
-        #expect(grid.fieldCount == 3)
+        expectEqual(grid.fieldCount, 3)
     }
 
     /// `fieldCapacity` (#678 8b, the `N of M set` denominator) is
@@ -158,6 +158,6 @@ struct SpaceOverrideFieldCountTests {
             LayoutMode.track.overrideFieldCapacity
                 == TrackOverride().fieldCapacity
         )
-        #expect(LayoutMode.floating.overrideFieldCapacity == 0)
+        expectEqual(LayoutMode.floating.overrideFieldCapacity, 0)
     }
 }

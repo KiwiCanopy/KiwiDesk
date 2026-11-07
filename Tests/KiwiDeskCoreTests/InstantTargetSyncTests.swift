@@ -95,7 +95,7 @@ struct InstantTargetStampTests {
         )
         #expect(core.tiler.recentInstantTarget(w1) == nil)
         core.tiler.setFrame(w1, target)
-        #expect(core.tiler.recentInstantTarget(w1) == target)
+        expectEqual(core.tiler.recentInstantTarget(w1), target)
         // The echo of our own set arrives: reality reported,
         // the stamp retires.
         core.tiler.echoGraceOverride = { _ in true }

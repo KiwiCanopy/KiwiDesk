@@ -143,7 +143,7 @@ struct DesktopSpaceRekeyTests {
         let core = makeAuthorityCore()
         core.lastDesktop = .number(1)
         _ = stampedSnapshotForTest(core)
-        #expect(core.lastDesktop == .identity(stamp))
+        expectEqual(core.lastDesktop, .identity(stamp))
     }
 
     /// And a `lastDesktop` this topology cannot name is left
@@ -155,7 +155,7 @@ struct DesktopSpaceRekeyTests {
         let absent = DesktopIdentity(raw: "STAMP-GONE-2")
         core.lastDesktop = .identity(absent)
         _ = stampedSnapshotForTest(core)
-        #expect(core.lastDesktop == .identity(absent))
+        expectEqual(core.lastDesktop, .identity(absent))
     }
 
     /// The settle outlives the reading that scheduled it, so it
@@ -178,7 +178,7 @@ struct DesktopSpaceRekeyTests {
         let scheduled = core.desktopMemory.lastDesktopSpace
         _ = stampedSnapshotForTest(core)
         // The key moved; what the settle compares did not.
-        #expect(core.lastDesktop == .identity(stamp))
-        #expect(core.desktopMemory.lastDesktopSpace == scheduled)
+        expectEqual(core.lastDesktop, .identity(stamp))
+        expectEqual(core.desktopMemory.lastDesktopSpace, scheduled)
     }
 }

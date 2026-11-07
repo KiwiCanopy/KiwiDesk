@@ -56,15 +56,15 @@ struct SpaceBarFrontAccentTests {
     func automaticFollowsText() throws {
         let o = try overlay()
         #expect(!o.frontAccentClip.isHidden)
-        #expect(o.frontAccentClip.frame == o.frontBox.frame)
-        #expect(stroke(o.frontAccent) == "#112233")
+        expectEqual(o.frontAccentClip.frame, o.frontBox.frame)
+        expectEqual(stroke(o.frontAccent), "#112233")
         #expect(o.frontAccent.layer?.borderWidth ?? 0 > 0)
     }
 
     @Test("A set colour draws as set")
     func setColourDraws() throws {
         let o = try overlay { $0.bar.focusedHighlightColor = "#AA0000" }
-        #expect(stroke(o.frontAccent) == "#AA0000")
+        expectEqual(stroke(o.frontAccent), "#AA0000")
     }
 
     @Test("The edge mark sits on the chip's window-facing side")
@@ -72,10 +72,10 @@ struct SpaceBarFrontAccentTests {
         let o = try overlay { $0.bar.activeIndicator = .edgeMark }
         let clip = o.frontAccentClip.bounds
         let mark = o.frontAccent.frame
-        #expect(o.frontAccent.layer?.borderWidth == 0)
-        #expect(mark.width == clip.width)
+        expectEqual(o.frontAccent.layer?.borderWidth, 0)
+        expectEqual(mark.width, clip.width)
         // A top bar's window-facing side is its bottom; flipped.
-        #expect(mark.maxY == clip.maxY)
+        expectEqual(mark.maxY, clip.maxY)
         #expect(mark.height < clip.height)
     }
 
@@ -121,7 +121,7 @@ struct SpaceBarFrontAccentTests {
     func setterTakesAutomatic() {
         var style = SpaceBarStyle()
         style.focusedItemColor = "#123456"
-        #expect(style.resolvedFocusedHighlightColor == "#123456")
+        expectEqual(style.resolvedFocusedHighlightColor, "#123456")
         let parsed = SpaceBarCommandSetting.parse(
             field: "focused_highlight_color",
             args: [.string("")]
@@ -132,7 +132,7 @@ struct SpaceBarFrontAccentTests {
         }
         style.focusedHighlightColor = "#FFFFFF"
         setting.apply(to: &style)
-        #expect(style.focusedHighlightColor == "")
+        expectEqual(style.focusedHighlightColor, "")
         guard
             case .failure = SpaceBarCommandSetting.parse(
                 field: "focused_highlight_color",
@@ -161,6 +161,6 @@ struct SpaceBarFrontAccentTests {
             name: "t",
             colors: ["space_bar.focused_highlight_color": ""]
         ).apply(to: &settings)
-        #expect(settings.spaceBarStyle.focusedHighlightColor == "")
+        expectEqual(settings.spaceBarStyle.focusedHighlightColor, "")
     }
 }

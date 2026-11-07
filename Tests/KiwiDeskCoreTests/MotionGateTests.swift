@@ -110,7 +110,7 @@ struct MotionGateTests {
         #expect(desk.gate.owed == nil)
         desk.stillFor = 10
         desk.poll()
-        #expect(desk.issued == sent)
+        expectEqual(desk.issued, sent)
     }
 
     @Test("A user call's late tail waits like ambient motion")
@@ -148,12 +148,12 @@ struct MotionGateTests {
         desk.stillFor = 0
         desk.core.retile(pass: .apply, sizing: .allSpringSized)
         desk.core.retile(pass: .event, sizing: .mayInstantSize)
-        #expect(desk.gate.owed?.pass == .apply)
-        #expect(desk.gate.owed?.sizing == .mayInstantSize)
+        expectEqual(desk.gate.owed?.pass, .apply)
+        expectEqual(desk.gate.owed?.sizing, .mayInstantSize)
         desk.gate.dropAll()
         desk.core.retile(sizing: .mayInstantSize)
         desk.core.retile(sizing: .allSpringSized)
-        #expect(desk.gate.owed?.sizing == .mayInstantSize)
+        expectEqual(desk.gate.owed?.sizing, .mayInstantSize)
     }
 
     /// The retile that pays a debt lays out what was owed: a held
@@ -193,7 +193,7 @@ struct MotionGateTests {
         desk.stillFor = 0
         desk.core.spaceSwitchRetile(asSwitch: false)
         #expect(desk.issued.isEmpty)
-        #expect(desk.gate.owed?.pass == .reissue)
+        expectEqual(desk.gate.owed?.pass, .reissue)
     }
 
     /// What was owed rides the admitted pass, so a weaker pass
@@ -219,8 +219,8 @@ struct MotionGateTests {
                 )
             )
         }
-        #expect(run?.pass == .apply)
-        #expect(run?.newlyCreatedWindow == WindowID(2))
+        expectEqual(run?.pass, .apply)
+        expectEqual(run?.newlyCreatedWindow, WindowID(2))
         #expect(desk.gate.owed == nil)
     }
 

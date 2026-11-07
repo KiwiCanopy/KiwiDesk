@@ -41,13 +41,13 @@ struct StashLeftPeekTests {
     )
     func fractionalWidthKeepsThePeek(screen: CGRect, width: CGFloat) {
         let park = leftPark(width: width, on: screen)
-        #expect(park.minX == park.minX.rounded())
+        expectEqual(park.minX, park.minX.rounded())
         for drawn in [width.rounded(.down), width.rounded(.up)] {
             let kept = peek(park, drawn: drawn, on: screen)
             #expect(kept >= TilingEngine.stashPeekX)
             #expect(kept < TilingEngine.stashPeekX + 2)
         }
-        #expect(park.width == width)
+        expectEqual(park.width, width)
     }
 
     @Test("A whole width parks exactly one peek in", arguments: screens)
@@ -66,7 +66,7 @@ struct StashLeftPeekTests {
             in: screen,
             corner: .bottomRight
         )
-        #expect(park.minX == screen.maxX - TilingEngine.stashPeekX)
+        expectEqual(park.minX, screen.maxX - TilingEngine.stashPeekX)
     }
 
     @Test(

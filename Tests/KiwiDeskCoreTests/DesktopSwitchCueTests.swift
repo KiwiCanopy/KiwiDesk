@@ -143,7 +143,7 @@ struct DesktopSwitchCueTests {
         )
         #expect(core.desktopCue.owed == nil)
         land(core, mainOn: 10)
-        #expect(shown.count == 1)
+        expectEqual(shown.count, 1)
     }
 
     @Test("a gesture switch owes nothing")
@@ -153,7 +153,7 @@ struct DesktopSwitchCueTests {
         var shown = 0
         core.desktopCue.onCue = { _ in shown += 1 }
         land(core, mainOn: 11)
-        #expect(shown == 0)
+        expectEqual(shown, 0)
     }
 
     @Test("switched off, the landing still settles the debt")
@@ -166,10 +166,10 @@ struct DesktopSwitchCueTests {
             core.execute("set_desktop_cue", args: [.bool(false)])
                 .isSuccess
         )
-        #expect(core.appWide.desktopCue == false)
+        expectEqual(core.appWide.desktopCue, false)
         core.execute("focus_desktop", args: [.number(2)])
         land(core, mainOn: 11)
-        #expect(shown == 0)
+        expectEqual(shown, 0)
         #expect(core.desktopCue.owed == nil)
         #expect(
             !core.execute("set_desktop_cue", args: [.string("no")])
@@ -188,7 +188,7 @@ struct DesktopSwitchCueTests {
             self.at.addingTimeInterval(DesktopCueLedger.bound + 0.1)
         }
         land(core, mainOn: 11)
-        #expect(shown == 0)
+        expectEqual(shown, 0)
         #expect(core.desktopCue.owed == nil)
     }
 
@@ -208,7 +208,7 @@ struct DesktopSwitchCueTests {
         }
         NativeSpaces.spacesOverride = shared
         let snapshot = NativeSpaces.desktopSnapshot()
-        #expect(core.cueDisplay("Main", in: snapshot) == DisplayID(1))
+        expectEqual(core.cueDisplay("Main", in: snapshot), DisplayID(1))
         // The control: with each screen's own Desktops, an
         // identifier no screen answers to names none.
         let split = authoritySnapshot(mainCurrent: 11)
@@ -237,7 +237,7 @@ struct DesktopSwitchCueTests {
         NativeSpaces.spacesOverride = shared(current: 11)
         NativeSpaces.activeSpaceIDOverride = 11
         core.handleDesktopChange()
-        #expect(shown.map(\.display) == [DisplayID(1)])
+        expectEqual(shown.map(\.display), [DisplayID(1)])
     }
 
     // MARK: - Stored shape
@@ -254,15 +254,15 @@ struct DesktopSwitchCueTests {
                 as? [String: Any]
         )
         let group = try #require(root["desktop"] as? [String: Any])
-        #expect(group["cue"] as? Bool == false)
+        expectEqual(group["cue"] as? Bool, false)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.desktopCue == false)
+        expectEqual(back.appWide?.desktopCue, false)
         var older = root
         older["desktop"] = nil
         let legacy = try JSONDecoder().decode(
             GuiConfig.self,
             from: JSONSerialization.data(withJSONObject: older)
         )
-        #expect(legacy.appWide?.desktopCue == true)
+        expectEqual(legacy.appWide?.desktopCue, true)
     }
 }

@@ -21,7 +21,7 @@ struct HeldWritesTests {
     @Test("a window nobody holds writes at once")
     func unheldPasses() {
         let held = HeldWrites()
-        #expect(held.stage(w, a, setSize: true, now: t0) == .pass)
+        expectEqual(held.stage(w, a, setSize: true, now: t0), .pass)
     }
 
     @Test("a held window stages, then folds later writes into it")
@@ -31,16 +31,16 @@ struct HeldWritesTests {
         #expect(
             held.stage(w, a, setSize: true, now: t0) == .staged(later(0.4))
         )
-        #expect(held.stage(w, b, setSize: false, now: t0) == .merged)
+        expectEqual(held.stage(w, b, setSize: false, now: t0), .merged)
         // Too early: the release waits.
-        #expect(held.release(w, now: later(0.1)) == .later(later(0.4)))
+        expectEqual(held.release(w, now: later(0.1)), .later(later(0.4)))
         #expect(
             held.release(w, now: later(0.4))
                 == .write(HeldWrites.Entry(frame: b, setSize: true))
         )
         // Once.
-        #expect(held.release(w, now: later(0.5)) == HeldWrites.Release.none)
-        #expect(held.stage(w, a, setSize: false, now: later(0.5)) == .pass)
+        expectEqual(held.release(w, now: later(0.5)), HeldWrites.Release.none)
+        expectEqual(held.stage(w, a, setSize: false, now: later(0.5)), .pass)
     }
 
     @Test("a burst holding the window again takes the later landing")
@@ -50,7 +50,7 @@ struct HeldWritesTests {
         _ = held.stage(w, a, setSize: false, now: t0)
         held.hold([w], until: later(0.7))
         held.hold([w], until: later(0.5))
-        #expect(held.release(w, now: later(0.4)) == .later(later(0.7)))
+        expectEqual(held.release(w, now: later(0.4)), .later(later(0.7)))
         #expect(held.isHeld(w, now: later(0.6)))
         #expect(!held.isHeld(w, now: later(0.7)))
     }
@@ -59,6 +59,6 @@ struct HeldWritesTests {
     func expiredHoldPasses() {
         let held = HeldWrites()
         held.hold([w], until: later(0.4))
-        #expect(held.stage(w, a, setSize: false, now: later(0.4)) == .pass)
+        expectEqual(held.stage(w, a, setSize: false, now: later(0.4)), .pass)
     }
 }

@@ -137,7 +137,7 @@ struct FloatGatherRepartitionTests {
             profile: profile("B", modes: ["1": .floating], settings: settings),
             cause: .reapply
         )
-        #expect(core.state.workspaces.space(of: Self.parked) == "1")
+        expectEqual(core.state.workspaces.space(of: Self.parked), "1")
         expectGathered(core)
         #expect(core.refiledWindows.isEmpty)
     }
@@ -170,7 +170,7 @@ struct FloatGatherRepartitionTests {
         // Back to A: its record puts them in `1`, which was drawn
         // floating all along.
         core.apply(profile: a, cause: .reapply)
-        #expect(core.state.workspaces.space(of: Self.parked) == "1")
+        expectEqual(core.state.workspaces.space(of: Self.parked), "1")
         expectGathered(core)
     }
 
@@ -184,9 +184,9 @@ struct FloatGatherRepartitionTests {
         let core = try #require(makeCore())
         core.state.workspaces.setMode("1", .floating)
         core.retile(pass: .apply)
-        #expect(core.drawnSpaceModes["1"] == .floating)
+        expectEqual(core.drawnSpaceModes["1"], .floating)
         core.pruneSpaces(keeping: ["1"], orderedBy: ["1"])
-        #expect(core.refiledWindows == Set(Self.members))
+        expectEqual(core.refiledWindows, Set(Self.members))
         core.retile(pass: .apply)
         expectGathered(core)
         #expect(core.refiledWindows.isEmpty)
@@ -205,7 +205,7 @@ struct FloatGatherRepartitionTests {
         core.retile(pass: .apply)
         core.execute("delete_space", args: [.string("2")])
         #expect(core.state.workspaces["2"] == nil)
-        #expect(core.state.workspaces.space(of: Self.parked) == "1")
+        expectEqual(core.state.workspaces.space(of: Self.parked), "1")
         expectGathered(core)
     }
 
@@ -234,7 +234,7 @@ struct FloatGatherRepartitionTests {
         core.state.workspaces.setMode("3", .bsp)
         core.retile(pass: .apply)
         core.pruneSpaces(keeping: ["1", "3"], orderedBy: ["3", "1"])
-        #expect(core.refiledWindows == Set(Self.members))
+        expectEqual(core.refiledWindows, Set(Self.members))
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
         #expect(core.tiler.stashOriginal(bystander) == nil)
@@ -285,8 +285,8 @@ struct FloatGatherRepartitionTests {
         // own record then moves the pair on to `2` — `1` was only
         // passed through.
         core.apply(profile: a, cause: .reapply)
-        #expect(core.state.workspaces.space(of: Self.parked) == "2")
-        #expect(core.state.workspaces.space(of: bystander) == "1")
+        expectEqual(core.state.workspaces.space(of: Self.parked), "2")
+        expectEqual(core.state.workspaces.space(of: bystander), "1")
         // Unshown `1` parks it and captures its own state frame,
         // which is not a gather.
         let capture = core.tiler.stashOriginal(bystander)

@@ -16,8 +16,8 @@ struct SyncPlanTests {
             folder: ["gui.json": "a", "looks.json": "m"],
             agreed: ["gui.json": "a", "looks.json": "l"]
         )
-        #expect(plan.push == ["gui.json"])
-        #expect(plan.pull == ["looks.json"])
+        expectEqual(plan.push, ["gui.json"])
+        expectEqual(plan.pull, ["looks.json"])
         #expect(plan.diverged.isEmpty)
     }
 
@@ -28,8 +28,8 @@ struct SyncPlanTests {
             folder: ["profiles/B.json": "b"],
             agreed: ["profiles/A.json": "a", "profiles/B.json": "b"]
         )
-        #expect(plan.removeFromFolder == ["profiles/B.json"])
-        #expect(plan.removeHere == ["profiles/A.json"])
+        expectEqual(plan.removeFromFolder, ["profiles/B.json"])
+        expectEqual(plan.removeHere, ["profiles/A.json"])
     }
 
     @Test("Equal sides copy nothing, whatever the agreement says")
@@ -39,7 +39,7 @@ struct SyncPlanTests {
             folder: ["gui.json": "x"],
             agreed: ["gui.json": "old"]
         )
-        #expect(plan == SyncPlan())
+        expectEqual(plan, SyncPlan())
     }
 
     @Test("A file both sides changed stops the whole pass")
@@ -49,7 +49,7 @@ struct SyncPlanTests {
             folder: ["gui.json": "c", "looks.json": "l"],
             agreed: ["gui.json": "a", "looks.json": "l"]
         )
-        #expect(plan.diverged == ["gui.json"])
+        expectEqual(plan.diverged, ["gui.json"])
         #expect(plan.copiesNothing)
     }
 
@@ -60,7 +60,7 @@ struct SyncPlanTests {
             folder: [:],
             agreed: nil
         )
-        #expect(plan.push == ["gui.json", "init.lua"])
+        expectEqual(plan.push, ["gui.json", "init.lua"])
     }
 
     @Test("With no agreement, differing sides diverge")
@@ -70,7 +70,7 @@ struct SyncPlanTests {
             folder: ["gui.json": "b"],
             agreed: nil
         )
-        #expect(plan.diverged == ["gui.json"])
+        expectEqual(plan.diverged, ["gui.json"])
         #expect(plan.copiesNothing)
     }
 }
@@ -110,7 +110,7 @@ struct SyncScanTests {
                 "profiles/Work.json",
             ]
         )
-        #expect(Set((SyncScan.hashes(in: root) ?? [:]).keys).count == 5)
+        expectEqual(Set((SyncScan.hashes(in: root) ?? [:]).keys).count, 5)
     }
 
     @Test("Each sync app's conflict copy is reported")

@@ -65,14 +65,14 @@ struct LogoutAutosaveFreezeTests {
         recovery.captureState = { desk([1, 2]) }
         recovery.autosave()
         let before = autosaved(in: dir)
-        #expect(before == [1, 2])
+        expectEqual(before, [1, 2])
         recovery.captureState = { full }
         recovery.autosave()
         recovery.freezeForLogout()
         recovery.captureState = { emptied }
         recovery.autosave()
         let after = autosaved(in: dir)
-        #expect(after == full.windows.map(\.id))
+        expectEqual(after, full.windows.map(\.id))
     }
 
     /// A cancelled logout posts nothing, so the freeze lifts past
@@ -94,7 +94,7 @@ struct LogoutAutosaveFreezeTests {
             recovery.autosave()
             let expected = (writes ? later : kept).windows.map(\.id)
             let read = autosaved(in: dir)
-            #expect(read == expected)
+            expectEqual(read, expected)
         }
     }
 
@@ -122,11 +122,11 @@ struct LogoutAutosaveFreezeTests {
             object: nil
         )
         let frozen = recovery.frozenAt
-        #expect(frozen == frozeAt)
+        expectEqual(frozen, frozeAt)
         recovery.captureState = { emptied }
         recovery.autosave()
         let read = autosaved(in: dir)
-        #expect(read == full.windows.map(\.id))
+        expectEqual(read, full.windows.map(\.id))
     }
 
     /// A logout ends in KiwiDesk's own clean stop, by when the
@@ -143,7 +143,7 @@ struct LogoutAutosaveFreezeTests {
         recovery.captureState = { desk([1]) }
         recovery.shutdownCleanly()
         let read = autosaved(in: dir)
-        #expect(read == full.windows.map(\.id))
+        expectEqual(read, full.windows.map(\.id))
     }
 
     /// The stop removes the observer from the center `start()`

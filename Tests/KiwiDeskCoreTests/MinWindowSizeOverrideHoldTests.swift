@@ -24,7 +24,7 @@ struct MinWindowSizeOverrideHoldTests {
         deskProfile.settings.gapsOverride[three] = .uniform(4)
         try core.profiles.write(deskProfile)
         core.execute("load_profile", args: [.string("desk")])
-        #expect(core.tiler.settings.minWindowSizeOverride[three] == 200)
+        expectEqual(core.tiler.settings.minWindowSizeOverride[three], 200)
         try core.profiles.write(
             desk.profile(
                 "pair",
@@ -33,7 +33,7 @@ struct MinWindowSizeOverrideHoldTests {
             )
         )
         core.execute("load_profile", args: [.string("pair")])
-        #expect(core.state.heldSpaces[three]?.name == three)
+        expectEqual(core.state.heldSpaces[three]?.name, three)
         try core.profiles.write(
             desk.profile(
                 "claim",
@@ -53,8 +53,8 @@ struct MinWindowSizeOverrideHoldTests {
         }
         core.execute("load_profile", args: [.string("desk")])
         #expect(core.state.heldSpaces.isEmpty)
-        #expect(desk.members(core, 3) == desk.ids([10, 11]))
-        #expect(core.tiler.settings.minWindowSizeOverride[three] == 200)
-        #expect(core.tiler.settings.gapsOverride[three] == .uniform(4))
+        expectEqual(desk.members(core, 3), desk.ids([10, 11]))
+        expectEqual(core.tiler.settings.minWindowSizeOverride[three], 200)
+        expectEqual(core.tiler.settings.gapsOverride[three], .uniform(4))
     }
 }

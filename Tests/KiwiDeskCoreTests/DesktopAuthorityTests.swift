@@ -23,18 +23,18 @@ struct DesktopAuthorityTests {
             mainCurrent: 10,
             secondaryCurrent: 20
         )
-        #expect(NativeSpaces.activeDesktopNumber() == 1)
+        expectEqual(NativeSpaces.activeDesktopNumber(), 1)
         // A secondary display's swipe moves the answer nowhere.
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
             secondaryCurrent: 21
         )
-        #expect(NativeSpaces.activeDesktopNumber() == 1)
+        expectEqual(NativeSpaces.activeDesktopNumber(), 1)
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 11,
             secondaryCurrent: 21
         )
-        #expect(NativeSpaces.activeDesktopNumber() == 2)
+        expectEqual(NativeSpaces.activeDesktopNumber(), 2)
     }
 
     @Test("An unresolvable main display falls back to the global read")
@@ -51,7 +51,7 @@ struct DesktopAuthorityTests {
             mainCurrent: 10,
             secondaryCurrent: 20
         )
-        #expect(NativeSpaces.activeDesktopNumber() == 3)
+        expectEqual(NativeSpaces.activeDesktopNumber(), 3)
     }
 
     @Test("A fullscreen Desktop on the main display is nil")
@@ -85,14 +85,14 @@ struct DesktopAuthorityTests {
             secondaryCurrent: 20
         )
         let snapshot = NativeSpaces.desktopSnapshot()
-        #expect(snapshot.authority == 2)
-        #expect(snapshot.mainUUID == "UUID-A")
-        #expect(snapshot.currentSpaces["UUID-A"] == 11)
-        #expect(snapshot.currentSpaces["UUID-B"] == 20)
+        expectEqual(snapshot.authority, 2)
+        expectEqual(snapshot.mainUUID, "UUID-A")
+        expectEqual(snapshot.currentSpaces["UUID-A"], 11)
+        expectEqual(snapshot.currentSpaces["UUID-B"], 20)
         // Numbering inside the snapshot, so a consumer cannot
         // number a Space in a topology the authority was not
         // counted in.
-        #expect(snapshot.number(of: 20) == 3)
+        expectEqual(snapshot.number(of: 20), 3)
     }
 
     /// The Desktops a binding can fire on: the main display's,
@@ -194,8 +194,8 @@ struct DesktopAuthorityTests {
             authoritySpace(11, display: "UUID-A"),
         ]
         let snapshot = NativeSpaces.desktopSnapshot()
-        #expect(snapshot.userDesktops == [1, 2, 3, 4])
-        #expect(snapshot.mainDisplayDesktops == [3, 4])
+        expectEqual(snapshot.userDesktops, [1, 2, 3, 4])
+        expectEqual(snapshot.mainDisplayDesktops, [3, 4])
     }
 
     /// A fullscreen space carries no Mission Control number, so

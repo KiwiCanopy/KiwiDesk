@@ -36,7 +36,7 @@ struct FocusedCommandGuardTests {
                 ManagedWindow(id: id, pid: pid, appName: "App")
             )
         )
-        #expect(core.focusedWindow?.id == id)
+        expectEqual(core.focusedWindow?.id, id)
         return id
     }
 
@@ -60,7 +60,7 @@ struct FocusedCommandGuardTests {
         // No provider wired (the unit-test default), so the guard
         // never engages and the command mutates as usual.
         #expect(core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, true)
     }
 
     @Test("Blocks when the frontmost app is a different pid")
@@ -75,7 +75,7 @@ struct FocusedCommandGuardTests {
                 == "another app is in front of the focused window"
         )
         // Fail closed = no mutation.
-        #expect(core.state.windows[WindowID(1)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, false)
     }
 
     @Test("Blocks when foreground ownership is unknown (nil)")
@@ -84,7 +84,7 @@ struct FocusedCommandGuardTests {
         addFocused(core, pid: 1)
         core.frontmostPIDProvider = { nil }
         #expect(!core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, false)
     }
 
     @Test("Blocks when the pid is frontmost but unobserved")
@@ -109,7 +109,7 @@ struct FocusedCommandGuardTests {
         observe(core, pid: pid)
         core.frontmostPIDProvider = { pid }
         #expect(core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, true)
     }
 
     /// A sibling process (Orion's second profile) is announced
@@ -136,7 +136,7 @@ struct FocusedCommandGuardTests {
         )
         core.frontmostPIDProvider = { sibling }
         #expect(core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == true)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, true)
         // An unlisted process of ANOTHER bundle is another app.
         let stranger: pid_t = 178_902
         core.eventLoop.processIdentity.record(
@@ -161,7 +161,7 @@ struct FocusedCommandGuardTests {
         // managed main window is stale behind it.
         core.ignoredPanel.active.insert(pid)
         #expect(!core.execute("make_floating").isSuccess)
-        #expect(core.state.windows[WindowID(1)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, false)
     }
 
     /// The hotkey path discards the response, so a denial must at

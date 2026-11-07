@@ -51,16 +51,16 @@ struct ScrollSizeTests {
 
     @Test("percentString is exact to a half percent")
     func percentStrings() {
-        #expect(ScrollSize.percentString(0.8) == "80%")
-        #expect(ScrollSize.percentString(0.5) == "50%")
-        #expect(ScrollSize.percentString(0.335) == "33.5%")
+        expectEqual(ScrollSize.percentString(0.8), "80%")
+        expectEqual(ScrollSize.percentString(0.5), "50%")
+        expectEqual(ScrollSize.percentString(0.335), "33.5%")
     }
 
     @Test("Clamping factories enforce one floor/ceiling")
     func clampingFactories() {
-        #expect(ScrollSize.points(clamping: 50) == .points(100))
-        #expect(ScrollSize.points(clamping: 500) == .points(500))
-        #expect(ScrollSize.fraction(clamping: 2) == .fraction(1))
+        expectEqual(ScrollSize.points(clamping: 50), .points(100))
+        expectEqual(ScrollSize.points(clamping: 500), .points(500))
+        expectEqual(ScrollSize.fraction(clamping: 2), .fraction(1))
         #expect(
             ScrollSize.fraction(clamping: 0.01) == .fraction(0.05)
         )
@@ -166,7 +166,7 @@ struct ScrollSlotSizeCommandTests {
                 args: [.number(0)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.scrolling.slotSize == .auto)
+        expectEqual(core.tiler.settings.scrolling.slotSize, .auto)
     }
 
     @Test("A \"NN%\" string sets a fraction")
@@ -215,7 +215,7 @@ struct ScrollAnchorCommandTests {
                     args: [.string(raw)]
                 ).isSuccess
             )
-            #expect(core.tiler.settings.scrolling.anchor == value)
+            expectEqual(core.tiler.settings.scrolling.anchor, value)
         }
     }
 
@@ -247,7 +247,7 @@ struct ScrollOverrideCommandTests {
         )
         let over =
             core.tiler.settings.scrolling.override[SpaceID("2")]
-        #expect(over?.orientation == .vertical)
+        expectEqual(over?.orientation, .vertical)
         // The global params are untouched.
         #expect(
             core.tiler.settings.scrolling.orientation
@@ -283,7 +283,7 @@ struct ScrollOverrideCommandTests {
             core.tiler.settings.scrolling.override[SpaceID("7")]
         // Same clamp/parsing as the global setters.
         #expect(over?.slotSize == .points(100))  // clamped floor
-        #expect(over?.anchor == .end)
+        expectEqual(over?.anchor, .end)
     }
 
     @Test("Invalid value is rejected and writes nothing")

@@ -64,10 +64,10 @@ struct SpaceBarStripHoldTests {
         #expect(
             manager.heldStrip(of: one) == .init(window: 2..<7, count: 9)
         )
-        #expect(released == 0)
+        expectEqual(released, 0)
         chip.setPointerInside(false)
         #expect(manager.heldStrip(of: one) == nil)
-        #expect(released == 1)
+        expectEqual(released, 1)
     }
 
     @Test("a slot that draws another Space releases the old hold")
@@ -80,7 +80,7 @@ struct SpaceBarStripHoldTests {
         // The row reorders: slot 0 now draws Space 2.
         manager.sync([bar([item(two), item(one)])])
         #expect(manager.heldStrip(of: one) == nil)
-        #expect(released == 1)
+        expectEqual(released, 1)
     }
 
     /// A run that shrinks drops its last views: one leaving under
@@ -97,7 +97,7 @@ struct SpaceBarStripHoldTests {
         #expect(manager.heldStrip(of: three) != nil)
         manager.sync([bar([item(two), item(three)])])
         #expect(manager.heldStrip(of: three) == nil)
-        #expect(released == 1)
+        expectEqual(released, 1)
     }
 
     /// A display's bar going away under the pointer ends the hold
@@ -125,7 +125,7 @@ struct SpaceBarStripHoldTests {
         #expect(manager.heldStrip(of: one) != nil)
         manager.sync([bar([item(two), item(one)])])
         #expect(manager.heldStrip(of: one) == nil)
-        #expect(released == 1)
+        expectEqual(released, 1)
     }
 
     /// Another chip's entry can arrive ahead of the first chip's
@@ -138,11 +138,11 @@ struct SpaceBarStripHoldTests {
         let drawn = SpaceBarStrip.Drawn(window: 2..<7, count: 9)
         manager.stripHover(one, drawn, inside: true)
         manager.stripHover(one, drawn, inside: true)
-        #expect(released == 0)
+        expectEqual(released, 0)
         manager.stripHover(two, drawn, inside: true)
-        #expect(released == 1)
+        expectEqual(released, 1)
         #expect(manager.heldStrip(of: one) == nil)
-        #expect(manager.heldStrip(of: two) == drawn)
+        expectEqual(manager.heldStrip(of: two), drawn)
     }
 
     @Test("a hold on a Space no bar draws is dropped")

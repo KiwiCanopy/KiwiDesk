@@ -113,13 +113,13 @@ struct SizeLedWriteTests {
                 answer: CGSize(width: width, height: 300)
             ).x
         }
-        #expect(at(450) == 275)
-        #expect(at(400) == 300)
-        #expect(at(420) == 290)
+        expectEqual(at(450), 275)
+        expectEqual(at(400), 300)
+        expectEqual(at(420), 290)
         // A ratio app answering below the anchor stays at the anchor,
         // and a point of rounding counts as the ask.
-        #expect(at(380) == 300)
-        #expect(at(449) == 275)
+        expectEqual(at(380), 300)
+        expectEqual(at(449), 275)
     }
 
     @Test("An axis the run never asked to change keeps the asked origin")
@@ -130,7 +130,7 @@ struct SizeLedWriteTests {
             anchor: start,
             answer: CGSize(width: 450, height: 180)
         )
-        #expect(origin == asked.origin)
+        expectEqual(origin, asked.origin)
     }
 
     @Test("A fixed window keeps its origin on every grow and shrink")
@@ -143,7 +143,7 @@ struct SizeLedWriteTests {
             CGRect(x: 300, y: 225, width: 400, height: 250),
         ] {
             write(frame, to: app, from: start)
-            #expect(app.now == start)
+            expectEqual(app.now, start)
         }
     }
 
@@ -152,8 +152,8 @@ struct SizeLedWriteTests {
         let app = SizeLedApp(start, .free, screen: screen)
         let asked = CGRect(x: 275, y: 200, width: 450, height: 300)
         write(asked, to: app, from: start)
-        #expect(app.now == asked)
-        #expect(app.writes.withLock { $0 } == ["size", "position", "size"])
+        expectEqual(app.now, asked)
+        expectEqual(app.writes.withLock { $0 }, ["size", "position", "size"])
     }
 
     @Test("A window fixed on one axis still takes the other")
@@ -164,10 +164,10 @@ struct SizeLedWriteTests {
             to: app,
             from: start
         )
-        #expect(app.now == start)
+        expectEqual(app.now, start)
         let taller = CGRect(x: 300, y: 175, width: 400, height: 350)
         write(taller, to: app, from: start)
-        #expect(app.now == taller)
+        expectEqual(app.now, taller)
     }
 
     @Test("A ratio app's shrink keeps its origin move, its grow does not")
@@ -178,14 +178,14 @@ struct SizeLedWriteTests {
             to: app,
             from: start
         )
-        #expect(app.now == start)
+        expectEqual(app.now, start)
         write(
             CGRect(x: 325, y: 200, width: 350, height: 300),
             to: app,
             from: start
         )
-        #expect(app.now.minX == 325)
-        #expect(app.now.width == 350)
+        expectEqual(app.now.minX, 325)
+        expectEqual(app.now.width, 350)
     }
 
     @Test("A free window against the right edge grows to the left")
@@ -194,7 +194,7 @@ struct SizeLedWriteTests {
         let app = SizeLedApp(flush, .free, screen: screen)
         let asked = CGRect(x: 1278, y: 200, width: 450, height: 300)
         write(asked, to: app, from: flush)
-        #expect(app.now == asked)
+        expectEqual(app.now, asked)
     }
 
     @Test("A free window against the bottom edge grows upward")
@@ -203,7 +203,7 @@ struct SizeLedWriteTests {
         let app = SizeLedApp(flush, .free, screen: screen)
         let asked = CGRect(x: 300, y: 767, width: 400, height: 350)
         write(asked, to: app, from: flush)
-        #expect(app.now == asked)
+        expectEqual(app.now, asked)
     }
 
     @Test("A fixed window against an edge never leaves it")
@@ -215,7 +215,7 @@ struct SizeLedWriteTests {
             to: app,
             from: flush
         )
-        #expect(app.now == flush)
+        expectEqual(app.now, flush)
         #expect(
             app.writes.withLock { $0 } == ["size", "position", "size"]
         )
@@ -230,7 +230,7 @@ struct SizeLedWriteTests {
             to: app,
             from: flush
         )
-        #expect(app.now == flush)
+        expectEqual(app.now, flush)
         #expect(
             app.writes.withLock { $0 }
                 == ["size", "position", "size", "position"]
@@ -243,7 +243,7 @@ struct SizeLedWriteTests {
         let app = SizeLedApp(near, .free, screen: screen)
         let asked = CGRect(x: 1228, y: 200, width: 500, height: 300)
         write(asked, to: app, from: near)
-        #expect(app.now == asked)
+        expectEqual(app.now, asked)
     }
 
     @Test("A shrink in the band lifts a settable window, never a fixed one")
@@ -253,12 +253,12 @@ struct SizeLedWriteTests {
         let asked = CGRect(x: 300, y: 822, width: 400, height: 290)
         let free = SizeLedApp(low, .free, screen: screen)
         write(asked, to: free, from: low, band: edgeBand)
-        #expect(free.writes.withLock { $0 }.first == "position")
-        #expect(free.now == asked)
+        expectEqual(free.writes.withLock { $0 }.first, "position")
+        expectEqual(free.now, asked)
         let fixed = SizeLedApp(low, .fixed, screen: screen)
         write(asked, to: fixed, from: low, band: edgeBand)
-        #expect(fixed.writes.withLock { $0 }.first == "size")
-        #expect(fixed.now == low)
+        expectEqual(fixed.writes.withLock { $0 }.first, "size")
+        expectEqual(fixed.now, low)
     }
 
     @Test("A spring's position-only frame follows the same answer")
@@ -270,8 +270,8 @@ struct SizeLedWriteTests {
             from: CGRect(x: 300, y: 200, width: 380, height: 300),
             setSize: false
         )
-        #expect(app.writes.withLock { $0 } == ["position"])
-        #expect(app.now.minX == 290)
+        expectEqual(app.writes.withLock { $0 }, ["position"])
+        expectEqual(app.now.minX, 290)
         app.frame.withLock { $0 = start }
         write(
             CGRect(x: 290, y: 200, width: 420, height: 300),
@@ -279,7 +279,7 @@ struct SizeLedWriteTests {
             from: start,
             setSize: false
         )
-        #expect(app.now == start)
+        expectEqual(app.now, start)
     }
 
     @Test("No read means no answer, so the frame is written as asked")
@@ -298,7 +298,7 @@ struct SizeLedWriteTests {
             nil,
             writer
         )
-        #expect(log.withLock { $0 } == ["size", "position", "size"])
+        expectEqual(log.withLock { $0 }, ["size", "position", "size"])
     }
 
     @Test("A clamp needs a grown axis ending at the window's screen edge")

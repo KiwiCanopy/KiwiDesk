@@ -73,7 +73,7 @@ struct FloatClampPendingCaptureTests {
         core.tiler.seedStash(Self.window, frame: capture)
         core.clampFloatsClearOfBars()
         #expect(core.tiler.recentInstantTarget(Self.window) == nil)
-        #expect(core.tiler.stashOriginal(Self.window) == capture)
+        expectEqual(core.tiler.stashOriginal(Self.window), capture)
     }
 
     @Test(
@@ -107,10 +107,10 @@ struct FloatClampPendingCaptureTests {
             "the sweep never wrote a frame for a covered capture"
         )
         #expect(commanded.minY >= painted.maxY)
-        #expect(commanded.size == capture.size)
+        expectEqual(commanded.size, capture.size)
         // The seed moves WITH the window, so the echo consumes it
         // rather than a later pass re-delivering the covered one.
-        #expect(core.tiler.stashOriginal(Self.window) == commanded)
+        expectEqual(core.tiler.stashOriginal(Self.window), commanded)
     }
 
     /// A float already sliding is retargeted clear of the bar

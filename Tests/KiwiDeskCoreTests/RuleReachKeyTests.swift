@@ -53,7 +53,7 @@ struct RuleReachKeyTests {
         let t = table
         #expect(t.reach(of: key, editing: "Work").isShared)
         #expect(t.resolved(key, for: "Travel") == nil)
-        #expect(t.leftOut(key) == ["Travel"])
+        expectEqual(t.leftOut(key), ["Travel"])
     }
 
     @Test("Ticking a profile takes its combo over from the other action")
@@ -74,7 +74,7 @@ struct RuleReachKeyTests {
         )
         let resolved = encoded?.resolved(onto: newBase) ?? newBase
         let combos = RuleReachTable<String>.combos(resolved)
-        #expect(combos[key] == "ctrl+alt+t")
+        expectEqual(combos[key], "ctrl+alt+t")
         let finderKey = RuleReachTable<String>.keyID(
             layer: "default",
             lua: finder
@@ -95,8 +95,8 @@ struct RuleReachKeyTests {
             storedBase: base,
             templates: templates
         )
-        #expect(shared.map(\.name) == ["default"])
-        #expect(RuleReachTable<String>.combos(shared)[key] == "ctrl+alt+t")
+        expectEqual(shared.map(\.name), ["default"])
+        expectEqual(RuleReachTable<String>.combos(shared)[key], "ctrl+alt+t")
     }
 
     @Test("A layer only the page's own override carried stays out")
@@ -116,7 +116,7 @@ struct RuleReachKeyTests {
             storedBase: base,
             templates: templates
         )
-        #expect(shared.map(\.name) == ["default"])
+        expectEqual(shared.map(\.name), ["default"])
     }
 
     @Test("The takeover is recorded in the table, not only the file")
@@ -133,7 +133,7 @@ struct RuleReachKeyTests {
             lua: finder
         )
         #expect(t.resolved(finderKey, for: "Travel") == nil)
-        #expect(t.touched["Travel"]?.contains(finderKey) == true)
+        expectEqual(t.touched["Travel"]?.contains(finderKey), true)
     }
 
     @Test("A shared combo taken by a new shared action leaves the base")
@@ -149,7 +149,7 @@ struct RuleReachKeyTests {
             reach: .shared(joining: []),
             editing: "Work"
         )
-        #expect(t.base[reloadKey] == "ctrl+alt+t")
+        expectEqual(t.base[reloadKey], "ctrl+alt+t")
         #expect(t.base[key] == nil)
     }
 
@@ -170,7 +170,7 @@ struct RuleReachKeyTests {
             base: base,
             overrides: [("Work", nil), ("Home", home)]
         )
-        #expect(t.resolved(key, for: "Home") == "ctrl+alt+y")
+        expectEqual(t.resolved(key, for: "Home"), "ctrl+alt+y")
         t.applyKey(
             key,
             value: nil,
@@ -178,10 +178,10 @@ struct RuleReachKeyTests {
             removal: .everywhere,
             editing: "Home"
         )
-        #expect(t.base[key] == "ctrl+alt+t")
+        expectEqual(t.base[key], "ctrl+alt+t")
         #expect(t.follows(key, "Work"))
         #expect(t.resolved(key, for: "Home") == nil)
-        #expect(t.leftOut(key) == ["Home"])
+        expectEqual(t.leftOut(key), ["Home"])
     }
 
     @Test("A combo the page's profile moved never reaches the base")
@@ -193,7 +193,7 @@ struct RuleReachKeyTests {
             KeyLayer(name: "default", bindings: [row("ctrl+alt+y", terminal)])
         ])
         let page = work.resolved(onto: base)
-        #expect(page[0].bindings.count == 2)
+        expectEqual(page[0].bindings.count, 2)
         let t = RuleReachTable<String>.keyLayers(
             base: base,
             overrides: [("Work", work)]
@@ -205,7 +205,7 @@ struct RuleReachKeyTests {
             storedBase: base,
             templates: templates
         )
-        #expect(shared[0].bindings.map(\.combo) == ["ctrl+alt+t"])
+        expectEqual(shared[0].bindings.map(\.combo), ["ctrl+alt+t"])
     }
 
     @Test("A base action bound to two combos keeps both")
@@ -229,7 +229,7 @@ struct RuleReachKeyTests {
             storedBase: twice,
             templates: templates
         )
-        #expect(shared[0].bindings.map(\.combo) == ["ctrl+alt+t", "alt+t"])
+        expectEqual(shared[0].bindings.map(\.combo), ["ctrl+alt+t", "alt+t"])
         #expect(RuleReachTable<String>.sameShortcuts(shared, twice))
     }
 
@@ -256,7 +256,7 @@ struct RuleReachKeyTests {
         )
         // Home keeps its own row, which wins on that combo, so it
         // reads as leaving the moved Terminal out — as its file will.
-        #expect(t.resolved(finderKey, for: "Home") == "ctrl+alt+y")
+        expectEqual(t.resolved(finderKey, for: "Home"), "ctrl+alt+y")
         #expect(t.resolved(key, for: "Home") == nil)
     }
 

@@ -211,7 +211,7 @@ struct BoxStrokeAboveGlassTests {
         defer { LiquidGlassGate.override = gate }
         LiquidGlassGate.override = { false }
         let overlay = appOverlay()
-        #expect(overlay.boxGlasses.count == 2)
+        expectEqual(overlay.boxGlasses.count, 2)
         for (item, glass) in zip(overlay.itemViews, overlay.boxGlasses) {
             #expect(GlassPlate.holds(glass, item))
             try expectAbove(item.strokes, of: item, glass: glass)
@@ -253,7 +253,7 @@ struct BoxStrokeAboveGlassTests {
         defer { LiquidGlassGate.override = gate }
         LiquidGlassGate.override = { false }
         let overlay = spaceOverlay()
-        #expect(overlay.boxGlasses.count == 2)
+        expectEqual(overlay.boxGlasses.count, 2)
         for (item, glass) in zip(overlay.itemViews, overlay.boxGlasses) {
             #expect(GlassPlate.holds(glass, item))
             try expectAbove(item.strokes, of: item, glass: glass)

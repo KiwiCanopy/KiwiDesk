@@ -44,7 +44,7 @@ struct BarReserveVerbTests {
                     + "app_bar.set_reserve"
             )
         }
-        #expect(core.tiler.settings == before)
+        expectEqual(core.tiler.settings, before)
     }
 
     /// The skip key compares the shelf's depth too, but no bar

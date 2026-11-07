@@ -33,11 +33,11 @@ struct UnsavedLiveSettingsTests {
                 .isSuccess
         )
         let unsaved = try #require(core.unsavedLiveSettings())
-        #expect(unsaved.live == core.tiler.settings)
-        #expect(unsaved.saved.borderStyle.width == stored)
+        expectEqual(unsaved.live, core.tiler.settings)
+        expectEqual(unsaved.saved.borderStyle.width, stored)
         var relive = unsaved.saved
         relive.borderStyle.width = 9
-        #expect(relive == unsaved.live)
+        expectEqual(relive, unsaved.live)
     }
 
     @Test("a follower's look leaf is unsaved against the shared look")
@@ -46,7 +46,7 @@ struct UnsavedLiveSettingsTests {
         let stored = core.tiler.settings.borderStyle.width
         _ = core.execute("border.set_width", args: [.number(9)])
         let unsaved = try #require(core.unsavedLiveSettings())
-        #expect(unsaved.saved.borderStyle.width == stored)
+        expectEqual(unsaved.saved.borderStyle.width, stored)
     }
 
     @Test("a value set back is saved again")
@@ -94,7 +94,7 @@ struct UnsavedLiveSettingsTests {
         )
         let unsaved = try #require(core.unsavedLiveSettings())
         #expect(unsaved.saved.spaceIcons[SpaceID("1")] == nil)
-        #expect(unsaved.saved.spaceIcons[SpaceID("8")] == "star")
+        expectEqual(unsaved.saved.spaceIcons[SpaceID("8")], "star")
     }
 
     /// What an open draft takes when live moved under it: its own
@@ -107,9 +107,9 @@ struct UnsavedLiveSettingsTests {
         var live = base
         live.borderStyle.width = 9
         let rebased = draft.rebased(from: base, onto: live)
-        #expect(rebased.borderStyle.width == 9)
-        #expect(rebased.gapsGlobal.outer.top == draft.gapsGlobal.outer.top)
-        #expect(base.rebased(from: base, onto: live) == live)
+        expectEqual(rebased.borderStyle.width, 9)
+        expectEqual(rebased.gapsGlobal.outer.top, draft.gapsGlobal.outer.top)
+        expectEqual(base.rebased(from: base, onto: live), live)
     }
 
     @Test("with no store to keep into, nothing is listed")

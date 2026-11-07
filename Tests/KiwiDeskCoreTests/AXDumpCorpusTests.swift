@@ -70,7 +70,7 @@ struct AXDumpCorpusTests {
             "the recorded dumps were not read"
         )
         #expect(Set(rows).count == rows.count, "a row is listed twice")
-        #expect(Set(dumps) == Set(rows))
+        expectEqual(Set(dumps), Set(rows))
     }
 
     @Test("each dump's verdict is the frozen one")
@@ -111,14 +111,14 @@ struct AXDumpCorpusTests {
             "Aero.AxFailed",
         ]
         let aero = AXDump.readKeys.filter { $0.hasPrefix("Aero.") }
-        #expect(aero == facts)
+        expectEqual(aero, facts)
         // The init applies the allowlist: a verdict key in the
         // file never reaches a reader.
         let dump = try AXDump(
             name: "probe",
             data: Data(#"{"AXRole": "w", "Aero.workspace": "1"}"#.utf8)
         )
-        #expect(Set(dump.values.keys) == ["AXRole"])
+        expectEqual(Set(dump.values.keys), ["AXRole"])
         let here = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
         let verdictKeys = [
@@ -154,11 +154,11 @@ struct AXDumpCorpusTests {
             try AXDump(name: "fixture", data: Data(body.utf8))
         }
         let bare = try dump(#"{"AXChildren": ["a", "b"]}"#)
-        #expect(bare.childCount == 2)
+        expectEqual(bare.childCount, 2)
         let nulled = try dump(
             #"{"AXChildren": ["a"], "AXTitleUIElement": null}"#
         )
-        #expect(nulled.childCount == 1)
+        expectEqual(nulled.childCount, 1)
         let titled = try dump(
             #"{"AXChildren": ["a"], "AXTitleUIElement": "t"}"#
         )

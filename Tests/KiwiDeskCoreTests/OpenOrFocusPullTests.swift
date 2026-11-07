@@ -64,8 +64,8 @@ struct OpenOrFocusPullTests {
         addWindow(core, 20, space: "2")
         core.rememberHonoredFocus(WindowID(30))
         #expect(press(core).isSuccess)
-        #expect(core.state.workspaces.activeSpace == "2")
-        #expect(core.state.workspaces.lastFocused == WindowID(20))
+        expectEqual(core.state.workspaces.activeSpace, "2")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(20))
         #expect(recorder.activated.isEmpty)
     }
 
@@ -79,8 +79,8 @@ struct OpenOrFocusPullTests {
         core.rememberHonoredFocus(WindowID(21))
         core.rememberHonoredFocus(WindowID(30))
         _ = press(core)
-        #expect(core.state.workspaces.activeSpace == "3")
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.activeSpace, "3")
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     @Test("With no answer either, the first in ring order wins")
@@ -89,7 +89,7 @@ struct OpenOrFocusPullTests {
         addWindow(core, 20, space: "2")
         addWindow(core, 21, space: "3")
         _ = press(core)
-        #expect(core.state.workspaces.lastFocused == WindowID(20))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(20))
     }
 
     /// A fresh KiwiDesk has stamped nothing: the app's own
@@ -101,7 +101,7 @@ struct OpenOrFocusPullTests {
         addWindow(core, 21, space: "3")
         core.eventLoop.shadows.focusedWindow = { _ in WindowID(21) }
         _ = press(core)
-        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(21))
     }
 
     @Test("Recency outranks the app's own focused window")
@@ -112,7 +112,7 @@ struct OpenOrFocusPullTests {
         core.rememberHonoredFocus(WindowID(20))
         core.eventLoop.shadows.focusedWindow = { _ in WindowID(21) }
         _ = press(core)
-        #expect(core.state.workspaces.lastFocused == WindowID(20))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(20))
     }
 
     /// The stamp is the honored verdict's, never the fold's: a
@@ -123,7 +123,7 @@ struct OpenOrFocusPullTests {
         let (core, _) = makeCore()
         addWindow(core, 20, space: "2")
         core.state.apply(.windowFocused(WindowID(20)))
-        #expect(core.state.focusRecencyRank(of: WindowID(20)) == 0)
+        expectEqual(core.state.focusRecencyRank(of: WindowID(20)), 0)
     }
 
     /// A Desktop departure or a minimize folds as a destroy but
@@ -145,7 +145,7 @@ struct OpenOrFocusPullTests {
             wasMinimized: false,
             effects: effects
         )
-        #expect(reason == .closed)
+        expectEqual(reason, .closed)
         #expect(core.state.focusRecency[WindowID(20)] == nil)
     }
 
@@ -178,8 +178,8 @@ struct OpenOrFocusPullTests {
             KiwiCore.AppWindowCensus(visible: 1, minimized: [])
         }
         _ = press(core)
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(recorder.activated == [100])
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(recorder.activated, [100])
     }
 
     @Test("With no tracked window the app is activated as before")
@@ -189,6 +189,6 @@ struct OpenOrFocusPullTests {
             KiwiCore.AppWindowCensus(visible: 1, minimized: [])
         }
         _ = press(core)
-        #expect(recorder.activated == [100])
+        expectEqual(recorder.activated, [100])
     }
 }

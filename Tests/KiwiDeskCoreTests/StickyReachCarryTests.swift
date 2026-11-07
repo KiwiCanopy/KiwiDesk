@@ -144,13 +144,13 @@ struct StickyReachCarryTests {
         core.handleDesktopChange()
         // Both scopes carry onto the arriving Desktop of THEIR
         // screen; the plain window stays.
-        #expect(Bridge.targets(of: w1) == [11])
-        #expect(Bridge.targets(of: w2) == [11])
+        expectEqual(Bridge.targets(of: w1), [11])
+        expectEqual(Bridge.targets(of: w2), [11])
         #expect(Bridge.targets(of: w3).isEmpty)
         // A window homed on the OTHER screen is normalized onto
         // that screen's current Desktop — never teleported across
         // screens because this one switched.
-        #expect(Bridge.targets(of: w4) == [20])
+        expectEqual(Bridge.targets(of: w4), [20])
     }
 
     @Test("a ∞ window carries with the screen it renders on")
@@ -167,9 +167,9 @@ struct StickyReachCarryTests {
             secondaryCurrent: 21
         )
         core.handleDesktopChange()
-        #expect(Bridge.targets(of: w1) == [21])
-        #expect(Bridge.targets(of: w2) == [10])
-        #expect(Bridge.targets(of: w4) == [21])
+        expectEqual(Bridge.targets(of: w1), [21])
+        expectEqual(Bridge.targets(of: w2), [10])
+        expectEqual(Bridge.targets(of: w4), [21])
     }
 
     @Test("the settle carries again, as the eager pass's net")
@@ -183,9 +183,9 @@ struct StickyReachCarryTests {
         core.handleDesktopChange()
         Bridge.reset()
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(Bridge.targets(of: w1) == [11])
-        #expect(Bridge.targets(of: w2) == [11])
-        #expect(Bridge.targets(of: w4) == [20])
+        expectEqual(Bridge.targets(of: w1), [11])
+        expectEqual(Bridge.targets(of: w2), [11])
+        expectEqual(Bridge.targets(of: w4), [20])
     }
 
     @Test("a secondary screen's switch carries only its own windows")
@@ -198,9 +198,9 @@ struct StickyReachCarryTests {
             secondaryCurrent: 21
         )
         core.handleDesktopChange()
-        #expect(Bridge.targets(of: w4) == [21])
-        #expect(Bridge.targets(of: w1) == [10])
-        #expect(Bridge.targets(of: w2) == [10])
+        expectEqual(Bridge.targets(of: w4), [21])
+        expectEqual(Bridge.targets(of: w1), [10])
+        expectEqual(Bridge.targets(of: w2), [10])
     }
 
     @Test("the eager carry runs after the arriving Space is activated")
@@ -219,9 +219,9 @@ struct StickyReachCarryTests {
             secondaryCurrent: 20
         )
         core.handleDesktopChange()
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(Bridge.targets(of: w1) == [11])
-        #expect(Bridge.targets(of: w4) == [20])
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("1"))
+        expectEqual(Bridge.targets(of: w1), [11])
+        expectEqual(Bridge.targets(of: w4), [20])
     }
 
     @Test("shared-Spaces mode carries everything with the one list")
@@ -234,9 +234,9 @@ struct StickyReachCarryTests {
             authoritySpace(30, display: "SHARED"),
             authoritySpace(31, display: "SHARED", current: true),
         ])
-        #expect(Bridge.targets(of: w1) == [31])
-        #expect(Bridge.targets(of: w2) == [31])
-        #expect(Bridge.targets(of: w4) == [31])
+        expectEqual(Bridge.targets(of: w1), [31])
+        expectEqual(Bridge.targets(of: w2), [31])
+        expectEqual(Bridge.targets(of: w4), [31])
         #expect(Bridge.targets(of: w3).isEmpty)
     }
 
@@ -256,6 +256,6 @@ struct StickyReachCarryTests {
         ])
         #expect(Bridge.targets(of: w1).isEmpty)
         #expect(Bridge.targets(of: w2).isEmpty)
-        #expect(Bridge.targets(of: w4) == [20])
+        expectEqual(Bridge.targets(of: w4), [20])
     }
 }

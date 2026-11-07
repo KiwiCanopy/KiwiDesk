@@ -82,7 +82,7 @@ struct NewerFormatWriteRefusalCallerTests {
             core.stripLegacyAppWide()
             let after = try Data(contentsOf: file)
             // The control: a current file IS stripped.
-            #expect((after == before) == newer)
+            expectEqual((after == before), newer)
         }
     }
 
@@ -107,7 +107,7 @@ struct NewerFormatWriteRefusalCallerTests {
             _ = try? core.profiles.save(profile("Desk"))
             let after = try Data(contentsOf: old)
             // The control: a current target clears the sibling.
-            #expect((after == before) == newer)
+            expectEqual((after == before), newer)
         }
     }
 

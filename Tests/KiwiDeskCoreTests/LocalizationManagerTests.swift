@@ -21,7 +21,7 @@ struct LocalizationManagerTests {
             "a_key_no_locale_will_ever_define",
             "The English fallback"
         )
-        #expect(value == "The English fallback")
+        expectEqual(value, "The English fallback")
     }
 
     @Test("the seeded German locale is discovered and shipped")
@@ -46,7 +46,7 @@ struct LocalizationManagerTests {
             "a_key_the_german_seed_does_not_translate",
             "Untranslated fallback"
         )
-        #expect(value == "Untranslated fallback")
+        expectEqual(value, "Untranslated fallback")
     }
 
     @Test("select(nil) restores System default")
@@ -60,8 +60,8 @@ struct LocalizationManagerTests {
     func adoptPersistedSelectionInjectsPick() {
         LocalizationManager.shared.adoptPersistedSelection("de")
         defer { reset() }
-        #expect(LocalizationManager.shared.selection == "de")
-        #expect(L("menu.quit", "Quit KiwiDesk") == "KiwiDesk beenden")
+        expectEqual(LocalizationManager.shared.selection, "de")
+        expectEqual(L("menu.quit", "Quit KiwiDesk"), "KiwiDesk beenden")
     }
 
     @Test("an unshipped explicit selection falls back to English")
@@ -70,20 +70,20 @@ struct LocalizationManagerTests {
         LocalizationManager.shared.select("xx-not-a-real-locale")
         defer { reset() }
         let value = L("menu.quit", "Quit KiwiDesk")
-        #expect(value == "Quit KiwiDesk")
+        expectEqual(value, "Quit KiwiDesk")
     }
 
     @Test("selecting English forces the inline source")
     func explicitEnglishOverridesTranslation() {
         reset()
         LocalizationManager.shared.select("de")
-        #expect(L("menu.quit", "Quit KiwiDesk") == "KiwiDesk beenden")
+        expectEqual(L("menu.quit", "Quit KiwiDesk"), "KiwiDesk beenden")
         // English is an explicit pick distinct from System
         // default: it must use the inline source even when a
         // German translation exists and the OS is German.
         LocalizationManager.shared.select("en")
         defer { reset() }
-        #expect(L("menu.quit", "Quit KiwiDesk") == "Quit KiwiDesk")
+        expectEqual(L("menu.quit", "Quit KiwiDesk"), "Quit KiwiDesk")
     }
 
     // MARK: - Interpolation overload (issue #9 review)
@@ -96,7 +96,7 @@ struct LocalizationManagerTests {
             "Move to %1$@",
             "Studio"
         )
-        #expect(value == "Move to Studio")
+        expectEqual(value, "Move to Studio")
     }
 
     @Test("the interpolating overload resolves through a translation")
@@ -112,7 +112,7 @@ struct LocalizationManagerTests {
             "Move to %1$@",
             "Studio"
         )
-        #expect(value == "Nach Studio verschieben")
+        expectEqual(value, "Nach Studio verschieben")
     }
 
     @Test("an untranslated interpolating key falls back to English")
@@ -126,6 +126,6 @@ struct LocalizationManagerTests {
             3,
             "Monocle"
         )
-        #expect(value == "Space 3: Monocle")
+        expectEqual(value, "Space 3: Monocle")
     }
 }

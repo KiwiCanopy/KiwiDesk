@@ -265,7 +265,7 @@ struct ZOrderFocusJumpTests {
             ).isSuccess
         )
         core.state.workspaces.focus(WindowID(7), in: "2")
-        #expect(core.state.workspaces["2"]?.windows.count == 6)
+        expectEqual(core.state.workspaces["2"]?.windows.count, 6)
         guard startDummyPan(core) else { return }
         core.moveBarItem(space: space, from: 0, to: 4)
         // The reorder itself still lands — only the restack is

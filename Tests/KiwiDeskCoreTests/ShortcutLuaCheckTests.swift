@@ -42,10 +42,10 @@ struct ShortcutLuaCheckTests {
         let lua = try #require(core.keys.lua)
         let escape = "end, (function() kiwi_escaped = true end)(), function()"
         #expect(core.shortcutLuaProblem(escape) == nil)
-        #expect(lua.global("kiwi_escaped") == .none)
+        expectEqual(lua.global("kiwi_escaped"), .none)
         if case .success(let ref) = lua.makeFunction(body: escape) {
             lua.release(ref: ref)
         }
-        #expect(lua.global("kiwi_escaped") == .bool(true))
+        expectEqual(lua.global("kiwi_escaped"), .bool(true))
     }
 }

@@ -104,7 +104,7 @@ struct RunParkSnapTests {
     func parkBoundsAreTheScreens() throws {
         let (core, _) = makeCore()
         let input = try #require(core.tiler.layoutInput(state: core.state))
-        #expect(input.context.parkBounds == Self.screen)
+        expectEqual(input.context.parkBounds, Self.screen)
     }
 
     /// macOS lifts a parked window off the line it was asked for

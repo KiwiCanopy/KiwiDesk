@@ -182,7 +182,7 @@ struct ReconcileSnapshotTests {
         // Both windows stayed: the read resolved them.
         #expect(!box.events.contains { $0.hasPrefix("destroyed") })
         // Two listed windows: the shadow traits were read once each.
-        #expect(box.traitReads == 2)
+        expectEqual(box.traitReads, 2)
     }
 
     @Test("a fullscreen flip read off main still lands")
@@ -192,7 +192,7 @@ struct ReconcileSnapshotTests {
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(box.events.contains("fullscreen w41 true"))
         #expect(box.events.contains("fullscreen w42 true"))
-        #expect(loop.detectedFullscreen[first] == true)
+        expectEqual(loop.detectedFullscreen[first], true)
     }
 
     @Test("the float verdict read off main matches the main-actor one")
@@ -229,11 +229,11 @@ struct ReconcileSnapshotTests {
         // window entering fullscreen; the held read saw it before.
         box.fullscreen = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(loop.detectedFullscreen[first] == true)
+        expectEqual(loop.detectedFullscreen[first], true)
         box.fullscreen = false
         box.events = []
         for work in box.held ?? [] { work() }
-        #expect(loop.detectedFullscreen[first] == true)
+        expectEqual(loop.detectedFullscreen[first], true)
         #expect(!box.events.contains("fullscreen w41 false"))
     }
 
@@ -245,7 +245,7 @@ struct ReconcileSnapshotTests {
         box.held = []
         loop.reconcileOffMain(pid: pid, app: ref)
         for work in box.held ?? [] { work() }
-        #expect(loop.detectedFullscreen[first] == false)
+        expectEqual(loop.detectedFullscreen[first], false)
         #expect(box.events.contains("fullscreen w41 false"))
     }
 
@@ -261,9 +261,9 @@ struct ReconcileSnapshotTests {
         box.fullscreen = true
         for work in box.held ?? [] { work() }
         // The reading's fullscreen state still lands.
-        #expect(loop.detectedFullscreen[first] == true)
+        expectEqual(loop.detectedFullscreen[first], true)
         // The fresher frame stands over the reading's.
-        #expect(loop.trackedFrames[first] == moved)
+        expectEqual(loop.trackedFrames[first], moved)
     }
 
     @Test("the force-float override decides the read verdict too")
@@ -274,7 +274,7 @@ struct ReconcileSnapshotTests {
         offMain.reconcileOffMain(pid: pid, app: ref)
         let (sync, _) = makeLoop(policy: .accessory)
         sync.reconcile(pid: pid, app: ref)
-        #expect(offMain.detectedFloating[first] == .floats(.accessoryApp))
+        expectEqual(offMain.detectedFloating[first], .floats(.accessoryApp))
         #expect(
             offMain.detectedFloating[first] == sync.detectedFloating[first]
         )
@@ -285,7 +285,7 @@ struct ReconcileSnapshotTests {
         let (loop, box) = makeLoop()
         box.policy = .accessory
         loop.reconcileOffMain(pid: pid, app: ref)
-        #expect(loop.policy(of: pid) == .accessory)
+        expectEqual(loop.policy(of: pid), .accessory)
         // Both are read on the read's own thread, never at request.
         #expect(box.askedWhileApplying.isEmpty, "\(box.askedWhileApplying)")
         #expect(box.askedOutsideRead.isEmpty, "\(box.askedOutsideRead)")
@@ -293,7 +293,7 @@ struct ReconcileSnapshotTests {
         box.hidden = true
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(box.events.contains("hidden w41"))
-        #expect(box.askedWhileApplying == ["hidden"])
+        expectEqual(box.askedWhileApplying, ["hidden"])
     }
 
     @Test("an unhide during the read keeps the windows")

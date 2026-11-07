@@ -43,8 +43,8 @@ struct AppBarIdleInkTests {
         for glyph in [nil, "A"] as [String?] {
             let view = makeView(active: false, glyph: glyph)
             let idle = NSColor(kiwiHex: view.style.idleItemColor)
-            #expect(view.label.textColor == idle)
-            #expect(view.glyphLabel.textColor == idle)
+            expectEqual(view.label.textColor, idle)
+            expectEqual(view.glyphLabel.textColor, idle)
             #expect(
                 view.label.textColor
                     != NSColor(kiwiHex: view.style.itemColor)
@@ -57,7 +57,7 @@ struct AppBarIdleInkTests {
         for seen in [BarVisibility.visible, .partly(shown: .left)] {
             let view = makeView(active: false, visibility: seen)
             let item = NSColor(kiwiHex: view.style.itemColor)
-            #expect((view.label.textColor == item) == (seen == .visible))
+            expectEqual((view.label.textColor == item), (seen == .visible))
         }
     }
 

@@ -69,7 +69,7 @@ struct ShortcutIssueSourceTests {
         base.layers = [Self.badRow]
         try core.guiConfigStore.save(GuiConfig())
         try core.saveGuiConfig(base)
-        #expect(symbolIssues(core).map(\.source) == ["gui.json"])
+        expectEqual(symbolIssues(core).map(\.source), ["gui.json"])
         try core.saveGuiConfig(GuiConfig())
         try core.profiles.save(
             profile("Work", layers: KeyLayerOverride(layers: [Self.badRow]))
@@ -77,7 +77,7 @@ struct ShortcutIssueSourceTests {
         #expect(
             core.execute("load_profile", args: [.string("Work")]).isSuccess
         )
-        #expect(symbolIssues(core).map(\.source) == ["Work.json"])
+        expectEqual(symbolIssues(core).map(\.source), ["Work.json"])
     }
 
     /// The install names the profile it resolved over, never the
@@ -98,8 +98,8 @@ struct ShortcutIssueSourceTests {
             ),
             lua: lua
         )
-        #expect(core.profiles.currentName == "Home")
-        #expect(symbolIssues(core).map(\.source) == ["Work.json"])
+        expectEqual(core.profiles.currentName, "Home")
+        expectEqual(symbolIssues(core).map(\.source), ["Work.json"])
     }
 
     @Test("A rename of the installed profile follows to its file")
@@ -114,8 +114,8 @@ struct ShortcutIssueSourceTests {
             profile: try core.profiles.read(name: "Work"),
             lua: lua
         )
-        #expect(symbolIssues(core).map(\.source) == ["Work.json"])
+        expectEqual(symbolIssues(core).map(\.source), ["Work.json"])
         try core.renameProfile(from: "Work", to: "Office")
-        #expect(symbolIssues(core).map(\.source) == ["Office.json"])
+        expectEqual(symbolIssues(core).map(\.source), ["Office.json"])
     }
 }

@@ -52,13 +52,13 @@ struct ExpandDurationMigrationTests {
 
     private func check(_ animations: AnimationSettings) {
         #expect(!animations.onExpand)
-        #expect(animations.expandDurationMS == 1250)
+        expectEqual(animations.expandDurationMS, 1250)
     }
 
     private func checkLook(_ body: LookBody?) throws {
         let style = try #require(body?.style)
-        #expect(style["animations.expand_duration"] == .number(1250))
-        #expect(style["animations.on_expand"] == .bool(false))
+        expectEqual(style["animations.expand_duration"], .number(1250))
+        expectEqual(style["animations.on_expand"], .bool(false))
         #expect(style["animations.shelf_duration"] == nil)
     }
 
@@ -97,7 +97,7 @@ struct ExpandDurationMigrationTests {
     func profileMoves() throws {
         let out = try root(migrated(legacy(profile(format: 27))))
         check(try decode(TilingSettings.self, out["settings"]).animations)
-        #expect(out["format"] as? Int == Profile.currentFormat)
+        expectEqual(out["format"] as? Int, Profile.currentFormat)
     }
 
     @Test("the shared look in gui.json crosses")

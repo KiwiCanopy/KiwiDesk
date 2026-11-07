@@ -74,7 +74,7 @@ struct LaunchFollowLateCreateTests {
             placement: .afterFocused
         )
         await Self.lateCreate(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Base.home)
+        expectEqual(core.state.workspaces.activeSpace, Base.home)
     }
 
     @Test("A refused arrival leaves no late create to pay")
@@ -123,7 +123,7 @@ struct LaunchFollowLateCreateTests {
         core.state.workspaces.ensureSpace(elsewhere)
         core.state.workspaces.activate(elsewhere)
         await Self.lateCreate(9, on: core)
-        #expect(core.state.workspaces.activeSpace == elsewhere)
+        expectEqual(core.state.workspaces.activeSpace, elsewhere)
     }
 
     @Test("A stop drops the late create")
@@ -144,7 +144,7 @@ struct LaunchFollowLateCreateTests {
         core.windowServerChanged(.created, id: WindowID(9))
         core.eventLoop.onEvent(.appTerminated(pid: 7))
         await core.deferred.task(for: .arrivalCreated)?.value
-        #expect(core.state.workspaces.activeSpace == Base.home)
+        expectEqual(core.state.workspaces.activeSpace, Base.home)
         #expect(core.launchFollow.spawn == nil)
     }
 

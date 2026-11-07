@@ -100,7 +100,7 @@ struct PocketListKeyboardTests {
         core.execute("pocket.toggle_list")
         #expect(core.shelves.peek.shown == nil)
         core.execute("pocket.toggle_list")
-        #expect(core.shelves.peek.panel.body.hovered == 0)
+        expectEqual(core.shelves.peek.panel.body.hovered, 0)
         // Closed and reopened, it starts over at the first row, inside
         // the close's landing and past it.
         let walked = core.shelves.peek.panel
@@ -110,26 +110,26 @@ struct PocketListKeyboardTests {
         core.execute("pocket.toggle_list")
         #expect(walked.leaving != nil)
         core.execute("pocket.toggle_list")
-        #expect(walked.body.hovered == 0)
+        expectEqual(walked.body.hovered, 0)
         #expect(walked.morphKey(Self.down))
         core.execute("pocket.toggle_list")
         landings.forEach { $0() }
         #expect(walked.morph == nil)
         core.execute("pocket.toggle_list")
-        #expect(walked.body.hovered == 0)
+        expectEqual(walked.body.hovered, 0)
         // A redraw of the list keeps the row the arrows reached.
         let panel = core.shelves.peek.panel
         #expect(panel.morphKey(Self.down))
-        #expect(panel.body.hovered == 1)
+        expectEqual(panel.body.hovered, 1)
         // A pointer leaving its row, or a press off every row, leaves
         // the row to Return; a click's list drops it (`clickDropsHover`).
         panel.body.mouseExited(with: pointerEvent())
-        #expect(panel.body.hovered == 1)
+        expectEqual(panel.body.hovered, 1)
         panel.body.press(at: CGPoint(x: -50, y: -50))
-        #expect(panel.body.hovered == 1)
+        expectEqual(panel.body.hovered, 1)
         panel.body.pressed = 0
         panel.body.drag(to: CGPoint(x: -50, y: -50))
-        #expect(panel.body.hovered == 1)
+        expectEqual(panel.body.hovered, 1)
         panel.body.pressed = nil
         core.shelves.peek.show(
             try #require(core.pocketPlate.view(on: display)),
@@ -137,8 +137,8 @@ struct PocketListKeyboardTests {
             space: nil,
             edge: .bottom
         )
-        #expect(panel.body.hovered == 1)
-        #expect(core.shelves.peek.shown?.keyed == true)
+        expectEqual(panel.body.hovered, 1)
+        expectEqual(core.shelves.peek.shown?.keyed, true)
     }
 
     @Test("the arrows walk the rows, Return picks, Esc closes")
@@ -153,10 +153,10 @@ struct PocketListKeyboardTests {
         let panel = core.shelves.peek.panel
         #expect(panel.morphKey(Self.down))
         #expect(panel.morphKey(Self.up))
-        #expect(panel.body.hovered == 0)
+        expectEqual(panel.body.hovered, 0)
         #expect(panel.morphKey(Self.down))
         #expect(panel.morphKey(Self.enter))
-        #expect(picked == [two])
+        expectEqual(picked, [two])
         #expect(core.shelves.peek.shown == nil)
         core.execute("pocket.toggle_list")
         #expect(core.shelves.peek.shown != nil)
@@ -178,19 +178,19 @@ struct PocketListKeyboardTests {
         #expect(
             window.performKeyEquivalent(with: key(Self.down, "\u{F701}"))
         )
-        #expect(panel.body.hovered == 1)
+        expectEqual(panel.body.hovered, 1)
         #expect(core.shelves.peek.shown != nil)
         #expect(
             window.performKeyEquivalent(with: key(Self.up, "\u{F700}"))
         )
-        #expect(panel.body.hovered == 0)
+        expectEqual(panel.body.hovered, 0)
         var picked: [WindowID] = []
         core.shelves.peek.pick = { id, _ in picked.append(id) }
         #expect(window.performKeyEquivalent(with: key(Self.enter, "\r")))
-        #expect(picked == [one])
+        expectEqual(picked, [one])
         core.execute("pocket.toggle_list")
         #expect(window.performKeyEquivalent(with: key(76, "\u{3}")))
-        #expect(picked == [one, one])
+        expectEqual(picked, [one, one])
         core.execute("pocket.toggle_list")
         #expect(window.performKeyEquivalent(with: key(12, "q")))
         #expect(core.shelves.peek.shown == nil)
@@ -271,13 +271,13 @@ struct PocketListKeyboardTests {
             maxHeight: 60,
             cutAtTop: true
         )
-        #expect(body.targets.first?.action == .more)
+        expectEqual(body.targets.first?.action, .more)
         body.liftRow(nil)
         let lifted = try #require(body.hovered)
         #expect(lifted > 0)
         // A row past a shrunken list lands on its last.
         body.liftRow(9)
-        #expect(body.hovered == body.targets.count - 1)
+        expectEqual(body.hovered, body.targets.count - 1)
     }
 
     @Test("an empty pocket shows its empty state, its first row lifted")
@@ -288,7 +288,7 @@ struct PocketListKeyboardTests {
         core.execute("pocket.toggle_list")
         let panel = core.shelves.peek.panel
         #expect(panel.drawn?.empty != nil)
-        #expect(panel.body.hovered == 0)
+        expectEqual(panel.body.hovered, 0)
     }
 
     @Test("it acts on no window: out of the foreground preflight")

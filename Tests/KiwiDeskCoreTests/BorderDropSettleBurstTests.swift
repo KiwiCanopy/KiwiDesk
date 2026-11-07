@@ -16,14 +16,14 @@ struct BorderDropSettleBurstTests {
     @Test("a lone ask settles early")
     func loneAskIsEarly() {
         var burst = DropSettleBurst()
-        #expect(burst.wait(asking: t0, early: early) == early)
+        expectEqual(burst.wait(asking: t0, early: early), early)
     }
 
     @Test("asks before the pass runs are one lone ask")
     func asksBeforeARunAreOne() {
         var burst = DropSettleBurst()
-        #expect(burst.wait(asking: t0, early: early) == early)
-        #expect(burst.wait(asking: t0, early: early) == early)
+        expectEqual(burst.wait(asking: t0, early: early), early)
+        expectEqual(burst.wait(asking: t0, early: early), early)
     }
 
     @Test("an ask inside the gap after a run waits the burst out")
@@ -43,7 +43,7 @@ struct BorderDropSettleBurstTests {
         var burst = DropSettleBurst()
         burst.ran(at: t0)
         let ask = t0.addingTimeInterval(0.25)
-        #expect(burst.wait(asking: ask, early: early, lone: true) == early)
+        expectEqual(burst.wait(asking: ask, early: early, lone: true), early)
         #expect(burst.wait(asking: ask, early: early) == DropSettleBurst.gap)
     }
 
@@ -52,7 +52,7 @@ struct BorderDropSettleBurstTests {
         var burst = DropSettleBurst()
         burst.ran(at: t0)
         let ask = t0.addingTimeInterval(DropSettleBurst.gap + 0.5)
-        #expect(burst.wait(asking: ask, early: early) == early)
+        expectEqual(burst.wait(asking: ask, early: early), early)
     }
 
     @Test("a burst runs its pass by maxWait")
@@ -65,11 +65,11 @@ struct BorderDropSettleBurstTests {
         let wait = burst.wait(asking: late, early: early)
         #expect(abs(wait - 0.4) < 0.001)
         let over = start.addingTimeInterval(DropSettleBurst.maxWait + 1)
-        #expect(burst.wait(asking: over, early: early) == 0)
+        expectEqual(burst.wait(asking: over, early: early), 0)
         burst.ran(at: over)
         #expect(burst.pendingSince == nil)
         let next = over.addingTimeInterval(DropSettleBurst.gap + 1)
-        #expect(burst.wait(asking: next, early: early) == early)
+        expectEqual(burst.wait(asking: next, early: early), early)
     }
 
     /// Asks closer than the early wait never let a pass run; the
@@ -84,8 +84,8 @@ struct BorderDropSettleBurstTests {
             waits.append(burst.wait(asking: ask, early: early))
             ask = ask.addingTimeInterval(0.04)
         }
-        #expect(waits.first == early)
-        #expect(waits.last == 0)
+        expectEqual(waits.first, early)
+        expectEqual(waits.last, 0)
     }
 
     /// The core asks through the type and stamps the run in the
@@ -101,15 +101,15 @@ struct BorderDropSettleBurstTests {
         core.scheduleBorderDropReconcile()
         core.scheduleBorderDropReconcile()
         await core.deferred.task(for: .borderDropSettle)?.value
-        #expect(box.waits.last == .milliseconds(50))
-        #expect(core.borders.dropSettleBurst.ranAt == core.wallClock())
-        #expect(core.borders.lastSyncReassertedOrder == true)
+        expectEqual(box.waits.last, .milliseconds(50))
+        expectEqual(core.borders.dropSettleBurst.ranAt, core.wallClock())
+        expectEqual(core.borders.lastSyncReassertedOrder, true)
         core.scheduleBorderDropReconcile()
         let pass = core.deferred.task(for: .borderDropSettle)
         await pass?.value
-        #expect(box.waits.last == .seconds(1))
+        expectEqual(box.waits.last, .seconds(1))
         core.scheduleBorderDropReconcile(lone: true)
         await core.deferred.task(for: .borderDropSettle)?.value
-        #expect(box.waits.last == .milliseconds(50))
+        expectEqual(box.waits.last, .milliseconds(50))
     }
 }

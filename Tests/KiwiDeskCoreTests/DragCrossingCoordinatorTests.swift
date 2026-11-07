@@ -42,7 +42,7 @@ struct DragCrossingCoordinatorTests {
             cursor: onForeign,
             homeDisplay: DisplayID(1)
         )
-        #expect(crossing.dwellTask == dwell)
+        expectEqual(crossing.dwellTask, dwell)
         // Await the dwell's own timeline rather than poll a wall
         // clock for `fired` (`tests.md` ▸ Async tests): the fire
         // lands on the main actor, so a deadline measured the
@@ -50,7 +50,7 @@ struct DragCrossingCoordinatorTests {
         await dwell?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
-        #expect(fired == [DisplayID(2)])
+        expectEqual(fired, [DisplayID(2)])
     }
 
     @Test("Returning home before the dwell disarms it")
@@ -72,7 +72,7 @@ struct DragCrossingCoordinatorTests {
             homeDisplay: DisplayID(1)
         )
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(fired == 0)
+        expectEqual(fired, 0)
     }
 
     @Test("A cursor over no display disarms the dwell")
@@ -96,7 +96,7 @@ struct DragCrossingCoordinatorTests {
             homeDisplay: DisplayID(1)
         )
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(fired == 0)
+        expectEqual(fired, 0)
     }
 
     @Test("endGesture disarms the pending dwell and reports")
@@ -112,9 +112,9 @@ struct DragCrossingCoordinatorTests {
         )
         // Nothing crossed yet — the drop landed before the
         // dwell elapsed (the fast flick #492 still owns).
-        #expect(crossing.endGesture(id) == false)
+        expectEqual(crossing.endGesture(id), false)
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(fired == 0)
+        expectEqual(fired, 0)
     }
 
     @Test("Gesture bookkeeping: origin once, crossed, cleared")
@@ -125,15 +125,15 @@ struct DragCrossingCoordinatorTests {
         // A second crossing keeps the FIRST home — that is the
         // abnormal-cancel restore point.
         crossing.recordOriginIfNeeded(id, space: "B", index: 0)
-        #expect(crossing.origin(for: id)?.space == SpaceID("A"))
-        #expect(crossing.origin(for: id)?.index == 2)
-        #expect(crossing.hasCrossed(id) == false)
+        expectEqual(crossing.origin(for: id)?.space, SpaceID("A"))
+        expectEqual(crossing.origin(for: id)?.index, 2)
+        expectEqual(crossing.hasCrossed(id), false)
         crossing.markCrossed(id)
         #expect(crossing.hasCrossed(id))
-        #expect(crossing.endGesture(id) == true)
+        expectEqual(crossing.endGesture(id), true)
         // Ended: a reused WindowID starts clean.
         #expect(crossing.origin(for: id) == nil)
-        #expect(crossing.hasCrossed(id) == false)
+        expectEqual(crossing.hasCrossed(id), false)
     }
 
     @Test("rekey moves the gesture record; the dwell dies")
@@ -152,23 +152,23 @@ struct DragCrossingCoordinatorTests {
         )
         crossing.rekey(old: old, new: new)
         // The bookkeeping follows the id swap (#308)…
-        #expect(crossing.origin(for: new)?.space == SpaceID("A"))
-        #expect(crossing.origin(for: new)?.index == 1)
+        expectEqual(crossing.origin(for: new)?.space, SpaceID("A"))
+        expectEqual(crossing.origin(for: new)?.index, 1)
         #expect(crossing.hasCrossed(new))
         #expect(crossing.origin(for: old) == nil)
         // …but the armed dwell dies with the aborted gesture.
         try await Task.sleep(nanoseconds: 150_000_000)
-        #expect(fired == 0)
+        expectEqual(fired, 0)
     }
 
     @Test("A sticky refusal is remembered for the gesture")
     func stickyRefusalOnce() {
         let crossing = makeCoordinator()
         let id = WindowID(1)
-        #expect(crossing.stickyRefused(id) == false)
+        expectEqual(crossing.stickyRefused(id), false)
         crossing.markStickyRefused(id)
         #expect(crossing.stickyRefused(id))
         crossing.endGesture(id)
-        #expect(crossing.stickyRefused(id) == false)
+        expectEqual(crossing.stickyRefused(id), false)
     }
 }

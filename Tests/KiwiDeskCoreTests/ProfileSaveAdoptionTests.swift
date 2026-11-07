@@ -88,8 +88,8 @@ struct ProfileSaveAdoptionTests {
         core.state.workspaces.add(WindowID(3), to: "1")
 
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1)])
-        #expect(members(core, "2") == [WindowID(2), WindowID(3)])
+        expectEqual(members(core, "1"), [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(2), WindowID(3)])
     }
 
     /// The existing-profile branch files too, and it takes a save
@@ -115,9 +115,9 @@ struct ProfileSaveAdoptionTests {
         let filed = core.state.profilePartitioning.remembered(
             for: .profile("A")
         )
-        #expect(filed?["1"] == [WindowID(1), WindowID(2)])
-        #expect(filed?["2"] == [])
-        #expect(core.profiles.currentName == "B")
+        expectEqual(filed?["1"], [WindowID(1), WindowID(2)])
+        expectEqual(filed?["2"], [])
+        expectEqual(core.profiles.currentName, "B")
     }
 
     /// The third `profiles.save` exit. `applyStandard` composes
@@ -157,12 +157,12 @@ struct ProfileSaveAdoptionTests {
                 mainID: DisplayID(1)
             )
         )
-        #expect(core.profiles.currentName == name)
+        expectEqual(core.profiles.currentName, name)
         let filed = core.state.profilePartitioning.remembered(
             for: .profile("A")
         )
-        #expect(filed?["1"] == [WindowID(1)])
-        #expect(filed?["2"] == [WindowID(2)])
+        expectEqual(filed?["1"], [WindowID(1)])
+        expectEqual(filed?["2"], [WindowID(2)])
     }
 
     /// The #634 tier-1 discard forgets saved arrangements but is
@@ -178,10 +178,10 @@ struct ProfileSaveAdoptionTests {
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
         try core.persistProfile(named: "A", modes: nil)
-        #expect(core.profiles.currentName == "A")
+        expectEqual(core.profiles.currentName, "A")
 
         core.discardSavedArrangement()
-        #expect(core.profiles.currentName == "A")
+        expectEqual(core.profiles.currentName, "A")
 
         // A's arrangement is still filed by the next write, so
         // the round trip below survives the discard.
@@ -192,8 +192,8 @@ struct ProfileSaveAdoptionTests {
         core.state.workspaces.add(WindowID(2), to: "1")
 
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1)])
-        #expect(members(core, "2") == [WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(2)])
     }
 
     /// The apply door judges the #36 fit itself, so every caller
@@ -225,7 +225,7 @@ struct ProfileSaveAdoptionTests {
         misfit.upsert(MonitorSet(monitors: ["Nowhere:640x480"]))
         misfit.release(fitting.monitorSets[0].monitors)
         core.apply(profile: misfit, cause: .event)
-        #expect(core.profiles.currentName == "B")
+        expectEqual(core.profiles.currentName, "B")
         #expect(core.profiles.isDirty)
     }
 
@@ -273,7 +273,7 @@ struct ProfileSaveAdoptionTests {
         try core.profiles.write(fitting)
         core.reapplyIfInEffect("A")
         #expect(!core.profiles.isDirty)
-        #expect(core.profiles.currentName == "A")
+        expectEqual(core.profiles.currentName, "A")
     }
 
     /// The #634 reset and a backup restore both end adoption, and
@@ -305,7 +305,7 @@ struct ProfileSaveAdoptionTests {
         core.apply(profile: b, cause: .event)
         // No prune, so the boot-restored space survives...
         #expect(core.state.workspaces["restored"] != nil)
-        #expect(members(core, "restored") == [WindowID(1)])
+        expectEqual(members(core, "restored"), [WindowID(1)])
         // ...and nothing was filed under the reset profile.
         #expect(
             core.state.profilePartitioning.remembered(for: .profile("A"))

@@ -37,7 +37,7 @@ struct MenuBarRevealPaymentTests {
         core.payMenuBarRevealIfDue()
         #expect(core.menuBarReveal.debt == nil)
         #expect(lines.contain("menu bar hidden; returning w1"))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 
     /// The bar a reveal shows is macOS's: opening or picking in
@@ -57,7 +57,7 @@ struct MenuBarRevealPaymentTests {
         core.payMenuBarRevealIfDue()
         #expect(core.menuBarReveal.debt == nil)
         #expect(lines.contain("menu bar hidden; returning w1"))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 
     @Test("A commanded focus while the return is owed drops it")
@@ -72,7 +72,7 @@ struct MenuBarRevealPaymentTests {
         #expect(lines.contain("a commanded focus since"))
         #expect(!lines.contain("menu bar hidden"))
         // The command chose the focus; nothing is handed back.
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 
     @Test("A return owed past its bound is dropped")
@@ -98,13 +98,13 @@ struct MenuBarRevealPaymentTests {
         let core = F.makeCore(inStrip: false)
         core.statusMenuDidOpen()
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
         core.payMenuBarRevealIfDue()
         #expect(core.menuBarReveal.debt != nil)
         core.statusMenuDidClose()
         core.payMenuBarRevealIfDue()
         #expect(core.menuBarReveal.debt == nil)
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 
     /// The click that closes the quick menu is no choice either.
@@ -122,7 +122,7 @@ struct MenuBarRevealPaymentTests {
         core.statusMenuDidClose()
         core.payMenuBarRevealIfDue()
         #expect(lines.contain("menu bar hidden; returning w1"))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 
     /// The reason the re-assert is a stamped raise and not the
@@ -137,7 +137,7 @@ struct MenuBarRevealPaymentTests {
         core.handle(.windowFocused(WindowID(2)))
         core.mouse.pointerInMenuBarStrip = { false }
         core.payMenuBarRevealIfDue()
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
         #expect(core.tiler.placements.recent(WindowID(2)) == nil)
     }
 
@@ -269,6 +269,6 @@ struct MenuBarRevealPaymentTests {
         core.payMenuBarRevealIfDue()
         #expect(core.menuBarReveal.debt == nil)
         #expect(lines.contain("menu bar hidden; returning w1"))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 }

@@ -21,17 +21,17 @@ struct ShelfScrollInputTests {
     @Test("A wheel notch moves about one item, either wheel axis")
     func wheelNotch() {
         // Wheel down (negative y) moves toward the end.
-        #expect(travel(0, -1) == 40)
-        #expect(travel(0, 1) == -40)
+        expectEqual(travel(0, -1), 40)
+        expectEqual(travel(0, 1), -40)
         // Tilt and shift-wheel arrive as x.
-        #expect(travel(-1, 0) == 40)
+        expectEqual(travel(-1, 0), 40)
     }
 
     @Test("A trackpad moves by its points on the dominant axis")
     func trackpadPoints() {
         let gain = ShelfScrollInput.trackpadGain
-        #expect(travel(-12, 3, precise: true) == 12 * gain)
-        #expect(travel(2, -30, precise: true) == 30 * gain)
+        expectEqual(travel(-12, 3, precise: true), 12 * gain)
+        expectEqual(travel(2, -30, precise: true), 30 * gain)
     }
 
     /// `scrollingDelta` already carries the user's natural
@@ -42,12 +42,12 @@ struct ShelfScrollInputTests {
     func naturalScrollingPassesThrough() {
         let natural = travel(0, 20, precise: true)
         let classic = travel(0, -20, precise: true)
-        #expect(natural == -classic)
-        #expect(natural == -20 * ShelfScrollInput.trackpadGain)
+        expectEqual(natural, -classic)
+        expectEqual(natural, -20 * ShelfScrollInput.trackpadGain)
     }
 
     @Test("No movement, no travel")
     func still() {
-        #expect(travel(0, 0) == 0)
+        expectEqual(travel(0, 0), 0)
     }
 }

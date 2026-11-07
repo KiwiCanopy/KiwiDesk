@@ -123,6 +123,6 @@ struct ShelfRevealSlideEdgeTests {
                 as? CABasicAnimation
         )
         let from = try #require(slide.fromValue as? NSValue).pointValue
-        #expect(from == standing)
+        expectEqual(from, standing)
     }
 }

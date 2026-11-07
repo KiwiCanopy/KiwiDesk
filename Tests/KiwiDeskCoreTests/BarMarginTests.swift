@@ -53,15 +53,15 @@ struct BarMarginTests {
     func outerMarginInsetsTheStrip() {
         let shelf = shelf(outer: 8)
         let strip = ShelfGeometry.strip(in: visible, edge: .top, shelf: shelf)
-        #expect(strip.minY == visible.minY + 8)
-        #expect(strip.height == 32)
-        #expect(strip.width == visible.width)
+        expectEqual(strip.minY, visible.minY + 8)
+        expectEqual(strip.height, 32)
+        expectEqual(strip.width, visible.width)
         let remaining = ShelfGeometry.remainingFrame(
             in: visible,
             edges: [.top],
             shelf: shelf
         )
-        #expect(remaining.minY == visible.minY + 8 + 32)
+        expectEqual(remaining.minY, visible.minY + 8 + 32)
     }
 
     @Test("The inner margin reserves room, moving no strip")
@@ -72,14 +72,14 @@ struct BarMarginTests {
             edge: .bottom,
             shelf: shelf
         )
-        #expect(strip.maxY == visible.maxY)
+        expectEqual(strip.maxY, visible.maxY)
         let remaining = ShelfGeometry.remainingFrame(
             in: visible,
             edges: [.bottom],
             shelf: shelf
         )
-        #expect(remaining.maxY == visible.maxY - 32 - 6)
-        #expect(shelf.reservation == 38)
+        expectEqual(remaining.maxY, visible.maxY - 32 - 6)
+        expectEqual(shelf.reservation, 38)
     }
 
     /// The windows keep their outer gap beyond the shelf — never
@@ -97,7 +97,7 @@ struct BarMarginTests {
             ),
             outer: outer
         )
-        #expect(area.maxY == visible.maxY - 32 - 10)
+        expectEqual(area.maxY, visible.maxY - 32 - 10)
     }
 
     @Test("Shelf margins move the strip in and the windows further")
@@ -108,8 +108,8 @@ struct BarMarginTests {
             edge: .bottom,
             shelf: shelf
         )
-        #expect(strip.maxY == visible.maxY - 5)
-        #expect(strip.height == 32)
+        expectEqual(strip.maxY, visible.maxY - 5)
+        expectEqual(strip.height, 32)
         let area = LayoutContext.usable(
             settings(shelf, edge: .bottom).layoutBounds(
                 from: visible,
@@ -119,7 +119,7 @@ struct BarMarginTests {
             ),
             outer: Gaps.uniform(10).outer
         )
-        #expect(area.maxY == visible.maxY - 5 - 32 - 7 - 10)
+        expectEqual(area.maxY, visible.maxY - 5 - 32 - 7 - 10)
     }
 
     /// Both bars sit on the one strip (#1517): showing the Space
@@ -140,8 +140,8 @@ struct BarMarginTests {
                 on: nil,
                 pocketAtRest: false
             )
-        #expect(both == one)
-        #expect(both.minY == visible.minY + 2 + 32 + 3)
+        expectEqual(both, one)
+        expectEqual(both.minY, visible.minY + 2 + 32 + 3)
     }
 
     @Test("Absent keys decode to 0 and a negative one is floored")
@@ -151,16 +151,16 @@ struct BarMarginTests {
             KiwiShelf.self,
             from: Data("{}".utf8)
         )
-        #expect(bare.outerMargin == 0)
-        #expect(bare.innerMargin == 0)
+        expectEqual(bare.outerMargin, 0)
+        expectEqual(bare.innerMargin, 0)
         let negative = try decoder.decode(
             KiwiShelf.self,
             from: Data(
                 #"{"outer_margin": -3, "inner_margin": -1}"#.utf8
             )
         )
-        #expect(negative.outerMargin == 0)
-        #expect(negative.innerMargin == 0)
+        expectEqual(negative.outerMargin, 0)
+        expectEqual(negative.innerMargin, 0)
     }
 }
 
@@ -193,8 +193,8 @@ struct BarMarginCommandTests {
                 args: [.number(4)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.outerMargin == 12)
-        #expect(core.tiler.settings.kiwishelf.innerMargin == 4)
+        expectEqual(core.tiler.settings.kiwishelf.outerMargin, 12)
+        expectEqual(core.tiler.settings.kiwishelf.innerMargin, 4)
         #expect(
             core.execute(
                 "kiwishelf.set_outer_margin",
@@ -207,8 +207,8 @@ struct BarMarginCommandTests {
                 args: [.number(-2)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.outerMargin == 6)
-        #expect(core.tiler.settings.kiwishelf.innerMargin == 0)
+        expectEqual(core.tiler.settings.kiwishelf.outerMargin, 6)
+        expectEqual(core.tiler.settings.kiwishelf.innerMargin, 0)
         #expect(
             !core.execute(
                 "kiwishelf.set_outer_margin",
@@ -232,6 +232,6 @@ struct BarMarginCommandTests {
                 args: [.number(3)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.outerMargin == 0)
+        expectEqual(core.tiler.settings.kiwishelf.outerMargin, 0)
     }
 }

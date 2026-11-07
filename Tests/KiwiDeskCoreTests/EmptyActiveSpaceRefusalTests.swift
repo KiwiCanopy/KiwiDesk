@@ -70,9 +70,9 @@ struct EmptyActiveSpaceRefusalTests {
         addWindow(core, 1, pid: pid, app: "Finder")
         core.execute("focus_space", args: [.string("2")])
         pinDisplay(core, Self.displayA, spaces: ["1", "2"])
-        #expect(core.activeSpace?.id == SpaceID("2"))
+        expectEqual(core.activeSpace?.id, SpaceID("2"))
         #expect(core.focusedWindowID == nil)
-        #expect(core.state.workspaces[SpaceID("1")]?.focused == WindowID(1))
+        expectEqual(core.state.workspaces[SpaceID("1")]?.focused, WindowID(1))
     }
 
     @Test("The refusal names the empty Space and the marked window")
@@ -165,7 +165,7 @@ struct EmptyActiveSpaceRefusalTests {
         // while the member stays.
         core.state.workspaces.add(WindowID(1), to: SpaceID("1"))
         #expect(core.focusedWindowID == nil)
-        #expect(core.activeSpace?.windows == [WindowID(1)])
+        expectEqual(core.activeSpace?.windows, [WindowID(1)])
         core.frontmostPIDProvider = { 1 }
         let response = core.execute(
             "move_to_desktop",
@@ -192,7 +192,7 @@ struct EmptyActiveSpaceRefusalTests {
             "move_to_desktop",
             args: [.number(1)]
         )
-        #expect(response.error == "the active Space 2 is empty")
+        expectEqual(response.error, "the active Space 2 is empty")
     }
 
     /// A Space on ANOTHER screen lays its windows out there, so
@@ -210,7 +210,7 @@ struct EmptyActiveSpaceRefusalTests {
             "move_to_desktop",
             args: [.number(1)]
         )
-        #expect(response.error == "the active Space 2 is empty")
+        expectEqual(response.error, "the active Space 2 is empty")
     }
 
     /// Two sibling Spaces each marking a focus, in Space order
@@ -229,7 +229,7 @@ struct EmptyActiveSpaceRefusalTests {
         // Space 1 marks 1, Space 3 marks 2; the last honored
         // focus is window 2, in the later-created Space.
         core.state.workspaces.focus(WindowID(2), in: SpaceID("3"))
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
         #expect(
             core.state.workspaces.allSpaces.map(\.id)
                 == [SpaceID("1"), SpaceID("3"), SpaceID("2")]
@@ -261,7 +261,7 @@ struct EmptyActiveSpaceRefusalTests {
         pinDisplay(core, Self.displayA, spaces: ["1", "2", "3"])
         pinDisplay(core, Self.displayB, spaces: ["5"])
         core.state.workspaces.focus(WindowID(5), in: SpaceID("5"))
-        #expect(core.state.workspaces.lastFocused == WindowID(5))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(5))
         core.frontmostPIDProvider = { 1 }
         let response = core.execute(
             "move_to_desktop",
@@ -288,8 +288,8 @@ struct EmptyActiveSpaceRefusalTests {
             ?? ""
         let recovery = error.components(separatedBy: " — ").last ?? ""
         let verb = recovery.split(separator: " ").first.map(String.init)
-        #expect(verb == "focus_space")
-        #expect(verb.map(APIReference.dispatchable.contains) == true)
+        expectEqual(verb, "focus_space")
+        expectEqual(verb.map(APIReference.dispatchable.contains), true)
     }
 
     /// Under All screens a focus key on an empty Space passes the
@@ -301,11 +301,11 @@ struct EmptyActiveSpaceRefusalTests {
         let core = makeCore()
         arriveOnEmptySpace(core, pid: 1)
         core.frontmostPIDProvider = { 1 }
-        #expect(core.focusWrap.mode == .allScreens)
+        expectEqual(core.focusWrap.mode, .allScreens)
         let all = core.execute("focus", args: [.string("right")])
-        #expect(all.error?.contains("is empty") == true)
+        expectEqual(all.error?.contains("is empty"), true)
         core.execute("set_focus_wrap", args: [.string("off")])
         let off = core.execute("focus", args: [.string("right")])
-        #expect(off.error?.contains("is empty") == true)
+        expectEqual(off.error?.contains("is empty"), true)
     }
 }

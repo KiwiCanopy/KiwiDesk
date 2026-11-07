@@ -120,12 +120,12 @@ struct ProcessPolicyReadingTests {
         box.census = [parent: [WindowID(1)]]
         loop.healSweep()
         box.policyReads = 0
-        #expect(loop.policy(of: parent) == .regular)
+        expectEqual(loop.policy(of: parent), .regular)
         loop.reconcile(pid: parent, app: app(parent).ref)
-        #expect(box.policyReads == 0)
+        expectEqual(box.policyReads, 0)
         // A process never observed still asks.
         _ = loop.policy(of: other)
-        #expect(box.policyReads == 1)
+        expectEqual(box.policyReads, 1)
     }
 
     @Test("a heal over watched apps never walks the app list")
@@ -138,17 +138,17 @@ struct ProcessPolicyReadingTests {
         #expect(loop.observes(pid: parent))
         box.listings = 0
         loop.healSweep()
-        #expect(box.listings == 0)
+        expectEqual(box.listings, 0)
         // A quieted unwatched app asks nothing of the list.
         box.census[other] = [WindowID(3)]
         loop.healQuiet[other] = [WindowID(3)]
         loop.healSweep()
-        #expect(box.listings == 0)
+        expectEqual(box.listings, 0)
         // Two unwatched apps the gate lets in: one walk.
         box.census[child] = [WindowID(2)]
         loop.healQuiet = [:]
         loop.healSweep()
-        #expect(box.listings == 1)
+        expectEqual(box.listings, 1)
         #expect(loop.observes(pid: other))
         #expect(loop.observes(pid: child))
     }
@@ -170,13 +170,13 @@ struct ProcessPolicyReadingTests {
             ]
         }
         loop.reconcileAll()
-        #expect(loop.policy(of: parent) == .accessory)
+        expectEqual(loop.policy(of: parent), .accessory)
         // The heal's walk, opened by an unwatched app, files the
         // watched one's policy too.
         loop.runningApplications = { self.listing }
         box.census[other] = [WindowID(3)]
         loop.healSweep()
-        #expect(loop.policy(of: parent) == .regular)
+        expectEqual(loop.policy(of: parent), .regular)
         // A created window reads once, ahead of its verdicts.
         loop.activationPolicy = { _ in .accessory }
         loop.handle(
@@ -185,7 +185,7 @@ struct ProcessPolicyReadingTests {
             pid: parent,
             app: app(parent).ref
         )
-        #expect(loop.policy(of: parent) == .accessory)
+        expectEqual(loop.policy(of: parent), .accessory)
         // So does a window returning from the Dock.
         loop.activationPolicy = { _ in .regular }
         loop.handle(
@@ -194,7 +194,7 @@ struct ProcessPolicyReadingTests {
             pid: parent,
             app: app(parent).ref
         )
-        #expect(loop.policy(of: parent) == .regular)
+        expectEqual(loop.policy(of: parent), .regular)
     }
 
     @Test("a record lost for a moment keeps a running process")
@@ -206,16 +206,16 @@ struct ProcessPolicyReadingTests {
         loop.onLog = { logs.append($0) }
         loop.notePolicy(nil, of: parent)
         loop.notePolicy(nil, of: parent)
-        #expect(loop.policy(of: parent) == .regular)
+        expectEqual(loop.policy(of: parent), .regular)
         // One absence, one line.
-        #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 1)
+        expectEqual(logs.filter { $0.hasPrefix("ownership:") }.count, 1)
         loop.reconcile(pid: parent, app: app(parent).ref)
         #expect(loop.observes(pid: parent))
         // The record back, then lost again: news again.
         loop.notePolicy(.regular, of: parent)
         loop.notePolicy(nil, of: parent)
-        #expect(loop.policy(of: parent) == .regular)
-        #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 2)
+        expectEqual(loop.policy(of: parent), .regular)
+        expectEqual(logs.filter { $0.hasPrefix("ownership:") }.count, 2)
     }
 
     @Test("an unnamed exit keeps a running process whose record is lost")
@@ -228,7 +228,7 @@ struct ProcessPolicyReadingTests {
         loop.retireExitedObservers()
         #expect(loop.observes(pid: parent))
         #expect(loop.observes(pid: child))
-        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+        expectEqual(loop.processIdentity.unlisted[child], Self.bundle)
         // Gone by the process table, record or not: retired.
         box.alive[child] = nil
         loop.retireExitedObservers()
@@ -243,7 +243,7 @@ struct ProcessPolicyReadingTests {
         loop.healSweep()
         box.alive[parent] = nil
         loop.notePolicy(nil, of: parent)
-        #expect(loop.policy(of: parent) == .prohibited)
+        expectEqual(loop.policy(of: parent), .prohibited)
         loop.reconcile(pid: parent, app: app(parent).ref)
         #expect(!loop.observes(pid: parent))
     }
@@ -252,7 +252,7 @@ struct ProcessPolicyReadingTests {
     func unobservedProcessIsProhibited() {
         let (loop, _) = makeLoop()
         loop.activationPolicy = { _ in nil }
-        #expect(loop.policy(of: other) == .prohibited)
+        expectEqual(loop.policy(of: other), .prohibited)
     }
 
     @Test("the policy read last is the one kept")
@@ -261,9 +261,9 @@ struct ProcessPolicyReadingTests {
         box.census = [parent: [WindowID(1)]]
         loop.healSweep()
         loop.notePolicy(.accessory, of: parent)
-        #expect(loop.policy(of: parent) == .accessory)
+        expectEqual(loop.policy(of: parent), .accessory)
         loop.notePolicy(nil, of: parent)
-        #expect(loop.policy(of: parent) == .accessory)
+        expectEqual(loop.policy(of: parent), .accessory)
     }
 
     @Test("an unlisted process that stopped running leaves the register")
@@ -271,7 +271,7 @@ struct ProcessPolicyReadingTests {
         let (loop, box) = makeLoop()
         box.census = [child: [WindowID(2)]]
         loop.healSweep()
-        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+        expectEqual(loop.processIdentity.unlisted[child], Self.bundle)
         box.alive[child] = nil
         _ = loop.liveApps(owners: [])
         #expect(loop.processIdentity.unlisted[child] == nil)

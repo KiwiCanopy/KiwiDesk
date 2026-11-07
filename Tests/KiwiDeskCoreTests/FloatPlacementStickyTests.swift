@@ -122,7 +122,7 @@ struct FloatPlacementStickyTests {
         #expect(core.state.workspaces.space(of: WindowID(4)) == SpaceID("3"))
         #expect(core.execute("toggle_floating").isSuccess)
         let step = FloatPlacement.cascadeStep
-        #expect(frames[WindowID(2)] == centre.offsetBy(dx: step, dy: step))
+        expectEqual(frames[WindowID(2)], centre.offsetBy(dx: step, dy: step))
     }
 
     /// Space 2 is unshown: the ∞ float is drawn on Space 1 now and

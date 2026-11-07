@@ -102,12 +102,12 @@ struct ShelfRevealStyleTests {
         let (core, display) = try #require(
             makeCore(space: .auto, app: .hidden)
         )
-        #expect(core.tiler.settings.kiwishelf.revealStyle == .slide)
+        expectEqual(core.tiler.settings.kiwishelf.revealStyle, .slide)
         #expect(
             core.execute("kiwishelf.set_reveal_style", args: [.string("grow")])
                 .isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.revealStyle == .grow)
+        expectEqual(core.tiler.settings.kiwishelf.revealStyle, .grow)
         for style in KiwiShelf.RevealStyle.allCases {
             #expect(
                 core.execute(
@@ -128,7 +128,7 @@ struct ShelfRevealStyleTests {
         let overlay = try #require(
             core.shelves.overlayForTesting(display, edge: .top)
         )
-        #expect(overlay.revealPath.kind == .grow)
+        expectEqual(overlay.revealPath.kind, .grow)
         // The mark keeps time with the grow.
         let key = ShelfRevealer.Key(
             shelf: ShelfManager.Key(display: display, edge: .top),
@@ -165,7 +165,7 @@ struct ShelfRevealStyleTests {
             origin
                 == ShelfOverlay.screenSide(of: overlay.restRoom, edge: .bottom)
         )
-        #expect(origin.minY == overlay.restRoom.maxY)
+        expectEqual(origin.minY, overlay.restRoom.maxY)
     }
 
     /// What Settings' Reveal row greys on (owner ruling,
@@ -212,7 +212,7 @@ struct ShelfRevealStyleTests {
             KiwiShelf.self,
             from: Data("{}".utf8)
         )
-        #expect(empty.revealStyle == .slide)
+        expectEqual(empty.revealStyle, .slide)
         var shelf = KiwiShelf()
         shelf.revealStyle = .grow
         let data = try JSONEncoder().encode(shelf)

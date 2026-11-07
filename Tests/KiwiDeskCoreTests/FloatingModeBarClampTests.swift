@@ -106,7 +106,7 @@ struct FloatingModeBarClampTests {
         // is its own test below — asserting an untouched size on
         // a window that could not have been resized proves
         // nothing (code review, 2026-08-31).
-        #expect(commanded.size == frame.size)
+        expectEqual(commanded.size, frame.size)
     }
 
     @Test(
@@ -183,7 +183,7 @@ struct FloatingModeBarClampTests {
         core.state.workspaces.ensureSpace("elsewhere")
         core.state.workspaces.setMode("elsewhere", .floating)
         core.state.workspaces.activate("elsewhere")
-        #expect(core.state.workspaces.space(of: Self.window) == home)
+        expectEqual(core.state.workspaces.space(of: Self.window), home)
         #expect(!core.dropLandsUnmanaged(Self.window))
 
         // And the same window IS unmanaged once it belongs to

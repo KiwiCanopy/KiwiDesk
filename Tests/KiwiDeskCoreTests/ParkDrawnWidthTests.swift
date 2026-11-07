@@ -46,8 +46,8 @@ struct ParkDrawnWidthTests {
             drawn: drawn,
             in: Self.screen
         )
-        #expect(issued == park(width: 500, corner: .bottomLeft))
-        #expect(issued.maxX - Self.screen.minX == TilingEngine.stashPeekX)
+        expectEqual(issued, park(width: 500, corner: .bottomLeft))
+        expectEqual(issued.maxX - Self.screen.minX, TilingEngine.stashPeekX)
     }
 
     @Test("A narrower drawn width keeps the ask")
@@ -124,10 +124,10 @@ struct ParkDrawnWidthTests {
         let issued = core.tiler.placedFrames(state: core.state)
         for id in cover.behind.keys {
             let sent = try #require(core.tiler.commandedFrame(of: id))
-            #expect(issued[id] == sent)
+            expectEqual(issued[id], sent)
             #expect(core.tiler.looksStashed(sent))
-            #expect(sent.width == 700)
-            #expect(sent.maxX - Self.screen.minX == TilingEngine.stashPeekX)
+            expectEqual(sent.width, 700)
+            expectEqual(sent.maxX - Self.screen.minX, TilingEngine.stashPeekX)
         }
     }
 }

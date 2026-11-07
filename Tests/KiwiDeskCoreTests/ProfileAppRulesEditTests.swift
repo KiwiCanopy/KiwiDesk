@@ -67,8 +67,8 @@ struct ProfileAppRulesEditTests {
 
         let config = try core.loadGuiConfig(editing: "Work")
 
-        #expect(config.appRules["mail"] == SpaceID(3))
-        #expect(config.appRules["safari"] == SpaceID(4))
+        expectEqual(config.appRules["mail"], SpaceID(3))
+        expectEqual(config.appRules["safari"], SpaceID(4))
         // The tombstoned base pin is absent from the resolved
         // map the tabs edit.
         #expect(config.appRules["music"] == nil)
@@ -93,7 +93,7 @@ struct ProfileAppRulesEditTests {
 
         let saved = try core.profiles.read(name: "Work")
         let stored = try #require(saved.appRules)
-        #expect(stored == override)
+        expectEqual(stored, override)
     }
 
     @Test("Unchanged edit session preserves the override")
@@ -110,7 +110,7 @@ struct ProfileAppRulesEditTests {
         )
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.appRules == override)
+        expectEqual(saved.appRules, override)
     }
 
     @Test("Reverting to base clears the override (nil, sparse)")
@@ -157,6 +157,6 @@ struct ProfileAppRulesEditTests {
         )
 
         let after = try Data(contentsOf: sidecarURL)
-        #expect(after == before)
+        expectEqual(after, before)
     }
 }

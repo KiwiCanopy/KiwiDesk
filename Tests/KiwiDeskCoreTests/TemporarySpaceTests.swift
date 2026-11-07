@@ -72,7 +72,7 @@ struct TemporarySpaceTests {
             )
         )
         core.execute("load_profile", args: [.string("wider")])
-        #expect(core.state.workspaces[scratch]?.windows == [WindowID(13)])
+        expectEqual(core.state.workspaces[scratch]?.windows, [WindowID(13)])
         #expect(!core.isTemporary(scratch))
     }
 
@@ -128,10 +128,10 @@ struct TemporarySpaceTests {
         )
         core.loadConfig()
         #expect(core.isTemporary(scratch))
-        #expect(core.spacePins[SpaceID(7)] == desk.dell.fingerprint)
+        expectEqual(core.spacePins[SpaceID(7)], desk.dell.fingerprint)
         core.execute("load_profile", args: [.string("desk")])
         #expect(core.isTemporary(scratch))
-        #expect(core.state.workspaces[scratch]?.windows == [WindowID(13)])
+        expectEqual(core.state.workspaces[scratch]?.windows, [WindowID(13)])
         core.execute("load_profile", args: [.string("solo")])
         // With windows it is held, and comes back temporary; empty,
         // it drops (#1790).
@@ -139,7 +139,7 @@ struct TemporarySpaceTests {
             core.state.heldSpaces.first { $0.value.name == scratch }
         )
         #expect(held.value.isTemporary)
-        #expect(core.state.workspaces[held.key]?.windows == [WindowID(13)])
+        expectEqual(core.state.workspaces[held.key]?.windows, [WindowID(13)])
         #expect(core.state.workspaces[SpaceID(7)] == nil)
         #expect(core.liveTemporarySpaces.isEmpty)
     }
@@ -159,7 +159,7 @@ struct TemporarySpaceTests {
             core.state.heldSpaces.first { $0.value.name == scratch }
         )
         #expect(held.value.isTemporary)
-        #expect(core.state.workspaces.space(of: WindowID(13)) == held.key)
+        expectEqual(core.state.workspaces.space(of: WindowID(13)), held.key)
     }
 
     @Test("it deletes itself once emptied, and waits while shown")
@@ -198,7 +198,7 @@ struct TemporarySpaceTests {
         let fresh = SpaceID(12)
         core.execute("focus_space", args: [.string(fresh.raw)])
         #expect(core.isTemporary(fresh))
-        #expect(core.state.workspaces.activeSpace == fresh)
+        expectEqual(core.state.workspaces.activeSpace, fresh)
         core.execute("focus_space", args: [.string("1")])
         #expect(core.state.workspaces[fresh] == nil)
         #expect(core.state.workspaces[SpaceID(7)] != nil)
@@ -217,9 +217,9 @@ struct TemporarySpaceTests {
             )
         }
         let order = core.state.workspaces.allSpaces.map(\.id)
-        #expect(Array(order.prefix(declared.count)) == declared)
+        expectEqual(Array(order.prefix(declared.count)), declared)
         let temporaries = order.filter(core.isTemporary)
-        #expect(temporaries == [SpaceID(6), SpaceID(7), SpaceID(8)])
+        expectEqual(temporaries, [SpaceID(6), SpaceID(7), SpaceID(8)])
     }
 
     @Test("a hidden app's window keeps it")
@@ -263,7 +263,7 @@ struct TemporarySpaceTests {
         let scratch = SpaceID("scratch")
         core.execute("create_space", args: [.string(scratch.raw)])
         // The Standard's own Spaces are declared by it.
-        #expect(core.liveTemporarySpaces == [scratch])
+        expectEqual(core.liveTemporarySpaces, [scratch])
         core.execute("load_profile", args: [.string("desk")])
         #expect(core.state.workspaces[scratch] == nil)
     }
@@ -306,9 +306,9 @@ struct TemporarySpaceTests {
             args: [.string("7"), .string("monocle")]
         )
         core.execute("load_profile", args: [.string("desk")])
-        #expect(core.state.workspaces[SpaceID(7)]?.mode == .monocle)
+        expectEqual(core.state.workspaces[SpaceID(7)]?.mode, .monocle)
         core.applyProfileScopedState(from: core.guiConfigSeed())
-        #expect(core.state.workspaces[SpaceID(7)]?.mode == .monocle)
+        expectEqual(core.state.workspaces[SpaceID(7)]?.mode, .monocle)
     }
 
     /// A settings leaf written through the door leaves what is
@@ -335,6 +335,6 @@ struct TemporarySpaceTests {
         )
         core.applyProfileScopedState(from: core.guiConfigSeed())
         #expect(core.isTemporary(SpaceID(7)))
-        #expect(core.spacePins[SpaceID(7)] == desk.dell.fingerprint)
+        expectEqual(core.spacePins[SpaceID(7)], desk.dell.fingerprint)
     }
 }

@@ -62,8 +62,8 @@ struct MoveToSpaceTests {
         let core = makeCore()
         addWindow(core, 1)
         // A freshly created window is its space's focus.
-        #expect(core.activeSpace?.id == SpaceID(1))
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.id, SpaceID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
 
         let response = core.execute(
             "move_to_space",
@@ -71,7 +71,7 @@ struct MoveToSpaceTests {
         )
         #expect(response.isSuccess)
         // No follow: we stay on space 1 ...
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
         // ... but the window now lives in space 2, as its focus.
         #expect(
             core.state.workspaces[SpaceID(2)]?.windows
@@ -96,8 +96,8 @@ struct MoveToSpaceTests {
             "focus_space",
             args: [.string("2")]
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID(2))
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Follow keeps focus on the moved window")
@@ -106,13 +106,13 @@ struct MoveToSpaceTests {
         addWindow(core, 1)
         addWindow(core, 2)
         // Window 2 is the active-space focus; move+follow it.
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         core.execute(
             "move_to_space_and_follow",
             args: [.string("3")]
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID(3))
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
         // Space 1 retains its other window and re-picks a focus.
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows
@@ -172,7 +172,7 @@ struct MoveToSpaceTests {
         // The prior settle is cancelled AND a fresh one scheduled
         // for the new target — not merely cancelled.
         let second = core.deferred.task(for: .spaceSettle)
-        #expect(first?.isCancelled == true)
+        expectEqual(first?.isCancelled, true)
         #expect(second != nil)
         #expect(second != first)
     }

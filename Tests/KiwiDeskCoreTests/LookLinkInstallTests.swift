@@ -29,16 +29,16 @@ struct LookLinkInstallTests {
             from: link,
             fallbackName: "My Look"
         )
-        #expect(look.galleryID == "dusk")
+        expectEqual(look.galleryID, "dusk")
         let stored = try core.lookLibrary.libraryLooks()
             .first { $0.name == "Dusk" }
-        #expect(stored?.galleryID == "dusk")
+        expectEqual(stored?.galleryID, "dusk")
         let encoded = try JSONEncoder().encode(look)
         #expect(
             String(decoding: encoded, as: UTF8.self)
                 .contains("\"gallery_id\":\"dusk\"")
         )
-        #expect(stored?.author == "Anna")
+        expectEqual(stored?.author, "Anna")
     }
 
     @Test("another gallery look under a taken name takes a free one")
@@ -51,7 +51,7 @@ struct LookLinkInstallTests {
             from: other,
             fallbackName: "x"
         )
-        #expect(second.name == "Dusk 2")
+        expectEqual(second.name, "Dusk 2")
     }
 
     /// #2943: a re-add found the look by name only, so it saved a copy.
@@ -65,7 +65,7 @@ struct LookLinkInstallTests {
             from: link,
             fallbackName: "x"
         )
-        #expect(again.name == "Evening")
+        expectEqual(again.name, "Evening")
         #expect(
             try core.lookLibrary.libraryLooks().map(\.name) == ["Evening"]
         )
@@ -80,7 +80,7 @@ struct LookLinkInstallTests {
             copy.galleryID = "dusk"
             try core.lookLibrary.save(copy)
         }
-        #expect(core.heldGalleryLook(for: link)?.name == "Copy")
+        expectEqual(core.heldGalleryLook(for: link)?.name, "Copy")
     }
 
     @Test("a look started from it credits the gallery id")
@@ -99,7 +99,7 @@ struct LookLinkInstallTests {
                 == LookCredit(name: "Dusk", author: "Anna", id: "dusk")
         )
         let share = LookShare(name: "Mine", settings: settings)
-        #expect(share.basedOnField == "dusk")
+        expectEqual(share.basedOnField, "dusk")
     }
 
     @Test("an exported file leaves the gallery id behind")

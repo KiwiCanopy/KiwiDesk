@@ -92,7 +92,7 @@ struct OwnPressProvenanceTests {
             at: CGPoint(x: inside.midX, y: inside.midY)
         )
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     @Test("Without the stamp the same report is bounced")
@@ -100,6 +100,6 @@ struct OwnPressProvenanceTests {
         let (core, target, other) = makeFixture()
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 }

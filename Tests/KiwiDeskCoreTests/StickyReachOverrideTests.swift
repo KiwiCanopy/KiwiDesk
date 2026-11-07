@@ -105,9 +105,9 @@ struct StickyReachOverrideTests {
         let id = WindowID(1)
         core.state.stickyReachOverrides[id] = false
         core.handle(.windowDestroyed(id, wasMinimized: true))
-        #expect(core.state.stickyReachOverrides[id] == false)
+        expectEqual(core.state.stickyReachOverrides[id], false)
         core.handle(.windowHidden(id))
-        #expect(core.state.stickyReachOverrides[id] == false)
+        expectEqual(core.state.stickyReachOverrides[id], false)
         core.handle(.windowDestroyed(id, wasMinimized: false))
         #expect(core.state.stickyReachOverrides[id] == nil)
     }

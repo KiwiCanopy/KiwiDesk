@@ -158,11 +158,11 @@ struct CommandBarIgnoreTests {
     @Test("a tracked window keeps its verdict from below the level")
     func trackedWindowIsJudgedBelowTheLevel() {
         let level = FloatDetection.screenSaverLayer
-        #expect(FloatDetection.judgedLayer(level, tracked: false) == level)
+        expectEqual(FloatDetection.judgedLayer(level, tracked: false), level)
         #expect(
             FloatDetection.judgedLayer(level + 1, tracked: true) == level - 1
         )
-        #expect(FloatDetection.judgedLayer(8, tracked: true) == 8)
+        expectEqual(FloatDetection.judgedLayer(8, tracked: true), 8)
     }
 
     /// A focus report for a screen-saver-level window arms the

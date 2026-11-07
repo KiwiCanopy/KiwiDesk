@@ -141,7 +141,7 @@ struct DesktopSwitchGuardTests {
             args: [.number(2)]
         )
         #expect(!response.isSuccess)
-        #expect(core.lastDesktopSwitch == before)
+        expectEqual(core.lastDesktopSwitch, before)
         // An unhidden origin under a refused set is the old
         // behavior; an origin hidden under one is a blank
         // screen.
@@ -230,7 +230,7 @@ struct DesktopSwitchGuardTests {
             core.execute("focus_desktop", args: [.number(2)])
                 .isSuccess
         )
-        #expect(Bridge.switches == [11])
+        expectEqual(Bridge.switches, [11])
         #expect(Bridge.hides.isEmpty)
     }
 

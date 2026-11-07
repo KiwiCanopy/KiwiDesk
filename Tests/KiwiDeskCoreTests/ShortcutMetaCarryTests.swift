@@ -44,7 +44,7 @@ struct ShortcutMetaCarryTests {
         var row = KeyBinding()
         let meta = KeyBindingMeta(desc: "D", group: "G", symbol: "star")
         row.meta = meta
-        #expect(row.meta == meta)
+        expectEqual(row.meta, meta)
         #expect(row.desc == "D" && row.group == "G" && row.symbol == "star")
     }
 
@@ -146,8 +146,8 @@ struct ShortcutMetaCarryTests {
             into: &config
         )
         let row = config.layers[0].bindings
-        #expect(row.count == 1)
-        #expect(row.first?.meta == KeyBindingMeta(desc: "New"))
+        expectEqual(row.count, 1)
+        expectEqual(row.first?.meta, KeyBindingMeta(desc: "New"))
     }
 
     @Test("A profile row that only re-describes the base row is kept")
@@ -163,7 +163,7 @@ struct ShortcutMetaCarryTests {
         let diff = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(diff.layers.first?.bindings.first?.desc == "Mine")
+        expectEqual(diff.layers.first?.bindings.first?.desc, "Mine")
         #expect(KeyLayerOverride.diff(base: base, edited: base) == nil)
     }
 
@@ -182,7 +182,7 @@ struct ShortcutMetaCarryTests {
                 $0.combo == "option+h"
             }
         )
-        #expect(row.meta == .none)
+        expectEqual(row.meta, .none)
     }
 
     /// The groups and the symbol issue read the chords whose body
@@ -196,7 +196,7 @@ struct ShortcutMetaCarryTests {
               { group = "Hidden", symbol = "kiwidesk.no.such.symbol" })
             """
         )
-        #expect(core.customShortcutGroups() == ["Hidden"])
+        expectEqual(core.customShortcutGroups(), ["Hidden"])
         #expect(
             symbolIssues(core).map(\.kind) == [
                 .unknownShortcutSymbol(
@@ -221,8 +221,8 @@ struct ShortcutMetaCarryTests {
             """
         )
         let issues = symbolIssues(core)
-        #expect(issues.count == 2)
-        #expect(Set(issues.map(\.id)).count == 2)
+        expectEqual(issues.count, 2)
+        expectEqual(Set(issues.map(\.id)).count, 2)
     }
 
     /// The issue is derived, so a republish that hands in only the
@@ -235,9 +235,9 @@ struct ShortcutMetaCarryTests {
               { symbol = "kiwidesk.no.such.symbol" })
             """
         )
-        #expect(symbolIssues(core).count == 1)
+        expectEqual(symbolIssues(core).count, 1)
         core.syncDerivedIssues()
         core.setConfigIssues([])
-        #expect(symbolIssues(core).count == 1)
+        expectEqual(symbolIssues(core).count, 1)
     }
 }

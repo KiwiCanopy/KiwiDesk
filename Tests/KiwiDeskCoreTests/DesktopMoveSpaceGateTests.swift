@@ -121,7 +121,7 @@ struct DesktopMoveSpaceGateTests {
             args: [.number(1), .string("mail")]
         )
         #expect(!response.isSuccess)
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(core.state.workspaces.space(of: window), origin)
         #expect(core.pendingSpace.isEmpty)
     }
 
@@ -140,7 +140,7 @@ struct DesktopMoveSpaceGateTests {
                 args: [.number(Double(desktop)), .string("mail")]
             )
             #expect(!response.isSuccess)
-            #expect(response.error?.contains("no screen yet") == true)
+            expectEqual(response.error?.contains("no screen yet"), true)
         }
         #expect(core.state.workspaces[mail] == nil)
         #expect(core.pendingSpace.isEmpty)
@@ -171,8 +171,8 @@ struct DesktopMoveSpaceGateTests {
         #expect(core.state.workspaces[mail] == nil)
         core.handle(.windowDestroyed(window, wasMinimized: false))
         #expect(core.state.workspaces[mail] != nil)
-        #expect(core.state.workspaces.display(of: mail) == DisplayID(1))
-        #expect(core.state.rememberedSpace(of: window) == mail)
+        expectEqual(core.state.workspaces.display(of: mail), DisplayID(1))
+        expectEqual(core.state.rememberedSpace(of: window), mail)
     }
 
     /// The gate is handed where the Space WILL lay out: a
@@ -192,8 +192,8 @@ struct DesktopMoveSpaceGateTests {
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("sticky") == true)
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(response.error?.contains("sticky"), true)
+        expectEqual(core.state.workspaces.space(of: window), origin)
         #expect(core.pendingSpace.isEmpty)
     }
 
@@ -222,7 +222,7 @@ struct DesktopMoveSpaceGateTests {
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("sticky") == true)
+        expectEqual(response.error?.contains("sticky"), true)
         #expect(core.state.workspaces[mail] == nil)
     }
 
@@ -241,9 +241,9 @@ struct DesktopMoveSpaceGateTests {
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("sticky") == true)
+        expectEqual(response.error?.contains("sticky"), true)
         #expect(core.state.windows[window] != nil)
-        #expect(core.state.workspaces.space(of: window) == origin)
+        expectEqual(core.state.workspaces.space(of: window), origin)
         #expect(core.state.workspaces[mail] == nil)
         #expect(core.pendingSpace.isEmpty)
     }

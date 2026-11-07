@@ -128,9 +128,9 @@ struct KiwiVisionLensFocusTests {
     )
     func focusSkips(mode: String) {
         let core = makeCore(mode: mode)
-        #expect(focusRight(core) == WindowID(2))
+        expectEqual(focusRight(core), WindowID(2))
         core.setKiwiVision(.lens("Writing"))
-        #expect(focusRight(core) == WindowID(3))
+        expectEqual(focusRight(core), WindowID(3))
     }
 
     @Test(
@@ -142,8 +142,8 @@ struct KiwiVisionLensFocusTests {
         core.setKiwiVision(.lens("Writing"))
         _ = focusRight(core, swapping: true)
         let order = core.activeSpace?.windows ?? []
-        #expect(order.firstIndex(of: WindowID(1)) == 2)
-        #expect(order.firstIndex(of: WindowID(3)) == 0)
+        expectEqual(order.firstIndex(of: WindowID(1)), 2)
+        expectEqual(order.firstIndex(of: WindowID(3)), 0)
     }
 
     /// Ruling 44: the keys follow the plates, so a member window
@@ -157,20 +157,20 @@ struct KiwiVisionLensFocusTests {
         hazed.setKiwiVision(.lens("Writing"))
         // Window 1's empty title matches nothing either: no
         // window is left to step to.
-        #expect(focusRight(hazed) == WindowID(1))
+        expectEqual(focusRight(hazed), WindowID(1))
         let clear = makeCore(mode: mode, titles: ["Mail"])
         clear.setKiwiVision(.lens("Writing"))
-        #expect(focusRight(clear) == WindowID(3))
+        expectEqual(focusRight(clear), WindowID(3))
     }
 
     @Test("the switch off and plain KiwiVision skip nothing")
     func nothingSkipped() {
         let off = makeCore(mode: "scrolling", keepFocus: false)
         off.setKiwiVision(.lens("Writing"))
-        #expect(focusRight(off) == WindowID(2))
+        expectEqual(focusRight(off), WindowID(2))
         let plain = makeCore(mode: "scrolling")
         plain.setKiwiVision(.plain)
-        #expect(focusRight(plain) == WindowID(2))
+        expectEqual(focusRight(plain), WindowID(2))
     }
 
     /// The float tier (#488) answers past the tiled edge; it skips
@@ -187,9 +187,9 @@ struct KiwiVisionLensFocusTests {
                 )
             )
         }
-        #expect(focusRight(core) == WindowID(2))
+        expectEqual(focusRight(core), WindowID(2))
         core.setKiwiVision(.lens("Writing"))
-        #expect(focusRight(core) == WindowID(3))
+        expectEqual(focusRight(core), WindowID(3))
     }
 }
 
@@ -229,9 +229,9 @@ struct KiwiVisionLensWrapTests {
     )
     func wrapSkips(mode: String) {
         let core = makeCore(mode: mode)
-        #expect(focusRight(core, from: 3) == WindowID(2))
+        expectEqual(focusRight(core, from: 3), WindowID(2))
         core.setKiwiVision(.lens("Writing"))
-        #expect(focusRight(core, from: 3) == WindowID(1))
+        expectEqual(focusRight(core, from: 3), WindowID(1))
     }
 
     /// With one member window left, a wrap has nowhere to go: the
@@ -244,7 +244,7 @@ struct KiwiVisionLensWrapTests {
         let core = makeCore(mode: mode)
         core.state.apply(.windowDestroyed(WindowID(1), wasMinimized: false))
         core.setKiwiVision(.lens("Writing"))
-        #expect(focusRight(core, from: 3) == WindowID(3))
+        expectEqual(focusRight(core, from: 3), WindowID(3))
         // A step onto the origin would answer `.ok`; one with nowhere
         // to go fails at the dead end.
         core.state.workspaces.focus(WindowID(3), in: "1")

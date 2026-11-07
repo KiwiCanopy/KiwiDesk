@@ -83,7 +83,7 @@ struct SpaceShortcutDropOwedTests {
         core.state.owedShortcutDrops = [SpaceID(9)]
         core.retile()
         #expect(core.state.owedShortcutDrops.isEmpty)
-        #expect(baseCombos(core) == ["control+option+9"])
+        expectEqual(baseCombos(core), ["control+option+9"])
     }
 
     @Test("an emptied hold with no workspace owes its chords")
@@ -186,7 +186,7 @@ struct SpaceShortcutDropOwedTests {
             baseLayers: [KeyLayer.defaultName, "Work"]
         )
         let names = trimmed?.layers.map(\.name) ?? []
-        #expect(names == ["Scratch", "Work"])
-        #expect(trimmed?.layers.allSatisfy(\.bindings.isEmpty) == true)
+        expectEqual(names, ["Scratch", "Work"])
+        expectEqual(trimmed?.layers.allSatisfy(\.bindings.isEmpty), true)
     }
 }

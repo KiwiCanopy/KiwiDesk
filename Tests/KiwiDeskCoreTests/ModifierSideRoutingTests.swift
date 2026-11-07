@@ -69,13 +69,13 @@ struct ModifierSideRoutingTests {
     func offIsCarbon() throws {
         let (manager, registrar, tap) = rig()
         manager.bind(try combo("rcmd+h"), ref: 1)
-        #expect(registrar.live.count == 1)
+        expectEqual(registrar.live.count, 1)
         #expect(
             registrar.live.values.first?.mask
                 == HotkeyModifiers.command.rawValue
         )
         #expect(tap() == nil)
-        #expect(manager.sideTapStatus == .off)
+        expectEqual(manager.sideTapStatus, .off)
     }
 
     @Test("off: two rows collapsing onto one chord, the second refused")
@@ -83,11 +83,11 @@ struct ModifierSideRoutingTests {
         let (manager, _, _) = rig()
         manager.bind(try combo("lcmd+h"), ref: 1)
         manager.bind(try combo("rcmd+h"), ref: 2)
-        #expect(manager.activationFailures.count == 1)
+        expectEqual(manager.activationFailures.count, 1)
         let (other, _, _) = rig()
         other.bind(try combo("cmd+h"), ref: 1)
         other.bind(try combo("rcmd+h"), ref: 2)
-        #expect(other.activationFailures.count == 1)
+        expectEqual(other.activationFailures.count, 1)
     }
 
     @Test("on: the sided chord's rows go to the tap, the rest to Carbon")
@@ -103,9 +103,9 @@ struct ModifierSideRoutingTests {
                 try combo("rcmd+h").modifiers, try combo("cmd+h").modifiers,
             ]
         )
-        #expect(registrar.live.count == 1)
+        expectEqual(registrar.live.count, 1)
         #expect(manager.activationFailures.isEmpty)
-        #expect(manager.sideTapStatus == .running)
+        expectEqual(manager.sideTapStatus, .running)
     }
 
     @Test("on with no sided row: no tap")
@@ -114,7 +114,7 @@ struct ModifierSideRoutingTests {
         manager.bind(try combo("cmd+h"), ref: 1)
         manager.modifierSides = true
         #expect(tap() == nil)
-        #expect(registrar.live.count == 1)
+        expectEqual(registrar.live.count, 1)
     }
 
     @Test("suspending empties the tap; turning it off stops it")
@@ -130,8 +130,8 @@ struct ModifierSideRoutingTests {
         #expect(!live.rows.isEmpty)
         manager.modifierSides = false
         #expect(live.stopped)
-        #expect(registrar.live.count == 1)
-        #expect(manager.sideTapStatus == .off)
+        expectEqual(registrar.live.count, 1)
+        expectEqual(manager.sideTapStatus, .off)
     }
 
     @Test("a refused tap falls back to Carbon and is asked once")
@@ -148,23 +148,23 @@ struct ModifierSideRoutingTests {
         manager.modifierSides = true
         manager.bind(try combo("rcmd+h"), ref: 2)
         manager.bind(try combo("cmd+j"), ref: 3)
-        #expect(manager.sideTapStatus == .refused)
-        #expect(asked == 1)
+        expectEqual(manager.sideTapStatus, .refused)
+        expectEqual(asked, 1)
         #expect(changes >= 1)
         // cmd+h and cmd+j on Carbon; rcmd+h collapses and fails.
-        #expect(registrar.live.count == 2)
+        expectEqual(registrar.live.count, 2)
         #expect(manager.activationFailures == [try combo("rcmd+h")])
         manager.modifierSides = false
         manager.modifierSides = true
-        #expect(asked == 2)
+        expectEqual(asked, 2)
         // The grant's door asks again too, and only after a refusal.
         manager.retrySideTap()
-        #expect(asked == 3)
+        expectEqual(asked, 3)
         manager.makeSideTap = { _, _ in FakeSideTap() }
         manager.retrySideTap()
-        #expect(manager.sideTapStatus == .running)
+        expectEqual(manager.sideTapStatus, .running)
         manager.retrySideTap()
-        #expect(manager.sideTapStatus == .running)
+        expectEqual(manager.sideTapStatus, .running)
     }
 
     @Test("a refused tap's keypad digit falls back with its twin")
@@ -175,7 +175,7 @@ struct ModifierSideRoutingTests {
         manager.modifierSides = true
         let row = try combo("rcmd+1").keyCode
         let twin = try #require(KeypadKeys.keypadTwin(of: row))
-        #expect(Set(registrar.live.values.map(\.code)) == [row, twin])
+        expectEqual(Set(registrar.live.values.map(\.code)), [row, twin])
     }
 
     @Test("a keypad digit's twin rides the tap too")
@@ -186,6 +186,6 @@ struct ModifierSideRoutingTests {
         let codes = Set(try #require(tap()).rows.map(\.keyCode))
         let row = try combo("rcmd+1").keyCode
         let twin = try #require(KeypadKeys.keypadTwin(of: row))
-        #expect(codes == [row, twin])
+        expectEqual(codes, [row, twin])
     }
 }

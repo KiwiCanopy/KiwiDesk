@@ -55,7 +55,7 @@ struct ScriptStampTests {
         #expect(run.status == 0, "stderr: \(run.stderr)")
         #expect(try fixture.declaration("semantic") == "1.2.3")
         let stamped = try fixture.declaration("commit")
-        #expect(stamped == fixture.headSHA)
+        expectEqual(stamped, fixture.headSHA)
         // Guards the assertion above against passing vacuously if
         // the fixture's git setup ever stops producing a SHA.
         #expect(stamped != "unknown")

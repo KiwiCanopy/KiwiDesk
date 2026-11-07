@@ -35,7 +35,7 @@ struct FillWhenAloneTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 
     @Test("Scrolling off: a lone window keeps the slot size")
@@ -48,10 +48,10 @@ struct FillWhenAloneTests {
             in: context
         )
         let only = try #require(frames[w1])
-        #expect(only.width == 600)
-        #expect(only.height == context.usable.height)
+        expectEqual(only.width, 600)
+        expectEqual(only.height, context.usable.height)
         // The one slot the row has sits where the row starts.
-        #expect(only.minX == context.usable.minX)
+        expectEqual(only.minX, context.usable.minX)
     }
 
     @Test("Scrolling off: the slot is the one a neighbour joins")
@@ -71,7 +71,7 @@ struct FillWhenAloneTests {
                 in: context
             )[w1]
         )
-        #expect(alone == joined)
+        expectEqual(alone, joined)
     }
 
     @Test("Stack: the default fills a lone master")
@@ -82,7 +82,7 @@ struct FillWhenAloneTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 
     @Test("Stack off: a lone master keeps the master zone")
@@ -102,7 +102,7 @@ struct FillWhenAloneTests {
             )[w1]
         )
         // Byte-identical to the zone a second window leaves it.
-        #expect(alone == joined)
+        expectEqual(alone, joined)
         #expect(abs(alone.width - 1890 * 0.6) < 0.01)
     }
 
@@ -117,7 +117,7 @@ struct FillWhenAloneTests {
                 in: context
             )[w1]
         )
-        #expect(alone.maxX == context.usable.maxX)
+        expectEqual(alone.maxX, context.usable.maxX)
         #expect(abs(alone.width - 1890 * 0.6) < 0.01)
     }
 
@@ -147,7 +147,7 @@ struct FillWhenAloneTests {
             for: [w1],
             in: context
         )
-        #expect(frames[w1] == context.usable)
+        expectEqual(frames[w1], context.usable)
     }
 
     @Test("The Lua setters write both flags")

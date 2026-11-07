@@ -24,7 +24,7 @@ struct PaletteStoreTests {
     @Test("Built-ins are the catalog; no user palettes at first")
     func initialState() {
         let (store, _) = makeStore()
-        #expect(store.builtins().count == 10)
+        expectEqual(store.builtins().count, 10)
         #expect(store.userPalettes().isEmpty)
     }
 
@@ -32,7 +32,7 @@ struct PaletteStoreTests {
     func saveAndRead() throws {
         let (store, _) = makeStore()
         try store.save(sample)
-        #expect(store.userPalettes() == [sample])
+        expectEqual(store.userPalettes(), [sample])
         #expect(store.hasUserPalette("Mine"))
     }
 
@@ -59,7 +59,7 @@ struct PaletteStoreTests {
             colors: ["border.focused_color": "#FF0000"]
         )
         try store.save(updated)
-        #expect(store.userPalettes() == [updated])
+        expectEqual(store.userPalettes(), [updated])
     }
 
     @Test("Deleting removes a user palette; missing throws")
@@ -99,7 +99,7 @@ struct PaletteStoreTests {
             try store.rename(from: "Mine", to: "Other")
         }
         // Both survive — no duplicate, no data loss.
-        #expect(store.userPalettes().count == 2)
+        expectEqual(store.userPalettes().count, 2)
         // Renaming to its own name is a harmless no-op.
         try store.rename(from: "Mine", to: "Mine")
         #expect(store.hasUserPalette("Mine"))
@@ -115,7 +115,7 @@ struct PaletteStoreTests {
         let url = dir.appendingPathComponent("out.json")
         try store.export(sample, to: url)
         let back = try store.importPalette(from: url)
-        #expect(back == sample)
+        expectEqual(back, sample)
     }
 
     @Test("Import drops unknown color keys")
@@ -135,7 +135,7 @@ struct PaletteStoreTests {
         )
         try JSONEncoder().encode(alien).write(to: url)
         let cleaned = try store.importPalette(from: url)
-        #expect(cleaned.colors == ["kiwishelf.fill_color": "#010203"])
+        expectEqual(cleaned.colors, ["kiwishelf.fill_color": "#010203"])
     }
 
     @Test("Importing a non-palette file throws")
@@ -169,7 +169,7 @@ struct PaletteStoreTests {
         let initial = try Data(contentsOf: store.url)
         #expect(ConfigMigration.needsMigration(initial))
         let loaded = store.userPalettes()
-        #expect(loaded == [sample])
+        expectEqual(loaded, [sample])
 
         let onDisk = try Data(contentsOf: store.url)
         #expect(!ConfigMigration.needsMigration(onDisk))
@@ -177,8 +177,8 @@ struct PaletteStoreTests {
             PaletteDocument.self,
             from: onDisk
         )
-        #expect(doc.format == PaletteDocument.currentFormat)
-        #expect(doc.palettes == [sample])
+        expectEqual(doc.format, PaletteDocument.currentFormat)
+        expectEqual(doc.palettes, [sample])
     }
 
     /// Saved palettes are wrapped and round-trip identically.
@@ -203,8 +203,8 @@ struct PaletteStoreTests {
             PaletteDocument.self,
             from: data
         )
-        #expect(doc.palettes == [sample])
-        #expect(store.userPalettes() == [sample])
+        expectEqual(doc.palettes, [sample])
+        expectEqual(store.userPalettes(), [sample])
     }
 
     /// A newer-format library reads as empty for pure QUERIES,
@@ -239,6 +239,6 @@ struct PaletteStoreTests {
         }
         // The refusal left the newer library untouched.
         let after = try Data(contentsOf: store.url)
-        #expect(after == Data(data.utf8))
+        expectEqual(after, Data(data.utf8))
     }
 }

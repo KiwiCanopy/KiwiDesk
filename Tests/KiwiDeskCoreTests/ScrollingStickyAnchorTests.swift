@@ -59,8 +59,8 @@ struct ScrollingStickyAnchorTests {
         // guard passes there) and sets `lastFocused` to it, but
         // never touches space1's `focused` slot.
         state.workspaces.focus(WindowID(50), in: "2")
-        #expect(state.workspaces["1"]?.focused == WindowID(1))
-        #expect(anchor(state) == WindowID(50))
+        expectEqual(state.workspaces["1"]?.focused, WindowID(1))
+        expectEqual(anchor(state), WindowID(50))
     }
 
     @Test("Focusing a local member reverts the anchor")
@@ -70,7 +70,7 @@ struct ScrollingStickyAnchorTests {
         // A later local focus makes it the frontmost window, so
         // the anchor drops back to the space's own slot.
         state.workspaces.focus(WindowID(2), in: "1")
-        #expect(anchor(state) == WindowID(2))
+        expectEqual(anchor(state), WindowID(2))
     }
 
     @Test("A non-traveler last-focus never anchors")
@@ -82,7 +82,7 @@ struct ScrollingStickyAnchorTests {
         state.workspaces.add(WindowID(99), to: "2")
         state.workspaces.focus(WindowID(1), in: "1")
         state.workspaces.focus(WindowID(99), in: "2")
-        #expect(anchor(state) == WindowID(1))
+        expectEqual(anchor(state), WindowID(1))
     }
 
     @Test("No focus yields no anchor")
@@ -100,7 +100,7 @@ struct ScrollingStickyAnchorTests {
         state.workspaces.add(WindowID(51), to: "2")
         state.workspaces.focus(WindowID(50), in: "2")
         state.workspaces.focus(WindowID(51), in: "2")
-        #expect(anchor(state) == WindowID(51))
+        expectEqual(anchor(state), WindowID(51))
     }
 
     @Test("On its home space a traveler yields the home slot")

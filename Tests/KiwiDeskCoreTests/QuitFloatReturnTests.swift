@@ -149,7 +149,7 @@ struct QuitFloatReturnTests {
         let after = landed(b, boot)
         for id in Self.handFloats {
             #expect(b.state.userFloated.contains(id), "w\(id.raw) tiled")
-            #expect(b.state.windows[id]?.isFloating == true)
+            expectEqual(b.state.windows[id]?.isFloating, true)
         }
         for window in Self.windows {
             #expect(
@@ -165,10 +165,10 @@ struct QuitFloatReturnTests {
         }
         // The parked float keeps the capture the old process held,
         // not the grid frame the gather left it at.
-        #expect(b.tiler.stashOriginal(Self.hiddenFloat) == capture)
+        expectEqual(b.tiler.stashOriginal(Self.hiddenFloat), capture)
         b.state.workspaces.activate(F.hidden)
         let shown = F.settle(b)
-        #expect(shown[Self.hiddenFloat] == capture)
+        expectEqual(shown[Self.hiddenFloat], capture)
     }
 
     /// Its debt rides every capture as its frame does (#2008), so
@@ -193,7 +193,7 @@ struct QuitFloatReturnTests {
             b.restoreAndSettleAfterWake(b.sessionSnapshot())
             let again = try #require(b.crash.stopCapture(inPlace: false))
             let owed = again.windows.first { $0.windowID == late }
-            #expect(owed?.floating == true)
+            expectEqual(owed?.floating, true)
         }
         var arrival = try #require(Self.scanned.first { $0.id == late })
         arrival.frame = left[late]!
@@ -202,8 +202,8 @@ struct QuitFloatReturnTests {
         }
         let after = landed(b, boot + issued)
         #expect(b.state.userFloated.contains(late))
-        #expect(b.state.workspaces.space(of: late) == F.shown)
-        #expect(after[late] == before[late])
+        expectEqual(b.state.workspaces.space(of: late), F.shown)
+        expectEqual(after[late], before[late])
     }
 
     /// The race the seed beside the set closes: the activation
@@ -230,10 +230,10 @@ struct QuitFloatReturnTests {
         b.restore(session)
         let float = Self.shownFloat
         // The set went out; its echo has not folded in.
-        #expect(b.state.windows[float]?.frame == left[float])
+        expectEqual(b.state.windows[float]?.frame, left[float])
         b.state.workspaces.activate(F.hidden)
         b.retile()
-        #expect(b.tiler.stashOriginal(float) == before[float])
+        expectEqual(b.tiler.stashOriginal(float), before[float])
     }
 
     /// The one autosave that carries a float (#2008): a debt owed
@@ -253,14 +253,14 @@ struct QuitFloatReturnTests {
             F.processB(early, left: left, session: session)
         )
         b.onLog = { _ in }
-        #expect(b.state.restoredFrames[late]?.floating == true)
+        expectEqual(b.state.restoredFrames[late]?.floating, true)
         b.crash.loginSession = { 1 }
         b.crash.bootTime = { .distantPast }
         // No stop follows: the next launch reads the autosave.
         b.crash.autosave()
         let crashed = try #require(b.crash.takeBootSnapshot())
         let owed = crashed.windows.first { $0.windowID == late }
-        #expect(owed?.floating == true)
+        expectEqual(owed?.floating, true)
         let (c, _) = try #require(
             F.processB(Self.scanned, left: left, session: crashed)
         )
@@ -294,7 +294,7 @@ struct QuitFloatReturnTests {
             windows[index]["session"] = session
             moved += 1
         }
-        #expect(moved == Self.handFloats.count)
+        expectEqual(moved, Self.handFloats.count)
         json["windows"] = windows
         let old = try JSONDecoder().decode(
             StateSnapshot.self,
@@ -302,7 +302,7 @@ struct QuitFloatReturnTests {
         )
         for id in Self.handFloats {
             let record = old.windows.first { $0.windowID == id }
-            #expect(record?.floating == true)
+            expectEqual(record?.floating, true)
         }
         let (b, _) = try #require(
             F.processB(Self.scanned, left: left, session: old)
@@ -335,6 +335,6 @@ struct QuitFloatReturnTests {
         a.crash.autosave()
         a.crash.shutdownCleanly(inPlace: true)
         let inPlace = try #require(a.crash.takeBootSnapshot())
-        #expect(marked(inPlace) == Set(Self.handFloats))
+        expectEqual(marked(inPlace), Set(Self.handFloats))
     }
 }

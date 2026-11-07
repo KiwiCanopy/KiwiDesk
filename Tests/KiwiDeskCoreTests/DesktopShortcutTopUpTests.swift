@@ -23,8 +23,8 @@ struct DesktopShortcutTopUpTests {
             above: 1,
             base: .standard
         )
-        #expect(rows.map(\.lua) == [lua(2), lua(3), lua(10)])
-        #expect(rows.map(\.combo) == ["2", "3", "0"].map { hyper + $0 })
+        expectEqual(rows.map(\.lua), [lua(2), lua(3), lua(10)])
+        expectEqual(rows.map(\.combo), ["2", "3", "0"].map { hyper + $0 })
         #expect(rows.allSatisfy { $0.kind == .navigation })
     }
 
@@ -44,7 +44,7 @@ struct DesktopShortcutTopUpTests {
             above: 0,
             base: .standard
         )
-        #expect(rows.map(\.lua) == [lua(1)])
+        expectEqual(rows.map(\.lua), [lua(1)])
     }
 
     private func offered(_ core: KiwiCore) -> ShortcutOffer {
@@ -74,8 +74,8 @@ struct DesktopShortcutTopUpTests {
     func offeredOnce() throws {
         let core = try makeCore()
         core.topUpDesktopShortcuts(desktops: [1, 2, 3])
-        #expect(desktopRows(core) == [lua(1), lua(2), lua(3)])
-        #expect(offered(core).desktop == 3)
+        expectEqual(desktopRows(core), [lua(1), lua(2), lua(3)])
+        expectEqual(offered(core).desktop, 3)
 
         var config = try #require(core.persistedGuiConfig())
         let index = try #require(config.layers.firstIndex { $0.isDefault })
@@ -83,8 +83,8 @@ struct DesktopShortcutTopUpTests {
         try core.guiConfigStore.save(config)
 
         core.topUpDesktopShortcuts(desktops: [1, 2, 3, 4])
-        #expect(desktopRows(core) == [lua(1), lua(3), lua(4)])
-        #expect(offered(core).desktop == 4)
+        expectEqual(desktopRows(core), [lua(1), lua(3), lua(4)])
+        expectEqual(offered(core).desktop, 4)
     }
 
     @Test("A setup the GUI does not manage keeps its marks")
@@ -102,7 +102,7 @@ struct DesktopShortcutTopUpTests {
         #expect(!core.isGuiManaged)
         core.topUpDesktopShortcuts(desktops: [1, 2])
         core.crossLegacyShortcutOffer()
-        #expect(cleared == 0)
+        expectEqual(cleared, 0)
         #expect(!core.guiConfigStore.exists)
     }
 
@@ -112,18 +112,18 @@ struct DesktopShortcutTopUpTests {
         var cleared = 0
         core.desktopMemory.clearLegacyShortcutOffer = { cleared += 1 }
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(offered(core).desktop == 2)
+        expectEqual(offered(core).desktop, 2)
         cleared = 0
         _ = core.discardArtifacts(
             [.guiConfig],
             reason: "test",
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect(cleared == 1)
+        expectEqual(cleared, 1)
         #expect(core.desktopMemory.knownShortcutOffer == nil)
         try core.guiConfigStore.save(GuiConfig())
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(desktopRows(core) == [lua(1), lua(2)])
+        expectEqual(desktopRows(core), [lua(1), lua(2)])
     }
 
     @Test("A declining setup is asked once a session")
@@ -137,7 +137,7 @@ struct DesktopShortcutTopUpTests {
         )
         core.desktopMemory.readLegacyShortcutOffer = { nil }
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(core.desktopMemory.shortcutTopUpDeclined == 2)
+        expectEqual(core.desktopMemory.shortcutTopUpDeclined, 2)
         // Managed now, but the session already declined these.
         try core.guiConfigStore.save(GuiConfig())
         core.topUpDesktopShortcuts(desktops: [1, 2])

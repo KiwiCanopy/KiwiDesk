@@ -37,15 +37,15 @@ struct ShelfRefusalPlaceTests {
         core.updateBars()
         #expect(core.focusedWindowID == nil)
         let place = try #require(core.refusalPlace(of: .app, on: display.id))
-        #expect(place.edge == .bottom)
-        #expect(place.strip.height == 0)
+        expectEqual(place.edge, .bottom)
+        expectEqual(place.strip.height, 0)
         let visible = GeometryUtils.axVisibleFrame(of: screen)
-        #expect(place.strip.minY == visible.maxY)
+        expectEqual(place.strip.minY, visible.maxY)
         // The Space Bar's refusal stands beside its own shown shelf.
         let spaceBar = try #require(
             core.refusalPlace(of: .space, on: display.id)
         )
-        #expect(spaceBar.edge == .top)
+        expectEqual(spaceBar.edge, .top)
         #expect(spaceBar.strip.height > 0)
     }
 

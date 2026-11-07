@@ -35,7 +35,7 @@ struct ShelfOverlayTests {
         )
         // One rect from the Space section's start to the App
         // section's end, gutter included, in strip coordinates.
-        #expect(plate == CGRect(x: 250, y: 0, width: 506, height: 40))
+        expectEqual(plate, CGRect(x: 250, y: 0, width: 506, height: 40))
     }
 
     @Test("Full spans the strip; Boxed draws no plate")
@@ -91,7 +91,7 @@ struct ShelfOverlayTests {
         // from its slot, the first's starts 2 in), centre 650,
         // strip-local 550; a section break thick, 70% of the 40 pt
         // depth (#1779).
-        #expect(frame == CGRect(x: 549, y: 6, width: 2, height: 28))
+        expectEqual(frame, CGRect(x: 549, y: 6, width: 2, height: 28))
         #expect(
             ShelfOverlay.dividerFrame(
                 slots: [slots[0]],

@@ -56,7 +56,7 @@ extension SpaceBarGlyphCellTests {
         view.layout()
         let field = view.identifierLabel
         let font = try #require(field.font)
-        #expect(font.familyName == family)
+        expectEqual(font.familyName, family)
         let span = try #require(Self.inkSpan(of: field))
         #expect(
             span.lowerBound > 0 && span.upperBound < field.bounds.width,

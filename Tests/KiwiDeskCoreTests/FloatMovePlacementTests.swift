@@ -92,7 +92,7 @@ struct FloatMovePlacementTests {
                 args: [.string("2")]
             ).isSuccess
         )
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        expectEqual(core.state.workspaces.activeSpace, SpaceID("2"))
         // The restore delivers through the instant set.
         #expect(frames[WindowID(2)] == nil)
         #expect(
@@ -136,7 +136,7 @@ struct FloatMovePlacementTests {
             core.execute("move_to_space", args: [.string("2")]).isSuccess
         )
         // Parked from where it was: the capture is its own frame.
-        #expect(core.tiler.stashOriginal(WindowID(2)) == slot)
+        expectEqual(core.tiler.stashOriginal(WindowID(2)), slot)
     }
 
     @Test("keep leaves a moved window where the layout had it")
@@ -151,7 +151,7 @@ struct FloatMovePlacementTests {
         #expect(
             core.execute("move_to_space", args: [.string("2")]).isSuccess
         )
-        #expect(core.tiler.stashOriginal(WindowID(2)) == slot)
+        expectEqual(core.tiler.stashOriginal(WindowID(2)), slot)
     }
 
     @Test("a dragged window keeps the pointer's placement")
@@ -207,7 +207,7 @@ struct FloatMovePlacementTests {
         #expect(
             core.execute("move_to_space", args: [.string("2")]).isSuccess
         )
-        #expect(core.tiler.stashOriginal(WindowID(2)) == saved)
+        expectEqual(core.tiler.stashOriginal(WindowID(2)), saved)
         #expect(core.state.floatFrames[WindowID(2)] == nil)
     }
 
@@ -228,7 +228,7 @@ struct FloatMovePlacementTests {
         // off w2's centre.
         let second = try #require(frames[WindowID(1)])
         let step = FloatPlacement.cascadeStep
-        #expect(second.midX == first.midX + step)
-        #expect(second.midY == first.midY + step)
+        expectEqual(second.midX, first.midX + step)
+        expectEqual(second.midY, first.midY + step)
     }
 }

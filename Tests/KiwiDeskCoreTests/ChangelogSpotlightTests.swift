@@ -103,7 +103,7 @@ struct ChangelogSpotlightTests {
             count: 280 - first.count - 1 - second.count - 1
         )
         let atLimit = "\(first) \(second)\(filler)."
-        #expect(atLimit.count == 280)
+        expectEqual(atLimit.count, 280)
         let accepted = try parse(Self.patch(atLimit), tag: "v2.2.1")
         #expect(accepted.status == 0, "\(accepted.stderr)")
 
@@ -220,11 +220,11 @@ struct ChangelogSpotlightTests {
         let id = Self.bracedID
         let written =
             try entry(body: rows(id))["spotlight"] as? [[String: String]]
-        #expect(written?.count == 2)
-        #expect(written?.first?["title"] == "Faster Space switching")
+        expectEqual(written?.count, 2)
+        expectEqual(written?.first?["title"], "Faster Space switching")
         #expect(written?.first?["setting"] == nil)
-        #expect(written?.last?["setting"] == id)
-        #expect(written?.last?["symbol"] == "keyboard")
+        expectEqual(written?.last?["setting"], id)
+        expectEqual(written?.last?["symbol"], "keyboard")
     }
 
     /// History is not re-judged against a later census: a renamed
@@ -235,6 +235,6 @@ struct ChangelogSpotlightTests {
         let written =
             try entry(body: rows("retired.key"))["spotlight"]
             as? [[String: String]]
-        #expect(written?.last?["setting"] == "retired.key")
+        expectEqual(written?.last?["setting"], "retired.key")
     }
 }

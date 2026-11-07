@@ -97,8 +97,8 @@ struct SpaceSlideDurationTests {
             overlay.run(incoming: [], holes: [])
             let play = try #require(overlay.play)
             let response = SpaceSlidePlan.response(at: pace)
-            #expect(response == SpaceSlidePlan.response(at: 1) * pace)
-            #expect(play.motion.response == response)
+            expectEqual(response, SpaceSlidePlan.response(at: 1) * pace)
+            expectEqual(play.motion.response, response)
             #expect(abs(try playedOmega(play) - 2 * .pi / response) < 1e-6)
             // The fades are fixed (#2524): how softly windows
             // appear is not the slide's speed.
@@ -108,7 +108,7 @@ struct SpaceSlideDurationTests {
             #expect(
                 abs(try fade(play, "out") - SpaceSlidePlan.fadeOut) < 1e-9
             )
-            #expect(play.motion.begin == 100 + SpaceSlidePlan.stripDelay)
+            expectEqual(play.motion.begin, 100 + SpaceSlidePlan.stripDelay)
             #expect(
                 abs(play.liftAt - pressed.landAt - SpaceSlidePlan.landMargin)
                     < 1e-9
@@ -134,8 +134,8 @@ struct SpaceSlideDurationTests {
         press(overlay, pace: 2)
         overlay.run(incoming: [], holes: [])
         let play = try #require(overlay.play)
-        #expect(play.pace == 2)
-        #expect(play.motion.response == SpaceSlidePlan.response(at: 2))
+        expectEqual(play.pace, 2)
+        expectEqual(play.motion.response, SpaceSlidePlan.response(at: 2))
         #expect(
             abs(try playedOmega(play) - 2 * .pi / play.motion.response)
                 < 1e-6
@@ -155,8 +155,8 @@ struct SpaceSlideDurationTests {
         clock.now = first.landAt + 0.01
         press(overlay, pace: 2)
         let motion = try #require(overlay.play?.motion)
-        #expect(motion.begin == clock.now + SpaceSlidePlan.stripDelay)
-        #expect(motion.response == SpaceSlidePlan.response(at: 2))
+        expectEqual(motion.begin, clock.now + SpaceSlidePlan.stripDelay)
+        expectEqual(motion.response, SpaceSlidePlan.response(at: 2))
     }
 
     /// The switch hands the overlay the setting's pace at the press.
@@ -187,7 +187,7 @@ struct SpaceSlideDurationTests {
         core.execute("focus_space", args: [.string("2")])
         defer { core.endSpaceSlide() }
         let play = try #require(core.spaceSlide.play)
-        #expect(play.pace == 3)
-        #expect(play.motion.response == SpaceSlidePlan.response(at: 3))
+        expectEqual(play.pace, 3)
+        expectEqual(play.motion.response, SpaceSlidePlan.response(at: 3))
     }
 }

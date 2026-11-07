@@ -58,15 +58,15 @@ struct ModeCycleCueTests {
                 as? [String: Any]
         )
         let group = try #require(root["mode"] as? [String: Any])
-        #expect(group["cue"] as? Bool == false)
+        expectEqual(group["cue"] as? Bool, false)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.modeCue == false)
+        expectEqual(back.appWide?.modeCue, false)
         var older = root
         older["mode"] = nil
         let legacy = try JSONDecoder().decode(
             GuiConfig.self,
             from: JSONSerialization.data(withJSONObject: older)
         )
-        #expect(legacy.appWide?.modeCue == true)
+        expectEqual(legacy.appWide?.modeCue, true)
     }
 }

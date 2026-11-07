@@ -14,7 +14,7 @@ struct HighlightWidthMarkTests {
     func rimWidthFollowsTheShelf() {
         var shelf = KiwiShelf()
         shelf.highlightWidth = 1
-        #expect(ShelfHandleSpec.rimWidth(for: shelf) == 1)
+        expectEqual(ShelfHandleSpec.rimWidth(for: shelf), 1)
         shelf.highlightWidth = 6
         #expect(
             ShelfHandleSpec.rimWidth(for: shelf)
@@ -62,9 +62,9 @@ struct HighlightWidthMarkTests {
             )?.view
         )
         let spec = try #require(view.spec)
-        #expect(spec.rimWidth == 2)
-        #expect(spec.sheen == 0.5)
-        #expect(view.rim.ink?.width == 2)
-        #expect(view.rim.ink?.sheen == 0.5)
+        expectEqual(spec.rimWidth, 2)
+        expectEqual(spec.sheen, 0.5)
+        expectEqual(view.rim.ink?.width, 2)
+        expectEqual(view.rim.ink?.sheen, 0.5)
     }
 }

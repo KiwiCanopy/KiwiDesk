@@ -40,13 +40,13 @@ struct SkyLightWindowEventTests {
             SkyLightWindowEvents.Kind.reorder,
             .level,
         ] {
-            #expect(kind.action == .reorder)
+            expectEqual(kind.action, .reorder)
         }
         for kind in [
             SkyLightWindowEvents.Kind.hide,
             .close,
         ] {
-            #expect(kind.action == .hide)
+            expectEqual(kind.action, .hide)
         }
     }
 
@@ -62,7 +62,7 @@ struct SkyLightWindowEventTests {
         queue.enqueue(.hide, window: window)
         queue.enqueue(.move, window: window)
         #expect(delivered.isEmpty)
-        #expect(scheduled.count == 1)
+        expectEqual(scheduled.count, 1)
         scheduled.removeFirst()()
         #expect(
             delivered == [

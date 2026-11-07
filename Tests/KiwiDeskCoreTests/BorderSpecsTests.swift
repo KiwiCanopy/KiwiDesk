@@ -52,8 +52,8 @@ struct BorderSpecsTests {
             slots: disjoint,
             sheen: 0.5
         )
-        #expect(result.count == 2)
-        #expect(result.filter { $0.sheen != 0 }.map(\.window) == [w1])
+        expectEqual(result.count, 2)
+        expectEqual(result.filter { $0.sheen != 0 }.map(\.window), [w1])
     }
 
     @Test("Disabled borders yield nothing")
@@ -83,8 +83,8 @@ struct BorderSpecsTests {
             focused: w1,
             slots: disjoint
         )
-        #expect(result.count == 1)
-        #expect(result.first?.window == w1)
+        expectEqual(result.count, 1)
+        expectEqual(result.first?.window, w1)
         #expect(
             result.first?.colorHex == BorderStyle().focusedColor
         )
@@ -95,10 +95,10 @@ struct BorderSpecsTests {
         var style = BorderStyle()
         style.unfocusedEnabled = true
         let result = specs(style, focused: w1, slots: disjoint)
-        #expect(result.count == 2)
-        #expect(result.first?.window == w1)
+        expectEqual(result.count, 2)
+        expectEqual(result.first?.window, w1)
         let other = result.first { $0.window == w2 }
-        #expect(other?.colorHex == style.unfocusedColor)
+        expectEqual(other?.colorHex, style.unfocusedColor)
     }
 
     @Test("Glow rides the focused ring only, never unfocused")
@@ -115,11 +115,11 @@ struct BorderSpecsTests {
         #expect((focused?.glowBlur ?? 0) > 0)
         // A bloom on every unfocused ring would undercut the one it
         // should make pop (#358) — so unfocused rings never glow.
-        #expect(other?.glowBlur == 0)
+        expectEqual(other?.glowBlur, 0)
         // And with glow off, the focused ring doesn't glow either.
         style.glow = false
         let plain = specs(style, focused: w1, slots: disjoint)
-        #expect(plain.first { $0.window == w1 }?.glowBlur == 0)
+        expectEqual(plain.first { $0.window == w1 }?.glowBlur, 0)
     }
 
     @Test("Monocle stays focused-only despite unfocused toggle")
@@ -132,8 +132,8 @@ struct BorderSpecsTests {
             slots: disjoint,
             monocle: true
         )
-        #expect(result.count == 1)
-        #expect(result.first?.window == w1)
+        expectEqual(result.count, 1)
+        expectEqual(result.first?.window, w1)
     }
 
     @Test("A focused transient overlay gets no ring")
@@ -167,7 +167,7 @@ struct BorderSpecsTests {
             slots: slots,
             overlays: [w2]
         )
-        #expect(Set(result.map(\.window)) == [w1, w3])
+        expectEqual(Set(result.map(\.window)), [w1, w3])
     }
 
     @Test("A focused native-fullscreen window gets no ring")
@@ -203,7 +203,7 @@ struct BorderSpecsTests {
             slots: slots,
             fillsDisplay: [w2]
         )
-        #expect(Set(result.map(\.window)) == [w1, w3])
+        expectEqual(Set(result.map(\.window)), [w1, w3])
     }
 
     /// A float is a slot like any other to the ring (#1286): its
@@ -221,7 +221,7 @@ struct BorderSpecsTests {
             (w3, CGRect(x: 400, y: 0, width: 100, height: 100)),
         ]
         let result = specs(style, focused: w1, slots: slots)
-        #expect(Set(result.map(\.window)) == [w1, w2, w3])
+        expectEqual(Set(result.map(\.window)), [w1, w2, w3])
         #expect(
             result.first { $0.window == w2 }?.colorHex
                 == style.unfocusedColor

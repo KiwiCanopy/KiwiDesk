@@ -66,10 +66,10 @@ struct KiwiVisionClearAppTests {
                 as? [String: Any]
         )
         let group = try #require(root["kiwivision"] as? [String: Any])
-        #expect(group["clear_app"] as? Bool == true)
+        expectEqual(group["clear_app"] as? Bool, true)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.visionClearApp == true)
-        #expect(AppWideSettings().visionClearApp == false)
+        expectEqual(back.appWide?.visionClearApp, true)
+        expectEqual(AppWideSettings().visionClearApp, false)
     }
 
     @Test("the verb is a session value and masks on its own")
@@ -94,9 +94,9 @@ struct KiwiVisionClearAppTests {
     @Test("the focused app's other windows are holes")
     func sameAppIsClear() {
         let core = makeCore()
-        #expect(clearIDs(core) == [false, false])
+        expectEqual(clearIDs(core), [false, false])
         core.setAppWide(persisting: false) { $0.visionClearApp = true }
-        #expect(clearIDs(core) == [true, false])
+        expectEqual(clearIDs(core), [true, false])
     }
 
     /// Another app's listed window from the same process family
@@ -127,7 +127,7 @@ struct KiwiVisionClearAppTests {
             targetPid: samePid,
             refreshingList: true
         )
-        #expect(windows.map(\.clear) == [true, false, true, false])
+        expectEqual(windows.map(\.clear), [true, false, true, false])
     }
 
     /// An app running as two processes (#1785): the child filed as

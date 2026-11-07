@@ -57,7 +57,7 @@ struct PanelButtonReaderTests {
     func trackedIsNeverAsked() {
         let (loop, box) = makeLoop()
         _ = loop.untrackedWindow(of: pid)(WindowID(31))
-        #expect(box.asked == [0])
+        expectEqual(box.asked, [0])
     }
 
     @Test("resolution stops at the asked window")
@@ -65,21 +65,21 @@ struct PanelButtonReaderTests {
         let (loop, box) = makeLoop()
         let reader = loop.untrackedWindow(of: pid)
         _ = reader(WindowID(31))
-        #expect(box.asked == [0])
+        expectEqual(box.asked, [0])
         _ = reader(WindowID(32))
-        #expect(box.asked == [0, 1])
+        expectEqual(box.asked, [0, 1])
     }
 
     @Test("one list read per scan, and a second ask is cached")
     func listIsReadOnce() {
         let (loop, box) = makeLoop()
         let reader = loop.untrackedWindow(of: pid)
-        #expect(box.listReads == 0)
+        expectEqual(box.listReads, 0)
         _ = reader(WindowID(31))
         _ = reader(WindowID(31))
         _ = reader(WindowID(99))
-        #expect(box.listReads == 1)
-        #expect(box.asked == [0, 1])
+        expectEqual(box.listReads, 1)
+        expectEqual(box.asked, [0, 1])
     }
 
     @Test("a window the app does not list has no element")

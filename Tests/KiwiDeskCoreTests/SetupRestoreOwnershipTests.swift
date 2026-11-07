@@ -99,7 +99,7 @@ struct SetupRestoreOwnershipTests {
 
         // Dropping it is right; dropping it SILENTLY is what this
         // feature's own export path argues against for itself.
-        #expect(outcome.refusedPalettes == 1)
+        expectEqual(outcome.refusedPalettes, 1)
         #expect(!outcome.isClean)
     }
 

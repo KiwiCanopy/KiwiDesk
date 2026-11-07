@@ -71,7 +71,7 @@ struct EdgeBandRightEdgeTests {
     @Test("A frame ending near a screen's right edge names its band")
     func screenNearTheRight() {
         let near = { EdgeBandWrite.band(for: $0, among: [self.band]) }
-        #expect(near(upper) == band)
+        expectEqual(near(upper), band)
         #expect(near(upper.offsetBy(dx: -200, dy: 0)) == nil)
         let below = EdgeBand(
             screen: screen.offsetBy(dx: 0, dy: screen.height),
@@ -115,8 +115,8 @@ struct EdgeBandRightEdgeTests {
             current: hanging,
             band: band
         )
-        #expect(lifted?.x == 0)
-        #expect(lifted?.y == 1117 - EdgeBandWrite.band - 501)
+        expectEqual(lifted?.x, 0)
+        expectEqual(lifted?.y, 1117 - EdgeBandWrite.band - 501)
     }
 
     @Test("The refusing app keeps the old width without the move")
@@ -128,7 +128,7 @@ struct EdgeBandRightEdgeTests {
             nearEdgeOf: nil,
             writer: app.writer
         )
-        #expect(app.frame.withLock { $0.width } == 846)
+        expectEqual(app.frame.withLock { $0.width }, 846)
     }
 
     /// Each applier door with a size, as `EdgeBandWriteTests`.

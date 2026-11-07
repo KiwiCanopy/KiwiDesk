@@ -53,21 +53,21 @@ struct SettingsCodingTests {
         )
         // 0 is the automatic sentinel (#551): the width-scaled
         // blur formula until the user sets an explicit size.
-        #expect(border["glow_size"] as? Double == 0)
-        #expect(border["enabled"] as? Bool == true)
-        #expect(border["width"] as? Double == 5)
-        #expect(border["focused_color"] as? String == "#4A9816")
-        #expect(border["unfocused_enabled"] as? Bool == false)
-        #expect(border["corner_style"] as? String == "rounded")
-        #expect(border["glow"] as? Bool == false)
-        #expect(border["draw_order"] as? String == "behind")
+        expectEqual(border["glow_size"] as? Double, 0)
+        expectEqual(border["enabled"] as? Bool, true)
+        expectEqual(border["width"] as? Double, 5)
+        expectEqual(border["focused_color"] as? String, "#4A9816")
+        expectEqual(border["unfocused_enabled"] as? Bool, false)
+        expectEqual(border["corner_style"] as? String, "rounded")
+        expectEqual(border["glow"] as? Bool, false)
+        expectEqual(border["draw_order"] as? String, "behind")
         // Bar chrome defaults take the brand kiwi green (#439);
         // pinned here so an accidental struct-default change
         // fails the build, not just the doc-drift breadcrumb.
         // One set for both bars, on the shelf (#1517).
         let shelf = try object(root["kiwishelf"])
-        #expect(shelf["active_item_color"] as? String == "#8DB354")
-        #expect(shelf["highlight_color"] as? String == "#8DB354")
+        expectEqual(shelf["active_item_color"] as? String, "#8DB354")
+        expectEqual(shelf["highlight_color"] as? String, "#8DB354")
         // `sticky.set_mark` → `sticky.mark` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.
@@ -78,44 +78,44 @@ struct SettingsCodingTests {
             Set(sticky.keys)
                 == ["mark", "color", "desktop_reach", "liquid_glass"]
         )
-        #expect(sticky["mark"] as? Bool == true)
+        expectEqual(sticky["mark"] as? Bool, true)
         // `sticky.set_liquid_glass` (#1621), on by default.
-        #expect(sticky["liquid_glass"] as? Bool == true)
-        #expect(sticky["color"] as? String == "")
+        expectEqual(sticky["liquid_glass"] as? Bool, true)
+        expectEqual(sticky["color"] as? String, "")
         // `sticky.set_desktop_reach` → `sticky.desktop_reach`
         // (#1145); default ON — the sticky promise spans
         // Desktops wherever the bridge exists.
-        #expect(sticky["desktop_reach"] as? Bool == true)
+        expectEqual(sticky["desktop_reach"] as? Bool, true)
         // `floating.set_color` → `floating.color` (#429): the
         // sticky mark's sibling namespace, also Automatic by
         // default; `floating.set_mark` → `floating.mark` (#1799),
         // default ON.
         let floating = try object(root["floating"])
-        #expect(Set(floating.keys) == ["mark", "color"])
-        #expect(floating["mark"] as? Bool == true)
-        #expect(floating["color"] as? String == "")
+        expectEqual(Set(floating.keys), ["mark", "color"])
+        expectEqual(floating["mark"] as? Bool, true)
+        expectEqual(floating["color"] as? String, "")
         // `pocket.set_color` → `pocket.color` (#2671), the third
         // mark's own colour, Automatic by default; where it sits is
         // KiwiShelf's (#2678); `set_capacity` is app-wide, in
         // gui.json's own `pocket` group.
         let pocket = try object(root["pocket"])
-        #expect(Set(pocket.keys) == ["color"])
-        #expect(pocket["color"] as? String == "")
-        #expect(shelf["pocket_edge"] as? String == "bottom")
-        #expect(shelf["pocket_position"] as? Double == 82)
+        expectEqual(Set(pocket.keys), ["color"])
+        expectEqual(pocket["color"] as? String, "")
+        expectEqual(shelf["pocket_edge"] as? String, "bottom")
+        expectEqual(shelf["pocket_position"] as? Double, 82)
         // `kiwishelf.set_reading_contrast` →
         // `kiwishelf.reading_contrast` (#2569): Lua-only.
-        #expect(shelf["reading_contrast"] as? Double == 2.2)
+        expectEqual(shelf["reading_contrast"] as? Double, 2.2)
         // The `quit` group left for gui.json with #1741
         // (`AppWideSettingsTests`); the key set above holds its
         // absence.
         // `mouse.set_follows_focus` → `mouse.follows_focus`
         // (#186), off by default.
         let mouse = try object(root["mouse"])
-        #expect(mouse["follows_focus"] as? Bool == false)
+        expectEqual(mouse["follows_focus"] as? Bool, false)
         // `mouse.set_hover_focus` → `mouse.hover_focus` (#1869),
         // off by default.
-        #expect(mouse["hover_focus"] as? Bool == false)
+        expectEqual(mouse["hover_focus"] as? Bool, false)
         // `mouse.set_hover_focus_delay` → `mouse.hover_focus_delay`
         // (#1869), in milliseconds.
         #expect(
@@ -124,10 +124,10 @@ struct SettingsCodingTests {
         )
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
-        #expect(root["swap_skips_cascade"] as? Bool == true)
+        expectEqual(root["swap_skips_cascade"] as? Bool, true)
         // `set_float_placement` → top-level `float_placement`
         // (#1674), `center` by default.
-        #expect(root["float_placement"] as? String == "center")
+        expectEqual(root["float_placement"] as? String, "center")
         // `set_float_scale_on_display_change` → top-level
         // `float_scale_on_display_change` (#502), ON by default:
         // a cross-display float scales to fit unless opted out
@@ -139,10 +139,10 @@ struct SettingsCodingTests {
         // `set_space_icon` → `space.icon[space_id]` (#68).
         let space = try object(root["space"])
         let icons = try object(space["icon"])
-        #expect(icons["2"] as? String == "globe")
+        expectEqual(icons["2"] as? String, "globe")
         // `set_resize_step` → `resize.step` (#58).
         let resize = try object(root["resize"])
-        #expect(resize["step"] as? Double == 50)
+        expectEqual(resize["step"] as? Double, 50)
         // #1307: the panel's leaf is written under its own group.
         // Present and Boolean, never pinned to a value; the three
         // leaves' agreement is `LiquidGlassMasterTests`'.
@@ -152,18 +152,18 @@ struct SettingsCodingTests {
                 == TilingSettings().shortcutPanelLiquidGlass
         )
         #expect(resize["feedback"] == nil)
-        #expect(root["mouse_resize"] as? String == "layout")
+        expectEqual(root["mouse_resize"] as? String, "layout")
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.
         let animations = try object(root["animations"])
-        #expect(animations["on_scrolling"] as? Bool == true)
-        #expect(animations["on_window_resize"] as? Bool == true)
-        #expect(animations["on_window_swap"] as? Bool == true)
-        #expect(animations["on_relayout"] as? Bool == true)
+        expectEqual(animations["on_scrolling"] as? Bool, true)
+        expectEqual(animations["on_window_resize"] as? Bool, true)
+        expectEqual(animations["on_window_swap"] as? Bool, true)
+        expectEqual(animations["on_relayout"] as? Bool, true)
         // `animations.set_duration` → JSON `animations.duration`
-        #expect(animations["duration"] as? Int == 150)
+        expectEqual(animations["duration"] as? Int, 150)
         // `animations.set_scroll_duration` → `animations.scroll_duration`
-        #expect(animations["scroll_duration"] as? Int == 150)
+        expectEqual(animations["scroll_duration"] as? Int, 150)
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [
@@ -173,30 +173,30 @@ struct SettingsCodingTests {
         )
         // Lua `bsp.set_ratio_h` / `scroll.set_slot_size`.
         let bsp = try object(layout["bsp"])
-        #expect(bsp["ratio_h"] as? Double == 0.5)
-        #expect(bsp["ratio_v"] as? Double == 0.5)
+        expectEqual(bsp["ratio_h"] as? Double, 0.5)
+        expectEqual(bsp["ratio_v"] as? Double, 0.5)
         let scroll = try object(layout["scroll"])
         // Default slot size is `auto`, encoded as 0.
-        #expect(scroll["slot_size"] as? Double == 0)
+        expectEqual(scroll["slot_size"] as? Double, 0)
         // `scroll.set_anchor` → `layout.scroll.anchor`; `follow`
         // by default (#239 — the minimal-pan behavior).
-        #expect(scroll["anchor"] as? String == "follow")
+        expectEqual(scroll["anchor"] as? String, "follow")
         // The focus wrap is one setting, never per layout (#2493).
         #expect(scroll["wrap_focus"] == nil)
         // `scroll.set_fill_when_alone` →
         // `layout.scroll.fill_when_alone`, on by default (#1389).
-        #expect(scroll["fill_when_alone"] as? Bool == true)
+        expectEqual(scroll["fill_when_alone"] as? Bool, true)
         // `grid.set_auto_size` → `layout.grid.auto_size` (#171),
         // off by default.
         let grid = try object(layout["grid"])
-        #expect(grid["auto_size"] as? Bool == false)
+        expectEqual(grid["auto_size"] as? Bool, false)
         let monocle = try object(layout["monocle"])
         #expect(monocle["wrap_focus"] == nil)
         // `monocle.set_hide_style` → `layout.monocle.hide_style`
         // (#881), `stack` by default — today's behavior.
-        #expect(monocle["hide_style"] as? String == "stack")
+        expectEqual(monocle["hide_style"] as? String, "stack")
         let stack = try object(layout["stack"])
-        #expect(stack["master_ratio"] as? Double == 0.6)
+        expectEqual(stack["master_ratio"] as? Double, 0.6)
         // `stack.set_master_orientation` / `set_stack_position`
         // (#222); the stack zone's lineup derives from the
         // position, so no `stack_orientation` key exists.
@@ -204,26 +204,26 @@ struct SettingsCodingTests {
         #expect(
             stack["master_orientation"] as? String == "horizontal"
         )
-        #expect(stack["stack_position"] as? String == "right")
+        expectEqual(stack["stack_position"] as? String, "right")
         #expect(stack["stack_orientation"] == nil)
-        #expect(stack["fill_when_alone"] as? Bool == true)
+        expectEqual(stack["fill_when_alone"] as? Bool, true)
         // `track.set_axis` → `layout.track.axis` (#128).
         let track = try object(layout["track"])
-        #expect(track["axis"] as? String == "vertical")
+        expectEqual(track["axis"] as? String, "vertical")
         // `track.set_auto_tracks` → `layout.track.auto_tracks`
         // (#178), on by default; `limit` is the remembered cap.
-        #expect(track["auto_tracks"] as? Bool == true)
-        #expect(track["limit"] as? Int == TrackParams().limit)
-        #expect(track["new_window"] as? String == "focused_track")
+        expectEqual(track["auto_tracks"] as? Bool, true)
+        expectEqual(track["limit"] as? Int, TrackParams().limit)
+        expectEqual(track["new_window"] as? String, "focused_track")
         #expect(track["wrap_focus"] == nil)
         // SpaceID-keyed maps encode as objects, not arrays.
         let gap = try object(root["gap"])
         let gapOverride = try object(gap["override"])
-        #expect(Array(gapOverride.keys) == ["2"])
+        expectEqual(Array(gapOverride.keys), ["2"])
         let placement = try object(
             root["new_window_placement_override"]
         )
-        #expect(placement["3"] as? String == "first")
+        expectEqual(placement["3"] as? String, "first")
         let drag = try object(root["drag"])
         #expect(
             Set(drag.keys) == [
@@ -231,15 +231,15 @@ struct SettingsCodingTests {
             ]
         )
         // `drag.set_liquid_glass` (#1620), on by default.
-        #expect(drag["liquid_glass"] as? Bool == true)
+        expectEqual(drag["liquid_glass"] as? Bool, true)
         // The markers store their switch alone (#2797): the drop
         // zone on, the ghost off for a fresh setup.
         let ghost = try object(drag["ghost"])
-        #expect(Set(ghost.keys) == ["enabled"])
-        #expect(ghost["enabled"] as? Bool == false)
+        expectEqual(Set(ghost.keys), ["enabled"])
+        expectEqual(ghost["enabled"] as? Bool, false)
         let zone = try object(drag["drop_zone"])
-        #expect(Set(zone.keys) == ["enabled"])
-        #expect(zone["enabled"] as? Bool == true)
+        expectEqual(Set(zone.keys), ["enabled"])
+        expectEqual(zone["enabled"] as? Bool, true)
     }
 
     @Test("A saved ghost keeps the switch it stored")
@@ -250,7 +250,7 @@ struct SettingsCodingTests {
             from: Data(json.utf8)
         )
         #expect(decoded.dragGhost.enabled)
-        #expect(decoded.dragDropZone == .dropZoneDefault)
+        expectEqual(decoded.dragDropZone, .dropZoneDefault)
     }
 
     /// `space_bar.set_edge(edge, screen)` →
@@ -277,7 +277,7 @@ struct SettingsCodingTests {
         let root = try object(JSONSerialization.jsonObject(with: data))
         for (bar, edge) in [("space_bar", "left"), ("app_bar", "bottom")] {
             let style = try object(root[bar])
-            #expect(style["edge"] as? String == "top")
+            expectEqual(style["edge"] as? String, "top")
             #expect(
                 style["edge_override"] as? [String: String]
                     == [screen: edge]

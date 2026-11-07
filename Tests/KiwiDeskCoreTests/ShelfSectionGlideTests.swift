@@ -29,7 +29,7 @@ struct ShelfSectionGlideTests {
         // The content sits on screen where it was drawn…
         #expect(start.minX + contentInSlot.minX == lone.minX + drawnLone.minX)
         // …at the new size, so only the origin travels.
-        #expect(start.size == slot.size)
+        expectEqual(start.size, slot.size)
     }
 
     /// Between two Spaces with an App Bar the section keeps its
@@ -46,7 +46,7 @@ struct ShelfSectionGlideTests {
         )
         // The old frame, size included: the new row is revealed as
         // the section grows, cropped as it shrinks.
-        #expect(start == from)
+        expectEqual(start, from)
     }
 
     /// A lone section's slot is the whole strip on every Space;
@@ -61,7 +61,7 @@ struct ShelfSectionGlideTests {
             to: strip,
             horizontal: true
         )
-        #expect(start == strip)
+        expectEqual(start, strip)
     }
 
     @Test("A vertical shelf holds its content along y")
@@ -73,9 +73,9 @@ struct ShelfSectionGlideTests {
             to: CGRect(x: 0, y: 500, width: 40, height: 240),
             horizontal: false
         )
-        #expect(start.minY + 20 == CGFloat(100 + 300))
-        #expect(start.minX == 0)
-        #expect(start.size == CGSize(width: 40, height: 240))
+        expectEqual(start.minY + 20, CGFloat(100 + 300))
+        expectEqual(start.minX, 0)
+        expectEqual(start.size, CGSize(width: 40, height: 240))
     }
 
     @Test("No content reading glides from the old frame")
@@ -114,9 +114,9 @@ struct ShelfAppearAnchorTests {
             to: alignment,
             horizontal: true
         )
-        #expect(collapsed.width == 0)
-        #expect(collapsed.minX == x)
-        #expect(collapsed.height == plate.height)
+        expectEqual(collapsed.width, 0)
+        expectEqual(collapsed.minX, x)
+        expectEqual(collapsed.height, plate.height)
     }
 
     @Test("A vertical shelf collapses along y")
@@ -126,8 +126,8 @@ struct ShelfAppearAnchorTests {
             to: .center,
             horizontal: false
         )
-        #expect(collapsed.height == 0)
-        #expect(collapsed.minY == 300)
-        #expect(collapsed.width == 40)
+        expectEqual(collapsed.height, 0)
+        expectEqual(collapsed.minY, 300)
+        expectEqual(collapsed.width, 40)
     }
 }

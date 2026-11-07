@@ -27,7 +27,7 @@ struct AppBarScrollLayoutTests {
         )
         // A title never sizes the slot: every one draws in the
         // fixed `titleSlot` (#2545).
-        #expect(longW == shortW)
+        expectEqual(longW, shortW)
         // Vertical bars render icon-only: the slot is the
         // icon square (QA 2026-07-19) and the half-moon's slot
         // above it (#2234).
@@ -209,21 +209,21 @@ struct AppBarScrollLayoutTests {
             horizontal: true,
             alignment: .center
         )
-        #expect(frames[0].minX == 0)
+        expectEqual(frames[0].minX, 0)
         let run = ShelfOverflow.runFrame(
             in: viewport,
             offset: 250,
             horizontal: true
         )
         #expect(run.minX == -250 && run.maxX == viewport.maxX)
-        #expect(frames[3].minX + run.minX == 50)
+        expectEqual(frames[3].minX + run.minX, 50)
         let vertical = ShelfOverflow.runFrame(
             in: viewport,
             offset: 40,
             horizontal: false
         )
         #expect(vertical.minY == -40 && vertical.maxY == viewport.maxY)
-        #expect(vertical.minX == 0)
+        expectEqual(vertical.minX, 0)
     }
 
     @Test("Frames line up along the axis, centered as a group")
@@ -236,9 +236,9 @@ struct AppBarScrollLayoutTests {
             alignment: .center
         )
         // 210 used of 320: the group starts at 55.
-        #expect(frames[0].minX == 55)
-        #expect(frames[1].minX == 165)
-        #expect(frames[0].height == 32)
+        expectEqual(frames[0].minX, 55)
+        expectEqual(frames[1].minX, 165)
+        expectEqual(frames[0].height, 32)
         // Vertical bars stack top-down instead.
         let vertical = AppBarOverlay.frames(
             lengths: [40, 40],
@@ -247,8 +247,8 @@ struct AppBarScrollLayoutTests {
             horizontal: false,
             alignment: .center
         )
-        #expect(vertical[0].minY == 10)
-        #expect(vertical[1].minY == 50)
-        #expect(vertical[1].width == 32)
+        expectEqual(vertical[0].minY, 10)
+        expectEqual(vertical[1].minY, 50)
+        expectEqual(vertical[1].width, 32)
     }
 }

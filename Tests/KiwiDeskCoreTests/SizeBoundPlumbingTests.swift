@@ -50,7 +50,7 @@ struct SizeBoundPlumbingTests {
             stackFlip: nil,
             sizeBounds: [WindowID(1): bound]
         )
-        #expect(context.sizeBounds[WindowID(1)] == bound)
+        expectEqual(context.sizeBounds[WindowID(1)], bound)
     }
 
     @Test("layoutInput threads the learner's confirmed bounds")

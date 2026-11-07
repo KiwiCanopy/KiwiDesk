@@ -49,8 +49,8 @@ extension FullscreenStandDownTests {
         let (core, box) = makeCueCore(isUser: true)
         core.modeCycle.profileOverride = [.bsp, .grid]
         #expect(core.execute("cycle_mode", args: []).isSuccess)
-        #expect(box.cues.map(\.cycle) == [[.bsp, .grid]])
-        #expect(box.cues.map(\.current) == [.grid])
+        expectEqual(box.cues.map(\.cycle), [[.bsp, .grid]])
+        expectEqual(box.cues.map(\.current), [.grid])
     }
 
     @Test("a full-screen Space keeps the layout cue away")
@@ -68,7 +68,7 @@ extension FullscreenStandDownTests {
         #expect(core.appWide.modeCue)
         let off = core.execute("set_mode_cue", args: [.bool(false)])
         #expect(off.isSuccess)
-        #expect(core.appWide.modeCue == false)
+        expectEqual(core.appWide.modeCue, false)
         #expect(core.execute("cycle_mode", args: []).isSuccess)
         #expect(box.cues.isEmpty)
         #expect(!core.execute("set_mode_cue", args: []).isSuccess)

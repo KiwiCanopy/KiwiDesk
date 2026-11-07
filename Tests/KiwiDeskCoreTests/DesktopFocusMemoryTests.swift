@@ -136,9 +136,9 @@ struct DesktopFocusMemoryTests {
     func honoredFocusIsRemembered() {
         let (core, _) = makeCore()
         defer { teardown() }
-        #expect(core.desktopMemory.honoredFocus[home]?[10] == focused)
+        expectEqual(core.desktopMemory.honoredFocus[home]?[10], focused)
         core.handle(.windowFocused(first))
-        #expect(core.desktopMemory.honoredFocus[home]?[10] == first)
+        expectEqual(core.desktopMemory.honoredFocus[home]?[10], first)
     }
 
     /// The device log's ordering: the departure's destroys fold
@@ -150,9 +150,9 @@ struct DesktopFocusMemoryTests {
         defer { teardown() }
         leaveDesktop1(core, destroysFirst: true)
         #expect(core.state.workspaces[home]?.focused == nil)
-        #expect(core.desktopMemory.honoredFocus[home]?[10] == focused)
+        expectEqual(core.desktopMemory.honoredFocus[home]?[10], focused)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
     }
 
     @Test("the return owes the remembered window, narrated")
@@ -161,7 +161,7 @@ struct DesktopFocusMemoryTests {
         defer { teardown() }
         leaveDesktop1(core, destroysFirst: false)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
         #expect(
             box.lines.contains { $0.contains("owing focus to w1") }
         )
@@ -180,15 +180,15 @@ struct DesktopFocusMemoryTests {
         leaveDesktop1(core)
         arrive(first, in: core)
         core.handle(.windowFocused(first))
-        #expect(core.desktopMemory.honoredFocus[home]?[10] == first)
+        expectEqual(core.desktopMemory.honoredFocus[home]?[10], first)
         #expect(core.desktopMemory.honoredFocus[home]?[11] == nil)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         #expect(!box.lines.contains { $0.contains("owing focus") })
-        #expect(core.state.workspaces[home]?.focused == first)
+        expectEqual(core.state.workspaces[home]?.focused, first)
         leaveDesktop1(core)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == first)
+        expectEqual(core.desktopMemory.returnFocus.owed(), first)
     }
 
     /// The other Desktop's window, honored there and still present
@@ -206,14 +206,14 @@ struct DesktopFocusMemoryTests {
         leaveDesktop1(core)
         arrive(other, in: core)
         core.handle(.windowFocused(other))
-        #expect(core.desktopMemory.honoredFocus[home]?[11] == other)
+        expectEqual(core.desktopMemory.honoredFocus[home]?[11], other)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
         core.handle(.windowDestroyed(other, wasMinimized: false))
         arrive(first, in: core)
         #expect(core.state.workspaces[home]?.focused == nil)
         arrive(focused, in: core)
-        #expect(core.state.workspaces[home]?.focused == focused)
+        expectEqual(core.state.workspaces[home]?.focused, focused)
         #expect(
             box.lines.contains { $0.contains("focus paid to w1") }
         )
@@ -232,7 +232,7 @@ struct DesktopFocusMemoryTests {
         )
         core.handle(.windowFocused(carried))
         leaveDesktop1(core)
-        #expect(core.state.workspaces[home]?.focused == carried)
+        expectEqual(core.state.workspaces[home]?.focused, carried)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         #expect(!box.lines.contains { $0.contains("owing focus") })
@@ -253,13 +253,13 @@ struct DesktopFocusMemoryTests {
         )
         core.handle(.windowFocused(focused))
         leaveDesktop1(core)
-        #expect(core.state.workspaces[home]?.focused == carried)
+        expectEqual(core.state.workspaces[home]?.focused, carried)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
         arrive(first, in: core)
-        #expect(core.state.workspaces[home]?.focused == carried)
+        expectEqual(core.state.workspaces[home]?.focused, carried)
         arrive(focused, in: core)
-        #expect(core.state.workspaces[home]?.focused == focused)
+        expectEqual(core.state.workspaces[home]?.focused, focused)
         #expect(
             box.lines.contains { $0.contains("focus paid to w1") }
         )
@@ -275,7 +275,7 @@ struct DesktopFocusMemoryTests {
         defer { teardown() }
         leaveDesktop1(core)
         returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        expectEqual(core.desktopMemory.returnFocus.owed(), focused)
         // Moved on before the window re-listed: Desktop 2
         // remembers nothing — no Space either, so the retire is
         // reached through the target's first-space fallback —

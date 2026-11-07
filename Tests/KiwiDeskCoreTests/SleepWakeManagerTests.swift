@@ -59,7 +59,7 @@ struct SleepWakeManagerTests {
         manager.systemWillRest(.direct)
         manager.systemDidReturn(.direct)
         await manager.pendingReplay?.value
-        #expect(restored == saved)
+        expectEqual(restored, saved)
     }
 
     @Test("Wake restore is skipped when the topology changed")

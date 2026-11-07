@@ -115,11 +115,11 @@ struct ProfilePartitioningTests {
         core.state.workspaces.add(WindowID(2), to: "2")
 
         core.apply(profile: b, cause: .event)
-        #expect(members(core, "1") == [WindowID(1), WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1), WindowID(2)])
 
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1)])
-        #expect(members(core, "2") == [WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(2)])
     }
 
     // MARK: - The landing rule
@@ -247,10 +247,10 @@ struct ProfilePartitioningTests {
         core.state.workspaces.add(WindowID(1), to: "2")
         core.state.workspaces.focus(WindowID(2), in: "2")
         core.state.workspaces.focus(WindowID(1), in: "2")
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
 
         core.apply(profile: a, cause: .event)
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
         #expect(
             core.state.workspaces.focusReturnCandidate
                 == WindowID(2)
@@ -286,7 +286,7 @@ struct ProfilePartitioningTests {
 
         core.apply(profile: b, cause: .event)
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1)])
-        #expect(members(core, "2") == [WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(2)])
     }
 }

@@ -147,7 +147,7 @@ struct BootWindowRuleReconcileTests {
         core.defersWindowRuleReconcileToSweep = true
         let before = box.windowQueries
         reapplyRules(core, float: "com.test.floater")
-        #expect(box.windowQueries == before)
+        expectEqual(box.windowQueries, before)
     }
 
     /// The equality skip's grave marker. A draft of #836 returned
@@ -197,6 +197,6 @@ struct BootWindowRuleReconcileTests {
         core.defersWindowRuleReconcile = true
         let before = box.windowQueries
         reapplyRules(core, float: "com.test.floater")
-        #expect(box.windowQueries == before)
+        expectEqual(box.windowQueries, before)
     }
 }

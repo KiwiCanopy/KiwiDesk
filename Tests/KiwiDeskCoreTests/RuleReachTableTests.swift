@@ -28,8 +28,8 @@ struct RuleReachTableTests {
         let t = table
         #expect(t.reach(of: "slack", editing: "Work") == .shared(joining: []))
         #expect(t.reach(of: "spotify", editing: "Work") == .listed(["Work"]))
-        #expect(t.reach(of: "figma", editing: "Home") == .listed(["Home"]))
-        #expect(t.differing("figma", editing: "Work") == ["Home"])
+        expectEqual(t.reach(of: "figma", editing: "Home"), .listed(["Home"]))
+        expectEqual(t.differing("figma", editing: "Work"), ["Home"])
         #expect(t.differing("mail", editing: "Work").isEmpty)
     }
 
@@ -51,9 +51,9 @@ struct RuleReachTableTests {
             reach: .listed(["Work", "Home"]),
             editing: "Work"
         )
-        #expect(t.base["mail"] == 1)
-        #expect(t.resolved("mail", for: "Work") == 3)
-        #expect(t.resolved("mail", for: "Home") == 3)
+        expectEqual(t.base["mail"], 1)
+        expectEqual(t.resolved("mail", for: "Work"), 3)
+        expectEqual(t.resolved("mail", for: "Home"), 3)
         // Travel was unticked: it keeps leaving the rule out.
         #expect(t.entries["Travel"]?["mail"] == .some(nil))
         #expect(t.touched["Travel"] == nil)
@@ -68,7 +68,7 @@ struct RuleReachTableTests {
             reach: .listed(["Work"]),
             editing: "Work"
         )
-        #expect(t == table)
+        expectEqual(t, table)
         #expect(t.touched.isEmpty && t.baseTouched.isEmpty)
     }
 
@@ -81,7 +81,7 @@ struct RuleReachTableTests {
             reach: .shared(joining: ["Home"]),
             editing: "Work"
         )
-        #expect(t.resolved("figma", for: "Home") == 4)
+        expectEqual(t.resolved("figma", for: "Home"), 4)
         #expect(t.entries["Home"]?["figma"] == nil)
         #expect(t.touched["Work"] == nil)
     }
@@ -95,9 +95,9 @@ struct RuleReachTableTests {
             reach: .shared(joining: []),
             editing: "Work"
         )
-        #expect(t.base["figma"] == 5)
-        #expect(t.resolved("figma", for: "Travel") == 5)
-        #expect(t.resolved("figma", for: "Home") == 2)
+        expectEqual(t.base["figma"], 5)
+        expectEqual(t.resolved("figma", for: "Travel"), 5)
+        expectEqual(t.resolved("figma", for: "Home"), 2)
     }
 
     @Test("A list over another's shared rule keeps that base")
@@ -110,9 +110,9 @@ struct RuleReachTableTests {
             reach: .listed(["Home", "Work"]),
             editing: "Home"
         )
-        #expect(t.base["figma"] == 4)
-        #expect(t.resolved("figma", for: "Work") == 2)
-        #expect(t.resolved("figma", for: "Travel") == 4)
+        expectEqual(t.base["figma"], 4)
+        expectEqual(t.resolved("figma", for: "Work"), 2)
+        expectEqual(t.resolved("figma", for: "Travel"), 4)
     }
 
     @Test("An unticked list member keeps its own value")
@@ -130,8 +130,8 @@ struct RuleReachTableTests {
             reach: .listed(["Work"]),
             editing: "Work"
         )
-        #expect(t.resolved("mail", for: "Work") == 2)
-        #expect(t.resolved("mail", for: "Home") == 1)
+        expectEqual(t.resolved("mail", for: "Work"), 2)
+        expectEqual(t.resolved("mail", for: "Home"), 1)
         #expect(t.touched["Home"] == nil)
     }
 
@@ -146,7 +146,7 @@ struct RuleReachTableTests {
             editing: "Work"
         )
         #expect(t.entries["Work"]?["slack"] == .some(nil))
-        #expect(t.resolved("slack", for: "Home") == 2)
+        expectEqual(t.resolved("slack", for: "Home"), 2)
         t.apply(
             "spotify",
             value: nil,
@@ -174,9 +174,9 @@ struct RuleReachTableTests {
             removal: .everywhere,
             editing: "Home"
         )
-        #expect(t.base["figma"] == 4)
+        expectEqual(t.base["figma"], 4)
         #expect(t.resolved("figma", for: "Home") == nil)
-        #expect(t.resolved("figma", for: "Work") == 4)
+        expectEqual(t.resolved("figma", for: "Work"), 4)
         // Dropping Travel's mark would hand it the shared rule.
         #expect(t.resolved("figma", for: "Travel") == nil)
     }
@@ -190,7 +190,7 @@ struct RuleReachTableTests {
             reach: .listed(["Work"]),
             editing: "Work"
         )
-        #expect(t.touched == ["Work": ["spotify"]])
+        expectEqual(t.touched, ["Work": ["spotify"]])
         #expect(t.baseTouched.isEmpty)
         #expect(
             t.appRuleOverride(for: "Home")
@@ -223,8 +223,8 @@ struct RuleReachTableTests {
     @Test("Float rules group per app, resolved per profile")
     func floatGroups() {
         let t = floats
-        #expect(t.resolved("zoom", for: "Work") == ["zoom"])
-        #expect(t.resolved("zoom", for: "Home") == ["zoom:Meeting"])
+        expectEqual(t.resolved("zoom", for: "Work"), ["zoom"])
+        expectEqual(t.resolved("zoom", for: "Home"), ["zoom:Meeting"])
         #expect(t.reach(of: "com.calc", editing: "Home").isShared)
     }
 
@@ -256,12 +256,12 @@ struct RuleReachTableTests {
         )
         let encoded = t.floatRuleOverride(for: "Home", original: original)
         let base = t.floatRuleBase(original: ["com.calc", "zoom"])
-        #expect(base == ["com.calc", "zoom", "zoom:Share"])
+        expectEqual(base, ["com.calc", "zoom", "zoom:Share"])
         let resolved = encoded?.resolved(
             onto: base,
             normalizing: FloatRules.normalizedRule
         ).sorted()
-        #expect(resolved == ["com.calc", "zoom:Meeting"])
+        expectEqual(resolved, ["com.calc", "zoom:Meeting"])
     }
 }
 
@@ -302,9 +302,9 @@ struct RuleReachSaveTests {
             editing: "Work"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.appRules["mail"] == 1)
+        expectEqual(core.guiConfigStore.load()?.appRules["mail"], 1)
         let work = try core.profiles.read(name: "Work")
-        #expect(work.appRules == AppRuleOverride(rules: ["mail": 2]))
+        expectEqual(work.appRules, AppRuleOverride(rules: ["mail": 2]))
         let home = try core.profiles.read(name: "Home")
         #expect(home.appRules == nil)
     }
@@ -318,6 +318,6 @@ struct RuleReachSaveTests {
         let snapshot = try #require(core.ruleReachSnapshot())
         try core.saveRuleReach(snapshot)
         let after = try Data(contentsOf: core.profiles.fileURL(name: "Home"))
-        #expect(before == after)
+        expectEqual(before, after)
     }
 }

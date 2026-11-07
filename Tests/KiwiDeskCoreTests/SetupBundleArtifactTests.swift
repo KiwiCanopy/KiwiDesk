@@ -25,11 +25,11 @@ struct SetupBundleArtifactTests {
     func everyArtifactResolves() {
         let core = makeTestCore()
         let urls = ConfigArtifact.allCases.map(core.url(of:))
-        #expect(urls.count == ConfigArtifact.allCases.count)
+        expectEqual(urls.count, ConfigArtifact.allCases.count)
         // Two artifacts sharing a path would mean one silently
         // stands in for the other in every discard and every
         // backup.
-        #expect(Set(urls.map(\.path)).count == urls.count)
+        expectEqual(Set(urls.map(\.path)).count, urls.count)
         // Each lives in one of the two folders, by whole path
         // component; the migration copies are this Mac's (#2324).
         func inside(_ url: URL, _ folder: URL) -> Bool {

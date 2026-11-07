@@ -87,8 +87,8 @@ struct TravelerFocusedCommandTests {
     func anchorIsTraveler() {
         let core = makeCore()
         seed(core, travelerPID: getpid())
-        #expect(core.focusedWindowID == WindowID(50))
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(50))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Directional focus from a cross-app traveler is not denied")
@@ -113,9 +113,9 @@ struct TravelerFocusedCommandTests {
         let core = makeCore()
         seed(core, travelerPID: getpid())
         #expect(core.execute("toggle_floating").isSuccess)
-        #expect(core.state.windows[WindowID(50)]?.isFloating == true)
+        expectEqual(core.state.windows[WindowID(50)]?.isFloating, true)
         // The stale local focus was not touched.
-        #expect(core.state.windows[WindowID(1)]?.isFloating == false)
+        expectEqual(core.state.windows[WindowID(1)]?.isFloating, false)
     }
 
     @Test("toggle_sticky un-sticks the traveler, not the local slot")
@@ -123,8 +123,8 @@ struct TravelerFocusedCommandTests {
         let core = makeCore()
         seed(core, travelerPID: getpid())
         #expect(core.execute("toggle_sticky").isSuccess)
-        #expect(core.state.windows[WindowID(50)]?.isSticky == false)
-        #expect(core.state.windows[WindowID(1)]?.isSticky == false)
+        expectEqual(core.state.windows[WindowID(50)]?.isSticky, false)
+        expectEqual(core.state.windows[WindowID(1)]?.isSticky, false)
     }
 
     @Test("move_to_space on a sticky traveler is refused, not misdirected")
@@ -146,8 +146,8 @@ struct TravelerFocusedCommandTests {
                 args: [.string("3")]
             ).isSuccess
         )
-        #expect(core.state.workspaces.space(of: WindowID(50)) == "2")
-        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        expectEqual(core.state.workspaces.space(of: WindowID(50)), "2")
+        expectEqual(core.state.workspaces.space(of: WindowID(1)), "1")
     }
 
     @Test("stack.promote from a traveler refuses, it does not deny")
@@ -161,6 +161,6 @@ struct TravelerFocusedCommandTests {
         // command is a semantic refusal (pill), reported as success —
         // never the guard denial, and never a local mutation.
         #expect(response.isSuccess)
-        #expect(core.state.workspaces["1"]?.windows == before)
+        expectEqual(core.state.workspaces["1"]?.windows, before)
     }
 }

@@ -115,11 +115,11 @@ struct ScrollingDeferredRaiseTests {
         }
         // State focus moved each step; only one raise is
         // pending, for the last target.
-        #expect(core.activeSpace?.focused == WindowID(2))
-        #expect(core.pendingFocusRaise == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
+        expectEqual(core.pendingFocusRaise, WindowID(2))
         core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("A real focus echo mid-pan cancels the pending raise")
@@ -130,7 +130,7 @@ struct ScrollingDeferredRaiseTests {
         settleFrames(core)
         guard startDummyPan(core) else { return }
         core.execute("focus", args: [.string("left")])
-        #expect(core.pendingFocusRaise == WindowID(4))
+        expectEqual(core.pendingFocusRaise, WindowID(4))
         // The user clicks window 1 mid-pan: the OS raised it
         // itself; a stale raise must not steal focus back. The
         // click is what tells it from the pan's own echo (#1161).
@@ -138,7 +138,7 @@ struct ScrollingDeferredRaiseTests {
         core.eventLoop.onEvent(.windowFocused(WindowID(1)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("A stale self-echo keeps a newer pending raise (#152)")
@@ -162,13 +162,13 @@ struct ScrollingDeferredRaiseTests {
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         // The stale self-echo neither clears the pending raise nor
         // snaps state focus back to 2.
-        #expect(core.pendingFocusRaise == WindowID(3))
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.pendingFocusRaise, WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
         // And the stamp survives the echo (#887): the app's
         // duplicate report must classify the same way.
         #expect(core.selfRaiseStamps[WindowID(2)] != nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     @Test("A stale echo can't revert a later forward step (#158)")
@@ -191,7 +191,7 @@ struct ScrollingDeferredRaiseTests {
         core.selfRaiseStamps[WindowID(4)] = core.wallClock()
         core.state.workspaces.focus(WindowID(4), in: space)
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -218,7 +218,7 @@ struct ScrollingDeferredRaiseTests {
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        expectEqual(core.activeSpace?.focused, WindowID(2))
     }
 
     @Test("A non-animated focus move raises immediately")
@@ -235,7 +235,7 @@ struct ScrollingDeferredRaiseTests {
         // No pan to wait on: nothing stays pending after the
         // command returns.
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
     }
 
     @Test("The deferred raise's own echo re-triggers nothing")
@@ -264,9 +264,9 @@ struct ScrollingDeferredRaiseTests {
         // schedule another raise or start a new pan.
         core.eventLoop.onEvent(.windowFocused(WindowID(4)))
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.tiler.animation.activeCount == 0)
-        #expect(core.activeSpace?.focused == WindowID(4))
-        #expect(focusEmits == 1)
+        expectEqual(core.tiler.animation.activeCount, 0)
+        expectEqual(core.activeSpace?.focused, WindowID(4))
+        expectEqual(focusEmits, 1)
     }
 
     @Test("Animated but pan-free focus raises immediately")
@@ -295,9 +295,9 @@ struct ScrollingDeferredRaiseTests {
             core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
-        #expect(core.tiler.animation.activeCount == 0)
+        expectEqual(core.tiler.animation.activeCount, 0)
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
     }
 
     @Test("Closing the focused window focuses the neighbor")
@@ -322,7 +322,7 @@ struct ScrollingDeferredRaiseTests {
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(3), wasMinimized: false)
         )
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
@@ -337,6 +337,6 @@ struct ScrollingDeferredRaiseTests {
         core.pendingFocusRaise = WindowID(2)
         core.tiler.animation.onAllAnimationsEnded()
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 }

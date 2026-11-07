@@ -50,7 +50,7 @@ struct LookBorderGapTests {
         var settings = TilingSettings()
         settings.borderStyle = before
         look(["border.\(field)": value]).apply(to: &settings)
-        #expect(settings.borderStyle == core.tiler.settings.borderStyle)
+        expectEqual(settings.borderStyle, core.tiler.settings.borderStyle)
     }
 
     /// A look stores the config's own spelling of the gaps and
@@ -65,12 +65,12 @@ struct LookBorderGapTests {
         let stored = LookKeys.extract(from: source)["gap.global"]
         var settings = TilingSettings()
         look(["gap.global": stored ?? .null]).apply(to: &settings)
-        #expect(settings.gapsGlobal == source.gapsGlobal)
+        expectEqual(settings.gapsGlobal, source.gapsGlobal)
         // A partial or wrongly typed value is skipped, never guessed.
         look(["gap.global": .object(["outer": .number(3)])])
             .apply(to: &settings)
         look(["gap.global": .number(3)]).apply(to: &settings)
-        #expect(settings.gapsGlobal == source.gapsGlobal)
+        expectEqual(settings.gapsGlobal, source.gapsGlobal)
     }
 
     /// The command keeps its own flat spelling; a missing key is
@@ -119,8 +119,8 @@ struct LookBorderGapTests {
         var settings = TilingSettings()
         settings.gapsOverride["1"] = .uniform(20)
         look(["gap.global": gaps(4, 4)]).apply(to: &settings)
-        #expect(settings.gapsGlobal == .uniform(4))
-        #expect(settings.gapsOverride["1"] == .uniform(20))
+        expectEqual(settings.gapsGlobal, .uniform(4))
+        expectEqual(settings.gapsOverride["1"], .uniform(20))
     }
 
     @Test("the enabled switches and the stacking never ride a look")
@@ -131,7 +131,7 @@ struct LookBorderGapTests {
             "border.unfocused_enabled": .bool(true),
             "border.draw_order": .string("front"),
         ]).apply(to: &settings)
-        #expect(settings == TilingSettings())
+        expectEqual(settings, TilingSettings())
     }
 
     /// Owner ruling 2026-09-28: Glass the shipped defaults, Tiler
@@ -151,7 +151,7 @@ struct LookBorderGapTests {
         let bundled = LookCatalog.bundled(
             sizes: [CGSize(width: 2560, height: 1440)]
         )
-        #expect(Set(column.keys) == Set(bundled.map(\.name)))
+        expectEqual(Set(column.keys), Set(bundled.map(\.name)))
         for look in bundled {
             let row = try #require(column[look.name])
             var settings = TilingSettings()

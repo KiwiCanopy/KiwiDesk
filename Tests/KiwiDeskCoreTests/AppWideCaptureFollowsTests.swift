@@ -63,8 +63,8 @@ struct AppWideCaptureFollowsTests {
         run("delete_profile", "Coding", core)
         try core.profiles.write(profile(named: "Coding"))
         run("load_profile", "Coding", core)
-        #expect(core.appWide == AppWideSettings())
-        #expect(core.guiConfigStore.load()?.appWide == AppWideSettings())
+        expectEqual(core.appWide, AppWideSettings())
+        expectEqual(core.guiConfigStore.load()?.appWide, AppWideSettings())
     }
 
     @Test("a renamed profile's capture follows it")
@@ -75,7 +75,7 @@ struct AppWideCaptureFollowsTests {
         try core.renameProfile(from: "Work", to: "Home")
         run("load_profile", "Home", core)
         #expect(core.appWide.refusalSound)
-        #expect(core.appWide.quitGridTargetDepth == 9)
+        expectEqual(core.appWide.quitGridTargetDepth, 9)
     }
 
     @Test("a renamed profile's old name owes nothing")
@@ -86,7 +86,7 @@ struct AppWideCaptureFollowsTests {
         try core.renameProfile(from: "Work", to: "Home")
         try core.profiles.write(profile(named: "Work"))
         run("load_profile", "Work", core)
-        #expect(core.appWide == AppWideSettings())
+        expectEqual(core.appWide, AppWideSettings())
     }
 
     @Test("a restore without gui.json drops every capture")
@@ -102,6 +102,6 @@ struct AppWideCaptureFollowsTests {
         )
         try core.restoreSetup(from: bundle) { _ in }
         run("load_profile", "Coding", core)
-        #expect(core.appWide == AppWideSettings())
+        expectEqual(core.appWide, AppWideSettings())
     }
 }

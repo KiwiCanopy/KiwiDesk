@@ -48,9 +48,9 @@ struct ShortcutMetaTests {
         )
         let rows = try layer(KeyLayer.defaultName, of: core).bindings
         let left = try #require(rows.first { $0.combo == "option+h" })
-        #expect(left.desc == "Left")
-        #expect(left.group == "Mine")
-        #expect(left.symbol == "star")
+        expectEqual(left.desc, "Left")
+        expectEqual(left.group, "Mine")
+        expectEqual(left.symbol, "star")
         let right = try #require(rows.first { $0.combo == "option+l" })
         #expect(right.desc.isEmpty && right.group.isEmpty)
     }
@@ -67,10 +67,10 @@ struct ShortcutMetaTests {
             """
         )
         let rows = try layer("resize", of: core).bindings
-        #expect(rows.count == 2)
+        expectEqual(rows.count, 2)
         let h = try #require(rows.first { $0.combo == "h" })
-        #expect(h.desc == "Narrower")
-        #expect(h.group == "size_float")
+        expectEqual(h.desc, "Narrower")
+        expectEqual(h.group, "size_float")
         let l = try #require(rows.first { $0.combo == "l" })
         #expect(l.desc.isEmpty)
     }
@@ -116,7 +116,7 @@ struct ShortcutMetaTests {
             KeyBinding.self,
             from: try JSONEncoder().encode(full)
         )
-        #expect(back == full)
+        expectEqual(back, full)
         #expect(back != plain)
         let old = Data(#"{"combo":"alt+h","lua":"x()"}"#.utf8)
         #expect(try JSONDecoder().decode(KeyBinding.self, from: old) == plain)
@@ -124,16 +124,16 @@ struct ShortcutMetaTests {
 
     @Test("A built-in token is matched; any other name is a group of its own")
     func groupsResolve() {
-        #expect(ShortcutGroup.filing("focus") == .builtIn(.focus))
+        expectEqual(ShortcutGroup.filing("focus"), .builtIn(.focus))
         #expect(
             ShortcutGroup.filing(" Move_Windows ") == .builtIn(.moveWindows)
         )
-        #expect(ShortcutGroup.filing(" Mine ") == .own("Mine"))
-        #expect(ShortcutGroup.filing("  ") == .none)
+        expectEqual(ShortcutGroup.filing(" Mine "), .own("Mine"))
+        expectEqual(ShortcutGroup.filing("  "), .none)
         let names = ShortcutGroup.custom(
             in: ["B", "focus", "A", " B", ""]
         )
-        #expect(names == ["B", "A"])
+        expectEqual(names, ["B", "A"])
     }
 
     @Test("shortcut.list_groups lists the tokens and the groups in use")
@@ -157,8 +157,8 @@ struct ShortcutMetaTests {
             )
             return
         }
-        #expect(builtIn.count == ShortcutGroup.allCases.count)
-        #expect(custom == [.string("Mine")])
+        expectEqual(builtIn.count, ShortcutGroup.allCases.count)
+        expectEqual(custom, [.string("Mine")])
     }
 
     @Test("A symbol that is no SF Symbol is a Config Issue; a real one is not")
@@ -176,6 +176,6 @@ struct ShortcutMetaTests {
             else { return nil }
             return symbol
         }
-        #expect(symbols == ["kiwidesk.no.such.symbol"])
+        expectEqual(symbols, ["kiwidesk.no.such.symbol"])
     }
 }

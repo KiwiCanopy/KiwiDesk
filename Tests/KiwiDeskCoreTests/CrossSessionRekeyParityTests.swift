@@ -132,7 +132,7 @@ struct CrossSessionRekeyParityTests {
         let before = fields(original)
         let after = fields(rekeyed)
         let empty = fields(blank)
-        #expect(Set(before.keys) == Set(register.keys))
+        expectEqual(Set(before.keys), Set(register.keys))
         for (label, (fate, _)) in register where fate != .recursed {
             let expected = fate == .carried ? before[label] : empty[label]
             #expect(after[label] == expected, "\(label) is not \(fate)")
@@ -186,10 +186,10 @@ struct CrossSessionRekeyParityTests {
             )
         )
         let space = try #require(snapshot.rekeyed([old: live]).spaces.first)
-        #expect(space.windows == [live.raw])
-        #expect(space.focused == live.raw)
-        #expect(space.trackBreaks == [live.raw])
-        #expect(space.trackWeights == [live.raw: 1.5])
+        expectEqual(space.windows, [live.raw])
+        expectEqual(space.focused, live.raw)
+        expectEqual(space.trackBreaks, [live.raw])
+        expectEqual(space.trackWeights, [live.raw: 1.5])
         #expect(snapshot.rekeyed([old: live]).windows.map(\.id) == [live.raw])
     }
 }

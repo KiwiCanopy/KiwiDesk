@@ -123,7 +123,7 @@ struct SpaceBarItemReuseTests {
             view.floatingBadgeViews.map { $0 != nil } == [false, false, true]
         )
         let marks = view.aboveOutline.subviews.filter { $0 is StateBadgeView }
-        #expect(marks.count == 2)
+        expectEqual(marks.count, 2)
     }
 
     @Test("A glyph changing kind or an app leaving retires its views")
@@ -143,7 +143,7 @@ struct SpaceBarItemReuseTests {
             apps: [Self.app(1, glyph: "a"), Self.app(2)],
             active: true
         )
-        #expect(view.appViews.count == 2)
+        expectEqual(view.appViews.count, 2)
         #expect(view.appViews[0] is NSTextField)
         #expect(kept.superview == nil)
         #expect(departed.superview == nil)
@@ -178,13 +178,13 @@ struct SpaceBarItemReuseTests {
             active: true
         )
         #expect(view.stickyBadgeViews[0] === badge)
-        #expect(badge.symbolName == StickyStyle.displaySymbolName)
+        expectEqual(badge.symbolName, StickyStyle.displaySymbolName)
         let drawn = try #require(badge.symbol.image)
         let fresh = StateBadgeView(
             symbolName: StickyStyle.displaySymbolName
         )
         let wanted = try #require(fresh.symbol.image)
-        #expect(drawn.tiffRepresentation == wanted.tiffRepresentation)
+        expectEqual(drawn.tiffRepresentation, wanted.tiffRepresentation)
         #expect(StickyStyle.displaySymbolName != StickyStyle.symbolName)
     }
 
@@ -200,7 +200,7 @@ struct SpaceBarItemReuseTests {
         #expect(view.appViews[1] === image)
         #expect(image.image === next.icon)
         #expect(view.badgeViews[1] === badge)
-        #expect(badge.stringValue == "5")
+        expectEqual(badge.stringValue, "5")
         #expect(!badge.isHidden)
     }
 

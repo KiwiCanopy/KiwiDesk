@@ -116,7 +116,7 @@ struct BootDeferralTests {
         #expect(loop.beginScan())
         defer { loop.stop() }
         loop.scanChunk(budget: nil)
-        #expect(box.deferrals.count == 2)
+        expectEqual(box.deferrals.count, 2)
         // The boot tail drains — and production ALWAYS drains
         // before the sweep opens, a second earlier. Clearing the
         // skip list on that take handed the sweep an empty list
@@ -135,7 +135,7 @@ struct BootDeferralTests {
         // `syncObservation` never re-installs an observer that
         // exists, so the install count is 2 == 2 under every
         // mutation (guard-prover, 2026-08-12).
-        #expect(box.windowQueries == queriesAfterScan)
+        expectEqual(box.windowQueries, queriesAfterScan)
         // The sweep found nothing new to defer, the scan's
         // deferrals having already been taken by the tail.
         #expect(loop.takeDeferredBootApps().isEmpty)
@@ -155,7 +155,7 @@ struct BootDeferralTests {
         box.step = .milliseconds(600)
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
-        #expect(box.deferrals.count == 2)
+        expectEqual(box.deferrals.count, 2)
         loop.stop()
 
         // A fresh boot, with the app answering promptly now.
@@ -166,7 +166,7 @@ struct BootDeferralTests {
         loop.scanChunk(budget: nil)
 
         #expect(box.windowQueries > queriesAfterFirstBoot)
-        #expect(box.deferrals.count == 2)
+        expectEqual(box.deferrals.count, 2)
     }
     /// A launch that stopped mid-drain must not wedge the next
     /// one. "Is a chain running" is derived from the queue being

@@ -57,7 +57,7 @@ struct LocalizationCollapseGuardTests {
                 "a.hide": "Opzione %1$@",
             ]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// The specifier clause must not fire on a *shared* English
@@ -74,7 +74,7 @@ struct LocalizationCollapseGuardTests {
                 "a.two": "Informazioni su %1$@",
             ]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// Without a specifier the bar is five distinct English
@@ -97,7 +97,7 @@ struct LocalizationCollapseGuardTests {
             english: english,
             catalog: catalog
         )
-        #expect((result.status == 0) == passes)
+        expectEqual((result.status == 0), passes)
     }
 
     /// A key the current code no longer defines has no English to
@@ -113,7 +113,7 @@ struct LocalizationCollapseGuardTests {
             english: ["a.real": "Default"],
             catalog: catalog
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 }
 

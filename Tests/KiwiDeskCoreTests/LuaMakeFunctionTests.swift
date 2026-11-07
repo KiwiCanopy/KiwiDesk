@@ -25,7 +25,7 @@ struct LuaMakeFunctionTests {
         // The ref must be a valid callable.
         #expect(lua.call(ref: ref).succeeded)
         // The body ran: x is now 42.
-        #expect(lua.global("x") == .number(42))
+        expectEqual(lua.global("x"), .number(42))
         lua.release(ref: ref)
     }
 
@@ -44,7 +44,7 @@ struct LuaMakeFunctionTests {
             return
         }
         #expect(lua.call(ref: ref).succeeded)
-        #expect(lua.global("result") == .number(15))
+        expectEqual(lua.global("result"), .number(15))
         lua.release(ref: ref)
     }
 

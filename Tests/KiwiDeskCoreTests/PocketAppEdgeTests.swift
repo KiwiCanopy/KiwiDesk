@@ -28,7 +28,7 @@ struct PocketAppEdgeTests {
         fixture.press()
         fixture.installRow(true)
         fixture.arrive(9)
-        #expect(fixture.core.state.pocketPhase(of: mine) == .out)
+        expectEqual(fixture.core.state.pocketPhase(of: mine), .out)
         #expect(fixture.owner(of: mine) == nil)
     }
 
@@ -46,9 +46,9 @@ struct PocketAppEdgeTests {
         let fixture = Fixture()
         #expect(fixture.core.execute("toggle_pocket_window").isSuccess)
         #expect(fixture.press().isSuccess)
-        #expect(fixture.opened == [Fixture.app])
+        expectEqual(fixture.opened, [Fixture.app])
         fixture.arrive(9)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
     }
 
     @Test("a hidden app's key shows the app")
@@ -71,7 +71,7 @@ struct PocketAppEdgeTests {
         fixture.arrive(9)
         fixture.arrive(10)
         let next = WindowID(10)
-        #expect(fixture.owner(of: mine) == Fixture.app)
+        expectEqual(fixture.owner(of: mine), Fixture.app)
         #expect(fixture.core.state.pocketPhase(of: next) == nil)
         #expect(
             fixture.core.state.workspaces.space(of: next) == SpaceID("2")

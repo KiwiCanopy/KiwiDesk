@@ -96,7 +96,7 @@ struct DesktopRaiseGateArmTests {
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(log.contains { $0.contains(Self.standDownNeedle) })
         #expect(
             !log.contains {
@@ -111,7 +111,7 @@ struct DesktopRaiseGateArmTests {
         let (target, other) = placementFixture(core)
         host(core, unshown: nil)
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 
     /// macOS restores the Desktop's last focused window on a
@@ -128,7 +128,7 @@ struct DesktopRaiseGateArmTests {
         core.desktopMemory.honoredFocus[space] = [10: target]
         core.recentReturns[target] = core.wallClock()
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     @Test("A remembered focus of another window is still distrusted")
@@ -140,7 +140,7 @@ struct DesktopRaiseGateArmTests {
         core.desktopMemory.honoredFocus[space] = [10: other]
         core.recentReturns[target] = core.wallClock()
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 
     /// Bound to the RETURN: the same memory entry past the
@@ -159,7 +159,7 @@ struct DesktopRaiseGateArmTests {
                 -KiwiCore.restoredFocusWindow - 1
             )
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 
     /// The production writer of `recentReturns`: an arrival the
@@ -194,7 +194,7 @@ struct DesktopRaiseGateArmTests {
             target: CGRect(x: 800, y: 100, width: 400, height: 300)
         )
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     @Test("A new arrival stamps no return")
@@ -221,9 +221,9 @@ struct DesktopRaiseGateArmTests {
         core.desktopMoveDepartures[old] = stamp
         core.handle(.windowRekeyed(old, new))
         #expect(core.recentReturns[old] == nil)
-        #expect(core.recentReturns[new] == stamp)
+        expectEqual(core.recentReturns[new], stamp)
         #expect(core.desktopMoveDepartures[old] == nil)
-        #expect(core.desktopMoveDepartures[new] == stamp)
+        expectEqual(core.desktopMoveDepartures[new], stamp)
     }
 
     // MARK: - Sibling re-report (#465)
@@ -251,7 +251,7 @@ struct DesktopRaiseGateArmTests {
         siblingFixture(core)
         host(core, unshown: WindowID(2))
         core.handle(.windowFocused(WindowID(1)))
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(1))
     }
 
     @Test("A sibling re-report with a shown intended window is distrusted")
@@ -260,7 +260,7 @@ struct DesktopRaiseGateArmTests {
         siblingFixture(core)
         host(core, unshown: nil)
         core.handle(.windowFocused(WindowID(1)))
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        expectEqual(core.state.workspaces.lastFocused, WindowID(2))
     }
 
     // MARK: - Accessibility-steal return (#958)

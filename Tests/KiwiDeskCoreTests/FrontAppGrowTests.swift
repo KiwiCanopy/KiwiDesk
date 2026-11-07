@@ -55,7 +55,7 @@ struct FrontAppGrowTests {
         #expect(overlay.frontLeaving, "it glides shut")
         #expect(!overlay.frontName.isHidden, "drawn until it lands")
         #expect(overlay.frontWindows.isEmpty, "no longer a target")
-        #expect(overlay.frontMenuHit == .empty)
+        expectEqual(overlay.frontMenuHit, .empty)
     }
 
     /// The run re-places when the segment joins or leaves, and its
@@ -100,7 +100,7 @@ struct FrontAppGrowTests {
         landings[1]()
         #expect(!overlay.frontLeaving)
         #expect(overlay.frontName.isHidden)
-        #expect(overlay.frontName.alphaValue == 1)
+        expectEqual(overlay.frontName.alphaValue, 1)
     }
 
     /// A hide inside the glide skips the landing; the next show
@@ -119,8 +119,8 @@ struct FrontAppGrowTests {
         overlay.hide()
         _ = try sync(manager, front: WindowID(1))
         #expect(!overlay.frontName.isHidden)
-        #expect(overlay.frontName.alphaValue == 1)
-        #expect(overlay.frontIcon.alphaValue == 1)
+        expectEqual(overlay.frontName.alphaValue, 1)
+        expectEqual(overlay.frontIcon.alphaValue, 1)
     }
 
     @Test("A segment drawn again ends the shrink")
@@ -132,7 +132,7 @@ struct FrontAppGrowTests {
         _ = try sync(manager, front: nil)
         _ = try sync(manager, front: WindowID(1))
         #expect(!overlay.frontLeaving)
-        #expect(overlay.frontWindows == [WindowID(1)])
+        expectEqual(overlay.frontWindows, [WindowID(1)])
     }
 
     @Test("With the expand off the segment snaps away")
@@ -160,8 +160,8 @@ struct FrontAppGrowTests {
         _ = try sync(manager, front: WindowID(1))
         let joined = overlay.frontName.frame
         let fresh = try sync(SpaceBarManager(), front: WindowID(1))
-        #expect(joined == fresh.frontName.frame)
-        #expect(overlay.frontName.alphaValue == 1)
+        expectEqual(joined, fresh.frontName.frame)
+        expectEqual(overlay.frontName.alphaValue, 1)
         #expect(joined.width > 0)
     }
 

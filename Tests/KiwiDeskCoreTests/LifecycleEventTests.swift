@@ -44,8 +44,8 @@ struct LifecycleEventTests {
             Issue.record("expected object payload")
             return
         }
-        #expect(payload["window_id"] == .number(42))
-        #expect(payload["app"] == .string("TestApp"))
+        expectEqual(payload["window_id"], .number(42))
+        expectEqual(payload["app"], .string("TestApp"))
         // The window was placed in the active space.
         #expect(payload["space_id"] != nil)
         #expect(payload["space_id"] != .null)
@@ -199,8 +199,8 @@ struct LifecycleEventTests {
             return
         }
         // The space it disappeared FROM, not the active one.
-        #expect(payload["space_id"] == .string("1"))
-        #expect(payload["app"] == .string("Zen"))
+        expectEqual(payload["space_id"], .string("1"))
+        expectEqual(payload["app"], .string("Zen"))
     }
 
     @Test("moving a window across spaces reports from and to")
@@ -227,10 +227,10 @@ struct LifecycleEventTests {
             Issue.record("expected moved-to-space payload")
             return
         }
-        #expect(payload["window_id"] == .number(31))
-        #expect(payload["app"] == .string("Spotify"))
-        #expect(payload["from_space_id"] == .string("1"))
-        #expect(payload["to_space_id"] == .string("3"))
+        expectEqual(payload["window_id"], .number(31))
+        expectEqual(payload["app"], .string("Spotify"))
+        expectEqual(payload["from_space_id"], .string("1"))
+        expectEqual(payload["to_space_id"], .string("3"))
         // Moving to the space it is already on stays silent.
         events.removeAll()
         _ = core.execute(
@@ -262,7 +262,7 @@ struct LifecycleEventTests {
         core.eventLoop.onEvent(
             .windowCreated(window(11, app: "Ghostty"))
         )
-        #expect(lua.global("created_id") == .number(11))
+        expectEqual(lua.global("created_id"), .number(11))
         #expect(
             lua.global("created_app") == .string("Ghostty")
         )

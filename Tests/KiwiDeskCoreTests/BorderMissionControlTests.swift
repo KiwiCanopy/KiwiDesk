@@ -23,7 +23,7 @@ struct BorderMissionControlTests {
         let panel = try #require(
             overlay.backend as? AppKitBorderOverlay
         )
-        #expect(panel.orderMode == order)
+        expectEqual(panel.orderMode, order)
         overlay.update(
             frame: CGRect(x: -9_000, y: -9_000, width: 40, height: 30),
             width: 4,

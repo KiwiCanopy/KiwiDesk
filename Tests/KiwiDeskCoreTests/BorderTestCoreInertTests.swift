@@ -37,6 +37,6 @@ struct BorderTestCoreInertTests {
         core.borders.sync([spec(7)])
         let ring = try #require(core.borders.overlays[WindowID(7)])
         let backend = try #require(ring.backend as? InertBorderBackend)
-        #expect(backend.orderMode == expected)
+        expectEqual(backend.orderMode, expected)
     }
 }

@@ -84,9 +84,9 @@ struct KiwiVisionLensRenameTests {
     @Test("the lens on follows an announced rename")
     func activeFollowsTheRename() {
         let core = core()
-        #expect(core.kiwiVisionActive == .lens("Writing"))
+        expectEqual(core.kiwiVisionActive, .lens("Writing"))
         rename(core, to: "Draft", announced: true)
-        #expect(core.kiwiVisionActive == .lens("Draft"))
+        expectEqual(core.kiwiVisionActive, .lens("Draft"))
         #expect(core.vision.renamedLens == nil)
     }
 
@@ -114,14 +114,14 @@ struct KiwiVisionLensRenameTests {
                 return lens
             }
         }
-        #expect(core.kiwiVisionActive == .lens("Draft"))
+        expectEqual(core.kiwiVisionActive, .lens("Draft"))
         #expect(core.vision.renamedLens == nil)
         #expect(
             core.guiConfigStore.load()?.appWide?.visionLenses.map(\.name)
                 == ["Draft"]
         )
         rename(core, to: "Writing")
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
     }
 
     @Test("a mark absent from the old name clears a stale new one")
@@ -140,6 +140,6 @@ struct KiwiVisionLensRenameTests {
     func unannouncedRenameTurnsOff() {
         let core = core()
         rename(core, to: "Draft")
-        #expect(core.kiwiVisionActive == .off)
+        expectEqual(core.kiwiVisionActive, .off)
     }
 }

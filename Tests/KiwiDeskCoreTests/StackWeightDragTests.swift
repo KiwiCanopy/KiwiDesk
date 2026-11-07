@@ -61,7 +61,7 @@ struct StackWeightDragTests {
             )
         }
         let space = core.state.workspaces[SpaceID("1")]!
-        #expect(space.windows == [WindowID(3), WindowID(2), WindowID(1)])
+        expectEqual(space.windows, [WindowID(3), WindowID(2), WindowID(1)])
         return space
     }
 
@@ -76,7 +76,7 @@ struct StackWeightDragTests {
         // The stack column is [2, 1]; drag w2 taller by 100 pt.
         // The drop hands the DRAGGED window, not the focus —
         // w3 is the focus here.
-        #expect(space.focused == WindowID(3))
+        expectEqual(space.focused, WindowID(3))
         core.applyResizeAdjustment(
             .stackWeight(100),
             for: WindowID(2),
@@ -128,7 +128,7 @@ struct StackWeightDragTests {
         let fromDrag = weight(dragged, 2)
         let fromKey = weight(typed, 2)
         #expect(fromDrag != nil)
-        #expect(fromDrag == fromKey)
+        expectEqual(fromDrag, fromKey)
     }
 
     /// A vertical split (stack on top or bottom) divides its
@@ -280,6 +280,6 @@ struct StackWeightDragTests {
             moved: { _ in .both }
         )
         let weights = core.state.workspaces[SpaceID("1")]?.stackWeights
-        #expect(weights?.isEmpty == true)
+        expectEqual(weights?.isEmpty, true)
     }
 }

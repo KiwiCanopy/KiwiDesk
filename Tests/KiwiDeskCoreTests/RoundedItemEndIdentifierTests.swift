@@ -28,10 +28,10 @@ struct RoundedItemEndIdentifierTests {
             items: Fixture.items(1, numbered: true)
         )
         let view = try #require(overlay.itemViews.first)
-        #expect(view.ends == ItemEnds(leading: e, trailing: e))
+        expectEqual(view.ends, ItemEnds(leading: e, trailing: e))
         let cell = view.cellLength
         let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
-        #expect(view.frame.width == flat + 2 * e)
+        expectEqual(view.frame.width, flat + 2 * e)
         let first = try #require(view.appViews.first).frame
         #expect(
             abs(first.minX - (cell + pad + 1 + pad) - pad - e) <= 0.5
@@ -51,16 +51,16 @@ struct RoundedItemEndIdentifierTests {
         items[1] = items[1].collapsed(to: .count)
         let overlay = try Fixture.spaceBar(look, items: items)
         let views = Array(overlay.itemViews.prefix(2))
-        #expect(views.count == 2)
+        expectEqual(views.count, 2)
         #expect(views[1].appViews.isEmpty)
-        #expect(views[1].ends == ItemEnds(leading: e, trailing: e))
+        expectEqual(views[1].ends, ItemEnds(leading: e, trailing: e))
         let measured = SpaceBarOverlay.itemLengths(
             items,
             depth: Fixture.depth,
             look: look,
             frontFollows: false
         )
-        #expect(measured[1] == views[1].frame.width)
+        expectEqual(measured[1], views[1].frame.width)
     }
 
     /// An empty Space collapses to no disc, so nothing sits at its
@@ -82,19 +82,19 @@ struct RoundedItemEndIdentifierTests {
             Fixture.items(1, numbered: true)[0], empty("2"),
             empty("3").collapsed(to: .count),
         ]
-        #expect(items[2].collapse?.windows == 0)
+        expectEqual(items[2].collapse?.windows, 0)
         let overlay = try Fixture.spaceBar(look, items: items)
         let views = Array(overlay.itemViews.prefix(3))
-        #expect(views.count == 3)
-        #expect(views[2].ends == .zero)
+        expectEqual(views.count, 3)
+        expectEqual(views[2].ends, .zero)
         // Collapsed or not, an empty item draws the same chip.
-        #expect(views[2].frame.width == views[1].frame.width)
+        expectEqual(views[2].frame.width, views[1].frame.width)
         let measured = SpaceBarOverlay.itemLengths(
             items,
             depth: Fixture.depth,
             look: look,
             frontFollows: false
         )
-        #expect(measured[2] == views[2].frame.width)
+        expectEqual(measured[2], views[2].frame.width)
     }
 }

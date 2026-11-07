@@ -44,8 +44,8 @@ struct AnimationPersistenceTests {
             TilingSettings.self,
             from: data
         )
-        #expect(decoded.animations.durationMS == 350)
-        #expect(decoded.animations.scrollDurationMS == 150)
+        expectEqual(decoded.animations.durationMS, 350)
+        expectEqual(decoded.animations.scrollDurationMS, 150)
     }
 
     @Test("Pre-issue-51 profile (no keys) keeps 150 ms defaults")
@@ -56,8 +56,8 @@ struct AnimationPersistenceTests {
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.animations.durationMS == 150)
-        #expect(decoded.animations.scrollDurationMS == 150)
+        expectEqual(decoded.animations.durationMS, 150)
+        expectEqual(decoded.animations.scrollDurationMS, 150)
     }
 
     // MARK: - Commands
@@ -70,7 +70,7 @@ struct AnimationPersistenceTests {
             args: [.number(400)]
         )
         #expect(response.isSuccess)
-        #expect(core.tiler.animation.durationMS == 400)
+        expectEqual(core.tiler.animation.durationMS, 400)
         // Persisted so a profile save captures it.
         #expect(
             core.tiler.settings.animations.durationMS == 400
@@ -100,7 +100,7 @@ struct AnimationPersistenceTests {
             "animations.set_duration",
             args: [.number(10)]
         )
-        #expect(core.tiler.animation.durationMS == 50)
+        expectEqual(core.tiler.animation.durationMS, 50)
         // The persisted copy must clamp too, else the profile
         // JSON and the GUI stepper show an out-of-range value.
         #expect(
@@ -110,7 +110,7 @@ struct AnimationPersistenceTests {
             "animations.set_duration",
             args: [.number(5000)]
         )
-        #expect(core.tiler.animation.durationMS == 1000)
+        expectEqual(core.tiler.animation.durationMS, 1000)
         #expect(
             core.tiler.settings.animations.durationMS == 1000
         )
@@ -140,8 +140,8 @@ struct AnimationPersistenceTests {
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.animations.durationMS == 1000)
-        #expect(decoded.animations.scrollDurationMS == 50)
+        expectEqual(decoded.animations.durationMS, 1000)
+        expectEqual(decoded.animations.scrollDurationMS, 50)
     }
 
     // MARK: - Profile apply sync
@@ -166,7 +166,7 @@ struct AnimationPersistenceTests {
             "load_profile",
             args: [.string("test")]
         )
-        #expect(core.tiler.animation.durationMS == 450)
+        expectEqual(core.tiler.animation.durationMS, 450)
         #expect(
             core.tiler.animation.scrollDurationMS == 120
         )
@@ -184,7 +184,7 @@ struct AnimationPersistenceTests {
         config.settings.animations.scrollDurationMS = 130
         config.spaces = [SpaceID(1)]
         core.applyProfileScopedState(from: config)
-        #expect(core.tiler.animation.durationMS == 470)
+        expectEqual(core.tiler.animation.durationMS, 470)
         #expect(
             core.tiler.animation.scrollDurationMS == 130
         )
@@ -215,7 +215,7 @@ struct AnimationPersistenceTests {
             "load_profile",
             args: [.string("durtest")]
         )
-        #expect(core.tiler.animation.durationMS == 380)
+        expectEqual(core.tiler.animation.durationMS, 380)
         #expect(
             core.tiler.animation.scrollDurationMS == 160
         )

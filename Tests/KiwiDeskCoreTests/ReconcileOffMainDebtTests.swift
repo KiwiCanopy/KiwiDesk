@@ -139,15 +139,15 @@ struct ReconcileOffMainDebtTests {
         loop.reconcileOffMain(pid: pid, app: ref) { answered.append("a") }
         loop.reconcileOffMain(pid: pid, app: ref) { answered.append("b") }
         loop.reconcileOffMain(pid: pid, app: ref) { answered.append("c") }
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         box.run(0)
-        #expect(answered == ["a"])
-        #expect(box.listReads == 1)
+        expectEqual(answered, ["a"])
+        expectEqual(box.listReads, 1)
         // b and c arrived mid-read: one more read answers both.
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         box.run(0)
-        #expect(answered == ["a", "b", "c"])
-        #expect(box.listReads == 2)
+        expectEqual(answered, ["a", "b", "c"])
+        expectEqual(box.listReads, 2)
         #expect(box.work.isEmpty)
     }
 
@@ -157,7 +157,7 @@ struct ReconcileOffMainDebtTests {
         let late = WindowID(31)
         box.focus = late
         loop.appActivated(app(pid), launchedAt: nil)
-        #expect(box.work.count == 2)
+        expectEqual(box.work.count, 2)
         // The focus read answers first: the window is untracked,
         // so the report waits on the list read already queued.
         box.run(1)
@@ -168,10 +168,10 @@ struct ReconcileOffMainDebtTests {
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.listed = [late]
         box.run(0)
-        #expect(box.focused == [late])
+        expectEqual(box.focused, [late])
         // A second read the coalescer only queued shows up here.
         box.drain()
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 
     @Test("an untracked focus joins the read parked behind one")
@@ -183,17 +183,17 @@ struct ReconcileOffMainDebtTests {
         let late = WindowID(34)
         box.focus = late
         loop.appActivated(app(pid), launchedAt: nil)
-        #expect(box.work.count == 2)
+        expectEqual(box.work.count, 2)
         box.run(1)
         // The read that began first answers nothing it was not
         // asked before it began.
         box.run(0)
         #expect(box.focused.isEmpty, "judged by the earlier read")
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.listed = [late]
         box.run(0)
-        #expect(box.focused == [late])
+        expectEqual(box.focused, [late])
     }
 
     @Test("a read from before a stop pays nothing after it")
@@ -208,8 +208,8 @@ struct ReconcileOffMainDebtTests {
         box.run(0)
         #expect(answered.isEmpty)
         box.run(0)
-        #expect(answered == ["b"])
-        #expect(box.listReads == 2)
+        expectEqual(answered, ["b"])
+        expectEqual(box.listReads, 2)
     }
 
     @Test("an untracked focus with no read pending asks a fresh one")
@@ -224,7 +224,7 @@ struct ReconcileOffMainDebtTests {
         #expect(!box.logs.contains { $0.contains("untracked w37") })
         box.drain()
         #expect(box.logs.contains { $0.contains("untracked w37") })
-        #expect(box.listReads == 2)
+        expectEqual(box.listReads, 2)
     }
 
     @Test("an app KiwiDesk does not observe is never read")
@@ -235,7 +235,7 @@ struct ReconcileOffMainDebtTests {
         loop.appActivated(app(pid), launchedAt: nil)
         box.drain()
         #expect(!box.dispatched.contains(stranger))
-        #expect(box.listReads == 1)
+        expectEqual(box.listReads, 1)
     }
 
     /// #1795: a bulk request parked behind a read keeps its
@@ -246,12 +246,12 @@ struct ReconcileOffMainDebtTests {
         loop.reconcileOffMain(pid: pid, app: ref)
         loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
         loop.reconcileOffMain(pid: pid, app: ref)
-        #expect(loop.offMain.next[pid]?.coalesceTabs == false)
+        expectEqual(loop.offMain.next[pid]?.coalesceTabs, false)
         box.drain()
         #expect(loop.offMain.next[pid] == nil)
         loop.reconcileOffMain(pid: pid, app: ref)
         loop.reconcileOffMain(pid: pid, app: ref)
-        #expect(loop.offMain.next[pid]?.coalesceTabs == true)
+        expectEqual(loop.offMain.next[pid]?.coalesceTabs, true)
     }
 
     /// Window 21, a tab carrier, vanishes as 22 appears at its frame
@@ -276,12 +276,12 @@ struct ReconcileOffMainDebtTests {
         let coalesced = tabSwitch {
             $0.reconcileOffMain(pid: pid, app: ref)
         }
-        #expect(coalesced.rekeyed == [id])
+        expectEqual(coalesced.rekeyed, [id])
         let bulk = tabSwitch {
             $0.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
         }
         #expect(bulk.rekeyed.isEmpty)
-        #expect(bulk.destroyed == [id])
+        expectEqual(bulk.destroyed, [id])
         // Parked behind a read that still lists 21: the next read,
         // the debt's, sees the switch and keeps the bulk shape.
         let (loop, box) = makeLoop()
@@ -291,10 +291,10 @@ struct ReconcileOffMainDebtTests {
         loop.reconcileOffMain(pid: pid, app: ref)
         loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
         box.run(0)
-        #expect(box.work.count == 1)
+        expectEqual(box.work.count, 1)
         box.listed = [WindowID(22)]
         box.run(0)
         #expect(box.rekeyed.isEmpty)
-        #expect(box.destroyed == [id])
+        expectEqual(box.destroyed, [id])
     }
 }

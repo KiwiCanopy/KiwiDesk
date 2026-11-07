@@ -47,16 +47,16 @@ struct ModifierSideCommandTests {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         let group = try #require(root["modifier"] as? [String: Any])
-        #expect(group["sides"] as? Bool == true)
+        expectEqual(group["sides"] as? Bool, true)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.appWide?.modifierSides == true)
+        expectEqual(back.appWide?.modifierSides, true)
         var bare = root
         bare["modifier"] = nil
         let old = try JSONDecoder().decode(
             GuiConfig.self,
             from: JSONSerialization.data(withJSONObject: bare)
         )
-        #expect(old.appWide?.modifierSides == false)
+        expectEqual(old.appWide?.modifierSides, false)
     }
 
     @Test("a Lua-owned reload reads the switch init.lua sets now")

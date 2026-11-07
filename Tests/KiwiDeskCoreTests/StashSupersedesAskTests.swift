@@ -196,7 +196,7 @@ struct StashSupersedesAskTests {
             force: true,
             capturesOriginal: false
         )
-        #expect(engine.boundLearner.bound(for: window.id) == learned)
+        expectEqual(engine.boundLearner.bound(for: window.id), learned)
     }
 
     /// A probe whose issue a park retired unanswered is re-sent
@@ -224,11 +224,11 @@ struct StashSupersedesAskTests {
             target: ask,
             keepsIssueOut: true
         )
-        #expect(again?.size == first.size)
-        #expect(again?.fresh == false)
+        expectEqual(again?.size, first.size)
+        expectEqual(again?.fresh, false)
         // The same issue, re-sent: no budget spent.
         let issues = learner.probes[w]?.width.pending?.issues
-        #expect(issues == 1)
+        expectEqual(issues, 1)
     }
 
     /// Through the engine: `stash` retires the probe's ask, so
@@ -272,9 +272,9 @@ struct StashSupersedesAskTests {
             target: ask,
             keepsIssueOut: true
         )
-        #expect(again?.size == first.size)
+        expectEqual(again?.size, first.size)
         let resends = engine.boundLearner.probes[w]?.width.pending?
             .resends
-        #expect(resends == 1)
+        expectEqual(resends, 1)
     }
 }

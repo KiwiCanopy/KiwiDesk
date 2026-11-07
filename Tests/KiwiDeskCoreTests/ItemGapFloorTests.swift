@@ -19,7 +19,7 @@ struct ItemGapFloorTests {
             KiwiShelf.self,
             from: Data(json.utf8)
         )
-        #expect(shelf.itemGap == CGFloat(drawn))
+        expectEqual(shelf.itemGap, CGFloat(drawn))
     }
 
     @Test(
@@ -33,7 +33,7 @@ struct ItemGapFloorTests {
         ).get()
         var shelf = KiwiShelf()
         setting.apply(to: &shelf)
-        #expect(shelf.itemGap == CGFloat(stored))
+        expectEqual(shelf.itemGap, CGFloat(stored))
     }
 
     /// The parser already raises every number to 0, so this
@@ -42,6 +42,6 @@ struct ItemGapFloorTests {
     func applyFloors() {
         var shelf = KiwiShelf()
         KiwiShelfCommandSetting.itemGap(-5).apply(to: &shelf)
-        #expect(shelf.itemGap == KiwiShelf.minItemGap)
+        expectEqual(shelf.itemGap, KiwiShelf.minItemGap)
     }
 }

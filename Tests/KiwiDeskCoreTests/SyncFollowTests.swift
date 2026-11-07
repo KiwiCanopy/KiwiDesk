@@ -51,7 +51,7 @@ struct SyncFollowTests {
             read("gui.json", in: folder)
                 == read("gui.json", in: core.configDirectory)
         )
-        #expect(core.sync.status == .upToDate)
+        expectEqual(core.sync.status, .upToDate)
     }
 
     @Test("A change made here goes out and does not come back")
@@ -62,7 +62,7 @@ struct SyncFollowTests {
         core.sync.onSyncedIn = { ins.append($0) }
         try write("print(1)\n", to: "init.lua", in: core.configDirectory)
         core.runSyncPass()
-        #expect(read("init.lua", in: folder) == Data("print(1)\n".utf8))
+        expectEqual(read("init.lua", in: folder), Data("print(1)\n".utf8))
         // The copy's own watch event: nothing changed either way.
         core.runSyncPass()
         #expect(ins.isEmpty)
@@ -81,12 +81,12 @@ struct SyncFollowTests {
             to: folder.appendingPathComponent("gui.json")
         )
         core.runSyncPass()
-        #expect(ins.map(\.paths) == [["gui.json"]])
+        expectEqual(ins.map(\.paths), [["gui.json"]])
         #expect(
             core.guiConfigStore.load()?.floatRules == ["app:Calculator"]
         )
         core.runSyncPass()
-        #expect(ins.count == 1)
+        expectEqual(ins.count, 1)
     }
 
     @Test("A file the folder dropped leaves this Mac too")
@@ -110,8 +110,8 @@ struct SyncFollowTests {
         try write("mine", to: "init.lua", in: core.configDirectory)
         try write("theirs", to: "init.lua", in: folder)
         core.runSyncPass()
-        #expect(core.sync.status == .changedOnBoth)
-        #expect(read("init.lua", in: folder) == Data("theirs".utf8))
+        expectEqual(core.sync.status, .changedOnBoth)
+        expectEqual(read("init.lua", in: folder), Data("theirs".utf8))
         #expect(
             read("init.lua", in: core.configDirectory) == Data("mine".utf8)
         )
@@ -122,7 +122,7 @@ struct SyncFollowTests {
         let (core, folder) = try setup()
         try write("theirs", to: "init.lua", in: folder)
         core.followSyncFolder(folder)
-        #expect(core.sync.status == .changedOnBoth)
+        expectEqual(core.sync.status, .changedOnBoth)
         #expect(read("init.lua", in: core.configDirectory) == nil)
     }
 
@@ -144,13 +144,13 @@ struct SyncFollowTests {
         )
         try other.keepThisMacsSetup(in: folder) { _ in }
         core.followSyncFolder(folder)
-        #expect(core.sync.status == .changedOnBoth)
+        expectEqual(core.sync.status, .changedOnBoth)
         try core.keepFoldersSetup(from: folder) {
             try FileManager.default.removeItem(at: $0)
         }
         core.runSyncPass()
-        #expect(core.sync.status == .upToDate)
-        #expect(core.guiConfigStore.load()?.spaceHistory == .allScreens)
+        expectEqual(core.sync.status, .upToDate)
+        expectEqual(core.guiConfigStore.load()?.spaceHistory, .allScreens)
     }
 
     @Test("A file the folder cannot read is never read as deleted")
@@ -170,7 +170,7 @@ struct SyncFollowTests {
             )
         }
         core.runSyncPass()
-        #expect(core.sync.status == .folderUnavailable)
+        expectEqual(core.sync.status, .folderUnavailable)
         #expect(read("init.lua", in: core.configDirectory) != nil)
     }
 
@@ -179,10 +179,10 @@ struct SyncFollowTests {
         let (core, folder) = try setup()
         core.sync.watchRequired = true
         core.followSyncFolder(folder)
-        #expect(core.sync.status == .folderUnavailable)
+        expectEqual(core.sync.status, .folderUnavailable)
         // A later pass — after a Compare and Copy, say — keeps it.
         core.runSyncPass()
-        #expect(core.sync.status == .folderUnavailable)
+        expectEqual(core.sync.status, .folderUnavailable)
     }
 
     @Test("Reset and restore forget the agreement: no copy goes out")
@@ -198,7 +198,7 @@ struct SyncFollowTests {
             )
         )
         core.followSyncFolder(folder)
-        #expect(core.sync.status == .changedOnBoth)
+        expectEqual(core.sync.status, .changedOnBoth)
         #expect(read("profiles/Keep.json", in: folder) != nil)
     }
 
@@ -225,10 +225,10 @@ struct SyncFollowTests {
     func unavailableHolds() throws {
         let (core, folder) = try setup()
         core.followSyncFolder(folder.appendingPathComponent("gone"))
-        #expect(core.sync.status == .folderUnavailable)
+        expectEqual(core.sync.status, .folderUnavailable)
         try write("", to: ".gui.json.icloud", in: folder)
         core.followSyncFolder(folder)
-        #expect(core.sync.status == .folderUnavailable)
+        expectEqual(core.sync.status, .folderUnavailable)
         #expect(read("gui.json", in: folder) == nil)
     }
 
@@ -292,8 +292,8 @@ struct SyncFollowTests {
         // change on both sides.
         try write("-- three\n", to: "init.lua", in: core.configDirectory)
         core.runSyncPass()
-        #expect(core.sync.status == .upToDate)
-        #expect(read("init.lua", in: folder) == Data("-- three\n".utf8))
+        expectEqual(core.sync.status, .upToDate)
+        expectEqual(read("init.lua", in: folder), Data("-- three\n".utf8))
     }
 
     @Test("A conflict copy is reported, and never copied")
@@ -301,7 +301,7 @@ struct SyncFollowTests {
         let (core, folder) = try setup()
         try write("x", to: "gui 2.json", in: folder)
         core.followSyncFolder(folder)
-        #expect(core.sync.status == .conflictCopy("gui 2.json"))
+        expectEqual(core.sync.status, .conflictCopy("gui 2.json"))
         #expect(read("gui 2.json", in: core.configDirectory) == nil)
     }
 
@@ -310,7 +310,7 @@ struct SyncFollowTests {
         let (core, folder) = try setup()
         core.followSyncFolder(folder)
         core.followSyncFolder(nil)
-        #expect(core.sync.status == .off)
+        expectEqual(core.sync.status, .off)
         #expect(read("gui.json", in: folder) != nil)
         #expect(read("gui.json", in: core.configDirectory) != nil)
     }

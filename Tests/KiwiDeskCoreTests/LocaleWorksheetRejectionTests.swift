@@ -54,7 +54,7 @@ struct LocaleWorksheetRejectionTests {
                 "de.json": #"{"gap.hint": "Abstand"}"#,
             ]
         )
-        #expect(result.status == 0)
+        expectEqual(result.status, 0)
     }
 
     /// And rejecting by name did not replace the shape check it
@@ -122,7 +122,7 @@ struct LocaleWorksheetRejectionTests {
         #expect(result.stderr.contains("missing_de.json"))
         // `gone.key` is a genuine orphan: a prune that ran would
         // have removed it.
-        #expect(after["gone.key"] == "Weg")
+        expectEqual(after["gone.key"], "Weg")
     }
 
     /// Site mode honours NO override — `site/src/i18n` is derived

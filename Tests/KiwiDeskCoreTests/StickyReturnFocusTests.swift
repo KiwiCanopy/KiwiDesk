@@ -145,10 +145,10 @@ struct StickyReturnFocusTests {
         let (core, box) = makeCore()
         defer { teardown() }
         roundTrip(core, box, leavingWith: sticky)
-        #expect(core.desktopMemory.stickyReturn?.window == sticky)
-        #expect(core.state.workspaces.lastFocused == other)
+        expectEqual(core.desktopMemory.stickyReturn?.window, sticky)
+        expectEqual(core.state.workspaces.lastFocused, other)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == sticky)
+        expectEqual(core.state.workspaces.lastFocused, sticky)
         #expect(box.lines.contains { $0.contains("focus back to carried") })
     }
 
@@ -159,7 +159,7 @@ struct StickyReturnFocusTests {
         roundTrip(core, box, leavingWith: other)
         #expect(core.desktopMemory.stickyReturn == nil)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == other)
+        expectEqual(core.state.workspaces.lastFocused, other)
     }
 
     /// macOS's restore report may land after the handler: it is
@@ -170,9 +170,9 @@ struct StickyReturnFocusTests {
         defer { teardown() }
         roundTrip(core, box, leavingWith: sticky)
         core.handle(.windowFocused(third))
-        #expect(core.desktopMemory.stickyReturn?.window == sticky)
+        expectEqual(core.desktopMemory.stickyReturn?.window, sticky)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == sticky)
+        expectEqual(core.state.workspaces.lastFocused, sticky)
     }
 
     /// A focus KiwiDesk commanded after the return — a `focus`
@@ -184,7 +184,7 @@ struct StickyReturnFocusTests {
         roundTrip(core, box, leavingWith: sticky)
         core.eventLoop.lastCommandedFocus = .now
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == other)
+        expectEqual(core.state.workspaces.lastFocused, other)
         #expect(box.lines.contains { $0.contains("commanded focus") })
     }
 
@@ -198,7 +198,7 @@ struct StickyReturnFocusTests {
         NativeSpaces.activeSpaceIsUserOverride = false
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.desktopMemory.stickyReturn == nil)
-        #expect(core.state.workspaces.lastFocused == other)
+        expectEqual(core.state.workspaces.lastFocused, other)
     }
 
     /// A stale settle — the main screen moved on since — ends it
@@ -229,7 +229,7 @@ struct StickyReturnFocusTests {
         roundTrip(core, box, leavingWith: sticky)
         core.lastLeftClick = (Date(), .zero, other)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == other)
+        expectEqual(core.state.workspaces.lastFocused, other)
         #expect(box.lines.contains { $0.contains("a press or") })
     }
 
@@ -244,6 +244,6 @@ struct StickyReturnFocusTests {
         #expect(core.desktopMemory.stickyLeft.isEmpty)
         #expect(core.desktopMemory.stickyReturn == nil)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == other)
+        expectEqual(core.state.workspaces.lastFocused, other)
     }
 }

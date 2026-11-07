@@ -20,8 +20,8 @@ struct DesktopBindingIDModelTests {
     func labelIsNotIdentity() {
         let a = DesktopBinding.Entry(id: work, name: "Work")
         let b = DesktopBinding.Entry(id: work, name: "Office")
-        #expect(a == b)
-        #expect(Set([a, b]).count == 1)
+        expectEqual(a, b)
+        expectEqual(Set([a, b]).count, 1)
         #expect(a != DesktopBinding.Entry(name: "Work"))
         #expect(
             a != DesktopBinding.Entry(id: work, name: "Work", setup: ["A"])
@@ -32,8 +32,8 @@ struct DesktopBindingIDModelTests {
     func bindRefreshesTheLabel() {
         var binding = record(.init(id: work, name: "Work"))
         binding.bind(.init(id: work, name: "Office")) { _ in 1 }
-        #expect(binding.entries.count == 1)
-        #expect(binding.entries[0].name == "Office")
+        expectEqual(binding.entries.count, 1)
+        expectEqual(binding.entries[0].name, "Office")
     }
 
     @Test("An unbind by id leaves a pending entry of that name")
@@ -43,7 +43,7 @@ struct DesktopBindingIDModelTests {
             .init(name: "Work", setup: ["A"])
         )
         binding.unbind(.id(work))
-        #expect(binding.entries == [.init(name: "Work", setup: ["A"])])
+        expectEqual(binding.entries, [.init(name: "Work", setup: ["A"])])
     }
 
     @Test("A rename relabels the id and follows a pending name")
@@ -54,7 +54,7 @@ struct DesktopBindingIDModelTests {
             .init(id: other, name: "Work", setup: ["B"])
         )
         binding.relabel(work, from: "Work", to: "Office")
-        #expect(binding.entries.map(\.name) == ["Office", "Office", "Work"])
+        expectEqual(binding.entries.map(\.name), ["Office", "Office", "Work"])
     }
 
     @Test("A promotion gives a pending entry its id, label kept")
@@ -62,8 +62,8 @@ struct DesktopBindingIDModelTests {
         var binding = record(.init(name: "Work"), .init(name: "Nobody"))
         let changed = binding.promote { $0 == "Work" ? work : nil }
         #expect(changed)
-        #expect(binding.entries[0].id == work)
-        #expect(binding.entries[0].name == "Work")
+        expectEqual(binding.entries[0].id, work)
+        expectEqual(binding.entries[0].name, "Work")
         #expect(binding.entries[1].id == nil)
         #expect(!binding.promote { _ in nil })
     }
@@ -72,7 +72,7 @@ struct DesktopBindingIDModelTests {
     func refreshLabels() {
         var binding = record(.init(id: work, name: "Work"), .init(name: "P"))
         #expect(binding.refreshLabels { $0 == work ? "Office" : nil })
-        #expect(binding.entries.map(\.name) == ["Office", "P"])
+        expectEqual(binding.entries.map(\.name), ["Office", "P"])
         #expect(!binding.refreshLabels { $0 == work ? "Office" : nil })
     }
 
@@ -101,15 +101,15 @@ struct DesktopBindingIDModelTests {
             JSONSerialization.jsonObject(with: data) as? [Any]
         )
         let first = try #require(raw[0] as? [String: Any])
-        #expect(first["id"] as? String == work.raw)
-        #expect(first["name"] as? String == "Work")
+        expectEqual(first["id"] as? String, work.raw)
+        expectEqual(first["name"] as? String, "Work")
         #expect(first["setup"] == nil)
-        #expect(raw[2] as? String == "Pending")
+        expectEqual(raw[2] as? String, "Pending")
         let back = try JSONDecoder().decode(
             [DesktopBinding.Entry].self,
             from: data
         )
-        #expect(back.map(\.name) == ["Work", "Other", "Pending"])
+        expectEqual(back.map(\.name), ["Work", "Other", "Pending"])
         #expect(back.map(\.id) == [work, other, nil])
         #expect(back.map(\.setup) == [nil, ["A:1x1"], nil])
     }

@@ -37,7 +37,7 @@ struct MonitorChangeSettleTests {
         core.execute("save_profile", args: [.string("pair")])
         core.handle(.displaysChanged([builtIn]))
         core.execute("save_profile", args: [.string("solo")])
-        #expect(core.profiles.currentName == "solo")
+        expectEqual(core.profiles.currentName, "solo")
         core.timings.monitorSettleDelay = .milliseconds(100)
         core.onLog = { log.lines.append($0) }
         return core
@@ -55,7 +55,7 @@ struct MonitorChangeSettleTests {
         core.handle(.displaysChanged([builtIn, headset]))
         core.handle(.displaysChanged([builtIn]))
         await settle(core)
-        #expect(core.profiles.currentName == "solo")
+        expectEqual(core.profiles.currentName, "solo")
         #expect(!log.lines.contains { $0.contains("'pair'") })
     }
 
@@ -69,7 +69,7 @@ struct MonitorChangeSettleTests {
         await settle(core)
         // The heal seeded a Space for the headset in between; the
         // settle retires it rather than keeping a stray (#1612).
-        #expect(core.state.workspaces.allSpaces.map(\.id) == before)
+        expectEqual(core.state.workspaces.allSpaces.map(\.id), before)
         #expect(core.healedSpaces.isEmpty)
     }
 
@@ -82,7 +82,7 @@ struct MonitorChangeSettleTests {
         core.execute("load_profile", args: [.string("solo")])
         #expect(!core.monitorSettlePending)
         await settle(core)
-        #expect(core.profiles.currentName == "solo")
+        expectEqual(core.profiles.currentName, "solo")
         #expect(!log.lines.contains { $0.contains("'pair'") })
     }
 
@@ -91,10 +91,10 @@ struct MonitorChangeSettleTests {
         let log = SettleLog()
         let core = makeCore(log: log)
         core.handle(.displaysChanged([builtIn, headset]))
-        #expect(core.profiles.currentName == "solo")
+        expectEqual(core.profiles.currentName, "solo")
         #expect(core.deferred.isScheduled(.monitorSettle))
         await settle(core)
-        #expect(core.profiles.currentName == "pair")
+        expectEqual(core.profiles.currentName, "pair")
         #expect(
             log.lines.filter { $0.hasPrefix("monitor change:") }
                 .count == 1
@@ -119,10 +119,10 @@ struct MonitorChangeSettleTests {
         let core = makeCore(log: log)
         core.execute("load_profile", args: [.string("pair")])
         core.handle(.displaysChanged([builtIn, headset]))
-        #expect(core.profiles.currentName == "pair")
+        expectEqual(core.profiles.currentName, "pair")
         core.handle(.displaysChanged([builtIn]))
         #expect(core.monitorSettlePending)
-        #expect(core.profiles.currentName == "pair")
+        expectEqual(core.profiles.currentName, "pair")
     }
 
     @Test("a report while a settle is owed re-arms it, whatever the count")
@@ -131,7 +131,7 @@ struct MonitorChangeSettleTests {
         core.handle(.displaysChanged([builtIn, headset]))
         core.handle(.displaysChanged([builtIn, headset]))
         #expect(core.monitorSettlePending)
-        #expect(core.profiles.currentName == "solo")
+        expectEqual(core.profiles.currentName, "solo")
     }
 
     @Test("monitor_change fires once, when the settle decides")
@@ -143,9 +143,9 @@ struct MonitorChangeSettleTests {
         }
         core.handle(.displaysChanged([builtIn, headset]))
         core.handle(.displaysChanged([builtIn]))
-        #expect(events.count == 0)
+        expectEqual(events.count, 0)
         await settle(core)
-        #expect(events.count == 1)
+        expectEqual(events.count, 1)
     }
 
     @Test("a load inside the wait still fires the owed event")
@@ -157,7 +157,7 @@ struct MonitorChangeSettleTests {
         }
         core.handle(.displaysChanged([builtIn, headset]))
         core.execute("load_profile", args: [.string("solo")])
-        #expect(events.count == 1)
+        expectEqual(events.count, 1)
     }
 
     @Test("windows move once: at the settle, never at the report")
@@ -216,7 +216,7 @@ struct MonitorChangeSettleTests {
         )
         core.state.workspaces.add(window, to: seed)
         core.retireOrphanedHealSeeds()
-        #expect(core.state.workspaces[seed]?.windows == [window])
+        expectEqual(core.state.workspaces[seed]?.windows, [window])
     }
 
     @Test("a same-count re-report decides at once")

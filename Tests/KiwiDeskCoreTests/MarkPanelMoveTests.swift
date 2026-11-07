@@ -53,9 +53,9 @@ struct MarkPanelMoveTests {
         let first = overlay.placedFrame
         endPass()
         overlay.update(frame: moved)
-        #expect(spy.moves.count == 1)
+        expectEqual(spy.moves.count, 1)
         #expect(overlay.placedFrame != first)
-        #expect(overlay.placedFrame?.size == first?.size)
+        expectEqual(overlay.placedFrame?.size, first?.size)
     }
 
     @Test("An overflow mark moved in the pass it first showed stays AppKit's")
@@ -99,7 +99,7 @@ struct MarkPanelMoveTests {
         overlay.update(frame: start)
         endPass()
         overlay.update(frame: moved)
-        #expect(spy.moves.count == 1)
+        expectEqual(spy.moves.count, 1)
     }
 
     @Test("A sticky mark moved in the pass it first showed stays AppKit's")
@@ -133,7 +133,7 @@ struct MarkManagerMoveTests {
         manager.sync([.init(window: WindowID(1), frame: start, glass: false)])
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         manager.reposition(WindowID(1), windowFrame: moved)
-        #expect(moves == 1)
+        expectEqual(moves, 1)
     }
 
     @Test("An overflow mark made by its manager moves through its move")
@@ -164,6 +164,6 @@ struct MarkManagerMoveTests {
         ])
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         manager.reposition(WindowID(1), windowFrame: moved)
-        #expect(moves == 1)
+        expectEqual(moves, 1)
     }
 }

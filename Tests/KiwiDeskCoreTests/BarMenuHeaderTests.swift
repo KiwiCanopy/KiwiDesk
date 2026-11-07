@@ -22,7 +22,7 @@ struct BarMenuHeaderTests {
             keyDown: { nil }
         )
         #expect(menu.items[0].isSectionHeader)
-        #expect(menu.items[0].title == "Safari")
+        expectEqual(menu.items[0].title, "Safari")
         #expect(!menu.items[1].isSectionHeader)
     }
 
@@ -53,9 +53,9 @@ struct BarMenuHeaderTests {
             clickCount: 1,
             pressure: 1
         )!
-        #expect(surface.menu(for: click)?.items.first?.title == "empty")
+        expectEqual(surface.menu(for: click)?.items.first?.title, "empty")
         surface.hitAt = { _ in .count }
-        #expect(surface.menu(for: click)?.items.first?.title == "count")
+        expectEqual(surface.menu(for: click)?.items.first?.title, "count")
     }
 
     /// The segment answers by point: the section root asks here
@@ -108,14 +108,14 @@ struct BarMenuHeaderTests {
             NSPoint(x: icon.frame.midX, y: icon.frame.midY),
             from: host
         )
-        #expect(overlay.frontHit(at: inside) == .appItem([WindowID(9)]))
-        #expect(overlay.root.hitAt(inside) == .appItem([WindowID(9)]))
+        expectEqual(overlay.frontHit(at: inside), .appItem([WindowID(9)]))
+        expectEqual(overlay.root.hitAt(inside), .appItem([WindowID(9)]))
         #expect(overlay.frontHit(at: NSPoint(x: -50, y: -50)) == nil)
         // VoiceOver reads the rows per query, not from the render.
         let rows = "\(BarHit.appItem([WindowID(9)]))"
-        #expect(icon.accessibilityCustomActions()?.map(\.name) == [rows])
+        expectEqual(icon.accessibilityCustomActions()?.map(\.name), [rows])
         menus.rows = { _ in [.action("later") {}] }
-        #expect(icon.accessibilityCustomActions()?.map(\.name) == ["later"])
+        expectEqual(icon.accessibilityCustomActions()?.map(\.name), ["later"])
         // The text glyph reads them live too.
         let glyph = SpaceBarItemView.App(
             name: "App9",
@@ -134,7 +134,7 @@ struct BarMenuHeaderTests {
         // A render with no front app forgets its windows.
         show(overlay, front: nil, style: style)
         #expect(overlay.frontWindows.isEmpty)
-        #expect(overlay.frontMenuHit == .empty)
+        expectEqual(overlay.frontMenuHit, .empty)
         withExtendedLifetime(menus) {}
     }
 

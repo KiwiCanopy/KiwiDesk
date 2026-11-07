@@ -140,7 +140,7 @@ struct RunRestWiringTests {
         #expect(!hidden.isEmpty)
         let zone = (2...6).map { WindowID(UInt32($0)) }
         let order = core.stackRestoreOrder(zone[...])
-        #expect(Set(order) == Set(zone).subtracting(hidden))
+        expectEqual(Set(order), Set(zone).subtracting(hidden))
     }
 
     /// Focus drives the scroll (#2235 ruling): the focus verb's
@@ -158,10 +158,10 @@ struct RunRestWiringTests {
         #expect(
             core.execute("focus", args: [.string("down")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(4))
+        expectEqual(core.activeSpace?.focused, WindowID(4))
         let after = try #require(core.tiler.runCovers[space])
         #expect(after.behind[WindowID(4)] == nil)
-        #expect(core.state.workspaces[space]?.runHeads == [WindowID(3)])
+        expectEqual(core.state.workspaces[space]?.runHeads, [WindowID(3)])
     }
 
     /// A run keeps both its ends at rest (owner, 2026-10-22): a
@@ -178,14 +178,14 @@ struct RunRestWiringTests {
         core.retile(animated: false)
         let run = try #require(core.tiler.runCovers[space]?.runs.first)
         // Room for two, yet the stored ends hold the one.
-        #expect(Array(run.shown) == [WindowID(3)])
+        expectEqual(Array(run.shown), [WindowID(3)])
         let stored = try #require(core.state.workspaces[space])
-        #expect(stored.runTails == [WindowID(3)])
+        expectEqual(stored.runTails, [WindowID(3)])
         // A step to window 4 moves the tail, and the pass writes
         // the new one back.
         core.state.workspaces.focus(WindowID(4), in: space)
         core.retile(animated: false)
-        #expect(core.state.workspaces[space]?.runTails == [WindowID(4)])
+        expectEqual(core.state.workspaces[space]?.runTails, [WindowID(4)])
     }
 
     /// The device case (owner, 2026-10-22): every window on its
@@ -211,7 +211,7 @@ struct RunRestWiringTests {
         #expect(
             core.execute("focus", args: [.string("down")]).isSuccess
         )
-        #expect(core.activeSpace?.focused == WindowID(3))
+        expectEqual(core.activeSpace?.focused, WindowID(3))
     }
 
     @Test("The shown slots leave a run's hidden windows out")

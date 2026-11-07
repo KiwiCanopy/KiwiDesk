@@ -79,7 +79,7 @@ struct ProfileSwitchClassificationTests {
         core.state.workspaces.add(WindowID(2), to: "1")
 
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1), WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1), WindowID(2)])
         #expect(members(core, "2").isEmpty)
     }
 
@@ -98,7 +98,7 @@ struct ProfileSwitchClassificationTests {
             cause: .event
         )
         #expect(core.state.workspaces["restored"] != nil)
-        #expect(members(core, "restored") == [WindowID(1)])
+        expectEqual(members(core, "restored"), [WindowID(1)])
     }
 
     /// The apply after a Standard restores the profile's own
@@ -128,8 +128,8 @@ struct ProfileSwitchClassificationTests {
             forceRetile: false
         )
         core.apply(profile: a, cause: .event)
-        #expect(members(core, "1") == [WindowID(1)])
-        #expect(members(core, "2") == [WindowID(2)])
+        expectEqual(members(core, "1"), [WindowID(1)])
+        expectEqual(members(core, "2"), [WindowID(2)])
     }
 
     /// A Standard → profile apply is a switch even where the
@@ -155,6 +155,6 @@ struct ProfileSwitchClassificationTests {
 
         core.apply(profile: profile("P", spaces: ["1"]), cause: .event)
         #expect(core.state.workspaces["9"] == nil)
-        #expect(members(core, "1") == [WindowID(1)])
+        expectEqual(members(core, "1"), [WindowID(1)])
     }
 }

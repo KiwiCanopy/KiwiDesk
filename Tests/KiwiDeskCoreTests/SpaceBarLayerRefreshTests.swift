@@ -63,10 +63,10 @@ struct SpaceBarLayerRefreshTests {
         core.keys.defineLayer("resize", bindings: [:])
         core.keys.switchLayer("resize")
         let during = identities(core)
-        #expect(during.first == .layer("resize"))
-        #expect(Array(during.dropFirst()) == before)
+        expectEqual(during.first, .layer("resize"))
+        expectEqual(Array(during.dropFirst()), before)
         core.keys.switchLayer("default")
-        #expect(identities(core) == before)
+        expectEqual(identities(core), before)
     }
 
     /// The layer never draws a bar of its own: a screen with no

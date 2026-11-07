@@ -97,7 +97,7 @@ struct PocketPlateTests {
         core.execute("pocket")
         let shown = try #require(spec(core))
         #expect(!shown.faded)
-        #expect(shown.windows == [one])
+        expectEqual(shown.windows, [one])
     }
 
     @Test("two inside: listed, and counted for VoiceOver alone")
@@ -106,7 +106,7 @@ struct PocketPlateTests {
         pocketTwo(core)
         let shown = try #require(spec(core))
         #expect(!shown.faded)
-        #expect(shown.windows == [one, two])
+        expectEqual(shown.windows, [one, two])
         // The pocket draws no count; its name carries it.
         #expect(shown.name.contains("2"))
     }
@@ -117,7 +117,7 @@ struct PocketPlateTests {
         several(core)
         core.updatePocketPlate()
         let displays = Set(core.state.workspaces.allDisplays.map(\.id))
-        #expect(Set(core.pocketPlate.specs.keys) == displays)
+        expectEqual(Set(core.pocketPlate.specs.keys), displays)
         let down = try #require(displays.first)
         core.pocketPlate.standingDown = [down]
         core.updatePocketPlate()
@@ -155,35 +155,35 @@ struct PocketPlateTests {
             quit: nil,
             pocket: group
         )
-        #expect(stored?.pocketCapacity == .several)
-        #expect(AppWideSettings().pocketCapacity == .one)
+        expectEqual(stored?.pocketCapacity, .several)
+        expectEqual(AppWideSettings().pocketCapacity, .one)
         let core = makeCore()
         #expect(
             !core.execute("pocket.set_capacity", args: [.string("many")])
                 .isSuccess
         )
-        #expect(core.appWide.pocketCapacity == .one)
+        expectEqual(core.appWide.pocketCapacity, .one)
         several(core)
-        #expect(core.appWide.pocketCapacity == .several)
+        expectEqual(core.appWide.pocketCapacity, .several)
     }
 
     @Test("the list is a click-held list of the windows inside")
     func listSource() {
         let source = BarPeekSource.pocket([one, two])
         #expect(source.isList)
-        #expect(source.clickGrowth == .outOfItem)
-        #expect(source.header == .full)
-        #expect(source.windows == [one, two])
+        expectEqual(source.clickGrowth, .outOfItem)
+        expectEqual(source.header, .full)
+        expectEqual(source.windows, [one, two])
     }
 
     @Test("a row of the list takes its window out")
     func rowTakesOut() {
         let core = makeCore()
         pocketTwo(core)
-        #expect(core.state.pocketedWindows == [one, two])
+        expectEqual(core.state.pocketedWindows, [one, two])
         core.pickBarRow(one, on: nil)
-        #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.pocketPhase(of: two) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .out)
+        expectEqual(core.state.pocketPhase(of: two), .pocketed)
     }
 
     @Test("a click grows the list out of that display's handle")
@@ -219,6 +219,6 @@ struct PocketPlateTests {
         let core = makeCore()
         pocketTwo(core)
         core.state.apply(.windowHidden(one))
-        #expect(core.pocketPlateWindows == [two])
+        expectEqual(core.pocketPlateWindows, [two])
     }
 }

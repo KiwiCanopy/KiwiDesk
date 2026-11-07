@@ -14,15 +14,15 @@ struct HighlightWidthTests {
     @Test("The default draws the pre-setting indicator")
     func defaultIsTodaysLook() {
         let shelf = KiwiShelf()
-        #expect(shelf.highlightWidth == 2)
-        #expect(shelf.edgeMarkThickness == 3)
+        expectEqual(shelf.highlightWidth, 2)
+        expectEqual(shelf.edgeMarkThickness, 3)
     }
 
     @Test("The edge mark follows the width")
     func edgeMarkScales() {
         var shelf = KiwiShelf()
         shelf.highlightWidth = 4
-        #expect(shelf.edgeMarkThickness == 4 * KiwiShelf.edgeMarkRatio)
+        expectEqual(shelf.edgeMarkThickness, 4 * KiwiShelf.edgeMarkRatio)
     }
 
     /// A writer that skips the clamp still draws inside the range:
@@ -31,8 +31,8 @@ struct HighlightWidthTests {
     func readersClamp() {
         var shelf = KiwiShelf()
         shelf.highlightWidth = 20
-        #expect(shelf.resolvedHighlightWidth == 6)
-        #expect(shelf.edgeMarkThickness == 6 * KiwiShelf.edgeMarkRatio)
+        expectEqual(shelf.resolvedHighlightWidth, 6)
+        expectEqual(shelf.edgeMarkThickness, 6 * KiwiShelf.edgeMarkRatio)
     }
 
     @Test(
@@ -45,7 +45,7 @@ struct HighlightWidthTests {
             KiwiShelf.self,
             from: Data(json.utf8)
         )
-        #expect(shelf.highlightWidth == CGFloat(drawn))
+        expectEqual(shelf.highlightWidth, CGFloat(drawn))
     }
 
     @Test(
@@ -59,7 +59,7 @@ struct HighlightWidthTests {
         ).get()
         var shelf = KiwiShelf()
         setting.apply(to: &shelf)
-        #expect(shelf.highlightWidth == CGFloat(stored))
+        expectEqual(shelf.highlightWidth, CGFloat(stored))
     }
 }
 
@@ -130,7 +130,7 @@ struct HighlightWidthDrawingTests {
     @Test("The Space Bar's outline strokes at the width")
     func spaceOutline() {
         let view = spaceItem(.outline)
-        #expect(view.accent.layer?.borderWidth == Self.width)
+        expectEqual(view.accent.layer?.borderWidth, Self.width)
     }
 
     /// The mark's cross extent: its height on a top or bottom
@@ -155,13 +155,13 @@ struct HighlightWidthDrawingTests {
     func spaceDropRing() {
         let view = spaceItem(.outline)
         view.beginSpringSweep(duration: 0.1, delay: 0)
-        #expect(view.springRing.lineWidth == Self.width)
+        expectEqual(view.springRing.lineWidth, Self.width)
     }
 
     @Test("The App Bar's outline strokes at the width")
     func appOutline() {
         let view = appItem(.outline)
-        #expect(view.accent.layer?.borderWidth == Self.width)
+        expectEqual(view.accent.layer?.borderWidth, Self.width)
     }
 
     @Test(
@@ -204,7 +204,7 @@ struct HighlightWidthDrawingTests {
     @Test("The front-app chip's outline strokes at the width")
     func frontOutline() throws {
         let overlay = try frontChip(.outline)
-        #expect(overlay.frontAccent.layer?.borderWidth == Self.width)
+        expectEqual(overlay.frontAccent.layer?.borderWidth, Self.width)
     }
 
     @Test(

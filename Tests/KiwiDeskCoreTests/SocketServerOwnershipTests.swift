@@ -82,6 +82,6 @@ struct SocketServerOwnershipTests {
                 .intValue
         }
         await waitUntil { mode() == 0o600 }
-        #expect(mode() == 0o600)
+        expectEqual(mode(), 0o600)
     }
 }

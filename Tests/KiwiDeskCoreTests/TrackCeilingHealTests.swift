@@ -197,7 +197,7 @@ struct TrackCeilingHealTests {
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: w1)?.maxWidth == 500)
+        expectEqual(core.tiler.sizeBound(for: w1)?.maxWidth, 500)
     }
 
     @Test("A retile hands a fixed-size window's surplus to its neighbour")
@@ -257,6 +257,6 @@ struct TrackCeilingHealTests {
                 .ownMaximum(w1, axis: "x", atBoundary: false)
             ]
         )
-        #expect(core.state.workspaces[space]?.trackWeights == before)
+        expectEqual(core.state.workspaces[space]?.trackWeights, before)
     }
 }

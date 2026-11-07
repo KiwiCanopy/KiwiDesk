@@ -64,14 +64,14 @@ struct OverflowMarkWiringTests {
         let space = makeSpace(core)
         let specs = core.overflowMarkSpecs()
         let spec = try #require(specs.first)
-        #expect(specs.count == 1)
-        #expect(spec.mark.space == space)
-        #expect(spec.mark.end == .bottom)
-        #expect(spec.mark.anchor == WindowID(3))
-        #expect(spec.mark.windows == [4, 5, 6].map { WindowID($0) })
-        #expect(spec.name == "More windows below: 3")
+        expectEqual(specs.count, 1)
+        expectEqual(spec.mark.space, space)
+        expectEqual(spec.mark.end, .bottom)
+        expectEqual(spec.mark.anchor, WindowID(3))
+        expectEqual(spec.mark.windows, [4, 5, 6].map { WindowID($0) })
+        expectEqual(spec.name, "More windows below: 3")
         // The retile's tail synced the manager from that reading.
-        #expect(core.overflowMarks.anchors == [WindowID(3)])
+        expectEqual(core.overflowMarks.anchors, [WindowID(3)])
     }
 
     /// A shelf write skips the layout pass (#1524) and runs only
@@ -83,7 +83,7 @@ struct OverflowMarkWiringTests {
         let hex = "#3355AAB3"
         _ = core.execute("kiwishelf.set_fill_color", args: [.string(hex)])
         let overlay = try #require(core.overflowMarks.overlays.values.first)
-        #expect(overlay.view.shelfLook.fillColor == hex)
+        expectEqual(overlay.view.shelfLook.fillColor, hex)
     }
 
     /// A step moves the end to another window: the same panel is
@@ -99,7 +99,7 @@ struct OverflowMarkWiringTests {
             core.overflowMarks.overlays.values.first { $0.mark.end == .bottom }
         )
         #expect(after === before)
-        #expect(after.mark.anchor == WindowID(4))
+        expectEqual(after.mark.anchor, WindowID(4))
     }
 
     /// The peek reads its anchor's frame only off a window on
@@ -146,7 +146,7 @@ struct OverflowMarkWiringTests {
         core.updateOverflowMarks()
         let after = try #require(overlay.drawnEnvironment)
         #expect(after.fonts != before.fonts)
-        #expect(after == BarDrawEnvironment.current)
+        expectEqual(after, BarDrawEnvironment.current)
     }
 
     @Test("A run that hides nothing draws no mark")
@@ -155,7 +155,7 @@ struct OverflowMarkWiringTests {
         let space = makeSpace(core)
         _ = core.execute("set_min_window_size", args: [.number(100)])
         core.retile(animated: false)
-        #expect(core.state.workspaces[space]?.mode == .stack)
+        expectEqual(core.state.workspaces[space]?.mode, .stack)
         #expect(core.overflowMarkSpecs().isEmpty)
         #expect(core.overflowMarks.anchors.isEmpty)
     }

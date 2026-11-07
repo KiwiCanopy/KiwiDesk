@@ -89,34 +89,34 @@ struct KiwiShelfMigrationTests {
         let shelf = try #require(group(s, "kiwishelf"))
         // Each bar keeps its own edge, and #1731 drops the shelf's.
         #expect(shelf["edge"] == nil)
-        #expect(shelf["thickness"] as? Double == 36)
-        #expect(shelf["item_gap"] as? Double == 3)
-        #expect(shelf["liquid_glass"] as? Bool == false)
+        expectEqual(shelf["thickness"] as? Double, 36)
+        expectEqual(shelf["item_gap"] as? Double, 3)
+        expectEqual(shelf["liquid_glass"] as? Bool, false)
         let space = try #require(group(s, "space_bar"))
-        #expect(space["edge"] as? String == "left")
+        expectEqual(space["edge"] as? String, "left")
         #expect(space["thickness"] == nil)
         #expect(space["title_cap"] == nil)
-        #expect(space["front_app_title_cap"] as? Double == 24)
-        #expect(space["active_dim_factor"] as? Double == 0.4)
+        expectEqual(space["front_app_title_cap"] as? Double, 24)
+        expectEqual(space["active_dim_factor"] as? Double, 0.4)
         // Colours move too; the Space Bar's dimmed idle ink is the
         // App Bar's colour at a lower alpha, so the shelf takes the
         // full colour and the idle rule dims it.
-        #expect(shelf["fill_color"] as? String == "#112233B3")
-        #expect(shelf["item_color"] as? String == "#EAF3EE")
+        expectEqual(shelf["fill_color"] as? String, "#112233B3")
+        expectEqual(shelf["item_color"] as? String, "#EAF3EE")
         #expect(space["fill_color"] == nil)
         #expect(space["item_color"] == nil)
         // Gap is gone; the App Bar that named none keeps Outline
         // ahead of its default's flip.
-        #expect(space["active_indicator"] as? String == "outline")
+        expectEqual(space["active_indicator"] as? String, "outline")
         let app = try #require(group(s, "app_bar"))
-        #expect(app["edge"] as? String == "bottom")
+        expectEqual(app["edge"] as? String, "bottom")
         #expect(app["thickness"] == nil)
         #expect(app["item_size"] == nil)
         // Its own stays through the shelf step; the chain's later
         // #1528 step drops the retired content.
         #expect(app["content"] == nil)
         #expect(app["item_color"] == nil)
-        #expect(app["active_indicator"] as? String == "outline")
+        expectEqual(app["active_indicator"] as? String, "outline")
         #expect(try root(out)["format"] as? Int == Profile.currentFormat)
     }
 
@@ -135,7 +135,7 @@ struct KiwiShelfMigrationTests {
         // A layout's colour is the shelf's now, and its Gap is
         // gone like the global bar's.
         #expect(bar["fill_color"] == nil)
-        #expect(bar["active_indicator"] as? String == "outline")
+        expectEqual(bar["active_indicator"] as? String, "outline")
     }
 
     /// The bar the user actually saw: with the Space Bar off,
@@ -153,9 +153,9 @@ struct KiwiShelfMigrationTests {
         let s = try settings(out)
         let shelf = try #require(group(s, "kiwishelf"))
         // Each bar keeps the edge it sat on (#1731).
-        #expect(group(s, "space_bar")?["edge"] as? String == "top")
-        #expect(group(s, "app_bar")?["edge"] as? String == "bottom")
-        #expect(shelf["thickness"] as? Double == 30)
+        expectEqual(group(s, "space_bar")?["edge"] as? String, "top")
+        expectEqual(group(s, "app_bar")?["edge"] as? String, "bottom")
+        expectEqual(shelf["thickness"] as? Double, 30)
     }
 
     /// The textual edit is what keeps a user's file theirs: the
@@ -183,11 +183,11 @@ struct KiwiShelfMigrationTests {
             )
         )
         // A setup split before the shelf stays split (#1731).
-        #expect(decoded.spaceBarStyle.edge == .left)
-        #expect(decoded.appBarStyle.edge == .bottom)
-        #expect(decoded.kiwishelf.thickness == 36)
-        #expect(decoded.kiwishelf.liquidGlass == false)
-        #expect(decoded.spaceBarStyle.frontAppTitleCap == 24)
+        expectEqual(decoded.spaceBarStyle.edge, .left)
+        expectEqual(decoded.appBarStyle.edge, .bottom)
+        expectEqual(decoded.kiwishelf.thickness, 36)
+        expectEqual(decoded.kiwishelf.liquidGlass, false)
+        expectEqual(decoded.spaceBarStyle.frontAppTitleCap, 24)
     }
 
     @Test("a migrated file needs no second crossing")
@@ -220,7 +220,7 @@ struct KiwiShelfMigrationTests {
             (($0["settings"] as? [String: Any])?["space_bar"]
                 as? [String: Any])?["edge"] as? String
         }
-        #expect(edges == ["left", "right"])
+        expectEqual(edges, ["left", "right"])
         #expect(
             try root(out)["format"] as? Int
                 == SetupBundle.currentFormat

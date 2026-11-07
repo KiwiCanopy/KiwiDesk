@@ -70,7 +70,7 @@ struct UnsolicitedResizeTests {
 
         core.handle(.windowResized(w, zoomed))
 
-        #expect(applied.frames[w] == slot)
+        expectEqual(applied.frames[w], slot)
         #expect(log.contains { $0.contains(Self.corrected) })
     }
 
@@ -142,7 +142,7 @@ struct UnsolicitedResizeTests {
             .windowResized(w, slot.insetBy(dx: -200, dy: 0))
         )
 
-        #expect(applied.frames[w] == slot)
+        expectEqual(applied.frames[w], slot)
         #expect(log.contains { $0.contains(Self.corrected) })
     }
 
@@ -311,7 +311,7 @@ struct UnsolicitedResizeTests {
         #expect(!log.contains { $0.contains(Self.corrected) })
         core.defersEventRetiles = false
         core.retile()
-        #expect(applied.frames[w] == slot)
+        expectEqual(applied.frames[w], slot)
     }
 
     @Test("An app that keeps reverting is corrected twice, then left")
@@ -335,7 +335,7 @@ struct UnsolicitedResizeTests {
             applied.frames = [:]
             core.handle(.windowResized(w, zoomed))
         }
-        #expect(corrections == UnsolicitedResizeMemo.maxConsecutive)
+        expectEqual(corrections, UnsolicitedResizeMemo.maxConsecutive)
         #expect(applied.frames[w] == nil)
 
         // Seen ON its frame again: the run ends and the memo
@@ -343,7 +343,7 @@ struct UnsolicitedResizeTests {
         core.handle(.windowResized(w, slot))
         applied.frames = [:]
         core.handle(.windowResized(w, zoomed))
-        #expect(applied.frames[w] == slot)
-        #expect(corrections == UnsolicitedResizeMemo.maxConsecutive + 1)
+        expectEqual(applied.frames[w], slot)
+        expectEqual(corrections, UnsolicitedResizeMemo.maxConsecutive + 1)
     }
 }

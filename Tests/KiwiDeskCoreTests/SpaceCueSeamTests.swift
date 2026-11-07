@@ -37,7 +37,7 @@ struct SpaceCueSeamTests {
             text.components(separatedBy: "paySpaceCue(for:").dropFirst()
                 .map { _ in name }
         }
-        #expect(calls == ["KiwiCore+SpaceTransition.swift"])
+        expectEqual(calls, ["KiwiCore+SpaceTransition.swift"])
     }
 
     @Test("the stored pick is read once, through the drawn reading")
@@ -52,12 +52,12 @@ struct SpaceCueSeamTests {
         let readers = try Self.sources().filter { _, text in
             text.contains("appWide.spaceTransition")
         }.map(\.0)
-        #expect(readers == ["KiwiCore+SpaceSlide.swift"])
+        expectEqual(readers, ["KiwiCore+SpaceSlide.swift"])
         // The scroll step's pick has the same one reader (#2971).
         let scrollReaders = try Self.sources().filter { _, text in
             text.contains("appWide.spaceScrollTransition")
         }.map(\.0)
-        #expect(scrollReaders == ["KiwiCore+SpaceSlide.swift"])
+        expectEqual(scrollReaders, ["KiwiCore+SpaceSlide.swift"])
     }
 
     /// A Space Bar pick pays no cue (#2591): each bar door that can

@@ -77,7 +77,7 @@ struct DragDropTests {
                 == [WindowID(2), WindowID(1)]
         )
         // The dropped window ends up focused.
-        #expect(core.activeSpace?.focused == WindowID(1))
+        expectEqual(core.activeSpace?.focused, WindowID(1))
     }
 
     @Test("Dropping into nowhere keeps the order (snap back)")

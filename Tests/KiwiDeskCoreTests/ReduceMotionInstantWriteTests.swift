@@ -80,8 +80,8 @@ struct ReduceMotionInstantWriteTests {
         let engine = makeEngine(log)
         engine.applyFrame(id, from: from, to: to, animated: true)
         await drain()
-        #expect(log.all == ["off", "frame 400x300", "on"])
-        #expect(engine.animation.isAnimating(window: id) == false)
+        expectEqual(log.all, ["off", "frame 400x300", "on"])
+        expectEqual(engine.animation.isAnimating(window: id), false)
     }
 
     /// The settle probe's stand-in (#2187): an app easing its
@@ -129,11 +129,11 @@ struct ReduceMotionInstantWriteTests {
         let engine = makeEngine(log, resends: resends)
         engine.applyFrame(id, from: from, to: onRight, animated: true)
         await drain()
-        #expect(resends.owed.count == 1)
+        expectEqual(resends.owed.count, 1)
         resends.fire()
         await drain()
         let set = ["off", "frame 508x687", "on"]
-        #expect(log.all == set + set)
+        expectEqual(log.all, set + set)
     }
 
     @Test("A set on its own screen writes once")
@@ -157,7 +157,7 @@ struct ReduceMotionInstantWriteTests {
         let written = log.all
         resends.fire()
         await drain()
-        #expect(log.all == written)
+        expectEqual(log.all, written)
     }
 
     /// A parked corner may lie mostly on a neighbour, so an
@@ -208,7 +208,7 @@ struct ReduceMotionInstantWriteTests {
         engine.dragExemptWindow = id
         resends.fire()
         await drain()
-        #expect(log.all == written)
+        expectEqual(log.all, written)
     }
 
     /// A spring's tick writes through `apply`; the tick is the
@@ -224,13 +224,13 @@ struct ReduceMotionInstantWriteTests {
         let written = log.all
         resends.fire()
         await drain()
-        #expect(log.all == written)
+        expectEqual(log.all, written)
     }
 
     @Test("The instant set stamps the commanded frame")
     func instantSetIsCommanded() {
         let engine = makeEngine(Log())
         engine.applyFrame(id, from: from, to: to, animated: true)
-        #expect(engine.applier.instantTarget(id) == to)
+        expectEqual(engine.applier.instantTarget(id), to)
     }
 }

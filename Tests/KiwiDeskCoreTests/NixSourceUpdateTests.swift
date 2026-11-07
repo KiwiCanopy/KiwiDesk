@@ -21,8 +21,8 @@ struct NixSourceUpdateTests {
 
         #expect(run.status == 0, "stderr: \(run.stderr)")
         let pin = try fixture.pin()
-        #expect(pin["version"] == "4.1.0")
-        #expect(pin["hash"] == Self.sri)
+        expectEqual(pin["version"], "4.1.0")
+        expectEqual(pin["hash"], Self.sri)
         #expect(
             pin["url"]
                 == "https://github.com/KiwiCanopy/KiwiDesk/releases/"

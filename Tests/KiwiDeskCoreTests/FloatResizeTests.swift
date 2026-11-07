@@ -34,10 +34,10 @@ struct FloatResizeTests {
             minSize: 300,
             bounds: nil
         ).frame
-        #expect(result.minX == base.minX - 75)
-        #expect(result.width == 650)
-        #expect(result.origin.y == base.origin.y)
-        #expect(result.height == 400)
+        expectEqual(result.minX, base.minX - 75)
+        expectEqual(result.width, 650)
+        expectEqual(result.origin.y, base.origin.y)
+        expectEqual(result.height, 400)
     }
 
     @Test("y shrinks the height down to min_window_size")
@@ -49,8 +49,8 @@ struct FloatResizeTests {
             minSize: 300,
             bounds: nil
         ).frame
-        #expect(result.height == 300)
-        #expect(result.width == 500)
+        expectEqual(result.height, 300)
+        expectEqual(result.width, 500)
     }
 
     @Test("a sub-floor window never grows on a shrink")
@@ -66,7 +66,7 @@ struct FloatResizeTests {
             minSize: 300,
             bounds: nil
         ).frame
-        #expect(result.width == 100)
+        expectEqual(result.width, 100)
     }
 
     @Test("a sub-floor window grows by exactly the delta")
@@ -79,7 +79,7 @@ struct FloatResizeTests {
             minSize: 300,
             bounds: nil
         ).frame
-        #expect(result.height == 140)
+        expectEqual(result.height, 140)
     }
 
     @Test("the floor never drops below 1 pt")
@@ -94,6 +94,6 @@ struct FloatResizeTests {
             minSize: 0,
             bounds: nil
         ).frame
-        #expect(result.width == 1)
+        expectEqual(result.width, 1)
     }
 }

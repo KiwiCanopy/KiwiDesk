@@ -113,7 +113,7 @@ struct FloatGatherRegionTests {
             ),
             targetDepth: core.appWide.quitGridTargetDepth
         )
-        #expect(seeded == carved[Self.scrolledOut])
+        expectEqual(seeded, carved[Self.scrolledOut])
         let bare = FloatGather.targets(
             members: [Self.inside, Self.scrolledOut, Self.partly],
             frames: Self.frames,
@@ -127,7 +127,7 @@ struct FloatGatherRegionTests {
         #expect(seeded != bare[Self.scrolledOut])
         // And the pass's own clamp sweep left the capture alone.
         core.clampFloatsClearOfBars()
-        #expect(core.tiler.stashOriginal(Self.scrolledOut) == seeded)
+        expectEqual(core.tiler.stashOriginal(Self.scrolledOut), seeded)
     }
 
     /// The JUDGMENT takes the correctness bound: a member flush
@@ -176,14 +176,14 @@ struct FloatGatherRegionTests {
         core.settleDrawnSpaceModes()
         core.state.apply(.windowFocused(Self.inside))
         let space = try #require(core.state.workspaces[Self.space])
-        #expect(space.focused == Self.inside)
+        expectEqual(space.focused, Self.inside)
         core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let seeded = try #require(core.tiler.stashOriginal(Self.inside))
         let others = [Self.scrolledOut, Self.partly].compactMap {
             core.tiler.stashOriginal($0)
         }
-        #expect(others.count == 2)
+        expectEqual(others.count, 2)
         for other in others {
             #expect(seeded.minX > other.minX)
         }

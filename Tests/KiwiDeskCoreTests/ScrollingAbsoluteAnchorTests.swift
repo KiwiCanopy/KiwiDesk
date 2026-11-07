@@ -93,17 +93,17 @@ struct ScrollingAbsoluteAnchorTests {
     func floatingFocusHolds() {
         // No slot to place: a fixed anchor keeps the previous
         // rest, not clamped back to the leading edge...
-        #expect(held(.center, 555, rowLength: 810) == 555)
+        expectEqual(held(.center, 555, rowLength: 810), 555)
         // ...but a rest measured against a row that has since
         // shrunk is bounded so the row stays on screen (#966):
         // a short row anywhere inside the axis, a long one with
         // no margin past either end.
-        #expect(held(.center, 1700, rowLength: 810) == 1090)
-        #expect(held(.end, -300, rowLength: 810) == 0)
-        #expect(held(.start, 100, rowLength: 3000) == 0)
-        #expect(held(.center, -2000, rowLength: 3000) == -1100)
+        expectEqual(held(.center, 1700, rowLength: 810), 1090)
+        expectEqual(held(.end, -300, rowLength: 810), 0)
+        expectEqual(held(.start, 100, rowLength: 3000), 0)
+        expectEqual(held(.center, -2000, rowLength: 3000), -1100)
         // `follow` keeps its own clamp: a short row leads.
-        #expect(held(.follow, 555, rowLength: 810) == 0)
+        expectEqual(held(.follow, 555, rowLength: 810), 0)
     }
 
     /// A fixed anchor keeps anchoring the last tiled focus while
@@ -120,8 +120,8 @@ struct ScrollingAbsoluteAnchorTests {
             for: [w1, w2, w3],
             in: context
         )
-        #expect(rest.offset == -410)
-        #expect(rest.slot?.window == w2)
+        expectEqual(rest.offset, -410)
+        expectEqual(rest.slot?.window, w2)
         // The float takes focus: w2 stays at the edge.
         context.focused = float
         context.scrollRest = rest
@@ -129,8 +129,8 @@ struct ScrollingAbsoluteAnchorTests {
             for: [w1, w2, w3],
             in: context
         )
-        #expect(held.offset == -410)
-        #expect(held.slot?.window == w2)
+        expectEqual(held.offset, -410)
+        expectEqual(held.slot?.window, w2)
         let frame = try #require(
             ScrollingLayout().calculateGeometry(
                 for: [w1, w2, w3],
@@ -145,7 +145,7 @@ struct ScrollingAbsoluteAnchorTests {
             for: [w1, w3],
             in: context
         )
-        #expect(gone.offset == 0)
+        expectEqual(gone.offset, 0)
     }
 
     /// The rest is recorded for a lone window kept at its slot
@@ -159,7 +159,7 @@ struct ScrollingAbsoluteAnchorTests {
             in: context
         )
         #expect(abs(rest.offset - (context.usable.width - 400) / 2) < 0.01)
-        #expect(rest.slot?.window == w1)
+        expectEqual(rest.slot?.window, w1)
         context.scrolling.fillWhenAlone = true
         context.scrollRest = ScrollRest(offset: 123)
         #expect(
@@ -207,7 +207,7 @@ struct ScrollingAbsoluteAnchorTests {
     @Test("the class has one home")
     func classHasOneHome() {
         for anchor in ScrollingParams.Anchor.allCases {
-            #expect(anchor.keepsRowOnScreen == (anchor == .follow))
+            expectEqual(anchor.keepsRowOnScreen, (anchor == .follow))
         }
     }
 }

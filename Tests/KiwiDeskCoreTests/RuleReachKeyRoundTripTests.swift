@@ -193,6 +193,6 @@ struct RuleReachKeyRoundTripTests {
                 \.label
             )
         )
-        #expect(layer == ["name", "icon", "bindings"])
+        expectEqual(layer, ["name", "icon", "bindings"])
     }
 }

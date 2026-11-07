@@ -92,7 +92,7 @@ struct GridRunCommandTests {
         #expect(
             core.execute("focus", args: [.string(key)]).isSuccess
         )
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     @Test("A press along an auto-sized run moves its weights")
@@ -112,7 +112,7 @@ struct GridRunCommandTests {
         let space = try #require(core.state.workspaces[id])
         #expect(space.stackWeights[WindowID(4)] != nil)
         // The grid's own column weights stay where they were.
-        #expect(core.sessionRatios(of: id) == columns)
+        expectEqual(core.sessionRatios(of: id), columns)
     }
 
     @Test("A mode change drops the run weights")
@@ -130,6 +130,6 @@ struct GridRunCommandTests {
             "set_mode",
             args: [.string(id.raw), .string("grid")]
         )
-        #expect(core.state.workspaces[id]?.stackWeights.isEmpty == true)
+        expectEqual(core.state.workspaces[id]?.stackWeights.isEmpty, true)
     }
 }

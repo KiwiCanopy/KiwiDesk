@@ -76,7 +76,7 @@ struct HealStandDownTests {
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: window)?.minWidth == 700)
+        expectEqual(core.tiler.sizeBound(for: window)?.minWidth, 700)
     }
 
     private func ratio(_ core: KiwiCore, _ space: SpaceID) -> Double {
@@ -110,7 +110,7 @@ struct HealStandDownTests {
     func awayMemberStandsSplitDown() {
         let result = healedRatio(offShown: [away])
         #expect(!result.healed)
-        #expect(result.ratio == 0.5)
+        expectEqual(result.ratio, 0.5)
     }
 
     @Test("Members on shown Desktops heal")
@@ -128,7 +128,7 @@ struct HealStandDownTests {
             sinceSwitch: EventLoop.spaceSwitchCoalesceGrace + 0.1
         )
         #expect(!inside.healed)
-        #expect(inside.ratio == 0.5)
+        expectEqual(inside.ratio, 0.5)
         #expect(past.healed)
     }
 
@@ -140,11 +140,11 @@ struct HealStandDownTests {
         seedFloor(core, window: away)
         core.lastDesktopSwitch = Date()
         core.retile()
-        #expect(ratio(core, space) == 0.5)
+        expectEqual(ratio(core, space), 0.5)
         #expect(core.deferred.isScheduled(.applyHealPass))
         core.lastDesktopSwitch = .distantPast
         core.payApplyHealPass(until: .now, restedAtLastLook: true)
-        #expect(ratio(core, space) == healedRatio(offShown: []).ratio)
+        expectEqual(ratio(core, space), healedRatio(offShown: []).ratio)
     }
 
     /// The device ratchet (2026-11-02): mixed passes wrote the
@@ -157,10 +157,10 @@ struct HealStandDownTests {
         core.lastDesktopSwitch = .distantPast
         core.desktopMemory.readOffShown = { $0.contains(self.away) }
         core.retile()
-        #expect(ratio(core, space) == 0.5)
+        expectEqual(ratio(core, space), 0.5)
         core.desktopMemory.readOffShown = { _ in false }
         core.retile()
-        #expect(ratio(core, space) == healedRatio(offShown: []).ratio)
+        expectEqual(ratio(core, space), healedRatio(offShown: []).ratio)
     }
 
     @Test("A member on a Desktop nobody shows stands the track heal down")
@@ -178,7 +178,7 @@ struct HealStandDownTests {
             return core.state.workspaces[space]?
                 .trackWeights[WindowID(1)]
         }
-        #expect(weight(away: true) == 10)
+        expectEqual(weight(away: true), 10)
         #expect(weight(away: false) != 10)
     }
 }

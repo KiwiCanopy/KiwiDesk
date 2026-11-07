@@ -210,8 +210,8 @@ struct SnapshotCarryCensusTests {
             "the register names a property ManagedWindow no longer has"
         )
         #expect(b.state.userFloated.contains(w1))
-        #expect(b.state.stickyReachOverrides[w1] == false)
-        #expect(b.tiler.monocleShownMembers[spaceID] == w2)
+        expectEqual(b.state.stickyReachOverrides[w1], false)
+        expectEqual(b.tiler.monocleShownMembers[spaceID], w2)
     }
 
     /// Build N writes, build N+1 reads (#930): a session payload
@@ -254,7 +254,7 @@ struct SnapshotCarryCensusTests {
         // arrangement is the claim.
         var expected = snapshot.droppingSessions()
         expected.capturedAt = decoded.capturedAt
-        #expect(decoded == expected)
+        expectEqual(decoded, expected)
         // And the arrangement restores from it.
         let b = makeTestCore()
         b.state.workspaces.ensureSpace(spaceID)
@@ -263,8 +263,8 @@ struct SnapshotCarryCensusTests {
         tracked(b, w2)
         b.restore(decoded)
         let space = try #require(b.state.workspaces[spaceID])
-        #expect(space.windows == [w2, w1])
-        #expect(space.mode == .track)
+        expectEqual(space.windows, [w2, w1])
+        expectEqual(space.mode, .track)
         #expect(b.desktopMemory.sessionRatios.isEmpty)
     }
 
@@ -285,7 +285,7 @@ struct SnapshotCarryCensusTests {
         let space = try #require(b.state.workspaces[spaceID])
         #expect(b.desktopMemory.sessionRatios.isEmpty)
         #expect(space.stackWeights.isEmpty)
-        #expect(b.state.windows[w1]?.isFloating == false)
-        #expect(b.state.windows[w1]?.stickyScope == StickyScope.none)
+        expectEqual(b.state.windows[w1]?.isFloating, false)
+        expectEqual(b.state.windows[w1]?.stickyScope, StickyScope.none)
     }
 }

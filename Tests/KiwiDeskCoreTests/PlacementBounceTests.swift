@@ -87,11 +87,11 @@ struct PlacementBounceTests {
         let (target, other) = makeFixture(core)
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
         // Never consumed: the app's second report is the same
         // bounce.
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     /// The active arm keys on the placement alone: the emulator
@@ -105,7 +105,7 @@ struct PlacementBounceTests {
         core.state.apply(.windowMoved(target, offscreen))
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     /// Outside the scrolling void a clickless focus is how a user
@@ -124,7 +124,7 @@ struct PlacementBounceTests {
         core.state.apply(.windowMoved(target, offscreen))
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     /// A distrusted bounce RENEWS the placement's window, so an
@@ -140,12 +140,12 @@ struct PlacementBounceTests {
         core.tiler.placements.stamp(target, target: offscreen)
         core.tiler.placements.clock = { 1.2 }
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
         // Without the renewal this read would be nil already.
         core.tiler.placements.clock = { 2.7 }
         #expect(core.tiler.placements.recent(target) != nil)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     /// The flipped on-screen test below tells the collapsed arm
@@ -169,7 +169,7 @@ struct PlacementBounceTests {
         let (target, other) = makeFixture(core)
         core.tiler.placements.stamp(target, target: onscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     @Test("A placement past the echo window is honored")
@@ -179,7 +179,7 @@ struct PlacementBounceTests {
         core.tiler.placements.stamp(target, target: offscreen)
         core.tiler.placements.clock = { PlacementLedger.echoWindow + 1 }
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     @Test("A click that reached the window escapes the distrust")
@@ -191,7 +191,7 @@ struct PlacementBounceTests {
             core.wallClock(), CGPoint(x: 100, y: 100), target
         )
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     /// The wiring: a retile that moves a window stamps it, so the
@@ -223,7 +223,7 @@ struct PlacementBounceTests {
             to: offscreen,
             animated: true
         )
-        #expect(core.tiler.placements.recent(target) == offscreen)
+        expectEqual(core.tiler.placements.recent(target), offscreen)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -253,8 +253,8 @@ struct PlacementBounceTests {
         #expect(corner != nil)
         core.handle(.windowFocused(target))
         #expect(core.deferred.task(for: .focusFollow) == nil)
-        #expect(core.state.workspaces.activeSpace == SpaceID(1))
-        #expect(focused(core) == other)
+        expectEqual(core.state.workspaces.activeSpace, SpaceID(1))
+        expectEqual(focused(core), other)
     }
 
     @Test("A window that took the stash corner follows as a cmd-tab")

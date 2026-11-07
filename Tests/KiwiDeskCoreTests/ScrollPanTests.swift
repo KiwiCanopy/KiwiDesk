@@ -84,11 +84,11 @@ struct ScrollPanTests {
         for _ in 0..<5 {
             core.handleScrollPan(event(.changed, dx: -80), session: session)
         }
-        #expect(focused(core) == WindowID(4))
+        expectEqual(focused(core), WindowID(4))
         core.handleScrollPan(event(.ended), session: session)
         core.handleScrollPan(event(.began), session: session)
         core.handleScrollPan(event(.changed, dx: 80), session: session)
-        #expect(focused(core) == WindowID(3))
+        expectEqual(focused(core), WindowID(3))
     }
 
     @Test("long swipes: first window early, then one per distance")
@@ -97,14 +97,14 @@ struct ScrollPanTests {
         byLength(core)
         core.handleScrollPan(event(.began), session: session)
         core.handleScrollPan(event(.changed, dx: -30), session: session)
-        #expect(focused(core) == WindowID(4))
+        expectEqual(focused(core), WindowID(4))
         core.handleScrollPan(
             event(.changed, dx: -(stride - 1)),
             session: session
         )
-        #expect(focused(core) == WindowID(4))
+        expectEqual(focused(core), WindowID(4))
         core.handleScrollPan(event(.changed, dx: -1), session: session)
-        #expect(focused(core) == WindowID(5))
+        expectEqual(focused(core), WindowID(5))
     }
 
     @Test("long swipes: several windows in one event")
@@ -117,7 +117,7 @@ struct ScrollPanTests {
             event(.changed, dx: -2 * stride),
             session: session
         )
-        #expect(focused(core) == WindowID(4))
+        expectEqual(focused(core), WindowID(4))
     }
 
     @Test("the glide after a lift never moves focus")
@@ -129,7 +129,7 @@ struct ScrollPanTests {
             event(.changed, dx: -10 * stride, momentum: true),
             session: session
         )
-        #expect(focused(core) == WindowID(3))
+        expectEqual(focused(core), WindowID(3))
     }
 
     @Test("a wheel moves one window per notch, either axis")
@@ -144,7 +144,7 @@ struct ScrollPanTests {
             event(.changed, dy: -40, input: .wheel, time: 1),
             session: session
         )
-        #expect(focused(core) == WindowID(5))
+        expectEqual(focused(core), WindowID(5))
     }
 
     /// The meter's latch reaches ⌃⌥ too (#1519 ruling): a spin
@@ -164,7 +164,7 @@ struct ScrollPanTests {
                 session: session
             )
         }
-        #expect(focused(core) == WindowID(2))
+        expectEqual(focused(core), WindowID(2))
     }
 
     @Test("a Monocle Space steps once per gesture")
@@ -174,11 +174,11 @@ struct ScrollPanTests {
         for _ in 0..<5 {
             core.handleScrollPan(event(.changed, dx: -40), session: session)
         }
-        #expect(focused(core) == WindowID(4))
+        expectEqual(focused(core), WindowID(4))
         core.handleScrollPan(event(.ended), session: session)
         core.handleScrollPan(event(.began), session: session)
         core.handleScrollPan(event(.changed, dx: 40), session: session)
-        #expect(focused(core) == WindowID(3))
+        expectEqual(focused(core), WindowID(3))
     }
 
     @Test("a gesture over no Space does nothing")
@@ -190,7 +190,7 @@ struct ScrollPanTests {
             event(.changed, dx: -5 * stride),
             session: session
         )
-        #expect(focused(core) == WindowID(3))
+        expectEqual(focused(core), WindowID(3))
     }
 
     @Test("an ended gesture stops acting")
@@ -202,7 +202,7 @@ struct ScrollPanTests {
             event(.changed, dx: -5 * stride),
             session: session
         )
-        #expect(focused(core) == WindowID(3))
+        expectEqual(focused(core), WindowID(3))
     }
 
     @Test("bootstrap wires the pan consumer")

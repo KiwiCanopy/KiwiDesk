@@ -36,24 +36,24 @@ struct ObserverRegistrationBoundTests {
     @Test("a responsive app is asked for every notification")
     func responsiveAppAddsAll() {
         let result = run(stalls: [], refused: ["b"])
-        #expect(result.asked == names)
-        #expect(result.failed == ["b"])
+        expectEqual(result.asked, names)
+        expectEqual(result.failed, ["b"])
         #expect(result.stalled == nil)
     }
 
     @Test("a stalled add ends the registration, the rest left failed")
     func stallStopsTheLoop() {
         let result = run(stalls: ["b"], refused: ["b"])
-        #expect(result.asked == ["a", "b"])
-        #expect(result.failed == ["b", "c", "d"])
-        #expect(result.stalled == "b")
+        expectEqual(result.asked, ["a", "b"])
+        expectEqual(result.failed, ["b", "c", "d"])
+        expectEqual(result.stalled, "b")
     }
 
     @Test("a stalled add that lands still counts as registered")
     func stalledSuccessIsRegistered() {
         let result = run(stalls: ["a"])
-        #expect(result.asked == ["a"])
-        #expect(result.failed == ["b", "c", "d"])
+        expectEqual(result.asked, ["a"])
+        expectEqual(result.failed, ["b", "c", "d"])
     }
 
     @Test("an add just under the bound does not stop the loop")
@@ -63,7 +63,7 @@ struct ObserverRegistrationBoundTests {
             cost: AXApplicationObserver.stalledAdd
                 - .milliseconds(1)
         )
-        #expect(result.asked == names)
+        expectEqual(result.asked, names)
         #expect(result.failed.isEmpty)
     }
 
@@ -96,8 +96,8 @@ struct ObserverRegistrationBoundTests {
         let declared = ["a", "b", "c", "d"]
         var ledger = ObserverRegistrationLedger()
         ledger.record((["a", "c", "d"], stalled: "a"), at: .now)
-        #expect(ledger.repairOrder(of: declared) == ["c", "d", "a"])
+        expectEqual(ledger.repairOrder(of: declared), ["c", "d", "a"])
         ledger.record((["a", "c"], stalled: nil), at: .now)
-        #expect(ledger.repairOrder(of: declared) == ["a", "c"])
+        expectEqual(ledger.repairOrder(of: declared), ["a", "c"])
     }
 }

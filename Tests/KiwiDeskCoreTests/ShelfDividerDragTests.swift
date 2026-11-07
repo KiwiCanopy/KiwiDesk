@@ -31,9 +31,9 @@ struct ShelfDividerDragTests {
     @Test("Only a full shelf drags")
     func onlyFullDrags() throws {
         let divider = try #require(full().divider)
-        #expect(divider.room == 1000)
-        #expect(divider.bounds == 100...700)
-        #expect(divider.spaceLength == 300)
+        expectEqual(divider.room, 1000)
+        expectEqual(divider.bounds, 100...700)
+        expectEqual(divider.spaceLength, 300)
         var shelf = KiwiShelf()
         shelf.itemGap = 0
         let fits = ShelfArrangement.arrange(
@@ -52,21 +52,21 @@ struct ShelfDividerDragTests {
     func dragFollowsTheDivider() throws {
         let divider = try #require(full().divider)
         // Spaces first: dragging toward the end grows the Spaces.
-        #expect(divider.minimum(afterDragging: 100) == 40)
-        #expect(divider.minimum(afterDragging: -50) == 25)
+        expectEqual(divider.minimum(afterDragging: 100), 40)
+        expectEqual(divider.minimum(afterDragging: -50), 25)
         let flipped = try #require(full(order: .appsFirst).divider)
-        #expect(flipped.minimum(afterDragging: -100) == 40)
-        #expect(flipped.minimum(afterDragging: 50) == 25)
+        expectEqual(flipped.minimum(afterDragging: -100), 40)
+        expectEqual(flipped.minimum(afterDragging: 50), 25)
     }
 
     @Test("A drag stops at the need, the floor and the range")
     func dragClamps() throws {
         let divider = try #require(full().divider)
         // Past the Space Bar's need (700 of 1000).
-        #expect(divider.minimum(afterDragging: 900) == 70)
+        expectEqual(divider.minimum(afterDragging: 900), 70)
         // Below the hard floor (100): the raw share; the setting's
         // own clamp takes it to 20 % (managerWritesTheSetting).
-        #expect(divider.minimum(afterDragging: -900) == 10)
+        expectEqual(divider.minimum(afterDragging: -900), 10)
     }
 
     /// A drag moves the minimum only where it moves the line. A
@@ -93,21 +93,21 @@ struct ShelfDividerDragTests {
         // Held by the App Bar's need: 800 drawn, floor 300.
         let held = try arrange(1200, 200)
         #expect(held.spaceLength == 800 && held.free == 800)
-        #expect(held.minimum(afterDragging: 0) == 30)
-        #expect(held.minimum(afterDragging: -50) == 30)
-        #expect(held.minimum(afterDragging: 50) == 85)
+        expectEqual(held.minimum(afterDragging: 0), 30)
+        expectEqual(held.minimum(afterDragging: -50), 30)
+        expectEqual(held.minimum(afterDragging: 50), 85)
         // At the Space Bar's need: growing moves nothing.
         shelf.minimum = 60
         let ceiling = try arrange(400, 900)
-        #expect(ceiling.spaceLength == 400)
-        #expect(ceiling.minimum(afterDragging: 50) == 60)
-        #expect(ceiling.minimum(afterDragging: -50) == 35)
+        expectEqual(ceiling.spaceLength, 400)
+        expectEqual(ceiling.minimum(afterDragging: 50), 60)
+        expectEqual(ceiling.minimum(afterDragging: -50), 35)
         // At the hard floor: shrinking moves nothing.
         shelf.minimum = 20
         let floor = try arrange(700, 900)
-        #expect(floor.spaceLength == 250)
-        #expect(floor.minimum(afterDragging: -50) == 20)
-        #expect(floor.minimum(afterDragging: 50) == 30)
+        expectEqual(floor.spaceLength, 250)
+        expectEqual(floor.minimum(afterDragging: -50), 20)
+        expectEqual(floor.minimum(afterDragging: 50), 30)
     }
 
     private func mouse(
@@ -149,25 +149,25 @@ struct ShelfDividerDragTests {
         handle.mouseDragged(with: try mouse(.leftMouseDragged, x: 350))
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 400))
         handle.range = found
-        #expect(reports.map(\.0) == [35, 40])
-        #expect(reports.map(\.1) == [false, true])
+        expectEqual(reports.map(\.0), [35, 40])
+        expectEqual(reports.map(\.1), [false, true])
         handle.mouseDown(with: try mouse(.leftMouseDown, x: 400, clicks: 2))
-        #expect(resets == 1)
+        expectEqual(resets, 1)
         // A drag after a reset needs a fresh press.
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 500))
-        #expect(reports.count == 2)
+        expectEqual(reports.count, 2)
         // Out and back to the press: the release restores the
         // minimum the press found, not the step's.
         handle.mouseDown(with: try mouse(.leftMouseDown, x: 300))
         handle.mouseDragged(with: try mouse(.leftMouseDragged, x: 360))
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 300))
-        #expect(reports.suffix(2).map(\.0) == [36, 30])
-        #expect(reports.last?.1 == true)
+        expectEqual(reports.suffix(2).map(\.0), [36, 30])
+        expectEqual(reports.last?.1, true)
         reports.removeLast(2)
         // A click that never moves commits nothing.
         handle.mouseDown(with: try mouse(.leftMouseDown, x: 400))
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 400))
-        #expect(reports.count == 2)
+        expectEqual(reports.count, 2)
     }
 
     /// On a vertical shelf the run grows downward while window
@@ -198,7 +198,7 @@ struct ShelfDividerDragTests {
         }
         handle.mouseDown(with: try at(500, .leftMouseDown))
         handle.mouseDragged(with: try at(400, .leftMouseDragged))
-        #expect(reports == [40])
+        expectEqual(reports, [40])
     }
 
     @Test("The grip shows over the line only while the shelf is full")
@@ -237,8 +237,8 @@ struct ShelfDividerDragTests {
             divider: full().divider
         )
         #expect(!overlay.handle.isHidden)
-        #expect(overlay.handle.frame.midX == overlay.divider.frame.midX)
-        #expect(overlay.handle.frame.height == 30)
+        expectEqual(overlay.handle.frame.midX, overlay.divider.frame.midX)
+        expectEqual(overlay.handle.frame.height, 30)
         overlay.hide()
     }
 
@@ -270,8 +270,8 @@ struct ShelfDividerDragTests {
         )
         overlay.handle.onMinimum(42, false)
         overlay.handle.onReset()
-        #expect(reports.map(\.0) == [42, KiwiShelf.resetMinimum])
-        #expect(reports.map(\.1) == [false, true])
+        expectEqual(reports.map(\.0), [42, KiwiShelf.resetMinimum])
+        expectEqual(reports.map(\.1), [false, true])
         overlay.hide()
     }
 
@@ -281,13 +281,13 @@ struct ShelfDividerDragTests {
     func managerWritesTheSetting() {
         let core = makeTestCore()
         core.shelves.onMinimum(45, false)
-        #expect(core.tiler.settings.kiwishelf.minimum == 45)
+        expectEqual(core.tiler.settings.kiwishelf.minimum, 45)
         core.shelves.onMinimum(55, true)
-        #expect(core.tiler.settings.kiwishelf.minimum == 55)
+        expectEqual(core.tiler.settings.kiwishelf.minimum, 55)
         // The setting's own clamp: a raw share past the range.
         core.shelves.onMinimum(10, true)
-        #expect(core.tiler.settings.kiwishelf.minimum == 20)
+        expectEqual(core.tiler.settings.kiwishelf.minimum, 20)
         core.shelves.onMinimum(KiwiShelf.resetMinimum, true)
-        #expect(core.tiler.settings.kiwishelf.minimum == 30)
+        expectEqual(core.tiler.settings.kiwishelf.minimum, 30)
     }
 }

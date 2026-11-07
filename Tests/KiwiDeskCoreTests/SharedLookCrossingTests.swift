@@ -53,8 +53,8 @@ struct SharedLookCrossingTests {
         core.prepareSharedLook()
         load("Work", core)
         let work = try core.profiles.read(name: "Work")
-        #expect(core.sharedLook == LookBody(of: work.settings))
-        #expect(core.guiConfigStore.load()?.look == core.sharedLook)
+        expectEqual(core.sharedLook, LookBody(of: work.settings))
+        expectEqual(core.guiConfigStore.load()?.look, core.sharedLook)
         #expect(work.look == nil)
         #expect(try core.profiles.read(name: "Twin").look == nil)
         #expect(try core.profiles.read(name: "Odd").look == .own)
@@ -83,7 +83,7 @@ struct SharedLookCrossingTests {
         core.prepareSharedLook()
         load("Work", core)
         load("Odd", core)
-        #expect(core.tiler.settings.kiwishelf.fillColor == "#0A0B0C")
+        expectEqual(core.tiler.settings.kiwishelf.fillColor, "#0A0B0C")
     }
 
     @Test("a profile nobody stored lends nothing")

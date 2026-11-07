@@ -59,9 +59,9 @@ struct FloatCentreCommandTests {
         let core = makeCore { frames[$0] = $1 }
         #expect(core.execute("center_floating").isSuccess)
         let frame = try #require(frames[one])
-        #expect(frame.size == start.size)
-        #expect(frame.midX == screen.midX)
-        #expect(frame.midY == screen.midY)
+        expectEqual(frame.size, start.size)
+        expectEqual(frame.midX, screen.midX)
+        expectEqual(frame.midY, screen.midY)
     }
 
     /// The size base outranks the echo: a size just commanded and
@@ -78,7 +78,7 @@ struct FloatCentreCommandTests {
             animated: false
         )
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.size == big)
+        expectEqual(frames[one]?.size, big)
     }
 
     @Test("an oversized window pins top and left and is not shrunk")
@@ -88,7 +88,7 @@ struct FloatCentreCommandTests {
         let huge = CGRect(x: 40, y: 40, width: 2000, height: 1400)
         core.state.apply(.windowResized(one, huge))
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one] == CGRect(origin: .zero, size: huge.size))
+        expectEqual(frames[one], CGRect(origin: .zero, size: huge.size))
     }
 
     @Test("one oversized axis pins alone; the other still centres")
@@ -97,14 +97,14 @@ struct FloatCentreCommandTests {
             CGSize(width: 400, height: 1400),
             in: screen
         )
-        #expect(tall.minY == screen.minY)
-        #expect(tall.midX == screen.midX)
+        expectEqual(tall.minY, screen.minY)
+        expectEqual(tall.midX, screen.midX)
         let wide = FloatPlacement.centered(
             CGSize(width: 2000, height: 300),
             in: screen
         )
-        #expect(wide.minX == screen.minX)
-        #expect(wide.midY == screen.midY)
+        expectEqual(wide.minX, screen.minX)
+        expectEqual(wide.midY, screen.midY)
     }
 
     /// Named on neither toggle but `on_state_change`: off, the write
@@ -116,7 +116,7 @@ struct FloatCentreCommandTests {
         core.tiler.settings.animations.onStateChange = false
         #expect(core.execute("center_floating").isSuccess)
         #expect(frames[one] == nil)
-        #expect(core.tiler.recentInstantTarget(one)?.midX == screen.midX)
+        expectEqual(core.tiler.recentInstantTarget(one)?.midX, screen.midX)
     }
 
     @Test("a bar's push leaves a near edge where the region has it")
@@ -161,9 +161,9 @@ struct FloatCentreCommandTests {
         core.borders.onResizeRefusal = { cues.append($0) }
         frames.removeAll()
         #expect(!core.execute("center_floating").isSuccess)
-        #expect(cues == [.moveNeedsFloat(one)])
+        expectEqual(cues, [.moveNeedsFloat(one)])
         #expect(frames[one] == nil)
-        #expect(core.state.windows[one]?.isFloating == false)
+        expectEqual(core.state.windows[one]?.isFloating, false)
     }
 
     /// Full screen is asked first, or a tiled full-screen window
@@ -178,7 +178,7 @@ struct FloatCentreCommandTests {
             core.state.apply(.windowFullscreenChanged(one, isFullscreen: true))
             frames.removeAll()
             #expect(!core.execute("center_floating").isSuccess)
-            #expect(cues == [.fullscreenCannotMove(one)])
+            expectEqual(cues, [.fullscreenCannotMove(one)])
             #expect(frames[one] == nil)
         }
     }
@@ -193,7 +193,7 @@ struct FloatCentreCommandTests {
         )
         frames.removeAll()
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.midX == screen.midX)
+        expectEqual(frames[one]?.midX, screen.midX)
     }
 
     @Test("float_placement keep still centres, memory untouched")
@@ -207,9 +207,9 @@ struct FloatCentreCommandTests {
         )
         core.state.floatFrames[one] = saved
         #expect(core.execute("center_floating").isSuccess)
-        #expect(frames[one]?.midX == screen.midX)
-        #expect(frames[one]?.size == start.size)
-        #expect(core.state.floatFrames[one] == saved)
+        expectEqual(frames[one]?.midX, screen.midX)
+        expectEqual(frames[one]?.size, start.size)
+        expectEqual(core.state.floatFrames[one], saved)
     }
 
     @Test("a second press on a centred window writes nothing")
@@ -223,7 +223,7 @@ struct FloatCentreCommandTests {
             )
         )
         #expect(core.execute("center_floating").isSuccess)
-        #expect(writes == 0)
+        expectEqual(writes, 0)
     }
 
     @Test("a drag holding the window stands the verb down")
@@ -271,6 +271,6 @@ struct FloatCentreCommandTests {
             $0.focused = one
         }
         #expect(core.execute("center_floating").isSuccess)
-        #expect(core.state.workspaces[space]?.maximized == tile)
+        expectEqual(core.state.workspaces[space]?.maximized, tile)
     }
 }

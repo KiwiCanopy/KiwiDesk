@@ -89,7 +89,7 @@ struct EdgeBandWriteTests {
     @Test("A frame ending near a screen's bottom names its band")
     func screenNearTheBottom() {
         let near = { EdgeBandWrite.band(for: $0, among: [self.band]) }
-        #expect(near(slot) == band)
+        expectEqual(near(slot), band)
         #expect(near(slot.offsetBy(dx: 0, dy: -200)) == nil)
         #expect(near(slot.offsetBy(dx: 0, dy: 100)) == nil)
         let beside = EdgeBand(
@@ -102,14 +102,14 @@ struct EdgeBandWriteTests {
 
     @Test("A shrink lifts the current frame clear of the band")
     func shrinkLifts() {
-        #expect(lift(slot, from: start) == 1117 - EdgeBandWrite.band - 499)
+        expectEqual(lift(slot, from: start), 1117 - EdgeBandWrite.band - 499)
     }
 
     @Test("A lift never puts the window lower than its target")
     func liftStopsAtTheTarget() {
         let target = CGRect(x: 16, y: 500, width: 840, height: 300)
         let current = CGRect(x: 16, y: 790, width: 840, height: 320)
-        #expect(lift(target, from: current) == 500)
+        expectEqual(lift(target, from: current), 500)
     }
 
     /// The un-maximize that hung a full-width window over the
@@ -118,8 +118,8 @@ struct EdgeBandWriteTests {
     func liftStaysOnTheScreen() {
         let wide = CGRect(x: 0, y: 600, width: 1728, height: 501)
         let lifted = origin(slot.offsetBy(dx: 856, dy: 0), from: wide)
-        #expect(lifted?.x == 0)
-        #expect(lifted?.y == 1117 - EdgeBandWrite.band - 501)
+        expectEqual(lifted?.x, 0)
+        expectEqual(lifted?.y, 1117 - EdgeBandWrite.band - 501)
     }
 
     @Test("A size write ending clear of the band is not lifted")
@@ -135,10 +135,10 @@ struct EdgeBandWriteTests {
         let current = CGRect(x: -1000, y: 300, width: 840, height: 499)
         #expect(other.contains(current))
         let above = CGRect(x: 16, y: -800, width: 840, height: 499)
-        #expect(lift(slot, from: above) == 1117 - EdgeBandWrite.band - 499)
+        expectEqual(lift(slot, from: above), 1117 - EdgeBandWrite.band - 499)
         #expect(lift(slot, from: current) == 1117 - EdgeBandWrite.band - 499)
         // On the target's screen, not left at the other one's x.
-        #expect(origin(slot, from: current)?.x == slot.minX)
+        expectEqual(origin(slot, from: current)?.x, slot.minX)
     }
 
     @Test("Nothing refused, nothing lifted")
@@ -163,7 +163,7 @@ struct EdgeBandWriteTests {
             nearEdgeOf: nil,
             writer: app.writer
         )
-        #expect(app.frame.withLock { $0.height } == 499)
+        expectEqual(app.frame.withLock { $0.height }, 499)
     }
 
     @Test("The lifted write lands the asked frame")
@@ -175,7 +175,7 @@ struct EdgeBandWriteTests {
             nearEdgeOf: band,
             writer: app.writer
         )
-        #expect(app.frame.withLock { $0 } == slot)
+        expectEqual(app.frame.withLock { $0 }, slot)
         #expect(
             app.calls.withLock { $0 } == ["read", "position", "frame"]
         )
@@ -227,7 +227,7 @@ struct EdgeBandWriteTests {
     func applierWritesThroughTheBand(door: Door) async throws {
         let app = RefusingApp(start, screenBottom: screen.maxY)
         try await send(slot, through: door, makeApplier(app), app)
-        #expect(app.frame.withLock { $0 } == slot)
+        expectEqual(app.frame.withLock { $0 }, slot)
     }
 
     /// The app grew its own window back after a landed ask, and
@@ -243,7 +243,7 @@ struct EdgeBandWriteTests {
         try await send(slot, through: door, applier, app)
         app.frame.withLock { $0 = start }
         try await send(slot, through: door, applier, app)
-        #expect(app.frame.withLock { $0 } == slot)
+        expectEqual(app.frame.withLock { $0 }, slot)
     }
 
     /// A sized write merged into a held position-only one keeps
@@ -260,7 +260,7 @@ struct EdgeBandWriteTests {
         for _ in 0..<500 where app.calls.withLock({ $0.isEmpty }) {
             try await Task.sleep(for: .milliseconds(10))
         }
-        #expect(app.frame.withLock { $0 } == slot)
+        expectEqual(app.frame.withLock { $0 }, slot)
     }
 
     @Test("A position-only frame merged into a sized one keeps its band")
@@ -276,8 +276,8 @@ struct EdgeBandWriteTests {
             .init(element: element, frame: slot, setSize: false)
         )
         let entry = pending.take(id)
-        #expect(entry?.setSize == true)
-        #expect(entry?.band == band)
+        expectEqual(entry?.setSize, true)
+        expectEqual(entry?.band, band)
     }
 
     @Test("A merge drops a waiting band its newer frame left")
@@ -304,7 +304,7 @@ struct EdgeBandWriteTests {
             id,
             .init(element: element, frame: taller, setSize: true)
         )
-        #expect(pending.take(id)?.band == band)
+        expectEqual(pending.take(id)?.band, band)
     }
 
     @Test("A taller sized frame merged into a held shrink keeps its band")
@@ -320,7 +320,7 @@ struct EdgeBandWriteTests {
             Issue.record("the staged write was not released")
             return
         }
-        #expect(entry.band == band)
+        expectEqual(entry.band, band)
     }
 
     @Test("A write far from any bottom edge reads nothing")
@@ -331,13 +331,13 @@ struct EdgeBandWriteTests {
             screenBottom: screen.maxY
         )
         try await send(high, through: .instant, makeApplier(app), app)
-        #expect(app.calls.withLock { $0 } == ["frame"])
+        expectEqual(app.calls.withLock { $0 }, ["frame"])
     }
 
     @Test("The engine hands the applier its screen frames")
     func engineWiresTheScreens() {
         let engine = TilingEngine()
         engine.allScreenFrames = { [screen] in [screen] }
-        #expect(engine.applier.screenFrames() == [screen])
+        expectEqual(engine.applier.screenFrames(), [screen])
     }
 }

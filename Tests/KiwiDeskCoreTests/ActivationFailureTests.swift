@@ -49,7 +49,7 @@ struct ActivationFailureTests {
         manager.bind(granted, ref: 1)
         manager.bind(denied, ref: 2)
 
-        #expect(manager.activationFailures == [denied])
+        expectEqual(manager.activationFailures, [denied])
     }
 
     @Test("The next successful activation clears failures")
@@ -59,7 +59,7 @@ struct ActivationFailureTests {
         let denied = try #require(KeyCombo.parse("cmd+q"))
         registrar.deniedKeyCodes = [denied.keyCode]
         manager.bind(denied, ref: 1)
-        #expect(manager.activationFailures == [denied])
+        expectEqual(manager.activationFailures, [denied])
 
         // The system frees the combo (or the user rebinds);
         // re-activating must not report a stale failure.

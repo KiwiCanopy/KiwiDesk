@@ -97,11 +97,11 @@ struct KeybindingConflictsTests {
             in: layers,
             distinguishingSides: false
         )
-        #expect(list.count == 1)
-        #expect(list[0].binding.label == "Close")
+        expectEqual(list.count, 1)
+        expectEqual(list[0].binding.label, "Close")
         // The case, never its English name (#96): Core cannot
         // reach `L()`, so the GUI resolves the display string.
-        #expect(list[0].target == .systemShortcut(.closeWindow))
+        expectEqual(list[0].target, .systemShortcut(.closeWindow))
     }
 
     @Test("conflicts(in:) names an intra-layer duplicate")
@@ -127,12 +127,12 @@ struct KeybindingConflictsTests {
             in: layers,
             distinguishingSides: false
         )
-        #expect(list.count == 2)
+        expectEqual(list.count, 2)
         // Each side carries the BINDING; the GUI names it (#2116).
-        #expect(list[0].binding == layers[0].bindings[0])
-        #expect(list[0].target == .otherBinding(layers[0].bindings[1]))
-        #expect(list[1].binding == layers[0].bindings[1])
-        #expect(list[1].target == .otherBinding(layers[0].bindings[0]))
+        expectEqual(list[0].binding, layers[0].bindings[0])
+        expectEqual(list[0].target, .otherBinding(layers[0].bindings[1]))
+        expectEqual(list[1].binding, layers[0].bindings[1])
+        expectEqual(list[1].target, .otherBinding(layers[0].bindings[0]))
     }
 
     /// Core picks no name for a label-less row: it hands the GUI
@@ -152,8 +152,8 @@ struct KeybindingConflictsTests {
             in: layers,
             distinguishingSides: false
         )
-        #expect(list.count == 1)
-        #expect(list[0].binding == layers[0].bindings[0])
+        expectEqual(list.count, 1)
+        expectEqual(list[0].binding, layers[0].bindings[0])
     }
 
     @Test("conflicts(in:) flags an unparseable combo")
@@ -174,8 +174,8 @@ struct KeybindingConflictsTests {
             in: layers,
             distinguishingSides: false
         )
-        #expect(list.count == 1)
-        #expect(list[0].binding.label == "Bad")
-        #expect(list[0].target == .unrecognized)
+        expectEqual(list.count, 1)
+        expectEqual(list[0].binding.label, "Bad")
+        expectEqual(list[0].target, .unrecognized)
     }
 }

@@ -83,8 +83,8 @@ struct ChangelogEntryKeysTests {
     @Test("a typed release carries section types and heads")
     func typedKeysWritten() throws {
         let typed = try entry(tag: "v2.0.0", body: Self.typedBody)
-        #expect(types(typed) == ["new", "scripting"])
-        #expect(typed["heads"] as? String == "settings carry over.")
+        expectEqual(types(typed), ["new", "scripting"])
+        expectEqual(typed["heads"] as? String, "settings carry over.")
     }
 
     /// The version is read off the tag's leading `vX.Y.Z`, so a
@@ -96,7 +96,7 @@ struct ChangelogEntryKeysTests {
             tag: "v2.1.0-rc.1",
             body: Self.typedBody
         )
-        #expect(types(typed) == ["new", "scripting"])
+        expectEqual(types(typed), ["new", "scripting"])
     }
 
     @Test("a release before 2.0.0 carries neither key")

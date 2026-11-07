@@ -92,7 +92,7 @@ struct ShelfRevealVerbPairTests {
             #expect(!core.appBars.shownStrips.isEmpty)
             // Each toggle leaves one line naming its bar.
             let reveals = lines.filter { $0.hasPrefix("shelf reveal: ") }
-            #expect(reveals.count == 2)
+            expectEqual(reveals.count, 2)
         }
     }
 }

@@ -13,7 +13,7 @@ struct AppFontResourceTests {
         let map = try #require(AppFontGlyphMap.loadBundled())
         #expect(map.exact.count > 100)
         // Ligatures are :name: tokens; spot-check a stable app.
-        #expect(map.ligature(for: "Safari")?.hasPrefix(":") == true)
+        expectEqual(map.ligature(for: "Safari")?.hasPrefix(":"), true)
     }
 
     @Test("Localized aliases are plain keys in the same map")
@@ -62,7 +62,7 @@ struct AppFontResourceTests {
     @Test("Bundled map and TTF both carry the KiwiDesk glyph")
     func kiwiDeskGlyph() throws {
         let map = AppFontGlyphMap.loadBundled()
-        #expect(map?.ligature(for: "KiwiDesk") == ":kiwidesk:")
+        expectEqual(map?.ligature(for: "KiwiDesk"), ":kiwidesk:")
         let font = try #require(AppFont.font(size: 12))
         // A present ligature collapses the whole token into one
         // glyph; a missing one leaves the characters unshaped.
@@ -72,7 +72,7 @@ struct AppFontResourceTests {
                 attributes: [.font: font]
             )
         )
-        #expect(CTLineGetGlyphCount(line) == 1)
+        expectEqual(CTLineGetGlyphCount(line), 1)
     }
 }
 
@@ -180,7 +180,7 @@ struct AppFontResolverTests {
             _ = resolver.glyph(forAppName: "B", source: .appFont)
         }
         _ = resolver.glyph(forAppName: "C", source: .appFont)
-        #expect(count.value == 1)
+        expectEqual(count.value, 1)
     }
 
     @Test("Missing map degrades to image-only, never crashes")

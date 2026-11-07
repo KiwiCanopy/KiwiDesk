@@ -81,15 +81,15 @@ struct ListWindowsTests {
         let seen = try entries(core)
         for id: UInt32 in [1, 2] {
             let entry = try #require(seen[id])
-            #expect(entry["shown"] == .bool(true))
-            #expect(entry["visibility"] == .string("visible"))
+            expectEqual(entry["shown"], .bool(true))
+            expectEqual(entry["visibility"], .string("visible"))
             #expect(hasRect(entry["frame"]))
-            #expect(entry["space_id"] == .string("1"))
-            #expect(entry["effective_float"] == .bool(false))
+            expectEqual(entry["space_id"], .string("1"))
+            expectEqual(entry["effective_float"], .bool(false))
             #expect(entry["title"] == .string("Title \(id)"))
         }
-        #expect(seen[1]?["focused"] == .bool(true))
-        #expect(seen[2]?["focused"] == .bool(false))
+        expectEqual(seen[1]?["focused"], .bool(true))
+        expectEqual(seen[2]?["focused"], .bool(false))
     }
 
     @Test("Monocle: the back member reads hidden")
@@ -100,9 +100,9 @@ struct ListWindowsTests {
         )
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try entries(core)
-        #expect(seen[1]?["visibility"] == .string("visible"))
-        #expect(seen[2]?["visibility"] == .string("hidden"))
-        #expect(seen[2]?["shown"] == .bool(true))
+        expectEqual(seen[1]?["visibility"], .string("visible"))
+        expectEqual(seen[2]?["visibility"], .string("hidden"))
+        expectEqual(seen[2]?["shown"], .bool(true))
     }
 
     @Test("A float reports its own frame and floats")
@@ -113,8 +113,8 @@ struct ListWindowsTests {
         )
         core.state.apply(.windowFocused(WindowID(1)))
         let entry = try #require(try entries(core)[2])
-        #expect(entry["effective_float"] == .bool(true))
-        #expect(entry["shown"] == .bool(true))
+        expectEqual(entry["effective_float"], .bool(true))
+        expectEqual(entry["shown"], .bool(true))
         #expect(
             entry["frame"]
                 == KiwiCore.json(
@@ -132,10 +132,10 @@ struct ListWindowsTests {
         core.state.apply(.windowCreated(window(3)))
         core.state.workspaces.add(WindowID(3), to: "2")
         let entry = try #require(try entries(core)[3])
-        #expect(entry["space_id"] == .string("2"))
-        #expect(entry["shown"] == .bool(false))
-        #expect(entry["frame"] == .null)
-        #expect(entry["visibility"] == .null)
+        expectEqual(entry["space_id"], .string("2"))
+        expectEqual(entry["shown"], .bool(false))
+        expectEqual(entry["frame"], .null)
+        expectEqual(entry["visibility"], .null)
     }
 
     @Test("A Space filter lists that Space's windows alone")

@@ -73,7 +73,7 @@ struct SizeBoundInvalidationTests {
         // the app performs. That contradicts nothing — the
         // ceiling still stands for the 900 ask.
         refused(&learner, asked: answered, answered: answered)
-        #expect(learner.bound(for: w)?.width.first?.answered == 715)
+        expectEqual(learner.bound(for: w)?.width.first?.answered, 715)
     }
 
     @Test("A transient compliance does not clear the candidate")
@@ -184,6 +184,6 @@ struct SizeBoundInvalidationTests {
         refused(&learner, asked: asked, answered: answered)
         learner.rekey(old: w, new: new)
         #expect(learner.bound(for: w) == nil)
-        #expect(learner.bound(for: new)?.width.first?.answered == 715)
+        expectEqual(learner.bound(for: new)?.width.first?.answered, 715)
     }
 }

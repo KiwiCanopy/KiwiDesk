@@ -41,11 +41,11 @@ struct DeferredTasksTests {
             winner = 2
         }
         let second = owner.task(for: .spaceSettle)
-        #expect(first?.isCancelled == true)
+        expectEqual(first?.isCancelled, true)
         #expect(second != first)
         await first?.value
         await second?.value
-        #expect(winner == 2)
+        expectEqual(winner, 2)
     }
 
     @Test("cancel(_:) prevents the body and clears the slot")
@@ -94,7 +94,7 @@ struct DeferredTasksTests {
             owner.schedule(key, after: .milliseconds(5), body)
         }
         let pending = keys.compactMap { owner.task(for: $0) }
-        #expect(pending.count == keys.count)
+        expectEqual(pending.count, keys.count)
         owner.cancelAll()
         for task in pending {
             await task.value
@@ -128,7 +128,7 @@ struct DeferredTasksTests {
         let settle = core.deferred.task(for: .spaceSettle)
         #expect(settle != nil)
         core.stop()
-        #expect(settle?.isCancelled == true)
+        expectEqual(settle?.isCancelled, true)
         #expect(core.deferred.task(for: .spaceSettle) == nil)
     }
 

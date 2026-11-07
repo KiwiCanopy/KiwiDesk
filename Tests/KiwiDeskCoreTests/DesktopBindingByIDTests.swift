@@ -46,7 +46,7 @@ struct DesktopBindingByIDTests {
         let bound = binding(.init(id: work.id, name: "Work"))
         try core.profiles.rename(from: "Work", to: "Office")
         let pick = try core.boundProfile(of: bound).get()
-        #expect(pick.profile.name == "Office")
+        expectEqual(pick.profile.name, "Office")
     }
 
     @Test("A deleted profile reads as missing, never unreadable")
@@ -61,7 +61,7 @@ struct DesktopBindingByIDTests {
             Issue.record("expected missing, got \(result)")
             return
         }
-        #expect(names == ["Work"])
+        expectEqual(names, ["Work"])
     }
 
     @Test("A file that will not decode stays unreadable")
@@ -215,7 +215,7 @@ struct DesktopBindingByIDTests {
     func verbStoresTheID() throws {
         let core = makeCore()
         let work = try save(core, "Work")
-        #expect(core.bindingEntry(named: "Work").id == work.id)
+        expectEqual(core.bindingEntry(named: "Work").id, work.id)
         #expect(core.bindingEntry(named: "Later").id == nil)
     }
 
@@ -243,8 +243,8 @@ struct DesktopBindingByIDTests {
         core.desktopBindings = pending
         core.promotePendingBindings()
         let stored = core.guiConfigStore.bindingsFile.load().profileBindings
-        #expect(stored[.number(1)]?.entries.first?.id == work.id)
-        #expect(stored[.number(2)]?.entries.first?.id == renamed.id)
+        expectEqual(stored[.number(1)]?.entries.first?.id, work.id)
+        expectEqual(stored[.number(2)]?.entries.first?.id, renamed.id)
         #expect(stored[.number(3)]?.entries.first?.id == nil)
         #expect(core.desktopBindings[.number(1)]?.entries.first?.id == work.id)
     }

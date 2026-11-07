@@ -26,7 +26,7 @@ struct StackTogglePositionTests {
             .top: .bottom, .bottom: .top, .left: .right, .right: .left,
         ]
         for position in Side.allCases {
-            #expect(position.opposite == pairs[position])
+            expectEqual(position.opposite, pairs[position])
             #expect(
                 position.opposite.splitsHorizontally
                     == position.splitsHorizontally
@@ -37,12 +37,12 @@ struct StackTogglePositionTests {
     @Test("the focused Space flips, and a second press flips back")
     func focusedSpaceFlipsBack() throws {
         let core = try KeepFixture.core()
-        #expect(core.state.workspaces.activeSpace == "1")
+        expectEqual(core.state.workspaces.activeSpace, "1")
         #expect(core.execute(verb).isSuccess)
-        #expect(drawn(core) == .left)
-        #expect(core.stackFlip(of: "1") == .left)
+        expectEqual(drawn(core), .left)
+        expectEqual(core.stackFlip(of: "1"), .left)
         #expect(core.execute(verb).isSuccess)
-        #expect(drawn(core) == .right)
+        expectEqual(drawn(core), .right)
         #expect(core.stackFlip(of: "1") == nil)
         #expect(core.desktopMemory.stackFlips.isEmpty)
     }
@@ -52,7 +52,7 @@ struct StackTogglePositionTests {
         let core = try KeepFixture.core()
         let before = core.tiler.settings
         #expect(core.execute(verb).isSuccess)
-        #expect(core.tiler.settings == before)
+        expectEqual(core.tiler.settings, before)
         #expect(core.tiler.settings.stack.override["1"] == nil)
         #expect(core.unsavedLiveSettings() == nil)
         _ = core.execute("stack.set_master_count", args: [.number(3)])
@@ -66,7 +66,7 @@ struct StackTogglePositionTests {
             ).isSuccess
         )
         #expect(core.unsavedLiveSettings() == nil)
-        #expect(drawn(core) == .left)
+        expectEqual(drawn(core), .left)
     }
 
     @Test("the flip reads the drawn side, override before global")
@@ -77,14 +77,14 @@ struct StackTogglePositionTests {
             args: [.string("bottom")]
         )
         #expect(core.execute(verb).isSuccess)
-        #expect(drawn(core) == .top)
+        expectEqual(drawn(core), .top)
         _ = core.execute(
             "stack.set_stack_position_override",
             args: [.string("1"), .string("left")]
         )
-        #expect(drawn(core) == .left)
+        expectEqual(drawn(core), .left)
         #expect(core.execute(verb).isSuccess)
-        #expect(drawn(core) == .right)
+        expectEqual(drawn(core), .right)
     }
 
     @Test("an id names another Space; an unknown one is refused")
@@ -92,11 +92,11 @@ struct StackTogglePositionTests {
         let core = try KeepFixture.core()
         core.state.workspaces.ensureSpace("2", mode: .stack)
         #expect(core.execute(verb, args: [.string("2")]).isSuccess)
-        #expect(drawn(core, "2") == .left)
-        #expect(drawn(core) == .right)
+        expectEqual(drawn(core, "2"), .left)
+        expectEqual(drawn(core), .right)
         let refused = core.execute(verb, args: [.string("9")])
         #expect(!refused.isSuccess)
-        #expect(refused.error == "unknown space: 9")
+        expectEqual(refused.error, "unknown space: 9")
         #expect(core.stackFlip(of: "9") == nil)
     }
 
@@ -118,9 +118,9 @@ struct StackTogglePositionTests {
             session: core.sessionRatios(of: space.id),
             flip: core.stackFlip(of: "1")
         )
-        #expect(params.stackPosition == .left)
-        #expect(params.masterRatio == 0.7)
-        #expect(params.masterCount == 2)
+        expectEqual(params.stackPosition, .left)
+        expectEqual(params.masterRatio, 0.7)
+        expectEqual(params.masterCount, 2)
         let over = try #require(core.tiler.settings.stack.override["1"])
         #expect(over.stackPosition == nil)
     }
@@ -140,8 +140,8 @@ struct StackTogglePositionTests {
             }
             return nil
         }
-        #expect(reported() == "right")
+        expectEqual(reported(), "right")
         #expect(core.execute(verb).isSuccess)
-        #expect(reported() == "left")
+        expectEqual(reported(), "left")
     }
 }

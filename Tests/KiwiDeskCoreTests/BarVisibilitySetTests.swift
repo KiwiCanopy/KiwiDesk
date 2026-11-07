@@ -26,7 +26,7 @@ struct BarVisibilitySetTests {
         for visibility in ShelfVisibility.allCases {
             var written = original
             written.setEveryBarVisibility(visibility)
-            #expect(written.uniformBarVisibility == visibility)
+            expectEqual(written.uniformBarVisibility, visibility)
             written.takeBarVisibility(from: original)
             #expect(written == original, "\(visibility)")
         }
@@ -38,7 +38,7 @@ struct BarVisibilitySetTests {
         source.resizeStep += 7
         var target = TilingSettings()
         target.takeBarVisibility(from: source)
-        #expect(target.resizeStep == TilingSettings().resizeStep)
-        #expect(target.spaceBarStyle.visibility == .hidden)
+        expectEqual(target.resizeStep, TilingSettings().resizeStep)
+        expectEqual(target.spaceBarStyle.visibility, .hidden)
     }
 }

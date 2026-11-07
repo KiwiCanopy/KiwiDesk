@@ -55,9 +55,9 @@ struct MachineLocationLegacyTests {
         try Self.write(kept, machine.appendingPathComponent(kept))
         MachineLocation.adoptLegacyFiles(from: config, into: machine)
         for name in moved {
-            #expect(Self.read(machine.appendingPathComponent(name)) == name)
+            expectEqual(Self.read(machine.appendingPathComponent(name)), name)
         }
-        #expect(Self.read(machine.appendingPathComponent(kept)) == kept)
+        expectEqual(Self.read(machine.appendingPathComponent(kept)), kept)
         for name in [
             ".state_snapshot", ".session_snapshot", "migration-backups",
         ] {
@@ -77,9 +77,9 @@ struct MachineLocationLegacyTests {
         try Self.write("old", config.appendingPathComponent(name))
         try Self.write("new", machine.appendingPathComponent(name))
         MachineLocation.adoptLegacyFiles(from: config, into: machine)
-        #expect(Self.read(machine.appendingPathComponent(name)) == "new")
+        expectEqual(Self.read(machine.appendingPathComponent(name)), "new")
         // A Mac on an older build may share the config folder.
-        #expect(Self.read(config.appendingPathComponent(name)) == "old")
+        expectEqual(Self.read(config.appendingPathComponent(name)), "old")
     }
 
     @Test("one folder for both moves and removes nothing")
@@ -91,7 +91,7 @@ struct MachineLocationLegacyTests {
         try Self.write("kept", snapshot)
         try Self.write("", socket)
         MachineLocation.adoptLegacyFiles(from: config, into: config)
-        #expect(Self.read(snapshot) == "kept")
+        expectEqual(Self.read(snapshot), "kept")
         #expect(FileManager.default.fileExists(atPath: socket.path))
     }
 

@@ -60,7 +60,7 @@ struct SettingsCodingDecodeTests {
             TilingSettings.self,
             from: data
         )
-        #expect(decoded == settings)
+        expectEqual(decoded, settings)
     }
 
     @Test("quit.grid_target_depth clamps into range on decode")
@@ -101,6 +101,6 @@ struct SettingsCodingDecodeTests {
             TilingSettings.self,
             from: Data("{}".utf8)
         )
-        #expect(decoded == TilingSettings())
+        expectEqual(decoded, TilingSettings())
     }
 }

@@ -82,8 +82,8 @@ struct CrashRecoveryTests {
             next.bootTime = { .distantPast }
             next.now = { captured.addingTimeInterval(age) }
             let taken = try #require(next.takeBootSnapshot())
-            #expect(taken.carriesSessions == keeps)
-            #expect(taken.windows.map(\.id) == record.windows.map(\.id))
+            expectEqual(taken.carriesSessions, keeps)
+            expectEqual(taken.windows.map(\.id), record.windows.map(\.id))
         }
     }
 
@@ -176,7 +176,7 @@ struct CrashRecoveryTests {
         third.onLog = { _ in }
         third.loginSession = { 1 }
         third.bootTime = { .distantPast }
-        #expect(third.consumeSession() == stamped(previous))
+        expectEqual(third.consumeSession(), stamped(previous))
     }
 
     @Test("Unclean shutdown restores the autosaved state")
@@ -194,7 +194,7 @@ struct CrashRecoveryTests {
         second.onLog = { _ in }
         second.loginSession = { 1 }
         second.bootTime = { .distantPast }
-        #expect(second.takeBootSnapshot() == stamped(sample))
+        expectEqual(second.takeBootSnapshot(), stamped(sample))
         // Consumed: the autosave that follows is this launch's.
         #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
@@ -217,7 +217,7 @@ struct CrashRecoveryTests {
         second.onLog = { _ in }
         second.loginSession = { 1 }
         second.bootTime = { .distantPast }
-        #expect(second.takeBootSnapshot() == stamped(newer))
+        expectEqual(second.takeBootSnapshot(), stamped(newer))
 
         let (third, thirdDir) = try makeRecovery()
         defer { try? FileManager.default.removeItem(at: thirdDir) }
@@ -236,7 +236,7 @@ struct CrashRecoveryTests {
         fourth.onLog = { _ in }
         fourth.loginSession = { 1 }
         fourth.bootTime = { .distantPast }
-        #expect(fourth.takeBootSnapshot() == stamped(newer))
+        expectEqual(fourth.takeBootSnapshot(), stamped(newer))
     }
 
     @Test("Clean shutdown leaves nothing to restore")
@@ -255,7 +255,7 @@ struct CrashRecoveryTests {
         second.loginSession = { 1 }
         second.bootTime = { .distantPast }
         // The session file is the arrangement; no crash replay.
-        #expect(second.takeBootSnapshot() == stamped(sample))
+        expectEqual(second.takeBootSnapshot(), stamped(sample))
         #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
     }

@@ -84,7 +84,7 @@ struct StickyPersistenceTests {
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isSticky == true)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, true)
     }
 
     @Test("an unsticky close clears a stale remembered intent")
@@ -97,13 +97,13 @@ struct StickyPersistenceTests {
         )
         // Reopen restores sticky; the user then turns it off.
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isSticky == true)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, true)
         state.setSticky(WindowID(2), .none)
         state.apply(
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(3)))
-        #expect(state.windows[WindowID(3)]?.isSticky == false)
+        expectEqual(state.windows[WindowID(3)]?.isSticky, false)
     }
 
     @Test("app termination remembers sticky for relaunch")
@@ -113,7 +113,7 @@ struct StickyPersistenceTests {
         state.setSticky(WindowID(1), .global)
         state.apply(.appTerminated(pid: 100))
         state.apply(.windowCreated(makeWindow(2)))
-        #expect(state.windows[WindowID(2)]?.isSticky == true)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, true)
     }
 
     @Test("a late-loading title still restores the intent")
@@ -125,9 +125,9 @@ struct StickyPersistenceTests {
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2, title: "")))
-        #expect(state.windows[WindowID(2)]?.isSticky == false)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, false)
         state.apply(.windowTitleChanged(WindowID(2), "Doc"))
-        #expect(state.windows[WindowID(2)]?.isSticky == true)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, true)
     }
 
     @Test("empty titles carry no identity to remember")
@@ -139,7 +139,7 @@ struct StickyPersistenceTests {
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2, title: "")))
-        #expect(state.windows[WindowID(2)]?.isSticky == false)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, false)
     }
 
     @Test("the restored intent re-arms for the next cycle")
@@ -155,7 +155,7 @@ struct StickyPersistenceTests {
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(3)))
-        #expect(state.windows[WindowID(3)]?.isSticky == true)
+        expectEqual(state.windows[WindowID(3)]?.isSticky, true)
     }
 
     @Test("untracked ids never record an intent")
@@ -163,7 +163,7 @@ struct StickyPersistenceTests {
         var state = StateCoordinator()
         state.setSticky(WindowID(9), .global)
         state.apply(.windowCreated(makeWindow(9)))
-        #expect(state.windows[WindowID(9)]?.isSticky == false)
+        expectEqual(state.windows[WindowID(9)]?.isSticky, false)
     }
 
     @Test("a rekey carries the sticky flag to the new id")
@@ -174,6 +174,6 @@ struct StickyPersistenceTests {
         state.apply(
             .windowRekeyed(WindowID(1), WindowID(2))
         )
-        #expect(state.windows[WindowID(2)]?.isSticky == true)
+        expectEqual(state.windows[WindowID(2)]?.isSticky, true)
     }
 }

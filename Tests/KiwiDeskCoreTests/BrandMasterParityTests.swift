@@ -63,7 +63,7 @@ struct BrandMasterParityTests {
     func mastersShareGeometry() throws {
         let light = paths(try master("logo_wordmark.svg"))
         let dark = paths(try master("logo_wordmark_dark.svg"))
-        #expect(light.count == dark.count)
+        expectEqual(light.count, dark.count)
         #expect(!light.isEmpty)
         for (index, pair) in zip(light, dark).enumerated() {
             #expect(

@@ -58,9 +58,9 @@ struct ShelfRevealStartTests {
         overlay.revealIn(ordering: true)
         // No mask is rendered off screen per frame: the panel clips.
         #expect(overlay.content.layer?.mask == nil)
-        #expect(motion(overlay.content)?.speed == 0)
+        expectEqual(motion(overlay.content)?.speed, 0)
         #expect(motion(overlay.stripView) == nil)
-        #expect(commits.count == 1)
+        expectEqual(commits.count, 1)
         commits.first?()
         let slide = try #require(motion(overlay.content))
         #expect(slide.speed > 0)
@@ -77,7 +77,7 @@ struct ShelfRevealStartTests {
         let slide = try #require(
             motion(overlay.content) as? CABasicAnimation
         )
-        #expect(slide.keyPath == "position")
+        expectEqual(slide.keyPath, "position")
         #expect(slide.isAdditive)
     }
 
@@ -93,7 +93,7 @@ struct ShelfRevealStartTests {
         let slide = try #require(
             motion(overlay.content) as? CABasicAnimation
         )
-        #expect(slide.keyPath == "position")
+        expectEqual(slide.keyPath, "position")
         #expect(slide.isAdditive)
     }
 
@@ -109,8 +109,8 @@ struct ShelfRevealStartTests {
         let fade = try #require(
             motion(overlay.content) as? CABasicAnimation
         )
-        #expect(fade.keyPath == "opacity")
-        #expect(fade.duration == BarMotion.revealFade)
+        expectEqual(fade.keyPath, "opacity")
+        expectEqual(fade.duration, BarMotion.revealFade)
         #expect(!overlay.growing)
     }
 
@@ -124,7 +124,7 @@ struct ShelfRevealStartTests {
         overlay.afterCommit = { _ in commits += 1 }
         overlay.revealIn()
         #expect((motion(overlay.content)?.speed ?? 0) > 0)
-        #expect(commits == 0)
+        expectEqual(commits, 0)
     }
 
     @Test("The reveal delay ends the hover in the reveal's own pass")
@@ -159,13 +159,13 @@ struct ShelfRevealStartTests {
             )
         ])
         revealer.moved(to: point)
-        #expect(changes.map(\.0) == [true])
+        expectEqual(changes.map(\.0), [true])
         changes = []
         timers.removeFirst()()
         // One redraw, already shown: no pass un-hovers the plate
         // first.
-        #expect(changes.count == 1)
-        #expect(changes.first?.0 == false)
-        #expect(changes.first?.1 == true)
+        expectEqual(changes.count, 1)
+        expectEqual(changes.first?.0, false)
+        expectEqual(changes.first?.1, true)
     }
 }

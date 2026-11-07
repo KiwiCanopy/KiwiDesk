@@ -64,8 +64,8 @@ struct AppBarHalfMoonTests {
         #expect(moon.width >= 5)
         #expect(moon.maxX <= view.iconView.frame.minX)
         #expect(abs(moon.midY - view.iconView.frame.midY) <= 0.5)
-        #expect(view.halfMoon.alphaValue == 1)
-        #expect(view.iconView.alphaValue == 0.4)
+        expectEqual(view.halfMoon.alphaValue, 1)
+        expectEqual(view.iconView.alphaValue, 0.4)
     }
 
     @Test("On a side bar it sits above the icon")
@@ -102,7 +102,7 @@ struct AppBarHalfMoonTests {
         let depth = look.contentDepth(forDepth: Self.depth)
         let view = item(.visible)
         let placed = view.horizontalPlacement(in: view.bounds.size)
-        #expect(placed.moon == AppBarHalfMoon.reserve(contentDepth: depth))
+        expectEqual(placed.moon, AppBarHalfMoon.reserve(contentDepth: depth))
         #expect(
             view.iconView.frame.minX == placed.x + placed.moon
         )

@@ -50,17 +50,17 @@ struct ShelfGeometryTests {
         )
         switch edge {
         case .top:
-            #expect(strip.minY == visible.minY)
-            #expect(remaining.minY == visible.minY + 32)
+            expectEqual(strip.minY, visible.minY)
+            expectEqual(remaining.minY, visible.minY + 32)
         case .bottom:
-            #expect(strip.maxY == visible.maxY)
-            #expect(remaining.maxY == visible.maxY - 32)
+            expectEqual(strip.maxY, visible.maxY)
+            expectEqual(remaining.maxY, visible.maxY - 32)
         case .left:
-            #expect(strip.minX == visible.minX)
-            #expect(remaining.minX == visible.minX + 32)
+            expectEqual(strip.minX, visible.minX)
+            expectEqual(remaining.minX, visible.minX + 32)
         case .right:
-            #expect(strip.maxX == visible.maxX)
-            #expect(remaining.maxX == visible.maxX - 32)
+            expectEqual(strip.maxX, visible.maxX)
+            expectEqual(remaining.maxX, visible.maxX - 32)
         }
     }
 
@@ -98,13 +98,13 @@ struct ShelfGeometryTests {
         }
         var monocle = settings
         monocle.monocle.appBar.visibility = .always
-        #expect(bounds(monocle, .monocle) == reserved)
-        #expect(bounds(monocle, .scrolling) == visible)
-        #expect(bounds(monocle, .bsp) == visible)
+        expectEqual(bounds(monocle, .monocle), reserved)
+        expectEqual(bounds(monocle, .scrolling), visible)
+        expectEqual(bounds(monocle, .bsp), visible)
         var scrolling = settings
         scrolling.scrolling.appBar.visibility = .always
-        #expect(bounds(scrolling, .scrolling) == reserved)
-        #expect(bounds(scrolling, .monocle) == visible)
+        expectEqual(bounds(scrolling, .scrolling), reserved)
+        expectEqual(bounds(scrolling, .monocle), visible)
     }
 
     @Test("Oversized thickness never yields a negative frame")
@@ -114,8 +114,8 @@ struct ShelfGeometryTests {
             edges: [.top],
             shelf: shelf(thickness: 5000)
         )
-        #expect(remaining.height == 0)
-        #expect(remaining.width == visible.width)
+        expectEqual(remaining.height, 0)
+        expectEqual(remaining.width, visible.width)
     }
 
     /// The #242 clamp applies to the shelf's strip: a float
@@ -138,8 +138,8 @@ struct ShelfGeometryTests {
             of: strip,
             edge: .top
         )
-        #expect(clamped.minY == strip.maxY)
-        #expect(clamped.size == float.size)
+        expectEqual(clamped.minY, strip.maxY)
+        expectEqual(clamped.size, float.size)
         // Already-clear frames pass through untouched.
         let clear = CGRect(
             x: 100,

@@ -61,15 +61,15 @@ struct SizeBoundProbeHoldTests {
         // The slot again, and the anchor's answer (a residue).
         let again = carry(&learner, slot)
         let residue = carry(&learner, held)
-        #expect(again?.size == CGSize(width: 380, height: probed))
-        #expect(residue?.size == CGSize(width: 380, height: probed))
-        #expect(again?.fresh == false)
-        #expect(again?.alreadyOut == true)
+        expectEqual(again?.size, CGSize(width: 380, height: probed))
+        expectEqual(residue?.size, CGSize(width: 380, height: probed))
+        expectEqual(again?.fresh, false)
+        expectEqual(again?.alreadyOut, true)
         // A neighbour's floor widened the column: the width
         // follows the layout, the height stays out.
         let wider = carry(&learner, CGSize(width: 400, height: 550))
-        #expect(wider?.size == CGSize(width: 400, height: probed))
-        #expect(wider?.alreadyOut == false)
+        expectEqual(wider?.size, CGSize(width: 400, height: probed))
+        expectEqual(wider?.alreadyOut, false)
         // A span the anchor does not answer carries nothing.
         let taller = carry(&learner, CGSize(width: 380, height: 700))
         #expect(taller == nil)
@@ -100,7 +100,7 @@ struct SizeBoundProbeHoldTests {
             settledRead: true
         )
         #expect(settled.answeredHeldProbe)
-        #expect(learner.bound(for: w)?.minHeight == 550)
+        expectEqual(learner.bound(for: w)?.minHeight, 550)
         let after = carry(&learner, held)
         #expect(after == nil)
     }
@@ -122,7 +122,7 @@ struct SizeBoundProbeHoldTests {
         #expect(!answer.performedProbe)
         #expect(answer.owesPlacement)
         // Answered: nothing is out any more, so no carry follows.
-        #expect(learner.probes[w]?.height.pending?.isOut == false)
+        expectEqual(learner.probes[w]?.height.pending?.isOut, false)
         let next = carry(&learner, slot)
         #expect(next?.fresh != false)
     }
@@ -151,7 +151,7 @@ struct SizeBoundProbeHoldTests {
         // re-issue rather than retiring the probe.
         learner.observe(w, currentSize: held, settledRead: true)
         let reissue = carry(&learner, slot)
-        #expect(reissue?.fresh == true)
+        expectEqual(reissue?.fresh, true)
     }
 
     @Test("The re-issue is carried too, and pairs once answered")
@@ -178,9 +178,9 @@ struct SizeBoundProbeHoldTests {
         // Before its answer it is carried, neither re-issued nor
         // retired.
         let early = carry(&learner, slot)
-        #expect(early?.fresh == false)
+        expectEqual(early?.fresh, false)
         learner.observe(w, currentSize: held, settledRead: true)
-        #expect(learner.bound(for: w)?.minHeight == 550)
+        expectEqual(learner.bound(for: w)?.minHeight, 550)
     }
 
     @Test("A new issue on one axis carries the other's issue out")
@@ -198,7 +198,7 @@ struct SizeBoundProbeHoldTests {
         let issue = try #require(taken)
         #expect(issue.fresh)
         let width = 336 - SizeBoundLearner.probeDistance
-        #expect(issue.size == CGSize(width: width, height: probed))
+        expectEqual(issue.size, CGSize(width: width, height: probed))
     }
 
     @Test("A width ceiling's carried answer is owed too")
@@ -225,14 +225,14 @@ struct SizeBoundProbeHoldTests {
             target: answered,
             keepsIssueOut: true
         )
-        #expect(bent?.size.width == issue.size.width)
+        expectEqual(bent?.size.width, issue.size.width)
         let answer = learner.observeAnswer(
             w,
             currentSize: answered,
             settledRead: true
         )
         #expect(answer.answeredHeldProbe)
-        #expect(learner.bound(for: w)?.maxWidth == 715)
+        expectEqual(learner.bound(for: w)?.maxWidth, 715)
     }
 
     @Test("The question out is in place only for the frame it served")
@@ -251,15 +251,15 @@ struct SizeBoundProbeHoldTests {
         // answer's size: a frame the issue has not served yet.
         let residue = CGRect(x: -374, y: 790, width: 380, height: 550)
         let first = serve(residue)
-        #expect(first?.sameQuestion == true)
-        #expect(first?.alreadyOut == false)
+        expectEqual(first?.sameQuestion, true)
+        expectEqual(first?.alreadyOut, false)
         // The same frame again: the question is out, in place.
         let again = serve(residue)
-        #expect(again?.alreadyOut == true)
+        expectEqual(again?.alreadyOut, true)
         // The residue's slot moved (a pan, a swap): asked there.
         let moved = serve(residue.offsetBy(dx: 0, dy: 332))
-        #expect(moved?.sameQuestion == true)
-        #expect(moved?.alreadyOut == false)
+        expectEqual(moved?.sameQuestion, true)
+        expectEqual(moved?.alreadyOut, false)
     }
 
     @Test("A new issue starts its own re-send budget")
@@ -279,11 +279,11 @@ struct SizeBoundProbeHoldTests {
         learner.recordAsk(w, size: CGSize(width: 380, height: 579))
         let resent = carry(&learner, slot)
         learner.recordAsk(w, size: try #require(resent).size)
-        #expect(learner.probes[w]?.height.pending?.resends == 1)
+        expectEqual(learner.probes[w]?.height.pending?.resends, 1)
         // Answered, and re-issued fresh: the budget starts again.
         learner.observe(w, currentSize: held, settledRead: true)
         let second = carry(&learner, slot)
-        #expect(second?.fresh == true)
-        #expect(learner.probes[w]?.height.pending?.resends == 0)
+        expectEqual(second?.fresh, true)
+        expectEqual(learner.probes[w]?.height.pending?.resends, 0)
     }
 }

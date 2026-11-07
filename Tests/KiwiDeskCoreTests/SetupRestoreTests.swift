@@ -205,7 +205,7 @@ struct SetupRestoreTests {
         // The shadow would be invisible until the built-in stopped
         // resolving.
         let names = core.paletteLibrary.userPalettes().map(\.name)
-        #expect(names == ["Fine"])
+        expectEqual(names, ["Fine"])
     }
 
     /// The restore reaches the RUNNING app, not only the disk.
@@ -229,7 +229,7 @@ struct SetupRestoreTests {
     func theRestoreIsApplied() throws {
         let core = makeTestCore()
         try core.guiConfigStore.save(GuiConfig())
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 10)
 
         var config = GuiConfig()
         config.spaces = [SpaceID("work")]
@@ -244,7 +244,7 @@ struct SetupRestoreTests {
             trash: hardDelete
         )
 
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 42)
+        expectEqual(core.tiler.settings.gapsGlobal.outer.top, 42)
     }
 
     @Test("Space modes and pins come back, not just the space list")
@@ -278,7 +278,7 @@ struct SetupRestoreTests {
         #expect(
             core.state.workspaces[SpaceID("play")]?.mode == .grid
         )
-        #expect(core.mainSpaces == [SpaceID("work")])
+        expectEqual(core.mainSpaces, [SpaceID("work")])
     }
 
     @Test("A space named only by its mode is kept, not pruned")

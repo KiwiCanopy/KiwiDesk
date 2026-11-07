@@ -51,7 +51,7 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
                 .done(placed: 4, total: 4),
             ]
         )
-        #expect(core.restorePhase == .done(placed: 4, total: 4))
+        expectEqual(core.restorePhase, .done(placed: 4, total: 4))
     }
 
     @Test(
@@ -91,7 +91,7 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         // Still matched after the settle, but the line has ended,
         // and the bound's close leaves it ended.
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(space(core, 30) == F.hidden)
+        expectEqual(space(core, 30), F.hidden)
         core.closeCrossSessionMatch()
         #expect(
             seen() == [
@@ -99,7 +99,7 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
                 .done(placed: 0, total: 2),
             ]
         )
-        #expect(core.restorePhase == .done(placed: 0, total: 2))
+        expectEqual(core.restorePhase, .done(placed: 0, total: 2))
     }
 
     @Test(
@@ -112,7 +112,7 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         leave(previous([(F.hidden, "com.a", "A")]), in: core)
         arrange(core)
         #expect(seen().isEmpty)
-        #expect(core.restorePhase == .none)
+        expectEqual(core.restorePhase, .none)
     }
 
     @Test(
@@ -127,7 +127,7 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         let other = core.buildProfile(name: "Other", modes: nil)
         core.profiles.becameLive(other, fits: true)
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(seen() == [.placing(placed: 0, total: 1), .none])
+        expectEqual(seen(), [.placing(placed: 0, total: 1), .none])
     }
 
     @Test(
@@ -141,8 +141,8 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
         arrange(core)
         if stop { core.stop() } else { core.discardSavedArrangement() }
-        #expect(seen() == [.placing(placed: 0, total: 1), .none])
-        #expect(core.restorePhase == .none)
+        expectEqual(seen(), [.placing(placed: 0, total: 1), .none])
+        expectEqual(core.restorePhase, .none)
     }
 
     /// A restore belongs to the boot that armed it: one that ended
@@ -156,15 +156,15 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
         arrange(core)
         core.crossSessionSettlePass()
-        #expect(core.restorePhase == .done(placed: 0, total: 1))
+        expectEqual(core.restorePhase, .done(placed: 0, total: 1))
         core.stop()
         // The reset alone: a test core never boots (#2294).
         core.boot.admitsStart = { false }
         core.start()
-        #expect(core.restorePhase == .none)
+        expectEqual(core.restorePhase, .none)
         let seen = recording(core)
         leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
         arrange(core)
-        #expect(seen().last == .placing(placed: 0, total: 1))
+        expectEqual(seen().last, .placing(placed: 0, total: 1))
     }
 }

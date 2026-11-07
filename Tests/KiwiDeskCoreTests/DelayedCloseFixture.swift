@@ -85,7 +85,7 @@ struct DelayedCloseFixture {
         core.deferred.cancel(.focusFollow)
         if follow {
             core.landFocusFollow(successor, on: "2")
-            #expect(core.state.workspaces.activeSpace == "2")
+            expectEqual(core.state.workspaces.activeSpace, "2")
         }
     }
 
@@ -114,14 +114,14 @@ struct DelayedCloseFixture {
     }
 
     func expectReturned(_ core: KiwiCore, _ log: Log) {
-        #expect(core.state.workspaces.activeSpace == "1")
-        #expect(core.activeSpace?.focused == fallback)
+        expectEqual(core.state.workspaces.activeSpace, "1")
+        expectEqual(core.activeSpace?.focused, fallback)
         #expect(log.has("close-return: raising w\(fallback.raw)"))
     }
 
     func expectUntouched(_ core: KiwiCore, _ log: Log) {
-        #expect(core.state.workspaces.activeSpace == "2")
-        #expect(core.activeSpace?.focused == successor)
+        expectEqual(core.state.workspaces.activeSpace, "2")
+        expectEqual(core.activeSpace?.focused, successor)
         #expect(!log.has("close-return: raising"))
         #expect(core.delayedCloseDebt == nil)
     }

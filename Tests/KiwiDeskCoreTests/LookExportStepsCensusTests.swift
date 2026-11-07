@@ -15,14 +15,14 @@ struct LookExportStepsCensusTests {
     @Test("the crossing lifts to the current look format")
     func liftsToCurrentFormat() {
         let top = ConfigMigration.lookExportSteps.map(\.to).max()
-        #expect(top == LookDocument.currentFormat)
+        expectEqual(top, LookDocument.currentFormat)
     }
 
     @Test("entries lift in order, each to a format of its own")
     func entriesAreOrdered() {
         let targets = ConfigMigration.lookExportSteps.map(\.to)
-        #expect(targets == targets.sorted())
-        #expect(Set(targets).count == targets.count)
+        expectEqual(targets, targets.sorted())
+        expectEqual(Set(targets).count, targets.count)
     }
 
     @Test("a file at a format skips the steps below it")
@@ -37,6 +37,6 @@ struct LookExportStepsCensusTests {
             Data(file.utf8),
             from: 2
         )
-        #expect(String(decoding: crossed, as: UTF8.self) == file)
+        expectEqual(String(decoding: crossed, as: UTF8.self), file)
     }
 }

@@ -59,8 +59,8 @@ struct StashOutgoingOnlyTests {
         core.execute("focus_space", args: [.string("2")])
         let c = meter.snapshot(reset: false).counts
         // w1 leaves view and parks; w3 already sits parked.
-        #expect(c.parksIssued == 1)
-        #expect(c.parksSkipped == 1)
+        expectEqual(c.parksIssued, 1)
+        expectEqual(c.parksSkipped, 1)
     }
 
     /// Space 2 is shown and left before its windows' echoes
@@ -95,8 +95,8 @@ struct StashOutgoingOnlyTests {
         }
         // w2 forced over its stale corner by the switch and the
         // settle, then checked; w3 checked throughout.
-        #expect(parks.map(\.0) == [1, 1, 0])
-        #expect(parks.map(\.1) == [1, 1, 2])
+        expectEqual(parks.map(\.0), [1, 1, 0])
+        expectEqual(parks.map(\.1), [1, 1, 2])
     }
 
     @Test("An event pass seeing the departure first leaves it owed")
@@ -108,10 +108,10 @@ struct StashOutgoingOnlyTests {
         _ = meter.snapshot(reset: true)
         core.retile()
         var c = meter.snapshot(reset: true).counts
-        #expect(c.parksIssued == 0)
+        expectEqual(c.parksIssued, 0)
         core.retile(animated: false, pass: .reissue)
         c = meter.snapshot(reset: false).counts
-        #expect(c.parksIssued == 1)
+        expectEqual(c.parksIssued, 1)
     }
 
     @Test("An unanswered ask outranks a corner the state still reads")
@@ -127,8 +127,8 @@ struct StashOutgoingOnlyTests {
         _ = meter.snapshot(reset: true)
         core.retile()
         let c = meter.snapshot(reset: false).counts
-        #expect(c.parksIssued == 1)
-        #expect(c.parksSkipped == 1)
+        expectEqual(c.parksIssued, 1)
+        expectEqual(c.parksSkipped, 1)
     }
 
     @Test("A slide away outranks an older instant park")
@@ -161,8 +161,8 @@ struct StashOutgoingOnlyTests {
         )
         let c = meter.snapshot(reset: false).counts
         engine.animation.cancelAll(snapToTargets: false)
-        #expect(c.parksIssued == 1)
-        #expect(c.parksSkipped == 0)
+        expectEqual(c.parksIssued, 1)
+        expectEqual(c.parksSkipped, 0)
     }
 
     @Test("A park macOS lifted off its line counts as parked")
@@ -197,7 +197,7 @@ struct StashOutgoingOnlyTests {
             )
         }
         let c = meter.snapshot(reset: false).counts
-        #expect(c.parksSkipped == 2)
-        #expect(c.parksIssued == 1)
+        expectEqual(c.parksSkipped, 2)
+        expectEqual(c.parksIssued, 1)
     }
 }

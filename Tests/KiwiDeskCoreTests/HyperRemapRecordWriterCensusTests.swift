@@ -35,7 +35,7 @@ struct HyperRemapRecordWriterCensusTests {
         // A new write in either home is a review question, so
         // both counts are pinned (#2471).
         #expect(writers["OS/HyperKeyRemap.swift"] == 6, "\(writers)")
-        #expect(writers["OS/HyperKeyRemap+Claim.swift"] == 1)
+        expectEqual(writers["OS/HyperKeyRemap+Claim.swift"], 1)
     }
 
     /// A writer can skip `writeWritten(` and store the record

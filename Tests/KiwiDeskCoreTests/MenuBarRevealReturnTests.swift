@@ -27,9 +27,9 @@ struct MenuBarRevealReturnTests {
         let core = F.makeCore()
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
         #expect(lines.contain(F.returnLogNeedle))
-        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+        expectEqual(core.menuBarReveal.debt?.window, WindowID(1))
     }
 
     @Test("The pointer elsewhere makes it an ordinary focus")
@@ -37,7 +37,7 @@ struct MenuBarRevealReturnTests {
         let core = F.makeCore(inStrip: false)
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
         #expect(!lines.contain(F.returnLogNeedle))
     }
 
@@ -56,7 +56,7 @@ struct MenuBarRevealReturnTests {
         )
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
         #expect(!lines.contain(F.returnLogNeedle))
         // The control: the same press in the bar is no choice.
         let bar = F.makeCore()
@@ -66,7 +66,7 @@ struct MenuBarRevealReturnTests {
             reached: nil
         )
         bar.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(bar) == WindowID(1))
+        expectEqual(F.focused(bar), WindowID(1))
         #expect(bar.menuBarReveal.debt != nil)
     }
 
@@ -77,7 +77,7 @@ struct MenuBarRevealReturnTests {
         let core = F.makeCore()
         core.handle(.windowFocused(WindowID(2)))
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
         #expect(core.menuBarReveal.debt != nil)
     }
 
@@ -94,7 +94,7 @@ struct MenuBarRevealReturnTests {
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         core.handle(.windowFocused(WindowID(2)))
         core.handle(.windowFocused(WindowID(3)))
-        #expect(F.focused(core) == WindowID(3))
+        expectEqual(F.focused(core), WindowID(3))
         #expect(core.menuBarReveal.debt == nil)
     }
 
@@ -108,7 +108,7 @@ struct MenuBarRevealReturnTests {
         core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
         #expect(!lines.contain(F.returnLogNeedle))
         #expect(lines.contain("#1345"))
         #expect(core.menuBarReveal.debt == nil)
@@ -117,7 +117,7 @@ struct MenuBarRevealReturnTests {
         shown.windowIsOnScreen = { _ in true }
         shown.desktopMemory.readWindowSpace = { _ in .hosted(10) }
         shown.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(shown) == WindowID(1))
+        expectEqual(F.focused(shown), WindowID(1))
     }
 
     @Test("A foreign anchor is never returned to")
@@ -138,7 +138,7 @@ struct MenuBarRevealReturnTests {
         core.state.workspaces.focus(WindowID(2), in: SpaceID(1))
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(3)))
-        #expect(F.focused(core) == WindowID(3))
+        expectEqual(F.focused(core), WindowID(3))
         #expect(!lines.contain(F.returnLogNeedle))
     }
 
@@ -160,7 +160,7 @@ struct MenuBarRevealReturnTests {
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(4)))
-        #expect(F.focused(core) == WindowID(4))
+        expectEqual(F.focused(core), WindowID(4))
         #expect(!lines.contain(F.returnLogNeedle))
     }
 
@@ -183,12 +183,12 @@ struct MenuBarRevealReturnTests {
         let core = F.makeCore(inStrip: false)
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
         #expect(!lines.contain(F.returnLogNeedle))
         core.statusMenuDidOpen()
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
         #expect(lines.contain(F.returnLogNeedle))
-        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+        expectEqual(core.menuBarReveal.debt?.window, WindowID(1))
     }
 
     /// A report older than the grace was the user's.
@@ -202,7 +202,7 @@ struct MenuBarRevealReturnTests {
         )
         core.wallClock = { late }
         core.statusMenuDidOpen()
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
         #expect(!lines.contain(F.returnLogNeedle))
         #expect(core.menuBarReveal.debt == nil)
     }
@@ -219,8 +219,8 @@ struct MenuBarRevealReturnTests {
         #expect(!lines.contain(F.returnLogNeedle))
         core.statusMenuDidOpen()
         #expect(lines.contain(F.returnLogNeedle))
-        #expect(core.menuBarReveal.debt?.window == WindowID(1))
-        #expect(F.focused(core) == WindowID(1))
+        expectEqual(core.menuBarReveal.debt?.window, WindowID(1))
+        expectEqual(F.focused(core), WindowID(1))
     }
 
     /// A lazy app's duplicate of the declined report (#887) keeps
@@ -233,7 +233,7 @@ struct MenuBarRevealReturnTests {
         core.handle(.windowFocused(WindowID(2)))
         core.statusMenuDidOpen()
         #expect(lines.contain(F.returnLogNeedle))
-        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+        expectEqual(core.menuBarReveal.debt?.window, WindowID(1))
     }
 
     /// A focus command between the report and the open is a
@@ -247,7 +247,7 @@ struct MenuBarRevealReturnTests {
             .now.advanced(by: .seconds(1))
         core.statusMenuDidOpen()
         #expect(core.menuBarReveal.debt == nil)
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
     }
 
     /// A click that reached the revealed window since is a window
@@ -263,7 +263,7 @@ struct MenuBarRevealReturnTests {
         )
         core.statusMenuDidOpen()
         #expect(core.menuBarReveal.debt == nil)
-        #expect(F.focused(core) == WindowID(2))
+        expectEqual(F.focused(core), WindowID(2))
     }
 
     /// The honored other-Space report scheduled the 250 ms Space
@@ -277,7 +277,7 @@ struct MenuBarRevealReturnTests {
         #expect(core.deferred.task(for: .focusFollow) != nil)
         core.statusMenuDidOpen()
         #expect(core.deferred.task(for: .focusFollow) == nil)
-        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+        expectEqual(core.menuBarReveal.debt?.window, WindowID(1))
     }
 
     /// An other-Space repeat reaches the decline branch again (the
@@ -291,7 +291,7 @@ struct MenuBarRevealReturnTests {
         core.handle(.windowFocused(WindowID(2)))
         core.wallClock = { first.addingTimeInterval(0.5) }
         core.handle(.windowFocused(WindowID(2)))
-        #expect(core.menuBarReveal.declined?.armedAt == first)
+        expectEqual(core.menuBarReveal.declined?.armedAt, first)
     }
 
     /// A window honored after the declined report is the user's
@@ -311,7 +311,7 @@ struct MenuBarRevealReturnTests {
         core.handle(.windowFocused(WindowID(2)))
         core.handle(.windowFocused(WindowID(3)))
         core.statusMenuDidOpen()
-        #expect(F.focused(core) == WindowID(3))
+        expectEqual(F.focused(core), WindowID(3))
         #expect(!lines.contain(F.returnLogNeedle))
         #expect(core.menuBarReveal.debt == nil)
     }

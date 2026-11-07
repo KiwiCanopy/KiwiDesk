@@ -84,7 +84,7 @@ struct FloatResizeAccumulationTests {
             core.tiler.recentInstantTarget(WindowID(1))?.width
                 == 550
         )
-        #expect(core.state.windows[WindowID(1)]?.frame.width == 500)
+        expectEqual(core.state.windows[WindowID(1)]?.frame.width, 500)
     }
 
     @Test(

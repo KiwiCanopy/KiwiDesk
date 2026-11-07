@@ -76,7 +76,7 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
         let (core, _) = try core()
         leave(desk(), in: core)
         arrange(core)
-        #expect(space(core, 10) == F.hidden)
+        expectEqual(space(core, 10), F.hidden)
         #expect(
             core.tiler.commandedFrame(of: WindowID(10)) == Self.recorded
         )
@@ -96,7 +96,7 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
         let landed = try #require(
             core.tiler.commandedFrame(of: WindowID(10))
         )
-        #expect(landed.size == column.size)
+        expectEqual(landed.size, column.size)
         #expect(abs(landed.midX - region.midX) < 1)
         #expect(try screen(core).contains(landed))
     }
@@ -115,7 +115,7 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
             in: core
         )
         arrange(core)
-        #expect(space(core, 10) == F.hidden)
+        expectEqual(space(core, 10), F.hidden)
         #expect(core.tiler.stashOriginal(WindowID(10)) == nil)
     }
 }

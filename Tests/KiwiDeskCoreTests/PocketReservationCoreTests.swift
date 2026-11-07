@@ -58,7 +58,7 @@ struct PocketReservationCoreTests {
             before.height - after.height
                 == core.tiler.settings.kiwishelf.hiddenReservation
         )
-        #expect(passes(meter) == 1)
+        expectEqual(passes(meter), 1)
     }
 
     @Test(
@@ -73,8 +73,8 @@ struct PocketReservationCoreTests {
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         core.setAppWide(persisting: false) { $0.pocketCapacity = .several }
-        #expect(core.tiler.layoutBounds(on: screen, for: space) == before)
-        #expect(passes(meter) == 0)
+        expectEqual(core.tiler.layoutBounds(on: screen, for: space), before)
+        expectEqual(passes(meter), 0)
     }
 
     @Test(
@@ -93,7 +93,7 @@ struct PocketReservationCoreTests {
             }
             let spec = try #require(core.pocketPlateSpecs().first)
             #expect(spec.whole == whole, "\(visibility)")
-            #expect(spec.risen == false)
+            expectEqual(spec.risen, false)
         }
     }
 }

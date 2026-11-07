@@ -45,7 +45,7 @@ struct BarPeekCheckTests {
             shelf: KiwiShelf(),
             hidden: 0
         )
-        #expect(listed.labels.map(\.frame) == plain.labels.map(\.frame))
+        expectEqual(listed.labels.map(\.frame), plain.labels.map(\.frame))
         #expect(
             checked.width - size.width
                 == BarPeekBody.Metrics.checkColumn
@@ -71,7 +71,7 @@ struct BarPeekCheckTests {
         )
         let line = BarPeekBody.lineHeight(row.font)
         try #require(row.frame.height > 1.5 * line, "the title wraps")
-        #expect(check.frame.maxX == size.width - BarPeekBody.Metrics.padH)
+        expectEqual(check.frame.maxX, size.width - BarPeekBody.Metrics.padH)
         #expect(check.frame.minX >= row.frame.maxX)
         #expect(check.frame.midY < row.frame.minY + line, "first line")
         // Centred on the first line's caps, never its line box.
@@ -85,7 +85,7 @@ struct BarPeekCheckTests {
         #expect(abs(check.frame.midY - capsMid) < 0.5)
         let boxMid = row.frame.minY + line / 2
         try #require(abs(boxMid - capsMid) >= 0.5, "the two differ")
-        #expect(check.contentTintColor == row.textColor)
+        expectEqual(check.contentTintColor, row.textColor)
         let target = try #require(
             body.targets.first { $0.action == .window(WindowID(1)) }
         )

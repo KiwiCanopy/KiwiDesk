@@ -62,11 +62,11 @@ struct PocketHomeTests {
 
         core.state.apply(.windowFocused(one))
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketedWindows == [one])
+        expectEqual(core.state.pocketedWindows, [one])
 
         core.apply(profile: b, cause: .event)
         #expect(core.state.workspaces.space(of: one) == nil)
-        #expect(core.state.pocketedWindows == [one])
+        expectEqual(core.state.pocketedWindows, [one])
     }
 
     /// The window was pocketed on the main screen; the home is
@@ -107,10 +107,10 @@ struct PocketHomeTests {
         state.workspaces.add(one, to: "1")
         state.markPocketWindow(one)
         state.pocketWindow(one)
-        #expect(state.pocketedWindows == [one])
-        #expect(state.pocketHomeDisplay == main)
+        expectEqual(state.pocketedWindows, [one])
+        expectEqual(state.pocketHomeDisplay, main)
 
         state.workspaces.activate(SpaceID("5"))
-        #expect(state.pocketHomeDisplay == second)
+        expectEqual(state.pocketHomeDisplay, second)
     }
 }

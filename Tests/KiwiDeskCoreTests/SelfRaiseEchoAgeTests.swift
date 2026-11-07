@@ -82,7 +82,7 @@ struct SelfRaiseEchoAgeTests {
         // than the prune window, which is how a no-echo raise
         // looks once anything else has raised since.
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     @Test("A stamp past the echo window is no self-echo")
@@ -94,7 +94,7 @@ struct SelfRaiseEchoAgeTests {
                 -KiwiCore.selfRaiseEchoWindow - 1
             )
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     /// The arm this bound must NOT loosen: a recent raise's echo
@@ -106,7 +106,7 @@ struct SelfRaiseEchoAgeTests {
         let (target, other) = makeFixture(core)
         core.selfRaiseStamps[target] = core.wallClock()
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     /// And even a fresh entry stands down for click provenance:
@@ -121,7 +121,7 @@ struct SelfRaiseEchoAgeTests {
             core.wallClock(), CGPoint(x: 100, y: 100), target
         )
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 }
 
@@ -148,14 +148,14 @@ struct SelfRaiseDuplicateEchoTests {
         core.state.workspaces.focus(target, in: space)
         core.selfRaiseStamps[target] = core.wallClock()
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
         #expect(core.selfRaiseStamps[target] != nil)
         // Step 2: the user moves on to `other` (raised, stamped).
         core.state.workspaces.focus(other, in: space)
         core.selfRaiseStamps[other] = core.wallClock()
         // The departed app's duplicate report lands now.
         core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
+        expectEqual(focused(core), other)
     }
 
     /// The bound the fix must keep (#687): a stale stamp is a
@@ -178,7 +178,7 @@ struct SelfRaiseDuplicateEchoTests {
                 -KiwiCore.selfRaiseEchoWindow - 1
             )
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        expectEqual(focused(core), target)
     }
 
     /// Ids are reused: a stamp that survived its echoes must

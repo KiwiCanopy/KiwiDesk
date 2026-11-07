@@ -164,7 +164,7 @@ struct LocalizationRegistryTests {
             ))
             """
         )
-        #expect(overlap == "[]")
+        expectEqual(overlap, "[]")
         // And neither is empty, or the intersection above is
         // vacuously clean.
         for name in ["LATIN_LOCALES", "NON_LATIN_LOCALES"] {

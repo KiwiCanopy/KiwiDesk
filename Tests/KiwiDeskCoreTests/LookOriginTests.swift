@@ -25,8 +25,8 @@ struct LookOriginTests {
     func pickRecordsTheAuthor() {
         var settings = TilingSettings()
         authored().pick(into: &settings)
-        #expect(settings.lookOrigin?.name == "Dusk")
-        #expect(settings.lookOrigin?.author == "Anna")
+        expectEqual(settings.lookOrigin?.name, "Dusk")
+        expectEqual(settings.lookOrigin?.author, "Anna")
         #expect(
             settings.lookCredit == LookCredit(name: "Dusk", author: "Anna")
         )
@@ -48,7 +48,7 @@ struct LookOriginTests {
         authored().pick(into: &settings)
         ShelfLook(name: "Mine", style: [:], colors: [:])
             .apply(to: &settings)
-        #expect(settings.lookOrigin?.name == "Dusk")
+        expectEqual(settings.lookOrigin?.name, "Dusk")
     }
 
     @Test("a saved look's credit passes through its own pick")
@@ -59,7 +59,7 @@ struct LookOriginTests {
         saved.basedOn = kept
         var settings = TilingSettings()
         saved.pick(into: &settings)
-        #expect(settings.lookCredit == kept)
+        expectEqual(settings.lookCredit, kept)
     }
 
     @Test("the credit drops below half of the origin kept")
@@ -74,7 +74,7 @@ struct LookOriginTests {
         ColorPalette(name: "", colors: palette).apply(to: &settings)
         #expect(settings.lookCredit == nil)
         // The origin stays: a later edit back can restore the credit.
-        #expect(settings.lookOrigin?.name == "Dusk")
+        expectEqual(settings.lookOrigin?.name, "Dusk")
     }
 
     @Test("the origin round-trips in the settings and is absent bare")
@@ -88,8 +88,8 @@ struct LookOriginTests {
         authored().pick(into: &settings)
         let data = try JSONEncoder().encode(settings)
         let back = try JSONDecoder().decode(TilingSettings.self, from: data)
-        #expect(back.lookOrigin == settings.lookOrigin)
-        #expect(back == settings)
+        expectEqual(back.lookOrigin, settings.lookOrigin)
+        expectEqual(back, settings)
     }
 
     @Test("the shared look carries its origin to a follower")
@@ -97,9 +97,9 @@ struct LookOriginTests {
         var settings = TilingSettings()
         authored().pick(into: &settings)
         let body = LookBody(of: settings)
-        #expect(body.origin?.name == "Dusk")
+        expectEqual(body.origin?.name, "Dusk")
         let follower = body.worn(over: TilingSettings())
-        #expect(follower.lookOrigin == settings.lookOrigin)
+        expectEqual(follower.lookOrigin, settings.lookOrigin)
         #expect(body.isStamped(on: follower))
         var cleared = follower
         cleared.lookOrigin = nil
@@ -129,7 +129,7 @@ struct LookOriginTourTests {
             look: authored,
             palette: nil
         )
-        #expect(picked.lookOrigin?.author == "Anna")
+        expectEqual(picked.lookOrigin?.author, "Anna")
         let bundled = ShelfLook(name: "Plain", style: [:], colors: [:])
         let cleared = KiwiCore.painted(picked, look: bundled, palette: nil)
         #expect(cleared.lookOrigin == nil)
@@ -139,7 +139,7 @@ struct LookOriginTourTests {
             look: nil,
             palette: palette
         )
-        #expect(recoloured.lookOrigin == picked.lookOrigin)
+        expectEqual(recoloured.lookOrigin, picked.lookOrigin)
     }
 
     @Test("a tour Revert returns the origin")
@@ -152,6 +152,6 @@ struct LookOriginTourTests {
         let bundled = ShelfLook(name: "Plain", style: [:], colors: [:])
         let after = KiwiCore.painted(before, look: bundled, palette: nil)
         let reverted = KiwiCore.unpainted(after, to: before)
-        #expect(reverted.lookOrigin == before.lookOrigin)
+        expectEqual(reverted.lookOrigin, before.lookOrigin)
     }
 }

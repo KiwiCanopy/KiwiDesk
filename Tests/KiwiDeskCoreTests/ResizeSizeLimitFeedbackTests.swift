@@ -19,7 +19,7 @@ struct ResizeSizeLimitFeedbackTests {
                 EffectiveSizeBound.Axis(asked: 250, answered: 400)
             ]
         )
-        #expect(bound.minWidth == 500)
+        expectEqual(bound.minWidth, 500)
         // A single refused ask never corroborates a floor —
         // grid noise reads exactly like it (#933/#677).
         #expect(bound.minHeight == nil)
@@ -265,6 +265,6 @@ struct ResizeSizeLimitFeedbackTests {
             args: [.string("x"), .number(-300)]
         )
         #expect(res.isSuccess)
-        #expect(appliedFrame?.width == 480)
+        expectEqual(appliedFrame?.width, 480)
     }
 }

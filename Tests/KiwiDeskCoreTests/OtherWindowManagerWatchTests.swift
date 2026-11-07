@@ -29,7 +29,7 @@ struct OtherWindowManagerWatchTests {
         let log = recording(watch)
         watch.noteLaunch(pid: 10, bundleID: Self.aerospace)
         watch.noteLaunch(pid: 11, bundleID: Self.aerospace)
-        #expect(log.detected == [Self.aerospace])
+        expectEqual(log.detected, [Self.aerospace])
     }
 
     @Test("an unknown app or a missing id states nothing")
@@ -66,9 +66,9 @@ struct OtherWindowManagerWatchTests {
         #expect(log.gone.isEmpty)
         watch.noteExit(pid: 99)
         watch.noteExit(pid: 11)
-        #expect(log.gone == [Self.aerospace])
+        expectEqual(log.gone, [Self.aerospace])
         watch.noteLaunch(pid: 12, bundleID: Self.aerospace)
-        #expect(log.detected == [Self.aerospace, Self.aerospace])
+        expectEqual(log.detected, [Self.aerospace, Self.aerospace])
     }
 
     @Test("quit asks every running process of that manager")
@@ -80,7 +80,7 @@ struct OtherWindowManagerWatchTests {
         watch.noteLaunch(pid: 11, bundleID: Self.aerospace)
         watch.noteLaunch(pid: 20, bundleID: "com.amethyst.Amethyst")
         watch.quit(OtherWindowManagerWatch.known[0])
-        #expect(asked.sorted() == [10, 11])
+        expectEqual(asked.sorted(), [10, 11])
     }
 
     @Test("launch and exit events reach the watch through the core")
@@ -95,8 +95,8 @@ struct OtherWindowManagerWatchTests {
             )
         )
         core.handle(.appTerminated(pid: 4242))
-        #expect(log.detected == [Self.aerospace])
-        #expect(log.gone == [Self.aerospace])
+        expectEqual(log.detected, [Self.aerospace])
+        expectEqual(log.gone, [Self.aerospace])
     }
 
     @Test("every known bundle id is listed once")
@@ -104,6 +104,6 @@ struct OtherWindowManagerWatchTests {
         let ids = OtherWindowManagerWatch.known.map {
             $0.bundleID.lowercased()
         }
-        #expect(Set(ids).count == ids.count)
+        expectEqual(Set(ids).count, ids.count)
     }
 }

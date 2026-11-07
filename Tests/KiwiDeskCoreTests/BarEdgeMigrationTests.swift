@@ -55,9 +55,9 @@ struct BarEdgeMigrationTests {
             TilingSettings.self,
             from: JSONSerialization.data(withJSONObject: settings)
         )
-        #expect(decoded.spaceBarStyle.edge == .left)
-        #expect(decoded.appBarStyle.edge == .left)
-        #expect(decoded.sharedBarEdge == .left)
+        expectEqual(decoded.spaceBarStyle.edge, .left)
+        expectEqual(decoded.appBarStyle.edge, .left)
+        expectEqual(decoded.sharedBarEdge, .left)
     }
 
     @Test("an absent edge has nothing to move")
@@ -88,8 +88,8 @@ struct BarEdgeMigrationTests {
         #expect(changed)
         let space = try #require(moved["space_bar"] as? [String: Any])
         let movedApp = try #require(moved["app_bar"] as? [String: Any])
-        #expect(space["edge"] as? String == "left")
-        #expect(movedApp["edge"] as? String == "bottom")
+        expectEqual(space["edge"] as? String, "left")
+        expectEqual(movedApp["edge"] as? String, "bottom")
     }
 
     @Test("a bundle's inline profiles cross too")
@@ -112,8 +112,8 @@ struct BarEdgeMigrationTests {
         )
         let space = try #require(settings["space_bar"] as? [String: Any])
         let app = try #require(settings["app_bar"] as? [String: Any])
-        #expect(space["edge"] as? String == "right")
-        #expect(app["edge"] as? String == "right")
+        expectEqual(space["edge"] as? String, "right")
+        expectEqual(app["edge"] as? String, "right")
     }
 
     /// A 1.x file (before the shelf) crosses both steps in one
@@ -148,7 +148,7 @@ struct BarEdgeMigrationTests {
             TilingSettings.self,
             from: JSONSerialization.data(withJSONObject: settings)
         )
-        #expect(decoded.spaceBarStyle.edge == .top)
+        expectEqual(decoded.spaceBarStyle.edge, .top)
         #expect(
             decoded.appBarStyle.edge == (appEdge.isEmpty ? .bottom : .left)
         )
@@ -177,8 +177,8 @@ struct BarEdgeMigrationTests {
         let settings = try #require(root(out)["settings"] as? [String: Any])
         let app = try #require(settings["app_bar"] as? [String: Any])
         let space = try #require(settings["space_bar"] as? [String: Any])
-        #expect(app["edge"] as? String == "right")
-        #expect(space["edge"] as? String == "right")
+        expectEqual(app["edge"] as? String, "right")
+        expectEqual(space["edge"] as? String, "right")
     }
 
     /// The textual edit keeps every other byte: a double is not

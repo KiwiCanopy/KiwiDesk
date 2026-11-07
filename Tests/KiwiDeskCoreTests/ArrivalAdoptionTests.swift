@@ -178,8 +178,8 @@ struct ArrivalAdoptionTests {
         let (windows, layers) = reader.read(elements) {
             listing.layers[$0]
         }
-        #expect(windows.count == elements.count)
-        #expect(layers == [arrivals[0]: 3])
+        expectEqual(windows.count, elements.count)
+        expectEqual(layers, [arrivals[0]: 3])
     }
 
     @Test("an arrival costs the main actor no AX call")
@@ -187,9 +187,9 @@ struct ArrivalAdoptionTests {
         let (loop, box, _, _) = makeLoop()
         loop.reconcileOffMain(pid: pid, app: ref)
         // Adopted from the read: the live title read answers "".
-        #expect(box.created.map(\.id) == arrivals)
+        expectEqual(box.created.map(\.id), arrivals)
         #expect(box.created.allSatisfy { $0.title == "Arrived" })
-        #expect(Set(loop.elements[pid]?.keys ?? [:].keys).count == 3)
+        expectEqual(Set(loop.elements[pid]?.keys ?? [:].keys).count, 3)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
         #expect(box.applySeams.isEmpty, "\(box.applySeams)")
     }
@@ -200,7 +200,7 @@ struct ArrivalAdoptionTests {
     func bulkArrivalAsksNothingOnMain() {
         let (loop, box, _, _) = makeLoop()
         loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
-        #expect(box.created.map(\.id) == arrivals)
+        expectEqual(box.created.map(\.id), arrivals)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
         #expect(box.applySeams.isEmpty, "\(box.applySeams)")
     }
@@ -247,7 +247,7 @@ struct ArrivalAdoptionTests {
                 app: ref
             )
         }
-        #expect(created == [arrivals[0]])
+        expectEqual(created, [arrivals[0]])
     }
 
     /// A close reaches the loop only for a window observed at
@@ -265,7 +265,7 @@ struct ArrivalAdoptionTests {
                 app: ref
             )
         }
-        #expect(created == [arrivals[0]])
+        expectEqual(created, [arrivals[0]])
     }
 
     /// A window untracked through the read reports no AX close;
@@ -275,7 +275,7 @@ struct ArrivalAdoptionTests {
         let created = try departDuringTheRead { loop, _ in
             loop.windowServerDestroyed(arrivals[1])
         }
-        #expect(created == [arrivals[0]])
+        expectEqual(created, [arrivals[0]])
     }
 
     /// Detection judged the layer the list read saw; where the
@@ -297,7 +297,7 @@ struct ArrivalAdoptionTests {
         let (loop, box, _, listing) = makeLoop()
         listing.shells = [arrivals[1]]
         loop.reconcileOffMain(pid: pid, app: ref)
-        #expect(box.created.map(\.id) == [arrivals[0]])
+        expectEqual(box.created.map(\.id), [arrivals[0]])
         #expect(loop.shadows.holds(arrivals[1], pid: pid))
     }
 }

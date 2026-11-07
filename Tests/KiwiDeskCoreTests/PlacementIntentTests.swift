@@ -92,7 +92,7 @@ struct PlacementIntentTests {
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(log.lines.contains { $0.contains("w1 (App1) honored") })
         #expect(
             !log.lines.contains {
@@ -122,7 +122,7 @@ struct PlacementIntentTests {
         // untracked id rescues the sign guard (guard-prover).
         #expect(EventLoop.ownWindowID(number: 0) == nil)
         #expect(EventLoop.ownWindowID(number: -1) == nil)
-        #expect(EventLoop.ownWindowID(number: 5) == WindowID(5))
+        expectEqual(EventLoop.ownWindowID(number: 5), WindowID(5))
         let log = Log()
         core.onLog = { log.lines.append($0) }
         #expect(core.focusOwnWindow(number: 7))
@@ -144,7 +144,7 @@ struct PlacementIntentTests {
         let (core, target, other) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.state.windows[target] == nil)
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
         #expect(core.focusOwnWindow(number: Int(target.raw)))
         let log = Log()
         core.onLog = { log.lines.append($0) }
@@ -154,12 +154,12 @@ struct PlacementIntentTests {
                 $0.contains("close return: w1 re-shown — placed as new")
             }
         )
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         // The arrival's retile stamped it: the ledger is LIVE
         // when the report lands.
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(log.lines.contains { $0.contains("w1 (App1) honored") })
         #expect(
             !log.lines.contains {
@@ -184,8 +184,8 @@ struct PlacementIntentTests {
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.state.workspaces.space(of: target) == home)
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.state.workspaces.space(of: target), home)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(
             log.lines.contains { $0.contains("placed as new") }
         )
@@ -203,7 +203,7 @@ struct PlacementIntentTests {
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(
             !log.lines.contains {
                 $0.contains("placement bounce distrusted")
@@ -213,7 +213,7 @@ struct PlacementIntentTests {
         // focus of another placed window still bounces.
         core.tiler.placements.stamp(other, target: offscreen)
         core.handle(.windowFocused(other))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         #expect(
             log.lines.contains {
                 $0.contains("w2 placement bounce distrusted")
@@ -226,7 +226,7 @@ struct PlacementIntentTests {
         let (core, target, other) = makeFixture()
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == other)
+        expectEqual(core.activeSpace?.focused, other)
     }
 
     /// The #1380 defect's shape, now honored by construction: the
@@ -238,10 +238,10 @@ struct PlacementIntentTests {
         let (core, target, _) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: false))
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == target)
+        expectEqual(core.activeSpace?.focused, target)
     }
 
     /// The closed window coming back under its old number, as a

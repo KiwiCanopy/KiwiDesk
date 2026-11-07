@@ -45,7 +45,7 @@ struct VisiblePanelButtonTests {
     @Test("an accessory app's buttoned window is no panel")
     func buttonedAccessoryWindowEscapes() {
         #expect(panel(window).panel)
-        #expect(panel(window).asked == [window])
+        expectEqual(panel(window).asked, [window])
         #expect(!panel(window, buttoned: [window]).panel)
     }
 
@@ -100,6 +100,6 @@ struct VisiblePanelButtonTests {
         }
         #expect(ghostty([]).0)
         #expect(!ghostty([window]).0)
-        #expect(ghostty([window]).1 == [window])
+        expectEqual(ghostty([window]).1, [window])
     }
 }

@@ -65,12 +65,12 @@ struct SwitchWorkCountTests {
         let c = meter.snapshot(reset: false).counts
         // Every frame already landed: the shown windows skip, the
         // hidden ones take the "already parked" check.
-        #expect(c.retiles == 1)
-        #expect(c.framesIssued == 0)
-        #expect(c.framesSkipped == shown.count)
-        #expect(c.parksIssued == 0)
-        #expect(c.parksSkipped == incoming.count + hidden.count)
-        #expect(c.barRenders == 1)
+        expectEqual(c.retiles, 1)
+        expectEqual(c.framesIssued, 0)
+        expectEqual(c.framesSkipped, shown.count)
+        expectEqual(c.parksIssued, 0)
+        expectEqual(c.parksSkipped, incoming.count + hidden.count)
+        expectEqual(c.barRenders, 1)
     }
 
     @Test("A switch parks what it leaves and frames what it shows")
@@ -82,14 +82,14 @@ struct SwitchWorkCountTests {
         let c = meter.snapshot(reset: false).counts
         // One re-issuing pass, one bar render; the long-hidden
         // Space 3 is checked, never re-parked (#1508).
-        #expect(c.spaceSwitches == 1)
-        #expect(c.retiles == 1)
-        #expect(c.reissuePasses == 1)
-        #expect(c.barRenders == 1)
-        #expect(c.parksIssued == shown.count)
-        #expect(c.parksSkipped == hidden.count)
-        #expect(c.framesIssued == incoming.count)
-        #expect(c.framesSkipped == 0)
+        expectEqual(c.spaceSwitches, 1)
+        expectEqual(c.retiles, 1)
+        expectEqual(c.reissuePasses, 1)
+        expectEqual(c.barRenders, 1)
+        expectEqual(c.parksIssued, shown.count)
+        expectEqual(c.parksSkipped, hidden.count)
+        expectEqual(c.framesIssued, incoming.count)
+        expectEqual(c.framesSkipped, 0)
     }
 
     @Test("The switch's settle re-sends what got no echo")
@@ -105,8 +105,8 @@ struct SwitchWorkCountTests {
         core.retile(animated: false, pass: .reissue)
         let c = meter.snapshot(reset: false).counts
         // No answer yet: every park and frame is re-sent.
-        #expect(c.parksIssued == shown.count)
-        #expect(c.framesIssued == incoming.count)
+        expectEqual(c.parksIssued, shown.count)
+        expectEqual(c.framesIssued, incoming.count)
     }
 
     @Test("The switch's settle re-sends what an echo confirmed")
@@ -130,8 +130,8 @@ struct SwitchWorkCountTests {
         let c = meter.snapshot(reset: false).counts
         // Today's behaviour, which #1964 asks whether to keep: a
         // fix that skips a confirmed park re-baselines this.
-        #expect(c.parksIssued == shown.count)
-        #expect(c.framesIssued == incoming.count)
+        expectEqual(c.parksIssued, shown.count)
+        expectEqual(c.framesIssued, incoming.count)
     }
 
     @Test("A burst of arrivals takes one retile per event")
@@ -153,14 +153,14 @@ struct SwitchWorkCountTests {
         // every tiled member (2 + k after the k-th arrival) and
         // checks every parked one.
         let parked = shown.count + hidden.count
-        #expect(c.events == arrivals.count)
-        #expect(c.retiles == arrivals.count)
+        expectEqual(c.events, arrivals.count)
+        expectEqual(c.retiles, arrivals.count)
         let weighed = (1...arrivals.count).reduce(0) {
             $0 + incoming.count + $1
         }
-        #expect(c.framesIssued + c.framesSkipped == weighed)
+        expectEqual(c.framesIssued + c.framesSkipped, weighed)
         #expect(c.framesIssued >= arrivals.count)
-        #expect(c.parksIssued == 0)
-        #expect(c.parksSkipped == parked * arrivals.count)
+        expectEqual(c.parksIssued, 0)
+        expectEqual(c.parksSkipped, parked * arrivals.count)
     }
 }

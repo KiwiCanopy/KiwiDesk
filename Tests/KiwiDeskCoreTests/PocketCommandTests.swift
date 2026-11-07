@@ -59,10 +59,10 @@ struct PocketCommandTests {
     func pockets() {
         let core = makeCore()
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(!isFiled(core, one))
-        #expect(core.state.windows[one]?.isFloating == true)
-        #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
+        expectEqual(core.state.windows[one]?.isFloating, true)
+        expectEqual(core.state.windows[one]?.stickyScope, StickyScope.none)
         #expect(core.state.pocketPhase(of: two) == nil)
     }
 
@@ -71,14 +71,14 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
         #expect(
             core.state.workspaces.space(of: one)
                 == core.state.workspaces.activeSpace
         )
-        #expect(core.state.windows[one]?.isFloating == true)
-        #expect(core.state.windows[one]?.stickyScope == .global)
-        #expect(core.state.workspaces.lastFocused == one)
+        expectEqual(core.state.windows[one]?.isFloating, true)
+        expectEqual(core.state.windows[one]?.stickyScope, .global)
+        expectEqual(core.state.workspaces.lastFocused, one)
     }
 
     @Test("a press while out puts it back, focused or not")
@@ -88,11 +88,11 @@ struct PocketCommandTests {
         core.execute("pocket")
         core.state.apply(.windowFocused(two))
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(core.state.pocketPhase(of: two) == nil)
         #expect(!isFiled(core, one))
         #expect(isFiled(core, two))
-        #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
+        expectEqual(core.state.windows[one]?.stickyScope, StickyScope.none)
     }
 
     @Test("an app's exit empties the pocket")
@@ -108,15 +108,15 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         core.state.apply(.windowHidden(one))
-        #expect(core.state.pocket.first?.window == one)
+        expectEqual(core.state.pocket.first?.window, one)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: one, pid: 900_001, appName: "App1")
             )
         )
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         #expect(!isFiled(core, one))
-        #expect(core.state.windows[one]?.isFloating == true)
+        expectEqual(core.state.windows[one]?.isFloating, true)
     }
 
     @Test("an out window re-adopted keeps its float and scope")
@@ -130,9 +130,9 @@ struct PocketCommandTests {
                 ManagedWindow(id: one, pid: 900_001, appName: "App1")
             )
         )
-        #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.windows[one]?.isFloating == true)
-        #expect(core.state.windows[one]?.stickyScope == .global)
+        expectEqual(core.state.pocketPhase(of: one), .out)
+        expectEqual(core.state.windows[one]?.isFloating, true)
+        expectEqual(core.state.windows[one]?.stickyScope, .global)
     }
 
     @Test("sticky and float keys are refused on a pocket window")
@@ -146,11 +146,11 @@ struct PocketCommandTests {
             !core.execute("override_sticky_reach", args: [.string("off")])
                 .isSuccess
         )
-        #expect(core.state.windows[one]?.stickyScope == .global)
+        expectEqual(core.state.windows[one]?.stickyScope, .global)
         #expect(!core.execute("toggle_floating").isSuccess)
         #expect(!core.execute("make_tiled").isSuccess)
-        #expect(core.state.windows[one]?.isFloating == true)
-        #expect(core.tileRefusal(of: one) == .pocket)
+        expectEqual(core.state.windows[one]?.isFloating, true)
+        expectEqual(core.tileRefusal(of: one), .pocket)
     }
 
     @Test("a native-tab re-key moves the slot")
@@ -158,7 +158,7 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         core.state.apply(.windowRekeyed(one, WindowID(9)))
-        #expect(core.state.pocket.first?.window == WindowID(9))
+        expectEqual(core.state.pocket.first?.window, WindowID(9))
     }
 
     @Test("a closed pocket window leaves no memory of its flags")
@@ -213,7 +213,7 @@ struct PocketCommandTests {
         core.releasePocketForQuit()
         #expect(core.state.pocket.isEmpty)
         #expect(isFiled(core, one))
-        #expect(core.state.windows[one]?.isFloating == true)
+        expectEqual(core.state.windows[one]?.isFloating, true)
         #expect(core.state.userFloated.contains(one))
     }
 
@@ -224,8 +224,8 @@ struct PocketCommandTests {
         core.execute("pocket")
         core.releasePocketForQuit()
         #expect(core.state.pocket.isEmpty)
-        #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
-        #expect(core.state.windows[one]?.isFloating == true)
+        expectEqual(core.state.windows[one]?.stickyScope, StickyScope.none)
+        expectEqual(core.state.windows[one]?.isFloating, true)
     }
 
     @Test("macOS focusing the pocketed window takes it out")
@@ -234,10 +234,10 @@ struct PocketCommandTests {
         core.execute("pocket")
         // Inside the latch: our own pocketing's echo.
         core.handle(.windowFocused(one))
-        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        expectEqual(core.state.pocketPhase(of: one), .pocketed)
         core.wallClock = { Date().addingTimeInterval(5) }
         core.handle(.windowFocused(one))
-        #expect(core.state.pocketPhase(of: one) == .out)
+        expectEqual(core.state.pocketPhase(of: one), .out)
     }
 
     @Test("a window pocketed from a tile comes out at the float size")
@@ -253,7 +253,7 @@ struct PocketCommandTests {
         core.execute("pocket")
         core.execute("pocket")
         let landed = try #require(core.tiler.stashedFrames[one])
-        #expect(landed.size == FloatPlacement.centered(in: region).size)
+        expectEqual(landed.size, FloatPlacement.centered(in: region).size)
         #expect(landed.size != CGSize(width: 600, height: 400))
     }
 

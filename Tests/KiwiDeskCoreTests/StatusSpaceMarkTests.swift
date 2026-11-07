@@ -57,7 +57,7 @@ struct StatusSpaceMarkTests {
         core.tiler.settings.spaceBarStyle.visibility = .always
         let on = core.statusSpaceMark()
         #expect(on.screens.isEmpty)
-        #expect(on.layer?.name == "resize")
+        expectEqual(on.layer?.name, "resize")
         core.tiler.settings.spaceBarStyle.visibility = .hidden
         #expect(!core.statusSpaceMark().screens.isEmpty)
     }
@@ -68,7 +68,7 @@ struct StatusSpaceMarkTests {
     func autoListsTheScreens() {
         let core = makeCore()
         core.tiler.settings.spaceBarStyle.visibility = .auto
-        #expect(core.statusSpaceMark().screens.count == 1)
+        expectEqual(core.statusSpaceMark().screens.count, 1)
         core.tiler.settings.spaceBarStyle.visibility = .always
         #expect(core.statusSpaceMark().screens.isEmpty)
     }
@@ -85,17 +85,17 @@ struct StatusSpaceMarkTests {
             core.tiler.settings.spaceBarStyle.edge
         #expect(core.statusSpaceMark().screens.isEmpty)
         core.tiler.settings.monocle.appBar.visibility = .auto
-        #expect(core.statusSpaceMark().screens.count == 1)
+        expectEqual(core.statusSpaceMark().screens.count, 1)
     }
 
     @Test("an icon-less Space shows its full name, not the monogram")
     func fullNameWithoutIcon() {
         let mark = makeCore().statusSpaceMark()
         #expect(mark.layer == nil)
-        #expect(mark.screens.count == 1)
-        #expect(mark.screens.first?.space == SpaceID("main"))
-        #expect(mark.screens.first?.glyph == .text("main", tinted: true))
-        #expect(mark.screens.first?.display.id == built)
+        expectEqual(mark.screens.count, 1)
+        expectEqual(mark.screens.first?.space, SpaceID("main"))
+        expectEqual(mark.screens.first?.glyph, .text("main", tinted: true))
+        expectEqual(mark.screens.first?.display.id, built)
     }
 
     @Test("a configured icon draws as the symbol or the emoji")
@@ -108,7 +108,7 @@ struct StatusSpaceMarkTests {
         )
         core.tiler.settings.spaceIcons[SpaceID("main")] = "🌐"
         let glyph = try #require(core.statusSpaceMark().screens.first?.glyph)
-        #expect(glyph == .text("🌐", tinted: false))
+        expectEqual(glyph, .text("🌐", tinted: false))
         #expect(glyph.keepsColour)
         #expect(!StatusSpaceMark.Glyph.text("main", tinted: true).keepsColour)
         #expect(!StatusSpaceMark.Glyph.symbol("envelope").keepsColour)
@@ -136,13 +136,13 @@ struct StatusSpaceMarkTests {
         )
         core.keys.switchLayer("resize")
         let layer = try #require(core.statusSpaceMark().layer)
-        #expect(layer.name == "resize")
-        #expect(layer.glyph == .symbol("arrow.left.and.right"))
+        expectEqual(layer.name, "resize")
+        expectEqual(layer.glyph, .symbol("arrow.left.and.right"))
         #expect(layer.hasIcon)
         core.keys.defineLayer("service", bindings: [:])
         core.keys.switchLayer("service")
         let monogram = try #require(core.statusSpaceMark().layer)
-        #expect(monogram.glyph == .text("SE", tinted: true))
+        expectEqual(monogram.glyph, .text("SE", tinted: true))
         #expect(!monogram.hasIcon)
         core.keys.switchLayer("default")
         #expect(core.statusSpaceMark().layer == nil)
@@ -169,19 +169,19 @@ struct StatusSpaceMarkTests {
         var published: [StatusSpaceMark] = []
         core.onStatusSpaceMarkChange = { published.append($0) }
         core.updateBars()
-        #expect(published.count == 1)
-        #expect(published.last?.screens.first?.space == SpaceID("main"))
-        #expect(core.spaceBars.statusMark == published.last)
+        expectEqual(published.count, 1)
+        expectEqual(published.last?.screens.first?.space, SpaceID("main"))
+        expectEqual(core.spaceBars.statusMark, published.last)
         core.updateBars()
-        #expect(published.count == 1)
+        expectEqual(published.count, 1)
         core.state.workspaces.activate(SpaceID("2"))
         core.updateBars()
-        #expect(published.count == 2)
-        #expect(published.last?.screens.first?.space == SpaceID("2"))
+        expectEqual(published.count, 2)
+        expectEqual(published.last?.screens.first?.space, SpaceID("2"))
         core.tiler.settings.spaceBarStyle.visibility = .always
         core.updateBars()
-        #expect(published.count == 3)
-        #expect(published.last?.screens.isEmpty == true)
+        expectEqual(published.count, 3)
+        expectEqual(published.last?.screens.isEmpty, true)
     }
 
     /// A layer switch retiles nothing, so the mark rides the
@@ -193,6 +193,6 @@ struct StatusSpaceMarkTests {
         core.onStatusSpaceMarkChange = { published.append($0) }
         core.keys.defineLayer("resize", bindings: [:])
         core.keys.switchLayer("resize")
-        #expect(published.last?.layer?.name == "resize")
+        expectEqual(published.last?.layer?.name, "resize")
     }
 }

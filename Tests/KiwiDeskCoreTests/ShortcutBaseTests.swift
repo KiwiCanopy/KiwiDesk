@@ -28,8 +28,8 @@ struct ShortcutBaseTests {
             ("control+option+shift+c", "hyper+shift+c"),
         ]
         for (from, to) in table {
-            #expect(moved(from, to: .hyper) == to)
-            #expect(moved(to, to: .standard) == from)
+            expectEqual(moved(from, to: .hyper), to)
+            expectEqual(moved(to, to: .standard), from)
         }
     }
 
@@ -85,7 +85,7 @@ struct ShortcutBaseTests {
             }
         for row in seed {
             let there = ShortcutBase.hyper.rebased(row)
-            #expect(ShortcutBase.standard.rebased(there) == row)
+            expectEqual(ShortcutBase.standard.rebased(there), row)
         }
     }
 

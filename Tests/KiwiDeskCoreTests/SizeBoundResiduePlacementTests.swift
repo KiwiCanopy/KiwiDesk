@@ -104,7 +104,7 @@ struct SizeBoundResiduePlacementTests {
         let probe =
             target.width
             + EffectiveSizeBound.corroborationDistinctness + 1
-        #expect(placed.width == probe)
+        expectEqual(placed.width, probe)
         // The placement's own echo — the app taking the origin
         // and refusing the probe's width — is no new ENTRY: it
         // seeds the probe's candidate and re-asks it once (the
@@ -119,7 +119,7 @@ struct SizeBoundResiduePlacementTests {
                 )
             )
         )
-        #expect(core.tiler.sizeBound(for: w)?.width.count == 1)
-        #expect(applied.frames[w]?.width == probe)
+        expectEqual(core.tiler.sizeBound(for: w)?.width.count, 1)
+        expectEqual(applied.frames[w]?.width, probe)
     }
 }

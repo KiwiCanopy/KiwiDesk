@@ -46,7 +46,7 @@ struct BarPeekAppBarRowTests {
         viaRow.shelves.peek.pick(WindowID(50), nil)
         viaItem.appBars.onSelect(WindowID(50))
         #expect(viaRow.activeSpace?.id == SpaceID("1"), "no switch away")
-        #expect(viaRow.activeSpace?.id == viaItem.activeSpace?.id)
+        expectEqual(viaRow.activeSpace?.id, viaItem.activeSpace?.id)
         #expect(
             viaRow.state.workspaces.lastFocused
                 == viaItem.state.workspaces.lastFocused
@@ -91,7 +91,7 @@ struct BarPeekAppBarRowTests {
         )
         viaRow.shelves.peek.pick(WindowID(60), nil)
         viaItem.appBars.onSelect(WindowID(60))
-        #expect(viaItem.activeSpace?.id == SpaceID("1"))
+        expectEqual(viaItem.activeSpace?.id, SpaceID("1"))
         #expect(viaRow.activeSpace?.id == SpaceID("1"), "no switch")
         #expect(
             viaRow.state.workspaces.lastFocused

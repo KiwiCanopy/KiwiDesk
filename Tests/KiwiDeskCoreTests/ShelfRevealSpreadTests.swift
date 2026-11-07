@@ -76,7 +76,7 @@ struct ShelfRevealSpreadTests {
     func unitsAreTheHosts() {
         let run = Run()
         let (boxes, still) = BarMotion.spreadUnits(in: run.view)
-        #expect(boxes.count == 2)
+        expectEqual(boxes.count, 2)
         #expect(boxes.contains { $0 === run.near })
         #expect(boxes.contains { $0 === run.far })
         #expect(still.count == 1 && still.first === run.count)
@@ -98,7 +98,7 @@ struct ShelfRevealSpreadTests {
             far.animations?.first { $0 is CASpringAnimation }
                 as? CASpringAnimation
         )
-        #expect(spring.keyPath == "transform")
+        expectEqual(spring.keyPath, "transform")
         let start = try #require(
             (spring.fromValue as? NSValue)?.caTransform3DValue
         )

@@ -78,11 +78,11 @@ struct JumpFullScreenTests {
         let core = makeCore()
         let element = AXUIElementCreateApplication(pid)
         depart(core, to: 9, element: element)
-        #expect(core.state.awayWindows[id]?.nativeSpace == 9)
+        expectEqual(core.state.awayWindows[id]?.nativeSpace, 9)
         let calls = record(core)
         core.jump(to: .window(id))
-        #expect(calls().raised.map(\.1) == [id])
-        #expect(calls().raised.first.map { CFEqual($0.0, element) } == true)
+        expectEqual(calls().raised.map(\.1), [id])
+        expectEqual(calls().raised.first.map { CFEqual($0.0, element) }, true)
         #expect(calls().activated.isEmpty)
     }
 
@@ -108,10 +108,10 @@ struct JumpFullScreenTests {
             minimized: [],
             coalesceTabs: false
         )
-        #expect(core.state.awayWindows[id]?.nativeSpace == 9)
+        expectEqual(core.state.awayWindows[id]?.nativeSpace, 9)
         let calls = record(core)
         core.jump(to: .window(id))
-        #expect(calls().raised.first.map { CFEqual($0.0, element) } == true)
+        expectEqual(calls().raised.first.map { CFEqual($0.0, element) }, true)
     }
 
     /// The slot names its window: a destroy folded with no release
@@ -134,7 +134,7 @@ struct JumpFullScreenTests {
         core.eventLoop.onEvent(.windowCreated(window))
         core.desktopMemory.readWindowSpace = { _ in .hosted(9) }
         core.eventLoop.onEvent(.windowDestroyed(other, wasMinimized: false))
-        #expect(core.state.awayWindows[other]?.nativeSpace == 9)
+        expectEqual(core.state.awayWindows[other]?.nativeSpace, 9)
         let away = Set(core.state.awayWindows.keys)
         #expect(
             core.eventLoop.fullScreenElements.element(of: other, away: away)
@@ -149,8 +149,8 @@ struct JumpFullScreenTests {
         depart(core, to: 9, element: AXUIElementCreateApplication(pid))
         let calls = record(core, raises: false)
         core.jump(to: .window(id))
-        #expect(calls().raised.count == 1)
-        #expect(calls().activated == [pid])
+        expectEqual(calls().raised.count, 1)
+        expectEqual(calls().activated, [pid])
     }
 
     @Test("a departure to a user Desktop keeps no element")
@@ -201,7 +201,7 @@ struct JumpFullScreenTests {
         let calls = record(core)
         core.jump(to: .window(id))
         #expect(calls().raised.isEmpty)
-        #expect(calls().activated == [pid])
+        expectEqual(calls().activated, [pid])
     }
 
     /// A raise the element refused stamps nothing: a stamp would read
@@ -215,8 +215,8 @@ struct JumpFullScreenTests {
         core.eventLoop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
         let calls = record(core, raises: false)
         core.jump(to: .window(id))
-        #expect(calls().raised.count == 1)
-        #expect(calls().activated == [pid])
+        expectEqual(calls().raised.count, 1)
+        expectEqual(calls().activated, [pid])
         #expect(core.selfRaiseStamp(id, now: core.wallClock()) == nil)
     }
 
@@ -230,7 +230,7 @@ struct JumpFullScreenTests {
         core.eventLoop.elements[pid] = [id: element]
         let calls = record(core)
         core.jump(to: .window(id))
-        #expect(calls().raised.map(\.1) == [id])
+        expectEqual(calls().raised.map(\.1), [id])
         #expect(calls().activated.isEmpty)
         #expect(core.selfRaiseStamp(id, now: core.wallClock()) != nil)
     }

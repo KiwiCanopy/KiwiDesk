@@ -67,10 +67,10 @@ struct ReturningFocusFoldTests {
         var state = makeDesktop(carrying: true)
         depart(&state)
         // The walk landed on the one member that stayed.
-        #expect(state.workspaces[home]?.focused == carried)
+        expectEqual(state.workspaces[home]?.focused, carried)
         state.returningFocus = owed
         let effects = state.apply(.windowCreated(makeWindow(owed)))
-        #expect(state.workspaces[home]?.focused == owed)
+        expectEqual(state.workspaces[home]?.focused, owed)
         #expect(effects.paidReturningFocus)
         // Consumed by the fold, like `arrivalDisplay`.
         #expect(state.returningFocus == nil)
@@ -92,7 +92,7 @@ struct ReturningFocusFoldTests {
         // …and the owed window's own arrival is the payment.
         state.returningFocus = owed
         let paid = state.apply(.windowCreated(makeWindow(owed)))
-        #expect(state.workspaces[home]?.focused == owed)
+        expectEqual(state.workspaces[home]?.focused, owed)
         #expect(paid.paidReturningFocus)
     }
 
@@ -102,7 +102,7 @@ struct ReturningFocusFoldTests {
         depart(&state)
         state.returningFocus = nil
         state.apply(.windowCreated(makeWindow(first)))
-        #expect(state.workspaces[home]?.focused == first)
+        expectEqual(state.workspaces[home]?.focused, first)
     }
 
     /// The `windows[owed] == nil` clause: a debt naming a window
@@ -117,10 +117,10 @@ struct ReturningFocusFoldTests {
         // owed window lives elsewhere with its departed memory.
         state.workspaces.add(owed, to: SpaceID(2))
         #expect(state.workspaces[home]?.focused == nil)
-        #expect(state.rememberedSpaces[owed] == .departed(home))
+        expectEqual(state.rememberedSpaces[owed], .departed(home))
         state.returningFocus = owed
         state.apply(.windowCreated(makeWindow(first)))
-        #expect(state.workspaces[home]?.focused == first)
+        expectEqual(state.workspaces[home]?.focused, first)
     }
 
     /// The `.departed(target)` clause: a debt whose window
@@ -130,10 +130,10 @@ struct ReturningFocusFoldTests {
         var state = makeDesktop()
         state.workspaces.add(owed, to: SpaceID(2))
         depart(&state)
-        #expect(state.rememberedSpaces[owed] == .departed(SpaceID(2)))
+        expectEqual(state.rememberedSpaces[owed], .departed(SpaceID(2)))
         state.returningFocus = owed
         state.apply(.windowCreated(makeWindow(first)))
-        #expect(state.workspaces[home]?.focused == first)
+        expectEqual(state.workspaces[home]?.focused, first)
     }
 
     /// The provenance half of that clause: a `.restored` memory
@@ -147,7 +147,7 @@ struct ReturningFocusFoldTests {
         state.rememberedSpaces[owed] = .restored(home)
         state.returningFocus = owed
         state.apply(.windowCreated(makeWindow(first)))
-        #expect(state.workspaces[home]?.focused == first)
+        expectEqual(state.workspaces[home]?.focused, first)
     }
 
     @Test("a fresh spawn carrying the owed id is not a payment")
@@ -157,7 +157,7 @@ struct ReturningFocusFoldTests {
         state.returningFocus = owed
         let effects = state.apply(.windowCreated(makeWindow(owed)))
         // The ordinary spawn grant, reported as no payment.
-        #expect(state.workspaces[home]?.focused == owed)
+        expectEqual(state.workspaces[home]?.focused, owed)
         #expect(!effects.paidReturningFocus)
     }
 
@@ -169,7 +169,7 @@ struct ReturningFocusFoldTests {
         state.workspaces.activate(SpaceID(2))
         state.returningFocus = owed
         let effects = state.apply(.windowCreated(makeWindow(owed)))
-        #expect(state.workspaces.space(of: owed) == home)
+        expectEqual(state.workspaces.space(of: owed), home)
         #expect(!effects.paidReturningFocus)
     }
 
@@ -183,7 +183,7 @@ struct ReturningFocusFoldTests {
                 makeWindow(owed, isTransientOverlay: true)
             )
         )
-        #expect(state.workspaces[home]?.focused == carried)
+        expectEqual(state.workspaces[home]?.focused, carried)
         #expect(!effects.paidReturningFocus)
     }
 }

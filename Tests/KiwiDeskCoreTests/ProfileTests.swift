@@ -35,7 +35,7 @@ struct ProfileModelTests {
     @Test("Monitor sets store canonically sorted")
     func sortedMonitors() {
         let set = MonitorSet(monitors: ["B:2x2", "A:1x1"])
-        #expect(set.monitors == ["A:1x1", "B:2x2"])
+        expectEqual(set.monitors, ["A:1x1", "B:2x2"])
     }
 
     @Test("Pins to monitors outside the set are dropped")
@@ -64,8 +64,8 @@ struct ProfileModelTests {
             spaceModes: [:],
             settings: TilingSettings()
         )
-        #expect(profile.monitorSets.count == 2)
-        #expect(profile.monitorCount == 2)
+        expectEqual(profile.monitorSets.count, 2)
+        expectEqual(profile.monitorCount, 2)
     }
 
     @Test("A profile with zero valid sets fails to decode")
@@ -128,11 +128,11 @@ struct ProfileModelTests {
                 assignment: [SpaceID(3): DisplayID(2)]
             )
         }
-        #expect(resolve(SpaceID(2)) == .pinned(b))
-        #expect(resolve(SpaceID(1)) == .main(a))
-        #expect(resolve(SpaceID(3)) == .auto(b))
+        expectEqual(resolve(SpaceID(2)), .pinned(b))
+        expectEqual(resolve(SpaceID(1)), .main(a))
+        expectEqual(resolve(SpaceID(3)), .auto(b))
         // Off-plan spaces land on main.
-        #expect(resolve(SpaceID(9)) == .auto(a))
+        expectEqual(resolve(SpaceID(9)), .auto(a))
         // A pin to a disconnected monitor keeps the intent
         // and falls back like an unpinned space would.
         #expect(
@@ -183,7 +183,7 @@ struct ProfileModelTests {
         )
         let sameSet = profile.upsert(replaced)
         #expect(sameSet)
-        #expect(profile.monitorSets.count == 1)
+        expectEqual(profile.monitorSets.count, 1)
         #expect(
             profile.monitorSets[0].spaceMonitorMap.count == 1
         )
@@ -191,7 +191,7 @@ struct ProfileModelTests {
             MonitorSet(monitors: ["B:2x2"])
         )
         #expect(newSet)
-        #expect(profile.monitorSets.count == 2)
+        expectEqual(profile.monitorSets.count, 2)
         let wrongLength = profile.upsert(
             MonitorSet(monitors: ["C:3x3", "D:4x4"])
         )
@@ -207,7 +207,7 @@ struct ProfileModelTests {
     func profileFormatRoundTrip() throws {
         let current = Profile.currentFormat
         let profile = makeProfile(name: "p", monitors: ["A:1x1"])
-        #expect(profile.format == current)
+        expectEqual(profile.format, current)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = try encoder.encode(profile)
@@ -240,6 +240,6 @@ struct ProfileModelTests {
             Profile.self,
             from: Data(older.utf8)
         )
-        #expect(upgraded.format == current)
+        expectEqual(upgraded.format, current)
     }
 }

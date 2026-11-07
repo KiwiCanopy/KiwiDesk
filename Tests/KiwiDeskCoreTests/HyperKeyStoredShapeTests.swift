@@ -31,7 +31,7 @@ struct HyperKeyStoredShapeTests {
         value.hyperKey = .rightCommand
         let stored = try root(value)
         let group = try #require(stored["hyper"] as? [String: Any])
-        #expect(group["key"] as? String == "right_command")
+        expectEqual(group["key"] as? String, "right_command")
         #expect(try decoded(stored)?.hyperKey == .rightCommand)
     }
 
@@ -39,7 +39,7 @@ struct HyperKeyStoredShapeTests {
     func offAndAbsence() throws {
         var stored = try root(AppWideSettings())
         let group = try #require(stored["hyper"] as? [String: Any])
-        #expect(group["key"] as? String == "off")
+        expectEqual(group["key"] as? String, "off")
         #expect(try decoded(stored)?.hyperKey == nil)
         stored["hyper"] = nil
         #expect(try decoded(stored)?.hyperKey == nil)

@@ -20,8 +20,8 @@ struct BarEdgeCommandTests {
             core.execute("app_bar.set_edge", args: [.string("bottom")])
                 .isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.edge == .left)
-        #expect(core.tiler.settings.appBarStyle.edge == .bottom)
+        expectEqual(core.tiler.settings.spaceBarStyle.edge, .left)
+        expectEqual(core.tiler.settings.appBarStyle.edge, .bottom)
         #expect(core.tiler.settings.sharedBarEdge == nil)
     }
 
@@ -54,9 +54,9 @@ struct BarEdgeCommandTests {
                 args: [.string("left")]
             )
             #expect(!response.isSuccess)
-            #expect(response.error?.contains("app_bar.set_edge") == true)
+            expectEqual(response.error?.contains("app_bar.set_edge"), true)
         }
-        #expect(core.tiler.settings == before)
+        expectEqual(core.tiler.settings, before)
         var bar = LayoutAppBar()
         #expect(
             !core.applyBarOverride(
@@ -65,6 +65,6 @@ struct BarEdgeCommandTests {
                 into: &bar
             ).isSuccess
         )
-        #expect(bar == LayoutAppBar())
+        expectEqual(bar, LayoutAppBar())
     }
 }

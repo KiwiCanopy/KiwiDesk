@@ -45,8 +45,8 @@ struct ZOrderDrainTests {
         server.latency[WindowID(2)] = 0.06
         let drain = server.restoreDrain(above: ids([9]))
         _ = drain.run(ids([2, 1]))
-        #expect(server.stacking() == ids([7, 1, 2, 9]))
-        #expect(server.raised == ids([2, 1]))
+        expectEqual(server.stacking(), ids([7, 1, 2, 9]))
+        expectEqual(server.raised, ids([2, 1]))
     }
 
     /// The floor a raise CANNOT clear is the failure this models:
@@ -67,7 +67,7 @@ struct ZOrderDrainTests {
         // nothing would satisfy the bound trivially), and it
         // reports the raises so their stamps are not dropped
         // while the echoes are still coming.
-        #expect(raised == ids([2, 1]))
+        expectEqual(raised, ids([2, 1]))
         #expect(
             server.clock
                 <= ZOrderDrain.Policy.restore.budget + ZOrderDrain.pollInterval
@@ -90,8 +90,8 @@ struct ZOrderDrainTests {
         server.latency[WindowID(3)] = 0.08
         let drain = server.restoreDrain()
         _ = drain.run(ids([4, 3, 2, 1]))
-        #expect(server.stacking() == ids([1, 2, 3, 4]))
-        #expect(server.raised == ids([3, 2, 1]))
+        expectEqual(server.stacking(), ids([1, 2, 3, 4]))
+        expectEqual(server.raised, ids([3, 2, 1]))
     }
 
     /// One wedged app must not stall the windows behind it in the
@@ -108,7 +108,7 @@ struct ZOrderDrainTests {
         // The wedged raise is still RETURNED: the echo ledger keys
         // off this, and a raise left out has its stamp dropped
         // while its echo is in flight.
-        #expect(returned == server.raised)
+        expectEqual(returned, server.raised)
         // It is not retried — a second raise inside one sequence
         // strands focus, see `neverRaisesAWindowTwice` — so it
         // stays where it is, and the windows that do answer still
@@ -137,12 +137,12 @@ struct ZOrderDrainTests {
         // Window 8 belongs at the back and is already there, so
         // the plan is the other seven — every one of them issued,
         // none dropped, inside the total budget.
-        #expect(Set(server.raised) == Set(order.dropFirst()))
+        expectEqual(Set(server.raised), Set(order.dropFirst()))
         // And the unverified tail is REPORTED as raised, not just
         // issued: its echoes are still coming, so a caller that
         // dropped those stamps would let one move the ring onto a
         // pile-mate.
-        #expect(Set(raised) == Set(server.raised))
+        expectEqual(Set(raised), Set(server.raised))
         // A poll interval of slack: the fake clock accumulates in
         // 5 ms steps, so it lands ON the limit, not before it.
         #expect(
@@ -191,8 +191,8 @@ struct ZOrderDrainTests {
         let server = FakeWindowServer(order: [])
         let drain = server.restoreDrain()
         let order = ids([3, 2, 1])
-        #expect(drain.run(order) == order)
-        #expect(server.raised == order)
+        expectEqual(drain.run(order), order)
+        expectEqual(server.raised, order)
     }
 
     /// A duplicate id would make every tail check fail, so `plan`
@@ -206,7 +206,7 @@ struct ZOrderDrainTests {
         let drain = server.restoreDrain()
         _ = drain.run(ids([3, 2, 2, 1]))
         #expect(!server.raised.isEmpty)
-        #expect(Set(server.raised).count == server.raised.count)
+        expectEqual(Set(server.raised).count, server.raised.count)
     }
 
     /// A jump landing mid-drain supersedes the sequence: it must
@@ -218,6 +218,6 @@ struct ZOrderDrainTests {
         server.currentUntilRaises = 2
         let drain = server.restoreDrain()
         _ = drain.run(ids([4, 3, 2, 1]))
-        #expect(server.raised == ids([3, 2]))
+        expectEqual(server.raised, ids([3, 2]))
     }
 }

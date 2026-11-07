@@ -80,7 +80,7 @@ struct ShelfPocketPanelTests {
                 )
         )
         #expect(pocket.superview === overlay.pocket.items)
-        #expect(pocket.frame.origin == CGPoint(x: 960, y: 0))
+        expectEqual(pocket.frame.origin, CGPoint(x: 960, y: 0))
         overlay.hide()
     }
 
@@ -102,7 +102,7 @@ struct ShelfPocketPanelTests {
         overlay.slides = true
         overlay.afterCommit = { _ in }
         show(overlay, pocket: NSView())
-        #expect(overlay.motionContents.count == 2)
+        expectEqual(overlay.motionContents.count, 2)
         let shelfKeys = overlay.content.layer?.animationKeys() ?? []
         let pocketKeys = overlay.pocket.content.layer?.animationKeys() ?? []
         #expect(shelfKeys.contains(BarMotion.revealKey))
@@ -125,7 +125,7 @@ struct ShelfPocketPanelTests {
         let overlay = ShelfOverlay()
         show(overlay, pocket: nil)
         #expect(!overlay.pocket.isMounted)
-        #expect(overlay.motionContents.count == 1)
+        expectEqual(overlay.motionContents.count, 1)
         #expect(overlay.pocket.panel?.isVisible != true)
         overlay.hide()
     }

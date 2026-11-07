@@ -67,13 +67,13 @@ struct FloatRegionFitTests {
             frame: CGRect(x: 0, y: 0, width: 2400, height: 1600)
         )
         let region = core.floatBounds(of: WindowID(1))!
-        #expect(region == Self.bounds)
+        expectEqual(region, Self.bounds)
         let fitted = core.floatFrameFittedClearOfBars(
             WindowID(1),
             frame: CGRect(x: 0, y: 0, width: 2400, height: 1600)
         )
-        #expect(fitted.width == region.width)
-        #expect(fitted.height == region.height)
+        expectEqual(fitted.width, region.width)
+        expectEqual(fitted.height, region.height)
     }
 
     @Test(
@@ -140,8 +140,8 @@ struct FloatRegionFitTests {
             WindowID(1),
             frame: frame
         )
-        #expect(fitted.origin == frame.origin)
-        #expect(fitted.size == frame.size)
+        expectEqual(fitted.origin, frame.origin)
+        expectEqual(fitted.size, frame.size)
     }
 
     @Test(
@@ -160,11 +160,11 @@ struct FloatRegionFitTests {
         )
         core.tiler.settings.borderStyle.enabled = true
         core.tiler.settings.borderStyle.width = 7
-        #expect(core.floatRingInset == 7)
+        expectEqual(core.floatRingInset, 7)
         // Rings off means no inset at all — a float should not
         // be held clear of a bar for a ring nobody draws.
         core.tiler.settings.borderStyle.enabled = false
-        #expect(core.floatRingInset == 0)
+        expectEqual(core.floatRingInset, 0)
     }
 
     @Test(
@@ -189,7 +189,7 @@ struct FloatRegionFitTests {
             "resize",
             args: [.string("x"), .number(100)]
         )
-        #expect(refusals.count == 1)
+        expectEqual(refusals.count, 1)
         // And a grow with room does NOT cue.
         let roomy = makeFloatCore(
             frame: CGRect(x: 200, y: 200, width: 400, height: 300)
@@ -234,8 +234,8 @@ struct FloatRegionFitTests {
             args: [.string("x"), .number(100)]
         )
         let frame = core.tiler.recentInstantTarget(WindowID(1))
-        #expect(frame?.maxX == Self.bounds.maxX)
-        #expect(frame?.minX == Self.bounds.maxX - 500)
+        expectEqual(frame?.maxX, Self.bounds.maxX)
+        expectEqual(frame?.minX, Self.bounds.maxX - 500)
     }
 
     @Test(
@@ -263,8 +263,8 @@ struct FloatRegionFitTests {
             WindowID(1),
             frame: frame
         )
-        #expect(fitted.width == 300)
-        #expect(fitted.height == 300)
+        expectEqual(fitted.width, 300)
+        expectEqual(fitted.height, 300)
     }
 
     @Test(

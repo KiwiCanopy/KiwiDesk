@@ -29,7 +29,7 @@ struct StackOverrideTests {
             Mirror(reflecting: StackOverride())
                 .children.compactMap(\.label)
         )
-        #expect(mirror == params.subtracting(Self.notOverridable))
+        expectEqual(mirror, params.subtracting(Self.notOverridable))
     }
 
     @Test("Resolve applies every set field onto the global")
@@ -40,10 +40,10 @@ struct StackOverrideTests {
         over.masterOrientation = .vertical
         over.stackPosition = .bottom
         let resolved = over.resolved(onto: StackParams())
-        #expect(resolved.masterCount == 3)
-        #expect(resolved.masterRatio == 0.75)
-        #expect(resolved.masterOrientation == .vertical)
-        #expect(resolved.stackPosition == .bottom)
+        expectEqual(resolved.masterCount, 3)
+        expectEqual(resolved.masterRatio, 0.75)
+        expectEqual(resolved.masterOrientation, .vertical)
+        expectEqual(resolved.stackPosition, .bottom)
     }
 
     @Test("Unset fields inherit the global, per field")
@@ -73,7 +73,7 @@ struct StackOverrideTests {
             StackOverride.self,
             from: data
         )
-        #expect(back == over)
+        expectEqual(back, over)
     }
 
     @Test("An empty override is sparse and inert")
@@ -81,7 +81,7 @@ struct StackOverrideTests {
         let over = StackOverride()
         #expect(over.isEmpty)
         let data = try JSONEncoder().encode(over)
-        #expect(String(data: data, encoding: .utf8) == "{}")
+        expectEqual(String(data: data, encoding: .utf8), "{}")
         #expect(
             over.resolved(onto: StackParams()) == StackParams()
         )
@@ -116,7 +116,7 @@ struct StackOverrideTests {
             TilingSettings.self,
             from: data
         )
-        #expect(back.stack.override == settings.stack.override)
+        expectEqual(back.stack.override, settings.stack.override)
     }
 }
 
@@ -143,9 +143,9 @@ struct StackOverrideCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.stack.override[SpaceID("2")]
-        #expect(over?.masterCount == 4)
+        expectEqual(over?.masterCount, 4)
         // The global params are untouched.
-        #expect(core.tiler.settings.stack.masterCount == 1)
+        expectEqual(core.tiler.settings.stack.masterCount, 1)
         #expect(
             core.tiler.settings.resolvedStack(for: "2").masterCount
                 == 4
@@ -173,7 +173,7 @@ struct StackOverrideCommandTests {
         )
         let over = core.tiler.settings.stack.override[SpaceID("7")]
         #expect(over?.masterRatio == 0.9)  // clamped ceiling
-        #expect(over?.stackPosition == .left)
+        expectEqual(over?.stackPosition, .left)
     }
 
     @Test("Invalid value is rejected and writes nothing")

@@ -199,7 +199,7 @@ struct BarTitleRefreshTests {
     /// indefinitely (#900).
     @Test("Refresh debounce has a max wait ceiling (#900)")
     func maxWaitConstant() {
-        #expect(KiwiCore.barTitleRefreshMaxWait == .seconds(1))
+        expectEqual(KiwiCore.barTitleRefreshMaxWait, .seconds(1))
     }
 
     /// Teardown reaches it, because it is a `DeferredTasks` slot

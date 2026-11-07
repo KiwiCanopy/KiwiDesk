@@ -17,7 +17,7 @@ struct ScrollGestureConfigParityTests {
     func fieldsMirror() {
         let base = labels(ScrollGestureBase.defaults)
         #expect(!base.isEmpty)
-        #expect(base == labels(ScrollGestureOverride()))
+        expectEqual(base, labels(ScrollGestureOverride()))
     }
 
     /// Every field differs from the base, so a resolve or a diff
@@ -39,7 +39,7 @@ struct ScrollGestureConfigParityTests {
                 "\($0.value)" != "nil"
             }
         )
-        #expect(over?.resolved(onto: base) == edited)
+        expectEqual(over?.resolved(onto: base), edited)
     }
 
     /// The "Applies to" table keys one row per field (#1656): a
@@ -56,10 +56,10 @@ struct ScrollGestureConfigParityTests {
             longSwipes: true,
             stepDistance: 120
         )
-        #expect(ScrollGestureField.allCases.count == labels(base).count)
-        #expect(base.writing(edited.fields) == edited)
+        expectEqual(ScrollGestureField.allCases.count, labels(base).count)
+        expectEqual(base.writing(edited.fields), edited)
         let over = ScrollGestureOverride.diff(base: base, edited: edited)
-        #expect(over?.fields == edited.fields)
+        expectEqual(over?.fields, edited.fields)
     }
 
     /// The sparse `Codable` is a hand-kept field list: every field

@@ -85,11 +85,11 @@ struct BarWindowActionRowsTests {
             done(true)
         }
         let rows = core.barMenuRows(.appItem([WindowID(1)]))
-        #expect(row(rows, "New Window")?.enabled == true)
+        expectEqual(row(rows, "New Window")?.enabled, true)
         perform(row(rows, "New Window"))
-        #expect(activated == [41])
-        #expect(pressed == [41])
-        #expect(core.launchFollow.owed(at: Date()) == "com.apple.safari")
+        expectEqual(activated, [41])
+        expectEqual(pressed, [41])
+        expectEqual(core.launchFollow.owed(at: Date()), "com.apple.safari")
     }
 
     @Test("New Window with no such row cues a refusal, not a fail")
@@ -113,7 +113,7 @@ struct BarWindowActionRowsTests {
             done(false)
         }
         core.execute("new_window", args: [.number(1)])
-        #expect(core.launchFollow.owed(at: Date()) == "com.other.app")
+        expectEqual(core.launchFollow.owed(at: Date()), "com.other.app")
     }
 
     /// A placement waits on its own app's activation, whichever
@@ -132,7 +132,7 @@ struct BarWindowActionRowsTests {
         core.windowActions.newWindow = { _, done in done(false) }
         core.execute("new_window", args: [.number(1)])
         #expect(core.launchFollow.owed(at: Date()) == nil)
-        #expect(core.launchFollow.placement?.bundleID == "com.other.app")
+        expectEqual(core.launchFollow.placement?.bundleID, "com.other.app")
     }
 
     @Test("Close Window presses the named window's own element")
@@ -146,8 +146,8 @@ struct BarWindowActionRowsTests {
         let rows = core.barMenuRows(.glyph([WindowID(2)]))
         perform(row(rows, "Close Window"))
         let element = core.eventLoop.element(for: WindowID(2))
-        #expect(closed.count == 1)
-        #expect(closed.first.map { CFEqual($0, element) } == true)
+        expectEqual(closed.count, 1)
+        expectEqual(closed.first.map { CFEqual($0, element) }, true)
     }
 
     @Test("a group's Close Window names each window")
@@ -161,9 +161,9 @@ struct BarWindowActionRowsTests {
             Issue.record("Close Window is not a submenu")
             return
         }
-        #expect(items.map(\.title) == ["Page 2", "Page 3"])
+        expectEqual(items.map(\.title), ["Page 2", "Page 3"])
         perform(items[1])
-        #expect(log.lines == ["no enabled close button: w3"])
+        expectEqual(log.lines, ["no enabled close button: w3"])
     }
 
     @Test("a window with no AX element fails the verb at once")
@@ -197,15 +197,15 @@ struct BarWindowActionRowsTests {
             WindowID(10): AXUIElementCreateApplication(own),
         ]
         let rows = core.barMenuRows(.appItem([WindowID(9)]))
-        #expect(row(rows, "New Window")?.enabled == false)
-        #expect(row(rows, "Close Window")?.enabled == false)
+        expectEqual(row(rows, "New Window")?.enabled, false)
+        expectEqual(row(rows, "Close Window")?.enabled, false)
         for verb in ["new_window", "close_window"] {
             #expect(!core.execute(verb, args: [.number(9)]).isSuccess)
         }
-        #expect(pressed == 0)
+        expectEqual(pressed, 0)
         // A group whose every window is greyed greys its submenu.
         let group = core.barMenuRows(.glyph([WindowID(9), WindowID(10)]))
-        #expect(row(group, "Close Window")?.enabled == false)
+        expectEqual(row(group, "Close Window")?.enabled, false)
     }
 
     /// The pill draws on the window it names where it is drawn —
@@ -245,16 +245,16 @@ struct BarWindowActionRowsTests {
             )
         }
         core.state.workspaces.focus(WindowID(1), in: one)
-        #expect(core.focusedWindowID == WindowID(1))
+        expectEqual(core.focusedWindowID, WindowID(1))
         #expect(core.tiler.looksStashed(parked))
-        #expect(core.cueWindow(for: WindowID(4)) == WindowID(4))
-        #expect(core.cueWindow(for: WindowID(5)) == WindowID(1))
-        #expect(core.cueWindow(for: WindowID(6)) == WindowID(1))
-        #expect(core.cueWindow(for: WindowID(2)) == WindowID(1))
+        expectEqual(core.cueWindow(for: WindowID(4)), WindowID(4))
+        expectEqual(core.cueWindow(for: WindowID(5)), WindowID(1))
+        expectEqual(core.cueWindow(for: WindowID(6)), WindowID(1))
+        expectEqual(core.cueWindow(for: WindowID(2)), WindowID(1))
         // A sticky window renders on the active Space, whatever
         // its hidden home.
         core.state.setSticky(WindowID(2), .global)
-        #expect(core.cueWindow(for: WindowID(2)) == WindowID(2))
+        expectEqual(core.cueWindow(for: WindowID(2)), WindowID(2))
     }
 
     @Test("the pill's sentences name their subject")

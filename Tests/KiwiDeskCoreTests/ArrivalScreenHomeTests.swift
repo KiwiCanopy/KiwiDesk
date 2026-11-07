@@ -106,7 +106,7 @@ struct ArrivalScreenHomeTests {
         let departing = departing ?? window()
         state.workspaces.activate(space)
         state.apply(.windowCreated(departing))
-        #expect(state.workspaces.space(of: mover) == space)
+        expectEqual(state.workspaces.space(of: mover), space)
         state.apply(
             .windowDestroyed(mover, wasMinimized: false)
         )
@@ -122,8 +122,8 @@ struct ArrivalScreenHomeTests {
         let effects = state.apply(.windowCreated(window()))
         // 6 — the space that screen SHOWS — and not 5, the
         // first one assigned to it.
-        #expect(state.workspaces.space(of: mover) == SpaceID("6"))
-        #expect(effects.rehomedToScreenSpace == SpaceID("6"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("6"))
+        expectEqual(effects.rehomedToScreenSpace, SpaceID("6"))
         // Homed, not duplicated: the flat array of the space it
         // remembered keeps no slot for it.
         #expect(
@@ -142,7 +142,7 @@ struct ArrivalScreenHomeTests {
         state.workspaces.activate(SpaceID("1"))
         state.arrivalDisplay = displayA
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("2"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("2"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -168,7 +168,7 @@ struct ArrivalScreenHomeTests {
         state.workspaces.activate(SpaceID("1"))
         state.arrivalDisplay = displayA
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("2"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("2"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -181,7 +181,7 @@ struct ArrivalScreenHomeTests {
         // mid-detach): resolve as before rather than guessing.
         state.arrivalDisplay = nil
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -194,7 +194,7 @@ struct ArrivalScreenHomeTests {
         // resolved to the other screen.
         state.arrivalDisplay = displayB
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -208,7 +208,7 @@ struct ArrivalScreenHomeTests {
                 window(bundleID: "com.apple.textedit")
             )
         )
-        #expect(state.workspaces.space(of: mover) == SpaceID("2"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("2"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -223,7 +223,7 @@ struct ArrivalScreenHomeTests {
         state.workspaces.removeDisplay(displayA)
         state.arrivalDisplay = displayB
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -249,7 +249,7 @@ struct ArrivalScreenHomeTests {
         )
         state.arrivalDisplay = displayC
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("1"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("1"))
         #expect(effects.rehomedToScreenSpace == nil)
     }
 
@@ -265,7 +265,7 @@ struct ArrivalScreenHomeTests {
         state.workspaces.activate(SpaceID("1"))
         state.arrivalDisplay = displayB
         state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("6"))
+        expectEqual(state.workspaces.space(of: mover), SpaceID("6"))
         #expect(
             state.workspaces[SpaceID("6")]?.focused
                 == WindowID(22)

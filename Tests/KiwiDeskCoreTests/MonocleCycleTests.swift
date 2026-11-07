@@ -57,15 +57,15 @@ struct MonocleCycleTests {
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w2)
+        expectEqual(core.activeSpace?.focused, w2)
         core.execute("focus", args: [.string("right")])
-        #expect(core.activeSpace?.focused == w3)
+        expectEqual(core.activeSpace?.focused, w3)
         // Wrap: past the last window back to the first.
         core.execute("focus", args: [.string("right")])
-        #expect(core.activeSpace?.focused == w1)
+        expectEqual(core.activeSpace?.focused, w1)
         // And backwards off the front to the last.
         core.execute("focus", args: [.string("left")])
-        #expect(core.activeSpace?.focused == w3)
+        expectEqual(core.activeSpace?.focused, w3)
     }
 
     @Test("Wrap focus off makes focus stop at the ends")
@@ -80,14 +80,14 @@ struct MonocleCycleTests {
             !core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w1)
+        expectEqual(core.activeSpace?.focused, w1)
         // Mid-array stepping is unaffected.
         core.state.workspaces.focus(w2, in: SpaceID(1))
         #expect(
             core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w3)
+        expectEqual(core.activeSpace?.focused, w3)
     }
 
     @Test("Cross-axis directions fall through to geometry")
@@ -101,7 +101,7 @@ struct MonocleCycleTests {
             args: [.string("up")]
         )
         #expect(!response.isSuccess)
-        #expect(core.activeSpace?.focused == w1)
+        expectEqual(core.activeSpace?.focused, w1)
     }
 
     @Test("Vertical orientation cycles on up/down instead")
@@ -112,9 +112,9 @@ struct MonocleCycleTests {
             args: [.string("vertical")]
         )
         core.execute("focus", args: [.string("down")])
-        #expect(core.activeSpace?.focused == w2)
+        expectEqual(core.activeSpace?.focused, w2)
         core.execute("focus", args: [.string("up")])
-        #expect(core.activeSpace?.focused == w1)
+        expectEqual(core.activeSpace?.focused, w1)
         // Left/right now fall through to the geometric path.
         #expect(
             !core.execute("focus", args: [.string("right")])
@@ -167,6 +167,6 @@ struct MonocleCycleTests {
             !core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
-        #expect(core.activeSpace?.focused == w1)
+        expectEqual(core.activeSpace?.focused, w1)
     }
 }
