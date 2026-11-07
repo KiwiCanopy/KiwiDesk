@@ -271,16 +271,19 @@ struct AwayBootSeedTests {
     }
 
     /// The full-screen arm shares the Desktop arm's admission: a
-    /// carried filing resumes as the departure it was (#2907); a
-    /// parked one stays a filing.
+    /// carried filing resumes as the departure it was (#2907), an
+    /// unobserved app's included; a parked one (its app hidden)
+    /// stays a filing.
     @Test("a carried filing on a hidden full-screen Space resumes")
     func fullScreenResumesCarried() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
-        core.state.refilePending([WindowID(7), WindowID(6)], in: "2")
+        let carried = [WindowID(7), WindowID(8), WindowID(6)]
+        core.state.refilePending(carried, in: "2")
         core.desktopMemory.readCensus = { _ in self.fullScreenCensus() }
         core.seedAwayWindows()
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        #expect(core.state.rememberedSpaces[WindowID(8)] == .departed("2"))
         #expect(core.state.rememberedSpaces[WindowID(6)] == .restored("2"))
         #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 9)
     }

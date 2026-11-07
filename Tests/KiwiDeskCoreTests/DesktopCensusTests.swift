@@ -136,14 +136,15 @@ struct DesktopCensusTests {
     /// #2949: the hidden full-screen Space 9 names windows 7 and 5;
     /// the CURRENT one, 30, is not read, and neither joins `hosts`.
     /// Window 4 is a toolbar window the Space lists but does not
-    /// name; window 5 is named but not in the owner map.
+    /// name; window 5 is named and parked (its app hidden).
     @Test("a hidden full-screen Space's own windows are listed apart")
     func hiddenFullScreenIsListed() throws {
         let census = try #require(
             DesktopCensus.build(
                 spaces: spaces,
                 owners: [
-                    WindowID(7): 100, WindowID(6): 100, WindowID(4): 100,
+                    WindowID(7): 100, WindowID(5): 100, WindowID(6): 100,
+                    WindowID(4): 100,
                 ],
                 list: lister([9: ([7, 5, 4], [7, 4]), 30: ([6], [6])])
             )
@@ -151,9 +152,39 @@ struct DesktopCensusTests {
         #expect(census.hiddenFullScreenHosts[WindowID(7)]?.space == 9)
         #expect(census.hiddenFullScreenHosts[WindowID(7)]?.pid == 100)
         #expect(census.hiddenFullScreenHosts[WindowID(7)]?.isUp == true)
-        #expect(census.hiddenFullScreenHosts[WindowID(5)] == nil)
+        #expect(census.hiddenFullScreenHosts[WindowID(5)]?.isUp == false)
         #expect(census.hiddenFullScreenHosts[WindowID(6)] == nil)
         #expect(census.hiddenFullScreenHosts[WindowID(4)] == nil)
         #expect(census.hosts.isEmpty)
+    }
+
+    /// Space 12 is a second hidden full-screen Space whose list
+    /// reads: only Space 9's unreadable list is skipped, and a
+    /// window the owner map lacks is no host.
+    @Test("an unreadable full-screen list skips that Space alone")
+    func unreadableFullScreenSkips() throws {
+        let second = NativeSpace(
+            id: 12,
+            displayUUID: "UUID-A",
+            isCurrent: false,
+            isUser: false,
+            fullScreenWindows: [WindowID(3), WindowID(2)]
+        )
+        let census = try #require(
+            DesktopCensus.build(
+                spaces: spaces + [second],
+                owners: [WindowID(7): 100, WindowID(3): 100]
+            ) { space, _ in
+                switch space {
+                case 9: nil
+                case 12: [WindowID(3), WindowID(2)]
+                default: [WindowID(7)]
+                }
+            }
+        )
+        #expect(census.hiddenFullScreenHosts[WindowID(7)] == nil)
+        #expect(census.hiddenFullScreenHosts[WindowID(3)]?.space == 12)
+        #expect(census.hiddenFullScreenHosts[WindowID(2)] == nil)
+        #expect(census.hosts[WindowID(7)] != nil)
     }
 }

@@ -92,25 +92,34 @@ public struct DesktopCensus: Sendable, Equatable {
             fullScreen: Set(spaces.filter { !$0.isUser }.map(\.id)),
             hiddenFullScreenHosts: hiddenFullScreenHosts(
                 spaces: spaces,
-                owners: owners
+                owners: owners,
+                list: list
             )
         )
     }
 
     /// The windows each full-screen Space no display shows names
     /// as its own (`NativeSpace.fullScreenWindows`), never the
-    /// toolbar windows it also hosts — read off the topology, so a
-    /// census costs no list read for them. A tile is UP: macOS
-    /// leaves full screen to minimize a window.
+    /// toolbar windows it also hosts. One UP-list read per such
+    /// Space, so a hidden app's window reads parked; a Space whose
+    /// list cannot be read is skipped, not the census.
     private static func hiddenFullScreenHosts(
         spaces: [NativeSpace],
-        owners: [WindowID: pid_t]
+        owners: [WindowID: pid_t],
+        list: (SkyLight.SpaceID, _ includingParked: Bool) -> [WindowID]?
     ) -> [WindowID: Host] {
         var hosts: [WindowID: Host] = [:]
         for space in spaces where !space.isUser && !space.isCurrent {
+            guard !space.fullScreenWindows.isEmpty,
+                let up = list(space.id, false).map(Set.init)
+            else { continue }
             for id in space.fullScreenWindows where hosts[id] == nil {
                 guard let pid = owners[id] else { continue }
-                hosts[id] = Host(space: space.id, pid: pid, isUp: true)
+                hosts[id] = Host(
+                    space: space.id,
+                    pid: pid,
+                    isUp: up.contains(id)
+                )
             }
         }
         return hosts
