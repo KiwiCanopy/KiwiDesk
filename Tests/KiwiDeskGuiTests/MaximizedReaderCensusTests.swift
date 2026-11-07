@@ -63,11 +63,35 @@ struct MaximizedReaderCensusTests {
         )
     }
 
+    /// Every file that may spell the stored `.maximizeShape`
+    /// (#3062), which outlives the window it was written with: a
+    /// reader takes `StateCoordinator.maximizedShape(of:)`.
+    private let shapeAllowed: [String: Int] = [
+        // The model's declaration.
+        "Models/SpaceModel.swift": 1,
+        // The in-place carry, written and adopted.
+        "Models/StateSnapshot+InPlace.swift": 4,
+        // The verdict.
+        "State/StateCoordinator+Maximized.swift": 1,
+        // The toggle, which writes it with the window.
+        "App/KiwiCore+Maximize.swift": 3,
+    ]
+
     @Test("Only the allowlisted files spell the stored maximize")
     func readersAreCensused() throws {
-        let pattern = try NSRegularExpression(
-            pattern: "\\.maximized\\b"
-        )
+        try census("\\.maximized\\b", allowed)
+    }
+
+    @Test("Only the allowlisted files spell the stored shape")
+    func shapeReadersAreCensused() throws {
+        try census("\\.maximizeShape\\b", shapeAllowed)
+    }
+
+    private func census(
+        _ needle: String,
+        _ allowed: [String: Int]
+    ) throws {
+        let pattern = try NSRegularExpression(pattern: needle)
         var counts: [String: Int] = [:]
         let prefix = coreRoot.path + "/"
         for file in try SourceScan.swiftSources(under: coreRoot) {

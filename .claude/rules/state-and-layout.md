@@ -2375,7 +2375,14 @@ editing here:
   stored `Space.maximized`, which outlives the focus that ended it
   until `retireEndedMaximize` runs; a raw spelling outside the
   register reds `MaximizedReaderCensusTests`, whose `allowed` map
-  is the one copy of who may. Lay the fill over the ISSUED frames
+  is the one copy of who may. **What it fills is read through
+  `StateCoordinator.maximizedShape(of:)` and written only beside
+  `maximized = id` (#3062)**: an ender clears the window alone, so
+  the stored `Space.maximizeShape` outlives it, and a raw spelling
+  joins the same suite's `shapeAllowed` with its reason
+  (`MaximizedReaderCensusTests` ▸ `shapeReadersAreCensused`). A
+  whole share is a full Maximize (`MaximizeShape.init`), so "fills
+  its screen" is `axis == nil` alone. Lay the fill over the ISSUED frames
   alone (`TilingEngine.fillingMaximized` inside
   `visibleFrames(placed: true)`), never the slots, so every slot
   reader keeps the row. **A write that rearranges a Space ends its

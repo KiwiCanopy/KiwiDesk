@@ -93,5 +93,9 @@ extension FullscreenStandDownTests {
         #expect(core.showsMaximized(on: display))
         core.updateBars()
         #expect(core.spaceBars.shownStrips.isEmpty)
+        #expect(!core.vision.standDown.contains(display))
+        // A bar drawn over the windows still has a strip to cover.
+        core.tiler.settings.spaceBarStyle.reserve = false
+        #expect(core.showsMaximized(on: display))
     }
 }

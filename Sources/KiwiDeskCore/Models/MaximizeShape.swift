@@ -28,9 +28,19 @@ public struct MaximizeShape: Equatable, Sendable, Codable {
         share: Double = 1,
         anchor: MaximizeAnchor = .center
     ) {
-        self.axis = axis
-        self.share = axis == nil ? 1 : share
-        self.anchor = axis == nil ? .center : anchor
+        // A whole share fills the screen: it IS a full Maximize, so
+        // every reader of "fills its screen" asks `axis` alone.
+        let full = axis == nil || share >= 1
+        self.axis = full ? nil : axis
+        self.share = full ? 1 : share
+        self.anchor = full ? .center : anchor
+    }
+
+    /// Whether `other` is this shape, its share within a rounding
+    /// of this one's, so a share typed as 0.6667 is ⅔ (#3062).
+    public func matches(_ other: MaximizeShape) -> Bool {
+        axis == other.axis && anchor == other.anchor
+            && abs(share - other.share) < 0.005
     }
 
     /// Today's Maximize (#2448): the whole screen.

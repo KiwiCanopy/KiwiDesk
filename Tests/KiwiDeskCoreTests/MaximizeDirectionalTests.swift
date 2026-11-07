@@ -120,6 +120,30 @@ struct MaximizeDirectionalTests {
         )
     }
 
+    @Test("A second press of the same axis ends it")
+    func sameAxisEnds() {
+        let core = makeCore()
+        core.execute("toggle_maximized", args: [.string("width")])
+        #expect(shape(core)?.axis == .width)
+        // A share a rounding off the stored one is the same.
+        core.execute(
+            "toggle_maximized",
+            args: [.string("width"), .number(0.5001)]
+        )
+        #expect(shape(core) == nil)
+    }
+
+    @Test("A whole share is a full Maximize")
+    func wholeShareIsFull() {
+        let core = makeCore()
+        core.execute(
+            "toggle_maximized",
+            args: [.string("height"), .number(1)]
+        )
+        #expect(shape(core) == .full)
+        #expect(issued(core)[w1] == bounds)
+    }
+
     @Test("A share or an axis out of range is refused")
     func refusals() {
         let core = makeCore()

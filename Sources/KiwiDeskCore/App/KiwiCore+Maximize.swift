@@ -27,7 +27,7 @@ extension KiwiCore {
         else { return .fail("no focused window") }
         if state.maximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {
-                if $0.maximizeShape == shape {
+                if $0.maximizeShape.matches(shape) {
                     $0.maximized = nil
                 } else {
                     $0.maximizeShape = shape

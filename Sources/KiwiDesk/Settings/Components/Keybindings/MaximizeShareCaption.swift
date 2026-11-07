@@ -24,7 +24,7 @@ struct MaximizeShareCaption: View {
                 SettingsCatalog.layoutDefaults.maximizeCard.text
             ),
             destination: .layoutDefaults,
-            row: row.id
+            row: row
         )
     }
 

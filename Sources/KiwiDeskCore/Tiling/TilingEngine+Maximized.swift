@@ -18,11 +18,12 @@ extension TilingEngine {
         state: StateCoordinator
     ) -> [WindowID: CGRect] {
         guard let id = state.maximizedWindow(of: input.space),
+            let shape = state.maximizedShape(of: input.space),
             let slot = frames[id]
         else { return frames }
         var context = input.context
         context.bounds = Self.maximizedBounds(
-            input.space.maximizeShape,
+            shape,
             screen: visibleBounds(screen),
             slot: slot
         )

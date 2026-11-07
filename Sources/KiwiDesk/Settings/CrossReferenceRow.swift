@@ -39,7 +39,7 @@ struct CrossReferenceRow: View {
     let destination: SettingsDestination
     /// The row on `destination` to land on and flash, or nil for its
     /// root (#3062).
-    var row: String? = nil
+    var row: SettingsControl? = nil
     @Environment(\.settingsNavigate) private var navigate
     @Environment(\.settingsLand) private var land
 
@@ -55,7 +55,10 @@ struct CrossReferenceRow: View {
             navigate: {
                 if let row {
                     land(
-                        SettingsAnchor(destination: destination, anchor: row)
+                        SettingsAnchor(
+                            destination: destination,
+                            anchor: row.id
+                        )
                     )
                 } else {
                     navigate(destination)

@@ -108,7 +108,7 @@ struct MaximizeChordCaption: View {
                 SettingsCatalog.shortcuts.sizeFloat.text
             ),
             destination: .shortcuts,
-            row: row.id
+            row: row
         )
     }
 

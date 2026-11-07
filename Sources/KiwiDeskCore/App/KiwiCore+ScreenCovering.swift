@@ -128,13 +128,31 @@ extension KiwiCore {
         else { return true }
         return Self.reachesShelf(
             frame,
-            layoutBounds: tiler.layoutBounds(on: screen, for: space)
+            layoutBounds: barStripBounds(on: screen, for: space)
+        )
+    }
+
+    /// `space`'s layout bounds on `screen` with every shown bar
+    /// carved off, reserving or not: a bar drawn over the windows
+    /// still has a strip a fill can cover (#3062).
+    private func barStripBounds(
+        on screen: NSScreen,
+        for space: Space
+    ) -> CGRect {
+        var carved = tiler.settings
+        carved.spaceBarStyle.reserve = true
+        carved.appBarStyle.reserve = true
+        return carved.layoutBounds(
+            from: tiler.visibleBounds(screen),
+            mode: space.mode,
+            on: tiler.fingerprint(of: screen),
+            pocketAtRest: carved.pocketRests
         )
     }
 
     /// Whether `frame` (AX) leaves `layoutBounds`, the screen with
-    /// the shelf's reservation carved off: it then covers a bar's
-    /// strip (#3062). A point of rounding is not a reach.
+    /// every bar's strip carved off: it then covers a bar's strip
+    /// (#3062). A point of rounding is not a reach.
     nonisolated static func reachesShelf(
         _ frame: CGRect,
         layoutBounds: CGRect
