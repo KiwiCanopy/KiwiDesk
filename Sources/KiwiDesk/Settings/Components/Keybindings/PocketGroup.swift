@@ -12,8 +12,6 @@ struct PocketGroup: View {
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.pocketCard) {
             Group {
-                // What it holds leads its keys (owner, #2678).
-                capacityRow
                 ForEach(ShortcutsRowOrder.pocketAtRest, id: \.id) {
                     key in
                     KeybindingFamilyRows(
@@ -30,59 +28,6 @@ struct PocketGroup: View {
             // Each app's own key (#2612).
             PocketAppRows(model: model, bindings: $bindings)
         }
-    }
-
-    /// A menu like Edge's: the recorder's footprint has no room for
-    /// two spelled-out segments.
-    private var capacityRow: some View {
-        let label = SettingsCatalog.shortcuts.pocketCapacity.text
-        return ShortcutSettingRow(title: label, help: Self.capacityHelp) {
-            // App-wide, written at once (#1741).
-            Picker(
-                label,
-                selection: Binding(
-                    get: { model.appWide.pocketCapacity },
-                    set: { new in
-                        model.setAppWide { $0.pocketCapacity = new }
-                    }
-                )
-            ) {
-                ForEach(PocketCapacity.allCases, id: \.self) {
-                    Text(Self.capacityName($0)).tag($0)
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-            .neutralMenuLabel()
-            .controlSize(.regular)
-            .fixedSize()
-            .accessibilityLabel(label)
-            .accessibilityValue(
-                Self.capacityName(model.appWide.pocketCapacity)
-            )
-        }
-        .searchAnchored(SettingsCatalog.shortcuts.pocketCapacity)
-    }
-
-    static func capacityName(_ capacity: PocketCapacity) -> String {
-        switch capacity {
-        case .one: L("pocket.capacity.one", "One window")
-        case .several: L("pocket.capacity.several", "Several windows")
-        }
-    }
-
-    /// Names both segments through their own keys (#818).
-    static var capacityHelp: String {
-        L(
-            "pocket.capacity.help",
-            "%1$@: the Pocket shows while a window goes in or out or "
-                + "while you drag one. %2$@: the Pocket stays on every "
-                + "screen. Either way the Pocket key puts away "
-                + "the one you used, or with all inside takes out the "
-                + "one put in last. Applies at once, in every profile.",
-            capacityName(.one),
-            capacityName(.several)
-        )
     }
 
     /// The track's ends name where the position runs: left to

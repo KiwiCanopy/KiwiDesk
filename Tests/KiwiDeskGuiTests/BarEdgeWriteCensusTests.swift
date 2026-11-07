@@ -125,6 +125,11 @@ struct BarEdgeWriteCensusTests {
             2,
             "`pocketRest` and `pocketReservation` over onScreen (#2784)"
         ),
+        "ConfigMigration+PocketVisibility.swift": (
+            1,
+            "the crossing's frozen reading of the retired rest over "
+                + "the bars' own edges, no screen at hand (#2978)"
+        ),
     ]
 
     /// Settings readers of a bar's own edge (or of the bars'

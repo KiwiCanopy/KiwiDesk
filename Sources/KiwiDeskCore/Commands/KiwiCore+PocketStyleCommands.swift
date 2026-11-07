@@ -1,8 +1,8 @@
 import Foundation
 
 /// `pocket.*`: the pocket mark's colour (#2671), through the marks'
-/// shared `setMarkColor` — empty is Automatic — and its capacity
-/// (#2678). Where it sits is KiwiShelf's (`kiwishelf.set_pocket_*`);
+/// shared `setMarkColor` — empty is Automatic. Where it sits and
+/// when it shows are KiwiShelf's (`kiwishelf.set_pocket_*`);
 /// its list's key takes no setter's pass (`pocketToggleListCommand`).
 extension KiwiCore {
     func pocketStyleCommand(
@@ -13,15 +13,6 @@ extension KiwiCore {
         case "pocket.set_color":
             return setMarkColor(args) {
                 tiler.settings.pocketStyle.color = $0
-            }
-        case "pocket.set_capacity":
-            // App-wide, the running value, as every app-wide verb.
-            switch BarSettingChoice.value(args, PocketCapacity.self) {
-            case .success(let capacity):
-                setAppWide(persisting: false) { $0.pocketCapacity = capacity }
-                return .ok()
-            case .failure(let error):
-                return .fail(error.message)
             }
         default:
             return .fail("unknown command: \(command)")

@@ -280,6 +280,10 @@ struct ResetEscapeHatchTests {
         }
 
         let virgin = try luaCore()
+        // A reset lands the stored default the test core's Hidden
+        // pin stands in for (#2978).
+        virgin.tiler.settings.kiwishelf.pocketVisibility =
+            KiwiShelf().pocketVisibility
         defer {
             try? files.removeItem(at: virgin.configDirectory)
         }

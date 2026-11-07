@@ -44,6 +44,9 @@ extension SettingsRevertRegister {
         .kiwishelf(.pocketPosition): .leaf(
             \.settings.kiwishelf.pocketPosition
         ),
+        .kiwishelf(.pocketVisibility): .leaf(
+            \.settings.kiwishelf.pocketVisibility
+        ),
     ]
 
     /// One app's rules back to the baseline, with the reach the

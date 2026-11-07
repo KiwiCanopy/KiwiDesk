@@ -118,12 +118,11 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.size_float",
         "Size & float"
     )
-    /// The Pocket card (#2680) and its capacity row (#2678).
+    /// The Pocket card (#2680).
     let pocketCard = SettingsControl(
         "shortcuts.section.pocket",
         "Pocket"
     )
-    let pocketCapacity = SettingsControl("pocket.capacity", "Holds")
     /// Its add row, where an empty Pocket's row of the same words
     /// lands (#2941).
     let pocketAppAdd = SettingsControl(

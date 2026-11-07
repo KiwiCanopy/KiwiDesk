@@ -32,7 +32,7 @@ extension TilingEngine {
             from: visibleBounds(screen),
             mode: space.mode,
             on: fingerprint(of: screen),
-            pocketAtRest: pocketAtRest()
+            pocketAtRest: settings.pocketRests
         )
     }
 }

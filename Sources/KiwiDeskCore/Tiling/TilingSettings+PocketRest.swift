@@ -1,41 +1,50 @@
 import CoreGraphics
 
-/// How the pocket stands at rest on its edge (#2678, #2784).
+/// How the pocket stands at rest on its edge (#2678, #2784, #2978).
 public enum PocketRest: Sendable, Equatable {
     /// A section of the bars drawn on its edge.
     case section
     /// The kiwi handle, on an edge that draws no bar at rest.
     case handle
-    /// The whole bare mark, on an edge no bar shows while the bars
-    /// read Always.
+    /// The whole bare mark, on an edge that draws no bar at rest
+    /// while the pocket reads Always.
     case mark
 }
 
 extension TilingSettings {
+    /// Whether the pocket rests on screen: its Show is not Hidden
+    /// (#2978) — the one input the bounds and the bar plan read.
+    public var pocketRests: Bool { kiwishelf.pocketVisibility != .hidden }
+
     /// How the pocket stands at rest on `screen` in `mode`: a section
-    /// where its edge draws a bar at rest, the handle where that
-    /// edge's bars hide; on an edge no bar shows it follows the bars'
-    /// Show, the more present of the two (owner, #2784 ▸ 8). The
-    /// at-rest answer from stored settings: the reservation and the
-    /// whole mark read it, while a live section stands where the
-    /// bar pass draws a bar (`PocketPlateOverlay.slots`).
+    /// where its edge draws a bar at rest, else its own Show decides,
+    /// the whole mark under Always and the handle under Auto (#2978).
+    /// The at-rest answer from stored settings, asked only while the
+    /// pocket rests (not Hidden): the reservation and the whole mark
+    /// read it, while a live section stands where the bar pass draws a
+    /// bar (`PocketPlateOverlay.slots`).
     public func pocketRest(
         in mode: LayoutMode,
         on screen: String?
     ) -> PocketRest {
         let settings = onScreen(screen)
-        let app = appBarVisibility(in: mode)
         let edge = settings.barEdges(
             space: spaceBarStyle.visibility,
-            app: app
+            app: appBarVisibility(in: mode)
         ).first { $0.edge == settings.kiwishelf.pocketEdge }
-        if let edge {
-            return edge.drawsNothingAtRest ? .handle : .section
-        }
-        let show = [spaceBarStyle.visibility, app]
-            .compactMap { $0 }
-            .max { $0.presence < $1.presence }
-        return show == .always ? .mark : .handle
+        if let edge, !edge.drawsNothingAtRest { return .section }
+        return kiwishelf.pocketVisibility == .always ? .mark : .handle
+    }
+
+    /// Whether a bar keeps an Auto pocket shown on `screen` in
+    /// `mode`: one drawn at rest on the pocket's edge — what
+    /// Settings' Pocket row notes (#2978).
+    public func barKeepsAutoPocket(
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> Bool {
+        kiwishelf.pocketVisibility == .auto
+            && pocketRest(in: mode, on: screen) == .section
     }
 
     /// The strip the pocket reserves at rest on `screen` in `mode`,
@@ -58,7 +67,9 @@ extension TilingSettings {
         let reserves =
             edge.map { !$0.reserving.isEmpty }
             ?? (spaceBarStyle.reserve || (hostsApp && appBarStyle.reserve))
-        guard reserves else { return nil }
+        guard reserves, kiwishelf.pocketVisibility != .hidden else {
+            return nil
+        }
         switch pocketRest(in: mode, on: screen) {
         case .section: return nil
         case .handle: return (pocketEdge, kiwishelf.hiddenReservation)

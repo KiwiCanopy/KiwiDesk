@@ -256,6 +256,8 @@ extension InterpolatedLabelTests {
         "keybinding.toggle_space_bar.inert_link": 2,
         "kiwishelf.show.space_bar.beside_always": 1,
         "kiwishelf.show.app_bar.beside_always": 1,
+        // #2978: an Auto Pocket a shown bar keeps up.
+        "kiwishelf.show.pocket.beside_always": 2,
         "keybinding.toggle_app_bar.inert_link": 4,
         // 5. #1241, #1609. The ladder lives in the Which profile
         //    loads card's one `?`, where it names the card

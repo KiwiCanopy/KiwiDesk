@@ -68,7 +68,6 @@ appWide.desktopCue
 appWide.hyperKey
 appWide.modeCue
 appWide.modifierSides
-appWide.pocketCapacity
 appWide.quitGridTargetDepth
 appWide.refusalSound
 appWide.spaceScrollTransition
@@ -222,6 +221,7 @@ settings.mouseResize
 settings.pocketStyle.color
 settings.kiwishelf.pocketEdge
 settings.kiwishelf.pocketPosition
+settings.kiwishelf.pocketVisibility
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone

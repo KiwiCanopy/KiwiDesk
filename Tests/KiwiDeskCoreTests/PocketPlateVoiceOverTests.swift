@@ -22,7 +22,10 @@ struct PocketPlateVoiceOverTests {
     private func fixture() throws -> Fixture {
         let fixture = Fixture()
         let core = fixture.core
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         fixture.press()
         fixture.arrive(9)
         fixture.press()

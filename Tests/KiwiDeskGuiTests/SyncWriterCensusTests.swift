@@ -40,6 +40,9 @@ struct SyncWriterCensusTests {
         "KiwiCore+ProfileSpaces.swift": (1, .userAct),
         "KiwiCore+RuleReachSave.swift": (2, .userAct),
         "KiwiCore+AppWide.swift": (1, .crossing),
+        // Ends once every profile crossed (#2978); a synced older
+        // folder crosses as this Mac's would.
+        "KiwiCore+PocketVisibilityCrossing.swift": (1, .crossing),
         "KiwiCore+SharedLook.swift": (2, .crossing),
         "KiwiCore+Config.swift": (1, .seedWhenAbsent),
         "KiwiCore+GuiSpaces.swift": (1, .standsDown),

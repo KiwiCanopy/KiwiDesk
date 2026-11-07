@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Two pocketable windows on the real main screen, the Space Bar at the
-/// top, so the pocket's own edge draws nothing; One window by default.
+/// top, so the pocket's own edge draws nothing; Hidden by default.
 /// The pocket's real panels order in, so its suites need a main screen.
 @MainActor
 private struct PocketListFixture {
@@ -61,7 +61,10 @@ private struct PocketListFixture {
 
     /// Pockets `ids`, Several windows holding them.
     func pocket(_ ids: [WindowID]) {
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         for id in ids {
             core.handle(.windowFocused(id))
             core.execute("toggle_pocket_window")

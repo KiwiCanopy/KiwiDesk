@@ -29,6 +29,7 @@ enum KiwiShelfCommandSetting {
     case revealStyle(KiwiShelf.RevealStyle)
     case pocketEdge(AppBarEdge)
     case pocketPosition(CGFloat)
+    case pocketVisibility(ShelfVisibility)
     case fillFade(CGFloat)
     case tintHubAndPlates(Bool)
     case readingContrast(Double)
@@ -83,6 +84,9 @@ enum KiwiShelfCommandSetting {
         case "pocket_edge":
             return BarSettingChoice.value(args, AppBarEdge.self)
                 .map(Self.pocketEdge)
+        case "pocket_visibility":
+            return BarSettingChoice.value(args, ShelfVisibility.self)
+                .map(Self.pocketVisibility)
         case "pocket_position":
             guard let value = args.first?.numberValue,
                 value.isFinite
@@ -206,6 +210,7 @@ enum KiwiShelfCommandSetting {
         case .order(let value): shelf.order = value
         case .revealStyle(let value): shelf.revealStyle = value
         case .pocketEdge(let value): shelf.pocketEdge = value
+        case .pocketVisibility(let value): shelf.pocketVisibility = value
         case .pocketPosition(let value):
             shelf.pocketPosition = KiwiShelf.clampPocketPosition(value)
         case .minimum(let value):

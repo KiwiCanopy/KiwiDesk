@@ -1,7 +1,7 @@
 import AppKit
 
-/// Drives the pocket on screen (#2678): while Several windows holds
-/// it, one pocket on every display, at the slot its shelf pins at a
+/// Drives the pocket on screen (#2678): while it rests (#2978),
+/// one pocket on every display, at the slot its shelf pins at a
 /// bar edge's outer end or as a handle on an edge no bar shows, faded
 /// while empty and unlit; during a window drag it shows as the drop
 /// target too. A click lists the windows inside.
@@ -9,8 +9,9 @@ import AppKit
 /// `updateBars()` and stands down on that pass's verdict, which the
 /// overlay keeps.
 extension KiwiCore {
-    /// Whether the pocket stays on screen (#2678): Several windows.
-    var pocketHoldsSeveral: Bool { appWide.pocketCapacity == .several }
+    /// Whether the pocket rests on screen (#2978): its Show is not
+    /// Hidden.
+    var pocketRests: Bool { tiler.settings.pocketRests }
 
     /// Whether the pocket stands on `display` this pass: it stands,
     /// and that screen does not stand down — what the pocket draws
@@ -20,15 +21,15 @@ extension KiwiCore {
             && !pocketPlate.standingDown.contains(display)
     }
 
-    /// Whether the pocket shows this pass; the shelf's plan reads the
-    /// capacity alone, so a drag or a play moves no bar (#2793).
+    /// Whether the pocket shows this pass; the shelf's plan reads
+    /// `pocketRests` alone, so a drag or a play moves no bar (#2793).
     var pocketStands: Bool {
         pocketStands(listing: pocketListedDisplay != nil)
     }
 
     private func pocketStands(listing: Bool) -> Bool {
         Self.pocketStands(
-            several: pocketHoldsSeveral,
+            rests: pocketRests,
             dragging: pocketPlate.dragging != nil,
             playing: !pocketPlate.playing.isEmpty,
             listing: listing
@@ -74,7 +75,7 @@ extension KiwiCore {
     }
 
     /// Whether the open list names other windows than it would now:
-    /// under One window it holds an app's own, which no spec counts.
+    /// under Hidden it holds an app's own, which no spec counts.
     private var pocketListIsStale: Bool {
         guard case .pocket(let listed)? = shelves.peek.shown?.source else {
             return false
@@ -100,12 +101,12 @@ extension KiwiCore {
     /// row can name, counts for nothing — the general list in
     /// put-in order, then the apps' own pocket windows, listed
     /// apart (#2923, amending #2612 ▸ 11) and only where the pocket
-    /// stands at rest, under Several windows.
+    /// rests (#2978).
     var pocketPlateWindows: [WindowID] {
-        pocketWindows(keyed: pocketHoldsSeveral)
+        pocketWindows(keyed: pocketRests)
     }
 
-    /// What the list shows: under One window too, it lists the apps'
+    /// What the list shows: under Hidden too, it lists the apps'
     /// own pocket windows, since a key can open it there (#2974).
     var pocketListWindows: [WindowID] { pocketWindows(keyed: true) }
 
@@ -127,7 +128,7 @@ extension KiwiCore {
         let name = L(
             "pocket.plate.ax",
             "Pocket, windows inside: %1$d",
-            // What its press opens, under One window an app's own too.
+            // What its press opens, under Hidden an app's own too.
             pocketListWindows.count
         )
         let edge = shelf.pocketEdge
@@ -188,18 +189,18 @@ extension KiwiCore {
         }
     }
 
-    /// Whether the pocket is on screen: always while Several windows
-    /// holds it; under One window during a window drag, as its drop
+    /// Whether the pocket is on screen: always while it rests;
+    /// under Hidden during a window drag, as its drop
     /// target, and while a window goes in or out — on a bar's edge
     /// just inside the strip, which opens no slot (#2793) — and while
     /// its list is open or `pocket.toggle_list` is opening it (#2974).
     static func pocketStands(
-        several: Bool,
+        rests: Bool,
         dragging: Bool,
         playing: Bool,
         listing: Bool
     ) -> Bool {
-        several || dragging || playing || listing
+        rests || dragging || playing || listing
     }
 
     /// Whether a play on `display` draws its own pocket: not where

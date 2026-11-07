@@ -42,7 +42,8 @@ extension KiwiCore {
     }
 
     /// Whether the whole mark stands at rest on `display`: its edge
-    /// shows no bar there and the bars read Always (#2784 ▸ 8).
+    /// shows no bar at rest there and the pocket reads Always
+    /// (#2784 ▸ 8, #2978).
     func pocketRestsWhole(on display: Display) -> Bool {
         let mode =
             state.workspaces.currentSpace(on: display.id)

@@ -26,7 +26,10 @@ struct PocketEmptyPeekTests {
             )
         )
         core.state.apply(.windowFocused(window))
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         return core
     }
 

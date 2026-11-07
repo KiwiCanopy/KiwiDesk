@@ -74,7 +74,7 @@ extension KiwiCore {
         )
         // The pocket's slot on each screen's bar edge (#2678).
         var pocketSlots: [DisplayID: CGRect] = [:]
-        // Under One window it stands inside its edge's strip (#2793).
+        // Under Hidden it stands inside its edge's strip (#2793).
         var pocketStrips: [DisplayID: CGRect] = [:]
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
@@ -109,7 +109,7 @@ extension KiwiCore {
                 settings: shown,
                 spaceItems: items,
                 app: app,
-                pocket: pocketHoldsSeveral,
+                pocket: pocketRests,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(

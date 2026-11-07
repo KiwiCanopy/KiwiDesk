@@ -71,6 +71,9 @@ extension APIReference {
         // the markers' widths are fixed (#2797, `retiredReasons`).
         map["drag.set_corner_radius"] = "border.set_corner_style"
         map["pull_or_spawn"] = "focus_or_spawn"
+        // The pocket's Show is each profile's, beside the bars'
+        // (#2978).
+        map["pocket.set_capacity"] = "kiwishelf.set_pocket_visibility"
         // A bar is never off, only hidden until its shortcut (#761).
         map["space_bar.set_enabled"] = "space_bar.set_visibility"
         for layout in ["monocle", "scroll"] {

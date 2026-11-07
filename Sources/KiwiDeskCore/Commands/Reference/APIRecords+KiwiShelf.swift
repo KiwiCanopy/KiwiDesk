@@ -170,6 +170,11 @@ extension APIReference {
             "Sets the screen edge the pocket sits on.",
             .choice("edge", AppBarEdge.self)
         ),
+        "set_pocket_visibility": APIRecord(
+            "Sets when the pocket shows: always, auto (its handle) "
+                + "or hidden.",
+            .choice("visibility", ShelfVisibility.self)
+        ),
         "set_pocket_position": APIRecord(
             "Sets where along its edge the pocket sits, 0–100 "
                 + "percent; a bar's edge takes the nearer end.",

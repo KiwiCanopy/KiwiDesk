@@ -29,8 +29,13 @@ func makeTestModel(
 ) -> SettingsModel {
     let domain = defaults ?? makeScratchDefaults().defaults
     if let root { SettingsRootPreference.write(root, to: domain) }
+    let core = core ?? makeTestCore()
+    // Settings reads the stored default, not the test core's Hidden
+    // pin, so a clean profile stays clean (#2978).
+    core.tiler.settings.kiwishelf.pocketVisibility =
+        KiwiShelf().pocketVisibility
     let model = SettingsModel(
-        core: core ?? makeTestCore(),
+        core: core,
         preferences: domain
     )
     // #1105: never read the host's com.apple.symbolichotkeys —

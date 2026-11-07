@@ -20,7 +20,10 @@ struct PocketListKeyedTests {
     /// then the other app's window put in the general list.
     private func fixture(general put: Bool = true) -> Fixture {
         let fixture = Fixture()
-        fixture.core.execute("pocket.set_capacity", args: [.string("several")])
+        fixture.core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         fixture.press()
         fixture.arrive(9)
         fixture.press()
@@ -91,10 +94,13 @@ struct PocketListKeyedTests {
 
     /// "Nothing changes under One window" (▸ 2): a drag or a play
     /// stands the pocket there, and it counts the general list.
-    @Test("under One window the plate counts the general list alone")
+    @Test("under Hidden the plate counts the general list alone")
     func oneWindowCountsGeneral() {
         let fixture = fixture()
-        fixture.core.execute("pocket.set_capacity", args: [.string("one")])
+        fixture.core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("hidden")]
+        )
         #expect(fixture.core.pocketPlateWindows == [general])
     }
 

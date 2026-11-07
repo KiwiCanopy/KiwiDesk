@@ -1,7 +1,7 @@
 import AppKit
 
 /// The pocket on screen (#2678): one per display — on every display
-/// while Several windows holds the pocket. At the slot its shelf's
+/// while it rests (#2978). At the slot its shelf's
 /// arrangement pins at a bar edge's outer end it is a shelf section,
 /// its view handed to the shelf (`sectionMount`), which draws it in
 /// the shelf's own motion; on an edge no bar shows it is a handle in
@@ -201,7 +201,7 @@ final class PocketPlateOverlay {
             hold(shown, at: spec, until: unpeeks && held)
         }
         orderIn(shown)
-        // Sized and ordered in first: under One window the handle is
+        // Sized and ordered in first: under Hidden the handle is
         // made in the pass it rises, and a rise played before showed
         // none on device (#2776).
         if changed {

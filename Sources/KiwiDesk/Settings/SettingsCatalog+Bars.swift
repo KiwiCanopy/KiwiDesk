@@ -26,7 +26,7 @@ struct BarsControls: Sendable {
     )
     let kiwishelfShowEach = SettingsDrawer(
         "kiwishelf.show.each_bar",
-        "Each bar",
+        "Each bar and Pocket",
         instance: "kiwishelf",
         children: KiwiShelfShowControls()
     )
@@ -81,7 +81,7 @@ struct KiwiShelfDurationControls: Sendable {
     )
 }
 
-/// KiwiShelf ▸ Show ▸ Each bar rows (#761), in
+/// KiwiShelf ▸ Show ▸ Each bar and Pocket rows (#761, #2978), in
 /// `BarsRowOrder.kiwishelfShowEach`' order.
 struct KiwiShelfShowControls: Sendable {
     let spaceBarShow = SettingsControl(
@@ -97,6 +97,10 @@ struct KiwiShelfShowControls: Sendable {
         "kiwishelf.show.scrolling",
         "App Bar in %1$@",
         naming: .scrolling
+    )
+    let pocketShow = SettingsControl(
+        "kiwishelf.show.pocket",
+        "Pocket"
     )
 }
 

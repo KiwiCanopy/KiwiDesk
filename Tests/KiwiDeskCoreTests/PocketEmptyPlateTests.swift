@@ -15,7 +15,10 @@ struct PocketEmptyPlateTests {
     /// screen so it stands (#531).
     private func core() throws -> KiwiCore {
         let core = makeTestCore()
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         let screen = try #require(NSScreen.main)
         let id = try #require(screen.kiwiDisplayID)
         let space = try #require(core.state.workspaces.activeSpace)

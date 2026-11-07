@@ -5,11 +5,12 @@ import SwiftUI
 /// bars along the edge: alignment for a lone bar, order and share
 /// once both show.
 extension KiwiShelfCard {
-    /// How the bars show (#761): one master for every bar, each
-    /// bar behind Each bar — the Space Bar in every layout, the
-    /// App Bar only where a layout can carry one — then the Space
-    /// cue. The master selects nothing while the bars differ and
-    /// says why through its `?`; the drawer then stays open.
+    /// How KiwiShelf shows (#761, #2978): one master for every bar
+    /// and the Pocket, each behind Each bar and Pocket — the Space
+    /// Bar in every layout, the App Bar only where a layout can
+    /// carry one, then the Pocket — then the reveal. The master
+    /// selects nothing while they differ and says why through its
+    /// `?`; the drawer then stays open.
     var showGroup: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(BarsRowOrder.kiwishelfShow, id: \.id) {
@@ -28,15 +29,16 @@ extension KiwiShelfCard {
             ? BarsGateHelp.visibilityDiffers
             : L(
                 "kiwishelf.show.visibility.help",
-                "Always keeps a bar on screen. Auto hides it "
-                    + "to a thin mark until the pointer rests "
-                    + "on it. Hidden leaves only the Pocket's "
-                    + "handle, which windows keep clear of; its "
-                    + "shortcut still shows the bar, over your "
-                    + "windows. Only %1$@ and %2$@ can carry an "
+                "Sets the bars and the Pocket together. Always "
+                    + "keeps them on screen. Auto hides each to its "
+                    + "handle until the pointer rests on it. "
+                    + "Hidden shows a bar only through its "
+                    + "shortcut, over your windows, and the Pocket "
+                    + "only while a window goes in or out, while "
+                    + "you drag one, or when its list's shortcut "
+                    + "opens it. Only %1$@ and %2$@ can carry an "
                     + "App Bar. With the Space Bar hidden, the "
-                    + "menu bar shows the Space each screen is "
-                    + "on.",
+                    + "menu bar shows the Space each screen is on.",
                 L("layout.monocle.name", "Monocle"),
                 L("layout.scrolling.name", "Scrolling")
             )
@@ -101,6 +103,18 @@ extension KiwiShelfCard {
                     .scrollingShowIn
             )
             besideAlwaysNote(.app, in: [.scrolling])
+        case .kiwishelf(.pocketVisibility):
+            visibilityRow(
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .pocketShow.text,
+                $model.config.settings.kiwishelf.pocketVisibility,
+                options: AppBarOptions.pocketVisibility
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .pocketShow
+            )
+            autoPocketNote
         default:
             let _ = assertionFailure(
                 "unrendered Show key: \(key.id)"
@@ -140,16 +154,39 @@ extension KiwiShelfCard {
         }
     }
 
+    /// Under an Auto Pocket on the edge of a bar shown at rest: it
+    /// stays shown there (#2978) — Core's verdict, on any screen's
+    /// edges in any layout.
+    @ViewBuilder private var autoPocketNote: some View {
+        let screens = model.config.settings.screenVariants
+        if screens.contains(where: { screen in
+            LayoutMode.allCases.contains {
+                screen.barKeepsAutoPocket(in: $0, on: nil)
+            }
+        }) {
+            BarNoteRow(
+                text: L(
+                    "kiwishelf.show.pocket.beside_always",
+                    "On %1$@, the Pocket stays shown while a bar on its "
+                        + "edge is set to %2$@.",
+                    L("kiwishelf.show.pocket.auto", "Auto"),
+                    L("bar.visibility.always", "Always")
+                )
+            )
+        }
+    }
+
     /// One bar's Always · Auto · Hidden strip, on the shared label
     /// axis like every labelled picker (#2439).
     private func visibilityRow(
         _ title: String,
-        _ selection: Binding<ShelfVisibility>
+        _ selection: Binding<ShelfVisibility>,
+        options: [(ShelfVisibility, String)] = AppBarOptions.visibility
     ) -> some View {
         SegmentedPicker(
             title,
             selection: selection,
-            options: AppBarOptions.visibility.map { ($0.1, $0.0) }
+            options: options.map { ($0.1, $0.0) }
         )
     }
 

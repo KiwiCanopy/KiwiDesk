@@ -501,9 +501,13 @@ pocket
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
 place the pocket
 ([`kiwishelf.set_pocket_edge`](lua-reference.md#kiwishelfset_pocket_edge)).
-`pocket.set_capacity one|several` (default `one`): `several` keeps it
-on every screen
-([`pocket.set_capacity`](lua-reference.md#pocketset_capacity)).
+
+:::unreleased
+`kiwishelf.set_pocket_visibility always|auto|hidden` (default
+`always`) sets when it shows, per profile
+([`kiwishelf.set_pocket_visibility`](lua-reference.md#kiwishelfset_pocket_visibility)).
+`pocket.set_capacity` fails naming it.
+:::
 
 `kiwishelf.set_reading_contrast 1–4.5` (default `2.2`) sets the
 contrast text keeps where the fill fades on KiwiHub, the plates

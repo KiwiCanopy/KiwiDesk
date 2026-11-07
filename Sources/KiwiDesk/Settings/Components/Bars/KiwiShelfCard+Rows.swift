@@ -123,6 +123,9 @@ extension KiwiShelfCard {
             pocketEdgeRow
         case .pocketPosition:
             pocketPositionRow
+        // Drawn in the Show drawer (`showRow`).
+        case .pocketVisibility:
+            EmptyView()
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
             .fillFade, .tintHubAndPlates, .readingContrast,
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,

@@ -28,8 +28,8 @@ extension KiwiShelfCard {
                 label: label,
                 help: L(
                     "kiwishelf.pocket_position.help",
-                    "With “%1$@”, the Pocket takes a bar's nearer end.",
-                    PocketGroup.capacityName(.several)
+                    "On a bar's edge, the Pocket takes the bar's nearer "
+                        + "end."
                 )
             )
         } control: {

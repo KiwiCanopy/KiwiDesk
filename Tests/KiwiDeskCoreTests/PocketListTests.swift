@@ -122,11 +122,11 @@ struct PocketListTests {
         #expect(core.state.pocketPhase(of: two) == .out)
     }
 
-    @Test("every capacity takes another mark (#2978)")
-    func everyCapacityTakesAnotherMark() {
-        for capacity in ["one", "several"] {
+    @Test("every pocket Show takes another mark (#2978)")
+    func everyShowTakesAnotherMark() {
+        for visibility in ShelfVisibility.allCases {
             let core = makeCore()
-            core.execute("pocket.set_capacity", args: [.string(capacity)])
+            core.tiler.settings.kiwishelf.pocketVisibility = visibility
             for window in [one, two, three] {
                 core.state.apply(.windowFocused(window))
                 #expect(core.execute("toggle_pocket_window").isSuccess)

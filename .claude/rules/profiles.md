@@ -4,6 +4,7 @@ paths:
   - "Sources/KiwiDeskCore/Config/**"
   - "Sources/KiwiDeskCore/Commands/**"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppWide*.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+PocketVisibilityCrossing.swift"
 ---
 
 # Profiles & config ownership
@@ -776,6 +777,32 @@ holds the secondary-switch decision including its nil case.
   decides; a Lua-owned setup crosses nothing), is
   `docs/design-decisions.md` ▸ *A setting nobody varies per
   profile is app-wide*.
+- **An app-wide value moving INTO each profile crosses by adoption
+  too, the other way round (#2978, `crossPocketVisibility`).** A
+  profile step cannot read `gui.json`, so the crossing reads the
+  retired group raw and stamps every profile file that does not
+  state the key. Run it ahead of every write that re-encodes
+  `gui.json`, which drops the group: first in `loadConfig`, at the
+  head of `saveGuiConfig` (a Settings Save, the Lua-to-GUI
+  adoption), and on a sync take's staged copy, whatever owns it,
+  before its bundle is built; decide the
+  debt by the file's format as well as the group, an older file
+  with no group crossing as its old default, which a `gui.json`
+  step states so every reader's restamp keeps it
+  (`migratingAbsentPocketCapacity`); migrate a profile before
+  inserting into its bytes, insert surgically, leave a file that
+  states the key and a newer build's file alone; and drop the group
+  only once every other profile crossed, so one that failed to read
+  or write crosses at the next load. A bundle carries both halves
+  and crosses in one `ConfigMigration` step, by its format. A
+  composed Standard has no file to stamp: its design entry states
+  what it takes (`PocketVisibilityCrossingTests` ▸
+  `adoptionStampsAndStrips`, `absentGroupCrossesAsOne`,
+  `unrestampedGroupCrossesAsOne`, `insertIsSurgical`,
+  `statedProfileKeeps`, `crossingRunsFirst`;
+  `PocketVisibilityBundleTests` ▸ `bundleStep`,
+  `bundleThroughMigration`; the newer-format skip and the
+  failed-write path are review's).
 
 ## Whose arrangement is live (#1249)
 
