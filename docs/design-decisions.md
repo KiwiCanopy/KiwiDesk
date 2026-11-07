@@ -6452,8 +6452,15 @@ in last. The deciding fact is whether a pocket window is on
 screen, which the user sees rather than remembers, and with one
 window the key is #2675's toggle. "Focused last" is the window
 switcher's own focus recency (#1840), not a second record of it.
-One window stays the default, so a second mark is refused until
-the Several windows setting opens the list.
+
+:::unreleased
+Any number of windows may be marked under either value, and no
+count refuses a mark (owner, 2026-11-07, #2978, retiring One window's
+cap): the refusal's remedy named a setting that retires with it, and
+a second `⌃⌥⇧P` undoes a stray mark. The trade is that the key can
+then step to a window the user did not mean, by focus and then
+recency.
+:::
 
 **Choosing the window is its own key (#2675), amending #2446,
 which chose the window with the one key that pockets it. Becoming
@@ -6463,11 +6470,11 @@ only toggled that window, so nothing short of closing the window or
 a quit let a user pick another. So
 `toggle_pocket_window` (`⌃⌥⇧P`) marks the focused window and
 unmarks it, and `pocket` (`⌃⌥P`) pockets and takes out the marked
-window alone. A second window is refused with a pill that sends the
-user to the marked window, rather than silently moving the mark: the pocket window
-carries a frame per screen and is the one window a key always
-reaches, so taking that away is an act on the marked window, not a
-side effect of pressing a key somewhere else. Marking floats the
+window alone. Marking another window adds it beside the marked one
+rather than moving the mark: a pocket window carries a frame per
+screen and is a window a key always reaches, so taking one off the
+list is an act on that window, not a side effect of pressing a key
+somewhere else. Marking floats the
 window at once at the float placement — a window already floating
 keeps its frame, since its size is one the user chose — and leaves
 it out:
@@ -6588,8 +6595,8 @@ one for every screen, so a screen's own Space Bar edge (#1948)
 leaves the pocket where it is.
 
 **Several windows keeps it on screen, empty included, on every
-display.** One window keeps the pocket out of sight, since its one
-window is a key away. Under Several windows the drop target and
+display.** One window keeps the pocket out of sight, since the key
+reaches what it holds. Under Several windows the drop target and
 the list are what the pocket is for, so it stays where the user
 left it — drawing no count: the list names what is inside
 and VoiceOver hears how many (owner, device 2026-10-29) — and on

@@ -45,8 +45,7 @@ extension KiwiCore {
     }
 
     /// Spends the claim on `id`: marked out, tied to its app where
-    /// the row still exists, else in the general list while the
-    /// capacity takes it, else left an ordinary window.
+    /// the row still exists, else in the general list.
     /// `retiling` is false on the arrival path, whose event retile
     /// places it.
     func takePocketClaim(_ id: WindowID, retiling: Bool = true) {
@@ -58,8 +57,6 @@ extension KiwiCore {
         // Its activation's launch debt is no open to follow (#1599).
         launchFollow.forget(pending: claim.bundleID)
         let keyed = claim.keyed && pocketAppRows().contains(claim.bundleID)
-        guard keyed || state.pocketAcceptsMark(appWide.pocketCapacity)
-        else { return }
         onLog("pocket: w\(id.raw) claimed for \(claim.bundleID)")
         markAsPocketWindow(
             id,

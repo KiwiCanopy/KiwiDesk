@@ -5,7 +5,7 @@ import Foundation
 /// none, the press opens a fresh window of the app, launching it if
 /// needed, which arrives out (▸ 9). The tie needs the app's
 /// Shortcuts row (▸ 10): without one the window joins the general
-/// list under its capacity. Acts on its app, never the focus.
+/// list. Acts on its app, never the focus.
 extension KiwiCore {
     func pocketAppCommand(_ args: [JSONValue]) -> CommandResponse {
         guard case .string(let raw)? = args.first, !raw.isEmpty else {
@@ -24,15 +24,10 @@ extension KiwiCore {
             onLog("pocket: \(bundleID)'s window is still on its way")
             return .ok()
         }
-        let keyed = pocketAppRows().contains(bundleID)
-        guard keyed || state.pocketAcceptsMark(appWide.pocketCapacity)
-        else {
-            guard let focused = focusedWindowID else {
-                return .fail("another window is the pocket window")
-            }
-            return refuseSecondPocketWindow(focused)
-        }
-        return openPocketAppWindow(bundleID, keyed: keyed)
+        return openPocketAppWindow(
+            bundleID,
+            keyed: pocketAppRows().contains(bundleID)
+        )
     }
 
     /// The app's own window in or out; a hidden app is shown, its

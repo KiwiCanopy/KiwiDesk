@@ -75,11 +75,11 @@ struct PocketGroup: View {
     static var capacityHelp: String {
         L(
             "pocket.capacity.help",
-            "%1$@: the Pocket keeps a single window. %2$@: mark more, "
-                + "and the Pocket stays on screen on every display; the "
-                + "Pocket key puts away the one you used, or with all "
-                + "inside takes out the one put in last. Applies at "
-                + "once, in every profile.",
+            "%1$@: the Pocket shows while a window goes in or out or "
+                + "while you drag one. %2$@: the Pocket stays on every "
+                + "screen. Either way the Pocket key puts away "
+                + "the one you used, or with all inside takes out the "
+                + "one put in last. Applies at once, in every profile.",
             capacityName(.one),
             capacityName(.several)
         )

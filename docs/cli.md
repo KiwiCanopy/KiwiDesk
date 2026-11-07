@@ -501,8 +501,8 @@ pocket
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
 place the pocket
 ([`kiwishelf.set_pocket_edge`](lua-reference.md#kiwishelfset_pocket_edge)).
-`pocket.set_capacity one|several` (default `one`) lets it hold
-several windows, kept on every screen
+`pocket.set_capacity one|several` (default `one`): `several` keeps it
+on every screen
 ([`pocket.set_capacity`](lua-reference.md#pocketset_capacity)).
 
 `kiwishelf.set_reading_contrast 1–4.5` (default `2.2`) sets the

@@ -143,19 +143,17 @@ struct PocketDropTests {
         #expect(core.state.pocket.isEmpty)
     }
 
-    @Test("under One window, taken, the plate lights not and refuses")
-    func takenRefuses() throws {
+    @Test("a window already inside leaves the plate open to another")
+    func secondWindowGoesIn() throws {
         let core = try makeCore()
         core.execute("pocket", args: [.number(Double(one.raw))])
         point(core, onPlate: false)
         move(core, two)
         point(core, onPlate: true)
         move(core, two)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
         end(core, two)
-        #expect(core.state.pocketPhase(of: two) == nil)
-        #expect(core.state.pocketedWindows == [one])
-        // Refused, the ordinary drop took it: the plate is done.
+        #expect(core.state.pocketedWindows == [one, two])
         #expect(core.pocketPlate.dragging == nil)
     }
 
@@ -308,10 +306,11 @@ struct PocketDropTests {
         #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
     }
 
-    @Test("a drag that starts on a taken pocket is refused only once off it")
-    func takenRefusesOnlyOnceArmed() throws {
+    @Test("a drag that starts on the pocket is refused only once off it")
+    func refusesOnlyOnceArmed() throws {
         let core = try makeCore()
-        core.execute("pocket", args: [.number(Double(one.raw))])
+        let marked = core.state.markPocketWindow(two, owner: "app.two")
+        #expect(marked)
         var spoken: [String] = []
         core.borders.announceRefusal = { spoken.append($0) }
         let pointer = Pointer()

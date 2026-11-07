@@ -181,8 +181,7 @@ extension KeybindingCatalog {
             L(
                 "keybinding.pocket_window.help",
                 "Makes the focused window your Pocket window, or "
-                    + "makes it an ordinary window again. Only one "
-                    + "window can be the Pocket window at a time."
+                    + "makes it an ordinary window again."
             )
         }
     )

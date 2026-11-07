@@ -211,9 +211,9 @@ extension KiwiCore {
     }
 
     /// Puts the window in the pocket through `pocket` naming it
-    /// (#2678), greyed where the pocket would refuse it — taken
-    /// under One window, a window no pocket takes, or one its
-    /// app's Pocket key keeps (#2612 ▸ 11).
+    /// (#2678), greyed where the pocket would refuse it — a window
+    /// no pocket takes, or one its app's Pocket key keeps
+    /// (#2612 ▸ 11).
     private func pocketRow(_ windows: [WindowID]) -> BarMenuRow {
         let title = L("bar.menu.pocket_window", "Pocket Window")
         let takes = { (id: WindowID) in

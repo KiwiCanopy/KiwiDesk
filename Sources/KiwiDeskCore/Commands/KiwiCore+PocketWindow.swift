@@ -22,10 +22,6 @@ extension KiwiCore {
             unmarkPocketWindow(id)
             return .ok()
         }
-        let capacity = appWide.pocketCapacity
-        guard state.pocketAcceptsMark(capacity) else {
-            return refuseSecondPocketWindow(id)
-        }
         if let reason = pocketBlock(window) { return .fail(reason) }
         markAsPocketWindow(id)
         return .ok()
@@ -66,20 +62,5 @@ extension KiwiCore {
         refreshStickyReach()
         guard tileRefusal(of: id) == nil else { return retile() }
         _ = setFloating(id, false)
-    }
-
-    /// A second window asked to be the pocket window: refused on it.
-    func refuseSecondPocketWindow(
-        _ id: WindowID
-    ) -> CommandResponse {
-        soundIfDrawn(
-            flashRefusalPill(
-                id,
-                text: PocketRefusal.markedElsewhereSentence,
-                symbol: PocketMark.takenName,
-                announce: true
-            )
-        )
-        return .fail("another window is the pocket window")
     }
 }

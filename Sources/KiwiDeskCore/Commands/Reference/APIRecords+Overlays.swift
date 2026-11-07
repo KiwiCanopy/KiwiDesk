@@ -115,7 +115,7 @@ extension APIReference {
             .color("hex")
         ),
         "set_capacity": APIRecord(
-            "Sets whether the pocket holds one window or several.",
+            "Sets whether the pocket stays on screen.",
             .choice("capacity", PocketCapacity.self)
         ),
         "toggle_list": APIRecord(
