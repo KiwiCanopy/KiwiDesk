@@ -167,7 +167,7 @@ struct CiPathFilterTests {
         // `contains` is satisfied by one job keeping its gate
         // while the other loses it — which is exactly the mutation
         // that has to red, and did not until this was split.
-        for job in ["build-lint-test", "release-build"] {
+        for job in ["test-gui", "test-core", "release-build"] {
             let block = Self.jobBlock(job, in: yaml)
             #expect(
                 block?.contains("needs: changes") == true,
@@ -184,16 +184,10 @@ struct CiPathFilterTests {
             // shape: `&&` would skip every normal PR. `!cancelled()`
             // reaches the failure arm; `always()` would also start
             // a run `cancel-in-progress` superseded.
-            // build-lint-test also runs on the instruction lane
-            // (#2712, `CiInstructionLaneTests`).
-            let lane =
-                job == "build-lint-test"
-                ? " || needs.changes.outputs.light == 'true'" : ""
             #expect(
                 gate
                     == "!cancelled() && (needs.changes.result != "
-                    + "'success' || needs.changes.outputs.run == 'true'"
-                    + lane + ")",
+                    + "'success' || needs.changes.outputs.run == 'true')",
                 "\(job) is skipped, not run, when the filter fails"
             )
         }

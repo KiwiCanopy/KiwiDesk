@@ -48,8 +48,8 @@ fi
 STAGED_SWIFT=()
 while IFS= read -r f; do
     STAGED_SWIFT+=("$ROOT/$f")
-done < <(git diff --cached --name-only --diff-filter=ACM \
-    | grep '\.swift$' || true)
+done < <(git -c core.quotePath=false diff --cached --name-only \
+    --diff-filter=ACM | grep '\.swift$' || true)
 
 STAGED_LOCALES=()
 while IFS= read -r f; do

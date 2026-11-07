@@ -1,5 +1,5 @@
 # Paths whose change alone cannot affect the CI build, lint or test
-# jobs. The `changes` job in ci.yml reads this file and gates the two
+# jobs. The `changes` job in ci.yml reads this file and gates the
 # macOS jobs on it; CiPathFilterTests guards the contents.
 #
 # This is an EXCLUDE list, deliberately the opposite shape from

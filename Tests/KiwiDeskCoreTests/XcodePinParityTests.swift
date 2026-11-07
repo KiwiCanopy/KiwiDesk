@@ -54,6 +54,21 @@ struct XcodePinParityTests {
         for (name, text) in workflows {
             let found = targets(in: text)
             #expect(!found.isEmpty, "\(name) selects no Xcode")
+            // Per job: a whole-file count passes with one job left on
+            // the image's default Xcode.
+            let jobs = CiPathFilterTests.jobIDs(in: text).compactMap {
+                CiPathFilterTests.jobBlock($0, in: text)
+            }
+            let macJobs = jobs.filter {
+                $0.contains("runs-on:") && !$0.contains("runs-on: ubuntu-")
+            }
+            #expect(!macJobs.isEmpty, "\(name): no macOS job read")
+            for job in macJobs {
+                #expect(
+                    !targets(in: job).isEmpty,
+                    "\(name) has a job selecting no Xcode: \(job.prefix(40))"
+                )
+            }
             for target in found where target != Self.fallback {
                 #expect(
                     target == pin || target == #""$XCODE""#,
