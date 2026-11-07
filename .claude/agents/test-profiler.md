@@ -31,9 +31,17 @@ you never edit a file in the repo. The fix is the caller's.
 3. Attribute the samples (skill step 2) and read the census (step
    3). Decide WAITING or WORKING from the numbers before naming any
    cause.
-4. Name the mechanism: the call chains that hold the time, with
-   their share, and the code they enter at (`path:line`).
-5. When the caller asked for a release comparison, use the
+4. When a WORKING target or a single suite is the question, rank
+   its tests from a serial run (skill step 6); never rank from a
+   parallel run's spans.
+5. When the build, not the run, is slow — or for a release
+   comparison — measure frontend CPU per module and the slowest
+   type-check bodies on a separate scratch path (step 7), and read
+   the numbers by step 8 before calling anything a change.
+6. Name the mechanism: the call chains, tests or bodies that hold
+   the time, with their share, and the code they enter at
+   (`path:line`).
+7. When the caller asked for a release comparison, use the
    baseline the caller hands you (it lives in the owner's private
    `plan/`, which a worktree cannot see) and report each delta;
    with none handed in, report the new numbers as the baseline.
@@ -44,6 +52,8 @@ you never edit a file in the repo. The fix is the caller's.
   is CPU-bound, and the evidence says which.
 - A single run's number as a trend, and `run.log`'s suite times as
   cost — they are finish times (the skill says how to read them).
+- A compile change judged on one CI run, or a shared assertion
+  helper as a compile fix — the skill's step 8 records why.
 - Suites that are slow by design and inside their budget; report
   what moved, not what is large.
 - Anything in the app's runtime behaviour — that is
@@ -53,7 +63,7 @@ you never edit a file in the repo. The fix is the caller's.
 
 For each target: wall time per run, mode (waiting or working), the
 top call chains with their sample share, the window census trend,
-and — for a release comparison — the delta against the baseline.
+the serial top tests and the frontend CPU when measured, and — for a release comparison — the delta against the baseline.
 Then the findings, most severe first:
 
 `path:line — SEVERITY: what costs the time, measured. suggested fix.`
