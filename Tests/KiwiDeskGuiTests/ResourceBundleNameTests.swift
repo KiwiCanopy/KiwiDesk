@@ -50,11 +50,16 @@ struct ResourceBundleNameTests {
         }
 
         var emitted: Set<String> = []
-        for case let url as URL in walker
-        where url.pathExtension == "bundle"
-            && url.lastPathComponent.hasPrefix("KiwiDesk_")
-        {
-            emitted.insert(url.lastPathComponent)
+        for case let url as URL in walker {
+            // The local ratchet check's build, which can lag this one
+            // (verify-gate).
+            if url.lastPathComponent == "ratchet" {
+                walker.skipDescendants()
+            } else if url.pathExtension == "bundle",
+                url.lastPathComponent.hasPrefix("KiwiDesk_")
+            {
+                emitted.insert(url.lastPathComponent)
+            }
         }
 
         // Only meaningful once a build has produced them; the

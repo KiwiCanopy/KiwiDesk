@@ -28,6 +28,36 @@ struct GateLockHookTests {
         }
     }
 
+    /// The ratchet's wrapper reaches the same compile, so it queues
+    /// too, read off the skill's own check, and the normal permission
+    /// check judges it: nothing here widens `PLAIN`.
+    @Test("a step through the warning gate is queued too")
+    func ratchetedStepsAreQueued() throws {
+        let skill = try String(
+            contentsOf: scriptFixtureRepoRoot().appendingPathComponent(
+                ".claude/skills/verify-gate/SKILL.md"
+            ),
+            encoding: .utf8
+        )
+        let fenced = skill.components(separatedBy: "```")
+            .enumerated().filter { $0.offset % 2 == 1 }.map(\.element)
+        let check = try #require(
+            fenced.first { $0.contains("scripts/warning-gate") },
+            "the skill no longer shows the ratchet check"
+        )
+        for command in [
+            check.trimmingCharacters(in: .whitespacesAndNewlines),
+            "scripts/warning-gate swift build --build-tests",
+            "./scripts/warning-gate swift test --skip ExecTests",
+            "/abs/scripts/warning-gate swift test",
+            "cd x && scripts/warning-gate swift test",
+        ] {
+            #expect(try rewrite(command) != nil, "\(command)")
+            #expect(try decision(command) == nil, "\(command)")
+        }
+        #expect(try rewrite("scripts/warning-gate true") == nil)
+    }
+
     @Test("a queued command is never queued twice")
     func alreadyLockedPassesThrough() throws {
         #expect(try rewrite("scripts/gate-lock swift test") == nil)

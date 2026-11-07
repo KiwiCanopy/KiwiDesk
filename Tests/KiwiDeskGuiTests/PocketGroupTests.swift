@@ -15,6 +15,7 @@ struct PocketGroupTests {
     func keysMoved() {
         let pocketKeys: [SettingKey] = [
             .shortcuts(.pocket), .shortcuts(.pocketWindow),
+            .shortcuts(.pocketList),
         ]
         #expect(ShortcutsRowOrder.pocketAtRest == pocketKeys)
         for key in pocketKeys {

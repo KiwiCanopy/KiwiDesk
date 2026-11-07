@@ -83,6 +83,12 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 |---|---|
 | [`kiwivision.toggle`](lua-reference.md#kiwivisiontoggle) | Turns KiwiVision on or off; named, turns that lens on, or off while it is on. |
 
+## pocket
+
+| Action | What it does |
+|---|---|
+| [`pocket.toggle_list`](lua-reference.md#pockettoggle_list) | Opens the pocket's list on the active Space's screen to pick a window by keyboard, or closes it. |
+
 ## space_bar
 
 | Action | What it does |

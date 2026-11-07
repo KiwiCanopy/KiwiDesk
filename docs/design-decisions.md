@@ -6789,6 +6789,21 @@ order ⌃⌥P steps.
 :::
 
 :::unreleased
+**A key opens the Pocket's list, the same peek a click grows**
+(owner, 2026-11-04, #2974): the list was mouse-only, and a per-app
+key is one more chord per window. `pocket.toggle_list` on `⌃⌥⌘P`, the
+heavier press beside `⌃⌥P`, grows the list out of the pocket at its
+Edge and Position on the active Space's screen, since a peek grows out
+of its item, so it is no free-floating panel and no KiwiHub side. No
+bar reveals or moves: `pocketStands` takes the list beside a drag and
+a play, and the bars' plan stays capacity-only, so under One window
+the pocket slides out for the list alone. A key has no pointer, so
+the first window row starts selected; `⌃⌥J` already searches the
+Pocket section, so the list has no search. No menu twins this list,
+so its rows speak.
+:::
+
+:::unreleased
 **An empty Pocket's click grows an empty state** (owner,
 2026-11-03, #2941): a faded Pocket that lights on hover invites a
 click, and a click that opened nothing left a newcomer with no way
@@ -6802,8 +6817,8 @@ count" and the #2776 fade, and hover still only lights it. Listing
 the two verbs as rows with their keys was rejected: rows in a
 click-held list read as acts on the focus (#2869), and Settings
 labels name keys without explaining the Pocket. A Settings link
-alone sends the user away instead of answering. Unlike the list,
-this panel speaks to VoiceOver, since no menu could twin it.
+alone sends the user away instead of answering. Unlike a click's
+list, this panel speaks to VoiceOver, since no menu could twin it.
 :::
 
 ### Spaces, profiles & config ownership

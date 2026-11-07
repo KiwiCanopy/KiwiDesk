@@ -21,6 +21,8 @@ extension BarPeekBody {
         let frame: CGRect
         let inks: [NSView]
         let rest: [NSColor?]
+        /// A key-opened list's name for it (`BarPeekBody+Spoken`).
+        var spoken: String?
     }
 
     func resetTargets(_ shelf: KiwiShelf) {
@@ -36,7 +38,12 @@ extension BarPeekBody {
     }
 
     /// A button around `text`, its hover reaching a little past it.
-    func addTarget(_ action: Action, around text: CGRect, inks: [NSView]) {
+    func addTarget(
+        _ action: Action,
+        around text: CGRect,
+        inks: [NSView],
+        spoken: String? = nil
+    ) {
         targets.append(
             Target(
                 action: action,
@@ -45,7 +52,8 @@ extension BarPeekBody {
                     dy: -Metrics.hoverPadV
                 ),
                 inks: inks,
-                rest: inks.map(Self.ink(of:))
+                rest: inks.map(Self.ink(of:)),
+                spoken: spoken
             )
         )
     }
@@ -81,14 +89,15 @@ extension BarPeekBody {
     /// A press on the button at `point` arms it.
     func press(at point: CGPoint) {
         pressed = target(at: point)
-        setHovered(pressed)
+        pointerHovers(pressed)
     }
 
     /// The pointer dragged to `point` while pressed: the armed
-    /// button stays lit only while the pointer is on it.
+    /// button stays lit only while the pointer is on it, save on a
+    /// key-opened list (`pointerHovers`).
     func drag(to point: CGPoint) {
         guard let pressed else { return }
-        setHovered(target(at: point) == pressed ? pressed : nil)
+        pointerHovers(target(at: point) == pressed ? pressed : nil)
     }
 
     /// The release at `point` acts where it lands on the button the
@@ -109,6 +118,7 @@ extension BarPeekBody {
             hovered.map { min(max($0 + delta, 0), targets.count - 1) }
             ?? (delta > 0 ? 0 : targets.count - 1)
         setHovered(next)
+        speakLiftedRow()
     }
 
     /// Return on a grown list: acts as a click on the lifted button.
@@ -170,20 +180,20 @@ extension BarPeekBody {
     override func mouseEntered(with event: NSEvent) {
         SkyLight.ensureBackgroundCursor()
         NSCursor.arrow.set()
-        setHovered(target(at: local(event)))
+        pointerHovers(target(at: local(event)))
         onPointerInside(true)
     }
 
     override func mouseMoved(with event: NSEvent) {
         NSCursor.arrow.set()
         guard pressed == nil else { return }
-        setHovered(target(at: local(event)))
+        pointerHovers(target(at: local(event)))
     }
 
     override func mouseExited(with event: NSEvent) {
         onPointerInside(false)
         guard pressed == nil else { return }
-        setHovered(nil)
+        pointerHovers(nil)
     }
 
     override func cursorUpdate(with event: NSEvent) {

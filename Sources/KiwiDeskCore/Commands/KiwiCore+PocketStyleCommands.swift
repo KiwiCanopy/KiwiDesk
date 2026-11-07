@@ -2,7 +2,8 @@ import Foundation
 
 /// `pocket.*`: the pocket mark's colour (#2671), through the marks'
 /// shared `setMarkColor` — empty is Automatic — and its capacity
-/// (#2678). Where it sits is KiwiShelf's (`kiwishelf.set_pocket_*`).
+/// (#2678). Where it sits is KiwiShelf's (`kiwishelf.set_pocket_*`);
+/// its list's key takes no setter's pass (`pocketToggleListCommand`).
 extension KiwiCore {
     func pocketStyleCommand(
         _ command: String,

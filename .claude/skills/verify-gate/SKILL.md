@@ -72,8 +72,8 @@ Heavy steps queue machine-wide: `scripts/gate-hook` runs every
 `swift build` / `swift test` whole under `scripts/gate-lock`,
 one at a time across all worktrees, so parallel sessions stop
 throttling the machine. Queue wait plus the suite can pass the
-Bash tool's 10-minute cap — run the test step with
-`run_in_background`. A step that says "gate busy" is waiting,
+Bash tool's 10-minute cap — run the test step and the ratchet
+check below with `run_in_background`. A step that says "gate busy" is waiting,
 not hung; don't kill it or run around it.
 
 1. `swift build`
@@ -102,9 +102,17 @@ check the warning the ratchet would see:
 
 ```
 scripts/warning-gate swift build --build-tests \
+  --scratch-path .build/ratchet \
   -Xswiftc -warnings-as-errors \
   -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 ```
+
+The folder of its own keeps both builds warm: SwiftPM recompiles when
+the flag set changes, so flipping flags on one `.build` rebuilds the
+package each way (#1596), at the cost of a second build folder (3.7 GB,
+measured 2026-11-07). Being warm is also its trap: only the run that
+compiled a file reports its warnings, so clear a red by fixing it,
+never by re-running.
 
 `scripts/warning-gate` fails on a warning `-warnings-as-errors`
 cannot promote — an isolation inherited from an SDK class

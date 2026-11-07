@@ -113,7 +113,8 @@ extension ShortcutsReferenceBuilder {
             return StickyStyle.displaySymbolName
         // The rows draw the pocket mark; this is its stand-in
         // where a surface draws symbols only (#2446, #2675).
-        case "KiwiDesk.pocket()", "KiwiDesk.toggle_pocket_window()":
+        case "KiwiDesk.pocket()", "KiwiDesk.toggle_pocket_window()",
+            "pocket.toggle_list()":
             return "tray.and.arrow.down.fill"
         case "KiwiDesk.reset_layout_sizing()":
             return "arrow.counterclockwise"
