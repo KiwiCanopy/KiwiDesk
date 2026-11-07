@@ -5,8 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `pocket` naming a window (#2678): it puts that window in, marking
-/// it first under the capacity, and the bar menus' Pocket Window row
-/// acts through it.
+/// it first, and the bar menus' Pocket Window row acts through it.
 @Suite("Pocket a named window", .serialized)
 @MainActor
 struct PocketNamedTests {

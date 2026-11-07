@@ -5821,8 +5821,8 @@ end)
 
 **Expects:** nothing, or a window id.
 
-**Does:** keeps one window, the pocket window, one key away. Mark
-it with [`toggle_pocket_window`](#toggle_pocket_window); each
+**Does:** keeps pocket windows one key away. Mark one
+with [`toggle_pocket_window`](#toggle_pocket_window); each
 `pocket` call takes the next step:
 
 - **Nothing marked:** marks the focused window and pockets it, a
@@ -5856,10 +5856,15 @@ refused.
 does: that window goes in, marked first, as
 [`toggle_pocket_window`](#toggle_pocket_window) would mark it.
 
-The pocket holds every marked window, in the order each last went in, and a
+Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
+pocket holds every marked window, in the order each last went in, and a
 call puts away before it takes out: while a marked window is out,
 it puts back the focused one, else the one focused last. Only with
 every marked window in does it take one out, the one put in last.
+
+:::unreleased
+Under `"one"` the pocket holds them the same way.
+:::
 
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another
@@ -5933,20 +5938,17 @@ mark. Unmarking tiles it on the active Space, as
 [`make_tiled`](#make_tiled) does; a window a float rule or
 detection floats stays floating.
 
-:::unreleased
-While one window is marked, a call on another window fails with a
-pill: "The Pocket takes one window. Set it to Several windows to add
-more."
-:::
-
-Unmark the marked window first; a
+A
 pocketed window is never the focused one, so take it out
 with [`pocket`](#pocket) before unmarking it. Fails on a window in
 native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
 
-A call on another window marks it too, beside the others.
+:::unreleased
+Under either [`pocket.set_capacity`](#pocketset_capacity), a call on
+another window marks it too, beside the others.
+:::
 
 :::unreleased
 `toggle_pocket_window` also takes a window id, as the bar menus'
@@ -5994,11 +5996,7 @@ Shortcuts & Gestures ▸ Pocket writes this shortcut: one row per
 app, added with **Give an app its own Pocket key…**.
 
 Called with no such shortcut — from the CLI, say — the window it
-opens is an ordinary pocket window, counted like any other: under
-`"one"`, with another pocket window marked, the call fails with
-`another window is the pocket window` (and the pill "The Pocket
-takes one window. Set it to Several windows to add more." on the
-focused window) and opens nothing. Fails
+opens is an ordinary pocket window. Fails
 with `app not found: <id>` for an app macOS cannot find.
 
 **Example:**

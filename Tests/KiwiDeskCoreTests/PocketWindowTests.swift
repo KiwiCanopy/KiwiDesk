@@ -5,10 +5,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Marking the pocket window (#2675): `toggle_pocket_window` marks
+/// Marking a pocket window (#2675): `toggle_pocket_window` marks
 /// the focused window and floats it as a Float does, unmarks it
-/// into the tiling (#2680), and refuses a second window; `pocket`
-/// then acts on the marked window alone.
+/// into the tiling (#2680), and marks a second beside the first
+/// (#2978); `pocket` then acts on the marked windows alone.
 @Suite("Pocket window mark", .serialized)
 @MainActor
 struct PocketWindowTests {
