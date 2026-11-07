@@ -89,7 +89,7 @@ struct ShortcutsSection: View {
         .onChange(of: model.nav.shortcutsWholePage) { _, _ in
             takeWholePageRequest()
         }
-        .onDisappear { model.shortcutsPartsBuilt = [] }
+        .onDisappear { model.shortcutsPage.built = [] }
         .onChange(of: model.config.layers.map(\.name)) {
             _,
             _ in
@@ -152,14 +152,13 @@ struct ShortcutsSection: View {
         ScrollView {
             stack {
                 ForEach(ShortcutsPagePart.allCases) { part in
-                    // The parts built, which a reveal reaches without a
-                    // detour (`revealLanding`); written here alone.
+                    // `ShortcutsPageState` states the set's contract.
                     self.part(part, expander: expander)
                         .onAppear {
-                            model.shortcutsPartsBuilt.insert(part)
+                            model.shortcutsPage.built.insert(part)
                         }
                         .onDisappear {
-                            model.shortcutsPartsBuilt.remove(part)
+                            model.shortcutsPage.built.remove(part)
                         }
                 }
             }

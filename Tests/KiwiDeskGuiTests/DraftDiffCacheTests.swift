@@ -95,4 +95,48 @@ struct DraftDiffCacheTests {
         #expect(source.contains("letdiff=model.draftDiff"))
         #expect(!source.contains("SettingsDraftDiff.between("))
     }
+
+    /// The inputs that drop the memo are `between`'s parameters, read
+    /// from both declarations: a parameter added there without a
+    /// `bump()` beside its property would be served stale.
+    @Test("every input the walk takes drops the memo")
+    func memoInputsAreTheWalksParameters() throws {
+        let walk = try Self.source("SettingsDraftDiff.swift")
+        let start = try #require(walk.range(of: "staticfuncbetween("))
+        let end = try #require(
+            walk.range(
+                of: ")->SettingsDraftDiff",
+                range: start.upperBound..<walk.endIndex
+            )
+        )
+        let parameters = Set(
+            walk[start.upperBound..<end.lowerBound]
+                .split(separator: ",")
+                .compactMap { $0.split(separator: ":").first.map(String.init) }
+        )
+        #expect(!parameters.isEmpty)
+        // Each stored property's declaration runs to the next one.
+        let model = try Self.source("SettingsModel.swift")
+        var bumping: Set<String> = []
+        for piece in model.components(separatedBy: "var").dropFirst() {
+            let name = String(piece.prefix { $0.isLetter || $0.isNumber })
+            if piece.contains("didSet{"), piece.contains("draftMemo.bump()") {
+                bumping.insert(name)
+            }
+        }
+        #expect(bumping == parameters)
+    }
+
+    private static func source(_ file: String) throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/\(file)"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .filter { !$0.isWhitespace }
+    }
 }

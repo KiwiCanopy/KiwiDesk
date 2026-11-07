@@ -68,10 +68,10 @@ extension ShortcutsSection {
         let owner = ShortcutsPagePart.owner(
             of: target,
             expander: expander,
-            bindings: bindingsBinding.wrappedValue
+            bindings: model.shortcutsLayerBindings
         )
         if owner == nil { buildsWholePage = true }
-        let built = owner.map(model.shortcutsPartsBuilt.contains) ?? false
+        let built = owner.map(model.shortcutsPage.built.contains) ?? false
         targetScroll?.cancel()
         targetScroll = Task { @MainActor in
             if !built {

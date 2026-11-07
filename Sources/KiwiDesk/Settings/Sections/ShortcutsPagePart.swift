@@ -94,7 +94,10 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     /// The part drawing a binding row the recorder names by id.
     private static func owner(of binding: KeyBinding) -> ShortcutsPagePart {
         if PocketAppLuaArg.bundleID(of: binding.lua) != nil { return .pocket }
-        return binding.kind == .application ? .openApplications : .luaBindings
+        switch binding.kind {
+        case .application: return .openApplications
+        case .custom, .navigation: return .luaBindings
+        }
     }
 
     /// Catalog controls no census row labels — the cards' own titles,
@@ -122,36 +125,33 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         for item in GestureItem.allCases { owners[item.anchor] = .gestures }
         return owners
     }()
-}
 
-/// Where a reveal of an anchor goes before the anchor itself on a
-/// lazily built page (#3060).
-enum RevealLanding: Equatable {
-    /// Scroll to this part's id first, so the stack builds it.
-    case part(String)
-    /// No part is known to hold the anchor: build the whole page.
-    case wholePage
-}
-
-extension SettingsModel {
-    /// How a reveal of `anchor` reaches it on a lazily built page;
-    /// nil where the anchor is already in the stack — every page but
-    /// Shortcuts, and a Shortcuts part the page holds built (#3060).
-    func revealLanding(for anchor: String) -> RevealLanding? {
-        switch destination {
-        case .shortcuts:
-            let layer = nav.shortcutsLayerSelection
-            let owner = ShortcutsPagePart.owner(
-                of: anchor,
-                expander: .ofDraft(self, layer: layer),
-                bindings: config.layers.first { $0.name == layer }?.bindings
-                    ?? []
-            )
-            guard let owner else { return .wholePage }
-            return shortcutsPartsBuilt.contains(owner)
-                ? nil : .part(owner.id)
-        default:
-            return nil
-        }
+    /// How a reveal reaches `anchor` on the page: through its part
+    /// unless the page holds the part built, or by building the whole
+    /// page when no part is known to hold it.
+    @MainActor static func landing(
+        for anchor: String,
+        in model: SettingsModel
+    ) -> RevealLanding? {
+        let layer = model.nav.shortcutsLayerSelection
+        let owner = owner(
+            of: anchor,
+            expander: .ofDraft(model, layer: layer),
+            bindings: model.shortcutsLayerBindings
+        )
+        guard let owner else { return .wholePage }
+        if model.shortcutsPage.built.contains(owner) { return nil }
+        return .part(owner.id)
     }
+}
+
+/// The Shortcuts page's parts built, which a reveal reaches without a
+/// detour (#3060). A hint fed by the parts' `onAppear` and
+/// `onDisappear` and emptied when the page goes: it can only miss a
+/// built part, never claim an unbuilt one, so a reader may skip a
+/// detour on it and never the whole-page fallback. Not published, so
+/// a write re-renders nothing.
+@MainActor
+final class ShortcutsPageState {
+    var built: Set<ShortcutsPagePart> = []
 }

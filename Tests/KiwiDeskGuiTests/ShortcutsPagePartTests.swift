@@ -161,7 +161,7 @@ struct ShortcutsPagePartTests {
             model.revealLanding(for: anchor)
                 == .part(ShortcutsPagePart.focus.id)
         )
-        model.shortcutsPartsBuilt = [.focus]
+        model.shortcutsPage.built = [.focus]
         #expect(model.revealLanding(for: anchor) == nil)
         #expect(model.revealLanding(for: "no such row") == .wholePage)
     }
@@ -186,8 +186,8 @@ struct ShortcutsPagePartTests {
         )
         #expect(
             parts.contains(
-                ".onAppear{model.shortcutsPartsBuilt.insert(part)}"
-                    + ".onDisappear{model.shortcutsPartsBuilt.remove(part)}"
+                ".onAppear{model.shortcutsPage.built.insert(part)}"
+                    + ".onDisappear{model.shortcutsPage.built.remove(part)}"
             )
         )
         let detail = try Self.source("SettingsView+Detail.swift")
