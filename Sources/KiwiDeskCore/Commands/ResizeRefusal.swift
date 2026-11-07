@@ -24,12 +24,15 @@ enum ResizeRefusal: Equatable {
     /// A grow stopped where `anchor` — a neighboring window —
     /// would drop below ITS effective minimum; `appBound` is the
     /// ANCHOR's verdict, since the anchor is the window whose
-    /// floor bound.
+    /// floor bound. `anchorApp` is the anchor's app name, since
+    /// the anchor may be hidden (overflow) while the trier's
+    /// pill shows; empty where none is known (#3067).
     case neighborMinimum(
         anchor: WindowID,
         focused: WindowID,
         axis: String,
-        appBound: Bool
+        appBound: Bool,
+        anchorApp: String
     )
     /// A grow stopped at the resized window's own learned
     /// app-enforced maximum (#1055) — the app refuses to get
@@ -97,7 +100,7 @@ extension ResizeRefusal {
             .fullscreenCannotMove(let id), .moveNeedsFloat(let id),
             .moveAtBoundary(let id, _):
             id
-        case .neighborMinimum(_, let focused, _, _):
+        case .neighborMinimum(_, let focused, _, _, _):
             focused
         }
     }
@@ -111,7 +114,7 @@ extension ResizeRefusal {
         case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _),
             .noAxisHere(_, let axis), .gridNoOtherTrack(_, let axis):
             axis
-        case .neighborMinimum(_, _, let axis, _):
+        case .neighborMinimum(_, _, let axis, _, _):
             axis
         case .moveAtBoundary(_, let direction):
             direction == .left || direction == .right ? "x" : "y"
@@ -137,7 +140,7 @@ extension ResizeRefusal {
         switch self {
         case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _):
             axis == "y" ? .down : .right
-        case .neighborMinimum(_, _, let axis, _):
+        case .neighborMinimum(_, _, let axis, _, _):
             axis == "y" ? .down : .right
         case .moveAtBoundary(_, let direction):
             direction

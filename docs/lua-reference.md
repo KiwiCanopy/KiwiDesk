@@ -6835,6 +6835,14 @@ the `min_window_size` bound, and lowering it helps; "This app
 won't go smaller" and "Neighboring app won't go smaller" mean
 the app's own learned floor, which no setting moves.
 
+:::unreleased
+The neighbour pair names the neighbour's app: "Neighboring
+Safari window is at the minimum window size" is the
+`min_window_size` bound, "Neighboring Safari window won't go
+smaller" the app's own floor. Where the app's name is unknown the
+nameless sentences above stay.
+:::
+
 In **bsp**, the window that cannot shrink is often not the one
 you are resizing (#1259). A window holding the whole height —
 the first window, when the layout splits side by side — cannot

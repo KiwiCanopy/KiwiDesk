@@ -514,6 +514,13 @@ app enforces, which KiwiDesk learns — the pill says so instead:
 *This app won't go bigger*. Lowering the configured minimum does
 not move those.
 
+:::unreleased
+The two neighbour pills name the neighbour's app, since that window
+may be out of sight behind an overflow mark: *Neighboring Safari
+window is at the minimum window size*, *Neighboring Safari window
+won't go smaller*.
+:::
+
 Running out of screen is a silent stop.
 
 :::unreleased

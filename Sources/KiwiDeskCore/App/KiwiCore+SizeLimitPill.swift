@@ -318,7 +318,8 @@ extension KiwiCore {
                 anchor: anchor,
                 focused: focused,
                 axis: axis,
-                appBound: minimumIsAppBound(of: anchor, axis: axis)
+                appBound: minimumIsAppBound(of: anchor, axis: axis),
+                anchorApp: anchorAppName(of: anchor)
             )
         )
     }
@@ -337,7 +338,8 @@ extension KiwiCore {
                 anchor: anchor,
                 focused: overhanging,
                 axis: axis,
-                appBound: minimumIsAppBound(of: anchor, axis: axis)
+                appBound: minimumIsAppBound(of: anchor, axis: axis),
+                anchorApp: anchorAppName(of: anchor)
             ),
             fromPress: false
         )

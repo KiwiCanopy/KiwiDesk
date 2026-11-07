@@ -75,6 +75,13 @@ extension KiwiCore {
             )
     }
 
+    /// The app name a neighbour pill names: the ANCHOR's, never
+    /// the trier's, resolved at cue time; empty when unknown
+    /// (#3067).
+    func anchorAppName(of anchor: WindowID) -> String {
+        state.windows[anchor]?.appName ?? ""
+    }
+
     /// One window's learned app-enforced maximum on `axis`
     /// (#1055) — `effectiveMinSize`'s mirror, with one
     /// asymmetry: there is no configured global maximum the way

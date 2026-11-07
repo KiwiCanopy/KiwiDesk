@@ -199,7 +199,8 @@ struct ResizeRefusalAppBoundTests {
                     anchor: WindowID(2),
                     focused: WindowID(1),
                     axis: "x",
-                    appBound: false
+                    appBound: false,
+                    anchorApp: "App2"
                 )
             ]
         )

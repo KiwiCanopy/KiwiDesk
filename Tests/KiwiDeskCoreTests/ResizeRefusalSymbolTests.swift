@@ -68,13 +68,15 @@ struct ResizeRefusalSymbolTests {
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: false
+                appBound: false,
+                anchorApp: "App2"
             ),
             .neighborMinimum(
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: true
+                appBound: true,
+                anchorApp: "App2"
             ),
         ] {
             #expect(refusal.pillSymbol.contains("arrow"))
@@ -102,7 +104,8 @@ struct ResizeRefusalSymbolTests {
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: false
+                appBound: false,
+                anchorApp: "App2"
             ).pillSymbol
                 == ResizeRefusal.ownMinimum(
                     window,
@@ -141,13 +144,15 @@ struct ResizeRefusalSymbolTests {
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: false
+                appBound: false,
+                anchorApp: "App2"
             ),
             .neighborMinimum(
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: true
+                appBound: true,
+                anchorApp: "App2"
             ),
             .noAxisHere(window, axis: "y"), .layoutHasNoResize(window),
             .windowIsFullscreen(window),

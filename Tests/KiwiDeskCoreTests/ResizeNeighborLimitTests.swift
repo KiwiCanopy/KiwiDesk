@@ -1,5 +1,4 @@
 import AppKit
-import CoreGraphics
 import Foundation
 import Testing
 
@@ -149,7 +148,8 @@ struct ResizeNeighborLimitTests {
                     anchor: WindowID(2),
                     focused: WindowID(1),
                     axis: "x",
-                    appBound: true
+                    appBound: true,
+                    anchorApp: "App2"
                 )
             ]
         )
@@ -200,7 +200,8 @@ struct ResizeNeighborLimitTests {
                     anchor: WindowID(3),
                     focused: WindowID(2),
                     axis: "x",
-                    appBound: true
+                    appBound: true,
+                    anchorApp: "App3"
                 )
             ]
         )
@@ -340,7 +341,8 @@ struct ResizeNeighborLimitTests {
                     anchor: WindowID(2),
                     focused: WindowID(1),
                     axis: "x",
-                    appBound: true
+                    appBound: true,
+                    anchorApp: "App2"
                 )
             ]
         )

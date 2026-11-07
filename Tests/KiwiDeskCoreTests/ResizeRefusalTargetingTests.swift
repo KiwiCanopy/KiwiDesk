@@ -123,7 +123,8 @@ struct ResizeRefusalTargetingTests {
                     anchor: WindowID(2),
                     focused: WindowID(1),
                     axis: "y",
-                    appBound: false
+                    appBound: false,
+                    anchorApp: "App2"
                 )
             ]
         )
@@ -159,7 +160,8 @@ struct ResizeRefusalTargetingTests {
                     anchor: WindowID(2),
                     focused: WindowID(1),
                     axis: "y",
-                    appBound: false
+                    appBound: false,
+                    anchorApp: "App2"
                 )
             ]
         )

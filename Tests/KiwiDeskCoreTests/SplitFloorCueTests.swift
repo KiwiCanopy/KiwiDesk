@@ -88,7 +88,8 @@ struct SplitFloorCueTests {
                     anchor: w2,
                     focused: w1,
                     axis: "x",
-                    appBound: true
+                    appBound: true,
+                    anchorApp: "App2"
                 )
             ]
         )
@@ -127,7 +128,8 @@ struct SplitFloorCueTests {
                     anchor: w2,
                     focused: w1,
                     axis: "x",
-                    appBound: true
+                    appBound: true,
+                    anchorApp: "App2"
                 )
         )
     }
@@ -192,7 +194,8 @@ struct SplitFloorCueTests {
                     anchor: w1,
                     focused: w2,
                     axis: "x",
-                    appBound: true
+                    appBound: true,
+                    anchorApp: "App1"
                 )
             ]
         )

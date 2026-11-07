@@ -51,7 +51,8 @@ struct ResizeRefusalRenderingTests {
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: false
+                appBound: false,
+                anchorApp: "App2"
             ).bumpDirection == .down
         )
         // No wall: these three say a limit does not exist.
@@ -115,13 +116,15 @@ struct ResizeRefusalRenderingTests {
                 anchor: other,
                 focused: window,
                 axis: "x",
-                appBound: true
+                appBound: true,
+                anchorApp: "App2"
             ).pillText
                 != ResizeRefusal.neighborMinimum(
                     anchor: other,
                     focused: window,
                     axis: "x",
-                    appBound: false
+                    appBound: false,
+                    anchorApp: "App2"
                 ).pillText
         )
         #expect(
@@ -144,13 +147,15 @@ struct ResizeRefusalRenderingTests {
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: false
+                appBound: false,
+                anchorApp: "App2"
             ),
             .neighborMinimum(
                 anchor: other,
                 focused: window,
                 axis: "y",
-                appBound: true
+                appBound: true,
+                anchorApp: "App2"
             ),
             .ownMaximum(window, axis: "y", atBoundary: false),
             .ownMaximum(window, axis: "y", atBoundary: true),
@@ -197,22 +202,7 @@ struct ResizeRefusalRenderingTests {
                 .pillText
                 == "This app won't go smaller"
         )
-        #expect(
-            ResizeRefusal.neighborMinimum(
-                anchor: other,
-                focused: window,
-                axis: "y",
-                appBound: false
-            ).pillText == "Neighboring window at its minimum size"
-        )
-        #expect(
-            ResizeRefusal.neighborMinimum(
-                anchor: other,
-                focused: window,
-                axis: "y",
-                appBound: true
-            ).pillText == "Neighboring app won't go smaller"
-        )
+        // The neighbour pair's English is ResizeRefusalAppNameTests'.
         // The learned maximum is ALWAYS the app's: no configured
         // global maximum exists, so this branch needs no flag.
         #expect(
@@ -289,7 +279,8 @@ struct ResizeRefusalRenderingTests {
             anchor: other,
             focused: window,
             axis: "y",
-            appBound: false
+            appBound: false,
+            anchorApp: "App2"
         )
         let second = paired.secondPill
         #expect(second?.window == other)
@@ -309,7 +300,8 @@ struct ResizeRefusalRenderingTests {
             anchor: other,
             focused: window,
             axis: "y",
-            appBound: true
+            appBound: true,
+            anchorApp: "App2"
         )
         #expect(
             appPaired.secondPill?.text
