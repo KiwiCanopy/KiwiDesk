@@ -147,7 +147,8 @@ struct GridResizeTests {
                     anchor: WindowID(2),
                     focused: WindowID(1),
                     axis: "x",
-                    appBound: false
+                    appBound: false,
+                    anchorApp: "App2"
                 )
             ]
         )
@@ -175,7 +176,8 @@ struct GridResizeTests {
                     anchor: WindowID(2),
                     focused: WindowID(5),
                     axis: "x",
-                    appBound: false
+                    appBound: false,
+                    anchorApp: "App2"
                 )
             ]
         )

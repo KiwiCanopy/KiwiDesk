@@ -78,16 +78,11 @@ extension ResizeRefusal {
                     "resize.min_size_reached",
                     "Minimum window size reached"
                 )
-        case .neighborMinimum(_, _, _, let appBound):
-            appBound
-                ? L(
-                    "resize.neighbor_app_min",
-                    "Neighboring app won't go smaller"
-                )
-                : L(
-                    "resize.neighbor_min_size",
-                    "Neighboring window at its minimum size"
-                )
+        case .neighborMinimum(_, _, _, let appBound, let anchorApp):
+            Self.neighborMinimumText(
+                appBound: appBound,
+                app: Self.pillAppName(anchorApp)
+            )
         case .ownMaximum(_, _, let atBoundary):
             atBoundary
                 ? L("resize.boundary_reached", "No room left to grow")
@@ -165,7 +160,7 @@ extension ResizeRefusal {
     @MainActor
     var secondPill: (window: WindowID, text: String)? {
         switch self {
-        case .neighborMinimum(let anchor, _, let axis, let appBound):
+        case .neighborMinimum(let anchor, _, let axis, let appBound, _):
             let mark = ResizeRefusal.ownMinimum(
                 anchor,
                 axis: axis,
@@ -175,5 +170,51 @@ extension ResizeRefusal {
         default:
             return nil
         }
+    }
+
+    /// The trier's sentence for a neighbour floor. It names the
+    /// anchor's app, since the anchor may be hidden in overflow;
+    /// an empty name keeps the nameless sentence.
+    @MainActor
+    private static func neighborMinimumText(
+        appBound: Bool,
+        app: String
+    ) -> String {
+        switch (appBound, app.isEmpty) {
+        case (true, true):
+            L(
+                "resize.neighbor_app_min",
+                "Neighboring app won't go smaller"
+            )
+        case (false, true):
+            L(
+                "resize.neighbor_min_size",
+                "Neighboring window at its minimum size"
+            )
+        case (true, false):
+            L(
+                "resize.neighbor_app_min_named",
+                "Neighboring %1$@ window won't go smaller",
+                app
+            )
+        case (false, false):
+            L(
+                "resize.neighbor_min_size_named",
+                "Neighboring %1$@ window is at the minimum window size",
+                app
+            )
+        }
+    }
+
+    /// The longest app name a pill spells out. A longer one is
+    /// cut and ends in "…", so the sentence's verb survives the
+    /// pill's own truncation.
+    static let pillAppNameLimit = 20
+
+    /// `name` trimmed, and cut to `pillAppNameLimit` characters.
+    static func pillAppName(_ name: String) -> String {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard trimmed.count > pillAppNameLimit else { return trimmed }
+        return trimmed.prefix(pillAppNameLimit - 1) + "…"
     }
 }
