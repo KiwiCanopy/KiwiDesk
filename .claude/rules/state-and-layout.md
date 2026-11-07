@@ -2464,7 +2464,7 @@ editing here:
   alone carries it, for windows tracked at the replay
   (`WindowSession.tiledOverRule`, key `tiled_over_rule`, a stored
   shape;
-  `TileOverRuleTests` ▸ `keyIsPinned`), so a crash re-floats; and
+  `TileOverRuleCarryTests` ▸ `keyIsPinned`), so a crash re-floats; and
   `TileRefusalSeamTests` holds the predicate's callers and the
   reader's place ahead of the fold.
 - **A float safety NET asks `EffectiveFloat.applies`, never the

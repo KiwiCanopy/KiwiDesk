@@ -68,7 +68,7 @@ extension StateCoordinator {
 
     /// Restores a remembered user float onto a (re)tracked window
     /// (#160) — consumed, never restored, where detection already
-    /// floats it (#1810).
+    /// floats it (#1810), a rule a Tile overrules included (#2975).
     mutating func restoreFloatOverride(
         of window: ManagedWindow
     ) {
@@ -76,11 +76,11 @@ extension StateCoordinator {
             WindowIdentity.exists(for: window),
             rememberedFloating.remove(WindowIdentity(of: window))
                 != nil,
-            windows[window.id]?.isFloating == false
+            windows[window.id]?.isFloating == false,
+            tiledOverRule[window.id] == nil
         else { return }
         windows.setFloating(window.id, true)
         userFloated.insert(window.id)
-        tiledOverRule[window.id] = nil
     }
 
     /// Saves closing window's sticky state into identity memory (#414).

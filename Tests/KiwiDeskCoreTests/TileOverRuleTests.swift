@@ -136,6 +136,40 @@ struct TileOverRuleTests {
         #expect(floats(core) == true)
     }
 
+    /// The reopen memory of a same-titled window floated by hand
+    /// never floats a window tiled over its rule: consumed at the
+    /// re-adoption and at a retitle alike.
+    @Test("the reopen memory never floats a Tile over a rule")
+    func reopenMemoryKeepsTheTile() {
+        let core = tiledOverRule()
+        let twin = ManagedWindow(
+            id: id,
+            pid: pid,
+            appName: "App",
+            title: "Doc"
+        )
+        let identity = StateCoordinator.WindowIdentity(of: twin)
+        core.state.rememberedFloating.insert(identity)
+        core.handle(.windowHidden(id))
+        arrive(core, .floats(.rule))
+        #expect(floats(core) == false)
+        #expect(core.state.userFloated.isEmpty)
+        #expect(core.state.rememberedFloating.isEmpty)
+        let retitled = StateCoordinator.WindowIdentity(
+            of: ManagedWindow(
+                id: id,
+                pid: pid,
+                appName: "App",
+                title: "New"
+            )
+        )
+        core.state.rememberedFloating.insert(retitled)
+        core.handle(.windowTitleChanged(id, "New"))
+        #expect(floats(core) == false)
+        #expect(core.state.tilesOverRule(id))
+        #expect(core.state.rememberedFloating.isEmpty)
+    }
+
     @Test("a toggle flips a Tile over a rule both ways")
     func toggleFlips() {
         let core = tiledOverRule()
@@ -262,65 +296,5 @@ struct TileOverRuleTests {
         ] {
             #expect(reason.refusesTile)
         }
-    }
-
-    /// The in-place stop carries the record; every other capture,
-    /// and a crash with it, floats the window again.
-    @Test("the in-place stop carries the Tile, a plain capture none")
-    func inPlaceCarries() throws {
-        let core = tiledOverRule()
-        let carried = core.state.inPlaceSnapshot(
-            monocleShown: [:],
-            ratios: { _ in .init(entries: [:], drawn: SessionRatios()) }
-        )
-        let record = try #require(
-            carried.windows.first { $0.windowID == id }
-        )
-        #expect(record.session?.tiledOverRule == true)
-        #expect(
-            core.state.snapshot().windows.allSatisfy {
-                $0.session?.tiledOverRule == nil
-            }
-        )
-        // Restored into a process whose scan floated it by the rule.
-        let next = makeCore()
-        arrive(next, .floats(.rule))
-        next.restore(carried)
-        #expect(next.state.windows[id]?.isFloating == false)
-        #expect(next.state.tilesOverRule(id))
-        // A verdict no longer the rule's takes nothing back.
-        let dialog = makeCore()
-        arrive(dialog, .floats(.panel))
-        dialog.restore(carried)
-        #expect(dialog.state.windows[id]?.isFloating == true)
-        #expect(dialog.state.tiledOverRule.isEmpty)
-    }
-
-    /// The key is a stored shape: a rename strands every carried
-    /// Tile across the update's in-place restart.
-    @Test("the session's key is pinned")
-    func keyIsPinned() throws {
-        let session = StateSnapshot.WindowSession(
-            sticky: .none,
-            stickyReach: nil,
-            tiledOverRule: true
-        )
-        let json = try #require(
-            JSONSerialization.jsonObject(
-                with: JSONEncoder().encode(session)
-            ) as? [String: Any]
-        )
-        #expect(json["tiled_over_rule"] as? Bool == true)
-        let none = try #require(
-            JSONSerialization.jsonObject(
-                with: JSONEncoder().encode(
-                    StateSnapshot.WindowSession(
-                        sticky: .none,
-                        stickyReach: nil
-                    )
-                )
-            ) as? [String: Any]
-        )
-        #expect(none["tiled_over_rule"] == nil)
     }
 }
