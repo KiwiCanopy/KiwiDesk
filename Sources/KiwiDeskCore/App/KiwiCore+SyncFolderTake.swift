@@ -126,7 +126,8 @@ extension KiwiCore {
         )
         // An older build's folder still holds the app-wide pocket
         // capacity, which the bundle's coder would drop (#2978).
-        Self.crossPocketVisibility(gui: gui, profiles: profiles) { _ in }
+        // Whatever owns the folder: its profiles held One window too.
+        Self.crossPocketVisibility(gui: gui, profiles: profiles, log: onLog)
         guard
             let bundle = try? Self.setupBundle(
                 gui: gui,

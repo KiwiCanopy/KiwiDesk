@@ -43,14 +43,8 @@ extension TilingSettings {
         in mode: LayoutMode,
         on screen: String?
     ) -> Bool {
-        guard kiwishelf.pocketVisibility == .auto else { return false }
-        let settings = onScreen(screen)
-        return settings.barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).contains {
-            $0.edge == settings.kiwishelf.pocketEdge && !$0.drawsNothingAtRest
-        }
+        kiwishelf.pocketVisibility == .auto
+            && pocketRest(in: mode, on: screen) == .section
     }
 
     /// The strip the pocket reserves at rest on `screen` in `mode`,

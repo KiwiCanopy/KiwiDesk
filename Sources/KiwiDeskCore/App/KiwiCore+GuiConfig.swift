@@ -240,6 +240,13 @@ extension KiwiCore {
     /// keybindings directly from the sidecar (#55). `init.lua`
     /// is not touched.
     public func saveGuiConfig(_ config: GuiConfig) throws {
+        // The save drops gui.json's retired pocket group, so an owed
+        // crossing runs first, a Lua-owned adoption's too (#2978).
+        Self.crossPocketVisibility(
+            gui: guiConfigStore,
+            profiles: profiles,
+            log: onLog
+        )
         try guiConfigStore.save(config)
         loadConfig()
     }

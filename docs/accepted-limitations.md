@@ -536,8 +536,8 @@ cross either: one that never called `pocket.set_capacity` showed the
 pocket only while it was used, and now shows it Always until
 `init.lua` adds `kiwishelf.set_pocket_visibility("hidden")`. A
 profile file that would not read at the upgrade keeps the old
-setting waiting for the next launch only until Settings next saves,
-after which it shows the pocket Always once it reads again.
+setting waiting for its next read only until KiwiDesk next rewrites
+its settings file, after which it shows the pocket Always.
 :::
 
 :::unreleased

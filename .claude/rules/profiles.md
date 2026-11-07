@@ -781,9 +781,11 @@ holds the secondary-switch decision including its nil case.
   too, the other way round (#2978, `crossPocketVisibility`).** A
   profile step cannot read `gui.json`, so the crossing reads the
   retired group raw and stamps every profile file that does not
-  state the key. Run it first in `loadConfig`, and on a sync take's
-  staged copy before its bundle is built, ahead of every write
-  that re-encodes `gui.json`, which drops the group; decide the
+  state the key. Run it ahead of every write that re-encodes
+  `gui.json`, which drops the group: first in `loadConfig`, at the
+  head of `saveGuiConfig` (a Settings Save, the Lua-to-GUI
+  adoption), and on a sync take's staged copy, whatever owns it,
+  before its bundle is built; decide the
   debt by the file's format as well as the group, an older file
   with no group crossing as its old default, which a `gui.json`
   step states so every reader's restamp keeps it
