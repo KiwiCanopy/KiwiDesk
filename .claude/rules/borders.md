@@ -507,7 +507,7 @@ a peek body that speaks (#2941, `PocketEmptyPlateTests`). A
 key-opened list speaks too, since no menu twins it: its `keyed`
 anchor lifts the first window row (#2974, `PocketListKeyboardTests` ▸
 `keyLiftsTheFirstRow`) and gives each row a button
-(`PocketListKeyboardTests` ▸ `rowsSpeak`).
+(`PocketListSpeechTests` ▸ `rowsSpeak`).
 **An empty pocket's content is `pocketEmptyState`, read when the
 peek shows**: each chord through the one `pocketVerbChord` hook,
 never `menuChord`, a line only while its key is bound, and `pocket`'s

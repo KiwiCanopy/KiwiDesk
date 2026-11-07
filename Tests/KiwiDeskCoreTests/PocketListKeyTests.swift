@@ -4,6 +4,74 @@ import Testing
 
 @testable import KiwiDeskCore
 
+/// Two pocketable windows on the real main screen, the Space Bar at the
+/// top, so the pocket's own edge draws nothing; One window by default.
+/// The pocket's real panels order in, so its suites need a main screen.
+@MainActor
+private struct PocketListFixture {
+    let one = WindowID(1)
+    let two = WindowID(2)
+    let core: KiwiCore
+    let display: DisplayID
+
+    init() throws {
+        core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-list-\(UUID().uuidString)")
+        )
+        for id in [one, two] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: id,
+                        pid: 900_000 + pid_t(id.raw),
+                        appName: "App\(id.raw)",
+                        title: "Window \(id.raw)",
+                        frame: CGRect(x: 100, y: 100, width: 600, height: 400)
+                    )
+                )
+            )
+        }
+        let screen = try #require(NSScreen.main)
+        display = try #require(screen.kiwiDisplayID)
+        let space = try #require(core.state.workspaces.activeSpace)
+        core.state.workspaces.upsertDisplay(
+            Display(id: display, name: "Main", frame: screen.frame)
+        )
+        core.state.workspaces.assign(space, to: display)
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 25, width: 1440, height: 800)
+        }
+        core.tiler.settings.spaceBarStyle.edge = .top
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
+        core.tiler.settings.kiwishelf.pocketEdge = .bottom
+        core.pocketPlate.ordersPanel = true
+        core.shelves.peek.visibleArea = { _ in
+            CGRect(x: -20_000, y: -20_000, width: 40_000, height: 40_000)
+        }
+    }
+
+    func tearDown() {
+        core.shelves.peek.dismiss()
+        core.shelves.peek.panel.panel?.orderOut(nil)
+        core.pocketPlate.sync([])
+        NativeSpaces.currentSpaceIsUserOverride = nil
+    }
+
+    /// Pockets `ids`, Several windows holding them.
+    func pocket(_ ids: [WindowID]) {
+        core.execute("pocket.set_capacity", args: [.string("several")])
+        for id in ids {
+            core.handle(.windowFocused(id))
+            core.execute("toggle_pocket_window")
+            core.execute("pocket")
+            #expect(core.state.isPocketed(id))
+        }
+        core.updatePocketPlate(slots: [:])
+    }
+}
+
 /// `pocket.toggle_list` (#2974 ▸ Ruling): a key opens the pocket's list
 /// wherever the pocket is, on that one screen; no bar moves and no
 /// window, and a stand-down refuses.
@@ -160,6 +228,25 @@ struct PocketListKeyTests {
         #expect(panel.drawn?.groups.last?.rows.map(\.window) == [one])
     }
 
+    @Test("the list closes when an app's own window leaves it")
+    func staleListCloses() throws {
+        let fixture = try PocketListFixture()
+        let core = fixture.core
+        defer { fixture.tearDown() }
+        fixture.pocket([one])
+        core.state.pocket = core.state.pocket.map {
+            var slot = $0
+            slot.keyedApp = "com.example.app"
+            return slot
+        }
+        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.execute("pocket.toggle_list")
+        #expect(core.shelves.peek.shown != nil)
+        core.state.pocket = []
+        core.updatePocketPlate()
+        #expect(core.shelves.peek.shown == nil)
+    }
+
     @Test("a key held through a Desktop switch's read keeps its repaint")
     func keepsTheSwitchRepaint() throws {
         let fixture = try PocketListFixture()
@@ -197,17 +284,6 @@ struct PocketListKeyTests {
         #expect(core.pocketPlate.specs[display]?.risen == true)
         core.execute("pocket.toggle_list")
         #expect(core.pocketPlate.specs[display]?.risen == false)
-    }
-
-    @Test("an empty pocket shows its empty state, its first row lifted")
-    func emptyShowsItsState() throws {
-        let fixture = try PocketListFixture()
-        let core = fixture.core
-        defer { fixture.tearDown() }
-        core.execute("pocket.toggle_list")
-        let panel = core.shelves.peek.panel
-        #expect(panel.drawn?.empty != nil)
-        #expect(panel.body.hovered == 0)
     }
 
     @Test("a stand-down refuses with no list and no pocket")
@@ -261,13 +337,5 @@ struct PocketListKeyTests {
         core.updatePocketPlate()
         #expect(core.shelves.peek.shown == nil)
         #expect(core.pocketPlate.specs[display] == nil)
-    }
-
-    @Test("it acts on no window: out of the foreground preflight")
-    func noFocusImplied() throws {
-        let fixture = try PocketListFixture()
-        let core = fixture.core
-        defer { fixture.tearDown() }
-        #expect(!core.impliesFocus("pocket.toggle_list", []))
     }
 }

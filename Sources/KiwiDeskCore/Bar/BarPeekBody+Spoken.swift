@@ -28,13 +28,12 @@ extension BarPeekBody {
         row.spokenChord.map { "\(row.title), \($0)" } ?? row.title
     }
 
-    /// One button per target, over its frame. The labels under it go
-    /// quiet, so VoiceOver reads the row once; the body's `hitTest`
-    /// keeps every press its own.
+    /// One button per target, over its frame, its labels already quiet
+    /// (`BarPeekBody.style`); the body's `hitTest` keeps every press
+    /// its own.
     func addRowButtons() {
         rowButtons = targets.map { target in
             let button = BarPeekRowButton(frame: target.frame)
-            for ink in target.inks { ink.setAccessibilityElement(false) }
             button.setAccessibilityLabel(
                 target.spoken
                     ?? (target.inks.first as? NSTextField)?.stringValue

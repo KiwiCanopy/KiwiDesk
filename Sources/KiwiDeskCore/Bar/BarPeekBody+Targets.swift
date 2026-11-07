@@ -89,14 +89,14 @@ extension BarPeekBody {
     /// A press on the button at `point` arms it.
     func press(at point: CGPoint) {
         pressed = target(at: point)
-        setHovered(pressed)
+        pointerHovers(pressed)
     }
 
     /// The pointer dragged to `point` while pressed: the armed
     /// button stays lit only while the pointer is on it.
     func drag(to point: CGPoint) {
         guard let pressed else { return }
-        setHovered(target(at: point) == pressed ? pressed : nil)
+        pointerHovers(target(at: point) == pressed ? pressed : nil)
     }
 
     /// The release at `point` acts where it lands on the button the

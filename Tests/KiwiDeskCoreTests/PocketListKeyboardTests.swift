@@ -4,6 +4,74 @@ import Testing
 
 @testable import KiwiDeskCore
 
+/// Two pocketable windows on the real main screen, the Space Bar at the
+/// top, so the pocket's own edge draws nothing; One window by default.
+/// The pocket's real panels order in, so its suites need a main screen.
+@MainActor
+private struct PocketListFixture {
+    let one = WindowID(1)
+    let two = WindowID(2)
+    let core: KiwiCore
+    let display: DisplayID
+
+    init() throws {
+        core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-list-\(UUID().uuidString)")
+        )
+        for id in [one, two] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: id,
+                        pid: 900_000 + pid_t(id.raw),
+                        appName: "App\(id.raw)",
+                        title: "Window \(id.raw)",
+                        frame: CGRect(x: 100, y: 100, width: 600, height: 400)
+                    )
+                )
+            )
+        }
+        let screen = try #require(NSScreen.main)
+        display = try #require(screen.kiwiDisplayID)
+        let space = try #require(core.state.workspaces.activeSpace)
+        core.state.workspaces.upsertDisplay(
+            Display(id: display, name: "Main", frame: screen.frame)
+        )
+        core.state.workspaces.assign(space, to: display)
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 25, width: 1440, height: 800)
+        }
+        core.tiler.settings.spaceBarStyle.edge = .top
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
+        core.tiler.settings.kiwishelf.pocketEdge = .bottom
+        core.pocketPlate.ordersPanel = true
+        core.shelves.peek.visibleArea = { _ in
+            CGRect(x: -20_000, y: -20_000, width: 40_000, height: 40_000)
+        }
+    }
+
+    func tearDown() {
+        core.shelves.peek.dismiss()
+        core.shelves.peek.panel.panel?.orderOut(nil)
+        core.pocketPlate.sync([])
+        NativeSpaces.currentSpaceIsUserOverride = nil
+    }
+
+    /// Pockets `ids`, Several windows holding them.
+    func pocket(_ ids: [WindowID]) {
+        core.execute("pocket.set_capacity", args: [.string("several")])
+        for id in ids {
+            core.handle(.windowFocused(id))
+            core.execute("toggle_pocket_window")
+            core.execute("pocket")
+            #expect(core.state.isPocketed(id))
+        }
+        core.updatePocketPlate(slots: [:])
+    }
+}
+
 /// A key-opened pocket list (#2974 ▸ Ruling 4): a row lifted, the
 /// arrows and Return walking it with the chord's ⌘ still held, and
 /// its rows speaking, since no menu twins it.
@@ -34,20 +102,36 @@ struct PocketListKeyboardTests {
         #expect(core.shelves.peek.shown == nil)
         core.execute("pocket.toggle_list")
         #expect(core.shelves.peek.panel.body.hovered == 0)
-        // Closed and reopened, it starts over at the first row.
+        // Closed and reopened, it starts over at the first row, inside
+        // the close's landing and past it.
         let walked = core.shelves.peek.panel
+        var landings: [@MainActor () -> Void] = []
+        core.shelves.peek.schedule = { _, body in landings.append(body) }
         #expect(walked.morphKey(Self.down))
         core.execute("pocket.toggle_list")
-        walked.land(0) {}
+        #expect(walked.leaving != nil)
+        core.execute("pocket.toggle_list")
+        #expect(walked.body.hovered == 0)
+        #expect(walked.morphKey(Self.down))
+        core.execute("pocket.toggle_list")
+        landings.forEach { $0() }
+        #expect(walked.morph == nil)
         core.execute("pocket.toggle_list")
         #expect(walked.body.hovered == 0)
         // A redraw of the list keeps the row the arrows reached.
         let panel = core.shelves.peek.panel
         #expect(panel.morphKey(Self.down))
         #expect(panel.body.hovered == 1)
-        // A pointer nudged off its row leaves the row to Return.
-        panel.body.pointerHovers(nil)
+        // A pointer leaving its row, or a press off every row, leaves
+        // the row to Return; a click's list drops it (`clickDropsHover`).
+        panel.body.mouseExited(with: pointerEvent())
         #expect(panel.body.hovered == 1)
+        panel.body.press(at: CGPoint(x: -50, y: -50))
+        #expect(panel.body.hovered == 1)
+        panel.body.pressed = 0
+        panel.body.drag(to: CGPoint(x: -50, y: -50))
+        #expect(panel.body.hovered == 1)
+        panel.body.pressed = nil
         core.shelves.peek.show(
             try #require(core.pocketPlate.view(on: display)),
             source: .pocket(core.pocketPlateWindows),
@@ -113,6 +197,34 @@ struct PocketListKeyboardTests {
         #expect(core.shelves.peek.shown == nil)
     }
 
+    private func pointerEvent() -> NSEvent {
+        NSEvent.enterExitEvent(
+            with: .mouseExited,
+            location: .zero,
+            modifierFlags: [],
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            eventNumber: 0,
+            trackingNumber: 0,
+            userData: nil
+        )!
+    }
+
+    @Test("a click's list drops its row as the pointer leaves it")
+    func clickDropsHover() throws {
+        let fixture = try PocketListFixture()
+        let (core, display) = (fixture.core, fixture.display)
+        defer { fixture.tearDown() }
+        fixture.pocket([one, two])
+        let view = try #require(core.pocketPlate.view(on: display))
+        core.pocketPlate.onClick(view)
+        let body = core.shelves.peek.panel.body
+        body.setHovered(0)
+        body.mouseExited(with: pointerEvent())
+        #expect(body.hovered == nil)
+    }
+
     @Test("a click's list closes on a ⌘ arrow, walking nothing")
     func clickListCloses() throws {
         let fixture = try PocketListFixture()
@@ -144,92 +256,6 @@ struct PocketListKeyboardTests {
         )!
     }
 
-    @Test("a key-opened list speaks; a click's stays the menu's")
-    func rowsSpeak() throws {
-        let fixture = try PocketListFixture()
-        let (core, display) = (fixture.core, fixture.display)
-        defer { fixture.tearDown() }
-        fixture.pocket([one, two])
-        let view = try #require(core.pocketPlate.view(on: display))
-        let peek = core.shelves.peek
-        core.pocketPlate.onClick(view)
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
-        #expect(peek.panel.body.rowButtons.isEmpty)
-        peek.dismiss()
-        core.execute("pocket.toggle_list")
-        #expect(peek.panel.panel?.isAccessibilityElement() == true)
-        let body = peek.panel.body
-        let buttons = body.rowButtons
-        try #require(buttons.count == 2)
-        for (button, target) in zip(buttons, body.targets) {
-            #expect(button.superview === body)
-            #expect(button.frame == target.frame)
-            #expect(button.isAccessibilityElement())
-            #expect(target.inks.allSatisfy { !$0.isAccessibilityElement() })
-        }
-        #expect(buttons.allSatisfy { $0.accessibilityRole() == .button })
-        #expect(buttons[0].accessibilityLabel() == "Window 1")
-        #expect(
-            BarPeekBody.spokenRow(
-                .init(
-                    window: one,
-                    title: "Notes",
-                    chord: "⌃⌥N",
-                    spokenChord: "Control Option N"
-                )
-            ) == "Notes, Control Option N"
-        )
-        var moved: [NSView] = []
-        body.moveVoiceOver = { moved.append($0) }
-        #expect(peek.panel.morphKey(Self.down))
-        #expect(moved == [buttons[1]])
-        var picked: [WindowID] = []
-        peek.pick = { id, _ in picked.append(id) }
-        #expect(buttons[1].accessibilityPerformPress())
-        #expect(picked == [two])
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
-    }
-
-    @Test("a key-opened list's cursor lands on its first row")
-    func openMovesVoiceOver() throws {
-        let fixture = try PocketListFixture()
-        let core = fixture.core
-        defer { fixture.tearDown() }
-        fixture.pocket([one, two])
-        let body = core.shelves.peek.panel.body
-        var moved: [NSView] = []
-        body.moveVoiceOver = { moved.append($0) }
-        core.execute("pocket.toggle_list")
-        #expect(moved == [body.rowButtons[0]])
-    }
-
-    /// The panel is one: every other show door takes the keyed state
-    /// off, or a hover label would speak.
-    @Test("a later hover peek or pill list on the panel stays hidden")
-    func otherShowsResetKeyed() throws {
-        let fixture = try PocketListFixture()
-        let core = fixture.core
-        defer { fixture.tearDown() }
-        fixture.pocket([one, two])
-        let peek = core.shelves.peek
-        core.execute("pocket.toggle_list")
-        let content = try #require(peek.panel.drawn)
-        let frame = CGRect(x: 0, y: 0, width: 400, height: 400)
-        peek.panel.show(
-            content,
-            shelf: KiwiShelf(),
-            edge: .bottom,
-            anchor: frame,
-            strip: frame,
-            visible: frame,
-            fades: false
-        )
-        #expect(!peek.panel.body.keyed)
-        #expect(peek.panel.body.rowButtons.isEmpty)
-        #expect(peek.panel.panel?.isAccessibilityElement() == false)
-        #expect(peek.panel.panel?.walksHeldKeys == false)
-    }
-
     @Test("the lift starts on a window, past a tall list's more line")
     func liftSkipsTheMoreLine() throws {
         let fixture = try PocketListFixture()
@@ -253,5 +279,24 @@ struct PocketListKeyboardTests {
         // A row past a shrunken list lands on its last.
         body.liftRow(9)
         #expect(body.hovered == body.targets.count - 1)
+    }
+
+    @Test("an empty pocket shows its empty state, its first row lifted")
+    func emptyShowsItsState() throws {
+        let fixture = try PocketListFixture()
+        let core = fixture.core
+        defer { fixture.tearDown() }
+        core.execute("pocket.toggle_list")
+        let panel = core.shelves.peek.panel
+        #expect(panel.drawn?.empty != nil)
+        #expect(panel.body.hovered == 0)
+    }
+
+    @Test("it acts on no window: out of the foreground preflight")
+    func noFocusImplied() throws {
+        let fixture = try PocketListFixture()
+        let core = fixture.core
+        defer { fixture.tearDown() }
+        #expect(!core.impliesFocus("pocket.toggle_list", []))
     }
 }

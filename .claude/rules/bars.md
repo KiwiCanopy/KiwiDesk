@@ -1192,7 +1192,7 @@ Obligations:
   each row a button landing through the peek's one `land` door on
   a `SettingsLanding` (#2941, `PocketEmptyPeekTests`) — and a
   key-opened list, which no menu twins either, each row a button
-  (#2974, `PocketListKeyboardTests` ▸ `rowsSpeak`). The argument is
+  (#2974, `PocketListSpeechTests` ▸ `rowsSpeak`). The argument is
   `docs/design-decisions.md` ▸ A bar item's hover peek.
 - **A list peek marks the focused window's row with a check**
   (#2063), read through `barFocus(on:)` (below), in

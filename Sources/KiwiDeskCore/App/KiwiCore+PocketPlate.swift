@@ -54,10 +54,11 @@ extension KiwiCore {
     func updatePocketPlate() {
         var specs = pocketPlateSpecs()
         if let display = pocketListDisplay,
-            !Self.pocketListHolds(
-                was: pocketPlate.specs[display],
-                now: specs.first { $0.display == display }
-            )
+            pocketListIsStale
+                || !Self.pocketListHolds(
+                    was: pocketPlate.specs[display],
+                    now: specs.first { $0.display == display }
+                )
         {
             shelves.peek.dismiss()
             // The list held a pocket that may stand no longer (#2974).
@@ -70,6 +71,15 @@ extension KiwiCore {
     var pocketListDisplay: DisplayID? {
         (shelves.peek.shown?.view as? PocketPlateView)
             .flatMap(pocketPlate.display(of:))
+    }
+
+    /// Whether the open list names other windows than it would now:
+    /// under One window it holds an app's own, which no spec counts.
+    private var pocketListIsStale: Bool {
+        guard case .pocket(let listed)? = shelves.peek.shown?.source else {
+            return false
+        }
+        return listed != pocketListWindows
     }
 
     /// Whether a list open on a pocket survives its pocket going
@@ -228,14 +238,14 @@ extension KiwiCore {
     func openPocketMenu(from view: PocketPlateView) {
         // An empty Pocket has no menu: its press grows the empty
         // state, which speaks (#2941 ▸ 1).
-        guard !pocketPlateWindows.isEmpty else {
+        guard !pocketListWindows.isEmpty else {
             openPocketList(from: view)
             return
         }
         shelves.peek.dismiss()
         // The menu holds a revealed shelf out while it tracks (#761).
         shelves.peek.noteMenuAnchor(view.window)
-        shelves.peek.openMenu(.pocket(pocketPlateWindows), nil, view)
+        shelves.peek.openMenu(.pocket(pocketListWindows), nil, view)
     }
 
     /// Grows the list of the windows inside out of `view`; `keyed`
