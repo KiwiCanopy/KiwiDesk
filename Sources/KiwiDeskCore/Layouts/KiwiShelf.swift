@@ -135,6 +135,10 @@ public struct KiwiShelf: Sendable, Equatable {
     /// Where along `pocketEdge` the pocket sits, in percent; on a
     /// bar's edge it takes the nearer end (`pocketLeansEnd`).
     public var pocketPosition: CGFloat = Self.defaultPocketPosition
+    /// When the pocket shows (#2978): Always the whole mark at rest,
+    /// Auto its handle, Hidden nothing until a drag, a window going
+    /// in or out, or its list key brings it out.
+    public var pocketVisibility = ShelfVisibility.always
 
     public init() {}
 

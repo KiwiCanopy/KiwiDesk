@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDesk
 
 /// The Pocket card (#2680): its keys moved in from Size & float,
-/// what it holds (#2678) and its placement rows, none greyed.
+/// and its rows, none greyed; when it shows is KiwiShelf's (#2978).
 @Suite("Pocket card")
 @MainActor
 struct PocketGroupTests {
@@ -24,14 +24,6 @@ struct PocketGroupTests {
             )
             #expect(key.placement.container == .pocket)
         }
-        for key in ShortcutsRowOrder.pocketList {
-            #expect(key.placement.container == .pocket)
-        }
-        // What it holds sits above the placement it decides on.
-        #expect(
-            ShortcutsRowOrder.pocketList.first
-                == .shortcuts(.pocketCapacity)
-        )
     }
 
     /// Every key the census places in the card sits in exactly one
@@ -40,8 +32,7 @@ struct PocketGroupTests {
     @Test("the card's lists partition its census keys")
     func listsPartitionTheCard() throws {
         let lists =
-            ShortcutsRowOrder.pocketAtRest + ShortcutsRowOrder.pocketList
-            + ShortcutsRowOrder.pocketApps
+            ShortcutsRowOrder.pocketAtRest + ShortcutsRowOrder.pocketApps
         let placed = SettingKey.allCases.filter {
             $0.placement.area == .shortcuts
                 && $0.placement.container == .pocket
@@ -58,16 +49,9 @@ struct PocketGroupTests {
         #expect(source.contains("PocketAppRows(model: model"))
     }
 
-    @Test("each capacity reads as its segment says it")
-    func capacityNames() {
-        LocalizationManager.shared.select("en")
-        #expect(PocketGroup.capacityName(.one) == "One window")
-        #expect(PocketGroup.capacityName(.several) == "Several windows")
-    }
-
-    /// The Pocket card draws Holds first, and no row of it greys
-    /// (#2678).
-    @Test("no Pocket row greys, and the Holds row is drawn")
+    /// No row of the Pocket card greys (#2678), and Holds retired
+    /// for KiwiShelf's Show (#2978).
+    @Test("no Pocket row greys, and no Holds row is drawn")
     func nothingGreys() throws {
         let source = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
@@ -75,24 +59,13 @@ struct PocketGroupTests {
                     + "PocketGroup.swift"
             )
         )
-        // The body draws Holds ahead of the keys (owner, #2678);
-        // where the pocket sits is KiwiShelf's card.
+        // The body walks the keys; when the pocket shows and where it
+        // sits are KiwiShelf's card (#2978).
         let body = try #require(source.range(of: "var body: some View"))
         let drawn = String(source[body.upperBound...])
-        // The row's own line at any depth, so wrapping it moves
-        // nothing.
-        let holds = try #require(
-            drawn.range(
-                of: #"\n\s*capacityRow\n"#,
-                options: .regularExpression
-            )
-        )
-        let keys = try #require(
-            drawn.range(of: "ShortcutsRowOrder.pocketAtRest")
-        )
-        #expect(holds.lowerBound < keys.lowerBound)
+        #expect(drawn.contains("ShortcutsRowOrder.pocketAtRest"))
+        #expect(!drawn.contains("capacityRow"))
         #expect(!drawn.contains("edgeRow"))
-        #expect(source.contains("$0.pocketCapacity = new"))
         // Every way a row could grey: none applies.
         for grey in [
             "GreyOut", "CrossReferenceRow", "onStateChange", ".disabled(",

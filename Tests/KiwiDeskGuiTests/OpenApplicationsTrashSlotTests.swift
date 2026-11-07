@@ -100,16 +100,16 @@ struct OpenApplicationsTrashSlotTests {
         #expect(held - bare >= slot)
     }
 
-    /// The Holds row and the key rows share one ask; the per-app
-    /// rows, which draw their own trash, stay outside it. The ask
+    /// The key rows share one ask (Holds retired, #2978); the
+    /// per-app rows, which draw their own trash, stay outside it. The ask
     /// is the card's one spelling of the key, so no row inside it
     /// sets it back.
-    @Test("the Pocket card's Holds row holds the slot")
+    @Test("the Pocket card's key rows hold the slot")
     func pocketHoldsRowHoldsTheSlot() throws {
         let group = try source("PocketGroup.swift")
         #expect(
             group.contains(
-                "Group{capacityRowForEach(ShortcutsRowOrder.pocketAtRest"
+                "Group{ForEach(ShortcutsRowOrder.pocketAtRest"
             )
         )
         #expect(

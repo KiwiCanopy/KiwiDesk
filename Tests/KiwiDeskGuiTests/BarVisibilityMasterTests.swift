@@ -41,6 +41,7 @@ struct BarVisibilityMasterTests {
         let settings = model.config.settings
         #expect(settings.spaceBarStyle.visibility == .auto)
         #expect(settings.appBarHosts.allSatisfy { $0.visibility == .auto })
+        #expect(settings.kiwishelf.pocketVisibility == .auto)
         let before = model.config
         model.barVisibilityMaster.wrappedValue = .auto
         model.barVisibilityMaster.wrappedValue = nil
@@ -49,7 +50,8 @@ struct BarVisibilityMasterTests {
 
     /// The master's leaves are each hosting layout's, read off the
     /// same `appBarHost` the reservation asks, so a third hosting
-    /// layout joins the master without an edit here.
+    /// layout joins the master without an edit here, and the
+    /// pocket's (#2978).
     @Test("the master's leaves book as one change, the hosting set")
     func masterOwnsEveryLeaf() {
         let hosts = LayoutMode.allCases
@@ -57,7 +59,35 @@ struct BarVisibilityMasterTests {
             .map { "settings.\($0.rawValue).appBar.visibility" }
         #expect(
             Set(SettingKey.masterWrites[.kiwishelf(.visibility)] ?? [])
-                == Set(["settings.spaceBarStyle.visibility"] + hosts)
+                == Set(
+                    ["settings.spaceBarStyle.visibility"] + hosts
+                        + ["settings.kiwishelf.pocketVisibility"]
+                )
+        )
+    }
+
+    /// Core's set and the GUI's agree: the master's ↺ puts back
+    /// every leaf `setEveryBarVisibility` writes, the pocket's too.
+    @Test("the master's revert puts back every element Core sets")
+    func revertTakesCoresSet() throws {
+        let model = split()
+        model.config.settings.setEveryBarVisibility(.hidden)
+        let writer = try #require(
+            SettingsRevertRegister.masters[.kiwishelf(.visibility)]
+        )
+        writer.apply(model, nil)
+        let clean = model.cleanConfig.settings
+        #expect(
+            model.config.settings.uniformBarVisibility
+                == clean.uniformBarVisibility
+        )
+        #expect(
+            model.config.settings.kiwishelf.pocketVisibility
+                == clean.kiwishelf.pocketVisibility
+        )
+        #expect(
+            Set(writer.paths)
+                == Set(SettingKey.masterWrites[.kiwishelf(.visibility)] ?? [])
         )
     }
 

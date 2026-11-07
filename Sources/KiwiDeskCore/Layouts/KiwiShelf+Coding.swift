@@ -46,6 +46,7 @@ extension KiwiShelf {
         case revealStyle = "reveal_style"
         case pocketEdge = "pocket_edge"
         case pocketPosition = "pocket_position"
+        case pocketVisibility = "pocket_visibility"
     }
 
     /// Decodes a shelf, a missing key taking its default.
@@ -150,6 +151,11 @@ extension KiwiShelf {
             try c.decodeIfPresent(CGFloat.self, forKey: .pocketPosition)
                 ?? d.pocketPosition
         )
+        pocketVisibility =
+            try c.decodeIfPresent(
+                ShelfVisibility.self,
+                forKey: .pocketVisibility
+            ) ?? d.pocketVisibility
         fillFade = Self.clampFillFade(
             try c.decodeIfPresent(CGFloat.self, forKey: .fillFade)
                 ?? d.fillFade

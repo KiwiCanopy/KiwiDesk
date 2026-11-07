@@ -25,6 +25,8 @@ struct PocketDropTests {
                 testTemporaryDirectory
                 .appendingPathComponent("kiwi-drop-\(UUID().uuidString)")
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         for raw: UInt32 in [2, 1] {
             core.state.apply(
                 .windowCreated(

@@ -929,7 +929,7 @@ editing here:
     refuses any window that is not the out slot's; a new entry
     path (a pick, #2678's list) marks first, and gates the mark
     on no count of marked windows (#2978, `PocketListTests` ▸
-    `everyCapacityTakesAnotherMark`). A reader of "the
+    `everyShowTakesAnotherMark`). A reader of "the
     pocket holds something" states whether it means any slot or
     the windows `pocket` works, since a per-app key's slot (#2612)
     is the one but not the other. **Which slot an app's key owns is

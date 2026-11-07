@@ -1,11 +1,12 @@
 /// The shelf both bars sit on (`KiwiShelf`, #1517) slice of the
-/// census. Its card also draws the three Show rows behind the Show
+/// census. Its card also draws the Show rows behind the Show
 /// master, whose keys stay with the value they write
-/// (`spaceBarVisibility`, the two layout App Bar visibilities).
+/// (`spaceBarVisibility`, the two layout App Bar visibilities,
+/// `pocketVisibility`).
 
 enum KiwiShelfKey: String, CaseIterable, Hashable {
-    /// The Show master: every bar's visibility (#761), which it
-    /// writes through `masterWrites`.
+    /// The Show master: every bar's visibility and the Pocket's
+    /// (#761, #2978), which it writes through `masterWrites`.
     case visibility = "settings.spaceBarStyle.visibility (master)"
     /// The Position master: both bars' edges (#1731), which it
     /// writes through `masterWrites`.
@@ -45,6 +46,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case revealStyle = "settings.kiwishelf.revealStyle"
     case pocketEdge = "settings.kiwishelf.pocketEdge"
     case pocketPosition = "settings.kiwishelf.pocketPosition"
+    /// The pocket's Show (#2978), behind the Show master's drawer.
+    case pocketVisibility = "settings.kiwishelf.pocketVisibility"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
@@ -66,7 +69,7 @@ extension KiwiShelfKey {
         case .thickness, .alignment, .pocketEdge, .pocketPosition:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
-            .appBarScreenEdge:
+            .appBarScreenEdge, .pocketVisibility:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
@@ -289,6 +292,8 @@ extension KiwiShelfKey {
                 "kiwishelf.pocket_edge",
                 help: "kiwishelf.pocket_edge.help"
             )
+        case .pocketVisibility:
+            return .text("kiwishelf.show.pocket")
         case .pocketPosition:
             return .text(
                 "kiwishelf.pocket_position",

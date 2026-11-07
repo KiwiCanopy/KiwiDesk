@@ -1,9 +1,9 @@
 import CoreGraphics
 import Foundation
 
-/// The pocket's style: the mark's colour (#2671). Where it sits is
-/// KiwiShelf's (`pocketEdge`, `pocketPosition`, #2678); how many
-/// windows it holds is app-wide (`AppWideSettings.pocketCapacity`).
+/// The pocket's style: the mark's colour (#2671). Where it sits and
+/// when it shows are KiwiShelf's (`pocketEdge`, `pocketPosition`,
+/// `pocketVisibility`; #2678, #2978).
 public struct PocketStyle: Sendable, Equatable {
     /// Pocket fill hex string; empty = automatic, the plate's
     /// mark ink (`.labelColor`), so it follows light and dark.
@@ -27,9 +27,4 @@ extension PocketStyle: Codable {
                 forKey: .color
             ) ?? Self().color
     }
-}
-
-/// How many windows the pocket holds (#2678).
-public enum PocketCapacity: String, Sendable, Codable, CaseIterable {
-    case one, several
 }

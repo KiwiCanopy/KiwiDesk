@@ -1,15 +1,15 @@
 import CoreGraphics
 
-/// The pocket under One window on a bar's edge (#2793): it never
+/// The pocket under Hidden on a bar's edge (#2793, #2978): it never
 /// joins the shelf, so no bar moves for it. It stands at Position,
 /// just inside the bars' strip on the window side, while a drag or a
 /// play shows it.
 extension KiwiCore {
-    /// The One-window pocket's frame on `display` (AX) while a bar's
+    /// The Hidden pocket's frame on `display` (AX) while a bar's
     /// strip stands on the pocket's edge there (`pocketStrip`); nil
-    /// under Several, or where none does this pass.
+    /// while it rests, or where none does this pass.
     func pocketInsideFrame(on display: DisplayID) -> CGRect? {
-        guard !pocketHoldsSeveral,
+        guard !pocketRests,
             let strip = pocketPlate.barStrips[display]
         else { return nil }
         let shelf = tiler.settings.kiwishelf

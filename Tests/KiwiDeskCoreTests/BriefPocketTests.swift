@@ -23,6 +23,8 @@ struct BriefPocketTests {
                     "kiwi-brief-pocket-\(UUID().uuidString)"
                 )
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }
@@ -100,7 +102,7 @@ struct BriefPocketTests {
         // The one door for where the pocket is (#2678 review 5)…
         #expect(request.pocket == core.pocketLanding(on: request.display))
         // …at the stored placement: the whole mark, no handle under
-        // One window (#2793), on the right edge 30 % down it.
+        // Hidden (#2793), on the right edge 30 % down it.
         let visible = GeometryUtils.axVisibleFrame(of: request.screen)
         let side = core.tiler.settings.kiwishelf.thickness
         // One outer margin in from the edge, as the bars' handles.

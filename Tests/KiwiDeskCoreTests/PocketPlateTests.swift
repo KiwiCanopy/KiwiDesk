@@ -6,7 +6,7 @@ import Testing
 
 /// The pocket on screen (#2678, 2026-10-29 ruling): while Several
 /// windows holds it, on every display, faded while empty, a count
-/// badge from two inside; nothing at rest under One window; a click
+/// badge from two inside; nothing at rest under Hidden; a click
 /// lists the windows inside, each row taking its window out.
 @Suite(
     "Pocket plate",
@@ -25,6 +25,8 @@ struct PocketPlateTests {
                 testTemporaryDirectory
                 .appendingPathComponent("kiwi-plate-\(UUID().uuidString)")
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         for raw: UInt32 in [3, 2, 1] {
             core.state.apply(
                 .windowCreated(
@@ -54,7 +56,10 @@ struct PocketPlateTests {
     }
 
     private func several(_ core: KiwiCore) {
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
     }
 
     /// `one` and `two` marked and put in, through the keys.
@@ -72,7 +77,7 @@ struct PocketPlateTests {
         return core.pocketPlate.specs.values.first
     }
 
-    @Test("under One window nothing shows at rest")
+    @Test("under Hidden nothing shows at rest")
     func oneShowsNothing() {
         let core = makeCore()
         core.handle(.windowFocused(one))
@@ -143,28 +148,26 @@ struct PocketPlateTests {
         )
     }
 
-    @Test("capacity is app-wide, decodes as stored, refuses a bad value")
-    func capacityStored() throws {
-        // App-wide (#2678): gui.json's `pocket` group.
-        let group = try JSONDecoder().decode(
-            AppWideSettings.Pocket.self,
-            from: Data(#"{"capacity":"several"}"#.utf8)
+    @Test("the Show is the profile's, decodes as stored, refuses a bad value")
+    func visibilityStored() throws {
+        // Each profile's (#2978): `kiwishelf.pocket_visibility`.
+        let shelf = try JSONDecoder().decode(
+            KiwiShelf.self,
+            from: Data(#"{"pocket_visibility":"auto"}"#.utf8)
         )
-        let stored = AppWideSettings(
-            refusal: AppWideSettings.Refusal(),
-            quit: nil,
-            pocket: group
-        )
-        #expect(stored?.pocketCapacity == .several)
-        #expect(AppWideSettings().pocketCapacity == .one)
+        #expect(shelf.pocketVisibility == .auto)
+        #expect(KiwiShelf().pocketVisibility == .always)
         let core = makeCore()
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         #expect(
-            !core.execute("pocket.set_capacity", args: [.string("many")])
-                .isSuccess
+            !core.execute(
+                "kiwishelf.set_pocket_visibility",
+                args: [.string("many")]
+            ).isSuccess
         )
-        #expect(core.appWide.pocketCapacity == .one)
+        #expect(core.tiler.settings.kiwishelf.pocketVisibility == .hidden)
         several(core)
-        #expect(core.appWide.pocketCapacity == .several)
+        #expect(core.tiler.settings.kiwishelf.pocketVisibility == .always)
     }
 
     @Test("the list is a click-held list of the windows inside")

@@ -224,7 +224,14 @@ struct MachineConfigTests {
         let migrated = try #require(
             ConfigMigration.migrated(Data(legacy.utf8))
         )
-        #expect(String(decoding: migrated, as: UTF8.self) == current)
+        // Below format 19 the pocket's absent group is stated too
+        // (#2978), one pair after the opening brace.
+        let stated = current.replacingOccurrences(
+            of: "{",
+            with: #"{"pocket":{"capacity":"one"},"#,
+            range: current.range(of: "{")
+        )
+        #expect(String(decoding: migrated, as: UTF8.self) == stated)
     }
 
     /// Another Mac's memory never travels: an old backup's copy is

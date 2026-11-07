@@ -68,10 +68,11 @@ struct WindowStrokeTests {
     @MainActor
     func retiredVerbsFail(verb: String, message: String) {
         let core = makeTestCore()
+        let before = core.tiler.settings
         let response = core.execute(verb, args: [.number(4)])
         #expect(!response.isSuccess)
         #expect(response.error?.contains(message) == true)
-        #expect(core.tiler.settings == TilingSettings())
+        #expect(core.tiler.settings == before)
     }
 
     /// A drag marker stores no stroke of its own, so no path can

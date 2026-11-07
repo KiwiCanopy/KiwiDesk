@@ -28,7 +28,10 @@ struct PocketHandleDwellTests {
         )
         core.state.workspaces.assign(space, to: id)
         core.tiler.settings.spaceBarStyle.visibility = .hidden
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("auto")]
+        )
         return core
     }
 

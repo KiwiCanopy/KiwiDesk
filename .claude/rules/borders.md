@@ -447,11 +447,11 @@ calls it, as an emptied pocket does, and a path that changes whether
 it STANDS — a drag starting or ending, a play's hold — calls
 `updateBars()`, since the bar pass refreshes what places it: the
 slot, the strip it stands inside and the stand-down. **Whether it
-shows is the one `pocketStands`** — Several windows, a drag, a play,
-or on one screen its list, open or being opened by
-`pocket.toggle_list` (#2974, `PocketListKeyTests` ▸
-`oneScreenStands`) — while the shelf's plan states the pocket by the
-capacity alone, so a drag, a play or the list moves no bar (#2793,
+shows is the one `pocketStands`** — `pocketRests` (its Show is not
+Hidden, #2978), a drag, a play, or on one screen its list, open or
+being opened by `pocket.toggle_list` (#2974, `PocketListKeyTests` ▸
+`oneScreenStands`) — while the shelf's plan states the pocket by
+`pocketRests` alone, so a drag, a play or the list moves no bar (#2793,
 `PocketShelfWiringTests` ▸ `dragStandsThePocket`,
 `PocketListKeyTests` ▸ `oneWindowStandsAndCloses`); it waits out a
 Desktop switch's read, which holds that pass
@@ -461,22 +461,22 @@ in `layoutCommand`'s dispatch**, as `toggle_reveal` does, or a press
 re-lays the Space (`PocketListKeyTests` ▸ `runsNoPass`). **Where it is is the one
 `pocketPlace(on:)`, which the drawing and `pocketLanding(on:)` both
 read** (`PocketPlaceTests` ▸ `landingIsTheDrawing`): its slot on a
-bar edge under Several, read off `ShelfArrangement.arrange(…pocket:)`;
-under One window just inside that edge's bar strip at Position, a
+bar edge while it rests, read off `ShelfArrangement.arrange(…pocket:)`;
+under Hidden just inside that edge's bar strip at Position, a
 drawn one or an Auto bar's while it hides (`pocketStrip`), opening
 no slot (#2793, `PocketInsideTests`); else the whole mark
-(`pocketMarkFrame(on:)`) under One window, which draws no handle, or
+(`pocketMarkFrame(on:)`) under Hidden, which draws no handle, or
 where `TilingSettings.pocketRest` says `.mark` (#2784); else its
 handle risen — on an Auto edge where the shown pocket stands,
 joining the row of marks where it would meet it
 (`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
 `handleStandsOnTheSlot`), else at Position — never a frame of its
-own beside them. The One-window pocket slides out of its edge
+own beside them. The Hidden pocket slides out of its edge
 (`BarMotion.playPocketEntrance`) and its panel orders out only at
 the slide back's landing, through the overlay's `afterLeave`, a
 return before it keeping the panel; every order-out drops its hover
 through the one `orderOut(_:on:)` (`PocketPlaceTests` ▸
-`leaveLandsOrReturns`). On a bar edge under Several it is a shelf
+`leaveLandsOrReturns`). On a bar edge while it rests it is a shelf
 section, its rules [bars.md](bars.md)'s ▸ The pocket is a shelf
 section.
 **A handle rises after `ShelfReveal.revealDelay` or at once on
@@ -490,10 +490,10 @@ its peek grows the handle's panel
 (`PocketHandleDwellTests` ▸ `hoverPeeksThenRises`).
 **What it counts and shows for is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it: the
-general list, then under Several windows the apps' own pocket
+general list, then while it rests the apps' own pocket
 windows, built from `generalPocket` and `keyedPocket` and never a
 filter beside them (#2923). **What it lists is the one
-`pocketListWindows`**, the same under One window too, where a key
+`pocketListWindows`**, the same under Hidden too, where a key
 can open it (#2974,
 `PocketListKeyTests` ▸ `oneWindowListsKeyed`). A reader that means the
 general list alone takes `generalPocket`. Its list is the bars' click-held peek, its panel

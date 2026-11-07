@@ -51,6 +51,9 @@ struct BarsGateWiringTests {
                 "besideAlwaysNote(.space,in:[.monocle,.scrolling])",
                 "besideAlwaysNote(.app,in:[.monocle])",
                 "besideAlwaysNote(.app,in:[.scrolling])",
+                // And an Auto Pocket a shown bar keeps up (#2978).
+                "autoPocketNotedefault:",
+                "screen.barKeepsAutoPocket(in:$0,on:nil)",
                 "model.config.settings.screenVariants",
                 // The Show drawer hangs under its master unruled.
                 "SettingsCatalog.bars.kiwishelfShowEach,"

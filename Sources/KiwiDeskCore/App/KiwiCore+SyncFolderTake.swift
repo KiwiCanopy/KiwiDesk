@@ -119,14 +119,19 @@ extension KiwiCore {
             machine: stage.appendingPathComponent("machine")
         )
         if gui.exists, gui.load() == nil { throw .folderUnreadable }
+        let profiles = ProfileManager(
+            directory: stage.appendingPathComponent(
+                SyncFolder.name(of: .profiles)
+            )
+        )
+        // An older build's folder still holds the app-wide pocket
+        // capacity, which the bundle's coder would drop (#2978).
+        // Whatever owns the folder: its profiles held One window too.
+        Self.crossPocketVisibility(gui: gui, profiles: profiles, log: onLog)
         guard
             let bundle = try? Self.setupBundle(
                 gui: gui,
-                profiles: ProfileManager(
-                    directory: stage.appendingPathComponent(
-                        SyncFolder.name(of: .profiles)
-                    )
-                ),
+                profiles: profiles,
                 palettes: PaletteStore(directory: stage),
                 looks: LookStore(directory: stage),
                 bindings: false

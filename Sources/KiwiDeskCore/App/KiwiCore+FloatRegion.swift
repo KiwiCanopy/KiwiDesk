@@ -189,7 +189,7 @@ extension KiwiCore {
         }
         // The whole pocket reserves a shelf's strip, so a float keeps
         // clear of it as of a bar (#2784).
-        guard tiler.pocketAtRest(),
+        guard tiler.settings.pocketRests,
             tiler.settings.pocketRest(in: mode, on: screen) == .mark,
             tiler.settings.pocketReservation(in: mode, on: screen) != nil,
             let display, let mark = pocketMarkFrame(on: display)

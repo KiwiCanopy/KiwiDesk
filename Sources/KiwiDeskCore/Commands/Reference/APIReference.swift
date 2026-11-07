@@ -234,6 +234,7 @@ public enum APIReference {
             "set_reveal_timeout", "set_reveal_style", "set_fill_fade",
             "set_tint_hub_and_plates", "set_reading_contrast",
             "set_pocket_edge", "set_pocket_position",
+            "set_pocket_visibility",
         ],
         "grid": [
             "set_type", "set_fill_empty_cells",
@@ -293,7 +294,7 @@ public enum APIReference {
             "set_mark", "set_color",
         ],
         "pocket": [
-            "set_capacity", "set_color", "toggle_list",
+            "set_color", "toggle_list",
         ],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",

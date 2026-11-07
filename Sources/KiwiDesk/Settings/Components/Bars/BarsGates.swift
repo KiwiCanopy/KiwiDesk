@@ -104,14 +104,14 @@ enum BarsGateHelp {
         )
     }
 
-    /// The Show master's acknowledgement while the bars show
-    /// differently (#761): the master stays live, and a pick sets
-    /// every bar.
+    /// The Show master's acknowledgement while the bars and the
+    /// Pocket show differently (#761, #2978): the master stays live,
+    /// and a pick sets them all.
     static var visibilityDiffers: String {
         L(
             "kiwishelf.show.differ.help",
-            "Your bars show differently right now; choosing here "
-                + "sets every bar."
+            "Your bars and the Pocket show differently right now; "
+                + "choosing here sets them all."
         )
     }
 

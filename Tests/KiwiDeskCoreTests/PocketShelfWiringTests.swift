@@ -7,7 +7,7 @@ import Testing
 /// The pocket through the one bar pass (#2678 review 10, 11, 4, 1):
 /// `updateBars()` asks the shelf's plan for the pocket's slot and
 /// mounts the pocket on that shelf; the pocket stands on every
-/// display; a drag stands it under One window; a list open on a
+/// display; a drag stands it under Hidden; a list open on a
 /// risen handle holds it out.
 @Suite(
     "Pocket shelf wiring",
@@ -24,6 +24,8 @@ struct PocketShelfWiringTests {
                 testTemporaryDirectory
                 .appendingPathComponent("kiwi-wiring-\(UUID().uuidString)")
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -55,7 +57,10 @@ struct PocketShelfWiringTests {
     @Test("a bar pass pins the slot and mounts the pocket on its shelf")
     func barPassMountsThePocket() throws {
         let (core, display) = try makeCore()
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         core.updateBars()
         let slot = try #require(core.pocketPlate.slots[display])
         let overlay = try #require(
@@ -71,7 +76,7 @@ struct PocketShelfWiringTests {
         #expect(panel.level == BarPanel.aboveLevel)
     }
 
-    @Test("under One window a drag stands the pocket inside the strip")
+    @Test("under Hidden a drag stands the pocket inside the strip")
     func dragStandsThePocket() throws {
         let (core, display) = try makeCore()
         // A margin, so the inside frame's own outer of 0 is told apart.
@@ -82,7 +87,7 @@ struct PocketShelfWiringTests {
         core.pocketPlate.dragging = one
         core.updateBars()
         #expect(core.pocketStands)
-        // Under One window the bar's edge opens no slot: the pocket
+        // Under Hidden the bar's edge opens no slot: the pocket
         // stands just inside the strip, in a panel of its own (#2793).
         #expect(core.pocketPlate.slots[display] == nil)
         let strip = try #require(core.pocketPlate.barStrips[display])
@@ -106,7 +111,10 @@ struct PocketShelfWiringTests {
     @Test("under Several the drag finds the pocket in its slot")
     func severalKeepsTheSlot() throws {
         let (core, display) = try makeCore()
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         core.pocketPlate.dragging = one
         core.updateBars()
         #expect(core.pocketPlate.slots[display] != nil)
@@ -117,7 +125,10 @@ struct PocketShelfWiringTests {
     @Test("the pocket stands on a second display at its own slot")
     func everyDisplayTakesItsSlot() throws {
         let (core, display) = try makeCore()
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         let second = DisplayID(900_777)
         core.state.workspaces.upsertDisplay(
             Display(
@@ -145,7 +156,10 @@ struct PocketShelfWiringTests {
         // Hidden, so the bottom edge rests a handle, not the whole
         // pocket (#2784).
         core.tiler.settings.spaceBarStyle.visibility = .hidden
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("auto")]
+        )
         core.pocketPlate.ordersPanel = true
         // The handle stands on the real screen's edge.
         core.shelves.peek.visibleArea = { _ in

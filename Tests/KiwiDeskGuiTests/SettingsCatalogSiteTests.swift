@@ -42,17 +42,18 @@ struct SettingsCatalogSiteTests {
         where !SourceScan.isCatalogFile(file.lastPathComponent)
             && !registryOnly.contains(file.lastPathComponent)
         {
-            rendered += SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            rendered += try SourceScan.strippedSource(at: file)
         }
         let names = SettingsDestination.allCases
             .flatMap { SettingsCatalog.entries(of: $0) }
             .compactMap { $0.propertyPath.last }
         #expect(!names.isEmpty)
+        // `memmem`: a Swift or Foundation substring search per name
+        // over the whole tree took seconds in a debug build.
+        let bytes = Array(rendered.utf8)
         for name in names {
             #expect(
-                rendered.occurrences(of: ".\(name)") >= 1,
+                Self.contains(bytes, Array(".\(name)".utf8)),
                 Comment(
                     rawValue:
                         "\(name) is declared in the catalog but "
@@ -60,6 +61,18 @@ struct SettingsCatalogSiteTests {
                         + "on it reveals nothing"
                 )
             )
+        }
+    }
+
+    private static func contains(
+        _ haystack: [UInt8],
+        _ needle: [UInt8]
+    ) -> Bool {
+        haystack.withUnsafeBytes { hay in
+            needle.withUnsafeBytes { pin in
+                memmem(hay.baseAddress, hay.count, pin.baseAddress, pin.count)
+                    != nil
+            }
         }
     }
 
@@ -81,9 +94,7 @@ struct SettingsCatalogSiteTests {
         where SourceScan.isDeclarationFile(
             file.lastPathComponent
         ) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try SourceScan.strippedSource(at: file)
             let hit = source.range(
                 of:
                     #"\bvar\s+\w+\s*:\s*Settings(Control|Drawer)"#,
@@ -115,9 +126,7 @@ struct SettingsCatalogSiteTests {
         where SourceScan.isDeclarationFile(
             file.lastPathComponent
         ) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try SourceScan.strippedSource(at: file)
             corpus += source
             declarations += SourceScan.allMatches(
                 in: source,

@@ -4,11 +4,11 @@ import CoreGraphics
 /// ladder the drawing (`pocketPlateSpecs`) and the landing
 /// (`pocketLanding`) both read, so the two never disagree.
 enum PocketPlace: Equatable {
-    /// Its slot on a bar's edge under Several windows, AX.
+    /// Its slot on a bar's edge while it rests, AX.
     case section(CGRect)
-    /// Under One window, just inside a bar's strip, AX (#2793).
+    /// Under Hidden, just inside a bar's strip, AX (#2793).
     case inside(CGRect)
-    /// The whole mark with no handle: under One window on an edge no
+    /// The whole mark with no handle: under Hidden on an edge no
     /// bar's strip stands, sliding out of it, or at rest under Always
     /// (#2784 ▸ 8).
     case whole(slides: Bool)
@@ -38,8 +38,8 @@ extension KiwiCore {
         if let inside = pocketInsideFrame(on: display) {
             return .inside(inside)
         }
-        // One window has no handle (#2793).
-        if !pocketHoldsSeveral { return .whole(slides: true) }
+        // Hidden has no handle (#2793).
+        if !pocketRests { return .whole(slides: true) }
         let shown = state.workspaces.allDisplays.first { $0.id == display }
         return shown.map(pocketRestsWhole) == true
             ? .whole(slides: false) : .handle

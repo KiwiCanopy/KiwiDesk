@@ -72,9 +72,6 @@ public struct AppWideSettings: Equatable, Sendable {
     /// Whether shortcuts tell left and right modifiers apart
     /// (`modifier.sides`, #2601). Off by default: no keyboard tap.
     public var modifierSides = false
-    /// How many windows the pocket holds (#2678): one person's
-    /// habit, so no profile varies it.
-    public var pocketCapacity = PocketCapacity.one
 
     public init() {}
 

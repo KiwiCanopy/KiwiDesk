@@ -24,9 +24,11 @@ struct MigrationRewriteRoutingTests {
     /// Readers that migrate in memory only: the settle's crossing
     /// check would stamp the file it asks about (#1530), and a
     /// backup is never rewritten; the corrupt-file judge (#2324
-    /// ruling 13) only asks whether a file reads.
+    /// ruling 13) only asks whether a file reads; the pocket
+    /// crossing (#2978) reads gui.json's capacity through the steps.
     private let inMemory: Set<String> = [
         "Profiles/ProfileManager+Settle.swift",
+        "App/KiwiCore+PocketVisibilityCrossing.swift",
         "App/KiwiCore+Backup.swift",
         "Config/CorruptFile.swift",
     ]

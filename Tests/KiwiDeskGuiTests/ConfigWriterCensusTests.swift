@@ -52,6 +52,11 @@ struct ConfigWriterCensusTests {
             "the profile strip asks the predicate first "
                 + "(NewerFormatWriteRefusalCallerTests)"
         ),
+        "KiwiCore+PocketVisibilityCrossing.swift": (
+            1,
+            "the pocket crossing (#2978) asks the predicate first "
+                + "for a profile"
+        ),
         "MigrationBackup.swift": (
             2,
             "rewrites only below the current format, and copies "

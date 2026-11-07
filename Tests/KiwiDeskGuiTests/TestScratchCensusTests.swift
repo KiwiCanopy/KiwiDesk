@@ -59,7 +59,8 @@ struct TestScratchCensusTests {
         "SecondLaunchExitTests.swift",  // a path string only
     ]
 
-    private static func collapsedSources() throws -> [(URL, String)] {
+    /// Collapsed once for every needle.
+    private static let collapsedSources = Result {
         try testTrees.flatMap { tree in
             try SourceScan.swiftSources(under: tree).map { file in
                 let source = try SourceScan.strippedSource(at: file)
@@ -70,7 +71,7 @@ struct TestScratchCensusTests {
 
     @Test("scratch spellings stay in their homes", arguments: needles)
     func confined(needle: Needle) throws {
-        let sources = try Self.collapsedSources()
+        let sources = try Self.collapsedSources.get()
         // A gutted walk would pass every clause below.
         #expect(sources.count > 500)
         let hits = sources.filter { $0.1.contains(needle.text) }

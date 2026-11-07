@@ -12,11 +12,13 @@ extension SettingKey {
             "settings.appBarStyle.edge",
         ],
         // Every bar's own visibility (#761): the Space Bar's and each
-        // layout that hosts an App Bar, read off Core's hosting set.
+        // layout that hosts an App Bar, read off Core's hosting set,
+        // then the pocket's (#2978).
         .kiwishelf(.visibility): ["settings.spaceBarStyle.visibility"]
             + LayoutMode.allCases
             .filter { TilingSettings().appBarHost(for: $0) != nil }
-            .map { "settings.\($0.rawValue).appBar.visibility" },
+            .map { "settings.\($0.rawValue).appBar.visibility" }
+            + ["settings.kiwishelf.pocketVisibility"],
         .colours(.liquidGlassMaster): [
             "settings.kiwishelf.liquidGlass",
             "settings.shortcutPanelLiquidGlass",
