@@ -38,7 +38,7 @@ extension KiwiCore {
         // Any move of a window whose crossing is landing, or that
         // landing would undo it.
         guard !desktopMemory.crossingsInFlight.contains(away.id) else {
-            return .fail("This window is still moving. Try again.")
+            return .fail("A window moves again once its last move lands.")
         }
         guard let crossingBase, let explicit else {
             return landAway(away, to: target, explicit, follow: follow)
@@ -53,7 +53,9 @@ extension KiwiCore {
             guard let self else { return }
             self.desktopMemory.crossingsInFlight.remove(away.id)
             // Up to the deadline later: the window may have arrived,
-            // gone or changed since the parse.
+            // gone or changed since the parse. The follow's switch
+            // needs no dispatch scope: the OS's own switch notification
+            // runs the handling, as it does for a swipe.
             guard wrote, let now = self.state.awayWindows[away.id],
                 self.awayMoveRefusal(now, to: target, follow: follow)
                     == nil

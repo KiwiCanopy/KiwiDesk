@@ -196,13 +196,13 @@ struct DesktopMoveCrossingTests {
         defer { teardown() }
         fileAway(core)
         _ = moveAway(core)
-        #expect(moveAway(core).error?.contains("still moving") == true)
+        #expect(moveAway(core).error?.contains("last move lands") == true)
         #expect(
             core.execute(
                 "move_to_desktop",
                 args: [.number(2), .string(""), awayID]
             )
-            .error?.contains("still moving") == true
+            .error?.contains("last move lands") == true
         )
         #expect(writes.sent.count == 1)
         #expect(DesktopVerbBridge.moves.isEmpty)

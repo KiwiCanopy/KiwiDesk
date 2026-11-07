@@ -341,8 +341,10 @@ editing here:
   the frame across before the arrival, or that net drops the name
   (#3048). A tracked window writes at its departure, its frame carried
   on `PendingSpaceAssignment`; an away window writes ahead of its move,
-  which waits on the write, so a second move of it refuses until the
-  first lands and its command answers from the parse. A new crossing
+  which waits on the write, so a second Desktop move of it refuses
+  until the first lands and its command answers from the parse; a
+  Move here's hop inside that wait is the residue the landing's
+  re-checks do not see. A new crossing
   route writes through `writeCrossingFrame` and `FrameApplier.writeAway`
   rather than a write of its own, which is review's, and a read-back
   asks `readWindowBounds`, never `screenHolding`, whose fallback passes

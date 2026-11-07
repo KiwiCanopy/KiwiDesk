@@ -193,7 +193,8 @@ final class DesktopMemory {
     var moveReapPIDs: Set<pid_t> = []
 
     /// The away windows whose crossing write a move still waits on
-    /// (#3048); a second move of one is refused until it lands.
+    /// (#3048); a second Desktop move of one is refused until it
+    /// lands. Desktop-move bookkeeping, beside `moveReapPIDs`.
     var crossingsInFlight: Set<WindowID> = []
 
     /// The crossing's deadline and read-back timer; tests fire it by
