@@ -59,19 +59,19 @@ struct TestScratchCensusTests {
         "SecondLaunchExitTests.swift",  // a path string only
     ]
 
-    /// Collapsed once for every needle; a read error leaves it
-    /// empty, which the `count > 500` floor reds.
-    private static let collapsedSources: [(URL, String)] =
-        (try? testTrees.flatMap { tree in
+    /// Collapsed once for every needle.
+    private static let collapsedSources = Result {
+        try testTrees.flatMap { tree in
             try SourceScan.swiftSources(under: tree).map { file in
                 let source = try SourceScan.strippedSource(at: file)
                 return (file, source.filter { !$0.isWhitespace })
             }
-        }) ?? []
+        }
+    }
 
     @Test("scratch spellings stay in their homes", arguments: needles)
     func confined(needle: Needle) throws {
-        let sources = Self.collapsedSources
+        let sources = try Self.collapsedSources.get()
         // A gutted walk would pass every clause below.
         #expect(sources.count > 500)
         let hits = sources.filter { $0.1.contains(needle.text) }

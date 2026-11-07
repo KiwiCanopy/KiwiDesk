@@ -20,6 +20,10 @@ struct GlassHandBackSeamTests {
     /// below asks the receiver's TYPE, so it never sees them.
     private static let allowed: [String: String] = [:]
 
+    /// Text every `write` match contains, so a file without it is
+    /// skipped before the regex runs.
+    private static let mustContain = ".contentView"
+
     /// A `contentView` assignment (not `==`, not `!==`); group 1
     /// is the receiver text on that line.
     private static let write = try! NSRegularExpression(
@@ -38,9 +42,7 @@ struct GlassHandBackSeamTests {
     /// receiver spells the glass type itself, or ends in a name the
     /// file bound to it.
     static func glassWrites(in source: String) -> [String] {
-        // `write` cannot match without this text; skipping the
-        // regex on the rest saves ~10 s a run.
-        guard source.contains(".contentView") else { return [] }
+        guard source.contains(mustContain) else { return [] }
         let ns = source as NSString
         let all = NSRange(location: 0, length: ns.length)
         let bound = Set(
@@ -92,6 +94,12 @@ struct GlassHandBackSeamTests {
 
     @Test("the needle sees a cast write and skips a panel's")
     func needleShape() {
+        // The skip is sound only while `write` spells this text.
+        #expect(
+            Self.write.pattern.contains(
+                NSRegularExpression.escapedPattern(for: Self.mustContain)
+            )
+        )
         #expect(
             Self.glassWrites(
                 in: "(glass as? NSGlassEffectView)?.contentView = nil"

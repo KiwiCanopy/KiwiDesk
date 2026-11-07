@@ -72,17 +72,11 @@ struct PrivatePathCensusTests {
         return out
     }
 
-    /// Each pattern compiled once for every file it is run over.
-    private static var compiled: [String: NSRegularExpression] = [:]
-
     private func matches(
         _ pattern: String,
         in source: String
     ) throws -> [String] {
-        let regex =
-            try Self.compiled[pattern]
-            ?? NSRegularExpression(pattern: pattern)
-        Self.compiled[pattern] = regex
+        let regex = try NSRegularExpression(pattern: pattern)
         let range = NSRange(source.startIndex..., in: source)
         return regex.matches(in: source, range: range).compactMap {
             Range($0.range(at: 1), in: source).map { String(source[$0]) }

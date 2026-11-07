@@ -128,7 +128,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// Split from `track`: one chain took the type-checker 1.5 s.
+    /// The drawn face; `track` adds focus and accessibility.
     private var trackFace: some View {
         segmentsLayout {
             ForEach(options.indices, id: \.self) { index in
