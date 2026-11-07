@@ -138,7 +138,9 @@ and the arrival files it where the user said (#1150).
 The destroy handler asks the WindowServer which Desktop hosts the
 departed window — the per-Desktop census in `OS`, two private list
 reads per user Desktop, up and parked, nil where the symbol is
-absent — and reports `vanished` or `closed` on that answer. A
+absent — and reports `vanished` or `closed` on that answer; a follow
+that switches Desktop reports `vanished` on the verb's word
+wherever it answers (#3052). A
 `vanished` window is filed in the away ledger beside the state
 (`StateCoordinator.awayWindows`, #1146). The ledger is reach and
 bookkeeping, never a bar row — the Space Bar draws the Desktop in

@@ -166,10 +166,8 @@ extension KiwiCore {
         // (#936: the ONE predicate governs the raise and the
         // restore arm alike) — held for exactly this synchronous
         // span, see its doc on `EventLoop`.
-        eventLoop.eagerDepartureInFlight = window
-        desktopMemory.eagerDepartureHost = host
+        eventLoop.eagerDepartureInFlight = (window, host)
         handle(.windowDestroyed(window, wasMinimized: false))
-        desktopMemory.eagerDepartureHost = nil
         eventLoop.eagerDepartureInFlight = nil
         // The state fold alone is a half-state: the event loop's
         // element registry would keep the window "already known"

@@ -90,7 +90,7 @@ struct AppActMotionTests {
     @Test("A focus lost to a Desktop departure waits for the hand")
     func eagerDepartureWaits() throws {
         let desk = try Desk()
-        desk.core.eventLoop.eagerDepartureInFlight = WindowID(1)
+        desk.core.eventLoop.eagerDepartureInFlight = (WindowID(1), 0)
         defer { desk.core.eventLoop.eagerDepartureInFlight = nil }
         desk.core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         #expect(desk.issued.isEmpty)

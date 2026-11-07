@@ -163,9 +163,10 @@ public final class EventLoop {
     /// synthetic removal at t=0 of a switch must not raise the
     /// origin's successor — the origin is still composited, so
     /// the on-screen gate passes on timing a real swipe-away
-    /// destroy never has. Nothing can interleave within the
-    /// span: the fold is synchronous main-actor code.
-    var eagerDepartureInFlight: WindowID?
+    /// destroy never has. Nothing can interleave: the fold is
+    /// synchronous. `host` is the verb's target, filed by the gone
+    /// handler (#3052).
+    var eagerDepartureInFlight: (window: WindowID, host: SkyLight.SpaceID)?
     /// Windows the transient filters dropped that already spent
     /// their one re-track, per pid (cleared on detach) — bounds
     /// the retry so a permanent invisible helper (#309) cannot

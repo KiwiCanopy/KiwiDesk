@@ -23,9 +23,7 @@ private final class ShowingSetCurrentSpace: NSObject {
 /// A follow onto another screen's hidden Desktop, through the real
 /// dispatch and fold (#3052). Two routes brought the window home: the
 /// departure read as a close, and the arrival judged by an AX frame
-/// still on the screen it left. Device-measured on separate Spaces:
-/// the AX frame read the old screen about 100 ms after the compositor
-/// had moved the window.
+/// still on the screen it left.
 ///
 /// The host's own first screen stands in for the target's, and the
 /// stale AX frame sits on no screen, since a test host may have one.
@@ -56,6 +54,12 @@ struct DesktopFollowAcrossScreensTests {
         let core = makeTestCore()
         let screen = try #require(ScreenList.all.first)
         let shown = try #require(screen.kiwiDisplayID)
+        core.state.workspaces.upsertDisplay(
+            Display(id: farScreen, name: "Far", frame: stale)
+        )
+        core.state.workspaces.upsertDisplay(
+            Display(id: shown, name: "Near", frame: screen.frame)
+        )
         core.state.workspaces.assign("1", to: farScreen)
         core.state.workspaces.assign(there, to: shown)
         core.state.apply(
@@ -140,7 +144,7 @@ struct DesktopFollowAcrossScreensTests {
         #expect(core.focusedWindowID == moved)
     }
 
-    /// The compositor's word is the verb's alone: a window its app
+    /// The verb's word is about its own window: a window its app
     /// stops listing on a shown Desktop is closed, as it ever was.
     @Test("a removal outside the follow still reads as a close")
     func plainRemovalCloses() throws {
@@ -152,12 +156,42 @@ struct DesktopFollowAcrossScreensTests {
         #expect(core.state.awayWindows[moved] == nil)
     }
 
-    @Test("the eager departure's host ends with its span")
-    func hostIsASpan() throws {
+    /// A Lua handler can close another window inside the span.
+    @Test("another window's removal inside the span still reads a close")
+    func otherWindowInSpanCloses() throws {
+        let (core, _) = try makeCore()
+        defer { teardown() }
+        let other = WindowID(8)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: other, pid: pid, appName: "App")
+            )
+        )
+        core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
+        core.eventLoop.eagerDepartureInFlight = (moved, 21)
+        core.handle(.windowDestroyed(other, wasMinimized: false))
+        core.eventLoop.eagerDepartureInFlight = nil
+        #expect(core.state.closedDepartures.contains(other))
+    }
+
+    /// No census stands behind an entry filed without an answer, so it
+    /// would never be pruned (#1234's shape).
+    @Test("with no compositor answer the departure files no entry")
+    func noAnswerFilesNoEntry() throws {
+        let (core, _) = try makeCore()
+        defer { teardown() }
+        core.desktopMemory.readWindowSpace = { _ in .unavailable }
+        #expect(follow(core, [.number(4)]))
+        #expect(core.state.awayWindows[moved] == nil)
+        #expect(!core.state.closedDepartures.contains(moved))
+    }
+
+    @Test("the eager departure's latch ends with its span")
+    func latchIsASpan() throws {
         let (core, _) = try makeCore()
         defer { teardown() }
         #expect(follow(core, [.number(4)]))
-        #expect(core.desktopMemory.eagerDepartureHost == nil)
+        #expect(core.eventLoop.eagerDepartureInFlight == nil)
     }
 
     /// Only a departed window's screen is judged by the compositor:
@@ -184,6 +218,13 @@ struct DesktopFollowAcrossScreensTests {
         #expect(reads == 0)
         core.state.rememberedSpaces[window.id] = .departed("1")
         #expect(core.arrivalFrame(of: window) == frame)
+        core.state.workspaces.removeDisplay(farScreen)
+        let oneScreen = reads
+        #expect(core.arrivalFrame(of: window) == stale)
+        #expect(reads == oneScreen)
+        core.state.workspaces.upsertDisplay(
+            Display(id: farScreen, name: "Far", frame: stale)
+        )
         core.windowServer.readWindowBounds = { _ in nil }
         #expect(core.arrivalFrame(of: window) == stale)
     }
