@@ -7962,7 +7962,7 @@ and the choices, each argued against its alternative:
   visible-only state stays exactly what
   [#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)
   left it — departed windows evicted, remembered by space and
-  rank — and a `vanished` writes one entry
+  rank — and a `vanished` the compositor answered for writes one entry
   beside it (pid, app, bundle id, native Space). Keeping away
   windows as members with a flag was the alternative: every
   consumer of a space's row would gain an exclusion, the

@@ -221,8 +221,9 @@ extension KiwiCore {
             handleFloatGeometryForBars(id)
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
-            // Classified on the compositor's word, and an away
-            // window joins the ledger (#1146).
+            // Classified on the compositor's word, a follow's own
+            // departure excepted, and an away window joins the
+            // ledger (#1146, #3052).
             goneReason = handleWindowGone(
                 id,
                 wasMinimized: wasMinimized,

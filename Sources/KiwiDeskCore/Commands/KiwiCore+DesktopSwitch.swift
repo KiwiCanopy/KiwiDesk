@@ -158,7 +158,8 @@ extension KiwiCore {
     /// reveal's reconcile lists it again — the same path a
     /// swipe-away takes. Runs only after an ACCEPTED switch, and
     /// classifies as `vanished`, hosted on `host`, on the verb's own
-    /// word (#3052); a refused switch folds nothing, because the
+    /// word where the compositor answers (#3052); a refused switch
+    /// folds nothing, because the
     /// window is then still where the user sees it.
     func departEagerly(_ window: WindowID, to host: SkyLight.SpaceID) {
         let pid = state.windows[window]?.pid

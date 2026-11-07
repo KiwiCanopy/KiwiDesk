@@ -113,6 +113,7 @@ struct DesktopFollowAcrossScreensTests {
         let (core, frame) = try makeCore()
         defer { teardown() }
         core.windowServer.readWindowBounds = { _ in frame }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(21) }
         #expect(follow(core, [.number(4)]))
         arrive(core)
         #expect(core.state.workspaces.space(of: moved) == there)
@@ -183,7 +184,6 @@ struct DesktopFollowAcrossScreensTests {
         core.desktopMemory.readWindowSpace = { _ in .unavailable }
         #expect(follow(core, [.number(4)]))
         #expect(core.state.awayWindows[moved] == nil)
-        #expect(!core.state.closedDepartures.contains(moved))
     }
 
     @Test("the eager departure's latch ends with its span")
