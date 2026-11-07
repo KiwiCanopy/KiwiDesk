@@ -332,8 +332,16 @@ editing here:
   undo. A shared Desktop names no screen, so a hidden one is judged
   against the screen holding the window's frame, the arrival's
   reading, or that net drops the name (#3033,
-  `DesktopMoveSharedSpaceTests`). Carry the screen a Space lands on
-  ON the resolution
+  `DesktopMoveSharedSpaceTests`). A window already away produces no
+  departure: its filing is written at once through
+  `StateCoordinator.fileAwayMove`, always `.departed` so the #1010 net
+  answers its arrival, a follow onto a shown Desktop owes Move here's
+  plain arrival focus and never a #1007 debt, and its move re-reads
+  the ledger's hosts in the reap, with no prune, rather than writing
+  `nativeSpace`; a plain move is the one reader that takes a parked
+  entry, and a follow refuses one (#3034, `DesktopMoveAwayTests`).
+  Carry the screen a
+  Space lands on ON the resolution
   (`SpaceTargetResolution.space(_:landing:)`) and hand it to the
   sticky gate as `landingOn` — the gate reads a nil assignment
   as "elsewhere", so the thread is load-bearing exactly where

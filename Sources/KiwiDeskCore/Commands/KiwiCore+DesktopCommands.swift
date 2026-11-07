@@ -152,7 +152,8 @@ extension KiwiCore {
     /// Shared Desktops name no screen, and a hidden one moves no
     /// frame, so the arrival's #1010 net would drop a Space off the
     /// window's screen: that is refused here (#3033). A shown one
-    /// files at once and crosses.
+    /// files at once and crosses, save for an away window, which
+    /// only an arrival files (#3034).
     func resolveSpaceTarget(
         _ args: [JSONValue],
         for target: DesktopTarget,
@@ -175,9 +176,10 @@ extension KiwiCore {
                         )
                     )
                 }
-            } else if !target.isCurrent,
-                let held = screenHolding(window),
-                assigned != held
+            } else if !target.isCurrent
+                || state.awayWindows[window] != nil,
+                screens.count > 1,
+                screenHolding(window) != assigned
             {
                 return .refused(
                     .fail(
@@ -202,12 +204,17 @@ extension KiwiCore {
     }
 
     /// The screen a window's frame sits on, the reading the arrival
-    /// takes; a frame on no screen answers by its Space's screen.
-    private func screenHolding(_ window: WindowID) -> DisplayID? {
-        state.windows[window].flatMap {
-            TilingEngine.screen(containing: $0.frame)?.kiwiDisplayID
+    /// takes; a frame on no screen answers by its Space's screen. An
+    /// away window has no state frame, and its Space is remembered.
+    func screenHolding(_ window: WindowID) -> DisplayID? {
+        let frame =
+            state.windows[window]?.frame
+            ?? windowServer.readWindowBounds(window)
+        return frame.flatMap {
+            TilingEngine.screen(containing: $0)?.kiwiDisplayID
         }
-            ?? state.workspaces.space(of: window).flatMap {
+            ?? (state.workspaces.space(of: window)
+            ?? state.rememberedSpace(of: window)).flatMap {
                 state.workspaces.display(of: $0)
             }
     }

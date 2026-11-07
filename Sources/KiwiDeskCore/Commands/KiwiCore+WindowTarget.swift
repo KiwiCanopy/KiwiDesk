@@ -5,7 +5,8 @@ import Foundation
 /// an id `get_state` reports. Where it sits is read off the verb's
 /// record, so the decoder and the #292 preflight ask the one copy
 /// the catalogue states — and a handler whose record takes one
-/// reads it only through `commandTarget` (`WindowArgumentReachTests`).
+/// reads it only through `commandTarget`, the Desktop moves through
+/// `awayTarget` ahead of it (`WindowArgumentReachTests`).
 extension APIReference {
     /// The position of `command`'s window argument, nil for a verb
     /// that takes none.
@@ -60,22 +61,37 @@ extension KiwiCore {
         return windowTarget(args[index])
     }
 
-    /// The tracked window `value` names — the one parse of a
-    /// window id. Outside `commandTarget` only for an id that
-    /// sits where the record's `.window` argument cannot: the
-    /// first of `swap`'s two and `swap_here`'s (#2509).
+    /// The away window `args` name, for the one verb family that
+    /// reaches one (#3034); nil leaves the call to `commandTarget`,
+    /// which refuses an id it does not track.
+    func awayTarget(_ command: String, _ args: [JSONValue]) -> AwayWindow? {
+        guard let index = APIReference.windowArgumentIndex(command),
+            args.indices.contains(index),
+            let id = windowID(args[index]),
+            state.windows[id] == nil
+        else { return nil }
+        return state.awayWindows[id]
+    }
+
+    /// The one parse of a window id: `exactly:` refuses a fraction,
+    /// a negative and the out-of-range alike.
+    private func windowID(_ value: JSONValue) -> WindowID? {
+        value.numberValue
+            .flatMap { UInt32(exactly: $0) }
+            .map(WindowID.init)
+    }
+
+    /// The tracked window `value` names. Outside `commandTarget` only
+    /// for an id that sits where the record's `.window` argument
+    /// cannot: the first of `swap`'s two and `swap_here`'s (#2509).
     func windowTarget(_ value: JSONValue) -> CommandTarget {
         guard let spelled = value.stringValue else {
             return .refused(.fail("expected window id"))
         }
-        // `exactly:` refuses a fraction, a negative and the
-        // out-of-range alike.
-        guard let number = value.numberValue,
-            let raw = UInt32(exactly: number)
-        else {
+        guard let id = windowID(value) else {
             return .refused(.fail("unknown window: \(spelled)"))
         }
-        let id = WindowID(raw)
+        let raw = id.raw
         guard state.windows[id] != nil else {
             guard let away = state.awayWindows[id] else {
                 return .refused(.fail("unknown window: \(spelled)"))
