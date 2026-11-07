@@ -20,6 +20,28 @@ struct DefaultShortcutsRowTests {
         )
     }
 
+    /// The brace-balanced body after `marker`, whitespace collapsed.
+    private static func body(
+        after marker: String,
+        in source: String
+    ) throws -> String {
+        let hit = try #require(source.range(of: marker))
+        var cursor = source.distance(
+            from: source.startIndex,
+            to: hit.upperBound
+        )
+        let run = try #require(
+            SourceScan.balanced(
+                Array(source),
+                from: &cursor,
+                open: "{",
+                close: "}"
+            )
+        )
+        return run.split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
+    }
+
     private func reason(
         layer: String,
         defaults: Bool
@@ -60,27 +82,29 @@ struct DefaultShortcutsRowTests {
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
         // The page mounts the header, then the groups.
-        let page = try #require(body.range(of: "private var page:"))
-        let tail = page.upperBound..<body.endIndex
-        let header = try #require(body.range(of: "header", range: tail))
-        let groups = try #require(
-            body.range(of: "actionGroups", range: tail)
+        let page = try Self.body(
+            after: "private var page: some View",
+            in: body
         )
-        #expect(header.upperBound < groups.lowerBound)
-        // Inside the header, the row comes last, after the card.
-        let decl = try #require(
-            body.range(of: "@ViewBuilder private var header:")
+        #expect(page.contains("{ header actionGroups tail }"))
+        // Inside the header's own body: one Layers card mount, then
+        // the row as the header's last view.
+        let header = try Self.body(
+            after: "@ViewBuilder private var header: some View",
+            in: body
         )
-        let rest = decl.upperBound..<body.endIndex
-        let layers = try #require(
-            body.range(of: "layersCard", range: rest)
-        )
+        let tokens = header.split(separator: " ")
+        #expect(tokens.filter { $0.contains("layersCard") }.count == 1)
+        let layers = try #require(header.range(of: " layersCard "))
         let row = try #require(
-            body.range(of: "DefaultShortcutsRow(model: model,", range: rest)
+            header.range(of: "DefaultShortcutsRow(model: model,")
         )
-        let next = try #require(body.range(of: "private var", range: rest))
-        #expect(layers.upperBound < row.lowerBound)
-        #expect(row.upperBound < next.lowerBound)
+        #expect(layers.upperBound <= row.lowerBound)
+        #expect(
+            header.hasSuffix(
+                "DefaultShortcutsRow(model: model, selected: selection)"
+            )
+        )
         #expect(
             body.components(separatedBy: "DefaultShortcutsRow(")
                 .count == 2
@@ -139,5 +163,11 @@ struct DefaultShortcutsRowTests {
                     + "help: caption(reason))"
             )
         )
+        // GreyOut is the button's one dim: nothing else hides it.
+        for hider in [".opacity(", ".hidden(", ".disabled("] {
+            #expect(!button.contains(hider), "\(hider)")
+        }
+        // The row's caption names the reason the button greys for.
+        #expect(squashed.contains("caption:caption(reason),"))
     }
 }
