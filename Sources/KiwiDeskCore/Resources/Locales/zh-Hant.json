@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "此視窗有自己的 Pocket 快速鍵：%1$@",
   "pocket.refusal.keyed_unnamed": "此視窗有自己的 Pocket 快速鍵",
   "pocket.refusal.list_stands_down": "視窗填滿螢幕時，Pocket 會維持隱藏",
-  "pocket.refusal.marked_elsewhere": "Pocket 只能放一個視窗。若要加入更多，請設為「%1$@」。",
   "pocket.refusal.sticky": "Pocket 視窗一律為 Sticky",
   "presets.apply": "套用",
   "presets.caption": "套用預置組合會將其儲存為可供後續編輯的真實描述檔。",

@@ -6452,8 +6452,12 @@ in last. The deciding fact is whether a pocket window is on
 screen, which the user sees rather than remembers, and with one
 window the key is #2675's toggle. "Focused last" is the window
 switcher's own focus recency (#1840), not a second record of it.
-One window stays the default, so a second mark is refused until
-the Several windows setting opens the list.
+Any number of windows may be marked under either value, and no
+count refuses a mark (owner, 2026-11-07, #2978, retiring One window's
+cap): the refusal's remedy named a setting that retires with it, and
+a second `⌃⌥⇧P` undoes a stray mark. The trade is that the key can
+then step to a window the user did not mean, by focus and then
+recency.
 
 **Choosing the window is its own key (#2675), amending #2446,
 which chose the window with the one key that pockets it. Becoming

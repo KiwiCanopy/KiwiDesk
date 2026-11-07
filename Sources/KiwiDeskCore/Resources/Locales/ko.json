@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "이 윈도우에는 전용 Pocket 단축키가 있습니다: %1$@",
   "pocket.refusal.keyed_unnamed": "이 윈도우에는 전용 Pocket 단축키가 있습니다",
   "pocket.refusal.list_stands_down": "윈도우가 화면을 채우는 동안 Pocket은 가려져 있음",
-  "pocket.refusal.marked_elsewhere": "Pocket에는 윈도우를 하나만 넣을 수 있습니다. 더 넣으려면 ‘%1$@’로 설정하십시오.",
   "pocket.refusal.sticky": "Pocket 윈도우는 항상 Sticky임",
   "presets.apply": "적용",
   "presets.caption": "사전 설정을 적용하면 실제 프로필로 저장되어 나중에 편집할 수 있습니다.",

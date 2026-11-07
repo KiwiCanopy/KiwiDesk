@@ -256,11 +256,6 @@ struct RefusalWordingTests {
         for (refusal, sentence) in sentences {
             #expect(refusal.sentence == sentence)
         }
-        #expect(
-            PocketRefusal.markedElsewhereSentence
-                == "The Pocket takes one window. "
-                + "Set it to Several windows to add more."
-        )
     }
 
     // MARK: - KiwiHub's rows no verb can see

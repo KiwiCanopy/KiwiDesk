@@ -100,8 +100,7 @@ extension KiwiCore {
     /// row can name, counts for nothing — the general list in
     /// put-in order, then the apps' own pocket windows, listed
     /// apart (#2923, amending #2612 ▸ 11) and only where the pocket
-    /// stands at rest, under Several windows. Capacity counts the
-    /// general list alone (`pocketAcceptsMark`).
+    /// stands at rest, under Several windows.
     var pocketPlateWindows: [WindowID] {
         pocketWindows(keyed: pocketHoldsSeveral)
     }

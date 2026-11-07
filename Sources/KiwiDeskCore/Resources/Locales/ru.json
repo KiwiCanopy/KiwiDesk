@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "У этого окна своё сочетание клавиш Pocket: %1$@",
   "pocket.refusal.keyed_unnamed": "У этого окна своё сочетание клавиш Pocket",
   "pocket.refusal.list_stands_down": "Pocket скрыт, пока окно занимает весь экран",
-  "pocket.refusal.marked_elsewhere": "Pocket вмещает одно окно. Выбери «%1$@», чтобы добавить ещё.",
   "pocket.refusal.sticky": "Окна Pocket всегда в режиме Sticky",
   "presets.apply": "Применить",
   "presets.caption": "Применение набора сохраняет его как настоящий профиль, который затем можно изменить.",

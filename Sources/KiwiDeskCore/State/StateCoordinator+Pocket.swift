@@ -30,8 +30,8 @@ extension StateCoordinator {
         pocketSlot(of: id)?.keyedApp
     }
 
-    /// The general list `pocket` steps through and the capacity
-    /// counts: every slot no app's key owns (#2612 ▸ 5).
+    /// The general list `pocket` steps through: every slot no app's
+    /// key owns (#2612 ▸ 5).
     var generalPocket: [PocketSlot] {
         pocket.filter { $0.keyedApp == nil }
     }
@@ -78,15 +78,6 @@ extension StateCoordinator {
         }
     }
 
-    /// Whether `toggle_pocket_window` may mark another window under
-    /// `capacity` (#2678): One window takes a mark only while the
-    /// general list is empty, Several always; a keyed slot never
-    /// counts (#2612 ▸ 5). `pocket`'s own mark asks for an empty
-    /// general list.
-    func pocketAcceptsMark(_ capacity: PocketCapacity) -> Bool {
-        capacity == .several || generalPocket.isEmpty
-    }
-
     /// Puts the out window `id` in the pocket: floating, no sticky
     /// scope, filed in no Space, last in put-in order. A slot fills
     /// only through `markPocketWindow` (#2675), so any other window
@@ -107,8 +98,7 @@ extension StateCoordinator {
 
     /// Marks `id` a pocket window where it is (#2675): out, its
     /// membership kept, never pocketed yet. False for an untracked
-    /// or already marked window; the caller asks
-    /// `pocketAcceptsMark` first.
+    /// or already marked window.
     @discardableResult
     mutating func markPocketWindow(
         _ id: WindowID,

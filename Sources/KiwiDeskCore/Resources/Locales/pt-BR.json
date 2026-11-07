@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "Esta janela tem um atalho próprio do Pocket: %1$@",
   "pocket.refusal.keyed_unnamed": "Esta janela tem um atalho próprio do Pocket",
   "pocket.refusal.list_stands_down": "O Pocket fica oculto enquanto uma janela preenche a tela",
-  "pocket.refusal.marked_elsewhere": "O Pocket comporta uma janela. Defina-o como “%1$@” para adicionar mais.",
   "pocket.refusal.sticky": "Janelas Pocket são sempre Sticky",
   "presets.apply": "Aplicar",
   "presets.caption": "Aplicar uma predefinição a salva como um perfil real que você pode editar depois.",

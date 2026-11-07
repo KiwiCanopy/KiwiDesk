@@ -6,7 +6,7 @@ import Testing
 /// `pocket_app` (#2612): the app's own key opens a fresh window of
 /// the app, which arrives out and tied to it while its row exists,
 /// then puts that window away and takes it out; the general list
-/// steps past it and its capacity never counts it.
+/// steps past it.
 @Suite("pocket_app", .serialized)
 @MainActor
 struct PocketAppTests {
@@ -104,17 +104,19 @@ struct PocketAppTests {
         #expect(fixture.core.state.pocketKeyOwner(of: mine) == nil)
     }
 
-    @Test("with no row and one window taken, the press opens nothing")
-    func noRowRespectsTheCapacity() {
+    @Test("with no row and another window marked, the press still opens")
+    func noRowOpensBesideAMark() {
         let fixture = Fixture(row: false)
         #expect(fixture.core.execute("toggle_pocket_window").isSuccess)
-        let response = fixture.press()
-        #expect(response.error == "another window is the pocket window")
-        #expect(fixture.opened.isEmpty)
+        #expect(fixture.press().isSuccess)
+        #expect(!fixture.opened.isEmpty)
+        fixture.arrive(9)
+        #expect(fixture.core.state.pocketPhase(of: mine) == .out)
+        #expect(fixture.core.state.pocketKeyOwner(of: mine) == nil)
     }
 
-    @Test("a keyed window is outside the capacity")
-    func keyedIsOutsideTheCapacity() {
+    @Test("a window goes in beside a keyed one")
+    func marksBesideAKeyedWindow() {
         let fixture = Fixture()
         fixture.press()
         fixture.arrive(9)

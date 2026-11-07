@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "Dieses Fenster hat ein eigenes Pocket-Tastenkürzel: %1$@",
   "pocket.refusal.keyed_unnamed": "Dieses Fenster hat ein eigenes Pocket-Tastenkürzel",
   "pocket.refusal.list_stands_down": "Die Pocket bleibt ausgeblendet, solange ein Fenster den Bildschirm füllt",
-  "pocket.refusal.marked_elsewhere": "Die Pocket fasst ein Fenster. Stelle sie auf „%1$@“ für weitere.",
   "pocket.refusal.sticky": "Pocket-Fenster sind immer Sticky",
   "presets.apply": "Anwenden",
   "presets.caption": "Beim Anwenden wird sie als eigenes Profil gespeichert, das du danach bearbeiten kannst.",

@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "此窗口有自己的 Pocket 快捷键：%1$@",
   "pocket.refusal.keyed_unnamed": "此窗口有自己的 Pocket 快捷键",
   "pocket.refusal.list_stands_down": "窗口铺满屏幕时，Pocket 保持隐藏",
-  "pocket.refusal.marked_elsewhere": "Pocket 只能放一个窗口。若要添加更多，请设为“%1$@”。",
   "pocket.refusal.sticky": "Pocket 窗口始终为 Sticky",
   "presets.apply": "套用",
   "presets.caption": "应用预设会将其保存为可供后续编辑的真实描述文件。",

@@ -5854,11 +5854,9 @@ refused.
 
 `pocket` also takes a window id, as the bar menus' Pocket Window
 does: that window goes in, marked first, as
-[`toggle_pocket_window`](#toggle_pocket_window) would mark it, and
-refused the same way while the pocket is taken.
+[`toggle_pocket_window`](#toggle_pocket_window) would mark it.
 
-Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
-pocket holds every marked window, in the order each last went in, and a
+The pocket holds every marked window, in the order each last went in, and a
 call puts away before it takes out: while a marked window is out,
 it puts back the focused one, else the one focused last. Only with
 every marked window in does it take one out, the one put in last.
@@ -5948,8 +5946,7 @@ native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
 
-Under [`pocket.set_capacity("several")`](#pocketset_capacity) a
-call on another window marks it too, beside the others.
+A call on another window marks it too, beside the others.
 
 :::unreleased
 `toggle_pocket_window` also takes a window id, as the bar menus'
@@ -5987,8 +5984,7 @@ the one call `KiwiDesk.pocket_app("<bundle id>")`, its argument in
 double quotes, and no Pocket verb but that shortcut moves it:
 `pocket` steps past it, and `pocket` naming it or
 [`toggle_pocket_window`](#toggle_pocket_window) on it fails with
-a pill naming its key. It does not count against
-[`pocket.set_capacity`](#pocketset_capacity). Remove the shortcut
+a pill naming its key. Remove the shortcut
 and the window becomes an ordinary window again, on the Space you
 are on; a profile that leaves the shortcut out keeps the tie, and
 the key works again when you switch back. Closing the window or
@@ -6157,12 +6153,15 @@ floating.set_color("#8E5DE0")
 
 **Expects:** `"one"` or `"several"` (default `"one"`).
 
-**Does:** sets how many windows the [pocket](#pocket) holds, on
+**Does:** sets whether the [pocket](#pocket) stays on screen, on
 every profile alike — the running value, which Settings ▸ Shortcuts
-& Gestures ▸ Pocket stores:
-`"one"` refuses a mark while any window is marked
-([`toggle_pocket_window`](#toggle_pocket_window)), save an app's
-own pocket window, and `"several"` marks any number.
+& Gestures ▸ Pocket stores.
+
+:::unreleased
+Either value holds any number of windows, so a mark
+([`toggle_pocket_window`](#toggle_pocket_window)) is never refused
+for the windows already marked.
+:::
 
 Under `"several"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
@@ -6201,7 +6200,7 @@ up on every screen as a drop target, and a drop on it pockets that
 window as [`pocket`](#pocket) naming it would; where the pocket
 would refuse it, the pocket does not light and the window goes
 back. A drag that starts with the pointer over the pocket takes
-no drop there until the pointer has left it. Switching back to `"one"` keeps the windows already marked.
+no drop there until the pointer has left it.
 
 **Example:**
 

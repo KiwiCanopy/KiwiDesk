@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "Cette fenêtre a son propre raccourci Pocket : %1$@",
   "pocket.refusal.keyed_unnamed": "Cette fenêtre a son propre raccourci Pocket",
   "pocket.refusal.list_stands_down": "La Pocket reste masquée tant qu'une fenêtre remplit l'écran",
-  "pocket.refusal.marked_elsewhere": "La Pocket garde une seule fenêtre. Réglez-la sur « %1$@ » pour en ajouter.",
   "pocket.refusal.sticky": "Les fenêtres Pocket sont toujours Sticky",
   "presets.apply": "Appliquer",
   "presets.caption": "L'appliquer l'enregistre comme un vrai profil que vous pouvez ensuite modifier.",

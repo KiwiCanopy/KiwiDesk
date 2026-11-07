@@ -122,34 +122,17 @@ struct PocketListTests {
         #expect(core.state.pocketPhase(of: two) == .out)
     }
 
-    @Test("a second mark is still refused in One window")
-    func secondMarkRefused() {
-        let core = makeCore()
-        core.state.apply(.windowFocused(one))
-        core.execute("toggle_pocket_window")
-        core.state.apply(.windowFocused(two))
-        #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [one])
-    }
-
-    @Test("Several windows takes a second mark, and One refuses again")
-    func severalTakesSecondMark() {
-        let core = makeCore()
-        #expect(
-            core.execute(
-                "pocket.set_capacity",
-                args: [.string("several")]
-            ).isSuccess
-        )
-        core.state.apply(.windowFocused(one))
-        core.execute("toggle_pocket_window")
-        core.state.apply(.windowFocused(two))
-        #expect(core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [one, two])
-        core.execute("pocket.set_capacity", args: [.string("one")])
-        core.state.apply(.windowFocused(three))
-        #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.map(\.window) == [one, two])
+    @Test("every capacity takes another mark (#2978)")
+    func everyCapacityTakesAnotherMark() {
+        for capacity in ["one", "several"] {
+            let core = makeCore()
+            core.execute("pocket.set_capacity", args: [.string(capacity)])
+            for window in [one, two, three] {
+                core.state.apply(.windowFocused(window))
+                #expect(core.execute("toggle_pocket_window").isSuccess)
+            }
+            #expect(core.state.pocket.map(\.window) == [one, two, three])
+        }
     }
 
     @Test("a quit files every pocketed window into the active Space")

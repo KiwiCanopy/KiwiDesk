@@ -492,8 +492,7 @@ its peek grows the handle's panel
 `pocketPlateWindows`**, never `pocketedWindows` beside it: the
 general list, then under Several windows the apps' own pocket
 windows, built from `generalPocket` and `keyedPocket` and never a
-filter beside them, while the capacity stays `pocketAcceptsMark`'s
-(#2923). **What it lists is the one `pocketListWindows`**, the same
+filter beside them (#2923). **What it lists is the one `pocketListWindows`**, the same
 under One window too, where a key can open it (#2974,
 `PocketListKeyTests` ▸ `oneWindowListsKeyed`). A reader that means the
 general list alone takes `generalPocket`. Its list is the bars' click-held peek, its panel

@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "Esta ventana tiene su propio atajo de Pocket: %1$@",
   "pocket.refusal.keyed_unnamed": "Esta ventana tiene su propio atajo de Pocket",
   "pocket.refusal.list_stands_down": "El Pocket sigue oculto mientras una ventana llena la pantalla",
-  "pocket.refusal.marked_elsewhere": "El Pocket admite una ventana. Ponlo en «%1$@» para añadir más.",
   "pocket.refusal.sticky": "Las ventanas Pocket siempre son sticky",
   "presets.apply": "Aplicar",
   "presets.caption": "Al aplicar uno se guarda como un perfil real que puedes editar después.",

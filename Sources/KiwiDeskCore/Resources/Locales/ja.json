@@ -1719,7 +1719,6 @@
   "pocket.refusal.keyed": "このウインドウには専用の Pocket のショートカットがあります：%1$@",
   "pocket.refusal.keyed_unnamed": "このウインドウには専用の Pocket のショートカットがあります",
   "pocket.refusal.list_stands_down": "ウインドウが画面全体を覆っている間は Pocket を表示しません",
-  "pocket.refusal.marked_elsewhere": "Pocket に入るウインドウは1つです。追加するには「%1$@」に設定してください。",
   "pocket.refusal.sticky": "Pocket ウインドウは常に Sticky",
   "presets.apply": "適用",
   "presets.caption": "プリセットを適用すると実際のプロファイルとして保存され、後から編集できるようになります。",

@@ -43,15 +43,4 @@ enum PocketRefusal {
             "The Pocket stays hidden while a window fills the screen"
         )
     }
-
-    /// `toggle_pocket_window` on a second window (#2675), drawn
-    /// beside `PocketMark.takenName`.
-    @MainActor
-    static var markedElsewhereSentence: String {
-        L(
-            "pocket.refusal.marked_elsewhere",
-            "The Pocket takes one window. Set it to %1$@ to add more.",
-            L("pocket.capacity.several", "Several windows")
-        )
-    }
 }

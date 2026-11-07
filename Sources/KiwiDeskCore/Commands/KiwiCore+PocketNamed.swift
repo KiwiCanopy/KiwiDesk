@@ -1,7 +1,7 @@
 import Foundation
 
 /// `pocket` naming a window (#2678): that window goes in, marked
-/// first under the capacity, never the key's next step. The bar
+/// first, never the key's next step. The bar
 /// menus' Pocket Window row acts through it and greys on the one
 /// `pocketNamedRefusal` the handler answers from.
 extension KiwiCore {
@@ -10,8 +10,6 @@ extension KiwiCore {
     enum PocketNamedRefusal: Equatable {
         /// A window its app's own Pocket key keeps (#2612 ▸ 11).
         case keyed(app: String)
-        /// One window, another already marked.
-        case taken
         /// What `pocketBlock` refuses, or untracked: a construction
         /// net, since `commandTarget` refuses an untracked id first.
         case cannot(reason: String)
@@ -25,9 +23,7 @@ extension KiwiCore {
         if let reason = pocketBlock(window) {
             return .cannot(reason: reason)
         }
-        guard state.pocketPhase(of: id) == nil else { return nil }
-        let capacity = appWide.pocketCapacity
-        return state.pocketAcceptsMark(capacity) ? nil : .taken
+        return nil
     }
 
     /// `pocket`'s dispatch: a named window, else the key's step.
@@ -40,7 +36,6 @@ extension KiwiCore {
         case .window(let id):
             switch pocketNamedRefusal(id) {
             case .keyed(let app): return refuseKeyedPocketWindow(id, app: app)
-            case .taken: return refuseSecondPocketWindow(id)
             case .cannot(let reason): return .fail(reason)
             case nil: break
             }

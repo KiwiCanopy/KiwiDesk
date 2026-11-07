@@ -104,37 +104,27 @@ struct PocketWindowTests {
         #expect(core.state.pocketPhase(of: one) == .out)
     }
 
-    @Test("a second window is refused, and the mark stays put")
-    func secondWindowRefused() {
+    @Test("a second window marks beside the first, and floats")
+    func secondWindowMarks() {
         let core = makeCore()
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
-        #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.first?.window == one)
+        #expect(core.execute("toggle_pocket_window").isSuccess)
+        #expect(core.state.pocket.map(\.window) == [one, two])
         #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(core.state.windows[two]?.isFloating == false)
+        #expect(core.state.pocketPhase(of: two) == .out)
+        #expect(core.state.windows[two]?.isFloating == true)
     }
 
-    /// The pill resolves the refusal's sentinel to the pocket
-    /// drawing, which no system symbol of that name could supply.
-    @Test("the pill draws the pocket's taken glyph")
-    @MainActor
-    func pillDrawsTheTakenGlyph() {
-        let taken = SizeLimitPillPlate.image(for: PocketMark.takenName)
-        #expect(taken != nil)
-        #expect(taken?.isTemplate == false)
-        #expect(SizeLimitPillPlate.image(for: "nosign") != nil)
-    }
-
-    @Test("a second window is refused while the mark is pocketed")
-    func pocketedMarkRefusesAnother() {
+    @Test("a second window marks while the first is pocketed")
+    func marksWhileThePocketedStaysIn() {
         let core = makeCore()
         core.execute("toggle_pocket_window")
         core.execute("pocket")
         #expect(core.focusedWindowID == two)
-        #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket.first?.window == one)
+        #expect(core.execute("toggle_pocket_window").isSuccess)
         #expect(core.state.pocketPhase(of: one) == .pocketed)
+        #expect(core.state.pocketPhase(of: two) == .out)
     }
 
     /// Unmarking tiles the window, as a Tile does (owner, #2680).

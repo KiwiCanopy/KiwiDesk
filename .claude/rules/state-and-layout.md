@@ -908,12 +908,9 @@ editing here:
     `StateCoordinator.markPocketWindow` alone, out and never
     pocketed — no frames, no `cameFrom` — and `pocketWindow`
     refuses any window that is not the out slot's; a new entry
-    path (a pick, #2678's list) marks first, and a path that adds
-    a window beside a marked one asks
-    `StateCoordinator.pocketAcceptsMark(_:)`, the one home of the
-    capacity gate — One window's cap, none under Several
-    (`PocketListTests` ▸ `secondMarkRefused`,
-    `severalTakesSecondMark`). A reader of "the
+    path (a pick, #2678's list) marks first, and no window count
+    refuses a mark (#2978, `PocketListTests` ▸
+    `everyCapacityTakesAnotherMark`). A reader of "the
     pocket holds something" states whether it means any slot or
     the windows `pocket` works, since a per-app key's slot (#2612)
     is the one but not the other. **Which slot an app's key owns is
