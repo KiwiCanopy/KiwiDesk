@@ -38,6 +38,9 @@ struct GlassHandBackSeamTests {
     /// receiver spells the glass type itself, or ends in a name the
     /// file bound to it.
     static func glassWrites(in source: String) -> [String] {
+        // `write` cannot match without this text; skipping the
+        // regex on the rest saves ~10 s a run.
+        guard source.contains(".contentView") else { return [] }
         let ns = source as NSString
         let all = NSRange(location: 0, length: ns.length)
         let bound = Set(

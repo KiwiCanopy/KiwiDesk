@@ -28,9 +28,7 @@ struct ShortcutsBespokeContainerTests {
             .appendingPathComponent("Sources/KiwiDesk")
         var rendered = ""
         for file in try SourceScan.swiftSources(under: root) {
-            rendered += SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            rendered += try SourceScan.strippedSource(at: file)
         }
         // Each order list, and the container it serves.
         let lists: [(String, SettingsContainer, [SettingKey])] = [
@@ -177,10 +175,11 @@ struct ShortcutsBespokeContainerTests {
         // no `ForEach` walks: Open applications' app list stays
         // bespoke beside its walked KiwiDesk rows (#1520), and an
         // empty list (`sizeAndFloatMore`) draws nothing either way.
+        let walks = Self.forEachBodies(in: rendered)
         var bespoke: Set<SettingsContainer> = []
         for (name, container, keys) in lists
         where !keys.isEmpty
-            && !isWalked(name, in: rendered, squeezed: squeezed)
+            && !isWalked(name, walks: walks, squeezed: squeezed)
         {
             bespoke.insert(container)
         }
@@ -211,9 +210,7 @@ struct ShortcutsBespokeContainerTests {
     ) throws -> Set<String> {
         var declared: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try SourceScan.strippedSource(at: file)
             for opener in [
                 "enum ShortcutsRowOrder",
                 "extension ShortcutsRowOrder",
@@ -246,8 +243,8 @@ struct ShortcutsBespokeContainerTests {
         var index = 0
         while index + needle.count <= characters.count {
             guard
-                Array(characters[index..<index + needle.count])
-                    == needle,
+                characters[index..<index + needle.count]
+                    .elementsEqual(needle),
                 index + needle.count < characters.count,
                 !SourceScan.isIdentifier(
                     characters[index + needle.count],
@@ -274,9 +271,10 @@ struct ShortcutsBespokeContainerTests {
         return found
     }
 
-    /// Whether a `ForEach(` anywhere in `source` walks the named
-    /// order list. Matched within the `ForEach`'s own balanced
-    /// parentheses so an unrelated mention nearby cannot count.
+    /// Whether a `ForEach(` in the scanned source walks the
+    /// named order list: `walks` holds each `ForEach`'s own
+    /// balanced parentheses, so an unrelated mention nearby
+    /// cannot count.
     ///
     /// A list handed to a view as a parameter counts as walked
     /// too (#1125): `TrackShortcutsOffer(keys:)` puts the
@@ -284,38 +282,44 @@ struct ShortcutsBespokeContainerTests {
     /// walk would classify a rendered container as bespoke.
     private func isWalked(
         _ list: String,
-        in source: String,
+        walks: [String],
         squeezed: String
     ) -> Bool {
         if squeezed.contains("keys:ShortcutsRowOrder.\(list)") {
             return true
         }
+        return walks.contains {
+            $0.contains("ShortcutsRowOrder.\(list)")
+        }
+    }
+
+    /// The text inside each `ForEach`'s balanced parentheses, in
+    /// source order — read once for every list `isWalked` asks
+    /// about.
+    private static func forEachBodies(in source: String) -> [String] {
         let characters = Array(source)
         let needle = Array("ForEach")
+        var bodies: [String] = []
         var index = 0
         while index + needle.count < characters.count {
             guard
-                Array(
-                    characters[index..<(index + needle.count)]
-                ) == needle
+                characters[index..<(index + needle.count)]
+                    .elementsEqual(needle)
             else {
                 index += 1
                 continue
             }
             var cursor = index + needle.count
-            let body = SourceScan.balanced(
+            if let body = SourceScan.balanced(
                 characters,
                 from: &cursor,
                 open: "(",
                 close: ")"
-            )
-            if body?.contains("ShortcutsRowOrder.\(list)")
-                == true
-            {
-                return true
+            ) {
+                bodies.append(body)
             }
             index += needle.count
         }
-        return false
+        return bodies
     }
 }
