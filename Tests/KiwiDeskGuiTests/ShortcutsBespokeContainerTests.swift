@@ -79,10 +79,6 @@ struct ShortcutsBespokeContainerTests {
                 ShortcutsRowOrder.pocketAtRest
             ),
             (
-                "pocketList", .pocket,
-                ShortcutsRowOrder.pocketList
-            ),
-            (
                 "pocketApps", .pocket,
                 ShortcutsRowOrder.pocketApps
             ),

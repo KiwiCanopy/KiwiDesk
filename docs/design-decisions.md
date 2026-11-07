@@ -6640,6 +6640,39 @@ Position therefore act whatever the animation switch says and do not
 grey. No "show the pocket" choice sits beside Holds,
 which already decides when the pocket stays.
 
+:::unreleased
+*Amended* (owner, 2026-11-07, #2978): **the pocket has a Show of its
+own, per profile, and Holds retires.** Once any number of windows
+could be marked under either value (▸ *The slot is an ordered
+list*), Holds no longer said how many windows the pocket holds,
+only whether it shows, which is the question KiwiShelf's Show
+already asks of each bar. So the pocket takes the bars' three values
+(`kiwishelf.pocket_visibility`, stored beside them and left out of a
+look, as their Show is), and Show's master sets it with the bars,
+its drawer *Each bar and Pocket*; a master writing per-profile values
+cannot also write an app-wide one without one press reaching every
+profile. **Hidden is really hidden**: nothing at rest
+and no strip, with windows inside or not, coming out only for a
+window drag, a window going in or out and the list's key; on a bar's
+edge it stands inside the strip at Position, as One window did, and
+the bars' plan carries no pocket, so an Auto bar reveals alone and a
+drag or a play moves no bar (#2793). The trade: it covers window
+content while out, and going from Hidden to Auto moves it to the
+shelf's end. **Auto** is the handle at rest; **Always** the whole
+mark, which on an edge no bar shows replaces following the bars'
+Show (below). On an edge drawing a bar at rest, both are a section.
+**The default is Always**, so a new desk's rows match and Show reads
+one value; Hidden would read "mixed" on every new desk, its drawer
+locked open. Absence therefore owes a crossing, and a profile file
+cannot read `gui.json`, so it is an adoption ahead of every
+`gui.json` write: One window crosses to Hidden, Several to the bars'
+value where they agree, a uniform Hidden to Auto so the handle
+stays, and mixed bars to Always where the whole mark rested before,
+else Auto. A One-window desk then reads "mixed" until Show is pressed
+once, and a built-in Standard, which has no file to stamp, takes
+Always.
+:::
+
 **Pinned at the shelf's outer end, outside the scrolling run.**
 The bars scroll and resize with their content; a pocket inside
 their run would move under a drag aimed at it. So it takes the
@@ -6811,8 +6844,9 @@ heavier press beside `⌃⌥P`, grows the list out of the pocket at its
 Edge and Position on the active Space's screen, since a peek grows out
 of its item, so it is no free-floating panel and no KiwiHub side. No
 bar reveals or moves: `pocketStands` takes the list beside a drag and
-a play, and the bars' plan stays capacity-only, so under One window
-the pocket slides out for the list alone. A key has no pointer, so
+a play, and the bars' plan reads only whether the pocket's Show is
+Hidden (#2978), so under Hidden the pocket slides out for the list
+alone. A key has no pointer, so
 the first window row starts selected; `⌃⌥J` already searches the
 Pocket section, so the list has no search. No menu twins this list,
 so its rows speak.
@@ -17041,6 +17075,11 @@ they differ, and links nothing — most setups give every bar one
 answer, so the master is the one decision a new user meets, and
 Each bar holds the rest.
 
+:::unreleased
+*Amended* (#2978): the master writes the pocket's own Show too (▸
+*The pocket belongs to KiwiShelf*).
+:::
+
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
@@ -18317,7 +18356,7 @@ fade where it says arrow.
 **The bar cards share one canonical row order.** (#374, re-cut
 by the #678 Phase 2 census render, by #1517 and by #2507.) The
 KiwiShelf card owns existence and placement: the Show master and
-its Each bar drawer, then Position and its Each bar drawer and
+its Each bar and Pocket drawer, then Position and its Each bar drawer and
 Alignment — where the bars sit, coarse to fine — then Thickness
 and its Style and Margins drawers. Order and Space Bar minimum
 close the Style drawer: they change how the joined run draws —

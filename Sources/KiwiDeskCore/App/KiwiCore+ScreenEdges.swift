@@ -36,12 +36,7 @@ extension KiwiCore {
     /// the pass (#1524, #1948).
     var shelfReservations: [ShelfReservation] {
         // The bounds' own read, so the skip and the bounds agree.
-        shelfReservations(pocketAtRest: tiler.pocketAtRest())
-    }
-
-    /// `shelfReservations` with the pocket at rest or not, for a
-    /// change of the capacity that decides it (#2784).
-    func shelfReservations(pocketAtRest: Bool) -> [ShelfReservation] {
+        let pocketAtRest = tiler.pocketAtRest()
         let screens: [String?] =
             [nil] + state.workspaces.allDisplays.map(\.fingerprint)
         return screens.flatMap { screen in

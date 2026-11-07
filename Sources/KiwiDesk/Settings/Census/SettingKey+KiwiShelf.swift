@@ -45,6 +45,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case revealStyle = "settings.kiwishelf.revealStyle"
     case pocketEdge = "settings.kiwishelf.pocketEdge"
     case pocketPosition = "settings.kiwishelf.pocketPosition"
+    /// The pocket's Show (#2978), behind the Show master's drawer.
+    case pocketVisibility = "settings.kiwishelf.pocketVisibility"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
@@ -66,7 +68,7 @@ extension KiwiShelfKey {
         case .thickness, .alignment, .pocketEdge, .pocketPosition:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
-            .appBarScreenEdge:
+            .appBarScreenEdge, .pocketVisibility:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
@@ -289,6 +291,8 @@ extension KiwiShelfKey {
                 "kiwishelf.pocket_edge",
                 help: "kiwishelf.pocket_edge.help"
             )
+        case .pocketVisibility:
+            return .text("kiwishelf.show.pocket")
         case .pocketPosition:
             return .text(
                 "kiwishelf.pocket_position",

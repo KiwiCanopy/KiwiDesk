@@ -76,5 +76,9 @@ extension GuiConfig {
     ///
     /// **18 (#2797)**: the drag markers' palette paths left the
     /// shared look's colours (`migratingRetiredDragLook`).
-    public static let currentFormat = 18
+    ///
+    /// **19 (#2978)**: the `pocket` group retired; its capacity
+    /// crosses onto each profile's pocket Show by adoption
+    /// (`crossPocketVisibility`), with no step.
+    public static let currentFormat = 19
 }

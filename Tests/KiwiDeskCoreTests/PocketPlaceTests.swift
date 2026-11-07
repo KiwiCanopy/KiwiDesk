@@ -26,6 +26,8 @@ struct PocketPlaceTests {
                 testTemporaryDirectory
                 .appendingPathComponent("kiwi-place-\(UUID().uuidString)")
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -91,7 +93,10 @@ struct PocketPlaceTests {
         }
         // Under Several: the shelf's section.
         let (core, display) = try makeCore()
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         core.updateBars()
         guard case .section(let slot) = core.pocketPlace(on: display.id)
         else {
@@ -100,10 +105,10 @@ struct PocketPlaceTests {
         }
         #expect(core.pocketLanding(on: display.id) == slot)
         #expect(core.pocketPlate.specs[display.id]?.slides == false)
-        // Under Several on an edge no bar shows, the bars Always: the
-        // whole mark at rest, which never slides (#2784 ▸ 8).
+        // Always on an edge no bar shows: the whole mark at rest,
+        // which never slides (#2784 ▸ 8, #2978).
         let (rest, shown) = try makeCore(pocket: .left)
-        rest.execute("pocket.set_capacity", args: [.string("several")])
+        rest.tiler.settings.kiwishelf.pocketVisibility = .always
         rest.updateBars()
         #expect(rest.pocketPlace(on: shown.id) == .whole(slides: false))
         #expect(rest.pocketPlate.specs[shown.id]?.slides == false)

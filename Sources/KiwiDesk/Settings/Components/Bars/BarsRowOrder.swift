@@ -15,11 +15,13 @@ enum BarsRowOrder {
         .colours(.animationsExpandDurationMS),
     ]
 
-    /// KiwiShelf card, behind Show's Each bar disclosure (#761).
+    /// KiwiShelf card, behind Show's Each bar and Pocket
+    /// disclosure (#761, #2978).
     static let kiwishelfShowEach: [SettingKey] = [
         .spaceBar(.spaceBarVisibility),
         .layoutAppBar(.monocleAppBarVisibility),
         .layoutAppBar(.scrollingAppBarVisibility),
+        .kiwishelf(.pocketVisibility),
     ]
 
     /// KiwiShelf card, at rest below the Show group: where the

@@ -109,7 +109,7 @@ extension KiwiCore {
                 settings: shown,
                 spaceItems: items,
                 app: app,
-                pocket: pocketHoldsSeveral,
+                pocket: pocketRests,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(

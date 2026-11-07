@@ -168,10 +168,6 @@ enum ShortcutsRowOrder {
         .shortcuts(.pocketList),
     ]
 
-    static let pocketList: [SettingKey] = [
-        .shortcuts(.pocketCapacity)
-    ]
-
     /// The Pocket card's per-app keys, drawn by their own view
     /// after its two keys (#2612).
     static let pocketApps: [SettingKey] = [

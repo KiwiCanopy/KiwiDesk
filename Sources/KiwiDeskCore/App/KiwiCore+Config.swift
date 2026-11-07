@@ -11,6 +11,9 @@ extension KiwiCore {
         // returns, so nothing is retired meanwhile.
         profiles.arrangementInFlight += 1
         defer { profiles.arrangementInFlight -= 1 }
+        // Ahead of every gui.json write, which drops the group it
+        // reads (#2978).
+        crossPocketVisibility()
         // Before the settle, which may rewrite a profile file the
         // #1741 crossing still has to read.
         prepareAppWide()

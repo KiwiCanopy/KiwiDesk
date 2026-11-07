@@ -81,6 +81,7 @@ struct KiwiShelfCommandParityTests {
             .revealTimeout(5), .revealStyle(.grow), .fillFade(40),
             .tintHubAndPlates(false), .readingContrast(3),
             .pocketEdge(.left), .pocketPosition(30),
+            .pocketVisibility(.hidden),
         ]
     }
 
@@ -153,6 +154,7 @@ struct KiwiShelfCommandParityTests {
         case .readingContrast: return [.number(3)]
         case .pocketEdge: return [.string("left")]
         case .pocketPosition: return [.number(30)]
+        case .pocketVisibility: return [.string("hidden")]
         case .minimum, .thickness, .outerMargin, .innerMargin,
             .cornerRoundness, .borderWidth, .highlightWidth, .itemGap,
             .glyphSize,

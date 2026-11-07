@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The pocket's strip reaches the live layout (#2784): the capacity
-/// enters the bounds through `TilingEngine.pocketAtRest`, a capacity
-/// change that moves a strip owes a pass and one that moves none only
-/// a repaint, and the whole mark draws exactly where
+/// The pocket's strip reaches the live layout (#2784, #2978): its
+/// Show enters the bounds through `TilingEngine.pocketAtRest`, a
+/// Show change that moves a strip owes a pass and one that moves
+/// none only a repaint, and the whole mark draws exactly where
 /// `TilingSettings.pocketRest` answers `.mark`.
 @Suite("Pocket reservation wiring (#2784)", .serialized)
 @MainActor
@@ -28,6 +28,7 @@ struct PocketReservationCoreTests {
         core.tiler.settings.spaceBarStyle.setEdge(.top)
         core.tiler.settings.spaceBarStyle.visibility = visibility
         core.tiler.settings.kiwishelf.pocketEdge = pocket
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         guard
             let id = core.state.workspaces.currentSpace(on: display.id),
             let space = core.state.workspaces[id]
@@ -42,7 +43,7 @@ struct PocketReservationCoreTests {
     }
 
     @Test(
-        "Several reserves the handle's strip and owes a pass",
+        "Auto reserves the handle's strip and owes a pass",
         .enabled(if: NSScreen.main != nil)
     )
     func capacityMovesTheBounds() throws {
@@ -52,7 +53,10 @@ struct PocketReservationCoreTests {
         let before = core.tiler.layoutBounds(on: screen, for: space)
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
-        core.setAppWide(persisting: false) { $0.pocketCapacity = .several }
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("auto")]
+        )
         let after = core.tiler.layoutBounds(on: screen, for: space)
         #expect(
             before.height - after.height
@@ -62,7 +66,7 @@ struct PocketReservationCoreTests {
     }
 
     @Test(
-        "a capacity change that moves no strip repaints, no pass",
+        "a Show change that moves no strip repaints, no pass",
         .enabled(if: NSScreen.main != nil)
     )
     func sectionMovesNothing() throws {
@@ -72,7 +76,10 @@ struct PocketReservationCoreTests {
         let before = core.tiler.layoutBounds(on: screen, for: space)
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
-        core.setAppWide(persisting: false) { $0.pocketCapacity = .several }
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("auto")]
+        )
         #expect(core.tiler.layoutBounds(on: screen, for: space) == before)
         #expect(passes(meter) == 0)
     }
@@ -86,11 +93,9 @@ struct PocketReservationCoreTests {
             (ShelfVisibility.always, true), (.auto, false),
         ] {
             let (core, _, _) = try #require(
-                makeCore(space: visibility, pocket: .bottom)
+                makeCore(space: .always, pocket: .bottom)
             )
-            core.setAppWide(persisting: false) {
-                $0.pocketCapacity = .several
-            }
+            core.tiler.settings.kiwishelf.pocketVisibility = visibility
             let spec = try #require(core.pocketPlateSpecs().first)
             #expect(spec.whole == whole, "\(visibility)")
             #expect(spec.risen == false)

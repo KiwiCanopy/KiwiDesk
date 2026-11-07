@@ -114,10 +114,6 @@ extension APIReference {
             "Sets the pocket mark's color; empty is automatic.",
             .color("hex")
         ),
-        "set_capacity": APIRecord(
-            "Sets whether the pocket stays on screen.",
-            .choice("capacity", PocketCapacity.self)
-        ),
         "toggle_list": APIRecord(
             "Opens the pocket's list on the active Space's screen to "
                 + "pick a window by keyboard, or closes it."

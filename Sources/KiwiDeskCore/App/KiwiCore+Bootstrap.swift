@@ -240,7 +240,7 @@ extension KiwiCore {
         }
         // A resting pocket's edge reserves its strip (#2784).
         tiler.pocketAtRest = { [weak self] in
-            self?.pocketHoldsSeveral ?? false
+            self?.pocketRests ?? false
         }
         // The drawn stack side reads the one flip door (#2771).
         tiler.stackFlip = { [weak self] space in

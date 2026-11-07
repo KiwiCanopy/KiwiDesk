@@ -3242,18 +3242,16 @@ Issue naming this verb; a saved profile keeps its edge.
 `"bottom"`; the starter setup seeds `"top"`).
 
 **Does:** sets the screen edge the [pocket](#pocket) sits on, on
-every screen. Under
-[`pocket.set_capacity("several")`](#pocketset_capacity), where a
-bar shows on that edge the pocket is a section of KiwiShelf, and
-where the bars there rest `"auto"` or `"hidden"` it is a handle.
-On an edge no bar sits on it follows the more present of the two
-bars' visibilities (the App Bar's in monocle and scrolling only):
-whole under `"always"`, a handle otherwise. Under `"one"` it is
-the whole mark on every edge, with no handle.
+every screen.
+
+:::unreleased
+Where a bar shows on that edge, the pocket is a section of
+KiwiShelf. On any other edge, how it rests is
+[`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)'s.
+:::
+
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
-places it. When it is on screen is
-[`pocket.set_capacity`](#pocketset_capacity)'s. A look carries
-it.
+places it. A look carries it.
 
 **Example:**
 
@@ -3271,23 +3269,91 @@ that range it is clamped.
 
 **Does:** sets where along its edge the [pocket](#pocket) sits, in
 percent: `0` is the left or top end, `100` the right or bottom
-end. Under `"one"` ([`pocket.set_capacity`](#pocketset_capacity))
-the pocket stands at the position on every edge. Under
-`"several"`, on an edge where a bar shows, it takes the shelf's
-nearer end instead — its start below `50`, its end from `50` —
-outside the bars' items, so it stays put while they scroll; on an
-edge where an `"auto"` bar rests hidden, its handle stands where
-the pocket shows once the bar comes in, joining the bars' handles
-in one row where it would meet them; on any other edge no bar
-shows, the handle, or the pocket where it rests whole, stands at
-the position. It is kept on screen at either end. A look carries
-it.
+end. It is kept on screen at either end. A look carries it.
+
+:::unreleased
+Under `"hidden"`
+([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility))
+the pocket stands at the position on every edge. Otherwise, on an
+edge where a bar shows, it takes the shelf's nearer end instead — its
+start below `50`, its end from `50` — outside the bars' items, so it
+stays put while they scroll; on an edge where an `"auto"` bar rests
+hidden, its handle, or under `"always"` its whole mark, stands where
+the pocket shows once the bar comes in, joining the bars' handles in
+one row where it would meet them; on
+any other edge no bar shows, the handle, or the pocket where it rests
+whole, stands at the position.
+:::
 
 **Example:**
 
 ```lua
 kiwishelf.set_pocket_position(50)  -- mid-edge, or a bar's end
 ```
+
+:::unreleased
+### kiwishelf.set_pocket_visibility
+
+Replaces `pocket.set_capacity`, which is now refused with a Config
+Issue naming this verb.
+
+**Expects:** `"always"`, `"auto"` or `"hidden"` (default `"always"`).
+
+**Does:** sets when the [pocket](#pocket) shows, per profile. On an
+edge where a bar shows at rest, `"always"` and `"auto"` both make
+the pocket a section of KiwiShelf. On any other edge:
+
+- `"always"` stands the whole pocket at rest, faded while empty
+  until you point at it or drag a window over it.
+- `"auto"` leaves its handle; pointing at the handle brings the
+  pocket up out of it.
+- `"hidden"` draws nothing and keeps no strip, with windows inside
+  or not.
+
+Under `"always"` and `"auto"` the pocket stays on every screen at
+[`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
+[`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
+with no count, except where KiwiShelf stands down for a native
+full-screen window or a presentation. Windows keep clear of the
+resting handle or pocket unless `reserve` is off for every bar on
+that edge, or on an edge no bar sits on, for both bars. A click on
+the pocket lists the windows inside by app; a row takes its window
+out. Below them, under **Pocket Keys**, the list shows each app's own
+pocket window ([`pocket_app`](#pocket_app)); its row takes it out
+too, and its shortcut still puts it away.
+
+Under `"hidden"` the pocket stands only while a window goes in or
+out
+([`animations.set_on_state_change`](#animationsset_on_state_change)),
+while you drag one, or for
+[`pocket.toggle_list`](#pockettoggle_list). It has no handle: it
+slides out of its edge at the position, just inside the bar on an
+edge where one sits, moving no bar, and otherwise one outer margin
+in from the screen edge. An `"auto"` bar on its edge comes in
+alone.
+
+On a handle the kiwis peek out as the pointer reaches it, and the
+pocket comes up once the pointer rests there for 0.15 s, at once
+on a push against the edge or a window drag. Under Reduce Motion
+the kiwis do not peek.
+
+While you drag a window, under any value, the pocket comes up on
+every screen as a drop target, and a drop on it pockets that window
+as [`pocket`](#pocket) naming it would; where the pocket would
+refuse it, the pocket does not light and the window goes back. A
+drag that starts with the pointer over the pocket takes no drop
+there until the pointer has left it.
+
+Settings ▸ KiwiShelf writes it as **Pocket** under **Show** ▸
+**Each bar and Pocket**; **Show** sets it with the bars'
+visibilities. A look never carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_pocket_visibility("auto")
+```
+:::
 
 ### KiwiShelf colours
 
@@ -3720,10 +3786,12 @@ App Bar in monocle and scrolling.
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
 
-On the pocket's edge, under
-[`pocket.set_capacity("several")`](#pocketset_capacity), an
-`"auto"` or `"hidden"` bar's edge also keeps clear of the
-pocket's resting handle.
+:::unreleased
+On the pocket's edge, unless
+[`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
+is `"hidden"`, an `"auto"` or `"hidden"` bar's edge also keeps clear
+of the pocket's resting handle or mark.
+:::
 
 A window drag opens an `"auto"` Space Bar as the pointer does
 above, so the window can be dropped on a Space
@@ -5862,14 +5930,11 @@ refused.
 does: that window goes in, marked first, as
 [`toggle_pocket_window`](#toggle_pocket_window) would mark it.
 
-Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
-pocket holds every marked window, in the order each last went in, and a
-call puts away before it takes out: while a marked window is out,
-it puts back the focused one, else the one focused last. Only with
-every marked window in does it take one out, the one put in last.
-
 :::unreleased
-Under `"one"` the pocket holds them the same way.
+The pocket holds every marked window, in the order each last went in,
+and a call puts away before it takes out: while a marked window is
+out, it puts back the focused one, else the one focused last. Only
+with every marked window in does it take one out, the one put in last.
 :::
 
 Out of the pocket the window floats on every Space, as a
@@ -5952,8 +6017,7 @@ native full screen and on a transient panel or popup. Bound to
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
 
 :::unreleased
-Under either [`pocket.set_capacity`](#pocketset_capacity), a call on
-another window marks it too, beside the others.
+A call on another window marks it too, beside the others.
 :::
 
 :::unreleased
@@ -6153,64 +6217,18 @@ is Automatic; any non-empty value must parse as a hex color.
 floating.set_color("#8E5DE0")
 ```
 
-### pocket.set_capacity
-
-**Expects:** `"one"` or `"several"` (default `"one"`).
-
-**Does:** sets whether the [pocket](#pocket) stays on screen, on
-every profile alike — the running value, which Settings ▸ Shortcuts
-& Gestures ▸ Pocket stores.
-
 :::unreleased
-Either value holds any number of windows, so a mark
-([`toggle_pocket_window`](#toggle_pocket_window)) is never refused
-for the windows already marked.
+### Retired pocket verbs
+
+`pocket.set_capacity` is retired →
+[`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility).
+A call in `init.lua` is reported in Config Issues, naming the
+replacement; over the CLI it fails with `pocket.set_capacity was
+retired — use kiwishelf.set_pocket_visibility`. An `init.lua` that
+never called it showed the pocket as `"one"` did and now takes
+`"always"`; add `kiwishelf.set_pocket_visibility("hidden")` to keep
+it out of sight.
 :::
-
-Under `"several"` the pocket stays on every screen at
-[`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
-[`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
-faded while empty until you point at it or drag a window over it,
-and with no count, except where KiwiShelf stands down for a native
-full-screen window or a presentation. Where it rests as a handle
-([`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says
-where), pointing at the handle brings the pocket up out of it.
-Windows keep clear of the resting handle or pocket unless
-`reserve` is off for every bar on that edge, or on an edge no bar
-sits on, for both bars. A click on the pocket lists the windows
-inside by app; a row takes its window out.
-
-:::unreleased
-Below them, under **Pocket Keys**, the list shows each app's own
-pocket window ([`pocket_app`](#pocket_app)); its row takes it out
-too, and its shortcut still puts it away.
-:::
-
-Under `"one"` nothing
-stays: the pocket stands only while a window goes in or out
-([`animations.set_on_state_change`](#animationsset_on_state_change))
-or while you drag one. It has no handle: it slides out of its edge
-at the position, just inside the bar on an edge where one sits,
-moving no bar, and otherwise one outer margin in from the screen
-edge.
-
-On a handle the kiwis peek out as the pointer reaches it, and the
-pocket comes up once the pointer rests there for 0.15 s, at once
-on a push against the edge or a window drag. Under Reduce Motion
-the kiwis do not peek.
-
-While you drag a window, under either capacity, the pocket comes
-up on every screen as a drop target, and a drop on it pockets that
-window as [`pocket`](#pocket) naming it would; where the pocket
-would refuse it, the pocket does not light and the window goes
-back. A drag that starts with the pointer over the pocket takes
-no drop there until the pointer has left it.
-
-**Example:**
-
-```lua
-pocket.set_capacity("several")
-```
 
 :::unreleased
 ### pocket.toggle_list
@@ -6221,9 +6239,9 @@ pocket.set_capacity("several")
 screen, or closes the one open. The pocket comes up at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position) and
-the list grows out of it, under either
-[`pocket.set_capacity`](#pocketset_capacity), and no bar shows or
-moves. The list is the one a click on the pocket opens, with
+the list grows out of it, under any
+[`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility),
+and no bar shows or moves. The list is the one a click on the pocket opens, with
 [`pocket_app`](#pocket_app)'s windows under **Pocket Keys**, its first
 window row selected: the up and down arrows move, Return takes that
 window out, and Esc closes the list, as does any other key. An empty
@@ -8142,14 +8160,16 @@ float rules make floating, follow
 
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
-place the pocket the plate flies to, under either
-[`pocket.set_capacity`](#pocketset_capacity): under `"several"`
-the pocket that stays, which on an edge no bar shows comes up out
-of its handle, or stands whole where
-[`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says it
-does; under `"one"` a pocket that slides out of its edge and moves
-no bar. That pocket lights as the window goes in or out, and nods
-as one lands in it.
+place the pocket the plate flies to. That pocket lights as the window
+goes in or out, and nods as one lands in it.
+
+:::unreleased
+Under `"always"` and `"auto"`
+([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility))
+it is the pocket that stays, which comes up out of its handle where
+it rests as one; under `"hidden"` a pocket that slides out of its
+edge and moves no bar.
+:::
 
 **Example:**
 

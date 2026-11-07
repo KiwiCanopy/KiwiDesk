@@ -20,6 +20,8 @@ private struct PocketListFixture {
                 testTemporaryDirectory
                 .appendingPathComponent("kiwi-list-\(UUID().uuidString)")
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         for id in [one, two] {
             core.state.apply(
                 .windowCreated(
@@ -61,7 +63,7 @@ private struct PocketListFixture {
 
     /// Pockets `ids`, Several windows holding them.
     func pocket(_ ids: [WindowID]) {
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.tiler.settings.kiwishelf.pocketVisibility = .auto
         for id in ids {
             core.handle(.windowFocused(id))
             core.execute("toggle_pocket_window")
@@ -219,7 +221,7 @@ struct PocketListKeyTests {
             slot.keyedApp = "com.example.app"
             return slot
         }
-        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         #expect(core.pocketPlateWindows.isEmpty)
         core.execute("pocket.toggle_list")
         let panel = core.shelves.peek.panel
@@ -239,7 +241,7 @@ struct PocketListKeyTests {
             slot.keyedApp = "com.example.app"
             return slot
         }
-        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         core.execute("pocket.toggle_list")
         #expect(core.shelves.peek.shown != nil)
         core.state.pocket = []

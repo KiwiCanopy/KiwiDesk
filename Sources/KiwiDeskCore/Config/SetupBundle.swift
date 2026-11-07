@@ -99,7 +99,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#2678), in a bundle's `[Profile]`.
     /// 42 = the drag markers' look retired (#2797), in every shape a
     /// bundle carries.
-    public static let currentFormat = 42
+    /// 43 = the app-wide pocket capacity crossed onto each
+    /// profile's `kiwishelf.pocket_visibility` (#2978), from a
+    /// bundle's `config` into its `[Profile]`.
+    public static let currentFormat = 43
 
     public let format: Int
 

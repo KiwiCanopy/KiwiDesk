@@ -86,6 +86,13 @@ extension SettingsValueReadout {
                     new: percent(Double(n.pocketPosition) / 100)
                 )
             ]
+        case .pocketVisibility:
+            return spaceBarChoiceRow(
+                census,
+                o.pocketVisibility,
+                n.pocketVisibility,
+                AppBarOptions.visibility
+            )
         case .revealStyle:
             return spaceBarChoiceRow(
                 census,

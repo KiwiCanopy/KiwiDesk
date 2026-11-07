@@ -521,6 +521,20 @@ window as the echo of pocketing it, which an app can still send,
 and swallows it. Press `⌃⌥P` to take the window out.
 
 :::unreleased
+The pocket's **Holds** setting moved onto each profile as the
+Pocket row under KiwiShelf ▸ Show ▸ Each bar and Pocket
+([#2978](https://github.com/KiwiCanopy/KiwiDesk/issues/2978); the
+ruling is in [design decisions](design-decisions.md#the-pocket-belongs-to-kiwishelf-2678)).
+On the upgrade every saved profile takes a value from it, but a
+built-in Standard — what KiwiDesk uses where no saved profile matches
+your screens — has no saved file to take one, so it shows the pocket
+Always. If Holds was One window, set Pocket to Hidden there and Save.
+A profile that crossed from One window shows **Show** with nothing
+selected until you choose one, since its Pocket row reads Hidden and
+its bars do not.
+:::
+
+:::unreleased
 An app's own Pocket key ([`pocket_app`](lua-reference.md#pocket_app))
 forgets its window when KiwiDesk quits
 ([#2612](https://github.com/KiwiCanopy/KiwiDesk/issues/2612)): the

@@ -4,6 +4,7 @@ paths:
   - "Sources/KiwiDeskCore/Config/**"
   - "Sources/KiwiDeskCore/Commands/**"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppWide*.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+PocketVisibilityCrossing.swift"
 ---
 
 # Profiles & config ownership
@@ -776,6 +777,23 @@ holds the secondary-switch decision including its nil case.
   decides; a Lua-owned setup crosses nothing), is
   `docs/design-decisions.md` ▸ *A setting nobody varies per
   profile is app-wide*.
+- **An app-wide value moving INTO each profile crosses by adoption
+  too, the other way round (#2978, `crossPocketVisibility`).** A
+  profile step cannot read `gui.json`, so the crossing reads the
+  retired group and stamps every profile file that does not state
+  the key. Run it first in `loadConfig`, ahead of every `gui.json`
+  write, since `GuiConfig` decodes the retired group and never
+  encodes it; insert the key surgically, leaving the rest of the
+  file as it was; leave a file that states the key, and a newer
+  build's file, alone; and drop the group only after every profile
+  write has landed, so a failed write crosses again at the next
+  load. A bundle carries both halves and crosses in one
+  `ConfigMigration` step. A composed Standard has no file to stamp:
+  its design entry states what it takes
+  (`PocketVisibilityCrossingTests` ▸ `adoptionStampsAndStrips`,
+  `insertIsSurgical`, `statedProfileKeeps`, `bundleStep`; the order
+  in `loadConfig`, the newer-format skip and the failed-write path
+  are review's).
 
 ## Whose arrangement is live (#1249)
 

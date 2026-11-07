@@ -61,7 +61,10 @@ private struct PocketListFixture {
 
     /// Pockets `ids`, Several windows holding them.
     func pocket(_ ids: [WindowID]) {
-        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         for id in ids {
             core.handle(.windowFocused(id))
             core.execute("toggle_pocket_window")
@@ -196,7 +199,10 @@ struct PocketListSpeechTests {
             slot.keyedApp = "com.example.app"
             return slot
         }
-        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("hidden")]
+        )
         core.pocketPlate.dragging = one
         core.updatePocketPlate(slots: [:])
         var asked: [BarPeekSource] = []

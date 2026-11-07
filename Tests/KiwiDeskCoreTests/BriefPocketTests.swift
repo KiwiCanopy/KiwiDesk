@@ -23,6 +23,8 @@ struct BriefPocketTests {
                     "kiwi-brief-pocket-\(UUID().uuidString)"
                 )
         )
+        // Hidden unless a case says otherwise (#2978).
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }

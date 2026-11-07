@@ -254,9 +254,9 @@ public final class TilingEngine {
         nil
     }
 
-    /// Whether the pocket stands at rest, under Several windows, so
+    /// Whether the pocket rests — its Show is not Hidden — so
     /// its edge reserves its strip (#2784); `bootstrapCoreServices`
-    /// wires it to `KiwiCore.pocketHoldsSeveral`.
+    /// wires it to `KiwiCore.pocketRests`.
     var pocketAtRest: @MainActor () -> Bool = { false }
     /// The side a Space draws on the Desktop shown now, where it
     /// was flipped there (#2771); `bootstrapCoreServices` wires it

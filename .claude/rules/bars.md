@@ -804,15 +804,19 @@ render content into it (#1517). Obligations:
 
 ## The pocket is a shelf section (#2678)
 
-Under Several windows the pocket on a bar's edge is the shelf's
+Unless its Show is Hidden (`kiwishelf.pocket_visibility`, #2978)
+the pocket on a bar's edge is the shelf's
 third section, drawn in a second panel the shelf owns
 (`ShelfPocketPiece`), so the gap between the bars' run and the
 pocket keeps passing clicks (#2497) while the pocket rides every
-motion the shelf plays. **Under One window it never takes a slot:
-the plan states the pocket by the capacity alone**, so a drag or a
-play moves no bar (#2793, `PocketShelfWiringTests` ▸
-`severalKeepsTheSlot`, `dragStandsThePocket`; where it stands then is
-[borders.md](borders.md)'s ▸ The pocket rides the bar pass).
+motion the shelf plays. **Under Hidden it never takes a slot: the
+plan states the pocket by `pocketRests` alone**, never
+`pocketStands`, so a drag, a play or the list moves no bar (#2793,
+`PocketShelfWiringTests` ▸ `severalKeepsTheSlot`,
+`dragStandsThePocket`; where it stands then is
+[borders.md](borders.md)'s ▸ The pocket rides the bar pass). Only a
+write to the Show may move a bar, since it is a Settings act
+(#2978 ruling 4).
 Obligations:
 
 - **A motion `ShelfOverlay` plays reaches both contents from one
@@ -843,9 +847,10 @@ Obligations:
   risen size read too. A box for it is a ruling in
   `docs/design-decisions.md` first.
 - **How the pocket rests is asked of the one
-  `TilingSettings.pocketRest`** (#2784) — a section, the handle, or
-  the whole mark on an edge no bar sits on while the bars read
-  Always — by the reservation (`pocketReservation`), the whole
+  `TilingSettings.pocketRest`** (#2784) — a section where its edge
+  draws a bar at rest, else the whole mark under the pocket's own
+  Always and the handle under its Auto, never the bars' Show (#2978)
+  — by the reservation (`pocketReservation`), the whole
   mark's drawing and the float region (`reservedStrips`); a live
   section stands only where the bar pass draws a bar
   (`pocketPlate.slots`). The pocket's strip enters `layoutBounds`
@@ -857,14 +862,13 @@ Obligations:
   too, never a depth of its own (`PocketReservationTests` ▸
   `autoEdgeTakesTheDeeper`, `PocketReservationCoreTests` ▸
   `wholeFollowsTheRest`).
-- **An app-wide write that moves `shelfReservations` owes a pass,
-  and one that moves none a repaint** — the capacity is the first
-  input to the bounds no bar write carries: it reaches them through
-  `TilingEngine.pocketAtRest` — the capacity alone, never
-  `pocketStands`, so a drag, a play or the list never retiles — which
-  `shelfReservations` reads too, and `appWideLiveChanged` compares
-  the reservations either side (`PocketReservationCoreTests` ▸
-  `capacityMovesTheBounds`,
+- **A Show write that moves `shelfReservations` owes a pass, and
+  one that moves none a repaint**: the pocket reaches the bounds
+  through `TilingEngine.pocketAtRest` — `pocketRests`, never
+  `pocketStands`, so a drag, a play or the list never retiles —
+  which `shelfReservations` reads too, and its `kiwishelf.*` verb
+  takes the bar writes' reservation comparison in `layoutCommand`
+  (`PocketReservationCoreTests` ▸ `capacityMovesTheBounds`,
   `sectionMovesNothing`).
 - **A play lights the standing pocket; a count change lights it only
   where no play runs** (#2776): `playBriefPocket` schedules
