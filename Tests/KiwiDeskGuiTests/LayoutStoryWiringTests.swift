@@ -25,12 +25,29 @@ struct LayoutStoryWiringTests {
     /// spelled `X(`, so a call scan cannot be passed by the
     /// explicit initializer spelling.
     private func squashed(_ url: URL) throws -> String {
-        SourceScan.stripComments(
-            try String(contentsOf: url, encoding: .utf8)
-        )
-        .split(whereSeparator: \.isWhitespace)
-        .joined()
-        .replacingOccurrences(of: ".init(", with: "(")
+        if let hit = try Self.squashedTree.get()[url] {
+            return hit
+        }
+        return Self.squash(try SourceScan.strippedSource(at: url))
+    }
+
+    /// Every `Sources/KiwiDesk` file squashed once per process and
+    /// shared by the suite's tests, which run in parallel.
+    private static let squashedTree = Result {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var tree: [URL: String] = [:]
+        for url in try SourceScan.swiftSources(under: root) {
+            tree[url] = squash(try SourceScan.strippedSource(at: url))
+        }
+        return tree
+    }
+
+    private static func squash(_ stripped: String) -> String {
+        stripped
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+            .replacingOccurrences(of: ".init(", with: "(")
     }
 
     private func relative(_ url: URL) -> String {
