@@ -101,6 +101,21 @@ struct PocketListKeyTests {
         #expect(core.pocketPlate.specs[display] == nil)
     }
 
+    /// A setter's dispatch ends in a forced pass, which drops learned
+    /// bounds and re-laid a tiled Space on every press (device).
+    @Test("opening and closing the list runs no layout pass")
+    func runsNoPass() throws {
+        let (core, _) = try makeCore()
+        defer { tearDown(core) }
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
+        #expect(core.execute("pocket.toggle_list").isSuccess)
+        #expect(core.shelves.peek.shown != nil)
+        #expect(core.execute("pocket.toggle_list").isSuccess)
+        let counts = meter.snapshot(reset: false).counts
+        #expect(counts.retiles + counts.passesHeld == 0)
+    }
+
     @Test("a handle's pocket rises for the key's list and sinks after it")
     func handleRises() throws {
         let (core, display) = try makeCore()
