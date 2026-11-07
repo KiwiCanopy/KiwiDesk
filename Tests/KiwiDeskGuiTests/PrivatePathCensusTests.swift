@@ -66,14 +66,7 @@ struct PrivatePathCensusTests {
         var out: [(URL, String)] = []
         for root in SourceScan.targetTrees(under: tree) {
             for file in try SourceScan.swiftSources(under: root) {
-                out.append(
-                    (
-                        file,
-                        SourceScan.stripComments(
-                            try String(contentsOf: file, encoding: .utf8)
-                        )
-                    )
-                )
+                out.append((file, try SourceScan.strippedSource(at: file)))
             }
         }
         return out
@@ -147,10 +140,16 @@ struct PrivatePathCensusTests {
             .filter { Self.exempt[$0.key] == nil }
         #expect(literals.count > 20)
         let files = try sources()
+        // `"name"` occurs exactly where two neighbouring quotes
+        // enclose the name, since no name holds a quote.
+        let quoted = files.map {
+            Set(Self.betweenQuotes($0.1).map(String.init))
+        }
         for name in literals.keys.sorted() {
-            let spellings = files.filter {
-                $0.1.contains("\"\(name)\"")
-            }
+            #expect(!name.contains("\""))
+            let spellings = zip(files, quoted)
+                .filter { $0.1.contains(name) }
+                .map(\.0)
             #expect(
                 spellings.count == 1,
                 """
@@ -173,6 +172,14 @@ struct PrivatePathCensusTests {
                 )
             }
         }
+    }
+
+    /// The text between each pair of neighbouring quotes.
+    private static func betweenQuotes(_ source: String) -> [Substring] {
+        Array(
+            source.split(separator: "\"", omittingEmptySubsequences: false)
+                .dropFirst().dropLast()
+        )
     }
 
     @Test("only the listed C symbols are called by the run")
