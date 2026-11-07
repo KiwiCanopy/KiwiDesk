@@ -65,16 +65,17 @@ struct DraftDiffCacheTests {
         }
     }
 
-    /// Unchanged inputs are served from the last walk.
+    /// Unchanged inputs are served from the last walk: a value the
+    /// walk could not produce — Lua changed while it is not — comes
+    /// back as stored.
     @Test("a read with no write is served from the last walk")
     func unchangedReadIsServed() {
         let model = makeTestModel()
-        _ = model.draftDiff
-        let writes = model.draftMemo.writes
-        #expect(model.draftMemo.value != nil)
-        _ = model.draftDiff
-        #expect(model.draftMemo.writes == writes)
-        #expect(model.draftMemo.value != nil)
+        #expect(!model.draftDiff.luaChanged)
+        var seeded = SettingsDraftDiff()
+        seeded.luaChanged = true
+        model.draftMemo.value = seeded
+        #expect(model.draftDiff.luaChanged)
     }
 
     /// The pill's rows take the cached walk rather than one of their

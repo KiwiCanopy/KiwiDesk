@@ -116,8 +116,9 @@ struct ShortcutsPagePartTests {
         }
     }
 
-    /// The recorder names an app, pocket-app or Lua row by its
-    /// binding's id; each finds its own part rather than the page.
+    /// The recorder names an app or Lua row by its binding's id and
+    /// an app's pocket key by its Lua; each finds its own part rather
+    /// than the page.
     @Test("a binding row finds its part by kind")
     func bindingRowsFindTheirPart() {
         let app = KeyBinding(
@@ -132,17 +133,13 @@ struct ShortcutsPagePartTests {
             kind: .custom,
             label: ""
         )
-        let pocket = KeyBinding(
-            combo: "",
-            lua: KeybindingCatalog.pocketApp("com.apple.Safari").lua,
-            kind: .custom,
-            label: ""
-        )
+        // An app's pocket key is a navigation row, named by its Lua.
+        let pocket = KeybindingCatalog.pocketApp("com.apple.Safari").lua
         let expander = Self.expander()
-        let rows = [app, lua, pocket]
-        let parts = rows.map {
+        let rows = [app, lua]
+        let parts = (rows.map(\.id.uuidString) + [pocket]).map {
             ShortcutsPagePart.owner(
-                of: $0.id.uuidString,
+                of: $0,
                 expander: expander,
                 bindings: rows
             )

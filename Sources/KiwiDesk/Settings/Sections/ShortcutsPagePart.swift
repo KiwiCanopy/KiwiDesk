@@ -67,6 +67,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         bindings: [KeyBinding]
     ) -> ShortcutsPagePart? {
         if let part = catalogOwners[anchor] { return part }
+        // An app's pocket key is a navigation row named by its Lua.
+        if PocketAppLuaArg.bundleID(of: anchor) != nil { return .pocket }
         if let binding = bindings.first(where: {
             $0.kind != .navigation && $0.id.uuidString == anchor
         }) {

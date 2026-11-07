@@ -41,11 +41,6 @@ extension SettingsModel {
 /// fields the walk reads (a binding's id, a Desktop entry's name).
 struct DraftDiffMemo {
     var value: SettingsDraftDiff?
-    /// How many writes it has seen, which a test reads.
-    private(set) var writes = 0
 
-    mutating func bump() {
-        writes += 1
-        value = nil
-    }
+    mutating func bump() { value = nil }
 }
