@@ -9,7 +9,8 @@ import Testing
 /// Desktop nobody shows joins the ledger — filed under the
 /// snapshot's space, else the Desktop's remembered Space, else
 /// unfiled — and an unobserved app's, a tracked one, one on a
-/// shown Desktop and a PARKED one do not.
+/// shown Desktop and a PARKED one do not. A window on a hidden
+/// full-screen Space joins it unfiled (#2949).
 @MainActor
 @Suite("Boot seeds the away ledger", .serialized)
 struct AwayBootSeedTests {
@@ -31,6 +32,7 @@ struct AwayBootSeedTests {
         NativeSpaces.spacesOverride = [
             authoritySpace(1, display: "UUID-A", current: true),
             authoritySpace(4, display: "UUID-A"),
+            authoritySpace(9, display: "UUID-A", isUser: false),
         ]
         NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
         let core = makeAuthorityCore()
@@ -219,5 +221,70 @@ struct AwayBootSeedTests {
         core.seedAwayWindows()
         #expect(core.state.awayWindows.isEmpty)
         #expect(!core.deferred.isScheduled(.awayCensus))
+    }
+
+    /// Space 9 is a full-screen Space no screen shows: its census
+    /// names the windows the user Desktops' `hosts` never lists.
+    private func fullScreenCensus() -> DesktopCensus {
+        DesktopCensus(
+            hosts: [:],
+            shown: [1],
+            fullScreen: [9],
+            hiddenFullScreenHosts: [
+                WindowID(7): host(9, pid: observed),
+                WindowID(8): host(9, pid: stranger),
+                WindowID(3): host(9, pid: observed),
+                WindowID(6): DesktopCensus.Host(
+                    space: 9,
+                    pid: observed,
+                    isUp: false
+                ),
+            ]
+        )
+    }
+
+    @Test("a window on a hidden full-screen Space is seeded unfiled")
+    func seedsFullScreenUnfiled() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.state.windows.upsert(
+            ManagedWindow(id: WindowID(3), pid: observed, appName: "Observed")
+        )
+        core.desktopMemory.readCensus = { _ in self.fullScreenCensus() }
+        core.seedAwayWindows()
+        // The observed app's untracked UP window alone: no stranger,
+        // no tracked window, no parked one.
+        #expect(Set(core.state.awayWindows.keys) == [WindowID(7)])
+        let entry = core.state.awayWindows[WindowID(7)]
+        #expect(entry?.nativeSpace == 9)
+        #expect(entry?.appName == "Observed")
+        #expect(entry?.title == "")
+        #expect(core.state.rememberedSpace(of: WindowID(7)) == nil)
+        // A full-screen-only seed still arms the census.
+        #expect(core.deferred.isScheduled(.awayCensus))
+        // KiwiHub lists it by app name, as full screen, in no Space.
+        let row = core.jumpEntries().first {
+            $0.target == .window(WindowID(7))
+        }
+        #expect(row?.app == "Observed")
+        #expect(row?.status == .fullscreen)
+        #expect(row?.space == nil)
+    }
+
+    @Test("the census prune keeps a seeded full-screen entry")
+    func pruneKeepsFullScreenSeed() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.desktopMemory.readCensus = { _ in self.fullScreenCensus() }
+        core.seedAwayWindows()
+        let empty = DesktopCensus(hosts: [:], shown: [1], fullScreen: [9])
+        core.desktopMemory.readCensus = { _ in empty }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(9) }
+        core.refreshAwayWindows()
+        #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 9)
+        // Closed while away: the same prune ends it.
+        core.desktopMemory.readWindowSpace = { _ in .gone }
+        core.refreshAwayWindows()
+        #expect(core.state.awayWindows[WindowID(7)] == nil)
     }
 }

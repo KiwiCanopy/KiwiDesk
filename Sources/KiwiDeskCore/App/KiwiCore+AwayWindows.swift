@@ -261,10 +261,11 @@ extension KiwiCore {
             }
             seeded += 1
         }
+        let fullScreen = seedFullScreenAway(census, refs: refs)
         if seeded > 0 {
             onLog("boot census: \(seeded) window(s) on away Desktops")
-            scheduleAwayCensus()
         }
+        if seeded + fullScreen > 0 { scheduleAwayCensus() }
     }
 
     /// The away members of `space`, in the order the row would

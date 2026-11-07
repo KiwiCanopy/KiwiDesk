@@ -26,15 +26,20 @@ public struct DesktopCensus: Sendable, Equatable {
     /// The topology's native full-screen Spaces, whose windows
     /// `hosts` never lists (#2930).
     public let fullScreen: Set<SkyLight.SpaceID>
+    /// The layer-0 windows of another process on a full-screen
+    /// Space no display shows, read for the boot seed (#2949).
+    public let hiddenFullScreenHosts: [WindowID: Host]
 
     public init(
         hosts: [WindowID: Host],
         shown: Set<SkyLight.SpaceID>,
-        fullScreen: Set<SkyLight.SpaceID> = []
+        fullScreen: Set<SkyLight.SpaceID> = [],
+        hiddenFullScreenHosts: [WindowID: Host] = [:]
     ) {
         self.hosts = hosts
         self.shown = shown
         self.fullScreen = fullScreen
+        self.hiddenFullScreenHosts = hiddenFullScreenHosts
     }
 
     /// Hosted on a user Desktop nobody shows.
@@ -82,8 +87,39 @@ public struct DesktopCensus: Sendable, Equatable {
         return DesktopCensus(
             hosts: hosts,
             shown: shown,
-            fullScreen: Set(spaces.filter { !$0.isUser }.map(\.id))
+            fullScreen: Set(spaces.filter { !$0.isUser }.map(\.id)),
+            hiddenFullScreenHosts: hiddenFullScreenHosts(
+                spaces: spaces,
+                owners: owners,
+                list: list
+            )
         )
+    }
+
+    /// The windows of each full-screen Space no display shows. A
+    /// list that cannot be read skips its Space rather than the
+    /// census: the user Desktops' reading stands without it.
+    private static func hiddenFullScreenHosts(
+        spaces: [NativeSpace],
+        owners: [WindowID: pid_t],
+        list: (SkyLight.SpaceID, _ includingParked: Bool) -> [WindowID]?
+    ) -> [WindowID: Host] {
+        var hosts: [WindowID: Host] = [:]
+        for space in spaces where !space.isUser && !space.isCurrent {
+            guard let all = list(space.id, true),
+                let up = list(space.id, false)
+            else { continue }
+            let upSet = Set(up)
+            for id in all where hosts[id] == nil {
+                guard let pid = owners[id] else { continue }
+                hosts[id] = Host(
+                    space: space.id,
+                    pid: pid,
+                    isUp: upSet.contains(id)
+                )
+            }
+        }
+        return hosts
     }
 }
 

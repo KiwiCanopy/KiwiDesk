@@ -793,6 +793,10 @@ editing here:
   alone, so a window left on its native full-screen Space is
   absent but alive — the prune keeps it and the Open or Focus
   reach lists it (`AwayFullScreenTests` ▸ `fullScreenHostIsKept`).
+  The boot seed files a window up on a full-screen Space no screen
+  shows, from the census's `hiddenFullScreenHosts`, UNFILED, since
+  that Space has none of ours (#2949, `AwayBootSeedTests` ▸
+  `seedsFullScreenUnfiled`).
   **The ledger is reach and bookkeeping, never a bar row**
   (#1228): the Space Bar draws the Desktop in front of the user,
   so `spaceBarApps` reads `state.effectiveMembers` alone and a
