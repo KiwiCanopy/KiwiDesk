@@ -236,10 +236,12 @@ extension EventLoop {
         // changed guess forgot, so none stays nil while it is up:
         // Brave lifted its main window to 999 with a permission
         // prompt up (2026-10-23). Over a Tile over a rule it keeps the
-        // rule's verdict, so the Tile stands and the cache names the
-        // rule (#2975).
+        // rule's verdict, a forgotten one included, so the Tile stands
+        // and the cache names the rule (#2975).
         if verdict == .floats(.raisedLayer) {
-            if before == .floats(.rule), tilesOverRule(id) {
+            if before == nil || before == .floats(.rule),
+                tilesOverRule(id)
+            {
                 verdict = .floats(.rule)
             } else if before?.floats != true {
                 verdict = .tiles

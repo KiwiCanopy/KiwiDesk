@@ -2448,9 +2448,10 @@ editing here:
   a comparison with `.rule` beside them to decide a refusal; a
   `.rule` comparison decides only whether the record applies. The
   record is `StateCoordinator.tiledOverRule`, keyed by id with its
-  pid, and never stands beside a user float: a write of
-  `userFloated` ends it (`setFloating`, the reopen memory, the
-  pocket's writes). A new ender of `floatFrames` ends it through
+  pid, and never stands beside a user float: `setFloating` and the
+  pocket's writes end it, the reopen memory refuses beside it, and
+  a new writer of `userFloated` joins `TileRefusalSeamTests`'
+  census of them with its answer. A new ender of `floatFrames` ends it through
   `forgetFloatMemory`, which is review's, since nothing counts the
   enders; a re-key moves it with them. Its one applier is
   `KiwiCore.applyingTileOverRule`, at the head of `handle` ahead of

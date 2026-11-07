@@ -134,7 +134,9 @@ struct TileRefusalSeamTests {
         // whether the record applies, never a refusal; a new one
         // states itself here.
         var ruleReads: [String: Int] = [:]
-        for needle in ["== .rule", "!= .rule", ".floats(.rule)"] {
+        for needle in [
+            "== .rule", "!= .rule", ".floats(.rule)", "case .rule",
+        ] {
             ruleReads.merge(
                 Self.census(needle, in: sources),
                 uniquingKeysWith: +
@@ -146,8 +148,22 @@ struct TileRefusalSeamTests {
                 "App/KiwiCore+TileOverRule.swift": 2,
                 // The verb's record branch and its no-op Float.
                 "Commands/KiwiCore+FloatCommands.swift": 2,
-                // The latch's kept verdict and the reason change.
-                "Events/EventLoop+Tracking.swift": 3,
+                // The latch's kept verdict, the reason change and
+                // the overlay classification.
+                "Events/EventLoop+Tracking.swift": 4,
+                // The reason's own switches: its guess, refusal and
+                // renderings.
+                "Models/AutoFloatReason.swift": 2,
+                "Commands/AutoFloatReason+Rendering.swift": 4,
+            ]
+        )
+        // A user float stands only where these write it, each ending
+        // or refusing a Tile over a rule (#2975): the re-key, the
+        // float verbs' `setFloating` and the reopen memory.
+        #expect(
+            Self.census("userFloated.insert(", in: sources) == [
+                "State/StateCoordinator.swift": 1,
+                "State/StateCoordinator+Intents.swift": 2,
             ]
         )
     }

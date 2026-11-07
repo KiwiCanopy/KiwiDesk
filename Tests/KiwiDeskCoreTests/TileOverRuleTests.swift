@@ -216,6 +216,10 @@ struct TileOverRuleTests {
         #expect(core.execute("make_floating").isSuccess)
         #expect(core.state.userFloated.isEmpty)
         #expect(core.execute("make_tiled").isSuccess)
+        // A forgotten verdict lifted keeps the rule's too.
+        core.eventLoop.detectedFloating[id] = nil
+        recheck(core, .raisedLayer)
+        #expect(core.eventLoop.detectedFloating[id] == .floats(.rule))
         // Its fall back to layer 0 is the rule's float again.
         recheck(core, .rule)
         #expect(core.eventLoop.detectedFloating[id] == .floats(.rule))
