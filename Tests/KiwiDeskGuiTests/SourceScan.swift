@@ -101,7 +101,7 @@ enum SourceScan {
     /// `blankingCommentsAndLiterals` is the same walk with the
     /// other emit policy (`SourceScan+Literals.swift`).
     static func stripComments(_ source: String) -> String {
-        memoizedStrip(source) { stripped(Array(source)) }
+        memoizedStrip(source)
     }
 
     /// ONE walk for both comment shapes, tracking string
@@ -306,7 +306,7 @@ enum SourceScan {
     /// this runs up to twice per character of every file every
     /// scan guard reads, and an `Array(needle)` inside it cost
     /// millions of small allocations per suite.
-    private static func matches(
+    static func matches(
         _ text: [Character],
         at i: Int,
         _ needle: [Character]

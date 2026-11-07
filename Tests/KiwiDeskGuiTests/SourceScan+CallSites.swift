@@ -36,7 +36,7 @@ extension SourceScan {
         let needle = Array(entry)
         var found: [(start: Int, paren: Int?)] = []
         for start in source.indices
-        where matches(needle, in: source, at: start) {
+        where matches(source, at: start, needle) {
             // Skip a longer identifier that merely CONTAINS
             // the needle. Trailing letters are refused by the
             // paren requirement below (`.animations`, which the
@@ -75,21 +75,6 @@ extension SourceScan {
         return found
     }
 
-    /// Whether `needle` sits at `start`, allocating nothing: these
-    /// walks run per character over whole files, per test.
-    private static func matches(
-        _ needle: [Character],
-        in source: [Character],
-        at start: Int
-    ) -> Bool {
-        guard start + needle.count <= source.count else { return false }
-        for offset in needle.indices
-        where source[start + offset] != needle[offset] {
-            return false
-        }
-        return true
-    }
-
     /// A mention of `spelling` that is not the tail of a
     /// longer identifier. No trailing boundary, deliberately:
     /// `NSAnimation` must go on catching `NSAnimationContext`.
@@ -99,7 +84,7 @@ extension SourceScan {
     ) -> Bool {
         let needle = Array(spelling)
         for start in source.indices
-        where matches(needle, in: source, at: start) {
+        where matches(source, at: start, needle) {
             if needsBoundary(spelling), start > 0,
                 isIdentifier(source[start - 1], orDot: false)
             {

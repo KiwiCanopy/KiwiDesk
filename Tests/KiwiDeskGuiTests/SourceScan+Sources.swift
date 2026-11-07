@@ -29,21 +29,15 @@ extension SourceScan {
         return raw
     }
 
-    /// Reads `url` and strips its comments, through `memoizedStrip`.
+    /// `url` with comments stripped, through `memoizedStrip`.
     static func strippedSource(at url: URL) throws -> String {
         stripComments(try rawSource(at: url))
     }
 
-    /// One strip per distinct text, however it was read: most callers
-    /// read a file themselves, and re-walked it per test (#1868). Keyed
-    /// by content, so an edited fixture is never served stale, and safe
-    /// only while `walk` is a pure function of `source`. Single-flight:
-    /// a run starts nearly every suite at once, so a late caller waits
-    /// for the first walk rather than repeating it.
-    static func memoizedStrip(
-        _ source: String,
-        walk: () -> String
-    ) -> String {
+    /// One strip per distinct text passed in, single-flight (#1868).
+    /// Keyed by `String` equality, so canonically equal texts share
+    /// an answer.
+    static func memoizedStrip(_ source: String) -> String {
         let key = StripKey(source)
         let textLock: NSLock = cacheLock.withLock {
             if let lock = stripLocks[key] { return lock }
@@ -56,13 +50,13 @@ extension SourceScan {
         if let cached = cacheLock.withLock({ strippedCache[key] }) {
             return cached
         }
-        let stripped = walk()
-        cacheLock.withLock { strippedCache[key] = stripped }
-        return stripped
+        let result = stripped(Array(source))
+        cacheLock.withLock { strippedCache[key] = result }
+        return result
     }
 
-    /// A text with its hash taken once, outside `cacheLock`: hashing
-    /// whole files under that one lock queued every scan behind it.
+    /// A text with its hash precomputed, so `cacheLock` never hashes
+    /// a whole text.
     private struct StripKey: Hashable {
         let text: String
         let textHash: Int
@@ -82,8 +76,7 @@ extension SourceScan {
     }
 
     /// `url` with comments AND literals blanked, cached across
-    /// suites like `strippedSource` (#1894): callers re-blanked
-    /// both trees per test. Single-flight per file, like the strip.
+    /// suites by file (#1894). Single-flight per file.
     static func blankedSource(at url: URL) throws -> String {
         let fileLock: NSLock = cacheLock.withLock {
             if let lock = blankLocks[url] { return lock }
