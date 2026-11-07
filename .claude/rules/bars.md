@@ -422,6 +422,10 @@ twice, was a question the user answered twice. The argument is
   and draws over a slide show. The cold-start App Bar
   (`appBarFallback`) is the one exception: it runs before any
   display is published, with no display to ask about.
+  KiwiVision's plate reads the verdict's covered half alone,
+  `overlaysStandDown`, so a Maximize stands the bars down and
+  keeps the plate (#3061); any other reader of that half joins
+  `ShelfStandDownSeamTests` ▸ `overlaysHalfHasTwoReaders`' map.
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸

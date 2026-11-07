@@ -2411,7 +2411,8 @@ editing here:
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
   the door's docstring. Which window a screen shows in FRONT is
-  read through `shelfStandsDown` (#2348), never off
+  read through `shelfStandsDown` or its covered half,
+  `overlaysStandDown` (#2348, #3061), never off
   the raw `KiwiCore.frontStack` seam, its live default or the
   CGWindowList read beneath it; a new z-order need reads that one
   seam's `FrontWindow` element rather than adding a second

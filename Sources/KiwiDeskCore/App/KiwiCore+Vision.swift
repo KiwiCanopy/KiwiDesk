@@ -245,8 +245,8 @@ extension KiwiCore {
         windowServer.restack(WindowID(target))
     }
 
-    /// The shelf's stand-down verdict, judged once per pass in
-    /// `updateBars`; a change re-draws the plates.
+    /// The plate's stand-down, `overlaysStandDown` judged once per
+    /// pass in `updateBars`; a change re-draws the plates.
     func noteVisionStandDown(_ displays: Set<DisplayID>) {
         if vision.noteStandDown(displays) { updateVision() }
     }
