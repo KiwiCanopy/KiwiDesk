@@ -36,10 +36,7 @@ extension SourceScan {
         let needle = Array(entry)
         var found: [(start: Int, paren: Int?)] = []
         for start in source.indices
-        where start + needle.count <= source.count
-            && Array(source[start..<(start + needle.count)])
-                == needle
-        {
+        where matches(source, at: start, needle) {
             // Skip a longer identifier that merely CONTAINS
             // the needle. Trailing letters are refused by the
             // paren requirement below (`.animations`, which the
@@ -87,10 +84,7 @@ extension SourceScan {
     ) -> Bool {
         let needle = Array(spelling)
         for start in source.indices
-        where start + needle.count <= source.count
-            && Array(source[start..<(start + needle.count)])
-                == needle
-        {
+        where matches(source, at: start, needle) {
             if needsBoundary(spelling), start > 0,
                 isIdentifier(source[start - 1], orDot: false)
             {

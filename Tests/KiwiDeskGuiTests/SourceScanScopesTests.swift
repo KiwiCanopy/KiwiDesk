@@ -89,4 +89,11 @@ struct SourceScanScopesTests {
         )
         #expect(!SourceScan.mentions(identifier: "panel", in: "_panel"))
     }
+
+    @Test("a spelling is matched in full")
+    func spellingIsWhole() {
+        #expect(SourceScan.mentions("panel", in: Array("a panel")))
+        #expect(!SourceScan.mentions("panel", in: Array("a pane.")))
+        #expect(!SourceScan.mentions("panel", in: Array("a pane")))
+    }
 }
