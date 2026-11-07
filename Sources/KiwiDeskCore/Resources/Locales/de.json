@@ -1697,6 +1697,7 @@
   "placement.new_window": "Neues Fenster",
   "placement.new_window.help": "Wo ein neues Fenster relativ zu den anderen landet: Erster oder Letzter in der Layout-Reihenfolge oder direkt vor bzw. nach dem aktuell fokussierten Fenster beim Öffnen.",
   "pocket.capacity": "Fasst",
+  "pocket.capacity.help": "%1$@: Die Pocket erscheint, während ein Fenster hinein- oder herauskommt oder während du eines ziehst. %2$@: Die Pocket bleibt auf jedem Bildschirm sichtbar. In beiden Fällen steckt das Pocket-Tastenkürzel das zuletzt benutzte wieder hinein oder holt, wenn alle drin sind, das zuletzt hineingesteckte heraus. Gilt sofort, in jedem Profil.",
   "pocket.capacity.one": "Ein Fenster",
   "pocket.capacity.several": "Mehrere Fenster",
   "pocket.color": "Pocket",

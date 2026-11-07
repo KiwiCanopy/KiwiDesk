@@ -76,8 +76,8 @@ struct PocketGroup: View {
         L(
             "pocket.capacity.help",
             "%1$@: the Pocket shows while a window goes in or out or "
-                + "while you drag one. %2$@: the Pocket stays on screen "
-                + "on every display. Either way the Pocket key puts away "
+                + "while you drag one. %2$@: the Pocket stays on every "
+                + "screen. Either way the Pocket key puts away "
                 + "the one you used, or with all inside takes out the "
                 + "one put in last. Applies at once, in every profile.",
             capacityName(.one),

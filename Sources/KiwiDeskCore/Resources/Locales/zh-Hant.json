@@ -1697,6 +1697,7 @@
   "placement.new_window": "新視窗",
   "placement.new_window.help": "新視窗相對於其他視窗的落點：在佈局順序中的最前或最後，或緊接在它開啟那一刻持有焦點的視窗之前或之後。",
   "pocket.capacity": "容量",
+  "pocket.capacity.help": "%1$@：視窗放入或取出時，或你拖移視窗時，Pocket 會顯示。%2$@：Pocket 會在每個螢幕上保持顯示。無論哪種情況，Pocket 快速鍵都會將你用過的那個放入 Pocket，如果全部都已放入，則取出最後放入的那個。立即生效，套用至所有描述檔。",
   "pocket.capacity.one": "一個視窗",
   "pocket.capacity.several": "多個視窗",
   "pocket.color": "Pocket",

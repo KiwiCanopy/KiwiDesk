@@ -1697,6 +1697,7 @@
   "placement.new_window": "Nouvelle fenêtre tuilée",
   "placement.new_window.help": "Où s'insère une nouvelle fenêtre par rapport aux autres : Au début ou À la fin dans l'ordre de la disposition, ou juste avant ou après la fenêtre ayant le focus au moment où elle s'ouvre.",
   "pocket.capacity": "Capacité",
+  "pocket.capacity.help": "%1$@ : la Pocket s'affiche pendant qu'une fenêtre y entre ou en sort, ou pendant que vous en faites glisser une. %2$@ : la Pocket reste visible sur chaque écran. Dans les deux cas, le raccourci Pocket remet dans la Pocket celle que vous avez utilisée ou, si toutes y sont, sort la dernière mise dedans. S'applique immédiatement, dans tous les profils.",
   "pocket.capacity.one": "Une fenêtre",
   "pocket.capacity.several": "Plusieurs fenêtres",
   "pocket.color": "Pocket",
