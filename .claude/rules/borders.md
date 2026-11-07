@@ -447,10 +447,14 @@ calls it, as an emptied pocket does, and a path that changes whether
 it STANDS — a drag starting or ending, a play's hold — calls
 `updateBars()`, since the bar pass refreshes what places it: the
 slot, the strip it stands inside and the stand-down. **Whether it
-shows is the one `pocketStands`** — Several windows, a drag, a play
-— while the shelf's plan states the pocket by the capacity alone, so
-a drag or a play moves no bar (#2793, `PocketShelfWiringTests` ▸
-`dragStandsThePocket`). **Where it is is the one
+shows is the one `pocketStands`** — Several windows, a drag, a play,
+its list open or `pocket.toggle_list` opening it (#2974, the list's
+key stands it through `openingList` for that one pass, and the open
+list holds it after) — while the shelf's plan states the pocket by
+the capacity alone, so
+a drag, a play or the list moves no bar (#2793, `PocketShelfWiringTests` ▸
+`dragStandsThePocket`, `PocketListKeyTests` ▸
+`oneWindowStandsAndCloses`). **Where it is is the one
 `pocketPlace(on:)`, which the drawing and `pocketLanding(on:)` both
 read** (`PocketPlaceTests` ▸ `landingIsTheDrawing`): its slot on a
 bar edge under Several, read off `ShelfArrangement.arrange(…pocket:)`;
@@ -495,7 +499,10 @@ that menu, never the peek**, which is hidden from accessibility:
 the plate's `onPress` takes the peek's one `openMenu` door, never
 the click's list (#2936, `PocketPlateVoiceOverTests`) — save an
 empty pocket, whose press and click both grow the empty state,
-the one peek body that speaks (#2941, `PocketEmptyPlateTests`).
+the one peek body that speaks (#2941, `PocketEmptyPlateTests`) until
+a key opens the list: no menu twins that one, so the peek's `keyed`
+anchor lifts its first window row and gives each row a button
+(#2974, `PocketListKeyTests` ▸ `rowsSpeak`).
 **An empty pocket's content is `pocketEmptyState`, read when the
 peek shows**: each chord through the one `pocketVerbChord` hook,
 never `menuChord`, a line only while its key is bound, and `pocket`'s

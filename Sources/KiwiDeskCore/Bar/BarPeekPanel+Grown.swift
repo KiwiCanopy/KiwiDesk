@@ -14,6 +14,8 @@ extension BarPeekPanel {
         let edge: AppBarEdge
         /// The frame of the bar's panel.
         let strip: CGRect
+        /// A key opened it (#2974): a row starts selected and speaks.
+        var keyed = false
     }
 
     /// Shows `content` grown out of `request`'s item inside the
@@ -34,6 +36,9 @@ extension BarPeekPanel {
         endUnlessContinued(by: next)
         body.reserve = .none
         header.isHidden = true
+        // Read ahead of the rebuild, which drops the lifted row.
+        let lifted = body.hovered
+        body.speaksRows = request.keyed
         let size = Self.fittedSize(
             of: body,
             content,
@@ -57,6 +62,7 @@ extension BarPeekPanel {
         panel.takesKey = true
         panel.setFrame(list, display: false)
         paint(shelf, edge: request.edge, size: size)
+        if request.keyed { body.liftRow(lifted) }
         guard adopt(content, next, panel: panel) else { return }
         playOpen(
             panel,
@@ -68,6 +74,10 @@ extension BarPeekPanel {
             in: list,
             anchor: nil
         )
-        if content.empty != nil { body.focusEmptyInfo() }
+        if content.empty != nil {
+            body.focusEmptyInfo()
+        } else if request.keyed {
+            body.speakLiftedRow()
+        }
     }
 }

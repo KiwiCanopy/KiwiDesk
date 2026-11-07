@@ -165,6 +165,7 @@ enum ShortcutsRowOrder {
     static let pocketAtRest: [SettingKey] = [
         .shortcuts(.pocket),
         .shortcuts(.pocketWindow),
+        .shortcuts(.pocketList),
     ]
 
     static let pocketList: [SettingKey] = [

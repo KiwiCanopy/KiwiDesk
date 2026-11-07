@@ -38,6 +38,10 @@ final class BarPeekBody: NSView {
     var chords: [NSTextField] = []
     /// An empty Pocket's header, which speaks its lines (#2941).
     var emptyInfo: NSTextField?
+    /// A key-opened list's rows speak, one button each, since no menu
+    /// twins it (#2974, `BarPeekBody+Spoken`).
+    var speaksRows = false
+    var rowButtons: [BarPeekRowButton] = []
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
     /// The buttons the last build laid out, top to bottom, and the
@@ -77,6 +81,7 @@ final class BarPeekBody: NSView {
         sectionHeader = nil
         chords = []
         emptyInfo = nil
+        rowButtons = []
         resetTargets(shelf)
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
@@ -171,6 +176,7 @@ final class BarPeekBody: NSView {
             height: ceil(y + Metrics.padV + reserve.bottom)
         )
         frame.size = size
+        if speaksRows { addRowButtons() }
         return size
     }
 

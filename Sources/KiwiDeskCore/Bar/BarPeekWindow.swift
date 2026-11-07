@@ -26,7 +26,9 @@ final class BarPeekWindow: NSPanel {
         guard takesKey, event.modifierFlags.contains(.command) else {
             return super.performKeyEquivalent(with: event)
         }
-        _ = onKey(UInt16.max)
+        // A list a ⌘ chord opened walks with that chord still held.
+        let walks = BarPeekPanel.listKeys.contains(event.keyCode)
+        _ = onKey(walks ? event.keyCode : UInt16.max)
         return true
     }
 }

@@ -293,7 +293,7 @@ public enum APIReference {
             "set_mark", "set_color",
         ],
         "pocket": [
-            "set_capacity", "set_color",
+            "set_capacity", "set_color", "toggle_list",
         ],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",

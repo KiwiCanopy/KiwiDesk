@@ -1,0 +1,68 @@
+import AppKit
+
+/// A key-opened list (#2974): a row starts lifted, since a key has no
+/// pointer, and each button speaks, since no menu twins this list as
+/// one does a click's.
+extension BarPeekBody {
+    /// Lifts the button at `index`, or the first window's, a tall
+    /// list's "more" line standing ahead of it on a bottom bar; an
+    /// empty Pocket's first row where it lists none.
+    func liftRow(_ index: Int?) {
+        guard !targets.isEmpty else { return }
+        let first = targets.firstIndex {
+            if case .window = $0.action { return true }
+            return false
+        }
+        setHovered(index.map { min($0, targets.count - 1) } ?? first ?? 0)
+    }
+
+    /// One button per target, over its frame. The labels under it go
+    /// quiet, so VoiceOver reads the row once; the body's `hitTest`
+    /// keeps every press its own.
+    func addRowButtons() {
+        rowButtons = targets.map { target in
+            let button = BarPeekRowButton(frame: target.frame)
+            for ink in target.inks { ink.setAccessibilityElement(false) }
+            button.setAccessibilityLabel(
+                (target.inks.first as? NSTextField)?.stringValue
+            )
+            let action = target.action
+            button.onPress = { [weak self] in self?.act(action) }
+            addSubview(button)
+            return button
+        }
+    }
+
+    /// Moves VoiceOver's cursor onto the lifted row, as the arrows
+    /// move the highlight.
+    func speakLiftedRow() {
+        guard speaksRows, let hovered, hovered < rowButtons.count else {
+            return
+        }
+        let button = rowButtons[hovered]
+        NSAccessibility.post(
+            element: button,
+            notification: .layoutChanged,
+            userInfo: [.uiElements: [button]]
+        )
+    }
+}
+
+/// A row of a key-opened list, to VoiceOver alone (#2974).
+final class BarPeekRowButton: NSView {
+    var onPress: @MainActor () -> Void = {}
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setAccessibilityElement(true)
+        setAccessibilityRole(.button)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { nil }
+
+    override func accessibilityPerformPress() -> Bool {
+        onPress()
+        return true
+    }
+}

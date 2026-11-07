@@ -109,6 +109,7 @@ extension BarPeekBody {
             hovered.map { min(max($0 + delta, 0), targets.count - 1) }
             ?? (delta > 0 ? 0 : targets.count - 1)
         setHovered(next)
+        speakLiftedRow()
     }
 
     /// Return on a grown list: acts as a click on the lifted button.

@@ -97,6 +97,7 @@ enum ShortcutsReferenceBuilder {
                 row.pocketMark = [
                     KeybindingCatalog.pocket.lua,
                     KeybindingCatalog.pocketWindow.lua,
+                    KeybindingCatalog.pocketList.lua,
                 ].contains(cmd.lua)
                 guard regroups, cmd.unavailable == nil else { return row }
                 switch ShortcutGroup.filing(binding.group) {

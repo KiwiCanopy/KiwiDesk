@@ -25,7 +25,9 @@ extension KiwiCore {
         Self.pocketStands(
             several: pocketHoldsSeveral,
             dragging: pocketPlate.dragging != nil,
-            playing: !pocketPlate.playing.isEmpty
+            playing: !pocketPlate.playing.isEmpty,
+            listing: pocketPlate.openingList != nil
+                || pocketListDisplay != nil
         )
     }
 
@@ -40,7 +42,7 @@ extension KiwiCore {
     /// stands — never for its hover, which the pointer leaves as it
     /// moves onto the list (#2678 review 1).
     func updatePocketPlate() {
-        let specs = pocketPlateSpecs()
+        var specs = pocketPlateSpecs()
         if let display = pocketListDisplay,
             !Self.pocketListHolds(
                 was: pocketPlate.specs[display],
@@ -48,6 +50,8 @@ extension KiwiCore {
             )
         {
             shelves.peek.dismiss()
+            // The list held a pocket that may stand no longer (#2974).
+            specs = pocketPlateSpecs()
         }
         pocketPlate.sync(specs)
     }
@@ -101,7 +105,7 @@ extension KiwiCore {
         let edge = shelf.pocketEdge
         let rise = Self.pocketRiseSide(thickness: shelf.thickness)
         // A list open on a risen pocket holds it out (#2678 review 1).
-        let listed = pocketListDisplay
+        let listed = pocketPlate.openingList ?? pocketListDisplay
         return state.workspaces.allDisplays.compactMap {
             display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
@@ -159,13 +163,15 @@ extension KiwiCore {
     /// Whether the pocket is on screen: always while Several windows
     /// holds it; under One window during a window drag, as its drop
     /// target, and while a window goes in or out — on a bar's edge
-    /// just inside the strip, which opens no slot (#2793).
+    /// just inside the strip, which opens no slot (#2793) — and while
+    /// its list is open or `pocket.toggle_list` is opening it (#2974).
     static func pocketStands(
         several: Bool,
         dragging: Bool,
-        playing: Bool
+        playing: Bool,
+        listing: Bool
     ) -> Bool {
-        several || dragging || playing
+        several || dragging || playing || listing
     }
 
     /// Whether a play on `display` draws its own pocket: not where

@@ -95,6 +95,19 @@ extension DefaultKeybindings {
         )
     }
 
+    /// The Pocket's list on `⌃⌥⌘P` (#2974), the heavier press beside
+    /// Pocket's `⌃⌥P`. Free in `com.apple.symbolichotkeys` and in the
+    /// main menus of the installed apps that ship one (read
+    /// 2026-11-07).
+    public static func pocketListRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+command+p",
+            lua: "pocket.toggle_list()",
+            kind: .navigation,
+            label: "Open or close the Pocket's list"
+        )
+    }
+
     /// The bars' shortcuts (#761): the Space Bar on `⌃⌥G`, the App
     /// Bar on `⌃⌥H` — the home row beside KiwiHub's J K L, the keys
     /// that show something (owner, 2026-10-19). Free in the seed and

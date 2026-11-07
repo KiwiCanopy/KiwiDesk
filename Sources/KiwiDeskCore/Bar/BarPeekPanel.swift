@@ -29,9 +29,14 @@ final class BarPeekPanel {
     var leaving: UUID?
     /// What the panel shows; nil while it is closed. Every show
     /// writes it, so the panel speaks for an empty Pocket's state
-    /// alone and stays hidden for every other peek (#2941).
+    /// and a key-opened list alone (#2974), and stays hidden for every
+    /// other peek, a menu twinning those (#2941).
     var drawn: BarPeekContent? {
-        didSet { panel?.setAccessibilityElement(drawn?.empty != nil) }
+        didSet {
+            panel?.setAccessibilityElement(
+                drawn?.empty != nil || (drawn != nil && body.speaksRows)
+            )
+        }
     }
     /// The list grown out of an anchor that shows, or is closing
     /// back into it (#2563); nil for every other peek.
@@ -76,6 +81,7 @@ final class BarPeekPanel {
         let shelf = LiquidGlassGate.rendered(stored)
         dropMorph()
         body.reserve = .none
+        body.speaksRows = false
         header.isHidden = true
         let size = Self.fittedSize(
             of: body,

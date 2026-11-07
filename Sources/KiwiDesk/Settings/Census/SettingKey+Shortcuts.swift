@@ -74,6 +74,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocket = "keybinding.pocket"
     /// `toggle_pocket_window` (#2675).
     case pocketWindow = "keybinding.pocket_window"
+    /// `pocket.toggle_list` (#2974).
+    case pocketList = "keybinding.pocket_list"
     /// What the pocket holds (#2678); where it stands is
     /// KiwiShelf's (`SettingKey+KiwiShelf`).
     case pocketCapacity = "appWide.pocketCapacity"
@@ -178,7 +180,7 @@ extension ShortcutsKey {
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         // Its own card (#2680): what it holds, then its two keys;
         // where it sits is KiwiShelf's (#2678).
-        case .pocket, .pocketWindow, .pocketCapacity, .pocketApps:
+        case .pocket, .pocketWindow, .pocketList, .pocketCapacity, .pocketApps:
             return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -269,6 +271,11 @@ extension ShortcutsKey {
             return .text(
                 "keybinding.pocket_window",
                 help: "keybinding.pocket_window.help"
+            )
+        case .pocketList:
+            return .text(
+                "keybinding.pocket_list",
+                help: "keybinding.pocket_list.help"
             )
         case .pocketCapacity:
             return .text("pocket.capacity", help: "pocket.capacity.help")

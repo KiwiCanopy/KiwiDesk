@@ -201,16 +201,24 @@ final class BarPeek {
     /// Shows the peek at `anchor` at once, with no dwell or
     /// cool-down — a fading one included — or re-reads the one
     /// showing in place: the open path of `clicked` (#2571) and the
-    /// overflow mark's own click (#2563).
+    /// overflow mark's own click (#2563). `keyed` says a key opened
+    /// a grown list (#2974).
     func show(
         _ anchor: NSView,
         source: BarPeekSource,
         space: SpaceID?,
-        edge: AppBarEdge
+        edge: AppBarEdge,
+        keyed: Bool = false
     ) {
         spent = nil
         present(
-            Anchor(view: anchor, source: source, space: space, edge: edge),
+            Anchor(
+                view: anchor,
+                source: source,
+                space: space,
+                edge: edge,
+                keyed: keyed
+            ),
             fades: false
         )
     }

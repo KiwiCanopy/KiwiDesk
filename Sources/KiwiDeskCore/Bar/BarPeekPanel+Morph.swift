@@ -56,6 +56,7 @@ extension BarPeekPanel {
             edge: request.edge
         )
         endUnlessContinued(by: next)
+        body.speaksRows = false
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)
@@ -260,6 +261,9 @@ extension BarPeekPanel {
         else { return }
         onClose()
     }
+
+    /// The keys a grown list uses: Escape, the arrows, Return twice.
+    nonisolated static let listKeys: Set<UInt16> = [53, 125, 126, 36, 76]
 
     /// A key on the grown list: Escape closes it, the arrows walk
     /// its rows, Return picks the lifted one; any other closes it.

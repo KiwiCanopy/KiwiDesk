@@ -12,6 +12,7 @@ extension KeybindingCatalog {
                 toggleSticky,
                 pocket,
                 pocketWindow,
+                pocketList,
             ]
     }
 
@@ -29,6 +30,7 @@ extension KeybindingCatalog {
         toggleDisplaySticky,
         pocket,
         pocketWindow,
+        pocketList,
         makeSticky,
         makeDisplaySticky,
         makeUnsticky,
@@ -181,6 +183,24 @@ extension KeybindingCatalog {
                 "Makes the focused window your Pocket window, or "
                     + "makes it an ordinary window again. Only one "
                     + "window can be the Pocket window at a time."
+            )
+        }
+    )
+
+    /// `pocket.toggle_list` (#2974): opens or closes the Pocket's
+    /// list, wherever the Pocket is.
+    static let pocketList = NavCommand(
+        label: "Open or close the Pocket's list",
+        lua: "pocket.toggle_list()",
+        displayLabel: {
+            L("keybinding.pocket_list", "Open or close the Pocket's list")
+        },
+        help: {
+            L(
+                "keybinding.pocket_list.help",
+                "Opens the Pocket's list without moving a bar, to pick "
+                    + "a window by keyboard: the arrow keys move, Return "
+                    + "takes the window out, Esc closes."
             )
         }
     )

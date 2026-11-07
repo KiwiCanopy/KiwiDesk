@@ -111,6 +111,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.pocket]
         case .pocketWindow:
             return [KeybindingCatalog.pocketWindow]
+        case .pocketList:
+            return [KeybindingCatalog.pocketList]
         case .showShortcuts:
             return [KeybindingCatalog.showShortcuts]
         case .openSettings:
