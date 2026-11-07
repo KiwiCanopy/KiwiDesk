@@ -117,7 +117,7 @@ public final class VisionManager {
     /// Whether the last sync held its target, so a restack orders
     /// the plates above it.
     private var holding = false
-    /// The shelf's per-screen stand-down, filed by `updateBars`
+    /// The per-screen `overlaysStandDown`, filed by `updateBars`
     /// once per pass so the plate reads no WindowServer itself.
     private(set) var standDown: Set<DisplayID> = []
     /// The Reduce Motion read the fades name (borders.md).
@@ -163,7 +163,7 @@ public final class VisionManager {
         plates.values.contains { $0.isShown }
     }
 
-    /// Files the shelf's stand-down verdict; true when it changed.
+    /// Files the plate's stand-down; true when it changed.
     func noteStandDown(_ displays: Set<DisplayID>) -> Bool {
         guard displays != standDown else { return false }
         standDown = displays

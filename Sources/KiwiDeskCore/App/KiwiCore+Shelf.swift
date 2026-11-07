@@ -88,7 +88,7 @@ extension KiwiCore {
             // #1787) gates here, read once for both bars: nil
             // retires each overlay through its manager, keeping
             // `shownStrips` consistent with the float clamp.
-            let covered = screenIsCovered(on: display.id)
+            let covered = overlaysStandDown(on: display.id)
             if covered { plateStandingDown.insert(display.id) }
             let down = shelfStandsDown(on: display.id, covered: covered)
             if down { standingDown.insert(display.id) }

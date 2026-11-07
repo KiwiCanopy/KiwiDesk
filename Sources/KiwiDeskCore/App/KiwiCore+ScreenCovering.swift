@@ -82,10 +82,10 @@ extension KiwiCore {
     }
 
     /// Whether the shelf stands down on `display`: the screen is
-    /// covered (`screenIsCovered`), or the Space it shows holds a
+    /// covered (`overlaysStandDown`), or the Space it shows holds a
     /// maximized window (#2448). Both bars ask this one answer.
     func shelfStandsDown(on display: DisplayID) -> Bool {
-        shelfStandsDown(on: display, covered: screenIsCovered(on: display))
+        shelfStandsDown(on: display, covered: overlaysStandDown(on: display))
     }
 
     /// The same answer over a `covered` verdict already read, so
@@ -99,7 +99,7 @@ extension KiwiCore {
     /// a native fullscreen Space (#670) or a presentation in
     /// front (#1787). KiwiVision's plate stands down on this
     /// alone, never on a maximize, which it keeps dimming (#3061).
-    func screenIsCovered(on display: DisplayID) -> Bool {
+    func overlaysStandDown(on display: DisplayID) -> Bool {
         !NativeSpaces.currentSpaceIsUser(
             display: display,
             filed: desktopMemory.shownUserSpaces,

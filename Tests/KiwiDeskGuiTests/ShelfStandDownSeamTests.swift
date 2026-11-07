@@ -6,7 +6,8 @@ import Testing
 /// (#670) or a presentation in front (#1787). A bar surface
 /// gating on a user-space read of its own would hide on the
 /// first and draw over a slide show, so the bar-building files
-/// spell none, bar the `allowed` map's.
+/// spell none, bar the `allowed` map's. KiwiVision's plate reads
+/// the covered half alone, `overlaysStandDown` (#3061).
 @Suite("Shelf stand-down seam (#1787)")
 struct ShelfStandDownSeamTests {
     /// The bar-building files, by path prefix under
@@ -91,5 +92,36 @@ struct ShelfStandDownSeamTests {
                 "\(file) asks the stand-down"
             )
         }
+    }
+
+    /// Who may ask the overlays' half of the verdict, and why
+    /// (#3061). Any other surface asks `shelfStandsDown`, so a
+    /// bar or a cue cannot stay up over a Maximize.
+    private static let overlayReaders: [String: Int] = [
+        // The one-arg `shelfStandsDown`, composing the whole verdict.
+        "KiwiCore+ScreenCovering.swift": 1,
+        // `updateBars()`, filing the KiwiVision plate's stand-down.
+        "KiwiCore+Shelf.swift": 1,
+    ]
+
+    @Test("only the verdict and the plate read the overlays' half")
+    func overlaysHalfHasTwoReaders() throws {
+        let core = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        var readers: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: core) {
+            let source = try SourceScan.strippedSource(at: url)
+                .filter { !$0.isWhitespace }
+            // A call spells the label; the declaration names its
+            // parameter (`on display:`), so it is not counted.
+            let calls =
+                source.components(separatedBy: "overlaysStandDown(on:")
+                .count - 1
+            if calls > 0 { readers[url.lastPathComponent] = calls }
+        }
+        #expect(
+            readers == Self.overlayReaders,
+            "overlays' half read outside its homes: \(readers)"
+        )
     }
 }

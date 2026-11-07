@@ -595,7 +595,7 @@ Obligations:
   per pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a
   WindowServer round trip per screen on the switch path. The half
-  is `screenIsCovered` — a native fullscreen Space or a
+  is `overlaysStandDown` — a native fullscreen Space or a
   presentation — never the shelf's maximize arm: a screen showing
   a Maximize keeps its plate, so the menu-bar band beside the notch
   stays dimmed (#3061, `FullscreenStandDownTests` ▸
