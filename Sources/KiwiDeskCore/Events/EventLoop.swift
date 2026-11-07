@@ -41,6 +41,9 @@ public final class EventLoop {
     /// (`scheduleRemovalRecheck`), and episodes ended re-listed.
     var onRemovalDistrust: @MainActor () -> Void = {}
     var onRemovalEpisodesEnded: @MainActor (Set<WindowID>) -> Void = { _ in }
+    /// Whether a Tile keeps the window tiled over its float rule
+    /// (#2975), which the #2572 latch reads as tiled.
+    var tilesOverRule: @MainActor (WindowID) -> Bool = { _ in false }
 
     /// The resolved float rules and guess, written only through
     /// `KiwiCore.installFloatRules` (`AutoFloatSeamTests`); the
@@ -86,16 +89,14 @@ public final class EventLoop {
     /// app wants); the pid is cleared so a re-attach re-applies it.
     var manualAXApplied: Set<pid_t> = []
     /// Last float-detection verdict per tracked window, with its
-    /// reason (#1810), so reconcile can re-check and emit only
-    /// actual changes.
+    /// reason (#1810): a recheck emits only a change.
     var detectedFloating: [WindowID: FloatVerdict] = [:]
     /// Last native-fullscreen verdict and AX subrole per tracked
     /// window, so a recheck emits only on a change (#1788).
     var detectedFullscreen: [WindowID: Bool] = [:]
     var detectedSubroles: [WindowID: String] = [:]
-    /// Tracked windows whose CGWindow layer read as ignored
-    /// once; untracked only if the reading persists (layers
-    /// flicker during fullscreen transitions).
+    /// Tracked windows whose layer read as ignored once; untracked
+    /// only if it persists (layers flicker in fullscreen changes).
     var ignorePending: Set<WindowID> = []
     /// Last-known on-screen frame of every tracked window — the key
     /// `TabReconciler` matches a vanished window against an appearing
@@ -167,10 +168,9 @@ public final class EventLoop {
     /// handler runs inside it. `host` is the verb's target, filed by
     /// the gone handler (#3052).
     var eagerDepartureInFlight: (window: WindowID, host: SkyLight.SpaceID)?
-    /// Windows the transient filters dropped that already spent
-    /// their one re-track, per pid (cleared on detach) — bounds
-    /// the retry so a permanent invisible helper (#309) cannot
-    /// schedule forever (#675).
+    /// Windows the transient filters dropped that spent their one
+    /// re-track, per pid (cleared on detach), so a permanent
+    /// invisible helper (#309) cannot schedule forever (#675).
     var transientRetried: [pid_t: Set<WindowID>] = [:]
     /// Pids owed a one-shot re-track for a transient drop
     /// (#675); drained by the scheduled task.

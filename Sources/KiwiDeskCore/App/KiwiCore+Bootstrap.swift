@@ -287,6 +287,9 @@ extension KiwiCore {
         eventLoop.displayWatch.onMenuBarPrefChange = { [weak self] in
             self?.scheduleMenuBarRemeasure()
         }
+        eventLoop.tilesOverRule = { [weak self] id in
+            self?.state.tilesOverRule(id) ?? false
+        }
         eventLoop.onRemovalDistrust = { [weak self] in
             self?.scheduleRemovalRecheck()
         }

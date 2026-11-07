@@ -134,12 +134,14 @@ public struct StateCoordinator: Sendable {
     var stickyReachOverrides: [WindowID: Bool] = [:]
 
     /// The frame each window last had while floating, written when
-    /// it is tiled and consumed when it floats again (#1675). Keep
-    /// it out of `StateSnapshot` — session state by the #1675
-    /// ruling — and end it where the window ends: a close's gone
+    /// it is tiled and consumed when it floats again (#1675):
+    /// session state, ended where the window ends — a close's gone
     /// verdict, an away window's retirement, its app's exit, the
     /// pid covering a hidden or minimized window no fold lists.
     var floatFrames: [WindowID: FloatFrame] = [:]
+    /// Windows a Tile keeps tiled over a float rule, by pid (#2975):
+    /// `floatFrames`' lifetime, carried by the in-place stop alone.
+    var tiledOverRule: [WindowID: pid_t] = [:]
 
     /// A float's judged aspect lock (#2973): session state, which a
     /// close, a gone-for-good retire and the app's exit end.
@@ -251,8 +253,7 @@ public struct StateCoordinator: Sendable {
                 workspaces.remove(id)
                 stickyReachOverrides[id] = nil
             }
-            floatFrames = floatFrames.filter { $0.value.pid != pid }
-            floatAspects = floatAspects.filter { $0.value.pid != pid }
+            forgetFloatMemory(pid: pid)
             focusRecency = focusRecency.filter { $0.value.pid != pid }
             forgetMinimized(pid: pid)
             // The app's exit ends its away entries for good

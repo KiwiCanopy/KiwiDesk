@@ -888,8 +888,12 @@ peeks instant; see
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
 `toggle_floating` towards tiled, fail on a window that detection
-or a float rule floats
-([`make_tiled`](lua-reference.md#make_tiled)).
+floats ([`make_tiled`](lua-reference.md#make_tiled)).
+
+:::unreleased
+A window a float rule floats is tiled, and stays tiled until it
+closes.
+:::
 
 `set_float_placement` replaces `set_float_nudge`: a saved setting
 that had the nudge off becomes `keep`, and a call to

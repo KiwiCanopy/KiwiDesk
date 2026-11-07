@@ -64,6 +64,9 @@ extension InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // The Float card's help names the bar menu's Tile row
+        // (#2975).
+        "app_rules.float.help": 1,
         // Simple's Spaces pointer and KiwiHub hover name a page by
         // its key (#2737, #2777); the root's name is not a label.
         "simple.spaces.hint": 1,

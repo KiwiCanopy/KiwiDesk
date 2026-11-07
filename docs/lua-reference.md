@@ -5197,7 +5197,7 @@ crossing re-stacks the zone.
 **Expects:** a Lua table of strings (bundle-id or
 bundle-id:title matchers).
 
-**Does:** windows matching any entry always float. An app is
+**Does:** windows matching any entry float. An app is
 named by its **bundle identifier** (e.g. `com.apple.finder`),
 not its display name. `"id"` matches every window of the app;
 `"id:Title"` matches when the title contains the fragment. The
@@ -5211,6 +5211,14 @@ an "App:Title" rule catches windows whose titles load late
 window that reported wrong metadata while launching corrects
 itself the same way. A manual `make_floating` override is never
 reverted by these re-checks.
+
+:::unreleased
+A rule decides how a window starts:
+[`make_tiled`](#make_tiled) tiles a window a rule floats, and it
+stays tiled until it closes, through hiding, a Desktop switch and
+the re-checks. A window that opens later, the same one reopened
+included, floats by the rule again.
+:::
 
 Panels and overlays that live above the normal window layer also
 float automatically, no rule needed. Windows belonging to apps that
@@ -5521,9 +5529,13 @@ window that closes while untitled has no identity to match and
 loses it) and applies only to that window — use `float_rules` to
 float every window of an app.
 
+:::unreleased
 A window that a `float_rules` entry, KiwiDesk's dialog and panel
 detection, or its app having no Dock icon already floats is left
-as it is, and nothing is remembered for it.
+as it is, and nothing is remembered for it. A window a rule floats
+that `make_tiled` tiled floats again, and the next window of that
+app is the rule's.
+:::
 
 **Example:**
 
@@ -5538,15 +5550,22 @@ KiwiDesk.make_floating()
 **Does:** returns the focused window to its space's tiling
 layout.
 
+:::unreleased
 It undoes a `make_floating`: from then on
 `float_rules` and KiwiDesk's own detection decide whether it
-floats, including rules you add later. A window floated by a
-`float_rules` entry, by that detection (dialogs, sheets, panels)
-or because its app has no Dock icon cannot be tiled: the command
-does nothing, a pill on the window names the reason, and over the
-CLI it fails. Remove the `float_rules` entry to tile such a
-window. A window that floats only because its Space is in
-floating layout still floats there.
+floats, including rules you add later.
+
+A window a `float_rules` entry floats is tiled, and stays tiled
+until it closes; [`make_floating`](#make_floating) floats it again.
+An update's relaunch and `kiwidesk service restart` keep it tiled,
+and a quit floats it again.
+A rule added while the window is tiled this way takes effect when
+it next opens. A window floated by KiwiDesk's detection (dialogs,
+sheets, panels, raised layers) or because its app has no Dock icon
+cannot be tiled: the command does nothing, a pill on the window
+names the reason, and over the CLI it fails. A window that floats
+only because its Space is in floating layout still floats there.
+:::
 
 A window floated only because it can't be resized or its app has
 no Dock icon tiles once its app is in [`tile_rules`](#tile_rules)
@@ -6073,8 +6092,12 @@ Marking floats it at once at the frame
 floating (a window already floating keeps its frame), and leaves it
 out of the pocket: on every Space, wearing the pocket
 mark. Unmarking tiles it on the active Space, as
-[`make_tiled`](#make_tiled) does; a window a float rule or
-detection floats stays floating.
+[`make_tiled`](#make_tiled) does; a window detection floats stays
+floating.
+:::unreleased
+A window a float rule floats is tiled too, as `make_tiled` tiles
+it.
+:::
 
 A
 pocketed window is never the focused one, so take it out
@@ -8613,7 +8636,9 @@ or a floating-layout Space — for a sticky window, the Space it is
 drawn on), `cause` (`detection`, `user`, `space_mode` or `nil`) and
 `detection` (`reason` — `rule`, `panel`, `accessory_app` or
 `fixed_size` — `is_guess`, and `escapes`, what would let it tile:
-`set_float_automatically`, `app_rule.remove_float`, or `tile_rule`,
+`make_tiled` or `app_rule.remove_float` for a rule (a rule
+`make_tiled` overruled leaves `cause` nil), `set_float_automatically`
+or `tile_rule`,
 a Tile rule only Settings, Lua or a profile writes). `app_rule`
 holds the app's Space rule (`space`), its float rules
 (`float_rules`), whether it has a Tile rule (`tile_rule`) and

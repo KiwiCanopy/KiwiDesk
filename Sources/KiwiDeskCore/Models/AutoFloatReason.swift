@@ -32,6 +32,11 @@ public enum AutoFloatReason: Sendable, Equatable {
         case .rule, .panel, .raisedLayer, .pocket: false
         }
     }
+
+    /// Whether a Tile refuses on the reason (#2975): a float rule
+    /// decides how a window starts, and a Tile overrules it for as
+    /// long as that window lives.
+    public var refusesTile: Bool { self != .rule }
 }
 
 /// Float detection's last verdict for one tracked window (#1810).

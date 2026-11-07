@@ -48,11 +48,11 @@ extension KiwiCore {
     }
 
     /// Whether the window floats, and WHY: detection's verdict
-    /// through the one `tileRefusal(of:)` door, else the user's
-    /// own float — #1810 lets no user float stand where detection
-    /// floats — else a floating-mode Space. Accepted: between a
-    /// guess's re-judge and its recheck, a detection float with no
-    /// cached verdict reads as the user's.
+    /// through the one `tileRefusal(of:)` door — save a rule a Tile
+    /// overruled (#2975) — else the user's own float, which #1810
+    /// lets no detection float keep, else a floating-mode Space.
+    /// Accepted: between a guess's re-judge and its recheck, a
+    /// detection float with no cached verdict reads as the user's.
     private func float(
         _ window: ManagedWindow,
         mode: LayoutMode?
@@ -60,7 +60,7 @@ extension KiwiCore {
         let reason = tileRefusal(of: window.id)
         let flag = window.isFloating
         let cause: JSONValue =
-            if reason != nil {
+            if let reason, reason.refusesTile || flag {
                 .string("detection")
             } else if flag {
                 .string("user")

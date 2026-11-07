@@ -48,8 +48,8 @@ extension APIReference {
         map["space_bar.set_title_cap"] =
             "space_bar.set_front_app_title_cap"
         map["set_float_nudge"] = "set_float_placement"
-        // A window is tiled or floating, and Tile hands it back
-        // to detection (#1810).
+        // A window is tiled or floating, and Tile does its job
+        // (#1810, #2975).
         map["make_auto"] = "make_tiled"
         // A Space switch slides, shows the Space or neither, one
         // app-wide choice (#2524).

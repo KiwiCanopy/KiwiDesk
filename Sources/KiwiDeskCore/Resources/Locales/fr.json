@@ -101,7 +101,7 @@
   "app_rules.dash": "—",
   "app_rules.empty": "Les apps sans règle s’ouvrent dans l’espace où vous les ouvrez, et se tuilent sauf si elles flottent automatiquement.",
   "app_rules.float": "Flottement",
-  "app_rules.float.help": "Le flottement sort les fenêtres correspondantes de cette app de la mosaïque : chacune conserve sa dernière position et sa taille et reste au-dessus des fenêtres tuilées, au lieu de s'aligner sur la grille d'un espace.\n\nIl s'agit d'un flottement par app, et non du mode de disposition **Floating**, qui fait flotter toutes les fenêtres d'un espace.",
+  "app_rules.float.help": "Le flottement sort les fenêtres correspondantes de cette app de la mosaïque dès leur ouverture : chacune conserve sa dernière position et sa taille et reste au-dessus des fenêtres tuilées, au lieu de s'aligner sur la grille d'un espace. **%1$@** tuile l'une d'elles jusqu'à sa fermeture.\n\nIl s'agit d'un flottement par app, et non du mode de disposition **Floating**, qui fait flotter toutes les fenêtres d'un espace.",
   "app_rules.float.help.open_windows": "S'applique aux fenêtres ouvertes dès que vous enregistrez. Une fenêtre que vous avez fait flotter vous-même continue de flotter jusqu'à ce que vous la tuiliez.",
   "app_rules.float.none": "Ne flotte pas",
   "app_rules.float.remove.help": "Ne plus faire flotter cette app",

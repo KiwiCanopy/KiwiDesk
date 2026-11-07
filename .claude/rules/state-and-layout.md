@@ -2441,6 +2441,25 @@ editing here:
   fold, the reopen memory, the in-place restore;
   `TileReturnsToRulesTests`); the argument is
   `docs/design-decisions.md`'s.
+  **A Tile over a float rule is a per-window record, never a user
+  float (#2975).** Whether a reason refuses a Tile is the one
+  `AutoFloatReason.refusesTile`, asked by the verb, the menu row
+  (`tileRefused`), `explain_window` and the pocket's unmark, never
+  a comparison with `.rule` beside them. The record is
+  `StateCoordinator.tiledOverRule`, keyed by id with its pid, ended
+  with `floatFrames` (a close, `forgetAway`, the app's exit, the
+  pocket's mark) and re-keyed with them; a new ender of
+  `floatFrames` ends it through `forgetFloatMemory` too. Its one
+  reader is `KiwiCore.applyingTileOverRule`, at the head of
+  `handle`, which keeps a re-adoption or a rule's float tiled and
+  ends the record on any reason that refuses a Tile — so the event
+  loop emits a reason change leaving `.rule`, and the #2572 latch
+  reads a recorded window as tiled through `EventLoop.tilesOverRule`.
+  The in-place capture alone carries it
+  (`WindowSession.tiled_over_rule`, a stored shape;
+  `TileOverRuleTests` ▸ `keyIsPinned`), so a crash re-floats; and
+  `TileRefusalSeamTests` holds the predicate's callers and the
+  reader's place ahead of the fold.
 - **A float safety NET asks `EffectiveFloat.applies`, never the
   flag alone** (#1178). `FloatingLayout` assigns no frames, so a
   `.floating` space's members are unmanaged in exactly the way a
