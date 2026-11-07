@@ -5,7 +5,7 @@ import Testing
 
 /// `pocket_app`'s edges (#2612): the tie is judged at the claim's
 /// spend against the row as it then stands, a keyed press and
-/// arrival pass a taken general list, a full-screen arrival is
+/// arrival tie beside a marked window, a full-screen arrival is
 /// never claimed, and a hidden app's key shows the app.
 @Suite("pocket_app edges", .serialized)
 @MainActor
@@ -41,8 +41,8 @@ struct PocketAppEdgeTests {
         #expect(fixture.owner(of: mine) == nil)
     }
 
-    @Test("a keyed press and arrival pass a taken general list")
-    func keyedPassesTheCapacity() {
+    @Test("a keyed press and arrival tie beside a marked window")
+    func keyedTiesBesideAMark() {
         let fixture = Fixture()
         #expect(fixture.core.execute("toggle_pocket_window").isSuccess)
         #expect(fixture.press().isSuccess)

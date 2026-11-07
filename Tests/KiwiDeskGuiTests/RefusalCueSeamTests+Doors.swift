@@ -129,12 +129,11 @@ extension RefusalCueSeamTests {
                 // A bar's shortcut refused (#761), sounded at the bar
                 // alone (#2567).
                 "KiwiCore+ShelfRevealCue.swift": .sounded(1),
-                // The pocket's refusals — sticky (#2446), a second
-                // window (#2675), an app's own window (#2612), a
-                // Desktop move (#2888), its list's key (#2974).
+                // The pocket's refusals — sticky (#2446), an app's
+                // own window (#2612), a Desktop move (#2888), its
+                // list's key (#2974).
                 "KiwiCore+PocketList.swift": .sounded(1),
                 "KiwiCore+Pocket.swift": .sounded(1),
-                "KiwiCore+PocketWindow.swift": .sounded(1),
                 "KiwiCore+PocketApp.swift": .sounded(1),
                 "KiwiCore+DesktopMoveRefusal.swift": .sounded(1),
                 // A Hyper press with nothing to do (#2480): silent
