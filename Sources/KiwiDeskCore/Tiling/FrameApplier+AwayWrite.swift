@@ -23,7 +23,6 @@ extension FrameApplier {
         pendingResends[id] = nil
         let band = edgeBand(frame, setSize: true)
         nonisolated(unsafe) let target = element
-        nonisolated(unsafe) let landed = landed
         let writer = writer
         let holds = enhancedUI
         holds.noteQueued(
