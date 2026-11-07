@@ -72,6 +72,7 @@ struct WMBridgeSeamTests {
         "WMBridge.": [
             "KiwiDeskCore/App/KiwiCore+Accessors.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopMove.swift": 1,
+            "KiwiDeskCore/Commands/KiwiCore+DesktopMoveAway.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopSwitch.swift": 2,
             // #1145 sticky reach: the one carry MOVE.
             "KiwiDeskCore/App/KiwiCore+StickyReach.swift": 1,

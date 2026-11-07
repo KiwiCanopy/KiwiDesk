@@ -56,7 +56,7 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 4
+            readers.count == 5
                 && files == [
                     "KiwiCore+AwayWindows.swift",
                     "KiwiCore+LaunchReach.swift",
@@ -65,8 +65,8 @@ struct DesktopCensusSeamTests {
                     "KiwiCore+SelfTest.swift",
                 ],
             .init(
-                rawValue: "expected the refresh, the boot seed, "
-                    + "the reach and the self-test, found "
+                rawValue: "expected the refresh, an away command's read, "
+                    + "the boot seed, the reach and the self-test, found "
                     + readers.map(\.site).joined(separator: ", ")
             )
         )
