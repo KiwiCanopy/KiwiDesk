@@ -335,6 +335,9 @@ extension InterpolatedLabelTests {
         // KiwiVision's pointer names Shortcuts ▸ Focus by its
         // labels (#2103).
         "kiwivision.xref_link": 1,
+        // The Maximize links name each other's place (#3062).
+        "layout_defaults.maximize.xref_link": 1,
+        "shortcuts.maximize.xref_link": 1,
         // The lens page's other-layer caption names Shortcuts
         // (#2103).
         "kiwivision.lens.chord_elsewhere": 1,

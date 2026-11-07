@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 10
+    public static let newestGeneration = 11
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -35,6 +35,8 @@ extension DefaultKeybindings {
         case 9: [pocketWindowRow()]
         // The Pocket's list (#2974).
         case 10: [pocketListRow()]
+        // Maximize Height and Width (#3062).
+        case 11: directionalMaximizeRows()
         default: []
         }
     }

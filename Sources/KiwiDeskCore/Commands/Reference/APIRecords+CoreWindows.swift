@@ -157,8 +157,11 @@ extension APIReference {
                 + "off."
         ),
         "toggle_maximized": APIRecord(
-            "Fills the screen with the focused tiled window until "
-                + "pressed again or focus moves on."
+            "Fills the screen, or one axis of it, with the focused "
+                + "tiled window until pressed again.",
+            .choice("axis", MaximizeAxis.self, optional: true),
+            .number("share", optional: true),
+            .choice("anchor", MaximizeAnchor.self, optional: true)
         ),
         "pocket": APIRecord(
             "Pockets or takes out the next pocket window, or "

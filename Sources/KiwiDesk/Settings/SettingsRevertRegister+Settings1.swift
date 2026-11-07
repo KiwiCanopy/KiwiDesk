@@ -36,6 +36,11 @@ extension SettingsRevertRegister {
             .leaf(\.settings.minWindowSizes.floating.width),
         .behaviour(.minSizeFloatingHeight):
             .leaf(\.settings.minWindowSizes.floating.height),
+        .behaviour(.maximizeHeightShare):
+            .leaf(\.settings.maximize.heightShare),
+        .behaviour(.maximizeWidthShare):
+            .leaf(\.settings.maximize.widthShare),
+        .behaviour(.maximizeAnchor): .leaf(\.settings.maximize.anchor),
         .behaviour(.resizeStep): .leaf(\.settings.resizeStep),
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),

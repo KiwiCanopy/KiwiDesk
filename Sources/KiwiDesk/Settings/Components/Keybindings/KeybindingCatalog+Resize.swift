@@ -8,6 +8,8 @@ extension KeybindingCatalog {
             + [
                 resetSizes,
                 maximize,
+                maximizeHeight,
+                maximizeWidth,
                 toggleFloating,
                 toggleSticky,
                 pocket,
@@ -24,6 +26,8 @@ extension KeybindingCatalog {
     static let stepFreeCommands: [NavCommand] = [
         resetSizes,
         maximize,
+        maximizeHeight,
+        maximizeWidth,
         toggleFloating,
         makeFloating,
         toggleSticky,
@@ -114,6 +118,44 @@ extension KeybindingCatalog {
                     + "bars, leaving the rest of the Space as it "
                     + "is. Press again, or move focus to another "
                     + "window, to put it back."
+            )
+        }
+    )
+
+    /// `toggle_maximized("height")` (#3062): the full height at
+    /// the stored share of the width.
+    static let maximizeHeight = NavCommand(
+        label: "Maximize Height",
+        lua: "KiwiDesk.toggle_maximized(\"height\")",
+        displayLabel: {
+            L("keybinding.maximize_height", "Maximize Height")
+        },
+        help: {
+            L(
+                "keybinding.maximize_height.help",
+                "Fills the screen's height with this window, at a "
+                    + "share of its width, leaving the rest of the "
+                    + "Space as it is. Press again, or move focus to "
+                    + "another window, to put it back."
+            )
+        }
+    )
+
+    /// `toggle_maximized("width")` (#3062): the full width at the
+    /// stored share of the height.
+    static let maximizeWidth = NavCommand(
+        label: "Maximize Width",
+        lua: "KiwiDesk.toggle_maximized(\"width\")",
+        displayLabel: {
+            L("keybinding.maximize_width", "Maximize Width")
+        },
+        help: {
+            L(
+                "keybinding.maximize_width.help",
+                "Fills the screen's width with this window, at a "
+                    + "share of its height, leaving the rest of the "
+                    + "Space as it is. Press again, or move focus to "
+                    + "another window, to put it back."
             )
         }
     )

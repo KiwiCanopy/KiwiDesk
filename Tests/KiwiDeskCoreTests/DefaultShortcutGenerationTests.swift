@@ -28,6 +28,8 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.pocket()",
         "KiwiDesk.toggle_pocket_window()",
         "pocket.toggle_list()",
+        "KiwiDesk.toggle_maximized(\"height\")",
+        "KiwiDesk.toggle_maximized(\"width\")",
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.
@@ -69,6 +71,18 @@ struct DefaultShortcutGenerationTests {
         #expect(
             KeyCombo.parse(ShortcutBase.hyper.rebased(row).combo)?.modifiers
                 == [.hyper, .command]
+        )
+    }
+
+    @Test("Maximize Height and Width are generation 11")
+    func directionalMaximizeGeneration() {
+        let rows = DefaultKeybindings.rows(ofGeneration: 11)
+        #expect(rows == DefaultKeybindings.directionalMaximizeRows())
+        #expect(
+            rows.compactMap { KeyCombo.parse($0.combo) } == [
+                KeyCombo.parse("control+option+shift+m"),
+                KeyCombo.parse("control+option+command+m"),
+            ]
         )
     }
 

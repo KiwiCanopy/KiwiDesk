@@ -72,6 +72,28 @@ extension DefaultKeybindings {
         )
     }
 
+    /// Maximize Height on `⌃⌥⇧M` and Maximize Width on `⌃⌥⌘M`
+    /// (#3062), related variants of Maximize's `⌃⌥M`: `⇧` the first,
+    /// `⌘` the second (owner, 2026-11-07). Free in
+    /// `SystemShortcuts.map`, `com.apple.symbolichotkeys` and the
+    /// menus of every running app (read 2026-11-07).
+    public static func directionalMaximizeRows() -> [KeyBinding] {
+        [
+            KeyBinding(
+                combo: "control+option+shift+m",
+                lua: "KiwiDesk.toggle_maximized(\"height\")",
+                kind: .navigation,
+                label: "Maximize Height"
+            ),
+            KeyBinding(
+                combo: "control+option+command+m",
+                lua: "KiwiDesk.toggle_maximized(\"width\")",
+                kind: .navigation,
+                label: "Maximize Width"
+            ),
+        ]
+    }
+
     /// Pocket on `⌃⌥P` (#2446), P for pocket: the chord pin held
     /// until 3.3.0, which keeps no default (owner, 2026-10-20).
     public static func pocketRow() -> KeyBinding {

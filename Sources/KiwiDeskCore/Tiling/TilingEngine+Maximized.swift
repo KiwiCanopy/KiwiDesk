@@ -18,10 +18,14 @@ extension TilingEngine {
         state: StateCoordinator
     ) -> [WindowID: CGRect] {
         guard let id = state.maximizedWindow(of: input.space),
-            frames[id] != nil
+            let slot = frames[id]
         else { return frames }
         var context = input.context
-        context.bounds = visibleBounds(screen)
+        context.bounds = Self.maximizedBounds(
+            input.space.maximizeShape,
+            screen: visibleBounds(screen),
+            slot: slot
+        )
         context.gaps = Gaps(
             outer: .init(top: 0, bottom: 0, left: 0, right: 0),
             inner: .init(horizontal: 0, vertical: 0)
@@ -35,5 +39,54 @@ extension TilingEngine {
                 context: context
             )[id] ?? context.bounds
         return filled
+    }
+
+    /// The rect a Maximize of `shape` fills on a `screen` of AX
+    /// visible bounds, from the window's `slot` (#3062): the whole
+    /// screen, or its axis whole and the other at the share,
+    /// centred on the screen or on the slot and kept inside it.
+    nonisolated static func maximizedBounds(
+        _ shape: MaximizeShape,
+        screen: CGRect,
+        slot: CGRect
+    ) -> CGRect {
+        guard let axis = shape.axis else { return screen }
+        let share = min(
+            max(shape.share, MaximizeShape.shareRange.lowerBound),
+            MaximizeShape.shareRange.upperBound
+        )
+        switch axis {
+        case .height:
+            let width = (screen.width * share).rounded()
+            let centre =
+                shape.anchor == .inPlace ? slot.midX : screen.midX
+            return CGRect(
+                x: Self.kept(width, centre, screen.minX, screen.maxX),
+                y: screen.minY,
+                width: width,
+                height: screen.height
+            )
+        case .width:
+            let height = (screen.height * share).rounded()
+            let centre =
+                shape.anchor == .inPlace ? slot.midY : screen.midY
+            return CGRect(
+                x: screen.minX,
+                y: Self.kept(height, centre, screen.minY, screen.maxY),
+                width: screen.width,
+                height: height
+            )
+        }
+    }
+
+    /// The start of a `length` centred on `centre`, moved back
+    /// inside `low...high`.
+    private nonisolated static func kept(
+        _ length: CGFloat,
+        _ centre: CGFloat,
+        _ low: CGFloat,
+        _ high: CGFloat
+    ) -> CGFloat {
+        min(max(centre - length / 2, low), high - length)
     }
 }

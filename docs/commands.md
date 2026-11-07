@@ -40,7 +40,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`make_unsticky`](lua-reference.md#make_unsticky) | Clears the focused window's sticky state. |
 | [`toggle_sticky`](lua-reference.md#toggle_sticky) | Flips the focused window between globally sticky and off. |
 | [`toggle_display_sticky`](lua-reference.md#toggle_display_sticky) | Flips the focused window between screen-sticky and off. |
-| [`toggle_maximized`](lua-reference.md#toggle_maximized) | Fills the screen with the focused tiled window until pressed again or focus moves on. |
+| [`toggle_maximized`](lua-reference.md#toggle_maximized) | Fills the screen, or one axis of it, with the focused tiled window until pressed again. |
 | [`pocket`](lua-reference.md#pocket) | Pockets or takes out the next pocket window, or pockets the window an id names. |
 | [`toggle_pocket_window`](lua-reference.md#toggle_pocket_window) | Marks the focused or named window as the pocket window, floating it, or unmarks it, tiling it. |
 | [`pocket_app`](lua-reference.md#pocket_app) | Takes an app's own pocket window out or puts it away, or opens a new window of the app there. |

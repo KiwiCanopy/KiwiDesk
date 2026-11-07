@@ -22,6 +22,8 @@ extension FocusWrap: APIChoiceType {}
 extension SpaceTransition: APIChoiceType {}
 extension ModeCycleDirection: APIChoiceType {}
 extension HyperSourceKey: APIChoiceType {}
+extension MaximizeAxis: APIChoiceType {}
+extension MaximizeAnchor: APIChoiceType {}
 
 extension BspParams.Strategy: APIChoiceType {}
 extension ScrollingParams.Anchor: APIChoiceType {}

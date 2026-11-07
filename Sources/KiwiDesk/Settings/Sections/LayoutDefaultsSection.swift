@@ -17,6 +17,7 @@ struct LayoutDefaultsSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 minSizeSection
+                MaximizeCard(model: model)
                 LayoutStrip(model: model, selection: selected)
                 LayoutCard(
                     model: model,

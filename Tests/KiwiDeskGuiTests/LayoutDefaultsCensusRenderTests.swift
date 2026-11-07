@@ -83,7 +83,18 @@ struct LayoutDefaultsCensusRenderTests {
                 LayoutDefaultsRowOrder.container(for: $0)
             }
         )
-        #expect(declared == rendered.union([.general]))
+        #expect(declared == rendered.union([.general, .maximize]))
+    }
+
+    /// The Maximize card beside it (#3062): every census row of
+    /// the container, in the card's order, at rest.
+    @Test("the Maximize card draws its container's census rows")
+    func maximizeRows() {
+        #expect(
+            Set(LayoutDefaultsRowOrder.maximize)
+                == censusRows(.maximize)
+        )
+        #expect(LayoutDefaultsRowOrder.maximize.count == 3)
     }
 
     /// Tier ↔ chrome. A set-equality guard is blind to chrome: it

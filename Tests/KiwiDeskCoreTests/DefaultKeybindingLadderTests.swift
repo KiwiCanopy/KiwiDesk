@@ -34,6 +34,10 @@ struct DefaultKeybindingLadderTests {
                 "KiwiDesk.toggle_pocket_window()",
                 "marks the window the plain key pockets (#2675)"
             ),
+            "KiwiDesk.toggle_maximized()": (
+                "KiwiDesk.toggle_maximized(\"height\")",
+                "maximizes the same window on one axis (#3062)"
+            ),
         ]
 
     /// Whether `row` is the ruled `⇧` variant of its seeded twin.

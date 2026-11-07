@@ -208,16 +208,38 @@ struct SizeFloatGroup: View {
                 ShortcutsRowOrder.sizeAndFloatAtRest,
                 id: \.id
             ) { key in
-                KeybindingFamilyRows(
-                    model: model,
-                    bindings: $bindings,
-                    key: key,
-                    expander: expander
-                )
+                sizeFloatRow(key)
             }
             Text(sizeFloatCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    /// A row of the card; a directional Maximize row is anchored
+    /// for the Layout Defaults link and carries its share (#3062).
+    @ViewBuilder private func sizeFloatRow(_ key: SettingKey) -> some View {
+        let family = KeybindingFamilyRows(
+            model: model,
+            bindings: $bindings,
+            key: key,
+            expander: expander
+        )
+        switch key {
+        case .shortcuts(.maximizeHeight):
+            VStack(alignment: .leading, spacing: 4) {
+                family
+                MaximizeShareCaption(model: model, axis: .height)
+            }
+            .searchAnchored(SettingsCatalog.shortcuts.maximizeHeightBinding)
+        case .shortcuts(.maximizeWidth):
+            VStack(alignment: .leading, spacing: 4) {
+                family
+                MaximizeShareCaption(model: model, axis: .width)
+            }
+            .searchAnchored(SettingsCatalog.shortcuts.maximizeWidthBinding)
+        default:
+            family
         }
     }
 

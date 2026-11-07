@@ -32,6 +32,9 @@ enum SettingsContainer: CaseIterable, Hashable {
     case focusBorder
     case gaps
     case general
+    /// Layout Defaults' Maximize card (#3062), beside the
+    /// minimum window size.
+    case maximize
     case glass
     case grid
     case habits
@@ -109,7 +112,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .kiwiVisionNeverDimmed, .kiwiVisionLenses,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
-            .focus, .gaps, .general, .grid, .showHide,
+            .focus, .gaps, .general, .maximize, .grid, .showHide,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .layout,
             .looks, .luaBindings,

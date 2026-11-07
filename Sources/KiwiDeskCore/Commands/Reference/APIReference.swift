@@ -296,6 +296,7 @@ public enum APIReference {
         "pocket": [
             "set_color", "toggle_list",
         ],
+        "maximize": ["set_share", "set_anchor"],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",
             "set_fade_curve", "set_appearance",

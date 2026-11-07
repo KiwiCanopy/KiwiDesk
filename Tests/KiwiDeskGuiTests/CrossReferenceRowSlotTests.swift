@@ -132,6 +132,9 @@ struct CrossReferenceRowSlotTests {
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
         "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests
         "SimpleSpacesCard.swift:Self.hintProse",  // SimpleSectionsTests
+        // MaximizeCaptionSlotTests (#3062).
+        "MaximizeCard.swift:prose",
+        "MaximizeShareCaption.swift:prose",
     ]
 
     // MARK: - The values
