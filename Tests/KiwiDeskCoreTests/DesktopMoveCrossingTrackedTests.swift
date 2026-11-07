@@ -140,14 +140,35 @@ struct DesktopMoveCrossingTrackedTests {
         #expect(writes.sent.count == 1)
     }
 
-    /// The layout owns the frame then, so a resend would undo it.
-    @Test("an arrived window is never resent")
+    @Test("a frame that missed on y alone resends")
+    func yMissResends() throws {
+        let writes = Writes()
+        let core = try landedCore(writes)
+        defer { teardown() }
+        let written = try #require(writes.sent.first?.1)
+        core.windowServer.readWindowBounds = { _ in
+            written.offsetBy(dx: 0, dy: 50)
+        }
+        writes.fire(after: KiwiCore.crossingCheckDelay)
+        #expect(writes.sent.count == 2)
+    }
+
+    /// The layout owns the frame then, so a resend would undo it. The
+    /// read itself is the stand-down's: the element store also drops
+    /// an arrived window, which would hide a check that read on.
+    @Test("an arrived window is never read back or resent")
     func arrivedStandsDown() throws {
         let writes = Writes()
         let core = try landedCore(writes)
         defer { teardown() }
         core.state.awayWindows[away] = nil
+        var reads = 0
+        core.windowServer.readWindowBounds = { [offScreen] _ in
+            reads += 1
+            return offScreen
+        }
         writes.fire(after: KiwiCore.crossingCheckDelay)
+        #expect(reads == 0)
         #expect(writes.sent.count == 1)
     }
 
@@ -197,6 +218,26 @@ struct DesktopMoveCrossingTrackedTests {
         departTracked(core)
         #expect(writes.sent.map(\.0) == [tracked])
         #expect(core.state.rememberedSpace(of: tracked) == mail)
+    }
+
+    /// A parked float's state frame is the stash corner.
+    @Test("a parked tracked float carries its capture")
+    func trackedParkedCarriesTheCapture() throws {
+        let writes = Writes()
+        let core = try makeCore(writes)
+        defer { teardown() }
+        track(core)
+        let capture = CGRect(x: 90_000, y: 0, width: 640, height: 480)
+        core.tiler.seedStash(tracked, frame: capture)
+        _ = core.execute(
+            "move_to_desktop",
+            args: [
+                .number(2), .string("mail"),
+                .number(Double(tracked.raw)),
+            ]
+        )
+        departTracked(core)
+        #expect(writes.sent.first?.1.size == capture.size)
     }
 
     @Test("a tracked window with no element is refused")

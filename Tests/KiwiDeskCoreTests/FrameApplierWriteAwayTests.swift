@@ -51,6 +51,20 @@ struct FrameApplierWriteAwayTests {
         #expect(log.lines == ["eui false", "id", "frame", "eui true"])
     }
 
+    /// A resend owed from an earlier write would undo this one.
+    @Test("drops a resend owed to the window")
+    func dropsTheResend() {
+        let door = applier(Log(), names: id)
+        door.pendingResends[id] = frame
+        door.writeAway(
+            id,
+            frame,
+            AXUIElementCreateApplication(pid),
+            pid
+        ) { _ in }
+        #expect(door.pendingResends[id] == nil)
+    }
+
     @Test("an element naming another window writes nothing")
     func staleWritesNothing() async {
         let log = Log()

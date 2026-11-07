@@ -173,6 +173,28 @@ struct DesktopMoveCrossingTests {
         #expect(core.tiler.stashOriginal(away) == nil)
     }
 
+    /// A spring still running would overwrite the frame written.
+    @Test("a spring on the window ends before its frame is written")
+    func springEnds() throws {
+        let writes = Writes()
+        let core = try makeCore(writes)
+        defer { teardown() }
+        fileAway(core)
+        let screen = try #require(ScreenList.all.first)
+        core.tiler.animation.apply = { _, _, _ in }
+        core.tiler.animation.reduceMotion = { false }
+        core.tiler.animation.animate(
+            window: away,
+            on: screen,
+            from: offScreen,
+            to: offScreen.offsetBy(dx: 200, dy: 0)
+        )
+        #expect(core.tiler.animation.isAnimating(window: away))
+        _ = moveAway(core)
+        #expect(!core.tiler.animation.isAnimating(window: away))
+        core.tiler.animation.cancel(window: away)
+    }
+
     @Test("an app that stalls is passed at the deadline, once")
     func stalledAppMovesAtTheDeadline() throws {
         let writes = Writes()
