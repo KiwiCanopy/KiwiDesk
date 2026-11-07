@@ -27,19 +27,15 @@ extension KiwiCore {
         profiles: ProfileManager,
         log onLog: (String) -> Void
     ) {
-        let url = guiConfigStore.url
-        guard let data = try? Data(contentsOf: url),
-            let capacity = ConfigMigration.retiredPocketCapacity(in: data)
+        // Read through the migration, which states an older file's
+        // absent group (`migratingAbsentPocketCapacity`), whether or
+        // not the load below writes it back.
+        guard let raw = try? Data(contentsOf: guiConfigStore.url),
+            let capacity = ConfigMigration.retiredPocketCapacity(
+                in: ConfigMigration.migrated(raw) ?? raw
+            ),
+            let config = guiConfigStore.load()
         else { return }
-        // State an absent group first: the load below restamps the
-        // file, after which absence would read as crossed.
-        if let stated = ConfigMigration.statingPocketCapacity(
-            capacity,
-            in: data
-        ) {
-            try? stated.write(to: url, options: .atomic)
-        }
-        guard let config = guiConfigStore.load() else { return }
         var landed = true
         for name in profiles.list() {
             guard let url = try? profiles.fileURL(name: name),

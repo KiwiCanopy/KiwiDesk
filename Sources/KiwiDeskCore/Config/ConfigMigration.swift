@@ -55,6 +55,7 @@ public enum ConfigMigration {
         migratingPinChordOntoPocket,
         migratingPocketPlacementOntoShelf,
         migratingRetiredDragLook,
+        migratingAbsentPocketCapacity,
         migratingPocketCapacityOntoShelf,
     ]
 

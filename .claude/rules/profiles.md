@@ -785,8 +785,9 @@ holds the secondary-switch decision including its nil case.
   staged copy before its bundle is built, ahead of every write
   that re-encodes `gui.json`, which drops the group; decide the
   debt by the file's format as well as the group, an older file
-  with no group crossing as its old default, and state that default
-  in the file before anything restamps it; migrate a profile before
+  with no group crossing as its old default, which a `gui.json`
+  step states so every reader's restamp keeps it
+  (`migratingAbsentPocketCapacity`); migrate a profile before
   inserting into its bytes, insert surgically, leave a file that
   states the key and a newer build's file alone; and drop the group
   only once every other profile crossed, so one that failed to read

@@ -534,7 +534,10 @@ selected until you choose one, since its Pocket row reads Hidden and
 its bars do not. A setup `init.lua` owns has no saved profile to
 cross either: one that never called `pocket.set_capacity` showed the
 pocket only while it was used, and now shows it Always until
-`init.lua` adds `kiwishelf.set_pocket_visibility("hidden")`.
+`init.lua` adds `kiwishelf.set_pocket_visibility("hidden")`. A
+profile file that would not read at the upgrade keeps the old
+setting waiting for the next launch only until Settings next saves,
+after which it shows the pocket Always once it reads again.
 :::
 
 :::unreleased

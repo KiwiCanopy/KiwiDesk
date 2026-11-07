@@ -39,34 +39,30 @@ extension ConfigMigration {
         return restedWhole ? .always : .auto
     }
 
-    /// `gui.json`'s retired `pocket.capacity`, nil once crossed. A
-    /// file below this crossing's format with no group read as One
-    /// window, the old default, so its absence crosses as `one`.
+    /// `gui.json`'s retired `pocket.capacity`, nil once crossed.
     static func retiredPocketCapacity(in data: Data) -> String? {
         guard
             let root = try? JSONSerialization.jsonObject(with: data)
-                as? [String: Any]
+                as? [String: Any],
+            let group = root[pocketCapacityGroup] as? [String: Any]
         else { return nil }
-        if let group = root[pocketCapacityGroup] as? [String: Any] {
-            return group[pocketCapacityKey] as? String ?? "one"
-        }
-        let format = root["format"] as? Int ?? 0
-        return format < pocketVisibilityGuiFormat ? "one" : nil
+        return group[pocketCapacityKey] as? String ?? "one"
     }
 
-    /// `data` with an absent group stated as the `capacity` it read
-    /// as, so the debt outlives a restamp while a profile has not
-    /// crossed; nil where the file states one already.
-    static func statingPocketCapacity(
-        _ capacity: String,
-        in data: Data
-    ) -> Data? {
+    /// A `gui.json` below this crossing's format with no group read
+    /// as One window, the old default: the step states it, so every
+    /// reader's restamp keeps the debt for the crossing
+    /// (`PocketVisibilityCrossingTests` ▸ `absentGroupCrossesAsOne`).
+    @Sendable
+    static func migratingAbsentPocketCapacity(_ data: Data) -> Data? {
         guard
             var root = try? JSONSerialization.jsonObject(with: data)
                 as? [String: Any],
+            shape(of: root) == .gui,
+            root["format"] as? Int ?? 0 < pocketVisibilityGuiFormat,
             root[pocketCapacityGroup] == nil
         else { return nil }
-        root[pocketCapacityGroup] = [pocketCapacityKey: capacity]
+        root[pocketCapacityGroup] = [pocketCapacityKey: "one"]
         return try? JSONSerialization.data(
             withJSONObject: root,
             options: [.prettyPrinted, .sortedKeys]
