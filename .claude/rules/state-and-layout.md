@@ -292,7 +292,14 @@ editing here:
   that needs the rule — a second screen at a negative y.
   `TilingEngine.screen(containing:)` resolves the pair
   correctly, over `GeometryUtils.axVisibleFrame(of:)`, which
-  owns the flip. Re-home through `workspaces.add` — the fold's
+  owns the flip. **Hand it the frame through the one
+  `KiwiCore.arrivalFrame(of:)` (#3052)**: a departed window's
+  answer is the WindowServer's, since its app's AX frame can still
+  read the screen it left when the arrival lands (measured on a
+  follow, 2026-11-07, macOS 27.2, separate Spaces on), and the net
+  would stand down (`DesktopFollowAcrossScreensTests`). Its gate
+  mirrors the fold's `arrivalScreenHome`: widen them together.
+  Re-home through `workspaces.add` — the fold's
   own, or `addFocusedToSpace` at the command altitude — never
   `moveWindow(_:to:follow:)`: it fires a focus hand-off, the
   move latch and the #446 wallpaper focus yield, and both
@@ -303,9 +310,9 @@ editing here:
   successor) and a retile of its own, since the branch it rides
   may stand down without one. `ArrivalScreenHomeTests` and
   `ScreenHomePredicateTests` pin the rule and each stand-down;
-  the two production wirings reach no unit test and are pinned
-  by `ArrivalDisplayWiringTests` and
-  `DesktopMoveRehomeWiringTests`.
+  the verb's re-home reaches no unit test, and
+  `ArrivalDisplayWiringTests` and `DesktopMoveRehomeWiringTests`
+  pin the two production wirings.
 - **An explicit `space:` on a Desktop move is a PENDING
   assignment, paid at the DEPARTURE (#1150)** — never an eager
   membership write for a hidden target, which the reveal
@@ -330,8 +337,8 @@ editing here:
   the pin hint, never hand-assigned, because the next
   `resolveSpaceDisplays` would move it back and re-open the same
   undo. A shared Desktop names no screen, so a hidden one is judged
-  against the screen holding the window's frame, the arrival's
-  reading, or that net drops the name (#3033,
+  against the screen holding the window's frame, the screen it
+  arrives on, or that net drops the name (#3033,
   `DesktopMoveSharedSpaceTests`). A window already away produces no
   departure: its filing is written at once through
   `StateCoordinator.fileAwayMove`, always `.departed` so the #1010 net
@@ -406,6 +413,13 @@ editing here:
   reveal is not scoped to the window that owes, so an unrelated
   switch inside the drain window would pay the debt and yank
   focus mid-swipe.
+  A follow's eager departure takes its presence from the host
+  `departEagerly(_:to:)` names, hosted and unshown, over any answer
+  `gonePresence` read, never over no answer, where a ledger entry
+  would have no census behind it (#3052,
+  `DesktopFollowAcrossScreensTests` ▸ `departureIsNoClose`,
+  `noAnswerFilesNoEntry`); a new eager route names its host the same
+  way. The argument is `docs/design-decisions.md`'s.
   `FollowFocusSeamTests` is the register of the production
   wirings — add a site there in the same change, since deleting
   any one of them leaves `FollowFocusIntentTests` fully green
@@ -718,8 +732,9 @@ editing here:
 - **A window on an away Desktop is KNOWN, in a ledger beside
   the state — never a member (#1146).** `StateCoordinator
   .awayWindows` (pid, app, bundle id, native Space) is written
-  on a compositor-confirmed `vanished` (`KiwiCore.handleWindowGone`)
-  and by the boot seed (`seedAwayWindows`) — a new FILING goes
+  on a `vanished` (`KiwiCore.handleWindowGone`) — confirmed by the
+  compositor, or named by a follow's verb, which the census then
+  reconciles (#3052, the #1007 bullet) — and by the boot seed (`seedAwayWindows`) — a new FILING goes
   through one of those two, never an assignment beside a call
   site (review's: nothing scans for one). **The BOOT SEED admits
   only a window that is UP** (#1234, `AwayBootSeedTests` ▸

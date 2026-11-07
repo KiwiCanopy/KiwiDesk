@@ -7977,7 +7977,7 @@ and the choices, each argued against its alternative:
   visible-only state stays exactly what
   [#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)
   left it — departed windows evicted, remembered by space and
-  rank — and a compositor-confirmed `vanished` writes one entry
+  rank — and a `vanished` the compositor answered for writes one entry
   beside it (pid, app, bundle id, native Space). Keeping away
   windows as members with a flag was the alternative: every
   consumer of a space's row would gain an exclusion, the
@@ -8138,7 +8138,7 @@ screen, so that refusal has nothing to compare with, and a hidden
 one moves no frame: the window arrives on the screen it left, and
 the #1010 net rightly outranks a name on another screen. So a
 hidden shared Desktop refuses a Space off the window's screen, read
-from its frame as the arrival reads it, and a follow with it, since
+from its frame, since it arrives on that screen, and a follow with it, since
 a follow arrives the same way
 ([#3033](https://github.com/KiwiCanopy/KiwiDesk/issues/3033)). Only
 the visible Desktop files a window at the command, where the layout can
@@ -8159,7 +8159,19 @@ own reap with no prune, since a window mid-move must not read as
 closed. A follow onto a shown Desktop has no reveal, so it switches
 the Space at the command and owes Move here's plain arrival focus,
 never the #1007 debt, and a follow refuses a minimized or hidden
-window, which no arrival would bring. A hand float restored from a
+window, which no arrival would bring. A departed window's arrival is
+judged on the WindowServer's frame, with more than one screen, and a
+follow's eager departure on the verb's word where the compositor
+answers
+([#3052](https://github.com/KiwiCanopy/KiwiDesk/issues/3052)).
+Measured 2026-11-07 on macOS 27.2 with separate Spaces on, the app's
+own frame still named the screen it left about 100 ms after a move
+across screens, so the #1010 net stood down. The switch, dispatched
+first, can already show the target, so the compositor's read calls
+the move a close, whose return is placed as new in the active Space.
+Either one alone brings the window home. The verb's word is no proof
+the move applied: the ledger's next census corrects its host, while
+the `desktop` the event carried stands. A hand float restored from a
 snapshot keeps its restored record, since its float flag lives there,
 so it may take its old frame on arrival; with separate Spaces on, one
 moved across screens stayed a float on the new screen (measured once,

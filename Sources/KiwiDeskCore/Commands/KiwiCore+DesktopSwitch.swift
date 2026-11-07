@@ -156,17 +156,18 @@ extension KiwiCore {
     /// fold files `.departed`, which is exactly what the #1010
     /// arrival rule needs to re-home the window when the
     /// reveal's reconcile lists it again — the same path a
-    /// swipe-away takes. Runs only after an ACCEPTED switch, so
-    /// the removal classifies as `vanished` against the stamp
-    /// the switch just wrote; a refused switch folds nothing,
-    /// because the window is then still where the user sees it.
-    func departEagerly(_ window: WindowID) {
+    /// swipe-away takes. Runs only after an ACCEPTED switch, and
+    /// classifies as `vanished`, hosted on `host`, on the verb's own
+    /// word where the compositor answers (#3052); a refused switch
+    /// folds nothing, because the
+    /// window is then still where the user sees it.
+    func departEagerly(_ window: WindowID, to host: SkyLight.SpaceID) {
         let pid = state.windows[window]?.pid
         // The latch is the close-return stand-down's third arm
         // (#936: the ONE predicate governs the raise and the
         // restore arm alike) — held for exactly this synchronous
         // span, see its doc on `EventLoop`.
-        eventLoop.eagerDepartureInFlight = window
+        eventLoop.eagerDepartureInFlight = (window, host)
         handle(.windowDestroyed(window, wasMinimized: false))
         eventLoop.eagerDepartureInFlight = nil
         // The state fold alone is a half-state: the event loop's

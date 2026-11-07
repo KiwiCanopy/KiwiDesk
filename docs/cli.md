@@ -1177,6 +1177,13 @@ window is away — so a consumer sees two destroys for that
 window, `vanished` then `closed`, and refreshing on
 `desktop_change` remains the safe pattern.
 
+:::unreleased
+A `move_to_desktop_and_follow` that switches Desktop reports its
+window `vanished` whatever the WindowServer hosts it on, where it
+answers. `desktop` names the Desktop you sent it to, which may
+already be on screen when the event fires.
+:::
+
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,
 with or without follow, or a drag onto another screen — the

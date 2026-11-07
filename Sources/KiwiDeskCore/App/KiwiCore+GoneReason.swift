@@ -1,11 +1,12 @@
 import Foundation
 
 /// The gone reason a `.windowDestroyed` reports (#40), decided
-/// on the compositor's word since #1146: a window the WindowServer
-/// still hosts on a Desktop nobody shows is `vanished`, one it
-/// hosts nowhere is `closed`. The #40 timer read the PREVIOUS
-/// switch for a fast app's departure (#1207's trace) and stays
-/// only where SkyLight cannot answer.
+/// on the compositor's word since #1146, a follow's own departure
+/// excepted (#3052): a window the WindowServer still hosts on a
+/// Desktop nobody shows is `vanished`, one it hosts nowhere is
+/// `closed`. The #40 timer read the PREVIOUS switch for a fast
+/// app's departure (#1207's trace) and stays only where SkyLight
+/// cannot answer.
 extension KiwiCore {
     /// The destroy arm's tail: classify, file an away entry for
     /// a `vanished` window, and emit. Returns the reason, which
@@ -33,7 +34,10 @@ extension KiwiCore {
             )
         }
         let spaces = NativeSpaces.allSpaces()
-        let presence = gonePresence(of: id, spaces: spaces)
+        let presence = eagerDeparturePresence(
+            of: id,
+            read: gonePresence(of: id, spaces: spaces)
+        )
         let reason = WindowGoneReason.classify(
             wasMinimized: wasMinimized,
             presence: presence
@@ -91,6 +95,33 @@ extension KiwiCore {
             desktop: desktop
         )
         return reason
+    }
+
+    /// A follow's eager departure takes the verb's word over the
+    /// compositor's: its switch is already dispatched, so the read can
+    /// find the target shown and call the move a close (#3052). No
+    /// answer stays no answer, since a ledger entry needs a census.
+    private func eagerDeparturePresence(
+        of id: WindowID,
+        read: GonePresence
+    ) -> GonePresence {
+        guard let departure = eventLoop.eagerDepartureInFlight,
+            departure.window == id
+        else { return read }
+        if case .unknown = read { return read }
+        return .hosted(space: departure.host, shown: false)
+    }
+
+    /// The frame an arrival's screen is judged on (#1010). A departed
+    /// window's is the WindowServer's with more than one screen: its
+    /// app's AX frame can read the screen it left for a beat after a
+    /// move across screens (#3052). One synchronous read per such
+    /// arrival; the gate mirrors `arrivalScreenHome`'s.
+    func arrivalFrame(of window: ManagedWindow) -> CGRect {
+        guard case .departed = state.rememberedSpaces[window.id],
+            state.workspaces.allDisplays.count > 1
+        else { return window.frame }
+        return windowServer.readWindowBounds(window.id) ?? window.frame
     }
 
     /// Whether a removal is the window LEAVING WITH ITS DESKTOP

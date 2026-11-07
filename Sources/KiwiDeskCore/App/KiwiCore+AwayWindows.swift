@@ -2,8 +2,9 @@ import Foundation
 
 /// The away ledger's writers and readers (#1146):
 /// `StateCoordinator.awayWindows`, beside the visible-only state.
-/// An entry is written on a compositor-confirmed `vanished` and
-/// at the boot census, pruned by a census that no longer hosts
+/// An entry is written on a `vanished` the compositor confirmed or
+/// a follow's verb named (#3052) and at the boot census, pruned by a
+/// census that no longer hosts
 /// the id (the corrective `closed`), and read by Open-or-Focus
 /// `get_state` and a Desktop move — never the Space Bar, which draws the
 /// Desktop in front of the user (#1228). The argument is

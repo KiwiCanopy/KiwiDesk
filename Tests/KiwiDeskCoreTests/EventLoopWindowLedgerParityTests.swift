@@ -121,7 +121,7 @@ struct EventLoopWindowLedgerParityTests {
         loop.removalDistrusted[old] = RemovalEpisode(arms: 1)
         loop.healQuiet[pid] = [old]
         loop.transientRetried[pid] = [old]
-        loop.eagerDepartureInFlight = old
+        loop.eagerDepartureInFlight = (old, 0)
         return loop
     }
 

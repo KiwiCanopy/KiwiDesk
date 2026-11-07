@@ -72,11 +72,12 @@ struct ArrivalDisplayWiringTests {
         let arm = try createdArm(in: text)
         #expect(arm.contains("state.arrivalDisplay ="))
         // Through the seam that owns the AX/AppKit y-flip, and
-        // off the ARRIVING window's own frame — a comparison
-        // spelled by hand here is silently wrong on a screen at
-        // a negative y, which is the topology that needs it.
+        // off the ARRIVING window's frame through the one door that
+        // answers a stale AX frame (#3052) — a comparison spelled by
+        // hand here is silently wrong on a screen at a negative y,
+        // which is the topology that needs it.
         #expect(arm.contains("TilingEngine.screen("))
-        #expect(arm.contains("containing: window.frame"))
+        #expect(arm.contains("containing: arrivalFrame(of: window)"))
     }
 
     @Test("nothing else in the file writes the seam")

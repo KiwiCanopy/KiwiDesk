@@ -77,8 +77,9 @@ public struct StateCoordinator: Sendable {
 
     /// Windows the compositor hosts on a Desktop nobody shows
     /// (#1146) — the away LEDGER, beside the visible-only state:
-    /// written on a compositor-confirmed `vanished` and by the
-    /// boot census, ended by the return, a census that no longer
+    /// written on a `vanished` the compositor confirmed or a
+    /// follow's verb named (#3052) and by the boot census, ended
+    /// by the return, a census that no longer
     /// hosts the id, the app's exit, the #634 reset, and moved by
     /// a re-key. Its space and rank are the two records above.
     var awayWindows: [WindowID: AwayWindow] = [:]

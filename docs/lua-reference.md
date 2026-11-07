@@ -7310,6 +7310,14 @@ two destroys, `"vanished"` then `"closed"`. A consumer that
 keeps its own list re-queries on `desktop_change` (the pattern
 in the sketchybar recipe).
 
+:::unreleased
+A [`move_to_desktop_and_follow`](#move_to_desktop_and_follow) that
+switches Desktop reports `"vanished"` whatever the WindowServer hosts
+the window on, where it answers. `desktop` then names the Desktop you
+sent the window to, which may already be on screen as the callback
+runs.
+:::
+
 ## External Commands
 
 Config callbacks run on KiwiDesk's main thread, so external

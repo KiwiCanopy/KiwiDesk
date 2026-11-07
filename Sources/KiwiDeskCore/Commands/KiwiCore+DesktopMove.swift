@@ -121,7 +121,7 @@ extension KiwiCore {
                         "follow: owing focus to w\(window.raw) "
                             + "when its Desktop reveals it"
                     )
-                    departEagerly(window)
+                    departEagerly(window, to: target.space)
                 case .alreadyShown:
                     // No vanish, no reveal. A window that held
                     // focus keeps key focus through the move

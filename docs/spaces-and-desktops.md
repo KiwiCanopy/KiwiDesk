@@ -321,7 +321,8 @@ The only things that move a window between Desktops are macOS
 itself and the two verbs that ask it to: `move_to_desktop` and
 `move_to_desktop_and_follow`. A window
 sent to another Desktop leaves KiwiDesk's view and rejoins its
-Space when that Desktop is next shown — or the Space you named,
+Space when that Desktop is next shown — a tiled window on another
+screen, the Space that screen shows then — or the Space you named,
 when you named one. It is reported gone with `reason: vanished`,
 the same value a plain Desktop swipe produces.
 

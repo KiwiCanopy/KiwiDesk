@@ -203,8 +203,8 @@ extension KiwiCore {
         return .space(space, landing: screens.first?.id)
     }
 
-    /// The screen a window's frame sits on, the reading the arrival
-    /// takes; a frame on no screen answers by its Space's screen. An
+    /// The screen a window's frame sits on, the screen it arrives on;
+    /// a frame on no screen answers by its Space's screen. An
     /// away window has no state frame, and its Space is remembered.
     func screenHolding(_ window: WindowID) -> DisplayID? {
         let frame =
