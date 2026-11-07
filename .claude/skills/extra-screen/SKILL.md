@@ -32,8 +32,9 @@ virtual screen named `Wide Screen` (3200 × 1440). Reuse it:
 betterdisplaycli set --name="Wide Screen" --connected=on
 ```
 
-Only when no virtual screen exists, make one and name it, so that step 4
-can name it too:
+Only when no virtual screen exists, make one and name it, so that step 6
+can name it too. It starts disconnected (2560 × 1440, to the panel's
+right), so connect it as above:
 
 ```bash
 betterdisplaycli create --type=VirtualScreen --virtualScreenName="Test Screen"
@@ -41,9 +42,10 @@ betterdisplaycli create --type=VirtualScreen --virtualScreenName="Test Screen"
 
 ## 2. Unmirror it
 
-A virtual screen connects **mirrored** onto the built-in panel, which
-macOS counts as one screen: KiwiDesk's `monitor_count` stays 1 and a test
-run now measures nothing. Turn the mirror off, naming the panel as
+A virtual screen can connect **mirrored** onto the built-in panel (seen
+on one connect, not on another), which macOS counts as one screen:
+KiwiDesk's `monitor_count` stays 1 and a test run measures nothing. Turn
+the mirror off every time, naming the panel as
 `--identifiers` spells it. The name follows the system language, so read
 it rather than assume it (`Integriertes Display` on the owner's German
 system).
@@ -87,11 +89,58 @@ A profile decides which Space lays out on which screen, so check that
 before reasoning about a result (`get_state`'s `spaces`) rather than
 assuming the screen from the Space's number.
 
-## 4. Put the desk back
+## 4. Arrange the screens
 
-Close the test's own windows **first**: a window left on the virtual
-screen moves to the built-in panel when the screen goes, and lands in
-whatever Space macOS files it to. Then:
+Note the starting position with `--placement`, and put it back when done.
+A placement is in logical points from the main screen's top left, and it
+survives a disconnect.
+
+```bash
+betterdisplaycli get --name="Wide Screen" --placement
+betterdisplaycli set --name="Wide Screen" --placement=1728x0
+```
+
+To change which screen is main, and with it the origin of every
+coordinate, set it, then give it back the same way, since there is no
+turning it off:
+
+```bash
+betterdisplaycli set --name="Wide Screen" --main=on
+betterdisplaycli set --name="Integriertes Display" --main=on
+```
+
+`--moveTo` answers `Failed. Pro required.` here, so use `--placement`.
+
+## 5. Add a Desktop to a screen
+
+A hidden Desktop on the second screen needs a second Desktop there. No
+command-line tool adds one without SIP off, which is never an option.
+Mission Control does it, and it is not readable from here: Accessibility
+lists nothing inside it and `screencapture` is refused, so click where
+the button sits and check the result. Post the clicks with `CGEvent`:
+`.mouseMoved` to hover, `.leftMouseDown` and `.leftMouseUp` to click.
+
+1. Open Mission Control: `osascript -e 'tell application "System Events" to key code 126 using control down'`.
+2. Move the pointer to the screen's top edge, 200 pt from its right, and
+   wait a second for the Desktop bar to open.
+3. Click 50 pt from the screen's right edge, 55 pt from its top.
+4. Close it: `osascript -e 'tell application "System Events" to key code 53'`.
+5. Read the Desktops back, through `SLSCopyManagedDisplaySpaces` (dlopen
+   SkyLight, pass `SLSMainConnectionID()`), and confirm the screen's list grew.
+
+That click landed first time on `Wide Screen` at the panel's left. It has
+only been run once, at that one position.
+
+**A Desktop you add outlives its screen.** On a disconnect it moves to
+the built-in panel, and it goes back on a reconnect. Disconnected, it stays
+on the panel and shifts the numbers of any Desktop after it, so ask the owner to
+remove it in Mission Control: no removal has been run from here.
+
+## 6. Put the desk back
+
+Close the test's own windows **first**. A window left on the virtual
+screen does not close with it: in one run KiwiDesk parked it on the panel,
+in another Space, and put it back when the screen returned. Then:
 
 ```bash
 betterdisplaycli set --name="Wide Screen" --connected=off
