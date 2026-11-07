@@ -34,6 +34,8 @@ extension StateCoordinator {
     ) {
         guard let window = windows[id] else { return }
         windows.setFloating(id, floating)
+        // A hand float or Tile ends a Tile over a rule (#2975).
+        tiledOverRule[id] = nil
         if floating {
             userFloated.insert(id)
         } else {
@@ -78,6 +80,7 @@ extension StateCoordinator {
         else { return }
         windows.setFloating(window.id, true)
         userFloated.insert(window.id)
+        tiledOverRule[window.id] = nil
     }
 
     /// Saves closing window's sticky state into identity memory (#414).

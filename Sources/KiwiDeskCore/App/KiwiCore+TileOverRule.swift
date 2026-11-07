@@ -32,6 +32,7 @@ extension KiwiCore {
     private func tileOverRuleStands(_ id: WindowID, pid: pid_t?) -> Bool {
         guard let recorded = state.tiledOverRule[id] else { return false }
         guard recorded == pid, state.pocketPhase(of: id) == nil,
+            !state.userFloated.contains(id),
             tileRefusal(of: id) == .rule
         else {
             state.tiledOverRule[id] = nil

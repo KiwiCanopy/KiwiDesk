@@ -235,18 +235,23 @@ extension EventLoop {
         // A raised layer likewise (#2572), and it tiles a verdict a
         // changed guess forgot, so none stays nil while it is up:
         // Brave lifted its main window to 999 with a permission
-        // prompt up (2026-10-23). A Tile over a rule reads as tiled.
-        if verdict == .floats(.raisedLayer),
-            before?.floats != true || tilesOverRule(id)
-        {
-            verdict = .tiles
+        // prompt up (2026-10-23). Over a Tile over a rule it keeps the
+        // rule's verdict, so the Tile stands and the cache names the
+        // rule (#2975).
+        if verdict == .floats(.raisedLayer) {
+            if before == .floats(.rule), tilesOverRule(id) {
+                verdict = .floats(.rule)
+            } else if before?.floats != true {
+                verdict = .tiles
+            }
         }
         detectedFloating[id] = verdict
         // A changed REASON alone is stored silently, save one leaving
-        // a rule: Core ends a Tile over that rule (#2975).
+        // a rule a Tile overrules: Core ends that Tile (#2975).
         if before?.floats != verdict.floats
-            || (before == .floats(.rule) && verdict.floats
-                && verdict != before)
+            || (before == .floats(.rule)
+                && verdict.reason?.refusesTile == true
+                && tilesOverRule(id))
         {
             onEvent(.windowFloatChanged(id, isFloating: verdict.floats))
         }

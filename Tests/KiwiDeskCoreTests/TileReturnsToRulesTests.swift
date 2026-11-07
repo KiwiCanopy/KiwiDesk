@@ -90,6 +90,16 @@ struct TileReturnsToRulesTests {
         #expect(cued == [reason])
     }
 
+    /// A rule's float is the one a Tile overrules (#2975).
+    @Test("a Tile tiles a window a float rule floats")
+    func tileOverrulesARule() {
+        let core = makeCore()
+        track(core, .floats(.rule))
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(floats(core) == false)
+        #expect(core.state.userFloated.isEmpty)
+    }
+
     @Test("a toggle towards tiled refuses the same way")
     func toggleRefuses() {
         let core = makeCore()

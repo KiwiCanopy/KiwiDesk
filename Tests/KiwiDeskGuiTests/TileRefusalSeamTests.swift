@@ -114,6 +114,8 @@ struct TileRefusalSeamTests {
                 "Commands/KiwiCore+FloatCommands.swift": 2,
                 "Commands/KiwiCore+Explain.swift": 1,
                 "Commands/KiwiCore+PocketWindow.swift": 1,
+                // The reason change that ends a Tile over a rule.
+                "Events/EventLoop+Tracking.swift": 1,
             ]
         )
         let row = try SourceScan.functionBody(
@@ -128,6 +130,26 @@ struct TileRefusalSeamTests {
             under: "Commands"
         )
         #expect(door.contains("$0.refusesTile"))
+        // A comparison with the rule beside the predicate decides
+        // whether the record applies, never a refusal; a new one
+        // states itself here.
+        var ruleReads: [String: Int] = [:]
+        for needle in ["== .rule", "!= .rule", ".floats(.rule)"] {
+            ruleReads.merge(
+                Self.census(needle, in: sources),
+                uniquingKeysWith: +
+            )
+        }
+        #expect(
+            ruleReads == [
+                // The reader's and the restore's verdict.
+                "App/KiwiCore+TileOverRule.swift": 2,
+                // The verb's record branch and its no-op Float.
+                "Commands/KiwiCore+FloatCommands.swift": 2,
+                // The latch's kept verdict and the reason change.
+                "Events/EventLoop+Tracking.swift": 3,
+            ]
+        )
     }
 
     /// The record is applied by one Core reader, ahead of the fold,

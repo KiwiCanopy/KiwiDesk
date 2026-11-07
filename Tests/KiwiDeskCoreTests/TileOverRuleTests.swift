@@ -118,6 +118,24 @@ struct TileOverRuleTests {
         #expect(floats(core) == false)
     }
 
+    /// A hand float ends the record wherever it is written, so the
+    /// two never stand together: the rule removed, a Float, the
+    /// rule back — the float is the rule's again, never a Tile.
+    @Test("a hand float ends a Tile over a rule")
+    func handFloatEnds() {
+        let core = tiledOverRule()
+        recheck(core, nil)
+        #expect(core.execute("make_floating").isSuccess)
+        #expect(core.state.userFloated == [id])
+        #expect(core.state.tiledOverRule.isEmpty)
+        recheck(core, .rule)
+        #expect(floats(core) == true)
+        #expect(core.state.userFloated.isEmpty)
+        core.handle(.windowHidden(id))
+        arrive(core, .floats(.rule))
+        #expect(floats(core) == true)
+    }
+
     @Test("a toggle flips a Tile over a rule both ways")
     func toggleFlips() {
         let core = tiledOverRule()
@@ -151,7 +169,7 @@ struct TileOverRuleTests {
     }
 
     /// #2572: Brave lifts its main window to 999. Over a record the
-    /// latch reads the window as tiled, so the lift floats nothing
+    /// latch keeps the rule's verdict, so the lift floats nothing
     /// and the record survives it.
     @Test("a raised layer over a Tile keeps it tiled")
     func raisedLayerKeeps() {
@@ -159,7 +177,11 @@ struct TileOverRuleTests {
         recheck(core, .raisedLayer)
         #expect(floats(core) == false)
         #expect(core.state.tilesOverRule(id))
-        #expect(core.eventLoop.detectedFloating[id] == .tiles)
+        #expect(core.eventLoop.detectedFloating[id] == .floats(.rule))
+        // A Float there is the rule's, never a hand float.
+        #expect(core.execute("make_floating").isSuccess)
+        #expect(core.state.userFloated.isEmpty)
+        #expect(core.execute("make_tiled").isSuccess)
         // Its fall back to layer 0 is the rule's float again.
         recheck(core, .rule)
         #expect(core.eventLoop.detectedFloating[id] == .floats(.rule))

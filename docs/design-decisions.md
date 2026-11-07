@@ -6266,6 +6266,7 @@ clears it, and the window follows the verdict again, including a
 rule added afterwards. `make_auto` is retired with no alias, since
 Tile does its job.
 
+:::unreleased
 *Over a float rule, Tile tiles the window until it closes.* A rule
 names an app, or a title, and floats every new window it matches;
 a user who wants one of them tiled had to remove the rule for all
@@ -6287,9 +6288,10 @@ breaks without it:
 - *It holds only while the verdict is the rule's.* A window that
   turns into a dialog, a panel or a Dock-less app's window ends
   it and floats; those still refuse a Tile. A raised layer is
-  judged at adoption (below), so a window tiled over a rule reads
-  as tiled to that latch, and Brave's lift to the prompt's level
-  floats nothing.
+  judged at adoption (below), so over a Tile that latch keeps the
+  rule's verdict, and Brave's lift to the prompt's level floats
+  nothing. A hand Float ends the Tile, so the two records never
+  stand together.
 - *It writes no user float.* Writing `userFloated` from a rule —
   the rejected "softer rule" that records the float at adoption —
   loses the rule's provenance: a Tile is undone by ⌘H and unhide,
@@ -6305,8 +6307,10 @@ breaks without it:
   Tile itself already makes, per window.
 
 What remains: App Rules can list a Float rule beside a tiled
-window, and a second rule added while a window is tiled over the
-first is not obeyed until that window closes.
+window, a second rule added while a window is tiled over the first
+is not obeyed until that window closes, and a window an in-place
+restart adopts only after its replay floats by the rule again.
+:::
 
 *Tile on a window detection floats refuses.* A dialog, panel or
 raised layer has no setting to change, and a guess's escape is the
@@ -6806,7 +6810,7 @@ could only ever be refused; the slot carries instead the one act
 that ends the window's time in the pocket, through
 `toggle_pocket_window` naming it, with Pocket Window kept below. A
 window its app's own key keeps greys both rather than hiding them,
-as Tile Window greys for a float rule (▸ *A window is tiled or
+as Tile Window greys for a dialog (▸ *A window is tiled or
 floating*), and only Remove names where that key lives, since
 removing the app's row is the way out.
 :::
