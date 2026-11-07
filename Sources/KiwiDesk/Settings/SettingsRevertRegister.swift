@@ -27,6 +27,7 @@ enum SettingsRevertRegister {
             .leaf(\.settings.spaceBarStyle.visibility),
             .leaf(\.settings.monocle.appBar.visibility),
             .leaf(\.settings.scrolling.appBar.visibility),
+            .leaf(\.settings.kiwishelf.pocketVisibility),
         ]),
         .kiwishelf(.spaceBarEdge): spaceBarEdge,
         .kiwishelf(.spaceBarScreenEdge): spaceBarEdge,

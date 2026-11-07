@@ -91,7 +91,7 @@ extension SettingsValueReadout {
                 census,
                 o.pocketVisibility,
                 n.pocketVisibility,
-                AppBarOptions.visibility
+                AppBarOptions.pocketVisibility
             )
         case .revealStyle:
             return spaceBarChoiceRow(

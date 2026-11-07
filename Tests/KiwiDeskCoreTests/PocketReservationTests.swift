@@ -123,4 +123,18 @@ struct PocketReservationTests {
                 == 2 * both.kiwishelf.reservation
         )
     }
+
+    /// Settings' Pocket row notes a bar that keeps an Auto pocket
+    /// shown (#2978).
+    @Test("an Auto pocket on a shown bar's edge is noted")
+    func autoPocketBesideAShownBar() {
+        let shown = settings(space: .always, pocket: .top)
+        #expect(shown.barKeepsAutoPocket(in: .bsp, on: nil))
+        let hiding = settings(space: .auto, pocket: .top)
+        #expect(!hiding.barKeepsAutoPocket(in: .bsp, on: nil))
+        let apart = settings(space: .always, pocket: .bottom)
+        #expect(!apart.barKeepsAutoPocket(in: .bsp, on: nil))
+        let always = settings(space: .always, pocket: .top, show: .always)
+        #expect(!always.barKeepsAutoPocket(in: .bsp, on: nil))
+    }
 }

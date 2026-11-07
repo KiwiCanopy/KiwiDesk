@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The pocket's strip reaches the live layout (#2784, #2978): its
-/// Show enters the bounds through `TilingEngine.pocketAtRest`, a
+/// Show enters the bounds through `TilingSettings.pocketRests`, a
 /// Show change that moves a strip owes a pass and one that moves
 /// none only a repaint, and the whole mark draws exactly where
 /// `TilingSettings.pocketRest` answers `.mark`.
@@ -100,5 +100,17 @@ struct PocketReservationCoreTests {
             #expect(spec.whole == whole, "\(visibility)")
             #expect(spec.risen == false)
         }
+    }
+
+    @Test(
+        "under Hidden nothing draws at rest",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func hiddenDrawsNothing() throws {
+        let (core, _, _) = try #require(
+            makeCore(space: .always, pocket: .bottom)
+        )
+        #expect(!core.pocketRests)
+        #expect(core.pocketPlateSpecs().isEmpty)
     }
 }

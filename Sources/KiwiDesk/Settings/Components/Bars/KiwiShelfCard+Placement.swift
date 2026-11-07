@@ -107,12 +107,14 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .pocketShow.text,
-                $model.config.settings.kiwishelf.pocketVisibility
+                $model.config.settings.kiwishelf.pocketVisibility,
+                options: AppBarOptions.pocketVisibility
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .pocketShow
             )
+            autoPocketNote
         default:
             let _ = assertionFailure(
                 "unrendered Show key: \(key.id)"
@@ -152,16 +154,39 @@ extension KiwiShelfCard {
         }
     }
 
+    /// Under an Auto Pocket on the edge of a bar shown at rest: it
+    /// stays shown there (#2978) — Core's verdict, on any screen's
+    /// edges in any layout.
+    @ViewBuilder private var autoPocketNote: some View {
+        let screens = model.config.settings.screenVariants
+        if screens.contains(where: { screen in
+            LayoutMode.allCases.contains {
+                screen.barKeepsAutoPocket(in: $0, on: nil)
+            }
+        }) {
+            BarNoteRow(
+                text: L(
+                    "kiwishelf.show.pocket.beside_always",
+                    "On %1$@, the Pocket stays shown while a bar on its "
+                        + "edge is set to %2$@.",
+                    L("kiwishelf.show.pocket.auto", "Auto"),
+                    L("bar.visibility.always", "Always")
+                )
+            )
+        }
+    }
+
     /// One bar's Always · Auto · Hidden strip, on the shared label
     /// axis like every labelled picker (#2439).
     private func visibilityRow(
         _ title: String,
-        _ selection: Binding<ShelfVisibility>
+        _ selection: Binding<ShelfVisibility>,
+        options: [(ShelfVisibility, String)] = AppBarOptions.visibility
     ) -> some View {
         SegmentedPicker(
             title,
             selection: selection,
-            options: AppBarOptions.visibility.map { ($0.1, $0.0) }
+            options: options.map { ($0.1, $0.0) }
         )
     }
 

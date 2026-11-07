@@ -6,7 +6,7 @@ import Testing
 
 /// The pocket on screen (#2678, 2026-10-29 ruling): while Several
 /// windows holds it, on every display, faded while empty, a count
-/// badge from two inside; nothing at rest under One window; a click
+/// badge from two inside; nothing at rest under Hidden; a click
 /// lists the windows inside, each row taking its window out.
 @Suite(
     "Pocket plate",
@@ -77,7 +77,7 @@ struct PocketPlateTests {
         return core.pocketPlate.specs.values.first
     }
 
-    @Test("under One window nothing shows at rest")
+    @Test("under Hidden nothing shows at rest")
     func oneShowsNothing() {
         let core = makeCore()
         core.handle(.windowFocused(one))

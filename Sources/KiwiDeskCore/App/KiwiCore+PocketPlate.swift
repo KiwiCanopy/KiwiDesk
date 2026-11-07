@@ -11,9 +11,7 @@ import AppKit
 extension KiwiCore {
     /// Whether the pocket rests on screen (#2978): its Show is not
     /// Hidden.
-    var pocketRests: Bool {
-        tiler.settings.kiwishelf.pocketVisibility != .hidden
-    }
+    var pocketRests: Bool { tiler.settings.pocketRests }
 
     /// Whether the pocket stands on `display` this pass: it stands,
     /// and that screen does not stand down — what the pocket draws

@@ -531,7 +531,10 @@ your screens — has no saved file to take one, so it shows the pocket
 Always. If Holds was One window, set Pocket to Hidden there and Save.
 A profile that crossed from One window shows **Show** with nothing
 selected until you choose one, since its Pocket row reads Hidden and
-its bars do not.
+its bars do not. A setup `init.lua` owns has no saved profile to
+cross either: one that never called `pocket.set_capacity` showed the
+pocket only while it was used, and now shows it Always until
+`init.lua` adds `kiwishelf.set_pocket_visibility("hidden")`.
 :::
 
 :::unreleased

@@ -238,10 +238,6 @@ extension KiwiCore {
                 self?.screenFingerprint(of: $0)
             }
         }
-        // A resting pocket's edge reserves its strip (#2784).
-        tiler.pocketAtRest = { [weak self] in
-            self?.pocketRests ?? false
-        }
         // The drawn stack side reads the one flip door (#2771).
         tiler.stackFlip = { [weak self] space in
             self?.stackFlip(of: space)

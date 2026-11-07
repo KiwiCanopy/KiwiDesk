@@ -12,8 +12,9 @@ extension ConfigMigration {
     static let pocketCapacityKey = "capacity"
     static let pocketVisibilityKey = "pocket_visibility"
     static let pocketVisibilityShelf = "kiwishelf"
-    /// The bundle format this step introduced, spelled as history.
+    /// The formats this crossing introduced, spelled as history.
     static let pocketVisibilityBundleFormat = 43
+    static let pocketVisibilityGuiFormat = 19
 
     /// What a profile with `settings` crosses to from `capacity`:
     /// One window is Hidden; Several takes the bars' Show where they
@@ -38,15 +39,38 @@ extension ConfigMigration {
         return restedWhole ? .always : .auto
     }
 
-    /// `gui.json`'s retired `pocket.capacity`, nil once crossed; an
-    /// absent value in a present group reads as the old default.
+    /// `gui.json`'s retired `pocket.capacity`, nil once crossed. A
+    /// file below this crossing's format with no group read as One
+    /// window, the old default, so its absence crosses as `one`.
     static func retiredPocketCapacity(in data: Data) -> String? {
         guard
             let root = try? JSONSerialization.jsonObject(with: data)
-                as? [String: Any],
-            let group = root[pocketCapacityGroup] as? [String: Any]
+                as? [String: Any]
         else { return nil }
-        return group[pocketCapacityKey] as? String ?? "one"
+        if let group = root[pocketCapacityGroup] as? [String: Any] {
+            return group[pocketCapacityKey] as? String ?? "one"
+        }
+        let format = root["format"] as? Int ?? 0
+        return format < pocketVisibilityGuiFormat ? "one" : nil
+    }
+
+    /// `data` with an absent group stated as the `capacity` it read
+    /// as, so the debt outlives a restamp while a profile has not
+    /// crossed; nil where the file states one already.
+    static func statingPocketCapacity(
+        _ capacity: String,
+        in data: Data
+    ) -> Data? {
+        guard
+            var root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any],
+            root[pocketCapacityGroup] == nil
+        else { return nil }
+        root[pocketCapacityGroup] = [pocketCapacityKey: capacity]
+        return try? JSONSerialization.data(
+            withJSONObject: root,
+            options: [.prettyPrinted, .sortedKeys]
+        )
     }
 
     /// Whether a profile's `settings` object already states the
@@ -65,13 +89,17 @@ extension ConfigMigration {
                 bundle: pocketVisibilityBundleFormat
             ),
             var root = try? JSONSerialization.jsonObject(with: data)
-                as? [String: Any],
-            var config = root["config"] as? [String: Any],
-            let group = config[pocketCapacityGroup] as? [String: Any]
+                as? [String: Any]
         else { return nil }
-        let capacity = group[pocketCapacityKey] as? String ?? "one"
-        config[pocketCapacityGroup] = nil
-        root["config"] = config
+        // An older bundle with no group read as One window, as did
+        // one with no config at all, a Lua-owned setup's.
+        var config = root["config"] as? [String: Any]
+        let group = config?[pocketCapacityGroup] as? [String: Any]
+        let capacity = group?[pocketCapacityKey] as? String ?? "one"
+        if config != nil {
+            config?[pocketCapacityGroup] = nil
+            root["config"] = config
+        }
         if var profiles = root[barEdgeProfilesKey] as? [[String: Any]] {
             for index in profiles.indices {
                 guard

@@ -41,4 +41,14 @@ struct BarVisibilitySetTests {
         #expect(target.resizeStep == TilingSettings().resizeStep)
         #expect(target.spaceBarStyle.visibility == .hidden)
     }
+
+    /// The pocket alone apart reads mixed (#2978).
+    @Test("the pocket apart makes the set mixed")
+    func pocketApartIsMixed() {
+        var settings = TilingSettings()
+        settings.setEveryBarVisibility(.auto)
+        #expect(settings.uniformBarVisibility == .auto)
+        settings.kiwishelf.pocketVisibility = .hidden
+        #expect(settings.uniformBarVisibility == nil)
+    }
 }

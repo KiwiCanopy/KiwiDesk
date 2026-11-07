@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Two pocketable windows on the real main screen, the Space Bar at the
-/// top, so the pocket's own edge draws nothing; One window by default.
+/// top, so the pocket's own edge draws nothing; Hidden by default.
 /// The pocket's real panels order in, so its suites need a main screen.
 @MainActor
 private struct PocketListFixture {
@@ -186,8 +186,8 @@ struct PocketListSpeechTests {
     }
 
     /// Its plate speaks a count and opens a menu of what the list holds,
-    /// one's own window under One window included.
-    @Test("under One window VoiceOver's press menus an app's own window")
+    /// one's own window under Hidden included.
+    @Test("under Hidden VoiceOver's press menus an app's own window")
     func pressMenusKeyedWindow() throws {
         LocalizationManager.shared.select("en")
         let fixture = try PocketListFixture()

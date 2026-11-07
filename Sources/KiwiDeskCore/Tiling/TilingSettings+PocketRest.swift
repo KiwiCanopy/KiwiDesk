@@ -12,6 +12,10 @@ public enum PocketRest: Sendable, Equatable {
 }
 
 extension TilingSettings {
+    /// Whether the pocket rests on screen: its Show is not Hidden
+    /// (#2978) — the one input the bounds and the bar plan read.
+    public var pocketRests: Bool { kiwishelf.pocketVisibility != .hidden }
+
     /// How the pocket stands at rest on `screen` in `mode`: a section
     /// where its edge draws a bar at rest, else its own Show decides,
     /// the whole mark under Always and the handle under Auto (#2978).
@@ -30,6 +34,23 @@ extension TilingSettings {
         ).first { $0.edge == settings.kiwishelf.pocketEdge }
         if let edge, !edge.drawsNothingAtRest { return .section }
         return kiwishelf.pocketVisibility == .always ? .mark : .handle
+    }
+
+    /// Whether a bar keeps an Auto pocket shown on `screen` in
+    /// `mode`: one drawn at rest on the pocket's edge — what
+    /// Settings' Pocket row notes (#2978).
+    public func barKeepsAutoPocket(
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> Bool {
+        guard kiwishelf.pocketVisibility == .auto else { return false }
+        let settings = onScreen(screen)
+        return settings.barEdges(
+            space: spaceBarStyle.visibility,
+            app: appBarVisibility(in: mode)
+        ).contains {
+            $0.edge == settings.kiwishelf.pocketEdge && !$0.drawsNothingAtRest
+        }
     }
 
     /// The strip the pocket reserves at rest on `screen` in `mode`,

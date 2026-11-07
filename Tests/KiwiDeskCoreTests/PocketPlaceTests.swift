@@ -71,7 +71,7 @@ struct PocketPlaceTests {
 
     @Test("a put-in lands where the pocket is drawn, on every arm")
     func landingIsTheDrawing() throws {
-        // Under One window: inside a bar's strip, and whole on an edge
+        // Under Hidden: inside a bar's strip, and whole on an edge
         // no bar shows.
         for pocket in [AppBarEdge.bottom, .left] {
             let (core, display) = try makeCore(pocket: pocket)

@@ -12,7 +12,7 @@ import SwiftUI
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
     /// Whether the pocket stands on the shelf, Core's
-    /// `pocketStands` at rest: Several windows (#2678).
+    /// `pocketStands` at rest: its Show is not Hidden (#2978).
     let pocketStands: Bool
     /// Real space count from draft (owner 2026-08-10).
     var spaceCount: Int = 3

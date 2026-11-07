@@ -1,11 +1,12 @@
 /// The shelf both bars sit on (`KiwiShelf`, #1517) slice of the
-/// census. Its card also draws the three Show rows behind the Show
+/// census. Its card also draws the Show rows behind the Show
 /// master, whose keys stay with the value they write
-/// (`spaceBarVisibility`, the two layout App Bar visibilities).
+/// (`spaceBarVisibility`, the two layout App Bar visibilities,
+/// `pocketVisibility`).
 
 enum KiwiShelfKey: String, CaseIterable, Hashable {
-    /// The Show master: every bar's visibility (#761), which it
-    /// writes through `masterWrites`.
+    /// The Show master: every bar's visibility and the Pocket's
+    /// (#761, #2978), which it writes through `masterWrites`.
     case visibility = "settings.spaceBarStyle.visibility (master)"
     /// The Position master: both bars' edges (#1731), which it
     /// writes through `masterWrites`.

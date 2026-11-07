@@ -233,7 +233,7 @@ extension TilingSettings {
     /// reads for `mode` on `screen` — what a bar write must change
     /// to owe a pass (#1524, `BarReserveCoreTests` ▸
     /// `unchangedReservationSkipsTheRetile`). `pocketAtRest`: the
-    /// pocket stands on screen at rest, under Several (#2784).
+    /// pocket rests, `pocketRests` (#2784, #2978).
     public func shelfReservation(
         in mode: LayoutMode,
         on screen: String?,

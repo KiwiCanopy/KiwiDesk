@@ -864,9 +864,10 @@ Obligations:
   `wholeFollowsTheRest`).
 - **A Show write that moves `shelfReservations` owes a pass, and
   one that moves none a repaint**: the pocket reaches the bounds
-  through `TilingEngine.pocketAtRest` — `pocketRests`, never
-  `pocketStands`, so a drag, a play or the list never retiles —
-  which `shelfReservations` reads too, and its `kiwishelf.*` verb
+  through the one `TilingSettings.pocketRests`, read from the
+  settings the bounds are asked of, never `pocketStands`, so a
+  drag, a play or the list never retiles — which
+  `shelfReservations` reads too, and its `kiwishelf.*` verb
   takes the bar writes' reservation comparison in `layoutCommand`
   (`PocketReservationCoreTests` ▸ `capacityMovesTheBounds`,
   `sectionMovesNothing`).

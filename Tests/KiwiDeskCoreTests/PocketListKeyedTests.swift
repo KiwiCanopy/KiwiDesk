@@ -94,7 +94,7 @@ struct PocketListKeyedTests {
 
     /// "Nothing changes under One window" (▸ 2): a drag or a play
     /// stands the pocket there, and it counts the general list.
-    @Test("under One window the plate counts the general list alone")
+    @Test("under Hidden the plate counts the general list alone")
     func oneWindowCountsGeneral() {
         let fixture = fixture()
         fixture.core.execute(

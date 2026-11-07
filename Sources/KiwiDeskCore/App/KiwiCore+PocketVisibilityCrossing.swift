@@ -8,32 +8,62 @@ import Foundation
 extension KiwiCore {
     /// Stamps every profile file that states no pocket Show from
     /// `gui.json`'s retired `pocket.capacity`, then drops the group —
-    /// only once every write landed, so a failed one crosses again at
-    /// the next load. A newer build's file is left alone; a composed
-    /// Standard has no file and takes the default.
+    /// only once every file crossed, so one that failed or would not
+    /// read crosses at the next load. A newer build's file is left
+    /// alone; a composed Standard has no file and takes the default.
     func crossPocketVisibility() {
-        guard isGuiManaged,
-            let data = try? Data(contentsOf: guiConfigStore.url),
-            let capacity = ConfigMigration.retiredPocketCapacity(in: data),
-            let config = guiConfigStore.load()
+        guard isGuiManaged else { return }
+        Self.crossPocketVisibility(
+            gui: guiConfigStore,
+            profiles: profiles,
+            log: onLog
+        )
+    }
+
+    /// The crossing over one setup's files: this Mac's, or a sync
+    /// folder's staged copy before a take builds its bundle.
+    static func crossPocketVisibility(
+        gui guiConfigStore: GuiConfigStore,
+        profiles: ProfileManager,
+        log onLog: (String) -> Void
+    ) {
+        let url = guiConfigStore.url
+        guard let data = try? Data(contentsOf: url),
+            let capacity = ConfigMigration.retiredPocketCapacity(in: data)
         else { return }
+        // State an absent group first: the load below restamps the
+        // file, after which absence would read as crossed.
+        if let stated = ConfigMigration.statingPocketCapacity(
+            capacity,
+            in: data
+        ) {
+            try? stated.write(to: url, options: .atomic)
+        }
+        guard let config = guiConfigStore.load() else { return }
         var landed = true
         for name in profiles.list() {
             guard let url = try? profiles.fileURL(name: name),
-                let data = try? Data(contentsOf: url),
-                (try? NewerFormatOnDisk.refuseProfile(url)) != nil,
-                let root = try? JSONSerialization.jsonObject(with: data)
-                    as? [String: Any],
-                let settings = root[ConfigMigration.barEdgeSettingsKey]
-                    as? [String: Any],
-                !ConfigMigration.statesPocketVisibility(settings),
-                let profile = try? profiles.read(name: name)
+                // A newer build's file is not this build's (#2325).
+                (try? NewerFormatOnDisk.refuseProfile(url)) != nil
             else { continue }
-            let value = ConfigMigration.crossedPocketVisibility(
-                capacity: capacity,
-                settings: profile.settings
-            )
             do {
+                // The read migrates the file in place first, so the
+                // insert lands on the bytes it left.
+                let profile = try profiles.read(name: name)
+                let data = try Data(contentsOf: url)
+                guard
+                    let root = try JSONSerialization.jsonObject(with: data)
+                        as? [String: Any],
+                    let settings = root[ConfigMigration.barEdgeSettingsKey]
+                        as? [String: Any]
+                else { throw CocoaError(.fileReadCorruptFile) }
+                if ConfigMigration.statesPocketVisibility(settings) {
+                    continue
+                }
+                let value = ConfigMigration.crossedPocketVisibility(
+                    capacity: capacity,
+                    settings: profile.settings
+                )
                 guard
                     let crossed = ConfigMigration.withPocketVisibility(
                         value,

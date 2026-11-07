@@ -91,7 +91,7 @@ struct PocketVisibilityCrossingTests {
     @Test("a bundle crosses its config's capacity into its profiles")
     func bundleStep() throws {
         var stated = TilingSettings()
-        stated.kiwishelf.pocketVisibility = .always
+        stated.kiwishelf.pocketVisibility = .hidden
         func object(_ settings: TilingSettings) throws -> Any {
             try JSONSerialization.jsonObject(
                 with: JSONEncoder().encode(settings)
@@ -129,7 +129,7 @@ struct PocketVisibilityCrossingTests {
             (($0["settings"] as? [String: Any])?["kiwishelf"]
                 as? [String: Any])?["pocket_visibility"] as? String
         }
-        #expect(values == ["auto", "always"])
+        #expect(values == ["auto", "hidden"])
     }
 
     private func makeGuiCore(capacity: String) throws -> KiwiCore {
@@ -248,5 +248,66 @@ struct PocketVisibilityCrossingTests {
         let save = try #require(body.range(of: "guiConfigStore.save("))
         #expect(cross.lowerBound < appWide.lowerBound)
         #expect(cross.lowerBound < save.lowerBound)
+    }
+
+    @Test("an older gui.json with no group crosses as One window")
+    func absentGroupCrossesAsOne() throws {
+        let core = try makeGuiCore(capacity: "several")
+        let url = core.guiConfigStore.url
+        var root = try #require(
+            JSONSerialization.jsonObject(with: Data(contentsOf: url))
+                as? [String: Any]
+        )
+        root["pocket"] = nil
+        root["format"] = 18
+        try JSONSerialization.data(withJSONObject: root).write(to: url)
+        #expect(retired(core) == "one")
+        try saveLegacy(
+            "Desk",
+            settings(space: .always, app: .always),
+            in: core
+        )
+        core.crossPocketVisibility()
+        #expect(
+            try core.profiles.read(name: "Desk").settings.kiwishelf
+                .pocketVisibility == .hidden
+        )
+        #expect(retired(core) == nil)
+    }
+
+    @Test("a format-42 bundle crosses through the migration")
+    func bundleThroughMigration() throws {
+        var settings = try #require(
+            try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(
+                    self.settings(space: .always, app: .always)
+                )
+            ) as? [String: Any]
+        )
+        var shelf = try #require(settings["kiwishelf"] as? [String: Any])
+        shelf["pocket_visibility"] = nil
+        settings["kiwishelf"] = shelf
+        let root: [String: Any] = [
+            "format": 42,
+            "writtenBy": "test",
+            "config": ["format": 18, "pocket": ["capacity": "one"]],
+            "profiles": [["settings": settings]],
+        ]
+        let out = try #require(
+            ConfigMigration.migrated(
+                try JSONSerialization.data(withJSONObject: root)
+            )
+        )
+        let migrated = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        #expect(migrated["format"] as? Int == SetupBundle.currentFormat)
+        let profiles = try #require(
+            migrated["profiles"] as? [[String: Any]]
+        )
+        let stamped =
+            ((profiles.first?["settings"] as? [String: Any])?["kiwishelf"]
+            as? [String: Any])?["pocket_visibility"] as? String
+        #expect(stamped == "hidden")
     }
 }

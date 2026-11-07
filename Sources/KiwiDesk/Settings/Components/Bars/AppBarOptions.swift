@@ -117,6 +117,17 @@ enum AppBarOptions {
         ]
     }
 
+    /// The Pocket's own Show words (#2978): a catalog agrees them
+    /// with Pocket, which its word for a bar may not share.
+    @MainActor
+    static var pocketVisibility: [(ShelfVisibility, String)] {
+        [
+            (.always, L("kiwishelf.show.pocket.always", "Always")),
+            (.auto, L("kiwishelf.show.pocket.auto", "Auto")),
+            (.hidden, L("kiwishelf.show.pocket.hidden", "Hidden")),
+        ]
+    }
+
     /// What names a Space item (#1535).
     @MainActor
     static var itemLabel: [(SpaceBarStyle.ItemLabel, String)] {

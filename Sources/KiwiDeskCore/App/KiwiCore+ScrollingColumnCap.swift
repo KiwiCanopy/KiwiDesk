@@ -24,7 +24,7 @@ extension KiwiCore {
                 from: tiler.visibleBounds(screen),
                 mode: .scrolling,
                 on: tiler.fingerprint(of: screen, in: settings),
-                pocketAtRest: tiler.pocketAtRest()
+                pocketAtRest: settings.pocketRests
             ),
             space: space
         )

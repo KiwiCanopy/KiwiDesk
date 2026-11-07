@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Two pocketable windows on the real main screen, the Space Bar at the
-/// top, so the pocket's own edge draws nothing; One window by default.
+/// top, so the pocket's own edge draws nothing; Hidden by default.
 /// The pocket's real panels order in, so its suites need a main screen.
 @MainActor
 private struct PocketListFixture {
@@ -86,7 +86,7 @@ private struct PocketListFixture {
 struct PocketListKeyTests {
     private let one = WindowID(1)
 
-    @Test("under One window the key stands the pocket and closes it again")
+    @Test("under Hidden the key stands the pocket and closes it again")
     func oneWindowStandsAndCloses() throws {
         let fixture = try PocketListFixture()
         let (core, display) = (fixture.core, fixture.display)
@@ -108,7 +108,7 @@ struct PocketListKeyTests {
         #expect(core.pocketPlate.specs[display] == nil)
     }
 
-    @Test("under One window a bar's edge opens no slot for the list")
+    @Test("under Hidden a bar's edge opens no slot for the list")
     func barEdgeOpensNoSlot() throws {
         let fixture = try PocketListFixture()
         let (core, display) = (fixture.core, fixture.display)
@@ -210,7 +210,7 @@ struct PocketListKeyTests {
         #expect(core.shelves.peek.shown == nil)
     }
 
-    @Test("under One window the key's list holds an app's own window")
+    @Test("under Hidden the key's list holds an app's own window")
     func oneWindowListsKeyed() throws {
         let fixture = try PocketListFixture()
         let core = fixture.core
