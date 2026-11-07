@@ -22,6 +22,9 @@ struct DeletionFocusRoutingTests {
     @Test("the rule names the next row, else the previous one")
     func ruleStepsNextElsePrevious() {
         #expect(DeletionFocus.neighbour(after: 1, in: [1, 2, 3]) == 2)
+        // A middle row has both neighbours: only here does the
+        // next-before-previous order decide the answer.
+        #expect(DeletionFocus.neighbour(after: 2, in: [1, 2, 3]) == 3)
         #expect(DeletionFocus.neighbour(after: 3, in: [1, 2, 3]) == 2)
         #expect(DeletionFocus.neighbour(after: 1, in: [1]) == nil)
         #expect(DeletionFocus.neighbour(after: 4, in: [1, 2]) == nil)
