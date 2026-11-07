@@ -222,9 +222,8 @@ struct DesktopMoveAwayLandingTests {
         return core
     }
 
-    /// Only an arrival files it, and an arrival stays on its screen,
-    /// so a shown Desktop refuses here where a tracked window crosses.
-    @Test("a Space off its screen refuses for a shown Desktop too")
+    /// The fixture keeps no element, so nothing can write its frame.
+    @Test("a Space off its screen refuses, with no element, on any Desktop")
     func sharedRefusesEitherTarget() {
         let core = sharedCore()
         defer { teardown() }
@@ -233,16 +232,16 @@ struct DesktopMoveAwayLandingTests {
                 "move_to_desktop",
                 args: [.number(1), .string("mail"), id]
             ).error
-                == "Screens can only be crossed through the visible Desktop. "
-                + "Cross there first, then move the window."
+                == "This window can only cross screens through the visible "
+                + "Desktop. Move it there first."
         )
         #expect(
             core.execute(
                 "move_to_desktop",
                 args: [.number(3), .string("mail"), id]
             ).error
-                == "Screens can only be crossed through the visible Desktop. "
-                + "Cross there first, then move the window."
+                == "This window can only cross screens through the visible "
+                + "Desktop. Move it there first."
         )
         #expect(DesktopVerbBridge.moves.isEmpty)
     }
@@ -292,7 +291,7 @@ struct DesktopMoveAwayLandingTests {
             core.execute(
                 "move_to_desktop",
                 args: [.number(3), .string("mail"), id]
-            ).error?.contains("crossed through") == true
+            ).error?.contains("cross screens") == true
         )
     }
 }

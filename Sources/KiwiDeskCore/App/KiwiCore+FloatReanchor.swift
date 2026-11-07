@@ -99,6 +99,28 @@ extension KiwiCore {
         return true
     }
 
+    /// The frame a window takes on `space`'s screen when a Desktop
+    /// move carries it there (#3048): `FloatReanchor`'s position, and
+    /// no larger than that screen, or it would overhang the next one
+    /// and read as arriving there.
+    func crossingFrame(from base: CGRect, to space: SpaceID) -> CGRect? {
+        guard
+            let targetScreen = TilingEngine.screen(for: space, in: state),
+            let sourceScreen = TilingEngine.screen(containing: base)
+                ?? ScreenList.mainOrFirst
+        else { return nil }
+        let dest = GeometryUtils.axVisibleFrame(of: targetScreen)
+        var fitted = base
+        fitted.size.width = min(base.width, dest.width)
+        fitted.size.height = min(base.height, dest.height)
+        return FloatReanchor.target(
+            frame: fitted,
+            from: GeometryUtils.axVisibleFrame(of: sourceScreen),
+            to: dest,
+            scaleSize: tiler.settings.floatScaleOnDisplayChange
+        )
+    }
+
     /// Re-anchors every floating member of `space` onto its
     /// (possibly new) display — the space-level sibling of the
     /// `moveWindow` re-anchor (#444), used by the space

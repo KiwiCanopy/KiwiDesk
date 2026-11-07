@@ -309,7 +309,7 @@ final class FrameApplier {
 
     /// Each window's set still owed its second write, cleared by
     /// any newer write to that window.
-    private var pendingResends: [WindowID: CGRect] = [:]
+    var pendingResends: [WindowID: CGRect] = [:]
     func forgetResend(_ id: WindowID, unlessSized size: CGSize) {
         if pendingResends[id]?.size != size { pendingResends[id] = nil }
     }

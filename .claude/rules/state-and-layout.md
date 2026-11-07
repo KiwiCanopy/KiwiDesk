@@ -336,9 +336,16 @@ editing here:
   #1150's review found them disagreeing), so it is refused with
   the pin hint, never hand-assigned, because the next
   `resolveSpaceDisplays` would move it back and re-open the same
-  undo. A shared Desktop names no screen, so a hidden one is judged
-  against the screen holding the window's frame, the screen it
-  arrives on, or that net drops the name (#3033,
+  undo. A shared Desktop names no screen and macOS moves no frame with
+  a window, so a named Space off the window's screen is judged by
+  `crossesScreens`, and the move writes the frame across before the
+  arrival, or that net drops the name (#3048): a tracked window at its
+  departure, carried on `PendingSpaceAssignment`, an away window ahead
+  of its move, through the one `writeCrossingFrame` over the element
+  `AwayElements` kept and the one `FrameApplier.writeAway` door, with a
+  read-back that asks `readWindowBounds`, never `screenHolding`, and
+  stands down once the window arrived. A window the write cannot reach
+  is refused (#3033, `canWriteCrossing`, `DesktopMoveCrossingTests`,
   `DesktopMoveSharedSpaceTests`). A window already away produces no
   departure: its filing is written at once through
   `StateCoordinator.fileAwayMove`, always `.departed` so the #1010 net
@@ -799,7 +806,7 @@ editing here:
   only at the top level — and a new reader owes the same branch.
   A per-away-id side store prunes itself to the ledger at each use
   and re-checks the id, so it takes no ender or re-key wiring
-  (`FullScreenElements`, #2939). What the ledger must never become: a member of `space.windows`
+  (`AwayElements`, #2939). What the ledger must never become: a member of `space.windows`
   with a flag (every `space.windows` consumer would gain an
   exclusion, and the return-by-rank fold above would be
   reworked), or a reason for the sweep to remove anything
@@ -1472,7 +1479,7 @@ editing here:
   the one `jumpToFullScreen`, which activates the app FIRST and then
   raises (`AXHelper.activateThenRaise`), never `AXHelper.raise`.
   No implicit raise calls the arm, its seam or its raise. An away
-  window's element comes from `FullScreenElements`, never a
+  window's element comes from `AwayElements`, never a
   remote-token scan, which is a ruling of its own; and a removal
   path that can vanish a window to a full-screen Space releases its
   registration BEFORE it emits `.windowDestroyed`, in the same turn,

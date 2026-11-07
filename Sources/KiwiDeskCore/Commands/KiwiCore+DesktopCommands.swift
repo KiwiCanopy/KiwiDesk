@@ -149,11 +149,10 @@ extension KiwiCore {
     /// creates the Space once the bridge accepted, so a refused
     /// move leaves no empty Space behind.
     ///
-    /// Shared Desktops name no screen, and a hidden one moves no
-    /// frame, so the arrival's #1010 net would drop a Space off the
-    /// window's screen: that is refused here (#3033). A shown one
-    /// files at once and crosses, save for an away window, which
-    /// only an arrival files (#3034).
+    /// Shared Desktops name no screen, and macOS moves no frame with
+    /// a window, so the arrival's #1010 net would drop a Space off the
+    /// window's screen. The move writes the frame across (#3048), and
+    /// a window it cannot write is refused here (#3033).
     func resolveSpaceTarget(
         _ args: [JSONValue],
         for target: DesktopTarget,
@@ -176,16 +175,13 @@ extension KiwiCore {
                         )
                     )
                 }
-            } else if !target.isCurrent
-                || state.awayWindows[window] != nil,
-                screens.count > 1,
-                screenHolding(window) != assigned
+            } else if crossesScreens(window, to: assigned, target),
+                !canWriteCrossing(window)
             {
                 return .refused(
                     .fail(
-                        "Screens can only be crossed through the "
-                            + "visible Desktop. Cross there first, then "
-                            + "move the window."
+                        "This window can only cross screens through the "
+                            + "visible Desktop. Move it there first."
                     )
                 )
             }

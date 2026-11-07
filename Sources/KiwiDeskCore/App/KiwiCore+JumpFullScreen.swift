@@ -13,7 +13,7 @@ extension KiwiCore {
         let element =
             tracked
             ? eventLoop.element(for: id)
-            : eventLoop.fullScreenElements.element(
+            : eventLoop.awayElements.element(
                 of: id,
                 away: Set(state.awayWindows.keys)
             )

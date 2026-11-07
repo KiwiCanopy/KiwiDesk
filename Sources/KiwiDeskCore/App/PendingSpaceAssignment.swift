@@ -24,18 +24,27 @@ final class PendingSpaceAssignment {
     static let drainWindow: TimeInterval =
         FollowFocusIntent.drainWindow
 
-    private var pending: [WindowID: (space: SpaceID, at: Date)] =
-        [:]
+    private var pending:
+        [WindowID: (space: SpaceID, crossingFrom: CGRect?, at: Date)] =
+            [:]
 
     var isEmpty: Bool { pending.isEmpty }
 
-    /// Names the Space `id` joins when it departs.
+    /// Names the Space `id` joins when it departs. `crossingFrom` is
+    /// the frame to carry onto that Space's screen, where the Space
+    /// lies off the window's screen on shared Desktops (#3048).
     func record(
         _ id: WindowID,
         space: SpaceID,
+        crossingFrom: CGRect? = nil,
         at now: Date = Date()
     ) {
-        pending[id] = (space, now)
+        pending[id] = (space, crossingFrom, now)
+    }
+
+    /// The frame recorded to carry across, read ahead of the claim.
+    func crossingBase(of id: WindowID) -> CGRect? {
+        pending[id]?.crossingFrom
     }
 
     /// The name owed to `id`, claimed once at its departure; nil

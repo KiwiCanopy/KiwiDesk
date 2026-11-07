@@ -8134,17 +8134,36 @@ old index (#1207).
 
 :::unreleased
 Shared Desktops (*Displays have separate Spaces* off) name no
-screen, so that refusal has nothing to compare with, and a hidden
-one moves no frame: the window arrives on the screen it left, and
-the #1010 net rightly outranks a name on another screen. So a
-hidden shared Desktop refuses a Space off the window's screen, read
-from its frame, since it arrives on that screen, and a follow with it, since
-a follow arrives the same way
-([#3033](https://github.com/KiwiCanopy/KiwiDesk/issues/3033)). Only
-the visible Desktop files a window at the command, where the layout can
-carry it, so the rule users carry is that screens can only be crossed
-through the visible Desktop. A window on a hidden Desktop is refused
-even when it would keep its Desktop.
+screen, so that refusal has nothing to compare with, and macOS moves
+no frame with a window: it arrives on the screen it left, where the
+#1010 net rightly outranks a name on another screen. So the move
+writes the frame onto the named Space's screen before the arrival
+([#3048](https://github.com/KiwiCanopy/KiwiDesk/issues/3048)), and the
+arrival is ordinary, the net standing down by its own predicate. The
+frame goes through an Accessibility element kept since the window left,
+since AX lists no window on a Desktop nobody shows. The measurements
+are on the issue (macOS 27.2): a named Space survived 81 of 81 moves
+across TextEdit, VS Code and Firefox, and with the write off the name
+dropped 3 of 3.
+
+A tracked window writes at its departure, when it can no longer be
+seen moving. An away window writes ahead of its move, because a write
+behind it shows the window on its old screen for 11 to 123 ms. So its
+move, filing and switch wait for the write, off the main actor, and
+go ahead at 150 ms for an app that stalls, whose window may then show
+on the old screen and whose name the net may drop; a log line says
+so if the frame stayed. The command's answer is the one the move will
+earn, since only a Desktop bridge missing could refuse it, and that is
+asked at the parse. The written size is capped at the screen's, or a
+window would overhang the next screen until the layout placed it.
+
+A window with no element, found at boot or re-keyed, and a minimized
+or hidden one, whose write is unmeasured, keep the refusal
+([#3033](https://github.com/KiwiCanopy/KiwiDesk/issues/3033)): such a
+window can cross screens only through the visible Desktop. The
+explicit name outranking the net needs no element, and was the fallback
+had slow apps failed; it draws a glide at the reveal, so it was not
+ruled.
 
 A window already on a hidden Desktop produces no departure, so
 naming one

@@ -16,8 +16,8 @@ struct DesktopMoveSharedSpaceTests {
     private let mail = SpaceID("mail")
     private let window = WindowID(7)
     private let refusal =
-        "Screens can only be crossed through the visible Desktop. "
-        + "Cross there first, then move the window."
+        "This window can only cross screens through the visible "
+        + "Desktop. Move it there first."
 
     private func makeCore() -> KiwiCore {
         DesktopVerbBridge.reset()

@@ -19,17 +19,53 @@ extension KiwiCore {
             return refusal
         }
         let explicit: SpaceID?
+        var crossingBase: CGRect?
         switch resolveSpaceTarget(args, for: target, moving: away.id) {
         case .refused(let response):
             return response
         case .none:
             explicit = nil
-        case .space(let space, _):
+        case .space(let space, let landing):
             guard !awayIsSticky(away) else {
                 return .fail("a sticky window keeps its Space")
             }
             explicit = space
+            crossingBase = landing.flatMap {
+                crossesScreens(away.id, to: $0, target)
+                    ? crossingBaseOfAway(away.id) : nil
+            }
         }
+        guard let crossingBase, let explicit else {
+            return landAway(away, to: target, explicit, follow: follow)
+        }
+        // The frame lands first: moved first, the window shows on its
+        // old screen (#3048). The answer is the one the move will
+        // earn, since only `canDriveDesktops` could refuse it.
+        writeCrossingFrame(away.id, from: crossingBase, to: explicit) {
+            [weak self] wrote in
+            guard let self else { return }
+            guard wrote, self.state.awayWindows[away.id] != nil else {
+                self.onLog(
+                    "move_to_desktop: w\(away.id.raw) not moved — its "
+                        + "frame could not be written"
+                )
+                return
+            }
+            _ = self.landAway(away, to: target, explicit, follow: follow)
+        }
+        guard follow else { return .ok() }
+        let outcome: DesktopSwitchOutcome =
+            target.isCurrent ? .alreadyShown : .switched
+        return outcome.response
+    }
+
+    /// The move itself, its filing and what the verb owes after it.
+    private func landAway(
+        _ away: AwayWindow,
+        to target: DesktopTarget,
+        _ explicit: SpaceID?,
+        follow: Bool
+    ) -> CommandResponse {
         guard WMBridge.moveWindows([away.id], to: target.space) else {
             return .fail("the Desktop bridge is unavailable on this macOS")
         }

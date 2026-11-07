@@ -328,8 +328,8 @@ the same value a plain Desktop swipe produces.
 
 :::unreleased
 A window on a hidden Desktop can be moved too, by naming its id from
-`get_state`. With *Displays have separate Spaces* off, screens can
-only be crossed through the visible Desktop; the
+`get_state`. With *Displays have separate Spaces* off, naming a Space
+on another screen moves it there in the same command; the
 [Lua reference](lua-reference.md#move_to_desktop) has the limits.
 :::
 

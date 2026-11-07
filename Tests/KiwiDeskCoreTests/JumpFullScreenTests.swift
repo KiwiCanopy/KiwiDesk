@@ -137,7 +137,7 @@ struct JumpFullScreenTests {
         #expect(core.state.awayWindows[other]?.nativeSpace == 9)
         let away = Set(core.state.awayWindows.keys)
         #expect(
-            core.eventLoop.fullScreenElements.element(of: other, away: away)
+            core.eventLoop.awayElements.element(of: other, away: away)
                 == nil
         )
     }
@@ -153,16 +153,17 @@ struct JumpFullScreenTests {
         #expect(calls().activated == [pid])
     }
 
-    @Test("a departure to a user Desktop keeps no element")
-    func userDesktopKeepsNothing() {
+    /// A move's frame write goes through it (#3048).
+    @Test("a departure to a user Desktop keeps its element too")
+    func userDesktopKeepsElement() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
         depart(core, to: 4, element: AXUIElementCreateApplication(pid))
         #expect(core.state.awayWindows[id] != nil)
         let away = Set(core.state.awayWindows.keys)
         #expect(
-            core.eventLoop.fullScreenElements.element(of: id, away: away)
-                == nil
+            core.eventLoop.awayElements.element(of: id, away: away)
+                != nil
         )
     }
 
@@ -173,15 +174,15 @@ struct JumpFullScreenTests {
         depart(core, to: 9, element: AXUIElementCreateApplication(pid))
         let kept = Set(core.state.awayWindows.keys)
         #expect(
-            core.eventLoop.fullScreenElements.element(of: id, away: kept)
+            core.eventLoop.awayElements.element(of: id, away: kept)
                 != nil
         )
         #expect(
-            core.eventLoop.fullScreenElements.element(of: id, away: [])
+            core.eventLoop.awayElements.element(of: id, away: [])
                 == nil
         )
         #expect(
-            core.eventLoop.fullScreenElements.element(of: id, away: kept)
+            core.eventLoop.awayElements.element(of: id, away: kept)
                 == nil
         )
     }
