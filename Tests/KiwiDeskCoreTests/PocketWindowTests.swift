@@ -323,7 +323,7 @@ struct PocketWindowTests {
                 existing: [],
                 above: 8,
                 base: .standard
-            ) == [row]
+            ) == [row, DefaultKeybindings.pocketListRow()]
         )
     }
 }
