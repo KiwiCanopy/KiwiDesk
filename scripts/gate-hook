@@ -26,12 +26,13 @@ import shlex
 import sys
 
 # A heavy step at the start of the command or after a shell
-# separator, optionally behind `VAR=value` assignments — never
-# inside a quoted argument like `grep "swift test"`.
+# separator, optionally behind `VAR=value` assignments or the warning
+# gate — never right after a quote, as in `grep "swift test"`. Trade:
+# a separator inside quotes counts, so `echo "a; swift test"` queues.
 HEAVY = re.compile(
     r"(?:^|[;&|(\n]|\bthen\b|\bdo\b)\s*"
     r"(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*"
-    r"(?:\./)?(?:swift\s+(?:build|test)\b"
+    r"(?:\./)?(?:(?:\S*/)?(?:scripts/warning-gate\s+)?swift\s+(?:build|test)\b"
     r"|scripts/(?:release|build-app)\.sh\b)"
 )
 

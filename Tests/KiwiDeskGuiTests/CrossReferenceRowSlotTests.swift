@@ -36,9 +36,8 @@ import Testing
 ///
 /// **These assertions do not read English, and cannot say which
 /// locale they DO read.** `L()` resolves through the shipped
-/// catalogs, and the locale is not merely the runner's: SwiftPM
-/// links every test target into one process, and several GUI
-/// suites call `LocalizationManager.shared.select(…)`
+/// catalogs, and the locale is not merely the runner's: several
+/// GUI suites call `LocalizationManager.shared.select(…)`
 /// concurrently, some without restoring. What these strings are
 /// in is whatever a concurrent suite last set. Coverage survives
 /// that — every catalog carries the specifier, so the slot lands

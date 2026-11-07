@@ -12,6 +12,7 @@
 # One suite type name per line.
 
 CiPathFilterTests
+GateLockHookTests
 InstructionPinTests
 RuleCitationTests
 SubsystemMapParityTests
