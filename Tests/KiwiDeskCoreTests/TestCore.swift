@@ -75,6 +75,10 @@ func makeTestCore(
     // silently turn a KiwiCore test's animations into instant
     // snaps (same host-state-leak class as the hotkey registrar).
     core.tiler.animation.reduceMotion = { false }
+    // The pocket's Show pinned Hidden, the old One-window default, so
+    // no fixture inherits its resting strip; a suite of it states one
+    // (#2978).
+    core.tiler.settings.kiwishelf.pocketVisibility = .hidden
     // The plate slide (#1956) and brief pocket (#2680) pinned off,
     // their panels and reads inert; a suite of either states them.
     core.spaceSlide.reduceMotion = { true }

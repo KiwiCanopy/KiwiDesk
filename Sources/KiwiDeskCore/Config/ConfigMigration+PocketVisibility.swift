@@ -56,17 +56,24 @@ extension ConfigMigration {
     @Sendable
     static func migratingAbsentPocketCapacity(_ data: Data) -> Data? {
         guard
-            var root = try? JSONSerialization.jsonObject(with: data)
+            let root = try? JSONSerialization.jsonObject(with: data)
                 as? [String: Any],
             shape(of: root) == .gui,
             root["format"] as? Int ?? 0 < pocketVisibilityGuiFormat,
-            root[pocketCapacityGroup] == nil
+            root[pocketCapacityGroup] == nil,
+            let text = String(data: data, encoding: .utf8),
+            let brace = text.firstIndex(of: "{")
         else { return nil }
-        root[pocketCapacityGroup] = [pocketCapacityKey: "one"]
-        return try? JSONSerialization.data(
-            withJSONObject: root,
-            options: [.prettyPrinted, .sortedKeys]
+        // One pair after the root's opening brace, the rest as written.
+        let pair =
+            "\"\(pocketCapacityGroup)\":{\"\(pocketCapacityKey)\":\"one\"}"
+        let empty = root.isEmpty
+        var out = text
+        out.insert(
+            contentsOf: pair + (empty ? "" : ","),
+            at: text.index(after: brace)
         )
+        return out.data(using: .utf8)
     }
 
     /// Whether a profile's `settings` object already states the
