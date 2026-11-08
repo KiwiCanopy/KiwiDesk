@@ -33,7 +33,7 @@ extension TilingEngine {
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
         sizing: BatchSizing = .mayInstantSize,
-        stateChange: WindowID? = nil
+        stateChange: Set<WindowID> = []
     ) {
         guard
             let screen = ScreenList.mainOrFirst
@@ -49,10 +49,11 @@ extension TilingEngine {
             // IS an instant size, so no promise survives one.
             let promised: BatchSizing =
                 newlyCreatedWindow == nil ? sizing : .mayInstantSize
-            stateChangeWindow =
-                stateChange == newlyCreatedWindow ? nil : stateChange
+            stateChangeWindows = stateChange.subtracting(
+                newlyCreatedWindow.map { [$0] } ?? []
+            )
             stateChangeSprings = newlyCreatedWindow == nil
-            defer { stateChangeWindow = nil }
+            defer { stateChangeWindows = [] }
 
             for (id, target) in frames {
                 // A window in an active drag keeps its user-driven

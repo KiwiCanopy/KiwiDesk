@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "层",
   "diff.label.layers": "层",
+  "diff.label.maximize_follow_focus": "最大化跟随焦点",
   "diff.label.min_size_override": "最小尺寸覆盖",
   "diff.label.placement_override": "落位覆盖",
   "diff.label.profile_binding": "描述文件绑定",

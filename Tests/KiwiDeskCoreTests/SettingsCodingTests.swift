@@ -105,9 +105,12 @@ struct SettingsCodingTests {
         // `maximize.set_share(axis, share, shape)` →
         // `maximize.share.<axis>.<shape>` and
         // `maximize.set_anchor(anchor, shape)` →
-        // `maximize.anchor.<shape>`, every shape stored (#3062).
+        // `maximize.anchor.<shape>`, every shape stored (#3062);
+        // `maximize.set_follow_focus` → `maximize.follow_focus`
+        // (#3063), off by default.
         let maximize = try object(root["maximize"])
-        #expect(Set(maximize.keys) == ["share", "anchor"])
+        #expect(Set(maximize.keys) == ["share", "anchor", "follow_focus"])
+        #expect(maximize["follow_focus"] as? Bool == false)
         let share = try object(maximize["share"])
         let shapes = Set(ScreenShape.allCases.map(\.rawValue))
         for axis in ["height", "width"] {

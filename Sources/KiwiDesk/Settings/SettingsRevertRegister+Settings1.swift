@@ -41,6 +41,8 @@ extension SettingsRevertRegister {
         .behaviour(.maximizeWidthShare):
             .leaf(\.settings.maximize.widthShare),
         .behaviour(.maximizeAnchor): .leaf(\.settings.maximize.anchor),
+        .behaviour(.maximizeFollowFocus):
+            .leaf(\.settings.maximize.followFocus),
         .behaviour(.resizeStep): .leaf(\.settings.resizeStep),
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),

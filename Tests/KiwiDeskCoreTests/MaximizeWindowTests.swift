@@ -78,7 +78,7 @@ struct MaximizeWindowTests {
         core.execute("toggle_maximized")
         core.focusWindow(w2, warp: false)
         #expect(maximized(core) == nil)
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(core.state.workspaces[space]?.maximized?.window == nil)
         core.focusWindow(w1, warp: false)
         #expect(maximized(core) == nil)
         #expect(issued(core)[w1] == slots(core)[w1])
@@ -109,7 +109,7 @@ struct MaximizeWindowTests {
         core.state.windows.setFloating(w1, true)
         #expect(maximized(core) == nil)
         core.retile()
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(core.state.workspaces[space]?.maximized?.window == nil)
     }
 
     @Test("A swap ends it before acting")
@@ -135,7 +135,7 @@ struct MaximizeWindowTests {
         let core = makeCore()
         core.state.windows.setFloating(w1, true)
         #expect(!core.execute("toggle_maximized").isSuccess)
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(core.state.workspaces[space]?.maximized?.window == nil)
     }
 
     @Test("The shelf stands down where the maximized Space shows")
@@ -159,12 +159,12 @@ struct MaximizeWindowTests {
     @Test("A rekey carries the maximized window")
     func rekeyCarries() {
         var model = Space(id: space, windows: [w1, w2])
-        model.maximized = w1
+        model.maximized = Maximize(window: w1)
         model.rekey(w1, to: w3)
-        #expect(model.maximized == w3)
+        #expect(model.maximized?.window == w3)
         // A removal keeps the id for a Desktop return; the state
         // fold and the retire end every other departure.
         model.remove(w3)
-        #expect(model.maximized == w3)
+        #expect(model.maximized?.window == w3)
     }
 }

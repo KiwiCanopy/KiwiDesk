@@ -735,6 +735,12 @@ shape (`laptop|widescreen|ultrawide|super_ultrawide|portrait`;
 [`toggle_maximized`](lua-reference.md#toggle_maximized)).
 
 :::unreleased
+`maximize.set_follow_focus true|false` (default `false`) makes a new
+Maximize move with focus instead of ending
+([`maximize.set_follow_focus`](lua-reference.md#maximizeset_follow_focus)).
+:::
+
+:::unreleased
 `monocle.set_maximize_windows true|false` (default `false`) makes
 every Monocle window fill the screen with no gaps while the bars read
 Hidden

@@ -25,12 +25,12 @@ struct MaximizedReaderCensusTests {
         // The model's initializer; `remove`, the rekey and the
         // reorder release write the field bare, inside the type.
         "Models/SpaceModel.swift": 1,
-        // The in-place carry, written and adopted, and whether the
-        // shape it writes beside it has a window (#3062).
-        "Models/StateSnapshot+InPlace.swift": 4,
-        // The verdict and the retire, which names the windows it
-        // ended (#2676).
-        "State/StateCoordinator+Maximized.swift": 4,
+        // The in-place carry of the window, its shape (#3062) and its
+        // follow (#3063), written and adopted.
+        "Models/StateSnapshot+InPlace.swift": 5,
+        // The verdict, its shape, the follow, and the retire, which
+        // ends or re-points it and names the windows (#2676, #3063).
+        "State/StateCoordinator+Maximized.swift": 7,
         // A close while away and a minimize end it; a Desktop
         // departure keeps the id for the return.
         "State/StateCoordinator+SpaceMemory.swift": 2,
@@ -38,8 +38,8 @@ struct MaximizedReaderCensusTests {
         // The mode write ends it; a re-key reaches a traveler's flag
         // on a Space it is no member of (#3035).
         "State/WorkspaceManager.swift": 3,
-        // The toggle and the drag's end.
-        "App/KiwiCore+Maximize.swift": 5,
+        // The toggle, its shape change, and the drag's end.
+        "App/KiwiCore+Maximize.swift": 7,
         // Rearranging writes end it.
         "Commands/KiwiCore+Resize.swift": 2,
         "Commands/KiwiCore+ResetLayoutSizing.swift": 1,
@@ -63,28 +63,9 @@ struct MaximizedReaderCensusTests {
         )
     }
 
-    /// Every file that may spell the stored `.maximizeShape`
-    /// (#3062), which outlives the window it was written with: a
-    /// reader takes `StateCoordinator.maximizedShape(of:)`.
-    private let shapeAllowed: [String: Int] = [
-        // The model's declaration.
-        "Models/SpaceModel.swift": 1,
-        // The in-place carry, written and adopted.
-        "Models/StateSnapshot+InPlace.swift": 4,
-        // The verdict.
-        "State/StateCoordinator+Maximized.swift": 1,
-        // The toggle, which writes it with the window.
-        "App/KiwiCore+Maximize.swift": 3,
-    ]
-
     @Test("Only the allowlisted files spell the stored maximize")
     func readersAreCensused() throws {
         try census("\\.maximized\\b", allowed)
-    }
-
-    @Test("Only the allowlisted files spell the stored shape")
-    func shapeReadersAreCensused() throws {
-        try census("\\.maximizeShape\\b", shapeAllowed)
     }
 
     private func census(

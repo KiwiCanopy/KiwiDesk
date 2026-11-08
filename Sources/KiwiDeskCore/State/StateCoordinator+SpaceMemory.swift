@@ -234,7 +234,7 @@ extension StateCoordinator {
         }
         closedDepartures.insert(id)
         // A close is no Desktop departure: its maximize ends (#2448).
-        if workspaces[space]?.maximized == id {
+        if workspaces[space]?.maximized?.window == id {
             workspaces.withSpace(space) { $0.maximized = nil }
         }
     }

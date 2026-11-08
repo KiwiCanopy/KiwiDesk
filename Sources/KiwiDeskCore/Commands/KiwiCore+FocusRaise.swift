@@ -123,8 +123,8 @@ extension KiwiCore {
         }
         // A focus onto another tiled window ends a maximize; this
         // command's own pass draws the return (#2448).
-        let ended = state.retireEndedMaximize().first
-        let endedMaximize = ended != nil
+        let ended = Set(state.retireEndedMaximize())
+        let endedMaximize = !ended.isEmpty
         if let previous = previousFocused, previous != id,
             let frame = state.windows[previous]?.frame
         {
@@ -178,7 +178,7 @@ extension KiwiCore {
             // subset of `isFocusDriven` — but if that drifts,
             // never lose the raise.
             if defersRaise { raiseWindow(id) }
-            if let ended { retileEndingMaximize(ended) }
+            if endedMaximize { retileEndingMaximize(ended) }
             return true
         }
         let offsetBefore = activeSpace?.scrollRest?.offset

@@ -140,9 +140,9 @@ public final class TilingEngine {
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()
-    /// The window changing state in the pass running now (#2676),
-    /// nil between passes and for a newcomer.
-    var stateChangeWindow: WindowID?
+    /// The windows changing state in the pass running now (#2676,
+    /// #3063), empty between passes; never a newcomer.
+    var stateChangeWindows: Set<WindowID> = []
     /// Whether it springs its size: no promise survives a
     /// newcomer (#45), whose pass places it at its final size.
     var stateChangeSprings = false

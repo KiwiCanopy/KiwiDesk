@@ -33,10 +33,10 @@ extension KiwiCore {
         let (id, spaceID) = focused
         if state.maximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {
-                if $0.maximizeShape.matches(shape) {
+                if $0.maximized?.shape.matches(shape) == true {
                     $0.maximized = nil
                 } else {
-                    $0.maximizeShape = shape
+                    $0.maximized?.shape = shape
                 }
             }
         } else {
@@ -48,12 +48,15 @@ extension KiwiCore {
                 return .fail("only a tiled window can be maximized")
             }
             state.workspaces.withSpace(spaceID) {
-                $0.maximized = id
-                $0.maximizeShape = shape
+                $0.maximized = Maximize(
+                    window: id,
+                    shape: shape,
+                    follows: tiler.settings.maximize.followFocus
+                )
             }
         }
-        retileEndingMaximize(id)
-        if state.workspaces[spaceID]?.maximized == id {
+        retileEndingMaximize([id])
+        if state.workspaces[spaceID]?.maximized?.window == id {
             raiseWindow(id)
             raiseFloatsAbove(afterFocusing: id)
         }
@@ -68,7 +71,8 @@ extension KiwiCore {
 
     /// The windows of `space` the ring and the marks step aside on as
     /// filling their screen: a full Maximize (#2448, not a Height or
-    /// Width one, #3062) and a maximizing Monocle's tiled members.
+    /// Width one, #3062) and the tiled members of a maximizing
+    /// Monocle or of a Monocle a full follow draws whole (#3063).
     func screenFillers(of space: Space) -> Set<WindowID> {
         var fillers: Set<WindowID> = []
         if state.maximizedShape(of: space)?.axis == nil,
@@ -76,7 +80,7 @@ extension KiwiCore {
         {
             fillers.insert(id)
         }
-        if maximizesWindows(of: space) {
+        if maximizesWindows(of: space) || state.monocleFollowFills(space) {
             fillers.formUnion(state.effectiveTiledMembers(of: space))
         }
         return fillers
@@ -85,13 +89,13 @@ extension KiwiCore {
     /// The pass that grows a window to its screen or puts it back:
     /// one already-placed window changes size in place, no slot or
     /// membership moving, so it promises spring sizing (#593);
-    /// `window` is the state change and follows its own switch
+    /// `windows` are the state change and follow their own switch
     /// (#2676), the pass the resize animation's.
-    func retileEndingMaximize(_ window: WindowID) {
+    func retileEndingMaximize(_ windows: Set<WindowID>) {
         retile(
             animated: tiler.settings.animations.onWindowResize,
             sizing: .allSpringSized,
-            stateChange: window
+            stateChange: windows
         )
     }
 
@@ -100,7 +104,7 @@ extension KiwiCore {
     @discardableResult
     func endMaximize(of window: WindowID) -> Bool {
         guard let spaceID = state.windows[window].flatMap(state.renderSpace),
-            state.workspaces[spaceID]?.maximized == window
+            state.workspaces[spaceID]?.maximized?.window == window
         else { return false }
         state.workspaces.withSpace(spaceID) { $0.maximized = nil }
         updateBars()

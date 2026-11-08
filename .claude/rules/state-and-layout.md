@@ -212,9 +212,12 @@ editing here:
   The pocket's window parks and returns in one write, its motion
   drawn by the brief pocket (input-and-animation.md ▸ Pocketing's
   motion is DRAWN too).
-  The named window alone follows `animations.on_state_change` and
-  springs its size where no newcomer shares the pass; its
-  neighbours keep the pass's toggle. A door whose own pass draws a
+  The named windows alone follow `animations.on_state_change` and
+  spring their size where no newcomer shares the pass; their
+  neighbours keep the pass's toggle. A pass names every window whose
+  state changed — a follow's re-point names the window left and the
+  one arriving (#3063) — and the ring's hold takes the focused one.
+  A door whose own pass draws a
   maximize's return passes the ended window (`retireEndedMaximize`
   returns it, `retileEndingMaximize(_:)` requires it); a maximize
   a rearranging write ends returns inside that write's pass. The
@@ -2381,11 +2384,20 @@ editing here:
   until `retireEndedMaximize` runs; a raw spelling outside the
   register reds `MaximizedReaderCensusTests`, whose `allowed` map
   is the one copy of who may. **What it fills is read through
-  `StateCoordinator.maximizedShape(of:)` and written only beside
-  `maximized = id` (#3062)**: an ender clears the window alone, so
-  the stored `Space.maximizeShape` outlives it, and a raw spelling
-  joins the same suite's `shapeAllowed` with its reason
-  (`MaximizedReaderCensusTests` ▸ `shapeReadersAreCensused`). A
+  `StateCoordinator.maximizedShape(of:)`, and the window and its
+  shape are ONE value, `Space.maximized: Maximize?` (#3062, #3063)**,
+  so an ender's `maximized = nil` clears both and a re-point or a
+  re-key moves `.window` alone; never a field of the Maximize kept
+  beside it on `Space`. **A following Maximize (#3063) re-points
+  in `retireEndedMaximize` alone**, onto the tiled rival the
+  verdict names, and only while its window is still tiled; its
+  `follows` is stamped at the make and never read from settings
+  after, and `focusRetiles` answers true while one stands
+  (`MaximizeFollowTests`). A full follow on Monocle is drawn whole
+  in `layoutInput` alone (`StateCoordinator.monocleFollowFills`),
+  not through `layoutBounds(on:for:)`, whose other readers either end
+  the Maximize first (the resize writers) or stand down under it (the
+  shelf, the App Bar); a new reader that neither does takes it. A
   whole share is a full Maximize (`MaximizeShape.init`), so "fills
   its screen" is `axis == nil` alone. A press reads the share and
   anchor table through the one `KiwiCore.maximizeShape(from:for:)`,

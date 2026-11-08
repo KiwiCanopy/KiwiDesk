@@ -177,7 +177,7 @@ struct StateChangeRingTests {
             from: rest,
             to: away
         )
-        core.holdRingForStateChange(WindowID(1))
+        core.holdRingForStateChange([WindowID(1)])
         #expect(ring.isDormant)
         core.tiler.animation.cancel(window: WindowID(1))
         #expect(border.stateChange?.settledAt != nil)

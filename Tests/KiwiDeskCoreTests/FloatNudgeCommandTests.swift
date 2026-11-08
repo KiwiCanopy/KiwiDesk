@@ -262,11 +262,11 @@ struct FloatNudgeCommandTests {
         )
         let space = SpaceID("1")
         core.state.workspaces.withSpace(space) {
-            $0.maximized = tile
+            $0.maximized = Maximize(window: tile)
             $0.focused = one
         }
         #expect(move(core, "x", 30).isSuccess)
         #expect(commanded(core)?.minX == start.minX + 30)
-        #expect(core.state.workspaces[space]?.maximized == tile)
+        #expect(core.state.workspaces[space]?.maximized?.window == tile)
     }
 }

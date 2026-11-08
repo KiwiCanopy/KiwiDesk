@@ -272,8 +272,8 @@ extension KiwiCore {
         let filedHere = payHiddenAppMove(focused: id)
         rememberHonoredFocus(id)
         // Ends a maximize, drawn by the one pass below (#2448).
-        let ended = state.retireEndedMaximize().first
-        let endedMaximize = ended != nil
+        let ended = Set(state.retireEndedMaximize())
+        let endedMaximize = !ended.isEmpty
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.
@@ -334,7 +334,7 @@ extension KiwiCore {
             )
         } else if filedHere {
             retile(animated: true)
-        } else if let ended {
+        } else if endedMaximize {
             retileEndingMaximize(ended)
         }
         // Keep floats above the just-focused tiled window (#418). Not

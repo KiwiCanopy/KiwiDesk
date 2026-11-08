@@ -110,6 +110,11 @@ extension APIReference {
             .choice("anchor", MaximizeAnchor.self),
             .choice("shape", ScreenShape.self, optional: true)
         ),
+        "set_follow_focus": APIRecord(
+            "Makes a new Maximize move to the tiled window focus lands "
+                + "on instead of ending.",
+            .boolean("enabled")
+        ),
     ]
 
     static let floatingRecords: [String: APIRecord] = [

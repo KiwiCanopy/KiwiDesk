@@ -89,7 +89,7 @@ extension KiwiCore {
         {
             state.floatFrames[id] = floatFrame
         }
-        retile(stateChange: floating ? nil : id)
+        retile(stateChange: floating ? [] : [id])
         // Float direction only: the tile direction is the retile's,
         // the window named as the state change (#2676).
         if floating, !wasFloating {

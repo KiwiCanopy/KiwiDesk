@@ -15,6 +15,10 @@ public struct MaximizeSettings: Sendable, Equatable {
     /// Where a directional Maximize grows from
     /// (`maximize.anchor.<shape>`).
     public var anchor = PerScreenShape(Self.defaultAnchor)
+    /// Whether a new Maximize moves to the tiled window focus lands
+    /// on instead of ending (`maximize.follow_focus`, #3063); one
+    /// value for every shape.
+    public var followFocus = false
 
     public init() {}
 
@@ -72,6 +76,7 @@ extension MaximizeSettings: Codable {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case share
         case anchor
+        case followFocus = "follow_focus"
     }
 
     enum ShareKeys: String, CodingKey, CaseIterable {
@@ -82,6 +87,9 @@ extension MaximizeSettings: Codable {
     public init(from decoder: Decoder) throws {
         let defaults = Self()
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        followFocus =
+            try container.decodeIfPresent(Bool.self, forKey: .followFocus)
+            ?? defaults.followFocus
         if container.contains(.anchor) {
             anchor = try .decode(
                 container.nestedContainer(
@@ -137,5 +145,6 @@ extension MaximizeSettings: Codable {
             forKey: .anchor
         )
         try anchor.encode(into: &anchors)
+        try container.encode(followFocus, forKey: .followFocus)
     }
 }

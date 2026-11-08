@@ -53,8 +53,8 @@ struct MaximizeStickyWindowTests {
     func travelerFills() {
         let core = makeCore()
         #expect(core.execute("toggle_maximized").isSuccess)
-        #expect(core.state.workspaces[here]?.maximized == sticky)
-        #expect(core.state.workspaces[home]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == sticky)
+        #expect(core.state.workspaces[home]?.maximized?.window == nil)
         #expect(maximized(core) == sticky)
         #expect(
             core.tiler.placedFrames(state: core.state)[sticky] == bounds
@@ -69,7 +69,7 @@ struct MaximizeStickyWindowTests {
         let core = makeCore()
         core.execute("toggle_maximized")
         #expect(core.execute("toggle_maximized").isSuccess)
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("On its home Space it fills like any member")
@@ -86,8 +86,8 @@ struct MaximizeStickyWindowTests {
         core.execute("toggle_maximized")
         core.state.workspaces.activate(home)
         core.retile()
-        #expect(core.state.workspaces[here]?.maximized == nil)
-        #expect(core.state.workspaces[home]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
+        #expect(core.state.workspaces[home]?.maximized?.window == nil)
         core.state.workspaces.activate(here)
         core.retile()
         #expect(maximized(core) == nil)
@@ -210,7 +210,7 @@ struct MaximizeStickyWindowTests {
         let core = makeCore()
         core.execute("toggle_maximized")
         core.state.workspaces.focus(tile, in: here)
-        #expect(core.state.workspaces[here]?.maximized == sticky)
+        #expect(core.state.workspaces[here]?.maximized?.window == sticky)
         core.state.apply(.windowDestroyed(tile, wasMinimized: false))
         #expect(core.state.workspaces.lastFocused != sticky)
     }
@@ -264,7 +264,7 @@ struct MaximizeStickyWindowTests {
         #expect(maximized(core) == sticky)
         core.state.workspaces.activate(home)
         core.retile()
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("A native-tab re-key carries the flag off its home")
@@ -273,7 +273,7 @@ struct MaximizeStickyWindowTests {
         core.execute("toggle_maximized")
         let next = WindowID(9)
         core.state.workspaces.rekey(sticky, to: next)
-        #expect(core.state.workspaces[here]?.maximized == next)
+        #expect(core.state.workspaces[here]?.maximized?.window == next)
     }
 
     @Test("A Desktop departure from its home Space waits for the return")
@@ -283,7 +283,7 @@ struct MaximizeStickyWindowTests {
         core.execute("toggle_maximized")
         core.state.apply(.windowDestroyed(sticky, wasMinimized: false))
         core.retile()
-        #expect(core.state.workspaces[home]?.maximized == sticky)
+        #expect(core.state.workspaces[home]?.maximized?.window == sticky)
     }
 
     @Test("Closing it ends it, though the flag is not on its home")
@@ -294,7 +294,7 @@ struct MaximizeStickyWindowTests {
         #expect(maximized(core) == nil)
         #expect(core.state.workspaces.lastFocused != sticky)
         core.retile()
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("Minimizing it ends it, though the flag is not on its home")
@@ -304,7 +304,7 @@ struct MaximizeStickyWindowTests {
         core.state.apply(.windowDestroyed(sticky, wasMinimized: true))
         #expect(maximized(core) == nil)
         core.retile()
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("A drag of the traveler ends it")
@@ -312,7 +312,7 @@ struct MaximizeStickyWindowTests {
         let core = makeCore()
         core.execute("toggle_maximized")
         #expect(core.endMaximize(of: sticky))
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("Turning sticky off sends it home and ends it")
@@ -322,7 +322,7 @@ struct MaximizeStickyWindowTests {
         core.state.setSticky(sticky, .none)
         #expect(maximized(core) == nil)
         core.retile()
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("A floating sticky window is still refused")
@@ -330,7 +330,7 @@ struct MaximizeStickyWindowTests {
         let core = makeCore()
         core.state.windows.setFloating(sticky, true)
         #expect(!core.execute("toggle_maximized").isSuccess)
-        #expect(core.state.workspaces[here]?.maximized == nil)
+        #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
     @Test("A traveler replaces a member's maximize on its Space")

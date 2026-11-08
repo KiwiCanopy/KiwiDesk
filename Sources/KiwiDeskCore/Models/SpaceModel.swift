@@ -142,14 +142,10 @@ public struct Space: Sendable, Equatable {
     /// The last shown window of each such run that hides windows
     /// after it (#2235), the run's other end.
     public var runTails: Set<WindowID>
-    /// The window filling its screen (a traveler's too, #3035) until
-    /// focus moves to another tiled window or it leaves the tiled set
-    /// (#2448): read `StateCoordinator.maximizedWindow(of:)`. Session-only.
-    public var maximized: WindowID?
-    /// What `maximized` fills (#3062), written with it by the toggle
-    /// and meaningless while it is nil: read
-    /// `StateCoordinator.maximizedShape(of:)`. Session-only.
-    public var maximizeShape: MaximizeShape = .full
+    /// The Maximize standing until focus moves to another tiled
+    /// window or its window leaves the tiled set (#2448): read
+    /// `StateCoordinator.maximizedWindow(of:)`. Session-only.
+    public var maximized: Maximize?
 
     public init(
         id: SpaceID,
@@ -163,8 +159,7 @@ public struct Space: Sendable, Equatable {
         trackWeights: [WindowID: Double] = [:],
         runHeads: Set<WindowID> = [],
         runTails: Set<WindowID> = [],
-        maximized: WindowID? = nil,
-        maximizeShape: MaximizeShape = .full
+        maximized: Maximize? = nil
     ) {
         self.id = id
         self.mode = mode
@@ -178,7 +173,6 @@ public struct Space: Sendable, Equatable {
         self.runHeads = runHeads
         self.runTails = runTails
         self.maximized = maximized
-        self.maximizeShape = maximizeShape
     }
 
     /// Appends window if not already present.
@@ -284,7 +278,8 @@ public struct Space: Sendable, Equatable {
         // A departing maximized window keeps its id: a Desktop
         // departure returns to it, and `retireEndedMaximize` ends
         // every other departure (#2448).
-        if focused == window, let maximized, maximized != window,
+        if focused == window, let maximized = maximized?.window,
+            maximized != window,
             windows.contains(maximized)
         {
             // A window closing over a maximized one (a dialog)

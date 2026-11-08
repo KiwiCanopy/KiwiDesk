@@ -31,13 +31,7 @@ extension TilingSettings {
     /// The gaps `space`'s layout input takes: none where its layout
     /// maximizes its windows, else the Space's own.
     public func layoutGaps(for space: Space) -> Gaps {
-        guard maximizesWindows(in: space.mode) else {
-            return gaps(for: space.id)
-        }
-        return Gaps(
-            outer: .init(top: 0, bottom: 0, left: 0, right: 0),
-            inner: .init(horizontal: 0, vertical: 0)
-        )
+        maximizesWindows(in: space.mode) ? .none : gaps(for: space.id)
     }
 
     /// Whether the pocket rests on screen in `mode`: its Show is not
@@ -46,4 +40,12 @@ extension TilingSettings {
     public func pocketRests(in mode: LayoutMode) -> Bool {
         pocketRests && !maximizesWindows(in: mode)
     }
+}
+
+extension Gaps {
+    /// No gap anywhere: what a window filling its screen takes.
+    public static let none = Gaps(
+        outer: .init(top: 0, bottom: 0, left: 0, right: 0),
+        inner: .init(horizontal: 0, vertical: 0)
+    )
 }

@@ -5891,6 +5891,12 @@ window is away from its home Space. With
 maximized on its home Space leaves with its Desktop and comes back
 maximized, as any window does.
 
+:::unreleased
+With [`maximize.set_follow_focus`](#maximizeset_follow_focus) on
+when it is made, moving focus to another tiled window moves the
+maximize there instead of ending it.
+:::
+
 
 With an axis, the window fills that axis of the same area and
 takes a share of the other: `"height"` runs top to bottom at a
@@ -5968,6 +5974,29 @@ elsewhere. A full Maximize ignores it.
 ```lua
 KiwiDesk.maximize.set_anchor("center", "ultrawide")
 ```
+
+### maximize.set_follow_focus
+
+:::unreleased
+**Expects:** `true` or `false` (default `false`). No Settings row.
+
+**Does:** with `true`, a Maximize made after the call moves to the
+tiled window focus lands on instead of ending, in every shape. Only
+the focused window fills; every other window keeps its place, so a
+focus key moves by the layout's own slots: in a 2×2 grid with
+bottom-left maximized, focus up fills top-left. Each step resizes two
+windows, the one arriving and the one left, save a full Maximize on a
+Monocle Space, where every window already fills the screen and a
+step only raises one. A Maximize already on
+screen keeps the switch it was made with. A float taking focus, a
+swap, a resize or a layout change behave as for any Maximize.
+
+**Example:**
+
+```lua
+KiwiDesk.maximize.set_follow_focus(true)
+```
+:::
 
 ### pocket
 

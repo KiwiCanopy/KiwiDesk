@@ -200,7 +200,7 @@ extension KiwiCore {
         // the window back rather than reading a swap or a resize off
         // it (#2448). A crossed one is a move like any other.
         if endedMaximize, !crossedDisplays {
-            retileEndingMaximize(id)
+            retileEndingMaximize([id])
             return
         }
         // A gesture that live-crossed displays (#504) skips the

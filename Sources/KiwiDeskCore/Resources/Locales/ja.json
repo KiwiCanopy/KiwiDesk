@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "レイヤー",
   "diff.label.layers": "レイヤー",
+  "diff.label.maximize_follow_focus": "フォーカスを追って最大化",
   "diff.label.min_size_override": "最小サイズのオーバーライド",
   "diff.label.placement_override": "配置のオーバーライド",
   "diff.label.profile_binding": "プロファイルの割り当て",

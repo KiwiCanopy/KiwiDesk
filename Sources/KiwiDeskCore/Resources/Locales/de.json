@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Ebene",
   "diff.label.layers": "Ebenen",
+  "diff.label.maximize_follow_focus": "Maximieren folgt dem Fokus",
   "diff.label.min_size_override": "Mindestgrößen-Überschreibung",
   "diff.label.placement_override": "Platzierungs-Überschreibung",
   "diff.label.profile_binding": "Profil-Verknüpfung",

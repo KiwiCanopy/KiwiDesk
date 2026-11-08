@@ -101,7 +101,7 @@ extension TilingEngine {
         let from = sent ?? current
         // The window changing state (#2676) follows its own switch
         // and springs its size.
-        let changing = id == stateChangeWindow
+        let changing = stateChangeWindows.contains(id)
         let instant = applyFrame(
             id,
             from: from,

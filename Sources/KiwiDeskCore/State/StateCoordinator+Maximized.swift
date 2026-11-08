@@ -13,25 +13,43 @@ extension StateCoordinator {
     /// (#431), so it asks the system focus itself, and focus on
     /// another screen keeps it (#3035).
     public func maximizedWindow(of space: Space) -> WindowID? {
-        guard let id = space.maximized, space.mode != .floating
+        guard let id = space.maximized?.window,
+            let tiled = maximizedTiled(of: space),
+            maximizeRival(of: space, window: id, tiled: tiled) == nil
+        else { return nil }
+        return id
+    }
+
+    /// `space`'s tiled members while its stored Maximize window is
+    /// drawn tiled on a tiled layout, or nil.
+    private func maximizedTiled(of space: Space) -> [WindowID]? {
+        guard let id = space.maximized?.window, space.mode != .floating
         else { return nil }
         let tiled = effectiveTiledMembers(of: space)
-        guard tiled.contains(id) else { return nil }
+        return tiled.contains(id) ? tiled : nil
+    }
+
+    /// The other tiled member of `space` holding focus over `window`,
+    /// which ends a Maximize or, while it follows, takes it (#3063).
+    private func maximizeRival(
+        of space: Space,
+        window id: WindowID,
+        tiled: [WindowID]
+    ) -> WindowID? {
         let rival =
             space.windows.contains(id)
             ? focusAnchor(of: space, tiled: tiled)
             : workspaces.lastFocused
-        if let rival, rival != id, tiled.contains(rival) {
+        guard let rival, rival != id, tiled.contains(rival) else {
             return nil
         }
-        return id
+        return rival
     }
 
     /// What `space`'s maximized window fills (#3062), or nil where
-    /// `maximizedWindow(of:)` shows none: the stored shape is
-    /// written with the window and outlives it, so read it here.
+    /// `maximizedWindow(of:)` shows none.
     public func maximizedShape(of space: Space) -> MaximizeShape? {
-        maximizedWindow(of: space) == nil ? nil : space.maximizeShape
+        maximizedWindow(of: space) == nil ? nil : space.maximized?.shape
     }
 
     /// The maximized traveler drawn beneath `id`, on the Space `id`
@@ -58,18 +76,50 @@ extension StateCoordinator {
     }
 
     /// Clears every stored maximize the verdict no longer honours,
-    /// so focus coming back never re-maximizes. Returns the windows
-    /// whose maximize it ended.
+    /// so focus coming back never re-maximizes, and re-points a
+    /// following one at the tiled window focus moved to (#3063).
+    /// Returns the windows whose size it changed: an ended one, and
+    /// a follow's window left and window arriving.
     @discardableResult
     mutating func retireEndedMaximize() -> [WindowID] {
-        let ended = workspaces.allSpaces.filter {
-            guard let id = $0.maximized else { return false }
-            return maximizedWindow(of: $0) == nil
-                && !awaitsMaximizedReturn(id, from: $0.id)
+        var changed: [WindowID] = []
+        for space in workspaces.allSpaces {
+            guard let maximize = space.maximized,
+                maximizedWindow(of: space) == nil,
+                !awaitsMaximizedReturn(maximize.window, from: space.id)
+            else { continue }
+            let rival =
+                maximize.follows
+                ? maximizedTiled(of: space).flatMap {
+                    maximizeRival(
+                        of: space,
+                        window: maximize.window,
+                        tiled: $0
+                    )
+                } : nil
+            workspaces.withSpace(space.id) {
+                if let rival {
+                    $0.maximized?.window = rival
+                } else {
+                    $0.maximized = nil
+                }
+            }
+            changed.append(maximize.window)
+            if let rival { changed.append(rival) }
         }
-        for space in ended {
-            workspaces.withSpace(space.id) { $0.maximized = nil }
-        }
-        return ended.compactMap(\.maximized)
+        return changed
+    }
+
+    /// Whether `space` is a Monocle showing a full Maximize that
+    /// follows focus, which every member draws at the full frame
+    /// (#3063 ▸ 4).
+    public func monocleFollowFills(_ space: Space) -> Bool {
+        space.mode == .monocle && followsMaximize(of: space)
+            && maximizedShape(of: space)?.axis == nil
+    }
+
+    /// Whether `space` shows a Maximize that follows focus (#3063).
+    public func followsMaximize(of space: Space) -> Bool {
+        maximizedWindow(of: space) != nil && space.maximized?.follows == true
     }
 }

@@ -63,10 +63,12 @@ extension KiwiCore {
     }
 
     /// Whether a focus on `id` owes a pass: a focus-driven layout
-    /// always, Stack or Track where the focus scrolls a run. The
-    /// one predicate the commanded focus and the focus report share.
+    /// always, Stack or Track where the focus scrolls a run, and any
+    /// layout while a Maximize follows focus (#3063). The one
+    /// predicate the commanded focus and the focus report share.
     func focusRetiles(to id: WindowID) -> Bool {
         activeSpace?.mode.isFocusDriven == true || focusScrollsRun(to: id)
+            || activeSpace.map(state.followsMaximize(of:)) == true
     }
 
     /// The windows the active Space's runs would park as the

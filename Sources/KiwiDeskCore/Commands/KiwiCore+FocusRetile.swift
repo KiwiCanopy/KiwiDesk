@@ -38,7 +38,7 @@ extension KiwiCore {
     /// sizing (#2448).
     func retileWithScrollDuration(
         sizing: BatchSizing = .mayInstantSize,
-        stateChange: WindowID? = nil
+        stateChange: Set<WindowID> = []
     ) {
         if activeSpace?.mode == .scrolling,
             tiler.settings.animations.onScrolling

@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Livello",
   "diff.label.layers": "Livelli",
+  "diff.label.maximize_follow_focus": "La massimizzazione segue il focus",
   "diff.label.min_size_override": "Personalizzazione della dimensione minima",
   "diff.label.placement_override": "Personalizzazione del posizionamento",
   "diff.label.profile_binding": "Associazione profilo",

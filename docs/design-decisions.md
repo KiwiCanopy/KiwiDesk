@@ -6412,9 +6412,9 @@ classifies against are unchanged, and the layout keeps
 reserving the bar strip, so nothing reflows on return.
 
 It ends when focus lands on another TILED window of its Space —
-a focus key included, so focus-right puts it back rather than
-moving the maximize to the neighbour, which would be Monocle — or
-when the window leaves the tiled set. A float taking focus (a
+a focus key included, so by default focus-right puts it back rather
+than moving the maximize to the neighbour — or when the window
+leaves the tiled set. A float taking focus (a
 dialog, a palette) and a switch away and back keep it, since
 the state is the window's, as macOS full screen, AeroSpace's
 `fullscreen` and Rectangle's restore all keep theirs. A verb
@@ -6435,6 +6435,24 @@ state](#a-window-changing-state-animates-under-its-own-switch-2676)).
 Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
+
+:::unreleased
+*It can follow focus (#3063).* `maximize.set_follow_focus(true)`, a
+Lua-only switch, makes a new Maximize move to the tiled window focus
+lands on instead of ending; any shape follows. It is not Monocle:
+only the focused window fills, laid over its own issued frame, and
+every other window keeps its slot, so focus search and drag still
+read the slots — in a 2×2 grid with bottom-left maximized, focus up
+fills top-left. The switch is stamped on the Maximize when it is
+made, as the share and anchor are, so flipping it never changes one
+already on screen and the retire stays a state pass with no settings
+read. The price is two frame writes into apps per focus step, the
+window arriving growing and the one left shrinking back, which
+Monocle avoids (#2099); so on a Monocle Space a full follow is drawn
+through the "Maximize windows" input transform (#2976), every member
+at the full frame, and a focus step there stays a raise. A Height or
+Width follow on Monocle pays the two writes.
+:::
 
 A sticky window's flag sits on the Space it renders on, where its
 layout input already places it, so leaving that Space ends it

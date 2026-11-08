@@ -92,7 +92,7 @@ extension KiwiCore {
         if let next, let space = state.workspaces.space(of: next) {
             state.workspaces.focus(next, in: space)
         }
-        retile(stateChange: id)
+        retile(stateChange: [id])
         let play = shown.flatMap {
             playBriefPocket(
                 .into,
@@ -188,7 +188,7 @@ extension KiwiCore {
             holdRingThroughLanding(id, target: frame, lands: lands)
         }
         refreshStickyReach()
-        retile(stateChange: id)
+        retile(stateChange: [id])
         // Raised as it lands, under the plate's fade, sharing the
         // held write's deadline unordered (#2845).
         handPocketFocus(after: play?.handOff, leaving: cameFrom) {

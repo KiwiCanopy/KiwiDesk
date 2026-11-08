@@ -20,6 +20,8 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case maximizeHeightShare = "settings.maximize.heightShare"
     case maximizeWidthShare = "settings.maximize.widthShare"
     case maximizeAnchor = "settings.maximize.anchor"
+    /// Whether a new Maximize follows focus (#3063), Lua-only.
+    case maximizeFollowFocus = "settings.maximize.followFocus"
     case resizeStep = "settings.resizeStep"
     case swapSkipsCascade = "settings.swapSkipsCascade"
     case floatPlacement = "settings.floatPlacement"
@@ -66,7 +68,8 @@ extension BehaviourKey {
                 gate: .setting(.spaces(.spaceModes))
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride:
+            .floatScaleOnDisplayChange, .placementOverride,
+            .maximizeFollowFocus:
             return .luaOnly
         case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
             .mouseHoverFocusDelay:
@@ -118,7 +121,8 @@ extension BehaviourKey {
                 help: "space_override.min_size.help"
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride:
+            .floatScaleOnDisplayChange, .placementOverride,
+            .maximizeFollowFocus:
             return .none
         case .mouseHoverFocusDelay:
             return .text("behavior.mouse.hover_focus_delay")

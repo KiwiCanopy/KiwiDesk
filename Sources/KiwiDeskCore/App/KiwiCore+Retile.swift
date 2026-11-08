@@ -35,7 +35,7 @@ extension KiwiCore {
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
         sizing: BatchSizing = .mayInstantSize,
-        stateChange: WindowID? = nil
+        stateChange: Set<WindowID> = []
     ) {
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
@@ -57,7 +57,8 @@ extension KiwiCore {
         if sortTemporarySpaces() { spacesChanged = true }
         if spacesChanged { emitSpaceChange() }
         payOwedShortcutDrops()  // #1827
-        state.retireEndedMaximize()  // #2448
+        // A retire here names what it changed, a follow's two (#3063).
+        let retired = Set(state.retireEndedMaximize())  // #2448
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
         let asked = MotionGate.Owed(
@@ -65,7 +66,7 @@ extension KiwiCore {
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
             sizing: sizing,
-            stateChange: stateChange
+            stateChange: stateChange.union(retired)
         )
         let paying = tiler.motionGate.owed != nil
         guard let run = tiler.motionGate.admit(asked) else {
@@ -159,7 +160,7 @@ extension KiwiCore {
         if pass.probes { oweApplyHealPass() }
         // The window changing state hides its ring until it lands,
         // a held pass's included (#2676).
-        if let stateChange { holdRingForStateChange(stateChange) }
+        holdRingForStateChange(stateChange)
         narrateCorroborationProbes()
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op

@@ -84,27 +84,30 @@ struct StateChangeAnimationTests {
         #expect(!core.tiler.settings.animations.onStateChange)
     }
 
-    @Test("a held pass keeps the newest state change")
+    @Test("a held pass keeps every state change (#3063)")
     func owedMergeKeepsTheWindow() {
         let older = MotionGate.Owed(
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize,
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         let bare = MotionGate.Owed(
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize
         )
-        #expect(older.merged(with: bare).stateChange == WindowID(1))
+        #expect(older.merged(with: bare).stateChange == [WindowID(1)])
         let newer = MotionGate.Owed(
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize,
-            stateChange: WindowID(2)
+            stateChange: [WindowID(2)]
         )
-        #expect(older.merged(with: newer).stateChange == WindowID(2))
+        #expect(
+            older.merged(with: newer).stateChange
+                == [WindowID(1), WindowID(2)]
+        )
     }
 
     @Test("floating follows on_state_change, not on_relayout")
@@ -210,11 +213,30 @@ struct StateChangeAnimationTests {
         core.tiler.retile(
             state: core.state,
             newlyCreatedWindow: WindowID(2),
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         #expect(!core.tiler.stateChangeSprings)
-        core.tiler.retile(state: core.state, stateChange: WindowID(1))
+        core.tiler.retile(state: core.state, stateChange: [WindowID(1)])
         #expect(core.tiler.stateChangeSprings)
+    }
+
+    /// A follow's re-point names two windows (#3063): each follows
+    /// `on_state_change`, an unnamed one the pass's toggle.
+    @Test("every window a pass names follows on_state_change")
+    func everyNamedWindowFollows() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        for raw: UInt32 in 1...3 { addWindow(core, raw) }
+        core.tiler.settings.animations.onStateChange = true
+        let applies = countApplies(core)
+        core.tiler.retile(
+            state: core.state,
+            animated: false,
+            stateChange: [WindowID(1), WindowID(2)]
+        )
+        #expect((applies()[WindowID(1)] ?? 0) >= 1)
+        #expect((applies()[WindowID(2)] ?? 0) >= 1)
+        #expect((applies()[WindowID(3)] ?? 0) == 0)
     }
 
     /// The newcomer is never the state change: it follows the
@@ -230,7 +252,7 @@ struct StateChangeAnimationTests {
             state: core.state,
             animated: true,
             newlyCreatedWindow: WindowID(1),
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         #expect((applies()[WindowID(1)] ?? 0) >= 1)
     }
@@ -253,7 +275,7 @@ struct StateChangeAnimationTests {
                 animated: nil,
                 pass: .event,
                 sizing: .mayInstantSize,
-                stateChange: WindowID(1)
+                stateChange: [WindowID(1)]
             )
         )
         #expect((applies()[WindowID(1)] ?? 0) >= 1)
@@ -273,7 +295,7 @@ struct StateChangeAnimationTests {
         core.tiler.retile(
             state: core.state,
             newlyCreatedWindow: WindowID(2),
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         let spring = try #require(
             core.tiler.animation.removeAnimation(for: WindowID(1))

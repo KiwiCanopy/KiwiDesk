@@ -34,8 +34,10 @@ extension TilingEngine {
     ) -> (space: Space, tiled: [WindowID], context: LayoutContext) {
         // The shelf's reservation (#293, #1517) comes off the
         // visible frame before any layout sees its bounds.
-        let bounds = layoutBounds(on: screen, for: space)
         let visible = visibleBounds(screen)
+        // A full Monocle follow takes #2976's transform (#3063 ▸ 4).
+        let follows = state.monocleFollowFills(space)
+        let bounds = follows ? visible : layoutBounds(on: screen, for: space)
         let tiled = state.effectiveTiledMembers(of: space)
         var context = settings.context(
             bounds: bounds,
@@ -43,16 +45,11 @@ extension TilingEngine {
             sticky: Set(state.windows.all.filter(\.isSticky).map(\.id)),
             session: sessionRatios(space.id),
             stackFlip: stackFlip(space.id),
-            // Surface a tiled-sticky traveler when it is the
-            // frontmost window (#431): it has a slot in `tiled`
-            // but can never be the membership-guarded `focused`
-            // slot. Scrolling reads `context.focused` to pan
-            // and Monocle's `park` reads it to pick the shown
-            // member (#881); `persistScrollRest` reads this
-            // same `layoutInput`, so the pan and the stored
-            // offset stay consistent. For a monocle space the
-            // anchor is HELD across a float focus — see
-            // `heldMonocleAnchor`.
+            // A tiled-sticky traveler in front (#431) has a slot but
+            // is never the membership-guarded `focused`; Scrolling's
+            // pan and Monocle's park read it (#881), and
+            // `persistScrollRest` reads this same input. Monocle
+            // HOLDS the anchor across a float focus.
             focusedOverride: heldMonocleAnchor(
                 state.focusAnchor(of: space, tiled: tiled),
                 space: space,
@@ -83,6 +80,7 @@ extension TilingEngine {
         // computation, so every other `calculatedFrames`
         // caller keeps the generalized consume.
         context.probesBeyondBounds = probeBeyondBoundsPass
+        if follows { context.gaps = .none }
         return (space, tiled, context)
     }
 
