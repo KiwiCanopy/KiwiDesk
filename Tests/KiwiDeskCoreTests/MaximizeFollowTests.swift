@@ -84,6 +84,26 @@ struct MaximizeFollowTests {
         #expect(slots(core)[ids[1]] != bounds)
     }
 
+    @Test("A focus report on a static layout draws the follow")
+    func focusReportDrawsTheFollow() {
+        let (core, space) = makeCore(follow: true, mode: "bsp")
+        #expect(core.execute("toggle_maximized").isSuccess)
+        core.handle(.windowFocused(ids[1]))
+        #expect(maximized(core, space) == ids[1])
+        #expect(issued(core)[ids[1]] == bounds)
+        #expect(issued(core)[ids[0]] == slots(core)[ids[0]])
+    }
+
+    @Test("A float taking focus keeps the follow where it is")
+    func floatFocusKeeps() {
+        let (core, space) = makeCore(follow: true)
+        core.execute("toggle_maximized")
+        core.state.windows.setFloating(ids[3], true)
+        core.state.workspaces.focus(ids[3], in: space)
+        core.state.retireEndedMaximize()
+        #expect(maximized(core, space) == ids[0])
+    }
+
     @Test("Focus search reads the slots: up from bottom-left")
     func focusSearchReadsTheSlots() throws {
         let (core, space) = makeCore(follow: true)
@@ -168,6 +188,18 @@ struct MaximizeFollowTests {
     @Test("On Monocle a full follow draws every member full")
     func monocleDrawsEveryMemberFull() {
         let (core, space) = makeCore(follow: true, mode: "monocle")
+        // A shown, reserving bar: the layout bounds then differ from
+        // the visible frame the follow draws over.
+        core.tiler.settings.spaceBarStyle.visibility = .always
+        core.tiler.settings.spaceBarStyle.reserve = true
+        #expect(
+            core.tiler.settings.layoutBounds(
+                from: bounds,
+                mode: .monocle,
+                on: nil,
+                pocketAtRest: false
+            ) != bounds
+        )
         core.execute("toggle_maximized")
         let before = issued(core)
         for id in ids { #expect(before[id] == bounds) }

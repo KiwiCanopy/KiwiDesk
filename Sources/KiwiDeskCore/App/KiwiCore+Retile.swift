@@ -57,7 +57,8 @@ extension KiwiCore {
         if sortTemporarySpaces() { spacesChanged = true }
         if spacesChanged { emitSpaceChange() }
         payOwedShortcutDrops()  // #1827
-        state.retireEndedMaximize()  // #2448
+        // A retire here names what it changed, a follow's two (#3063).
+        let retired = Set(state.retireEndedMaximize())  // #2448
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
         let asked = MotionGate.Owed(
@@ -65,7 +66,7 @@ extension KiwiCore {
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
             sizing: sizing,
-            stateChange: stateChange
+            stateChange: stateChange.union(retired)
         )
         let paying = tiler.motionGate.owed != nil
         guard let run = tiler.motionGate.admit(asked) else {
