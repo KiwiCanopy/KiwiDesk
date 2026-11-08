@@ -6467,6 +6467,44 @@ a user typing 33 would see "33 %" as an off-menu item beside the ⅓
 they meant, and a press would size the window just short of the
 third the menu offers.
 
+:::unreleased
+### Monocle's "Maximize windows" hides the bars, it does not stand them down (#2976)
+
+**[Rationale]**
+
+**A Monocle setting, `monocle.set_maximize_windows`, puts every
+member at the screen's visible frame with no gaps, and Monocle then
+reads as if both bars were set to Hidden in that layout.** Two
+rulings above read close to it. The #2448 refusal of "Monocle with
+the bars hidden" was about how to build Maximize, a state that ends
+when focus moves; this is a layout setting you may live in for
+hours, and it adds no layout. The Monocle row of the App Bar
+turned off (#2099) is not enough either: it reaches only the App
+Bar, never the Space Bar, the pocket, the ring or the marks.
+
+Real Maximize stands the shelf down (`shelfStandsDown`); this
+does not, and the difference is deliberate. A stand-down refuses
+the bar's shortcut, makes arriving on the Space instant while
+leaving it slides, and leaves nothing naming the Space. Read as
+Hidden instead, the shortcut still shows a bar over the window with
+nothing moving, the Space slide and the Space, layout and Desktop
+cues keep playing, and the menu-bar item names the Space, as for
+any Hidden bar. The Hidden reading wins over an Always sibling on
+the edge, or the shortcut would answer "shown beside always".
+
+The frame is settled when the layout input is built
+(`TilingSettings.context`, gaps 0 over `visibleBounds`), so every
+member, a parked one included, holds the full frame up front and a
+focus step stays a raise that writes to no app (#2099); the one
+window `Space.maximized` names could not give that. The pocket
+shows no handle and no strip on that layout, only during a drag or
+a play, since a handle at rest would sit on the window. The ring
+and the marks step aside through one predicate beside
+`maximizedWindow(of:)`, `maximizesWindows(of:)`, rather than
+through the Hidden reading, which never reaches them. It applies on
+every Monocle Space; a per-Space override waits for someone to ask.
+:::
+
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
 
 **[Rationale]**

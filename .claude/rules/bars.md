@@ -433,6 +433,17 @@ twice, was a question the user answered twice. The argument is
   (#3062, `FullscreenStandDownTests` ▸ `directionalReachIsWired`).
   The verdict stays per screen, not per edge: a fill reaching one
   edge's strip stands down the bars on every edge.
+  **A maximizing Monocle (#2976) is no stand-down**: it reads both
+  bars Hidden through the one `TilingSettings.barVisibilities(in:)`,
+  which every per-mode answer takes — `drawsAtRest`,
+  `revealActionLive`, `autoReadsAlways`, the reservation, the
+  pocket's rest and the live plan (`shelfPlans(mode:)`) — never
+  `spaceBarStyle.visibility` or `appBarVisibility(in:)` read beside
+  a mode, so a shortcut, the slide and the cues keep working and
+  the Hidden reading beats an Always sibling. Its pocket rests
+  nowhere through the one `KiwiCore.pocketRests(on:)`, which the
+  plan, `pocketPlace` and the specs read per screen
+  (`MonocleMaximizeBarTests`).
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
