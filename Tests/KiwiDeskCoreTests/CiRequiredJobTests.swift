@@ -11,8 +11,9 @@ struct CiRequiredJobTests {
     private static let judge = "build-lint-test"
 
     /// Every step that runs `swift test`, read from the workflow so a
-    /// new one is owed the ratchet (`WarningRatchetWorkflowTests`,
-    /// `WarningGateTests`).
+    /// new one is seen by every reader of the list: the ratchet's
+    /// (`WarningRatchetWorkflowTests`, `WarningGateTests`) and the
+    /// tag's partitions (`ReleaseTestPartitionParityTests`).
     static func testSteps(in yaml: String) throws -> [String] {
         let names = yaml.split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }
@@ -38,7 +39,7 @@ struct CiRequiredJobTests {
 
     /// The package's test targets, read from the manifest so a new
     /// one is owed a job.
-    private func testTargets() throws -> [String] {
+    static func testTargets() throws -> [String] {
         let manifest = try String(
             contentsOf: scriptFixtureRepoRoot()
                 .appendingPathComponent("Package.swift"),
@@ -84,7 +85,7 @@ struct CiRequiredJobTests {
             CiPathFilterTests.jobBlock($0, in: yaml)
         }
         try #require(!jobs.isEmpty, "no job read")
-        for target in try testTargets() {
+        for target in try Self.testTargets() {
             let product = "--test-product \(target) "
             let owners = jobs.filter {
                 $0.contains(product + "--skip ExecTests")

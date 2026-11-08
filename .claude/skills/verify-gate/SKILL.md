@@ -119,9 +119,10 @@ cannot promote — an isolation inherited from an SDK class
 (#1780) — as CI's steps do.
 
 Step 1 keeps its bare command deliberately: `VerifyGateParityTests`
-scrapes it and requires the identical line in `scripts/release.sh`
-and `release.yml`'s verify job, both of which the ratchet
-deliberately exempts.
+scrapes it and requires the identical line in `scripts/release.sh`,
+which the ratchet deliberately exempts. `release.yml` verifies the
+tag with ci.yml's parallel split instead of this list
+(`ReleaseTestPartitionParityTests`, packaging-and-release.md).
 
 ## Release build — conditional
 
