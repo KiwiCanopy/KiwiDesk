@@ -145,6 +145,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 lua: KiwiHubSide.view.lua
             )
         }
+        wireTilingRow(statusItem)
         statusItem.settingsComboProvider = { [weak self] in
             guard let self else { return nil }
             return ShortcutsOpenBinding.combo(

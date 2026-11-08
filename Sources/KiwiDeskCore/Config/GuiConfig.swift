@@ -131,6 +131,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case desktop
         case space
         case mode
+        case tiling
         case kiwivision
         case hyper
         case kiwihub
@@ -247,6 +248,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 AppWideSettings.Mode.self,
                 forKey: .mode
             ),
+            tiling: try container.decodeIfPresent(
+                AppWideSettings.Tiling.self,
+                forKey: .tiling
+            ),
             vision: try container.decodeIfPresent(
                 AppWideSettings.Vision.self,
                 forKey: .kiwivision
@@ -315,6 +320,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.desktop, forKey: .desktop)
             try container.encode(appWide.space, forKey: .space)
             try container.encode(appWide.mode, forKey: .mode)
+            try container.encode(appWide.tiling, forKey: .tiling)
             try container.encode(appWide.vision, forKey: .kiwivision)
             try container.encode(appWide.hyper, forKey: .hyper)
             try container.encode(appWide.kiwihub, forKey: .kiwihub)

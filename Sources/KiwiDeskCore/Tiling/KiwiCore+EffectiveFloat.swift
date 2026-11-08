@@ -14,7 +14,7 @@ extension KiwiCore {
         return EffectiveFloat.applies(
             isFloating: state.windows[id]?.isFloating == true,
             mode: active?.windows.contains(id) == true
-                ? active?.mode
+                ? active.map(state.placementMode(of:))
                 : nil
         )
     }

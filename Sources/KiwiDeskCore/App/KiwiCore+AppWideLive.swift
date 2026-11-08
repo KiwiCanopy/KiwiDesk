@@ -22,6 +22,11 @@ extension KiwiCore {
         // The whole stored group, so a field v3 adds re-draws too.
         if new.vision != old.vision, before == after { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }
+        // The writer's own pass lays it out; a load's closing
+        // retile does for a load (#3008).
+        if new.tilingStartGlobal != old.tilingStartGlobal {
+            mirrorTilingStart()
+        }
         if new.modifierSides != old.modifierSides {
             keys.modifierSides = new.modifierSides
         }

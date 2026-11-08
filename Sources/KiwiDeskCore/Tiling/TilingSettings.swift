@@ -66,6 +66,8 @@ public struct TilingSettings: Sendable, Equatable {
     public var pocketStyle = PocketStyle()
     /// Directional Maximize's shares and anchor (`maximize.*`, #3062).
     public var maximize = MaximizeSettings()
+    /// The tiling toggle's start values and ticks (#3008).
+    public var tiling = TilingToggleSettings()
     /// The drag ghost's switch (`drag.ghost`).
     public var dragGhost = DragVisual.ghostDefault
     /// The drag drop zone's switch (`drag.drop_zone`).

@@ -156,6 +156,17 @@ extension APIReference {
             "Flips the focused window between screen-sticky and "
                 + "off."
         ),
+        "toggle_tiling": APIRecord(
+            "Turns a Space's tiling off or back on, the active "
+                + "Space's when none is named.",
+            .space("space", optional: true)
+        ),
+        "set_tiling": APIRecord(
+            "Turns a Space's tiling on or off for this session, the "
+                + "active Space's when none is named.",
+            .boolean("enabled"),
+            .space("space", optional: true)
+        ),
         "toggle_maximized": APIRecord(
             "Fills the screen or one axis of it with the focused "
                 + "tiled window until toggled or focus moves.",

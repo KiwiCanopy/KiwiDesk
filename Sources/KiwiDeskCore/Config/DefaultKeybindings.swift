@@ -84,6 +84,7 @@ public enum DefaultKeybindings {
         rows.append(resetSizesRow())
         rows.append(maximizeRow())
         rows.append(contentsOf: directionalMaximizeRows())
+        rows.append(toggleTilingRow())
         rows.append(contentsOf: barRevealRows())
         rows.append(contentsOf: appChromeRows())
         return rows.map(base.rebased)

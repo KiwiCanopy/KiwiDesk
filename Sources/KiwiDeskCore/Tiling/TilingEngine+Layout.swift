@@ -4,14 +4,11 @@ import CoreGraphics
 // MARK: - Layout inputs & per-display placement
 
 extension TilingEngine {
-    /// The FOCUSED display's active-space layout inputs — the
-    /// single source that the focused-space consumers
-    /// (`persistScrollRest`, ZOrder, TrackSwap) read, so the
-    /// screen pick, floating filter, and context can never drift
-    /// between the frames we apply and the offset we store. Laid
-    /// out on the focused space's OWN display (multi-monitor),
-    /// falling back to the main screen when it has no display
-    /// assigned. `nil` without an active space or a screen.
+    /// The FOCUSED display's active-space layout inputs, the one
+    /// source the focused-space consumers (`persistScrollRest`,
+    /// ZOrder, TrackSwap) read so the frames applied and the offset
+    /// stored never drift; laid out on that Space's own display,
+    /// else the main screen. `nil` without an active space or a screen.
     func layoutInput(
         state: StateCoordinator
     ) -> (space: Space, tiled: [WindowID], context: LayoutContext)? {
@@ -32,6 +29,9 @@ extension TilingEngine {
         space: Space,
         screen: NSScreen
     ) -> (space: Space, tiled: [WindowID], context: LayoutContext) {
+        // A Space with tiling off lays out as Floating (#3008).
+        var space = space
+        space.mode = state.placementMode(of: space)
         // The shelf's reservation (#293, #1517) comes off the
         // visible frame before any layout sees its bounds.
         let visible = visibleBounds(screen)

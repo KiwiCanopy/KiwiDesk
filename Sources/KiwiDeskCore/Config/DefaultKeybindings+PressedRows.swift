@@ -72,6 +72,19 @@ extension DefaultKeybindings {
         )
     }
 
+    /// Tiling off and on for the Space on `⌃⌥T` (#3008), T for
+    /// tiling (owner, 2026-11-08). Free in the seed,
+    /// `SystemShortcuts.map` and macOS's symbolic hotkeys
+    /// (read 2026-11-08).
+    public static func toggleTilingRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+t",
+            lua: "KiwiDesk.toggle_tiling()",
+            kind: .navigation,
+            label: "Tiling Off for This Space"
+        )
+    }
+
     /// Maximize Height on `⌃⌥⇧M` and Maximize Width on `⌃⌥⌘M`
     /// (#3062), related variants of Maximize's `⌃⌥M`: `⇧` the first,
     /// `⌘` the second (owner, 2026-11-07). Free in

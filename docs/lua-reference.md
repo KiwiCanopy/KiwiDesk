@@ -5998,6 +5998,122 @@ KiwiDesk.maximize.set_follow_focus(true)
 ```
 :::
 
+### toggle_tiling
+
+:::unreleased
+**Expects:** nothing, or a Space id.
+
+**Does:** turns tiling off for the active Space, or the Space
+named, and back on with the next call. With tiling off, KiwiDesk
+stops arranging that Space's windows and leaves them where they
+are, as a Floating Space does, without gathering them; a drag
+moves a window without reordering the Space. Turning tiling back
+on puts each window back in its place, adds windows opened in
+the meantime at the end and drops the ones closed. Bars, rings
+and every shortcut keep working, unless
+[`tiling.set_off_hides_borders`](#tilingset_off_hides_borders) or
+[`tiling.set_off_hides_bars`](#tilingset_off_hides_bars) hides
+them. The Space Bar marks the Space with a pause symbol, and the
+quick menu's "Tiling Off for This Space" row shows the state. It
+lasts until KiwiDesk quits; a restart in place keeps it. Bound to
+`⌃⌥T` by default.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+t", function()
+    KiwiDesk.toggle_tiling()
+end)
+```
+:::
+
+### set_tiling
+
+:::unreleased
+**Expects:** a boolean, then optionally a Space id.
+
+**Does:** turns tiling on (`true`) or off (`false`) for the
+active Space, or the Space named, as
+[`toggle_tiling`](#toggle_tiling) does, without reading the state
+first.
+
+**Example:**
+
+```lua
+-- Space 3 holds a screen share: leave its windows alone.
+KiwiDesk.set_tiling(false, 3)
+```
+:::
+
+### set_tiling_start_global
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** sets whether a Space starts with tiling on where neither
+the profile ([`tiling.set_start`](#tilingset_start)) nor the Space
+says. Default `true`. A Space whose tiling a toggle set keeps that
+choice; every other Space follows the new value at once.
+App-wide, for this session only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_tiling_start_global(false)
+```
+:::
+
+### tiling.set_start
+
+:::unreleased
+**Expects:** a boolean or `nil`, then optionally a Space id.
+
+**Does:** sets whether this profile's Spaces start with tiling
+on, or with a Space id whether that Space does. A Space's value
+wins over the profile's, and the profile's over
+[`set_tiling_start_global`](#set_tiling_start_global); `nil`
+removes the value, so the level above decides. A Space whose
+tiling a toggle set keeps that choice; every other Space follows a
+new value at once.
+
+**Example:**
+
+```lua
+KiwiDesk.tiling.set_start(false, "Share")
+```
+:::
+
+### tiling.set_off_hides_borders
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** sets whether a Space with tiling off hides its focus
+border. Default `false`. Sticky and floating marks stay.
+
+**Example:**
+
+```lua
+KiwiDesk.tiling.set_off_hides_borders(true)
+```
+:::
+
+### tiling.set_off_hides_bars
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** sets whether a Space with tiling off hides the bars on
+its screen. Default `false`. Where the Space Bar is hidden, the
+menu-bar item shows the Space with the pause symbol.
+
+**Example:**
+
+```lua
+KiwiDesk.tiling.set_off_hides_bars(true)
+```
+:::
+
 ### pocket
 
 **Expects:** nothing, or a window id.

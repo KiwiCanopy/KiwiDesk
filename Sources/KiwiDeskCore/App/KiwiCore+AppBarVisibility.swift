@@ -53,6 +53,15 @@ extension KiwiCore {
         else { return [:] }
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let laid = tiler.placedFrames(of: space, on: screen, state: state)
+        // A Space with tiling off places no tile: every member is
+        // judged as a float, from its own frame (#3008).
+        let floats =
+            state.placementMode(of: space) == .floating
+            ? floats
+                + state.effectiveTiledMembers(of: space).filter {
+                    !floats.contains($0)
+                }
+            : floats
         let floating = Set(floats)
         let tiled = state.effectiveTiledMembers(of: space)
             .filter { !floating.contains($0) }

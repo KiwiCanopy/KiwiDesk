@@ -64,6 +64,8 @@ extension KiwiCore {
             // The sides too (#2601), applied at once: a line removed
             // reads off, and init.lua setting it again re-arms.
             appWideLedger.live.modifierSides = false
+            // The start value too (#3008): a line removed reads on.
+            appWideLedger.live.tilingStartGlobal = true
             return
         }
         guard let config = guiConfigStore.load() else { return }

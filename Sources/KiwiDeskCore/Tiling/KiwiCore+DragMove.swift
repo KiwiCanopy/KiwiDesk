@@ -53,7 +53,7 @@ extension KiwiCore {
         }
         guard
             let space = activeSpace,
-            space.mode != .floating,
+            state.placementMode(of: space) != .floating,
             space.windows.contains(id),
             state.windows[id]?.isFloating == false
         else {

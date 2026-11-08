@@ -32,6 +32,8 @@ enum QuickMenuBuilders {
         // The Settings pull-down (#1393) turns auto-enabling off and
         // states every row's `isEnabled` from its item.
         "Sources/KiwiDesk/Settings/Components/Common/NativePullDown.swift",
+        // The tiling row (#3008) states its own enablement.
+        "Sources/KiwiDesk/StatusItemController+TilingRow.swift",
     ]
 
     /// Files that construct rows and are NOT checked per row,

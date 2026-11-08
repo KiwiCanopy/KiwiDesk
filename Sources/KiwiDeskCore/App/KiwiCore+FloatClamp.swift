@@ -242,10 +242,13 @@ extension KiwiCore {
             // stamp read the show's first focus as a bounce
             // (#1787).
             !coversAsShow(window, at: frame),
+            // A layout's park on a tiling-off Space stays put, as the
+            // stranded-float recovery leaves it (#3008).
+            !(state.isTilingOff(workspace.id) && tiler.looksStashed(frame)),
             // EFFECTIVE float, never the flag (#1178).
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
-                mode: workspace.mode
+                mode: state.placementMode(of: workspace)
             )
         else { return nil }
         // One fold over every strip, one apply: a per-strip loop

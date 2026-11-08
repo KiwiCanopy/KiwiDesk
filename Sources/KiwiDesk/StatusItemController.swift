@@ -22,6 +22,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// The combo bound to Open Settings (#1381), read the same way;
     /// nil keeps the app menu's `⌘,`.
     var settingsComboProvider: () -> KeyCombo? = { nil }
+    /// Whether the active Space has tiling off, nil while no Space
+    /// can be toggled; its chord and its action (#3008).
+    var tilingOffProvider: () -> Bool? = { nil }
+    var tilingComboProvider: () -> KeyCombo? = { nil }
+    var onToggleTiling: () -> Void = {}
     /// The keyDown behind the menu action firing now, or nil;
     /// injected for tests (#2869).
     var menuKeyDown: () -> NSEvent? = { KeyCombo.menuKeyDown() }

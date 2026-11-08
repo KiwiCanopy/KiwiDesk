@@ -124,6 +124,15 @@ the anchor may yield joins `anchorVisitors`, never the anchor or
 the slot list alone (`BorderTravelerFocusTests` ▸
 `floatingVisitorGetsFocusedRing`).
 
+## Tiling off hides the rings only on its tick (#3008)
+
+A Space with tiling off keeps its rings unless the profile's
+`tiling.off_hides_borders` tick is on; then `desiredBorderSpecs`
+returns none for it, through the one named
+`KiwiCore.tilingOffHidesRings(on:)` — never a read of the tick or
+the toggle beside it. Sticky and floating marks stay: the tick
+names the focus border.
+
 ## The focused ring consults the own-key-window seam
 
 While the process holds an own key or modal window that is NOT

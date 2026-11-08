@@ -23,7 +23,8 @@ extension StateCoordinator {
     /// `space`'s tiled members while its stored Maximize window is
     /// drawn tiled on a tiled layout, or nil.
     private func maximizedTiled(of space: Space) -> [WindowID]? {
-        guard let id = space.maximized?.window, space.mode != .floating
+        guard let id = space.maximized?.window,
+            placementMode(of: space) != .floating
         else { return nil }
         let tiled = effectiveTiledMembers(of: space)
         return tiled.contains(id) ? tiled : nil

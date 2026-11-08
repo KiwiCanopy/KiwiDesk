@@ -33,7 +33,7 @@ extension KiwiCore {
         guard let window = state.windows[id],
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
-                mode: state.workspaces[target]?.mode
+                mode: state.placementMode(of: target)
             ),
             window.stickyScope != .global,
             tiler.dragExemptWindow != id

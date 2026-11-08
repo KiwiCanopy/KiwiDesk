@@ -20,7 +20,9 @@ extension KiwiCore {
                     // Never parked ⇒ never stranded: the verdict
                     // the park decides on (#445).
                     state.parksOnInactive(window, in: space),
-                    // EFFECTIVE float, never the flag (#1178).
+                    // EFFECTIVE float, never the flag (#1178), on the
+                    // stored mode: tiling off leaves a layout's park
+                    // where it is until resume places it (#3008).
                     EffectiveFloat.applies(
                         isFloating: window.isFloating,
                         mode: workspace.mode

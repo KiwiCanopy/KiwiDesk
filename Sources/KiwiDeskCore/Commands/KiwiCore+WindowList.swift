@@ -103,7 +103,8 @@ extension KiwiCore {
             }
             let tiled = Set(state.effectiveTiledMembers(of: space))
             let floats = drawn.map(\.id).filter {
-                space.mode == .floating || !tiled.contains($0)
+                state.placementMode(of: space) == .floating
+                    || !tiled.contains($0)
             }
             placements.merge(
                 windowPlacements(of: space, floats: floats),
@@ -163,7 +164,7 @@ extension KiwiCore {
             "effective_float": .bool(
                 EffectiveFloat.applies(
                     isFloating: window.isFloating,
-                    mode: site.drawn.flatMap { state.workspaces[$0]?.mode }
+                    mode: site.drawn.flatMap { state.placementMode(of: $0) }
                 )
             ),
             "focused": .bool(focusedWindowID == id),

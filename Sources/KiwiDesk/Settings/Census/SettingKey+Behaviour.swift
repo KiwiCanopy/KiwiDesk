@@ -31,6 +31,13 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case mouseFollowsFocus = "settings.mouse.followsFocus"
     case mouseHoverFocus = "settings.mouse.hoverFocus"
     case mouseHoverFocusDelay = "settings.mouse.hoverFocusDelayMS"
+    /// The tiling toggle's start values and ticks (#3008), Lua-only
+    /// until the owner rules their rows.
+    case tilingStart = "settings.tiling.start"
+    case tilingStartOverride = "settings.tiling.startOverride[space]"
+    case tilingOffHidesBorders = "settings.tiling.offHidesBorders"
+    case tilingOffHidesBars = "settings.tiling.offHidesBars"
+    case tilingStartGlobal = "appWide.tilingStartGlobal"
 }
 
 extension BehaviourKey {
@@ -69,7 +76,8 @@ extension BehaviourKey {
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
-            .maximizeFollowFocus:
+            .maximizeFollowFocus, .tilingStart, .tilingStartOverride,
+            .tilingOffHidesBorders, .tilingOffHidesBars, .tilingStartGlobal:
             return .luaOnly
         case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
             .mouseHoverFocusDelay:
@@ -122,7 +130,8 @@ extension BehaviourKey {
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
-            .maximizeFollowFocus:
+            .maximizeFollowFocus, .tilingStart, .tilingStartOverride,
+            .tilingOffHidesBorders, .tilingOffHidesBars, .tilingStartGlobal:
             return .none
         case .mouseHoverFocusDelay:
             return .text("behavior.mouse.hover_focus_delay")

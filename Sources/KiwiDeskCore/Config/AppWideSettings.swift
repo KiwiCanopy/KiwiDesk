@@ -32,6 +32,10 @@ public struct AppWideSettings: Equatable, Sendable {
     /// and the layout it landed on (`mode.cue`, #2144). ON by
     /// default: the press asked for it.
     public var modeCue = true
+    /// Whether a Space starts with tiling on where neither the
+    /// profile nor the Space says (`tiling.start_global`, #3008).
+    /// ON by default.
+    public var tilingStartGlobal = true
     /// KiwiVision's dim, in percent (`kiwivision.dim`, #2103) —
     /// 60 by default (ruling 10).
     public var visionDim: Double = 60

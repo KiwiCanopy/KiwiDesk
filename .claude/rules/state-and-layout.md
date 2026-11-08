@@ -35,6 +35,42 @@ editing here:
   Space and returns with it (`MinWindowSizeOverrideHoldTests`
   holds the return; a rekey added there is review's, since the
   apply's wholesale settings replace would hide it).
+- **A Space whose tiling is off is placed as Floating, through
+  the one `StateCoordinator.placementMode(of:)` (#3008).** The
+  toggle is per-Desktop, per-Space session state (owner,
+  2026-11-09): `tilingToggles` holds the shown Desktop's, and
+  `DesktopMemory.tilingToggles` every other Desktop's, swapped at
+  each switch by the one `refileTilingToggles` and never at a
+  screen move, so a Space moved to another screen keeps its
+  toggle; both rekey at `moveMembers` and forget at
+  `forwardWindows(of:to:)`. It sits over the start-tiled value
+  `tilingStart` mirrors in (the Space's `tiling.start_override`,
+  else the profile's `tiling.start`, else the app-wide
+  `tiling.start_global`). The Space's stored `mode`
+  never changes, so the Floating gather (#1177) never runs on a
+  toggle and resuming lays the same array out again: remembered
+  slots, windows opened while off appended (`.last`), closed
+  ones gone. A hidden Space about to lose its tiling seeds its
+  layout's slots as stash captures first, through the one
+  `seedSlotsBeforeTilingOff`, or its parked windows have nothing
+  to return to. A reader that decides HOW a window is placed — the
+  layout input, the stash capture, every `EffectiveFloat.applies`
+  mode arm, the maximize gates, the App Bar's visibility verdict
+  and the drag's reorder gates — takes `placementMode`; a reader
+  that names the layout (the config seed, the snapshot, events,
+  the App Bar host, the layout menu, `cycle_mode`, the spawn's
+  track rule, and the stranded-float recovery, so a toggle never
+  re-centres a layout's park) keeps `mode`.
+  `TilingOffPlacementSeamTests` reds an `EffectiveFloat.applies(`
+  file that does neither, its `storedMode` map the ruled ones. Set
+  `tilingStart` only through `KiwiCore.mirrorTilingStart`, called
+  where its inputs change (the `tiling` group's settings hook and
+  `appWideLiveChanged`), so a read never writes. The focus and
+  navigate verbs keep the stored layout's rules while tiling is
+  off, and a keyboard swap still reorders the array; a change to
+  either owes a ruling on #3008. The toggle rides
+  the in-place capture alone (`SpaceSession.tiling`), never
+  `snapshot()` or a profile.
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load

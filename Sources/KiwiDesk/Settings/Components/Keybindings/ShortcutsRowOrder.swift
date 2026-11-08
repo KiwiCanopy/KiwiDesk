@@ -159,6 +159,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.maximizeHeight),
         .shortcuts(.maximizeWidth),
         .shortcuts(.toggleFloating),
+        .shortcuts(.toggleTiling),
         .shortcuts(.toggleSticky),
     ]
 

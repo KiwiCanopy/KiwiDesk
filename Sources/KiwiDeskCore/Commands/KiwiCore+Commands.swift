@@ -80,6 +80,10 @@ extension KiwiCore {
             return toggleFocusedSticky(.display)
         case "toggle_maximized":
             return toggleMaximized(args)
+        case "toggle_tiling":
+            return toggleTilingCommand(args)
+        case "set_tiling":
+            return setTilingCommand(args)
         case "pocket":
             return pocketCommand(args)
         case "toggle_pocket_window":
@@ -144,6 +148,8 @@ extension KiwiCore {
             return runExportSetup(args)
         case Self.restoreSetupCommand:
             return runRestoreSetup(args)
+        case "set_tiling_start_global":
+            return setTilingStartGlobal(args)
         case "set_mode_cue":
             return setModeCue(args)
         case "set_space_transition":

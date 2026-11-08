@@ -12,6 +12,7 @@ extension AppWideSettings {
             desktop: desktop,
             space: space,
             mode: mode,
+            tiling: tiling,
             kiwivision: vision,
             hyper: hyper,
             kiwihub: kiwihub,
@@ -26,6 +27,7 @@ extension AppWideSettings {
         let desktop: Desktop
         let space: Space
         let mode: Mode
+        let tiling: Tiling
         let kiwivision: Vision
         let hyper: Hyper
         let kiwihub: KiwiHub

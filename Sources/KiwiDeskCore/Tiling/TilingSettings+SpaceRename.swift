@@ -11,6 +11,7 @@ extension TilingSettings {
         move(&gapsOverride, from, to)
         move(&minWindowSizeOverride, from, to)
         move(&placementOverride, from, to)
+        move(&tiling.startOverride, from, to)
         move(&spaceIcons, from, to)
         move(&bsp.override, from, to)
         move(&stack.override, from, to)
@@ -27,6 +28,7 @@ extension TilingSettings {
         gapsOverride[space] = nil
         minWindowSizeOverride[space] = nil
         placementOverride[space] = nil
+        tiling.startOverride[space] = nil
         spaceIcons[space] = nil
         bsp.override[space] = nil
         stack.override[space] = nil
@@ -47,6 +49,7 @@ extension TilingSettings {
         minWindowSizeOverride[space] =
             other.minWindowSizeOverride[space]
         placementOverride[space] = other.placementOverride[space]
+        tiling.startOverride[space] = other.tiling.startOverride[space]
         spaceIcons[space] = other.spaceIcons[space]
         bsp.override[space] = other.bsp.override[space]
         stack.override[space] = other.stack.override[space]

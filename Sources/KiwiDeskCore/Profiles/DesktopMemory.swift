@@ -52,6 +52,15 @@ final class DesktopMemory {
     var stackFlips: [SkyLight.SpaceID?: SpaceSides] = [:]
     typealias SpaceSides = [SpaceID: StackParams.StackPosition]
 
+    /// The tiling toggles of each Desktop its screen does not show
+    /// now (#3008), keyed like `stackFlips`; the shown Desktop's
+    /// live in `StateCoordinator.tilingToggles`. Session state:
+    /// swapped at each switch by `KiwiCore.refileTilingToggles`.
+    var tilingToggles: [SkyLight.SpaceID?: [SpaceID: Bool]] = [:]
+    /// The Desktop each Space's state toggle belongs to: the last
+    /// one a reading showed it on, kept through a full-screen Space.
+    var tilingToggleDesktop: [SpaceID: SkyLight.SpaceID?] = [:]
+
     /// The sizes a resize wrote for each Space on each Desktop
     /// under the arrangement live there (#2921), keyed like
     /// `stackFlips`, then by arrangement; the nil Desktop key is the

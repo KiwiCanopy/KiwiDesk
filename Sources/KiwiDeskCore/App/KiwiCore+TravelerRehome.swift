@@ -29,7 +29,7 @@ extension KiwiCore {
                 rehomeTraveler(
                     id,
                     onto: destination,
-                    mode: space.mode,
+                    mode: state.placementMode(of: space),
                     screens: screens,
                     space: spaceID,
                     animated: animated

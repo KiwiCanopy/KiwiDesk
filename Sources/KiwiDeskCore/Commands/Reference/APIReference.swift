@@ -45,6 +45,8 @@ public enum APIReference {
             ("toggle_sticky", "toggle_sticky"),
             ("toggle_display_sticky", "toggle_display_sticky"),
             ("toggle_maximized", "toggle_maximized"),
+            ("toggle_tiling", "toggle_tiling"),
+            ("set_tiling", "set_tiling"),
             ("pocket", "pocket"),
             ("toggle_pocket_window", "toggle_pocket_window"),
             ("pocket_app", "pocket_app"),
@@ -86,6 +88,7 @@ public enum APIReference {
             ("set_hyper_key", "set_hyper_key"),
             ("set_modifier_sides", "set_modifier_sides"),
             ("set_mode_cue", "set_mode_cue"),
+            ("set_tiling_start_global", "set_tiling_start_global"),
             ("set_space_transition", "set_space_transition"),
             ("set_space_scroll_transition", "set_space_scroll_transition"),
             ("set_space_slide_duration", "set_space_slide_duration"),
@@ -297,6 +300,9 @@ public enum APIReference {
             "set_color", "toggle_list",
         ],
         "maximize": ["set_share", "set_anchor", "set_follow_focus"],
+        "tiling": [
+            "set_start", "set_off_hides_borders", "set_off_hides_bars",
+        ],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",
             "set_fade_curve", "set_appearance",

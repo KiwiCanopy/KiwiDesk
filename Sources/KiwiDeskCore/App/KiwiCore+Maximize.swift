@@ -40,7 +40,7 @@ extension KiwiCore {
                 }
             }
         } else {
-            guard space.mode != .floating,
+            guard state.placementMode(of: space) != .floating,
                 spaceID == state.workspaces.activeSpace,
                 state.effectiveTiledMembers(of: space).contains(id)
             else {

@@ -26,6 +26,7 @@ private func populated() -> TilingSettings {
     settings.gapsOverride[probe] = .uniform(4)
     settings.minWindowSizeOverride[probe] = 200
     settings.placementOverride[probe] = .first
+    settings.tiling.startOverride[probe] = false
     settings.spaceIcons[probe] = "globe"
     settings.bsp.override[probe] = BspOverride()
     settings.stack.override[probe] = StackOverride()

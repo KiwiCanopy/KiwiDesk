@@ -32,7 +32,9 @@ public final class SpaceBarOverlay {
 
         /// Where a held Space came from (#1507).
         var held: SpaceBarItemView.Held? {
-            if case .held(let held) = marker { return held }
+            if case .held(let held)? = marker?.spaceState {
+                return held
+            }
             return nil
         }
 

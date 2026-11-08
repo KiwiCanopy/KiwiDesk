@@ -242,6 +242,10 @@ extension KiwiCore {
         tiler.stackFlip = { [weak self] space in
             self?.stackFlip(of: space)
         }
+        // The start-tiled mirror follows its inputs (#3008).
+        tiler.onTilingToggleSettings = { [weak self] in
+            self?.mirrorTilingStart()
+        }
         // The drawn sizes read the one session door (#2921).
         tiler.sessionRatios = { [weak self] space in
             self?.sessionRatios(of: space) ?? SessionRatios()

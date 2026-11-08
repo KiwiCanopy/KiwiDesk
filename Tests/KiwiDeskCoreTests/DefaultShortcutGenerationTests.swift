@@ -30,6 +30,7 @@ struct DefaultShortcutGenerationTests {
         "pocket.toggle_list()",
         "KiwiDesk.toggle_maximized(\"height\")",
         "KiwiDesk.toggle_maximized(\"width\")",
+        "KiwiDesk.toggle_tiling()",
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.

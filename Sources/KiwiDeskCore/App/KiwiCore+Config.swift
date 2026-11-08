@@ -242,6 +242,7 @@ extension KiwiCore {
         tiler.settings.gapsOverride = [:]
         tiler.settings.minWindowSizeOverride = [:]
         tiler.settings.placementOverride = [:]
+        tiler.settings.tiling.startOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
         // Read while `init.lua`'s last Spaces still count (#1790).

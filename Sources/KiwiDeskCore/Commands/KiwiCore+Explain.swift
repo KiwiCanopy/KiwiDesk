@@ -34,7 +34,7 @@ extension KiwiCore {
                     "float": float(
                         window,
                         mode: state.renderSpace(of: window).flatMap {
-                            state.workspaces[$0]?.mode
+                            state.placementMode(of: $0)
                         }
                     ),
                     "app_rule": appRuleFacts(window.appBundleID),

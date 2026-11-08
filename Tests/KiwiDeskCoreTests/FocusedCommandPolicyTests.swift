@@ -38,6 +38,9 @@ struct FocusedCommandPolicyTests {
         // Re-lays the focused Space out, like set_mode without a
         // Space, moving no window between Spaces (#453).
         "cycle_mode",
+        // Turns the focused Space's tiling off and on, moving no
+        // window between Spaces (#3008).
+        "toggle_tiling",
         // Names an app, never the focused window (#1510).
         "gather",
         // An app's own Pocket key acts on its app (#2612 ▸ 6).

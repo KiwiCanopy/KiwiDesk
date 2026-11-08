@@ -19,7 +19,7 @@ extension KiwiCore {
         EffectiveFloat.applies(
             isFloating: state.windows[id]?.isFloating == true,
             mode: floatPlacementSpace(of: id).flatMap {
-                state.workspaces[$0]?.mode
+                state.placementMode(of: $0)
             }
         )
     }
@@ -239,7 +239,7 @@ extension KiwiCore {
                 !window.isFullscreen,
                 EffectiveFloat.applies(
                     isFloating: window.isFloating,
-                    mode: workspace.mode
+                    mode: state.placementMode(of: workspace)
                 )
             else { return nil }
             return wouldBeFrame(of: window)

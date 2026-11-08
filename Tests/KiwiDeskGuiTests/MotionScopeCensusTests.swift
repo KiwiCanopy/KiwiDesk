@@ -51,6 +51,9 @@ struct MotionScopeCensusTests {
         // from it or the quick menu (#2309), and its Save as New
         // Profile… (#2359).
         "KiwiDeskCore/App/KiwiCore+LayoutPicker.swift": 3,
+        // The quick menu's tiling row (#3008): a resume moves
+        // windows.
+        "KiwiDesk/AppDelegate+TilingRow.swift": 1,
         // Jump to window's Jump and Bring here (#1875).
         "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
         // KiwiHub's Swap here (#2885).
