@@ -52,16 +52,21 @@ extension KiwiCore {
     /// Whether `id`'s AX echoes are a grab's own writes, which it
     /// already fed the pipeline: while it writes, and after its
     /// release until the drop settles, since a slow app's echo of
-    /// an earlier write would land as the drop frame. Every echo
-    /// asks before it reaches the coordinator, so the first echo
-    /// after the settle retires the release and a later title-bar
-    /// drag of the window is its own.
+    /// an earlier write would land as the drop frame.
     func modifierGrabOwns(_ id: WindowID) -> Bool {
-        if modifierGrab.session?.id == id { return true }
-        guard modifierGrab.released == id else { return false }
-        if drag.hasGesture(id) { return true }
-        modifierGrab.released = nil
-        return false
+        modifierGrab.session?.id == id
+            || (modifierGrab.released == id && drag.hasGesture(id))
+    }
+
+    /// The echo arms' one door: whether this echo of `id` is the
+    /// grab's, retiring a settled release first, so a later
+    /// title-bar drag of the window is its own. Every AX echo
+    /// asks it before it reaches the coordinator.
+    func modifierGrabTakesEcho(of id: WindowID) -> Bool {
+        if modifierGrab.released == id, !drag.hasGesture(id) {
+            modifierGrab.released = nil
+        }
+        return modifierGrabOwns(id)
     }
 
     private func beginModifierGrab(_ event: ModifierGrabEvent) {

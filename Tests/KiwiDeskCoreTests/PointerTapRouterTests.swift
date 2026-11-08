@@ -155,6 +155,19 @@ struct PointerTapRouterTests {
         #expect(r.owner == nil)
     }
 
+    @Test("an owner whose action turns off stops swallowing")
+    func actionOffEnds() {
+        var r = router()
+        _ = r.route(sample(.leftDown, Self.moveChord), now: 1)
+        var settings = ModifierDragSettings.defaults
+        settings.move.chord = []
+        r.snapshot = PointerTapSnapshot(grab: settings)
+        let routed = r.route(sample(.leftDragged, []), now: 2)
+        #expect(!routed.swallow)
+        #expect(routed.grab.map(\.phase) == [.ended])
+        #expect(r.route(sample(.leftUp, []), now: 3) == .pass)
+    }
+
     @Test("a snapshot that turns the consumer off ends the grab")
     func snapshotOffEnds() {
         var r = router()

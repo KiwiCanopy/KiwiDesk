@@ -206,7 +206,7 @@ extension KiwiCore {
                 tiler.clearInstantTarget(id)
             }
             // A modifier grab feeds its own writes (#2447).
-            guard !modifierGrabOwns(id) else { break }
+            guard !modifierGrabTakesEcho(of: id) else { break }
             let late = isLateFlick(id, frame: frame, previous: preEventFrame)
             drag.windowMoved(
                 id,

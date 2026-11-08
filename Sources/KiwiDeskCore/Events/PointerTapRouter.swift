@@ -65,9 +65,11 @@ struct PointerTapRouter {
         now: CFAbsoluteTime
     ) -> Routed {
         if let owner {
-            guard let settings = snapshot.grab else {
-                return reseed(now: now)
-            }
+            // The front ended a grab whose consumer or action went
+            // off; the stream is no longer the grab's to swallow.
+            guard let settings = snapshot.grab,
+                !settings[owner.action].isOff
+            else { return reseed(now: now) }
             return continuing(owner, sample, settings, now: now)
         }
         for consumer in PointerConsumers.Consumer.allCases {

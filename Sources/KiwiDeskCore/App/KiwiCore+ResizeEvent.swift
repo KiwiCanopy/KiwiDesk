@@ -91,7 +91,7 @@ extension KiwiCore {
         // release.
         // A modifier grab feeds its own writes (#2447).
         if gesture {
-            guard !modifierGrabOwns(id) else { return }
+            guard !modifierGrabTakesEcho(of: id) else { return }
             drag.windowMoved(
                 id,
                 frame: frame,

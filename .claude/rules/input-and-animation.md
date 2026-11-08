@@ -242,7 +242,8 @@ editing here:
     own**: it writes the frame through `applyFrame`, hands each
     frame to `DragCoordinator.windowMoved`, and its window's AX
     echoes stay out of the coordinator until the drop settles,
-    since they read as our own animation (`modifierGrabOwns`,
+    since they read as our own animation — every echo arm asks the
+    one `modifierGrabTakesEcho(of:)` first (`modifierGrabOwns`,
     `ModifierGrabWiringTests` ▸ `echoesAreLeftOut`,
     `lateEchoIsLeftOut`). A grab in flight reads as a held button
     through `MouseTracker.leftButtonHeld` and `anyButtonHeld`, so a

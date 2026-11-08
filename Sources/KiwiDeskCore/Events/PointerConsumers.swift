@@ -105,12 +105,8 @@ public final class PointerConsumers {
     /// Hands routed events to their consumer, a batch's moves
     /// coalesced to the last one so a slow main actor writes one
     /// frame per turn.
-    func receive(
-        _ delivery: PointerTapDelivery,
-        fromTap generation: Int? = nil
-    ) {
-        guard started, generation ?? tapGeneration == tapGeneration
-        else { return }
+    func receive(_ delivery: PointerTapDelivery, fromTap generation: Int) {
+        guard started, generation == tapGeneration else { return }
         if delivery.reenabled {
             onLog("pointer tap: re-enabled after macOS disabled it")
         }
@@ -129,6 +125,14 @@ public final class PointerConsumers {
             grabHandler?(event)
         }
     }
+
+    #if DEBUG
+        /// Test seam: a delivery from the live tap, never read by
+        /// production, which always names the tap it came from.
+        func receive(_ delivery: PointerTapDelivery) {
+            receive(delivery, fromTap: tapGeneration)
+        }
+    #endif
 
     /// The live consumers: wired, and on.
     private var liveConsumers: [Consumer] {
