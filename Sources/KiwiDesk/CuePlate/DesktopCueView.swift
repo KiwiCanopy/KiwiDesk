@@ -12,7 +12,7 @@ struct DesktopCueView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Text(verbatim: "\(cue.position)")
+            Text(verbatim: "\(cue.number)")
                 .font(CuePlateModel.digitFont)
                 .monospacedDigit()
             if let profile = cue.loadedProfile {

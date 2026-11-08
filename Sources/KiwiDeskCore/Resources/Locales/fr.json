@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "Le raccourci de \"%1$@\" n'est pas un raccourci reconnu.",
   "keybinding.desktop_absent": "Absent pour l'instant",
   "keybinding.desktop_away.axhint": "Non connecté pour le moment.",
-  "keybinding.desktop_landing": "%1$@ · Bureau %2$d",
   "keybinding.dir.above": "du dessus",
   "keybinding.dir.below": "du dessous",
   "keybinding.dir.left": "de gauche",

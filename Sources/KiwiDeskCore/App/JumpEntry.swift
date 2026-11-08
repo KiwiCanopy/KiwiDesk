@@ -19,9 +19,9 @@ public struct JumpEntry: Sendable, Equatable {
         /// app's row, which `isHiddenApp` tells apart.
         case shown
         /// Up on a Desktop no screen shows; `desktop` is its
-        /// number on its own screen, as Mission Control labels it
-        /// (#2792) — a label only (profiles.md), nil where no
-        /// reading named it.
+        /// Mission Control number, counted across screens (#3103)
+        /// — a label only (profiles.md), nil where no reading
+        /// named it.
         case away(desktop: Int?)
         case minimized
         case fullscreen
@@ -140,7 +140,7 @@ public enum JumpSwapBlock: Sendable, Equatable {
     case unfiled
     case minimized
     case hiddenApp
-    /// Up on another macOS Desktop, numbered on its own screen.
+    /// Up on another macOS Desktop, by its Mission Control number.
     case otherDesktop(Int?)
     /// The row is your own window.
     case yours

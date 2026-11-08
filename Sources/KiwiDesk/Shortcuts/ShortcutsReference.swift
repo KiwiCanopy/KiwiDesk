@@ -12,7 +12,7 @@ enum ShortcutsReferenceBuilder {
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
         desktops: [Int],
-        landings: [Int: DesktopLanding] = [:],
+        landings: [Int: ScreenLabel] = [:],
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],

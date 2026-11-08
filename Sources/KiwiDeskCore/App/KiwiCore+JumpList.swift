@@ -145,7 +145,7 @@ extension KiwiCore {
             let block: JumpSwapBlock =
                 fullScreen
                 ? .fullScreen
-                : .otherDesktop(snapshot.screenNumber(of: entry.nativeSpace))
+                : .otherDesktop(snapshot.number(of: entry.nativeSpace))
             return JumpEntry(
                 target: .window(entry.id),
                 pid: entry.pid,
@@ -156,7 +156,7 @@ extension KiwiCore {
                 status: fullScreen
                     ? .fullscreen
                     : .away(
-                        desktop: snapshot.screenNumber(of: entry.nativeSpace)
+                        desktop: snapshot.number(of: entry.nativeSpace)
                     ),
                 movesHere: !fullScreen && canDriveDesktops
                     && entry.appBundleID != nil && here != nil,

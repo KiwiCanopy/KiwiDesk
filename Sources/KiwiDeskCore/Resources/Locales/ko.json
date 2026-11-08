@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "‘%1$@’의 단축키는 인식되지 않는 단축키입니다.",
   "keybinding.desktop_absent": "지금은 존재하지 않음",
   "keybinding.desktop_away.axhint": "지금은 연결되어 있지 않습니다.",
-  "keybinding.desktop_landing": "%1$@ · 데스크탑 %2$d",
   "keybinding.dir.above": "위",
   "keybinding.dir.below": "아래",
   "keybinding.dir.left": "왼쪽",

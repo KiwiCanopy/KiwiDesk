@@ -609,7 +609,7 @@ every lens with why it cannot turn on.
 | | `focus_space_back` / `focus_space_forward` | — (the Spaces you visited; see `set_space_history`) |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
-| | `focus_desktop` | Desktop number, counted across every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)) |
+| | `focus_desktop` | Desktop number, counted across every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)) |
 | | `move_to_desktop` | Desktop number, [space id] — moves the window there; you stay. `space id` names the Space it lands in |
 | | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
 | | `move_space_to_display` | space id, display index or name |
@@ -1119,7 +1119,7 @@ lifecycle; the `reason` field says why the set changed:
   macOS Desktop no screen is showing; it returns as
   `returned`). A `vanished` payload also carries `desktop`,
   the number of the Desktop holding the window, counted across
-  every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)), where the Desktop can be read; every other reason —
+  every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)), where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
 
 `window_created` also reports `existing`: a window that was
@@ -1203,7 +1203,7 @@ Bulk reassignments (profile load, session restore) stay silent:
 screen — a swipe, Mission Control, or a `focus_desktop` /
 `move_to_desktop_and_follow` command; its data carries the 1-based
 Desktop number now current on the screen that switched, counted
-across every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)), that
+across every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)), that
 screen's positional number (`monitor`: 1 is the main screen,
 secondaries follow left to right — the same 1-based positional
 numbering a screen argument takes), and the active profile:

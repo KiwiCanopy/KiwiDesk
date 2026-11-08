@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "Сочетание клавиш для «%1$@» не распознаётся как сочетание клавиш.",
   "keybinding.desktop_absent": "Сейчас отсутствует",
   "keybinding.desktop_away.axhint": "Сейчас не подключён.",
-  "keybinding.desktop_landing": "%1$@ · Рабочий стол %2$d",
   "keybinding.dir.above": "сверху",
   "keybinding.dir.below": "снизу",
   "keybinding.dir.left": "слева",

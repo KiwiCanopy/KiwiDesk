@@ -135,7 +135,7 @@ extension DesktopsGroup {
             L(
                 "desktops.scope.add.ax",
                 "Add a screen setup to Desktop %1$d",
-                row.shownNumber
+                row.number
             )
         )
         // Named, so it owes a value (#812): how many setups it

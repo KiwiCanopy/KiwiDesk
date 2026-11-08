@@ -93,8 +93,9 @@ final class CuePlateModel: ObservableObject {
         }
     }
 
-    /// The spoken cue: "Desktop 2 of 4", "Desktop 1 of 3 on DELL
-    /// U2723" with more than one screen (#2792), and the profile a
+    /// The spoken cue: "Desktop 2 of 4", "Desktop 7 of 8 on DELL
+    /// U2723" with more than one screen (#2792), counted across
+    /// screens as Mission Control does (#3103), and the profile a
     /// binding loaded after it.
     static func spoken(_ cue: DesktopSwitchCue) -> String {
         let desktop =
@@ -102,16 +103,16 @@ final class CuePlateModel: ObservableObject {
                 L(
                     "desktop_cue.ax.screen",
                     "Desktop %1$d of %2$d on %3$@",
-                    cue.position,
-                    cue.count,
+                    cue.number,
+                    cue.total,
                     $0.displayName
                 )
             }
             ?? L(
                 "desktop_cue.ax.same",
                 "Desktop %1$d of %2$d",
-                cue.position,
-                cue.count
+                cue.number,
+                cue.total
             )
         guard let profile = cue.loadedProfile else { return desktop }
         return L(
