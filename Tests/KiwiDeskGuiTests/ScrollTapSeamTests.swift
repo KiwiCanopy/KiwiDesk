@@ -22,7 +22,9 @@ import Testing
 ///   `makeTestCore` twins — the #565 class: a suite that binds a
 ///   gesture would otherwise take a session-wide tap.
 ///
-/// Residue: the thread clause pins where `install()` is CALLED —
+/// Residue: the factory clause counts the spelling `Type.live`, so
+/// a reference through `.self`, a typealias or `Self` inside the
+/// type passes; the thread clause pins where `install()` is CALLED —
 /// inside the closure `start` hands its `Thread` — not what thread
 /// `CFRunLoopRun` then serves; and the pin clause reads the twins'
 /// text, not that `makeTestCore` reaches the line.

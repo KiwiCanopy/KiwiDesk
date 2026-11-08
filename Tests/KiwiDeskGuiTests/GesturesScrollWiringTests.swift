@@ -48,7 +48,12 @@ struct GesturesScrollWiringTests {
         let field = Self.squash(
             try Self.source("ScrollChordRecorderField.swift")
         )
-        #expect(field.contains("refuse:{ScrollChordRefusal.of($0,"))
+        #expect(
+            field.contains(
+                "refuse:{ScrollChordRefusal.of($0,other:other,"
+                    + "heldBy:otherGesture)"
+            )
+        )
         let shared = Self.squash(
             try Self.source("ModifierChordRecorder.swift")
         )
@@ -66,6 +71,13 @@ struct GesturesScrollWiringTests {
             )
         )
         #expect(branch.contains("return"))
+        // Nothing writes the chord ahead of the verdict, whatever
+        // the spelling.
+        let ahead = String(shared[..<refusal.lowerBound])
+        let commit = ahead.components(separatedBy: "funccommit(").last ?? ""
+        for write in ["chord=", "$chord", "_chord", "self.chord"] {
+            #expect(!commit.contains(write), "\(write)")
+        }
         #expect(shared.contains("mode:.modifiers"))
     }
 

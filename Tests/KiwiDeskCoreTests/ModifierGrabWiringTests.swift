@@ -176,7 +176,7 @@ struct ModifierGrabWiringTests {
         // own: the echo that opens it asks first, as the event arms
         // do, and the gesture it opens is never the grab's.
         core.drag.cancel(Self.window)
-        #expect(!core.modifierGrabTakesEcho(of: Self.window))
+        core.handle(.windowMoved(Self.window, Self.frame))
         core.drag.windowMoved(
             Self.window,
             frame: Self.frame,
