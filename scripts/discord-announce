@@ -70,6 +70,44 @@ UPDATE_LINE = (
     "to get it now, click the circular arrow (Check for updates) "
     "in the footer of Settings Home."
 )
+# Home Manager's update command (#2909 step 5), posted only when the
+# KiwiCanopy/nix flake already lists the release, or a reader would
+# run it and stay on the old version.
+NIX_LINE = (
+    "Installed with Nix and Home Manager? Run "
+    "`nix flake update kiwicanopy && home-manager switch`."
+)
+NIX_SOURCE_URL = (
+    "https://raw.githubusercontent.com/KiwiCanopy/nix/main/"
+    "pkgs/kiwidesk/source.json"
+)
+
+
+def nix_lists(version: str, source: str | None = None) -> bool:
+    """Whether the flake's `source.json` names `version`: read from
+    `source` (a file, for tests) or the flake's main branch. Any
+    failure reads as not listed, so the line is left out."""
+    try:
+        if source:
+            text = Path(source).read_text(encoding="utf-8")
+        else:
+            request = urllib.request.Request(
+                NIX_SOURCE_URL,
+                headers={"User-Agent": "KiwiDesk-release-sync"},
+            )
+            with urllib.request.urlopen(request, timeout=30) as response:
+                text = response.read().decode("utf-8")
+        return json.loads(text).get("version") == version
+    except (urllib.error.URLError, OSError, ValueError):
+        return False
+
+
+def update_lines(nix: bool) -> str:
+    """The closing how-to-update lines: the app's own, then Home
+    Manager's when the flake lists the release."""
+    return f"{UPDATE_LINE}\n{NIX_LINE}" if nix else UPDATE_LINE
+
+
 # A typed section's change, counted in words (#2112): one entry per
 # `changelog-sync` SECTION_TYPES type, held to that table by
 # `DiscordAnnounceSpotlightTests`; a type missing here still counts.
@@ -156,7 +194,7 @@ def pointer(entry: dict, rest: list[dict]) -> str:
     return f"**Also in this release:** {names} — full notes: {entry['url']}"
 
 
-def description(entry: dict) -> str:
+def description(entry: dict, nix: bool = False) -> str:
     """The embed body. A block with Spotlight rows posts the rows,
     never its sections; one without posts its sections, cut at a
     section boundary to fit. The head — summary, Before you
@@ -164,8 +202,9 @@ def description(entry: dict) -> str:
     the close."""
     sections = entry.get("sections") or []
     rows = entry.get("spotlight") or []
-    close = f"{counts_line(entry)}\n{UPDATE_LINE}"
-    cut_close = f"{pointer(entry, sections)}\n{UPDATE_LINE}"
+    update = update_lines(nix)
+    close = f"{counts_line(entry)}\n{update}"
+    cut_close = f"{pointer(entry, sections)}\n{update}"
     head: list[str] = []
     if entry.get("summary"):
         head.append(entry["summary"])
@@ -191,16 +230,16 @@ def description(entry: dict) -> str:
     for index, section in enumerate(sections):
         block = section_block(section)
         rest = sections[index + 1 :]
-        tail = f"{pointer(entry, rest)}\n{UPDATE_LINE}" if rest else close
+        tail = f"{pointer(entry, rest)}\n{update}" if rest else close
         candidate = "\n\n".join(parts + [block, tail])
         if len(candidate) > DESCRIPTION_BUDGET:
-            cut = f"{pointer(entry, sections[index:])}\n{UPDATE_LINE}"
+            cut = f"{pointer(entry, sections[index:])}\n{update}"
             return "\n\n".join(parts + [cut])
         parts.append(block)
     return "\n\n".join(parts + [close])
 
 
-def payload(entry: dict) -> dict:
+def payload(entry: dict, nix: bool = False) -> dict:
     return {
         "username": USERNAME,
         "allowed_mentions": {"parse": []},
@@ -208,7 +247,7 @@ def payload(entry: dict) -> dict:
             {
                 "title": f"KiwiDesk {entry['version']}",
                 "url": entry["url"],
-                "description": description(entry),
+                "description": description(entry, nix),
             }
         ],
     }
@@ -244,6 +283,11 @@ def main(argv: list[str]) -> int:
         help="read the release from a JSON fixture instead of `gh`",
     )
     parser.add_argument(
+        "--nix-source",
+        metavar="FILE",
+        help="read the flake's source.json from a file, not GitHub",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="print the payload and post nothing",
@@ -257,7 +301,10 @@ def main(argv: list[str]) -> int:
         )
     except _sync.NotesError as error:
         return _sync._report(error)
-    body = payload(entry)
+    # A dry run stays offline unless a source file is named.
+    reads_nix = bool(args.nix_source) or not args.dry_run
+    nix = reads_nix and nix_lists(entry["version"], args.nix_source)
+    body = payload(entry, nix)
     if args.dry_run:
         print(json.dumps(body, indent=2, ensure_ascii=False))
         return 0

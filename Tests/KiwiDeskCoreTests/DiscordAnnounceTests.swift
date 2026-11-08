@@ -249,4 +249,46 @@ struct DiscordAnnounceTests {
         #expect(result.status != 0)
         #expect(result.stderr.contains("no `## Highlights` block"))
     }
+
+    private static let nixLine =
+        "Installed with Nix and Home Manager? Run "
+        + "`nix flake update kiwicanopy && home-manager switch`."
+
+    /// The flake's `source.json`, naming `version`, as a file.
+    private func nixSource(_ version: String) throws -> URL {
+        let file =
+            testTemporaryDirectory
+            .appendingPathComponent("nix-source-\(UUID().uuidString).json")
+        try JSONSerialization.data(withJSONObject: ["version": version])
+            .write(to: file)
+        return file
+    }
+
+    /// Home Manager's update command closes the post only once the
+    /// KiwiCanopy/nix flake lists the release (#2909 step 5).
+    @Test("the Nix line follows when the flake lists the release")
+    func nixLineWhenListed() throws {
+        let source = try nixSource("9999.3.0")
+        defer { try? FileManager.default.removeItem(at: source) }
+        let result = try run(
+            body: Self.body,
+            arguments: ["--dry-run", "--nix-source", source.path]
+        )
+        #expect(result.status == 0, "\(result.stderr)")
+        let text = try #require(try embed(result)["description"] as? String)
+        #expect(text.hasSuffix("\(Self.update)\n\(Self.nixLine)"))
+    }
+
+    @Test("no Nix line while the flake names another version")
+    func noNixLineWhenBehind() throws {
+        let source = try nixSource("9999.2.0")
+        defer { try? FileManager.default.removeItem(at: source) }
+        let result = try run(
+            body: Self.body,
+            arguments: ["--dry-run", "--nix-source", source.path]
+        )
+        let text = try #require(try embed(result)["description"] as? String)
+        #expect(text.hasSuffix(Self.update))
+        #expect(!text.contains("home-manager"))
+    }
 }
