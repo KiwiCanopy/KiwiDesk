@@ -51,7 +51,7 @@ extension KiwiCore {
                 $0.maximized = Maximize(window: id, shape: shape)
             }
         }
-        retileEndingMaximize(id)
+        retileEndingMaximize([id])
         if state.workspaces[spaceID]?.maximized?.window == id {
             raiseWindow(id)
             raiseFloatsAbove(afterFocusing: id)
@@ -84,13 +84,13 @@ extension KiwiCore {
     /// The pass that grows a window to its screen or puts it back:
     /// one already-placed window changes size in place, no slot or
     /// membership moving, so it promises spring sizing (#593);
-    /// `window` is the state change and follows its own switch
+    /// `windows` are the state change and follow their own switch
     /// (#2676), the pass the resize animation's.
-    func retileEndingMaximize(_ window: WindowID) {
+    func retileEndingMaximize(_ windows: Set<WindowID>) {
         retile(
             animated: tiler.settings.animations.onWindowResize,
             sizing: .allSpringSized,
-            stateChange: window
+            stateChange: windows
         )
     }
 

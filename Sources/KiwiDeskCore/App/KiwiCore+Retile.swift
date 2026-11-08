@@ -35,7 +35,7 @@ extension KiwiCore {
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
         sizing: BatchSizing = .mayInstantSize,
-        stateChange: WindowID? = nil
+        stateChange: Set<WindowID> = []
     ) {
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
@@ -159,7 +159,7 @@ extension KiwiCore {
         if pass.probes { oweApplyHealPass() }
         // The window changing state hides its ring until it lands,
         // a held pass's included (#2676).
-        if let stateChange { holdRingForStateChange(stateChange) }
+        holdRingForStateChange(stateChange)
         narrateCorroborationProbes()
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op

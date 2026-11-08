@@ -90,7 +90,7 @@ struct StateChangeAnimationTests {
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize,
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         let bare = MotionGate.Owed(
             animated: nil,
@@ -102,7 +102,7 @@ struct StateChangeAnimationTests {
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize,
-            stateChange: WindowID(2)
+            stateChange: [WindowID(2)]
         )
         #expect(older.merged(with: newer).stateChange == WindowID(2))
     }
@@ -210,10 +210,10 @@ struct StateChangeAnimationTests {
         core.tiler.retile(
             state: core.state,
             newlyCreatedWindow: WindowID(2),
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         #expect(!core.tiler.stateChangeSprings)
-        core.tiler.retile(state: core.state, stateChange: WindowID(1))
+        core.tiler.retile(state: core.state, stateChange: [WindowID(1)])
         #expect(core.tiler.stateChangeSprings)
     }
 
@@ -230,7 +230,7 @@ struct StateChangeAnimationTests {
             state: core.state,
             animated: true,
             newlyCreatedWindow: WindowID(1),
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         #expect((applies()[WindowID(1)] ?? 0) >= 1)
     }
@@ -253,7 +253,7 @@ struct StateChangeAnimationTests {
                 animated: nil,
                 pass: .event,
                 sizing: .mayInstantSize,
-                stateChange: WindowID(1)
+                stateChange: [WindowID(1)]
             )
         )
         #expect((applies()[WindowID(1)] ?? 0) >= 1)
@@ -273,7 +273,7 @@ struct StateChangeAnimationTests {
         core.tiler.retile(
             state: core.state,
             newlyCreatedWindow: WindowID(2),
-            stateChange: WindowID(1)
+            stateChange: [WindowID(1)]
         )
         let spring = try #require(
             core.tiler.animation.removeAnimation(for: WindowID(1))

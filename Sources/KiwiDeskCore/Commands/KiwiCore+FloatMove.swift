@@ -95,7 +95,7 @@ extension KiwiCore {
             animated: tiler.settings.animations.onStateChange,
             sizing: .allSpringSized
         )
-        holdRingForStateChange(id)
+        holdRingForStateChange([id])
         return .ok()
     }
 

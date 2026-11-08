@@ -20,8 +20,14 @@ extension KiwiCore {
         }
     }
 
-    func holdRingForStateChange(_ id: WindowID) {
-        guard tiler.animation.isAnimating(window: id) else { return }
+    func holdRingForStateChange(_ windows: Set<WindowID>) {
+        // The ring is the focused window's: of two, it holds that one.
+        guard
+            let id = windows.count > 1
+                ? focusedWindowID.flatMap({ windows.contains($0) ? $0 : nil })
+                : windows.first,
+            tiler.animation.isAnimating(window: id)
+        else { return }
         borders.holdStateChange(
             of: id,
             target: tiler.commandedFrame(of: id)

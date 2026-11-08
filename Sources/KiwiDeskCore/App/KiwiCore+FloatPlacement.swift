@@ -56,7 +56,7 @@ extension KiwiCore {
                 ? animations.onStateChange : animations.onRelayout,
             sizing: asStateChange ? .allSpringSized : .mayInstantSize
         )
-        if asStateChange { holdRingForStateChange(id) }
+        if asStateChange { holdRingForStateChange([id]) }
         // A size change outside the layout's asks (#677): its echo
         // must not read as the app refusing the last tiled ask, or
         // the next tiled space places the float's size as residue.

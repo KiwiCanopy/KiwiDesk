@@ -161,7 +161,7 @@ extension KiwiCore {
         var resized = false
         defer {
             if let endedMaximize, !resized {
-                retileEndingMaximize(endedMaximize)
+                retileEndingMaximize([endedMaximize])
             }
         }
         // Span resolves on the space's OWN display (#449) —
