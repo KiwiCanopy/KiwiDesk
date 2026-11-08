@@ -21,9 +21,11 @@ editing here:
   Mouse presses are read through `NSEvent` monitors, save the
   keyboard tap's listen-only mouse-down, which ends a modifier
   tap's count and so must be read on the tap's own thread, in
-  order with the modifier changes; it stays on the keyboard tap,
-  never the pointer tap. A press that must be SWALLOWED goes
-  through the pointer tap below.
+  order with the modifier changes, and the mouse-down that closes
+  an open key sequence (#1871), which must be decided on that
+  thread with the keys; both stay on the keyboard tap, never the
+  pointer tap. A press that must be SWALLOWED goes through the
+  pointer tap below.
 - **A menu row drawing a Carbon-bound chord drops only that
   chord's own keyDown, asked of the one `KeyCombo.isCarbonTwin`**
   — Carbon's hotkey already acted, and every other keyboard
@@ -140,8 +142,9 @@ editing here:
     through the one `KeyboardTapRows` value and its `setRows`
     door, and the live consumers are read off its non-empty
     fields, so a new consumer adds a field there; a new path that
-    routes rows to it goes through `tappedChords` or
-    `modifierTapRows`, never a row list of its own
+    routes rows to it goes through `tappedChords`,
+    `modifierTapRows` or `sequences(for:)`, never a row list of
+    its own
     (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
     `KeyboardTapRoutingTests` ▸ `noTapRowNoConsumer`,
     `rowsNameConsumers`).
@@ -151,14 +154,19 @@ editing here:
     leader through `.modifierTaps` under `KeyboardTap.leaderID` —
     never from a main-actor hop, or the first keys after a leader
     reach the front app. It is declared first, so an open sequence
-    outranks a sided chord, and swallows every key-down while one
-    is open, which `.modifierTaps` still hears. A leader never
-    reaches Carbon: activation skips a press row on its chord, and
-    a refused tap lists the leader in `activationFailures`. The
-    main actor closes a sequence only through
-    `requestSequenceClose`, read at the tap's next event, and new
-    rows close it, the manager telling the hint panel in the same
-    turn (`KeySequenceTapTests`, `KeySequenceRouterTests`).
+    outranks a sided chord, swallows every key-down while one is
+    open, which `.modifierTaps` still hears, and closes one on a
+    mouse-down, the one click door. A leader never reaches Carbon:
+    activation skips a press row on its chord, and a refused tap
+    lists the leader in `activationFailures`
+    (`KeySequenceInstallTests`). Each decision carries the row
+    generation it was made over, and the manager drops an older
+    one, since a reload reuses its refs; new rows close the
+    sequence and drop what waited, and the main actor closes one
+    only through `requestSequenceClose`, said at the tap's next
+    event (`KeySequenceTapTests`, `KeySequenceTapThreadTests`). An
+    end key is never disabled on a failure: the hint panel reads
+    the stored tree, which would still list it.
   - **`.sides` answers only the chords a sided row names**, the
     either-side row on such a chord included, and only while
     `modifierSides` is on; every other chord stays a Carbon
@@ -188,7 +196,8 @@ editing here:
     recording
     (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
   - **On its own thread, deciding from the rows handed it** and
-    passing every event no `.sides` row answers; the callback does
+    passing every event no swallowing consumer answers; the
+    callback does
     no AX and no main-actor hop, and a consumer hears its verdict
     on the main queue. The live factory is pinned inert in both
     `makeTestCore` twins (`ScrollTapSeamTests` ▸ `installsOffMain`,

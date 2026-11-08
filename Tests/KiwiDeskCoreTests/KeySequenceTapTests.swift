@@ -80,6 +80,9 @@ struct KeySequenceTapTests {
         manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
         manager.suspend()
         #expect(taps().last?.sequences.isEmpty == true)
+        // A sequence defined while suspended reaches no tap either.
+        manager.defineSequence(try sequence("ctrl+alt+k"), in: "default")
+        #expect(taps().last?.sequences.isEmpty == true)
     }
 
     @Test("a refused tap names the leader a failure")
@@ -103,13 +106,46 @@ struct KeySequenceTapTests {
         let tap = try #require(taps().last)
         let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
         tap.decisions = [
-            KeySequenceDecision(outcome: .stepped, progress: open),
-            KeySequenceDecision(outcome: .unbound, progress: open),
-            KeySequenceDecision(outcome: .closed, progress: nil),
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: open,
+                generation: manager.sequenceGeneration
+            ),
+            KeySequenceDecision(
+                outcome: .unbound,
+                progress: open,
+                generation: manager.sequenceGeneration
+            ),
+            KeySequenceDecision(
+                outcome: .closed,
+                progress: nil,
+                generation: manager.sequenceGeneration
+            ),
         ]
         manager.tapFire(KeyboardTap.sequenceFireID)
         #expect(seen == [open, nil])
         #expect(beeps == 1)
+    }
+
+    @Test("a decision made over older rows is dropped")
+    func staleDecisionIsDropped() throws {
+        let (manager, taps) = rig()
+        var seen: [KeySequenceProgress?] = []
+        manager.onSequenceProgress = { seen.append($0) }
+        manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
+        let stale = manager.sequenceGeneration
+        manager.defineSequence(try sequence("ctrl+alt+k"), in: "default")
+        let tap = try #require(taps().last)
+        tap.decisions = [
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: KeySequenceProgress(leader: "x", path: []),
+                generation: stale
+            )
+        ]
+        manager.tapFire(KeyboardTap.sequenceFireID)
+        #expect(seen.isEmpty)
+        #expect(manager.sequenceGeneration != stale)
     }
 
     @Test("a main-actor close asks the tap and tells the panel")
@@ -123,7 +159,11 @@ struct KeySequenceTapTests {
         #expect(tap.closeRequests == 0)  // nothing open, nothing asked
         let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
         tap.decisions = [
-            KeySequenceDecision(outcome: .stepped, progress: open)
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: open,
+                generation: manager.sequenceGeneration
+            )
         ]
         manager.tapFire(KeyboardTap.sequenceFireID)
         manager.closeSequence()
@@ -140,7 +180,11 @@ struct KeySequenceTapTests {
         let tap = try #require(taps().last)
         let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
         tap.decisions = [
-            KeySequenceDecision(outcome: .stepped, progress: open)
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: open,
+                generation: manager.sequenceGeneration
+            )
         ]
         manager.tapFire(KeyboardTap.sequenceFireID)
         manager.reset()

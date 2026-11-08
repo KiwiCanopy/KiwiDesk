@@ -54,10 +54,14 @@ public final class KeybindingManager {
         _ in
     }
     /// The unbound-key sound: the core wires the refusal sound
-    /// (`KiwiCore+Bootstrap`), so a bare manager stays silent.
+    /// (#1871 ▸ unbound step key, `KiwiCore+Bootstrap`), so a bare
+    /// manager stays silent.
     var beep: @MainActor () -> Void = {}
     /// Whether the hint panel was last told a sequence is open.
     var sequenceOpen = false
+    /// Bumped with every row set the tap is handed, so a decision
+    /// made over older rows is dropped (#1871).
+    var sequenceGeneration: UInt64 = 0
     private var layerIcons: [String: String] = [:]
     /// What a Lua binding says of itself — description, group and
     /// symbol (#2544) — by layer and chord.
@@ -318,31 +322,16 @@ public final class KeybindingManager {
         activate(currentLayer)
     }
 
-    #if DEBUG
-        /// Test-only: runs `body` inside a fire's scope (#804).
-        func simulatingFire(_ body: () -> Void) {
-            let wasFiring = isFiring
-            isFiring = true
-            defer { isFiring = wasFiring }
-            body()
-        }
-    #endif
-
     func fire(ref: Int32, combo: KeyCombo) {
-        guard let lua else { return }
-        let wasFiring = isFiring
-        isFiring = true
-        defer { isFiring = wasFiring }
-        if case .failure(let error) = lua.call(ref: ref) {
-            onLog("keybinding disabled: \(error)")
-            for (layer, var bindings) in layers {
-                if bindings[combo] == ref {
-                    bindings[combo] = nil
-                    layers[layer] = bindings
-                }
+        guard let error = call(ref: ref) else { return }
+        onLog("keybinding disabled: \(error)")
+        for (layer, var bindings) in layers {
+            if bindings[combo] == ref {
+                bindings[combo] = nil
+                layers[layer] = bindings
             }
-            lua.release(ref: ref)
-            activate(currentLayer)
         }
+        lua?.release(ref: ref)
+        activate(currentLayer)
     }
 }

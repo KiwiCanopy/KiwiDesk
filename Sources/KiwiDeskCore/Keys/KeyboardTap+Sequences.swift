@@ -8,12 +8,25 @@ struct SequenceTapState: Sendable {
     var waiting: [KeySequenceDecision] = []
     /// The main actor asked for a close; read at the next event.
     var closeRequested = false
+    var generation: UInt64 = 0
 
-    /// Applies a main-actor close, if one is waiting.
+    /// New rows: the open sequence closes, and nothing decided over
+    /// the old rows is left to drain.
+    mutating func reset(_ rows: KeyboardTapRows) {
+        router.setSequences(rows.sequences)
+        generation = rows.sequenceGeneration
+        waiting = []
+        closeRequested = false
+    }
+
+    /// Applies a main-actor close, if one is waiting, and says so,
+    /// so a decision queued before it is followed by the close.
     mutating func takeClose() {
         guard closeRequested else { return }
         closeRequested = false
+        guard router.isOpen else { return }
         router.close()
+        _ = record(.closed)
     }
 
     /// Records a decision the main actor must take; false for one
@@ -21,7 +34,11 @@ struct SequenceTapState: Sendable {
     mutating func record(_ outcome: KeySequenceRouter.Outcome) -> Bool {
         guard outcome != .pass, outcome != .repeated else { return false }
         waiting.append(
-            KeySequenceDecision(outcome: outcome, progress: router.progress)
+            KeySequenceDecision(
+                outcome: outcome,
+                progress: router.progress,
+                generation: generation
+            )
         )
         return true
     }
@@ -42,7 +59,9 @@ extension KeyboardTap {
         leaderBase + UInt32(index)
     }
 
-    /// Whether `event` is the consumer's to swallow.
+    /// Whether `event` is the consumer's to swallow: a leader, and
+    /// every key-down while a sequence is open. A mouse-down closes
+    /// an open one and passes, the one door a click closes by.
     func sequenceEvent(_ type: CGEventType, _ event: CGEvent) -> Bool {
         let code = UInt32(event.getIntegerValueField(.keyboardEventKeycode))
         let held = HotkeyModifiers.held(by: event.flags)
@@ -51,6 +70,7 @@ extension KeyboardTap {
         let (swallow, heard) = sequenceState.withLock {
             state -> (Bool, Bool) in
             state.takeClose()
+            var swallow = false
             switch type {
             case .keyDown:
                 let outcome = state.router.press(
@@ -58,14 +78,17 @@ extension KeyboardTap {
                     held: held,
                     isRepeat: isRepeat
                 )
-                return (outcome != .pass, state.record(outcome))
+                swallow = outcome != .pass
+                _ = state.record(outcome)
             case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-                guard state.router.isOpen else { return (false, false) }
-                state.router.close()
-                return (false, state.record(.closed))
+                if state.router.isOpen {
+                    state.router.close()
+                    _ = state.record(.closed)
+                }
             default:
-                return (false, false)
+                break
             }
+            return (swallow, !state.waiting.isEmpty)
         }
         if heard { fire(Self.sequenceFireID) }
         return swallow
@@ -80,7 +103,30 @@ extension KeyboardTap {
         }
         let heard = sequenceState.withLock {
             $0.takeClose()
-            return $0.record($0.router.openLeader(Int(id - Self.leaderBase)))
+            _ = $0.record($0.router.openLeader(Int(id - Self.leaderBase)))
+            return !$0.waiting.isEmpty
+        }
+        if heard { fire(Self.sequenceFireID) }
+    }
+
+    #if DEBUG
+        /// Tests only: a tap that never installs, whose consumers a
+        /// suite drives with fabricated events. Production must not
+        /// read this.
+        static func unstarted(
+            consumers: Set<KeyboardTapConsumer>,
+            fire: @escaping Fire
+        ) -> KeyboardTap {
+            KeyboardTap(consumers: consumers, fire: fire, report: { _ in })
+        }
+    #endif
+
+    /// Closes an open sequence after the tap was off.
+    func closeSequenceAfterGap() {
+        let heard = sequenceState.withLock { state -> Bool in
+            guard state.router.isOpen else { return false }
+            state.router.close()
+            return state.record(.closed)
         }
         if heard { fire(Self.sequenceFireID) }
     }

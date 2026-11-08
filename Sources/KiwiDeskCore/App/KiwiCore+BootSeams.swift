@@ -84,8 +84,6 @@ extension KiwiCore {
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
             // A click on a window a lens holds clears it (#2103).
             self?.visionPressed()
-            // A click closes an open key sequence (#1871).
-            self?.closeKeySequence()
             // Neither arm hears a press on a bar or the peek, so
             // every press it does hear is a click outside the peek
             // (#1946).

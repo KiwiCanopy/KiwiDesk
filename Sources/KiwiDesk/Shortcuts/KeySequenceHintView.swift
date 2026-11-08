@@ -64,7 +64,7 @@ struct KeySequenceHintView: View {
         HStack(spacing: 8) {
             Text(L("key_sequence.hint.back", "%1$@ Back", "⌫"))
             Text(verbatim: "·").accessibilityHidden(true)
-            Text(L("key_sequence.hint.cancel", "%1$@ Cancel", "esc"))
+            Text(L("key_sequence.hint.cancel", "%1$@ Cancel", "Esc"))
         }
         .font(.caption)
         .foregroundStyle(.secondary)

@@ -94,6 +94,31 @@ struct KeySequenceHintTests {
         #expect(!hint.title.isEmpty)
     }
 
+    @Test("The import classifier files a sequence's end keys")
+    func classifierReachesEndKeys() {
+        var config = GuiConfig()
+        config.layers = [
+            KeyLayer(
+                name: "default",
+                bindings: [
+                    .sequence(
+                        combo: "ctrl+alt+space",
+                        steps: [
+                            KeyBinding(
+                                combo: "h",
+                                lua: "KiwiDesk.focus(\"left\")"
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+        KeybindingImportClassifier.classify(&config)
+        let end = config.layers[0].bindings[0].steps?.first
+        #expect(end?.kind == .navigation)
+        #expect(config.layers[0].bindings[0].isSequence)
+    }
+
     /// The manager's beep defaults silent, so the wiring is the
     /// one place an unbound key makes a sound (tests.md ▸ an
     /// inverted seam takes the two-sided guard).
@@ -113,6 +138,26 @@ struct KeySequenceHintTests {
         #expect(
             boot.contains(
                 "keys.beep = { [weak self] in self?.soundPanelRefusal() }"
+            )
+        )
+    }
+
+    @Test("A Space switch and a Desktop change close a sequence")
+    func switchDoorsClose() throws {
+        let core = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let transition = try SourceScan.strippedSource(
+            at: core.appendingPathComponent(
+                "Commands/KiwiCore+SpaceTransition.swift"
+            )
+        )
+        #expect(transition.contains("if asSwitch { closeKeySequence() }"))
+        let desktops = try SourceScan.strippedSource(
+            at: core.appendingPathComponent("Profiles/KiwiCore+Desktops.swift")
+        )
+        #expect(
+            desktops.contains(
+                "func handleDesktopChange() {\n        closeKeySequence()"
             )
         )
     }

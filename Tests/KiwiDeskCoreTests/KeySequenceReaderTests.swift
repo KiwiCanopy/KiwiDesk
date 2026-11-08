@@ -45,11 +45,11 @@ struct KeySequenceReaderTests {
     }
 
     @Test("A gone Space takes its end key and leaves the leader")
-    func spaceDropTrimsTheSequence() {
+    func spaceDropTrimsTheSequence() throws {
         let layers = [KeyLayer(name: "default", bindings: [Self.goToTwo])]
         let result = layers.removingRows(naming: [SpaceID("2")])
-        #expect(result.layers[0].sequences.count == 1)
-        #expect(result.layers[0].bindings[0].steps?.map(\.combo) == ["3"])
+        let kept = try #require(result.layers[0].sequences.first)
+        #expect(kept.steps?.map(\.combo) == ["3"])
         // No row was taken, so no tombstone combo is named.
         #expect(result.removed.isEmpty)
     }

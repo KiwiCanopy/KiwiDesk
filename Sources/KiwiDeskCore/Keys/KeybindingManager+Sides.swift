@@ -51,6 +51,7 @@ extension KeybindingManager {
         sequences: [KeySequence]
     ) -> Bool {
         tapBindings = [:]
+        sequenceGeneration &+= 1
         let rows = KeyboardTapRows(
             sides: sideTapRows(sides),
             taps: taps.map { combo, ref in
@@ -63,7 +64,8 @@ extension KeybindingManager {
                         id: KeyboardTap.leaderID($0.offset)
                     )
                 },
-            sequences: sequences
+            sequences: sequences,
+            sequenceGeneration: sequenceGeneration
         )
         let wanted = rows.consumers
         guard !wanted.isEmpty else {
@@ -134,6 +136,8 @@ extension KeybindingManager {
 
     private func liveTapID(_ combo: KeyCombo, _ ref: Int32) -> UInt32 {
         nextTapID &+= 1
+        // Ids from `KeyboardTap.leaderBase` up are the sequences'.
+        if nextTapID >= KeyboardTap.leaderBase { nextTapID = 1 }
         tapBindings[nextTapID] = LiveBinding(ref: ref, combo: combo)
         return nextTapID
     }

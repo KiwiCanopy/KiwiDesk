@@ -11,6 +11,7 @@ extension KiwiCore {
             guard let self, let lua else { return .none }
             guard let text = args.first?.stringValue,
                 let leader = KeyCombo.parse(text),
+                KeySequence.admitsLeader(leader),
                 case .table(let table) = args.dropFirst().first ?? .none
             else {
                 self.onLog("define_sequence(): expected leader and table")
@@ -22,12 +23,15 @@ extension KiwiCore {
                 options = opts
             }
             let steps = self.sequenceKeys(table, under: text, lua: lua)
+            var source = KeyBinding.sequence(
+                combo: text,
+                label: options["name"]?.stringValue ?? ""
+            )
+            source.meta = KeyBindingMeta(options: options)
             let sequence = KeySequence(
                 leader: leader,
-                stored: text,
-                steps: steps,
-                label: options["name"]?.stringValue ?? "",
-                meta: KeyBindingMeta(options: options)
+                source: source,
+                steps: steps
             )
             self.keys.defineSequence(
                 sequence,
@@ -48,6 +52,7 @@ extension KiwiCore {
         var keys: [KeySequence.Key] = []
         for (key, value) in table.sorted(by: { $0.key < $1.key }) {
             guard let combo = KeyCombo.parse(key),
+                KeySequence.admitsStep(combo),
                 let action = sequenceAction(
                     value,
                     under: path + " " + key,
@@ -58,14 +63,18 @@ extension KiwiCore {
                 Self.releaseRefs(in: [value], lua: lua)
                 continue
             }
-            var entry = KeySequence.Key(
-                combo: combo,
-                stored: key,
-                action: action.action
+            var source = KeyBinding(combo: key, label: action.label)
+            if case .opens = action.action {
+                source = .sequence(combo: key, label: action.label)
+            }
+            source.meta = action.meta
+            keys.append(
+                KeySequence.Key(
+                    combo: combo,
+                    source: source,
+                    action: action.action
+                )
             )
-            entry.label = action.label
-            entry.meta = action.meta
-            keys.append(entry)
         }
         return keys
     }
@@ -82,6 +91,11 @@ extension KiwiCore {
             let label = node["name"]?.stringValue ?? ""
             let meta = KeyBindingMeta(options: node)
             if case .table(let next)? = node["keys"] {
+                // A key either opens more keys or runs one function.
+                if node["fn"] != nil {
+                    onLog("define_sequence('\(path)'): keys and fn, keys kept")
+                    Self.releaseRefs(in: [node["fn"] ?? .none], lua: lua)
+                }
                 let keys = sequenceKeys(next, under: path, lua: lua)
                 return (.opens(keys), label, meta)
             }

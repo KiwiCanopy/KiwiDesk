@@ -174,7 +174,34 @@ struct KeySequenceInstallTests {
     @Test("A reset releases every end key's ref")
     func resetReleases() throws {
         let core = try loaded(Self.script)
+        let lua = try #require(core.keys.lua)
+        let ref = try #require(core.keys.sequences(for: "default").first)
+            .refs[0]
+        #expect((try? lua.call(ref: ref).get()) != nil)
         core.keys.reset()
         #expect(core.keys.sequences(for: "default").isEmpty)
+        #expect((try? lua.call(ref: ref).get()) == nil)
+    }
+
+    @Test("A fired end key runs its function")
+    func firedRuns() throws {
+        let core = try loaded(
+            """
+            KiwiDesk.define_sequence("ctrl+alt+space", {
+              t = function() seq_hit = (seq_hit or 0) + 1 end,
+            })
+            """
+        )
+        let lua = try #require(core.keys.lua)
+        let ref = try #require(core.keys.sequences(for: "default").first)
+            .refs[0]
+        core.keys.sequenceDecided(
+            KeySequenceDecision(
+                outcome: .fired(ref: ref),
+                progress: nil,
+                generation: core.keys.sequenceGeneration
+            )
+        )
+        #expect((try? lua.run("assert(seq_hit == 1)").get()) != nil)
     }
 }

@@ -117,6 +117,46 @@ struct KeySequenceRouterTests {
         #expect(!router.isOpen)
     }
 
+    @Test("esc and ⌫ close or go back only when pressed plain")
+    func plainOnly() {
+        var router = router()
+        _ = press(&router, "ctrl+alt+space")
+        _ = press(&router, "w")
+        #expect(press(&router, "ctrl+escape") == .unbound)
+        #expect(press(&router, "cmd+delete") == .unbound)
+        #expect(router.progress?.path == ["w"])
+    }
+
+    @Test("A keypad digit stands for its number-row step key")
+    func keypadTwin() {
+        var router = KeySequenceRouter()
+        router.setSequences([
+            KeySequence(
+                leader: Self.leader,
+                stored: "ctrl+alt+space",
+                steps: [Self.key("2", .run(ref: 4))]
+            )
+        ])
+        _ = press(&router, "ctrl+alt+space")
+        #expect(
+            router.press(
+                keyCode: UInt32(kVK_ANSI_Keypad2),
+                held: [],
+                isRepeat: false
+            ) == .fired(ref: 4)
+        )
+    }
+
+    @Test("A tap leader opens, and the same tap again closes")
+    func tapLeaderToggles() {
+        var router = router()
+        #expect(router.openLeader(0) == .stepped)
+        #expect(router.isOpen)
+        #expect(router.openLeader(0) == .closed)
+        #expect(!router.isOpen)
+        #expect(router.openLeader(9) == .pass)
+    }
+
     @Test("A repeat neither opens nor moves a step")
     func repeatsAreSwallowed() {
         var router = router()

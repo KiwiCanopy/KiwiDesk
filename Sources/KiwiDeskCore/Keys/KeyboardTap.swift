@@ -89,6 +89,8 @@ struct KeyboardTapRows: Equatable, Sendable {
     /// The current layer's key sequences (#1871); a tap leader also
     /// rides `taps`, under `KeyboardTap.leaderID(_:)`.
     var sequences: [KeySequence] = []
+    /// Stamped on every sequence decision made over these rows.
+    var sequenceGeneration: UInt64 = 0
 
     static let empty = KeyboardTapRows()
 
@@ -123,22 +125,18 @@ protocol KeyboardTapHandle: AnyObject {
     func requestSequenceClose()
 }
 
-extension KeyboardTapHandle {
-    func drainSequenceDecisions() -> [KeySequenceDecision] { [] }
-    func requestSequenceClose() {}
-}
-
-/// The one keyboard event tap (#2601, #1872), run only while a
-/// consumer has rows.
+/// The one keyboard event tap (#2601, #1872, #1871), run only
+/// while a consumer has rows.
 ///
-/// ACTIVE while `.sides` is live, so a matching press is swallowed
-/// rather than typed, listen-only otherwise; macOS allows both
-/// with Accessibility alone (measured on macOS 27,
+/// ACTIVE while a swallowing consumer is live — `.sequences` or
+/// `.sides` — so a press one answers is swallowed rather than
+/// typed, listen-only otherwise; macOS allows both with
+/// Accessibility alone (measured on macOS 27,
 /// `docs/design-decisions.md`). It runs on its own thread, since
 /// every key press on the Mac waits on the callback, and passes
-/// every event no side row answers. A disabled tap — macOS judged
-/// it slow — turns itself back on, forgets a half-counted tap and
-/// says so.
+/// every event no swallowing consumer answers. A disabled tap —
+/// macOS judged it slow — turns itself back on, forgets a
+/// half-counted tap and an open sequence, and says so.
 final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     typealias Fire = @Sendable (UInt32) -> Void
     typealias Report = @Sendable (String) -> Void
@@ -163,7 +161,9 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     private var runLoop: CFRunLoop?
     private var installed = false
 
-    private init(
+    /// Builds without installing; `live` starts it, and a test
+    /// takes `unstarted`.
+    init(
         consumers: Set<KeyboardTapConsumer>,
         fire: @escaping Fire,
         report: @escaping Report
@@ -191,7 +191,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     func setRows(_ rows: KeyboardTapRows) {
         sideRows.withLock { $0 = rows.sides }
         router.withLock { $0.setRows(rows.taps) }
-        sequenceState.withLock { $0.router.setSequences(rows.sequences) }
+        sequenceState.withLock { $0.reset(rows) }
     }
 
     func stop() {
@@ -256,6 +256,8 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
             if let port { CGEvent.tapEnable(tap: port, enable: true) }
             // A count half-heard across the gap is no tap.
             route(.key)
+            // Keys passed while it was off: an open sequence lost them.
+            closeSequenceAfterGap()
             report("keyboard tap: re-enabled after \(type)")
             return pass
         }

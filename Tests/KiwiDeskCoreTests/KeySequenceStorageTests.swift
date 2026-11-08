@@ -126,11 +126,14 @@ struct KeySequenceStorageTests {
         #expect(mapped.bindings[0].label == "Leader")
     }
 
-    @Test("Every format the ruling names is bumped")
+    /// The floors the #1871 bump set: an older build refuses a
+    /// file holding a sequence as newer, never as corrupt. A later
+    /// bump keeps them; dropping one reds.
+    @Test("Every format the ruling names is at least its bump")
     func formatsAreBumped() {
-        #expect(GuiConfig.currentFormat == 20)
-        #expect(Profile.currentFormat == 35)
-        #expect(SetupBundle.currentFormat == 44)
+        #expect(GuiConfig.currentFormat >= 20)
+        #expect(Profile.currentFormat >= 35)
+        #expect(SetupBundle.currentFormat >= 44)
     }
 
     @Test("A gui.json carrying a sequence round-trips")

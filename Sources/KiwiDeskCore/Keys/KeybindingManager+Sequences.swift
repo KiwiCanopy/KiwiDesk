@@ -44,24 +44,16 @@ extension KeybindingManager {
 
     /// An end key the tap answered: fires it as a Carbon press
     /// does, with no hold glide, since the tap reports no release.
+    /// An end key is never disabled on a failure: the hint panel
+    /// reads the stored tree, so a dropped key would be listed and
+    /// beep. Its failure is logged at each press.
     func sequenceFire(ref: Int32) {
-        guard !isSuspended, let lua else { return }
-        // The ref must still be one this layer's sequences hold:
-        // a reload between the press and this hop released it.
-        guard
-            sequences(for: currentLayer).contains(where: {
-                $0.refs.contains(ref)
-            })
-        else { return }
-        let outer = holdGlide.beginFire()
-        let wasFiring = isFiring
-        isFiring = true
-        if case .failure(let error) = lua.call(ref: ref) {
-            onLog("key sequence: end key failed: \(error)")
+        guard !isSuspended else { return }
+        firePress(id: nil) {
+            if let error = call(ref: ref) {
+                onLog("key sequence: end key failed: \(error)")
+            }
         }
-        isFiring = wasFiring
-        holdGlide.cancelRun()
-        holdGlide.restoreTally(outer)
     }
 }
 
@@ -71,12 +63,16 @@ extension KeybindingManager {
 struct KeySequenceDecision: Equatable, Sendable {
     var outcome: KeySequenceRouter.Outcome
     var progress: KeySequenceProgress?
+    /// The rows the decision was made over: one made before newer
+    /// rows is dropped, since its ref may name another key now.
+    var generation: UInt64 = 0
 }
 
 extension KeybindingManager {
     /// Acts on one decision the tap made: the hint panel follows
     /// the path, an end key fires, an unbound key beeps.
     func sequenceDecided(_ decision: KeySequenceDecision) {
+        guard decision.generation == sequenceGeneration else { return }
         switch decision.outcome {
         case .pass, .repeated:
             return

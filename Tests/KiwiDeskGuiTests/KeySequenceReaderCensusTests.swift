@@ -120,7 +120,9 @@ struct KeySequenceReaderCensusTests {
                 "KiwiDeskCore/App/KiwiCore+StructuredKeybindings.swift"
             )
         )
-        #expect(text.contains("layer.pressBindings.enumerated()"))
+        // The whole loop header, so a needle kept beside a widened
+        // walk reds too.
+        #expect(text.contains("in layer.pressBindings.enumerated()\n"))
         #expect(text.contains("prepareSequences(layer, lua: lua)"))
     }
 }

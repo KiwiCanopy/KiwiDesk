@@ -29,13 +29,13 @@ struct BindingNameDoorTests {
         // opens more keys runs no catalog action, so its stored
         // name is its only name.
         "KeySequence.swift": (
-            4,
-            "the runtime tree carries each node's stored name and"
-                + " reads it back for the Lua importer"
+            1,
+            "the leader's stored name, the hint panel's title"
         ),
         "KiwiCore+SequenceLuaAPI.swift": (
-            1,
+            2,
             "define_sequence: a step's name, read from its Lua table"
+                + " into the step's stored binding"
         ),
         "KiwiCore+ShortcutGroups.swift": (
             1,
