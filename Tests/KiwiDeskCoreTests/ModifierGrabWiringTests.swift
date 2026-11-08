@@ -102,7 +102,7 @@ struct ModifierGrabWiringTests {
         #expect(core.drag.hasGesture(Self.window))
         #expect(core.mouse.leftButtonHeld)
         send(core, .ended, at: CGPoint(x: 240, y: 170))
-        #expect(!core.modifierGrabOwns(Self.window))
+        #expect(core.modifierGrab.session == nil)
         #expect(!core.mouse.leftButtonHeld)
         #expect(core.mouse.press?.upAt != nil)
     }
@@ -166,10 +166,12 @@ struct ModifierGrabWiringTests {
         send(core, .ended, at: CGPoint(x: 260, y: 150))
         #expect(core.drag.hasGesture(Self.window))
         #expect(core.modifierGrabOwns(Self.window))
+        let fed = log.moves.count
         core.handle(.windowMoved(Self.window, Self.frame))
-        // Still settling, and not on the stale frame.
+        // Still settling: the stale echo fed nothing and cancelled
+        // nothing.
         #expect(core.drag.hasGesture(Self.window))
-        #expect(log.moves.last?.frame == Self.frame.offsetBy(dx: 60, dy: 0))
+        #expect(log.moves.count == fed)
         // Once the drop has settled, the window's next drag is its
         // own: the echo that opens it asks first, as the event arms
         // do, and the gesture it opens is never the grab's.
