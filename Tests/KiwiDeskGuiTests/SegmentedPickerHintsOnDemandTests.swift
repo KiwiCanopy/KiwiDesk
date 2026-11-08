@@ -69,5 +69,7 @@ struct SegmentedPickerHintsOnDemandTests {
             )
         )
         #expect(source.contains("pointer:pointerIndex,"))
+        // ⌘ held reaches the label, not only the picker's input.
+        #expect(source.contains("showsAll:showsHints,"))
     }
 }
