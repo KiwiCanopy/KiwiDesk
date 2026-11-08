@@ -18,15 +18,9 @@ struct UpdateWindowFooter: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             buttons
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .frame(minHeight: 60)
-        .background(SettingsTheme.panel)
+        .updateFooterBar()
         .onChange(of: session.phase.step) { answerFocused = true }
         .onAppear { primaryFocused = true }
-        .overlay(alignment: .top) {
-            Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
-        }
     }
 
     // MARK: - Status
@@ -43,7 +37,9 @@ struct UpdateWindowFooter: View {
                 )
             )
             .font(.system(size: 11))
-            .foregroundStyle(SettingsTheme.ink3)
+            // The header's on-glass secondary ink: ink3 nears the
+            // floor on bright glass (#3111).
+            .foregroundStyle(SettingsTheme.ink2)
         case .downloading(let received, let expected):
             progress(
                 fraction: expected.map {
@@ -207,15 +203,23 @@ struct WhatsNewFooter: View {
                 .keyboardShortcut(.defaultAction)
                 .focused($focused)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .frame(minHeight: 60)
-        .background(SettingsTheme.panel)
-        .overlay(alignment: .top) {
-            Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
-        }
+        .updateFooterBar()
         .onAppear { focused = true }
         // Escape answers Done too; a Button cannot carry both.
         .onExitCommand(perform: done)
+    }
+}
+
+extension View {
+    /// Every update window's pinned footer bar: on the window's
+    /// glass with no ground of its own, set off by its hairline
+    /// (#3111).
+    func updateFooterBar() -> some View {
+        padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(minHeight: 60)
+            .overlay(alignment: .top) {
+                Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
+            }
     }
 }
