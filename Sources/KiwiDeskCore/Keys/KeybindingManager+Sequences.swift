@@ -73,6 +73,11 @@ extension KeybindingManager {
     /// the path, an end key fires, an unbound key beeps.
     func sequenceDecided(_ decision: KeySequenceDecision) {
         guard decision.generation == sequenceGeneration else { return }
+        // A step decided before a main close is no longer the tap's.
+        if closePending {
+            guard decision.outcome == .closed else { return }
+            closePending = false
+        }
         switch decision.outcome {
         case .pass, .repeated:
             return
@@ -93,8 +98,12 @@ extension KeybindingManager {
     /// Space switch (#1871 ▸ hint panel). The tap reads the request
     /// at its next press, so the decision stays on its thread.
     func closeSequence() {
-        guard sequenceOpen else { return }
-        keyboardTap?.requestSequenceClose()
+        // Asked even while the panel is shut: a leader may already be
+        // on its way here; the tap answers with `.closed` either way.
+        guard let keyboardTap, !sequences(for: currentLayer).isEmpty
+        else { return }
+        keyboardTap.requestSequenceClose()
+        closePending = true
         noteSequenceClosed()
     }
 

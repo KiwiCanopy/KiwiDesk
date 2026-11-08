@@ -63,11 +63,14 @@ struct KeySequence: Equatable, Sendable {
     var label: String { source.label }
     var meta: KeyBindingMeta { source.meta }
 
-    /// Whether `combo` may be a step key: a key-down the tap can
-    /// match, never a modifier tap, a Hyper chord (no held state
-    /// reaches the tap) or the plain esc and ⌫ the router keeps.
-    static func admitsStep(_ combo: KeyCombo) -> Bool {
-        !combo.isTap && admitsLeader(combo)
+    /// Whether `combo` may be a step key under `leader`: a key-down
+    /// the tap can match, never a modifier tap, a Hyper chord (no
+    /// held state reaches the tap), the leader itself, or the plain
+    /// esc and ⌫ the router keeps.
+    static func admitsStep(_ combo: KeyCombo, under leader: KeyCombo)
+        -> Bool
+    {
+        !combo.isTap && admitsLeader(combo) && combo != leader
             && !(combo.modifiers.isEmpty
                 && [UInt32(kVK_Escape), UInt32(kVK_Delete)]
                     .contains(combo.keyCode))
@@ -149,6 +152,7 @@ struct KeySequence: Equatable, Sendable {
         var skipped: [String] = []
         let steps = keys(
             binding.steps ?? [],
+            leader: leader,
             compile: compile,
             release: release,
             skipped: &skipped
@@ -163,6 +167,7 @@ struct KeySequence: Equatable, Sendable {
 
     private static func keys(
         _ bindings: [KeyBinding],
+        leader: KeyCombo,
         compile: (KeyBinding) -> Int32?,
         release: (Int32) -> Void,
         skipped: inout [String]
@@ -170,7 +175,7 @@ struct KeySequence: Equatable, Sendable {
         var built: [Key] = []
         for binding in bindings where !binding.combo.isEmpty {
             guard let combo = KeyCombo.parse(binding.combo),
-                admitsStep(combo)
+                admitsStep(combo, under: leader)
             else {
                 skipped.append(binding.combo)
                 continue
@@ -180,6 +185,7 @@ struct KeySequence: Equatable, Sendable {
                 action = .opens(
                     keys(
                         binding.steps ?? [],
+                        leader: leader,
                         compile: compile,
                         release: release,
                         skipped: &skipped

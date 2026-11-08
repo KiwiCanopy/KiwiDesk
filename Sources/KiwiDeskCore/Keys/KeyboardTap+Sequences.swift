@@ -19,12 +19,12 @@ struct SequenceTapState: Sendable {
         closeRequested = false
     }
 
-    /// Applies a main-actor close, if one is waiting, and says so,
-    /// so a decision queued before it is followed by the close.
+    /// Applies a main-actor close, if one is waiting, and answers it
+    /// with `.closed` whether or not one was open, which ends the
+    /// main actor's wait.
     mutating func takeClose() {
         guard closeRequested else { return }
         closeRequested = false
-        guard router.isOpen else { return }
         router.close()
         _ = record(.closed)
     }

@@ -40,6 +40,16 @@ struct KeySequenceBuildTests {
         #expect(sequence?.steps.map(\.stored) == ["shift+escape"])
     }
 
+    @Test("a step key on the leader's own chord is skipped")
+    func leaderChordStep() {
+        let (sequence, skipped, _) = build([
+            KeyBinding(combo: "ctrl+k", lua: "a()"),
+            KeyBinding(combo: "k", lua: "b()"),
+        ])
+        #expect(skipped == ["ctrl+k"])
+        #expect(sequence?.steps.map(\.stored) == ["k"])
+    }
+
     @Test("a Hyper leader builds nothing")
     func hyperLeader() {
         let (sequence, skipped, _) = build([], leader: "hyper+k")

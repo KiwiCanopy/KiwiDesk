@@ -44,6 +44,21 @@ struct KeySequenceInstallTests {
         #expect(held.first?.refs.count == 2)
     }
 
+    @Test("Two spellings of one step chord keep the last")
+    func luaStepDuplicate() throws {
+        let core = try loaded(
+            """
+            KiwiDesk.define_sequence("ctrl+alt+space", {
+              ["alt+a"] = function() KiwiDesk.focus("left") end,
+              ["opt+a"] = function() KiwiDesk.focus("right") end,
+            })
+            """
+        )
+        let held = try #require(core.keys.sequences(for: "default").first)
+        #expect(held.steps.map(\.stored) == ["opt+a"])
+        #expect(held.refs.count == 1)
+    }
+
     @Test("A leader registers no Carbon hotkey")
     func leaderIsNotCarbon() throws {
         let core = try loaded(Self.script)
@@ -137,7 +152,7 @@ struct KeySequenceInstallTests {
         #expect(core.keys.bindings(for: "default").count == 1)
         let held = try #require(core.keys.sequences(for: "default").first)
         #expect(held.refs.count == 3)
-        // The installed snapshot keeps the stored sequence whole.
+        // The installed snapshot keeps the tree the router answers.
         let snapshot = try #require(core.liveKeybindingSnapshot())
         #expect(
             snapshot.keyLayers.first?.sequences
@@ -169,6 +184,11 @@ struct KeySequenceInstallTests {
             return
         }
         #expect(skipped.map(\.chord) == ["ctrl+alt+space"])
+        // The panel reads the pruned tree, never the broken key.
+        #expect(
+            core.liveKeybindingSnapshot()?.keyLayers.first?.sequences
+                .first?.steps?.map(\.combo) == ["t"]
+        )
     }
 
     @Test("A reset releases every end key's ref")

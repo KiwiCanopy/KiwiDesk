@@ -153,22 +153,56 @@ struct KeySequenceTapTests {
         let (manager, taps) = rig()
         var seen: [KeySequenceProgress?] = []
         manager.onSequenceProgress = { seen.append($0) }
+        manager.closeSequence()  // no sequence defined, nothing asked
         manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
         let tap = try #require(taps().last)
-        manager.closeSequence()
-        #expect(tap.closeRequests == 0)  // nothing open, nothing asked
         let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
+        let gen = manager.sequenceGeneration
         tap.decisions = [
             KeySequenceDecision(
                 outcome: .stepped,
                 progress: open,
-                generation: manager.sequenceGeneration
+                generation: gen
             )
         ]
         manager.tapFire(KeyboardTap.sequenceFireID)
         manager.closeSequence()
         #expect(tap.closeRequests == 1)
         #expect(seen == [open, nil])
+    }
+
+    @Test("a leader in flight when the main actor closes stays closed")
+    func closeBeatsALeaderInFlight() throws {
+        let (manager, taps) = rig()
+        var seen: [KeySequenceProgress?] = []
+        manager.onSequenceProgress = { seen.append($0) }
+        manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
+        let tap = try #require(taps().last)
+        // The panel is shut, yet the tap is asked: a leader's step
+        // may be on its way.
+        manager.closeSequence()
+        #expect(tap.closeRequests == 1)
+        let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
+        let gen = manager.sequenceGeneration
+        tap.decisions = [
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: open,
+                generation: gen
+            ),
+            KeySequenceDecision(
+                outcome: .closed,
+                progress: nil,
+                generation: gen
+            ),
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: open,
+                generation: gen
+            ),
+        ]
+        manager.tapFire(KeyboardTap.sequenceFireID)
+        #expect(seen == [open])
     }
 
     @Test("new rows close the panel with the tap's sequence")

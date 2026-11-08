@@ -62,6 +62,8 @@ public final class KeybindingManager {
     /// Bumped with every row set the tap is handed, so a decision
     /// made over older rows is dropped (#1871).
     var sequenceGeneration: UInt64 = 0
+    /// A main close the tap has yet to answer with `.closed`.
+    var closePending = false
     private var layerIcons: [String: String] = [:]
     /// What a Lua binding says of itself — description, group and
     /// symbol (#2544) — by layer and chord.

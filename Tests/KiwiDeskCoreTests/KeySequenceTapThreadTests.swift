@@ -127,6 +127,30 @@ struct KeySequenceTapThreadTests {
         #expect(!tap.sequenceEvent(.keyDown, try key(17)))
     }
 
+    @Test("a gap in the tap closes an open sequence")
+    func gapCloses() throws {
+        let (tap, fired) = try tap("ctrl+alt+space")
+        tap.closeSequenceAfterGap()
+        #expect(fired.ids.isEmpty)
+        _ = tap.sequenceEvent(
+            .keyDown,
+            try key(49, [.maskControl, .maskAlternate])
+        )
+        tap.closeSequenceAfterGap()
+        #expect(fired.ids.count == 2)
+        #expect(
+            tap.drainSequenceDecisions().map(\.outcome) == [.stepped, .closed]
+        )
+    }
+
+    @Test("a main close is answered even with nothing open")
+    func closeIsAlwaysAnswered() throws {
+        let (tap, _) = try tap("ctrl+alt+space")
+        tap.requestSequenceClose()
+        #expect(!tap.sequenceEvent(.keyDown, try key(17)))
+        #expect(tap.drainSequenceDecisions().map(\.outcome) == [.closed])
+    }
+
     @Test("a tap leader opens through the modifier-tap id")
     func tapLeaderOpens() throws {
         let (tap, fired) = try tap("cmd+cmd")

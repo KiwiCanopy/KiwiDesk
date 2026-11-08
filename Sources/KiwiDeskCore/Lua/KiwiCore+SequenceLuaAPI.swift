@@ -22,7 +22,12 @@ extension KiwiCore {
             if case .table(let opts)? = args.dropFirst(2).first {
                 options = opts
             }
-            let steps = self.sequenceKeys(table, under: text, lua: lua)
+            let steps = self.sequenceKeys(
+                table,
+                under: text,
+                leader: leader,
+                lua: lua
+            )
             var source = KeyBinding.sequence(
                 combo: text,
                 label: options["name"]?.stringValue ?? ""
@@ -47,15 +52,17 @@ extension KiwiCore {
     private func sequenceKeys(
         _ table: [String: LuaValue],
         under path: String,
+        leader: KeyCombo,
         lua: LuaInterpreter
     ) -> [KeySequence.Key] {
         var keys: [KeySequence.Key] = []
         for (key, value) in table.sorted(by: { $0.key < $1.key }) {
             guard let combo = KeyCombo.parse(key),
-                KeySequence.admitsStep(combo),
+                KeySequence.admitsStep(combo, under: leader),
                 let action = sequenceAction(
                     value,
                     under: path + " " + key,
+                    leader: leader,
                     lua: lua
                 )
             else {
@@ -68,6 +75,12 @@ extension KiwiCore {
                 source = .sequence(combo: key, label: action.label)
             }
             source.meta = action.meta
+            // Two spellings of one chord: the last wins, as in a build.
+            for lost in keys where lost.combo == combo {
+                onLog("define_sequence('\(path)'): '\(lost.stored)' replaced")
+                KeySequence.refs(in: [lost]).forEach { lua.release(ref: $0) }
+            }
+            keys.removeAll { $0.combo == combo }
             keys.append(
                 KeySequence.Key(
                     combo: combo,
@@ -82,6 +95,7 @@ extension KiwiCore {
     private func sequenceAction(
         _ value: LuaValue,
         under path: String,
+        leader: KeyCombo,
         lua: LuaInterpreter
     ) -> (action: KeySequence.Action, label: String, meta: KeyBindingMeta)? {
         switch value {
@@ -96,7 +110,12 @@ extension KiwiCore {
                     onLog("define_sequence('\(path)'): keys and fn, keys kept")
                     Self.releaseRefs(in: [node["fn"] ?? .none], lua: lua)
                 }
-                let keys = sequenceKeys(next, under: path, lua: lua)
+                let keys = sequenceKeys(
+                    next,
+                    under: path,
+                    leader: leader,
+                    lua: lua
+                )
                 return (.opens(keys), label, meta)
             }
             if case .functionRef(let ref)? = node["fn"] {
