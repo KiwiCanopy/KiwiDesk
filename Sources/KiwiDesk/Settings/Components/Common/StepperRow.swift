@@ -86,6 +86,9 @@ struct StepperRow: View {
                 .monospacedDigit()
                 .textFieldStyle(.roundedBorder)
                 .commitsOnSave($focused, commit)
+                // ↑/↓ in the field step as the arrows do.
+                .onKeyPress(.upArrow) { step(by: step) }
+                .onKeyPress(.downArrow) { step(by: -step) }
                 .onChange(of: text) { _, now in
                     guard liveCommit, let parsed = Int(now)
                     else { return }
@@ -101,7 +104,7 @@ struct StepperRow: View {
                     .foregroundStyle(.secondary)
                     .fixedSize()
             }
-            Stepper(value: $value, in: range, step: step) {}
+            Stepper(value: stepped, in: range, step: step) {}
                 .labelsHidden()
                 .controlSize(.large)
                 .accessibilityLabel(label)
@@ -110,6 +113,28 @@ struct StepperRow: View {
                         ?? "\(value)"
                 )
         }
+    }
+
+    /// The arrows' write: the value and the field's text together,
+    /// since a focused field keeps its text through an outside
+    /// change (#3062).
+    private var stepped: Binding<Int> {
+        Binding(
+            get: { value },
+            set: {
+                value = $0
+                text = "\($0)"
+            }
+        )
+    }
+
+    private func step(by delta: Int) -> KeyPress.Result {
+        commit()
+        stepped.wrappedValue = min(
+            max(value + delta, range.lowerBound),
+            range.upperBound
+        )
+        return .handled
     }
 
     private func commit() {

@@ -125,6 +125,27 @@ struct MaximizeShareMenuTests {
         )
     }
 
+    /// A step shows in a focused field: the arrows and ↑/↓ write the
+    /// field's text with the value, which the field's own outside-
+    /// change refresh skips while focused (owner eyeball, 2026-11-08).
+    @Test("a step updates the focused field's text")
+    func stepUpdatesTheField() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "StepperRow.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .replacingOccurrences(of: " ", with: "")
+        .replacingOccurrences(of: "\n", with: "")
+        #expect(source.contains("Stepper(value:stepped,in:range,step:step)"))
+        #expect(source.contains("set:{value=$0text=\"\\($0)\"}"))
+        #expect(source.contains(".onKeyPress(.upArrow){step(by:step)}"))
+        #expect(source.contains(".onKeyPress(.downArrow){step(by:-step)}"))
+    }
+
     private func shapeRowSource() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
