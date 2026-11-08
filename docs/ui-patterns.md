@@ -226,7 +226,6 @@ the anchor makes of the count is the preview caption's. The
 argument is in
 [design decisions](design-decisions.md#a-repeating-slot-is-offered-as-a-count-a-split-as-a-share).
 
-:::unreleased
 The Maximize card is a ruled exception (owner, 2026-11-08, #3062):
 its shares sit in a table, one row per screen shape, and each cell
 is a pop-up of ¼ ⅓ ½ ⅔ ¾ rather than a slider. A value stored
@@ -240,7 +239,6 @@ rule refuses a typed identifier where a list can be browsed, and a
 share is a number on a bounded range, which the stepper already
 types everywhere else. A typed percent that rounds to a menu
 fraction stores that fraction, so the menu checks it.
-:::
 
 **Layout Defaults picks one layout at a time, and picks it by
 its picture (#204, #678 turn 10).** The layout modes are a
@@ -510,10 +508,8 @@ override resets), never a normal row action. Native macOS
 shape differences between these classes are intentional —
 choose by semantic role, not by a desired silhouette.
 
-:::unreleased
 A tile or card is the one clickable surface that casts a shadow: it
 rises under the pointer (*Hover confirms custom hit areas*, #3042).
-:::
 
 **The exception is a button filled with the app's own accent,
 and it is about ink rather than silhouette.**
@@ -1137,14 +1133,12 @@ group closes with "Applies at once, in every profile." and a
 divider above **Animate windows**, and the card's Reduce Motion
 warning names window animations alone.
 
-:::unreleased
 **Step between Spaces (mouse or trackpad)** sits under **Space
 switches** with the same three options, for the scroll Space step
 alone; **Space switches** keeps every other switch. Its caption
 shows only while its pick differs from the row above, which says
 the same sentence otherwise. **Slide duration** stays live while
 either pick draws a slide (#2971).
-:::
 
 Three bar motions keep playing under Reduce Motion, by the owner's
 ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
@@ -1263,7 +1257,6 @@ discoverable.
 On KiwiHub's tinted Fill a button chip's fills fade with the
 panel's other fills (#2725).
 
-:::unreleased
 **A tile or card answers the pointer with its edge and a rise
 (#3042).** Home cards, Layout, palette, look and dashed tiles, Screen
 cards and the gesture strip's pictures take `hoverEdge`, a neutral
@@ -1278,7 +1271,6 @@ A selected stroke and check fade in over 0.12 s (`SelectionStroke`,
 Under Reduce Motion the rise and the fade arrive at once. The setup
 tour's tiles take the edge without the rise. A chip, a row, a KiwiHub
 item and a Space card's menu face keep their fill.
-:::
 
 A borderless value-menu or
 popover trigger whose label is text takes the glyph chip's lift
