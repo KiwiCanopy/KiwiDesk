@@ -8,6 +8,8 @@ import Testing
 /// 2026-11-08): a hovered tile must not pass for a selected one, so
 /// `hoverEdge` separates from `accent` by `ColorVision`'s floor in
 /// both appearances, the measure that sees hue as well as luminance.
+/// The one `ColorVision` pairing this suite holds: it reads the
+/// shipped tokens, which the GUI target alone can resolve.
 extension SettingsThemeContrastTests {
     @Test("the hover edge separates from the selected accent")
     func hoverEdgeSeparatesFromAccent() throws {
@@ -30,6 +32,22 @@ extension SettingsThemeContrastTests {
                 )
             )
         }
+    }
+
+    /// The gesture strip's edge crosses `lightPlate`, which only light
+    /// draws, so the both-modes pairing list cannot hold it.
+    @Test("the hover edge clears 3:1 on the light plate")
+    func hoverEdgeClearsLightPlate() throws {
+        let ratio = try ThemeContrast.contrast(
+            SettingsTheme.hoverEdge,
+            over: SettingsTheme.lightPlate,
+            inkAlpha: 1,
+            dark: false
+        )
+        #expect(
+            ratio >= 3.0,
+            Comment(rawValue: String(format: "light: %.2f", ratio))
+        )
     }
 
     /// A token resolved in one appearance, as `#RRGGBB`.

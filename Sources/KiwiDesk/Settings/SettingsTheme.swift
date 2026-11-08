@@ -24,7 +24,8 @@ enum SettingsTheme {
 
     /// A tile's or card's edge under the pointer (#3040, #3042): a
     /// neutral of its own, never an alias of an ink, 3:1 or more on
-    /// every ground it crosses and apart from `accent` in hue.
+    /// every ground it crosses, apart from `accent` by the
+    /// colour-vision floor.
     static let hoverEdge = token(
         light: 0x64_72_6A,
         dark: 0xE6_EC_E6

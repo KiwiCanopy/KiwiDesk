@@ -11375,38 +11375,41 @@ takes its own channel. Glow stays out, as shadow and movement do on
 every ordinary button.
 
 **A tile or card takes the edge and a rise, and selection shares its
-border (#3042, owner 2026-11-06).** The fill lift, a neutral edge and
-an inset ring were all previewed; one green edge with a 2 pt rise was
-chosen, on the surfaces `docs/ui-patterns.md` names, so a tile or card
-has one answer to the pointer. That gives up the #1173 split above
-where a border carries selection, at a known cost: in dark the two strokes are one colour and
-the shadow barely shows on the black page, and a rise reads mainly
-while it moves, so a still frame cannot lean on it. So the weights
-differ, a tile whose click changes nothing stays flat, and a selected
+border (#3042, owner 2026-11-06).** The fill lift, an edge and an
+inset ring were all previewed; an edge with a 2 pt rise was chosen, on
+the surfaces `docs/ui-patterns.md` names, so a tile or card has one
+answer to the pointer. That gives up the #1173 split of channel above
+where a border carries selection, and colour keeps it (below). The
+known cost: the shadow barely shows on the black page, and a rise
+reads mainly while it moves, so a still frame cannot lean on it. So
+the weights differ, a tile whose click changes nothing stays flat, and a selected
 Layout tile gains a check, which is what a colour-blind reader and a
 screenshot have left. A chip, a row and a Space card's menu face keep
 the fill, and KiwiHub does because it marks selection with a fill the
 split still protects. The setup tour's tiles take the edge alone: its
 scrollers leave no room for a rise, and its ground is not a card's.
 
-**The hover edge takes a neutral of its own (owner 2026-11-08),
-reversing the green edge above.** One green for both strokes left a
-hovered tile passing for a selected one: in dark the two strokes were
-the same `#AACB5D`, and in light the edge sat at the colour-vision
-floor against the accent (separation 60.4 on a floor of 60). Weight
-and a check could not carry the difference alone, since a 0.5 pt step
-is not read at a glance and the check lives on Layout tiles only. So
-`hoverEdge` becomes a neutral, light `#64726A` and dark `#E6ECE6`,
-which restores #1173's split on the colour axis, accent for identity
-and selection and neutral for the pointer, while the rise and the
-1.5 pt weight stay. It is its own token rather than `ink3` or `ink`,
+**The hover edge takes a neutral of its own (owner 2026-11-08).**
+This reverses the #3042 preview's rejection of a neutral edge. The
+accent green it chose for both strokes left a hovered tile passing for
+a selected one: in dark the two strokes were the same `#AACB5D`, and
+in light the edge sat at the colour-vision floor against the accent
+(separation 60.4 on a floor of 60). Weight and a check could not
+carry the difference alone, since a 0.5 pt step is not read at a
+glance and the check lives on Layout and palette tiles only. So
+`hoverEdge` is a neutral, light `#64726A` and dark `#E6ECE6`, which
+restores #1173's split on the colour axis, accent for identity and
+selection and neutral for the pointer, while the rise and the 1.5 pt
+weight stay. It is its own token rather than `ink3` or `ink`,
 so retuning an ink cannot move the edge, and
 `SettingsThemeContrastTests` holds it apart from the accent (91.5
-light, 146.3 dark) as well as at 3:1 on every ground it crosses. A
+light, 146.3 dark, measured 2026-11-08) as well as at 3:1 on every
+ground it crosses. A
 quiet dark `#98A296` was previewed; the bright shade was chosen,
 accepting that in dark a hovered tile outshines the selected one. That
-trade is safe because selection keeps the accent, its heavier stroke
-and its check, which a hover never takes.
+trade is safe because selection keeps the accent and its heavier
+stroke, and a Layout or palette tile its check, none of which a hover
+takes.
 :::
 
 **One draft, three views — and the save surface is the floating
@@ -15015,7 +15018,10 @@ loop taught nothing they do not.
 :::unreleased
 The strip's picture takes the edge and rise every tile takes, in place
 of its accent edge (#3042). Its frame moves and its drawing does not,
-which keeps the ruling that the strip's pictures stay still.
+which keeps the ruling that the strip's pictures stay still. The edge
+is now the neutral `hoverEdge` (owner 2026-11-08): what the #2537
+argument needs is an edge rather than a fill lift, so the picture
+still reads as a link, and the accent stays selection's.
 :::
 
 **An entry lands with its feature, and greys where its surface is

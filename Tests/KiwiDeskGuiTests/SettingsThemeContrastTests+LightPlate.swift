@@ -31,9 +31,9 @@ extension SettingsThemeContrastTests {
             floor: 3.0
         ),
         // The brand's marks on the plate (`accentMark`,
-        // `boundKeyEdge`): the gesture strip's hover ring, the
-        // tour's menu-bar icon ring and a bound key's edge on the
-        // board — the accent fill itself measures ~1.9:1 here.
+        // `boundKeyEdge`): the tour's menu-bar icon ring and a
+        // bound key's edge on the board — the accent fill itself
+        // measures ~1.9:1 here.
         Pairing(
             "lightAccent marks on lightPlate",
             SettingsTheme.lightAccent,
