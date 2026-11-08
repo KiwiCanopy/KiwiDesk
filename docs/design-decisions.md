@@ -14543,6 +14543,60 @@ lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
 
+:::unreleased
+**The Desktops side is KiwiHub's map of the whole desk (#1229,
+owner ruling 2026-11-01).** The Space Bar answers what is on the
+Desktop in front of you; nothing answered where everything else
+is. Mission Control shows the Desktops but knows nothing of
+KiwiDesk's Spaces, so the overview is a fourth KiwiHub side, not a
+panel of its own: one field, one footer and one set of keys the
+user already knows. The View entry's reason for three sides was
+the switch's room beside the field; a side answering a different
+question, where everything is rather than how the desk looks, is
+worth a fourth, and the switch makes the room by drawing titles
+only. Its VoiceOver noun is "Desktop overview" and
+its Shortcuts row "Show Desktop overview".
+
+One row per screen in physical order, left to right read top to
+bottom, the screen's name as the row header; the current screen is
+marked, never moved, so a row is always in the same place and the
+side reads as a map. Each row holds that screen's Desktop cards,
+all one size, scrolling sideways; a card lists the screen's Spaces,
+one line each, empty ones included, and a line its windows as app
+icons in a fixed window of five slots with "+n" counts off each
+edge. A card's height follows its Space count, never its window
+count, because icons squeezed below a readable size answer nothing.
+KiwiDesk keeps no Space set per Desktop (state-and-layout.md), so
+every Desktop of a screen lists that screen's live Spaces: a
+hidden Desktop's windows come from the away ledger, each in the
+Space it will return to. Colour carries nothing alone: a check,
+the shown-Space capsule, an underline for each Space's
+last-focused window, a dashed outline for a picked window and a
+solid stroke for a target.
+
+The keyboard picks places before windows. Arrows move between
+Space lines; ⌘↓ opens one, as Finder's pair does, and ⌘↑ goes back.
+A window is carried rather than dragged: ⌘↩ picks it up, more than
+one may be picked, and ↩ drops them where the arrows chose, one
+move per window in pick order. ⇧ always means "a window moves, you
+stay" and ⌃ means "and follow" across KiwiHub, so one modifier
+never means opposites in one panel; ⌃-click is the secondary click
+on a Mac, so the mouse has no follow and a drop means stay. Esc
+steps back one layer per press: the carry, the open Space, the
+search, then the panel. The footer is the only hint surface: no
+Settings button and no overlay listing every key, which would be a
+second surface with no macOS precedent and would have to come to
+all four sides; ⌘, still opens Settings.
+
+The keys the side adds are stored names, `open_space`,
+`leave_space`, `pick_up` and `follow`, so `kiwihub.set_key` can add
+an alternative to each; the built-in key keeps working (#2600).
+Windows on a hidden Desktop, pocketed and full-screen windows
+cannot be picked up: macOS lists no element for the first until
+#2884, the pocket is no Space, and a full-screen window owns its
+own macOS Space.
+:::
+
 **A KiwiHub list wraps on a fresh press and stops on a held key
 (#2897, owner ruling 2026-11-01).** This reverses #1875's
 "↑/↓ move the selection without wrapping". Spotlight and Finder

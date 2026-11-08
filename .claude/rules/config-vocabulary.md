@@ -508,7 +508,7 @@ synonym:
   and the user names each one ("Writing"). Retired as names for
   it: *set*, *room*, *scene*, *session*, *focus*, *layer* and
   *mode*, each already spoken for or rejected on #2103.
-- **KiwiHub** — the product name of the key panel and its three
+- **KiwiHub** — the product name of the key panel and its
   sides (Lua `kiwihub.show(side)`, #2265). Write **KiwiHub** where
   copy — a label, a catalog value, `docs/` prose — names the whole
   panel, and a side's own name where it names one; a row title
@@ -543,11 +543,21 @@ synonym:
 - **window switcher** / **view picker** — the key panel's
   Windows and View sides, which ⌃⌥J and ⌃⌥L open, by their
   VoiceOver names (#2245, #2309); with the shortcuts panel between
-  them the panel has three sides, J, K and L (#2246); a side
+  them the panel's first three sides are J, K and L (#2246); a side
   name is translated, never kept as an English word. Retired as
   the panel's NAME: *Jump to window*, which stays its field
   prompt — the panel's own verb is *Jump* — and never a brand
   name.
+- **Desktops** / **Desktop overview** — KiwiHub's fourth side
+  (Lua `kiwihub.show("desktops")`, #1229): **Desktops** as the
+  side's title, **Desktop overview** as its VoiceOver name and in
+  its Shortcuts row, "Show Desktop overview". Inside it a Space's
+  line on a Desktop card is a **place**; a window taken along is
+  **picked up** and **dropped**, never *grabbed*, *cut* or
+  *pasted*, and **Put back** undoes a pick. The keys it adds are
+  stored `KiwiHubKey` names — `open_space`, `leave_space`,
+  `pick_up`, `follow` — named for the act, so a rename owes a
+  `ConfigMigration` step. Never a *map*, *board* or *Exposé*.
 - **View** — the ⌃⌥L side's name (Lua `kiwihub.show("view")`,
   #2309): one chord reaching the Layout, Profile and KiwiVision
   lines, each a **line** of chips or tiles. Write **View** as the
