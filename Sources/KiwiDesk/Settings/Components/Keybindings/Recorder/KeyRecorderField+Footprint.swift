@@ -15,6 +15,8 @@ private struct RecorderFootprint: View {
     @Environment(\.recorderSides) private var recorderSides
 
     var body: some View {
+        // Read here: the guard's closure is Sendable.
+        let shift = recorderSides == nil ? 0 : lead / 2
         HStack(spacing: 6) {
             slot
             if recorderSides != nil { slot }
@@ -33,7 +35,7 @@ private struct RecorderFootprint: View {
         // Its centre stays the well's, which an overlay on the
         // footprint centres on, the Sides slot leading it or not.
         .alignmentGuide(HorizontalAlignment.center) { size in
-            size.width / 2 + (recorderSides == nil ? 0 : lead / 2)
+            size.width / 2 + shift
         }
     }
 
