@@ -103,6 +103,28 @@ struct MaximizeShareMenuTests {
         )
     }
 
+    /// The popover's "%" sits beside "Share" in a row laid out at
+    /// its fitting width, where an unfixed unit was squeezed out
+    /// (owner eyeball, 2026-11-08).
+    @Test("the stepper's unit keeps its width")
+    func unitKeepsItsWidth() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "StepperRow.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .replacingOccurrences(of: " ", with: "")
+        .replacingOccurrences(of: "\n", with: "")
+        #expect(
+            source.contains(
+                "Text(suffix).foregroundStyle(.secondary).fixedSize()"
+            )
+        )
+    }
+
     private func shapeRowSource() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(

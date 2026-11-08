@@ -95,7 +95,11 @@ struct StepperRow: View {
                     )
                 }
             if let suffix {
-                Text(suffix).foregroundStyle(.secondary)
+                // The unit keeps its width: in a row laid out at its
+                // fitting width it was squeezed out first (#3062).
+                Text(suffix)
+                    .foregroundStyle(.secondary)
+                    .fixedSize()
             }
             Stepper(value: $value, in: range, step: step) {}
                 .labelsHidden()
