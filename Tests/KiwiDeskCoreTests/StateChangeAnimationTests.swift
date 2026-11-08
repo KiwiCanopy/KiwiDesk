@@ -226,7 +226,7 @@ struct StateChangeAnimationTests {
     func everyNamedWindowFollows() {
         guard NSScreen.main != nil else { return }
         let core = makeCore()
-        for raw in 1...3 { addWindow(core, raw) }
+        for raw: UInt32 in 1...3 { addWindow(core, raw) }
         core.tiler.settings.animations.onStateChange = true
         let applies = countApplies(core)
         core.tiler.retile(
