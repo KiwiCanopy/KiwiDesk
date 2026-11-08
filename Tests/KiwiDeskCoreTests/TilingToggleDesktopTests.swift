@@ -34,10 +34,12 @@ struct TilingToggleDesktopTests {
             core.execute("set_tiling", args: [.bool(false)]).isSuccess
         )
         #expect(core.isTilingOff(space))
-        core.refileTilingToggles { show(core, ["Main": 11]) }
+        show(core, ["Main": 11])
+        core.refileTilingToggles()
         #expect(!core.isTilingOff(space))
         #expect(core.desktopMemory.tilingToggles[10]?[space] == false)
-        core.refileTilingToggles { show(core, ["Main": 10]) }
+        show(core, ["Main": 10])
+        core.refileTilingToggles()
         #expect(core.isTilingOff(space))
         #expect(core.desktopMemory.tilingToggles.isEmpty)
     }
@@ -47,15 +49,17 @@ struct TilingToggleDesktopTests {
         let core = try core()
         core.execute("set_tiling", args: [.bool(false)])
         // A full-screen app: no user Desktop shown.
-        core.refileTilingToggles {
-            show(core, ["Main": 99])
-            core.desktopMemory.shownUserSpaces = ["Main": false]
-        }
-        core.refileTilingToggles { show(core, ["Main": 11]) }
+        show(core, ["Main": 99])
+        core.desktopMemory.shownUserSpaces = ["Main": false]
+        core.refileTilingToggles()
+        show(core, ["Main": 11])
+        core.refileTilingToggles()
         #expect(!core.isTilingOff(space))
-        core.refileTilingToggles { show(core, ["Main": 10]) }
+        show(core, ["Main": 10])
+        core.refileTilingToggles()
         #expect(core.isTilingOff(space))
-        core.refileTilingToggles { show(core, ["Main": 11]) }
+        show(core, ["Main": 11])
+        core.refileTilingToggles()
         #expect(!core.isTilingOff(space))
     }
 
@@ -63,7 +67,8 @@ struct TilingToggleDesktopTests {
     func sameDesktopSwapsNothing() throws {
         let core = try core()
         core.execute("set_tiling", args: [.bool(false)])
-        core.refileTilingToggles { show(core, ["Main": 10]) }
+        show(core, ["Main": 10])
+        core.refileTilingToggles()
         #expect(core.isTilingOff(space))
         #expect(core.desktopMemory.tilingToggles.isEmpty)
     }
@@ -73,7 +78,8 @@ struct TilingToggleDesktopTests {
         let core = try core()
         core.state.workspaces.ensureSpace(SpaceID("2"))
         core.execute("set_tiling", args: [.bool(false), .string("2")])
-        core.refileTilingToggles { show(core, ["Main": 11]) }
+        show(core, ["Main": 11])
+        core.refileTilingToggles()
         #expect(
             core.desktopMemory.tilingToggles[10]?[SpaceID("2")] == false
         )

@@ -154,7 +154,8 @@ struct TilingOffPlacementSeamTests {
             (
                 "handleDesktopChange", "KiwiCore+Desktops.swift",
                 "Profiles",
-                "refileTilingToggles { desktopMemory.fileShown(snapshot) }"
+                "desktopMemory.fileShown(snapshot)\n"
+                    + "        refileTilingToggles()"
             ),
             (
                 "bootstrapCoreServices", "KiwiCore+Bootstrap.swift", "App",

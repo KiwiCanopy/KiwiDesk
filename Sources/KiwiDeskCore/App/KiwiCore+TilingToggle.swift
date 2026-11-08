@@ -163,13 +163,12 @@ extension KiwiCore {
 /// A Space moved to another screen keeps its toggle, since nothing
 /// is swapped until that screen's next switch.
 extension KiwiCore {
-    /// Runs `file`, which files a new Desktop reading, and swaps the
-    /// toggles of every Space now shown on another Desktop than the
-    /// one its state toggle belongs to — remembered across a
-    /// full-screen Space between them: that Desktop keeps them, the
-    /// one arriving brings its own.
-    func refileTilingToggles(_ file: () -> Void) {
-        file()
+    /// After a Desktop reading is filed, swaps the toggles of every
+    /// Space now shown on another Desktop than the one its state
+    /// toggle belongs to — remembered across a full-screen Space
+    /// between them: that Desktop keeps them, the arriving one
+    /// brings its own.
+    func refileTilingToggles() {
         for space in state.workspaces.allSpaces.map(\.id) {
             guard case .shown(let arriving) = shownDesktop(of: space)
             else { continue }

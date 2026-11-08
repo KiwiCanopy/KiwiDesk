@@ -106,8 +106,8 @@ extension KiwiCore {
         // stamped at the first switch that shows it, and every
         // question below is still answered from this ONE reading.
         let snapshot = stampedDesktopSnapshot()
-        // Each Desktop keeps its own tiling toggles (#3008).
-        refileTilingToggles { desktopMemory.fileShown(snapshot) }
+        desktopMemory.fileShown(snapshot)
+        refileTilingToggles()  // #3008: each Desktop keeps its own
         // The arriving Desktop, answered from the SAME snapshot
         // (#1147): its stamp where it carries one, its Mission
         // Control number where it does not.
