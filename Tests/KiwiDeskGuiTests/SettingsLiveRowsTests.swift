@@ -81,7 +81,8 @@ struct SettingsLiveRowsTests {
 
     /// Wiring the behaviour suites cannot see: Core is asked again
     /// at the seed, a window-key return, a captured or adopted
-    /// outside write — the rows' freshness, while the Save's own
+    /// outside write, any live settings change while the window is
+    /// open — the rows' freshness, while the Save's own
     /// rebase is `SettingsLiveSaveTests`'; the one refresh gates on
     /// the live target; the pill
     /// and the active profile's Save count a live row as work; the
@@ -105,6 +106,10 @@ struct SettingsLiveRowsTests {
             "SettingsWindowController.swift": [
                 "model.adoptCapturedSpaces()}model.refreshUnsavedLive()"
             ],
+            "SettingsWindowController+LiveSettings.swift": [
+                "guardisShownelse{return}",
+                "self?.model.refreshUnsavedLive()",
+            ],
             "SettingsDiffRowSource+Live.swift": [
                 "unsavedLive=target==.live&&!editingLua"
                     + "?core.unsavedLiveSettings():nil"
@@ -120,6 +125,18 @@ struct SettingsLiveRowsTests {
                 "rows(for:model).filter{$0.section==.draft}",
             ],
         ]
+        // A live write from outside reaches an open window that is
+        // never keyed again (#3062's CLI report).
+        let readers = SourceScan.stripComments(
+            try String(
+                contentsOf: root.deletingLastPathComponent()
+                    .appendingPathComponent(
+                        "AppDelegate+SettingsReaders.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(readers.contains("dashboardIfCreated?.liveSettingsChanged()"))
         for (file, needles) in wants {
             let source = SourceScan.stripComments(
                 try String(
