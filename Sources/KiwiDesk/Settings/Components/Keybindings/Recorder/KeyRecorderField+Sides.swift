@@ -11,14 +11,28 @@ extension KeyRecorderField {
     @ViewBuilder var sidesSlot: some View {
         if let sides = recorderSides {
             iconSlot {
-                if !recording, let parsed = KeyCombo.parse(combo),
-                    !parsed.pickableSideKinds(hyperKey: sides.hyperKey)
-                        .isEmpty
-                {
+                if let parsed = Self.sidesMenuCombo(
+                    combo,
+                    recording: recording,
+                    hyperKey: sides.hyperKey
+                ) {
                     sidesMenu(parsed, hyperKey: sides.hyperKey)
                 }
             }
         }
+    }
+
+    /// The combo the slot draws a menu for: nil while recording, and
+    /// for a shortcut with no modifier that can take a side.
+    static func sidesMenuCombo(
+        _ combo: String,
+        recording: Bool,
+        hyperKey: HyperSourceKey?
+    ) -> KeyCombo? {
+        guard !recording, let parsed = KeyCombo.parse(combo),
+            !parsed.pickableSideKinds(hyperKey: hyperKey).isEmpty
+        else { return nil }
+        return parsed
     }
 
     private func sidesMenu(
@@ -70,23 +84,36 @@ extension KeyRecorderField {
     /// Left, Right, then Either side (nil).
     static let choices: [ModifierSide?] = [.left, .right, nil]
 
-    /// Commits `side` for `kind`, unless it is the row's own: a
-    /// stored spelling the canonical form differs from is no edit.
+    /// Commits a pick through the preflight, when it is an edit.
     private func pickSide(
         _ side: ModifierSide?,
         of kind: ModifierKind,
         in parsed: KeyCombo,
         _ hyperKey: HyperSourceKey?
     ) {
+        if let text = Self.pickedText(side, of: kind, in: parsed, hyperKey) {
+            commit(text)
+        }
+    }
+
+    /// What picking `side` for `kind` stores, nil where it is the
+    /// row's own already: a stored spelling the canonical form
+    /// differs from is no edit.
+    static func pickedText(
+        _ side: ModifierSide?,
+        of kind: ModifierKind,
+        in parsed: KeyCombo,
+        _ hyperKey: HyperSourceKey?
+    ) -> String? {
         guard
             let picked = parsed.pickingSide(
                 side,
                 of: kind,
                 hyperKey: hyperKey
             ),
-            picked != parsed, let text = picked.comboString()
-        else { return }
-        commit(text)
+            picked != parsed
+        else { return nil }
+        return picked.comboString()
     }
 
     /// A section's title: the modifier's glyph and its name.

@@ -42,7 +42,7 @@ struct KeyRecorderSidesTests {
         #expect(slot.upperBound <= well.lowerBound)
         let sides = try Self.source("KeyRecorderField+Sides.swift")
         #expect(sides.contains("if let sides = recorderSides {"))
-        #expect(sides.contains("if !recording,"))
+        #expect(sides.contains("recording: recording,"))
         #expect(sides.contains("hyperKey: sides.hyperKey"))
         // The footprint holds the slot under the same switch.
         let footprint = try Self.source("KeyRecorderField+Footprint.swift")
@@ -52,14 +52,52 @@ struct KeyRecorderSidesTests {
     @Test("a pick commits through the preflight, and names itself")
     func pickWiring() throws {
         let sides = try Self.source("KeyRecorderField+Sides.swift")
-        #expect(sides.contains("commit(text)"))
+        #expect(
+            sides.contains(
+                "if let text = Self.pickedText(side, of: kind, in: parsed, "
+                    + "hyperKey) {\n            commit(text)\n        }"
+            )
+        )
         #expect(!sides.contains("onRecord("))
-        #expect(sides.contains("picked != parsed"))
         #expect(
             sides.contains(
                 #"systemImage: "arrow.left.and.right")"#
             )
         )
         #expect(!sides.contains("Image(systemName:"))
+    }
+
+    @Test("the menu shows at rest only, for a modifier that takes a side")
+    func menuShows() {
+        let menu = { (combo: String, recording: Bool) in
+            KeyRecorderField.sidesMenuCombo(
+                combo,
+                recording: recording,
+                hyperKey: nil
+            )
+        }
+        #expect(menu("rcmd+h", false) == KeyCombo.parse("rcmd+h"))
+        #expect(menu("rcmd+h", true) == nil)
+        #expect(menu("h", false) == nil)
+        #expect(menu("hyper+cmd+h", false) == nil)
+        #expect(menu("", false) == nil)
+        #expect(
+            KeyRecorderField.sidesMenuCombo(
+                "cmd+h",
+                recording: false,
+                hyperKey: .rightCommand
+            ) == nil
+        )
+    }
+
+    @Test("a pick stores the new chord, and nothing for the row's own")
+    func pickedText() throws {
+        let stored = try #require(KeyCombo.parse("cmd+h"))
+        let pick = { (side: ModifierSide?) in
+            KeyRecorderField.pickedText(side, of: .command, in: stored, nil)
+        }
+        #expect(pick(nil) == nil)
+        #expect(pick(.right) == "rcmd+h")
+        #expect(pick(.left) == "lcmd+h")
     }
 }
