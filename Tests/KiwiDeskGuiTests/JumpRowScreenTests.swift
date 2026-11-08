@@ -125,15 +125,16 @@ struct JumpRowScreenTests {
             CuePlateModel.spoken(.desktop(cue))
                 == "Desktop 7 of 8 on DELL U2723"
         )
+        // Distinct from the dots, so the arm reads the number.
         let lone = DesktopSwitchCue(
             display: DisplayID(1),
-            number: 2,
-            total: 4,
-            position: 2,
-            count: 4,
+            number: 3,
+            total: 5,
+            position: 1,
+            count: 2,
             loadedProfile: nil
         )
-        #expect(CuePlateModel.spoken(.desktop(lone)) == "Desktop 2 of 4")
+        #expect(CuePlateModel.spoken(.desktop(lone)) == "Desktop 3 of 5")
     }
 }
 
