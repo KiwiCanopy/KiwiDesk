@@ -8,8 +8,8 @@ extension SettingsThemeTokenTests {
     static let hoverPins: [Pin] = [
         Pin(
             "hoverEdge",
-            0x5F_8F_35,
-            0xAA_CB_5D,
+            0x64_72_6A,
+            0xE6_EC_E6,
             SettingsTheme.hoverEdge
         ),
         Pin(

@@ -247,10 +247,10 @@ struct SettingsThemeContrastTests {
             SettingsTheme.keyGlyph,
             on: SettingsTheme.accent
         ),
-        // The gesture strip's accent hover border on the dark
-        // plate (#2537).
+        // A dark plate's picture accent where the shelf's own
+        // colour sinks (`HomeCardPlate.darkPalette`, #2862).
         Pairing(
-            "accent hover cue on previewPlate",
+            "accent picture ink on previewPlate",
             SettingsTheme.accent,
             on: SettingsTheme.previewPlate
         ),
