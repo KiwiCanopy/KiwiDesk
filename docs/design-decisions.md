@@ -12638,6 +12638,25 @@ of a one-sided Hyper key, which only one key can produce: one is
 recorded with the switch off, or written in Lua as `cmd+h`.
 Accepted.
 
+:::unreleased
+*Amended (#2614, owner, 2026-11-08): the side is picked after
+recording.* While the switch is on, a **Sides** pull-down sits
+before each row's recorder well, its slot held on every row so the
+wells line up. It lists each sided modifier of the shortcut with
+Left, Right and Either side, so `Right ⌘ ⌥ H` can keep Right ⌘ and
+make ⌥ either-side; a single modifier tap offers no Either side,
+since it names a side (#1872), and the modifier one of whose keys
+is the Hyper key offers no side at all (Ruling 4 above). It is the
+GUI's route to an either-side shortcut; the switch and Lua's
+`cmd+h` stay. It works at rest only: the well is
+one button whose click re-records and any click while recording
+cancels, so the menu cannot live inside the well. A pick goes
+through the same duplicate check as a recording, and re-recording
+records what is pressed, forgetting an earlier pick. Refused:
+holding both keys of a modifier (a two-key gesture nobody finds)
+and double-tap-and-hold (it collides with recording ⌘⌘).
+:::
+
 What it unblocks: reading keys needs no Input Monitoring, so
 #1874's "tap Hyper alone for Escape" turns on whether posting the
 Escape does, which is #1874's to measure.

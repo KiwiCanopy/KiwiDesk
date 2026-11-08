@@ -26,7 +26,7 @@ struct KeyRecorderField: View {
 
     @EnvironmentObject var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
-    @Environment(\.recorderSides) private var recorderSides
+    @Environment(\.recorderSides) var recorderSides
     @Environment(\.recorderConflictAnchor) var conflictAnchor
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
@@ -41,7 +41,7 @@ struct KeyRecorderField: View {
     @State private var flashing = false
     @State var conflictPopoverShown = false
 
-    private var recording: Bool {
+    var recording: Bool {
         coordinator.active == fieldID
     }
 
@@ -49,6 +49,7 @@ struct KeyRecorderField: View {
         VStack(alignment: .trailing, spacing: 4) {
             HStack(spacing: 6) {
                 conflictBadge
+                sidesSlot
                 recordButton
                 clearButton
             }
@@ -227,7 +228,7 @@ struct KeyRecorderField: View {
         flashing ? SettingsTheme.danger : SettingsTheme.ink
     }
 
-    private var label: String {
+    var label: String {
         if recording, let pendingTap {
             let drawn = ChordGlyphs.render(
                 pendingTap,
@@ -318,7 +319,7 @@ struct KeyRecorderField: View {
     }
 
     /// Validates preflight and commits recorded combo string (#34).
-    private func commit(_ string: String) {
+    func commit(_ string: String) {
         if let found = preflight?(string) {
             rejection = found
             flash()

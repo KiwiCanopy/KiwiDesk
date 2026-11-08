@@ -20,7 +20,7 @@ struct RecorderSides: Equatable {
         var out = held.unsided
         for kind in ModifierKind.allCases
         where held.contains(kind.plain)
-            && kind != hyperKey?.modifierSide?.kind
+            && KeyCombo.takesSide(kind, hyperKey: hyperKey)
         {
             let down = ModifierSide.allCases.filter {
                 held.contains(.side($0, of: kind))
