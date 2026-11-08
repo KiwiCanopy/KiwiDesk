@@ -1159,7 +1159,7 @@
   "kiwishelf.show.each_bar": "Каждая панель и Pocket",
   "kiwishelf.show.label": "Показывать",
   "kiwishelf.show.monocle": "App Bar в %1$@",
-  "kiwishelf.show.monocle.maximizes_link": "Обычно скрыта, пока для %2$@ в разделе %3$@ включено «%1$@».",
+  "kiwishelf.show.monocle.maximizes_link": "Обычно скрыта, пока в разделе %3$@ для раскладки %2$@ включено «%1$@».",
   "kiwishelf.show.pocket": "Pocket",
   "kiwishelf.show.pocket.always": "Всегда",
   "kiwishelf.show.pocket.auto": "Авто",

@@ -6499,9 +6499,9 @@ focus step stays a raise that writes to no app (#2099); the one
 window `Space.maximized` names could not give that. The pocket
 shows no handle and no strip on that layout, only during a drag or
 a play, since a handle at rest would sit on the window. The ring
-and the marks step aside through one predicate beside
-`maximizedWindow(of:)`, `maximizesWindows(of:)`, rather than
-through the Hidden reading, which never reaches them. It applies on
+and the marks step aside through the one set of windows that fill
+their screen, `screenFillers(of:)`, which a full Maximize joins too,
+rather than through the Hidden reading, which never reaches them. It applies on
 every Monocle Space; a per-Space override waits for someone to ask.
 :::
 

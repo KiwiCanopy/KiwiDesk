@@ -202,7 +202,8 @@ The pocket's resting strip is part of that input:
 `ShelfReservation` reserves each edge's deepest strip (#2784).
 
 The pocket rests unless its Show is Hidden
-(`kiwishelf.pocket_visibility`, #2978), and a
+(`kiwishelf.pocket_visibility`, #2978) or the screen shows a
+maximizing Monocle (`KiwiCore.pocketRests(on:)`, #2976), and a
 `kiwishelf.set_pocket_visibility` write retiles only where it moves a
 strip, through the bar writes' reservation comparison in the command
 dispatch.

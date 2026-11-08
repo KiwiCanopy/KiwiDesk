@@ -10,19 +10,20 @@ struct SimpleSpacePicture: View {
     let space: SpaceID
 
     var body: some View {
-        let settings = model.simplePreviewSettings
         let mode = model.config.modes(for: [space])[space] ?? .bsp
+        let settings = Self.drawn(model.simplePreviewSettings, in: mode)
+        let shown = settings.barVisibilities(in: mode)
         let shape = RoundedRectangle(cornerRadius: 8)
         GeometryReader { geo in
             HomeCardBarsTile(
                 settings: settings,
-                pocketStands: model.pocketStandsAtRest,
+                pocketStands: model.pocketStandsAtRest
+                    && !settings.maximizesWindows(in: mode),
                 spaceCount: model.config.spaces.count,
                 scale: Self.barScale(forWidth: geo.size.width),
                 spaceLabels: BarsPanelPreview.spaceLabels(of: model.config),
                 activeSpace: model.config.spaces.firstIndex(of: space) ?? 0,
-                showsAppBar: settings.appBarVisibility(in: mode)
-                    .map(\.showsUnprompted) == true,
+                showsAppBar: shown.app?.showsUnprompted == true,
                 wellContent: AnyView(schematic(settings, mode: mode)),
                 drawsFrame: false
             )
@@ -44,6 +45,20 @@ struct SimpleSpacePicture: View {
     ) -> Int {
         let count = LayoutSchematic.windowCount(base, for: mode)
         return mode == .floating ? max(count, 3) : count
+    }
+
+    /// `settings` with the Space Bar as a Space laid out in `mode`
+    /// reads it (`barVisibilities(in:)`, #2976), for the tile, which
+    /// asks the stored value.
+    nonisolated static func drawn(
+        _ settings: TilingSettings,
+        in mode: LayoutMode
+    ) -> TilingSettings {
+        var drawn = settings
+        drawn.spaceBarStyle.visibility =
+            settings.barVisibilities(in: mode)
+            .space
+        return drawn
     }
 
     /// The plate's padding around the bars tile.

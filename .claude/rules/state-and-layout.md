@@ -2415,9 +2415,8 @@ editing here:
   layout input — gaps through the one `TilingSettings.layoutGaps(for:)`
   inside `context`, bounds from the bars' Hidden reading
   ([bars.md](bars.md)) — so no fill pass and no ender reach it, and a
-  focus step stays a raise (#2099); a reader asking whether chrome
-  steps aside asks `KiwiCore.maximizesWindows(of:)` beside this
-  verdict (`MonocleMaximizeLayoutTests`).
+  focus step stays a raise (#2099); whether chrome steps aside is
+  [borders.md](borders.md)'s (`MonocleMaximizeLayoutTests`).
 - **A tracked window's "is it presenting" is asked through the
   one `KiwiCore.presents` door (#1788)**, which rules the float
   gate once — a tiled slot a gapless layout sizes to its screen

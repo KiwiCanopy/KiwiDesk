@@ -3316,7 +3316,10 @@ Under `"always"` and `"auto"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
 with no count, except where KiwiShelf stands down for a native
-full-screen window or a presentation. Windows keep clear of the
+full-screen window or a presentation, and on a Monocle Space while
+[`monocle.set_maximize_windows`](#monocleset_maximize_windows) is on,
+where it shows only during a window drag or while a window goes in or
+out. Windows keep clear of the
 resting handle or pocket unless `reserve` is off for every bar on
 that edge, or on an edge no bar sits on, for both bars. A click on
 the pocket lists the windows inside by app; a row takes its window
@@ -3590,8 +3593,8 @@ layout carries no App Bar, or where its App Bar is `"always"`.
 It fails with a pill too where the Space holds no window, so the
 App Bar has nothing to show.
 
-It fails with a pill first while a window fills the screen, as
-the Space Bar's call does.
+It fails with a pill first while a maximized, full-screen or
+presenting window fills the screen, as the Space Bar's call does.
 
 **Example:**
 

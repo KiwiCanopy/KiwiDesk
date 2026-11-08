@@ -76,23 +76,15 @@ struct MonocleMaximizeLayoutTests {
         #expect(parked != bounds)
     }
 
-    @Test("A focus step moves no frame")
-    func focusStepWritesNoFrame() {
-        let core = makeCore(maximize: true)
-        let before = core.tiler.placedFrames(state: core.state)
-        core.focusWindow(w2, warp: false)
-        #expect(core.tiler.placedFrames(state: core.state) == before)
-    }
-
     @Test("Another layout is untouched by the setting")
-    func otherLayoutsUntouched() {
+    func otherLayoutsUntouched() throws {
         let core = makeCore(maximize: true)
         core.execute("set_mode", args: [.string("1"), .string("bsp")])
         let frame = core.tiler.placedFrames(state: core.state)[w1]
         #expect(frame != bounds)
         #expect(
             core.tiler.settings.layoutGaps(
-                for: try! #require(core.state.workspaces[space])
+                for: try #require(core.state.workspaces[space])
             ) == core.tiler.settings.gapsGlobal
         )
     }

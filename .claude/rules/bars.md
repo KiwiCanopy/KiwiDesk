@@ -433,17 +433,18 @@ twice, was a question the user answered twice. The argument is
   (#3062, `FullscreenStandDownTests` ▸ `directionalReachIsWired`).
   The verdict stays per screen, not per edge: a fill reaching one
   edge's strip stands down the bars on every edge.
-  **A maximizing Monocle (#2976) is no stand-down**: it reads both
-  bars Hidden through the one `TilingSettings.barVisibilities(in:)`,
-  which every per-mode answer takes — `drawsAtRest`,
-  `revealActionLive`, `autoReadsAlways`, the reservation, the
-  pocket's rest and the live plan (`shelfPlans(mode:)`) — never
-  `spaceBarStyle.visibility` or `appBarVisibility(in:)` read beside
-  a mode, so a shortcut, the slide and the cues keep working and
-  the Hidden reading beats an Always sibling. Its pocket rests
-  nowhere through the one `KiwiCore.pocketRests(on:)`, which the
-  plan, `pocketPlace` and the specs read per screen
-  (`MonocleMaximizeBarTests`).
+  **A maximizing Monocle (#2976) is no stand-down**: a bar's
+  VISIBILITY answered for a mode is read through the one
+  `TilingSettings.barVisibilities(in:)`, which reads both bars Hidden
+  there, never a stored visibility value beside a mode — whether a
+  layout carries an App Bar at all stays `appBarVisibility(in:) !=
+  nil` — so a shortcut, the slide and the cues keep working and the
+  Hidden reading beats an Always sibling. A per-screen pocket answer
+  is read through the one `KiwiCore.pocketRests(on:)`, never the
+  global `pocketRests` beside a screen
+  (`MonocleMaximizeBarTests`, `MonocleMaximizeWiringTests`); a new
+  reader routing beside either is review's, since nothing scans for
+  it.
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸

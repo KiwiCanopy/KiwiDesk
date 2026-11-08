@@ -82,7 +82,9 @@ extension KiwiShelfCard {
             )
             besideAlwaysNote(.space, in: [.monocle, .scrolling])
         case .layoutAppBar(.monocleAppBarVisibility):
-            let maximizes = model.config.settings.monocle.maximizeWindows
+            let maximizes = model.config.settings.maximizesWindows(
+                in: .monocle
+            )
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .monocleShowIn.text,

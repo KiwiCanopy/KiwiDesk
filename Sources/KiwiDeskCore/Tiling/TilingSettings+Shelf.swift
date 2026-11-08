@@ -227,7 +227,8 @@ extension TilingSettings {
     /// reads for `mode` on `screen` — what a bar write must change
     /// to owe a pass (#1524, `BarReserveCoreTests` ▸
     /// `unchangedReservationSkipsTheRetile`). `pocketAtRest`: the
-    /// pocket rests, `pocketRests` (#2784, #2978).
+    /// pocket rests, `pocketRests` (#2784, #2978); a mode that
+    /// rests it nowhere answers so inside (`pocketRests(in:)`).
     public func shelfReservation(
         in mode: LayoutMode,
         on screen: String?,
