@@ -29,6 +29,7 @@ extension KeybindingManager {
         var hyperRows: [(KeyCombo, Int32)] = []
         var sideRows: [(KeyCombo, Int32)] = []
         let tapped = tappedChords(in: layer)
+        let leaders = sequenceLeaders(in: layer)
         // Either-side rows first, so a pair collapsing onto one
         // Carbon chord keeps the same one every launch (#2601).
         let rows = bindings(for: layer).sorted {
@@ -39,6 +40,12 @@ extension KeybindingManager {
                 )
         }
         for (combo, ref) in rows {
+            // A sequence's leader takes its chord (#1871).
+            if leaders.contains(combo) {
+                activationFailures.insert(combo)
+                onLog("keybinding: a key sequence's leader holds a chord")
+                continue
+            }
             // A modifier tap is the keyboard tap's alone (#1872).
             if combo.isTap { continue }
             // A Hyper combo registers only while the key is held.

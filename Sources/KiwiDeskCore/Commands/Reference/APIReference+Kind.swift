@@ -58,6 +58,7 @@ extension APIReference {
         "bind": .setting,
         "on": .setting,
         "define_layer": .setting,
+        "define_sequence": .setting,
         KiwiCore.keepSettingsCommand: .setting,
         KiwiCore.revertSettingsCommand: .setting,
         // Writes `gap.global`.

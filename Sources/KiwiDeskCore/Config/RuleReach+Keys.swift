@@ -209,11 +209,15 @@ extension RuleReachTable where Value == String {
                 [layer.name, layer.icon ?? ""]
                     // What a row says of itself is stored too
                     // (#2544): a changed description is a write.
-                    + layer.bindings.map {
-                        [$0.combo, $0.lua, $0.desc, $0.group, $0.symbol]
-                            .joined(separator: "\u{1F}")
-                    }
+                    + layer.bindings.map(rowShape)
             }
+        }
+        // A sequence's whole tree is its row (#1871).
+        func rowShape(_ row: KeyBinding) -> String {
+            ([row.combo, row.lua, row.desc, row.group, row.symbol]
+                + (row.isSequence ? ["\u{1E}" + row.label] : [])
+                + (row.steps ?? []).map { "\u{1D}" + rowShape($0) })
+                .joined(separator: "\u{1F}")
         }
         return shape(a) == shape(b)
     }

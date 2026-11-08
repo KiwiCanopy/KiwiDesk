@@ -102,7 +102,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 43 = the app-wide pocket capacity crossed onto each
     /// profile's `kiwishelf.pocket_visibility` (#2978), from a
     /// bundle's `config` into its `[Profile]`.
-    public static let currentFormat = 43
+    /// 44 = a binding may be a key sequence (#1871), in a bundle's
+    /// `config` and its `[Profile]` alike, with no step.
+    public static let currentFormat = 44
 
     public let format: Int
 

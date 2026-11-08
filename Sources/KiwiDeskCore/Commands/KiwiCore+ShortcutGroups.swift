@@ -27,6 +27,11 @@ extension KiwiCore {
         ).children where !value.isEmpty {
             entry[key] = .string(value)
         }
+        // A key sequence lists its keys, each an entry (#1871).
+        if let steps = binding.steps {
+            entry["label"] = .string(binding.label)
+            entry["steps"] = .array(steps.map(shortcutEntry))
+        }
         return .object(entry)
     }
 

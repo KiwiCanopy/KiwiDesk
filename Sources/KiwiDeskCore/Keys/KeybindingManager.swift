@@ -40,11 +40,14 @@ public final class KeybindingManager {
     /// with the flag off and never cues. Save/restore (not
     /// set/clear) in `fire`, so a callback pumping a nested run
     /// loop cannot clear the outer fire's flag.
-    public private(set) var isFiring = false
+    public internal(set) var isFiring = false
     /// Combos rejected during the most recent activation.
     public internal(set) var activationFailures: Set<KeyCombo> =
         []
     private var layers: [String: [KeyCombo: Int32]] = [:]
+    /// Each layer's key sequences (#1871), beside `layers`: the
+    /// keyboard tap answers the current layer's, never Carbon.
+    var sequences: [String: [KeySequence]] = [:]
     private var layerIcons: [String: String] = [:]
     /// What a Lua binding says of itself — description, group and
     /// symbol (#2544) — by layer and chord.
@@ -154,7 +157,7 @@ public final class KeybindingManager {
 
     /// Defined layer names in stable order for GUI import (#4).
     public var definedLayers: [String] {
-        let others = layers.keys
+        let others = Set(layers.keys).union(sequences.keys)
             .filter { $0 != Self.defaultLayer }
             .sorted()
         return [Self.defaultLayer] + others
@@ -211,7 +214,9 @@ public final class KeybindingManager {
     }
 
     public func switchLayer(_ name: String) {
-        guard name == Self.defaultLayer || layers[name] != nil
+        guard
+            name == Self.defaultLayer || layers[name] != nil
+                || sequences[name] != nil
         else {
             onLog("switch_layer: unknown layer '\(name)'")
             return
@@ -241,7 +246,9 @@ public final class KeybindingManager {
                 }
             }
         }
+        releaseSequences(sequences)
         layers = [:]
+        sequences = [:]
         layerIcons = [:]
         layerMeta = [:]
         let previous = currentLayer
@@ -253,14 +260,17 @@ public final class KeybindingManager {
     /// Atomically replaces layers from structured config.
     func replaceLayers(
         _ replacements: [String: [KeyCombo: Int32]],
+        sequences newSequences: [String: [KeySequence]] = [:],
         icons: [String: String],
         preferredLayer: String
     ) {
         let oldLayers = layers
+        let oldSequences = sequences
         let oldCurrent = currentLayer
 
         deactivate()
         layers = replacements
+        sequences = newSequences
         if layers[Self.defaultLayer] == nil {
             layers[Self.defaultLayer] = [:]
         }
@@ -281,6 +291,7 @@ public final class KeybindingManager {
                 }
             }
         }
+        releaseSequences(oldSequences)
         activate(currentLayer)
         announce(from: oldCurrent, to: currentLayer)
     }

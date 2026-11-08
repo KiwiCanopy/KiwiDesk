@@ -112,6 +112,9 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         switch binding.kind {
         case .application: return .openApplications
         case .custom, .navigation: return .luaBindings
+        // A key sequence belongs to its layer (#1871); its own card
+        // is L-1871b's.
+        case .sequence: return .layers
         }
     }
 

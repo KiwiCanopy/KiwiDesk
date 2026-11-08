@@ -13,12 +13,11 @@ extension Array where Element == KeyLayer {
     ) -> (layers: [KeyLayer], removed: [String: [String]]) {
         var removed: [String: [String]] = [:]
         let layers = map { layer -> KeyLayer in
-            var layer = layer
-            let gone = layer.bindings.filter { $0.names(spaces) }
-            guard !gone.isEmpty else { return layer }
-            removed[layer.name] = gone.map(\.combo)
-            layer.bindings.removeAll { $0.names(spaces) }
-            return layer
+            let gone = layer.pressBindings.filter { $0.names(spaces) }
+            if !gone.isEmpty { removed[layer.name] = gone.map(\.combo) }
+            // A sequence keeps its leader and loses the end keys
+            // naming a gone Space (#1871): it is no row taken.
+            return layer.mappingActions { $0.names(spaces) ? nil : $0 }
         }
         return (layers, removed)
     }
@@ -68,9 +67,14 @@ extension KeyLayerOverride {
 }
 
 extension KeyBinding {
-    /// Whether this row's Lua names one of `spaces`.
+    /// Whether this row's Lua names one of `spaces`; a sequence
+    /// asks each of its end keys (#1871).
     func names(_ spaces: Set<SpaceID>) -> Bool {
-        SpaceLuaArg.target(of: lua).map { spaces.contains($0.space) }
-            ?? false
+        if isSequence {
+            return endKeys.contains { $0.binding.names(spaces) }
+        }
+        return SpaceLuaArg.target(of: lua).map {
+            spaces.contains($0.space)
+        } ?? false
     }
 }
