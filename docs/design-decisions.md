@@ -14159,6 +14159,21 @@ so hjkl beside the arrows can only live in one layer, and two
 chords that do the same thing cannot conflict. A duplicate *chord*
 stays refused everywhere (#33/#34/#35). (#1797)
 
+:::unreleased
+*Amended (#1871, owner, 2026-11-08): a sequence's end key is a
+separate trigger.* A key sequence (a leader chord, then keys) may
+end on an action a row already holds on its own chord, and the row
+keeps that chord: the two are different triggers, reached by
+different presses, and the row says so in a caption ("Also ⌃⌥Space
+→ W → H"). The rule above is about two CHORDS for one action in a
+layer, which a row cannot draw; a sequence is drawn in its own card
+and in KiwiHub with its whole path, so nothing is hidden. Within one
+step a key is either an end key or opens more keys, never both, so
+no timeout is ever needed; two siblings on one key are refused "in
+this step", and a leader chord is refused against a row's chord in
+its layer both ways, since both live in Settings.
+:::
+
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the
 current profile: it stays Carbon-registered (pressing it recreates
