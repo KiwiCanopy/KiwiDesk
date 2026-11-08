@@ -72,4 +72,30 @@ extension FullscreenStandDownTests {
         #expect(core.spaceBars.shownStrips.isEmpty)
         #expect(core.vision.standDown.contains(display))
     }
+
+    /// A directional Maximize stands the bars down only where its
+    /// fill reaches their strip (#3062): a centred Width fill clears
+    /// a top or bottom bar, a Height fill reaches it.
+    @Test("a Width fill keeps the bars; a Height fill stands them down")
+    func directionalReachIsWired() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, display) = try #require(
+            makeMaximizeCore(isUser: true)
+        )
+        core.execute(
+            "toggle_maximized",
+            args: [.string("width"), .number(0.5)]
+        )
+        #expect(core.showsMaximized(on: display) == false)
+        core.updateBars()
+        #expect(!core.spaceBars.shownStrips.isEmpty)
+        core.execute("toggle_maximized", args: [.string("height")])
+        #expect(core.showsMaximized(on: display))
+        core.updateBars()
+        #expect(core.spaceBars.shownStrips.isEmpty)
+        #expect(!core.vision.standDown.contains(display))
+        // A bar drawn over the windows still has a strip to cover.
+        core.tiler.settings.spaceBarStyle.reserve = false
+        #expect(core.showsMaximized(on: display))
+    }
 }

@@ -43,6 +43,11 @@ struct FrameSetReaderCensusTests {
             "a hover stands down if a focus would move any window "
                 + "from where it was asked to sit (#1869)"
         ),
+        "KiwiCore+ScreenCovering.swift": (
+            .issued,
+            "a Height or Width maximize stands the shelf down where "
+                + "its drawn fill covers a bar's strip (#3062)"
+        ),
         "KiwiCore+AppBarVisibility.swift": (
             .issued,
             "an App Bar item dims by where its window sits (#2234)"

@@ -55,6 +55,10 @@ struct CommandRejectionDerivationTests {
         // prev/next to a delta. Nothing to read `allCases` off.
         "expected axis (x|y) and delta": "no enum",
         "expected prev|next": "no enum",
+        // The gap override's scope words, which share two spellings
+        // with `MaximizeAxis` (#3062) and are not its vocabulary.
+        "expected at most width, height, layout": "not MaximizeAxis",
+        "expected at most space, width, height": "not MaximizeAxis",
     ]
 
     @Test("the vocabularies are non-empty")

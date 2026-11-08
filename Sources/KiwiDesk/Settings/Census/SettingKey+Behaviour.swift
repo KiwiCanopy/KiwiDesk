@@ -15,6 +15,11 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case minSizeFloatingWidth = "settings.minWindowSizes.floating.width"
     case minSizeFloatingHeight = "settings.minWindowSizes.floating.height"
     case minSizePerSpaceOverride = "settings.minWindowSizeOverride[space]"
+    /// Maximize Height's width share, Maximize Width's height share
+    /// and where both grow from (#3062).
+    case maximizeHeightShare = "settings.maximize.heightShare"
+    case maximizeWidthShare = "settings.maximize.widthShare"
+    case maximizeAnchor = "settings.maximize.anchor"
     case resizeStep = "settings.resizeStep"
     case swapSkipsCascade = "settings.swapSkipsCascade"
     case floatPlacement = "settings.floatPlacement"
@@ -47,6 +52,10 @@ extension BehaviourKey {
             .minSizeFloatingHeight:
             // The master's "Per layout" drawer (#2237).
             return .row(.layoutDefaults, .general, .showMore)
+        case .maximizeHeightShare, .maximizeWidthShare, .maximizeAnchor:
+            // Never greyed: the verb reads them whether or not a
+            // chord is bound (#3062).
+            return .row(.layoutDefaults, .maximize, .atRest)
         case .minSizePerSpaceOverride:
             // A Space's own floor (#2422), beside its gaps; inert
             // while the Space is Monocle, which applies none.
@@ -97,6 +106,15 @@ extension BehaviourKey {
             return .text("layout_defaults.min_size.floating_width")
         case .minSizeFloatingHeight:
             return .text("layout_defaults.min_size.floating_height")
+        case .maximizeHeightShare:
+            return .text("layout_defaults.maximize.height_share")
+        case .maximizeWidthShare:
+            return .text("layout_defaults.maximize.width_share")
+        case .maximizeAnchor:
+            return .text(
+                "layout_defaults.maximize.anchor",
+                help: "layout_defaults.maximize.anchor.help"
+            )
         case .minSizePerSpaceOverride:
             return .text(
                 "layout_defaults.min_window_size",

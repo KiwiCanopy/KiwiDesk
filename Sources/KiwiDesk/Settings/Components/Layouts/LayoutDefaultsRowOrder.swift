@@ -10,6 +10,14 @@ enum LayoutDefaultsRowOrder {
         [.behaviour(.minWindowSize)]
         + MinSizeText.followers.map(SettingKey.behaviour)
 
+    /// The Maximize card (#3062): the two shares in the Shortcuts
+    /// rows' order, then where both grow from.
+    static let maximize: [SettingKey] = [
+        .behaviour(.maximizeHeightShare),
+        .behaviour(.maximizeWidthShare),
+        .behaviour(.maximizeAnchor),
+    ]
+
     static let bsp: [SettingKey] = [
         .layout(.bspStrategy),
         .layout(.bspSplitRatioH),

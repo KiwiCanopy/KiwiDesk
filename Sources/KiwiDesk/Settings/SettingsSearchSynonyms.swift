@@ -67,6 +67,10 @@ enum SettingsSearchSynonyms {
             return ["space", "pin"]
         // The rows were "Columns" and "Rows" until #2541 made them
         // a limit.
+        // The ruling spelled it "Centre" (#3062); the English is
+        // American, so the other spelling still finds the row.
+        case .behaviour(.maximizeAnchor):
+            return ["centre", "center", "anchor"]
         case .layout(.gridColumns):
             return ["columns"]
         case .layout(.gridRows):

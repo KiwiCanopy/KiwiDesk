@@ -132,43 +132,22 @@ struct GesturesDrawerTests {
         #expect(!entry[control.upperBound..<end.lowerBound].contains("dim"))
     }
 
-    /// The brace-balanced body after `marker`, whitespace collapsed.
-    private static func body(
-        after marker: String,
-        in source: String
-    ) throws -> String {
-        let hit = try #require(source.range(of: marker))
-        var cursor = source.distance(
-            from: source.startIndex,
-            to: hit.upperBound
-        )
-        let run = try #require(
-            SourceScan.balanced(
-                Array(source),
-                from: &cursor,
-                open: "{",
-                close: "}"
-            )
-        )
-        return run.split(whereSeparator: \.isWhitespace)
-            .joined(separator: " ")
-    }
-
     @Test("the drawer mounts above the layer header")
     func mountsAboveTheLayerHeader() throws {
+        let parts = ShortcutsPagePart.allCases
+        let drawer = try #require(parts.firstIndex(of: .gestures))
+        let layers = try #require(parts.firstIndex(of: .layers))
+        #expect(drawer < layers)
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
-        // Both mounts are read inside the header's own body.
-        let run = try Self.body(
-            after: "@ViewBuilder private var header: some View",
-            in: body
+        let squashed = body.filter { !$0.isWhitespace }
+        #expect(
+            squashed.contains(
+                "case.gestures:GesturesDrawer(model:model,"
+            ),
+            "the gestures part draws the drawer"
         )
-        let drawer = try #require(
-            run.range(of: "GesturesDrawer(model: model,")
-        )
-        let header = try #require(run.range(of: " layersCard "))
-        #expect(drawer.lowerBound < header.lowerBound)
         #expect(
             body.components(separatedBy: "GesturesDrawer(").count
                 == 2,

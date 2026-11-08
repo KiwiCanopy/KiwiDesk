@@ -21,6 +21,24 @@ struct LayoutDefaultsControls: Sendable {
         "Per layout",
         children: MinSizeDrawerControls()
     )
+    /// The Maximize card and its rows (#3062), each a search and
+    /// link anchor.
+    let maximizeCard = SettingsControl(
+        "layout_defaults.maximize.title",
+        "Maximize"
+    )
+    let maximizeHeightShare = SettingsControl(
+        "layout_defaults.maximize.height_share",
+        "Width when maximizing height"
+    )
+    let maximizeWidthShare = SettingsControl(
+        "layout_defaults.maximize.width_share",
+        "Height when maximizing width"
+    )
+    let maximizeAnchor = SettingsControl(
+        "layout_defaults.maximize.anchor",
+        "Maximize from"
+    )
     let livePreview = SettingsControl(
         "layout_defaults.live_preview",
         "Live preview"

@@ -83,6 +83,7 @@ public enum DefaultKeybindings {
         rows.append(kiwiVisionRow())
         rows.append(resetSizesRow())
         rows.append(maximizeRow())
+        rows.append(contentsOf: directionalMaximizeRows())
         rows.append(contentsOf: barRevealRows())
         rows.append(contentsOf: appChromeRows())
         return rows.map(base.rebased)

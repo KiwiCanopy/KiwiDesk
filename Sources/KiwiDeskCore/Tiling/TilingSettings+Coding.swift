@@ -16,6 +16,7 @@ extension TilingSettings: Codable {
         case sticky
         case floating
         case pocket
+        case maximize
         case drag
         case gap
         case layout
@@ -142,6 +143,11 @@ extension TilingSettings: Codable {
                 PocketStyle.self,
                 forKey: .pocket
             ) ?? PocketStyle()
+        maximize =
+            try container.decodeIfPresent(
+                MaximizeSettings.self,
+                forKey: .maximize
+            ) ?? MaximizeSettings()
         animations =
             try container.decodeIfPresent(
                 AnimationSettings.self,

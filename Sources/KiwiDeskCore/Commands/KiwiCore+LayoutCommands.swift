@@ -76,6 +76,8 @@ extension KiwiCore {
             response = pocketStyleCommand(command, args)
         } else if command.hasPrefix("mouse.") {
             response = mouseCommand(command, args)
+        } else if command.hasPrefix("maximize.") {
+            response = maximizeSettingsCommand(command, args)
         } else {
             response = settingsCommand(command, args)
         }

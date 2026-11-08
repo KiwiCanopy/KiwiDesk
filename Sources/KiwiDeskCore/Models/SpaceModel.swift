@@ -146,6 +146,10 @@ public struct Space: Sendable, Equatable {
     /// focus moves to another tiled window or it leaves the tiled set
     /// (#2448): read `StateCoordinator.maximizedWindow(of:)`. Session-only.
     public var maximized: WindowID?
+    /// What `maximized` fills (#3062), written with it by the toggle
+    /// and meaningless while it is nil: read
+    /// `StateCoordinator.maximizedShape(of:)`. Session-only.
+    public var maximizeShape: MaximizeShape = .full
 
     public init(
         id: SpaceID,
@@ -159,7 +163,8 @@ public struct Space: Sendable, Equatable {
         trackWeights: [WindowID: Double] = [:],
         runHeads: Set<WindowID> = [],
         runTails: Set<WindowID> = [],
-        maximized: WindowID? = nil
+        maximized: WindowID? = nil,
+        maximizeShape: MaximizeShape = .full
     ) {
         self.id = id
         self.mode = mode
@@ -173,20 +178,7 @@ public struct Space: Sendable, Equatable {
         self.runHeads = runHeads
         self.runTails = runTails
         self.maximized = maximized
-    }
-
-    /// Clears this Space's SIZING — what `resize` accumulates in
-    /// the Space: the weights and the run sizes — and nothing
-    /// structural (#764). The one statement of which stored
-    /// properties are sizes: `SpaceSizingCensusTests` classifies
-    /// every property as cleared here or named structure, so a
-    /// new store cannot join unclassified. The per-Desktop
-    /// session ratios live outside the Space (#2921) and are
-    /// cleared beside this by `reset_layout_sizing`.
-    public mutating func resetSizing() {
-        stackWeights = [:]
-        runSizes = [:]
-        trackWeights = [:]
+        self.maximizeShape = maximizeShape
     }
 
     /// Appends window if not already present.

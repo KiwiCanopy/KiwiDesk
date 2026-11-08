@@ -32,7 +32,8 @@ struct SettingsCodingTests {
                 "gap",
                 "layout", "min_window_size",
                 "min_window_size_override", "mouse",
-                "mouse_resize", "new_window_placement_override",
+                "maximize", "mouse_resize",
+                "new_window_placement_override",
                 "shortcut_panel",
                 "floating", "pocket", "resize", "space",
                 "space_bar",
@@ -101,6 +102,14 @@ struct SettingsCodingTests {
         let pocket = try object(root["pocket"])
         #expect(Set(pocket.keys) == ["color"])
         #expect(pocket["color"] as? String == "")
+        // `maximize.set_share(axis, share)` → `maximize.share.<axis>`
+        // and `maximize.set_anchor` → `maximize.anchor` (#3062).
+        let maximize = try object(root["maximize"])
+        #expect(Set(maximize.keys) == ["share", "anchor"])
+        let share = try object(maximize["share"])
+        #expect(share["height"] as? Double == 0.5)
+        #expect(share["width"] as? Double == 0.5)
+        #expect(maximize["anchor"] as? String == "center")
         #expect(shelf["pocket_edge"] as? String == "bottom")
         #expect(shelf["pocket_position"] as? Double == 82)
         // `kiwishelf.set_reading_contrast` →

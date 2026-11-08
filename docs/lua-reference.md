@@ -5860,6 +5860,11 @@ end)
 
 **Expects:** nothing.
 
+:::unreleased
+Or an axis, `"height"` or `"width"`, then optionally a share from
+0.1 to 1 and an anchor, `"center"` or `"in_place"`.
+:::
+
 **Does:** makes the focused tiled window fill its screen —
 the whole area between the menu bar and the Dock, with no gaps —
 and hides both bars on that screen, without a macOS full-screen
@@ -5884,6 +5889,22 @@ maximized on its home Space leaves with its Desktop and comes back
 maximized, as any window does.
 :::
 
+
+:::unreleased
+With an axis, the window fills that axis of the same area and
+takes a share of the other: `"height"` runs top to bottom at a
+share of the width, `"width"` side to side at a share of the
+height. The share and the anchor default to
+[`maximize.set_share`](#maximizeset_share) and
+[`maximize.set_anchor`](#maximizeset_anchor). It centres on the
+screen, or with `"in_place"` on the window's own slot, moved back
+inside the screen where it would cross an edge. The bars hide
+only where the window reaches into their strip, and the focus
+ring stays. A call with the same shape puts the window back; a
+call with another shape changes it in place. Bound to `⌃⌥⇧M`
+(height) and `⌃⌥⌘M` (width) by default.
+:::
+
 **Example:**
 
 ```lua
@@ -5891,6 +5912,52 @@ KiwiDesk.bind("ctrl+alt+m", function()
     KiwiDesk.toggle_maximized()
 end)
 ```
+
+:::unreleased
+```lua
+-- A centred editor column, two thirds of the screen wide.
+KiwiDesk.bind("ctrl+alt+e", function()
+    KiwiDesk.toggle_maximized("height", 2 / 3)
+end)
+```
+:::
+
+### maximize.set_share
+
+:::unreleased
+**Expects:** an axis, `"height"` or `"width"`, and a share from
+0.1 to 1.
+
+**Does:** sets the share of the other axis that
+[`toggle_maximized`](#toggle_maximized) takes for that axis:
+for `"height"` the window's width as a share of the screen's, for
+`"width"` its height. Default `0.5` for both. A window already
+maximized keeps the shape it was given.
+
+**Example:**
+
+```lua
+KiwiDesk.maximize.set_share("height", 0.6)
+```
+:::
+
+### maximize.set_anchor
+
+:::unreleased
+**Expects:** `"center"` or `"in_place"`.
+
+**Does:** sets where a Maximize Height or Width grows from:
+`"center"` centres it on the screen, `"in_place"` on the window's
+own slot, moved back inside the screen where it would cross an
+edge. A wider share in place covers part of a neighbour. Default
+`"center"`. A full Maximize ignores it.
+
+**Example:**
+
+```lua
+KiwiDesk.maximize.set_anchor("in_place")
+```
+:::
 
 ### pocket
 

@@ -79,7 +79,7 @@ extension KiwiCore {
         case "toggle_display_sticky":
             return toggleFocusedSticky(.display)
         case "toggle_maximized":
-            return toggleMaximized()
+            return toggleMaximized(args)
         case "pocket":
             return pocketCommand(args)
         case "toggle_pocket_window":

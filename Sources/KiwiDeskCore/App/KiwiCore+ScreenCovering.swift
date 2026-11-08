@@ -108,12 +108,56 @@ extension KiwiCore {
             || showsPresentation(on: display)
     }
 
-    /// Whether the Space `display` shows holds a maximized window.
+    /// Whether the Space `display` shows holds a maximized window
+    /// over the shelf: a full Maximize always, a Height or Width one
+    /// where its drawn frame reaches into the shelf's strip (#3062).
     func showsMaximized(on display: DisplayID) -> Bool {
         guard let id = state.workspaces.activeSpace(on: display),
-            let space = state.workspaces[id]
+            let space = state.workspaces[id],
+            let window = state.maximizedWindow(of: space)
         else { return false }
-        return state.maximizedWindow(of: space) != nil
+        guard state.maximizedShape(of: space)?.axis != nil else {
+            return true
+        }
+        guard let screen = TilingEngine.screen(for: display),
+            let frame = tiler.placedFrames(
+                of: space,
+                on: screen,
+                state: state
+            ).frames[window]
+        else { return true }
+        return Self.reachesShelf(
+            frame,
+            layoutBounds: barStripBounds(on: screen, for: space)
+        )
+    }
+
+    /// `space`'s layout bounds on `screen` with every shown bar
+    /// carved off, reserving or not: a bar drawn over the windows
+    /// still has a strip a fill can cover (#3062).
+    private func barStripBounds(
+        on screen: NSScreen,
+        for space: Space
+    ) -> CGRect {
+        var carved = tiler.settings
+        carved.spaceBarStyle.reserve = true
+        carved.appBarStyle.reserve = true
+        return carved.layoutBounds(
+            from: tiler.visibleBounds(screen),
+            mode: space.mode,
+            on: tiler.fingerprint(of: screen),
+            pocketAtRest: carved.pocketRests
+        )
+    }
+
+    /// Whether `frame` (AX) leaves `layoutBounds`, the screen with
+    /// every bar's strip carved off: it then covers a bar's strip
+    /// (#3062). A point of rounding is not a reach.
+    nonisolated static func reachesShelf(
+        _ frame: CGRect,
+        layoutBounds: CGRect
+    ) -> Bool {
+        !layoutBounds.insetBy(dx: -1, dy: -1).contains(frame)
     }
 
     /// The same answer for a GUI surface on `screen` — the

@@ -209,6 +209,9 @@ struct SettingsView: View {
             else { return }
             selection = destination
         }
+        .environment(\.settingsLand) { anchor in
+            model.land(on: anchor)
+        }
     }
 
 }

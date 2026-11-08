@@ -426,6 +426,13 @@ twice, was a question the user answered twice. The argument is
   `overlaysStandDown`, so a Maximize stands the bars down and
   keeps the plate (#3061); any other reader of that half joins
   `ShelfStandDownSeamTests` ▸ `overlaysHalfHasTwoReaders`' map.
+  A Height or Width Maximize stands the whole shelf down only where
+  its issued frame covers a shown bar's strip, reserving or not,
+  through the one `KiwiCore.reachesShelf` inside `showsMaximized`;
+  never a second "does the fill reach a bar" read beside it
+  (#3062, `FullscreenStandDownTests` ▸ `directionalReachIsWired`).
+  The verdict stays per screen, not per edge: a fill reaching one
+  edge's strip stands down the bars on every edge.
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸

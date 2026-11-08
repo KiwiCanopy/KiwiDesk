@@ -27,6 +27,9 @@ extension SettingsValueReadout {
             .minSizeScrollingWidth, .minSizeScrollingHeight,
             .minSizeFloatingWidth, .minSizeFloatingHeight:
             return minSizeRows(key, census, before, after)
+        case .maximizeHeightShare, .maximizeWidthShare,
+            .maximizeAnchor:
+            return maximizeRows(key, census, before, after)
         case .resizeStep:
             return [
                 .change(

@@ -20,28 +20,6 @@ struct DefaultShortcutsRowTests {
         )
     }
 
-    /// The brace-balanced body after `marker`, whitespace collapsed.
-    private static func body(
-        after marker: String,
-        in source: String
-    ) throws -> String {
-        let hit = try #require(source.range(of: marker))
-        var cursor = source.distance(
-            from: source.startIndex,
-            to: hit.upperBound
-        )
-        let run = try #require(
-            SourceScan.balanced(
-                Array(source),
-                from: &cursor,
-                open: "{",
-                close: "}"
-            )
-        )
-        return run.split(whereSeparator: \.isWhitespace)
-            .joined(separator: " ")
-    }
-
     private func reason(
         layer: String,
         defaults: Bool
@@ -78,31 +56,22 @@ struct DefaultShortcutsRowTests {
 
     @Test("the row mounts once, under the Layers card")
     func mountsUnderLayers() throws {
+        // The page draws its parts in case order.
+        let parts = ShortcutsPagePart.allCases
+        let layers = try #require(parts.firstIndex(of: .layers))
+        #expect(parts.firstIndex(of: .defaultShortcuts) == layers + 1)
+        #expect(
+            ShortcutsPagePart(SettingsContainer.defaultShortcuts)
+                == .defaultShortcuts
+        )
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
-        // The page mounts the header, then the groups.
-        let page = try Self.body(
-            after: "private var page: some View",
-            in: body
-        )
-        #expect(page.contains("{ header actionGroups tail }"))
-        // Inside the header's own body: one Layers card mount, then
-        // the row as the header's last view.
-        let header = try Self.body(
-            after: "@ViewBuilder private var header: some View",
-            in: body
-        )
-        let tokens = header.split(separator: " ")
-        #expect(tokens.filter { $0.contains("layersCard") }.count == 1)
-        let layers = try #require(header.range(of: " layersCard "))
-        let row = try #require(
-            header.range(of: "DefaultShortcutsRow(model: model,")
-        )
-        #expect(layers.upperBound <= row.lowerBound)
+        let squashed = body.filter { !$0.isWhitespace }
         #expect(
-            header.hasSuffix(
-                "DefaultShortcutsRow(model: model, selected: selection)"
+            squashed.contains(
+                "case.defaultShortcuts:"
+                    + "DefaultShortcutsRow(model:model,selected:selection)"
             )
         )
         #expect(
