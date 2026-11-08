@@ -38,8 +38,9 @@ extension KiwiCore {
         if let inside = pocketInsideFrame(on: display) {
             return .inside(inside)
         }
-        // Hidden has no handle (#2793).
-        if !pocketRests { return .whole(slides: true) }
+        // Hidden has no handle (#2793), nor a maximizing Monocle
+        // (#2976).
+        if !pocketRests(on: display) { return .whole(slides: true) }
         let shown = state.workspaces.allDisplays.first { $0.id == display }
         return shown.map(pocketRestsWhole) == true
             ? .whole(slides: false) : .handle

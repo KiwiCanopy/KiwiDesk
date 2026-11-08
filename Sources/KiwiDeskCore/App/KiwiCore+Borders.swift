@@ -114,16 +114,19 @@ extension KiwiCore {
         // presenting float (#1788). Travelers ARE included (a
         // sticky window can go fullscreen). A maximized window
         // fills its screen too (#2448), a Height or Width one not
-        // (#3062).
+        // (#3062), and so does every tiled member of a maximizing
+        // Monocle (#2976).
         let maximized =
             state.maximizedShape(of: space)?.axis == nil
             ? state.maximizedWindow(of: space) : nil
+        let maximizes = maximizesWindows(of: space)
         let fillsDisplay = Set(
             (space.windows + travelers).filter { id in
                 guard let window = state.windows[id] else {
                     return false
                 }
                 return window.isFullscreen || id == maximized
+                    || (maximizes && tiled.contains(id))
                     || presents(id, at: window.frame)
             }
         )

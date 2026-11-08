@@ -116,6 +116,12 @@ struct BarEdgeWriteCensusTests {
                 + "`hidingEdges(in:on:)`, `autoReadsAlways` and "
                 + "`drawsAtRest` over onScreen (#761)"
         ),
+        "TilingSettings+MaximizeWindows.swift": (
+            2,
+            "the per-mode `barEdges(in:)` and its fold of the "
+                + "visibilities `mode` reads, called over onScreen "
+                + "(#2976)"
+        ),
         "KiwiCore+ShelfPlan.swift": (
             1,
             "`updateBars()` hands it each display's onScreen copy"

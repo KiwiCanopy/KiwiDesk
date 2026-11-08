@@ -5,6 +5,9 @@ import SwiftUI
 struct MonocleSchematic: View {
     let orientation: MonocleParams.Orientation
     var hideStyle: MonocleParams.HideStyle = .stack
+    /// Every window fills the screen with no gaps (#2976), as
+    /// `TilingSettings.maximizesWindows(in:)` answers.
+    var maximizes = false
     @Environment(\.schematicFocusStroke) private var focusStroke
     @Environment(\.schematicPalette) private var palette
     var windows = LayoutSchematic.defaultWindowCount
@@ -27,8 +30,13 @@ struct MonocleSchematic: View {
     /// Depth of cards drawn behind focused window.
     var depth: Int { min(max(windows, 1), 4) - 1 }
 
-    /// Visible fan depth; collapsed under park hide style (#881).
-    var fanDepth: Int { parked ? 0 : depth }
+    /// Visible fan depth; collapsed under park hide style (#881)
+    /// and while every window holds the one full frame (#2976).
+    var fanDepth: Int { parked || maximizes ? 0 : depth }
+
+    /// The cards' inset from the canvas: the gaps, none while every
+    /// window fills the screen (#2976).
+    var inset: CGFloat { maximizes ? 0 : 10 }
 
     /// Whether parked mini pile is rendered at panel scale
     /// (#753). Internal, not private, so the caption guard asserts
@@ -56,6 +64,7 @@ struct MonocleSchematic: View {
             .animation(damping, value: orientation)
             .animation(damping, value: windows)
             .animation(damping, value: hideStyle)
+            .animation(damping, value: maximizes)
         }
     }
 
@@ -66,7 +75,7 @@ struct MonocleSchematic: View {
                 id: \.self
             ) { level in
                 fanCard(level: level)
-                    .padding(10)
+                    .padding(inset)
                     .opacity(opacity(ofLevel: level))
                     .offset(
                         x: drawnLevel(level) * 5,
@@ -114,7 +123,7 @@ struct MonocleSchematic: View {
     /// the rest frame draws nothing here.
     private var leavingCard: some View {
         card(front: true)
-            .padding(10)
+            .padding(inset)
             .opacity(arrival)
             .allowsHitTesting(false)
     }

@@ -24,7 +24,16 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
 extension LayoutAppBarKey {
     var placement: SettingPlacement {
         switch self {
-        case .monocleAppBarVisibility, .scrollingAppBarVisibility:
+        case .monocleAppBarVisibility:
+            // Behind the Show master's Each bar drawer (#761); no
+            // effect at rest while Monocle maximizes (#2976).
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: .setting(.layout(.monocleMaximizeWindows))
+            )
+        case .scrollingAppBarVisibility:
             // Behind the Show master's Each bar drawer (#761),
             // which has no container gate.
             return .row(.bars, .kiwishelf, .showMore)

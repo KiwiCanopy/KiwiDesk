@@ -28,10 +28,9 @@ extension TilingSettings {
         on screen: String?
     ) -> PocketRest {
         let settings = onScreen(screen)
-        let edge = settings.barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).first { $0.edge == settings.kiwishelf.pocketEdge }
+        let edge = settings.barEdges(in: mode).first {
+            $0.edge == settings.kiwishelf.pocketEdge
+        }
         if let edge, !edge.drawsNothingAtRest { return .section }
         return kiwishelf.pocketVisibility == .always ? .mark : .handle
     }
@@ -59,15 +58,12 @@ extension TilingSettings {
     ) -> (edge: AppBarEdge, depth: CGFloat)? {
         let settings = onScreen(screen)
         let pocketEdge = settings.kiwishelf.pocketEdge
-        let edge = settings.barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).first { $0.edge == pocketEdge }
+        let edge = settings.barEdges(in: mode).first { $0.edge == pocketEdge }
         let hostsApp = appBarVisibility(in: mode) != nil
         let reserves =
             edge.map { !$0.reserving.isEmpty }
             ?? (spaceBarStyle.reserve || (hostsApp && appBarStyle.reserve))
-        guard reserves, kiwishelf.pocketVisibility != .hidden else {
+        guard reserves, pocketRests(in: mode) else {
             return nil
         }
         switch pocketRest(in: mode, on: screen) {

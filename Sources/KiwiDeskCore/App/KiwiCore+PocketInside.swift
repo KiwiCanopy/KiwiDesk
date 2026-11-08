@@ -9,7 +9,7 @@ extension KiwiCore {
     /// strip stands on the pocket's edge there (`pocketStrip`); nil
     /// while it rests, or where none does this pass.
     func pocketInsideFrame(on display: DisplayID) -> CGRect? {
-        guard !pocketRests,
+        guard !pocketRests(on: display),
             let strip = pocketPlate.barStrips[display]
         else { return nil }
         let shelf = tiler.settings.kiwishelf

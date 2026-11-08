@@ -23,6 +23,9 @@ struct MonocleOverrideTests {
         // by the shared `new_window_placement_override`, not a
         // monocle-only field (#188).
         "newWindowPlacement",
+        // Every Monocle Space alike; a per-Space override waits
+        // for someone to ask (#2976 ▸ 5).
+        "maximizeWindows",
         // The override map itself.
         "override",
     ]

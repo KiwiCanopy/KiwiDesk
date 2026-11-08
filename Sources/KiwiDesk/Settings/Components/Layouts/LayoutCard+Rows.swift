@@ -25,6 +25,7 @@ extension LayoutCard {
         case .gridAutoSize: gridDimensionsGroup
         case .monocleOrientation: monocleOrientationRow
         case .monocleHideStyle: monocleHideStyleRow
+        case .monocleMaximizeWindows: monocleMaximizeWindowsRow
         case .trackAxis: trackArrangeRow
         case .trackNewWindow: trackNewWindowRow
         case .trackNewWindowPosition: trackPositionRow
@@ -222,6 +223,15 @@ extension LayoutCard {
                 ),
             ],
             help: LayoutHelp.monocleHideStyle
+        )
+    }
+
+    /// Monocle's "Maximize windows" (#2976).
+    var monocleMaximizeWindowsRow: some View {
+        ToggleRow(
+            label: LayoutHelp.monocleMaximizeWindowsLabel,
+            isOn: monocle.maximizeWindows,
+            help: LayoutHelp.monocleMaximizeWindows
         )
     }
 }

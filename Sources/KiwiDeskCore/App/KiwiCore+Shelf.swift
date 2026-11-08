@@ -110,9 +110,10 @@ extension KiwiCore {
             let planned = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: shown,
+                mode: shownMode(on: display.id),
                 spaceItems: items,
                 app: app,
-                pocket: pocketRests,
+                pocket: pocketRests(on: display.id),
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(

@@ -45,11 +45,10 @@ extension KiwiCore {
     /// shows no bar at rest there and the pocket reads Always
     /// (#2784 ▸ 8, #2978).
     func pocketRestsWhole(on display: Display) -> Bool {
-        let mode =
-            state.workspaces.currentSpace(on: display.id)
-            .flatMap { state.workspaces[$0]?.mode } ?? .bsp
-        return tiler.settings.pocketRest(in: mode, on: display.fingerprint)
-            == .mark
+        tiler.settings.pocketRest(
+            in: shownMode(on: display.id),
+            on: display.fingerprint
+        ) == .mark
     }
 
     /// The whole mark's frame on `display` (AX): a square a section

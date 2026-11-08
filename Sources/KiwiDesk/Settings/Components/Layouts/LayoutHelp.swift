@@ -92,6 +92,21 @@ enum LayoutHelp {
         )
     }
 
+    /// Monocle's "Maximize windows" label (#2976).
+    @MainActor static var monocleMaximizeWindowsLabel: String {
+        L("monocle.maximize_windows", "Maximize windows")
+    }
+
+    /// Monocle's "Maximize windows" help text, as ruled (#2976).
+    @MainActor static var monocleMaximizeWindows: String {
+        L(
+            "monocle.maximize_windows.help",
+            "Every window fills the screen with no gaps, and the "
+                + "bars, focus border and marks step aside. A bar's "
+                + "shortcut still shows it over the window."
+        )
+    }
+
     /// Scrolling slot size override help text (#290, #818).
     @MainActor static var slotSize: String {
         L(

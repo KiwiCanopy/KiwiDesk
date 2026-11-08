@@ -212,6 +212,9 @@ struct SettingsCodingTests {
         // `monocle.set_hide_style` → `layout.monocle.hide_style`
         // (#881), `stack` by default — today's behavior.
         #expect(monocle["hide_style"] as? String == "stack")
+        // `monocle.set_maximize_windows` →
+        // `layout.monocle.maximize_windows` (#2976), off by default.
+        #expect(monocle["maximize_windows"] as? Bool == false)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // `stack.set_master_orientation` / `set_stack_position`

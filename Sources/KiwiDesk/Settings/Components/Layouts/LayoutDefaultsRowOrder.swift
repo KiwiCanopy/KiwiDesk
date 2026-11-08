@@ -60,6 +60,7 @@ enum LayoutDefaultsRowOrder {
     static let monocle: [SettingKey] = [
         .layout(.monocleOrientation),
         .layout(.monocleHideStyle),
+        .layout(.monocleMaximizeWindows),
         .layout(.monocleNewWindowPlacement),
     ]
 

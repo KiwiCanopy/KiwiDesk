@@ -60,6 +60,15 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// Whether `space` lays every tiled member at its screen's whole
+    /// visible frame: Monocle's "Maximize windows" (#2976). The ONE
+    /// question the ring, mark and z-order readers ask beside
+    /// `StateCoordinator.maximizedWindow(of:)`, OR-ing the two; never
+    /// folded into that verdict or into `shelfStandsDown`.
+    func maximizesWindows(of space: Space) -> Bool {
+        tiler.settings.maximizesWindows(in: space.mode)
+    }
+
     /// The pass that grows a window to its screen or puts it back:
     /// one already-placed window changes size in place, no slot or
     /// membership moving, so it promises spring sizing (#593);

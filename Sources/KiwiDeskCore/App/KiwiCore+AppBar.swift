@@ -27,6 +27,7 @@ extension KiwiCore {
             let plan = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: settings,
+                mode: app.space.mode,
                 spaceItems: nil,
                 app: app,
                 // Before any display, no pocket stands.

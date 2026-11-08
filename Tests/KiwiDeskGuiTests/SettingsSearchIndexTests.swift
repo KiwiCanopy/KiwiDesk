@@ -189,8 +189,8 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                // 32 since #2493 took the three wrap rows.
-                .layoutDefaults: 32,
+                // 33: #2493's three wrap rows, #2976's Maximize.
+                .layoutDefaults: 33,
                 .screens: 3,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are

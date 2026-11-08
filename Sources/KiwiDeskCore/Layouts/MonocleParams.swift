@@ -17,6 +17,10 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
 
     public var orientation: Orientation = .horizontal
     public var hideStyle: HideStyle = .stack
+    /// Every member fills the screen with no gaps and the chrome
+    /// steps aside (#2976): read through
+    /// `TilingSettings.maximizesWindows(in:)`.
+    public var maximizeWindows = false
     /// Placement for newly spawned windows (`SpawnPlacement`).
     public var newWindowPlacement: SpawnPlacement = .first
     public var appBar = LayoutAppBar()
@@ -32,6 +36,7 @@ extension MonocleParams: Codable {
     private enum CodingKeys: String, CodingKey {
         case orientation
         case hideStyle = "hide_style"
+        case maximizeWindows = "maximize_windows"
         case newWindowPlacement = "new_window_placement"
         case appBar = "app_bar"
         case override
@@ -54,6 +59,11 @@ extension MonocleParams: Codable {
                 HideStyle.self,
                 forKey: .hideStyle
             ) ?? defaults.hideStyle
+        maximizeWindows =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .maximizeWindows
+            ) ?? defaults.maximizeWindows
         newWindowPlacement =
             try container.decodeIfPresent(
                 SpawnPlacement.self,
@@ -76,6 +86,10 @@ extension MonocleParams: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(orientation, forKey: .orientation)
         try container.encode(hideStyle, forKey: .hideStyle)
+        try container.encode(
+            maximizeWindows,
+            forKey: .maximizeWindows
+        )
         try container.encode(
             newWindowPlacement,
             forKey: .newWindowPlacement

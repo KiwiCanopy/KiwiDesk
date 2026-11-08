@@ -30,6 +30,13 @@ extension KiwiCore {
             tiler.settings.monocle.hideStyle = style
             return .ok()
         }
+        if command == "monocle.set_maximize_windows" {
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.monocle.maximizeWindows = on
+            return .ok()
+        }
         if command == "monocle.set_new_window_placement" {
             guard let placement = parsePlacement(args) else {
                 return placementError

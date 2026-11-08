@@ -13,12 +13,31 @@ extension KiwiCore {
     /// Hidden.
     var pocketRests: Bool { tiler.settings.pocketRests }
 
-    /// Whether the pocket stands on `display` this pass: it stands,
-    /// and that screen does not stand down — what the pocket draws
-    /// and where a play lands both read (#2678 review 5).
+    /// Whether the pocket rests on `display`: it rests, and the
+    /// layout that screen shows does not maximize its windows
+    /// (#2976 ▸ 4) — the one per-screen answer the bar plan, the
+    /// pocket's place and its specs read.
+    func pocketRests(on display: DisplayID) -> Bool {
+        tiler.settings.pocketRests(in: shownMode(on: display))
+    }
+
+    /// The layout `display`'s shown Space is laid out in, or bsp
+    /// where it shows none.
+    func shownMode(on display: DisplayID) -> LayoutMode {
+        state.workspaces.currentSpace(on: display)
+            .flatMap { state.workspaces[$0]?.mode } ?? .bsp
+    }
+
+    /// Whether the pocket stands on `display` this pass: it stands
+    /// there, and that screen does not stand down — what the pocket
+    /// draws and where a play lands both read (#2678 review 5).
     func pocketStands(on display: DisplayID) -> Bool {
-        pocketStands(listing: pocketListedDisplay == display)
-            && !pocketPlate.standingDown.contains(display)
+        Self.pocketStands(
+            rests: pocketRests(on: display),
+            dragging: pocketPlate.dragging != nil,
+            playing: !pocketPlate.playing.isEmpty,
+            listing: pocketListedDisplay == display
+        ) && !pocketPlate.standingDown.contains(display)
     }
 
     /// Whether the pocket shows this pass; the shelf's plan reads

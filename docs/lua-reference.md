@@ -2383,6 +2383,28 @@ at the corner.
 monocle.set_hide_style("park")
 ```
 
+:::unreleased
+### monocle.set_maximize_windows
+
+**Expects:** `true` or `false` (default `false`). Settings ▸
+Layout Defaults ▸ Monocle ▸ Maximize windows.
+
+**Does:** on every Monocle Space, every window fills the screen's
+visible frame with no gaps, parked windows included. Both bars read
+as Hidden in Monocle, so `space_bar.toggle_reveal()` and
+`app_bar.toggle_reveal()` still show a bar over the window, and the
+menu-bar item names the Space. The pocket shows no handle at rest
+there, only during a window drag or while a window goes in or out.
+The focus border and the marks step aside on the tiled windows.
+`toggle_maximized` is unchanged.
+
+**Example:**
+
+```lua
+monocle.set_maximize_windows(true)
+```
+:::
+
 ### monocle.set_new_window_placement
 
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or

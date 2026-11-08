@@ -219,6 +219,13 @@ extension SettingsValueReadout {
                 n.monocle.hideStyle,
                 layoutHideStyle
             )
+        case .monocleMaximizeWindows:
+            return layoutRow(
+                census,
+                o.monocle.maximizeWindows,
+                n.monocle.maximizeWindows,
+                onOff
+            )
         case .monocleNewWindowPlacement:
             return layoutRow(
                 census,

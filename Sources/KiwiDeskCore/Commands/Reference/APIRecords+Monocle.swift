@@ -23,6 +23,11 @@ extension APIReference {
             "Sets how unfocused monocle windows are hidden.",
             .choice("style", MonocleParams.HideStyle.self)
         ),
+        "set_maximize_windows": APIRecord(
+            "Makes every monocle window fill the screen while the "
+                + "bars, border and marks step aside.",
+            .boolean("enabled")
+        ),
         "set_new_window_placement": APIRecord(
             "Sets where a new window lands in the monocle cycle.",
             .choice("placement", SpawnPlacement.self)

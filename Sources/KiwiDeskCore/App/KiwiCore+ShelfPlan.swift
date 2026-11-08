@@ -49,20 +49,23 @@ extension KiwiCore {
     /// they are split (#1731), the Space Bar's first
     /// (`ShelfGeometry.strips`) — placing only the bars `drawn`
     /// answers for that edge (#761): the ones shown at rest and the
-    /// ones a reveal shows. A plan that draws nothing still carries
+    /// ones a reveal shows, read in `mode`, the layout the screen
+    /// shows. A plan that draws nothing still carries
     /// its strip, where a hidden bar's shortcut would show it.
     func shelfPlans(
         visible: CGRect,
         settings: TilingSettings,
+        mode: LayoutMode,
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
         pocket: Bool,
         drawn: (ShelfEdge) -> Set<ShelfBar>
     ) -> [ShelfPlan] {
+        // The bars as the screen's shown layout reads them (#2976).
+        let shown = settings.barVisibilities(in: mode)
         let folded = settings.barEdges(
-            space: spaceItems != nil
-                ? settings.spaceBarStyle.visibility : nil,
-            app: app.flatMap { settings.appBarVisibility(in: $0.space.mode) }
+            space: spaceItems != nil ? shown.space : nil,
+            app: app != nil ? shown.app : nil
         )
         let strips = ShelfGeometry.strips(
             in: visible,

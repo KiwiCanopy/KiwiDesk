@@ -31,11 +31,16 @@ extension KiwiCore {
             glass: tiler.settings.stickyStyle.liquidGlass
         )
         // A Height or Width maximize keeps its marks, as its ring
-        // (#3062): it does not fill its screen.
+        // (#3062): it does not fill its screen. A maximizing
+        // Monocle's tiled members wear none (#2976).
         let maximized = Set(
-            state.workspaces.allSpaces.compactMap {
-                state.maximizedShape(of: $0)?.axis == nil
-                    ? state.maximizedWindow(of: $0) : nil
+            state.workspaces.allSpaces.flatMap { space -> [WindowID] in
+                if maximizesWindows(of: space) {
+                    return state.effectiveTiledMembers(of: space)
+                }
+                return state.maximizedShape(of: space)?.axis == nil
+                    ? state.maximizedWindow(of: space).map { [$0] } ?? []
+                    : []
             }
         )
         // A window a run parks wears no mark at the corner
