@@ -64,6 +64,8 @@ public struct TilingSettings: Sendable, Equatable {
     public var floatingStyle = FloatingStyle()
     /// Pocket mark appearance (`pocket.*`, #2671).
     public var pocketStyle = PocketStyle()
+    /// Directional Maximize's shares and anchor (`maximize.*`, #3062).
+    public var maximize = MaximizeSettings()
     /// The drag ghost's switch (`drag.ghost`).
     public var dragGhost = DragVisual.ghostDefault
     /// The drag drop zone's switch (`drag.drop_zone`).

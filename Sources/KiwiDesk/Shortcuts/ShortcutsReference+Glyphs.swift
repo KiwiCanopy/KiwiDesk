@@ -137,6 +137,11 @@ extension ShortcutsReferenceBuilder {
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"
+        // Its one-axis twins (#3062).
+        case KeybindingCatalog.maximizeHeight.lua:
+            return "arrow.up.and.down"
+        case KeybindingCatalog.maximizeWidth.lua:
+            return "arrow.left.and.right"
         // The bars' show/hide (#2530): the Space Bar wears the arrowed
         // symbol the 3.2.0 notes' hiding-bars spotlight wears, the App
         // Bar the strip along the screen's foot (owner, 2026-10-23).

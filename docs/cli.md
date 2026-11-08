@@ -737,6 +737,14 @@ every lens with why it cannot turn on.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
+`toggle_maximized` also takes `height|width`, then an optional share
+from 0.1 to 1 and `center|in_place`: the window fills that axis at a
+share of the other. `maximize.set_share <height|width> <share>` and
+`maximize.set_anchor <center|in_place>` set what a press without them
+takes ([`toggle_maximized`](lua-reference.md#toggle_maximized)).
+:::
+
+:::unreleased
 `center_floating` moves the focused floating window to the middle of
 its screen at its size
 ([`center_floating`](lua-reference.md#center_floating)).

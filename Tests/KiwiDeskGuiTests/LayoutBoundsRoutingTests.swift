@@ -74,6 +74,10 @@ struct LayoutBoundsRoutingTests {
     private let allowed: [String: Int] = [
         // The hook's own declaration.
         "Tiling/TilingEngine.swift": 1,
+        // The shelf's strips with every bar carved off, reserving or
+        // not (#3062): a box a Maximize's fill is checked against,
+        // never a span a window is laid in.
+        "App/KiwiCore+ScreenCovering.swift": 1,
         // A containment box, not a span (#1161): whether a
         // placement lies past the screen's edge, which is what
         // the placement-bounce distrust keys on.

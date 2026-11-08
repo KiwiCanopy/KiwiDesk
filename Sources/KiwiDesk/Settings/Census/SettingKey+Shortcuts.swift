@@ -68,6 +68,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case resetSizes = "keybinding.reset_sizes"
     /// `toggle_maximized` (#2448).
     case maximize = "keybinding.maximize"
+    /// `toggle_maximized(axis)` (#3062).
+    case maximizeHeight = "keybinding.maximize_height"
+    case maximizeWidth = "keybinding.maximize_width"
     case toggleFloating = "keybinding.toggle_floating"
     case toggleSticky = "keybinding.toggle_sticky"
     /// `pocket` (#2446), in pin's place since pin went Lua-only.
@@ -173,7 +176,8 @@ extension ShortcutsKey {
                 gate: .runtime(.luaOwnsConfig)
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
-            .resetSizes, .maximize, .toggleFloating, .toggleSticky:
+            .resetSizes, .maximize, .maximizeHeight, .maximizeWidth,
+            .toggleFloating, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         // Its own card (#2680): its keys; where it sits and when it
         // shows are KiwiShelf's (#2678, #2978).
@@ -245,6 +249,16 @@ extension ShortcutsKey {
             return .text(
                 "keybinding.maximize",
                 help: "keybinding.maximize.help"
+            )
+        case .maximizeHeight:
+            return .text(
+                "keybinding.maximize_height",
+                help: "keybinding.maximize_height.help"
+            )
+        case .maximizeWidth:
+            return .text(
+                "keybinding.maximize_width",
+                help: "keybinding.maximize_width.help"
             )
         case .toggleFloating:
             return .text("keybinding.toggle_floating")

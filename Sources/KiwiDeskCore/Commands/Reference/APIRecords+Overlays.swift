@@ -96,6 +96,20 @@ extension APIReference {
         ),
     ]
 
+    static let maximizeRecords: [String: APIRecord] = [
+        "set_share": APIRecord(
+            "Sets the share of the other axis a Maximize Height or "
+                + "Maximize Width takes, from 0.1 to 1.",
+            .choice("axis", MaximizeAxis.self),
+            .number("share")
+        ),
+        "set_anchor": APIRecord(
+            "Sets where a Maximize Height or Width grows from: the "
+                + "screen's centre or the window's own place.",
+            .choice("anchor", MaximizeAnchor.self)
+        ),
+    ]
+
     static let floatingRecords: [String: APIRecord] = [
         "set_mark": APIRecord(
             "Shows or hides the on-window mark on windows set "

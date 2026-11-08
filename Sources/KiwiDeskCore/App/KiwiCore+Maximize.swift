@@ -10,14 +10,29 @@ import Foundation
 /// Space ends its maximize at the write (`Space.releaseScrollSlot`,
 /// `resetSizing`, the mode write, `resize`, a profile switch).
 extension KiwiCore {
-    func toggleMaximized() -> CommandResponse {
+    /// `toggle_maximized([axis, share, anchor])`: no arguments is the
+    /// whole screen; an axis fills that one at a share of the other
+    /// (#3062). A press of the shape shown ends it, any other shape
+    /// changes it in place.
+    func toggleMaximized(_ args: [JSONValue] = []) -> CommandResponse {
+        let shape: MaximizeShape
+        switch maximizeShape(from: args) {
+        case .success(let read): shape = read
+        case .failure(let refusal): return refusal.response
+        }
         guard let id = focusedWindowID,
             let window = state.windows[id],
             let spaceID = state.renderSpace(of: window),
             let space = state.workspaces[spaceID]
         else { return .fail("no focused window") }
         if state.maximizedWindow(of: space) == id {
-            state.workspaces.withSpace(spaceID) { $0.maximized = nil }
+            state.workspaces.withSpace(spaceID) {
+                if $0.maximizeShape.matches(shape) {
+                    $0.maximized = nil
+                } else {
+                    $0.maximizeShape = shape
+                }
+            }
         } else {
             guard space.mode != .floating,
                 spaceID == state.workspaces.activeSpace,
@@ -26,7 +41,10 @@ extension KiwiCore {
                 cueMaximizeRefused(id)
                 return .fail("only a tiled window can be maximized")
             }
-            state.workspaces.withSpace(spaceID) { $0.maximized = id }
+            state.workspaces.withSpace(spaceID) {
+                $0.maximized = id
+                $0.maximizeShape = shape
+            }
         }
         retileEndingMaximize(id)
         if state.workspaces[spaceID]?.maximized == id {

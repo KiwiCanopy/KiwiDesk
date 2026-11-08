@@ -117,6 +117,11 @@ struct SnapshotCarryCensusTests {
             $0.runHeads = [self.w2]
             $0.runTails = [self.w2]
             $0.maximized = self.w2
+            $0.maximizeShape = MaximizeShape(
+                axis: .height,
+                share: 0.6,
+                anchor: .inPlace
+            )
         }
         // A per-Desktop size (#2921), carried or dropped with the
         // rest of the session; its leaves are

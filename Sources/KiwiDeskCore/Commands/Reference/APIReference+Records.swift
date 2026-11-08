@@ -37,6 +37,7 @@ extension APIReference {
         "sticky": stickyRecords,
         "floating": floatingRecords,
         "pocket": pocketRecords,
+        "maximize": maximizeRecords,
         "kiwivision": kiwivisionRecords,
         "kiwihub": kiwihubRecords,
         "look": lookRecords,

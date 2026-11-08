@@ -27,6 +27,13 @@ extension StateCoordinator {
         return id
     }
 
+    /// What `space`'s maximized window fills (#3062), or nil where
+    /// `maximizedWindow(of:)` shows none: the stored shape is
+    /// written with the window and outlives it, so read it here.
+    public func maximizedShape(of space: Space) -> MaximizeShape? {
+        maximizedWindow(of: space) == nil ? nil : space.maximizeShape
+    }
+
     /// The maximized traveler drawn beneath `id`, on the Space `id`
     /// renders on, which focus returns to if `id` holds it and
     /// closes (#3035). A member's hand-back is `Space.remove`'s.

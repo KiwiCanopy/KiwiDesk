@@ -102,6 +102,8 @@ config.tileRules
 keybinding.grow_height
 keybinding.grow_width
 keybinding.maximize
+keybinding.maximize_height
+keybinding.maximize_width
 keybinding.open_settings
 keybinding.pocket
 keybinding.pocket_list
@@ -197,6 +199,9 @@ settings.kiwishelf.outerMargin
 settings.kiwishelf.revealStyle
 settings.kiwishelf.thickness
 settings.kiwishelf.tintHubAndPlates
+settings.maximize.anchor
+settings.maximize.heightShare
+settings.maximize.widthShare
 settings.minWindowSizes (master)
 settings.minWindowSizes.bsp.height
 settings.minWindowSizes.bsp.width

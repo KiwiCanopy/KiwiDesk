@@ -28,6 +28,7 @@ struct SpaceSizingCensusTests {
         "trackBreaks": "where the user broke the row (#128)",
         "handedBreaks": "a break's provenance (#1387)",
         "maximized": "a window filling its screen, not a size (#2448)",
+        "maximizeShape": "what the maximized window fills (#3062)",
         "runHeads": "where a scrolled zone rests, not a size (#2235)",
         "runTails": "where a scrolled zone ends, not a size (#2235)",
     ]
@@ -49,6 +50,7 @@ struct SpaceSizingCensusTests {
         space.runHeads = [w2]
         space.runTails = [w2]
         space.maximized = w2
+        space.maximizeShape = MaximizeShape(axis: .width, share: 0.4)
         return space
     }
 

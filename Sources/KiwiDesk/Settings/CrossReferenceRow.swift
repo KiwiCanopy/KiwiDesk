@@ -16,6 +16,20 @@ extension EnvironmentValues {
     }
 }
 
+private struct SettingsLandKey: EnvironmentKey {
+    static let defaultValue: @MainActor (SettingsAnchor) -> Void = { _ in
+    }
+}
+
+extension EnvironmentValues {
+    /// Lands the settings window on one row, through the model's
+    /// one `land(on:)` (#3062).
+    var settingsLand: @MainActor (SettingsAnchor) -> Void {
+        get { self[SettingsLandKey.self] }
+        set { self[SettingsLandKey.self] = newValue }
+    }
+}
+
 /// Standard "lives elsewhere" row embedding a linked destination inline
 /// (`localization.md`, `CrossReferenceRowSlotTests`, `LinkedCaption`).
 struct CrossReferenceRow: View {
@@ -23,7 +37,11 @@ struct CrossReferenceRow: View {
     let prose: String
     let linkTitle: String
     let destination: SettingsDestination
+    /// The row on `destination` to land on and flash, or nil for its
+    /// root (#3062).
+    var row: SettingsControl? = nil
     @Environment(\.settingsNavigate) private var navigate
+    @Environment(\.settingsLand) private var land
 
     /// Unicode U+FFFC replacement character used as the link slot token.
     static let linkSlot = "\u{FFFC}"
@@ -34,7 +52,18 @@ struct CrossReferenceRow: View {
             leading: leading,
             linkTitle: linkTitle,
             trailing: trailing,
-            navigate: { navigate(destination) }
+            navigate: {
+                if let row {
+                    land(
+                        SettingsAnchor(
+                            destination: destination,
+                            anchor: row.id
+                        )
+                    )
+                } else {
+                    navigate(destination)
+                }
+            }
         )
     }
 

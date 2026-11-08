@@ -145,6 +145,16 @@ struct ShortcutsControls: Sendable {
         "keybinding.open_settings",
         "Open Settings"
     )
+    /// The directional Maximize rows (#3062), anchors for the
+    /// Layout Defaults captions' links.
+    let maximizeHeightBinding = SettingsControl(
+        "keybinding.maximize_height",
+        "Maximize Height"
+    )
+    let maximizeWidthBinding = SettingsControl(
+        "keybinding.maximize_width",
+        "Maximize Width"
+    )
     let inactiveShortcuts = SettingsControl(
         "shortcuts.section.inactive",
         "Inactive shortcuts"
