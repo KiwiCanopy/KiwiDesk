@@ -201,13 +201,11 @@ The pocket's resting strip is part of that input:
 `TilingSettings.pocketReservation` adds its edge, and
 `ShelfReservation` reserves each edge's deepest strip (#2784).
 
-:::unreleased
 The pocket rests unless its Show is Hidden
 (`kiwishelf.pocket_visibility`, #2978), and a
 `kiwishelf.set_pocket_visibility` write retiles only where it moves a
 strip, through the bar writes' reservation comparison in the command
 dispatch.
-:::
 
 A Space switch is always that one instant reissue, and how it
 shows itself is read once, through `drawnSpaceTransition`

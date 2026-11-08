@@ -200,10 +200,8 @@ two, trade places: each takes the other's slot. A floating
 window, a window in native full screen and a sticky window that
 cannot change Space are refused.
 
-:::unreleased
 A window swapped with itself, a pocketed window and those three
 refusals say why in a cue on the window.
-:::
 
 A direction followed by a window
 id swaps that window with its neighbour in that direction, in the
@@ -507,7 +505,6 @@ KiwiDesk.move_to_desktop(3)
 KiwiDesk.move_to_desktop(3, "mail")
 ```
 
-:::unreleased
 Neither `move_to_desktop` nor `move_to_desktop_and_follow` moves a
 **full-screen** window or a **pocket** window, named or focused:
 each refuses and the window stays on its Desktop. Either verb can
@@ -526,7 +523,6 @@ about 150 ms after the command returns. Until it lands, a second
 `move_to_desktop` or `move_to_desktop_and_follow` of that window
 refuses with `A window moves again once its last move lands.`, so a
 script sending one window twice retries after a short wait.
-:::
 
 ### move_to_desktop_and_follow
 
@@ -564,7 +560,6 @@ KiwiDesk.move_to_desktop_and_follow(3)
 KiwiDesk.move_to_desktop_and_follow(3, "mail")
 ```
 
-:::unreleased
 `move_to_desktop` and `move_to_desktop_and_follow` take an optional
 window id from [`get_state`](#get_state) after the space, and then
 move that window rather than the focused one. Pass `nil` for the
@@ -585,7 +580,6 @@ it. A sticky one refuses a named Space, and the follow refuses a minimized
 or hidden one, since it could not take focus. With *Displays have
 separate Spaces* off it can [cross screens](#move_to_desktop) too,
 with the limits named there.
-:::
 
 ### move_space_to_display
 
@@ -948,14 +942,12 @@ return to the weights `grid.set_column_weight` and
 sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
 `"all"` has no default key.
 
-:::unreleased
 The session layer is kept per macOS Desktop and profile
 ([resize](#resize)): a space id, or nothing, resets that Space on
 the Desktop its screen shows under the profile live there — a Space
 with no screen, on every Desktop; `"all"` resets every Space on
 every Desktop. It also clears the length a grow along a run kept
 ([resize](#resize)).
-:::
 
 **Example:**
 
@@ -1067,10 +1059,8 @@ window with no overlay — stays silent.
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent.
 
-:::unreleased
 A held chord stops silently at a limit: it neither draws nor sounds.
 A fresh press there does both.
-:::
 
 A refusal only the app can give — [`new_window`](#new_window)
 finding no New Window, [`close_window`](#close_window) no close
@@ -1320,10 +1310,8 @@ screen that switched:
   and leaves without the fade.
 - `"none"`: the screen changes at once.
 
-:::unreleased
 The [scroll Space step](#scroll_gestureset_space_step) has its own
 choice, [`set_space_scroll_transition`](#set_space_scroll_transition).
-:::
 
 The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
 switches**, which neither Reduce Motion nor the **Animate
@@ -1346,7 +1334,6 @@ KiwiDesk.set_space_transition("show")
 
 ### set_space_scroll_transition
 
-:::unreleased
 **Expects:** `"slide"`, `"show"` or `"none"` (default `"slide"`).
 
 **Does:** sets how the
@@ -1369,7 +1356,6 @@ running value only. Neither `set_space_transition` nor a stored
 KiwiDesk.set_space_transition("none")
 KiwiDesk.set_space_scroll_transition("slide")
 ```
-:::
 
 ### set_space_slide_duration
 
@@ -1391,12 +1377,10 @@ setting is app-wide, stored in `gui.json` as
 It replaces `animations.set_space_change_duration`, which is
 refused, naming it.
 
-:::unreleased
 A slide plays where [`set_space_transition`](#set_space_transition),
 or for the scroll step
 [`set_space_scroll_transition`](#set_space_scroll_transition), is
 `"slide"`.
-:::
 
 **Example:**
 
@@ -1500,10 +1484,8 @@ How the switch shows itself — the plate slide, at once with a
 plate naming the Space, or at once — is
 [`set_space_transition`](#set_space_transition).
 
-:::unreleased
 The scroll Space step's is
 [`set_space_scroll_transition`](#set_space_scroll_transition).
-:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -1812,7 +1794,6 @@ stack.set_stack_position_override("3", "bottom")
 **Expects:** an optional space identifier; without one, the
 focused space.
 
-:::unreleased
 **Does:** moves that space's stack zone to the opposite side —
 `"left"` ↔ `"right"`, `"top"` ↔ `"bottom"` — on the macOS Desktop
 its screen shows now, and on no other Desktop. It starts from the
@@ -1837,7 +1818,6 @@ space, on every Desktop, it ends on
 [`stack.set_stack_position_override`](#stackset_stack_position_override)
 and when the space is deleted. A restart forgets it. To keep a side
 per Desktop, bind a profile to that Desktop.
-:::
 
 **Example:**
 
@@ -3245,11 +3225,9 @@ Issue naming this verb; a saved profile keeps its edge.
 **Does:** sets the screen edge the [pocket](#pocket) sits on, on
 every screen.
 
-:::unreleased
 Where a bar shows on that edge, the pocket is a section of
 KiwiShelf. On any other edge, how it rests is
 [`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)'s.
-:::
 
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
 places it. A look carries it.
@@ -3272,7 +3250,6 @@ that range it is clamped.
 percent: `0` is the left or top end, `100` the right or bottom
 end. It is kept on screen at either end. A look carries it.
 
-:::unreleased
 Under `"hidden"`
 ([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility))
 the pocket stands at the position on every edge. Otherwise, on an
@@ -3284,7 +3261,6 @@ the pocket shows once the bar comes in, joining the bars' handles in
 one row where it would meet them; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
-:::
 
 **Example:**
 
@@ -3292,7 +3268,6 @@ whole, stands at the position.
 kiwishelf.set_pocket_position(50)  -- mid-edge, or a bar's end
 ```
 
-:::unreleased
 ### kiwishelf.set_pocket_visibility
 
 Replaces `pocket.set_capacity`, which is now refused with a Config
@@ -3354,7 +3329,6 @@ visibilities. A look never carries it.
 ```lua
 kiwishelf.set_pocket_visibility("auto")
 ```
-:::
 
 ### KiwiShelf colours
 
@@ -3787,12 +3761,10 @@ App Bar in monocle and scrolling.
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
 
-:::unreleased
 On the pocket's edge, unless
 [`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
 is `"hidden"`, an `"auto"` or `"hidden"` bar's edge also keeps clear
 of the pocket's resting handle or mark.
-:::
 
 A window drag opens an `"auto"` Space Bar as the pointer does
 above, so the window can be dropped on a Space
@@ -4828,13 +4800,11 @@ Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and
 snaps back.
 
-:::unreleased
 The exception is a shrink along a Stack zone, a Track track, an
 auto-sized Grid's full last track or a BSP chain: dragging the outer
 edge inward answers as [`resize`](#resize) does (#2970). Dragging it
 outward still snaps back, and so does a window alone in its zone with
 none waiting, or a master zone lined up along the split.
-:::
 
 In Scrolling one slot size serves the whole row, so any edge of a
 column resizes it, including the outer edge of
@@ -5133,10 +5103,8 @@ it fits, so a step reveals one window. A zone at rest keeps the
 windows it shows; closing one lets the others grow into the
 room.
 
-:::unreleased
 A window you grew along the zone past what its neighbours could
 give keeps that length instead ([resize](#resize)).
-:::
 
 Each end of a zone that hides windows shows a "+n" overflow mark
 on its edge window, counting that end's hidden windows. Clicking
@@ -5213,13 +5181,11 @@ window that reported wrong metadata while launching corrects
 itself the same way. A manual `make_floating` override is never
 reverted by these re-checks.
 
-:::unreleased
 A rule decides how a window starts:
 [`make_tiled`](#make_tiled) tiles a window a rule floats, and it
 stays tiled until it closes, through hiding, a Desktop switch and
 the re-checks. A window that opens later, the same one reopened
 included, floats by the rule again.
-:::
 
 Panels and overlays that live above the normal window layer also
 float automatically, no rule needed. Windows belonging to apps that
@@ -5445,12 +5411,10 @@ Settings Save of the rules or a quit; over the CLI or an AI app,
 
 **Expects:** nothing.
 
-:::unreleased
 **Does:** returns the live rules: `app_rules` (bundle id →
 Space), `float_rules`, `tile_rules`, `ignore_rules`,
 `float_automatically`, the `owner` of the rules (`gui` or `lua`)
 and the live `profile`.
-:::
 
 #### app_rule.set_space / app_rule.remove_space
 
@@ -5534,9 +5498,7 @@ A window that a `float_rules` entry, KiwiDesk's dialog and panel
 detection, or its app having no Dock icon already floats is left
 as it is, and nothing is remembered for it.
 
-:::unreleased
 A window a rule floats that `make_tiled` tiled floats again.
-:::
 
 **Example:**
 
@@ -5555,7 +5517,6 @@ It undoes a `make_floating`: from then on
 `float_rules` and KiwiDesk's own detection decide whether it
 floats, including rules you add later.
 
-:::unreleased
 A window a `float_rules` entry floats is tiled, and stays tiled
 until it closes; [`make_floating`](#make_floating) floats it again.
 It stays tiled across an in-place restart
@@ -5566,7 +5527,6 @@ sheets, panels, raised layers) or because its app has no Dock icon
 cannot be tiled: the command does nothing, a pill on the window
 names the reason, and over the CLI it fails. A window that floats
 only because its Space is in floating layout still floats there.
-:::
 
 A window floated only because it can't be resized or its app has
 no Dock icon tiles once its app is in [`tile_rules`](#tile_rules)
@@ -5612,7 +5572,6 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
-:::unreleased
 ### center_floating
 
 **Expects:** nothing.
@@ -5683,7 +5642,6 @@ KiwiDesk.bind("ctrl+alt+shift+l", function()
     KiwiDesk.move_floating("x", 20)
 end)
 ```
-:::
 
 ## Opening and Closing Windows
 
@@ -5879,10 +5837,8 @@ end)
 
 **Expects:** nothing.
 
-:::unreleased
 Or an axis, `"height"` or `"width"`, then optionally a share from
 0.1 to 1 and an anchor, `"center"` or `"in_place"`.
-:::
 
 **Does:** makes the focused tiled window fill its screen —
 the whole area between the menu bar and the Dock, with no gaps —
@@ -5898,7 +5854,6 @@ floating window, a switch to another Space or Desktop and back,
 or KiwiDesk's own restart leaves it filling the screen. Fails on
 a floating window. Bound to `⌃⌥M` by default.
 
-:::unreleased
 A sticky window fills the screen of the Space it is drawn on. Its
 maximize ends when you leave that Space, and it does not come back
 when you return. KiwiDesk's own restart ends it too while the
@@ -5906,10 +5861,8 @@ window is away from its home Space. With
 [`sticky.set_desktop_reach`](#stickyset_desktop_reach) off, one
 maximized on its home Space leaves with its Desktop and comes back
 maximized, as any window does.
-:::
 
 
-:::unreleased
 With an axis, the window fills that axis of the same area and
 takes a share of the other: `"height"` runs top to bottom at a
 share of the width, `"width"` side to side at a share of the
@@ -5923,7 +5876,6 @@ only where the window reaches into their strip, and the focus
 ring stays. A call with the same shape puts the window back; a
 call with another shape changes it in place. Bound to `⌃⌥⇧M`
 (height) and `⌃⌥⌘M` (width) by default.
-:::
 
 **Example:**
 
@@ -5933,18 +5885,15 @@ KiwiDesk.bind("ctrl+alt+m", function()
 end)
 ```
 
-:::unreleased
 ```lua
 -- A centred editor column, two thirds of the screen wide.
 KiwiDesk.bind("ctrl+alt+e", function()
     KiwiDesk.toggle_maximized("height", 2 / 3)
 end)
 ```
-:::
 
 ### maximize.set_share
 
-:::unreleased
 **Expects:** an axis, `"height"` or `"width"`, a share from 0.1 to
 1, and optionally a screen shape: `"laptop"`, `"widescreen"`,
 `"ultrawide"`, `"super_ultrawide"` or `"portrait"`.
@@ -5971,11 +5920,9 @@ The defaults are the two right-hand columns.
 ```lua
 KiwiDesk.maximize.set_share("height", 0.6, "widescreen")
 ```
-:::
 
 ### maximize.set_anchor
 
-:::unreleased
 **Expects:** `"center"` or `"in_place"`, and optionally a screen
 shape, as [`maximize.set_share`](#maximizeset_share) takes.
 
@@ -5992,7 +5939,6 @@ elsewhere. A full Maximize ignores it.
 ```lua
 KiwiDesk.maximize.set_anchor("center", "ultrawide")
 ```
-:::
 
 ### pocket
 
@@ -6019,11 +5965,9 @@ with [`toggle_pocket_window`](#toggle_pocket_window); each
   where that is still on the Space, else to the Space's focused
   window.
 
-:::unreleased
 While the window's app is hidden, taking it out or putting it back
 fails with `the pocket window's app is hidden or relaunching` until
 the app is shown again.
-:::
 
 An app that quit while hidden empties the pocket at the next call. A
 `move_to_space` or `swap` naming the pocketed window's id is
@@ -6033,20 +5977,16 @@ refused.
 does: that window goes in, marked first, as
 [`toggle_pocket_window`](#toggle_pocket_window) would mark it.
 
-:::unreleased
 The pocket holds every marked window, in the order each last went in,
 and a call puts away before it takes out: while a marked window is
 out, it puts back the focused one, else the one focused last. Only
 with every marked window in does it take one out, the one put in last.
-:::
 
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another
 Space is refused with the same pill.
 
-:::unreleased
 [`move_to_desktop`](#move_to_desktop) refuses it too.
-:::
 
 It comes along when you switch
 macOS Desktops whatever
@@ -6111,10 +6051,8 @@ out of the pocket: on every Space, wearing the pocket
 mark. Unmarking tiles it on the active Space, as
 [`make_tiled`](#make_tiled) does; a window detection floats stays
 floating.
-:::unreleased
 A window a float rule floats is tiled too, as `make_tiled` tiles
 it.
-:::
 
 A
 pocketed window is never the focused one, so take it out
@@ -6123,16 +6061,12 @@ native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
 
-:::unreleased
 A call on another window marks it too, beside the others.
-:::
 
-:::unreleased
 `toggle_pocket_window` also takes a window id, as the bar menus'
 Remove from Pocket does: it marks or unmarks that window instead of
 the focused one, and unmarks a pocketed window without taking it
 out first.
-:::
 
 **Example:**
 
@@ -6142,7 +6076,6 @@ KiwiDesk.bind("ctrl+alt+shift+p", function()
 end)
 ```
 
-:::unreleased
 ### pocket_app
 
 **Expects:** an app's bundle id.
@@ -6183,7 +6116,6 @@ KiwiDesk.bind("ctrl+alt+t", function()
     KiwiDesk.pocket_app("com.mitchellh.ghostty")
 end)
 ```
-:::
 
 ### override_sticky_reach
 
@@ -6324,7 +6256,6 @@ is Automatic; any non-empty value must parse as a hex color.
 floating.set_color("#8E5DE0")
 ```
 
-:::unreleased
 ### Retired pocket verbs
 
 `pocket.set_capacity` is retired →
@@ -6335,9 +6266,7 @@ retired — use kiwishelf.set_pocket_visibility`. An `init.lua` that
 never called it showed the pocket as `"one"` did and now takes
 `"always"`; add `kiwishelf.set_pocket_visibility("hidden")` to keep
 it out of sight.
-:::
 
-:::unreleased
 ### pocket.toggle_list
 
 **Expects:** nothing.
@@ -6363,7 +6292,6 @@ KiwiDesk.bind("control+option+command+p", function()
     pocket.toggle_list()
 end)
 ```
-:::
 
 ### pocket.set_color
 
@@ -6579,7 +6507,6 @@ under **Pocket**.
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
 
-:::unreleased
 A window in native full screen is listed, and **Return** shows it
 on its own full-screen Space
 ([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939)).
@@ -6588,9 +6515,7 @@ started is listed by its app's name
 ([#2949](https://github.com/KiwiCanopy/KiwiDesk/issues/2949)), and
 picking it brings the app forward
 ([accepted limitations](accepted-limitations.md)).
-:::
 
-:::unreleased
 **⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
 window with yours, as [swap_here](#swap_here) does, and **⌥⌘1** …
 **⌥⌘9** (or **⇧⌥⌘1** …) swap one of the first nine. Yours is
@@ -6600,14 +6525,11 @@ and a pocketed window are refused, and so, until #2884, are a
 minimized window and one on another macOS Desktop. A refused swap
 or Move here keeps KiwiHub open, with the refusal sound where that
 is on.
-:::
 
-:::unreleased
 **↑** on the first row selects the last, and **↓** on the last
 selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
-:::
 
 The `"view"` side is the **view picker**, three lines in one
 panel, the current item on each marked ✓. The menu bar's **Open
@@ -6650,11 +6572,9 @@ Keys on this side:
   **⌘S** keeps the layouts in the profile, as Keep in a Space's
   Layout menu does.
 
-:::unreleased
 Past the end of a line, **←** and **→** go round to its other end,
 and past the last line **↓** comes back to the first, **↑** the
 other way. Holding the key down stops at the end instead.
-:::
 
 On every side:
 
@@ -6862,12 +6782,10 @@ larger minimum the app itself enforces once KiwiDesk has learned
 it (#677). A window already smaller than that shrinks no
 further.
 
-:::unreleased
 On a floating window whose app holds its aspect ratio, such as mpv
 or QuickTime Player, either axis scales both, and both stop at the
 first floor or screen edge. KiwiDesk learns this from the first
 press on that window; a first grow lands about a second late (#2973).
-:::
 
 "Floating" here is the window's *effective* float (#1184): its
 own float flag — set by a toggle, `make_floating`, a
@@ -6886,14 +6804,12 @@ strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
 
-:::unreleased
 A window whose app refuses the size stays where it is and `resize`
 still reports success; one that takes part of the size moves only as
 far as the size did. An app that keeps an axis or its ratio can show
 the half step for a moment at a screen's right or bottom edge, or
 off every screen
 ([#2981](https://github.com/KiwiCanopy/KiwiDesk/issues/2981)).
-:::
 
 Tiled windows resize in bsp, stack, scrolling, track and grid
 layouts; monocle reports "not supported" and flashes a pill on
@@ -6934,7 +6850,6 @@ also names the reason while the blocking neighbor marks itself
 at its minimum. Keyboard and mouse resizes share these clamps
 and cues.
 
-:::unreleased
 Along a run's scroll direction — a Stack zone, a Track track, an
 auto-sized Grid's last track once the grid is full, a BSP chain —
 a grow does not stop at a neighbour's minimum (#2709): the
@@ -6954,7 +6869,6 @@ track weights, while windows wait in its run, until
 the window moving between a Stack's zones clears it. Across the
 run, in a Grid's last track while it draws its cells and in BSP's
 halved splits a grow still stops at the neighbour's minimum.
-:::
 
 The pill says *whose* minimum it was (#1261): "Minimum window
 size reached" and "Neighboring window at its minimum size" mean
@@ -6962,13 +6876,11 @@ the `min_window_size` bound, and lowering it helps; "This app
 won't go smaller" and "Neighboring app won't go smaller" mean
 the app's own learned floor, which no setting moves.
 
-:::unreleased
 The neighbour pair names the neighbour's app: "Neighboring
 Safari window is at the minimum window size" is the
 `min_window_size` bound, "Neighboring Safari window won't go
 smaller" the app's own floor. Where the app's name is unknown the
 nameless sentences above stay.
-:::
 
 In **bsp**, the window that cannot shrink is often not the one
 you are resizing (#1259). A window holding the whole height —
@@ -7018,14 +6930,10 @@ fires once per press.
 A limit (#933/#1055) ends the run; scrolling's wordless out-of-screen
 stop keeps gliding harmlessly until release.
 
-:::unreleased
 [`move_floating`](#move_floating) glides the same way.
-:::
 
-:::unreleased
 A hold reaching a limit stops with no pill, and a fresh press there
 shows it (#3017).
-:::
 
 Releasing the chord, switching layers, or arming a Settings
 shortcut recorder ends the run immediately.
@@ -7034,11 +6942,9 @@ A glide writes each frame instantly, on every layout and on a
 floating window alike, whatever `animations.set_on_window_resize`
 says and under system **Reduce Motion** (#1082/#1090).
 
-:::unreleased
 A glide along a run stops with the neighbour at its minimum and pushes
 nothing; pressing again pushes one window
 ([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
-:::
 
 A floating resize accumulates against what was last
 *commanded* — the in-flight animation's target where one exists
@@ -7127,7 +7033,6 @@ covers the BSP split ratios, the stack master ratio, and the
 scrolling slot size — the three interactive-resize knobs —
 consistently.
 
-:::unreleased
 The session layer is kept per macOS Desktop and per profile live
 on it: a Space shown on two Desktops keeps its own sizes on each,
 switching profile keeps each profile's sizes for when it returns,
@@ -7152,7 +7057,6 @@ flowchart LR
     S -->|"reset_layout_sizing"| E["this Space here;<br/>all: everything"]
 ```
 
-:::
 
 **Example:**
 
@@ -7410,7 +7314,6 @@ return. The `reason` argument says which kind of change fired:
   sixth argument, `desktop`, names the Desktop holding it where
   the Desktop can be read — `nil` on a Mac without SkyLight).
 
-:::unreleased
 `window_created` also reports `"existing"`: a window that was
 already open when KiwiDesk began managing it — every window found
 when KiwiDesk starts, and, where macOS reports windows opening, a
@@ -7424,7 +7327,6 @@ macOS to report the window opening, the event can follow the
 window's `focus_change` by up to half a second; it always comes
 before that window's `window_destroyed`. More reasons may be added,
 so match the ones your callback handles.
-:::
 
 A bar callback that only cares about real lifecycle filters in
 one line:
@@ -7448,13 +7350,11 @@ two destroys, `"vanished"` then `"closed"`. A consumer that
 keeps its own list re-queries on `desktop_change` (the pattern
 in the sketchybar recipe).
 
-:::unreleased
 A [`move_to_desktop_and_follow`](#move_to_desktop_and_follow) that
 switches Desktop reports `"vanished"` whatever the WindowServer hosts
 the window on, where it answers. `desktop` then names the Desktop you
 sent the window to, which may already be on screen as the callback
 runs.
-:::
 
 ## External Commands
 
@@ -8208,10 +8108,8 @@ animations.set_on_scrolling(true)
 **Does:** enables or disables animation on window resizes (split-ratio
 changes, mouse-resize settle).
 
-:::unreleased
 A floating window whose app holds its aspect ratio
 ([`resize`](#resize)) resizes instantly whatever this says (#2973).
-:::
 
 **Example:**
 
@@ -8261,22 +8159,18 @@ Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
 
-:::unreleased
 [`center_floating`](#center_floating) follows it too.
-:::
 
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
 place the pocket the plate flies to. That pocket lights as the window
 goes in or out, and nods as one lands in it.
 
-:::unreleased
 Under `"always"` and `"auto"`
 ([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility))
 it is the pocket that stays, which comes up out of its handle where
 it rests as one; under `"hidden"` a pocket that slides out of its
 edge and moves no bar.
-:::
 
 **Example:**
 
@@ -8612,11 +8506,9 @@ carry `track_breaks` (ids of the windows that start a track,
 #128) and, while a track holds an uneven cross-axis split,
 `track_weights` (head window id → session weight).
 
-:::unreleased
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
 [flip](#stacktoggle_stack_position) included.
-:::
 
 Each window object has: `id`, `app`, `bundle_id`, `title`,
 `floating` (boolean).
@@ -8643,7 +8535,6 @@ end
 **Expects:** optionally a window id from `get_state`'s `windows`;
 the focused window otherwise.
 
-:::unreleased
 **Does:** returns why the window floats or tiles: `id`, `app`,
 `bundle_id`, `space_id`, `mode`, `floating` (its own float flag,
 as `get_state` has it), `float`, `app_rule`, `sticky` (`none`,
@@ -8666,7 +8557,6 @@ window's included; ask `explain_app` instead.
 
 The answer also carries `title`, the window's title as `get_state`
 has it.
-:::
 
 `detection.reason` can also read `raised_layer`: a standard
 window that floats because it opened above the normal window
@@ -8688,12 +8578,10 @@ windows), `minimized`, `away` (each with its `space_id`) and
 `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
 
-:::unreleased
 Each entry of `windows`, `minimized` and `away` is the window's
 `id` and `title`; a minimized or away window's title is the one it
 had when it left, and a window found away at start has none
 (`""`).
-:::
 
 ### get_config_status
 
@@ -8770,7 +8658,6 @@ end)
 **Expects:** optionally a Space id; every tracked window otherwise.
 An unknown Space is refused.
 
-:::unreleased
 **Does:** returns where each window sits, one entry per window, in
 Space order: `id` (as `get_state` has it), `space_id`, `display`
 (the `list_monitors` id of the screen it draws on), `shown`,
@@ -8791,7 +8678,6 @@ full-screen window has no `visibility`.
 `list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
-:::
 
 Each entry also carries `app`, `pid`, `index` (the window's
 place in its Space's row, from 1; `null` for a window no Space
@@ -8803,11 +8689,9 @@ order is the Spaces' rows, not the stacking order: sort by `z` for
 that. A window KiwiDesk does not track, such as a menu, counts
 toward no rank, though it may cover a window.
 
-:::unreleased
 Each entry also carries `title`, the window's title as `get_state`
 has it, so a list reads without a second call. Titles need not be
 unique; `id` names the window.
-:::
 
 `z` and `visibility` can disagree. `visibility` follows the order
 KiwiDesk arranged, as the App Bar does, while `z` is the order

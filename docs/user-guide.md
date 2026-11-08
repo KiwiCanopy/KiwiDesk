@@ -501,12 +501,10 @@ bounces and shows a frosted pill:
 - On a scrolling space, growing stops at a maximum the app
   enforces (System Settings will not grow past its own width).
 
-:::unreleased
 Where windows that do not fit wait behind a `+n` overflow mark, a
 grow along that line does not stop at the neighbour: the neighbour
 joins the windows waiting and the `+n` counts it. Shrinking a window
 alone on that line brings the next one back.
-:::
 
 Where the limit is the **app's own** — a minimum or maximum the
 app enforces, which KiwiDesk learns — the pill says so instead:
@@ -514,19 +512,15 @@ app enforces, which KiwiDesk learns — the pill says so instead:
 *This app won't go bigger*. Lowering the configured minimum does
 not move those.
 
-:::unreleased
 The two neighbour pills name the neighbour's app, since that window
 may be out of sight behind an overflow mark: *Neighboring Safari
 window is at the minimum window size*, *Neighboring Safari window
 won't go smaller*.
-:::
 
 Running out of screen is a silent stop.
 
-:::unreleased
 A held resize shortcut also stops silently at a limit. A fresh press
 there shows the pill.
-:::
 
 Floating windows join directional focus as a second tier: when
 no tiled window lies in the pressed direction, focus reaches a
