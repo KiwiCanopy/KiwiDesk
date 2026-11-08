@@ -96,21 +96,24 @@ struct UpdateCheckingView: View {
             .padding(.top, 4)
             .padding(.horizontal, UpdateWindowMetrics.inset)
             .padding(.bottom, 22)
-            HStack {
-                Spacer(minLength: 0)
-                Button(L("update.window.cancel", "Cancel"), action: cancel)
-                    .settingsActionButton()
-                    .keyboardShortcut(.cancelAction)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .frame(minHeight: 60)
-            .background(SettingsTheme.panel)
-            .overlay(alignment: .top) {
-                Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
-            }
+            UpdateCheckingFooter(cancel: cancel)
         }
         .frame(width: Self.width)
         .updateWindowGround()
+    }
+}
+
+/// The checking window's footer: one Cancel on the window's glass.
+struct UpdateCheckingFooter: View {
+    let cancel: () -> Void
+
+    var body: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button(L("update.window.cancel", "Cancel"), action: cancel)
+                .settingsActionButton()
+                .keyboardShortcut(.cancelAction)
+        }
+        .updateFooterBar()
     }
 }
