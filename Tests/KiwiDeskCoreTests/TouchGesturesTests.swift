@@ -229,6 +229,10 @@ struct TouchGesturesTests {
         #expect(parsed.swipes[3] == [.horizontal, .vertical])
         #expect(parsed.swipes[4] == [.vertical])
         #expect(parsed.lookUpTap)
+        let tapOne = TrackpadSystemGestures.parse([
+            "TrackpadThreeFingerTapGesture": 1
+        ])
+        #expect(tapOne.lookUpTap, "any value but 0 is macOS's")
         let drag = TrackpadSystemGestures.parse(["TrackpadThreeFingerDrag": 1])
         #expect(drag.swipes[3] == [.horizontal, .vertical])
         #expect(drag.swipes[4] == nil)

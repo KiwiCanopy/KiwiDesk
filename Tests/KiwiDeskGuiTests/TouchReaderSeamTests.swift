@@ -16,8 +16,11 @@ import Testing
 ///   and its own home, so a second caller cannot register a
 ///   device beside the one `stop` unregisters.
 ///
+/// Needles are the bare names, `TouchReader.live` and each
+/// `…Symbol`, so an alias or a function reference is a site too.
 /// Residue: the pin clause reads the twins' text, not that
-/// `makeTestCore` reaches the line.
+/// `makeTestCore` reaches the line, and a scan matches one line,
+/// so a name split across lines is unseen.
 @Suite("The touch reader stays one, behind its door")
 struct TouchReaderSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -35,7 +38,7 @@ struct TouchReaderSeamTests {
     @Test("one live factory, pinned inert in both twins")
     func liveFactoryPinned() throws {
         #expect(
-            try Self.files(of: "TouchReader.live(") == [
+            try Self.files(of: "TouchReader.live") == [
                 "TouchGestures.swift"
             ]
         )
@@ -74,8 +77,8 @@ struct TouchReaderSeamTests {
     @Test("the framework's callables are the reader's alone")
     func callablesHaveOneCaller() throws {
         for symbol in [
-            "registerSymbol.function", "unregisterSymbol.function",
-            "startSymbol.function", "stopSymbol.function",
+            "registerSymbol", "unregisterSymbol", "startSymbol",
+            "stopSymbol",
         ] {
             let homes = Set(try Self.files(of: symbol))
             #expect(
