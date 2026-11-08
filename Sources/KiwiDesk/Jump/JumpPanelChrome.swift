@@ -28,11 +28,14 @@ struct JumpFooter: View {
     /// Whether the field names a profile: ↩ saves, Esc goes back,
     /// and no digit picks (#2359).
     var naming = false
+    /// The Desktops side's layer, which picks its hints (#1229).
+    var desktops: DesktopsFooterState?
 
     var body: some View {
         let hints = hints
         ViewThatFits(in: .horizontal) {
-            ForEach((0...hints.count).reversed(), id: \.self) {
+            // A side's leading hints never shed (#1229 ▸ Footer).
+            ForEach((keeps...hints.count).reversed(), id: \.self) {
                 row(Array(hints.prefix($0)))
             }
             // Past every candidate the cue truncates rather than
@@ -69,6 +72,19 @@ struct JumpFooter: View {
         .fixedSize(horizontal: fixed, vertical: false)
     }
 
+    /// How many leading hints never shed: the Desktops side's ↩
+    /// pair, or its three carry keys (#1229); every other side
+    /// sheds them all.
+    var keeps: Int {
+        switch scope {
+        case .desktops:
+            let floor = desktops?.isCarrying == true ? 3 : 2
+            return min(floor, hints.count)
+        case .windows, .shortcuts, .view:
+            return 0
+        }
+    }
+
     /// The side's scroll cue; the View side never scrolls.
     var scrollHint: String? { Self.scrollHint(for: scope) }
 
@@ -81,7 +97,7 @@ struct JumpFooter: View {
                 "shortcuts.panel.scroll_hint",
                 "Scroll for more shortcuts"
             )
-        case .view:
+        case .view, .desktops:
             return nil
         }
     }
@@ -97,6 +113,7 @@ extension JumpFooter {
     /// the digits on View.
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
+        if scope == .desktops { return desktopsLeading }
         // ⌃ is left out: the chord that opened the panel may still
         // be held when it draws.
         let held = modifiers.intersection([.shift, .option, .command])
@@ -163,6 +180,8 @@ extension JumpFooter {
             scope.stepped(forward: true).title
         )
         switch scope {
+        case .desktops:
+            return desktopsHints
         case .windows:
             return [
                 L("jump.footer.jump", "%1$@ Jump", "↩"),

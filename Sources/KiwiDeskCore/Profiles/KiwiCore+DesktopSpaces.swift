@@ -57,6 +57,16 @@ import Foundation
 /// where it carries one, so an entry survives a renumber — which
 /// is what the memory was silently losing.
 extension KiwiCore {
+    /// The Space a Desktop returns to, under either of its keys —
+    /// a read, for the Desktops side's hidden cards (#1229).
+    func rememberedVirtualSpace(
+        of native: SkyLight.SpaceID,
+        in snapshot: DesktopSnapshot
+    ) -> SpaceID? {
+        snapshot.keys(of: native).lazy
+            .compactMap { self.desktopMemory.virtualSpaces[$0] }.first
+    }
+
     /// Records the Space the Desktop being left was showing.
     func rememberVirtualSpace(
         _ space: SpaceID,

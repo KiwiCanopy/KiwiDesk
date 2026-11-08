@@ -15,6 +15,11 @@ final class JumpModel: ObservableObject {
     /// The Shortcuts side's sheet, read fresh on each entry to it
     /// (#2246).
     @Published var shortcuts: ShortcutsSheet?
+    /// The Desktops side's reading and selection, read fresh on
+    /// each entry to it (#1229).
+    @Published var desktops: DesktopsState?
+    /// Its windows' app icons, read with it.
+    @Published var desktopIcons: [pid_t: NSImage] = [:]
     /// The scroll the Shortcuts side's keys last asked for.
     @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
@@ -121,6 +126,15 @@ final class JumpModel: ObservableObject {
     /// landed.
     var onSaveProfile: (String) -> Bool = { _ in true }
     var onKeep: () -> Void = {}
+    /// Reads the whole desk now (#1229).
+    var loadDesktops: () -> DesktopOverview = {
+        DesktopOverview(screens: [], yours: nil)
+    }
+    var loadIcons: (Set<pid_t>) -> [pid_t: NSImage] = { _ in [:] }
+    /// Runs a Desktops pick; the panel closes first.
+    var onDesktopsAction: (DesktopsAction) -> Void = { _ in }
+    /// ⌘, there: Settings ▸ Profiles, whose card binds Desktops.
+    var onDesktopsSettings: () -> Void = {}
     /// ⌘, on the View side: the Settings page of the line.
     var onViewSettings: (ViewPickList.Line, ViewPickList.Item?) -> Void =
         { _, _ in }
@@ -151,6 +165,7 @@ final class JumpModel: ObservableObject {
             case .windows: return list.query
             case .shortcuts: return shortcuts?.query ?? ""
             case .view: return naming?.text ?? view?.query ?? ""
+            case .desktops: return desktops?.query ?? ""
             }
         }
         set {
@@ -168,6 +183,9 @@ final class JumpModel: ObservableObject {
                 return
             case .view:
                 setViewQuery(newValue)
+                return
+            case .desktops:
+                setDesktopsQuery(newValue)
                 return
             }
             list.setQuery(newValue)
@@ -197,6 +215,9 @@ final class JumpModel: ObservableObject {
         case .view:
             handleView(key, repeated: repeated)
             return
+        case .desktops:
+            handleDesktops(key, repeated: repeated)
+            return
         }
         switch key {
         case .step(let delta):
@@ -223,7 +244,8 @@ final class JumpModel: ObservableObject {
             }
         case .dead:
             onDeadKey()
-        case .stepScope, .side, .keep, .settings, .swallow:
+        case .stepScope, .side, .keep, .settings, .swallow, .openSpace,
+            .leaveSpace, .pickUp, .follow:
             break
         }
     }
@@ -238,6 +260,9 @@ final class JumpModel: ObservableObject {
         if scope == .shortcuts {
             shortcuts = ShortcutsSheet(reference: loadShortcuts())
         }
+        // ⇥ or a side switch discards a carry (#1229).
+        desktops = nil
+        if scope == .desktops { enterDesktops() }
         if !list.query.isEmpty { list.setQuery("") }
         view?.setQuery("")
         shortcuts?.setQuery("")
@@ -270,6 +295,7 @@ final class JumpModel: ObservableObject {
         case .windows: return list.selected != nil
         case .shortcuts: return false
         case .view: return view?.selected?.isApplicable == true
+        case .desktops: return desktops?.place != nil
         }
     }
 

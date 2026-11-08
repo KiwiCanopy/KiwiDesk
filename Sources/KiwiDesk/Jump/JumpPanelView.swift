@@ -131,6 +131,27 @@ struct JumpPanelView: View {
                     maxHeight: model.sheetCap
                 )
                 .transition(.opacity)
+            } else if model.scope == .desktops, let state = model.desktops {
+                DesktopsSideView(
+                    state: state,
+                    icons: model.desktopIcons,
+                    maxHeight: model.sheetCap,
+                    onPlace: {
+                        model.clickPlace(
+                            $0,
+                            count: $1,
+                            modifiers: $2,
+                            opens: $3
+                        )
+                    },
+                    onWindow: {
+                        model.clickWindow($0, in: $1, count: $2, modifiers: $3)
+                    },
+                    onMore: { model.clickMore($0, forward: $1) },
+                    onDrop: { model.dropWindows($0, on: $1) },
+                    onSettings: { model.handle(.settings, repeated: false) }
+                )
+                .transition(.opacity)
             } else if let view = model.view {
                 JumpViewSide(
                     list: view,

@@ -6481,7 +6481,7 @@ end)
 **Does:** opens **KiwiHub** on that side, switches to it from
 another side, or closes KiwiHub when it already shows that side.
 Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
-is refused, naming the three.
+is refused, naming the sides it takes.
 
 The `"shortcuts"` side is the read-only **shortcuts panel** — a
 live glance at the active layer's bindings.
@@ -6580,10 +6580,47 @@ Past the end of a line, **←** and **→** go round to its other end,
 and past the last line **↓** comes back to the first, **↑** the
 other way. Holding the key down stops at the end instead.
 
+:::unreleased
+The `"desktops"` side is the **Desktop overview**, the fourth side,
+after View: one row per screen, left to right, each screen's
+Desktops as cards, and on each card the screen's Spaces with their
+windows. A window on a Desktop no screen shows is listed in the
+Space it returns to, or under **Not in a Space yet**, which nothing
+can be moved into. The menu bar's **Show Desktop overview** row
+opens it too, and **Shortcuts & Gestures ▸ KiwiHub** offers a row
+for it with no key set.
+
+- **↑** **↓** **←** **→** choose a Space; **Return** goes there,
+  **⇧Return** moves your window there, **⌃Return** moves it and
+  follows; **⌘1**–**⌘9** go to that Desktop of the row and
+  **⇧⌘1**–**⇧⌘9** move your window there.
+- **⌘↓** opens the Space to choose a window, **⌘↑** goes back.
+  Inside, **Return** jumps to the window, **⇧Return** moves it to
+  the Space KiwiHub's screen shows and **⌥Return** swaps it with
+  yours there.
+- **⌘Return** picks the window up, or puts it back; picked
+  windows ride along while you choose another Space, and
+  **Return** drops them there, **⌃Return** drops them and follows
+  the first, **⌘1**–**⌘9** drop them on that Desktop's shown
+  Space. A window on a Desktop no screen shows, a pocketed one and
+  a full-screen one cannot be picked up.
+- A click on a Space opens it, a double click goes there, and a
+  double click on a Desktop's title goes to that Desktop;
+  **⇧**-click moves,
+  **⌥**-click swaps, **⌘**-click picks up. Dragging an icon onto
+  a Space moves it, and you stay.
+- Typing finds windows by app and title; matches move to the
+  front of their Space and the rest dim.
+- **Escape** steps back: the picked windows, the open Space, the
+  typing, then KiwiHub.
+
+**Tab** reaches it from View, and **⇧Tab** from Windows.
+:::
+
 On every side:
 
 - **Tab** steps to the next side and **⇧Tab** to the one before —
-  Windows, Shortcuts and View, wrapping — clearing the typing.
+  in the switch's order and wrapping — clearing the typing.
 - **Escape** clears the typing, then closes KiwiHub; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 
@@ -6617,7 +6654,7 @@ string; no combo, or `""`, clears it.
 **Does:** makes the combo a second key for that built-in key
 while KiwiHub is open: `"down"` moves the selection down as **↓**
 does, `"page_down"` a page as **Page Down** does. `"left"` and
-`"right"` move only on the View side, as **←** and **→** do;
+`"right"` move only where **←** and **→** do;
 elsewhere their combo types into the search field. The built-in
 keys keep working, holding **⇧** with a combo moves as with the
 arrows, and the combo does nothing outside KiwiHub. While the
@@ -6629,6 +6666,13 @@ Refused, naming the reason: a combo it cannot read; one without
 **Escape**, **Tab**, an arrow or a page key under any modifier;
 **cmd** with a digit or with **S**, **,**, **W**, **A**, **C**,
 **V**, **X** or **Z**; and a combo already set for another key.
+
+:::unreleased
+Four more keys name the Desktop overview's own presses:
+`"open_space"` (**⌘↓**), `"leave_space"` (**⌘↑**), `"pick_up"`
+(**⌘Return**) and `"follow"` (**⌃Return**); their combos act on
+that side alone.
+:::
 
 The keys are the Mac's, not a profile's. Lua-only: no Settings
 row shows them.

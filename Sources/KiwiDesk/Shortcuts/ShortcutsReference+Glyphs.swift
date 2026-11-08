@@ -129,6 +129,9 @@ extension ShortcutsReferenceBuilder {
             return SettingsDestination.shortcuts.symbol
         case KiwiHubSide.view.lua:
             return SettingsDestination.layoutDefaults.symbol
+        // The Desktop overview wears the quick menu row's symbol.
+        case KiwiHubSide.desktops.lua:
+            return "rectangle.3.group"
         // The panel draws KiwiDesk's own icon on this row; a
         // Settings row wears the Settings gear (#2670).
         case KeybindingCatalog.openSettings.lua:

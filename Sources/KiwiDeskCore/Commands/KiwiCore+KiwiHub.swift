@@ -1,12 +1,14 @@
 import Foundation
 
-/// KiwiHub's three sides, in the order of their keys J K L
-/// (#2246, #2265, #2309): the window switcher, the shortcuts panel
-/// and the view picker.
+/// KiwiHub's sides: the window switcher, the shortcuts panel and
+/// the view picker in the order of their keys J K L (#2246, #2265,
+/// #2309), then the Desktop overview (#1229). The order is the
+/// switch's and ⇥'s.
 public enum KiwiHubSide: String, Sendable, CaseIterable, Equatable {
     case windows
     case shortcuts
     case view
+    case desktops
 
     /// The Lua a binding runs to open this side — the one spelling
     /// the seed, the Settings rows and the panel's chord labels

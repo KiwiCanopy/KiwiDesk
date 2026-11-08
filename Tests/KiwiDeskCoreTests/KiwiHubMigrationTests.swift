@@ -30,7 +30,9 @@ struct KiwiHubMigrationTests {
     }
 
     private var migratedRows: [String] {
-        KiwiHubSide.allCases.map(\.lua) + [Self.script]
+        // The three sides the retired verbs opened; the Desktops
+        // side came after them (#1229).
+        [KiwiHubSide.windows, .shortcuts, .view].map(\.lua) + [Self.script]
     }
 
     private func row(

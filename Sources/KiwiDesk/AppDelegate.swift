@@ -113,6 +113,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onOpenKiwiHub = { [weak jumpPanel] in
             jumpPanel?.toggle(.view)
         }
+        statusItem.onOpenDesktopOverview = { [weak jumpPanel] in
+            jumpPanel?.toggle(.desktops)
+        }
         jumpPanel.hold = { [weak self] in self?.coreHold ?? .running }
         // ⌃⌥J/K/L open KiwiHub on a side (#2246, #2265).
         core.uiBridge.onKiwihubShow = { [weak jumpPanel] side in

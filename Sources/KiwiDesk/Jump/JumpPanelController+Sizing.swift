@@ -121,8 +121,12 @@ extension JumpPanelController {
     static func icons(
         for snapshot: JumpSnapshot
     ) -> [pid_t: NSImage] {
+        icons(for: Set(snapshot.entries.map(\.pid)))
+    }
+
+    static func icons(for pids: Set<pid_t>) -> [pid_t: NSImage] {
         var icons: [pid_t: NSImage] = [:]
-        for pid in Set(snapshot.entries.map(\.pid)) {
+        for pid in pids {
             icons[pid] =
                 NSRunningApplication(processIdentifier: pid)?.icon
         }

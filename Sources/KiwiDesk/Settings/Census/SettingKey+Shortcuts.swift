@@ -39,9 +39,10 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
         "keybinding.move_to_desktop_follow (x N)"
     /// Next / previous layout of the focused Space (#453).
     case layoutCycle = "keybinding.{next,previous}_layout"
-    /// KiwiHub's View side, its Layout line at the pointer (#762,
-    /// #2309).
+    /// KiwiHub's View side, its Layout line at the pointer (#762, #2309).
     case viewPicker = "keybinding.show_view_picker"
+    /// KiwiHub's Desktops side (#1229).
+    case desktopOverview = "keybinding.show_desktop_overview"
     /// The layouts the cycle walks (#453).
     case modeCycle = "config.modeCycle"
     /// The plate shown after a cycle (#2144): app-wide (#1741).
@@ -121,7 +122,7 @@ extension ShortcutsKey {
         // One card for what shows and hides: KiwiHub's sides
         // (#2265), the bars (#761), KiwiVision and its lenses.
         case .jumpToWindow, .showShortcuts, .viewPicker,
-            .toggleSpaceBar, .toggleAppBar,
+            .desktopOverview, .toggleSpaceBar, .toggleAppBar,
             .toggleKiwiVision, .toggleLens:
             return .row(.shortcuts, .showHide, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
@@ -223,13 +224,12 @@ extension ShortcutsKey {
         case .kiwiHubNavigationKeys:
             return .none
         case .layers, .openApplications, .pocketApps, .advanced,
-            .focusDir,
-            .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
-            .swapDir,
-            .moveWindowToTrack, .swapWithTrack,
+            .focusDir, .screenLast, .spaceStep, .spaceHistoryStep,
+            .goToSpace, .swapDir, .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
-            .layoutCycle, .viewPicker, .jumpToWindow, .toggleLens:
+            .layoutCycle, .viewPicker, .desktopOverview, .jumpToWindow,
+            .toggleLens:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

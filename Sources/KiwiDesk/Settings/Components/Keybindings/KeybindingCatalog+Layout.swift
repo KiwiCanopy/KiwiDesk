@@ -29,6 +29,16 @@ extension KeybindingCatalog {
         }
     )
 
+    /// The Desktop overview, KiwiHub's Desktops side (#1229): no
+    /// seeded chord yet; ⇥, the quick menu and Lua reach it.
+    static let showDesktopOverview = NavCommand(
+        label: "Show Desktop overview",
+        lua: KiwiHubSide.desktops.lua,
+        displayLabel: {
+            L("keybinding.show_desktop_overview", "Show Desktop overview")
+        }
+    )
+
     /// The layout cycle's rows (#453).
     static let layoutCycleRows: [NavCommand] = [
         nextLayout,

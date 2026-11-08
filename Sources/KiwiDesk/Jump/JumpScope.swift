@@ -2,11 +2,12 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiHub's three sides (#2229, #2246, #2265, #2309): the window
+/// KiwiHub's sides (#2229, #2246, #2265, #2309, #1229): the window
 /// switcher's list, the shortcuts sheet and the view picker's
-/// lines, one field above all three, in the order of their keys
-/// J K L. ⇥ steps forward and ⇧⇥ back, wrapping, and each side's
-/// own shortcut reaches it while the panel is up. One enum with
+/// lines in the order of their keys J K L, then the Desktop
+/// overview, one field above all of them. ⇥ steps forward and ⇧⇥
+/// back, wrapping, and each side's own shortcut reaches it while
+/// the panel is up. One enum with
 /// Core's, so the panel and `kiwihub.show` cannot map a side two
 /// ways.
 typealias JumpScope = KiwiHubSide
@@ -32,6 +33,7 @@ extension KiwiHubSide {
         case .shortcuts:
             return L("jump.scope.shortcuts", "Shortcuts")
         case .view: return L("jump.scope.view", "View")
+        case .desktops: return L("jump.scope.desktops", "Desktops")
         }
     }
 
@@ -50,6 +52,8 @@ extension KiwiHubSide {
             return L("shortcuts.panel.ax_label", "Shortcuts panel")
         case .view:
             return L("view_picker.panel.ax_label", "View picker")
+        case .desktops:
+            return L("desktop_overview.panel.ax_label", "Desktop overview")
         }
     }
 
@@ -64,6 +68,8 @@ extension KiwiHubSide {
                 "view_picker.field.label",
                 "Search layouts, profiles and lenses"
             )
+        case .desktops:
+            return L("desktop_overview.field.label", "Search windows")
         }
     }
 }

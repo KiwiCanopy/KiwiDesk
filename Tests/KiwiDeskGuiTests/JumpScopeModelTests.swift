@@ -94,10 +94,15 @@ struct JumpScopeModelTests {
         #expect(model.shortcuts?.query == "")
         model.query = "mon"
         model.handle(.stepScope(forward: true), repeated: false)
-        #expect(model.scope == .windows)
+        #expect(model.scope == .desktops)
         #expect(model.view?.query == "")
+        // The Desktop overview follows View (#1229).
+        model.query = "saf"
+        model.handle(.stepScope(forward: true), repeated: false)
+        #expect(model.scope == .windows)
+        #expect(model.desktops == nil)
         model.handle(.stepScope(forward: false), repeated: false)
-        #expect(model.scope == .view)
+        #expect(model.scope == .desktops)
     }
 
     /// Profile and KiwiVision need no Space, so the side opens

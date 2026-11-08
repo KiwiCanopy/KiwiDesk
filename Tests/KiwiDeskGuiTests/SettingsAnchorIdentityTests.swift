@@ -126,6 +126,12 @@ struct SettingsAnchorIdentityTests {
         // Scroll identity: the Look line's follow, as the layout
         // strip's (#2987).
         "SimpleLookCard.swift": 1,
+        // Scroll identity: KiwiHub's Desktops side scrolls its
+        // selected screen row, card and line into view (#1229). Not
+        // a Settings destination, so nothing there is a reveal
+        // target.
+        "DesktopsSideView.swift": 2,
+        "DesktopCardView.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

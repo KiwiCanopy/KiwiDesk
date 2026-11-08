@@ -49,6 +49,8 @@ struct ScrollSlotReleaseSeamTests {
         "Layouts/TrackLayout+SpaceState.swift": 4,
         // A local copy of a quit-grid group, not a Space.
         "App/KiwiCore+Teardown.swift": 2,
+        // KiwiHub's Desktops reading, a snapshot, not a Space (#1229).
+        "App/DesktopOverview.swift": 1,
     ]
 
     /// Occurrences of `needle` in `source` that are writes: a

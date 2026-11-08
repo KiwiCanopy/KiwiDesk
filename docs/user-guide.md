@@ -985,13 +985,12 @@ reach it, and Shortcuts & Gestures can give it a key of its own.
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J`, `⌃⌥K`
 and `⌃⌥L` open **KiwiHub**
-([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel with
-three sides, listed together under Shortcuts & Gestures ▸ KiwiHub:
+([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel whose
+sides are listed together under Shortcuts & Gestures ▸ KiwiHub:
 `⌃⌥J` the **window switcher**, `⌃⌥K` the **shortcuts panel**, where
 typing searches your shortcuts, and `⌃⌥L` the **view picker**,
 which switches the layout of the space under the pointer, the
-profile and KiwiVision. `Tab` and `⇧Tab` step through the three
-sides.
+profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
 `⌃⌥R` returns the focused space's sizes to what your profile set
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),

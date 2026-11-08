@@ -155,7 +155,8 @@ struct JumpFooterFitTests {
             )
         )
         #expect(chrome.contains("ViewThatFits(in: .horizontal)"))
-        #expect(chrome.contains("(0...hints.count).reversed()"))
+        // Every hint sheds, but a side's `keeps` floor (#1229).
+        #expect(chrome.contains("(keeps...hints.count).reversed()"))
         // The last candidate, which ViewThatFits takes when none
         // fits, truncates instead of spilling.
         let chars = Array(chrome)

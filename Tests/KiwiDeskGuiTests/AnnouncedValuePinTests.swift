@@ -157,6 +157,8 @@ struct AnnouncedValuePinTests {
         "SettingsHeaderBar+Simple.swift": 1,
         // The switch-to-Shared prompt's question (#2820).
         "LookShareSheet.swift": 1,
+        // KiwiHub's Desktops side: each screen row's name (#1229).
+        "DesktopsSideView.swift": 1,
     ]
 
     @Test("title components are rotor headings")

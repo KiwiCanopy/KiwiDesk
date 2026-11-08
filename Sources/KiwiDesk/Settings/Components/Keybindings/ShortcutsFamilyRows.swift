@@ -81,6 +81,8 @@ struct ShortcutsFamilyRows {
             return KeybindingCatalog.layoutCycleRows
         case .viewPicker:
             return [KeybindingCatalog.showLayoutPicker]
+        case .desktopOverview:
+            return [KeybindingCatalog.showDesktopOverview]
         case .jumpToWindow:
             return [KeybindingCatalog.jumpToWindow]
         case .toggleKiwiVision:

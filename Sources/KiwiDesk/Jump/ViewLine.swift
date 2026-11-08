@@ -4,9 +4,10 @@ import SwiftUI
 /// One line of the View side (#2309 ruling 3): it never wraps; a
 /// line longer than the panel scrolls sideways, keeps the
 /// selection in view and fades at each edge it cuts.
-struct ViewLine<Content: View>: View {
+/// The Desktops side's screen rows take it too (#1229).
+struct ViewLine<Selected: Hashable, Content: View>: View {
     /// The selected item's id, where it is on this line.
-    let selected: ViewPickList.Pick?
+    let selected: Selected?
     @ViewBuilder let content: Content
 
     @State private var offset: CGFloat = 0

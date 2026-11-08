@@ -812,13 +812,22 @@ moves the focused Space to the next layout in its cycle list;
 
 `kiwihub.show` takes `windows`, `shortcuts` or `view` and opens
 KiwiHub on that side, so a launcher reaches it without a shortcut;
-any other side is refused, naming the three. See
+any other side is refused, naming the sides it takes. See
 [kiwihub.show](lua-reference.md#kiwihubshow).
+
+:::unreleased
+It also takes `desktops`, the Desktop overview.
+:::
 
 `kiwihub.set_key` takes a built-in KiwiHub key (`up`, `down`,
 `page_up`, `page_down`, `left`, `right`) and a combo, and makes the
 combo a second key for it while KiwiHub is open; no combo clears it.
 See [kiwihub.set_key](lua-reference.md#kiwihubset_key).
+
+:::unreleased
+It also takes `open_space`, `leave_space`, `pick_up` and
+`follow`, the Desktop overview's own keys.
+:::
 
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
