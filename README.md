@@ -72,6 +72,10 @@ Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** — the
 same signed, notarized app; the cask additionally puts the `kiwidesk`
 CLI on your `PATH`. Either way KiwiDesk checks for updates itself.
 
+With Nix, the [KiwiCanopy flake](https://github.com/KiwiCanopy/nix)
+installs the same app through Home Manager (`programs.kiwidesk`), CLI
+included. That copy updates with `home-manager switch`.
+
 On first launch a wizard walks you through the Accessibility
 permission; nothing moves until you press **Start Tiling**. Everything past
 that — Settings, the CLI, Lua — is in the

@@ -54,6 +54,11 @@ the cask additionally puts the `kiwidesk` CLI on your `PATH`,
 which [the CLI page](cli.md) shows how to link after a `.dmg`
 install. Either way KiwiDesk checks for updates itself.
 
+With Nix, the [KiwiCanopy flake](https://github.com/KiwiCanopy/nix)
+installs the same app through Home Manager (`programs.kiwidesk`),
+with the CLI on your `PATH`. That copy updates with
+`home-manager switch`, and Settings says so.
+
 The [User Guide](user-guide.md) covers the starter setup,
 **Start at login**, and the Accessibility permission under
 [Troubleshooting](user-guide.md#troubleshooting). If windows stop
