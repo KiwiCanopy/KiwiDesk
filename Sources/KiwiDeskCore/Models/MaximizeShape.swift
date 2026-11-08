@@ -17,16 +17,24 @@ public enum MaximizeAnchor: String, Codable, Sendable, CaseIterable {
 }
 
 /// A Space's Maximize (#2448): the window filling its screen (a
-/// traveler's too, #3035) and what it fills (#3062), one value so an
-/// ender's `maximized = nil` clears both. Session-only; read through
-/// `StateCoordinator.maximizedWindow(of:)` and `maximizedShape(of:)`.
+/// traveler's too, #3035), what it fills (#3062) and whether it
+/// moves with focus (#3063, stamped at the make), one value so an
+/// ender's `maximized = nil` clears all three. Session-only; read
+/// through `StateCoordinator.maximizedWindow(of:)` and
+/// `maximizedShape(of:)`.
 public struct Maximize: Equatable, Sendable {
     public var window: WindowID
     public var shape: MaximizeShape
+    public var follows: Bool
 
-    public init(window: WindowID, shape: MaximizeShape = .full) {
+    public init(
+        window: WindowID,
+        shape: MaximizeShape = .full,
+        follows: Bool = false
+    ) {
         self.window = window
         self.shape = shape
+        self.follows = follows
     }
 }
 
