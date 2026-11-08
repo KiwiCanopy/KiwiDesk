@@ -18,7 +18,8 @@ extension KiwiCore {
             window.isFloating = false
             return .windowCreated(window)
         case .windowFloatChanged(let id, isFloating: true):
-            let pid = state.windows[id]?.pid
+            // A window a hide dropped is no verdict on its Tile.
+            guard let pid = state.windows[id]?.pid else { return event }
             return tileOverRuleStands(id, pid: pid) ? nil : event
         default:
             return event
@@ -35,7 +36,11 @@ extension KiwiCore {
             tileRefusal(of: id) == .rule
         else {
             state.tiledOverRule[id] = nil
-            onLog("float: w\(id.raw) Tile over a rule ended")
+            let reason = tileRefusal(of: id).map { $0.wireName } ?? "none"
+            onLog(
+                "float: w\(id.raw) Tile over a rule ended "
+                    + "(reason \(reason), pid \(pid.map(String.init) ?? "-"))"
+            )
             return false
         }
         return true

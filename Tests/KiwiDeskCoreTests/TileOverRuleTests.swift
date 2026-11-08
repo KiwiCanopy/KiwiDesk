@@ -94,6 +94,20 @@ struct TileOverRuleTests {
         #expect(core.state.tilesOverRule(id))
     }
 
+    /// Hiding the active app drops the window, and a float report
+    /// for it can land after the drop (device, 2026-11-08): it
+    /// judges nothing, so the Tile is back at the unhide.
+    @Test("a float report for a hidden window keeps the Tile")
+    func reportWhileHiddenKeeps() {
+        let core = tiledOverRule()
+        core.handle(.windowHidden(id))
+        core.eventLoop.detectedFloating[id] = nil
+        core.handle(.windowFloatChanged(id, isFloating: true))
+        #expect(core.state.tiledOverRule[id] == pid)
+        arrive(core, .floats(.rule))
+        #expect(floats(core) == false)
+    }
+
     /// A changed guess forgets the verdict (`rejudgeGuesses`), and
     /// the next recheck reports the rule's float again.
     @Test("a forgotten verdict's recheck keeps the Tile")
