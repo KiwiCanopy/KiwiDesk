@@ -89,7 +89,9 @@ extension KiwiCore {
         // resize (classified via the recent press near a
         // slot edge) start the gesture even after the
         // release.
+        // A modifier grab feeds its own writes (#2447).
         if gesture {
+            guard !modifierGrabOwns(id) else { return }
             drag.windowMoved(
                 id,
                 frame: frame,

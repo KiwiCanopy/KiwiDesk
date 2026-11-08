@@ -128,7 +128,7 @@ extension KiwiCore {
     /// An own overlay the pointer passes through — a ring, a
     /// mark, a cue, the KiwiVision plate — rather than a window it
     /// rests on.
-    private static func ignoresPointer(number: Int) -> Bool {
+    static func ignoresPointer(number: Int) -> Bool {
         EventLoop.ownWindow(number: number)?.ignoresMouseEvents
             == true
     }

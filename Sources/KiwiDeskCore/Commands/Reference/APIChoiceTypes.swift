@@ -56,3 +56,4 @@ extension ShelfVisibility: APIChoiceType {}
 extension BorderStyle.CornerStyle: APIChoiceType {}
 extension BorderStyle.DrawOrder: APIChoiceType {}
 extension ScrollInput: APIChoiceType {}
+extension ModifierDragStart: APIChoiceType {}

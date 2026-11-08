@@ -207,6 +207,24 @@ extension APIReference {
         ),
     ]
 
+    static let modifierDragRecords: [String: APIRecord] = [
+        "set_move": APIRecord(
+            "Sets the modifiers that move the window under the "
+                + "pointer, like \"control+command\"; \"\" is off. "
+                + "The start, drag or hover, says whether a click "
+                + "begins it.",
+            .text("modifiers"),
+            .choice("start", ModifierDragStart.self, optional: true)
+        ),
+        "set_resize": APIRecord(
+            "Sets the modifiers that resize the window under the "
+                + "pointer from its nearest corner or edge; \"\" is "
+                + "off.",
+            .text("modifiers"),
+            .choice("start", ModifierDragStart.self, optional: true)
+        ),
+    ]
+
     static let quitRecords: [String: APIRecord] = [
         "set_layout": APIRecord(
             "Sets how windows are laid out when KiwiDesk quits.",

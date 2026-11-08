@@ -4,19 +4,21 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The one scroll-wheel event tap stays one, scroll-only, off the
-/// main actor and out of the test run (#1656, #1519).
+/// The event taps stay three, each narrow, off the main actor and
+/// out of the test run (#1656, #1519, #2601, #2447).
 ///
 /// What each clause keeps, because a behavioural suite over the
 /// `FakeTap` sees none of it:
-/// - ONE `tapCreate(` per tap file, the scroll tap's and #2601's
-///   keyboard tap's: a third tap, or a mask widened past its
-///   constant, asks macOS for more than these do (measured
-///   2026-09-28 and 2026-10-25).
+/// - ONE `tapCreate(` per tap file, the scroll tap's, #2601's
+///   keyboard tap's and #2447's pointer tap's: a fourth tap, or a
+///   mask widened past its constants, asks macOS for more than
+///   these do (measured 2026-09-28, 2026-10-25 and 2026-11-08). A
+///   consumer that must swallow a pointer event joins the pointer
+///   tap rather than adding a file here.
 /// - the install runs inside `start`'s own `Thread`: every scroll
 ///   on the Mac waits on the callback, and a tap on the main run
 ///   loop stalls them behind a slow app's AX reply.
-/// - ONE live factory, in `ScrollGestures`, pinned inert in both
+/// - ONE live factory per tap, pinned inert in both
 ///   `makeTestCore` twins — the #565 class: a suite that binds a
 ///   gesture would otherwise take a session-wide tap.
 ///
@@ -24,7 +26,7 @@ import Testing
 /// inside the closure `start` hands its `Thread` — not what thread
 /// `CFRunLoopRun` then serves; and the pin clause reads the twins'
 /// text, not that `makeTestCore` reaches the line.
-@Suite("The event taps stay two, narrow and off-main")
+@Suite("The event taps stay three, narrow and off-main")
 struct ScrollTapSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let productionTrees = [
@@ -43,18 +45,22 @@ struct ScrollTapSeamTests {
         }
     }
 
-    @Test("two event taps in the app, one per tap file")
+    @Test("three event taps in the app, one per tap file")
     func oneTapPerFile() throws {
         // `tapCreate` without its `(` also catches `tapCreateForPid(`
         // and `tapCreateForPSN(`; `EventTapCreate` the C spelling.
         // The keyboard tap is #2601's, which every key reader joins
-        // as a consumer (#1872).
+        // as a consumer (#1872); the pointer tap #2447's, shared by
+        // its consumers.
         let sites =
             try Self.sites(of: "tapCreate")
             + Self.sites(of: "EventTapCreate")
         #expect(
             sites.map(\.file.lastPathComponent).sorted()
-                == ["KeyboardTap.swift", "ScrollGestureTap.swift"],
+                == [
+                    "KeyboardTap.swift", "PointerTap.swift",
+                    "ScrollGestureTap.swift",
+                ],
             .init(rawValue: sites.map(\.site).joined(separator: ", "))
         )
     }
@@ -75,6 +81,12 @@ struct ScrollTapSeamTests {
                 "KeyboardTap.swift", "Keys",
                 Self.root.appendingPathComponent(
                     "Sources/KiwiDeskCore/Keys/KeyboardTap.swift"
+                )
+            ),
+            (
+                "PointerTap.swift", "Events",
+                Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Events/PointerTap.swift"
                 )
             ),
         ]
@@ -131,6 +143,10 @@ struct ScrollTapSeamTests {
             (
                 "KeyboardTap.live(", "KeybindingManager.swift",
                 "keys.makeKeyboardTap = { _, _, _ in nil }"
+            ),
+            (
+                "PointerTap.live(", "PointerConsumers.swift",
+                "mouse.pointer.makeTap = { _, _ in nil }"
             ),
         ]
         for (factory, home, pin) in factories {
@@ -191,5 +207,38 @@ struct ScrollTapSeamTests {
         #expect(
             KeyboardTapConsumer.options([.sides, .modifierTaps]) == .defaultTap
         )
+    }
+
+    @Test("the pointer tap takes the union of its consumers' masks")
+    func pointerMask() throws {
+        let file = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/Events/PointerTap.swift"
+        )
+        let source = try SourceScan.strippedSource(at: file)
+        // The tap is created over the mask it was built with, and
+        // the front builds that from the live consumers alone.
+        #expect(source.contains("eventsOfInterest: mask"))
+        #expect(source.components(separatedBy: "eventsOfInterest:").count == 2)
+        let front = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/Events/PointerConsumers.swift"
+            )
+        )
+        #expect(
+            front.contains("live.reduce(CGEventMask(0)) { $0 | $1.mask }")
+        )
+        // The grab's value: the left-button trio and the moves with
+        // their modifier changes — the set the tccd log measured.
+        let types: [CGEventType] = [
+            .leftMouseDown, .leftMouseDragged, .leftMouseUp,
+            .mouseMoved, .flagsChanged,
+        ]
+        #expect(
+            PointerConsumers.grabMask
+                == types.reduce(0) { $0 | CGEventMask(1) << $1.rawValue }
+        )
+        for consumer in PointerConsumers.Consumer.allCases {
+            #expect(consumer.mask != 0, "\(consumer)")
+        }
     }
 }

@@ -56,6 +56,7 @@ extension KiwiCore {
             // defaults, the profile's override dropped with the
             // rest of its state on this branch.
             applyScrollGestures(profile: nil)
+            applyModifierDrag()
             applySpaceHistory(profile: nil)
             applyFocusWrap(profile: nil)
             return
@@ -181,6 +182,7 @@ extension KiwiCore {
         }
         retirePlaceholderSpace()
         applyScrollGestures(profile: mouse.scroll.profileOverride)
+        applyModifierDrag()
         retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON
@@ -235,6 +237,7 @@ extension KiwiCore {
         // `init.lua`'s scroll_gesture verbs declare the base anew;
         // the load's tail configures the tap once.
         resetScrollGestureInputs()
+        modifierDragBase = .defaults
         spaceHistory.base = .defaultKind
         spaceHistory.profileOverride = nil
         modeCycle = ModeCycleState()

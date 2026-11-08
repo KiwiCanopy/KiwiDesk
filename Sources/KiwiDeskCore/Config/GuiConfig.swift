@@ -49,6 +49,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The scroll gestures' global base (#1656); a profile
     /// diverges through `Profile.scrollGesture`.
     public var scrollGesture: ScrollGestureBase = .defaults
+    /// The modifier drags (#2447); global, no profile override.
+    public var modifierDrag: ModifierDragSettings = .defaults
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
@@ -120,6 +122,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case ignoreRules = "ignore_rules"
         case layers
         case scrollGesture = "scroll_gesture"
+        case modifierDrag = "modifier_drag"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
         case focusWrap = "focus_wrap"
@@ -193,6 +196,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.decodeIfPresent(
                 ScrollGestureBase.self,
                 forKey: .scrollGesture
+            ) ?? .defaults
+        // Additive since #2447: absence is the defaults.
+        modifierDrag =
+            try container.decodeIfPresent(
+                ModifierDragSettings.self,
+                forKey: .modifierDrag
             ) ?? .defaults
         // Additive since #1655: absence is the default.
         spaceHistory =
@@ -302,6 +311,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(ignoreRules, forKey: .ignoreRules)
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
+        try container.encode(modifierDrag, forKey: .modifierDrag)
         try container.encode(spaceHistory, forKey: .spaceHistory)
         try container.encode(modeCycle, forKey: .modeCycle)
         try container.encode(focusWrap, forKey: .focusWrap)
