@@ -42,6 +42,8 @@ struct DesktopsSideCeilingTests {
         let cap = model.sheetCap
         let whole = DesktopsSideView.height(rows: 2, cap: .infinity)
         #expect(DesktopsSideView.height(rows: 2, cap: cap) == whole)
+        // Whole means each row's own height at least.
+        #expect(whole >= 2 * DesktopsSideView.rowHeight)
         #expect(height >= whole + JumpPanelView.fieldHeight, "\(height)")
         #expect(height <= JumpPanelController.maxPanelHeight, "\(height)")
     }

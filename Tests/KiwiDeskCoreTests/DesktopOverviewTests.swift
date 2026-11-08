@@ -24,7 +24,13 @@ struct DesktopOverviewTests {
             core,
             [
                 authorityDisplay(1, "Built-in"),
-                authorityDisplay(2, "DELL", x: -100),
+                // Left of Built-in and below it: left to right comes
+                // first, so a sort by height alone reds.
+                Display(
+                    id: DisplayID(2),
+                    name: "DELL",
+                    frame: CGRect(x: -100, y: -50, width: 100, height: 100)
+                ),
             ]
         )
         for space in ["1", "2", "5"] {
