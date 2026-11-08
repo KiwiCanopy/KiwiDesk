@@ -9,6 +9,8 @@ import Foundation
 extension KiwiCore {
     func handle(_ event: KiwiEvent) {
         tiler.meter.add(\.events)  // #1508
+        // A Tile over a rule, ahead of every reader (#2975).
+        guard let event = applyingTileOverRule(event) else { return }
         noteVisionMaskEvent(event)
         // `state.apply` folds the event in and hands back the
         // facts the write erases — the gone window's app / space /

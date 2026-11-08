@@ -63,12 +63,14 @@ extension AppRulesSection {
         var text = L(
             "app_rules.float.help",
             "Floating takes this app's matching windows out "
-                + "of tiling: each keeps its last position "
-                + "and size and stays above the tiled "
+                + "of tiling as they open: each keeps its last "
+                + "position and size and stays above the tiled "
                 + "windows, instead of snapping into one "
-                + "Space's grid.\n\nThis is per-app floating "
+                + "Space's grid. **%1$@** tiles one of them "
+                + "until it closes.\n\nThis is per-app floating "
                 + "— not the **Floating** layout mode, which "
-                + "floats every window in a Space."
+                + "floats every window in a Space.",
+            L("bar.menu.tile_window", "Tile Window")
         )
         // Unlike the Space list, a float rule reaches windows
         // already open: a Save reloads the config, which re-checks

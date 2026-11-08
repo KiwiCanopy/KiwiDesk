@@ -49,7 +49,7 @@ extension KiwiCore {
     }
 
     /// Empties `id`'s slot and tiles it on the active Space, as a
-    /// Tile does (owner, #2680); a window detection floats stays a
+    /// Tile does (owner, #2680); a window a Tile refuses stays a
     /// float. Only an out window holds the focus the verb reads.
     func unmarkPocketWindow(_ id: WindowID) {
         state.releasePocketWindow(id)
@@ -60,7 +60,9 @@ extension KiwiCore {
         }
         onLog("pocket: w\(id.raw) unmarked")
         refreshStickyReach()
-        guard tileRefusal(of: id) == nil else { return retile() }
+        guard tileRefusal(of: id)?.refusesTile != true else {
+            return retile()
+        }
         _ = setFloating(id, false)
     }
 }

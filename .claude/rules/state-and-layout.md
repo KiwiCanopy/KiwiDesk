@@ -954,8 +954,8 @@ editing here:
     `fallbackPlacesBeforeThePark`). Emptying the slot is
     `releasePocketWindow`, for a quit and an unmark alike; the unmark's filing goes through
     `fileMembership`, and it then tiles through the Tile's own
-    `setFloating` unless `tileRefusal` names a reason (#2680,
-    `PocketWindowTests` ▸ `unmarks`).
+    `setFloating` unless the reason `tileRefusal` names
+    `refusesTile` (#2680, #2975, `PocketWindowTests` ▸ `unmarks`).
 
   The argument is `docs/design-decisions.md` ▸ *The pocket is one
   slot beside the Spaces, not a Space*.
@@ -2441,6 +2441,33 @@ editing here:
   fold, the reopen memory, the in-place restore;
   `TileReturnsToRulesTests`); the argument is
   `docs/design-decisions.md`'s.
+  **A Tile over a float rule is a per-window record, never a user
+  float (#2975).** Whether a reason refuses a Tile is the one
+  `AutoFloatReason.refusesTile`, asked by the verb, the menu row
+  (`tileRefused`), `explain_window` and the pocket's unmark, never
+  a comparison with `.rule` beside them to decide a refusal; a
+  `.rule` comparison decides only whether the record applies. The
+  record is `StateCoordinator.tiledOverRule`, keyed by id with its
+  pid, and never stands beside a user float: `setFloating` and the
+  pocket's writes end it, the reopen memory refuses beside it, and
+  a new writer of `userFloated` joins `TileRefusalSeamTests`'
+  census of them with its answer. A new ender of `floatFrames` ends it through
+  `forgetFloatMemory`, which is review's, since nothing counts the
+  enders; a re-key moves it with them. Its one applier is
+  `KiwiCore.applyingTileOverRule`, at the head of `handle` ahead of
+  the fold, which keeps a re-adoption or a rule's float tiled and
+  ends the record on any reason that refuses a Tile — so the event
+  loop emits a reason change leaving `.rule` over a record, and the
+  #2572 latch keeps the rule's verdict over one, both through
+  `EventLoop.tilesOverRule`. A record outlives a rule removed while
+  the window stays tiled, so that rule re-added is not obeyed until
+  the window closes (the ruling's residue). The in-place capture
+  alone carries it, for windows tracked at the replay
+  (`WindowSession.tiledOverRule`, key `tiled_over_rule`, a stored
+  shape;
+  `TileOverRuleCarryTests` ▸ `keyIsPinned`), so a crash re-floats; and
+  `TileRefusalSeamTests` holds the predicate's callers and the
+  reader's place ahead of the fold.
 - **A float safety NET asks `EffectiveFloat.applies`, never the
   flag alone** (#1178). `FloatingLayout` assigns no frames, so a
   `.floating` space's members are unmanaged in exactly the way a

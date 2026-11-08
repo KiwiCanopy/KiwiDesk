@@ -891,6 +891,11 @@ use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
 or a float rule floats
 ([`make_tiled`](lua-reference.md#make_tiled)).
 
+:::unreleased
+A float rule's window is the exception
+([`make_tiled`](lua-reference.md#make_tiled)).
+:::
+
 `set_float_placement` replaces `set_float_nudge`: a saved setting
 that had the nudge off becomes `keep`, and a call to
 `set_float_nudge` fails naming its replacement.

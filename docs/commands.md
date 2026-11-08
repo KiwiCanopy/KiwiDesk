@@ -31,7 +31,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`create_space`](lua-reference.md#create_space) | Makes a Space; temporary unless scope is profile, which may take the optional mode's place. |
 | [`delete_space`](lua-reference.md#delete_space) | Removes a Space after rehoming its windows; scope profile removes it from the profile too. |
 | [`make_floating`](lua-reference.md#make_floating) | Marks the focused window, or the one a window id names, as floating above the tiles. |
-| [`make_tiled`](lua-reference.md#make_tiled) | Tiles the focused or named window; refused where a float rule or detection floats it. |
+| [`make_tiled`](lua-reference.md#make_tiled) | Tiles the focused or named window, a float rule's too; refused where detection floats it. |
 | [`toggle_floating`](lua-reference.md#toggle_floating) | Flips the focused or named window between floating and tiled, refused as make_tiled is. |
 | [`new_window`](lua-reference.md#new_window) | Asks the focused or named window's app for a new window; success means asked. |
 | [`close_window`](lua-reference.md#close_window) | Presses the focused or named window's close button; success means asked. |

@@ -101,7 +101,7 @@
   "app_rules.dash": "—",
   "app_rules.empty": "Le app senza regola si aprono nello spazio in cui le apri e si affiancano, a meno che non fluttuino automaticamente.",
   "app_rules.float": "Fluttuazione",
-  "app_rules.float.help": "La fluttuazione toglie le finestre corrispondenti di questa app dall'affiancamento: ciascuna mantiene la sua ultima posizione e dimensione e resta sopra le finestre affiancate, invece di incastrarsi nella griglia di uno spazio.\n\nQuesta è fluttuazione per app, non la modalità di layout **Floating**, che fa fluttuare tutte le finestre di uno spazio.",
+  "app_rules.float.help": "La fluttuazione toglie le finestre corrispondenti di questa app dall'affiancamento appena si aprono: ciascuna mantiene la sua ultima posizione e dimensione e resta sopra le finestre affiancate, invece di incastrarsi nella griglia di uno spazio. Il comando **%1$@** affianca una di esse finché non viene chiusa.\n\nQuesta è fluttuazione per app, non la modalità di layout **Floating**, che fa fluttuare tutte le finestre di uno spazio.",
   "app_rules.float.help.open_windows": "Si applica alle finestre aperte non appena salvi. Una finestra che hai fatto fluttuare a mano continua a fluttuare finché non la affianchi.",
   "app_rules.float.none": "Non fluttua",
   "app_rules.float.remove.help": "Non far più fluttuare questa app",
