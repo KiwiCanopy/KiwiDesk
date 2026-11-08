@@ -40,6 +40,21 @@ extension SettingsValueReadout {
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
             return scrollGestureRows(key, old: old, new: new)
+        case .modifierDragMove, .modifierDragResize:
+            let action: ModifierDragAction =
+                key == .modifierDragMove ? .move : .resize
+            return [
+                .change(
+                    census,
+                    label: GesturesModifierDragRows.label(action),
+                    old: GesturesModifierDragRows.value(
+                        old.modifierDrag[action]
+                    ),
+                    new: GesturesModifierDragRows.value(
+                        new.modifierDrag[action]
+                    )
+                )
+            ]
         case .shortcutBase:
             return [
                 .change(

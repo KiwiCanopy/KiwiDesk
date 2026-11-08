@@ -49,7 +49,8 @@ struct GuiConfigParityTests {
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
-                "scrollGesture", "appWide", "look", "spaceHistory",
+                "scrollGesture", "modifierDrag", "appWide", "look",
+                "spaceHistory",
                 "modeCycle", "focusWrap",
                 "floatAutomatically", "tileRules",
                 "shortcutBase", "shortcutOffer",
@@ -100,6 +101,13 @@ struct GuiConfigParityTests {
             naturalMouse: false,
             longSwipes: true,
             stepDistance: 120
+        )
+        config.modifierDrag = ModifierDragSettings(
+            move: ModifierDragBinding(chord: [.option, .command]),
+            resize: ModifierDragBinding(
+                chord: [.control, .shift],
+                start: .hover
+            )
         )
         config.spaceHistory = .allScreens
         config.modeCycle = [.grid, .monocle]

@@ -210,16 +210,13 @@ extension APIReference {
     static let modifierDragRecords: [String: APIRecord] = [
         "set_move": APIRecord(
             "Sets the modifiers that move the window under the "
-                + "pointer, like \"control+command\"; \"\" is off. "
-                + "The start, drag or hover, says whether a click "
-                + "begins it.",
+                + "pointer, and whether a click starts it.",
             .text("modifiers"),
             .choice("start", ModifierDragStart.self, optional: true)
         ),
         "set_resize": APIRecord(
             "Sets the modifiers that resize the window under the "
-                + "pointer from its nearest corner or edge; \"\" is "
-                + "off.",
+                + "pointer from its nearest corner.",
             .text("modifiers"),
             .choice("start", ModifierDragStart.self, optional: true)
         ),

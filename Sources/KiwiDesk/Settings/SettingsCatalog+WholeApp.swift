@@ -233,6 +233,14 @@ struct GesturesControls: Sendable {
         "behavior.mouse.resize_action",
         "Mouse resize action"
     )
+    let modifierDragMove = SettingsControl(
+        "shortcuts.gestures.modifier_drag.move",
+        "Move windows from anywhere"
+    )
+    let modifierDragResize = SettingsControl(
+        "shortcuts.gestures.modifier_drag.resize",
+        "Resize windows from anywhere"
+    )
     let hoverFocus = SettingsControl(
         "behavior.mouse.hover_focus",
         "Focus the window the pointer rests on"

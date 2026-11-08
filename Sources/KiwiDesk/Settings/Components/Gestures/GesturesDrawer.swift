@@ -128,6 +128,8 @@ struct GesturesDrawer: View {
             )
         }
         .gestureAnchored(.edge)
+        GestureRule()
+        GesturesModifierDragRows(model: model)
     }
 
     /// Hover focus, then its inverse: the hand acts, then the

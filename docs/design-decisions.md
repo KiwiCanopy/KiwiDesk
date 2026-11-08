@@ -12718,6 +12718,54 @@ warning about a tap may name only what macOS itself answers; a
 list of other apps' taps would be stale the day it shipped.
 :::
 
+**Every pointer event KiwiDesk must swallow goes through one
+active tap, and only while a consumer needs it (#2447, #2764).**
+An `NSEvent` monitor hears a press but cannot drop it, so a
+gesture that takes the press — ⌃⌘ + drag moving the window under
+the pointer, ⌃⌥ + drag resizing it — needs an active `CGEventTap`.
+Measured with a probe at the shipped tap location
+(`.cgSessionEventTap`, active, 2026-11-08, macOS 27.2): a mask of
+the left-button trio, and that mask with the moves and the
+modifier changes, ask tccd for `PostEvent` alone, the same
+signature as the scroll tap's, whose mask was measured in the same
+run as the control; `ListenEvent` appears only as WindowServer's
+own preflight, for every mask alike. So the grab needs the
+Accessibility grant KiwiDesk already holds and no Input
+Monitoring.
+
+So there is one pointer tap, `PointerTap`, beside the scroll tap
+and the keyboard tap, and every later consumer that must swallow a
+pointer event joins it — #2764's screen crossing and #1873's
+gestures — rather than adding a fourth. Two taps over one stream
+would each judge a press the other may already have dropped, and
+the order macOS runs them in is no order KiwiDesk chose; one tap
+runs its consumers in one precedence, and a grab owns the button
+stream it began to the release. The tap is built over the union of
+the live consumers' masks, so a user with every consumer off has
+no tap, and a consumer turned on widens the tap only by its own
+mask.
+
+The callback decides from the event and a snapshot of the
+settings, nothing else: every pointer event on the Mac waits on
+it, and the main actor can block for seconds on a slow app's AX
+reply. The window under the pointer, its frame and the drop are
+the main actor's, after delivery. A grab feeds the title-bar
+drag's own pipeline — the ghost, the swap, the float clamp, the
+screen crossing and the mouse resize — so it is a new way to
+START a drag, never a second drop path to keep in step.
+
+The trade: a swallowed press is one the app under the pointer
+never hears, and with no tracked window there the click is lost
+(⌃⌘-click on the desktop does nothing). The swallow also deafens
+KiwiDesk's own press listeners, so each consumer re-delivers to
+them through their own doors. The defaults are on, ⌃⌘ and ⌃⌥ with
+the button held, since a press is a clear start and its release a
+clear end; "+ move (no click)" is an opt-in per action, and shows
+no warning when its chord also starts a shortcut, since pressing a
+key is deliberate (owner, 2026-11-08). The settings are the Mac's,
+in `gui.json`: no per-profile value preceded them, so they cross
+nothing.
+
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
 opposite treatments, so the line is drawn here rather than

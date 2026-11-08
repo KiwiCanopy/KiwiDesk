@@ -66,6 +66,8 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,
         // Hover focus at the resting pointer (#1869).
         "KiwiDeskCore/App/KiwiCore+HoverFocus.swift": 1,
+        // The modifier grab's every phase (#2447).
+        "KiwiDeskCore/Tiling/KiwiCore+ModifierGrab.swift": 1,
         // The window drag: its moves and its drop, a live display
         // crossing, the Space Bar spring switch.
         "KiwiDeskCore/Tiling/KiwiCore+Drag.swift": 2,
