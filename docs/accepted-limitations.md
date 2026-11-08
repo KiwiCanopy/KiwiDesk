@@ -565,3 +565,13 @@ set of sizes that every Desktop KiwiDesk cannot name shares; the
 first Desktop switch on that screen leaves them behind, and the
 Desktop shown uses the override, then the global value, until you
 resize again.
+
+:::unreleased
+While **Secure Input** is on (a password field, Terminal's Secure
+Keyboard Entry), macOS hides key presses from KiwiDesk's keyboard
+tap, so a [key sequence](lua-reference.md#define_sequence)'s leader
+does nothing, and keys typed into a sequence already open reach the
+front app. Leave the field, or press the leader again after Secure
+Input ends ([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
+No fix is planned.
+:::

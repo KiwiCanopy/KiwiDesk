@@ -77,6 +77,10 @@ the GUI** instead. Settings are:
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_desktop`.
 
+:::unreleased
+`KiwiDesk.define_sequence` counts as a keybinding too.
+:::
+
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
 
 A [`kiwihub.set_key`](#kiwihubset_key) call counts as a setting too.
@@ -7550,6 +7554,50 @@ KiwiDesk.define_layer("resize", {
   ["h"] = { fn = shrink, desc = "Narrower", group = "size_float" },
 })
 ```
+
+:::unreleased
+### Key Sequences
+
+#### define_sequence
+
+**Expects:**
+
+- A leader chord, written as a combo (`"ctrl+alt+space"`).
+- A table of step keys. Each value is a function, a
+  `{ fn = …, desc = …, group = …, symbol = … }` table (see
+  [Describing a Shortcut](#describing-a-shortcut)), or
+  `{ name = "…", keys = { … } }`, a key that opens a further step.
+- Optionally, a table with `name`, the leader's name, and
+  `layer`, the layer it belongs to (`"default"` when absent).
+
+**Does:** pressing the leader opens step 1; each key then runs its
+function or opens its next step. After 0.25 s a panel lists the
+step's keys under the leader's name, with the steps taken above
+them. `escape` or the leader again cancels, `delete` goes back one
+step, and a click or a Space or Desktop switch cancels. A key the
+step does not hold beeps and the step stays open.
+
+A step key matches its chord exactly, modifiers included: with
+the leader's modifiers still held, `w` does not fire, and
+`ctrl+alt+w` is a different key. A leader takes its chord from a
+`KiwiDesk.bind` on the same chord in its layer. A second
+`define_sequence` on one leader replaces the first. The leader
+does not fire while macOS Secure Input is on
+([Accepted Limitations](accepted-limitations.md)).
+
+**Example:**
+
+```lua
+KiwiDesk.define_sequence("ctrl+alt+space", {
+  w = { name = "Windows", keys = {
+    h = function() KiwiDesk.focus("left") end,
+    l = function() KiwiDesk.focus("right") end,
+  } },
+  t = { fn = function() KiwiDesk.toggle_float() end,
+        desc = "Float or tile" },
+}, { name = "Leader" })
+```
+:::
 
 ### Config Cascade (Per-Profile Keybindings)
 
