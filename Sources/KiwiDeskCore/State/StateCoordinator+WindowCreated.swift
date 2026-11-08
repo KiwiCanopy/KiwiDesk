@@ -76,7 +76,7 @@ extension StateCoordinator {
         guard let target else { return }
         // A window opened while tiling is off joins the end (#3008).
         let tilingOff = isTilingOff(target)
-        let mode = placementMode(of: target) ?? .bsp
+        let mode = workspaces[target]?.mode ?? .bsp
         let track =
             mode == .track
             ? (trackParams.override[target]
@@ -95,9 +95,7 @@ extension StateCoordinator {
                 rank: slot.rank,
                 ranks: departedRanks
             )
-            if workspaces[target]?.mode == .track,
-                slot.trackBreak == .head
-            {
+            if mode == .track, slot.trackBreak == .head {
                 workspaces.withSpace(target) {
                     $0.takeTrackBreakBack(
                         for: window.id,
@@ -105,7 +103,7 @@ extension StateCoordinator {
                     )
                 }
             }
-        } else if let track, !window.isFloating {
+        } else if let track, !tilingOff, !window.isFloating {
             workspaces.add(
                 window.id,
                 to: target,

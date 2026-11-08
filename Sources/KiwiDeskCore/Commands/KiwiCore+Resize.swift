@@ -106,7 +106,7 @@ extension KiwiCore {
         else { return false }
         return EffectiveFloat.applies(
             isFloating: window.isFloating,
-            mode: space.mode
+            mode: state.placementMode(of: space)
         )
     }
 

@@ -17,7 +17,7 @@ extension KiwiCore {
         let space =
             state.windows[id].flatMap(state.renderSpace(of:))
             ?? state.workspaces.space(of: id)
-        let mode = space.flatMap { state.workspaces[$0]?.mode }
+        let mode = space.flatMap { state.placementMode(of: $0) }
         let floats = EffectiveFloat.applies(
             isFloating: state.windows[id]?.isFloating == true,
             mode: mode

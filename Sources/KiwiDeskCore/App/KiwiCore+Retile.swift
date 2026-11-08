@@ -43,7 +43,6 @@ extension KiwiCore {
         // A temporary one the same way, once armed (#1790).
         // A plate slide another activation took past (#1956).
         endSpaceSlideIfOvertaken()
-        mirrorTilingStart()  // #3008, ahead of every placement read
         noteSpaceVisits()  // #1655: a Space shown without an event
         let heldRetired = retireEmptiedHeldSpaces()
         var spacesChanged = false

@@ -239,7 +239,7 @@ extension KiwiCore {
                 !window.isFullscreen,
                 EffectiveFloat.applies(
                     isFloating: window.isFloating,
-                    mode: workspace.mode
+                    mode: state.placementMode(of: workspace)
                 )
             else { return nil }
             return wouldBeFrame(of: window)

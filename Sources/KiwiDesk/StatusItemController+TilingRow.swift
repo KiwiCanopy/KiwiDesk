@@ -14,7 +14,7 @@ extension StatusItemController {
             keyEquivalent: ""
         )
         item.target = self
-        item.image = symbol("pause")
+        item.image = symbol(StatusSpaceMark.tilingOffSymbol)
         item.state = off ? .on : .off
         item.isEnabled = true
         if let combo = tilingComboProvider() {

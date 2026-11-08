@@ -45,6 +45,10 @@ public struct StatusSpaceMark: Equatable {
         public var tilingOff = false
     }
 
+    /// The SF Symbol a tiling-off Space wears (#3008): the Space
+    /// Bar's marker, the menu-bar mark and the menus read this one.
+    public static let tilingOffSymbol = "pause"
+
     /// nil on `default`, which has no icon.
     public let layer: Layer?
     /// One per display showing a Space, unordered — the GUI
@@ -74,7 +78,7 @@ extension KiwiCore {
             else { return nil }
             let mode = state.workspaces[space]?.mode ?? .bsp
             // A tiling-off Space whose tick hides the bars shows no
-            // Space Bar either (#3008).
+            // Space Bar either (#3008, bars.md).
             guard
                 !settings.drawsAtRest(
                     .space,

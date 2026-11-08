@@ -47,11 +47,20 @@ editing here:
   toggle and resuming lays the same array out again: remembered
   slots, windows opened while off appended (`.last`), closed
   ones gone. A reader that decides HOW a window is placed — the
-  layout input, the stash capture, the effective-float doors and
-  the drag's reorder gates — takes `placementMode`; a reader that
-  names the layout (the config seed, the snapshot, events, the
-  layout menu, `cycle_mode`) keeps `mode`
-  (`TilingOffPlacementSeamTests`).
+  layout input, the stash capture, every `EffectiveFloat.applies`
+  mode arm, the maximize gates, the App Bar's visibility verdict
+  and the drag's reorder gates — takes `placementMode`; a reader
+  that names the layout (the config seed, the snapshot, events,
+  the App Bar host, the layout menu, `cycle_mode`, the spawn's
+  track rule, and the stranded-float recovery, so a toggle never
+  re-centres a layout's park) keeps `mode`.
+  `TilingOffPlacementSeamTests` reds an `EffectiveFloat.applies(`
+  file that does neither, its `storedMode` map the ruled ones. Set
+  `tilingStart` only through `KiwiCore.mirrorTilingStart`, called
+  where its inputs change (the `tiling` group's settings hook and
+  `appWideLiveChanged`), so a read never writes. The toggle rides
+  the in-place capture alone (`SpaceSession.tiling`), never
+  `snapshot()` or a profile.
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load

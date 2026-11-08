@@ -11,12 +11,19 @@ import AppKit
 extension SpaceBarItemView {
     /// Which marker a Space wears — one value, so a Space cannot
     /// carry two.
-    indirect enum Marker: Equatable {
+    enum Marker: Equatable {
         case held(Held)
         case temporary
         /// Tiling off (#3008) wins the slot; `beside` is the held
         /// or temporary state it covers, which the sentence names.
-        case tilingOff(beside: Marker?)
+        case tilingOff(beside: SpaceState?)
+
+        init(_ state: SpaceState) {
+            switch state {
+            case .held(let held): self = .held(held)
+            case .temporary: self = .temporary
+            }
+        }
 
         /// The SF Symbol it draws: outlines, so each reads as an
         /// object rather than a mark to decode.
@@ -24,15 +31,24 @@ extension SpaceBarItemView {
             switch self {
             case .held: return "display.2"
             case .temporary: return "hourglass"
-            case .tilingOff: return "pause"
+            case .tilingOff: return StatusSpaceMark.tilingOffSymbol
             }
         }
 
         /// The held or temporary state, under tiling off or not.
-        var spaceState: Marker? {
-            if case .tilingOff(let beside) = self { return beside }
-            return self
+        var spaceState: SpaceState? {
+            switch self {
+            case .held(let held): return .held(held)
+            case .temporary: return .temporary
+            case .tilingOff(let beside): return beside
+            }
         }
+    }
+
+    /// A Space's held or temporary state — never both (#1790).
+    enum SpaceState: Equatable {
+        case held(Held)
+        case temporary
     }
 
     /// Where this item's Space was held from, if it is held.
@@ -157,7 +173,7 @@ extension SpaceBarItemView {
         }
         return L(
             "space_bar.item.ax.tiling_off",
-            "Tiling off, %@",
+            "Tiling off, %1$@",
             stateName(space, windows: windows)
         )
     }

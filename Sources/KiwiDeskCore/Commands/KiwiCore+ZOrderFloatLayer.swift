@@ -20,7 +20,7 @@ extension KiwiCore {
             tiled: state.effectiveTiledMembers(of: space).filter {
                 !EffectiveFloat.applies(
                     isFloating: state.windows[$0]?.isFloating == true,
-                    mode: space.mode
+                    mode: state.placementMode(of: space)
                 )
             },
             excluding: focused

@@ -174,7 +174,7 @@ extension KiwiCore {
         stack: [UInt32: Int],
         in page: CGRect
     ) -> [SpaceSlidePlan.Plate] {
-        let mode = state.workspaces[space]?.mode
+        let mode = state.placementMode(of: space)
         return SpaceSlidePlan.plates(
             slideMembers(of: space).map {
                 SpaceSlidePlan.Entry(

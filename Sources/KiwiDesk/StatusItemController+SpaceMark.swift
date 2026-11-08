@@ -57,7 +57,7 @@ extension StatusItemController {
             screen.tilingOff
                 ? L(
                     "menu.status.space.tiling_off",
-                    "%@, tiling off",
+                    "%1$@, tiling off",
                     screen.space.raw
                 )
                 : screen.space.raw
@@ -104,7 +104,9 @@ extension StatusItemController {
 
     /// The Space Bar's tiling-off marker (#3008), drawn right after
     /// its Space's glyph with no divider.
-    static let tilingOffMarker = StatusSpaceMark.Glyph.symbol("pause")
+    static let tilingOffMarker = StatusSpaceMark.Glyph.symbol(
+        StatusSpaceMark.tilingOffSymbol
+    )
 
     /// Which glyphs carry the tiling-off marker after them, in
     /// `spaceMarkGlyphs`' order.

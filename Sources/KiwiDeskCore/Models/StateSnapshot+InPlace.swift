@@ -40,12 +40,17 @@ extension StateSnapshot {
         /// scrolled zone rests.
         public var runHeads: [UInt32]?
         public var runTails: [UInt32]?
+        /// This session's tiling toggle (#3008); absent where none
+        /// was set, so the Space starts as its settings say.
+        public var tiling: Bool?
 
         public init(
             space: Space,
             ratios sizes: SessionSizing,
-            monocleShown: WindowID?
+            monocleShown: WindowID?,
+            tiling: Bool? = nil
         ) {
+            self.tiling = tiling
             ratios = sizes.drawn
             desktopRatios = sizes.entries
                 .map {
@@ -115,6 +120,7 @@ extension StateSnapshot {
             case maximizeFollows = "maximize_follows"
             case runHeads = "run_heads"
             case runTails = "run_tails"
+            case tiling
         }
     }
 
@@ -229,7 +235,8 @@ extension StateCoordinator {
                 session: StateSnapshot.SpaceSession(
                     space: $0,
                     ratios: ratios($0.id),
-                    monocleShown: monocleShown[$0.id]
+                    monocleShown: monocleShown[$0.id],
+                    tiling: tilingToggles[$0.id]
                 )
             )
         }
@@ -257,6 +264,7 @@ extension StateCoordinator {
         in space: SpaceID
     ) {
         guard let session = record.session else { return }
+        if let tiling = session.tiling { tilingToggles[space] = tiling }
         workspaces.withSpace(space) {
             $0.stackWeights = Dictionary(
                 uniqueKeysWithValues: session.stackWeights.map {

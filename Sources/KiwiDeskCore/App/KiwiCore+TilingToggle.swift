@@ -5,8 +5,9 @@ import Foundation
 /// stand-downs read the profile's ticks. The Space's windows stay
 /// where they are; resuming lays its array out again.
 extension KiwiCore {
-    /// Mirrors the config's start-tiled values into state, ahead of
-    /// every reader of `isTilingOff`.
+    /// Mirrors the config's start-tiled values into state: the one
+    /// writer, called where its inputs change — `tiler.settings`'
+    /// `tiling` group and `appWideLiveChanged`.
     func mirrorTilingStart() {
         state.tilingStart = tiler.settings.tiling.start(
             global: appWide.tilingStartGlobal
@@ -15,8 +16,7 @@ extension KiwiCore {
 
     /// Whether `space` has tiling off now.
     public func isTilingOff(_ space: SpaceID) -> Bool {
-        mirrorTilingStart()
-        return state.isTilingOff(space)
+        state.isTilingOff(space)
     }
 
     /// `KiwiDesk.toggle_tiling([space])`: flips the Space's tiling,
@@ -67,7 +67,6 @@ extension KiwiCore {
             return .fail("expected a boolean")
         }
         setAppWide(persisting: false) { $0.tilingStartGlobal = on }
-        retile(pass: .apply)
         return .ok()
     }
 

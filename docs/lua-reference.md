@@ -6015,7 +6015,8 @@ and every shortcut keep working, unless
 [`tiling.set_off_hides_bars`](#tilingset_off_hides_bars) hides
 them. The Space Bar marks the Space with a pause symbol, and the
 quick menu's "Tiling Off for This Space" row shows the state. It
-lasts until KiwiDesk quits. Bound to `⌃⌥T` by default.
+lasts until KiwiDesk quits; a restart in place keeps it. Bound to
+`⌃⌥T` by default.
 
 **Example:**
 
@@ -6071,7 +6072,9 @@ KiwiDesk.set_tiling_start_global(false)
 on, or with a Space id whether that Space does. A Space's value
 wins over the profile's, and the profile's over
 [`set_tiling_start_global`](#set_tiling_start_global); `nil`
-removes the value, so the level above decides.
+removes the value, so the level above decides. A Space whose
+tiling a toggle set keeps that choice; every other Space follows a
+new value at once.
 
 **Example:**
 

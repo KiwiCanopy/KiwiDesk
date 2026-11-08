@@ -245,7 +245,7 @@ extension KiwiCore {
             // EFFECTIVE float, never the flag (#1178).
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
-                mode: workspace.mode
+                mode: state.placementMode(of: workspace)
             )
         else { return nil }
         // One fold over every strip, one apply: a per-strip loop

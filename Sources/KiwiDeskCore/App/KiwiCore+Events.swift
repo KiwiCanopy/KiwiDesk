@@ -23,7 +23,6 @@ extension KiwiCore {
             }
         )
         state.spawnOverride = tiler.settings.placementOverride
-        mirrorTilingStart()  // #3008
         state.trackParams = tiler.settings.track
         // Fill-then-spill needs each track space's capacity (#437),
         // which is display geometry — resolve it here and mirror it

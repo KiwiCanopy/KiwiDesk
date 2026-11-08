@@ -149,7 +149,7 @@ extension ShortcutsReferenceBuilder {
             return "arrow.left.and.right"
         // The Space Bar's tiling-off marker (#3008).
         case KeybindingCatalog.toggleTiling.lua:
-            return "pause"
+            return StatusSpaceMark.tilingOffSymbol
         // The bars' show/hide (#2530): the Space Bar wears the arrowed
         // symbol the 3.2.0 notes' hiding-bars spotlight wears, the App
         // Bar the strip along the screen's foot (owner, 2026-10-23).

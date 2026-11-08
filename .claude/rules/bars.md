@@ -448,7 +448,8 @@ twice, was a question the user answered twice. The argument is
   A Space with tiling off stands the shelf down only where the
   profile's `tiling.off_hides_bars` tick asks, through the one
   named `KiwiCore.tilingOffHidesShelf(on:)` inside
-  `shelfStandsDown` (#3008), never a read beside it.
+  `shelfStandsDown` (#3008); its one other reader is the menu-bar
+  Space mark, which lists that screen (`TilingOffPlacementSeamTests`).
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
@@ -1421,8 +1422,10 @@ window state alone (`TemporarySpaceBarTests` ▸
 A Space with tiling off (#3008) wears `pause` in the same slot,
 **winning it over held or temporary**: `Marker.tilingOff(beside:)`
 carries the state it covers, so the `spaceName` sentence still
-names both. Where a screen shows no Space Bar, the menu-bar Space
-mark wears the same marker, so the state is never invisible.
+names both. Where a screen draws no Space Bar at rest or the
+tiling-off tick hides it, the menu-bar Space mark lists the Space
+and wears the same marker, read from
+`StatusSpaceMark.tilingOffSymbol`, the one copy of the symbol.
 
 ## A per-display bar answers the SHOWN question, never the render one
 

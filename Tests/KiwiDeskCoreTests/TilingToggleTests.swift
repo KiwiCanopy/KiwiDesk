@@ -66,7 +66,6 @@ struct TilingToggleTests {
         open(core, 1)
         open(core, 2)
         core.state.apply(.windowFocused(WindowID(1)))
-        let before = members(core)
         // The control: with tiling on, a new window lands by the
         // spawn rule, not at the end.
         open(core, 3)
@@ -82,7 +81,6 @@ struct TilingToggleTests {
             members(core)
                 == order.filter { $0 != WindowID(1) } + [WindowID(4)]
         )
-        #expect(before.count == 2)
     }
 
     @Test("set_tiling forces a state without reading it")
@@ -140,12 +138,66 @@ struct TilingToggleTests {
     @Test("the ticks stand the rings and the shelf down, only when on")
     func ticksStandDown() {
         let core = makeCore()
+        let display = DisplayID(7)
+        core.state.workspaces.assign(space, to: display)
+        core.state.workspaces.activate(space)
         core.execute("set_tiling", args: [.bool(false)])
         #expect(!core.tilingOffHidesRings(on: space))
+        #expect(!core.tilingOffHidesShelf(on: display))
         core.execute("tiling.set_off_hides_borders", args: [.bool(true)])
+        core.execute("tiling.set_off_hides_bars", args: [.bool(true)])
         #expect(core.tilingOffHidesRings(on: space))
+        #expect(core.tilingOffHidesShelf(on: display))
+        #expect(core.shelfStandsDown(on: display, covered: false))
         core.execute("set_tiling", args: [.bool(true)])
         #expect(!core.tilingOffHidesRings(on: space))
+        #expect(!core.tilingOffHidesShelf(on: display))
+    }
+
+    @Test("the toggle crosses an in-place restart, and only that")
+    func inPlaceCarries() {
+        let core = makeCore()
+        open(core, 1)
+        core.execute("set_tiling", args: [.bool(false)])
+        #expect(
+            core.state.snapshot().spaces.allSatisfy { $0.session == nil }
+        )
+        let carried = core.state.inPlaceSnapshot(
+            monocleShown: [:],
+            ratios: { _ in
+                StateSnapshot.SessionSizing(
+                    entries: [:],
+                    drawn: SessionRatios()
+                )
+            }
+        )
+        var fresh = StateCoordinator()
+        fresh.adopt(carried)
+        #expect(fresh.tilingToggles[space] == false)
+    }
+
+    @Test("a tile on a tiling-off Space is an effective float")
+    func tileIsAnEffectiveFloat() throws {
+        let core = makeCore()
+        open(core, 1)
+        core.retile()
+        core.execute("set_tiling", args: [.bool(false)])
+        let window = try #require(core.state.windows[WindowID(1)])
+        let workspace = try #require(core.state.workspaces[space])
+        #expect(
+            EffectiveFloat.applies(
+                isFloating: window.isFloating,
+                mode: core.state.placementMode(of: workspace)
+            )
+        )
+        // The control: tiling on, a tile has no capture to return to.
+        core.execute("set_tiling", args: [.bool(true)])
+        #expect(
+            !EffectiveFloat.applies(
+                isFloating: window.isFloating,
+                mode: core.state.placementMode(of: workspace)
+            )
+        )
     }
 
     @Test("tiling off wins the marker slot and keeps what it covers")

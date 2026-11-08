@@ -102,7 +102,7 @@ public struct StateCoordinator: Sendable {
     var temporaryArmed: Set<SpaceID> = []
     /// This session's tiling toggles and the start values (#3008).
     var tilingToggles: [SpaceID: Bool] = [:]
-    public var tilingStart = TilingStart()
+    public internal(set) var tilingStart = TilingStart()
     /// Temporary or held Spaces that ended and whose shortcuts are
     /// still to go (#1827, `KiwiCore+SpaceShortcutDrop`); a number
     /// here is taken until they have.

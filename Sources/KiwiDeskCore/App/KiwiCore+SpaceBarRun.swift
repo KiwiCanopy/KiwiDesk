@@ -49,7 +49,8 @@ extension KiwiCore {
                 // Tiling off wins the slot (#3008, bars.md).
                 item.marker =
                     isTilingOff(id)
-                    ? .tilingOff(beside: spaceState) : spaceState
+                    ? .tilingOff(beside: spaceState)
+                    : spaceState.map(SpaceBarItemView.Marker.init)
                 // After the `hide_empty` verdict, which reads
                 // the glyphs the collapse drops.
                 return item.collapsed(to: style.inactiveContent)

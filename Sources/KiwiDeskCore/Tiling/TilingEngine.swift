@@ -34,6 +34,9 @@ public final class TilingEngine {
             if settings.mouse != oldValue.mouse {
                 onMouseSettings?(settings.mouse)
             }
+            if settings.tiling != oldValue.tiling {
+                onTilingToggleSettings?()
+            }
             if settings != oldValue { onSettingsChange(settings) }
         }
     }
@@ -41,6 +44,8 @@ public final class TilingEngine {
     /// Told when `settings.mouse` changes, by whichever write —
     /// the pointer rest's switch rides it (#1869).
     var onMouseSettings: (@MainActor (MouseSettings) -> Void)?
+    /// Told when `settings.tiling` changes: the start mirror (#3008).
+    var onTilingToggleSettings: (@MainActor () -> Void)?
     /// Told when the settings change, by whichever write (#2604).
     var onSettingsChange: @MainActor (TilingSettings) -> Void = { _ in }
 
