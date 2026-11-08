@@ -74,8 +74,13 @@ extension JumpPanelController {
         case .jumpDesktop(let desktop), .moveYoursToDesktop(let desktop):
             return desktop.number == nil
                 ? DesktopsText.refusal(.unreachable) : nil
-        case .jump(let target), .moveYours(let target, _),
-            .drop(_, let target, _):
+        // A hidden Desktop's Space is reached by its last-focused
+        // window, which needs no number.
+        case .jump(let target):
+            return !target.desktop.isShown && target.desktop.number == nil
+                && target.lastFocused == nil
+                ? DesktopsText.refusal(.unreachable) : nil
+        case .moveYours(let target, _), .drop(_, let target, _):
             return !target.desktop.isShown && target.desktop.number == nil
                 ? DesktopsText.refusal(.unreachable) : nil
         case .jumpWindow:
