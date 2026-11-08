@@ -78,10 +78,27 @@ struct PointerTapRouterTests {
     func lostUpRestarts() {
         var r = router()
         _ = r.route(sample(.leftDown, Self.moveChord), now: 1)
-        let again = r.route(sample(.leftDown, Self.resizeChord), now: 2)
+        let again = r.route(
+            sample(.leftDown, Self.resizeChord, x: 900),
+            now: 2
+        )
         #expect(again.grab.map(\.phase) == [.ended, .began])
+        // The lost stream ends where its last drag left it, never
+        // at the new press.
+        #expect(again.grab.first?.location == nil)
         #expect(again.grab.last?.action == .resize)
         #expect(again.swallow)
+    }
+
+    @Test("a buttonless move inside a press stream ends it")
+    func buttonlessMoveEnds() {
+        var r = router()
+        _ = r.route(sample(.leftDown, Self.moveChord), now: 1)
+        let moved = r.route(sample(.mouseMoved, [], x: 300), now: 2)
+        #expect(moved.grab.map(\.phase) == [.ended])
+        #expect(moved.grab.first?.location == nil)
+        #expect(!moved.swallow)
+        #expect(r.owner == nil)
     }
 
     @Test("an off action, or an off consumer, begins nothing")
@@ -128,10 +145,13 @@ struct PointerTapRouterTests {
     @Test("a re-seed ends the grab in flight, and is quiet otherwise")
     func reseedEnds() {
         var r = router()
-        #expect(r.reseed(now: 0, at: .zero) == .pass)
+        #expect(r.reseed(now: 0) == .pass)
         _ = r.route(sample(.leftDown, Self.moveChord), now: 1)
-        let reseeded = r.reseed(now: 2, at: .zero)
+        let reseeded = r.reseed(now: 2)
         #expect(reseeded.grab.map(\.phase) == [.ended])
+        // No event says where it ended: the grab keeps its last
+        // frame.
+        #expect(reseeded.grab.first?.location == nil)
         #expect(r.owner == nil)
     }
 

@@ -129,7 +129,7 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
                 let port
             {
                 CGEvent.tapEnable(tap: port, enable: true)
-                let routed = router.reseed(now: now, at: event.location)
+                let routed = router.reseed(now: now)
                 deliver(.init(grab: routed.grab, reenabled: true))
             }
             return Unmanaged.passUnretained(event)

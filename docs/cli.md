@@ -688,6 +688,8 @@ every lens with why it cannot turn on.
 | | `scroll_gesture.set_natural_scrolling` | true\|false, [`trackpad\|mouse`] (default `true` for both) |
 | | `scroll_gesture.set_long_swipes` | true\|false (default `false`) |
 | | `scroll_gesture.set_step_distance` | pt (10–1000, default 60) — travel per extra window of a long swipe |
+| Modifier drags | `modifier_drag.set_move` | modifiers (default `control+command`; `""` off), [`drag\|hover`] (default `drag`) — held to move the window under the pointer |
+| | `modifier_drag.set_resize` | modifiers (default `control+option`; `""` off), [`drag\|hover`] (default `drag`) — held to resize it from its nearest corner or edge |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_drop_zone_enabled` | true\|false (default `true`) |
@@ -888,6 +890,11 @@ see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
 
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
+
+:::unreleased
+The `modifier_drag.*` commands set the modifier drags; see
+[Modifier Drags](lua-reference.md#modifier-drags).
+:::
 
 `animations.set_on_expand` and `animations.set_expand_duration` set
 the KiwiShelf expand on a Space switch, and

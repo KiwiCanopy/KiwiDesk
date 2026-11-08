@@ -92,6 +92,47 @@ struct PointerConsumersTests {
         #expect(rig.taps.last?.snapshots.last?.grab?.resize.isOff == true)
     }
 
+    @Test("a refused tap is asked again once its switch moves")
+    func refusalRetriesOnSwitch() {
+        let rig = Rig()
+        rig.refuse = true
+        rig.front.start()
+        rig.refuse = false
+        var off = ModifierDragSettings.defaults
+        off.move.chord = []
+        off.resize.chord = []
+        rig.front.configure(grab: off)
+        rig.front.configure(grab: .defaults)
+        #expect(rig.masks.count == 2)
+        #expect(rig.front.isTapped)
+    }
+
+    @Test("a delivery an old tap queued is dropped after a rebuild")
+    func staleTapIsDropped() {
+        var delivers: [PointerTap.Deliver] = []
+        let rig = Rig()
+        rig.front.makeTap = { _, deliver in
+            delivers.append(deliver)
+            return FakeTap()
+        }
+        rig.front.start()
+        rig.front.stop()
+        rig.front.start()
+        #expect(delivers.count == 2)
+        // The first tap's began reaches the front after the second
+        // tap is up: no router of the new tap would end it.
+        rig.front.receive(
+            .init(grab: [event(.began)], reenabled: false),
+            fromTap: 1
+        )
+        #expect(rig.front.grabInFlight == nil)
+        rig.front.receive(
+            .init(grab: [event(.began)], reenabled: false),
+            fromTap: 2
+        )
+        #expect(rig.front.grabInFlight != nil)
+    }
+
     @Test("a refused tap is asked again only at the next start")
     func refusalWaits() {
         let rig = Rig()

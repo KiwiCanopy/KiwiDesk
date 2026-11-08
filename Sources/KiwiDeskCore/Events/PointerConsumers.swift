@@ -54,13 +54,14 @@ public final class PointerConsumers {
     /// The grab the main actor has heard begin and not yet end, as
     /// it began.
     public private(set) var grabInFlight: ModifierGrabEvent?
-    /// The window that grab took, written by `KiwiCore+ModifierGrab`
-    /// alone; nil where it found none.
-    var grabSession: ModifierGrabSession?
     private var tap: PointerTapHandle?
     private var tapMask: CGEventMask = 0
+    /// Which tap a delivery came from: one an old tap queued before
+    /// a stop or a rebuild is dropped, since no router of the new
+    /// tap will end what it began.
+    private var tapGeneration = 0
     /// The union macOS last refused: asked again only at `start()`
-    /// or when a consumer's switch moves the union.
+    /// or once a consumer's switch moves the union.
     private var refusedMask: CGEventMask?
     private var started = false
 
@@ -104,8 +105,12 @@ public final class PointerConsumers {
     /// Hands routed events to their consumer, a batch's moves
     /// coalesced to the last one so a slow main actor writes one
     /// frame per turn.
-    func receive(_ delivery: PointerTapDelivery) {
-        guard started else { return }
+    func receive(
+        _ delivery: PointerTapDelivery,
+        fromTap generation: Int? = nil
+    ) {
+        guard started, generation ?? tapGeneration == tapGeneration
+        else { return }
         if delivery.reenabled {
             onLog("pointer tap: re-enabled after macOS disabled it")
         }
@@ -147,20 +152,29 @@ public final class PointerConsumers {
     private func sync() {
         let live = liveConsumers
         let mask = live.reduce(CGEventMask(0)) { $0 | $1.mask }
-        if !started || mask == 0 || mask != tapMask {
-            tap?.stop()
+        if mask == 0 { refusedMask = nil }
+        if let old = tap, !started || mask == 0 || mask != tapMask {
+            // A torn-down tap's router ends nothing it owned, so
+            // the front ends it here, as a re-enable would.
+            old.stop()
             tap = nil
             tapMask = 0
+            endGrab()
         }
         guard started, mask != 0, refusedMask != mask else { return }
         if tap == nil {
+            tapGeneration += 1
+            let generation = tapGeneration
             tap = makeTap(mask) { [weak self] delivery in
                 DispatchQueue.main.async {
-                    MainActor.assumeIsolated { self?.receive(delivery) }
+                    MainActor.assumeIsolated {
+                        self?.receive(delivery, fromTap: generation)
+                    }
                 }
             }
             tapMask = tap == nil ? 0 : mask
             refusedMask = tap == nil ? mask : nil
+            if tap == nil { endGrab() }
             onLog(
                 tap == nil
                     ? "pointer tap: refused by macOS (Accessibility?)"

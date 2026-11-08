@@ -42,8 +42,9 @@ public struct ModifierGrabEvent: Equatable, Sendable {
 /// The pointer tap's pure decision (#2447, #2764 ruling): each
 /// event against the snapshot, from the event's own location and
 /// flags, never a remembered position. The one state kept is
-/// which consumer owns the stream it began, so a grab owns its
-/// button stream to the release.
+/// which consumer owns the stream it began: an owner continues
+/// it to its end, and only then may a consumer begin another, in
+/// `PointerConsumers.Consumer` order.
 struct PointerTapRouter {
     /// What the tap does with one event.
     struct Routed: Equatable {
@@ -63,26 +64,32 @@ struct PointerTapRouter {
         _ sample: PointerSample,
         now: CFAbsoluteTime
     ) -> Routed {
-        guard let settings = snapshot.grab else {
-            return reseed(now: now, at: sample.location)
-        }
         if let owner {
+            guard let settings = snapshot.grab else {
+                return reseed(now: now)
+            }
             return continuing(owner, sample, settings, now: now)
         }
-        return beginning(sample, settings, now: now)
+        for consumer in PointerConsumers.Consumer.allCases {
+            switch consumer {
+            case .grab:
+                guard let settings = snapshot.grab else { continue }
+                let routed = beginning(sample, settings, now: now)
+                if routed != .pass { return routed }
+            }
+        }
+        return .pass
     }
 
-    /// Ends the grab in flight — a disabled tap's re-enable, or a
-    /// snapshot that turned the consumer off.
-    mutating func reseed(
-        now: CFAbsoluteTime,
-        at location: CGPoint
-    ) -> Routed {
+    /// Ends the grab in flight with no location of its own — a
+    /// disabled tap's re-enable, or a snapshot that turned the
+    /// consumer off: no event of the grab's says where it ended.
+    mutating func reseed(now: CFAbsoluteTime) -> Routed {
         guard let owner else { return .pass }
         self.owner = nil
         return Routed(
             swallow: false,
-            grab: [event(.ended, owner, location, now)]
+            grab: [event(.ended, owner, nil, now)]
         )
     }
 
@@ -132,13 +139,11 @@ struct PointerTapRouter {
                 swallow: true,
                 grab: [event(.ended, owner, at, now)]
             )
-        case (.drag, .leftDown):
-            // A down with no up between: the up was lost to a
-            // disabled tap. Start over from this press.
-            self.owner = nil
-            var routed = beginning(sample, settings, now: now)
-            routed.grab.insert(event(.ended, owner, at, now), at: 0)
-            return routed
+        case (.drag, .leftDown), (.drag, .mouseMoved):
+            // A press, or a move with no button, inside a press
+            // stream: its up was lost. The grab ends where its
+            // last drag left it, and this event starts afresh.
+            return restarting(owner, sample, settings, now: now)
         case (.hover, .mouseMoved)
         where sample.chord == settings[owner.action].chord:
             return Routed(
@@ -164,10 +169,22 @@ struct PointerTapRouter {
         }
     }
 
+    private mutating func restarting(
+        _ owner: Owner,
+        _ sample: PointerSample,
+        _ settings: ModifierDragSettings,
+        now: CFAbsoluteTime
+    ) -> Routed {
+        self.owner = nil
+        var routed = beginning(sample, settings, now: now)
+        routed.grab.insert(event(.ended, owner, nil, now), at: 0)
+        return routed
+    }
+
     private func event(
         _ phase: ModifierGrabEvent.Phase,
         _ owner: Owner,
-        _ location: CGPoint,
+        _ location: CGPoint?,
         _ time: CFAbsoluteTime
     ) -> ModifierGrabEvent {
         ModifierGrabEvent(

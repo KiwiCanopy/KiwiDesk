@@ -5126,13 +5126,14 @@ The keys must be exactly the ones set, and they count only at the
 press: the drag goes on to the release whatever the keys do. With
 the start `hover`, no click is needed: holding the keys and moving
 the pointer moves or resizes the window under it, and letting a
-key go, or clicking, ends it. A press over no window KiwiDesk
-manages does nothing, and the app under the pointer does not get
-the click. It needs only the Accessibility permission, never Input
+key go, or clicking, ends it. A press over anything but a window
+KiwiDesk can move there — the Dock, the menu bar, a bar, a window
+in full screen — does nothing, and the app under the pointer does
+not get the click. It needs only the Accessibility permission, never Input
 Monitoring.
 
 The settings are stored in `gui.json` as the `modifier_drag`
-object — `move` and `resize`, each with `keys` and `start` — for
+object — `move` and `resize`, each with `modifiers` and `start` — for
 every profile alike. A single-modifier chord there turns that drag
 off, and a `resize` equal to `move` turns the resize off. In the
 Settings app they are the **Move windows from anywhere** and
@@ -5140,8 +5141,10 @@ Settings app they are the **Move windows from anywhere** and
 ▸ Mouse & trackpad**.
 
 The verbs below change the running value only: nothing reaches
-`gui.json`, and the value lasts until KiwiDesk next loads its
-config.
+`gui.json`, and in a setup the Settings app manages the value lasts
+until a profile load or a config reload sets it again. In a
+Lua-owned setup `init.lua` is where it is kept, and **Adopt into
+the GUI** keeps what it set.
 :::
 
 ### modifier_drag.set_move

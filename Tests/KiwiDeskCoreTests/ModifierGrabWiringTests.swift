@@ -137,16 +137,43 @@ struct ModifierGrabWiringTests {
         send(core, .began, at: CGPoint(x: 200, y: 150))
         send(core, .moved, at: CGPoint(x: 210, y: 150))
         let fed = log.moves.count
-        // The echo of our own write reads as our animation; fed to
-        // the coordinator, it would cancel the gesture mid-grab.
+        // A lagging echo of an earlier write: fed to the
+        // coordinator it reads as our animation and cancels the
+        // gesture mid-grab.
         #expect(core.tiler.didRecentlySetFrame(Self.window))
-        core.handle(.windowMoved(Self.window, Self.frame))
-        core.handle(.windowResized(Self.window, Self.frame))
-        #expect(log.moves.count == fed)
+        let stale = Self.frame.offsetBy(dx: 3, dy: 0)
+        core.handle(.windowMoved(Self.window, stale))
         #expect(core.drag.hasGesture(Self.window))
+        core.handle(
+            .windowResized(
+                Self.window,
+                CGRect(x: 110, y: 100, width: 380, height: 280)
+            )
+        )
+        #expect(core.drag.hasGesture(Self.window))
+        #expect(log.moves.count == fed)
         // The next move still lands.
         send(core, .moved, at: CGPoint(x: 220, y: 150))
         #expect(log.moves.count == fed + 1)
+    }
+
+    @Test("an echo after the release is left out while the drop settles")
+    func lateEchoIsLeftOut() {
+        let log = Log()
+        let core = make(log)
+        send(core, .began, at: CGPoint(x: 200, y: 150))
+        send(core, .moved, at: CGPoint(x: 240, y: 150))
+        send(core, .ended, at: CGPoint(x: 260, y: 150))
+        #expect(core.drag.hasGesture(Self.window))
+        #expect(core.modifierGrabOwns(Self.window))
+        core.handle(.windowMoved(Self.window, Self.frame))
+        // Still settling, and not on the stale frame.
+        #expect(core.drag.hasGesture(Self.window))
+        #expect(log.moves.last?.frame == Self.frame.offsetBy(dx: 60, dy: 0))
+        // Once the drop has settled the window is no longer the
+        // grab's.
+        core.drag.cancel(Self.window)
+        #expect(!core.modifierGrabOwns(Self.window))
     }
 
     @Test("nothing under the pointer takes no window")
@@ -154,7 +181,7 @@ struct ModifierGrabWiringTests {
         let log = Log()
         let core = make(log)
         send(core, .began, at: CGPoint(x: 900, y: 900))
-        #expect(core.mouse.pointer.grabSession == nil)
+        #expect(core.modifierGrab.session == nil)
         send(core, .moved, at: CGPoint(x: 950, y: 950))
         #expect(log.moves.isEmpty)
     }

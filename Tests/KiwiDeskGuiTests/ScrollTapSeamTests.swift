@@ -137,19 +137,21 @@ struct ScrollTapSeamTests {
     func liveFactoryPinned() throws {
         let factories: [(String, String, String)] = [
             (
-                "ScrollGestureTap.live(", "ScrollGestures.swift",
+                "ScrollGestureTap.live", "ScrollGestures.swift",
                 "mouse.scroll.makeTap = { _ in nil }"
             ),
             (
-                "KeyboardTap.live(", "KeybindingManager.swift",
+                "KeyboardTap.live", "KeybindingManager.swift",
                 "keys.makeKeyboardTap = { _, _, _ in nil }"
             ),
             (
-                "PointerTap.live(", "PointerConsumers.swift",
+                "PointerTap.live", "PointerConsumers.swift",
                 "mouse.pointer.makeTap = { _, _ in nil }"
             ),
         ]
         for (factory, home, pin) in factories {
+            // The bare name, not the call: a factory handed on as
+            // a function reference spells no `(` after it.
             let live = try Self.sites(of: factory)
             #expect(live.count == 1, "\(factory)")
             #expect(live.first?.file.lastPathComponent == home)

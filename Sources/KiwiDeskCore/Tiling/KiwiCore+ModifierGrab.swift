@@ -2,7 +2,7 @@ import AppKit
 import CoreGraphics
 
 /// One modifier grab in flight (#2447): the window it took, how,
-/// and where it started. Held by `PointerConsumers.grabSession`.
+/// and where it started. Held by `ModifierGrabState.session`.
 struct ModifierGrabSession: Equatable {
     let id: WindowID
     let action: ModifierDragAction
@@ -13,6 +13,17 @@ struct ModifierGrabSession: Equatable {
     let grab: CGPoint
     let handle: ModifierGrabGeometry.Handle
     var last: CGRect
+}
+
+/// What the modifier grab keeps between its events, written by
+/// `KiwiCore+ModifierGrab` alone.
+@MainActor
+final class ModifierGrabState {
+    /// The grab in flight, nil where none took a window.
+    var session: ModifierGrabSession?
+    /// The window the last grab released, whose drop the drag
+    /// coordinator may still be settling.
+    var released: WindowID?
 }
 
 /// The modifier grab's main-actor half (#2447): the tap decided
@@ -38,10 +49,13 @@ extension KiwiCore {
         }
     }
 
-    /// Whether a grab writes `id`'s frame now: its AX echoes are
-    /// our own writes, which the grab already fed the pipeline.
+    /// Whether `id`'s AX echoes are a grab's own writes, which it
+    /// already fed the pipeline: while it writes, and after its
+    /// release until the drop settles, since a slow app's echo of
+    /// an earlier write would land as the drop frame.
     func modifierGrabOwns(_ id: WindowID) -> Bool {
-        mouse.pointer.grabSession?.id == id
+        modifierGrab.session?.id == id
+            || (modifierGrab.released == id && drag.hasGesture(id))
     }
 
     private func beginModifierGrab(_ event: ModifierGrabEvent) {
@@ -55,14 +69,13 @@ extension KiwiCore {
             mouse.deliverPress(at: cocoa, from: .otherApp)
             mouse.recordDown(at: cocoa, from: .otherApp, clickCount: 1)
         }
-        guard let id = modifierGrabTarget(at: point),
-            let window = state.windows[id]
-        else {
+        modifierGrab.released = nil
+        guard let window = frontTrackedWindow(at: point)?.window else {
             onLog("modifier drag: no window under the pointer")
             return
         }
-        mouse.pointer.grabSession = ModifierGrabSession(
-            id: id,
+        modifierGrab.session = ModifierGrabSession(
+            id: window.id,
             action: event.action,
             pressed: pressed,
             start: window.frame,
@@ -73,11 +86,11 @@ extension KiwiCore {
             ),
             last: window.frame
         )
-        onLog("modifier drag: \(event.action.rawValue) w\(id.raw)")
+        onLog("modifier drag: \(event.action.rawValue) w\(window.id.raw)")
     }
 
     private func moveModifierGrab(to point: CGPoint) {
-        guard var session = mouse.pointer.grabSession else { return }
+        guard var session = modifierGrab.session else { return }
         let frame =
             session.action == .move
             ? ModifierGrabGeometry.moved(
@@ -106,7 +119,7 @@ extension KiwiCore {
             animated: false
         )
         session.last = frame
-        mouse.pointer.grabSession = session
+        modifierGrab.session = session
         drag.windowMoved(
             session.id,
             frame: frame,
@@ -118,36 +131,10 @@ extension KiwiCore {
 
     private func endModifierGrab(_ event: ModifierGrabEvent) {
         if let point = event.location { moveModifierGrab(to: point) }
-        mouse.pointer.grabSession = nil
+        modifierGrab.released = modifierGrab.session?.id
+        modifierGrab.session = nil
         // The drag coordinator settles the drop itself, now that
         // no grab holds the button down.
         if event.start == .drag { mouse.recordUp(from: .otherApp) }
-    }
-
-    /// The window a grab at `point` (AX space) takes: the front
-    /// window there, tracked, not full screen, in a shown Space;
-    /// nil over anything else — a bar, a menu, the Dock.
-    func modifierGrabTarget(at point: CGPoint) -> WindowID? {
-        guard state.windows.all.contains(where: { $0.frame.contains(point) })
-        else { return nil }
-        let own = getpid()
-        guard
-            let front = frontStack().first(where: {
-                $0.frame.contains(point)
-                    && !($0.pid == own
-                        && Self.ignoresPointer(number: Int($0.number)))
-            }),
-            let window = state.windows[WindowID(front.number)],
-            front.pid != own
-                || eventLoop.tilesAsOwnWindow(
-                    pid: window.pid,
-                    id: window.id
-                ),
-            !window.isFullscreen,
-            let space = state.stickyRenderSpace(of: window)
-                ?? state.workspaces.space(of: window.id),
-            state.workspaces.visibleSpaces.contains(space)
-        else { return nil }
-        return window.id
     }
 }

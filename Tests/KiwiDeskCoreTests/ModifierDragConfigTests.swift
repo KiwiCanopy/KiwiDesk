@@ -41,7 +41,7 @@ struct ModifierDragConfigTests {
         )
         #expect(Set(object.keys) == ["move", "resize"])
         let move = try #require(object["move"] as? [String: Any])
-        #expect(Set(move.keys) == ["keys", "start"])
+        #expect(Set(move.keys) == ["modifiers", "start"])
     }
 
     @Test("a key a file leaves out keeps its default")
@@ -51,7 +51,7 @@ struct ModifierDragConfigTests {
         #expect(partial.move == ModifierDragSettings.defaults.move)
         #expect(partial.resize.chord == [.control, .option])
         #expect(partial.resize.start == .hover)
-        let off = try decode(#"{"move": {"keys": ""}}"#)
+        let off = try decode(#"{"move": {"modifiers": ""}}"#)
         #expect(off.move.isOff)
     }
 

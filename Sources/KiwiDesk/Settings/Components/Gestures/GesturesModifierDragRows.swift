@@ -35,7 +35,8 @@ struct GesturesModifierDragRows: View {
         L(
             "shortcuts.gestures.modifier_drag.caption",
             "Hold the keys and drag inside a window. Resizing follows "
-                + "the corner nearest where you grab."
+                + "the corner nearest where you grab; grab the middle "
+                + "of an edge to move that edge alone."
         )
     }
 

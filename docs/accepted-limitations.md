@@ -140,6 +140,20 @@ before the move, as it does for a drag or a `resize`
 ([#2972](https://github.com/KiwiCanopy/KiwiDesk/issues/2972)). Press
 again if a burst comes up short. No fix is planned.
 
+:::unreleased
+A ⌃⌘ or ⌃⌥ press of a
+[modifier drag](lua-reference.md#modifier-drags) over anything
+KiwiDesk cannot move there — the desktop, the Dock, the menu bar, a
+bar, a window in full screen or on a Space nobody shows — does
+nothing, and the app under the pointer never gets the click. The
+pointer tap decides from the event alone, since every pointer event
+on the Mac waits on it, and the window under the pointer is looked up
+after the press is already swallowed
+([#2447](https://github.com/KiwiCanopy/KiwiDesk/issues/2447)). Let a
+key go and click again. A fix would hand the tap the managed windows'
+frames, or post the press again where no window takes it.
+:::
+
 A Space switch while `center_floating` is still moving a window can
 lose the centring: the switch files the frame the window has reached,
 as it does for a window `make_floating` is placing

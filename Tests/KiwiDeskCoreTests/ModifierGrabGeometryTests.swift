@@ -31,6 +31,20 @@ struct ModifierGrabGeometryTests {
         #expect(handle(380, 250) == Handle(x: 1, y: 0))
     }
 
+    @Test("the thirds fall at a third and two thirds of each side")
+    func thirdsBoundaries() {
+        // Just inside and just past each boundary, from the frame.
+        // Above the middle, so the centre cell reads its top corners.
+        let y = frame.midY - 10
+        let nudge: CGFloat = 2
+        let first = frame.minX + frame.width / 3
+        let second = frame.minX + frame.width * 2 / 3
+        #expect(handle(first - nudge, y) == Handle(x: -1, y: 0))
+        #expect(handle(first + nudge, y) == Handle(x: -1, y: -1))
+        #expect(handle(second - nudge, y) == Handle(x: 1, y: -1))
+        #expect(handle(second + nudge, y) == Handle(x: 1, y: 0))
+    }
+
     @Test("the centre cell takes the corner of its quadrant")
     func centre() {
         #expect(handle(240, 240) == Handle(x: -1, y: -1))
