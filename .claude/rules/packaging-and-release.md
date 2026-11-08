@@ -495,37 +495,44 @@ fails on the far side of the one irreversible step.
 **Its verification gate mirrors the `verify-gate` skill, and a
 change to one updates the others.** AGENTS.md §3 gives that skill
 the procedure, and two ship-grade copies re-state it — the ones
-where running a *stale* gate ships an artifact:
-`scripts/release.sh` (release build made unconditional) and the
-`verify` job in `release.yml`, which re-runs the gate against a
-pushed tag — the copy that catches a tag pushed by hand, which
-never met the script's (#487; branch protection cannot see tags,
-so the workflow is the only gate such a tag passes). Both copies
-are pinned to the skill by `VerifyGateParityTests`, which derives
-the command list from `SKILL.md` — extend that suite before
-shipping a further copy, and at a *third* ship-grade copy weigh
-one sealed verify script every copy calls over another scanner
-(the same past-two-mirrors escalation parity-tests.md applies to
-field lists). (Drift in ci.yml's copy weakens a PR check, not a
-release, so it sits outside the suite's ship-grade scope.)
+where running a *stale* gate ships an artifact.
+`scripts/release.sh` copies the skill's single run (release build
+made unconditional), pinned to `SKILL.md` by
+`VerifyGateParityTests`, which derives the command list from it.
+`release.yml` re-runs the gate against a pushed tag — the copy that
+catches a tag pushed by hand, which never met the script's (#487;
+branch protection cannot see tags, so the workflow is the only gate
+such a tag passes) — as a hand copy of ci.yml's parallel split
+(#3108): a `gate` job for the cheap refusals, one test job per test
+product with its `ExecTests` partitions, build and lint in one of
+them, and the release job `needs:` all of them.
+`ReleaseTestPartitionParityTests` holds its partitions to ci.yml's
+and its products to `Package.swift`, partitions only, never flags,
+so the ratchet difference below stays legal. Keep it a copy: a
+`workflow_call` share renames ci.yml's required checks to
+"caller / job", and the two must differ (strict Xcode, no ratchet,
+the vetted SHA, no `changes` filter). Extend those suites before
+shipping a further copy, and at a *third* ship-grade copy weigh one
+sealed verify script every copy calls over another scanner (the
+same past-two-mirrors escalation parity-tests.md applies to field
+lists).
 
-The `verify` job carries one named exemption, which the suite
-encodes structurally — its workflow pin scrapes only the skill's
-fast-inner-loop section: no `swift build -c release`. The
-obligation it leans on — **the release job must keep a
-`-c release` compile ahead of any submission or draft**; today
+The tag's test jobs carry one named exemption: no `swift build -c
+release`. The obligation it leans on — **the release job must keep
+a `-c release` compile ahead of any submission or draft**; today
 that is `build-app.sh`'s first act — is what lets the pipeline
 still refuse a tree that cannot build release without paying the
 same compile twice in sequence.
 
-**A job downstream of `verify` checks out
-`needs.verify.outputs.sha`, never a ref name.** A tag name is
+**A job downstream of `gate` checks out
+`needs.gate.outputs.sha`, never a ref name.** A tag name is
 re-resolved against the remote at each job's own start, so by
 name a single-job re-run — or a tag deleted and re-pushed
 mid-run — hands the job a tree the gate never saw. The release
-job's checkout comment carries the full argument; a future
-publish job (a tap bump, a Sparkle appcast) copies its shape,
-not ci.yml's `github.ref` template.
+job's checkout comment carries the full argument, and its
+assertion that the checkout resolved the pin is what refuses a
+run whose pin broke; a future publish job (a tap bump, a Sparkle
+appcast) copies its shape, not ci.yml's `github.ref` template.
 
 **Stamp the commit at build time; never check one in.** A commit
 cannot contain its own SHA, so a bump made while the release
@@ -760,7 +767,7 @@ its own joins its `needs` and its verdict (`CiRequiredJobTests` ▸
 the release job or the tag path (#1594).** `ci.yml`'s `Build`
 step passes `-warnings-as-errors`, so a new warning reds a PR
 someone is already reading; the release build and
-`release.yml`'s verify job take no ratchet, because a toolchain
+`release.yml`'s test jobs take no ratchet, because a toolchain
 bump that introduces a diagnostic would otherwise block a tag
 push — a release refused over a deprecation notice. That is the
 same asymmetry the rest of this section rests on: a PR is the
@@ -854,10 +861,13 @@ is review's.
 branch whose sole change is one `semantic` literal in
 `KiwiDeskVersion.swift`. What gates that tree is downstream —
 `main`'s push CI, `release.sh`'s second run and `release.yml`'s
-`verify` on the tag — so a change that moves one of those owes the
-skip a fresh look. The `changes` job runs the script from the BASE
-commit and only for this repository's own branches, so neither a PR
-nor a fork judges itself, and a new skip clause joins that script
+test jobs on the tag — so a change that moves one of those owes the
+skip a fresh look. Before the tag, main's push CI is the only run
+that tests the stamped tree, since phase B skips its gate on a tree
+match; that is why the tag tests itself rather than trusting it.
+The `changes` job runs the script from the BASE commit and only
+for this repository's own branches, so neither a PR nor a fork
+judges itself, and a new skip clause joins that script
 rather than a second exception beside it (`CiStampOnlyTests`).
 
 **A workflow that changes the tree opens a PR; it never writes to

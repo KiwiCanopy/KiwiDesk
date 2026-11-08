@@ -39,11 +39,11 @@ concurrency:
 # hole; it costs nothing and removes the class.
 env:
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
-  # One copy for both jobs, read by the shell like TAG above: a
-  # green Verify vouches for the exact toolchain the artifact is
-  # then built with, so the two pins must be one string — an
-  # Xcode bump that edited one job and not the other would leave
-  # both green while the artifact is built by a compiler Verify
+  # One copy for every macOS job, read by the shell like TAG
+  # above: green test jobs vouch for the exact toolchain the
+  # artifact is then built with, so the pins must be one string —
+  # an Xcode bump that edited one job and not another would leave
+  # all green while the artifact is built by a compiler the tests
   # never ran.
   XCODE: /Applications/Xcode_27.2.app
 
@@ -54,29 +54,23 @@ jobs:
   # skipping the gate entirely, and branch protection cannot see
   # tags. A bad merge to main is cheap to fix; a bad tag fans out
   # to Homebrew and the direct download and cannot be unshipped
-  # (#487). Tests fail, nothing ships: the release job `needs:`
-  # this one. VerifyGateParityTests pins this job's command list
-  # to the verify-gate skill that owns the procedure.
+  # (#487). The release job `needs:` the gate and every test job,
+  # so any of them failing ships nothing.
   #
-  # No `swift build -c release` here: the release job must keep
-  # that compile ahead of any submission or draft — today it is
-  # build-app.sh's first act — and the jobs run in sequence, so
-  # this copy would only lengthen the critical path. The full
-  # argument lives in packaging-and-release.md.
-  verify:
-    name: Verify
-    # xcode-27 for the same reason ci.yml pins it: the artifact
-    # is built by the toolchain the tree is developed and vetted
-    # on (#1500).
-    runs-on: xcode-27
+  # `gate` holds the cheap refusals, on Linux: a tag the
+  # milestone, the binary's version or main refuses costs seconds
+  # and no macOS runner.
+  gate:
+    name: Gate
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       # Read-only, for the milestone gate below.
       issues: read
-    # The commit this job vetted, for the release job to build.
-    # A tag NAME is re-resolved against the remote at each job's
-    # own checkout, so it cannot carry this assertion — see the
-    # release job's checkout for what would slip through.
+    # The commit this job vetted, for every later job to check
+    # out. A tag NAME is re-resolved against the remote at each
+    # job's own checkout, so it cannot carry this assertion — see
+    # the release job's checkout for what would slip through.
     outputs:
       sha: ${{ steps.audit.outputs.sha }}
     steps:
@@ -88,11 +82,10 @@ jobs:
           fetch-depth: 0
 
       # Backstop for scripts/release.sh's copy of this check. The
-      # script refuses to cut the tag at all; this catches a tag cut
-      # by hand, or on a machine without gh. Placed before Xcode is
-      # selected, so a release the milestone forbids costs seconds
-      # rather than a whole build — and withholds the artifacts,
-      # which is all CI can still do once the tag exists.
+      # script refuses to cut the tag at all; this catches a tag
+      # cut by hand, or on a machine without gh. A release the
+      # milestone forbids withholds the artifacts, which is all CI
+      # can still do once the tag exists.
       - name: Milestone must be clear
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,15 +111,6 @@ jobs:
         id: audit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      # Strict, from the one workflow-level pin — and unlike
-      # ci.yml's fallback, deliberately: see the release job's
-      # Select Xcode for the argument.
-      - name: Select Xcode
-        run: |
-          sudo xcode-select -s "$XCODE"
-          swift --version
-          xcodebuild -version
-
       # The one guard that stops a mislabelled binary shipping.
       # The tag and KiwiDeskVersion.semantic are two hand-written
       # copies of one number: release.sh stamps the constant and
@@ -134,9 +118,6 @@ jobs:
       # silently disagree the first time someone tags by hand.
       # Failing here costs a re-tag; not failing here ships a
       # binary whose --version output names a release it is not.
-      # First in the gate, before the build: every step in this
-      # job exists to fail a bad tag fast, and this one is the
-      # cheapest.
       - name: Verify the tag matches the binary
         run: |
           EXPECTED="${TAG#v}"
@@ -173,54 +154,123 @@ jobs:
           fi
           echo "tag and binary agree on $EXPECTED"
 
+  # The test jobs are a hand copy of ci.yml's split, one job per
+  # test product with its ExecTests partition (#3108), so the tag
+  # waits for the slowest job rather than the sum.
+  # ReleaseTestPartitionParityTests holds the partitions to
+  # ci.yml's and to Package.swift. Deliberately unlike ci.yml: a
+  # strict Xcode, no warning ratchet (#1594), the vetted SHA, no
+  # `changes` filter. A `workflow_call` share would rename ci.yml's
+  # required checks.
+  #
+  # No `swift build -c release` here: the release job must keep
+  # that compile ahead of any submission or draft — today it is
+  # build-app.sh's first act. packaging-and-release.md argues it.
+  test-gui:
+    name: Build, Lint & Test GUI
+    needs: gate
+    # xcode-27 for the same reason ci.yml pins it: the artifact
+    # is built by the toolchain the tree is developed and vetted
+    # on (#1500).
+    runs-on: xcode-27
+    permissions:
+      contents: read
+    steps:
+      # An empty sha falls back to the default branch here; the
+      # release job's assertion refuses that run before it ships.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+
+      # Strict, from the one workflow-level pin — and unlike
+      # ci.yml's fallback, deliberately: see the release job's
+      # Select Xcode for the argument.
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE"
+          swift --version
+          xcodebuild -version
+
       - name: Build
         run: swift build
 
       - name: Lint
         run: ./scripts/lint.sh
 
-      # One `swift test`: the two-command split died with the
-      # #494 tail-hang fix (.claude/rules/tests.md). ci.yml
-      # keeps a two-step over ExecTests for per-partition
-      # failure attribution; this job mirrors the skill instead,
-      # and VerifyGateParityTests pins it there.
-      - name: Test
-        run: swift test -q
+      # The skip/filter matches suite TYPE names, so exec-child
+      # suites carry the ExecTests prefix (.claude/rules/tests.md).
+      - name: Test (GUI)
+        run: >-
+          swift test
+          --test-product KiwiDeskGuiTests --skip ExecTests
 
+      - name: Test (GUI ExecTests)
+        run: >-
+          swift test
+          --test-product KiwiDeskGuiTests --filter ExecTests
+
+  test-core:
+    name: Test Core
+    needs: gate
+    runs-on: xcode-27
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE"
+          swift --version
+          xcodebuild -version
+
+      - name: Test (Core)
+        run: >-
+          swift test
+          --test-product KiwiDeskCoreTests --skip ExecTests
+
+      - name: Test (Core ExecTests)
+        run: >-
+          swift test
+          --test-product KiwiDeskCoreTests --filter ExecTests
 
   release:
     name: Build & draft release
-    needs: verify
+    # Plain `needs`: any result but success skips this job. `gate`
+    # is listed for its outputs as much as its verdict.
+    needs: [gate, test-gui, test-core]
     # xcode-27 for the same reason ci.yml pins it: the artifact
     # is built by the toolchain the tree is developed and vetted
     # on (#1500).
     runs-on: xcode-27
     permissions:
       # The draft and its assets — the one write this workflow
-      # does. Verify above runs with read only.
+      # does. The jobs above run with read only.
       contents: write
     steps:
       - uses: actions/checkout@v7
         with:
-          # The exact commit Verify vetted — never the tag name,
+          # The exact commit the gate vetted — never the tag name,
           # which is re-resolved against the remote at THIS job's
           # start. By name, a tag deleted and re-pushed after
-          # Verify passed (or a "Re-run failed jobs" of this job
+          # the tests passed (or a "Re-run failed jobs" of this job
           # alone, to which job outputs are replayed) would build
           # a tree that never met the gate. Everything below
           # reads the tag only as a NAME for the API — and the
           # one call that could recreate the ref, `gh release
           # create`, pins --target to this clone's HEAD.
-          ref: ${{ needs.verify.outputs.sha }}
+          ref: ${{ needs.gate.outputs.sha }}
           # Shallow is enough here: the tag-on-main assertion
           # that needed origin/main (fetch-depth: 0) lives in
-          # Verify now, and the release notes read nothing from
+          # the gate job, and the release notes read nothing from
           # this clone — `--generate-notes` is computed
           # server-side by the API.
 
       # The pin above fails OPEN if its wiring ever breaks: a
       # renamed step id or output key evaluates to an empty
-      # string with Verify still green, and checkout treats an
+      # string with the gate still green, and checkout treats an
       # empty `ref` as unset — falling back to the DEFAULT
       # branch's tip on a workflow_dispatch run, after which
       # every later check self-agrees on the wrong tree (the
@@ -228,16 +278,16 @@ jobs:
       # So prove the checkout resolved the pin, not a fallback.
       - name: Assert the vetted commit is checked out
         env:
-          VETTED: ${{ needs.verify.outputs.sha }}
+          VETTED: ${{ needs.gate.outputs.sha }}
         run: |
           if [ -z "$VETTED" ]; then
-            echo "::error::verify's sha output is empty — the" \
+            echo "::error::the gate's sha output is empty — the" \
                  "audit step's wiring broke"
             exit 1
           fi
           if [ "$(git rev-parse HEAD)" != "$VETTED" ]; then
             echo "::error::checked out $(git rev-parse HEAD)" \
-                 "but verify vetted $VETTED"
+                 "but the gate vetted $VETTED"
             exit 1
           fi
 

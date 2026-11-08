@@ -38,7 +38,7 @@ struct CiRequiredJobTests {
 
     /// The package's test targets, read from the manifest so a new
     /// one is owed a job.
-    private func testTargets() throws -> [String] {
+    static func testTargets() throws -> [String] {
         let manifest = try String(
             contentsOf: scriptFixtureRepoRoot()
                 .appendingPathComponent("Package.swift"),
@@ -84,7 +84,7 @@ struct CiRequiredJobTests {
             CiPathFilterTests.jobBlock($0, in: yaml)
         }
         try #require(!jobs.isEmpty, "no job read")
-        for target in try testTargets() {
+        for target in try Self.testTargets() {
             let product = "--test-product \(target) "
             let owners = jobs.filter {
                 $0.contains(product + "--skip ExecTests")
