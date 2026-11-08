@@ -73,15 +73,14 @@ final class KeySequenceHintController {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         panel.wearsActiveLook = glass.enabled && glass.wearsActiveLook
+        let view = KeySequenceHintView(
+            hint: hint,
+            reference: reference,
+            glass: glass
+        )
         let host = NSHostingView(
-            rootView: LocaleScopedRoot {
-                KeySequenceHintView(
-                    hint: hint,
-                    reference: reference,
-                    glass: glass
-                )
-            }
-            .environmentObject(LocalizationManager.shared)
+            rootView: LocaleScopedRoot { view }
+                .environmentObject(LocalizationManager.shared)
         )
         let size = host.fittingSize
         panel.contentView = host
@@ -96,6 +95,15 @@ final class KeySequenceHintController {
             display: true
         )
         panel.orderFrontRegardless()
+        // The panel takes no focus, so VoiceOver hears the step.
+        NSAccessibility.post(
+            element: NSApp as Any,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: hint.spokenBreadcrumb,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+            ]
+        )
     }
 
     private func makePanel() -> ActiveGlassPanel {

@@ -94,6 +94,29 @@ struct KeySequenceHintTests {
         #expect(!hint.title.isEmpty)
     }
 
+    /// The manager's beep defaults silent, so the wiring is the
+    /// one place an unbound key makes a sound (tests.md ▸ an
+    /// inverted seam takes the two-sided guard).
+    @Test("An unbound key's beep is the panel refusal sound, once")
+    func beepIsWired() throws {
+        let core = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        var wired = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            let text = try SourceScan.strippedSource(at: file)
+            wired += text.components(separatedBy: "keys.beep =").count - 1
+        }
+        #expect(wired == 1)
+        let boot = try SourceScan.strippedSource(
+            at: core.appendingPathComponent("App/KiwiCore+Bootstrap.swift")
+        )
+        #expect(
+            boot.contains(
+                "keys.beep = { [weak self] in self?.soundPanelRefusal() }"
+            )
+        )
+    }
+
     @Test("The app hands Core's progress to the hint panel")
     func wiring() throws {
         let text = try SourceScan.strippedSource(

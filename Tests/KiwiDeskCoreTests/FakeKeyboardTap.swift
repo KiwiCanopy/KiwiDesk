@@ -9,6 +9,10 @@ final class FakeKeyboardTap: KeyboardTapHandle {
     let fire: KeyboardTap.Fire
     var rows: [SideTapRow] = []
     var tapRows: [ModifierTapRow] = []
+    var sequences: [KeySequence] = []
+    /// Decisions a test queues for the manager to drain (#1871).
+    var decisions: [KeySequenceDecision] = []
+    var closeRequests = 0
     var stopped = false
     /// How many times the manager handed it rows.
     var handed = 0
@@ -25,6 +29,12 @@ final class FakeKeyboardTap: KeyboardTapHandle {
         handed += 1
         self.rows = rows.sides
         tapRows = rows.taps
+        sequences = rows.sequences
     }
     func stop() { stopped = true }
+    func drainSequenceDecisions() -> [KeySequenceDecision] {
+        defer { decisions = [] }
+        return decisions
+    }
+    func requestSequenceClose() { closeRequests += 1 }
 }

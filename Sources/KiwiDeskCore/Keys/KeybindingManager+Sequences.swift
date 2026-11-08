@@ -98,11 +98,11 @@ extension KeybindingManager {
     /// at its next press, so the decision stays on its thread.
     func closeSequence() {
         guard sequenceOpen else { return }
-        sequenceCloser()
+        keyboardTap?.requestSequenceClose()
         noteSequenceClosed()
     }
 
-    private func noteSequenceClosed() {
+    func noteSequenceClosed() {
         guard sequenceOpen else { return }
         sequenceOpen = false
         onSequenceProgress(nil)

@@ -39,6 +39,18 @@ struct KeySequenceRouter: Sendable {
 
     mutating func close() { open = nil }
 
+    /// A tap leader, which the modifier-tap detector decided: opens
+    /// its sequence, or closes it when it is the one open.
+    mutating func openLeader(_ index: Int) -> Outcome {
+        guard sequences.indices.contains(index) else { return .pass }
+        if open?.sequence == index {
+            open = nil
+            return .closed
+        }
+        open = (index, [])
+        return .stepped
+    }
+
     var isOpen: Bool { open != nil }
 
     /// The open sequence's path, nil while closed.
@@ -64,7 +76,7 @@ struct KeySequenceRouter: Sendable {
         guard let current = open else {
             guard !isRepeat,
                 let index = Self.match(
-                    sequences.map(\.leader),
+                    sequences.map { $0.leader.isTap ? nil : $0.leader },
                     keyCode: keyCode,
                     held: held
                 )
@@ -123,12 +135,14 @@ struct KeySequenceRouter: Sendable {
     /// The index of the chord a press answers, through the side
     /// tap's one matcher, a keypad digit standing for its twin.
     private static func match(
-        _ combos: [KeyCombo],
+        _ combos: [KeyCombo?],
         keyCode: UInt32,
         held: HotkeyModifiers
     ) -> Int? {
         let rows = combos.enumerated().flatMap { index, combo in
-            ([combo.keyCode]
+            guard let combo else { return [SideTapRow]() }
+            return
+                ([combo.keyCode]
                 + [KeypadKeys.keypadTwin(of: combo.keyCode)]
                 .compactMap { $0 })
                 .map {

@@ -16,6 +16,8 @@ extension KeybindingManager {
         // swallow the sided press the recorder reads (#2601).
         tapBindings = [:]
         keyboardTap?.setRows(.empty)
+        // New rows close the tap's open sequence; the panel follows.
+        noteSequenceClosed()
     }
 
     func activate(_ layer: String) {
@@ -23,7 +25,7 @@ extension KeybindingManager {
         activationFailures = []
         noteHyperShortcuts()
         guard !isSuspended else {
-            _ = armKeyboardTap(sides: [], taps: [])
+            _ = armKeyboardTap(sides: [], taps: [], sequences: [])
             return
         }
         var hyperRows: [(KeyCombo, Int32)] = []
@@ -90,8 +92,11 @@ extension KeybindingManager {
         }
         armHyper(hyperRows)
         let taps = modifierTapRows(in: layer)
-        if !armKeyboardTap(sides: sideRows, taps: taps) {
+        let held = sequences(for: layer)
+        if !armKeyboardTap(sides: sideRows, taps: taps, sequences: held) {
             activationFailures.formUnion(taps.map(\.0))
+            // A leader has no Carbon fallback: the tap is its door.
+            activationFailures.formUnion(held.map(\.leader))
             // No tap: the chord falls back to Carbon either-side,
             // as with the switch off, and a collapse is refused.
             for (combo, ref) in sideRows {

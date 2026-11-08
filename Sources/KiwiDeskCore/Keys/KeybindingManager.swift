@@ -1,4 +1,4 @@
-import AppKit
+import Foundation
 
 /// Abstraction over Carbon hotkey registration for test
 /// isolation. An implementor never fires the handler of a FAILED
@@ -53,10 +53,9 @@ public final class KeybindingManager {
     var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void = {
         _ in
     }
-    /// The unbound-key beep; `makeTestCore` pins it silent.
-    var beep: @MainActor () -> Void = { NSSound.beep() }
-    /// Asks the tap to close its open sequence at its next press.
-    var sequenceCloser: @MainActor () -> Void = {}
+    /// The unbound-key sound: the core wires the refusal sound
+    /// (`KiwiCore+Bootstrap`), so a bare manager stays silent.
+    var beep: @MainActor () -> Void = {}
     /// Whether the hint panel was last told a sequence is open.
     var sequenceOpen = false
     private var layerIcons: [String: String] = [:]

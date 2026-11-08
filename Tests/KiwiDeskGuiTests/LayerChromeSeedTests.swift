@@ -14,7 +14,11 @@ import Testing
 @Suite("New layers carry the app-chrome rows")
 struct LayerChromeSeedTests {
     /// `KeyLayer(` sites that seed nothing, and why.
-    private static let allowed: [String: String] = [:]
+    private static let allowed: [String: String] = [
+        "KeySequenceHint.swift":
+            "a key sequence step's end keys as a layer the Shortcuts"
+            + " side files (#1871): a drawn copy, never stored"
+    ]
 
     @Test("every layer-authoring site seeds through appChromeRows")
     func layerSitesSeedThroughTheSeam() throws {

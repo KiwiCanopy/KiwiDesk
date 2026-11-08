@@ -196,6 +196,16 @@ reading). Lua itself is uncapped — the
 argument is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes
 may give an action a second chord in a layer*.
 
+**A key sequence is one row, keyed by its leader (#1871).** A
+reader of a layer's rows that registers or runs them takes
+`KeyLayer.pressBindings`, one that asks what an action does takes
+`actionBindings` (end keys included), and one that rewrites an
+action's Lua takes `mappingActions`, which reaches the end keys;
+any other reader carries a sequence whole, its `steps` with it. A
+new Core reader classifies itself in
+`KeySequenceReaderCensusTests`, and a profile holds or overrides a
+whole sequence, never a key inside one (`KeySequenceReaderTests`).
+
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`
 and `symbol` one by one, so a field added to `KeyBindingMeta`

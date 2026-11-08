@@ -37,8 +37,7 @@ extension APIReference {
         ),
         "define_sequence": APIRecord(
             "Defines a key sequence: a leader chord, then keys that "
-                + "run a function or open more keys (the options "
-                + "table takes its name and layer).",
+                + "run a function or open more keys.",
             .text("leader"),
             .table("keys"),
             .table("options", optional: true)

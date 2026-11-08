@@ -77,6 +77,7 @@ struct KeyBindingComparatorTests {
     func storedPropertyCount() {
         let children = Mirror(reflecting: row).children
         // id + combo + lua + kind + label + desc + group + symbol
-        #expect(children.count == 8)
+        // + steps, which `sameAction` compares whole (#1871)
+        #expect(children.count == 9)
     }
 }

@@ -36,6 +36,10 @@ struct SideTapRow: Hashable, Sendable {
 /// swallowing one first, and a listen-only one hears every event
 /// in its mask, swallowed or not.
 enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
+    /// Key sequences (#1871): key-down, swallowing a leader and every
+    /// key while one is open, which outranks a sided chord; a
+    /// mouse-down closes an open one.
+    case sequences
     /// Sided chords (#2601): key-down, swallowing a match.
     case sides
     /// Modifier taps (#1872): modifier changes, key-down and
@@ -45,13 +49,17 @@ enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
 
     var mask: CGEventMask {
         switch self {
+        case .sequences: Self.sequencesMask
         case .sides: Self.sidesMask
         case .modifierTaps: Self.modifierTapsMask
         }
     }
 
-    var swallows: Bool { self == .sides }
+    var swallows: Bool { self != .modifierTaps }
 
+    static let sequencesMask =
+        bit(.keyDown) | bit(.leftMouseDown) | bit(.rightMouseDown)
+        | bit(.otherMouseDown)
     static let sidesMask = bit(.keyDown)
     static let modifierTapsMask =
         bit(.flagsChanged) | bit(.keyDown) | bit(.leftMouseDown)
@@ -78,6 +86,9 @@ enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
 struct KeyboardTapRows: Equatable, Sendable {
     var sides: [SideTapRow] = []
     var taps: [ModifierTapRow] = []
+    /// The current layer's key sequences (#1871); a tap leader also
+    /// rides `taps`, under `KeyboardTap.leaderID(_:)`.
+    var sequences: [KeySequence] = []
 
     static let empty = KeyboardTapRows()
 
@@ -86,6 +97,7 @@ struct KeyboardTapRows: Equatable, Sendable {
         Set(
             KeyboardTapConsumer.allCases.filter {
                 switch $0 {
+                case .sequences: !sequences.isEmpty
                 case .sides: !sides.isEmpty
                 case .modifierTaps: !taps.isEmpty
                 }
@@ -99,9 +111,21 @@ struct KeyboardTapRows: Equatable, Sendable {
 protocol KeyboardTapHandle: AnyObject {
     /// The consumers it was built for; a change rebuilds it.
     var consumers: Set<KeyboardTapConsumer> { get }
-    /// The rows each consumer answers; read on its thread.
+    /// The rows each consumer answers; read on its thread. New rows
+    /// close an open key sequence.
     func setRows(_ rows: KeyboardTapRows)
     func stop()
+    /// The sequence decisions made since the last drain, in order
+    /// (#1871): `fire(sequenceFireID)` asks the main actor to take
+    /// them.
+    func drainSequenceDecisions() -> [KeySequenceDecision]
+    /// Closes an open sequence at the tap's next event.
+    func requestSequenceClose()
+}
+
+extension KeyboardTapHandle {
+    func drainSequenceDecisions() -> [KeySequenceDecision] { [] }
+    func requestSequenceClose() {}
 }
 
 /// The one keyboard event tap (#2601, #1872), run only while a
@@ -126,7 +150,12 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     private let router = OSAllocatedUnfairLock(
         initialState: ModifierTapRouter()
     )
-    private let fire: Fire
+    /// The open-or-closed sequence state, decided on this thread
+    /// (#1871), and the decisions waiting for the main actor.
+    let sequenceState = OSAllocatedUnfairLock(
+        initialState: SequenceTapState()
+    )
+    let fire: Fire
     private let report: Report
     // Tap-thread state; `installed` is written before the start
     // semaphore signals and read after it waits.
@@ -162,6 +191,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     func setRows(_ rows: KeyboardTapRows) {
         sideRows.withLock { $0 = rows.sides }
         router.withLock { $0.setRows(rows.taps) }
+        sequenceState.withLock { $0.router.setSequences(rows.sequences) }
     }
 
     func stop() {
@@ -233,6 +263,8 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         for consumer in KeyboardTapConsumer.allCases
         where consumers.contains(consumer) {
             switch consumer {
+            case .sequences:
+                if sequenceEvent(type, event) { swallowed = true }
             case .sides:
                 if !swallowed, type == .keyDown, sideKey(event) {
                     swallowed = true
@@ -288,7 +320,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     /// and arms the gap timer a single tap waits on.
     private func route(_ input: ModifierTapDetector.Input) {
         let (ids, pending) = router.withLock { $0.feed(input) }
-        ids.forEach(fire)
+        ids.forEach(fireOrOpen)
         if let pending {
             DispatchQueue.global(qos: .userInteractive).asyncAfter(
                 deadline: .now() + ModifierTapDetector.gapLimit
@@ -296,7 +328,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
                 guard let self,
                     let id = self.router.withLock({ $0.expire(pending) })
                 else { return }
-                self.fire(id)
+                self.fireOrOpen(id)
             }
         }
     }

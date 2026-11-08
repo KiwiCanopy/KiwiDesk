@@ -145,6 +145,20 @@ editing here:
     (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
     `KeyboardTapRoutingTests` ▸ `noTapRowNoConsumer`,
     `rowsNameConsumers`).
+  - **`.sequences` decides an open key sequence on the tap's
+    thread (#1871)**, from a leader the tap itself sees — a
+    key-down leader through `KeySequenceRouter.press`, a tap
+    leader through `.modifierTaps` under `KeyboardTap.leaderID` —
+    never from a main-actor hop, or the first keys after a leader
+    reach the front app. It is declared first, so an open sequence
+    outranks a sided chord, and swallows every key-down while one
+    is open, which `.modifierTaps` still hears. A leader never
+    reaches Carbon: activation skips a press row on its chord, and
+    a refused tap lists the leader in `activationFailures`. The
+    main actor closes a sequence only through
+    `requestSequenceClose`, read at the tap's next event, and new
+    rows close it, the manager telling the hint panel in the same
+    turn (`KeySequenceTapTests`, `KeySequenceRouterTests`).
   - **`.sides` answers only the chords a sided row names**, the
     either-side row on such a chord included, and only while
     `modifierSides` is on; every other chord stays a Carbon
