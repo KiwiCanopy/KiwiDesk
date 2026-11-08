@@ -14269,6 +14269,20 @@ with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Custom. (#602, PR #638, #2246)
 
+:::unreleased
+**The side switch draws titles only (#1229, owner ruling
+2026-11-01, amending #2245).** One line, every side always
+visible and clickable; a side's chord stands in for its title —
+every side's while ⌘ is held, one side's while the pointer is on
+it — in a width reserved for the wider of the two, so the switch
+never changes size. A fourth side's chord did not fit beside its
+title on one line, and the openers are listed elsewhere too: on
+the Simple page, in the welcome tour and in the shortcut recorder.
+So the chord that links a key to its side above is shown on
+demand rather than printed. The panel's ceiling rises from 452 to
+488 pt on every side, for the Desktops side's two screen rows.
+:::
+
 **The key panel never takes activation, so there is none to
 hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
 non-activating panel (#1875): it takes the keyboard while the

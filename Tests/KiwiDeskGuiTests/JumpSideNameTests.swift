@@ -6,7 +6,7 @@ import Testing
 
 /// The key panel's sides by name and by key (#2245): each side's
 /// shortcut row reads "Show" and the side's VoiceOver name, and
-/// the scope switch prints each side's live chord as a hint.
+/// the scope switch shows each side's live chord as a hint.
 /// `ShortcutsPanelNounTests` holds the pairing per catalog; this
 /// suite holds that the views draw the keys it compares.
 @MainActor
@@ -71,6 +71,10 @@ struct JumpSideNameTests {
         )
         let chrome = try Self.source("JumpPanelChrome.swift")
         #expect(chrome.occurrences(of: "hints: model.chords") == 1)
+        // Titles only: every chord stands in while ⌘ is held (#1229).
+        let squashed = chrome.split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(squashed.occurrences(of: "showsHints:model.commandHeld") == 1)
         // VoiceOver hears the chord in the panel's own frame, as
         // the layout tiles speak theirs.
         #expect(
@@ -119,23 +123,14 @@ struct JumpSideNameTests {
 
     @Test("a chord is the segment's hint, never its name")
     func chordIsAHint() throws {
-        let picker = SourceScan.stripComments(
-            try String(
-                contentsOf: SourceScan.repoRoot(from: #filePath)
-                    .appendingPathComponent(
-                        "Sources/KiwiDesk/Settings/Components/"
-                            + "Common/SegmentedPicker.swift"
-                    ),
-                encoding: .utf8
-            )
-        )
+        let picker = try SourceScan.segmentedPickerSource(from: #filePath)
         #expect(
             picker.occurrences(
                 of: ".accessibilityHint(hints[option.value].map(spokenHint)"
             ) == 1
         )
         let body = try #require(
-            picker.range(of: "private func hintText(")
+            picker.range(of: "func hintText(")
         )
         let rest = picker[body.lowerBound...]
         let end = try #require(rest.range(of: "\n    }\n"))

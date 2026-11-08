@@ -13,16 +13,20 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// labels' sum and shares that equally, which shortens the
     /// longest. A strip that hugs its content (#1726) sizes every
     /// segment to the widest label at the selected weight instead.
-    private let hugsLabels: Bool
+    let hugsLabels: Bool
     /// Each segment keeps its own label's width, reserved at the
     /// selected weight so picking never changes it, without the
     /// equal sizing `hugsLabels` adds — a strip whose longest label
     /// must not cost every segment its width (#2246).
-    private let reservesWeight: Bool
-    /// A key drawn in secondary ink after a segment's title, and
-    /// read as that segment's VoiceOver hint, never its name. A new
-    /// caller adds its ground to the contrast suite's pairings.
-    private let hints: [Value: String]
+    let reservesWeight: Bool
+    /// A key that stands in for a segment's title while shown —
+    /// under the pointer, or every segment's while `showsHints` —
+    /// in a width reserved for the wider of the two, so the strip
+    /// never changes size (#1229 ▸ Tab bar). Read as the segment's
+    /// VoiceOver hint, never its name. A new caller adds its ground
+    /// to the contrast suite's pairings.
+    let hints: [Value: String]
+    let showsHints: Bool
     /// The words VoiceOver reads a hint in.
     private let spokenHint: (String) -> String
     /// A segment's name for VoiceOver where its title is a glyph
@@ -33,16 +37,18 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// Optional field help text (#94).
     private let help: String?
     /// A neutral pill for a choice no hue may mark (#2777 ruling 14).
-    private let neutral: Bool
+    let neutral: Bool
     @Namespace private var pillSpace
-    @State private var hoveredIndex: Int?
+    @State var hoveredIndex: Int?
+    /// The segment under the pointer, selected or not.
+    @State var pointerIndex: Int?
     @FocusState private var focused: Bool
     @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
+    var reduceMotion
+    @Environment(\.isEnabled) var isEnabled
     /// KiwiHub's selection inside it (#2569); elsewhere its defaults
     /// are this picker's own Settings tokens.
-    @Environment(\.kiwiHubPaint) private var paint
+    @Environment(\.kiwiHubPaint) var paint
 
     init(
         _ label: String? = nil,
@@ -51,6 +57,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         hugsLabels: Bool = false,
         reservesWeight: Bool = false,
         hints: [Value: String] = [:],
+        showsHints: Bool = false,
         spokenHint: @escaping (String) -> String = { $0 },
         spokenTitles: [Value: String] = [:],
         selection: Binding<Value>,
@@ -64,6 +71,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.hugsLabels = hugsLabels
         self.reservesWeight = reservesWeight
         self.hints = hints
+        self.showsHints = showsHints
         self.spokenHint = spokenHint
         self.spokenTitles = spokenTitles
         self._selection = selection
@@ -107,25 +115,6 @@ struct SegmentedPicker<Value: Hashable>: View {
         hugsLabels
             ? AnyLayout(EqualSegmentsLayout(spacing: 2))
             : AnyLayout(HStackLayout(spacing: 2))
-    }
-
-    /// A hugging strip sizes each label by the selected weight
-    /// whatever the state, so picking never changes its width.
-    @ViewBuilder private func labelText(
-        _ title: String,
-        selected: Bool
-    ) -> some View {
-        let label = Text(title)
-            .font(selected ? .body.weight(.semibold) : .callout)
-            .lineLimit(1)
-        if hugsLabels || reservesWeight {
-            Text(title)
-                .font(.body.weight(.semibold))
-                .hidden()
-                .overlay { label }
-        } else {
-            label
-        }
     }
 
     /// The drawn face; `track` adds focus and accessibility.
@@ -172,7 +161,15 @@ struct SegmentedPicker<Value: Hashable>: View {
                 spokenValue ?? selectedIndex.map { options[$0].title } ?? ""
             )
             .onChange(of: isEnabled) { _, now in
-                if !now { hoveredIndex = nil }
+                if !now {
+                    hoveredIndex = nil
+                    pointerIndex = nil
+                }
+            }
+            // A panel ordered out under the pointer sends no exit.
+            .onDisappear {
+                hoveredIndex = nil
+                pointerIndex = nil
             }
     }
 
@@ -219,6 +216,11 @@ struct SegmentedPicker<Value: Hashable>: View {
         .focusable(false)
         .accessibilityLabel(spokenTitles[option.value] ?? option.title)
         .onHover { inside in
+            if inside, isEnabled {
+                pointerIndex = index
+            } else if pointerIndex == index {
+                pointerIndex = nil
+            }
             updateHover(
                 inside: inside,
                 selected: selected,
@@ -234,67 +236,6 @@ struct SegmentedPicker<Value: Hashable>: View {
             selected ? [.isSelected] : []
         )
         .accessibilityHint(hints[option.value].map(spokenHint) ?? "")
-    }
-
-    private func segmentLabel(
-        _ title: String,
-        hint: String?,
-        selected: Bool,
-        index: Int
-    ) -> some View {
-        HStack(spacing: 5) {
-            labelText(title, selected: selected)
-                .foregroundStyle(
-                    selected && !neutral
-                        ? AnyShapeStyle(paint.selectionInk) : restInk(index)
-                )
-            if let hint {
-                hintText(
-                    hint,
-                    selected: selected,
-                    hovered: hoveredIndex == index
-                )
-            }
-        }
-        .lineLimit(1)
-        .padding(.vertical, 4)
-        .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity)
-        .background(
-            Capsule().fill(
-                isEnabled && !selected && hoveredIndex == index
-                    ? paint.fill(paint.rowHover) : AnyShapeStyle(.clear)
-            )
-        )
-        .animation(
-            reduceMotion ? nil : .easeOut(duration: 0.12),
-            value: hoveredIndex
-        )
-        .contentShape(Capsule())
-    }
-
-    /// The selected segment's ink is one value, measured on each
-    /// mode's fill; the hover lift takes full ink, `ink2`
-    /// falling under 4.5:1 on it in dark.
-    private func hintText(
-        _ hint: String,
-        selected: Bool,
-        hovered: Bool
-    ) -> some View {
-        Text(hint)
-            .font(.callout)
-            .foregroundStyle(
-                selected
-                    ? AnyShapeStyle(paint.selectionInkSecondary)
-                    : paint.tinted
-                        ? hovered
-                            ? AnyShapeStyle(paint.hoverInk ?? .primary)
-                            : AnyShapeStyle(.secondary)
-                        : AnyShapeStyle(
-                            hovered ? SettingsTheme.ink : SettingsTheme.ink2
-                        )
-            )
-            .accessibilityHidden(true)
     }
 
     private func updateHover(
@@ -340,7 +281,7 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     /// An unselected label's ink: the theme's, or on KiwiHub's Fill
     /// the panel's own hierarchy and its hover ink (gui.md).
-    private func restInk(_ index: Int) -> AnyShapeStyle {
+    func restInk(_ index: Int) -> AnyShapeStyle {
         guard paint.tinted else { return AnyShapeStyle(SettingsTheme.ink) }
         if hoveredIndex == index, let ink = paint.hoverInk {
             return AnyShapeStyle(ink)
