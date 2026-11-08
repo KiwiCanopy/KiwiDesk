@@ -45,6 +45,15 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
+    /// `gui.json`'s `tiling` group (#3008) — additive, as `desktop`.
+    struct Tiling: Codable {
+        var startGlobal: Bool?
+
+        enum CodingKeys: String, CodingKey {
+            case startGlobal = "start_global"
+        }
+    }
+
     /// `gui.json`'s `hyper` group (#1870) — additive, as `desktop`.
     /// Off is stored as `"off"`, never left out, so the group
     /// always carries its one leaf. Strict: a key name this build
@@ -132,6 +141,7 @@ extension AppWideSettings {
         desktop: Desktop? = nil,
         space: Space? = nil,
         mode: Mode? = nil,
+        tiling: Tiling? = nil,
         vision: Vision? = nil,
         hyper: Hyper? = nil,
         kiwihub: KiwiHub? = nil,
@@ -150,6 +160,7 @@ extension AppWideSettings {
             spaceSlideDuration = Self.clampedSlideDuration(ms)
         }
         if let cue = mode?.cue { modeCue = cue }
+        if let start = tiling?.startGlobal { tilingStartGlobal = start }
         hyperKey = hyper?.key
         if let keys = kiwihub?.key { kiwiHubKeys = keys }
         if let sides = modifier?.sides { modifierSides = sides }
@@ -192,6 +203,7 @@ extension AppWideSettings {
         )
     }
     var mode: Mode { Mode(cue: modeCue) }
+    var tiling: Tiling { Tiling(startGlobal: tilingStartGlobal) }
     var hyper: Hyper { Hyper(key: hyperKey) }
     var kiwihub: KiwiHub { KiwiHub(key: kiwiHubKeys) }
     var modifier: Modifier { Modifier(sides: modifierSides) }

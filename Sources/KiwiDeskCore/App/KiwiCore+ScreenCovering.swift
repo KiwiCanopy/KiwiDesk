@@ -93,6 +93,7 @@ extension KiwiCore {
     /// KiwiVision plate alike.
     func shelfStandsDown(on display: DisplayID, covered: Bool) -> Bool {
         covered || showsMaximized(on: display)
+            || tilingOffHidesShelf(on: display)
     }
 
     /// Whether `display` shows something no overlay draws over:

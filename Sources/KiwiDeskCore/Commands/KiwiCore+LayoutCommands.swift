@@ -78,6 +78,8 @@ extension KiwiCore {
             response = mouseCommand(command, args)
         } else if command.hasPrefix("maximize.") {
             response = maximizeSettingsCommand(command, args)
+        } else if command.hasPrefix("tiling.") {
+            response = tilingSettingsCommand(command, args)
         } else {
             response = settingsCommand(command, args)
         }

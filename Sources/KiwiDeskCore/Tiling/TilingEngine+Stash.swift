@@ -178,7 +178,7 @@ extension TilingEngine {
                     // would ever bring them back from the corner.
                     capturesOriginal: EffectiveFloat.applies(
                         isFloating: window.isFloating,
-                        mode: space.mode
+                        mode: state.placementMode(of: space)
                     )
                 )
             }

@@ -73,14 +73,14 @@ extension KiwiCore {
             let originID = state.workspaces.space(of: id),
             let origin = state.workspaces[originID],
             origin.windows.contains(id),
-            origin.mode != .floating,
+            state.placementMode(of: origin) != .floating,
             state.windows[id]?.isFloating == false,
             let destID = state.workspaces.activeSpace(on: display),
             destID != originID,
             let dest = state.workspaces[destID],
             // A floating-mode destination has no layout to make
             // room in; the drop-commit relocate handles it.
-            dest.mode != .floating
+            state.placementMode(of: dest) != .floating
         else { return }
         // The #445 sticky gate, once per gesture: the refusal
         // pill should not re-flash on every dwell while the

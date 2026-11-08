@@ -747,6 +747,17 @@ Hidden
 ([`monocle.set_maximize_windows`](lua-reference.md#monocleset_maximize_windows)).
 :::
 
+:::unreleased
+`toggle_tiling [space]` turns a Space's tiling off and back on, and
+`set_tiling <true|false> [space]` sets it; the windows stay where
+they are while it is off. `set_tiling_start_global <true|false>`,
+`tiling.set_start <true|false|null> [space]`,
+`tiling.set_off_hides_borders <true|false>` and
+`tiling.set_off_hides_bars <true|false>` set where Spaces start and
+what a Space with tiling off hides
+([`toggle_tiling`](lua-reference.md#toggle_tiling)).
+:::
+
 `center_floating` moves the focused floating window to the middle of
 its screen at its size
 ([`center_floating`](lua-reference.md#center_floating)).

@@ -326,6 +326,7 @@ extension KiwiCore {
         // Every remembered window, a hidden app's included (#1669).
         state.renameRememberedSpace(source, to: target)
         spaceHistory.trails.rekey(source, to: target)  // #1655
+        state.rekeyTilingToggle(source, to: target)  // #3008
         rekeyStackFlips(source, to: target)  // #2771
         rekeySessionRatios(source, to: target, under: origin.arrangement)
     }

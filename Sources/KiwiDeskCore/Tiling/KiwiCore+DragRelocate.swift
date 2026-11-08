@@ -209,7 +209,7 @@ extension KiwiCore {
             destID != originID,
             let dest = state.workspaces[destID]
         else { return }
-        if !window.isFloating, dest.mode != .floating {
+        if !window.isFloating, state.placementMode(of: dest) != .floating {
             state.setFloating(id, true)
         }
         commitCrossDisplayDrop(

@@ -19,7 +19,7 @@ extension KiwiCore {
         EffectiveFloat.applies(
             isFloating: state.windows[id]?.isFloating == true,
             mode: floatPlacementSpace(of: id).flatMap {
-                state.workspaces[$0]?.mode
+                state.placementMode(of: $0)
             }
         )
     }

@@ -115,6 +115,9 @@ extension StatusItemController {
         overview.target = self
         overview.image = symbol("rectangle.3.group")
         menu.addItem(overview)
+        if !tilingIdle, !warning, let tiling = makeTilingItem() {
+            menu.addItem(tiling)
+        }
         let settings = NSMenuItem(
             title: L("menu.settings", "Settings…"),
             action: #selector(openDashboard),

@@ -155,7 +155,7 @@ extension KiwiCore {
             return
         }
         guard let space = activeSpace,
-            space.mode != .floating,
+            state.placementMode(of: space) != .floating,
             state.windows[id]?.isFloating == false
         else { return }
         // A tiled-sticky traveler (#414 v2) is an on-screen

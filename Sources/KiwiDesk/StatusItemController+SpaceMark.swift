@@ -15,6 +15,7 @@ extension StatusItemController {
     nonisolated private static let height: CGFloat = 18
     private static let gap: CGFloat = 5
     private static let dividerHeight: CGFloat = 12
+    private static let markerGap: CGFloat = 2
 
     func applySpaceMark(
         _ mark: StatusSpaceMark,
@@ -52,7 +53,15 @@ extension StatusItemController {
     /// The button's name and tooltip: the layer, then each
     /// screen's Space in the drawn order.
     static func spaceMarkName(_ mark: StatusSpaceMark) -> String {
-        let names = screens(of: mark).map(\.space.raw)
+        let names = screens(of: mark).map { screen in
+            screen.tilingOff
+                ? L(
+                    "menu.status.space.tiling_off",
+                    "%@, tiling off",
+                    screen.space.raw
+                )
+                : screen.space.raw
+        }
         let spaces = LocalizedList.join(names)
         let several = names.count > 1
         if let layer = mark.layer {
@@ -93,13 +102,28 @@ extension StatusItemController {
             + screens(of: mark).map(\.glyph)
     }
 
+    /// The Space Bar's tiling-off marker (#3008), drawn right after
+    /// its Space's glyph with no divider.
+    static let tilingOffMarker = StatusSpaceMark.Glyph.symbol("pause")
+
+    /// Which glyphs carry the tiling-off marker after them, in
+    /// `spaceMarkGlyphs`' order.
+    static func markedGlyphs(_ mark: StatusSpaceMark) -> [Bool] {
+        (mark.layer == nil ? [] : [false])
+            + screens(of: mark).map(\.tilingOff)
+    }
+
     static func spaceMarkImage(
         _ mark: StatusSpaceMark
     ) -> SpaceMarkImage {
         let glyphs = spaceMarkGlyphs(mark)
         let runs = glyphs.map(Run.init)
+        let marked = markedGlyphs(mark)
+        let marker = Run(tilingOffMarker)
+        let markerWidth = marker.size.width + markerGap
         var width = runs.reduce(0) { $0 + $1.size.width }
         width += CGFloat(runs.count - 1) * (gap * 2 + 1)
+        width += CGFloat(marked.filter { $0 }.count) * markerWidth
         let size = CGSize(width: max(width, 1), height: height)
         let image = SpaceMarkImage(size: size, flipped: false) { _ in
             var x: CGFloat = 0
@@ -116,6 +140,10 @@ extension StatusItemController {
                 }
                 run.draw(atX: x)
                 x += run.size.width
+                if marked[index] {
+                    marker.draw(atX: x + markerGap)
+                    x += markerWidth
+                }
             }
             return true
         }

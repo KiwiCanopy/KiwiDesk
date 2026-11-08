@@ -87,7 +87,9 @@ extension KiwiCore {
     /// are disabled or no space is active.
     func desiredBorderSpecs() -> [BorderManager.Spec] {
         let style = tiler.settings.borderStyle
-        guard style.enabled, let space = activeSpace else { return [] }
+        guard style.enabled, let space = activeSpace,
+            !tilingOffHidesRings(on: space.id)
+        else { return [] }
         // Layout slots identify the active space's tiled windows and
         // provide fallback geometry; drawing below uses each real
         // frame so apps that clamp their size still get an exact ring.

@@ -107,6 +107,11 @@ extension APIReference {
                 + "to its band.",
             .integer("milliseconds")
         ),
+        "set_tiling_start_global": APIRecord(
+            "Sets whether Spaces start with tiling on where neither "
+                + "the profile nor the Space says.",
+            .boolean("enabled")
+        ),
         "set_mode_cue": APIRecord(
             "Shows the cycle list and the new layout on the "
                 + "Space's screen after cycle_mode.",

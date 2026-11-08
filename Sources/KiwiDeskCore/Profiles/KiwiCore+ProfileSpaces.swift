@@ -153,6 +153,7 @@ extension KiwiCore {
         }
         state.workspaces.removeSpace(space)
         state.temporaryArmed.remove(space)
+        state.forgetTilingToggle(of: space)  // #3008
         spaceHistory.trails.forget(space)  // #1655
         forgetStackFlips(of: space)  // #2771
         forgetDroppedSessionRatios(of: space)  // #2921

@@ -45,7 +45,11 @@ extension KiwiCore {
                     after: content.after,
                     drawn: content.drawn
                 )
-                item.marker = spaceMarker(of: id)
+                let spaceState = spaceMarker(of: id)
+                // Tiling off wins the slot (#3008, bars.md).
+                item.marker =
+                    isTilingOff(id)
+                    ? .tilingOff(beside: spaceState) : spaceState
                 // After the `hide_empty` verdict, which reads
                 // the glyphs the collapse drops.
                 return item.collapsed(to: style.inactiveContent)

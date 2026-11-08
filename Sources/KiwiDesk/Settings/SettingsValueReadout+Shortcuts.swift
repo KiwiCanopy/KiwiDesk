@@ -21,7 +21,7 @@ extension SettingsValueReadout {
             .desktopOverview, .jumpToWindow,
             .growWidth, .shrinkWidth, .growHeight, .shrinkHeight, .resetSizes,
             .maximize, .maximizeHeight, .maximizeWidth,
-            .toggleFloating, .toggleKiwiVision, .toggleLens,
+            .toggleFloating, .toggleTiling, .toggleKiwiVision, .toggleLens,
             .toggleSpaceBar, .toggleAppBar,
             .toggleSticky, .pocket, .pocketWindow, .pocketList,
             .showShortcuts,

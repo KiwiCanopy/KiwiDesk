@@ -40,6 +40,9 @@ public struct StatusSpaceMark: Equatable {
         public let display: Display
         public let space: SpaceID
         public let glyph: Glyph
+        /// Whether the Space has tiling off (#3008): the mark wears
+        /// the Space Bar's `pause` marker.
+        public var tilingOff = false
     }
 
     /// nil on `default`, which has no icon.
@@ -70,18 +73,22 @@ extension KiwiCore {
                 )
             else { return nil }
             let mode = state.workspaces[space]?.mode ?? .bsp
+            // A tiling-off Space whose tick hides the bars shows no
+            // Space Bar either (#3008).
             guard
                 !settings.drawsAtRest(
                     .space,
                     in: mode,
                     on: display.fingerprint
-                )
+                ) || tilingOffHidesShelf(on: display.id)
             else { return nil }
-            return StatusSpaceMark.Screen(
+            var screen = StatusSpaceMark.Screen(
                 display: display,
                 space: space,
                 glyph: StatusSpaceMark.Glyph(spaceGlyph(for: space))
             )
+            screen.tilingOff = isTilingOff(space)
+            return screen
         }
         return StatusSpaceMark(layer: layer, screens: screens)
     }

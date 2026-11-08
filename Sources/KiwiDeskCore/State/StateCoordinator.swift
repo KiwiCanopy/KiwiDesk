@@ -100,6 +100,9 @@ public struct StateCoordinator: Sendable {
     /// emptying one deletes it. Whether a Space IS temporary is
     /// derived (`KiwiCore.isTemporary`); only this is stored.
     var temporaryArmed: Set<SpaceID> = []
+    /// This session's tiling toggles and the start values (#3008).
+    var tilingToggles: [SpaceID: Bool] = [:]
+    public var tilingStart = TilingStart()
     /// Temporary or held Spaces that ended and whose shortcuts are
     /// still to go (#1827, `KiwiCore+SpaceShortcutDrop`); a number
     /// here is taken until they have.
@@ -160,9 +163,6 @@ public struct StateCoordinator: Sendable {
     /// The pocket (#2446, #2678), in put-in order:
     /// `StateCoordinator+Pocket`.
     public internal(set) var pocket: [PocketSlot] = []
-
-    /// The id a first launch seeds before any config declares one.
-    public static let placeholderID = SpaceID(1)
 
     /// A seed planted unasked so state is never spaceless before a
     /// config loads — by `init`, and by the #634 reset for a

@@ -11,9 +11,12 @@ import AppKit
 extension SpaceBarItemView {
     /// Which marker a Space wears — one value, so a Space cannot
     /// carry two.
-    enum Marker: Equatable {
+    indirect enum Marker: Equatable {
         case held(Held)
         case temporary
+        /// Tiling off (#3008) wins the slot; `beside` is the held
+        /// or temporary state it covers, which the sentence names.
+        case tilingOff(beside: Marker?)
 
         /// The SF Symbol it draws: outlines, so each reads as an
         /// object rather than a mark to decode.
@@ -21,13 +24,20 @@ extension SpaceBarItemView {
             switch self {
             case .held: return "display.2"
             case .temporary: return "hourglass"
+            case .tilingOff: return "pause"
             }
+        }
+
+        /// The held or temporary state, under tiling off or not.
+        var spaceState: Marker? {
+            if case .tilingOff(let beside) = self { return beside }
+            return self
         }
     }
 
     /// Where this item's Space was held from, if it is held.
     var held: Held? {
-        if case .held(let held) = marker { return held }
+        if case .held(let held)? = marker?.spaceState { return held }
         return nil
     }
 
@@ -142,7 +152,19 @@ extension SpaceBarItemView {
     /// held, the temporary one where it is temporary, the plain one
     /// otherwise. The window count stays last.
     func spaceName(_ space: SpaceID, windows: Int) -> String {
-        if marker == .temporary {
+        guard case .tilingOff = marker else {
+            return stateName(space, windows: windows)
+        }
+        return L(
+            "space_bar.item.ax.tiling_off",
+            "Tiling off, %@",
+            stateName(space, windows: windows)
+        )
+    }
+
+    /// The sentence for the held or temporary state alone.
+    private func stateName(_ space: SpaceID, windows: Int) -> String {
+        if marker?.spaceState == .temporary {
             return L(
                 "space_bar.item.ax.temporary",
                 "Space %1$@, temporary, windows: %2$d",

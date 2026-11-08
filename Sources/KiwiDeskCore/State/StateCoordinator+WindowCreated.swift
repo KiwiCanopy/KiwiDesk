@@ -74,7 +74,9 @@ extension StateCoordinator {
         }
         let target = held ?? ruled ?? workspaces.activeSpace
         guard let target else { return }
-        let mode = workspaces[target]?.mode ?? .bsp
+        // A window opened while tiling is off joins the end (#3008).
+        let tilingOff = isTilingOff(target)
+        let mode = placementMode(of: target) ?? .bsp
         let track =
             mode == .track
             ? (trackParams.override[target]
@@ -93,7 +95,9 @@ extension StateCoordinator {
                 rank: slot.rank,
                 ranks: departedRanks
             )
-            if mode == .track, slot.trackBreak == .head {
+            if workspaces[target]?.mode == .track,
+                slot.trackBreak == .head
+            {
                 workspaces.withSpace(target) {
                     $0.takeTrackBreakBack(
                         for: window.id,
@@ -122,9 +126,11 @@ extension StateCoordinator {
             workspaces.add(
                 window.id,
                 to: target,
-                placement: spawnOverride[target]
-                    ?? spawnPlacements[mode]
-                    ?? .afterFocused
+                placement: tilingOff
+                    ? .last
+                    : spawnOverride[target]
+                        ?? spawnPlacements[mode]
+                        ?? .afterFocused
             )
             // Floating window in own_track space gets dormant break marker
             // (#160).

@@ -117,6 +117,25 @@ extension APIReference {
         ),
     ]
 
+    static let tilingRecords: [String: APIRecord] = [
+        "set_start": APIRecord(
+            "Sets whether the profile's Spaces, or one Space, start "
+                + "with tiling on; nil follows the level above.",
+            .boolean("enabled", optional: true),
+            .space("space", optional: true)
+        ),
+        "set_off_hides_borders": APIRecord(
+            "Sets whether a Space with tiling off hides its focus "
+                + "border.",
+            .boolean("enabled")
+        ),
+        "set_off_hides_bars": APIRecord(
+            "Sets whether a Space with tiling off hides the bars on "
+                + "its screen.",
+            .boolean("enabled")
+        ),
+    ]
+
     static let floatingRecords: [String: APIRecord] = [
         "set_mark": APIRecord(
             "Shows or hides the on-window mark on windows set "
