@@ -46,6 +46,12 @@ extension SnapshotStoreCensusTests {
                     + "(#1675) — no frame at the restart; it is "
                     + "placed anew"
             ),
+        "state.tiledOverRule":
+            (
+                .inPlace,
+                "a Tile over a float rule (#2975) — a crash or a "
+                    + "quit floats the window by its rule again"
+            ),
         "state.floatAspects":
             (
                 .behind,

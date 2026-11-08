@@ -2,17 +2,25 @@ import Foundation
 
 /// The float verbs (#1810): a window is tiled or floating. A Float
 /// records that the user floated it; a Tile clears that record and
-/// hands the window back to detection — float rules, dialog and
-/// panel detection, apps without a Dock icon — and refuses where
-/// detection floats it.
+/// hands the window back to detection — dialog and panel
+/// detection, apps without a Dock icon — and refuses where
+/// detection floats it. A float rule only decides how a window
+/// starts: a Tile overrules it until the window closes, and a Float
+/// ends that (#2975, `KiwiCore+TileOverRule`).
 extension KiwiCore {
-    /// Why a Tile of `id` would do nothing, or nil where it tiles:
-    /// read from the event loop's one verdict, never re-detected
-    /// beside a verb. The bar menu's row and the refusal pill both
-    /// read it.
+    /// Why detection floats `id`, or nil where it tiles: read from
+    /// the event loop's one verdict, never re-detected beside a
+    /// verb. A Tile refuses where the reason `refusesTile`; the bar
+    /// menu's row and the refusal pill both read it.
     func tileRefusal(of id: WindowID) -> AutoFloatReason? {
         if state.pocketPhase(of: id) != nil { return .pocket }
         return eventLoop.detectionVerdict(for: id)?.reason
+    }
+
+    /// The reason a Tile of `id` refuses, or nil where it tiles:
+    /// the bar menu's row.
+    func tileRefused(_ id: WindowID) -> AutoFloatReason? {
+        tileRefusal(of: id).flatMap { $0.refusesTile ? $0 : nil }
     }
 
     /// `make_floating` / `make_tiled`: the named window, else the
@@ -50,12 +58,17 @@ extension KiwiCore {
         _ id: WindowID,
         _ floating: Bool
     ) -> CommandResponse {
-        if let reason = tileRefusal(of: id) {
+        let reason = tileRefusal(of: id)
+        if let reason, reason.refusesTile {
             // Detection floats it: a Float has nothing to record.
             guard floating else {
                 cueTileRefusal(id, reason)
                 return .fail(reason.failure)
             }
+            return .ok()
+        }
+        // A rule floats it: only a Tile over the rule moves anything.
+        if reason == .rule, floating, !state.tilesOverRule(id) {
             return .ok()
         }
         // Snapshot before the flip: the placement fires only for
@@ -66,7 +79,11 @@ extension KiwiCore {
         // the flip really tiles it — a floating-mode member made
         // tiled still floats (#1675).
         let floatFrame = !floating ? floatFrameToRemember(id) : nil
-        state.setFloating(id, floating)
+        if reason == .rule {
+            state.setTiledOverRule(id, !floating)
+        } else {
+            state.setFloating(id, floating)
+        }
         if let floatFrame, wasFloating,
             !isEffectiveFloatForPlacement(id)
         {

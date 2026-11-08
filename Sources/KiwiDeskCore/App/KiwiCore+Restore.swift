@@ -44,6 +44,7 @@ extension KiwiCore {
         // gathered when it happened.
         settleDrawnSpaceModes()
         state.adopt(snapshot)
+        adoptTilesOverRule(snapshot)  // #2975
         // The Monocle hold and the per-Desktop sizes an in-place
         // restart carried (#930, #2921), after the modes above;
         // the read validates membership.

@@ -6,7 +6,9 @@ import Testing
 
 /// A window is tiled or floating (#1810): a Float records the
 /// user's choice, a Tile clears it and hands the window back to
-/// detection, and a Tile refuses where detection floats it.
+/// detection, and a Tile refuses where detection floats it — save
+/// a float rule, which a Tile overrules (#2975,
+/// `TileOverRuleTests`).
 @Suite("Tile returns a window to its rules (#1810)", .serialized)
 @MainActor
 struct TileReturnsToRulesTests {
@@ -70,7 +72,7 @@ struct TileReturnsToRulesTests {
     @Test(
         "a Tile refuses where detection floats the window",
         arguments: [
-            AutoFloatReason.rule, .panel, .accessoryApp, .fixedSize,
+            AutoFloatReason.panel, .accessoryApp, .fixedSize,
         ]
     )
     func tileRefuses(_ reason: AutoFloatReason) {
@@ -86,6 +88,16 @@ struct TileReturnsToRulesTests {
         #expect(floats(core) == true)
         #expect(core.tileRefusal(of: id) == reason)
         #expect(cued == [reason])
+    }
+
+    /// A rule's float is the one a Tile overrules (#2975).
+    @Test("a Tile tiles a window a float rule floats")
+    func tileOverrulesARule() {
+        let core = makeCore()
+        track(core, .floats(.rule))
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(floats(core) == false)
+        #expect(core.state.userFloated.isEmpty)
     }
 
     @Test("a toggle towards tiled refuses the same way")
@@ -113,7 +125,6 @@ struct TileReturnsToRulesTests {
         core.eventLoop.detectedFloating[id] = .floats(.rule)
         core.state.apply(.windowFloatChanged(id, isFloating: true))
         #expect(core.state.userFloated.isEmpty)
-        #expect(!core.execute("make_tiled").isSuccess)
         core.eventLoop.detectedFloating[id] = .tiles
         core.state.apply(.windowFloatChanged(id, isFloating: false))
         #expect(floats(core) == false)

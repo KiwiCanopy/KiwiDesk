@@ -247,8 +247,7 @@ extension StateCoordinator {
         closedDepartures.remove(id)
         unjudgedFilings.remove(id)
         restoredFrames[id] = nil
-        floatFrames[id] = nil
-        floatAspects[id] = nil
+        forgetFloatMemory(of: id)
         retireDepartureRecord(of: id)
     }
 

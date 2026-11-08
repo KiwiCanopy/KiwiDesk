@@ -141,7 +141,7 @@ struct BarWindowMenuRowsTests {
 
     /// Where detection floats the window, a Tile would refuse: the
     /// row is greyed, never hidden, and carries the refusal pill's
-    /// own sentence (#1810).
+    /// own sentence (#1810). A rule's float takes a Tile (#2975).
     @Test("a Tile detection would refuse is greyed with its reason")
     func tileGreyedWithReason() {
         let core = seededCore()
@@ -149,11 +149,16 @@ struct BarWindowMenuRowsTests {
         core.state.apply(
             .windowFloatChanged(WindowID(1), isFloating: true)
         )
+        let ruled = core.barMenuRows(.appItem([WindowID(1)]))[2]
+        #expect(ruled.title == "Tile Window")
+        #expect(ruled.enabled)
+        #expect(ruled.subtitle == nil)
+        core.eventLoop.detectedFloating[WindowID(1)] =
+            .floats(.fixedSize)
         let tile = core.barMenuRows(.appItem([WindowID(1)]))[2]
         #expect(tile.title == "Tile Window")
         #expect(!tile.enabled)
-        #expect(tile.subtitle == AutoFloatReason.rule.sentence)
-        #expect(tile.subtitle == "An App Rule floats this window")
+        #expect(tile.subtitle == AutoFloatReason.fixedSize.sentence)
         core.eventLoop.detectedFloating[WindowID(3)] = .floats(.panel)
         core.state.apply(
             .windowFloatChanged(WindowID(3), isFloating: true)

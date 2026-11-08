@@ -77,6 +77,7 @@ private func trackedFixture() -> StateCoordinator {
         frame: CGRect(x: 5, y: 6, width: 7, height: 8)
     )
     state.floatAspects[old] = .init(pid: 7, ratio: 1.5)
+    state.tiledOverRule[old] = 7
     state.departedSlots[old] = .init(rank: 0)
     state.closedDepartures.insert(old)
     state.unjudgedFilings.insert(old)
@@ -98,7 +99,7 @@ private func trackedFixture() -> StateCoordinator {
 /// populates: `WindowManager.windows`, `rememberedSpaces`,
 /// `restoredFrames` (#1362), `userFloated`,
 /// `stickyReachOverrides` (#1145), `floatFrames` (#1675),
-/// `floatAspects` (#2973),
+/// `floatAspects` (#2973), `tiledOverRule` (#2975),
 /// `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414),
 /// `unjudgedFilings` (#1646), `focusRecency` (#1840),
@@ -113,7 +114,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 21
+private let expectedContainerCount = 22
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.

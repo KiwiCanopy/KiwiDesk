@@ -6251,50 +6251,84 @@ the flag, and the same-app grouping it breaks keeps it with it
 withheld, and neither claims the space is anything but what the
 user set it to.
 
-**A window is tiled or floating, and Tile hands it back to the
-rules ([#1810](https://github.com/KiwiCanopy/KiwiDesk/issues/1810)).**
+**A window is tiled or floating; a rule decides how it starts, and
+Tile overrules the rule for that window
+([#1810](https://github.com/KiwiCanopy/KiwiDesk/issues/1810),
+[#2975](https://github.com/KiwiCanopy/KiwiDesk/issues/2975)).**
 [Principle] The automatic verdict — float rules, dialog, sheet,
 panel and raised-layer detection, an app with no Dock icon —
-decides whether a window floats, and the user can add exactly one
-thing on top of it: "I floated this". Float (`make_floating`, the
-bar menu's Float Window, `toggle_floating` towards floating)
-records it; Tile (`make_tiled`, Tile Window, `toggle_floating`
-towards tiled) clears it, and the window follows the verdict
-again, including a rule added afterwards. There is no manual-tile
-override and so no third "auto" state to return to: `make_auto`
-is retired with no alias, since Tile does its job. Do not bring a
-tile override back:
+decides whether a window floats, and the user can add one thing on
+top of it per window: "I floated this", or, over a float rule, "I
+tiled this". Float (`make_floating`, the bar menu's Float Window,
+`toggle_floating` towards floating) records the first; Tile
+(`make_tiled`, Tile Window, `toggle_floating` towards tiled)
+clears it, and the window follows the verdict again, including a
+rule added afterwards. `make_auto` is retired with no alias, since
+Tile does its job.
 
-- It was never designed. `make_tiled` shipped as "un-float", and
-  only a later change made it a sticky override.
-- No report ever used it to correct a misdetection.
-- It was an invisible third state: it beat every rule, survived
-  close and reopen, nothing drew it, and only Lua or the CLI
-  could clear it. With Tile Window one click away on the bar
-  menu, a window tiled once would never obey a float rule added
-  later.
-- A Tile pressed during a momentary misread mid-launch stuck
-  after detection healed.
-- Its one real beneficiary, an app that hides its Dock icon, is
-  better served by an app-level rule: the Tile rule
-  ([#2173](https://github.com/KiwiCanopy/KiwiDesk/issues/2173)).
+:::unreleased
+*Over a float rule, Tile tiles the window until it closes.* A rule
+names an app, or a title, and floats every new window it matches;
+a user who wants one of them tiled had to remove the rule for all
+of them. So a Tile on a window the rule floats keeps that window
+tiled while it lives — through ⌘H and unhide, a Desktop return, a
+changed guess and every re-check — and Float on it floats it again.
+A new window floats by the rule, so a reopen and an app restart
+obey it. Four constraints shape the exception, and each is what
+breaks without it:
 
-*Tile on a window the verdict floats refuses.* Overriding the
-verdict there is the third state again, so the verb does nothing
-and says why, in one sentence per reason — a rule, a dialog or
-panel, an app with no Dock icon — carried as a reason case that
-one Core renderer turns into words (`AutoFloatReason+Rendering`:
-the pill and the menu are Core-drawn, so no word crosses the #96
-seam), and CLI/IPC fail in English. The bar menu's
+- *It dies with the window.* A Tile that survived a reopen would
+  be the identity-keyed override this entry retired: it beat
+  every rule, survived close and reopen, nothing drew it, and a
+  window tiled once never obeyed a rule added later. The record
+  is keyed by window id and its process, ended at a close, an
+  away window's retirement and the app's exit, moved by a
+  native-tab re-key, and carried only by an in-place restart, so a
+  crash or a quit floats the window again — the safe direction.
+- *It holds only while the verdict is the rule's.* A window that
+  turns into a dialog, a panel or a Dock-less app's window ends
+  it and floats; those still refuse a Tile. A raised layer is
+  judged at adoption (below), so over a Tile that latch keeps the
+  rule's verdict, and Brave's lift to the prompt's level floats
+  nothing. A hand Float ends the Tile, so the two records never
+  stand together.
+- *It writes no user float.* Writing `userFloated` from a rule —
+  the rejected "softer rule" that records the float at adoption —
+  loses the rule's provenance: a Tile is undone by ⌘H and unhide,
+  a removed rule leaves the window floating across restarts, a
+  crash tiles every rule-floated window, and open windows stop
+  following a profile's rules. So the record lives beside the
+  verdict and is applied by one Core reader after it, and
+  `autoFloatVerdict` stays the only composition.
+- *No "first launch" and no per-rule option.* "First launch" has
+  no usable meaning: Finder is launched at login, and boot sweeps,
+  unhides and Desktop reveals all adopt windows the same way. A
+  per-rule switch is a setting and a stored shape for a choice the
+  Tile itself already makes, per window.
+
+What remains: App Rules can list a Float rule beside a tiled
+window, a second rule added while a window is tiled over the first
+is not obeyed until that window closes, and a window an in-place
+restart adopts only after its replay floats by the rule again.
+:::
+
+*Tile on a window detection floats refuses.* A dialog, panel or
+raised layer has no setting to change, and a guess's escape is the
+Tile rule or Float automatically
+([#2173](https://github.com/KiwiCanopy/KiwiDesk/issues/2173)), so
+the verb does nothing and says why, in one sentence per reason —
+a dialog or panel, an app with no Dock icon, a fixed size —
+carried as a reason case that one Core renderer turns into words
+(`AutoFloatReason+Rendering`: the pill and the menu are
+Core-drawn, so no word crosses the #96 seam), and CLI/IPC fail in
+English. Whether a reason refuses is one predicate,
+`AutoFloatReason.refusesTile`, which the verb, the menu row,
+`explain_window` and the pocket's unmark all ask. The bar menu's
 Tile Window row greys with the same sentence rather than hiding
 (grey, don't hide), and the row and the cue read the one reason
-value so they cannot disagree. A rule's reason names App Rules,
-because that is where the user can change the answer — and so
-does a guess's, which says "floats automatically" where a dialog
-says "always": the word tells which floats have an escape
-(#2173). The label names the first obstacle met, so a fixed-size
-window a Float rule also matches names its size first and, once a
-Tile rule tiles the guess, the rule: two steps, each one true.
+value so they cannot disagree. A guess's sentence says "floats
+automatically" where a dialog says "always": the word tells which
+floats have an escape. The label names the first obstacle met.
 
 *Float records nothing where the verdict already floats.* Such a
 record changes nothing now, and later keeps the window floating
@@ -6302,7 +6336,9 @@ after the user removes the rule that floated it — the hidden
 state by the other door. So the rule holds from every door, not
 only the verb's: a record made earlier is dropped the moment
 detection floats the window, and neither the reopen memory nor a
-restart restores one onto a window detection floats.
+restart restores one onto a window detection floats. A Float of
+a window tiled over a rule ends that Tile and records nothing
+either.
 
 *The verdict has one reader.* A verb and the menu row ask it
 through `KiwiCore.tileRefusal(of:)`, which reads
@@ -6774,7 +6810,7 @@ could only ever be refused; the slot carries instead the one act
 that ends the window's time in the pocket, through
 `toggle_pocket_window` naming it, with Pocket Window kept below. A
 window its app's own key keeps greys both rather than hiding them,
-as Tile Window greys for a float rule (▸ *A window is tiled or
+as Tile Window greys for a dialog (▸ *A window is tiled or
 floating*), and only Remove names where that key lives, since
 removing the app's row is the way out.
 :::

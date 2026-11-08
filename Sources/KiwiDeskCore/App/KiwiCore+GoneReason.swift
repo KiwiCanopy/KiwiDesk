@@ -64,10 +64,10 @@ extension KiwiCore {
             // The departure's provenance, read at the return
             // (#1414): a re-shown window takes the focus.
             state.rememberClosedDeparture(id)
-            // A close ends the re-float memory (#1675); a vanish
-            // or a hide comes back under the same id and keeps it.
-            state.floatFrames[id] = nil
-            state.floatAspects[id] = nil
+            // A close ends the re-float memory (#1675) and a Tile
+            // over a rule (#2975); a vanish or a hide comes back
+            // under the same id and keeps both.
+            state.forgetFloatMemory(of: id)
             state.focusRecency[id] = nil
             // Closing the window empties its slot (#2446).
             state.emptyPocket(id)

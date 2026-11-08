@@ -119,8 +119,8 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "make_tiled": APIRecord(
-            "Tiles the focused or named window; refused where "
-                + "a float rule or detection floats it.",
+            "Tiles the focused or named window, a float rule's "
+                + "too; refused where detection floats it.",
             .window("window", optional: true)
         ),
         "toggle_floating": APIRecord(

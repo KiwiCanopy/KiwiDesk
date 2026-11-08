@@ -89,6 +89,7 @@ extension StateCoordinator {
         windows.setFloating(id, true)
         windows.setSticky(id, .none)
         userFloated.remove(id)
+        tiledOverRule[id] = nil
         workspaces.remove(id)
         var slot = pocket.remove(at: index)
         slot.phase = .pocketed
@@ -107,6 +108,7 @@ extension StateCoordinator {
         guard pocketIndex(of: id) == nil, windows[id] != nil
         else { return false }
         userFloated.remove(id)
+        tiledOverRule[id] = nil
         pocket.append(
             PocketSlot(
                 window: id,

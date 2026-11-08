@@ -78,6 +78,7 @@ struct SnapshotStoreCensusTests {
         core.state.stickyReachOverrides[WindowID(2)] = true
         core.state.floatFrames[WindowID(1)] = .init(pid: 7, frame: .zero)
         core.state.floatAspects[WindowID(1)] = .init(pid: 7, ratio: 1.5)
+        core.state.tiledOverRule[WindowID(1)] = 7
         core.windowCreates.noteCreated(WindowID(1), at: core.wallClock())
         for raw: UInt32 in [2, 3] {
             core.arrivals.hold(
@@ -152,7 +153,8 @@ struct SnapshotStoreCensusTests {
         let paths = Set(found.map(\.path))
         // Non-vacuous: the stores the ruling names were reached.
         for named in [
-            "state.floatFrames", "tiler.boundLearner.lastAsks",
+            "state.floatFrames", "state.tiledOverRule",
+            "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",
             "tiler.stashDepartures.owed", "tiler.motionGate.owedWrites",

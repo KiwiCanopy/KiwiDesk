@@ -49,6 +49,9 @@ struct FloatFlagReaderCensusTests {
         "State/WindowManager.swift": [.identity: 1],
         "State/StateCoordinator.swift": [.identity: 2],
         "Events/EventLoop+Tracking.swift": [.identity: 1],
+        // A Tile over a rule rewrites the arriving flag and takes a
+        // carried Tile only where the rule floats it (#2975).
+        "App/KiwiCore+TileOverRule.swift": [.identity: 3],
         // `toggle_floating` flips the flag by ruling (#1697).
         "Commands/KiwiCore+FloatCommands.swift": [.ruledToStay: 1],
         "Commands/KiwiCore+Diagnostics.swift": [.identity: 1],

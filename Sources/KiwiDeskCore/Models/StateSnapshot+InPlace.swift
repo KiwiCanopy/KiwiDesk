@@ -158,21 +158,31 @@ extension StateSnapshot {
         }
     }
 
-    /// One window's runtime flags: the sticky scope and the
-    /// sticky-reach override. The hand float rides the record
-    /// itself, on every stop (#1864, `StateSnapshot+StopFloats`).
+    /// One window's runtime flags: the sticky scope, the
+    /// sticky-reach override and a Tile over a float rule. The hand
+    /// float rides the record itself, on every stop (#1864,
+    /// `StateSnapshot+StopFloats`).
     public struct WindowSession: Codable, Sendable, Equatable {
         public var sticky: StickyScope
         public var stickyReach: Bool?
+        /// A Tile over a float rule (#2975), `true` else nil: a
+        /// crash or a quit floats the window again.
+        public var tiledOverRule: Bool?
 
-        public init(sticky: StickyScope, stickyReach: Bool?) {
+        public init(
+            sticky: StickyScope,
+            stickyReach: Bool?,
+            tiledOverRule: Bool? = nil
+        ) {
             self.sticky = sticky
             self.stickyReach = stickyReach
+            self.tiledOverRule = tiledOverRule
         }
 
         private enum CodingKeys: String, CodingKey {
             case sticky
             case stickyReach = "sticky_reach"
+            case tiledOverRule = "tiled_over_rule"
         }
     }
 }
@@ -223,7 +233,8 @@ extension StateCoordinator {
             if let window = windows[record.windowID] {
                 record.session = StateSnapshot.WindowSession(
                     sticky: window.stickyScope,
-                    stickyReach: stickyReachOverrides[window.id]
+                    stickyReach: stickyReachOverrides[window.id],
+                    tiledOverRule: tilesOverRule(window.id) ? true : nil
                 )
             }
             return record

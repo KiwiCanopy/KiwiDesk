@@ -93,6 +93,27 @@ struct ExplainCommandsTests {
         )
     }
 
+    /// A rule a Tile overruled floats nothing (#2975): no cause,
+    /// while the verdict still names the rule and its escapes.
+    @Test("a rule a Tile overruled is no cause")
+    func overruledRuleIsNoCause() {
+        let core = makeCore()
+        track(core, .floats(.rule))
+        #expect(
+            core.execute("make_tiled", args: [.number(Double(id.raw))])
+                .isSuccess
+        )
+        let floating = explain(core)["float"]
+        #expect(field(floating, "effective_float") == .bool(false))
+        #expect(field(floating, "cause") == .null)
+        let detection = field(floating, "detection")
+        #expect(field(detection, "reason") == .string("rule"))
+        #expect(
+            field(detection, "escapes")
+                == .array(AutoFloatReason.rule.escapes.map(JSONValue.string))
+        )
+    }
+
     @Test("a guess escapes through a Tile rule, a panel through none")
     func escapesFollowTheReason() {
         #expect(
@@ -106,7 +127,8 @@ struct ExplainCommandsTests {
         #expect(AutoFloatReason.panel.escapes.isEmpty)
         #expect(AutoFloatReason.raisedLayer.escapes.isEmpty)
         #expect(
-            AutoFloatReason.rule.escapes == ["app_rule.remove_float"]
+            AutoFloatReason.rule.escapes
+                == ["make_tiled", "app_rule.remove_float"]
         )
         // An escape that names a verb names one that exists.
         let verbs = [AutoFloatReason.rule, .panel, .accessoryApp, .fixedSize]
