@@ -88,6 +88,25 @@ struct MaximizeShareScreenTests {
         #expect(shape(wide)?.anchor == .inPlace)
     }
 
+    /// A host with no screen has no main screen to read; it passes
+    /// vacuously there, as headless CI never is.
+    @Test("A Space no screen holds reads the main screen's shape")
+    func unplacedReadsTheMainScreen() {
+        let core = makeTestCore()
+        guard let main = ScreenList.mainOrFirst?.kiwiDisplayID else {
+            return
+        }
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: main,
+                name: "Main",
+                frame: CGRect(x: 0, y: 0, width: 1080, height: 1920)
+            )
+        )
+        #expect(core.maximizeScreenShape(of: SpaceID("99")) == .portrait)
+        #expect(core.maximizeScreenShape(of: nil) == .portrait)
+    }
+
     @Test("A setter with a shape writes that row alone")
     func setterWritesOneRow() {
         let core = makeCore(screen: laptop)

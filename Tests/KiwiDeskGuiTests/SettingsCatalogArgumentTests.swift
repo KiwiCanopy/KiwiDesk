@@ -234,8 +234,8 @@ struct SettingsCatalogArgumentTests {
         // Edge and Position rows, 153 #2678 its Holds row, 154
         // #2941 its add row, 155 #2971 the scroll step's row, 161
         // #3062 the Maximize card, its three rows and the two
-        // Shortcuts rows its captions land on, 162 with its table
-        // (2026-11-08): three column headings and the drawer.
+        // Shortcuts rows its captions land on, 162 with its
+        // other-shapes drawer (the column anchors moved to headings).
         #expect(direct.values.reduce(0, +) == 162)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card

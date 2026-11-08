@@ -71,10 +71,11 @@ extension KiwiCore {
         let id =
             space.flatMap { state.workspaces.display(of: $0) }
             ?? main?.kiwiDisplayID
-        let display =
-            id.flatMap { state.workspaces.displays[$0] }
-            ?? main?.kiwiDisplay
-        return display.map(ScreenShape.of) ?? .widescreen
+        if let display = id.flatMap({ state.workspaces.displays[$0] }) {
+            return ScreenShape.of(display)
+        }
+        return main.map { ScreenShape(ScreenClass.of($0.frame.size)) }
+            ?? .widescreen
     }
 
     /// `maximize.set_share(axis, share[, shape])` and
