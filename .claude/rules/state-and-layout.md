@@ -46,7 +46,10 @@ editing here:
   never changes, so the Floating gather (#1177) never runs on a
   toggle and resuming lays the same array out again: remembered
   slots, windows opened while off appended (`.last`), closed
-  ones gone. A reader that decides HOW a window is placed — the
+  ones gone. A hidden Space about to lose its tiling seeds its
+  layout's slots as stash captures first, through the one
+  `seedSlotsBeforeTilingOff`, or its parked windows have nothing
+  to return to. A reader that decides HOW a window is placed — the
   layout input, the stash capture, every `EffectiveFloat.applies`
   mode arm, the maximize gates, the App Bar's visibility verdict
   and the drag's reorder gates — takes `placementMode`; a reader
@@ -58,7 +61,10 @@ editing here:
   file that does neither, its `storedMode` map the ruled ones. Set
   `tilingStart` only through `KiwiCore.mirrorTilingStart`, called
   where its inputs change (the `tiling` group's settings hook and
-  `appWideLiveChanged`), so a read never writes. The toggle rides
+  `appWideLiveChanged`), so a read never writes. The focus and
+  navigate verbs keep the stored layout's rules while tiling is
+  off, and a keyboard swap still reorders the array; a change to
+  either owes a ruling on #3008. The toggle rides
   the in-place capture alone (`SpaceSession.tiling`), never
   `snapshot()` or a profile.
 - **A Space seeded before any config declares one is

@@ -29,33 +29,43 @@ struct TilingOffPlacementSeamTests {
         return out
     }
 
-    /// Files whose `EffectiveFloat.applies(` keeps the stored mode,
-    /// each with its reason.
-    private static let storedMode: [String: String] = [
-        "App/KiwiCore+FloatRecovery.swift": parkStays
+    /// Files whose `EffectiveFloat.applies(` calls keep the stored
+    /// mode, by exact count, with the reason.
+    private static let storedMode: [String: (calls: Int, why: String)] = [
+        "App/KiwiCore+FloatRecovery.swift": (1, parkStays)
     ]
     private static let parkStays =
         "a layout's park stays put while tiling is off; resume "
         + "places it (#3008)"
 
-    /// A file asking `EffectiveFloat.applies(` judges a mode arm:
-    /// it takes the placement mode, or is ruled in `storedMode`.
-    /// The floor keeps the census from passing on an empty walk.
-    @Test("every effective-float file takes placementMode")
+    /// A file asking `EffectiveFloat.applies(` judges a mode arm per
+    /// call: it spells `placementMode(of:` at least once per call, or
+    /// is ruled in `storedMode` at its exact count. Trade: a count,
+    /// not a parse — a call handed a `mode` computed beside a second
+    /// `placementMode` read still passes; review's. The floor keeps
+    /// the census from passing on an empty walk.
+    @Test("every effective-float call takes placementMode")
     func effectiveFloatCensus() throws {
+        func count(_ needle: String, in text: String) -> Int {
+            text.components(separatedBy: needle).count - 1
+        }
         let all = try Self.coreSources().filter {
             $0.1.contains("EffectiveFloat.applies(")
         }
-        for file in Self.storedMode.keys {
-            #expect(all.contains { $0.0 == file }, "\(file) moved")
-        }
-        let callers = all.filter { Self.storedMode[$0.0] == nil }
-        #expect(callers.count >= 10)
-        for (file, source) in callers {
+        #expect(all.count >= 10)
+        for (file, source) in all {
+            let calls = count("EffectiveFloat.applies(", in: source)
+            if let ruled = Self.storedMode[file] {
+                #expect(calls == ruled.calls, "\(file): \(ruled.why)")
+                continue
+            }
             #expect(
-                source.contains("placementMode(of:"),
+                count("placementMode(of:", in: source) >= calls,
                 "\(file) judges a float on the stored mode"
             )
+        }
+        for file in Self.storedMode.keys {
+            #expect(all.contains { $0.0 == file }, "\(file) moved")
         }
     }
 

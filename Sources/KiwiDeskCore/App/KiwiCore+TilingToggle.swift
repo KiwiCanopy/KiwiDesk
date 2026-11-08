@@ -9,9 +9,38 @@ extension KiwiCore {
     /// writer, called where its inputs change — `tiler.settings`'
     /// `tiling` group and `appWideLiveChanged`.
     func mirrorTilingStart() {
-        state.tilingStart = tiler.settings.tiling.start(
+        let next = tiler.settings.tiling.start(
             global: appWide.tilingStartGlobal
         )
+        seedSlotsBeforeTilingOff(
+            state.workspaces.allSpaces.map(\.id).filter {
+                state.tilingToggles[$0] == nil && !next.startsTiled($0)
+            }
+        )
+        state.tilingStart = next
+    }
+
+    /// Seeds each hidden Space about to lose its tiling a capture at
+    /// the slots its layout draws, so the stash brings its windows
+    /// back from the park when it shows (#3008). Runs while the
+    /// Space still tiles; a shown Space's windows are on screen.
+    func seedSlotsBeforeTilingOff(_ spaces: [SpaceID]) {
+        let visible = state.workspaces.visibleSpaces
+        for id in spaces where !visible.contains(id) {
+            guard !state.isTilingOff(id),
+                let space = state.workspaces[id],
+                let screen = TilingEngine.screen(for: id, in: state)
+            else { continue }
+            let frames = tiler.placedFrames(
+                of: space,
+                on: screen,
+                state: state
+            ).frames
+            for (window, frame) in frames
+            where tiler.stashOriginal(window) == nil {
+                tiler.seedStash(window, frame: frame)
+            }
+        }
     }
 
     /// Whether `space` has tiling off now.
@@ -55,6 +84,7 @@ extension KiwiCore {
         _ tiling: Bool,
         on space: SpaceID
     ) -> CommandResponse {
+        if !tiling { seedSlotsBeforeTilingOff([space]) }
         state.setTiling(tiling, for: space)
         retile(pass: tiling ? .apply : .event)
         return .ok()
@@ -67,6 +97,7 @@ extension KiwiCore {
             return .fail("expected a boolean")
         }
         setAppWide(persisting: false) { $0.tilingStartGlobal = on }
+        retile(pass: .apply)
         return .ok()
     }
 

@@ -59,9 +59,7 @@ struct RetilePassRoutingTests {
         // A tiling resume (#3008) and the app-wide start value it
         // follows: an explicit apply laying the Space out again.
         "KiwiDeskCore/App/KiwiCore+TilingToggle.swift":
-            Site(applies: 1, reissues: 0),
-        "KiwiDeskCore/App/KiwiCore+AppWideLive.swift":
-            Site(applies: 1, reissues: 0),
+            Site(applies: 2, reissues: 0),
         // `revert_settings` (#2411): stored values applied live,
         // an explicit apply like the setters it undoes.
         "KiwiDeskCore/Commands/KiwiCore+RevertSettings.swift":

@@ -176,6 +176,23 @@ struct TilingToggleTests {
         #expect(fresh.tilingToggles[space] == false)
     }
 
+    @Test("a hidden Space losing its tiling keeps its slots to return to")
+    func hiddenSpaceSeedsItsSlots() throws {
+        try #require(ScreenList.mainOrFirst != nil)
+        let core = makeCore()
+        let hidden = SpaceID("2")
+        core.state.workspaces.ensureSpace(hidden)
+        core.state.workspaces.activate(hidden)
+        open(core, 5)
+        core.state.workspaces.activate(space)
+        core.retile()
+        #expect(core.state.workspaces.space(of: WindowID(5)) == hidden)
+        // The control: tiling on, a parked tile owes no capture.
+        #expect(core.tiler.stashOriginal(WindowID(5)) == nil)
+        core.execute("set_tiling", args: [.bool(false), .string("2")])
+        #expect(core.tiler.stashOriginal(WindowID(5)) != nil)
+    }
+
     @Test("a tile on a tiling-off Space is an effective float")
     func tileIsAnEffectiveFloat() throws {
         let core = makeCore()

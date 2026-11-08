@@ -172,7 +172,7 @@ extension KiwiCore {
         // writes, and the caps below share the same span.
         let span = layoutSpan(of: space, horizontal: axis == "x")
         let response: CommandResponse
-        switch space.mode {
+        switch state.placementMode(of: space) {
         case .bsp:
             response = resizeBsp(
                 axis: axis,
