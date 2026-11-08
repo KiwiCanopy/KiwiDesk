@@ -97,6 +97,18 @@ struct MonocleMaximizeBarTests {
         #expect(settings(maximize: false).pocketRests(in: .monocle))
     }
 
+    @Test("The pocket's rest takes no section of a Hidden-read bar")
+    func pocketRestTakesNoSection() {
+        #expect(
+            settings(maximize: false).pocketRest(in: .monocle, on: nil)
+                == .section
+        )
+        #expect(
+            settings(maximize: true).pocketRest(in: .monocle, on: nil)
+                != .section
+        )
+    }
+
     @Test("Monocle's gaps are zero only while it maximizes")
     func gapsZero() {
         var on = settings(maximize: true)
