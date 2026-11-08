@@ -230,7 +230,6 @@ binding takes that number:
 `move_to_desktop`, `bind_profile_to_desktop`, and the **Go to
 Desktop N** shortcuts, as macOS's own "Switch to Desktop N" does.
 
-:::unreleased
 KiwiDesk shows that same number: KiwiHub's window switcher, the
 Desktop switch plate and the Desktop rows in Settings. A KiwiHub
 row for a window on another screen names that screen too — `Work
@@ -238,7 +237,6 @@ row for a window on another screen names that screen too — `Work
 Desktops of the screen that switched. With more than one screen,
 Settings ▸ Shortcuts and KiwiHub's Shortcuts side name the screen
 each Desktop row reaches right now.
-:::
 
 A Settings row for a Desktop that is not present keeps the number
 it was last seen at.
@@ -325,12 +323,10 @@ screen, the Space that screen shows then — or the Space you named,
 when you named one. It is reported gone with `reason: vanished`,
 the same value a plain Desktop swipe produces.
 
-:::unreleased
 A window on a hidden Desktop can be moved too, by naming its id from
 `get_state`. With *Displays have separate Spaces* off, naming a Space
 on another screen moves it there in the same command; the
 [Lua reference](lua-reference.md#move_to_desktop) has the limits.
-:::
 
 KiwiDesk keeps knowing it is there, but does not draw it. The
 Space Bar shows the Desktop you are looking at, so a window on

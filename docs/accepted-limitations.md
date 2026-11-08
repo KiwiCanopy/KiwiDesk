@@ -111,7 +111,6 @@ class — see
 | A screen whose **parking corner has another screen beside or below it** — a landscape screen between two taller portrait ones, or one with a screen under its bottom-right corner — shows the windows KiwiDesk parks there on that neighbour. | A parked window must stay on its own screen: parked on another screen's free corner, macOS moves it onto that screen's Desktop (measured 2026-10-29), which would break [Parking is not a Desktop move](spaces-and-desktops.md#parking-is-not-a-desktop-move). And macOS keeps a parked window's title bar about 48 pt on screen, so its body hangs off the corner into whatever lies beside and below it. | `TilingEngine.optimalHideCorner` over `ScreenNeighbors.detect` ([#410](https://github.com/KiwiCanopy/KiwiDesk/issues/410)) prefers bottom-right whenever no screen is to the right, and falls back to it when both sides have one; it does not count screens below. Reported on [#2547](https://github.com/KiwiCanopy/KiwiDesk/issues/2547). | Rearrange the screens in System Settings ▸ Displays so the corner each one parks in is clear ([With more than one screen](spaces-and-desktops.md#with-more-than-one-screen)). Planned in [#2754](https://github.com/KiwiCanopy/KiwiDesk/issues/2754): a warning in Settings ▸ Screens for an arrangement whose parking corner is covered, and a corner choice by least overlap that also counts screens below. |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
-:::unreleased
 With **Displays have separate Spaces** off, a `move_to_desktop` that
 sends a window to another screen answers before the window moves,
 since the move waits for its frame to be written first. If the app
@@ -122,9 +121,7 @@ moment, it does not move at all, though the command said it did. Both
 leave a line in the log. Move it again
 ([#3048](https://github.com/KiwiCanopy/KiwiDesk/issues/3048)). No fix
 is planned.
-:::
 
-:::unreleased
 A second `move_floating` landing before the app reports the first
 re-asks the same frame instead of adding to it, so it is swallowed.
 This is the rapid-resize row above with its one difference: `resize`
@@ -134,17 +131,13 @@ the key is exact. A Space switch inside that lag files the frame from
 before the move, as it does for a drag or a `resize`
 ([#2972](https://github.com/KiwiCanopy/KiwiDesk/issues/2972)). Press
 again if a burst comes up short. No fix is planned.
-:::
 
-:::unreleased
 A Space switch while `center_floating` is still moving a window can
 lose the centring: the switch files the frame the window has reached,
 as it does for a window `make_floating` is placing
 ([#3007](https://github.com/KiwiCanopy/KiwiDesk/issues/3007)). Press
 it again on the way back. No fix is planned.
-:::
 
-:::unreleased
 A floating window whose app holds it taller or wider than the area
 between the bars can lose its top or left edge under a bottom or right
 bar at the next layout pass, though `center_floating` left it in reach:
@@ -153,9 +146,7 @@ change on such a window
 ([#3007](https://github.com/KiwiCanopy/KiwiDesk/issues/3007)). Move the
 bar, or size the window down. Whether the pass should keep that edge
 too is open.
-:::
 
-:::unreleased
 With "Displays have separate Spaces" off and a second screen reaching
 past a screen's bottom or right edge, a window near that edge jumps up to
 about 32 pt and back on a small resize, unless a neighbouring screen
@@ -163,9 +154,7 @@ sits beside the window's whole length there and no third screen reaches
 past that edge. macOS refuses the size otherwise, and a refused size leaves the window stuck
 ([#2966](https://github.com/KiwiCanopy/KiwiDesk/issues/2966)). No escape
 is planned beyond arranging the screens or turning that setting on.
-:::
 
-:::unreleased
 A window whose close KiwiDesk judges late, most often one closing with
 no animation, can keep its tile for under a second. It reads like the
 first moment of native full screen, where macOS holds the window on no
@@ -173,18 +162,14 @@ Desktop for about half a second, so KiwiDesk waits and the window keeps
 its slot (macOS 27.2, separate Spaces off, 2026-11-06,
 [#2935](https://github.com/KiwiCanopy/KiwiDesk/issues/2935)). No escape
 is planned: the wait ends by itself.
-:::
 
-:::unreleased
 An app that keeps one axis or its ratio can show half a resize step
 for a moment when a floating window's keyboard resize grows it at a
 screen's right or bottom edge, or off every screen. macOS clamps a size write there until
 the origin moves, so only the move tells a clamp from a refusal
 ([#2981](https://github.com/KiwiCanopy/KiwiDesk/issues/2981)). No
 escape is planned.
-:::
 
-:::unreleased
 A floating window whose app fixes one axis, or which sits at its own
 maximum, can show its ring growing past the window on repeated resize
 presses or a hold, until the screen's edge stops it, where a press says
@@ -192,23 +177,17 @@ presses or a hold, until the screen's edge stops it, where a press says
 looks the same as a cell grid or a late app
 ([#2994](https://github.com/KiwiCanopy/KiwiDesk/issues/2994)). No
 escape is planned.
-:::
 
-:::unreleased
 A reload drops the length a grow along a run kept as well, so the
 windows it pushed come back once they fit
 ([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
-:::
 
-:::unreleased
 A cross-screen float delivery is sent at most twice: when macOS
 re-clamps the window both times, it stays where it was clamped,
 and KiwiDesk stops re-sending it
 ([#2881](https://github.com/KiwiCanopy/KiwiDesk/issues/2881)).
 Move or drag it to place it.
-:::
 
-:::unreleased
 In a Scrolling row, a focus step or closing the focused window can
 show the wrong window of an edge pile for the length of its slide,
 until the restack at the end of it
@@ -221,9 +200,7 @@ show a window other than the next one. KiwiDesk keeps only the windows
 that show in order, since raising every buried window took longer than
 the time a restack is given. A float you focus while the row settles
 has the other floats raised once it comes to rest.
-:::
 
-:::unreleased
 After KiwiDesk restarts, the windows waiting on another macOS
 Desktop come back to their Space in the order they left, but a
 sticky window that stayed in that Space can land between them
@@ -235,7 +212,6 @@ or which of them headed a track
 ([#2907](https://github.com/KiwiCanopy/KiwiDesk/issues/2907),
 `PendingSlotCarryTests`). Switch Desktops and back, or move the
 sticky window back by hand.
-:::
 
 The stale-bound row and the probe-pass row above say a genuine
 resize forgets what was learned about a window. That holds for a
@@ -333,7 +309,6 @@ A slow cold start takes you there too: the press counts when the app's process s
 
 New Window, or an un-minimize from the window switcher, pressed in the moment after a macOS Desktop switch — before KiwiDesk has read the arriving Desktop's windows, under half a second — does not take you to the window's Space when that window arrives with the switch's own windows; it opens where its app rule files it ([#2347](https://github.com/KiwiCanopy/KiwiDesk/issues/2347)). A window of the same app that the switch reveals cannot take you there instead either.
 
-:::unreleased
 Picking a window that was already in native full screen on a Space
 no screen showed as KiwiDesk started brings the app forward, until
 its Space has been shown once
@@ -342,7 +317,6 @@ its Space has been shown once
 macOS gives KiwiDesk no handle on a window whose full-screen Space is
 not shown. Show the Space once from Mission Control or with a swipe;
 from then on, picking it shows its Space.
-:::
 
 Reopening an app whose last window you closed while the app kept running can take you to **another macOS Desktop**. Some apps — Microsoft Word for one — hide a closed window and show that same window again when you click the app in the Dock, and macOS switches to the Desktop that window was on before KiwiDesk hears of it (measured 2026-10-13). KiwiDesk does not switch you back: undoing a switch macOS has already made would move you between two Desktops on every reopen ([#1515](https://github.com/KiwiCanopy/KiwiDesk/issues/1515)). An app you quit opens its next window on the Desktop you are on. macOS's own *When switching to an application, switch to a Space with open windows for the application* (System Settings ▸ Desktop & Dock ▸ Mission Control) governs that switch; whether turning it off keeps you on your Desktop for a re-shown window is not measured.
 
@@ -364,7 +338,6 @@ WindowServer's create notification; where that route is
 unavailable, only opening the app takes you along. Use
 `focus_space` to reach the window when you are left behind.
 
-:::unreleased
 The [`window_created`](lua-reference.md#events) event reads the
 same notification to tell `new` from `existing`
 ([#2630](https://github.com/KiwiCanopy/KiwiDesk/issues/2630)). An
@@ -378,7 +351,6 @@ the event waits for macOS to report the window opening. Listen to
 loading when KiwiDesk starts is read a few seconds later; a window
 it opens in that time that macOS does not report through
 Accessibility is reported `existing` and does not take you along.
-:::
 
 Open or Focus asks a running app with **no window at all** for a new one, the way a Dock click does, and it judges "no window" from what it can see ([#1840](https://github.com/KiwiCanopy/KiwiDesk/issues/1840)). A window on another Desktop counts only once KiwiDesk has seen it: on a Mac where the per-Desktop window list cannot be read none does, and anywhere else a window the app opened on a Desktop nobody has shown since does not, so the shortcut sends that reopen anyway. Whether the app then opens a second window beside the one on the other Desktop is the app's own reopen handling. Not observed; reasoned from the mechanism. Switch to the Desktop that holds the window to reach it instead.
 
@@ -425,10 +397,8 @@ KiwiDesk sends each window its move at the press and holds the
 arriving ones until the plates land, but when the app performs
 the move is the app's.
 
-:::unreleased
 The same holds with **Step between Spaces (mouse or trackpad)** on
 Slide.
-:::
 
 A Stack zone, a Track track — the overflow track included —, a
 Grid's last track (#2541) or BSP's scrolling line
@@ -465,13 +435,11 @@ swipe let go before Mission Control opens leaves the ring drawn
 until the swipe ends
 ([#1921](https://github.com/KiwiCanopy/KiwiDesk/issues/1921)).
 
-:::unreleased
 That is accepted for now: until Mission Control opens, the swipe
 gives KiwiDesk no signal but the raw finger contacts on the
 trackpad, which KiwiDesk does not read yet — the reader
 [#1873](https://github.com/KiwiCanopy/KiwiDesk/issues/1873)
 needs too.
-:::
 
 With KiwiVision on, the window you move the focus away from stays clear for a split second — about 40–60 ms — after you click or switch, until KiwiDesk hears that the focus moved ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)). A floating window shows it most, since it sits on top. macOS reports a focus change through Accessibility only after the window has come forward.
 
@@ -521,7 +489,6 @@ For that second KiwiDesk reads a focus report for the pocketed
 window as the echo of pocketing it, which an app can still send,
 and swallows it. Press `⌃⌥P` to take the window out.
 
-:::unreleased
 The pocket's **Holds** setting moved onto each profile as the
 Pocket row under KiwiShelf ▸ Show ▸ Each bar and Pocket
 ([#2978](https://github.com/KiwiCanopy/KiwiDesk/issues/2978); the
@@ -539,9 +506,7 @@ pocket only while it was used, and now shows it Always until
 profile file that would not read at the upgrade keeps the old
 setting waiting for its next read only until KiwiDesk next rewrites
 its settings file, after which it shows the pocket Always.
-:::
 
-:::unreleased
 An app's own Pocket key ([`pocket_app`](lua-reference.md#pocket_app))
 forgets its window when KiwiDesk quits
 ([#2612](https://github.com/KiwiCanopy/KiwiDesk/issues/2612)): the
@@ -557,9 +522,7 @@ another macOS Desktop, opens nothing on its Pocket key: the key
 reopens the app, which only brings one of those windows forward, and
 for about ten seconds a second press waits for a window that never
 comes. The window count KiwiDesk reads sees only the Desktop shown.
-:::
 
-:::unreleased
 A [stack flip](lua-reference.md#stacktoggle_stack_position) lasts
 for the session and is filed under the macOS Desktop's own id
 ([#2771](https://github.com/KiwiCanopy/KiwiDesk/issues/2771)), so a
@@ -569,9 +532,7 @@ authored side. A screen plugged in since the last Desktop switch
 refuses the flip until you switch Desktops once. To keep a side for
 one Desktop, bind a profile with that side to it
 ([Design Decisions ▸ A stack flip belongs to one Desktop](design-decisions.md#a-stack-flip-belongs-to-one-desktop-2771)).
-:::
 
-:::unreleased
 The sizes a [resize](lua-reference.md#resize) writes are filed
 under the same Desktop id and the profile live there
 ([#2921](https://github.com/KiwiCanopy/KiwiDesk/issues/2921)): a
@@ -582,4 +543,3 @@ set of sizes that every Desktop KiwiDesk cannot name shares; the
 first Desktop switch on that screen leaves them behind, and the
 Desktop shown uses the override, then the global value, until you
 resize again.
-:::
