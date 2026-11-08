@@ -4,6 +4,7 @@ import SwiftUI
 /// A share pop-up's "Custom…" (#3062, ruling amendment 2): a
 /// typed whole percent, its snap onto the menu's fractions, and the
 /// anchored popover that takes it.
+@MainActor
 enum MaximizeCustomShare {
     /// The tag "Custom…" carries: no share is negative, so it never
     /// collides with a stored value.

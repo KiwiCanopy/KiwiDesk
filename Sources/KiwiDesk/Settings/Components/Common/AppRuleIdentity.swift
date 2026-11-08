@@ -70,21 +70,24 @@ struct AppRuleDeleteButton: View {
     /// trash beside it (#3062 lane, owner 2026-11-08).
     static let columnWidth: CGFloat = 25
 
-    @ViewBuilder var body: some View {
-        Group {
-            if let sharedFrom {
-                Self.menu(help: help, sharedFrom: sharedFrom, onDelete)
-            } else {
-                Button {
-                    onDelete(.everywhere)
-                } label: {
-                    Image(systemName: "trash")
-                }
-                .buttonStyle(.borderless)
-                .iconButtonAffordance(help)
+    var body: some View {
+        face.frame(width: Self.columnWidth)
+    }
+
+    /// The trash at its own width, which `columnWidth` holds
+    /// (`OpenApplicationsTrashSlotTests`).
+    @ViewBuilder var face: some View {
+        if let sharedFrom {
+            Self.menu(help: help, sharedFrom: sharedFrom, onDelete)
+        } else {
+            Button {
+                onDelete(.everywhere)
+            } label: {
+                Image(systemName: "trash")
             }
+            .buttonStyle(.borderless)
+            .iconButtonAffordance(help)
         }
-        .frame(width: Self.columnWidth)
     }
 
     /// The trash's width, held empty and unannounced, for a row

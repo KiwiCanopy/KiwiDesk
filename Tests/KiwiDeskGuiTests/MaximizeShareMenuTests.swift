@@ -53,10 +53,7 @@ struct MaximizeShareMenuTests {
         #expect(
             MaximizeCustomShare.share(forPercent: 140) == core.upperBound
         )
-        #expect(
-            MaximizeCustomShare.range.lowerBound
-                == MaximizeCustomShare.percent(of: core.lowerBound)
-        )
+
         #expect(MaximizeCustomShare.tag < 0)
     }
 

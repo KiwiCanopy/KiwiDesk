@@ -33,17 +33,21 @@ struct OpenApplicationsTrashSlotTests {
         )
     }
 
-    @Test("both trash forms and the empty slot are one width")
+    /// The column holds both trash forms at their own width: the
+    /// shared form's menu, the widest, fills it exactly, so the
+    /// number is the menu's and never a guess.
+    @Test("the column is the trash forms' own width")
     func oneWidth() {
-        let plain = width(AppRuleDeleteButton(help: "x") { _ in })
+        let plain = width(AppRuleDeleteButton(help: "x") { _ in }.face)
         let menu = width(
             AppRuleDeleteButton(help: "x", sharedFrom: shared) { _ in }
+                .face
         )
-        let slot = width(AppRuleDeleteButton.slot)
+        let column = AppRuleDeleteButton.columnWidth
         #expect(plain > 0)
-        #expect(plain == menu)
-        #expect(slot == menu)
-        #expect(slot == AppRuleDeleteButton.columnWidth)
+        #expect(plain <= column)
+        #expect(menu == column)
+        #expect(width(AppRuleDeleteButton.slot) == column)
     }
 
     /// Every form takes the one fixed width, and the slot is no
@@ -61,9 +65,10 @@ struct OpenApplicationsTrashSlotTests {
             try String(contentsOf: url, encoding: .utf8)
         )
         .split(whereSeparator: \.isWhitespace).joined()
+        #expect(source.contains("face.frame(width:Self.columnWidth)}"))
         #expect(
             source.contains(
-                "}}.frame(width:Self.columnWidth)}staticvarslot:someView{"
+                "staticvarslot:someView{"
                     + "Color.clear.frame(width:columnWidth,height:1)"
             )
         )
