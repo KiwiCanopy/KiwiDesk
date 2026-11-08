@@ -33,10 +33,10 @@ extension KiwiCore {
         let (id, spaceID) = focused
         if state.maximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {
-                if $0.maximizeShape.matches(shape) {
+                if $0.maximized?.shape.matches(shape) == true {
                     $0.maximized = nil
                 } else {
-                    $0.maximizeShape = shape
+                    $0.maximized?.shape = shape
                 }
             }
         } else {
@@ -48,12 +48,11 @@ extension KiwiCore {
                 return .fail("only a tiled window can be maximized")
             }
             state.workspaces.withSpace(spaceID) {
-                $0.maximized = id
-                $0.maximizeShape = shape
+                $0.maximized = Maximize(window: id, shape: shape)
             }
         }
         retileEndingMaximize(id)
-        if state.workspaces[spaceID]?.maximized == id {
+        if state.workspaces[spaceID]?.maximized?.window == id {
             raiseWindow(id)
             raiseFloatsAbove(afterFocusing: id)
         }
@@ -100,7 +99,7 @@ extension KiwiCore {
     @discardableResult
     func endMaximize(of window: WindowID) -> Bool {
         guard let spaceID = state.windows[window].flatMap(state.renderSpace),
-            state.workspaces[spaceID]?.maximized == window
+            state.workspaces[spaceID]?.maximized?.window == window
         else { return false }
         state.workspaces.withSpace(spaceID) { $0.maximized = nil }
         updateBars()

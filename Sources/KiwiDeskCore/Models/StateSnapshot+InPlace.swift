@@ -29,7 +29,7 @@ extension StateSnapshot {
         /// `Space.maximized` (#2448): an in-place restart moves
         /// nothing, so the maximized window stays filling its screen.
         public var maximized: UInt32?
-        /// `Space.maximizeShape` (#3062); absent for a full Maximize
+        /// `Space.maximized`'s shape (#3062); absent for a full Maximize
         /// and from a build before it, either decoding as full.
         public var maximizeShape: MaximizeShape?
         /// `Space.runHeads` and `runTails` (#2235): where each
@@ -67,10 +67,9 @@ extension StateSnapshot {
                 )
             scrollRest = space.scrollRest
             self.monocleShown = monocleShown?.raw
-            maximized = space.maximized?.raw
+            maximized = space.maximized?.window.raw
             maximizeShape =
-                space.maximized == nil || space.maximizeShape == .full
-                ? nil : space.maximizeShape
+                space.maximized.flatMap { $0.shape == .full ? nil : $0.shape }
             runHeads =
                 space.runHeads.isEmpty
                 ? nil : space.runHeads.map(\.raw).sorted()
@@ -273,8 +272,10 @@ extension StateCoordinator {
             if let raw = session.maximized,
                 $0.windows.contains(WindowID(raw))
             {
-                $0.maximized = WindowID(raw)
-                $0.maximizeShape = session.maximizeShape ?? .full
+                $0.maximized = Maximize(
+                    window: WindowID(raw),
+                    shape: session.maximizeShape ?? .full
+                )
             }
         }
     }

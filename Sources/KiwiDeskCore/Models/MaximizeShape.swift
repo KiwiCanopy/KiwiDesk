@@ -16,6 +16,20 @@ public enum MaximizeAnchor: String, Codable, Sendable, CaseIterable {
     case inPlace = "in_place"
 }
 
+/// A Space's Maximize (#2448): the window filling its screen (a
+/// traveler's too, #3035) and what it fills (#3062), one value so an
+/// ender's `maximized = nil` clears both. Session-only; read through
+/// `StateCoordinator.maximizedWindow(of:)` and `maximizedShape(of:)`.
+public struct Maximize: Equatable, Sendable {
+    public var window: WindowID
+    public var shape: MaximizeShape
+
+    public init(window: WindowID, shape: MaximizeShape = .full) {
+        self.window = window
+        self.shape = shape
+    }
+}
+
 /// What one Maximize fills: the whole screen (`axis` nil), or one
 /// axis at `share` of the other, anchored by `anchor` (#3062).
 public struct MaximizeShape: Equatable, Sendable, Codable {

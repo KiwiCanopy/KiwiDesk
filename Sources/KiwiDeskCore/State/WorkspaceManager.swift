@@ -260,8 +260,8 @@ public struct WorkspaceManager: Sendable {
         // `lastFocused`, or every tab switch silently kills it.
         if focusReturnCandidate == old { focusReturnCandidate = new }
         // A traveler's flag sits on a Space it is no member of (#3035).
-        for id in order where spaces[id]?.maximized == old {
-            spaces[id]?.maximized = new
+        for id in order where spaces[id]?.maximized?.window == old {
+            spaces[id]?.maximized?.window = new
         }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)

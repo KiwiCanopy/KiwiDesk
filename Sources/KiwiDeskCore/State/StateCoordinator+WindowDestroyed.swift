@@ -16,7 +16,7 @@ extension StateCoordinator {
             // A minimize is no Desktop departure: its maximize ends
             // (#2448).
             if let home = workspaces.space(of: id),
-                workspaces[home]?.maximized == id
+                workspaces[home]?.maximized?.window == id
             {
                 workspaces.withSpace(home) { $0.maximized = nil }
             }

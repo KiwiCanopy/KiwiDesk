@@ -15,8 +15,8 @@ extension Space {
         if focused == old {
             focused = new
         }
-        if maximized == old {
-            maximized = new
+        if maximized?.window == old {
+            maximized?.window = new
         }
         if let weight = stackWeights.removeValue(forKey: old) {
             stackWeights[new] = weight

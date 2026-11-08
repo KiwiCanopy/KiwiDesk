@@ -13,7 +13,7 @@ extension StateCoordinator {
     /// (#431), so it asks the system focus itself, and focus on
     /// another screen keeps it (#3035).
     public func maximizedWindow(of space: Space) -> WindowID? {
-        guard let id = space.maximized, space.mode != .floating
+        guard let id = space.maximized?.window, space.mode != .floating
         else { return nil }
         let tiled = effectiveTiledMembers(of: space)
         guard tiled.contains(id) else { return nil }
@@ -28,10 +28,9 @@ extension StateCoordinator {
     }
 
     /// What `space`'s maximized window fills (#3062), or nil where
-    /// `maximizedWindow(of:)` shows none: the stored shape is
-    /// written with the window and outlives it, so read it here.
+    /// `maximizedWindow(of:)` shows none.
     public func maximizedShape(of space: Space) -> MaximizeShape? {
-        maximizedWindow(of: space) == nil ? nil : space.maximizeShape
+        maximizedWindow(of: space) == nil ? nil : space.maximized?.shape
     }
 
     /// The maximized traveler drawn beneath `id`, on the Space `id`
@@ -63,13 +62,13 @@ extension StateCoordinator {
     @discardableResult
     mutating func retireEndedMaximize() -> [WindowID] {
         let ended = workspaces.allSpaces.filter {
-            guard let id = $0.maximized else { return false }
+            guard let id = $0.maximized?.window else { return false }
             return maximizedWindow(of: $0) == nil
                 && !awaitsMaximizedReturn(id, from: $0.id)
         }
         for space in ended {
             workspaces.withSpace(space.id) { $0.maximized = nil }
         }
-        return ended.compactMap(\.maximized)
+        return ended.compactMap(\.maximized?.window)
     }
 }

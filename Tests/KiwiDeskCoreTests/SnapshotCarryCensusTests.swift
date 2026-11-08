@@ -116,11 +116,13 @@ struct SnapshotCarryCensusTests {
             $0.trackWeights = [self.w2: 1.5]
             $0.runHeads = [self.w2]
             $0.runTails = [self.w2]
-            $0.maximized = self.w2
-            $0.maximizeShape = MaximizeShape(
-                axis: .height,
-                share: 0.6,
-                anchor: .inPlace
+            $0.maximized = Maximize(
+                window: self.w2,
+                shape: MaximizeShape(
+                    axis: .height,
+                    share: 0.6,
+                    anchor: .inPlace
+                )
             )
         }
         // A per-Desktop size (#2921), carried or dropped with the

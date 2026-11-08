@@ -54,7 +54,7 @@ struct MonocleMaximizeLayoutTests {
         for id in [w1, w2, w3] {
             #expect(frames[id] == bounds)
         }
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(core.state.workspaces[space]?.maximized?.window == nil)
     }
 
     @Test("Off keeps the gaps and the Space Bar's strip")

@@ -156,7 +156,7 @@ extension KiwiCore {
         // it ends the maximize first — the writers measure the
         // drawn slot — and a refusal still draws the return
         // (#2448).
-        let endedMaximize = space.maximized
+        let endedMaximize = space.maximized?.window
         state.workspaces.withSpace(space.id) { $0.maximized = nil }
         var resized = false
         defer {
