@@ -144,13 +144,17 @@ struct MaximizeFollowTests {
         #expect(core.state.workspaces[space]?.maximized?.window == ids[2])
     }
 
-    @Test("A close still ends it")
-    func closeEnds() {
+    @Test("A window leaving the tiled set takes no follow")
+    func leavingTakesNoFollow() {
         let (core, space) = makeCore(follow: true)
         core.execute("toggle_maximized")
         core.state.apply(.windowDestroyed(ids[0], wasMinimized: false))
         core.retile()
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        // The destroy may be a Desktop departure, so the stored value
+        // waits for the return (#2448); it never moves to a neighbour.
+        #expect(maximized(core, space) == nil)
+        let stored = core.state.workspaces[space]?.maximized?.window
+        #expect(stored == nil || stored == ids[0])
     }
 
     @Test("A focus retiles while a follow stands, and not otherwise")
