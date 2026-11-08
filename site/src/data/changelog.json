@@ -42,7 +42,7 @@
         },
         {
           "title": "Room to grow",
-          "line": "Grow a window and its neighbour waits behind the +n mark.",
+          "line": "Grow a window and its neighbour joins the ones waiting behind +n.",
           "symbol": "rectangle.split.3x1"
         },
         {
@@ -75,7 +75,7 @@
           "items": [
             "**The pocket now has its own Show — Always, Auto or Hidden — under KiwiShelf ▸ Show ▸ Each bar and Pocket, and holds any number of windows.** The Holds row in Shortcuts & Gestures ▸ Pocket is gone, and your choice there carries over on its own.",
             "**Clicking an empty pocket now explains it**, with its keys and a way to Pocket Shortcuts….",
-            "**Growing a window in a Stack, Track or Grid row no longer stops at its neighbour's minimum**: the neighbour waits behind the +n mark, and shrinking brings it back.",
+            "**Growing a window in a Stack, Track or Grid row no longer stops at its neighbour's minimum**: the neighbour joins the windows waiting behind the +n mark, and shrinking brings it back.",
             "**Resizing a layout or flipping its stack side now changes only the macOS Desktop you're on**, so the same Space on your other Desktops keeps its own sizes.",
             "**Tile Window now works on a window an app rule floats, and keeps it tiled until it closes**; the app's next window floats by the rule again.",
             "**Maximize now works on a sticky window**, and ends when you leave that Space.",
