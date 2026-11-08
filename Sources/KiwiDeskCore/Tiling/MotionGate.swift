@@ -28,7 +28,7 @@ final class MotionGate {
 
         /// Two held passes as one: the stronger pass, a spring
         /// promise only when both made it (#593), the newest
-        /// window, state change and animation choice.
+        /// window and animation choice, and every state change.
         func merged(with newer: Owed) -> Owed {
             Owed(
                 animated: newer.animated ?? animated,
@@ -37,8 +37,7 @@ final class MotionGate {
                 newlyCreatedWindow: newer.newlyCreatedWindow
                     ?? newlyCreatedWindow,
                 sizing: sizing == newer.sizing ? sizing : .mayInstantSize,
-                stateChange: newer.stateChange.isEmpty
-                    ? stateChange : newer.stateChange
+                stateChange: stateChange.union(newer.stateChange)
             )
         }
 

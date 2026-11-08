@@ -2393,7 +2393,11 @@ editing here:
   verdict names, and only while its window is still tiled; its
   `follows` is stamped at the make and never read from settings
   after, and `focusRetiles` answers true while one stands
-  (`MaximizeFollowTests`). A
+  (`MaximizeFollowTests`). A full follow on Monocle is drawn whole
+  in `layoutInput` alone (`StateCoordinator.monocleFollowFills`),
+  not through `layoutBounds(on:for:)`, whose other readers either end
+  the Maximize first (the resize writers) or stand down under it (the
+  shelf, the App Bar); a new reader that neither does takes it. A
   whole share is a full Maximize (`MaximizeShape.init`), so "fills
   its screen" is `axis == nil` alone. A press reads the share and
   anchor table through the one `KiwiCore.maximizeShape(from:for:)`,

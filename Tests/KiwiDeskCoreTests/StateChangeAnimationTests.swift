@@ -84,7 +84,7 @@ struct StateChangeAnimationTests {
         #expect(!core.tiler.settings.animations.onStateChange)
     }
 
-    @Test("a held pass keeps the newest state change")
+    @Test("a held pass keeps every state change (#3063)")
     func owedMergeKeepsTheWindow() {
         let older = MotionGate.Owed(
             animated: nil,
@@ -104,7 +104,10 @@ struct StateChangeAnimationTests {
             sizing: .mayInstantSize,
             stateChange: [WindowID(2)]
         )
-        #expect(older.merged(with: newer).stateChange == [WindowID(2)])
+        #expect(
+            older.merged(with: newer).stateChange
+                == [WindowID(1), WindowID(2)]
+        )
     }
 
     @Test("floating follows on_state_change, not on_relayout")

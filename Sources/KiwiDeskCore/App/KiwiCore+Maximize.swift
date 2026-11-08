@@ -71,7 +71,8 @@ extension KiwiCore {
 
     /// The windows of `space` the ring and the marks step aside on as
     /// filling their screen: a full Maximize (#2448, not a Height or
-    /// Width one, #3062) and a maximizing Monocle's tiled members.
+    /// Width one, #3062) and the tiled members of a maximizing
+    /// Monocle or of a Monocle a full follow draws whole (#3063).
     func screenFillers(of space: Space) -> Set<WindowID> {
         var fillers: Set<WindowID> = []
         if state.maximizedShape(of: space)?.axis == nil,
@@ -79,7 +80,7 @@ extension KiwiCore {
         {
             fillers.insert(id)
         }
-        if maximizesWindows(of: space) {
+        if maximizesWindows(of: space) || state.monocleFollowFills(space) {
             fillers.formUnion(state.effectiveTiledMembers(of: space))
         }
         return fillers

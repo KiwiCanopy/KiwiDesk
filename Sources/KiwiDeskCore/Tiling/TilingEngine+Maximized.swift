@@ -27,10 +27,7 @@ extension TilingEngine {
             screen: visibleBounds(screen),
             slot: slot
         )
-        context.gaps = Gaps(
-            outer: .init(top: 0, bottom: 0, left: 0, right: 0),
-            inner: .init(horizontal: 0, vertical: 0)
-        )
+        context.gaps = .none
         context.focused = id
         var filled = frames
         filled[id] =
