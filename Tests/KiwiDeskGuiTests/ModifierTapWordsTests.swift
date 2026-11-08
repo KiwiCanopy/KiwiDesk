@@ -65,7 +65,8 @@ struct ModifierTapWordsTests {
         )
         // A single sided glyph is also a modifier-layer chip, so
         // the shared door leaves it as a chord.
-        #expect(SidedChordWords.spoken("Right ⌘")?.contains("once") != true)
+        let chip = SidedChordWords.spoken("Right ⌘")
+        #expect(chip?.contains("press") == false)
         #expect(SidedChordWords.spoken("⌘⌥") == nil)
     }
 
