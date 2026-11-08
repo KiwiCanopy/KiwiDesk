@@ -88,4 +88,20 @@ struct SplitDomainTests {
         )
         #expect(abs(value - 0.95) < 1e-9)
     }
+
+    /// Minimums filling the span exactly round lower above upper in
+    /// Double (100/1440 > 1 - 1340/1440); the range must not trap
+    /// (#3099, reported and diagnosed by MDsza).
+    @Test("Minimums filling the span exactly do not trap")
+    func exactFillDoesNotTrap() throws {
+        let range = try #require(
+            SplitDomain.effectiveRatioRange(
+                available: 1440,
+                minLow: 100,
+                minHigh: 1340
+            )
+        )
+        #expect(range.lowerBound == range.upperBound)
+        #expect(abs(range.lowerBound - 100.0 / 1440) < 1e-9)
+    }
 }
