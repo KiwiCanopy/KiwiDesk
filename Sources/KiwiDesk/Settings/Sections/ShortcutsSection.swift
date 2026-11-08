@@ -153,7 +153,7 @@ struct ShortcutsSection: View {
             stack {
                 ForEach(ShortcutsPagePart.allCases) { part in
                     // `ShortcutsPageState` states the set's contract.
-                    self.part(part, expander: expander)
+                    ruled(part) { self.part(part, expander: expander) }
                         .onAppear {
                             model.shortcutsPage.built.insert(part)
                         }
@@ -186,6 +186,23 @@ struct ShortcutsSection: View {
         }
         .onPreferenceChange(SettingsSectionFrames.self) { frames in
             jumpTracker.sections(frames)
+        }
+    }
+
+    /// The part, under the jump bar's rule where the bar draws one.
+    @ViewBuilder private func ruled(
+        _ part: ShortcutsPagePart,
+        @ViewBuilder _ content: () -> some View
+    ) -> some View {
+        if part.ruledAbove {
+            VStack(alignment: .leading, spacing: 16) {
+                SettingsTheme.hairlineSubtle
+                    .frame(height: 1)
+                    .accessibilityHidden(true)
+                content()
+            }
+        } else {
+            content()
         }
     }
 

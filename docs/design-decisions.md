@@ -14970,7 +14970,10 @@ summary does the telling while it is shut.
 Since the layer's name moved onto the pinned jump bar (#1520), the
 separation is carried by the rule after the Mouse & trackpad chip
 and by the Layers card, which leads everything layer-scoped: the
-card above it belongs to no layer.
+card above it belongs to no layer. The page draws the bar's rule
+too, above the Layers card, so its two bands — what applies
+everywhere, then the layer's own rows — read apart without the bar
+(owner 2026-11-08).
 
 **Its entries are grouped by where the hand is** — on your
 windows, on the KiwiShelf, anywhere holding a modifier — never by
