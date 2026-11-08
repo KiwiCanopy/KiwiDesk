@@ -414,7 +414,7 @@ Space's focus where it is.
 
 **Expects:** a macOS Desktop number, counted across every screen
 — the same one `bind_profile_to_desktop` keys on ([which
-count](spaces-and-desktops.md#a-desktop-has-two-numbers)).
+count](spaces-and-desktops.md#how-desktops-are-numbered)).
 
 **Does:** switches to that Desktop — the *macOS* Desktop, not a
 KiwiDesk Space — as a swipe would: the screen that Desktop
@@ -1185,14 +1185,20 @@ KiwiDesk.set_focus_wrap("this_screen")
 [`focus_desktop`](#focus_desktop) or
 [`move_to_desktop_and_follow`](#move_to_desktop_and_follow) —
 shows a plate in the middle of the screen that switched: the
-Desktop's number on that screen ([which
-count](spaces-and-desktops.md#a-desktop-has-two-numbers)), a dot
-for each Desktop on that screen with the current one filled, and the profile a
-[Desktop binding](#bind_profile_to_desktop) loaded, if one did
-(#2142). It takes no focus or click, fades after about a
-second, and stays away from a screen showing a full-screen app
-or a presentation. A swipe or Mission Control switch shows nothing; macOS
-animates those itself.
+Desktop's Mission Control number ([how Desktops are
+numbered](spaces-and-desktops.md#how-desktops-are-numbered)), a
+dot for each Desktop on that screen with the current one filled,
+and the profile a [Desktop binding](#bind_profile_to_desktop)
+loaded, if one did (#2142). It takes no focus or click, fades
+after about a second, and stays away from a screen showing a
+full-screen app or a presentation. A swipe or Mission Control
+switch shows nothing; macOS animates those itself.
+
+:::unreleased
+On a second screen the plate's number continues the count from
+the first screen, as Mission Control's does: the second screen's
+first Desktop can read 7.
+:::
 
 The GUI twin is **Shortcuts & Gestures ▸ macOS Desktops ▸ Show
 the Desktop's number after a switch**. Like
@@ -7725,7 +7731,7 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
 
 - A Desktop number, counted across every screen (1-based;
   fullscreen apps don't count) — [which
-  count](spaces-and-desktops.md#a-desktop-has-two-numbers).
+  count](spaces-and-desktops.md#how-desktops-are-numbered).
 - A profile name.
 - Optionally, the fingerprint of every screen in one screen
   setup, as `list_monitors` prints them.

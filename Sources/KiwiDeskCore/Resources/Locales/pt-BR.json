@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "O atalho para \"%1$@\" não é um atalho reconhecido.",
   "keybinding.desktop_absent": "Ausente no momento",
   "keybinding.desktop_away.axhint": "Não conectada no momento.",
-  "keybinding.desktop_landing": "%1$@ · Mesa %2$d",
   "keybinding.dir.above": "acima",
   "keybinding.dir.below": "abaixo",
   "keybinding.dir.left": "à esquerda",

@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "\"%1$@\"的快捷键不是可识别的快捷键。",
   "keybinding.desktop_absent": "当前未检测到",
   "keybinding.desktop_away.axhint": "当前未连接。",
-  "keybinding.desktop_landing": "%1$@ · 桌面 %2$d",
   "keybinding.dir.above": "上方",
   "keybinding.dir.below": "下方",
   "keybinding.dir.left": "左侧",

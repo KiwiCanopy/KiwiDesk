@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "Das Tastenkürzel für „%1$@“ ist kein gültiges Tastenkürzel.",
   "keybinding.desktop_absent": "Zurzeit nicht vorhanden",
   "keybinding.desktop_away.axhint": "Zurzeit nicht angeschlossen.",
-  "keybinding.desktop_landing": "%1$@ · Schreibtisch %2$d",
   "keybinding.dir.above": "oben",
   "keybinding.dir.below": "unten",
   "keybinding.dir.left": "links",

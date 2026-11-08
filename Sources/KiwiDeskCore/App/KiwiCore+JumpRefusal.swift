@@ -23,7 +23,7 @@ extension KiwiCore {
             let desktops = desktopMemory.readDesktops()
             if let yours { return yours }
             if awayIsFullScreen(away, in: desktops) { return .fullScreen }
-            return .otherDesktop(desktops.screenNumber(of: away.nativeSpace))
+            return .otherDesktop(desktops.number(of: away.nativeSpace))
         }
         if state.minimizeOrder.contains(where: { $0.id == id }) {
             return yours ?? .minimized

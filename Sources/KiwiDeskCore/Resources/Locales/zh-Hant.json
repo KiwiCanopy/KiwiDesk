@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "「%1$@」的快速鍵不是可辨識的快速鍵。",
   "keybinding.desktop_absent": "目前未偵測到",
   "keybinding.desktop_away.axhint": "目前未連接。",
-  "keybinding.desktop_landing": "%1$@ · 桌面 %2$d",
   "keybinding.dir.above": "上方",
   "keybinding.dir.below": "下方",
   "keybinding.dir.left": "左側",

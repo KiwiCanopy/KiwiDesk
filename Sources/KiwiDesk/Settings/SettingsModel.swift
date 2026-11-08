@@ -201,10 +201,8 @@ final class SettingsModel: ObservableObject {
     /// Each present Desktop's screen name by key (#1438); a
     /// dormant row reads its record instead.
     @Published var desktopScreens: [DesktopKey: String] = [:]
-    /// Each present Desktop's number on its own screen (#2792).
-    @Published var desktopScreenNumbers: [DesktopKey: Int] = [:]
     /// Where each Desktop number a shortcut takes lands (#2792).
-    @Published var desktopLandings: [Int: DesktopLanding] = [:]
+    @Published var desktopLandings: [Int: ScreenLabel] = [:]
 
     /// Whether this macOS drives native Desktops (#1145) — read
     /// once from the core (process-constant, so not published);
