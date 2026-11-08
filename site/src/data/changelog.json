@@ -37,7 +37,7 @@
         },
         {
           "title": "Swap it in",
-          "line": "In KiwiHub, ⌥↩ swaps the window you picked into your spot.",
+          "line": "In KiwiHub, ⌥↩︎ swaps the window you picked into your spot.",
           "symbol": "macwindow.on.rectangle"
         },
         {
@@ -65,7 +65,7 @@
             "**New: an app can now have its own Pocket key.** Give an app its own Pocket key… in Shortcuts & Gestures ▸ Pocket adds a key that opens its window (launching the app if needed), puts it away and takes it out again; the pocket's list shows these windows under Pocket Keys.",
             "**New: ⌃⌥⌘P opens the pocket's list**, where the arrow keys pick a window and Return takes it out.",
             "**New: Maximize Height (⌃⌥⇧M) and Maximize Width (⌃⌥⌘M) fill one side of the screen** and keep a share of the other, sized for each screen's shape. The new Maximize card in Layout Defaults lists your screens by shape (Laptop, Widescreen, Ultrawide, Super Ultrawide, Portrait) and sets each shape's share, from ¼ to ¾ or your own with Custom…, and whether the window grows from the centre or from where it is.",
-            "**New: Swap here in KiwiHub's window switcher.** ⌥↩ or ⌥-click brings the window you picked into your window's spot and sends yours to where it was.",
+            "**New: Swap here in KiwiHub's window switcher.** ⌥↩︎ or ⌥-click brings the window you picked into your window's spot and sends yours to where it was.",
             "**New: Step between Spaces (mouse or trackpad) in Looks & Animations ▸ Animations** picks the scroll step's own transition, so a scroll can slide while keys switch at once."
           ],
           "type": "new"
@@ -504,7 +504,7 @@
           "items": [
             "**New: KiwiVision (⌃⌥V) dims and blurs everything but the window you're in.** Settings ▸ KiwiVision sets how much, whether the wallpaper or the current app's other windows stay clear, which apps are never dimmed, and whether macOS switches to Dark while it's on.",
             "**New: KiwiVision lenses keep the apps you pick clear**, each on its own shortcut and in the profiles you choose; while one is on, KiwiDesk's focus keys stay on those apps. Make one with New Lens… in Settings ▸ KiwiVision.",
-            "**New: KiwiHub, one panel on ⌃⌥J, ⌃⌥K and ⌃⌥L.** Jump to any window by typing its name (⇧↩ brings it to the Space you're on), see every shortcut, or pick a layout, profile or lens for the Space under the pointer; Tab steps between the three.",
+            "**New: KiwiHub, one panel on ⌃⌥J, ⌃⌥K and ⌃⌥L.** Jump to any window by typing its name (⇧↩︎ brings it to the Space you're on), see every shortcut, or pick a layout, profile or lens for the Space under the pointer; Tab steps between the three.",
             "**New: ⌃⌥C switches the Space you're on to its next layout and ⌃⌥⇧C to the previous one**, with a moment's picture of the cycle. Choose the layouts it walks under Shortcuts & Gestures ▸ Layout ▸ Layouts to cycle; it starts with BSP, Scrolling and Floating.",
             "**New: set KiwiDesk up by asking your AI app.** Settings ▸ AI adds KiwiDesk to Claude Desktop in one click or copies a setup prompt for Claude Code, Cursor or Codex, with ready-made prompts for your Spaces, a new look, app rules or a move from another window manager; setting changes stay temporary until you say keep.",
             "**New: focus can follow the mouse** — rest the pointer on a window and it takes the focus. Off by default; turn it on under Shortcuts & Gestures ▸ Mouse & trackpad ▸ Focus and the pointer.",
