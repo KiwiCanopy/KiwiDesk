@@ -185,14 +185,15 @@ struct MaximizeShareMenuTests {
         )
         #expect(two.label.hasSuffix(", Laptop +1"))
         #expect(two.newValue == SettingsValueReadout.percent(0.4))
-        #expect(
+        let rest = try #require(
             SettingsValueReadout.maximizeRows(
                 .maximizeHeightShare,
                 key,
                 before,
                 before
-            ).isEmpty
+            ).first
         )
+        #expect(rest.label.hasSuffix(", Laptop"))
     }
 
     private func shapeRowSource() throws -> String {

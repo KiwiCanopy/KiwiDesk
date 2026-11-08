@@ -12,10 +12,11 @@ enum MaximizeCustomShare {
 
     /// The popover's range in percent, Core's clamp (#1359), and
     /// its arrow step.
-    static let range: ClosedRange<Int> =
+    static var range: ClosedRange<Int> {
         percent(
             of: MaximizeShape.shareRange.lowerBound
         )...percent(of: MaximizeShape.shareRange.upperBound)
+    }
     static let step = 5
 
     /// The share a typed percent stores: a menu fraction's exact

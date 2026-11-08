@@ -53,10 +53,13 @@ extension SettingsValueReadout {
         _ format: (Value) -> String
     ) -> ShapeChange? {
         let shapes = ScreenShape.allCases.filter { old[$0] != new[$0] }
-        guard let first = shapes.first else { return nil }
+        // Nothing changed narrates the first shape's value, as every
+        // readout narrates its value at rest.
+        guard let first = shapes.first ?? ScreenShape.allCases.first
+        else { return nil }
         let name = MaximizeShapeText.name(first)
         return ShapeChange(
-            shapes: shapes.count == 1
+            shapes: shapes.count <= 1
                 ? name
                 : L(
                     "layout_defaults.maximize.diff_more",
