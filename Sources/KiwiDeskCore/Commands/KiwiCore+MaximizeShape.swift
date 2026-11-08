@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 /// A refused `toggle_maximized` argument (#3062).
