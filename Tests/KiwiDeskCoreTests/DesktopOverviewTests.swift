@@ -95,14 +95,14 @@ struct DesktopOverviewTests {
         #expect(overview.screens.map(\.isHere) == [false, true])
     }
 
-    @Test("each screen lists its own Desktops, labelled on that screen")
+    @Test("each screen lists its own Desktops, numbered across screens")
     func desktopsPerScreen() {
         let core = makeCore()
         defer { reset() }
         let screens = core.desktopOverview(on: DisplayID(1)).screens
         let dell = screens[0].desktops
         #expect(dell.map(\.native) == [20, 21])
-        #expect(dell.map(\.label) == [1, 2])
+        #expect(dell.map(\.label) == [3, 4])
         #expect(dell.map(\.number) == [3, 4])
         #expect(dell.map(\.isShown) == [true, false])
         #expect(screens[1].desktops.map(\.native) == [10, 11])

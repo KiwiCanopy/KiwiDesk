@@ -77,7 +77,7 @@ extension KiwiCore {
             let shown = Self.isShown(native.id, in: snapshot)
             return DesktopOverview.Desktop(
                 native: native.id,
-                label: snapshot.screenNumber(of: native.id) ?? index + 1,
+                label: snapshot.number(of: native.id) ?? index + 1,
                 number: snapshot.number(of: native.id),
                 isShown: shown,
                 profile: boundProfileLabel(of: native.id, in: snapshot),

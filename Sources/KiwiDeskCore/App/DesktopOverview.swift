@@ -44,7 +44,8 @@ public struct DesktopOverview: Sendable, Equatable {
     public struct Desktop: Sendable, Equatable {
         /// The Desktop's native Space id.
         public let native: SkyLight.SpaceID
-        /// Its number on its own screen, the label (#2792).
+        /// Its number across screens, as Mission Control labels
+        /// it (#3103).
         public let label: Int
         /// The number a verb takes (`focus_desktop`), nil where no
         /// reading numbers it.
