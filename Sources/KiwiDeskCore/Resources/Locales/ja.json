@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "このウインドウを画面の幅いっぱいに広げ、高さは画面の一定の割合にします。スペースのほかの部分はそのままです。もう一度押すか、フォーカスを別のウインドウに移すと元に戻ります。",
   "keybinding.move_to_desktop": "ウインドウをデスクトップ %1$@ に移動",
   "keybinding.move_to_desktop_follow": "ウインドウをデスクトップ %1$@ に移動して追従",
+  "keybinding.move_to_display_last": "ウインドウを最後に使った画面に移動",
+  "keybinding.move_to_display_last_follow": "ウインドウを最後に使った画面に移動して追従",
   "keybinding.move_to_space": "ウインドウをスペース %1$@ に移動",
   "keybinding.move_to_space_follow": "ウインドウをスペース %1$@ に移動して追従",
   "keybinding.move_window_to_next_track": "ウインドウを次のトラックに移動",

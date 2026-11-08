@@ -357,6 +357,54 @@ KiwiDesk.focus_display_last()
 KiwiDesk.focus_display("right")
 ```
 
+:::unreleased
+### move_to_display_last / move_to_display
+
+**Expects:** nothing for `move_to_display_last`; a direction
+(`"left"`, `"right"`, `"up"` or `"down"`) for `move_to_display`.
+
+**Does:** moves the focused window into the Space another screen
+shows, an empty one included, by the rules of
+[`move_to_space`](#move_to_space). The screen is the one
+[`focus_display_last` / `focus_display`](#focus_display_last--focus_display)
+would go to.
+
+You stay where you are, so pressing again sends the next window
+to the same screen.
+
+Where no screen answers, the focused window's ring bumps, nothing
+moves, and the command fails with `no other screen` or
+`no screen <direction> of focus`. A screen showing a native
+full-screen Space takes no window: the ring bumps and the command
+fails.
+
+`move_to_display_last` and its follow form are **Move to last
+screen** and **Move to last screen & follow** under Settings ▸
+Shortcuts & Gestures ▸ Move windows, with no default chord;
+`move_to_display` and its follow form are Lua and CLI only.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_display_last()
+KiwiDesk.move_to_display("right")
+```
+
+#### move_to_display_last_and_follow / move_to_display_and_follow
+
+**Expects:** the same as the form without `_and_follow`.
+
+**Does:** the same move, and goes with the window. That arrival
+counts as a screen visit, so `move_to_display_last_and_follow`
+pressed again sends the window back.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_display_last_and_follow()
+```
+:::
+
 ### move_to_space
 
 **Expects:** a space identifier.

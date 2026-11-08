@@ -8,7 +8,7 @@ extension ShortcutsKey {
         case .layers, .openApplications, .pocketApps, .advanced,
             .focusDir,
             .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
-            .swapDir,
+            .swapDir, .screenMove,
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,

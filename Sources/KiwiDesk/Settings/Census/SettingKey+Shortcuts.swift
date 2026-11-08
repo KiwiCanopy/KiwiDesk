@@ -28,8 +28,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleSpaceBar = "keybinding.toggle_space_bar"
     case toggleAppBar = "keybinding.toggle_app_bar"
     case swapDir = "keybinding.swap_dir (x4)"
-    case moveWindowToTrack =
-        "keybinding.move_window_to_{prev,next}_track"
+    /// Send the window to the last screen, or follow it (#3117).
+    case screenMove = "keybinding.move_to_display_last{,_follow}"
+    case moveWindowToTrack = "keybinding.move_window_to_{prev,next}_track"
     case swapWithTrack =
         "keybinding.swap_with_{prev,next}_track"
     case moveToSpace = "keybinding.move_to_space (x N)"
@@ -55,7 +56,6 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// KiwiHub's navigation key alternatives (#2600): app-wide,
     /// Lua-only.
     case kiwiHubNavigationKeys = "appWide.kiwiHubKeys"
-
     /// Whether shortcuts keep a modifier's side (#2601): app-wide.
     case modifierSides = "appWide.modifierSides"
     /// The "Shortcuts use" switch's base (#2460), drafted with the
@@ -130,7 +130,7 @@ extension ShortcutsKey {
             .desktopOverview, .toggleSpaceBar, .toggleAppBar,
             .toggleKiwiVision, .toggleLens:
             return .row(.shortcuts, .showHide, .atRest)
-        case .swapDir, .moveToSpace, .moveToSpaceFollow:
+        case .swapDir, .screenMove, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
         // An OFFER until the Track layout is in play (#1440).
         case .moveWindowToTrack, .swapWithTrack:

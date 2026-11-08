@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Preenche a largura da tela com esta janela, com uma parte da altura da tela, deixando o resto do espaço como está. Pressione de novo, ou mova o foco para outra janela, para devolvê-la ao lugar.",
   "keybinding.move_to_desktop": "Mover para a Mesa %1$@",
   "keybinding.move_to_desktop_follow": "Mover para a Mesa %1$@ e seguir",
+  "keybinding.move_to_display_last": "Mover para a última tela usada",
+  "keybinding.move_to_display_last_follow": "Mover para a última tela usada e seguir",
   "keybinding.move_to_space": "Mover para o espaço %1$@",
   "keybinding.move_to_space_follow": "Mover para o espaço %1$@ e seguir",
   "keybinding.move_window_to_next_track": "Mover janela para o Track seguinte",

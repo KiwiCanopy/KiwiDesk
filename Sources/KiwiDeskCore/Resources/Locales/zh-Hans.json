@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "让此窗口铺满屏幕宽度，高度占屏幕的一定比例，空间中的其余部分保持不变。再按一次，或将焦点移到其他窗口，即可让它回到原处。",
   "keybinding.move_to_desktop": "移动到桌面 %1$@",
   "keybinding.move_to_desktop_follow": "移动到桌面 %1$@ 并跟随",
+  "keybinding.move_to_display_last": "移动到上次使用的显示器",
+  "keybinding.move_to_display_last_follow": "移动到上次使用的显示器并跟随",
   "keybinding.move_to_space": "移动到空间 %1$@",
   "keybinding.move_to_space_follow": "移动到空间 %1$@ 并跟随",
   "keybinding.move_window_to_next_track": "将窗口移动到下一条轨道",

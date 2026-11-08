@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Llena la anchura de la pantalla con esta ventana, con una parte de la altura de la pantalla, sin cambiar el resto del espacio. Pulsa de nuevo, o mueve el foco a otra ventana, para devolverla a su sitio.",
   "keybinding.move_to_desktop": "Mover al Escritorio %1$@",
   "keybinding.move_to_desktop_follow": "Mover al Escritorio %1$@ y seguir",
+  "keybinding.move_to_display_last": "Mover a la última pantalla usada",
+  "keybinding.move_to_display_last_follow": "Mover a la última pantalla usada y seguir",
   "keybinding.move_to_space": "Mover al espacio %1$@",
   "keybinding.move_to_space_follow": "Mover al espacio %1$@ y seguir",
   "keybinding.move_window_to_next_track": "Mover ventana al Track siguiente",

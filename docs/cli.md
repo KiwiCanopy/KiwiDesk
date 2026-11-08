@@ -476,6 +476,14 @@ Spaces by their order and by the ones you visited
 that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
 
+:::unreleased
+`move_to_display_last` and `move_to_display` move the focused
+window into the Space another screen shows, the screen
+`focus_display_last` or `focus_display` would go to; their
+`_and_follow` forms go with it
+([`move_to_display_last`](lua-reference.md#move_to_display_last--move_to_display)).
+:::
+
 `set_space_transition` picks how an explicit Space switch shows itself, and
 `set_space_slide_duration` paces the slide
 ([`set_space_transition`](lua-reference.md#set_space_transition)).

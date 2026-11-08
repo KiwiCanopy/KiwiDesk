@@ -139,6 +139,10 @@ extension ShortcutsReferenceBuilder {
         // Two screens: back to the one before (#2512).
         case KeybindingCatalog.screenLastRow.lua:
             return "display.2"
+        // A window sent to the last screen (#3117).
+        case KeybindingCatalog.screenMoveRows[0].lua,
+            KeybindingCatalog.screenMoveRows[1].lua:
+            return "macwindow.on.rectangle"
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"

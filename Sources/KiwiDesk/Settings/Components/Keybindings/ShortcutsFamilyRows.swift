@@ -51,6 +51,8 @@ struct ShortcutsFamilyRows {
             return perSpace(KeybindingCatalog.goToSpace)
         case .swapDir:
             return KeybindingCatalog.swapDirections
+        case .screenMove:
+            return KeybindingCatalog.screenMoveRows
         case .moveWindowToTrack:
             return KeybindingCatalog.moveToTrackRows
         case .swapWithTrack:

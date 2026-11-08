@@ -40,6 +40,14 @@ extension KiwiCore {
             return focusDisplayLast()
         case "focus_display":
             return focusDisplay(args)
+        case "move_to_display_last":
+            return moveToDisplayLast(follow: false)
+        case "move_to_display_last_and_follow":
+            return moveToDisplayLast(follow: true)
+        case "move_to_display":
+            return moveToDisplay(args, follow: false)
+        case "move_to_display_and_follow":
+            return moveToDisplay(args, follow: true)
         case "move_to_space":
             return moveToSpace(command, args, follow: false)
         case "move_to_space_and_follow":

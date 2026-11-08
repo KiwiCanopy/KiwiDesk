@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Riempie la larghezza dello schermo con questa finestra, su una parte dell'altezza dello schermo, lasciando il resto dello spazio com'è. Premi di nuovo, o sposta il focus su un'altra finestra, per rimetterla al suo posto.",
   "keybinding.move_to_desktop": "Sposta sulla Scrivania %1$@",
   "keybinding.move_to_desktop_follow": "Sposta sulla Scrivania %1$@ e segui",
+  "keybinding.move_to_display_last": "Sposta sull'ultimo schermo usato",
+  "keybinding.move_to_display_last_follow": "Sposta sull'ultimo schermo usato e segui",
   "keybinding.move_to_space": "Sposta nello spazio %1$@",
   "keybinding.move_to_space_follow": "Sposta nello spazio %1$@ e segui",
   "keybinding.move_window_to_next_track": "Sposta la finestra sul Track successivo",

@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "讓這個視窗填滿螢幕寬度，高度佔螢幕的一定比例，空間中的其餘部分維持不變。再按一次，或把焦點移到其他視窗，即可讓它回到原處。",
   "keybinding.move_to_desktop": "移至桌面 %1$@",
   "keybinding.move_to_desktop_follow": "移至桌面 %1$@ 並跟隨",
+  "keybinding.move_to_display_last": "移至上次使用的螢幕",
+  "keybinding.move_to_display_last_follow": "移至上次使用的螢幕並跟隨",
   "keybinding.move_to_space": "移至空間 %1$@",
   "keybinding.move_to_space_follow": "移至空間 %1$@ 並跟隨",
   "keybinding.move_window_to_next_track": "將視窗移至下一條軌道",

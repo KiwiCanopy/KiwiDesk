@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Füllt die volle Bildschirmbreite mit diesem Fenster, bei einem Anteil der Bildschirmhöhe; der Rest des Space bleibt, wie er ist. Drücke erneut oder bewege den Fokus auf ein anderes Fenster, um es an seinen Platz zurückzubringen.",
   "keybinding.move_to_desktop": "Auf Schreibtisch %1$@ verschieben",
   "keybinding.move_to_desktop_follow": "Auf Schreibtisch %1$@ verschieben & folgen",
+  "keybinding.move_to_display_last": "Auf den zuletzt genutzten Bildschirm verschieben",
+  "keybinding.move_to_display_last_follow": "Auf den zuletzt genutzten Bildschirm verschieben & folgen",
   "keybinding.move_to_space": "Nach Space %1$@ verschieben",
   "keybinding.move_to_space_follow": "Nach Space %1$@ verschieben & folgen",
   "keybinding.move_window_to_next_track": "In den nächsten Track verschieben",

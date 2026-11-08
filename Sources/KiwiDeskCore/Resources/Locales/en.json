@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Fills the screen's width with this window, at a share of its height, leaving the rest of the Space as it is. Press again, or move focus to another window, to put it back.",
   "keybinding.move_to_desktop": "Move to Desktop %1$@",
   "keybinding.move_to_desktop_follow": "Move to Desktop %1$@ & follow",
+  "keybinding.move_to_display_last": "Move to last screen",
+  "keybinding.move_to_display_last_follow": "Move to last screen & follow",
   "keybinding.move_to_space": "Move to Space %1$@",
   "keybinding.move_to_space_follow": "Move to Space %1$@ & follow",
   "keybinding.move_window_to_next_track": "Move window to next track",
