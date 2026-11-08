@@ -902,10 +902,10 @@ exec children inheriting the runner's stdout, so whoever read
 it waited for an EOF that never came. Fire-and-forget children
 now get `FileHandle.nullDevice` and callback children write to
 launcher-owned pipes (`ExecLauncher`), so no child holds the
-runner's stdio on either path. CI keeps its `--skip` /
-`--filter` two-step over `ExecTests` for failure attribution,
-which is why every suite spawning real shell children is
-*named* under the `ExecTests` prefix (`MachineTouchTests` pins
+runner's stdio on either path. CI and the tag's test jobs keep
+their `--skip` / `--filter` two-step over `ExecTests` for failure
+attribution, which is why every suite spawning real shell children
+is *named* under the `ExecTests` prefix (`MachineTouchTests` pins
 that partition).
 
 **A device eyeball takes the bundle `build-app.sh` verified,
