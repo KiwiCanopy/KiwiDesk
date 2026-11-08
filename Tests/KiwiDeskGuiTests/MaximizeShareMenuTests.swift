@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A Maximize share pop-up offers ¼ ⅓ ½ ⅔ ¾ and Custom… (#3062,
 /// owner 2026-11-08); a stored share outside them shows as one extra
@@ -42,10 +43,20 @@ struct MaximizeShareMenuTests {
         #expect(MaximizeShapeRow.offMenuShare(0.4) == 0.4)
     }
 
-    @Test("Custom clamps to the popover's range")
+    /// The range is Core's clamp, never a second copy (#1359).
+    @Test("Custom clamps to Core's share range")
     func customClamps() {
-        #expect(MaximizeCustomShare.share(forPercent: 5) == 0.1)
-        #expect(MaximizeCustomShare.share(forPercent: 140) == 1)
+        let core = MaximizeShape.shareRange
+        #expect(
+            MaximizeCustomShare.share(forPercent: 1) == core.lowerBound
+        )
+        #expect(
+            MaximizeCustomShare.share(forPercent: 140) == core.upperBound
+        )
+        #expect(
+            MaximizeCustomShare.range.lowerBound
+                == MaximizeCustomShare.percent(of: core.lowerBound)
+        )
         #expect(MaximizeCustomShare.tag < 0)
     }
 
@@ -60,7 +71,17 @@ struct MaximizeShareMenuTests {
             )
         )
         #expect(source.contains("ifpicked==MaximizeCustomShare.tag{"))
-        #expect(source.contains(".popover(item:customBinding(key))"))
+        #expect(
+            source.contains(".popover(item:customBinding(key,value:value))")
+        )
+        // The draft is written at the dismissal, never at a teardown.
+        #expect(
+            source.contains(
+                "ifnew==nil,letopen=custom[key],!open.cancelled,"
+                    + "open.percent!=open.seed{"
+                    + "value.wrappedValue=MaximizeCustomShare.share("
+            )
+        )
     }
 
     /// A menu pop-up draws at its own width whatever frame it gets,
@@ -70,7 +91,11 @@ struct MaximizeShareMenuTests {
     @Test("every cell sits on its column's leading edge")
     func cellsLeadTheirColumn() throws {
         let source = try shapeRowSource()
-        #expect(!source.contains(".frame(width:88)"))
+        let menu = try #require(
+            source.components(separatedBy: "privatefuncshareMenu(").last?
+                .components(separatedBy: "privatefunccustomBinding(").first
+        )
+        #expect(!menu.contains(".frame(width:"))
         #expect(
             source.components(separatedBy: ".fixedSize()").count - 1 == 2
         )

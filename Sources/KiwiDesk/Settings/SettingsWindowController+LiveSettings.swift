@@ -1,14 +1,19 @@
 import KiwiDeskCore
 
+/// Windows with a live-rows ask already queued this main turn.
+@MainActor private var liveAskQueued: Set<ObjectIdentifier> = []
+
 extension SettingsWindowController {
     /// The live settings moved — a verb, the CLI, Lua — while
     /// Settings is open: its "Live, not saved" rows ask Core again
     /// (#2262), since a window the user only looks at is never
-    /// keyed again. On the next main turn, so the ask never runs
-    /// inside the settings write that called it.
+    /// keyed again. Once per main turn, after the settings write
+    /// that called it, so a burst of writes reads the profile once.
     func liveSettingsChanged() {
-        guard isShown else { return }
+        let id = ObjectIdentifier(self)
+        guard isShown, liveAskQueued.insert(id).inserted else { return }
         Task { @MainActor [weak self] in
+            liveAskQueued.remove(id)
             self?.model.refreshUnsavedLive()
         }
     }

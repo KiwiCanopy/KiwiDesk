@@ -1314,7 +1314,7 @@
   "layout_defaults.maximize.caption.help": "%1$@: mais alta do que larga. %2$@: pelo menos %3$@ vezes mais larga do que alta. %4$@: pelo menos %5$@ pontos de largura, ou pelo menos %6$@ vezes mais larga do que alta. %7$@: menos de %8$@ pontos de largura. %9$@: qualquer outra tela. “%10$@” define onde a janela fica no outro eixo: no centro da tela, ou sobre o próprio lugar no layout, deslocada para dentro se fosse passar de uma borda.",
   "layout_defaults.maximize.cell": "%1$@, %2$@",
   "layout_defaults.maximize.custom": "Personalizada…",
-  "layout_defaults.maximize.custom.ax": "%1$@, proporção personalizada, %2$@ por cento",
+  "layout_defaults.maximize.custom.ax": "%1$@, proporção personalizada",
   "layout_defaults.maximize.custom.percent": "%",
   "layout_defaults.maximize.custom.share": "Proporção",
   "layout_defaults.maximize.diff_value": "%1$@ %2$@",

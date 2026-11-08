@@ -1314,7 +1314,7 @@
   "layout_defaults.maximize.caption.help": "%1$@：高度大于宽度。%2$@：宽度至少为高度的 %3$@ 倍。%4$@：宽度至少 %5$@ pt，或宽度至少为高度的 %6$@ 倍。%7$@：宽度小于 %8$@ pt。%9$@：其他所有屏幕。“%10$@”决定窗口在另一个方向上的位置：屏幕中央，或布局中它自己的原位；若会超出边缘，则向内移入。",
   "layout_defaults.maximize.cell": "%1$@，%2$@",
   "layout_defaults.maximize.custom": "自定义…",
-  "layout_defaults.maximize.custom.ax": "%1$@，自定义比例，%2$@%%",
+  "layout_defaults.maximize.custom.ax": "%1$@，自定义比例",
   "layout_defaults.maximize.custom.percent": "%",
   "layout_defaults.maximize.custom.share": "比例",
   "layout_defaults.maximize.diff_value": "%1$@ %2$@",

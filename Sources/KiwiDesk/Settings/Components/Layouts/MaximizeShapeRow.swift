@@ -105,26 +105,40 @@ struct MaximizeShapeRow: View {
         .fixedSize()
         .accessibilityLabel(label(key))
         .accessibilityValue(spoken)
-        .popover(item: customBinding(key)) { request in
+        .popover(item: customBinding(key, value: value)) { request in
             MaximizeCustomPopover(
-                seed: request.seed,
-                column: MaximizeCard.control(key)?.text ?? ""
-            ) { percent in
-                value.wrappedValue = MaximizeCustomShare.share(
-                    forPercent: percent
-                )
-            }
+                percent: Binding(
+                    get: { custom[key]?.percent ?? request.percent },
+                    set: { custom[key]?.percent = $0 }
+                ),
+                column: MaximizeCard.control(key)?.text ?? "",
+                cancel: { custom[key]?.cancelled = true }
+            )
             .settingsPopoverChrome()
         }
     }
 
-    /// The Custom popover's request for `key`'s column alone.
+    /// The Custom popover's request for `key`'s column alone. Its
+    /// dismissal — Return, a click outside — writes the typed share,
+    /// unless Escape cancelled or nothing was typed, which keeps an
+    /// exact stored share; a teardown dismisses nothing, so a
+    /// closing window writes no draft.
     private func customBinding(
-        _ key: SettingKey
+        _ key: SettingKey,
+        value: Binding<Double>
     ) -> Binding<MaximizeCustomRequest?> {
         Binding(
             get: { custom[key] },
-            set: { custom[key] = $0 }
+            set: { new in
+                if new == nil, let open = custom[key], !open.cancelled,
+                    open.percent != open.seed
+                {
+                    value.wrappedValue = MaximizeCustomShare.share(
+                        forPercent: open.percent
+                    )
+                }
+                custom[key] = new
+            }
         )
     }
 

@@ -9,8 +9,12 @@ enum MaximizeCustomShare {
     /// collides with a stored value.
     static let tag: Double = -1
 
-    /// The popover's range and arrow step, in percent.
-    static let range: ClosedRange<Int> = 10...100
+    /// The popover's range in percent, Core's clamp (#1359), and
+    /// its arrow step.
+    static let range: ClosedRange<Int> =
+        percent(
+            of: MaximizeShape.shareRange.lowerBound
+        )...percent(of: MaximizeShape.shareRange.upperBound)
     static let step = 5
 
     /// The share a typed percent stores: a menu fraction's exact
@@ -30,31 +34,30 @@ enum MaximizeCustomShare {
 }
 
 /// One presentation of the Custom popover (#843): a fresh id per
-/// open keeps the popover's own `@State` fresh.
+/// open, the percent being typed, and whether Escape cancelled it.
+/// The row holds it, so the row writes the draft at the dismissal.
 struct MaximizeCustomRequest: Identifiable, Equatable {
     let id = UUID()
+    /// The stored share as a whole percent, which the field opens on.
     let seed: Int
+    var percent: Int
+    var cancelled = false
+
+    init(seed: Int) {
+        self.seed = seed
+        percent = seed
+    }
 }
 
 /// The Custom popover: one percent field with arrows. Return or a
-/// click outside commits, Escape cancels; it has no buttons.
+/// click outside dismisses it, which commits at the row; Escape
+/// cancels first. It has no buttons.
 struct MaximizeCustomPopover: View {
+    @Binding var percent: Int
     /// The column's label, for the spoken name.
     let column: String
-    let onCommit: (Int) -> Void
-    @State private var percent: Int
-    @State private var cancelled = false
+    let cancel: () -> Void
     @Environment(\.dismiss) private var dismiss
-
-    init(
-        seed: Int,
-        column: String,
-        onCommit: @escaping (Int) -> Void
-    ) {
-        self.column = column
-        self.onCommit = onCommit
-        _percent = State(initialValue: seed)
-    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -76,20 +79,18 @@ struct MaximizeCustomPopover: View {
         .padding(12)
         .onSubmit { dismiss() }
         .onExitCommand {
-            cancelled = true
+            cancel()
             dismiss()
-        }
-        .onDisappear {
-            if !cancelled { onCommit(percent) }
         }
     }
 
     private var spokenName: String {
+        // The number is the field's and the arrows' value, never
+        // the name's (gui.md ▸ a named control is valued).
         L(
             "layout_defaults.maximize.custom.ax",
-            "%1$@, custom share, %2$@ percent",
-            column,
-            percent.formatted(.number.grouping(.never))
+            "%1$@, custom share",
+            column
         )
     }
 }

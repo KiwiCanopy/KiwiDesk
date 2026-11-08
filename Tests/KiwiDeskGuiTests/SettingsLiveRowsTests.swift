@@ -107,7 +107,8 @@ struct SettingsLiveRowsTests {
                 "model.adoptCapturedSpaces()}model.refreshUnsavedLive()"
             ],
             "SettingsWindowController+LiveSettings.swift": [
-                "guardisShownelse{return}",
+                "guardisShown,liveAskQueued.insert(id).insertedelse{"
+                    + "return}",
                 "self?.model.refreshUnsavedLive()",
             ],
             "SettingsDiffRowSource+Live.swift": [

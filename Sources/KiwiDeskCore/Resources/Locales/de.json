@@ -1314,7 +1314,7 @@
   "layout_defaults.maximize.caption.help": "%1$@: höher als breit. %2$@: mindestens %3$@-mal so breit wie hoch. %4$@: mindestens %5$@ Punkte breit oder mindestens %6$@-mal so breit wie hoch. %7$@: weniger als %8$@ Punkte breit. %9$@: jeder andere Bildschirm. „%10$@“ legt fest, wo das Fenster in der anderen Richtung sitzt: in der Mitte des Bildschirms oder über seinem eigenen Platz im Layout, nach innen gerückt, falls es über einen Rand ragen würde.",
   "layout_defaults.maximize.cell": "%1$@, %2$@",
   "layout_defaults.maximize.custom": "Eigener Wert…",
-  "layout_defaults.maximize.custom.ax": "%1$@, eigener Anteil, %2$@ Prozent",
+  "layout_defaults.maximize.custom.ax": "%1$@, eigener Anteil",
   "layout_defaults.maximize.custom.percent": "%",
   "layout_defaults.maximize.custom.share": "Anteil",
   "layout_defaults.maximize.diff_value": "%1$@ %2$@",

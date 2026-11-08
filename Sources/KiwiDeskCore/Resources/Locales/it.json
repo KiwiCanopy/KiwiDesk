@@ -1314,7 +1314,7 @@
   "layout_defaults.maximize.caption.help": "%1$@: più alto che largo. %2$@: largo almeno %3$@ volte l'altezza. %4$@: largo almeno %5$@ punti, oppure almeno %6$@ volte l'altezza. %7$@: largo meno di %8$@ punti. %9$@: ogni altro schermo. «%10$@» stabilisce dove si trova la finestra sull'altro asse: al centro dello schermo, oppure sopra il suo posto nel layout, spostata verso l'interno se dovesse superare un bordo.",
   "layout_defaults.maximize.cell": "%1$@, %2$@",
   "layout_defaults.maximize.custom": "Personalizzata…",
-  "layout_defaults.maximize.custom.ax": "%1$@, quota personalizzata, %2$@ percento",
+  "layout_defaults.maximize.custom.ax": "%1$@, quota personalizzata",
   "layout_defaults.maximize.custom.percent": "%",
   "layout_defaults.maximize.custom.share": "Quota",
   "layout_defaults.maximize.diff_value": "%1$@ %2$@",
