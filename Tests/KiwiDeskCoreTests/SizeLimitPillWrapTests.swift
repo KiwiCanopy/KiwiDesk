@@ -119,6 +119,8 @@ struct SizeLimitPillWrapTests {
 
     @Test("the Tile refusal pill leads with the refused act")
     func pillLeads() {
+        // Asserts English words: pin the locale (#740, tests.md).
+        LocalizationManager.shared.select("en")
         for reason in [AutoFloatReason.fixedSize, .accessoryApp, .panel] {
             #expect(reason.pillSentence.hasPrefix("Can't tile. "))
             #expect(reason.pillSentence.hasSuffix(reason.sentence))
