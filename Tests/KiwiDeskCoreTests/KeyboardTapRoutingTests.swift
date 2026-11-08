@@ -168,4 +168,27 @@ struct KeyboardTapRoutingTests {
         manager.suspend()
         #expect(manager.tapBindings[row.id] == nil)
     }
+
+    @Test("rows name their consumers; no rows, none")
+    func rowsNameConsumers() throws {
+        let side = SideTapRow(keyCode: 4, modifiers: .command, id: 1)
+        let tap = ModifierTapRow(combo: try combo("cmd+cmd"), id: 2)
+        #expect(KeyboardTapRows.empty.consumers.isEmpty)
+        #expect(KeyboardTapRows(sides: [side]).consumers == [.sides])
+        #expect(KeyboardTapRows(taps: [tap]).consumers == [.modifierTaps])
+        #expect(
+            KeyboardTapRows(sides: [side], taps: [tap]).consumers
+                == [.sides, .modifierTaps]
+        )
+    }
+
+    @Test("Carbon's one door refuses a tap")
+    func registerRefusesTaps() throws {
+        let (manager, registrar, _) = rig()
+        let tap = try combo("cmd+cmd")
+        #expect(
+            !manager.registerPhysical(code: tap.keyCode, combo: tap, ref: 1)
+        )
+        #expect(registrar.codes.isEmpty)
+    }
 }

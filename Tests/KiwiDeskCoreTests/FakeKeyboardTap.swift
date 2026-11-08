@@ -19,7 +19,9 @@ final class FakeKeyboardTap: KeyboardTapHandle {
         self.fire = fire
     }
 
-    func setSideRows(_ rows: [SideTapRow]) { self.rows = rows }
-    func setTapRows(_ rows: [ModifierTapRow]) { tapRows = rows }
+    func setRows(_ rows: KeyboardTapRows) {
+        self.rows = rows.sides
+        tapRows = rows.taps
+    }
     func stop() { stopped = true }
 }

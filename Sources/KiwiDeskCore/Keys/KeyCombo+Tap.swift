@@ -62,17 +62,10 @@ extension KeyCombo {
     private static func tapToken(
         _ part: String
     ) -> (ModifierKind, ModifierSide?)? {
-        if let kind = tapKinds[part] { return (kind, nil) }
+        if let kind = plainKinds[part] { return (kind, nil) }
         if let (kind, side) = sideTokens[part] { return (kind, side) }
         return nil
     }
-
-    private static let tapKinds: [String: ModifierKind] = [
-        "cmd": .command, "command": .command,
-        "alt": .option, "opt": .option, "option": .option,
-        "ctrl": .control, "control": .control,
-        "shift": .shift,
-    ]
 
     /// A tap's canonical spelling, which `parse` round-trips.
     var tapString: String? {

@@ -2236,7 +2236,7 @@
   "shortcuts.modifier_keys.summary": "把一个键变成 Hyper，并选择快捷键使用的修饰键",
   "shortcuts.modifier_sides": "区分左右修饰键",
   "shortcuts.modifier_sides.either_side_hint": "“%1$@”关闭期间可从任意一侧使用。",
-  "shortcuts.modifier_sides.help": "开启后，你录制的快捷键会保留你按下的那一侧：%1$@ 加 H 会录制为 %2$@，因此它和 %3$@ 可以执行不同的操作。之前录制的快捷键仍可从任意一侧使用。开启期间，每次新录制都会保留侧别；若要录制可从任意一侧使用的快捷键，请在关闭此选项时录制，或在 Lua 中写成 %4$@。为了区分左右，KiwiDesk 会读取按键，但仅在至少有一个快捷键保留侧别时才会读取，并且只对这些按键上的快捷键作出响应。",
+  "shortcuts.modifier_sides.help": "开启后，你录制的快捷键会保留你按下的那一侧：%1$@ 加 H 会录制为 %2$@，因此它和 %3$@ 可以执行不同的操作。之前录制的快捷键仍可从任意一侧使用。开启期间，每次新录制都会保留侧别；若要录制可从任意一侧使用的快捷键，请在关闭此选项时录制，或在 Lua 中写成 %4$@。为了区分左右并识别单独轻按的修饰键，KiwiDesk 会读取按键，但仅在至少有一个快捷键保留侧别或属于轻按时才会读取，并且只对这些快捷键作出响应。对于轻按，它还会读取修饰键变化和点按；这些都不会被记录或存储。",
   "shortcuts.modifier_sides.refused": "macOS 不允许 KiwiDesk 读取按键，因此保留侧别的快捷键暂时可从任意一侧使用。KiwiDesk 下次开始管理你的窗口时会再次请求。",
   "shortcuts.modifier_sides.waiting": "保留侧别的快捷键：%1$d",
   "shortcuts.modifier_sides.waiting_detail": "在开启此选项之前，它们可从任意一侧使用。",

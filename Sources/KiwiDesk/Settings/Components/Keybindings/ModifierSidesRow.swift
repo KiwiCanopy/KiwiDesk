@@ -79,10 +79,12 @@ enum ModifierSidesWords {
                 + "earlier still work from either side. While this is "
                 + "on, every new recording keeps its side; for one that "
                 + "works from either side, record it with this off or "
-                + "write %4$@ in Lua. To tell the sides apart, KiwiDesk "
-                + "reads key presses, but only while at least one "
-                + "shortcut keeps a side, and it acts only on the "
-                + "shortcuts on those keys.",
+                + "write %4$@ in Lua. To tell the sides apart, and to "
+                + "hear a modifier tapped alone, KiwiDesk reads key "
+                + "presses, but only while at least one shortcut keeps "
+                + "a side or is a tap, and it acts only on those "
+                + "shortcuts. For a tap it also reads modifier changes "
+                + "and clicks; it records and stores none of them.",
             HyperKeyWords.name(.rightCommand),
             drawn(.right) + space + "H",
             drawn(.left) + space + "H",

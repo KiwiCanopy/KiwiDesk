@@ -12545,12 +12545,15 @@ mechanism, chosen because it needs no Input Monitoring
 permission. Multi-key chords (⌘J+K) are therefore not
 recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
-⚠ unrecognized.
+⚠ unrecognized. The one other kind is a modifier tapped alone,
+which the keyboard tap reads instead of Carbon (*A modifier tap
+is one binding kind*, below).
 
 **The Hyper key is a modifier KiwiDesk owns, and needs no
 Input Monitoring (#1870).** The usual hyper key is an event
-tap rewriting Caps Lock into `⌃⌥⇧⌘`. KiwiDesk runs no tap on a
-default install, so it instead remaps the chosen key to F18
+tap rewriting Caps Lock into `⌃⌥⇧⌘`. KiwiDesk runs no tap to
+rewrite keys (a default install ran none at all until the seeded
+taps, *Left and right modifiers…* ▸ Amended), so it instead remaps the chosen key to F18
 with `hidutil` — per user, no permission, gone at a restart —
 and watches F18 with a Carbon hotkey, which hears both its press
 and its release. Only while it is held are the `hyper+…`
@@ -12639,28 +12642,30 @@ What it unblocks: reading keys needs no Input Monitoring, so
 #1874's "tap Hyper alone for Escape" turns on whether posting the
 Escape does, which is #1874's to measure.
 
-**Amended (#1872, #1229, #1873; owner, 2026-11-08): a default
-install may run the keyboard tap, and a reader of touches, for a
-seeded shortcut.** The bound above, "a default install sees no
-keystroke", is retired, for two seeds only: #1229's ⌘⌘ (Show
+**Amended (#1872, #1229, #1873; owner, 2026-11-08): a seeded
+shortcut may run the keyboard tap, or a reader of touches, on a
+default install.** The bound above, "a default install sees no
+keystroke", is retired for two seeds only: #1229's ⌘⌘ (Show
 Desktop overview) and #1873's ⌃⌥ + pinch. Neither can be anything
 else. Carbon registers no binding without a non-modifier key, so a
 modifier tap is a keyboard tap or nothing; a pinch is a touch
-reader or nothing. And a seed nobody can find is no seed: the
-overview's opener is the one shortcut a new user is told about,
-and putting it behind a switch first would make the tour teach a
-switch. What stays bounded is what the tap does, not whether it
-runs. It runs while a modifier-tap binding exists, the seeded one
-included, so clearing ⌘⌘ stops it. For taps it is listen-only: it
-reads modifier changes, key presses (to tell a tap from a chord's
-start) and mouse-down (so ⌘-click in Finder never counts), and it
-swallows, records and stores none of them. It asks for
-Accessibility alone. It stays one tap: a reader of key events
-joins it as a consumer with its own mask, built from the union,
-and is no tap of its own (`.claude/rules/input-and-animation.md`).
-Accepted: under Secure Input, key presses are hidden from the tap,
-so a key typed between two ⌘ taps cannot reset the count.
+reader or nothing. And a seed nobody can find is no seed: putting
+the overview's opener behind a switch first would make the tour
+teach a switch. What stays bounded is what the tap does, and those
+seeds keep these bounds. The tap runs while a modifier-tap binding
+exists, a seeded one included, so clearing every tap stops it. Of
+modifier changes, key presses (to tell a tap from a chord's start)
+and mouse-down (so ⌘-click in Finder never counts) it swallows,
+records and stores none, and it is listen-only unless a sided
+shortcut also needs it. It asks for Accessibility alone. It stays
+one tap: a system-wide reader of key events joins it as a consumer
+with its own mask, built from the union, and is no tap of its own
+(`.claude/rules/input-and-animation.md`). Accepted: under Secure
+Input, key presses are hidden from the tap, so a key typed between
+two ⌘ taps cannot reset the count
+([accepted limitations](accepted-limitations.md)).
 
+:::unreleased
 **A modifier tap is one binding kind, decided by one rule
 (#1872).** Any row and any Lua binding may hold a tap in place of
 a chord, a layer switch included, stored in the chord's own
@@ -12684,13 +12689,15 @@ place. Three bounds keep it from firing by accident:
   means left twice or right twice. A double tap records its side
   as a chord does, either-side unless *Tell left and right
   modifiers apart* is on. The tap always reads sides, so a stored
-  side holds with the switch off too.
+  side holds with the switch off too, and two taps a side tells
+  apart are never a collapse conflict.
 
 There is no hold-alone kind, and no Lua timing override until
 someone asks. A single tap fires at its release when no double
-tap waits on the same key, and 300 ms later when one does. The
-only warning a tap raises is one macOS itself answers; a list of
-other apps' taps would be stale the day it shipped.
+tap waits on the same key, and 300 ms later when one does. A
+warning about a tap may name only what macOS itself answers; a
+list of other apps' taps would be stale the day it shipped.
+:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get

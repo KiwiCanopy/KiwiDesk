@@ -30,8 +30,11 @@ struct SideTapRow: Hashable, Sendable {
     }
 }
 
-/// A reader of key events joining the one keyboard tap
-/// (input-and-animation.md), each with its own mask.
+/// A system-wide reader of key events joining the one keyboard tap
+/// (input-and-animation.md), each with its own mask. Declared in
+/// precedence order: the tap asks each live consumer in turn, a
+/// swallowing one first, and a listen-only one hears every event
+/// in its mask, swallowed or not.
 enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
     /// Sided chords (#2601): key-down, swallowing a match.
     case sides
@@ -64,14 +67,34 @@ enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
     }
 }
 
+/// The rows every consumer answers, handed to the tap through one
+/// door, so no consumer's rows can be left behind a suspend.
+struct KeyboardTapRows: Equatable, Sendable {
+    var sides: [SideTapRow] = []
+    var taps: [ModifierTapRow] = []
+
+    static let empty = KeyboardTapRows()
+
+    /// The consumers these rows make live: one per non-empty field.
+    var consumers: Set<KeyboardTapConsumer> {
+        Set(
+            KeyboardTapConsumer.allCases.filter {
+                switch $0 {
+                case .sides: !sides.isEmpty
+                case .modifierTaps: !taps.isEmpty
+                }
+            }
+        )
+    }
+}
+
 /// What the keybinding manager holds of the keyboard tap — the
 /// seam a test replaces (#565).
 protocol KeyboardTapHandle: AnyObject {
     /// The consumers it was built for; a change rebuilds it.
     var consumers: Set<KeyboardTapConsumer> { get }
     /// The rows each consumer answers; read on its thread.
-    func setSideRows(_ rows: [SideTapRow])
-    func setTapRows(_ rows: [ModifierTapRow])
+    func setRows(_ rows: KeyboardTapRows)
     func stop()
 }
 
@@ -130,12 +153,9 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         return tap.start() ? tap : nil
     }
 
-    func setSideRows(_ rows: [SideTapRow]) {
-        sideRows.withLock { $0 = rows }
-    }
-
-    func setTapRows(_ rows: [ModifierTapRow]) {
-        router.withLock { $0.setRows(rows) }
+    func setRows(_ rows: KeyboardTapRows) {
+        sideRows.withLock { $0 = rows.sides }
+        router.withLock { $0.setRows(rows.taps) }
     }
 
     func stop() {
@@ -190,31 +210,53 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         return true
     }
 
-    /// The callback body, on the tap thread.
+    /// The callback body, on the tap thread: every live consumer
+    /// in precedence order, the event swallowed once any did.
     private func handle(
         _ type: CGEventType,
         _ event: CGEvent
     ) -> Unmanaged<CGEvent>? {
         let pass = Unmanaged.passUnretained(event)
-        switch type {
-        case .tapDisabledByTimeout, .tapDisabledByUserInput:
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let port { CGEvent.tapEnable(tap: port, enable: true) }
+            // A count half-heard across the gap is no tap.
             route(.key)
             report("keyboard tap: re-enabled after \(type)")
             return pass
-        case .keyDown:
-            if consumers.contains(.modifierTaps) { route(.key) }
-            return sideKey(event) ? nil : pass
-        case .flagsChanged:
-            let held = HotkeyModifiers.held(by: event.flags)
-            let time = TimeInterval(event.timestamp) / 1e9
-            route(.flags(held, at: time))
-            return pass
+        }
+        var swallowed = false
+        for consumer in KeyboardTapConsumer.allCases
+        where consumers.contains(consumer) {
+            switch consumer {
+            case .sides:
+                if !swallowed, type == .keyDown, sideKey(event) {
+                    swallowed = true
+                }
+            case .modifierTaps:
+                if let input = Self.tapInput(type, event) { route(input) }
+            }
+        }
+        return swallowed ? nil : pass
+    }
+
+    /// What `.modifierTaps` hears of an event, nil for nothing.
+    private static func tapInput(
+        _ type: CGEventType,
+        _ event: CGEvent
+    ) -> ModifierTapDetector.Input? {
+        switch type {
+        case .keyDown: return .key
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            route(.mouseDown)
-            return pass
-        default:
-            return pass
+            return .mouseDown
+        case .flagsChanged:
+            // The tap's own uptime clock: `CGEvent.timestamp`'s
+            // unit differs by architecture (mach ticks on arm64).
+            let time =
+                TimeInterval(
+                    clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+                ) / 1e9
+            return .flags(HotkeyModifiers.held(by: event.flags), at: time)
+        default: return nil
         }
     }
 
@@ -222,7 +264,6 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     /// swallowed. A repeat is swallowed and fires nothing, as
     /// Carbon's hotkeys never repeat.
     private func sideKey(_ event: CGEvent) -> Bool {
-        guard consumers.contains(.sides) else { return false }
         let code = UInt32(event.getIntegerValueField(.keyboardEventKeycode))
         let held = HotkeyModifiers.held(by: event.flags)
         guard

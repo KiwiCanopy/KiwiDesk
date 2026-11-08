@@ -93,4 +93,15 @@ struct KeyComboTapTests {
             .target == .otherBinding(twin)
         )
     }
+
+    @Test("a KiwiHub key refuses a tap, whose events it never sees")
+    func kiwiHubRefusesTaps() throws {
+        for text in ["cmd+cmd", "ropt+ropt", "rctrl"] {
+            let combo = try #require(KeyCombo.parse(text))
+            #expect(
+                KiwiHubKeyRefusal.ofChord(combo) == .modifierTap,
+                "\(text)"
+            )
+        }
+    }
 }

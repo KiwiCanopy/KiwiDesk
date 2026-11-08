@@ -15,8 +15,7 @@ extension KeybindingManager {
         // The tap answers nothing while suspended, or it would
         // swallow the sided press the recorder reads (#2601).
         tapBindings = [:]
-        keyboardTap?.setSideRows([])
-        keyboardTap?.setTapRows([])
+        keyboardTap?.setRows(.empty)
     }
 
     func activate(_ layer: String) {
@@ -118,6 +117,8 @@ extension KeybindingManager {
         combo: KeyCombo,
         ref: Int32
     ) -> Bool {
+        // A modifier tap is no key Carbon can register (#1872).
+        guard !combo.isTap else { return false }
         let box = RegistrationBox()
         let id = registrar.register(
             keyCode: code,

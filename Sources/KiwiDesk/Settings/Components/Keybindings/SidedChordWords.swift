@@ -15,6 +15,9 @@ enum SidedChordWords {
         let frames = ModifierSide.allCases.map { side in
             (side, frame(side))
         }
+        if let tap = tap(in: drawn, frames: frames) {
+            return ModifierTapWords.spoken(tap)
+        }
         var rest = Substring(drawn)
         var words: [String] = []
         var sided = false
@@ -54,6 +57,29 @@ enum SidedChordWords {
     /// The hover text a sided chord owes, empty for any other.
     static func help(_ drawn: String) -> String {
         spoken(drawn) ?? ""
+    }
+
+    /// The double tap `drawn` is (#1872): one glyph twice, alone,
+    /// inside one side frame or none — `⌘⌘`, `Right ⌥⌥`. A single
+    /// tap draws as a modifier-layer chip does (`Right ⌘`), so only
+    /// a reader holding the combo can call it a tap.
+    private static func tap(
+        in drawn: String,
+        frames: [(ModifierSide, (prefix: String, suffix: String))]
+    ) -> KeyCombo? {
+        let text = Substring(drawn.trimmingCharacters(in: .whitespaces))
+        var run = String(text)
+        var side: ModifierSide?
+        for (each, frame) in frames {
+            if let (inner, tail) = match(frame, in: text), tail.isEmpty {
+                run = inner
+                side = each
+            }
+        }
+        guard run.count == 2, let glyph = run.first, run.last == glyph,
+            let kind = ChordGlyphs.kinds[glyph]
+        else { return nil }
+        return KeyCombo.tap(kind, side: side, count: 2)
     }
 
     /// The catalog's frame for `side`, split around its run.

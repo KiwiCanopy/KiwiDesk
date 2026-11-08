@@ -97,6 +97,9 @@ public enum KiwiHubKeyRefusal: Equatable, Sendable {
     case panelKey
     /// The alternative of another built-in key.
     case taken(KiwiHubKey)
+    /// A modifier tap (#1872), which the panel's key events never
+    /// carry.
+    case modifierTap
 
     public var message: String {
         switch self {
@@ -108,6 +111,8 @@ public enum KiwiHubKeyRefusal: Equatable, Sendable {
             return "KiwiHub already uses that key"
         case .taken(let other):
             return "already the key for \(other.rawValue)"
+        case .modifierTap:
+            return "a KiwiHub key cannot be a modifier tap"
         }
     }
 
@@ -127,6 +132,7 @@ public enum KiwiHubKeyRefusal: Equatable, Sendable {
 
     /// The refusal the chord earns on its own, whatever else is set.
     static func ofChord(_ combo: KeyCombo) -> KiwiHubKeyRefusal? {
+        if combo.isTap { return .modifierTap }
         if combo.modifiers.contains(.hyper) { return .hyper }
         if combo.modifiers.isDisjoint(with: [.control, .command]) {
             return .typesIntoField

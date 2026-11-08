@@ -161,7 +161,10 @@ struct SidedChordWordsTests {
         )
         #expect(
             try read(keys + "Recorder/KeyRecorderField.swift").contains(
-                ".accessibilityValue(SidedChordWords.label(label))"
+                // A single tap's words come first: only the combo
+                // can call `Right ⌘` a tap (#1872).
+                ".accessibilityValue(spokenTap ?? "
+                    + "SidedChordWords.label(label))"
             )
         )
         // A Pocket key's refusal pill speaks it (#2612).

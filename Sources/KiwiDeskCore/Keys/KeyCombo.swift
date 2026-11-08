@@ -53,7 +53,7 @@ public struct KeyCombo: Hashable, Sendable {
         return (kind, kind.plain.union(.side(side, of: kind)))
     }
 
-    private static let plainKinds: [String: ModifierKind] = [
+    static let plainKinds: [String: ModifierKind] = [
         "cmd": .command, "command": .command,
         "alt": .option, "opt": .option, "option": .option,
         "ctrl": .control, "control": .control,

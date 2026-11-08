@@ -54,4 +54,48 @@ struct ModifierTapWordsTests {
                 == "Tap again for Right ⌘⌘"
         )
     }
+
+    @Test("every chord surface speaks a drawn double tap in words")
+    func sharedDoorSpeaksDoubles() {
+        LocalizationManager.shared.select("en")
+        #expect(SidedChordWords.label("⌘⌘") == "Command, press twice")
+        #expect(
+            SidedChordWords.label("Right ⌥⌥")
+                == "Right Option, press twice"
+        )
+        // A single sided glyph is also a modifier-layer chip, so
+        // the shared door leaves it as a chord.
+        #expect(SidedChordWords.spoken("Right ⌘")?.contains("once") != true)
+        #expect(SidedChordWords.spoken("⌘⌥") == nil)
+    }
+
+    @Test("a tap row carries no either-side hint, a sided chord does")
+    func noEitherSideHintOnTaps() {
+        LocalizationManager.shared.select("en")
+        let hint = { (combo: String) in
+            KeyRecorderField.rowHint(
+                combo: combo,
+                sidesOn: false,
+                recording: false,
+                hyperDormant: false
+            )
+        }
+        #expect(hint("rcmd") == nil)
+        #expect(hint("ropt+ropt") == nil)
+        #expect(hint("rcmd+h") != nil)
+    }
+
+    @Test("the keyboard board leaves taps out")
+    func boardSkipsTaps() {
+        let layer = KeyLayer(
+            name: "default",
+            bindings: [
+                KeyBinding(combo: "cmd+cmd", lua: "print(1)"),
+                KeyBinding(combo: "cmd+h", lua: "print(2)"),
+            ]
+        )
+        #expect(
+            KeyboardCensus.combos(in: [layer]) == [KeyCombo.parse("cmd+h")]
+        )
+    }
 }

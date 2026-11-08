@@ -160,8 +160,8 @@ struct KeyRecorderField: View {
         hyperDormant: Bool
     ) -> String? {
         if hyperDormant { return ShortcutBaseWords.dormantHint }
-        if !sidesOn, !recording,
-            KeyCombo.parse(combo)?.modifiers.isSided == true
+        if !sidesOn, !recording, let parsed = KeyCombo.parse(combo),
+            parsed.modifiers.isSided, !parsed.isTap
         {
             return ModifierSidesWords.eitherSideHint
         }
@@ -178,7 +178,8 @@ struct KeyRecorderField: View {
             .joined(separator: "\n")
     }
 
-    /// The row's tap in words, nil for a chord or while recording.
+    /// The row's tap in words; a single tap draws as a chip does,
+    /// so only the combo can say it is one (#1872).
     private var spokenTap: String? {
         guard !recording, let parsed = KeyCombo.parse(combo) else {
             return nil

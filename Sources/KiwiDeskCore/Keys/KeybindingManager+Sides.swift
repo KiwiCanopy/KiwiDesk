@@ -1,9 +1,11 @@
 import Foundation
 
-/// What the side tap last did (#2601), for the Settings row; the
-/// GUI narrates it (#96).
+/// What the keyboard tap last did (#2601, #1872), for the sides
+/// row, which narrates it while the switch is on (#96). A refused
+/// tap's modifier-tap rows are told through `activationFailures`.
 public enum SideTapStatus: Equatable, Sendable {
-    /// No sided shortcut needs it, or the switch is off.
+    /// No row needs it: no sided chord with the switch on, and no
+    /// modifier tap.
     case off
     case running
     /// macOS refused the tap, which a missing Accessibility grant
@@ -48,15 +50,20 @@ extension KeybindingManager {
         taps: [(KeyCombo, Int32)]
     ) -> Bool {
         tapBindings = [:]
-        var wanted: Set<KeyboardTapConsumer> = []
-        if !sides.isEmpty { wanted.insert(.sides) }
-        if !taps.isEmpty { wanted.insert(.modifierTaps) }
+        let rows = KeyboardTapRows(
+            sides: sideTapRows(sides),
+            taps: taps.map { combo, ref in
+                ModifierTapRow(combo: combo, id: liveTapID(combo, ref))
+            }
+        )
+        let wanted = rows.consumers
         guard !wanted.isEmpty else {
             dropKeyboardTap()
             sideTapStatus = .off
             return true
         }
         guard !keyboardTapRefused else {
+            tapBindings = [:]
             dropKeyboardTap()
             sideTapStatus = .refused
             return false
@@ -84,15 +91,11 @@ extension KeybindingManager {
         }
         guard let keyboardTap else {
             keyboardTapRefused = true
+            tapBindings = [:]
             sideTapStatus = .refused
             return false
         }
-        keyboardTap.setSideRows(sideTapRows(sides))
-        keyboardTap.setTapRows(
-            taps.map { combo, ref in
-                ModifierTapRow(combo: combo, id: liveTapID(combo, ref))
-            }
-        )
+        keyboardTap.setRows(rows)
         sideTapStatus = .running
         return true
     }
