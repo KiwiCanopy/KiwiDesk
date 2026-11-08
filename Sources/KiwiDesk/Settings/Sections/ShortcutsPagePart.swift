@@ -36,6 +36,21 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         ShortcutsJumpGroup.allCases.first { Self($0) == self }
     }
 
+    /// Whether the page draws the jump bar's rule above this part:
+    /// the part after the one whose chip the bar rules after
+    /// (`ShortcutsJumpGroup.ruledAfter`), so the page splits what
+    /// applies everywhere from the layer's own rows where the bar
+    /// does (owner 2026-11-08). `.layers` stays the part right
+    /// after the ruled chip's, since the rule marks the first
+    /// layer-scoped part (`ShortcutsPagePartTests`).
+    var ruledAbove: Bool {
+        let parts = Self.allCases
+        guard let at = parts.firstIndex(of: self), at > 0 else {
+            return false
+        }
+        return parts[at - 1].group?.ruledAfter == true
+    }
+
     /// The part that draws a census container's rows; nil for a
     /// container the page does not draw.
     init?(_ container: SettingsContainer) {

@@ -229,10 +229,17 @@ argument is in
 :::unreleased
 The Maximize card is a ruled exception (owner, 2026-11-08, #3062):
 its shares sit in a table, one row per screen shape, and each cell
-is a pop-up of ¼ ⅓ ½ ⅔ ¾ rather than a slider. A value Lua stored
+is a pop-up of ¼ ⅓ ½ ⅔ ¾ rather than a slider. A value stored
 outside the five shows as an extra checked item above a separator,
-kept until a fraction replaces it; exact shares are Lua-only, the
-one escape (#1279).
+kept until a fraction replaces it. Each share pop-up ends in a
+separator and *Custom…*, which opens a popover anchored to the
+pop-up: one percent field with arrows, 10–100 in steps of 5, that
+Return or a click outside commits and Escape cancels, with no
+buttons. This is no second escape beside *Other…* (#1279): that
+rule refuses a typed identifier where a list can be browsed, and a
+share is a number on a bounded range, which the stepper already
+types everywhere else. A typed percent that rounds to a menu
+fraction stores that fraction, so the menu checks it.
 :::
 
 **Layout Defaults picks one layout at a time, and picks it by

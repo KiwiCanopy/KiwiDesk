@@ -139,6 +139,7 @@ struct SettingsLiveKeepTests {
         LocalizationManager.shared.select("en")
         let model = try makeModel()
         let core = model.core
+        let storedWidth = core.tiler.settings.borderStyle.width
         _ = core.execute("border.set_width", args: [.number(9)])
         model.refreshOwner()
         let row = try #require(
@@ -169,6 +170,16 @@ struct SettingsLiveKeepTests {
             refusals: model.liveKeepRefusals
         ) { _ in nil }
         #expect(keep.refusal(for: stays) != nil)
+        // An unrelated live change keeps the reason; the leaf
+        // put back clears it.
+        model.refreshUnsavedLive()
+        #expect(!model.liveKeepRefusals.isEmpty)
+        _ = core.execute(
+            "border.set_width",
+            args: [.number(Double(storedWidth))]
+        )
+        model.refreshUnsavedLive()
+        #expect(model.liveKeepRefusals.isEmpty)
     }
 
     /// Each refusal reason reads its own sentence.

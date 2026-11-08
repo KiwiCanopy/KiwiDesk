@@ -100,7 +100,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     /// The one reading of "Settings is open": shown, or
     /// minimized to the Dock (#1970, #2049).
-    private var isShown: Bool {
+    var isShown: Bool {
         window.map { $0.isVisible || $0.isMiniaturized } ?? false
     }
 

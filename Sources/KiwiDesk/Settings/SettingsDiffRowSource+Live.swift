@@ -141,13 +141,19 @@ extension SettingsModel {
     /// Asks Core again — the one writer of `unsavedLive` and
     /// `liveUnsaved`. Owed wherever the live settings or the
     /// draft's baseline can have moved: the seed, a window-key
-    /// return, an outside write the draft adopts. Only the live
+    /// return, an outside write the draft adopts, and any live
+    /// settings change while the window is open. Only the live
     /// target lists live rows: a stored profile is another file.
+    /// A Keep's refusal stays while its leaf is still unsaved, so an
+    /// unrelated live change keeps the reason beside its row.
     func refreshUnsavedLive() {
-        liveKeepRefusals = [:]
         unsavedLive =
             target == .live && !editingLua
             ? core.unsavedLiveSettings() : nil
+        let unsaved = unsavedLive?.leaves ?? [:]
+        liveKeepRefusals = liveKeepRefusals.filter {
+            unsaved[$0.key] != nil
+        }
         liveUnsaved = !SettingsDiffRowSource.liveRows(
             for: self,
             leaving: []

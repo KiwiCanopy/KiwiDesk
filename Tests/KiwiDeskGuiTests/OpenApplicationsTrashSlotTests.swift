@@ -33,16 +33,45 @@ struct OpenApplicationsTrashSlotTests {
         )
     }
 
-    @Test("both trash forms and the empty slot are one width")
+    /// The column holds both trash forms at their own width: the
+    /// shared form's menu, the widest, fills it exactly, so the
+    /// number is the menu's and never a guess.
+    @Test("the column is the trash forms' own width")
     func oneWidth() {
-        let plain = width(AppRuleDeleteButton(help: "x") { _ in })
+        let plain = width(AppRuleDeleteButton(help: "x") { _ in }.face)
         let menu = width(
             AppRuleDeleteButton(help: "x", sharedFrom: shared) { _ in }
+                .face
         )
-        let slot = width(AppRuleDeleteButton.slot)
+        let column = AppRuleDeleteButton.columnWidth
         #expect(plain > 0)
-        #expect(plain == menu)
-        #expect(slot == menu)
+        #expect(plain <= column)
+        #expect(menu == column)
+        #expect(width(AppRuleDeleteButton.slot) == column)
+    }
+
+    /// Every form takes the one fixed width, and the slot is no
+    /// control: a hidden item-less menu sized itself narrower than
+    /// the trash in a live window, which `fittingSize` above cannot
+    /// see (Pocket and Open applications, owner 2026-11-08).
+    @Test("the trash column is one fixed width, the slot no control")
+    func columnIsFixed() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "AppRuleIdentity.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(source.contains("face.frame(width:Self.columnWidth)}"))
+        #expect(
+            source.contains(
+                "staticvarslot:someView{"
+                    + "Color.clear.frame(width:columnWidth,height:1)"
+            )
+        )
     }
 
     private func source(_ name: String) throws -> String {

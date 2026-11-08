@@ -166,6 +166,31 @@ struct ShortcutsPagePartTests {
         #expect(model.revealLanding(for: "no such row") == .wholePage)
     }
 
+    /// The page draws the jump bar's rule where the bar does: above
+    /// the part after the ruled chip's, which is the Layers card
+    /// (owner 2026-11-08).
+    @Test("the page rule sits where the jump bar's does")
+    func pageRuleFollowsTheBar() throws {
+        let ruled = ShortcutsPagePart.allCases.filter(\.ruledAbove)
+        let after = ShortcutsJumpGroup.allCases.filter(\.ruledAfter)
+            .compactMap { group -> ShortcutsPagePart? in
+                let parts = ShortcutsPagePart.allCases
+                guard let at = parts.firstIndex(of: .init(group)),
+                    at + 1 < parts.count
+                else { return nil }
+                return parts[at + 1]
+            }
+        #expect(ruled == after)
+        #expect(ruled == [.layers])
+        let page = try Self.source("Sections/ShortcutsSection.swift")
+        #expect(
+            page.contains(
+                "ifpart.ruledAbove{VStack(alignment:.leading,spacing:16){"
+                    + "SettingsTheme.hairlineSubtle.frame(height:1)"
+            )
+        )
+    }
+
     /// The page stacks the parts lazily, and every scroll into it
     /// takes the detour: the reveal, the recorder's Go to, and the
     /// whole-page fallback for a row no part is known to hold.
@@ -175,7 +200,8 @@ struct ShortcutsPagePartTests {
         #expect(
             parts.contains(
                 "ForEach(ShortcutsPagePart.allCases){partin"
-                    + "self.part(part,expander:expander).onAppear{"
+                    + "ruled(part){self.part(part,expander:expander)}"
+                    + ".onAppear{"
             )
         )
         #expect(

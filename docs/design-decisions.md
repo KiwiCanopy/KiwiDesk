@@ -6478,6 +6478,13 @@ other candidate and is refused: it hides the five values a user
 might want to change, and its manual share applies to every
 screen, which is the problem the table solves. A per-Space
 override is #3090's.
+
+A Custom… share snaps: a typed whole percent that rounds to one of
+the five fractions stores the exact fraction (33 stores ⅓, not
+0.33), and any other percent is stored as typed. Without the snap
+a user typing 33 would see "33 %" as an off-menu item beside the ⅓
+they meant, and a press would size the window just short of the
+third the menu offers.
 :::
 
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
@@ -14963,7 +14970,10 @@ summary does the telling while it is shut.
 Since the layer's name moved onto the pinned jump bar (#1520), the
 separation is carried by the rule after the Mouse & trackpad chip
 and by the Layers card, which leads everything layer-scoped: the
-card above it belongs to no layer.
+card above it belongs to no layer. The page draws the bar's rule
+too, above the Layers card, so its two bands — what applies
+everywhere, then the layer's own rows — read apart without the bar
+(owner 2026-11-08).
 
 **Its entries are grouped by where the hand is** — on your
 windows, on the KiwiShelf, anywhere holding a modifier — never by
