@@ -62,11 +62,17 @@ struct VerifyGateParityTests {
 
     /// The skill's numbered commands, in document order.
     ///
-    /// Both its lists are scraped: the fast inner loop and the
-    /// conditional release build. `release.sh` runs the release
-    /// build unconditionally — its own comment argues why — so
-    /// the skill's list is a subset obligation, not an equality.
-    func skillSteps() throws -> [String] {
+    /// Both its lists are scraped by default: the fast inner
+    /// loop and the conditional release build. `release.sh` runs
+    /// the release build unconditionally — its own comment
+    /// argues why — so the skill's list is a subset obligation,
+    /// not an equality. `section` narrows the scrape to one
+    /// `## ` heading's list, which is how the tag's pin
+    /// (`ReleaseTestPartitionParityTests`) exempts the release
+    /// build structurally instead of by command text.
+    func skillSteps(
+        section: String? = nil
+    ) throws -> [String] {
         let skill = try String(
             contentsOf: Self.repoRoot
                 .appendingPathComponent(".claude")
@@ -76,8 +82,16 @@ struct VerifyGateParityTests {
             encoding: .utf8
         )
         var steps: [String] = []
+        var heading = ""
         for raw in skill.split(separator: "\n") {
             let line = raw.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("## ") {
+                heading = String(line.dropFirst(3))
+                continue
+            }
+            guard section == nil || heading == section else {
+                continue
+            }
             // `1. \`swift build\`` — a numbered step whose command
             // is the first backticked span on the line.
             guard let dot = line.firstIndex(of: "."),

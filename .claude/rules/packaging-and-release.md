@@ -492,23 +492,25 @@ widening what `build-app.sh` can package, buys a release that
 fails on the far side of the one irreversible step.
 `ScriptStampTests` holds the accepted shape.
 
-**Its verification gate mirrors the `verify-gate` skill, and a
-change to one updates the others.** AGENTS.md §3 gives that skill
-the procedure, and two ship-grade copies re-state it — the ones
-where running a *stale* gate ships an artifact.
-`scripts/release.sh` copies the skill's single run (release build
-made unconditional), pinned to `SKILL.md` by
-`VerifyGateParityTests`, which derives the command list from it.
-`release.yml` re-runs the gate against a pushed tag — the copy that
+**Its verification gate has two ship-grade copies, and a change to
+what either copies updates it.** They are the copies where running
+a *stale* gate ships an artifact. `scripts/release.sh` mirrors the
+`verify-gate` skill, which AGENTS.md §3 gives the procedure: the
+skill's single run, release build made unconditional, pinned to
+`SKILL.md` by `VerifyGateParityTests`, which derives the command
+list from it. `release.yml` mirrors ci.yml's test split: it re-runs
+the gate against a pushed tag — the copy that
 catches a tag pushed by hand, which never met the script's (#487;
 branch protection cannot see tags, so the workflow is the only gate
 such a tag passes) — as a hand copy of ci.yml's parallel split
 (#3108): a `gate` job for the cheap refusals, one test job per test
-product with its `ExecTests` partitions, build and lint in one of
-them, and the release job `needs:` all of them.
-`ReleaseTestPartitionParityTests` holds its partitions to ci.yml's
-and its products to `Package.swift`, partitions only, never flags,
-so the ratchet difference below stays legal. Keep it a copy: a
+product with both its `ExecTests` partitions, the skill's other
+fast-loop steps in a test job, and the release job `needs:` the
+gate and every test job, unconditionally.
+`ReleaseTestPartitionParityTests` holds those shapes, the partitions
+to ci.yml's and the products to `Package.swift` — partitions only,
+never flags, so the ratchet difference below stays legal — and
+refuses the ratchet on the tag path. Keep it a copy: a
 `workflow_call` share renames ci.yml's required checks to
 "caller / job", and the two must differ (strict Xcode, no ratchet,
 the vetted SHA, no `changes` filter). Extend those suites before
@@ -748,14 +750,17 @@ names both — and when to run it locally as well is decided by
 the `verify-gate` skill, which owns that call.
 
 **Each test target compiles and runs in a job of its own, and a new
-test target joins one of those jobs in the same change**: `swift
+test target joins one of those jobs, in ci.yml and in release.yml,
+in the same change**: `swift
 test --test-product` builds that target and its dependencies, so the
 two targets stop building and running in series
-(`CiRequiredJobTests` ▸ `everyTargetHasAJob`). The flag is hidden in
-SwiftPM (read 2026-11-06), so it may go without notice; that fails
-the jobs loudly, and the remedy is one test job running the plain
-`swift test`, with the judge's `needs` and `CiRequiredJobTests` moving
-in the same change. **The required context is the `build-lint-test` job, a
+(`CiRequiredJobTests` ▸ `everyTargetHasAJob`,
+`ReleaseTestPartitionParityTests` ▸ `productsAreTheTestTargets`).
+The flag is hidden in SwiftPM (read 2026-11-06), so it may go
+without notice; that fails the jobs loudly, and the remedy is one
+test job running the plain `swift test`, with the judge's `needs`,
+`CiRequiredJobTests`, release.yml's test jobs and
+`ReleaseTestPartitionParityTests` moving in the same change. **The required context is the `build-lint-test` job, a
 judge over the test jobs**, so moving a job costs no ruleset edit. It
 fails closed: a job the filter's answer owed must have succeeded,
 since a skip reaches it looking like a pass (`CiRequiredJobTests` ▸
@@ -783,7 +788,9 @@ widens the hole it was cut for, the idiom `CiPathFilterTests` ▸
 two-sided** — the debug step carries it, the release step must
 not — since a one-sided clause passes on a workflow that
 ratchets everything, which is the change this rule refuses.
-`WarningRatchetWorkflowTests` holds all three.
+`WarningRatchetWorkflowTests` holds all three for ci.yml, and
+`ReleaseTestPartitionParityTests` ▸ `releaseTakesNoRatchet` the tag
+path.
 
 **The test steps pass the Build step's `-Xswiftc` arguments, the
 same ones in the same order, so `Tests/` is ratcheted too

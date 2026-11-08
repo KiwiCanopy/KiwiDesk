@@ -176,8 +176,9 @@ jobs:
     permissions:
       contents: read
     steps:
-      # An empty sha falls back to the default branch here; the
-      # release job's assertion refuses that run before it ships.
+      # An empty sha falls back to the event's ref (the default
+      # branch's tip on a dispatch); the release job's assertion
+      # refuses that run before it ships.
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.gate.outputs.sha }}

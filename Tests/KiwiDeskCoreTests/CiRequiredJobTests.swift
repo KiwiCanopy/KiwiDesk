@@ -11,8 +11,9 @@ struct CiRequiredJobTests {
     private static let judge = "build-lint-test"
 
     /// Every step that runs `swift test`, read from the workflow so a
-    /// new one is owed the ratchet (`WarningRatchetWorkflowTests`,
-    /// `WarningGateTests`).
+    /// new one is seen by every reader of the list: the ratchet's
+    /// (`WarningRatchetWorkflowTests`, `WarningGateTests`) and the
+    /// tag's partitions (`ReleaseTestPartitionParityTests`).
     static func testSteps(in yaml: String) throws -> [String] {
         let names = yaml.split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }
