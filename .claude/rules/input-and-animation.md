@@ -16,7 +16,7 @@ Canonical for this subsystem (AGENTS.md §5 indexes it). When
 editing here:
 
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`); the one
-  keyboard tap is the side tap below (`docs/design-decisions.md` ▸
+  keyboard tap is `KeyboardTap` below (`docs/design-decisions.md` ▸
   *Left and right modifiers are told apart by one keyboard tap*).
   Mouse presses are read through `NSEvent` monitors.
 - **A menu row drawing a Carbon-bound chord drops only that
@@ -72,7 +72,7 @@ editing here:
   obligations:
   - **One tap, scroll-only.** A mask widened past `.scrollWheel`
     asks macOS for more than the gesture needs; the only other tap
-    is the side tap below (`ScrollTapSeamTests` for one tap per
+    is the keyboard tap below (`ScrollTapSeamTests` for one tap per
     file and each one mask constant, `ScrollSampleTests` for the
     scroll constant's value).
   - **The tap installs on its own thread and decides there.**
@@ -117,28 +117,49 @@ editing here:
     built only through `tapSettings`, read by the door alone, or
     a path hands the tap a value that skipped the override
     (`ScrollGestureConfigureSeamTests`).
-- **Left and right modifiers take ONE keyboard tap,
-  `ModifierSideTap`, owned by `KeybindingManager` (#2601).**
-  The tap answers only the chords a sided row names, the
-  either-side row on such a chord included, and only while
-  `modifierSides` is on; every other shortcut stays a Carbon
-  hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`). Obligations:
-  - **No sided row, no tap.** `armSideTap` stops it with its last
-    row; a new path that routes rows to it goes through
-    `tappedChords`, never a row list of its own
-    (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`).
-  - **A refused tap hands its chords back to Carbon** either-side
-    and is asked again only when the switch moves or at
-    `KiwiCore.start()`, the grant's door
+- **The keyboard takes ONE tap, `KeyboardTap`, owned by
+  `KeybindingManager` (#2601, #1872), and every reader of key
+  events outside the recorder joins it as a CONSUMER.** A consumer
+  is a case of `KeyboardTapConsumer` owning one mask constant; the
+  tap is created with the union of the live consumers' masks and
+  rebuilt when that union changes; no live consumer, no tap. It
+  is created active only while a live consumer swallows, listen-
+  only otherwise. Today's consumers: `.sides` (key-down, swallows)
+  and `.modifierTaps` (modifier changes, key-down and mouse-down,
+  swallows nothing). A new reader adds a case, never a tap
+  (`ScrollTapSeamTests` ▸ `oneTapPerFile`, `consumerMasks`;
+  `KeyboardTapRoutingTests`). Obligations:
+  - **No row, no consumer.** `armKeyboardTap` drops a consumer with
+    its last row and stops the tap with its last consumer; a new
+    path that routes rows to it goes through `tappedChords` or
+    `modifierTapRows`, never a row list of its own
+    (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
+    `KeyboardTapRoutingTests` ▸ `noTapRowNoConsumer`).
+  - **`.sides` answers only the chords a sided row names**, the
+    either-side row on such a chord included, and only while
+    `modifierSides` is on; every other chord stays a Carbon
+    hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`).
+  - **A modifier tap is decided by the one pure
+    `ModifierTapDetector`**, which the recorder calls too, so what
+    records is what fires; its timings are its constants and no
+    caller re-states them (`ModifierTapDetectorTests`). A tap is
+    never a Carbon hotkey: activation routes every tap row to the
+    tap, and a refused tap lists them in `activationFailures`
+    (`KeyboardTapRoutingTests` ▸ `tapsNeverReachCarbon`).
+  - **A refused tap hands its side chords back to Carbon**
+    either-side and is asked again only when the switch moves or
+    at `KiwiCore.start()`, the grant's door
     (`ModifierSideRoutingTests` ▸ `refusedTapFallsBack`).
   - **A suspended manager answers nothing** — `deactivate` empties
-    the rows, or the tap swallows the sided press the recorder
-    reads (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
-  - **Key-down only, on its own thread**, deciding from the rows
-    `setRows` handed it and passing every press no row answers;
-    the live factory is pinned inert in both `makeTestCore`
-    twins (`ScrollTapSeamTests` ▸ `installsOffMain`,
-    `keyboardMask`, `liveFactoryPinned`).
+    every consumer's rows, or the tap swallows the sided press the
+    recorder reads and fires a tap the recorder is recording
+    (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
+  - **On its own thread, deciding from the rows handed it** and
+    passing every event no `.sides` row answers; the callback does
+    no AX and no main-actor hop, and a consumer hears its verdict
+    on the main queue. The live factory is pinned inert in both
+    `makeTestCore` twins (`ScrollTapSeamTests` ▸ `installsOffMain`,
+    `liveFactoryPinned`).
   - **Carbon reads a sided chord either-side**: `carbonMask` and
     `KeyCombo.registered` strip the side bits
     (`ModifierSideComboTests` ▸ `carbonReadsEitherSide`,
