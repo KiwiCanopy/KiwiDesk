@@ -32,9 +32,8 @@ final class SizeLimitOverlay {
         }
     }
 
-    private static let holdDuration: TimeInterval = 1.4
+    nonisolated private static let holdDuration: TimeInterval = 1.4
     private static let fadeDuration: TimeInterval = 0.2
-    private static let pillHeight: CGFloat = 26
     nonisolated static let pillPadding: CGFloat = 20
     /// The entrance pop's keyframe scales. Its PEAK sizes the
     /// panel's margin (`PopRoom`), so a retune cannot clip the
@@ -62,6 +61,12 @@ final class SizeLimitOverlay {
             max(textWidth + pillPadding, 120)
         )
         return width > 40 ? width : nil
+    }
+
+    /// How long a refusal pill stays: a wrapped pill holds one
+    /// second more per extra line, so its words can be read.
+    nonisolated static func hold(extraLines: Int) -> TimeInterval {
+        holdDuration + TimeInterval(max(0, extraLines))
     }
 
     /// Flashes size-limit pill on window frame in AX coordinates
@@ -145,12 +150,19 @@ final class SizeLimitOverlay {
             return false
         }
 
+        // A shelf pill keeps one line: its band is one pill deep.
+        var pillHeight = pill.plate.height(forWidth: pillWidth)
+        if case .shelf = window { pillHeight = SizeLimitPillPlate.lineHeight }
+        let extraLines = Int(
+            ((pillHeight - SizeLimitPillPlate.lineHeight)
+                / pill.plate.textLineHeight).rounded()
+        )
         let pillRect = CGRect(
             x: frame.midX - pillWidth / 2,
             y: symbol == nil
-                ? frame.midY - Self.pillHeight / 2 : frame.minY + 8,
+                ? frame.midY - pillHeight / 2 : frame.minY + 8,
             width: pillWidth,
-            height: Self.pillHeight
+            height: pillHeight
         )
         let screenRect = GeometryUtils.flip(
             pillRect,
@@ -197,7 +209,7 @@ final class SizeLimitOverlay {
         pill.hideWork = work
         pills[window] = pill
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + Self.holdDuration,
+            deadline: .now() + Self.hold(extraLines: extraLines),
             execute: work
         )
         return true

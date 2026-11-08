@@ -145,15 +145,15 @@ extension KiwiCore {
     }
 
     /// A Tile refused because detection floats the window
-    /// (#1810): the pill names the reason, the sentence the bar
-    /// menu's greyed row carries too.
+    /// (#1810): the pill names the refused act and the reason,
+    /// the sentence the bar menu's greyed row carries too.
     func cueTileRefusal(_ window: WindowID, _ reason: AutoFloatReason) {
         borders.onTileRefusal(window, reason)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
                 symbol: reason.pillSymbol,
-                text: reason.sentence
+                text: reason.pillSentence
             )
         )
     }

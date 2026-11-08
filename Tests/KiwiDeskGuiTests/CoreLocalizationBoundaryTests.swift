@@ -99,7 +99,7 @@ struct CoreLocalizationBoundaryTests {
         // The Tile refusal's reasons (#1810), the pocket's among
         // them (#2446), drawn on the same pill and on the bar
         // menu's greyed row, both Core's.
-        "Commands/AutoFloatReason+Rendering.swift": 6,
+        "Commands/AutoFloatReason+Rendering.swift": 7,
         // The pocket's sticky refusal (#2446), its keyed one, two
         // spellings (#2612), its Desktop move refusal (#2888), on
         // the same pill, and its list key's (#2974) by its edge.

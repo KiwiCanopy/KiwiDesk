@@ -535,6 +535,7 @@
   "float.refusal.accessory_app": "Apps ohne Dock-Symbol schweben automatisch. Ändere das unter „%1$@“.",
   "float.refusal.fixed_size": "Fenster, deren Größe sich nicht ändern lässt, schweben automatisch. Ändere das unter „%1$@“.",
   "float.refusal.panel": "Dialoge und Panels schweben immer",
+  "float.refusal.pill": "Kann nicht gekachelt werden. %1$@",
   "float.refusal.rule": "Eine App-Regel lässt dieses Fenster schweben",
   "floating.color": "Floating",
   "floating.color.a11y": "Markierungsfarbe für schwebende Fenster",

@@ -915,6 +915,18 @@ twice. The argument is required so every caller writes the choice
 down; an announcement posted beside a door, rather than through it,
 is review's (`HyperBarePressCueTests`, `RefusalCueSeamTests`).
 
+## A refusal pill wraps before it cuts
+
+**A window's refusal pill wraps at word breaks up to
+`SizeLimitPillPlate.maxLines` lines and truncates only past them;
+its height is measured by the label's own cell, never a separate
+text measure, and its hold grows by a second per extra line**
+(owner, 2026-11-08: a Tile refusal on Calculator showed half its
+words). A shelf pill keeps one line, because its band is one pill
+deep. Setting the label back to one line, or measuring the height
+apart from the cell that draws it, cuts the sentence again
+(`SizeLimitPillWrapTests`).
+
 ## The sheen is one ramp, painted by the surface that owns the stroke
 
 `border.sheen` (#1644) reaches the focused ring and the shelf's

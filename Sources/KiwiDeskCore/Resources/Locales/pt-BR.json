@@ -535,6 +535,7 @@
   "float.refusal.accessory_app": "Apps sem ícone no Dock flutuam automaticamente. Altere isso em %1$@.",
   "float.refusal.fixed_size": "Janelas que não podem ser redimensionadas flutuam automaticamente. Altere isso em %1$@.",
   "float.refusal.panel": "Caixas de diálogo e painéis sempre flutuam",
+  "float.refusal.pill": "Não é possível colocar lado a lado. %1$@",
   "float.refusal.rule": "Uma regra de apps faz esta janela flutuar",
   "floating.color": "Floating",
   "floating.color.a11y": "Cor da marca de janela flutuante",
