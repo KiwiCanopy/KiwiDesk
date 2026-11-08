@@ -535,6 +535,7 @@
   "float.refusal.accessory_app": "Le app senza icona nel Dock fluttuano automaticamente. Modificalo in %1$@.",
   "float.refusal.fixed_size": "Le finestre non ridimensionabili fluttuano automaticamente. Modificalo in %1$@.",
   "float.refusal.panel": "Le finestre di dialogo e i pannelli fluttuano sempre",
+  "float.refusal.pill": "Impossibile affiancare: %1$@",
   "float.refusal.rule": "Una regola app fa fluttuare questa finestra",
   "floating.color": "Floating",
   "floating.color.a11y": "Colore del marcatore di finestra fluttuante",

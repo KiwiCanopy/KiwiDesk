@@ -1,8 +1,9 @@
 import Foundation
 
 /// Where a Tile refusal becomes words (#1810, #96): the pill Core
-/// draws on the window and the subtitle of the bar menu's greyed
-/// row take this one sentence, so they cannot disagree.
+/// draws on the window (behind its lead) and the subtitle of the
+/// bar menu's greyed row take this one sentence, so they cannot
+/// disagree.
 extension AutoFloatReason {
     /// A rule's sentence names App Rules, where it is changed, and
     /// so does a guess's (#2173): "always" is kept for the floats
@@ -31,6 +32,14 @@ extension AutoFloatReason {
         case .pocket:
             L("pocket.refusal.float", "Pocket windows always float")
         }
+    }
+
+    /// The pill's words: the refused act first, then `sentence`,
+    /// so a fixed-size float's reason does not read as a refused
+    /// resize. The bar menu's greyed Tile row needs no lead.
+    @MainActor
+    var pillSentence: String {
+        L("float.refusal.pill", "Can't tile: %1$@", sentence)
     }
 
     @MainActor

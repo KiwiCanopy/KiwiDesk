@@ -535,6 +535,7 @@
   "float.refusal.accessory_app": "沒有 Dock 圖像的 App 會自動浮動。可在「%1$@」中變更。",
   "float.refusal.fixed_size": "無法調整大小的視窗會自動浮動。可在「%1$@」中變更。",
   "float.refusal.panel": "對話框和面板一律浮動",
+  "float.refusal.pill": "無法並排：%1$@",
   "float.refusal.rule": "App 規則讓這個視窗浮動",
   "floating.color": "浮動",
   "floating.color.a11y": "浮動視窗標記顏色",

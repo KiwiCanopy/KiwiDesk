@@ -535,6 +535,7 @@
   "float.refusal.accessory_app": "Les apps sans icône dans le Dock flottent automatiquement. Modifiez-le dans %1$@.",
   "float.refusal.fixed_size": "Les fenêtres non redimensionnables flottent automatiquement. Modifiez-le dans %1$@.",
   "float.refusal.panel": "Les zones de dialogue et les panneaux flottent toujours",
+  "float.refusal.pill": "Impossible de tuiler : %1$@",
   "float.refusal.rule": "Une règle d’apps fait flotter cette fenêtre",
   "floating.color": "Floating",
   "floating.color.a11y": "Couleur de la marque de fenêtre flottante",

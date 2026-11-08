@@ -535,6 +535,7 @@
   "float.refusal.accessory_app": "Dockにアイコンがないアプリは自動的にフローティングになります。%1$@で変更できます。",
   "float.refusal.fixed_size": "サイズを変更できないウインドウは自動的にフローティングになります。%1$@で変更できます。",
   "float.refusal.panel": "ダイアログとパネルは常にフローティング",
+  "float.refusal.pill": "タイル表示にできません：%1$@",
   "float.refusal.rule": "アプリルールでフローティング中",
   "floating.color": "フローティング",
   "floating.color.a11y": "フローティングウインドウのマークのカラー",
