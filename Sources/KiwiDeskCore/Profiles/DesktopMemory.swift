@@ -57,6 +57,9 @@ final class DesktopMemory {
     /// live in `StateCoordinator.tilingToggles`. Session state:
     /// swapped at each switch by `KiwiCore.refileTilingToggles`.
     var tilingToggles: [SkyLight.SpaceID?: [SpaceID: Bool]] = [:]
+    /// The Desktop each Space's state toggle belongs to: the last
+    /// one a reading showed it on, kept through a full-screen Space.
+    var tilingToggleDesktop: [SpaceID: SkyLight.SpaceID?] = [:]
 
     /// The sizes a resize wrote for each Space on each Desktop
     /// under the arrangement live there (#2921), keyed like

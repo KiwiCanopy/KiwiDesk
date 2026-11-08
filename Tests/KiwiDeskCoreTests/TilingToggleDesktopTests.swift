@@ -42,6 +42,23 @@ struct TilingToggleDesktopTests {
         #expect(core.desktopMemory.tilingToggles.isEmpty)
     }
 
+    @Test("a full-screen Space between two Desktops moves no toggle")
+    func fullScreenBetweenKeepsEach() throws {
+        let core = try core()
+        core.execute("set_tiling", args: [.bool(false)])
+        // A full-screen app: no user Desktop shown.
+        core.refileTilingToggles {
+            show(core, ["Main": 99])
+            core.desktopMemory.shownUserSpaces = ["Main": false]
+        }
+        core.refileTilingToggles { show(core, ["Main": 11]) }
+        #expect(!core.isTilingOff(space))
+        core.refileTilingToggles { show(core, ["Main": 10]) }
+        #expect(core.isTilingOff(space))
+        core.refileTilingToggles { show(core, ["Main": 11]) }
+        #expect(!core.isTilingOff(space))
+    }
+
     @Test("a reading that leaves the Desktop as it was swaps nothing")
     func sameDesktopSwapsNothing() throws {
         let core = try core()

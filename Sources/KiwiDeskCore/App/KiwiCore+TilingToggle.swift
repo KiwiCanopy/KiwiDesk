@@ -85,6 +85,11 @@ extension KiwiCore {
         on space: SpaceID
     ) -> CommandResponse {
         if !tiling { seedSlotsBeforeTilingOff([space]) }
+        if case .shown(let desktop) = shownDesktop(of: space),
+            desktopMemory.tilingToggleDesktop[space] == nil
+        {
+            desktopMemory.tilingToggleDesktop[space] = .some(desktop)
+        }
         state.setTiling(tiling, for: space)
         retile(pass: tiling ? .apply : .event)
         return .ok()
@@ -159,17 +164,18 @@ extension KiwiCore {
 /// is swapped until that screen's next switch.
 extension KiwiCore {
     /// Runs `file`, which files a new Desktop reading, and swaps the
-    /// toggles of every Space whose shown Desktop it changed: the
-    /// Desktop left keeps them, the one arriving brings its own.
+    /// toggles of every Space now shown on another Desktop than the
+    /// one its state toggle belongs to — remembered across a
+    /// full-screen Space between them: that Desktop keeps them, the
+    /// one arriving brings its own.
     func refileTilingToggles(_ file: () -> Void) {
-        let spaces = state.workspaces.allSpaces.map(\.id)
-        let before = spaces.map { shownDesktop(of: $0) }
         file()
-        for (space, was) in zip(spaces, before) {
-            guard case .shown(let left) = was,
-                case .shown(let arriving) = shownDesktop(of: space),
-                left != arriving
+        for space in state.workspaces.allSpaces.map(\.id) {
+            guard case .shown(let arriving) = shownDesktop(of: space)
             else { continue }
+            let owner = desktopMemory.tilingToggleDesktop[space]
+            desktopMemory.tilingToggleDesktop[space] = .some(arriving)
+            guard let left = owner, left != arriving else { continue }
             var kept = desktopMemory.tilingToggles[left] ?? [:]
             kept[space] = state.tilingToggles[space]
             desktopMemory.tilingToggles[left] = kept.isEmpty ? nil : kept
@@ -186,6 +192,11 @@ extension KiwiCore {
     /// (`moveMembers`, #1655).
     func rekeyTilingToggles(_ old: SpaceID, to new: SpaceID) {
         state.rekeyTilingToggle(old, to: new)
+        if let owner = desktopMemory.tilingToggleDesktop
+            .removeValue(forKey: old)
+        {
+            desktopMemory.tilingToggleDesktop[new] = owner
+        }
         desktopMemory.tilingToggles = desktopMemory.tilingToggles
             .mapValues {
                 var toggles = $0
@@ -200,6 +211,7 @@ extension KiwiCore {
     /// (`forwardWindows(of:to:)`).
     func forgetTilingToggles(of space: SpaceID) {
         state.forgetTilingToggle(of: space)
+        desktopMemory.tilingToggleDesktop[space] = nil
         desktopMemory.tilingToggles = desktopMemory.tilingToggles
             .mapValues { $0.filter { $0.key != space } }
             .filter { !$0.value.isEmpty }
