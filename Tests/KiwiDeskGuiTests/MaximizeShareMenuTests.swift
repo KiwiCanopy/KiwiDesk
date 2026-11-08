@@ -146,6 +146,53 @@ struct MaximizeShareMenuTests {
         #expect(source.contains(".onKeyPress(.downArrow){step(by:-step)}"))
     }
 
+    /// The pill's row names the changed shape in its label, so its
+    /// readout is the values alone and fits the value column (owner
+    /// eyeball, 2026-11-08); several shapes read as the first "+N".
+    @Test("a Maximize diff row names its shape in the label")
+    func diffRowNamesItsShape() throws {
+        LocalizationManager.shared.select("en")
+        let before = TilingSettings()
+        var after = before
+        after.maximize.setShare(0.4, for: .height, on: .laptop)
+        let key = SettingKey.behaviour(.maximizeHeightShare)
+        let one = try #require(
+            SettingsValueReadout.maximizeRows(
+                .maximizeHeightShare,
+                key,
+                before,
+                after
+            ).first
+        )
+        #expect(one.label.hasSuffix(", Laptop"))
+        #expect(
+            one.oldValue
+                == SettingsValueReadout.percent(
+                    before.maximize.heightShare[.laptop]
+                )
+        )
+        #expect(one.newValue == SettingsValueReadout.percent(0.4))
+        after.maximize.setShare(0.4, for: .height, on: .portrait)
+        let two = try #require(
+            SettingsValueReadout.maximizeRows(
+                .maximizeHeightShare,
+                key,
+                before,
+                after
+            ).first
+        )
+        #expect(two.label.hasSuffix(", Laptop +1"))
+        #expect(two.newValue == SettingsValueReadout.percent(0.4))
+        #expect(
+            SettingsValueReadout.maximizeRows(
+                .maximizeHeightShare,
+                key,
+                before,
+                before
+            ).isEmpty
+        )
+    }
+
     private func shapeRowSource() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
