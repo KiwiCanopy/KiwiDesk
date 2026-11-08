@@ -16,6 +16,12 @@ struct ModifierDragRecorderField: View {
         ModifierChordRecorder(
             name: name,
             chord: $chord,
+            recordHelp: L(
+                "shortcuts.gestures.modifier_drag.help",
+                "Hold any of ⌃ Control, ⌥ Option, ⇧ Shift, and "
+                    + "⌘ Command, then let go — the keys you held "
+                    + "together are recorded."
+            ),
             clearHelp: L(
                 "shortcuts.gestures.modifier_drag.clear",
                 "Turn this drag off"
@@ -35,13 +41,6 @@ struct ModifierDragRecorderField: View {
     /// The sentence under the field for a refused chord.
     @MainActor static func caption(_ refusal: ModifierDragRefusal) -> String {
         switch refusal {
-        case .singleModifier:
-            return L(
-                "shortcuts.gestures.modifier_drag.refused_single",
-                "Hold two or more keys. With one key, dragging is "
-                    + "already taken: ⌘ moves a background window, "
-                    + "and ⌥ or ⇧ do something in many apps."
-            )
         case .otherAction(.move):
             return L(
                 "shortcuts.gestures.modifier_drag.refused_move",

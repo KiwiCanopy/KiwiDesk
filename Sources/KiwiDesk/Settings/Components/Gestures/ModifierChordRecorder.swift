@@ -14,6 +14,8 @@ struct ModifierChordRecorder<Refusal: Equatable, Caption: View>: View {
     /// VoiceOver's name for the field.
     let name: String
     @Binding var chord: ScrollChord
+    /// The field's help, naming the keys it takes.
+    let recordHelp: String
     /// The ×'s help, naming what it turns off.
     let clearHelp: String
     /// Core's verdict on a recorded chord; nil accepts it.
@@ -63,7 +65,7 @@ struct ModifierChordRecorder<Refusal: Equatable, Caption: View>: View {
         .modifier(
             RecorderButtonChrome(recording: recording, flashing: flashing)
         )
-        .help(Self.recordHelp)
+        .help(recordHelp)
         .accessibilityLabel(name)
         .accessibilityValue(spokenValue)
     }
@@ -106,15 +108,6 @@ struct ModifierChordRecorder<Refusal: Equatable, Caption: View>: View {
     private var spokenValue: String {
         guard !recording, chord.isEmpty else { return label }
         return SettingsValueReadout.onOff(false)
-    }
-
-    @MainActor private static var recordHelp: String {
-        L(
-            "shortcuts.gestures.scroll.help",
-            "Hold two or more of ⌃ Control, ⌥ Option, ⇧ Shift, and "
-                + "⌘ Command, then let go — the keys you held "
-                + "together are recorded."
-        )
     }
 
     // MARK: - Recording lifecycle

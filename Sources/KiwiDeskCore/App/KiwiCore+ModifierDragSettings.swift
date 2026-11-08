@@ -76,8 +76,6 @@ extension KiwiCore {
     ) -> String? {
         switch ModifierDragRefusal.of(chord, other: other, heldBy: heldBy) {
         case nil: return nil
-        case .singleModifier:
-            return "a modifier drag needs two or more modifiers"
         case .otherAction:
             return "the move and resize drags need different modifiers"
         }

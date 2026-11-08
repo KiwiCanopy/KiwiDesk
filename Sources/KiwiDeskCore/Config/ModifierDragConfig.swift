@@ -33,11 +33,12 @@ public struct ModifierDragBinding: Equatable, Sendable {
     public var isOff: Bool { chord.isEmpty }
 }
 
-/// Why a modifier drag's chord is refused: one modifier alone is
-/// a click macOS and apps already read, and the two actions never
-/// share a chord. Core names it; the CLI and the recorder word it.
+/// Why a modifier drag's chord is refused: the two actions never
+/// share a chord, since the press could start only the first. One
+/// modifier alone is the user's to choose (owner, 2026-11-08), for
+/// the click it costs. Core names it; the CLI and the recorder
+/// word it.
 public enum ModifierDragRefusal: Equatable, Sendable {
-    case singleModifier
     /// The other action, named, already holds these keys.
     case otherAction(ModifierDragAction)
 
@@ -48,10 +49,8 @@ public enum ModifierDragRefusal: Equatable, Sendable {
         other: ScrollChord,
         heldBy: ModifierDragAction
     ) -> ModifierDragRefusal? {
-        guard !chord.isEmpty else { return nil }
-        if chord.rawValue.nonzeroBitCount < 2 { return .singleModifier }
-        if chord == other { return .otherAction(heldBy) }
-        return nil
+        guard !chord.isEmpty, chord == other else { return nil }
+        return .otherAction(heldBy)
     }
 }
 
@@ -79,16 +78,11 @@ public struct ModifierDragSettings: Equatable, Sendable {
         }
     }
 
-    /// The recorder's and the verbs' refusals, applied once more
-    /// to what a hand-edited file can reach: a lone modifier turns
-    /// that action off, and a shared chord stays the move's.
+    /// The recorder's and the verbs' refusal, applied once more to
+    /// what a hand-edited file can reach: a shared chord stays the
+    /// move's.
     public var sanitized: ModifierDragSettings {
         var result = self
-        if ModifierDragRefusal.of(move.chord, other: [], heldBy: .resize)
-            != nil
-        {
-            result.move.chord = []
-        }
         if ModifierDragRefusal.of(
             resize.chord,
             other: result.move.chord,

@@ -21,6 +21,12 @@ struct ScrollChordRecorderField: View {
         ModifierChordRecorder(
             name: name,
             chord: $chord,
+            recordHelp: L(
+                "shortcuts.gestures.scroll.help",
+                "Hold two or more of ⌃ Control, ⌥ Option, ⇧ Shift, and "
+                    + "⌘ Command, then let go — the keys you held "
+                    + "together are recorded."
+            ),
             clearHelp: L(
                 "shortcuts.gestures.scroll.clear",
                 "Turn this gesture off"

@@ -12762,9 +12762,19 @@ them through their own doors. The defaults are on, ⌃⌘ and ⌃⌥ with
 the button held, since a press is a clear start and its release a
 clear end; "+ move (no click)" is an opt-in per action, and shows
 no warning when its chord also starts a shortcut, since pressing a
-key is deliberate (owner, 2026-11-08). The settings are the Mac's,
-in `gui.json`: no per-profile value preceded them, so they cross
-nothing.
+key is deliberate (owner, 2026-11-08). One modifier alone is the
+user's to choose: it takes that key's own click — ⌃-click's
+secondary click, ⌘-drag's background move — while it is on, and
+nothing refuses it; the two rows never share a chord, since a press
+could start only one of them (owner, 2026-11-08). The settings are
+the Mac's, in `gui.json`: no per-profile value preceded them, so
+they cross nothing.
+
+The grabbed window takes focus at the drop, tiled or floating: one
+gesture keeps one rule, and no click reached the app that would
+otherwise have focused a float. The press moves no focus, so a press
+that never becomes a drag takes none; a float dropped by its own
+title bar is macOS's to focus (owner with ui-designer, 2026-11-08).
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get

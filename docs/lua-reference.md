@@ -5134,8 +5134,8 @@ Monitoring.
 
 The settings are stored in `gui.json` as the `modifier_drag`
 object — `move` and `resize`, each with `modifiers` and `start` — for
-every profile alike. A single-modifier chord there turns that drag
-off, and a `resize` equal to `move` turns the resize off. In the
+every profile alike. A `resize` equal to `move` turns the resize
+off. In the
 Settings app they are the **Move windows from anywhere** and
 **Resize windows from anywhere** rows under **Shortcuts & Gestures
 ▸ Mouse & trackpad**.
@@ -5156,9 +5156,9 @@ the GUI** keeps what it set.
 `"drag"` (the default, the button held) or `"hover"` (no click).
 
 **Does:** sets the keys that move the window under the pointer,
-and how the move starts. It takes two or more modifiers: one alone
-fails, and so does the chord
-[`set_resize`](#modifier_dragset_resize) holds.
+and how the move starts. One modifier is accepted, and that key's
+own click — ⌃-click, ⌘-drag — is then the move's; the chord
+[`set_resize`](#modifier_dragset_resize) holds fails.
 
 **Example:**
 

@@ -72,11 +72,11 @@ struct ModifierDragConfigTests {
         #expect(GuiConfig().modifierDrag == .defaults)
     }
 
-    @Test("a lone modifier turns an action off; a shared chord is the move's")
+    @Test("a lone modifier is kept; a shared chord is the move's")
     func sanitized() {
         var settings = ModifierDragSettings.defaults
         settings.move.chord = [.command]
-        #expect(settings.sanitized.move.isOff)
+        #expect(settings.sanitized.move.chord == [.command])
         settings = .defaults
         settings.resize.chord = settings.move.chord
         #expect(settings.sanitized.resize.isOff)
@@ -88,9 +88,9 @@ struct ModifierDragConfigTests {
         #expect(
             ModifierDragRefusal.of([], other: [.control], heldBy: .move) == nil
         )
+        // One key is the user's choice (owner, 2026-11-08).
         #expect(
-            ModifierDragRefusal.of([.option], other: [], heldBy: .move)
-                == .singleModifier
+            ModifierDragRefusal.of([.option], other: [], heldBy: .move) == nil
         )
         #expect(
             ModifierDragRefusal.of(
