@@ -189,8 +189,22 @@ struct TilingToggleTests {
         #expect(core.state.workspaces.space(of: WindowID(5)) == hidden)
         // The control: tiling on, a parked tile owes no capture.
         #expect(core.tiler.stashOriginal(WindowID(5)) == nil)
+        let screen = try #require(
+            TilingEngine.screen(for: hidden, in: core.state)
+        )
+        let hiddenSpace = try #require(core.state.workspaces[hidden])
+        let slot = try #require(
+            core.tiler.placedFrames(
+                of: hiddenSpace,
+                on: screen,
+                state: core.state
+            ).frames[WindowID(5)]
+        )
+        // The fixture's state frame is no park: the capture must be
+        // the slot, not the frame a later pass would read.
+        #expect(core.state.windows[WindowID(5)]?.frame != slot)
         core.execute("set_tiling", args: [.bool(false), .string("2")])
-        #expect(core.tiler.stashOriginal(WindowID(5)) != nil)
+        #expect(core.tiler.stashOriginal(WindowID(5)) == slot)
     }
 
     @Test("a tile on a tiling-off Space is an effective float")
