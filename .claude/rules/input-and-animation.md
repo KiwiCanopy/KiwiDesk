@@ -991,7 +991,12 @@ editing here:
   `TouchReader`, reached only through `MouseTracker.trackpad`
   (#1873).** MultitouchSupport delivers every frame with no
   permission (probed 2026-10-31, macOS 27) and swallows nothing.
-  Four obligations:
+  Five obligations:
+  - **Resolve the slots in ONE home, `KiwiCore.applyTrackpadGestures`,
+    the one caller of `TouchGestures.resolve`**; the config load's
+    `resetInputs` is the one deferred writer, configured at the
+    load's tail. Nothing scans for a second caller, so it is
+    review's.
   - **No touch binding, no reader.** `TouchGestures` starts the
     reader only while the core runs and a bound slot's `source`
     is `.touches`; the live factory is pinned inert in both
@@ -1007,8 +1012,17 @@ editing here:
     so the binding stays live (`TouchGesturesTests` ▸
     `systemOwnedStandsDown`).
   - **Consuming a pinch, spread, rotation or Force Click is a
-    gesture-event mask on `PointerTap` (#2447), never a fourth tap
-    and never this reader**, which cannot swallow. Until it lands
-    those slots resolve and fire nothing; their consumer reads
-    `TouchGestures.bindings` for slots whose `source` is
-    `.gestureEvents`.
+    gesture-event mask on #2447's pointer tap once it lands (the
+    ruling's `PointerTap`), never a tap of its own and never this
+    reader**, which cannot swallow. The tap takes the chords it
+    swallows through the one `TouchGestures.onGestureEventChords`,
+    which hands an empty map while no such slot is bound or the
+    core is stopped, so no binding arms no mask; it decides on its
+    own thread from that pushed copy and hands each gesture back
+    through `TouchGestures.receive` as `.gesture(slot)`, so the
+    exact-modifier match and the handler stay one
+    (`TouchGesturesTests` ▸ `gestureEventChordsReachTheDoor`).
+    Residue: the reader takes the devices connected when it is
+    built, and is rebuilt only at a resolve that needs it and at
+    the session's return (`rearm`); a trackpad paired mid-session
+    waits for one of those. Neither path is measured on a device.

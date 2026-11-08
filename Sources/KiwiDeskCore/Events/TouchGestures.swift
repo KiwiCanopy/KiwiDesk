@@ -20,7 +20,9 @@ public final class TouchGestures {
     /// Builds the machine reader. Live in production; both
     /// `makeTestCore` twins pin one that touches nothing.
     var makeReader: MakeReader = { TouchReader.live(deliver: $0) }
-    /// What macOS answers itself, read at each start.
+    /// What macOS answers itself, read afresh for each batch of
+    /// recognized gestures, which are rare, so a change in System
+    /// Settings ▸ Trackpad lands at the next gesture.
     var readSystemGestures: @MainActor () -> TrackpadSystemGestures = {
         TrackpadSystemGestures.readLive()
     }
@@ -34,9 +36,11 @@ public final class TouchGestures {
     /// written through `resolve` alone.
     private(set) var base = TrackpadGestureMap()
     private(set) var profileOverride: TrackpadGestureMap?
-    private(set) var system = TrackpadSystemGestures.unread
     private var handler: Handler?
     private var reader: TouchReaderHandle?
+    /// The last reader verdict logged, so a Mac with no trackpad
+    /// says so once rather than at every resolve.
+    private var loggedReading: Bool?
     private var started = false
 
     public init() {}
@@ -72,7 +76,6 @@ public final class TouchGestures {
 
     func start() {
         started = true
-        system = readSystemGestures()
         sync()
     }
 
@@ -81,11 +84,21 @@ public final class TouchGestures {
         sync()
     }
 
+    /// Builds the reader again over the devices connected now —
+    /// the session's return from sleep or a lock, after which a
+    /// Bluetooth trackpad comes back as a device nobody registered.
+    func rearm() {
+        reader?.stop()
+        reader = nil
+        sync()
+    }
+
     /// Hands each recognized gesture to the handler, once its slot
     /// is bound with exactly the modifiers held and macOS does not
     /// answer the gesture itself.
     func receive(_ events: [TrackpadGestureEvent]) {
         guard started, let handler else { return }
+        let system = readSystemGestures()
         for event in events {
             guard let slot = Self.slot(of: event),
                 let binding = bindings[slot],
@@ -100,7 +113,25 @@ public final class TouchGestures {
         switch event.kind {
         case .tap: return .tap(fingers: event.fingers)
         case .swipe: return .swipe(fingers: event.fingers)
+        case .gesture(let slot):
+            return slot.source == .gestureEvents ? slot : nil
         }
+    }
+
+    /// The chords the gesture-event consumer swallows, per slot —
+    /// the one door #2447's tap takes them through, handed on every
+    /// change and empty while stopped, so no binding arms no mask.
+    /// Its gestures come back through `receive`.
+    var onGestureEventChords:
+        (@MainActor ([TrackpadGestureSlot: ScrollChord]) -> Void)?
+    {
+        didSet { sync() }
+    }
+
+    private var gestureEventChords: [TrackpadGestureSlot: ScrollChord] {
+        guard started else { return [:] }
+        return bindings.filter { $0.key.source == .gestureEvents }
+            .mapValues(\.modifiers)
     }
 
     /// Whether a bound slot needs the touch reader.
@@ -110,6 +141,7 @@ public final class TouchGestures {
     }
 
     private func sync() {
+        onGestureEventChords?(gestureEventChords)
         guard started, needsReader else {
             reader?.stop()
             reader = nil
@@ -121,11 +153,14 @@ public final class TouchGestures {
                 MainActor.assumeIsolated { self?.receive(events) }
             }
         }
+        let reading = reader != nil
+        guard reading != loggedReading else { return }
+        loggedReading = reading
         onLog(
-            reader == nil
-                ? "touch reader: unavailable (no MultitouchSupport "
+            reading
+                ? "touch reader: started"
+                : "touch reader: unavailable (no MultitouchSupport "
                     + "or no trackpad)"
-                : "touch reader: started"
         )
     }
 }

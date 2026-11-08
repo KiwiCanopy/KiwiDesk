@@ -104,10 +104,10 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     ) {
         let contacts: [TouchContact]
         if let touches, count > 0 {
-            contacts = TouchFrame.contacts(
+            contacts = MultitouchSupport.contacts(
                 in: UnsafeRawBufferPointer(
                     start: touches,
-                    count: count * TouchFrame.Layout.stride
+                    count: count * MultitouchSupport.Layout.stride
                 ),
                 count: count
             )

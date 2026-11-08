@@ -1,10 +1,14 @@
 import Foundation
 
-/// A tap or a swipe the router recognized (#1873).
+/// A recognized trackpad gesture (#1873): a tap or a swipe from the
+/// router, or a macOS gesture event a tap with the gesture-event
+/// mask hands in (#2447), named by its slot.
 public struct TrackpadGestureEvent: Equatable, Sendable {
     public enum Kind: Equatable, Sendable {
         case tap
         case swipe(Direction)
+        /// A `.gestureEvents` slot's gesture; `fingers` is unread.
+        case gesture(TrackpadGestureSlot)
     }
 
     public var kind: Kind
@@ -26,7 +30,10 @@ public struct TrackpadGestureEvent: Equatable, Sendable {
 /// finger stayed within `tapTravel` and the touch lasted at most
 /// `tapDuration`.
 struct TrackpadGestureRouter {
-    /// Normalized pad travel; the pad is about 13 cm wide.
+    /// Normalized pad travel on either axis, so a vertical swipe
+    /// fires at about two thirds of a horizontal one's travel, the
+    /// pad being shorter than it is wide — chosen, as macOS's own
+    /// vertical swipes are shorter too.
     static let swipeDistance: Float = 0.12
     /// The swipe's own axis must lead the other by this factor.
     static let axisDominance: Float = 1.6

@@ -347,6 +347,7 @@ extension KiwiCore {
         sleepWake.sessionPresence = { .live() }
         sleepWake.onReturn = { [weak self] in
             self?.eventLoop.sessionDidReturn()
+            self?.mouse.trackpad.rearm()
         }
     }
 }

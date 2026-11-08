@@ -162,16 +162,36 @@ struct TouchGesturesTests {
         #expect(box.fired.isEmpty)
     }
 
+    @Test("the gesture-event chords reach their door, empty when off")
+    func gestureEventChordsReachTheDoor() {
+        let (gestures, box) = front()
+        var pushed: [[TrackpadGestureSlot: ScrollChord]] = []
+        gestures.onGestureEventChords = { pushed.append($0) }
+        gestures.resolve(
+            base: TrackpadGestureMap([.spread: .unbound]),
+            profileOverride: nil
+        )
+        #expect(pushed.last == [:], "nothing before the start")
+        gestures.start()
+        #expect(pushed.last == [.rotate: Self.hyper])
+        gestures.receive([event(.gesture(.rotate), 0, Self.hyper)])
+        gestures.receive([event(.gesture(.tap3), 0)])
+        #expect(box.fired.map(\.0) == [.rotate])
+        gestures.stop()
+        #expect(pushed.last == [:])
+    }
+
     @Test("the preference read decides which gestures macOS owns")
     func systemPrefsParse() {
         let parsed = TrackpadSystemGestures.parse([
             "TrackpadThreeFingerHorizSwipeGesture": 2,
             "TrackpadThreeFingerVertSwipeGesture": 1,
+            "TrackpadFourFingerHorizSwipeGesture": 0,
             "TrackpadFourFingerVertSwipeGesture": 2,
             "TrackpadThreeFingerTapGesture": 2,
         ])
         #expect(parsed.read)
-        #expect(parsed.swipes[3] == [.horizontal])
+        #expect(parsed.swipes[3] == [.horizontal, .vertical])
         #expect(parsed.swipes[4] == [.vertical])
         #expect(parsed.lookUpTap)
         let none = TrackpadSystemGestures.parse([:])

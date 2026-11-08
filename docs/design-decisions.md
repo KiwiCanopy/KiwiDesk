@@ -12777,37 +12777,45 @@ that never becomes a drag takes none; a float dropped by its own
 title bar is macOS's to focus (owner with ui-designer, 2026-11-08).
 
 :::unreleased
-**A default install runs one input reader: the seeded trackpad
-gestures' (#1873, owner ruling 2026-11-08).** #2601 promised that "a
-default install, and one that never records a side, sees no
-keystroke", and that still holds for keys. It no longer holds for
-input as a whole: the gesture slots ship bound and on — a four-finger
-tap opens KiwiHub, a three-finger tap goes back a Space, ⌃⌥ + spread
-toggles maximized, ⌃⌥ + rotate cycles the layout — so a default
+**A default install reads the trackpad's fingers (#1873, owner
+ruling 2026-11-08).** #2601 promised that "a default install, and one
+that never records a side, sees no keystroke", and that still holds.
+The seeded gesture slots add a reader of a different input: they ship
+bound and on — a four-finger tap opens KiwiHub's shortcuts panel and a
+three-finger tap goes back to the Space you were on — so a default
 install reads the trackpad's fingers. The same amendment is meant to
 cover #1229's seeded ⌘⌘, a keyboard tap on a default install, when
 that lane seeds it.
 
-What bounds the reader instead is #2601's other rule, applied per
-input: no binding, no reader. The MultitouchSupport reader runs only
-while the core runs and a bound slot reads touches, so unbinding the
-taps and swipes stops it. It reads and never swallows — the framework
-hands every frame to every listener — and it records and stores
-nothing, deciding on its own thread through a pure router and handing
-the main actor only a gesture it recognized. It needs no permission:
-the 2026-10-31 probe read every frame system-wide with Accessibility,
-Input Monitoring and PostEvent all refused, and tccd logged no request,
-so the Input Monitoring ruling carried from #1874 has no case here.
-Where the `dlsym` lookup fails there is no reader and no fallback to
-write, the os-private-apis carve-out: the scroll gestures keep
-working through their public tap.
+What bounds each input is #2601's other rule, applied per input: no
+binding, no reader. Two inputs answer it, and they stand on different
+ground:
+
+- **The touch reader** (MultitouchSupport) serves the taps and swipes.
+  It runs only while the core runs and a bound slot reads touches, so
+  unbinding the taps and swipes stops it. It reads and never swallows
+  — the framework hands every frame to every listener — records and
+  stores nothing, decides on its own thread through a pure router,
+  and hands the main actor only a gesture it recognized. It needs no
+  permission: the 2026-10-31 probe read every frame system-wide with
+  Accessibility, Input Monitoring and PostEvent all refused, and tccd
+  logged no request. Where the `dlsym` lookup fails there is no reader
+  and no fallback to write, the os-private-apis carve-out: the scroll
+  gestures keep working through their public tap.
+- **The gesture-event consumer** (#2447) will serve ⌃⌥ + spread
+  (toggle maximized) and ⌃⌥ + rotate (cycle the layout), which ship
+  bound but fire nothing until it lands. Its mask arms only while such
+  a slot is bound, so the seeds put it on every default install too.
+  Which TCC service that mask asks for at `.cgSessionEventTap` is
+  unmeasured: the ruling owes that measurement before #2447 builds,
+  and this entry claims nothing for it.
 
 Because the reader cannot keep macOS from answering a gesture too, a
 gesture macOS owns does not fire: KiwiDesk reads the trackpad
 preferences and a three-finger tap set to Look up, or a three- or
 four-finger swipe on an axis macOS uses, stands down; a preference
 it cannot read owns nothing, so the binding stays live. Every swipe,
-pinch and rotation needs a modifier, since macOS and apps own the
+pinch, rotation and Force Click needs a modifier, since macOS and apps own the
 unmodified ones; a tap may take none.
 
 The slots are stored sparsely, in `gui.json` over the seeds and in a
@@ -12817,7 +12825,10 @@ Desktop overview — reaches an install that never touched that slot
 with no top-up generation, and the cost is the mirror: changing a
 shipped seed changes it for everyone who kept it, which makes each
 such change a ruling. The key is additive, so it takes no format
-bump: an older build ignores it, and its Save drops it.
+bump: an older build ignores it, and its Save drops it. The map itself
+decodes strictly, so a slot a later release adds is a name this build
+refuses, and adding one bumps `GuiConfig.currentFormat` and
+`Profile.currentFormat`.
 :::
 
 **An absent capability is not a greyed one, and an absent

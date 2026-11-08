@@ -1,9 +1,12 @@
 import Foundation
 
-/// The wire shape (#1873): `{ "tap4": { "action": …, "modifiers":
-/// "control+option" }, "tap3": null }`. A slot the object leaves
-/// out inherits and `null` is the tombstone; an unknown slot name
-/// fails the decode, as every stored value's does.
+/// The wire shape (#1873): `{ "tap4": { "lua": …, "modifiers":
+/// "control+option" }, "swipe3": { "family": "focus", … },
+/// "tap3": null }`. A swipe slot stores its family under `family`,
+/// every other slot its Lua under `lua`, the key a migration
+/// rewriting stored Lua already matches in shortcut rows. A slot the
+/// object leaves out inherits and `null` is the tombstone; an
+/// unknown slot name fails the decode, as every stored value's does.
 extension TrackpadGestureMap: Codable {
     private struct SlotKey: CodingKey {
         let stringValue: String
@@ -13,7 +16,7 @@ extension TrackpadGestureMap: Codable {
     }
 
     private enum BindingKeys: String, CodingKey {
-        case action, modifiers
+        case lua, family, modifiers
     }
 
     public init(from decoder: Decoder) throws {
@@ -38,7 +41,10 @@ extension TrackpadGestureMap: Codable {
             )
             entries[slot] = .bound(
                 TrackpadGestureBinding(
-                    action: try b.decode(String.self, forKey: .action),
+                    action: try b.decode(
+                        String.self,
+                        forKey: slot.isSwipe ? .family : .lua
+                    ),
                     modifiers: try b.decodeIfPresent(
                         ScrollChord.self,
                         forKey: .modifiers
@@ -61,7 +67,10 @@ extension TrackpadGestureMap: Codable {
                     keyedBy: BindingKeys.self,
                     forKey: key
                 )
-                try b.encode(binding.action, forKey: .action)
+                try b.encode(
+                    binding.action,
+                    forKey: slot.isSwipe ? .family : .lua
+                )
                 try b.encode(binding.modifiers, forKey: .modifiers)
             }
         }

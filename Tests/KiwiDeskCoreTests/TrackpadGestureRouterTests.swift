@@ -124,8 +124,8 @@ struct TrackpadGestureRouterTests {
     }
 }
 
-/// The `MTTouch` record read (#1873): stride, offsets, the
-/// touching states, and the buffer's end.
+/// The `MTTouch` record read (#1873): the touching states, the
+/// buffer's end, and positions off the pad.
 @Suite("Touch frame parse")
 struct TouchFrameParseTests {
     private func record(
@@ -134,7 +134,10 @@ struct TouchFrameParseTests {
         x: Float,
         y: Float
     ) -> [UInt8] {
-        var bytes = [UInt8](repeating: 0, count: TouchFrame.Layout.stride)
+        var bytes = [UInt8](
+            repeating: 0,
+            count: MultitouchSupport.Layout.stride
+        )
         func put<T>(_ value: T, at offset: Int) {
             withUnsafeBytes(of: value) { raw in
                 for (index, byte) in raw.enumerated() {
@@ -142,10 +145,10 @@ struct TouchFrameParseTests {
                 }
             }
         }
-        put(id, at: TouchFrame.Layout.identifier)
-        put(state, at: TouchFrame.Layout.state)
-        put(x, at: TouchFrame.Layout.x)
-        put(y, at: TouchFrame.Layout.y)
+        put(id, at: MultitouchSupport.Layout.identifier)
+        put(state, at: MultitouchSupport.Layout.state)
+        put(x, at: MultitouchSupport.Layout.x)
+        put(y, at: MultitouchSupport.Layout.y)
         return bytes
     }
 
@@ -156,7 +159,7 @@ struct TouchFrameParseTests {
             + record(id: 8, state: 2, x: 0.5, y: 0.5)
             + record(id: 9, state: 3, x: 0.1, y: 0.2)
         let contacts = bytes.withUnsafeBytes {
-            TouchFrame.contacts(in: $0, count: 4)
+            MultitouchSupport.contacts(in: $0, count: 4)
         }
         #expect(
             contacts == [
@@ -166,12 +169,16 @@ struct TouchFrameParseTests {
         )
     }
 
-    @Test("the layout is the probed one")
-    func layoutIsPinned() {
-        #expect(TouchFrame.Layout.stride == 96)
-        #expect(TouchFrame.Layout.identifier == 16)
-        #expect(TouchFrame.Layout.state == 20)
-        #expect(TouchFrame.Layout.x == 32)
-        #expect(TouchFrame.Layout.y == 36)
+    @Test("a position off the pad is garbage and dropped")
+    func offPadDrops() {
+        let bytes =
+            record(id: 1, state: 4, x: .nan, y: 0.5)
+            + record(id: 2, state: 4, x: 0.5, y: 7)
+            + record(id: 3, state: 4, x: -0.2, y: 0.5)
+            + record(id: 4, state: 4, x: 1, y: 0)
+        let contacts = bytes.withUnsafeBytes {
+            MultitouchSupport.contacts(in: $0, count: 4)
+        }
+        #expect(contacts.map(\.id) == [4])
     }
 }

@@ -24,6 +24,18 @@ struct TrackpadGestureConfigTests {
         #expect(seeds[.tap4]?.modifiers == [])
         #expect(seeds[.tap3]?.action == "KiwiDesk.focus_space_back()")
         #expect(seeds[.swipe3] == nil)
+        // Each seed runs the Shortcuts catalogue's own Lua, so a row
+        // that recognizes a catalogue action by its text knows it.
+        let catalogue = Set(
+            DefaultKeybindings.bindings(
+                spaces: [SpaceID("1")],
+                resizeStep: 50,
+                base: .standard
+            ).map(\.lua)
+        )
+        for (slot, binding) in TrackpadGestureSeeds.seeds {
+            #expect(catalogue.contains(binding.action), "\(slot)")
+        }
         // Every seed passes its own slot's refusals.
         for (slot, binding) in TrackpadGestureSeeds.seeds {
             #expect(binding.refusal(on: slot) == nil, "\(slot)")
@@ -80,6 +92,7 @@ struct TrackpadGestureConfigTests {
         let map = TrackpadGestureMap([
             .tap3: .unbound,
             .swipe4: .bound(.init(action: "swap", modifiers: Self.hyper)),
+            .tap5: .bound(.init(action: "x()")),
         ])
         let data = try JSONEncoder().encode(map)
         let object = try #require(
@@ -87,13 +100,30 @@ struct TrackpadGestureConfigTests {
         )
         #expect(object["tap3"] is NSNull)
         let swipe = try #require(object["swipe4"] as? [String: String])
-        #expect(swipe == ["action": "swap", "modifiers": "control+option"])
-        #expect(object.count == 2)
+        #expect(swipe == ["family": "swap", "modifiers": "control+option"])
+        let tap = try #require(object["tap5"] as? [String: String])
+        #expect(tap == ["lua": "x()", "modifiers": ""])
+        #expect(object.count == 3)
         let back = try JSONDecoder().decode(
             TrackpadGestureMap.self,
             from: data
         )
         #expect(back == map)
+    }
+
+    @Test("a slot's action under the other slot kind's key fails")
+    func wrongKeyFails() {
+        for json in [
+            #"{"swipe3": {"lua": "focus", "modifiers": "control"}}"#,
+            #"{"tap3": {"family": "x()"}}"#,
+        ] {
+            #expect(throws: DecodingError.self) {
+                try JSONDecoder().decode(
+                    TrackpadGestureMap.self,
+                    from: Data(json.utf8)
+                )
+            }
+        }
     }
 
     @Test("an unknown slot fails the decode")
@@ -123,7 +153,7 @@ struct TrackpadGestureConfigTests {
 
         var profile = Profile(
             name: "P",
-            monitorSets: [],
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
             spaceModes: [:],
             settings: TilingSettings()
         )

@@ -4,7 +4,7 @@ import Foundation
 /// where a recognized gesture runs its action (#1873).
 extension KiwiCore {
     /// Wires the handler; once, at bootstrap. A slot's action runs
-    /// as a shortcut press does, so its motion is the user's.
+    /// as user motion, as a scroll gesture's step does (#804).
     func wireTrackpadGestures() {
         mouse.trackpad.setHandler { [weak self] slot, binding, event in
             self?.runTrackpadGesture(slot, binding, event)
@@ -19,8 +19,11 @@ extension KiwiCore {
         guard let code = Self.trackpadGestureLua(binding, event) else {
             return
         }
-        if case .failure(let error) = keys.firePress(code) {
-            onLog("trackpad_gesture \(slot.rawValue): \(error)")
+        guard let lua = keys.lua else { return }
+        withUserMotion {
+            if case .failure(let error) = lua.run(code) {
+                onLog("trackpad_gesture \(slot.rawValue): \(error)")
+            }
         }
     }
 
@@ -31,7 +34,7 @@ extension KiwiCore {
         _ event: TrackpadGestureEvent
     ) -> String? {
         switch event.kind {
-        case .tap: return binding.action
+        case .tap, .gesture: return binding.action
         case .swipe(let direction):
             return TrackpadSwipeFamily(rawValue: binding.action)?
                 .lua(direction)

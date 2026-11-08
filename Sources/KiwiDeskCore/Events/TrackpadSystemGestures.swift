@@ -31,6 +31,9 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
     func owns(_ event: TrackpadGestureEvent) -> Bool {
         switch event.kind {
         case .tap: return event.fingers == 3 && lookUpTap
+        // A gesture event reaches KiwiDesk only through a tap that
+        // swallows it, so macOS never answers it as well.
+        case .gesture: return false
         case .swipe(let direction):
             let axis: Axis =
                 direction == .left || direction == .right
@@ -39,9 +42,11 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         }
     }
 
-    /// The preference keys and the values that mean "on": 2 for
-    /// a swipe (1 is three-finger drag's), and for the tap 2,
-    /// Look up rather than tap-to-click's own.
+    /// The preference keys. Any value but 0 counts as macOS's: a
+    /// swipe key's 1 and 2 are both gestures macOS answers (pages,
+    /// full-screen apps, Mission Control), and the tap key's value
+    /// table is unmeasured, so a reading is taken as owned rather
+    /// than shared (owner eyeball on #1873).
     static let swipeKeys: [(String, Int, Axis)] = [
         ("TrackpadThreeFingerHorizSwipeGesture", 3, .horizontal),
         ("TrackpadThreeFingerVertSwipeGesture", 3, .vertical),
@@ -56,12 +61,12 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         guard !prefs.isEmpty else { return .unread }
         var swipes: [Int: Set<Axis>] = [:]
         for (key, fingers, axis) in swipeKeys
-        where prefs[key] == 2 {
+        where (prefs[key] ?? 0) != 0 {
             swipes[fingers, default: []].insert(axis)
         }
         return TrackpadSystemGestures(
             swipes: swipes,
-            lookUpTap: prefs[tapKey] == 2
+            lookUpTap: (prefs[tapKey] ?? 0) != 0
         )
     }
 
@@ -72,6 +77,7 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
 
     /// The live read.
     static func readLive() -> TrackpadSystemGestures {
+        CFPreferencesAppSynchronize(domain as CFString)
         var prefs: [String: Int] = [:]
         for key in swipeKeys.map(\.0) + [tapKey] {
             if let value = CFPreferencesCopyAppValue(
