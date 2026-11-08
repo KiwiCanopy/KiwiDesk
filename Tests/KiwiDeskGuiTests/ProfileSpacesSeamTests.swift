@@ -56,7 +56,7 @@ struct ProfileSpacesSeamTests {
         // reaching the map themselves.
         "virtualSpaces": [
             "Profiles/DesktopMemory.swift": 1,
-            "Profiles/KiwiCore+DesktopSpaces.swift": 6,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 7,
             "Profiles/KiwiCore+DesktopSpacePersistence.swift": 5,
             "App/KiwiCore+AwayWindows.swift": 1,
         ],

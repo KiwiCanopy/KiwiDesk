@@ -139,8 +139,7 @@ extension KiwiCore {
                 $0.nativeSpace == native.id ? $0 : nil
             }
         }
-        let returning = snapshot.keys(of: native.id).lazy
-            .compactMap { self.desktopMemory.virtualSpaces[$0] }.first
+        let returning = rememberedVirtualSpace(of: native.id, in: snapshot)
         let spaces = state.workspaces.spaces(on: display)
         var lines = spaces.map { id in
             overviewLine(

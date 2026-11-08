@@ -16,8 +16,8 @@ enum DesktopsAction: Equatable {
     case jumpDesktop(DesktopOverview.Desktop)
     case moveYoursToDesktop(DesktopOverview.Desktop)
     case jumpWindow(WindowID)
-    case moveHere(WindowID)
-    case swapHere(WindowID)
+    case moveWindowHere(WindowID)
+    case swapWindowHere(WindowID)
     case drop([WindowID], DesktopsTarget, follow: Bool)
 }
 
@@ -103,7 +103,7 @@ extension DesktopsState {
             return .moved
         case .swapHere:
             guard !isCarrying, let window else { return .dead }
-            return .act(.swapHere(window))
+            return .act(.swapWindowHere(window))
         case .quick(let index, let moveHere):
             return digit(index, shift: moveHere)
         case .quickSwap, .dead, .keep, .settings, .swallow, .stepScope:
@@ -136,7 +136,7 @@ extension DesktopsState {
         }
         if let window {
             if follow { return .dead }
-            return .act(shift ? .moveHere(window) : .jumpWindow(window))
+            return .act(shift ? .moveWindowHere(window) : .jumpWindow(window))
         }
         guard let target = target(place) else {
             return shift || follow ? .refuse(.noSpace) : .dead

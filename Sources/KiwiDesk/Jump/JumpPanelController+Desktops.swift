@@ -51,7 +51,8 @@ extension JumpPanelController {
         else { return }
         let failed = run(action, in: overview)
         guard !failed.isEmpty else { return }
-        core.soundPanelRefusal()
+        // Spoken only: the refusal sound answers an in-panel
+        // refusal alone (`JumpRefusalRowTests`).
         let words = failed.compactMap(overview.window)
             .map(DesktopsText.notMoved)
             .joined(separator: ". ")
@@ -64,12 +65,14 @@ extension JumpPanelController {
 
     /// What Core refuses for `action` now, in the panel's words.
     private func refusal(of action: DesktopsAction) -> String? {
+        // The panel's screen, as the pick below reads it.
+        let hub = hubDisplay
         switch action {
-        case .moveHere(let id):
-            return core.moveHereRefusal(.window(id), on: hubDisplay)
+        case .moveWindowHere(let id):
+            return core.moveHereRefusal(.window(id), on: hub)
                 .map(JumpRowText.refusal)
-        case .swapHere(let id):
-            return core.swapRefusal(.window(id), on: hubDisplay)
+        case .swapWindowHere(let id):
+            return core.swapRefusal(.window(id), on: hub)
                 .map(JumpRowText.refusal)
         case .jumpDesktop(let desktop), .moveYoursToDesktop(let desktop):
             return desktop.number == nil
@@ -94,7 +97,8 @@ extension JumpPanelController {
         in overview: DesktopOverview
     ) -> pid_t? {
         switch action {
-        case .jumpWindow(let id), .swapHere(let id), .moveHere(let id):
+        case .jumpWindow(let id), .swapWindowHere(let id),
+            .moveWindowHere(let id):
             return overview.window(id)?.pid
         case .jump(let target):
             return target.lastFocused.flatMap(overview.window)?.pid
@@ -128,9 +132,9 @@ extension JumpPanelController {
             return moved ? [] : [yours]
         case .jumpWindow(let id):
             core.jump(to: .window(id))
-        case .moveHere(let id):
+        case .moveWindowHere(let id):
             _ = core.moveHere(.window(id), on: hubDisplay)
-        case .swapHere(let id):
+        case .swapWindowHere(let id):
             core.swapHere(.window(id), on: hubDisplay)
         case .drop(let ids, let target, let follow):
             return move(ids, to: target, follow: follow)

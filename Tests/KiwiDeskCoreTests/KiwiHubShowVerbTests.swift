@@ -61,6 +61,7 @@ struct KiwiHubShowVerbTests {
             DefaultKeybindings.showShortcutsRow(),
             DefaultKeybindings.layoutPickerRow(),
         ].map(\.lua)
-        #expect(seed == KiwiHubSide.allCases.map(\.lua))
+        // J K L; the Desktops side is seeded on no chord yet (#1229).
+        #expect(seed == [KiwiHubSide.windows, .shortcuts, .view].map(\.lua))
     }
 }

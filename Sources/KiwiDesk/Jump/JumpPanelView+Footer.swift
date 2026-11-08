@@ -19,8 +19,9 @@ extension JumpPanelView {
                 naming: model.isNaming,
                 desktops: model.desktops.map(DesktopsFooterState.init)
             ),
-            carriesControls: model.scope == .shortcuts
-                || model.scope == .view,
+            // Desktops draws its tray, no button (#1229).
+            carriesControls: model.scope != .windows
+                && model.scope != .desktops,
             leading: { footerLeading },
             trailing: { footerTrailing }
         )
