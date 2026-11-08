@@ -1035,8 +1035,9 @@ only while no shortcut is bound anywhere. An install that already
 has shortcuts gets a later default once, at launch, where its
 action has no shortcut and its key is free; **Restore…** on the
 **Default shortcuts** row puts back the whole set, keeping the
-shortcuts you made yourself except one sitting on a key a default
-needs; the confirmation counts those.
+shortcuts you added under **Open applications** and **Lua
+bindings** except one sitting on a key a default needs; the
+confirmation counts those.
 
 ### Choosing Your Own Shortcuts
 

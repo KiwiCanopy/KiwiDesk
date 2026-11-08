@@ -165,9 +165,12 @@ struct DefaultShortcutsRow: View {
             return L(
                 "shortcuts.restore_defaults.help",
                 "Puts back the shortcuts KiwiDesk provides, "
-                    + "including ones it has added since you "
-                    + "installed it. Shortcuts you made yourself "
-                    + "are kept."
+                    + "including ones added since you installed "
+                    + "it. Shortcuts you added under "
+                    + "\u{201C}%1$@\u{201D} and \u{201C}%2$@\u{201D} "
+                    + "are kept.",
+                SettingsCatalog.shortcuts.openApplications.text,
+                SettingsCatalog.shortcuts.luaBindings.control.text
             )
         case .otherLayerPicked?:
             return L(
@@ -195,7 +198,7 @@ struct DefaultShortcutsRow: View {
                 + "anything changes, you are told how many "
                 + "shortcuts come back and how many of yours "
                 + "are lost because they use a key a default "
-                + "needs."
+                + "needs. Your init.lua is never changed."
         )
     }
 
