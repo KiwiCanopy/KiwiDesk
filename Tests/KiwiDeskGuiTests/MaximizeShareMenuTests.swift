@@ -6,6 +6,7 @@ import Testing
 /// 2026-11-08); a stored share outside them shows as one extra
 /// checked item and goes once a fraction replaces it.
 @Suite("Maximize share pop-up items (#3062)")
+@MainActor
 struct MaximizeShareMenuTests {
     @Test("A preset share adds no item and checks its fraction")
     func presetAddsNothing() {

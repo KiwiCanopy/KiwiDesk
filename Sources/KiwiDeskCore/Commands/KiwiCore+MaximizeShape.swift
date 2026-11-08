@@ -11,13 +11,16 @@ struct MaximizeArgRefusal: Error {
 /// stored ones; a full Maximize takes neither.
 extension KiwiCore {
     /// The shape `args` ask for: none is the whole screen; an axis
-    /// takes the share and anchor `shape`'s row stores unless the
-    /// press names its own.
+    /// takes the share and anchor stored for the shape of the
+    /// screen `space` lays out on, unless the press names its own.
+    /// The one reader of the table at a press, so a per-Space layer
+    /// (#3090) outranks it here.
     func maximizeShape(
         from args: [JSONValue],
-        on shape: ScreenShape
+        for space: SpaceID?
     ) -> Result<MaximizeShape, MaximizeArgRefusal> {
         guard let first = args.first else { return .success(.full) }
+        let shape = maximizeScreenShape(of: space)
         guard let raw = first.stringValue,
             let axis = MaximizeAxis(rawValue: raw)
         else {
@@ -59,15 +62,19 @@ extension KiwiCore {
             + "\(MaximizeShape.shareRange.upperBound)"
     )
 
-    /// The shape of the screen `space` lays out on; a Space no
-    /// screen holds yet reads as Widescreen, the class
-    /// `ScreenClass.of` gives a screen it cannot measure.
+    /// The shape of the screen `space` lays out on, by the rule
+    /// `TilingEngine.screen(for:in:)` fills on: its assigned display,
+    /// else the main screen. Read from the tracked `Display` first,
+    /// so a fixture's display answers; Widescreen with no screen.
     func maximizeScreenShape(of space: SpaceID?) -> ScreenShape {
+        let main = ScreenList.mainOrFirst
+        let id =
+            space.flatMap { state.workspaces.display(of: $0) }
+            ?? main?.kiwiDisplayID
         let display =
-            space
-            .flatMap { state.workspaces.display(of: $0) }
-            .flatMap { state.workspaces.displays[$0] }
-        return ScreenShape(display.map(ScreenClass.of) ?? .desktop)
+            id.flatMap { state.workspaces.displays[$0] }
+            ?? main?.kiwiDisplay
+        return display.map(ScreenShape.of) ?? .widescreen
     }
 
     /// `maximize.set_share(axis, share[, shape])` and

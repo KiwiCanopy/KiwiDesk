@@ -2,7 +2,10 @@ import Foundation
 
 /// A screen's shape as a setting names it (#3062): one `ScreenClass`
 /// each, spelled with the starter's nouns, in the order Settings
-/// lists them. The raw value is the Lua and JSON spelling.
+/// lists them. The raw value is the Lua and JSON spelling. Apart
+/// from `ScreenClass` because that type's case order IS its
+/// classification order (`ScreenClassTests`), which is not the
+/// order a table of shapes reads in.
 public enum ScreenShape: String, CaseIterable, Codable, Sendable,
     CodingKey
 {
@@ -21,6 +24,11 @@ public enum ScreenShape: String, CaseIterable, Codable, Sendable,
         case .superUltrawide: self = .superUltrawide
         case .pivoted: self = .portrait
         }
+    }
+
+    /// The shape of `display`, by its full frame.
+    public static func of(_ display: Display) -> ScreenShape {
+        ScreenShape(ScreenClass.of(display))
     }
 
     /// The class this shape names.

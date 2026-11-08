@@ -141,6 +141,22 @@ struct LayoutDefaultsCensusRenderTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
+            // The second ruled drawer: the Maximize card's screen
+            // shapes not connected (#3062 amendment, 2026-11-08).
+            // It holds shape ROWS of the three census columns, no
+            // census row of its own, so the tier pin holds.
+            if file.lastPathComponent == "MaximizeCard.swift" {
+                #expect(
+                    source.components(separatedBy: "SettingsDisclosure(")
+                        .count == 2
+                )
+                #expect(
+                    source.contains(
+                        "SettingsCatalog.layoutDefaults.maximizeOtherShapes"
+                    )
+                )
+                continue
+            }
             // The one ruled drawer: the minimum window size's
             // per layout rows (#2237), a catalog drawer.
             guard file.lastPathComponent != "MinWindowSizeRows.swift"

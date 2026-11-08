@@ -23,7 +23,7 @@ extension KiwiCore {
         let shape: MaximizeShape
         switch maximizeShape(
             from: args,
-            on: maximizeScreenShape(of: focused?.1)
+            for: focused?.1
         ) {
         case .success(let read): shape = read
         case .failure(let refusal): return refusal.response

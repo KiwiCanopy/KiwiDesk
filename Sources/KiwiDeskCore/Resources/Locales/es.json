@@ -1311,7 +1311,7 @@
   "layout_defaults.maximize.anchor.center": "Centro",
   "layout_defaults.maximize.anchor.in_place": "Donde está",
   "layout_defaults.maximize.caption": "Qué anchura da «%1$@» a una ventana y qué altura le da «%2$@», para cada forma de pantalla. La forma de una pantalla depende de su tamaño.",
-  "layout_defaults.maximize.caption.help": "%1$@: más alta que ancha. %2$@: al menos %3$@ veces más ancha que alta. %4$@: al menos %5$@ puntos de anchura, o %6$@ veces más ancha que alta. %7$@: menos de %8$@ puntos de anchura. %9$@: cualquier otra pantalla. «%10$@» define dónde se sitúa la ventana en el otro eje: en el centro de la pantalla, o sobre su propio lugar en el diseño, desplazada hacia dentro si fuera a cruzar un borde.",
+  "layout_defaults.maximize.caption.help": "%1$@: más alta que ancha. %2$@: al menos %3$@ veces más ancha que alta. %4$@: al menos %5$@ puntos de anchura, o al menos %6$@ veces más ancha que alta. %7$@: menos de %8$@ puntos de anchura. %9$@: cualquier otra pantalla. «%10$@» define dónde se sitúa la ventana en el otro eje: en el centro de la pantalla, o sobre su propio lugar en el diseño, desplazada hacia dentro si fuera a cruzar un borde.",
   "layout_defaults.maximize.cell": "%1$@, %2$@",
   "layout_defaults.maximize.diff_value": "%1$@ %2$@",
   "layout_defaults.maximize.from": "Desde",

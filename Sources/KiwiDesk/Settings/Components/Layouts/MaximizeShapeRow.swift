@@ -49,8 +49,13 @@ struct MaximizeShapeRow: View {
                 key,
                 value: maximize[dynamicMember: \.widthShare[shape]]
             )
-        default:
+        case .behaviour(.maximizeAnchor):
             anchorMenu(key)
+        default:
+            let _ = assertionFailure(
+                "unrendered Maximize cell: \(key.id)"
+            )
+            EmptyView()
         }
     }
 
@@ -123,7 +128,7 @@ struct MaximizeShapeRow: View {
         L(
             "layout_defaults.maximize.cell",
             "%1$@, %2$@",
-            MaximizeCard.control(key).text,
+            MaximizeCard.control(key)?.text ?? "",
             MaximizeShapeText.name(shape)
         )
     }
@@ -144,7 +149,7 @@ enum MaximizeShapeText {
             "layout_defaults.maximize.caption.help",
             "%1$@: taller than wide. %2$@: %3$@ times as wide as "
                 + "tall or more. %4$@: %5$@ points wide or more, or "
-                + "%6$@ times as wide as tall. %7$@: under %8$@ "
+                + "%6$@ times as wide as tall or more. %7$@: under %8$@ "
                 + "points wide. %9$@: every other screen. %10$@ "
                 + "sets where the window sits on its other side: the "
                 + "center of the screen, or over its own place in "
@@ -162,7 +167,16 @@ enum MaximizeShapeText {
         )
     }
 
+    /// A threshold in the selected language's digits.
     private static func number(_ value: CGFloat) -> String {
-        String(format: "%g", Double(value))
+        Double(value).formatted(
+            .number.grouping(.never)
+                .locale(
+                    Locale(
+                        identifier: LocalizationManager.shared
+                            .effectiveLocale ?? "en"
+                    )
+                )
+        )
     }
 }

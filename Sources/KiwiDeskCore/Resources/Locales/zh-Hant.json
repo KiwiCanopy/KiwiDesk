@@ -1311,7 +1311,7 @@
   "layout_defaults.maximize.anchor.center": "居中",
   "layout_defaults.maximize.anchor.in_place": "原位",
   "layout_defaults.maximize.caption": "依螢幕形狀設定「%1$@」讓視窗有多寬，以及「%2$@」讓視窗有多高。螢幕形狀由其尺寸決定。",
-  "layout_defaults.maximize.caption.help": "%1$@：高度大於寬度。%2$@：寬度至少為高度的 %3$@ 倍。%4$@：寬度至少 %5$@ pt，或寬度為高度的 %6$@ 倍。%7$@：寬度小於 %8$@ pt。%9$@：其他所有螢幕。「%10$@」決定視窗在另一個方向上的位置：螢幕中央，或佈局中它自己的原位；若會超出邊緣，則向內移入。",
+  "layout_defaults.maximize.caption.help": "%1$@：高度大於寬度。%2$@：寬度至少為高度的 %3$@ 倍。%4$@：寬度至少 %5$@ pt，或寬度至少為高度的 %6$@ 倍。%7$@：寬度小於 %8$@ pt。%9$@：其他所有螢幕。「%10$@」決定視窗在另一個方向上的位置：螢幕中央，或佈局中它自己的原位；若會超出邊緣，則向內移入。",
   "layout_defaults.maximize.cell": "%1$@，%2$@",
   "layout_defaults.maximize.diff_value": "%1$@ %2$@",
   "layout_defaults.maximize.from": "位置",

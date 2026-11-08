@@ -15,9 +15,7 @@ struct MaximizeCard: View {
 
     /// The connected screens, by shape.
     private var screens: [ScreenShape: [Display]] {
-        Dictionary(grouping: model.displays) {
-            ScreenShape(ScreenClass.of($0))
-        }
+        Dictionary(grouping: model.displays, by: ScreenShape.of)
     }
 
     private var shown: [ScreenShape] {
@@ -30,7 +28,7 @@ struct MaximizeCard: View {
 
     var body: some View {
         SettingsSection(
-            controls.maximizeCard,
+            SettingsCatalog.layoutDefaults.maximizeCard,
             caption: L(
                 "layout_defaults.maximize.caption",
                 "How wide %1$@ makes a window, and how tall %2$@ "
@@ -53,7 +51,7 @@ struct MaximizeCard: View {
             }
             if !hidden.isEmpty {
                 SettingsDisclosure(
-                    controls.maximizeOtherShapes,
+                    SettingsCatalog.layoutDefaults.maximizeOtherShapes,
                     summary: hidden.map(MaximizeShapeText.name)
                         .joined(separator: ", ")
                 ) {
@@ -91,14 +89,13 @@ struct MaximizeCard: View {
             )
             .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(LayoutDefaultsRowOrder.maximize, id: \.id) { key in
-                Text(Self.heading(key))
+                headingCell(key)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(
                         width: MaximizeShapeRow.columnWidth,
                         alignment: .leading
                     )
-                    .searchAnchored(Self.control(key))
             }
         }
         .font(.callout)
@@ -106,26 +103,44 @@ struct MaximizeCard: View {
         .accessibilityHidden(true)
     }
 
-    /// A column's catalog anchor.
-    static func control(_ key: SettingKey) -> SettingsControl {
+    /// A column's heading, the search anchor of its census key.
+    @ViewBuilder
+    private func headingCell(_ key: SettingKey) -> some View {
+        switch key {
+        case .behaviour(.maximizeHeightShare):
+            Text(controls.maximizeHeightShare.text)
+                .searchAnchored(
+                    SettingsCatalog.layoutDefaults.maximizeHeightShare
+                )
+        case .behaviour(.maximizeWidthShare):
+            Text(controls.maximizeWidthShare.text)
+                .searchAnchored(
+                    SettingsCatalog.layoutDefaults.maximizeWidthShare
+                )
+        case .behaviour(.maximizeAnchor):
+            Text(L("layout_defaults.maximize.from", "From"))
+                .searchAnchored(
+                    SettingsCatalog.layoutDefaults.maximizeAnchor
+                )
+        default:
+            let _ = assertionFailure(
+                "unrendered Maximize column: \(key.id)"
+            )
+            EmptyView()
+        }
+    }
+
+    /// A column's catalog control, whose label names its cells.
+    static func control(_ key: SettingKey) -> SettingsControl? {
         switch key {
         case .behaviour(.maximizeHeightShare):
             SettingsCatalog.layoutDefaults.maximizeHeightShare
         case .behaviour(.maximizeWidthShare):
             SettingsCatalog.layoutDefaults.maximizeWidthShare
-        default:
+        case .behaviour(.maximizeAnchor):
             SettingsCatalog.layoutDefaults.maximizeAnchor
-        }
-    }
-
-    /// A column's heading: the share columns' labels, and "From".
-    static func heading(_ key: SettingKey) -> String {
-        switch key {
-        case .behaviour(.maximizeHeightShare),
-            .behaviour(.maximizeWidthShare):
-            control(key).text
         default:
-            L("layout_defaults.maximize.from", "From")
+            nil
         }
     }
 

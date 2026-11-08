@@ -15,8 +15,16 @@ private let w2 = WindowID(2)
 private func makeCore() -> KiwiCore {
     let core = makeTestCore()
     core.tiler.visibleBounds = { _ in bounds }
-    // No screen holds the Space, so a press reads the Widescreen
-    // row; the per-shape cases are `MaximizeShareScreenTests`'.
+    // A Widescreen display holds the Space, so a press reads that
+    // row whatever the host's screen; the per-shape cases are
+    // `MaximizeShareScreenTests`'.
+    core.state.workspaces.upsertDisplay(
+        Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 2560, height: 1440)
+        )
+    )
     for id in [w1, w2] {
         core.state.apply(
             .windowCreated(
@@ -25,6 +33,7 @@ private func makeCore() -> KiwiCore {
         )
     }
     core.execute("set_mode", args: [.string("1"), .string("bsp")])
+    core.state.workspaces.assign(space, to: DisplayID(1))
     core.state.workspaces.focus(w1, in: space)
     return core
 }
