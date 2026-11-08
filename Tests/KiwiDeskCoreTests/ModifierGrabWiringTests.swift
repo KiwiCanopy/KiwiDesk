@@ -170,9 +170,18 @@ struct ModifierGrabWiringTests {
         // Still settling, and not on the stale frame.
         #expect(core.drag.hasGesture(Self.window))
         #expect(log.moves.last?.frame == Self.frame.offsetBy(dx: 60, dy: 0))
-        // Once the drop has settled the window is no longer the
-        // grab's.
+        // Once the drop has settled, the window's next drag is its
+        // own: the echo that opens it asks first, as the event arms
+        // do, and the gesture it opens is never the grab's.
         core.drag.cancel(Self.window)
+        #expect(!core.modifierGrabOwns(Self.window))
+        core.drag.windowMoved(
+            Self.window,
+            frame: Self.frame,
+            validated: true,
+            answersPress: true
+        )
+        #expect(core.drag.hasGesture(Self.window))
         #expect(!core.modifierGrabOwns(Self.window))
     }
 

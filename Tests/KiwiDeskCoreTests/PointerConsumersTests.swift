@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -108,7 +109,7 @@ struct PointerConsumersTests {
     }
 
     @Test("a delivery an old tap queued is dropped after a rebuild")
-    func staleTapIsDropped() {
+    func staleTapIsDropped() async {
         var delivers: [PointerTap.Deliver] = []
         let rig = Rig()
         rig.front.makeTap = { _, deliver in
@@ -120,17 +121,21 @@ struct PointerConsumersTests {
         rig.front.start()
         #expect(delivers.count == 2)
         // The first tap's began reaches the front after the second
-        // tap is up: no router of the new tap would end it.
-        rig.front.receive(
-            .init(grab: [event(.began)], reenabled: false),
-            fromTap: 1
-        )
+        // tap is up, through the tap's own closure and its main
+        // queue hop: no router of the new tap would end it.
+        delivers[0](.init(grab: [event(.began)], reenabled: false))
+        await Self.mainQueueTurn()
         #expect(rig.front.grabInFlight == nil)
-        rig.front.receive(
-            .init(grab: [event(.began)], reenabled: false),
-            fromTap: 2
-        )
+        delivers[1](.init(grab: [event(.began)], reenabled: false))
+        await Self.mainQueueTurn()
         #expect(rig.front.grabInFlight != nil)
+    }
+
+    /// Returns once the main queue has run what was queued ahead.
+    private static func mainQueueTurn() async {
+        await withCheckedContinuation { done in
+            DispatchQueue.main.async { done.resume() }
+        }
     }
 
     @Test("a refused tap is asked again only at the next start")
