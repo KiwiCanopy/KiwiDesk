@@ -30,7 +30,15 @@ private struct RecorderFootprint: View {
         }
         .hidden()
         .accessibilityHidden(true)
+        // Its centre stays the well's, which an overlay on the
+        // footprint centres on, the Sides slot leading it or not.
+        .alignmentGuide(HorizontalAlignment.center) { size in
+            size.width / 2 + (recorderSides == nil ? 0 : lead / 2)
+        }
     }
+
+    /// The Sides slot and the gap after it.
+    private var lead: CGFloat { KeyRecorderField.iconSlotWidth + 6 }
 
     private var slot: some View {
         Color.clear.frame(width: KeyRecorderField.iconSlotWidth)

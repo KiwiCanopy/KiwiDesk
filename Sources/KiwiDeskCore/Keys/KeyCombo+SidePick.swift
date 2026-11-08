@@ -4,10 +4,10 @@ import Foundation
 /// chord or a tap may be put on its left key, its right key or
 /// either side, after recording.
 extension KeyCombo {
-    /// Whether `kind` can keep a side at all: not under a held
-    /// Hyper, and not the modifier one of whose keys IS the Hyper
-    /// key, which only the other key can then make (#2601 ▸
-    /// Ruling 4). The recorder and the pull-down both ask it.
+    /// Whether `kind` can keep a side at all: not the modifier one
+    /// of whose keys IS the Hyper key, which only the other key can
+    /// then make (#2601 ▸ Ruling 4). A Hyper chord is the caller's
+    /// to refuse. The recorder and the pull-down both ask it.
     public static func takesSide(
         _ kind: ModifierKind,
         hyperKey: HyperSourceKey?
