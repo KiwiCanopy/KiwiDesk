@@ -8,6 +8,8 @@ struct MaximizeShapeRow: View {
     @ObservedObject var model: SettingsModel
     let shape: ScreenShape
     let screens: [Display]
+    /// The open Custom popover, by column (#3062).
+    @State private var custom: [SettingKey: MaximizeCustomRequest] = [:]
 
     /// A pop-up column's width, the headings' too.
     static let columnWidth: CGFloat = 120
@@ -59,8 +61,9 @@ struct MaximizeShapeRow: View {
         }
     }
 
-    /// A share's pop-up: the five fractions, and a stored value
-    /// outside them as a checked item above a separator.
+    /// A share's pop-up: the five fractions, a stored value
+    /// outside them as a checked item above a separator, then
+    /// "Custom…", which opens an anchored percent popover.
     private func shareMenu(
         _ key: SettingKey,
         value: Binding<Double>
@@ -68,7 +71,17 @@ struct MaximizeShapeRow: View {
         let offMenu = Self.offMenuShare(value.wrappedValue)
         let selection = Binding<Double>(
             get: { Self.selection(value.wrappedValue) },
-            set: { value.wrappedValue = $0 }
+            set: { picked in
+                if picked == MaximizeCustomShare.tag {
+                    custom[key] = MaximizeCustomRequest(
+                        seed: MaximizeCustomShare.percent(
+                            of: value.wrappedValue
+                        )
+                    )
+                } else {
+                    value.wrappedValue = picked
+                }
+            }
         )
         let spoken = SettingsValueReadout.percent(value.wrappedValue)
         return Picker(label(key), selection: selection) {
@@ -79,6 +92,9 @@ struct MaximizeShapeRow: View {
             ForEach(FractionChips.shares, id: \.glyph) { share in
                 Text(share.glyph).tag(share.value)
             }
+            Divider()
+            Text(L("layout_defaults.maximize.custom", "Custom…"))
+                .tag(MaximizeCustomShare.tag)
         }
         .labelsHidden()
         .pickerStyle(.menu)
@@ -87,12 +103,32 @@ struct MaximizeShapeRow: View {
         .frame(width: 88)
         .accessibilityLabel(label(key))
         .accessibilityValue(spoken)
+        .popover(item: customBinding(key)) { request in
+            MaximizeCustomPopover(
+                seed: request.seed,
+                column: MaximizeCard.control(key)?.text ?? ""
+            ) { percent in
+                value.wrappedValue = MaximizeCustomShare.share(
+                    forPercent: percent
+                )
+            }
+            .settingsPopoverChrome()
+        }
+    }
+
+    /// The Custom popover's request for `key`'s column alone.
+    private func customBinding(
+        _ key: SettingKey
+    ) -> Binding<MaximizeCustomRequest?> {
+        Binding(
+            get: { custom[key] },
+            set: { custom[key] = $0 }
+        )
     }
 
     /// A stored share none of the five fractions reads as — one
     /// Lua or the CLI set — which the pop-up keeps as an extra
-    /// checked item; nil for a preset. Exact shares are Lua-only
-    /// (`docs/ui-patterns.md` ▸ One escape, #1279).
+    /// checked item; nil for a preset. Custom… writes one too.
     static func offMenuShare(_ stored: Double) -> Double? {
         FractionChips.shares.contains {
             FractionChips.matches(stored, $0.value)

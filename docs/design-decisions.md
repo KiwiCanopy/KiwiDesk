@@ -6478,6 +6478,13 @@ other candidate and is refused: it hides the five values a user
 might want to change, and its manual share applies to every
 screen, which is the problem the table solves. A per-Space
 override is #3090's.
+
+A Custom… share snaps: a typed whole percent that rounds to one of
+the five fractions stores the exact fraction (33 stores ⅓, not
+0.33), and any other percent is stored as typed. Without the snap
+a user typing 33 would see "33 %" as an off-menu item beside the ⅓
+they meant, and a press would size the window just short of the
+third the menu offers.
 :::
 
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
