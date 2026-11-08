@@ -216,7 +216,8 @@ editing here:
   spring their size where no newcomer shares the pass; their
   neighbours keep the pass's toggle. A pass names every window whose
   state changed — a follow's re-point names the window left and the
-  one arriving (#3063) — and the ring's hold takes the focused one. A door whose own pass draws a
+  one arriving (#3063) — and the ring's hold takes the focused one.
+  A door whose own pass draws a
   maximize's return passes the ended window (`retireEndedMaximize`
   returns it, `retileEndingMaximize(_:)` requires it); a maximize
   a rearranging write ends returns inside that write's pass. The
