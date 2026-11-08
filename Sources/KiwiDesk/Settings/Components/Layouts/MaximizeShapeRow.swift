@@ -100,7 +100,9 @@ struct MaximizeShapeRow: View {
         .pickerStyle(.menu)
         .neutralMenuLabel()
         .controlSize(.large)
-        .frame(width: 88)
+        // A menu pop-up draws at its own width whatever frame it
+        // gets; natural width on the cell's leading edge aligns it.
+        .fixedSize()
         .accessibilityLabel(label(key))
         .accessibilityValue(spoken)
         .popover(item: customBinding(key)) { request in

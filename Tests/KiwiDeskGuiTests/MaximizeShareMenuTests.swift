@@ -63,6 +63,24 @@ struct MaximizeShareMenuTests {
         #expect(source.contains(".popover(item:customBinding(key))"))
     }
 
+    /// A menu pop-up draws at its own width whatever frame it gets,
+    /// so a fixed frame centres it and a column's pills start apart:
+    /// every cell takes its natural width on the column's leading
+    /// edge, as the From column does.
+    @Test("every cell sits on its column's leading edge")
+    func cellsLeadTheirColumn() throws {
+        let source = try shapeRowSource()
+        #expect(!source.contains(".frame(width:88)"))
+        #expect(
+            source.components(separatedBy: ".fixedSize()").count - 1 == 2
+        )
+        #expect(
+            source.contains(
+                "cell(key).frame(width:Self.columnWidth,alignment:.leading)"
+            )
+        )
+    }
+
     private func shapeRowSource() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
