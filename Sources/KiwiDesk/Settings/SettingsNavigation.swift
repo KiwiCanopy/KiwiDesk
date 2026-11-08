@@ -72,6 +72,11 @@ struct SettingsNavigation {
     /// once and clears this, so a remount does not replay it.
     var convergePending = false
 
+    /// A reveal asked the Shortcuts page to build every part, for an
+    /// anchor no part is known to hold (#3060); the page takes it
+    /// and clears it.
+    var shortcutsWholePage = false
+
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
@@ -102,6 +107,7 @@ struct SettingsNavigation {
         spaceOverridesFocus = nil
         simpleHover = nil
         convergePending = false
+        shortcutsWholePage = false
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states
         // no destination rather than one the last visit earned.

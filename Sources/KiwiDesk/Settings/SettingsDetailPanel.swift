@@ -189,12 +189,7 @@ enum SettingsDiffRowSource {
     static func rows(
         for model: SettingsModel
     ) -> [SettingsDiffRow] {
-        let diff = SettingsDraftDiff.between(
-            config: model.config,
-            cleanConfig: model.cleanConfig,
-            luaSource: model.luaSource,
-            cleanLuaSource: model.cleanLuaSource
-        )
+        let diff = model.draftDiff
         var rows: [SettingsDiffRow] = []
         // One control's edges are one row while they agree (#2450),
         // never over an edge the live rows narrate.

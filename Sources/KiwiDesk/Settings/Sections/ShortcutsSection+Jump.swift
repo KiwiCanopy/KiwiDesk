@@ -5,7 +5,10 @@ import SwiftUI
 /// page's geometry, and a click puts the group's header under the
 /// bar — Mouse & trackpad opening its card on the way.
 extension ShortcutsSection {
-    func jumpBar(_ proxy: ScrollViewProxy) -> some View {
+    func jumpBar(
+        _ proxy: ScrollViewProxy,
+        expander: ShortcutsFamilyRows
+    ) -> some View {
         ShortcutsJumpBar(
             tracker: jumpTracker,
             readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
@@ -39,12 +42,74 @@ extension ShortcutsSection {
         jumpTracker.jump(to: group)
         if group == .gestures { gesturesExpanded = true }
         if group == .luaBindings { advancedExpanded = true }
-        withAnimation(
-            reduceMotion
-                ? nil
-                : .easeInOut(duration: SettingsReveal.scroll)
-        ) {
-            proxy.scrollTo(group.control.id, anchor: .top)
+        // The part's id: the lazy stack knows it before the part is
+        // built, unlike the card's own (#3060).
+        let part = ShortcutsPagePart(group).id
+        targetScroll?.cancel()
+        targetScroll = Task { @MainActor in
+            withAnimation(
+                reduceMotion
+                    ? nil
+                    : .easeInOut(duration: SettingsReveal.scroll)
+            ) {
+                proxy.scrollTo(part, anchor: .top)
+            }
+            await settleThenReissue { proxy.scrollTo(part, anchor: .top) }
         }
+    }
+
+    /// Scrolls to a row the recorder names: to its part first unless
+    /// the page holds it built, then to the row (#3060).
+    func scroll(
+        to target: String,
+        proxy: ScrollViewProxy,
+        expander: ShortcutsFamilyRows
+    ) {
+        let owner = ShortcutsPagePart.owner(
+            of: target,
+            expander: expander,
+            bindings: model.shortcutsLayerBindings
+        )
+        if owner == nil { buildsWholePage = true }
+        let built = owner.map(model.shortcutsPage.built.contains) ?? false
+        targetScroll?.cancel()
+        targetScroll = Task { @MainActor in
+            if !built {
+                if let owner { proxy.scrollTo(owner.id, anchor: .top) }
+                // A yield does not promise layout (`SettingsView.reveal`).
+                try? await Task.sleep(
+                    nanoseconds: SettingsReveal.nanoseconds(
+                        SettingsReveal.settle
+                    )
+                )
+                guard !Task.isCancelled else { return }
+            }
+            withAnimation(reduceMotion ? nil : .default) {
+                proxy.scrollTo(target, anchor: .center)
+            }
+            await settleThenReissue {
+                proxy.scrollTo(target, anchor: .center)
+            }
+        }
+    }
+
+    /// Re-issues a scroll un-animated once its animation is over: a
+    /// lazy stack lays out the parts between on the way, so the first
+    /// landing rests on estimated heights (`SettingsView.reveal`).
+    private func settleThenReissue(_ scroll: () -> Void) async {
+        try? await Task.sleep(
+            nanoseconds: SettingsReveal.nanoseconds(
+                SettingsReveal.scroll + SettingsReveal.settle
+            )
+        )
+        guard !Task.isCancelled else { return }
+        scroll()
+    }
+
+    /// Takes a reveal's request to build every part (#3060).
+    func takeWholePageRequest() {
+        guard model.nav.shortcutsWholePage else { return }
+        model.nav.shortcutsWholePage = false
+        buildsWholePage = true
     }
 }

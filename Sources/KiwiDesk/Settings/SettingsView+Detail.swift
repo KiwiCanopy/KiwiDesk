@@ -168,6 +168,20 @@ extension SettingsView {
         let destination = model.destination
         revealTask = Task { @MainActor in
             await Task.yield()
+            // A lazily built page draws a row once its part is in
+            // the stack: reach the part, or build the page (#3060).
+            if let landing = model.revealLanding(for: anchor) {
+                switch landing {
+                case .part(let part): proxy.scrollTo(part, anchor: .top)
+                case .wholePage: model.nav.shortcutsWholePage = true
+                }
+                try? await Task.sleep(
+                    nanoseconds: SettingsReveal.nanoseconds(
+                        SettingsReveal.settle
+                    )
+                )
+                guard !Task.isCancelled else { return }
+            }
             withAnimation(
                 reduceMotion
                     ? nil

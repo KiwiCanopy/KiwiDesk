@@ -23,15 +23,20 @@ struct ShortcutsSection: View {
     @State var jumpTracker = ShortcutsJumpTracker()
     /// Bumped by Add binding, whose row lands at the page's end.
     @State var luaAdded = 0
+    /// Set once a scroll targets a row no part is known to hold —
+    /// the recorder's, or a reveal's through `nav` — and the page then
+    /// builds every part, as before #3060.
+    @State var buildsWholePage = false
     @State private var endScroll: Task<Void, Never>?
-    @StateObject private var coordinator =
+    @State var targetScroll: Task<Void, Never>?
+    @StateObject var coordinator =
         RecorderCoordinator(scrollsInPlace: true)
 
     /// The selected layer lives on `nav` rather than here
     /// (#1127): the live preview panel is this section's
     /// sibling, so it can only learn the layer from the model.
     /// Cleared per visit by `SettingsNavigation.resetSurfaces()`.
-    private var selection: Binding<String> {
+    var selection: Binding<String> {
         Binding(
             get: { selected },
             set: { model.nav.shortcutsLayer = $0 }
@@ -43,10 +48,12 @@ struct ShortcutsSection: View {
     }
 
     var body: some View {
+        // Once per pass: every group reads it (#3060).
+        let expander = self.expander
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
-                jumpBar(proxy)
-                page
+                jumpBar(proxy, expander: expander)
+                page(expander)
             }
             // A container, so the pane's title names it rather
             // than renaming every chip beneath (#812).
@@ -55,10 +62,8 @@ struct ShortcutsSection: View {
                 _,
                 target in
                 guard let target else { return }
-                withAnimation(reduceMotion ? nil : .default) {
-                    proxy.scrollTo(target, anchor: .center)
-                }
                 coordinator.scrollTarget = nil
+                scroll(to: target, proxy: proxy, expander: expander)
             }
             .onChange(of: luaAdded) { _, _ in
                 scrollToEnd(proxy)
@@ -71,7 +76,20 @@ struct ShortcutsSection: View {
             coordinator.onArmedChange = { [model] armed in
                 model.setRecorderArmed(armed)
             }
+            takeWholePageRequest()
         }
+        // Here rather than on the drawer, which the lazy stack builds
+        // only when it is scrolled to (#3060).
+        .onAppear {
+            let gates = ShortcutsGates(config: model.config)
+            if gates.luaBindingsExist(in: selected) {
+                advancedExpanded = true
+            }
+        }
+        .onChange(of: model.nav.shortcutsWholePage) { _, _ in
+            takeWholePageRequest()
+        }
+        .onDisappear { model.shortcutsPage.built = [] }
         .onChange(of: model.config.layers.map(\.name)) {
             _,
             _ in
@@ -111,12 +129,38 @@ struct ShortcutsSection: View {
         }
     }
 
-    private var page: some View {
+    private var layerIndex: Int {
+        model.config.layers.firstIndex {
+            $0.name == selected
+        } ?? 0
+    }
+
+    var bindingsBinding: Binding<[KeyBinding]> {
+        Binding(
+            get: { model.config.layers[layerIndex].bindings },
+            set: {
+                model.config.layers[layerIndex].bindings = $0
+            }
+        )
+    }
+
+    /// One lazily built child per `ShortcutsPagePart`, so a visit
+    /// builds the parts on screen rather than every row (#3060). Rows
+    /// appear as a list's rows do, with no motion of their own (owner
+    /// ruling on #3060).
+    func page(_ expander: ShortcutsFamilyRows) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                header
-                actionGroups
-                tail
+            stack {
+                ForEach(ShortcutsPagePart.allCases) { part in
+                    // `ShortcutsPageState` states the set's contract.
+                    self.part(part, expander: expander)
+                        .onAppear {
+                            model.shortcutsPage.built.insert(part)
+                        }
+                        .onDisappear {
+                            model.shortcutsPage.built.remove(part)
+                        }
+                }
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()
@@ -145,79 +189,113 @@ struct ShortcutsSection: View {
         }
     }
 
-    @ViewBuilder private var header: some View {
-        KeybindingConflictBanner(model: model)
+    /// Lazy, until a scroll needs a row no part is known to hold.
+    @ViewBuilder private func stack(
+        @ViewBuilder _ content: () -> some View
+    ) -> some View {
+        if buildsWholePage {
+            VStack(alignment: .leading, spacing: 16, content: content)
+        } else {
+            LazyVStack(alignment: .leading, spacing: 16, content: content)
+        }
+    }
+
+    @ViewBuilder private func part(
+        _ part: ShortcutsPagePart,
+        expander: ShortcutsFamilyRows
+    ) -> some View {
+        switch part {
+        case .conflictBanner:
+            KeybindingConflictBanner(model: model)
         // Above the layer header, set off by the jump bar's rule
         // after its chip, so nothing in it reads as per-layer
         // (#1726, #1520; amending the 2026-08-04 ruling that the
         // layers card leads the section).
-        ModifierKeysCard(model: model)
-        GesturesDrawer(model: model, expanded: $gesturesExpanded)
-        ShortcutsHeader(model: model, selected: selection)
-        layersCard
+        case .modifierKeys:
+            ModifierKeysCard(model: model)
+        case .gestures:
+            GesturesDrawer(model: model, expanded: $gesturesExpanded)
+        case .header:
+            ShortcutsHeader(model: model, selected: selection)
+        case .layers:
+            LayersCard(
+                model: model,
+                bindings: bindingsBinding,
+                selected: selection,
+                expander: expander
+            )
+        case .showHide, .focus, .moveWindows, .macosDesktops, .layout,
+            .sizeFloat, .pocket, .openApplications:
+            actionGroup(part, expander: expander)
+        case .inactive:
+            // Orphaned space-targeting rows (#92).
+            OrphanedShortcutsGroup(
+                model: model,
+                bindings: bindingsBinding,
+                spaces: expander.liveSpaces,
+                layers: model.config.layers.map(\.name)
+            )
+        case .luaBindings:
+            luaDrawer
+        }
     }
 
-    private var layersCard: some View {
-        LayersCard(
-            model: model,
-            bindings: bindingsBinding,
-            selected: selection,
-            expander: expander
-        )
-    }
-
-    @ViewBuilder private var actionGroups: some View {
-        ShowHideGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        FocusGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        MoveWindowsGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        MacOSDesktopsGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        LayoutGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        SizeFloatGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        PocketGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        ApplicationsGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-    }
-
-    @ViewBuilder private var tail: some View {
-        // Orphaned space-targeting rows (#92).
-        OrphanedShortcutsGroup(
-            model: model,
-            bindings: bindingsBinding,
-            spaces: expander.liveSpaces,
-            layers: model.config.layers.map(\.name)
-        )
-        luaDrawer
+    @ViewBuilder private func actionGroup(
+        _ part: ShortcutsPagePart,
+        expander: ShortcutsFamilyRows
+    ) -> some View {
+        switch part {
+        case .showHide:
+            ShowHideGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .focus:
+            FocusGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .moveWindows:
+            MoveWindowsGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .macosDesktops:
+            MacOSDesktopsGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .layout:
+            LayoutGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .sizeFloat:
+            SizeFloatGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .pocket:
+            PocketGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        case .openApplications:
+            ApplicationsGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        default:
+            EmptyView()
+        }
     }
 
     /// Shut until a layer carries a Lua binding, then open on
@@ -243,53 +321,5 @@ struct ShortcutsSection: View {
         }
         // Its jump chip's anchor (#2544).
         .reportsSectionFrame(SettingsCatalog.shortcuts.luaBindings.control)
-        .onAppear {
-            let gates = ShortcutsGates(config: model.config)
-            if gates.luaBindingsExist(in: selected) {
-                advancedExpanded = true
-            }
-        }
-    }
-
-    private var advancedDrawerCaption: String {
-        L(
-            "shortcuts.advanced.caption",
-            "Bind any Lua to a hotkey. This is the "
-                + "power-user escape hatch — the "
-                + "groups above cover the built-in "
-                + "actions."
-        )
-    }
-
-    /// Family-to-rows expansion for the selected layer.
-    var expander: ShortcutsFamilyRows {
-        ShortcutsFamilyRows.ofDraft(model, layer: selected)
-    }
-
-    private var layerIndex: Int {
-        model.config.layers.firstIndex {
-            $0.name == selected
-        } ?? 0
-    }
-
-    private var bindingsBinding: Binding<[KeyBinding]> {
-        Binding(
-            get: { model.config.layers[layerIndex].bindings },
-            set: {
-                model.config.layers[layerIndex].bindings = $0
-            }
-        )
-    }
-
-    /// Falls back to the default layer if the remembered
-    /// selection no longer exists (e.g. after a reload).
-    private func ensureSelection() {
-        if !model.config.layers.contains(
-            where: { $0.name == selected }
-        ) {
-            // Nil rather than the name: `nav`'s own coalescing
-            // is the one place the landing is decided (#1127).
-            model.nav.shortcutsLayer = nil
-        }
     }
 }
