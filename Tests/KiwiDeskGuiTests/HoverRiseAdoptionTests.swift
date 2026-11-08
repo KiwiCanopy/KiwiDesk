@@ -138,9 +138,8 @@ struct HoverRiseAdoptionTests {
         #expect(screen.contains(".onHover{hovering=$0}"))
     }
 
-    /// The pointer's stroke stays under every selected one: in dark
-    /// the two are one colour, so weight is what remains on a still
-    /// frame.
+    /// The pointer's stroke stays under every selected one, so weight
+    /// marks selection beside the accent (#3042).
     @Test("a selected stroke outweighs the hover edge")
     func selectedOutweighsHover() {
         let hover = SettingsTheme.hoverEdgeStroke
@@ -148,8 +147,8 @@ struct HoverRiseAdoptionTests {
         #expect(hover < SettingsTheme.screenCardStrokeSelected)
     }
 
-    /// A Layout tile's stroke was its whole selection mark, which now
-    /// shares a colour with the pointer's in dark.
+    /// A Layout tile's check marks selection where colour cannot: for
+    /// a colour-blind reader and on a still frame (#3042).
     @Test("a selected Layout tile carries a check")
     func layoutTileCarriesACheck() throws {
         let strip = try squashed("Components/Layouts/LayoutStrip.swift")

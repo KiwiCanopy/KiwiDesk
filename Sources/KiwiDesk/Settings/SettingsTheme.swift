@@ -22,11 +22,13 @@ enum SettingsTheme {
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x08_12_0C)
 
-    /// A tile's or card's edge under the pointer (#3040, #3042): 3:1
-    /// or more on every ground it crosses.
+    /// A tile's or card's edge under the pointer (#3040, #3042): a
+    /// neutral of its own, never an alias of an ink, 3:1 or more on
+    /// every ground it crosses, apart from `accent` by the
+    /// colour-vision floor.
     static let hoverEdge = token(
-        light: 0x5F_8F_35,
-        dark: 0xAA_CB_5D
+        light: 0x64_72_6A,
+        dark: 0xE6_EC_E6
     )
 
     /// The shadow under a risen tile or card (#3042). In dark it

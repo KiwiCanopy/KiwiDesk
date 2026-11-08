@@ -64,8 +64,8 @@ struct SchematicPalette: Equatable {
     }
     /// Ink for plate chrome no look paints (the tour's menu bar).
     var chromeInk: Color { light ? ink : SettingsTheme.plateInk }
-    /// A brand mark on the plate — a hover ring, the tour's icon
-    /// ring — at 3:1 or more against it.
+    /// A brand mark on the plate — the tour's icon ring — at 3:1 or
+    /// more against it.
     var accentMark: Color {
         light ? SettingsTheme.lightAccent : SettingsTheme.accent
     }

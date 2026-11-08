@@ -1294,8 +1294,12 @@ must keep:
   (`HoverRiseAdoptionTests`; `docs/ui-patterns.md` ▸ *Hover confirms
   custom hit areas* names the surfaces). The pointer still never
   replaces a marked stroke: selection's colour and weight win, and a
-  selected stroke stays heavier than `hoverEdgeStroke`, since the two
-  share a colour in dark. A selected surface whose click changes nothing
+  selected stroke stays heavier than `hoverEdgeStroke`. `hoverEdge` is
+  a neutral of its own, apart from `accent` by `ColorVision`'s
+  separation floor in both appearances
+  (`SettingsThemeContrastTests` ▸ `hoverEdgeSeparatesFromAccent`), so
+  colour keeps #1173's split: accent for selection, neutral for the
+  pointer. A selected surface whose click changes nothing
   stays flat and carries a check; a Screen card's click deselects, so it
   rises, `screenCardStrokeSelected` the mark by ruling. A marking other
   than selection returning to a tile's or card's edge takes its own
