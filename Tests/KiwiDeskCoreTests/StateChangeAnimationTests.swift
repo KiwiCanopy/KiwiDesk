@@ -97,14 +97,14 @@ struct StateChangeAnimationTests {
             pass: .event,
             sizing: .mayInstantSize
         )
-        #expect(older.merged(with: bare).stateChange == WindowID(1))
+        #expect(older.merged(with: bare).stateChange == [WindowID(1)])
         let newer = MotionGate.Owed(
             animated: nil,
             pass: .event,
             sizing: .mayInstantSize,
             stateChange: [WindowID(2)]
         )
-        #expect(older.merged(with: newer).stateChange == WindowID(2))
+        #expect(older.merged(with: newer).stateChange == [WindowID(2)])
     }
 
     @Test("floating follows on_state_change, not on_relayout")
