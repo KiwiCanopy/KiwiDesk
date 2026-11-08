@@ -153,4 +153,9 @@ struct KeySequence: Equatable, Sendable {
 public struct KeySequenceProgress: Equatable, Sendable {
     public var leader: String
     public var path: [String]
+
+    public init(leader: String, path: [String]) {
+        self.leader = leader
+        self.path = path
+    }
 }

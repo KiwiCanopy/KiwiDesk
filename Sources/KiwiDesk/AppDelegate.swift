@@ -27,6 +27,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let bootNotice = BootNoticeController()
     /// The switch cues' one plate (#2142, #2144).
     let cuePlate = CuePlateController()
+    /// The key sequence hint panel (#1871).
+    lazy var keySequenceHint = KeySequenceHintController(core: core)
     /// Cached dashboard controller to avoid constructing on refresh.
     private(set) var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -180,6 +182,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         self.statusItem = statusItem
         wireBootNotice()
         wireCuePlate()
+        core.onKeySequence = { [weak self] progress in
+            self?.keySequenceHint.follow(progress)
+        }
         wireKiwiVision()
         wireSettingsReaders()
 

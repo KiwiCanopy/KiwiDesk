@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 
 /// Abstraction over Carbon hotkey registration for test
 /// isolation. An implementor never fires the handler of a FAILED
@@ -48,6 +48,17 @@ public final class KeybindingManager {
     /// Each layer's key sequences (#1871), beside `layers`: the
     /// keyboard tap answers the current layer's, never Carbon.
     var sequences: [String: [KeySequence]] = [:]
+    /// Where an open sequence stands, nil once it closes (#1871):
+    /// the hint panel's one input.
+    var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void = {
+        _ in
+    }
+    /// The unbound-key beep; `makeTestCore` pins it silent.
+    var beep: @MainActor () -> Void = { NSSound.beep() }
+    /// Asks the tap to close its open sequence at its next press.
+    var sequenceCloser: @MainActor () -> Void = {}
+    /// Whether the hint panel was last told a sequence is open.
+    var sequenceOpen = false
     private var layerIcons: [String: String] = [:]
     /// What a Lua binding says of itself — description, group and
     /// symbol (#2544) — by layer and chord.
@@ -155,13 +166,8 @@ public final class KeybindingManager {
         layers[layer] ?? [:]
     }
 
-    /// Defined layer names in stable order for GUI import (#4).
-    public var definedLayers: [String] {
-        let others = Set(layers.keys).union(sequences.keys)
-            .filter { $0 != Self.defaultLayer }
-            .sorted()
-        return [Self.defaultLayer] + others
-    }
+    /// The layers holding Carbon rows.
+    var pressLayers: [String] { Array(layers.keys) }
 
     /// Binds combo to Lua ref in default layer, with what the binding
     /// says of itself.

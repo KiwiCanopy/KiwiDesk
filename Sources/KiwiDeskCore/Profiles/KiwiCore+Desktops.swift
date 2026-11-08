@@ -102,6 +102,7 @@ extension KiwiCore {
     /// reach that arm, so their flow is exactly the pre-#888
     /// one.
     func handleDesktopChange() {
+        closeKeySequence()  // a switch ends a key sequence (#1871)
         // Stamped (#1147): a Desktop the user just created is
         // stamped at the first switch that shows it, and every
         // question below is still answered from this ONE reading.

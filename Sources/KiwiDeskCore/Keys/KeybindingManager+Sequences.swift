@@ -3,6 +3,15 @@ import Foundation
 /// Key sequences for KeybindingManager (#1871): kept per layer
 /// beside the Carbon table, answered by the keyboard tap.
 extension KeybindingManager {
+    /// Defined layer names in stable order for GUI import (#4): a
+    /// layer holding only sequences is one too (#1871).
+    public var definedLayers: [String] {
+        let others = Set(pressLayers).union(sequences.keys)
+            .filter { $0 != Self.defaultLayer }
+            .sorted()
+        return [Self.defaultLayer] + others
+    }
+
     /// Defines `sequence` in `layer`, replacing one on the same
     /// leader there and releasing its refs.
     func defineSequence(_ sequence: KeySequence, in layer: String) {
@@ -53,5 +62,49 @@ extension KeybindingManager {
         isFiring = wasFiring
         holdGlide.cancelRun()
         holdGlide.restoreTally(outer)
+    }
+}
+
+/// What the keyboard tap decided for an open sequence, handed to
+/// the main actor (#1871): the outcome and where the sequence then
+/// stood, both read on the tap thread at the press.
+struct KeySequenceDecision: Equatable, Sendable {
+    var outcome: KeySequenceRouter.Outcome
+    var progress: KeySequenceProgress?
+}
+
+extension KeybindingManager {
+    /// Acts on one decision the tap made: the hint panel follows
+    /// the path, an end key fires, an unbound key beeps.
+    func sequenceDecided(_ decision: KeySequenceDecision) {
+        switch decision.outcome {
+        case .pass, .repeated:
+            return
+        case .stepped, .back:
+            sequenceOpen = true
+            onSequenceProgress(decision.progress)
+        case .closed:
+            noteSequenceClosed()
+        case .fired(let ref):
+            noteSequenceClosed()
+            sequenceFire(ref: ref)
+        case .unbound:
+            beep()
+        }
+    }
+
+    /// Closes an open sequence from the main actor — a click, a
+    /// Space switch (#1871 ▸ hint panel). The tap reads the request
+    /// at its next press, so the decision stays on its thread.
+    func closeSequence() {
+        guard sequenceOpen else { return }
+        sequenceCloser()
+        noteSequenceClosed()
+    }
+
+    private func noteSequenceClosed() {
+        guard sequenceOpen else { return }
+        sequenceOpen = false
+        onSequenceProgress(nil)
     }
 }

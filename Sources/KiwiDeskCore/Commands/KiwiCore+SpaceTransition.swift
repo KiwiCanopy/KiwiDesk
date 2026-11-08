@@ -36,6 +36,8 @@ extension KiwiCore {
         newcomer: WindowID? = nil,
         slide: SpaceSlideIntent? = nil
     ) {
+        // A Space switch closes an open key sequence (#1871).
+        if asSwitch { closeKeySequence() }
         let run = slide.flatMap(prepareSpaceSlide)
         // A navigation that stands the slide down cuts a running
         // one; anything else is the head-of-retile check's.
