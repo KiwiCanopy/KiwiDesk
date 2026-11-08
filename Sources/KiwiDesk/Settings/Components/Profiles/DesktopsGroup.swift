@@ -244,7 +244,6 @@ struct DesktopsGroup: View {
             keys: model.desktopKeys,
             present: model.presentDesktopKeys,
             screens: model.desktopScreens,
-            screenNumbers: model.desktopScreenNumbers,
             bindings: model.config.profileBindings
         )
     }

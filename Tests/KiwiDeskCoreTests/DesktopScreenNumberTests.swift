@@ -4,44 +4,47 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A Desktop's label number is its place on its own screen, as
-/// Mission Control numbers each screen's strip (#2792 ▸ Ruling);
-/// KiwiHub names the screen of a row off its own screen.
-@Suite("Desktop number per screen", .serialized)
+/// A Desktop's label number is Mission Control's, one count
+/// across screens in the Space order the verbs take (#3103): on
+/// the #888 fixture, Desktops 1–2 on `UUID-A` (ids 10, 11) and
+/// 3–4 on `UUID-B` (ids 20, 21). A screen's own place is the
+/// switch plate's dot alone. KiwiHub names a row's screen off its
+/// own screen.
+@Suite("Desktop number across screens", .serialized)
 @MainActor
 struct DesktopScreenNumberTests {
-    @Test("a second screen's Desktops count from 1")
-    func screenNumber() {
+    @Test("the second screen continues the count")
+    func numberRunsAcrossScreens() {
         defer { resetAuthorityOverrides() }
         let snapshot = authoritySnapshot()
-        #expect(snapshot.screenNumber(of: 10) == 1)
-        #expect(snapshot.screenNumber(of: 11) == 2)
-        #expect(snapshot.screenNumber(of: 20) == 1)
-        #expect(snapshot.screenNumber(of: 21) == 2)
-        // Verbs keep counting globally.
-        #expect(snapshot.number(of: 21) == 4)
-        #expect(snapshot.screenNumber(of: 99) == nil)
+        let order = snapshot.spaces.filter(\.isUser).map(\.id)
+        #expect(order == [10, 11, 20, 21])
+        for (index, id) in order.enumerated() {
+            #expect(snapshot.number(of: id) == index + 1)
+        }
+        #expect(snapshot.space(numbered: 3)?.id == 20)
+        #expect(snapshot.number(of: 99) == nil)
     }
 
-    @Test("a non-user Space takes no number and shifts none")
+    @Test("a screen's place is the dot, counted from 1")
+    func screenPlace() {
+        defer { resetAuthorityOverrides() }
+        let snapshot = authoritySnapshot()
+        #expect(snapshot.screenPlace(of: 20) == 1)
+        #expect(snapshot.screenPlace(of: 21) == 2)
+        #expect(snapshot.screenPlace(of: 99) == nil)
+    }
+
+    @Test("a non-user Space takes no place and shifts none")
     func fullscreenSkipped() {
         let spaces = [
             authoritySpace(20, display: "B"),
             authoritySpace(30, display: "B", isUser: false),
             authoritySpace(21, display: "B"),
         ]
-        #expect(NativeSpaces.screenNumber(of: 21, in: spaces) == 2)
-        #expect(NativeSpaces.screenNumber(of: 30, in: spaces) == nil)
-    }
-
-    @Test("every key a Desktop answers to carries its screen number")
-    func numbersByKey() {
-        defer { resetAuthorityOverrides() }
-        let snapshot = authoritySnapshot()
-        let numbers = snapshot.screenNumbersByKey
-        #expect(numbers[.number(4)] == 2)
-        #expect(numbers[.number(3)] == 1)
-        #expect(numbers[.number(1)] == 1)
+        #expect(NativeSpaces.screenPlace(of: 21, in: spaces) == 2)
+        #expect(NativeSpaces.screenPlace(of: 30, in: spaces) == nil)
+        #expect(NativeSpaces.number(of: 21, in: spaces) == 2)
     }
 
     private func makeCore() -> KiwiCore {
@@ -99,7 +102,7 @@ struct DesktopScreenNumberTests {
         )
     }
 
-    @Test("an away row takes its screen and its number there")
+    @Test("an away row takes its screen and the number verbs take")
     func awayRow() {
         let core = makeCore()
         defer { resetAuthorityOverrides() }
@@ -123,7 +126,9 @@ struct DesktopScreenNumberTests {
             )
         }
         let away = row(core, 7, on: DisplayID(1))
-        #expect(away?.status == .away(desktop: 2))
+        #expect(away?.status == .away(desktop: 4))
+        #expect(away?.swapBlock == .otherDesktop(4))
+        #expect(core.swapRefusal(.window(WindowID(7))) == .otherDesktop(4))
         #expect(away?.screen == ScreenLabel(name: "DELL U2723"))
     }
 
@@ -133,9 +138,10 @@ struct DesktopScreenNumberTests {
         defer { resetAuthorityOverrides() }
         let landings = core.desktopLandings(in: NativeSpaces.desktopSnapshot())
         let dell = ScreenLabel(name: "DELL U2723")
-        #expect(landings[3] == DesktopLanding(screen: dell, number: 1))
-        #expect(landings[4] == DesktopLanding(screen: dell, number: 2))
-        #expect(landings[1]?.number == 1)
+        let builtIn = ScreenLabel(name: "Built-in")
+        #expect(landings[3] == DesktopLanding(screen: dell))
+        #expect(landings[4] == DesktopLanding(screen: dell))
+        #expect(landings[1] == DesktopLanding(screen: builtIn))
         #expect(landings[5] == nil)
     }
 

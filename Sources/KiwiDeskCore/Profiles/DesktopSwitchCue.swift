@@ -6,10 +6,15 @@ import Foundation
 public struct DesktopSwitchCue: Equatable, Sendable {
     /// The screen that switched — the only one the plate draws on.
     public let display: DisplayID
-    /// 1-based place among that screen's Desktops — the number
-    /// the plate draws, as that screen's Mission Control strip
-    /// labels it (#2792), and the filled dot. A label, never a
-    /// lookup key (#1147).
+    /// The Desktop's Mission Control number, counted across
+    /// screens (#3103) — the number the plate draws and speaks.
+    /// A label, never a lookup key (#1147).
+    public let number: Int
+    /// How many Desktops every screen has together — the "of N"
+    /// spoken beside `number`.
+    public let total: Int
+    /// 1-based place among that screen's Desktops — the filled
+    /// dot.
     public let position: Int
     /// How many Desktops that screen has — one dot each.
     public let count: Int
@@ -22,12 +27,16 @@ public struct DesktopSwitchCue: Equatable, Sendable {
 
     public init(
         display: DisplayID,
+        number: Int,
+        total: Int,
         position: Int,
         count: Int,
         loadedProfile: String?,
         screen: ScreenLabel? = nil
     ) {
         self.display = display
+        self.number = number
+        self.total = total
         self.position = position
         self.count = count
         self.loadedProfile = loadedProfile
@@ -84,14 +93,18 @@ final class DesktopCueLedger {
         else { return .waiting }
         guard snapshot.currentSpaceIsUser(on: owed.displayUUID),
             let display,
-            let position = snapshot.screenNumber(of: owed.space)
+            let number = snapshot.number(of: owed.space),
+            let position = snapshot.screenPlace(of: owed.space)
         else { return .settled(nil) }
-        let count = snapshot.spaces.filter {
-            $0.displayUUID == owed.displayUUID && $0.isUser
+        let desktops = snapshot.spaces.filter(\.isUser)
+        let count = desktops.filter {
+            $0.displayUUID == owed.displayUUID
         }.count
         return .settled(
             DesktopSwitchCue(
                 display: display,
+                number: number,
+                total: desktops.count,
                 position: position,
                 count: count,
                 loadedProfile: loadedProfile,

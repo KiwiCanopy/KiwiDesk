@@ -30,11 +30,10 @@ extension KiwiCore {
         var out: [Int: DesktopLanding] = [:]
         for space in snapshot.spaces where space.isUser {
             guard let number = snapshot.number(of: space.id),
-                let local = snapshot.screenNumber(of: space.id),
                 let display = display(forUUID: space.displayUUID),
                 let screen = screenLabel(of: display)
             else { continue }
-            out[number] = DesktopLanding(screen: screen, number: local)
+            out[number] = DesktopLanding(screen: screen)
         }
         return out
     }

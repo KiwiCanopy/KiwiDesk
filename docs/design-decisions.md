@@ -8353,6 +8353,17 @@ entry refused is the one taken: a label and a command count
 differently on a second screen, and `docs/spaces-and-desktops.md`
 says so once.
 
+**Amended again with #3103: one count, as Mission Control's**
+(owner, 2026-11-08). The #2792 premise was itself wrong: on macOS
+27.2 with "Displays have separate Spaces" on, Mission Control
+numbers every Desktop in one count across screens (the built-in
+screen's six read 1–6, a DELL's two read 7 and 8), and the
+remembered per-screen "2" was a shared Desktop set with the
+setting off. So every label returns to the number a command
+takes, read from the same Space list order, and the two-number
+cost is gone. The plate keeps the per-screen dots, the one place
+a screen's own place shows.
+
 **The profile line shows only when the switch changed the live
 profile.** A Desktop with no binding loads nothing, and naming the
 profile that merely stayed would be noise on every press.

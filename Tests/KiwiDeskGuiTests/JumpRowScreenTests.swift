@@ -111,8 +111,11 @@ struct JumpRowScreenTests {
     @Test("the switch plate speaks its screen")
     func plateSpoken() {
         LocalizationManager.shared.select("en")
+        // macOS's Desktop 7 of 8, first of three on the DELL.
         let cue = DesktopSwitchCue(
             display: DisplayID(2),
+            number: 7,
+            total: 8,
             position: 1,
             count: 3,
             loadedProfile: nil,
@@ -120,10 +123,12 @@ struct JumpRowScreenTests {
         )
         #expect(
             CuePlateModel.spoken(.desktop(cue))
-                == "Desktop 1 of 3 on DELL U2723"
+                == "Desktop 7 of 8 on DELL U2723"
         )
         let lone = DesktopSwitchCue(
             display: DisplayID(1),
+            number: 2,
+            total: 4,
             position: 2,
             count: 4,
             loadedProfile: nil
@@ -141,7 +146,7 @@ struct DesktopShortcutLandingTests {
     func detail() {
         LocalizationManager.shared.select("en")
         let landings = [
-            3: DesktopLanding(screen: ScreenLabel(name: "DELL"), number: 1)
+            3: DesktopLanding(screen: ScreenLabel(name: "DELL"))
         ]
         let rows = KeybindingCatalog.goToDesktop(
             [3, 9],
@@ -149,7 +154,7 @@ struct DesktopShortcutLandingTests {
             landings: landings
         )
         #expect(rows[0].resolvedLabel == "Go to Desktop 3")
-        #expect(rows[0].detail?() == "DELL · Desktop 1")
+        #expect(rows[0].detail?() == "DELL · Desktop 3")
         #expect(rows[1].detail?() == "Not present right now")
         // One screen: the number says it all.
         let lone = KeybindingCatalog.goToDesktop([3, 9], absent: [9])
@@ -167,7 +172,7 @@ struct DesktopLandingFoldTests {
         let landed = KeybindingCatalog.goToDesktop(
             [1],
             landings: [
-                1: DesktopLanding(screen: ScreenLabel(name: "A"), number: 1)
+                1: DesktopLanding(screen: ScreenLabel(name: "A"))
             ]
         )[0]
         let lone = KeybindingCatalog.goToDesktop([1])[0]

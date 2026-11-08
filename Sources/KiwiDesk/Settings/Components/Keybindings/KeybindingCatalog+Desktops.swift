@@ -115,9 +115,9 @@ extension KeybindingCatalog {
         }
     }
 
-    /// Where a row's Desktop number lands now (#2792): its screen
-    /// and number there, or that no Desktop has the number. Nil on
-    /// one screen, where the row's own number says it.
+    /// Where a row's Desktop number lands now (#2792): its screen,
+    /// or that no Desktop has the number. Nil on one screen, where
+    /// the row's own number says it.
     private static func landing(
         _ number: Int,
         in landings: [Int: DesktopLanding],
@@ -129,7 +129,7 @@ extension KeybindingCatalog {
                     "keybinding.desktop_landing",
                     "%1$@ · Desktop %2$d",
                     landing.screen.displayName,
-                    landing.number
+                    number
                 )
             }
         }

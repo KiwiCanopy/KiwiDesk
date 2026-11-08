@@ -555,16 +555,17 @@ them against one two-screen arrangement where they differ, and
 `KiwiCore.bindableDesktops(in:)` is where the list meets the
 capability.
 
-**A Desktop LABEL counts per screen; a Desktop the user TYPES or
-a verb takes counts globally (#2792).** A number KiwiDesk draws or
-speaks for a Desktop — KiwiHub's rows, the switch plate, a Settings
-Desktop row — is its place on its own screen, read through
-`DesktopSnapshot.screenNumber(of:)` or `screenNumbersByKey`, never
-`number(of:)`; the number a command, a binding or a shortcut's
-title carries stays `number(of:)`'s, and a row that shows both says
-where the global one lands through `KiwiCore.desktopLandings(in:)`.
-`DesktopScreenNumberTests` holds the two counts on one two-screen
-arrangement; a new label reading the global number is review's.
+**A Desktop has ONE number, and a label and a verb read it
+through `DesktopSnapshot.number(of:)` (#3103).** Mission Control
+counts every Desktop across screens under "Displays have
+separate Spaces" (measured on macOS 27.2, 2026-11-08), so a
+number KiwiDesk draws or speaks for a Desktop — KiwiHub's rows,
+the switch plate, a Settings Desktop row — is the number a
+command, a binding or a shortcut's title takes. A Desktop's place
+on its own screen, `screenPlace(of:)`, is the plate's dot alone
+and never a label; a label reading it re-opens #3103, which is
+review's. `DesktopScreenNumberTests` holds the labels to the
+Space order on one two-screen arrangement.
 
 The returning-focus memory that sits beside this one
 (`KiwiCore+DesktopFocusMemory.swift`, #1207) is

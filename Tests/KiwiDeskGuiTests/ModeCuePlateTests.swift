@@ -49,6 +49,8 @@ struct ModeCuePlateTests {
         let desktop = CuePlateModel.Content.desktop(
             DesktopSwitchCue(
                 display: DisplayID(1),
+                number: 2,
+                total: 3,
                 position: 2,
                 count: 3,
                 loadedProfile: nil

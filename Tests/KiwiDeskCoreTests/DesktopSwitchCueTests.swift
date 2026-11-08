@@ -6,7 +6,8 @@ import Testing
 
 /// The Desktop switch cue (#2142): owed only by KiwiDesk's own
 /// switch, paid by the switch handler once the target is shown,
-/// carrying the global number, the screen's dots and a profile
+/// carrying the number across screens (#3103), the screen's dots
+/// and a profile
 /// only where one loaded. Over the #888 fixture: Desktops 1–2 on
 /// `UUID-A` (ids 10, 11), 3–4 on `UUID-B` (ids 20, 21).
 @Suite("Desktop switch cue (#2142)", .serialized)
@@ -22,8 +23,8 @@ struct DesktopSwitchCueTests {
         .init(displayUUID: uuid, space: space, at: time ?? at)
     }
 
-    @Test("a second screen's Desktop takes its number on that screen")
-    func screenNumberLocalDots() {
+    @Test("a second screen's Desktop takes the count across screens")
+    func numberAcrossScreensLocalDots() {
         defer { resetAuthorityOverrides() }
         let snapshot = authoritySnapshot(mainCurrent: 10, secondaryCurrent: 21)
         let verdict = DesktopCueLedger.verdict(
@@ -38,6 +39,8 @@ struct DesktopSwitchCueTests {
                 == .settled(
                     DesktopSwitchCue(
                         display: DisplayID(2),
+                        number: 4,
+                        total: 4,
                         position: 2,
                         count: 2,
                         loadedProfile: "Work"
@@ -135,6 +138,8 @@ struct DesktopSwitchCueTests {
             shown == [
                 DesktopSwitchCue(
                     display: DisplayID(1),
+                    number: 2,
+                    total: 4,
                     position: 2,
                     count: 2,
                     loadedProfile: nil
