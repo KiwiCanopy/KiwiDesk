@@ -150,18 +150,19 @@ struct TouchGesturesTests {
 
     @Test("the preferences are read afresh for each batch")
     func prefsReadPerBatch() {
-        var system = TrackpadSystemGestures.unread
+        final class Prefs { var system = TrackpadSystemGestures.unread }
+        let prefs = Prefs()
         let (gestures, box) = front()
-        gestures.readSystemGestures = { system }
+        gestures.readSystemGestures = { prefs.system }
         gestures.resolve(
             base: map([.tap3: .bound(.init(action: "a()"))]),
             profileOverride: nil
         )
         gestures.start()
         gestures.receive([event(.tap, 3)])
-        system = TrackpadSystemGestures(lookUpTap: true)
+        prefs.system = TrackpadSystemGestures(lookUpTap: true)
         gestures.receive([event(.tap, 3)])
-        system = .unread
+        prefs.system = .unread
         gestures.receive([event(.tap, 3)])
         #expect(box.fired.count == 2)
     }

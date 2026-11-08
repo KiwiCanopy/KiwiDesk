@@ -60,6 +60,9 @@ struct FocusOrSpawnMigrationRoutingTests {
         )
     }
 
+    /// A trackpad gesture slot stores its Lua under `lua` ON PURPOSE
+    /// (#1873): it is an action a stored-Lua rename must reach, as a
+    /// shortcut row's is.
     @Test("the step's `lua` key has one declarer")
     func luaKeyStaysUnique() throws {
         let declaring = try scan { source in
@@ -72,7 +75,10 @@ struct FocusOrSpawnMigrationRoutingTests {
             return codingKey || synthesized
         }
         #expect(
-            declaring == ["KiwiDeskCore/Config/KeyLayer.swift"],
+            declaring == [
+                "KiwiDeskCore/Config/KeyLayer.swift",
+                "KiwiDeskCore/Config/TrackpadGestureConfig+Coding.swift",
+            ],
             Comment(
                 rawValue: "`lua` keys: \(declaring.sorted()) — "
                     + "a second one is a value the #1511 rename "
