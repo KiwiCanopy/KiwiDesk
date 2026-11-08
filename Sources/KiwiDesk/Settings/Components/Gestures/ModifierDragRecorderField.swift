@@ -2,8 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A modifier drag's modifier recorder (#2447): the shared
-/// `ModifierChordRecorder` with the drags' own refusals — a lone
-/// modifier, or the other drag's chord.
+/// `ModifierChordRecorder` with the drags' own refusal — the
+/// other drag's chord.
 struct ModifierDragRecorderField: View {
     /// VoiceOver's name for the field.
     let name: String
