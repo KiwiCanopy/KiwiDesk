@@ -80,24 +80,9 @@ struct SegmentedPickerCoverageTests {
     /// colour paints beside them, whichever way it is spelled.
     @Test("the picker draws its track and lift from the theme")
     func trackAndLiftAreTokens() throws {
-        let folder = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Common"
-            )
-        // The picker and its label extension, read as one.
-        let source = try ["", "+Label"].map { part in
-            SourceScan.stripComments(
-                try String(
-                    contentsOf: folder.appendingPathComponent(
-                        "SegmentedPicker\(part).swift"
-                    ),
-                    encoding: .utf8
-                )
-            )
-        }
-        .joined()
-        .split(whereSeparator: \.isWhitespace)
-        .joined()
+        let source = try SourceScan.segmentedPickerSource(from: #filePath)
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
         for needle in [
             ".background(Capsule().fill(paint.fill(SettingsTheme.trackFill)))",
             "Capsule().strokeBorder(paint.fill(SettingsTheme.trackFill),",

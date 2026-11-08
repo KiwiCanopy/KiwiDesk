@@ -19,15 +19,13 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// equal sizing `hugsLabels` adds — a strip whose longest label
     /// must not cost every segment its width (#2246).
     let reservesWeight: Bool
-    /// A key drawn in secondary ink after a segment's title, and
-    /// read as that segment's VoiceOver hint, never its name. A new
-    /// caller adds its ground to the contrast suite's pairings.
+    /// A key that stands in for a segment's title while shown —
+    /// under the pointer, or every segment's while `showsHints` —
+    /// in a width reserved for the wider of the two, so the strip
+    /// never changes size (#1229 ▸ Tab bar). Read as the segment's
+    /// VoiceOver hint, never its name. A new caller adds its ground
+    /// to the contrast suite's pairings.
     let hints: [Value: String]
-    /// Whether a hint stands in for its segment's title only while
-    /// shown — under the pointer, or all of them while
-    /// `showsHints` — in a width reserved for the wider of the two,
-    /// so the strip never changes size (#1229 ▸ Tab bar).
-    let hintsOnDemand: Bool
     let showsHints: Bool
     /// The words VoiceOver reads a hint in.
     private let spokenHint: (String) -> String
@@ -59,7 +57,6 @@ struct SegmentedPicker<Value: Hashable>: View {
         hugsLabels: Bool = false,
         reservesWeight: Bool = false,
         hints: [Value: String] = [:],
-        hintsOnDemand: Bool = false,
         showsHints: Bool = false,
         spokenHint: @escaping (String) -> String = { $0 },
         spokenTitles: [Value: String] = [:],
@@ -74,7 +71,6 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.hugsLabels = hugsLabels
         self.reservesWeight = reservesWeight
         self.hints = hints
-        self.hintsOnDemand = hintsOnDemand
         self.showsHints = showsHints
         self.spokenHint = spokenHint
         self.spokenTitles = spokenTitles
@@ -165,7 +161,15 @@ struct SegmentedPicker<Value: Hashable>: View {
                 spokenValue ?? selectedIndex.map { options[$0].title } ?? ""
             )
             .onChange(of: isEnabled) { _, now in
-                if !now { hoveredIndex = nil }
+                if !now {
+                    hoveredIndex = nil
+                    pointerIndex = nil
+                }
+            }
+            // A panel ordered out under the pointer sends no exit.
+            .onDisappear {
+                hoveredIndex = nil
+                pointerIndex = nil
             }
     }
 
@@ -212,7 +216,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         .focusable(false)
         .accessibilityLabel(spokenTitles[option.value] ?? option.title)
         .onHover { inside in
-            if inside {
+            if inside, isEnabled {
                 pointerIndex = index
             } else if pointerIndex == index {
                 pointerIndex = nil

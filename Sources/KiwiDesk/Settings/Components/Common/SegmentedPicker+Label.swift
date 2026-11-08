@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// A segment's drawn label: its title, and the hint beside it or,
-/// on demand, in its place.
+/// A segment's drawn label: its title, or its hint in its place.
 extension SegmentedPicker {
     /// A hugging strip sizes each label by the selected weight
     /// whatever the state, so picking never changes its width.
@@ -22,9 +21,14 @@ extension SegmentedPicker {
         }
     }
 
-    /// Whether the segment at `index` shows its hint now.
-    func showsHint(at index: Int) -> Bool {
-        !hintsOnDemand || showsHints || pointerIndex == index
+    /// Whether the segment at `index` shows its hint: every one
+    /// while `showsAll`, else the one under the pointer.
+    static func showsHint(
+        showsAll: Bool,
+        pointer: Int?,
+        index: Int
+    ) -> Bool {
+        showsAll || pointer == index
     }
 
     func segmentLabel(
@@ -33,35 +37,30 @@ extension SegmentedPicker {
         selected: Bool,
         index: Int
     ) -> some View {
-        HStack(spacing: 5) {
-            if hintsOnDemand, let hint {
-                let shown = showsHint(at: index)
-                // The wider of the two holds the width either way.
-                ZStack {
-                    titleText(title, selected: selected, index: index)
-                        .opacity(shown ? 0 : 1)
-                    hintText(
-                        hint,
-                        selected: selected,
-                        hovered: hoveredIndex == index
-                    )
-                    .opacity(shown ? 1 : 0)
-                }
-                .animation(
-                    reduceMotion ? nil : .easeOut(duration: 0.12),
-                    value: shown
+        let shown =
+            hint != nil
+            && Self.showsHint(
+                showsAll: showsHints,
+                pointer: pointerIndex,
+                index: index
+            )
+        // The wider of the two holds the width either way.
+        return ZStack {
+            titleText(title, selected: selected, index: index)
+                .opacity(shown ? 0 : 1)
+            if let hint {
+                hintText(
+                    hint,
+                    selected: selected,
+                    hovered: hoveredIndex == index
                 )
-            } else {
-                titleText(title, selected: selected, index: index)
-                if let hint {
-                    hintText(
-                        hint,
-                        selected: selected,
-                        hovered: hoveredIndex == index
-                    )
-                }
+                .opacity(shown ? 1 : 0)
             }
         }
+        .animation(
+            reduceMotion ? nil : .easeOut(duration: 0.12),
+            value: shown
+        )
         .lineLimit(1)
         .padding(.vertical, 4)
         .padding(.horizontal, 10)

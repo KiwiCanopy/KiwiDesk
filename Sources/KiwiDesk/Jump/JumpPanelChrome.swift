@@ -230,7 +230,6 @@ struct JumpScopeSwitch: View {
             spokenLabel: JumpScope.switchName,
             reservesWeight: true,
             hints: model.chords,
-            hintsOnDemand: true,
             showsHints: model.commandHeld,
             spokenHint: LayoutPickText.chordHint,
             selection: Binding(

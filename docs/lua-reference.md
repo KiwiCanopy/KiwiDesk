@@ -6587,10 +6587,12 @@ On every side:
 - **Escape** clears the typing, then closes KiwiHub; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 
-:::unreleased
 The switch at the end of the field shows each side's own key,
-read from your shortcuts, in place of its title while you hold
-**⌘** or point at it.
+read from your shortcuts.
+
+:::unreleased
+Each key shows in place of its side's title: every side's while
+you hold **⌘**, one side's while you point at it.
 :::
 
 Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer

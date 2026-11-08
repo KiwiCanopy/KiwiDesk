@@ -14258,16 +14258,9 @@ The three bindings that open the panel's sides — ⌃⌥J, ⌃⌥K
 (seeded per layer, #602) and ⌃⌥L, `kiwihub.show`'s — are dropped
 from the builder's working set and render in no section: the one
 deliberate exception to the sheet's "no bound shortcut is ever
-invisible" contract. Their home is the side switch, which shows
+invisible" contract. Their home is the side switch, which prints
 each side's live chord (#2245): it follows a rebind, and it shows
-in the empty and unavailable states, which no section does. The
-switch draws titles only, one line, every side always visible and
-clickable; a side's chord stands in for its title while ⌘ is held
-or the pointer is on it, in a width reserved for the wider of the
-two, so the switch never changes size (#1229, owner ruling
-2026-11-01): a fourth side's chord did not fit beside its title
-on one line, and the openers are also listed on the Simple page,
-in the welcome tour and in the shortcut recorder. A row
+in the empty and unavailable states, which no section does. A row
 would also be self-referential — you just pressed the chord it
 teaches, and no macOS surface lists its own trigger as content —
 and, listed, it would surface in *Custom*, the section that means
@@ -14275,6 +14268,20 @@ and, listed, it would surface in *Custom*, the section that means
 with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Custom. (#602, PR #638, #2246)
+
+:::unreleased
+**The side switch draws titles only (#1229, owner ruling
+2026-11-01, amending #2245).** One line, every side always
+visible and clickable; a side's chord stands in for its title —
+every side's while ⌘ is held, one side's while the pointer is on
+it — in a width reserved for the wider of the two, so the switch
+never changes size. A fourth side's chord did not fit beside its
+title on one line, and the openers are listed elsewhere too: on
+the Simple page, in the welcome tour and in the shortcut recorder.
+So the chord that links a key to its side above is shown on
+demand rather than printed. The panel's ceiling rises from 452 to
+488 pt on every side, for the Desktops side's two screen rows.
+:::
 
 **The key panel never takes activation, so there is none to
 hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
@@ -14315,11 +14322,9 @@ leads Apps, which is KiwiDesk's own app row, rather than standing
 alone in a one-row group. The panel holds one fixed width, 720 pt,
 since a width that changed on ⇥ would move the field and the
 switch under the eye; only the height follows each side, its top
-fixed at the field, under one ceiling of 488 pt on every side
+fixed at the field, under one ceiling of 452 pt on every side
 (#2309, owner rulings 2026-10-15 and 2026-10-16 — raised from
-400 so a roomier footer row costs the Shortcuts sheet nothing;
-raised again from 452 for the Desktops side's two screen rows,
-#1229, owner ruling 2026-11-01). A glance panel stays compact,
+400 so a roomier footer row costs the Shortcuts sheet nothing). A glance panel stays compact,
 as Spotlight's fixed height does, and a sheet that grew to the
 screen's bottom read as a window rather than a launcher; the
 Shortcuts sheet scrolls past the ceiling, cued in words, and the

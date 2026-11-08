@@ -7,19 +7,19 @@ import Testing
 /// KiwiHub's side switch draws titles only, a side's chord standing
 /// in for its title while ⌘ is held or the pointer is on it, in a
 /// width that never moves (#1229 ▸ Tab bar). `@MainActor` for the
-/// renderer; four small renders.
+/// renderer and the source scan; a few small renders.
 @Suite("Segmented picker hints on demand")
 @MainActor
 struct SegmentedPickerHintsOnDemandTests {
     private let options = [("Windows", 0), ("View", 1)]
-    /// One chord wider than its title, one narrower.
-    private let hints = [0: "⌃⌥J", 1: "⌃⌥⌘⇧F12"]
 
-    private func width(onDemand: Bool, shown: Bool) throws -> CGFloat {
+    private func width(
+        hints: [Int: String],
+        shown: Bool
+    ) throws -> CGFloat {
         let picker = SegmentedPicker(
             reservesWeight: true,
             hints: hints,
-            hintsOnDemand: onDemand,
             showsHints: shown,
             selection: .constant(0),
             options: options
@@ -31,32 +31,43 @@ struct SegmentedPickerHintsOnDemandTests {
 
     @Test("showing the chords never changes the switch's width")
     func widthHolds() throws {
-        let rest = try width(onDemand: true, shown: false)
-        #expect(try width(onDemand: true, shown: true) == rest)
+        // One chord wider than its title, one narrower.
+        let hints = [0: "⌃⌥J", 1: "⌃⌥⌘⇧F12"]
+        let rest = try width(hints: hints, shown: false)
+        #expect(try width(hints: hints, shown: true) == rest)
     }
 
-    /// The reserve is the wider of title and chord per segment, never
-    /// their sum, which is what the inline strip pays.
-    @Test("the on-demand strip is narrower than the inline one")
-    func narrowerThanInline() throws {
-        let inline = try width(onDemand: false, shown: false)
-        #expect(try width(onDemand: true, shown: false) < inline)
+    /// The reserve is the wider of title and chord per segment,
+    /// never their sum: chords narrower than their titles cost no
+    /// width at all.
+    @Test("a narrow chord costs the switch nothing")
+    func reserveIsTheWider() throws {
+        let bare = try width(hints: [:], shown: false)
+        #expect(try width(hints: [0: "J", 1: "L"], shown: false) == bare)
+        #expect(try width(hints: [1: "⌃⌥⌘⇧F12"], shown: false) > bare)
     }
 
-    @Test("a chord shows on demand only")
+    @Test("every chord shows under ⌘; one under the pointer")
     func showsOnDemand() {
-        func picker(onDemand: Bool, shown: Bool) -> SegmentedPicker<Int> {
-            SegmentedPicker(
-                hints: hints,
-                hintsOnDemand: onDemand,
-                showsHints: shown,
-                selection: .constant(0),
-                options: options
+        typealias Picker = SegmentedPicker<Int>
+        let shows = Picker.showsHint(showsAll:pointer:index:)
+        #expect(!shows(false, nil, 0))
+        #expect(shows(true, nil, 1))
+        #expect(shows(false, 1, 1))
+        #expect(!shows(false, 1, 0))
+    }
+
+    /// The pointer half reaches the label only through the segment's
+    /// own hover, gated as the lift is; no fixture can hover.
+    @Test("a segment's hover writes the pointer, enabled only")
+    func hoverWritesThePointer() throws {
+        let source = try SourceScan.segmentedPickerSource(from: #filePath)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.contains(
+                ".onHover{insideinifinside,isEnabled{pointerIndex=index}"
             )
-        }
-        #expect(!picker(onDemand: true, shown: false).showsHint(at: 0))
-        #expect(picker(onDemand: true, shown: true).showsHint(at: 1))
-        // Every other strip keeps its hints drawn.
-        #expect(picker(onDemand: false, shown: false).showsHint(at: 0))
+        )
+        #expect(source.contains("pointer:pointerIndex,"))
     }
 }

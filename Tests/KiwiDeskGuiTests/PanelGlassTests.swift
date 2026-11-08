@@ -211,12 +211,7 @@ struct PanelGlassTests {
     /// defaults are the picker's own tokens (#2569).
     @Test("The scope switch paints through KiwiHub's paint")
     func scopeSwitchReadsThePaint() throws {
-        // The picker and its label extension, read as one.
-        let picker = try ["", "+Label"].map {
-            try Self.source(
-                "Settings/Components/Common/SegmentedPicker\($0).swift"
-            )
-        }.joined(separator: "\n")
+        let picker = try SourceScan.segmentedPickerSource(from: #filePath)
         #expect(picker.contains("@Environment(\\.kiwiHubPaint)"))
         #expect(picker.contains(".fill(paint.selection)"))
         #expect(picker.contains("paint.selectionInk"))

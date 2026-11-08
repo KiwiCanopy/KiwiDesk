@@ -71,13 +71,10 @@ struct JumpSideNameTests {
         )
         let chrome = try Self.source("JumpPanelChrome.swift")
         #expect(chrome.occurrences(of: "hints: model.chords") == 1)
-        // Titles only: a chord stands in while ⌘ is held (#1229).
-        #expect(
-            chrome.occurrences(
-                of: "hintsOnDemand: true,\n            showsHints: "
-                    + "model.commandHeld"
-            ) == 1
-        )
+        // Titles only: every chord stands in while ⌘ is held (#1229).
+        let squashed = chrome.split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(squashed.occurrences(of: "showsHints:model.commandHeld") == 1)
         // VoiceOver hears the chord in the panel's own frame, as
         // the layout tiles speak theirs.
         #expect(
@@ -126,19 +123,7 @@ struct JumpSideNameTests {
 
     @Test("a chord is the segment's hint, never its name")
     func chordIsAHint() throws {
-        // The picker and its label extension, read as one.
-        let picker = try ["", "+Label"].map { part in
-            SourceScan.stripComments(
-                try String(
-                    contentsOf: SourceScan.repoRoot(from: #filePath)
-                        .appendingPathComponent(
-                            "Sources/KiwiDesk/Settings/Components/"
-                                + "Common/SegmentedPicker\(part).swift"
-                        ),
-                    encoding: .utf8
-                )
-            )
-        }.joined(separator: "\n")
+        let picker = try SourceScan.segmentedPickerSource(from: #filePath)
         #expect(
             picker.occurrences(
                 of: ".accessibilityHint(hints[option.value].map(spokenHint)"
