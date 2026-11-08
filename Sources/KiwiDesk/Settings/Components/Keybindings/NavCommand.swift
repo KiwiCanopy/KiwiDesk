@@ -18,7 +18,7 @@ struct NavCommand: Identifiable, Hashable {
     /// (`keybindingRowStyle`).
     var unavailable: (@MainActor () -> String)? = nil
     /// A line under the title saying where the row acts right now
-    /// (#2792: the screen and Desktop a global number lands on).
+    /// (#2792: the screen a Desktop number lands on).
     var detail: (@MainActor () -> String)? = nil
     /// A live Space the profile does not hold, whose chip the row
     /// wears (#1827).

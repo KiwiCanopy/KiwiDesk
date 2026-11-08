@@ -558,14 +558,15 @@ capability.
 **A Desktop has ONE number, and a label and a verb read it
 through `DesktopSnapshot.number(of:)` (#3103).** Mission Control
 counts every Desktop across screens under "Displays have
-separate Spaces" (measured on macOS 27.2, 2026-11-08), so a
-number KiwiDesk draws or speaks for a Desktop — KiwiHub's rows,
+separate Spaces" (`docs/design-decisions.md`, the #2142 entry's
+#3103 amendment), so a number KiwiDesk draws or speaks for a Desktop — KiwiHub's rows,
 the switch plate, a Settings Desktop row — is the number a
 command, a binding or a shortcut's title takes. A Desktop's place
 on its own screen, `screenPlace(of:)`, is the plate's dot alone
-and never a label; a label reading it re-opens #3103, which is
-review's. `DesktopScreenNumberTests` holds the labels to the
-Space order on one two-screen arrangement.
+and never a label (`DesktopNumberWiringTests` ▸
+`placeIsNoLabel` holds its readers). `DesktopScreenNumberTests`
+holds the labels to the Space order on one two-screen
+arrangement.
 
 The returning-focus memory that sits beside this one
 (`KiwiCore+DesktopFocusMemory.swift`, #1207) is

@@ -1,9 +1,8 @@
 import Foundation
 
 /// Which screen a Desktop lives on, by name (#1438) — the line
-/// the Desktops card draws under each row so two rows both
-/// titled "Desktop 1" (each screen's own, under "Displays have
-/// separate Spaces") can be told apart.
+/// the Desktops card draws under each row, so a row says which
+/// screen its Desktop is on.
 ///
 /// The join is `displaysByUUID()`'s — the topology's
 /// `displayUUID` against the attached displays.

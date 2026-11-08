@@ -139,9 +139,9 @@ struct DesktopScreenNumberTests {
         let landings = core.desktopLandings(in: NativeSpaces.desktopSnapshot())
         let dell = ScreenLabel(name: "DELL U2723")
         let builtIn = ScreenLabel(name: "Built-in")
-        #expect(landings[3] == DesktopLanding(screen: dell))
-        #expect(landings[4] == DesktopLanding(screen: dell))
-        #expect(landings[1] == DesktopLanding(screen: builtIn))
+        #expect(landings[3] == dell)
+        #expect(landings[4] == dell)
+        #expect(landings[1] == builtIn)
         #expect(landings[5] == nil)
     }
 

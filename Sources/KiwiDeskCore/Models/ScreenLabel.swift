@@ -14,15 +14,3 @@ public struct ScreenLabel: Sendable, Equatable {
         self.twinPlace = twinPlace
     }
 }
-
-/// Where a Desktop number a command takes lands now (#2792): the
-/// screen it is on. Only with more than one screen connected; the
-/// number is the command's own, as Mission Control counts across
-/// screens (#3103).
-public struct DesktopLanding: Sendable, Equatable {
-    public let screen: ScreenLabel
-
-    public init(screen: ScreenLabel) {
-        self.screen = screen
-    }
-}

@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "El atajo de «%1$@» no es un atajo reconocido.",
   "keybinding.desktop_absent": "Ausente ahora mismo",
   "keybinding.desktop_away.axhint": "Ahora mismo no está conectado.",
-  "keybinding.desktop_landing": "%1$@ · Escritorio %2$d",
   "keybinding.dir.above": "de arriba",
   "keybinding.dir.below": "de abajo",
   "keybinding.dir.left": "de la izquierda",

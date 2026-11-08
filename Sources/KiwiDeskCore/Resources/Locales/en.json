@@ -900,7 +900,6 @@
   "keybinding.conflict.unrecognized": "Shortcut for \"%1$@\" isn't a recognized shortcut.",
   "keybinding.desktop_absent": "Not present right now",
   "keybinding.desktop_away.axhint": "Not connected right now.",
-  "keybinding.desktop_landing": "%1$@ · Desktop %2$d",
   "keybinding.dir.above": "above",
   "keybinding.dir.below": "below",
   "keybinding.dir.left": "to the left",

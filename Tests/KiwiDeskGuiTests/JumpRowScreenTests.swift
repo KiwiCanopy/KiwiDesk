@@ -146,7 +146,7 @@ struct DesktopShortcutLandingTests {
     func detail() {
         LocalizationManager.shared.select("en")
         let landings = [
-            3: DesktopLanding(screen: ScreenLabel(name: "DELL"))
+            3: ScreenLabel(name: "DELL")
         ]
         let rows = KeybindingCatalog.goToDesktop(
             [3, 9],
@@ -154,7 +154,7 @@ struct DesktopShortcutLandingTests {
             landings: landings
         )
         #expect(rows[0].resolvedLabel == "Go to Desktop 3")
-        #expect(rows[0].detail?() == "DELL · Desktop 3")
+        #expect(rows[0].detail?() == "DELL")
         #expect(rows[1].detail?() == "Not present right now")
         // One screen: the number says it all.
         let lone = KeybindingCatalog.goToDesktop([3, 9], absent: [9])
@@ -172,7 +172,7 @@ struct DesktopLandingFoldTests {
         let landed = KeybindingCatalog.goToDesktop(
             [1],
             landings: [
-                1: DesktopLanding(screen: ScreenLabel(name: "A"))
+                1: ScreenLabel(name: "A")
             ]
         )[0]
         let lone = KeybindingCatalog.goToDesktop([1])[0]

@@ -8,7 +8,7 @@ extension KeybindingCatalog {
     static func goToDesktop(
         _ desktops: [Int],
         absent: Set<Int> = [],
-        landings: [Int: DesktopLanding] = [:]
+        landings: [Int: ScreenLabel] = [:]
     ) -> [NavCommand] {
         desktops.map { number in
             NavCommand(
@@ -33,7 +33,7 @@ extension KeybindingCatalog {
     static func moveToDesktop(
         _ desktops: [Int],
         absent: Set<Int> = [],
-        landings: [Int: DesktopLanding] = [:]
+        landings: [Int: ScreenLabel] = [:]
     ) -> [NavCommand] {
         zip(
             moveToDesktopRows(
@@ -54,7 +54,7 @@ extension KeybindingCatalog {
     static func moveToDesktopRows(
         _ desktops: [Int],
         absent: Set<Int> = [],
-        landings: [Int: DesktopLanding] = [:]
+        landings: [Int: ScreenLabel] = [:]
     ) -> [NavCommand] {
         desktops.map { number in
             NavCommand(
@@ -79,7 +79,7 @@ extension KeybindingCatalog {
     static func moveToDesktopFollowRows(
         _ desktops: [Int],
         absent: Set<Int> = [],
-        landings: [Int: DesktopLanding] = [:]
+        landings: [Int: ScreenLabel] = [:]
     ) -> [NavCommand] {
         desktops.map { number in
             NavCommand(
@@ -115,23 +115,17 @@ extension KeybindingCatalog {
         }
     }
 
-    /// Where a row's Desktop number lands now (#2792): its screen,
-    /// or that no Desktop has the number. Nil on one screen, where
-    /// the row's own number says it.
+    /// The screen a row's Desktop number lands on now (#2792), or
+    /// that no Desktop has the number. Nil on one screen, which
+    /// needs no screen named; the number is the row's title's
+    /// (#3103).
     private static func landing(
         _ number: Int,
-        in landings: [Int: DesktopLanding],
+        in landings: [Int: ScreenLabel],
         absent: Set<Int>
     ) -> (@MainActor () -> String)? {
-        if let landing = landings[number] {
-            return {
-                L(
-                    "keybinding.desktop_landing",
-                    "%1$@ · Desktop %2$d",
-                    landing.screen.displayName,
-                    number
-                )
-            }
+        if let screen = landings[number] {
+            return { screen.displayName }
         }
         guard !landings.isEmpty, absent.contains(number) else {
             return nil
@@ -157,7 +151,7 @@ extension KeybindingCatalog {
         var desktops: [Int] = []
         var absent: Set<Int> = []
         /// Where each number lands now, with more than one screen.
-        var landings: [Int: DesktopLanding] = [:]
+        var landings: [Int: ScreenLabel] = [:]
 
         static let none = DesktopOffer()
     }
@@ -187,7 +181,7 @@ extension KeybindingCatalog {
     static func desktopOffer(
         live: [Int],
         bindings: [KeyBinding],
-        landings: [Int: DesktopLanding] = [:]
+        landings: [Int: ScreenLabel] = [:]
     ) -> DesktopOffer {
         let bound = Set(
             bindings.filter(recordsDesktop)

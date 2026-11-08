@@ -1175,8 +1175,8 @@ A new layer also carries the `⌃⌥,` Open Settings row.
 ## macOS Desktops (Mission Control)
 
 **Profiles ▸ Profiles per macOS Desktop** lists the Desktops on
-your **main screen** by their Mission Control number. Which count
-that is, and the one a binding takes, is [Spaces &
+your **main screen** by their Mission Control number. How
+Desktops are numbered is in [Spaces &
 Desktops](spaces-and-desktops.md#how-desktops-are-numbered). A Desktop you
 bound that is not on your main screen carries a **not on main
 screen** badge and cannot fire until a screen change makes it

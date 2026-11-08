@@ -7,9 +7,9 @@ import Testing
 /// The Desktop switch cue (#2142): owed only by KiwiDesk's own
 /// switch, paid by the switch handler once the target is shown,
 /// carrying the number across screens (#3103), the screen's dots
-/// and a profile
-/// only where one loaded. Over the #888 fixture: Desktops 1–2 on
-/// `UUID-A` (ids 10, 11), 3–4 on `UUID-B` (ids 20, 21).
+/// and a profile only where one loaded. Over the #888 fixture:
+/// Desktops 1–2 on `UUID-A` (ids 10, 11), 3–4 on `UUID-B` (ids 20,
+/// 21).
 @Suite("Desktop switch cue (#2142)", .serialized)
 @MainActor
 struct DesktopSwitchCueTests {

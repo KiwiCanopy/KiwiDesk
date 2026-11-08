@@ -96,15 +96,14 @@ final class DesktopCueLedger {
             let number = snapshot.number(of: owed.space),
             let position = snapshot.screenPlace(of: owed.space)
         else { return .settled(nil) }
-        let desktops = snapshot.spaces.filter(\.isUser)
-        let count = desktops.filter {
-            $0.displayUUID == owed.displayUUID
+        let count = snapshot.spaces.filter {
+            $0.displayUUID == owed.displayUUID && $0.isUser
         }.count
         return .settled(
             DesktopSwitchCue(
                 display: display,
                 number: number,
-                total: desktops.count,
+                total: snapshot.userDesktops.count,
                 position: position,
                 count: count,
                 loadedProfile: loadedProfile,

@@ -22,18 +22,18 @@ extension KiwiCore {
         return ScreenLabel(name: named.name, twinPlace: place)
     }
 
-    /// Each Desktop number a command takes, by where it lands in
-    /// `snapshot`; empty with one screen connected.
+    /// The screen each Desktop number a command takes lands on in
+    /// `snapshot` (#2792); empty with one screen connected.
     public func desktopLandings(
         in snapshot: DesktopSnapshot
-    ) -> [Int: DesktopLanding] {
-        var out: [Int: DesktopLanding] = [:]
+    ) -> [Int: ScreenLabel] {
+        var out: [Int: ScreenLabel] = [:]
         for space in snapshot.spaces where space.isUser {
             guard let number = snapshot.number(of: space.id),
                 let display = display(forUUID: space.displayUUID),
                 let screen = screenLabel(of: display)
             else { continue }
-            out[number] = DesktopLanding(screen: screen)
+            out[number] = screen
         }
         return out
     }
