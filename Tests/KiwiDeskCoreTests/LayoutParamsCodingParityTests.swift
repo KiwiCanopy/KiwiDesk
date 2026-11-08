@@ -137,6 +137,7 @@ struct LayoutParamsCodingParityTests {
         var params = MonocleParams()
         params.orientation = .vertical
         params.hideStyle = .park
+        params.maximizeWindows = true
         params.newWindowPlacement = .last
         params.appBar.visibility = .hidden
         var over = MonocleOverride()

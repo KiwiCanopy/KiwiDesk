@@ -6,7 +6,8 @@ import Testing
 
 /// The ring and the marks step aside on a maximizing Monocle's tiled
 /// members through `KiwiCore.maximizesWindows(of:)` (#2976), each case
-/// beside a control that differs only in the setting, or in the mode.
+/// beside a control that differs only in the setting, or in the mode;
+/// a full Maximize joins the same set (`screenFillers(of:)`).
 @Suite("Monocle maximize windows: ring and marks (#2976)", .serialized)
 @MainActor
 struct MonocleMaximizeChromeTests {
@@ -78,6 +79,17 @@ struct MonocleMaximizeChromeTests {
         #expect(!on.stickyMarkSpecs().contains { $0.window == first })
         let off = makeCore(maximize: false)
         #expect(off.stickyMarkSpecs().contains { $0.window == first })
+    }
+
+    @Test("A full Maximize drops the mark; a Height one keeps it")
+    func fullMaximizeDropsTheMark() {
+        let full = makeCore(maximize: false, mode: "bsp")
+        #expect(full.stickyMarkSpecs().contains { $0.window == first })
+        #expect(full.execute("toggle_maximized").isSuccess)
+        #expect(!full.stickyMarkSpecs().contains { $0.window == first })
+        let height = makeCore(maximize: false, mode: "bsp")
+        height.execute("toggle_maximized", args: [.string("height")])
+        #expect(height.stickyMarkSpecs().contains { $0.window == first })
     }
 
     @Test("The predicate is no Maximize verdict")
