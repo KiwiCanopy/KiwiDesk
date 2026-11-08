@@ -151,3 +151,57 @@ extension KiwiCore {
         tiler.settings.tiling.offHidesBorders && isTilingOff(space)
     }
 }
+
+/// The tiling toggle belongs to the Desktop its Space shows on
+/// (#3008, owner 2026-11-09): state holds the shown Desktop's
+/// toggles, `DesktopMemory.tilingToggles` every other Desktop's.
+/// A Space moved to another screen keeps its toggle, since nothing
+/// is swapped until that screen's next switch.
+extension KiwiCore {
+    /// Runs `file`, which files a new Desktop reading, and swaps the
+    /// toggles of every Space whose shown Desktop it changed: the
+    /// Desktop left keeps them, the one arriving brings its own.
+    func refileTilingToggles(_ file: () -> Void) {
+        let spaces = state.workspaces.allSpaces.map(\.id)
+        let before = spaces.map { shownDesktop(of: $0) }
+        file()
+        for (space, was) in zip(spaces, before) {
+            guard case .shown(let left) = was,
+                case .shown(let arriving) = shownDesktop(of: space),
+                left != arriving
+            else { continue }
+            var kept = desktopMemory.tilingToggles[left] ?? [:]
+            kept[space] = state.tilingToggles[space]
+            desktopMemory.tilingToggles[left] = kept.isEmpty ? nil : kept
+            let incoming = desktopMemory.tilingToggles[arriving]?[space]
+            desktopMemory.tilingToggles[arriving]?[space] = nil
+            if desktopMemory.tilingToggles[arriving]?.isEmpty == true {
+                desktopMemory.tilingToggles[arriving] = nil
+            }
+            state.tilingToggles[space] = incoming
+        }
+    }
+
+    /// A renumbered Space keeps its toggles on every Desktop
+    /// (`moveMembers`, #1655).
+    func rekeyTilingToggles(_ old: SpaceID, to new: SpaceID) {
+        state.rekeyTilingToggle(old, to: new)
+        desktopMemory.tilingToggles = desktopMemory.tilingToggles
+            .mapValues {
+                var toggles = $0
+                if let on = toggles.removeValue(forKey: old) {
+                    toggles[new] = on
+                }
+                return toggles
+            }
+    }
+
+    /// A dropped Space forgets its toggles on every Desktop
+    /// (`forwardWindows(of:to:)`).
+    func forgetTilingToggles(of space: SpaceID) {
+        state.forgetTilingToggle(of: space)
+        desktopMemory.tilingToggles = desktopMemory.tilingToggles
+            .mapValues { $0.filter { $0.key != space } }
+            .filter { !$0.value.isEmpty }
+    }
+}

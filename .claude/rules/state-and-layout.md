@@ -37,9 +37,13 @@ editing here:
   apply's wholesale settings replace would hide it).
 - **A Space whose tiling is off is placed as Floating, through
   the one `StateCoordinator.placementMode(of:)` (#3008).** The
-  toggle is per-Space session state (`tilingToggles`, a per-Space
-  session store like the rest: rekeyed at `moveMembers`, forgotten
-  at `forwardWindows(of:to:)`), over the start-tiled value
+  toggle is per-Desktop, per-Space session state (owner,
+  2026-11-09): `tilingToggles` holds the shown Desktop's, and
+  `DesktopMemory.tilingToggles` every other Desktop's, swapped at
+  each switch by the one `refileTilingToggles` and never at a
+  screen move, so a Space moved to another screen keeps its
+  toggle; both rekey at `moveMembers` and forget at
+  `forwardWindows(of:to:)`. It sits over the start-tiled value
   `tilingStart` mirrors in (the Space's `tiling.start_override`,
   else the profile's `tiling.start`, else the app-wide
   `tiling.start_global`). The Space's stored `mode`

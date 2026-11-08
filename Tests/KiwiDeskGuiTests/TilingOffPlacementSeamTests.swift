@@ -141,15 +141,20 @@ struct TilingOffPlacementSeamTests {
             ),
             (
                 "forwardWindows", "KiwiCore+ProfileSpaces.swift",
-                "Profiles", "state.forgetTilingToggle(of: space)"
+                "Profiles", "forgetTilingToggles(of: space)"
             ),
             (
                 "moveMembers", "KiwiCore+HeldSpaces.swift", "Profiles",
-                "state.rekeyTilingToggle(source, to: target)"
+                "rekeyTilingToggles(source, to: target)"
             ),
             (
                 "appWideLiveChanged", "KiwiCore+AppWideLive.swift", "App",
                 "mirrorTilingStart()"
+            ),
+            (
+                "handleDesktopChange", "KiwiCore+Desktops.swift",
+                "Profiles",
+                "refileTilingToggles { desktopMemory.fileShown(snapshot) }"
             ),
             (
                 "bootstrapCoreServices", "KiwiCore+Bootstrap.swift", "App",
