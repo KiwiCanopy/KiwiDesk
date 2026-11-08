@@ -13,8 +13,9 @@ extension KeyCombo {
         layoutChar: (UInt32) -> String?
     ) {
         // A menu key equivalent has no side, so drawing `R⌘H` as
-        // `⌘H` would promise the left key too (#2601).
-        guard !modifiers.isSided else { return }
+        // `⌘H` would promise the left key too (#2601); a modifier
+        // tap has no key at all (#1872).
+        guard !modifiers.isSided, !isTap else { return }
         guard let key = Self.menuKey(for: keyCode, layoutChar: layoutChar)
         else { return }
         item.keyEquivalent = key

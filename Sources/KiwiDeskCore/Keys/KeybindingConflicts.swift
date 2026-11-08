@@ -102,7 +102,8 @@ public enum KeybindingConflicts {
                     target: .otherBinding(other)
                 )
             }
-            if !distinguishingSides {
+            // A tap reads its side whatever the switch (#1872).
+            if !distinguishingSides, !parsed.isTap {
                 return Conflict(
                     binding: binding,
                     target: .sideCollapse(other)

@@ -46,10 +46,14 @@ extension SettingsModel {
     /// What the side tap last did, read live.
     var sideTapStatus: SideTapStatus { core.keys.sideTapStatus }
 
-    /// The draft's rows that keep a modifier's side, every layer.
+    /// The draft's chords that keep a modifier's side, every layer;
+    /// a modifier tap reads its side whatever the switch (#1872).
     var sidedShortcutCount: Int {
         config.layers.flatMap(\.bindings).count {
-            KeyCombo.parse($0.combo)?.modifiers.isSided == true
+            guard let combo = KeyCombo.parse($0.combo) else {
+                return false
+            }
+            return combo.modifiers.isSided && !combo.isTap
         }
     }
 }

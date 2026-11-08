@@ -14,8 +14,8 @@ extension KeybindingManager {
         activeBindings = [:]
         // The tap answers nothing while suspended, or it would
         // swallow the sided press the recorder reads (#2601).
-        sideBindings = [:]
-        sideTap?.setRows([])
+        tapBindings = [:]
+        keyboardTap?.setRows(.empty)
     }
 
     func activate(_ layer: String) {
@@ -23,7 +23,7 @@ extension KeybindingManager {
         activationFailures = []
         noteHyperShortcuts()
         guard !isSuspended else {
-            _ = armSideTap([])
+            _ = armKeyboardTap(sides: [], taps: [])
             return
         }
         var hyperRows: [(KeyCombo, Int32)] = []
@@ -39,6 +39,8 @@ extension KeybindingManager {
                 )
         }
         for (combo, ref) in rows {
+            // A modifier tap is the keyboard tap's alone (#1872).
+            if combo.isTap { continue }
             // A Hyper combo registers only while the key is held.
             if combo.modifiers.contains(.hyper) {
                 hyperRows.append((combo, ref))
@@ -80,7 +82,9 @@ extension KeybindingManager {
             }
         }
         armHyper(hyperRows)
-        if !armSideTap(sideRows) {
+        let taps = modifierTapRows(in: layer)
+        if !armKeyboardTap(sides: sideRows, taps: taps) {
+            activationFailures.formUnion(taps.map(\.0))
             // No tap: the chord falls back to Carbon either-side,
             // as with the switch off, and a collapse is refused.
             for (combo, ref) in sideRows {
@@ -113,6 +117,8 @@ extension KeybindingManager {
         combo: KeyCombo,
         ref: Int32
     ) -> Bool {
+        // A modifier tap is no key Carbon can register (#1872).
+        guard !combo.isTap else { return false }
         let box = RegistrationBox()
         let id = registrar.register(
             keyCode: code,

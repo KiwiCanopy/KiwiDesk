@@ -49,11 +49,13 @@ enum KeyboardCensus {
         return match.map { [$0] } ?? []
     }
 
-    /// Parses non-empty key bindings across layers (`KeyCombo.parse`).
+    /// Parses non-empty key bindings across layers (`KeyCombo.parse`);
+    /// a modifier tap holds no key, so the board has none (#1872).
     static func combos(in layers: [KeyLayer]) -> [KeyCombo] {
         layers
             .flatMap(\.bindings)
             .compactMap { KeyCombo.parse($0.combo) }
+            .filter { !$0.isTap }
     }
 
     /// Modifier combinations in chip sort order.

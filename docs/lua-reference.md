@@ -1262,6 +1262,12 @@ only on the shortcuts on those keys. If macOS refuses that
 as with `false`. They fire once per press when held
 ([resize](#resize)).
 
+:::unreleased
+A [modifier tap](#modifiers-and-keys) is read the same way whatever
+this says: while one is bound, KiwiDesk also reads modifier changes
+and clicks, and acts only on the taps.
+:::
+
 The GUI twin is **Tell left and right modifiers apart** in
 **Shortcuts & Gestures ▸ Modifier keys**. Like
 [`set_hyper_key`](#set_hyper_key), the setting is app-wide, stored
@@ -6918,6 +6924,20 @@ A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
 of one modifier (`"lcmd+rcmd+h"`, `"cmd+rcmd+h"`) and a side with
 `hyper` are unrecognized.
 
+:::unreleased
+**A modifier tapped alone** binds like a chord. The modifier twice
+is a double tap: `"cmd+cmd"` taps either ⌘ twice (the same key both
+times), `"ropt+ropt"` the right ⌥ twice. One sided modifier alone
+is a single tap: `"rcmd"` taps the right ⌘ once. A single tap needs
+a side, and three taps or more are unrecognized. A tap counts when
+each press is shorter than 250 ms, the second follows within
+300 ms, and no key or click comes between. Unlike a sided chord, a
+tap keeps its side with `set_modifier_sides` off. A single tap on a
+key that also has a double tap waits 300 ms before it fires. A tap
+needs Accessibility; if macOS refuses it, a tap does not fire and
+its row is flagged.
+:::
+
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
 `return`/`enter`, `tab`, `escape`/`esc`, `f1`–`f12`, and
@@ -6956,9 +6976,11 @@ navigation keys from the keypad instead, and no keypad shortcut
 fires.
 
 The Settings app's shortcut recorder writes the long forms
-(`command`, `option`, `semicolon`, …); every alias round-trips.
+(`command`, `option`, `semicolon`, …), save for a modifier tap,
+which it writes short (`cmd+cmd`, `rcmd`); every alias round-trips.
 
-A combo is any set of modifiers plus **exactly one key**.
+A combo is any set of modifiers plus **exactly one key**, or a
+modifier tap (above).
 Multi-key chords (`cmd+j+k`) are not expressible; a hand-written
 combo that doesn't parse is never registered, and the Shortcuts
 & Gestures page flags the row with ⚠ *"isn't a recognized shortcut"*.

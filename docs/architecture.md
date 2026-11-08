@@ -162,8 +162,8 @@ flowchart TD
 ```
 
 1. **`Keys`** (Carbon `RegisterEventHotKey` — no Input Monitoring
-   permission — or, for a shortcut that keeps a modifier's side,
-   one keyboard tap; `input-and-animation.md`), **`IPC`** (CLI /
+   permission — or, for a shortcut that keeps a modifier's side
+   or a modifier tap, one keyboard tap; `input-and-animation.md`), **`IPC`** (CLI /
    external) or **`Lua`** (VM bridge) originates the intent.
 2. **`Commands`** — dispatches the `set_*` verb. The verb
    vocabulary is one-to-one with the profile JSON keys

@@ -47,13 +47,14 @@ struct ScrollTapSeamTests {
     func oneTapPerFile() throws {
         // `tapCreate` without its `(` also catches `tapCreateForPid(`
         // and `tapCreateForPSN(`; `EventTapCreate` the C spelling.
-        // The keyboard tap is #2601's, bounded to sided shortcuts.
+        // The keyboard tap is #2601's, which every key reader joins
+        // as a consumer (#1872).
         let sites =
             try Self.sites(of: "tapCreate")
             + Self.sites(of: "EventTapCreate")
         #expect(
             sites.map(\.file.lastPathComponent).sorted()
-                == ["ModifierSideTap.swift", "ScrollGestureTap.swift"],
+                == ["KeyboardTap.swift", "ScrollGestureTap.swift"],
             .init(rawValue: sites.map(\.site).joined(separator: ", "))
         )
     }
@@ -71,9 +72,9 @@ struct ScrollTapSeamTests {
         let taps = [
             ("ScrollGestureTap.swift", "Events", Self.tapFile),
             (
-                "ModifierSideTap.swift", "Keys",
+                "KeyboardTap.swift", "Keys",
                 Self.root.appendingPathComponent(
-                    "Sources/KiwiDeskCore/Keys/ModifierSideTap.swift"
+                    "Sources/KiwiDeskCore/Keys/KeyboardTap.swift"
                 )
             ),
         ]
@@ -128,8 +129,8 @@ struct ScrollTapSeamTests {
                 "mouse.scroll.makeTap = { _ in nil }"
             ),
             (
-                "ModifierSideTap.live(", "KeybindingManager.swift",
-                "keys.makeSideTap = { _, _ in nil }"
+                "KeyboardTap.live(", "KeybindingManager.swift",
+                "keys.makeKeyboardTap = { _, _, _ in nil }"
             ),
         ]
         for (factory, home, pin) in factories {
@@ -149,24 +150,46 @@ struct ScrollTapSeamTests {
         }
     }
 
-    @Test("the keyboard tap takes its one key-down mask")
-    func keyboardMask() throws {
+    @Test("the keyboard tap is built from its consumers' masks")
+    func consumerMasks() throws {
         let file = Self.root.appendingPathComponent(
-            "Sources/KiwiDeskCore/Keys/ModifierSideTap.swift"
+            "Sources/KiwiDeskCore/Keys/KeyboardTap.swift"
         )
         let source = try SourceScan.strippedSource(at: file)
-        #expect(source.contains("eventsOfInterest: Self.mask"))
+        // One creation, from the live consumers' union; no mask
+        // spelled beside the consumer's own constants.
+        // Ends at the comma: a widened union keeps the prefix.
         #expect(
             source.contains(
-                "CGEventMask(1) << CGEventType.keyDown.rawValue"
+                "eventsOfInterest: KeyboardTapConsumer.union(consumers),"
             )
         )
-        #expect(source.components(separatedBy: "CGEventMask(").count == 2)
-        // The value too: a mask widened by a second term keeps the
-        // spelling above.
+        #expect(source.components(separatedBy: "eventsOfInterest:").count == 2)
+        #expect(source.components(separatedBy: "CGEventMask(1)").count == 2)
+        // The values: `.sides` key-down alone, `.modifierTaps` the
+        // flag changes, key-down and mouse-down #1229 rules, and the
+        // union of none is no mask.
+        let bit = { (type: CGEventType) in CGEventMask(1) << type.rawValue }
+        #expect(KeyboardTapConsumer.sides.mask == bit(.keyDown))
         #expect(
-            ModifierSideTap.mask
-                == CGEventMask(1) << CGEventType.keyDown.rawValue
+            KeyboardTapConsumer.modifierTaps.mask
+                == bit(.flagsChanged) | bit(.keyDown) | bit(.leftMouseDown)
+                | bit(.rightMouseDown) | bit(.otherMouseDown)
+        )
+        #expect(KeyboardTapConsumer.union([]) == 0)
+        #expect(
+            KeyboardTapConsumer.union([.sides, .modifierTaps])
+                == KeyboardTapConsumer.modifierTaps.mask
+        )
+        // Only `.sides` swallows, so a taps-only tap listens.
+        #expect(KeyboardTapConsumer.allCases.filter(\.swallows) == [.sides])
+        #expect(
+            source.contains("options: KeyboardTapConsumer.options(consumers),")
+        )
+        #expect(KeyboardTapConsumer.options([.modifierTaps]) == .listenOnly)
+        #expect(KeyboardTapConsumer.options([.sides]) == .defaultTap)
+        #expect(
+            KeyboardTapConsumer.options([.sides, .modifierTaps]) == .defaultTap
         )
     }
 }

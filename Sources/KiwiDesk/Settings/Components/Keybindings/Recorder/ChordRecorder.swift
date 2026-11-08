@@ -58,7 +58,13 @@ final class ChordRecorder {
     private var hyperOn = false
     private var hyperHeld = false
     /// `.combo` mode: what a press keeps of a side, nil for none.
-    private var sides: RecorderSides?
+    private(set) var sides: RecorderSides?
+    /// `.combo` mode with taps on: the one tap rule (#1872), and
+    /// the wait a single tap commits after.
+    var tapDetector: ModifierTapDetector?
+    var tapWait: Task<Void, Never>?
+    /// The single tap waiting out the gap, nil once it is not.
+    var onPendingTap: (KeyCombo?) -> Void = { _ in }
     var onPreview: (String) -> Void = { _ in }
     var onFinish: (Outcome) -> Void = { _ in }
     var isSuppressingKeyUp: Bool { releaseMonitor != nil }
@@ -68,11 +74,15 @@ final class ChordRecorder {
         mode: Mode = .combo,
         hyper: Bool = false,
         sides: RecorderSides? = nil,
+        taps: Bool = false,
+        pendingTap: @escaping (KeyCombo?) -> Void = { _ in },
         preview: @escaping (String) -> Void,
         finish: @escaping (Outcome) -> Void
     ) {
         stop()
         self.mode = mode
+        tapDetector = taps && mode == .combo ? ModifierTapDetector() : nil
+        onPendingTap = pendingTap
         heldMost = []
         hyperOn = hyper
         hyperHeld = false
@@ -94,7 +104,8 @@ final class ChordRecorder {
             let swallow = self.handle(
                 kind,
                 keyCode: event.keyCode,
-                flags: event.modifierFlags
+                flags: event.modifierFlags,
+                time: event.timestamp
             )
             return swallow ? nil : event
         }
@@ -124,6 +135,7 @@ final class ChordRecorder {
     }
 
     private func stopCapture() {
+        endTaps()
         if let keyMonitor {
             NSEvent.removeMonitor(keyMonitor)
         }
@@ -154,10 +166,12 @@ final class ChordRecorder {
     func handle(
         _ kind: EventKind,
         keyCode: UInt16,
-        flags: NSEvent.ModifierFlags
+        flags: NSEvent.ModifierFlags,
+        time: TimeInterval = 0
     ) -> Bool {
         switch kind {
         case .keyDown:
+            feedTap(.key)
             let held = flags.intersection([
                 .command, .option, .control, .shift,
             ])
@@ -210,6 +224,7 @@ final class ChordRecorder {
             }
             guard mode == .modifiers else {
                 onPreview(previewSymbols(flags))
+                feedTap(.flags(Self.held(flags), at: time))
                 return false
             }
             return modifiersChanged(flags)

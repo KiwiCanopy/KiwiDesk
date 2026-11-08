@@ -1,9 +1,11 @@
 import Foundation
 
-/// What the side tap last did (#2601), for the Settings row; the
-/// GUI narrates it (#96).
+/// What the keyboard tap last did (#2601, #1872), for the sides
+/// row, which narrates it while the switch is on (#96). A refused
+/// tap's modifier-tap rows are told through `activationFailures`.
 public enum SideTapStatus: Equatable, Sendable {
-    /// No sided shortcut needs it, or the switch is off.
+    /// No row needs it: no sided chord with the switch on, and no
+    /// modifier tap.
     case off
     case running
     /// macOS refused the tap, which a missing Accessibility grant
@@ -13,9 +15,10 @@ public enum SideTapStatus: Equatable, Sendable {
     case refused
 }
 
-/// The side tap's rows for KeybindingManager (#2601): every
-/// either-side shortcut stays a Carbon hotkey, and only the chords
-/// a sided shortcut names move to the tap while the switch is on.
+/// The keyboard tap's rows for KeybindingManager: every
+/// either-side shortcut stays a Carbon hotkey, only the chords a
+/// sided shortcut names move to the tap while the switch is on
+/// (#2601), and every modifier tap rides it (#1872).
 extension KeybindingManager {
     /// The either-side chords whose rows the tap answers: those a
     /// sided row in `layer` names, while the switch is on. An
@@ -32,44 +35,46 @@ extension KeybindingManager {
         )
     }
 
-    /// Hands the tap its rows, building it for the first and
-    /// stopping it with the last, so no row means no tap. False
-    /// where rows wanted a tap macOS refused.
-    func armSideTap(_ rows: [(KeyCombo, Int32)]) -> Bool {
-        guard !rows.isEmpty else {
-            sideTap?.stop()
-            sideTap = nil
+    /// The modifier-tap rows in `layer` (#1872): every tap, since
+    /// a tap is never a Carbon hotkey.
+    func modifierTapRows(in layer: String) -> [(KeyCombo, Int32)] {
+        bindings(for: layer).filter { $0.key.isTap }.map { ($0.key, $0.value) }
+    }
+
+    /// Hands the keyboard tap its rows per consumer, building it for
+    /// the first consumer, rebuilding it when the set of consumers
+    /// changes and stopping it with the last, so no row means no
+    /// tap. False where rows wanted a tap macOS refused.
+    func armKeyboardTap(
+        sides: [(KeyCombo, Int32)],
+        taps: [(KeyCombo, Int32)]
+    ) -> Bool {
+        tapBindings = [:]
+        let rows = KeyboardTapRows(
+            sides: sideTapRows(sides),
+            taps: taps.map { combo, ref in
+                ModifierTapRow(combo: combo, id: liveTapID(combo, ref))
+            }
+        )
+        let wanted = rows.consumers
+        guard !wanted.isEmpty else {
+            dropKeyboardTap()
             sideTapStatus = .off
             return true
         }
-        guard !sideTapRefused || sideTap != nil else {
+        guard !keyboardTapRefused else {
+            tapBindings = [:]
+            dropKeyboardTap()
             sideTapStatus = .refused
             return false
         }
-        var tapRows: [SideTapRow] = []
-        for (combo, ref) in rows {
-            var codes = [combo.keyCode]
-            // A keypad digit is its number-row twin (#1074).
-            if let twin = KeypadKeys.keypadTwin(of: combo.keyCode) {
-                codes.append(twin)
-            }
-            for code in codes {
-                nextSideID &+= 1
-                sideBindings[nextSideID] = LiveBinding(ref: ref, combo: combo)
-                tapRows.append(
-                    SideTapRow(
-                        keyCode: code,
-                        modifiers: combo.modifiers,
-                        id: nextSideID
-                    )
-                )
-            }
-        }
-        if sideTap == nil {
-            sideTap = makeSideTap(
+        if keyboardTap?.consumers != wanted {
+            dropKeyboardTap()
+            keyboardTap = makeKeyboardTap(
+                wanted,
                 { [weak self] id in
                     DispatchQueue.main.async {
-                        MainActor.assumeIsolated { self?.sideFire(id) }
+                        MainActor.assumeIsolated { self?.tapFire(id) }
                     }
                 },
                 { [weak self] line in
@@ -79,35 +84,64 @@ extension KeybindingManager {
                 }
             )
             onLog(
-                sideTap == nil
-                    ? "modifier side tap: refused by macOS (Accessibility?)"
-                    : "modifier side tap: installed"
+                keyboardTap == nil
+                    ? "keyboard tap: refused by macOS (Accessibility?)"
+                    : "keyboard tap: installed"
             )
         }
-        guard let sideTap else {
-            sideTapRefused = true
-            sideBindings = [:]
+        guard let keyboardTap else {
+            keyboardTapRefused = true
+            tapBindings = [:]
             sideTapStatus = .refused
             return false
         }
+        keyboardTap.setRows(rows)
         sideTapStatus = .running
-        sideTap.setRows(tapRows)
         return true
+    }
+
+    private func dropKeyboardTap() {
+        keyboardTap?.stop()
+        keyboardTap = nil
+    }
+
+    /// The side rows, a keypad digit with its number-row twin
+    /// (#1074).
+    private func sideTapRows(_ rows: [(KeyCombo, Int32)]) -> [SideTapRow] {
+        rows.flatMap { combo, ref in
+            var codes = [combo.keyCode]
+            if let twin = KeypadKeys.keypadTwin(of: combo.keyCode) {
+                codes.append(twin)
+            }
+            return codes.map {
+                SideTapRow(
+                    keyCode: $0,
+                    modifiers: combo.modifiers,
+                    id: liveTapID(combo, ref)
+                )
+            }
+        }
+    }
+
+    private func liveTapID(_ combo: KeyCombo, _ ref: Int32) -> UInt32 {
+        nextTapID &+= 1
+        tapBindings[nextTapID] = LiveBinding(ref: ref, combo: combo)
+        return nextTapID
     }
 
     /// Asks macOS for the tap again — at `KiwiCore.start()`, the
     /// door a granted Accessibility comes through.
-    func retrySideTap() {
-        guard sideTapRefused else { return }
-        sideTapRefused = false
+    func retryKeyboardTap() {
+        guard keyboardTapRefused else { return }
+        keyboardTapRefused = false
         activate(currentLayer)
     }
 
-    /// A press the tap answered: fires the binding as a Carbon
-    /// press does, with no hold glide, since the tap reports no
-    /// release.
-    func sideFire(_ id: UInt32) {
-        guard !isSuspended, let live = sideBindings[id] else { return }
+    /// A press or tap the keyboard tap answered: fires the binding
+    /// as a Carbon press does, with no hold glide, since the tap
+    /// reports no release.
+    func tapFire(_ id: UInt32) {
+        guard !isSuspended, let live = tapBindings[id] else { return }
         pressFire(ref: live.ref, combo: live.combo, id: nil)
     }
 }
