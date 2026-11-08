@@ -64,14 +64,17 @@ struct AppRuleDeleteButton: View {
     var sharedFrom: RuleReachReading?
     let onDelete: (RuleRemoval) -> Void
 
+    /// The trash column's one width, every form's: a menu pop-up
+    /// takes its width from AppKit in a live window, so a hidden
+    /// item-less menu standing in for it drew narrower than the
+    /// trash beside it (#3062 lane, owner 2026-11-08).
+    static let columnWidth: CGFloat = 25
+
     @ViewBuilder var body: some View {
-        if let sharedFrom {
-            Self.menu(help: help, sharedFrom: sharedFrom, onDelete)
-        } else {
-            // Stands in the menu form's width, so a list mixing
-            // shared and unshared rules keeps one trailing column.
-            ZStack {
-                Self.slot
+        Group {
+            if let sharedFrom {
+                Self.menu(help: help, sharedFrom: sharedFrom, onDelete)
+            } else {
                 Button {
                     onDelete(.everywhere)
                 } label: {
@@ -81,13 +84,14 @@ struct AppRuleDeleteButton: View {
                 .iconButtonAffordance(help)
             }
         }
+        .frame(width: Self.columnWidth)
     }
 
     /// The trash's width, held empty and unannounced, for a row
     /// with nothing to remove beside rows ending in this trash.
     static var slot: some View {
-        menu(help: "", sharedFrom: nil) { _ in }
-            .hidden()
+        Color.clear
+            .frame(width: columnWidth, height: 1)
             .accessibilityHidden(true)
     }
 

@@ -43,6 +43,30 @@ struct OpenApplicationsTrashSlotTests {
         #expect(plain > 0)
         #expect(plain == menu)
         #expect(slot == menu)
+        #expect(slot == AppRuleDeleteButton.columnWidth)
+    }
+
+    /// Every form takes the one fixed width, and the slot is no
+    /// control: a hidden item-less menu sized itself narrower than
+    /// the trash in a live window, which `fittingSize` above cannot
+    /// see (Pocket and Open applications, owner 2026-11-08).
+    @Test("the trash column is one fixed width, the slot no control")
+    func columnIsFixed() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "AppRuleIdentity.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.contains(
+                "}}.frame(width:Self.columnWidth)}staticvarslot:someView{"
+                    + "Color.clear.frame(width:columnWidth,height:1)"
+            )
+        )
     }
 
     private func source(_ name: String) throws -> String {
