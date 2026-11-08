@@ -55,6 +55,22 @@ struct TouchReaderSeamTests {
         }
     }
 
+    @Test("the session's return rebuilds the reader")
+    func returnRearms() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+            )
+        )
+        // The closure the session's return runs, up to its brace.
+        let start = try #require(
+            source.range(of: "sleepWake.onReturn = {")
+        )
+        let closure = source[start.upperBound...]
+            .prefix { $0 != "}" }
+        #expect(closure.contains("mouse.trackpad.rearm()"))
+    }
+
     @Test("the framework's callables are the reader's alone")
     func callablesHaveOneCaller() throws {
         for symbol in [

@@ -175,7 +175,7 @@ struct TouchFrameParseTests {
             record(id: 1, state: 4, x: .nan, y: 0.5)
             + record(id: 2, state: 4, x: 0.5, y: 7)
             + record(id: 3, state: 4, x: -0.2, y: 0.5)
-            + record(id: 4, state: 4, x: 1, y: 0)
+            + record(id: 4, state: 4, x: 1.05, y: -0.05)
         let contacts = bytes.withUnsafeBytes {
             MultitouchSupport.contacts(in: $0, count: 4)
         }

@@ -54,6 +54,9 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         ("TrackpadFourFingerVertSwipeGesture", 4, .vertical),
     ]
     static let tapKey = "TrackpadThreeFingerTapGesture"
+    /// Three-finger drag zeroes the three-finger swipe keys while
+    /// it drags with those fingers, so it owns both axes.
+    static let dragKey = "TrackpadThreeFingerDrag"
 
     /// The verdict over the keys read; none read is unread, since
     /// a domain System Settings never wrote states no choice.
@@ -64,27 +67,34 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         where (prefs[key] ?? 0) != 0 {
             swipes[fingers, default: []].insert(axis)
         }
+        if (prefs[dragKey] ?? 0) != 0 {
+            swipes[3, default: []].formUnion([.horizontal, .vertical])
+        }
         return TrackpadSystemGestures(
             swipes: swipes,
             lookUpTap: (prefs[tapKey] ?? 0) != 0
         )
     }
 
-    /// The built-in trackpad's domain; a Magic Trackpad writes the
-    /// same keys to the Bluetooth driver's, which System Settings
-    /// keeps in step.
-    static let domain = "com.apple.AppleMultitouchTrackpad"
+    /// The built-in trackpad's domain and the Magic Trackpad's
+    /// driver's; a key either one sets counts.
+    static let domains = [
+        "com.apple.AppleMultitouchTrackpad",
+        "com.apple.driver.AppleBluetoothMultitouch.trackpad",
+    ]
 
     /// The live read.
     static func readLive() -> TrackpadSystemGestures {
-        CFPreferencesAppSynchronize(domain as CFString)
         var prefs: [String: Int] = [:]
-        for key in swipeKeys.map(\.0) + [tapKey] {
-            if let value = CFPreferencesCopyAppValue(
-                key as CFString,
-                domain as CFString
-            ) as? Int {
-                prefs[key] = value
+        for domain in domains {
+            CFPreferencesAppSynchronize(domain as CFString)
+            for key in swipeKeys.map(\.0) + [tapKey, dragKey] {
+                if let value = CFPreferencesCopyAppValue(
+                    key as CFString,
+                    domain as CFString
+                ) as? Int, value != 0 || prefs[key] == nil {
+                    prefs[key] = value
+                }
             }
         }
         return parse(prefs)

@@ -5222,8 +5222,9 @@ The keys must be exactly the ones bound. A swipe, a pinch, a
 rotation and a Force Click need at least one modifier; a tap may
 take none. A gesture macOS answers itself, set in System Settings
 ▸ Trackpad, does nothing here, since both would act on it: a
-three-finger tap set to Look up, and a three- or four-finger
-swipe along an axis macOS uses. KiwiDesk reads those settings each
+three-finger tap set to Look up, a three- or four-finger swipe
+along an axis macOS uses, and any three-finger swipe while
+three-finger drag is on. KiwiDesk reads those settings each
 time a gesture lands. Reading the trackpad needs no
 permission; where macOS no longer offers the private framework
 KiwiDesk reads it through, no slot fires, and the scroll gestures

@@ -148,6 +148,40 @@ struct TouchGesturesTests {
         #expect(box.fired.first?.1.kind == .swipe(.up))
     }
 
+    @Test("the preferences are read afresh for each batch")
+    func prefsReadPerBatch() {
+        var system = TrackpadSystemGestures.unread
+        let (gestures, box) = front()
+        gestures.readSystemGestures = { system }
+        gestures.resolve(
+            base: map([.tap3: .bound(.init(action: "a()"))]),
+            profileOverride: nil
+        )
+        gestures.start()
+        gestures.receive([event(.tap, 3)])
+        system = TrackpadSystemGestures(lookUpTap: true)
+        gestures.receive([event(.tap, 3)])
+        system = .unread
+        gestures.receive([event(.tap, 3)])
+        #expect(box.fired.count == 2)
+    }
+
+    @Test("a rearm builds the reader afresh, and none while stopped")
+    func rearmRebuilds() {
+        let (gestures, box) = front()
+        gestures.resolve(
+            base: map([.tap4: .bound(.init(action: "b()"))]),
+            profileOverride: nil
+        )
+        gestures.rearm()
+        #expect(box.readers.isEmpty, "stopped: nothing to rebuild")
+        gestures.start()
+        gestures.rearm()
+        #expect(box.readers.count == 2)
+        #expect(box.readers.first?.stopped == true)
+        #expect(box.readers.last?.stopped == false)
+    }
+
     @Test("nothing fires before the start or after the stop")
     func stoppedDropsEvents() {
         let (gestures, box) = front()
@@ -194,6 +228,9 @@ struct TouchGesturesTests {
         #expect(parsed.swipes[3] == [.horizontal, .vertical])
         #expect(parsed.swipes[4] == [.vertical])
         #expect(parsed.lookUpTap)
+        let drag = TrackpadSystemGestures.parse(["TrackpadThreeFingerDrag": 1])
+        #expect(drag.swipes[3] == [.horizontal, .vertical])
+        #expect(drag.swipes[4] == nil)
         let none = TrackpadSystemGestures.parse([:])
         #expect(!none.read)
         #expect(!none.owns(event(.tap, 3)))

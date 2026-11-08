@@ -12813,7 +12813,8 @@ ground:
 Because the reader cannot keep macOS from answering a gesture too, a
 gesture macOS owns does not fire: KiwiDesk reads the trackpad
 preferences and a three-finger tap set to Look up, or a three- or
-four-finger swipe on an axis macOS uses, stands down; a preference
+four-finger swipe on an axis macOS uses (or any three-finger
+swipe under three-finger drag), stands down; a preference
 it cannot read owns nothing, so the binding stays live. Every swipe,
 pinch, rotation and Force Click needs a modifier, since macOS and apps own the
 unmodified ones; a tap may take none.

@@ -20,8 +20,10 @@ extension MultitouchSupport {
 
     /// Reads `count` records from `buffer`, which the caller sizes
     /// at `count` strides. A record whose position is not a finite
-    /// point on the pad is dropped: a layout a later macOS moved
-    /// reads as garbage there, and garbage must never fire a slot.
+    /// point on or just past the pad is dropped: a layout a later
+    /// macOS moved reads as garbage there, and garbage must never
+    /// fire a slot. The margin keeps a finger at the border, whose
+    /// reading may overshoot an edge (unmeasured).
     static func contacts(
         in buffer: UnsafeRawBufferPointer,
         count: Int
@@ -50,6 +52,6 @@ extension MultitouchSupport {
     }
 
     private static func onPad(_ value: Float) -> Bool {
-        value.isFinite && (0...1).contains(value)
+        value.isFinite && (-0.1...1.1).contains(value)
     }
 }
