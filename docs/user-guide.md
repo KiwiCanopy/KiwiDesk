@@ -1092,14 +1092,14 @@ Its other keys are separate: `keypadplus`, `keypadminus`,
 keypad sends digits only while Num Lock is on.
 
 A combo is one set of modifiers plus exactly one key; multi-key
-chords like `cmd+j+k` are not supported — use layers.
+chords like `cmd+j+k` are not supported — use layers. KiwiDesk
+binds the physical key, so switching input sources changes what
+the caps print, not which key fires.
 
 :::unreleased
 A combo can also be a modifier tapped alone, `cmd+cmd` or `rcmd`
 ([Modifiers and Keys](lua-reference.md#modifiers-and-keys)).
-::: KiwiDesk
-binds the physical key, so switching input sources changes what
-the caps print, not which key fires.
+:::
 
 ### Actions
 
