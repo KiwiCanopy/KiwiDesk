@@ -29,6 +29,9 @@ struct SettingsCatalogDrawerTests {
         // `.dynamic`, since the switch cue left for Shortcuts ▸
         // macOS Desktops (#2655).
         "desktops.title",
+        // Maximize's screen shapes not connected (#3062): each row
+        // is a shape, and its cells are the card's own columns.
+        "layout_defaults.maximize.other_shapes",
         // Raw Lua bindings: rows are the user's own bindings.
         "shortcuts.advanced.title",
     ]

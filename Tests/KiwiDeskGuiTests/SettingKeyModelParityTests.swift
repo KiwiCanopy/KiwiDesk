@@ -130,7 +130,9 @@ struct SettingKeyModelParityTests {
     /// coverage: a stripped `(master)` row must NOT own its
     /// subtree, or a field added to `AnimationSettings` or the
     /// `Gaps` pair would need no census row and this direction
-    /// would stay green.
+    /// would stay green. A `PerScreenShape` reflects as one
+    /// collection, a column of the Maximize table (#3062), so the
+    /// walk stops there: a struct-valued one would hide its fields.
     @Test func everyModelLeafHasACensusRow() {
         let walked = Self.walkedModel()
         #expect(

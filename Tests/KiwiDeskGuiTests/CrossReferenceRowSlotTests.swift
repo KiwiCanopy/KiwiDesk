@@ -134,7 +134,7 @@ struct CrossReferenceRowSlotTests {
         "SimpleSpacesCard.swift:Self.hintProse",  // SimpleSectionsTests
         // MaximizeCaptionSlotTests (#3062).
         "MaximizeCard.swift:prose",
-        "MaximizeShareCaption.swift:prose",
+        "MaximizeShareCaption.swift:Self.prose(axis:axis)",
     ]
 
     // MARK: - The values

@@ -5913,9 +5913,10 @@ maximized, as any window does.
 With an axis, the window fills that axis of the same area and
 takes a share of the other: `"height"` runs top to bottom at a
 share of the width, `"width"` side to side at a share of the
-height. The share and the anchor default to
+height. The share and the anchor default to the row
 [`maximize.set_share`](#maximizeset_share) and
-[`maximize.set_anchor`](#maximizeset_anchor). It centres on the
+[`maximize.set_anchor`](#maximizeset_anchor) store for the shape
+of the window's screen. It centres on the
 screen, or with `"in_place"` on the window's own slot, moved back
 inside the screen where it would cross an edge. The bars hide
 only where the window reaches into their strip, and the focus
@@ -5944,37 +5945,52 @@ end)
 ### maximize.set_share
 
 :::unreleased
-**Expects:** an axis, `"height"` or `"width"`, and a share from
-0.1 to 1.
+**Expects:** an axis, `"height"` or `"width"`, a share from 0.1 to
+1, and optionally a screen shape: `"laptop"`, `"widescreen"`,
+`"ultrawide"`, `"super_ultrawide"` or `"portrait"`.
 
 **Does:** sets the share of the other axis that
-[`toggle_maximized`](#toggle_maximized) takes for that axis:
-for `"height"` the window's width as a share of the screen's, for
-`"width"` its height. Default `0.5` for both. A window already
-maximized keeps the shape it was given.
+[`toggle_maximized`](#toggle_maximized) takes for that axis on a
+screen of that shape: for `"height"` the window's width as a share
+of the screen's, for `"width"` its height. Without a shape it sets
+every shape. A window already maximized keeps the shape it was
+given.
+
+| Shape | Screen | `"height"` | `"width"` |
+|---|---|---|---|
+| `"laptop"` | under 1900 pt wide | 0.75 | 0.667 |
+| `"widescreen"` | every other screen | 0.5 | 0.5 |
+| `"ultrawide"` | 3000 pt wide or more, or 2.1:1 | 0.333 | 0.5 |
+| `"super_ultrawide"` | 3:1 or wider | 0.25 | 0.5 |
+| `"portrait"` | taller than wide | 0.75 | 0.5 |
+
+The defaults are the two right-hand columns.
 
 **Example:**
 
 ```lua
-KiwiDesk.maximize.set_share("height", 0.6)
+KiwiDesk.maximize.set_share("height", 0.6, "widescreen")
 ```
 :::
 
 ### maximize.set_anchor
 
 :::unreleased
-**Expects:** `"center"` or `"in_place"`.
+**Expects:** `"center"` or `"in_place"`, and optionally a screen
+shape, as [`maximize.set_share`](#maximizeset_share) takes.
 
-**Does:** sets where a Maximize Height or Width grows from:
-`"center"` centres it on the screen, `"in_place"` on the window's
-own slot, moved back inside the screen where it would cross an
-edge. A wider share in place covers part of a neighbour. Default
-`"center"`. A full Maximize ignores it.
+**Does:** sets where a Maximize Height or Width grows from on a
+screen of that shape: `"center"` centres it on the screen,
+`"in_place"` on the window's own slot, moved back inside the
+screen where it would cross an edge. A wider share in place covers
+part of a neighbour. Without a shape it sets every shape. Default
+`"in_place"` on `"ultrawide"` and `"super_ultrawide"`, `"center"`
+elsewhere. A full Maximize ignores it.
 
 **Example:**
 
 ```lua
-KiwiDesk.maximize.set_anchor("in_place")
+KiwiDesk.maximize.set_anchor("center", "ultrawide")
 ```
 :::
 

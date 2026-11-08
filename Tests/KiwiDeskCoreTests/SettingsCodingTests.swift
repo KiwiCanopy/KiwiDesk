@@ -102,14 +102,22 @@ struct SettingsCodingTests {
         let pocket = try object(root["pocket"])
         #expect(Set(pocket.keys) == ["color"])
         #expect(pocket["color"] as? String == "")
-        // `maximize.set_share(axis, share)` → `maximize.share.<axis>`
-        // and `maximize.set_anchor` → `maximize.anchor` (#3062).
+        // `maximize.set_share(axis, share, shape)` →
+        // `maximize.share.<axis>.<shape>` and
+        // `maximize.set_anchor(anchor, shape)` →
+        // `maximize.anchor.<shape>`, every shape stored (#3062).
         let maximize = try object(root["maximize"])
         #expect(Set(maximize.keys) == ["share", "anchor"])
         let share = try object(maximize["share"])
-        #expect(share["height"] as? Double == 0.5)
-        #expect(share["width"] as? Double == 0.5)
-        #expect(maximize["anchor"] as? String == "center")
+        let shapes = Set(ScreenShape.allCases.map(\.rawValue))
+        for axis in ["height", "width"] {
+            #expect(Set(try object(share[axis]).keys) == shapes)
+        }
+        let height = try object(share["height"])
+        #expect(height["super_ultrawide"] as? Double == 0.25)
+        let anchors = try object(maximize["anchor"])
+        #expect(Set(anchors.keys) == shapes)
+        #expect(anchors["ultrawide"] as? String == "in_place")
         #expect(shelf["pocket_edge"] as? String == "bottom")
         #expect(shelf["pocket_position"] as? Double == 82)
         // `kiwishelf.set_reading_contrast` →

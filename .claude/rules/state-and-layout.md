@@ -2382,7 +2382,11 @@ editing here:
   joins the same suite's `shapeAllowed` with its reason
   (`MaximizedReaderCensusTests` ▸ `shapeReadersAreCensused`). A
   whole share is a full Maximize (`MaximizeShape.init`), so "fills
-  its screen" is `axis == nil` alone. Lay the fill over the ISSUED frames
+  its screen" is `axis == nil` alone. A press reads the share and
+  anchor table through the one `KiwiCore.maximizeShape(from:for:)`,
+  for the shape of the screen the fill draws on
+  (`maximizeScreenShape(of:)`, `TilingEngine.screen(for:in:)`'s rule),
+  so a per-Space layer joins that body rather than a call site. Lay the fill over the ISSUED frames
   alone (`TilingEngine.fillingMaximized` inside
   `visibleFrames(placed: true)`), never the slots, so every slot
   reader keeps the row. **A write that rearranges a Space ends its

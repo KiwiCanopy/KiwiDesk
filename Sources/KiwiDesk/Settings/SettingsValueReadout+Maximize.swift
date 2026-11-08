@@ -1,6 +1,7 @@
 import KiwiDeskCore
 
-/// The Maximize card's diff rows (#3062).
+/// The Maximize card's diff rows (#3062): one per column, naming the
+/// screen shapes whose value changed.
 extension SettingsValueReadout {
     static func maximizeRows(
         _ key: BehaviourKey,
@@ -10,34 +11,44 @@ extension SettingsValueReadout {
     ) -> [SettingsDiffRow] {
         let old = before.maximize
         let new = after.maximize
+        let pair: (old: String, new: String)
         switch key {
         case .maximizeHeightShare:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: percent(old.heightShare),
-                    new: percent(new.heightShare)
-                )
-            ]
+            pair = changed(old.heightShare, new.heightShare, percent)
         case .maximizeWidthShare:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: percent(old.widthShare),
-                    new: percent(new.widthShare)
-                )
-            ]
+            pair = changed(old.widthShare, new.widthShare, percent)
         default:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: MaximizeCard.anchorName(old.anchor),
-                    new: MaximizeCard.anchorName(new.anchor)
-                )
-            ]
+            pair = changed(old.anchor, new.anchor, MaximizeCard.anchorName)
         }
+        return [
+            .change(
+                census,
+                label: label(for: census),
+                old: pair.old,
+                new: pair.new
+            )
+        ]
+    }
+
+    /// Each changed shape's value before and after, "Laptop 75%".
+    @MainActor
+    private static func changed<Value>(
+        _ old: PerScreenShape<Value>,
+        _ new: PerScreenShape<Value>,
+        _ format: (Value) -> String
+    ) -> (old: String, new: String) {
+        let shapes = ScreenShape.allCases.filter { old[$0] != new[$0] }
+        func list(_ values: PerScreenShape<Value>) -> String {
+            shapes.map {
+                L(
+                    "layout_defaults.maximize.diff_value",
+                    "%1$@ %2$@",
+                    MaximizeShapeText.name($0),
+                    format(values[$0])
+                )
+            }
+            .joined(separator: ", ")
+        }
+        return (list(old), list(new))
     }
 }

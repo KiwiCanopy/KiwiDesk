@@ -15,16 +15,22 @@ extension KiwiCore {
     /// (#3062). A press of the shape shown ends it, any other shape
     /// changes it in place.
     func toggleMaximized(_ args: [JSONValue] = []) -> CommandResponse {
+        let focused = focusedWindowID.flatMap { id in
+            state.windows[id].flatMap { window in
+                state.renderSpace(of: window).map { (id, $0) }
+            }
+        }
         let shape: MaximizeShape
-        switch maximizeShape(from: args) {
+        switch maximizeShape(
+            from: args,
+            for: focused?.1
+        ) {
         case .success(let read): shape = read
         case .failure(let refusal): return refusal.response
         }
-        guard let id = focusedWindowID,
-            let window = state.windows[id],
-            let spaceID = state.renderSpace(of: window),
-            let space = state.workspaces[spaceID]
+        guard let focused, let space = state.workspaces[focused.1]
         else { return .fail("no focused window") }
+        let (id, spaceID) = focused
         if state.maximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {
                 if $0.maximizeShape.matches(shape) {

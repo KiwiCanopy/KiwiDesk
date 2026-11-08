@@ -226,6 +226,15 @@ the anchor makes of the count is the preview caption's. The
 argument is in
 [design decisions](design-decisions.md#a-repeating-slot-is-offered-as-a-count-a-split-as-a-share).
 
+:::unreleased
+The Maximize card is a ruled exception (owner, 2026-11-08, #3062):
+its shares sit in a table, one row per screen shape, and each cell
+is a pop-up of ¼ ⅓ ½ ⅔ ¾ rather than a slider. A value Lua stored
+outside the five shows as an extra checked item above a separator,
+kept until a fraction replaces it; exact shares are Lua-only, the
+one escape (#1279).
+:::
+
 **Layout Defaults picks one layout at a time, and picks it by
 its picture (#204, #678 turn 10).** The layout modes are a
 fixed, small, mutually-exclusive set (`LayoutMode` minus

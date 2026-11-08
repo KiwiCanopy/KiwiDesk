@@ -13,8 +13,8 @@ struct MaximizeCaptionSlotTests {
         for prose in [
             MaximizeChordCaption.prose(name: "Height", chord: "⌃⌥⇧M"),
             MaximizeChordCaption.prose(name: "Width", chord: nil),
-            MaximizeShareCaption.prose(axis: .height, share: "50%"),
-            MaximizeShareCaption.prose(axis: .width, share: "50%"),
+            MaximizeShareCaption.prose(axis: .height),
+            MaximizeShareCaption.prose(axis: .width),
         ] {
             #expect(prose.contains(CrossReferenceRow.linkSlot), "\(prose)")
         }

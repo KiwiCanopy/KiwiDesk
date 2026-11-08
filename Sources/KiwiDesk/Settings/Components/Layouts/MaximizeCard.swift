@@ -1,79 +1,150 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Layout Defaults' Maximize card (#3062): the share each
-/// directional Maximize takes of its other axis, and where both grow
-/// from. Beside the minimum window size, since it applies to every
-/// layout; no row ever greys, since the verb reads them from Lua and
-/// the CLI whether or not a chord is bound.
+/// Layout Defaults' Maximize card (#3062, amendment 2026-11-08): for
+/// each shape of screen, the share each directional Maximize takes
+/// of its other axis and where it grows from. The shapes of the
+/// connected screens show; the rest wait in a drawer. Nothing greys:
+/// the verb reads every row from Lua and the CLI too.
 struct MaximizeCard: View {
     @ObservedObject var model: SettingsModel
 
-    private var maximize: Binding<MaximizeSettings> {
-        $model.config.settings.maximize
+    private var controls: LayoutDefaultsControls {
+        SettingsCatalog.layoutDefaults
+    }
+
+    /// The connected screens, by shape.
+    private var screens: [ScreenShape: [Display]] {
+        Dictionary(grouping: model.displays, by: ScreenShape.of)
+    }
+
+    private var shown: [ScreenShape] {
+        ScreenShape.allCases.filter { screens[$0] != nil }
+    }
+
+    private var hidden: [ScreenShape] {
+        ScreenShape.allCases.filter { screens[$0] == nil }
     }
 
     var body: some View {
-        SettingsSection(SettingsCatalog.layoutDefaults.maximizeCard) {
-            ForEach(LayoutDefaultsRowOrder.maximize, id: \.id) { key in
-                row(key)
+        SettingsSection(
+            SettingsCatalog.layoutDefaults.maximizeCard,
+            caption: L(
+                "layout_defaults.maximize.caption",
+                "How wide %1$@ makes a window, and how tall %2$@ "
+                    + "makes it, for each shape of screen. A screen's "
+                    + "shape comes from its size.",
+                KeybindingCatalog.maximizeHeight.displayLabel(),
+                KeybindingCatalog.maximizeWidth.displayLabel()
+            ),
+            help: MaximizeShapeText.thresholds
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
+                header
+                ForEach(shown, id: \.self) { shape in
+                    MaximizeShapeRow(
+                        model: model,
+                        shape: shape,
+                        screens: screens[shape] ?? []
+                    )
+                }
+            }
+            if !hidden.isEmpty {
+                SettingsDisclosure(
+                    SettingsCatalog.layoutDefaults.maximizeOtherShapes,
+                    summary: hidden.map(MaximizeShapeText.name)
+                        .joined(separator: ", ")
+                ) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(hidden, id: \.self) { shape in
+                            MaximizeShapeRow(
+                                model: model,
+                                shape: shape,
+                                screens: []
+                            )
+                        }
+                    }
+                }
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                MaximizeChordCaption(
+                    model: model,
+                    command: KeybindingCatalog.maximizeHeight,
+                    row: SettingsCatalog.shortcuts.maximizeHeightBinding
+                )
+                MaximizeChordCaption(
+                    model: model,
+                    command: KeybindingCatalog.maximizeWidth,
+                    row: SettingsCatalog.shortcuts.maximizeWidthBinding
+                )
             }
         }
     }
 
+    /// The column headings, one per census key in the card's order.
+    private var header: some View {
+        HStack(alignment: .bottom, spacing: MaximizeShapeRow.spacing) {
+            Text(
+                L("layout_defaults.maximize.screen_shape", "Screen shape")
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+            ForEach(LayoutDefaultsRowOrder.maximize, id: \.id) { key in
+                headingCell(key)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(
+                        width: MaximizeShapeRow.columnWidth,
+                        alignment: .leading
+                    )
+            }
+        }
+        .font(.callout)
+        .foregroundStyle(SettingsTheme.ink2)
+        .accessibilityHidden(true)
+    }
+
+    /// A column's heading, the search anchor of its census key.
     @ViewBuilder
-    private func row(_ key: SettingKey) -> some View {
+    private func headingCell(_ key: SettingKey) -> some View {
         switch key {
         case .behaviour(.maximizeHeightShare):
-            RatioRow(
-                label: SettingsCatalog.layoutDefaults.maximizeHeightShare.text,
-                value: maximize.heightShare,
-                range: MaximizeShape.shareRange
-            )
-            .searchAnchored(SettingsCatalog.layoutDefaults.maximizeHeightShare)
-            MaximizeChordCaption(
-                model: model,
-                command: KeybindingCatalog.maximizeHeight,
-                row: SettingsCatalog.shortcuts.maximizeHeightBinding
-            )
-        case .behaviour(.maximizeWidthShare):
-            RatioRow(
-                label: SettingsCatalog.layoutDefaults.maximizeWidthShare.text,
-                value: maximize.widthShare,
-                range: MaximizeShape.shareRange
-            )
-            .searchAnchored(SettingsCatalog.layoutDefaults.maximizeWidthShare)
-            MaximizeChordCaption(
-                model: model,
-                command: KeybindingCatalog.maximizeWidth,
-                row: SettingsCatalog.shortcuts.maximizeWidthBinding
-            )
-        case .behaviour(.maximizeAnchor):
-            SegmentedPicker(
-                SettingsCatalog.layoutDefaults.maximizeAnchor.text,
-                selection: maximize.anchor,
-                options: MaximizeAnchor.allCases.map {
-                    (title: Self.anchorName($0), value: $0)
-                },
-                help: L(
-                    "layout_defaults.maximize.anchor.help",
-                    "Where a window maximized on one side sits on the "
-                        + "other: in the center of the screen, or over "
-                        + "its own place in the layout, moved in if it "
-                        + "would cross an edge. Maximize itself always "
-                        + "fills the screen."
+            Text(controls.maximizeHeightShare.text)
+                .searchAnchored(
+                    SettingsCatalog.layoutDefaults.maximizeHeightShare
                 )
-            )
-            .searchAnchored(SettingsCatalog.layoutDefaults.maximizeAnchor)
+        case .behaviour(.maximizeWidthShare):
+            Text(controls.maximizeWidthShare.text)
+                .searchAnchored(
+                    SettingsCatalog.layoutDefaults.maximizeWidthShare
+                )
+        case .behaviour(.maximizeAnchor):
+            Text(L("layout_defaults.maximize.from", "From"))
+                .searchAnchored(
+                    SettingsCatalog.layoutDefaults.maximizeAnchor
+                )
         default:
             let _ = assertionFailure(
-                "unrendered Layout Defaults maximize row: \(key.id)"
+                "unrendered Maximize column: \(key.id)"
             )
             EmptyView()
         }
     }
 
-    /// An anchor's name, the picker's and the diff row's.
+    /// A column's catalog control, whose label names its cells.
+    static func control(_ key: SettingKey) -> SettingsControl? {
+        switch key {
+        case .behaviour(.maximizeHeightShare):
+            SettingsCatalog.layoutDefaults.maximizeHeightShare
+        case .behaviour(.maximizeWidthShare):
+            SettingsCatalog.layoutDefaults.maximizeWidthShare
+        case .behaviour(.maximizeAnchor):
+            SettingsCatalog.layoutDefaults.maximizeAnchor
+        default:
+            nil
+        }
+    }
+
+    /// An anchor's name, the pop-up's and the diff row's.
     static func anchorName(_ anchor: MaximizeAnchor) -> String {
         switch anchor {
         case .center:

@@ -16,7 +16,7 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case minSizeFloatingHeight = "settings.minWindowSizes.floating.height"
     case minSizePerSpaceOverride = "settings.minWindowSizeOverride[space]"
     /// Maximize Height's width share, Maximize Width's height share
-    /// and where both grow from (#3062).
+    /// and where both grow from, each per screen shape (#3062).
     case maximizeHeightShare = "settings.maximize.heightShare"
     case maximizeWidthShare = "settings.maximize.widthShare"
     case maximizeAnchor = "settings.maximize.anchor"
@@ -111,10 +111,7 @@ extension BehaviourKey {
         case .maximizeWidthShare:
             return .text("layout_defaults.maximize.width_share")
         case .maximizeAnchor:
-            return .text(
-                "layout_defaults.maximize.anchor",
-                help: "layout_defaults.maximize.anchor.help"
-            )
+            return .text("layout_defaults.maximize.anchor")
         case .minSizePerSpaceOverride:
             return .text(
                 "layout_defaults.min_window_size",
