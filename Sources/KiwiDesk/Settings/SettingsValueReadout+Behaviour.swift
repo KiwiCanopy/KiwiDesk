@@ -129,9 +129,19 @@ extension SettingsValueReadout {
                     new: after.tiling.offHidesBars
                 )
             ]
-        // Lua-only start values (#3008): no draft writes them, and
-        // the app-wide one is undrafted.
-        case .tilingStart, .tilingStartOverride, .tilingStartGlobal:
+        // Unset follows the app-wide value, on by default (#3008).
+        case .tilingStart:
+            return [
+                behaviourToggleRow(
+                    census,
+                    label: label(for: census),
+                    old: before.tiling.start ?? true,
+                    new: after.tiling.start ?? true
+                )
+            ]
+        // Lua-only (#3008): no draft writes the per-Space values,
+        // and the app-wide one is undrafted.
+        case .tilingStartOverride, .tilingStartGlobal:
             return []
         case .mouseFollowsFocus:
             return [

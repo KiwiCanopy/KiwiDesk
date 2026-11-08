@@ -52,6 +52,13 @@ extension SettingsRevertRegister {
             .entry(\.settings.minWindowSizeOverride, key: { SpaceID($0) }),
         .behaviour(.placementOverride):
             .entry(\.settings.placementOverride, key: { SpaceID($0) }),
+        .behaviour(.tilingStart): .leaf(\.settings.tiling.start),
+        .behaviour(.tilingStartOverride):
+            .entry(\.settings.tiling.startOverride, key: { SpaceID($0) }),
+        .behaviour(.tilingOffHidesBorders):
+            .leaf(\.settings.tiling.offHidesBorders),
+        .behaviour(.tilingOffHidesBars):
+            .leaf(\.settings.tiling.offHidesBars),
         .behaviour(.mouseResize): .leaf(\.settings.mouseResize),
         .behaviour(.mouseFollowsFocus): .leaf(\.settings.mouse.followsFocus),
         .behaviour(.mouseHoverFocus): .leaf(\.settings.mouse.hoverFocus),

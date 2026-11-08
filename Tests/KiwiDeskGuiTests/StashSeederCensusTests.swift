@@ -37,6 +37,9 @@ struct StashSeederCensusTests {
         "App/KiwiCore+FloatPlacement.swift": 1,
         // The entry-into-floating gather (#1177).
         "App/KiwiCore+FloatGather.swift": 1,
+        // A hidden Space losing its tiling keeps its layout's slots
+        // to return to (#3008): issued frames, never a corner.
+        "App/KiwiCore+TilingToggle.swift": 1,
         // The clamp correcting a pending capture in place, so
         // the echo consumes it (#1177).
         "App/KiwiCore+FloatClamp.swift": 1,

@@ -48,6 +48,11 @@ struct FrameSetReaderCensusTests {
             "a Height or Width maximize stands the shelf down where "
                 + "its drawn fill covers a bar's strip (#3062)"
         ),
+        "KiwiCore+TilingToggle.swift": (
+            .issued,
+            "a hidden Space losing its tiling seeds where its windows "
+                + "are sent as their stash captures (#3008)"
+        ),
         "KiwiCore+AppBarVisibility.swift": (
             .issued,
             "an App Bar item dims by where its window sits (#2234)"
