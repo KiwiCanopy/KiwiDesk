@@ -11,6 +11,14 @@ extension SourceScan {
     static func segmentedPickerSource(
         from filePath: String
     ) throws -> String {
+        try segmentedPickerFiles(from: filePath).map {
+            try strippedSource(at: $0)
+        }.joined(separator: "\n")
+    }
+
+    /// The files `segmentedPickerSource` reads; the canary holds
+    /// them against every file declaring or extending the picker.
+    static func segmentedPickerFiles(from filePath: String) throws -> [URL] {
         let folder = repoRoot(from: filePath).appendingPathComponent(
             "Sources/KiwiDesk/Settings/Components/Common"
         )
@@ -22,8 +30,8 @@ extension SourceScan {
             .sorted()
         // The floor: a split the walk cannot find reads as no split.
         guard !names.isEmpty else { throw NoPickerParts() }
-        return try (["SegmentedPicker.swift"] + names).map {
-            try strippedSource(at: folder.appendingPathComponent($0))
-        }.joined(separator: "\n")
+        return (["SegmentedPicker.swift"] + names).map {
+            folder.appendingPathComponent($0)
+        }
     }
 }
