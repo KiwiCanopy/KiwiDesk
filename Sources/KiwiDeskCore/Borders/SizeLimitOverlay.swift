@@ -32,7 +32,7 @@ final class SizeLimitOverlay {
         }
     }
 
-    private static let holdDuration: TimeInterval = 1.4
+    nonisolated private static let holdDuration: TimeInterval = 1.4
     private static let fadeDuration: TimeInterval = 0.2
     nonisolated static let pillPadding: CGFloat = 20
     /// The entrance pop's keyframe scales. Its PEAK sizes the
