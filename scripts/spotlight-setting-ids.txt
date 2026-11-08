@@ -117,6 +117,7 @@ keybinding.toggle_floating
 keybinding.toggle_kiwivision
 keybinding.toggle_space_bar
 keybinding.toggle_sticky
+keybinding.toggle_tiling
 profile.isDefault
 settings.animations (master)
 settings.animations.durationMS

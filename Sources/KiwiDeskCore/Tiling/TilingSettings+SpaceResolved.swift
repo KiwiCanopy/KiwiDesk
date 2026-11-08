@@ -42,6 +42,8 @@ extension TilingSettings {
             }
         }
         out.placementOverride = [:]
+        out.tiling.start = tiling.startOverride[space] ?? tiling.start
+        out.tiling.startOverride = [:]
         out.spaceIcons = spaceIcons[space].map { [space: $0] } ?? [:]
         return out
     }

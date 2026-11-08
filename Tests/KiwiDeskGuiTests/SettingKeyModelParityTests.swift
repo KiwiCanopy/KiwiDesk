@@ -27,6 +27,7 @@ struct SettingKeyModelParityTests {
         settings.minWindowSizeOverride["1"] = 200
         settings.spaceIcons["1"] = "star"
         settings.placementOverride["1"] = .first
+        settings.tiling.startOverride["1"] = false
         settings.bsp.override["1"] = BspOverride()
         settings.stack.override["1"] = StackOverride()
         settings.scrolling.override["1"] = ScrollingOverride()

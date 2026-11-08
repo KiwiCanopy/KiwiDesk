@@ -21,9 +21,9 @@ struct TilingOffPlacementSeamTests {
         var out: [(String, String)] = []
         while let url = walker?.nextObject() as? URL {
             guard url.pathExtension == "swift" else { continue }
-            let relative = String(
-                url.path.dropFirst(root.path.count + 1)
-            )
+            let marker = core + "/"
+            guard let cut = url.path.range(of: marker) else { continue }
+            let relative = String(url.path[cut.upperBound...])
             out.append((relative, try SourceScan.strippedSource(at: url)))
         }
         return out
@@ -32,11 +32,11 @@ struct TilingOffPlacementSeamTests {
     /// Files whose `EffectiveFloat.applies(` keeps the stored mode,
     /// each with its reason.
     private static let storedMode: [String: String] = [
-        "Tiling/EffectiveFloat.swift": "the predicate itself",
-        "App/KiwiCore+FloatRecovery.swift":
-            "a layout's park stays put while tiling is off; resume "
-            + "places it (#3008)",
+        "App/KiwiCore+FloatRecovery.swift": parkStays
     ]
+    private static let parkStays =
+        "a layout's park stays put while tiling is off; resume "
+        + "places it (#3008)"
 
     /// A file asking `EffectiveFloat.applies(` judges a mode arm:
     /// it takes the placement mode, or is ruled in `storedMode`.
@@ -110,7 +110,6 @@ struct TilingOffPlacementSeamTests {
                 == [
                     "App/KiwiCore+ScreenCovering.swift",
                     "App/KiwiCore+StatusSpaceMark.swift",
-                    "App/KiwiCore+TilingToggle.swift",
                 ]
         )
         #expect(

@@ -13,6 +13,7 @@ struct CarbonTwinSeamTests {
     private static let twinCallers = [
         "BarMenu.swift": 1,
         "StatusItemController+Menu.swift": 2,
+        "StatusItemController+TilingRow.swift": 1,
     ]
 
     private func counts(of needle: String) throws -> [String: Int] {

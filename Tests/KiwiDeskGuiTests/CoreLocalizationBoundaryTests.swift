@@ -122,8 +122,9 @@ struct CoreLocalizationBoundaryTests {
         // Bar call is the layer item's label (#1169).
         "Bar/AppBarItemView.swift": 5,
         "Bar/SpaceBarItemView+Collapse.swift": 3,
-        // The Space's announced name: held (#1507), temporary (#1790).
-        "Bar/SpaceBarItemView+Marker.swift": 6,
+        // The Space's announced name: held (#1507), temporary (#1790),
+        // tiling off (#3008).
+        "Bar/SpaceBarItemView+Marker.swift": 7,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,
         // A glyph target's VoiceOver name and each side's `+n`
         // target's (#1528).

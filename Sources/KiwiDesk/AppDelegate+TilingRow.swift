@@ -18,7 +18,9 @@ extension AppDelegate {
             )
         }
         statusItem.onToggleTiling = { [weak self] in
-            _ = self?.core.execute("toggle_tiling")
+            self?.core.withUserMotion {
+                _ = self?.core.execute("toggle_tiling")
+            }
         }
     }
 }

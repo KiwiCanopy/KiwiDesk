@@ -111,6 +111,28 @@ extension SettingsValueReadout {
                     new: behaviourMouseResize(after.mouseResize)
                 )
             ]
+        case .tilingOffHidesBorders:
+            return [
+                behaviourToggleRow(
+                    census,
+                    label: label(for: census),
+                    old: before.tiling.offHidesBorders,
+                    new: after.tiling.offHidesBorders
+                )
+            ]
+        case .tilingOffHidesBars:
+            return [
+                behaviourToggleRow(
+                    census,
+                    label: label(for: census),
+                    old: before.tiling.offHidesBars,
+                    new: after.tiling.offHidesBars
+                )
+            ]
+        // Lua-only start values (#3008): no draft writes them, and
+        // the app-wide one is undrafted.
+        case .tilingStart, .tilingStartOverride, .tilingStartGlobal:
+            return []
         case .mouseFollowsFocus:
             return [
                 behaviourToggleRow(

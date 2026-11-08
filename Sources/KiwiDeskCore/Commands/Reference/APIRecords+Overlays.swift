@@ -120,7 +120,7 @@ extension APIReference {
     static let tilingRecords: [String: APIRecord] = [
         "set_start": APIRecord(
             "Sets whether the profile's Spaces, or one Space, start "
-                + "with tiling on; nil follows the level above.",
+                + "tiled; nil follows the level above.",
             .boolean("enabled", optional: true),
             .space("space", optional: true)
         ),
