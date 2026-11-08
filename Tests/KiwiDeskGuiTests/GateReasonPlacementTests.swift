@@ -122,6 +122,9 @@ struct GateReasonPlacementTests {
                 .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
                 // A lens's page draws it under its draft cards.
                 .kiwiVision(.lenses),
+                // #3074: Restore greys at the defaults, a cause shown
+                // nowhere else, so its row's caption says why.
+                .shortcuts(.restoreDefaults),
             ]
         )
     }

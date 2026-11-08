@@ -192,8 +192,8 @@ extension ShortcutsKey {
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
-            // Surfaced at rest (never behind disclosure) when init.lua has
-            // unadopted shortcuts.
+            // Drawn in the Default shortcuts row (#3074) when init.lua
+            // has unadopted shortcuts; its container stays Lua bindings.
             return .row(
                 .shortcuts,
                 .luaBindings,
@@ -206,7 +206,7 @@ extension ShortcutsKey {
             // The Mouse & trackpad drawer's first group (#1656).
             return .row(.shortcuts, .gestures, .showMore)
         case .restoreDefaults:
-            // Surfaced at rest when unseeded defaults are missing.
+            // Always drawn; greys at the defaults or on another layer (#3074).
             return .row(
                 .shortcuts,
                 .defaultShortcuts,
@@ -297,7 +297,7 @@ extension ShortcutsKey {
         case .restoreDefaults:
             return .text(
                 "shortcuts.restore_defaults",
-                help: "shortcuts.restore_defaults.help"
+                help: "shortcuts.restore_defaults.explain"
             )
         case .scrollPan:
             return .text("shortcuts.gestures.scroll.pan")

@@ -215,8 +215,6 @@ struct ShortcutsSection: View {
             ModifierKeysCard(model: model)
         case .gestures:
             GesturesDrawer(model: model, expanded: $gesturesExpanded)
-        case .header:
-            ShortcutsHeader(model: model, selected: selection)
         case .layers:
             LayersCard(
                 model: model,
@@ -224,6 +222,10 @@ struct ShortcutsSection: View {
                 selected: selection,
                 expander: expander
             )
+        // Under the layer pick that gates it, above the groups it
+        // rewrites (#3074).
+        case .defaultShortcuts:
+            DefaultShortcutsRow(model: model, selected: selection)
         case .showHide, .focus, .moveWindows, .macosDesktops, .layout,
             .sizeFloat, .pocket, .openApplications:
             actionGroup(part, expander: expander)

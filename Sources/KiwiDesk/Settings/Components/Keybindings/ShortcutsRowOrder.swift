@@ -208,12 +208,12 @@ enum ShortcutsRowOrder {
         .shortcuts(.advanced)
     ]
 
-    /// Header import action.
+    /// The Default shortcuts row's import action (#3074).
     static let luaBindingsAtRest: [SettingKey] = [
         .shortcuts(.import)
     ]
 
-    /// Header restore defaults action.
+    /// The Default shortcuts row's restore action (#3074).
     static let defaultShortcutsAtRest: [SettingKey] = [
         .shortcuts(.restoreDefaults)
     ]

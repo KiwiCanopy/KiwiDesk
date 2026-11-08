@@ -276,7 +276,7 @@ row, and nothing switches. A screen with one Space stops there
 too. A wrap slides in the key's direction.
 
 Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
-gets them through **Restore Defaults…**.
+gets them through **Default shortcuts ▸ Restore…**.
 
 **Example:**
 
@@ -305,7 +305,8 @@ the focused window's ring bumps and nothing switches. The history
 starts fresh each time KiwiDesk starts.
 
 Seeded on `⌥⌘Tab` (back) and `⌥⌘⇧Tab` (forward) for a new setup;
-an existing one gets them through **Restore Defaults…**.
+an existing one gets them through **Default shortcuts ▸
+Restore…**.
 
 **Example:**
 

@@ -134,14 +134,20 @@ struct GesturesDrawerTests {
 
     @Test("the drawer mounts above the layer header")
     func mountsAboveTheLayerHeader() throws {
+        let parts = ShortcutsPagePart.allCases
+        let drawer = try #require(parts.firstIndex(of: .gestures))
+        let layers = try #require(parts.firstIndex(of: .layers))
+        #expect(drawer < layers)
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
-        let drawer = try #require(
-            body.range(of: "GesturesDrawer(model: model,")
+        let squashed = body.filter { !$0.isWhitespace }
+        #expect(
+            squashed.contains(
+                "case.gestures:GesturesDrawer(model:model,"
+            ),
+            "the gestures part draws the drawer"
         )
-        let header = try #require(body.range(of: "ShortcutsHeader("))
-        #expect(drawer.lowerBound < header.lowerBound)
         #expect(
             body.components(separatedBy: "GesturesDrawer(").count
                 == 2,

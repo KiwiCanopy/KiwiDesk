@@ -10,8 +10,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     case conflictBanner
     case modifierKeys
     case gestures
-    case header
     case layers
+    case defaultShortcuts
     case showHide
     case focus
     case moveWindows
@@ -42,7 +42,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         switch container {
         case .modifierKeys: self = .modifierKeys
         case .gestures: self = .gestures
-        case .defaultShortcuts: self = .header
+        case .defaultShortcuts: self = .defaultShortcuts
         case .layers: self = .layers
         case .showHide: self = .showHide
         case .focus: self = .focus

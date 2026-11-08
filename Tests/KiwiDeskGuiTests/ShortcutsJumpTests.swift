@@ -43,7 +43,7 @@ struct ShortcutsJumpTests {
         let exempt: Set<SettingsContainer> = [
             // Scope, not a destination.
             .layers,
-            // The header's restore row.
+            // The restore row under Layers (#3074).
             .defaultShortcuts,
             // One card above the first chip's card (#1870).
             .modifierKeys,

@@ -83,14 +83,14 @@ extension SettingRuntimeGate {
             .noBarHides, .expandOffInConfig, .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
-            .noBindingStore:
+            .noBindingStore, .defaultsToRestore:
             return true
         case .orphanPinsExist, .screensDisconnected,
             .paletteGlowPairing, .lookReplacedUnsavedColors,
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent,
-            .trackInUse, .defaultsToRestore:
+            .trackInUse:
             return false
         }
     }
@@ -114,6 +114,10 @@ extension SettingRuntimeGate {
         case .expandOffInConfig:
             // Its knob has no row anywhere.
             return false
+        case .defaultsToRestore:
+            // The layer pick sits above it, but not that the
+            // default layer matches the shipped set (#3074).
+            return false
         case .editingStoredProfile, .screenCountMismatch:
             return true
         case .orphanPinsExist, .screensDisconnected,
@@ -121,7 +125,7 @@ extension SettingRuntimeGate {
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent,
-            .trackInUse, .defaultsToRestore:
+            .trackInUse:
             return true
         }
     }
