@@ -59,6 +59,24 @@ struct LuaBindingRowTests {
         #expect(rows.map(\.lua) == ["one", "three"])
     }
 
+    /// Line 1 leads with the symbol, then the Description; line 2
+    /// leads with the Lua (#2544 ▸ Ruling, amended 2026-11-08).
+    @Test("the symbol leads line 1 and the Lua line 2")
+    func lineOrder() throws {
+        let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
+        #expect(
+            row.contains(
+                "VStack(alignment:.leading,spacing:6){HStack{"
+                    + "symbolPicker(binding,name:name)TextField("
+            )
+        )
+        #expect(
+            row.contains(
+                "}HStack{luaLine(binding,name:name)ShortcutGroupField("
+            )
+        )
+    }
+
     @Test("the fields write the binding's own description, symbol, group")
     func fieldsWriteTheBinding() throws {
         let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")

@@ -1,14 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One Lua binding's two lines (#2544 ▸ Ruling): Description, keys
-/// and remove; then symbol, Lua and shortcut group. VoiceOver reads
-/// the row as one binding named as KiwiHub names it.
+/// One Lua binding's two lines (#2544 ▸ Ruling, amended by the
+/// owner 2026-11-08): symbol, Description, keys and remove; then
+/// Lua and shortcut group. VoiceOver reads the row as one binding
+/// named as KiwiHub names it.
 extension AdvancedLuaGroup {
     func row(_ binding: Binding<KeyBinding>) -> some View {
         let name = rowName(binding.wrappedValue)
         return VStack(alignment: .leading, spacing: 6) {
             HStack {
+                symbolPicker(binding, name: name)
                 TextField(
                     descPlaceholder(binding.wrappedValue),
                     text: binding.desc
@@ -30,21 +32,6 @@ extension AdvancedLuaGroup {
                 ) { remove(binding.wrappedValue.id) }
             }
             HStack {
-                IconPicker(
-                    icon: binding.symbol,
-                    preview: .chip,
-                    symbolsOnly: true,
-                    placeholder: LuaMark.symbol
-                )
-                .accessibilityLabel(
-                    L("shortcuts.lua.symbol_ax", "Symbol for %1$@", name)
-                )
-                // `</>` is shown, never named (config-vocabulary.md).
-                .accessibilityValue(
-                    binding.wrappedValue.symbol.isEmpty
-                        ? L("shortcuts.lua.default_symbol", "</>")
-                        : binding.wrappedValue.symbol
-                )
                 luaLine(binding, name: name)
                 ShortcutGroupField(
                     group: binding.group,
@@ -58,6 +45,27 @@ extension AdvancedLuaGroup {
         .accessibilityLabel(name)
         .id(binding.wrappedValue.id.uuidString)
         .onAppear { judge(binding.wrappedValue.id) }
+    }
+
+    private func symbolPicker(
+        _ binding: Binding<KeyBinding>,
+        name: String
+    ) -> some View {
+        IconPicker(
+            icon: binding.symbol,
+            preview: .chip,
+            symbolsOnly: true,
+            placeholder: LuaMark.symbol
+        )
+        .accessibilityLabel(
+            L("shortcuts.lua.symbol_ax", "Symbol for %1$@", name)
+        )
+        // `</>` is shown, never named (config-vocabulary.md).
+        .accessibilityValue(
+            binding.wrappedValue.symbol.isEmpty
+                ? L("shortcuts.lua.default_symbol", "</>")
+                : binding.wrappedValue.symbol
+        )
     }
 
     /// The name KiwiHub lists the row under: its description, else
