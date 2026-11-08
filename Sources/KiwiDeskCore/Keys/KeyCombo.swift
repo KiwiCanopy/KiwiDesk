@@ -16,6 +16,8 @@ public struct KeyCombo: Hashable, Sendable {
         let parts = text.lowercased()
             .split(separator: "+")
             .map { $0.trimmingCharacters(in: .whitespaces) }
+        // A lone modifier, or one twice, is a tap (#1872).
+        if let tap = parseTap(parts) { return tap }
         guard let keyName = parts.last, !keyName.isEmpty
         else { return nil }
         guard let keyCode = keyCodes[keyName] else {
@@ -59,7 +61,7 @@ public struct KeyCombo: Hashable, Sendable {
     ]
 
     /// The side spellings (#2601 ▸ Ruling): the short names only.
-    private static let sideTokens: [String: (ModifierKind, ModifierSide)] = [
+    static let sideTokens: [String: (ModifierKind, ModifierSide)] = [
         "lcmd": (.command, .left), "rcmd": (.command, .right),
         "lopt": (.option, .left), "ropt": (.option, .right),
         "lalt": (.option, .left), "ralt": (.option, .right),
@@ -121,6 +123,7 @@ public struct KeyCombo: Hashable, Sendable {
     /// takes its Lua token (`rcmd`, `lopt`, #2601), which `parse`
     /// round-trips.
     public func comboString() -> String? {
+        if isTap { return tapString }
         guard modifiers.isSided else {
             return Self.comboString(
                 keyCode: keyCode,

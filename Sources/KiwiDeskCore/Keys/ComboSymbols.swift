@@ -14,7 +14,14 @@ public enum ComboSymbols {
         _ combo: KeyCombo,
         layoutChar: (UInt32) -> String?
     ) -> String {
-        modifierSymbols(combo.modifiers)
+        // A tap draws its modifier once per press, no key (#1872).
+        if let count = combo.tapCount {
+            return String(
+                repeating: modifierSymbols(combo.modifiers),
+                count: count
+            )
+        }
+        return modifierSymbols(combo.modifiers)
             + keyGlyph(combo.keyCode, layoutChar)
     }
 

@@ -14,6 +14,6 @@ struct ModifierSideWiringTests {
             in: "KiwiCore+Boot.swift",
             under: "App"
         )
-        #expect(body.contains("keys.retrySideTap()"))
+        #expect(body.contains("keys.retryKeyboardTap()"))
     }
 }

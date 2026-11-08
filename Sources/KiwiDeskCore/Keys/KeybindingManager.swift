@@ -105,33 +105,36 @@ public final class KeybindingManager {
     public internal(set) var modifierSides = false {
         didSet {
             guard modifierSides != oldValue else { return }
-            sideTapRefused = false
+            keyboardTapRefused = false
             activate(currentLayer)
         }
     }
     /// macOS refused the tap; asked again only once the switch
     /// moves, or every `bind` of a load would spawn and refuse.
-    var sideTapRefused = false
+    var keyboardTapRefused = false
     /// `sideTapStatus` changed: Settings re-reads it (#96).
     var onSideTapStatusChange: @MainActor () -> Void = {}
-    /// The side tap's rows by id, beside `activeBindings`, which
-    /// stays Carbon's (#2601).
-    var sideBindings: [UInt32: LiveBinding] = [:]
-    var sideTap: SideTapHandle?
-    var nextSideID: UInt32 = 0
-    /// What the side tap did last, for the Settings row (#96).
+    /// The keyboard tap's rows by id, side chords and modifier
+    /// taps alike, beside `activeBindings`, which stays Carbon's.
+    var tapBindings: [UInt32: LiveBinding] = [:]
+    var keyboardTap: KeyboardTapHandle?
+    var nextTapID: UInt32 = 0
+    /// What the keyboard tap did last, for the Settings row (#96).
     public internal(set) var sideTapStatus = SideTapStatus.off {
         didSet {
             if sideTapStatus != oldValue { onSideTapStatusChange() }
         }
     }
-    /// Builds the side tap. Live in production; `makeTestCore`
-    /// pins one that touches nothing.
-    var makeSideTap:
+    /// Builds the keyboard tap for its consumers. Live in
+    /// production; `makeTestCore` pins one that touches nothing.
+    var makeKeyboardTap:
         (
-            @escaping ModifierSideTap.Fire,
-            @escaping ModifierSideTap.Report
-        ) -> SideTapHandle? = { ModifierSideTap.live(fire: $0, report: $1) }
+            Set<KeyboardTapConsumer>,
+            @escaping KeyboardTap.Fire,
+            @escaping KeyboardTap.Report
+        ) -> KeyboardTapHandle? = {
+            KeyboardTap.live(consumers: $0, fire: $1, report: $2)
+        }
     private var suspended = false
     let registrar: HotkeyRegistrar
 

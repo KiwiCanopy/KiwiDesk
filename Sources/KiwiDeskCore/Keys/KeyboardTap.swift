@@ -1,0 +1,257 @@
+import AppKit
+import os
+
+/// One chord the side tap answers: a key and the modifiers it is
+/// pressed with, sides included, and the binding it fires (#2601).
+struct SideTapRow: Hashable, Sendable {
+    var keyCode: UInt32
+    var modifiers: HotkeyModifiers
+    var id: UInt32
+
+    /// The row a press of `keyCode` holding `held` fires: among
+    /// the rows it answers, the one naming the most sides, so a
+    /// sided chord wins on its side and an either-side one on the
+    /// other.
+    static func match(
+        _ rows: [SideTapRow],
+        keyCode: UInt32,
+        held: HotkeyModifiers
+    ) -> SideTapRow? {
+        rows.filter {
+            $0.keyCode == keyCode && $0.modifiers.answers(held)
+        }
+        .max { lhs, rhs in
+            let left = lhs.modifiers.intersection(.sides).rawValue
+            let right = rhs.modifiers.intersection(.sides).rawValue
+            // A tie breaks on the bits, never the rows' order.
+            return (left.nonzeroBitCount, left)
+                < (right.nonzeroBitCount, right)
+        }
+    }
+}
+
+/// A reader of key events joining the one keyboard tap
+/// (input-and-animation.md), each with its own mask.
+enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
+    /// Sided chords (#2601): key-down, swallowing a match.
+    case sides
+    /// Modifier taps (#1872): modifier changes, key-down and
+    /// mouse-down, so a key or ⌘-click ends a count; swallows
+    /// nothing.
+    case modifierTaps
+
+    var mask: CGEventMask {
+        switch self {
+        case .sides: Self.sidesMask
+        case .modifierTaps: Self.modifierTapsMask
+        }
+    }
+
+    var swallows: Bool { self == .sides }
+
+    static let sidesMask = bit(.keyDown)
+    static let modifierTapsMask =
+        bit(.flagsChanged) | bit(.keyDown) | bit(.leftMouseDown)
+        | bit(.rightMouseDown) | bit(.otherMouseDown)
+
+    /// The mask a tap serving `consumers` is created with.
+    static func union(_ consumers: Set<Self>) -> CGEventMask {
+        consumers.reduce(0) { $0 | $1.mask }
+    }
+
+    private static func bit(_ type: CGEventType) -> CGEventMask {
+        CGEventMask(1) << type.rawValue
+    }
+}
+
+/// What the keybinding manager holds of the keyboard tap — the
+/// seam a test replaces (#565).
+protocol KeyboardTapHandle: AnyObject {
+    /// The consumers it was built for; a change rebuilds it.
+    var consumers: Set<KeyboardTapConsumer> { get }
+    /// The rows each consumer answers; read on its thread.
+    func setSideRows(_ rows: [SideTapRow])
+    func setTapRows(_ rows: [ModifierTapRow])
+    func stop()
+}
+
+/// The one keyboard event tap (#2601, #1872), run only while a
+/// consumer has rows.
+///
+/// ACTIVE while `.sides` is live, so a matching press is swallowed
+/// rather than typed, listen-only otherwise; macOS allows both
+/// with Accessibility alone (measured on macOS 27,
+/// `docs/design-decisions.md`). It runs on its own thread, since
+/// every key press on the Mac waits on the callback, and passes
+/// every event no side row answers. A disabled tap — macOS judged
+/// it slow — turns itself back on, forgets a half-counted tap and
+/// says so.
+final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
+    typealias Fire = @Sendable (UInt32) -> Void
+    typealias Report = @Sendable (String) -> Void
+
+    let consumers: Set<KeyboardTapConsumer>
+    private let sideRows = OSAllocatedUnfairLock<[SideTapRow]>(
+        initialState: []
+    )
+    private let router = OSAllocatedUnfairLock(
+        initialState: ModifierTapRouter()
+    )
+    private let fire: Fire
+    private let report: Report
+    // Tap-thread state; `installed` is written before the start
+    // semaphore signals and read after it waits.
+    private var port: CFMachPort?
+    private var runLoop: CFRunLoop?
+    private var installed = false
+
+    private init(
+        consumers: Set<KeyboardTapConsumer>,
+        fire: @escaping Fire,
+        report: @escaping Report
+    ) {
+        self.consumers = consumers
+        self.fire = fire
+        self.report = report
+    }
+
+    /// Builds and starts the tap; nil when macOS refuses it, which
+    /// is what a missing Accessibility grant looks like.
+    static func live(
+        consumers: Set<KeyboardTapConsumer>,
+        fire: @escaping Fire,
+        report: @escaping Report
+    ) -> KeyboardTapHandle? {
+        let tap = KeyboardTap(
+            consumers: consumers,
+            fire: fire,
+            report: report
+        )
+        return tap.start() ? tap : nil
+    }
+
+    func setSideRows(_ rows: [SideTapRow]) {
+        sideRows.withLock { $0 = rows }
+    }
+
+    func setTapRows(_ rows: [ModifierTapRow]) {
+        router.withLock { $0.setRows(rows) }
+    }
+
+    func stop() {
+        guard let runLoop else { return }
+        CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue) {
+            [self] in
+            if let port { CFMachPortInvalidate(port) }
+            CFRunLoopStop(CFRunLoopGetCurrent())
+        }
+        CFRunLoopWakeUp(runLoop)
+        self.runLoop = nil
+    }
+
+    private func start() -> Bool {
+        let ready = DispatchSemaphore(value: 0)
+        let thread = Thread { [self] in
+            installed = install()
+            if installed { runLoop = CFRunLoopGetCurrent() }
+            ready.signal()
+            if installed { CFRunLoopRun() }
+        }
+        thread.name = "KiwiDesk keyboard tap"
+        thread.qualityOfService = .userInteractive
+        thread.start()
+        ready.wait()
+        return installed
+    }
+
+    /// On the tap thread: creates the tap from the consumers' union.
+    private func install() -> Bool {
+        let swallows = consumers.contains { $0.swallows }
+        guard
+            let port = CGEvent.tapCreate(
+                tap: .cgSessionEventTap,
+                place: .headInsertEventTap,
+                options: swallows ? .defaultTap : .listenOnly,
+                eventsOfInterest: KeyboardTapConsumer.union(consumers),
+                callback: { _, type, event, info in
+                    guard let info else {
+                        return Unmanaged.passUnretained(event)
+                    }
+                    let tap = Unmanaged<KeyboardTap>
+                        .fromOpaque(info).takeUnretainedValue()
+                    return tap.handle(type, event)
+                },
+                userInfo: Unmanaged.passUnretained(self).toOpaque()
+            )
+        else { return false }
+        self.port = port
+        let source = CFMachPortCreateRunLoopSource(nil, port, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
+        return true
+    }
+
+    /// The callback body, on the tap thread.
+    private func handle(
+        _ type: CGEventType,
+        _ event: CGEvent
+    ) -> Unmanaged<CGEvent>? {
+        let pass = Unmanaged.passUnretained(event)
+        switch type {
+        case .tapDisabledByTimeout, .tapDisabledByUserInput:
+            if let port { CGEvent.tapEnable(tap: port, enable: true) }
+            route(.key)
+            report("keyboard tap: re-enabled after \(type)")
+            return pass
+        case .keyDown:
+            if consumers.contains(.modifierTaps) { route(.key) }
+            return sideKey(event) ? nil : pass
+        case .flagsChanged:
+            let held = HotkeyModifiers.held(by: event.flags)
+            let time = TimeInterval(event.timestamp) / 1e9
+            route(.flags(held, at: time))
+            return pass
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            route(.mouseDown)
+            return pass
+        default:
+            return pass
+        }
+    }
+
+    /// `.sides`: whether a row answers the press, which is then
+    /// swallowed. A repeat is swallowed and fires nothing, as
+    /// Carbon's hotkeys never repeat.
+    private func sideKey(_ event: CGEvent) -> Bool {
+        guard consumers.contains(.sides) else { return false }
+        let code = UInt32(event.getIntegerValueField(.keyboardEventKeycode))
+        let held = HotkeyModifiers.held(by: event.flags)
+        guard
+            let row = SideTapRow.match(
+                sideRows.withLock { $0 },
+                keyCode: code,
+                held: held
+            )
+        else { return false }
+        if event.getIntegerValueField(.keyboardEventAutorepeat) == 0 {
+            fire(row.id)
+        }
+        return true
+    }
+
+    /// `.modifierTaps`: feeds the detector, fires what it decided,
+    /// and arms the gap timer a single tap waits on.
+    private func route(_ input: ModifierTapDetector.Input) {
+        let (ids, pending) = router.withLock { $0.feed(input) }
+        ids.forEach(fire)
+        if let pending {
+            DispatchQueue.global(qos: .userInteractive).asyncAfter(
+                deadline: .now() + ModifierTapDetector.gapLimit
+            ) { [weak self] in
+                guard let self,
+                    let id = self.router.withLock({ $0.expire(pending) })
+                else { return }
+                self.fire(id)
+            }
+        }
+    }
+}

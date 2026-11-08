@@ -25,14 +25,6 @@ private final class CarbonLikeRegistrar: HotkeyRegistrar {
     func unregister(id: UInt32) { live[id] = nil }
 }
 
-/// The tap a test reads instead of a session-wide one.
-private final class FakeSideTap: SideTapHandle {
-    var rows: [SideTapRow] = []
-    var stopped = false
-    func setRows(_ rows: [SideTapRow]) { self.rows = rows }
-    func stop() { stopped = true }
-}
-
 /// Which rows the side tap answers (#2601): none while the switch
 /// is off, where a sided shortcut is a Carbon hotkey either-side;
 /// with it on, every row on a chord a sided row names, and no tap
@@ -43,18 +35,18 @@ struct ModifierSideRoutingTests {
     private struct Rig {
         let manager: KeybindingManager
         let registrar: CarbonLikeRegistrar
-        var taps: [FakeSideTap] = []
+        var taps: [FakeKeyboardTap] = []
     }
 
     private func rig() -> (
-        KeybindingManager, CarbonLikeRegistrar, () -> FakeSideTap?
+        KeybindingManager, CarbonLikeRegistrar, () -> FakeKeyboardTap?
     ) {
         let registrar = CarbonLikeRegistrar()
         let manager = KeybindingManager(registrar: registrar)
         manager.onLog = { _ in }
-        var made: [FakeSideTap] = []
-        manager.makeSideTap = { _, _ in
-            let tap = FakeSideTap()
+        var made: [FakeKeyboardTap] = []
+        manager.makeKeyboardTap = { consumers, _, _ in
+            let tap = FakeKeyboardTap(consumers)
             made.append(tap)
             return tap
         }
@@ -138,7 +130,7 @@ struct ModifierSideRoutingTests {
     func refusedTapFallsBack() throws {
         let (manager, registrar, _) = rig()
         var asked = 0
-        manager.makeSideTap = { _, _ in
+        manager.makeKeyboardTap = { _, _, _ in
             asked += 1
             return nil
         }
@@ -158,19 +150,19 @@ struct ModifierSideRoutingTests {
         manager.modifierSides = true
         #expect(asked == 2)
         // The grant's door asks again too, and only after a refusal.
-        manager.retrySideTap()
+        manager.retryKeyboardTap()
         #expect(asked == 3)
-        manager.makeSideTap = { _, _ in FakeSideTap() }
-        manager.retrySideTap()
+        manager.makeKeyboardTap = { FakeKeyboardTap($0, $1) }
+        manager.retryKeyboardTap()
         #expect(manager.sideTapStatus == .running)
-        manager.retrySideTap()
+        manager.retryKeyboardTap()
         #expect(manager.sideTapStatus == .running)
     }
 
     @Test("a refused tap's keypad digit falls back with its twin")
     func refusedKeypadTwin() throws {
         let (manager, registrar, _) = rig()
-        manager.makeSideTap = { _, _ in nil }
+        manager.makeKeyboardTap = { _, _, _ in nil }
         manager.bind(try combo("rcmd+1"), ref: 1)
         manager.modifierSides = true
         let row = try combo("rcmd+1").keyCode

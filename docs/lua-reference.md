@@ -6918,6 +6918,18 @@ A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
 of one modifier (`"lcmd+rcmd+h"`, `"cmd+rcmd+h"`) and a side with
 `hyper` are unrecognized.
 
+:::unreleased
+**A modifier tapped alone** binds like a chord. The modifier twice
+is a double tap: `"cmd+cmd"` taps either ⌘ twice (the same key both
+times), `"ropt+ropt"` the right ⌥ twice. One sided modifier alone
+is a single tap: `"rcmd"` taps the right ⌘ once. A single tap needs
+a side, and three taps or more are unrecognized. A tap counts when
+each press is shorter than 250 ms, the second follows within
+300 ms, and no key or click comes between. Unlike a sided chord, a
+tap keeps its side with `set_modifier_sides` off. A single tap on a
+key that also has a double tap waits 300 ms before it fires.
+:::
+
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
 `return`/`enter`, `tab`, `escape`/`esc`, `f1`–`f12`, and

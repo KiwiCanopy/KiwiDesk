@@ -31,6 +31,8 @@ struct KeyRecorderField: View {
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
+    /// A single modifier tap waiting out the gap (#1872).
+    @State private var pendingTap: KeyCombo?
     /// Set when a click-away cancelled recording — the button's own
     /// click lands right after the mouse monitor and must not
     /// immediately restart it.
@@ -51,6 +53,16 @@ struct KeyRecorderField: View {
                 clearButton
             }
             deadCaption
+            if recording, let pendingTap,
+                let hint = ModifierTapWords.tapAgain(
+                    pendingTap,
+                    sidesKept: recorderSides != nil
+                )
+            {
+                Text(hint)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
@@ -126,7 +138,7 @@ struct KeyRecorderField: View {
         // The cost is announced ONCE, by the badge that precedes
         // this button in the row (#1126) — a second copy here
         // read the same sentence on two adjacent VoiceOver stops.
-        .accessibilityValue(SidedChordWords.label(label))
+        .accessibilityValue(spokenTap ?? SidedChordWords.label(label))
     }
 
     /// Why the row would not fire as drawn: a Hyper chord with no
@@ -159,43 +171,23 @@ struct KeyRecorderField: View {
     /// The hover text: a sided chord in words, then the hint or how
     /// recording works.
     private var helpText: String {
-        let spoken = recording ? nil : SidedChordWords.spoken(label)
+        let spoken =
+            recording ? nil : spokenTap ?? SidedChordWords.spoken(label)
         return [spoken, hint ?? recordHelp]
             .compactMap { $0 }
             .joined(separator: "\n")
     }
 
+    /// The row's tap in words, nil for a chord or while recording.
+    private var spokenTap: String? {
+        guard !recording, let parsed = KeyCombo.parse(combo) else {
+            return nil
+        }
+        return ModifierTapWords.spoken(parsed)
+    }
+
     private var recordHelp: String {
         recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
-    }
-
-    /// The help with sides kept: one frame, so no translation has
-    /// to join two sentences (localization.md).
-    @MainActor private static var recordSidesHelp: String {
-        L(
-            "key_recorder.help_press_sides",
-            "A shortcut is one key plus any of "
-                + "⌃ Control, ⌥ Option, ⇧ Shift, "
-                + "and ⌘ Command — it locks in the "
-                + "moment you press the key. Add a layer "
-                + "to give one key a second meaning. The side "
-                + "you press is kept: %1$@ is recorded as %2$@.",
-            HyperKeyWords.name(.rightCommand),
-            ModifierSidesWords.drawn(.right)
-        )
-    }
-
-    // Computed: a localized value stored for the life of the
-    // process keeps the locale it was first read in (#1311).
-    @MainActor private static var recordHelp: String {
-        L(
-            "key_recorder.help_press",
-            "A shortcut is one key plus any of "
-                + "⌃ Control, ⌥ Option, ⇧ Shift, "
-                + "and ⌘ Command — it locks in the "
-                + "moment you press the key. Add a layer "
-                + "to give one key a second meaning."
-        )
     }
 
     // MARK: - Rejection UI (#34)
@@ -235,6 +227,13 @@ struct KeyRecorderField: View {
     }
 
     private var label: String {
+        if recording, let pendingTap {
+            let drawn = ChordGlyphs.render(
+                pendingTap,
+                layoutChar: LayoutKeyGlyph.char
+            )
+            return drawn + " …"
+        }
         if recording {
             return preview.isEmpty
                 ? L("key_recorder.press_keys", "Press keys…")
@@ -270,6 +269,7 @@ struct KeyRecorderField: View {
     private func start() {
         rejection = nil
         preview = ""
+        pendingTap = nil
         let previewBinding = $preview
         coordinator.claim(fieldID) { [recorder] in
             recorder.stop()
@@ -278,6 +278,10 @@ struct KeyRecorderField: View {
         recorder.start(
             hyper: !hyperKeyIsOff,
             sides: recorderSides,
+            taps: true,
+            pendingTap: { tap in
+                pendingTap = tap
+            },
             preview: { display in
                 preview = display
             },
@@ -289,6 +293,7 @@ struct KeyRecorderField: View {
 
     private func finish(_ outcome: ChordRecorder.Outcome) {
         preview = ""
+        pendingTap = nil
         // Release coordinator before committing hotkey (#213).
         coordinator.release(fieldID)
         switch outcome {
@@ -307,6 +312,7 @@ struct KeyRecorderField: View {
     private func stop() {
         recorder.stop()
         preview = ""
+        pendingTap = nil
         coordinator.release(fieldID)
     }
 
