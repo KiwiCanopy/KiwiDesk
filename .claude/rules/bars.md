@@ -1425,8 +1425,10 @@ reading a bar still makes for itself:
   two residues are
   [state-and-layout.md](state-and-layout.md)'s — this line
   exists because that file does not load when you edit
-  `Bar/**`, and the next new bar surface (#1229's overview
-  panel) is written here.
+  `Bar/**`. KiwiHub's Desktops side (#1229) is no bar: it reads
+  the ledger by ruling, for the Desktops no screen shows alone,
+  and its lines for a shown Desktop read the members alone
+  (`KiwiCore+DesktopOverview.swift`).
 - A bar derivation answering *which window holds the SYSTEM
   focus* — the glyph tint, the `+n` badge's, a list peek's check,
   a window menu's state — reads the one

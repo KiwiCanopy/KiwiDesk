@@ -20,6 +20,10 @@ extension JumpModel {
     }
 
     func handleDesktops(_ key: JumpKey, repeated: Bool) {
+        if key == .settings {
+            onDesktopsSettings()
+            return
+        }
         guard var state = desktops else { return }
         let outcome = state.press(key, repeated: repeated)
         desktops = state
@@ -105,12 +109,23 @@ extension JumpModel {
 
     /// A drop of dragged windows on a place: a move, and you stay.
     func dropWindows(_ ids: [WindowID], on place: DesktopsPlace) {
-        guard scope == .desktops, let state = desktops,
-            let target = state.target(place)
-        else { return }
+        guard scope == .desktops, let state = desktops else { return }
+        guard let target = state.target(place) else {
+            return answer(.refuse(.noSpace))
+        }
+        // A drag carries what ⌘↩ may pick up, and nothing else.
+        for id in ids {
+            if let window = state.overview.window(id),
+                let block = window.block
+            {
+                return answer(.refuse(.carryBlocked(window, block)))
+            }
+        }
         let there = Set(state.line(place)?.windows.map(\.id) ?? [])
         let moving = ids.filter { !there.contains($0) }
-        guard !moving.isEmpty else { return }
+        guard !moving.isEmpty else {
+            return answer(.refuse(.alreadyThere(target.space)))
+        }
         answer(.act(.drop(moving, target, follow: false)))
     }
 

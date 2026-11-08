@@ -32,6 +32,8 @@ enum DesktopsRefusal: Equatable {
     case nothingYours
     /// Every picked window is already in that Space.
     case alreadyThere(SpaceID)
+    /// macOS numbers no such Desktop, so no verb reaches it.
+    case unreachable
 }
 
 /// A press's result.

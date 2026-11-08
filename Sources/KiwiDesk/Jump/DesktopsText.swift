@@ -10,6 +10,11 @@ enum DesktopsText {
         L("desktop_overview.line.unfiled", "Not in a Space yet")
     }
 
+    /// The panel's VoiceOver action for ⌘, (#1229 ▸ Footer).
+    static var editInSettings: String {
+        L("desktop_overview.ax.edit_in_settings", "Edit in Settings")
+    }
+
     static var shown: String { L("desktop_overview.card.shown", "shown") }
 
     static var main: String { L("desktop_overview.screen.main", "main") }
@@ -25,9 +30,7 @@ enum DesktopsText {
 
     /// The footer's tray while windows ride along.
     static func moving(_ count: Int) -> String {
-        count == 1
-            ? L("desktop_overview.tray.one", "Moving 1 window")
-            : L("desktop_overview.tray.other", "Moving %1$d windows", count)
+        L("desktop_overview.tray", "Moving windows: %1$d", count)
     }
 
     // MARK: Hints
@@ -41,14 +44,6 @@ enum DesktopsText {
             "desktop_overview.footer.move_there",
             "%1$@ Move window there",
             "⇧↩"
-        )
-    }
-
-    static var moveFollow: String {
-        L(
-            "desktop_overview.footer.move_follow",
-            "%1$@ Move & follow",
-            "⌃↩"
         )
     }
 
@@ -118,31 +113,20 @@ enum DesktopsText {
 
     // MARK: Refusals
 
+    /// Each refusal states the rule that forbids the act
+    /// (core-boundaries.md ▸ #3033).
     static func refusal(_ refusal: DesktopsRefusal) -> String {
         switch refusal {
-        case .carryBlocked(let window, let block):
-            let name = window.title.isEmpty ? window.app : window.title
-            switch block {
-            case .otherDesktop:
-                return L(
-                    "desktop_overview.refusal.other_desktop",
-                    "“%1$@” is on another Desktop and can’t be "
-                        + "picked up",
-                    name
-                )
-            case .pocketed:
-                return L(
-                    "desktop_overview.refusal.pocketed",
-                    "“%1$@” is in your Pocket and can’t be picked up",
-                    name
-                )
-            case .fullScreen:
-                return L(
-                    "desktop_overview.refusal.full_screen",
-                    "“%1$@” is in full screen and can’t be picked up",
-                    name
-                )
-            }
+        case .carryBlocked(_, .otherDesktop):
+            return L(
+                "desktop_overview.refusal.hidden_desktop",
+                "Windows on a hidden Desktop can’t be picked up"
+            )
+        case .carryBlocked(_, .fullScreen):
+            return L(
+                "desktop_overview.refusal.full_screen_window",
+                "Full-screen windows can’t be picked up"
+            )
         case .emptySpace:
             return L(
                 "desktop_overview.refusal.empty",
@@ -158,11 +142,15 @@ enum DesktopsText {
                 "desktop_overview.refusal.nothing_yours",
                 "There is no window of yours to move"
             )
-        case .alreadyThere(let space):
+        case .alreadyThere:
             return L(
-                "desktop_overview.refusal.already_there",
-                "The picked windows are already in Space %1$@",
-                space.raw
+                "desktop_overview.refusal.already_in_space",
+                "The windows you picked up are already in that Space"
+            )
+        case .unreachable:
+            return L(
+                "desktop_overview.refusal.unreachable",
+                "macOS lists no number for this Desktop"
             )
         }
     }

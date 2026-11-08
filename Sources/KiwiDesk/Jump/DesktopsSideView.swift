@@ -14,9 +14,19 @@ struct DesktopsSideView: View {
     let onWindow: (WindowID, DesktopsPlace, Int, NSEvent.ModifierFlags) -> Void
     let onMore: (DesktopsPlace, Bool) -> Void
     let onDrop: ([WindowID], DesktopsPlace) -> Void
+    /// The panel's VoiceOver action for ⌘,.
+    let onSettings: () -> Void
 
     /// A screen row: its header and one card's height.
     static var rowHeight: CGFloat { 22 + DesktopCardView.height }
+
+    /// The side's height for `rows` screen rows: every row whole,
+    /// up to `cap`, past which it scrolls.
+    static func height(rows: Int, cap: CGFloat) -> CGFloat {
+        let count = CGFloat(rows)
+        let full = count * rowHeight + max(count - 1, 0) * 8 + 16
+        return min(full, cap)
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -29,6 +39,10 @@ struct DesktopsSideView: View {
                 .padding(.vertical, 8)
             }
             .frame(height: height)
+            .accessibilityAction(
+                named: Text(DesktopsText.editInSettings),
+                onSettings
+            )
             .onAppear { proxy.scrollTo(state.place?.screen) }
             .onChange(of: state.place?.screen) { _, screen in
                 proxy.scrollTo(screen)
@@ -36,11 +50,8 @@ struct DesktopsSideView: View {
         }
     }
 
-    /// Every row fits, up to the cap.
     private var height: CGFloat {
-        let rows = CGFloat(state.overview.screens.count)
-        let full = rows * Self.rowHeight + max(rows - 1, 0) * 8 + 16
-        return min(full, maxHeight)
+        Self.height(rows: state.overview.screens.count, cap: maxHeight)
     }
 
     private func row(_ screen: Int) -> some View {

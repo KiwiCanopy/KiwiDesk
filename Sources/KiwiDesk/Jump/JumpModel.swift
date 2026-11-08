@@ -133,6 +133,8 @@ final class JumpModel: ObservableObject {
     var loadIcons: (Set<pid_t>) -> [pid_t: NSImage] = { _ in [:] }
     /// Runs a Desktops pick; the panel closes first.
     var onDesktopsAction: (DesktopsAction) -> Void = { _ in }
+    /// ⌘, there: Settings ▸ Profiles, whose card binds Desktops.
+    var onDesktopsSettings: () -> Void = {}
     /// ⌘, on the View side: the Settings page of the line.
     var onViewSettings: (ViewPickList.Line, ViewPickList.Item?) -> Void =
         { _, _ in }

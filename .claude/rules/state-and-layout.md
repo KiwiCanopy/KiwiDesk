@@ -833,8 +833,13 @@ editing here:
   `guard-prover` 2026-09-03 and neither closable by a scan.**
   First, `SpaceBarAwayTests` pins `spaceBarApps` and nothing
   else: a merge added in another bar derivation — a new item
-  builder, the front-app segment, #1229's overview panel — reds
-  nothing, so each new author owes the branch deliberately.
+  builder, the front-app segment — reds nothing, so each new
+  author owes the branch deliberately. KiwiHub's Desktops side
+  (#1229) is the ruled ledger reader beside the bars: a Desktop
+  no screen shows lists the ledger's up windows through
+  `awayMembers(of:)`, a shown one its members alone, and a new
+  reader there states which half it is
+  (`DesktopOverviewTests`).
   Second, the bar is kept clean at TWO independent points — the
   member list (`state.effectiveMembers`, which never yields an
   away id) and the resolution (`state.windows[id]`, which drops

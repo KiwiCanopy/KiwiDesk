@@ -17,15 +17,29 @@ extension DesktopsText {
         _ window: DesktopOverview.Window,
         picked: Bool
     ) -> String {
-        let title = window.title.isEmpty ? window.app : window.title
+        // An untitled window is its app, spoken once.
+        guard !window.title.isEmpty else {
+            return picked
+                ? L(
+                    "desktop_overview.ax.app_picked",
+                    "%1$@, picked up",
+                    window.app
+                )
+                : window.app
+        }
         return picked
             ? L(
                 "desktop_overview.ax.window_picked",
-                "%1$@, %2$@, picked",
+                "%1$@, %2$@, picked up",
                 window.app,
-                title
+                window.title
             )
-            : L("desktop_overview.ax.window", "%1$@, %2$@", window.app, title)
+            : L(
+                "desktop_overview.ax.window",
+                "%1$@, %2$@",
+                window.app,
+                window.title
+            )
     }
 
     static func spoken(

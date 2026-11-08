@@ -2,10 +2,10 @@ import AppKit
 import KiwiDeskCore
 
 /// KiwiHub's Desktops side (#1229): which screen it reads from and
-/// what a pick does. Every move goes through the verbs a binding
-/// runs — `move_to_space` on a Desktop its screen shows,
-/// `move_to_desktop` with its Space on one it does not (#2888) —
-/// naming the window, so no pick acts on a focus it did not mean.
+/// what a pick does. Moves go through Core's overview doors, which
+/// pick the verb from a fresh reading of the Desktops; Move here
+/// and Swap here ask Core at the press, as the Windows side does
+/// (gui.md ▸ A KiwiHub pick asks Core at the press).
 extension JumpPanelController {
     func wireDesktops(_ model: JumpModel) {
         model.loadDesktops = { [weak self] in
@@ -16,15 +16,30 @@ extension JumpPanelController {
         }
         model.loadIcons = { Self.icons(for: $0) }
         model.onDesktopsAction = { [weak self, weak model] action in
-            guard let self, let overview = model?.desktops?.overview
+            guard let self, let model,
+                let overview = model.desktops?.overview
             else { return }
-            self.perform(action, in: overview)
+            self.perform(action, in: overview, model: model)
+        }
+        // ⌘, opens Profiles, whose Desktops card binds them.
+        model.onDesktopsSettings = { [weak self] in
+            guard let self, self.dismiss(distrusting: false) else { return }
+            self.core.barMenuHooks.openSettings(.profiles)
         }
     }
 
-    /// Closes the panel, then runs the pick; a window that did not
-    /// move is named after the close.
-    func perform(_ action: DesktopsAction, in overview: DesktopOverview) {
+    /// Refuses in the panel what Core refuses at the press; else
+    /// closes it and runs the pick. A window that did not move is
+    /// named after the close.
+    func perform(
+        _ action: DesktopsAction,
+        in overview: DesktopOverview,
+        model: JumpModel
+    ) {
+        if let refusal = refusal(of: action) {
+            model.onRefuse(refusal)
+            return
+        }
         let own = ProcessInfo.processInfo.processIdentifier
         let pid = Self.landingPid(action, in: overview)
         guard
@@ -45,6 +60,27 @@ extension JumpPanelController {
             notification: .announcementRequested,
             userInfo: [.announcement: words, .priority: 90]
         )
+    }
+
+    /// What Core refuses for `action` now, in the panel's words.
+    private func refusal(of action: DesktopsAction) -> String? {
+        switch action {
+        case .moveHere(let id):
+            return core.moveHereRefusal(.window(id), on: hubDisplay)
+                .map(JumpRowText.refusal)
+        case .swapHere(let id):
+            return core.swapRefusal(.window(id), on: hubDisplay)
+                .map(JumpRowText.refusal)
+        case .jumpDesktop(let desktop), .moveYoursToDesktop(let desktop):
+            return desktop.number == nil
+                ? DesktopsText.refusal(.unreachable) : nil
+        case .jump(let target), .moveYours(let target, _),
+            .drop(_, let target, _):
+            return !target.desktop.isShown && target.desktop.number == nil
+                ? DesktopsText.refusal(.unreachable) : nil
+        case .jumpWindow:
+            return nil
+        }
     }
 
     /// The app a pick leaves in front, where it names a window.
@@ -71,25 +107,20 @@ extension JumpPanelController {
     ) -> [WindowID] {
         switch action {
         case .jump(let target):
-            jump(to: target)
+            core.overviewJump(
+                to: target.space,
+                onDesktop: target.desktop.native,
+                lastFocused: target.lastFocused
+            )
         case .moveYours(let target, let follow):
             guard let yours = overview.yours else { return [] }
-            return move(yours, to: target, follow: follow) ? [] : [yours]
+            return move([yours], to: target, follow: follow)
         case .jumpDesktop(let desktop):
-            if let number = desktop.number {
-                _ = send(
-                    "focus_desktop",
-                    args: [.number(Double(number))]
-                )
-            }
+            core.overviewJump(toDesktop: desktop.native)
         case .moveYoursToDesktop(let desktop):
-            guard let yours = overview.yours, let number = desktop.number
-            else { return [] }
-            let response = send(
-                "move_to_desktop",
-                args: [.number(Double(number)), .null, Self.arg(yours)]
-            )
-            return response ? [] : [yours]
+            guard let yours = overview.yours else { return [] }
+            let moved = core.overviewMove(yours, toDesktop: desktop.native)
+            return moved ? [] : [yours]
         case .jumpWindow(let id):
             core.jump(to: .window(id))
         case .moveHere(let id):
@@ -97,54 +128,39 @@ extension JumpPanelController {
         case .swapHere(let id):
             core.swapHere(.window(id), on: hubDisplay)
         case .drop(let ids, let target, let follow):
-            // One move per window in pick order; the first-picked
-            // takes the follow, so focus lands on it.
-            return ids.enumerated().compactMap { index, id in
-                move(id, to: target, follow: follow && index == 0) ? nil : id
-            }
+            return move(ids, to: target, follow: follow)
         }
         return []
     }
 
-    /// The Space on its Desktop: the shown one directly, a hidden
-    /// one's last-focused window, else the Desktop.
-    private func jump(to target: DesktopsTarget) {
-        if target.desktop.isShown {
-            _ = send("focus_space", args: [.string(target.space.raw)])
-        } else if let window = target.lastFocused {
-            core.jump(to: .window(window))
-        } else if let number = target.desktop.number {
-            _ = send("focus_desktop", args: [.number(Double(number))])
-        }
-    }
-
-    /// Moves `window` into `target`'s Space; whether it went.
+    /// One move per window in pick order; a follow goes last, on
+    /// the first-picked window, so the others leave before the
+    /// Desktop switches and focus lands on it.
     private func move(
-        _ window: WindowID,
+        _ ids: [WindowID],
         to target: DesktopsTarget,
         follow: Bool
-    ) -> Bool {
-        let space = JSONValue.string(target.space.raw)
-        if target.desktop.isShown {
-            let verb = follow ? "move_to_space_and_follow" : "move_to_space"
-            return send(verb, args: [space, Self.arg(window)])
+    ) -> [WindowID] {
+        guard let first = ids.first else { return [] }
+        let rest = follow ? Array(ids.dropFirst()) : ids
+        var failed = rest.filter {
+            !core.overviewMove(
+                $0,
+                into: target.space,
+                onDesktop: target.desktop.native,
+                follow: false
+            )
         }
-        guard let number = target.desktop.number else { return false }
-        let verb = follow ? "move_to_desktop_and_follow" : "move_to_desktop"
-        return send(
-            verb,
-            args: [.number(Double(number)), space, Self.arg(window)]
-        )
-    }
-
-    /// One verb, inside the user motion scope (#804); whether it
-    /// ran. Jump, Move here and Swap here open their own.
-    @discardableResult
-    private func send(_ verb: String, args: [JSONValue]) -> Bool {
-        core.withUserMotion { core.execute(verb, args: args) }.isSuccess
-    }
-
-    private static func arg(_ window: WindowID) -> JSONValue {
-        .number(Double(window.raw))
+        if follow,
+            !core.overviewMove(
+                first,
+                into: target.space,
+                onDesktop: target.desktop.native,
+                follow: true
+            )
+        {
+            failed.insert(first, at: 0)
+        }
+        return failed
     }
 }

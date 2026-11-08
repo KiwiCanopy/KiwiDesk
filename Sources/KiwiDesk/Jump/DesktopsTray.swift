@@ -3,7 +3,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The footer's leading slot while windows ride along (#1229 ▸
-/// Carrying): "Moving 2 windows" and their icons, in pick order.
+/// Carrying): "Moving windows: 2" and their icons, in pick order.
 struct DesktopsTray: View {
     let state: DesktopsState
     let icons: [pid_t: NSImage]

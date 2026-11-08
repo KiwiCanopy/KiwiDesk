@@ -107,7 +107,8 @@ extension StatusItemController {
         // The Desktops side's own row while it has no seeded
         // trigger (#1229 ▸ Fallbacks).
         let overview = NSMenuItem(
-            title: L("menu.show_desktop_overview", "Show Desktop overview"),
+            // The Shortcuts row's own words, one key for one act.
+            title: KeybindingCatalog.showDesktopOverview.resolvedLabel,
             action: #selector(openDesktopOverview(_:)),
             keyEquivalent: ""
         )

@@ -55,6 +55,9 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
         // KiwiHub's Swap here (#2885).
         "KiwiDeskCore/App/KiwiCore+JumpSwap.swift": 1,
+        // KiwiHub's Desktops side sends its verbs through one
+        // scoped door (#1229).
+        "KiwiDeskCore/App/KiwiCore+DesktopOverviewMoves.swift": 1,
         // The scroll gestures' two consumers.
         "KiwiDeskCore/App/KiwiCore+ScrollPan.swift": 1,
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,
@@ -65,9 +68,6 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/Tiling/KiwiCore+Drag.swift": 2,
         "KiwiDeskCore/Tiling/KiwiCore+DragCrossing.swift": 1,
         "KiwiDeskCore/Bar/KiwiCore+SpaceBarDrop.swift": 1,
-        // KiwiHub's Desktops side sends its verbs through one
-        // scoped door (#1229).
-        "KiwiDesk/Jump/JumpPanelController+Desktops.swift": 1,
         // Config Issues' reload and delete.
         "KiwiDesk/AppDelegate.swift": 2,
         // The tour's shelf paint and its revert.

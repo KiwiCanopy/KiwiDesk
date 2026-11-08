@@ -37,12 +37,12 @@ struct DesktopsSideCeilingTests {
                 .environmentObject(LocalizationManager.shared)
         )
         let height = host.fittingSize.height
-        // Both rows are drawn whole, not scrolled to fit.
-        #expect(
-            height >= 2 * DesktopsSideView.rowHeight
-                + JumpPanelView.fieldHeight,
-            "stands \(height) pt"
-        )
-        #expect(height <= JumpPanelController.maxPanelHeight, "\(height) pt")
+        // Both rows stand whole: the cap the side is handed does not
+        // cut them.
+        let cap = model.sheetCap
+        let whole = DesktopsSideView.height(rows: 2, cap: .infinity)
+        #expect(DesktopsSideView.height(rows: 2, cap: cap) == whole)
+        #expect(height >= whole + JumpPanelView.fieldHeight, "\(height)")
+        #expect(height <= JumpPanelController.maxPanelHeight, "\(height)")
     }
 }

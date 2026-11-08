@@ -72,6 +72,19 @@ struct JumpFooter: View {
         .fixedSize(horizontal: fixed, vertical: false)
     }
 
+    /// How many leading hints never shed: the Desktops side's ↩
+    /// pair, or its three carry keys (#1229); every other side
+    /// sheds them all.
+    var keeps: Int {
+        switch scope {
+        case .desktops:
+            let floor = desktops?.isCarrying == true ? 3 : 2
+            return min(floor, hints.count)
+        case .windows, .shortcuts, .view:
+            return 0
+        }
+    }
+
     /// The side's scroll cue; the View side never scrolls.
     var scrollHint: String? { Self.scrollHint(for: scope) }
 

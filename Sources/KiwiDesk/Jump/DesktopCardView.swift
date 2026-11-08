@@ -28,23 +28,19 @@ struct DesktopCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             title
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(desktop.spaces.indices, id: \.self) { line in
-                        DesktopLineView(
-                            state: state,
-                            place: DesktopsPlace(
-                                screen: screen,
-                                desktop: index,
-                                line: line
-                            ),
-                            icons: icons,
-                            onPlace: onPlace,
-                            onWindow: onWindow,
-                            onMore: onMore,
-                            onDrop: onDrop
-                        )
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(desktop.spaces.indices, id: \.self) {
+                            line($0).id($0)
+                        }
                     }
+                }
+                // A card past four Spaces keeps the selected one in
+                // view.
+                .onAppear { proxy.scrollTo(selectedLine) }
+                .onChange(of: selectedLine) { _, line in
+                    proxy.scrollTo(line)
                 }
             }
         }
@@ -56,6 +52,26 @@ struct DesktopCardView: View {
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel(DesktopsText.desktop(desktop.label))
+    }
+
+    /// The selected line, where the selection is on this card.
+    private var selectedLine: Int? {
+        guard let place = state.place, place.screen == screen,
+            place.desktop == index
+        else { return nil }
+        return place.line
+    }
+
+    private func line(_ line: Int) -> some View {
+        DesktopLineView(
+            state: state,
+            place: DesktopsPlace(screen: screen, desktop: index, line: line),
+            icons: icons,
+            onPlace: onPlace,
+            onWindow: onWindow,
+            onMore: onMore,
+            onDrop: onDrop
+        )
     }
 
     private var title: some View {

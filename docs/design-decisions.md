@@ -14544,7 +14544,7 @@ lines need no Space.
 `JumpScopeModelTests` hold it.
 
 :::unreleased
-**The Desktops side is KiwiHub's map of the whole desk (#1229,
+**The Desktops side is KiwiHub's overview of the whole desk (#1229,
 owner ruling 2026-11-01).** The Space Bar answers what is on the
 Desktop in front of you; nothing answered where everything else
 is. Mission Control shows the Desktops but knows nothing of
@@ -14560,7 +14560,7 @@ its Shortcuts row "Show Desktop overview".
 One row per screen in physical order, left to right read top to
 bottom, the screen's name as the row header; the current screen is
 marked, never moved, so a row is always in the same place and the
-side reads as a map. Each row holds that screen's Desktop cards,
+side reads like the desk itself. Each row holds that screen's Desktop cards,
 all one size, scrolling sideways; a card lists the screen's Spaces,
 one line each, empty ones included, and a line its windows as app
 icons in a fixed window of five slots with "+n" counts off each
@@ -14576,7 +14576,7 @@ solid stroke for a target.
 
 The keyboard picks places before windows. Arrows move between
 Space lines; ⌘↓ opens one, as Finder's pair does, and ⌘↑ goes back.
-A window is carried rather than dragged: ⌘↩ picks it up, more than
+On the keyboard a window is carried: ⌘↩ picks it up, more than
 one may be picked, and ↩ drops them where the arrows chose, one
 move per window in pick order. ⇧ always means "a window moves, you
 stay" and ⌃ means "and follow" across KiwiHub, so one modifier
@@ -14659,9 +14659,9 @@ talk about the panel as one thing; *Jump* stays its verb and
 never its name. The sides keep their own names, which their rows
 and VoiceOver already use, and the panel's container speaks the
 product name around them, so a side announces "KiwiHub, window
-switcher". The Shortcuts page groups the three rows under one
-KiwiHub card, J K L in key order, because the panel is the topic
-and the trio reads as one. Open applications ▸ KiwiDesk keeps
+switcher". The Shortcuts page groups KiwiHub's rows under one
+card, its sides in key order, because the panel is the topic and
+the rows read as one. Open applications ▸ KiwiDesk keeps
 Open Settings under its subheading, one row and all: there the
 heading says whose window the row opens, among rows that open
 other apps, which a lone row still needs.

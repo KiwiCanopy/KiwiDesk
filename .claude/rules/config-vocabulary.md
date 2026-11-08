@@ -554,9 +554,8 @@ synonym:
   its Shortcuts row, "Show Desktop overview". Inside it a Space's
   line on a Desktop card is a **place**; a window taken along is
   **picked up** and **dropped**, never *grabbed*, *cut* or
-  *pasted*, and **Put back** undoes a pick. The keys it adds are
-  stored `KiwiHubKey` names — `open_space`, `leave_space`,
-  `pick_up`, `follow` — named for the act, so a rename owes a
+  *pasted*, and **Put back** undoes a pick. A key it adds is a
+  stored `KiwiHubKey` name, named for the act, so a rename owes a
   `ConfigMigration` step. Never a *map*, *board* or *Exposé*.
 - **View** — the ⌃⌥L side's name (Lua `kiwihub.show("view")`,
   #2309): one chord reaching the Layout, Profile and KiwiVision

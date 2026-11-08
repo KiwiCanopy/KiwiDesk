@@ -30,7 +30,6 @@ struct DesktopsStateTests {
     ) -> DesktopOverview.SpaceLine {
         DesktopOverview.SpaceLine(
             space: SpaceID(space),
-            glyph: nil,
             mode: .bsp,
             isShown: shown,
             marker: nil,

@@ -148,7 +148,8 @@ struct JumpPanelView: View {
                         model.clickWindow($0, in: $1, count: $2, modifiers: $3)
                     },
                     onMore: { model.clickMore($0, forward: $1) },
-                    onDrop: { model.dropWindows($0, on: $1) }
+                    onDrop: { model.dropWindows($0, on: $1) },
+                    onSettings: { model.handle(.settings, repeated: false) }
                 )
                 .transition(.opacity)
             } else if let view = model.view {

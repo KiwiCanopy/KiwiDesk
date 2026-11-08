@@ -76,7 +76,6 @@ public struct DesktopOverview: Sendable, Equatable {
     public struct SpaceLine: Sendable, Equatable {
         /// Nil for the windows on this Desktop no Space holds yet.
         public let space: SpaceID?
-        public let glyph: SpaceGlyph?
         public let mode: LayoutMode?
         /// Whether the Desktop shows this Space — on a hidden
         /// Desktop, the one it returns to.
@@ -88,7 +87,6 @@ public struct DesktopOverview: Sendable, Equatable {
 
         public init(
             space: SpaceID?,
-            glyph: SpaceGlyph?,
             mode: LayoutMode?,
             isShown: Bool,
             marker: Marker?,
@@ -96,7 +94,6 @@ public struct DesktopOverview: Sendable, Equatable {
             lastFocused: WindowID?
         ) {
             self.space = space
-            self.glyph = glyph
             self.mode = mode
             self.isShown = isShown
             self.marker = marker
@@ -139,7 +136,6 @@ public struct DesktopOverview: Sendable, Equatable {
     public enum CarryBlock: Sendable, Equatable {
         /// On a Desktop no screen shows (until #2884).
         case otherDesktop
-        case pocketed
         case fullScreen
     }
 }

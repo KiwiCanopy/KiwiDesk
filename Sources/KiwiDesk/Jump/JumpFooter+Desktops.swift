@@ -22,12 +22,6 @@ struct DesktopsFooterState: Equatable {
 /// end; ↩ and ⇧↩, or ↩ ⌃↩ Esc while carrying, never shed.
 /// Holding ⇧, ⌥ or ⌘ rewrites them as on the other sides.
 extension JumpFooter {
-    /// How many leading hints never shed.
-    var keeps: Int {
-        guard scope == .desktops, let desktops else { return 0 }
-        return min(desktops.isCarrying ? 3 : 2, hints.count)
-    }
-
     var desktopsHints: [String] {
         guard let desktops else { return [] }
         let next = L(
@@ -57,9 +51,7 @@ extension JumpFooter {
                 ? DesktopsText.swapHere : DesktopsText.moveHere
             return [DesktopsText.jump, second, pick, DesktopsText.back, next]
         }
-        let second =
-            modifiers.contains(.control)
-            ? DesktopsText.moveFollow : DesktopsText.moveThere
+        let second = DesktopsText.moveThere
         let desktop =
             modifiers.contains(.shift)
             ? DesktopsText.moveDesktop("⇧" + digits)

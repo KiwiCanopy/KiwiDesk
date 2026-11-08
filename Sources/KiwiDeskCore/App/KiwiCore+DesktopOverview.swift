@@ -74,10 +74,7 @@ extension KiwiCore {
             ]
         }
         return natives.enumerated().map { index, native in
-            let shown =
-                snapshot.currentSpaces[native.displayUUID].map {
-                    $0 == native.id
-                } ?? native.isCurrent
+            let shown = Self.isShown(native.id, in: snapshot)
             return DesktopOverview.Desktop(
                 native: native.id,
                 label: snapshot.screenNumber(of: native.id) ?? index + 1,
@@ -86,23 +83,28 @@ extension KiwiCore {
                 profile: boundProfileLabel(of: native.id, in: snapshot),
                 spaces: shown
                     ? shownLines(on: display)
-                    : hiddenLines(on: display, native: native, in: snapshot)
+                    : hiddenLines(
+                        on: display,
+                        native: native,
+                        in: snapshot,
+                        shared: shared
+                    )
             )
         }
     }
 
-    /// The label of the profile a Desktop's binding would load,
-    /// read off the binding's own rank without opening a file.
+    /// The profile a Desktop's binding loads, picked by the one
+    /// gate (profiles.md ▸ readers follow the pick); nil where none
+    /// is bound or the binding stands aside.
     private func boundProfileLabel(
         of native: SkyLight.SpaceID,
         in snapshot: DesktopSnapshot
     ) -> String? {
         let binding = snapshot.keys(of: native).lazy
             .compactMap { self.desktopBindings[$0] }.first
-        return binding?.ranked(
-            for: liveFingerprints,
-            preferring: liveProfileRef
-        ).first?.name
+        guard let binding, case .success(let pick) = boundProfile(of: binding)
+        else { return nil }
+        return pick.profile.name
     }
 
     /// The Spaces of a screen on the Desktop it shows.
@@ -129,11 +131,14 @@ extension KiwiCore {
     private func hiddenLines(
         on display: DisplayID,
         native: NativeSpace,
-        in snapshot: DesktopSnapshot
+        in snapshot: DesktopSnapshot,
+        shared: Bool
     ) -> [DesktopOverview.SpaceLine] {
-        let away = state.awayWindows.values
-            .filter { $0.isUp && $0.nativeSpace == native.id }
-            .sorted { $0.id.raw < $1.id.raw }
+        let onDesktop: (WindowID) -> AwayWindow? = { id in
+            self.state.awayWindows[id].flatMap {
+                $0.nativeSpace == native.id ? $0 : nil
+            }
+        }
         let returning = snapshot.keys(of: native.id).lazy
             .compactMap { self.desktopMemory.virtualSpaces[$0] }.first
         let spaces = state.workspaces.spaces(on: display)
@@ -141,23 +146,28 @@ extension KiwiCore {
             overviewLine(
                 id,
                 isShown: id == returning,
-                windows:
-                    away
-                    .filter { state.rememberedSpace(of: $0.id) == id }
+                // The ledger's own reader, in the rank they return in.
+                windows: awayMembers(of: id).compactMap(onDesktop)
                     .map(awayOverviewWindow),
                 lastFocused: desktopMemory.honoredFocus[id]?[native.id]
             )
         }
-        let unfiled = away.filter { entry in
-            state.rememberedSpace(of: entry.id).map {
-                !spaces.contains($0)
-            } ?? true
-        }
+        // Only what no screen's Space will take back: with shared
+        // Desktops each screen lists the set, and a window filed on
+        // another screen is listed there.
+        let unfiled = state.awayWindows.values
+            .filter { $0.isUp && $0.nativeSpace == native.id }
+            .filter { entry in
+                state.rememberedSpace(of: entry.id).map {
+                    !spaces.contains($0)
+                        && !(shared && state.workspaces.display(of: $0) != nil)
+                } ?? true
+            }
+            .sorted { $0.id.raw < $1.id.raw }
         if !unfiled.isEmpty {
             lines.append(
                 DesktopOverview.SpaceLine(
                     space: nil,
-                    glyph: nil,
                     mode: nil,
                     isShown: false,
                     marker: nil,
@@ -176,11 +186,13 @@ extension KiwiCore {
         lastFocused: WindowID?
     ) -> DesktopOverview.SpaceLine {
         let marker: DesktopOverview.Marker? =
-            state.heldSpaces[id] != nil
-            ? .held : isTemporary(id) ? .temporary : nil
+            switch spaceMarker(of: id) {
+            case .held?: .held
+            case .temporary?: .temporary
+            case nil: nil
+            }
         return DesktopOverview.SpaceLine(
             space: id,
-            glyph: spaceGlyph(for: id),
             mode: state.workspaces[id]?.mode,
             isShown: isShown,
             marker: marker,

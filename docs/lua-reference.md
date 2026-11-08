@@ -6481,7 +6481,7 @@ end)
 **Does:** opens **KiwiHub** on that side, switches to it from
 another side, or closes KiwiHub when it already shows that side.
 Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
-is refused, naming the three.
+is refused, naming the sides it takes.
 
 The `"shortcuts"` side is the read-only **shortcuts panel** — a
 live glance at the active layer's bindings.
@@ -6585,7 +6585,8 @@ The `"desktops"` side is the **Desktop overview**, the fourth side,
 after View: one row per screen, left to right, each screen's
 Desktops as cards, and on each card the screen's Spaces with their
 windows. A window on a Desktop no screen shows is listed in the
-Space it returns to. The menu bar's **Show Desktop overview** row
+Space it returns to, or under **Not in a Space yet**, which nothing
+can be moved into. The menu bar's **Show Desktop overview** row
 opens it too, and **Shortcuts & Gestures ▸ KiwiHub** offers a row
 for it with no key set.
 
@@ -6603,7 +6604,9 @@ for it with no key set.
   the first, **⌘1**–**⌘9** drop them on that Desktop's shown
   Space. A window on a Desktop no screen shows, a pocketed one and
   a full-screen one cannot be picked up.
-- A click selects, a double click goes there; **⇧**-click moves,
+- A click on a Space opens it, a double click goes there, and a
+  double click on a Desktop's title goes to that Desktop;
+  **⇧**-click moves,
   **⌥**-click swaps, **⌘**-click picks up. Dragging an icon onto
   a Space moves it, and you stay.
 - Typing finds windows by app and title; matches move to the
@@ -6617,7 +6620,7 @@ for it with no key set.
 On every side:
 
 - **Tab** steps to the next side and **⇧Tab** to the one before —
-  Windows, Shortcuts and View, wrapping — clearing the typing.
+  in the switch's order and wrapping — clearing the typing.
 - **Escape** clears the typing, then closes KiwiHub; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 
@@ -6651,7 +6654,7 @@ string; no combo, or `""`, clears it.
 **Does:** makes the combo a second key for that built-in key
 while KiwiHub is open: `"down"` moves the selection down as **↓**
 does, `"page_down"` a page as **Page Down** does. `"left"` and
-`"right"` move only on the View side, as **←** and **→** do;
+`"right"` move only where **←** and **→** do;
 elsewhere their combo types into the search field. The built-in
 keys keep working, holding **⇧** with a combo moves as with the
 arrows, and the combo does nothing outside KiwiHub. While the

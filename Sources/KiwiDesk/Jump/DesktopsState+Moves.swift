@@ -109,8 +109,9 @@ extension DesktopsState {
         )
     }
 
-    /// One step from `index`, wrapping only where asked; nil where
-    /// the step leaves nothing to land on.
+    /// One step from `index` through KiwiHub's one list step
+    /// (gui.md ▸ #2897): a fresh press wraps, a held key and a page
+    /// stop at the end; nil where nothing moved.
     static func step(
         _ index: Int,
         _ delta: Int,
@@ -118,9 +119,7 @@ extension DesktopsState {
         wrap: Bool
     ) -> Int? {
         guard count > 0 else { return nil }
-        let next = index + delta
-        if (0..<count).contains(next) { return next }
-        guard wrap else { return nil }
-        return (next % count + count) % count
+        let next = JumpList.stepped(index, by: delta, count: count, wrap: wrap)
+        return next == index ? nil : next
     }
 }
