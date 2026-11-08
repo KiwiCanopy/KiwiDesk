@@ -93,9 +93,11 @@ struct MaximizeShareMenuTests {
                 .components(separatedBy: "privatefunccustomBinding(").first
         )
         #expect(!menu.contains(".frame(width:"))
-        #expect(
-            source.components(separatedBy: ".fixedSize()").count - 1 == 2
+        #expect(menu.contains(".controlSize(.large).fixedSize()"))
+        let anchor = try #require(
+            source.components(separatedBy: "privatefuncanchorMenu(").last
         )
+        #expect(anchor.contains(".controlSize(.large).fixedSize()"))
         #expect(
             source.contains(
                 "cell(key).frame(width:Self.columnWidth,alignment:.leading)"

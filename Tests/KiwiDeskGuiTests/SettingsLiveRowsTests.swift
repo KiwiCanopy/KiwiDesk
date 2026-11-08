@@ -109,7 +109,11 @@ struct SettingsLiveRowsTests {
             "SettingsWindowController+LiveSettings.swift": [
                 "guardisShown,liveAskQueued.insert(id).insertedelse{"
                     + "return}",
-                "self?.model.refreshUnsavedLive()",
+                // The queue clears at each ask, or only the first
+                // live change after an open is ever asked.
+                "Task{@MainActor[weakself]in"
+                    + "liveAskQueued.remove(id)"
+                    + "self?.model.refreshUnsavedLive()}",
             ],
             "SettingsDiffRowSource+Live.swift": [
                 "unsavedLive=target==.live&&!editingLua"
