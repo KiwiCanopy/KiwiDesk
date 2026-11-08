@@ -53,6 +53,14 @@ the ring draws on an AppKit panel, why a fullscreen window gets
 none) live in `docs/design-decisions.md`. This file is the
 engineering side: which input owns an overlay's frame, and when.
 
+**A ring or a mark stands aside on a window filling its screen
+through the one `KiwiCore.screenFillers(of:)`** — a full Maximize
+and a maximizing Monocle's tiled members (#2448, #3062, #2976) —
+never the bars' Hidden reading, which reaches no overlay, nor a
+Maximize or mode check beside it; a new kind of filling window
+joins that helper (`MonocleMaximizeChromeTests`). A reader routing
+beside it is review's, since nothing scans for one.
+
 ## One type owns "which frame does an overlay render"
 
 `FollowSource` holds both decisions — `renderFrame` for a

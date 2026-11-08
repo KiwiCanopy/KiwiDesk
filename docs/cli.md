@@ -734,6 +734,13 @@ a press without them takes on a screen of that shape, or on every
 shape (`laptop|widescreen|ultrawide|super_ultrawide|portrait`;
 [`toggle_maximized`](lua-reference.md#toggle_maximized)).
 
+:::unreleased
+`monocle.set_maximize_windows true|false` (default `false`) makes
+every Monocle window fill the screen with no gaps while the bars read
+Hidden
+([`monocle.set_maximize_windows`](lua-reference.md#monocleset_maximize_windows)).
+:::
+
 `center_floating` moves the focused floating window to the middle of
 its screen at its size
 ([`center_floating`](lua-reference.md#center_floating)).

@@ -130,6 +130,7 @@ struct ShelfSplitPlanTests {
         return core.shelfPlans(
             visible: CGRect(x: 0, y: 0, width: 1600, height: 1000),
             settings: settings,
+            mode: app(settings).space.mode,
             spaceItems: items(),
             app: app(settings),
             pocket: false,
@@ -152,6 +153,7 @@ struct ShelfSplitPlanTests {
         let plans = core.shelfPlans(
             visible: visible,
             settings: settings,
+            mode: app(settings).space.mode,
             spaceItems: items(),
             app: app(settings),
             pocket: false,

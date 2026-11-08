@@ -60,6 +60,28 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// Whether `space` lays every tiled member at its screen's whole
+    /// visible frame: Monocle's "Maximize windows" (#2976).
+    func maximizesWindows(of space: Space) -> Bool {
+        tiler.settings.maximizesWindows(in: space.mode)
+    }
+
+    /// The windows of `space` the ring and the marks step aside on as
+    /// filling their screen: a full Maximize (#2448, not a Height or
+    /// Width one, #3062) and a maximizing Monocle's tiled members.
+    func screenFillers(of space: Space) -> Set<WindowID> {
+        var fillers: Set<WindowID> = []
+        if state.maximizedShape(of: space)?.axis == nil,
+            let id = state.maximizedWindow(of: space)
+        {
+            fillers.insert(id)
+        }
+        if maximizesWindows(of: space) {
+            fillers.formUnion(state.effectiveTiledMembers(of: space))
+        }
+        return fillers
+    }
+
     /// The pass that grows a window to its screen or puts it back:
     /// one already-placed window changes size in place, no slot or
     /// membership moving, so it promises spring sizing (#593);

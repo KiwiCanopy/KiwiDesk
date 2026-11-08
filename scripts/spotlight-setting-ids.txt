@@ -217,6 +217,7 @@ settings.minWindowSizes.track.height
 settings.minWindowSizes.track.width
 settings.monocle.appBar.visibility
 settings.monocle.hideStyle
+settings.monocle.maximizeWindows
 settings.monocle.newWindowPlacement
 settings.monocle.orientation
 settings.mouse.followsFocus

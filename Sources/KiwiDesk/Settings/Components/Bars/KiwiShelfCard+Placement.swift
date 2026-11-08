@@ -82,16 +82,24 @@ extension KiwiShelfCard {
             )
             besideAlwaysNote(.space, in: [.monocle, .scrolling])
         case .layoutAppBar(.monocleAppBarVisibility):
+            let maximizes = model.config.settings.maximizesWindows(
+                in: .monocle
+            )
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .monocleShowIn.text,
                 $model.config.settings.monocle.appBar.visibility
             )
+            .modifier(GreyOut(active: maximizes))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .monocleShowIn
             )
-            besideAlwaysNote(.app, in: [.monocle])
+            if maximizes {
+                monocleMaximizesNote
+            } else {
+                besideAlwaysNote(.app, in: [.monocle])
+            }
         case .layoutAppBar(.scrollingAppBarVisibility):
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
@@ -121,6 +129,30 @@ extension KiwiShelfCard {
             )
             EmptyView()
         }
+    }
+
+    /// Under the App Bar in Monocle while Monocle maximizes its
+    /// windows: the row has no effect at rest there, so it greys
+    /// and links to the switch (#2976 ▸ 6).
+    private var monocleMaximizesNote: some View {
+        CrossReferenceRow(
+            prose: Self.monocleMaximizesProse,
+            linkTitle: SettingsDestination.layoutDefaults.title,
+            destination: .layoutDefaults
+        )
+        .font(.caption)
+    }
+
+    /// The link line's sentence, its link at the slot.
+    static var monocleMaximizesProse: String {
+        L(
+            "kiwishelf.show.monocle.maximizes_link",
+            "Hidden at rest while \u{201C}%1$@\u{201D} is on for %2$@ "
+                + "in %3$@.",
+            LayoutHelp.monocleMaximizeWindowsLabel,
+            L("layout.monocle.name", "Monocle"),
+            CrossReferenceRow.linkSlot
+        )
     }
 
     /// Under an `auto` bar beside an `always` one on its edge: it

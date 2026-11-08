@@ -30,14 +30,11 @@ extension KiwiCore {
         let glass = LiquidGlassGate.rendered(
             glass: tiler.settings.stickyStyle.liquidGlass
         )
-        // A Height or Width maximize keeps its marks, as its ring
-        // (#3062): it does not fill its screen.
-        let maximized = Set(
-            state.workspaces.allSpaces.compactMap {
-                state.maximizedShape(of: $0)?.axis == nil
-                    ? state.maximizedWindow(of: $0) : nil
-            }
-        )
+        // What fills its screen wears no mark, as no ring (#2448,
+        // #3062, #2976).
+        let maximized = state.workspaces.allSpaces.reduce(
+            into: Set<WindowID>()
+        ) { $0.formUnion(screenFillers(of: $1)) }
         // A window a run parks wears no mark at the corner
         // (#2235, owner 2026-10-22: no exemption).
         let hidden = runHidden

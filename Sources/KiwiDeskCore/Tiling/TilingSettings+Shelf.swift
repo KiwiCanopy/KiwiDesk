@@ -40,9 +40,10 @@ extension TilingSettings {
         _ bar: ShelfBar,
         in mode: LayoutMode
     ) -> Bool {
-        switch bar {
-        case .space: spaceBarStyle.visibility.revealable
-        case .app: appBarVisibility(in: mode)?.revealable == true
+        let shown = barVisibilities(in: mode)
+        return switch bar {
+        case .space: shown.space.revealable
+        case .app: shown.app?.revealable == true
         }
     }
 
@@ -60,10 +61,8 @@ extension TilingSettings {
         let hides = {
             (screen: TilingSettings, bar: ShelfBar, mode: LayoutMode)
                 -> Bool in
-            let value =
-                bar == .space
-                ? screen.spaceBarStyle.visibility
-                : screen.appBarVisibility(in: mode)
+            let shown = screen.barVisibilities(in: mode)
+            let value = bar == .space ? shown.space : shown.app
             switch value {
             case .hidden: return true
             case .auto: return !screen.autoReadsAlways(bar, in: mode, on: nil)
@@ -100,10 +99,9 @@ extension TilingSettings {
         in mode: LayoutMode,
         on screen: String?
     ) -> [AppBarEdge] {
-        onScreen(screen).barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).filter { $0.reservation == .always }.map(\.edge)
+        onScreen(screen).barEdges(in: mode).filter {
+            $0.reservation == .always
+        }.map(\.edge)
     }
 
     /// The hiding edges a space laid out in `mode` on `screen`
@@ -114,10 +112,8 @@ extension TilingSettings {
         in mode: LayoutMode,
         on screen: String?
     ) -> [AppBarEdge] {
-        onScreen(screen).barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).filter { $0.reservation == .auto }.map(\.edge)
+        onScreen(screen).barEdges(in: mode).filter { $0.reservation == .auto }
+            .map(\.edge)
     }
 
     /// Whether `bar`, stored `auto`, reads `always` in `mode` on
@@ -129,10 +125,9 @@ extension TilingSettings {
         in mode: LayoutMode,
         on screen: String?
     ) -> Bool {
-        onScreen(screen).barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).contains { $0.bars[bar] == .auto && $0.shown(bar) == .always }
+        onScreen(screen).barEdges(in: mode).contains {
+            $0.bars[bar] == .auto && $0.shown(bar) == .always
+        }
     }
 
     /// Whether `bar` is drawn at rest on `screen` in `mode`: the
@@ -142,10 +137,9 @@ extension TilingSettings {
         in mode: LayoutMode,
         on screen: String?
     ) -> Bool {
-        onScreen(screen).barEdges(
-            space: spaceBarStyle.visibility,
-            app: appBarVisibility(in: mode)
-        ).contains { $0.drawnAtRest.contains(bar) }
+        onScreen(screen).barEdges(in: mode).contains {
+            $0.drawnAtRest.contains(bar)
+        }
     }
 
     /// The edges the bars sit on — the ONE list the reservation
@@ -233,7 +227,8 @@ extension TilingSettings {
     /// reads for `mode` on `screen` — what a bar write must change
     /// to owe a pass (#1524, `BarReserveCoreTests` ▸
     /// `unchangedReservationSkipsTheRetile`). `pocketAtRest`: the
-    /// pocket rests, `pocketRests` (#2784, #2978).
+    /// pocket rests, `pocketRests` (#2784, #2978); a mode that
+    /// rests it nowhere answers so inside (`pocketRests(in:)`).
     public func shelfReservation(
         in mode: LayoutMode,
         on screen: String?,

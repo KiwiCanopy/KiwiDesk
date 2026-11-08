@@ -188,7 +188,7 @@ extension SettingsValueReadout {
             .gridAutoSize, .gridColumns, .gridRows,
             .gridNewWindowPlacement, .gridColumnWeights,
             .gridRowWeights, .monocleOrientation,
-            .monocleHideStyle,
+            .monocleHideStyle, .monocleMaximizeWindows,
             .monocleNewWindowPlacement,
             .trackAxis, .trackNewWindow,
             .trackNewWindowPosition, .trackAutoTracks,

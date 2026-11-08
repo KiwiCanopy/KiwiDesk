@@ -5,9 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `space_bar.glyph_gap` (#1689): room between a Space item's app
-/// glyph cells and before its `+n` badge, floored at decode and
-/// set with no ceiling (#1695), and read by the item's layout,
-/// its measured length and the shelf's plan alike.
+/// glyph cells and before its `+n` badge, floored at decode with no
+/// ceiling (#1695), read by its layout, length and the shelf's plan.
 @Suite("Space Bar glyph gap")
 struct GlyphGapTests {
     @Test("The default abuts the cells, as before the setting")
@@ -331,6 +330,7 @@ struct GlyphGapPlanTests {
             let plan = core.shelfPlans(
                 visible: CGRect(x: 0, y: 0, width: 3000, height: 800),
                 settings: settings,
+                mode: app.space.mode,
                 spaceItems: items,
                 app: app,
                 pocket: false,

@@ -95,6 +95,7 @@ struct LayoutSchematicView: View {
             MonocleSchematic(
                 orientation: settings.monocle.orientation,
                 hideStyle: settings.monocle.hideStyle,
+                maximizes: settings.maximizesWindows(in: .monocle),
                 windows: windows,
                 scale: scale,
                 arrival: motion.arrival

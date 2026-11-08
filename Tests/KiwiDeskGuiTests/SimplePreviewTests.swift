@@ -130,7 +130,11 @@ struct SimplePreviewTests {
             )
         let text = try SourceScan.strippedSource(at: file)
             .filter { !$0.isWhitespace }
-        #expect(text.contains("letsettings=model.simplePreviewSettings"))
+        #expect(
+            text.contains(
+                "letsettings=Self.drawn(model.simplePreviewSettings,"
+            )
+        )
         #expect(text.contains("HomeCardBarsTile(settings:settings,"))
         #expect(
             text.contains(

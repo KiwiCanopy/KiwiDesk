@@ -195,6 +195,7 @@ struct ShelfFloorWiringTests {
         let plans = core.shelfPlans(
             visible: CGRect(x: 0, y: 0, width: 600, height: 400),
             settings: settings,
+            mode: app.space.mode,
             spaceItems: spaces,
             app: app,
             pocket: false,

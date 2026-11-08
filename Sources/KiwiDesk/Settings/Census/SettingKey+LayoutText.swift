@@ -77,6 +77,11 @@ extension LayoutKey {
                 "monocle.hide_style",
                 help: "monocle.hide_style.help"
             )
+        case .monocleMaximizeWindows:
+            return .text(
+                "monocle.maximize_windows",
+                help: "monocle.maximize_windows.help"
+            )
         case .trackNewWindow:
             return .text("track.new_window")
         case .trackNewWindowPosition:

@@ -238,7 +238,7 @@ extension TilingSettings {
     ) -> LayoutContext {
         var context = LayoutContext(
             bounds: bounds,
-            gaps: gaps(for: space.id),
+            gaps: layoutGaps(for: space),
             focused: focusedOverride ?? space.focused,
             minWindowSize: minWindowSize(for: space.mode, in: space.id),
             stackWeights: space.stackWeights,

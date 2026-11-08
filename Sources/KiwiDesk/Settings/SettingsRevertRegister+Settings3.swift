@@ -10,6 +10,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.grid.newWindowPlacement),
         .layout(.monocleOrientation): .leaf(\.settings.monocle.orientation),
         .layout(.monocleHideStyle): .leaf(\.settings.monocle.hideStyle),
+        .layout(.monocleMaximizeWindows):
+            .leaf(\.settings.monocle.maximizeWindows),
         .layout(.monocleNewWindowPlacement):
             .leaf(\.settings.monocle.newWindowPlacement),
         .layout(.trackAxis): .leaf(\.settings.track.axis),

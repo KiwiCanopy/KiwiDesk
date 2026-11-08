@@ -91,6 +91,7 @@ struct AppBarFloatTests {
             core.shelfPlans(
                 visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
                 settings: core.tiler.settings,
+                mode: app.space.mode,
                 spaceItems: nil,
                 app: app,
                 pocket: false,

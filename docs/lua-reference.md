@@ -2383,6 +2383,28 @@ at the corner.
 monocle.set_hide_style("park")
 ```
 
+:::unreleased
+### monocle.set_maximize_windows
+
+**Expects:** `true` or `false` (default `false`). Settings ▸
+Layout Defaults ▸ Monocle ▸ Maximize windows.
+
+**Does:** on every Monocle Space, every window fills the screen's
+visible frame with no gaps, parked windows included. Both bars read
+as Hidden in Monocle, so `space_bar.toggle_reveal()` and
+`app_bar.toggle_reveal()` still show a bar over the window, and the
+menu-bar item names the Space. The pocket shows no handle at rest
+there, only during a window drag or while a window goes in or out.
+The focus border and the marks step aside on the tiled windows.
+`toggle_maximized` is unchanged.
+
+**Example:**
+
+```lua
+monocle.set_maximize_windows(true)
+```
+:::
+
 ### monocle.set_new_window_placement
 
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or
@@ -3294,7 +3316,10 @@ Under `"always"` and `"auto"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
 with no count, except where KiwiShelf stands down for a native
-full-screen window or a presentation. Windows keep clear of the
+full-screen window or a presentation, and on a Monocle Space while
+[`monocle.set_maximize_windows`](#monocleset_maximize_windows) is on,
+where it shows only during a window drag or while a window goes in or
+out. Windows keep clear of the
 resting handle or pocket unless `reserve` is off for every bar on
 that edge, or on an edge no bar sits on, for both bars. A click on
 the pocket lists the windows inside by app; a row takes its window
@@ -3568,8 +3593,8 @@ layout carries no App Bar, or where its App Bar is `"always"`.
 It fails with a pill too where the Space holds no window, so the
 App Bar has nothing to show.
 
-It fails with a pill first while a window fills the screen, as
-the Space Bar's call does.
+It fails with a pill first while a maximized, full-screen or
+presenting window fills the screen, as the Space Bar's call does.
 
 **Example:**
 
