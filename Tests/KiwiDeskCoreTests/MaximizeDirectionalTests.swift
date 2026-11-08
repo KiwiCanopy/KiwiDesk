@@ -15,6 +15,8 @@ private let w2 = WindowID(2)
 private func makeCore() -> KiwiCore {
     let core = makeTestCore()
     core.tiler.visibleBounds = { _ in bounds }
+    // No screen holds the Space, so a press reads the Widescreen
+    // row; the per-shape cases are `MaximizeShareScreenTests`'.
     for id in [w1, w2] {
         core.state.apply(
             .windowCreated(
@@ -48,7 +50,12 @@ struct MaximizeDirectionalTests {
     @Test("Height fills top to bottom at the stored share, centred")
     func heightCentred() {
         let core = makeCore()
-        #expect(core.tiler.settings.maximize.heightShare == 0.5)
+        #expect(
+            core.tiler.settings.maximize.share(
+                for: .height,
+                on: .widescreen
+            ) == 0.5
+        )
         #expect(
             core.execute("toggle_maximized", args: [.string("height")])
                 .isSuccess

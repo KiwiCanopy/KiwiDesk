@@ -333,12 +333,12 @@ extension InterpolatedLabelTests {
         "colors.front_app_off.help": 2,
         // A layer's locked box points at Delete layer (#2022).
         "shortcuts.layer_reach.locked_help": 1,
-        // KiwiVision's pointer names Shortcuts ▸ Focus by its
-        // labels (#2103).
+        // KiwiVision's pointer to Shortcuts ▸ Focus (#2103).
         "kiwivision.xref_link": 1,
-        // The Maximize links name each other's place (#3062).
+        // Maximize's links and its `?` (#3062).
         "layout_defaults.maximize.xref_link": 1,
         "shortcuts.maximize.xref_link": 1,
+        "layout_defaults.maximize.caption.help": 1,
         // The lens page's other-layer caption names Shortcuts
         // (#2103).
         "kiwivision.lens.chord_elsewhere": 1,

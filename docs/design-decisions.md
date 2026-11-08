@@ -6462,6 +6462,24 @@ member of that Space at an in-place replay, so a restart ends it
 there.
 :::
 
+:::unreleased
+**A Maximize Height or Width takes its share from the shape of the
+screen, from a table every shape stores (#3062).** One share
+cannot suit every screen: half a laptop is a narrow column, half
+a 32:9 screen a whole monitor. So each `ScreenClass` keeps its own
+width share, height share and "from" — Laptop ¾ / ⅔ / Center,
+Widescreen ½ / ½ / Center, Ultrawide ⅓ / ½ / Where it is, Super
+Ultrawide ¼ / ½ / Where it is, Portrait ¾ / ½ / Center — and a
+press reads the row of the window's screen. Every row is always
+stored, with no value behind them, as the minimum size is per
+layout (#2237): a fallback row would be a second place to look
+for one number. An "Automatic" switch over a fixed table was the
+other candidate and is refused: it hides the five values a user
+might want to change, and its manual share applies to every
+screen, which is the problem the table solves. A per-Space
+override is #3090's.
+:::
+
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
 
 **[Rationale]**

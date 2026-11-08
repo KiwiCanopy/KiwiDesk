@@ -69,6 +69,9 @@ struct AnnouncedValueTests {
         // #2544: a Lua binding's shortcut group menu, named for its
         // row.
         "ShortcutGroupField.swift": 1,
+        // #3062: a Maximize table cell's share and From pop-ups,
+        // named for their column and screen shape.
+        "MaximizeShapeRow.swift": 2,
     ]
 
     @Test("a named picker or menu gives its value back")

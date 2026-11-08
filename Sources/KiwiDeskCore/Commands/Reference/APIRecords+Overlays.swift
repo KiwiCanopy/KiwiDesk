@@ -98,15 +98,17 @@ extension APIReference {
 
     static let maximizeRecords: [String: APIRecord] = [
         "set_share": APIRecord(
-            "Sets the share of the other axis a Maximize Height or "
-                + "Maximize Width takes, from 0.1 to 1.",
+            "Sets a Maximize Height or Width's share of the other "
+                + "axis, 0.1 to 1, per screen shape.",
             .choice("axis", MaximizeAxis.self),
-            .number("share")
+            .number("share"),
+            .choice("shape", ScreenShape.self, optional: true)
         ),
         "set_anchor": APIRecord(
-            "Sets where a Maximize Height or Width grows from: the "
-                + "screen's centre or the window's own place.",
-            .choice("anchor", MaximizeAnchor.self)
+            "Sets where a Maximize Height or Width grows from, "
+                + "per screen shape.",
+            .choice("anchor", MaximizeAnchor.self),
+            .choice("shape", ScreenShape.self, optional: true)
         ),
     ]
 

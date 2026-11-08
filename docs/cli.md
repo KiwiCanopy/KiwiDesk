@@ -739,9 +739,11 @@ every lens with why it cannot turn on.
 :::unreleased
 `toggle_maximized` also takes `height|width`, then an optional share
 from 0.1 to 1 and `center|in_place`: the window fills that axis at a
-share of the other. `maximize.set_share <height|width> <share>` and
-`maximize.set_anchor <center|in_place>` set what a press without them
-takes ([`toggle_maximized`](lua-reference.md#toggle_maximized)).
+share of the other. `maximize.set_share <height|width> <share>
+[shape]` and `maximize.set_anchor <center|in_place> [shape]` set what
+a press without them takes on a screen of that shape, or on every
+shape (`laptop|widescreen|ultrawide|super_ultrawide|portrait`;
+[`toggle_maximized`](lua-reference.md#toggle_maximized)).
 :::
 
 :::unreleased

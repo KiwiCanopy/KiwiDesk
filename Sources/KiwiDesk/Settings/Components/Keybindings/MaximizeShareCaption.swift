@@ -1,22 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The line under a directional Maximize row (#3062): the share it
-/// takes, read from the draft, and the Layout Defaults row that sets
-/// it.
+/// The line under a directional Maximize row (#3062): its share
+/// depends on the screen's shape, set in Layout Defaults ▸ Maximize.
 struct MaximizeShareCaption: View {
-    @ObservedObject var model: SettingsModel
     let axis: MaximizeAxis
 
     var body: some View {
-        let prose = Self.prose(
-            axis: axis,
-            share: SettingsValueReadout.percent(
-                model.config.settings.maximize.share(for: axis)
-            )
-        )
         CrossReferenceRow(
-            prose: prose,
+            prose: Self.prose(axis: axis),
             linkTitle: L(
                 "shortcuts.maximize.xref_link",
                 "%1$@ ▸ %2$@",
@@ -35,21 +27,19 @@ struct MaximizeShareCaption: View {
         }
     }
 
-    /// The sentence naming `share` of `axis`'s other side.
-    static func prose(axis: MaximizeAxis, share: String) -> String {
+    /// The sentence for `axis`'s other side.
+    static func prose(axis: MaximizeAxis) -> String {
         switch axis {
         case .height:
             return L(
-                "shortcuts.maximize_height.share",
-                "Uses %1$@ of the screen's width, set in %2$@.",
-                share,
+                "shortcuts.maximize_height.by_shape",
+                "Its width depends on the screen's shape, set in %1$@.",
                 CrossReferenceRow.linkSlot
             )
         case .width:
             return L(
-                "shortcuts.maximize_width.share",
-                "Uses %1$@ of the screen's height, set in %2$@.",
-                share,
+                "shortcuts.maximize_width.by_shape",
+                "Its height depends on the screen's shape, set in %1$@.",
                 CrossReferenceRow.linkSlot
             )
         }

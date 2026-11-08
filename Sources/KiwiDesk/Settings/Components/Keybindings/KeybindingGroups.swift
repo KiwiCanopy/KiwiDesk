@@ -229,13 +229,13 @@ struct SizeFloatGroup: View {
         case .shortcuts(.maximizeHeight):
             VStack(alignment: .leading, spacing: 4) {
                 family
-                MaximizeShareCaption(model: model, axis: .height)
+                MaximizeShareCaption(axis: .height)
             }
             .searchAnchored(SettingsCatalog.shortcuts.maximizeHeightBinding)
         case .shortcuts(.maximizeWidth):
             VStack(alignment: .leading, spacing: 4) {
                 family
-                MaximizeShareCaption(model: model, axis: .width)
+                MaximizeShareCaption(axis: .width)
             }
             .searchAnchored(SettingsCatalog.shortcuts.maximizeWidthBinding)
         default:

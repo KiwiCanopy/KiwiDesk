@@ -21,8 +21,9 @@ struct LayoutDefaultsControls: Sendable {
         "Per layout",
         children: MinSizeDrawerControls()
     )
-    /// The Maximize card and its rows (#3062), each a search and
-    /// link anchor.
+    /// The Maximize card and its columns (#3062), each a search and
+    /// link anchor, and the drawer holding the shapes of screens not
+    /// connected.
     let maximizeCard = SettingsControl(
         "layout_defaults.maximize.title",
         "Maximize"
@@ -38,6 +39,10 @@ struct LayoutDefaultsControls: Sendable {
     let maximizeAnchor = SettingsControl(
         "layout_defaults.maximize.anchor",
         "Maximize from"
+    )
+    let maximizeOtherShapes = SettingsDrawer(
+        "layout_defaults.maximize.other_shapes",
+        "Other screen shapes"
     )
     let livePreview = SettingsControl(
         "layout_defaults.live_preview",

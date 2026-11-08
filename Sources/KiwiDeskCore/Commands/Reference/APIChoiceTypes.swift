@@ -24,6 +24,7 @@ extension ModeCycleDirection: APIChoiceType {}
 extension HyperSourceKey: APIChoiceType {}
 extension MaximizeAxis: APIChoiceType {}
 extension MaximizeAnchor: APIChoiceType {}
+extension ScreenShape: APIChoiceType {}
 
 extension BspParams.Strategy: APIChoiceType {}
 extension ScrollingParams.Anchor: APIChoiceType {}

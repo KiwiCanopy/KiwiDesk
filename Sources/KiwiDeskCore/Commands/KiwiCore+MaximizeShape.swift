@@ -11,10 +11,11 @@ struct MaximizeArgRefusal: Error {
 /// stored ones; a full Maximize takes neither.
 extension KiwiCore {
     /// The shape `args` ask for: none is the whole screen; an axis
-    /// takes the stored share and anchor unless the press names
-    /// its own.
+    /// takes the share and anchor `shape`'s row stores unless the
+    /// press names its own.
     func maximizeShape(
-        from args: [JSONValue]
+        from args: [JSONValue],
+        on shape: ScreenShape
     ) -> Result<MaximizeShape, MaximizeArgRefusal> {
         guard let first = args.first else { return .success(.full) }
         guard let raw = first.stringValue,
@@ -27,14 +28,14 @@ extension KiwiCore {
             )
         }
         let settings = tiler.settings.maximize
-        var share = settings.share(for: axis)
+        var share = settings.share(for: axis, on: shape)
         if args.count > 1 {
             guard let read = args[1].numberValue,
                 MaximizeShape.shareRange.contains(read)
             else { return .failure(Self.shareRefusal) }
             share = read
         }
-        var anchor = settings.anchor
+        var anchor = settings.anchor[shape]
         if args.count > 2 {
             guard let raw = args[2].stringValue,
                 let read = MaximizeAnchor(rawValue: raw)
@@ -58,9 +59,21 @@ extension KiwiCore {
             + "\(MaximizeShape.shareRange.upperBound)"
     )
 
-    /// `maximize.set_share(axis, share)` and
-    /// `maximize.set_anchor(anchor)`: a window already maximized
-    /// keeps the shape it was pressed with.
+    /// The shape of the screen `space` lays out on; a Space no
+    /// screen holds yet reads as Widescreen, the class
+    /// `ScreenClass.of` gives a screen it cannot measure.
+    func maximizeScreenShape(of space: SpaceID?) -> ScreenShape {
+        let display =
+            space
+            .flatMap { state.workspaces.display(of: $0) }
+            .flatMap { state.workspaces.displays[$0] }
+        return ScreenShape(display.map(ScreenClass.of) ?? .desktop)
+    }
+
+    /// `maximize.set_share(axis, share[, shape])` and
+    /// `maximize.set_anchor(anchor[, shape])`: no shape writes every
+    /// one. A window already maximized keeps the shape it was
+    /// pressed with.
     func maximizeSettingsCommand(
         _ command: String,
         _ args: [JSONValue]
@@ -73,16 +86,44 @@ extension KiwiCore {
             guard args.count > 1, let share = args[1].numberValue,
                 MaximizeShape.shareRange.contains(share)
             else { return Self.shareRefusal.response }
-            tiler.settings.maximize.setShare(share, for: axis)
+            let shape: ScreenShape?
+            switch Self.screenShapeArgument(args, at: 2) {
+            case .success(let read): shape = read
+            case .failure(let refusal): return refusal.response
+            }
+            tiler.settings.maximize.setShare(share, for: axis, on: shape)
             return .ok()
         case "maximize.set_anchor":
             guard let raw = args.first?.stringValue,
                 let anchor = MaximizeAnchor(rawValue: raw)
             else { return .expected(MaximizeAnchor.self) }
-            tiler.settings.maximize.anchor = anchor
+            let shape: ScreenShape?
+            switch Self.screenShapeArgument(args, at: 1) {
+            case .success(let read): shape = read
+            case .failure(let refusal): return refusal.response
+            }
+            tiler.settings.maximize.anchor.set(anchor, on: shape)
             return .ok()
         default:
             return .fail("unknown command: \(command)")
         }
+    }
+
+    /// The optional shape at `index`: absent is nil, every shape.
+    private static func screenShapeArgument(
+        _ args: [JSONValue],
+        at index: Int
+    ) -> Result<ScreenShape?, MaximizeArgRefusal> {
+        guard args.count > index else { return .success(nil) }
+        guard let raw = args[index].stringValue,
+            let shape = ScreenShape(rawValue: raw)
+        else {
+            return .failure(
+                MaximizeArgRefusal(
+                    message: "expected \(ScreenShape.expectedList)"
+                )
+            )
+        }
+        return .success(shape)
     }
 }
