@@ -134,13 +134,13 @@ public struct ModifierTapDetector: Sendable {
         token &+= 1
         press = (key, time)
         guard let first else { return Output() }
-        if first.key != key {
-            self.first = nil
-        } else if time - first.released > Self.gapLimit {
-            // The gap ran out before a late timer said so.
+        if time - first.released > Self.gapLimit {
+            // The gap ran out before a late timer said so: the
+            // single tap was whole, whichever key comes next.
             self.first = nil
             return Output(taps: [ModifierTap(first.key, count: 1)])
         }
+        if first.key != key { self.first = nil }
         return Output()
     }
 

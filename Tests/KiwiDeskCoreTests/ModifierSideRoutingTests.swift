@@ -152,12 +152,19 @@ struct ModifierSideRoutingTests {
         // The grant's door asks again too, and only after a refusal.
         manager.retryKeyboardTap()
         #expect(asked == 3)
+        var live: FakeKeyboardTap?
         manager.makeKeyboardTap = { consumers, fire, _ in
-            FakeKeyboardTap(consumers, fire)
+            let tap = FakeKeyboardTap(consumers, fire)
+            live = tap
+            return tap
         }
         manager.retryKeyboardTap()
         #expect(manager.sideTapStatus == .running)
+        // With no refusal standing, a retry re-arms nothing.
+        let handed = try #require(live).handed
         manager.retryKeyboardTap()
+        manager.retryKeyboardTap()
+        #expect(live?.handed == handed)
         #expect(manager.sideTapStatus == .running)
     }
 

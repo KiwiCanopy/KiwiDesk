@@ -158,9 +158,10 @@ struct ScrollTapSeamTests {
         let source = try SourceScan.strippedSource(at: file)
         // One creation, from the live consumers' union; no mask
         // spelled beside the consumer's own constants.
+        // Ends at the comma: a widened union keeps the prefix.
         #expect(
             source.contains(
-                "eventsOfInterest: KeyboardTapConsumer.union(consumers)"
+                "eventsOfInterest: KeyboardTapConsumer.union(consumers),"
             )
         )
         #expect(source.components(separatedBy: "eventsOfInterest:").count == 2)
@@ -182,6 +183,13 @@ struct ScrollTapSeamTests {
         )
         // Only `.sides` swallows, so a taps-only tap listens.
         #expect(KeyboardTapConsumer.allCases.filter(\.swallows) == [.sides])
-        #expect(source.contains("swallows ? .defaultTap : .listenOnly"))
+        #expect(
+            source.contains("options: KeyboardTapConsumer.options(consumers),")
+        )
+        #expect(KeyboardTapConsumer.options([.modifierTaps]) == .listenOnly)
+        #expect(KeyboardTapConsumer.options([.sides]) == .defaultTap)
+        #expect(
+            KeyboardTapConsumer.options([.sides, .modifierTaps]) == .defaultTap
+        )
     }
 }

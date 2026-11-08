@@ -10,6 +10,8 @@ final class FakeKeyboardTap: KeyboardTapHandle {
     var rows: [SideTapRow] = []
     var tapRows: [ModifierTapRow] = []
     var stopped = false
+    /// How many times the manager handed it rows.
+    var handed = 0
 
     init(
         _ consumers: Set<KeyboardTapConsumer>,
@@ -20,6 +22,7 @@ final class FakeKeyboardTap: KeyboardTapHandle {
     }
 
     func setRows(_ rows: KeyboardTapRows) {
+        handed += 1
         self.rows = rows.sides
         tapRows = rows.taps
     }

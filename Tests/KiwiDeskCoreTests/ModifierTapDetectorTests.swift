@@ -94,6 +94,31 @@ struct ModifierTapDetectorTests {
         #expect(press.taps == [ModifierTap(Self.rightCommand, count: 1)])
     }
 
+    @Test("a second press exactly at the gap still doubles")
+    func gapBoundary() {
+        var detector = ModifierTapDetector()
+        // Released at 0, so the gap is the second press's time,
+        // exact in binary.
+        _ = Self.tap(&detector, Self.rightCommand, -0.1, 0)
+        let second = Self.tap(
+            &detector,
+            Self.rightCommand,
+            ModifierTapDetector.gapLimit,
+            ModifierTapDetector.gapLimit + 0.1
+        )
+        #expect(second.taps == [ModifierTap(Self.rightCommand, count: 2)])
+    }
+
+    @Test("a lapsed single fires at another key's press")
+    func lapsedSingleOnAnotherKey() {
+        var detector = ModifierTapDetector()
+        _ = Self.tap(&detector, Self.leftCommand, -0.1, 0)
+        let press = detector.feed(
+            .flags(Self.held(Self.rightCommand), at: 0.5)
+        )
+        #expect(press.taps == [ModifierTap(Self.leftCommand, count: 1)])
+    }
+
     @Test("left then right is no double tap")
     func otherSideIsNoDouble() {
         var detector = ModifierTapDetector()

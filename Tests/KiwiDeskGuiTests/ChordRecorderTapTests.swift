@@ -125,4 +125,19 @@ struct ChordRecorderTapTests {
         #expect(capture.outcomes.isEmpty)
         #expect(recorder.tapWait == nil)
     }
+
+    @Test("a key that records nothing still ends a waiting tap")
+    func keyEndsTheWait() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = TapCapture()
+        capture.attach(recorder)
+        tap(recorder, down: 0, up: 0.1)
+        #expect(recorder.tapWait != nil)
+        // 200 names no key, so no chord locks and recording goes on.
+        recorder.handle(.keyDown, keyCode: 200, flags: [], time: 0.2)
+        #expect(recorder.tapWait == nil)
+        #expect(capture.pending.last == .some(nil))
+        #expect(capture.outcomes.isEmpty)
+    }
 }

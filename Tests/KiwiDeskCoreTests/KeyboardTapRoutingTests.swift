@@ -119,19 +119,21 @@ struct KeyboardTapRoutingTests {
 
     @Test("a sided tap row wins on its side, either-side the other")
     func routerMatch() {
+        // The sided row takes the LOWER id, so id order cannot
+        // stand in for the side preference.
         let either = ModifierTapRow(
             combo: KeyCombo.tap(.command, side: nil, count: 2)!,
-            id: 1
+            id: 2
         )
         let right = ModifierTapRow(
             combo: KeyCombo.tap(.command, side: .right, count: 2)!,
-            id: 2
+            id: 1
         )
         let rows = [right, either]
         let onRight = ModifierTap(ModifierKey(.command, .right), count: 2)
         let onLeft = ModifierTap(ModifierKey(.command, .left), count: 2)
-        #expect(ModifierTapRouter.match(rows, onRight)?.id == 2)
-        #expect(ModifierTapRouter.match(rows, onLeft)?.id == 1)
+        #expect(ModifierTapRouter.match(rows, onRight)?.id == 1)
+        #expect(ModifierTapRouter.match(rows, onLeft)?.id == 2)
         let single = ModifierTap(ModifierKey(.command, .right), count: 1)
         #expect(ModifierTapRouter.match(rows, single) == nil)
     }

@@ -57,6 +57,12 @@ enum KeyboardTapConsumer: CaseIterable, Hashable, Sendable {
         bit(.flagsChanged) | bit(.keyDown) | bit(.leftMouseDown)
         | bit(.rightMouseDown) | bit(.otherMouseDown)
 
+    /// The tap's option for `consumers`: active only while one
+    /// swallows, listen-only otherwise.
+    static func options(_ consumers: Set<Self>) -> CGEventTapOptions {
+        consumers.contains { $0.swallows } ? .defaultTap : .listenOnly
+    }
+
     /// The mask a tap serving `consumers` is created with.
     static func union(_ consumers: Set<Self>) -> CGEventMask {
         consumers.reduce(0) { $0 | $1.mask }
@@ -186,12 +192,11 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
 
     /// On the tap thread: creates the tap from the consumers' union.
     private func install() -> Bool {
-        let swallows = consumers.contains { $0.swallows }
         guard
             let port = CGEvent.tapCreate(
                 tap: .cgSessionEventTap,
                 place: .headInsertEventTap,
-                options: swallows ? .defaultTap : .listenOnly,
+                options: KeyboardTapConsumer.options(consumers),
                 eventsOfInterest: KeyboardTapConsumer.union(consumers),
                 callback: { _, type, event, info in
                     guard let info else {
