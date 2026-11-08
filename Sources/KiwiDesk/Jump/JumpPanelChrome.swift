@@ -219,8 +219,9 @@ struct JumpScrollCue: View {
 
 /// The scope switch at the field's trailing end (#2229): a click
 /// target and a mark of where ⇥ goes. The panel reads Tab ahead of
-/// every view, so the field keeps the keys. Each side prints its
-/// own shortcut's live chord (#2245).
+/// every view, so the field keeps the keys. Titles only: a side's
+/// live chord stands in for its title while ⌘ is held or the
+/// pointer is on it (#1229 ▸ Tab bar, amending #2245).
 struct JumpScopeSwitch: View {
     @ObservedObject var model: JumpModel
 
@@ -229,6 +230,8 @@ struct JumpScopeSwitch: View {
             spokenLabel: JumpScope.switchName,
             reservesWeight: true,
             hints: model.chords,
+            hintsOnDemand: true,
+            showsHints: model.commandHeld,
             spokenHint: LayoutPickText.chordHint,
             selection: Binding(
                 get: { model.scope },

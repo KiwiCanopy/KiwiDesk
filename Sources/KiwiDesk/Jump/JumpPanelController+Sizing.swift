@@ -53,8 +53,8 @@ extension JumpPanelController {
     /// The tallest the panel stands on any side: compact, as
     /// Spotlight is, the Shortcuts sheet scrolling past it (#2309).
     /// Room for the Windows side's nine rows under the footer row,
-    /// and two more Shortcuts rows than 400 gave.
-    static let maxPanelHeight: CGFloat = 452
+    /// and for two screen rows of Desktop cards (#1229).
+    static let maxPanelHeight: CGFloat = 488
 
     /// What the Shortcuts side draws besides its sheet: the field,
     /// the footer row and their two dividers.

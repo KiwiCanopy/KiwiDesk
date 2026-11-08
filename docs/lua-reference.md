@@ -6583,11 +6583,15 @@ other way. Holding the key down stops at the end instead.
 On every side:
 
 - **Tab** steps to the next side and **⇧Tab** to the one before —
-  Windows, Shortcuts and View, wrapping — clearing the typing. The
-  switch at the end of the field shows each side's own key, read
-  from your shortcuts.
+  Windows, Shortcuts and View, wrapping — clearing the typing.
 - **Escape** clears the typing, then closes KiwiHub; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
+
+:::unreleased
+The switch at the end of the field shows each side's own key,
+read from your shortcuts, in place of its title while you hold
+**⌘** or point at it.
+:::
 
 Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
 you create too) and **⌃⌥L** (view), and offered under
