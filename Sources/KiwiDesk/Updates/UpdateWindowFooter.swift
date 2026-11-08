@@ -37,8 +37,7 @@ struct UpdateWindowFooter: View {
                 )
             )
             .font(.system(size: 11))
-            // The header's on-glass secondary ink: ink3 nears the
-            // floor on bright glass (#3111).
+            // The header's on-glass secondary ink (#3111).
             .foregroundStyle(SettingsTheme.ink2)
         case .downloading(let received, let expected):
             progress(

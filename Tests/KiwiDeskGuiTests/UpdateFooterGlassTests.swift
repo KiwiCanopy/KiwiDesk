@@ -7,6 +7,8 @@ import Testing
 
 /// Every update window's footer sits on the window's glass: it
 /// paints no ground of its own, only its hairline (#3111).
+/// `@MainActor` for `ImageRenderer`: six footer renders of a few
+/// hundred points and one scan of the Updates folder's ~35 files.
 @MainActor
 @Suite("Update footer on glass (#3111)")
 struct UpdateFooterGlassTests {
@@ -51,6 +53,26 @@ struct UpdateFooterGlassTests {
             let hairline = pixels[0][..<inset].filter { $0 > 0 }.count
             #expect(hairline == inset, "\(name) lost its hairline")
         }
+    }
+
+    /// The renders cover the footers alone; a ground added where a
+    /// window mounts one is caught here: no Updates source paints
+    /// the opaque panel token over the glass.
+    @Test("no update window paints the panel ground")
+    func noPanelGround() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Updates")
+        let files = try SourceScan.swiftSources(under: root)
+        let texts = try files.map {
+            try String(contentsOf: $0, encoding: .utf8)
+        }
+        let mounts = texts.filter { $0.contains(".updateFooterBar()") }
+        #expect(mounts.count >= 2, "scan lost the footers: \(mounts.count)")
+        let panel = /SettingsTheme\.panel\b/
+        let hits = zip(files, texts)
+            .filter { $0.1.contains(panel) }
+            .map(\.0.lastPathComponent)
+        #expect(hits.isEmpty, "panel ground in \(hits)")
     }
 
     /// Alpha per pixel, top row first.
