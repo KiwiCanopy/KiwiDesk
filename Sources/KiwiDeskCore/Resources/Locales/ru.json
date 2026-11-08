@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Слой",
   "diff.label.layers": "Слои",
+  "diff.label.maximize_follow_focus": "Разворачивание следует за фокусом",
   "diff.label.min_size_override": "Переопределение минимального размера",
   "diff.label.placement_override": "Переопределение размещения",
   "diff.label.profile_binding": "Привязка профиля",

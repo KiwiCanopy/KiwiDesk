@@ -25,12 +25,12 @@ struct MaximizedReaderCensusTests {
         // The model's initializer; `remove`, the rekey and the
         // reorder release write the field bare, inside the type.
         "Models/SpaceModel.swift": 1,
-        // The in-place carry of the window and its shape (#3062),
-        // written and adopted.
-        "Models/StateSnapshot+InPlace.swift": 4,
-        // The verdict, its shape, and the retire, which names the
-        // windows it ended (#2676).
-        "State/StateCoordinator+Maximized.swift": 5,
+        // The in-place carry of the window, its shape (#3062) and its
+        // follow (#3063), written and adopted.
+        "Models/StateSnapshot+InPlace.swift": 5,
+        // The verdict, its shape, the follow, and the retire, which
+        // ends or re-points it and names the windows (#2676, #3063).
+        "State/StateCoordinator+Maximized.swift": 7,
         // A close while away and a minimize end it; a Desktop
         // departure keeps the id for the return.
         "State/StateCoordinator+SpaceMemory.swift": 2,

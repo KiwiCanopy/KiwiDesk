@@ -5969,6 +5969,27 @@ elsewhere. A full Maximize ignores it.
 KiwiDesk.maximize.set_anchor("center", "ultrawide")
 ```
 
+### maximize.set_follow_focus
+
+:::unreleased
+**Expects:** `true` or `false` (default `false`). No Settings row.
+
+**Does:** with `true`, a Maximize made after the call moves to the
+tiled window focus lands on instead of ending, in every shape. Only
+the focused window fills; every other window keeps its place, so a
+focus key moves by the layout's own slots: in a 2×2 grid with
+bottom-left maximized, focus up fills top-left. Each step resizes two
+windows, the one arriving and the one left. A Maximize already on
+screen keeps the switch it was made with. A float taking focus, a
+swap, a resize or a layout change behave as for any Maximize.
+
+**Example:**
+
+```lua
+KiwiDesk.maximize.set_follow_focus(true)
+```
+:::
+
 ### pocket
 
 **Expects:** nothing, or a window id.

@@ -48,7 +48,11 @@ extension KiwiCore {
                 return .fail("only a tiled window can be maximized")
             }
             state.workspaces.withSpace(spaceID) {
-                $0.maximized = Maximize(window: id, shape: shape)
+                $0.maximized = Maximize(
+                    window: id,
+                    shape: shape,
+                    follows: tiler.settings.maximize.followFocus
+                )
             }
         }
         retileEndingMaximize([id])

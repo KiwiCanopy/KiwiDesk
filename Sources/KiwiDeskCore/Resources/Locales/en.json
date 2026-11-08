@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Layer",
   "diff.label.layers": "Layers",
+  "diff.label.maximize_follow_focus": "Maximize follows focus",
   "diff.label.min_size_override": "Minimum size override",
   "diff.label.placement_override": "Placement override",
   "diff.label.profile_binding": "Profile binding",

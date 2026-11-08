@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Camada",
   "diff.label.layers": "Camadas",
+  "diff.label.maximize_follow_focus": "Maximização acompanha o foco",
   "diff.label.min_size_override": "Substituição de tamanho mínimo",
   "diff.label.placement_override": "Substituição de posicionamento",
   "diff.label.profile_binding": "Vínculo de perfil",

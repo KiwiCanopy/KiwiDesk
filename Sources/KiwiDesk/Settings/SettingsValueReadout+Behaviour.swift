@@ -42,6 +42,18 @@ extension SettingsValueReadout {
                     new: points(after.resizeStep)
                 )
             ]
+        case .maximizeFollowFocus:
+            return [
+                behaviourToggleRow(
+                    census,
+                    label: L(
+                        "diff.label.maximize_follow_focus",
+                        "Maximize follows focus"
+                    ),
+                    old: before.maximize.followFocus,
+                    new: after.maximize.followFocus
+                )
+            ]
         case .swapSkipsCascade:
             return [
                 behaviourToggleRow(

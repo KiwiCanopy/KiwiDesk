@@ -32,6 +32,10 @@ extension StateSnapshot {
         /// `Space.maximized`'s shape (#3062); absent for a full Maximize
         /// and from a build before it, either decoding as full.
         public var maximizeShape: MaximizeShape?
+        /// Whether that Maximize follows focus (#3063); absent when it
+        /// does not and from a build before it, either decoding as no
+        /// follow.
+        public var maximizeFollows: Bool?
         /// `Space.runHeads` and `runTails` (#2235): where each
         /// scrolled zone rests.
         public var runHeads: [UInt32]?
@@ -70,6 +74,7 @@ extension StateSnapshot {
             maximized = space.maximized?.window.raw
             maximizeShape =
                 space.maximized.flatMap { $0.shape == .full ? nil : $0.shape }
+            maximizeFollows = space.maximized?.follows == true ? true : nil
             runHeads =
                 space.runHeads.isEmpty
                 ? nil : space.runHeads.map(\.raw).sorted()
@@ -107,6 +112,7 @@ extension StateSnapshot {
             case monocleShown = "monocle_shown"
             case maximized
             case maximizeShape = "maximize_shape"
+            case maximizeFollows = "maximize_follows"
             case runHeads = "run_heads"
             case runTails = "run_tails"
         }
@@ -274,7 +280,8 @@ extension StateCoordinator {
             {
                 $0.maximized = Maximize(
                     window: WindowID(raw),
-                    shape: session.maximizeShape ?? .full
+                    shape: session.maximizeShape ?? .full,
+                    follows: session.maximizeFollows ?? false
                 )
             }
         }

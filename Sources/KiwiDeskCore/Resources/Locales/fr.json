@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Calque",
   "diff.label.layers": "Calques",
+  "diff.label.maximize_follow_focus": "La maximisation suit le focus",
   "diff.label.min_size_override": "Surcharge de taille minimale",
   "diff.label.placement_override": "Surcharge de placement",
   "diff.label.profile_binding": "Association de profil",

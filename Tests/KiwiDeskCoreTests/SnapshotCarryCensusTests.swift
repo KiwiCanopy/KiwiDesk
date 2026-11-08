@@ -122,7 +122,8 @@ struct SnapshotCarryCensusTests {
                     axis: .height,
                     share: 0.6,
                     anchor: .inPlace
-                )
+                ),
+                follows: true
             )
         }
         // A per-Desktop size (#2921), carried or dropped with the

@@ -79,10 +79,10 @@ extension KiwiCore {
             ?? .widescreen
     }
 
-    /// `maximize.set_share(axis, share[, shape])` and
-    /// `maximize.set_anchor(anchor[, shape])`: no shape writes every
-    /// one. A window already maximized keeps the shape it was
-    /// pressed with.
+    /// `maximize.set_share(axis, share[, shape])`,
+    /// `maximize.set_anchor(anchor[, shape])` (no shape writes every
+    /// one) and `maximize.set_follow_focus(bool)`. A window already
+    /// maximized keeps the shape and the follow it was pressed with.
     func maximizeSettingsCommand(
         _ command: String,
         _ args: [JSONValue]
@@ -112,6 +112,12 @@ extension KiwiCore {
             case .failure(let refusal): return refusal.response
             }
             tiler.settings.maximize.anchor.set(anchor, on: shape)
+            return .ok()
+        case "maximize.set_follow_focus":
+            guard let follows = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.maximize.followFocus = follows
             return .ok()
         default:
             return .fail("unknown command: \(command)")

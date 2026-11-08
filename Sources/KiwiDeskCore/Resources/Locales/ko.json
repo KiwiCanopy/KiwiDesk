@@ -472,6 +472,7 @@
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "레이어",
   "diff.label.layers": "레이어",
+  "diff.label.maximize_follow_focus": "포커스를 따라 최대화",
   "diff.label.min_size_override": "최소 크기 오버라이드",
   "diff.label.placement_override": "배치 오버라이드",
   "diff.label.profile_binding": "프로필 바인딩",
