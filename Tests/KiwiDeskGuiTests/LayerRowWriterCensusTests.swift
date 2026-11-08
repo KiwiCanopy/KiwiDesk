@@ -23,17 +23,13 @@ struct LayerRowWriterCensusTests {
     private static let writers: [String: (Int, String)] = [
         "KiwiDeskCore/Config/NavigationChords.swift":
             (1, "the dedupe itself"),
-        "KiwiDeskCore/Config/SpaceShortcutRemoval.swift":
+        "KiwiDeskCore/Config/KeyBinding+Sequence.swift":
             (
                 1,
-                "drop: removes the rows naming a gone Space, adds"
-                    + " none (#1827)"
-            ),
-        "KiwiDeskCore/Config/GuiConfig+Spaces.swift":
-            (
-                1,
-                "rename: rewrites Lua in place, then takes the dedupe"
-                    + " (driven)"
+                "mappingActions (#1871): rewrites or drops rows and end"
+                    + " keys in place, adds none — the Space drop"
+                    + " (#1827) and the Space rename, which then takes"
+                    + " the dedupe (driven)"
             ),
         "KiwiDesk/Settings/SettingsModel+LayerAdd.swift":
             (1, "import: merges, then takes the dedupe (driven)"),
@@ -107,7 +103,11 @@ struct LayerRowWriterCensusTests {
                     + " ShortcutsLensRowsTests)"
             ),
         "KiwiDesk/Shortcuts/ShortcutsReference.swift":
-            (1, "shortcuts panel: removes rows from a copy it draws"),
+            (
+                2,
+                "shortcuts panel: removes rows from a copy it draws,"
+                    + " its openers and the key sequences (#1871)"
+            ),
         "KiwiDeskCore/Config/ShortcutBaseSwitch.swift":
             (
                 1,
