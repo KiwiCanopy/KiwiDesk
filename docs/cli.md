@@ -296,10 +296,8 @@ app is told. A command the binary does
 not know is refused rather than sent. `get_state` hands the AI
 app your window titles.
 
-:::unreleased
 So do `diagnose_window` and `list_windows`, which the AI app can
 send through `run`.
-:::
 
 ChatGPT reaches only remote MCP servers, so it needs
 [OpenAI's Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
@@ -482,32 +480,26 @@ that way, stopping at the edge; neither takes other arguments
 `set_space_slide_duration` paces the slide
 ([`set_space_transition`](lua-reference.md#set_space_transition)).
 
-:::unreleased
 `set_space_scroll_transition` picks the same for the scroll Space
 step, apart from every other Space switch
 ([`set_space_scroll_transition`](lua-reference.md#set_space_scroll_transition)).
-:::
 
 `animations.set_on_state_change` animates a window floating,
 maximizing or going into the Pocket and out, the last as a brief
 pocket
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 
-:::unreleased
 `center_floating` follows it too.
-:::
 
 `kiwishelf.set_pocket_edge top|bottom|left|right` (default
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
 place the pocket
 ([`kiwishelf.set_pocket_edge`](lua-reference.md#kiwishelfset_pocket_edge)).
 
-:::unreleased
 `kiwishelf.set_pocket_visibility always|auto|hidden` (default
 `always`) sets when it shows, per profile
 ([`kiwishelf.set_pocket_visibility`](lua-reference.md#kiwishelfset_pocket_visibility)).
 `pocket.set_capacity` fails naming it.
-:::
 
 `kiwishelf.set_reading_contrast 1–4.5` (default `2.2`) sets the
 contrast text keeps where the fill fades on KiwiHub, the plates
@@ -586,7 +578,6 @@ with `jq`:
 kiwidesk list_windows | jq '.[] | select(.focused)'
 ```
 
-:::unreleased
 Each `list_windows` entry, the `explain_window` answer and each
 window `explain_app` lists carry the window's `title`, as
 `get_state` has it:
@@ -594,7 +585,6 @@ window `explain_app` lists carry the window's `title`, as
 ```bash
 kiwidesk list_windows | jq -r '.[] | "\(.id) \(.title)"'
 ```
-:::
 
 `swap <window> [window]` swaps the focused window with the one an
 id names, or two named windows, across Spaces and screens too, and
@@ -736,7 +726,6 @@ every lens with why it cannot turn on.
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `toggle_maximized` also takes `height|width`, then an optional share
 from 0.1 to 1 and `center|in_place`: the window fills that axis at a
 share of the other. `maximize.set_share <height|width> <share>
@@ -744,32 +733,25 @@ share of the other. `maximize.set_share <height|width> <share>
 a press without them takes on a screen of that shape, or on every
 shape (`laptop|widescreen|ultrawide|super_ultrawide|portrait`;
 [`toggle_maximized`](lua-reference.md#toggle_maximized)).
-:::
 
-:::unreleased
 `center_floating` moves the focused floating window to the middle of
 its screen at its size
 ([`center_floating`](lua-reference.md#center_floating)).
 `move_floating` moves it by a delta in points and a held key glides
 ([`move_floating`](lua-reference.md#move_floating)).
-:::
 
-:::unreleased
 `pocket_app` takes an app bundle id: the app's own pocket window
 out or away, or a new window of the app opened there
 ([`pocket_app`](lua-reference.md#pocket_app)).
 `toggle_pocket_window` takes an optional window id, marking or
 unmarking that window instead of the focused one.
-:::
 
-:::unreleased
 `stack.toggle_stack_position [space]` moves a space's stack zone
 to the opposite side (left ↔ right, top ↔ bottom) on the macOS
 Desktop its screen shows now, the focused space when no id is
 given. The flip lasts for the session and is no setting; what ends
 it, and the `stack_position` that `get_state` reports, are in the
 [Lua reference](lua-reference.md#stacktoggle_stack_position).
-:::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
@@ -856,14 +838,12 @@ argument, a window `id` from `get_state`: they then act on that
 window rather than the focused one, and refuse an id no managed
 window carries (`kiwidesk make_floating 4711`).
 
-:::unreleased
 `move_to_desktop` and `move_to_desktop_and_follow` take the same
 window `id`, after the space id. Ahead of an id, an empty string
 leaves the space out: `kiwidesk move_to_desktop 3 "" 4711`. The id
 may be one `get_state` lists under `away_windows`. Neither moves a
 full-screen window or a pocket window, named or focused. A named Space
 has [limits with *Displays have separate Spaces* off](lua-reference.md#move_to_desktop).
-:::
 
 `new_window` and `close_window` take the same optional window
 `id`. `new_window` presses that window's app's **File ▸ New
@@ -893,10 +873,8 @@ use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
 or a float rule floats
 ([`make_tiled`](lua-reference.md#make_tiled)).
 
-:::unreleased
 A float rule's window is the exception
 ([`make_tiled`](lua-reference.md#make_tiled)).
-:::
 
 `set_float_placement` replaces `set_float_nudge`: a saved setting
 that had the nudge off becomes `keep`, and a call to
@@ -928,11 +906,9 @@ stays; the global only where nothing was authored), and leaves
 structure alone
 ([Lua reference](lua-reference.md#reset_layout_sizing)).
 
-:::unreleased
 A named space, or the active one, resets on the Desktop its screen
 shows; `all` resets every Desktop. It also clears the length a
 grow along a run kept.
-:::
 
 Every layout global has a per-space `_override` twin (e.g.
 `bsp.set_ratio_h_override`, `scroll.set_slot_size_override`) that
@@ -981,11 +957,9 @@ the next column (the previous one for the last column) and `y`
 the same for rows, writing session-scoped column and row
 weights.
 
-:::unreleased
 Along a run's scroll direction a grow pushes its neighbour into
 the run instead of stopping at its minimum
 ([Lua reference](lua-reference.md#resize)).
-:::
 
 ### Deleting a Space
 
@@ -1049,13 +1023,11 @@ kiwidesk subscribe space_change layout_change
 
 Each event is one JSON line:
 
-:::unreleased
 ```json
 {"event": "space_change",
  "data": {"space_id": "3", "mode": "bsp",
           "window_count": 4}}
 ```
-:::
 
 Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `desktop_change`, `window_created`,
@@ -1087,12 +1059,10 @@ were missed. Each reconnection prints the confirmation line again.
 kiwidesk subscribe --reconnect space_change
 ```
 
-:::unreleased
 A stream whose reader goes away — `kiwidesk subscribe | head -1`
 once `head` has its line — ends with exit code 1, with or without
 `--reconnect`. Any command whose app quits before the request is
 sent fails with `sendFailed` and exit code 1.
-:::
 
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `focus_or_spawn` match on) — next to
@@ -1152,7 +1122,6 @@ lifecycle; the `reason` field says why the set changed:
   every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)), where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
 
-:::unreleased
 `window_created` also reports `existing`: a window that was
 already open when KiwiDesk began managing it — every window found
 when KiwiDesk starts, and, where macOS reports windows opening, a
@@ -1177,7 +1146,6 @@ a window re-shown after a `closed` destroy with no new window
 behind it is `existing`, and so is a window a Desktop switch
 reveals that KiwiDesk never placed. More reasons may be added, so
 match the ones your consumer handles.
-:::
 
 A window re-shown after a `closed` destroy — an app whose close
 hides the window and shows the same one again — comes back as
@@ -1196,12 +1164,10 @@ window is away — so a consumer sees two destroys for that
 window, `vanished` then `closed`, and refreshing on
 `desktop_change` remains the safe pattern.
 
-:::unreleased
 A `move_to_desktop_and_follow` that switches Desktop reports its
 window `vanished` whatever the WindowServer hosts it on, where it
 answers. `desktop` names the Desktop you sent it to, which may
 already be on screen when the event fires.
-:::
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,
@@ -1220,11 +1186,9 @@ reported `vanished` and comes back with `window_created`,
 `reason: returned`, already in the named Space
 ([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
 
-:::unreleased
 A window already on a hidden Desktop was reported `vanished` when it
 left, so a move emits nothing until it reaches a Desktop on screen,
 where it comes back with `window_created`, `reason: returned`.
-:::
 
 Bulk reassignments (profile load, session restore) stay silent:
 

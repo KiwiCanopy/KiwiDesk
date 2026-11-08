@@ -432,7 +432,6 @@ the cask users are the stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
 
-:::unreleased
 **A package manager's copy keeps Sparkle off, and says who updates
 it (#2909).** The cask goes the other way: it declares
 `auto_updates`, so Sparkle owns the install and `brew upgrade`
@@ -459,7 +458,6 @@ Sparkle's authorization prompt is right there. A Nix user has no
 Sparkle to fall back on, so the release's hash bump is their only
 update path, and a release is not complete until the `Update Nix
 flake` workflow is green.
-:::
 
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first
@@ -2384,7 +2382,6 @@ close; the residue, a window closed *while* fullscreen dropping a
 budget late, is in
 [Accepted Limitations](accepted-limitations.md).
 
-:::unreleased
 AppKit's own transition has the same beat, and it hosts the window
 on no Space at all
 ([#2935](https://github.com/KiwiCanopy/KiwiDesk/issues/2935)): it
@@ -2404,7 +2401,6 @@ which lands that window last in the row. The trade is a real frameless
 window opened beside a transitioning sibling, which is that sibling's
 shadow until the sibling lists again or goes, and a close judged late,
 one recheck late ([Accepted Limitations](accepted-limitations.md)).
-:::
 
 The ring **draws on the public AppKit panel and tracks through
 WindowServer opportunistically** (#285, #1917): when the
@@ -3745,7 +3741,6 @@ recomputed from the connected screens on every retile
 screen plugged in or out is correct from the retile the display
 change already triggers.
 
-:::unreleased
 **A Scrolling pile keeps only what shows in order (#2985).** A
 Scrolling restore raises the windows that show and leaves the buried
 ones below them in any order, because raising a long row one verified
@@ -3763,7 +3758,6 @@ what the wall exists to prevent, every park snaps, and a slot that
 cannot fully fit still underlaps its neighbour, so the restore would
 stay. The traded cost is in
 [Accepted limitations](accepted-limitations.md).
-:::
 
 **Monocle hides by z-order, and `park` is the opt-in for
 bodies the stack shows through (#881).** The default `stack`
@@ -3862,7 +3856,6 @@ on the screen that switched; or **None**, the instant switch
 alone. Every switch is one instant pass underneath, and the
 choice changes only what is drawn over it.
 
-:::unreleased
 *The scroll step chooses for itself (#2971).* A key press is a
 command whose result you want now; a scroll step is a hand moving
 the desk, and a hand expects to see it move. So
@@ -3891,7 +3884,6 @@ no reader, since an older build's `Space` skips a key it does not
 know, and latching the whole file read-only there would cost more
 than the one pick. An older build saving the file drops the key, so
 the row reads Slide again after a round trip through one.
-:::
 
 *Why three, and the slide first.* The slide and the plate answer
 different questions. The plate says where you are now, at the
@@ -4155,12 +4147,10 @@ so a display reconnect never eats an interactive resize. Covers
 the BSP split ratios, stack master ratio, and scrolling slot
 size — the same shape for all three, per the #458 scope note.
 
-:::unreleased
 The layer is now kept per macOS Desktop (#2921, *A stack flip
 belongs to one Desktop*), so a reconnect that makes macOS give a
 Desktop a new id does drop that Desktop's sizes (the accepted
 limitation).
-:::
 
 **The session layer outranks the authored override, and a
 resize never writes an override (#458 as amended by #764).**
@@ -4414,10 +4404,8 @@ applied: inside a run it divides only the span left after the
 shown windows' floors, which is the span the layout divides
 (#933), so a press never writes a share the run does not draw.
 
-:::unreleased
 A press that moves a window into or out of the run writes a length
 instead (*A grow along a run pushes into it*, below).
-:::
 
 *Learned floors, judged once per pass.* A floor is the configured
 minimum, or an app's corroborated learned minimum where larger
@@ -4618,7 +4606,6 @@ whole-zone pile of the other runs. With no layout piling part of
 a Space, the "Sticky windows can't be moved to the pile" refusal
 (#438) has nothing left to refuse and is retired.
 
-:::unreleased
 **A grow along a run pushes into it (#2709).** Where windows
 already scroll — a Stack zone, a Track track, an auto-sized Grid's
 full last track, a BSP chain — a resize along the scroll direction
@@ -4716,7 +4703,6 @@ Grid's last track that draws the cells of the tracks across it
 moves that line for every track rather than breaking out of the
 grid, and BSP's halved splits move a ratio; the rule reaches only
 a line laid by floor and weight, so neither needs an exception.
-:::
 
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
@@ -5033,7 +5019,6 @@ glyph cannot hold, since an app limit is contingent by
 state and structural by actionability, and a third glyph in a
 slot that holds two would say neither.
 
-:::unreleased
 The neighbour pair's sentence names the anchor's app (#3067,
 "Neighboring Safari window won't go smaller", "Neighboring Safari
 window is at the minimum window size"): the anchor can wait out of
@@ -5041,7 +5026,6 @@ sight behind an overflow mark, so its own pill is not seen and
 "Neighboring app" named nothing. The configured-floor sentence echoes the setting's
 label rather than "your", which no catalog string uses for a
 setting. The nameless sentences stay for an unknown name.
-:::
 
 The verdict rides the `ResizeRefusal` case (`appBound`) and is
 derived ONCE, from the same resolution every clamp measured
@@ -5118,13 +5102,11 @@ out — overshooting focus is worse than pressing again — and
 widening the set (`HoldGlide.glidableCommands`) is a per-verb
 ruling, never an inference.
 
-:::unreleased
 `move_floating` is the second verb so ruled (#2972). A nudge is the
 same small adjustment a resize is, and overshooting one costs a nudge
 back, where overshooting focus lands on another window. So a hold on
 it arms and glides by the same tally, and its stop at the float region
 ends the run through the same refusal.
-:::
 
 *A hold GLIDES rather than repeating* (owner ruling, replacing
 #1056's interval acceleration). Re-firing the binding on a
@@ -5250,7 +5232,6 @@ ruling rather than inventing a signal for it. The cue is heard
 during the glide as well as the press fire, since the glide runs
 outside any binding fire.
 
-:::unreleased
 This supersedes "pills once per hold" and "the cue is heard during the
 glide" above; remove both when this ships. A hold now stops silently at
 any limit, and only a fresh press at the limit draws the pill, the bump
@@ -5260,7 +5241,6 @@ catching up, 32 to 75 pt before it landed on TextEdit, and a hold that
 has stopped already says so. A mouse or CLI refusal during a glide stays
 silent too, which needs a drag or a script beside a held chord. A
 retile's cue is no hold's, so it still draws.
-:::
 
 Structurally, the engine arms only when its registrar can report
 releases (`HotkeyReleaseReporting` — a hold with no stop channel
@@ -5529,7 +5509,6 @@ flat-array trade's residue and stays in the limitations row.
 `SplitFloorHealWiringTests`, `SplitFloorCueTests`,
 `SplitFloorHealNeedleTests`)
 
-:::unreleased
 The heal moves the ratio only for a membership a Desktop shows
 (#2907). Through a Desktop switch a Space briefly holds both
 Desktops' windows, and a heal over that mix wrote the one ratio
@@ -5541,7 +5520,6 @@ over its own Desktop alone. (`HealStandDownTests`) The ratio is
 now each Desktop's own (#2921); the stand-down stays, since a heal
 over the mixed membership still writes the Desktop shown for a
 layout it does not draw.
-:::
 
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
@@ -5651,7 +5629,6 @@ remembering which way the last grow went — a stored direction
 needs invalidating on every move, mode change and display change,
 and buys back less than it costs.
 
-:::unreleased
 *A refused size moves nothing (#2981).* An app that refuses a size
 still takes an origin written with it: on 4.1.0 Calculator stayed
 230 x 408 while its x went 749, 724, 699. So the size goes first and
@@ -5695,7 +5672,6 @@ nothing, so it reports nothing. A window fixed on one axis, or at its
 own maximum, reports settable and still climbs to the screen's edge.
 The first step of each press still shows on the ring, since the ask
 has to go out before the app can answer.
-:::
 
 **A float whose app holds its ratio is told by its answers, and
 its resize keys scale it ([#2973](https://github.com/KiwiCanopy/KiwiDesk/issues/2973)).**
@@ -6266,7 +6242,6 @@ clears it, and the window follows the verdict again, including a
 rule added afterwards. `make_auto` is retired with no alias, since
 Tile does its job.
 
-:::unreleased
 *Over a float rule, Tile tiles the window until it closes.* A rule
 names an app, or a title, and floats every new window it matches;
 a user who wants one of them tiled had to remove the rule for all
@@ -6310,7 +6285,6 @@ What remains: App Rules can list a Float rule beside a tiled
 window, a second rule added while a window is tiled over the first
 is not obeyed until that window closes, and a window an in-place
 restart adopts only after its replay floats by the rule again.
-:::
 
 *Tile on a window detection floats refuses.* A dialog, panel or
 raised layer has no setting to change, and a guess's escape is the
@@ -6452,7 +6426,6 @@ Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 
-:::unreleased
 A sticky window's flag sits on the Space it renders on, where its
 layout input already places it, so leaving that Space ends it
 (#3035): a traveler is never that Space's own focus (#431), so a
@@ -6460,9 +6433,7 @@ return could not keep it, and a flag on the window would cover
 every Space and leave a switch nothing to show. Its flag names no
 member of that Space at an in-place replay, so a restart ends it
 there.
-:::
 
-:::unreleased
 **A Maximize Height or Width takes its share from the shape of the
 screen, from a table every shape stores (#3062).** One share
 cannot suit every screen: half a laptop is a narrow column, half
@@ -6485,7 +6456,6 @@ the five fractions stores the exact fraction (33 stores ⅓, not
 a user typing 33 would see "33 %" as an off-menu item beside the ⅓
 they meant, and a press would size the window just short of the
 third the menu offers.
-:::
 
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
 
@@ -6522,14 +6492,12 @@ screen, which the user sees rather than remembers, and with one
 window the key is #2675's toggle. "Focused last" is the window
 switcher's own focus recency (#1840), not a second record of it.
 
-:::unreleased
 Any number of windows may be marked under either value, and no
 count refuses a mark (owner, 2026-11-07, #2978, retiring One window's
 cap): the refusal's remedy named a setting that retires with it, and
 a second `⌃⌥⇧P` undoes a stray mark. The trade is that the key can
 then step to a window the user did not mean, by focus and then
 recency.
-:::
 
 **Choosing the window is its own key (#2675), amending #2446,
 which chose the window with the one key that pockets it. Becoming
@@ -6585,12 +6553,10 @@ claims tiled, or held to one Space, which is neither state.
 `make_floating` asks for what the window already is and succeeds
 without a pill.
 
-:::unreleased
 A Desktop move is refused on it for the same reason, though a
 sticky window's is allowed (#2888): a sticky window's carry can be
 turned off with `override_sticky_reach`, so its move can be made to
 last, and the pocket's carry cannot.
-:::
 
 **Not minimize, not ⌘H, not a Space.** Minimize animates into the
 Dock, changes the Dock's state, and drops the window from
@@ -6701,7 +6667,6 @@ Position therefore act whatever the animation switch says and do not
 grey. No "show the pocket" choice sits beside Holds,
 which already decides when the pocket stays.
 
-:::unreleased
 *Amended* (owner, 2026-11-07, #2978): **the pocket has a Show of its
 own, per profile, and Holds retires.** Once any number of windows
 could be marked under either value (▸ *The slot is an ordered
@@ -6732,7 +6697,6 @@ stays, and mixed bars to Always where the whole mark rested before,
 else Auto. A One-window desk then reads "mixed" until Show is pressed
 once, and a built-in Standard, which has no file to stamp, takes
 Always.
-:::
 
 **Pinned at the shelf's outer end, outside the scrolling run.**
 The bars scroll and resize with their content; a pocket inside
@@ -6828,7 +6792,6 @@ edge standing on the screen read as a border. A hover ring in the
 highlight colour was weighed and set aside, since it reads like the
 focused-window ring; a coloured glow is the focused ring's alone.
 
-:::unreleased
 **Remove from Pocket takes the float row's slot (#2612 ▸ 4).** A
 pocket window always floats, so the Tile Window the slot would hold
 could only ever be refused; the slot carries instead the one act
@@ -6838,7 +6801,6 @@ window its app's own key keeps greys both rather than hiding them,
 as Tile Window greys for a dialog (▸ *A window is tiled or
 floating*), and only Remove names where that key lives, since
 removing the app's row is the way out.
-:::
 
 ### A window changing state animates under its own switch (#2676)
 
@@ -6859,11 +6821,9 @@ leaving only the corner to travel. A slow app's window trails our
 spring, so its ring is held dormant until the window has landed
 rather than running ahead of it.
 
-:::unreleased
 `center_floating` follows the same switch (#3007). It changes where a
 window is, not what it is, but it is one deliberate placement of one
 window, as a float's own placement is, and no reflow.
-:::
 
 **One toggle, not a choice of styles.** No style can capture
 another app's window, and none can set its transparency
@@ -6890,14 +6850,11 @@ the nod take no setting, since they shape how softly the pocket
 appears, not how fast anything travels (#1931's *own pace* ruling
 the other way round).
 
-:::unreleased
 The pocket's list is where an app's own pocket window comes out
 too (#2923): listed apart, under a *Pocket Keys* header with its
 key, since mixed into the general groups it would break the put-in
 order ⌃⌥P steps.
-:::
 
-:::unreleased
 **A key opens the Pocket's list, the same peek a click grows**
 (owner, 2026-11-04, #2974): the list was mouse-only, and a per-app
 key is one more chord per window. `pocket.toggle_list` on `⌃⌥⌘P`, the
@@ -6911,9 +6868,7 @@ alone. A key has no pointer, so
 the first window row starts selected; `⌃⌥J` already searches the
 Pocket section, so the list has no search. No menu twins this list,
 so its rows speak.
-:::
 
-:::unreleased
 **An empty Pocket's click grows an empty state** (owner,
 2026-11-03, #2941): a faded Pocket that lights on hover invites a
 click, and a click that opened nothing left a newcomer with no way
@@ -6929,7 +6884,6 @@ click-held list read as acts on the focus (#2869), and Settings
 labels name keys without explaining the Pocket. A Settings link
 alone sends the user away instead of answering. Unlike a click's
 list, this panel speaks to VoiceOver, since no menu could twin it.
-:::
 
 ### Spaces, profiles & config ownership
 
@@ -7880,7 +7834,6 @@ it. A setting is owed only when a user asks for one.
 
 **[Principle]**
 
-:::unreleased
 `stack.toggle_stack_position` flips the side a Space's stack zone
 draws on the macOS Desktop its screen shows now, and on no other
 Desktop. A KiwiDesk Space is one Space on every Desktop, so a flip
@@ -7965,7 +7918,6 @@ Space. The owner's rulings
 - **A Space with no screen** — held, or not yet placed — resets on
   every Desktop when `reset_layout_sizing` names it; it has no
   Desktop of its own to name.
-:::
 
 ### A Desktop switch is not a close (#1207)
 
@@ -8242,7 +8194,6 @@ Space it was taken in, so a window filed into a different Space
 returns by the arrival's ordinary placement rather than at its
 old index (#1207).
 
-:::unreleased
 Shared Desktops (*Displays have separate Spaces* off) name no
 screen, so that refusal has nothing to compare with, and macOS moves
 no frame with a window: it arrives on the screen it left, where the
@@ -8309,7 +8260,6 @@ snapshot keeps its restored record, since its float flag lives there,
 so it may take its old frame on arrival; with separate Spaces on, one
 moved across screens stayed a float on the new screen (measured once,
 2026-11-07).
-:::
 
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
 
@@ -8353,7 +8303,6 @@ entry refused is the one taken: a label and a command count
 differently on a second screen, and `docs/spaces-and-desktops.md`
 says so once.
 
-:::unreleased
 **Amended again with #3103: one count, as Mission Control's**
 (owner, 2026-11-08). The #2792 premise was itself wrong: on macOS
 27.2 with "Displays have separate Spaces" on, Mission Control
@@ -8368,7 +8317,6 @@ every Desktop ("Desktop 7 of 8 on DELL U2723"), the count the
 number belongs to, rather than the dots'. A shortcut row's
 landing line names the screen alone, since its number is the
 row's title.
-:::
 
 **The profile line shows only when the switch changed the live
 profile.** A Desktop with no binding loads nothing, and naming the
@@ -9059,7 +9007,6 @@ tokens that paint *pictures* (the desktop plate, the keyboard
 board's free keys) hold one value in both modes, since what a
 picture shows must not change with the window's appearance.
 
-:::unreleased
 Dark's page is pure black, and a plane on it reads by its edge
 rather than by a lifted grey, so the accent sits one step brighter
 there and the line splits in two: `hairline` is a plane's edge,
@@ -9070,7 +9017,6 @@ green read as more saturated than the neutral controls on it, and
 those controls stay neutral. A mark the accent
 paints on a picture follows the accent, since it names the same
 state as the controls beside the board.
-:::
 
 The site takes the same black, surfaces and lines but keeps its
 hero glow, card gradient and brown pill, because a marketing page
@@ -11166,7 +11112,6 @@ KiwiVision's veil stays black over either plate. Only the look
 tiles keep their own ground (`LookPlate`, #1740), since a look
 is chosen by its mood.
 
-:::unreleased
 **Home's cards keep the dark plate in light mode (#3040, owner
 2026-11-06, amending #2859 for that one host).** The light-plate
 options previewed gave Home's small cards no shape: a pale band on
@@ -11177,9 +11122,7 @@ stands there. So Home passes `alwaysDark`, and switching between
 Home and Simple changes the ground. The page moves to `F1F3ED`, the darkest that keeps
 `ink3` at its floor, and `hairline` to `D6DCD1` so a white card has
 an edge on it.
-:::
 
-:::unreleased
 **Every look draws on the light plate outside Home (#3041, owner
 2026-11-06, reversing #2859's "a failing look swaps the ground, never
 the ink" for these hosts).** A single dark block among light pictures
@@ -11190,7 +11133,6 @@ and the bars keep the look's own colours, as they do on a real desk.
 That also retires #2859's floor on a look's ink against its own bar:
 a saved look whose ink sinks into its fill draws that way here, as it
 does on the desk.
-:::
 
 **Settings is one surface: depth grows in place, never by a
 mode.** (#2654, owner ruling 2026-10-26, superseding #678's
@@ -11374,7 +11316,6 @@ modes. "Advanced" names the root alone: General's drawer
 that held the config file, backup and resets is *Files & Reset*,
 for what it holds.
 
-:::unreleased
 **Simple's Look line holds every look the user has** (#2943,
 owner ruling 2026-11-03, superseding #2737's "the bundled looks").
 My looks lead, newest first, then a hairline, then the bundled
@@ -11394,7 +11335,6 @@ order, where copies exist) and saves no copy, before any download,
 and the look stays as the user keeps it, renamed or edited:
 overwriting it from a changed gallery file would undo their work
 without a word.
-:::
 
 **A persistent statement and a transient one never share a
 property.** (#1173.) Hover shipped on the full-strength accent of
@@ -11408,7 +11348,6 @@ a statement a pointer can delete is not a statement. So the
 channels split by what they answer: the border says what a card
 is, the fill says where the pointer is.
 
-:::unreleased
 With the marking gone (#2654), no durable statement on a Home card
 uses its border, so the pointer takes it: the fill lift was too
 faint to find, a 1.5 pt `hoverEdge` is not, and the fill no longer
@@ -11452,7 +11391,6 @@ accepting that in dark a hovered tile outshines the selected one. That
 trade is safe because selection keeps the accent and its heavier
 stroke, and a Layout or palette tile its check, none of which a hover
 takes.
-:::
 
 **One draft, three views — and the save surface is the floating
 pill.** (#678 turn 9; Phase 4 shell.) Three views of one draft on
@@ -14410,7 +14348,6 @@ through its digit, so each shows its own. Lighting every row under
 ⇧ would answer no "what does pressing now do", and repaint the
 whole list on the lighter chord.
 
-:::unreleased
 Under ⌥ or ⇧⌥ (#2885) the Move here slot reads "⌥↩ Swap here" and
 is the lit hint, unless the swap would refuse the selection; the
 digits read "⌥⌘1–9 Quick swap here", lit under ⌥⌘; and the row ⌥
@@ -14422,9 +14359,7 @@ would move. A refused press stays in the panel: the reason swells
 once (none under Reduce Motion), the refusal sound plays where it is
 on, and VoiceOver hears "Can't swap: …". Refusal and dead-end
 feedback stay apart (#435/#436), so the panel never shakes.
-:::
 
-:::unreleased
 **⌥ is Swap here, and ⇧ never means "there" (#2885, owner ruling
 2026-11-01).** ⌥↩ and ⇧⌥↩ both bring the selected window into your
 slot and send yours to its slot, you staying put — "your window"
@@ -14447,7 +14382,6 @@ Space another screen shows, `swap` naming both windows —
 `swap_here`'s implied window is the active Space's focus, and
 switching there first would meet a preflight whose frontmost app
 has not followed — with the switch to that Space after the trade.
-:::
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
@@ -15060,14 +14994,12 @@ so a wheel or swipe begun over the strip stuttered. The tooltip
 already names the gesture and the click plays it, so the hover
 loop taught nothing they do not.
 
-:::unreleased
 The strip's picture takes the edge and rise every tile takes, in place
 of its accent edge (#3042). Its frame moves and its drawing does not,
 which keeps the ruling that the strip's pictures stay still. The edge
 is now the neutral `hoverEdge` (owner 2026-11-08): what the #2537
 argument needs is an edge rather than a fill lift, so the picture
 still reads as a link, and the accent stays selection's.
-:::
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
@@ -17181,10 +17113,8 @@ they differ, and links nothing — most setups give every bar one
 answer, so the master is the one decision a new user meets, and
 Each bar holds the rest.
 
-:::unreleased
 *Amended* (#2978): the master writes the pocket's own Show too (▸
 *The pocket belongs to KiwiShelf*).
-:::
 
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
@@ -20911,7 +20841,6 @@ KiwiHub's middle side, one ⇧⇥ from where the row lands); and a
 **Support** row (it lives in Settings as a discreet link — a menu
 opened daily is no place for a recurring support ask).
 
-:::unreleased
 **A bar menu row shows its chord only where the chord IS the row
 (#2869).** The bars' right-click menus teach the same way, in the
 native key-equivalent column, but a chord there is a promise that
@@ -20926,7 +20855,6 @@ with a left- or right-only modifier, shows nothing rather than a
 key that might not be the row's. The column is display only: the
 row drops AppKit's matching keyDown, since Carbon's hotkey has
 already acted, or Float would toggle twice.
-:::
 
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain
