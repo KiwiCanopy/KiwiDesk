@@ -24,7 +24,11 @@ public enum SplitDomain {
         let high = max(minHigh, 0)
         guard low > 0 || high > 0 else { return 0...1 }
         guard available >= low + high else { return nil }
-        return (low / available)...(1 - high / available)
+        let lower = low / available
+        // Minimums filling `available` exactly can round lower a
+        // hair above upper, and a ClosedRange traps on that (#3099).
+        let upper = max(lower, 1 - high / available)
+        return lower...upper
     }
 
     /// Clamps interactive ratio write to prevent cascade (#933).
