@@ -77,14 +77,14 @@ struct MaximizeShareScreenTests {
     func pressReadsTheScreen() {
         let core = makeCore(screen: laptop)
         core.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(core)?.share == 3 / 4)
+        #expect(shape(core)?.share == 3.0 / 4)
         #expect(shape(core)?.anchor == .center)
         core.execute("toggle_maximized", args: [.string("width")])
-        #expect(shape(core)?.share == 2 / 3)
+        #expect(shape(core)?.share == 2.0 / 3)
 
         let wide = makeCore(screen: ultrawide)
         wide.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(wide)?.share == 1 / 3)
+        #expect(shape(wide)?.share == 1.0 / 3)
         #expect(shape(wide)?.anchor == .inPlace)
     }
 
@@ -190,7 +190,7 @@ struct MaximizeShareScreenTests {
             )
         )
         #expect(sparse.share(for: .height, on: .laptop) == 0.4)
-        #expect(sparse.share(for: .height, on: .ultrawide) == 1 / 3)
+        #expect(sparse.share(for: .height, on: .ultrawide) == 1.0 / 3)
         #expect(sparse.anchor == MaximizeSettings().anchor)
     }
 }
