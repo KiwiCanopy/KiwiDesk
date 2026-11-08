@@ -182,9 +182,10 @@ enum KeybindingCatalog {
         SpaceLuaArg.quote(raw)
     }
 
-    /// KiwiHub's sides in the order of their keys, J K L (#2265).
+    /// KiwiHub's sides in the order of their keys, J K L (#2265),
+    /// then the Desktop overview (#1229).
     static var kiwiHubRows: [NavCommand] {
-        [jumpToWindow, showShortcuts, showLayoutPicker]
+        [jumpToWindow, showShortcuts, showLayoutPicker, showDesktopOverview]
     }
 
     /// The window switcher (#1875): "Show" and the side's

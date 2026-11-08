@@ -13,6 +13,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var onMenuClose: () -> Void = {}
     /// Opens KiwiHub on its View side (#2309 ruling 8).
     var onOpenKiwiHub: () -> Void = {}
+    /// Opens KiwiHub on its Desktops side (#1229).
+    var onOpenDesktopOverview: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
     /// The combo bound to open the View side, read fresh on each
     /// menu open so AppKit renders the live binding.

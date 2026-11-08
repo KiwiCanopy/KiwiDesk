@@ -34,11 +34,12 @@ enum ShortcutsRowOrder {
     ]
 
     /// Show & hide ▸ KiwiHub order: its sides in the order of their keys,
-    /// J K L (#2246, #2265).
+    /// J K L (#2246, #2265), then the Desktop overview (#1229).
     static let kiwiHubAtRest: [SettingKey] = [
         .shortcuts(.jumpToWindow),
         .shortcuts(.showShortcuts),
         .shortcuts(.viewPicker),
+        .shortcuts(.desktopOverview),
     ]
 
     /// Focus group order: the wrap setting above the direction keys

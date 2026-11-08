@@ -10,6 +10,14 @@ public enum KiwiHubKey: String, Sendable, CaseIterable, Equatable {
     case pageDown = "page_down"
     case left
     case right
+    /// ⌘↓ on the Desktops side: open the selected Space (#1229).
+    case openSpace = "open_space"
+    /// ⌘↑ there: back to the places.
+    case leaveSpace = "leave_space"
+    /// ⌘↩ there: pick the window up, or put it back.
+    case pickUp = "pick_up"
+    /// ⌃↩ there: drop, or move, and follow.
+    case follow
 }
 
 extension KiwiHubKey: APIChoiceType {}
@@ -25,11 +33,18 @@ public struct KiwiHubKeys: Sendable, Equatable, Codable {
     public var pageDown: String?
     public var left: String?
     public var right: String?
+    public var openSpace: String?
+    public var leaveSpace: String?
+    public var pickUp: String?
+    public var follow: String?
 
     private enum CodingKeys: String, CodingKey {
-        case up, down, left, right
+        case up, down, left, right, follow
         case pageUp = "page_up"
         case pageDown = "page_down"
+        case openSpace = "open_space"
+        case leaveSpace = "leave_space"
+        case pickUp = "pick_up"
     }
 
     public init() {}
@@ -44,6 +59,10 @@ public struct KiwiHubKeys: Sendable, Equatable, Codable {
         case .pageDown: return \.pageDown
         case .left: return \.left
         case .right: return \.right
+        case .openSpace: return \.openSpace
+        case .leaveSpace: return \.leaveSpace
+        case .pickUp: return \.pickUp
+        case .follow: return \.follow
         }
     }
 

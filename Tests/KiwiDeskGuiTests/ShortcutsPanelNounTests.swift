@@ -84,6 +84,11 @@ struct ShortcutsPanelNounTests {
             opener: "keybinding.show_view_picker",
             translated: true
         ),
+        Pair(
+            panelName: "desktop_overview.panel.ax_label",
+            opener: "keybinding.show_desktop_overview",
+            translated: true
+        ),
     ]
 
     /// Panel names authored before their translation round, whose

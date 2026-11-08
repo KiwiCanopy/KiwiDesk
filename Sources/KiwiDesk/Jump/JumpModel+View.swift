@@ -48,7 +48,7 @@ extension JumpModel {
                 setViewQuery("")
             }
         case .pick, .swapHere, .quick, .quickSwap, .page, .stepScope,
-            .swallow, .dead:
+            .swallow, .dead, .openSpace, .leaveSpace, .pickUp, .follow:
             break
         }
     }

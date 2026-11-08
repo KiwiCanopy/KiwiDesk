@@ -52,7 +52,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     var pickerSpace: SpaceID?
     /// The screen the panel opened on: its list's "here" and Move
     /// here's target are the Space it shows (#2791).
-    private var hubDisplay: DisplayID?
+    private(set) var hubDisplay: DisplayID?
 
     /// A scope's own shortcut (#2229).
     func toggle(_ scope: JumpScope = .windows) {
@@ -320,6 +320,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.scope = { [weak model] in model?.scope ?? .windows }
         panel.naming = { [weak model] in model?.isNaming ?? false }
         wireView(model)
+        wireDesktops(model)
         wireShortcuts(model)
     }
 

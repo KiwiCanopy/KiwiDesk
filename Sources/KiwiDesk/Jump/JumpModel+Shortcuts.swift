@@ -44,7 +44,8 @@ extension JumpModel {
                 setShortcutQuery("")
             }
         case .pick, .swapHere, .quick, .quickSwap, .stepScope, .side,
-            .keep, .swallow, .dead:
+            .keep, .swallow, .dead, .openSpace, .leaveSpace, .pickUp,
+            .follow:
             break
         }
     }

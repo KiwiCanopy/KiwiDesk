@@ -70,7 +70,8 @@ struct QuickMenuHubRowTests {
         #expect(!rows.contains { $0.hasPrefix("Profile: ") })
         #expect(
             rows.filter { !$0.isEmpty } == [
-                "Open KiwiHub…", "Settings…", "Quit KiwiDesk",
+                "Open KiwiHub…", "Show Desktop overview", "Settings…",
+                "Quit KiwiDesk",
             ]
         )
     }

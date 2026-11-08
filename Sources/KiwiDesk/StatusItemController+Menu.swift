@@ -104,6 +104,16 @@ extension StatusItemController {
             )
         }
         menu.addItem(hub)
+        // The Desktops side's own row while it has no seeded
+        // trigger (#1229 ▸ Fallbacks).
+        let overview = NSMenuItem(
+            title: L("menu.show_desktop_overview", "Show Desktop overview"),
+            action: #selector(openDesktopOverview(_:)),
+            keyEquivalent: ""
+        )
+        overview.target = self
+        overview.image = symbol("rectangle.3.group")
+        menu.addItem(overview)
         let settings = NSMenuItem(
             title: L("menu.settings", "Settings…"),
             action: #selector(openDashboard),
@@ -166,6 +176,10 @@ extension StatusItemController {
             return
         }
         onOpenKiwiHub()
+    }
+
+    @objc private func openDesktopOverview(_ sender: NSMenuItem) {
+        onOpenDesktopOverview()
     }
 
     @objc private func showConfigIssues() {

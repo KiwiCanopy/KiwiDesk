@@ -74,7 +74,7 @@ extension KiwiCore {
     /// `lastFocused` outlives a move to an app KiwiDesk does not
     /// track, whose last window is then the one the user most
     /// likely wants back.
-    private func jumpFocusedWindow() -> WindowID? {
+    func jumpFocusedWindow() -> WindowID? {
         guard let id = barFocus(on: nil),
             let pid = state.windows[id]?.pid,
             frontmostOwns(pid: pid)

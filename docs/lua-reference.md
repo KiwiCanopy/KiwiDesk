@@ -6580,6 +6580,40 @@ Past the end of a line, **←** and **→** go round to its other end,
 and past the last line **↓** comes back to the first, **↑** the
 other way. Holding the key down stops at the end instead.
 
+:::unreleased
+The `"desktops"` side is the **Desktop overview**, the fourth side,
+after View: one row per screen, left to right, each screen's
+Desktops as cards, and on each card the screen's Spaces with their
+windows. A window on a Desktop no screen shows is listed in the
+Space it returns to. The menu bar's **Show Desktop overview** row
+opens it too, and **Shortcuts & Gestures ▸ KiwiHub** offers a row
+for it with no key set.
+
+- **↑** **↓** **←** **→** choose a Space; **Return** goes there,
+  **⇧Return** moves your window there, **⌃Return** moves it and
+  follows; **⌘1**–**⌘9** go to that Desktop of the row and
+  **⇧⌘1**–**⇧⌘9** move your window there.
+- **⌘↓** opens the Space to choose a window, **⌘↑** goes back.
+  Inside, **Return** jumps to the window, **⇧Return** moves it to
+  the Space KiwiHub's screen shows and **⌥Return** swaps it with
+  yours there.
+- **⌘Return** picks the window up, or puts it back; picked
+  windows ride along while you choose another Space, and
+  **Return** drops them there, **⌃Return** drops them and follows
+  the first, **⌘1**–**⌘9** drop them on that Desktop's shown
+  Space. A window on a Desktop no screen shows, a pocketed one and
+  a full-screen one cannot be picked up.
+- A click selects, a double click goes there; **⇧**-click moves,
+  **⌥**-click swaps, **⌘**-click picks up. Dragging an icon onto
+  a Space moves it, and you stay.
+- Typing finds windows by app and title; matches move to the
+  front of their Space and the rest dim.
+- **Escape** steps back: the picked windows, the open Space, the
+  typing, then KiwiHub.
+
+**Tab** reaches it from View, and **⇧Tab** from Windows.
+:::
+
 On every side:
 
 - **Tab** steps to the next side and **⇧Tab** to the one before —
@@ -6629,6 +6663,13 @@ Refused, naming the reason: a combo it cannot read; one without
 **Escape**, **Tab**, an arrow or a page key under any modifier;
 **cmd** with a digit or with **S**, **,**, **W**, **A**, **C**,
 **V**, **X** or **Z**; and a combo already set for another key.
+
+:::unreleased
+Four more keys name the Desktop overview's own presses:
+`"open_space"` (**⌘↓**), `"leave_space"` (**⌘↑**), `"pick_up"`
+(**⌘Return**) and `"follow"` (**⌃Return**); their combos act on
+that side alone.
+:::
 
 The keys are the Mac's, not a profile's. Lua-only: no Settings
 row shows them.

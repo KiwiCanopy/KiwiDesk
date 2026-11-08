@@ -16,9 +16,11 @@ extension JumpPanelView {
                 selectionMoves: selected?.moveBlock == nil,
                 quickCount: model.viewQuickCount,
                 turnsOff: model.view?.selectionTurnsOff ?? false,
-                naming: model.isNaming
+                naming: model.isNaming,
+                desktops: model.desktops.map(DesktopsFooterState.init)
             ),
-            carriesControls: model.scope != .windows,
+            carriesControls: model.scope == .shortcuts
+                || model.scope == .view,
             leading: { footerLeading },
             trailing: { footerTrailing }
         )
@@ -35,7 +37,7 @@ extension JumpPanelView {
                 content: sheetHeight,
                 cap: model.sheetCap
             )
-        case .view:
+        case .view, .desktops:
             return false
         }
     }
@@ -44,6 +46,10 @@ extension JumpPanelView {
         switch model.scope {
         case .windows:
             EmptyView()
+        case .desktops:
+            if let state = model.desktops, state.isCarrying {
+                DesktopsTray(state: state, icons: model.desktopIcons)
+            }
         case .shortcuts:
             // The scroll cue reads first, beside the active layer.
             HStack(spacing: 8) {
@@ -74,7 +80,7 @@ extension JumpPanelView {
 
     @ViewBuilder private var footerTrailing: some View {
         switch model.scope {
-        case .windows:
+        case .windows, .desktops:
             EmptyView()
         case .shortcuts:
             KeyPanelChordButton(

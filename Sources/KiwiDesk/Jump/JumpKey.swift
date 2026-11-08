@@ -39,6 +39,14 @@ enum JumpKey: Equatable {
     case settings
     /// Tab with ⌃ or ⌥ stays in the field.
     case swallow
+    /// ⌘↓ on Desktops: open the selected Space (#1229).
+    case openSpace
+    /// ⌘↑ on Desktops: back to the places.
+    case leaveSpace
+    /// ⌘↩ on Desktops: pick the window up, or put it back.
+    case pickUp
+    /// ⌃↩ on Desktops: the move or the drop, and follow.
+    case follow
 
     private static let up: UInt16 = 126
     private static let down: UInt16 = 125
@@ -77,6 +85,9 @@ enum JumpKey: Equatable {
             return namingKey(keyCode, held)
         }
         if scope == .view, let key = layouts(keyCode, held) {
+            return key
+        }
+        if scope == .desktops, let key = desktops(keyCode, held) {
             return key
         }
         if scope != .windows, keyCode == comma, held == .command {
@@ -153,6 +164,35 @@ enum JumpKey: Equatable {
         }
     }
 
+    /// The Desktops side's own keys (#1229): ← → move as on View,
+    /// ⌘↓ ⌘↑ open and leave a Space, and ↩ reads its modifier —
+    /// ⇧ a window moves and you stay, ⌥ Swap here, ⌃ and follow,
+    /// ⌘ pick up.
+    private static func desktops(
+        _ keyCode: UInt16,
+        _ held: NSEvent.ModifierFlags
+    ) -> JumpKey? {
+        switch keyCode {
+        case left, right:
+            guard held.subtracting(.shift).isEmpty else { return nil }
+            return .side(keyCode == left ? -1 : 1)
+        case up, down:
+            guard held == .command else { return nil }
+            return keyCode == down ? .openSpace : .leaveSpace
+        case returnKey, enter:
+            switch held {
+            case []: return .pick(moveHere: false)
+            case .shift: return .pick(moveHere: true)
+            case .option, [.option, .shift]: return .swapHere
+            case .control: return .follow
+            case .command: return .pickUp
+            default: return .dead
+            }
+        default:
+            return nil
+        }
+    }
+
     /// The press as `KiwiHubKeys` spells it.
     private static func combo(
         _ keyCode: UInt16,
@@ -168,8 +208,8 @@ enum JumpKey: Equatable {
 
     /// What a Lua alternative does: its built-in key's move. ⇧
     /// previews Move here, so an alternative moves under it too, as
-    /// the arrows do. ← and → move only in View, so elsewhere
-    /// theirs is typing.
+    /// the arrows do. ← and → move only in View and Desktops, so
+    /// elsewhere theirs is typing.
     private static func alternative(
         _ keyCode: UInt16,
         _ held: NSEvent.ModifierFlags,
@@ -185,9 +225,18 @@ enum JumpKey: Equatable {
         case .down: return .step(1)
         case .pageUp: return .page(-1)
         case .pageDown: return .page(1)
-        case .left: return scope == .view ? .side(-1) : nil
-        case .right: return scope == .view ? .side(1) : nil
+        case .left: return sideways(scope) ? .side(-1) : nil
+        case .right: return sideways(scope) ? .side(1) : nil
+        case .openSpace: return scope == .desktops ? .openSpace : nil
+        case .leaveSpace: return scope == .desktops ? .leaveSpace : nil
+        case .pickUp: return scope == .desktops ? .pickUp : nil
+        case .follow: return scope == .desktops ? .follow : nil
         }
+    }
+
+    /// The sides whose ← and → move a selection.
+    private static func sideways(_ scope: JumpScope) -> Bool {
+        scope == .view || scope == .desktops
     }
 
     private static func quick(
