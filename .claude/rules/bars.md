@@ -445,6 +445,10 @@ twice, was a question the user answered twice. The argument is
   (`MonocleMaximizeBarTests`, `MonocleMaximizeWiringTests`); a new
   reader routing beside either is review's, since nothing scans for
   it.
+  A Space with tiling off stands the shelf down only where the
+  profile's `tiling.off_hides_bars` tick asks, through the one
+  named `KiwiCore.tilingOffHidesShelf(on:)` inside
+  `shelfStandsDown` (#3008), never a read beside it.
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
@@ -1413,6 +1417,12 @@ shelf plans is the one the item draws (`SpaceBarCollapsedRenderTests`);
 and **no marker is gated on `style.stickyBadge`**, which hides
 window state alone (`TemporarySpaceBarTests` ▸
 `stickySwitchKeepsMarkers`).
+
+A Space with tiling off (#3008) wears `pause` in the same slot,
+**winning it over held or temporary**: `Marker.tilingOff(beside:)`
+carries the state it covers, so the `spaceName` sentence still
+names both. Where a screen shows no Space Bar, the menu-bar Space
+mark wears the same marker, so the state is never invisible.
 
 ## A per-display bar answers the SHOWN question, never the render one
 

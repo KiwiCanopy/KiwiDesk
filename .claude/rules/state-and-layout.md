@@ -35,6 +35,23 @@ editing here:
   Space and returns with it (`MinWindowSizeOverrideHoldTests`
   holds the return; a rekey added there is review's, since the
   apply's wholesale settings replace would hide it).
+- **A Space whose tiling is off is placed as Floating, through
+  the one `StateCoordinator.placementMode(of:)` (#3008).** The
+  toggle is per-Space session state (`tilingToggles`, a per-Space
+  session store like the rest: rekeyed at `moveMembers`, forgotten
+  at `forwardWindows(of:to:)`), over the start-tiled value
+  `tilingStart` mirrors in (the Space's `tiling.start_override`,
+  else the profile's `tiling.start`, else the app-wide
+  `tiling.start_global`). The Space's stored `mode`
+  never changes, so the Floating gather (#1177) never runs on a
+  toggle and resuming lays the same array out again: remembered
+  slots, windows opened while off appended (`.last`), closed
+  ones gone. A reader that decides HOW a window is placed — the
+  layout input, the stash capture, the effective-float doors and
+  the drag's reorder gates — takes `placementMode`; a reader that
+  names the layout (the config seed, the snapshot, events, the
+  layout menu, `cycle_mode`) keeps `mode`
+  (`TilingOffPlacementSeamTests`).
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load
