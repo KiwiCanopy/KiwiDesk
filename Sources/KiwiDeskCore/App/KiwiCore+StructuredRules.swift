@@ -89,6 +89,10 @@ extension KiwiCore {
             base: base?.scrollGesture,
             profile: profile?.scrollGesture
         )
+        applyTrackpadGestures(
+            base: base?.trackpadGesture,
+            profile: profile?.trackpadGesture
+        )
         applySpaceHistory(
             base: base?.spaceHistory,
             profile: profile?.spaceHistory

@@ -23,6 +23,7 @@ public enum PrivatePathSelfTest {
             + WMBridge.selfTestProbes(context)
             + SystemAppearance.selfTestProbes()
             + GlassActiveAppearance.selfTestProbes()
+            + MultitouchSupport.selfTestProbes()
     }
 
     /// Runs each probe once, in order, into the verb's reply.

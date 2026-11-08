@@ -312,6 +312,17 @@ public final class KeybindingManager {
         }
     #endif
 
+    /// Runs `code` as a shortcut press — a trackpad gesture slot's
+    /// action (#1873) — so its motion and its refusal cues read as
+    /// the user's, as a hotkey's do.
+    func firePress(_ code: String) -> Result<Void, LuaError> {
+        guard let lua else { return .failure(.initializationFailed) }
+        let wasFiring = isFiring
+        isFiring = true
+        defer { isFiring = wasFiring }
+        return lua.run(code)
+    }
+
     func fire(ref: Int32, combo: KeyCombo) {
         guard let lua else { return }
         let wasFiring = isFiring

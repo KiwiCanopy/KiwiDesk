@@ -51,6 +51,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var scrollGesture: ScrollGestureBase = .defaults
     /// The modifier drags (#2447); global, no profile override.
     public var modifierDrag: ModifierDragSettings = .defaults
+    /// The trackpad gesture slots' global base over the seeds
+    /// (#1873), sparse; a profile diverges through
+    /// `Profile.trackpadGesture`.
+    public var trackpadGesture = TrackpadGestureMap()
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
@@ -123,6 +127,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case layers
         case scrollGesture = "scroll_gesture"
         case modifierDrag = "modifier_drag"
+        case trackpadGesture = "trackpad_gesture"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
         case focusWrap = "focus_wrap"
@@ -203,6 +208,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 ModifierDragSettings.self,
                 forKey: .modifierDrag
             ) ?? .defaults
+        // Additive since #1873: absence follows the seeds.
+        trackpadGesture =
+            try container.decodeIfPresent(
+                TrackpadGestureMap.self,
+                forKey: .trackpadGesture
+            ) ?? TrackpadGestureMap()
         // Additive since #1655: absence is the default.
         spaceHistory =
             try container.decodeIfPresent(
@@ -312,6 +323,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
         try container.encode(modifierDrag, forKey: .modifierDrag)
+        if !trackpadGesture.isEmpty {
+            try container.encode(
+                trackpadGesture,
+                forKey: .trackpadGesture
+            )
+        }
         try container.encode(spaceHistory, forKey: .spaceHistory)
         try container.encode(modeCycle, forKey: .modeCycle)
         try container.encode(focusWrap, forKey: .focusWrap)

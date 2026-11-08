@@ -276,6 +276,7 @@ public enum APIReference {
             "set_long_swipes", "set_step_distance",
         ],
         "modifier_drag": ["set_move", "set_resize"],
+        "trackpad_gesture": ["bind"],
         "quit": [
             "set_layout", "set_grid_target_depth",
         ],

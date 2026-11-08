@@ -262,6 +262,9 @@ extension KiwiCore {
         case let drag where drag.hasPrefix("modifier_drag."):
             // No window moves: the grab's chords change (#2447).
             return modifierDragCommand(command, args)
+        case let gesture where gesture.hasPrefix("trackpad_gesture."):
+            // No window moves: the slots' bindings change (#1873).
+            return trackpadGestureCommand(command, args)
         default:
             return layoutCommand(command, args)
         }
