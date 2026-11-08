@@ -54,8 +54,7 @@ final class SizeLimitPillPlate: NSVisualEffectView {
 
     private var textInset: CGFloat { icon.isHidden ? 12 : 24 }
 
-    /// The label's font, shared with `textHeight` so a measure and
-    /// a draw cannot disagree.
+    /// The label's font, shared by the one-line width measure.
     nonisolated static var font: NSFont {
         NSFont.systemFont(ofSize: 11.5, weight: .medium)
     }
@@ -67,35 +66,44 @@ final class SizeLimitPillPlate: NSVisualEffectView {
     /// The one-line pill's height; a wrapped pill adds its lines.
     nonisolated static let lineHeight: CGFloat = 26
 
-    /// The height of `text` wrapped at `width`, capped at
-    /// `maxLines` lines. Pure, so a test can read it headless.
-    nonisolated static func textHeight(
-        _ text: String,
-        width: CGFloat
-    ) -> CGFloat {
-        let font = Self.font
-        let line = ceil(font.ascender - font.descender + font.leading)
-        let drawn = NSAttributedString(
-            string: text,
-            attributes: [.font: font]
-        ).boundingRect(
-            with: NSSize(
+    /// The plate's vertical padding around the label, top and
+    /// bottom together.
+    private static let verticalPad: CGFloat = 11
+
+    /// The label's trailing inset inside the plate.
+    private static let trailingPad: CGFloat = 6
+
+    /// One wrapped line's height, as the label's cell draws it.
+    var textLineHeight: CGFloat { drawnHeight("X", width: 1000) }
+
+    /// The label's drawn height for `text` at the label width a
+    /// pill of `width` gives it, measured by the label's own cell
+    /// so the measure and the wrap cannot disagree; capped at
+    /// `maxLines` lines.
+    func textHeight(forWidth width: CGFloat) -> CGFloat {
+        let labelWidth = width - textInset - Self.trailingPad
+        let drawn = drawnHeight(label.stringValue, width: labelWidth)
+        return min(drawn, textLineHeight * CGFloat(Self.maxLines))
+    }
+
+    private func drawnHeight(_ text: String, width: CGFloat) -> CGFloat {
+        guard let cell = label.cell?.copy() as? NSCell else { return 15 }
+        cell.stringValue = text
+        let size = cell.cellSize(
+            forBounds: NSRect(
+                x: 0,
+                y: 0,
                 width: max(width, 1),
                 height: .greatestFiniteMagnitude
-            ),
-            options: [.usesLineFragmentOrigin, .usesFontLeading]
+            )
         )
-        return min(ceil(drawn.height), line * CGFloat(maxLines))
+        return ceil(size.height)
     }
 
     /// The pill's height at `width`: one line keeps `lineHeight`,
     /// each wrapped line adds its own.
     func height(forWidth width: CGFloat) -> CGFloat {
-        let text = Self.textHeight(
-            label.stringValue,
-            width: width - textInset - 6
-        )
-        return max(Self.lineHeight, text + 11)
+        max(Self.lineHeight, textHeight(forWidth: width) + Self.verticalPad)
     }
 
     /// The width the text asks for on one line, before the
@@ -119,11 +127,11 @@ final class SizeLimitPillPlate: NSVisualEffectView {
             width: 12,
             height: 12
         )
-        let textHeight = max(15, bounds.height - 11)
+        let textHeight = max(15, bounds.height - Self.verticalPad)
         label.frame = NSRect(
             x: textInset,
             y: (bounds.height - textHeight) / 2,
-            width: bounds.width - textInset - 6,
+            width: bounds.width - textInset - Self.trailingPad,
             height: textHeight
         )
     }

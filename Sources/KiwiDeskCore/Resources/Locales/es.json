@@ -535,7 +535,7 @@
   "float.refusal.accessory_app": "Las apps sin icono en el Dock flotan automáticamente. Cámbialo en %1$@.",
   "float.refusal.fixed_size": "Las ventanas que no se pueden redimensionar flotan automáticamente. Cámbialo en %1$@.",
   "float.refusal.panel": "Los diálogos y paneles siempre flotan",
-  "float.refusal.pill": "No se puede colocar en mosaico: %1$@",
+  "float.refusal.pill": "No se puede colocar en mosaico. %1$@",
   "float.refusal.rule": "Una regla de apps hace flotar esta ventana",
   "floating.color": "Floating",
   "floating.color.a11y": "Color de la marca de ventana flotante",

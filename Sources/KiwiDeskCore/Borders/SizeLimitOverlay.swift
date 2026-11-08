@@ -65,9 +65,8 @@ final class SizeLimitOverlay {
 
     /// How long a refusal pill stays: a wrapped pill holds one
     /// second more per extra line, so its words can be read.
-    nonisolated static func hold(height: CGFloat) -> TimeInterval {
-        let extra = (height - SizeLimitPillPlate.lineHeight) / 14
-        return holdDuration + max(0, extra.rounded())
+    nonisolated static func hold(extraLines: Int) -> TimeInterval {
+        holdDuration + TimeInterval(max(0, extraLines))
     }
 
     /// Flashes size-limit pill on window frame in AX coordinates
@@ -151,7 +150,13 @@ final class SizeLimitOverlay {
             return false
         }
 
-        let pillHeight = pill.plate.height(forWidth: pillWidth)
+        // A shelf pill keeps one line: its band is one pill deep.
+        var pillHeight = pill.plate.height(forWidth: pillWidth)
+        if case .shelf = window { pillHeight = SizeLimitPillPlate.lineHeight }
+        let extraLines = Int(
+            ((pillHeight - SizeLimitPillPlate.lineHeight)
+                / pill.plate.textLineHeight).rounded()
+        )
         let pillRect = CGRect(
             x: frame.midX - pillWidth / 2,
             y: symbol == nil
@@ -204,7 +209,7 @@ final class SizeLimitOverlay {
         pill.hideWork = work
         pills[window] = pill
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + Self.hold(height: pillHeight),
+            deadline: .now() + Self.hold(extraLines: extraLines),
             execute: work
         )
         return true

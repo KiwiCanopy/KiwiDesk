@@ -39,7 +39,7 @@ extension AutoFloatReason {
     /// resize. The bar menu's greyed Tile row needs no lead.
     @MainActor
     var pillSentence: String {
-        L("float.refusal.pill", "Can't tile: %1$@", sentence)
+        L("float.refusal.pill", "Can't tile. %1$@", sentence)
     }
 
     @MainActor

@@ -535,7 +535,7 @@
   "float.refusal.accessory_app": "Apps without a Dock icon float automatically. Change it in %1$@.",
   "float.refusal.fixed_size": "Windows that can't be resized float automatically. Change it in %1$@.",
   "float.refusal.panel": "Dialogs and panels always float",
-  "float.refusal.pill": "Can't tile: %1$@",
+  "float.refusal.pill": "Can't tile. %1$@",
   "float.refusal.rule": "An App Rule floats this window",
   "floating.color": "Floating",
   "floating.color.a11y": "Floating window mark color",

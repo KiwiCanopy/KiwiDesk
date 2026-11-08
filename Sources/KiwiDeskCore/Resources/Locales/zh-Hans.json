@@ -535,7 +535,7 @@
   "float.refusal.accessory_app": "没有程序坞图标的 App 会自动浮动。可在“%1$@”中更改。",
   "float.refusal.fixed_size": "无法调整大小的窗口会自动浮动。可在“%1$@”中更改。",
   "float.refusal.panel": "对话框和面板始终浮动",
-  "float.refusal.pill": "无法平铺：%1$@",
+  "float.refusal.pill": "无法平铺。%1$@",
   "float.refusal.rule": "App 规则让此窗口浮动",
   "floating.color": "浮动",
   "floating.color.a11y": "浮动窗口标记的颜色",

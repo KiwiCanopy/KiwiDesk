@@ -7,48 +7,85 @@ import Testing
 /// 2026-11-08): on a narrow window such as Calculator the Tile
 /// refusal showed about half its words. Up to
 /// `SizeLimitPillPlate.maxLines` lines; past that the last ends
-/// in "…".
+/// in "…". The measure is the label cell's own, so these clauses
+/// read the label as it draws.
 @Suite("Size limit pill wrap")
+@MainActor
 struct SizeLimitPillWrapTests {
     private let long =
-        "Can't tile: Windows that can't be resized float "
+        "Can't tile. Windows that can't be resized float "
         + "automatically. Change it in App Rules."
 
-    private var oneLine: CGFloat {
-        SizeLimitPillPlate.textHeight("Can't tile", width: 1000)
+    private func plate(_ text: String) -> SizeLimitPillPlate {
+        let plate = SizeLimitPillPlate()
+        plate.setSymbol("nosign")
+        plate.setText(text)
+        return plate
     }
 
-    @Test("a short sentence keeps one line")
+    private func label(of plate: SizeLimitPillPlate) throws -> NSTextField {
+        try #require(plate.subviews.compactMap { $0 as? NSTextField }.first)
+    }
+
+    @Test("a short sentence keeps the one-line pill")
     func shortKeepsOneLine() {
-        let text = SizeLimitPillPlate.textHeight(
-            "Can't be any smaller",
-            width: 400
-        )
-        #expect(text == oneLine)
+        let plate = plate("Can't be any smaller")
+        #expect(plate.height(forWidth: 400) == SizeLimitPillPlate.lineHeight)
     }
 
     @Test("a long sentence on a narrow pill wraps")
     func longWraps() {
-        let text = SizeLimitPillPlate.textHeight(long, width: 176)
-        #expect(text > oneLine * 1.5)
-        #expect(text <= oneLine * CGFloat(SizeLimitPillPlate.maxLines))
+        let plate = plate(long)
+        let line = plate.textLineHeight
+        let text = plate.textHeight(forWidth: 206)
+        #expect(text > line * 1.5)
+        #expect(text <= line * CGFloat(SizeLimitPillPlate.maxLines))
+        #expect(plate.height(forWidth: 206) > SizeLimitPillPlate.lineHeight)
     }
 
     @Test("wrapping stops at the line cap")
     func capped() {
-        let text = SizeLimitPillPlate.textHeight(
-            String(repeating: long + " ", count: 6),
-            width: 120
+        let plate = plate(String(repeating: long + " ", count: 6))
+        let line = plate.textLineHeight
+        let text = plate.textHeight(forWidth: 160)
+        #expect(text <= line * CGFloat(SizeLimitPillPlate.maxLines))
+        #expect(text > line * 2.5)
+    }
+
+    /// The label as drawn: it wraps, and at the plate's own laid
+    /// out frame its cell needs no more height than it was given,
+    /// so the last line is never cut before `maxLines`.
+    @Test("the laid-out label holds its wrapped text")
+    func labelHoldsText() throws {
+        let plate = plate(long)
+        let width: CGFloat = 206
+        plate.frame = NSRect(
+            x: 0,
+            y: 0,
+            width: width,
+            height: plate.height(forWidth: width)
         )
-        #expect(text <= oneLine * CGFloat(SizeLimitPillPlate.maxLines))
-        #expect(text > oneLine * 2.5)
+        plate.layoutSubtreeIfNeeded()
+        let label = try label(of: plate)
+        #expect(label.maximumNumberOfLines == SizeLimitPillPlate.maxLines)
+        #expect(label.lineBreakMode == .byWordWrapping)
+        let cell = try #require(label.cell)
+        let needs = cell.cellSize(
+            forBounds: NSRect(
+                x: 0,
+                y: 0,
+                width: label.frame.width,
+                height: .greatestFiniteMagnitude
+            )
+        ).height
+        #expect(needs <= label.frame.height + 0.5)
+        #expect(label.frame.height > plate.textLineHeight * 1.5)
     }
 
     /// The overlay's own call site: a long refusal flashed on a
     /// Calculator-sized window draws a taller plate, a short one
     /// on a wide window keeps the one-line height.
     @Test("a flashed long refusal draws a taller pill")
-    @MainActor
     func flashedPillGrows() throws {
         let overlay = SizeLimitOverlay()
         try #require(
@@ -74,22 +111,16 @@ struct SizeLimitPillWrapTests {
         #expect(tall.width <= 230 - 24)
     }
 
-    @Test("a wrapped pill holds longer")
+    @Test("a wrapped pill holds a second longer per extra line")
     func wrappedHoldsLonger() {
-        let one = SizeLimitOverlay.hold(
-            height: SizeLimitPillPlate.lineHeight
-        )
-        let three = SizeLimitOverlay.hold(
-            height: SizeLimitPillPlate.lineHeight + 28
-        )
-        #expect(three > one)
+        let one = SizeLimitOverlay.hold(extraLines: 0)
+        #expect(SizeLimitOverlay.hold(extraLines: 2) == one + 2)
     }
 
     @Test("the Tile refusal pill leads with the refused act")
-    @MainActor
     func pillLeads() {
         for reason in [AutoFloatReason.fixedSize, .accessoryApp, .panel] {
-            #expect(reason.pillSentence.hasPrefix("Can't tile: "))
+            #expect(reason.pillSentence.hasPrefix("Can't tile. "))
             #expect(reason.pillSentence.hasSuffix(reason.sentence))
         }
     }

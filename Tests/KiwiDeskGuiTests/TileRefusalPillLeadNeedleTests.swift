@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-/// The Tile refusal's pill leads with "Can't tile:" (owner,
+/// The Tile refusal's pill leads with "Can't tile." (owner,
 /// 2026-11-08); the bar menu's greyed Tile row keeps the bare
 /// reason. The pill never renders under test, so the wiring is
 /// held by `cueTileRefusal`'s shape.
