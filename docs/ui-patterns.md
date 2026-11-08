@@ -1250,8 +1250,8 @@ panel's other fills (#2725).
 :::unreleased
 **A tile or card answers the pointer with its edge and a rise
 (#3042).** Home cards, Layout, palette, look and dashed tiles, Screen
-cards and the gesture strip's pictures take `hoverEdge` at
-`hoverEdgeStroke` and rise on a shadow through `hoverRise(_:in:)`,
+cards and the gesture strip's pictures take `hoverEdge`, a neutral
+apart from the accent, at `hoverEdgeStroke` and rise on a shadow through `hoverRise(_:in:)`,
 with no fill change and a hit area that stays at rest. They are the
 exception to the ban on movement and shadow on buttons above. A
 selected stroke stays heavier. A selected tile stays flat, since its

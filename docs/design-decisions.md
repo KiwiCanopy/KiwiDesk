@@ -11388,6 +11388,25 @@ screenshot have left. A chip, a row and a Space card's menu face keep
 the fill, and KiwiHub does because it marks selection with a fill the
 split still protects. The setup tour's tiles take the edge alone: its
 scrollers leave no room for a rise, and its ground is not a card's.
+
+**The hover edge takes a neutral of its own (owner 2026-11-08),
+reversing the green edge above.** One green for both strokes left a
+hovered tile passing for a selected one: in dark the two strokes were
+the same `#AACB5D`, and in light the edge sat at the colour-vision
+floor against the accent (separation 60.4 on a floor of 60). Weight
+and a check could not carry the difference alone, since a 0.5 pt step
+is not read at a glance and the check lives on Layout tiles only. So
+`hoverEdge` becomes a neutral, light `#64726A` and dark `#E6ECE6`,
+which restores #1173's split on the colour axis, accent for identity
+and selection and neutral for the pointer, while the rise and the
+1.5 pt weight stay. It is its own token rather than `ink3` or `ink`,
+so retuning an ink cannot move the edge, and
+`SettingsThemeContrastTests` holds it apart from the accent (91.5
+light, 146.3 dark) as well as at 3:1 on every ground it crosses. A
+quiet dark `#98A296` was previewed; the bright shade was chosen,
+accepting that in dark a hovered tile outshines the selected one. That
+trade is safe because selection keeps the accent, its heavier stroke
+and its check, which a hover never takes.
 :::
 
 **One draft, three views — and the save surface is the floating
