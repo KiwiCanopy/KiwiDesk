@@ -220,6 +220,25 @@ struct StateChangeAnimationTests {
         #expect(core.tiler.stateChangeSprings)
     }
 
+    /// A follow's re-point names two windows (#3063): each follows
+    /// `on_state_change`, an unnamed one the pass's toggle.
+    @Test("every window a pass names follows on_state_change")
+    func everyNamedWindowFollows() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        for raw in 1...3 { addWindow(core, raw) }
+        core.tiler.settings.animations.onStateChange = true
+        let applies = countApplies(core)
+        core.tiler.retile(
+            state: core.state,
+            animated: false,
+            stateChange: [WindowID(1), WindowID(2)]
+        )
+        #expect((applies()[WindowID(1)] ?? 0) >= 1)
+        #expect((applies()[WindowID(2)] ?? 0) >= 1)
+        #expect((applies()[WindowID(3)] ?? 0) == 0)
+    }
+
     /// The newcomer is never the state change: it follows the
     /// pass's toggle, never `on_state_change`.
     @Test("a newcomer named as the state change follows the pass")
