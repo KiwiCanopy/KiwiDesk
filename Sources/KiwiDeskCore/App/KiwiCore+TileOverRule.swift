@@ -32,11 +32,12 @@ extension KiwiCore {
     /// Any other reason ends it.
     private func tileOverRuleStands(_ id: WindowID, pid: pid_t?) -> Bool {
         guard let recorded = state.tiledOverRule[id] else { return false }
+        let verdict = tileRefusal(of: id)
         guard recorded == pid, state.pocketPhase(of: id) == nil,
-            tileRefusal(of: id) == .rule
+            verdict == .rule
         else {
             state.tiledOverRule[id] = nil
-            let reason = tileRefusal(of: id).map { $0.wireName } ?? "none"
+            let reason = verdict.map { $0.wireName } ?? "none"
             onLog(
                 "float: w\(id.raw) Tile over a rule ended "
                     + "(reason \(reason), pid \(pid.map(String.init) ?? "-"))"
