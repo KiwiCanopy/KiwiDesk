@@ -90,6 +90,8 @@ config.layers[].icon
 config.layers[].reach
 config.mainSpaces
 config.modeCycle
+config.modifierDrag.move
+config.modifierDrag.resize
 config.scrollGesture.longSwipes
 config.scrollGesture.naturalMouse
 config.scrollGesture.naturalTrackpad

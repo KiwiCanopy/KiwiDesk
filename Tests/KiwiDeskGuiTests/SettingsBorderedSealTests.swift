@@ -112,6 +112,11 @@ struct SettingsBorderedSealTests {
                 "the scroll gestures' modifier recorder (#1656), "
                     + "the key recorder's own field and tint"
             ),
+            "ModifierDragRecorderField.swift": (
+                1, ".tint(buttonTint)",
+                "the modifier drags' modifier recorder (#2447), "
+                    + "the key recorder's own field and tint"
+            ),
         ]
 
     /// A raw bordered style appears only where an exemption

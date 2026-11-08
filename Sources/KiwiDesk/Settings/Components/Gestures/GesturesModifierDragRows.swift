@@ -39,7 +39,7 @@ struct GesturesModifierDragRows: View {
         )
     }
 
-    static func label(_ action: ModifierDragAction) -> String {
+    static func title(_ action: ModifierDragAction) -> String {
         switch action {
         case .move:
             return L(
@@ -83,17 +83,17 @@ struct GesturesModifierDragRows: View {
     private func row(_ action: ModifierDragAction) -> some View {
         let other: ModifierDragAction = action == .move ? .resize : .move
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(Self.label(action))
+            Text(Self.title(action))
                 .accessibilityHidden(true)
             Spacer(minLength: 8)
             ModifierDragRecorderField(
-                name: Self.label(action),
+                name: Self.title(action),
                 chord: $model.config.modifierDrag[action].chord,
                 other: drags[other].chord,
                 otherAction: other
             )
             Picker(
-                Self.label(action),
+                Self.title(action),
                 selection: $model.config.modifierDrag[action].start
             ) {
                 ForEach(ModifierDragStart.allCases, id: \.self) { start in
@@ -104,7 +104,7 @@ struct GesturesModifierDragRows: View {
             .pickerStyle(.menu)
             .neutralMenuLabel()
             .fixedSize()
-            .accessibilityLabel(Self.label(action))
+            .accessibilityLabel(Self.title(action))
             .accessibilityValue(Self.startTitle(drags[action].start))
         }
     }

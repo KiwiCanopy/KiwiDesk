@@ -46,7 +46,7 @@ extension SettingsValueReadout {
             return [
                 .change(
                     census,
-                    label: GesturesModifierDragRows.label(action),
+                    label: GesturesModifierDragRows.title(action),
                     old: GesturesModifierDragRows.value(
                         old.modifierDrag[action]
                     ),
