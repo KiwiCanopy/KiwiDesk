@@ -228,7 +228,7 @@ struct KeyRecorderField: View {
         flashing ? SettingsTheme.danger : SettingsTheme.ink
     }
 
-    private var label: String {
+    var label: String {
         if recording, let pendingTap {
             let drawn = ChordGlyphs.render(
                 pendingTap,

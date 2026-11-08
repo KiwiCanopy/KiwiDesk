@@ -12645,7 +12645,10 @@ before each row's recorder well, its slot held on every row so the
 wells line up. It lists each sided modifier of the shortcut with
 Left, Right and Either side, so `Right ⌘ ⌥ H` can keep Right ⌘ and
 make ⌥ either-side; a single modifier tap offers no Either side,
-since it names a side (#1872). It works at rest only: the well is
+since it names a side (#1872), and the modifier one of whose keys
+is the Hyper key offers no side at all (Ruling 4 above). It is the
+GUI's route to an either-side shortcut; the switch and Lua's
+`cmd+h` stay. It works at rest only: the well is
 one button whose click re-records and any click while recording
 cancels, so the menu cannot live inside the well. A pick goes
 through the same duplicate check as a recording, and re-recording
