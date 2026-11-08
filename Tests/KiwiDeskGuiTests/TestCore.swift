@@ -148,8 +148,8 @@ func makeTestCore(
     core.mouse.pointer.makeTap = { _, _ in nil }
     core.keys.makeKeyboardTap = { _, _, _ in nil }
     // The touch reader reads the host's trackpad (#1873).
-    core.mouse.touch.makeReader = { _ in nil }
-    core.mouse.touch.readSystemGestures = { .unread }
+    core.mouse.trackpad.makeReader = { _ in nil }
+    core.mouse.trackpad.readSystemGestures = { .unread }
     // The pointer rest's mouse-moved monitor (#1869).
     core.mouse.rest.makeMonitor = { _ in nil }
     // The hiding shelves' pointer monitor (#761) hears the

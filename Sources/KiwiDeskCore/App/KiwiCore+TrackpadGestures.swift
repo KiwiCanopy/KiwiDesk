@@ -6,7 +6,7 @@ extension KiwiCore {
     /// Wires the handler; once, at bootstrap. A slot's action runs
     /// as a shortcut press does, so its motion is the user's.
     func wireTrackpadGestures() {
-        mouse.touch.setHandler { [weak self] slot, binding, event in
+        mouse.trackpad.setHandler { [weak self] slot, binding, event in
             self?.runTrackpadGesture(slot, binding, event)
         }
     }
@@ -47,8 +47,8 @@ extension KiwiCore {
         base: TrackpadGestureMap? = nil,
         profile: TrackpadGestureMap?
     ) {
-        mouse.touch.adoptResolution(
-            base: base ?? mouse.touch.base,
+        mouse.trackpad.resolve(
+            base: base ?? mouse.trackpad.base,
             profileOverride: profile
         )
     }
@@ -70,7 +70,7 @@ extension KiwiCore {
         guard let slot = TrackpadGestureSlot(rawValue: raw) else {
             return .expected(TrackpadGestureSlot.self)
         }
-        var base = mouse.touch.base
+        var base = mouse.trackpad.base
         let action = args.dropFirst().first?.stringValue ?? ""
         if action.isEmpty {
             base[slot] = .unbound
@@ -97,7 +97,7 @@ extension KiwiCore {
         }
         applyTrackpadGestures(
             base: base,
-            profile: mouse.touch.profileOverride
+            profile: mouse.trackpad.profileOverride
         )
         return .ok()
     }

@@ -987,3 +987,28 @@ editing here:
   (#804)**, and the motion gate reads mouse quiet and buttons
   through seams `makeTestCore` pins — state-and-layout.md ▸
   Window motion says whose it is.
+- **Trackpad gesture slots read fingers through ONE reader,
+  `TouchReader`, reached only through `MouseTracker.trackpad`
+  (#1873).** MultitouchSupport delivers every frame with no
+  permission (probed 2026-10-31, macOS 27) and swallows nothing.
+  Four obligations:
+  - **No touch binding, no reader.** `TouchGestures` starts the
+    reader only while the core runs and a bound slot's `source`
+    is `.touches`; the live factory is pinned inert in both
+    `makeTestCore` twins, with the trackpad-preference read
+    (`TouchReaderSeamTests`, `TouchGesturesTests`).
+  - **The decision is the pure `TrackpadGestureRouter`'s, on the
+    framework's thread**, fed a Sendable `TouchFrame`; the main
+    actor hears only a recognized tap or swipe, and a swipe is one
+    discrete step per touch, never a pan (#1656;
+    `TrackpadGestureRouterTests`).
+  - **A gesture macOS answers itself stands down**, read through
+    `TrackpadSystemGestures`; an unread preference owns nothing,
+    so the binding stays live (`TouchGesturesTests` ▸
+    `systemOwnedStandsDown`).
+  - **Consuming a pinch, spread, rotation or Force Click is a
+    gesture-event mask on `PointerTap` (#2447), never a fourth tap
+    and never this reader**, which cannot swallow. Until it lands
+    those slots resolve and fire nothing; their consumer reads
+    `TouchGestures.bindings` for slots whose `source` is
+    `.gestureEvents`.

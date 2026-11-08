@@ -68,7 +68,7 @@ extension KiwiCore {
         strandDetector.onLog = log
         mouse.scroll.onLog = log
         mouse.pointer.onLog = log
-        mouse.touch.onLog = log
+        mouse.trackpad.onLog = log
         tiler.motionGate.onLog = log
         tiler.onLog = log
         vision.appearanceSwitch = .live(onLog: log)

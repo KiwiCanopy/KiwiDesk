@@ -1,7 +1,7 @@
 import Foundation
 
 /// The main-actor front of the touch reader (#1873). One door,
-/// `configure`, takes the resolved bindings; the reader runs only
+/// `resolve`, takes the resolve's inputs; the reader runs only
 /// while the core is started AND a bound slot reads touches, so a
 /// user with every touch slot unbound has no reader (ruling ▸
 /// Reader: no binding, no reader).
@@ -25,10 +25,13 @@ public final class TouchGestures {
         TrackpadSystemGestures.readLive()
     }
 
-    public private(set) var bindings:
-        [TrackpadGestureSlot: TrackpadGestureBinding] = [:]
+    /// The seeds until the first resolve, as on a fresh install.
+    public private(set) var bindings = TrackpadGestureSeeds.resolved(
+        base: TrackpadGestureMap(),
+        profile: nil
+    )
     /// The inputs `KiwiCore.applyTrackpadGestures` resolves from,
-    /// written through `adoptResolution` alone.
+    /// written through `resolve` alone.
     private(set) var base = TrackpadGestureMap()
     private(set) var profileOverride: TrackpadGestureMap?
     private(set) var system = TrackpadSystemGestures.unread
@@ -48,7 +51,7 @@ public final class TouchGestures {
     }
 
     /// The one write of the resolve's inputs and output.
-    func adoptResolution(
+    func resolve(
         base: TrackpadGestureMap,
         profileOverride: TrackpadGestureMap?
     ) {

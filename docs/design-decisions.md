@@ -12665,7 +12665,7 @@ Escape does, which is #1874's to measure.
 shortcut may run the keyboard tap, or a reader of touches, on a
 default install.** The bound above, "a default install sees no
 keystroke", is retired for two seeds only: #1229's ⌘⌘ (Show
-Desktop overview) and #1873's ⌃⌥ + pinch. Neither can be anything
+Desktop overview) and #1873's seeded gestures. Neither can be anything
 else. Carbon registers no binding without a non-modifier key, so a
 modifier tap is a keyboard tap or nothing; a pinch is a touch
 reader or nothing. And a seed nobody can find is no seed: putting
@@ -12775,6 +12775,50 @@ gesture keeps one rule, and no click reached the app that would
 otherwise have focused a float. The press moves no focus, so a press
 that never becomes a drag takes none; a float dropped by its own
 title bar is macOS's to focus (owner with ui-designer, 2026-11-08).
+
+:::unreleased
+**A default install runs one input reader: the seeded trackpad
+gestures' (#1873, owner ruling 2026-11-08).** #2601 promised that "a
+default install, and one that never records a side, sees no
+keystroke", and that still holds for keys. It no longer holds for
+input as a whole: the gesture slots ship bound and on — a four-finger
+tap opens KiwiHub, a three-finger tap goes back a Space, ⌃⌥ + spread
+toggles maximized, ⌃⌥ + rotate cycles the layout — so a default
+install reads the trackpad's fingers. The same amendment is meant to
+cover #1229's seeded ⌘⌘, a keyboard tap on a default install, when
+that lane seeds it.
+
+What bounds the reader instead is #2601's other rule, applied per
+input: no binding, no reader. The MultitouchSupport reader runs only
+while the core runs and a bound slot reads touches, so unbinding the
+taps and swipes stops it. It reads and never swallows — the framework
+hands every frame to every listener — and it records and stores
+nothing, deciding on its own thread through a pure router and handing
+the main actor only a gesture it recognized. It needs no permission:
+the 2026-10-31 probe read every frame system-wide with Accessibility,
+Input Monitoring and PostEvent all refused, and tccd logged no request,
+so the Input Monitoring ruling carried from #1874 has no case here.
+Where the `dlsym` lookup fails there is no reader and no fallback to
+write, the os-private-apis carve-out: the scroll gestures keep
+working through their public tap.
+
+Because the reader cannot keep macOS from answering a gesture too, a
+gesture macOS owns does not fire: KiwiDesk reads the trackpad
+preferences and a three-finger tap set to Look up, or a three- or
+four-finger swipe on an axis macOS uses, stands down; a preference
+it cannot read owns nothing, so the binding stays live. Every swipe,
+pinch and rotation needs a modifier, since macOS and apps own the
+unmodified ones; a tap may take none.
+
+The slots are stored sparsely, in `gui.json` over the seeds and in a
+profile over that, a missing slot inheriting and `null` meaning None.
+So a seed a later release adds — #1229's ⌃⌥ + pinch together for the
+Desktop overview — reaches an install that never touched that slot
+with no top-up generation, and the cost is the mirror: changing a
+shipped seed changes it for everyone who kept it, which makes each
+such change a ruling. The key is additive, so it takes no format
+bump: an older build ignores it, and its Save drops it.
+:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get

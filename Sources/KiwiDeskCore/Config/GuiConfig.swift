@@ -100,8 +100,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// `appWide` (#1741) and the shared `look` (#1752) are
     /// stamped the same way, and `shortcutOffer` (#2324) is the
     /// top-ups' bookkeeping, merged at the write.
+    /// `trackpadGesture` (#1873) has no Settings row yet; the lane
+    /// that adds its rows drafts it and leaves this list.
     public static let undraftedFields: Set<String> = [
         "format", "desktopSpaces", "appWide", "look", "shortcutOffer",
+        "trackpadGesture",
     ]
 
     /// Fields `gui.json` never carries: they mean something on

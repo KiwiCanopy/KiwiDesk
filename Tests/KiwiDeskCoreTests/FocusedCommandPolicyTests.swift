@@ -124,6 +124,8 @@ struct FocusedCommandPolicyTests {
         "pocket.toggle_list",
         // Flips a Space's stack side, touching no window (#2771).
         "stack.toggle_stack_position",
+        // Binds a trackpad gesture slot, touching no window (#1873).
+        "trackpad_gesture.bind",
     ]
 
     /// A command that does not act on the implicit focused window:

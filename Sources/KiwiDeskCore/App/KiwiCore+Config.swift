@@ -184,7 +184,7 @@ extension KiwiCore {
         retirePlaceholderSpace()
         applyScrollGestures(profile: mouse.scroll.profileOverride)
         applyModifierDrag()
-        applyTrackpadGestures(profile: mouse.touch.profileOverride)
+        applyTrackpadGestures(profile: mouse.trackpad.profileOverride)
         retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON
@@ -240,7 +240,7 @@ extension KiwiCore {
         // the load's tail configures the tap once.
         resetScrollGestureInputs()
         modifierDragBase = .defaults
-        mouse.touch.resetInputs()
+        mouse.trackpad.resetInputs()
         spaceHistory.base = .defaultKind
         spaceHistory.profileOverride = nil
         modeCycle = ModeCycleState()

@@ -31,7 +31,7 @@ public final class MouseTracker {
     /// The one pointer tap's consumers: the modifier grab (#2447).
     public let pointer = PointerConsumers()
     /// Trackpad gesture slots through the touch reader (#1873).
-    public let touch = TouchGestures()
+    public let trackpad = TouchGestures()
     /// The pointer coming to rest, hover focus's trigger (#1869).
     public let rest = PointerRest()
 
@@ -139,7 +139,7 @@ public final class MouseTracker {
     public func start() {
         scroll.start()
         pointer.start()
-        touch.start()
+        trackpad.start()
         rest.start()
         guard monitors.isEmpty else { return }
         let down = NSEvent.addGlobalMonitorForEvents(
@@ -240,7 +240,7 @@ public final class MouseTracker {
         press = nil
         scroll.stop()
         pointer.stop()
-        touch.stop()
+        trackpad.stop()
         rest.stop()
     }
 

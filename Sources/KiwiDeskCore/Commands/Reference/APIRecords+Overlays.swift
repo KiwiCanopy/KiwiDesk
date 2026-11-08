@@ -224,10 +224,8 @@ extension APIReference {
 
     static let trackpadGestureRecords: [String: APIRecord] = [
         "bind": APIRecord(
-            "Binds a trackpad gesture slot to Lua, or a swipe slot to "
-                + "a family (focus, swap, display, track, space), with "
-                + "modifiers like \"control+option\"; no action is "
-                + "None.",
+            "Binds a trackpad gesture slot to Lua or a swipe family, "
+                + "with modifiers; no action is None.",
             .choice("slot", TrackpadGestureSlot.self),
             .text("action", optional: true),
             .text("modifiers", optional: true)
