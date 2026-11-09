@@ -26,6 +26,9 @@ extension KiwiCore {
         axis: String,
         delta: Double
     ) -> CommandResponse {
+        // A press ends the float's Maximize and acts from the frame
+        // it returns to (#3036).
+        endMaximizeBeforeFloatVerb(id)
         guard let window = state.windows[id] else {
             return .fail("unknown window")
         }

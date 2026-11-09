@@ -130,12 +130,13 @@ struct MaximizeWindowTests {
         #expect(maximized(core) == nil)
     }
 
-    @Test("A float press is refused")
-    func floatRefused() {
+    @Test("A float press maximizes it as a float (#3036)")
+    func floatPressFloats() {
         let core = makeCore()
         core.state.windows.setFloating(w1, true)
-        #expect(!core.execute("toggle_maximized").isSuccess)
-        #expect(core.state.workspaces[space]?.maximized?.window == nil)
+        #expect(core.execute("toggle_maximized").isSuccess)
+        #expect(maximized(core) == w1)
+        #expect(core.state.maximizedFloatReturn[w1] != nil)
     }
 
     @Test("The shelf stands down where the maximized Space shows")

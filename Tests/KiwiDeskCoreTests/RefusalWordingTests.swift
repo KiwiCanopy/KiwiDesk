@@ -221,15 +221,22 @@ struct RefusalWordingTests {
 
     // MARK: - Maximize
 
-    @Test("maximize says only a tiled window can")
+    @Test("maximize names the windows it refuses (#3036)")
     func maximizeNamesTheRule() {
         let core = makeCore()
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
-        track(core, 1) { $0.isFloating = true }
+        track(core, 1, pid: 900_001) {
+            $0.isFloating = true
+            $0.isTransientOverlay = true
+            $0.frame = CGRect(x: 100, y: 100, width: 300, height: 200)
+        }
+        core.state.apply(.windowFocused(WindowID(1)))
+        #expect(core.state.windows[WindowID(1)]?.isTransientOverlay == true)
         #expect(
             core.execute("toggle_maximized").error
-                == "only a tiled window can be maximized"
+                == "a dialog, a full-screen window or the pocket "
+                + "window cannot be maximized"
         )
     }
 

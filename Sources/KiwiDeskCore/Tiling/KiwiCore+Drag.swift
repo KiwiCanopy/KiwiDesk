@@ -140,6 +140,12 @@ extension KiwiCore {
         // back below the strip (#242, #1178).
         if dropLandsUnmanaged(id) {
             let frame = liveDropFrame(id, fallback: frame)
+            // A gesture that began on a float's Maximize (#3036).
+            if endedMaximize,
+                settleMaximizedFloatDrop(id, start: start, frame: frame)
+            {
+                return
+            }
             // Folded ahead of the re-file's retile, whose nets
             // would otherwise judge a lagging echo (#1686).
             state.apply(.windowMoved(id, frame))

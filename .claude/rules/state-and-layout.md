@@ -2478,7 +2478,14 @@ editing here:
   so a per-Space layer joins that body rather than a call site. Lay the fill over the ISSUED frames
   alone (`TilingEngine.fillingMaximized` inside
   `visibleFrames(placed: true)`), never the slots, so every slot
-  reader keeps the row. **A write that rearranges a Space ends its
+  reader keeps the row. **A float's Maximize (#3036) holds a
+  return record, `maximizedFloatReturn`, and its frame comes back
+  only through the one `payMaximizedFloatReturns`** — the tail of
+  `retile()`, or a float verb ending it first through
+  `endMaximizeBeforeFloatVerb` — so an ender clears the flag and
+  writes no frame of its own; a new verb moving a float's frame
+  takes that door ahead of its base read (`MaximizeFloatTests`).
+  **A write that rearranges a Space ends its
   maximize AT the write** — every order write through the one
   `Space.endMaximize`, the mode write, `resize`,
   `reset_layout_sizing` — so a refused

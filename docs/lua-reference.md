@@ -5887,6 +5887,11 @@ A full-screen window is refused with `the focused window is
 fullscreen`, and a tiled one with `the focused window is not
 floating`, which never floats it. Each shows a pill on the window.
 
+:::unreleased
+A maximized floating window goes back to the frame it had first, and
+that frame is centred.
+:::
+
 No shortcut comes with it. Bind it in init.lua or in Settings' Lua
 bindings drawer.
 
@@ -5925,6 +5930,11 @@ Space they are drawn on, and leaves them filed where they are. A
 maximized window beneath a floating one stays maximized. A full-screen
 window is refused with `the focused window is fullscreen`, and a tiled
 one with `the focused window is not floating`, each with a pill.
+
+:::unreleased
+A maximized floating window goes back to the frame it had first, and
+moves from there.
+:::
 
 No shortcut comes with it. Bind it in init.lua or in Settings' Lua
 bindings drawer.
@@ -6145,8 +6155,21 @@ swap, resize, layout change or reset of sizes
 puts it back first, then acts, and a mouse drag of it puts it
 back; a command that refuses leaves it as it is. Focus on a
 floating window, a switch to another Space or Desktop and back,
-or KiwiDesk's own restart leaves it filling the screen. Fails on
-a floating window. Bound to `⌃⌥M` by default.
+or KiwiDesk's own restart leaves it filling the screen. Bound to
+`⌃⌥M` by default.
+
+:::unreleased
+A floating window fills its screen the same way, on any layout,
+and a second call puts it back at the frame it had. Moving focus
+to a tiled window of the Space puts it back too, as does tiling it
+or putting it in the Pocket; focus on another floating window keeps
+it, and the maximized window stays beneath that one. On a Floating
+layout Space nothing is tiled, so only a second call or the window
+leaving ends it. `move_floating`, `center_floating`, a resize and a
+mouse drag put it back first; a mouse resize of its edge keeps the
+new size instead. Fails with a pill on a dialog, a full-screen
+window and the Pocket window.
+:::
 
 A sticky window fills the screen of the Space it is drawn on. Its
 maximize ends when you leave that Space, and it does not come back

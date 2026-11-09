@@ -74,7 +74,12 @@ extension KiwiCore {
         // Nothing under a maximized window shows: it alone is kept
         // above the tiled plane, never a neighbour lifted over it
         // (#2448).
+        // A maximized float is the float tier's, which keeps it
+        // under the other floats (#3036).
         if let maximized = state.maximizedWindow(of: space) {
+            if !state.effectiveTiledMembers(of: space).contains(maximized) {
+                return
+            }
             restoreMaximizedZOrder(maximized, in: space)
             return
         }

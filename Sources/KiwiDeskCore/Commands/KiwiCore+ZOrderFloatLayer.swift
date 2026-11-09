@@ -33,7 +33,7 @@ extension KiwiCore {
     /// gate is `isFloating`, never `isSticky` alone — a tiled-sticky
     /// window is a real layout participant (#414 v2) and stays on
     /// the tiled plane. Sorted by id so overlapping floats keep a
-    /// stable order across passes.
+    /// stable order across passes, a maximized float first (#3036).
     ///
     /// **Known residue, mixed CGWindow layers (#684).** A float
     /// may sit at layer 0 (a normal window the user floated) or
@@ -68,7 +68,23 @@ extension KiwiCore {
         {
             targets.append(window.id)
         }
-        return targets
+        return maximizedFloatLowest(targets)
+    }
+
+    /// `targets` with the active Space's maximized float raised
+    /// first, so it sits under every other float while focus is on
+    /// one of them and cannot bury a dialog (#3036); the hand-back
+    /// raises it again while it holds focus.
+    private func maximizedFloatLowest(
+        _ targets: [WindowID]
+    ) -> [WindowID] {
+        guard let space = activeSpace,
+            let maximized = state.maximizedWindow(of: space),
+            let index = targets.firstIndex(of: maximized)
+        else { return targets }
+        var ordered = targets
+        ordered.remove(at: index)
+        return [maximized] + ordered
     }
 
     /// The targets the float raise lifts, and the floats that hold

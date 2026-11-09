@@ -3,8 +3,9 @@ import Foundation
 /// Which window a Space shows maximized (#2448). The stored
 /// `Space.maximized` is the toggle; this verdict is what every
 /// reader takes, since the maximize ends the moment its window
-/// leaves the tiled set or focus lands on another tiled member.
-/// KiwiVision's derived fill answers where no toggle stands (#3064).
+/// leaves the tiled set (a float's, the float set, #3036) or focus
+/// lands on another tiled member. KiwiVision's derived fill answers
+/// where no toggle stands (#3064).
 extension StateCoordinator {
     /// The window `space` shows filling its screen, or nil: a hand
     /// Maximize, else KiwiVision's fill (#3064).
@@ -19,19 +20,65 @@ extension StateCoordinator {
     /// slot for (a float). A traveler is never `space.focused`
     /// (#431), so it asks the system focus itself, and focus on
     /// another screen keeps it (#3035).
+    /// A float's Maximize (#3036) stands while the window is an
+    /// effective float `space` draws, holding a return frame, and
+    /// no tiled member of `space` holds focus.
     public func handMaximizedWindow(of space: Space) -> WindowID? {
         guard let id = space.maximized?.window,
-            let tiled = maximizedTiled(of: space),
+            let tiled = maximizedTiled(of: space)
+                ?? maximizedFloatPlane(of: space),
             maximizeRival(of: space, window: id, tiled: tiled) == nil
         else { return nil }
         return id
     }
 
     /// `space`'s tiled members while its stored Maximize window is
-    /// drawn tiled on a tiled layout, or nil.
+    /// an effective float it draws (#3036), or nil: none on a
+    /// floating layout, so focus never ends it there.
+    private func maximizedFloatPlane(of space: Space) -> [WindowID]? {
+        guard let id = space.maximized?.window,
+            maximizesAsFloat(id, on: space)
+        else { return nil }
+        return placementMode(of: space) == .floating
+            ? [] : effectiveTiledMembers(of: space)
+    }
+
+    /// Whether `id` may stand maximized as a float of `space`
+    /// (#3036): an effective float drawn there with a return
+    /// frame, never native full screen, a transient overlay or the
+    /// pocket's window, whose frames are the pocket's.
+    func maximizesAsFloat(_ id: WindowID, on space: Space) -> Bool {
+        guard maximizedFloatReturn[id] != nil,
+            let window = windows[id],
+            !window.isFullscreen, !window.isTransientOverlay,
+            pocketSlot(of: id) == nil,
+            renderSpace(of: window) == space.id
+        else { return false }
+        return EffectiveFloat.applies(
+            isFloating: window.isFloating,
+            mode: placementMode(of: space)
+        )
+    }
+
+    /// The return frames no Maximize holds any longer (#3036): a
+    /// tracked window no Space's stored Maximize names. A window
+    /// not tracked keeps its record — a Desktop departure's
+    /// Maximize stands, a minimize returns to the frame — until
+    /// `forgetFloatMemory` ends it.
+    func owedMaximizedFloatReturns() -> [WindowID: FloatFrame] {
+        let held = Set(workspaces.allSpaces.compactMap(\.maximized?.window))
+        return maximizedFloatReturn.filter {
+            windows[$0.key] != nil && !held.contains($0.key)
+        }
+    }
+
+    /// `space`'s tiled members while its stored Maximize window is
+    /// drawn tiled on a tiled layout, or nil. A float's Maximize is
+    /// no tile's once the window tiles: its return record ends it.
     private func maximizedTiled(of space: Space) -> [WindowID]? {
         guard let id = space.maximized?.window,
-            placementMode(of: space) != .floating
+            placementMode(of: space) != .floating,
+            maximizedFloatReturn[id] == nil
         else { return nil }
         let tiled = effectiveTiledMembers(of: space)
         return tiled.contains(id) ? tiled : nil

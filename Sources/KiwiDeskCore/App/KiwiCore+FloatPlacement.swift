@@ -253,6 +253,8 @@ extension KiwiCore {
         _ id: WindowID
     ) -> StateCoordinator.FloatFrame? {
         guard let window = state.windows[id] else { return nil }
+        // A maximized float remembers where it returns to (#3036).
+        if let saved = state.maximizedFloatReturn[id] { return saved }
         let frame = currentFrame(of: id, fallback: window.frame)
         guard !tiler.looksStashed(frame) else { return nil }
         return .init(pid: window.pid, frame: frame)

@@ -232,6 +232,8 @@ extension KiwiCore {
                 }),
             spacesWithShownBars.contains(workspace.id),
             let window = state.windows[id],
+            // A maximized float fills its screen by design (#3036).
+            !isMaximizedFloat(window),
             // A native-fullscreen window keeps its slot but
             // lives on its own macOS Space (#670): a size fit at
             // a fullscreen app is the frame set the stash
@@ -263,6 +265,13 @@ extension KiwiCore {
             return nil
         }
         return clamped
+    }
+
+    /// Whether `window` is the Maximize of the Space it renders on.
+    private func isMaximizedFloat(_ window: ManagedWindow) -> Bool {
+        state.renderSpace(of: window)
+            .flatMap { state.workspaces[$0] }
+            .map { state.maximizedWindow(of: $0) == window.id } ?? false
     }
 
     /// Every space with at least one painted strip: the App
