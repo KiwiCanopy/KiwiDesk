@@ -14,10 +14,15 @@ struct OwnKeyWindowReading: Equatable {
     /// `EventLoop.classifiesAsOwnDialog`.
     let isDialog: Bool
     /// Whether that window is a non-modal panel floating over every
-    /// window — KiwiHub — which the focus ring and KiwiVision look
-    /// past to the focus beneath it (#2373). The raise stand-down
-    /// and the menu-bar reveal still read the window.
+    /// window — KiwiHub, or a bar's grown peek — which the focus
+    /// ring and KiwiVision look past to the focus beneath it
+    /// (#2373) and which holds the modifier taps while key
+    /// (`ModifierTapHold`, #1229). The raise stand-down and the
+    /// menu-bar reveal still read the window.
     var floatsOverWindows = false
+    /// Whether that window is KiwiHub, by its stamped identifier
+    /// (`KiwiHubSide.panelIdentifier`).
+    var isKiwiHub = false
 }
 
 /// The close-return raise stand-down (#913/#929/#935) and the
@@ -123,7 +128,9 @@ extension EventLoop {
             ),
             floatsOverWindows: classified is NSPanel
                 && app.modalWindow !== key
-                && floatsAboveWindows(key.level)
+                && floatsAboveWindows(key.level),
+            isKiwiHub: classified.identifier?.rawValue
+                == KiwiHubSide.panelIdentifier
         )
     }
 

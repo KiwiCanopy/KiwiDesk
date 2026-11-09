@@ -64,7 +64,8 @@ struct HyperLayerTests {
         keys.replaceLayers(
             [KeybindingManager.defaultLayer: [hyperH: 1, plainJ: 2]],
             icons: [:],
-            preferredLayer: KeybindingManager.defaultLayer
+            preferredLayer: KeybindingManager.defaultLayer,
+            kiwiHubSideRefs: []
         )
         return keys
     }
@@ -136,7 +137,8 @@ struct HyperLayerTests {
         keys.replaceLayers(
             [KeybindingManager.defaultLayer: [hyperK: 3]],
             icons: [:],
-            preferredLayer: KeybindingManager.defaultLayer
+            preferredLayer: KeybindingManager.defaultLayer,
+            kiwiHubSideRefs: []
         )
         let k = UInt32(kVK_ANSI_K)
         #expect(registrar.has(k))  // the new layer, still held

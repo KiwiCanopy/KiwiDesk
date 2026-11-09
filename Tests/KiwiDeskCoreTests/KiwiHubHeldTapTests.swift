@@ -48,11 +48,11 @@ struct KiwiHubHeldTapTests {
     @Test("a held ⌘⌘ fires nothing; released, it fires")
     func heldDoubleTap() throws {
         let (tap, fired) = try doubleTapRig()
-        tap.holdTaps(true)
+        tap.holdTaps(.all)
         try self.tap(tap, device: 0x08)
         try self.tap(tap, device: 0x08)
         #expect(fired.ids.isEmpty)
-        tap.holdTaps(false)
+        tap.holdTaps(.none)
         try self.tap(tap, device: 0x08)
         try self.tap(tap, device: 0x08)
         #expect(fired.ids == [1])
@@ -86,11 +86,11 @@ struct KiwiHubHeldTapTests {
                 ]
             )
         )
-        tap.holdTaps(true)
+        tap.holdTaps(.all)
         try self.tap(tap, device: 0x10)
         #expect(fired.ids.isEmpty)
         #expect(tap.drainSequenceDecisions().isEmpty)
-        tap.holdTaps(false)
+        tap.holdTaps(.none)
         try self.tap(tap, device: 0x10)
         #expect(fired.ids == [KeyboardTap.sequenceFireID])
     }
@@ -131,12 +131,12 @@ struct KiwiHubHeldTapTests {
         #expect(controlFired.ids == [1])
 
         let (atTap, atTapFired) = try lapseRig()
-        atTap.holdTaps(true)
+        atTap.holdTaps(.all)
         try tap(atTap, device: 0x10)
-        atTap.holdTaps(false)
+        atTap.holdTaps(.none)
         let (atLapse, atLapseFired) = try lapseRig()
         try tap(atLapse, device: 0x10)
-        atLapse.holdTaps(true)
+        atLapse.holdTaps(.all)
         let past = Date().addingTimeInterval(
             ModifierTapDetector.gapLimit * 3
         )
@@ -171,19 +171,27 @@ struct KiwiHubHeldTapTests {
         )
         core.ownKeyWindowDidChange()
         core.keys.bind(try #require(KeyCombo.parse("cmd+cmd")), ref: 1)
-        #expect(made.last?.held == true)
+        #expect(made.last?.held == .all)
         reading = OwnKeyWindowReading(number: 2, isDialog: false)
         core.ownKeyWindowDidChange()
-        #expect(made.last?.held == false)
+        #expect(made.last?.held == ModifierTapHold.none)
         reading = OwnKeyWindowReading(
             number: 1,
             isDialog: false,
             floatsOverWindows: true
         )
         core.ownKeyWindowDidChange()
-        #expect(made.last?.held == true)
+        #expect(made.last?.held == .all)
+        reading = OwnKeyWindowReading(
+            number: 3,
+            isDialog: false,
+            floatsOverWindows: true,
+            isKiwiHub: true
+        )
+        core.ownKeyWindowDidChange()
+        #expect(made.last?.held == .kiwiHub)
         reading = nil
         core.ownKeyWindowDidChange()
-        #expect(made.last?.held == false)
+        #expect(made.last?.held == ModifierTapHold.none)
     }
 }
