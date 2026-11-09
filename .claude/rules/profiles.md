@@ -209,11 +209,14 @@ its `steps` with it. A new reader classifies itself in
 or overrides a whole sequence, never a key inside one
 (`KeySequenceReaderTests`). A writer of a sequence from Settings
 saves it whole through the loaded profile's layer rows, never
-through the key table (`KeySequenceCardSaveTests`), and until a
-sequence has a reach (#3124) the Key sequences card stays greyed
-on a stored profile's page (`KeySequenceCardTests` ▸
-`storedPageGreys`); the argument is `docs/design-decisions.md`'s
-#1871 amendment.
+through the key table (`KeySequenceCardSaveTests`), and a Save of
+that page keeps a sequence the profile's own override holds out of
+the shared base (`KeySequenceCardSaveTests` ▸ `ownSequenceStaysOwn`).
+Until a sequence has a reach (#3124), the Key sequences card stays
+greyed on a stored profile's page and where the loaded profile keeps
+its own sequences in the layer (`KeySequenceCardTests` ▸
+`storedPageGreys`, `KeySequenceCardSaveTests` ▸ `editBlocks`); the
+argument is `docs/design-decisions.md`'s #1871 amendment.
 
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`

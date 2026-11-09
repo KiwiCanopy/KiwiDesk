@@ -75,6 +75,30 @@ struct KeySequenceCardSaveTests {
         )
     }
 
+    @Test("a profile's own sequence stays out of the shared rows")
+    func ownSequenceStaysOwn() throws {
+        let model = try makeModel()
+        var work = try model.core.profiles.read(name: "Work")
+        work.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: KeyLayer.defaultName, bindings: [sequence()])
+            ]
+        )
+        try model.core.profiles.write(work)
+        model.reload()
+        // An unrelated edit on Work's page, then its Save.
+        model.config.layers[0].bindings.append(
+            KeyBinding(combo: "alt+h", lua: left, kind: .navigation)
+        )
+        model.updateActiveProfile()
+
+        #expect(stored(model).isEmpty)
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        let own = try model.core.profiles.read(name: "Work").layers?
+            .resolved(onto: base)
+        #expect(own?.first?.sequences == [sequence()])
+    }
+
     @Test("a sequence recorded on the live page lands whole")
     func liveSaveWritesTheTree() throws {
         let model = try makeModel()

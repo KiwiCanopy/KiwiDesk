@@ -79,7 +79,8 @@ extension KeyBinding {
     /// what it says of itself — a sequence its name and whole tree
     /// (#1871).
     public var shortcutShape: String {
-        ([combo, lua, desc, group, symbol]
+        // `meta` whole, so a field it gains is compared too (#2544).
+        ([combo, lua, String(describing: meta)]
             + (isSequence ? ["\u{1E}" + label] : [])
             // Each child bracketed, so a key one step up never
             // reads as the same tree.
