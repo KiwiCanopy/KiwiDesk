@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// The key panel's Shortcuts side (#2246): the reference read when
 /// the side opens, and the typed query that narrows it. Read-only —
