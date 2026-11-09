@@ -7,7 +7,8 @@ import Testing
 /// `scripts/test-desk` and the app agree on the test desk (#3121):
 /// the defaults suite `down` deletes is the one the app writes, and
 /// the keys `up` seeds past the first-run tour are the app's own.
-/// A drifted name leaves the suite behind, or the tour up.
+/// A drifted name leaves the suite behind, the tour up, or a
+/// loaded service unrefused.
 @Suite("Test desk script parity (#3121)")
 struct TestDeskScriptTests {
     private static let script = SourceScan.repoRoot(from: #filePath)
@@ -21,6 +22,8 @@ struct TestDeskScriptTests {
             .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("#") }
             .joined(separator: "\n")
         #expect(text.contains("SUITE=\"\(TestDesk.defaultsSuite)\""))
+        #expect(text.contains("LABEL=\"\(ServiceManager.label)\""))
+        #expect(text.contains("gui/$(id -u)/$LABEL"))
         for key in [
             TilingConsent.key, OnboardingDiscovery.key,
             WhatsNewRecord.lastRunKey,
@@ -30,15 +33,6 @@ struct TestDeskScriptTests {
                 "\(key) is not seeded"
             )
         }
-    }
-
-    @Test("the service verbs ask the refusal")
-    func serviceAsksTheRefusal() throws {
-        let cli = try SourceScan.strippedSource(
-            at: SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent("Sources/KiwiDesk/CLIMain.swift")
-        )
-        #expect(cli.contains("TestDesk.refusal(\"service\")"))
     }
 
     /// A bundle with an id and a feed, which an updater takes.

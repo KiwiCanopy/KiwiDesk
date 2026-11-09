@@ -37,6 +37,13 @@ enum ServiceAction: String, CaseIterable {
         "usage: kiwidesk service "
             + allCases.map(\.rawValue).joined(separator: "|")
     }
+
+    /// Why this verb is refused on a test desk (#3121), nil if it
+    /// may run: only `status` changes nothing launchd starts.
+    func refusal(active: Bool = TestDesk.isActive) -> String? {
+        self == .status
+            ? nil : TestDesk.refusal("service", active: active)
+    }
 }
 
 private func runService(_ arguments: [String]) -> Int32 {
@@ -48,7 +55,7 @@ private func runService(_ arguments: [String]) -> Int32 {
         print("unknown service command: \(arguments[2])")
         return 1
     }
-    if action != .status, let refusal = TestDesk.refusal("service") {
+    if let refusal = action.refusal() {
         FileHandle.standardError.write(Data("\(refusal)\n".utf8))
         return 1
     }

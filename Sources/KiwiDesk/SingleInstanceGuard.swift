@@ -10,6 +10,21 @@ import KiwiDeskCore
 /// instance start?".
 let secondLaunchExitStatus: Int32 = 0
 
+/// Another instance runs. A test desk shares the lock (#3121) and
+/// so refuses rather than surface the instance it would replace.
+@MainActor
+func lostTheInstanceLock() -> Never {
+    if TestDesk.isActive {
+        fputs(
+            "KiwiDesk: \(TestDesk.variable) is set while another "
+                + "instance runs — quit it first.\n",
+            stderr
+        )
+        exit(1)
+    }
+    surfaceRunningInstanceAndExit()
+}
+
 /// Activates running instance and exits when lock is held
 /// (`main.swift`, #196).
 @MainActor

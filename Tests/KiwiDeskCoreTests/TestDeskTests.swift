@@ -39,6 +39,13 @@ struct TestDeskTests {
         #expect(MachineLocation.directory == MachineLocation.defaultDirectory)
     }
 
+    @Test("a test desk takes its own suite, never the owner's")
+    func testDeskTakesItsSuite() {
+        let store = AppDefaults.store(active: true)
+        #expect(store !== UserDefaults.standard)
+        #expect(AppDefaults.store(active: false) === UserDefaults.standard)
+    }
+
     @Test("a test desk refuses the service and the login item")
     func refusesLaunchers() {
         #expect(TestDesk.refusal("service", active: true) != nil)

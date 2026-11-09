@@ -9,9 +9,13 @@ public enum AppDefaults {
     /// Immutable once read; `UserDefaults` is documented
     /// thread-safe, which the SDK does not yet declare.
     nonisolated(unsafe) public static let store: UserDefaults =
-        TestDesk.isActive
-        ? testDeskSuite()
-        : .standard
+        store(active: TestDesk.isActive)
+
+    /// The store a process takes, `active` saying whether it runs
+    /// on a test desk.
+    static func store(active: Bool) -> UserDefaults {
+        active ? testDeskSuite() : .standard
+    }
 
     /// Never the owner's domain: a suite that cannot open stops
     /// the test desk rather than writing `.standard`.

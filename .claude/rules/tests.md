@@ -958,7 +958,10 @@ owner's state asks `TestDesk`, never the variable itself, and a new
 settings read takes `AppDefaults.store` (both
 `AppDefaultsRoutingTests`); a record of machine-wide state one
 instance owns, such as the `hidutil` remap, stays on `.standard`,
-so the owner's instance finds it after a test desk.
+so the owner's instance finds it after a test desk. The instance
+lock stays in the default machine folder for every instance,
+never the test desk's, or a test desk runs beside the owner's
+(`TestDeskSeamTests`).
 
 Window geometry can be sampled without any screen-recording
 grant: `CGWindowListCopyWindowInfo` returns frames for every

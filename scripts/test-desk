@@ -21,6 +21,7 @@ EXE="Contents/MacOS/KiwiDesk"
 HERE="$(cd "$(dirname "$0")/.." && pwd -P)"
 FIXTURE="$HERE/Tests/KiwiDeskCoreTests/TestDesk/config"
 SUITE="com.kiwicanopy.kiwidesk.testdesk"
+LABEL="org.kiwidesk.KiwiDesk"
 POINTER="${TMPDIR:-/tmp}/kiwidesk-test-desk.root"
 
 die() { echo "test-desk: $*" >&2; exit 1; }
@@ -76,7 +77,7 @@ case "${1:-}" in
 up)
     [ -n "$(root_dir)" ] && die "a test desk is up; run down first"
     # launchd would relaunch a service-managed instance beside it.
-    launchctl print "gui/$(id -u)/org.kiwidesk.KiwiDesk" >/dev/null 2>&1 \
+    launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1 \
         && die "the KiwiDesk service is loaded; run 'KiwiDesk service stop'"
     MINE="$(cd "${2:?bundle}" && pwd -P)" || exit 1
     [ -x "$MINE/$EXE" ] || die "$MINE is no KiwiDesk bundle"
