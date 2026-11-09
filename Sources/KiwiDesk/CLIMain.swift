@@ -48,6 +48,10 @@ private func runService(_ arguments: [String]) -> Int32 {
         print("unknown service command: \(arguments[2])")
         return 1
     }
+    if action != .status, let refusal = TestDesk.refusal("service") {
+        FileHandle.standardError.write(Data("\(refusal)\n".utf8))
+        return 1
+    }
     let outcome: ServiceManager.Outcome
     switch action {
     case .start:

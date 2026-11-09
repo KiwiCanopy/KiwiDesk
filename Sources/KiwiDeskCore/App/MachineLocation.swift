@@ -10,8 +10,16 @@ import Foundation
 /// service and `main.swift`, which takes the lock before any
 /// config is read.
 public enum MachineLocation {
-    /// `~/Library/Application Support/KiwiDesk/`.
+    /// `~/Library/Application Support/KiwiDesk/`, or a test
+    /// desk's machine folder (`TestDesk`, #3121).
     public static var directory: URL {
+        TestDesk.root.map(TestDesk.machineDirectory(under:))
+            ?? defaultDirectory
+    }
+
+    /// The folder a normal launch uses, whatever `TestDesk` says:
+    /// a test desk refuses to start while its lock is held.
+    public static var defaultDirectory: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(
                 "Library/Application Support/KiwiDesk"
@@ -24,6 +32,11 @@ public enum MachineLocation {
 
     public static var lockPath: String {
         lock(in: directory).path
+    }
+
+    /// A normal launch's lock, read by a test desk (#3121).
+    public static var defaultLockPath: String {
+        lock(in: defaultDirectory).path
     }
 
     static func socket(in directory: URL) -> URL {

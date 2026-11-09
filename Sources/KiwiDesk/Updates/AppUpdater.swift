@@ -224,11 +224,13 @@ enum AppUpdaterFactory {
     /// Builds the updater `choice` picks for the running copy.
     static func make() -> any AppUpdating {
         let main = Bundle.main
+        // A test desk never updates the bundle under it (#3121).
         let bundled =
-            main.bundleIdentifier != nil
+            !TestDesk.isActive
+            && main.bundleIdentifier != nil
             && main.object(forInfoDictionaryKey: "SUFeedURL") != nil
         let manager = ExternalUpdates.current(
-            defaults: .standard,
+            defaults: AppDefaults.store,
             bundlePath: main.bundlePath
         )
         switch choice(bundled: bundled, manager: manager) {

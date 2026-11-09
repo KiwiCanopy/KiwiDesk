@@ -66,6 +66,11 @@ public enum LoginItemManager {
         write: (Bool) throws -> Void,
         read: () -> LoginItemState = { current }
     ) -> LoginItemState {
+        // A test desk's login item would start without its root.
+        if let refusal = TestDesk.refusal("the login item") {
+            note(refusal)
+            return read()
+        }
         if let reason = unavailableReason(for: url) {
             note("login-item write refused: \(reason)")
             return .unavailable(reason)

@@ -15,6 +15,18 @@ let app = KiwiApplication.shared
 // Single-instance lock held for process lifetime (#196). Must
 // run before the delegate exists: a second KiwiCore would
 // clobber the running instance's IPC socket.
+// A test desk replaces the default instance, never runs beside
+// it: two would retile and answer every hotkey twice (#3121).
+if TestDesk.isActive,
+    SingleInstanceLock.isHeld(at: MachineLocation.defaultLockPath)
+{
+    fputs(
+        "KiwiDesk: \(TestDesk.variable) is set while the default "
+            + "instance runs — quit it first.\n",
+        stderr
+    )
+    exit(1)
+}
 let instanceLock = SingleInstanceLock(path: MachineLocation.lockPath)
 if !instanceLock.acquire() {
     surfaceRunningInstanceAndExit()

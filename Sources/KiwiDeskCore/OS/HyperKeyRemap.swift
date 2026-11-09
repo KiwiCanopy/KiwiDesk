@@ -305,22 +305,22 @@ extension HyperKeyRemap.Host {
         },
         readWritten: {
             HyperKeyRemap.recorded(
-                UserDefaults.standard.dictionary(forKey: recordKey),
+                AppDefaults.store.dictionary(forKey: recordKey),
                 boot: HyperKeyRemap.bootSession()
             )
         },
         writeWritten: { pair in
             guard let pair else {
-                UserDefaults.standard.removeObject(forKey: recordKey)
+                AppDefaults.store.removeObject(forKey: recordKey)
                 return
             }
             // No boot to stamp: write nothing a later read would
             // have to trust.
             guard let boot = HyperKeyRemap.bootSession() else {
-                UserDefaults.standard.removeObject(forKey: recordKey)
+                AppDefaults.store.removeObject(forKey: recordKey)
                 return
             }
-            UserDefaults.standard.set(
+            AppDefaults.store.set(
                 HyperKeyRemap.record(pair, boot: boot),
                 forKey: recordKey
             )
