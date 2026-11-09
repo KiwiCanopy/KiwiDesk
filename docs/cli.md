@@ -477,6 +477,16 @@ that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
 
 :::unreleased
+`focus_app_window` takes `next|prev` and focuses the focused app's
+next or previous window, on any Space, screen or Desktop, in the
+order a repeat `focus_or_spawn` press walks; minimized windows are
+skipped. Unlike macOS's own **Move focus to next window** (System
+Settings ▸ Keyboard ▸ Keyboard Shortcuts… ▸ Keyboard), which stays
+on the current Space, it also reaches other Spaces and Desktops no
+screen shows ([`focus_app_window`](lua-reference.md#focus_app_window)).
+:::
+
+:::unreleased
 `move_to_display_last` and `move_to_display` move the focused
 window into the Space another screen shows, the screen
 `focus_display_last` or `focus_display` would go to; their

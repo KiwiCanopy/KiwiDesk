@@ -1,7 +1,8 @@
 import Foundation
 
 /// Repeat presses of Open or Focus cycle the app's windows
-/// (#637): when `focus_or_spawn` fires while one of the target
+/// (#637), and `focus_app_window` walks the same ring either
+/// way (#3131): when `focus_or_spawn` fires while one of the target
 /// app's windows is already focused, the shortcut advances to
 /// the app's next window — space order, then slot order,
 /// wrapping — instead of re-activating an app that is already
@@ -13,13 +14,19 @@ import Foundation
 /// (`KiwiCore+LaunchReach`). Without the bridge the ring is the
 /// tracked windows alone.
 extension KiwiCore {
-    /// The already-focused branch of `focus_or_spawn`. Returns
-    /// `false` when cycling does not apply — the focused window
-    /// is not this app's, the app is not the frontmost one, or
-    /// it has fewer than two windows in the ring — so the caller
-    /// falls through to the pull. `bundleID` arrives
-    /// lowercased (the command's normalization).
-    func cycleToNextWindow(bundleID: String) -> Bool {
+    /// The one step through the app's ring, shared by
+    /// `focus_or_spawn`'s repeat press (always `.next`) and
+    /// `focus_app_window` (#3131). Returns `false` when cycling
+    /// does not apply — the focused window is not this app's,
+    /// the app is not the frontmost one, or it has fewer than
+    /// two windows in the ring — and the caller decides what
+    /// that means. `bundleID` arrives lowercased; `verb` names
+    /// the caller on the away reach's log line.
+    func cycleAppWindow(
+        bundleID: String,
+        direction: ModeCycleDirection,
+        verb: String
+    ) -> Bool {
         guard
             let current = state.workspaces.lastFocused,
             let window = state.windows[current],
@@ -38,7 +45,12 @@ extension KiwiCore {
         guard ring.count > 1,
             let index = ring.firstIndex(of: current)
         else { return false }
-        return focusCycleTarget(ring[(index + 1) % ring.count], reach: reach)
+        let step = direction == .next ? 1 : ring.count - 1
+        return focusCycleTarget(
+            ring[(index + step) % ring.count],
+            reach: reach,
+            verb: verb
+        )
     }
 
     /// The first press (#1840): focuses the app's most recently
@@ -53,7 +65,11 @@ extension KiwiCore {
         guard let target = pullTarget(bundleID: bundleID, pid: pid),
             !raiseCrossesDesktops(target)
         else { return false }
-        return focusCycleTarget(target, reach: nil)
+        return focusCycleTarget(
+            target,
+            reach: nil,
+            verb: "focus_or_spawn"
+        )
     }
 
     private func pullTarget(bundleID: String, pid: pid_t) -> WindowID? {
@@ -111,7 +127,7 @@ extension KiwiCore {
         }
     }
 
-    /// Focuses the cycle's successor. A same-space target is a
+    /// Focuses the cycle's chosen window. A same-space target is a
     /// plain focus; one on another Space switches the
     /// way a follow move does (`followSwitch`). A STICKY
     /// target never switches (#414): its membership names only
@@ -121,7 +137,8 @@ extension KiwiCore {
     /// the press to the pull.
     private func focusCycleTarget(
         _ id: WindowID,
-        reach: AwayReach?
+        reach: AwayReach?,
+        verb: String
     ) -> Bool {
         if let reach,
             let entry = reach.windows.first(where: { $0.window.id == id })
@@ -130,7 +147,7 @@ extension KiwiCore {
                 entry.window,
                 desktop: entry.desktop,
                 snapshot: reach.snapshot,
-                verb: "focus_or_spawn"
+                verb: verb
             )
         }
         guard

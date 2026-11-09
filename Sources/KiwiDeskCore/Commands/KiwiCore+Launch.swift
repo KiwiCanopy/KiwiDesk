@@ -19,7 +19,11 @@ extension KiwiCore {
         // (#637) — checked first, off tracked state alone, so
         // the repeat press cycles instead of re-activating.
         if !newInstance,
-            cycleToNextWindow(bundleID: bundleID)
+            cycleAppWindow(
+                bundleID: bundleID,
+                direction: .next,
+                verb: "focus_or_spawn"
+            )
         {
             return .ok()
         }
