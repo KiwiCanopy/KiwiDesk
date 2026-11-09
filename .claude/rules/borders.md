@@ -811,8 +811,8 @@ Obligations:
 - **A change of KiwiVision's maximize fill owes the plates one
   re-mask at the late resync** (#3064): the window left is still
   shrinking when its fade masks its slot. Flag it through the one
-  `KiwiCore.retireEndedFills`, which every caller of
-  `retireEndedMaximize` takes, and pay it through
+  `KiwiCore.retireEndedFills`, and route every new retire through
+  it, never `retireEndedMaximize` direct; pay it through
   `payVisionSettleReshape` at the tail of `runBorderResync`, never
   a reshape of its own on the focus path (`KiwiVisionMaximizeTests`
   ▸ `settleReshape`).

@@ -82,6 +82,7 @@ private func trackedFixture() -> StateCoordinator {
     state.closedDepartures.insert(old)
     state.unjudgedFilings.insert(old)
     state.focusRecency[old] = .init(pid: 7, tick: 1)
+    state.visionFill.drawn.insert(old)
     // A bare id inside a record VALUE (#1387) — the scan's net,
     // not the count's, like `scrollRest`.
     state.departedSlots[WindowID(1)] = .init(rank: 1, handedTo: old)
@@ -103,7 +104,7 @@ private func trackedFixture() -> StateCoordinator {
 /// `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414),
 /// `unjudgedFilings` (#1646), `focusRecency` (#1840),
-/// `crossSession.placed` (#1385), plus
+/// `crossSession.placed` (#1385), `visionFill.drawn` (#3064), plus
 /// each space's `windows`, `stackWeights`, `runSizes` (#2709),
 /// `trackBreaks`,
 /// `handedBreaks` (#1387), `trackWeights`, `runHeads` and
@@ -114,7 +115,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 22
+private let expectedContainerCount = 23
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.

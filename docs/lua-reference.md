@@ -4806,11 +4806,14 @@ and anchor [`maximize.set_share`](#maximizeset_share) and
 screen's shape (`"height"`, `"width"`). Every other window keeps
 its slot. Focus another tiled window — a key, a click, ⌘-Tab or
 [hover focus](#mouseset_hover_focus) — and that window
-takes the fill. Each Space's focused window fills while KiwiVision
-stays on, so a Space switch keeps it; turning KiwiVision off puts
+takes the fill; on two screens only the window holding the focus
+fills, and a Space switch keeps it. Turning KiwiVision off puts
 every window back. A Monocle Space and a floating window keep their
-size. A [`toggle_maximized`](#toggle_maximized) press wins while it
-stands, and its end hands the fill back. Stored as `maximize` in the
+size, and while a floating window holds the focus the tiled window
+focused last keeps the fill. A [`toggle_maximized`](#toggle_maximized)
+press of another shape wins while it stands, and its end hands the
+fill back; a press of the shape KiwiVision fills, and
+[`resize`](#resize), are refused while the fill stands. Stored as `maximize` in the
 `kiwivision` group, absent while `"off"`, and a lens table takes it
 too.
 :::

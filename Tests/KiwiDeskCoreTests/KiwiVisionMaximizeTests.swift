@@ -59,29 +59,46 @@ private func slots(_ core: KiwiCore) -> [WindowID: CGRect] {
     core.tiler.calculatedFrames(state: core.state)
 }
 
+@MainActor
+private func passes(_ meter: WorkMeter) -> Int {
+    meter.snapshot(reset: false).counts.retiles
+}
+
 /// KiwiVision's maximize (#3064): derived each pass from KiwiVision
-/// on, the option and the focused tiled window — it follows focus,
-/// stands down on Monocle and floats, and a hand Maximize wins.
+/// on, the option and the active Space's focused tiled window — it
+/// follows focus, stands down on Monocle, keeps a float's tiled
+/// window filled, refuses what it would hide, and a hand Maximize
+/// wins.
 @Suite("KiwiVision maximize (#3064)", .serialized)
 @MainActor
 struct KiwiVisionMaximizeTests {
-    @Test("On with Full, the focused window fills; the rest keep slots")
+    @Test("Turning it on runs the pass that fills the focused window")
     func focusedFills() {
-        let (core, space) = makeCore()
+        let (core, space) = makeCore(fill: .off)
+        let meter = WorkMeter()
+        core.tiler.meter = meter
+        core.execute("kiwivision.set_maximize", args: [.string("full")])
+        #expect(passes(meter) > 0)
+        #expect(core.state.visionFill.drawn == [ids[0]])
         #expect(filled(core, space) == ids[0])
         #expect(issued(core)[ids[0]] == bounds)
         #expect(issued(core)[ids[1]] == slots(core)[ids[1]])
         #expect(core.state.workspaces[space]?.maximized == nil)
     }
 
-    @Test("The fill follows focus, a focus report included")
+    @Test("The fill follows focus through a pass, a report included")
     func followsFocus() {
         let (core, space) = makeCore()
+        let meter = WorkMeter()
+        core.tiler.meter = meter
         core.focusWindow(ids[1], warp: false)
+        #expect(passes(meter) > 0)
         #expect(filled(core, space) == ids[1])
         #expect(issued(core)[ids[1]] == bounds)
         #expect(issued(core)[ids[0]] == slots(core)[ids[0]])
+        let before = passes(meter)
         core.handle(.windowFocused(ids[2]))
+        #expect(passes(meter) > before)
         #expect(filled(core, space) == ids[2])
         #expect(issued(core)[ids[2]] == bounds)
     }
@@ -94,7 +111,7 @@ struct KiwiVisionMaximizeTests {
         #expect(core.retireEndedFills().isEmpty)
     }
 
-    @Test("Off, KiwiVision off, Monocle or a float focus fill nothing")
+    @Test("Off, KiwiVision off or Monocle fill nothing")
     func standsDown() {
         let (core, space) = makeCore(fill: .off)
         #expect(filled(core, space) == nil)
@@ -105,10 +122,23 @@ struct KiwiVisionMaximizeTests {
         #expect(issued(core)[ids[0]] == slots(core)[ids[0]])
         let (monocle, mSpace) = makeCore(mode: "monocle")
         #expect(filled(monocle, mSpace) == nil)
-        let (floats, fSpace) = makeCore()
-        floats.state.windows.setFloating(ids[2], true)
-        floats.state.workspaces.focus(ids[2], in: fSpace)
-        #expect(filled(floats, fSpace) == nil)
+    }
+
+    @Test("Only the Space holding the system focus fills")
+    func activeSpaceOnly() {
+        let (core, space) = makeCore()
+        #expect(filled(core, space) == ids[0])
+        core.state.workspaces.activate(SpaceID(9))
+        #expect(filled(core, space) == nil)
+    }
+
+    @Test("A float taking the focus leaves the tiled window filled")
+    func floatKeepsTheTiledFill() {
+        let (core, space) = makeCore()
+        core.handle(.windowFocused(ids[1]))
+        core.state.windows.setFloating(ids[2], true)
+        core.state.workspaces.focus(ids[2], in: space)
+        #expect(filled(core, space) == ids[1])
     }
 
     @Test("Height fills the height at the Layout Defaults share")
@@ -125,7 +155,7 @@ struct KiwiVisionMaximizeTests {
         #expect(rect.width < bounds.width)
     }
 
-    @Test("A hand Maximize outranks it and its end hands back")
+    @Test("A hand Maximize of another shape outranks it and hands back")
     func handOutranks() {
         let (core, space) = makeCore(fill: .height)
         #expect(core.execute("toggle_maximized").isSuccess)
@@ -135,6 +165,18 @@ struct KiwiVisionMaximizeTests {
         #expect(core.state.workspaces[space]?.maximized == nil)
         #expect(filled(core, space) == ids[0])
         #expect(issued(core)[ids[0]] != bounds)
+    }
+
+    @Test("A press of the filled shape, or a resize, is refused")
+    func refusesWhatItHides() {
+        let (core, space) = makeCore()
+        let before = slots(core)
+        #expect(!core.execute("toggle_maximized").isSuccess)
+        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(!core.resize([.string("x"), .number(80)]).isSuccess)
+        #expect(slots(core) == before)
+        core.execute("kiwivision.toggle")
+        #expect(core.resize([.string("x"), .number(80)]).isSuccess)
     }
 
     @Test("A focus step retiles while the fill stands, on any layout")
@@ -152,7 +194,9 @@ struct KiwiVisionMaximizeTests {
         core.state.workspaces.focus(ids[1], in: space)
         _ = core.retireEndedFills()
         #expect(core.vision.owesSettleReshape)
+        core.deferred.cancel(.visionMask)
         core.runBorderResync()
         #expect(!core.vision.owesSettleReshape)
+        #expect(core.deferred.task(for: .visionMask) != nil)
     }
 }

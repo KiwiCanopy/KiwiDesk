@@ -227,6 +227,7 @@ public struct StateCoordinator: Sendable {
             focusRecency[new] = rank
         }
         rekeyPocket(old, to: new)
+        rekeyVisionFill(old, to: new)
     }
 
     /// Folds an event into state and returns side-effect facts (#166).

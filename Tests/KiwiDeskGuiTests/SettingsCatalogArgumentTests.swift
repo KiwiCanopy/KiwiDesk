@@ -75,6 +75,8 @@ struct SettingsCatalogArgumentTests {
         "KiwiVisionLensOverrides.swift: "
             + "SettingsCatalog.kiwiVision.clearCard.text",
         "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.maximizeCard.text",
+        "KiwiVisionLensOverrides.swift: "
             + "SettingsCatalog.kiwiVision.appearanceCard.text",
         "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",
         "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
@@ -237,8 +239,9 @@ struct SettingsCatalogArgumentTests {
         // Shortcuts rows its captions land on, 162 with its
         // other-shapes drawer (the column anchors moved to headings),
         // 164 with #2447's two modifier drag rows, 165 with #3088's
-        // Sync across Macs row, 166 #3064's KiwiVision maximize row.
-        #expect(direct.values.reduce(0, +) == 166)
+        // Sync across Macs row, 167 with #3064's KiwiVision Maximize
+        // card and its row.
+        #expect(direct.values.reduce(0, +) == 167)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

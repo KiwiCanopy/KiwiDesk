@@ -1,24 +1,13 @@
 import Foundation
 
 /// What KiwiVision's maximize asks while KiwiVision is on (#3064):
-/// the axis, and the Layout Defaults table its shape reads.
+/// the shape it fills on the active Space's screen, resolved by
+/// `KiwiCore.maximizeShape(from:for:)`, the hand press's one reader
+/// of the Layout Defaults table.
 public struct VisionFill: Equatable, Sendable {
-    /// The axis a directional fill takes, nil for the whole screen.
-    public var axis: MaximizeAxis?
-    /// The shares and anchors per screen shape (`maximize.*`).
-    public var maximize: MaximizeSettings
-    /// The shape of a Space whose screen state does not track.
-    public var fallbackShape: ScreenShape
+    public var shape: MaximizeShape
 
-    public init(
-        axis: MaximizeAxis?,
-        maximize: MaximizeSettings,
-        fallbackShape: ScreenShape
-    ) {
-        self.axis = axis
-        self.maximize = maximize
-        self.fallbackShape = fallbackShape
-    }
+    public init(shape: MaximizeShape) { self.shape = shape }
 }
 
 /// KiwiVision's maximize as state holds it: what the session asks,
@@ -28,51 +17,47 @@ public struct VisionFillState: Equatable, Sendable {
     /// nil while KiwiVision is off or its maximize is Off.
     public internal(set) var fill: VisionFill?
     /// What `retireVisionFill` last saw filled, read only to name
-    /// the windows a change moved; a re-keyed id reads as one
-    /// change naming a window that no longer exists.
+    /// the windows a change moved; re-keyed with the window.
     var drawn: Set<WindowID> = []
 }
 
-/// The derived verdict (#3064): the focused tiled window of every
-/// Space fills while KiwiVision's maximize stands, never stored per
+/// The derived verdict (#3064): the active Space's focused tiled
+/// window fills while KiwiVision's maximize stands, never stored per
 /// Space and never through `Space.maximized`, so it follows focus
 /// by what it means and lasts across Space switches as KiwiVision
 /// does. A hand Maximize outranks it (`maximizedWindow(of:)`).
 extension StateCoordinator {
-    /// Whether KiwiVision's maximize stands on `space`: asked, and a
-    /// tiled layout other than Monocle, where one window already
-    /// fills the screen.
+    /// Whether KiwiVision's maximize stands on `space`: asked, the
+    /// active Space — the one holding the system focus, so on two
+    /// screens one window fills — and a tiled layout other than
+    /// Monocle, where one window already fills the screen.
     public func visionFillStands(on space: Space) -> Bool {
-        guard visionFill.fill != nil else { return false }
+        guard visionFill.fill != nil, space.id == workspaces.activeSpace
+        else { return false }
         let mode = placementMode(of: space)
         return mode != .floating && mode != .monocle
     }
 
     /// The window KiwiVision's maximize fills on `space`: its focus
-    /// anchor while drawn tiled, never a float (#3036), or nil.
+    /// anchor while drawn tiled; while a float holds the focus, the
+    /// tiled window focused last keeps it, as a hand Maximize does
+    /// (owner, 2026-11-09; a float never fills until #3036).
     public func visionFilledWindow(of space: Space) -> WindowID? {
         guard visionFillStands(on: space) else { return nil }
         let tiled = effectiveTiledMembers(of: space)
-        guard let anchor = focusAnchor(of: space, tiled: tiled),
-            tiled.contains(anchor)
-        else { return nil }
-        return anchor
+        guard let anchor = focusAnchor(of: space, tiled: tiled) else {
+            return nil
+        }
+        if tiled.contains(anchor) { return anchor }
+        let last = tiled.max {
+            focusRecencyRank(of: $0) < focusRecencyRank(of: $1)
+        }
+        return last.flatMap { focusRecencyRank(of: $0) > 0 ? $0 : nil }
     }
 
-    /// What KiwiVision's maximize fills on `space`, at the share
-    /// and anchor Layout Defaults store for its screen's shape.
+    /// What KiwiVision's maximize fills on `space`.
     func visionFillShape(of space: Space) -> MaximizeShape? {
-        guard let fill = visionFill.fill else { return nil }
-        guard let axis = fill.axis else { return .full }
-        let shape =
-            workspaces.display(of: space.id)
-            .flatMap { workspaces.displays[$0] }
-            .map(ScreenShape.of) ?? fill.fallbackShape
-        return MaximizeShape(
-            axis: axis,
-            share: fill.maximize.share(for: axis, on: shape),
-            anchor: fill.maximize.anchor[shape]
-        )
+        visionFillStands(on: space) ? visionFill.fill?.shape : nil
     }
 
     /// Mirrors what KiwiVision asks; true where it changed.
@@ -95,5 +80,14 @@ extension StateCoordinator {
         let changed = now.symmetricDifference(visionFill.drawn)
         visionFill.drawn = now
         return changed.sorted { $0.raw < $1.raw }
+    }
+}
+
+extension StateCoordinator {
+    /// A native-tab re-key of a window `drawn` names (#308).
+    mutating func rekeyVisionFill(_ old: WindowID, to new: WindowID) {
+        if visionFill.drawn.remove(old) != nil {
+            visionFill.drawn.insert(new)
+        }
     }
 }

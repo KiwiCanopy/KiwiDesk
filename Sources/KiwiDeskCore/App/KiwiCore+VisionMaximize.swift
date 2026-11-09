@@ -17,15 +17,19 @@ extension KiwiCore {
     }
 
     /// What the look asks of state now: nil while KiwiVision is off
-    /// or its maximize, through `VisionLook`, is Off.
+    /// or its maximize, through `VisionLook`, is Off; else the shape
+    /// a hand press of that axis takes on the active Space.
     var askedVisionFill: VisionFill? {
         let fill = visionLook.maximize
         guard vision.isOn, fill != .off else { return nil }
-        return VisionFill(
-            axis: fill.axis,
-            maximize: tiler.settings.maximize,
-            fallbackShape: maximizeScreenShape(of: nil)
-        )
+        let args = fill.axis.map { [JSONValue.string($0.rawValue)] } ?? []
+        guard
+            case .success(let shape) = maximizeShape(
+                from: args,
+                for: state.workspaces.activeSpace
+            )
+        else { return nil }
+        return VisionFill(shape: shape)
     }
 
     /// Mirrors the asked fill into state at every door that can

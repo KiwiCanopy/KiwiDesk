@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The KiwiVision page (#2103 ▸ the Settings area ruling): the
 /// lens strip, then the selected chip's body — Default's
-/// four cards, written at once (#1741), or a lens's page, saved
+/// five cards, written at once (#1741), or a lens's page, saved
 /// with Save (ruling 29). The picture is the side panel's
 /// (`KiwiVisionPanelPreview`), following the chip on `nav`.
 struct KiwiVisionSection: View {
@@ -36,6 +36,7 @@ struct KiwiVisionSection: View {
         KiwiVisionPointer(model: model)
         KiwiVisionLevelsCard(model: model)
         KiwiVisionClearCard(model: model)
+        KiwiVisionMaximizeCard(model: model)
         KiwiVisionAppearanceCard(model: model)
         KiwiVisionNeverDimmedCard(model: model)
     }

@@ -53,7 +53,14 @@ extension KiwiVisionKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
-        case .clearWallpaper, .clearApp, .maximize:
+        case .maximize:
+            return .row(
+                .kiwiVision,
+                .kiwiVisionMaximize,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
+        case .clearWallpaper, .clearApp:
             return .row(
                 .kiwiVision,
                 .kiwiVisionClear,

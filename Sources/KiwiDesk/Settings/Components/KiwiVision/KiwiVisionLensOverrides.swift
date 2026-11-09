@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A lens's own values for the Default cards (#2103 rulings
-/// 23, 29, 46): Dim and blur, Stays clear and System appearance,
+/// 23, 29, 46): Dim and blur, Stays clear, Maximize (#3064) and
+/// System appearance,
 /// one override checkbox per ROW — a lens often changes the dim and
 /// keeps the blur. An unchecked row reads "follows Default ·
 /// <value>"; checking it seeds the lens with that value.
@@ -42,8 +43,10 @@ struct KiwiVisionLensOverrides: View {
                         \.clearWallpaper,
                         plain.visionClearWallpaper
                     )
-                    maximizeRow
                 }
+            }
+            SettingsSection(SettingsCatalog.kiwiVision.maximizeCard.text) {
+                maximizeRow
             }
             SettingsSection(
                 SettingsCatalog.kiwiVision.appearanceCard.text
@@ -151,7 +154,7 @@ struct KiwiVisionLensOverrides: View {
 
     private var maximizeRow: some View {
         let value = override(\.maximize)
-        let label = SettingsCatalog.kiwiVision.maximize.text
+        let label = SettingsCatalog.kiwiVision.focusedFill.text
         let global = plain.visionMaximize
         let current = value.wrappedValue ?? global
         return OverrideChrome(

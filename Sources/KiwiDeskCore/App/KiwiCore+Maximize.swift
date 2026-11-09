@@ -47,6 +47,13 @@ extension KiwiCore {
                 cueMaximizeRefused(id)
                 return .fail("only a tiled window can be maximized")
             }
+            // A press of the shape KiwiVision fills would change
+            // nothing on screen (#3064).
+            if state.visionFilledWindow(of: space) == id,
+                state.maximizedShape(of: space)?.matches(shape) == true
+            {
+                return refuseVisionFilled(id)
+            }
             state.workspaces.withSpace(spaceID) {
                 $0.maximized = Maximize(
                     window: id,
@@ -111,6 +118,22 @@ extension KiwiCore {
         updateBorders()
         updateMarks()
         return true
+    }
+
+    /// A press KiwiVision's fill would hide — a resize, a Maximize of
+    /// the shape it fills — refused with its pill, VoiceOver
+    /// hearing it too (#3064).
+    func refuseVisionFilled(_ window: WindowID) -> CommandResponse {
+        flashRefusalPill(
+            window,
+            text: L(
+                "kiwivision.maximize.refused",
+                "A window KiwiVision fills keeps its size."
+            ),
+            symbol: "arrow.up.left.and.arrow.down.right",
+            announce: true
+        )
+        return .fail("a window KiwiVision fills keeps its size")
     }
 
     /// A refused press's cue: the pill is its only one, so

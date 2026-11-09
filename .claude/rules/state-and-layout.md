@@ -2428,12 +2428,19 @@ editing here:
   is the one copy of who may. **KiwiVision's fill (#3064) is the
   verdict's second half, derived in `StateCoordinator+VisionFill`
   and never written to `Space`**: what it asks is
-  `StateCoordinator.visionFill`, mirrored in by the one
-  `KiwiCore.refillVision` at every door that changes KiwiVision's
-  look and at the head of `retile()`; a reader that means the hand
+  `StateCoordinator.visionFill`, and a door that changes
+  KiwiVision's look calls the one `KiwiCore.refillVision`, as
+  `retile()` does at its head; a reader that means the hand
   toggle alone — its press, its retire, its follow — asks
   `handMaximizedWindow(of:)`, and every other reader takes the
-  verdict (`KiwiVisionMaximizeTests`). **What it fills is read through
+  verdict (`KiwiVisionMaximizeTests`). The fill cannot end, so a
+  door that ends a hand Maximize states its answer for the fill:
+  `resize` and a press of the filled shape refuse through the one
+  `refuseVisionFilled`, while an order write, a mode write and a
+  drag proceed and the fill follows the focus. A float fill
+  (#3036) widens both float stand-downs together —
+  `maximizedTiled` and `visionFilledWindow` — and
+  `retileEndingMaximize`'s spring promise with them. **What it fills is read through
   `StateCoordinator.maximizedShape(of:)`, and the window and its
   shape are ONE value, `Space.maximized: Maximize?` (#3062, #3063)**,
   so an ender's `maximized = nil` clears both and a re-point or a

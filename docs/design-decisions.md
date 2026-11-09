@@ -8688,10 +8688,12 @@ Height or Width, one segmented picker on the KiwiVision page and
 Width read the share and the anchor Layout Defaults store for the
 screen's shape, the same table a hand Maximize reads, so KiwiVision
 has no anchor of its own (owner, 2026-11-09). A lens overrides the
-mode one row at a time, so a "Writing" lens can ask for Height.
+mode alone, one optional row like its other overrides, so a
+"Writing" lens can ask for Height.
 
-The verdict is computed on every read from three inputs: KiwiVision
-on, the option through `VisionLook`, and each Space's focused tiled
+The verdict is computed on every read from what state holds —
+KiwiVision's ask, copied in through `VisionLook` at every change,
+with the Layout Defaults table — and each Space's focused tiled
 window. A hand Maximize outranks it, so `maximizedWindow(of:)` is
 the stored toggle first and the derived fill second. It is not
 built on `Space.maximized`: that value names one window at a time
@@ -8703,12 +8705,21 @@ by what it means, with no switch: a swap reorders the slots and the
 focused window keeps the fill, and the fill lasts across Space
 switches because KiwiVision does. Hover focus moves it like any
 other focus (owner, 2026-11-08): a user who turned both on gets
-both. It stands down on a Monocle Space, where one window already
-fills the screen, and on a floating focus until #3036 rules how a
-float fills.
+both. Only the Space holding the system focus fills, so on two
+screens the fill moves with the focus rather than standing on a
+dimmed window (owner, 2026-11-09). It stands down on a Monocle
+Space, where one window already fills the screen. A float never
+fills until #3036 rules how one does; while a float holds the focus
+the tiled window focused last keeps the fill, as a hand Maximize
+does, so a click on a float costs no shrink and grow.
 
-State keeps one record beside the verdict: the windows the last
-retire saw filled, read only so a focus step can name the window
+The fill cannot end the way a hand Maximize does, so the presses a
+hand Maximize ends on are refused with a pill instead: a resize,
+which would move only the slots the fill hides, and a Maximize of
+the shape already filled, which would change nothing on screen.
+
+Beside the ask, state keeps the windows the last retire saw
+filled, read only so a focus step can name the window
 left and the window arriving on its pass, as a following Maximize
 does (#3063). Each focus step therefore costs two frame writes into
 apps.

@@ -9,8 +9,9 @@ enum KiwiVisionRowOrder {
 
     static let clear: [SettingKey] = [
         .kiwiVision(.clearApp), .kiwiVision(.clearWallpaper),
-        .kiwiVision(.maximize),
     ]
+
+    static let maximize: [SettingKey] = [.kiwiVision(.maximize)]
 
     static let neverDimmed: [SettingKey] = [
         .kiwiVision(.neverDimmed)
@@ -26,6 +27,7 @@ enum KiwiVisionRowOrder {
     static let byContainer: [SettingsContainer: [SettingKey]] = [
         .kiwiVisionLevels: levels,
         .kiwiVisionClear: clear,
+        .kiwiVisionMaximize: maximize,
         .kiwiVisionNeverDimmed: neverDimmed,
         .kiwiVisionAppearance: appearance,
         .kiwiVisionLenses: lenses,

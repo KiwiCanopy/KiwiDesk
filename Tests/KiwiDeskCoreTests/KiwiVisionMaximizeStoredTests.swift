@@ -92,9 +92,9 @@ struct KiwiVisionMaximizeStoredTests {
         core.execute("kiwivision.set_maximize", args: [.string("full")])
         #expect(core.state.visionFill.fill == nil)
         core.execute("kiwivision.toggle")
-        #expect(core.state.visionFill.fill?.axis == nil)
+        #expect(core.state.visionFill.fill?.shape.axis == nil)
         #expect(core.state.visionFill.fill != nil)
         core.execute("kiwivision.set_maximize", args: [.string("width")])
-        #expect(core.state.visionFill.fill?.axis == .width)
+        #expect(core.state.visionFill.fill?.shape.axis == .width)
     }
 }

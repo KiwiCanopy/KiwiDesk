@@ -26,7 +26,11 @@ struct KiwiVisionControls: Sendable {
         "kiwivision.clear_wallpaper",
         "Wallpaper"
     )
-    let maximize = SettingsControl(
+    let maximizeCard = SettingsControl(
+        "kiwivision.section.maximize",
+        "Maximize"
+    )
+    let focusedFill = SettingsControl(
         "kiwivision.maximize",
         "Maximize the focused window"
     )

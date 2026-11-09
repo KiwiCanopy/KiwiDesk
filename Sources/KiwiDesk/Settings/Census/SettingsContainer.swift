@@ -7,6 +7,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case kiwiVisionAppearance
     /// KiwiVision ▸ Stays clear (#2103 ruling 18).
     case kiwiVisionClear
+    /// KiwiVision ▸ Maximize (#3064).
+    case kiwiVisionMaximize
     /// KiwiVision ▸ Never dimmed (#2103 rulings 26–27).
     case kiwiVisionNeverDimmed
     /// KiwiVision ▸ the lens strip and the lens page drawn per live
@@ -108,7 +110,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             // always matters (#761).
             return nil
         case .accent, .advanced, .aiSetup, .readyMadePrompts,
-            .kiwiVisionAppearance, .kiwiVisionClear,
+            .kiwiVisionAppearance, .kiwiVisionClear, .kiwiVisionMaximize,
             .kiwiVisionNeverDimmed, .kiwiVisionLenses,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,

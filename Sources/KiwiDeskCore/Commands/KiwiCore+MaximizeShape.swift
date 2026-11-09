@@ -14,8 +14,8 @@ extension KiwiCore {
     /// The shape `args` ask for: none is the whole screen; an axis
     /// takes the share and anchor stored for the shape of the
     /// screen `space` lays out on, unless the press names its own.
-    /// The one reader of the table at a press, so a per-Space layer
-    /// (#3090) outranks it here.
+    /// The one reader of the table, at a press and for KiwiVision's
+    /// fill (#3064), so a per-Space layer (#3090) outranks it here.
     func maximizeShape(
         from args: [JSONValue],
         for space: SpaceID?

@@ -152,6 +152,11 @@ extension KiwiCore {
                 delta: delta
             )
         }
+        // KiwiVision's fill cannot end, so a resize under it would
+        // move only the slots it hides (#3064).
+        if let filled = state.visionFilledWindow(of: space) {
+            return refuseVisionFilled(filled)
+        }
         // A tiled resize moves slots a maximized window hides, so
         // it ends the maximize first — the writers measure the
         // drawn slot — and a refusal still draws the return
