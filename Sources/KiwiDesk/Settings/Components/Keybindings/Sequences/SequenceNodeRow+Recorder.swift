@@ -135,6 +135,13 @@ extension SequenceNodeRow {
     }
 
     func record(_ combo: String) {
+        if isLeader {
+            model.carrySequenceReach(
+                layer: layerName,
+                from: node.combo,
+                to: combo
+            )
+        }
         editing.update(node.id) { $0.combo = combo }
         if fresh == node.id { fresh = nil }
         if isLeader, let root = editing.root {

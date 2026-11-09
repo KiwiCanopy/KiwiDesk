@@ -179,6 +179,15 @@ extension SettingsModel {
             let parts = RuleReachTable<String>.keyParts(key)
             guard let at = layers.firstIndex(where: { $0.name == parts.layer })
             else { continue }
+            // A key sequence lands whole, on its leader (#3124).
+            if RuleReachTable<String>.isSequenceKey(key) {
+                RuleReachTable<String>.writeSequence(
+                    &layers,
+                    key: key,
+                    value: combo
+                )
+                continue
+            }
             let written = KeyBinding(combo: combo ?? "", lua: parts.lua)
             var placed = false
             var rows: [KeyBinding] = []
