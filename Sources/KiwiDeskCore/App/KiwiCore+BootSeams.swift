@@ -80,6 +80,9 @@ extension KiwiCore {
         // the click discriminator for the cross-display sibling
         // distrust (#496) — in AX coordinates, the space window
         // frames live in.
+        // A key no step holds: the panel stays, and the sound is a
+        // panel's refusal, off by default (#1871 ▸ unbound step key).
+        keys.beep = { [weak self] in self?.soundPanelRefusal() }
         mouse.onLeftMouseDown = { [weak self] point, origin in
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
             // A click on a window a lens holds clears it (#2103).

@@ -26,6 +26,16 @@ extension JumpPanelController {
     /// Builds the shortcuts reference for the active key layer
     /// (`ShortcutsReferenceBuilder`, #820).
     func buildReference() -> ShortcutsReference? {
+        Self.reference(core: core)
+    }
+
+    /// The reference for what `stepping` makes of the active layer —
+    /// the layer itself, or the step of a key sequence the hint
+    /// panel lists (#1871) — nil where it makes nothing.
+    static func reference(
+        core: KiwiCore,
+        stepping: (KeyLayer) -> KeyLayer? = { $0 }
+    ) -> ShortcutsReference? {
         var layers: [KeyLayer]
         let activeLayer: String
         let config: GuiConfig
@@ -61,10 +71,13 @@ extension JumpPanelController {
         } else {
             return nil
         }
-        let layer =
-            layers.first { $0.name == activeLayer }
-            ?? layers.first
-            ?? KeyLayer.defaultLayer
+        guard
+            let layer = stepping(
+                layers.first { $0.name == activeLayer }
+                    ?? layers.first
+                    ?? KeyLayer.defaultLayer
+            )
+        else { return nil }
         // Two-source read: layers supply bindings; config supplies
         // spaces/icons/step for candidate rows. A transient
         // disagreement can only MISFILE a binding (into Inactive
@@ -90,14 +103,16 @@ extension JumpPanelController {
         )
         return withAppGlyphs(
             reference,
-            settings: config.settings
+            settings: config.settings,
+            core: core
         )
     }
 
     /// Attaches app font glyphs to reference app shortcuts (#294).
-    private func withAppGlyphs(
+    private static func withAppGlyphs(
         _ reference: ShortcutsReference,
-        settings: TilingSettings
+        settings: TilingSettings,
+        core: KiwiCore
     ) -> ShortcutsReference {
         let source = settings.kiwishelf.iconSource
         // Allocation early-out only — the authoritative gate

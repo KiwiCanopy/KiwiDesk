@@ -201,8 +201,18 @@ struct ScrollTapSeamTests {
             KeyboardTapConsumer.union([.sides, .modifierTaps])
                 == KeyboardTapConsumer.modifierTaps.mask
         )
-        // Only `.sides` swallows, so a taps-only tap listens.
-        #expect(KeyboardTapConsumer.allCases.filter(\.swallows) == [.sides])
+        // `.sequences` (#1871) and `.sides` swallow, so a taps-only
+        // tap listens.
+        #expect(
+            KeyboardTapConsumer.allCases.filter(\.swallows)
+                == [.sequences, .sides]
+        )
+        #expect(
+            KeyboardTapConsumer.sequences.mask
+                == bit(.keyDown) | bit(.leftMouseDown)
+                | bit(.rightMouseDown) | bit(.otherMouseDown)
+        )
+        #expect(KeyboardTapConsumer.options([.sequences]) == .defaultTap)
         #expect(
             source.contains("options: KeyboardTapConsumer.options(consumers),")
         )

@@ -39,6 +39,9 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         case navigation
         case application
         case custom
+        /// A leader chord whose `steps` pick what runs (#1871);
+        /// runs nothing on its own press.
+        case sequence
     }
 
     public var id = UUID()
@@ -58,6 +61,10 @@ public struct KeyBinding: Codable, Equatable, Sendable,
     public var group: String
     /// The SF Symbol its row wears (#2544); empty for the Lua mark.
     public var symbol: String
+    /// The keys a `.sequence` node opens, each a binding of its
+    /// own (#1871); nil on every other kind, the decoder refusing
+    /// either half without the other.
+    public var steps: [KeyBinding]?
 
     public init(
         combo: String = "",
@@ -66,7 +73,8 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         label: String = "",
         desc: String = "",
         group: String = "",
-        symbol: String = ""
+        symbol: String = "",
+        steps: [KeyBinding]? = nil
     ) {
         self.combo = combo
         self.lua = lua
@@ -75,6 +83,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         self.desc = desc
         self.group = group
         self.symbol = symbol
+        self.steps = steps
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -85,6 +94,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         case desc
         case group
         case symbol
+        case steps
     }
 
     public init(from decoder: Decoder) throws {
@@ -112,6 +122,17 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         symbol =
             try container.decodeIfPresent(String.self, forKey: .symbol)
             ?? ""
+        steps = try container.decodeIfPresent(
+            [KeyBinding].self,
+            forKey: .steps
+        )
+        guard (kind == .sequence) == (steps != nil) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .steps,
+                in: container,
+                debugDescription: "steps belong to a sequence alone"
+            )
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -129,6 +150,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         if !symbol.isEmpty {
             try container.encode(symbol, forKey: .symbol)
         }
+        try container.encodeIfPresent(steps, forKey: .steps)
     }
 
     /// What the binding says of itself, the three fields whole
@@ -149,14 +171,19 @@ public struct KeyBinding: Codable, Equatable, Sendable,
     ) -> Bool {
         lhs.combo == rhs.combo && lhs.lua == rhs.lua
             && lhs.kind == rhs.kind && lhs.label == rhs.label
-            && lhs.meta == rhs.meta
+            && lhs.meta == rhs.meta && lhs.steps == rhs.steps
     }
 
     /// Semantic identity for the override cascade (#55): combo +
     /// lua only. The import classifier may upgrade `kind`/`label`,
     /// and that must never read as divergence from the base, or an
-    /// unchanged edit session persists spurious overrides.
+    /// unchanged edit session persists spurious overrides. A
+    /// sequence is one unit and compares whole, its name included
+    /// (#1871).
     public func sameAction(as other: KeyBinding) -> Bool {
-        combo == other.combo && lua == other.lua
+        if kind == .sequence || other.kind == .sequence {
+            return self == other
+        }
+        return combo == other.combo && lua == other.lua
     }
 }

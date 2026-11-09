@@ -47,14 +47,25 @@ extension KeybindingManager {
     /// tap. False where rows wanted a tap macOS refused.
     func armKeyboardTap(
         sides: [(KeyCombo, Int32)],
-        taps: [(KeyCombo, Int32)]
+        taps: [(KeyCombo, Int32)],
+        sequences: [KeySequence]
     ) -> Bool {
         tapBindings = [:]
+        sequenceGeneration &+= 1
         let rows = KeyboardTapRows(
             sides: sideTapRows(sides),
             taps: taps.map { combo, ref in
                 ModifierTapRow(combo: combo, id: liveTapID(combo, ref))
             }
+                // A tap leader is detected as any tap is (#1871).
+                + sequences.enumerated().filter(\.element.leader.isTap).map {
+                    ModifierTapRow(
+                        combo: $0.element.leader,
+                        id: KeyboardTap.leaderID($0.offset)
+                    )
+                },
+            sequences: sequences,
+            sequenceGeneration: sequenceGeneration
         )
         let wanted = rows.consumers
         guard !wanted.isEmpty else {
@@ -125,6 +136,8 @@ extension KeybindingManager {
 
     private func liveTapID(_ combo: KeyCombo, _ ref: Int32) -> UInt32 {
         nextTapID &+= 1
+        // Ids from `KeyboardTap.leaderBase` up are the sequences'.
+        if nextTapID >= KeyboardTap.leaderBase { nextTapID = 1 }
         tapBindings[nextTapID] = LiveBinding(ref: ref, combo: combo)
         return nextTapID
     }
@@ -141,6 +154,10 @@ extension KeybindingManager {
     /// as a Carbon press does, with no hold glide, since the tap
     /// reports no release.
     func tapFire(_ id: UInt32) {
+        if id == KeyboardTap.sequenceFireID {
+            keyboardTap?.drainSequenceDecisions().forEach(sequenceDecided)
+            return
+        }
         guard !isSuspended, let live = tapBindings[id] else { return }
         pressFire(ref: live.ref, combo: live.combo, id: nil)
     }

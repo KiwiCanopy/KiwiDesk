@@ -90,8 +90,10 @@ extension KiwiCore {
     /// exists", which the GUI reads for its chord too. An install
     /// keeps only rows whose chord registers, so a row left without
     /// a key ties nothing.
+    /// A sequence's end key ties its app too, but is no row with a
+    /// chord of its own (#1871), so this answers press rows alone.
     public func pocketAppRow(for bundleID: String) -> KeyBinding? {
-        installedLayers.flatMap(\.bindings).first {
+        installedLayers.flatMap(\.pressBindings).first {
             PocketAppLuaArg.bundleID(of: $0.lua) == bundleID.lowercased()
         }
     }
@@ -99,7 +101,7 @@ extension KiwiCore {
     /// The bundle ids whose Pocket key row is installed.
     func pocketAppRows() -> Set<String> {
         Set(
-            installedLayers.flatMap(\.bindings).compactMap {
+            installedLayers.flatMap(\.actionBindings).compactMap {
                 PocketAppLuaArg.bundleID(of: $0.lua)
             }
         )
@@ -118,7 +120,7 @@ extension KiwiCore {
                 profile: profile?.layers
             )
             rows.formUnion(
-                layers.flatMap(\.bindings).compactMap {
+                layers.flatMap(\.actionBindings).compactMap {
                     PocketAppLuaArg.bundleID(of: $0.lua)
                 }
             )

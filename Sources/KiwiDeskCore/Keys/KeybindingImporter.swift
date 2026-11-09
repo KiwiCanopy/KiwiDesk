@@ -60,6 +60,36 @@ enum KeybindingImporter {
                 rows.append(row)
             }
             rows.sort { $0.combo < $1.combo }
+            // A sequence is one unit (#1871): one end key unread
+            // leaves the whole sequence unread, never a sequence
+            // saved short of a key.
+            for sequence in manager.sequences(for: name) {
+                var missed = false
+                let row = sequence.binding { ref in
+                    guard
+                        let lua = action(
+                            ref: ref,
+                            interpreter: interpreter,
+                            readFile: readFile,
+                            cache: &cache
+                        )
+                    else {
+                        missed = true
+                        return ""
+                    }
+                    return lua
+                }
+                if missed {
+                    unread[name, default: []].append(
+                        UnreadChord(
+                            chord: sequence.stored,
+                            meta: sequence.meta
+                        )
+                    )
+                } else {
+                    rows.append(row)
+                }
+            }
             unread[name]?.sort { $0.chord < $1.chord }
             return KeyLayer(
                 name: name,

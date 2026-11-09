@@ -77,6 +77,10 @@ the GUI** instead. Settings are:
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_desktop`.
 
+:::unreleased
+`KiwiDesk.define_sequence` counts as a keybinding too.
+:::
+
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
 
 A [`kiwihub.set_key`](#kiwihubset_key) call counts as a setting too.
@@ -1266,6 +1270,13 @@ as with `false`. They fire once per press when held
 A [modifier tap](#modifiers-and-keys) is read the same way whatever
 this says: while one is bound, KiwiDesk also reads modifier changes
 and clicks, and acts only on the taps.
+:::
+
+:::unreleased
+A [key sequence](#define_sequence) is read the same way whatever
+this says: while one is defined, KiwiDesk reads key presses and
+clicks, takes its leader and, while a sequence is open, every key
+press, and acts on nothing else.
 :::
 
 The GUI twin is **Tell left and right modifiers apart** in
@@ -7551,6 +7562,61 @@ KiwiDesk.define_layer("resize", {
 })
 ```
 
+:::unreleased
+### Key Sequences
+
+#### define_sequence
+
+**Expects:**
+
+- A leader: a combo (`"ctrl+alt+space"`) or a
+  [modifier tap](#modifiers-and-keys) (`"cmd+cmd"`), never a Hyper
+  chord.
+- A table of step keys. Each value is a function, a
+  `{ fn = …, name = …, desc = …, group = …, symbol = … }` table, or
+  `{ name = "…", keys = { … } }`, a key that opens a further step.
+  A step key is a combo; a modifier tap, a Hyper chord and a plain
+  `escape` or `delete` are refused and logged.
+- Optionally, a table with `name`, the leader's name, `layer`, the
+  layer it belongs to (`"default"` when absent), and `desc`,
+  `group` and `symbol`.
+
+**Does:** pressing the leader opens step 1; each key then runs its
+function or opens its next step. After 0.25 s a panel lists the
+step's keys under the leader's name, the steps taken above them,
+end keys under their `name` or `desc` in their shortcut group.
+`escape` or the leader again cancels; `delete` goes back one step,
+and at step 1 cancels; a click or a Space or Desktop switch
+cancels. A key the step does not hold leaves the step open and
+plays the refusal sound while
+[`set_refusal_sound`](#set_refusal_sound) is on, off by default
+([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
+
+A step key matches its chord exactly, modifiers included: with
+the leader's modifiers still held, `w` does not fire, and
+`ctrl+alt+w` is a different key. The leader wins its chord: a
+`KiwiDesk.bind` on the same chord in its layer is not registered
+and is flagged. A second `define_sequence` on one leader replaces
+the first. A leader works only through KiwiDesk's keyboard tap; if
+macOS refuses the tap (Accessibility not granted), it does nothing
+and is flagged. The CLI can neither bind nor remove a sequence.
+Under Secure Input see
+[Accepted Limitations](accepted-limitations.md).
+
+**Example:**
+
+```lua
+KiwiDesk.define_sequence("ctrl+alt+space", {
+  w = { name = "Windows", keys = {
+    h = function() KiwiDesk.focus("left") end,
+    l = function() KiwiDesk.focus("right") end,
+  } },
+  t = { fn = function() KiwiDesk.toggle_float() end,
+        desc = "Float or tile" },
+}, { name = "Leader" })
+```
+:::
+
 ### Config Cascade (Per-Profile Keybindings)
 
 Keybindings resolve through a two-level cascade, like tiling
@@ -7615,6 +7681,13 @@ A shortcut that describes itself carries its `desc`, `group` and
 reads the saved files, where
 [`shortcut.list_groups`](#shortcutlist_groups) reads the shortcuts
 in effect.
+
+:::unreleased
+A [key sequence](#define_sequence) is listed by its leader's
+`chord`, with an empty `lua`, its `label` and its `steps`: each
+step key an entry of its own, a key that opens more keys carrying
+its `label` and `steps` again.
+:::
 
 #### shortcut.set
 

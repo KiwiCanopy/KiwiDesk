@@ -75,7 +75,8 @@ extension KiwiCore {
         }
     }
 
-    /// `KiwiDesk.bind`, `define_layer`, and `switch_layer`.
+    /// `KiwiDesk.bind`, `define_layer`, `define_sequence` and
+    /// `switch_layer`.
     private func registerKeybindingAPI(
         on lua: LuaInterpreter
     ) {
@@ -145,6 +146,7 @@ extension KiwiCore {
             )
             return .none
         }
+        registerSequenceAPI(on: lua)
         lua.register("switch_layer") { [weak self] args in
             guard let name = args.first?.stringValue else {
                 self?.onLog(

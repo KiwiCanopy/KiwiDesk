@@ -186,6 +186,9 @@ struct RuleReachKeyRoundTripTests {
             binding == [
                 "id", "combo", "lua", "kind", "label", "desc", "group",
                 "symbol",
+                // Compared whole with a sequence's name (#1871,
+                // `KeySequenceReaderTests` ▸ `shapeSeesSteps`).
+                "steps",
             ]
         )
         let layer = Set(

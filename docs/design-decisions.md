@@ -14159,6 +14159,36 @@ so hjkl beside the arrows can only live in one layer, and two
 chords that do the same thing cannot conflict. A duplicate *chord*
 stays refused everywhere (#33/#34/#35). (#1797)
 
+:::unreleased
+*Amended (#1871, owner, 2026-11-08): a sequence's end key is a
+separate trigger.* A key sequence (a leader chord, then keys) may
+end on an action a row already holds on its own chord, and the row
+keeps that chord: the two are different triggers, reached by
+different presses. The rule above is about two CHORDS for one
+action in a layer, which a row cannot draw; a sequence is drawn
+whole, its path in its hint panel, so nothing is hidden. Within one
+step a key is either an end key or opens more keys, never both, so
+no timeout is ever needed; a leader is a chord like a row's, judged
+against the rows of its layer. The Settings half of the ruling, a
+Key sequences card whose rows refuse two siblings on one key "in
+this step" and a row caption naming the sequence ("Also ⌃⌥Space →
+W → H"), is #1871's second change.
+:::
+
+:::unreleased
+*Amended (#1871, owner, 2026-11-08): a key sequence runs the
+keyboard tap too.* A key sequence joins the one tap as a consumer,
+so while one is defined the tap runs, active, whatever the sides
+switch says. Its bounds: it takes a leader and, while a sequence
+is open, every key press, which an open sequence must keep from the
+front app; it reads mouse-down to close one and swallows none; it
+records and stores nothing. The open-or-closed state is decided on
+the tap's own thread, or the first keys after a leader would reach
+the front app before the main actor heard of it
+(`.claude/rules/input-and-animation.md`). Accepted: Secure Input
+hides key presses from it ([accepted limitations](accepted-limitations.md)).
+:::
+
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the
 current profile: it stays Carbon-registered (pressing it recreates
