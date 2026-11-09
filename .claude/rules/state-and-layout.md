@@ -2279,8 +2279,8 @@ editing here:
   `FrameSetReaderCensusTests`' `allowed` map is the one copy of
   who reads which and why. The issued set carries one float, a
   maximized one's fill (#3036), so a new issued-set reader rules on
-  that entry rather than reading every key as a tile. The stack zone's own shares
-  stay out (#944). `SplitFloorHealTests` holds the math,
+  that entry rather than reading every key as a tile. The stack
+  zone's own shares stay out (#944). `SplitFloorHealTests` holds the math,
   `SplitOverflowTests` the post-pass, `SplitFloorHealWiringTests`
   the retile wiring and the traveler stand-down,
   `SplitFloorCueTests` the cue and the inward landing over a

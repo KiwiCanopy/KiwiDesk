@@ -6511,8 +6511,8 @@ rules.
 
 *The fill is the one float in the issued frames.* Floats never had
 an issued frame: nothing laid them out, so the unsolicited-resize
-check had no frame to hold them to. A maximized float's fill is laid into the issued set beside
-the tiles', anchored on its return frame for an "in place" share, so
+check had no frame to hold them to. A maximized float's fill is
+laid into the issued set beside the tiles', anchored on its return frame for an "in place" share, so
 the retile issues it, an app's own resize is corrected through the
 unsolicited-resize check that already reads that set first, and a
 learned maximum is centred by the same Monocle pass a tile's fill
