@@ -16210,7 +16210,11 @@ override is its gaps still shows it — on a Floating Space as
 **N saved** — while the panel caption and the header's "N of M
 set" stay layout-only, a gaps-only Space truly following Layout
 Defaults, where the row stays visible, greyed with its
-reason, because floating places no windows. The row edits the
+reason, because floating places no windows. It greys the same
+way on a Monocle Space while Monocle's "Maximize windows" is on,
+which draws no gaps; that switch lives on Layout Defaults, so the
+reason carries a link there, as the auto-size and auto-track
+greys do (#3123, owner ruling 2026-11-10). The row edits the
 uniform Outer and Inner masters only; per-edge values stay in
 Lua (`set_gap_override` with a table) and read "mixed", the
 first drag converging them, as on Gaps & Borders. "Reset All

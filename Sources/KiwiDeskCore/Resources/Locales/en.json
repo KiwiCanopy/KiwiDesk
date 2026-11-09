@@ -2442,6 +2442,8 @@
   "space_override.floating.no_layout": "Floating has no layout overrides.",
   "space_override.fraction": "%1$d of %2$d set",
   "space_override.gaps.floating": "Floating places no windows, so these gaps apply when this Space tiles.",
+  "space_override.gaps.monocle_maximizes": "“%1$@” is on for Monocle, so this Space draws no gaps.",
+  "space_override.gaps.monocle_maximizes.xref": "“%1$@” is on for Monocle, so this Space draws no gaps — change it in %2$@.",
   "space_override.gaps.value": "outer %1$@, inner %2$@",
   "space_override.inherits": "follows %1$@ defaults · %2$@",
   "space_override.inherits_page": "follows %1$@ · %2$@",

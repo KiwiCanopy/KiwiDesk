@@ -15,6 +15,7 @@ struct SpacesGates {
         case autoSizedGrid
         case autoTracks
         case floatingPlacesNone
+        case monocleMaximizes
         case monocleAppliesNone
     }
 
@@ -39,7 +40,9 @@ struct SpacesGates {
             return settings.resolvedTrack(for: space).autoTracks
                 ? .autoTracks : nil
         case .gaps(.perSpaceOverride):
-            return mode == .floating ? .floatingPlacesNone : nil
+            if mode == .floating { return .floatingPlacesNone }
+            return settings.maximizesWindows(in: mode)
+                ? .monocleMaximizes : nil
         case .behaviour(.minSizePerSpaceOverride):
             return mode == .monocle ? .monocleAppliesNone : nil
         default:
@@ -113,6 +116,13 @@ enum SpacesGateHelp {
                 "Floating places no windows, so these gaps apply when "
                     + "this Space tiles."
             )
+        case .monocleMaximizes:
+            return L(
+                "space_override.gaps.monocle_maximizes",
+                "“%1$@” is on for Monocle, so this Space draws no "
+                    + "gaps.",
+                L("monocle.maximize_windows", "Maximize windows")
+            )
         case .monocleAppliesNone:
             return L(
                 "space_override.min_size.monocle",
@@ -129,7 +139,7 @@ enum SpacesGateHelp {
     /// `remoteMatchesTheCensus` (`GateReasonPlacementTests`); the
     /// derivation is owed (architect review, 2026-08-16).
     static let remote: Set<SpacesGates.InertReason> = [
-        .autoSizedGrid, .autoTracks,
+        .autoSizedGrid, .autoTracks, .monocleMaximizes,
     ]
 
     /// Cross-reference navigation sentence for remote gate reasons (#818,
@@ -152,6 +162,14 @@ enum SpacesGateHelp {
                 "%1$@ is on, so the screen decides how many "
                     + "tracks open — change it in %2$@.",
                 L("track.auto_tracks", "Auto track limit"),
+                CrossReferenceRow.linkSlot
+            )
+        case .monocleMaximizes:
+            return L(
+                "space_override.gaps.monocle_maximizes.xref",
+                "“%1$@” is on for Monocle, so this Space draws no "
+                    + "gaps — change it in %2$@.",
+                L("monocle.maximize_windows", "Maximize windows"),
                 CrossReferenceRow.linkSlot
             )
         default:

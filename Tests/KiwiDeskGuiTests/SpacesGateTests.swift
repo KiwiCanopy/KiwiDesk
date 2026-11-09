@@ -225,6 +225,47 @@ struct SpacesGateTests {
         )
     }
 
+    /// The gaps row asks both inputs (#3123): Monocle's global
+    /// "Maximize windows" and the Space's own layout. Floating
+    /// keeps its own reason, whatever the switch says.
+    @MainActor
+    @Test("gaps grey while Monocle maximizes")
+    func gapsGreyWhileMonocleMaximizes() {
+        let key = SettingKey.gaps(.perSpaceOverride)
+        let on: (inout TilingSettings) -> Void = {
+            $0.monocle.maximizeWindows = true
+        }
+        #expect(
+            gates(mode: .monocle, on).inertReason(for: key)
+                == .monocleMaximizes
+        )
+        #expect(
+            gates(mode: .monocle) {
+                $0.monocle.maximizeWindows = false
+            }
+            .inertReason(for: key) == nil
+        )
+        for mode in LayoutMode.allCases
+        where mode != .monocle && mode != .floating {
+            #expect(gates(mode: mode, on).inertReason(for: key) == nil)
+        }
+        #expect(
+            gates(mode: .floating, on).inertReason(for: key)
+                == .floatingPlacesNone
+        )
+        // The census names both owners. The row's channel stays
+        // inline for its Floating arm; the Monocle owner sits on
+        // Layout Defaults, which is why that reason is remote.
+        let owners = key.placement.gate?.settings ?? []
+        #expect(owners.contains(.spaces(.spaceModes)))
+        #expect(owners.contains(.layout(.monocleMaximizeWindows)))
+        #expect(
+            SettingKey.layout(.monocleMaximizeWindows).placement.area
+                == .layoutDefaults
+        )
+        #expect(SpacesGateHelp.remote.contains(.monocleMaximizes))
+    }
+
     /// Every reason renders a distinct, non-empty sentence: a
     /// collapsed pair would send the reader to the wrong fix.
     @MainActor

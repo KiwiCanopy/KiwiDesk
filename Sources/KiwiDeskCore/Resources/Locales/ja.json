@@ -2442,6 +2442,8 @@
   "space_override.floating.no_layout": "フローティングにはレイアウトの上書きがありません。",
   "space_override.fraction": "%2$d個中%1$d個設定済み",
   "space_override.gaps.floating": "フローティングはウインドウを配置しないため、これらのギャップはこのスペースがタイル表示になったときに適用されます。",
+  "space_override.gaps.monocle_maximizes": "モノクルで「%1$@」がオンのため、このスペースにはギャップが表示されません。",
+  "space_override.gaps.monocle_maximizes.xref": "モノクルで「%1$@」がオンのため、このスペースにはギャップが表示されません。%2$@で変更してください。",
   "space_override.gaps.value": "アウター %1$@、インナー %2$@",
   "space_override.inherits": "%1$@のデフォルトに従う · %2$@",
   "space_override.inherits_page": "%1$@に従う · %2$@",

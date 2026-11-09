@@ -179,8 +179,7 @@ struct GateReasonPlacementTests {
     /// — so nothing stopped the two drifting: a gate retargeted
     /// to an on-page owner would leave the anchor drawing, and a
     /// new `.remote` row would get none (architect review,
-    /// 2026-08-16). This binds them until the derivation
-    /// replaces the copy.
+    /// 2026-08-16); gaps' Monocle arm is remote (#3123).
     @Test("the remote reason set agrees with the census")
     func remoteMatchesTheCensus() {
         // Every key the census calls `.remote` on this surface
@@ -196,7 +195,8 @@ struct GateReasonPlacementTests {
         // …and the set names only reasons those keys produce, so
         // it cannot grow an entry the census does not back.
         #expect(
-            SpacesGateHelp.remote == [.autoSizedGrid, .autoTracks]
+            SpacesGateHelp.remote
+                == [.autoSizedGrid, .autoTracks, .monocleMaximizes]
         )
         // The co-located sibling stays OUT, by the census's own
         // answer rather than by assertion: its owner renders as
