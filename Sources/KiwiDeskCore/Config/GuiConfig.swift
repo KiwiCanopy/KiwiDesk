@@ -51,6 +51,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var scrollGesture: ScrollGestureBase = .defaults
     /// The modifier drags (#2447); global, no profile override.
     public var modifierDrag: ModifierDragSettings = .defaults
+    /// The trackpad gesture slots' global base over the seeds
+    /// (#1873), sparse; a profile diverges through
+    /// `Profile.trackpadGesture`.
+    public var trackpadGesture = TrackpadGestureMap()
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
@@ -96,8 +100,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// `appWide` (#1741) and the shared `look` (#1752) are
     /// stamped the same way, and `shortcutOffer` (#2324) is the
     /// top-ups' bookkeeping, merged at the write.
+    /// `trackpadGesture` (#1873) has no Settings row yet; the lane
+    /// that adds its rows drafts it and leaves this list.
     public static let undraftedFields: Set<String> = [
         "format", "desktopSpaces", "appWide", "look", "shortcutOffer",
+        "trackpadGesture",
     ]
 
     /// Fields `gui.json` never carries: they mean something on
@@ -114,7 +121,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// profile-scoped ones round-trip through the profile JSON
     /// instead (#36), which is what lets the two files never
     /// drift.
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case format
         case spaces
         case appRules = "app_rules"
@@ -123,6 +130,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case layers
         case scrollGesture = "scroll_gesture"
         case modifierDrag = "modifier_drag"
+        case trackpadGesture = "trackpad_gesture"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
         case focusWrap = "focus_wrap"
@@ -203,6 +211,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 ModifierDragSettings.self,
                 forKey: .modifierDrag
             ) ?? .defaults
+        // Additive since #1873: absence follows the seeds.
+        trackpadGesture =
+            try container.decodeIfPresent(
+                TrackpadGestureMap.self,
+                forKey: .trackpadGesture
+            ) ?? TrackpadGestureMap()
         // Additive since #1655: absence is the default.
         spaceHistory =
             try container.decodeIfPresent(
@@ -298,48 +312,5 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         // filter stays separate.
         removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(
-            keyedBy: CodingKeys.self
-        )
-        try container.encode(format, forKey: .format)
-        try container.encode(spaces, forKey: .spaces)
-        try container.encode(appRules, forKey: .appRules)
-        try container.encode(floatRules, forKey: .floatRules)
-        try container.encode(ignoreRules, forKey: .ignoreRules)
-        try container.encode(layers, forKey: .layers)
-        try container.encode(scrollGesture, forKey: .scrollGesture)
-        try container.encode(modifierDrag, forKey: .modifierDrag)
-        try container.encode(spaceHistory, forKey: .spaceHistory)
-        try container.encode(modeCycle, forKey: .modeCycle)
-        try container.encode(focusWrap, forKey: .focusWrap)
-        try container.encode(
-            floatAutomatically,
-            forKey: .floatAutomatically
-        )
-        try container.encode(tileRules, forKey: .tileRules)
-        try container.encode(
-            shortcutBase,
-            forKey: .shortcutBase
-        )
-        if let appWide {
-            try container.encode(appWide.refusal, forKey: .refusal)
-            try container.encode(appWide.quit, forKey: .quit)
-            try container.encode(appWide.desktop, forKey: .desktop)
-            try container.encode(appWide.space, forKey: .space)
-            try container.encode(appWide.mode, forKey: .mode)
-            try container.encode(appWide.tiling, forKey: .tiling)
-            try container.encode(appWide.vision, forKey: .kiwivision)
-            try container.encode(appWide.hyper, forKey: .hyper)
-            try container.encode(appWide.kiwihub, forKey: .kiwihub)
-            try container.encode(appWide.modifier, forKey: .modifier)
-        }
-        try container.encodeIfPresent(look, forKey: .look)
-        try container.encodeIfPresent(
-            shortcutOffer,
-            forKey: .shortcutOffer
-        )
     }
 }

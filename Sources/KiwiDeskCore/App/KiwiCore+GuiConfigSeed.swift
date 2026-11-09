@@ -203,6 +203,8 @@ extension KiwiCore {
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
         config.modifierDrag = modifierDragBase
+        // The slots `init.lua`'s `trackpad_gesture.bind` wrote (#1873).
+        config.trackpadGesture = mouse.trackpad.base
         config.spaceHistory = spaceHistory.base
         config.modeCycle = modeCycle.base
         config.focusWrap = focusWrap.base

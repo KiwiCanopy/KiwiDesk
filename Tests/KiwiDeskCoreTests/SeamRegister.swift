@@ -41,6 +41,7 @@ enum SeamRegister {
         "SocketServer",
         "StrandDetector",
         "TilingEngine",
+        "TouchGestures",
         "WindowServerWatch",
     ]
 

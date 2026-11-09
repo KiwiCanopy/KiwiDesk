@@ -114,8 +114,10 @@ struct APIHelpResponseTests {
         // `ExecTests` before #1033 — it is about the help
         // payload, and that suite was at the size ceiling.
         var channels: [String: String] = [:]
+        // Keyed by the qualified name: a namespace verb may share a
+        // Lua-only name (`trackpad_gesture.bind` beside `bind`).
         for entry in APIReference.entries {
-            channels[entry.name] = entry.channel.rawValue
+            channels[entry.qualifiedName] = entry.channel.rawValue
         }
         for name in APIReference.luaOnly {
             #expect(

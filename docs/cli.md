@@ -779,6 +779,14 @@ given. The flip lasts for the session and is no setting; what ends
 it, and the `stack_position` that `get_state` reports, are in the
 [Lua reference](lua-reference.md#stacktoggle_stack_position).
 
+:::unreleased
+`trackpad_gesture.bind <slot> [action] [modifiers]` binds a trackpad
+gesture slot (`tap3`–`tap5`, `swipe3`–`swipe5`, `spread`,
+`pinch_together`, `rotate`, `force_click`) to Lua, or a swipe slot to
+a family (`focus|swap|display|track|space`); no action turns the slot
+off ([`trackpad_gesture.bind`](lua-reference.md#trackpad_gesturebind)).
+:::
+
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
 for every other.

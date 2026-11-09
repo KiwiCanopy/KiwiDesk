@@ -68,12 +68,11 @@ extension KiwiCore {
         strandDetector.onLog = log
         mouse.scroll.onLog = log
         mouse.pointer.onLog = log
+        mouse.trackpad.onLog = log
         tiler.motionGate.onLog = log
         tiler.onLog = log
         vision.appearanceSwitch = .live(onLog: log)
-        wireScrollPan()
-        wireModifierGrab()
-        wireScrollSpaceStep()
+        wireInputHandlers()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
         // pins every overlay to the AX-fallback path.
         windowServer.onLog = log
@@ -345,6 +344,7 @@ extension KiwiCore {
         sleepWake.sessionPresence = { .live() }
         sleepWake.onReturn = { [weak self] in
             self?.eventLoop.sessionDidReturn()
+            self?.mouse.trackpad.rearm()
         }
     }
 }

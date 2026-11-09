@@ -64,6 +64,8 @@ struct MotionScopeCensusTests {
         // The scroll gestures' two consumers.
         "KiwiDeskCore/App/KiwiCore+ScrollPan.swift": 1,
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,
+        // A trackpad gesture slot's action (#1873).
+        "KiwiDeskCore/App/KiwiCore+TrackpadGestures.swift": 1,
         // Hover focus at the resting pointer (#1869).
         "KiwiDeskCore/App/KiwiCore+HoverFocus.swift": 1,
         // The modifier grab's every phase (#2447).

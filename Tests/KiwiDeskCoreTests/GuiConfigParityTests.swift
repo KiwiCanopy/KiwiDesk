@@ -49,7 +49,8 @@ struct GuiConfigParityTests {
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
-                "scrollGesture", "modifierDrag", "appWide", "look",
+                "scrollGesture", "modifierDrag", "trackpadGesture",
+                "appWide", "look",
                 "spaceHistory",
                 "modeCycle", "focusWrap",
                 "floatAutomatically", "tileRules",
@@ -109,6 +110,12 @@ struct GuiConfigParityTests {
                 start: .hover
             )
         )
+        config.trackpadGesture = TrackpadGestureMap([
+            .tap3: .unbound,
+            .swipe3: .bound(
+                .init(action: "focus", modifiers: [.control, .option])
+            ),
+        ])
         config.spaceHistory = .allScreens
         config.modeCycle = [.grid, .monocle]
         config.focusWrap = .off
@@ -142,6 +149,7 @@ struct GuiConfigParityTests {
         #expect(back.appWide == config.appWide)
         #expect(back.look == config.look)
         #expect(back.scrollGesture == config.scrollGesture)
+        #expect(back.trackpadGesture == config.trackpadGesture)
         #expect(back.spaceHistory == config.spaceHistory)
         #expect(back.modeCycle == config.modeCycle)
         #expect(back.focusWrap == config.focusWrap)

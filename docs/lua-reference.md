@@ -5188,6 +5188,88 @@ modifier_drag.set_resize("control+option", "hover")
 ```
 :::
 
+## Trackpad Gestures
+
+:::unreleased
+A fixed list of trackpad gesture slots, each bound to an action.
+The slots are `tap3`, `tap4` and `tap5` (a tap with three, four or
+five fingers), `swipe3`, `swipe4` and `swipe5` (a swipe with that
+many fingers), `spread` (fingers moving apart), `pinch_together`
+(fingers closing), `rotate` and `force_click`.
+
+A tap slot runs Lua. A swipe slot binds a family — `focus`, `swap`,
+`display` (`focus_display`), `track` (`move_to_track`) or `space`
+(the next or previous Space) — and the swipe's direction supplies
+the argument: fingers moving left focus, swap or go to the screen
+on the left, and step to the next Space, as a macOS Desktop swipe
+does. For `track` and `space` a swipe up counts as one to the left:
+fingers moving left or up go to the previous track and the next
+Space. A swipe moves one step, however long it is.
+
+Out of the box these are bound:
+
+| Slot | Keys | Action |
+|---|---|---|
+| `tap4` | none | Open KiwiHub's shortcuts panel |
+| `tap3` | none | Go back to the Space you were on before ([`focus_space_back`](#focus_space_back--focus_space_forward)) |
+| `spread` | ⌃⌥ | Toggle maximized |
+| `rotate` | ⌃⌥ | Cycle the layout |
+
+`spread`, `pinch_together`, `rotate` and `force_click` keep their
+bindings but do nothing yet.
+
+The keys must be exactly the ones bound. A swipe, a pinch, a
+rotation and a Force Click need at least one modifier; a tap may
+take none. A gesture macOS answers itself, set in System Settings
+▸ Trackpad, does nothing here, since both would act on it: a
+three-finger tap set to Look up, a three- or four-finger swipe
+along an axis macOS uses, and any three-finger swipe while
+three-finger drag is on. KiwiDesk reads those settings each
+time a gesture lands. Reading the trackpad needs no
+permission; where macOS no longer offers the private framework
+KiwiDesk reads it through, no slot fires, and the scroll gestures
+above keep working.
+
+The bindings are stored in `gui.json` as the `trackpad_gesture`
+object, keyed by slot: a swipe slot's family under `family`, any
+other slot's Lua under `lua`. A slot it leaves out keeps its default, and
+`null` turns it off. A slot name it does not know makes the file
+unreadable, and a binding the verb would refuse leaves its slot off.
+A profile file may carry a `trackpad_gesture` object of the same
+shape, which outranks it slot by slot:
+
+```json
+"trackpad_gesture": {
+  "tap3": null,
+  "tap5": { "lua": "KiwiDesk.cycle_mode()", "modifiers": "" },
+  "swipe3": { "family": "focus", "modifiers": "control+option" }
+}
+```
+
+### trackpad_gesture.bind
+
+**Expects:** a slot; then an action — Lua, or a swipe family for a
+`swipe` slot; then optionally modifiers joined by `+`, spelled as
+for [`scroll_gesture.set_pan`](#scroll_gestureset_pan); one is
+enough. No action turns the slot off.
+
+**Does:** binds the slot in the running base: a profile's own
+binding still wins, nothing reaches `gui.json`, and the binding
+lasts until KiwiDesk next loads its config. In a Lua-owned setup
+`init.lua` is where it is kept, and **Adopt into the GUI** keeps the
+bindings it set. It fails on an unknown slot or family, an unknown
+or repeated modifier, and on a slot that needs a modifier bound
+without one.
+
+**Example:**
+
+```lua
+trackpad_gesture.bind("swipe3", "focus", "control+option")
+trackpad_gesture.bind("tap5", "KiwiDesk.cycle_mode()")
+trackpad_gesture.bind("tap3")   -- off
+```
+:::
+
 ## When Windows No Longer Fit
 
 No layout ever shrinks a window below `min_window_size`. Where

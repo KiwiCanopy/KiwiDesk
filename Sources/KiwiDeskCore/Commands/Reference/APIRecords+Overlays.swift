@@ -222,6 +222,16 @@ extension APIReference {
         ),
     ]
 
+    static let trackpadGestureRecords: [String: APIRecord] = [
+        "bind": APIRecord(
+            "Binds a trackpad gesture slot to Lua or a swipe family, "
+                + "with modifiers; no action is None.",
+            .choice("slot", TrackpadGestureSlot.self),
+            .text("action", optional: true),
+            .text("modifiers", optional: true)
+        )
+    ]
+
     static let quitRecords: [String: APIRecord] = [
         "set_layout": APIRecord(
             "Sets how windows are laid out when KiwiDesk quits.",

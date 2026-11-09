@@ -63,6 +63,7 @@ extension MotionGate: LogSeamOwner {}
 extension PointerConsumers: LogSeamOwner {}
 extension ProfileManager: LogSeamOwner {}
 extension ScrollGestures: LogSeamOwner {}
+extension TouchGestures: LogSeamOwner {}
 extension SleepWakeManager: LogSeamOwner {}
 extension SocketServer: LogSeamOwner {}
 extension StrandDetector: LogSeamOwner {}
