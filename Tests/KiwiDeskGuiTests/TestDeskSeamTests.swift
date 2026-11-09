@@ -18,6 +18,12 @@ struct TestDeskSeamTests {
         )
     }
 
+    /// `text` with every whitespace run one space, so a clause
+    /// matches a whole site whatever its line breaks.
+    private static func flat(_ text: some StringProtocol) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
+
     /// The body after `opening`, up to its first closing brace.
     private static func body(
         after opening: String,
@@ -42,6 +48,24 @@ struct TestDeskSeamTests {
             lock.trimmingCharacters(in: .whitespacesAndNewlines)
                 == "lock(in: defaultDirectory).path"
         )
+        let main = try Self.source("Sources/KiwiDesk/main.swift")
+        #expect(
+            main.contains(
+                "SingleInstanceLock(path: MachineLocation.lockPath)"
+            )
+        )
+    }
+
+    @Test("the shipped store asks whether this is a test desk")
+    func storeAsksTheDesk() throws {
+        let text = try Self.source(
+            "Sources/KiwiDeskCore/App/AppDefaults.swift"
+        )
+        #expect(
+            Self.flat(text).contains(
+                "UserDefaults = store(active: TestDesk.isActive)"
+            )
+        )
     }
 
     @Test("both lock losses refuse on a test desk")
@@ -55,14 +79,19 @@ struct TestDeskSeamTests {
         let guardText = try Self.source(
             "Sources/KiwiDesk/SingleInstanceGuard.swift"
         )
-        let loss = try Self.body(
-            after: "func lostTheInstanceLock() -> Never {",
-            in: guardText
+        // The whole body, wording included: a needle inside it let
+        // a surface ahead of the refusal through (guard-prover).
+        let opening = "func lostTheInstanceLock() -> Never {"
+        let start = try #require(guardText.range(of: opening))
+        let rest = guardText[start.upperBound...]
+        let end = try #require(rest.range(of: "\n}"))
+        #expect(
+            Self.flat(rest[..<end.lowerBound])
+                == "if TestDesk.isActive { fputs( \"KiwiDesk: "
+                + "\\(TestDesk.variable) is set while another \" "
+                + "+ \"instance runs — quit it first.\\n\", stderr ) "
+                + "exit(1) } surfaceRunningInstanceAndExit()"
         )
-        let refusal = try #require(
-            loss.range(of: "if TestDesk.isActive {")
-        )
-        #expect(loss[refusal.upperBound...].contains("exit(1)"))
     }
 
     @Test("a test desk refuses every service verb but status")
@@ -76,7 +105,18 @@ struct TestDeskSeamTests {
 
     @Test("the service door asks the refusal")
     func serviceAsksTheRefusal() throws {
-        let cli = try Self.source("Sources/KiwiDesk/CLIMain.swift")
-        #expect(cli.contains("if let refusal = action.refusal() {"))
+        let cli = Self.flat(
+            try Self.source("Sources/KiwiDesk/CLIMain.swift")
+        )
+        #expect(
+            cli.contains(
+                "if let refusal = action.refusal() { FileHandle"
+                    + ".standardError.write(Data(\"\\(refusal)\\n\""
+                    + ".utf8)) return 1 }"
+            )
+        )
+        #expect(
+            cli.contains("func refusal(active: Bool = TestDesk.isActive)")
+        )
     }
 }

@@ -273,6 +273,12 @@
           "lua" : "kiwihub.show(\"windows\")"
         },
         {
+          "combo" : "cmd+cmd",
+          "kind" : "navigation",
+          "label" : "Show Desktop overview",
+          "lua" : "kiwihub.show(\"desktops\")"
+        },
+        {
           "combo" : "control+option+v",
           "kind" : "navigation",
           "label" : "Toggle KiwiVision",

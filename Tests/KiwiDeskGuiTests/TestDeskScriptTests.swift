@@ -24,6 +24,12 @@ struct TestDeskScriptTests {
         #expect(text.contains("SUITE=\"\(TestDesk.defaultsSuite)\""))
         #expect(text.contains("LABEL=\"\(ServiceManager.label)\""))
         #expect(text.contains("gui/$(id -u)/$LABEL"))
+        // One assignment each, so a later one cannot rename either.
+        for name in ["SUITE=", "LABEL="] {
+            let lines = text.split(separator: "\n")
+                .filter { $0.hasPrefix(name) }
+            #expect(lines.count == 1, "\(name)")
+        }
         for key in [
             TilingConsent.key, OnboardingDiscovery.key,
             WhatsNewRecord.lastRunKey,
