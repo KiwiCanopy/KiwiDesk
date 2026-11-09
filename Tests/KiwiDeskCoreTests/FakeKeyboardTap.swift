@@ -34,6 +34,9 @@ final class FakeKeyboardTap: KeyboardTapHandle {
         sequences = rows.sequences
     }
     func stop() { stopped = true }
+    /// The hold the manager last handed it (#1229).
+    var held = false
+    func holdTaps(_ held: Bool) { self.held = held }
     func drainSequenceDecisions() -> [KeySequenceDecision] {
         defer { decisions = [] }
         return decisions

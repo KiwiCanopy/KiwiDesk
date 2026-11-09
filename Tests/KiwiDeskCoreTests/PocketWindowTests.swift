@@ -316,6 +316,7 @@ struct PocketWindowTests {
             ) == [row, DefaultKeybindings.pocketListRow()]
                 + DefaultKeybindings.rows(ofGeneration: 11)
                 + DefaultKeybindings.rows(ofGeneration: 12)
+                + DefaultKeybindings.rows(ofGeneration: 13)
         )
     }
 }

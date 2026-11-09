@@ -18,7 +18,7 @@ enum ShortcutsReferenceBuilder {
         lenses: [String] = [],
         unread: [UnreadChord] = []
     ) -> ShortcutsReference {
-        // Drop the key panel's three openers from the working set
+        // Drop the key panel's openers from the working set
         // BEFORE any band builds, so the suppression holds by
         // construction: the panel's switch already prints each
         // side's chord (#2246). Scoped to callers entering HERE: the §2.1

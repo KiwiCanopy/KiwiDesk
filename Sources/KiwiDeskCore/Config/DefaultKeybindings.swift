@@ -80,6 +80,7 @@ public enum DefaultKeybindings {
         rows.append(previousLayoutRow())
         rows.append(layoutPickerRow())
         rows.append(jumpToWindowRow())
+        rows.append(desktopOverviewRow())
         rows.append(kiwiVisionRow())
         rows.append(resetSizesRow())
         rows.append(maximizeRow())

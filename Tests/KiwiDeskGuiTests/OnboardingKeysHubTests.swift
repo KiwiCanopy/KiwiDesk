@@ -59,6 +59,24 @@ struct OnboardingKeysHubTests {
         #expect(spoken.contains("View ⌃⌥L"))
     }
 
+    /// The seeded ⌘⌘ (#1229) stands on its own keycap after the
+    /// J K L collapse, read off the seed itself.
+    @Test("the seeded overview tap stands apart from J K L")
+    func seededTapStandsApart() {
+        LocalizationManager.shared.select("en")
+        var seeded = KeyLayer.defaultLayer
+        seeded.bindings = DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50,
+            base: .standard
+        )
+        let row = OnboardingKeys.kiwiHubFamily(layer: seeded)
+        #expect(row?.chord == .mixed(["⌃⌥ J K L", "⌘⌘"]))
+        #expect(
+            row?.label == "KiwiHub: Windows, Shortcuts, View, and Desktops"
+        )
+    }
+
     @Test("an unbound side is left out, and no side means no row")
     func hubRowShrinks() {
         LocalizationManager.shared.select("en")

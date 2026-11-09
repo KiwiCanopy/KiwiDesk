@@ -31,6 +31,7 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.toggle_maximized(\"height\")",
         "KiwiDesk.toggle_maximized(\"width\")",
         "KiwiDesk.toggle_tiling()",
+        KiwiHubSide.desktops.lua,
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.
