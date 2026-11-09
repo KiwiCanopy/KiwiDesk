@@ -65,10 +65,11 @@ struct StepperRow: View {
             }
         }
         // Keep the field in step with arrow taps and external
-        // changes — but never mid-edit, or a background write
-        // would discard the user's partial entry.
-        .onChange(of: value) { _, now in
-            if !focused { text = "\(now)" }
+        // changes.
+        .onChange(of: value) { was, now in
+            if FieldBuffer.follows(text, was: "\(was)", focused: focused) {
+                text = "\(now)"
+            }
         }
     }
 

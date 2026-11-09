@@ -113,7 +113,12 @@ struct SettingsLiveRowsTests {
                 // live change after an open is ever asked.
                 "Task{@MainActor[weakself]in"
                     + "liveAskQueued.remove(id)"
-                    + "self?.model.refreshUnsavedLive()}",
+                    + "self?.model.liveSettingsMoved()}",
+            ],
+            // The controls follow and the rows re-read at one
+            // moment (#3098).
+            "SettingsModel+FollowLive.swift": [
+                "funcliveSettingsMoved(){followLive()refreshUnsavedLive()}"
             ],
             "SettingsDiffRowSource+Live.swift": [
                 "unsavedLive=target==.live&&!editingLua"
