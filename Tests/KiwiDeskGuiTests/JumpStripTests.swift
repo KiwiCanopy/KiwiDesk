@@ -185,26 +185,46 @@ struct JumpStripTests {
         #expect(alternative == .side(-1))
     }
 
-    /// ⌥⇥ again steps the strip as ⌘⇥ steps macOS's switcher, ⇧
-    /// back; on another side ⌥⇥ stays swallowed (#3135).
-    @Test("⌥⇥ steps the strip on Windows, ⇧⌥⇥ back")
-    func optionTab() {
+    /// Back is the opener's own chord with ⇧, whatever it is bound
+    /// to; ⌥⇥ itself reaches the panel only as the global hotkey
+    /// (#3135, owner 2026-11-09).
+    @Test("the opener's chord with ⇧ steps back, a fixed one never")
+    func backFollowsTheOpener() {
         func key(
             _ modifiers: NSEvent.ModifierFlags,
+            back: KeyCombo?,
             _ scope: JumpScope = .windows
         ) -> JumpKey? {
             JumpKey.of(
                 keyCode: 48,
                 modifiers: modifiers,
                 scope: scope,
-                naming: false
+                naming: false,
+                back: back
             )
         }
-        #expect(key(.option) == .side(1))
-        #expect(key([.option, .shift]) == .side(-1))
-        #expect(key(.option, .shortcuts) == .swallow)
-        #expect(key([]) == .stepScope(forward: true))
-        #expect(key(.control) == .swallow)
+        let optionTab = JumpKey.back(of: KeyCombo.parse("option+tab"))
+        let controlTab = JumpKey.back(of: KeyCombo.parse("control+tab"))
+        #expect(optionTab == KeyCombo.parse("shift+option+tab"))
+        #expect(key([.option, .shift], back: optionTab) == .side(-1))
+        #expect(key([.control, .shift], back: controlTab) == .side(-1))
+        // Rebound to ⌃⇥, ⇧⌥⇥ is no back key any more.
+        #expect(key([.option, .shift], back: controlTab) == .swallow)
+        #expect(key(.option, back: optionTab) == .swallow)
+        #expect(key([.option, .shift], back: optionTab, .view) == .swallow)
+        #expect(key(.shift, back: optionTab) == .stepScope(forward: false))
+    }
+
+    @Test("no back key for no opener, a ⇧ chord, a bare ⇥ or a tap")
+    func noBackForm() {
+        #expect(JumpKey.back(of: nil) == nil)
+        #expect(JumpKey.back(of: KeyCombo.parse("shift+control+y")) == nil)
+        #expect(JumpKey.back(of: KeyCombo.parse("tab")) == nil)
+        #expect(JumpKey.back(of: KeyCombo.parse("cmd+cmd")) == nil)
+        #expect(
+            JumpKey.back(of: KeyCombo.parse("control+option+y"))
+                == KeyCombo.parse("shift+control+option+y")
+        )
     }
 
     @Test("the last-app opener steps where Windows shows")

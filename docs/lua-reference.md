@@ -7171,8 +7171,9 @@ the app of the window you used last, that window selected — while
 a [KiwiVision lens](#kiwivisiondefine_lens) is on too — so
 **Return** goes back to it. It switches to the window switcher from
 another side. Pressed again while the window switcher is up, it
-steps the app strip to the next app, as **→** does, and **⇧⌥⇥**
-steps back; **Esc** closes KiwiHub.
+steps the app strip to the next app, as **→** does, and the same
+key with **⇧** steps back (**⇧⌥⇥** by default); **Esc** closes
+KiwiHub.
 It is bound to `⌥⇥` by default, listed under Shortcuts & Gestures ▸
 KiwiHub as **Show window switcher for last app**.
 Over the CLI it is `kiwidesk kiwihub.show_last_app`.

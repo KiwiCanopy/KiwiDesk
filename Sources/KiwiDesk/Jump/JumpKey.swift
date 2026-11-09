@@ -75,7 +75,8 @@ enum JumpKey: Equatable {
         modifiers: NSEvent.ModifierFlags,
         scope: JumpScope = .windows,
         naming: Bool,
-        keys: KiwiHubKeys = KiwiHubKeys()
+        keys: KiwiHubKeys = KiwiHubKeys(),
+        back: KeyCombo? = nil
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
@@ -92,6 +93,14 @@ enum JumpKey: Equatable {
         if scope == .desktops, let key = desktops(keyCode, held) {
             return key
         }
+        // The last-app opener's own key with ⇧ steps the strip
+        // back, as ⇧⌘⇥ does macOS's switcher; ahead of every key
+        // a Lua alternative or ⇥ could shadow it with (#3135).
+        if scope == .windows, let back,
+            combo(keyCode, held) == back
+        {
+            return .side(-1)
+        }
         // ← → walk the strip, never the caret, while a query is
         // typed too (#3135 ▸ Amendment).
         if scope == .windows,
@@ -105,11 +114,6 @@ enum JumpKey: Equatable {
         }
         switch keyCode {
         case tab:
-            // ⌥⇥ again walks the strip, as ⌘⇥ walks macOS's
-            // switcher; ⇧ goes back (#3135, owner 2026-11-09).
-            if scope == .windows, held.subtracting(.shift) == .option {
-                return .side(held.contains(.shift) ? -1 : 1)
-            }
             return held.subtracting(.shift).isEmpty
                 ? .stepScope(forward: !held.contains(.shift))
                 : .swallow
@@ -206,6 +210,22 @@ enum JumpKey: Equatable {
         default:
             return nil
         }
+    }
+
+    /// The Windows side's back key: the last-app opener's chord
+    /// with ⇧ added, as registered (#3135, owner 2026-11-09). None
+    /// for no opener, a tap, a chord already holding ⇧, or a bare
+    /// ⇥, whose ⇧ form is the previous side.
+    static func back(of opener: KeyCombo?) -> KeyCombo? {
+        guard let opener, !opener.isTap else { return nil }
+        let chord = opener.registered
+        guard !chord.modifiers.contains(.shift),
+            !(UInt16(chord.keyCode) == tab && chord.modifiers.isEmpty)
+        else { return nil }
+        return KeyCombo(
+            keyCode: chord.keyCode,
+            modifiers: chord.modifiers.union(.shift)
+        )
     }
 
     /// The press as `KiwiHubKeys` spells it.

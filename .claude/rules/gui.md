@@ -2185,6 +2185,16 @@ doors refuse through, never a combination of reads beside it
 `PaletteDoorSeamTests` ▸ `actionsTakeTheDoors` and
 `LookDoorSeamTests` ▸ `buttonsAskTheVerdict`).
 
+## The app strip's back key follows its opener (#3135)
+
+**The Windows side's back key is derived from the last-app opener's
+live binding through the one `JumpKey.back(of:)` — the opener's
+chord with ⇧ — and passed at both of `JumpPanel`'s key doors,
+never a chord spelled in `JumpKey` and never a binding row of its
+own** (owner, 2026-11-09; `JumpStripTests`, `JumpStripModelTests` ▸
+`stripWiring`). It is matched ahead of ⇥ and the Lua alternatives,
+so neither can shadow it.
+
 ## A KiwiHub pick asks Core at the press (#2885)
 
 **Every Windows-side pick — a key, a click, a digit, a VoiceOver

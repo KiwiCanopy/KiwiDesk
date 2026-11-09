@@ -168,7 +168,18 @@ struct JumpStripModelTests {
             try squash("JumpPanelController.swift")
                 .contains("wireStrip(model)")
         )
+        // Back reads the opener's live chord at each press, through
+        // both of the panel's key doors.
+        #expect(
+            try squash("JumpPanelController.swift")
+                .contains("panel.back={[core]inSelf.backKey(core)}")
+        )
+        #expect(
+            try squash("JumpPanel.swift")
+                .components(separatedBy: "back:back()").count == 3
+        )
         let squashed = try squash("JumpPanelController+Strip.swift")
+        #expect(squashed.contains("lua:KiwiHubSide.lastAppLua"))
         // Pressed again on Windows, the opener steps the strip.
         #expect(
             squashed.contains(

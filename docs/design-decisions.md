@@ -15139,7 +15139,13 @@ like ⌘⌘: the chord sits beside ⌘⇥ for the same "go back" job, and a
 page's ⌥⇥ item-to-item move in Safari is the cost a user meets.
 Pressed again while the switcher is up it steps the strip to the
 next app, ⇧ stepping back, as ⌘⇥ steps macOS's switcher (owner,
-2026-11-09). That is no blind gesture: each press moves a selection
+2026-11-09). The back key is the opener's own chord with ⇧, read from
+the live bindings, never a chord of its own: a rebound opener takes
+its back key with it, and the ⇧ form is never registered system-wide,
+so the app in front keeps it until the switcher is up. A separate
+back shortcut was weighed and left out for the same two reasons — it
+would drift from a rebound opener, and claim a second chord from
+every app. That is no blind gesture: each press moves a selection
 drawn before it, and nothing lands until ↩ — releasing ⌥ picks
 nothing, so the hold-and-release form stays ruled out.
 :::

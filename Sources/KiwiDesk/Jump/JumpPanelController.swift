@@ -263,6 +263,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         ]
         panel.delegate = self
         panel.keys = { [core] in core.appWide.kiwiHubKeys }
+        // Back follows the opener's live chord, never a fixed one.
+        panel.back = { [core] in Self.backKey(core) }
         panel.onCancel = { [weak self] in
             self?.close()
         }
