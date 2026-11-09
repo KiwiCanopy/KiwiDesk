@@ -151,6 +151,8 @@ struct AnnouncedValuePinTests {
         "SyncReviewSheet.swift": 2,
         // The app picker's two section headers, one site (#2103).
         "AppPickerButton.swift": 1,
+        // The key sequence action picker's group captions (#1871).
+        "SequenceActionMenu.swift": 1,
         // The diff list's "Live, not saved" heading (#2262).
         "SettingsDiffRowsView+Live.swift": 1,
         // The Lua binding editor's title (#2688).

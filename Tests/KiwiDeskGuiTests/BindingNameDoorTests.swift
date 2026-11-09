@@ -93,9 +93,11 @@ struct BindingNameDoorTests {
             "application rows sort by their app-name label"
         ),
         "ShortcutsReference+Bands.swift": (
-            1,
+            3,
             "an application row's app-name label when no bundle id "
-                + "names it, and the rows' sort by that name"
+                + "names it, and the rows' sort by that name; a key "
+                + "sequence's leader and branch names, its path's own "
+                + "names (#1871)"
         ),
         "ShortcutsReference+PocketApps.swift": (
             1,

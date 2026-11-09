@@ -126,14 +126,15 @@ struct SequenceActionMenu: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                // A row's scroll id is its command's Lua, the ForEach's.
                 .onChange(of: scrollTarget) { _, slot in
-                    guard let slot else { return }
-                    proxy.scrollTo(slot, anchor: .center)
+                    guard case .command(let lua) = slot else { return }
+                    proxy.scrollTo(lua, anchor: .center)
                 }
                 // Opened scrolled to the current pick.
                 .onAppear {
-                    if let slot = scrollTarget {
-                        proxy.scrollTo(slot, anchor: .center)
+                    if case .command(let lua) = scrollTarget {
+                        proxy.scrollTo(lua, anchor: .center)
                     }
                 }
             }
@@ -164,7 +165,6 @@ struct SequenceActionMenu: View {
         .buttonStyle(.plain)
         .dropdownCursorRow(onCursor) { hover(slot) }
         .accessibilityAddTraits(picked ? .isSelected : [])
-        .id(slot)
     }
 
     private func pinned(
