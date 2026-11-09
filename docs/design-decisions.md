@@ -12768,6 +12768,7 @@ warning about a tap may name only what macOS itself answers; a
 list of other apps' taps would be stale the day it shipped.
 :::
 
+:::unreleased
 **Every pointer event KiwiDesk must swallow goes through one
 active tap, and only while a consumer needs it (#2447, #2764).**
 An `NSEvent` monitor hears a press but cannot drop it, so a
@@ -12825,6 +12826,7 @@ gesture keeps one rule, and no click reached the app that would
 otherwise have focused a float. The press moves no focus, so a press
 that never becomes a drag takes none; a float dropped by its own
 title bar is macOS's to focus (owner with ui-designer, 2026-11-08).
+:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
