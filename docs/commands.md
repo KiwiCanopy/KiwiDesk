@@ -44,7 +44,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`make_unsticky`](lua-reference.md#make_unsticky) | Clears the focused window's sticky state. |
 | [`toggle_sticky`](lua-reference.md#toggle_sticky) | Flips the focused window between globally sticky and off. |
 | [`toggle_display_sticky`](lua-reference.md#toggle_display_sticky) | Flips the focused window between screen-sticky and off. |
-| [`toggle_maximized`](lua-reference.md#toggle_maximized) | Fills the screen or one axis of it with the focused tiled window until toggled or focus moves. |
+| [`toggle_maximized`](lua-reference.md#toggle_maximized) | Fills the screen or one axis of it with the focused window until toggled or a tile takes focus. |
 | [`toggle_tiling`](lua-reference.md#toggle_tiling) | Turns a Space's tiling off or back on, the active Space's when none is named. |
 | [`pocket`](lua-reference.md#pocket) | Pockets or takes out the next pocket window, or pockets the window an id names. |
 | [`toggle_pocket_window`](lua-reference.md#toggle_pocket_window) | Marks the focused or named window as the pocket window, floating it, or unmarks it, tiling it. |
@@ -55,6 +55,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`move_floating`](lua-reference.md#move_floating) | Moves the focused floating window along x or y by a delta in points, positive y moving down. |
 | [`move_to_track`](lua-reference.md#move_to_track) | Moves the focused window one track along; takes prev or next. |
 | [`focus_or_spawn`](lua-reference.md#focus_or_spawn) | Focuses an app's window, or launches a new instance. |
+| [`focus_app_window`](lua-reference.md#focus_app_window) | Focuses the focused app's next or previous window, on any Space, screen or Desktop. |
 | [`spawn_new`](lua-reference.md#spawn_new) | Launches a new instance of an app by bundle identifier. |
 | [`gather`](lua-reference.md#gather) | Moves every window of an app into the Space you are on, from other Desktops too. |
 | [`move_here`](lua-reference.md#move_here) | Moves an app's most recently focused window into the Space you are on, or opens the app. |

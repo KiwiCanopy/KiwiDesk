@@ -69,12 +69,6 @@ public struct StateCoordinator: Sendable {
     /// (#1387), so every ender and the re-key carry both or neither.
     var departedSlots: [WindowID: DepartedSlot] = [:]
 
-    /// The ranks alone, the shape `Space.insert(_:rank:ranks:)`
-    /// takes.
-    var departedRanks: [WindowID: Int] {
-        departedSlots.mapValues(\.rank)
-    }
-
     /// Windows the compositor hosts on a Desktop nobody shows
     /// (#1146) — the away LEDGER, beside the visible-only state:
     /// written on a `vanished` the compositor confirmed or a
@@ -145,6 +139,8 @@ public struct StateCoordinator: Sendable {
     /// Windows a Tile keeps tiled over a float rule, by pid (#2975):
     /// `floatFrames`' lifetime, carried by the in-place stop alone.
     var tiledOverRule: [WindowID: pid_t] = [:]
+    /// The frame a maximized float returns to (#3036), the same.
+    var maximizedFloatReturn: [WindowID: FloatFrame] = [:]
 
     /// A float's judged aspect lock (#2973): session state, which a
     /// close, a gone-for-good retire and the app's exit end.

@@ -80,7 +80,9 @@ struct TilingOffPlacementSeamTests {
             "Tiling/KiwiCore+DragRelocate.swift": 1,
             "App/KiwiCore+Maximize.swift": 1,
             "App/KiwiCore+AppBarVisibility.swift": 1,
-            "State/StateCoordinator+Maximized.swift": 1,
+            // The tiled arm, and a float's plane and its float test
+            // (#3036).
+            "State/StateCoordinator+Maximized.swift": 3,
         ]
         let sources = Dictionary(
             try Self.coreSources(),

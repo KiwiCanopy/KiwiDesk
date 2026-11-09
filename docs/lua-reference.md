@@ -169,6 +169,42 @@ unknown to KiwiDesk is refused.
 KiwiDesk.focus_window(1234)
 ```
 
+:::unreleased
+### focus_app_window
+
+**Expects:** a direction, `"next"` or `"prev"`.
+
+**Does:** focuses the focused app's next or previous window,
+wherever it is: another Space, another screen, or a macOS Desktop
+no screen shows. The order is the one a repeat press of
+[`focus_or_spawn`](#focus_or_spawn) walks — Spaces in the order
+the Space Bar lists them, then each window's slot, wrapping around
+— and `"prev"` walks it backwards. Minimized windows are skipped
+and stay minimized. A window on a Desktop no screen shows needs the
+Desktop bridge, as `focus_or_spawn`'s does. It is refused with no
+other window of the app, with another app in front, or when the
+Desktop holding the next window cannot be switched to. It has no
+shortcut until you bind one.
+
+macOS has its own **Move focus to next window** (System Settings ▸
+Keyboard ▸ Keyboard Shortcuts… ▸ Keyboard), whose key depends on
+your keyboard layout. It cycles the front app's windows on the
+current Space only, most recently used first. `focus_app_window`
+also reaches the app's windows on other Spaces and on Desktops no
+screen shows, in a fixed order.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("alt+tab", function()
+    KiwiDesk.focus_app_window("next")
+end)
+KiwiDesk.bind("alt+shift+tab", function()
+    KiwiDesk.focus_app_window("prev")
+end)
+```
+:::
+
 ### swap
 
 **Expects:** a direction (`"left"`, `"right"`, `"up"`, or
@@ -5887,6 +5923,11 @@ A full-screen window is refused with `the focused window is
 fullscreen`, and a tiled one with `the focused window is not
 floating`, which never floats it. Each shows a pill on the window.
 
+:::unreleased
+A maximized floating window goes back to the frame it had first, and
+that frame is centred.
+:::
+
 No shortcut comes with it. Bind it in init.lua or in Settings' Lua
 bindings drawer.
 
@@ -5925,6 +5966,11 @@ Space they are drawn on, and leaves them filed where they are. A
 maximized window beneath a floating one stays maximized. A full-screen
 window is refused with `the focused window is fullscreen`, and a tiled
 one with `the focused window is not floating`, each with a pill.
+
+:::unreleased
+A maximized floating window goes back to the frame it had first, and
+moves from there.
+:::
 
 No shortcut comes with it. Bind it in init.lua or in Settings' Lua
 bindings drawer.
@@ -6145,8 +6191,22 @@ swap, resize, layout change or reset of sizes
 puts it back first, then acts, and a mouse drag of it puts it
 back; a command that refuses leaves it as it is. Focus on a
 floating window, a switch to another Space or Desktop and back,
-or KiwiDesk's own restart leaves it filling the screen. Fails on
-a floating window. Bound to `⌃⌥M` by default.
+or KiwiDesk's own restart leaves it filling the screen. Bound to
+`⌃⌥M` by default.
+
+:::unreleased
+A floating window fills its screen the same way, on any layout,
+and a second call puts it back at the frame it had. Moving focus
+to a tiled window of the Space puts it back too, as does tiling it
+or putting it in the Pocket; focus on another floating window keeps
+it, and the maximized window stays beneath that one. On a Floating
+layout Space nothing is tiled, so only a second call or the window
+leaving ends it. `move_floating`, `center_floating`, a resize and a
+mouse drag put it back first; a mouse resize of its edge keeps the
+new size instead. Fails with a pill on a dialog, a full-screen
+window and the Pocket window. A floating window takes an axis too,
+and `"in_place"` centres it on the frame it had.
+:::
 
 A sticky window fills the screen of the Space it is drawn on. Its
 maximize ends when you leave that Space, and it does not come back
@@ -6438,7 +6498,7 @@ that screen.
 Out of the pocket it wears the pocket mark inside its top-right
 corner, whatever [`sticky.set_mark`](#stickyset_mark) and
 [`floating.set_mark`](#floatingset_mark) say, and no mark while it
-is maximized or presenting; [`pocket.set_color`](#pocketset_color)
+is presenting; [`pocket.set_color`](#pocketset_color)
 colors it. Its Space Bar glyph wears the pocket
 badge at the glyph's bottom-right corner, beside the floating badge,
 and no sticky badge;
