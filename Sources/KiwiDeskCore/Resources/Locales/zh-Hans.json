@@ -2614,6 +2614,7 @@
   "whatsnew.trail.next": "下一项：%1$@",
   "window_action.refusal.all_here": "%1$@ 的所有窗口都在这里",
   "window_action.refusal.already_in": "“%1$@”已在该空间中",
+  "window_action.refusal.cannot_change_space_full_screen": "“%1$@”处于全屏，无法移到其他空间",
   "window_action.refusal.cannot_move_full_screen": "“%1$@”处于全屏，无法移到其他桌面",
   "window_action.refusal.cannot_move_here": "“%1$@”无法移到这里",
   "window_action.refusal.cannot_move_here_full_screen": "全屏窗口无法移到这里",

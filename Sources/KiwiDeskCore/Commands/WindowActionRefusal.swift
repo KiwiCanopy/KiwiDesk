@@ -35,6 +35,9 @@ enum WindowActionRefusal: Equatable {
     /// A Desktop move on a full-screen window, whose macOS Space
     /// is its own (#670, #2888).
     case cannotMoveFullScreen(window: String)
+    /// A Space move on a full-screen window: macOS holds it on its
+    /// own Space, which no KiwiDesk Space files (#3119).
+    case cannotChangeSpaceFullScreen(window: String)
     /// A screen move whose screen shows a full-screen or system
     /// Space, which hides whatever is filed under it (#3117); the
     /// sentence names the full-screen app, the case a user meets.
@@ -134,6 +137,12 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” is full screen and can't change Desktop",
                 window
             )
+        case .cannotChangeSpaceFullScreen(let window):
+            L(
+                "window_action.refusal.cannot_change_space_full_screen",
+                "“%1$@” is full screen and can't change Space",
+                window
+            )
         case .screenShowsFullScreen:
             L(
                 "window_action.refusal.screen_shows_full_screen",
@@ -190,6 +199,8 @@ enum WindowActionRefusal: Equatable {
         case .cannotSwapFullScreen: "a full-screen window cannot be swapped"
         case .cannotMoveFullScreen:
             "a full-screen window cannot change Desktop"
+        case .cannotChangeSpaceFullScreen:
+            "a full-screen window cannot change Space"
         case .screenShowsFullScreen:
             "a window cannot move to a screen showing a full-screen Space"
         case .cannotSwapPocketed:
