@@ -15,7 +15,11 @@ struct TestDeskScriptTests {
 
     @Test("the script names the app's suite and seeds its keys")
     func scriptMatchesTheApp() throws {
+        // Comment lines dropped, so a commented-out seed reds.
         let text = try String(contentsOf: Self.script, encoding: .utf8)
+            .split(separator: "\n")
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("#") }
+            .joined(separator: "\n")
         #expect(text.contains("SUITE=\"\(TestDesk.defaultsSuite)\""))
         for key in [
             TilingConsent.key, OnboardingDiscovery.key,
@@ -26,6 +30,15 @@ struct TestDeskScriptTests {
                 "\(key) is not seeded"
             )
         }
+    }
+
+    @Test("the service verbs ask the refusal")
+    func serviceAsksTheRefusal() throws {
+        let cli = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources/KiwiDesk/CLIMain.swift")
+        )
+        #expect(cli.contains("TestDesk.refusal(\"service\")"))
     }
 
     /// A bundle with an id and a feed, which an updater takes.

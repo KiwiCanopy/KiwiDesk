@@ -29,20 +29,6 @@ public final class SingleInstanceLock {
         return false
     }
 
-    /// Whether another process holds the lock at `path`. Leaves
-    /// the file in place, held or free (#3121). The probe holds the
-    /// lock for a moment, so a launch racing it reads "running".
-    public static func isHeld(at path: String) -> Bool {
-        let fd = open(path, O_RDWR)
-        guard fd >= 0 else { return false }
-        defer { close(fd) }
-        guard flock(fd, LOCK_EX | LOCK_NB) == 0 else {
-            return errno == EWOULDBLOCK
-        }
-        flock(fd, LOCK_UN)
-        return false
-    }
-
     /// Acquires non-blocking flock. Returns false if already held (#196).
     public func acquire() -> Bool {
         guard descriptor < 0 else { return true }

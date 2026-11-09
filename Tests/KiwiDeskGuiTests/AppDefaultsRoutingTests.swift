@@ -85,10 +85,20 @@ struct AppDefaultsRoutingTests {
         #expect(sites.isEmpty, .init(rawValue: sites.joined(separator: ", ")))
     }
 
-    @Test("only TestDesk spells KIWIDESK_HOME")
+    @Test("a suite never falls back to the standard domain")
+    func noSuiteFallback() throws {
+        let sites = try Self.sites {
+            $0.contains("suiteName:") && $0.contains("?? .standard")
+        }
+        #expect(sites.isEmpty, .init(rawValue: sites.joined(separator: ", ")))
+    }
+
+    @Test("only TestDesk reads KIWIDESK_HOME")
     func oneReadOfTheVariable() throws {
-        let sites = try Self.sites { $0.contains("\"KIWIDESK_HOME\"") }
-        #expect(sites.count == 1)
-        #expect(sites.allSatisfy { Self.file(of: $0) == "TestDesk.swift" })
+        let spelled = try Self.sites { $0.contains("\"KIWIDESK_HOME\"") }
+        #expect(spelled.count == 1)
+        #expect(spelled.allSatisfy { Self.file(of: $0) == "TestDesk.swift" })
+        let read = try Self.sites { $0.contains("[TestDesk.variable]") }
+        #expect(read.isEmpty, .init(rawValue: read.joined(separator: ", ")))
     }
 }

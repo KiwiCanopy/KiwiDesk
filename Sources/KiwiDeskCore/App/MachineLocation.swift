@@ -17,8 +17,8 @@ public enum MachineLocation {
             ?? defaultDirectory
     }
 
-    /// The folder a normal launch uses, whatever `TestDesk` says:
-    /// a test desk refuses to start while its lock is held.
+    /// The folder a normal launch uses, whatever `TestDesk` says;
+    /// it holds `lockPath` for every instance.
     public static var defaultDirectory: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(
@@ -30,20 +30,11 @@ public enum MachineLocation {
         socket(in: directory).path
     }
 
+    /// The one lock every instance takes, a test desk's included,
+    /// so a test desk and a normal instance never run together:
+    /// two would retile every window and answer every hotkey (#3121).
     public static var lockPath: String {
-        lock(in: directory).path
-    }
-
-    /// A normal launch's lock, read by a test desk (#3121).
-    public static var defaultLockPath: String {
         lock(in: defaultDirectory).path
-    }
-
-    /// Held by a running test desk, so a normal launch never starts
-    /// beside it (#3121).
-    public static var testDeskLockPath: String {
-        defaultDirectory.appendingPathComponent("KiwiDesk.testdesk.lock")
-            .path
     }
 
     static func socket(in directory: URL) -> URL {

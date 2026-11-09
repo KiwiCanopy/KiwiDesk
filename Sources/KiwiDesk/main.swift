@@ -12,31 +12,21 @@ if CommandLine.arguments.count > 1 {
 // The first `shared` read picks the class (#2049).
 let app = KiwiApplication.shared
 
-// A test desk and a normal instance never run together: two
-// would retile every window and answer every hotkey twice (#3121).
-let testDeskLock = SingleInstanceLock(
-    path: MachineLocation.testDeskLockPath
-)
-if TestDesk.isActive {
-    if SingleInstanceLock.isHeld(at: MachineLocation.defaultLockPath) {
-        fputs(
-            "KiwiDesk: \(TestDesk.variable) is set while the default "
-                + "instance runs — quit it first.\n",
-            stderr
-        )
-        exit(1)
-    }
-    _ = testDeskLock.acquire()
-} else if SingleInstanceLock.isHeld(
-    at: MachineLocation.testDeskLockPath
-) {
-    surfaceRunningInstanceAndExit()
-}
 // Single-instance lock held for process lifetime (#196). Must
 // run before the delegate exists: a second KiwiCore would
 // clobber the running instance's IPC socket.
 let instanceLock = SingleInstanceLock(path: MachineLocation.lockPath)
 if !instanceLock.acquire() {
+    // A test desk shares the lock (#3121) and so never surfaces
+    // the instance it would have replaced.
+    if TestDesk.isActive {
+        fputs(
+            "KiwiDesk: \(TestDesk.variable) is set while another "
+                + "instance runs — quit it first.\n",
+            stderr
+        )
+        exit(1)
+    }
     surfaceRunningInstanceAndExit()
 }
 // A pre-#2324 build still running holds the lock's old home.

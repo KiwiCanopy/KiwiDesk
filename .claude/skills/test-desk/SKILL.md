@@ -7,13 +7,13 @@ The test desk is a config folder checked into the repo
 (`Tests/KiwiDeskCoreTests/TestDesk/config`) and the `KIWIDESK_HOME` QA lever
 (#3121). With `KIWIDESK_HOME=<root>` set, a KiwiDesk process reads
 `<root>/config` as its config folder and `<root>/machine` as its
-machine folder, so the lock, the socket, the snapshots and the
-migration copies are the desk's own. It also keeps the defaults in
-the `com.kiwicanopy.kiwidesk.testdesk` suite, and it refuses the
+machine folder, so the socket, the snapshots and the migration
+copies are the desk's own. It also keeps the defaults in the
+`com.kiwicanopy.kiwidesk.testdesk` suite, and it refuses the
 service, the login item and the updater. It writes nothing of the
 owner's config and settings. What it shares is machine-wide by
-nature: a lock file beside the owner's (so neither instance starts
-beside the other) and the records of the `hidutil` remap and the
+nature: the instance lock, so a test desk and a normal instance
+never run together, and the records of the `hidutil` remap and the
 KiwiVision appearance debt, which only one instance owns at a time.
 
 ## What the desk holds
@@ -49,8 +49,8 @@ KiwiVision appearance debt, which only one instance owns at a time.
    every TextEdit window opened since `up`, the owner's included. It deletes the root and the defaults
    suite, then reopens the KiwiDesk that was running.
 
-`up` swaps the owner's running app for the test desk (`main.swift`
-says why the two never run together): run it only where the owner's
+`up` swaps the owner's running app for the test desk
+(`MachineLocation.lockPath` says why the two never run together): run it only where the owner's
 desk may be interrupted, and never during the owner's own sitting.
 
 Change the copy, never the fixture: a check that needs Lua appends

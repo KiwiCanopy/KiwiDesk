@@ -65,17 +65,4 @@ struct TestDeskTests {
             SyncFolderLocation.followed(in: defaults, testDesk: true) == nil
         )
     }
-
-    @Test("isHeld reads another holder's lock and leaves a free one")
-    func isHeldReadsTheLock() {
-        let name = "held-\(UUID().uuidString).lock"
-        let path = testTemporaryDirectory.appendingPathComponent(name).path
-        #expect(!SingleInstanceLock.isHeld(at: path), "no file")
-        let lock = SingleInstanceLock(path: path)
-        #expect(lock.acquire())
-        #expect(SingleInstanceLock.isHeld(at: path))
-        lock.release()
-        #expect(!SingleInstanceLock.isHeld(at: path))
-        #expect(FileManager.default.fileExists(atPath: path))
-    }
 }

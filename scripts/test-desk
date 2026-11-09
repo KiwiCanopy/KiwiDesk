@@ -12,7 +12,7 @@
 # sun_path's 104 bytes), seeds its defaults suite past the first-run
 # tour, stops the running KiwiDesk by its own bundle path, and opens
 # <bundle.app> with KIWIDESK_HOME=<root>; the desk replaces the
-# running instance (main.swift says why). `down` quits the test
+# running instance (MachineLocation.lockPath says why). `down` quits the test
 # instance, closes every TextEdit window opened since `up`, deletes
 # the root and the defaults suite, and reopens the KiwiDesk that was
 # running. Run `down` before the next `up`; one desk at a time.
@@ -75,6 +75,9 @@ textedit_ids() {
 case "${1:-}" in
 up)
     [ -n "$(root_dir)" ] && die "a test desk is up; run down first"
+    # launchd would relaunch a service-managed instance beside it.
+    launchctl print "gui/$(id -u)/org.kiwidesk.KiwiDesk" >/dev/null 2>&1 \
+        && die "the KiwiDesk service is loaded; run 'KiwiDesk service stop'"
     MINE="$(cd "${2:?bundle}" && pwd -P)" || exit 1
     [ -x "$MINE/$EXE" ] || die "$MINE is no KiwiDesk bundle"
     # `stop` finds the instance by this name, so `down` could not.

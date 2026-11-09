@@ -7,8 +7,8 @@ import Foundation
 /// (`AppDefaults`), LaunchAgent, login item and updater. Unset,
 /// every path is the default one.
 ///
-/// Read once per process, here only: the app, the CLI and the
-/// lock in `main.swift` must agree on one root.
+/// Read once per process, here only: the app and the CLI must
+/// agree on one root. The instance lock stays the default one.
 public enum TestDesk {
     public static let variable = "KIWIDESK_HOME"
     /// The defaults suite a test desk reads and writes.
