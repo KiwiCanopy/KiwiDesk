@@ -136,13 +136,13 @@ extension ShortcutsReferenceBuilder {
         // Settings row wears the Settings gear (#2670).
         case KeybindingCatalog.openSettings.lua:
             return "gearshape"
-        // Two screens: back to the one before (#2512).
-        case KeybindingCatalog.screenLastRow.lua:
-            return "display.2"
-        // A window sent to the last screen (#3117).
-        case KeybindingCatalog.screenMoveRows[0].lua,
+        // Two screens: back to the one before (#2512), and a window
+        // sent there, staying or following (#3117), as the Space and
+        // Desktop rows share their destination's glyph.
+        case KeybindingCatalog.screenLastRow.lua,
+            KeybindingCatalog.screenMoveRows[0].lua,
             KeybindingCatalog.screenMoveRows[1].lua:
-            return "macwindow.on.rectangle"
+            return "display.2"
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"
