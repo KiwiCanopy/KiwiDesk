@@ -154,15 +154,18 @@ struct FieldBufferTests {
             let subject = watched.replacingOccurrences(of: "of:", with: "")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             // A hook that only moves focus is no buffer: it gates on
-            // none.
+            // none. One calling the verdict is swept whatever focus
+            // it passes, so a wrong `focused:` reds at its site.
+            let gated = focuses.first(where: {
+                !matches(
+                    of: #"(!|focused: )\#($0)\b"#,
+                    in: body,
+                    whole: true
+                ).isEmpty
+            })
+            let calls = body.contains("FieldBuffer.follows(")
             guard !focuses.contains(subject),
-                let focus = focuses.first(where: {
-                    !matches(
-                        of: #"(!|focused: )\#($0)\b"#,
-                        in: body,
-                        whole: true
-                    ).isEmpty
-                })
+                let focus = gated ?? (calls ? focuses[0] : nil)
             else { continue }
             hooks.append((body, focus))
         }
