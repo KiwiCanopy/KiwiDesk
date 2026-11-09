@@ -25,6 +25,31 @@ struct BindingNameDoorTests {
     /// rather than on how it is compared: any new read reds until
     /// it is routed through the door or classified here.
     private let allowed: [String: (count: Int, reason: String)] = [
+        // A key sequence's names (#1871): a leader or a key that
+        // opens more keys runs no catalog action, so its stored
+        // name is its only name.
+        "KeySequence.swift": (
+            1,
+            "the leader's stored name, the hint panel's title"
+        ),
+        "KiwiCore+SequenceLuaAPI.swift": (
+            2,
+            "define_sequence: a step's name, read from its Lua table"
+                + " into the step's stored binding"
+        ),
+        "KiwiCore+ShortcutGroups.swift": (
+            1,
+            "shortcut.list: a sequence entry carries its stored name"
+        ),
+        "RuleReach+Keys.swift": (
+            1,
+            "sameShortcuts: a sequence's stored name is a write"
+        ),
+        "KeySequenceHint.swift": (
+            4,
+            "a key sequence node's own name (#1871): a leader or a"
+                + " key that opens more keys runs no catalog action"
+        ),
         "ShortcutsPagePart.swift": (
             1,
             "a census row's text label key, matched to a reveal "
@@ -93,10 +118,6 @@ struct BindingNameDoorTests {
         "KeyLayer.swift": (
             4,
             "the type's own coding keys and equality"
-        ),
-        "KeybindingMerge.swift": (
-            1,
-            "a merge copying a row's label into the stored binding"
         ),
     ]
 

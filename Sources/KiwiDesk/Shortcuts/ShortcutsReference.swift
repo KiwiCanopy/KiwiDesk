@@ -29,6 +29,9 @@ enum ShortcutsReferenceBuilder {
         var layer = layer
         let openers = Set(JumpScope.allCases.map(\.lua))
         layer.bindings.removeAll { openers.contains($0.lua) }
+        // A key sequence is no press row; its hint panel lists its
+        // keys (#1871).
+        layer.bindings.removeAll(where: \.isSequence)
 
         // Keyed by row identity (UUID), never `lua`: two bindings
         // can share a command's Lua with different combos (vim

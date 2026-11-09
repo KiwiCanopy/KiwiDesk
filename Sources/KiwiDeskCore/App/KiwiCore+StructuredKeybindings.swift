@@ -6,6 +6,7 @@ import Foundation
 /// half-built layer set.
 struct PreparedKeybindings {
     var refs: [String: [KeyCombo: Int32]]
+    var sequences: [String: [KeySequence]]
     var icons: [String: String]
     var registeredLayers: [KeyLayer]
     var skipped: [InstalledKeybindings.Skipped]
@@ -35,6 +36,7 @@ extension KiwiCore {
         )
         keys.replaceLayers(
             prepared.refs,
+            sequences: prepared.sequences,
             icons: prepared.icons,
             preferredLayer: preferredLayer
         )
@@ -59,6 +61,7 @@ extension KiwiCore {
         lua: LuaInterpreter
     ) -> PreparedKeybindings {
         var refs: [String: [KeyCombo: Int32]] = [:]
+        var sequences: [String: [KeySequence]] = [:]
         var icons: [String: String] = [:]
         var registeredLayers: [KeyLayer] = []
         var skipped: [InstalledKeybindings.Skipped] = []
@@ -67,6 +70,9 @@ extension KiwiCore {
             let prepared = prepare(layer: layer, lua: lua)
             refs[layer.name] = prepared.refs
             skipped += prepared.skipped
+            let built = prepareSequences(layer, lua: lua)
+            sequences[layer.name] = built.sequences
+            skipped += built.skipped
             if let icon = layer.icon, !icon.isEmpty {
                 icons[layer.name] = icon
             }
@@ -74,12 +80,13 @@ extension KiwiCore {
                 KeyLayer(
                     name: layer.name,
                     icon: layer.icon,
-                    bindings: prepared.bindings
+                    bindings: prepared.bindings + built.bindings
                 )
             )
         }
         return PreparedKeybindings(
             refs: refs,
+            sequences: sequences,
             icons: icons,
             registeredLayers: registeredLayers,
             skipped: skipped
@@ -102,7 +109,7 @@ extension KiwiCore {
             [:]
         var unparsed: [String: DeadShortcutReason] = [:]
 
-        for (index, binding) in layer.bindings.enumerated()
+        for (index, binding) in layer.pressBindings.enumerated()
         where !binding.combo.isEmpty {
             guard let combo = KeyCombo.parse(binding.combo)
             else {

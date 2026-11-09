@@ -48,12 +48,12 @@ public enum KeybindingMerge {
         if let index = bindings.firstIndex(
             where: { $0.combo == row.combo }
         ) {
-            bindings[index].lua = row.lua
-            bindings[index].kind = row.kind
-            bindings[index].label = row.label
-            // What the binding says of itself follows its source
-            // (#2544), cleared where the source dropped it.
-            bindings[index].meta = row.meta
+            // The row is replaced whole, its identity kept: what it
+            // says of itself follows its source (#2544), and a
+            // sequence's steps with it (#1871).
+            var replaced = row
+            replaced.id = bindings[index].id
+            bindings[index] = replaced
         } else {
             bindings.append(row)
         }

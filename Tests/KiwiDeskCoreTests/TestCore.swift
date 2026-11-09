@@ -167,6 +167,8 @@ func makeTestCore(
     // The touch reader reads the host's trackpad (#1873).
     core.mouse.trackpad.makeReader = { _ in nil }
     core.mouse.trackpad.readSystemGestures = { .unread }
+    // A key sequence's unbound-key beep (#1871) is the host's speaker.
+    core.keys.beep = {}
     // The pointer rest's mouse-moved monitor (#1869).
     core.mouse.rest.makeMonitor = { _ in nil }
     // The hiding shelves' pointer monitor (#761) hears the

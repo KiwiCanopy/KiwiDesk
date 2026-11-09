@@ -101,6 +101,16 @@ extension KiwiCore {
                 return .fail("\(chord) runs \(row.lua); remove it first")
             }
         }
+        // A key sequence's leader holds its chord too (#1871): the
+        // key table, keyed by action, does not list it.
+        let pages = [page] + snapshot.storedKeyOverrides.keys.sorted()
+        let leaders = pages.flatMap {
+            snapshot.storedKeyLayers(for: $0)
+                .first { $0.name == layer }?.sequences ?? []
+        }
+        if leaders.contains(where: { Self.sameChord($0.combo, chord) }) {
+            return .fail("\(chord) opens a key sequence; remove it first")
+        }
         snapshot.keyTemplates[key] = KeyBinding(combo: chord, lua: lua)
         snapshot.keyLayers.applyKey(
             key,

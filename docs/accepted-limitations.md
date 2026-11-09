@@ -119,6 +119,15 @@ letter, then ⌘ again can fire a `cmd+cmd` shortcut. No fix is planned
 ([#1872](https://github.com/KiwiCanopy/KiwiDesk/issues/1872)).
 :::
 
+:::unreleased
+The same hiding reaches a
+[key sequence](lua-reference.md#define_sequence): a leader written
+as a combo does nothing, and keys typed while a sequence is open
+reach the front app, a sequence opened by a modifier-tap leader
+included. Leave the field first. No fix is planned
+([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
+:::
+
 With **Displays have separate Spaces** off, a `move_to_desktop` that
 sends a window to another screen answers before the window moves,
 since the move waits for its frame to be written first. If the app
@@ -565,3 +574,4 @@ set of sizes that every Desktop KiwiDesk cannot name shares; the
 first Desktop switch on that screen leaves them behind, and the
 Desktop shown uses the override, then the global value, until you
 resize again.
+

@@ -324,8 +324,8 @@ public enum APIReference {
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).
     public static let luaOnly: [String] = [
-        "exec", "bind", "on", "define_layer", "switch_layer",
-        "open_settings",
+        "exec", "bind", "on", "define_layer", "define_sequence",
+        "switch_layer", "open_settings",
     ]
 
     /// Command names reachable through dispatcher and CLI/IPC (#37).

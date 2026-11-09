@@ -45,9 +45,9 @@ extension GuiConfig {
         for (app, space) in appRules where space == from {
             appRules[app] = to
         }
+        // A sequence's end keys are renamed too (#1871).
         layers = layers.map { layer in
-            var layer = layer
-            layer.bindings = layer.bindings.map { binding in
+            layer.mappingActions { binding in
                 var binding = binding
                 binding.lua = SpaceLuaArg.rename(
                     in: binding.lua,
@@ -56,7 +56,6 @@ extension GuiConfig {
                 )
                 return binding
             }
-            return layer
         }
         // Rows a deleted `to` left behind (#92) now meet the
         // renamed ones; nothing else is touched.

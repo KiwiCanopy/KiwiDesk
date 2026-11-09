@@ -35,6 +35,13 @@ extension APIReference {
             .table("bindings"),
             .text("icon", optional: true)
         ),
+        "define_sequence": APIRecord(
+            "Defines a key sequence: a leader chord, then keys that "
+                + "run a function or open more keys.",
+            .text("leader"),
+            .table("keys"),
+            .table("options", optional: true)
+        ),
         "switch_layer": APIRecord(
             "Makes a defined keybinding layer the active one.",
             .text("name")

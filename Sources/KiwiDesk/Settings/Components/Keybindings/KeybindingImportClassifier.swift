@@ -16,14 +16,14 @@ enum KeybindingImportClassifier {
     ) {
         let navigation = navigationLabels(for: config)
         var recoveredStep: Int?
-        for layer in config.layers.indices {
-            for row in config.layers[layer].bindings.indices {
-                if let step = reclassify(
-                    &config.layers[layer].bindings[row],
-                    navigation: navigation
-                ) {
+        // A key sequence's end keys are filed as its rows are (#1871).
+        config.layers = config.layers.map { layer in
+            layer.mappingActions { row in
+                var row = row
+                if let step = reclassify(&row, navigation: navigation) {
                     recoveredStep = step
                 }
+                return row
             }
         }
         if recoverResizeStep, let recoveredStep {

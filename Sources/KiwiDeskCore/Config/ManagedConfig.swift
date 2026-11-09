@@ -17,6 +17,7 @@ public enum ManagedConfig {
         "ignore_rules",
         "KiwiDesk.bind(",
         "KiwiDesk.define_layer(",
+        "KiwiDesk.define_sequence(",
         "KiwiDesk.bind_profile_to_desktop(",
     ]
 

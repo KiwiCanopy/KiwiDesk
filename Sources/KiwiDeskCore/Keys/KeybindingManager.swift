@@ -40,11 +40,32 @@ public final class KeybindingManager {
     /// with the flag off and never cues. Save/restore (not
     /// set/clear) in `fire`, so a callback pumping a nested run
     /// loop cannot clear the outer fire's flag.
-    public private(set) var isFiring = false
+    public internal(set) var isFiring = false
     /// Combos rejected during the most recent activation.
     public internal(set) var activationFailures: Set<KeyCombo> =
         []
     private var layers: [String: [KeyCombo: Int32]] = [:]
+    /// Each layer's key sequences (#1871), beside `layers`: the
+    /// keyboard tap answers the current layer's, never Carbon.
+    var sequences: [String: [KeySequence]] = [:]
+    /// Where an open sequence stands, nil once it closes (#1871):
+    /// the hint panel's one input.
+    var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void = {
+        _ in
+    }
+    /// The unbound-key sound: the core wires the refusal sound
+    /// (#1871 ▸ unbound step key, `KiwiCore+Bootstrap`), so a bare
+    /// manager stays silent.
+    var beep: @MainActor () -> Void = {}
+    /// Whether the hint panel was last told a sequence is open.
+    var sequenceOpen = false
+    /// The sequence epoch: bumped with every row set the tap is
+    /// handed and every main close, so a decision made before
+    /// either is dropped (#1871).
+    var sequenceGeneration: UInt64 = 0
+    /// True while an end key's Lua runs: its own switch closes no
+    /// sequence, since the tap closed one at the fire.
+    var firingEndKey = false
     private var layerIcons: [String: String] = [:]
     /// What a Lua binding says of itself — description, group and
     /// symbol (#2544) — by layer and chord.
@@ -152,13 +173,8 @@ public final class KeybindingManager {
         layers[layer] ?? [:]
     }
 
-    /// Defined layer names in stable order for GUI import (#4).
-    public var definedLayers: [String] {
-        let others = layers.keys
-            .filter { $0 != Self.defaultLayer }
-            .sorted()
-        return [Self.defaultLayer] + others
-    }
+    /// The layers holding Carbon rows.
+    var pressLayers: [String] { Array(layers.keys) }
 
     /// Binds combo to Lua ref in default layer, with what the binding
     /// says of itself.
@@ -211,7 +227,9 @@ public final class KeybindingManager {
     }
 
     public func switchLayer(_ name: String) {
-        guard name == Self.defaultLayer || layers[name] != nil
+        guard
+            name == Self.defaultLayer || layers[name] != nil
+                || sequences[name] != nil
         else {
             onLog("switch_layer: unknown layer '\(name)'")
             return
@@ -241,7 +259,9 @@ public final class KeybindingManager {
                 }
             }
         }
+        releaseSequences(sequences)
         layers = [:]
+        sequences = [:]
         layerIcons = [:]
         layerMeta = [:]
         let previous = currentLayer
@@ -253,14 +273,17 @@ public final class KeybindingManager {
     /// Atomically replaces layers from structured config.
     func replaceLayers(
         _ replacements: [String: [KeyCombo: Int32]],
+        sequences newSequences: [String: [KeySequence]] = [:],
         icons: [String: String],
         preferredLayer: String
     ) {
         let oldLayers = layers
+        let oldSequences = sequences
         let oldCurrent = currentLayer
 
         deactivate()
         layers = replacements
+        sequences = newSequences
         if layers[Self.defaultLayer] == nil {
             layers[Self.defaultLayer] = [:]
         }
@@ -281,6 +304,7 @@ public final class KeybindingManager {
                 }
             }
         }
+        releaseSequences(oldSequences)
         activate(currentLayer)
         announce(from: oldCurrent, to: currentLayer)
     }
@@ -302,31 +326,16 @@ public final class KeybindingManager {
         activate(currentLayer)
     }
 
-    #if DEBUG
-        /// Test-only: runs `body` inside a fire's scope (#804).
-        func simulatingFire(_ body: () -> Void) {
-            let wasFiring = isFiring
-            isFiring = true
-            defer { isFiring = wasFiring }
-            body()
-        }
-    #endif
-
     func fire(ref: Int32, combo: KeyCombo) {
-        guard let lua else { return }
-        let wasFiring = isFiring
-        isFiring = true
-        defer { isFiring = wasFiring }
-        if case .failure(let error) = lua.call(ref: ref) {
-            onLog("keybinding disabled: \(error)")
-            for (layer, var bindings) in layers {
-                if bindings[combo] == ref {
-                    bindings[combo] = nil
-                    layers[layer] = bindings
-                }
+        guard let error = call(ref: ref) else { return }
+        onLog("keybinding disabled: \(error)")
+        for (layer, var bindings) in layers {
+            if bindings[combo] == ref {
+                bindings[combo] = nil
+                layers[layer] = bindings
             }
-            lua.release(ref: ref)
-            activate(currentLayer)
         }
+        lua?.release(ref: ref)
+        activate(currentLayer)
     }
 }

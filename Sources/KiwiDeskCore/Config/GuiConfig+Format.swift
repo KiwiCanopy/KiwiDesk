@@ -80,5 +80,9 @@ extension GuiConfig {
     /// **19 (#2978)**: the `pocket` group retired; its capacity
     /// crosses onto each profile's pocket Show by adoption
     /// (`crossPocketVisibility`), with no step.
-    public static let currentFormat = 19
+    ///
+    /// **20 (#1871)**: a binding may be a key sequence
+    /// (`"kind": "sequence"` with its `steps`), which an older
+    /// build cannot decode; no step, the bump is the refusal.
+    public static let currentFormat = 20
 }

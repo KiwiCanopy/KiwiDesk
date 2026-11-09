@@ -36,7 +36,8 @@ struct ShortcutMetaCarryTests {
     /// joins `KeyBindingMeta`, so no comparison can skip it.
     @Test("KeyBindingMeta is exactly the fields beyond the row's own")
     func metaIsTheOneHome() {
-        let own: Set = ["id", "combo", "lua", "kind", "label"]
+        // A sequence's `steps` is structure, never meta (#1871).
+        let own: Set = ["id", "combo", "lua", "kind", "label", "steps"]
         #expect(
             fieldNames(KeyBinding()).subtracting(own)
                 == fieldNames(KeyBindingMeta())

@@ -99,6 +99,8 @@ struct AnnouncedValuePinTests {
     /// headings (architect review, 2026-08-24).
     private static let headings: [String: Int] = [
         "SettingsSection.swift": 2,
+        // The key sequence hint panel's title (#1871).
+        "KeySequenceHintView.swift": 1,
         // The panel's eyebrows, through its one helper.
         "SettingsDetailPanel.swift": 1,
         // Gaps & Borders' preview groups (#2983).
