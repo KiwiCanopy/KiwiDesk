@@ -39,7 +39,7 @@ struct SequenceEditing {
     /// A text field's binding on one field of the node `id` names.
     func field(
         _ id: UUID,
-        _ path: WritableKeyPath<KeyBinding, String>
+        _ path: WritableKeyPath<KeyBinding, String> & Sendable
     ) -> Binding<String> {
         Binding(
             get: {
