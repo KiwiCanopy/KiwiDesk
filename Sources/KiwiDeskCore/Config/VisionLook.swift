@@ -13,6 +13,8 @@ public struct VisionLook: Equatable, Sendable {
     public var fadeCurve: VisionFadeCurve
     public var clearWallpaper: Bool
     public var clearApp: Bool
+    /// What the focused window fills (#3064).
+    public var maximize: VisionMaximize
     /// Never dimmed: always the plain list (ruling 33).
     public var neverDimmed: [String]
     /// The lens drawn, nil for plain KiwiVision.
@@ -38,6 +40,7 @@ extension VisionLook {
             fadeCurve: fadeCurve,
             clearWallpaper: clearWallpaper,
             clearApp: clearApp,
+            maximize: maximize == .off ? nil : maximize,
             neverDimmed: neverDimmed,
             lenses: nil
         )
@@ -59,6 +62,7 @@ extension AppWideSettings {
             clearWallpaper: overrides.clearWallpaper
                 ?? visionClearWallpaper,
             clearApp: overrides.clearApp ?? visionClearApp,
+            maximize: overrides.maximize ?? visionMaximize,
             neverDimmed: visionNeverDimmed,
             lens: lens
         )

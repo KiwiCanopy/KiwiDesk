@@ -83,6 +83,8 @@ extension KiwiCore {
                 $0.visionNeverDimmed =
                     AppWideSettings.neverDimmedEntries(apps)
             }
+        case "kiwivision.set_maximize":
+            return setVisionMaximize(args.first?.stringValue)
         case "kiwivision.set_clear_app":
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")
@@ -131,6 +133,7 @@ extension KiwiCore {
             updateVision(reassertOrder: true)
         }
         if let cause { cueVisionOff(cause) }
+        refillVision()  // #3064
         vision.onChange(next, cause)
     }
 

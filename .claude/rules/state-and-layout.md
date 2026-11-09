@@ -2425,7 +2425,15 @@ editing here:
   stored `Space.maximized`, which outlives the focus that ended it
   until `retireEndedMaximize` runs; a raw spelling outside the
   register reds `MaximizedReaderCensusTests`, whose `allowed` map
-  is the one copy of who may. **What it fills is read through
+  is the one copy of who may. **KiwiVision's fill (#3064) is the
+  verdict's second half, derived in `StateCoordinator+VisionFill`
+  and never written to `Space`**: what it asks is
+  `StateCoordinator.visionFill`, mirrored in by the one
+  `KiwiCore.refillVision` at every door that changes KiwiVision's
+  look and at the head of `retile()`; a reader that means the hand
+  toggle alone — its press, its retire, its follow — asks
+  `handMaximizedWindow(of:)`, and every other reader takes the
+  verdict (`KiwiVisionMaximizeTests`). **What it fills is read through
   `StateCoordinator.maximizedShape(of:)`, and the window and its
   shape are ONE value, `Space.maximized: Maximize?` (#3062, #3063)**,
   so an ender's `maximized = nil` clears both and a re-point or a

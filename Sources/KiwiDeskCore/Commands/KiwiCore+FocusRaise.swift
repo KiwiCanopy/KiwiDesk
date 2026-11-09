@@ -123,7 +123,7 @@ extension KiwiCore {
         }
         // A focus onto another tiled window ends a maximize; this
         // command's own pass draws the return (#2448).
-        let ended = Set(state.retireEndedMaximize())
+        let ended = retireEndedFills()
         let endedMaximize = !ended.isEmpty
         if let previous = previousFocused, previous != id,
             let frame = state.windows[previous]?.frame

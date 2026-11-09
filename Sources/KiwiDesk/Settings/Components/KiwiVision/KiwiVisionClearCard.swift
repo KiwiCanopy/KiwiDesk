@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// KiwiVision ▸ Stays clear (#2103 ruling 18): what the haze
-/// leaves alone besides the focused window. A card of its own,
-/// since Dim and blur set how strong the haze is and these set
-/// where it reaches.
+/// leaves alone besides the focused window, and the room that
+/// window takes (#3064). A card of its own, since Dim and blur set
+/// how strong the haze is and these set where it reaches.
 struct KiwiVisionClearCard: View {
     @ObservedObject var model: SettingsModel
 
@@ -30,6 +30,11 @@ struct KiwiVisionClearCard: View {
         switch key {
         case .kiwiVision(.clearApp): appRow
         case .kiwiVision(.clearWallpaper): wallpaperRow
+        case .kiwiVision(.maximize):
+            KiwiVisionMaximizeRow(
+                model: model,
+                disabled: reason(for: key) != nil
+            )
         default:
             let _ = assertionFailure(
                 "unrendered KiwiVision census key: \(key.id)"

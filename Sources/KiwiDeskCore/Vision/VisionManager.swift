@@ -149,6 +149,10 @@ public final class VisionManager {
     /// re-mask (`KiwiCore.oweVisionReshape`).
     var listOwed = false
 
+    /// Whether KiwiVision's maximize moved a window since the last
+    /// settle, which owes the plates a re-mask there (#3064).
+    var owesSettleReshape = false
+
     #if DEBUG
         /// Test-only: builds plate backends. Every test core sets
         /// it to the inert plate, so a real panel needs its own

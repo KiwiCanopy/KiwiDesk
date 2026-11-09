@@ -115,11 +115,13 @@ extension AppWideSettings {
         var fadeCurve: VisionFadeCurve?
         var clearWallpaper: Bool?
         var clearApp: Bool?
+        /// Absent while Off (#3064), so it owes no crossing.
+        var maximize: VisionMaximize?
         var neverDimmed: [String]?
         var lenses: [VisionLens]?
 
         enum CodingKeys: String, CodingKey {
-            case dim, blur, appearance, lenses
+            case dim, blur, appearance, lenses, maximize
             case fadeDuration = "fade_duration"
             case fadeCurve = "fade_curve"
             case clearWallpaper = "clear_wallpaper"
@@ -177,6 +179,7 @@ extension AppWideSettings {
             visionClearWallpaper = clear
         }
         if let clear = vision?.clearApp { visionClearApp = clear }
+        if let fill = vision?.maximize { visionMaximize = fill }
         if let apps = vision?.neverDimmed {
             visionNeverDimmed = Self.neverDimmedEntries(apps)
         }
@@ -216,6 +219,7 @@ extension AppWideSettings {
             fadeCurve: visionFadeCurve,
             clearWallpaper: visionClearWallpaper,
             clearApp: visionClearApp,
+            maximize: visionMaximize == .off ? nil : visionMaximize,
             neverDimmed: visionNeverDimmed,
             lenses: visionLenses
         )

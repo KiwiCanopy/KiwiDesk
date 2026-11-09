@@ -23,6 +23,7 @@ struct VisionLensTests {
         lens.overrides.fadeCurve = .linear
         lens.overrides.clearWallpaper = true
         lens.overrides.clearApp = true
+        lens.overrides.maximize = .height
         return lens
     }
 

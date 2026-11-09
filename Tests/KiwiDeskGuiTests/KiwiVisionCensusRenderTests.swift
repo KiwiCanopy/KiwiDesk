@@ -60,7 +60,10 @@ struct KiwiVisionCensusRenderTests {
         )
         #expect(
             KiwiVisionRowOrder.clear
-                == [.kiwiVision(.clearApp), .kiwiVision(.clearWallpaper)]
+                == [
+                    .kiwiVision(.clearApp), .kiwiVision(.clearWallpaper),
+                    .kiwiVision(.maximize),
+                ]
         )
     }
 

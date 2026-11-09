@@ -11,6 +11,8 @@ enum KiwiVisionKey: String, CaseIterable, Hashable {
     case appearance = "appWide.visionAppearance"
     case clearWallpaper = "appWide.visionClearWallpaper"
     case clearApp = "appWide.visionClearApp"
+    /// What the focused window fills while on (#3064).
+    case maximize = "appWide.visionMaximize"
     case neverDimmed = "appWide.visionNeverDimmed"
     /// The lens page (#2103 ruling 29): one setting drawing a
     /// page per live lens, saved with the page's Save.
@@ -51,7 +53,7 @@ extension KiwiVisionKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
-        case .clearWallpaper, .clearApp:
+        case .clearWallpaper, .clearApp, .maximize:
             return .row(
                 .kiwiVision,
                 .kiwiVisionClear,
@@ -105,6 +107,11 @@ extension KiwiVisionKey {
             return .text(
                 "kiwivision.clear_app",
                 help: "kiwivision.clear_app.help"
+            )
+        case .maximize:
+            return .text(
+                "kiwivision.maximize",
+                help: "kiwivision.maximize.help"
             )
         case .neverDimmed:
             return .text(

@@ -42,6 +42,7 @@ struct KiwiVisionLensOverrides: View {
                         \.clearWallpaper,
                         plain.visionClearWallpaper
                     )
+                    maximizeRow
                 }
             }
             SettingsSection(
@@ -142,6 +143,36 @@ struct KiwiVisionLensOverrides: View {
                 ) {
                     ForEach(VisionFadeCurve.allCases, id: \.self) {
                         Text(KiwiVisionLevelsCard.curveTitle($0)).tag($0)
+                    }
+                }
+            }
+        }
+    }
+
+    private var maximizeRow: some View {
+        let value = override(\.maximize)
+        let label = SettingsCatalog.kiwiVision.maximize.text
+        let global = plain.visionMaximize
+        let current = value.wrappedValue ?? global
+        return OverrideChrome(
+            isOn: overrideToggle(value, global: global),
+            inherited: (label, KiwiVisionMaximizeRow.title(global)),
+            inheritsName: defaultName
+        ) {
+            DropdownRow(
+                label: label,
+                spokenValue: KiwiVisionMaximizeRow.title(current),
+                help: nil
+            ) {
+                Picker(
+                    label,
+                    selection: Binding(
+                        get: { current },
+                        set: { value.wrappedValue = $0 }
+                    )
+                ) {
+                    ForEach(KiwiVisionMaximizeRow.order, id: \.self) {
+                        Text(KiwiVisionMaximizeRow.title($0)).tag($0)
                     }
                 }
             }

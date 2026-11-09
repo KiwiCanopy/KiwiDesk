@@ -31,7 +31,7 @@ extension KiwiCore {
         guard let focused, let space = state.workspaces[focused.1]
         else { return .fail("no focused window") }
         let (id, spaceID) = focused
-        if state.maximizedWindow(of: space) == id {
+        if state.handMaximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {
                 if $0.maximized?.shape.matches(shape) == true {
                     $0.maximized = nil

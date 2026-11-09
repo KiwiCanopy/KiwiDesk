@@ -54,8 +54,9 @@ none) live in `docs/design-decisions.md`. This file is the
 engineering side: which input owns an overlay's frame, and when.
 
 **A ring or a mark stands aside on a window filling its screen
-through the one `KiwiCore.screenFillers(of:)`** — a full Maximize
-and a maximizing Monocle's tiled members (#2448, #3062, #2976) —
+through the one `KiwiCore.screenFillers(of:)`** — a full Maximize,
+KiwiVision's Full fill through the same verdict (#3064), and a
+maximizing Monocle's tiled members (#2448, #3062, #2976) —
 never the bars' Hidden reading, which reaches no overlay, nor a
 Maximize or mode check beside it; a new kind of filling window
 joins that helper (`MonocleMaximizeChromeTests`). A reader routing
@@ -807,6 +808,14 @@ Obligations:
   fade's masks reach WindowServer before the order, or the window
   left is covered whole for a frame (`VisionLeaveFadeSeamTests`,
   `VisionLeaveFadeTests`, `KiwiVisionLeavingTests`).
+- **A change of KiwiVision's maximize fill owes the plates one
+  re-mask at the late resync** (#3064): the window left is still
+  shrinking when its fade masks its slot. Flag it through the one
+  `KiwiCore.retireEndedFills`, which every caller of
+  `retireEndedMaximize` takes, and pay it through
+  `payVisionSettleReshape` at the tail of `runBorderResync`, never
+  a reshape of its own on the focus path (`KiwiVisionMaximizeTests`
+  ▸ `settleReshape`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

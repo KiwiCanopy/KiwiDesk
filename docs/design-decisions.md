@@ -8670,6 +8670,54 @@ curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
 
+With KiwiVision's maximize on (#3064, below), the arrival is still
+instant but no longer still: the window you focus clears at its
+slot and then grows into the fill, while the window you leave fades
+as it shrinks back to its slot. The leave fade masks the slot the
+window is heading for, so for the length of the spring the part of
+the shrinking window outside that slot dims at once rather than
+fading; the plates owe a re-mask once the springs settle.
+
+### KiwiVision's maximize is derived, never stored per Space (#3064)
+
+**[Rationale]**
+
+KiwiVision can also give the focused window the room: Off, Full,
+Height or Width, one segmented picker on the KiwiVision page and
+`kiwivision.set_maximize`. It turns nothing else on. Height and
+Width read the share and the anchor Layout Defaults store for the
+screen's shape, the same table a hand Maximize reads, so KiwiVision
+has no anchor of its own (owner, 2026-11-09). A lens overrides the
+mode one row at a time, so a "Writing" lens can ask for Height.
+
+The verdict is computed on every read from three inputs: KiwiVision
+on, the option through `VisionLook`, and each Space's focused tiled
+window. A hand Maximize outranks it, so `maximizedWindow(of:)` is
+the stored toggle first and the derived fill second. It is not
+built on `Space.maximized`: that value names one window at a time
+and is retired whenever its verdict ends (#2448), so a fill stored
+there would have to be re-written on every focus step, every Space
+switch and every lens change, and each writer missed would leave a
+window filled with KiwiVision off. Derived, the fill follows focus
+by what it means, with no switch: a swap reorders the slots and the
+focused window keeps the fill, and the fill lasts across Space
+switches because KiwiVision does. Hover focus moves it like any
+other focus (owner, 2026-11-08): a user who turned both on gets
+both. It stands down on a Monocle Space, where one window already
+fills the screen, and on a floating focus until #3036 rules how a
+float fills.
+
+State keeps one record beside the verdict: the windows the last
+retire saw filled, read only so a focus step can name the window
+left and the window arriving on its pass, as a following Maximize
+does (#3063). Each focus step therefore costs two frame writes into
+apps.
+
+The new `kiwivision.maximize` key is encoded only when it is not
+Off, so files written before it decode unchanged and it owes no
+crossing. It has no per-profile predecessor either: KiwiVision's
+settings were app-wide from their first release.
+
 ### KiwiVision switches the appearance and owes it back (#2103)
 
 **[Rationale]**
