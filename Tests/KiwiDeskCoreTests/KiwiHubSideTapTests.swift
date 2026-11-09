@@ -208,4 +208,86 @@ struct KiwiHubSideTapTests {
         core.keys.tapFire(side.id)
         #expect(opened == [.desktops])
     }
+
+    /// Right ⌘ single bound to a side (id 1) and left ⌘ single on
+    /// another action (id 2); each waits on its double, so a single
+    /// fires only at the gap's lapse.
+    private func lapseRig() throws -> (KeyboardTap, Fired) {
+        let fired = Fired()
+        let tap = KeyboardTap.unstarted(
+            consumers: [.modifierTaps],
+            fire: { fired.append($0) }
+        )
+        func row(_ text: String, _ id: UInt32, side: Bool = false)
+            throws -> ModifierTapRow
+        {
+            ModifierTapRow(
+                combo: try #require(KeyCombo.parse(text)),
+                id: id,
+                opensKiwiHubSide: side
+            )
+        }
+        tap.setRows(
+            KeyboardTapRows(taps: [
+                try row("rcmd", 1, side: true),
+                try row("rcmd+rcmd", 3),
+                try row("lcmd", 2),
+                try row("lcmd+lcmd", 4),
+            ])
+        )
+        return (tap, fired)
+    }
+
+    private func pastTheGap() async {
+        let past = Date().addingTimeInterval(
+            ModifierTapDetector.gapLimit * 3
+        )
+        while Date() < past {
+            try? await Task.sleep(nanoseconds: 20_000_000)
+        }
+    }
+
+    @Test("at a single's lapse KiwiHub lets only a side's tap through")
+    func lapseUnderKiwiHub() async throws {
+        let (passing, passed) = try lapseRig()
+        passing.holdTaps(.kiwiHub)
+        try press(passing, .maskCommand, device: 0x10)
+        let (other, otherFired) = try lapseRig()
+        other.holdTaps(.kiwiHub)
+        try press(other, .maskCommand, device: 0x08)
+        let (closed, closedFired) = try lapseRig()
+        closed.holdTaps(.kiwiHub)
+        try press(closed, .maskCommand, device: 0x10)
+        closed.holdTaps(.all)
+        await pastTheGap()
+        #expect(passed.ids == [1])
+        #expect(otherFired.ids.isEmpty)
+        #expect(closedFired.ids.isEmpty)
+    }
+
+    /// Lua reuses a freed ref, so a released binding's side mark
+    /// must go with it, or the next binding inherits the pass.
+    @Test("a released binding drops its side mark")
+    @MainActor
+    func releaseDropsTheMark() throws {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-hubref-\(UUID().uuidString)")
+        )
+        let lua = try #require(LuaInterpreter())
+        core.keys.lua = lua
+        core.keys.onLog = { _ in }
+        guard case .success(let ref) = lua.makeFunction(body: "error('x')")
+        else {
+            Issue.record("no ref")
+            return
+        }
+        let combo = try #require(KeyCombo.parse("cmd+cmd"))
+        core.keys.bind(combo, ref: ref)
+        core.keys.kiwiHubSideRefs = [ref]
+        core.keys.fire(ref: ref, combo: combo)
+        #expect(core.keys.kiwiHubSideRefs.isEmpty)
+        #expect(core.keys.bindings(for: "default")[combo] == nil)
+    }
 }

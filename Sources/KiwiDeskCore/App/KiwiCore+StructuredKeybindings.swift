@@ -7,7 +7,7 @@ import Foundation
 struct PreparedKeybindings {
     var refs: [String: [KeyCombo: Int32]]
     /// The refs running a KiwiHub side's own Lua (#1229).
-    var kiwiHubSideRefs: Set<Int32> = []
+    var kiwiHubSideRefs: Set<Int32>
     var sequences: [String: [KeySequence]]
     var icons: [String: String]
     var registeredLayers: [KeyLayer]

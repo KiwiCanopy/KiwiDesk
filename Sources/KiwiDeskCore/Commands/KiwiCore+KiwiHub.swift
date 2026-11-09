@@ -18,6 +18,22 @@ public enum KiwiHubSide: String, Sendable, CaseIterable, Equatable {
 
 extension KiwiHubSide: APIChoiceType {}
 
+extension KiwiHubSide {
+    /// The identifier `JumpPanelController.makePanel` stamps on
+    /// KiwiHub's window, read by `EventLoop.ownKeyWindowReading`
+    /// (#1229). Unstamped, KiwiHub holds every tap; stamped on a
+    /// grown peek, a side's tap would pass there.
+    public static let panelIdentifier = "kiwidesk.kiwihub"
+
+    /// The side a binding running `lua` opens: the action is the
+    /// side's own Lua, the spelling the panel's chord labels match.
+    public init?(boundLua lua: String) {
+        guard let side = Self.allCases.first(where: { $0.lua == lua })
+        else { return nil }
+        self = side
+    }
+}
+
 extension KiwiCore {
     /// The `kiwihub.*` verbs (#2265). `show` opens KiwiHub on a
     /// side, switches it there, or closes it when that side is

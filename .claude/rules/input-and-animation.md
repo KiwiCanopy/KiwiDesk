@@ -202,8 +202,11 @@ editing here:
     and no tap leader opens, save under KiwiHub a tap bound to one
     of its sides (#1229)**: derive the `ModifierTapHold` from the
     `ownKeyWindow` reading in `KiwiCore.ownKeyWindowDidChange`
-    alone, never a flag a panel sets; mark a side's row by its
-    bound Lua (`KiwiHubSide(boundLua:)`), never its modifier; and
+    alone, reading KiwiHub off the key window's stamped identifier
+    (`KiwiHubSide.panelIdentifier`), never a flag a panel pushes;
+    mark a side's row by its structured row's Lua
+    (`KiwiHubSide(boundLua:)`), never its modifier, and release a
+    binding's ref through `releaseBinding`, since Lua reuses it; and
     decide it on the tap thread ahead of `fireOrOpen` and again at
     a single tap's lapse (`KiwiHubHeldTapTests`,
     `KiwiHubSideTapTests`). The why

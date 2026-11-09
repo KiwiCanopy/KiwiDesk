@@ -32,17 +32,3 @@ enum ModifierTapHold: Equatable, Sendable {
         }
     }
 }
-
-extension KiwiHubSide {
-    /// The panel's window identifier, which KiwiHub stamps and the
-    /// own key window reading compares against (#1229).
-    public static let panelIdentifier = "kiwidesk.kiwihub"
-
-    /// The side a binding running `lua` opens: the action is the
-    /// side's own Lua, the spelling the panel's chord labels match.
-    public init?(boundLua lua: String) {
-        guard let side = Self.allCases.first(where: { $0.lua == lua })
-        else { return nil }
-        self = side
-    }
-}

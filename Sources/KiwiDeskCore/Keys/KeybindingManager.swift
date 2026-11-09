@@ -146,9 +146,10 @@ public final class KeybindingManager {
     var modifierTapHold = ModifierTapHold.none {
         didSet { keyboardTap?.holdTaps(modifierTapHold) }
     }
-    /// The refs whose binding runs a KiwiHub side's own Lua, which a
-    /// tap row carries as `opensKiwiHubSide`; set by
-    /// `replaceLayers`, and a ref leaves it when released.
+    /// The refs whose structured binding runs a KiwiHub side's own
+    /// Lua, carried as `opensKiwiHubSide`; set by `replaceLayers`,
+    /// pruned by `releaseBinding`. A `keys.bind` function is never
+    /// marked: its action cannot be read.
     var kiwiHubSideRefs: Set<Int32> = []
     let registrar: HotkeyRegistrar
 
@@ -177,8 +178,7 @@ public final class KeybindingManager {
         let old = layers[Self.defaultLayer, default: [:]]
             .updateValue(ref, forKey: combo)
         if let old, old != ref {
-            lua?.release(ref: old)
-            kiwiHubSideRefs.remove(old)
+            releaseBinding(old)
         }
         if currentLayer == Self.defaultLayer {
             activate(Self.defaultLayer)
@@ -192,11 +192,10 @@ public final class KeybindingManager {
         icon: String? = nil,
         meta: [KeyCombo: KeyBindingMeta] = [:]
     ) {
-        if let lua, let old = layers[name] {
+        if lua != nil, let old = layers[name] {
             for ref in old.values
             where bindings.values.contains(ref) == false {
-                lua.release(ref: ref)
-                kiwiHubSideRefs.remove(ref)
+                releaseBinding(ref)
             }
         }
         layers[name] = bindings
@@ -272,7 +271,7 @@ public final class KeybindingManager {
         sequences newSequences: [String: [KeySequence]] = [:],
         icons: [String: String],
         preferredLayer: String,
-        kiwiHubSideRefs newSideRefs: Set<Int32> = []
+        kiwiHubSideRefs newSideRefs: Set<Int32>
     ) {
         let oldLayers = layers
         let oldSequences = sequences
@@ -333,7 +332,14 @@ public final class KeybindingManager {
                 layers[layer] = bindings
             }
         }
-        lua?.release(ref: ref)
+        releaseBinding(ref)
         activate(currentLayer)
+    }
+
+    /// Releases one binding's ref and its KiwiHub side mark, since
+    /// Lua reuses a freed ref for the next binding (#1229).
+    func releaseBinding(_ ref: Int32) {
+        lua?.release(ref: ref)
+        kiwiHubSideRefs.remove(ref)
     }
 }

@@ -182,6 +182,14 @@ struct KiwiHubHeldTapTests {
         )
         core.ownKeyWindowDidChange()
         #expect(made.last?.held == .all)
+        reading = OwnKeyWindowReading(
+            number: 3,
+            isDialog: false,
+            floatsOverWindows: true,
+            isKiwiHub: true
+        )
+        core.ownKeyWindowDidChange()
+        #expect(made.last?.held == .kiwiHub)
         reading = nil
         core.ownKeyWindowDidChange()
         #expect(made.last?.held == ModifierTapHold.none)
