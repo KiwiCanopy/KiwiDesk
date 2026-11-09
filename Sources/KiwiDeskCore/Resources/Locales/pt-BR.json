@@ -2614,6 +2614,7 @@
   "whatsnew.trail.next": "Próximo: %1$@",
   "window_action.refusal.all_here": "Todas as janelas de %1$@ estão aqui",
   "window_action.refusal.already_in": "“%1$@” já está nesse espaço",
+  "window_action.refusal.cannot_change_space_full_screen": "“%1$@” está em tela cheia e não pode trocar de espaço",
   "window_action.refusal.cannot_move_full_screen": "“%1$@” está em tela cheia e não pode trocar de Mesa",
   "window_action.refusal.cannot_move_here": "“%1$@” não pode ser movido para cá",
   "window_action.refusal.cannot_move_here_full_screen": "Uma janela em tela cheia não pode ser movida para cá",

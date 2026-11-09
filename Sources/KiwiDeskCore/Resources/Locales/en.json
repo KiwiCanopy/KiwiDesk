@@ -2614,6 +2614,7 @@
   "whatsnew.trail.next": "Next: %1$@",
   "window_action.refusal.all_here": "Every %1$@ window is here",
   "window_action.refusal.already_in": "“%1$@” is already in that Space",
+  "window_action.refusal.cannot_change_space_full_screen": "“%1$@” is full screen and can't change Space",
   "window_action.refusal.cannot_move_full_screen": "“%1$@” is full screen and can't change Desktop",
   "window_action.refusal.cannot_move_here": "“%1$@” can't be moved here",
   "window_action.refusal.cannot_move_here_full_screen": "A full-screen window can't be moved here",

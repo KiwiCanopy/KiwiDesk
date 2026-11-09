@@ -2614,6 +2614,7 @@
   "whatsnew.trail.next": "Далее: %1$@",
   "window_action.refusal.all_here": "Все окна %1$@ уже здесь",
   "window_action.refusal.already_in": "Окно «%1$@» уже в этом пространстве",
+  "window_action.refusal.cannot_change_space_full_screen": "Окно «%1$@» развёрнуто во весь экран, его нельзя переместить в другое пространство",
   "window_action.refusal.cannot_move_full_screen": "Окно «%1$@» развёрнуто во весь экран, его нельзя переместить на другой Рабочий стол",
   "window_action.refusal.cannot_move_here": "Окно «%1$@» нельзя переместить сюда",
   "window_action.refusal.cannot_move_here_full_screen": "Полноэкранное окно нельзя переместить сюда",

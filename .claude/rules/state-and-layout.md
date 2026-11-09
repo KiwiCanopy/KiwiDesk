@@ -1174,6 +1174,10 @@ editing here:
   A Desktop move refuses a full-screen window, named or focused, since
   its macOS Space is its own (#2888,
   `DesktopMoveNamedWindowTests` ▸ `fullScreenRefuses`).
+  A Space move refuses one too, at every door through
+  `move_to_space`'s move, by asking the one `spaceMoveRefusal`
+  ahead of its target; a new door that files into another Space
+  asks it the same way (#3119, `MoveToSpaceFullScreenTests`).
   A verb filing a window into the Space a SCREEN shows owes the
   refusal of a screen on a full-screen or system Space, asked
   through `screenShowsUserSpace(on:)`, never a

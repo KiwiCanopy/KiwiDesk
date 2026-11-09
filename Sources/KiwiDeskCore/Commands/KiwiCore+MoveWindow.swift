@@ -27,9 +27,7 @@ extension KiwiCore {
         _ target: SpaceID,
         follow: Bool
     ) -> CommandResponse {
-        guard !state.isPocketed(window) else {
-            return .fail("a pocketed window cannot move to a Space")
-        }
+        if let refusal = spaceMoveRefusal(window) { return refusal }
         if state.workspaces.space(of: window) == target,
             stickyMoveBlock(window, to: target) == nil
         {
@@ -37,6 +35,23 @@ extension KiwiCore {
         }
         moveWindow(window, to: target, follow: follow)
         return .ok()
+    }
+
+    /// The refusal of a window no Space move may take, ahead of
+    /// its target: a pocketed window is filed nowhere (#2446), and
+    /// a full-screen one is held on its own macOS Space (#3119).
+    func spaceMoveRefusal(_ window: WindowID) -> CommandResponse? {
+        guard !state.isPocketed(window) else {
+            return .fail("a pocketed window cannot move to a Space")
+        }
+        guard state.windows[window]?.isFullscreen == true else {
+            return nil
+        }
+        let refusal = WindowActionRefusal.cannotChangeSpaceFullScreen(
+            window: windowTitle(window)
+        )
+        cueWindowAction(refusal, on: window)
+        return .fail(refusal.logReason)
     }
 
     /// A move into the window's own Space re-files nothing: a
@@ -89,6 +104,13 @@ extension KiwiCore {
             partner.map({ !state.isPocketed($0) }) ?? true
         else {
             onLog("move: w\(window.raw) refused — in the pocket")
+            return
+        }
+        // A construction net: every door asks `spaceMoveRefusal`
+        // or refuses full screen itself first (#3119).
+        guard !isFullscreen(window), !(partner.map(isFullscreen) ?? false)
+        else {
+            onLog("move: w\(window.raw) refused — full screen")
             return
         }
         // Told where an undeclared target WILL lay out (#1994).
@@ -179,6 +201,10 @@ extension KiwiCore {
             // contract).
             retile(animated: true)
         }
+    }
+
+    private func isFullscreen(_ window: WindowID) -> Bool {
+        state.windows[window]?.isFullscreen == true
     }
 
     /// The one trade filing (#2509): `a` and `b`, in different
