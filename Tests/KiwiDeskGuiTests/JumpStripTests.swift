@@ -185,6 +185,40 @@ struct JumpStripTests {
         #expect(alternative == .side(-1))
     }
 
+    /// ⌥⇥ again steps the strip as ⌘⇥ steps macOS's switcher, ⇧
+    /// back; on another side ⌥⇥ stays swallowed (#3135).
+    @Test("⌥⇥ steps the strip on Windows, ⇧⌥⇥ back")
+    func optionTab() {
+        func key(
+            _ modifiers: NSEvent.ModifierFlags,
+            _ scope: JumpScope = .windows
+        ) -> JumpKey? {
+            JumpKey.of(
+                keyCode: 48,
+                modifiers: modifiers,
+                scope: scope,
+                naming: false
+            )
+        }
+        #expect(key(.option) == .side(1))
+        #expect(key([.option, .shift]) == .side(-1))
+        #expect(key(.option, .shortcuts) == .swallow)
+        #expect(key([]) == .stepScope(forward: true))
+        #expect(key(.control) == .swallow)
+    }
+
+    @Test("the last-app opener steps where Windows shows")
+    func openerSteps() {
+        #expect(JumpPanelController.lastAppAction(showing: nil) == .open)
+        #expect(
+            JumpPanelController.lastAppAction(showing: .windows) == .step
+        )
+        #expect(
+            JumpPanelController.lastAppAction(showing: .view)
+                == .switchScope
+        )
+    }
+
     @Test("a query's strip steps over the apps with no match")
     func typedStepSkipsDimmed() {
         var list = JumpList(snapshot: Self.snapshot)

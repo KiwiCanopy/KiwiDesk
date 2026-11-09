@@ -35,9 +35,11 @@ struct ShowHideCensusRenderTests {
         #expect(Set(all) == censusRows(.atRest))
         #expect(all.count == Set(all).count)
         #expect(lists.allSatisfy { !$0.isEmpty })
+        // Each side's opener and the switcher's last-app one
+        // (#3135).
         #expect(
             ShortcutsRowOrder.kiwiHubAtRest.count
-                == KiwiHubSide.allCases.count
+                == KiwiHubSide.allCases.count + 1
         )
         #expect(censusRows(.showMore).isEmpty)
         #expect(censusRows(.immediate).isEmpty)

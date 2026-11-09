@@ -251,7 +251,7 @@ public struct UIBridgeHooks {
 
     /// `kiwihub.show_last_app()` (#3135): opens the window switcher
     /// with its app strip on the app of the window used last, or
-    /// closes it when that side is up.
+    /// steps the strip to the next app when that side is up.
     public var onKiwihubShowLastApp: @MainActor () -> Void = {}
 
     public init() {}

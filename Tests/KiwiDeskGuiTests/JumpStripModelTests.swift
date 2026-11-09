@@ -169,6 +169,12 @@ struct JumpStripModelTests {
                 .contains("wireStrip(model)")
         )
         let squashed = try squash("JumpPanelController+Strip.swift")
+        // Pressed again on Windows, the opener steps the strip.
+        #expect(
+            squashed.contains(
+                "case.step:currentModel?.handle(.side(1),repeated:false)"
+            )
+        )
         // The pick reaches Core's reopen after the panel's close.
         #expect(squashed.contains("model.onReopen={[weakself]appin"))
         #expect(squashed.contains("core.reopenJumpApp(bundleID:bundleID)"))

@@ -14,6 +14,10 @@ public enum KiwiHubSide: String, Sendable, CaseIterable, Equatable {
     /// the seed, the Settings rows and the panel's chord labels
     /// share.
     public var lua: String { "kiwihub.show(\"\(rawValue)\")" }
+
+    /// The Lua the window switcher's last-app opener runs (#3135),
+    /// the one spelling its seed and its Settings row share.
+    public static let lastAppLua = "kiwihub.show_last_app()"
 }
 
 extension KiwiHubSide: APIChoiceType {}

@@ -38,7 +38,8 @@ enum JumpKey: Equatable {
     /// ⌘, in Layouts or Shortcuts: that side's Settings page —
     /// Layout Defaults, or Shortcuts & Gestures.
     case settings
-    /// Tab with ⌃ or ⌥ stays in the field.
+    /// Tab with ⌃, or with ⌥ off the Windows side, stays in the
+    /// field.
     case swallow
     /// ⌘↓ on Desktops: open the selected Space (#1229).
     case openSpace
@@ -104,6 +105,11 @@ enum JumpKey: Equatable {
         }
         switch keyCode {
         case tab:
+            // ⌥⇥ again walks the strip, as ⌘⇥ walks macOS's
+            // switcher; ⇧ goes back (#3135, owner 2026-11-09).
+            if scope == .windows, held.subtracting(.shift) == .option {
+                return .side(held.contains(.shift) ? -1 : 1)
+            }
             return held.subtracting(.shift).isEmpty
                 ? .stepScope(forward: !held.contains(.shift))
                 : .swallow

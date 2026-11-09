@@ -216,7 +216,7 @@ enum KeybindingCatalog {
     /// key adds over its own (`ShortcutsPanelNounTests`).
     static let jumpToLastApp = NavCommand(
         label: "Show window switcher for last app",
-        lua: "kiwihub.show_last_app()",
+        lua: KiwiHubSide.lastAppLua,
         displayLabel: {
             L(
                 "keybinding.show_window_switcher_last_app",

@@ -15134,7 +15134,14 @@ option on `kiwihub.show`: a side and an opening are two questions,
 and an option would put a second meaning on a call every existing
 binding and `UIBridgeHooks` field already spells one way. It lands
 on the window Core last saw focused, never on row 1, which a lens
-reorders.
+reorders. It is seeded on ⌥⇥ (owner, 2026-11-09), off the ⌃⌥ ladder
+like ⌘⌘: the chord sits beside ⌘⇥ for the same "go back" job, and a
+page's ⌥⇥ item-to-item move in Safari is the cost a user meets.
+Pressed again while the switcher is up it steps the strip to the
+next app, ⇧ stepping back, as ⌘⇥ steps macOS's switcher (owner,
+2026-11-09). That is no blind gesture: each press moves a selection
+drawn before it, and nothing lands until ↩ — releasing ⌥ picks
+nothing, so the hold-and-release form stays ruled out.
 :::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on
