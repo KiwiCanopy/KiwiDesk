@@ -203,11 +203,14 @@ writer, since an end key is a separate trigger; one that asks what
 an action does takes `actionBindings` (end keys included), and one
 that rewrites an action's Lua or kind takes `mappingActions`, which
 reaches the end keys; any other reader carries a sequence whole,
-its `steps` with it. A new Core reader classifies itself in
-`KeySequenceReaderCensusTests`, whose scan stops at Core: a GUI
-reader is review's until the Key sequences card's census lands
-(L-1871b). A profile holds or overrides a whole sequence, never a
-key inside one (`KeySequenceReaderTests`).
+its `steps` with it. A new reader classifies itself in
+`KeySequenceReaderCensusTests` (Core) or
+`KeySequenceGuiReaderCensusTests` (the GUI tree). A profile holds
+or overrides a whole sequence, never a key inside one
+(`KeySequenceReaderTests`); a Settings Save writes one through the
+layer's rows, since the key table names no row without Lua, so the
+Key sequences card edits the loaded page alone
+(`KeySequenceCardSaveTests`).
 
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`

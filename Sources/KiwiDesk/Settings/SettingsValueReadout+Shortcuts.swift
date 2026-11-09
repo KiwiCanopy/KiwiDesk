@@ -116,10 +116,26 @@ extension SettingsValueReadout {
                 rows += shortcutsBindingRows(
                     census,
                     layer: layer,
-                    old: previous.bindings,
+                    old: previous.pressBindings,
                     labels: labels,
                     config: new
                 )
+                // A key sequence's Lua is empty, so it pairs by no
+                // action: its layer's sequences narrate as one edit
+                // (#1871).
+                if previous.sequences != layer.sequences {
+                    rows.append(
+                        .note(
+                            census,
+                            instance: "sequences+" + layer.name,
+                            label: instanceLabel(
+                                L("diff.label.key_sequences", "Key sequences"),
+                                layer.name
+                            ),
+                            note: editedNote
+                        )
+                    )
+                }
             } else {
                 var row = SettingsDiffRow.note(
                     census,
@@ -166,7 +182,7 @@ extension SettingsValueReadout {
     ) -> [SettingsDiffRow] {
         let (removed, added) = shortcutsUnmatched(
             old: old,
-            new: layer.bindings
+            new: layer.pressBindings
         )
         var additions = added
         var rows: [SettingsDiffRow] = []

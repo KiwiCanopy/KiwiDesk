@@ -1097,6 +1097,12 @@ binds the physical key, so switching input sources changes what
 the caps print, not which key fires.
 
 :::unreleased
+A key sequence — a leader chord, then one key after another — is
+recorded in Shortcuts ▸ Key sequences, or written with
+[`define_sequence`](lua-reference.md#define_sequence).
+:::
+
+:::unreleased
 A combo can also be a modifier tapped alone, `cmd+cmd` or `rcmd`
 ([Modifiers and Keys](lua-reference.md#modifiers-and-keys)).
 :::

@@ -40,6 +40,9 @@ struct ShortcutRow: Identifiable {
     /// The label VoiceOver reads where the drawn one abbreviates,
     /// a folded range read as "1 to 3".
     var spokenLabel: String? = nil
+    /// The chord VoiceOver reads where the drawn one is a key
+    /// sequence's path (#1871); nil reads the drawn chord.
+    var spokenCombo: String? = nil
 }
 
 /// Named subgroup of shortcut rows in the Controls band.

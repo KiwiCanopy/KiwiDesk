@@ -92,7 +92,8 @@ extension KeybindingCatalog {
                     AppWideSettings.sameLens($0, lens)
                 }
             }
-            layer.bindings = layer.bindings.map { binding in
+            // A sequence's end keys follow too (#1871).
+            return layer.mappingActions { binding in
                 guard let lens = lensTarget(of: binding.lua),
                     let new = renamed(lens)
                 else { return binding }
@@ -105,7 +106,6 @@ extension KeybindingCatalog {
                 }
                 return binding
             }
-            return layer
         }
     }
 
@@ -116,9 +116,7 @@ extension KeybindingCatalog {
         named name: String
     ) -> [KeyLayer] {
         layers.map { layer in
-            var layer = layer
-            layer.bindings.removeAll { names($0, name) }
-            return layer
+            layer.mappingActions { names($0, name) ? nil : $0 }
         }
     }
 

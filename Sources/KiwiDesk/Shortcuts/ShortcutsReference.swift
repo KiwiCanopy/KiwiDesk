@@ -29,9 +29,10 @@ enum ShortcutsReferenceBuilder {
         var layer = layer
         let openers = Set(JumpScope.allCases.map(\.lua))
         layer.bindings.removeAll { openers.contains($0.lua) }
-        // A key sequence is no press row; its hint panel lists its
-        // keys (#1871).
-        layer.bindings.removeAll(where: \.isSequence)
+        // A key sequence is no press row: its end keys are listed
+        // under their action by path, its leader not at all (#1871).
+        let endKeys = layer.sequences.flatMap(\.endKeys)
+        layer.bindings = layer.pressBindings
 
         // Keyed by row identity (UUID), never `lua`: two bindings
         // can share a command's Lua with different combos (vim
@@ -73,48 +74,76 @@ enum ShortcutsReferenceBuilder {
             band: ShortcutGroup?,
             regroups: Bool
         ) -> [ShortcutRow] {
-            commands.compactMap { cmd in
-                guard let binding = bound(cmd.lua) else {
-                    return nil
-                }
-                consumed.insert(binding.id)
-                let combo = glyphs(binding.combo)
-                // A field the binding sets wins; one it leaves empty
-                // keeps the built-in name or symbol (#2544).
-                var row = ShortcutRow(
-                    id: cmd.lua,
-                    label: binding.desc.isEmpty
-                        ? cmd.resolvedLabel : binding.desc,
-                    combo: combo,
-                    icon: binding.meta.usableSymbol ?? icon(for: cmd),
-                    unavailable: cmd.unavailable != nil,
-                    detail: cmd.detail?(),
-                    fold: ShortcutFold.tag(
-                        for: cmd,
-                        at: places[cmd.lua],
-                        combo: KeyCombo.parse(binding.combo),
-                        rendered: combo
-                    )
+            commands.flatMap { cmd in
+                pathRows(cmd, endKeys, band: band, regroups: regroups)
+            }
+        }
+        // The end keys running `cmd`, after its own row.
+        func pathRows(
+            _ cmd: NavCommand,
+            _ endKeys: [SequenceEndKey],
+            band: ShortcutGroup?,
+            regroups: Bool
+        ) -> [ShortcutRow] {
+            let own = row(cmd, band: band, regroups: regroups)
+            let paths = endKeys.filter { cmd.runs($0.binding.lua) }.map {
+                end in
+                var path = ShortcutRow(
+                    id: ([cmd.lua] + end.path).joined(separator: "\u{1F}"),
+                    label: cmd.resolvedLabel,
+                    combo: SequencePathWords.drawn(end.path),
+                    icon: icon(for: cmd)
                 )
-                row.ownApp = cmd.lua == KeybindingCatalog.openSettings.lua
-                row.pocketMark = [
-                    KeybindingCatalog.pocket.lua,
-                    KeybindingCatalog.pocketWindow.lua,
-                    KeybindingCatalog.pocketList.lua,
-                ].contains(cmd.lua)
-                guard regroups, cmd.unavailable == nil else { return row }
-                switch ShortcutGroup.filing(binding.group) {
-                case .none:
-                    return row
-                case .builtIn(let group) where group == band:
-                    return row
-                case .builtIn(let group):
-                    regrouped.append(OwnRow(row: row, group: group.rawValue))
-                    return nil
-                case .own(let name):
-                    regrouped.append(OwnRow(row: row, group: name))
-                    return nil
-                }
+                path.spokenCombo = SequencePathWords.spoken(end.path)
+                return path
+            }
+            return (own.map { [$0] } ?? []) + paths
+        }
+        func row(
+            _ cmd: NavCommand,
+            band: ShortcutGroup?,
+            regroups: Bool
+        ) -> ShortcutRow? {
+            guard let binding = bound(cmd.lua) else {
+                return nil
+            }
+            consumed.insert(binding.id)
+            let combo = glyphs(binding.combo)
+            // A field the binding sets wins; one it leaves empty
+            // keeps the built-in name or symbol (#2544).
+            var row = ShortcutRow(
+                id: cmd.lua,
+                label: binding.desc.isEmpty
+                    ? cmd.resolvedLabel : binding.desc,
+                combo: combo,
+                icon: binding.meta.usableSymbol ?? icon(for: cmd),
+                unavailable: cmd.unavailable != nil,
+                detail: cmd.detail?(),
+                fold: ShortcutFold.tag(
+                    for: cmd,
+                    at: places[cmd.lua],
+                    combo: KeyCombo.parse(binding.combo),
+                    rendered: combo
+                )
+            )
+            row.ownApp = cmd.lua == KeybindingCatalog.openSettings.lua
+            row.pocketMark = [
+                KeybindingCatalog.pocket.lua,
+                KeybindingCatalog.pocketWindow.lua,
+                KeybindingCatalog.pocketList.lua,
+            ].contains(cmd.lua)
+            guard regroups, cmd.unavailable == nil else { return row }
+            switch ShortcutGroup.filing(binding.group) {
+            case .none:
+                return row
+            case .builtIn(let group) where group == band:
+                return row
+            case .builtIn(let group):
+                regrouped.append(OwnRow(row: row, group: group.rawValue))
+                return nil
+            case .own(let name):
+                regrouped.append(OwnRow(row: row, group: name))
+                return nil
             }
         }
 

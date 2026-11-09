@@ -34,6 +34,11 @@ extension KeybindingCatalog {
         of binding: KeyBinding,
         config: GuiConfig
     ) -> String {
+        if binding.isSequence {
+            return binding.label.trimmed.isEmpty
+                ? L("shortcuts.sequence.unnamed", "Unnamed keys")
+                : binding.label
+        }
         let commands = namedCommands(config, widenedBy: binding)
         guard binding.label.isEmpty else {
             return commands.first(where: { $0.label == binding.label })?

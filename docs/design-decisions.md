@@ -14191,10 +14191,14 @@ action in a layer, which a row cannot draw; a sequence is drawn
 whole, its path in its hint panel, so nothing is hidden. Within one
 step a key is either an end key or opens more keys, never both, so
 no timeout is ever needed; a leader is a chord like a row's, judged
-against the rows of its layer. The Settings half of the ruling, a
-Key sequences card whose rows refuse two siblings on one key "in
-this step" and a row caption naming the sequence ("Also ⌃⌥Space →
-W → H"), is #1871's second change.
+against the rows of its layer. In Settings the Key sequences card
+refuses two siblings on one key "in this step", and the action's
+own row names the sequence in a caption ("Also ⌃⌥Space → W → H").
+A sequence has no "Applies to" column yet: the key table that
+draws it keys a row by its Lua, which a leader has none of, so a
+sequence edited on the live page lands in the layer's shared rows,
+whole, and the card is greyed while a stored profile is edited
+(#3124).
 :::
 
 :::unreleased

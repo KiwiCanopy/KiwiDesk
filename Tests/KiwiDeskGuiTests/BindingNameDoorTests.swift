@@ -50,6 +50,30 @@ struct BindingNameDoorTests {
             "a key sequence node's own name (#1871): a leader or a"
                 + " key that opens more keys runs no catalog action"
         ),
+        "SequencePathWords.swift": (
+            1,
+            "SidedChordWords.label, a chord's spoken words — no "
+                + "binding's label is read"
+        ),
+        "SequenceNodeRow.swift": (
+            1,
+            "the name field's key path on a sequence node, its only"
+                + " name (#1871)"
+        ),
+        "SequenceNodeRow+Recorder.swift": (
+            1,
+            "SidedChordWords.label, a chord's spoken words — no "
+                + "binding's label is read"
+        ),
+        "SequenceTree.swift": (
+            1,
+            "a catalogue pick stores its command's English label, as"
+                + " a navigation row does (#1871)"
+        ),
+        "SettingsModel+LayerReach.swift": (
+            1,
+            "sameRows: a sequence's stored name is a write (#1871)"
+        ),
         "ShortcutsPagePart.swift": (
             1,
             "a census row's text label key, matched to a reveal "

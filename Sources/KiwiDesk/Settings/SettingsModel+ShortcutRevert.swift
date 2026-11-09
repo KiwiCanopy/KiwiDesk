@@ -47,8 +47,9 @@ extension SettingsModel {
         guard let (layer, lua) = revertedBinding(row) else { return [] }
         let saved = savedLayerName(layer)
         let rows =
-            (config.layers.first { $0.name == layer }?.bindings ?? [])
-            + (revertBaseline.first { $0.name == saved }?.bindings ?? [])
+            (config.layers.first { $0.name == layer }?.pressBindings ?? [])
+            + (revertBaseline.first { $0.name == saved }?.pressBindings
+                ?? [])
         return revertActions(layer: layer, lua: lua).dropFirst()
             .compactMap { action in
                 rows.first { $0.lua == action }.map {

@@ -40,8 +40,10 @@ struct ShortcutRowView: View {
                 // A sided chord grows; the name truncates first,
                 // never the chord (#2601).
                 .fixedSize()
-                .accessibilityLabel(SidedChordWords.label(row.combo))
-                .help(SidedChordWords.help(row.combo))
+                .accessibilityLabel(
+                    row.spokenCombo ?? SidedChordWords.label(row.combo)
+                )
+                .help(row.spokenCombo ?? SidedChordWords.help(row.combo))
         }
         .help(row.monospaced ? row.label : "")
         .opacity(row.unavailable ? 0.55 : 1)

@@ -129,7 +129,9 @@ extension SettingsModel {
                 : snapshot.keyLayers.profiles.filter { profile in
                     snapshot.storedKeyLayers(for: profile).contains {
                         $0.name == name
-                            || $0.bindings.contains { $0.lua == switchTo }
+                            || $0.actionBindings.contains {
+                                $0.lua == switchTo
+                            }
                     }
                 }
             try snapshot.rewriteLayers(

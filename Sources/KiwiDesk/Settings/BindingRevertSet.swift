@@ -116,7 +116,9 @@ enum BindingRevertSet {
         _ layer: String,
         in layers: [KeyLayer]
     ) -> [KeyBinding] {
-        layers.first { $0.name == layer }?.bindings ?? []
+        // A key sequence's Lua is empty, so it is no action a ↺
+        // walks; it reverts whole by its own row (#1871).
+        layers.first { $0.name == layer }?.pressBindings ?? []
     }
 
     /// Whether the draft holds `lua`'s rows otherwise than saved.
