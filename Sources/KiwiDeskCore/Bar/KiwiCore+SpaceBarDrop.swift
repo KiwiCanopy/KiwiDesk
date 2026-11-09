@@ -101,10 +101,10 @@ extension KiwiCore {
         // silently re-home a window that `move_to_space` refuses.
         // Refused → no spring at all (no move, no visible switch);
         // the pill explains why, the drag stays on this space.
-        if stickyMoveRefused(window, to: target) { return false }
-        // The verb's full-screen refusal, cued, for the same reason
-        // (#3119).
+        // The verb's full-screen refusal first, cued, for the same
+        // reason (#3119).
         if spaceMoveRefusal(window) != nil { return false }
+        if stickyMoveRefused(window, to: target) { return false }
         tiler.dragExemptWindow = window
         let from = state.workspaces.space(of: window)
         // The one filing (#1150); its float re-anchor stands

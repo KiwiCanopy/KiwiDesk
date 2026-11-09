@@ -24,9 +24,9 @@ struct SpaceMoveDoorSeamTests {
         }
     }
 
-    /// The spring files past `moveWindow`, so it asks beside its
-    /// sticky arm, ahead of the filing.
-    @Test("the spring asks beside its sticky arm")
+    /// The spring files past `moveWindow`, so it asks ahead of its
+    /// sticky arm, as the verb does, and of the filing.
+    @Test("the spring asks ahead of its sticky arm")
     func springAsks() throws {
         let body = try SourceScan.functionBody(
             of: "springSwitchSpace",
@@ -36,10 +36,13 @@ struct SpaceMoveDoorSeamTests {
         let ask = body.range(
             of: "if spaceMoveRefusal(window) != nil { return false }"
         )
+        let sticky = body.range(of: "stickyMoveRefused(window")
         let file = body.range(of: "fileMembership(window")
         #expect(ask != nil)
+        #expect(sticky != nil)
         #expect(file != nil)
-        if let ask, let file {
+        if let ask, let sticky, let file {
+            #expect(ask.lowerBound < sticky.lowerBound)
             #expect(ask.lowerBound < file.lowerBound)
         }
     }
