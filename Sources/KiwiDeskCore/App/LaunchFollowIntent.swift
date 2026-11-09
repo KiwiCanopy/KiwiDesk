@@ -196,7 +196,11 @@ final class LaunchFollowIntent {
     /// Records that `bundleID`'s next rule-placed window is owed a
     /// follow; replaces any earlier debt.
     func record(_ bundleID: String, at now: Date) {
-        quietApps[bundleID.lowercased()] = nil  // the user named it
+        // The user named an app: no quiet open stands over it.
+        quietApps[bundleID.lowercased()] = nil
+        if quietOpen?.bundleIDs.contains(bundleID.lowercased()) == true {
+            quietOpen = nil
+        }
         pending = (bundleID, now)
     }
 
@@ -221,10 +225,18 @@ final class LaunchFollowIntent {
         return pending.bundleID
     }
 
-    /// A lens's quiet open (#3122): the apps it opened in the
-    /// background, owed ONE focus move to the first of their windows
-    /// to arrive. Stamped with the focus and the front app at the
-    /// press; within `drainWindow`, and retired with the debt above.
+    /// How long a lens's quiet open stands (#3122): it has no
+    /// activation to start `drainWindow` from, so it takes the
+    /// slowest cold start, `coldStartGrace`, plus one adoption heal.
+    static let quietBound: TimeInterval =
+        coldStartGrace + drainWindow - FollowFocusIntent.drainWindow
+
+    /// A lens's quiet open (#3122), owed through `oweLaunchFollow`:
+    /// the apps it opened in the background, owed ONE focus move to
+    /// the first of their windows to arrive. Stamped with the focus
+    /// and the front app at the press; within `quietBound`, and
+    /// retired with the debt below. Its own slot, since the debt
+    /// names a set of apps and the press's focus.
     struct QuietOpen {
         let bundleIDs: Set<String>
         let lens: String
@@ -248,8 +260,11 @@ final class LaunchFollowIntent {
         quietOpen = open
     }
 
-    /// The apps a lens opened in the background and when, whose
-    /// arrivals within `drainWindow` the create fold grants no focus.
+    /// The apps a lens opened in the background and when: within
+    /// `quietBound` the create fold grants their arrivals no focus
+    /// and no rule follow, and their activation owes none. A window
+    /// the user opens of such an app inside the bound arrives quiet
+    /// too, the accepted residue.
     private var quietApps: [String: Date] = [:]
 
     /// Notes `apps` as opened quietly at `now`.
@@ -260,7 +275,7 @@ final class LaunchFollowIntent {
     /// Whether a window of `bundleID` arrives from a quiet open.
     func opensQuietly(_ bundleID: String, at now: Date) -> Bool {
         quietApps = quietApps.filter {
-            now.timeIntervalSince($0.value) < Self.drainWindow
+            now.timeIntervalSince($0.value) < Self.quietBound
         }
         return quietApps[bundleID] != nil
     }
@@ -269,7 +284,7 @@ final class LaunchFollowIntent {
     /// within the bound; another app's window leaves it standing.
     func claimQuiet(_ bundleID: String, at now: Date) -> QuietOpen? {
         guard let open = quietOpen else { return nil }
-        guard now.timeIntervalSince(open.at) < Self.drainWindow else {
+        guard now.timeIntervalSince(open.at) < Self.quietBound else {
             quietOpen = nil
             return nil
         }

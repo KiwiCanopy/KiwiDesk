@@ -69,8 +69,9 @@ extension StateCoordinator {
         // Only the rule's own verdict may earn the launch follow
         // (#1599), and only into a Space the user is not in.
         // A Pocket key's candidate keeps its rule but follows none.
+        // Nor does a lens's quiet open (#3122).
         if let ruled, ruled != workspaces.activeSpace,
-            claim != .awaited(window.id)
+            claim != .awaited(window.id), !quiet
         {
             effects.placedByAppRule = ruled
         }

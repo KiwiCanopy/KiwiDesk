@@ -1224,7 +1224,7 @@
   "kiwivision.lens.apps.all_windows": "All windows",
   "kiwivision.lens.apps.auto_open": "Auto-open",
   "kiwivision.lens.apps.auto_open.help": "When this lens turns on and %1$@ has no window open, KiwiDesk opens one.",
-  "kiwivision.lens.apps.auto_open.no_bundle": "KiwiDesk opens only an app it knows by its bundle id.",
+  "kiwivision.lens.apps.auto_open.no_bundle": "KiwiDesk opens only an app it knows by its bundle ID.",
   "kiwivision.lens.apps.auto_open.titled": "A new window would not match the title and would stay hazed. Choose %1$@ to open one.",
   "kiwivision.lens.apps.caption": "These apps stay clear while %1$@ is on.",
   "kiwivision.lens.apps.empty": "No apps yet. Add the apps you work in, and %1$@ keeps them clear.",

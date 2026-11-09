@@ -60,6 +60,9 @@ struct KiwiVisionAutoOpenFocusTests {
     func strangersLeaveTheDebt() {
         let core = Self.owing()
         Self.arrive(6, bundleID: "com.test.other", on: core)
+        // A stranger takes the focus a new window gets.
+        #expect(core.focusedWindowID == WindowID(6))
+        core.focusWindow(WindowID(1), warp: false)
         Self.arrive(7, bundleID: F.music, on: core, overlay: true)
         #expect(core.launchFollow.quietOpen != nil)
     }
@@ -125,16 +128,63 @@ struct KiwiVisionAutoOpenFocusTests {
 
     /// Past the bound the debt and the quiet mark are gone: the
     /// window arrives as any new window does.
-    @Test("the debt ends at the launch follow's bound")
+    @Test("the debt ends at the quiet bound")
     func boundEnds() {
         let core = Self.owing()
         let late = core.wallClock().addingTimeInterval(
-            LaunchFollowIntent.drainWindow + 1
+            LaunchFollowIntent.quietBound + 1
         )
         #expect(core.launchFollow.opensQuietly(F.music, at: late) == false)
-        core.wallClock = { late }
-        Self.arrive(7, bundleID: F.music, on: core)
+        #expect(core.launchFollow.claimQuiet(F.music, at: late) == nil)
         #expect(core.launchFollow.quietOpen == nil)
+    }
+
+    /// Word's cold start measured 7.58 s (#2201): past the launch
+    /// follow's own bound the quiet open still stands.
+    @Test("a slow first window is still quiet and still owed")
+    func slowFirstWindowIsOwed() {
+        let core = Self.owing()
+        let slow = core.wallClock().addingTimeInterval(
+            LaunchFollowIntent.drainWindow + 1
+        )
+        core.wallClock = { slow }
+        Self.arrive(7, bundleID: F.music, on: core)
+        #expect(core.focusedWindowID == WindowID(7))
+    }
+
+    @Test("a rule-filed member in a hidden Space switches nothing")
+    func ruleFiledStays() {
+        let core = Self.owing()
+        let home = core.state.workspaces.activeSpace
+        let ruled = SpaceID("2")
+        core.state.workspaces.ensureSpace(ruled)
+        core.state.appRules[F.music] = ruled
+        Self.arrive(7, bundleID: F.music, on: core)
+        #expect(core.state.workspaces.space(of: WindowID(7)) == ruled)
+        #expect(core.state.workspaces.activeSpace == home)
+        #expect(core.focusedWindowID == WindowID(1))
+        #expect(core.launchFollow.quietOpen == nil)
+    }
+
+    /// The control owes: the same press and start make another app's
+    /// activation an open (#1599).
+    @Test("a quiet app's own activation owes no launch follow")
+    func quietActivationOwesNothing() {
+        let core = Self.owing()
+        core.launchFollow.pressAge = { 0.2 }
+        let now = core.wallClock()
+        for app in [F.music, "com.test.other"] {
+            core.noteAppActivation(
+                AppActivation(
+                    pid: 900_160,
+                    bundleID: app,
+                    launchedAt: now.addingTimeInterval(-0.3)
+                ),
+                now: now
+            )
+            let owed = core.launchFollow.owed(at: now)
+            #expect(owed == (app == F.music ? nil : app))
+        }
     }
 
     @Test("Open or Focus on a quiet app lifts its quiet mark")

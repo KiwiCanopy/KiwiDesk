@@ -4631,6 +4631,11 @@ With a lens name (any case), it turns that lens on — from off, or
 from another lens — and turns KiwiVision off when that lens is the
 one on. A lens with no apps, or a name no lens has, is refused.
 
+:::unreleased
+Turning a lens on opens the apps its
+[`open_apps`](#kiwivisiondefine_lens) lists that have no window.
+:::
+
 A saved profile can leave a lens out through its
 [`lens_reach`](#profile-json-format). While that profile is live,
 turning the lens on is refused: "Writing does not reach Studio". A
@@ -4707,13 +4712,15 @@ that was clear never wait.
 :::unreleased
 `open_apps` lists the apps, from `apps`, that KiwiDesk opens when
 you turn the lens on and they have no window open — one minimized
-or on another Desktop counts as open. They open in the background.
-Where none of the lens's apps had a window, the focus moves once,
-to the first of their windows to arrive on a Desktop a screen
-shows, unless you moved the focus or clicked first. A member
-matched by `titles`, or named by its process name, never opens.
-When no app of the lens is open and none opens, a pill says so.
-Turning a lens on from `init.lua` opens nothing.
+or on another Desktop counts as open. They open in the background,
+and none of their windows takes the focus or switches Space, save
+one: where none of the lens's apps had a window, the first of
+their windows to arrive takes the focus, if a screen shows it and
+you have not moved the focus, clicked or turned the lens off since.
+A member matched by `titles`, or named by its process name, never
+opens. When no app of the lens is open and none opens, a pill says
+so, or names the app KiwiDesk could not find. Turning a lens on
+from `init.lua` opens nothing.
 :::
 
 A setting the lens leaves out follows the

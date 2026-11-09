@@ -64,7 +64,8 @@ public final class VisionManager {
     /// reminder, nil for the default; the GUI announces it.
     public var onHold: @MainActor (String?) -> Void = { _ in }
     /// Whether a config load is running: a lens it turns on opens
-    /// no app (#3122).
+    /// no app (#3122). It covers `init.lua`'s run alone; a Lua
+    /// callback that toggles a lens later opens as a press would.
     var configLoading = false
     /// Hears a lens notice the pill draws, for VoiceOver (#3122).
     public var onNotice: @MainActor (VisionLensNotice) -> Void = { _ in }

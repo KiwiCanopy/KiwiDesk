@@ -281,7 +281,13 @@ editing here:
   from the slot would put every focused command on the window
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
-  argument lives in `docs/design-decisions.md`.
+  argument lives in `docs/design-decisions.md`. **A window a lens
+  opened quietly (#3122) takes neither the grant nor a rule
+  follow**: the arrival arm mirrors `StateCoordinator.arrivesQuietly`
+  in from `LaunchFollowIntent.opensQuietly` ahead of the fold, as
+  `arrivalDisplay` is, and a new fold arm that grants focus or sets
+  `placedByAppRule` reads it too (`KiwiVisionAutoOpenWiringTests` ▸
+  `foldReadsTheMirror`, `KiwiVisionAutoOpenFocusTests`).
   The fold's TARGET skips the App Rule for a POPUP only —
   `ManagedWindow.isPopup`, an overlay on a raised layer (#1602)
   or with no title-bar button (#2475, a Chromium extension
@@ -592,6 +598,14 @@ editing here:
   `placedByAppRule` alone, so a door that must not follow keeps it
   unset rather than adding a check at the claim
   (`LaunchFollowSpawnTests`, `LaunchFollowSeamTests`).
+  **A lens's quiet open (#3122) is owed through the same door**,
+  `oweLaunchFollow(quietly:)`, onto the ledger's `quietOpen` slot:
+  one focus move, claimed ahead of the follow at the first member
+  arrival and paid by a bare focus, never a switch, within
+  `quietBound`. Its apps' activations owe no follow while the mark
+  stands, `record` and `forget(keeping:)` retire it with the debt,
+  and a new owe or retire of it joins `LaunchFollowSeamTests`'
+  register (`KiwiVisionAutoOpenFocusTests` holds each cancel).
   **Every reader of "was this arrival created" goes through ONE
   door with ONE late-create resolution (#2630)** — the follow,
   the `window_created` reason, and any pocket claim (#2629, #2612)

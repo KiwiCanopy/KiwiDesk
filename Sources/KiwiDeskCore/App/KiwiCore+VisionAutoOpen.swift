@@ -36,72 +36,68 @@ extension KiwiCore {
         )
     }
 
-    /// Whether the member `app` has a window: one KiwiDesk tracks,
-    /// one minimized, or one on another Desktop. A tracked-state
-    /// read, never a census.
+    /// Whether the member `app` has a window: one KiwiDesk tracks
+    /// (the pocket's included, in either phase), one minimized, or
+    /// one on another Desktop. A tracked-state read, never a census;
+    /// a ⌘H-hidden app's windows are in none of the three.
     func lensMemberHasWindow(_ app: String) -> Bool {
-        state.windows.all.contains { $0.appRef.listKey == app }
-            || state.minimizeOrder.contains {
-                ($0.bundleID ?? $0.app.lowercased()) == app
-            }
+        func key(_ bundleID: String?, _ name: String) -> String {
+            AppRef(bundleID: bundleID, name: name).listKey
+        }
+        return state.windows.all.contains { $0.appRef.listKey == app }
+            || state.minimizeOrder.contains { key($0.bundleID, $0.app) == app }
             || state.awayWindows.values.contains {
-                $0.appBundleID?.lowercased() == app
+                key($0.appBundleID, $0.appName) == app
             }
     }
 
-    /// The one focus move a quiet open owes (#3122), through the
-    /// launch follow's ledger (#1599): stamped with the focus and
-    /// front app at the press, which its cancels compare against.
+    /// The one focus move a quiet open owes (#3122), owed through
+    /// the launch follow's door (#1599): stamped with the focus and
+    /// the front app at the press, which its cancels compare against.
     private func oweQuietOpenFocus(_ apps: Set<String>, lens: String) {
         let focus = focusedWindowID
-        launchFollow.recordQuiet(
-            .init(
-                bundleIDs: apps,
-                lens: lens,
-                focus: focus,
-                front: focus.flatMap { state.windows[$0]?.appBundleID }?
-                    .lowercased(),
-                at: wallClock()
-            )
+        let open = LaunchFollowIntent.QuietOpen(
+            bundleIDs: apps,
+            lens: lens,
+            focus: focus,
+            front: focus.flatMap { state.windows[$0]?.appBundleID }?
+                .lowercased(),
+            at: wallClock()
         )
+        oweLaunchFollow(quietly: open)
     }
 
-    /// A quiet open's debt claimed at an arrival, and the Space its
-    /// window's app rule owes a follow into, nil for none.
-    struct QuietOpenPaid { let follow: SpaceID? }
-
-    /// Pays the quiet open's focus move on `window`'s arrival, nil
-    /// where the window owes it nothing. Focus moves only while the
-    /// focus is the press's, no click came since and the lens is
-    /// still on; `focusWindow` refuses a window no screen shows,
-    /// and KiwiDesk switches no Desktop for it.
-    func claimQuietOpen(
-        arrived window: ManagedWindow,
-        effects: AppliedEffects
-    ) -> QuietOpenPaid? {
+    /// Pays the quiet open's one focus move at `window`'s arrival;
+    /// true where the window claimed the debt. Focus moves only
+    /// while the focus is the press's, no click came since, the lens
+    /// is still on and a screen shows the window's Space; KiwiDesk
+    /// switches no Space or Desktop for it, so a window its app rule
+    /// files in a hidden Space spends the move and stays there.
+    func claimQuietOpen(arrived window: ManagedWindow) -> Bool {
         guard !eventLoop.switchReads.applying,
-            !window.isTransientOverlay,
+            state.windows[window.id]?.isTransientOverlay == false,
             let owed = launchFollow.claimQuiet(
                 window.appRef.listKey,
                 at: wallClock()
             )
-        else { return nil }
+        else { return false }
         let clicked = lastLeftClick.map { $0.at > owed.at } ?? false
         let lensOn = visionLensName.map {
             AppWideSettings.sameLens($0, owed.lens)
         }
-        guard focusedWindowID == owed.focus, !clicked, lensOn == true
+        let space = state.workspaces.space(of: window.id)
+        let shown =
+            space.flatMap { state.workspaces.display(of: $0) }
+            .map { state.workspaces.activeSpace(on: $0) == space }
+            ?? (space == state.workspaces.activeSpace)
+        guard focusedWindowID == owed.focus, !clicked, lensOn == true,
+            shown
         else {
             onLog("kiwivision: w\(window.id.raw) arrived — focus stays")
-            return QuietOpenPaid(follow: nil)
-        }
-        if let space = effects.placedByAppRule,
-            state.workspaces.space(of: window.id) == space
-        {
-            return QuietOpenPaid(follow: space)
+            return true
         }
         onLog("kiwivision: focus handed to w\(window.id.raw)")
         focusWindow(window.id, refocusRetile: false, warp: true)
-        return QuietOpenPaid(follow: nil)
+        return true
     }
 }

@@ -58,7 +58,7 @@ enum KiwiVisionLensAutoOpenWords {
         case .noBundleID:
             return L(
                 "kiwivision.lens.apps.auto_open.no_bundle",
-                "KiwiDesk opens only an app it knows by its bundle id."
+                "KiwiDesk opens only an app it knows by its bundle ID."
             )
         }
     }

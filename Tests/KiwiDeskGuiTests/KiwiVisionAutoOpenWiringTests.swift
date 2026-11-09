@@ -36,7 +36,12 @@ struct KiwiVisionAutoOpenWiringTests {
         ),
         // The one focus move, claimed ahead of the launch follow.
         (
-            "claimQuietOpen(arrived:window,effects:effects)",
+            "ifclaimQuietOpen(arrived:window){returnnil}",
+            "App/KiwiCore+LaunchFollow.swift", 1
+        ),
+        // A quiet activation owes no follow.
+        (
+            "guard!launchFollow.opensQuietly(bundleID.lowercased(),at:now)",
             "App/KiwiCore+LaunchFollow.swift", 1
         ),
         // The notice crosses as structure, and the pill falls back
@@ -68,6 +73,10 @@ struct KiwiVisionAutoOpenWiringTests {
             "Sources/KiwiDeskCore/State/StateCoordinator+WindowCreated.swift"
         )
         #expect(Self.count("letquiet=arrivesQuietly", in: fold) == 1)
+        // Nor a rule follow.
+        #expect(
+            Self.count("claim!=.awaited(window.id),!quiet", in: fold) == 1
+        )
         #expect(
             Self.count(
                 "guardwindows[window.id]?.isTransientOverlay!=true,!quiet",
