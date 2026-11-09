@@ -289,5 +289,22 @@ struct KiwiHubSideTapTests {
         core.keys.fire(ref: ref, combo: combo)
         #expect(core.keys.kiwiHubSideRefs.isEmpty)
         #expect(core.keys.bindings(for: "default")[combo] == nil)
+
+        // A rebind releases the ref it replaces.
+        let first = try #require(try? lua.makeFunction(body: "").get())
+        let second = try #require(try? lua.makeFunction(body: "").get())
+        core.keys.bind(combo, ref: first)
+        core.keys.kiwiHubSideRefs = [first]
+        core.keys.bind(combo, ref: second)
+        #expect(core.keys.kiwiHubSideRefs.isEmpty)
+
+        // A redefined layer releases the refs it drops.
+        let kept = try #require(try? lua.makeFunction(body: "").get())
+        let dropped = try #require(try? lua.makeFunction(body: "").get())
+        let other = try #require(KeyCombo.parse("ctrl+ctrl"))
+        core.keys.defineLayer("hub", bindings: [combo: kept, other: dropped])
+        core.keys.kiwiHubSideRefs = [kept, dropped]
+        core.keys.defineLayer("hub", bindings: [combo: kept])
+        #expect(core.keys.kiwiHubSideRefs == [kept])
     }
 }
