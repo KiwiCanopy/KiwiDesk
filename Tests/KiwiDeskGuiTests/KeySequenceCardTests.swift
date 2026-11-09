@@ -158,6 +158,23 @@ struct KeySequenceCardTests {
         #expect(text.contains("model.sequenceEditBlock(in: layerName)"))
     }
 
+    @Test("two copies of a layer differ by a sequence's tree")
+    func layerCompareReadsTheTree() {
+        let base = KeyLayer(name: "default", bindings: [sequence()])
+        var renamed = base
+        renamed.bindings[0].steps?[0].label = "Win"
+        var grown = base
+        grown.bindings[0].steps?.append(
+            KeyBinding(combo: "t", lua: left.lua, kind: .navigation)
+        )
+        var named = base
+        named.bindings[0].label = "Other"
+        #expect(SettingsModel.sameRows(base, base))
+        #expect(!SettingsModel.sameRows(base, renamed))
+        #expect(!SettingsModel.sameRows(base, grown))
+        #expect(!SettingsModel.sameRows(base, named))
+    }
+
     @Test("a layer rename and delete reach a sequence's end keys")
     func layerRewritesReachEndKeys() {
         let to = KeybindingCatalog.switchLayerCommand("Gaming").lua
