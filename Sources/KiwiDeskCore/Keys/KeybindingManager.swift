@@ -157,6 +157,8 @@ public final class KeybindingManager {
             KeyboardTap.live(consumers: $0, fire: $1, report: $2)
         }
     private var suspended = false
+    /// While true, a modifier tap fires nothing (#1229).
+    public var modifierTapsHeld = false
     let registrar: HotkeyRegistrar
 
     public init(

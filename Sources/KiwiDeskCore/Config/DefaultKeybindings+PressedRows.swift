@@ -34,6 +34,18 @@ extension DefaultKeybindings {
         )
     }
 
+    /// The Desktop overview on a double tap of either `⌘`, the same
+    /// key twice (#1229, owner 2026-11-01). A tap rides the keyboard
+    /// tap, never Carbon, so no base moves it.
+    public static func desktopOverviewRow() -> KeyBinding {
+        KeyBinding(
+            combo: "cmd+cmd",
+            lua: KiwiHubSide.desktops.lua,
+            kind: .navigation,
+            label: "Show Desktop overview"
+        )
+    }
+
     /// KiwiVision on `⌃⌥V` (#2103), V for vision. Free in
     /// `SystemShortcuts.map` and macOS's symbolic hotkeys
     /// (read 2026-10-14).

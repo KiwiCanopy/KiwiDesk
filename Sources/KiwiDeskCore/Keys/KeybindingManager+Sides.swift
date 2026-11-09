@@ -158,7 +158,9 @@ extension KeybindingManager {
             keyboardTap?.drainSequenceDecisions().forEach(sequenceDecided)
             return
         }
-        guard !isSuspended, let live = tapBindings[id] else { return }
+        guard !isSuspended, let live = tapBindings[id],
+            !(modifierTapsHeld && live.combo.isTap)
+        else { return }
         pressFire(ref: live.ref, combo: live.combo, id: nil)
     }
 }

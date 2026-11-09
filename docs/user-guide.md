@@ -992,6 +992,11 @@ typing searches your shortcuts, and `⌃⌥L` the **view picker**,
 which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
+:::unreleased
+`⌘⌘`, either ⌘ tapped twice, opens KiwiHub's **Desktop overview**.
+Taps do nothing while KiwiHub is open.
+:::
+
 `⌃⌥R` returns the focused space's sizes to what your profile set
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
 listed under Shortcuts & Gestures ▸ Size & float.

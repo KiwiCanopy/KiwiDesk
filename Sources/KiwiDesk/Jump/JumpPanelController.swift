@@ -328,10 +328,12 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
 
     /// The field takes the keys whenever the panel does.
     func windowDidBecomeKey(_ notification: Notification) {
+        core.setKiwiHubHoldsKeys(true)
         currentModel?.requestFieldFocus()
     }
 
     func windowDidResignKey(_ notification: Notification) {
+        core.setKiwiHubHoldsKeys(false)
         jumpLog.log("KiwiDesk: jump resign key; open \(self.isOpen)")
         close()
     }

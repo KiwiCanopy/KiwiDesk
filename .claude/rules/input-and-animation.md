@@ -198,6 +198,12 @@ editing here:
     press the recorder reads and fires a tap the recorder is
     recording
     (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
+  - **While KiwiHub holds the keyboard a modifier tap fires
+    nothing (#1229)**: KiwiHub's keys ride every modifier, so the
+    hold is set through `KiwiCore.setKiwiHubHoldsKeys` from the
+    panel's key and resign key alone, and read in `tapFire`; a
+    further key panel that takes modifiers sets it the same way
+    (`KiwiHubHeldTapTests`, `KiwiHubTapHoldWiringTests`).
   - **On its own thread, deciding from the rows handed it** and
     passing every event no swallowing consumer answers; the
     callback does

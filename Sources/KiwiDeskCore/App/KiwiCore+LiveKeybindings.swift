@@ -146,4 +146,11 @@ extension KiwiCore {
     public func resumeHotkeysForRecording() {
         keys.resume()
     }
+
+    /// Whether KiwiHub holds the keyboard (#1229): while it does,
+    /// a modifier tap fires nothing, since KiwiHub's own keys use
+    /// those modifiers. The GUI sets it at key and resign key.
+    public func setKiwiHubHoldsKeys(_ holds: Bool) {
+        keys.modifierTapsHeld = holds
+    }
 }
