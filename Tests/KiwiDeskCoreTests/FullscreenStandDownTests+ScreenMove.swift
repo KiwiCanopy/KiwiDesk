@@ -67,10 +67,12 @@ extension FullscreenStandDownTests {
             )
         )
 
-        // A full-screen window refuses a move onto a user Desktop
-        // too: macOS holds it on its own Space (#3119).
-        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        // A full-screen window refuses with its own rule ahead of
+        // the screen's, and onto a user Desktop too (#3119).
         core.state.apply(.windowFullscreenChanged(window, isFullscreen: true))
+        let first = core.execute("move_to_display_last")
+        #expect(first.error == "a full-screen window cannot change Space")
+        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         lines.removeAll()
         let held = core.execute("move_to_display_last")
         #expect(held.error == "a full-screen window cannot change Space")

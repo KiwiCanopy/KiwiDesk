@@ -19,8 +19,12 @@ struct SpaceMoveDoorSeamTests {
         let move = body.range(of: "moveWindow(id, to: target")
         #expect(ask != nil)
         #expect(move != nil)
-        if let ask, let move {
-            #expect(ask.lowerBound < move.lowerBound)
+        if let ask, let move, ask.lowerBound < move.lowerBound {
+            // Inside the branch: no brace closes it before the move.
+            let between = body[ask.upperBound..<move.lowerBound]
+            #expect(!between.contains("}"))
+        } else {
+            Issue.record("the move precedes its ask")
         }
     }
 
