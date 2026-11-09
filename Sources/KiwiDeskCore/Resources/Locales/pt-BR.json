@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Preenche a largura da tela com esta janela, com uma parte da altura da tela, deixando o resto do espaço como está. Pressione de novo, ou mova o foco para outra janela, para devolvê-la ao lugar.",
   "keybinding.move_to_desktop": "Mover para a Mesa %1$@",
   "keybinding.move_to_desktop_follow": "Mover para a Mesa %1$@ e seguir",
+  "keybinding.move_to_display_last": "Mover para a última tela usada",
+  "keybinding.move_to_display_last_follow": "Mover para a última tela usada e seguir",
   "keybinding.move_to_space": "Mover para o espaço %1$@",
   "keybinding.move_to_space_follow": "Mover para o espaço %1$@ e seguir",
   "keybinding.move_window_to_next_track": "Mover janela para o Track seguinte",
@@ -1609,6 +1611,8 @@
   "menu.status.space.tiling_off": "%1$@, lado a lado desativado",
   "menu.status.starting.a11y": "KiwiDesk (iniciando)",
   "menu.status.starting.tooltip": "O KiwiDesk está iniciando — examinando seus apps abertos.",
+  "menu.status.sync_paused.a11y": "KiwiDesk (sincronização pausada)",
+  "menu.status.sync_paused.tooltip": "“%1$@” está em pausa — abra o menu para ver o motivo.",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk (atualização disponível)",
   "menu.status.update.tooltip": "Há uma atualização do KiwiDesk disponível — abra o menu para instalá-la.",
@@ -1616,6 +1620,7 @@
   "menu.status.warning.tooltip": "O KiwiDesk precisa da permissão de Acessibilidade. O gerenciamento de janelas está pausado.",
   "menu.status.whats_new.a11y": "KiwiDesk (novidades em %1$@)",
   "menu.status.whats_new.tooltip": "O KiwiDesk foi atualizado — abra o menu para ver as novidades.",
+  "menu.sync_paused": "Sincronização pausada…",
   "menu.tiling_off": "Lado a lado desativado neste espaço",
   "menu.update_available": "Atualização disponível…",
   "menu.whats_new": "Novidades do KiwiDesk %1$@…",
@@ -2625,5 +2630,6 @@
   "window_action.refusal.no_title_match": "Nenhuma janela de %1$@ corresponde a “%2$@”",
   "window_action.refusal.nothing_here_to_swap": "Nenhuma janela aqui para trocar",
   "window_action.refusal.nothing_to_gather": "Nenhuma janela de %1$@ para reunir",
+  "window_action.refusal.screen_shows_full_screen": "Uma janela não pode ser movida para uma tela que mostra um app em tela cheia",
   "window_action.refusal.swap_with_self": "“%1$@” não pode ser trocado com ele mesmo"
 }

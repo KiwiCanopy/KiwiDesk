@@ -34,6 +34,33 @@ extension KeybindingCatalog {
         }
     )
 
+    /// Send the focused window to the screen the focus was on
+    /// before, staying or following (#3117). No default chord; the
+    /// direction forms stay Lua and CLI only until #2764 settles
+    /// which way a screen lies.
+    static let screenMoveRows: [NavCommand] = [
+        NavCommand(
+            label: "Move to last screen",
+            lua: "KiwiDesk.move_to_display_last()",
+            displayLabel: {
+                L(
+                    "keybinding.move_to_display_last",
+                    "Move to last screen"
+                )
+            }
+        ),
+        NavCommand(
+            label: "Move to last screen & follow",
+            lua: "KiwiDesk.move_to_display_last_and_follow()",
+            displayLabel: {
+                L(
+                    "keybinding.move_to_display_last_follow",
+                    "Move to last screen & follow"
+                )
+            }
+        ),
+    ]
+
     /// Go back / forward in the Space history.
     static let spaceHistoryRows: [NavCommand] = [
         NavCommand(

@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "讓這個視窗填滿螢幕寬度，高度佔螢幕的一定比例，空間中的其餘部分維持不變。再按一次，或把焦點移到其他視窗，即可讓它回到原處。",
   "keybinding.move_to_desktop": "移至桌面 %1$@",
   "keybinding.move_to_desktop_follow": "移至桌面 %1$@ 並跟隨",
+  "keybinding.move_to_display_last": "移至上次使用的螢幕",
+  "keybinding.move_to_display_last_follow": "移至上次使用的螢幕並跟隨",
   "keybinding.move_to_space": "移至空間 %1$@",
   "keybinding.move_to_space_follow": "移至空間 %1$@ 並跟隨",
   "keybinding.move_window_to_next_track": "將視窗移至下一條軌道",
@@ -1609,6 +1611,8 @@
   "menu.status.space.tiling_off": "%1$@，並排已關閉",
   "menu.status.starting.a11y": "KiwiDesk（正在啟動）",
   "menu.status.starting.tooltip": "KiwiDesk 正在啟動 — 逐一檢查你開啟的 App。",
+  "menu.status.sync_paused.a11y": "KiwiDesk（同步已暫停）",
+  "menu.status.sync_paused.tooltip": "「%1$@」已暫停 — 打開選單查看原因。",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk（有可用的更新）",
   "menu.status.update.tooltip": "KiwiDesk 有可用的更新 — 打開選單即可安裝。",
@@ -1616,6 +1620,7 @@
   "menu.status.warning.tooltip": "KiwiDesk 需要「輔助使用」權限。視窗管理已暫停。",
   "menu.status.whats_new.a11y": "KiwiDesk（%1$@ 的新功能）",
   "menu.status.whats_new.tooltip": "KiwiDesk 已更新 — 打開選單即可查看新功能。",
+  "menu.sync_paused": "同步已暫停…",
   "menu.tiling_off": "此空間關閉並排",
   "menu.update_available": "有可用的更新…",
   "menu.whats_new": "KiwiDesk %1$@ 的新功能…",
@@ -2625,5 +2630,6 @@
   "window_action.refusal.no_title_match": "沒有符合「%2$@」的 %1$@ 視窗",
   "window_action.refusal.nothing_here_to_swap": "這裡沒有可互換的視窗",
   "window_action.refusal.nothing_to_gather": "沒有可收集的 %1$@ 視窗",
+  "window_action.refusal.screen_shows_full_screen": "視窗無法移到正在顯示全螢幕 App 的螢幕",
   "window_action.refusal.swap_with_self": "「%1$@」無法與自身互換"
 }

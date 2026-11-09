@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Разворачивает это окно на всю ширину экрана, занимая часть высоты экрана и не меняя остальное пространство. Нажми ещё раз или переведи фокус на другое окно, чтобы вернуть его на место.",
   "keybinding.move_to_desktop": "Переместить на Рабочий стол %1$@",
   "keybinding.move_to_desktop_follow": "Переместить на Рабочий стол %1$@ и перейти",
+  "keybinding.move_to_display_last": "Переместить на последний использованный экран",
+  "keybinding.move_to_display_last_follow": "Переместить на последний использованный экран и перейти",
   "keybinding.move_to_space": "Переместить в пространство %1$@",
   "keybinding.move_to_space_follow": "Переместить в пространство %1$@ и перейти",
   "keybinding.move_window_to_next_track": "Переместить окно в следующий Track",
@@ -1609,6 +1611,8 @@
   "menu.status.space.tiling_off": "%1$@, мозаика выключена",
   "menu.status.starting.a11y": "KiwiDesk (запускается)",
   "menu.status.starting.tooltip": "KiwiDesk запускается — просматривает твои открытые приложения.",
+  "menu.status.sync_paused.a11y": "KiwiDesk (синхронизация на паузе)",
+  "menu.status.sync_paused.tooltip": "«%1$@» на паузе — открой меню, чтобы узнать почему.",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk (доступно обновление)",
   "menu.status.update.tooltip": "Доступно обновление KiwiDesk — открой меню, чтобы установить его.",
@@ -1616,6 +1620,7 @@
   "menu.status.warning.tooltip": "KiwiDesk требуется разрешение «Универсальный доступ». Управление окнами на паузе.",
   "menu.status.whats_new.a11y": "KiwiDesk (что нового в %1$@)",
   "menu.status.whats_new.tooltip": "KiwiDesk обновлён — открой меню, чтобы посмотреть, что нового.",
+  "menu.sync_paused": "Синхронизация на паузе…",
   "menu.tiling_off": "Мозаика выключена в этом пространстве",
   "menu.update_available": "Доступно обновление…",
   "menu.whats_new": "Что нового в KiwiDesk %1$@…",
@@ -2625,5 +2630,6 @@
   "window_action.refusal.no_title_match": "Нет окна %1$@, подходящего под «%2$@»",
   "window_action.refusal.nothing_here_to_swap": "Здесь нет окна для обмена местами",
   "window_action.refusal.nothing_to_gather": "Нет окон %1$@, которые можно собрать",
+  "window_action.refusal.screen_shows_full_screen": "Окно нельзя переместить на экран, на котором показано полноэкранное приложение",
   "window_action.refusal.swap_with_self": "Окно «%1$@» нельзя поменять местами с самим собой"
 }

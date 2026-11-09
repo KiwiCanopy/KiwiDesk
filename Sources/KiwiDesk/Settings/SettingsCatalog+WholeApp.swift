@@ -279,6 +279,12 @@ struct GeneralControls: Sendable {
         "general.applies_immediately.title",
         "Applies immediately"
     )
+    /// The Sync across Macs group, where the quick menu's Sync
+    /// Paused… row lands (#3088); keyed on its census label.
+    let syncAcrossMacs = SettingsControl(
+        "general.sync",
+        "Sync across Macs"
+    )
     /// Declared with its children so a search hit on any of
     /// them opens the drawer it lands in (#1250).
     let generalAdvanced = SettingsDrawer(

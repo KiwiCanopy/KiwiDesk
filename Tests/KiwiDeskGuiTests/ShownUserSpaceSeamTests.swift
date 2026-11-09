@@ -101,13 +101,25 @@ struct ShownUserSpaceSeamTests {
 
     /// The stand-down's live read goes through the one seam both test
     /// cores pin (#2937): a host's own full-screen Space stood the
-    /// pocket suites down on the owner's Mac.
+    /// pocket suites down on the owner's Mac. The read lives in the
+    /// one `screenShowsUserSpace`, which the stand-down and the
+    /// screen moves (#3117) both ask.
     @Test("the stand-down's live Space read is a pinned seam")
     func liveReadIsPinned() throws {
         let covering = try SourceScan.strippedSource(
             at: Self.core.appendingPathComponent(
                 "App/KiwiCore+ScreenCovering.swift"
             )
+        )
+        let verdict = try #require(
+            SourceScan.declarationBody(
+                after: "func screenShowsUserSpace(on display: DisplayID)",
+                in: covering
+            )
+        )
+        #expect(
+            verdict.occurrences(of: "live: desktopMemory.liveSpaceIsUser")
+                == 1
         )
         let standDown = try #require(
             SourceScan.declarationBody(
@@ -116,7 +128,7 @@ struct ShownUserSpaceSeamTests {
             )
         )
         #expect(
-            standDown.occurrences(of: "live: desktopMemory.liveSpaceIsUser")
+            standDown.occurrences(of: "screenShowsUserSpace(on: display)")
                 == 1
         )
         #expect(

@@ -63,6 +63,7 @@ struct SyncAcrossMacsRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .searchAnchored(SettingsCatalog.general.syncAcrossMacs)
         .onAppear {
             folder = model.syncFolder
             follows = model.syncFollows

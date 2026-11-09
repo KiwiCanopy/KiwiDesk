@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Remplit la largeur de l'écran avec cette fenêtre, sur une part de la hauteur de l'écran, sans toucher au reste de l'espace. Appuyez de nouveau, ou déplacez le focus vers une autre fenêtre, pour la remettre à sa place.",
   "keybinding.move_to_desktop": "Déplacer vers le Bureau %1$@",
   "keybinding.move_to_desktop_follow": "Déplacer vers le Bureau %1$@ et suivre",
+  "keybinding.move_to_display_last": "Déplacer vers le dernier écran utilisé",
+  "keybinding.move_to_display_last_follow": "Déplacer vers le dernier écran utilisé et suivre",
   "keybinding.move_to_space": "Déplacer vers l'espace %1$@",
   "keybinding.move_to_space_follow": "Déplacer vers l'espace %1$@ et suivre",
   "keybinding.move_window_to_next_track": "Déplacer vers le Track suivant",
@@ -1609,6 +1611,8 @@
   "menu.status.space.tiling_off": "%1$@, mosaïque désactivée",
   "menu.status.starting.a11y": "KiwiDesk (démarrage en cours)",
   "menu.status.starting.tooltip": "KiwiDesk démarre — il parcourt vos apps ouvertes.",
+  "menu.status.sync_paused.a11y": "KiwiDesk (synchronisation en pause)",
+  "menu.status.sync_paused.tooltip": "« %1$@ » est en pause — ouvrez le menu pour savoir pourquoi.",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk (mise à jour disponible)",
   "menu.status.update.tooltip": "Une mise à jour de KiwiDesk est disponible — ouvrez le menu pour l'installer.",
@@ -1616,6 +1620,7 @@
   "menu.status.warning.tooltip": "KiwiDesk a besoin de l'autorisation d'Accessibilité. La gestion des fenêtres est en pause.",
   "menu.status.whats_new.a11y": "KiwiDesk (nouveautés de %1$@)",
   "menu.status.whats_new.tooltip": "KiwiDesk a été mis à jour — ouvrez le menu pour voir les nouveautés.",
+  "menu.sync_paused": "Synchronisation en pause…",
   "menu.tiling_off": "Mosaïque désactivée pour cet espace",
   "menu.update_available": "Mise à jour disponible…",
   "menu.whats_new": "Nouveautés de KiwiDesk %1$@…",
@@ -2625,5 +2630,6 @@
   "window_action.refusal.no_title_match": "Aucune fenêtre de %1$@ ne correspond à « %2$@ »",
   "window_action.refusal.nothing_here_to_swap": "Aucune fenêtre ici avec laquelle échanger",
   "window_action.refusal.nothing_to_gather": "Aucune fenêtre de %1$@ à rassembler",
+  "window_action.refusal.screen_shows_full_screen": "Une fenêtre ne peut pas être déplacée vers un écran qui affiche une app en plein écran",
   "window_action.refusal.swap_with_self": "« %1$@ » ne peut pas être échangé avec lui-même"
 }

@@ -40,20 +40,26 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
         else { return .expected(Direction.self) }
-        let screens = tiler.displayFrames()
-        guard let here = focusedScreen,
-            let frame = screens.first(where: { $0.id == here })?.frame,
-            let target = ScreenHop.ahead(
-                of: frame,
-                in: direction,
-                band: frame,
-                among: screens.filter { $0.id != here }
-            ).first
-        else {
+        guard let target = screenAhead(direction) else {
             bumpAtScreenEdge(direction)
             return .fail("no screen \(raw) of focus")
         }
         return focusScreen(target)
+    }
+
+    /// The nearest screen `direction` of the focused one, the one
+    /// answer every screen verb's direction form takes (#3117).
+    func screenAhead(_ direction: Direction) -> DisplayID? {
+        let screens = tiler.displayFrames()
+        guard let here = focusedScreen,
+            let frame = screens.first(where: { $0.id == here })?.frame
+        else { return nil }
+        return ScreenHop.ahead(
+            of: frame,
+            in: direction,
+            band: frame,
+            among: screens.filter { $0.id != here }
+        ).first
     }
 
     /// Switches to the Space `display` shows. An empty one still
@@ -69,7 +75,7 @@ extension KiwiCore {
 
     /// The dead-end bump on the focused window (#436); an empty
     /// Space has no ring and says nothing.
-    private func bumpAtScreenEdge(_ direction: Direction) {
+    func bumpAtScreenEdge(_ direction: Direction) {
         guard let space = activeSpace,
             let focused = state.focusAnchor(of: space)
         else { return }

@@ -25,6 +25,13 @@ public enum APIReference {
             ("focus_display", "focus_display"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),
+            ("move_to_display_last", "move_to_display_last"),
+            (
+                "move_to_display_last_and_follow",
+                "move_to_display_last_and_follow"
+            ),
+            ("move_to_display", "move_to_display"),
+            ("move_to_display_and_follow", "move_to_display_and_follow"),
             // The Desktop twins (#884): `desktop` is macOS's,
             // matching the event namespace and the bind verb.
             ("focus_desktop", "focus_desktop"),
@@ -327,22 +334,4 @@ public enum APIReference {
         "exec", "bind", "on", "define_layer", "define_sequence",
         "switch_layer", "open_settings",
     ]
-
-    /// Command names reachable through dispatcher and CLI/IPC (#37).
-    public static var dispatchable: [String] {
-        var names = Set(commands.map(\.command))
-        for (table, functions) in namespaces {
-            for function in functions {
-                names.insert("\(table).\(function)")
-            }
-        }
-        names.formUnion(cliOnly)
-        return names.sorted()
-    }
-
-    /// Full set of command names for census cross-checking
-    /// (`APIRecordCensusTests`, `CLIHelpSeamTests`, #1033).
-    public static var allCommands: [String] {
-        Set(dispatchable).union(luaOnly).sorted()
-    }
 }

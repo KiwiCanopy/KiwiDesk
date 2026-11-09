@@ -215,16 +215,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptRuleKeep()
     }
 
-    /// A change the sync folder brought in, and where following
-    /// stands (#2324 slice 3).
-    func adoptSyncedChange(_ change: SyncedChange) {
-        model.adoptSyncedChange(change)
-    }
-
-    func syncStatusChanged(_ status: SyncStatus) {
-        model.sync.status = status
-    }
-
     /// Re-reads a setup `restore_setup` replaced (#2517).
     func reloadAfterRestore() {
         model.reload()

@@ -111,3 +111,12 @@ extension SettingsAnchor {
         }
     }
 }
+
+extension SettingsAnchor {
+    /// The Sync across Macs row, whose status line says why
+    /// following stopped — the Sync Paused… row's landing (#3088).
+    static let syncAcrossMacs = SettingsAnchor(
+        destination: .general,
+        anchor: SettingsCatalog.general.syncAcrossMacs.id
+    )
+}

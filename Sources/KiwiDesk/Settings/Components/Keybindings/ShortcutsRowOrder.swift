@@ -71,9 +71,11 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleAppBar),
     ]
 
-    /// Move windows group order: swaps, then space moves.
+    /// Move windows group order: swaps, the last-screen moves
+    /// (#3117), then space moves.
     static let moveWindowsAtRest: [SettingKey] = [
         .shortcuts(.swapDir),
+        .shortcuts(.screenMove),
         .shortcuts(.moveToSpace),
         .shortcuts(.moveToSpaceFollow),
     ]

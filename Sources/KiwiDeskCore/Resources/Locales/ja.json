@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "このウインドウを画面の幅いっぱいに広げ、高さは画面の一定の割合にします。スペースのほかの部分はそのままです。もう一度押すか、フォーカスを別のウインドウに移すと元に戻ります。",
   "keybinding.move_to_desktop": "ウインドウをデスクトップ %1$@ に移動",
   "keybinding.move_to_desktop_follow": "ウインドウをデスクトップ %1$@ に移動して追従",
+  "keybinding.move_to_display_last": "ウインドウを最後に使った画面に移動",
+  "keybinding.move_to_display_last_follow": "ウインドウを最後に使った画面に移動して追従",
   "keybinding.move_to_space": "ウインドウをスペース %1$@ に移動",
   "keybinding.move_to_space_follow": "ウインドウをスペース %1$@ に移動して追従",
   "keybinding.move_window_to_next_track": "ウインドウを次のトラックに移動",
@@ -1609,6 +1611,8 @@
   "menu.status.space.tiling_off": "%1$@、タイル表示オフ",
   "menu.status.starting.a11y": "KiwiDesk（起動中）",
   "menu.status.starting.tooltip": "KiwiDeskを起動しています。開いているアプリを順に確認中です。",
+  "menu.status.sync_paused.a11y": "KiwiDesk（同期を一時停止中）",
+  "menu.status.sync_paused.tooltip": "「%1$@」は一時停止中です。理由を確認するにはメニューを開いてください。",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk（アップデートあり）",
   "menu.status.update.tooltip": "KiwiDeskのアップデートが利用可能です。インストールするにはメニューを開いてください。",
@@ -1616,6 +1620,7 @@
   "menu.status.warning.tooltip": "KiwiDeskにはアクセシビリティの許可が必要です。ウインドウ管理は一時停止しています。",
   "menu.status.whats_new.a11y": "KiwiDesk（%1$@ の新機能）",
   "menu.status.whats_new.tooltip": "KiwiDeskがアップデートされました。新機能を見るにはメニューを開いてください。",
+  "menu.sync_paused": "同期を一時停止中…",
   "menu.tiling_off": "このスペースのタイル表示をオフ",
   "menu.update_available": "アップデートが利用可能…",
   "menu.whats_new": "KiwiDesk %1$@ の新機能…",
@@ -2625,5 +2630,6 @@
   "window_action.refusal.no_title_match": "「%2$@」に一致する%1$@のウインドウはありません",
   "window_action.refusal.nothing_here_to_swap": "ここに入れ替えるウインドウがありません",
   "window_action.refusal.nothing_to_gather": "集める%1$@のウインドウはありません",
+  "window_action.refusal.screen_shows_full_screen": "フルスクリーンのアプリを表示中の画面にはウインドウを移動できません",
   "window_action.refusal.swap_with_self": "「%1$@」を自身と入れ替えることはできません"
 }
