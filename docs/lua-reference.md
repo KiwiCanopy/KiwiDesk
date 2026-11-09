@@ -6168,7 +6168,8 @@ layout Space nothing is tiled, so only a second call or the window
 leaving ends it. `move_floating`, `center_floating`, a resize and a
 mouse drag put it back first; a mouse resize of its edge keeps the
 new size instead. Fails with a pill on a dialog, a full-screen
-window and the Pocket window.
+window and the Pocket window. A floating window takes an axis too,
+and `"in_place"` centres it on the frame it had.
 :::
 
 A sticky window fills the screen of the Space it is drawn on. Its
@@ -6461,7 +6462,7 @@ that screen.
 Out of the pocket it wears the pocket mark inside its top-right
 corner, whatever [`sticky.set_mark`](#stickyset_mark) and
 [`floating.set_mark`](#floatingset_mark) say, and no mark while it
-is maximized or presenting; [`pocket.set_color`](#pocketset_color)
+is presenting; [`pocket.set_color`](#pocketset_color)
 colors it. Its Space Bar glyph wears the pocket
 badge at the glyph's bottom-right corner, beside the floating badge,
 and no sticky badge;

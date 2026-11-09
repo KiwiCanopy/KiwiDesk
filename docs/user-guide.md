@@ -1010,7 +1010,7 @@ listed under Shortcuts & Gestures ▸ Size & float.
 listed under Shortcuts & Gestures ▸ Show & hide ▸ KiwiShelf.
 
 `⌃⌥M` makes the focused window fill its screen and hides the bars
-there, until you press it again or move focus to another window
+there, until you press it again or move focus to another tiled window
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)), listed
 under Shortcuts & Gestures ▸ Size & float.
 

@@ -141,9 +141,7 @@ extension KiwiCore {
         if dropLandsUnmanaged(id) {
             let frame = liveDropFrame(id, fallback: frame)
             // A gesture that began on a float's Maximize (#3036).
-            if endedMaximize,
-                settleMaximizedFloatDrop(id, start: start, frame: frame)
-            {
+            if settleMaximizedFloatDrop(id, start: start, frame: frame) {
                 return
             }
             // Folded ahead of the re-file's retile, whose nets

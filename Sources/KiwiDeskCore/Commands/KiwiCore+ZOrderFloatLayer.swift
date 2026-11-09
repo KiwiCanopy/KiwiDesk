@@ -79,7 +79,7 @@ extension KiwiCore {
         _ targets: [WindowID]
     ) -> [WindowID] {
         guard let space = activeSpace,
-            let maximized = state.maximizedWindow(of: space),
+            let maximized = state.maximizedFloat(of: space),
             let index = targets.firstIndex(of: maximized)
         else { return targets }
         var ordered = targets

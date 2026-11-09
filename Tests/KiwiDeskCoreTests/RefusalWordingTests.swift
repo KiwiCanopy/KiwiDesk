@@ -235,8 +235,8 @@ struct RefusalWordingTests {
         #expect(core.state.windows[WindowID(1)]?.isTransientOverlay == true)
         #expect(
             core.execute("toggle_maximized").error
-                == "a dialog, a full-screen window or the pocket "
-                + "window cannot be maximized"
+                == "a dialog, a panel, a full-screen window or the "
+                + "pocket window cannot be maximized"
         )
     }
 

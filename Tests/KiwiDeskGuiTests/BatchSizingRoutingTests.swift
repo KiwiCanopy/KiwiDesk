@@ -123,6 +123,10 @@ struct BatchSizingRoutingTests {
         // above the tiles; a detected float keeps the default.
         "KiwiDeskCore/App/KiwiCore+FloatPlacement.swift":
             Site(names: 2, promises: 1),
+        // A maximized float's return (#3036): the same direct write
+        // of one float, outside the layout, a state change.
+        "KiwiDeskCore/App/KiwiCore+MaximizeFloatReturn.swift":
+            Site(names: 2, promises: 1),
         // `center_floating` (#3007): the same direct write of one
         // float at its own size, a state change like the verb's.
         "KiwiDeskCore/Commands/KiwiCore+FloatMove.swift":

@@ -187,7 +187,7 @@ extension APIReference {
         ),
         "toggle_maximized": APIRecord(
             "Fills the screen or one axis of it with the focused "
-                + "tiled window until toggled or focus moves.",
+                + "window until toggled or focus moves to a tile.",
             .choice("axis", MaximizeAxis.self, optional: true),
             .number("share", optional: true),
             .choice("anchor", MaximizeAnchor.self, optional: true)

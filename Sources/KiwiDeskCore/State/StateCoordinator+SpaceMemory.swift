@@ -2,6 +2,12 @@ import Foundation
 
 /// Space memory accessors and provenance tracking (`StateCoordinator`, #1010).
 extension StateCoordinator {
+    /// The ranks alone, the shape `Space.insert(_:rank:ranks:)`
+    /// takes.
+    var departedRanks: [WindowID: Int] {
+        departedSlots.mapValues(\.rank)
+    }
+
     /// Tracks origin and provenance of remembered window space associations
     /// (`StateSnapshot.adopt`, #1010).
     enum SpaceMemory: Sendable, Equatable {

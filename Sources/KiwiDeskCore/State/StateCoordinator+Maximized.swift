@@ -43,13 +43,19 @@ extension StateCoordinator {
             ? [] : effectiveTiledMembers(of: space)
     }
 
-    /// Whether `id` may stand maximized as a float of `space`
-    /// (#3036): an effective float drawn there with a return
-    /// frame, never native full screen, a transient overlay or the
-    /// pocket's window, whose frames are the pocket's.
+    /// Whether `id` stands maximized as a float of `space` (#3036):
+    /// `mayMaximizeAsFloat` with its return record written.
     func maximizesAsFloat(_ id: WindowID, on space: Space) -> Bool {
-        guard maximizedFloatReturn[id] != nil,
-            let window = windows[id],
+        maximizedFloatReturn[id] != nil
+            && mayMaximizeAsFloat(id, on: space)
+    }
+
+    /// Whether a press may maximize `id` as a float of `space`, read
+    /// without writing (#3036): an effective float drawn there,
+    /// never native full screen, a transient overlay or the
+    /// pocket's window, whose frames are the pocket's.
+    func mayMaximizeAsFloat(_ id: WindowID, on space: Space) -> Bool {
+        guard let window = windows[id],
             !window.isFullscreen, !window.isTransientOverlay,
             pocketSlot(of: id) == nil,
             renderSpace(of: window) == space.id
@@ -99,6 +105,15 @@ extension StateCoordinator {
             return nil
         }
         return rival
+    }
+
+    /// `space`'s maximized window where it stands as a float, the
+    /// float tier's (#3036), or nil: the one answer of which plane a
+    /// Maximize is on, since a tile's holds no return record.
+    public func maximizedFloat(of space: Space) -> WindowID? {
+        maximizedWindow(of: space).flatMap {
+            maximizedFloatReturn[$0] == nil ? nil : $0
+        }
     }
 
     /// What `space`'s maximized window fills (#3062), or nil where

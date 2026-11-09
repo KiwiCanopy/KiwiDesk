@@ -753,6 +753,12 @@ Maximize move with focus instead of ending
 :::
 
 :::unreleased
+`toggle_maximized` takes a floating window too, whole or along one
+axis, and puts it back at the frame it had
+([`toggle_maximized`](lua-reference.md#toggle_maximized)).
+:::
+
+:::unreleased
 `monocle.set_maximize_windows true|false` (default `false`) makes
 every Monocle window fill the screen with no gaps while the bars read
 Hidden

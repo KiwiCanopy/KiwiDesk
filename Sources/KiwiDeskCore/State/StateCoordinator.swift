@@ -69,12 +69,6 @@ public struct StateCoordinator: Sendable {
     /// (#1387), so every ender and the re-key carry both or neither.
     var departedSlots: [WindowID: DepartedSlot] = [:]
 
-    /// The ranks alone, the shape `Space.insert(_:rank:ranks:)`
-    /// takes.
-    var departedRanks: [WindowID: Int] {
-        departedSlots.mapValues(\.rank)
-    }
-
     /// Windows the compositor hosts on a Desktop nobody shows
     /// (#1146) — the away LEDGER, beside the visible-only state:
     /// written on a `vanished` the compositor confirmed or a
@@ -136,14 +130,16 @@ public struct StateCoordinator: Sendable {
     /// state, dropped on destroy — old ids can be recycled.
     var stickyReachOverrides: [WindowID: Bool] = [:]
 
-    /// The frame each window last had while floating, written at a
-    /// Tile, consumed at its next float (#1675) and ended with the
-    /// window — the pid covering a window no fold lists.
+    /// The frame each window last had while floating, written when
+    /// it is tiled and consumed when it floats again (#1675):
+    /// session state, ended where the window ends — a close's gone
+    /// verdict, an away window's retirement, its app's exit, the
+    /// pid covering a hidden or minimized window no fold lists.
     var floatFrames: [WindowID: FloatFrame] = [:]
-    /// `floatFrames`' lifetime, carried by the in-place stop alone:
-    /// windows a Tile keeps tiled over a float rule, by pid (#2975),
-    /// and the frame a maximized float returns to (#3036).
+    /// Windows a Tile keeps tiled over a float rule, by pid (#2975):
+    /// `floatFrames`' lifetime, carried by the in-place stop alone.
     var tiledOverRule: [WindowID: pid_t] = [:]
+    /// The frame a maximized float returns to (#3036), the same.
     var maximizedFloatReturn: [WindowID: FloatFrame] = [:]
 
     /// A float's judged aspect lock (#2973): session state, which a

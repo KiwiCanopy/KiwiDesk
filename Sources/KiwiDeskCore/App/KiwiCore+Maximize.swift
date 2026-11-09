@@ -46,8 +46,8 @@ extension KiwiCore {
             else {
                 cueMaximizeRefused(id)
                 return .fail(
-                    "a dialog, a full-screen window or the pocket "
-                        + "window cannot be maximized"
+                    "a dialog, a panel, a full-screen window or the "
+                        + "pocket window cannot be maximized"
                 )
             }
             // A press of the shape KiwiVision fills would change
@@ -81,18 +81,21 @@ extension KiwiCore {
         if state.placementMode(of: space) != .floating,
             state.effectiveTiledMembers(of: space).contains(id)
         {
+            // A record a float left unpaid names no tile's plane.
+            state.maximizedFloatReturn[id] = nil
             return tiler.settings.maximize.followFocus
         }
-        guard let window = state.windows[id] else { return nil }
-        let saved = state.maximizedFloatReturn[id]
-        state.maximizedFloatReturn[id] = .init(
-            pid: window.pid,
-            frame: tiler.commandedFrame(of: id) ?? window.frame
-        )
-        guard state.maximizesAsFloat(id, on: space) else {
-            state.maximizedFloatReturn[id] = saved
-            return nil
-        }
+        guard state.mayMaximizeAsFloat(id, on: space),
+            let window = state.windows[id]
+        else { return nil }
+        // A return a held pass still owes is where the window goes
+        // back to; its frame now is the fill.
+        state.maximizedFloatReturn[id] =
+            state.maximizedFloatReturn[id]
+            ?? .init(
+                pid: window.pid,
+                frame: tiler.commandedFrame(of: id) ?? window.frame
+            )
         return false
     }
 
@@ -169,8 +172,8 @@ extension KiwiCore {
             window,
             text: L(
                 "maximize.refused.window",
-                "Dialogs, full-screen windows and the Pocket window "
-                    + "can't be maximized."
+                "Dialogs, panels, full-screen windows and the Pocket "
+                    + "window can't be maximized"
             ),
             symbol: "arrow.up.left.and.arrow.down.right",
             announce: true

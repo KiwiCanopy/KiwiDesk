@@ -78,6 +78,10 @@ private func trackedFixture() -> StateCoordinator {
     )
     state.floatAspects[old] = .init(pid: 7, ratio: 1.5)
     state.tiledOverRule[old] = 7
+    state.maximizedFloatReturn[old] = .init(
+        pid: 7,
+        frame: CGRect(x: 9, y: 9, width: 9, height: 9)
+    )
     state.departedSlots[old] = .init(rank: 0)
     state.closedDepartures.insert(old)
     state.unjudgedFilings.insert(old)
@@ -101,7 +105,7 @@ private func trackedFixture() -> StateCoordinator {
 /// `restoredFrames` (#1362), `userFloated`,
 /// `stickyReachOverrides` (#1145), `floatFrames` (#1675),
 /// `floatAspects` (#2973), `tiledOverRule` (#2975),
-/// `departedSlots` (#1207),
+/// `maximizedFloatReturn` (#3036), `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414),
 /// `unjudgedFilings` (#1646), `focusRecency` (#1840),
 /// `crossSession.placed` (#1385), `visionFill.drawn` (#3064), plus

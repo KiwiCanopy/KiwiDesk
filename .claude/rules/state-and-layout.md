@@ -2277,7 +2277,9 @@ editing here:
   both windows of the first unfit pair that way), while a cue
   handed the slot draws beside the window.
   `FrameSetReaderCensusTests`' `allowed` map is the one copy of
-  who reads which and why. The stack zone's own shares
+  who reads which and why. The issued set carries one float, a
+  maximized one's fill (#3036), so a new issued-set reader rules on
+  that entry rather than reading every key as a tile. The stack zone's own shares
   stay out (#944). `SplitFloorHealTests` holds the math,
   `SplitOverflowTests` the post-pass, `SplitFloorHealWiringTests`
   the retile wiring and the traveler stand-down,
@@ -2484,7 +2486,13 @@ editing here:
   `retile()`, or a float verb ending it first through
   `endMaximizeBeforeFloatVerb` — so an ender clears the flag and
   writes no frame of its own; a new verb moving a float's frame
-  takes that door ahead of its base read (`MaximizeFloatTests`).
+  takes that door ahead of its base read, which is review's, since
+  nothing scans for one (`MaximizeFloatTests` drives the verbs that
+  exist). The record's presence is part of the verdict: a float's
+  Maximize stands only while it holds one and a tile's only while
+  it holds none, so a new writer of the record changes what is
+  maximized, and which plane one stands on is read through
+  `maximizedFloat(of:)`, never re-derived beside it.
   **A write that rearranges a Space ends its
   maximize AT the write** — every order write through the one
   `Space.endMaximize`, the mode write, `resize`,

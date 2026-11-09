@@ -271,7 +271,7 @@ extension KiwiCore {
     private func isMaximizedFloat(_ window: ManagedWindow) -> Bool {
         state.renderSpace(of: window)
             .flatMap { state.workspaces[$0] }
-            .map { state.maximizedWindow(of: $0) == window.id } ?? false
+            .map { state.maximizedFloat(of: $0) == window.id } ?? false
     }
 
     /// Every space with at least one painted strip: the App

@@ -15,7 +15,7 @@ private let aside = CGRect(x: 900, y: 100, width: 300, height: 300)
 
 /// Space 1 in `mode` with `float` floating at `start` and focused,
 /// `tile` tiled beside it. The engine is off, so every write lands
-/// on `Writes`.
+/// on `Writes` and folds back into state as the app's answer.
 @MainActor
 private final class Writes {
     var last: [WindowID: CGRect] = [:]
@@ -33,6 +33,7 @@ private func makeCore(
         )
     )
     core.tiler.visibleBounds = { _ in screen }
+    core.tiler.allScreenBounds = { [screen] }
     core.execute("set_mode", args: [.string("1"), .string(mode)])
     for id in [float, tile, other] {
         core.state.apply(
@@ -49,7 +50,10 @@ private func makeCore(
     }
     core.state.apply(.windowFocused(float))
     core.tiler.animation.isEnabled = false
-    core.tiler.animation.apply = { id, frame, _ in writes.last[id] = frame }
+    core.tiler.animation.apply = { [weak core] id, frame, _ in
+        writes.last[id] = frame
+        core?.state.apply(.windowResized(id, frame))
+    }
     return core
 }
 
@@ -100,7 +104,6 @@ struct MaximizeFloatTests {
         let core = makeCore(writes: writes)
         core.execute("toggle_maximized")
         core.focusWindow(tile, warp: false)
-        core.retile()
         #expect(maximized(core) == nil)
         #expect(writes.last[float] == start)
     }
@@ -118,8 +121,6 @@ struct MaximizeFloatTests {
     func floatingLayout() {
         let core = makeCore(mode: "floating", floats: [])
         #expect(core.execute("toggle_maximized").isSuccess)
-        // The app takes the fill, or the learner reads a refusal.
-        core.state.apply(.windowResized(float, screen))
         core.state.workspaces.focus(tile, in: space)
         core.retile()
         #expect(maximized(core) == float)
@@ -128,7 +129,8 @@ struct MaximizeFloatTests {
 
     @Test("Tiling the window ends it with no return write")
     func tileEnds() {
-        let core = makeCore()
+        let writes = Writes()
+        let core = makeCore(writes: writes)
         core.execute("toggle_maximized")
         let remembered = core.floatFrameToRemember(float)
         #expect(remembered?.frame == start)
@@ -136,6 +138,7 @@ struct MaximizeFloatTests {
         core.retile()
         #expect(maximized(core) == nil)
         #expect(core.state.maximizedFloatReturn[float] == nil)
+        #expect(writes.last[float] != start)
     }
 
     @Test("move_floating ends it first and steps from the return")
@@ -150,7 +153,7 @@ struct MaximizeFloatTests {
             ).isSuccess
         )
         #expect(maximized(core) == nil)
-        #expect(writes.last[float] == start)
+        // The step writes instantly, past the fixture's apply hook.
         let moved = core.tiler.recentInstantTarget(float)
         #expect(moved == start.offsetBy(dx: 10, dy: 0))
     }
@@ -177,7 +180,44 @@ struct MaximizeFloatTests {
         core.handleDragMove(float, start: screen, frame: resized)
         core.handleDragEnd(float, start: screen, frame: resized)
         #expect(core.state.maximizedFloatReturn[float] == nil)
-        #expect(writes.last[float] != start)
+        #expect(core.state.windows[float]?.frame == resized)
+    }
+
+    @Test("center_floating ends it first and centres the return")
+    func centreEndsFirst() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        #expect(core.execute("center_floating").isSuccess)
+        #expect(maximized(core) == nil)
+        let frame = core.state.windows[float]?.frame
+        #expect(frame?.size == start.size)
+        #expect(frame?.midX == screen.midX)
+    }
+
+    @Test("A float resize ends it first and grows the return")
+    func resizeEndsFirst() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        #expect(
+            core.execute(
+                "resize",
+                args: [.string("x"), .number(100)]
+            ).isSuccess
+        )
+        #expect(maximized(core) == nil)
+        #expect(core.state.maximizedFloatReturn[float] == nil)
+        let width = core.state.windows[float]?.frame.width
+        #expect(width == start.width + 100)
+    }
+
+    @Test("A float's Maximize never follows focus")
+    func floatNeverFollows() {
+        let core = makeCore()
+        core.tiler.settings.maximize.followFocus = true
+        core.execute("toggle_maximized")
+        #expect(core.state.workspaces[space]?.maximized?.follows == false)
+        core.focusWindow(tile, warp: false)
+        #expect(maximized(core) == nil)
     }
 
     @Test("A transient overlay is refused with nothing recorded")
@@ -230,15 +270,49 @@ struct MaximizeFloatTests {
         #expect(state.maximizedFloatReturn[other]?.frame == start)
         state.forgetFloatMemory(of: other)
         #expect(state.maximizedFloatReturn[other] == nil)
+        state.maximizedFloatReturn[float] = .init(pid: 4, frame: start)
+        state.forgetFloatMemory(pid: 4)
+        #expect(state.maximizedFloatReturn[float] == nil)
     }
 
     @Test("The float tier raises the maximized float first")
     func raisedLowest() {
-        let core = makeCore(floats: [other, float])
-        core.state.workspaces.focus(float, in: space)
-        core.state.apply(.windowFocused(float))
-        core.execute("toggle_maximized")
+        let core = makeCore(floats: [float, other])
+        core.state.workspaces.focus(other, in: space)
+        core.state.apply(.windowFocused(other))
         #expect(core.floatLayerTargets().first == float)
+        core.execute("toggle_maximized")
+        #expect(maximized(core) == other)
+        #expect(core.floatLayerTargets().first == other)
+    }
+
+    @Test("A return off the window's screen lands inside it")
+    func returnFollowsTheScreen() {
+        let writes = Writes()
+        let core = makeCore(writes: writes)
+        core.tiler.allScreenBounds = { [screen] }
+        core.execute("toggle_maximized")
+        let away = start.offsetBy(dx: 3000, dy: 0)
+        core.state.maximizedFloatReturn[float] = .init(
+            pid: 900_001,
+            frame: away
+        )
+        core.execute("toggle_maximized")
+        let back = writes.last[float]
+        #expect(back?.size == start.size)
+        #expect(back.map { screen.contains($0) } == true)
+    }
+
+    @Test("The in-place key is maximized_return")
+    func keyPin() throws {
+        let session = StateSnapshot.WindowSession(
+            sticky: .none,
+            stickyReach: nil,
+            maximizedReturn: start
+        )
+        let data = try JSONEncoder().encode(session)
+        let json = String(decoding: data, as: UTF8.self)
+        #expect(json.contains("\"maximized_return\""))
     }
 
     @Test("A float on Monocle may take Maximize Height")

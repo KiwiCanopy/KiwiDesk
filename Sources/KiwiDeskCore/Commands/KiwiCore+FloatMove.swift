@@ -82,8 +82,9 @@ extension KiwiCore {
         case .target(let focus): target = focus
         }
         let id = target.id
-        endMaximizeBeforeFloatVerb(id)  // #3036
-        let base = tiler.commandedFrame(of: id) ?? target.window.frame
+        let returned = endMaximizeBeforeFloatVerb(id)  // #3036
+        let base =
+            returned ?? tiler.commandedFrame(of: id) ?? target.window.frame
         let centred = floatMoveFrame(
             FloatPlacement.centered(base.size, in: target.region),
             for: target
@@ -120,10 +121,11 @@ extension KiwiCore {
         case .target(let focus): target = focus
         }
         let id = target.id
-        endMaximizeBeforeFloatVerb(id)  // #3036
+        let returned = endMaximizeBeforeFloatVerb(id)  // #3036
         let isGlideWrite = keys.isApplyingGlideStep
         let base =
-            tiler.animation.commandedFrame(
+            returned
+            ?? tiler.animation.commandedFrame(
                 window: id,
                 includingHeldGlide: isGlideWrite
             ) ?? target.window.frame

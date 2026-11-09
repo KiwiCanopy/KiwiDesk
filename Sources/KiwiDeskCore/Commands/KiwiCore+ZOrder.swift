@@ -77,9 +77,7 @@ extension KiwiCore {
         // A maximized float is the float tier's, which keeps it
         // under the other floats (#3036).
         if let maximized = state.maximizedWindow(of: space) {
-            if !state.effectiveTiledMembers(of: space).contains(maximized) {
-                return
-            }
+            if state.maximizedFloat(of: space) != nil { return }
             restoreMaximizedZOrder(maximized, in: space)
             return
         }
