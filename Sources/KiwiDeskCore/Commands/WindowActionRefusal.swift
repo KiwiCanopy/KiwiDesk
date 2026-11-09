@@ -36,7 +36,8 @@ enum WindowActionRefusal: Equatable {
     /// is its own (#670, #2888).
     case cannotMoveFullScreen(window: String)
     /// A screen move whose screen shows a full-screen or system
-    /// Space, which hides whatever is filed under it (#3117).
+    /// Space, which hides whatever is filed under it (#3117); the
+    /// sentence names the full-screen app, the case a user meets.
     case screenShowsFullScreen
     /// A window with no slot to swap, each by what it is (#2885):
     /// the verb's unfiled sides and KiwiHub's rows no verb can see.

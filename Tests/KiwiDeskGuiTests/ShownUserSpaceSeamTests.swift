@@ -113,7 +113,7 @@ struct ShownUserSpaceSeamTests {
         )
         let verdict = try #require(
             SourceScan.declarationBody(
-                after: "func screenShowsUserSpace(_ display: DisplayID)",
+                after: "func screenShowsUserSpace(on display: DisplayID)",
                 in: covering
             )
         )
@@ -128,7 +128,7 @@ struct ShownUserSpaceSeamTests {
             )
         )
         #expect(
-            standDown.occurrences(of: "screenShowsUserSpace(display)")
+            standDown.occurrences(of: "screenShowsUserSpace(on: display)")
                 == 1
         )
         #expect(

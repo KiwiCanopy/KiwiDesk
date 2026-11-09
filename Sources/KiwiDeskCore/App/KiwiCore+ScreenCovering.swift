@@ -102,14 +102,14 @@ extension KiwiCore {
     /// front (#1787). KiwiVision's plate stands down on this
     /// alone, never on a maximize, which it keeps dimming (#3061).
     func overlaysStandDown(on display: DisplayID) -> Bool {
-        !screenShowsUserSpace(display) || showsPresentation(on: display)
+        !screenShowsUserSpace(on: display) || showsPresentation(on: display)
     }
 
     /// Whether `display` shows a user Desktop rather than a native
     /// full-screen or system Space (#670): the one reading of the
     /// filed verdict with its live fallback (#2937), which the
     /// screen moves ask too (#3117).
-    func screenShowsUserSpace(_ display: DisplayID) -> Bool {
+    func screenShowsUserSpace(on display: DisplayID) -> Bool {
         NativeSpaces.currentSpaceIsUser(
             display: display,
             filed: desktopMemory.shownUserSpaces,
