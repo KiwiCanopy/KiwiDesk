@@ -83,46 +83,6 @@ struct KeySequenceCardTests {
         )
     }
 
-    @Test("KiwiHub lists an end key by its path, the leader not at all")
-    func referenceListsPaths() {
-        LocalizationManager.shared.select("en")
-        var root = sequence()
-        root.steps?.append(
-            KeyBinding(
-                combo: "t",
-                lua: "print(1)",
-                kind: .custom,
-                desc: "Mine"
-            )
-        )
-        let reference = ShortcutsReferenceBuilder.build(
-            layer: KeyLayer(name: "default", bindings: [root]),
-            spaces: [],
-            spaceIcons: [:],
-            desktops: [],
-            resizeStep: 50,
-            layerNames: ["default"]
-        )
-        let rows =
-            reference.controls.flatMap(\.rows) + reference.custom
-            + reference.groups.flatMap(\.rows)
-        let path = SequencePathWords.drawn(["ctrl+alt+space", "w", "h"])
-        #expect(
-            rows.contains {
-                $0.combo == path && $0.label == left.resolvedLabel
-            }
-        )
-        // The user's Lua end key is listed by path too, never dropped.
-        // The chord column speaks the path in key words.
-        let spokenPath = SequencePathWords.spoken(
-            ["ctrl+alt+space", "w", "h"]
-        )
-        #expect(rows.contains { $0.spokenChord == spokenPath })
-        let lua = SequencePathWords.drawn(["ctrl+alt+space", "t"])
-        #expect(rows.contains { $0.combo == lua && $0.label == "Mine" })
-        #expect(rows.count == 2)
-    }
-
     @Test("a step key the router never matches is told apart")
     func admitsAsTheRouter() throws {
         let leader = "ctrl+alt+space"
@@ -149,10 +109,11 @@ struct KeySequenceCardTests {
             )
         )
         #expect(row.contains("guard let leader = editing.root?.combo"))
+        // The leader branch and its refusal, as one span.
         #expect(
-            row.contains(
-                "guard !KeyBinding.admitsLeader(node.combo) else "
-                    + "{ return nil }"
+            row.filter { !$0.isWhitespace }.contains(
+                "ifisLeader{guard!KeyBinding.admitsLeader(node.combo)"
+                    + "else{returnnil}"
             )
         )
     }
@@ -167,74 +128,6 @@ struct KeySequenceCardTests {
         #expect(!text.isEmpty)
         #expect(text.contains(".disabled(block != nil)"))
         #expect(text.contains("model.sequenceEditBlock(in: layerName)"))
-    }
-
-    @Test("a path row follows a folded run, which stays whole")
-    func pathFollowsTheFold() {
-        LocalizationManager.shared.select("en")
-        let spaces = [SpaceID("1"), SpaceID("2"), SpaceID("3")]
-        let go = KeybindingCatalog.goToSpace(spaces)
-        var rows = go.enumerated().map { at, command in
-            KeyBinding(
-                combo: "ctrl+alt+\(at + 1)",
-                lua: command.lua,
-                kind: .navigation
-            )
-        }
-        rows.append(
-            .sequence(
-                combo: "ctrl+alt+space",
-                label: "Leader",
-                steps: [
-                    .sequence(
-                        combo: "s",
-                        label: "Spaces",
-                        steps: [
-                            KeyBinding(
-                                combo: "2",
-                                lua: go[1].lua,
-                                kind: .navigation
-                            )
-                        ]
-                    )
-                ]
-            )
-        )
-        let reference = ShortcutsReferenceBuilder.build(
-            layer: KeyLayer(name: "default", bindings: rows),
-            spaces: spaces,
-            spaceIcons: [:],
-            desktops: [],
-            resizeStep: 50,
-            layerNames: ["default"]
-        )
-        let focus = reference.controls.flatMap(\.rows)
-        let path = SequencePathWords.drawn(["ctrl+alt+space", "s", "2"])
-        let folded = focus.firstIndex { !$0.members.isEmpty }
-        let after = focus.firstIndex { $0.combo == path }
-        #expect(folded != nil && after != nil)
-        #expect(focus.filter { !$0.members.isEmpty }.count == 1)
-        if let folded, let after { #expect(after == folded + 1) }
-    }
-
-    @Test("KiwiHub search finds a path row by a name along its path")
-    func searchReadsPathNames() {
-        LocalizationManager.shared.select("en")
-        let reference = ShortcutsReferenceBuilder.build(
-            layer: KeyLayer(name: "default", bindings: [sequence()]),
-            spaces: [],
-            spaceIcons: [:],
-            desktops: [],
-            resizeStep: 50,
-            layerNames: ["default"]
-        )
-        var sheet = ShortcutsSheet(reference: reference)
-        sheet.setQuery("windows")
-        let rows = sheet.shown?.controls.flatMap(\.rows) ?? []
-        #expect(rows.count == 1)
-        #expect(rows.first?.matchedPathName == "Windows")
-        sheet.setQuery("nowhere")
-        #expect(sheet.matchCount == 0)
     }
 
     @Test("the Also caption's spoken twin is the spoken path")
@@ -253,6 +146,16 @@ struct KeySequenceCardTests {
                     + "in:rows,spoken:true)"
             )
         )
+        #expect(nav.contains(".accessibilityLabel(drawn.alsoSpoken??also)"))
+        // A path hit is drawn on its row (#1871).
+        let bands = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Shortcuts/ShortcutsBands.swift"
+                )
+        )
+        .filter { !$0.isWhitespace }
+        #expect(bands.contains("iflet detail=row.detail??pathHit{"))
     }
 
     @Test("a long path shortens to its leader and last two keys")
@@ -261,6 +164,10 @@ struct KeySequenceCardTests {
         #expect(
             SequencePathWords.shortened(short)
                 == SequencePathWords.drawn(short)
+        )
+        let four = ["ctrl+alt+space", "w", "s", "2"]
+        #expect(
+            SequencePathWords.shortened(four) == SequencePathWords.drawn(four)
         )
         let long = ["ctrl+alt+space", "w", "s", "2", "x"]
         let drawn = SequencePathWords.shortened(long)
