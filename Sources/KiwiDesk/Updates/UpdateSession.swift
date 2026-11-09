@@ -79,9 +79,16 @@ final class UpdateSession: ObservableObject {
     @Published private(set) var canCancel = false
     /// Where Install lands: a download already fetched in the
     /// background goes straight to Preparing.
-    let installsFrom: UpdateWindowPhase
+    private let installsFrom: UpdateWindowPhase
     private var acknowledgement: (() -> Void)?
     private var retryTermination: (() -> Void)?
+
+    /// Install begins with a download: Sparkle holds nothing of
+    /// the update yet.
+    var downloadsOnInstall: Bool {
+        if case .downloading = installsFrom { return true }
+        return false
+    }
 
     /// Starts the check a Try Again needs; set by the driver.
     var startCheck: () -> Void = {}

@@ -98,17 +98,31 @@ struct UpdateParkedOfferTests {
         #expect(!driver.prompts.updatePending)
     }
 
-    /// An offer already installing keeps its session: its Later
-    /// does not end it, so no cycle end would start the check.
-    @Test("an installing offer is not dropped")
-    func installingIsKept() throws {
+    /// Sparkle resumes a downloaded or installing update without
+    /// a fetch, so dropping one would re-offer the same build.
+    @Test(
+        "a downloaded or installing offer is not dropped",
+        arguments: [SPUUserUpdateStage.downloaded, .installing]
+    )
+    func heldStagesAreKept(stage: SPUUserUpdateStage) throws {
         let (driver, log) = driver()
-        try park(driver, log, stage: .installing)
+        try park(driver, log, stage: stage)
         #expect(!driver.dropParkedOffer())
         #expect(log.replies.isEmpty)
         #expect(driver.window != nil)
         driver.updateCycleFinished()
         #expect(log.checks == 0)
+    }
+
+    /// An offer the user has seen just comes forward.
+    @Test("a shown offer is not dropped")
+    func shownOfferIsKept() throws {
+        let (driver, log) = driver()
+        try park(driver, log)
+        driver.showUpdateInFocus()
+        #expect(!driver.prompts.updatePending)
+        #expect(!driver.dropParkedOffer())
+        #expect(log.replies.isEmpty)
     }
 
     @Test("no open offer, nothing dropped")
@@ -119,8 +133,8 @@ struct UpdateParkedOfferTests {
         #expect(log.checks == 0)
     }
 
-    /// The live updater asks the drop first, gated on the pending
-    /// fact, so a shown offer still just comes forward.
+    /// The live updater asks the drop before the bring-forward,
+    /// which would clear the pending fact the drop reads.
     @Test("the live check drops a parked offer first")
     func liveCheckDropsFirst() throws {
         let source = try SourceScan.strippedSource(
@@ -137,10 +151,7 @@ struct UpdateParkedOfferTests {
             after.components(separatedBy: "func startOwnCheck()").first
         )
         let drop = try #require(
-            body.range(
-                of: "if policy.updatePending, driver.dropParkedOffer() "
-                    + "{ return }"
-            )
+            body.range(of: "if driver.dropParkedOffer() { return }")
         )
         let focus = try #require(
             body.range(of: "if driver.focusOpenWindow() { return }")
