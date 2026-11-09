@@ -18,6 +18,7 @@ struct VisionStoredGroupParityTests {
         settings.visionAppearance = .light
         settings.visionClearWallpaper.toggle()
         settings.visionClearApp.toggle()
+        settings.visionMaximize = .width
         settings.visionNeverDimmed = ["sketchybar"]
         settings.visionLenses = [VisionLens(name: "Writing")]
         return settings

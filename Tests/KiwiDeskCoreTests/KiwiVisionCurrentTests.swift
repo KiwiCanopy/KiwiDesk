@@ -201,6 +201,7 @@ struct KiwiVisionCurrentTests {
             clearWallpaper: true,
             clearApp: true
         )
+        lens.overrides.maximize = .height
         let data = try JSONEncoder().encode(lens)
         let object = try JSONSerialization.jsonObject(with: data)
         let keys = (object as? [String: Any])?.keys.sorted() ?? []

@@ -122,5 +122,6 @@ extension KiwiCore {
         borders.heldRooms.removeAll()
         updateBorders(reassertOrder: true)
         updateMarks(reassertOrder: true)
+        payVisionSettleReshape()
     }
 }

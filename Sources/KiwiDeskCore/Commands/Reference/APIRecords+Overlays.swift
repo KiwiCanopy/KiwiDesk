@@ -302,6 +302,11 @@ extension APIReference {
                 + "the focused one; off by default.",
             .boolean("enabled")
         ),
+        "set_maximize": APIRecord(
+            "Makes the focused window fill the screen, its height or "
+                + "its width while KiwiVision is on.",
+            .choice("fill", VisionMaximize.self)
+        ),
     ]
 
     static let kiwihubRecords: [String: APIRecord] = [

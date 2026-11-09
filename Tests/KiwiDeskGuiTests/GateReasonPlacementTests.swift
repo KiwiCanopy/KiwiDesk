@@ -116,7 +116,7 @@ struct GateReasonPlacementTests {
                 // #2103: KiwiVision's app-wide rows grey under a
                 // Lua-owned config, a cause shown nowhere on its
                 // page, so each draws its sentence.
-                .kiwiVision(.dim), .kiwiVision(.blur),
+                .kiwiVision(.dim), .kiwiVision(.blur), .kiwiVision(.maximize),
                 .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
                 .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
                 .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),

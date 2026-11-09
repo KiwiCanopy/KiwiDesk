@@ -75,6 +75,8 @@ struct SettingsCatalogArgumentTests {
         "KiwiVisionLensOverrides.swift: "
             + "SettingsCatalog.kiwiVision.clearCard.text",
         "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.fillCard.text",
+        "KiwiVisionLensOverrides.swift: "
             + "SettingsCatalog.kiwiVision.appearanceCard.text",
         "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",
         "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
@@ -233,12 +235,9 @@ struct SettingsCatalogArgumentTests {
         // 149 #2676 Animate float, 152 #2680 the Pocket card, its
         // Edge and Position rows, 153 #2678 its Holds row, 154
         // #2941 its add row, 155 #2971 the scroll step's row, 161
-        // #3062 the Maximize card, its three rows and the two
-        // Shortcuts rows its captions land on, 162 with its
-        // other-shapes drawer (the column anchors moved to headings),
-        // 164 with #2447's two modifier drag rows, 165 with #3088's
-        // Sync across Macs row, 166 with #1871's Key sequences card.
-        #expect(direct.values.reduce(0, +) == 166)
+        // #3062's Maximize card and its rows, 162 its drawer, 164
+        // #2447, 165 #3088, 166 #1871, 167 #3064's KiwiVision card.
+        #expect(direct.values.reduce(0, +) == 168)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

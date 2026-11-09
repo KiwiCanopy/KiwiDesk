@@ -4,15 +4,22 @@ import Foundation
 /// `Space.maximized` is the toggle; this verdict is what every
 /// reader takes, since the maximize ends the moment its window
 /// leaves the tiled set or focus lands on another tiled member.
+/// KiwiVision's derived fill answers where no toggle stands (#3064).
 extension StateCoordinator {
-    /// The window `space` shows filling its screen, or nil: the
+    /// The window `space` shows filling its screen, or nil: a hand
+    /// Maximize, else KiwiVision's fill (#3064).
+    public func maximizedWindow(of space: Space) -> WindowID? {
+        handMaximizedWindow(of: space) ?? visionFilledWindow(of: space)
+    }
+
+    /// The window a hand Maximize fills on `space`, or nil: the
     /// stored `Space.maximized` while that window is drawn tiled
     /// on a tiled layout, a traveler included, and the Space's
     /// focus anchor is on it, or on a window the layout draws no
     /// slot for (a float). A traveler is never `space.focused`
     /// (#431), so it asks the system focus itself, and focus on
     /// another screen keeps it (#3035).
-    public func maximizedWindow(of space: Space) -> WindowID? {
+    public func handMaximizedWindow(of space: Space) -> WindowID? {
         guard let id = space.maximized?.window,
             let tiled = maximizedTiled(of: space),
             maximizeRival(of: space, window: id, tiled: tiled) == nil
@@ -50,7 +57,11 @@ extension StateCoordinator {
     /// What `space`'s maximized window fills (#3062), or nil where
     /// `maximizedWindow(of:)` shows none.
     public func maximizedShape(of space: Space) -> MaximizeShape? {
-        maximizedWindow(of: space) == nil ? nil : space.maximized?.shape
+        if handMaximizedWindow(of: space) != nil {
+            return space.maximized?.shape
+        }
+        return visionFilledWindow(of: space) == nil
+            ? nil : visionFillShape(of: space)
     }
 
     /// The maximized traveler drawn beneath `id`, on the Space `id`
@@ -79,14 +90,15 @@ extension StateCoordinator {
     /// Clears every stored maximize the verdict no longer honours,
     /// so focus coming back never re-maximizes, and re-points a
     /// following one at the tiled window focus moved to (#3063).
-    /// Returns the windows whose size it changed: an ended one, and
-    /// a follow's window left and window arriving.
+    /// Returns the windows whose size it changed: an ended one, a
+    /// follow's window left and window arriving, and KiwiVision's
+    /// (`retireVisionFill`, #3064).
     @discardableResult
     mutating func retireEndedMaximize() -> [WindowID] {
         var changed: [WindowID] = []
         for space in workspaces.allSpaces {
             guard let maximize = space.maximized,
-                maximizedWindow(of: space) == nil,
+                handMaximizedWindow(of: space) == nil,
                 !awaitsMaximizedReturn(maximize.window, from: space.id)
             else { continue }
             let rival =
@@ -108,7 +120,7 @@ extension StateCoordinator {
             changed.append(maximize.window)
             if let rival { changed.append(rival) }
         }
-        return changed
+        return changed + retireVisionFill()
     }
 
     /// Whether `space` is a Monocle showing a full Maximize that
@@ -121,6 +133,7 @@ extension StateCoordinator {
 
     /// Whether `space` shows a Maximize that follows focus (#3063).
     public func followsMaximize(of space: Space) -> Bool {
-        maximizedWindow(of: space) != nil && space.maximized?.follows == true
+        handMaximizedWindow(of: space) != nil
+            && space.maximized?.follows == true
     }
 }

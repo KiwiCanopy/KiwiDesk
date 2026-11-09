@@ -164,6 +164,9 @@ public struct StateCoordinator: Sendable {
     /// `StateCoordinator+Pocket`.
     public internal(set) var pocket: [PocketSlot] = []
 
+    /// KiwiVision's maximize (#3064): `StateCoordinator+VisionFill`.
+    public internal(set) var visionFill = VisionFillState()
+
     /// A seed planted unasked so state is never spaceless before a
     /// config loads — by `init`, and by the #634 reset for a
     /// Lua-owned config; nil once a load has ruled on it (#1526,
@@ -210,17 +213,13 @@ public struct StateCoordinator: Sendable {
         if let away = awayWindows.removeValue(forKey: old) {
             awayWindows[new] = away.withID(new)
         }
-        if let index = minimizeOrder.firstIndex(
-            where: { $0.id == old }
-        ) {
+        if let index = minimizeOrder.firstIndex(where: { $0.id == old }) {
             minimizeOrder[index].id = new
         }
         if userFloated.remove(old) != nil {
             userFloated.insert(new)
         }
-        if let reach = stickyReachOverrides.removeValue(
-            forKey: old
-        ) {
+        if let reach = stickyReachOverrides.removeValue(forKey: old) {
             stickyReachOverrides[new] = reach
         }
         rekeyFloatMemory(old, to: new)
@@ -228,6 +227,7 @@ public struct StateCoordinator: Sendable {
             focusRecency[new] = rank
         }
         rekeyPocket(old, to: new)
+        rekeyVisionFill(old, to: new)
     }
 
     /// Folds an event into state and returns side-effect facts (#166).

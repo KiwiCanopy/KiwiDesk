@@ -81,6 +81,7 @@ appWide.visionDim
 appWide.visionFadeCurve
 appWide.visionFadeDuration
 appWide.visionLenses
+appWide.visionMaximize
 appWide.visionNeverDimmed
 config.appRules[app]
 config.floatAutomatically

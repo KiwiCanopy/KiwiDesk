@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A lens's own values for the Default cards (#2103 rulings
-/// 23, 29, 46): Dim and blur, Stays clear and System appearance,
+/// 23, 29, 46): Dim and blur, Stays clear, Maximize (#3064) and
+/// System appearance,
 /// one override checkbox per ROW — a lens often changes the dim and
 /// keeps the blur. An unchecked row reads "follows Default ·
 /// <value>"; checking it seeds the lens with that value.
@@ -43,6 +44,9 @@ struct KiwiVisionLensOverrides: View {
                         plain.visionClearWallpaper
                     )
                 }
+            }
+            SettingsSection(SettingsCatalog.kiwiVision.fillCard.text) {
+                maximizeRow
             }
             SettingsSection(
                 SettingsCatalog.kiwiVision.appearanceCard.text
@@ -142,6 +146,36 @@ struct KiwiVisionLensOverrides: View {
                 ) {
                     ForEach(VisionFadeCurve.allCases, id: \.self) {
                         Text(KiwiVisionLevelsCard.curveTitle($0)).tag($0)
+                    }
+                }
+            }
+        }
+    }
+
+    private var maximizeRow: some View {
+        let value = override(\.maximize)
+        let label = SettingsCatalog.kiwiVision.focusedFill.text
+        let global = plain.visionMaximize
+        let current = value.wrappedValue ?? global
+        return OverrideChrome(
+            isOn: overrideToggle(value, global: global),
+            inherited: (label, KiwiVisionMaximizeRow.title(global)),
+            inheritsName: defaultName
+        ) {
+            DropdownRow(
+                label: label,
+                spokenValue: KiwiVisionMaximizeRow.title(current),
+                help: nil
+            ) {
+                Picker(
+                    label,
+                    selection: Binding(
+                        get: { current },
+                        set: { value.wrappedValue = $0 }
+                    )
+                ) {
+                    ForEach(KiwiVisionMaximizeRow.order, id: \.self) {
+                        Text(KiwiVisionMaximizeRow.title($0)).tag($0)
                     }
                 }
             }

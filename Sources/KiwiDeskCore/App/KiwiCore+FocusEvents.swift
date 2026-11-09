@@ -272,7 +272,7 @@ extension KiwiCore {
         let filedHere = payHiddenAppMove(focused: id)
         rememberHonoredFocus(id)
         // Ends a maximize, drawn by the one pass below (#2448).
-        let ended = Set(state.retireEndedMaximize())
+        let ended = retireEndedFills()
         let endedMaximize = !ended.isEmpty
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)

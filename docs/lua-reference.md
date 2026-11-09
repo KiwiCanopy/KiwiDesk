@@ -4676,6 +4676,10 @@ without one), and optionally `titles`, `keep_focus`, `clear_delay`,
 `reminder` and any of `dim`, `blur`, `appearance`,
 `clear_wallpaper` and `clear_app`.
 
+:::unreleased
+A lens table also takes `maximize`.
+:::
+
 **Does:** adds a lens, or replaces the one of its name. While the
 lens is on, every window of its apps stays clear beside the focused
 one. `titles` maps an app to text its window titles contain: only
@@ -4795,6 +4799,32 @@ the next layout pass settles.
 focused one — the part of each you can see; where another app's
 window covers it, that window stays dimmed. Focus a window of
 another app and its windows become the clear ones.
+
+:::unreleased
+### kiwivision.set_maximize
+
+**Expects:** `"off"`, `"full"`, `"height"` or `"width"`. Default
+`"off"`.
+
+**Does:** while KiwiVision is on, the focused tiled window fills
+its screen (`"full"`), or the screen's height or width at the share
+and anchor [`maximize.set_share`](#maximizeset_share) and
+[`maximize.set_anchor`](#maximizeset_anchor) store for that
+screen's shape (`"height"`, `"width"`). Every other window keeps
+its slot. Focus another tiled window — a key, a click, ⌘-Tab or
+[hover focus](#mouseset_hover_focus) — and that window
+takes the fill; on two screens only the window holding the focus
+fills, and a Space switch keeps it. Turning KiwiVision off puts
+every window back. A Monocle Space and a floating window keep their
+size, and while a floating window holds the focus the tiled window
+focused last keeps the fill. A [`toggle_maximized`](#toggle_maximized)
+press of another shape wins while it stands, and its end hands the
+fill back; a press of the shape KiwiVision fills, and
+[`resize`](#resize), are refused while the fill stands, and a
+mouse resize snaps back. Stored as `maximize` in the
+`kiwivision` group, absent while `"off"`, and a lens table takes it
+too.
+:::
 
 ### kiwivision.set_never_dimmed
 
