@@ -14,9 +14,11 @@ struct OwnKeyWindowReading: Equatable {
     /// `EventLoop.classifiesAsOwnDialog`.
     let isDialog: Bool
     /// Whether that window is a non-modal panel floating over every
-    /// window — KiwiHub — which the focus ring and KiwiVision look
-    /// past to the focus beneath it (#2373). The raise stand-down
-    /// and the menu-bar reveal still read the window.
+    /// window — KiwiHub, or a bar's grown peek — which the focus
+    /// ring and KiwiVision look past to the focus beneath it
+    /// (#2373); while it is key, every modifier tap and tap leader
+    /// is held (#1229). The raise stand-down and the menu-bar
+    /// reveal still read the window.
     var floatsOverWindows = false
 }
 

@@ -12710,10 +12710,16 @@ different ground:
   Accessibility alone. It stays one tap: a system-wide reader of key
   events joins it as a consumer with its own mask, built from the
   union, and is no tap of its own
-  (`.claude/rules/input-and-animation.md`). While KiwiHub — or any
-  own floating panel — is the key window, no modifier tap fires and
-  no tap leader opens a sequence, since KiwiHub's own keys ride every
-  modifier. Accepted: under Secure Input, key presses are hidden from
+  (`.claude/rules/input-and-animation.md`). While any of KiwiDesk's
+  own non-activating panels holds the keyboard — KiwiHub, or a
+  bar's grown peek — no modifier tap fires and no tap leader opens
+  a sequence, not only ⌘⌘ (#1229 ruling, owner 2026-11-09). The
+  hold reads the predicate hover focus already stands down on,
+  `OwnKeyWindowReading.floatsOverWindows`: narrowing it to KiwiHub
+  would need a second, GUI-set source of truth for "KiwiHub is
+  key", and narrowing it to ⌘ would let a recorded ⌥⌥ or ⌃⌃ fire
+  inside KiwiHub, whose own keys use all four modifiers.
+  Accepted: under Secure Input, key presses are hidden from
   the tap, so a key typed between two ⌘ taps cannot reset the count
   ([accepted limitations](accepted-limitations.md)).
 - **The touch reader** (MultitouchSupport) serves the taps and swipes.
