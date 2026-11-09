@@ -119,7 +119,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 23
+private let expectedContainerCount = 24
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.

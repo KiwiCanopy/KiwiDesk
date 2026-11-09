@@ -111,7 +111,7 @@ extension StateCoordinator {
     /// float tier's (#3036), or nil: the one answer of which plane a
     /// Maximize is on, since a tile's holds no return record.
     public func maximizedFloat(of space: Space) -> WindowID? {
-        maximizedWindow(of: space).flatMap {
+        handMaximizedWindow(of: space).flatMap {
             maximizedFloatReturn[$0] == nil ? nil : $0
         }
     }
