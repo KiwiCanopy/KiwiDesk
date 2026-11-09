@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// The app strip's words (#3135): Core names the apps, the strip

@@ -14,17 +14,20 @@ struct JumpStripView: View {
     static let verticalPadding: CGFloat = 6
 
     var body: some View {
+        ViewLine(selected: model.list.tile) { tiles }
+            .padding(.vertical, Self.verticalPadding)
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(JumpStripText.stripName)
+    }
+
+    /// The run of tiles the line scrolls.
+    var tiles: some View {
         let list = model.list
-        ViewLine(selected: list.tile) {
-            HStack(spacing: Self.spacing) {
-                ForEach(0..<list.tileCount, id: \.self) { index in
-                    tile(index, in: list).id(index)
-                }
+        return HStack(spacing: Self.spacing) {
+            ForEach(0..<list.tileCount, id: \.self) { index in
+                tile(index, in: list).id(index)
             }
         }
-        .padding(.vertical, Self.verticalPadding)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(JumpStripText.stripName)
     }
 
     private func tile(_ index: Int, in list: JumpList) -> some View {
@@ -32,7 +35,7 @@ struct JumpStripView: View {
         return JumpStripTile(
             name: app?.name ?? JumpStripText.allName,
             icon: app.flatMap { model.icons[$0.pid] },
-            windows: app.map(list.windowCount) ?? 0,
+            windows: app.map { list.windowCount(of: $0) } ?? 0,
             isSelected: index == list.tile,
             isDimmed: !list.tileMatches(index),
             onActivate: { model.clickTile(index) }

@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// The Windows side's list words, and its app strip (#3135): ← →

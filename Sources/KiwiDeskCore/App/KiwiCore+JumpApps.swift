@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 
 /// KiwiHub's app strip (#3135): the apps the Windows side lists,
 /// most recently used first, read with the rows when the panel
@@ -29,7 +29,7 @@ extension KiwiCore {
         eventLoop.liveApps(owners: []).filter { app in
             pids.contains(app.pid) && app.ref.bundleID != nil
                 && !EventLoop.isOwnProcess(app.pid)
-                && eventLoop.policy(of: app.pid) == .regular
+                && app.activationPolicy == .regular
                 && !frontmostOwns(pid: app.pid)
         }.map { app in
             JumpApp(

@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// The panel's list state over one opening's snapshot (#1875):

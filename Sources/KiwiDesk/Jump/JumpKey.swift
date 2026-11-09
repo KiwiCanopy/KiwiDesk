@@ -233,7 +233,7 @@ enum JumpKey: Equatable {
         keys: KiwiHubKeys,
         stripMoves: Bool
     ) -> JumpKey? {
-        let sideways = sideways(scope) || scope == .windows && stripMoves
+        let walks = sideways(scope) || scope == .windows && stripMoves
         guard
             let key = keys.key(for: combo(keyCode, held))
                 ?? keys.key(for: combo(keyCode, held.subtracting(.shift)))
@@ -243,8 +243,8 @@ enum JumpKey: Equatable {
         case .down: return .step(1)
         case .pageUp: return .page(-1)
         case .pageDown: return .page(1)
-        case .left: return sideways ? .side(-1) : nil
-        case .right: return sideways ? .side(1) : nil
+        case .left: return walks ? .side(-1) : nil
+        case .right: return walks ? .side(1) : nil
         case .openSpace: return scope == .desktops ? .openSpace : nil
         case .leaveSpace: return scope == .desktops ? .leaveSpace : nil
         case .pickUp: return scope == .desktops ? .pickUp : nil
