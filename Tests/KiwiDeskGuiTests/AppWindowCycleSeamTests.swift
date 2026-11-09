@@ -20,14 +20,17 @@ struct AppWindowCycleSeamTests {
     private static let verbFile = "KiwiCore+FocusAppWindow.swift"
 
     /// needle → file → count, across the whole Core tree: the
-    /// declaration and its two callers, and the ring's
+    /// step's declaration and its two callers (Open or Focus and
+    /// the focused-app entry), that entry and its one caller, the
+    /// verb, and the ring's
     /// declaration, its two readers in the cycle file and the
     /// ruled `move_here` reader (#1513).
     private static let sites: [(String, [String: Int])] = [
         (
             "cycleAppWindow(",
-            [cycleFile: 1, "KiwiCore+Launch.swift": 1, verbFile: 1]
+            [cycleFile: 2, "KiwiCore+Launch.swift": 1]
         ),
+        ("cycleFocusedAppWindow(", [cycleFile: 1, verbFile: 1]),
         (
             "cycleRing(",
             [cycleFile: 3, "KiwiCore+MoveHere.swift": 1]
@@ -49,22 +52,23 @@ struct AppWindowCycleSeamTests {
         }
     }
 
-    /// The verb steps the shared cycle and builds no ring: the
-    /// spellings a hand-built ring needs are absent from it.
+    /// The verb's file steps the shared cycle and builds no ring:
+    /// the spellings a hand-built ring needs are absent from the
+    /// whole file, a private helper beside the verb included.
     @Test("focus_app_window steps the shared cycle and builds no ring")
     func verbBuildsNoRing() throws {
-        let body = try SourceScan.functionBody(
-            of: "focusAppWindow",
-            in: Self.verbFile,
-            under: "Commands"
+        let file = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "Commands/\(Self.verbFile)"
+            )
         )
-        #expect(body.contains("cycleAppWindow("))
-        #expect(body.contains("verb: \"focus_app_window\""))
+        #expect(file.contains("cycleFocusedAppWindow("))
+        #expect(file.contains("verb: \"focus_app_window\""))
         for spelling in [
             "cycleRing(", "withAwayMembers(", "allSpaces",
-            "awayReach(", "% ",
+            "awayReach(", "appBundleID", "%",
         ] {
-            #expect(!body.contains(spelling), "\(spelling)")
+            #expect(!file.contains(spelling), "\(spelling)")
         }
     }
 

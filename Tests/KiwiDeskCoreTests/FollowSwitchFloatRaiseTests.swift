@@ -100,7 +100,7 @@ struct FollowSwitchFloatRaiseTests {
                 bundleID: Self.bundle,
                 direction: .next,
                 verb: "focus_or_spawn"
-            )
+            ) == .stepped
         )
         expectRaised(core)
     }

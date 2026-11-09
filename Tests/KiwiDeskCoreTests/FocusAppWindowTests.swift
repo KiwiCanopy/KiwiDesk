@@ -120,6 +120,29 @@ struct FocusAppWindowTests {
         #expect(core.state.windows[WindowID(21)] == nil)
     }
 
+    /// Every other window minimized: the press is refused, not
+    /// answered by un-minimizing one the way Open or Focus's
+    /// first press does (#673).
+    @Test("Other windows all minimized: refused, none restored")
+    func allOthersMinimizedRefuses() {
+        let core = makeCore()
+        var restored: [WindowID] = []
+        core.openOrFocus.deminiaturize = { _, id in
+            restored.append(id)
+        }
+        for id: UInt32 in [21, 22] {
+            core.state.apply(
+                .windowDestroyed(WindowID(id), wasMinimized: true)
+            )
+        }
+        #expect(
+            step(core, "next")
+                == .fail("the focused app has no other window to focus")
+        )
+        #expect(restored.isEmpty)
+        #expect(core.state.workspaces.lastFocused == WindowID(20))
+    }
+
     /// The parity half of the one-ring guard
     /// (`AppWindowCycleSeamTests` holds the source half): the
     /// verb's `next` and Open or Focus's repeat press visit the
@@ -144,7 +167,10 @@ struct FocusAppWindowTests {
     func otherFrontmostRefuses() {
         let core = makeCore()
         core.frontmostPIDProvider = { 999 }
-        #expect(!step(core, "next").isSuccess)
+        #expect(
+            step(core, "next")
+                == .fail("only the app in front cycles its windows")
+        )
         #expect(core.state.workspaces.lastFocused == WindowID(20))
     }
 
@@ -153,7 +179,10 @@ struct FocusAppWindowTests {
         let core = makeCore()
         core.state.workspaces.focus(WindowID(30), in: "1")
         core.frontmostPIDProvider = { 300 }
-        #expect(!step(core, "next").isSuccess)
+        #expect(
+            step(core, "next")
+                == .fail("the focused app has no other window to focus")
+        )
         #expect(core.state.workspaces.lastFocused == WindowID(30))
     }
 

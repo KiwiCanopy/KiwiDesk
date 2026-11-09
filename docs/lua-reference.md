@@ -181,8 +181,9 @@ no screen shows. The order is the one a repeat press of
 the Space Bar lists them, then each window's slot, wrapping around
 — and `"prev"` walks it backwards. Minimized windows are skipped
 and stay minimized. A window on a Desktop no screen shows needs the
-Desktop bridge, as `focus_or_spawn`'s does. With no other window
-of the app, or with another app in front, it is refused. It has no
+Desktop bridge, as `focus_or_spawn`'s does. It is refused with no
+other window of the app, with another app in front, or when the
+Desktop holding the next window cannot be switched to. It has no
 shortcut until you bind one.
 
 macOS has its own **Move focus to next window** (System Settings ▸

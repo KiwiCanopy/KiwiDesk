@@ -141,11 +141,11 @@ struct OpenOrFocusCycleTests {
         core.state.workspaces.focus(WindowID(20), in: "1")
         core.frontmostPIDProvider = { 100 }
         #expect(
-            !core.cycleAppWindow(
+            core.cycleAppWindow(
                 bundleID: Self.bundle,
                 direction: .next,
                 verb: "focus_or_spawn"
-            )
+            ) == .loneWindow
         )
         #expect(
             core.state.workspaces.lastFocused == WindowID(20)
@@ -185,11 +185,11 @@ struct OpenOrFocusCycleTests {
         // app is forward — the press must pull, not cycle.
         core.frontmostPIDProvider = { 999 }
         #expect(
-            !core.cycleAppWindow(
+            core.cycleAppWindow(
                 bundleID: Self.bundle,
                 direction: .next,
                 verb: "focus_or_spawn"
-            )
+            ) == .notFrontmost
         )
         #expect(
             core.state.workspaces.lastFocused == WindowID(20)
@@ -207,11 +207,11 @@ struct OpenOrFocusCycleTests {
         core.state.workspaces.focus(WindowID(30), in: "1")
         core.frontmostPIDProvider = { 300 }
         #expect(
-            !core.cycleAppWindow(
+            core.cycleAppWindow(
                 bundleID: Self.bundle,
                 direction: .next,
                 verb: "focus_or_spawn"
-            )
+            ) == .notFocused
         )
         #expect(
             core.state.workspaces.lastFocused == WindowID(30)
@@ -227,11 +227,11 @@ struct OpenOrFocusCycleTests {
         core.state.workspaces.focus(WindowID(20), in: "1")
         core.frontmostPIDProvider = { 100 }
         #expect(
-            !core.cycleAppWindow(
+            core.cycleAppWindow(
                 bundleID: Self.bundle,
                 direction: .next,
                 verb: "focus_or_spawn"
-            )
+            ) == .loneWindow
         )
         #expect(
             core.state.workspaces.lastFocused == WindowID(20)

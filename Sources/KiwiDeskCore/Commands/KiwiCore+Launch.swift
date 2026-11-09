@@ -23,7 +23,7 @@ extension KiwiCore {
                 bundleID: bundleID,
                 direction: .next,
                 verb: "focus_or_spawn"
-            )
+            ) == .stepped
         {
             return .ok()
         }

@@ -180,6 +180,22 @@ struct FocusAppWindowReachTests {
         #expect(core.followFocus.owed() == WindowID(2))
     }
 
+    @Test("a refused reach is refused by its rule, focus unmoved")
+    func refusedReachRefuses() {
+        let core = makeCore(bridge: .refusing)
+        defer { teardown() }
+        #expect(
+            core.execute("focus_app_window", args: [.string("next")])
+                == .fail(
+                    "the app's next window is on a Desktop that "
+                        + "could not be switched to"
+                )
+        )
+        #expect(Bridge.switches.isEmpty)
+        #expect(core.followFocus.owed() == nil)
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+    }
+
     @Test("without the bridge the ring is the tracked windows")
     func noBridgeSkipsAway() {
         let core = makeCore(bridge: .absent)

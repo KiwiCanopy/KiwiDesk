@@ -479,11 +479,9 @@ that way, stopping at the edge; neither takes other arguments
 :::unreleased
 `focus_app_window` takes `next|prev` and focuses the focused app's
 next or previous window, on any Space, screen or Desktop, in the
-order a repeat `focus_or_spawn` press walks; minimized windows are
-skipped. Unlike macOS's own **Move focus to next window** (System
-Settings ▸ Keyboard ▸ Keyboard Shortcuts… ▸ Keyboard), which stays
-on the current Space, it also reaches other Spaces and Desktops no
-screen shows ([`focus_app_window`](lua-reference.md#focus_app_window)).
+order a repeat `focus_or_spawn` press walks; unlike macOS's own
+**Move focus to next window**, it reaches past the current Space
+([`focus_app_window`](lua-reference.md#focus_app_window)).
 :::
 
 :::unreleased
