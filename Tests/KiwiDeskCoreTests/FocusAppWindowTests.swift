@@ -187,10 +187,16 @@ struct FocusAppWindowTests {
     }
 
     /// A focused transient overlay (#300) is outside its app's
-    /// ring, refused as such rather than as a lone window.
+    /// ring, refused as such rather than as a lone window — on a
+    /// ring of one, where the two answers would differ.
     @Test("A focused transient overlay is refused as outside the ring")
     func focusedOverlayRefuses() {
         let core = makeCore()
+        for id: UInt32 in [21, 22] {
+            core.state.apply(
+                .windowDestroyed(WindowID(id), wasMinimized: true)
+            )
+        }
         core.state.windows.upsert(
             ManagedWindow(
                 id: WindowID(23),
