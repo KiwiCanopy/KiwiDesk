@@ -226,6 +226,23 @@ struct KeySequenceCardTests {
         #expect(sheet.matchCount == 0)
     }
 
+    @Test("a long path shortens to its leader and last two keys")
+    func longPathShortens() {
+        let short = ["ctrl+alt+space", "w", "h"]
+        #expect(
+            SequencePathWords.shortened(short)
+                == SequencePathWords.drawn(short)
+        )
+        let long = ["ctrl+alt+space", "w", "s", "2", "x"]
+        let drawn = SequencePathWords.shortened(long)
+        #expect(
+            drawn
+                == SequencePathWords.drawn(["ctrl+alt+space"]) + " \u{2192} "
+                + "\u{2026} \u{2192} "
+                + SequencePathWords.drawn(["2", "x"])
+        )
+    }
+
     @Test("two copies of a layer differ by a sequence's tree")
     func layerCompareReadsTheTree() {
         let base = KeyLayer(name: "default", bindings: [sequence()])

@@ -11,6 +11,17 @@ enum SequencePathWords {
         path.map(KeySequenceHint.drawn).joined(separator: " \u{2192} ")
     }
 
+    /// The path for a one-line chord column (owner, 2026-11-09): past
+    /// four keys, the leader, "…", then the last two keys, so the
+    /// row's name keeps its room. Hover and VoiceOver read it whole.
+    static func shortened(_ path: [String]) -> String {
+        guard path.count > 4 else { return drawn(path) }
+        return
+            ([KeySequenceHint.drawn(path[0]), "\u{2026}"]
+            + path.suffix(2).map(KeySequenceHint.drawn))
+            .joined(separator: " \u{2192} ")
+    }
+
     /// The path as VoiceOver reads it, each chord in words.
     static func spoken(_ path: [String]) -> String {
         path.map { SidedChordWords.label(KeySequenceHint.drawn($0)) }

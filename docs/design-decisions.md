@@ -14198,7 +14198,8 @@ caption ("Also ⌃⌥Space → W → H"). An end key's action is picked
 in a searchable popover over the whole catalogue in the page's
 groups, never folded, with "Opens more keys ›" and "Lua…" pinned
 outside its scrolling list (owner, 2026-11-09). KiwiHub's
-Shortcuts side lists an end key by its path, finds it by the names
+Shortcuts side lists an end key by its path (past four keys, the
+leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
 card already do. A sequence has no "Applies to"
 column yet: the key table keys a row by its Lua, which a leader has

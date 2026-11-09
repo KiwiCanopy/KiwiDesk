@@ -236,7 +236,7 @@ extension ShortcutsReferenceBuilder {
         var row = ShortcutRow(
             id: "sequence:" + end.binding.id.uuidString,
             label: label,
-            combo: SequencePathWords.drawn(end.path),
+            combo: SequencePathWords.shortened(end.path),
             icon: icon,
             monospaced: monospaced,
             unavailable: unavailable
