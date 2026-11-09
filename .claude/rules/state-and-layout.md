@@ -2287,8 +2287,10 @@ editing here:
   both windows of the first unfit pair that way), while a cue
   handed the slot draws beside the window.
   `FrameSetReaderCensusTests`' `allowed` map is the one copy of
-  who reads which and why. The stack zone's own shares
-  stay out (#944). `SplitFloorHealTests` holds the math,
+  who reads which and why. The issued set carries one float, a
+  maximized one's fill (#3036), so a new issued-set reader rules on
+  that entry rather than reading every key as a tile. The stack
+  zone's own shares stay out (#944). `SplitFloorHealTests` holds the math,
   `SplitOverflowTests` the post-pass, `SplitFloorHealWiringTests`
   the retile wiring and the traveler stand-down,
   `SplitFloorCueTests` the cue and the inward landing over a
@@ -2488,7 +2490,22 @@ editing here:
   so a per-Space layer joins that body rather than a call site. Lay the fill over the ISSUED frames
   alone (`TilingEngine.fillingMaximized` inside
   `visibleFrames(placed: true)`), never the slots, so every slot
-  reader keeps the row. **A write that rearranges a Space ends its
+  reader keeps the row. **A float's Maximize (#3036) holds a
+  return record, `maximizedFloatReturn`, and its frame comes back
+  only through the one `payMaximizedFloatReturns`** — the tail of
+  `retile()`, or a float verb ending it first through
+  `endMaximizeBeforeFloatVerb` — so an ender clears the flag and
+  writes no frame of its own; a new verb moving a float's frame
+  takes that door ahead of its base read and steps from the frame
+  it returns, and an entry asking whether a return is owed asks
+  `owedMaximizedFloatReturns()` — both review's, since nothing
+  scans for them (`MaximizeFloatTests` drives the verbs that
+  exist). The record's presence is part of the verdict: a float's
+  Maximize stands only while it holds one and a tile's only while
+  it holds none, so a new writer of the record changes what is
+  maximized, and which plane one stands on is read through
+  `maximizedFloat(of:)`, never re-derived beside it.
+  **A write that rearranges a Space ends its
   maximize AT the write** — every order write through the one
   `Space.endMaximize`, the mode write, `resize`,
   `reset_layout_sizing` — so a refused

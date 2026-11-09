@@ -325,12 +325,13 @@ struct MaximizeStickyWindowTests {
         #expect(core.state.workspaces[here]?.maximized?.window == nil)
     }
 
-    @Test("A floating sticky window is still refused")
-    func floatingStickyRefused() {
+    @Test("A floating sticky window fills where it renders (#3036)")
+    func floatingStickyFills() {
         let core = makeCore()
         core.state.windows.setFloating(sticky, true)
-        #expect(!core.execute("toggle_maximized").isSuccess)
-        #expect(core.state.workspaces[here]?.maximized?.window == nil)
+        #expect(core.execute("toggle_maximized").isSuccess)
+        #expect(core.state.workspaces[here]?.maximized?.window == sticky)
+        #expect(core.state.maximizedFloatReturn[sticky] != nil)
     }
 
     @Test("A traveler replaces a member's maximize on its Space")

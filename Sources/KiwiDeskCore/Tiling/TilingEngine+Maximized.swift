@@ -2,13 +2,17 @@ import AppKit
 import CoreGraphics
 
 /// The maximized window's frame (#2448): the screen's whole
-/// visible frame with no gaps, laid over the ISSUED frames only.
+/// visible frame with no gaps, laid over the ISSUED frames only —
+/// a maximized float's included, the one float the set carries
+/// (#3036).
 /// The slots (`calculatedFrames`) keep the window's place in the
 /// row, so drag, resize and scroll anchors never read the
 /// maximized frame as a slot.
 extension TilingEngine {
     /// `frames` with `space`'s maximized window, if it has one,
-    /// filling `screen`. Laid out by Monocle over a one-window row,
+    /// filling `screen`; a float's fill is its one issued frame,
+    /// anchored on its return frame (#3036). Laid out by Monocle
+    /// over a one-window row,
     /// so an app whose learned maximum is smaller sits centred
     /// (#880) rather than at the corner.
     func fillingMaximized(
@@ -19,7 +23,7 @@ extension TilingEngine {
     ) -> [WindowID: CGRect] {
         guard let id = state.maximizedWindow(of: input.space),
             let shape = state.maximizedShape(of: input.space),
-            let slot = frames[id]
+            let slot = frames[id] ?? state.maximizedFloatReturn[id]?.frame
         else { return frames }
         var context = input.context
         context.bounds = Self.maximizedBounds(

@@ -125,6 +125,11 @@ struct SnapshotStoreCensusTests {
         // After the settle, whose retire prunes an arm on a Space
         // no live profile leaves temporary.
         core.state.temporaryArmed.insert(shown)
+        // After the settle too, whose pass pays an unheld return.
+        core.state.maximizedFloatReturn[WindowID(1)] = .init(
+            pid: 7,
+            frame: .zero
+        )
         // A departure owed (#1508): the hidden Space leaves view.
         _ = core.tiler.stashDepartures.pass(
             shown: [shown, hidden],
@@ -154,6 +159,7 @@ struct SnapshotStoreCensusTests {
         // Non-vacuous: the stores the ruling names were reached.
         for named in [
             "state.floatFrames", "state.tiledOverRule",
+            "state.maximizedFloatReturn",
             "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",

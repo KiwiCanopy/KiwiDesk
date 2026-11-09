@@ -29,8 +29,10 @@ struct MaximizedReaderCensusTests {
         // follow (#3063), written and adopted.
         "Models/StateSnapshot+InPlace.swift": 5,
         // The verdict, its shape, the follow, and the retire, which
-        // ends or re-points it and names the windows (#2676, #3063).
-        "State/StateCoordinator+Maximized.swift": 7,
+        // ends or re-points it and names the windows (#2676, #3063);
+        // a float's plane and the return frames no Maximize holds
+        // (#3036).
+        "State/StateCoordinator+Maximized.swift": 9,
         // A close while away and a minimize end it; a Desktop
         // departure keeps the id for the return.
         "State/StateCoordinator+SpaceMemory.swift": 2,

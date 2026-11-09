@@ -2,7 +2,8 @@ import CoreGraphics
 import Foundation
 
 /// The per-window float records that live as long as the window:
-/// a float's frame and aspect, and a Tile over a float rule.
+/// a float's frame and aspect, a Tile over a float rule and a
+/// maximized float's return frame (#3036).
 extension StateCoordinator {
     /// One remembered float frame and the process that owns it.
     struct FloatFrame: Sendable, Equatable {
@@ -24,7 +25,7 @@ extension StateCoordinator {
         case probing(WindowID)
     }
 
-    /// Carries both records across a native-tab re-key. A judgement in
+    /// Carries the records across a native-tab re-key. A judgement in
     /// flight is not carried: it ends unjudged at its next read.
     mutating func rekeyFloatMemory(_ old: WindowID, to new: WindowID) {
         if let frame = floatFrames.removeValue(forKey: old) {
@@ -36,6 +37,9 @@ extension StateCoordinator {
         if let pid = tiledOverRule.removeValue(forKey: old) {
             tiledOverRule[new] = pid
         }
+        if let frame = maximizedFloatReturn.removeValue(forKey: old) {
+            maximizedFloatReturn[new] = frame
+        }
     }
 
     /// Ends every record above for an app that exited.
@@ -43,6 +47,9 @@ extension StateCoordinator {
         floatFrames = floatFrames.filter { $0.value.pid != pid }
         floatAspects = floatAspects.filter { $0.value.pid != pid }
         tiledOverRule = tiledOverRule.filter { $0.value != pid }
+        maximizedFloatReturn = maximizedFloatReturn.filter {
+            $0.value.pid != pid
+        }
     }
 
     /// Ends the per-window records for a window gone for good: a
@@ -51,6 +58,7 @@ extension StateCoordinator {
         floatFrames[id] = nil
         floatAspects[id] = nil
         tiledOverRule[id] = nil
+        maximizedFloatReturn[id] = nil
     }
 
     /// Whether a Tile keeps `id` tiled over a float rule (#2975):

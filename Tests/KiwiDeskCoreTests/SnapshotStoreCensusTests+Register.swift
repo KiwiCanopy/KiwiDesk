@@ -52,6 +52,13 @@ extension SnapshotStoreCensusTests {
                 "a Tile over a float rule (#2975) — a crash or a "
                     + "quit floats the window by its rule again"
             ),
+        "state.maximizedFloatReturn":
+            (
+                .inPlace,
+                "a maximized float's return frame (#3036) — every "
+                    + "snapshot records it as the window's frame, so "
+                    + "a crash or a quit returns it there"
+            ),
         "state.floatAspects":
             (
                 .behind,

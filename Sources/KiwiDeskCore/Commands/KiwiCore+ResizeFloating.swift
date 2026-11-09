@@ -26,6 +26,9 @@ extension KiwiCore {
         axis: String,
         delta: Double
     ) -> CommandResponse {
+        // A press ends the float's Maximize and acts from the frame
+        // it returns to (#3036).
+        let returned = endMaximizeBeforeFloatVerb(id)
         guard let window = state.windows[id] else {
             return .fail("unknown window")
         }
@@ -75,7 +78,8 @@ extension KiwiCore {
             (aspect == nil || lockedRatio != nil) && !isGlideWrite
             ? windowServer.readWindowBounds(id) : nil
         let base =
-            tiler.animation.commandedFrame(
+            returned
+            ?? tiler.animation.commandedFrame(
                 window: id,
                 includingHeldGlide: isGlideWrite
             )

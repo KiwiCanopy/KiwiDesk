@@ -92,6 +92,9 @@ struct FloatFlagReaderCensusTests {
             [.routed: 1, .ruledToStay: 2],
         "State/StateCoordinator+EffectiveMembers.swift":
             [.tiledMember: 4],
+        // A float's Maximize stands while it is an effective float
+        // of its Space (#3036).
+        "State/StateCoordinator+Maximized.swift": [.routed: 1],
         "State/StateCoordinator+WindowCreated.swift":
             [.tiledMember: 2],
         // Ruled to stay (#1362): an arrival on another display

@@ -159,6 +159,8 @@ extension KiwiCore {
         _ = tiler.takePendingBoundPlacement()
         // The heal stood down on an apply's probe (#2785).
         if pass.probes { oweApplyHealPass() }
+        // An ended float Maximize gets its frame back here (#3036).
+        payMaximizedFloatReturns()
         // The window changing state hides its ring until it lands,
         // a held pass's included (#2676).
         holdRingForStateChange(stateChange)

@@ -6476,6 +6476,50 @@ at the full frame, and a focus step there stays a raise. A Height or
 Width follow on Monocle pays the two writes.
 :::
 
+:::unreleased
+*A floating window takes it too (#3036).* "Tiled windows only for
+now" ends: an effective float — a floated window on any layout, or
+any window of a Floating layout Space — fills the same frame with
+the same chrome stood down, and reads the same share table. It ends
+on the same two predicates read for its plane: focus on a TILED
+window of its Space, or the window leaving the Space's float set
+(tiled, pocketed, closed, moved). A Floating layout Space has no
+tiled window, so there only a second press or a departure ends it.
+Focus on another float keeps it, a dialog or a plain float alike,
+and the float raise keeps the maximized float lowest of the floats
+while it does not hold focus, so it cannot bury the one in front.
+Dialogs, full-screen windows and the Pocket window stay refused.
+
+The frame it returns to is its own record,
+`maximizedFloatReturn`, written at the press, never `floatFrames`,
+which is a tile's memory of its float frame and is consumed by the
+next float. The enders still only clear the flag; the tail of
+`retile()` pays the frame back for every record no Maximize holds
+any more, or seeds it as the stash capture where the Space is not
+shown, so no ender owes a write of its own and none can forget it.
+A verb that moves the float ends the Maximize and pays first, then
+acts from the returned frame. A mouse drag puts it back without
+acting on the drop, as a tile's does; a mouse resize of its edge
+keeps the new size and forgets the record, since the size is the
+user's statement. A crash snapshot records the return frame rather
+than the fill, and an in-place restart carries the record.
+
+A stateless fill — write the visible frame, remember the old one,
+end only on a second press, leave the bars up — is refused: it costs
+less, but one key would then have two looks and two sets of ending
+rules.
+
+*The fill is the one float in the issued frames.* Floats never had
+an issued frame: nothing laid them out, so the unsolicited-resize
+check had no frame to hold them to. A maximized float's fill is
+laid into the issued set beside the tiles', anchored on its return frame for an "in place" share, so
+the retile issues it, an app's own resize is corrected through the
+unsolicited-resize check that already reads that set first, and a
+learned maximum is centred by the same Monocle pass a tile's fill
+takes. The slots carry no float, so no classifier sees it. Whether
+KiwiVision's fill follows a maximized float is #3064's.
+:::
+
 A sticky window's flag sits on the Space it renders on, where its
 layout input already places it, so leaving that Space ends it
 (#3035): a traveler is never that Space's own focus (#431), so a
