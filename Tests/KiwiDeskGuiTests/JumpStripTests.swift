@@ -177,6 +177,29 @@ struct JumpStripTests {
         #expect(held != .side(1))
     }
 
+    /// Lua's alternatives to ← → follow the same field rule.
+    @Test("a Lua alternative walks the strip only on an empty field")
+    func alternativeArrows() {
+        var keys = KiwiHubKeys()
+        keys.left = "control+b"
+        keys.right = "control+f"
+        func key(_ code: UInt16, empty: Bool) -> JumpKey? {
+            JumpKey.of(
+                keyCode: code,
+                modifiers: .control,
+                scope: .windows,
+                naming: false,
+                keys: keys,
+                stripMoves: empty
+            )
+        }
+        // b and f on the US layout.
+        #expect(key(11, empty: true) == .side(-1))
+        #expect(key(3, empty: true) == .side(1))
+        #expect(key(11, empty: false) == nil)
+        #expect(key(3, empty: false) == nil)
+    }
+
     @Test("a snapshot with no strip of its own lists its rows' apps")
     func defaultApps() {
         let snapshot = JumpSnapshot(

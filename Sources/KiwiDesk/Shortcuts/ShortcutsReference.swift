@@ -27,7 +27,7 @@ enum ShortcutsReferenceBuilder {
         // `ShortcutsSelfRowTests` pins — a band builder is
         // `build`'s to call.
         var layer = layer
-        let openers = Set(JumpScope.allCases.map(\.lua))
+        let openers = KeybindingCatalog.kiwiHubOpenerLuas
         layer.bindings.removeAll { openers.contains($0.lua) }
         // A key sequence is no press row: its end keys are listed
         // under their action by path, its leader not at all (#1871).

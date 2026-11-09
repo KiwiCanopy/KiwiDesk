@@ -36,12 +36,16 @@ struct JumpAppStripTests {
         core.state.workspaces.add(WindowID(id), to: SpaceID("1"))
     }
 
-    private func app(_ pid: pid_t, bundle: String? = nil) -> RunningApp {
+    private func app(
+        _ pid: pid_t,
+        bundle: String? = "",
+        policy: NSApplication.ActivationPolicy = .regular
+    ) -> RunningApp {
         RunningApp(
             pid: pid,
-            activationPolicy: .regular,
+            activationPolicy: policy,
             ref: AppRef(
-                bundleID: bundle ?? "app.test.\(pid)",
+                bundleID: bundle == "" ? "app.test.\(pid)" : bundle,
                 name: "A\(pid)"
             ),
             isHidden: false
@@ -98,11 +102,32 @@ struct JumpAppStripTests {
         #expect(pids(core).isEmpty)
     }
 
+    /// Each exclusion alone: a stamped app with no row that the
+    /// strip leaves out, beside a control it keeps.
+    @Test(
+        "no bundle id, KiwiDesk itself and a non-regular app are left out",
+        arguments: ["bundle", "own", "accessory"]
+    )
+    func exclusions(_ kind: String) {
+        let pid: pid_t = kind == "own" ? getpid() : 900_005
+        let excluded = app(
+            pid,
+            bundle: kind == "bundle" ? nil : "",
+            policy: kind == "accessory" ? .accessory : .regular
+        )
+        let core = makeCore(apps: [excluded, app(900_006)])
+        defer { resetAuthorityOverrides() }
+        core.state.stampAppRecency(pid)
+        core.state.stampAppRecency(900_006)
+        #expect(pids(core) == [900_006])
+    }
+
     @Test("an app's exit ends its stamp")
     func exitEndsTheStamp() {
         let core = makeCore()
         defer { resetAuthorityOverrides() }
         core.state.stampAppRecency(900_004)
+        #expect(core.state.appRecency[900_004] != nil)
         core.state.apply(.appTerminated(pid: 900_004))
         #expect(core.state.appRecency[900_004] == nil)
     }

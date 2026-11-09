@@ -157,6 +157,24 @@ struct JumpStripModelTests {
                     + "&&model?.query.isEmpty==true"
             )
         )
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Jump")
+        func squash(_ file: String) throws -> String {
+            try SourceScan.strippedSource(
+                at: root.appendingPathComponent(file)
+            ).split(whereSeparator: \.isWhitespace).joined()
+        }
+        // The controller wires the strip at every opening, and both
+        // of the panel's key doors hand the field's verdict on.
+        #expect(
+            try squash("JumpPanelController.swift")
+                .contains("wireStrip(model,panel)")
+        )
+        #expect(
+            try squash("JumpPanel.swift")
+                .components(separatedBy: "stripMoves:stripMoves()")
+                .count == 3
+        )
         // The pick reaches Core's reopen after the panel's close.
         #expect(squashed.contains("model.onReopen={[weakself]appin"))
         #expect(squashed.contains("core.reopenJumpApp(bundleID:bundleID)"))

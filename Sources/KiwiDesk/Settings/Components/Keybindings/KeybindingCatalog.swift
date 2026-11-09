@@ -204,6 +204,13 @@ enum KeybindingCatalog {
         }
     )
 
+    /// The Lua of every key that opens KiwiHub — each side's and the
+    /// switcher's last-app opener (#3135) — which the Shortcuts side
+    /// leaves out (#2246).
+    static var kiwiHubOpenerLuas: Set<String> {
+        Set(JumpScope.allCases.map(\.lua) + [jumpToLastApp.lua])
+    }
+
     /// The window switcher with its app strip on the app of the
     /// window used last (#3135): the switcher's noun, and what this
     /// key adds over its own (`ShortcutsPanelNounTests`).
