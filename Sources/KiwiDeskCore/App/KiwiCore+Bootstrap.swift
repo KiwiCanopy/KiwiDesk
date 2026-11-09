@@ -72,10 +72,7 @@ extension KiwiCore {
         tiler.motionGate.onLog = log
         tiler.onLog = log
         vision.appearanceSwitch = .live(onLog: log)
-        wireScrollPan()
-        wireModifierGrab()
-        wireScrollSpaceStep()
-        wireTrackpadGestures()
+        wireInputHandlers()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
         // pins every overlay to the AX-fallback path.
         windowServer.onLog = log

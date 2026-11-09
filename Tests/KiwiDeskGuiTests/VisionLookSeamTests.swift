@@ -19,7 +19,7 @@ struct VisionLookSeamTests {
     /// scan reads their file: the `gui.json` encoder writes the
     /// stored group whole, which is the store, not a drawn value.
     private static let exemptLines: [String: String] = [
-        "Config/GuiConfig.swift":
+        "Config/GuiConfig+Encoding.swift":
             "container.encode(appWide.vision, forKey: .kiwivision)"
     ]
 
