@@ -1,0 +1,191 @@
+import Foundation
+import SwiftUI
+import Testing
+
+@testable import KiwiDesk
+@testable import KiwiDeskCore
+
+/// What the Key sequences card writes reaches the files (#1871): a
+/// sequence has no Lua, so the key table never names it, and it
+/// rides the layer's rows whole.
+@Suite("Key sequence card save (#1871)", .serialized)
+@MainActor
+struct KeySequenceCardSaveTests {
+    private let left = "KiwiDesk.focus(\"left\")"
+
+    private func makeModel() throws -> SettingsModel {
+        let core = makeTestCore()
+        var config = GuiConfig()
+        config.spaces = [SpaceID("1")]
+        config.layers = [KeyLayer(name: KeyLayer.defaultName)]
+        try core.guiConfigStore.save(config)
+        try core.profiles.save(profile("Work"))
+        try core.profiles.write(profile("Home"))
+        let model = makeTestModel(core: core)
+        model.reload()
+        return model
+    }
+
+    private func profile(_ name: String) -> Profile {
+        Profile(
+            name: name,
+            monitorSets: [MonitorSet(monitors: [])],
+            spaces: [SpaceID("1")],
+            spaceModes: [:],
+            settings: TilingSettings()
+        )
+    }
+
+    private func sequence() -> KeyBinding {
+        let branch = KeyBinding.sequence(
+            combo: "w",
+            label: "Windows",
+            steps: [KeyBinding(combo: "h", lua: left, kind: .navigation)]
+        )
+        return .sequence(
+            combo: "ctrl+alt+space",
+            label: "Leader",
+            steps: [branch]
+        )
+    }
+
+    private func stored(_ model: SettingsModel) -> [KeyBinding] {
+        model.core.guiConfigStore.load()?.layers.first?.sequences ?? []
+    }
+
+    @Test("the card blocks a stored page and a profile's own copy")
+    func editBlocks() throws {
+        let model = try makeModel()
+        #expect(model.sequenceEditBlock(in: KeyLayer.defaultName) == nil)
+        var work = try model.core.profiles.read(name: "Work")
+        work.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: KeyLayer.defaultName, bindings: [sequence()])
+            ]
+        )
+        try model.core.profiles.write(work)
+        model.reload()
+        #expect(
+            model.sequenceEditBlock(in: KeyLayer.defaultName)
+                == .profileOwnsSequences
+        )
+        model.selectEditTarget("Home")
+        #expect(
+            model.sequenceEditBlock(in: KeyLayer.defaultName) == .storedPage
+        )
+    }
+
+    @Test("a profile's own sequence stays out of the shared rows")
+    func ownSequenceStaysOwn() throws {
+        let model = try makeModel()
+        var work = try model.core.profiles.read(name: "Work")
+        work.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: KeyLayer.defaultName, bindings: [sequence()])
+            ]
+        )
+        try model.core.profiles.write(work)
+        model.reload()
+        // An unrelated edit on Work's page, then its Save.
+        model.config.layers[0].bindings.append(
+            KeyBinding(combo: "alt+h", lua: left, kind: .navigation)
+        )
+        model.updateActiveProfile()
+
+        #expect(stored(model).isEmpty)
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        let own = try model.core.profiles.read(name: "Work").layers?
+            .resolved(onto: base)
+        #expect(own?.first?.sequences == [sequence()])
+    }
+
+    @Test("shared sequences stay whole when a profile shadows them")
+    func sharedSequencesStayShared() throws {
+        let model = try makeModel()
+        let other = KeyBinding.sequence(
+            combo: "ctrl+alt+b",
+            label: "Other",
+            steps: [KeyBinding(combo: "h", lua: left, kind: .navigation)]
+        )
+        var config = try #require(model.core.guiConfigStore.load())
+        config.layers[0].bindings = [sequence(), other]
+        try model.core.guiConfigStore.save(config)
+        var shadow = sequence()
+        shadow.label = "Mine"
+        var work = try model.core.profiles.read(name: "Work")
+        work.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: KeyLayer.defaultName, bindings: [shadow])
+            ],
+            removed: [KeyLayer.defaultName: ["ctrl+alt+b"]]
+        )
+        try model.core.profiles.write(work)
+        model.reload()
+        model.config.layers[0].bindings.append(
+            KeyBinding(combo: "alt+h", lua: left, kind: .navigation)
+        )
+        model.updateActiveProfile()
+
+        // The shadowed one goes back to its shared tree, and the one
+        // Work leaves out stays in the base.
+        #expect(Set(stored(model).map(\.label)) == ["Leader", "Other"])
+        #expect(stored(model).contains(sequence()))
+        #expect(stored(model).contains(other))
+    }
+
+    @Test("the action picker narrows by name and keeps its groups")
+    func pickerNarrows() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeModel()
+        let catalog = SequenceActionCatalog(
+            expander: .ofDraft(model, layer: KeyLayer.defaultName)
+        )
+        #expect(catalog.matching("").count == catalog.groups.count)
+        let hits = catalog.matching("to the left")
+        #expect(!hits.isEmpty)
+        #expect(
+            hits.allSatisfy { group in
+                group.commands.allSatisfy {
+                    $0.resolvedLabel.localizedCaseInsensitiveContains(
+                        "to the left"
+                    )
+                }
+            }
+        )
+        #expect(catalog.matching("zzqq").isEmpty)
+        let slots = SequenceActionMenu.sequence(hits)
+        #expect(slots.first == .branch && slots.last == .lua)
+    }
+
+    @Test("a sequence recorded on the live page lands whole")
+    func liveSaveWritesTheTree() throws {
+        let model = try makeModel()
+        model.config.layers[0].bindings.append(sequence())
+        #expect(model.isDirty)
+        model.updateActiveProfile()
+
+        #expect(stored(model) == [sequence()])
+        #expect(!model.isDirty)
+    }
+
+    @Test("a step edited under a saved leader lands")
+    func liveStepEditLands() throws {
+        let model = try makeModel()
+        model.config.layers[0].bindings.append(sequence())
+        model.updateActiveProfile()
+        let id = try #require(model.config.layers[0].sequences.first?.id)
+        let editing = SequenceEditing(
+            bindings: Binding(
+                get: { model.config.layers[0].bindings },
+                set: { model.config.layers[0].bindings = $0 }
+            ),
+            rootID: id
+        )
+        let branch = try #require(editing.root?.steps?.first)
+        editing.update(branch.id) { $0.label = "Win" }
+        #expect(model.isDirty)
+        model.updateActiveProfile()
+
+        #expect(stored(model).first?.steps?.first?.label == "Win")
+    }
+}

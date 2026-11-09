@@ -58,6 +58,9 @@ public struct AppWideSettings: Equatable, Sendable {
     /// clear, not only the focused one (`kiwivision.clear_app`,
     /// #2103 ruling 17). OFF by default: v1's one clear window.
     public var visionClearApp = false
+    /// What the focused window fills while KiwiVision is on
+    /// (`kiwivision.maximize`, #3064). OFF by default.
+    public var visionMaximize = VisionMaximize.off
     /// The apps whose windows KiwiVision never dims or blurs, each
     /// a lowercased bundle id or, for a process with none, its name
     /// (`kiwivision.never_dimmed`, #2103 ruling 26). Empty by

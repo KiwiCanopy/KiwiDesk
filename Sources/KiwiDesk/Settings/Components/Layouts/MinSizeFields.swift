@@ -81,8 +81,11 @@ struct MinSizeAxisField: View {
             .accessibilityValue(value.map { "\($0) pt" } ?? Self.mixed)
         }
         .onAppear { text = value.map(String.init) ?? "" }
-        .onChange(of: value) { _, now in
-            if !focused { text = now.map(String.init) ?? "" }
+        .onChange(of: value) { was, now in
+            let shown = was.map(String.init) ?? ""
+            if FieldBuffer.follows(text, was: shown, focused: focused) {
+                text = now.map(String.init) ?? ""
+            }
         }
     }
 

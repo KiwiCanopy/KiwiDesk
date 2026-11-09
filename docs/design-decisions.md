@@ -8670,6 +8670,65 @@ curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
 
+With KiwiVision's maximize on (#3064, below), the arrival is still
+instant but no longer still: the window you focus clears at its
+slot and then grows into the fill, while the window you leave fades
+as it shrinks back to its slot. The leave fade masks the slot the
+window is heading for, so for the length of the spring the part of
+the shrinking window outside that slot dims at once rather than
+fading; the plates owe a re-mask once the springs settle.
+
+### KiwiVision's maximize is derived, never stored per Space (#3064)
+
+**[Rationale]**
+
+KiwiVision can also give the focused window the room: Off, Full,
+Height or Width, one segmented picker on the KiwiVision page and
+`kiwivision.set_maximize`. It turns nothing else on. Height and
+Width read the share and the anchor Layout Defaults store for the
+screen's shape, the same table a hand Maximize reads, so KiwiVision
+has no anchor of its own (owner, 2026-11-09). A lens overrides the
+mode alone, one optional row like its other overrides, so a
+"Writing" lens can ask for Height.
+
+The verdict is computed on every read from what state holds —
+KiwiVision's ask, copied in through `VisionLook` at every change,
+with the Layout Defaults table — and the active Space's focused
+tiled window. A hand Maximize outranks it, so `maximizedWindow(of:)` is
+the stored toggle first and the derived fill second. It is not
+built on `Space.maximized`: that value names one window at a time
+and is retired whenever its verdict ends (#2448), so a fill stored
+there would have to be re-written on every focus step, every Space
+switch and every lens change, and each writer missed would leave a
+window filled with KiwiVision off. Derived, the fill follows focus
+by what it means, with no switch: a swap reorders the slots and the
+focused window keeps the fill, and the fill lasts across Space
+switches because KiwiVision does. Hover focus moves it like any
+other focus (owner, 2026-11-08): a user who turned both on gets
+both. Only the Space holding the system focus fills, so on two
+screens the fill moves with the focus rather than standing on a
+dimmed window (owner, 2026-11-09). It stands down on a Monocle
+Space, where one window already fills the screen. A float never
+fills until #3036 rules how one does; while a float holds the focus
+the tiled window focused last keeps the fill, as a hand Maximize
+does, so a click on a float costs no shrink and grow.
+
+The fill cannot end the way a hand Maximize does, so the presses a
+hand Maximize ends on are refused with a pill instead: a resize,
+which would move only the slots the fill hides, and a Maximize of
+the shape already filled, which would change nothing on screen.
+
+Beside the ask, state keeps the windows the last retire saw
+filled, read only so a focus step can name the window
+left and the window arriving on its pass, as a following Maximize
+does (#3063). Each focus step therefore costs two frame writes into
+apps.
+
+The new `kiwivision.maximize` key is encoded only when it is not
+Off, so files written before it decode unchanged and it owes no
+crossing. It has no per-profile predecessor either: KiwiVision's
+settings were app-wide from their first release.
+
 ### KiwiVision switches the appearance and owes it back (#2103)
 
 **[Rationale]**
@@ -9437,6 +9496,31 @@ alone, since that edit is what its Save commits. Undoing a live row means
 applying the saved value live, a Core verb rather than a draft
 writeback (#2411, ▸ *A row's revert writes its one key back
 through a register*).
+
+:::unreleased
+An open window on the live target follows live (#3098): when a
+live change arrives, every draft leaf the user has not edited —
+one still equal to the draft's baseline — takes the live value,
+and the baseline moves onto live, so the controls show what the
+pill's row narrates and which value a control shows never depends
+on when Settings was opened. A session-only change follows too:
+it is the pill's live row, never an edit, so taking it on both
+sides of the draft calls nothing saved. An edited leaf keeps the
+user's value, and so does a field mid-edit: a focused field takes
+an outside change only while it still shows what it last took,
+since overwriting a partial entry loses the typing and holding the
+old value would write it back over live on blur. This follows
+from the Save above rather than reversing anything: a draft that
+lays only its edits over live already means live for every
+untouched leaf. The re-seed and the rows' re-read are one door, so
+the two never read different moments. An edit that live comes to
+match is no longer the draft's: the value stands live and the
+pill's row keeps it. A draft stays as it is
+where following would mislead: a stored profile's (another file),
+a stale page's, one with sync questions open (their baseline is
+the other Mac's value), and one whose edits the decoder refuses
+over live.
+:::
 
 ### A row's revert writes its one key back through a register (#792)
 
@@ -14206,10 +14290,23 @@ action in a layer, which a row cannot draw; a sequence is drawn
 whole, its path in its hint panel, so nothing is hidden. Within one
 step a key is either an end key or opens more keys, never both, so
 no timeout is ever needed; a leader is a chord like a row's, judged
-against the rows of its layer. The Settings half of the ruling, a
-Key sequences card whose rows refuse two siblings on one key "in
-this step" and a row caption naming the sequence ("Also ⌃⌥Space →
-W → H"), is #1871's second change.
+against the rows of its layer. In Settings the Key sequences card
+refuses two siblings on one key ("Assigned to … at this point in
+the sequence"), and the action's own row names the sequence in a
+caption ("Also ⌃⌥Space → W → H"). An end key's action is picked
+in a searchable popover over the whole catalogue in the page's
+groups, never folded, with "Opens more keys ›" and "Lua…" pinned
+outside its scrolling list (owner, 2026-11-09). KiwiHub's
+Shortcuts side lists an end key by its path (past four keys, the
+leader, "…" and the last two), finds it by the names
+along that path too, and draws no tree: the hint panel and the
+card already do. A sequence has no "Applies to"
+column yet: the key table keys a row by its Lua, which a leader has
+none of, so a stored profile's Save, which writes through that
+table, would drop a sequence edited there. A sequence edited on the
+loaded profile's page is saved in the layer's shared rows, whole,
+so every profile without its own override has it, and the card is
+greyed, never hidden, while a stored profile is edited (#3124).
 :::
 
 :::unreleased

@@ -139,9 +139,10 @@ extension RefusalCueSeamTests {
                 // A Hyper press with nothing to do (#2480): silent
                 // by ruling, on a window or else the shelf.
                 "KiwiCore+HyperBarePress.swift": .unsounded(2),
-                // Maximize on a floating window (#2448): its only
-                // cue, so it announces, unsounded.
-                "KiwiCore+Maximize.swift": .unsounded(1),
+                // Maximize on a floating window (#2448), and a press
+                // KiwiVision's fill would hide (#3064): each its
+                // only cue, so it announces, unsounded.
+                "KiwiCore+Maximize.swift": .unsounded(2),
             ],
             "found: \(callers)"
         )

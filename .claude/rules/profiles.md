@@ -203,11 +203,20 @@ writer, since an end key is a separate trigger; one that asks what
 an action does takes `actionBindings` (end keys included), and one
 that rewrites an action's Lua or kind takes `mappingActions`, which
 reaches the end keys; any other reader carries a sequence whole,
-its `steps` with it. A new Core reader classifies itself in
-`KeySequenceReaderCensusTests`, whose scan stops at Core: a GUI
-reader is review's until the Key sequences card's census lands
-(L-1871b). A profile holds or overrides a whole sequence, never a
-key inside one (`KeySequenceReaderTests`).
+its `steps` with it. A new reader classifies itself in
+`KeySequenceReaderCensusTests` (Core) or
+`KeySequenceGuiReaderCensusTests` (the GUI tree). A profile holds
+or overrides a whole sequence, never a key inside one
+(`KeySequenceReaderTests`). A writer of a sequence from Settings
+saves it whole through the loaded profile's layer rows, never
+through the key table (`KeySequenceCardSaveTests`), and a Save of
+that page keeps a sequence the profile's own override holds out of
+the shared base (`KeySequenceCardSaveTests` ▸ `ownSequenceStaysOwn`).
+Until a sequence has a reach (#3124), the Key sequences card stays
+greyed on a stored profile's page and where the loaded profile keeps
+its own sequences in the layer (`KeySequenceCardTests` ▸
+`storedPageGreys`, `KeySequenceCardSaveTests` ▸ `editBlocks`); the
+argument is `docs/design-decisions.md`'s #1871 amendment.
 
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`
@@ -1956,9 +1965,10 @@ draft is another file and takes nothing. An edit NO file took —
 no profile live, or the write failed — lasts the session, as the
 tour's click does, which means until a Save writes the draft: a
 clean draft still re-reads, the tour's shipped behaviour, while a
-dirty draft takes nothing of it, since taking it on both sides
-would call a session value saved
-(`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
+dirty draft takes it as any live change, on its unedited leaves
+through `SettingsModel.liveSettingsMoved` (#3098) — the pill's
+live row narrates it, so it never counts as the user's
+(`BarMenuLandingTests` ▸ `sessionOnlyWriteFollowsUnedited`,
 `BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). Its Save
 still keeps the value: a Settings Save lays only the draft's own
 edits over live as it is at the Save (#2262,

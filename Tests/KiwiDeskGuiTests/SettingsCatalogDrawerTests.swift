@@ -34,6 +34,8 @@ struct SettingsCatalogDrawerTests {
         "layout_defaults.maximize.other_shapes",
         // Raw Lua bindings: rows are the user's own bindings.
         "shortcuts.advanced.title",
+        // Key sequences (#1871): rows are the user's own sequences.
+        "shortcuts.section.key_sequences",
     ]
 
     /// The declared set matches the register above — derived

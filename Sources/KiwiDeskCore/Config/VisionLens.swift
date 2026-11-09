@@ -36,6 +36,7 @@ public struct VisionLens: Equatable, Sendable {
         public var fadeCurve: VisionFadeCurve?
         public var clearWallpaper: Bool?
         public var clearApp: Bool?
+        public var maximize: VisionMaximize?
     }
 }
 
@@ -51,6 +52,7 @@ extension VisionLens: Codable {
         case fadeCurve = "fade_curve"
         case clearWallpaper = "clear_wallpaper"
         case clearApp = "clear_app"
+        case maximize
     }
 
     public init(from decoder: Decoder) throws {
@@ -96,7 +98,11 @@ extension VisionLens: Codable {
                 Bool.self,
                 forKey: .clearWallpaper
             ),
-            clearApp: try c.decodeIfPresent(Bool.self, forKey: .clearApp)
+            clearApp: try c.decodeIfPresent(Bool.self, forKey: .clearApp),
+            maximize: try c.decodeIfPresent(
+                VisionMaximize.self,
+                forKey: .maximize
+            )
         )
     }
 
@@ -121,6 +127,7 @@ extension VisionLens: Codable {
             forKey: .clearWallpaper
         )
         try c.encodeIfPresent(overrides.clearApp, forKey: .clearApp)
+        try c.encodeIfPresent(overrides.maximize, forKey: .maximize)
     }
 }
 

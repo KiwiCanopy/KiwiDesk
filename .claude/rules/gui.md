@@ -1273,7 +1273,9 @@ must keep:
   `KiwiCore.unsavedLiveSettings`, diffing the two sides it hands
   over and never the draft's baseline, asked again through the one
   `refreshUnsavedLive` wherever live or that baseline can have
-  moved (#2262, `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
+  moved, through `liveSettingsMoved` where live moved, which first
+  lets the draft's unedited leaves follow (#3098, #2262,
+  `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
   `UnsavedLiveSettingsTests`) — and a Settings Save lays only the
   draft's own settings edits over live as it is AT the Save
   (`TilingSettings.rebased`), never the draft's settings whole,
@@ -2277,6 +2279,11 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   ⌘S lives on the Settings root, mounted
   and enabled whatever the draft, since a typed value can be the
   one edit (`CommitsOnSaveCensusTests`, `SaveCommitsFocusedFieldTests`).
+- **Such a field takes an outside change of its value through
+  `FieldBuffer.follows`, never a bare `!focused`** (#3098): a
+  focused buffer still showing what it last took follows, or a
+  live change stays hidden and the blur writes the old value back
+  (`FieldBufferTests` ▸ `sitesReadTheVerdict`, a sweep).
 - **An `NSViewRepresentable` hosting editable AppKit text writes
   SwiftUI's value into the view only through a check that drops
   the view's own late echoes, and keeps the selection when it

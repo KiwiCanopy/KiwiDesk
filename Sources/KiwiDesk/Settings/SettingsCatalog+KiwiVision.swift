@@ -26,6 +26,14 @@ struct KiwiVisionControls: Sendable {
         "kiwivision.clear_wallpaper",
         "Wallpaper"
     )
+    let fillCard = SettingsControl(
+        "kiwivision.section.maximize",
+        "Maximize"
+    )
+    let focusedFill = SettingsControl(
+        "kiwivision.maximize",
+        "Maximize the focused window"
+    )
     let neverDimmedCard = SettingsControl(
         "kiwivision.section.never_dimmed",
         "Never dimmed"

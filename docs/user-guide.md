@@ -1105,6 +1105,12 @@ binds the physical key, so switching input sources changes what
 the caps print, not which key fires.
 
 :::unreleased
+A key sequence — a leader chord, then one key after another — is
+recorded in Shortcuts & Gestures ▸ Key sequences, or written with
+[`define_sequence`](lua-reference.md#define_sequence).
+:::
+
+:::unreleased
 A combo can also be a modifier tapped alone, `cmd+cmd` or `rcmd`
 ([Modifiers and Keys](lua-reference.md#modifiers-and-keys)).
 :::
@@ -1175,6 +1181,12 @@ turns a shared shortcut off there and keeps it everywhere else,
 and a profile can put a shared shortcut on another key of its
 own. Ticking a profile that uses the key for something else
 gives the key to this shortcut there.
+
+:::unreleased
+A key sequence has no **Applies to**: every profile without its
+own override uses it, and it is edited on the loaded profile's
+page.
+:::
 
 A new layer also carries the `⌃⌥,` Open Settings row.
 

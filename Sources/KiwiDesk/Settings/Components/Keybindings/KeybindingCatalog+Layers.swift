@@ -50,7 +50,8 @@ extension KeybindingCatalog {
         return layers.map { layer in
             var layer = layer
             if layer.name == old { layer.name = new }
-            layer.bindings = layer.bindings.map { binding in
+            // A sequence's end keys switch too (#1871).
+            return layer.mappingActions { binding in
                 var binding = binding
                 if binding.lua == oldCmd.lua {
                     binding.lua = newCmd.lua
@@ -58,7 +59,6 @@ extension KeybindingCatalog {
                 }
                 return binding
             }
-            return layer
         }
     }
 
@@ -74,9 +74,7 @@ extension KeybindingCatalog {
         guard name != KeyLayer.defaultName else { return layers }
         let switchTo = switchLayerCommand(name).lua
         return layers.filter { $0.name != name }.map { layer in
-            var layer = layer
-            layer.bindings.removeAll { $0.lua == switchTo }
-            return layer
+            layer.mappingActions { $0.lua == switchTo ? nil : $0 }
         }
     }
 

@@ -114,14 +114,14 @@ extension SettingsModel {
     /// Core's revert (#2411), a user act (#804), then asks Core
     /// again. A revert writes no file, so the draft takes it as
     /// `adoptLiveWrite` takes a session-only write: a clean draft
-    /// re-reads, a dirty one takes nothing, its Save laying only its
-    /// own edits over live.
+    /// re-reads, a dirty one's unedited leaves follow (#3098), its
+    /// Save laying only its own edits over live.
     @discardableResult
     func revertLive(_ ids: [String]) -> LiveRevertOutcome? {
         guard target == .live, !ids.isEmpty else { return nil }
         let outcome = core.withUserMotion { core.revertUnsavedLive(ids) }
         if !isDirty { reload() }
-        refreshUnsavedLive()
+        liveSettingsMoved()
         return outcome
     }
 
@@ -141,8 +141,8 @@ extension SettingsModel {
     /// Asks Core again — the one writer of `unsavedLive` and
     /// `liveUnsaved`. Owed wherever the live settings or the
     /// draft's baseline can have moved: the seed, a window-key
-    /// return, an outside write the draft adopts, and any live
-    /// settings change while the window is open. Only the live
+    /// return, an outside write the draft adopts; where the live
+    /// settings moved, through `liveSettingsMoved` (#3098). Only the live
     /// target lists live rows: a stored profile is another file.
     /// A Keep's refusal stays while its leaf is still unsaved, so an
     /// unrelated live change keeps the reason beside its row.

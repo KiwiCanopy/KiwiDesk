@@ -77,7 +77,7 @@ extension SettingsModel {
         let switchTo = KeybindingCatalog.switchLayerCommand(name).lua
         let own = config.layers.first { $0.name == name }?.bindings.count
         let switches = config.layers.reduce(0) { total, layer in
-            total + layer.bindings.filter { $0.lua == switchTo }.count
+            total + layer.actionBindings.filter { $0.lua == switchTo }.count
         }
         return (own ?? 0) + switches
     }
@@ -90,7 +90,7 @@ extension SettingsModel {
         let rows = config.layers.first { $0.name == name }?.bindings ?? []
         let switchTo = KeybindingCatalog.switchLayerCommand(name).lua
         let switches = config.layers.contains { layer in
-            layer.bindings.contains { $0.lua == switchTo }
+            layer.actionBindings.contains { $0.lua == switchTo }
         }
         let others = layerReach(name).map { $0.users.count > 1 } ?? false
         return others || switches || rows.contains { !chrome.contains($0.lua) }

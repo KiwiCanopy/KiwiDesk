@@ -22,6 +22,8 @@ struct AppWideKeepGroupsTests {
         for key in KiwiHubKey.allCases {
             settings.kiwiHubKeys[key] = "control+n"
         }
+        // KiwiVision's maximize is absent while off (#3064).
+        settings.visionMaximize = .full
         let members = Mirror(reflecting: settings).children.count
         #expect(members > 0)
         #expect(

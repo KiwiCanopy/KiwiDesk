@@ -316,7 +316,7 @@ public enum APIReference {
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",
             "set_fade_curve", "set_appearance",
             "set_clear_wallpaper", "set_clear_app", "set_never_dimmed",
-            "define_lens", "delete_lens",
+            "set_maximize", "define_lens", "delete_lens",
         ],
         "kiwihub": ["show", "set_key"],
         "look": [

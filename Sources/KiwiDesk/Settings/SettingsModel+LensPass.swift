@@ -44,7 +44,7 @@ extension SettingsModel {
     ) throws {
         func holds(_ layers: [KeyLayer]) -> Bool {
             layers.contains { layer in
-                layer.bindings.contains { binding in
+                layer.actionBindings.contains { binding in
                     lenses.contains { KeybindingCatalog.names(binding, $0) }
                 }
             }
