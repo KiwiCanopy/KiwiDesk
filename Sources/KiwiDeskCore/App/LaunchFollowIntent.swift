@@ -263,8 +263,9 @@ final class LaunchFollowIntent {
     /// The apps a lens opened in the background and when: within
     /// `quietBound` the create fold grants their arrivals no focus
     /// and no rule follow, and their activation owes none. A window
-    /// the user opens of such an app inside the bound arrives quiet
-    /// too, the accepted residue.
+    /// the user opens of such an app inside the bound, by ⌘N or a
+    /// Dock click, arrives quiet too, the accepted residue; Open or
+    /// Focus lifts the mark.
     private var quietApps: [String: Date] = [:]
 
     /// Notes `apps` as opened quietly at `now`.
