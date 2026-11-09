@@ -24,10 +24,10 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`focus_display`](lua-reference.md#focus_display_last--focus_display) | Goes to the nearest screen in a direction, stopping at the last. |
 | [`move_to_space`](lua-reference.md#move_to_space) | Moves the focused window, or the one a window id names, to a Space without following it. |
 | [`move_to_space_and_follow`](lua-reference.md#move_to_space_and_follow) | Moves the focused window, or the one a window id names, to a Space and switches to it. |
-| [`move_to_display_last`](lua-reference.md#move_to_display_last--move_to_display) | Moves the focused window to the Space the screen you were on before shows, without following it. |
-| [`move_to_display_last_and_follow`](lua-reference.md#move_to_display_last_and_follow--move_to_display_and_follow) | Moves the focused window to the Space the screen you were on before shows, and goes with it. |
-| [`move_to_display`](lua-reference.md#move_to_display_last--move_to_display) | Moves the focused window to the Space the nearest screen in a direction shows, without following it. |
-| [`move_to_display_and_follow`](lua-reference.md#move_to_display_last_and_follow--move_to_display_and_follow) | Moves the focused window to the Space the nearest screen in a direction shows, and goes with it. |
+| [`move_to_display_last`](lua-reference.md#move_to_display_last--move_to_display) | Moves the focused window to the screen you were on before, without following it. |
+| [`move_to_display_last_and_follow`](lua-reference.md#move_to_display_last_and_follow--move_to_display_and_follow) | Moves the focused window to the screen you were on before and follows it. |
+| [`move_to_display`](lua-reference.md#move_to_display_last--move_to_display) | Moves the focused window to the nearest screen in a direction, without following it. |
+| [`move_to_display_and_follow`](lua-reference.md#move_to_display_last_and_follow--move_to_display_and_follow) | Moves the focused window to the nearest screen in a direction and follows it. |
 | [`focus_desktop`](lua-reference.md#focus_desktop) | Switches to a macOS Desktop, exactly as a swipe would. |
 | [`move_to_desktop`](lua-reference.md#move_to_desktop) | Moves the focused or named window to a macOS Desktop, and into a Space when one is named. |
 | [`move_to_desktop_and_follow`](lua-reference.md#move_to_desktop_and_follow) | Moves the focused or named window to a macOS Desktop, into a Space if named, and follows it. |

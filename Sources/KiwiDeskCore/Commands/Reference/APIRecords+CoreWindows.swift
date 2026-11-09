@@ -70,21 +70,21 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "move_to_display_last": APIRecord(
-            "Moves the focused window to the Space the screen you "
-                + "were on before shows, without following it."
+            "Moves the focused window to the screen you were on "
+                + "before, without following it."
         ),
         "move_to_display_last_and_follow": APIRecord(
-            "Moves the focused window to the Space the screen you "
-                + "were on before shows, and goes with it."
+            "Moves the focused window to the screen you were on "
+                + "before and follows it."
         ),
         "move_to_display": APIRecord(
-            "Moves the focused window to the Space the nearest "
-                + "screen in a direction shows, without following it.",
+            "Moves the focused window to the nearest screen in a "
+                + "direction, without following it.",
             .choice("direction", Direction.self)
         ),
         "move_to_display_and_follow": APIRecord(
-            "Moves the focused window to the Space the nearest "
-                + "screen in a direction shows, and goes with it.",
+            "Moves the focused window to the nearest screen in a "
+                + "direction and follows it.",
             .choice("direction", Direction.self)
         ),
         "focus_desktop": APIRecord(
