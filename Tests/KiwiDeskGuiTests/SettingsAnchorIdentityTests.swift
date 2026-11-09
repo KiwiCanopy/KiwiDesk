@@ -64,6 +64,8 @@ struct SettingsAnchorIdentityTests {
         "KeybindingAppGroup+Row.swift": 1,
         "PocketAppRows.swift": 1,
         "AdvancedLuaGroup+Row.swift": 1,
+        // A key sequence node, keyed by its id for Go to (#1871).
+        "SequenceNodeRow.swift": 1,
         // Locale identity: `L()` is not observable state, so a
         // language change rebuilds the whole hosting root by
         // keying it on the locale. Deliberately the coarsest

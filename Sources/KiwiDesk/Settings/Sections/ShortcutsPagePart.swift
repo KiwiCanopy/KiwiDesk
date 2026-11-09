@@ -12,6 +12,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     case gestures
     case layers
     case defaultShortcuts
+    case keySequences
     case showHide
     case focus
     case moveWindows
@@ -112,9 +113,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         switch binding.kind {
         case .application: return .openApplications
         case .custom, .navigation: return .luaBindings
-        // A key sequence belongs to its layer (#1871); its own card
-        // is L-1871b's.
-        case .sequence: return .layers
+        case .sequence: return .keySequences
         }
     }
 
@@ -131,6 +130,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         let more: [(SettingsControl, Self)] = [
             (catalog.modifierKeys.control, .modifierKeys),
             (catalog.layersCard.control, .layers),
+            (catalog.keySequencesCard.control, .keySequences),
             (catalog.moveWindowsTracks.control, .moveWindows),
             (catalog.desktopMoves.control, .macosDesktops),
             (catalog.pocketAppAdd, .pocket),

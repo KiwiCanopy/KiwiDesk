@@ -76,6 +76,9 @@ struct RecorderRejection {
     let holder: String
     let holderRowID: String
     let steal: () -> Void
+    /// The holder is another key of the same key sequence step
+    /// (#1871), where the collision is scoped "in this step".
+    var inStep = false
 }
 
 enum RecorderPreflight {

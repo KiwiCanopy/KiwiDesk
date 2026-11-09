@@ -145,7 +145,14 @@ extension SettingsRevertRegister {
             let was = clean.layers.first { $0.name == saved }?.bindings ?? []
             model.config.layers[at].bindings =
                 model.config.layers[at].bindings.map { row in
-                    was.first { sameRow($0, row) } ?? row
+                    guard let back = was.first(where: { sameRow($0, row) })
+                    else { return row }
+                    // A sequence keeps its tree; only its leader's
+                    // spelling goes back (#1871).
+                    guard row.isSequence else { return back }
+                    var kept = row
+                    kept.combo = back.combo
+                    return kept
                 }
         }
     }
