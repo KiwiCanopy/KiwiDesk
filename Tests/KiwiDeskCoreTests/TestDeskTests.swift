@@ -18,16 +18,16 @@ struct TestDeskTests {
     @Test("a root puts the config and machine folders under it")
     func rootHoldsBoth() throws {
         let root = try #require(
-            TestDesk.root(in: [TestDesk.variable: "/tmp/kd//desk/"])
+            TestDesk.root(in: [TestDesk.variable: "/kd//desk/"])
         )
-        #expect(root.path == "/tmp/kd/desk")
+        #expect(root.path == "/kd/desk")
         #expect(
             TestDesk.configDirectory(under: root).path
-                == "/tmp/kd/desk/config"
+                == "/kd/desk/config"
         )
         #expect(
             TestDesk.machineDirectory(under: root).path
-                == "/tmp/kd/desk/machine"
+                == "/kd/desk/machine"
         )
     }
 
@@ -64,7 +64,7 @@ struct TestDeskTests {
     @Test("a test desk follows no sync folder")
     func followsNoSyncFolder() {
         let (defaults, _) = makeScratchDefaults()
-        let folder = URL(fileURLWithPath: "/tmp/kd-sync", isDirectory: true)
+        let folder = URL(fileURLWithPath: "/kd-sync", isDirectory: true)
         SyncFolderLocation.store(folder, in: defaults)
         SyncFolderLocation.storeFollows(true, in: defaults)
         #expect(SyncFolderLocation.followed(in: defaults) != nil)
