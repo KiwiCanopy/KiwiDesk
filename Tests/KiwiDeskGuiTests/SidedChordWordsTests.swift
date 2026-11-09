@@ -219,7 +219,12 @@ struct SidedChordWordsTests {
         )
         #expect(
             try read("Shortcuts/ShortcutsBands.swift").contains(
-                ".help(SidedChordWords.help(row.combo))"
+                ".help(row.spokenHelp)"
+            )
+        )
+        #expect(
+            try read("Shortcuts/ShortcutRow.swift").contains(
+                "spokenCombo ?? SidedChordWords.help(combo)"
             )
         )
         #expect(

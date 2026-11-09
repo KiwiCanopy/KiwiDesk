@@ -48,6 +48,11 @@ struct ShortcutRow: Identifiable {
     @MainActor var spokenChord: String {
         spokenCombo ?? SidedChordWords.label(combo)
     }
+
+    /// The chord's hover text: a path in key words, a chord's sides.
+    @MainActor var spokenHelp: String {
+        spokenCombo ?? SidedChordWords.help(combo)
+    }
 }
 
 /// Named subgroup of shortcut rows in the Controls band.

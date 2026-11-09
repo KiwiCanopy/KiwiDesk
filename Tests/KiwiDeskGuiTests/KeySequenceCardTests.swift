@@ -119,14 +119,31 @@ struct KeySequenceCardTests {
     }
 
     @Test("a step key the router never matches is told apart")
-    func admitsAsTheRouter() {
+    func admitsAsTheRouter() throws {
         let leader = "ctrl+alt+space"
         #expect(KeyBinding.admitsStepKey("w", under: leader))
         #expect(KeyBinding.admitsStepKey("ctrl+alt+w", under: leader))
         #expect(!KeyBinding.admitsStepKey("escape", under: leader))
+        #expect(!KeyBinding.admitsStepKey("delete", under: leader))
         #expect(!KeyBinding.admitsStepKey("cmd+cmd", under: leader))
         #expect(!KeyBinding.admitsStepKey(leader, under: leader))
         #expect(KeyBinding.admitsLeader(leader))
+        #expect(!KeyBinding.admitsLeader("hyper+a"))
+        // The row asks Core first, against its own leader.
+        let row = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                        + "Sequences/SequenceNodeRow+Recorder.swift"
+                )
+        )
+        #expect(row.contains("if let refused = refusal { return refused }"))
+        #expect(
+            row.contains(
+                "KeyBinding.admitsStepKey(node.combo, under: leader)"
+            )
+        )
+        #expect(row.contains("guard let leader = editing.root?.combo"))
     }
 
     @Test("the card greys on a stored profile's page (#3124)")

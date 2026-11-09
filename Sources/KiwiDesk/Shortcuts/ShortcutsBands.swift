@@ -41,7 +41,7 @@ struct ShortcutRowView: View {
                 // never the chord (#2601).
                 .fixedSize()
                 .accessibilityLabel(row.spokenChord)
-                .help(SidedChordWords.help(row.combo))
+                .help(row.spokenHelp)
         }
         .help(row.monospaced ? row.label : "")
         .opacity(row.unavailable ? 0.55 : 1)
