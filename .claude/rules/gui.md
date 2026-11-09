@@ -543,6 +543,14 @@ first; a new direct-launch path owes a marker of its own
 (`UpdatePromptWiringTests` ▸ the launch origin,
 `WhatsNewSurfaceTests`).
 
+**A stopped sync is the third pending fact under the same rule
+(#3088).** Read Core's `SyncFollower.status` through the status
+item's provider at render, never a copy; its nudge is a render.
+Rank its words between an update offer and What's new, keep it
+on the healthy and idle icons only, and build its Sync Paused…
+row only while the fact holds, beside Update Available… when both
+hold (`UpdateReminderReadNotStoredTests`, `SyncStoppedMarkTests`).
+
 **Home's "What's new" opens the same window on a click and answers
 nothing (#2308).** It goes through `WhatsNewCoordinator.browse()`
 alone, from Home's footer alone (`HomeSupportStripTests` ▸

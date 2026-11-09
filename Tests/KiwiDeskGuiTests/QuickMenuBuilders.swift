@@ -34,6 +34,8 @@ enum QuickMenuBuilders {
         "Sources/KiwiDesk/Settings/Components/Common/NativePullDown.swift",
         // The tiling row (#3008) states its own enablement.
         "Sources/KiwiDesk/StatusItemController+TilingRow.swift",
+        // The Sync Paused… row (#3088) states its own enablement.
+        "Sources/KiwiDesk/StatusItemController+Mark.swift",
     ]
 
     /// Files that construct rows and are NOT checked per row,

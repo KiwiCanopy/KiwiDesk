@@ -140,6 +140,9 @@ extension StatusItemController {
         if let whatsNew = makeWhatsNewItem() {
             menu.addItem(whatsNew)
         }
+        if let syncPaused = makeSyncPausedItem() {
+            menu.addItem(syncPaused)
+        }
         if let updates = makeUpdatesItem() {
             menu.addItem(updates)
         }

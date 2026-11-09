@@ -54,14 +54,42 @@ struct UpdateReminderReadNotStoredTests {
                 encoding: .utf8
             )
         )
-        for text in [source, updates] {
-            #expect(
-                text.range(
-                    of: #"whatsNewWaiting\s*=(?!=)"#,
-                    options: .regularExpression
-                ) == nil
+        let mark = SourceScan.stripComments(
+            try String(
+                contentsOf: file.deletingLastPathComponent()
+                    .appendingPathComponent(
+                        "StatusItemController+Mark.swift"
+                    ),
+                encoding: .utf8
             )
+        )
+        for text in [source, updates, mark] {
+            for fact in ["whatsNewWaiting", "syncStopped"] {
+                #expect(
+                    text.range(
+                        of: fact + #"\s*=(?!=)"#,
+                        options: .regularExpression
+                    ) == nil,
+                    "\(fact)"
+                )
+            }
         }
+        // A stopped sync (#3088) is the third: read through the
+        // provider at render, its nudge a render alone.
+        #expect(
+            source.contains(
+                "var syncStopped: Bool { "
+                    + "Self.stopsSync(syncStatusProvider()) }"
+            )
+        )
+        let syncNudge = try #require(
+            SourceScan.declarationBody(
+                after: "func syncStatusChanged()",
+                in: source
+            )
+        )
+        #expect(syncNudge.contains("render()"))
+        #expect(!syncNudge.contains("="))
         let waitStart = try #require(
             source.range(of: "onWaitingChanged = {")
         )

@@ -619,8 +619,9 @@ handler resolves the bar's label colour and `systemOrange` at
 every draw, so light and dark still follow, and the shape alone
 still separates the mark for colour-vision deficiency. Nothing
 moves, so Reduce Motion has nothing to gate. It rides only the
-healthy glyphs, because a permission warning or a config error
-outranks an offer. The updates row is retitled in place — "Update
+healthy and idle glyphs, because a permission warning, the
+starting phase or a config error outranks anything the mark
+carries. The updates row is retitled in place — "Update
 Available…" — rather than doubled: Sparkle's own door for
 bringing the waiting alert forward is `checkForUpdates`, the row's
 existing action, and `canCheckForUpdates` stays true while the
@@ -638,6 +639,27 @@ update reminder would spend that prompt on an offer, on top of a
 first-run story that is already a permission wizard, to tell
 someone about an update. No setting was added — the reminder
 costs nothing to ignore.
+
+:::unreleased
+*The mark's third meaning is a stopped sync (#3088).* The orange
+mark says one thing: something waits on you. Its facts are an
+update offer (#1013), a sync that stopped
+(`SyncStatus.newerOnAnotherMac`, `.changedOnBoth`) and What's new
+(#1542), and its words go by that rank. The sync fact clears when
+syncing resumes, not when its row is opened: reading why sync
+stopped does not restart it. Like an offer, it rides the dimmed
+idle icon (#2050): an idle app can still act on it. A stopped sync is no
+Config Issue: nothing in this Mac's config failed to load, and the
+config badge would outrank real config problems. A conflict copy
+(sync keeps running), an unreachable folder (changes wait) and
+`.newerHere` (already a Config Issue) take no mark. Its row,
+**Sync Paused…**, opens Settings on the Sync across Macs row,
+whose status line says why and what to do; it starts no update
+check, since the other Mac's build may be one this Mac's channel
+never offers. When an update is also offered, both rows show
+(owner, 2026-11-08): one installs this Mac's update, the other
+says why this Mac stopped syncing.
+:::
 
 ### KiwiDesk draws its own update window (#1542)
 

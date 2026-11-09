@@ -53,7 +53,15 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// "What's new" left waiting by a launch that did not open it
     /// (#1542), read from the updater's coordinator at every render.
     var whatsNewWaiting: String? { updater.whatsNew?.waiting?.version }
+    /// Where following the sync folder stands, Core's
+    /// `SyncFollower.status`, read at every render (#3088).
+    var syncStatusProvider: () -> SyncStatus = { .off }
+    /// The mark's third pending fact (#3088).
+    var syncStopped: Bool { Self.stopsSync(syncStatusProvider()) }
     var onShowAccessibilityHelp: () -> Void = {}
+    /// The Sync Paused… row's action: Settings on the Sync across
+    /// Macs row (#3088).
+    var onShowSyncStatus: () -> Void = {}
     /// The Start Tiling row's action (#2050).
     var onStartTiling: () -> Void = {}
 
@@ -104,6 +112,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Sets config-error badge state (§3.7).
     func setConfigError(_ error: Bool) {
         configError = error
+        render()
+    }
+
+    /// The sync status changed (#3088): the fact is read at render.
+    func syncStatusChanged() {
         render()
     }
 
@@ -221,33 +234,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         }
         button.setAccessibilityLabel(mark.label)
         button.toolTip = mark.tooltip
-    }
-
-    /// What the mark says, by rank: an update waiting outranks
-    /// the notes of one already installed (#1013, #1542).
-    private var markNarration: (label: String, tooltip: String)? {
-        if updatePending {
-            return (
-                L("menu.status.update.a11y", "KiwiDesk (update available)"),
-                L(
-                    "menu.status.update.tooltip",
-                    "A KiwiDesk update is available — open the menu to "
-                        + "install it."
-                )
-            )
-        }
-        guard let version = whatsNewWaiting else { return nil }
-        return (
-            L(
-                "menu.status.whats_new.a11y",
-                "KiwiDesk (what's new in %1$@)",
-                version
-            ),
-            L(
-                "menu.status.whats_new.tooltip",
-                "KiwiDesk was updated — open the menu to see what's new."
-            )
-        )
     }
 
     func symbol(_ name: String) -> NSImage? {

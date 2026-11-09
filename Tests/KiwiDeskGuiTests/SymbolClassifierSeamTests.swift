@@ -28,6 +28,8 @@ struct SymbolClassifierSeamTests {
             "builds the Space mark's image from a `.symbol` verdict",
         "Sources/KiwiDesk/StatusItemController+Updates.swift":
             "builds the updates row's image from a fixed name",
+        "Sources/KiwiDesk/StatusItemController+Mark.swift":
+            "builds the Sync Paused… row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Style.swift":
             "builds the identifier image from a `.symbol` verdict",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Ends.swift":
