@@ -418,11 +418,12 @@ time you switch there it is the window you land on.
 A window already in that space stays where it is: the call fails
 and a pill on the window says it is already there. The same holds
 for `move_to_space_and_follow`.
+
 :::unreleased
 A window in native full screen stays on its own Space: the call
 fails with `a full-screen window cannot change Space`, and a pill
 on the window says so. The same holds for
-`move_to_space_and_follow` and the screen moves.
+`move_to_space_and_follow`.
 :::
 
 If the target space is shown on **another screen**, a floating

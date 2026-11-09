@@ -85,6 +85,23 @@ struct MoveToSpaceFullScreenTests {
         #expect(core.state.workspaces.space(of: WindowID(2)) == "2")
     }
 
+    @Test(
+        "its own Space refuses with the full-screen rule, follow too",
+        arguments: ["move_to_space", "move_to_space_and_follow"]
+    )
+    func ownSpaceNamesFullScreen(command: String) {
+        let (core, logs) = makeCore()
+        core.state.workspaces.activate("2")
+        fullScreen(core, 3)
+        let response = core.execute(
+            command,
+            args: [.string("1"), .number(3)]
+        )
+        #expect(response.error == Self.reason)
+        #expect(core.state.workspaces.activeSpace == "2")
+        #expect(logs().contains("\(Self.reason): w3"))
+    }
+
     @Test("the bar menu's Move row is greyed for a full-screen window")
     func barRowGreyed() {
         let (core, _) = makeCore()

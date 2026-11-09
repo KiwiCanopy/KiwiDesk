@@ -37,21 +37,33 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The refusal of a window no Space move may take, ahead of
-    /// its target: a pocketed window is filed nowhere (#2446), and
-    /// a full-screen one is held on its own macOS Space (#3119).
+    /// Why no Space move may take `window`, or nil: a pocketed
+    /// window is filed nowhere (#2446), and a full-screen one is
+    /// held on its own macOS Space (#3119). Pure, for a gate that
+    /// greys; a verb refuses through `spaceMoveRefusal`.
+    func spaceMoveBlock(_ window: WindowID) -> SpaceMoveBlock? {
+        if state.isPocketed(window) { return .pocketed }
+        if state.windows[window]?.isFullscreen == true {
+            return .fullScreen
+        }
+        return nil
+    }
+
+    /// `spaceMoveBlock`'s refusal, ahead of the move's target; a
+    /// full-screen window's is cued on the window.
     func spaceMoveRefusal(_ window: WindowID) -> CommandResponse? {
-        guard !state.isPocketed(window) else {
-            return .fail("a pocketed window cannot move to a Space")
-        }
-        guard state.windows[window]?.isFullscreen == true else {
+        switch spaceMoveBlock(window) {
+        case nil:
             return nil
+        case .pocketed:
+            return .fail("a pocketed window cannot move to a Space")
+        case .fullScreen:
+            let refusal = WindowActionRefusal.cannotChangeSpaceFullScreen(
+                window: windowTitle(window)
+            )
+            cueWindowAction(refusal, on: window)
+            return .fail(refusal.logReason)
         }
-        let refusal = WindowActionRefusal.cannotChangeSpaceFullScreen(
-            window: windowTitle(window)
-        )
-        cueWindowAction(refusal, on: window)
-        return .fail(refusal.logReason)
     }
 
     /// A move into the window's own Space re-files nothing: a
@@ -106,10 +118,9 @@ extension KiwiCore {
             onLog("move: w\(window.raw) refused — in the pocket")
             return
         }
-        // A construction net: every door asks `spaceMoveRefusal`
-        // or refuses full screen itself first (#3119).
-        guard !isFullscreen(window), !(partner.map(isFullscreen) ?? false)
-        else {
+        // A construction net: every door refuses a full-screen
+        // window first, a trade through `swapBlock` (#3119).
+        guard spaceMoveBlock(window) != .fullScreen else {
             onLog("move: w\(window.raw) refused — full screen")
             return
         }
@@ -203,10 +214,6 @@ extension KiwiCore {
         }
     }
 
-    private func isFullscreen(_ window: WindowID) -> Bool {
-        state.windows[window]?.isFullscreen == true
-    }
-
     /// The one trade filing (#2509): `a` and `b`, in different
     /// Spaces, take each other's slot in one step, then each
     /// takes the side effects `fileMembership` owes a filing
@@ -244,4 +251,10 @@ extension KiwiCore {
             )
         }
     }
+}
+
+/// What stands a Space move down for the window itself (#3119).
+enum SpaceMoveBlock: Equatable {
+    case pocketed
+    case fullScreen
 }

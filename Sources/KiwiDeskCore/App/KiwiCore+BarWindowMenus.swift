@@ -96,7 +96,7 @@ extension KiwiCore {
         )
         let movable = { (id: WindowID) in
             guard let target, homes[id] != target,
-                self.state.windows[id]?.isFullscreen != true
+                self.spaceMoveBlock(id) == nil
             else { return false }
             return self.stickyMoveBlock(id, to: target) == nil
         }

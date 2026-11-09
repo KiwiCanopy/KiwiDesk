@@ -2614,7 +2614,7 @@
   "whatsnew.trail.next": "Suivant : %1$@",
   "window_action.refusal.all_here": "Toutes les fenêtres de %1$@ sont ici",
   "window_action.refusal.already_in": "« %1$@ » est déjà dans cet espace",
-  "window_action.refusal.cannot_change_space_full_screen": "« %1$@ » est en plein écran et ne peut pas changer d’espace",
+  "window_action.refusal.cannot_change_space_full_screen": "« %1$@ » est en plein écran et ne peut pas changer d'espace",
   "window_action.refusal.cannot_move_full_screen": "« %1$@ » est en plein écran et ne peut pas changer de Bureau",
   "window_action.refusal.cannot_move_here": "« %1$@ » ne peut pas être déplacé ici",
   "window_action.refusal.cannot_move_here_full_screen": "Une fenêtre en plein écran ne peut pas être déplacée ici",

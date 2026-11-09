@@ -84,7 +84,8 @@ extension KiwiCore {
     ///
     /// Returns whether it actually sprang, so the drop coordinator
     /// records `sprungSpace` only on a real switch (#445): a refused
-    /// sticky move or an already-active target springs nothing.
+    /// sticky or full-screen move or an already-active target
+    /// springs nothing.
     @discardableResult
     private func springSwitchSpace(
         to target: SpaceID,
@@ -101,6 +102,9 @@ extension KiwiCore {
         // Refused → no spring at all (no move, no visible switch);
         // the pill explains why, the drag stays on this space.
         if stickyMoveRefused(window, to: target) { return false }
+        // The verb's full-screen refusal, cued, for the same reason
+        // (#3119).
+        if spaceMoveRefusal(window) != nil { return false }
         tiler.dragExemptWindow = window
         let from = state.workspaces.space(of: window)
         // The one filing (#1150); its float re-anchor stands
