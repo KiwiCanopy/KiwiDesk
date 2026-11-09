@@ -55,7 +55,11 @@ extension KeybindingManager {
         let rows = KeyboardTapRows(
             sides: sideTapRows(sides),
             taps: taps.map { combo, ref in
-                ModifierTapRow(combo: combo, id: liveTapID(combo, ref))
+                ModifierTapRow(
+                    combo: combo,
+                    id: liveTapID(combo, ref),
+                    opensKiwiHubSide: kiwiHubSideRefs.contains(ref)
+                )
             }
                 // A tap leader is detected as any tap is (#1871).
                 + sequences.enumerated().filter(\.element.leader.isTap).map {
@@ -94,7 +98,7 @@ extension KeybindingManager {
                     }
                 }
             )
-            keyboardTap?.holdTaps(modifierTapsHeld)
+            keyboardTap?.holdTaps(modifierTapHold)
             onLog(
                 keyboardTap == nil
                     ? "keyboard tap: refused by macOS (Accessibility?)"

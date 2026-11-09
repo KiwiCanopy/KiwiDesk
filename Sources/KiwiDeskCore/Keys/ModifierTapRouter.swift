@@ -5,6 +5,9 @@ struct ModifierTapRow: Hashable, Sendable {
     /// A tap combo (`KeyCombo.isTap`).
     var combo: KeyCombo
     var id: UInt32
+    /// Bound to a KiwiHub side, so it fires while KiwiHub is key
+    /// (`ModifierTapHold`, #1229).
+    var opensKiwiHubSide = false
 }
 
 /// The `.modifierTaps` consumer's decision (#1872): the one

@@ -12794,10 +12794,28 @@ different ground:
   Accessibility alone. It stays one tap: a system-wide reader of key
   events joins it as a consumer with its own mask, built from the
   union, and is no tap of its own
-  (`.claude/rules/input-and-animation.md`). While KiwiHub — or any
-  own floating panel — is the key window, no modifier tap fires and
-  no tap leader opens a sequence, since KiwiHub's own keys ride every
-  modifier. Accepted: under Secure Input, key presses are hidden from
+  (`.claude/rules/input-and-animation.md`). While any of KiwiDesk's
+  own non-activating panels holds the keyboard — KiwiHub, or a
+  bar's grown peek — no modifier tap fires and no tap leader opens
+  a sequence, with one exception: under KiwiHub, a tap bound to
+  one of KiwiHub's own sides fires, and runs that side's toggle as
+  its chord does, closing the side it shows and switching from
+  another (#1229 ruling, owner 2026-11-09). The exception is
+  decided by the bound action, never by a modifier: KiwiHub's own
+  keys use all four modifiers, so a recorded ⌥⌥ or ⌃⌃ on any other
+  action would fire inside it, while a side's tap runs the toggle
+  the side's own chord runs while KiwiHub is key, so letting it
+  through starts nothing under the panel. The action is read off a
+  Shortcuts row's Lua; a function bound in `init.lua` says nothing
+  readable of its action, so it stays held. Both readings are
+  taken off the key window in the one reading: `floatsOverWindows`,
+  the predicate hover focus stands down on, and the identifier
+  KiwiHub's panel is created with. A stamp on the window cannot
+  say "KiwiHub is key" while another window is; a flag the panel
+  pushed to the core could, and would be a second source of
+  truth. Nothing passes under a grown peek, whose list answers no
+  side.
+  Accepted: under Secure Input, key presses are hidden from
   the tap, so a key typed between two ⌘ taps cannot reset the count
   ([accepted limitations](accepted-limitations.md)).
 - **The touch reader** (MultitouchSupport) serves the taps and swipes.

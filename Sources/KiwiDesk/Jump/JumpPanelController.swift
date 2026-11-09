@@ -244,6 +244,11 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.backgroundColor = .clear
         panel.hasShadow = true
         panel.level = .floating
+        // Core holds every tap but a side's own while KiwiHub is
+        // key, telling it by this stamp (#1229).
+        panel.identifier = NSUserInterfaceItemIdentifier(
+            KiwiHubSide.panelIdentifier
+        )
         panel.isReleasedWhenClosed = false
         // A deactivation hide would leave the panel to come back
         // with the next activation; the resign-key close owns it.

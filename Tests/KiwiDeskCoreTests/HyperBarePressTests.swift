@@ -63,7 +63,8 @@ struct HyperBarePressTests {
         keys.replaceLayers(
             [KeybindingManager.defaultLayer: layer],
             icons: [:],
-            preferredLayer: KeybindingManager.defaultLayer
+            preferredLayer: KeybindingManager.defaultLayer,
+            kiwiHubSideRefs: []
         )
         keys.hyperEnabled = true
         return keys
@@ -114,13 +115,15 @@ struct HyperBarePressTests {
         keys.replaceLayers(
             [layer: [hyperH: 1]],
             icons: [:],
-            preferredLayer: layer
+            preferredLayer: layer,
+            kiwiHubSideRefs: []
         )
         #expect(flips == 1)
         keys.replaceLayers(
             [layer: [hyperH: 1]],
             icons: [:],
-            preferredLayer: layer
+            preferredLayer: layer,
+            kiwiHubSideRefs: []
         )
         #expect(flips == 1)
         keys.reset()

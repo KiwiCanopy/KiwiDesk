@@ -64,6 +64,15 @@ struct PanelHandBackTests {
         #expect(jump.styleMask.contains(.nonactivatingPanel))
     }
 
+    /// Core tells KiwiHub from a grown peek by this stamp, letting
+    /// a side's own tap through only under KiwiHub (#1229).
+    @Test("the key panel carries KiwiHub's identifier")
+    func panelIsStamped() {
+        let core = makeTestCore()
+        let jump = JumpPanelController(core: core).makePanel()
+        #expect(jump.identifier?.rawValue == KiwiHubSide.panelIdentifier)
+    }
+
     /// A non-activating panel's app is not the one in the menu
     /// bar, so both hand their chords to KiwiDesk's main menu —
     /// ⌘W's Close (#1533) and the edit chords, one table.

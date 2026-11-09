@@ -35,8 +35,8 @@ final class FakeKeyboardTap: KeyboardTapHandle {
     }
     func stop() { stopped = true }
     /// The hold the manager last handed it (#1229).
-    var held = false
-    func holdTaps(_ held: Bool) { self.held = held }
+    var held = ModifierTapHold.none
+    func holdTaps(_ hold: ModifierTapHold) { held = hold }
     func drainSequenceDecisions() -> [KeySequenceDecision] {
         defer { decisions = [] }
         return decisions

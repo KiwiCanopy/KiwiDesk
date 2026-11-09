@@ -199,11 +199,17 @@ editing here:
     recording
     (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
   - **While an own floating panel is key, no modifier tap fires
-    and no tap leader opens (#1229)**: derive the hold from
-    `ownKeyWindow`'s `floatsOverWindows` in
-    `KiwiCore.ownKeyWindowDidChange` alone, never a flag a panel
-    sets, and decide it on the tap thread ahead of `fireOrOpen` and
-    again at a single tap's lapse (`KiwiHubHeldTapTests`). The why
+    and no tap leader opens, save under KiwiHub a tap bound to one
+    of its sides (#1229)**: derive the `ModifierTapHold` from the
+    `ownKeyWindow` reading in `KiwiCore.ownKeyWindowDidChange`
+    alone, reading KiwiHub off the key window's stamped identifier
+    (`KiwiHubSide.panelIdentifier`), never a flag a panel pushes;
+    mark a side's row by its structured row's Lua
+    (`KiwiHubSide(boundLua:)`), never its modifier, and release a
+    binding's ref through `releaseBinding`, since Lua reuses it; and
+    decide it on the tap thread ahead of `fireOrOpen` and again at
+    a single tap's lapse (`KiwiHubHeldTapTests`,
+    `KiwiHubSideTapTests`). The why
     is `docs/design-decisions.md` ▸ the #1872/#1229/#1873 amendment.
   - **On its own thread, deciding from the rows handed it** and
     passing every event no swallowing consumer answers; the
