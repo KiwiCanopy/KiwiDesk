@@ -94,6 +94,7 @@ enum ShortcutsReferenceBuilder {
                 listedEnds.insert(end.binding.id)
                 return sequencePathRow(
                     end,
+                    names: pathNames(of: end, in: sequences),
                     label: cmd.resolvedLabel,
                     icon: icon(for: cmd),
                     unavailable: cmd.unavailable != nil

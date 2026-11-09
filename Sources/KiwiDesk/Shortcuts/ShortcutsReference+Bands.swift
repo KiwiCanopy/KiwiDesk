@@ -227,6 +227,7 @@ extension ShortcutsReferenceBuilder {
     /// its id the end key's own, unique where a step repeats a key.
     static func sequencePathRow(
         _ end: SequenceEndKey,
+        names: [String],
         label: String,
         icon: String?,
         unavailable: Bool = false,
@@ -241,7 +242,29 @@ extension ShortcutsReferenceBuilder {
             unavailable: unavailable
         )
         row.spokenCombo = SequencePathWords.spoken(end.path)
+        row.pathNames = names.filter { !$0.trimmed.isEmpty }
         return row
+    }
+
+    /// The names along `end`'s path: its leader's, then each branch
+    /// it passes through.
+    static func pathNames(
+        of end: SequenceEndKey,
+        in sequences: [KeyBinding]
+    ) -> [String] {
+        guard var node = sequences.first(where: { $0.combo == end.path[0] })
+        else { return [] }
+        var names = [node.label]
+        for step in end.path.dropFirst().dropLast() {
+            guard
+                let next = node.steps?.first(where: {
+                    $0.combo == step && $0.isSequence
+                })
+            else { break }
+            names.append(next.label)
+            node = next
+        }
+        return names
     }
 
     /// The end keys no catalogue row listed — the user's Lua — in
@@ -258,6 +281,7 @@ extension ShortcutsReferenceBuilder {
                 OwnRow(
                     row: sequencePathRow(
                         end,
+                        names: pathNames(of: end, in: sequences),
                         label: end.binding.desc.isEmpty
                             ? end.binding.lua : end.binding.desc,
                         icon: ownIcon(end.binding.meta),

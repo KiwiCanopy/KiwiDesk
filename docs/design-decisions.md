@@ -14194,7 +14194,13 @@ no timeout is ever needed; a leader is a chord like a row's, judged
 against the rows of its layer. In Settings the Key sequences card
 refuses two siblings on one key ("Assigned to … at this point in
 the sequence"), and the action's own row names the sequence in a
-caption ("Also ⌃⌥Space → W → H"). A sequence has no "Applies to"
+caption ("Also ⌃⌥Space → W → H"). An end key's action is picked
+in a searchable popover over the whole catalogue in the page's
+groups, never folded, with "Opens more keys ›" and "Lua…" pinned
+outside its scrolling list (owner, 2026-11-09). KiwiHub's
+Shortcuts side lists an end key by its path, finds it by the names
+along that path too, and draws no tree: the hint panel and the
+card already do. A sequence has no "Applies to"
 column yet: the key table keys a row by its Lua, which a leader has
 none of, so a stored profile's Save, which writes through that
 table, would drop a sequence edited there. A sequence edited on the

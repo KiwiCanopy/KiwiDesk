@@ -99,6 +99,30 @@ struct KeySequenceCardSaveTests {
         #expect(own?.first?.sequences == [sequence()])
     }
 
+    @Test("the action picker narrows by name and keeps its groups")
+    func pickerNarrows() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeModel()
+        let catalog = SequenceActionCatalog(
+            expander: .ofDraft(model, layer: KeyLayer.defaultName)
+        )
+        #expect(catalog.matching("").count == catalog.groups.count)
+        let hits = catalog.matching("to the left")
+        #expect(!hits.isEmpty)
+        #expect(
+            hits.allSatisfy { group in
+                group.commands.allSatisfy {
+                    $0.resolvedLabel.localizedCaseInsensitiveContains(
+                        "to the left"
+                    )
+                }
+            }
+        )
+        #expect(catalog.matching("zzqq").isEmpty)
+        let slots = SequenceActionMenu.sequence(hits)
+        #expect(slots.first == .branch && slots.last == .lua)
+    }
+
     @Test("a sequence recorded on the live page lands whole")
     func liveSaveWritesTheTree() throws {
         let model = try makeModel()

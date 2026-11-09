@@ -158,6 +158,74 @@ struct KeySequenceCardTests {
         #expect(text.contains("model.sequenceEditBlock(in: layerName)"))
     }
 
+    @Test("a path row follows a folded run, which stays whole")
+    func pathFollowsTheFold() {
+        LocalizationManager.shared.select("en")
+        let spaces = [SpaceID("1"), SpaceID("2"), SpaceID("3")]
+        let go = KeybindingCatalog.goToSpace(spaces)
+        var rows = go.enumerated().map { at, command in
+            KeyBinding(
+                combo: "ctrl+alt+\(at + 1)",
+                lua: command.lua,
+                kind: .navigation
+            )
+        }
+        rows.append(
+            .sequence(
+                combo: "ctrl+alt+space",
+                label: "Leader",
+                steps: [
+                    .sequence(
+                        combo: "s",
+                        label: "Spaces",
+                        steps: [
+                            KeyBinding(
+                                combo: "2",
+                                lua: go[1].lua,
+                                kind: .navigation
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+        let reference = ShortcutsReferenceBuilder.build(
+            layer: KeyLayer(name: "default", bindings: rows),
+            spaces: spaces,
+            spaceIcons: [:],
+            desktops: [],
+            resizeStep: 50,
+            layerNames: ["default"]
+        )
+        let focus = reference.controls.flatMap(\.rows)
+        let path = SequencePathWords.drawn(["ctrl+alt+space", "s", "2"])
+        let folded = focus.firstIndex { !$0.members.isEmpty }
+        let after = focus.firstIndex { $0.combo == path }
+        #expect(folded != nil && after != nil)
+        #expect(focus.filter { !$0.members.isEmpty }.count == 1)
+        if let folded, let after { #expect(after == folded + 1) }
+    }
+
+    @Test("KiwiHub search finds a path row by a name along its path")
+    func searchReadsPathNames() {
+        LocalizationManager.shared.select("en")
+        let reference = ShortcutsReferenceBuilder.build(
+            layer: KeyLayer(name: "default", bindings: [sequence()]),
+            spaces: [],
+            spaceIcons: [:],
+            desktops: [],
+            resizeStep: 50,
+            layerNames: ["default"]
+        )
+        var sheet = ShortcutsSheet(reference: reference)
+        sheet.setQuery("windows")
+        let rows = sheet.shown?.controls.flatMap(\.rows) ?? []
+        #expect(rows.count == 1)
+        #expect(rows.first?.detail?.contains("Windows") == true)
+        sheet.setQuery("nowhere")
+        #expect(sheet.matchCount == 0)
+    }
+
     @Test("two copies of a layer differ by a sequence's tree")
     func layerCompareReadsTheTree() {
         let base = KeyLayer(name: "default", bindings: [sequence()])

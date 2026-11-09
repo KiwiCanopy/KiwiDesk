@@ -46,14 +46,16 @@ struct ShortcutsSheet {
         by needle: String
     ) -> ShortcutsReference {
         func keeps(_ row: ShortcutRow) -> Bool {
-            matchRange(of: needle, in: row.label) != nil
+            matched(row, by: needle) != nil
         }
         // A folded row stays whole where every member matches, or
         // none does and its own label still matches; otherwise it
         // opens to the members that match (#2312).
         func shown(_ row: ShortcutRow) -> [ShortcutRow] {
             let hits = row.members.filter(keeps)
-            if hits.isEmpty { return keeps(row) ? [row] : [] }
+            if hits.isEmpty {
+                return matched(row, by: needle).map { [$0] } ?? []
+            }
             return hits.count == row.members.count ? [row] : hits
         }
         var out = reference
@@ -66,11 +68,32 @@ struct ShortcutsSheet {
         }
         out.controls = narrowed(reference.controls)
         out.groups = narrowed(reference.groups)
-        out.inactive = reference.inactive.filter(keeps)
-        out.desktopAway = reference.desktopAway.filter(keeps)
-        out.apps = reference.apps.filter(keeps)
-        out.custom = reference.custom.filter(keeps)
+        out.inactive = reference.inactive.compactMap {
+            matched($0, by: needle)
+        }
+        out.desktopAway = reference.desktopAway.compactMap {
+            matched($0, by: needle)
+        }
+        out.apps = reference.apps.compactMap { matched($0, by: needle) }
+        out.custom = reference.custom.compactMap { matched($0, by: needle) }
         return out
+    }
+
+    /// `row` as the query keeps it: by its name, or by a name along
+    /// its key sequence's path, which its detail line then shows
+    /// (#1871), so a hit never matches text the row does not draw;
+    /// nil where neither holds the query.
+    static func matched(_ row: ShortcutRow, by needle: String) -> ShortcutRow?
+    {
+        if matchRange(of: needle, in: row.label) != nil { return row }
+        guard
+            let name = row.pathNames.first(where: {
+                matchRange(of: needle, in: $0) != nil
+            })
+        else { return nil }
+        var row = row
+        row.detail = L("shortcuts.panel.in_sequence", "in %1$@", name)
+        return row
     }
 
     /// Where `needle` sits in `label`, ignoring case and

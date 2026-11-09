@@ -1,93 +1,227 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// What an end key may run, grouped as the Shortcuts page draws
-/// its groups (#1871 ▸ Settings): "Opens more keys ›" first, then
-/// the catalogue, then "Lua…" below a divider.
-@MainActor
-struct SequenceActionCatalog {
-    struct Group: Identifiable {
-        let title: String
-        let commands: [NavCommand]
-        var id: String { title }
-    }
-
-    let groups: [Group]
-
-    /// The page parts whose rows an end key may run, in page order.
-    static let parts: [ShortcutsPagePart] = [
-        .showHide, .focus, .moveWindows, .macosDesktops, .layout,
-        .sizeFloat, .pocket,
-    ]
-
-    init(expander: ShortcutsFamilyRows) {
-        groups = Self.parts.compactMap { part in
-            guard let title = part.group?.control.text else { return nil }
-            let commands = SettingKey.allCases.filter {
-                $0.placement.area.flatMap(SettingsDestination.init(area:))
-                    == .shortcuts
-                    && $0.placement.container.flatMap(
-                        ShortcutsPagePart.init
-                    ) == part
-            }
-            .flatMap { expander.rows(for: $0) ?? [] }
-            .filter { $0.unavailable == nil }
-            return commands.isEmpty
-                ? nil : Group(title: title, commands: commands)
-        }
-    }
-
-    /// The catalogue command `lua` runs, nil for none.
-    func command(running lua: String) -> NavCommand? {
-        guard !lua.isEmpty else { return nil }
-        return groups.lazy.flatMap(\.commands).first { $0.runs(lua) }
-    }
+/// Opens an end key's action picker, keyed by the node (#843).
+struct SequencePickRequest: Identifiable, Equatable {
+    let id: UUID
 }
 
-/// An end key's action pop-up.
+/// A row the action picker's one cursor stops on (`DropdownCursor`):
+/// "Opens more keys ›" pinned above the list, a catalogue command,
+/// or "Lua…" pinned below it.
+enum SequencePickSlot: Hashable {
+    case branch
+    case command(String)
+    case lua
+}
+
+/// An end key's action picker (#1871, owner 2026-11-09): a search
+/// field over the whole catalogue in the page's groups, opened on
+/// the current pick, with "Opens more keys ›" and "Lua…" pinned
+/// outside the scrolling list. ↑/↓ and real pointer motion move one
+/// cursor (`SequenceActionMenu+Cursor`); Return picks it.
 struct SequenceActionMenu: View {
     let node: KeyBinding
     let catalog: SequenceActionCatalog
-    /// What VoiceOver calls the pop-up.
+    /// What VoiceOver calls the trigger.
     let spokenLabel: String
     let onBranch: () -> Void
     let onPick: (NavCommand) -> Void
     let onLua: () -> Void
 
+    @State var request: SequencePickRequest?
+    @State var search = ""
+    @State var cursor = DropdownCursor<SequencePickSlot>()
+    /// Where the list scrolls — set by the keyboard alone, so the
+    /// pointer never scrolls the list out from under itself.
+    @State var scrollTarget: SequencePickSlot?
+    @FocusState private var searchFocused: Bool
+
     var body: some View {
-        Menu {
-            Button(
-                L("shortcuts.sequence.opens_more", "Opens more keys ›"),
-                action: onBranch
+        Button {
+            request = SequencePickRequest(id: node.id)
+        } label: {
+            HStack(spacing: 4) {
+                Text(title).lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .fixedSize(horizontal: true, vertical: false)
+        }
+        .settingsPopUpTrigger()
+        .accessibilityLabel(spokenLabel)
+        .accessibilityValue(title)
+        .popover(item: $request) { _ in
+            popover.settingsPopoverChrome()
+        }
+        // Every open starts with an empty search (#1357).
+        .onChange(of: request) { _, open in
+            if open == nil { search = "" } else { opened() }
+        }
+    }
+
+    private var popover: some View {
+        let groups = shownGroups
+        return VStack(spacing: 6) {
+            TextField(
+                L("shortcuts.sequence.search", "Search actions"),
+                text: $search
             )
+            .textFieldStyle(.roundedBorder)
+            .focused($searchFocused)
+            .onSubmit { commit(groups) }
+            .onKeyPress(.downArrow) { move(1, in: groups) }
+            .onKeyPress(.upArrow) { move(-1, in: groups) }
+            .onChange(of: search) { _, _ in searched() }
+            pinned(.branch, Self.branchLabel, symbol: "chevron.right")
             Divider()
-            ForEach(catalog.groups) { group in
-                Section(group.title) {
-                    ForEach(group.commands) { command in
-                        Button(command.resolvedLabel) { onPick(command) }
+            list(groups)
+            Divider()
+            pinned(
+                .lua,
+                Self.luaLabel,
+                symbol: "chevron.left.forwardslash.chevron.right"
+            )
+        }
+        .padding(12)
+        .frame(width: 280, height: 360)
+        .onAppear { searchFocused = true }
+    }
+
+    @ViewBuilder private func list(
+        _ groups: [SequenceActionCatalog.Group]
+    ) -> some View {
+        if groups.isEmpty {
+            Text(
+                L(
+                    "shortcuts.sequence.no_match",
+                    "No action matches \u{201C}%1$@\u{201D}",
+                    search.trimmed
+                )
+            )
+            .font(.callout)
+            .foregroundStyle(SettingsTheme.ink3)
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity,
+                alignment: .top
+            )
+            .padding(.top, 8)
+        } else {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(groups) { group in
+                            Text(group.title)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(SettingsTheme.ink3)
+                                .padding(.top, 6)
+                                .padding(.bottom, 2)
+                                .accessibilityAddTraits(.isHeader)
+                            ForEach(group.commands) { command in
+                                row(command)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .onChange(of: scrollTarget) { _, slot in
+                    guard let slot else { return }
+                    proxy.scrollTo(slot, anchor: .center)
+                }
+                // Opened scrolled to the current pick.
+                .onAppear {
+                    if let slot = scrollTarget {
+                        proxy.scrollTo(slot, anchor: .center)
                     }
                 }
             }
-            Divider()
-            Button(L("shortcuts.sequence.lua", "Lua…"), action: onLua)
-        } label: {
-            Text(title)
-                .lineLimit(1)
-                .truncationMode(.tail)
         }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .fixedSize(horizontal: true, vertical: false)
-        .accessibilityLabel(spokenLabel)
-        .accessibilityValue(title)
+    }
+
+    private func row(_ command: NavCommand) -> some View {
+        let slot = SequencePickSlot.command(command.lua)
+        let onCursor = cursor.highlighted == slot
+        let picked = node.kind != .custom && command.runs(node.lua)
+        return Button {
+            pick(command)
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark")
+                    .font(.caption.weight(.semibold))
+                    .opacity(picked ? 1 : 0)
+                    .frame(width: 12)
+                    .accessibilityHidden(true)
+                Text(bolded(command.resolvedLabel)).lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(DropdownRowStyle.ink(onCursor))
+            .contentShape(Rectangle())
+            .padding(.vertical, 3)
+            .padding(.horizontal, 4)
+        }
+        .buttonStyle(.plain)
+        .dropdownCursorRow(onCursor) { hover(slot) }
+        .accessibilityAddTraits(picked ? .isSelected : [])
+        .id(slot)
+    }
+
+    private func pinned(
+        _ slot: SequencePickSlot,
+        _ label: String,
+        symbol: String
+    ) -> some View {
+        let onCursor = cursor.highlighted == slot
+        return Button {
+            take(slot, in: shownGroups)
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: symbol)
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 12)
+                    .accessibilityHidden(true)
+                Text(label)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(DropdownRowStyle.ink(onCursor))
+            .contentShape(Rectangle())
+            .padding(.vertical, 3)
+            .padding(.horizontal, 4)
+        }
+        .buttonStyle(.plain)
+        .dropdownCursorRow(onCursor) { hover(slot) }
+    }
+
+    /// `label` with the query's match in bold, as the Shortcuts
+    /// side draws a hit.
+    private func bolded(_ label: String) -> AttributedString {
+        var text = AttributedString(label)
+        guard
+            let range = ShortcutsSheet.matchRange(
+                of: search.trimmed,
+                in: label
+            ),
+            let lower = AttributedString.Index(range.lowerBound, within: text),
+            let upper = AttributedString.Index(range.upperBound, within: text)
+        else { return text }
+        text[lower..<upper].inlinePresentationIntent = .stronglyEmphasized
+        return text
+    }
+
+    static var branchLabel: String {
+        L("shortcuts.sequence.opens_more", "Opens more keys ›")
+    }
+
+    static var luaLabel: String {
+        L("shortcuts.sequence.lua", "Lua…")
     }
 
     /// The action's name, "Lua…" for the user's own, "Choose…" for
     /// none yet.
     private var title: String {
         if node.kind == .custom {
-            return node.desc.trimmed.isEmpty
-                ? L("shortcuts.sequence.lua", "Lua…") : node.desc
+            return node.desc.trimmed.isEmpty ? Self.luaLabel : node.desc
         }
         if let command = catalog.command(running: node.lua) {
             return command.resolvedLabel
