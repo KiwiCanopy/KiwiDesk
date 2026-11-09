@@ -59,6 +59,14 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDeskCore/App/KiwiCore+GuiConfigSeed.swift":
             (1, "first-run seed: one row per action by construction"),
+        "KiwiDeskCore/Config/RuleReach+KeyBase.swift":
+            (
+                2,
+                "the loaded page's base: a profile's own sequence goes"
+                    + " back to the shared one on its leader, adds no row"
+                    + " but a shared sequence the profile left out"
+                    + " (#1871, KeySequenceCardSaveTests)"
+            ),
         "KiwiDeskCore/Config/RuleReach+Keys.swift":
             (
                 3,

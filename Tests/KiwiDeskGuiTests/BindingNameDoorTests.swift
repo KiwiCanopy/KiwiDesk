@@ -41,10 +41,6 @@ struct BindingNameDoorTests {
             1,
             "shortcut.list: a sequence entry carries its stored name"
         ),
-        "RuleReach+Keys.swift": (
-            1,
-            "sameShortcuts: a sequence's stored name is a write"
-        ),
         "KeySequenceHint.swift": (
             4,
             "a key sequence node's own name (#1871): a leader or a"
@@ -69,10 +65,6 @@ struct BindingNameDoorTests {
             1,
             "a catalogue pick stores its command's English label, as"
                 + " a navigation row does (#1871)"
-        ),
-        "SettingsModel+LayerReach.swift": (
-            1,
-            "sameRows: a sequence's stored name is a write (#1871)"
         ),
         "ShortcutsPagePart.swift": (
             1,
