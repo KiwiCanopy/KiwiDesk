@@ -110,8 +110,8 @@ final class JumpModel: ObservableObject {
     /// modifier that named the pick is let go.
     @Published var revealedRow: Int?
     var onClose: () -> Void = {}
-    /// Reopens an app the strip lists with no window, by bundle id.
-    var onReopen: (String) -> Void = { _ in }
+    /// Reopens an app the strip lists with no window.
+    var onReopen: (JumpApp) -> Void = { _ in }
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
     /// The panel's height glides to the new scope.
@@ -229,7 +229,9 @@ final class JumpModel: ObservableObject {
         case .pick(let moveHere):
             if let index = list.selection {
                 pick(index, moveHere ? .moveHere : .jump)
-            } else if !moveHere, let app = list.stripApp?.bundleID {
+            } else if !moveHere, let app = list.stripApp,
+                app.bundleID != nil
+            {
                 onReopen(app)
             }
         case .swapHere:

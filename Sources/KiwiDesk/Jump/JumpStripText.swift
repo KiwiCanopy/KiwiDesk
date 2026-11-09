@@ -11,6 +11,11 @@ enum JumpStripText {
     /// The strip's VoiceOver name.
     static var stripName: String { L("jump.strip.ax_label", "Apps") }
 
+    /// Why a dimmed tile takes no pick, the list's own line.
+    static var noMatch: String {
+        L("jump.empty.no_match", "No open windows match")
+    }
+
     /// A tile as VoiceOver hears it: its name, and its windows
     /// where it has more than one. The count goes last behind a
     /// label, so nothing has to agree with it.

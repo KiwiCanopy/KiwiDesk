@@ -15123,6 +15123,11 @@ end the user has to back out of, where All with dimmed tiles shows
 at once which apps hold a match. While a query is up, the
 keyboard keeps ← → for the text cursor, so the strip moves by
 pointer only and a dimmed tile takes no pick.
+
+The opener is its own verb, `kiwihub.show_last_app`, rather than an
+option on `kiwihub.show`: a side and an opening are two questions,
+and an option would put a second meaning on a call every existing
+binding and `UIBridgeHooks` field already spells one way.
 :::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on

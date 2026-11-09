@@ -1007,7 +1007,7 @@
   "keybinding.show_shortcuts": "Mostrar el panel de atajos",
   "keybinding.show_view_picker": "Mostrar el selector de vista",
   "keybinding.show_window_switcher": "Mostrar el selector de ventanas",
-  "keybinding.show_window_switcher_last_app": "Mostrar el selector de ventanas para la última app",
+  "keybinding.show_window_switcher_last_app": "Mostrar el selector de ventanas para la última app usada",
   "keybinding.shrink_height": "Reducir la altura",
   "keybinding.shrink_width": "Reducir la anchura",
   "keybinding.space_back": "Retroceder en el historial de espacios",

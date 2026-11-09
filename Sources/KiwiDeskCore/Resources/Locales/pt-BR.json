@@ -1007,7 +1007,7 @@
   "keybinding.show_shortcuts": "Mostrar o painel de atalhos",
   "keybinding.show_view_picker": "Mostrar o seletor de visualização",
   "keybinding.show_window_switcher": "Mostrar o seletor de janelas",
-  "keybinding.show_window_switcher_last_app": "Mostrar o seletor de janelas para o último app",
+  "keybinding.show_window_switcher_last_app": "Mostrar o seletor de janelas para o último app usado",
   "keybinding.shrink_height": "Reduzir a altura",
   "keybinding.shrink_width": "Reduzir a largura",
   "keybinding.space_back": "Voltar no histórico de espaços",

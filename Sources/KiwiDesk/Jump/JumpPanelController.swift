@@ -5,7 +5,7 @@ import os
 
 /// Diagnostic logging for the panel's show, pick and close.
 /// `privacy: .public`, or macOS redacts every line (#951).
-private let jumpLog = Logger(
+let jumpLog = Logger(
     subsystem: KiwiLog.subsystem,
     category: "gui"
 )

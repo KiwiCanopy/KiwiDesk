@@ -32,13 +32,25 @@ struct JumpStripView: View {
 
     private func tile(_ index: Int, in list: JumpList) -> some View {
         let app = index == 0 ? nil : list.snapshot.apps[index - 1]
+        let selected = index == list.tile
+        let dimmed = !list.tileMatches(index)
         return JumpStripTile(
             name: app?.name ?? JumpStripText.allName,
             icon: app.flatMap { model.icons[$0.pid] },
             windows: app.map { list.windowCount(of: $0) } ?? 0,
-            isSelected: index == list.tile,
-            isDimmed: !list.tileMatches(index),
-            onActivate: { model.clickTile(index) }
+            isSelected: selected,
+            isLifted: JumpHover.lifts(
+                .tile(index),
+                hover: model.hover,
+                selected: selected,
+                clickable: !dimmed
+            ),
+            isDimmed: dimmed,
+            onActivate: { model.clickTile(index) },
+            onHover: {
+                model.hoverTile(index, pointer: model.currentPointer())
+            },
+            onHoverEnd: { model.endHover(.tile(index)) }
         )
     }
 }
@@ -46,16 +58,20 @@ struct JumpStripView: View {
 /// One tile: the app's icon — All's grid symbol on a neutral plate
 /// — and its name under it, one line, middle-truncated; a neutral
 /// count capsule for two or more windows, never red. The selected
-/// tile takes the hover ground and a 2 pt caret.
+/// tile takes the hover ground, its ink and a 2 pt accent caret; a
+/// lifted one the ground and ink alone.
 struct JumpStripTile: View {
     let name: String
     /// nil draws All's symbol.
     let icon: NSImage?
     let windows: Int
     let isSelected: Bool
+    /// The pointer lifts this tile (#2365), never the selected one.
+    let isLifted: Bool
     let isDimmed: Bool
     let onActivate: () -> Void
-    @State private var hovered = false
+    let onHover: () -> Void
+    let onHoverEnd: () -> Void
     @Environment(\.kiwiHubPaint) private var paint
 
     static let width: CGFloat = 76
@@ -63,13 +79,25 @@ struct JumpStripTile: View {
     static let caret: CGFloat = 2
 
     var body: some View {
-        Button(action: onActivate) { content }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .disabled(isDimmed)
-            .onHover { hovered = $0 }
-            .accessibilityLabel(JumpStripText.spoken(name, windows: windows))
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
+        Button(action: onActivate) {
+            // A selected or lifted tile sits on the hover ground and
+            // takes its measured ink; the accent stays a fill.
+            content.kiwiHubRowInk(
+                paint,
+                selected: false,
+                lifted: isSelected || isLifted
+            )
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .disabled(isDimmed)
+        .onContinuousHover { phase in
+            if case .active = phase { onHover() } else { onHoverEnd() }
+        }
+        .accessibilityLabel(JumpStripText.spoken(name, windows: windows))
+        // A dim is not a sentence: a tile with no match says why.
+        .accessibilityHint(isDimmed ? JumpStripText.noMatch : "")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private var content: some View {
@@ -81,8 +109,7 @@ struct JumpStripTile: View {
                 .truncationMode(.middle)
                 .foregroundStyle(
                     isSelected
-                        ? AnyShapeStyle(paint.selection)
-                        : AnyShapeStyle(.secondary)
+                        ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary)
                 )
             Capsule()
                 .fill(isSelected ? paint.selection : .clear)
@@ -129,12 +156,12 @@ struct JumpStripTile: View {
     }
 
     @ViewBuilder private var ground: some View {
-        if isSelected || hovered && !isDimmed {
+        if isSelected || isLifted {
             RoundedRectangle(
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(paint.fill(isSelected ? paint.rowHover : paint.chipHover))
+            .fill(paint.fill(paint.rowHover))
         }
     }
 }

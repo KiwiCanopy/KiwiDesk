@@ -45,7 +45,7 @@ struct JumpStripModelTests {
         LocalizationManager.shared.select("en")
         let model = model()
         var reopened: [String] = []
-        model.onReopen = { reopened.append($0) }
+        model.onReopen = { reopened.append($0.bundleID ?? "") }
         model.clickTile(3)
         #expect(model.emptyText == "No windows")
         model.handle(.pick(moveHere: true), repeated: false)
@@ -76,6 +76,35 @@ struct JumpStripModelTests {
         #expect(heard.last?.hasPrefix("Notes: ") == true)
         model.clickTile(3)
         #expect(heard.last == "Xcode: No windows")
+    }
+
+    /// The pointer lifts a tile through the model (#2365): a real
+    /// move only, never the selected tile, never a dimmed one.
+    @Test("a tile lifts on a real pointer move, as a row does")
+    func tileHover() {
+        let model = model()
+        model.hoverTile(2, pointer: .zero)
+        #expect(model.hover == nil)
+        model.hoverTile(2, pointer: CGPoint(x: 5, y: 5))
+        #expect(model.hover == .tile(2))
+        #expect(
+            JumpHover.lifts(
+                .tile(2),
+                hover: model.hover,
+                selected: false,
+                clickable: true
+            )
+        )
+        #expect(
+            !JumpHover.lifts(
+                .tile(2),
+                hover: model.hover,
+                selected: true,
+                clickable: true
+            )
+        )
+        model.endHover(.tile(2))
+        #expect(model.hover == nil)
     }
 
     @Test("the last-app opener lands on row 1's app, row 1 kept")

@@ -1007,7 +1007,7 @@
   "keybinding.show_shortcuts": "Показать панель сочетаний клавиш",
   "keybinding.show_view_picker": "Показать выбор вида",
   "keybinding.show_window_switcher": "Показать переключатель окон",
-  "keybinding.show_window_switcher_last_app": "Показать переключатель окон для последнего приложения",
+  "keybinding.show_window_switcher_last_app": "Показать переключатель окон для последнего использованного приложения",
   "keybinding.shrink_height": "Уменьшить высоту",
   "keybinding.shrink_width": "Уменьшить ширину",
   "keybinding.space_back": "Перейти назад по истории пространств",
