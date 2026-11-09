@@ -73,6 +73,19 @@ extension UpdatePromptDriver {
         }
     }
 
+    /// Answers a parked offer Later, so the user's check that
+    /// starts at the cycle's end reads the feed afresh (#3139).
+    /// False when no unseen offer is open: one already installing
+    /// is kept, since its Later does not end the session.
+    func dropParkedOffer() -> Bool {
+        guard let window, window.session.phase == .found,
+            window.session.installsFrom != .installing
+        else { return false }
+        checksAtCycleEnd = true
+        window.session.later()
+        return true
+    }
+
     /// Shows the offer: it got the user's attention.
     func presentWindow() {
         prompts.offerGotAttention()

@@ -79,7 +79,7 @@ final class UpdateSession: ObservableObject {
     @Published private(set) var canCancel = false
     /// Where Install lands: a download already fetched in the
     /// background goes straight to Preparing.
-    private let installsFrom: UpdateWindowPhase
+    let installsFrom: UpdateWindowPhase
     private var acknowledgement: (() -> Void)?
     private var retryTermination: (() -> Void)?
 

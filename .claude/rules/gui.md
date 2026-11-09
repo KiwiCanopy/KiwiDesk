@@ -479,8 +479,10 @@ channels whether or not an image exists, since a mode icon that
 is no SF Symbol takes the title fallback; the updates row EXISTS
 only while an update was found — the pending reminder or the
 channel's own answer (#1536) — and reads "Update Available…",
-because `checkForUpdates` is the one door that brings the waiting
-alert forward, and asking for a check is the Settings footer's
+because `checkForUpdates` is the one door that offers the newest
+update: a parked scheduled offer is answered Later and the check
+starts at the cycle's end (#3139, `UpdateParkedOfferTests`), and
+asking for a check is the Settings footer's
 (`UpdateReminderTests`, `UpdatesRowTests`).
 
 **Every update answer a user can meet is KiwiDesk's own window's

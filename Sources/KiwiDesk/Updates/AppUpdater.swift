@@ -20,9 +20,9 @@ protocol AppUpdating: AnyObject {
     /// Whether an update check can be started.
     var canCheckForUpdates: Bool { get }
 
-    /// Initiates an update check — or, while a scheduled update
-    /// waits behind a gentle reminder, brings its alert forward
-    /// (#1013, Sparkle's documented door).
+    /// Initiates an update check. A scheduled offer waiting behind
+    /// the gentle reminder (#1013) is answered Later and the check
+    /// reads the feed afresh, so it offers the newest (#3139).
     func checkForUpdates()
 
     /// Whether a scheduled update waits behind the gentle reminder
@@ -154,6 +154,9 @@ final class SparkleUpdater: AppUpdating {
     }
 
     func checkForUpdates() {
+        // A parked scheduled offer may be stale: its check starts
+        // once Sparkle's cycle ends (#3139).
+        if policy.updatePending, driver.dropParkedOffer() { return }
         // An open update window comes back instead (#1849).
         if driver.focusOpenWindow() { return }
         startOwnCheck()
