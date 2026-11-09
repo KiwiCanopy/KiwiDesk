@@ -82,6 +82,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | Action | What it does |
 |---|---|
 | [`kiwihub.show`](lua-reference.md#kiwihubshow) | Opens KiwiHub on a side, switches it there, or closes it if that side is open. |
+| [`kiwihub.show_last_app`](lua-reference.md#kiwihubshow_last_app) | Opens KiwiHub's window switcher on the app of the window used last, or closes it if it is open. |
 
 ## kiwivision
 

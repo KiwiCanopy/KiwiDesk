@@ -52,6 +52,10 @@ extension KiwiCore {
             else { return CommandResponse.expected(KiwiHubSide.self) }
             uiBridge.onKiwihubShow(side)
             return .ok()
+        case "kiwihub.show_last_app":
+            // The app strip's opener (#3135).
+            uiBridge.onKiwihubShowLastApp()
+            return .ok()
         case "kiwihub.set_key":
             return setKiwiHubKey(args)
         default:
