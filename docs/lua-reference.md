@@ -4677,7 +4677,7 @@ without one), and optionally `titles`, `keep_focus`, `clear_delay`,
 `clear_wallpaper` and `clear_app`.
 
 :::unreleased
-A lens table also takes `maximize`.
+A lens table also takes `maximize` and `open_apps`.
 :::
 
 **Does:** adds a lens, or replaces the one of its name. While the
@@ -4703,6 +4703,18 @@ on the window clears it at once; typing does not. The pill shows
 VoiceOver reads it once. Never-dimmed apps, KiwiDesk's own windows,
 overlays such as a launcher palette, and a dialog of the window
 that was clear never wait.
+
+:::unreleased
+`open_apps` lists the apps, from `apps`, that KiwiDesk opens when
+you turn the lens on and they have no window open — one minimized
+or on another Desktop counts as open. They open in the background.
+Where none of the lens's apps had a window, the focus moves once,
+to the first of their windows to arrive on a Desktop a screen
+shows, unless you moved the focus or clicked first. A member
+matched by `titles`, or named by its process name, never opens.
+When no app of the lens is open and none opens, a pill says so.
+Turning a lens on from `init.lua` opens nothing.
+:::
 
 A setting the lens leaves out follows the
 plain KiwiVision one, and never-dimmed apps stay clear under every

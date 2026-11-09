@@ -82,7 +82,7 @@ extension KiwiCore {
             if census.visible == 0, census.minimized.isEmpty,
                 !(reach?.listsAny
                     ?? !awayWindows(bundleID: bundleID).isEmpty),
-                openOrFocus.openApp(bundleID, false)
+                openOrFocus.openApp(bundleID, .reopen)
             {
                 return .ok()
             }
@@ -95,12 +95,22 @@ extension KiwiCore {
         // CoreServices, apps in ~/Applications). Seamed like the
         // branch above, so no test can launch a real app by naming
         // one that happens to be installed.
-        guard openOrFocus.openApp(bundleID, newInstance) else {
+        let mode: OpenAppMode = newInstance ? .newInstance : .reopen
+        guard openOrFocus.openApp(bundleID, mode) else {
             return .fail("app not found: \(bundleID)")
         }
         // The user named the app: its next rule-placed window
         // takes them along, whatever the press timing (#1599).
         oweLaunchFollow(bundleID)
         return .ok()
+    }
+
+    /// `launch`'s background mode (#3122): opens `bundleID` — a
+    /// launch, or a reopen of a running app with no window —
+    /// without activating it, owing no follow and reaching no away
+    /// Desktop. The caller judged the app windowless. False where
+    /// LaunchServices cannot resolve the id.
+    func launchInBackground(_ bundleID: String) -> Bool {
+        openOrFocus.openApp(bundleID.lowercased(), .background)
     }
 }

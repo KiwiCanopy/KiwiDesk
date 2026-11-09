@@ -62,30 +62,42 @@ struct OpenOrFocusSeams {
     /// Launches the app — the branch taken when it is not running,
     /// or when `spawn_new` asks for a fresh instance — and, on a
     /// running app with no window at all, reopens it so it opens
-    /// one, as a Dock click does (#1840). Returns
-    /// false when LaunchServices cannot resolve the bundle id,
-    /// which is the command's "app not found".
+    /// one, as a Dock click does (#1840). `.background` opens it
+    /// without activating it (#3122). Returns false when
+    /// LaunchServices cannot resolve the bundle id, which is the
+    /// command's "app not found".
     ///
     /// Seamed for the same reason as the rest and not because
     /// #673 needs it: without it a test naming any INSTALLED
     /// bundle id launches that app for real, which is how the
     /// suite came to activate Finder on every run.
-    var openApp: @MainActor (String, Bool) -> Bool = {
+    var openApp: @MainActor (String, OpenAppMode) -> Bool = {
         bundleID,
-        newInstance in
+        mode in
         guard
             let url = NSWorkspace.shared.urlForApplication(
                 withBundleIdentifier: bundleID
             )
         else { return false }
         let config = NSWorkspace.OpenConfiguration()
-        config.createsNewApplicationInstance = newInstance
+        config.createsNewApplicationInstance = mode == .newInstance
+        config.activates = mode != .background
         NSWorkspace.shared.openApplication(
             at: url,
             configuration: config
         )
         return true
     }
+}
+
+/// How `OpenOrFocusSeams.openApp` opens an app.
+enum OpenAppMode: Equatable, Sendable {
+    /// Launch or reopen it, and bring it forward.
+    case reopen
+    /// Launch a fresh instance (`spawn_new`).
+    case newInstance
+    /// Launch or reopen it and leave it behind (#3122).
+    case background
 }
 
 /// The all-minimized arm of Open or Focus (#673).

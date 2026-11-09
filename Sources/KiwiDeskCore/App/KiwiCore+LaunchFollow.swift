@@ -125,6 +125,10 @@ extension KiwiCore {
         effects: AppliedEffects,
         now: Date = Date()
     ) -> SpaceID? {
+        // A lens's quiet open is owed first (#3122).
+        if let paid = claimQuietOpen(arrived: window, effects: effects) {
+            return paid.follow
+        }
         guard !eventLoop.switchReads.applying,
             let space = effects.placedByAppRule,
             let bundleID = window.appBundleID,

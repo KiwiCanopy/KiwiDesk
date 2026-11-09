@@ -63,6 +63,11 @@ public final class VisionManager {
     /// Hears each landing a lens holds, with the lens's own
     /// reminder, nil for the default; the GUI announces it.
     public var onHold: @MainActor (String?) -> Void = { _ in }
+    /// Whether a config load is running: a lens it turns on opens
+    /// no app (#3122).
+    var configLoading = false
+    /// Hears a lens notice the pill draws, for VoiceOver (#3122).
+    public var onNotice: @MainActor (VisionLensNotice) -> Void = { _ in }
     /// The lens rename the write in flight carries, set by
     /// `setAppWide(…renamingLens:)` for that write alone (#2103).
     var renamedLens: (from: String, to: String)?

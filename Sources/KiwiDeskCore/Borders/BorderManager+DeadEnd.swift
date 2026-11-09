@@ -102,6 +102,24 @@ extension BorderManager {
         )
     }
 
+    /// Flashes a pill centred on a screen with no window to stand
+    /// on (#3122).
+    @discardableResult
+    func flashScreenPill(
+        display: DisplayID,
+        frame: CGRect,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        guard privateRuntimeStarted else { return false }
+        return sizeLimitOverlay.flash(
+            screen: display,
+            frame: frame,
+            text: text,
+            symbol: symbol
+        )
+    }
+
     /// Shows the reminder pill on a window a lens holds, centred
     /// on it, until `releaseHoldPill` (#2103 ruling 12).
     func showHoldPill(window: WindowID, frame: CGRect, text: String) {

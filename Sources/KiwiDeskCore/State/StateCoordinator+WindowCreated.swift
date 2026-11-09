@@ -44,6 +44,8 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
+        let quiet = arrivesQuietly
+        arrivesQuietly = false
         let claim = pocketClaimed
         pocketClaimed = nil
         let claimed = claim == .claimed(window.id)
@@ -156,7 +158,8 @@ extension StateCoordinator {
                     && rememberedSpaces[$0] == .departed(target)
                     && windows[$0] == nil
             } ?? false
-        guard windows[window.id]?.isTransientOverlay != true
+        // A window a lens opened quietly takes no focus (#3122).
+        guard windows[window.id]?.isTransientOverlay != true, !quiet
         else { return }
         if effects.hadRememberedSpace, owed == window.id,
             target == workspaces.activeSpace

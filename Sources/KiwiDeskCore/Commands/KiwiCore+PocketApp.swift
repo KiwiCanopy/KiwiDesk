@@ -92,7 +92,7 @@ extension KiwiCore {
     /// Launches or reopens `bundleID`, dropping the claim where no
     /// such app exists.
     private func reopenPocketApp(_ bundleID: String) -> CommandResponse {
-        guard openOrFocus.openApp(bundleID, false) else {
+        guard openOrFocus.openApp(bundleID, .reopen) else {
             arrivals.pocketClaims[bundleID] = nil
             return .fail("app not found: \(bundleID)")
         }

@@ -191,6 +191,7 @@ struct KiwiVisionCurrentTests {
         var lens = VisionLens(name: "Writing")
         lens.apps = ["a"]
         lens.titles = ["a": ["Docs"]]
+        lens.openApps = ["a"]
         lens.reminder = "Back"
         lens.overrides = VisionLens.Overrides(
             dim: 50,

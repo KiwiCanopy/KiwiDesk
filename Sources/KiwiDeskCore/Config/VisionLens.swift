@@ -13,6 +13,9 @@ public struct VisionLens: Equatable, Sendable {
     /// Per member, the title fragments its clear windows match;
     /// a member left out keeps all its windows clear (ruling 32).
     public var titles: [String: [String]] = [:]
+    /// Members KiwiDesk opens when the lens turns on and they have
+    /// no window (#3122): a subset of `apps`, in its order.
+    public var openApps: [String] = []
     /// "Keep focus on these apps", on by default (ruling 30).
     public var keepFocus = true
     /// Seconds another app's window waits before it clears; never
@@ -40,11 +43,20 @@ public struct VisionLens: Equatable, Sendable {
     }
 }
 
+/// Why a lens member's Auto-open is greyed (#3122).
+public enum AutoOpenBlock: Equatable, Sendable {
+    /// The member matches its windows by title.
+    case titled
+    /// The member is named by its process name alone.
+    case noBundleID
+}
+
 extension VisionLens: Codable {
     /// One flat object per lens: its own keys and the overrides
     /// beside them, each named as the plain setting it overrides.
     enum CodingKeys: String, CodingKey, CaseIterable {
         case name, apps, titles, reminder
+        case openApps = "open_apps"
         case keepFocus = "keep_focus"
         case clearDelay = "clear_delay"
         case dim, blur, appearance
@@ -66,6 +78,10 @@ extension VisionLens: Codable {
                 [String: [String]].self,
                 forKey: .titles
             ) ?? [:],
+            of: apps
+        )
+        openApps = Self.members(
+            try c.decodeIfPresent([String].self, forKey: .openApps) ?? [],
             of: apps
         )
         let defaults = VisionLens(name: name)
@@ -111,6 +127,9 @@ extension VisionLens: Codable {
         try c.encode(name, forKey: .name)
         try c.encode(apps, forKey: .apps)
         if !titles.isEmpty { try c.encode(titles, forKey: .titles) }
+        if !openApps.isEmpty {
+            try c.encode(openApps, forKey: .openApps)
+        }
         try c.encode(keepFocus, forKey: .keepFocus)
         try c.encode(clearDelay, forKey: .clearDelay)
         try c.encodeIfPresent(reminder, forKey: .reminder)
@@ -143,6 +162,41 @@ extension VisionLens {
     /// (ruling 39).
     public static func reachKey(_ name: String) -> String {
         AppWideSettings.lensName(name).lowercased()
+    }
+
+    /// Takes `app` out of the lens and out of every per-app list.
+    public mutating func removeApp(_ app: String) {
+        apps.removeAll { $0 == app }
+        titles[app] = nil
+        openApps.removeAll { $0 == app }
+    }
+
+    /// Turns Auto-open on or off for the member `app`, keeping
+    /// `openApps` in `apps`' order (#3122).
+    public mutating func setOpensApp(_ app: String, _ on: Bool) {
+        openApps = apps.filter {
+            $0 == app ? on : openApps.contains($0)
+        }
+    }
+
+    /// Why Auto-open cannot open `app`, nil where it can (#3122): a
+    /// fresh window would not match a title rule, and a member
+    /// keyed by its process name has no bundle id to open.
+    public func autoOpenBlock(_ app: String) -> AutoOpenBlock? {
+        if titles[app] != nil { return .titled }
+        // A bundle id is reverse-DNS: dotted, with no spaces.
+        let bundled =
+            app.contains(".") && !app.contains(where: \.isWhitespace)
+        return bundled ? nil : .noBundleID
+    }
+
+    /// The `raw` entries that name a member, keyed as members are,
+    /// in the members' order.
+    static func members(_ raw: [String], of members: [String]) -> [String] {
+        let wanted = Set(
+            raw.map { $0.trimmingCharacters(in: .whitespaces).lowercased() }
+        )
+        return members.filter { wanted.contains($0) }
     }
 
     /// Title patterns keyed as members are (`AppRef.listKey`,

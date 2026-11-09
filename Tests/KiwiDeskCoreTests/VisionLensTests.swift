@@ -13,6 +13,7 @@ struct VisionLensTests {
         var lens = VisionLens(name: "Writing")
         lens.apps = ["com.apple.preview", "sketchybar"]
         lens.titles = ["com.apple.preview": ["notes"]]
+        lens.openApps = ["com.apple.preview"]
         lens.keepFocus = false
         lens.clearDelay = 3.5
         lens.reminder = "Back to it"
