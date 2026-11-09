@@ -93,7 +93,7 @@ struct ShortcutsGates {
     /// macOS Desktops drawer's hold-open, not a census gate. Go to
     /// Desktop is seeded, so it never opens the drawer.
     var desktopMovesBound: Bool {
-        config.layers.flatMap(\.bindings)
+        config.layers.flatMap(\.actionBindings)
             .contains(where: KeybindingCatalog.recordsDesktopMove)
     }
 
@@ -121,7 +121,7 @@ struct ShortcutsGates {
 
     private var trackIsUsed: Bool {
         !LayoutUsage.spaces(on: .track, in: config).isEmpty
-            || config.layers.flatMap(\.bindings)
+            || config.layers.flatMap(\.actionBindings)
                 .contains(where: KeybindingCatalog.recordsTrack)
     }
 

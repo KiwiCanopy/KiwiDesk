@@ -42,6 +42,11 @@ extension RuleReachTable where Value == String {
             else { continue }
             layers[at].icon = shared.icon
         }
+        Self.keepSharedSequences(
+            &layers,
+            storedPage: storedPage,
+            storedBase: storedBase
+        )
         // An untouched action's rows are the page's, minus the ones
         // its profile's OWN override added and plus the shared ones
         // it left out or rebound — so a combo the profile moved
@@ -78,5 +83,38 @@ extension RuleReachTable where Value == String {
             }
         }
         return layers
+    }
+
+    /// A sequence has no Lua, so the key walk never sees it (#1871):
+    /// the page's copy of a sequence its profile's own override
+    /// holds goes back to the shared one on that leader, or out, and
+    /// a shared one the profile left out stays in the base.
+    static func keepSharedSequences(
+        _ layers: inout [KeyLayer],
+        storedPage: [KeyLayer],
+        storedBase: [KeyLayer]
+    ) {
+        for at in layers.indices {
+            let name = layers[at].name
+            guard
+                let shared = storedBase.first(where: { $0.name == name })?
+                    .sequences,
+                let own = storedPage.first(where: { $0.name == name })?
+                    .sequences
+            else { continue }
+            layers[at].bindings = layers[at].bindings.compactMap { row in
+                guard row.isSequence,
+                    own.contains(row), !shared.contains(row)
+                else { return row }
+                return shared.first { $0.combo == row.combo }
+            }
+            let held = Set(layers[at].sequences.map(\.combo))
+            for row in shared
+            where !held.contains(row.combo)
+                && !own.contains(where: { $0.combo == row.combo })
+            {
+                layers[at].bindings.append(row)
+            }
+        }
     }
 }

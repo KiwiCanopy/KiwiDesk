@@ -23,6 +23,8 @@ struct KeyRecorderField: View {
     /// Commits the combo into the draft; Save registers it.
     let onRecord: (String) -> Void
     let onClear: () -> Void
+    /// Arms on arrival while empty — a key sequence's new key (#1871).
+    var armsOnAppear = false
 
     @EnvironmentObject var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
@@ -76,6 +78,7 @@ struct KeyRecorderField: View {
         .onChange(of: liveRejection == nil) { _, clear in
             if clear { rejection = nil }
         }
+        .onAppear { if armsOnAppear, combo.isEmpty { start() } }
         .onDisappear(perform: stop)
     }
 

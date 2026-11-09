@@ -43,6 +43,9 @@ extension KiwiCore {
         guard let window = focusedWindowID else {
             return .fail("no focused window")
         }
+        // Ahead of the screen's verdict, so the window's own
+        // refusal names it; `moveToSpace` asks again (#3119).
+        if let refusal = spaceMoveRefusal(window) { return refusal }
         guard screenShowsUserSpace(on: display) else {
             let refusal = WindowActionRefusal.screenShowsFullScreen
             cueWindowAction(refusal, on: window)

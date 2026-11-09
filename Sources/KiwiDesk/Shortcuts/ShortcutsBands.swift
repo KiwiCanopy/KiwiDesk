@@ -20,7 +20,7 @@ struct ShortcutRowView: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .accessibilityLabel(row.spokenLabel ?? row.label)
-            if let detail = row.detail {
+            if let detail = row.detail ?? pathHit {
                 Text(detail)
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -40,8 +40,8 @@ struct ShortcutRowView: View {
                 // A sided chord grows; the name truncates first,
                 // never the chord (#2601).
                 .fixedSize()
-                .accessibilityLabel(SidedChordWords.label(row.combo))
-                .help(SidedChordWords.help(row.combo))
+                .accessibilityLabel(row.spokenChord)
+                .help(row.spokenHelp)
         }
         .help(row.monospaced ? row.label : "")
         .opacity(row.unavailable ? 0.55 : 1)
@@ -53,6 +53,14 @@ struct ShortcutRowView: View {
                 )
                 : ""
         )
+    }
+
+    /// Which name along a key sequence's path the search matched
+    /// (#1871), so a hit never matches text the row does not draw.
+    private var pathHit: String? {
+        row.matchedPathName.map {
+            L("shortcuts.panel.in_sequence", "in %1$@", $0)
+        }
     }
 
     /// The name with the query's match in bold.

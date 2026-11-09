@@ -239,6 +239,12 @@ struct ShortcutsSection: View {
                 selected: selection,
                 expander: expander
             )
+        case .keySequences:
+            KeySequencesCard(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
         // Under the layer pick that gates it, above the groups it
         // rewrites (#3074).
         case .defaultShortcuts:

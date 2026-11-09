@@ -35,6 +35,9 @@ struct NavRow: View, Equatable {
         let icon: String?
         let unavailable: String?
         let detail: String?
+        /// The key sequences that also run the action (#1871).
+        let also: String?
+        let alsoSpoken: String?
         let liveOnly: LiveOnlySpace.Kind?
         let isPocket: Bool
         let binding: KeyBinding?
@@ -62,6 +65,12 @@ struct NavRow: View, Equatable {
             icon: ShortcutsReferenceBuilder.icon(for: command),
             unavailable: command.unavailable?(),
             detail: command.detail?(),
+            also: SequencePathWords.also(running: command, in: rows),
+            alsoSpoken: SequencePathWords.also(
+                running: command,
+                in: rows,
+                spoken: true
+            ),
             liveOnly: command.liveOnly,
             isPocket: command.lua == KeybindingCatalog.pocket.lua,
             binding: binding,
@@ -122,6 +131,12 @@ struct NavRow: View, Equatable {
                     Text(detail)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                }
+                if let also = drawn.also {
+                    Text(also)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel(drawn.alsoSpoken ?? also)
                 }
             }
             if let kind = drawn.liveOnly {

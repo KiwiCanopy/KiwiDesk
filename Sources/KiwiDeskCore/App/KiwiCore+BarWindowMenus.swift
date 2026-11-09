@@ -84,7 +84,8 @@ extension KiwiCore {
     /// "Current Space" is the Space holding the system focus —
     /// `state.workspaces.activeSpace` — never `currentSpace(on:)`
     /// of the chip's screen; greyed where the window already is,
-    /// and where the move's own sticky gate would refuse it.
+    /// where the move's own sticky gate would refuse it, and for a
+    /// full-screen window, which the move refuses (#3119).
     private func moveRow(_ windows: [WindowID]) -> BarMenuRow {
         let title = L("bar.menu.move_here", "Move to Current Space")
         let target = state.workspaces.activeSpace
@@ -94,7 +95,9 @@ extension KiwiCore {
             }
         )
         let movable = { (id: WindowID) in
-            guard let target, homes[id] != target else { return false }
+            guard let target, homes[id] != target,
+                self.spaceMoveBlock(id) == nil
+            else { return false }
             return self.stickyMoveBlock(id, to: target) == nil
         }
         let move = { [weak self] (id: WindowID) in
