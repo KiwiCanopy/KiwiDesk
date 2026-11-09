@@ -81,7 +81,7 @@ struct ShortcutsSheet {
     }
 
     /// `row` as the query keeps it: by its name, or by a name along
-    /// its key sequence's path, which its detail line then shows
+    /// its key sequence's path, which its row then names
     /// (#1871), so a hit never matches text the row does not draw;
     /// nil where neither holds the query.
     static func matched(_ row: ShortcutRow, by needle: String) -> ShortcutRow?
@@ -93,7 +93,7 @@ struct ShortcutsSheet {
             })
         else { return nil }
         var row = row
-        row.detail = L("shortcuts.panel.in_sequence", "in %1$@", name)
+        row.matchedPathName = name
         return row
     }
 

@@ -232,7 +232,7 @@ struct KeySequenceCardTests {
         sheet.setQuery("windows")
         let rows = sheet.shown?.controls.flatMap(\.rows) ?? []
         #expect(rows.count == 1)
-        #expect(rows.first?.detail?.contains("Windows") == true)
+        #expect(rows.first?.matchedPathName == "Windows")
         sheet.setQuery("nowhere")
         #expect(sheet.matchCount == 0)
     }
