@@ -226,7 +226,8 @@ const markOf = (section: Section) =>
     padding: 1cqi 1.6cqi;
   }
   .plate--plain.plate--border .plate__bar {
-    box-shadow: inset 0 0 0 var(--lk-border-w) var(--lk-border);
+    box-shadow: inset 0 0 0 var(--lk-border-w, 1px)
+      var(--lk-border, rgba(255, 255, 255, 0.1));
   }
   .plate--hug .plate__bar {
     justify-self: center;
@@ -275,7 +276,8 @@ const markOf = (section: Section) =>
     background: var(--lk-fill, rgba(20, 24, 22, 0.8));
   }
   .plate--boxed.plate--border .item {
-    box-shadow: inset 0 0 0 var(--lk-border-w) var(--lk-border);
+    box-shadow: inset 0 0 0 var(--lk-border-w, 1px)
+      var(--lk-border, rgba(255, 255, 255, 0.1));
   }
   .plate--glass.plate--plain .plate__bar,
   .plate--glass.plate--boxed .item {
