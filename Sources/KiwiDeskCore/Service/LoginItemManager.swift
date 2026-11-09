@@ -64,10 +64,14 @@ public enum LoginItemManager {
         _ enabled: Bool,
         at url: URL,
         write: (Bool) throws -> Void,
-        read: () -> LoginItemState = { current }
+        read: () -> LoginItemState = { current },
+        testDesk: Bool = TestDesk.isActive
     ) -> LoginItemState {
         // A test desk's login item would start without its root.
-        if let refusal = TestDesk.refusal("the login item") {
+        if let refusal = TestDesk.refusal(
+            "the login item",
+            active: testDesk
+        ) {
             note(refusal)
             return read()
         }

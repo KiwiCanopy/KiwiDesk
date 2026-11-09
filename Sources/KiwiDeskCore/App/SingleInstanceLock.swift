@@ -30,7 +30,8 @@ public final class SingleInstanceLock {
     }
 
     /// Whether another process holds the lock at `path`. Leaves
-    /// the file in place, held or free (#3121).
+    /// the file in place, held or free (#3121). The probe holds the
+    /// lock for a moment, so a launch racing it reads "running".
     public static func isHeld(at path: String) -> Bool {
         let fd = open(path, O_RDWR)
         guard fd >= 0 else { return false }

@@ -39,6 +39,13 @@ public enum MachineLocation {
         lock(in: defaultDirectory).path
     }
 
+    /// Held by a running test desk, so a normal launch never starts
+    /// beside it (#3121).
+    public static var testDeskLockPath: String {
+        defaultDirectory.appendingPathComponent("KiwiDesk.testdesk.lock")
+            .path
+    }
+
     static func socket(in directory: URL) -> URL {
         directory.appendingPathComponent(socketName)
     }

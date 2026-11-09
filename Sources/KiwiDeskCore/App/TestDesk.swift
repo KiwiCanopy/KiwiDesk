@@ -40,21 +40,11 @@ public enum TestDesk {
     /// Why `verb` is refused on a test desk, nil if it may run:
     /// the service and the login item would start the bundle
     /// later without the variable, on the owner's folders.
-    public static func refusal(_ verb: String) -> String? {
-        guard isActive else { return nil }
+    public static func refusal(
+        _ verb: String,
+        active: Bool = isActive
+    ) -> String? {
+        guard active else { return nil }
         return "KiwiDesk: \(verb) is refused while \(variable) is set"
     }
-}
-
-/// The defaults store every KiwiDesk setting reads and writes:
-/// `.standard`, or `TestDesk.defaultsSuite` on a test desk.
-/// Reads of another domain (`NSGlobalDomain`) stay on
-/// `.standard` (`AppDefaultsRoutingTests`).
-public enum AppDefaults {
-    /// Immutable once read; `UserDefaults` is documented
-    /// thread-safe, which the SDK does not yet declare.
-    nonisolated(unsafe) public static let store: UserDefaults =
-        TestDesk.isActive
-        ? UserDefaults(suiteName: TestDesk.defaultsSuite) ?? .standard
-        : .standard
 }

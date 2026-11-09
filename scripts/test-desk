@@ -11,13 +11,11 @@
 # `up` copies the fixture to a short root (the socket path must fit
 # sun_path's 104 bytes), seeds its defaults suite past the first-run
 # tour, stops the running KiwiDesk by its own bundle path, and opens
-# <bundle.app> with KIWIDESK_HOME=<root>. Two instances on one desk
-# would both tile every window and answer every hotkey, so the desk
-# replaces the running one; the app itself refuses to start beside
-# it. `down` quits the test instance, closes only the windows
-# `windows` opened, deletes the root and the defaults suite, and
-# reopens the KiwiDesk that was running. Run `down` before the next
-# `up`. Only one test desk runs at a time.
+# <bundle.app> with KIWIDESK_HOME=<root>; the desk replaces the
+# running instance (main.swift says why). `down` quits the test
+# instance, closes every TextEdit window opened since `up`, deletes
+# the root and the defaults suite, and reopens the KiwiDesk that was
+# running. Run `down` before the next `up`; one desk at a time.
 set -uo pipefail
 EXE="Contents/MacOS/KiwiDesk"
 HERE="$(cd "$(dirname "$0")/.." && pwd -P)"
@@ -33,14 +31,14 @@ get() { sed -n "s/^$1=//p" "$(root_dir)/state"; }
 
 pids_of() {  # pids whose whole command is bundle $1's executable
     local pid
-    for pid in $(pgrep -f "KiwiDesk\.app/$EXE\$"); do
+    for pid in $(pgrep -U "$(id -u)" -f "KiwiDesk\.app/$EXE\$"); do
         [ "$(ps -o command= -p "$pid")" = "$1/$EXE" ] && echo "$pid"
     done
 }
 
 running() {  # the bundle of the KiwiDesk running now, if any
     local pid
-    pid=$(pgrep -f "KiwiDesk\.app/$EXE\$" | head -1)
+    pid=$(pgrep -U "$(id -u)" -f "KiwiDesk\.app/$EXE\$" | head -1)
     [ -n "$pid" ] && ps -o command= -p "$pid" | sed "s|/$EXE\$||"
 }
 
@@ -79,6 +77,9 @@ up)
     [ -n "$(root_dir)" ] && die "a test desk is up; run down first"
     MINE="$(cd "${2:?bundle}" && pwd -P)" || exit 1
     [ -x "$MINE/$EXE" ] || die "$MINE is no KiwiDesk bundle"
+    # `stop` finds the instance by this name, so `down` could not.
+    [ "$(basename "$MINE")" = KiwiDesk.app ] \
+        || die "name the bundle KiwiDesk.app"
     ROOT="/tmp/kd-desk-$(id -u)"
     [ "${3:-}" = "--root" ] && ROOT="${4:?root}"
     [ -e "$ROOT" ] && die "$ROOT exists; remove it or pass --root"

@@ -38,4 +38,44 @@ struct TestDeskTests {
         #expect(AppDefaults.store === UserDefaults.standard)
         #expect(MachineLocation.directory == MachineLocation.defaultDirectory)
     }
+
+    @Test("a test desk refuses the service and the login item")
+    func refusesLaunchers() {
+        #expect(TestDesk.refusal("service", active: true) != nil)
+        var wrote = false
+        let state = LoginItemManager.guardedWrite(
+            true,
+            at: URL(fileURLWithPath: "/Applications/KiwiDesk.app"),
+            write: { _ in wrote = true },
+            read: { .notRegistered },
+            testDesk: true
+        )
+        #expect(!wrote)
+        #expect(state == .notRegistered)
+    }
+
+    @Test("a test desk follows no sync folder")
+    func followsNoSyncFolder() {
+        let (defaults, _) = makeScratchDefaults()
+        let folder = URL(fileURLWithPath: "/tmp/kd-sync", isDirectory: true)
+        SyncFolderLocation.store(folder, in: defaults)
+        SyncFolderLocation.storeFollows(true, in: defaults)
+        #expect(SyncFolderLocation.followed(in: defaults) != nil)
+        #expect(
+            SyncFolderLocation.followed(in: defaults, testDesk: true) == nil
+        )
+    }
+
+    @Test("isHeld reads another holder's lock and leaves a free one")
+    func isHeldReadsTheLock() {
+        let name = "held-\(UUID().uuidString).lock"
+        let path = testTemporaryDirectory.appendingPathComponent(name).path
+        #expect(!SingleInstanceLock.isHeld(at: path), "no file")
+        let lock = SingleInstanceLock(path: path)
+        #expect(lock.acquire())
+        #expect(SingleInstanceLock.isHeld(at: path))
+        lock.release()
+        #expect(!SingleInstanceLock.isHeld(at: path))
+        #expect(FileManager.default.fileExists(atPath: path))
+    }
 }

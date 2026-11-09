@@ -74,7 +74,7 @@ struct VisionAppearanceSwitch {
             setDark: { SystemAppearance.setDark($0, onLog: onLog) },
             rearmAuto: { SystemAppearance.rearmAuto() },
             readDebt: {
-                AppDefaults.store.data(forKey: debtKey).flatMap {
+                UserDefaults.standard.data(forKey: debtKey).flatMap {
                     try? JSONDecoder().decode(
                         VisionAppearanceDebt.self,
                         from: $0
@@ -83,13 +83,13 @@ struct VisionAppearanceSwitch {
             },
             writeDebt: { debt in
                 guard let debt else {
-                    AppDefaults.store.removeObject(forKey: debtKey)
+                    UserDefaults.standard.removeObject(forKey: debtKey)
                     return true
                 }
                 guard let data = try? JSONEncoder().encode(debt) else {
                     return false
                 }
-                AppDefaults.store.set(data, forKey: debtKey)
+                UserDefaults.standard.set(data, forKey: debtKey)
                 return true
             }
         )
