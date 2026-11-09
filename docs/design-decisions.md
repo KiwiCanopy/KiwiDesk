@@ -9438,6 +9438,31 @@ applying the saved value live, a Core verb rather than a draft
 writeback (#2411, ▸ *A row's revert writes its one key back
 through a register*).
 
+:::unreleased
+An open window on the live target follows live (#3098): when a
+live change arrives, every draft leaf the user has not edited —
+one still equal to the draft's baseline — takes the live value,
+and the baseline moves onto live, so the controls show what the
+pill's row narrates and which value a control shows never depends
+on when Settings was opened. A session-only change follows too:
+it is the pill's live row, never an edit, so taking it on both
+sides of the draft calls nothing saved. An edited leaf keeps the
+user's value, and so does a field mid-edit: a focused field takes
+an outside change only while it still shows what it last took,
+since overwriting a partial entry loses the typing and holding the
+old value would write it back over live on blur. This follows
+from the Save above rather than reversing anything: a draft that
+lays only its edits over live already means live for every
+untouched leaf. The re-seed and the rows' re-read are one door, so
+the two never read different moments. An edit that live comes to
+match is no longer the draft's: the value stands live and the
+pill's row keeps it. A draft stays as it is
+where following would mislead: a stored profile's (another file),
+a stale page's, one with sync questions open (their baseline is
+the other Mac's value), and one whose edits the decoder refuses
+over live.
+:::
+
 ### A row's revert writes its one key back through a register (#792)
 
 **[Rationale]**

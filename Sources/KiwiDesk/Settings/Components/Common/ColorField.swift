@@ -130,11 +130,14 @@ struct ColorSwatch: View {
                     )
                 )
         }
-        // Track panel picks / external edits into the field —
-        // but never mid-edit, or a background write would
-        // discard the user's partial entry.
-        .onChange(of: hex) { _, now in
-            if !focused {
+        // Track panel picks / external edits into the field.
+        .onChange(of: hex) { was, now in
+            let shown = Self.shown(
+                was,
+                automatic: automatic,
+                clearable: clearable
+            )
+            if FieldBuffer.follows(draft, was: shown, focused: focused) {
                 draft = Self.shown(
                     now,
                     automatic: automatic,
