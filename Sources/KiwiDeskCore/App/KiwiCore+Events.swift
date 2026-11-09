@@ -282,6 +282,7 @@ extension KiwiCore {
             // A list a click held open names the Desktop left
             // (#2563).
             shelves.peek.dismissHeld()
+            closeKeySequence()  // so does a key sequence (#1871)
             handleDesktopChange()
         case .windowRekeyed(let old, let new):
             // The whole id-retarget lives in

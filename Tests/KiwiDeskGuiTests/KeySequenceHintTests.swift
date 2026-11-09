@@ -133,7 +133,7 @@ struct KeySequenceHintTests {
         }
         #expect(wired == 1)
         let boot = try SourceScan.strippedSource(
-            at: core.appendingPathComponent("App/KiwiCore+Bootstrap.swift")
+            at: core.appendingPathComponent("App/KiwiCore+BootSeams.swift")
         )
         #expect(
             boot.contains(
@@ -152,13 +152,16 @@ struct KeySequenceHintTests {
             )
         )
         #expect(transition.contains("if asSwitch { closeKeySequence() }"))
-        let desktops = try SourceScan.strippedSource(
-            at: core.appendingPathComponent("Profiles/KiwiCore+Desktops.swift")
+        let events = try SourceScan.strippedSource(
+            at: core.appendingPathComponent("App/KiwiCore+Events.swift")
         )
         #expect(
-            desktops.contains(
-                "func handleDesktopChange() {\n        closeKeySequence()"
+            events.contains(
+                "closeKeySequence()  \n            handleDesktopChange()"
             )
+                || events.contains(
+                    "closeKeySequence()\n            handleDesktopChange()"
+                )
         )
     }
 

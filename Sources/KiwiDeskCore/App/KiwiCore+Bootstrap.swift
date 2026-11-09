@@ -41,9 +41,6 @@ extension KiwiCore {
             self?.emitLayerChange(from: from, to: to)
         }
         keys.onBareHyper = { [weak self] in self?.cueBareHyper() }
-        // A key no step holds: the panel stays, and the sound is a
-        // panel's refusal, off by default (#1871 ▸ unbound step key).
-        keys.beep = { [weak self] in self?.soundPanelRefusal() }
         keys.onHyperShortcutsChange = { [weak self] in
             self?.onAppWideChange()
         }
