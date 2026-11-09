@@ -14,11 +14,13 @@ extension KiwiCore {
     public func jumpSnapshot(on display: DisplayID? = nil) -> JumpSnapshot {
         let here = moveHereSpace(on: display)
         let hub = display ?? here.flatMap { state.workspaces.display(of: $0) }
+        let entries = jumpEntries(here: here, hub: hub)
         return JumpSnapshot(
-            entries: jumpEntries(here: here, hub: hub),
+            entries: entries,
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon),
-            swapsInHere: jumpHereFocus(in: here) != nil
+            swapsInHere: jumpHereFocus(in: here) != nil,
+            apps: jumpApps(for: entries)
         )
     }
 

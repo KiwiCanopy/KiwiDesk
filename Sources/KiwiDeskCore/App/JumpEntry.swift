@@ -102,17 +102,21 @@ public struct JumpSnapshot: Sendable, Equatable {
     /// Space has no focus it trades with the global one (#2885), and
     /// no row draws a route to `here`.
     public let swapsInHere: Bool
+    /// The app strip's apps, most recently used first (#3135).
+    public let apps: [JumpApp]
 
     public init(
         entries: [JumpEntry],
         here: SpaceID?,
         hereIcon: SpaceGlyph?,
-        swapsInHere: Bool = false
+        swapsInHere: Bool = false,
+        apps: [JumpApp]? = nil
     ) {
         self.entries = entries
         self.here = here
         self.hereIcon = hereIcon
         self.swapsInHere = swapsInHere
+        self.apps = apps ?? JumpApp.listed(in: entries)
     }
 }
 
