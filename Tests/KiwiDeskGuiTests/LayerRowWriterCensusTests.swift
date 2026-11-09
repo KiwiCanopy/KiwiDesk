@@ -102,6 +102,12 @@ struct LayerRowWriterCensusTests {
                     + " removes rows, adds none (#2103,"
                     + " ShortcutsLensRowsTests)"
             ),
+        "KiwiDesk/Shortcuts/KeySequenceHintController.swift":
+            (
+                1,
+                "hint panel (#1871): appends the running sequence to a"
+                    + " copy it draws, never a stored row"
+            ),
         "KiwiDesk/Shortcuts/ShortcutsReference.swift":
             (
                 2,
