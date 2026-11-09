@@ -187,8 +187,8 @@ struct FocusAppWindowReachTests {
         #expect(
             core.execute("focus_app_window", args: [.string("next")])
                 == .fail(
-                    "the app's next window is on a Desktop that "
-                        + "could not be switched to"
+                    "the window this step lands on is on a Desktop "
+                        + "that could not be switched to"
                 )
         )
         #expect(Bridge.switches.isEmpty)

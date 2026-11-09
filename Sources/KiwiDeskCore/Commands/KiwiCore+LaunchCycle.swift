@@ -43,11 +43,12 @@ extension KiwiCore {
         direction: ModeCycleDirection,
         verb: String
     ) -> AppCycleStep {
-        guard
-            let current = state.workspaces.lastFocused,
-            let window = state.windows[current],
-            window.appBundleID?.lowercased() == bundleID
+        guard let current = state.workspaces.lastFocused,
+            let window = state.windows[current]
         else { return .notFocused }
+        guard window.appBundleID?.lowercased() == bundleID else {
+            return .otherAppFocused
+        }
         // OS truth, not just our state: after a cmd-tab away,
         // the stale state focus must not turn a "bring it back"
         // press into a surprise cycle. A sibling process in
@@ -183,9 +184,11 @@ extension KiwiCore {
 /// rule each case names.
 enum AppCycleStep: Equatable {
     case stepped
-    /// No window holds the focus, or the focus is not the
-    /// app's.
+    /// No window holds the focus.
     case notFocused
+    /// The focus is another app's: only a caller naming its own
+    /// app (`focus_or_spawn`) reaches it.
+    case otherAppFocused
     /// The focused window's app reports no bundle identifier.
     case noBundleID
     /// The OS has another app in front (#1785).

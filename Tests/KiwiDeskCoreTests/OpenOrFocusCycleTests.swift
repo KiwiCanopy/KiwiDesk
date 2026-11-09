@@ -211,7 +211,7 @@ struct OpenOrFocusCycleTests {
                 bundleID: Self.bundle,
                 direction: .next,
                 verb: "focus_or_spawn"
-            ) == .notFocused
+            ) == .otherAppFocused
         )
         #expect(
             core.state.workspaces.lastFocused == WindowID(30)

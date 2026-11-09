@@ -186,6 +186,47 @@ struct FocusAppWindowTests {
         #expect(core.state.workspaces.lastFocused == WindowID(30))
     }
 
+    /// A focused transient overlay (#300) is outside its app's
+    /// ring, refused as such rather than as a lone window.
+    @Test("A focused transient overlay is refused as outside the ring")
+    func focusedOverlayRefuses() {
+        let core = makeCore()
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: WindowID(23),
+                pid: 100,
+                appName: "App100",
+                appBundleID: Self.bundle,
+                isTransientOverlay: true
+            )
+        )
+        core.state.workspaces.add(WindowID(23), to: "1")
+        core.state.workspaces.focus(WindowID(23), in: "1")
+        #expect(
+            step(core, "next")
+                == .fail(
+                    "a transient panel is not one of its app's windows"
+                )
+        )
+        #expect(core.state.workspaces.lastFocused == WindowID(23))
+    }
+
+    @Test("A focused window with no bundle id is refused")
+    func noBundleIDRefuses() {
+        let core = makeCore()
+        core.state.windows.upsert(
+            ManagedWindow(id: WindowID(40), pid: 400, appName: "Bare")
+        )
+        core.state.workspaces.add(WindowID(40), to: "1")
+        core.state.workspaces.focus(WindowID(40), in: "1")
+        core.frontmostPIDProvider = { 400 }
+        #expect(
+            step(core, "next")
+                == .fail("only an app with a bundle id cycles its windows")
+        )
+        #expect(core.state.workspaces.lastFocused == WindowID(40))
+    }
+
     @Test("A direction outside prev|next is refused")
     func unknownDirectionRefuses() {
         let core = makeCore()

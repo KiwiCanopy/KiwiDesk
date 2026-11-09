@@ -18,7 +18,9 @@ extension KiwiCore {
         ) {
         case .stepped:
             return .ok()
-        case .notFocused:
+        case .notFocused, .otherAppFocused:
+            // `.otherAppFocused` cannot arise here: the focused
+            // app is the one the step names.
             return .fail("no focused window")
         case .noBundleID:
             return .fail("only an app with a bundle id cycles its windows")
@@ -30,8 +32,8 @@ extension KiwiCore {
             return .fail("the focused app has no other window to focus")
         case .reachRefused:
             return .fail(
-                "the app's next window is on a Desktop that could "
-                    + "not be switched to"
+                "the window this step lands on is on a Desktop that "
+                    + "could not be switched to"
             )
         }
     }
