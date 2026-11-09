@@ -1555,7 +1555,11 @@ claim; the obligations a change here takes on:
   (the per-space override editor, #841) — either way it must be
   reachable while the rows it explains are inert, so it is drawn
   outside the `GreyOut`, and hover text alone never discharges
-  it. So do NOT caption every greyed
+  it. **A row whose gate's owners span destinations takes its
+  channel per REASON**, from the owners that reason names
+  (`SpacesGates.InertReason.isRemote`), since the per-key
+  `channel` answers one arm only (#3123, `SpacesGateTests` ▸
+  `reasonsAgreeWithTheCensus`). So do NOT caption every greyed
   row — a `GreyOut` inside a `ForEach` stamps its sentence under
   every child, and several of these greys are ordinary states.
   `GateReasonPlacementTests` holds the derivation against the

@@ -253,17 +253,35 @@ struct SpacesGateTests {
             gates(mode: .floating, on).inertReason(for: key)
                 == .floatingPlacesNone
         )
-        // The census names both owners. The row's channel stays
-        // inline for its Floating arm; the Monocle owner sits on
-        // Layout Defaults, which is why that reason is remote.
-        let owners = key.placement.gate?.settings ?? []
-        #expect(owners.contains(.spaces(.spaceModes)))
-        #expect(owners.contains(.layout(.monocleMaximizeWindows)))
+    }
+
+    /// Each reason's owners are owners the census names for its
+    /// row, and a reason that names them all takes the row's
+    /// census channel (#3123). A row whose owners span two
+    /// destinations takes its channel per reason.
+    @Test("each reason's owners agree with the census")
+    func reasonsAgreeWithTheCensus() {
+        for reason in SpacesGates.InertReason.allCases {
+            let gate = reason.row.placement.gate
+            let declared = Set(gate?.settings ?? [])
+            #expect(
+                Set(reason.owners).isSubset(of: declared),
+                "\(reason) names an owner its row's gate does not"
+            )
+            guard !reason.owners.isEmpty,
+                Set(reason.owners) == declared
+            else { continue }
+            #expect(
+                reason.isRemote
+                    == (GateReasonPlacement.channel(reason.row)
+                        == .remote),
+                "\(reason) disagrees with its row's channel"
+            )
+        }
         #expect(
-            SettingKey.layout(.monocleMaximizeWindows).placement.area
-                == .layoutDefaults
+            Set(SpacesGates.InertReason.allCases.map(\.row))
+                .isSubset(of: SpacesGates.resolved)
         )
-        #expect(SpacesGateHelp.remote.contains(.monocleMaximizes))
     }
 
     /// Every reason renders a distinct, non-empty sentence: a

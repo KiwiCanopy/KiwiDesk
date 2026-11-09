@@ -67,6 +67,54 @@ struct SpacesGates {
     static let resolvedElsewhere: Set<SettingKey> = []
 }
 
+extension SpacesGates.InertReason {
+    /// The row this reason greys.
+    var row: SettingKey {
+        switch self {
+        case .noOverrides: return .spaces(.spaceOverrideResetActive)
+        case .oneMaster: return .layout(.stackOverrideMasterOrientation)
+        case .rigidGrid: return .layout(.gridOverrideFillEmptyCells)
+        case .autoSizedGrid: return .layout(.gridOverrideColumns)
+        case .autoTracks: return .layout(.trackOverrideLimit)
+        case .floatingPlacesNone, .monocleMaximizes:
+            return .gaps(.perSpaceOverride)
+        case .monocleAppliesNone:
+            return .behaviour(.minSizePerSpaceOverride)
+        }
+    }
+
+    /// The census owners whose values cause this reason; empty for
+    /// a runtime gate. A row may carry reasons from two
+    /// destinations, so the channel is the reason's, not the
+    /// row's (#3123).
+    var owners: [SettingKey] {
+        switch self {
+        case .noOverrides: return []
+        case .oneMaster:
+            return [
+                .layout(.stackMasterCount),
+                .layout(.stackOverrideMasterCount),
+            ]
+        case .rigidGrid:
+            return [.layout(.gridType), .layout(.gridOverrideType)]
+        case .autoSizedGrid: return [.layout(.gridAutoSize)]
+        case .autoTracks: return [.layout(.trackAutoTracks)]
+        case .floatingPlacesNone, .monocleAppliesNone:
+            return [.spaces(.spaceModes)]
+        case .monocleMaximizes:
+            return [.layout(.monocleMaximizeWindows)]
+        }
+    }
+
+    /// Whether every owner lives on another destination than the
+    /// row, so the reason owes a live link there (#841).
+    var isRemote: Bool {
+        let area = row.placement.area
+        return !owners.isEmpty
+            && owners.allSatisfy { $0.placement.area != area }
+    }
+}
+
 /// Localized hover and cross-reference text for gated space settings (#678,
 /// #841).
 @MainActor
@@ -134,13 +182,11 @@ enum SpacesGateHelp {
     }
 
     /// Remote gate reasons whose switch lives on another
-    /// destination (#841, #815). A hand-kept copy of what
-    /// `GateReasonPlacement.channel` derives, bound by
-    /// `remoteMatchesTheCensus` (`GateReasonPlacementTests`); the
-    /// derivation is owed (architect review, 2026-08-16).
-    static let remote: Set<SpacesGates.InertReason> = [
-        .autoSizedGrid, .autoTracks, .monocleMaximizes,
-    ]
+    /// destination (#841, #815), derived from each reason's
+    /// owners and bound to the census by `SpacesGateTests`.
+    static let remote = Set(
+        SpacesGates.InertReason.allCases.filter(\.isRemote)
+    )
 
     /// Cross-reference navigation sentence for remote gate reasons (#818,
     /// #841).

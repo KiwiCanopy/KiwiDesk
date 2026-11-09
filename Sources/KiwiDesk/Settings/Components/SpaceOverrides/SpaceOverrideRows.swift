@@ -84,7 +84,7 @@ struct SpaceOverrideRows: View {
             let sentence = SpacesGateHelp.sentence(for: reason)
             VStack(alignment: .leading, spacing: 4) {
                 row.modifier(GreyOut(active: true, help: sentence))
-                if SpacesGateHelp.remote.contains(reason) {
+                if SpacesGateHelp.crossReference(for: reason) != nil {
                     remoteGateReference(for: .gaps(.perSpaceOverride))
                         .padding(
                             .horizontal,

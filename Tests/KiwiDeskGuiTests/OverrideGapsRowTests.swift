@@ -130,7 +130,8 @@ struct OverrideGapsRowTests {
         #expect(
             box.contains(
                 Self.squashed(
-                    "if SpacesGateHelp.remote.contains(reason) { "
+                    "if SpacesGateHelp.crossReference(for: reason) "
+                        + "!= nil { "
                         + "remoteGateReference(for: "
                         + ".gaps(.perSpaceOverride))"
                 )
