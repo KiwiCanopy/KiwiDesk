@@ -81,8 +81,8 @@ struct SettingsLiveRevertTests {
     }
 
     /// A draft seeded after the live change holds the live value; a
-    /// clean draft re-reads after the row's revert, and a dirty one
-    /// takes nothing, as a session-only write (`adoptLiveWrite`).
+    /// clean draft re-reads after the row's revert, and a dirty one's
+    /// unedited leaf follows it at once (#3098), its edit kept.
     @Test("the draft follows a live row's revert")
     func draftFollows() throws {
         LocalizationManager.shared.select("en")
@@ -101,9 +101,8 @@ struct SettingsLiveRevertTests {
             let row = try #require(liveRows(model).first)
             model.revert(row)
             #expect(core.tiler.settings.borderStyle.width == width)
-            let shown = dirty ? 9 : width
-            #expect(model.config.settings.borderStyle.width == shown)
-            #expect(model.cleanConfig.settings.borderStyle.width == shown)
+            #expect(model.config.settings.borderStyle.width == width)
+            #expect(model.cleanConfig.settings.borderStyle.width == width)
             #expect(model.config.settings.appBarStyle.titleCap == cap)
             #expect(model.isDirty == dirty)
         }

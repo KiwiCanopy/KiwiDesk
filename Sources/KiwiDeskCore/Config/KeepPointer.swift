@@ -108,7 +108,16 @@ extension TilingSettings {
         from base: TilingSettings,
         onto live: TilingSettings
     ) -> TilingSettings {
-        guard let mine = keepJSON else { return self }
+        rebasedIfDecodable(from: base, onto: live) ?? self
+    }
+
+    /// `rebased`, nil where the decoder refuses the edits over live
+    /// — an open draft following live (#3098) then stays as it is.
+    public func rebasedIfDecodable(
+        from base: TilingSettings,
+        onto live: TilingSettings
+    ) -> TilingSettings? {
+        guard let mine = keepJSON else { return nil }
         var leaves: [[String]: JSONValue?] = [:]
         for path in KeepPointer.diff(base.keepJSON, mine) {
             leaves.updateValue(
@@ -117,7 +126,7 @@ extension TilingSettings {
             )
         }
         guard !leaves.isEmpty else { return live }
-        return live.patched(leaves) ?? self
+        return live.patched(leaves)
     }
 
     /// `patched`, where a leaf the decoder refuses beside the others

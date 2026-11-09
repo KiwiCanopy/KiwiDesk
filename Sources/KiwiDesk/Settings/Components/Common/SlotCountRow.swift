@@ -82,7 +82,9 @@ struct SlotCountRow: View {
             }
         }
         .onChange(of: size) { _, _ in
-            if !focused { seed() }
+            if FieldBuffer.follows(text, was: seeded, focused: focused) {
+                seed()
+            }
         }
         .onAppear(perform: seed)
     }

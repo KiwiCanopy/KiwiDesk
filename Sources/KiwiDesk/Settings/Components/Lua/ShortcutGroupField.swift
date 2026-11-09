@@ -36,8 +36,11 @@ struct ShortcutGroupField: View {
         }
         .frame(width: 170)
         .onAppear(perform: revert)
-        .onChange(of: group) { _, _ in
-            if !editing { revert() }
+        .onChange(of: group) { was, _ in
+            let shown = naming.shown(was)
+            if FieldBuffer.follows(text, was: shown, focused: editing) {
+                revert()
+            }
         }
     }
 
