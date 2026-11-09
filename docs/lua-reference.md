@@ -419,6 +419,13 @@ A window already in that space stays where it is: the call fails
 and a pill on the window says it is already there. The same holds
 for `move_to_space_and_follow`.
 
+:::unreleased
+A window in native full screen stays on its own Space: the call
+fails with `a full-screen window cannot change Space`, and a pill
+on the window says so. The same holds for
+`move_to_space_and_follow`.
+:::
+
 If the target space is shown on **another screen**, a floating
 window is re-anchored onto that screen: it keeps its
 *proportional* position (a bottom-right float stays
@@ -7651,7 +7658,8 @@ the leader's modifiers still held, `w` does not fire, and
 and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
-and is flagged. The CLI can neither bind nor remove a sequence.
+and is flagged. The CLI can neither bind nor remove a sequence. In
+Settings, Shortcuts & Gestures ▸ Key sequences records one.
 Under Secure Input see
 [Accepted Limitations](accepted-limitations.md).
 

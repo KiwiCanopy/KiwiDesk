@@ -27,9 +27,7 @@ extension KiwiCore {
         _ target: SpaceID,
         follow: Bool
     ) -> CommandResponse {
-        guard !state.isPocketed(window) else {
-            return .fail("a pocketed window cannot move to a Space")
-        }
+        if let refusal = spaceMoveRefusal(window) { return refusal }
         if state.workspaces.space(of: window) == target,
             stickyMoveBlock(window, to: target) == nil
         {
@@ -89,6 +87,12 @@ extension KiwiCore {
             partner.map({ !state.isPocketed($0) }) ?? true
         else {
             onLog("move: w\(window.raw) refused — in the pocket")
+            return
+        }
+        // A construction net: every door refuses a full-screen
+        // window first, a trade through `swapBlock` (#3119).
+        guard spaceMoveBlock(window) != .fullScreen else {
+            onLog("move: w\(window.raw) refused — full screen")
             return
         }
         // Told where an undeclared target WILL lay out (#1994).

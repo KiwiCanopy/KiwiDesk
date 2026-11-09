@@ -51,6 +51,12 @@ struct KeySequenceReaderCensusTests {
             ),
         "KiwiDeskCore/Config/NavigationChords.swift":
             (2, "the dedupe: it groups navigation rows alone"),
+        "KiwiDeskCore/Config/RuleReach+KeyBase.swift":
+            (
+                3,
+                "the loaded page's base keeps the profile's own sequences"
+                    + " out by leader (KeySequenceCardSaveTests)"
+            ),
         "KiwiDeskCore/Config/RuleReach+Keys.swift":
             (
                 7,

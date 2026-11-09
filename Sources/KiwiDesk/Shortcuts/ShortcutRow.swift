@@ -40,6 +40,25 @@ struct ShortcutRow: Identifiable {
     /// The label VoiceOver reads where the drawn one abbreviates,
     /// a folded range read as "1 to 3".
     var spokenLabel: String? = nil
+    /// The chord VoiceOver reads where the drawn one is a key
+    /// sequence's path (#1871); nil reads the drawn chord.
+    var spokenCombo: String? = nil
+    /// A key sequence row's names along its path — the leader's,
+    /// then each branch's (#1871): search finds the row by them too.
+    var pathNames: [String] = []
+    /// The name along the path a search matched, which the row draws
+    /// as "in …"; nil where the row's own name matched.
+    var matchedPathName: String? = nil
+
+    /// The chord as VoiceOver reads it, each run of a side in words.
+    @MainActor var spokenChord: String {
+        spokenCombo ?? SidedChordWords.label(combo)
+    }
+
+    /// The chord's hover text: a path in key words, a chord's sides.
+    @MainActor var spokenHelp: String {
+        spokenCombo ?? SidedChordWords.help(combo)
+    }
 }
 
 /// Named subgroup of shortcut rows in the Controls band.

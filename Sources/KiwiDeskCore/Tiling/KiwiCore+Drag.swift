@@ -116,7 +116,10 @@ extension KiwiCore {
         switch barDrop {
         case .relocate(let target):
             finishPocketGesture(id)
-            moveWindow(id, to: target, follow: false)
+            // The verb's refusal, cued: a full-screen window (#3119).
+            if spaceMoveRefusal(id) == nil {
+                moveWindow(id, to: target, follow: false)
+            }
             return
         case .placeInSprung, .none:
             break
