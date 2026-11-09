@@ -31,7 +31,7 @@ enum ShortcutsReferenceBuilder {
         layer.bindings.removeAll { openers.contains($0.lua) }
         // A key sequence is no press row: its end keys are listed
         // under their action by path, its leader not at all (#1871).
-        let endKeys = layer.sequences.flatMap(\.endKeys)
+        let sequences = layer.sequences
         layer.bindings = layer.pressBindings
 
         // Keyed by row identity (UUID), never `lua`: two bindings
@@ -69,33 +69,35 @@ enum ShortcutsReferenceBuilder {
         // (#2544 ▸ Ruling); an inactive or unavailable row keeps its
         // own section.
         var regrouped: [OwnRow] = []
+        var listedEnds = Set<UUID>()
         func rows(
             _ commands: [NavCommand],
             band: ShortcutGroup?,
             regroups: Bool
         ) -> [ShortcutRow] {
             commands.flatMap { cmd in
-                pathRows(cmd, endKeys, band: band, regroups: regroups)
+                pathRows(cmd, band: band, regroups: regroups)
             }
         }
         // The end keys running `cmd`, after its own row.
         func pathRows(
             _ cmd: NavCommand,
-            _ endKeys: [SequenceEndKey],
             band: ShortcutGroup?,
             regroups: Bool
         ) -> [ShortcutRow] {
             let own = row(cmd, band: band, regroups: regroups)
-            let paths = endKeys.filter { cmd.runs($0.binding.lua) }.map {
-                end in
-                var path = ShortcutRow(
-                    id: ([cmd.lua] + end.path).joined(separator: "\u{1F}"),
+            let paths = SequencePathWords.endKeys(
+                running: cmd,
+                in: sequences
+            )
+            .map { end in
+                listedEnds.insert(end.binding.id)
+                return sequencePathRow(
+                    end,
                     label: cmd.resolvedLabel,
-                    combo: SequencePathWords.drawn(end.path),
-                    icon: icon(for: cmd)
+                    icon: icon(for: cmd),
+                    unavailable: cmd.unavailable != nil
                 )
-                path.spokenCombo = SequencePathWords.spoken(end.path)
-                return path
             }
             return (own.map { [$0] } ?? []) + paths
         }
@@ -174,6 +176,7 @@ enum ShortcutsReferenceBuilder {
             + buildApps(layer, consumed: &consumed)
         let filed = file(
             regrouped + buildCustom(layer, consumed: consumed)
+                + customSequenceRows(sequences, listed: listedEnds)
                 + buildUnread(unread),
             controls: controls,
             apps: apps

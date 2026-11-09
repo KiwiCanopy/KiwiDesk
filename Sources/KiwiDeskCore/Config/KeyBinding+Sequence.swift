@@ -56,6 +56,38 @@ extension KeyBinding {
     }
 }
 
+extension KeyBinding {
+    /// Whether `combo` may be a step key under the leader `leader`
+    /// (#1871): the router's own rule, `KeySequence.admitsStep`. A
+    /// spelling that does not parse is the recorder's to flag.
+    public static func admitsStepKey(_ combo: String, under leader: String)
+        -> Bool
+    {
+        guard let key = KeyCombo.parse(combo) else { return true }
+        guard let lead = KeyCombo.parse(leader) else {
+            return !key.isTap && KeySequence.admitsLeader(key)
+        }
+        return KeySequence.admitsStep(key, under: lead)
+    }
+
+    /// Whether `combo` may lead a sequence (`KeySequence.admitsLeader`).
+    public static func admitsLeader(_ combo: String) -> Bool {
+        KeyCombo.parse(combo).map(KeySequence.admitsLeader) ?? true
+    }
+
+    /// What a write compares of a row: its chord, its action and
+    /// what it says of itself — a sequence its name and whole tree
+    /// (#1871).
+    public var shortcutShape: String {
+        ([combo, lua, desc, group, symbol]
+            + (isSequence ? ["\u{1E}" + label] : [])
+            // Each child bracketed, so a key one step up never
+            // reads as the same tree.
+            + (steps ?? []).map { "\u{1D}" + $0.shortcutShape + "\u{1C}" })
+            .joined(separator: "\u{1F}")
+    }
+}
+
 extension KeyLayer {
     /// The rows that run on their own press (#1871): every binding
     /// but the sequences.

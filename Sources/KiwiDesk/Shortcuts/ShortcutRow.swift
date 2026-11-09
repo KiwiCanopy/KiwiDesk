@@ -43,6 +43,11 @@ struct ShortcutRow: Identifiable {
     /// The chord VoiceOver reads where the drawn one is a key
     /// sequence's path (#1871); nil reads the drawn chord.
     var spokenCombo: String? = nil
+
+    /// The chord as VoiceOver reads it, each run of a side in words.
+    @MainActor var spokenChord: String {
+        spokenCombo ?? SidedChordWords.label(combo)
+    }
 }
 
 /// Named subgroup of shortcut rows in the Controls band.

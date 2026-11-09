@@ -162,10 +162,8 @@ extension SettingsModel {
     /// its name and whole tree (#1871).
     static func sameRows(_ a: KeyLayer?, _ b: KeyLayer?) -> Bool {
         func shape(_ row: KeyBinding) -> String {
-            ([row.combo, row.lua]
-                + (row.isSequence ? ["\u{1E}" + row.label] : [])
-                + (row.steps ?? []).map { "\u{1D}" + shape($0) })
-                .joined(separator: "\u{1F}")
+            row.isSequence
+                ? row.shortcutShape : row.combo + "\u{1F}" + row.lua
         }
         func rows(_ layer: KeyLayer?) -> [String] {
             (layer?.bindings ?? []).map(shape).sorted()

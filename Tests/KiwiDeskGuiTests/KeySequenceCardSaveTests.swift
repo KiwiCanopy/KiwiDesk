@@ -53,6 +53,28 @@ struct KeySequenceCardSaveTests {
         model.core.guiConfigStore.load()?.layers.first?.sequences ?? []
     }
 
+    @Test("the card blocks a stored page and a profile's own copy")
+    func editBlocks() throws {
+        let model = try makeModel()
+        #expect(model.sequenceEditBlock(in: KeyLayer.defaultName) == nil)
+        var work = try model.core.profiles.read(name: "Work")
+        work.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: KeyLayer.defaultName, bindings: [sequence()])
+            ]
+        )
+        try model.core.profiles.write(work)
+        model.reload()
+        #expect(
+            model.sequenceEditBlock(in: KeyLayer.defaultName)
+                == .profileOwnsSequences
+        )
+        model.selectEditTarget("Home")
+        #expect(
+            model.sequenceEditBlock(in: KeyLayer.defaultName) == .storedPage
+        )
+    }
+
     @Test("a sequence recorded on the live page lands whole")
     func liveSaveWritesTheTree() throws {
         let model = try makeModel()

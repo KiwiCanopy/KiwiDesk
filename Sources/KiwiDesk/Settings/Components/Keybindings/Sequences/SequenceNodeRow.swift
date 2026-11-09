@@ -45,6 +45,8 @@ struct SequenceNodeRow: View {
             if node.isSequence, isOpen { keys }
         }
         .id(node.id.uuidString)
+        // A well armed once: rebuilt later, it waits for a click.
+        .onDisappear { if fresh == node.id { fresh = nil } }
         .confirmationDialog(
             L(
                 "shortcuts.sequence.delete_title",
@@ -114,7 +116,14 @@ struct SequenceNodeRow: View {
                 catalog: catalog,
                 spokenLabel: actionLabel,
                 onBranch: {
-                    editing.update(node.id) { $0 = SequenceTree.branch($0) }
+                    // A name field and an armed child well (#1871).
+                    let key = SequenceTree.newEndKey()
+                    editing.update(node.id) {
+                        $0 = SequenceTree.branch($0)
+                        $0.steps = [key]
+                    }
+                    collapsed.remove(node.id)
+                    fresh = key.id
                 },
                 onPick: { command in
                     editing.update(node.id) {
@@ -189,7 +198,7 @@ struct SequenceNodeRow: View {
 
     private var keys: some View {
         HStack(alignment: .top, spacing: 0) {
-            SettingsTheme.hairline
+            SettingsTheme.hairlineSubtle
                 .frame(width: 1)
                 .padding(.leading, SettingsMetrics.shortcutIconSlot / 2)
                 .padding(.trailing, SettingsMetrics.shortcutIconSlot / 2)

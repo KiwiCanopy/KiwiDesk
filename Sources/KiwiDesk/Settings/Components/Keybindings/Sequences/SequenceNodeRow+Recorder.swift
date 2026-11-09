@@ -43,6 +43,7 @@ extension SequenceNodeRow {
     /// A leader is judged against the layer's rows; a step key
     /// against its step's other keys (#1871 ▸ Conflicts).
     var reading: ConflictReading? {
+        if let refused = refusal { return refused }
         if isLeader {
             return ConflictText.reading(
                 for: node,
@@ -70,6 +71,35 @@ extension SequenceNodeRow {
         )
     }
 
+    /// A chord the router never matches here (Core's
+    /// `KeyBinding.admitsStepKey` / `admitsLeader`): it is kept and
+    /// flagged, as the engine files it.
+    var refusal: ConflictReading? {
+        guard !node.combo.isEmpty else { return nil }
+        if isLeader {
+            guard !KeyBinding.admitsLeader(node.combo) else { return nil }
+            return ConflictReading(
+                severity: .unrecognized,
+                sentence: L(
+                    "keybinding.conflict.tooltip.not_leader",
+                    "A Hyper chord can't start a key sequence."
+                )
+            )
+        }
+        guard let leader = editing.root?.combo,
+            !KeyBinding.admitsStepKey(node.combo, under: leader)
+        else { return nil }
+        return ConflictReading(
+            severity: .unrecognized,
+            sentence: L(
+                "keybinding.conflict.tooltip.not_step",
+                "Can't be a key in a sequence: a modifier tapped alone, "
+                    + "a Hyper chord, the sequence's first key, or esc "
+                    + "or ⌫ on its own."
+            )
+        )
+    }
+
     func preflight(_ combo: String) -> RecorderRejection? {
         if isLeader {
             return RecorderPreflight.rejection(
@@ -91,7 +121,8 @@ extension SequenceNodeRow {
             combo: combo,
             holder: holderName(holder),
             holderRowID: holder.id.uuidString,
-            steal: { [editing, id = node.id] in
+            steal: { [editing, armed = $fresh, id = node.id] in
+                armed.wrappedValue = nil
                 editing.update(holder.id) { $0.combo = "" }
                 editing.update(id) { $0.combo = combo }
             },

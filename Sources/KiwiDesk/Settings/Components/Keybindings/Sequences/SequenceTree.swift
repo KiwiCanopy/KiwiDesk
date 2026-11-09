@@ -111,9 +111,4 @@ enum SequenceTree {
         }
         return nil
     }
-
-    /// Every key under `node`, at any depth.
-    static func keyCount(under node: KeyBinding) -> Int {
-        (node.steps ?? []).reduce(0) { $0 + 1 + keyCount(under: $1) }
-    }
 }

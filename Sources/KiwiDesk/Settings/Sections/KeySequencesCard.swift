@@ -14,6 +14,7 @@ struct KeySequencesCard: View {
     @State private var expanded = false
     @State private var collapsed: Set<UUID> = []
     @State private var fresh: UUID?
+    @Environment(\.keybindingLayerName) private var layerName
 
     private var sequences: [KeyBinding] { bindings.filter(\.isSequence) }
 
@@ -34,28 +35,25 @@ struct KeySequencesCard: View {
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                // A stored profile's Save writes its shortcuts through
-                // the key table, which names no sequence: greyed there,
-                // never hidden (#171).
-                if !model.reachIsLoaded {
-                    Text(
-                        L(
-                            "shortcuts.sequence.live_only",
-                            "Key sequences are edited on the loaded "
-                                + "profile's page."
-                        )
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                // Greyed where a Save cannot keep the edit, never
+                // hidden (#171, #3124).
+                if let block {
+                    Text(blockCaption(block))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 Group {
                     rows(catalog)
                 }
-                .disabled(!model.reachIsLoaded)
+                .disabled(block != nil)
             }
         }
         // Open on arrival once in use — never forced shut.
         .onAppear { if !sequences.isEmpty { expanded = true } }
+        // A layer picked that holds sequences opens it too.
+        .onChange(of: sequences.isEmpty) { _, empty in
+            if !empty { expanded = true }
+        }
     }
 
     @ViewBuilder private func rows(
@@ -81,6 +79,26 @@ struct KeySequencesCard: View {
             )
         }
         .settingsActionButton()
+    }
+
+    private var block: SequenceEditBlock? {
+        model.sequenceEditBlock(in: layerName)
+    }
+
+    private func blockCaption(_ block: SequenceEditBlock) -> String {
+        switch block {
+        case .storedPage:
+            return L(
+                "shortcuts.sequence.live_only",
+                "Key sequences are edited on the loaded profile's page."
+            )
+        case .profileOwnsSequences:
+            return L(
+                "shortcuts.sequence.profile_own",
+                "This profile keeps its own key sequences in this layer, "
+                    + "which Settings can't edit yet."
+            )
+        }
     }
 
     private func add() {

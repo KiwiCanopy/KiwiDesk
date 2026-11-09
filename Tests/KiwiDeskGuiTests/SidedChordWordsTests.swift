@@ -151,7 +151,23 @@ struct SidedChordWordsTests {
         let keys = "Settings/Components/Keybindings/"
         #expect(
             try read("Shortcuts/ShortcutsBands.swift").contains(
-                ".accessibilityLabel(SidedChordWords.label(row.combo))"
+                ".accessibilityLabel(row.spokenChord)"
+            )
+        )
+        #expect(
+            try read("Shortcuts/ShortcutRow.swift").contains(
+                "spokenCombo ?? SidedChordWords.label(combo)"
+            )
+        )
+        // A key sequence's path speaks each chord (#1871).
+        #expect(
+            try read(keys + "Sequences/SequencePathWords.swift").contains(
+                "SidedChordWords.label(KeySequenceHint.drawn($0))"
+            )
+        )
+        #expect(
+            try read(keys + "KeybindingNavRow.swift").contains(
+                ".accessibilityLabel(drawn.alsoSpoken ?? also)"
             )
         )
         #expect(

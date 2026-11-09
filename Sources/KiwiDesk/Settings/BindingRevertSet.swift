@@ -117,7 +117,7 @@ enum BindingRevertSet {
         in layers: [KeyLayer]
     ) -> [KeyBinding] {
         // A key sequence's Lua is empty, so it is no action a ↺
-        // walks; it reverts whole by its own row (#1871).
+        // walks; a sequence edit has no ↺ of its own (#1871, #3124).
         layers.first { $0.name == layer }?.pressBindings ?? []
     }
 

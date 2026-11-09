@@ -76,6 +76,7 @@ struct SequenceActionMenu: View {
                 .truncationMode(.tail)
         }
         .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
         .fixedSize(horizontal: true, vertical: false)
         .accessibilityLabel(spokenLabel)
         .accessibilityValue(title)

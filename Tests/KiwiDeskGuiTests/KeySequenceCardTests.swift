@@ -48,7 +48,7 @@ struct KeySequenceCardTests {
         #expect(key.combo == "h")
         let gone = SequenceTree.removing(end.id, from: root)
         #expect(SequenceTree.node(end.id, in: gone) == nil)
-        #expect(SequenceTree.keyCount(under: gone) == 2)
+        #expect(gone.steps?.first?.steps?.count == 1)
     }
 
     @Test("a sibling holds a chord in its step alone")
@@ -86,22 +86,59 @@ struct KeySequenceCardTests {
     @Test("KiwiHub lists an end key by its path, the leader not at all")
     func referenceListsPaths() {
         LocalizationManager.shared.select("en")
+        var root = sequence()
+        root.steps?.append(
+            KeyBinding(
+                combo: "t",
+                lua: "print(1)",
+                kind: .custom,
+                desc: "Mine"
+            )
+        )
         let reference = ShortcutsReferenceBuilder.build(
-            layer: KeyLayer(name: "default", bindings: [sequence()]),
+            layer: KeyLayer(name: "default", bindings: [root]),
             spaces: [],
             spaceIcons: [:],
             desktops: [],
             resizeStep: 50,
             layerNames: ["default"]
         )
-        let rows = reference.controls.flatMap(\.rows) + reference.custom
+        let rows =
+            reference.controls.flatMap(\.rows) + reference.custom
+            + reference.groups.flatMap(\.rows)
         let path = SequencePathWords.drawn(["ctrl+alt+space", "w", "h"])
         #expect(
             rows.contains {
                 $0.combo == path && $0.label == left.resolvedLabel
             }
         )
-        #expect(rows.count == 1)
+        // The user's Lua end key is listed by path too, never dropped.
+        let lua = SequencePathWords.drawn(["ctrl+alt+space", "t"])
+        #expect(rows.contains { $0.combo == lua && $0.label == "Mine" })
+        #expect(rows.count == 2)
+    }
+
+    @Test("a step key the router never matches is told apart")
+    func admitsAsTheRouter() {
+        let leader = "ctrl+alt+space"
+        #expect(KeyBinding.admitsStepKey("w", under: leader))
+        #expect(KeyBinding.admitsStepKey("ctrl+alt+w", under: leader))
+        #expect(!KeyBinding.admitsStepKey("escape", under: leader))
+        #expect(!KeyBinding.admitsStepKey("cmd+cmd", under: leader))
+        #expect(!KeyBinding.admitsStepKey(leader, under: leader))
+        #expect(KeyBinding.admitsLeader(leader))
+    }
+
+    @Test("the card greys on a stored profile's page (#3124)")
+    func storedPageGreys() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/KeySequencesCard.swift"
+            )
+        let text = try SourceScan.strippedSource(at: file)
+        #expect(!text.isEmpty)
+        #expect(text.contains(".disabled(block != nil)"))
+        #expect(text.contains("model.sequenceEditBlock(in: layerName)"))
     }
 
     @Test("a layer rename and delete reach a sequence's end keys")

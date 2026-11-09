@@ -223,6 +223,51 @@ extension ShortcutsReferenceBuilder {
             }
     }
 
+    /// A sequence end key's row, its chord the drawn path (#1871);
+    /// its id the end key's own, unique where a step repeats a key.
+    static func sequencePathRow(
+        _ end: SequenceEndKey,
+        label: String,
+        icon: String?,
+        unavailable: Bool = false,
+        monospaced: Bool = false
+    ) -> ShortcutRow {
+        var row = ShortcutRow(
+            id: "sequence:" + end.binding.id.uuidString,
+            label: label,
+            combo: SequencePathWords.drawn(end.path),
+            icon: icon,
+            monospaced: monospaced,
+            unavailable: unavailable
+        )
+        row.spokenCombo = SequencePathWords.spoken(end.path)
+        return row
+    }
+
+    /// The end keys no catalogue row listed — the user's Lua — in
+    /// Custom by path, never dropped (#1871).
+    static func customSequenceRows(
+        _ sequences: [KeyBinding],
+        listed: Set<UUID>
+    ) -> [OwnRow] {
+        sequences.flatMap(\.endKeys)
+            .filter {
+                !$0.binding.lua.isEmpty && !listed.contains($0.binding.id)
+            }
+            .map { end in
+                OwnRow(
+                    row: sequencePathRow(
+                        end,
+                        label: end.binding.desc.isEmpty
+                            ? end.binding.lua : end.binding.desc,
+                        icon: ownIcon(end.binding.meta),
+                        monospaced: end.binding.desc.isEmpty
+                    ),
+                    group: end.binding.group
+                )
+            }
+    }
+
     /// Rows for Lua-owned chords whose action `init.lua` does not
     /// spell inline (a named handler, a C function): the chord is
     /// registered, so it is listed, under its description or a

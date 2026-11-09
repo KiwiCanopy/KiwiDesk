@@ -32,10 +32,11 @@ enum SequencePathWords {
     /// sequence runs it.
     static func also(
         running command: NavCommand,
-        in rows: [KeyBinding]
+        in rows: [KeyBinding],
+        spoken: Bool = false
     ) -> String? {
         let paths = endKeys(running: command, in: rows)
-            .map { drawn($0.path) }
+            .map { spoken ? self.spoken($0.path) : drawn($0.path) }
         guard !paths.isEmpty else { return nil }
         return L(
             "shortcuts.sequence.also",

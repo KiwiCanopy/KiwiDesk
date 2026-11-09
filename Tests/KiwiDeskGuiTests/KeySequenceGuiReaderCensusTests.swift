@@ -8,7 +8,10 @@ import Testing
 /// asks what an action does takes `actionBindings`, one rewriting an
 /// action takes `mappingActions`, and the rest carry a sequence
 /// whole. A new reader reds here until it is classified; the
-/// partition's own spellings are outside the scan.
+/// partition's own spellings are outside the scan. Trade: the
+/// needle sees a `.bindings` read only, so a reader handed a
+/// layer's rows as a `[KeyBinding]` value or binding (the Key
+/// sequences card's subtree, `NavRow`'s caption) is review's.
 @Suite("Key sequence GUI reader census (#1871)")
 struct KeySequenceGuiReaderCensusTests {
     private static let root = SourceScan.repoRoot(from: #filePath)

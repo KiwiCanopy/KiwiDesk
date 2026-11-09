@@ -39,6 +39,8 @@ import Testing
 struct AnnouncedValueTests {
     /// File basename → how many labelled pickers/menus it holds.
     private static let labelled: [String: Int] = [
+        // A key sequence end key's action pop-up (#1871).
+        "SequenceActionMenu.swift": 1,
         "AppRuleSpaceRow.swift": 1,
         "AppRuleFloatRow.swift": 1,
         // A lens app's All windows / Windows titled… menu (#2103).

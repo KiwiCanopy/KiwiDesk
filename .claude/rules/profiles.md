@@ -207,10 +207,13 @@ its `steps` with it. A new reader classifies itself in
 `KeySequenceReaderCensusTests` (Core) or
 `KeySequenceGuiReaderCensusTests` (the GUI tree). A profile holds
 or overrides a whole sequence, never a key inside one
-(`KeySequenceReaderTests`); a Settings Save writes one through the
-layer's rows, since the key table names no row without Lua, so the
-Key sequences card edits the loaded page alone
-(`KeySequenceCardSaveTests`).
+(`KeySequenceReaderTests`). A writer of a sequence from Settings
+saves it whole through the loaded profile's layer rows, never
+through the key table (`KeySequenceCardSaveTests`), and until a
+sequence has a reach (#3124) the Key sequences card stays greyed
+on a stored profile's page (`KeySequenceCardTests` ▸
+`storedPageGreys`); the argument is `docs/design-decisions.md`'s
+#1871 amendment.
 
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`
