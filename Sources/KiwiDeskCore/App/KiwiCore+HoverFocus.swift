@@ -65,6 +65,31 @@ extension KiwiCore {
     func hoverTarget(
         at point: CGPoint
     ) -> (id: WindowID, space: SpaceID, own: Bool)? {
+        guard let (window, space, own) = frontTrackedWindow(at: point)
+        else { return nil }
+        if space == state.workspaces.activeSpace,
+            let active = activeSpace,
+            state.focusAnchor(of: active) == window.id,
+            frontmostOwns(pid: window.pid)
+        {
+            return nil
+        }
+        guard !focusMovesWindows(window.id, in: space) else {
+            return nil
+        }
+        return (window.id, space, own)
+    }
+
+    /// The tracked window in front at `point` (AX space), the shown
+    /// Space it renders in, and whether it is KiwiDesk's own marked
+    /// window — nil where something else is in front there (a
+    /// menu, the Dock, a bar, a panel), an own window other than
+    /// the marked one, or the window is full screen or in no shown
+    /// Space. Hover focus and the modifier grab (#2447) both take
+    /// it.
+    func frontTrackedWindow(
+        at point: CGPoint
+    ) -> (window: ManagedWindow, space: SpaceID, own: Bool)? {
         // No tracked window there: skip the WindowServer read.
         guard state.windows.all.contains(where: { $0.frame.contains(point) })
         else { return nil }
@@ -86,17 +111,7 @@ extension KiwiCore {
                 ?? state.workspaces.space(of: window.id),
             state.workspaces.visibleSpaces.contains(space)
         else { return nil }
-        if space == state.workspaces.activeSpace,
-            let active = activeSpace,
-            state.focusAnchor(of: active) == window.id,
-            frontmostOwns(pid: window.pid)
-        {
-            return nil
-        }
-        guard !focusMovesWindows(window.id, in: space) else {
-            return nil
-        }
-        return (window.id, space, front.pid == own)
+        return (window, space, front.pid == own)
     }
 
     /// Whether focusing `id` would move any window the layouts

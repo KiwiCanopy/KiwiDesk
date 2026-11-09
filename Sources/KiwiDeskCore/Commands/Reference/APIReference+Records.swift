@@ -31,6 +31,7 @@ extension APIReference {
         "track": trackRecords,
         "mouse": mouseRecords,
         "scroll_gesture": scrollGestureRecords,
+        "modifier_drag": modifierDragRecords,
         "quit": quitRecords,
         "drag": dragRecords,
         "border": borderRecords,

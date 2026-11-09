@@ -142,9 +142,10 @@ func makeTestCore(
     core.eventLoop.shadows.focusedWindow = { _ in nil }
     core.windowActions.newWindow = { _, _ in }
     core.windowActions.close = { _, _ in }
-    // The event taps (#1656, #2601) are session-wide when live;
+    // The event taps (#1656, #2601, #2447) are session-wide when live;
     // a suite that means one injects its own.
     core.mouse.scroll.makeTap = { _ in nil }
+    core.mouse.pointer.makeTap = { _, _ in nil }
     core.keys.makeKeyboardTap = { _, _, _ in nil }
     // The pointer rest's mouse-moved monitor (#1869).
     core.mouse.rest.makeMonitor = { _ in nil }

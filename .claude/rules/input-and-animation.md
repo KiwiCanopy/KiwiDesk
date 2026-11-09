@@ -21,8 +21,9 @@ editing here:
   Mouse presses are read through `NSEvent` monitors, save the
   keyboard tap's listen-only mouse-down, which ends a modifier
   tap's count and so must be read on the tap's own thread, in
-  order with the modifier changes; it stays on the keyboard tap
-  when #2764's `PointerTap` lands.
+  order with the modifier changes; it stays on the keyboard tap,
+  never the pointer tap. A press that must be SWALLOWED goes
+  through the pointer tap below.
 - **A menu row drawing a Carbon-bound chord drops only that
   chord's own keyDown, asked of the one `KeyCombo.isCarbonTwin`**
   — Carbon's hotkey already acted, and every other keyboard
@@ -75,10 +76,10 @@ editing here:
   `ListenEvent` (tccd log, device build, 2026-09-28). Seven
   obligations:
   - **One tap, scroll-only.** A mask widened past `.scrollWheel`
-    asks macOS for more than the gesture needs; the only other tap
-    is the keyboard tap below (`ScrollTapSeamTests` for one tap per
-    file and each one mask constant, `ScrollSampleTests` for the
-    scroll constant's value).
+    asks macOS for more than the gesture needs; the other taps are
+    the keyboard tap and the pointer tap below (`ScrollTapSeamTests`
+    for one tap per file and each one mask constant,
+    `ScrollSampleTests` for the scroll constant's value).
   - **The tap installs on its own thread and decides there.**
     Every scroll on the Mac waits on the callback, and the main
     actor can block on a slow app's AX reply for seconds; the
@@ -186,6 +187,68 @@ editing here:
     collapsing pair is refused as a duplicate
     (`ModifierSideRoutingTests` ▸ `offCollapses`) and named a
     `sideCollapse` conflict (`ModifierSideConflictTests`).
+- **A consumer that must swallow a mouse-button or pointer event
+  joins the ONE active pointer tap, `PointerTap`, reached only
+  through `MouseTracker.pointer` (#2447, #2764 ruling
+  2026-11-01); none creates a tap of its own.** Its creation at
+  `.cgSessionEventTap` asks macOS for the Accessibility-class
+  `PostEvent` service alone, never `ListenEvent` (tccd log of a
+  probe at the shipped tap location, 2026-11-08; the measurement
+  is `docs/design-decisions.md` ▸ *Every pointer event KiwiDesk
+  must swallow goes through one active tap*). A mask that asks for
+  more is measured before it joins. Obligations:
+  - **One mask per consumer, the tap built from the union.**
+    Each `PointerConsumers.Consumer` owns one mask constant;
+    the front creates the tap over the union of the LIVE
+    consumers' masks and rebuilds it when that union changes, and
+    no live consumer means no tap — the live factory pinned inert
+    in both `makeTestCore` twins (`ScrollTapSeamTests` ▸
+    `pointerMask`, `liveFactoryPinned`; `PointerConsumersTests`).
+    A torn-down or refused tap ends every stream its router owned
+    through the front, and a delivery from an older tap is dropped
+    (`PointerConsumersTests` ▸ `staleTapIsDropped`).
+  - **Precedence is the `Consumer` order, and an owner keeps the
+    stream it began** to its end, whatever the modifiers do
+    meanwhile; `PointerTapRouter.route` asks the consumers in that
+    order only while no one owns the stream, so a consumer added
+    later (#2764's crossing, #1873's gestures) adds its case there
+    and runs after the grab for a grab's stream
+    (`PointerTapRouterTests` ▸ `ownsTheStream`).
+  - **The callback reads only the event and the snapshot.** The
+    main actor publishes each consumer's settings as a Sendable
+    `PointerTapSnapshot`; the pure `PointerTapRouter` decides from
+    the event's own location and flags, never a remembered
+    position, and the callback does no AX, no window lookup and no
+    main-actor hop. Window lookups and frame writes run on the
+    main actor after delivery, and an end no event placed carries
+    no location (`PointerTapRouterTests`, `ScrollTapSeamTests` ▸
+    `installsOffMain`).
+  - **One re-enable path.** `tapDisabledByTimeout` or
+    `ByUserInput` re-enables the tap, re-seeds the router — ending
+    any stream a consumer owned — and logs; while macOS refuses
+    the tap no consumer acts, and it is asked again only at
+    `KiwiCore.start()` or once a consumer's switch moves the union
+    (`PointerConsumersTests` ▸ `refusalWaits`,
+    `refusalRetriesOnSwitch`).
+  - **A swallow re-delivers to every in-process listener it
+    deafens, through that listener's own door.** A consumer that
+    swallows a press re-delivers it through
+    `MouseTracker.deliverPress` and the press record (`recordDown`
+    and its `recordUp`); one that swallows a left drag re-delivers
+    it to `ShelfRevealer.moved(to:dragging:)`; a consumer whose
+    swallow reaches a listener not named here names it here, with
+    its door or why none is owed (`ModifierGrabWiringTests`).
+  - **A grab feeds the drag pipeline, never a drop path of its
+    own**: it writes the frame through `applyFrame`, hands each
+    frame to `DragCoordinator.windowMoved`, and its window's AX
+    echoes stay out of the coordinator until the drop settles,
+    since they read as our own animation — every echo arm asks the
+    one `modifierGrabTakesEcho(of:)` first (`modifierGrabOwns`,
+    `ModifierGrabWiringTests` ▸ `echoesAreLeftOut`,
+    `lateEchoIsLeftOut`). A grab in flight reads as a held button
+    through `MouseTracker.leftButtonHeld` and `anyButtonHeld`, so a
+    later consumer that must act during a grab's stream — #2764's
+    crossing routes it — never stands down on those reads.
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

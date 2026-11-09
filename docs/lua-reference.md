@@ -5108,6 +5108,86 @@ does nothing, while long swipes are off.
 scroll_gesture.set_step_distance(120)
 ```
 
+## Modifier Drags
+
+:::unreleased
+Hold **⌃⌘** (the default; [`set_move`](#modifier_dragset_move)
+changes it) and drag anywhere inside a window to move it, as a
+drag by its title bar does: a tiled window swaps with the one
+under the pointer at the drop, a floating window takes the new
+frame, and a drop on another screen or on the Space Bar moves it
+there. Hold **⌃⌥** (the default;
+[`set_resize`](#modifier_dragset_resize)) and drag to resize it:
+a grab in the middle third of an edge moves that edge, and
+anywhere else the nearest corner. A tiled window's resize
+changes its layout's split, as dragging its edge does.
+
+The keys must be exactly the ones set, and they count only at the
+press: the drag goes on to the release whatever the keys do. With
+the start `hover`, no click is needed: holding the keys and moving
+the pointer moves or resizes the window under it, and letting a
+key go, or clicking, ends it. A press over anything but a window
+KiwiDesk can move there — the Dock, the menu bar, a bar, a window
+in full screen — does nothing, and the app under the pointer does
+not get the click. It needs only the Accessibility permission, never Input
+Monitoring.
+
+The settings are stored in `gui.json` as the `modifier_drag`
+object — `move` and `resize`, each with `modifiers` and `start` — for
+every profile alike. A `resize` equal to `move` turns the resize
+off. In the
+Settings app they are the **Move windows from anywhere** and
+**Resize windows from anywhere** rows under **Shortcuts & Gestures
+▸ Mouse & trackpad**.
+
+The verbs below change the running value only: nothing reaches
+`gui.json`, and in a setup the Settings app manages the value lasts
+until a profile load or a config reload sets it again. In a
+Lua-owned setup `init.lua` is where it is kept, and **Adopt into
+the GUI** keeps what it set.
+:::
+
+### modifier_drag.set_move
+
+:::unreleased
+**Expects:** modifiers, as for
+[`scroll_gesture.set_pan`](#scroll_gestureset_pan) (default
+`"control+command"`), `""` for off; then optionally the start,
+`"drag"` (the default, the button held) or `"hover"` (no click).
+
+**Does:** sets the keys that move the window under the pointer,
+and how the move starts. One modifier is accepted, and that key's
+own click — ⌃-click, ⌘-drag — is then the move's; the chord
+[`set_resize`](#modifier_dragset_resize) holds fails.
+
+**Example:**
+
+```lua
+modifier_drag.set_move("control+option+command")
+modifier_drag.set_move("control+command", "hover")
+modifier_drag.set_move("")   -- off
+```
+:::
+
+### modifier_drag.set_resize
+
+:::unreleased
+**Expects:** modifiers and a start, as for
+[`set_move`](#modifier_dragset_move) (default
+`"control+option"`).
+
+**Does:** sets the keys that resize the window under the pointer
+from its nearest corner or edge, and how the resize starts. It
+fails on the same chords `set_move` does, with the move's chord
+in place of its own.
+
+**Example:**
+
+```lua
+modifier_drag.set_resize("control+option", "hover")
+```
+:::
+
 ## When Windows No Longer Fit
 
 No layout ever shrinks a window below `min_window_size`. Where

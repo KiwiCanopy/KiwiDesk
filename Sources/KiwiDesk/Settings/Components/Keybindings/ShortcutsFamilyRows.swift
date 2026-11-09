@@ -136,6 +136,7 @@ struct ShortcutsFamilyRows {
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
+            .modifierDragMove, .modifierDragResize,
             .focusWrap, .modeCycle, .modeCue, .desktopCue, .hyperKey,
             .shortcutBase, .kiwiHubNavigationKeys, .modifierSides:
             return nil

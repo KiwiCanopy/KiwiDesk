@@ -94,6 +94,7 @@ extension KiwiCore {
             profile: profile?.spaceHistory
         )
         applyModeCycle(base: base?.modeCycle, profile: profile?.modeCycle)
+        applyModifierDrag(base?.modifierDrag)
         applyFocusWrap(base: base?.focusWrap, profile: profile?.focusWrap)
     }
 

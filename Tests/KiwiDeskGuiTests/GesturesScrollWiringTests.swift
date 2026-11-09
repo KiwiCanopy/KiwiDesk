@@ -44,24 +44,41 @@ struct GesturesScrollWiringTests {
 
     @Test("a recorded chord is judged by Core's refusal before it lands")
     func recorderAsksCore() throws {
+        // The field hands the shared recorder Core's verdict.
         let field = Self.squash(
             try Self.source("ScrollChordRecorderField.swift")
         )
-        let refusal = try #require(
-            field.range(of: "ScrollChordRefusal.of(recorded,")
+        #expect(
+            field.contains(
+                "refuse:{ScrollChordRefusal.of($0,other:other,"
+                    + "heldBy:otherGesture)"
+            )
         )
-        let write = try #require(field.range(of: "chord=recorded"))
+        let shared = Self.squash(
+            try Self.source("ModifierChordRecorder.swift")
+        )
+        let refusal = try #require(
+            shared.range(of: "ifletfound=refuse(recorded)")
+        )
+        let write = try #require(shared.range(of: "chord=recorded"))
         #expect(refusal.lowerBound < write.lowerBound)
         // The refused branch leaves before the write, not only
         // ahead of it in the text.
         let branch = try #require(
             SourceScan.declarationBody(
-                after: "if let found = ScrollChordRefusal.of(",
-                in: try Self.source("ScrollChordRecorderField.swift")
+                after: "if let found = refuse(recorded)",
+                in: try Self.source("ModifierChordRecorder.swift")
             )
         )
         #expect(branch.contains("return"))
-        #expect(field.contains("mode:.modifiers"))
+        // Nothing writes the chord ahead of the verdict, whatever
+        // the spelling.
+        let ahead = String(shared[..<refusal.lowerBound])
+        let commit = ahead.components(separatedBy: "funccommit(").last ?? ""
+        for write in ["chord=", "$chord", "_chord", "self.chord"] {
+            #expect(!commit.contains(write), "\(write)")
+        }
+        #expect(shared.contains("mode:.modifiers"))
     }
 
     @Test("the travel field greys, never hides, while the box is off")

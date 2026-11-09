@@ -152,6 +152,9 @@ extension KiwiCore {
                     animated: false
                 )
             }
+            // A modifier grab's float takes focus at the drop, as a
+            // tiled one does: no click reached its app (#2447).
+            if modifierGrab.released == id { focusWindow(id, warp: false) }
             return
         }
         guard let space = activeSpace,

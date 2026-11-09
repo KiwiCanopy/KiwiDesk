@@ -275,6 +275,7 @@ public enum APIReference {
             "set_pan", "set_space_step", "set_natural_scrolling",
             "set_long_swipes", "set_step_distance",
         ],
+        "modifier_drag": ["set_move", "set_resize"],
         "quit": [
             "set_layout", "set_grid_target_depth",
         ],

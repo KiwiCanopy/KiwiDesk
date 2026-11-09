@@ -107,10 +107,11 @@ struct SettingsBorderedSealTests {
                 "the Hyper key's recorder (#1870), the key "
                     + "recorder's own field and tint"
             ),
-            "ScrollChordRecorderField.swift": (
+            "ModifierChordRecorder.swift": (
                 1, ".tint(buttonTint)",
-                "the scroll gestures' modifier recorder (#1656), "
-                    + "the key recorder's own field and tint"
+                "the modifiers-only recorder the scroll gestures "
+                    + "(#1656) and modifier drags (#2447) share, the "
+                    + "key recorder's own field and tint"
             ),
         ]
 

@@ -18,8 +18,8 @@ public final class KiwiCore {
     public let spaceBars = SpaceBarManager()
     public let otherWindowManagers = OtherWindowManagerWatch()  // #1882
     let shelves = ShelfManager()
-    /// Space Bar drag-drop gesture state (#372).
-    let spaceBarDrop = SpaceBarDropCoordinator()
+    let spaceBarDrop = SpaceBarDropCoordinator()  // Space Bar drop, #372
+    let modifierGrab = ModifierGrabState()  // #2447
     /// Live cross-display make-room gesture state (#504).
     let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).

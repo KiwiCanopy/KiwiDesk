@@ -15,6 +15,7 @@ extension SettingsModel {
         target.format = source.format
         target.layers = source.layers
         target.scrollGesture = source.scrollGesture
+        target.modifierDrag = source.modifierDrag
         target.spaceHistory = source.spaceHistory
         target.modeCycle = source.modeCycle
         target.focusWrap = source.focusWrap

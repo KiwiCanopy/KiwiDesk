@@ -2,9 +2,9 @@ import AppKit
 
 /// Pointer input: left-button presses for gesture
 /// classification and display focus (#446, #953), and — through
-/// `scroll` and `rest` — the scroll-gesture tap and the pointer
-/// rest, whose lifetimes follow this tracker's `start`/`stop`
-/// (#1656, #1519, #1869).
+/// `scroll`, `pointer` and `rest` — the scroll-gesture tap, the
+/// pointer tap and the pointer rest, whose lifetimes follow this
+/// tracker's `start`/`stop` (#1656, #1519, #2447, #1869).
 @MainActor
 public final class MouseTracker {
     public struct Press {
@@ -28,6 +28,8 @@ public final class MouseTracker {
     public private(set) var press: Press?
     /// Scroll gestures (#1656, #1519).
     public let scroll = ScrollGestures()
+    /// The one pointer tap's consumers: the modifier grab (#2447).
+    public let pointer = PointerConsumers()
     /// The pointer coming to rest, hover focus's trigger (#1869).
     public let rest = PointerRest()
 
@@ -43,12 +45,18 @@ public final class MouseTracker {
     }
 
     /// The left button alone — drags and mouse resizes are
-    /// left-button gestures.
-    var leftButtonHeld: Bool { pressedButtons() & 1 == 1 }
+    /// left-button gestures. A modifier grab in flight reads as
+    /// held, whether its press was swallowed or it took none
+    /// (#2447).
+    var leftButtonHeld: Bool {
+        pressedButtons() & 1 == 1 || pointer.grabInFlight != nil
+    }
 
     /// Any button — a warp must not yank the pointer out of a
     /// gesture, whichever button started it.
-    var anyButtonHeld: Bool { pressedButtons() != 0 }
+    var anyButtonHeld: Bool {
+        pressedButtons() != 0 || pointer.grabInFlight != nil
+    }
 
     /// The screen the pointer is on, nil where no screen holds it
     /// — the screen handoff's gate (#2548). Live in production,
@@ -128,6 +136,7 @@ public final class MouseTracker {
 
     public func start() {
         scroll.start()
+        pointer.start()
         rest.start()
         guard monitors.isEmpty else { return }
         let down = NSEvent.addGlobalMonitorForEvents(
@@ -227,6 +236,7 @@ public final class MouseTracker {
         monitors = []
         press = nil
         scroll.stop()
+        pointer.stop()
         rest.stop()
     }
 
