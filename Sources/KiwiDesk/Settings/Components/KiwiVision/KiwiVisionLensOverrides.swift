@@ -45,7 +45,7 @@ struct KiwiVisionLensOverrides: View {
                     )
                 }
             }
-            SettingsSection(SettingsCatalog.kiwiVision.maximizeCard.text) {
+            SettingsSection(SettingsCatalog.kiwiVision.fillCard.text) {
                 maximizeRow
             }
             SettingsSection(

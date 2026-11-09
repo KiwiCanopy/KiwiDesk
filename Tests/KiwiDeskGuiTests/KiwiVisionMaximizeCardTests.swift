@@ -68,7 +68,7 @@ struct KiwiVisionMaximizeCardTests {
         )
         #expect(
             overrides.contains(
-                "SettingsSection(SettingsCatalog.kiwiVision.maximizeCard"
+                "SettingsSection(SettingsCatalog.kiwiVision.fillCard"
             )
         )
         #expect(overrides.contains("override(\\.maximize)"))

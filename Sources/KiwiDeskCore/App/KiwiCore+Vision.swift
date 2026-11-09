@@ -132,8 +132,8 @@ extension KiwiCore {
             )
             updateVision(reassertOrder: true)
         }
-        if let cause { cueVisionOff(cause) }
         refillVision()  // #3064
+        if let cause { cueVisionOff(cause) }
         vision.onChange(next, cause)
     }
 

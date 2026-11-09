@@ -9,7 +9,7 @@ struct KiwiVisionMaximizeCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.kiwiVision.maximizeCard,
+            SettingsCatalog.kiwiVision.fillCard,
             caption: KiwiVisionCopy.appliesAtOnce
         ) {
             VStack(alignment: .leading, spacing: 8) {

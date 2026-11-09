@@ -75,7 +75,7 @@ struct SettingsCatalogArgumentTests {
         "KiwiVisionLensOverrides.swift: "
             + "SettingsCatalog.kiwiVision.clearCard.text",
         "KiwiVisionLensOverrides.swift: "
-            + "SettingsCatalog.kiwiVision.maximizeCard.text",
+            + "SettingsCatalog.kiwiVision.fillCard.text",
         "KiwiVisionLensOverrides.swift: "
             + "SettingsCatalog.kiwiVision.appearanceCard.text",
         "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",

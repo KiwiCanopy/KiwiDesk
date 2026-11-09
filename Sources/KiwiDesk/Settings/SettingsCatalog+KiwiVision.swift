@@ -26,7 +26,7 @@ struct KiwiVisionControls: Sendable {
         "kiwivision.clear_wallpaper",
         "Wallpaper"
     )
-    let maximizeCard = SettingsControl(
+    let fillCard = SettingsControl(
         "kiwivision.section.maximize",
         "Maximize"
     )
