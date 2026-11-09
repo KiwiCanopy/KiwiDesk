@@ -1273,8 +1273,9 @@ must keep:
   `KiwiCore.unsavedLiveSettings`, diffing the two sides it hands
   over and never the draft's baseline, asked again through the one
   `refreshUnsavedLive` wherever live or that baseline can have
-  moved — where live moved, through `liveSettingsMoved`, which
-  first lets the draft's unedited leaves follow (#3098) — (#2262, `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
+  moved, through `liveSettingsMoved` where live moved, which first
+  lets the draft's unedited leaves follow (#3098, #2262,
+  `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
   `UnsavedLiveSettingsTests`) — and a Settings Save lays only the
   draft's own settings edits over live as it is AT the Save
   (`TilingSettings.rebased`), never the draft's settings whole,

@@ -143,6 +143,7 @@ struct SettingsFollowLiveTests {
         model.config.settings.maximize.widthShare[.laptop] = 0.6
         setLaptopHeight(model, 0.4)
         model.liveSettingsMoved()
+        #expect(model.config[keyPath: laptopHeight] == 0.4)
         let row = try #require(
             SettingsDiffRowSource.rows(for: model)
                 .first { $0.key == .behaviour(.maximizeHeightShare) }

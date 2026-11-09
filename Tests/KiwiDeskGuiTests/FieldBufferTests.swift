@@ -17,9 +17,13 @@ struct FieldBufferTests {
     }
 
     /// Every GUI hook re-seeding a buffer over a value it watches —
-    /// an `.onChange` of anything but focus whose body reads
-    /// `focused` — goes through the one verdict, found by a sweep so
-    /// a new buffered field cannot go bare.
+    /// an `.onChange` of anything but a `@FocusState` whose body
+    /// gates on one — goes through the one verdict, with that focus
+    /// and the value the field last took. The subject is keyed on
+    /// the declared `@FocusState` names, so a renamed focus is still
+    /// swept; a focus read only through a helper the body calls is
+    /// not, and that `seeded` is written only by the seed is
+    /// review's.
     @Test("every buffer's outside-change hook reads the verdict")
     func sitesReadTheVerdict() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -27,79 +31,155 @@ struct FieldBufferTests {
         var sites: [String] = []
         for url in try SourceScan.swiftSources(under: root) {
             let source = try SourceScan.strippedSource(at: url)
-            for body in Self.bufferHooks(in: source) {
-                let file = url.lastPathComponent
+            let file = url.lastPathComponent
+            for hook in Self.bufferHooks(in: source, file: file) {
                 sites.append(file)
                 #expect(
-                    Self.readsTheOldValue(body),
-                    Comment(rawValue: "\(file) does not follow by was:")
+                    Self.readsTheOldValue(hook.body, focus: hook.focus),
+                    Comment(rawValue: "\(file) does not follow the verdict")
                 )
             }
         }
-        // StepperRow, ColorField, SlotCountRow, MinSizeFields.
-        #expect(sites.count >= 4)
+        // StepperRow, ColorField, SlotCountRow, MinSizeFields,
+        // ShortcutGroupField.
+        #expect(sites.count >= 5)
     }
 
-    /// The body calls the verdict with `was:` naming what the field
-    /// last took — the hook's old value, or a local or the stored
-    /// `seeded` read from it — never the new value, and the field's
-    /// own focus.
-    private static func readsTheOldValue(_ body: String) -> Bool {
-        let head = body.prefix { $0 != "\n" }
-        let params = head.split(separator: " ").map {
-            $0.trimmingCharacters(in: .punctuationCharacters)
-        }
-        guard body.contains("focused: focused)"),
-            let call = body.range(of: "FieldBuffer.follows("),
-            let was = body[call.upperBound...].range(of: "was: ")
+    /// The body calls the verdict with the field's own focus and a
+    /// `was:` naming what the field last took — the hook's old
+    /// value, a local read from it, or the stored `seeded` — never
+    /// the new value, and holds no bare `!focus` beside it.
+    private static func readsTheOldValue(
+        _ body: String,
+        focus: String
+    ) -> Bool {
+        guard !body.contains("!\(focus)"),
+            let arguments = callArguments(of: "FieldBuffer.follows", in: body),
+            arguments.last == "focused: \(focus)",
+            let was = arguments.first(where: { $0.hasPrefix("was: ") })
         else { return false }
-        let argument = body[was.upperBound...]
-            .prefix { $0 != "," && $0 != ")" }
-            .trimmingCharacters(in: .whitespaces)
+        let argument = String(was.dropFirst("was: ".count))
         if argument == "seeded" { return true }
+        let params = body.prefix { $0 != "\n" }
+            .split(separator: " ")
+            .map { $0.trimmingCharacters(in: .punctuationCharacters) }
         guard params.count >= 3, params[0] != "_" else { return false }
-        let old = params[0]
-        let new = params[1]
-        let named = argument.contains(old) ? argument : nil
+        let (old, new) = (params[0], params[1])
+        let call = body.range(of: "FieldBuffer.follows(")!
         let local = body.range(of: "let \(argument) = ").map {
             String(body[$0.upperBound..<call.lowerBound])
         }
-        let source = named ?? local ?? ""
-        return source.contains(old) && !source.contains(new)
+        let source = argument.contains(old) ? argument : local ?? ""
+        return source.contains(old)
+            && (new == "_" || !source.contains(new))
     }
 
-    /// The bodies of `.onChange(of: x)` hooks whose `x` is not a focus
-    /// and whose body reads `focused`.
-    private static func bufferHooks(in source: String) -> [String] {
-        let chars = Array(source)
-        var hooks: [String] = []
-        var rest = source.startIndex
-        let needle = ".onChange(of: "
-        while let hit = source.range(of: needle, range: rest..<source.endIndex)
-        {
-            rest = hit.upperBound
-            guard let close = source[hit.upperBound...].firstIndex(of: ")")
-            else { break }
-            let watched = source[hit.upperBound..<close]
-            guard !watched.lowercased().contains("focus") else { continue }
-            var cursor = source.distance(
-                from: source.startIndex,
-                to: source.index(after: close)
+    /// The top-level comma-separated arguments of the first call to
+    /// `function` in `text`, trimmed.
+    private static func callArguments(
+        of function: String,
+        in text: String
+    ) -> [String]? {
+        guard let hit = text.range(of: function + "(") else { return nil }
+        var cursor = text.distance(
+            from: text.startIndex,
+            to: text.index(before: hit.upperBound)
+        )
+        guard
+            let inside = SourceScan.balanced(
+                Array(text),
+                from: &cursor,
+                open: "(",
+                close: ")"
             )
+        else { return nil }
+        var parts: [String] = []
+        var depth = 0
+        var part = ""
+        for character in inside {
+            if "([{".contains(character) { depth += 1 }
+            if ")]}".contains(character) { depth -= 1 }
+            if character == ",", depth == 0 {
+                parts.append(part)
+                part = ""
+            } else {
+                part.append(character)
+            }
+        }
+        parts.append(part)
+        return parts.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+    }
+
+    /// The `.onChange(of: x)` hooks whose `x` is no `@FocusState` of
+    /// the file and whose body reads one, with the focus it reads.
+    private static func bufferHooks(
+        in source: String,
+        file: String
+    ) -> [(body: String, focus: String)] {
+        let focuses = matches(
+            of: #"@FocusState\s+(?:private\s+)?var\s+(\w+)"#,
+            in: source
+        )
+        guard !focuses.isEmpty else { return [] }
+        let chars = Array(source)
+        var hooks: [(body: String, focus: String)] = []
+        var rest = source.startIndex
+        while let hit = source.range(
+            of: #"\.onChange\(\s*of:"#,
+            options: .regularExpression,
+            range: rest..<source.endIndex
+        ) {
+            rest = hit.upperBound
+            let open = source[hit].firstIndex(of: "(")!
+            var cursor = source.distance(from: source.startIndex, to: open)
             guard
+                let watched = SourceScan.balanced(
+                    chars,
+                    from: &cursor,
+                    open: "(",
+                    close: ")"
+                ),
                 let body = SourceScan.balanced(
                     chars,
                     from: &cursor,
                     open: "{",
                     close: "}"
-                ),
-                body.range(
-                    of: "\\bfocused\\b",
-                    options: .regularExpression
-                ) != nil
+                )
+            else {
+                Issue.record("unread .onChange hook in \(file)")
+                continue
+            }
+            let subject = watched.replacingOccurrences(of: "of:", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            // A hook that only moves focus is no buffer: it gates on
+            // none.
+            guard !focuses.contains(subject),
+                let focus = focuses.first(where: {
+                    !matches(
+                        of: #"(!|focused: )\#($0)\b"#,
+                        in: body,
+                        whole: true
+                    ).isEmpty
+                })
             else { continue }
-            hooks.append(body)
+            hooks.append((body, focus))
         }
         return hooks
+    }
+
+    /// The first capture group of each match, or each whole match.
+    private static func matches(
+        of pattern: String,
+        in text: String,
+        whole: Bool = false
+    ) -> [String] {
+        guard let regex = try? NSRegularExpression(pattern: pattern)
+        else { return [] }
+        let range = NSRange(text.startIndex..., in: text)
+        return regex.matches(in: text, range: range).compactMap {
+            Range($0.range(at: whole ? 0 : 1), in: text).map {
+                String(text[$0])
+            }
+        }
     }
 }
