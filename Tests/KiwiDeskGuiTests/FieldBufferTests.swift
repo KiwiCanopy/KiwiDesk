@@ -21,9 +21,11 @@ struct FieldBufferTests {
     /// gates on one — goes through the one verdict, with that focus
     /// and the value the field last took. The subject is keyed on
     /// the declared `@FocusState` names, so a renamed focus is still
-    /// swept; a focus read only through a helper the body calls is
-    /// not, and that `seeded` is written only by the seed is
-    /// review's.
+    /// swept. Not swept, so review's: a focus read through a helper
+    /// or gated as `focused == false` / `if X { return }`; a focus
+    /// declared `fileprivate` or received as `FocusState.Binding`;
+    /// a buffer with no outside-change hook at all; and that
+    /// `seeded` is written only by the seed.
     @Test("every buffer's outside-change hook reads the verdict")
     func sitesReadTheVerdict() throws {
         let root = SourceScan.repoRoot(from: #filePath)
