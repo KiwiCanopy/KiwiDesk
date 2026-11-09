@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "이 윈도우로 화면 너비를 채우고 높이는 화면의 일정 비율로 맞추며, 공간의 나머지는 그대로 둡니다. 다시 누르거나 포커스를 다른 윈도우로 옮기면 원래 자리로 돌아갑니다.",
   "keybinding.move_to_desktop": "윈도우를 데스크탑 %1$@(으)로 이동",
   "keybinding.move_to_desktop_follow": "윈도우를 데스크탑 %1$@(으)로 이동 및 추종",
+  "keybinding.move_to_display_last": "윈도우를 마지막으로 사용한 화면으로 이동",
+  "keybinding.move_to_display_last_follow": "윈도우를 마지막으로 사용한 화면으로 이동 및 추종",
   "keybinding.move_to_space": "윈도우를 공간 %1$@(으)로 이동",
   "keybinding.move_to_space_follow": "윈도우를 공간 %1$@(으)로 이동 및 추종",
   "keybinding.move_window_to_next_track": "윈도우를 다음 트랙으로 이동",
@@ -2625,5 +2627,6 @@
   "window_action.refusal.no_title_match": "‘%2$@’에 맞는 %1$@ 윈도우가 없습니다",
   "window_action.refusal.nothing_here_to_swap": "여기에 교체할 윈도우가 없습니다",
   "window_action.refusal.nothing_to_gather": "모을 %1$@ 윈도우가 없습니다",
+  "window_action.refusal.screen_shows_full_screen": "전체 화면 앱을 표시 중인 화면으로는 윈도우를 이동할 수 없습니다",
   "window_action.refusal.swap_with_self": "‘%1$@’은(는) 자기 자신과 교체할 수 없습니다"
 }

@@ -14,7 +14,7 @@ extension SettingsValueReadout {
         case .layersIcon:
             return shortcutsIconRows(census, old: old, new: new)
         case .focusDir, .screenLast, .spaceStep, .spaceHistoryStep,
-            .goToSpace, .swapDir,
+            .goToSpace, .swapDir, .screenMove,
             .moveWindowToTrack, .swapWithTrack, .moveToSpace,
             .moveToSpaceFollow, .focusDesktop, .moveToDesktop,
             .moveToDesktopFollow, .layoutCycle, .viewPicker,

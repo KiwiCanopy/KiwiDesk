@@ -165,6 +165,7 @@ enum KeybindingCatalog {
             NavGroup(
                 title: "Window Management",
                 commands: swapDirections
+                    + screenMoveRows
                     + trackRows
                     + moveToSpace(spaces)
             ),

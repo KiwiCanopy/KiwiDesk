@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Riempie la larghezza dello schermo con questa finestra, su una parte dell'altezza dello schermo, lasciando il resto dello spazio com'è. Premi di nuovo, o sposta il focus su un'altra finestra, per rimetterla al suo posto.",
   "keybinding.move_to_desktop": "Sposta sulla Scrivania %1$@",
   "keybinding.move_to_desktop_follow": "Sposta sulla Scrivania %1$@ e segui",
+  "keybinding.move_to_display_last": "Sposta sull'ultimo schermo usato",
+  "keybinding.move_to_display_last_follow": "Sposta sull'ultimo schermo usato e segui",
   "keybinding.move_to_space": "Sposta nello spazio %1$@",
   "keybinding.move_to_space_follow": "Sposta nello spazio %1$@ e segui",
   "keybinding.move_window_to_next_track": "Sposta la finestra sul Track successivo",
@@ -2625,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Nessuna finestra di %1$@ corrisponde a «%2$@»",
   "window_action.refusal.nothing_here_to_swap": "Nessuna finestra qui con cui scambiare",
   "window_action.refusal.nothing_to_gather": "Nessuna finestra di %1$@ da raccogliere",
+  "window_action.refusal.screen_shows_full_screen": "Una finestra non può essere spostata su uno schermo che mostra un'app a tutto schermo",
   "window_action.refusal.swap_with_self": "«%1$@» non può essere scambiato con sé stesso"
 }

@@ -16,18 +16,27 @@ extension KiwiCore {
         switch commandTarget(command, args) {
         case .refused(let response): return response
         case .window(let window):
-            guard !state.isPocketed(window) else {
-                return .fail("a pocketed window cannot move to a Space")
-            }
-            let target = SpaceID(raw)
-            if state.workspaces.space(of: window) == target,
-                stickyMoveBlock(window, to: target) == nil
-            {
-                return moveIntoOwnSpace(window, target, follow: follow)
-            }
-            moveWindow(window, to: target, follow: follow)
-            return .ok()
+            return moveToSpace(window, SpaceID(raw), follow: follow)
         }
+    }
+
+    /// The verb's move once its window and Space are known, shared
+    /// with the screen moves (#3117).
+    func moveToSpace(
+        _ window: WindowID,
+        _ target: SpaceID,
+        follow: Bool
+    ) -> CommandResponse {
+        guard !state.isPocketed(window) else {
+            return .fail("a pocketed window cannot move to a Space")
+        }
+        if state.workspaces.space(of: window) == target,
+            stickyMoveBlock(window, to: target) == nil
+        {
+            return moveIntoOwnSpace(window, target, follow: follow)
+        }
+        moveWindow(window, to: target, follow: follow)
+        return .ok()
     }
 
     /// A move into the window's own Space re-files nothing: a

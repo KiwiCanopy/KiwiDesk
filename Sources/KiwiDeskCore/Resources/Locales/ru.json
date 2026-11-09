@@ -976,6 +976,8 @@
   "keybinding.maximize_width.help": "Разворачивает это окно на всю ширину экрана, занимая часть высоты экрана и не меняя остальное пространство. Нажми ещё раз или переведи фокус на другое окно, чтобы вернуть его на место.",
   "keybinding.move_to_desktop": "Переместить на Рабочий стол %1$@",
   "keybinding.move_to_desktop_follow": "Переместить на Рабочий стол %1$@ и перейти",
+  "keybinding.move_to_display_last": "Переместить на последний использованный экран",
+  "keybinding.move_to_display_last_follow": "Переместить на последний использованный экран и перейти",
   "keybinding.move_to_space": "Переместить в пространство %1$@",
   "keybinding.move_to_space_follow": "Переместить в пространство %1$@ и перейти",
   "keybinding.move_window_to_next_track": "Переместить окно в следующий Track",
@@ -2625,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Нет окна %1$@, подходящего под «%2$@»",
   "window_action.refusal.nothing_here_to_swap": "Здесь нет окна для обмена местами",
   "window_action.refusal.nothing_to_gather": "Нет окон %1$@, которые можно собрать",
+  "window_action.refusal.screen_shows_full_screen": "Окно нельзя переместить на экран, на котором показано полноэкранное приложение",
   "window_action.refusal.swap_with_self": "Окно «%1$@» нельзя поменять местами с самим собой"
 }

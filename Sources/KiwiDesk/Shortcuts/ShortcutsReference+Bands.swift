@@ -34,6 +34,7 @@ extension ShortcutsReferenceBuilder {
             )
         let move =
             KeybindingCatalog.swapDirections
+            + KeybindingCatalog.screenMoveRows
             + KeybindingCatalog.trackRows
             + KeybindingCatalog.moveToSpace(
                 spaces,
