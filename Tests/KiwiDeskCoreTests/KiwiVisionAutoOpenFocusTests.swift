@@ -150,6 +150,10 @@ struct KiwiVisionAutoOpenFocusTests {
         core.wallClock = { slow }
         Self.arrive(7, bundleID: F.music, on: core)
         #expect(core.focusedWindowID == WindowID(7))
+        // Still quiet: a later member window takes no grant.
+        core.focusWindow(WindowID(1), warp: false)
+        Self.arrive(8, bundleID: F.notes, on: core)
+        #expect(core.focusedWindowID == WindowID(1))
     }
 
     @Test("a rule-filed member in a hidden Space switches nothing")
