@@ -36,5 +36,5 @@ final class FakeKeyboardTap: KeyboardTapHandle {
         defer { decisions = [] }
         return decisions
     }
-    func requestSequenceClose() { closeRequests += 1 }
+    func requestSequenceClose(generation: UInt64) { closeRequests += 1 }
 }

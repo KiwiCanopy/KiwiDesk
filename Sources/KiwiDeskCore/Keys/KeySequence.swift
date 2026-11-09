@@ -15,22 +15,24 @@ struct KeySequence: Equatable, Sendable {
 
         var stored: String { source.combo }
 
-        /// A key built from its spelling alone, as Lua defines one.
         init(combo: KeyCombo, source: KeyBinding, action: Action) {
             self.combo = combo
             self.source = source
             self.action = action
         }
 
-        init(combo: KeyCombo, stored: String, action: Action) {
-            self.combo = combo
-            if case .opens = action {
-                source = .sequence(combo: stored)
-            } else {
-                source = KeyBinding(combo: stored)
+        #if DEBUG
+            /// Tests only: a key from its spelling alone.
+            init(combo: KeyCombo, stored: String, action: Action) {
+                self.combo = combo
+                if case .opens = action {
+                    source = .sequence(combo: stored)
+                } else {
+                    source = KeyBinding(combo: stored)
+                }
+                self.action = action
             }
-            self.action = action
-        }
+        #endif
     }
 
     indirect enum Action: Equatable, Sendable {
@@ -122,6 +124,21 @@ struct KeySequence: Equatable, Sendable {
         }
     }
 
+    /// Appends `key` to a step, the last of two keys on one chord
+    /// winning as a layer's last row does: the loser's refs go to
+    /// `release`, and its spelling is returned.
+    static func keepLast(
+        _ key: Key,
+        in step: inout [Key],
+        release: (Int32) -> Void
+    ) -> [String] {
+        let lost = step.filter { $0.combo == key.combo }
+        refs(in: lost).forEach(release)
+        step.removeAll { $0.combo == key.combo }
+        step.append(key)
+        return lost.map(\.stored)
+    }
+
     /// Every ref the sequence holds, for release.
     var refs: [Int32] { Self.refs(in: steps) }
 
@@ -197,14 +214,13 @@ struct KeySequence: Equatable, Sendable {
                 skipped.append(binding.combo)
                 continue
             }
-            for lost in built where lost.combo == combo {
-                skipped.append(lost.stored)
-                refs(in: [lost]).forEach(release)
-            }
-            built.removeAll { $0.combo == combo }
             var source = binding
             if source.isSequence { source.steps = [] }
-            built.append(Key(combo: combo, source: source, action: action))
+            skipped += keepLast(
+                Key(combo: combo, source: source, action: action),
+                in: &built,
+                release: release
+            )
         }
         return built
     }

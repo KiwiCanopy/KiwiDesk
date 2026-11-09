@@ -68,7 +68,9 @@ struct KeySequenceTapThreadTests {
         )
         #expect(tap.sequenceEvent(.keyDown, try key(12)))  // q, unbound
         #expect(tap.sequenceEvent(.keyDown, try key(17)))  // t fires
-        #expect(fired.ids.allSatisfy { $0 == KeyboardTap.sequenceFireID })
+        #expect(
+            fired.ids == Array(repeating: KeyboardTap.sequenceFireID, count: 3)
+        )
         let drained = tap.drainSequenceDecisions()
         #expect(
             drained.map(\.outcome) == [.stepped, .unbound, .fired(ref: 7)]
@@ -101,18 +103,22 @@ struct KeySequenceTapThreadTests {
         #expect(!tap.sequenceEvent(.keyDown, try key(17)))
     }
 
-    @Test("a main-actor close is taken, and said, at the next event")
+    @Test("a main-actor close is taken at the next event, with its epoch")
     func mainCloseIsTaken() throws {
         let (tap, _) = try tap("ctrl+alt+space")
         _ = tap.sequenceEvent(
             .keyDown,
             try key(49, [.maskControl, .maskAlternate])
         )
-        tap.requestSequenceClose()
+        tap.requestSequenceClose(generation: 5)
         #expect(!tap.sequenceEvent(.keyDown, try key(17)))
-        #expect(
-            tap.drainSequenceDecisions().map(\.outcome) == [.stepped, .closed]
+        _ = tap.sequenceEvent(
+            .keyDown,
+            try key(49, [.maskControl, .maskAlternate])
         )
+        let drained = tap.drainSequenceDecisions()
+        #expect(drained.map(\.outcome) == [.stepped, .stepped])
+        #expect(drained.map(\.generation) == [3, 5])
     }
 
     @Test("new rows close the sequence and drop what waited")
@@ -125,6 +131,18 @@ struct KeySequenceTapThreadTests {
         tap.setRows(.empty)
         #expect(tap.drainSequenceDecisions().isEmpty)
         #expect(!tap.sequenceEvent(.keyDown, try key(17)))
+    }
+
+    @Test("the callback swallows what the consumer takes, and a gap closes")
+    func callbackRoutes() throws {
+        let (tap, _) = try tap("ctrl+alt+space")
+        #expect(!tap.handledForTesting(.keyDown, try key(17)))
+        let leader = try key(49, [.maskControl, .maskAlternate])
+        #expect(tap.handledForTesting(.keyDown, leader))
+        #expect(!tap.handledForTesting(.tapDisabledByTimeout, leader))
+        #expect(
+            tap.drainSequenceDecisions().map(\.outcome) == [.stepped, .closed]
+        )
     }
 
     @Test("a gap in the tap closes an open sequence")
@@ -141,14 +159,6 @@ struct KeySequenceTapThreadTests {
         #expect(
             tap.drainSequenceDecisions().map(\.outcome) == [.stepped, .closed]
         )
-    }
-
-    @Test("a main close is answered even with nothing open")
-    func closeIsAlwaysAnswered() throws {
-        let (tap, _) = try tap("ctrl+alt+space")
-        tap.requestSequenceClose()
-        #expect(!tap.sequenceEvent(.keyDown, try key(17)))
-        #expect(tap.drainSequenceDecisions().map(\.outcome) == [.closed])
     }
 
     @Test("a tap leader opens through the modifier-tap id")

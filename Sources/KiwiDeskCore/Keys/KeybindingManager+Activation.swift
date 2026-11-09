@@ -16,9 +16,7 @@ extension KeybindingManager {
         // swallow the sided press the recorder reads (#2601).
         tapBindings = [:]
         keyboardTap?.setRows(.empty)
-        // New rows close the tap's open sequence, and answer no main
-        // close; the panel follows.
-        closePending = false
+        // New rows close the tap's open sequence; the panel follows.
         noteSequenceClosed()
     }
 

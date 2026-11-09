@@ -122,7 +122,11 @@ struct KeySequenceReaderCensusTests {
         )
         // The whole loop header, so a needle kept beside a widened
         // walk reds too.
-        #expect(text.contains("in layer.pressBindings.enumerated()\n"))
+        #expect(
+            text.contains(
+                "for (index, binding) in layer.pressBindings.enumerated()\n"
+            )
+        )
         #expect(text.contains("prepareSequences(layer, lua: lua)"))
     }
 }

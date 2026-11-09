@@ -43,7 +43,11 @@ struct KeySequenceTapTests {
         #expect(KeyboardTapConsumer.sequences.swallows)
         let mask = KeyboardTapConsumer.sequencesMask
         #expect(mask & (1 << CGEventType.keyDown.rawValue) != 0)
-        #expect(mask & (1 << CGEventType.leftMouseDown.rawValue) != 0)
+        for click in [
+            CGEventType.leftMouseDown, .rightMouseDown, .otherMouseDown,
+        ] {
+            #expect(mask & (1 << click.rawValue) != 0)
+        }
         #expect(
             KeyboardTapRows(sequences: [
                 KeySequence(
@@ -178,27 +182,23 @@ struct KeySequenceTapTests {
         manager.onSequenceProgress = { seen.append($0) }
         manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
         let tap = try #require(taps().last)
+        let before = manager.sequenceGeneration
         // The panel is shut, yet the tap is asked: a leader's step
         // may be on its way.
         manager.closeSequence()
         #expect(tap.closeRequests == 1)
+        #expect(manager.sequenceGeneration != before)
         let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
-        let gen = manager.sequenceGeneration
         tap.decisions = [
             KeySequenceDecision(
                 outcome: .stepped,
                 progress: open,
-                generation: gen
-            ),
-            KeySequenceDecision(
-                outcome: .closed,
-                progress: nil,
-                generation: gen
+                generation: before
             ),
             KeySequenceDecision(
                 outcome: .stepped,
                 progress: open,
-                generation: gen
+                generation: manager.sequenceGeneration
             ),
         ]
         manager.tapFire(KeyboardTap.sequenceFireID)
@@ -235,9 +235,10 @@ struct KeySequenceTapTests {
         let heard = state.record(opened)
         #expect(!passed && !repeated && heard)
         #expect(state.waiting.last?.progress?.path == [])
-        state.closeRequested = true
+        state.closeRequested = 9
         state.takeClose()
         #expect(!state.router.isOpen)
-        #expect(!state.closeRequested)
+        #expect(state.closeRequested == nil)
+        #expect(state.generation == 9)
     }
 }

@@ -132,6 +132,24 @@ struct KeySequenceInstallTests {
         )
     }
 
+    @Test("An unread Lua sequence still names its keys for the panel")
+    func runningTreeForUnread() throws {
+        let core = try loaded(
+            """
+            local named = function() KiwiDesk.focus("left") end
+            KiwiDesk.define_sequence("ctrl+alt+space", {
+              h = { fn = named, name = "Left" },
+            }, { name = "Leader" })
+            """
+        )
+        let tree = try #require(
+            core.runningKeySequence(leader: "ctrl+alt+space")
+        )
+        #expect(tree.label == "Leader")
+        #expect(tree.steps?.map(\.label) == ["Left"])
+        #expect(core.runningKeySequence(leader: "ctrl+k") == nil)
+    }
+
     @Test("A structured sequence compiles beside the press table")
     func structuredInstall() throws {
         let core = try loaded("")

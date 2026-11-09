@@ -121,8 +121,9 @@ protocol KeyboardTapHandle: AnyObject {
     /// (#1871): `fire(sequenceFireID)` asks the main actor to take
     /// them.
     func drainSequenceDecisions() -> [KeySequenceDecision]
-    /// Closes an open sequence at the tap's next event.
-    func requestSequenceClose()
+    /// Closes an open sequence at the tap's next event, its later
+    /// decisions stamped `generation`.
+    func requestSequenceClose(generation: UInt64)
 }
 
 /// The one keyboard event tap (#2601, #1872, #1871), run only
@@ -161,9 +162,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     private var runLoop: CFRunLoop?
     private var installed = false
 
-    /// Builds without installing; `live` starts it, and a test
-    /// takes `unstarted`.
-    init(
+    private init(
         consumers: Set<KeyboardTapConsumer>,
         fire: @escaping Fire,
         report: @escaping Report
@@ -172,6 +171,18 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         self.fire = fire
         self.report = report
     }
+
+    #if DEBUG
+        /// Tests only: a tap that never installs, whose consumers a
+        /// suite drives with fabricated events. Production must not
+        /// read this.
+        static func unstarted(
+            consumers: Set<KeyboardTapConsumer>,
+            fire: @escaping Fire
+        ) -> KeyboardTap {
+            KeyboardTap(consumers: consumers, fire: fire, report: { _ in })
+        }
+    #endif
 
     /// Builds and starts the tap; nil when macOS refuses it, which
     /// is what a missing Accessibility grant looks like.
@@ -247,7 +258,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
 
     /// The callback body, on the tap thread: every live consumer
     /// in precedence order, the event swallowed once any did.
-    private func handle(
+    func handle(
         _ type: CGEventType,
         _ event: CGEvent
     ) -> Unmanaged<CGEvent>? {

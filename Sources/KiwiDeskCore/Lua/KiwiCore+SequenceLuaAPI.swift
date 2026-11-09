@@ -75,19 +75,18 @@ extension KiwiCore {
                 source = .sequence(combo: key, label: action.label)
             }
             source.meta = action.meta
-            // Two spellings of one chord: the last wins, as in a build.
-            for lost in keys where lost.combo == combo {
-                onLog("define_sequence('\(path)'): '\(lost.stored)' replaced")
-                KeySequence.refs(in: [lost]).forEach { lua.release(ref: $0) }
-            }
-            keys.removeAll { $0.combo == combo }
-            keys.append(
+            let lost = KeySequence.keepLast(
                 KeySequence.Key(
                     combo: combo,
                     source: source,
                     action: action.action
-                )
+                ),
+                in: &keys,
+                release: { lua.release(ref: $0) }
             )
+            for spelling in lost {
+                onLog("define_sequence('\(path)'): '\(spelling)' replaced")
+            }
         }
         return keys
     }

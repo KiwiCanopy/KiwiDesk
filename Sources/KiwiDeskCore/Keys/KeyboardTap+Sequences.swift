@@ -6,8 +6,8 @@ import os
 struct SequenceTapState: Sendable {
     var router = KeySequenceRouter()
     var waiting: [KeySequenceDecision] = []
-    /// The main actor asked for a close; read at the next event.
-    var closeRequested = false
+    /// The epoch a main close asked for; taken at the next event.
+    var closeRequested: UInt64?
     var generation: UInt64 = 0
 
     /// New rows: the open sequence closes, and nothing decided over
@@ -16,17 +16,17 @@ struct SequenceTapState: Sendable {
         router.setSequences(rows.sequences)
         generation = rows.sequenceGeneration
         waiting = []
-        closeRequested = false
+        closeRequested = nil
     }
 
-    /// Applies a main-actor close, if one is waiting, and answers it
-    /// with `.closed` whether or not one was open, which ends the
-    /// main actor's wait.
+    /// Applies a main-actor close, if one is waiting: the sequence
+    /// closes, and later decisions carry its epoch. The main actor
+    /// has already told the panel, and drops the older ones.
     mutating func takeClose() {
-        guard closeRequested else { return }
-        closeRequested = false
+        guard let epoch = closeRequested else { return }
+        closeRequested = nil
         router.close()
-        _ = record(.closed)
+        generation = epoch
     }
 
     /// Records a decision the main actor must take; false for one
@@ -110,14 +110,10 @@ extension KeyboardTap {
     }
 
     #if DEBUG
-        /// Tests only: a tap that never installs, whose consumers a
-        /// suite drives with fabricated events. Production must not
-        /// read this.
-        static func unstarted(
-            consumers: Set<KeyboardTapConsumer>,
-            fire: @escaping Fire
-        ) -> KeyboardTap {
-            KeyboardTap(consumers: consumers, fire: fire, report: { _ in })
+        /// Tests only: the callback's body, true where it swallowed
+        /// the event. Production must not read this.
+        func handledForTesting(_ type: CGEventType, _ event: CGEvent) -> Bool {
+            handle(type, event) == nil
         }
     #endif
 
@@ -138,7 +134,7 @@ extension KeyboardTap {
         }
     }
 
-    func requestSequenceClose() {
-        sequenceState.withLock { $0.closeRequested = true }
+    func requestSequenceClose(generation: UInt64) {
+        sequenceState.withLock { $0.closeRequested = generation }
     }
 }

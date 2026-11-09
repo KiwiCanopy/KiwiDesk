@@ -160,17 +160,16 @@ editing here:
     activation skips a press row on its chord, and a refused tap
     lists the leader in `activationFailures`
     (`KeySequenceInstallTests` ▸ `leaderWinsItsChord`,
-    `KeySequenceTapTests` ▸ `refusedTapFails`). Each decision carries the row
-    generation it was made over, and the manager drops an older
-    one, since a reload reuses its refs; new rows close the
-    sequence and drop what waited, and the main actor closes one
-    only through `requestSequenceClose`, asked whenever the layer
-    holds a sequence, since a leader may be on its way, and
-    answered with `.closed` at the tap's next event; a step decided
-    before that answer is dropped (`KeySequenceTapTests`,
-    `KeySequenceTapThreadTests`). An
-    end key is never disabled on a failure: the hint panel reads
-    the stored tree, which would still list it.
+    `KeySequenceTapTests` ▸ `refusedTapFails`). Each decision
+    carries the epoch it was made in, and the manager drops an
+    older one: new rows start an epoch, since a reload reuses its
+    refs, and drop what waited; a main close starts one too,
+    through `requestSequenceClose(generation:)`, asked whenever the
+    layer holds a sequence, since a leader may be on its way, and
+    taken at the tap's next event (`KeySequenceTapTests`,
+    `KeySequenceTapThreadTests`). An end key is never disabled on a
+    failure: the hint panel reads the stored tree, which would
+    still list it.
   - **`.sides` answers only the chords a sided row names**, the
     either-side row on such a chord included, and only while
     `modifierSides` is on; every other chord stays a Carbon
