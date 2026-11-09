@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "‘%2$@’에 맞는 %1$@ 윈도우가 없습니다",
   "window_action.refusal.nothing_here_to_swap": "여기에 교체할 윈도우가 없습니다",
   "window_action.refusal.nothing_to_gather": "모을 %1$@ 윈도우가 없습니다",
+  "window_action.refusal.screen_shows_full_screen": "전체 화면 앱을 표시 중인 화면으로는 윈도우를 이동할 수 없습니다",
   "window_action.refusal.swap_with_self": "‘%1$@’은(는) 자기 자신과 교체할 수 없습니다"
 }

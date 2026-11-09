@@ -30,7 +30,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case swapDir = "keybinding.swap_dir (x4)"
     /// Send the window to the last screen, or follow it (#3117).
     case screenMove = "keybinding.move_to_display_last{,_follow}"
-    case moveWindowToTrack = "keybinding.move_window_to_{prev,next}_track"
+    case moveWindowToTrack =
+        "keybinding.move_window_to_{prev,next}_track"
     case swapWithTrack =
         "keybinding.swap_with_{prev,next}_track"
     case moveToSpace = "keybinding.move_to_space (x N)"
@@ -56,6 +57,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// KiwiHub's navigation key alternatives (#2600): app-wide,
     /// Lua-only.
     case kiwiHubNavigationKeys = "appWide.kiwiHubKeys"
+
     /// Whether shortcuts keep a modifier's side (#2601): app-wide.
     case modifierSides = "appWide.modifierSides"
     /// The "Shortcuts use" switch's base (#2460), drafted with the

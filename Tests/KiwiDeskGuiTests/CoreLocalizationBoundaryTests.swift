@@ -159,9 +159,10 @@ struct CoreLocalizationBoundaryTests {
         // to window's Bring here refusal (#1875), move_here's
         // two (#1513), a move into the window's own Space, the
         // swap verbs' per-state refusals (#2885), Move here's
-        // full-screen one and a full-screen window's Desktop
-        // move (#2888).
-        "Commands/WindowActionRefusal.swift": 19,
+        // full-screen one, a full-screen window's Desktop move
+        // (#2888) and a screen move onto a full-screen screen
+        // (#3117).
+        "Commands/WindowActionRefusal.swift": 20,
         // KiwiVision's out-of-reach pill (#2103 ruling 16).
         "App/KiwiCore+VisionReach.swift": 1,
         // A bar shortcut's refusal pill (#761), drawn beside the

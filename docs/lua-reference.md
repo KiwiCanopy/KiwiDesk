@@ -374,9 +374,10 @@ to the same screen.
 
 Where no screen answers, the focused window's ring bumps, nothing
 moves, and the command fails with `no other screen` or
-`no screen <direction> of focus`. A screen showing a native
-full-screen Space takes no window: the ring bumps and the command
-fails.
+`no screen <direction> of focus`. A screen showing a full-screen
+app takes no window: a pill on the window says so, and the command
+fails with `a window cannot move to a screen showing a full-screen
+Space`.
 
 `move_to_display_last` and its follow form are **Move to last
 screen** and **Move to last screen & follow** under Settings ▸

@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Ninguna ventana de %1$@ coincide con «%2$@»",
   "window_action.refusal.nothing_here_to_swap": "No hay ninguna ventana aquí con la que intercambiar",
   "window_action.refusal.nothing_to_gather": "No hay ventanas de %1$@ que reunir",
+  "window_action.refusal.screen_shows_full_screen": "Una ventana no se puede mover a una pantalla que muestra una app a pantalla completa",
   "window_action.refusal.swap_with_self": "«%1$@» no se puede intercambiar consigo misma"
 }

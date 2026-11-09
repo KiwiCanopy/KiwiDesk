@@ -480,7 +480,9 @@ that way, stopping at the edge; neither takes other arguments
 `move_to_display_last` and `move_to_display` move the focused
 window into the Space another screen shows, the screen
 `focus_display_last` or `focus_display` would go to; their
-`_and_follow` forms go with it
+`_and_follow` forms go with it. `move_to_display` and
+`move_to_display_and_follow` take `left|right|up|down`; none of
+the four takes a window id
 ([`move_to_display_last`](lua-reference.md#move_to_display_last--move_to_display)).
 :::
 

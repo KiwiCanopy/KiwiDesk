@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Nenhuma janela de %1$@ corresponde a “%2$@”",
   "window_action.refusal.nothing_here_to_swap": "Nenhuma janela aqui para trocar",
   "window_action.refusal.nothing_to_gather": "Nenhuma janela de %1$@ para reunir",
+  "window_action.refusal.screen_shows_full_screen": "Uma janela não pode ser movida para uma tela que mostra um app em tela cheia",
   "window_action.refusal.swap_with_self": "“%1$@” não pode ser trocado com ele mesmo"
 }

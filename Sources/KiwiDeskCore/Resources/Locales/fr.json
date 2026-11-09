@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Aucune fenêtre de %1$@ ne correspond à « %2$@ »",
   "window_action.refusal.nothing_here_to_swap": "Aucune fenêtre ici avec laquelle échanger",
   "window_action.refusal.nothing_to_gather": "Aucune fenêtre de %1$@ à rassembler",
+  "window_action.refusal.screen_shows_full_screen": "Une fenêtre ne peut pas être déplacée vers un écran qui affiche une app en plein écran",
   "window_action.refusal.swap_with_self": "« %1$@ » ne peut pas être échangé avec lui-même"
 }

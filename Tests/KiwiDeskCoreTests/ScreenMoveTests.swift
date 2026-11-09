@@ -149,9 +149,28 @@ struct ScreenMoveTests {
     @Test("one screen has no other")
     func oneScreenRefuses() {
         let core = makeCore(screens: 1)
+        var bumps: [Direction] = []
+        core.borders.deadEndProbe = { bumps.append($1) }
         let response = core.execute("move_to_display_last_and_follow")
         #expect(response.error == "no other screen")
         #expect(home(core) == SpaceID("1"))
+        #expect(bumps == [.right])
+    }
+
+    /// A screen reached with no command behind it is in no history
+    /// until the press records it, so the toggle depends on that
+    /// record.
+    @Test("the press records the screen it leaves")
+    func pressRecordsItsScreen() {
+        let core = makeCore(screens: 3)
+        core.execute("focus_space", args: [.string("3")])
+        core.state.workspaces.activate(SpaceID("1"))
+        let verb = "move_to_display_last_and_follow"
+        #expect(core.execute(verb).isSuccess)
+        #expect(core.focusedScreen == Self.c)
+        #expect(core.execute(verb).isSuccess)
+        #expect(home(core) == SpaceID("1"))
+        #expect(core.focusedScreen == Self.a)
     }
 
     @Test("the direction is read from the type")

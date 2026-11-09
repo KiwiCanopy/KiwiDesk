@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "沒有符合「%2$@」的 %1$@ 視窗",
   "window_action.refusal.nothing_here_to_swap": "這裡沒有可互換的視窗",
   "window_action.refusal.nothing_to_gather": "沒有可收集的 %1$@ 視窗",
+  "window_action.refusal.screen_shows_full_screen": "視窗無法移到正在顯示全螢幕 App 的螢幕",
   "window_action.refusal.swap_with_self": "「%1$@」無法與自身互換"
 }

@@ -36,7 +36,8 @@ extension KeybindingCatalog {
 
     /// Send the focused window to the screen the focus was on
     /// before, staying or following (#3117). No default chord; the
-    /// direction forms are Lua and CLI only.
+    /// direction forms stay Lua and CLI only until #2764 settles
+    /// which way a screen lies.
     static let screenMoveRows: [NavCommand] = [
         NavCommand(
             label: "Move to last screen",

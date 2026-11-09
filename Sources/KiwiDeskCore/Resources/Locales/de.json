@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Kein Fenster von %1$@ passt zu „%2$@“",
   "window_action.refusal.nothing_here_to_swap": "Hier ist kein Fenster zum Tauschen",
   "window_action.refusal.nothing_to_gather": "Kein Fenster von %1$@ zum Sammeln",
+  "window_action.refusal.screen_shows_full_screen": "Ein Fenster kann nicht auf einen Bildschirm verschoben werden, der eine App im Vollbild zeigt",
   "window_action.refusal.swap_with_self": "„%1$@“ kann nicht mit sich selbst getauscht werden"
 }

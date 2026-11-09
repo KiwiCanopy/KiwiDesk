@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "没有与“%2$@”匹配的 %1$@ 窗口",
   "window_action.refusal.nothing_here_to_swap": "这里没有可互换的窗口",
   "window_action.refusal.nothing_to_gather": "没有可收集的 %1$@ 窗口",
+  "window_action.refusal.screen_shows_full_screen": "窗口无法移到正在显示全屏 App 的显示器",
   "window_action.refusal.swap_with_self": "“%1$@”无法与自身互换"
 }

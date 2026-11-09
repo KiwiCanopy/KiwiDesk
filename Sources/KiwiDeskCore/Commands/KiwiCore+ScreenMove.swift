@@ -14,7 +14,7 @@ extension KiwiCore {
             bumpAtScreenEdge(.right)
             return .fail("no other screen")
         }
-        return moveToScreen(target, toward: .right, follow: follow)
+        return moveToScreen(target, follow: follow)
     }
 
     /// `move_to_display(_and_follow) <direction>`: the nearest
@@ -30,7 +30,7 @@ extension KiwiCore {
             bumpAtScreenEdge(direction)
             return .fail("no screen \(raw) of focus")
         }
-        return moveToScreen(target, toward: direction, follow: follow)
+        return moveToScreen(target, follow: follow)
     }
 
     /// Files the focused window into the Space `display` shows. A
@@ -38,32 +38,19 @@ extension KiwiCore {
     /// window, since that Space hides whatever is filed under it.
     private func moveToScreen(
         _ display: DisplayID,
-        toward direction: Direction,
         follow: Bool
     ) -> CommandResponse {
         guard let window = focusedWindowID else {
             return .fail("no focused window")
         }
         guard screenShowsUserSpace(display) else {
-            bumpAtScreenEdge(direction)
-            return .fail(
-                "a window cannot move to a screen showing a "
-                    + "full-screen Space"
-            )
+            let refusal = WindowActionRefusal.screenShowsFullScreen
+            cueWindowAction(refusal, on: window)
+            return .fail(refusal.logReason)
         }
         guard let shown = state.workspaces.activeSpace(on: display) else {
             return .fail("no Space on that screen")
         }
         return moveToSpace(window, shown, follow: follow)
-    }
-
-    /// Whether `display` shows a user Desktop rather than a native
-    /// full-screen or system Space (#670).
-    private func screenShowsUserSpace(_ display: DisplayID) -> Bool {
-        NativeSpaces.currentSpaceIsUser(
-            display: display,
-            filed: desktopMemory.shownUserSpaces,
-            live: desktopMemory.liveSpaceIsUser
-        )
     }
 }

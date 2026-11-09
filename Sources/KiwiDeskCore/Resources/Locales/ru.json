@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "Нет окна %1$@, подходящего под «%2$@»",
   "window_action.refusal.nothing_here_to_swap": "Здесь нет окна для обмена местами",
   "window_action.refusal.nothing_to_gather": "Нет окон %1$@, которые можно собрать",
+  "window_action.refusal.screen_shows_full_screen": "Окно нельзя переместить на экран, на котором показано полноэкранное приложение",
   "window_action.refusal.swap_with_self": "Окно «%1$@» нельзя поменять местами с самим собой"
 }

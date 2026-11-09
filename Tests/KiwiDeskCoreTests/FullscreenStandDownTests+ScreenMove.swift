@@ -50,9 +50,22 @@ extension FullscreenStandDownTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
 
         NativeSpaces.currentSpaceIsUserOverride = { $0 != b }
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
         let refused = core.execute("move_to_display_last")
-        #expect(!refused.isSuccess)
+        #expect(
+            refused.error
+                == "a window cannot move to a screen showing a "
+                + "full-screen Space"
+        )
         #expect(core.state.workspaces.space(of: window) == "1")
+        // The pill's cue, which logs its reason for the window.
+        #expect(
+            lines.contains(
+                "a window cannot move to a screen showing a "
+                    + "full-screen Space: w1"
+            )
+        )
 
         // The control: the same move onto a user Desktop lands.
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }

@@ -2627,5 +2627,6 @@
   "window_action.refusal.no_title_match": "「%2$@」に一致する%1$@のウインドウはありません",
   "window_action.refusal.nothing_here_to_swap": "ここに入れ替えるウインドウがありません",
   "window_action.refusal.nothing_to_gather": "集める%1$@のウインドウはありません",
+  "window_action.refusal.screen_shows_full_screen": "フルスクリーンのアプリを表示中の画面にはウインドウを移動できません",
   "window_action.refusal.swap_with_self": "「%1$@」を自身と入れ替えることはできません"
 }
