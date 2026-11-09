@@ -184,9 +184,13 @@ enum KeybindingCatalog {
     }
 
     /// KiwiHub's sides in the order of their keys, J K L (#2265),
-    /// then the Desktop overview (#1229).
+    /// the switcher's last-app opener beside its own (#3135), then
+    /// the Desktop overview (#1229).
     static var kiwiHubRows: [NavCommand] {
-        [jumpToWindow, showShortcuts, showLayoutPicker, showDesktopOverview]
+        [
+            jumpToWindow, jumpToLastApp, showShortcuts, showLayoutPicker,
+            showDesktopOverview,
+        ]
     }
 
     /// The window switcher (#1875): "Show" and the side's
@@ -197,6 +201,20 @@ enum KeybindingCatalog {
         lua: KiwiHubSide.windows.lua,
         displayLabel: {
             L("keybinding.show_window_switcher", "Show window switcher")
+        }
+    )
+
+    /// The window switcher with its app strip on the app of the
+    /// window used last (#3135): the switcher's noun, and what this
+    /// key adds over its own (`ShortcutsPanelNounTests`).
+    static let jumpToLastApp = NavCommand(
+        label: "Show window switcher for last app",
+        lua: "kiwihub.show_last_app()",
+        displayLabel: {
+            L(
+                "keybinding.show_window_switcher_last_app",
+                "Show window switcher for last app"
+            )
         }
     )
 

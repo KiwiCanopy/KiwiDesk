@@ -110,6 +110,8 @@ final class JumpModel: ObservableObject {
     /// modifier that named the pick is let go.
     @Published var revealedRow: Int?
     var onClose: () -> Void = {}
+    /// Reopens an app the strip lists with no window, by bundle id.
+    var onReopen: (String) -> Void = { _ in }
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
     /// The panel's height glides to the new scope.
@@ -227,6 +229,8 @@ final class JumpModel: ObservableObject {
         case .pick(let moveHere):
             if let index = list.selection {
                 pick(index, moveHere ? .moveHere : .jump)
+            } else if !moveHere, let app = list.stripApp?.bundleID {
+                onReopen(app)
             }
         case .swapHere:
             if let index = list.selection { pick(index, .swapHere) }
@@ -244,7 +248,9 @@ final class JumpModel: ObservableObject {
             }
         case .dead:
             onDeadKey()
-        case .stepScope, .side, .keep, .settings, .swallow, .openSpace,
+        case .side(let delta):
+            stepTile(delta, wrap: !repeated)
+        case .stepScope, .keep, .settings, .swallow, .openSpace,
             .leaveSpace, .pickUp, .follow:
             break
         }
@@ -309,23 +315,12 @@ final class JumpModel: ObservableObject {
         if !shift, !option, revealedRow != nil { revealedRow = nil }
     }
 
-    /// What VoiceOver hears when the results change.
-    var resultsSpoken: String {
-        guard list.results.isEmpty else {
-            return L(
-                "jump.ax.results",
-                "Results: %1$d",
-                list.results.count
-            )
-        }
-        return emptyText
-    }
-
-    /// The line an empty list shows.
-    var emptyText: String {
-        list.snapshot.entries.isEmpty
-            ? L("jump.empty.other", "No other windows")
-            : L("jump.empty.no_match", "No open windows match")
+    /// The app strip's one door into the list (#3135): a tile slides
+    /// rows under a still pointer, as a key does.
+    func moveStrip(_ move: (inout JumpList) -> Void) {
+        restPointer()
+        move(&list)
+        onResultsChange()
     }
 
     private func move(by delta: Int, wrap: Bool = false) {

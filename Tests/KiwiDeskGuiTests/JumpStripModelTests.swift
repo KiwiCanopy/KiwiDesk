@@ -1,0 +1,108 @@
+import AppKit
+import KiwiDeskCore
+import Testing
+
+@testable import KiwiDesk
+
+/// The app strip through the panel's model (#3135): ← → reach it on
+/// Windows, a click on a dimmed tile does nothing, ↩ on an app with
+/// no window reopens it, every chord still picks from the narrowed
+/// list, and VoiceOver hears the tile with the row it selects.
+@Suite("KiwiHub app strip model")
+@MainActor
+struct JumpStripModelTests {
+    private func model() -> JumpModel {
+        LocalizationManager.shared.select("en")
+        let model = JumpModel(
+            snapshot: JumpStripTests.snapshot,
+            icons: [:],
+            rowCap: 6,
+            pointer: .zero
+        )
+        model.currentPointer = { .zero }
+        return model
+    }
+
+    @Test("← → move the strip, and the chords pick from its app")
+    func sideMovesTheStrip() {
+        LocalizationManager.shared.select("en")
+        let model = model()
+        var picked: [(String, JumpPick)] = []
+        model.onPick = { picked.append(($0.title, $1)) }
+        model.handle(.side(1), repeated: false)
+        model.handle(.side(1), repeated: false)
+        #expect(model.list.stripApp?.name == "Mail")
+        model.handle(.step(1), repeated: false)
+        model.handle(.pick(moveHere: true), repeated: false)
+        model.handle(.swapHere, repeated: false)
+        model.handle(.quick(0, moveHere: false), repeated: false)
+        #expect(picked.map(\.0) == ["Inbox", "Inbox", "Draft"])
+        #expect(picked.map(\.1) == [.moveHere, .swapHere, .jump])
+    }
+
+    @Test("↩ on an app with no window reopens it; ⇧↩ does not")
+    func reopens() {
+        LocalizationManager.shared.select("en")
+        let model = model()
+        var reopened: [String] = []
+        model.onReopen = { reopened.append($0) }
+        model.clickTile(3)
+        #expect(model.emptyText == "No windows")
+        model.handle(.pick(moveHere: true), repeated: false)
+        #expect(reopened.isEmpty)
+        model.handle(.pick(moveHere: false), repeated: false)
+        #expect(reopened == ["com.apple.dt"])
+    }
+
+    @Test("a click on a dimmed tile does nothing")
+    func dimmedClick() {
+        LocalizationManager.shared.select("en")
+        let model = model()
+        model.query = "inbox"
+        model.clickTile(1)
+        #expect(model.list.tile == 0)
+        model.clickTile(2)
+        #expect(model.list.stripApp?.name == "Mail")
+        #expect(model.query == "inbox")
+    }
+
+    @Test("a strip move announces the tile and its row")
+    func announces() {
+        LocalizationManager.shared.select("en")
+        let model = model()
+        var heard: [String] = []
+        model.onAnnounce = { heard.append($0) }
+        model.handle(.side(1), repeated: false)
+        #expect(heard.last?.hasPrefix("Notes: ") == true)
+        model.clickTile(3)
+        #expect(heard.last == "Xcode: No windows")
+    }
+
+    @Test("the last-app opener lands on row 1's app, row 1 kept")
+    func lastAppOpener() {
+        let model = model()
+        model.openOnLastApp()
+        #expect(model.list.stripApp?.name == "Mail")
+        #expect(model.list.selected?.entry.title == "Draft")
+    }
+
+    /// The panel reads the field at each press: ← → walk the strip
+    /// only on Windows with an empty field (`wireStrip`).
+    @Test("the controller lets ← → walk only an empty Windows field")
+    func stripMovesWiring() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Jump/JumpPanelController+Strip.swift"
+                )
+        )
+        let squashed = source.split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(
+            squashed.contains(
+                "panel.stripMoves={[weakmodel]inmodel?.scope==.windows"
+                    + "&&model?.query.isEmpty==true"
+            )
+        )
+    }
+}

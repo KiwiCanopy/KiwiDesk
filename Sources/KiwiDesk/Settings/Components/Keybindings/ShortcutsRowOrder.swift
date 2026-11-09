@@ -36,9 +36,11 @@ enum ShortcutsRowOrder {
     ]
 
     /// Show & hide ▸ KiwiHub order: its sides in the order of their keys,
-    /// J K L (#2246, #2265), then the Desktop overview (#1229).
+    /// J K L (#2246, #2265), the window switcher's last-app opener
+    /// beside its own (#3135), then the Desktop overview (#1229).
     static let kiwiHubAtRest: [SettingKey] = [
         .shortcuts(.jumpToWindow),
+        .shortcuts(.jumpToLastApp),
         .shortcuts(.showShortcuts),
         .shortcuts(.viewPicker),
         .shortcuts(.desktopOverview),

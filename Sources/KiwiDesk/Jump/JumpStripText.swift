@@ -1,0 +1,26 @@
+import KiwiDeskCore
+
+/// The app strip's words (#3135): Core names the apps, the strip
+/// writes every label (#96).
+@MainActor
+enum JumpStripText {
+    /// The first tile, today's flat list.
+    static var allName: String { L("jump.strip.all", "All") }
+
+    /// The strip's VoiceOver name.
+    static var stripName: String { L("jump.strip.ax_label", "Apps") }
+
+    /// A tile as VoiceOver hears it: its name, and its windows
+    /// where it has more than one. The count goes last behind a
+    /// label, so nothing has to agree with it.
+    static func spoken(_ name: String, windows: Int) -> String {
+        guard windows > 1 else { return name }
+        return L("jump.strip.ax.windows", "%1$@, windows: %2$d", name, windows)
+    }
+
+    /// What a move along the strip announces: the tile, then the
+    /// row the list now selects or its empty line.
+    static func moved(tile: String, row: String) -> String {
+        L("jump.strip.ax.moved", "%1$@: %2$@", tile, row)
+    }
+}

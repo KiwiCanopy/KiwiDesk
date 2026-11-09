@@ -7029,6 +7029,19 @@ is on.
 selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
+:::unreleased
+Above the list sits the **app strip**: **All** first, then one tile
+per app the list holds, most recently used first, with a count on
+an app with two windows or more. **←** and **→** move along it
+while the search field is empty, and a click picks a tile; the
+list then holds that app's windows alone, its most recent window
+selected. An app with no window shows **No windows**, and
+**Return** opens it again, as [focus_or_spawn](#focus_or_spawn)
+does. Typing puts the strip back on **All** and dims each app with
+no match; a click on a lit tile then narrows the matches to that
+app. [kiwihub.show_last_app](#kiwihubshow_last_app) opens this side
+with the strip on the app of the window you used last.
+:::
 
 The `"view"` side is the **view picker**, three lines in one
 panel, the current item on each marked ✓. The menu bar's **Open
@@ -7144,6 +7157,26 @@ KiwiDesk.bind("alt+space", function()
     kiwihub.show("windows")
 end)
 ```
+
+:::unreleased
+### kiwihub.show_last_app
+
+**Expects:** nothing.
+
+**Does:** opens KiwiHub's window switcher with its app strip on
+the app of the window you used last, that window selected, so
+**Return** goes back to it. It switches to the window switcher from
+another side, and closes KiwiHub when the window switcher is up.
+Settings lists it under Shortcuts & Gestures ▸ KiwiHub as **Show
+window switcher for last app**, with no key until you give it one.
+Over the CLI it is `kiwidesk kiwihub.show_last_app`.
+
+```lua
+KiwiDesk.bind("alt+tab", function()
+    kiwihub.show_last_app()
+end)
+```
+:::
 
 ### kiwihub.set_key
 

@@ -13,7 +13,7 @@ extension ShortcutsKey {
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
             .layoutCycle, .viewPicker, .desktopOverview, .jumpToWindow,
-            .toggleLens:
+            .jumpToLastApp, .toggleLens:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

@@ -87,6 +87,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.showDesktopOverview]
         case .jumpToWindow:
             return [KeybindingCatalog.jumpToWindow]
+        case .jumpToLastApp:
+            return [KeybindingCatalog.jumpToLastApp]
         case .toggleKiwiVision:
             return [KeybindingCatalog.toggleKiwiVision]
         case .toggleSpaceBar:
