@@ -2437,8 +2437,14 @@ editing here:
   door that ends a hand Maximize states its answer for the fill:
   `resize` and a press of the filled shape refuse through the one
   `refuseVisionFilled` and a mouse resize snaps back through it
-  in `handleDragEnd`, while an order write, a mode write and a
-  drag that moves proceed and the fill follows the focus. A float fill
+  in `handleDragEnd`, while an order write, a mode write,
+  `reset_layout_sizing` and a drag that moves proceed and the fill
+  follows the focus. A new mouse or gesture path to the
+  `writeCapped*` writers owes the same refusal. The fill stands on
+  `workspaces.activeSpace` alone, its shape resolved for that
+  Space's screen, so a path that changes the active Space and reads
+  the shape before its own retile calls
+  `refillVision(retiling: false)` first. A float fill
   (#3036) widens both float stand-downs together —
   `maximizedTiled` and `visionFilledWindow` — and
   `retileEndingMaximize`'s spring promise with them. **What it fills is read through

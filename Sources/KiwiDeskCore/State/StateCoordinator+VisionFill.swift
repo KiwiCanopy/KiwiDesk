@@ -16,8 +16,9 @@ public struct VisionFill: Equatable, Sendable {
 public struct VisionFillState: Equatable, Sendable {
     /// nil while KiwiVision is off or its maximize is Off.
     public internal(set) var fill: VisionFill?
-    /// What `retireVisionFill` last saw filled, read only to name
-    /// the windows a change moved; re-keyed with the window.
+    /// What `retireVisionFill` last saw filled: names the windows a
+    /// change moved, and is the verdict's memory while a float holds
+    /// the focus. Only that retire and the re-key write it.
     var drawn: Set<WindowID> = []
 }
 
