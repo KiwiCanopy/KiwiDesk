@@ -15122,12 +15122,12 @@ rejected, because a query that empties one app's list ("No windows
 match in Xcode") is a dead end the user has to back out of, where
 All with dimmed tiles shows at once which apps hold a match.
 
-The ruling gives ← → to the strip only while the field is empty,
-and also says they walk the matching apps while a query is up. The
-shipped reading keeps ← → for the text cursor under a query, as a
-search field does everywhere on macOS, so there the strip moves by
-pointer only and a dimmed tile takes no click; the owner confirms
-or reverses that reading on #3135.
+← → belong to the strip whether or not a query is typed (owner
+amendment on #3135): under a query they step through only the apps
+with a match, so a query narrowed to one app is a key away, and a
+dimmed tile is never landed on. The field gives up its in-text
+cursor movement for it, which costs little because a query is a
+few letters typed and corrected from the end.
 
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,

@@ -327,7 +327,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
         panel.naming = { [weak model] in model?.isNaming ?? false }
-        wireStrip(model, panel)
+        wireStrip(model)
         wireView(model)
         wireDesktops(model)
         wireShortcuts(model)

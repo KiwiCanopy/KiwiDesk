@@ -7035,15 +7035,15 @@ Above the list sits the **app strip**: **All** first, then one tile
 per app the list holds and per app you brought forward since
 KiwiDesk started that is still running with no window, most
 recently used first, with a count on an app with two windows or
-more. **←** and **→** move along it
-while the search field is empty, and a click picks a tile; the
+more. **←** and **→** move along it and a click picks a tile; the
 list then holds that app's windows alone, its most recent window
 selected. An app with no window shows **No windows**, and
-**Return** opens it again, as [focus_or_spawn](#focus_or_spawn)
-does. Typing puts the strip back on **All** and dims each app with
-no match; a click on a lit tile then narrows the matches to that
-app. [kiwihub.show_last_app](#kiwihubshow_last_app) opens this side
-with the strip on the app of the window you used last.
+**Return** or a click opens it again, as
+[focus_or_spawn](#focus_or_spawn) does. Typing puts the strip back
+on **All** and dims each app with no match; **←** and **→** then
+step through the apps with a match, never the text, and narrow the
+matches to that app. [kiwihub.show_last_app](#kiwihubshow_last_app)
+opens this side with the strip on the app of the window you used last.
 :::
 
 The `"view"` side is the **view picker**, three lines in one

@@ -20,9 +20,6 @@ final class JumpPanel: NSPanel {
     /// Lua's alternatives to the navigation keys, read per press
     /// so a `kiwihub.set_key` takes effect at once (#2600).
     var keys: () -> KiwiHubKeys = { KiwiHubKeys() }
-    /// Whether ← → walk Windows' app strip: its field is empty
-    /// (#3135).
-    var stripMoves: () -> Bool = { false }
 
     override var canBecomeKey: Bool { true }
 
@@ -56,8 +53,7 @@ final class JumpPanel: NSPanel {
                 modifiers: event.modifierFlags,
                 scope: scope(),
                 naming: naming(),
-                keys: keys(),
-                stripMoves: stripMoves()
+                keys: keys()
             )
         {
             onKey(key, event.isARepeat)
@@ -97,8 +93,7 @@ final class JumpPanel: NSPanel {
                     modifiers: event.modifierFlags,
                     scope: scope(),
                     naming: naming(),
-                    keys: keys(),
-                    stripMoves: stripMoves()
+                    keys: keys()
                 )
             {
                 onKey(key, event.isARepeat)

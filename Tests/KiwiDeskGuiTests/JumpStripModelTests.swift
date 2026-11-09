@@ -139,24 +139,24 @@ struct JumpStripModelTests {
         #expect(model.list.selected?.entry.title == "Draft")
     }
 
-    /// The panel reads the field at each press: ← → walk the strip
-    /// only on Windows with an empty field (`wireStrip`).
-    @Test("the controller lets ← → walk only an empty Windows field")
-    func stripMovesWiring() throws {
-        let source = try SourceScan.strippedSource(
-            at: SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(
-                    "Sources/KiwiDesk/Jump/JumpPanelController+Strip.swift"
-                )
-        )
-        let squashed = source.split(whereSeparator: \.isWhitespace)
-            .joined()
-        #expect(
-            squashed.contains(
-                "panel.stripMoves={[weakmodel]inmodel?.scope==.windows"
-                    + "&&model?.query.isEmpty==true"
-            )
-        )
+    /// The model under a typed query: ← → keep the query and narrow
+    /// to the next app with a match (#3135 ▸ Amendment).
+    @Test("← → under a query walk the matching apps, query kept")
+    func typedArrows() {
+        LocalizationManager.shared.select("en")
+        let model = model()
+        model.query = "inbox"
+        model.handle(.side(1), repeated: false)
+        #expect(model.query == "inbox")
+        #expect(model.list.stripApp?.name == "Mail")
+        #expect(model.list.results.map(\.entry.title) == ["Inbox"])
+        model.handle(.side(1), repeated: false)
+        #expect(model.list.tile == 0)
+    }
+
+    /// The controller wires the strip at every opening.
+    @Test("the controller wires the strip's reopen")
+    func stripWiring() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Jump")
         func squash(_ file: String) throws -> String {
@@ -164,17 +164,11 @@ struct JumpStripModelTests {
                 at: root.appendingPathComponent(file)
             ).split(whereSeparator: \.isWhitespace).joined()
         }
-        // The controller wires the strip at every opening, and both
-        // of the panel's key doors hand the field's verdict on.
         #expect(
             try squash("JumpPanelController.swift")
-                .contains("wireStrip(model,panel)")
+                .contains("wireStrip(model)")
         )
-        #expect(
-            try squash("JumpPanel.swift")
-                .components(separatedBy: "stripMoves:stripMoves()")
-                .count == 3
-        )
+        let squashed = try squash("JumpPanelController+Strip.swift")
         // The pick reaches Core's reopen after the panel's close.
         #expect(squashed.contains("model.onReopen={[weakself]appin"))
         #expect(squashed.contains("core.reopenJumpApp(bundleID:bundleID)"))

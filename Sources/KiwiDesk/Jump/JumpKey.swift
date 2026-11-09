@@ -30,8 +30,8 @@ enum JumpKey: Equatable {
     /// ⇥ (forward) or ⇧⇥ (back): the next side, wrapping, with
     /// the query cleared.
     case stepScope(forward: Bool)
-    /// ← / → in Layouts and Desktops, and on Windows' app strip
-    /// while the field is empty: one tile (#2897, #3135).
+    /// ← / → in Layouts and Desktops, and on Windows' app strip,
+    /// typed or not: one tile (#2897, #3135).
     case side(Int)
     /// ⌘S in Layouts: Keep in Profile.
     case keep
@@ -74,8 +74,7 @@ enum JumpKey: Equatable {
         modifiers: NSEvent.ModifierFlags,
         scope: JumpScope = .windows,
         naming: Bool,
-        keys: KiwiHubKeys = KiwiHubKeys(),
-        stripMoves: Bool = false
+        keys: KiwiHubKeys = KiwiHubKeys()
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
@@ -92,8 +91,9 @@ enum JumpKey: Equatable {
         if scope == .desktops, let key = desktops(keyCode, held) {
             return key
         }
-        // An empty field has no caret to move: ← → walk the strip.
-        if scope == .windows, stripMoves,
+        // ← → walk the strip, never the caret, while a query is
+        // typed too (#3135 ▸ Amendment).
+        if scope == .windows,
             keyCode == left || keyCode == right,
             held.subtracting(.shift).isEmpty
         {
@@ -133,13 +133,7 @@ enum JumpKey: Equatable {
             // A Lua alternative is read after every built-in key,
             // so none can shadow one (#2600).
             return quick(keyCode, held, scope: scope)
-                ?? alternative(
-                    keyCode,
-                    held,
-                    scope: scope,
-                    keys: keys,
-                    stripMoves: stripMoves
-                )
+                ?? alternative(keyCode, held, scope: scope, keys: keys)
         }
     }
 
@@ -223,17 +217,14 @@ enum JumpKey: Equatable {
 
     /// What a Lua alternative does: its built-in key's move. ⇧
     /// previews Move here, so an alternative moves under it too, as
-    /// the arrows do. ← and → move in View and Desktops, and on
-    /// Windows' strip while the field is empty; elsewhere theirs is
-    /// typing.
+    /// the arrows do. ← and → move in View, Desktops and Windows'
+    /// strip; on Shortcuts theirs is typing.
     private static func alternative(
         _ keyCode: UInt16,
         _ held: NSEvent.ModifierFlags,
         scope: JumpScope,
-        keys: KiwiHubKeys,
-        stripMoves: Bool
+        keys: KiwiHubKeys
     ) -> JumpKey? {
-        let walks = sideways(scope) || scope == .windows && stripMoves
         guard
             let key = keys.key(for: combo(keyCode, held))
                 ?? keys.key(for: combo(keyCode, held.subtracting(.shift)))
@@ -243,8 +234,8 @@ enum JumpKey: Equatable {
         case .down: return .step(1)
         case .pageUp: return .page(-1)
         case .pageDown: return .page(1)
-        case .left: return walks ? .side(-1) : nil
-        case .right: return walks ? .side(1) : nil
+        case .left: return sideways(scope) ? .side(-1) : nil
+        case .right: return sideways(scope) ? .side(1) : nil
         case .openSpace: return scope == .desktops ? .openSpace : nil
         case .leaveSpace: return scope == .desktops ? .leaveSpace : nil
         case .pickUp: return scope == .desktops ? .pickUp : nil
@@ -254,7 +245,7 @@ enum JumpKey: Equatable {
 
     /// The sides whose ← and → move a selection.
     private static func sideways(_ scope: JumpScope) -> Bool {
-        scope == .view || scope == .desktops
+        scope == .view || scope == .desktops || scope == .windows
     }
 
     private static func quick(

@@ -152,52 +152,63 @@ struct JumpStripTests {
         #expect(hidden.windowCount(of: JumpApp(pid: 40, name: "Music")) == 0)
     }
 
-    @Test("← → walk the strip only while the field is empty")
+    /// The field never takes ← →: queries are short, so the strip
+    /// keeps them typed or not (#3135 ▸ Amendment).
+    @Test("← → walk the strip on Windows, a held ⌘ excepted")
     func arrows() {
-        func key(_ code: UInt16, empty: Bool) -> JumpKey? {
+        func key(
+            _ code: UInt16,
+            _ modifiers: NSEvent.ModifierFlags = []
+        ) -> JumpKey? {
             JumpKey.of(
                 keyCode: code,
-                modifiers: [],
+                modifiers: modifiers,
                 scope: .windows,
-                naming: false,
-                stripMoves: empty
+                naming: false
             )
         }
-        #expect(key(123, empty: true) == .side(-1))
-        #expect(key(124, empty: true) == .side(1))
-        #expect(key(123, empty: false) == nil)
-        #expect(key(124, empty: false) == nil)
-        let held = JumpKey.of(
-            keyCode: 124,
-            modifiers: .command,
-            scope: .windows,
-            naming: false,
-            stripMoves: true
-        )
-        #expect(held != .side(1))
-    }
-
-    /// Lua's alternatives to ← → follow the same field rule.
-    @Test("a Lua alternative walks the strip only on an empty field")
-    func alternativeArrows() {
+        #expect(key(123) == .side(-1))
+        #expect(key(124) == .side(1))
+        #expect(key(124, .shift) == .side(1))
+        #expect(key(124, .command) != .side(1))
         var keys = KiwiHubKeys()
         keys.left = "control+b"
         keys.right = "control+f"
-        func key(_ code: UInt16, empty: Bool) -> JumpKey? {
-            JumpKey.of(
-                keyCode: code,
-                modifiers: .control,
-                scope: .windows,
-                naming: false,
-                keys: keys,
-                stripMoves: empty
-            )
+        // b and f on the US layout: Lua's alternatives move too.
+        let alternative = JumpKey.of(
+            keyCode: 11,
+            modifiers: .control,
+            scope: .windows,
+            naming: false,
+            keys: keys
+        )
+        #expect(alternative == .side(-1))
+    }
+
+    @Test("a query's strip steps over the apps with no match")
+    func typedStepSkipsDimmed() {
+        var list = JumpList(snapshot: Self.snapshot)
+        list.setQuery("inbox")
+        // Notes (tile 1) holds no match: the step lands on Mail.
+        list.stepTile(1, wrap: true)
+        #expect(list.tile == 2)
+        #expect(list.query == "inbox")
+        #expect(list.results.map(\.entry.title) == ["Inbox"])
+        list.stepTile(-1, wrap: true)
+        #expect(list.tile == 0)
+        list.stepTile(-1, wrap: true)
+        #expect(list.tile == 2)
+    }
+
+    @Test("an empty field's strip walks every tile")
+    func emptyStepWalksAll() {
+        var list = JumpList(snapshot: Self.snapshot)
+        var seen: [Int] = []
+        for _ in 0..<list.tileCount {
+            list.stepTile(1, wrap: true)
+            seen.append(list.tile)
         }
-        // b and f on the US layout.
-        #expect(key(11, empty: true) == .side(-1))
-        #expect(key(3, empty: true) == .side(1))
-        #expect(key(11, empty: false) == nil)
-        #expect(key(3, empty: false) == nil)
+        #expect(seen == [1, 2, 3, 0])
     }
 
     @Test("a snapshot with no strip of its own lists its rows' apps")

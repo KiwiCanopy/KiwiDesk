@@ -21,11 +21,7 @@ extension JumpPanelController {
         }
     }
 
-    func wireStrip(_ model: JumpModel, _ panel: JumpPanel) {
-        // An empty field has no caret for ← → to move.
-        panel.stripMoves = { [weak model] in
-            model?.scope == .windows && model?.query.isEmpty == true
-        }
+    func wireStrip(_ model: JumpModel) {
         // An app the strip lists with no window reopens (#1840).
         model.onReopen = { [weak self] app in
             self?.reopen(app)
