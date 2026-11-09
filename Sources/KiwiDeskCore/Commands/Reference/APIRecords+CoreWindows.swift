@@ -236,6 +236,11 @@ extension APIReference {
             "Focuses an app's window, or launches a new instance.",
             .text("bundle_id")
         ),
+        "focus_app_window": APIRecord(
+            "Focuses the focused app's next or previous window, on "
+                + "any Space, screen or Desktop.",
+            .choice("direction", ModeCycleDirection.self)
+        ),
         "spawn_new": APIRecord(
             "Launches a new instance of an app by bundle "
                 + "identifier.",

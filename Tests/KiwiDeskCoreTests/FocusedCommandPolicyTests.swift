@@ -34,6 +34,10 @@ struct FocusedCommandPolicyTests {
         "create_space",
         "delete_space",
         "focus_or_spawn",
+        // Steps focus_or_spawn's own cycle, which asks the OS
+        // for the frontmost app itself (#1785), moving no
+        // window (#3131).
+        "focus_app_window",
         "spawn_new",
         // Re-lays the focused Space out, like set_mode without a
         // Space, moving no window between Spaces (#453).

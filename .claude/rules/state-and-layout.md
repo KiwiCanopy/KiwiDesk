@@ -611,6 +611,16 @@ editing here:
   consumer inside the fold takes the value `handle` read, never a
   read of its own (`ArrivalProvenanceSeamTests`,
   `LifecycleArrivalReasonTests`).
+- **An app's windows are walked through ONE ring (#637, #3131).**
+  Open or Focus's repeat press and `focus_app_window` step it through
+  the one `cycleAppWindow`, which builds it with `cycleRing`; a verb
+  that walks an app's windows — a follow variant, a bar chip's cycle
+  — takes that step or that ring, never a ring of its own, which
+  would drop the away reach, the frontmost check, the sticky arm or
+  the overlay exclusion the day one copy changed. A new reader of
+  either joins `AppWindowCycleSeamTests` ▸ `sitesArePinned` with its
+  reason; the step's outcome names each refusal
+  (`AppCycleStep`), so a new caller answers each case.
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves
   `Space.focused` down the departing windows to nil — or onto a

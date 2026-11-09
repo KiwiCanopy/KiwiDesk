@@ -63,6 +63,7 @@ public enum APIReference {
             ("move_floating", "move_floating"),
             ("move_to_track", "move_to_track"),
             ("focus_or_spawn", "focus_or_spawn"),
+            ("focus_app_window", "focus_app_window"),
             ("spawn_new", "spawn_new"),
             ("gather", "gather"),
             ("move_here", "move_here"),

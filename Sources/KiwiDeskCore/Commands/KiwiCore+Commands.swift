@@ -116,6 +116,8 @@ extension KiwiCore {
             return trackSwap(args)
         case "focus_or_spawn":
             return namingBundleID(launch(args, newInstance: false), args)
+        case "focus_app_window":
+            return focusAppWindow(args)
         case "spawn_new":
             return namingBundleID(launch(args, newInstance: true), args)
         case "gather":

@@ -95,7 +95,13 @@ struct FollowSwitchFloatRaiseTests {
         // The cycle asks the OS frontmost; left nil elsewhere, it
         // keeps the #292 preflight inert for the move verb.
         core.frontmostPIDProvider = { Self.pid }
-        #expect(core.cycleToNextWindow(bundleID: Self.bundle))
+        #expect(
+            core.cycleAppWindow(
+                bundleID: Self.bundle,
+                direction: .next,
+                verb: "focus_or_spawn"
+            ) == .stepped
+        )
         expectRaised(core)
     }
 

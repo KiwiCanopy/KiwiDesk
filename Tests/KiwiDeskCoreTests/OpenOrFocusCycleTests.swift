@@ -140,7 +140,13 @@ struct OpenOrFocusCycleTests {
         addWindow(core, 21, overlay: true)
         core.state.workspaces.focus(WindowID(20), in: "1")
         core.frontmostPIDProvider = { 100 }
-        #expect(!core.cycleToNextWindow(bundleID: Self.bundle))
+        #expect(
+            core.cycleAppWindow(
+                bundleID: Self.bundle,
+                direction: .next,
+                verb: "focus_or_spawn"
+            ) == .loneWindow
+        )
         #expect(
             core.state.workspaces.lastFocused == WindowID(20)
         )
@@ -178,7 +184,13 @@ struct OpenOrFocusCycleTests {
         // State says our window is focused; the OS says another
         // app is forward — the press must pull, not cycle.
         core.frontmostPIDProvider = { 999 }
-        #expect(!core.cycleToNextWindow(bundleID: Self.bundle))
+        #expect(
+            core.cycleAppWindow(
+                bundleID: Self.bundle,
+                direction: .next,
+                verb: "focus_or_spawn"
+            ) == .notFrontmost
+        )
         #expect(
             core.state.workspaces.lastFocused == WindowID(20)
         )
@@ -194,7 +206,13 @@ struct OpenOrFocusCycleTests {
         addWindow(core, 30, pid: 300)
         core.state.workspaces.focus(WindowID(30), in: "1")
         core.frontmostPIDProvider = { 300 }
-        #expect(!core.cycleToNextWindow(bundleID: Self.bundle))
+        #expect(
+            core.cycleAppWindow(
+                bundleID: Self.bundle,
+                direction: .next,
+                verb: "focus_or_spawn"
+            ) == .otherAppFocused
+        )
         #expect(
             core.state.workspaces.lastFocused == WindowID(30)
         )
@@ -208,7 +226,13 @@ struct OpenOrFocusCycleTests {
         addWindow(core, 20)
         core.state.workspaces.focus(WindowID(20), in: "1")
         core.frontmostPIDProvider = { 100 }
-        #expect(!core.cycleToNextWindow(bundleID: Self.bundle))
+        #expect(
+            core.cycleAppWindow(
+                bundleID: Self.bundle,
+                direction: .next,
+                verb: "focus_or_spawn"
+            ) == .loneWindow
+        )
         #expect(
             core.state.workspaces.lastFocused == WindowID(20)
         )
