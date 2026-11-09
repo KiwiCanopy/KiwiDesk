@@ -994,8 +994,9 @@ profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
 :::unreleased
 `⌘⌘`, either ⌘ tapped twice (the same key both times), opens
-KiwiHub's **Desktop overview**. A modifier tap does nothing while
-KiwiHub, or another KiwiDesk panel, has the keyboard.
+KiwiHub's **Desktop overview**, and closes it again. While KiwiHub
+has the keyboard, only a modifier tap that opens one of its sides
+works; while another KiwiDesk panel has it, no modifier tap does.
 :::
 
 `⌃⌥R` returns the focused space's sizes to what your profile set

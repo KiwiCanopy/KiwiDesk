@@ -77,11 +77,10 @@ extension KiwiCore {
     }
 
     /// The observer body: one cheap, idempotent spec rebuild, and
-    /// the modifier taps held while an own floating panel — KiwiHub
-    /// — is key, since its keys ride every modifier (#1229).
+    /// the modifier taps held while an own floating panel is key,
+    /// since KiwiHub's keys ride every modifier (#1229).
     func ownKeyWindowDidChange() {
-        keys.modifierTapsHeld =
-            eventLoop.ownKeyWindow()?.floatsOverWindows == true
+        keys.modifierTapHold = ModifierTapHold(eventLoop.ownKeyWindow())
         updateBorders()
     }
 

@@ -6,6 +6,8 @@ import Foundation
 /// half-built layer set.
 struct PreparedKeybindings {
     var refs: [String: [KeyCombo: Int32]]
+    /// The refs running a KiwiHub side's own Lua (#1229).
+    var kiwiHubSideRefs: Set<Int32> = []
     var sequences: [String: [KeySequence]]
     var icons: [String: String]
     var registeredLayers: [KeyLayer]
@@ -38,7 +40,8 @@ extension KiwiCore {
             prepared.refs,
             sequences: prepared.sequences,
             icons: prepared.icons,
-            preferredLayer: preferredLayer
+            preferredLayer: preferredLayer,
+            kiwiHubSideRefs: prepared.kiwiHubSideRefs
         )
         installedKeybindings = .structured(
             prepared.registeredLayers,
@@ -61,6 +64,7 @@ extension KiwiCore {
         lua: LuaInterpreter
     ) -> PreparedKeybindings {
         var refs: [String: [KeyCombo: Int32]] = [:]
+        var sideRefs: Set<Int32> = []
         var sequences: [String: [KeySequence]] = [:]
         var icons: [String: String] = [:]
         var registeredLayers: [KeyLayer] = []
@@ -69,6 +73,7 @@ extension KiwiCore {
         for layer in layers {
             let prepared = prepare(layer: layer, lua: lua)
             refs[layer.name] = prepared.refs
+            sideRefs.formUnion(prepared.sideRefs)
             skipped += prepared.skipped
             let built = prepareSequences(layer, lua: lua)
             sequences[layer.name] = built.sequences
@@ -86,6 +91,7 @@ extension KiwiCore {
         }
         return PreparedKeybindings(
             refs: refs,
+            kiwiHubSideRefs: sideRefs,
             sequences: sequences,
             icons: icons,
             registeredLayers: registeredLayers,
@@ -98,6 +104,7 @@ extension KiwiCore {
         lua: LuaInterpreter
     ) -> (
         refs: [KeyCombo: Int32],
+        sideRefs: Set<Int32>,
         bindings: [KeyBinding],
         skipped: [InstalledKeybindings.Skipped]
     ) {
@@ -150,6 +157,11 @@ extension KiwiCore {
                 uniqueKeysWithValues: ordered.map {
                     ($0.key, $0.value.ref)
                 }
+            ),
+            sideRefs: Set(
+                ordered.map(\.value)
+                    .filter { KiwiHubSide(boundLua: $0.binding.lua) != nil }
+                    .map(\.ref)
             ),
             bindings: ordered.map(\.value.binding),
             // A key another row installed still fires (#2574).

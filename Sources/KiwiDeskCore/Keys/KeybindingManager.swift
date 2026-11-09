@@ -1,21 +1,5 @@
 import Foundation
 
-/// Abstraction over Carbon hotkey registration for test
-/// isolation. An implementor never fires the handler of a FAILED
-/// registration — the hold-to-glide press path leans on it
-/// (`RegistrationBox` carries a nil id for exactly that handler).
-@MainActor
-public protocol HotkeyRegistrar: AnyObject {
-    func register(
-        keyCode: UInt32,
-        modifiers: HotkeyModifiers,
-        handler: @escaping @MainActor () -> Void
-    ) -> UInt32?
-    func unregister(id: UInt32)
-}
-
-extension CarbonHotkeyCenter: HotkeyRegistrar {}
-
 /// Modal keybinding manager with named layers and hold-to-glide
 /// support (#1056, #1082).
 @MainActor
@@ -157,11 +141,15 @@ public final class KeybindingManager {
             KeyboardTap.live(consumers: $0, fire: $1, report: $2)
         }
     private var suspended = false
-    /// While true the keyboard tap fires no modifier tap (#1229);
+    /// The taps the keyboard tap holds (#1229);
     /// `KiwiCore.ownKeyWindowDidChange` is its one writer.
-    var modifierTapsHeld = false {
-        didSet { keyboardTap?.holdTaps(modifierTapsHeld) }
+    var modifierTapHold = ModifierTapHold.none {
+        didSet { keyboardTap?.holdTaps(modifierTapHold) }
     }
+    /// The refs whose binding runs a KiwiHub side's own Lua, which a
+    /// tap row carries as `opensKiwiHubSide`; set by
+    /// `replaceLayers`, and a ref leaves it when released.
+    var kiwiHubSideRefs: Set<Int32> = []
     let registrar: HotkeyRegistrar
 
     public init(
@@ -190,6 +178,7 @@ public final class KeybindingManager {
             .updateValue(ref, forKey: combo)
         if let old, old != ref {
             lua?.release(ref: old)
+            kiwiHubSideRefs.remove(old)
         }
         if currentLayer == Self.defaultLayer {
             activate(Self.defaultLayer)
@@ -207,6 +196,7 @@ public final class KeybindingManager {
             for ref in old.values
             where bindings.values.contains(ref) == false {
                 lua.release(ref: ref)
+                kiwiHubSideRefs.remove(ref)
             }
         }
         layers[name] = bindings
@@ -266,6 +256,7 @@ public final class KeybindingManager {
         }
         releaseSequences(sequences)
         layers = [:]
+        kiwiHubSideRefs = []
         sequences = [:]
         layerIcons = [:]
         layerMeta = [:]
@@ -280,7 +271,8 @@ public final class KeybindingManager {
         _ replacements: [String: [KeyCombo: Int32]],
         sequences newSequences: [String: [KeySequence]] = [:],
         icons: [String: String],
-        preferredLayer: String
+        preferredLayer: String,
+        kiwiHubSideRefs newSideRefs: Set<Int32> = []
     ) {
         let oldLayers = layers
         let oldSequences = sequences
@@ -288,6 +280,7 @@ public final class KeybindingManager {
 
         deactivate()
         layers = replacements
+        kiwiHubSideRefs = newSideRefs
         sequences = newSequences
         if layers[Self.defaultLayer] == nil {
             layers[Self.defaultLayer] = [:]

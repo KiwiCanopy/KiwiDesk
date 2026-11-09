@@ -12713,12 +12713,21 @@ different ground:
   (`.claude/rules/input-and-animation.md`). While any of KiwiDesk's
   own non-activating panels holds the keyboard — KiwiHub, or a
   bar's grown peek — no modifier tap fires and no tap leader opens
-  a sequence, not only ⌘⌘ (#1229 ruling, owner 2026-11-09). The
-  hold reads the predicate hover focus already stands down on,
-  `OwnKeyWindowReading.floatsOverWindows`: narrowing it to KiwiHub
-  would need a second, GUI-set source of truth for "KiwiHub is
-  key", and narrowing it to ⌘ would let a recorded ⌥⌥ or ⌃⌃ fire
-  inside KiwiHub, whose own keys use all four modifiers.
+  a sequence, not only ⌘⌘, with one exception: under KiwiHub, a
+  tap bound to one of KiwiHub's own sides fires, and runs that
+  side's toggle as its chord does, closing the side it shows and
+  switching from another (#1229 ruling, owner 2026-11-09). So ⌘⌘
+  closes the Desktop overview it opened, and ⌃⌃ recorded on
+  Windows does the same. The exception is decided by the bound
+  action, never by a modifier: KiwiHub's own keys use all four
+  modifiers, so a recorded ⌥⌥ or ⌃⌃ on any other action would
+  fire inside it, and a side's toggle is the one tap whose result
+  KiwiHub already answers for. Both readings come from the key
+  window itself — `floatsOverWindows`, the predicate hover focus
+  stands down on, and the identifier KiwiHub's panel carries —
+  never from a flag the panel sets, which would be a second
+  source of truth for "KiwiHub is key". Nothing passes under a
+  grown peek, whose list answers no side.
   Accepted: under Secure Input, key presses are hidden from
   the tap, so a key typed between two ⌘ taps cannot reset the count
   ([accepted limitations](accepted-limitations.md)).
