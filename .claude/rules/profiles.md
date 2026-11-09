@@ -1956,9 +1956,10 @@ draft is another file and takes nothing. An edit NO file took —
 no profile live, or the write failed — lasts the session, as the
 tour's click does, which means until a Save writes the draft: a
 clean draft still re-reads, the tour's shipped behaviour, while a
-dirty draft takes nothing of it, since taking it on both sides
-would call a session value saved
-(`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
+dirty draft takes it as any live change, on its unedited leaves
+through `SettingsModel.liveSettingsMoved` (#3098) — the pill's
+live row narrates it, so it never counts as the user's
+(`BarMenuLandingTests` ▸ `sessionOnlyWriteFollowsUnedited`,
 `BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). Its Save
 still keeps the value: a Settings Save lays only the draft's own
 edits over live as it is at the Save (#2262,

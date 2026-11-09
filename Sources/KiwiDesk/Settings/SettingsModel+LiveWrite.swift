@@ -12,9 +12,10 @@ extension SettingsModel {
     /// edit on both sides of its diff, so the change is neither
     /// lost at the next Save nor counted as the user's — and on a
     /// leaf the draft had itself staged, the write, the newer act,
-    /// wins — and nothing of an edit no file took, which lasts the
-    /// session as the tour's does. A stored profile's draft is
-    /// another file, which the write did not reach.
+    /// wins — and an edit no file took, which lasts the session as
+    /// the tour's does, as any live change: on its unedited leaves
+    /// (`followLive`). A stored profile's draft is another file,
+    /// which the write did not reach.
     func adoptLiveWrite(_ edit: LiveProfileEdit, persisted: Bool) {
         guard target == .live else { return }
         guard isDirty else {
@@ -23,8 +24,9 @@ extension SettingsModel {
         }
         guard persisted else {
             // A session-only write is a live change like a verb's
-            // (#2262): the rows re-read it, the draft takes nothing.
-            refreshUnsavedLive()
+            // (#2262): the rows re-read it, and the draft's unedited
+            // leaves follow it (#3098).
+            liveSettingsMoved()
             return
         }
         suppressDirty = true

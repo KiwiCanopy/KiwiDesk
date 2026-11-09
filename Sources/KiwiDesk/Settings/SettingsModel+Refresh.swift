@@ -81,8 +81,8 @@ extension SettingsModel {
             reload()
         } else {
             // A live setting a verb moved while the window was away
-            // calls nothing back (#2262).
-            refreshUnsavedLive()
+            // calls nothing back (#2262, #3098).
+            liveSettingsMoved()
         }
     }
 

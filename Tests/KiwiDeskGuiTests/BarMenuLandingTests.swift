@@ -156,19 +156,24 @@ struct BarMenuLandingTests {
     }
 
     /// An edit no file took — no profile live, or a failed write —
-    /// lasts the session, as the tour's does: a dirty draft keeps
-    /// what it holds rather than calling the value saved.
-    @Test("a dirty draft takes nothing of a session-only write")
-    func sessionOnlyWriteLeavesTheDraft() {
+    /// lasts the session, as the tour's does: a dirty draft's
+    /// unedited leaves follow it as any live change (#3098), never
+    /// counting it as the user's, and the user's edit stays.
+    @Test("a dirty draft follows a session-only write, uncounted")
+    func sessionOnlyWriteFollowsUnedited() {
         let model = dirtyModel()
         let span = model.config.settings.spaceBarStyle.glyphSpan
-        // Live took the write: a draft that re-read live would see it.
+        let edited = model.config.settings.kiwishelf.minimum
         model.core.tiler.settings.spaceBarStyle.glyphSpan = span + 2
         model.adoptLiveWrite(
             .settings { $0.spaceBarStyle.glyphSpan = span + 2 },
             persisted: false
         )
-        #expect(model.config.settings.spaceBarStyle.glyphSpan == span)
-        #expect(model.cleanConfig.settings.spaceBarStyle.glyphSpan == span)
+        #expect(model.config.settings.spaceBarStyle.glyphSpan == span + 2)
+        #expect(
+            model.cleanConfig.settings.spaceBarStyle.glyphSpan == span + 2
+        )
+        #expect(model.config.settings.kiwishelf.minimum == edited)
+        #expect(model.draftChangeCount == 1)
     }
 }

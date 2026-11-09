@@ -122,4 +122,64 @@ struct SettingsFollowLiveTests {
         model.liveSettingsMoved()
         #expect(model.config[keyPath: laptopHeight] == before)
     }
+
+    /// A change made while the window was away arrives at its
+    /// window-key return, through the same door.
+    @Test("a window-key return follows what moved while away")
+    func returnFollows() throws {
+        let model = try makeModel()
+        setLaptopHeight(model, 0.4)
+        model.refreshOwner()
+        #expect(model.config[keyPath: laptopHeight] == 0.4)
+        #expect(model.liveUnsaved)
+    }
+
+    /// A row's ↺ moves live itself: the control is back at once,
+    /// not a turn later through the hook.
+    @Test("a live row's revert puts the control back at once")
+    func revertFollowsAtOnce() throws {
+        let model = try makeModel()
+        let saved = model.config[keyPath: laptopHeight]
+        model.config.settings.maximize.widthShare[.laptop] = 0.6
+        setLaptopHeight(model, 0.4)
+        model.liveSettingsMoved()
+        let row = try #require(
+            SettingsDiffRowSource.rows(for: model)
+                .first { $0.key == .behaviour(.maximizeHeightShare) }
+        )
+        model.revertLive(row.keepIDs)
+        #expect(model.config[keyPath: laptopHeight] == saved)
+        #expect(model.config.settings.maximize.widthShare[.laptop] == 0.6)
+    }
+
+    @Test("a stale page stays as it is")
+    func stalePageStays() throws {
+        let model = try makeModel()
+        model.reachPage = "Gone"
+        #expect(model.draftStale)
+        let before = model.config[keyPath: laptopHeight]
+        setLaptopHeight(model, 0.4)
+        model.liveSettingsMoved()
+        #expect(model.config[keyPath: laptopHeight] == before)
+    }
+
+    /// Sync's baseline holds the other Mac's value while a question
+    /// is open (#2450), so live may not overwrite it.
+    @Test("an open sync question holds the draft")
+    func syncQuestionHolds() throws {
+        let model = try makeModel()
+        model.sync.conflicts = [
+            SyncConflict(
+                key: nil,
+                label: "",
+                yours: "",
+                theirs: "",
+                mac: nil
+            )
+        ]
+        let before = model.config[keyPath: laptopHeight]
+        setLaptopHeight(model, 0.4)
+        model.liveSettingsMoved()
+        #expect(model.config[keyPath: laptopHeight] == before)
+    }
 }
