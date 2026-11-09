@@ -20,6 +20,13 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case maximizeHeightShare = "settings.maximize.heightShare"
     case maximizeWidthShare = "settings.maximize.widthShare"
     case maximizeAnchor = "settings.maximize.anchor"
+    /// A Space's own Maximize Height and Width shares and anchor,
+    /// over its screen shape's (#3090).
+    case maximizeHeightSharePerSpace =
+        "settings.maximize.shareOverride[space].height"
+    case maximizeWidthSharePerSpace =
+        "settings.maximize.shareOverride[space].width"
+    case maximizeAnchorPerSpace = "settings.maximize.anchorOverride[space]"
     /// Whether a new Maximize follows focus (#3063), Lua-only.
     case maximizeFollowFocus = "settings.maximize.followFocus"
     case resizeStep = "settings.resizeStep"
@@ -65,6 +72,11 @@ extension BehaviourKey {
             // Never greyed: the verb reads them whether or not a
             // chord is bound (#3062).
             return .row(.layoutDefaults, .maximize, .atRest)
+        case .maximizeHeightSharePerSpace, .maximizeWidthSharePerSpace,
+            .maximizeAnchorPerSpace:
+            // Never greyed: a Floating Space maximizes its floats and
+            // a Monocle one its floats (#3090).
+            return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
         case .minSizePerSpaceOverride:
             // A Space's own floor (#2422), beside its gaps; inert
             // while the Space is Monocle, which applies none.
@@ -122,6 +134,12 @@ extension BehaviourKey {
         case .maximizeWidthShare:
             return .text("layout_defaults.maximize.width_share")
         case .maximizeAnchor:
+            return .text("layout_defaults.maximize.anchor")
+        case .maximizeHeightSharePerSpace:
+            return .text("keybinding.maximize_height")
+        case .maximizeWidthSharePerSpace:
+            return .text("keybinding.maximize_width")
+        case .maximizeAnchorPerSpace:
             return .text("layout_defaults.maximize.anchor")
         case .minSizePerSpaceOverride:
             return .text(

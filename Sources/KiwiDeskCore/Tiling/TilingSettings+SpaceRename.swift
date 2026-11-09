@@ -19,6 +19,8 @@ extension TilingSettings {
         move(&grid.override, from, to)
         move(&monocle.override, from, to)
         move(&track.override, from, to)
+        move(&maximize.shareOverride, from, to)
+        move(&maximize.anchorOverride, from, to)
     }
 
     /// Drops `space`'s entry from every per-space map — the
@@ -36,6 +38,8 @@ extension TilingSettings {
         grid.override[space] = nil
         monocle.override[space] = nil
         track.override[space] = nil
+        maximize.shareOverride[space] = nil
+        maximize.anchorOverride[space] = nil
     }
 
     /// Takes `space`'s entry in every per-space map from `other`,
@@ -57,6 +61,10 @@ extension TilingSettings {
         grid.override[space] = other.grid.override[space]
         monocle.override[space] = other.monocle.override[space]
         track.override[space] = other.track.override[space]
+        maximize.shareOverride[space] =
+            other.maximize.shareOverride[space]
+        maximize.anchorOverride[space] =
+            other.maximize.anchorOverride[space]
     }
 
     private func move<T>(

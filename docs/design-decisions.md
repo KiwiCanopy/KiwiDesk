@@ -6544,6 +6544,26 @@ might want to change, and its manual share applies to every
 screen, which is the problem the table solves. A per-Space
 override is #3090's.
 
+:::unreleased
+**A Space may carry its own shares and "from", over its screen's
+row (#3090).** An editor Space and a browser Space on one screen
+share one shape row, and the owner pins Spaces to screens, so a
+value set on a Space always meets the same screen. The order is a
+binding's own arguments, then the Space's value, then the shape
+row, read through the one pair `MaximizeSettings.share(for:on:in:)`
+and `anchor(on:in:)` that the press and `resolved(for:)` both take.
+An unpinned Space that moves keeps its screen's row for every axis
+it leaves unset. A per-layout value, #2237's shape, was weighed and
+refused for this setting: the case is two Spaces of one layout on
+one screen. The maps are sparse and the decoder already accepted a
+file without them, so they owe no format bump, as #2422's floor.
+
+**On Monocle a tiled window refuses Maximize Height and Width
+(#3090).** A Monocle member already fills the screen, so an axis
+only shrank it into a column, which reads as a defect. A float
+there may still take one, and a full Maximize is unchanged.
+:::
+
 A Custom… share snaps: a typed whole percent that rounds to one of
 the five fractions stores the exact fraction (33 stores ⅓, not
 0.33), and any other percent is stored as typed. Without the snap

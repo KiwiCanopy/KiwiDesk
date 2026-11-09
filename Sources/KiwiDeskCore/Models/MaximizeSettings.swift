@@ -19,6 +19,11 @@ public struct MaximizeSettings: Sendable, Equatable {
     /// on instead of ending (`maximize.follow_focus`, #3063); one
     /// value for every shape.
     public var followFocus = false
+    /// Each Space's own shares, outranking its screen shape's row
+    /// (`maximize.share_override`, #3090).
+    public var shareOverride: [SpaceID: MaximizeShareOverride] = [:]
+    /// Each Space's own anchor (`maximize.anchor_override`, #3090).
+    public var anchorOverride: [SpaceID: MaximizeAnchor] = [:]
 
     public init() {}
 
@@ -77,6 +82,8 @@ extension MaximizeSettings: Codable {
         case share
         case anchor
         case followFocus = "follow_focus"
+        case shareOverride = "share_override"
+        case anchorOverride = "anchor_override"
     }
 
     enum ShareKeys: String, CodingKey, CaseIterable {
@@ -90,6 +97,16 @@ extension MaximizeSettings: Codable {
         followFocus =
             try container.decodeIfPresent(Bool.self, forKey: .followFocus)
             ?? defaults.followFocus
+        shareOverride =
+            try container.decodeIfPresent(
+                [SpaceID: MaximizeShareOverride].self,
+                forKey: .shareOverride
+            ) ?? [:]
+        anchorOverride =
+            try container.decodeIfPresent(
+                [SpaceID: MaximizeAnchor].self,
+                forKey: .anchorOverride
+            ) ?? [:]
         if container.contains(.anchor) {
             anchor = try .decode(
                 container.nestedContainer(
@@ -146,5 +163,7 @@ extension MaximizeSettings: Codable {
         )
         try anchor.encode(into: &anchors)
         try container.encode(followFocus, forKey: .followFocus)
+        try container.encode(shareOverride, forKey: .shareOverride)
+        try container.encode(anchorOverride, forKey: .anchorOverride)
     }
 }

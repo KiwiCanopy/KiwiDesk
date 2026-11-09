@@ -6237,6 +6237,15 @@ ring stays. A call with the same shape puts the window back; a
 call with another shape changes it in place. Bound to `⌃⌥⇧M`
 (height) and `⌃⌥⌘M` (width) by default.
 
+:::unreleased
+A Space's own value, set with
+[`maximize.set_share_override`](#maximizeset_share_override) or
+[`maximize.set_anchor_override`](#maximizeset_anchor_override),
+outranks its screen shape's row. On a Monocle Space a tiled window
+refuses an axis with "Monocle already fills the screen"; a floating
+window there may still take one, and a full Maximize is unchanged.
+:::
+
 **Example:**
 
 ```lua
@@ -6278,7 +6287,7 @@ The defaults are the two right-hand columns.
 **Example:**
 
 ```lua
-KiwiDesk.maximize.set_share("height", 0.6, "widescreen")
+maximize.set_share("height", 0.6, "widescreen")
 ```
 
 ### maximize.set_anchor
@@ -6297,8 +6306,45 @@ elsewhere. A full Maximize ignores it.
 **Example:**
 
 ```lua
-KiwiDesk.maximize.set_anchor("center", "ultrawide")
+maximize.set_anchor("center", "ultrawide")
 ```
+
+### maximize.set_share_override
+
+:::unreleased
+**Expects:** a Space id, an axis, `"height"` or `"width"`, and a
+share from 0.1 to 1, or `nil` to clear that axis.
+
+**Does:** sets that Space's own share for the axis, over the row
+[`maximize.set_share`](#maximizeset_share) stores for its screen
+shape. The other axis keeps its screen's row. A binding's own share
+still wins. Settings ▸ Spaces & Layouts sets it in the Space's
+override editor. `get_settings` with the Space reports it folded
+onto every shape.
+
+**Example:**
+
+```lua
+maximize.set_share_override("editor", "height", 2 / 3)
+```
+:::
+
+### maximize.set_anchor_override
+
+:::unreleased
+**Expects:** a Space id and `"center"` or `"in_place"`, or `nil` to
+clear it.
+
+**Does:** sets where a Maximize Height or Width grows from in that
+Space, over the row [`maximize.set_anchor`](#maximizeset_anchor)
+stores for its screen shape.
+
+**Example:**
+
+```lua
+maximize.set_anchor_override("editor", "center")
+```
+:::
 
 ### maximize.set_follow_focus
 
@@ -6319,7 +6365,7 @@ swap, a resize or a layout change behave as for any Maximize.
 **Example:**
 
 ```lua
-KiwiDesk.maximize.set_follow_focus(true)
+maximize.set_follow_focus(true)
 ```
 :::
 

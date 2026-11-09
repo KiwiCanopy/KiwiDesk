@@ -247,6 +247,8 @@ extension KiwiCore {
         focusWrap = FocusWrapState()
         tiler.settings.gapsOverride = [:]
         tiler.settings.minWindowSizeOverride = [:]
+        tiler.settings.maximize.shareOverride = [:]
+        tiler.settings.maximize.anchorOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.tiling.startOverride = [:]
         tiler.settings.spaceIcons = [:]

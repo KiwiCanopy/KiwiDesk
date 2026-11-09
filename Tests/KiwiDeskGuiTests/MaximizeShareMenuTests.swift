@@ -13,18 +13,18 @@ struct MaximizeShareMenuTests {
     @Test("A preset share adds no item and checks its fraction")
     func presetAddsNothing() {
         for share in FractionChips.shares {
-            #expect(MaximizeShapeRow.offMenuShare(share.value) == nil)
-            #expect(MaximizeShapeRow.selection(share.value) == share.value)
+            #expect(MaximizeSharePopUp.offMenuShare(share.value) == nil)
+            #expect(MaximizeSharePopUp.selection(share.value) == share.value)
         }
         // Typed to the wire's precision, a third is still ⅓.
-        #expect(MaximizeShapeRow.offMenuShare(0.3333) == nil)
-        #expect(MaximizeShapeRow.selection(0.3333) == 1.0 / 3)
+        #expect(MaximizeSharePopUp.offMenuShare(0.3333) == nil)
+        #expect(MaximizeSharePopUp.selection(0.3333) == 1.0 / 3)
     }
 
     @Test("A share off the menu is its own checked item")
     func offMenuIsKept() {
-        #expect(MaximizeShapeRow.offMenuShare(0.4) == 0.4)
-        #expect(MaximizeShapeRow.selection(0.4) == 0.4)
+        #expect(MaximizeSharePopUp.offMenuShare(0.4) == 0.4)
+        #expect(MaximizeSharePopUp.selection(0.4) == 0.4)
     }
 
     /// A typed percent that rounds to a fraction stores the fraction
@@ -40,7 +40,7 @@ struct MaximizeShareMenuTests {
         }
         #expect(MaximizeCustomShare.share(forPercent: 33) == 1.0 / 3)
         #expect(MaximizeCustomShare.share(forPercent: 40) == 0.4)
-        #expect(MaximizeShapeRow.offMenuShare(0.4) == 0.4)
+        #expect(MaximizeSharePopUp.offMenuShare(0.4) == 0.4)
     }
 
     /// The range is Core's clamp, never a second copy (#1359).
@@ -61,7 +61,7 @@ struct MaximizeShareMenuTests {
     /// popover from that pick, anchored to itself.
     @Test("the share menu ends in Custom… and opens its popover")
     func menuWiresCustom() throws {
-        let source = try shapeRowSource()
+        let source = try popUpSource()
         #expect(
             source.contains(
                 "Divider()Text(L(\"layout_defaults.maximize.custom\""
@@ -69,14 +69,14 @@ struct MaximizeShareMenuTests {
         )
         #expect(source.contains("ifpicked==MaximizeCustomShare.tag{"))
         #expect(
-            source.contains(".popover(item:customBinding(key,value:value))")
+            source.contains(".popover(item:customBinding)")
         )
         // The draft is written at the dismissal, never at a teardown.
         #expect(
             source.contains(
-                "ifnew==nil,letopen=custom[key],!open.cancelled,"
+                "ifnew==nil,letopen=custom,!open.cancelled,"
                     + "open.percent!=open.seed{"
-                    + "value.wrappedValue=MaximizeCustomShare.share("
+                    + "value=MaximizeCustomShare.share("
             )
         )
     }
@@ -89,8 +89,9 @@ struct MaximizeShareMenuTests {
     func cellsLeadTheirColumn() throws {
         let source = try shapeRowSource()
         let menu = try #require(
-            source.components(separatedBy: "privatefuncshareMenu(").last?
-                .components(separatedBy: "privatefunccustomBinding(").first
+            try popUpSource().components(separatedBy: "varbody:someView{")
+                .last?
+                .components(separatedBy: "privatevarcustomBinding:").first
         )
         #expect(!menu.contains(".frame(width:"))
         #expect(menu.contains(".controlSize(.large).fixedSize()"))
@@ -196,11 +197,18 @@ struct MaximizeShareMenuTests {
         #expect(rest.label.hasSuffix(", Laptop"))
     }
 
+    private func popUpSource() throws -> String {
+        try source("MaximizeSharePopUp.swift")
+    }
+
     private func shapeRowSource() throws -> String {
+        try source("MaximizeShapeRow.swift")
+    }
+
+    private func source(_ file: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Layouts/"
-                    + "MaximizeShapeRow.swift"
+                "Sources/KiwiDesk/Settings/Components/Layouts/" + file
             )
         return SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)

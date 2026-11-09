@@ -70,9 +70,11 @@ struct AnnouncedValueTests {
         // #2544: a Lua binding's shortcut group menu, named for its
         // row.
         "ShortcutGroupField.swift": 1,
-        // #3062: a Maximize table cell's share and From pop-ups,
-        // named for their column and screen shape.
-        "MaximizeShapeRow.swift": 2,
+        // #3062: a Maximize table cell's From pop-up, named for its
+        // column and screen shape; the share pop-up it shares with a
+        // Space's own rows (#3090), named by its host.
+        "MaximizeShapeRow.swift": 1,
+        "MaximizeSharePopUp.swift": 1,
         // #2614: a recorder's Sides menu, named for its row.
         "KeyRecorderField+Sides.swift": 1,
     ]

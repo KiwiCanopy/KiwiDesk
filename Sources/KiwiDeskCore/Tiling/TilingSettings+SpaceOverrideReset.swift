@@ -36,13 +36,14 @@ extension TilingSettings {
     }
 
     /// Total count of a space's overrides: the set fields across
-    /// all layouts (#290) plus its own gaps (#1775) and minimum
-    /// window size (#2422), which count as one each and survive a
-    /// layout switch.
+    /// all layouts (#290) plus its own gaps (#1775), minimum
+    /// window size (#2422) and three Maximize rows (#3090), which
+    /// count as one each and survive a layout switch.
     public func spaceOverrideCount(for space: SpaceID) -> Int {
         let own =
             (gapsOverride[space] == nil ? 0 : 1)
             + (minWindowSizeOverride[space] == nil ? 0 : 1)
+            + maximize.overrideCount(for: space)
         return Self.overridableLayouts.reduce(own) {
             $0 + overrideFieldCount($1, for: space)
         }
@@ -50,9 +51,11 @@ extension TilingSettings {
 
     /// The overrides among `spaceOverrideCount` that still apply
     /// while the Space floats: its own minimum window size, which
-    /// floors every float (#2422). Gaps and layout fields wait.
+    /// floors every float (#2422), and its Maximize rows, since its
+    /// floats maximize (#3090). Gaps and layout fields wait.
     public func floatingLiveOverrideCount(for space: SpaceID) -> Int {
-        minWindowSizeOverride[space] == nil ? 0 : 1
+        (minWindowSizeOverride[space] == nil ? 0 : 1)
+            + maximize.overrideCount(for: space)
     }
 
     /// Dormant layout overrides for inactive layouts on space (#290).
