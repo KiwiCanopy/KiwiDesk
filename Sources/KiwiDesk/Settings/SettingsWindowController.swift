@@ -221,6 +221,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptSyncedChange(change)
     }
 
+    /// Shows Settings on the Sync across Macs row (#3088).
+    func showSyncAcrossMacs() {
+        model.land(on: .syncAcrossMacs)
+        show()
+    }
+
     func syncStatusChanged(_ status: SyncStatus) {
         model.sync.status = status
     }

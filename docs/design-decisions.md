@@ -639,6 +639,24 @@ first-run story that is already a permission wizard, to tell
 someone about an update. No setting was added — the reminder
 costs nothing to ignore.
 
+:::unreleased
+*The mark's third meaning is a stopped sync (#3088).* The orange
+mark says one thing: something waits for you that you have not
+seen. Its facts are an update offer (#1013), a sync that stopped
+(`SyncStatus.newerOnAnotherMac`, `.changedOnBoth`) and What's new
+(#1542), and its words go by that rank. A stopped sync is no
+Config Issue: nothing in this Mac's config failed to load, and the
+config badge would outrank real config problems. A conflict copy
+(sync keeps running), an unreachable folder (changes wait) and
+`.newerHere` (already a Config Issue) take no mark. Its row,
+**Sync Paused…**, opens Settings on the Sync across Macs row,
+whose status line says why and what to do; it starts no update
+check, since the other Mac's build may be one this Mac's channel
+never offers. When an update is also offered, both rows show
+(owner, 2026-11-08): one installs this Mac's update, the other
+says why this Mac stopped syncing.
+:::
+
 ### KiwiDesk draws its own update window (#1542)
 
 **[Rationale]**

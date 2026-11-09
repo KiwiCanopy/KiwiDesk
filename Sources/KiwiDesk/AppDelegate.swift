@@ -173,6 +173,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
         }
+        statusItem.onShowSyncStatus = { [weak self] in
+            self?.dashboard.showSyncAcrossMacs()
+        }
         statusItem.onShowAccessibilityHelp = { [weak self] in
             self?.showAccessibilityHelp()
         }
@@ -231,6 +234,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         core.sync.onStatusChange = { [weak self] status in
             self?.dashboardIfCreated?.syncStatusChanged(status)
+            self?.statusItem?.setSyncStatus(status)
         }
         wireBarMenus()
         wireWhatsNewTrail()

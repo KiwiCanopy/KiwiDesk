@@ -163,9 +163,9 @@ struct SettingsCatalogTests {
         // Colors drawer in, the Fill, Tint, Fill fade and Sheen
         // out — at rest, they take no anchor (#277). 209 with
         // #2655: the macOS Desktops section in for the Focus
-        // card's Desktop drawer, net zero. 212 #2654; 213 #2671; 214 #2676;
-        // 217 #2680; 218 #2678; 214 #2797; 215 #2941; 223 #3062; 225 #2447.
-        #expect(allEntries.count == 225)
+        // card's Desktop drawer, net zero. Then 212-218 #2654, #2671,
+        // #2676, #2680, #2678; 214-226 #2797, #2941, #3062, #2447, #3088.
+        #expect(allEntries.count == 226)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
