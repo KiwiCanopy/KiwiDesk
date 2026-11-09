@@ -155,7 +155,7 @@ struct KeySequenceCardTests {
                 )
         )
         .filter { !$0.isWhitespace }
-        #expect(bands.contains("iflet detail=row.detail??pathHit{"))
+        #expect(bands.contains("ifletdetail=row.detail??pathHit{"))
     }
 
     @Test("a long path shortens to its leader and last two keys")
