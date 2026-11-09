@@ -49,6 +49,10 @@ extension KeybindingManager {
     /// beep. Its failure is logged at each press.
     func sequenceFire(ref: Int32) {
         guard !isSuspended else { return }
+        // The router closed at the fire: an end key's own Space
+        // switch must not close the next sequence already typed.
+        firingEndKey = true
+        defer { firingEndKey = false }
         firePress(id: nil) {
             if let error = call(ref: ref) {
                 onLog("key sequence: end key failed: \(error)")
@@ -63,8 +67,8 @@ extension KeybindingManager {
 struct KeySequenceDecision: Equatable, Sendable {
     var outcome: KeySequenceRouter.Outcome
     var progress: KeySequenceProgress?
-    /// The rows the decision was made over: one made before newer
-    /// rows is dropped, since its ref may name another key now.
+    /// The epoch it was made in (`sequenceGeneration`): one made
+    /// before newer rows or a main close is dropped.
     var generation: UInt64 = 0
 }
 
@@ -95,7 +99,8 @@ extension KeybindingManager {
     func closeSequence() {
         // Asked even while the panel is shut: a leader may already be
         // on its way here.
-        guard let keyboardTap, !sequences(for: currentLayer).isEmpty
+        guard !firingEndKey, let keyboardTap,
+            !sequences(for: currentLayer).isEmpty
         else { return }
         // A new epoch: whatever the tap decided before it is dropped.
         sequenceGeneration &+= 1

@@ -188,6 +188,8 @@ struct KeySequenceTapTests {
         manager.closeSequence()
         #expect(tap.closeRequests == 1)
         #expect(manager.sequenceGeneration != before)
+        // The tap takes the epoch the manager now holds.
+        #expect(tap.closeEpoch == manager.sequenceGeneration)
         let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
         tap.decisions = [
             KeySequenceDecision(

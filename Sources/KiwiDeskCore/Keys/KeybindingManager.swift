@@ -63,6 +63,9 @@ public final class KeybindingManager {
     /// handed and every main close, so a decision made before
     /// either is dropped (#1871).
     var sequenceGeneration: UInt64 = 0
+    /// True while an end key's Lua runs: its own switch closes no
+    /// sequence, since the tap closed one at the fire.
+    var firingEndKey = false
     private var layerIcons: [String: String] = [:]
     /// What a Lua binding says of itself — description, group and
     /// symbol (#2544) — by layer and chord.

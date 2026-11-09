@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -211,5 +212,58 @@ struct KeySequenceCloserTests {
         core.closeKeySequence()
         #expect(tap.closeRequests == 1)
         #expect(seen == [open, nil])
+    }
+}
+
+/// An end key that switches Space runs while the tap already closed
+/// its sequence (#1871): its switch must not close the next one.
+@MainActor
+@Suite("Key sequence end key switch")
+struct KeySequenceEndKeySwitchTests {
+    @Test("an end key's own switch closes no sequence")
+    func endKeySwitchKeepsTheNext() throws {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-seq-sw-\(UUID().uuidString)")
+        )
+        var made: [FakeKeyboardTap] = []
+        core.keys.makeKeyboardTap = { consumers, fire, _ in
+            let tap = FakeKeyboardTap(consumers, fire)
+            made.append(tap)
+            return tap
+        }
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
+        )
+        try """
+        KiwiDesk.define_sequence("ctrl+alt+space", {
+          ["2"] = function() KiwiDesk.focus_space("2") end,
+        })
+        """.write(to: core.configURL, atomically: true, encoding: .utf8)
+        core.loadConfig()
+        let tap = try #require(made.last)
+        let ref = try #require(core.keys.sequences(for: "default").first)
+            .refs[0]
+        var seen: [KeySequenceProgress?] = []
+        core.onKeySequence = { seen.append($0) }
+        let open = KeySequenceProgress(leader: "ctrl+alt+space", path: [])
+        let epoch = core.keys.sequenceGeneration
+        tap.decisions = [
+            KeySequenceDecision(
+                outcome: .fired(ref: ref),
+                progress: nil,
+                generation: epoch
+            ),
+            KeySequenceDecision(
+                outcome: .stepped,
+                progress: open,
+                generation: epoch
+            ),
+        ]
+        core.keys.tapFire(KeyboardTap.sequenceFireID)
+        #expect(tap.closeRequests == 0)
+        #expect(seen == [open])
     }
 }

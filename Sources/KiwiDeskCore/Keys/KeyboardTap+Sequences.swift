@@ -109,14 +109,6 @@ extension KeyboardTap {
         if heard { fire(Self.sequenceFireID) }
     }
 
-    #if DEBUG
-        /// Tests only: the callback's body, true where it swallowed
-        /// the event. Production must not read this.
-        func handledForTesting(_ type: CGEventType, _ event: CGEvent) -> Bool {
-            handle(type, event) == nil
-        }
-    #endif
-
     /// Closes an open sequence after the tap was off.
     func closeSequenceAfterGap() {
         let heard = sequenceState.withLock { state -> Bool in

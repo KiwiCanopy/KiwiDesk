@@ -51,14 +51,16 @@ struct KeySequence: Equatable, Sendable {
         self.steps = steps
     }
 
-    /// A sequence from its leader's spelling alone.
-    init(leader: KeyCombo, stored: String, steps: [Key]) {
-        self.init(
-            leader: leader,
-            source: .sequence(combo: stored),
-            steps: steps
-        )
-    }
+    #if DEBUG
+        /// Tests only: a sequence from its leader's spelling alone.
+        init(leader: KeyCombo, stored: String, steps: [Key]) {
+            self.init(
+                leader: leader,
+                source: .sequence(combo: stored),
+                steps: steps
+            )
+        }
+    #endif
 
     var stored: String { source.combo }
     /// The leader's name: the hint panel's title.

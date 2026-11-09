@@ -136,9 +136,8 @@ struct KeySequenceInstallTests {
     func runningTreeForUnread() throws {
         let core = try loaded(
             """
-            local named = function() KiwiDesk.focus("left") end
             KiwiDesk.define_sequence("ctrl+alt+space", {
-              h = { fn = named, name = "Left" },
+              h = { fn = KiwiDesk.toggle_float, name = "Left" },
             }, { name = "Leader" })
             """
         )
