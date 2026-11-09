@@ -24,6 +24,16 @@ struct SyncStoppedMarkTests {
         return (controller, updater)
     }
 
+    /// Core's status as the provider answers it, then the nudge
+    /// `onStatusChange` sends.
+    private static func set(
+        _ controller: StatusItemController,
+        _ status: SyncStatus
+    ) {
+        controller.syncStatusProvider = { status }
+        controller.syncStatusChanged()
+    }
+
     private func marked(_ controller: StatusItemController) throws -> Bool {
         let button = try #require(controller.anchorButton)
         return try #require(button.image)
@@ -56,14 +66,14 @@ struct SyncStoppedMarkTests {
         let (controller, _) = controller()
         let button = try #require(controller.anchorButton)
         #expect(try !marked(controller))
-        controller.setSyncStatus(.newerOnAnotherMac(Self.newer))
+        Self.set(controller, .newerOnAnotherMac(Self.newer))
         #expect(try marked(controller))
         #expect(button.accessibilityLabel() == "KiwiDesk (sync paused)")
         #expect(button.toolTip?.contains("Sync across Macs") == true)
-        controller.setSyncStatus(.upToDate)
+        Self.set(controller, .upToDate)
         #expect(try !marked(controller))
         #expect(button.accessibilityLabel() == "KiwiDesk")
-        controller.setSyncStatus(.changedOnBoth)
+        Self.set(controller, .changedOnBoth)
         #expect(try marked(controller))
     }
 
@@ -71,9 +81,9 @@ struct SyncStoppedMarkTests {
     func rowFollowsTheStatus() throws {
         let (controller, _) = controller()
         #expect(controller.makeSyncPausedItem() == nil)
-        controller.setSyncStatus(.conflictCopy("x"))
+        Self.set(controller, .conflictCopy("x"))
         #expect(controller.makeSyncPausedItem() == nil)
-        controller.setSyncStatus(.changedOnBoth)
+        Self.set(controller, .changedOnBoth)
         let row = try #require(controller.makeSyncPausedItem())
         #expect(row.title == "Sync Paused…")
         #expect(row.isEnabled)
@@ -90,7 +100,7 @@ struct SyncStoppedMarkTests {
     func updateOutranksAndBothRowsShow() throws {
         let (controller, updater) = controller()
         let button = try #require(controller.anchorButton)
-        controller.setSyncStatus(.newerOnAnotherMac(Self.newer))
+        Self.set(controller, .newerOnAnotherMac(Self.newer))
         updater.updatePending = true
         #expect(button.accessibilityLabel() == "KiwiDesk (update available)")
         let menu = NSMenu()
@@ -114,9 +124,9 @@ struct SyncStoppedMarkTests {
         controller.updater = WhatsNewFakeUpdater(whatsNew: coordinator)
         let button = try #require(controller.anchorButton)
         await coordinator.launched(opensWindow: false, existingUser: true)
-        controller.setSyncStatus(.changedOnBoth)
+        Self.set(controller, .changedOnBoth)
         #expect(button.accessibilityLabel() == "KiwiDesk (sync paused)")
-        controller.setSyncStatus(.upToDate)
+        Self.set(controller, .upToDate)
         #expect(
             button.accessibilityLabel()
                 == "KiwiDesk (what's new in 9999.2.0)"
@@ -133,7 +143,6 @@ struct SyncStoppedMarkTests {
             }
         )
         #expect(row.anchor == .syncAcrossMacs)
-        #expect(SettingsAnchor.syncAcrossMacs.anchor != nil)
     }
 
     /// Like the other offers it rides only the healthy icons: a
@@ -143,7 +152,7 @@ struct SyncStoppedMarkTests {
     func brokenStatesOutrank() throws {
         let (controller, _) = controller()
         let button = try #require(controller.anchorButton)
-        controller.setSyncStatus(.changedOnBoth)
+        Self.set(controller, .changedOnBoth)
         controller.setWarning(true)
         #expect(try !marked(controller))
         #expect(
@@ -193,7 +202,14 @@ struct SyncStoppedWiringTests {
                 in: text
             )
         )
-        #expect(body.contains("statusItem?.setSyncStatus(status)"))
+        #expect(body.contains("statusItem?.syncStatusChanged()"))
+        let provider = try #require(
+            SourceScan.declarationBody(
+                after: "statusItem.syncStatusProvider =",
+                in: text
+            )
+        )
+        #expect(provider.contains("core?.sync.status"))
         let row = try #require(
             SourceScan.declarationBody(
                 after: "statusItem.onShowSyncStatus =",
@@ -206,7 +222,7 @@ struct SyncStoppedWiringTests {
     @Test("the row lands on the anchored Sync across Macs row")
     func rowLandsOnTheAnchor() throws {
         let window = try Self.source(
-            "Sources/KiwiDesk/Settings/SettingsWindowController.swift"
+            "Sources/KiwiDesk/Settings/SettingsWindowController+Sync.swift"
         )
         let body = try #require(
             SourceScan.declarationBody(

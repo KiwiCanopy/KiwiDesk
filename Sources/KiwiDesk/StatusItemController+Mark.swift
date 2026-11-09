@@ -1,19 +1,9 @@
 import AppKit
 import KiwiDeskCore
 
-/// The orange mark's pending facts and the Sync Paused… row
+/// What the orange mark says, and the Sync Paused… row
 /// (#1013, #1542, #3088; `docs/design-decisions.md`).
 extension StatusItemController {
-    /// The mark, on both channels and in ONE place (#1013).
-    func applyMark(to button: NSStatusBarButton) {
-        guard let mark = markNarration else { return }
-        if let image = button.image {
-            button.image = Self.badged(image)
-        }
-        button.setAccessibilityLabel(mark.label)
-        button.toolTip = mark.tooltip
-    }
-
     /// What the mark says, by rank: an update waiting, then a
     /// stopped sync, then the notes of one already installed
     /// (#1013, #3088, #1542).
@@ -34,7 +24,7 @@ extension StatusItemController {
                 L(
                     "menu.status.sync_paused.tooltip",
                     "%1$@ is paused — open the menu to see why.",
-                    L("general.sync", "Sync across Macs")
+                    SyncText.label
                 )
             )
         }
@@ -52,9 +42,10 @@ extension StatusItemController {
         )
     }
 
-    /// Whether `status` stops every pass until the user acts
-    /// (#3088). A conflict copy and an unreachable folder keep
-    /// syncing or wait; `.newerHere` is already a Config Issue.
+    /// Whether the mark surfaces `status` as a stopped sync — the
+    /// mark's own verdict, not Core's hold (#3088). A conflict copy
+    /// and an unreachable folder keep syncing or wait; `.newerHere`
+    /// is already a Config Issue.
     static func stopsSync(_ status: SyncStatus) -> Bool {
         switch status {
         case .newerOnAnotherMac, .changedOnBoth:

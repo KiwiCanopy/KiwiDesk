@@ -53,6 +53,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// "What's new" left waiting by a launch that did not open it
     /// (#1542), read from the updater's coordinator at every render.
     var whatsNewWaiting: String? { updater.whatsNew?.waiting?.version }
+    /// Where following the sync folder stands, Core's
+    /// `SyncFollower.status`, read at every render (#3088).
+    var syncStatusProvider: () -> SyncStatus = { .off }
+    /// The mark's third pending fact (#3088).
+    var syncStopped: Bool { Self.stopsSync(syncStatusProvider()) }
     var onShowAccessibilityHelp: () -> Void = {}
     /// The Sync Paused… row's action: Settings on the Sync across
     /// Macs row (#3088).
@@ -83,10 +88,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Held so a phase published mid-tracking can retitle the open
     /// menu's row in place (owner, on device, 2026-08-12).
     weak var startingRow: NSMenuItem?
-    /// Following the sync folder has stopped until the user acts
-    /// (#3088), the mark's third pending fact; mutated only via
-    /// `setSyncStatus`.
-    private(set) var syncStopped = false
 
     init(item: (any StatusItemHandle)? = nil) {
         self.item = item ?? SystemStatusItem()
@@ -114,11 +115,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         render()
     }
 
-    /// Sets where following the sync folder stands (#3088).
-    func setSyncStatus(_ status: SyncStatus) {
-        let stopped = Self.stopsSync(status)
-        guard stopped != syncStopped else { return }
-        syncStopped = stopped
+    /// The sync status changed (#3088): the fact is read at render.
+    func syncStatusChanged() {
         render()
     }
 
@@ -226,6 +224,16 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         // starting phase and a config error outrank an offer on
         // the glyph AND the name (#1013).
         applyMark(to: button)
+    }
+
+    /// The mark, on both channels and in ONE place (#1013).
+    private func applyMark(to button: NSStatusBarButton) {
+        guard let mark = markNarration else { return }
+        if let image = button.image {
+            button.image = Self.badged(image)
+        }
+        button.setAccessibilityLabel(mark.label)
+        button.toolTip = mark.tooltip
     }
 
     func symbol(_ name: String) -> NSImage? {

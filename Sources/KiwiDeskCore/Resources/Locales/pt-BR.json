@@ -1612,7 +1612,7 @@
   "menu.status.starting.a11y": "KiwiDesk (iniciando)",
   "menu.status.starting.tooltip": "O KiwiDesk está iniciando — examinando seus apps abertos.",
   "menu.status.sync_paused.a11y": "KiwiDesk (sincronização pausada)",
-  "menu.status.sync_paused.tooltip": "“%1$@” está pausado — abra o menu para ver o motivo.",
+  "menu.status.sync_paused.tooltip": "“%1$@” está em pausa — abra o menu para ver o motivo.",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk (atualização disponível)",
   "menu.status.update.tooltip": "Há uma atualização do KiwiDesk disponível — abra o menu para instalá-la.",

@@ -212,14 +212,6 @@ folder keeps the setup the other Macs use; turning it back on, or
 restoring a backup while it is on, asks which setup to keep with
 Compare and Copy.
 
-:::unreleased
-When syncing stops until you act — another Mac saved with a newer
-KiwiDesk, or both Macs changed the setup — the menu-bar icon shows
-the orange dot and the quick menu a **Sync Paused…** row, which
-opens Settings on Sync across Macs. An update offered at the same
-time keeps its own **Update Available…** row beside it.
-:::
-
 When an update moves `gui.json`, a profile, your palettes or your
 looks to a newer file format, KiwiDesk first keeps the file as it
 was in `~/Library/Application Support/KiwiDesk/migration-backups/`,

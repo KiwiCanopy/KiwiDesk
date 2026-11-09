@@ -1612,7 +1612,7 @@
   "menu.status.starting.a11y": "KiwiDesk(시작 중)",
   "menu.status.starting.tooltip": "KiwiDesk를 시작하는 중입니다. 열려 있는 앱을 하나씩 확인하고 있습니다.",
   "menu.status.sync_paused.a11y": "KiwiDesk(동기화 일시 정지됨)",
-  "menu.status.sync_paused.tooltip": "'%1$@'이(가) 일시 정지되었습니다. 이유를 확인하려면 메뉴를 여십시오.",
+  "menu.status.sync_paused.tooltip": "‘%1$@’이(가) 일시 정지되었습니다. 이유를 확인하려면 메뉴를 여십시오.",
   "menu.status.tooltip": "KiwiDesk",
   "menu.status.update.a11y": "KiwiDesk(업데이트 사용 가능)",
   "menu.status.update.tooltip": "KiwiDesk 업데이트를 사용할 수 있습니다. 설치하려면 메뉴를 여십시오.",
