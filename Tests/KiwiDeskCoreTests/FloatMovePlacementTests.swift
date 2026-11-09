@@ -179,6 +179,8 @@ struct FloatMovePlacementTests {
         #expect(core.tiler.boundLearner.bounds[WindowID(2)] == nil)
     }
 
+    /// The move itself refuses a full-screen window (#3119), so
+    /// nothing is filed and nothing seeded.
     @Test("a native-fullscreen window is never seeded")
     func fullscreenStandsDown() throws {
         let core = setup()
@@ -186,7 +188,7 @@ struct FloatMovePlacementTests {
             .windowFullscreenChanged(WindowID(2), isFullscreen: true)
         )
         core.moveWindow(WindowID(2), to: SpaceID("2"), follow: false)
-        #expect(core.state.workspaces.space(of: WindowID(2)) == SpaceID("2"))
+        #expect(core.state.workspaces.space(of: WindowID(2)) != SpaceID("2"))
         #expect(core.tiler.stashOriginal(WindowID(2)) != (try centred(core)))
     }
 

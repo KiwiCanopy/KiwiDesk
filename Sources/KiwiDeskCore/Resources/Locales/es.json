@@ -2645,6 +2645,7 @@
   "whatsnew.trail.next": "Siguiente: %1$@",
   "window_action.refusal.all_here": "Todas las ventanas de %1$@ están aquí",
   "window_action.refusal.already_in": "«%1$@» ya está en ese espacio",
+  "window_action.refusal.cannot_change_space_full_screen": "«%1$@» está a pantalla completa y no puede cambiar de espacio",
   "window_action.refusal.cannot_move_full_screen": "«%1$@» está a pantalla completa y no puede cambiar de Escritorio",
   "window_action.refusal.cannot_move_here": "«%1$@» no se puede mover aquí",
   "window_action.refusal.cannot_move_here_full_screen": "Una ventana a pantalla completa no se puede mover aquí",

@@ -2645,6 +2645,7 @@
   "whatsnew.trail.next": "다음: %1$@",
   "window_action.refusal.all_here": "%1$@ 윈도우가 모두 여기에 있습니다",
   "window_action.refusal.already_in": "‘%1$@’은(는) 이미 해당 공간에 있습니다",
+  "window_action.refusal.cannot_change_space_full_screen": "‘%1$@’은(는) 전체 화면이라 다른 공간으로 이동할 수 없습니다",
   "window_action.refusal.cannot_move_full_screen": "‘%1$@’은(는) 전체 화면이라 다른 데스크탑으로 이동할 수 없습니다",
   "window_action.refusal.cannot_move_here": "‘%1$@’은(는) 여기로 이동할 수 없습니다",
   "window_action.refusal.cannot_move_here_full_screen": "전체 화면 윈도우는 여기로 이동할 수 없습니다",

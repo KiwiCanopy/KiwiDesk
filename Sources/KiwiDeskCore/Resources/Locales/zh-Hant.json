@@ -2645,6 +2645,7 @@
   "whatsnew.trail.next": "下一項：%1$@",
   "window_action.refusal.all_here": "%1$@ 的所有視窗都在這裡",
   "window_action.refusal.already_in": "「%1$@」已在該空間中",
+  "window_action.refusal.cannot_change_space_full_screen": "「%1$@」處於全螢幕，無法移到其他空間",
   "window_action.refusal.cannot_move_full_screen": "「%1$@」處於全螢幕，無法移到其他桌面",
   "window_action.refusal.cannot_move_here": "「%1$@」無法移到這裡",
   "window_action.refusal.cannot_move_here_full_screen": "全螢幕視窗無法移到這裡",
