@@ -6938,8 +6938,9 @@ Space it returns to, or under **Not in a Space yet**, which nothing
 can be moved into. The menu bar's **Show Desktop overview** row
 opens it too. The side is seeded on **⌘⌘**, either ⌘ tapped twice (the
 same key both times), and **Shortcuts & Gestures ▸ KiwiHub** lists
-the row to rebind or clear. While KiwiHub is open a modifier tap
-does nothing, so ⌘⌘ there leaves the panel open.
+the row to rebind or clear. While KiwiHub, or another KiwiDesk
+panel, has the keyboard a modifier tap does nothing, so ⌘⌘ there
+leaves the panel open.
 
 - **↑** **↓** **←** **→** choose a Space; **Return** goes there,
   **⇧Return** moves your window there, **⌃Return** moves it and

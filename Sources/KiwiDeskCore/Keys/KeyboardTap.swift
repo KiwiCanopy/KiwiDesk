@@ -288,17 +288,19 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
 
     /// `.modifierTaps`: feeds the detector, fires what it decided
     /// unless the taps are held, and arms the gap timer a single tap
-    /// waits on, which asks the hold again when it lapses.
+    /// waits on, which fires only if the taps were held neither at
+    /// the tap nor at the lapse.
     private func route(_ input: ModifierTapDetector.Input) {
         let (ids, pending) = router.withLock { $0.feed(input) }
-        if !tapsHeld.withLock({ $0 }) { ids.forEach(fireOrOpen) }
+        let heldAtTap = tapsHeld.withLock { $0 }
+        if !heldAtTap { ids.forEach(fireOrOpen) }
         if let pending {
             DispatchQueue.global(qos: .userInteractive).asyncAfter(
                 deadline: .now() + ModifierTapDetector.gapLimit
             ) { [weak self] in
                 guard let self,
                     let id = self.router.withLock({ $0.expire(pending) }),
-                    !self.tapsHeld.withLock({ $0 })
+                    !heldAtTap, !self.tapsHeld.withLock({ $0 })
                 else { return }
                 self.fireOrOpen(id)
             }

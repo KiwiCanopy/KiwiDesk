@@ -40,20 +40,26 @@ extension OnboardingKeys {
         )
     }
 
-    /// The chords collapsed over their shared modifiers, then each
-    /// modifier tap on a keycap of its own — `⌃⌥ J K L` and `⌘⌘`
+    /// The chords collapsed over their shared modifiers on one
+    /// keycap, at the first chord's place, and each modifier tap on
+    /// a keycap of its own in side order — `⌃⌥ J K L` and `⌘⌘`
     /// (#1229); nil where no tap stands apart or the chords share
     /// no prefix.
     private static func tapsApart(_ combos: [String]) -> OnboardingChord? {
         let isTap = { KeyCombo.parse($0)?.isTap == true }
-        let taps = combos.filter(isTap)
         let chords = combos.filter { !isTap($0) }
-        guard !taps.isEmpty, chords.count > 1,
+        guard chords.count > 1, chords.count < combos.count,
             let shared = collapsed(chords)
         else { return nil }
-        return .mixed(
-            [shared.glyphs] + taps.compactMap { rendered(combo: $0) }
-        )
+        var keycaps: [String] = []
+        for combo in combos {
+            if !isTap(combo) {
+                if combo == chords[0] { keycaps.append(shared.glyphs) }
+            } else if let tap = rendered(combo: combo) {
+                keycaps.append(tap)
+            }
+        }
+        return .mixed(keycaps)
     }
 
     /// KiwiHub's name before what follows it — the row's sides,

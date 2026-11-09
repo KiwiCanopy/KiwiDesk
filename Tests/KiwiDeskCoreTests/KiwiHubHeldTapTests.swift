@@ -10,8 +10,12 @@ import Testing
 /// door is covered, and derived in Core from the own key window.
 @Suite("KiwiHub holds modifier taps (#1229)", .serialized)
 struct KiwiHubHeldTapTests {
+    /// Fired ids, appended from the tap's lapse queue too.
     private final class Fired: @unchecked Sendable {
-        var ids: [UInt32] = []
+        private let lock = NSLock()
+        private var stored: [UInt32] = []
+        var ids: [UInt32] { lock.withLock { stored } }
+        func append(_ id: UInt32) { lock.withLock { stored.append(id) } }
     }
 
     private func flags(_ raw: UInt64) throws -> CGEvent {
@@ -32,7 +36,7 @@ struct KiwiHubHeldTapTests {
         let fired = Fired()
         let tap = KeyboardTap.unstarted(
             consumers: [.modifierTaps],
-            fire: { fired.ids.append($0) }
+            fire: { fired.append($0) }
         )
         let combo = try #require(KeyCombo.parse("cmd+cmd"))
         tap.setRows(
@@ -59,7 +63,7 @@ struct KiwiHubHeldTapTests {
         let fired = Fired()
         let tap = KeyboardTap.unstarted(
             consumers: [.modifierTaps, .sequences],
-            fire: { fired.ids.append($0) }
+            fire: { fired.append($0) }
         )
         let leader = try #require(KeyCombo.parse("rcmd"))
         tap.setRows(
@@ -89,6 +93,56 @@ struct KiwiHubHeldTapTests {
         tap.holdTaps(false)
         try self.tap(tap, device: 0x10)
         #expect(fired.ids == [KeyboardTap.sequenceFireID])
+    }
+
+    /// A right ⌘ single that waits on its double: it fires only at
+    /// the gap's lapse, on the tap's own queue.
+    private func lapseRig() throws -> (KeyboardTap, Fired) {
+        let fired = Fired()
+        let tap = KeyboardTap.unstarted(
+            consumers: [.modifierTaps],
+            fire: { fired.append($0) }
+        )
+        let single = try #require(KeyCombo.parse("rcmd"))
+        let double = try #require(KeyCombo.parse("rcmd+rcmd"))
+        tap.setRows(
+            KeyboardTapRows(taps: [
+                ModifierTapRow(combo: single, id: 1),
+                ModifierTapRow(combo: double, id: 2),
+            ])
+        )
+        return (tap, fired)
+    }
+
+    /// Polls past the gap against a wall-clock deadline: the lapse
+    /// runs on a timer this suite holds no handle to.
+    private func settle(_ fired: Fired, until done: () -> Bool) async {
+        let deadline = Date().addingTimeInterval(5)
+        while !done(), Date() < deadline {
+            try? await Task.sleep(nanoseconds: 20_000_000)
+        }
+    }
+
+    @Test("a single held at its tap or at its lapse fires nothing")
+    func heldLapse() async throws {
+        let (control, controlFired) = try lapseRig()
+        try tap(control, device: 0x10)
+        await settle(controlFired) { !controlFired.ids.isEmpty }
+        #expect(controlFired.ids == [1])
+
+        let (atTap, atTapFired) = try lapseRig()
+        atTap.holdTaps(true)
+        try tap(atTap, device: 0x10)
+        atTap.holdTaps(false)
+        let (atLapse, atLapseFired) = try lapseRig()
+        try tap(atLapse, device: 0x10)
+        atLapse.holdTaps(true)
+        let past = Date().addingTimeInterval(
+            ModifierTapDetector.gapLimit * 3
+        )
+        await settle(atTapFired) { Date() >= past }
+        #expect(atTapFired.ids.isEmpty)
+        #expect(atLapseFired.ids.isEmpty)
     }
 
     /// The hold follows the own key window: a floating panel holds
