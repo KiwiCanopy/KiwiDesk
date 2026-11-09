@@ -8693,8 +8693,8 @@ mode alone, one optional row like its other overrides, so a
 
 The verdict is computed on every read from what state holds —
 KiwiVision's ask, copied in through `VisionLook` at every change,
-with the Layout Defaults table — and each Space's focused tiled
-window. A hand Maximize outranks it, so `maximizedWindow(of:)` is
+with the Layout Defaults table — and the active Space's focused
+tiled window. A hand Maximize outranks it, so `maximizedWindow(of:)` is
 the stored toggle first and the derived fill second. It is not
 built on `Space.maximized`: that value names one window at a time
 and is retired whenever its verdict ends (#2448), so a fill stored

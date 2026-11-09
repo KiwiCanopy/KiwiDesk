@@ -40,8 +40,8 @@ extension StateCoordinator {
 
     /// The window KiwiVision's maximize fills on `space`: its focus
     /// anchor while drawn tiled; while a float holds the focus, the
-    /// tiled window focused last keeps it, as a hand Maximize does
-    /// (owner, 2026-11-09; a float never fills until #3036).
+    /// tiled window it last drew keeps it, else the one focused
+    /// last (owner, 2026-11-09; a float never fills until #3036).
     public func visionFilledWindow(of space: Space) -> WindowID? {
         guard visionFillStands(on: space) else { return nil }
         let tiled = effectiveTiledMembers(of: space)
@@ -49,6 +49,9 @@ extension StateCoordinator {
             return nil
         }
         if tiled.contains(anchor) { return anchor }
+        if let kept = tiled.first(where: visionFill.drawn.contains) {
+            return kept
+        }
         let last = tiled.max {
             focusRecencyRank(of: $0) < focusRecencyRank(of: $1)
         }

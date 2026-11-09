@@ -141,6 +141,28 @@ struct KiwiVisionMaximizeTests {
         #expect(filled(core, space) == ids[1])
     }
 
+    @Test("With no honored report, the window drawn keeps the fill")
+    func floatKeepsTheDrawnFill() {
+        let (core, space) = makeCore()
+        #expect(core.state.visionFill.drawn == [ids[0]])
+        core.state.windows.setFloating(ids[2], true)
+        core.state.workspaces.focus(ids[2], in: space)
+        #expect(filled(core, space) == ids[0])
+    }
+
+    @Test("A mouse resize of the filled window snaps back")
+    func dragResizeSnapsBack() throws {
+        let (core, space) = makeCore(fill: .width)
+        let before = slots(core)
+        let start = try #require(issued(core)[ids[0]])
+        var frame = start
+        frame.size.height -= 120
+        core.handleDragEnd(ids[0], start: start, frame: frame)
+        #expect(slots(core) == before)
+        #expect(filled(core, space) == ids[0])
+        #expect(issued(core)[ids[0]] == start)
+    }
+
     @Test("Height fills the height at the Layout Defaults share")
     func heightTakesTheShare() throws {
         let (core, space) = makeCore(fill: .height)

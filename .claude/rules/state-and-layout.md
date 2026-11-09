@@ -2436,8 +2436,9 @@ editing here:
   verdict (`KiwiVisionMaximizeTests`). The fill cannot end, so a
   door that ends a hand Maximize states its answer for the fill:
   `resize` and a press of the filled shape refuse through the one
-  `refuseVisionFilled`, while an order write, a mode write and a
-  drag proceed and the fill follows the focus. A float fill
+  `refuseVisionFilled` and a mouse resize snaps back through it
+  in `handleDragEnd`, while an order write, a mode write and a
+  drag that moves proceed and the fill follows the focus. A float fill
   (#3036) widens both float stand-downs together —
   `maximizedTiled` and `visionFilledWindow` — and
   `retileEndingMaximize`'s spring promise with them. **What it fills is read through

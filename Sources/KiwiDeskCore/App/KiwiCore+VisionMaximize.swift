@@ -1,8 +1,8 @@
 import Foundation
 
 /// KiwiVision's maximize (#3064): while KiwiVision is on, the
-/// focused tiled window fills its screen, or its height or width at
-/// the Layout Defaults share. The verdict is derived in
+/// active Space's focused tiled window fills its screen, or its
+/// height or width at the Layout Defaults share. The verdict is derived in
 /// `StateCoordinator+VisionFill`; this file mirrors what the look
 /// asks into state and owes the plates their settle re-mask.
 extension KiwiCore {
@@ -34,7 +34,8 @@ extension KiwiCore {
 
     /// Mirrors the asked fill into state at every door that can
     /// change it — on or off, a lens, a live value, the head of
-    /// `retile()` for the Layout Defaults table — and, where it
+    /// `retile()` for the Layout Defaults table and the active
+    /// Space, whose screen the shape is resolved for — and, where it
     /// changed outside a pass, runs the pass that grows or returns
     /// the window, its retire naming them.
     func refillVision(retiling: Bool = true) {

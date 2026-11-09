@@ -4813,7 +4813,8 @@ size, and while a floating window holds the focus the tiled window
 focused last keeps the fill. A [`toggle_maximized`](#toggle_maximized)
 press of another shape wins while it stands, and its end hands the
 fill back; a press of the shape KiwiVision fills, and
-[`resize`](#resize), are refused while the fill stands. Stored as `maximize` in the
+[`resize`](#resize), are refused while the fill stands, and a
+mouse resize snaps back. Stored as `maximize` in the
 `kiwivision` group, absent while `"off"`, and a lens table takes it
 too.
 :::

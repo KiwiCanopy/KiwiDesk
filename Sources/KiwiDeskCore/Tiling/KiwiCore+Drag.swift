@@ -206,6 +206,15 @@ extension KiwiCore {
             retileEndingMaximize([id])
             return
         }
+        // KiwiVision's fill cannot end: a resize of it snaps back
+        // with the keyboard's refusal; a move proceeds (#3064).
+        if !crossedDisplays, state.visionFilledWindow(of: space) == id,
+            MouseResize.isResize(from: start, to: frame)
+        {
+            _ = refuseVisionFilled(id)
+            retileEndingMaximize([id])
+            return
+        }
         // A gesture that live-crossed displays (#504) skips the
         // resize interpretation: macOS clamps a big window's size
         // as it lands on a smaller display, which `isResize`
