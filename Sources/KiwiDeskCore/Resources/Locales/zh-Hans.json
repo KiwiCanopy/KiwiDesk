@@ -922,6 +922,7 @@
   "jump.status.pocketed": "在 Pocket 中",
   "jump.strip.all": "全部",
   "jump.strip.ax.moved": "%1$@：%2$@",
+  "jump.strip.ax.reopen": "打开 App",
   "jump.strip.ax.windows": "%1$@，窗口：%2$d",
   "jump.strip.ax_label": "App",
   "key_recorder.assigned_to": "已指定给“%1$@”",

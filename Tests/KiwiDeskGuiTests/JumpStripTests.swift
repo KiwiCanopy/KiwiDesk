@@ -84,6 +84,25 @@ struct JumpStripTests {
         #expect(list.selected?.entry.title == "Draft")
     }
 
+    /// A lens orders its apps' rows first, so row 1 need not be the
+    /// window used last: the opener takes Core's `lastUsed`.
+    @Test("the last-app opener lands on Core's last-used window")
+    func lastUsedOutranksRowOne() {
+        let base = Self.snapshot
+        var list = JumpList(
+            snapshot: JumpSnapshot(
+                entries: base.entries,
+                here: "1",
+                hereIcon: nil,
+                apps: base.apps,
+                lastUsed: .window(WindowID(4))
+            )
+        )
+        list.pickLastApp()
+        #expect(list.stripApp?.name == "Notes")
+        #expect(list.selected?.entry.title == "List")
+    }
+
     @Test("typing returns to All and dims the apps with no match")
     func typingCoversAll() {
         var list = JumpList(snapshot: Self.snapshot)

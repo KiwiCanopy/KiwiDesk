@@ -107,6 +107,19 @@ struct JumpAppStripTests {
         #expect(core.state.appRecency[900_004] == nil)
     }
 
+    @Test("the snapshot names the listed window focused last")
+    func lastUsedIsNewestStamp() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        track(core, 1, pid: 900_001)
+        track(core, 2, pid: 900_002)
+        #expect(core.jumpSnapshot().lastUsed == nil)
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampAppRecency(900_002)
+        #expect(core.jumpSnapshot().lastUsed == .window(WindowID(1)))
+    }
+
     @Test("an unnamed process is no identity")
     func unnamedPidIsNotStamped() {
         let core = makeCore()

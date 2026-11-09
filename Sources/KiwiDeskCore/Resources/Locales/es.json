@@ -922,6 +922,7 @@
   "jump.status.pocketed": "En tu Pocket",
   "jump.strip.all": "Todas",
   "jump.strip.ax.moved": "%1$@: %2$@",
+  "jump.strip.ax.reopen": "Abre la app",
   "jump.strip.ax.windows": "%1$@, ventanas: %2$d",
   "jump.strip.ax_label": "Apps",
   "key_recorder.assigned_to": "Asignado a «%1$@»",

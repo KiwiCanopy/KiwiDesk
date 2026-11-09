@@ -7029,10 +7029,13 @@ is on.
 selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
+
 :::unreleased
 Above the list sits the **app strip**: **All** first, then one tile
-per app the list holds, most recently used first, with a count on
-an app with two windows or more. **←** and **→** move along it
+per app the list holds and per app you brought forward since
+KiwiDesk started that is still running with no window, most
+recently used first, with a count on an app with two windows or
+more. **←** and **→** move along it
 while the search field is empty, and a click picks a tile; the
 list then holds that app's windows alone, its most recent window
 selected. An app with no window shows **No windows**, and
@@ -7164,7 +7167,8 @@ end)
 **Expects:** nothing.
 
 **Does:** opens KiwiHub's window switcher with its app strip on
-the app of the window you used last, that window selected, so
+the app of the window you used last, that window selected — while
+a [KiwiVision lens](#kiwivisiondefine_lens) is on too — so
 **Return** goes back to it. It switches to the window switcher from
 another side, and closes KiwiHub when the window switcher is up.
 Settings lists it under Shortcuts & Gestures ▸ KiwiHub as **Show

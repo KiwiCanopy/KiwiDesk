@@ -203,13 +203,20 @@ extension JumpList {
         selection = results.isEmpty ? nil : 0
     }
 
-    /// Puts the strip on the app of row 1 — the window used just
-    /// before — keeping that row selected: the opener for the last
-    /// app (#3135), so ↩ goes back from either key.
+    /// Puts the strip on the app of the window used last — Core's
+    /// `lastUsed`, else row 1 — and selects that window: the opener
+    /// for the last app (#3135), so ↩ goes back.
     mutating func pickLastApp() {
-        guard let pid = results.first?.entry.pid,
-            let index = snapshot.apps.firstIndex(where: { $0.pid == pid })
+        guard
+            let target = snapshot.lastUsed ?? results.first?.entry.target,
+            let entry = snapshot.entries.first(where: { $0.target == target }),
+            let index = snapshot.apps.firstIndex(where: {
+                $0.pid == entry.pid
+            })
         else { return }
         pickTile(index + 1)
+        if let row = results.firstIndex(where: { $0.entry.target == target }) {
+            selection = row
+        }
     }
 }

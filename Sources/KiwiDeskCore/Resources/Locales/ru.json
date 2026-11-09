@@ -922,6 +922,7 @@
   "jump.status.pocketed": "В твоём Pocket",
   "jump.strip.all": "Все",
   "jump.strip.ax.moved": "%1$@: %2$@",
+  "jump.strip.ax.reopen": "Открывает приложение",
   "jump.strip.ax.windows": "%1$@, окон: %2$d",
   "jump.strip.ax_label": "Приложения",
   "key_recorder.assigned_to": "Назначено для «%1$@»",

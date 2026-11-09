@@ -16,6 +16,12 @@ enum JumpStripText {
         L("jump.empty.no_match", "No open windows match")
     }
 
+    /// What the "No windows" row's pick does: the macOS menu's own
+    /// verb, which reopens an app already running.
+    static var reopenHint: String {
+        L("jump.strip.ax.reopen", "Opens the app")
+    }
+
     /// A tile as VoiceOver hears it: its name, and its windows
     /// where it has more than one. The count goes last behind a
     /// label, so nothing has to agree with it.

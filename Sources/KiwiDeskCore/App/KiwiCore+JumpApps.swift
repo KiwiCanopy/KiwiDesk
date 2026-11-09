@@ -40,12 +40,26 @@ extension KiwiCore {
         }
     }
 
+    /// The listed window with the newest focus stamp (#1840), nil
+    /// where no listed window has one.
+    func jumpLastUsed(in entries: [JumpEntry]) -> JumpEntry.Target? {
+        entries.compactMap { entry -> (JumpEntry.Target, UInt64)? in
+            guard case .window(let id) = entry.target else { return nil }
+            let rank = state.focusRecencyRank(of: id)
+            return rank > 0 ? (entry.target, rank) : nil
+        }
+        .max { $0.1 < $1.1 }?.0
+    }
+
     /// Reopens an app the strip lists with no window, as Open or
     /// Focus does for an app with nothing up (#1840): its launch
     /// follow included.
     public func reopenJumpApp(bundleID: String) {
-        withUserMotion {
-            _ = launch([.string(bundleID)], newInstance: false)
+        let response = withUserMotion {
+            launch([.string(bundleID)], newInstance: false)
+        }
+        if !response.isSuccess {
+            onLog("jump: reopen \(bundleID) refused")
         }
     }
 }

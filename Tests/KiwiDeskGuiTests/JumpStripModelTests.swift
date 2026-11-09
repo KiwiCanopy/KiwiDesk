@@ -54,6 +54,30 @@ struct JumpStripModelTests {
         #expect(reopened == ["com.apple.dt"])
     }
 
+    @Test("a side switch lands Windows back on All")
+    func sideSwitchResetsTheStrip() {
+        let model = model()
+        model.clickTile(2)
+        model.setScope(.view)
+        model.setScope(.windows)
+        #expect(model.list.tile == 0)
+        model.openOnLastApp()
+        #expect(model.list.stripApp?.name == "Mail")
+        #expect(model.list.selected?.entry.title == "Draft")
+    }
+
+    @Test("the No windows row's click reopens, as ↩ does")
+    func rowClickReopens() {
+        let model = model()
+        var reopened: [String] = []
+        model.onReopen = { reopened.append($0.bundleID ?? "") }
+        model.reopenStripApp()
+        #expect(reopened.isEmpty)
+        model.clickTile(3)
+        model.reopenStripApp()
+        #expect(reopened == ["com.apple.dt"])
+    }
+
     @Test("a click on a dimmed tile does nothing")
     func dimmedClick() {
         LocalizationManager.shared.select("en")
@@ -133,5 +157,8 @@ struct JumpStripModelTests {
                     + "&&model?.query.isEmpty==true"
             )
         )
+        // The pick reaches Core's reopen after the panel's close.
+        #expect(squashed.contains("model.onReopen={[weakself]appin"))
+        #expect(squashed.contains("core.reopenJumpApp(bundleID:bundleID)"))
     }
 }

@@ -15089,45 +15089,52 @@ the position (#2309 ruling 11). `JumpListTests`,
 :::unreleased
 **KiwiHub's app strip orders by recency because the order is on
 screen and the pick is explicit (#3135, owner ruling 2026-11-09).**
-The Windows side carries a strip of recent apps above its list,
-All first; picking an app narrows the list to that app's windows,
-and a second shortcut opens the side with the strip on the app of
-the window used just before. [Rationale] #637 rejected recency for a
-*repeating* gesture: a ring that reorders itself under a key pressed
-again and again makes the third press land where nobody can predict,
-because the order it walks is history the user cannot see. #1840
-kept Open or Focus a fixed ring for that reason, and #3131 deferred
-a recency order for `focus_app_window` for the same one. The strip
-is the other case. Its order is drawn before any key acts, snapshot
-when the panel opens and never moved while it is up, and nothing
-lands until ↩ or a click names the row. A step along the strip
-moves a selection the user is watching; it does not focus anything.
-That is the line: recency may order what is shown, never what a
-blind repeated key acts on. So the strip and `focus_app_window` never
-share an order, and a hold-and-release form of the strip was ruled
-out with the rest of the blind gesture — releasing a held key is a
-pick the user did not look at.
+[Rationale] #637 rejected recency for a *repeating* gesture: a ring
+that reorders itself under a key pressed again and again makes the
+third press land where nobody can predict, because the order it
+walks is history the user cannot see. #1840 kept Open or Focus a
+fixed ring for that reason, and #3131 deferred a recency order for
+`focus_app_window` for the same one. The strip is the other case.
+Its order is drawn before any key acts, snapshot when the panel
+opens and never moved while it is up, and nothing lands until ↩ or
+a click names the row. A step along the strip moves a selection the
+user is watching; it does not focus anything. That is the line:
+recency may order what is shown, never what a blind repeated key
+acts on. So the strip and `focus_app_window` never share an order.
+The hold-and-release form was ruled out on its costs — ⌘⇥ and
+⌃⌥J ↩ already flip back in one tap, the release raised a Secure
+Input spike and picked early on a slipped key, it lost ⌥↩ Swap,
+and it was harder to follow with VoiceOver — and on the ruling's
+own line that a pick by recency is a deliberate press.
 
 Narrowing to one app squares with #2103's "the switcher orders and
 never filters". That rule keeps a lens from hiding windows the user
 did not ask to hide: a filter the user did not set would make other
-apps' windows unfindable from KiwiDesk. The strip's narrowing is set
-by the user, one app at a time, with All one key away and the
-default on every opener, so no window is out of reach and none is
-dropped behind the user's back. Search keeps the same guarantee:
-typing returns the strip to All, so a query always covers every
-window, and a tile with no match dims in place rather than leaving
-the strip. Filtering inside one app was rejected, because a query
-that empties one app's list ("No windows match in Xcode") is a dead
-end the user has to back out of, where All with dimmed tiles shows
-at once which apps hold a match. While a query is up, the
-keyboard keeps ← → for the text cursor, so the strip moves by
-pointer only and a dimmed tile takes no pick.
+apps' windows unfindable from KiwiDesk. The strip narrows only to
+an app the user picked, or the app the last-app shortcut was
+pressed for, and All stays on the same strip: ⌃⌥J and every query
+start there, and ← or a click reaches it from any tile. No window
+is out of reach and none is dropped behind the user's back. Search
+keeps the same guarantee: typing returns the strip to All, so a
+query always covers every window, and a tile with no match dims in
+place rather than leaving the strip. Filtering inside one app was
+rejected, because a query that empties one app's list ("No windows
+match in Xcode") is a dead end the user has to back out of, where
+All with dimmed tiles shows at once which apps hold a match.
+
+The ruling gives ← → to the strip only while the field is empty,
+and also says they walk the matching apps while a query is up. The
+shipped reading keeps ← → for the text cursor under a query, as a
+search field does everywhere on macOS, so there the strip moves by
+pointer only and a dimmed tile takes no click; the owner confirms
+or reverses that reading on #3135.
 
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,
 and an option would put a second meaning on a call every existing
-binding and `UIBridgeHooks` field already spells one way.
+binding and `UIBridgeHooks` field already spells one way. It lands
+on the window Core last saw focused, never on row 1, which a lens
+reorders.
 :::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on

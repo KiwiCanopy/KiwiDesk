@@ -175,7 +175,15 @@ struct JumpPanelView: View {
     }
 
     @ViewBuilder private var results: some View {
-        if model.list.results.isEmpty {
+        if model.list.stripApp?.bundleID != nil {
+            JumpReopenRow(
+                text: model.emptyText,
+                app: model.list.stripApp?.name ?? "",
+                onActivate: { model.reopenStripApp() }
+            )
+            .padding(.vertical, Self.listPadding)
+            .padding(.horizontal, KeyPanelStyle.selectionInset)
+        } else if model.list.results.isEmpty {
             Text(model.emptyText)
                 .font(.body)
                 .foregroundStyle(.secondary)

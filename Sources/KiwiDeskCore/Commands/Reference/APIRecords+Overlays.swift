@@ -317,7 +317,7 @@ extension APIReference {
         ),
         "show_last_app": APIRecord(
             "Opens KiwiHub's window switcher on the app of the window "
-                + "used last, or closes it if it is open."
+                + "used last, or closes it while it is up."
         ),
         "set_key": APIRecord(
             "Sets a second chord for a KiwiHub navigation key; no "

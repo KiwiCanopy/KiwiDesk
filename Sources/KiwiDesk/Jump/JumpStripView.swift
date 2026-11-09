@@ -165,3 +165,36 @@ struct JumpStripTile: View {
         }
     }
 }
+
+/// The list's one row for an app the strip lists with no window
+/// (#3135): "No windows", dimmed, on the selection's hover ground,
+/// and its pick — ↩, a click or VoiceOver — reopens the app.
+struct JumpReopenRow: View {
+    let text: String
+    let app: String
+    let onActivate: () -> Void
+    @Environment(\.kiwiHubPaint) private var paint
+
+    var body: some View {
+        Button(action: onActivate) {
+            Text(text)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: JumpRowView.height)
+                .background(
+                    RoundedRectangle(
+                        cornerRadius: KeyPanelStyle.selectionRadius,
+                        style: .continuous
+                    )
+                    .fill(paint.fill(paint.rowHover))
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .accessibilityLabel(JumpStripText.moved(tile: app, row: text))
+        .accessibilityHint(JumpStripText.reopenHint)
+        .accessibilityAddTraits(.isSelected)
+    }
+}

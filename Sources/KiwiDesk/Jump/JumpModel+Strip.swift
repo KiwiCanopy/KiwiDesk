@@ -45,6 +45,15 @@ extension JumpModel {
         announceTile()
     }
 
+    /// Reopens the app the strip is on where it lists no window —
+    /// ↩, a click or VoiceOver on its "No windows" row (#1840).
+    func reopenStripApp() {
+        guard list.results.isEmpty, let app = list.stripApp,
+            app.bundleID != nil
+        else { return }
+        onReopen(app)
+    }
+
     /// The last-app opener: the strip on row 1's app, row 1 kept.
     func openOnLastApp() {
         guard scope == .windows else { return }

@@ -20,7 +20,8 @@ extension KiwiCore {
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon),
             swapsInHere: jumpHereFocus(in: here) != nil,
-            apps: jumpApps(for: entries)
+            apps: jumpApps(for: entries),
+            lastUsed: jumpLastUsed(in: entries)
         )
     }
 

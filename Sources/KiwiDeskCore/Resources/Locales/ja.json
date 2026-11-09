@@ -922,6 +922,7 @@
   "jump.status.pocketed": "Pocket内",
   "jump.strip.all": "すべて",
   "jump.strip.ax.moved": "%1$@：%2$@",
+  "jump.strip.ax.reopen": "アプリを開きます",
   "jump.strip.ax.windows": "%1$@、ウインドウ：%2$d",
   "jump.strip.ax_label": "アプリ",
   "key_recorder.assigned_to": "「%1$@」に割り当て済み",

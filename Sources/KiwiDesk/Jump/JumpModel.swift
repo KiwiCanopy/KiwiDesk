@@ -229,10 +229,8 @@ final class JumpModel: ObservableObject {
         case .pick(let moveHere):
             if let index = list.selection {
                 pick(index, moveHere ? .moveHere : .jump)
-            } else if !moveHere, let app = list.stripApp,
-                app.bundleID != nil
-            {
-                onReopen(app)
+            } else if !moveHere {
+                reopenStripApp()
             }
         case .swapHere:
             if let index = list.selection { pick(index, .swapHere) }
@@ -272,6 +270,8 @@ final class JumpModel: ObservableObject {
         desktops = nil
         if scope == .desktops { enterDesktops() }
         if !list.query.isEmpty { list.setQuery("") }
+        // Every side switch lands Windows back on All (#3135).
+        list.pickTile(0)
         view?.setQuery("")
         shortcuts?.setQuery("")
         self.scope = scope
