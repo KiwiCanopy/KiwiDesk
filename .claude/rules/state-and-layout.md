@@ -2486,8 +2486,10 @@ editing here:
   `retile()`, or a float verb ending it first through
   `endMaximizeBeforeFloatVerb` — so an ender clears the flag and
   writes no frame of its own; a new verb moving a float's frame
-  takes that door ahead of its base read, which is review's, since
-  nothing scans for one (`MaximizeFloatTests` drives the verbs that
+  takes that door ahead of its base read and steps from the frame
+  it returns, and an entry asking whether a return is owed asks
+  `owedMaximizedFloatReturns()` — both review's, since nothing
+  scans for them (`MaximizeFloatTests` drives the verbs that
   exist). The record's presence is part of the verdict: a float's
   Maximize stands only while it holds one and a tile's only while
   it holds none, so a new writer of the record changes what is

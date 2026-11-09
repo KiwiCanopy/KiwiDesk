@@ -46,20 +46,22 @@ extension KiwiCore {
         return paid
     }
 
-    /// `frame` where it still lies on the screen of the Space `id`
-    /// is drawn on, else fitted into that Space's float region: the
-    /// window or its Space moved screens while it filled one.
+    /// `frame` confined to the float region of the Space `id` is
+    /// drawn on, as a remembered float frame is (#1675), and centred
+    /// there first where it lies on another screen: the window or
+    /// its Space moved screens while it filled one.
     private func returnFrame(_ frame: CGRect, of id: WindowID) -> CGRect {
         guard let space = floatPlacementSpace(of: id),
-            let region = floatGrowBounds(on: space),
-            !FloatPlacement.onSameScreen(
-                frame,
-                as: region,
-                among: tiler.allScreenBounds()
-            )
+            let region = floatGrowBounds(on: space)
         else { return frame }
+        let sameScreen = FloatPlacement.onSameScreen(
+            frame,
+            as: region,
+            among: tiler.allScreenBounds()
+        )
         return FloatPlacement.restored(
-            FloatRecovery.centred(frame.size, in: region),
+            sameScreen
+                ? frame : FloatRecovery.centred(frame.size, in: region),
             in: region
         )
     }
