@@ -68,6 +68,9 @@ protocol KeyboardTapHandle: AnyObject {
     /// Closes an open sequence at the tap's next event, its later
     /// decisions stamped `generation`.
     func requestSequenceClose(generation: UInt64)
+    /// While held, no modifier tap fires and no tap leader opens
+    /// (#1229); the detector keeps counting.
+    func holdTaps(_ held: Bool)
 }
 
 /// The one keyboard event tap (#2601, #1872, #1871), run only
@@ -98,6 +101,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     let sequenceState = OSAllocatedUnfairLock(
         initialState: SequenceTapState()
     )
+    private let tapsHeld = OSAllocatedUnfairLock(initialState: false)
     let fire: Fire
     private let report: Report
     // Tap-thread state; `installed` is written before the start
@@ -146,6 +150,10 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
             report: report
         )
         return tap.start() ? tap : nil
+    }
+
+    func holdTaps(_ held: Bool) {
+        tapsHeld.withLock { $0 = held }
     }
 
     func setRows(_ rows: KeyboardTapRows) {
@@ -278,17 +286,21 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         return true
     }
 
-    /// `.modifierTaps`: feeds the detector, fires what it decided,
-    /// and arms the gap timer a single tap waits on.
+    /// `.modifierTaps`: feeds the detector, fires what it decided
+    /// unless the taps are held, and arms the gap timer a single tap
+    /// waits on, which fires only if the taps were held neither at
+    /// the tap nor at the lapse.
     private func route(_ input: ModifierTapDetector.Input) {
         let (ids, pending) = router.withLock { $0.feed(input) }
-        ids.forEach(fireOrOpen)
+        let heldAtTap = tapsHeld.withLock { $0 }
+        if !heldAtTap { ids.forEach(fireOrOpen) }
         if let pending {
             DispatchQueue.global(qos: .userInteractive).asyncAfter(
                 deadline: .now() + ModifierTapDetector.gapLimit
             ) { [weak self] in
                 guard let self,
-                    let id = self.router.withLock({ $0.expire(pending) })
+                    let id = self.router.withLock({ $0.expire(pending) }),
+                    !heldAtTap, !self.tapsHeld.withLock({ $0 })
                 else { return }
                 self.fireOrOpen(id)
             }

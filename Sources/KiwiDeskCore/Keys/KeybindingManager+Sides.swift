@@ -94,6 +94,7 @@ extension KeybindingManager {
                     }
                 }
             )
+            keyboardTap?.holdTaps(modifierTapsHeld)
             onLog(
                 keyboardTap == nil
                     ? "keyboard tap: refused by macOS (Accessibility?)"

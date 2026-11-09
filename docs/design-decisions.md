@@ -12683,28 +12683,79 @@ What it unblocks: reading keys needs no Input Monitoring, so
 #1874's "tap Hyper alone for Escape" turns on whether posting the
 Escape does, which is #1874's to measure.
 
+:::unreleased
 **Amended (#1872, #1229, #1873; owner, 2026-11-08): a seeded
-shortcut may run the keyboard tap, or a reader of touches, on a
-default install.** The bound above, "a default install sees no
-keystroke", is retired for two seeds only: #1229's ⌘⌘ (Show
-Desktop overview) and #1873's seeded gestures. Neither can be anything
-else. Carbon registers no binding without a non-modifier key, so a
-modifier tap is a keyboard tap or nothing; a pinch is a touch
-reader or nothing. And a seed nobody can find is no seed: putting
-the overview's opener behind a switch first would make the tour
-teach a switch. What stays bounded is what the tap does, and those
-seeds keep these bounds. The tap runs while a modifier-tap binding
-exists, a seeded one included, so clearing every tap stops it. Of
-modifier changes, key presses (to tell a tap from a chord's start)
-and mouse-down (so ⌘-click in Finder never counts) it swallows,
-records and stores none, and it is listen-only unless a sided
-shortcut also needs it. It asks for Accessibility alone. It stays
-one tap: a system-wide reader of key events joins it as a consumer
-with its own mask, built from the union, and is no tap of its own
-(`.claude/rules/input-and-animation.md`). Accepted: under Secure
-Input, key presses are hidden from the tap, so a key typed between
-two ⌘ taps cannot reset the count
-([accepted limitations](accepted-limitations.md)).
+binding may run a reader of keys or of the trackpad on a default
+install.** The bound above, "a default install, and one that never
+records a side, sees no keystroke", is retired for two seeds only:
+#1229's ⌘⌘ (Show Desktop overview) and #1873's seeded gesture
+slots, which ship bound and on — a four-finger tap opens KiwiHub's
+shortcuts panel and a three-finger tap goes back to the Space you
+were on. Neither can be anything else. Carbon registers no binding
+without a non-modifier key, so a modifier tap is a keyboard tap or
+nothing; a pinch or a tap is a trackpad reader or nothing. And a seed nobody can
+find is no seed: putting the overview's opener behind a switch first
+would make the tour teach a switch.
+
+What bounds each input is #2601's other rule, applied per input: no
+binding, no reader. Three inputs answer it, and they stand on
+different ground:
+
+- **The keyboard tap** serves the modifier taps. It runs while a
+  modifier-tap binding exists, a seeded one included, so clearing
+  every tap stops it. Of modifier changes, key presses (to tell a
+  tap from a chord's start) and mouse-down (so ⌘-click in Finder
+  never counts) it swallows, records and stores none, and it is
+  listen-only unless a sided shortcut also needs it. It asks for
+  Accessibility alone. It stays one tap: a system-wide reader of key
+  events joins it as a consumer with its own mask, built from the
+  union, and is no tap of its own
+  (`.claude/rules/input-and-animation.md`). While KiwiHub — or any
+  own floating panel — is the key window, no modifier tap fires and
+  no tap leader opens a sequence, since KiwiHub's own keys ride every
+  modifier. Accepted: under Secure Input, key presses are hidden from
+  the tap, so a key typed between two ⌘ taps cannot reset the count
+  ([accepted limitations](accepted-limitations.md)).
+- **The touch reader** (MultitouchSupport) serves the taps and swipes.
+  It runs only while the core runs and a bound slot reads touches, so
+  unbinding the taps and swipes stops it. It reads and never swallows
+  — the framework hands every frame to every listener — records and
+  stores nothing, decides on its own thread through a pure router,
+  and hands the main actor only a gesture it recognized. It needs no
+  permission: the 2026-10-31 probe read every frame system-wide with
+  Accessibility, Input Monitoring and PostEvent all refused, and tccd
+  logged no request. Where the `dlsym` lookup fails there is no reader
+  and no fallback to write, the os-private-apis carve-out: the scroll
+  gestures keep working through their public tap.
+- **The gesture-event consumer** (#2447) will serve ⌃⌥ + spread
+  (toggle maximized) and ⌃⌥ + rotate (cycle the layout), which ship
+  bound but fire nothing until it lands. Its mask arms only while such
+  a slot is bound, so the seeds put it on every default install too.
+  Which TCC service that mask asks for at `.cgSessionEventTap` is
+  unmeasured: the ruling owes that measurement before #2447 builds,
+  and this entry claims nothing for it.
+
+Because the reader cannot keep macOS from answering a gesture too, a
+gesture macOS owns does not fire: KiwiDesk reads the trackpad
+preferences and a three-finger tap set to Look up, or a three- or
+four-finger swipe on an axis macOS uses (or any three-finger swipe
+under three-finger drag), stands down; a preference it cannot read
+owns nothing, so the binding stays live. Every swipe, pinch, rotation
+and Force Click needs a modifier, since macOS and apps own the
+unmodified ones; a tap may take none.
+
+The slots are stored sparsely, in `gui.json` over the seeds and in a
+profile over that, a missing slot inheriting and `null` meaning None.
+So a seed a later release adds — #1229's ⌃⌥ + pinch together for the
+Desktop overview — reaches an install that never touched that slot
+with no top-up generation, and the cost is the mirror: changing a
+shipped seed changes it for everyone who kept it, which makes each
+such change a ruling. The key is additive, so it takes no format
+bump: an older build ignores it, and its Save drops it. The map itself
+decodes strictly, so a slot a later release adds is a name this build
+refuses, and adding one bumps `GuiConfig.currentFormat` and
+`Profile.currentFormat`.
+:::
 
 :::unreleased
 **A modifier tap is one binding kind, decided by one rule
@@ -12740,6 +12791,7 @@ warning about a tap may name only what macOS itself answers; a
 list of other apps' taps would be stale the day it shipped.
 :::
 
+:::unreleased
 **Every pointer event KiwiDesk must swallow goes through one
 active tap, and only while a consumer needs it (#2447, #2764).**
 An `NSEvent` monitor hears a press but cannot drop it, so a
@@ -12797,61 +12849,6 @@ gesture keeps one rule, and no click reached the app that would
 otherwise have focused a float. The press moves no focus, so a press
 that never becomes a drag takes none; a float dropped by its own
 title bar is macOS's to focus (owner with ui-designer, 2026-11-08).
-
-:::unreleased
-**A default install reads the trackpad's fingers (#1873, owner
-ruling 2026-11-08).** #2601 promised that "a default install, and one
-that never records a side, sees no keystroke", and that still holds.
-The seeded gesture slots add a reader of a different input: they ship
-bound and on — a four-finger tap opens KiwiHub's shortcuts panel and a
-three-finger tap goes back to the Space you were on — so a default
-install reads the trackpad's fingers. The same amendment is meant to
-cover #1229's seeded ⌘⌘, a keyboard tap on a default install, when
-that lane seeds it.
-
-What bounds each input is #2601's other rule, applied per input: no
-binding, no reader. Two inputs answer it, and they stand on different
-ground:
-
-- **The touch reader** (MultitouchSupport) serves the taps and swipes.
-  It runs only while the core runs and a bound slot reads touches, so
-  unbinding the taps and swipes stops it. It reads and never swallows
-  — the framework hands every frame to every listener — records and
-  stores nothing, decides on its own thread through a pure router,
-  and hands the main actor only a gesture it recognized. It needs no
-  permission: the 2026-10-31 probe read every frame system-wide with
-  Accessibility, Input Monitoring and PostEvent all refused, and tccd
-  logged no request. Where the `dlsym` lookup fails there is no reader
-  and no fallback to write, the os-private-apis carve-out: the scroll
-  gestures keep working through their public tap.
-- **The gesture-event consumer** (#2447) will serve ⌃⌥ + spread
-  (toggle maximized) and ⌃⌥ + rotate (cycle the layout), which ship
-  bound but fire nothing until it lands. Its mask arms only while such
-  a slot is bound, so the seeds put it on every default install too.
-  Which TCC service that mask asks for at `.cgSessionEventTap` is
-  unmeasured: the ruling owes that measurement before #2447 builds,
-  and this entry claims nothing for it.
-
-Because the reader cannot keep macOS from answering a gesture too, a
-gesture macOS owns does not fire: KiwiDesk reads the trackpad
-preferences and a three-finger tap set to Look up, or a three- or
-four-finger swipe on an axis macOS uses (or any three-finger swipe
-under three-finger drag), stands down; a preference it cannot read
-owns nothing, so the binding stays live. Every swipe, pinch, rotation
-and Force Click needs a modifier, since macOS and apps own the
-unmodified ones; a tap may take none.
-
-The slots are stored sparsely, in `gui.json` over the seeds and in a
-profile over that, a missing slot inheriting and `null` meaning None.
-So a seed a later release adds — #1229's ⌃⌥ + pinch together for the
-Desktop overview — reaches an install that never touched that slot
-with no top-up generation, and the cost is the mirror: changing a
-shipped seed changes it for everyone who kept it, which makes each
-such change a ruling. The key is additive, so it takes no format
-bump: an older build ignores it, and its Save drops it. The map itself
-decodes strictly, so a slot a later release adds is a name this build
-refuses, and adding one bumps `GuiConfig.currentFormat` and
-`Profile.currentFormat`.
 :::
 
 **An absent capability is not a greyed one, and an absent
@@ -14569,6 +14566,12 @@ and, listed, it would surface in *Custom*, the section that means
 with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Custom. (#602, PR #638, #2246)
+
+:::unreleased
+The Desktop overview's opener, seeded on ⌘⌘ (#1229), is a fourth
+and is dropped the same way; the side switch prints it beside the
+Desktops title.
+:::
 
 :::unreleased
 **The side switch draws titles only (#1229, owner ruling

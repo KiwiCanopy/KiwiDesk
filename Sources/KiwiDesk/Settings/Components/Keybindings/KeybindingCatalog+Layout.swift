@@ -29,8 +29,8 @@ extension KeybindingCatalog {
         }
     )
 
-    /// The Desktop overview, KiwiHub's Desktops side (#1229): no
-    /// seeded chord yet; ⇥, the quick menu and Lua reach it.
+    /// The Desktop overview, KiwiHub's Desktops side (#1229),
+    /// seeded on ⌘⌘.
     static let showDesktopOverview = NavCommand(
         label: "Show Desktop overview",
         lua: KiwiHubSide.desktops.lua,

@@ -198,6 +198,13 @@ editing here:
     press the recorder reads and fires a tap the recorder is
     recording
     (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
+  - **While an own floating panel is key, no modifier tap fires
+    and no tap leader opens (#1229)**: derive the hold from
+    `ownKeyWindow`'s `floatsOverWindows` in
+    `KiwiCore.ownKeyWindowDidChange` alone, never a flag a panel
+    sets, and decide it on the tap thread ahead of `fireOrOpen` and
+    again at a single tap's lapse (`KiwiHubHeldTapTests`). The why
+    is `docs/design-decisions.md` ▸ the #1872/#1229/#1873 amendment.
   - **On its own thread, deciding from the rows handed it** and
     passing every event no swallowing consumer answers; the
     callback does
