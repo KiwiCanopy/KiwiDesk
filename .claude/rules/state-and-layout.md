@@ -1180,7 +1180,8 @@ editing here:
   `spaceMoveBlock`, and a door filing past `moveWindow` — the
   Space Bar spring — asks it beside its sticky arm
   (`MoveToSpaceFullScreenTests` ▸ `namedRefuses`,
-  `MoveToSpaceFullScreenTests` ▸ `barRowGreyed`).
+  `MoveToSpaceFullScreenTests` ▸ `barRowGreyed`,
+  `SpaceMoveDoorSeamTests` ▸ `springAsks`).
   A verb filing a window into the Space a SCREEN shows owes the
   refusal of a screen on a full-screen or system Space, asked
   through `screenShowsUserSpace(on:)`, never a
