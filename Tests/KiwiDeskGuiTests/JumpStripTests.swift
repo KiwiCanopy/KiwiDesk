@@ -228,6 +228,7 @@ struct JumpStripTests {
     }
 
     @Test("the last-app opener steps where Windows shows")
+    @MainActor
     func openerSteps() {
         #expect(JumpPanelController.lastAppAction(showing: nil) == .open)
         #expect(
