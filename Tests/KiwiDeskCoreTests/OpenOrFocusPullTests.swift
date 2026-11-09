@@ -69,6 +69,24 @@ struct OpenOrFocusPullTests {
         #expect(recorder.activated.isEmpty)
     }
 
+    /// State still names the app's window after a ⌘-Tab away
+    /// (#1785): the cycle answers `.notFrontmost` and the press
+    /// pulls the app's most recent window rather than stopping
+    /// at the cycle (#3131 moved that answer to `AppCycleStep`).
+    @Test("A stale focus falls through the cycle to the pull")
+    func staleFocusPulls() {
+        let (core, recorder) = makeCore()
+        addWindow(core, 20, space: "1")
+        addWindow(core, 21, space: "2")
+        core.rememberHonoredFocus(WindowID(20))
+        core.rememberHonoredFocus(WindowID(21))
+        core.state.workspaces.focus(WindowID(20), in: "1")
+        #expect(press(core).isSuccess)
+        #expect(core.state.workspaces.activeSpace == "2")
+        #expect(core.state.workspaces.lastFocused == WindowID(21))
+        #expect(recorder.activated.isEmpty)
+    }
+
     @Test("The most recently focused window wins over ring order")
     func mostRecentWins() {
         let (core, _) = makeCore()

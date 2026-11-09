@@ -94,7 +94,7 @@ struct OpenOrFocusSeams {
 /// does not take anything out of the Dock, so pressing the
 /// shortcut for an app whose every window is minimized made the
 /// app frontmost with nothing on screen — no visible response at
-/// all. The cycle (`cycleToNextWindow`) cannot help: a minimize
+/// all. The cycle (`cycleAppWindow`) cannot help: a minimize
 /// evicts the window from state entirely.
 ///
 /// The rule, ruled and recorded in `docs/design-decisions.md`:

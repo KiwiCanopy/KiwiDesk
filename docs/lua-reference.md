@@ -169,6 +169,42 @@ unknown to KiwiDesk is refused.
 KiwiDesk.focus_window(1234)
 ```
 
+:::unreleased
+### focus_app_window
+
+**Expects:** a direction, `"next"` or `"prev"`.
+
+**Does:** focuses the focused app's next or previous window,
+wherever it is: another Space, another screen, or a macOS Desktop
+no screen shows. The order is the one a repeat press of
+[`focus_or_spawn`](#focus_or_spawn) walks — Spaces in the order
+the Space Bar lists them, then each window's slot, wrapping around
+— and `"prev"` walks it backwards. Minimized windows are skipped
+and stay minimized. A window on a Desktop no screen shows needs the
+Desktop bridge, as `focus_or_spawn`'s does. It is refused with no
+other window of the app, with another app in front, or when the
+Desktop holding the next window cannot be switched to. It has no
+shortcut until you bind one.
+
+macOS has its own **Move focus to next window** (System Settings ▸
+Keyboard ▸ Keyboard Shortcuts… ▸ Keyboard), whose key depends on
+your keyboard layout. It cycles the front app's windows on the
+current Space only, most recently used first. `focus_app_window`
+also reaches the app's windows on other Spaces and on Desktops no
+screen shows, in a fixed order.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("alt+tab", function()
+    KiwiDesk.focus_app_window("next")
+end)
+KiwiDesk.bind("alt+shift+tab", function()
+    KiwiDesk.focus_app_window("prev")
+end)
+```
+:::
+
 ### swap
 
 **Expects:** a direction (`"left"`, `"right"`, `"up"`, or

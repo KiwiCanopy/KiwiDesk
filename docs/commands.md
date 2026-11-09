@@ -55,6 +55,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`move_floating`](lua-reference.md#move_floating) | Moves the focused floating window along x or y by a delta in points, positive y moving down. |
 | [`move_to_track`](lua-reference.md#move_to_track) | Moves the focused window one track along; takes prev or next. |
 | [`focus_or_spawn`](lua-reference.md#focus_or_spawn) | Focuses an app's window, or launches a new instance. |
+| [`focus_app_window`](lua-reference.md#focus_app_window) | Focuses the focused app's next or previous window, on any Space, screen or Desktop. |
 | [`spawn_new`](lua-reference.md#spawn_new) | Launches a new instance of an app by bundle identifier. |
 | [`gather`](lua-reference.md#gather) | Moves every window of an app into the Space you are on, from other Desktops too. |
 | [`move_here`](lua-reference.md#move_here) | Moves an app's most recently focused window into the Space you are on, or opens the app. |
