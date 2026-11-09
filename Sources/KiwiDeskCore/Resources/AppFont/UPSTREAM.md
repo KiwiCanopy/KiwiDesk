@@ -1,11 +1,11 @@
 # Vendored: sketchybar-app-font
 
 - Upstream: https://github.com/kvndrsslr/sketchybar-app-font
-- Release: v3.0.18
-- Vendored: 2026-11-02
+- Release: v3.0.22
+- Vendored: 2026-11-09
 - License: CC0-1.0 (see upstream)
 - SHA-256:
-  - 7235be55e92eee3b0ee4e8f8761add98a7158aeb7d925a595f8c2c6da1d62095  sketchybar-app-font.ttf
+  - e0ae78fd484def50f5a8b4cbbc1bb4d0854043e997b9050759fec2fcfd622dce  sketchybar-app-font.ttf
 
 Snapshot of the release asset `sketchybar-app-font.ttf`; the
 app name table is read from its `meta` table (`APPM`). Do not

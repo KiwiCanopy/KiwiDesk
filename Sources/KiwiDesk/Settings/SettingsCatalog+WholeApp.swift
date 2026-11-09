@@ -38,6 +38,12 @@ struct ShortcutsControls: Sendable {
         "Layers",
         children: LayersControls()
     )
+    /// The edited layer's key sequences, a collapsible card under
+    /// Layers (#1871).
+    let keySequencesCard = SettingsDrawer(
+        "shortcuts.section.key_sequences",
+        "Key sequences"
+    )
     /// The Show & hide card: KiwiHub, KiwiShelf and KiwiVision,
     /// each a sub-group titled by its product name below.
     let showHideKeys = SettingsControl(

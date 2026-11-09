@@ -59,6 +59,14 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDeskCore/App/KiwiCore+GuiConfigSeed.swift":
             (1, "first-run seed: one row per action by construction"),
+        "KiwiDeskCore/Config/RuleReach+KeyBase.swift":
+            (
+                2,
+                "the loaded page's base: a profile's own sequence goes"
+                    + " back to the shared one on its leader, adds no row"
+                    + " but a shared sequence the profile left out"
+                    + " (#1871, KeySequenceCardSaveTests)"
+            ),
         "KiwiDeskCore/Config/RuleReach+Keys.swift":
             (
                 3,
@@ -87,20 +95,12 @@ struct LayerRowWriterCensusTests {
                     + " taken with it (BindingRevertSetTests)"
             ),
         "KiwiDesk/Settings/Components/Keybindings/"
-            + "KeybindingCatalog+Layers.swift":
-            (
-                2,
-                "layer rename: rewrites Lua in place, adds no row;"
-                    + " layer delete: removes rows, adds none"
-            ),
-        "KiwiDesk/Settings/Components/Keybindings/"
             + "KeybindingCatalog+Lenses.swift":
             (
-                3,
-                "lens rename: drops a stale row of the new name, then"
-                    + " rewrites Lua in place, adds no row; lens delete:"
-                    + " removes rows, adds none (#2103,"
-                    + " ShortcutsLensRowsTests)"
+                1,
+                "lens rename: drops a stale row of the new name; the"
+                    + " rewrite and the delete go through mappingActions"
+                    + " (#2103, #1871, ShortcutsLensRowsTests)"
             ),
         "KiwiDesk/Shortcuts/KeySequenceHintController.swift":
             (
@@ -204,6 +204,19 @@ struct LayerRowWriterCensusTests {
             (1, "an offer: hands the holder to its rows"),
         "KiwiDesk/Settings/Sections/LayersCard.swift":
             (1, "the layer card: hands the holder to its rows"),
+        "KiwiDesk/Settings/Sections/KeySequencesCard.swift":
+            (
+                1,
+                "the Key sequences card (#1871): appends a leader with"
+                    + " no action, hands the holder to its outline"
+            ),
+        "KiwiDesk/Settings/Components/Keybindings/Sequences/"
+            + "SequenceEditing.swift":
+            (
+                1,
+                "a sequence's tree, rewritten whole by its leader: an"
+                    + " end key is a separate trigger (#1871)"
+            ),
     ]
 
     private static let holderPattern = try! NSRegularExpression(

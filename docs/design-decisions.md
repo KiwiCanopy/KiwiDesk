@@ -14213,10 +14213,23 @@ action in a layer, which a row cannot draw; a sequence is drawn
 whole, its path in its hint panel, so nothing is hidden. Within one
 step a key is either an end key or opens more keys, never both, so
 no timeout is ever needed; a leader is a chord like a row's, judged
-against the rows of its layer. The Settings half of the ruling, a
-Key sequences card whose rows refuse two siblings on one key "in
-this step" and a row caption naming the sequence ("Also ⌃⌥Space →
-W → H"), is #1871's second change.
+against the rows of its layer. In Settings the Key sequences card
+refuses two siblings on one key ("Assigned to … at this point in
+the sequence"), and the action's own row names the sequence in a
+caption ("Also ⌃⌥Space → W → H"). An end key's action is picked
+in a searchable popover over the whole catalogue in the page's
+groups, never folded, with "Opens more keys ›" and "Lua…" pinned
+outside its scrolling list (owner, 2026-11-09). KiwiHub's
+Shortcuts side lists an end key by its path (past four keys, the
+leader, "…" and the last two), finds it by the names
+along that path too, and draws no tree: the hint panel and the
+card already do. A sequence has no "Applies to"
+column yet: the key table keys a row by its Lua, which a leader has
+none of, so a stored profile's Save, which writes through that
+table, would drop a sequence edited there. A sequence edited on the
+loaded profile's page is saved in the layer's shared rows, whole,
+so every profile without its own override has it, and the card is
+greyed, never hidden, while a stored profile is edited (#3124).
 :::
 
 :::unreleased

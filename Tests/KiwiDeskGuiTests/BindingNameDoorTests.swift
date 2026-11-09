@@ -41,14 +41,30 @@ struct BindingNameDoorTests {
             1,
             "shortcut.list: a sequence entry carries its stored name"
         ),
-        "RuleReach+Keys.swift": (
-            1,
-            "sameShortcuts: a sequence's stored name is a write"
-        ),
         "KeySequenceHint.swift": (
             4,
             "a key sequence node's own name (#1871): a leader or a"
                 + " key that opens more keys runs no catalog action"
+        ),
+        "SequencePathWords.swift": (
+            1,
+            "SidedChordWords.label, a chord's spoken words — no "
+                + "binding's label is read"
+        ),
+        "SequenceNodeRow.swift": (
+            1,
+            "the name field's key path on a sequence node, its only"
+                + " name (#1871)"
+        ),
+        "SequenceNodeRow+Recorder.swift": (
+            1,
+            "SidedChordWords.label, a chord's spoken words — no "
+                + "binding's label is read"
+        ),
+        "SequenceTree.swift": (
+            1,
+            "a catalogue pick stores its command's English label, as"
+                + " a navigation row does (#1871)"
         ),
         "ShortcutsPagePart.swift": (
             1,
@@ -77,9 +93,11 @@ struct BindingNameDoorTests {
             "application rows sort by their app-name label"
         ),
         "ShortcutsReference+Bands.swift": (
-            1,
+            3,
             "an application row's app-name label when no bundle id "
-                + "names it, and the rows' sort by that name"
+                + "names it, and the rows' sort by that name; a key "
+                + "sequence's leader and branch names, its path's own "
+                + "names (#1871)"
         ),
         "ShortcutsReference+PocketApps.swift": (
             1,

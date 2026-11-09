@@ -203,11 +203,20 @@ writer, since an end key is a separate trigger; one that asks what
 an action does takes `actionBindings` (end keys included), and one
 that rewrites an action's Lua or kind takes `mappingActions`, which
 reaches the end keys; any other reader carries a sequence whole,
-its `steps` with it. A new Core reader classifies itself in
-`KeySequenceReaderCensusTests`, whose scan stops at Core: a GUI
-reader is review's until the Key sequences card's census lands
-(L-1871b). A profile holds or overrides a whole sequence, never a
-key inside one (`KeySequenceReaderTests`).
+its `steps` with it. A new reader classifies itself in
+`KeySequenceReaderCensusTests` (Core) or
+`KeySequenceGuiReaderCensusTests` (the GUI tree). A profile holds
+or overrides a whole sequence, never a key inside one
+(`KeySequenceReaderTests`). A writer of a sequence from Settings
+saves it whole through the loaded profile's layer rows, never
+through the key table (`KeySequenceCardSaveTests`), and a Save of
+that page keeps a sequence the profile's own override holds out of
+the shared base (`KeySequenceCardSaveTests` ▸ `ownSequenceStaysOwn`).
+Until a sequence has a reach (#3124), the Key sequences card stays
+greyed on a stored profile's page and where the loaded profile keeps
+its own sequences in the layer (`KeySequenceCardTests` ▸
+`storedPageGreys`, `KeySequenceCardSaveTests` ▸ `editBlocks`); the
+argument is `docs/design-decisions.md`'s #1871 amendment.
 
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`

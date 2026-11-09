@@ -237,8 +237,8 @@ struct SettingsCatalogArgumentTests {
         // Shortcuts rows its captions land on, 162 with its
         // other-shapes drawer (the column anchors moved to headings),
         // 164 with #2447's two modifier drag rows, 165 with #3088's
-        // Sync across Macs row.
-        #expect(direct.values.reduce(0, +) == 165)
+        // Sync across Macs row, 166 with #1871's Key sequences card.
+        #expect(direct.values.reduce(0, +) == 166)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

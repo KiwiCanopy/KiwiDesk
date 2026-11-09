@@ -17,14 +17,8 @@ struct KeyRecorderRejectionRow: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(SettingsTheme.danger)
                 .accessibilityHidden(true)
-            Text(
-                L(
-                    "key_recorder.assigned_to",
-                    "Assigned to \u{201C}%1$@\u{201D}",
-                    rejection.holder
-                )
-            )
-            .foregroundStyle(SettingsTheme.danger)
+            Text(assigned)
+                .foregroundStyle(SettingsTheme.danger)
             Button(L("key_recorder.steal", "Steal"), action: onSteal)
                 .buttonStyle(.link)
                 .pointingHandCursor()
@@ -44,5 +38,20 @@ struct KeyRecorderRejectionRow: View {
             )
         }
         .font(.caption)
+    }
+
+    private var assigned: String {
+        rejection.inStep
+            ? L(
+                "key_recorder.assigned_to_in_step",
+                "Assigned to \u{201C}%1$@\u{201D} at this point in "
+                    + "the sequence",
+                rejection.holder
+            )
+            : L(
+                "key_recorder.assigned_to",
+                "Assigned to \u{201C}%1$@\u{201D}",
+                rejection.holder
+            )
     }
 }
