@@ -6936,7 +6936,7 @@ Desktops as cards, and on each card the screen's Spaces with their
 windows. A window on a Desktop no screen shows is listed in the
 Space it returns to, or under **Not in a Space yet**, which nothing
 can be moved into. The menu bar's **Show Desktop overview** row
-opens it too. It is seeded on **⌘⌘**, either ⌘ tapped twice (the
+opens it too. The side is seeded on **⌘⌘**, either ⌘ tapped twice (the
 same key both times), and **Shortcuts & Gestures ▸ KiwiHub** lists
 the row to rebind or clear. While KiwiHub is open a modifier tap
 does nothing, so ⌘⌘ there leaves the panel open.

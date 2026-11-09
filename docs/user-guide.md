@@ -993,8 +993,9 @@ which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
 :::unreleased
-`⌘⌘`, either ⌘ tapped twice, opens KiwiHub's **Desktop overview**.
-Taps do nothing while KiwiHub is open.
+`⌘⌘`, either ⌘ tapped twice (the same key both times), opens
+KiwiHub's **Desktop overview**. A modifier tap does nothing while
+KiwiHub is open.
 :::
 
 `⌃⌥R` returns the focused space's sizes to what your profile set

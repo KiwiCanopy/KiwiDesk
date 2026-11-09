@@ -94,6 +94,7 @@ extension KeybindingManager {
                     }
                 }
             )
+            keyboardTap?.holdTaps(modifierTapsHeld)
             onLog(
                 keyboardTap == nil
                     ? "keyboard tap: refused by macOS (Accessibility?)"
@@ -158,9 +159,7 @@ extension KeybindingManager {
             keyboardTap?.drainSequenceDecisions().forEach(sequenceDecided)
             return
         }
-        guard !isSuspended, let live = tapBindings[id],
-            !(modifierTapsHeld && live.combo.isTap)
-        else { return }
+        guard !isSuspended, let live = tapBindings[id] else { return }
         pressFire(ref: live.ref, combo: live.combo, id: nil)
     }
 }

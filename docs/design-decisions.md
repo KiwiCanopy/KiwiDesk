@@ -12663,7 +12663,7 @@ Escape does, which is #1874's to measure.
 
 :::unreleased
 **Amended (#1872, #1229, #1873; owner, 2026-11-08): a seeded
-binding may run a reader of keys or of touches on a default
+binding may run a reader of keys or of the trackpad on a default
 install.** The bound above, "a default install, and one that never
 records a side, sees no keystroke", is retired for two seeds only:
 #1229's ⌘⌘ (Show Desktop overview) and #1873's seeded gesture
@@ -12671,7 +12671,7 @@ slots, which ship bound and on — a four-finger tap opens KiwiHub's
 shortcuts panel and a three-finger tap goes back to the Space you
 were on. Neither can be anything else. Carbon registers no binding
 without a non-modifier key, so a modifier tap is a keyboard tap or
-nothing; a pinch is a touch reader or nothing. And a seed nobody can
+nothing; a pinch or a tap is a trackpad reader or nothing. And a seed nobody can
 find is no seed: putting the overview's opener behind a switch first
 would make the tour teach a switch.
 
@@ -12688,8 +12688,9 @@ different ground:
   Accessibility alone. It stays one tap: a system-wide reader of key
   events joins it as a consumer with its own mask, built from the
   union, and is no tap of its own
-  (`.claude/rules/input-and-animation.md`). While KiwiHub holds the
-  keyboard a tap fires nothing, since KiwiHub's own keys ride every
+  (`.claude/rules/input-and-animation.md`). While KiwiHub — or any
+  own floating panel — is the key window, no modifier tap fires and
+  no tap leader opens a sequence, since KiwiHub's own keys ride every
   modifier. Accepted: under Secure Input, key presses are hidden from
   the tap, so a key typed between two ⌘ taps cannot reset the count
   ([accepted limitations](accepted-limitations.md)).
@@ -14543,6 +14544,12 @@ and, listed, it would surface in *Custom*, the section that means
 with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Custom. (#602, PR #638, #2246)
+
+:::unreleased
+The Desktop overview's opener, seeded on ⌘⌘ (#1229), is a fourth
+and is dropped the same way; the side switch prints it beside the
+Desktops title.
+:::
 
 :::unreleased
 **The side switch draws titles only (#1229, owner ruling
