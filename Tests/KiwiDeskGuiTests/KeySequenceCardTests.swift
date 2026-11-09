@@ -113,6 +113,11 @@ struct KeySequenceCardTests {
             }
         )
         // The user's Lua end key is listed by path too, never dropped.
+        // The chord column speaks the path in key words.
+        let spokenPath = SequencePathWords.spoken(
+            ["ctrl+alt+space", "w", "h"]
+        )
+        #expect(rows.contains { $0.spokenChord == spokenPath })
         let lua = SequencePathWords.drawn(["ctrl+alt+space", "t"])
         #expect(rows.contains { $0.combo == lua && $0.label == "Mine" })
         #expect(rows.count == 2)
@@ -144,6 +149,12 @@ struct KeySequenceCardTests {
             )
         )
         #expect(row.contains("guard let leader = editing.root?.combo"))
+        #expect(
+            row.contains(
+                "guard !KeyBinding.admitsLeader(node.combo) else "
+                    + "{ return nil }"
+            )
+        )
     }
 
     @Test("the card greys on a stored profile's page (#3124)")
@@ -226,6 +237,24 @@ struct KeySequenceCardTests {
         #expect(sheet.matchCount == 0)
     }
 
+    @Test("the Also caption's spoken twin is the spoken path")
+    func alsoIsSpoken() throws {
+        let nav = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                        + "KeybindingNavRow.swift"
+                )
+        )
+        .filter { !$0.isWhitespace }
+        #expect(
+            nav.contains(
+                "alsoSpoken:SequencePathWords.also(running:command,"
+                    + "in:rows,spoken:true)"
+            )
+        )
+    }
+
     @Test("a long path shortens to its leader and last two keys")
     func longPathShortens() {
         let short = ["ctrl+alt+space", "w", "h"]
@@ -258,6 +287,12 @@ struct KeySequenceCardTests {
         #expect(!SettingsModel.sameRows(base, renamed))
         #expect(!SettingsModel.sameRows(base, grown))
         #expect(!SettingsModel.sameRows(base, named))
+        // A key one step deeper is a different tree.
+        var lifted = base
+        lifted.bindings[0].steps?[0].steps?.append(
+            KeyBinding(combo: "t", lua: left.lua, kind: .navigation)
+        )
+        #expect(!SettingsModel.sameRows(grown, lifted))
     }
 
     @Test("a layer rename and delete reach a sequence's end keys")

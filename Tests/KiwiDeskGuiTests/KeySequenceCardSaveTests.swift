@@ -99,6 +99,40 @@ struct KeySequenceCardSaveTests {
         #expect(own?.first?.sequences == [sequence()])
     }
 
+    @Test("shared sequences stay whole when a profile shadows them")
+    func sharedSequencesStayShared() throws {
+        let model = try makeModel()
+        let other = KeyBinding.sequence(
+            combo: "ctrl+alt+b",
+            label: "Other",
+            steps: [KeyBinding(combo: "h", lua: left, kind: .navigation)]
+        )
+        var config = try #require(model.core.guiConfigStore.load())
+        config.layers[0].bindings = [sequence(), other]
+        try model.core.guiConfigStore.save(config)
+        var shadow = sequence()
+        shadow.label = "Mine"
+        var work = try model.core.profiles.read(name: "Work")
+        work.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: KeyLayer.defaultName, bindings: [shadow])
+            ],
+            removed: [KeyLayer.defaultName: ["ctrl+alt+b"]]
+        )
+        try model.core.profiles.write(work)
+        model.reload()
+        model.config.layers[0].bindings.append(
+            KeyBinding(combo: "alt+h", lua: left, kind: .navigation)
+        )
+        model.updateActiveProfile()
+
+        // The shadowed one goes back to its shared tree, and the one
+        // Work leaves out stays in the base.
+        #expect(Set(stored(model).map(\.label)) == ["Leader", "Other"])
+        #expect(stored(model).contains(sequence()))
+        #expect(stored(model).contains(other))
+    }
+
     @Test("the action picker narrows by name and keeps its groups")
     func pickerNarrows() throws {
         LocalizationManager.shared.select("en")
