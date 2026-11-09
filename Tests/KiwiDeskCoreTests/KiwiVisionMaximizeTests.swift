@@ -150,14 +150,20 @@ struct KiwiVisionMaximizeTests {
         #expect(filled(core, space) == ids[0])
     }
 
+    /// The general path snaps a screen-side edge back as well
+    /// (#2970), so the refusal's spoken cue is what tells the
+    /// vision door from it.
     @Test("A mouse resize of the filled window snaps back")
     func dragResizeSnapsBack() throws {
         let (core, space) = makeCore(fill: .width)
+        var spoken: [String] = []
+        core.borders.announceRefusal = { spoken.append($0) }
         let before = slots(core)
         let start = try #require(issued(core)[ids[0]])
         var frame = start
         frame.size.height -= 120
         core.handleDragEnd(ids[0], start: start, frame: frame)
+        #expect(spoken.count == 1)
         #expect(slots(core) == before)
         #expect(filled(core, space) == ids[0])
         #expect(issued(core)[ids[0]] == start)
