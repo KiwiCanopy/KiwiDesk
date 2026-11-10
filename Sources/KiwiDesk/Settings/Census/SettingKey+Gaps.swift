@@ -24,12 +24,16 @@ extension GapsKey {
             return .row(.gapsAndBorders, .gaps, .atRest)
         case .perSpaceOverride:
             // A Space's own gaps (#1775), first in its overrides,
-            // inert while the Space floats.
+            // inert while the Space floats or Monocle maximizes
+            // (#3123).
             return .row(
                 .spacesAndLayouts,
                 .perSpaceOverrides,
                 .atRest,
-                gate: .setting(.spaces(.spaceModes))
+                gate: .anyOf([
+                    .spaces(.spaceModes),
+                    .layout(.monocleMaximizeWindows),
+                ])
             )
         }
     }

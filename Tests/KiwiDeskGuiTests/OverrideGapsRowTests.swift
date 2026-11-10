@@ -129,5 +129,16 @@ struct OverrideGapsRowTests {
             box.contains("row.modifier(GreyOut(active:true,help:sentence))")
         )
         #expect(box.contains("Text(sentence)"))
+        // A remote reason draws its live link instead (#3123).
+        #expect(
+            box.contains(
+                Self.squashed(
+                    "if SpacesGateHelp.crossReference(for: reason) "
+                        + "!= nil { "
+                        + "remoteGateReference(for: "
+                        + ".gaps(.perSpaceOverride))"
+                )
+            )
+        )
     }
 }

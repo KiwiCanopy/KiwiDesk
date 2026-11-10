@@ -73,7 +73,8 @@ struct SpaceOverrideRows: View {
 
     /// The Space's own gaps (#1775), above the layout rows since
     /// they survive a layout switch; inert, greyed with its reason
-    /// beside it, while the Space floats.
+    /// beside it, while the Space floats, or with a link to Layout
+    /// Defaults while Monocle maximizes (#3123).
     @ViewBuilder
     private var gapsRow: some View {
         let reason = gates.inertReason(for: .gaps(.perSpaceOverride))
@@ -85,10 +86,21 @@ struct SpaceOverrideRows: View {
             let sentence = SpacesGateHelp.sentence(for: reason)
             VStack(alignment: .leading, spacing: 4) {
                 row.modifier(GreyOut(active: true, help: sentence))
-                Text(sentence)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, SettingsMetrics.overrideRowInset)
+                if SpacesGateHelp.crossReference(for: reason) != nil {
+                    remoteGateReference(for: .gaps(.perSpaceOverride))
+                        .padding(
+                            .horizontal,
+                            SettingsMetrics.overrideRowInset
+                        )
+                } else {
+                    Text(sentence)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(
+                            .horizontal,
+                            SettingsMetrics.overrideRowInset
+                        )
+                }
             }
         } else {
             row
