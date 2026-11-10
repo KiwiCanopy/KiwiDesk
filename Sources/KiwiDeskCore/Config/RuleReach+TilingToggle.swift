@@ -68,6 +68,12 @@ extension RuleReachTable where Value == Bool {
         )
     }
 
+    /// `profile`'s own value for `key` as the table holds it; nil
+    /// where it follows.
+    public func tilingOwn(_ key: String, for profile: String) -> Bool? {
+        entries[profile]?[key] ?? nil
+    }
+
     /// `key`'s base as the table now holds it, over `fallback`.
     public func tilingBase(_ key: String, fallback: Bool) -> Bool {
         base[key] ?? fallback

@@ -131,8 +131,8 @@ enum TilingOffWords {
         L(
             "shortcuts.tiling_off.start.help",
             "When this is off, every Space starts with tiling off. A "
-                + "change applies at once to every Space you have not "
-                + "switched this session."
+                + "change applies at once to every Space whose tiling you "
+                + "have not turned on or off this session."
         )
     }
 

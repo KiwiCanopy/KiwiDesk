@@ -107,11 +107,20 @@ extension SettingsModel {
         for profile: String
     ) -> TilingToggleSettings {
         var toggle = settings
-        let start = reach.tilingStart.entries[profile] ?? [:]
-        let hides = reach.tilingOffHides.entries[profile] ?? [:]
-        toggle.start = start[TilingTable.tilingStartKey] ?? nil
-        toggle.offHidesBorders = hides[TilingTable.offHidesBordersKey] ?? nil
-        toggle.offHidesBars = hides[TilingTable.offHidesBarsKey] ?? nil
+        let start = reach.tilingStart
+        let hides = reach.tilingOffHides
+        toggle.start = start.tilingOwn(
+            TilingTable.tilingStartKey,
+            for: profile
+        )
+        toggle.offHidesBorders = hides.tilingOwn(
+            TilingTable.offHidesBordersKey,
+            for: profile
+        )
+        toggle.offHidesBars = hides.tilingOwn(
+            TilingTable.offHidesBarsKey,
+            for: profile
+        )
         return toggle
     }
 

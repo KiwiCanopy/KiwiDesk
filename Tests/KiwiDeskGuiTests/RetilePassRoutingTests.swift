@@ -60,6 +60,10 @@ struct RetilePassRoutingTests {
         // follows: an explicit apply laying the Space out again.
         "KiwiDeskCore/App/KiwiCore+TilingToggle.swift":
             Site(applies: 2, reissues: 0),
+        // A Settings Save of the start value (#3089): the same
+        // explicit apply, through the Save's one door.
+        "KiwiDeskCore/Profiles/KiwiCore+TilingToggleReach.swift":
+            Site(applies: 1, reissues: 0),
         // `revert_settings` (#2411): stored values applied live,
         // an explicit apply like the setters it undoes.
         "KiwiDeskCore/Commands/KiwiCore+RevertSettings.swift":

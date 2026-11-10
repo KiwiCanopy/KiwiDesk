@@ -233,14 +233,11 @@ extension SettingsModel {
             ) ?? stored.floatAutomatically.floatAutomaticallyBase
         // The page holds the loaded profile's own values, as its
         // file does (#3089).
-        typealias Table = RuleReachTable<Bool>
-        let start = stored.tilingStart.entries[loaded] ?? [:]
-        let hides = stored.tilingOffHides.entries[loaded] ?? [:]
-        var toggle = config.settings.tiling
-        toggle.start = start[Table.tilingStartKey] ?? nil
-        toggle.offHidesBorders = hides[Table.offHidesBordersKey] ?? nil
-        toggle.offHidesBars = hides[Table.offHidesBarsKey] ?? nil
-        config.settings.tiling = toggle
+        config.settings.tiling = encodedTilingToggle(
+            config.settings.tiling,
+            in: stored,
+            for: loaded
+        )
     }
 
     /// The draft as gui.json must hold it: on the live target the

@@ -2370,7 +2370,7 @@
   "shortcuts.tiling_off.hide_bars": "Hide the bars while tiling is off",
   "shortcuts.tiling_off.hide_borders": "Hide the focus border while tiling is off",
   "shortcuts.tiling_off.start": "Spaces start with tiling on",
-  "shortcuts.tiling_off.start.help": "When this is off, every Space starts with tiling off. A change applies at once to every Space you have not switched this session.",
+  "shortcuts.tiling_off.start.help": "When this is off, every Space starts with tiling off. A change applies at once to every Space whose tiling you have not turned on or off this session.",
   "shortcuts.tracks.help": "In the track layout, windows line up in tracks — columns, or rows if the axis is flipped — and several can share one. Previous is the track to the left or above, next the one to the right or below. Tune the layout in **%1$@**.",
   "shortcuts.tracks.move": "Move windows in the track layout",
   "simple.apps.caption": "Give the apps you use most a shortcut that opens or focuses them",
