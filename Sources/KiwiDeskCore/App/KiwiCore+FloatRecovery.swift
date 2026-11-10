@@ -54,8 +54,9 @@ extension KiwiCore {
 
     /// The session snapshot the crash and sleep legs write —
     /// every `captureState` consumer takes this, never
-    /// `state.snapshot()`: state, with a parked float's CAPTURE
-    /// in place of its state frame. The state frame of a parked
+    /// `state.snapshot()`: state, with a maximized float's return
+    /// frame (#3036), else a parked float's CAPTURE, in place of its
+    /// state frame. The state frame of a parked
     /// float is the corner, and a restore replaying it verbatim
     /// put the window back there with nothing left to undo it.
     ///
@@ -86,7 +87,12 @@ extension KiwiCore {
         // Only the frames change; every other field rides as
         // captured (the held Spaces, #1646).
         return snapshot.mappingWindowRecords { record in
-            guard let original = tiler.stashOriginal(record.windowID)
+            // A maximized float records its return, never the fill,
+            // so no restore leaves it full size (#3036).
+            guard
+                let original = state.maximizedFloatReturn[
+                    record.windowID
+                ]?.frame ?? tiler.stashOriginal(record.windowID)
             else { return record }
             var copy = record
             copy.frame = original

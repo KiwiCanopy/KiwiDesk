@@ -62,7 +62,8 @@ struct StateChangeSeamTests {
     }
 
     /// Every state change arms the hold: the retile for its pass's
-    /// named window, the float verb for its own write.
+    /// named window, the float verb for its own write, and a
+    /// maximized float's return (#3036).
     @Test("the hold is armed where a state change runs")
     func doorIsCalled() throws {
         #expect(
@@ -72,6 +73,7 @@ struct StateChangeSeamTests {
                     "KiwiCore+Retile.swift": 1,
                     "KiwiCore+FloatPlacement.swift": 1,
                     "KiwiCore+FloatMove.swift": 1,
+                    "KiwiCore+MaximizeFloatReturn.swift": 1,
                 ]
         )
     }

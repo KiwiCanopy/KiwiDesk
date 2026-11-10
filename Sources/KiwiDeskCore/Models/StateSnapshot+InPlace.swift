@@ -170,7 +170,8 @@ extension StateSnapshot {
     }
 
     /// One window's runtime flags: the sticky scope, the
-    /// sticky-reach override and a Tile over a float rule. The hand
+    /// sticky-reach override, a Tile over a float rule and a
+    /// maximized float's return frame. The hand
     /// float rides the record itself, on every stop (#1864,
     /// `StateSnapshot+StopFloats`).
     public struct WindowSession: Codable, Sendable, Equatable {
@@ -179,21 +180,27 @@ extension StateSnapshot {
         /// A Tile over a float rule (#2975), `true` else nil: a
         /// crash or a quit floats the window again.
         public var tiledOverRule: Bool?
+        /// A maximized float's return frame (#3036), else nil: the
+        /// record's own frame is that return, never the fill.
+        public var maximizedReturn: CGRect?
 
         public init(
             sticky: StickyScope,
             stickyReach: Bool?,
-            tiledOverRule: Bool? = nil
+            tiledOverRule: Bool? = nil,
+            maximizedReturn: CGRect? = nil
         ) {
             self.sticky = sticky
             self.stickyReach = stickyReach
             self.tiledOverRule = tiledOverRule
+            self.maximizedReturn = maximizedReturn
         }
 
         private enum CodingKeys: String, CodingKey {
             case sticky
             case stickyReach = "sticky_reach"
             case tiledOverRule = "tiled_over_rule"
+            case maximizedReturn = "maximized_return"
         }
     }
 }
@@ -246,7 +253,8 @@ extension StateCoordinator {
                 record.session = StateSnapshot.WindowSession(
                     sticky: window.stickyScope,
                     stickyReach: stickyReachOverrides[window.id],
-                    tiledOverRule: tilesOverRule(window.id) ? true : nil
+                    tiledOverRule: tilesOverRule(window.id) ? true : nil,
+                    maximizedReturn: maximizedFloatReturn[window.id]?.frame
                 )
             }
             return record
@@ -304,6 +312,12 @@ extension StateCoordinator {
         let id = record.windowID
         setSticky(id, session.sticky)
         stickyReachOverrides[id] = session.stickyReach
+        if let frame = session.maximizedReturn, let window = windows[id] {
+            maximizedFloatReturn[id] = FloatFrame(
+                pid: window.pid,
+                frame: frame
+            )
+        }
     }
 
     /// Takes back an in-place capture's pocket (#2446). A window the

@@ -47,7 +47,9 @@ struct SecondLaunchExitTests {
         // of the function must not make this pass for having
         // found nothing (rule-authoring.md).
         #expect(source.contains("surfaceRunningInstanceAndExit"))
-        #expect(source.occurrences(of: "exit(") == 1)
+        // The second is the test desk's refusal, launched by
+        // `open` and never by launchd (`TestDeskSeamTests`).
+        #expect(source.occurrences(of: "exit(") == 2)
         #expect(
             source.contains("exit(secondLaunchExitStatus)"),
             "the second-launch exit must name the constant"
@@ -61,7 +63,8 @@ struct SecondLaunchExitTests {
     /// the whole defect with every other clause green
     /// (guard-prover, probe B). One contiguous needle, because
     /// a cut ending at the `{` passes on a branch that kept its
-    /// condition and stopped calling.
+    /// condition and stopped calling. `lostTheInstanceLock`'s
+    /// body, which ends in the surface, is `TestDeskSeamTests`'.
     @Test("The lock-held branch goes through that function")
     func theLockedBranchSurfacesAndExits() throws {
         let file = SourceScan.repoRoot(from: #filePath)
@@ -73,7 +76,7 @@ struct SecondLaunchExitTests {
         #expect(source.contains("instanceLock"))
         let branch = """
             if !instanceLock.acquire() {
-                surfaceRunningInstanceAndExit()
+                lostTheInstanceLock()
             }
             """
         #expect(
@@ -84,7 +87,7 @@ struct SecondLaunchExitTests {
         // the old folder, which the new lock never sees (#2324).
         let legacy = """
             if SingleInstanceLock.legacyHolderRuns(at: legacyLock) {
-                surfaceRunningInstanceAndExit()
+                lostTheInstanceLock()
             }
             """
         #expect(

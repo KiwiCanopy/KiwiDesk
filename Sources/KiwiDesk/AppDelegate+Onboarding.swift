@@ -152,7 +152,7 @@ extension AppDelegate {
         // Keyed on model completion rather than hardcoded step cases (#678).
         if onboardingModel.reachedEnd {
             OnboardingDiscovery.markShown()
-            HomeFirstRunState.seed(.standard)
+            HomeFirstRunState.seed(AppDefaults.store)
         }
         // Reset flag so subsequent presentations do not re-trigger completion.
         onboardingModel.clearReachedEnd()

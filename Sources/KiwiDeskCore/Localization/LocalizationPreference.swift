@@ -12,7 +12,7 @@ public enum LocalizationPreference {
 
     /// Reads the persisted pick, or `nil` for "System default".
     public static func read(
-        from defaults: UserDefaults = .standard
+        from defaults: UserDefaults = AppDefaults.store
     ) -> String? {
         defaults.string(forKey: key)
     }
@@ -20,7 +20,7 @@ public enum LocalizationPreference {
     /// Persists language pick, removing key on nil for system default.
     public static func write(
         _ language: String?,
-        to defaults: UserDefaults = .standard
+        to defaults: UserDefaults = AppDefaults.store
     ) {
         if let language {
             defaults.set(language, forKey: key)

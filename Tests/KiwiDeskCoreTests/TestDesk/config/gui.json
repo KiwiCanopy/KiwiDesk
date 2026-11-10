@@ -1,0 +1,383 @@
+{
+  "app_rules" : {
+
+  },
+  "float_automatically" : true,
+  "float_rules" : [
+
+  ],
+  "focus_wrap" : "all_screens",
+  "format" : 20,
+  "ignore_rules" : [
+
+  ],
+  "layers" : [
+    {
+      "bindings" : [
+        {
+          "combo" : "control+option+left",
+          "kind" : "navigation",
+          "label" : "Focus window to the left",
+          "lua" : "KiwiDesk.focus(\"left\")"
+        },
+        {
+          "combo" : "control+option+down",
+          "kind" : "navigation",
+          "label" : "Focus window below",
+          "lua" : "KiwiDesk.focus(\"down\")"
+        },
+        {
+          "combo" : "control+option+up",
+          "kind" : "navigation",
+          "label" : "Focus window above",
+          "lua" : "KiwiDesk.focus(\"up\")"
+        },
+        {
+          "combo" : "control+option+right",
+          "kind" : "navigation",
+          "label" : "Focus window to the right",
+          "lua" : "KiwiDesk.focus(\"right\")"
+        },
+        {
+          "combo" : "control+option+1",
+          "kind" : "navigation",
+          "label" : "Go to Space 1",
+          "lua" : "KiwiDesk.focus_space(\"1\")"
+        },
+        {
+          "combo" : "control+option+2",
+          "kind" : "navigation",
+          "label" : "Go to Space 2",
+          "lua" : "KiwiDesk.focus_space(\"2\")"
+        },
+        {
+          "combo" : "control+option+3",
+          "kind" : "navigation",
+          "label" : "Go to Space 3",
+          "lua" : "KiwiDesk.focus_space(\"3\")"
+        },
+        {
+          "combo" : "control+option+4",
+          "kind" : "navigation",
+          "label" : "Go to Space 4",
+          "lua" : "KiwiDesk.focus_space(\"4\")"
+        },
+        {
+          "combo" : "control+option+5",
+          "kind" : "navigation",
+          "label" : "Go to Space 5",
+          "lua" : "KiwiDesk.focus_space(\"5\")"
+        },
+        {
+          "combo" : "control+option+6",
+          "kind" : "navigation",
+          "label" : "Go to Space 6",
+          "lua" : "KiwiDesk.focus_space(\"6\")"
+        },
+        {
+          "combo" : "control+option+shift+left",
+          "kind" : "navigation",
+          "label" : "Swap with window to the left",
+          "lua" : "KiwiDesk.swap(\"left\")"
+        },
+        {
+          "combo" : "control+option+shift+down",
+          "kind" : "navigation",
+          "label" : "Swap with window below",
+          "lua" : "KiwiDesk.swap(\"down\")"
+        },
+        {
+          "combo" : "control+option+shift+up",
+          "kind" : "navigation",
+          "label" : "Swap with window above",
+          "lua" : "KiwiDesk.swap(\"up\")"
+        },
+        {
+          "combo" : "control+option+shift+right",
+          "kind" : "navigation",
+          "label" : "Swap with window to the right",
+          "lua" : "KiwiDesk.swap(\"right\")"
+        },
+        {
+          "combo" : "control+option+shift+1",
+          "kind" : "navigation",
+          "label" : "Move to Space 1",
+          "lua" : "KiwiDesk.move_to_space(\"1\")"
+        },
+        {
+          "combo" : "control+option+shift+2",
+          "kind" : "navigation",
+          "label" : "Move to Space 2",
+          "lua" : "KiwiDesk.move_to_space(\"2\")"
+        },
+        {
+          "combo" : "control+option+shift+3",
+          "kind" : "navigation",
+          "label" : "Move to Space 3",
+          "lua" : "KiwiDesk.move_to_space(\"3\")"
+        },
+        {
+          "combo" : "control+option+shift+4",
+          "kind" : "navigation",
+          "label" : "Move to Space 4",
+          "lua" : "KiwiDesk.move_to_space(\"4\")"
+        },
+        {
+          "combo" : "control+option+shift+5",
+          "kind" : "navigation",
+          "label" : "Move to Space 5",
+          "lua" : "KiwiDesk.move_to_space(\"5\")"
+        },
+        {
+          "combo" : "control+option+shift+6",
+          "kind" : "navigation",
+          "label" : "Move to Space 6",
+          "lua" : "KiwiDesk.move_to_space(\"6\")"
+        },
+        {
+          "combo" : "control+option+command+left",
+          "kind" : "navigation",
+          "label" : "Go to previous Space",
+          "lua" : "KiwiDesk.focus_space_previous()"
+        },
+        {
+          "combo" : "control+option+command+right",
+          "kind" : "navigation",
+          "label" : "Go to next Space",
+          "lua" : "KiwiDesk.focus_space_next()"
+        },
+        {
+          "combo" : "control+option+command+1",
+          "kind" : "navigation",
+          "label" : "Move to Space 1 & follow",
+          "lua" : "KiwiDesk.move_to_space_and_follow(\"1\")"
+        },
+        {
+          "combo" : "control+option+command+2",
+          "kind" : "navigation",
+          "label" : "Move to Space 2 & follow",
+          "lua" : "KiwiDesk.move_to_space_and_follow(\"2\")"
+        },
+        {
+          "combo" : "control+option+command+3",
+          "kind" : "navigation",
+          "label" : "Move to Space 3 & follow",
+          "lua" : "KiwiDesk.move_to_space_and_follow(\"3\")"
+        },
+        {
+          "combo" : "control+option+command+4",
+          "kind" : "navigation",
+          "label" : "Move to Space 4 & follow",
+          "lua" : "KiwiDesk.move_to_space_and_follow(\"4\")"
+        },
+        {
+          "combo" : "control+option+command+5",
+          "kind" : "navigation",
+          "label" : "Move to Space 5 & follow",
+          "lua" : "KiwiDesk.move_to_space_and_follow(\"5\")"
+        },
+        {
+          "combo" : "control+option+command+6",
+          "kind" : "navigation",
+          "label" : "Move to Space 6 & follow",
+          "lua" : "KiwiDesk.move_to_space_and_follow(\"6\")"
+        },
+        {
+          "combo" : "option+command+tab",
+          "kind" : "navigation",
+          "label" : "Go back in Space history",
+          "lua" : "KiwiDesk.focus_space_back()"
+        },
+        {
+          "combo" : "shift+option+command+tab",
+          "kind" : "navigation",
+          "label" : "Go forward in Space history",
+          "lua" : "KiwiDesk.focus_space_forward()"
+        },
+        {
+          "combo" : "option+command+2",
+          "kind" : "navigation",
+          "label" : "Grow width",
+          "lua" : "KiwiDesk.resize(\"x\", 50)"
+        },
+        {
+          "combo" : "option+command+1",
+          "kind" : "navigation",
+          "label" : "Shrink width",
+          "lua" : "KiwiDesk.resize(\"x\", -50)"
+        },
+        {
+          "combo" : "option+command+5",
+          "kind" : "navigation",
+          "label" : "Grow height",
+          "lua" : "KiwiDesk.resize(\"y\", 50)"
+        },
+        {
+          "combo" : "option+command+4",
+          "kind" : "navigation",
+          "label" : "Shrink height",
+          "lua" : "KiwiDesk.resize(\"y\", -50)"
+        },
+        {
+          "combo" : "control+option+f",
+          "kind" : "navigation",
+          "label" : "Toggle floating",
+          "lua" : "KiwiDesk.toggle_floating()"
+        },
+        {
+          "combo" : "control+option+s",
+          "kind" : "navigation",
+          "label" : "Toggle sticky",
+          "lua" : "KiwiDesk.toggle_sticky()"
+        },
+        {
+          "combo" : "control+option+p",
+          "kind" : "navigation",
+          "label" : "Pocket or take out",
+          "lua" : "KiwiDesk.pocket()"
+        },
+        {
+          "combo" : "control+option+shift+p",
+          "kind" : "navigation",
+          "label" : "Toggle Pocket",
+          "lua" : "KiwiDesk.toggle_pocket_window()"
+        },
+        {
+          "combo" : "control+option+command+p",
+          "kind" : "navigation",
+          "label" : "Open or close the Pocket's list",
+          "lua" : "pocket.toggle_list()"
+        },
+        {
+          "combo" : "control+option+c",
+          "kind" : "navigation",
+          "label" : "Next layout",
+          "lua" : "KiwiDesk.cycle_mode()"
+        },
+        {
+          "combo" : "control+option+shift+c",
+          "kind" : "navigation",
+          "label" : "Previous layout",
+          "lua" : "KiwiDesk.cycle_mode(\"prev\")"
+        },
+        {
+          "combo" : "control+option+l",
+          "kind" : "navigation",
+          "label" : "Show view picker",
+          "lua" : "kiwihub.show(\"view\")"
+        },
+        {
+          "combo" : "control+option+j",
+          "kind" : "navigation",
+          "label" : "Jump to window",
+          "lua" : "kiwihub.show(\"windows\")"
+        },
+        {
+          "combo" : "cmd+cmd",
+          "kind" : "navigation",
+          "label" : "Show Desktop overview",
+          "lua" : "kiwihub.show(\"desktops\")"
+        },
+        {
+          "combo" : "control+option+v",
+          "kind" : "navigation",
+          "label" : "Toggle KiwiVision",
+          "lua" : "kiwivision.toggle()"
+        },
+        {
+          "combo" : "control+option+r",
+          "kind" : "navigation",
+          "label" : "Reset sizes in this Space",
+          "lua" : "KiwiDesk.reset_layout_sizing()"
+        },
+        {
+          "combo" : "control+option+m",
+          "kind" : "navigation",
+          "label" : "Maximize",
+          "lua" : "KiwiDesk.toggle_maximized()"
+        },
+        {
+          "combo" : "control+option+shift+m",
+          "kind" : "navigation",
+          "label" : "Maximize Height",
+          "lua" : "KiwiDesk.toggle_maximized(\"height\")"
+        },
+        {
+          "combo" : "control+option+command+m",
+          "kind" : "navigation",
+          "label" : "Maximize Width",
+          "lua" : "KiwiDesk.toggle_maximized(\"width\")"
+        },
+        {
+          "combo" : "control+option+t",
+          "kind" : "navigation",
+          "label" : "Tiling Off for This Space",
+          "lua" : "KiwiDesk.toggle_tiling()"
+        },
+        {
+          "combo" : "control+option+g",
+          "kind" : "navigation",
+          "label" : "Show or hide the Space Bar",
+          "lua" : "space_bar.toggle_reveal()"
+        },
+        {
+          "combo" : "control+option+h",
+          "kind" : "navigation",
+          "label" : "Show or hide the App Bar",
+          "lua" : "app_bar.toggle_reveal()"
+        },
+        {
+          "combo" : "control+option+k",
+          "kind" : "navigation",
+          "label" : "Show shortcuts panel",
+          "lua" : "kiwihub.show(\"shortcuts\")"
+        },
+        {
+          "combo" : "control+option+comma",
+          "kind" : "navigation",
+          "label" : "Open Settings",
+          "lua" : "KiwiDesk.open_settings()"
+        }
+      ],
+      "name" : "default"
+    }
+  ],
+  "mode_cycle" : [
+    "bsp",
+    "scrolling",
+    "floating"
+  ],
+  "modifier_drag" : {
+    "move" : {
+      "modifiers" : "control+command",
+      "start" : "drag"
+    },
+    "resize" : {
+      "modifiers" : "control+option",
+      "start" : "drag"
+    }
+  },
+  "scroll_gesture" : {
+    "long_swipes" : false,
+    "natural_scrolling" : {
+      "mouse" : true,
+      "trackpad" : true
+    },
+    "pan" : "control+option",
+    "space_step" : "control+option+command",
+    "step_distance" : 60
+  },
+  "shortcut_base" : "control+option",
+  "space_history" : "per_screen",
+  "spaces" : [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+  ],
+  "tile_rules" : [
+
+  ]
+}

@@ -1,8 +1,9 @@
 import Foundation
 
-/// `toggle_maximized` (#2448): the focused tiled window fills its
-/// screen until pressed again, until focus lands on another tiled
-/// window of its Space, or until it leaves the tiled set. A sticky
+/// `toggle_maximized` (#2448): the focused tiled window, or an
+/// effective float (#3036), fills its screen until pressed again,
+/// until focus lands on another tiled window of its Space, or until
+/// it leaves the tiled set (a float, the float set). A sticky
 /// window's flag sits on the Space it renders on, so leaving that
 /// Space ends it (#3035). The
 /// verdict is `StateCoordinator.maximizedWindow(of:)`; the frame
@@ -40,12 +41,14 @@ extension KiwiCore {
                 }
             }
         } else {
-            guard state.placementMode(of: space) != .floating,
-                spaceID == state.workspaces.activeSpace,
-                state.effectiveTiledMembers(of: space).contains(id)
+            guard spaceID == state.workspaces.activeSpace,
+                let follows = maximizeAdmits(id, on: space)
             else {
                 cueMaximizeRefused(id)
-                return .fail("only a tiled window can be maximized")
+                return .fail(
+                    "a dialog, a panel, a full-screen window or the "
+                        + "pocket window cannot be maximized"
+                )
             }
             // A press of the shape KiwiVision fills would change
             // nothing on screen (#3064).
@@ -58,7 +61,7 @@ extension KiwiCore {
                 $0.maximized = Maximize(
                     window: id,
                     shape: shape,
-                    follows: tiler.settings.maximize.followFocus
+                    follows: follows
                 )
             }
         }
@@ -68,6 +71,32 @@ extension KiwiCore {
             raiseFloatsAbove(afterFocusing: id)
         }
         return .ok()
+    }
+
+    /// Whether a press may maximize `id` on `space`, and the follow
+    /// it stamps: a tile takes the setting's (#3063); an effective
+    /// float follows nothing and records the frame it returns to
+    /// (#3036). Nil refuses, recording nothing.
+    private func maximizeAdmits(_ id: WindowID, on space: Space) -> Bool? {
+        if state.placementMode(of: space) != .floating,
+            state.effectiveTiledMembers(of: space).contains(id)
+        {
+            // A record a float left unpaid names no tile's plane.
+            state.maximizedFloatReturn[id] = nil
+            return tiler.settings.maximize.followFocus
+        }
+        guard state.mayMaximizeAsFloat(id, on: space),
+            let window = state.windows[id]
+        else { return nil }
+        // A return a held pass still owes is where the window goes
+        // back to; its frame now is the fill.
+        state.maximizedFloatReturn[id] =
+            state.maximizedFloatReturn[id]
+            ?? .init(
+                pid: window.pid,
+                frame: tiler.commandedFrame(of: id) ?? window.frame
+            )
+        return false
     }
 
     /// Whether `space` lays every tiled member at its screen's whole
@@ -142,8 +171,9 @@ extension KiwiCore {
         flashRefusalPill(
             window,
             text: L(
-                "maximize.refused.floating",
-                "Only a tiled window can be maximized."
+                "maximize.refused.window",
+                "Dialogs, panels, full-screen windows and the Pocket "
+                    + "window can't be maximized"
             ),
             symbol: "arrow.up.left.and.arrow.down.right",
             announce: true

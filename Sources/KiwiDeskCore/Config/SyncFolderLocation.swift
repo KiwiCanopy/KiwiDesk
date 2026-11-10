@@ -30,10 +30,15 @@ public enum SyncFolderLocation {
         defaults.set(on, forKey: followsKey)
     }
 
-    /// The folder to keep in step, nil while none is chosen or the
-    /// switch is off.
-    public static func followed(in defaults: UserDefaults) -> URL? {
-        follows(in: defaults) ? stored(in: defaults) : nil
+    /// The folder to keep in step, nil while none is chosen, the
+    /// switch is off, or on a test desk, which never writes a
+    /// folder the owner syncs (#3121).
+    public static func followed(
+        in defaults: UserDefaults,
+        testDesk: Bool = TestDesk.isActive
+    ) -> URL? {
+        guard !testDesk else { return nil }
+        return follows(in: defaults) ? stored(in: defaults) : nil
     }
 
     /// iCloud Drive's own folder; absent while Drive is off.

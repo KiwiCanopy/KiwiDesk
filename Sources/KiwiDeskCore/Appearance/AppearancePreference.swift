@@ -14,7 +14,7 @@ public enum AppearancePreference {
 
     /// Reads persisted appearance choice or falls back to system.
     public static func read(
-        from defaults: UserDefaults = .standard
+        from defaults: UserDefaults = AppDefaults.store
     ) -> AppearanceChoice {
         guard
             let raw = defaults.string(forKey: key),
@@ -28,7 +28,7 @@ public enum AppearancePreference {
     /// Persists appearance choice to UserDefaults (.system removes key).
     public static func write(
         _ choice: AppearanceChoice,
-        to defaults: UserDefaults = .standard
+        to defaults: UserDefaults = AppDefaults.store
     ) {
         if choice == .system {
             defaults.removeObject(forKey: key)

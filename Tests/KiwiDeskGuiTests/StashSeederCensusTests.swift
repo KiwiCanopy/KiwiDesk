@@ -46,6 +46,10 @@ struct StashSeederCensusTests {
         // The cross-session title pass's carried float, never a
         // corner (#1864).
         "App/KiwiCore+CrossSession.swift": 1,
+        // A maximized float's return frame on a Space no screen
+        // shows (#3036): the frame it had at the press, never a
+        // corner, since a press happens on the shown Space.
+        "App/KiwiCore+MaximizeFloatReturn.swift": 1,
         // The pocket's take-out (#2446): the frame it last had on
         // that screen — its float placement when it became the
         // pocket window (#2672) — or centred; no corner, since a

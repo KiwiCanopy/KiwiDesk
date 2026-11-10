@@ -1,0 +1,160 @@
+#!/bin/bash
+# The in-repo test desk (#3121): a KiwiDesk instance on the fixture
+# in Tests/KiwiDeskCoreTests/TestDesk, never on ~/.config/KiwiDesk.
+#
+# Usage: scripts/test-desk up <bundle.app> [--root <dir>]
+#        scripts/test-desk windows <n>     open n TextEdit windows
+#        scripts/test-desk cli <args…>     the CLI, on the test desk
+#        scripts/test-desk down
+#        scripts/test-desk regen           rewrite the fixture
+#
+# `up` copies the fixture to a short root (the socket path must fit
+# sun_path's 104 bytes), seeds its defaults suite past the first-run
+# tour, stops the running KiwiDesk by its own bundle path, and opens
+# <bundle.app> with KIWIDESK_HOME=<root>; the desk replaces the
+# running instance (MachineLocation.lockPath says why). `down` quits the test
+# instance, closes every TextEdit window opened since `up`, deletes
+# the root and the defaults suite, and reopens the KiwiDesk that was
+# running. Run `down` before the next `up`; one desk at a time.
+set -uo pipefail
+EXE="Contents/MacOS/KiwiDesk"
+HERE="$(cd "$(dirname "$0")/.." && pwd -P)"
+FIXTURE="$HERE/Tests/KiwiDeskCoreTests/TestDesk/config"
+SUITE="com.kiwicanopy.kiwidesk.testdesk"
+LABEL="org.kiwidesk.KiwiDesk"
+POINTER="${TMPDIR:-/tmp}/kiwidesk-test-desk.root"
+
+die() { echo "test-desk: $*" >&2; exit 1; }
+
+root_dir() { [ -f "$POINTER" ] && cat "$POINTER"; }
+
+get() { sed -n "s/^$1=//p" "$(root_dir)/state"; }
+
+pids_of() {  # pids whose whole command is bundle $1's executable
+    local pid
+    for pid in $(pgrep -U "$(id -u)" -f "KiwiDesk\.app/$EXE\$"); do
+        [ "$(ps -o command= -p "$pid")" = "$1/$EXE" ] && echo "$pid"
+    done
+}
+
+running() {  # the bundle of the KiwiDesk running now, if any
+    local pid
+    pid=$(pgrep -U "$(id -u)" -f "KiwiDesk\.app/$EXE\$" | head -1)
+    [ -n "$pid" ] && ps -o command= -p "$pid" | sed "s|/$EXE\$||"
+}
+
+stop() {  # TERM the app at bundle $1 and wait for it to go
+    local pid
+    for pid in $(pids_of "$1"); do kill -TERM "$pid"; done
+    for _ in $(seq 50); do
+        [ -z "$(pids_of "$1")" ] && return 0
+        sleep 0.2
+    done
+    die "$1 did not exit (a modal sheet?)"
+}
+
+desk_cli() {  # the test bundle's CLI, on the test desk's socket
+    KIWIDESK_HOME="$(root_dir)" "$(get mine)/$EXE" "$@"
+}
+
+seed_defaults() {  # $1 = bundle: skip the tour and What's New
+    local version
+    version=$(/usr/libexec/PlistBuddy -c \
+        "Print :CFBundleShortVersionString" "$1/Contents/Info.plist")
+    defaults delete "$SUITE" >/dev/null 2>&1
+    defaults write "$SUITE" onboarding.tilingStarted -bool YES
+    defaults write "$SUITE" onboarding.discoveryShown -bool YES
+    defaults write "$SUITE" updates.lastRunVersion -string "$version"
+}
+
+textedit_ids() {
+    pgrep -xq TextEdit || return 0
+    osascript -e 'tell application "TextEdit" to get id of every window' \
+        2>/dev/null | tr -d ' '
+}
+
+case "${1:-}" in
+up)
+    [ -n "$(root_dir)" ] && die "a test desk is up; run down first"
+    # launchd would relaunch a service-managed instance beside it.
+    launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1 \
+        && die "the KiwiDesk service is loaded; run 'KiwiDesk service stop'"
+    MINE="$(cd "${2:?bundle}" && pwd -P)" || exit 1
+    [ -x "$MINE/$EXE" ] || die "$MINE is no KiwiDesk bundle"
+    # `stop` finds the instance by this name, so `down` could not.
+    [ "$(basename "$MINE")" = KiwiDesk.app ] \
+        || die "name the bundle KiwiDesk.app"
+    ROOT="/tmp/kd-desk-$(id -u)"
+    [ "${3:-}" = "--root" ] && ROOT="${4:?root}"
+    [ -e "$ROOT" ] && die "$ROOT exists; remove it or pass --root"
+    mkdir -p "$ROOT/machine" && cp -R "$FIXTURE" "$ROOT/config" \
+        || exit 1
+    ROOT="$(cd "$ROOT" && pwd -P)"
+    PREV="$(running)"
+    was=0; pgrep -xq TextEdit && was=1
+    printf 'prev=%s\nmine=%s\ntextedit.was=%s\ntextedit.ids=%s\n' \
+        "$PREV" "$MINE" "$was" "$(textedit_ids)" > "$ROOT/state"
+    echo "$ROOT" > "$POINTER"
+    [ -n "$PREV" ] && stop "$PREV"
+    seed_defaults "$MINE"
+    open --env "KIWIDESK_HOME=$ROOT" "$MINE"
+    for _ in $(seq 100); do
+        desk_cli get_state >/dev/null 2>&1 && break
+        sleep 0.2
+    done
+    desk_cli get_state >/dev/null 2>&1 || die "the test desk did not answer"
+    echo "test desk up: $ROOT"
+    echo "CLI: scripts/test-desk cli <command>, or KIWIDESK_HOME=$ROOT"
+    ;;
+windows)
+    [ -n "$(root_dir)" ] || die "no test desk is up"
+    want=$(( $(osascript -e 'tell application "TextEdit" to count windows' \
+        2>/dev/null || echo 0) + ${2:?count} ))
+    osascript -e 'tell application "TextEdit" to activate' >/dev/null
+    sleep 1
+    # Counted, not looped blind: a fresh TextEdit opens a document
+    # of its own at launch.
+    for _ in $(seq "$2"); do
+        have=$(osascript -e \
+            'tell application "TextEdit" to count windows')
+        [ "$have" -ge "$want" ] && break
+        osascript -e 'tell application "TextEdit" to make new document' \
+            >/dev/null
+    done
+    ;;
+cli)
+    [ -n "$(root_dir)" ] || die "no test desk is up"
+    shift
+    desk_cli "$@"
+    ;;
+down)
+    ROOT="$(root_dir)"
+    [ -n "$ROOT" ] || die "no test desk is up"
+    stop "$(get mine)"
+    before=",$(get textedit.ids),"
+    for id in $(textedit_ids | tr ',' ' '); do
+        case "$before" in *",$id,"*) continue ;; esac
+        osascript -e "tell application \"TextEdit\" to close \
+(window id $id) saving no" >/dev/null 2>&1
+    done
+    # The desk started TextEdit, so it quits it.
+    if [ "$(get textedit.was)" = 0 ] && pgrep -xq TextEdit; then
+        osascript -e 'tell application "TextEdit" to quit' \
+            >/dev/null 2>&1
+    fi
+    PREV="$(get prev)"
+    defaults delete "$SUITE" >/dev/null 2>&1
+    rm -f "$HOME/Library/Preferences/$SUITE.plist"
+    rm -rf "$ROOT" "$POINTER"
+    if [ -n "$PREV" ]; then
+        open "$PREV" && echo "running: $PREV"
+    fi
+    ;;
+regen)
+    cd "$HERE" && KIWIDESK_REGEN_TEST_DESK=1 scripts/gate-lock \
+        swift test --filter TestDeskFixtureTests
+    ;;
+*)
+    sed -n 2,20p "$0"; exit 2
+    ;;
+esac

@@ -82,7 +82,9 @@ extension KiwiCore {
         case .target(let focus): target = focus
         }
         let id = target.id
-        let base = tiler.commandedFrame(of: id) ?? target.window.frame
+        let returned = endMaximizeBeforeFloatVerb(id)  // #3036
+        let base =
+            returned ?? tiler.commandedFrame(of: id) ?? target.window.frame
         let centred = floatMoveFrame(
             FloatPlacement.centered(base.size, in: target.region),
             for: target
@@ -101,10 +103,10 @@ extension KiwiCore {
 
     /// `move_floating`: `delta` points along `axis`, positive y moving
     /// down, stopping at the float region, so it never reaches another
-    /// screen. A tap and a glide both write instantly. It ends no
-    /// maximize: a float holds none, and one standing on a tile beneath
-    /// is that tile's (#2972). Base and retire as `resizeFloating`,
-    /// whose comments argue them.
+    /// screen. A tap and a glide both write instantly. It ends the
+    /// float's own Maximize first (#3036), never one standing on a tile
+    /// beneath, which is that tile's (#2972). Base and retire as
+    /// `resizeFloating`, whose comments argue them.
     func moveFloating(_ args: [JSONValue]) -> CommandResponse {
         guard let axis = args.first?.stringValue,
             axis == "x" || axis == "y",
@@ -119,9 +121,11 @@ extension KiwiCore {
         case .target(let focus): target = focus
         }
         let id = target.id
+        let returned = endMaximizeBeforeFloatVerb(id)  // #3036
         let isGlideWrite = keys.isApplyingGlideStep
         let base =
-            tiler.animation.commandedFrame(
+            returned
+            ?? tiler.animation.commandedFrame(
                 window: id,
                 includingHeldGlide: isGlideWrite
             ) ?? target.window.frame

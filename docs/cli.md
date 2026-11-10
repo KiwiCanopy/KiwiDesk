@@ -477,6 +477,14 @@ that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
 
 :::unreleased
+`focus_app_window` takes `next|prev` and focuses the focused app's
+next or previous window, on any Space, screen or Desktop, in the
+order a repeat `focus_or_spawn` press walks; unlike macOS's own
+**Move focus to next window**, it reaches past the current Space
+([`focus_app_window`](lua-reference.md#focus_app_window)).
+:::
+
+:::unreleased
 `move_to_display_last` and `move_to_display` move the focused
 window into the Space another screen shows, the screen
 `focus_display_last` or `focus_display` would go to; their
@@ -750,6 +758,12 @@ shape (`laptop|widescreen|ultrawide|super_ultrawide|portrait`;
 `maximize.set_follow_focus true|false` (default `false`) makes a new
 Maximize move with focus instead of ending
 ([`maximize.set_follow_focus`](lua-reference.md#maximizeset_follow_focus)).
+:::
+
+:::unreleased
+`toggle_maximized` takes a floating window too, whole or along one
+axis, and puts it back at the frame it had
+([`toggle_maximized`](lua-reference.md#toggle_maximized)).
 :::
 
 :::unreleased

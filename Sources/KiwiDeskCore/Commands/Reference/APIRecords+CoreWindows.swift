@@ -187,7 +187,7 @@ extension APIReference {
         ),
         "toggle_maximized": APIRecord(
             "Fills the screen or one axis of it with the focused "
-                + "tiled window until toggled or focus moves.",
+                + "window until toggled or a tile takes focus.",
             .choice("axis", MaximizeAxis.self, optional: true),
             .number("share", optional: true),
             .choice("anchor", MaximizeAnchor.self, optional: true)
@@ -235,6 +235,11 @@ extension APIReference {
         "focus_or_spawn": APIRecord(
             "Focuses an app's window, or launches a new instance.",
             .text("bundle_id")
+        ),
+        "focus_app_window": APIRecord(
+            "Focuses the focused app's next or previous window, on "
+                + "any Space, screen or Desktop.",
+            .choice("direction", ModeCycleDirection.self)
         ),
         "spawn_new": APIRecord(
             "Launches a new instance of an app by bundle "
