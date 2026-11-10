@@ -718,33 +718,27 @@ moved aside does.
 ## Pruning build output (#3186)
 
 **A script that deletes build output calls `scripts/prune-builds`;
-it never re-derives the predicate.** Every worktree keeps a
-SwiftPM `.build` of several GB, and 61 idle ones filled the disk
-on 2026-11-10. The script owns the four clauses that make a
-deletion safe — it holds `kiwidesk-gate.lock` for the whole
-sweep, one `lsof -a -d cwd,txt` pass rules out a tree a process
-uses, the caller's own tree is skipped, and the build markers
-must be idle for 12 hours — and its header states them. A second
-copy that dropped one would delete a `.build` under a running
-compile or a launched binary. It deletes only `.build`,
-`site/node_modules` and `site/.astro`, never a worktree or a
-branch, and only reports DerivedData.
+it never re-derives the predicate.** The script's header lists the
+clauses that make a deletion safe — the gate held for the whole
+sweep, no process using the tree, never the caller's tree, idle
+build markers — and is their one home. A copy that dropped one
+would delete a `.build` under a running compile or a launched
+binary. It deletes only regenerable folders, never a worktree or a
+branch.
 
-**The idle clause reads `.build`'s children, never the yaml files
-alone.** The ruling named `.build/*.yaml` and `build.db`; Swift
-Build writes neither in a lane tree (measured 2026-11-10: only
-`CACHEDIR.TAG`, `manifest.pif`, `workspace-state.json` and the
-product folders move), so those markers alone call every lane
-unbuilt. The children's newest mtime is a superset, so it never
-calls a tree idler than the ruling's list would.
+**The idle clause takes the newest mtime over all of `.build`'s
+children**, never named build files alone: a marker the toolchain
+stops writing turns into "never built" on every lane (#3186 ▸
+Ruling).
 
 **`scripts/gate-lock` prunes from inside its lock, before the
-`exec`, when the volume has under 40 GB free** — `--apply
---gate-held`, under a 180 s alarm and `|| true`, so a prune can
-neither fail nor hang a gate. The nested `KIWIDESK_GATE_LOCK_HELD`
-path skips it. `ExecTestsPruneBuilds` runs both scripts on
-fixture worktrees with their own lock: gate held, a process cwd
-inside, own tree, a recent build, and the trigger's three paths.
+`exec`, on low disk, and a prune can neither fail nor hang the
+gate** — `|| true`, and a timeout that stops the whole sweep's
+process group before the gated command runs. The nested
+`KIWIDESK_GATE_LOCK_HELD` path skips it. Both scripts find the
+lock through `gate-lock --lock-path`, the lock file's one name.
+`ExecTestsPruneBuilds` holds each clause and the trigger on
+fixture worktrees with a lock of their own.
 
 ## Git hooks
 

@@ -16,6 +16,9 @@ struct ExecTestsPruneBuilds {
         let run = try desk.prune(from: desk.tree("a"))
         #expect(run.status == 0, "\(run.stderr)")
         #expect(desk.hasOutput(desk.tree("a")), "own tree cleared")
+        // The reason, not just the survival: the script's own cwd
+        // keeps the tree through clause 2 as well.
+        #expect(run.stdout.contains("/a (own tree)"), "\(run.stdout)")
         #expect(!desk.hasOutput(desk.tree("b")), "\(run.stdout)")
         #expect(!desk.hasOutput(desk.repo), "\(run.stdout)")
     }
@@ -67,6 +70,23 @@ struct ExecTestsPruneBuilds {
         #expect(run.status == 0, "\(run.stderr)")
         #expect(desk.hasOutput(desk.tree("b")), "\(run.stdout)")
         #expect(!desk.hasOutput(desk.tree("a")), "\(run.stdout)")
+    }
+
+    /// A trigger moved ahead of gate-lock's own lockf would prune
+    /// while another gate step runs.
+    @Test("gate-lock never prunes before it holds the gate")
+    func gateLockPrunesOnlyInsideTheLock() throws {
+        let desk = try PruneDesk()
+        defer { desk.remove() }
+        let holder = try desk.hold(
+            "/usr/bin/lockf",
+            ["-k", desk.lock.path, "/bin/cat"]
+        )
+        defer { holder.release() }
+        try desk.waitUntilGateHeld()
+        let run = try desk.gateLock(lowDisk: true, wait: "1")
+        #expect(run.status == 75, "\(run.stdout)\(run.stderr)")
+        #expect(desk.hasOutput(desk.tree("a")), "\(run.stderr)")
     }
 
     /// The trigger itself: gate-lock prunes on low disk, inside its
@@ -153,6 +173,7 @@ private struct PruneDesk {
         var env = ProcessInfo.processInfo.environment
         env["KIWIDESK_GATE_LOCK_HELD"] = nil
         env["KIWIDESK_GATE_PRUNE_BELOW_GB"] = nil
+        env["KIWIDESK_GATE_WAIT"] = nil
         env["KIWIDESK_GATE_DIR"] =
             root.appendingPathComponent("gate").path
         env["HOME"] = root.appendingPathComponent("home").path
@@ -173,9 +194,11 @@ private struct PruneDesk {
     /// threshold set above or below what the volume has free.
     func gateLock(
         lowDisk: Bool,
-        nested: Bool = false
+        nested: Bool = false,
+        wait: String? = nil
     ) throws -> ScriptRun {
         var env = environment
+        env["KIWIDESK_GATE_WAIT"] = wait
         env["KIWIDESK_GATE_PRUNE_BELOW_GB"] =
             lowDisk ? "1000000" : "0"
         if nested { env["KIWIDESK_GATE_LOCK_HELD"] = "1" }

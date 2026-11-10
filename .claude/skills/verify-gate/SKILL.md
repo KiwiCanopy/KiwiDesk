@@ -74,9 +74,9 @@ one at a time across all worktrees, so parallel sessions stop
 throttling the machine. Queue wait plus the suite can pass the
 Bash tool's 10-minute cap — run the test step and the ratchet
 check below with `run_in_background`. A step that says "gate busy" is waiting,
-not hung; don't kill it or run around it. Below 40 GB free the
-gate first clears idle worktrees' build output
-(`scripts/prune-builds`, #3186) and logs one line saying so.
+not hung; don't kill it or run around it. On low disk the gate
+first clears idle worktrees' build output (`scripts/prune-builds`,
+#3186) and logs one line saying so.
 
 1. `swift build`
 2. `swift test -q` (the full suite — a PR-gated change runs

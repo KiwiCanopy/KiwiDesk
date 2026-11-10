@@ -7,63 +7,87 @@
 # Sweeps every `git worktree list` entry. Deletes only .build,
 # site/node_modules and site/.astro, and only in a tree passing
 # every clause below; DerivedData is reported, never touched. Never
-# removes a worktree or a branch. packaging-and-release.md owns
-# the predicate: anything else that deletes build output calls
-# this script rather than re-deriving it.
+# removes a worktree or a branch. Anything else that deletes build
+# output calls this script (packaging-and-release.md).
 #
-#   1. The gate is free: kiwidesk-gate.lock is taken with
-#      `lockf -t 0` and held for the whole sweep. --gate-held says
-#      the caller holds it: gate-lock, or this script's re-run.
+#   1. The gate is free: --apply takes gate-lock's lock with
+#      `lockf -t 0` and holds it for the whole sweep, or runs
+#      inside gate-lock (KIWIDESK_GATE_LOCK_HELD=1).
 #   2. No process has its cwd or executable inside the tree: one
 #      `lsof -a -d cwd,txt -Fn` pass, prefix-matched on the real
 #      path. Never `lsof +D`, which walks every file.
 #   3. Not the caller's own tree.
-#   4. Idle >= N hours (default 12) by the newest build marker:
-#      .build's children and `.build/*/debug.yaml` (Swift Build
-#      writes no top-level yaml), never .build's own mtime.
+#   4. Idle >= N hours (default 12) by the newest of .build's
+#      children and `.build/*/debug.yaml`, never .build's own
+#      mtime: Swift Build writes no top-level yaml or build.db.
 #
-# --if-below-gb N exits at once unless the volume has under N GB
-# free (gate-lock's trigger). Exit 75: --apply found the gate busy.
+# A dry run takes no lock, so it never queues a gate. --if-below-gb
+# N exits at once unless the volume has under N GB free; --timeout
+# S kills the whole sweep, children included, after S seconds.
+# Exit 75: --apply found the gate busy.
 set -uo pipefail
 
 ARGS=("$@")
-APPLY=0 IDLE_HOURS=12 BELOW_GB="" GATE_HELD=0
+APPLY=0 IDLE_HOURS=12 BELOW_GB="" TIMEOUT=""
+REST=()
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --apply) APPLY=1 ;;
-        --gate-held) GATE_HELD=1 ;;
-        --idle-hours) IDLE_HOURS="${2:?}"; shift ;;
-        --if-below-gb) BELOW_GB="${2:?}"; shift ;;
+        --apply) APPLY=1; REST+=("$1") ;;
+        --idle-hours) IDLE_HOURS="${2:?}"
+            REST+=("$1" "$2"); shift ;;
+        --if-below-gb) BELOW_GB="${2:?}"
+            REST+=("$1" "$2"); shift ;;
+        --timeout) TIMEOUT="${2:?}"; shift ;;
         *) echo "usage: scripts/prune-builds [--apply]" \
-            "[--idle-hours N] [--if-below-gb N]" >&2; exit 64 ;;
+            "[--idle-hours N] [--if-below-gb N] [--timeout S]" >&2
+            exit 64 ;;
     esac
     shift
 done
 
-free_kb() { df -k "$PWD" | awk 'NR == 2 { print $4 }'; }
+# In its own process group, so the deadline stops an in-flight rm
+# too, and waited for, so nothing outlives the caller's lock.
+if [ -n "$TIMEOUT" ]; then
+    exec /usr/bin/perl -e '
+        my $t = shift;
+        my $pid = fork() // exit 0;
+        if ($pid == 0) { setpgrp(0, 0); exec(@ARGV) or exit 1 }
+        $SIG{ALRM} = sub {
+            kill("TERM", -$pid);
+            waitpid($pid, 0);
+            print STDERR "prune-builds: stopped after ${t}s\n";
+            exit 124;
+        };
+        alarm($t);
+        waitpid($pid, 0);
+        exit($? >> 8);' "$TIMEOUT" "$0" ${REST[@]+"${REST[@]}"}
+fi
+
+free_kb() {
+    df -k "$PWD" 2>/dev/null | awk 'NR == 2 { print $4 }'
+}
 gb() { awk -v k="$1" 'BEGIN { printf "%.1f", k / 1048576 }'; }
 
 BEFORE_KB="$(free_kb)"
+case "$BEFORE_KB" in
+    '' | *[!0-9]*)
+        echo "prune-builds: df failed; nothing pruned" >&2
+        exit 0 ;;
+esac
 if [ -n "$BELOW_GB" ] &&
-    [ "${BEFORE_KB:-0}" -ge $((BELOW_GB * 1048576)) ]; then
+    [ "$BEFORE_KB" -ge $((BELOW_GB * 1048576)) ]; then
     exit 0
 fi
 
-# The file gate-lock takes; KIWIDESK_GATE_DIR points tests at theirs.
-DIR="${KIWIDESK_GATE_DIR:-$(getconf DARWIN_USER_TEMP_DIR \
-    2>/dev/null || echo /tmp/)}"
-LOCK="${DIR%/}/kiwidesk-gate.lock"
-
-if [ "$GATE_HELD" = 0 ]; then
-    /usr/bin/lockf -k -t 0 "$LOCK" \
-        "$0" ${ARGS[@]+"${ARGS[@]}"} --gate-held
+if [ "$APPLY" = 1 ] && [ "${KIWIDESK_GATE_LOCK_HELD:-}" != 1 ]; then
+    LOCK="$("$(dirname "$0")/gate-lock" --lock-path)" || exit 1
+    KIWIDESK_GATE_LOCK_HELD=1 /usr/bin/lockf -k -t 0 "$LOCK" \
+        "$0" ${ARGS[@]+"${ARGS[@]}"}
     STATUS=$?
-    [ "$STATUS" -ne 75 ] && exit "$STATUS"
-    if [ "$APPLY" = 1 ]; then
+    if [ "$STATUS" -eq 75 ]; then
         echo "prune-builds: gate busy; nothing pruned" >&2
-        exit 75
     fi
-    echo "prune-builds: gate busy; listing only" >&2
+    exit "$STATUS"
 fi
 
 OWN="$(git rev-parse --show-toplevel 2>/dev/null)" || {
