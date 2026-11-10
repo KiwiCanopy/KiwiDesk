@@ -183,17 +183,23 @@ extension KiwiCore {
                 // capture, and correct it with the window so the
                 // echo consumes it (#412).
                 let pending = tiler.stashOriginal(id)
-                guard let window = state.windows[id],
+                guard let window = state.windows[id] else { continue }
+                // A frame sent and not yet echoed outranks the state
+                // one the same way: a maximized float's return,
+                // judged by its fill's echo, was fitted to the whole
+                // region (#3157).
+                let base =
+                    pending ?? tiler.commandedFrame(of: id)
+                    ?? window.frame
+                guard
                     let clamped = floatFitCorrection(
                         id,
-                        frame: pending ?? window.frame,
+                        frame: base,
                         in: workspace
-                    )
-                else { continue }
-                guard
+                    ),
                     shouldIssueFloatFit(
                         id,
-                        current: pending ?? window.frame,
+                        current: base,
                         fitted: clamped
                     )
                 else { continue }
