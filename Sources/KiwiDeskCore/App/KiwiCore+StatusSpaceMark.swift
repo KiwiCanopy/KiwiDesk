@@ -66,7 +66,6 @@ extension KiwiCore {
                 hasIcon: $0.hasIcon
             )
         }
-        let settings = tiler.settings
         let screens = state.workspaces.allDisplays.compactMap {
             display -> StatusSpaceMark.Screen? in
             // SHOWN, not focused (#1214): the item names what

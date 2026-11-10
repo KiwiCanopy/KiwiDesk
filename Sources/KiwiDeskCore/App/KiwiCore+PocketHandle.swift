@@ -45,7 +45,7 @@ extension KiwiCore {
     /// shows no bar at rest there and the pocket reads Always
     /// (#2784 ▸ 8, #2978).
     func pocketRestsWhole(on display: Display) -> Bool {
-        tiler.settings.pocketRest(
+        shelfSettings(on: display.id).pocketRest(
             in: shownMode(on: display.id),
             on: display.fingerprint
         ) == .mark

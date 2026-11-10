@@ -48,11 +48,13 @@ struct TilingOffBarsHiddenTests {
         let core = makeCore()
         core.tiler.settings.spaceBarStyle.visibility = .always
         core.execute("tiling.set_off_hides_bars", args: [.bool(true)])
-        // Control: tiling on, the bar keeps its own Show.
+        core.tiler.settings.kiwishelf.pocketVisibility = .always
+        // Control: tiling on, the bar and the Pocket keep their Show.
         #expect(
             core.shelfSettings(on: display).spaceBarStyle.visibility
                 == .always
         )
+        #expect(core.pocketRests(on: display))
         core.execute("set_tiling", args: [.bool(false)])
         let shown = core.shelfSettings(on: display)
         #expect(shown.spaceBarStyle.visibility == .hidden)

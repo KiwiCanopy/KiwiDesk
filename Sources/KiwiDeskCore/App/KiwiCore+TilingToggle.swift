@@ -161,17 +161,6 @@ extension KiwiCore {
         return isTilingOff(space)
     }
 
-    /// The settings `display`'s shelf reads: each bar's edge as
-    /// that screen has it, and on a tiling-off Space whose tick
-    /// hides the bars every bar and the Pocket read Hidden, so a
-    /// shortcut still shows one (#3151). The one door the shelf
-    /// pass, the reveal verb and the menu-bar mark take.
-    func shelfSettings(on display: DisplayID) -> TilingSettings {
-        let shown = settings(on: display)
-        return tilingOffHidesShelf(on: display)
-            ? shown.hidingEveryBar() : shown
-    }
-
     /// Whether the active Space has tiling off and the profile hides
     /// its rings — `desiredBorderSpecs`' one tiling-off read
     /// (borders.md).

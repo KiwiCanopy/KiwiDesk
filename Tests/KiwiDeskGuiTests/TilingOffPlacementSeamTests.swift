@@ -111,9 +111,8 @@ struct TilingOffPlacementSeamTests {
     }
 
     /// The shelf's tiling-off read has one home, the shelf's
-    /// settings door, which the shelf pass, the reveal verb, the
-    /// menu-bar mark and the Pocket's rest take (#3151, bars.md);
-    /// the mirror has one writer.
+    /// settings door (#3151, bars.md; its readers are
+    /// `TilingOffBarsHiddenSeamTests`'); the mirror has one writer.
     @Test("the shelf read and the mirror keep their sites")
     func singleSites() throws {
         let sources = try Self.coreSources()
@@ -122,16 +121,7 @@ struct TilingOffPlacementSeamTests {
         }
         #expect(
             callers("tilingOffHidesShelf(on:")
-                == ["App/KiwiCore+TilingToggle.swift"]
-        )
-        #expect(
-            callers("shelfSettings(on:")
-                == [
-                    "App/KiwiCore+PocketPlate.swift",
-                    "App/KiwiCore+Shelf.swift",
-                    "App/KiwiCore+ShelfRevealCommand.swift",
-                    "App/KiwiCore+StatusSpaceMark.swift",
-                ]
+                == ["App/KiwiCore+ScreenEdges.swift"]
         )
         #expect(
             callers("state.tilingStart = ")
@@ -143,7 +133,7 @@ struct TilingOffPlacementSeamTests {
     func sitesAreWired() throws {
         let sites: [(String, String, String, String)] = [
             (
-                "shelfSettings", "KiwiCore+TilingToggle.swift", "App",
+                "shelfSettings", "KiwiCore+ScreenEdges.swift", "App",
                 "tilingOffHidesShelf(on: display)"
             ),
             (

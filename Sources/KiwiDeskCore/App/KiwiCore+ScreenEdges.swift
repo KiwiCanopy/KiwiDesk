@@ -16,8 +16,21 @@ extension KiwiCore {
 
     /// The live settings as `display` shows them: each bar's edge
     /// resolved for that screen (`TilingSettings.onScreen(_:)`).
+    /// What the bars SHOW there is `shelfSettings(on:)`'s.
     func settings(on display: DisplayID) -> TilingSettings {
         tiler.settings.onScreen(screenFingerprint(of: display))
+    }
+
+    /// The settings `display`'s shelf reads: each bar's edge as
+    /// that screen has it, and on a tiling-off Space whose tick
+    /// hides the bars every bar and the Pocket read Hidden, so a
+    /// shortcut still shows one (#3151). The one door a reader of a
+    /// screen's bar or Pocket visibility takes
+    /// (`TilingOffBarsHiddenSeamTests`).
+    func shelfSettings(on display: DisplayID) -> TilingSettings {
+        let shown = settings(on: display)
+        return tilingOffHidesShelf(on: display)
+            ? shown.hidingEveryBar() : shown
     }
 
     /// The axis a Space switch's plates slide along on `display`:

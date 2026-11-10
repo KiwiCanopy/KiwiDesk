@@ -451,10 +451,13 @@ twice, was a question the user answered twice. The argument is
   tick resolves the profile's own value, else the app-wide base,
   through `TilingToggleSettings.offHidesBars(base:)` (#3089), read
   only by `KiwiCore.tilingOffHidesShelf(on:)` inside the one
-  `KiwiCore.shelfSettings(on:)` door, which the shelf pass, the
-  reveal verb, the menu-bar Space mark and the Pocket's rest take;
-  a new reader of a screen's bar visibility takes it too
-  (`TilingOffPlacementSeamTests`, `TilingOffBarsHiddenTests`).
+  `KiwiCore.shelfSettings(on:)` door. A reader of a screen's bar or
+  Pocket visibility in Core takes that door, never `tiler.settings`
+  or the edge-only `settings(on:)` (`TilingOffBarsHiddenSeamTests`,
+  whose `allowed` map is the one copy of who reads beside it). Off
+  the stand-down, the Space slide and the Space, layout and Desktop
+  cues play on such a Space, as beside any Hidden bar
+  (`TilingOffBarsHiddenTests`).
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
