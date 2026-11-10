@@ -212,7 +212,7 @@ struct OpenInBackgroundSpaceTests {
     func quietSpaceReadsTheBound() {
         let follow = LaunchFollowIntent()
         let start = Date(timeIntervalSince1970: 1_000)
-        follow.noteQuietApps([F.app], at: start, into: Self.named)
+        follow.noteQuietApps([F.app], at: start, place: (Self.named, nil))
         #expect(follow.quietSpace(F.app, at: start) == Self.named)
         let late = start.addingTimeInterval(LaunchFollowIntent.quietBound + 1)
         #expect(follow.quietSpace(F.app, at: late) == nil)
