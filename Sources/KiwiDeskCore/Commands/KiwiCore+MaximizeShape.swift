@@ -32,14 +32,14 @@ extension KiwiCore {
             )
         }
         let settings = tiler.settings.maximize
-        var share = settings.share(for: axis, on: shape)
+        var share = settings.share(for: axis, on: shape, in: space)
         if args.count > 1 {
             guard let read = args[1].numberValue,
                 MaximizeShape.shareRange.contains(read)
             else { return .failure(Self.shareRefusal) }
             share = read
         }
-        var anchor = settings.anchor[shape]
+        var anchor = settings.anchor(on: shape, in: space)
         if args.count > 2 {
             guard let raw = args[2].stringValue,
                 let read = MaximizeAnchor(rawValue: raw)
@@ -81,7 +81,8 @@ extension KiwiCore {
 
     /// `maximize.set_share(axis, share[, shape])`,
     /// `maximize.set_anchor(anchor[, shape])` (no shape writes every
-    /// one) and `maximize.set_follow_focus(bool)`. A window already
+    /// one), `maximize.set_follow_focus(bool)` and the two per-Space
+    /// `_override` twins (#3090). A window already
     /// maximized keeps the shape and the follow it was pressed with.
     func maximizeSettingsCommand(
         _ command: String,
@@ -119,6 +120,10 @@ extension KiwiCore {
             }
             tiler.settings.maximize.followFocus = follows
             return .ok()
+        case "maximize.set_share_override":
+            return setMaximizeShareOverride(args)
+        case "maximize.set_anchor_override":
+            return setMaximizeAnchorOverride(args)
         default:
             return .fail("unknown command: \(command)")
         }

@@ -25,6 +25,11 @@ struct SettingKeyModelParityTests {
         var settings = TilingSettings()
         settings.gapsOverride["1"] = Gaps()
         settings.minWindowSizeOverride["1"] = 200
+        settings.maximize.shareOverride["1"] = MaximizeShareOverride(
+            height: 0.4,
+            width: 0.4
+        )
+        settings.maximize.anchorOverride["1"] = .center
         settings.spaceIcons["1"] = "star"
         settings.placementOverride["1"] = .first
         settings.tiling.startOverride["1"] = false

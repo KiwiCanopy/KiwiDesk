@@ -14,7 +14,6 @@ struct KeySequencesCard: View {
     @State private var expanded = false
     @State private var collapsed: Set<UUID> = []
     @State private var fresh: UUID?
-    @Environment(\.keybindingLayerName) private var layerName
 
     private var sequences: [KeyBinding] { bindings.filter(\.isSequence) }
 
@@ -35,17 +34,7 @@ struct KeySequencesCard: View {
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                // Greyed where a Save cannot keep the edit, never
-                // hidden (#171, #3124).
-                if let block {
-                    Text(blockCaption(block))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Group {
-                    rows(catalog)
-                }
-                .disabled(block != nil)
+                rows(catalog)
             }
         }
         // Open on arrival once in use — never forced shut.
@@ -79,26 +68,6 @@ struct KeySequencesCard: View {
             )
         }
         .settingsActionButton()
-    }
-
-    private var block: SequenceEditBlock? {
-        model.sequenceEditBlock(in: layerName)
-    }
-
-    private func blockCaption(_ block: SequenceEditBlock) -> String {
-        switch block {
-        case .storedPage:
-            return L(
-                "shortcuts.sequence.live_only",
-                "Key sequences are edited on the loaded profile's page."
-            )
-        case .profileOwnsSequences:
-            return L(
-                "shortcuts.sequence.profile_own",
-                "This profile keeps its own key sequences in this layer, "
-                    + "which Settings can't edit yet."
-            )
-        }
     }
 
     private func add() {

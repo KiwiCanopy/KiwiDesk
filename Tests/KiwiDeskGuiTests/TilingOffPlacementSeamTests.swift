@@ -78,7 +78,8 @@ struct TilingOffPlacementSeamTests {
             "Tiling/KiwiCore+DragMove.swift": 1,
             "Tiling/KiwiCore+DragCrossing.swift": 2,
             "Tiling/KiwiCore+DragRelocate.swift": 1,
-            "App/KiwiCore+Maximize.swift": 1,
+            // The Floating gate, and the Monocle refusal (#3090).
+            "App/KiwiCore+Maximize.swift": 2,
             "App/KiwiCore+AppBarVisibility.swift": 1,
             // The tiled arm, and a float's plane and its float test
             // (#3036).

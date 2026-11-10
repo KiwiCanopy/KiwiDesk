@@ -10,7 +10,7 @@ public struct StateCoordinator: Sendable {
     /// `app_rules` routing new windows of these apps to a fixed space.
     public var appRules: [String: SpaceID] = [:]
 
-    /// `new_window_placement` per layout mode, mirrored from tiler settings.
+    /// `new_window_placement` per layout mode, from tiler settings.
     public var spawnPlacements: [LayoutMode: SpawnPlacement] = [
         .bsp: BspParams().newWindowPlacement,
         .stack: StackParams().newWindowPlacement,
@@ -25,14 +25,14 @@ public struct StateCoordinator: Sendable {
     public var trackParams = TrackParams()
     /// Per-space fill-then-spill track capacity (#437), geometry-derived.
     public var trackCapacities: [SpaceID: Int] = [:]
-
     /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
     /// The arrival a `pocket_app` press claims (#2612), likewise.
     public var pocketClaimed: PocketArrivalClaim?
-
     /// A Desktop return's owed focus (#1207), mirrored likewise.
     public var returningFocus: WindowID?
+    /// An arrival a lens opened quietly (#3122): granted no focus.
+    public var arrivesQuietly = false
 
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
@@ -112,9 +112,9 @@ public struct StateCoordinator: Sendable {
     /// by the event arm, read by the hold, cleared by the settle.
     var settlingScreens: [SpaceID: String] = [:]
 
-    /// Honored-focus recency per window (#1840): stamped only by
-    /// `rememberHonoredFocus`, ended by a close or the app's exit.
+    /// Recency per window (#1840) and per app (#3135), one tick.
     var focusRecency: [WindowID: FocusStamp] = [:]
+    var appRecency: [pid_t: UInt64] = [:]
     var focusTick: UInt64 = 0
 
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
@@ -250,7 +250,7 @@ public struct StateCoordinator: Sendable {
                 stickyReachOverrides[id] = nil
             }
             forgetFloatMemory(pid: pid)
-            focusRecency = focusRecency.filter { $0.value.pid != pid }
+            forgetRecency(of: pid)
             forgetMinimized(pid: pid)
             // The app's exit ends its away entries for good
             // (#1146), and a head's hand-off with them (#1387).

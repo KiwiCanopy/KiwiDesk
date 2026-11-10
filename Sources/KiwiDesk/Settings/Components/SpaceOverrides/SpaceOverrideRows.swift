@@ -15,6 +15,8 @@ struct SpaceOverrideRows: View {
                 gapsRow
                 minSizeRow
                 Divider()
+                maximizeRows
+                Divider()
                 modeRows
             }
             .environment(\.overrideLayoutName, mode.displayName)

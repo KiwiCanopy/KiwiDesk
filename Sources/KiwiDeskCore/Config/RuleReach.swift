@@ -193,27 +193,40 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     /// value is a combo has any). The base's rival leaves the base;
     /// a profile the user `ticked` gives its rival up; a profile that
     /// did not keeps its own rival, which wins on that combo, so it
-    /// reads as leaving `key` out.
-    mutating func takeOver(
+    /// reads as leaving `key` out. `chord` reads the combo a key holds
+    /// at a value — a key sequence carries its leader in its key — and
+    /// a tick never gives up a rival `clashes` names, so `key` is left
+    /// out there instead (#3124 ▸ Ruling 1).
+    mutating func takeOver<Chord: Equatable>(
         _ key: String,
         value: Value,
         from old: Value?,
         rivals: [String],
         ticked: Set<String>,
-        editing: String
+        editing: String,
+        chord: (String, Value) -> Chord,
+        clashes: (String, String) -> Bool
     ) {
+        let combo = chord(key, value)
+        let previous = old.map { chord(key, $0) }
+        func holds(_ rival: String, _ held: Value?, _ wanted: Chord?) -> Bool {
+            guard let held, let wanted else { return false }
+            return chord(rival, held) == wanted
+        }
         if base[key] == value {
-            for rival in rivals where base[rival] == value {
+            for rival in rivals where holds(rival, base[rival], combo) {
                 setBase(rival, nil)
             }
         }
         for profile in profiles
         where profile != editing && resolved(key, for: profile) == value {
             let held = rivals.filter {
-                resolved($0, for: profile) == value
+                holds($0, resolved($0, for: profile), combo)
             }
             guard !held.isEmpty else { continue }
-            if ticked.contains(profile) {
+            if ticked.contains(profile),
+                !held.contains(where: { clashes(key, $0) })
+            {
                 for rival in held { setEntry(rival, for: profile, .some(nil)) }
             } else {
                 setEntry(key, for: profile, .some(nil))
@@ -223,15 +236,16 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         // rival on the OLD combo ends — that profile follows again, as
         // its file will read — while a removal is re-written onto the
         // new combo, since the file stores it by combo.
-        guard base[key] == value, old != value else { return }
+        guard base[key] == value, previous != combo else { return }
         for profile in profiles
         where profile != editing && entries[profile]?[key] == .some(nil)
-            && !rivals.contains(where: { resolved($0, for: profile) == value })
+            && !rivals.contains(where: {
+                holds($0, resolved($0, for: profile), combo)
+            })
         {
-            let rivalHeldOld =
-                old.map { old in
-                    rivals.contains { resolved($0, for: profile) == old }
-                } ?? false
+            let rivalHeldOld = rivals.contains {
+                holds($0, resolved($0, for: profile), previous)
+            }
             if rivalHeldOld {
                 setEntry(key, for: profile, .none)
             } else {

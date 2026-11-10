@@ -18,6 +18,7 @@ struct SequenceNodeRow: View {
     var disabledSystemShortcuts
     @State private var confirmingDelete = false
     @State private var editingLua: LuaEditRequest?
+    @Environment(\.keybindingLayerName) var layerName
 
     var isLeader: Bool { node.id == editing.rootID }
     private var isOpen: Bool { !collapsed.contains(node.id) }
@@ -30,11 +31,22 @@ struct SequenceNodeRow: View {
             HStack(spacing: 8) {
                 if node.isSequence { branchLine } else { endKeyLine }
                 Spacer(minLength: 8)
+                // The leader's row carries the sequence's reach, as a
+                // shortcut row does (#3124).
+                if isLeader { reachColumn }
                 recorder
-                AppRuleDeleteButton(
-                    help: L("shortcuts.sequence.remove", "Remove key"),
-                    sharedFrom: nil
-                ) { _ in requestDelete() }
+                if isLeader {
+                    KeyReachTrash(
+                        model: model,
+                        layer: layerName,
+                        binding: node
+                    ) { requestDelete() }
+                } else {
+                    AppRuleDeleteButton(
+                        help: L("shortcuts.sequence.remove", "Remove key"),
+                        sharedFrom: nil
+                    ) { _ in requestDelete() }
+                }
             }
             if node.isSequence, node.steps?.isEmpty ?? true {
                 Text(L("shortcuts.sequence.empty", "Does nothing yet"))
@@ -63,6 +75,10 @@ struct SequenceNodeRow: View {
     }
 
     // MARK: - Lines
+
+    private var reachColumn: some View {
+        KeyReachColumn(model: model, layer: layerName, binding: node)
+    }
 
     private var branchLine: some View {
         HStack(spacing: 8) {
@@ -103,6 +119,8 @@ struct SequenceNodeRow: View {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
+            // The name field gives way first at a narrow width.
+            .fixedSize()
         }
     }
 

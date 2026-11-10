@@ -50,6 +50,20 @@ extension SettingsRevertRegister {
             .leaf(\.settings.floatScaleOnDisplayChange),
         .behaviour(.minSizePerSpaceOverride):
             .entry(\.settings.minWindowSizeOverride, key: { SpaceID($0) }),
+        .behaviour(.maximizeHeightSharePerSpace):
+            .entryField(
+                \.settings.maximize.shareOverride,
+                \.height,
+                key: { SpaceID($0) }
+            ),
+        .behaviour(.maximizeWidthSharePerSpace):
+            .entryField(
+                \.settings.maximize.shareOverride,
+                \.width,
+                key: { SpaceID($0) }
+            ),
+        .behaviour(.maximizeAnchorPerSpace):
+            .entry(\.settings.maximize.anchorOverride, key: { SpaceID($0) }),
         .behaviour(.placementOverride):
             .entry(\.settings.placementOverride, key: { SpaceID($0) }),
         .behaviour(.tilingStart): .leaf(\.settings.tiling.start),

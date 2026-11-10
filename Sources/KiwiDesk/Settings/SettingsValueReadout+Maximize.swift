@@ -38,6 +38,43 @@ extension SettingsValueReadout {
         ]
     }
 
+    /// A Space's own Maximize rows (#3090): one per Space whose
+    /// value moved, unset where it follows its screen's shape.
+    static func maximizeSpaceRows(
+        _ key: BehaviourKey,
+        _ census: SettingKey,
+        _ before: TilingSettings,
+        _ after: TilingSettings
+    ) -> [SettingsDiffRow] {
+        let read: (MaximizeSettings, SpaceID) -> String? = { settings, space in
+            switch key {
+            case .maximizeHeightSharePerSpace:
+                settings.shareOverride[space]?.height.map(percent)
+            case .maximizeWidthSharePerSpace:
+                settings.shareOverride[space]?.width.map(percent)
+            default:
+                settings.anchorOverride[space].map(MaximizeCard.anchorName)
+            }
+        }
+        let old = before.maximize
+        let new = after.maximize
+        let spaces = Set(old.shareOverride.keys)
+            .union(new.shareOverride.keys)
+            .union(old.anchorOverride.keys)
+            .union(new.anchorOverride.keys)
+            .filter { read(old, $0) != read(new, $0) }
+            .sorted { $0.raw < $1.raw }
+        return spaces.map { space in
+            .change(
+                census,
+                instance: space.raw,
+                label: instanceLabel(label(for: census), space.raw),
+                old: read(old, space) ?? unset,
+                new: read(new, space) ?? unset
+            )
+        }
+    }
+
     /// The changed shapes named for the label, and the first one's
     /// values before and after.
     struct ShapeChange {

@@ -44,6 +44,7 @@ extension TilingSettings {
         out.placementOverride = [:]
         out.tiling.start = tiling.startOverride[space] ?? tiling.start
         out.tiling.startOverride = [:]
+        out.maximize = maximize.resolved(for: space)
         out.spaceIcons = spaceIcons[space].map { [space: $0] } ?? [:]
         return out
     }

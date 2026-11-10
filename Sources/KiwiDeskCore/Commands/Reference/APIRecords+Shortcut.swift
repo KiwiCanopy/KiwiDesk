@@ -22,5 +22,10 @@ extension APIReference {
             "Unbinds a chord in the default layer and saves at once.",
             .text("chord")
         ),
+        "remove_sequence": APIRecord(
+            "Removes the key sequence a leader chord opens in the "
+                + "default layer, whole, and saves at once.",
+            .text("leader")
+        ),
     ]
 }

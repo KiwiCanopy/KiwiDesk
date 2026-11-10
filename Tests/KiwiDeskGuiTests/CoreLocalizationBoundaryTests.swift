@@ -163,18 +163,20 @@ struct CoreLocalizationBoundaryTests {
         // (#2888), a screen move onto a full-screen screen
         // (#3117) and a full-screen window's Space move (#3119).
         "Commands/WindowActionRefusal.swift": 21,
-        // KiwiVision's out-of-reach pill (#2103 ruling 16).
-        "App/KiwiCore+VisionReach.swift": 1,
+        // KiwiVision's out-of-reach pill (#2103 ruling 16) and a lens
+        // notice (#3122).
+        "App/KiwiCore+VisionReach.swift": 3,
         // A bar shortcut's refusal pill (#761), drawn beside the
         // shelf.
         "App/KiwiCore+ShelfRevealCue.swift": 10,
         // A Hyper press with nothing to do (#2480), on the pill
         // Core draws.
         "App/KiwiCore+HyperBarePress.swift": 1,
-        // A refused Maximize (#2448, #3036), and a press
-        // KiwiVision's fill would hide (#3064), on the pill Core
-        // draws.
-        "App/KiwiCore+Maximize.swift": 2,
+        // A refused Maximize (#2448, #3036), a Height or Width a
+        // Monocle tile refuses with the layout's name (#3090), and a
+        // press KiwiVision's fill would hide (#3064), on the pill
+        // Core draws.
+        "App/KiwiCore+Maximize.swift": 4,
         // A lens's default reminder, on the hold pill Core draws
         // (#2103 ruling 42a).
         "App/KiwiCore+VisionHold.swift": 1,

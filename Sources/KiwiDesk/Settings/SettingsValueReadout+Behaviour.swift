@@ -30,6 +30,9 @@ extension SettingsValueReadout {
         case .maximizeHeightShare, .maximizeWidthShare,
             .maximizeAnchor:
             return maximizeRows(key, census, before, after)
+        case .maximizeHeightSharePerSpace, .maximizeWidthSharePerSpace,
+            .maximizeAnchorPerSpace:
+            return maximizeSpaceRows(key, census, before, after)
         case .resizeStep:
             return [
                 .change(

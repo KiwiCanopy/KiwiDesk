@@ -42,6 +42,18 @@ extension AppDelegate {
                 ]
             )
         }
+        // A lens that turned on with none of its apps open (#3122).
+        core.vision.onNotice = { notice in
+            NSAccessibility.post(
+                element: NSApp as Any,
+                notification: .announcementRequested,
+                userInfo: [
+                    .announcement: Self.announcement(notice),
+                    .priority:
+                        NSAccessibilityPriorityLevel.high.rawValue,
+                ]
+            )
+        }
         var wasOn = core.kiwiVisionIsOn
         core.vision.onChange = { [weak self] active, cause in
             self?.visionReadersChanged()
@@ -91,6 +103,25 @@ extension AppDelegate {
             return on
                 ? L("kiwivision.announce.on", "KiwiVision on")
                 : L("kiwivision.announce.off", "KiwiVision off")
+        }
+    }
+
+    /// What VoiceOver hears for a lens notice: the sentence the
+    /// pill draws (#3122).
+    static func announcement(_ notice: VisionLensNotice) -> String {
+        switch notice {
+        case .noMemberOpen(let lens):
+            return L(
+                "kiwivision.notice.no_member_open",
+                "%1$@ is on: none of its apps is open.",
+                lens
+            )
+        case .notInstalled(let app):
+            return L(
+                "kiwivision.notice.not_installed",
+                "%1$@ is not installed.",
+                app
+            )
         }
     }
 }

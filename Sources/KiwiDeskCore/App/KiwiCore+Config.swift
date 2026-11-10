@@ -7,6 +7,10 @@ extension KiwiCore {
         // A load may move who owns the setup, which a lens's reach
         // reads (#2103 ruling 40).
         defer { liveProfileChanged() }
+        // A lens init.lua turns on opens nothing (#3122).
+        let wasLoading = vision.configLoading
+        vision.configLoading = true
+        defer { vision.configLoading = wasLoading }
         // #1790: `init.lua`'s Spaces are undeclared until its run
         // returns, so nothing is retired meanwhile.
         profiles.arrangementInFlight += 1
@@ -247,6 +251,8 @@ extension KiwiCore {
         focusWrap = FocusWrapState()
         tiler.settings.gapsOverride = [:]
         tiler.settings.minWindowSizeOverride = [:]
+        tiler.settings.maximize.shareOverride = [:]
+        tiler.settings.maximize.anchorOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.tiling.startOverride = [:]
         tiler.settings.spaceIcons = [:]

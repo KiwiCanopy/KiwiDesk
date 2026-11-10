@@ -115,6 +115,19 @@ extension APIReference {
                 + "on instead of ending.",
             .boolean("enabled")
         ),
+        "set_share_override": APIRecord(
+            "Sets one Space's own Maximize Height or Width share, "
+                + "over its screen shape's; nil clears.",
+            .space("space"),
+            .choice("axis", MaximizeAxis.self),
+            .number("share", optional: true)
+        ),
+        "set_anchor_override": APIRecord(
+            "Sets where a Maximize Height or Width grows from in one "
+                + "Space; nil clears.",
+            .space("space"),
+            .choice("anchor", MaximizeAnchor.self, optional: true)
+        ),
     ]
 
     static let tilingRecords: [String: APIRecord] = [
@@ -314,6 +327,10 @@ extension APIReference {
             "Opens KiwiHub on a side, switches it there, or closes "
                 + "it if that side is open.",
             .choice("side", KiwiHubSide.self)
+        ),
+        "show_last_app": APIRecord(
+            "Opens the window switcher on the app used last, or steps "
+                + "it to the next app while it is up."
         ),
         "set_key": APIRecord(
             "Sets a second chord for a KiwiHub navigation key; no "

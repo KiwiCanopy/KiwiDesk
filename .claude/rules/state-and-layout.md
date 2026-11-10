@@ -281,7 +281,13 @@ editing here:
   from the slot would put every focused command on the window
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
-  argument lives in `docs/design-decisions.md`.
+  argument lives in `docs/design-decisions.md`. **A window a lens
+  opened quietly (#3122) takes neither the grant nor a rule
+  follow**: the arrival arm mirrors `StateCoordinator.arrivesQuietly`
+  in from `LaunchFollowIntent.opensQuietly` ahead of the fold, as
+  `arrivalDisplay` is, and a new fold arm that grants focus or sets
+  `placedByAppRule` reads it too (`KiwiVisionAutoOpenWiringTests` ▸
+  `foldReadsTheMirror`, `KiwiVisionAutoOpenFocusTests`).
   The fold's TARGET skips the App Rule for a POPUP only —
   `ManagedWindow.isPopup`, an overlay on a raised layer (#1602)
   or with no title-bar button (#2475, a Chromium extension
@@ -592,6 +598,14 @@ editing here:
   `placedByAppRule` alone, so a door that must not follow keeps it
   unset rather than adding a check at the claim
   (`LaunchFollowSpawnTests`, `LaunchFollowSeamTests`).
+  **A lens's quiet open (#3122) is owed through the same door**,
+  `oweLaunchFollow(quietly:)`, onto the ledger's `quietOpen` slot:
+  one focus move, claimed ahead of the follow at the first member
+  arrival and paid by a bare focus, never a switch, within
+  `quietBound`. Its apps' activations owe no follow while the mark
+  stands, `record` and `forget(keeping:)` retire it with the debt,
+  and a new owe or retire of it joins `LaunchFollowSeamTests`'
+  register (`KiwiVisionAutoOpenFocusTests` holds each cancel).
   **Every reader of "was this arrival created" goes through ONE
   door with ONE late-create resolution (#2630)** — the follow,
   the `window_created` reason, and any pocket claim (#2629, #2612)
@@ -1238,6 +1252,13 @@ editing here:
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
   call, which no unit test reaches, is
   `ZOrderSequenceWiringTests`' needle).
+- **An app's recency is stamped only by `noteAppActivation`, on
+  the shared `focusTick`, and ended only by the app's exit through
+  `forgetRecency` (#3135).** KiwiHub's app strip reads it through
+  `appRecencyRank` and `jumpApps` alone; never add a second
+  app-recency store, and never let the strip's order and
+  `focus_app_window`'s cycle share one (`docs/design-decisions.md`
+  ▸ KiwiHub's app strip; `JumpAppStripTests`).
 - **A focused float schedules no float-tier raise of its own, so a
   raise owed ahead of it and any mode's restore ending under it pay
   through `raiseFloatsForFocusedFloat` (#2985,
@@ -2504,7 +2525,11 @@ editing here:
   Maximize stands only while it holds one and a tile's only while
   it holds none, so a new writer of the record changes what is
   maximized, and which plane one stands on is read through
-  `maximizedFloat(of:)`, never re-derived beside it.
+  `maximizedFloat(of:)`, never re-derived beside it. A Height or
+  Width press on a tiled member of a Monocle Space is refused at
+  the press (#3090), and a further door writing an axis Maximize
+  asks the same `monocleRefuses` (`MaximizeShareSpaceTests` ▸
+  `monocleRefusesTiles`, `monocleKeepsFloats`).
   **A write that rearranges a Space ends its
   maximize AT the write** — every order write through the one
   `Space.endMaximize`, the mode write, `resize`,

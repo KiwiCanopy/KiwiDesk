@@ -3,7 +3,7 @@ import Foundation
 /// What KiwiVision's maximize asks while KiwiVision is on (#3064):
 /// the shape it fills on the active Space's screen, resolved by
 /// `KiwiCore.maximizeShape(from:for:)`, the hand press's one reader
-/// of the Layout Defaults table.
+/// of the share a press takes on that Space (#3090).
 public struct VisionFill: Equatable, Sendable {
     public var shape: MaximizeShape
 

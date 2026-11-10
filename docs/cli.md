@@ -572,6 +572,11 @@ without writing it.
 `shortcut.remove <chord>` read and write the saved shortcuts; a
 write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 
+:::unreleased
+`shortcut.remove_sequence <leader>` removes a whole key sequence
+([`shortcut.remove_sequence`](lua-reference.md#shortcutremove_sequence)).
+:::
+
 `shortcut.list_groups` lists the shortcut groups a binding's `group`
 can name: the built-in tokens and the groups your shortcuts make
 ([`shortcut.list_groups`](lua-reference.md#shortcutlist_groups)).
@@ -761,6 +766,14 @@ Maximize move with focus instead of ending
 :::
 
 :::unreleased
+`maximize.set_share_override <space> <height|width> [share]` and
+`maximize.set_anchor_override <space> [center|in_place]` set one
+Space's own values over its screen shape's; leaving the value out
+clears it
+([`maximize.set_share_override`](lua-reference.md#maximizeset_share_override)).
+:::
+
+:::unreleased
 `toggle_maximized` takes a floating window too, whole or along one
 axis, and puts it back at the frame it had
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)).
@@ -875,6 +888,12 @@ any other side is refused, naming the sides it takes. See
 
 :::unreleased
 It also takes `desktops`, the Desktop overview.
+:::
+
+:::unreleased
+`kiwihub.show_last_app` opens the window switcher on the app of
+the window you used last. See
+[kiwihub.show_last_app](lua-reference.md#kiwihubshow_last_app).
 :::
 
 `kiwihub.set_key` takes a built-in KiwiHub key (`up`, `down`,

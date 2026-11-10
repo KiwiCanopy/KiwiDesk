@@ -26,6 +26,10 @@ struct OverrideChrome<Content: View>: View {
     /// defaults — the gaps row's Gaps & Borders page (#1775), a
     /// lens row's Default (#2103 rulings 46, 55).
     var inheritsName: String? = nil
+    /// The whole inheriting readout, where no "follows" frame with a
+    /// value fits — a Maximize row whose Space has no single screen
+    /// (#3090). It outranks `inheritsName`.
+    var inheritedLine: String? = nil
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed
     @Environment(\.overrideLayoutName) private var layoutName
@@ -147,6 +151,7 @@ struct OverrideChrome<Content: View>: View {
 
 extension OverrideChrome {
     fileprivate func inheritedText(_ value: String) -> String {
+        if let inheritedLine { return inheritedLine }
         if let followed = inheritsName {
             return L(
                 "space_override.inherits_page",
@@ -265,6 +270,8 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
     let global: Value
     let options: [(Value, String)]
     var help: String? = nil
+    var inheritsName: String? = nil
+    var inheritedLine: String? = nil
 
     var body: some View {
         OverrideChrome(
@@ -274,7 +281,9 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
                 options.first { $0.0 == global }?.1 ?? ""
             ),
             help: help,
-            subject: label
+            subject: label,
+            inheritsName: inheritsName,
+            inheritedLine: inheritedLine
         ) {
             DropdownRow(
                 label: label,

@@ -9,10 +9,12 @@ import CoreGraphics
 /// ordered by level alone, since no window anchors it.
 @MainActor
 final class SizeLimitOverlay {
-    /// What a pill stands on: a window it orders above, or a shelf.
+    /// What a pill stands on: a window it orders above, a shelf,
+    /// or the middle of a screen (#3122).
     enum Anchor: Hashable {
         case window(CGWindowID)
         case shelf(DisplayID, AppBarEdge)
+        case screen(DisplayID)
     }
 
     private struct Pill {
@@ -101,6 +103,17 @@ final class SizeLimitOverlay {
         )
     }
 
+    /// Flashes a pill centred on a screen's `frame` (#3122).
+    @discardableResult
+    func flash(
+        screen display: DisplayID,
+        frame: CGRect,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        present(.screen(display), frame: frame, text: text, symbol: symbol)
+    }
+
     /// Shows a lens's reminder pill centred on a held window, with
     /// no symbol and no timer: it stays until `release` (#2103
     /// ruling 12). A pill already shown follows the window without
@@ -157,10 +170,11 @@ final class SizeLimitOverlay {
             ((pillHeight - SizeLimitPillPlate.lineHeight)
                 / pill.plate.textLineHeight).rounded()
         )
+        var centred = symbol == nil
+        if case .screen = window { centred = true }
         let pillRect = CGRect(
             x: frame.midX - pillWidth / 2,
-            y: symbol == nil
-                ? frame.midY - pillHeight / 2 : frame.minY + 8,
+            y: centred ? frame.midY - pillHeight / 2 : frame.minY + 8,
             width: pillWidth,
             height: pillHeight
         )
@@ -190,7 +204,7 @@ final class SizeLimitOverlay {
         switch window {
         case .window(let id):
             pill.panel.order(.above, relativeTo: Int(id))
-        case .shelf:
+        case .shelf, .screen:
             pill.panel.orderFrontRegardless()
         }
         pill.panel.alphaValue = 1

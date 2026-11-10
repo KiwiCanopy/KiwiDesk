@@ -22,7 +22,9 @@ extension SettingsModel {
         switch row.revert {
         case .binding(let layer, let lua):
             return (layer, lua)
-        case .ruleReach(let key) where row.key == .shortcuts(.layers):
+        case .ruleReach(let key)
+        where row.key == .shortcuts(.layers)
+            && !RuleReachTable<String>.isSequenceKey(key):
             let parts = RuleReachTable<String>.keyParts(key)
             return (parts.layer, parts.lua)
         default:

@@ -14,6 +14,12 @@ extension KiwiCore {
         launchFollow.record(bundleID, at: now)
     }
 
+    /// The same door for a lens's quiet open (#3122): the apps it
+    /// opened in the background, owed one focus move and no follow.
+    func oweLaunchFollow(quietly open: LaunchFollowIntent.QuietOpen) {
+        launchFollow.recordQuiet(open)
+    }
+
     /// Another app coming forward retires the debt (the user moved
     /// on); the owing app's own activation does not, since it is
     /// the open completing. An activation owes a new one only as an
@@ -23,15 +29,21 @@ extension KiwiCore {
     /// inside the press grace.
     /// A rule-placed window that arrived after the press and before
     /// this activation is paid here rather than owed.
+    /// Every activation first stamps its app's recency, which
+    /// KiwiHub's app strip orders by (#3135).
     func noteAppActivation(
         _ activation: AppActivation,
         now: Date = Date()
     ) {
+        state.stampAppRecency(activation.pid)
         if launchFollow.owed(at: now) != activation.bundleID {
             launchFollow.forget(keeping: activation.bundleID)
         }
         guard let bundleID = activation.bundleID,
             let press = openingPress(of: activation, now: now)
+        else { return }
+        // A lens's quiet open is no press of the app's (#3122).
+        guard !launchFollow.opensQuietly(bundleID.lowercased(), at: now)
         else { return }
         // A Pocket key's open keeps its window where you are (#2612).
         guard
@@ -125,6 +137,8 @@ extension KiwiCore {
         effects: AppliedEffects,
         now: Date = Date()
     ) -> SpaceID? {
+        // A lens's quiet open is owed first (#3122).
+        if claimQuietOpen(arrived: window) { return nil }
         guard !eventLoop.switchReads.applying,
             let space = effects.placedByAppRule,
             let bundleID = window.appBundleID,

@@ -6552,6 +6552,32 @@ they meant, and a press would size the window just short of the
 third the menu offers.
 
 :::unreleased
+**A Space may carry its own shares and "from", over its screen's
+row (#3090).** An editor Space and a browser Space on one screen
+share one shape row, and that row cannot serve both: the editor
+wants a narrow column, the browser a wide one. So a Space keeps an
+optional share per axis and an optional "from", and the order is a
+binding's own arguments, then the Space's value, then the shape
+row, read through the one pair `MaximizeSettings.share(for:on:in:)`
+and `anchor(on:in:)` that the press and `resolved(for:)` both take.
+The cost is the one #2422 names for its floor: a value set on a
+Space travels with it, so a Space moved to a screen of another
+shape keeps a share chosen for the first screen, which is what the
+#3062 table exists to avoid. The trade is accepted because a Space
+the user tunes this way is one pinned to its screen, and every
+axis a Space leaves unset still follows the screen it lands on. A
+per-layout value, #2237's shape, was weighed and refused: the case
+is two Spaces of one layout on one screen. The maps are sparse and
+the decoder already accepted a file without them, so they owe no
+format bump, as #2422's floor.
+
+**On Monocle a tiled window refuses Maximize Height and Width
+(#3090).** A Monocle member already fills the screen, so an axis
+only shrank it into a column, which reads as a defect. A float
+there may still take one, and a full Maximize is unchanged.
+:::
+
+:::unreleased
 ### Monocle's "Maximize windows" hides the bars, it does not stand them down (#2976)
 
 **[Rationale]**
@@ -8834,6 +8860,36 @@ since a step that lands under the haze is the press the lens
 exists to save. A Never dimmed app's windows stay clear on screen
 but are no member, so a step skips them too: they are kept clear
 to be seen, not worked in.
+
+### A lens opens only the apps you switched on, and moves the focus once (#3122)
+
+**[Rationale]**
+
+A lens turning on with none of its apps open left dead keys and a
+nagging pill. The answer is a per-app **Auto-open** checkbox, off by
+default, rather than a lens that launches its apps unasked: a
+visual mode never starts apps on its own, as Focus modes and Stage
+Manager don't. A lens-wide "open the first app" was rejected,
+since the list's order would then carry a hidden meaning.
+
+Every Auto-open app with no window opens in the background,
+through the one launcher, and none takes the focus. Where none of
+the lens's apps had a window, the focus moves once, to the first
+member window to ARRIVE rather than the first in lens order, and
+only while the focus, the clicks and the lens stand as they were at
+the press, and a screen shows the window's Space. KiwiDesk switches
+no Space or Desktop for it; a keystroke into a window is no choice
+of it. A minimized window, or one on another Desktop, counts as
+open. The move is owed through the launch follow's door (#1599)
+and bounded by the slowest cold start, since a background launch
+has no activation to time from.
+
+It fires only where the user turned the lens on: in the doors a
+chord, the menu, the CLI and the GUI take, never in the one writer
+of what KiwiDesk draws, which also carries renames and turn-offs,
+and never on a relaunch, a reload, a profile switch or `init.lua`'s
+run. When nothing is open and nothing opens, the pill says so, on
+the screen's centre where no window holds the focus.
 
 ### A lens holds a stray landing, never refuses it (#2103)
 
@@ -14344,13 +14400,24 @@ outside its scrolling list (owner, 2026-11-09). KiwiHub's
 Shortcuts side lists an end key by its path (past four keys, the
 leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
-card already do. A sequence has no "Applies to"
-column yet: the key table keys a row by its Lua, which a leader has
-none of, so a stored profile's Save, which writes through that
-table, would drop a sequence edited there. A sequence edited on the
-loaded profile's page is saved in the layer's shared rows, whole,
-so every profile without its own override has it, and the card is
-greyed, never hidden, while a stored profile is edited (#3124).
+card already do.
+:::
+
+:::unreleased
+*Amended (#3124, owner, 2026-11-10): a key sequence has a reach.*
+The key table keys a sequence by its layer and leader chord, its
+value the whole tree, so the leader's row carries an "Applies to"
+like any shortcut and the card edits on every profile's page: a
+profile holds or overrides the tree whole, never a key inside it.
+Ticking a profile where a key sequence and a row would share one
+chord is refused, the box greyed with the row it clashes with:
+taking the chord over would delete a whole tree there, or bury a
+row under one, without the user seeing either. A re-recorded leader
+keeps its reach, since the user moved the chord of one sequence
+rather than making another. Removing a sequence from Lua or the CLI
+is its own verb, `shortcut.remove_sequence`, destructive like
+`shortcut.remove`, because a whole tree goes with one call;
+`shortcut.remove` refuses a leader and names that verb.
 :::
 
 :::unreleased
@@ -15074,6 +15141,70 @@ takes the same rule along a line and across its lines, keeping
 the position (#2309 ruling 11). `JumpListTests`,
 `ViewPickListTests`, `JumpModelTests`, `JumpScopeModelTests` and
 `JumpPanelEventTests` hold it.
+
+:::unreleased
+**KiwiHub's app strip orders by recency because the order is on
+screen and the pick is explicit (#3135, owner ruling 2026-11-09).**
+[Rationale] #637 rejected recency for a *repeating* gesture: a ring
+that reorders itself under a key pressed again and again makes the
+third press land where nobody can predict, because the order it
+walks is history the user cannot see. #1840 kept Open or Focus a
+fixed ring for that reason, and #3131 deferred a recency order for
+`focus_app_window` for the same one. The strip is the other case.
+Its order is drawn before any key acts, snapshot when the panel
+opens and never moved while it is up, and nothing lands until ↩ or
+a click names the row. A step along the strip moves a selection the
+user is watching; it does not focus anything. That is the line:
+recency may order what is shown, never what a blind repeated key
+acts on. So the strip and `focus_app_window` never share an order.
+The hold-and-release form was ruled out on its costs — ⌘⇥ and
+⌃⌥J ↩ already flip back in one tap, the release raised a Secure
+Input spike and picked early on a slipped key, it lost ⌥↩ Swap,
+and it was harder to follow with VoiceOver — and on the ruling's
+own line that a pick by recency is a deliberate press.
+
+Narrowing to one app squares with #2103's "the switcher orders and
+never filters". That rule keeps a lens from hiding windows the user
+did not ask to hide: a filter the user did not set would make other
+apps' windows unfindable from KiwiDesk. The strip narrows only to
+an app the user picked, or the app the last-app shortcut was
+pressed for, and All stays on the same strip: ⌃⌥J and every query
+start there, and ← or a click reaches it from any tile. No window
+is out of reach and none is dropped behind the user's back. Search
+keeps the same guarantee: typing returns the strip to All, so a
+query always covers every window, and a tile with no match dims in
+place rather than leaving the strip. Filtering inside one app was
+rejected, because a query that empties one app's list ("No windows
+match in Xcode") is a dead end the user has to back out of, where
+All with dimmed tiles shows at once which apps hold a match.
+
+← → belong to the strip whether or not a query is typed (owner
+amendment on #3135): under a query they step through only the apps
+with a match, so a query narrowed to one app is a key away, and a
+dimmed tile is never landed on. The field gives up its in-text
+cursor movement for it, which costs little because a query is a
+few letters typed and corrected from the end.
+
+The opener is its own verb, `kiwihub.show_last_app`, rather than an
+option on `kiwihub.show`: a side and an opening are two questions,
+and an option would put a second meaning on a call every existing
+binding and `UIBridgeHooks` field already spells one way. It lands
+on the window Core last saw focused, never on row 1, which a lens
+reorders. It is seeded on ⌥⇥ (owner, 2026-11-09), off the ⌃⌥ ladder
+like ⌘⌘: the chord sits beside ⌘⇥ for the same "go back" job, and a
+page's ⌥⇥ item-to-item move in Safari is the cost a user meets.
+Pressed again while the switcher is up it steps the strip to the
+next app, ⇧ stepping back, as ⌘⇥ steps macOS's switcher (owner,
+2026-11-09). The back key is the opener's own chord with ⇧, read from
+the live bindings, never a chord of its own: a rebound opener takes
+its back key with it, and the ⇧ form is never registered system-wide,
+so the app in front keeps it until the switcher is up. A separate
+back shortcut was weighed and left out for the same two reasons — it
+would drift from a rebound opener, and claim a second chord from
+every app. That is no blind gesture: each press moves a selection
+drawn before it, and nothing lands until ↩ — releasing ⌥ picks
+nothing, so the hold-and-release form stays ruled out.
+:::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**
@@ -16235,6 +16366,25 @@ apart from the layout rows, and survives a layout switch. Unlike
 the gaps it is live on a Floating Space, since it floors every
 float there, so it greys only on Monocle, which applies no
 minimum.
+
+:::unreleased
+**A Space's own Maximize rows are the fourth class, on their own
+tests** (#3090). Its first test is the gaps': a Maximize share
+belongs to no layout and every layout's windows take it. Its second
+is its own: the value is read at the press, by
+`KiwiCore.maximizeShape(from:for:)`, not before the layout
+calculation, and the fill it shapes is laid over the issued frames
+after it, so no layout math reads it. Its third holds as written:
+the screen shape's row on Layout Defaults is an unambiguous "off",
+which the unchecked row names ("follows Laptop · ¾"). The three
+rows — Maximize Height, Maximize Width, Maximize from — sit below
+the minimum size, apart from the layout rows, survive a layout
+switch and count one each. Like the minimum size they are live on
+a Floating Space, whose floats maximize, so they count there too,
+and on Monocle, whose floats may still take an axis. "Reset All
+Layout Overrides" leaves them alone, as it leaves the gaps: each
+row's checkbox is its reset.
+:::
 
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the

@@ -93,7 +93,8 @@ extension RefusalCueSeamTests {
     /// own callers offer the sound above, and the window actions'
     /// cue, which lands after any hotkey fire (#1518), and
     /// KiwiVision's out-of-reach cue, which a profile switch draws
-    /// rather than a press (#2103 ruling 16). A further caller
+    /// rather than a press (#2103 ruling 16), with a lens notice
+    /// beside it (#3122). A further caller
     /// would be a refusal silently exempt from `refusal.sound` —
     /// the defect this suite exists to catch. Each file's calls are
     /// counted sounded (`soundIfDrawn(` wrapping the call) and
@@ -125,7 +126,9 @@ extension RefusalCueSeamTests {
             callers == [
                 "KiwiCore+SizeLimitPill.swift": .unsounded(1),
                 "KiwiCore+WindowActions.swift": .unsounded(1),
-                "KiwiCore+VisionReach.swift": .unsounded(1),
+                // The out-of-reach cue and a lens notice (#3122),
+                // neither a refusal of a press.
+                "KiwiCore+VisionReach.swift": .unsounded(2),
                 // A bar's shortcut refused (#761), sounded at the bar
                 // alone (#2567).
                 "KiwiCore+ShelfRevealCue.swift": .sounded(1),
