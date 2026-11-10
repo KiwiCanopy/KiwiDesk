@@ -125,6 +125,20 @@ struct UpdateParkedOfferTests {
         #expect(log.replies.isEmpty)
     }
 
+    /// An offer past its Install is under way, not parked: its
+    /// Later would cancel the download.
+    @Test("an offer under way is not dropped")
+    func underWayIsKept() throws {
+        let (driver, log) = driver()
+        try park(driver, log)
+        let session = try #require(driver.window?.session)
+        session.install()
+        #expect(!driver.dropParkedOffer())
+        #expect(log.replies == [.install])
+        driver.updateCycleFinished()
+        #expect(log.checks == 0)
+    }
+
     @Test("no open offer, nothing dropped")
     func nothingOpen() {
         let (driver, log) = driver()
