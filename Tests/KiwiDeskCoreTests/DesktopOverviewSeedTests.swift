@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// ⌘⌘ opens the Desktop overview (#1229, owner 2026-11-01): a
-/// double tap of either ⌘, the same key twice, seeded on the
-/// "Show Desktop overview" row, reaching an existing install as
-/// generation 13 and staying put on either shortcut base.
+/// ⌃⌥O opens the Desktop overview (#3167, replacing #1229's ⌘⌘): a
+/// plain chord seeded on the "Show Desktop overview" row, reaching
+/// an existing install as generation 13 and staying put on either
+/// shortcut base.
 @Suite("Desktop overview seed (#1229)")
 struct DesktopOverviewSeedTests {
     private let row = DefaultKeybindings.desktopOverviewRow()
@@ -19,10 +19,11 @@ struct DesktopOverviewSeedTests {
         )
     }
 
-    @Test("the row taps either ⌘ twice and opens the Desktops side")
+    @Test("the row is ⌃⌥O, no tap, and opens the Desktops side")
     func rowShape() throws {
         let combo = try #require(KeyCombo.parse(row.combo))
-        #expect(combo == KeyCombo.tap(.command, side: nil, count: 2))
+        #expect(combo == KeyCombo.parse("ctrl+alt+o"))
+        #expect(!combo.isTap)
         #expect(row.lua == KiwiHubSide.desktops.lua)
         #expect(row.label == "Show Desktop overview")
         #expect(row.kind == .navigation)
@@ -65,11 +66,11 @@ struct DesktopOverviewSeedTests {
         )
     }
 
-    /// A ⌘⌘ the user already spent on something else stays theirs.
-    @Test("a taken ⌘⌘ is not offered")
-    func takenTapIsSkipped() {
+    /// A ⌃⌥O the user already spent on something else stays theirs.
+    @Test("a taken ⌃⌥O is not offered")
+    func takenChordIsSkipped() {
         let mine = KeyBinding(
-            combo: "cmd+cmd",
+            combo: "control+option+o",
             lua: "KiwiDesk.toggle_floating()",
             kind: .navigation
         )

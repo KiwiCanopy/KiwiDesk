@@ -999,8 +999,8 @@ last, that window selected
 :::
 
 :::unreleased
-`⌘⌘`, either ⌘ tapped twice (the same key both times), opens
-KiwiHub's **Desktop overview**, and closes it again. While KiwiHub
+`⌃⌥O` opens KiwiHub's **Desktop overview**, and closes it
+again. While KiwiHub
 has the keyboard, only a modifier tap set to one of its sides
 works, as that side's shortcut does; while another KiwiDesk panel
 has it, no modifier tap does.
