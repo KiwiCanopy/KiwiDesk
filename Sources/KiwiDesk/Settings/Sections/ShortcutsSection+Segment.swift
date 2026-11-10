@@ -35,9 +35,7 @@ extension ShortcutsSection {
                     gesturesPlayed = true
                     gesturesPlay = true
                 }
-                if let top = ShortcutsPagePart.parts(in: segment).first {
-                    proxy.scrollTo(top.id, anchor: .top)
-                }
+                proxy.scrollTo(Self.pageTop, anchor: .top)
                 model.nav.shortcutsSegment = picked
             }
         )

@@ -119,6 +119,9 @@ struct ShortcutsSection: View {
 
     /// The page's bottom edge, padding included.
     static let pageEnd = "shortcuts.page_end"
+    /// The page's top edge: always laid out, unlike a part that may
+    /// draw nothing, so a segment pick can open there (#3184).
+    static let pageTop = "shortcuts.page_top"
 
     /// Scrolls to the page's end, then again un-animated once the
     /// appended row is laid out — a yield does not promise layout
@@ -182,6 +185,9 @@ struct ShortcutsSection: View {
             .settingsPageBottom()
             .overlay(alignment: .bottom) {
                 Color.clear.frame(height: 1).id(Self.pageEnd)
+            }
+            .overlay(alignment: .top) {
+                Color.clear.frame(height: 1).id(Self.pageTop)
             }
             .shortcutsJumpSlot(.content)
             .environment(\.keybindingLayerName, selected)

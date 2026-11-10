@@ -123,7 +123,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
                 return part
             }
             if expander.rows(for: key)?.contains(where: {
-                $0.lua == anchor
+                $0.runs(anchor)
             }) == true {
                 return part
             }

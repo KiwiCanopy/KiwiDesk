@@ -85,7 +85,13 @@ struct ShortcutsSegmentTests {
             KeyBinding(combo: "", lua: "y", kind: .custom, label: ""),
             KeyBinding(
                 combo: "",
-                lua: "kiwi.focus_space(\"gone\")",
+                lua: "KiwiDesk.focus_space(\"gone\")",
+                kind: .navigation,
+                label: ""
+            ),
+            KeyBinding(
+                combo: "",
+                lua: "KiwiDesk.switch_layer(\"gone\")",
                 kind: .navigation,
                 label: ""
             ),
@@ -105,13 +111,23 @@ struct ShortcutsSegmentTests {
                 )?.segment
             }
         #expect(placed == [.personal, .personal])
-        let gone = ShortcutsPagePart.placing(
-            RecorderPreflight.rowID(rows[2]),
-            expander: expander,
+        // Both are rows the Inactive card draws: a deleted Space's and
+        // a deleted layer's.
+        let drawn = OrphanedShortcuts.commands(
             bindings: rows,
-            shown: .personal
-        )
-        #expect(gone?.part == .inactive && gone?.segment == .builtIn)
+            spaces: expander.liveSpaces,
+            layers: model.config.layers.map(\.name)
+        ).map(\.lua)
+        #expect(Set(drawn) == [rows[2].lua, rows[3].lua])
+        for row in rows[2...] {
+            let gone = ShortcutsPagePart.placing(
+                RecorderPreflight.rowID(row),
+                expander: expander,
+                bindings: rows,
+                shown: .personal
+            )
+            #expect(gone?.part == .inactive && gone?.segment == .builtIn)
+        }
         #expect(
             model.shortcutsSegment(holding: rows[1].id.uuidString)
                 == .personal
@@ -149,9 +165,16 @@ struct ShortcutsSegmentTests {
         let page = try Self.source("Sections/ShortcutsSection.swift")
         // Its declaration is the page's one write.
         #expect(page.components(separatedBy: "gesturesPlay=").count == 2)
-        // A pick opens the part at its top, before the part changes.
+        // A pick opens the part at its top — an anchor always laid
+        // out — before the part changes.
+        #expect(
+            page.contains(
+                ".overlay(alignment:.top){Color.clear.frame(height:1)"
+                    + ".id(Self.pageTop)}"
+            )
+        )
         let top = try #require(
-            segment.range(of: "proxy.scrollTo(top.id,anchor:.top)")
+            segment.range(of: "proxy.scrollTo(Self.pageTop,anchor:.top)")
         )
         let write = try #require(
             segment.range(of: "model.nav.shortcutsSegment=picked")
