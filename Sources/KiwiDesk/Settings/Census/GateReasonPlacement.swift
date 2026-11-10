@@ -80,7 +80,8 @@ extension SettingRuntimeGate {
             .loginItemServiceStatus, .autoStartServiceLoaded,
             .runningCopyTranslocated,
             .automaticInstallUnavailable, .luaOwnsConfig,
-            .noBarHides, .expandOffInConfig, .spaceHasNoOverrides,
+            .noBarHides, .noBarShows, .focusBorderOff,
+            .expandOffInConfig, .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
             .noBindingStore, .defaultsToRestore:
@@ -113,6 +114,9 @@ extension SettingRuntimeGate {
             return false
         case .expandOffInConfig:
             // Its knob has no row anywhere.
+            return false
+        case .noBarShows, .focusBorderOff:
+            // Their causes are on other pages (#3089).
             return false
         case .defaultsToRestore:
             // The layer pick sits above it, but not that the

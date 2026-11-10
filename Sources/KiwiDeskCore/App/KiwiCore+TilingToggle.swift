@@ -123,27 +123,39 @@ extension KiwiCore {
                 return .ok()
             }
             tiler.settings.tiling.startOverride[SpaceID(raw)] = on
+        // The ticks write the app-wide base, as `set_focus_wrap`
+        // does, so a profile's own value still wins (#3089).
         case "tiling.set_off_hides_borders":
             guard let on = args.first?.boolValue else {
                 return .fail("expected a boolean")
             }
-            tiler.settings.tiling.offHidesBorders = on
+            setAppWide(persisting: false) { $0.tilingOffHidesBorders = on }
         case "tiling.set_off_hides_bars":
             guard let on = args.first?.boolValue else {
                 return .fail("expected a boolean")
             }
-            tiler.settings.tiling.offHidesBars = on
+            setAppWide(persisting: false) { $0.tilingOffHidesBars = on }
         default:
             return .fail("unknown command: \(command)")
         }
         return .ok()
     }
 
+    /// Redraws the bars and rings a tick hides, for a tick that
+    /// moved with no pass of its own (#3089).
+    func repaintTilingOffStandDowns() {
+        updateBars()
+        updateBorders()
+    }
+
     /// Whether the Space `display` shows has tiling off and the
     /// profile hides the bars for it — `shelfStandsDown`'s one
     /// tiling-off read (bars.md).
     func tilingOffHidesShelf(on display: DisplayID) -> Bool {
-        guard tiler.settings.tiling.offHidesBars,
+        guard
+            tiler.settings.tiling.offHidesBars(
+                base: appWide.tilingOffHidesBars
+            ),
             let space = state.workspaces.activeSpace(on: display)
         else { return false }
         return isTilingOff(space)
@@ -153,7 +165,9 @@ extension KiwiCore {
     /// its rings — `desiredBorderSpecs`' one tiling-off read
     /// (borders.md).
     func tilingOffHidesRings(on space: SpaceID) -> Bool {
-        tiler.settings.tiling.offHidesBorders && isTilingOff(space)
+        tiler.settings.tiling.offHidesBorders(
+            base: appWide.tilingOffHidesBorders
+        ) && isTilingOff(space)
     }
 }
 

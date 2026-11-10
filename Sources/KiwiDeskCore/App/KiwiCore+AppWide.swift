@@ -36,6 +36,10 @@ struct AppWideLedger {
 extension KiwiCore {
     public var appWide: AppWideSettings { appWideLedger.live }
 
+    /// The stored app-wide values, without a verb's session change:
+    /// what a Settings table reads as its shared base (#3089).
+    var appWideSettled: AppWideSettings { appWideLedger.settled }
+
     /// What every `gui.json` write stamps in
     /// (`GuiConfigStore.liveAppWide`): the settled values once
     /// stored, never a verb's session change.
@@ -64,8 +68,11 @@ extension KiwiCore {
             // The sides too (#2601), applied at once: a line removed
             // reads off, and init.lua setting it again re-arms.
             appWideLedger.live.modifierSides = false
-            // The start value too (#3008): a line removed reads on.
+            // The tiling-off bases too (#3008, #3089): a line removed
+            // reads the default.
             appWideLedger.live.tilingStartGlobal = true
+            appWideLedger.live.tilingOffHidesBorders = false
+            appWideLedger.live.tilingOffHidesBars = false
             return
         }
         guard let config = guiConfigStore.load() else { return }

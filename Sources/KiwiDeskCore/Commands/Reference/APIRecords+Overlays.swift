@@ -138,13 +138,13 @@ extension APIReference {
             .space("space", optional: true)
         ),
         "set_off_hides_borders": APIRecord(
-            "Sets whether a Space with tiling off hides its focus "
-                + "border.",
+            "Sets whether tiling off hides the focus border, for "
+                + "profiles without their own value.",
             .boolean("enabled")
         ),
         "set_off_hides_bars": APIRecord(
-            "Sets whether a Space with tiling off hides the bars on "
-                + "its screen.",
+            "Sets whether tiling off hides the bars, for profiles "
+                + "without their own value.",
             .boolean("enabled")
         ),
     ]

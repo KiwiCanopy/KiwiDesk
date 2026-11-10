@@ -28,6 +28,16 @@ struct RuleFamilyField {
         field(.cycle, \.modeCycle),
         field(.tile, \.tileRules),
         field(.autoFloat, \.floatAutomatically),
+        field(.tilingStart, \.settings.tiling.start),
+        RuleFamilyField(
+            family: .tilingOffHides,
+            same: {
+                $0.settings.tiling.offHidesBorders
+                    == $1.settings.tiling.offHidesBorders
+                    && $0.settings.tiling.offHidesBars
+                        == $1.settings.tiling.offHidesBars
+            }
+        ),
     ]
 
     static func of(_ family: RuleFamily) -> RuleFamilyField? {

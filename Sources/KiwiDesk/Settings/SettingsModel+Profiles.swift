@@ -127,6 +127,9 @@ extension SettingsModel {
             from: cleanConfig.settings,
             onto: core.tiler.settings
         )
+        committing.settings.tiling = keepingLiveTilingToggle(
+            committing.settings.tiling
+        )
         core.withUserMotion {
             core.applyProfileScopedState(
                 from: committing,

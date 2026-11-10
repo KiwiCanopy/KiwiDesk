@@ -8,18 +8,25 @@ import SwiftUI
 struct ShortcutSettingRow<Reach: View, Control: View>: View {
     /// Drawn twin of the control's own spoken name.
     let title: String
-    let help: String
+    /// Its `?`, nil for a row whose title says it all (#3089).
+    let help: String?
     /// What the `?` names for VoiceOver; the title unless a group
     /// heading names the subject better.
     let helpSubject: String
     let reach: Reach
     let control: Control
+    /// An on/off's leading checkbox, which carries the title in
+    /// place of the drawn label (#2439, #3089); nil for a row whose
+    /// value control sits in the footprint.
+    var checkbox: Binding<Bool>?
+    /// Why the checkbox is greyed, nil while it is live.
+    var checkboxGrey: String?
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
 
     init(
         title: String,
-        help: String,
+        help: String?,
         helpSubject: String? = nil,
         @ViewBuilder reach: () -> Reach,
         @ViewBuilder control: () -> Control
@@ -41,9 +48,22 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
             IconGlyphLabel(icon: Self.settingGlyph)
                 .frame(width: SettingsMetrics.shortcutIconSlot)
                 .accessibilityHidden(true)
-            Text(title)
-                .accessibilityHidden(true)
-            HelpButton(explanation: help, subject: helpSubject)
+            if let checkbox {
+                Toggle(title, isOn: checkbox)
+                    .toggleStyle(.checkbox)
+                    .modifier(
+                        GreyOut(
+                            active: checkboxGrey != nil,
+                            help: checkboxGrey ?? ""
+                        )
+                    )
+            } else {
+                Text(title)
+                    .accessibilityHidden(true)
+            }
+            if let help {
+                HelpButton(explanation: help, subject: helpSubject)
+            }
             Spacer()
             reach
             KeyRecorderField.footprint.overlay { control }
@@ -57,7 +77,7 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
 extension ShortcutSettingRow where Reach == EmptyView {
     init(
         title: String,
-        help: String,
+        help: String?,
         @ViewBuilder control: () -> Control
     ) {
         self.init(
@@ -66,5 +86,27 @@ extension ShortcutSettingRow where Reach == EmptyView {
             reach: { EmptyView() },
             control: control
         )
+    }
+}
+
+extension ShortcutSettingRow where Control == EmptyView {
+    /// An on/off setting: a leading checkbox carrying the title,
+    /// greyed with `grey` as its reason, and an empty footprint so
+    /// the reach column still lines up (#2439, #3089).
+    init(
+        title: String,
+        help: String?,
+        isOn: Binding<Bool>,
+        grey: String? = nil,
+        @ViewBuilder reach: () -> Reach
+    ) {
+        self.init(
+            title: title,
+            help: help,
+            reach: reach,
+            control: { EmptyView() }
+        )
+        checkbox = isOn
+        checkboxGrey = grey
     }
 }

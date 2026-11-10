@@ -42,6 +42,8 @@ struct RuleReachChecklist: View {
         case .cycle: model.cycleReach()
         case .tile: model.tileReach(app)
         case .autoFloat: model.autoFloatReach()
+        case .tilingStart: model.tilingStartReach()
+        case .tilingOffHides: model.tilingOffHidesReach(app)
         }
     }
 

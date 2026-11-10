@@ -17,6 +17,28 @@ extension SettingsRevertRegister {
         .appRules(.floatAutomatically): RevertWriter.leaf(
             \.floatAutomatically
         ).then { model, _ in settle(model, .autoFloat, nil) },
+        // The tiling-off rows take their reach along (#3089).
+        .behaviour(.tilingStart): RevertWriter.leaf(
+            \.settings.tiling.start
+        ).then { model, _ in settle(model, .tilingStart, nil) },
+        .behaviour(.tilingOffHidesBorders): RevertWriter.leaf(
+            \.settings.tiling.offHidesBorders
+        ).then { model, _ in
+            settle(
+                model,
+                .tilingOffHides,
+                RuleReachTable<Bool>.offHidesBordersKey
+            )
+        },
+        .behaviour(.tilingOffHidesBars): RevertWriter.leaf(
+            \.settings.tiling.offHidesBars
+        ).then { model, _ in
+            settle(
+                model,
+                .tilingOffHides,
+                RuleReachTable<Bool>.offHidesBarsKey
+            )
+        },
         .shortcuts(.layers): layers,
         .shortcuts(.layersIcon): layerIcon,
         .shortcuts(.shortcutBase): shortcutBase,
@@ -218,6 +240,12 @@ extension SettingsRevertRegister {
             return config.tileRules.filter {
                 family.subject(ofRule: $0) == subject
             }
+        case .tilingOffHides:
+            let toggle = config.settings.tiling
+            let value =
+                subject == RuleReachTable<Bool>.offHidesBordersKey
+                ? toggle.offHidesBorders : toggle.offHidesBars
+            return [value.map { "\($0)" } ?? "follows"]
         default:
             return []
         }

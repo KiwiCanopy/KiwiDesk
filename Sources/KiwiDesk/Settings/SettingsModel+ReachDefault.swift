@@ -74,6 +74,20 @@ extension SettingsModel {
                 editing: editing,
                 isLoaded: reachIsLoaded
             )
+        case .tilingStart:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.tilingStart,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .tilingOffHides:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.tilingOffHides,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
         }
     }
 }

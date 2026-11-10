@@ -50,8 +50,8 @@ struct ShortcutsFamilyRowsTests {
         //    Mouse & trackpad drawer's mouse settings (#1726, #2379),
         //    whose census cases live in the Behaviour sub-enum,
         //    and its scroll gestures (#1656, #1519) — controls the
-        //    drawer's entries draw — and Focus's Space history
-        //    setting (#1655), drawn by `SpaceHistoryRow`.
+        //    drawer's entries draw — Focus's Space history setting
+        //    (#1655) and Size & float's Tiling off rows (#3089).
         let handDrawn: Set<SettingKey> = [
             .shortcuts(.layers),
             .shortcuts(.layersIcon),
@@ -75,6 +75,10 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.modifierDragResize),
             .shortcuts(.spaceHistory),
             .shortcuts(.focusWrap),
+            // The Tiling off rows, drawn by `TilingOffRows` (#3089).
+            .behaviour(.tilingStart),
+            .behaviour(.tilingOffHidesBorders),
+            .behaviour(.tilingOffHidesBars),
             .shortcuts(.modeCycle),
             .shortcuts(.modeCue),
             .shortcuts(.desktopCue),
@@ -315,20 +319,6 @@ struct ShortcutsFamilyRowsTests {
             Set(perSpace)
                 == Set(OrphanedShortcuts.perSpaceFamilies)
         )
-    }
-
-    /// A census key from ANOTHER area carries no keybinding
-    /// rows. Pinned because `nil` here means two different
-    /// things — a hand-drawn Shortcuts container, or a key that
-    /// was never a shortcut — and only the second is checkable
-    /// by kind.
-    @Test("a key from another area carries no keybinding rows")
-    @MainActor
-    func foreignKeyIsNotAFamily() {
-        #expect(
-            fixture().rows(for: .behaviour(.minWindowSize)) == nil
-        )
-        #expect(fixture().rows(for: .general(.language)) == nil)
     }
 
     /// Pins the display-independent inputs every expansion

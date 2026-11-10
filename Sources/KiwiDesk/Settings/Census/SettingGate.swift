@@ -23,6 +23,12 @@ enum SettingRuntimeGate: Hashable {
     /// Every bar reads Always on every layout and screen, so no
     /// bar ever reveals (owner ruling, 2026-10-21).
     case noBarHides
+    /// No bar rests on screen in any layout or on any screen, so
+    /// the tiling-off bars tick hides nothing (#3089).
+    case noBarShows
+    /// The focus border is off, so the tiling-off border tick
+    /// hides nothing (#3089).
+    case focusBorderOff
     /// `init.lua` or a profile turned the shelf's expand off
     /// (`animations.on_expand`), a knob with no row of its own.
     case expandOffInConfig

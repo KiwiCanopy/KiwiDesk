@@ -226,6 +226,12 @@ struct SizeFloatGroup: View {
             expander: expander
         )
         switch key {
+        case .behaviour(.tilingStart):
+            TilingOffRows(model: model)
+        case .behaviour(.tilingOffHidesBorders),
+            .behaviour(.tilingOffHidesBars):
+            // Drawn by `TilingOffRows` under its sub-header.
+            EmptyView()
         case .shortcuts(.maximizeHeight):
             VStack(alignment: .leading, spacing: 4) {
                 family

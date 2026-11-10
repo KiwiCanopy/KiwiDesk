@@ -93,11 +93,10 @@ struct CrossReferenceRowSlotTests {
     /// with its coverage guard, but two `Self.`-scoped entries
     /// remain and the collision is still reachable).
     ///
-    /// Whitespace is stripped rather than collapsed for a
-    /// duller reason: collapsing leaves a space where a line
-    /// break was, so `swift format` re-wrapping a call — which a
-    /// rename past 79 chars forces — redded a guard that nothing
-    /// had broken.
+    /// Whitespace is stripped rather than collapsed for a duller reason:
+    /// collapsing leaves a space where a line break was, so `swift format`
+    /// re-wrapping a call — which a rename past 79 chars forces — redded a
+    /// guard that nothing had broken.
     ///
     /// One entry names a BINDING rather than a producer, and the
     /// file+expression key does not close the hole there: `LayoutCard`'s row
@@ -128,6 +127,7 @@ struct CrossReferenceRowSlotTests {
         "SpacesSection.swift:Self.shortcutsProse",
         "AILookPointer.swift:Self.prose",
         "KiwiShelfKeyRows.swift:Self.caption(key)",  // #761
+        "TilingOffRows.swift:link.prose",  // TilingOffRowsTests
         // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
         "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests

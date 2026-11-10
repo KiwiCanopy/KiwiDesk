@@ -14,23 +14,43 @@ import Testing
 @Suite("Rule reach family parity")
 @MainActor
 struct RuleReachFamilyParityTests {
-    /// Each family → its `Profile` field, which a stored-profile
+    /// Each family → its `Profile` fields, which a stored-profile
     /// Save keeps as stored and the apply helper resolves, or nil
     /// with the reason it does neither.
-    private static let profileField: [String: String?] = [
-        "appRules": "appRules",
-        "floatRules": "floatRules",
-        "scrollGestures": "scrollGesture",
-        "spaceHistory": "spaceHistory",
-        "modeCycle": "modeCycle",
-        "focusWrap": "focusWrap",
-        "tileRules": "tileRules",
-        "floatAutomatically": "floatAutomatically",
+    private static let profileField: [String: [String]?] = [
+        "appRules": ["appRules"],
+        "floatRules": ["floatRules"],
+        "scrollGestures": ["scrollGesture"],
+        "spaceHistory": ["spaceHistory"],
+        "modeCycle": ["modeCycle"],
+        "focusWrap": ["focusWrap"],
+        "tileRules": ["tileRules"],
+        "floatAutomatically": ["floatAutomatically"],
+        "tilingStart": ["settings.tiling.start"],
+        "tilingOffHides": [
+            "settings.tiling.offHidesBorders",
+            "settings.tiling.offHidesBars",
+        ],
         // The shortcut override is always the Save's own diff
         // (`overwriteProfile`'s docstring), never kept as stored,
         // and each apply caller registers it with its own VM.
         "keyLayers": nil,
     ]
+
+    /// Families the apply helper does not resolve → the resolver
+    /// each Core reader calls instead. A profile's own value rides
+    /// its `settings`, which the apply installs whole, and is read
+    /// over the app-wide base where it is used (#3089).
+    private static let resolvedAtRead: [String: [String]] = [
+        "tilingStart": ["start(global:"],
+        "tilingOffHides": ["offHidesBorders(base:", "offHidesBars(base:"],
+    ]
+
+    /// `text` with every whitespace run one space, so a needle
+    /// survives a line wrapped at the column limit.
+    private static func oneLine(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
 
     private func families() throws -> [String] {
         let core = makeTestCore()
@@ -152,7 +172,7 @@ struct RuleReachFamilyParityTests {
         #expect(
             sites.map(\.file.lastPathComponent).sorted() == [
                 "KiwiCore+VisionReach.swift",
-                "SettingsModel+RuleReach.swift",
+                "SettingsModel+RuleReachSave.swift",
             ]
         )
     }
@@ -171,13 +191,35 @@ struct RuleReachFamilyParityTests {
         let rules = try windowRuleOverridesInit()
         let body = helper + rules
         for family in try families() {
-            guard let field = Self.profileField[family] ?? nil else {
-                continue
+            guard Self.resolvedAtRead[family] == nil,
+                let fields = Self.profileField[family] ?? nil
+            else { continue }
+            for field in fields {
+                #expect(
+                    body.contains("profile?.\(field)"),
+                    "\(family) never resolves on a profile apply"
+                )
             }
-            #expect(
-                body.contains("profile?.\(field)"),
-                "\(family) never resolves on a profile apply"
+        }
+    }
+
+    @Test("a family resolved at the read calls its resolver there")
+    func readResolversAreCalled() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+TilingToggle.swift"
             )
+        let text = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        let found = try families()
+        for (family, needles) in Self.resolvedAtRead {
+            #expect(found.contains(family), "\(family) is no family")
+            for needle in needles {
+                #expect(
+                    text.contains(".\(needle)".filter { !$0.isWhitespace }),
+                    "\(family) is never read through \(needle)"
+                )
+            }
         }
     }
 
@@ -189,13 +231,17 @@ struct RuleReachFamilyParityTests {
             under: "Profiles"
         )
         for family in try families() {
-            guard let field = Self.profileField[family] ?? nil else {
+            guard let fields = Self.profileField[family] ?? nil else {
                 continue
             }
-            #expect(
-                body.contains("existing.\(field) = stored.\(field)"),
-                "\(family) is written twice on a stored Save"
-            )
+            for field in fields {
+                #expect(
+                    Self.oneLine(body).contains(
+                        "existing.\(field) = stored.\(field)"
+                    ),
+                    "\(family) is written twice on a stored Save"
+                )
+            }
         }
     }
 }

@@ -38,13 +38,16 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case mouseFollowsFocus = "settings.mouse.followsFocus"
     case mouseHoverFocus = "settings.mouse.hoverFocus"
     case mouseHoverFocusDelay = "settings.mouse.hoverFocusDelayMS"
-    /// The tiling toggle's start values and ticks (#3008), Lua-only
-    /// until the owner rules their rows.
+    /// The tiling toggle's start value and ticks (#3008, #3089):
+    /// rows in Size & float; the per-Space start and the app-wide
+    /// bases, which a row's All profiles writes, stay Lua-only.
     case tilingStart = "settings.tiling.start"
     case tilingStartOverride = "settings.tiling.startOverride[space]"
     case tilingOffHidesBorders = "settings.tiling.offHidesBorders"
     case tilingOffHidesBars = "settings.tiling.offHidesBars"
     case tilingStartGlobal = "appWide.tilingStartGlobal"
+    case tilingOffHidesBordersGlobal = "appWide.tilingOffHidesBorders"
+    case tilingOffHidesBarsGlobal = "appWide.tilingOffHidesBars"
 }
 
 extension BehaviourKey {
@@ -88,9 +91,26 @@ extension BehaviourKey {
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
-            .maximizeFollowFocus, .tilingStart, .tilingStartOverride,
-            .tilingOffHidesBorders, .tilingOffHidesBars, .tilingStartGlobal:
+            .maximizeFollowFocus, .tilingStartOverride, .tilingStartGlobal,
+            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return .luaOnly
+        case .tilingStart:
+            // Never greyed: the menu row and Lua pause tiling too.
+            return .row(.shortcuts, .sizeAndFloat, .atRest)
+        case .tilingOffHidesBorders:
+            return .row(
+                .shortcuts,
+                .sizeAndFloat,
+                .atRest,
+                gate: .runtime(.focusBorderOff)
+            )
+        case .tilingOffHidesBars:
+            return .row(
+                .shortcuts,
+                .sizeAndFloat,
+                .atRest,
+                gate: .runtime(.noBarShows)
+            )
         case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
             .mouseHoverFocusDelay:
             // Moved from Behavior with #1726: the Mouse &
@@ -148,9 +168,18 @@ extension BehaviourKey {
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
-            .maximizeFollowFocus, .tilingStart, .tilingStartOverride,
-            .tilingOffHidesBorders, .tilingOffHidesBars, .tilingStartGlobal:
+            .maximizeFollowFocus, .tilingStartOverride, .tilingStartGlobal,
+            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return .none
+        case .tilingStart:
+            return .text(
+                "shortcuts.tiling_off.start",
+                help: "shortcuts.tiling_off.start.help"
+            )
+        case .tilingOffHidesBorders:
+            return .text("shortcuts.tiling_off.hide_borders")
+        case .tilingOffHidesBars:
+            return .text("shortcuts.tiling_off.hide_bars")
         case .mouseHoverFocusDelay:
             return .text("behavior.mouse.hover_focus_delay")
         case .mouseResize:

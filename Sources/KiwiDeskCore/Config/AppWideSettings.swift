@@ -36,6 +36,12 @@ public struct AppWideSettings: Equatable, Sendable {
     /// profile nor the Space says (`tiling.start_global`, #3008).
     /// ON by default.
     public var tilingStartGlobal = true
+    /// What a profile that leaves `tiling.off_hides_borders` unset
+    /// follows (#3089). OFF by default.
+    public var tilingOffHidesBorders = false
+    /// What a profile that leaves `tiling.off_hides_bars` unset
+    /// follows (#3089). OFF by default.
+    public var tilingOffHidesBars = false
     /// KiwiVision's dim, in percent (`kiwivision.dim`, #2103) —
     /// 60 by default (ruling 10).
     public var visionDim: Double = 60

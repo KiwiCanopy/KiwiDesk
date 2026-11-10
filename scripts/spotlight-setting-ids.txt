@@ -264,6 +264,9 @@ settings.stack.stackPosition
 settings.stickyStyle.color
 settings.stickyStyle.desktopReach
 settings.stickyStyle.mark
+settings.tiling.offHidesBars
+settings.tiling.offHidesBorders
+settings.tiling.start
 settings.track.autoTracks
 settings.track.axis
 settings.track.limit

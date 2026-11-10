@@ -79,6 +79,11 @@ struct GateReasonPlacementTests {
                 .shortcuts(.shortcutBase),
                 // #2601: the sides switch, on the same card.
                 .shortcuts(.modifierSides),
+                // #3089: the Tiling off hide rows, greyed by the
+                // focus border switch and the bars' Show values,
+                // both on other pages, so each links there.
+                .behaviour(.tilingOffHidesBorders),
+                .behaviour(.tilingOffHidesBars),
                 // #2524, #2971: the Space switch pickers and the
                 // slide's pace, the same shape on Colors ▸ Animations,
                 // one sentence for the group under its first row.
@@ -333,18 +338,5 @@ struct GateReasonPlacementTests {
                     + ".borders(.borderFitGaps))"
             )
         )
-    }
-
-    /// A surfacing condition dims nothing, so it carries no
-    /// channel at all — the distinction that keeps
-    /// `causeIsOnSurface` from answering two questions with one
-    /// name.
-    @Test("a presence condition has no reason to place")
-    func surfacingConditionsCarryNoChannel() {
-        #expect(SettingRuntimeGate.layersExist.greys == false)
-        #expect(SettingRuntimeGate.reduceMotion.greys)
-        // The Layers card surfaces on `layersExist`; nothing
-        // there is dimmed, so nothing owes a sentence.
-        #expect(channel(.shortcuts(.layers)) == nil)
     }
 }

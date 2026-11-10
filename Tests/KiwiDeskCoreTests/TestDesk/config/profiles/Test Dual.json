@@ -284,8 +284,6 @@
     },
     "swap_skips_cascade" : true,
     "tiling" : {
-      "off_hides_bars" : false,
-      "off_hides_borders" : false,
       "start_override" : {
 
       }

@@ -24,6 +24,12 @@ enum RuleFamily: Hashable {
     /// The Automatic floating switch, keyed by
     /// `RuleReachTable.floatAutomaticallyKey` (#2173).
     case autoFloat
+    /// The tiling toggle's start value, keyed by
+    /// `RuleReachTable.tilingStartKey` (#3089).
+    case tilingStart
+    /// The tiling toggle's two hide ticks, keyed by
+    /// `offHidesBordersKey` and `offHidesBarsKey` (#3089).
+    case tilingOffHides
 
     /// How a row's subject keys its table: app rules by the
     /// lowercased bundle id — a float rule's app by the engine's
@@ -31,7 +37,8 @@ enum RuleFamily: Hashable {
     /// scroll setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
-        case .key, .scroll, .history, .wrap, .cycle, .autoFloat:
+        case .key, .scroll, .history, .wrap, .cycle, .autoFloat,
+            .tilingStart, .tilingOffHides:
             subject
         case .float: FloatRules.appKey(subject)
         case .space, .tile: subject.lowercased()

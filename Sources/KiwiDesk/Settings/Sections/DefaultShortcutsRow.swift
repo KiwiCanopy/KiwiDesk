@@ -179,10 +179,11 @@ struct DefaultShortcutsRow: View {
                     + "restore. Pick it in %1$@ above.",
                 SettingsCatalog.shortcuts.layersCard.control.text
             )
-        // The last four are other keys' reasons and never reach
-        // this one; listed so a new case asks for its sentence.
+        // The others are other keys' reasons and never reach this
+        // one; listed so a new case asks for its sentence.
         case .matchesDefaults?, .onlyDefaultLayer?, .trackUnused?,
-            .appWideLuaOwned?, .storedProfilePage?:
+            .appWideLuaOwned?, .storedProfilePage?, .noBarShows?,
+            .focusBorderOff?:
             return L(
                 "shortcuts.restore_defaults.at_defaults",
                 "Every default shortcut is in place."

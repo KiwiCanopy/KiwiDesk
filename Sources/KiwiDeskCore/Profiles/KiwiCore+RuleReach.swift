@@ -16,6 +16,10 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var modeCycle: RuleReachTable<[LayoutMode]>
     /// The focus-wrap setting, one key (#2493).
     public var focusWrap: RuleReachTable<FocusWrap>
+    /// The tiling toggle's start value, one key, and its two hide
+    /// ticks, two keys; each base is app-wide (#3089).
+    public var tilingStart: RuleReachTable<Bool>
+    public var tilingOffHides: RuleReachTable<Bool>
     /// The Tile list and the Automatic floating switch
     /// (#2173).
     public var tileRules: RuleReachTable<[String]>
@@ -58,6 +62,17 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
         focusWrap: RuleReachTable<FocusWrap>,
+        tilingStart: RuleReachTable<Bool> = .tilingStart(
+            base: AppWideSettings().tilingStartGlobal,
+            overrides: []
+        ),
+        tilingOffHides: RuleReachTable<Bool> = .tilingOffHides(
+            base: (
+                AppWideSettings().tilingOffHidesBorders,
+                AppWideSettings().tilingOffHidesBars
+            ),
+            overrides: []
+        ),
         tileRules: RuleReachTable<[String]>,
         floatAutomatically: RuleReachTable<Bool>,
         storedTileBase: [String],
@@ -79,6 +94,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
         self.focusWrap = focusWrap
+        self.tilingStart = tilingStart
+        self.tilingOffHides = tilingOffHides
         self.tileRules = tileRules
         self.floatAutomatically = floatAutomatically
         self.storedTileBase = storedTileBase
@@ -104,6 +121,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || !spaceHistory.baseTouched.isEmpty
             || !modeCycle.baseTouched.isEmpty
             || !focusWrap.baseTouched.isEmpty
+            || !tilingStart.baseTouched.isEmpty
+            || !tilingOffHides.baseTouched.isEmpty
             || !tileRules.baseTouched.isEmpty
             || !floatAutomatically.baseTouched.isEmpty
             || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
@@ -115,6 +134,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || spaceHistory.touched.values.contains { !$0.isEmpty }
             || modeCycle.touched.values.contains { !$0.isEmpty }
             || focusWrap.touched.values.contains { !$0.isEmpty }
+            || tilingStart.touched.values.contains { !$0.isEmpty }
+            || tilingOffHides.touched.values.contains { !$0.isEmpty }
             || tileRules.touched.values.contains { !$0.isEmpty }
             || floatAutomatically.touched.values.contains { !$0.isEmpty }
             || lensReach != fileLensReach
@@ -204,6 +225,17 @@ extension KiwiCore {
             focusWrap: .focusWrap(
                 base: sidecar.focusWrap,
                 overrides: stored.map { ($0.name, $0.focusWrap) }
+            ),
+            tilingStart: .tilingStart(
+                base: appWideSettled.tilingStartGlobal,
+                overrides: stored.map { ($0.name, $0.settings.tiling.start) }
+            ),
+            tilingOffHides: .tilingOffHides(
+                base: (
+                    appWideSettled.tilingOffHidesBorders,
+                    appWideSettled.tilingOffHidesBars
+                ),
+                overrides: stored.map { ($0.name, $0.settings.tiling) }
             ),
             tileRules: .tileRules(
                 base: sidecar.tileRules,
