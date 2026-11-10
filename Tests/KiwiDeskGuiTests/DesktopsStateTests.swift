@@ -88,7 +88,7 @@ struct DesktopsStateTests {
                     [
                         line(
                             "1",
-                            [window(20, "Safari", block: .otherDesktop)]
+                            [window(20, "Safari")]
                         ),
                         line("2", [], shown: true),
                     ]
@@ -182,15 +182,34 @@ struct DesktopsStateTests {
         )
     }
 
-    @Test("a window on a hidden Desktop is not picked up")
-    func hiddenWindowRefuses() {
+    @Test("a window on a hidden Desktop is picked up (#3171)")
+    func hiddenWindowPicks() {
         var state = DesktopsState(overview: Self.overview())
         _ = state.press(.side(1), repeated: false)
         _ = state.press(.openSpace, repeated: false)
-        let safari = Self.window(20, "Safari", block: .otherDesktop)
+        #expect(state.press(.pickUp, repeated: false) == .moved)
+        #expect(state.carried == [WindowID(20)])
+    }
+
+    @Test("a full-screen window is not picked up")
+    func fullScreenRefuses() {
+        let blocked = Self.window(30, "Movie", block: .fullScreen)
+        let screen = DesktopOverview.Screen(
+            display: DisplayID(1),
+            name: "Built-in",
+            isMain: true,
+            isHere: true,
+            desktops: [
+                Self.desktop(1, shown: true, [Self.line("1", [blocked])])
+            ]
+        )
+        var state = DesktopsState(
+            overview: DesktopOverview(screens: [screen], yours: nil)
+        )
+        _ = state.press(.openSpace, repeated: false)
         #expect(
             state.press(.pickUp, repeated: false)
-                == .refuse(.carryBlocked(safari, .otherDesktop))
+                == .refuse(.carryBlocked(blocked, .fullScreen))
         )
         #expect(!state.isCarrying)
     }

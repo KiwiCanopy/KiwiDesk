@@ -135,8 +135,6 @@ public struct DesktopOverview: Sendable, Equatable {
 
     /// Why a window cannot be picked up (#1229 ▸ Carrying).
     public enum CarryBlock: Sendable, Equatable {
-        /// On a Desktop no screen shows (until #2884).
-        case otherDesktop
         case fullScreen
     }
 }

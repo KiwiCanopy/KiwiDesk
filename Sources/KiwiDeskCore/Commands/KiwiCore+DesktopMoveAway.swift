@@ -27,7 +27,7 @@ extension KiwiCore {
             explicit = nil
         case .space(let space, let landing):
             guard !awayIsSticky(away) else {
-                return .fail("a sticky window keeps its Space")
+                return .fail(AwayMoveRefusal.sticky.message)
             }
             explicit = space
             crossingBase = landing.flatMap {
@@ -38,7 +38,7 @@ extension KiwiCore {
         // Any move of a window whose crossing is landing, or that
         // landing would undo it.
         guard !desktopMemory.crossingsInFlight.contains(away.id) else {
-            return .fail("A window moves again once its last move lands.")
+            return .fail(AwayMoveRefusal.stillLanding.message)
         }
         guard let crossingBase, let explicit else {
             return landAway(away, to: target, explicit, follow: follow)
@@ -163,36 +163,22 @@ extension KiwiCore {
         )
     }
 
-    /// What refuses an away window before anything moves. A follow
-    /// ends with focus on the window, which a minimized or hidden one
-    /// cannot take, so it never switches for one.
+    /// What refuses an away window before anything moves, as the
+    /// verb answers it.
     private func awayMoveRefusal(
         _ away: AwayWindow,
         to target: DesktopTarget,
         follow: Bool
     ) -> CommandResponse? {
-        switch state.pocketPhase(of: away.id) {
-        case .pocketed:
-            return .fail(Self.pocketedMoveRefusal)
-        case .out:
-            return .fail(Self.outPocketMoveRefusal)
-        case nil:
-            break
-        }
-        if isFullScreenHost(away.nativeSpace, in: target.spaces) {
-            return .fail("a full-screen window cannot change Desktop")
-        }
-        if follow, !away.isUp {
-            return .fail("Can't follow a minimized or hidden window.")
-        }
-        return nil
+        awayMoveVerdict(away, to: target, follow: follow)
+            .map { .fail($0.message) }
     }
 
     /// Whether `away` left with a sticky scope, restored at its
     /// arrival (#414). A named Space is a membership write, and the
     /// sticky gate reads tracked windows, so every scope refuses here,
     /// a screen-sticky window's other-screen re-home included.
-    private func awayIsSticky(_ away: AwayWindow) -> Bool {
+    func awayIsSticky(_ away: AwayWindow) -> Bool {
         let window = ManagedWindow(
             id: away.id,
             pid: away.pid,

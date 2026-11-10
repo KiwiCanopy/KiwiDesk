@@ -32,8 +32,16 @@ struct JumpFooter: View {
     var desktops: DesktopsFooterState?
 
     var body: some View {
+        if let refusal = desktops?.refusal {
+            desktopsRefusal(refusal)
+        } else {
+            fitted
+        }
+    }
+
+    private var fitted: some View {
         let hints = hints
-        ViewThatFits(in: .horizontal) {
+        return ViewThatFits(in: .horizontal) {
             // A side's leading hints never shed (#1229 ▸ Footer).
             ForEach((keeps...hints.count).reversed(), id: \.self) {
                 row(Array(hints.prefix($0)))

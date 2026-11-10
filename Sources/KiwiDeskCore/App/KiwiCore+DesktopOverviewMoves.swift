@@ -4,8 +4,10 @@ import Foundation
 /// reads the Desktops afresh at the press and picks the route the
 /// verbs a binding runs take — `move_to_space` onto a Desktop its
 /// screen shows, `move_to_desktop` with its Space onto one it does
-/// not (#2888) — naming the window, so the verbs' own gates refuse
-/// and no pick acts on a focus it did not mean.
+/// not (#2888), and onto any for a window on a hidden Desktop, which
+/// `move_to_space` cannot name (#3171) — naming the window, so the
+/// verbs' own gates refuse and no pick acts on a focus it did not
+/// mean.
 extension KiwiCore {
     /// Moves `window` into `space` on the Desktop `native`, and
     /// follows it where asked; whether the verb moved it.
@@ -19,7 +21,10 @@ extension KiwiCore {
         let snapshot = desktopMemory.readDesktops()
         let id = JSONValue.number(Double(window.raw))
         let target = JSONValue.string(space.raw)
-        if Self.isShown(native, in: snapshot) {
+        let away =
+            state.windows[window] == nil
+            && state.awayWindows[window] != nil
+        if !away, Self.isShown(native, in: snapshot) {
             let verb = follow ? "move_to_space_and_follow" : "move_to_space"
             return overviewSend(verb, [target, id])
         }
