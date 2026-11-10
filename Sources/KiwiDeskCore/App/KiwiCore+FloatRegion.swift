@@ -3,9 +3,9 @@ import CoreGraphics
 /// Where a floating window may sit, derived once (#1091).
 ///
 /// Split from `KiwiCore+FloatClamp`, which holds the top-bar push
-/// that ACTS on a float; this one holds the region the float verbs
-/// and the gather act within, and the ring reservation that
-/// separates the correctness bound from the grow bound.
+/// that ACTS on a float; this one holds the bounds a float is placed
+/// or stepped within — the region, the grow bound and the verbs'
+/// reach (#3163) — over one derivation, and the ring reservation.
 ///
 /// Reads the display through `TilingEngine.visibleBounds`
 /// (#531), never `GeometryUtils.axVisibleFrame` — a direct call
@@ -40,7 +40,7 @@ extension KiwiCore {
         ).rounded(.up)
     }
 
-    /// **The one derivation of the region**: the bound
+    /// **The region**, every reserved strip carved off: the bound
     /// `center_floating` and the gather act within. No sweep fits a
     /// float into it (#3163), and the stepping verbs reach
     /// `floatReachBounds` instead.
@@ -50,14 +50,14 @@ extension KiwiCore {
     /// reserves exactly one reach on every edge of it, and the
     /// two are a genuine pair of questions
     /// rather than one rect wearing two meanings (device QA,
-    /// 2026-08-29): "where may a verb take this window" and "how
-    /// far may a deliberate grow take it" have different answers,
-    /// because a clipped ring is a blemish.
+    /// 2026-08-29): "is this window in the region" and "where may a
+    /// placement lay it" have different answers, because a clipped
+    /// ring is a blemish.
     ///
     /// Each consumer states its own scope. A placement nothing
-    /// corrects takes `floatGrowBounds`, the resize takes
-    /// `floatReachBounds(ringInset:)`, because pinning is a
-    /// question about how much room each EDGE has, and
+    /// corrects takes `floatGrowBounds`. The resize takes
+    /// `floatReachBounds(ringInset:)`, a rect rather than a clamp
+    /// because pinning asks how much room each EDGE has.
     /// `floatFrameClampedClearOfBars` pushes off a top bar alone
     /// (#3163): it runs for every float on every retile, so any
     /// other edge would move a window the user placed.
@@ -81,24 +81,40 @@ extension KiwiCore {
     /// The region a float may occupy on `space` — the arm a
     /// traveler takes for the space it RENDERS on (#1217).
     func floatBounds(on space: SpaceID) -> CGRect? {
+        floatArea(on: space, carving: reservedStrips(forSpace: space))
+    }
+
+    /// The one derivation beneath every float bound: `space`'s
+    /// screen, its visible bounds, `strips` carved off their edges.
+    /// No ring reservation here, at a bar edge any more than at a
+    /// screen edge: `ringReserved` adds one reach, and a carve here
+    /// made a bound take two at a bar.
+    private func floatArea(
+        on space: SpaceID,
+        carving strips: [(strip: CGRect, edge: AppBarEdge)]
+    ) -> CGRect? {
         guard
-            let screen = TilingEngine.screen(
-                for: space,
-                in: state
-            )
+            let screen = TilingEngine.screen(for: space, in: state)
         else { return nil }
-        var region = tiler.visibleBounds(screen)
-        for (strip, edge) in reservedStrips(forSpace: space) {
-            // No ring reservation here, at a bar edge any more
-            // than at a screen edge: `floatGrowBounds` adds one
-            // reach, and a carve here made it take two at a bar.
-            region = AppBarGeometry.regionClear(
-                region,
-                of: strip,
-                edge: edge
-            )
+        var area = tiler.visibleBounds(screen)
+        for (strip, edge) in strips {
+            area = AppBarGeometry.regionClear(area, of: strip, edge: edge)
         }
-        return region
+        return area
+    }
+
+    /// `rect` with the focus ring's reach reserved once on every
+    /// edge. Floored rather than trusted: a ring wide enough to
+    /// out-reach a small display would otherwise invert the rect and
+    /// read as enormous free space.
+    private func ringReserved(_ rect: CGRect) -> CGRect {
+        let inset = floatRingInset
+        return CGRect(
+            x: rect.minX + inset,
+            y: rect.minY + inset,
+            width: max(0, rect.width - inset * 2),
+            height: max(0, rect.height - inset * 2)
+        )
     }
 
     /// Where a placement may lay a float: the region
@@ -125,16 +141,9 @@ extension KiwiCore {
     /// than doubled because only one window's ring ever meets a
     /// screen edge.
     ///
-    /// Reserved regardless of whether this window is focused
-    /// right now, which costs nothing where it matters: a
-    /// keyboard resize acts on the FOCUSED window, so the ring
-    /// is always drawn on the one being grown. An inset that
-    /// tracked the ring's presence would shift a float every
-    /// time it gained or lost focus.
-    ///
-    /// Floored rather than trusted: a ring wide enough to
-    /// out-reach a small display would otherwise invert the rect
-    /// and read as enormous free space.
+    /// Reserved regardless of whether the window is focused, so an
+    /// inset that tracked the ring's presence never shifts a float
+    /// each time it gains or loses focus.
     func floatGrowBounds(of id: WindowID) -> CGRect? {
         guard let space = state.workspaces.space(of: id)
         else { return nil }
@@ -145,45 +154,35 @@ extension KiwiCore {
     /// will correct lays a frame (the #1177 gather), so the clamp
     /// has no ring push left to make.
     func floatGrowBounds(on space: SpaceID) -> CGRect? {
-        guard var region = floatBounds(on: space) else { return nil }
-        let inset = floatRingInset
-        region.size.width = max(0, region.width - inset * 2)
-        region.size.height = max(0, region.height - inset * 2)
-        region.origin.x += inset
-        region.origin.y += inset
-        return region
+        floatBounds(on: space).map(ringReserved)
     }
 
     /// Where a float VERB that steps or grows may take a window
     /// (#3163, owner ruling 2026-11-10): the screen's visible bounds
-    /// with only a reserved TOP strip carved off, the place a hand
-    /// drag reaches, so a bottom or side bar stops neither route.
-    /// `ringInset` reserves the focus ring's reach on every edge, as
-    /// `floatGrowBounds` does for the region.
+    /// less `floatStoppingStrips`, the place a hand drag reaches, so
+    /// a bottom or side bar stops neither route. A step reaches the
+    /// bare edge; `ringInset` holds the ring clear for a grow, which
+    /// acts on the FOCUSED window, so the ring is always drawn on the
+    /// one being grown.
     func floatReachBounds(
         on space: SpaceID,
         ringInset: Bool = false
     ) -> CGRect? {
-        guard
-            let screen = TilingEngine.screen(for: space, in: state)
-        else { return nil }
-        var reach = tiler.visibleBounds(screen)
-        for (strip, edge) in reservedStrips(forSpace: space)
-        where edge == .top {
-            reach = AppBarGeometry.regionClear(
-                reach,
-                of: strip,
-                edge: edge
-            )
-        }
-        guard ringInset else { return reach }
-        let inset = floatRingInset
-        return CGRect(
-            x: reach.minX + inset,
-            y: reach.minY + inset,
-            width: max(0, reach.width - inset * 2),
-            height: max(0, reach.height - inset * 2)
+        let reach = floatArea(
+            on: space,
+            carving: floatStoppingStrips(forSpace: space)
         )
+        return ringInset ? reach.map(ringReserved) : reach
+    }
+
+    /// The strips that stop or push a placed float: reserved ones on
+    /// the TOP edge alone (#3163). The push and the verbs' reach read
+    /// this one answer, so a key and the mouse stop at the same place
+    /// and the push never fights a keyboard move.
+    func floatStoppingStrips(
+        forSpace space: SpaceID
+    ) -> [(strip: CGRect, edge: AppBarEdge)] {
+        reservedStrips(forSpace: space).filter { $0.edge == .top }
     }
 
     /// EVERY painted strip covering `space` on an edge the

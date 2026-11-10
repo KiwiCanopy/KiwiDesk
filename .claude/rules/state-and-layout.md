@@ -3075,9 +3075,12 @@ editing here:
   own size (`FloatRecovery.centredAtSize`). A new correcting door
   takes one of those two. The region bounds `center_floating`,
   `make_floating`'s derived size and the gather, never a float the
-  user placed; a verb that steps or grows (`move_floating`,
-  `resize`) reaches `floatReachBounds`, the screen less a top strip,
-  as a drag does (`FloatVerbReachTests`, `FloatNeverResizedTests`,
+  user placed; `move_floating` and the grow side of `resize`
+  reach `floatReachBounds`, the screen less a top strip, as a drag
+  does — a step to the bare edge, a grow with the ring held clear.
+  A reader of the strips that stop or push a placed float takes
+  `floatStoppingStrips`, so the push and the reach never part
+  (`FloatVerbReachTests`, `FloatNeverResizedTests`,
   `FloatingModeBarClampTests`, `FloatStrandRecoveryTests` ▸
   `recentresAtOwnSize`). `FloatRegionSeamTests` ▸
   `noFloatFitInCore` bans only the retired names, so a new fit

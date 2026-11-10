@@ -95,6 +95,9 @@ struct FloatVerbReachTests {
         #expect(moved.maxY == screen.frame.maxY)
     }
 
+    /// Holds the push half of the rule: a step up ends below the top
+    /// bar. The push in `floatMoveFrame` would rescue a reach that
+    /// lost its top carve, so this pins the outcome, not the carve.
     @Test(
         "move_floating still stops below a top bar",
         .enabled(if: NSScreen.main != nil)

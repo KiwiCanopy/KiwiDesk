@@ -88,7 +88,9 @@ extension KiwiCore {
         // Where a grow may reach: the screen less a top strip, as a
         // hand drag reaches (#3163), the ring held clear. A rect, not
         // a clamp, because pinning asks how much room each EDGE has.
-        let region = state.workspaces.space(of: id).flatMap {
+        // Judged where the window RENDERS (#1217), as move_floating.
+        let space = floatPlacementSpace(of: id)
+        let region = space.flatMap {
             floatReachBounds(on: $0, ringInset: true)
         }
         let outcome: FloatResize.Outcome
@@ -126,7 +128,8 @@ extension KiwiCore {
         // never saw.
         let target = floatFrameClampedClearOfBars(
             id,
-            frame: outcome.frame
+            frame: outcome.frame,
+            space: space
         )
         // A grow the boundary blocks or TRUNCATES cues (#1091).
         // It used to do neither: the float path cued on shrink

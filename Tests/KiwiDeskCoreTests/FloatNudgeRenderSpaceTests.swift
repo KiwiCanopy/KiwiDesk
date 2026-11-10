@@ -5,8 +5,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `move_floating` on a window that renders somewhere it is not a
-/// member (#2972): the stop is the render Space's, and neither window
+/// `move_floating` and a float `resize` on a window that renders
+/// somewhere it is not a member (#2972, #3163): the stop is the
+/// render Space's, and neither window
 /// is re-filed. Space 1 shows no strip; Space 2, shown, has the Space
 /// Bar's along the top.
 @Suite("Move floating on a traveler", .serialized)
@@ -140,5 +141,24 @@ struct FloatNudgeRenderSpaceTests {
         core.execute("toggle_pocket_window")
         try stopsAtTheShownBar(core)
         #expect(core.state.pocketPhase(of: one) == .out)
+    }
+
+    /// The grow judges the render Space too (#3163): a traveler grown
+    /// upward stops at the shown Space's top bar, not at its home's
+    /// bare screen edge.
+    @Test(
+        "a sticky traveler grows to the bar of the Space it renders on",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func travelerGrow() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let core = try #require(makeCore())
+        core.execute("make_sticky")
+        let region = try arrive(core)
+        core.tiler.settings.animations.onWindowResize = false
+        core.execute("resize", args: [.string("y"), .number(5000)])
+        let grown = try #require(core.tiler.recentInstantTarget(one))
+        #expect(grown.minY == region.minY + core.floatRingInset)
+        #expect(core.state.workspaces.space(of: one) == home)
     }
 }

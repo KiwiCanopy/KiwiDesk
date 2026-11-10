@@ -7558,7 +7558,9 @@ its space uses: its width for `"x"`, its height for `"y"`.
 The delta is split between **both** edges (#1091), so a float
 grows and shrinks around its own centre. An edge already against
 the boundary is *pinned* and the whole delta goes to the other
-side, and when both edges are against it a grow refuses and
+side; the boundary is the screen's visible bounds less any bar
+strips on that space, so a float cannot be grown underneath a
+bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
 
 :::unreleased

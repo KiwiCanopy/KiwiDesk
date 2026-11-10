@@ -31,8 +31,7 @@ extension KiwiCore {
         let inset = floatRingInset
         // Each push is monotonic, so with two strips on the top
         // edge the deeper one's push subsumes the other's.
-        for (strip, edge) in reservedStrips(forSpace: space)
-        where edge == .top {
+        for (strip, _) in floatStoppingStrips(forSpace: space) {
             result = AppBarGeometry.pushedBelow(
                 result,
                 strip: strip,

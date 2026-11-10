@@ -544,9 +544,7 @@ window keeps its own Space.
 :::unreleased
 A floating window keeps the size and place you give it. Only a bar
 on the top edge moves one: down, at the same size, until its title
-bar shows. A bar on the bottom or a side never moves it, and a
-shortcut that moves or grows a floating window runs past such a bar
-to the screen's edge.
+bar shows. A bar on the bottom or a side never moves it.
 :::
 
 ### Sticky Windows
@@ -1159,6 +1157,12 @@ A combo can also be a modifier tapped alone, `cmd+cmd` or `rcmd`
   windows; which window each press reaches is in
   [`focus_or_spawn`](lua-reference.md#focus_or_spawn). Add the
   same app twice to bind one shortcut per behaviour.
+
+:::unreleased
+A floating window's resize and move shortcuts run under a bar on
+the bottom or a side to the screen's edge; only a bar on the top
+edge stops them.
+:::
 
 The verb behind *Open or Focus* is now `focus_or_spawn`, formerly
 `pull_or_spawn`; shortcuts made here are updated for you.
