@@ -134,6 +134,10 @@ struct SettingsAnchorIdentityTests {
         // target.
         "DesktopsSideView.swift": 2,
         "DesktopCardView.swift": 1,
+        // Scroll identity: KiwiHub's app strip follows its selected
+        // tile clear of the fade (#3135, #2901). Not a Settings
+        // destination, so nothing there is a reveal target.
+        "JumpStripView.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

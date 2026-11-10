@@ -123,7 +123,8 @@ extension ShortcutsReferenceBuilder {
         // KiwiHub's sides wear the symbol of the Settings page the
         // side mirrors; the window switcher, the swap of two windows
         // (owner, 2026-10-27).
-        case KiwiHubSide.windows.lua:
+        // Its last-app opener opens the same side (#3135).
+        case KiwiHubSide.windows.lua, KeybindingCatalog.jumpToLastApp.lua:
             return "rectangle.2.swap"
         case KiwiHubSide.shortcuts.lua:
             return SettingsDestination.shortcuts.symbol

@@ -17,6 +17,9 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var loadedItems: [SUAppcastItem] = []
     /// Starts a user-initiated check; Try Again's door.
     var startCheck: () -> Void = {}
+    /// A dropped parked offer owes the user's check at the cycle's
+    /// end (#3139).
+    var checksAtCycleEnd = false
     /// The one update window on screen (#1849), replaced only
     /// through `replace(with:presenting:)`.
     var current: UpdateWindowSlot? {
@@ -167,6 +170,10 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     /// Sparkle's cycle ended — the one moment Try Again's check
     /// can start (`SPUUpdater` allows a new session from here).
     func updateCycleFinished() {
+        if checksAtCycleEnd {
+            checksAtCycleEnd = false
+            return startCheck()
+        }
         window?.session.cycleEnded()
     }
 

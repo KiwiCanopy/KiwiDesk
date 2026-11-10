@@ -123,7 +123,11 @@ struct JumpPanelView: View {
     @ViewBuilder private var scopeContent: some View {
         ZStack(alignment: .top) {
             if model.scope == .windows {
-                results.transition(.opacity)
+                VStack(spacing: 0) {
+                    JumpStripView(model: model)
+                    results
+                }
+                .transition(.opacity)
             } else if model.scope == .shortcuts, let sheet = model.shortcuts {
                 JumpShortcutsView(
                     sheet: sheet,
@@ -171,7 +175,15 @@ struct JumpPanelView: View {
     }
 
     @ViewBuilder private var results: some View {
-        if model.list.results.isEmpty {
+        if model.list.stripApp?.bundleID != nil {
+            JumpReopenRow(
+                text: model.emptyText,
+                app: model.list.stripApp?.name ?? "",
+                onActivate: { model.reopenStripApp() }
+            )
+            .padding(.vertical, Self.listPadding)
+            .padding(.horizontal, KeyPanelStyle.selectionInset)
+        } else if model.list.results.isEmpty {
             Text(model.emptyText)
                 .font(.body)
                 .foregroundStyle(.secondary)

@@ -5,7 +5,7 @@ import os
 
 /// Diagnostic logging for the panel's show, pick and close.
 /// `privacy: .public`, or macOS redacts every line (#951).
-private let jumpLog = Logger(
+let jumpLog = Logger(
     subsystem: KiwiLog.subsystem,
     category: "gui"
 )
@@ -78,7 +78,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         return showing == asked ? .close : .switchScope
     }
 
-    func show(_ scope: JumpScope = .windows) {
+    /// `lastApp` puts the Windows side's strip on the app of the
+    /// window used last (#3135).
+    func show(_ scope: JumpScope = .windows, lastApp: Bool = false) {
         let screen = PanelHandBack.screenUnderPointer()
         pickerSpace = core.layoutPickerSpace()
         hubDisplay = core.jumpDisplay()
@@ -107,6 +109,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         wire(model, panel)
         let width = Self.width(visibleWidth: area.width)
         if scope != .windows { model.setScope(scope) }
+        if lastApp { model.openOnLastApp() }
         let root = JumpPanelView(
             model: model,
             presence: presence,
@@ -260,6 +263,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         ]
         panel.delegate = self
         panel.keys = { [core] in core.appWide.kiwiHubKeys }
+        // Back follows the opener's live chord, never a fixed one.
+        panel.back = { [core] in Self.backKey(core) }
         panel.onCancel = { [weak self] in
             self?.close()
         }
@@ -324,6 +329,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
         panel.naming = { [weak model] in model?.isNaming ?? false }
+        wireStrip(model)
         wireView(model)
         wireDesktops(model)
         wireShortcuts(model)

@@ -1238,6 +1238,13 @@ editing here:
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
   call, which no unit test reaches, is
   `ZOrderSequenceWiringTests`' needle).
+- **An app's recency is stamped only by `noteAppActivation`, on
+  the shared `focusTick`, and ended only by the app's exit through
+  `forgetRecency` (#3135).** KiwiHub's app strip reads it through
+  `appRecencyRank` and `jumpApps` alone; never add a second
+  app-recency store, and never let the strip's order and
+  `focus_app_window`'s cycle share one (`docs/design-decisions.md`
+  ▸ KiwiHub's app strip; `JumpAppStripTests`).
 - **A focused float schedules no float-tier raise of its own, so a
   raise owed ahead of it and any mode's restore ending under it pay
   through `raiseFloatsForFocusedFloat` (#2985,

@@ -83,6 +83,13 @@ final class UpdateSession: ObservableObject {
     private var acknowledgement: (() -> Void)?
     private var retryTermination: (() -> Void)?
 
+    /// Install begins with a download: Sparkle holds nothing of
+    /// the update yet.
+    var downloadsOnInstall: Bool {
+        if case .downloading = installsFrom { return true }
+        return false
+    }
+
     /// Starts the check a Try Again needs; set by the driver.
     var startCheck: () -> Void = {}
     /// Hides the window without ending the session.

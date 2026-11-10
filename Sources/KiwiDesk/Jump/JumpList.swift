@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// The panel's list state over one opening's snapshot (#1875):
@@ -10,6 +11,12 @@ struct JumpList {
     private(set) var results: [JumpSearch.Match]
     /// Index into `results`; nil only while there are none.
     private(set) var selection: Int?
+    /// The app strip's tile (#3135): 0 is All, `n` the snapshot's
+    /// app `n − 1`, whose rows alone the list then shows.
+    private(set) var tile = 0
+    /// The apps holding a match for `query`; every app while it is
+    /// empty. A tile outside it dims and takes no pick.
+    private(set) var matchedApps: Set<pid_t>
 
     /// Results that take a ⌘ number.
     static let numbered = 9
@@ -17,16 +24,23 @@ struct JumpList {
     init(snapshot: JumpSnapshot) {
         self.snapshot = snapshot
         results = JumpSearch.matches(snapshot.entries, query: "")
+        matchedApps = Set(snapshot.apps.map(\.pid))
         selection = results.isEmpty ? nil : 0
     }
 
-    /// Re-ranks for `text`; row 1 is preselected either way — with
+    /// Re-ranks for `text` over every app — typing returns the
+    /// strip to All (#3135); row 1 is preselected either way — with
     /// the focused window left out, an empty query's row 1 is the
     /// previous window, so opening and pressing Return goes back.
     mutating func setQuery(_ text: String) {
         guard text != query else { return }
         query = text
-        results = JumpSearch.matches(snapshot.entries, query: text)
+        tile = 0
+        let all = JumpSearch.matches(snapshot.entries, query: text)
+        matchedApps =
+            text.isEmpty
+            ? Set(snapshot.apps.map(\.pid)) : Set(all.map(\.entry.pid))
+        results = all
         selection = results.isEmpty ? nil : 0
     }
 
@@ -131,4 +145,78 @@ struct JumpList {
 
     enum Section { case minimized, hidden, pocket, otherApps }
 
+}
+
+/// The Windows side's app strip (#3135): All, then the snapshot's
+/// apps most recently used first. A tile narrows the list to its
+/// app's rows, in the list's own order, so its first row is the
+/// app's most recent window; a query keeps covering every app.
+extension JumpList {
+    /// The app the strip is on; nil on All.
+    var stripApp: JumpApp? {
+        tile == 0 ? nil : snapshot.apps[tile - 1]
+    }
+
+    /// How many tiles the strip draws, All included.
+    var tileCount: Int { snapshot.apps.count + 1 }
+
+    /// Whether tile `index` holds a match for the query; All always.
+    func tileMatches(_ index: Int) -> Bool {
+        guard index > 0, snapshot.apps.indices.contains(index - 1) else {
+            return index == 0
+        }
+        return matchedApps.contains(snapshot.apps[index - 1].pid)
+    }
+
+    /// How many windows the app's rows list; a hidden app's row is
+    /// no window.
+    func windowCount(of app: JumpApp) -> Int {
+        snapshot.entries.filter {
+            $0.pid == app.pid && !$0.isHiddenApp
+        }.count
+    }
+
+    /// Moves the strip by `delta` tiles, over the tiles with a
+    /// match, wrapping on a fresh press only (#2897).
+    mutating func stepTile(_ delta: Int, wrap: Bool) {
+        let walkable = (0..<tileCount).filter(tileMatches)
+        guard let at = walkable.firstIndex(of: tile) else { return }
+        let next = Self.stepped(
+            at,
+            by: delta,
+            count: walkable.count,
+            wrap: wrap
+        )
+        pickTile(walkable[next])
+    }
+
+    /// Puts the strip on tile `index` where it holds a match; the
+    /// list narrows to that app's matches, row 1 selected.
+    mutating func pickTile(_ index: Int) {
+        guard index != tile, tileMatches(index) else { return }
+        tile = index
+        let all = JumpSearch.matches(snapshot.entries, query: query)
+        results =
+            stripApp.map { app in
+                all.filter { $0.entry.pid == app.pid }
+            } ?? all
+        selection = results.isEmpty ? nil : 0
+    }
+
+    /// Puts the strip on the app of the window used last — Core's
+    /// `lastUsed`, else row 1 — and selects that window: the opener
+    /// for the last app (#3135), so ↩ goes back.
+    mutating func pickLastApp() {
+        guard
+            let target = snapshot.lastUsed ?? results.first?.entry.target,
+            let entry = snapshot.entries.first(where: { $0.target == target }),
+            let index = snapshot.apps.firstIndex(where: {
+                $0.pid == entry.pid
+            })
+        else { return }
+        pickTile(index + 1)
+        if let row = results.firstIndex(where: { $0.entry.target == target }) {
+            selection = row
+        }
+    }
 }
