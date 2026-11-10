@@ -56,8 +56,9 @@ struct DesktopsGeometry: Equatable {
         let fitted = CGFloat(min(max(screens.count, 1), 2))
         let budget = (cap - Self.chrome(rows: fitted)) / fitted
         let fit = most > 0 ? (budget / CGFloat(most)).rounded(.down) : 0
-        line = min(max(fit, Self.shortestLine), Self.tallestLine)
+        let line = min(max(fit, Self.shortestLine), Self.tallestLine)
         let share = max(budget, line)
+        self.line = line
         lines = screens.map { screen in
             let deepest = screen.desktops.map(\.spaces.count).max() ?? 0
             return min(CGFloat(deepest) * line, share)
