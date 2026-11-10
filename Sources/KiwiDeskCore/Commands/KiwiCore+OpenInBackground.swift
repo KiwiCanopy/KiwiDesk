@@ -11,6 +11,11 @@ extension KiwiCore {
         else {
             return .fail("expected app bundle id")
         }
+        // Tracked state first: a slow or failed AX list reads empty.
+        if hasTrackedWindow(app: bundleID) {
+            onLog("open_in_background: \(bundleID) has a window")
+            return .ok()
+        }
         if let pid = openOrFocus.runningAppPID(bundleID),
             !isWindowless(
                 bundleID,

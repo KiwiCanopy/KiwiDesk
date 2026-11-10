@@ -6,14 +6,15 @@ import Foundation
 /// Two doors share each app's one claim, since either can come
 /// first: the app's activation, which fires before its first window
 /// is adopted (#1599 measured the heal 0.6–6.3 s late), and the
-/// focus report of a window already tracked. A second take is the
-/// app's: its windows leave the #1161 ledger, so no placement
-/// bounce re-asserts against it.
+/// focus report of a window already tracked. The activation's own
+/// report, read after it, is handed back with it (`echoGrace`). A
+/// second take is the app's: its windows leave the #1161 ledger,
+/// so no placement bounce re-asserts against it.
 extension KiwiCore {
     /// The `handleWindowFocused` door: a report moving the focus off
-    /// another app's window onto a held app's. A click on the window
-    /// is the user's choice and spends the hold unpaid. True where
-    /// it handed back.
+    /// another app's window onto a held app's, or the echo of an
+    /// activation handed back. A click on the window is the user's
+    /// choice and spends the hold unpaid. True where it handed back.
     func handBackBackgroundFocus(
         _ id: WindowID,
         before: WindowID?,
@@ -22,7 +23,8 @@ extension KiwiCore {
         guard let app = state.windows[id]?.appRef.listKey,
             let before, before != id,
             let left = state.windows[before]?.appRef.listKey, left != app,
-            launchFollow.holds.claim(app, at: now)
+            launchFollow.holds.echoes(app, at: now)
+                || launchFollow.holds.claim(app, at: now)
         else { return false }
         guard !recentClickReached(id, now: now),
             handBack(to: before, from: app, leaving: id)
@@ -61,6 +63,8 @@ extension KiwiCore {
             onLog("open_in_background: \(app) keeps the focus")
             return
         }
+        // The activation's own focus read is asked after this.
+        launchFollow.holds.markHandedBack(app, at: now)
     }
 
     /// Focuses `target` again off `app`, and drops the app's windows

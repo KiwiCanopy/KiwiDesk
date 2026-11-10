@@ -613,7 +613,9 @@ editing here:
   app at whichever door comes first, the app's activation
   (`noteAppActivation`, since its first window is adopted late) or
   the focus report of its tracked window, which sits ahead of the
-  #1161 re-assert. The hand-back is `focusWindow`, the command
+  #1161 re-assert. The activation's own report, asked after the
+  door ran, is handed back with it inside `echoGrace`, never by a
+  second claim. The hand-back is `focusWindow`, the command
   path (#1281), and drops the app's windows from the #1161 ledger
   so a second take is honored; a new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register

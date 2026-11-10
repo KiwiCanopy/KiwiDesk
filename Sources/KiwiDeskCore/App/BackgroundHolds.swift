@@ -13,7 +13,15 @@ struct BackgroundHolds {
     /// app inside it handed back once, short.
     static let grace: TimeInterval = 10
 
+    /// How long after an activation's hand-back the app's own
+    /// focus reports are that activation's: its focused-window read
+    /// is asked after the hand-back and took 1.09 s off main for
+    /// VS Code on the owner's Mac (2026-11-09 log).
+    static let echoGrace: TimeInterval = 2
+
     private(set) var opened: [String: Date] = [:]
+    /// When each app's activation was handed back; never renewed.
+    private(set) var handedBack: [String: Date] = [:]
 
     /// Owes `app` a hand-back from `now`, replacing its own stamp.
     mutating func note(_ app: String, at now: Date) {
@@ -28,8 +36,21 @@ struct BackgroundHolds {
         return now.timeIntervalSince(at) < Self.grace
     }
 
-    /// Drops `app`'s hand-back unpaid.
+    /// Notes that `app`'s activation was handed back at `now`.
+    mutating func markHandedBack(_ app: String, at now: Date) {
+        handedBack[app] = now
+    }
+
+    /// Whether a report of `app` at `now` still belongs to the
+    /// activation handed back, within `echoGrace`.
+    func echoes(_ app: String, at now: Date) -> Bool {
+        handedBack[app].map { now.timeIntervalSince($0) < Self.echoGrace }
+            ?? false
+    }
+
+    /// Drops `app`'s hand-back unpaid, and its echo.
     mutating func lift(_ app: String) {
         opened[app] = nil
+        handedBack[app] = nil
     }
 }

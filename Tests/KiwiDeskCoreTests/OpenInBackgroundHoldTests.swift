@@ -128,7 +128,9 @@ struct OpenInBackgroundHoldTests {
         let log = Self.capture(core)
         Self.activate(core)
         #expect(log().contains(Self.handedBack))
-        #expect(core.focusedWindowID == WindowID(1))
+        // State focus never left w1; the raise needs an element a
+        // test core lacks, so the echo mark is what is observable.
+        #expect(core.launchFollow.holds.handedBack[F.app] != nil)
         #expect(core.launchFollow.holds.opened.isEmpty)
     }
 
@@ -140,6 +142,7 @@ struct OpenInBackgroundHoldTests {
         core.lastLeftClick = (core.wallClock(), .zero, nil)
         Self.activate(core)
         #expect(!log().contains(Self.handedBack))
+        #expect(core.launchFollow.holds.handedBack.isEmpty)
         #expect(log().contains("open_in_background: \(F.app) keeps the focus"))
     }
 
@@ -151,12 +154,27 @@ struct OpenInBackgroundHoldTests {
         core.lastLeftClick = (core.wallClock(), .zero, WindowID(1))
         Self.activate(core)
         #expect(log().contains(Self.handedBack))
+        #expect(core.launchFollow.holds.handedBack[F.app] != nil)
     }
 
-    @Test("a report after the activation's hand-back is the app's")
-    func doorsShareOneClaim() {
+    /// `appActivated` asks the app's focused window AFTER this
+    /// door ran, so its report is the same take.
+    @Test("the activation's own report is handed back with it")
+    func activationReportHandedBack() {
         let core = F.taken()
         Self.activate(core)
+        core.handle(.windowFocused(WindowID(7)))
+        #expect(core.focusedWindowID == WindowID(1))
+    }
+
+    @Test("a take past the activation's echo is the app's")
+    func laterTakeKept() {
+        let core = F.taken()
+        Self.activate(core)
+        let later = core.wallClock().addingTimeInterval(
+            BackgroundHolds.echoGrace + 0.5
+        )
+        core.wallClock = { later }
         core.handle(.windowFocused(WindowID(7)))
         #expect(core.focusedWindowID == WindowID(7))
     }

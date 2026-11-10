@@ -117,6 +117,15 @@ struct OpenInBackgroundTests {
         #expect(core.launchFollow.holds.opened.isEmpty)
     }
 
+    /// A slow or failed AX list reads empty: tracked state wins.
+    @Test("a tracked window of the app opens nothing")
+    func trackedWindowOpensNothing() {
+        let (core, recorder) = Self.makeCore(running: true)
+        Self.arrive(7, bundleID: Self.app, on: core)
+        #expect(Self.open(core).isSuccess)
+        #expect(recorder.opened.isEmpty)
+    }
+
     @Test("an id LaunchServices cannot resolve is refused")
     func unknownAppRefused() {
         let (core, _) = Self.makeCore(found: false)

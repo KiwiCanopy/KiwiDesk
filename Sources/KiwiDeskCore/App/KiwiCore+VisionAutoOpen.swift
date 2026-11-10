@@ -10,7 +10,7 @@ extension KiwiCore {
     /// never inside a config load.
     func openLensApps(_ lens: VisionLens) {
         guard !vision.configLoading else { return }
-        let open = Set(lens.apps.filter(lensMemberHasWindow))
+        let open = Set(lens.apps.filter(hasTrackedWindow(app:)))
         var queued: Set<String> = []
         var missing: [String] = []
         for app in lens.openApps
@@ -36,11 +36,12 @@ extension KiwiCore {
         )
     }
 
-    /// Whether the member `app` has a window: one KiwiDesk tracks
+    /// Whether `app` (a list key) has a window, a lens member's
+    /// and `open_in_background`'s test: one KiwiDesk tracks
     /// (the pocket's included, in either phase), one minimized, or
     /// one on another Desktop. A tracked-state read, never a census;
     /// a ⌘H-hidden app's windows are in none of the three.
-    func lensMemberHasWindow(_ app: String) -> Bool {
+    func hasTrackedWindow(app: String) -> Bool {
         func key(_ bundleID: String?, _ name: String) -> String {
             AppRef(bundleID: bundleID, name: name).listKey
         }
