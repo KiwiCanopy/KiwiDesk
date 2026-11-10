@@ -483,7 +483,8 @@ that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
 
 :::unreleased
-`open_in_background` takes an app bundle id and opens the app
+`open_in_background` takes an app bundle id, and optionally a
+Space id to put its windows in, and opens the app
 without taking the focus: it launches it, or asks a running app
 with no window for one, and does nothing when the app has a
 window anywhere. When the app brings itself forward anyway,

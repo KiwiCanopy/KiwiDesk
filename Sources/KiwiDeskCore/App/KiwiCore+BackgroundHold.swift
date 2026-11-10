@@ -30,6 +30,7 @@ extension KiwiCore {
             handBack(to: before, from: app, leaving: id)
         else {
             onLog("open_in_background: w\(id.raw) keeps the focus")
+            launchFollow.holds.liftSpace(app)  // #3152
             return false
         }
         return true
@@ -62,6 +63,7 @@ extension KiwiCore {
             handBack(to: focus, from: app, leaving: nil)
         else {
             onLog("open_in_background: \(app) keeps the focus")
+            launchFollow.holds.liftSpace(app)  // #3152
             return
         }
         // The activation's own focus read is asked after this.

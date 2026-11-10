@@ -31,8 +31,8 @@ public struct StateCoordinator: Sendable {
     public var pocketClaimed: PocketArrivalClaim?
     /// A Desktop return's owed focus (#1207), mirrored likewise.
     public var returningFocus: WindowID?
-    /// An arrival a lens opened quietly (#3122): granted no focus.
-    public var arrivesQuietly = false
+    /// How the arrival may take the focus (#3122, #3152), likewise.
+    public var arrivalFocus = ArrivalFocus.foreground
 
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]

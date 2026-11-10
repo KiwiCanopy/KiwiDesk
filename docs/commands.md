@@ -57,7 +57,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`focus_or_spawn`](lua-reference.md#focus_or_spawn) | Focuses an app's window, or launches a new instance. |
 | [`focus_app_window`](lua-reference.md#focus_app_window) | Focuses the focused app's next or previous window, on any Space, screen or Desktop. |
 | [`spawn_new`](lua-reference.md#spawn_new) | Launches a new instance of an app by bundle identifier. |
-| [`open_in_background`](lua-reference.md#open_in_background) | Opens an app without taking focus. |
+| [`open_in_background`](lua-reference.md#open_in_background) | Opens an app without taking focus, in a Space you name or the one you are in. |
 | [`gather`](lua-reference.md#gather) | Moves every window of an app into the Space you are on, from other Desktops too. |
 | [`move_here`](lua-reference.md#move_here) | Moves an app's most recently focused window into the Space you are on, or opens the app. |
 | [`set_mode`](lua-reference.md#set_mode) | Sets a Space's layout mode; omit the Space to set the active one. |

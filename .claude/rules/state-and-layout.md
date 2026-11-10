@@ -281,13 +281,21 @@ editing here:
   from the slot would put every focused command on the window
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
-  argument lives in `docs/design-decisions.md`. **A window a lens
-  opened quietly (#3122) takes neither the grant nor a rule
-  follow**: the arrival arm mirrors `StateCoordinator.arrivesQuietly`
-  in from `LaunchFollowIntent.opensQuietly` ahead of the fold, as
-  `arrivalDisplay` is, and a new fold arm that grants focus or sets
-  `placedByAppRule` reads it too (`KiwiVisionAutoOpenWiringTests` ▸
-  `foldReadsTheMirror`, `KiwiVisionAutoOpenFocusTests`).
+  argument lives in `docs/design-decisions.md`. **How an arrival
+  may take the focus is ONE mirrored value,
+  `StateCoordinator.arrivalFocus` (#3122, #3152)**, written once by
+  `KiwiCore.arrivalFocus(of:)` ahead of the fold, as `arrivalDisplay`
+  is, and consumed on every arrival. A quiet open's window
+  (`.quiet`) takes neither the grant nor a rule follow; a NEW
+  window takes the grant only where its app holds the keys
+  (`.foreground`), read through the #1322 gate
+  (`reportsFromActiveApp`), never a bare `lastActivePid ==`, and
+  KiwiDesk's own windows always do (#1281, #1414). The nil arm
+  stays for every case but `.quiet`, and `.background` keeps its
+  rule follow. A new fold arm that grants focus or sets
+  `placedByAppRule` reads that value, never a flag beside it
+  (`KiwiVisionAutoOpenWiringTests` ▸ `foldReadsTheMirror`,
+  `BackgroundArrivalFocusTests`, `KiwiVisionAutoOpenFocusTests`).
   The fold's TARGET skips the App Rule for a POPUP only —
   `ManagedWindow.isPopup`, an overlay on a raised layer (#1602)
   or with no title-bar button (#2475, a Chromium extension
@@ -620,7 +628,13 @@ editing here:
   (`holds.noteActivation`), unlike the hold, which no activation
   retires. The hand-back is `focusWindow`, the command
   path (#1281), and drops the app's windows from the #1161 ledger
-  so a second take is honored; a new door claims through
+  so a second take is honored. **A Space the open named (#3152)
+  rides the quiet case** (`.quiet(into:)`, from `holds.spaces`):
+  it takes the app rule's place in the fold, below `held` and
+  through the rule's gate, is re-checked against a living Space
+  there, never follows, and ends where the mark ends or where the
+  user takes the app — the doors' unpaid branches lift it
+  (`holds.liftSpace`, `OpenInBackgroundSpaceTests`). A new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register
   (`OpenInBackgroundHoldTests`, `OpenInBackgroundSeamTests`).
   **Every reader of "was this arrival created" goes through ONE

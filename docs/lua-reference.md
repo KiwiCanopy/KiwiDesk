@@ -6981,17 +6981,27 @@ the per-row menu of an Open applications shortcut: *Open or Focus*
 :::unreleased
 ### open_in_background
 
-**Expects:** an app bundle identifier (e.g. `com.apple.Notes`).
-See [Finding a bundle identifier](#finding-a-bundle-identifier).
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`)
+and, optionally, a Space id. See
+[Finding a bundle identifier](#finding-a-bundle-identifier).
 
 **Does:** opens an app without taking the focus from the window
 you are in, the way `open -g` does. If the app is not running, it
 is launched; if it is running with no window, it is asked for
 one, as a Dock click would; if it has a window anywhere, up,
 minimized or on another Desktop, nothing happens. Its new window
-still tiles into the Space you are in, or into its
+tiles into the Space you are in, or into its
 [app rule](#app_rules)'s Space without taking you there, and the
 layout makes room for it.
+
+With a Space named, the app's windows go into that Space instead,
+ahead of its app rule, and KiwiDesk switches nothing: you stay
+where you are and find them there. A Space that does not exist is
+refused, and so is the call when the app already has a window,
+since nothing would move. Only a KiwiDesk Space can be named, not
+a macOS Desktop. A click on the app, or
+[`focus_or_spawn`](#focus_or_spawn) naming it, ends this, so a
+window you open of it yourself lands where you are.
 
 Some apps, Electron ones among them, bring themselves forward on
 launch anyway. KiwiDesk hands the focus back to the window it was
@@ -7006,6 +7016,8 @@ keyboard (⌘Tab) within those 10 seconds is handed back once too.
 KiwiDesk.bind("ctrl+alt+m", function()
     KiwiDesk.open_in_background("com.apple.Music")
 end)
+-- Mail opens in Space 3, out of the way.
+KiwiDesk.open_in_background("com.apple.mail", "3")
 ```
 :::
 
