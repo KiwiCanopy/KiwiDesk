@@ -83,9 +83,7 @@ extension KiwiCore {
             // the way a Dock click does (#1840). An away entry an
             // unreadable census could not confirm keeps the
             // activate; one the census no longer lists does not.
-            if census.visible == 0, census.minimized.isEmpty,
-                !(reach?.listsAny
-                    ?? !awayWindows(bundleID: bundleID).isEmpty),
+            if isWindowless(bundleID, census: census, reach: reach),
                 openOrFocus.openApp(bundleID, .reopen)
             {
                 return .ok()
@@ -116,5 +114,23 @@ extension KiwiCore {
     /// LaunchServices cannot resolve the id.
     func launchInBackground(_ bundleID: String) -> Bool {
         openOrFocus.openApp(bundleID.lowercased(), .background)
+    }
+
+    /// Whether a running app has no window to show: none up or
+    /// minimized in its own list, and none on record on an away
+    /// Desktop that `reach` (read only past the census) does not
+    /// rule out. The one test Open or Focus's reopen (#1840) and
+    /// `open_in_background` take.
+    func isWindowless(
+        _ bundleID: String,
+        census: AppWindowCensus,
+        reach: @autoclosure () -> AwayReach?
+    ) -> Bool {
+        guard census.visible == 0, census.minimized.isEmpty else {
+            return false
+        }
+        let away =
+            reach()?.listsAny ?? !awayWindows(bundleID: bundleID).isEmpty
+        return !away
     }
 }

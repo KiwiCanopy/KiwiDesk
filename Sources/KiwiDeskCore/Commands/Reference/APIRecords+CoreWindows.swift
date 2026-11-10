@@ -236,6 +236,10 @@ extension APIReference {
             "Focuses an app's window, or launches a new instance.",
             .text("bundle_id")
         ),
+        "open_in_background": APIRecord(
+            "Opens an app without taking focus.",
+            .text("bundle_id")
+        ),
         "focus_app_window": APIRecord(
             "Focuses the focused app's next or previous window, on "
                 + "any Space, screen or Desktop.",

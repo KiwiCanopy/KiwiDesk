@@ -606,6 +606,23 @@ editing here:
   stands, `record` and `forget(keeping:)` retire it with the debt,
   and a new owe or retire of it joins `LaunchFollowSeamTests`'
   register (`KiwiVisionAutoOpenFocusTests` holds each cancel).
+  **`open_in_background`'s hold (#3141) is the ledger's
+  `holds` slot**, per app and stamped per app, never the lens's
+  `quietOpen`: owed at the verb beside the quiet mark, lifted by
+  `record`, never retired by an activation. It is claimed ONCE per
+  app at whichever door comes first, the app's activation
+  (`noteAppActivation`, since its first window is adopted late) or
+  the focus report of its tracked window, which sits ahead of the
+  #1161 re-assert. The activation's own report, asked after the
+  door ran, is handed back with it inside `echoGrace`, never by a
+  second claim: the echo is marked by the activation door's
+  hand-back alone and ended by that app's next activation
+  (`holds.noteActivation`), unlike the hold, which no activation
+  retires. The hand-back is `focusWindow`, the command
+  path (#1281), and drops the app's windows from the #1161 ledger
+  so a second take is honored; a new door claims through
+  `holds.claim(` and joins `LaunchFollowSeamTests`' register
+  (`OpenInBackgroundHoldTests`, `OpenInBackgroundSeamTests`).
   **Every reader of "was this arrival created" goes through ONE
   door with ONE late-create resolution (#2630)** — the follow,
   the `window_created` reason, and any pocket claim (#2629, #2612)

@@ -6978,6 +6978,38 @@ Both launch verbs are also reachable from the Settings app, from
 the per-row menu of an Open applications shortcut: *Open or Focus*
 (`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
 
+:::unreleased
+### open_in_background
+
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`).
+See [Finding a bundle identifier](#finding-a-bundle-identifier).
+
+**Does:** opens an app without taking the focus from the window
+you are in, the way `open -g` does. If the app is not running, it
+is launched; if it is running with no window, it is asked for
+one, as a Dock click would; if it has a window anywhere, up,
+minimized or on another Desktop, nothing happens. Its new window
+still tiles into the Space you are in, or into its
+[app rule](#app_rules)'s Space without taking you there, and the
+layout makes room for it.
+
+Some apps, Electron ones among them, bring themselves forward on
+launch anyway. KiwiDesk hands the focus back to the window it was
+taken from, once per app, within 10 seconds of the call. If the
+app takes the focus a second time, it keeps it. A click on the app
+or its Dock icon keeps the focus there; a switch to the app by
+keyboard (⌘Tab) within those 10 seconds is handed back once too.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+m", function()
+    KiwiDesk.open_in_background("com.apple.Music")
+end)
+```
+:::
+
+
 ### gather
 
 **Expects:** an app bundle identifier (e.g. `com.apple.Notes`).

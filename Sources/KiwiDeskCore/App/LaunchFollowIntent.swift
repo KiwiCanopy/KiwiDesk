@@ -198,6 +198,7 @@ final class LaunchFollowIntent {
     func record(_ bundleID: String, at now: Date) {
         // The user named an app: no quiet open stands over it.
         quietApps[bundleID.lowercased()] = nil
+        holds.lift(bundleID.lowercased())
         if quietOpen?.bundleIDs.contains(bundleID.lowercased()) == true {
             quietOpen = nil
         }
@@ -259,6 +260,10 @@ final class LaunchFollowIntent {
     func recordQuiet(_ open: QuietOpen) {
         quietOpen = open
     }
+
+    /// `open_in_background`'s holds (#3141): one hand-back per app,
+    /// never retired by an activation.
+    var holds = BackgroundHolds()
 
     /// The apps a lens opened in the background and when: within
     /// `quietBound` the create fold grants their arrivals no focus
