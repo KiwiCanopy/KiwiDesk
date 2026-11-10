@@ -2859,10 +2859,15 @@ editing here:
   the same placement (`FloatMovePlacementTests`,
   `PendingSpaceSeamTests` ▸ `filingReanchors`). A member's frame
   is the one it WOULD show, `wouldBeFrame`'s four rungs, stated
-  there once. And `clampFloatsClearOfBars` judges a pending
-  capture rather than the state frame the window is leaving,
-  correcting the capture WITH the window, or a fit of the stale
-  frame lands after the restore's delivery and undoes it. A
+  there once. And `clampFloatsClearOfBars` judges the frame the
+  window WOULD show, through `wouldBeFrame`, never the state
+  frame it is leaving: a pending capture, corrected WITH the
+  window, or a frame sent and not yet echoed (#3157), since a
+  fit of the stale frame lands after the delivery and undoes it
+  — a maximized float's return was fitted to the region that
+  way. Its refusal memo reads what the app reported, and an
+  unechoed ask judged fitted clears no memo
+  (`FloatFitMemoGraceTests`). A
   NEW writer of the seed states what it seeds, why it is no
   corner and where in the pass it lands, and joins
   `StashSeederCensusTests`' map, which reds an unclassified
@@ -2870,7 +2875,8 @@ editing here:
   decision), `FloatGatherEntryTests` (the ledger, the seed, the
   order, the unshown arm), `FloatGatherRegionTests` (the two
   regions and the strip), `FloatGatherRepartitionTests` (the
-  re-file arm) and `FloatClampPendingCaptureTests`.
+  re-file arm), `FloatClampPendingCaptureTests` and
+  `MaximizeFloatBarReturnTests`.
 - **A new stored property of `Space`, of `ManagedWindow`, of
   the session value types inside them, or a new WindowID- or
   SpaceID-keyed store on `StateCoordinator`, `TilingEngine` or
