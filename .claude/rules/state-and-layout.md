@@ -2543,8 +2543,8 @@ editing here:
   maximize that follows focus (`maximizeFollowsFocus(on:)`, the
   predicate `focusRetiles` reads too) never stands it down, while
   a hand Maximize that ends on focus still does (#3177,
-  `HoverFocusVisionFillTests`); a new maximize kind that follows
-  focus joins both. A float fill
+  `HoverFocusVisionFillTests`, which also holds the copy to the
+  predicate); a new maximize kind that follows focus joins both. A float fill
   (#3036) widens both float stand-downs together —
   `maximizedTiled` and `visionFilledWindow` — and
   `retileEndingMaximize`'s spring promise with them. **What it fills is read through

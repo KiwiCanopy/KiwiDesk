@@ -119,6 +119,16 @@ struct HoverFocusVisionFillTests {
         return (neighbour, try #require(shown(core, neighbour)))
     }
 
+    /// Whether the copy the stand-down judges still holds a
+    /// maximize that follows focus: the copy and the predicate are
+    /// one list (#3177).
+    private func copyStillFollows(_ core: KiwiCore) throws -> Bool {
+        let space = try #require(core.activeSpace)
+        let copy = core.state.droppingFocusFollowers(on: space.id)
+        let held = try #require(copy.workspaces[space.id])
+        return copy.maximizeFollowsFocus(on: held)
+    }
+
     private func rest(_ core: KiwiCore, at point: CGPoint) {
         core.focusUnderRestingPointer(
             at: GeometryUtils.axPoint(point),
@@ -133,6 +143,7 @@ struct HoverFocusVisionFillTests {
     func restMovesTheFill(fill: String) throws {
         let core = makeCore(fill: fill)
         #expect(core.state.visionFill.drawn == [ids[0]])
+        #expect(try !copyStillFollows(core))
         let (neighbour, point) = try neighbourInView(core)
         #expect(core.hoverTarget(at: point)?.id == neighbour)
         rest(core, at: point)
@@ -148,6 +159,7 @@ struct HoverFocusVisionFillTests {
         let core = makeCore(fill: "height", hand: follows)
         let space = try #require(core.activeSpace)
         #expect(core.state.maximizedWindow(of: space) == ids[0])
+        #expect(try !copyStillFollows(core))
         let (neighbour, point) = try neighbourInView(core)
         let target = core.hoverTarget(at: point)?.id
         #expect((target == neighbour) == follows)
