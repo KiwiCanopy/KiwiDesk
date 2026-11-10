@@ -85,6 +85,9 @@ final class JumpModel: ObservableObject {
     /// Each side's own chord, read from the live bindings when the
     /// panel opens; a side with none bound is absent (#2245).
     @Published var chords: [JumpScope: String] = [:]
+    /// The last-app opener's chord from the live bindings, which
+    /// the Windows footer names; nil where it is unbound (#3159).
+    @Published var lastAppChord: String?
     /// The live settings the panel draws: its glass, its paint and
     /// the layout tiles, kept current while it is open (#2604).
     @Published var settings = TilingSettings()
@@ -114,10 +117,11 @@ final class JumpModel: ObservableObject {
     /// modifier that named the pick is let go.
     @Published var revealedRow: Int?
     var onClose: () -> Void = {}
-    /// Reopens an app the strip lists with no window.
-    var onReopen: (JumpApp) -> Void = { _ in }
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
+    /// The app strip appeared or left: the panel's height slides
+    /// to it, at once under Reduce Motion (#3168).
+    var onStripToggle: () -> Void = {}
     /// The panel's height glides to the new scope.
     var onScopeChange: () -> Void = {}
     /// Reads the View side's lines now.
@@ -194,8 +198,9 @@ final class JumpModel: ObservableObject {
                 setDesktopsQuery(newValue)
                 return
             }
+            let stripWas = list.stripShown
             list.setQuery(newValue)
-            onResultsChange()
+            listChanged(stripWas: stripWas)
             onAnnounce(resultsSpoken)
         }
     }
@@ -233,8 +238,6 @@ final class JumpModel: ObservableObject {
         case .pick(let moveHere):
             if let index = list.selection {
                 pick(index, moveHere ? .moveHere : .jump)
-            } else if !moveHere {
-                reopenStripApp()
             }
         case .swapHere:
             if let index = list.selection { pick(index, .swapHere) }
@@ -292,26 +295,30 @@ final class JumpModel: ObservableObject {
         list.select(index)
         self.pick(index, pick)
     }
-    /// ⇧, ⌥ and ⌘ as held now, for the footer's one lit hint.
-    var heldModifiers: NSEvent.ModifierFlags {
-        var flags: NSEvent.ModifierFlags = []
-        if shiftHeld { flags.insert(.shift) }
-        if optionHeld { flags.insert(.option) }
-        if commandHeld { flags.insert(.command) }
-        return flags
+    /// Modifiers still held from the chord that opened or stepped
+    /// the panel: none counts for a pick, a click or the lit hint
+    /// until it is let go (#3168).
+    private(set) var staleModifiers: NSEvent.ModifierFlags = []
+
+    /// The opener or a step fired with `flags` held.
+    func latchOpener(_ flags: NSEvent.ModifierFlags) {
+        staleModifiers = flags.intersection(
+            [.shift, .option, .command, .control]
+        )
+        noteModifiers(flags)
     }
 
-    /// Whether the side shown has a selection a pick acts on.
-    var hasSelection: Bool {
-        switch scope {
-        case .windows: return list.selected != nil
-        case .shortcuts: return false
-        case .view: return view?.selected?.isApplicable == true
-        case .desktops: return desktops?.place != nil
-        }
+    /// `flags` as a pick reads them: the stale ones left out.
+    func pickModifiers(_ flags: NSEvent.ModifierFlags)
+        -> NSEvent.ModifierFlags
+    {
+        flags.subtracting(staleModifiers)
     }
 
-    func noteModifiers(_ flags: NSEvent.ModifierFlags) {
+    func noteModifiers(_ held: NSEvent.ModifierFlags) {
+        // A modifier let go is fresh from then on.
+        staleModifiers.formIntersection(held)
+        let flags = pickModifiers(held)
         let command = flags.contains(.command)
         let shift = flags.contains(.shift)
         let option = flags.contains(.option)
@@ -325,8 +332,9 @@ final class JumpModel: ObservableObject {
     /// rows under a still pointer, as a key does.
     func moveStrip(_ move: (inout JumpList) -> Void) {
         restPointer()
+        let stripWas = list.stripShown
         move(&list)
-        onResultsChange()
+        listChanged(stripWas: stripWas)
     }
 
     private func move(by delta: Int, wrap: Bool = false) {

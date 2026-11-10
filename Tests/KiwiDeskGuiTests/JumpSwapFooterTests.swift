@@ -83,7 +83,8 @@ struct JumpSwapFooterTests {
                 optionHeld: option,
                 wayHere: here,
                 waySwap: here,
-                onActivate: { _ in }
+                onActivate: { _ in },
+                pickModifiers: { [] }
             )
         }
         let swap = row(owns: true, shift: true, option: true)

@@ -228,6 +228,28 @@ enum JumpKey: Equatable {
         )
     }
 
+    /// Whether the press is `chord`, modifiers exactly.
+    static func presses(
+        _ chord: KeyCombo,
+        keyCode: UInt16,
+        modifiers: NSEvent.ModifierFlags
+    ) -> Bool {
+        let held = modifiers.intersection(
+            [.shift, .command, .option, .control]
+        )
+        return combo(keyCode, held) == chord
+    }
+
+    /// Whether the key picks a row — ↩, a ⌘ digit or a dead ↩
+    /// chord — so it reads only the modifiers pressed since the
+    /// opener (#3168).
+    var picks: Bool {
+        switch self {
+        case .pick, .swapHere, .quick, .quickSwap, .dead: true
+        default: false
+        }
+    }
+
     /// The press as `KiwiHubKeys` spells it.
     private static func combo(
         _ keyCode: UInt16,

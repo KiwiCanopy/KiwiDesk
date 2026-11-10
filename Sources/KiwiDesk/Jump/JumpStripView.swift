@@ -2,8 +2,9 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The Windows side's app strip (#3135): All, then the recent apps,
-/// above the list. It scrolls sideways with fades and follows the
+/// The Windows side's app strip (#3135): All, the app you are in,
+/// then the recent apps, under the field, shown off All or under a
+/// query (#3168). It scrolls sideways with fades and follows the
 /// selection on KiwiHub's `ViewLine` (#2901); a tile the query
 /// leaves without a match dims in place, so the strip never
 /// reflows.
@@ -74,18 +75,18 @@ struct JumpStripTile: View {
     let onHoverEnd: () -> Void
     @Environment(\.kiwiHubPaint) private var paint
 
-    static let width: CGFloat = 76
-    static let iconSize: CGFloat = 32
+    static let width: CGFloat = 92
+    static let iconSize: CGFloat = 48
     static let caret: CGFloat = 2
 
     var body: some View {
         Button(action: onActivate) {
-            // A selected or lifted tile sits on the hover ground and
-            // takes its measured ink; the accent stays a fill.
+            // Only the pointer's lift sits on the hover ground and
+            // takes its measured ink; the selection is the caret.
             content.kiwiHubRowInk(
                 paint,
                 selected: false,
-                lifted: isSelected || isLifted
+                lifted: isLifted
             )
         }
         .buttonStyle(.plain)
@@ -131,11 +132,11 @@ struct JumpStripTile: View {
                 .accessibilityHidden(true)
         } else {
             Image(systemName: "square.grid.2x2")
-                .font(.system(size: 17, weight: .medium))
+                .font(.system(size: 26, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: Self.iconSize, height: Self.iconSize)
                 .background(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .fill(paint.fill(paint.rowHover))
                 )
                 .accessibilityHidden(true)
@@ -150,13 +151,13 @@ struct JumpStripTile: View {
                 .padding(.horizontal, 5)
                 .padding(.vertical, 1)
                 .background(Capsule().fill(paint.fill(paint.rowHover)))
-                .offset(x: 8, y: -4)
+                .offset(x: 10, y: -4)
                 .accessibilityHidden(true)
         }
     }
 
     @ViewBuilder private var ground: some View {
-        if isSelected || isLifted {
+        if isLifted {
             RoundedRectangle(
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
@@ -166,35 +167,45 @@ struct JumpStripTile: View {
     }
 }
 
-/// The list's one row for an app the strip lists with no window
-/// (#3135): "No windows", dimmed, on the selection's hover ground,
-/// and its pick — ↩, a click or VoiceOver — reopens the app.
-struct JumpReopenRow: View {
-    let text: String
-    let app: String
-    let onActivate: () -> Void
-    @Environment(\.kiwiHubPaint) private var paint
+/// The current window's row (#3168): the window ⌥↩ swaps with
+/// (#2885), at the top of All and of its app's tile, drawn as a
+/// list row in grey — no plate, no hover — and named on the right.
+/// Not one of the results: the arrows, the digits and search never
+/// reach it, and VoiceOver reads it as text, unannounced.
+struct JumpYoursLine: View {
+    let entry: JumpEntry
+    let icon: NSImage?
 
     var body: some View {
-        Button(action: onActivate) {
-            Text(text)
+        HStack(spacing: JumpRowView.spacing) {
+            mark
+            Text(JumpStripText.yoursTitle(entry))
                 .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .frame(height: JumpRowView.height)
-                .background(
-                    RoundedRectangle(
-                        cornerRadius: KeyPanelStyle.selectionRadius,
-                        style: .continuous
-                    )
-                    .fill(paint.fill(paint.rowHover))
-                )
-                .contentShape(Rectangle())
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Spacer(minLength: 12)
+            Text(JumpStripText.yoursTag(entry))
+                .font(.callout)
+                .lineLimit(1)
+                .layoutPriority(1)
         }
-        .buttonStyle(.plain)
-        .focusable(false)
-        .accessibilityLabel(JumpStripText.moved(tile: app, row: text))
-        .accessibilityHint(JumpStripText.reopenHint)
-        .accessibilityAddTraits(.isSelected)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, JumpRowView.padding)
+        .frame(height: JumpRowView.height)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(JumpStripText.yoursSpoken(entry))
+        .accessibilityAddTraits(.isStaticText)
+    }
+
+    @ViewBuilder private var mark: some View {
+        let size = JumpRowView.iconSize
+        if let icon {
+            Image(nsImage: icon)
+                .resizable()
+                .frame(width: size, height: size)
+                .opacity(0.45)
+        } else {
+            Color.clear.frame(width: size, height: size)
+        }
     }
 }

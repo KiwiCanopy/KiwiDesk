@@ -5,7 +5,8 @@ import AppKit
 /// the minimized ones, each tier most recently used first — then
 /// one row per hidden app. The focused window is left out:
 /// neither a jump nor Move here does anything for the window the
-/// user is in (owner, 2026-10-12). Read once
+/// user is in (owner, 2026-10-12); the snapshot's `yours` names it
+/// instead (#3168, `docs/design-decisions.md`). Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
     /// `display` is the screen the panel opened on: "here" is the
@@ -15,14 +16,30 @@ extension KiwiCore {
         let here = moveHereSpace(on: display)
         let hub = display ?? here.flatMap { state.workspaces.display(of: $0) }
         let entries = jumpEntries(here: here, hub: hub)
+        let yours = jumpYours(here: here, hub: hub)
         return JumpSnapshot(
             entries: entries,
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon),
             swapsInHere: jumpHereFocus(in: here) != nil,
-            apps: jumpApps(for: entries),
-            lastUsed: jumpLastUsed(in: entries)
+            // Your app takes its tile by recency, as ⌘⇥ lists the
+            // app in front first (#3168).
+            apps: jumpApps(for: entries + [yours].compactMap { $0 }),
+            lastUsed: jumpLastUsed(in: entries),
+            yours: yours
         )
+    }
+
+    /// The window a Swap here from `here`'s screen trades with, as
+    /// a row would draw it.
+    private func jumpYours(
+        here: SpaceID?,
+        hub: DisplayID?
+    ) -> JumpEntry? {
+        guard let id = jumpSwapPartner(in: here),
+            let window = state.windows[id]
+        else { return nil }
+        return trackedJumpEntry(window, here: here, hub: hub, partner: id)
     }
 
     func jumpEntries(
@@ -100,32 +117,38 @@ extension KiwiCore {
         state.windows.all
             .filter { !$0.isTransientOverlay }
             .sorted { $0.id.raw < $1.id.raw }
-            .map { window in
-                let space = state.workspaces.space(of: window.id)
-                let status: JumpEntry.Status =
-                    state.isPocketed(window.id)
-                    ? .pocketed
-                    : window.isFullscreen ? .fullscreen : .shown
-                let shownOn = state.renderSpace(of: window)
-                    .flatMap { state.workspaces.display(of: $0) }
-                return JumpEntry(
-                    target: .window(window.id),
-                    pid: window.pid,
-                    app: window.appName,
-                    title: window.title,
-                    space: space,
-                    spaceIcon: space.flatMap(jumpSpaceIcon),
-                    status: status,
-                    movesHere: jumpMovesHere(window, from: space, into: here),
-                    swapBlock: jumpSwapBlock(window.id, partner: partner),
-                    moveBlock: here.flatMap {
-                        jumpMoveBlock(window, into: $0)
-                    },
-                    isOtherApp: jumpIsOtherApp(window.appRef),
-                    screen: status == .shown
-                        ? jumpScreen(shownOn, hub: hub) : nil
-                )
+            .map {
+                trackedJumpEntry($0, here: here, hub: hub, partner: partner)
             }
+    }
+
+    private func trackedJumpEntry(
+        _ window: ManagedWindow,
+        here: SpaceID?,
+        hub: DisplayID?,
+        partner: WindowID?
+    ) -> JumpEntry {
+        let space = state.workspaces.space(of: window.id)
+        let status: JumpEntry.Status =
+            state.isPocketed(window.id)
+            ? .pocketed
+            : window.isFullscreen ? .fullscreen : .shown
+        let shownOn = state.renderSpace(of: window)
+            .flatMap { state.workspaces.display(of: $0) }
+        return JumpEntry(
+            target: .window(window.id),
+            pid: window.pid,
+            app: window.appName,
+            title: window.title,
+            space: space,
+            spaceIcon: space.flatMap(jumpSpaceIcon),
+            status: status,
+            movesHere: jumpMovesHere(window, from: space, into: here),
+            swapBlock: jumpSwapBlock(window.id, partner: partner),
+            moveBlock: here.flatMap { jumpMoveBlock(window, into: $0) },
+            isOtherApp: jumpIsOtherApp(window.appRef),
+            screen: status == .shown ? jumpScreen(shownOn, hub: hub) : nil
+        )
     }
 
     /// The away ledger's UP entries — a window parked while away is

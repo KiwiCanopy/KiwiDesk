@@ -34,6 +34,9 @@ struct JumpRowView: View {
     /// the modifier is held, whichever row the pointer lifts.
     var revealed = false
     let onActivate: (JumpPick) -> Void
+    /// The modifiers a click picks by: those held now, less any
+    /// still held from the opener (`JumpModel.pickModifiers`).
+    let pickModifiers: () -> NSEvent.ModifierFlags
     /// The pointer moved over this row.
     var onHover: () -> Void = {}
     var onHoverEnd: () -> Void = {}
@@ -104,7 +107,7 @@ struct JumpRowView: View {
 
     var body: some View {
         Button {
-            if let pick = JumpPick.of(NSEvent.modifierFlags) {
+            if let pick = JumpPick.of(pickModifiers()) {
                 onActivate(pick)
             }
         } label: {

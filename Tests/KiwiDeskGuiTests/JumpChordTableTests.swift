@@ -136,7 +136,7 @@ struct JumpChordTableTests {
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(
             row.contains(
-                "ifletpick=JumpPick.of(NSEvent.modifierFlags){"
+                "ifletpick=JumpPick.of(pickModifiers()){"
                     + "onActivate(pick)"
             )
         )

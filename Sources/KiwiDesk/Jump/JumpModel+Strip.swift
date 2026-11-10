@@ -18,15 +18,21 @@ extension JumpModel {
         return emptyText
     }
 
-    /// The line an empty list shows: an app the strip is on that
-    /// lists no window says so (#3135).
+    /// The line an empty list shows.
     var emptyText: String {
-        if list.stripApp != nil {
-            return L("jump.empty.app", "No windows")
-        }
-        return list.snapshot.entries.isEmpty
+        list.snapshot.entries.isEmpty
             ? L("jump.empty.other", "No other windows")
             : L("jump.empty.no_match", "No open windows match")
+    }
+
+    /// Reports a list change; a strip that appears or leaves with
+    /// it slides the panel instead of snapping it (#3168).
+    func listChanged(stripWas: Bool) {
+        if list.stripShown == stripWas {
+            onResultsChange()
+        } else {
+            onStripToggle()
+        }
     }
 
     /// One tile along the strip, wrapping on a fresh press (#2897).
@@ -45,15 +51,6 @@ extension JumpModel {
         announceTile()
     }
 
-    /// Reopens the app the strip is on where it lists no window —
-    /// ↩, a click or VoiceOver on its "No windows" row (#1840).
-    func reopenStripApp() {
-        guard list.results.isEmpty, let app = list.stripApp,
-            app.bundleID != nil
-        else { return }
-        onReopen(app)
-    }
-
     /// The last-app opener: the strip on row 1's app, row 1 kept.
     func openOnLastApp() {
         guard scope == .windows else { return }
@@ -63,7 +60,9 @@ extension JumpModel {
     /// The tile's name and what the list now selects.
     private func announceTile() {
         let name = list.stripApp.map(\.name) ?? JumpStripText.allName
-        let row = list.selected.map { JumpRowText.spoken($0.entry) }
+        let row =
+            list.selected.map { JumpRowText.spoken($0.entry) }
+            ?? list.yours.map(JumpStripText.yoursSpoken)
         onAnnounce(JumpStripText.moved(tile: name, row: row ?? emptyText))
     }
 }

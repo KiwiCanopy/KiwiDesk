@@ -128,7 +128,8 @@ struct JumpPanelShapeTests {
                 commandHeld: command,
                 shiftHeld: shift,
                 wayHere: here,
-                onActivate: { _ in }
+                onActivate: { _ in },
+                pickModifiers: { [] }
             ).showsWayHere
         }
         #expect(shows(selected: true, number: 1, command: false, shift: true))

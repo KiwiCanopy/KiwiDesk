@@ -23,6 +23,11 @@ final class JumpPanel: NSPanel {
     /// The Windows side's back key, the last-app opener's chord
     /// with ⇧ (`JumpKey.back(of:)`, #3135); nil where none.
     var back: () -> KeyCombo? = { nil }
+    /// The modifiers still held from the chord that opened or
+    /// stepped the panel, which a pick does not read (#3168).
+    var stale: () -> NSEvent.ModifierFlags = { [] }
+    /// The back key was pressed with these modifiers held.
+    var onBackChord: (NSEvent.ModifierFlags) -> Void = { _ in }
 
     override var canBecomeKey: Bool { true }
 
@@ -50,16 +55,7 @@ final class JumpPanel: NSPanel {
         guard holdsKeys, event.type == .keyDown,
             event.modifierFlags.contains(.command)
         else { return super.performKeyEquivalent(with: event) }
-        if !composing,
-            let key = JumpKey.of(
-                keyCode: event.keyCode,
-                modifiers: event.modifierFlags,
-                scope: scope(),
-                naming: naming(),
-                keys: keys(),
-                back: back()
-            )
-        {
+        if !composing, let key = key(for: event) {
             onKey(key, event.isARepeat)
             return true
         }
@@ -91,16 +87,7 @@ final class JumpPanel: NSPanel {
         case .flagsChanged:
             onModifiers(event.modifierFlags)
         case .keyDown:
-            if !composing,
-                let key = JumpKey.of(
-                    keyCode: event.keyCode,
-                    modifiers: event.modifierFlags,
-                    scope: scope(),
-                    naming: naming(),
-                    keys: keys(),
-                    back: back()
-                )
-            {
+            if !composing, let key = key(for: event) {
                 onKey(key, event.isARepeat)
                 return
             }
@@ -114,5 +101,36 @@ final class JumpPanel: NSPanel {
     /// commits it, Esc cancels it and the arrows pick a candidate.
     var composing: Bool {
         (firstResponder as? NSTextInputClient)?.hasMarkedText() == true
+    }
+}
+
+extension JumpPanel {
+    /// What `event` means: a pick reads the modifiers pressed since
+    /// the opener, so ↩ under the ⌥ still held from ⌥⇥ jumps
+    /// rather than swaps; every other key reads them all (#3168).
+    func key(for event: NSEvent) -> JumpKey? {
+        let flags = event.modifierFlags
+        let key = key(event.keyCode, flags)
+        if let chord = back(),
+            JumpKey.presses(chord, keyCode: event.keyCode, modifiers: flags)
+        {
+            onBackChord(flags)
+        }
+        guard let key, key.picks else { return key }
+        return self.key(event.keyCode, flags.subtracting(stale()))
+    }
+
+    private func key(
+        _ keyCode: UInt16,
+        _ flags: NSEvent.ModifierFlags
+    ) -> JumpKey? {
+        JumpKey.of(
+            keyCode: keyCode,
+            modifiers: flags,
+            scope: scope(),
+            naming: naming(),
+            keys: keys(),
+            back: back()
+        )
     }
 }
