@@ -45,10 +45,8 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-# In its own process group, so the deadline stops an in-flight rm
-# too, and waited for, so nothing outlives the caller's lock. A
-# signal to the wrapper is passed to the group: it left the
-# caller's, so the caller's Ctrl-C no longer reaches it.
+# Own process group, waited for: a deadline or a signal to the
+# wrapper stops the whole sweep, so nothing outlives the caller's lock.
 if [ -n "$TIMEOUT" ]; then
     exec /usr/bin/perl -MPOSIX=setpgid -e '
         my $t = shift;
@@ -63,7 +61,8 @@ if [ -n "$TIMEOUT" ]; then
         setpgid($pid, $pid);
         alarm($t);
         waitpid($pid, 0);
-        exit($? >> 8);' "$TIMEOUT" "$0" ${REST[@]+"${REST[@]}"}
+        exit($? & 127 ? 128 + ($? & 127) : $? >> 8);' \
+        "$TIMEOUT" "$0" ${REST[@]+"${REST[@]}"}
 fi
 
 free_kb() {

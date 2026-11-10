@@ -5,6 +5,9 @@ import Testing
 /// timeout (#3186), on `PruneDesk`'s fixture worktrees.
 @Suite("gate-lock prunes on low disk, inside its lock")
 struct ExecTestsPruneBuildsTrigger {
+    /// Far under the stub's 600 s sleep, far over a 1 s deadline.
+    private let stallBound: TimeInterval = 30
+
     /// A trigger moved ahead of gate-lock's own lockf would prune
     /// while another gate step runs.
     @Test("gate-lock never prunes before it holds the gate")
@@ -22,18 +25,24 @@ struct ExecTestsPruneBuildsTrigger {
         #expect(desk.hasOutput(desk.tree("a")), "\(run.stderr)")
     }
 
-    /// The sweep stalls in a stub `git`; a deadline that killed only
-    /// the sweep's own shell would leave the stub running.
+    /// The sweep stalls in a stub `git` far longer than the bound; a
+    /// deadline that killed only the sweep's shell, or waited the
+    /// sweep out, would leave the stub running or blow the bound.
+    /// Run as if inside the gate, so no `lockf` holds the pipes.
     @Test("the timeout stops the whole sweep, children included")
     func timeoutStopsTheSweep() throws {
         let desk = try PruneDesk()
         defer { desk.remove() }
+        var env = try desk.stalledEnvironment()
+        env["KIWIDESK_GATE_LOCK_HELD"] = "1"
+        let started = Date()
         let run = try spawn(
             "/bin/bash",
             [desk.script("prune-builds").path, "--apply", "--timeout", "1"],
-            environment: try desk.stalledEnvironment(),
+            environment: env,
             currentDirectory: desk.repo
         )
+        #expect(Date().timeIntervalSince(started) < stallBound)
         #expect(run.status == 124, "\(run.stdout)\(run.stderr)")
         #expect(try desk.stallEnds(), "a child outlived the sweep")
     }
@@ -56,8 +65,15 @@ struct ExecTestsPruneBuildsTrigger {
         process.standardError = FileHandle.nullDevice
         try process.run()
         try desk.waitUntilStalled()
-        process.terminate()
+        let wrapper = process.processIdentifier
+        let stub = try #require(desk.stallPid())
+        // A sweep left in the wrapper's group would die of the
+        // group's signal, not of the wrapper passing it on.
+        #expect(getpgid(stub) != getpgid(wrapper))
+        let started = Date()
+        kill(wrapper, SIGTERM)
         process.waitUntilExit()
+        #expect(Date().timeIntervalSince(started) < stallBound)
         #expect(process.terminationStatus == 124)
         #expect(try desk.stallEnds(), "a child outlived the signal")
     }
@@ -92,7 +108,7 @@ extension PruneDesk {
             """
             #!/bin/sh
             echo $$ > "\(stallFile.path)"
-            exec /bin/sleep 30 < /dev/null > /dev/null 2>&1
+            exec /bin/sleep 600 < /dev/null > /dev/null 2>&1
             """
         )
     }
