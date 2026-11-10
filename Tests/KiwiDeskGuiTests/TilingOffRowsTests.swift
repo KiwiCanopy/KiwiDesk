@@ -86,6 +86,18 @@ struct TilingOffRowsTests {
         #expect(row.oldValue == "follows All profiles · On")
     }
 
+    @Test("the row reads the stored base the tables encode against")
+    func rowReadsTheStoredBase() throws {
+        let model = try makeModel()
+        model.core.execute("set_tiling_start_global", args: [.bool(true)])
+        #expect(model.core.appWide.tilingStartGlobal)
+        #expect(!model.tilingStartOn)
+        model.config.settings.tiling.start = true
+        model.updateActiveProfile()
+        // The tick moved the stored base the row showed.
+        #expect(model.core.appWideSettled.tilingStartGlobal)
+    }
+
     @Test("a live Save keeps a verb's session start it did not touch")
     func liveSaveKeepsTheSessionStart() throws {
         let model = try makeModel()
@@ -147,6 +159,10 @@ struct TilingOffRowsTests {
         let border = try #require(TilingOffWords.link(for: .focusBorderOff))
         #expect(border.destination == .gapsAndBorders)
         #expect(border.prose.contains(CrossReferenceRow.linkSlot))
+        #expect(
+            TilingOffWords.hover(border)
+                == "Works when the focus border is on in Gaps & Borders."
+        )
         #expect(TilingOffWords.link(for: .trackUnused) == nil)
     }
 

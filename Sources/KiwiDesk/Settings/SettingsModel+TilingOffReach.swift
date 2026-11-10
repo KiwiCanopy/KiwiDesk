@@ -6,14 +6,25 @@ import KiwiDeskCore
 extension SettingsModel {
     typealias TilingTable = RuleReachTable<Bool>
 
-    /// The shared start value the engine reads now — a verb's
-    /// session change included, as every app-wide row shows it.
-    var tilingStartBase: Bool { appWide.tilingStartGlobal }
+    /// The shared start value as stored — the base the tables
+    /// encode against and the readout narrates — or the live value
+    /// where no checklist reads one (a Lua-owned config).
+    var tilingStartBase: Bool {
+        ruleReachStored?.tilingStart.tilingBase(
+            TilingTable.tilingStartKey,
+            fallback: appWide.tilingStartGlobal
+        ) ?? appWide.tilingStartGlobal
+    }
 
     /// The shared value of a hide tick, as `tilingStartBase`.
     func tilingOffHidesBase(_ key: String) -> Bool {
-        key == TilingTable.offHidesBordersKey
+        let live =
+            key == TilingTable.offHidesBordersKey
             ? appWide.tilingOffHidesBorders : appWide.tilingOffHidesBars
+        return ruleReachStored?.tilingOffHides.tilingBase(
+            key,
+            fallback: live
+        ) ?? live
     }
 
     /// The start row's switch: the page's own value over the base.

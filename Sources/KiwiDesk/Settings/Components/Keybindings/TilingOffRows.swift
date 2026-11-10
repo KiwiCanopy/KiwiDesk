@@ -73,7 +73,7 @@ struct TilingOffRows: View {
                 get: { model.tilingOffHidesOn(key) },
                 set: { model.config.settings.tiling[keyPath: path] = $0 }
             ),
-            grey: link.map { CrossReferenceRow.split($0.prose).0 },
+            grey: link.map(TilingOffWords.hover),
             reach: {
                 reach(
                     .tilingOffHides,
@@ -158,6 +158,17 @@ enum TilingOffWords {
 }
 
 extension TilingOffWords {
+    /// A grey's hover text: its sentence with the destination named
+    /// where the link sits.
+    static func hover(
+        _ link: (prose: String, destination: SettingsDestination)
+    ) -> String {
+        link.prose.replacingOccurrences(
+            of: CrossReferenceRow.linkSlot,
+            with: link.destination.title
+        )
+    }
+
     /// What makes a greyed hide row work, its link at
     /// `CrossReferenceRow.linkSlot`; nil for a reason no hide row
     /// takes.
