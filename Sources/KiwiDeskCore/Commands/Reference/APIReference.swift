@@ -309,7 +309,10 @@ public enum APIReference {
         "pocket": [
             "set_color", "toggle_list",
         ],
-        "maximize": ["set_share", "set_anchor", "set_follow_focus"],
+        "maximize": [
+            "set_share", "set_anchor", "set_follow_focus",
+            "set_share_override", "set_anchor_override",
+        ],
         "tiling": [
             "set_start", "set_off_hides_borders", "set_off_hides_bars",
         ],

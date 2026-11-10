@@ -2525,7 +2525,11 @@ editing here:
   Maximize stands only while it holds one and a tile's only while
   it holds none, so a new writer of the record changes what is
   maximized, and which plane one stands on is read through
-  `maximizedFloat(of:)`, never re-derived beside it.
+  `maximizedFloat(of:)`, never re-derived beside it. A Height or
+  Width press on a tiled member of a Monocle Space is refused at
+  the press (#3090), and a further door writing an axis Maximize
+  asks the same `monocleRefuses` (`MaximizeShareSpaceTests` ▸
+  `monocleRefusesTiles`, `monocleKeepsFloats`).
   **A write that rearranges a Space ends its
   maximize AT the write** — every order write through the one
   `Space.endMaximize`, the mode write, `resize`,

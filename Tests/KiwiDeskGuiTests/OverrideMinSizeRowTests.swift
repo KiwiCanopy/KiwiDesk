@@ -53,7 +53,11 @@ struct OverrideMinSizeRowTests {
     @Test("the box draws the row after the gaps through its gate")
     func boxDrawsTheRow() throws {
         let box = try Self.source("SpaceOverrideRows.swift")
-        #expect(box.contains("gapsRowminSizeRowDivider()modeRows"))
+        #expect(
+            box.contains(
+                "gapsRowminSizeRowDivider()maximizeRowsDivider()modeRows"
+            )
+        )
         let row = try Self.source("SpaceOverrideRows+MinSize.swift")
         #expect(
             row.contains(

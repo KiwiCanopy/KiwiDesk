@@ -766,6 +766,14 @@ Maximize move with focus instead of ending
 :::
 
 :::unreleased
+`maximize.set_share_override <space> <height|width> [share]` and
+`maximize.set_anchor_override <space> [center|in_place]` set one
+Space's own values over its screen shape's; leaving the value out
+clears it
+([`maximize.set_share_override`](lua-reference.md#maximizeset_share_override)).
+:::
+
+:::unreleased
 `toggle_maximized` takes a floating window too, whole or along one
 axis, and puts it back at the frame it had
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)).

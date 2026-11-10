@@ -115,6 +115,19 @@ extension APIReference {
                 + "on instead of ending.",
             .boolean("enabled")
         ),
+        "set_share_override": APIRecord(
+            "Sets one Space's own Maximize Height or Width share, "
+                + "over its screen shape's; nil clears.",
+            .space("space"),
+            .choice("axis", MaximizeAxis.self),
+            .number("share", optional: true)
+        ),
+        "set_anchor_override": APIRecord(
+            "Sets where a Maximize Height or Width grows from in one "
+                + "Space; nil clears.",
+            .space("space"),
+            .choice("anchor", MaximizeAnchor.self, optional: true)
+        ),
     ]
 
     static let tilingRecords: [String: APIRecord] = [

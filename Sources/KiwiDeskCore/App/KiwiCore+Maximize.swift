@@ -32,6 +32,19 @@ extension KiwiCore {
         guard let focused, let space = state.workspaces[focused.1]
         else { return .fail("no focused window") }
         let (id, spaceID) = focused
+        if monocleRefuses(shape, id, on: space) {
+            cueMaximizeRefused(
+                id,
+                text: L(
+                    "maximize.refused.monocle",
+                    "On %1$@, a tiled window already fills the screen",
+                    L("layout.monocle.name", "Monocle")
+                )
+            )
+            return .fail(
+                "on monocle, a tiled window already fills the screen"
+            )
+        }
         if state.handMaximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {
                 if $0.maximized?.shape.matches(shape) == true {
@@ -44,7 +57,14 @@ extension KiwiCore {
             guard spaceID == state.workspaces.activeSpace,
                 let follows = maximizeAdmits(id, on: space)
             else {
-                cueMaximizeRefused(id)
+                cueMaximizeRefused(
+                    id,
+                    text: L(
+                        "maximize.refused.window",
+                        "Dialogs, panels, full-screen windows and the "
+                            + "Pocket window can't be maximized"
+                    )
+                )
                 return .fail(
                     "a dialog, a panel, a full-screen window or the "
                         + "pocket window cannot be maximized"
@@ -165,16 +185,26 @@ extension KiwiCore {
         return .fail("a window KiwiVision fills keeps its size")
     }
 
+    /// Whether a Height or Width press on `id` is refused: a tiled
+    /// window on a Monocle Space already fills its screen, so the
+    /// press would only shrink it into a column (#3090). A float
+    /// there may still take one, and a full Maximize is unchanged.
+    private func monocleRefuses(
+        _ shape: MaximizeShape,
+        _ id: WindowID,
+        on space: Space
+    ) -> Bool {
+        shape.axis != nil
+            && state.placementMode(of: space) == .monocle
+            && state.effectiveTiledMembers(of: space).contains(id)
+    }
+
     /// A refused press's cue: the pill is its only one, so
     /// VoiceOver hears it too (#2480).
-    private func cueMaximizeRefused(_ window: WindowID) {
+    private func cueMaximizeRefused(_ window: WindowID, text: String) {
         flashRefusalPill(
             window,
-            text: L(
-                "maximize.refused.window",
-                "Dialogs, panels, full-screen windows and the Pocket "
-                    + "window can't be maximized"
-            ),
+            text: text,
             symbol: "arrow.up.left.and.arrow.down.right",
             announce: true
         )

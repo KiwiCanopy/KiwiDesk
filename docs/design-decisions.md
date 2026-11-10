@@ -6552,6 +6552,32 @@ they meant, and a press would size the window just short of the
 third the menu offers.
 
 :::unreleased
+**A Space may carry its own shares and "from", over its screen's
+row (#3090).** An editor Space and a browser Space on one screen
+share one shape row, and that row cannot serve both: the editor
+wants a narrow column, the browser a wide one. So a Space keeps an
+optional share per axis and an optional "from", and the order is a
+binding's own arguments, then the Space's value, then the shape
+row, read through the one pair `MaximizeSettings.share(for:on:in:)`
+and `anchor(on:in:)` that the press and `resolved(for:)` both take.
+The cost is the one #2422 names for its floor: a value set on a
+Space travels with it, so a Space moved to a screen of another
+shape keeps a share chosen for the first screen, which is what the
+#3062 table exists to avoid. The trade is accepted because a Space
+the user tunes this way is one pinned to its screen, and every
+axis a Space leaves unset still follows the screen it lands on. A
+per-layout value, #2237's shape, was weighed and refused: the case
+is two Spaces of one layout on one screen. The maps are sparse and
+the decoder already accepted a file without them, so they owe no
+format bump, as #2422's floor.
+
+**On Monocle a tiled window refuses Maximize Height and Width
+(#3090).** A Monocle member already fills the screen, so an axis
+only shrank it into a column, which reads as a defect. A float
+there may still take one, and a full Maximize is unchanged.
+:::
+
+:::unreleased
 ### Monocle's "Maximize windows" hides the bars, it does not stand them down (#2976)
 
 **[Rationale]**
@@ -16336,6 +16362,25 @@ apart from the layout rows, and survives a layout switch. Unlike
 the gaps it is live on a Floating Space, since it floors every
 float there, so it greys only on Monocle, which applies no
 minimum.
+
+:::unreleased
+**A Space's own Maximize rows are the fourth class, on their own
+tests** (#3090). Its first test is the gaps': a Maximize share
+belongs to no layout and every layout's windows take it. Its second
+is its own: the value is read at the press, by
+`KiwiCore.maximizeShape(from:for:)`, not before the layout
+calculation, and the fill it shapes is laid over the issued frames
+after it, so no layout math reads it. Its third holds as written:
+the screen shape's row on Layout Defaults is an unambiguous "off",
+which the unchecked row names ("follows Laptop · ¾"). The three
+rows — Maximize Height, Maximize Width, Maximize from — sit below
+the minimum size, apart from the layout rows, survive a layout
+switch and count one each. Like the minimum size they are live on
+a Floating Space, whose floats maximize, so they count there too,
+and on Monocle, whose floats may still take an axis. "Reset All
+Layout Overrides" leaves them alone, as it leaves the gaps: each
+row's checkbox is its reset.
+:::
 
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the

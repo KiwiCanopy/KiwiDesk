@@ -181,6 +181,9 @@
         "ultrawide" : "in_place",
         "widescreen" : "center"
       },
+      "anchor_override" : {
+
+      },
       "follow_focus" : false,
       "share" : {
         "height" : {
@@ -197,6 +200,9 @@
           "ultrawide" : 0.5,
           "widescreen" : 0.5
         }
+      },
+      "share_override" : {
+
       }
     },
     "min_window_size" : {

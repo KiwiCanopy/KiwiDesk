@@ -199,6 +199,8 @@ struct SettingsRowShapeTests {
         "MinWindowSizeRows.swift": 2,
         // A Space's own minimum window size (#2422).
         "OverrideMinSizeRow.swift": 1,
+        // A Space's own Maximize share rows (#3090).
+        "SpaceOverrideRows+Maximize.swift": 1,
         // Titled action rows (AI page, General ▸ Files & Reset).
         "SettingsActionRow.swift": 1,
         // Every override row's inheriting readout, whatever its
