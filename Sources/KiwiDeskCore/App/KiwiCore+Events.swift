@@ -48,6 +48,11 @@ extension KiwiCore {
                 )?.kiwiDisplayID
             // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()
+            // A lens's quiet open (#3122), mirrored likewise.
+            state.arrivesQuietly = launchFollow.opensQuietly(
+                window.appRef.listKey,
+                at: wallClock()
+            )
             claimCrossSessionArrival(window)  // #1385
         }
         // Read BEFORE the fold below overwrites/removes them —

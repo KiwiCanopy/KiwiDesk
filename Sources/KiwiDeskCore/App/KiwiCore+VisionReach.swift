@@ -73,4 +73,47 @@ extension KiwiCore {
             )
         }
     }
+
+    /// A lens notice (#3122): one pill on the focused window, else
+    /// centred on the active Space's screen; the GUI announces it.
+    func noteLensNotice(_ notice: VisionLensNotice) {
+        let text: String
+        switch notice {
+        case .noMemberOpen(let lens):
+            text = L(
+                "kiwivision.notice.no_member_open",
+                "%1$@ is on: none of its apps is open.",
+                lens
+            )
+        case .notInstalled(let app):
+            text = L(
+                "kiwivision.notice.not_installed",
+                "%1$@ is not installed.",
+                app
+            )
+        }
+        vision.onNotice(notice)
+        if let window = focusedWindowID, refusalPillFrame(window) != nil {
+            flashRefusalPill(
+                window,
+                text: text,
+                symbol: "eyeglasses",
+                announce: false
+            )
+            return
+        }
+        let shown = state.workspaces.activeSpace.flatMap {
+            state.workspaces.display(of: $0)
+        }
+        let screen =
+            tiler.displayFrames().first { $0.id == shown }
+            ?? tiler.displayFrames().first
+        guard let screen else { return }
+        borders.flashScreenPill(
+            display: screen.id,
+            frame: screen.frame,
+            text: text,
+            symbol: "eyeglasses"
+        )
+    }
 }

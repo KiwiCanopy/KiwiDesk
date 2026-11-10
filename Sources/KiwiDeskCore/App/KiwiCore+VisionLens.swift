@@ -29,6 +29,7 @@ extension KiwiCore {
             }
         }
         setVision(active == true ? .off : .lens(lens.name))
+        if active != true { openLensApps(lens) }
         return toggleAnswer()
     }
 
@@ -56,7 +57,11 @@ extension KiwiCore {
         }
         guard let lens = appWide.lens(named: name), lensRefusal(lens) == nil
         else { return }
+        let wasOn = visionLensName.map {
+            AppWideSettings.sameLens($0, lens.name)
+        }
         setVision(.lens(lens.name))
+        if wasOn != true { openLensApps(lens) }
     }
 
     private func toggleAnswer() -> CommandResponse {

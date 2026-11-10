@@ -17,6 +17,16 @@ public enum VisionChangeCause: Equatable, Sendable {
     case outOfReach(lens: String, profile: String)
 }
 
+/// What a lens turning on tells the user when none of its apps
+/// has a window and nothing opened (#3122). Core draws the pill;
+/// the GUI narrates it for VoiceOver.
+public enum VisionLensNotice: Equatable, Sendable {
+    /// No member has a window, and none is set to open.
+    case noMemberOpen(lens: String)
+    /// An Auto-open member LaunchServices cannot find.
+    case notInstalled(app: String)
+}
+
 /// A lens as a picker offers it: its stored name and why it cannot
 /// turn on, nil where it can.
 public struct VisionLensChoice: Equatable, Sendable {
