@@ -44,8 +44,15 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
-        let quiet = arrivesQuietly
-        arrivesQuietly = false
+        let focus = arrivalFocus
+        arrivalFocus = .foreground
+        var quiet = false
+        var named: SpaceID?
+        if case .quiet(let into) = focus {
+            quiet = true
+            // A Space a profile switch retired is never re-created.
+            named = into.flatMap { workspaces[$0] == nil ? nil : $0 }
+        }
         let claim = pocketClaimed
         pocketClaimed = nil
         let claimed = claim == .claimed(window.id)
@@ -60,11 +67,12 @@ extension StateCoordinator {
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
         // A popup skips the rule (#1602, #2475), and so does the
-        // window a Pocket key claims (#2612 ▸ 7).
+        // window a Pocket key claims (#2612 ▸ 7); a Space a quiet
+        // open named stands in for the rule, through its gate (#3152).
         let popup = windows[window.id]?.isPopup ?? false
         let ruled =
             held == nil && !popup && !claimed
-            ? window.appBundleID.flatMap { appRules[$0] }
+            ? named ?? window.appBundleID.flatMap { appRules[$0] }
             : nil
         // Only the rule's own verdict may earn the launch follow
         // (#1599), and only into a Space the user is not in.
@@ -167,12 +175,13 @@ extension StateCoordinator {
         {
             workspaces.focus(window.id, in: target)
             effects.paidReturningFocus = true
-        } else if !effects.hadRememberedSpace
+        } else if (!effects.hadRememberedSpace && focus == .foreground)
             || (workspaces[target]?.focused == nil && !owedHere)
         {
             // A new window — a close return among them (#1414):
             // its own report then arrives intended, and the
-            // placement distrust never reads it.
+            // placement distrust never reads it. Only where its app
+            // holds the keys, or the ring would leave them (#3152).
             workspaces.focus(window.id, in: target)
         }
     }

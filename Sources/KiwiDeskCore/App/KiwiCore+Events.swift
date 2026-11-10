@@ -48,11 +48,8 @@ extension KiwiCore {
                 )?.kiwiDisplayID
             // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()
-            // A lens's quiet open (#3122), mirrored likewise.
-            state.arrivesQuietly = launchFollow.opensQuietly(
-                window.appRef.listKey,
-                at: wallClock()
-            )
+            // How it may take the focus (#3122, #3152), likewise.
+            state.arrivalFocus = arrivalFocus(of: window)
             claimCrossSessionArrival(window)  // #1385
         }
         // Read BEFORE the fold below overwrites/removes them —
@@ -113,7 +110,9 @@ extension KiwiCore {
             if effects.closedReturnPlacedAsNew {
                 onLog(
                     "close return: w\(window.id.raw) re-shown — "
-                        + "placed as new, focus taken (#1414/#1561)"
+                        + "placed as new, focus "
+                        + (focusedWindowID == window.id ? "taken" : "left")
+                        + " (#1414/#1561)"
                 )
             }
             guard let provenance else {

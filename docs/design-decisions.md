@@ -8933,6 +8933,46 @@ run. When nothing is open and nothing opens, the pill says so, on
 the screen's centre where no window holds the focus.
 
 :::unreleased
+### The ring follows the keys at a window's arrival (#3152)
+
+**[Rationale]**
+
+A new window takes KiwiDesk's focus at arrival only when its app
+holds the keys. A window an app opens behind you, through `open -g`,
+a login item, a helper or its own dialog, tiles in and leaves the
+ring where you are typing, as macOS leaves the keys there. The ring
+means "your typing goes here", and a ring that disagrees with the
+keys is worse than one that moves a beat late.
+
+Withholding every arrival's grant until the focus report was
+rejected: a launched app's first window is often adopted after its
+activation has already passed (#1599), and in a scrolling Space a
+window's own clickless report reads as the #1161 placement bounce.
+Moving the ring and also activating the app was rejected because it
+takes your keys mid-sentence, the thing #3141 exists to prevent.
+
+Three edges stay as they were:
+- **A Space with no focus still takes its first window.** That is
+  how a Space gets a focus at boot, so switching to it has
+  somewhere to land.
+- **A background window still follows its app rule.** Whether it
+  should take you along is a separate question.
+- **KiwiDesk's own windows always take the ring.** The app fronts
+  them itself.
+
+A window that arrives just before its app activates is left
+ungranted until a device log shows the race matters.
+
+`open_in_background` can also name a Space, and its app's windows
+go there with nothing switched, ahead of the app's rule, since the
+caller named the place. Only a KiwiDesk Space can be named for now.
+A macOS Desktop no screen shows would leave the window on your
+Space until KiwiDesk adopts it and only then move it, and a refusal
+that depends on the window could come only after the call had
+answered; both are measured before a Desktop is offered.
+:::
+
+:::unreleased
 ### Opening an app in the background hands the focus back once (#3141)
 
 **[Rationale]**

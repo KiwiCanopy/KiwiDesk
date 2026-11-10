@@ -270,20 +270,35 @@ final class LaunchFollowIntent {
     /// and no rule follow, and their activation owes none. A window
     /// the user opens of such an app inside the bound, by ⌘N or a
     /// Dock click, arrives quiet too, the accepted residue; Open or
-    /// Focus lifts the mark.
-    private var quietApps: [String: Date] = [:]
+    /// Focus lifts the mark. `into` is the Space an
+    /// `open_in_background` named (#3152), which rides the mark.
+    private var quietApps: [String: (at: Date, into: SpaceID?)] = [:]
 
-    /// Notes `apps` as opened quietly at `now`.
-    func noteQuietApps(_ apps: Set<String>, at now: Date) {
-        for app in apps { quietApps[app] = now }
+    /// Notes `apps` as opened quietly at `now`, filed into `space`.
+    func noteQuietApps(
+        _ apps: Set<String>,
+        at now: Date,
+        into space: SpaceID? = nil
+    ) {
+        for app in apps { quietApps[app] = (now, space) }
     }
 
     /// Whether a window of `bundleID` arrives from a quiet open.
     func opensQuietly(_ bundleID: String, at now: Date) -> Bool {
         quietApps = quietApps.filter {
-            now.timeIntervalSince($0.value) < Self.quietBound
+            now.timeIntervalSince($0.value.at) < Self.quietBound
         }
         return quietApps[bundleID] != nil
+    }
+
+    /// The Space a quiet open files `bundleID`'s windows into.
+    func quietSpace(_ bundleID: String, at now: Date) -> SpaceID? {
+        opensQuietly(bundleID, at: now) ? quietApps[bundleID]?.into : nil
+    }
+
+    /// The user took `bundleID`: its next window lands where they are.
+    func liftQuietSpace(_ bundleID: String) {
+        quietApps[bundleID]?.into = nil
     }
 
     /// Takes the quiet open's debt for a window of `bundleID`, once,

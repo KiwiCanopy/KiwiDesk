@@ -112,6 +112,16 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+A window an app opens **in the background** (`open -g`, a login
+item, a helper) takes KiwiDesk's focus ring only when it lands in
+a Space with no focused window, so the ring and your keys can still
+part there. A Space with no focus takes the first window to arrive
+so that switching to it has somewhere to land
+([#3152](https://github.com/KiwiCanopy/KiwiDesk/issues/3152)).
+Click the window you are typing in to bring the ring back.
+:::
+
+:::unreleased
 Within **10 seconds of an
 [`open_in_background`](lua-reference.md#open_in_background)**, one
 switch to that app by keyboard (⌘Tab, Spotlight) is handed back to

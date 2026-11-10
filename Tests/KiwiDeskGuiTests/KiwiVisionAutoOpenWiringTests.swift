@@ -31,7 +31,7 @@ struct KiwiVisionAutoOpenWiringTests {
         ("vision.configLoading=true", "App/KiwiCore+Config.swift", 1),
         // The fold's quiet arrival, mirrored ahead of the apply.
         (
-            "state.arrivesQuietly=launchFollow.opensQuietly(",
+            "state.arrivalFocus=arrivalFocus(of:window)",
             "App/KiwiCore+Events.swift", 1
         ),
         // The one focus move, claimed ahead of the launch follow.
@@ -74,7 +74,8 @@ struct KiwiVisionAutoOpenWiringTests {
         let fold = try Self.flat(
             "Sources/KiwiDeskCore/State/StateCoordinator+WindowCreated.swift"
         )
-        #expect(Self.count("letquiet=arrivesQuietly", in: fold) == 1)
+        #expect(Self.count("letfocus=arrivalFocus", in: fold) == 1)
+        #expect(Self.count("ifcase.quiet(letinto)=focus", in: fold) == 1)
         // Nor a rule follow.
         #expect(
             Self.count("claim!=.awaited(window.id),!quiet", in: fold) == 1
