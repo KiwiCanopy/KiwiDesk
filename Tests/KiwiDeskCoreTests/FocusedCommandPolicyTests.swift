@@ -39,6 +39,8 @@ struct FocusedCommandPolicyTests {
         // window (#3131).
         "focus_app_window",
         "spawn_new",
+        // Opens an app behind the focus (#3141), moving no window.
+        "open_in_background",
         // Re-lays the focused Space out, like set_mode without a
         // Space, moving no window between Spaces (#453).
         "cycle_mode",

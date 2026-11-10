@@ -125,4 +125,35 @@ extension KiwiCore {
         }
         return false
     }
+
+    /// The `handleWindowFocused` arm: AX re-reports the app's managed
+    /// main window, possibly on another space, as focused once an
+    /// ignored panel dismisses (#21/#244); the flag outlives the
+    /// dismissal by a grace, since the stale re-report wins that
+    /// race by 125-200 ms (#951). Consumes the flag and restores the
+    /// pre-panel focus; true where the report was consumed.
+    func consumeIgnoredPanelReport(
+        _ id: WindowID,
+        effects: AppliedEffects,
+        now: Date
+    ) -> Bool {
+        guard let pid = state.windows[id]?.pid,
+            shouldConsumeIgnoredPanelReport(pid: pid, id: id, now: now)
+        else { return false }
+        onLog(
+            "focus: w\(id.raw) re-report consumed "
+                + "(ignored-panel dismiss, pid "
+                + "\(pid)); restoring "
+                + describe(effects.focusBefore)
+        )
+        // The id's self-raise stamp stays: age bounds it, and the
+        // #465 order read needs it as the newer sibling against the
+        // app's next re-report.
+        if let before = effects.focusBefore,
+            let space = state.workspaces.space(of: before)
+        {
+            state.workspaces.focus(before, in: space)
+        }
+        return true
+    }
 }

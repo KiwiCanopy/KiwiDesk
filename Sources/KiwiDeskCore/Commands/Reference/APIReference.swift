@@ -65,6 +65,7 @@ public enum APIReference {
             ("focus_or_spawn", "focus_or_spawn"),
             ("focus_app_window", "focus_app_window"),
             ("spawn_new", "spawn_new"),
+            ("open_in_background", "open_in_background"),
             ("gather", "gather"),
             ("move_here", "move_here"),
             ("set_mode", "set_mode"),

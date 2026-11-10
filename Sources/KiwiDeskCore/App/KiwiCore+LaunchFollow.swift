@@ -36,6 +36,7 @@ extension KiwiCore {
         now: Date = Date()
     ) {
         state.stampAppRecency(activation.pid)
+        handBackBackgroundActivation(activation, now: now)  // #3141
         if launchFollow.owed(at: now) != activation.bundleID {
             launchFollow.forget(keeping: activation.bundleID)
         }
