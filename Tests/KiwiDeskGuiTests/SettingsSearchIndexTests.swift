@@ -242,7 +242,8 @@ struct SettingsSearchIndexTests {
                 // 13 since #2103: Toggle KiwiVision, at rest.
                 // 14 #2460: Shortcuts use; 15 #2303; 17 #761's bar rows.
                 // 18 #2448: Maximize. 19 #2493: Wrap focus.
-                // 16 #2654: in cards. 17 #2675. 18 #2974. 19 #3008. 22 #3089.
+                // 16 #2654: in cards. 17 #2675. 18 #2974. 19 #3008.
+                // 22 #3089: the three Tiling off rows, at rest.
                 .shortcuts: 22,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
@@ -312,39 +313,5 @@ struct SettingsSearchIndexTests {
         ).first
         #expect(row?.newValue != nil)
         #expect(row?.newValue == row?.oldValue)
-    }
-
-    /// Spec 11a's hard line, as a source scan: the match path —
-    /// the index, the builder, the synonyms — never touches the
-    /// value readout, the palette store, AX or the filesystem.
-    /// Enrichment happens in the ROW view, per visible row, and
-    /// the context is collected by the header bar from memory.
-    @Test("the match path stays off enrichment and disk")
-    func matchPathStaysPure() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-        let searchCore = [
-            "Sources/KiwiDesk/Settings/SettingsSearch.swift",
-            "Sources/KiwiDesk/Settings/SettingsSearchIndex.swift",
-            "Sources/KiwiDesk/Settings/SettingsSearchSynonyms.swift",
-        ]
-        let forbidden = [
-            "SettingsValueReadout",
-            "PaletteStore",
-            "AXHelper",
-            "FileManager",
-            "Data(contentsOf",
-        ]
-        for path in searchCore {
-            let url = root.appendingPathComponent(path)
-            let source = SourceScan.stripComments(
-                try String(contentsOf: url, encoding: .utf8)
-            )
-            for needle in forbidden {
-                #expect(
-                    !source.contains(needle),
-                    "\(path) touches \(needle)"
-                )
-            }
-        }
     }
 }

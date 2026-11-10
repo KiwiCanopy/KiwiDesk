@@ -6,24 +6,14 @@ import KiwiDeskCore
 extension SettingsModel {
     typealias TilingTable = RuleReachTable<Bool>
 
-    /// The shared start value as stored: the snapshot's base, or
-    /// the live app-wide value where no checklist reads one.
-    var tilingStartBase: Bool {
-        ruleReachStored?.tilingStart.tilingBase(
-            TilingTable.tilingStartKey,
-            fallback: appWide.tilingStartGlobal
-        ) ?? appWide.tilingStartGlobal
-    }
+    /// The shared start value the engine reads now — a verb's
+    /// session change included, as every app-wide row shows it.
+    var tilingStartBase: Bool { appWide.tilingStartGlobal }
 
     /// The shared value of a hide tick, as `tilingStartBase`.
     func tilingOffHidesBase(_ key: String) -> Bool {
-        let live =
-            key == TilingTable.offHidesBordersKey
+        key == TilingTable.offHidesBordersKey
             ? appWide.tilingOffHidesBorders : appWide.tilingOffHidesBars
-        return ruleReachStored?.tilingOffHides.tilingBase(
-            key,
-            fallback: live
-        ) ?? live
     }
 
     /// The start row's switch: the page's own value over the base.
@@ -96,56 +86,37 @@ extension SettingsModel {
         ]
     }
 
-    /// `settings` with each tiling-off value the draft moved for
-    /// `profile` as the encoded tables leave its own: nil where it
-    /// follows. What a live Save commits and the sidecar carries,
-    /// so neither bakes a shared value in as the profile's own; a
-    /// value the draft left as stored stays as it is.
-    func sparseTilingToggle(
+    /// The page's own tiling-off values as the encoded tables
+    /// leave them, nil where it follows: what the sidecar carries.
+    /// The tables are Core's to write (`saveRuleReach`), so this
+    /// reads their entries and decides nothing.
+    func encodedTilingToggle(
         _ settings: TilingToggleSettings,
         in reach: RuleReachSnapshot,
         for profile: String
     ) -> TilingToggleSettings {
         var toggle = settings
-        let stored = ruleReachStored
-        func own(
-            _ table: TilingTable,
-            _ storedTable: TilingTable?,
-            _ key: String,
-            _ page: Bool?,
-            _ base: Bool
-        ) -> Bool? {
-            let entry = storedTable?.entries[profile]?[key] ?? nil
-            let moved =
-                table.touched[profile]?.contains(key) == true
-                || table.baseTouched.contains(key) || page != entry
-            guard moved else { return page }
-            return table.tilingOverride(key, for: profile, fallback: base)
-        }
-        let startKey = TilingTable.tilingStartKey
-        toggle.start = own(
-            reach.tilingStart,
-            stored?.tilingStart,
-            startKey,
-            settings.start,
-            tilingStartBase
-        )
-        let borders = TilingTable.offHidesBordersKey
-        toggle.offHidesBorders = own(
-            reach.tilingOffHides,
-            stored?.tilingOffHides,
-            borders,
-            settings.offHidesBorders,
-            tilingOffHidesBase(borders)
-        )
-        let bars = TilingTable.offHidesBarsKey
-        toggle.offHidesBars = own(
-            reach.tilingOffHides,
-            stored?.tilingOffHides,
-            bars,
-            settings.offHidesBars,
-            tilingOffHidesBase(bars)
-        )
+        let start = reach.tilingStart.entries[profile] ?? [:]
+        let hides = reach.tilingOffHides.entries[profile] ?? [:]
+        toggle.start = start[TilingTable.tilingStartKey] ?? nil
+        toggle.offHidesBorders = hides[TilingTable.offHidesBordersKey] ?? nil
+        toggle.offHidesBars = hides[TilingTable.offHidesBarsKey] ?? nil
+        return toggle
+    }
+
+    /// `committing` with the tiling-off values live holds now: with
+    /// a checklist those are the tables', which `saveRuleReach`
+    /// writes and live then follows, so the commit takes none of the
+    /// page's (#3089).
+    func keepingLiveTilingToggle(
+        _ committing: TilingToggleSettings
+    ) -> TilingToggleSettings {
+        guard encodedReach != nil else { return committing }
+        let live = core.tiler.settings.tiling
+        var toggle = committing
+        toggle.start = live.start
+        toggle.offHidesBorders = live.offHidesBorders
+        toggle.offHidesBars = live.offHidesBars
         return toggle
     }
 }

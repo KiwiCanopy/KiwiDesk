@@ -39,6 +39,10 @@ struct TilingOffRows: View {
         ShortcutSettingRow(
             title: TilingOffWords.start,
             help: TilingOffWords.startHelp,
+            isOn: Binding(
+                get: { model.tilingStartOn },
+                set: { model.config.settings.tiling.start = $0 }
+            ),
             reach: {
                 reach(
                     .tilingStart,
@@ -47,19 +51,12 @@ struct TilingOffRows: View {
                     reading: model.tilingStartReach(),
                     on: model.tilingStartOn
                 )
-            },
-            control: {
-                toggle(
-                    TilingOffWords.start,
-                    isOn: Binding(
-                        get: { model.tilingStartOn },
-                        set: { model.config.settings.tiling.start = $0 }
-                    )
-                )
             }
         )
     }
 
+    /// A hide row, and outside its grey the live pointer to where
+    /// its cause is set (gui.md ▸ a dim is not a sentence).
     @ViewBuilder private func hideRow(
         _ census: SettingKey,
         key: String,
@@ -68,10 +65,15 @@ struct TilingOffRows: View {
     ) -> some View {
         let reason = ShortcutsGates(config: model.config)
             .inertReason(for: census)
-        let sentence = reason.flatMap(ShortcutsGateHelp.sentence(for:))
+        let link = reason.flatMap(TilingOffWords.link(for:))
         ShortcutSettingRow(
             title: title,
             help: nil,
+            isOn: Binding(
+                get: { model.tilingOffHidesOn(key) },
+                set: { model.config.settings.tiling[keyPath: path] = $0 }
+            ),
+            grey: link.map { CrossReferenceRow.split($0.prose).0 },
             reach: {
                 reach(
                     .tilingOffHides,
@@ -80,36 +82,17 @@ struct TilingOffRows: View {
                     reading: model.tilingOffHidesReach(key),
                     on: model.tilingOffHidesOn(key)
                 )
-            },
-            control: {
-                toggle(
-                    title,
-                    isOn: Binding(
-                        get: { model.tilingOffHidesOn(key) },
-                        set: {
-                            model.config.settings.tiling[keyPath: path] = $0
-                        }
-                    )
-                )
-                .modifier(
-                    GreyOut(active: reason != nil, help: sentence ?? "")
-                )
             }
         )
-        if let sentence {
-            Text(sentence)
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink3)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.leading, SettingsMetrics.shortcutTextIndent)
+        if let link {
+            CrossReferenceRow(
+                prose: link.prose,
+                linkTitle: link.destination.title,
+                destination: link.destination
+            )
+            .font(.caption)
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
         }
-    }
-
-    private func toggle(_ title: String, isOn: Binding<Bool>) -> some View {
-        Toggle(title, isOn: isOn)
-            .labelsHidden()
-            .toggleStyle(.switch)
-            .controlSize(.small)
     }
 
     @ViewBuilder private func reach(
@@ -172,29 +155,36 @@ enum TilingOffWords {
             ? L("diff.value.on", "On")
             : L("diff.value.off", "Off")
     }
-
-    /// A row's own value in the diff: nil follows All profiles.
-    static func value(_ own: Bool?) -> String {
-        own.map(onOff)
-            ?? L("shortcuts.tiling_off.follows", "Same as all profiles")
-    }
 }
 
-/// The Shortcuts greys' sentences (#3089); nil for a reason that
-/// withholds rather than greys.
-@MainActor
-enum ShortcutsGateHelp {
-    static func sentence(for reason: ShortcutsGates.InertReason) -> String? {
+extension TilingOffWords {
+    /// What makes a greyed hide row work, its link at
+    /// `CrossReferenceRow.linkSlot`; nil for a reason no hide row
+    /// takes.
+    static func link(
+        for reason: ShortcutsGates.InertReason
+    ) -> (prose: String, destination: SettingsDestination)? {
         switch reason {
         case .noBarShows:
-            L(
-                "shortcuts.tiling_off.no_bar_shows",
-                "No bar shows in any layout, so there is nothing to hide."
+            (
+                L(
+                    "shortcuts.tiling_off.bars_link",
+                    "Works when the Space Bar or App Bar is set to %1$@ "
+                        + "or %2$@ in %3$@.",
+                    L("bar.visibility.always", "Always"),
+                    L("bar.visibility.auto", "Auto"),
+                    CrossReferenceRow.linkSlot
+                ),
+                .bars
             )
         case .focusBorderOff:
-            L(
-                "shortcuts.tiling_off.border_off",
-                "The focus border is off, so there is nothing to hide."
+            (
+                L(
+                    "shortcuts.tiling_off.border_link",
+                    "Works when the focus border is on in %1$@.",
+                    CrossReferenceRow.linkSlot
+                ),
+                .gapsAndBorders
             )
         case .onlyDefaultLayer, .trackUnused, .appWideLuaOwned,
             .storedProfilePage, .otherLayerPicked, .matchesDefaults:

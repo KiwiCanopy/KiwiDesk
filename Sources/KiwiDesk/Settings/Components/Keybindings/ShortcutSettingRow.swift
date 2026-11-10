@@ -15,6 +15,12 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
     let helpSubject: String
     let reach: Reach
     let control: Control
+    /// An on/off's leading checkbox, which carries the title in
+    /// place of the drawn label (#2439, #3089); nil for a row whose
+    /// value control sits in the footprint.
+    var checkbox: Binding<Bool>?
+    /// Why the checkbox is greyed, nil while it is live.
+    var checkboxGrey: String?
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
 
@@ -42,8 +48,19 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
             IconGlyphLabel(icon: Self.settingGlyph)
                 .frame(width: SettingsMetrics.shortcutIconSlot)
                 .accessibilityHidden(true)
-            Text(title)
-                .accessibilityHidden(true)
+            if let checkbox {
+                Toggle(title, isOn: checkbox)
+                    .toggleStyle(.checkbox)
+                    .modifier(
+                        GreyOut(
+                            active: checkboxGrey != nil,
+                            help: checkboxGrey ?? ""
+                        )
+                    )
+            } else {
+                Text(title)
+                    .accessibilityHidden(true)
+            }
             if let help {
                 HelpButton(explanation: help, subject: helpSubject)
             }
@@ -69,5 +86,27 @@ extension ShortcutSettingRow where Reach == EmptyView {
             reach: { EmptyView() },
             control: control
         )
+    }
+}
+
+extension ShortcutSettingRow where Control == EmptyView {
+    /// An on/off setting: a leading checkbox carrying the title,
+    /// greyed with `grey` as its reason, and an empty footprint so
+    /// the reach column still lines up (#2439, #3089).
+    init(
+        title: String,
+        help: String?,
+        isOn: Binding<Bool>,
+        grey: String? = nil,
+        @ViewBuilder reach: () -> Reach
+    ) {
+        self.init(
+            title: title,
+            help: help,
+            reach: reach,
+            control: { EmptyView() }
+        )
+        checkbox = isOn
+        checkboxGrey = grey
     }
 }

@@ -114,32 +114,8 @@ extension SettingsValueReadout {
                     new: behaviourMouseResize(after.mouseResize)
                 )
             ]
-        // Three states (#3089): unset follows All profiles, whose
-        // value is app-wide and no draft's to narrate.
-        case .tilingOffHidesBorders:
-            return [
-                tilingRow(
-                    census,
-                    old: before.tiling.offHidesBorders,
-                    new: after.tiling.offHidesBorders
-                )
-            ]
-        case .tilingOffHidesBars:
-            return [
-                tilingRow(
-                    census,
-                    old: before.tiling.offHidesBars,
-                    new: after.tiling.offHidesBars
-                )
-            ]
-        case .tilingStart:
-            return [
-                tilingRow(
-                    census,
-                    old: before.tiling.start,
-                    new: after.tiling.start
-                )
-            ]
+        case .tilingStart, .tilingOffHidesBorders, .tilingOffHidesBars:
+            return tilingRows(key, census, old: old, new: new)
         // Lua-only (#3008): no draft writes the per-Space values,
         // and the app-wide ones are undrafted.
         case .tilingStartOverride, .tilingStartGlobal,
@@ -183,20 +159,6 @@ extension SettingsValueReadout {
     }
 
     // MARK: - Helpers
-
-    /// A tiling-off row: follows, on or off (#3089).
-    private static func tilingRow(
-        _ census: SettingKey,
-        old: Bool?,
-        new: Bool?
-    ) -> SettingsDiffRow {
-        .change(
-            census,
-            label: label(for: census),
-            old: TilingOffWords.value(old),
-            new: TilingOffWords.value(new)
-        )
-    }
 
     private static func behaviourToggleRow(
         _ census: SettingKey,

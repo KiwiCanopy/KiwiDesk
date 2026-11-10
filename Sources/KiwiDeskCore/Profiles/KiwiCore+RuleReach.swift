@@ -63,11 +63,14 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         modeCycle: RuleReachTable<[LayoutMode]>,
         focusWrap: RuleReachTable<FocusWrap>,
         tilingStart: RuleReachTable<Bool> = .tilingStart(
-            base: true,
+            base: AppWideSettings().tilingStartGlobal,
             overrides: []
         ),
         tilingOffHides: RuleReachTable<Bool> = .tilingOffHides(
-            base: (false, false),
+            base: (
+                AppWideSettings().tilingOffHidesBorders,
+                AppWideSettings().tilingOffHidesBars
+            ),
             overrides: []
         ),
         tileRules: RuleReachTable<[String]>,

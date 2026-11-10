@@ -141,6 +141,13 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// Redraws the bars and rings a tick hides, for a tick that
+    /// moved with no pass of its own (#3089).
+    func repaintTilingOffStandDowns() {
+        updateBars()
+        updateBorders()
+    }
+
     /// Whether the Space `display` shows has tiling off and the
     /// profile hides the bars for it — `shelfStandsDown`'s one
     /// tiling-off read (bars.md).

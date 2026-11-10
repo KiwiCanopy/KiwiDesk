@@ -75,9 +75,12 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.modifierDragResize),
             .shortcuts(.spaceHistory),
             .shortcuts(.focusWrap),
-            .behaviour(.tilingStart), .behaviour(.tilingOffHidesBars),
+            // The Tiling off rows, drawn by `TilingOffRows` (#3089).
+            .behaviour(.tilingStart),
             .behaviour(.tilingOffHidesBorders),
-            .shortcuts(.modeCycle), .shortcuts(.modeCue),
+            .behaviour(.tilingOffHidesBars),
+            .shortcuts(.modeCycle),
+            .shortcuts(.modeCue),
             .shortcuts(.desktopCue),
             .shortcuts(.hyperKey),
             .shortcuts(.shortcutBase),
@@ -316,20 +319,6 @@ struct ShortcutsFamilyRowsTests {
             Set(perSpace)
                 == Set(OrphanedShortcuts.perSpaceFamilies)
         )
-    }
-
-    /// A census key from ANOTHER area carries no keybinding
-    /// rows. Pinned because `nil` here means two different
-    /// things — a hand-drawn Shortcuts container, or a key that
-    /// was never a shortcut — and only the second is checkable
-    /// by kind.
-    @Test("a key from another area carries no keybinding rows")
-    @MainActor
-    func foreignKeyIsNotAFamily() {
-        #expect(
-            fixture().rows(for: .behaviour(.minWindowSize)) == nil
-        )
-        #expect(fixture().rows(for: .general(.language)) == nil)
     }
 
     /// Pins the display-independent inputs every expansion

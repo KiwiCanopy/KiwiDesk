@@ -6448,8 +6448,9 @@ KiwiDesk.set_tiling(false, 3)
 the profile ([`tiling.set_start`](#tilingset_start)) nor the Space
 says. Default `true`. A Space whose tiling a toggle set keeps that
 choice; every other Space follows the new value at once.
-App-wide, for this session only. Settings stores it as the "Spaces
-start with tiling on" row's All profiles value.
+App-wide, for this session only; it never reaches a file. The
+stored value is the "Spaces start with tiling on" row's All
+profiles value, under Shortcuts & Gestures ▸ Size & float.
 
 **Example:**
 
@@ -6467,7 +6468,9 @@ KiwiDesk.set_tiling_start_global(false)
 on, or with a Space id whether that Space does. A Space's value
 wins over the profile's, and the profile's over
 [`set_tiling_start_global`](#set_tiling_start_global); `nil`
-removes the value, so the level above decides. A Space whose
+removes the value, so the level above decides. The profile's
+value is the "Spaces start with tiling on" row's own entry for that
+profile; the Space form has no row. A Space whose
 tiling a toggle set keeps that choice; every other Space follows a
 new value at once.
 
@@ -6486,7 +6489,7 @@ tiling.set_start(false, "Share")
 **Does:** sets whether a Space with tiling off hides its focus
 border, for every profile without its own value — the All profiles
 value of Settings' "Hide the focus border while tiling is off"
-row. Default `false`. A profile's own value wins. For this session
+row under Shortcuts & Gestures ▸ Size & float. Default `false`. A profile's own value wins. For this session
 only. Sticky and floating marks stay.
 
 **Example:**
@@ -6504,7 +6507,7 @@ tiling.set_off_hides_borders(true)
 **Does:** sets whether a Space with tiling off hides the bars on
 its screen, for every profile without its own value — the All
 profiles value of Settings' "Hide the bars while tiling is off"
-row. Default `false`. A profile's own value wins. For this session
+row under Shortcuts & Gestures ▸ Size & float. Default `false`. A profile's own value wins. For this session
 only. Where the Space Bar is hidden, the menu-bar item shows the
 Space with the pause symbol.
 

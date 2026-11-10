@@ -125,23 +125,37 @@ struct TilingOffReachTests {
     @Test("a Settings write of the start base retiles an untoggled Space")
     func baseSaveRetiles() throws {
         let core = try makeCore()
-        #expect(!core.isTilingOff(space))
+        for raw: UInt32 in [1, 2] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(id: WindowID(raw), pid: 1, appName: "A")
+                )
+            )
+        }
+        core.setAppWide(persisting: true) { $0.tilingStartGlobal = false }
+        #expect(core.isTilingOff(space))
+        var issued: [WindowID: CGRect] = [:]
+        core.tiler.animation.apply = { id, frame, _ in issued[id] = frame }
         var snapshot = try #require(core.ruleReachSnapshot())
         snapshot.tilingStart.apply(
             Table.tilingStartKey,
-            value: false,
+            value: true,
             reach: .shared(joining: []),
             editing: "Work"
         )
         try core.saveRuleReach(snapshot)
-        #expect(!core.appWide.tilingStartGlobal)
-        #expect(core.isTilingOff(space))
-        #expect(core.state.placementMode(of: space) == .floating)
+        #expect(core.appWide.tilingStartGlobal)
+        #expect(!core.isTilingOff(space))
+        // The resume lays the row out: both windows were sent the
+        // frames their layout draws.
+        let slots = core.tiler.placedFrames(state: core.state)
+        #expect(issued[WindowID(1)] == slots[WindowID(1)])
+        #expect(issued[WindowID(2)] == slots[WindowID(2)])
+        #expect(issued[WindowID(1)] != nil)
         let stored = try #require(core.guiConfigStore.load()?.appWide)
-        #expect(!stored.tilingStartGlobal)
-        #expect(
-            try core.profiles.read(name: "Work").settings.tiling.start == nil
-        )
+        #expect(stored.tilingStartGlobal)
+        let work = try core.profiles.read(name: "Work")
+        #expect(work.settings.tiling.start == nil)
     }
 
     @Test("a listed tick lands in that profile alone, the base kept")

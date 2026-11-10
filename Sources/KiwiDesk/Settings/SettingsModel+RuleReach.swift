@@ -273,7 +273,7 @@ extension SettingsModel {
         // The base is app-wide, stamped at the write; the page's own
         // values go back as the profile keeps them (#3089).
         if let page = reachProfile {
-            sidecar.settings.tiling = sparseTilingToggle(
+            sidecar.settings.tiling = encodedTilingToggle(
                 config.settings.tiling,
                 in: reach,
                 for: page

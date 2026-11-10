@@ -127,8 +127,11 @@ the slot list alone (`BorderTravelerFocusTests` ▸
 
 ## Tiling off hides the rings only on its tick (#3008)
 
-A Space with tiling off keeps its rings unless the profile's
-`tiling.off_hides_borders` tick is on; then `desiredBorderSpecs`
+A Space with tiling off keeps its rings unless the
+`tiling.off_hides_borders` tick resolves on — the profile's own
+value, else the app-wide base, read through
+`TilingToggleSettings.offHidesBorders(base:)` (#3089); then
+`desiredBorderSpecs`
 returns none for it, through the one named
 `KiwiCore.tilingOffHidesRings(on:)` — never a read of the tick or
 the toggle beside it. Sticky and floating marks stay: the tick

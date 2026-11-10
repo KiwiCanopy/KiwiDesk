@@ -1875,6 +1875,17 @@ draft and committed as one, and a wholesale re-apply never
 reaches a standing temporary layout from Settings. A second
 door into the loaded profile as a stored target reopens that.
 
+**A reach family whose base is app-wide writes that base only
+through the Save's `settleTilingToggle` (#3089)** — the tiling-off
+families, whose base is `gui.json`'s `tiling` group: it stores a
+touched base with `setAppWide(persisting: true)`, after the files,
+and the live profile's own values follow the file it wrote there,
+never a GUI commit, which keeps live's values while a checklist
+reads (`keepingLiveTilingToggle`). The draft decides nothing of its
+own: the sidecar reads the encoded tables' entries
+(`TilingOffRowsTests`, `TilingOffReachTests`). A further such
+family takes the same door.
+
 **A Settings Save may write OTHER profiles' files and the shared
 base (#1393).** An App Rules row's "Applies to" checklist
 reaches every profile it names, so a Save on any target writes

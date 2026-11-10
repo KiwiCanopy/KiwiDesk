@@ -40,9 +40,10 @@ extension KiwiCore {
     }
 
     /// After a Save's files landed: stores each touched base
-    /// app-wide, has the live profile's own values follow the file
-    /// just written, and lays the Spaces out under the result, an
-    /// explicit apply as the `tiling.*` verbs' (AGENTS.md §5).
+    /// app-wide and has the live profile's own values follow the
+    /// file just written. A moved start lays the Spaces out, an
+    /// explicit apply as the `tiling.*` verbs' (AGENTS.md §5); a
+    /// moved tick only repaints what it hides.
     func settleTilingToggle(
         start: RuleReachTable<Bool>,
         hides: RuleReachTable<Bool>,
@@ -80,17 +81,21 @@ extension KiwiCore {
                 }
             }
         }
+        var startMoved = bases.contains(Table.tilingStartKey)
         if let stored = live?.settings.tiling {
-            // The page committed its own value; the file is the
-            // truth now, so a later base change reaches live too.
+            // The file is the truth now, so a later base change
+            // reaches live too; the hide bases repaint through
+            // `appWideLiveChanged`.
             var toggle = tiler.settings.tiling
+            startMoved = startMoved || toggle.start != stored.start
             toggle.start = stored.start
             toggle.offHidesBorders = stored.offHidesBorders
             toggle.offHidesBars = stored.offHidesBars
             if toggle != tiler.settings.tiling {
                 tiler.settings.tiling = toggle
+                if !startMoved { repaintTilingOffStandDowns() }
             }
         }
-        retile(pass: .apply)
+        if startMoved { retile(pass: .apply) }
     }
 }

@@ -252,9 +252,9 @@ extension InterpolatedLabelTests {
         //    the sentence would have named a control that no
         //    longer exists under that name in any locale.
         "keybinding.toggle_display_sticky.help": 1,
-        // #761: a bar shortcut's grey names the segments and, for
-        // the App Bar, the layouts that carry it.
+        // #761, #3089: a bar grey names the segments and layouts.
         "keybinding.toggle_space_bar.inert_link": 2,
+        "shortcuts.tiling_off.bars_link": 2, "space_override.inherits_page": 1,
         "kiwishelf.show.space_bar.beside_always": 1,
         "kiwishelf.show.app_bar.beside_always": 1,
         "kiwishelf.show.pocket.beside_always": 2,  // #2978

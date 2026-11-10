@@ -446,8 +446,10 @@ twice, was a question the user answered twice. The argument is
   reader routing beside either is review's, since nothing scans for
   it.
   A Space with tiling off stands the shelf down only where the
-  profile's `tiling.off_hides_bars` tick asks, through the one
-  named `KiwiCore.tilingOffHidesShelf(on:)` inside
+  `tiling.off_hides_bars` tick resolves on — the profile's own
+  value, else the app-wide base, through
+  `TilingToggleSettings.offHidesBars(base:)` (#3089) — through the
+  one named `KiwiCore.tilingOffHidesShelf(on:)` inside
   `shelfStandsDown` (#3008); its one other reader is the menu-bar
   Space mark, which lists that screen (`TilingOffPlacementSeamTests`).
   `ShelfStandDownSeamTests` holds the bar-building files to that,

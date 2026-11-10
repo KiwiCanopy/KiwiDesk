@@ -39,49 +39,60 @@ struct TilingOffRowsTests {
         )
     }
 
-    private func readout(
-        _ key: BehaviourKey,
-        _ old: TilingToggleSettings,
-        _ new: TilingToggleSettings
-    ) -> [SettingsDiffRow] {
-        var before = GuiConfig()
-        before.settings.tiling = old
-        var after = GuiConfig()
-        after.settings.tiling = new
-        return SettingsValueReadout.rows(
-            for: .behaviour(key),
-            old: before,
-            new: after
-        )
-    }
-
     @Test("the readouts narrate follows, on and off against an Off base")
     func threeStateReadouts() throws {
         LocalizationManager.shared.select("en")
         let model = try makeModel()
         #expect(!model.tilingStartBase)
-        #expect(!model.tilingStartOn)
-        let follows = TilingToggleSettings()
-        var on = follows
-        on.start = true
-        on.offHidesBorders = true
-        on.offHidesBars = true
-        var off = follows
-        off.start = false
-        off.offHidesBorders = false
-        off.offHidesBars = false
+        let draft = model.config
+        #expect(draft.appWide?.tilingStartGlobal == false)
+        var on = draft
+        on.settings.tiling.start = true
+        on.settings.tiling.offHidesBorders = true
+        on.settings.tiling.offHidesBars = true
+        var off = draft
+        off.settings.tiling.start = false
+        off.settings.tiling.offHidesBorders = false
+        off.settings.tiling.offHidesBars = false
+        let follows = "follows All profiles · Off"
         for key in [
             BehaviourKey.tilingStart, .tilingOffHidesBorders,
             .tilingOffHidesBars,
         ] {
-            let toOn = try #require(readout(key, follows, on).first)
-            #expect(toOn.oldValue == "Same as all profiles")
+            let rows = { (old: GuiConfig, new: GuiConfig) in
+                SettingsValueReadout.rows(
+                    for: .behaviour(key),
+                    old: old,
+                    new: new
+                )
+            }
+            let toOn = try #require(rows(draft, on).first)
+            #expect(toOn.oldValue == follows)
             #expect(toOn.newValue == "On")
-            let toOff = try #require(readout(key, follows, off).first)
-            #expect(toOff.newValue == "Off")
-            let back = try #require(readout(key, off, follows).first)
-            #expect(back.newValue == "Same as all profiles")
+            let back = try #require(rows(off, draft).first)
+            #expect(back.oldValue == "Off")
+            #expect(back.newValue == follows)
         }
+        // The follow names the value it resolves to.
+        var onBase = draft
+        onBase.appWide?.tilingStartGlobal = true
+        let row = try #require(
+            SettingsValueReadout.rows(
+                for: .behaviour(.tilingStart),
+                old: onBase,
+                new: off
+            ).first
+        )
+        #expect(row.oldValue == "follows All profiles · On")
+    }
+
+    @Test("a live Save keeps a verb's session start it did not touch")
+    func liveSaveKeepsTheSessionStart() throws {
+        let model = try makeModel()
+        model.core.execute("tiling.set_start", args: [.bool(true)])
+        model.config.settings.resizeStep += 10
+        model.updateActiveProfile()
+        #expect(model.core.tiler.settings.tiling.start == true)
     }
 
     @Test("the loaded page follows; its switch reads the shared value")
@@ -126,8 +137,21 @@ struct TilingOffRowsTests {
         #expect(home.settings.tiling.offHidesBorders == nil)
     }
 
+    @Test("each grey names what makes its row work, and links there")
+    func greysLink() throws {
+        LocalizationManager.shared.select("en")
+        let bars = try #require(TilingOffWords.link(for: .noBarShows))
+        #expect(bars.destination == .bars)
+        #expect(bars.prose.contains(CrossReferenceRow.linkSlot))
+        #expect(bars.prose.hasPrefix("Works when the Space Bar or App Bar"))
+        let border = try #require(TilingOffWords.link(for: .focusBorderOff))
+        #expect(border.destination == .gapsAndBorders)
+        #expect(border.prose.contains(CrossReferenceRow.linkSlot))
+        #expect(TilingOffWords.link(for: .trackUnused) == nil)
+    }
+
     @Test("the hide rows grey where they would hide nothing")
-    func hideRowsGrey() {
+    func hideRowsGrey() throws {
         var config = GuiConfig()
         let gates = { ShortcutsGates(config: config) }
         #expect(
@@ -153,6 +177,15 @@ struct TilingOffRowsTests {
             gates().inertReason(for: .behaviour(.tilingOffHidesBars))
                 == .noBarShows
         )
+        // An App Bar that shows keeps the row live on its own.
+        let scrolling = try #require(
+            TilingSettings.appBarPath(for: .scrolling)
+        )
+        config.settings[keyPath: scrolling].visibility = .always
+        #expect(
+            gates().inertReason(for: .behaviour(.tilingOffHidesBars)) == nil
+        )
+        config.settings[keyPath: scrolling].visibility = .hidden
         config.settings.spaceBarStyle.visibility = .auto
         #expect(
             gates().inertReason(for: .behaviour(.tilingOffHidesBars)) == nil

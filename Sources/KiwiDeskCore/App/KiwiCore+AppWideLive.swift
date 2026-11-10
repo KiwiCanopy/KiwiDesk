@@ -27,6 +27,11 @@ extension KiwiCore {
         if new.tilingStartGlobal != old.tilingStartGlobal {
             mirrorTilingStart()
         }
+        if new.tilingOffHidesBorders != old.tilingOffHidesBorders
+            || new.tilingOffHidesBars != old.tilingOffHidesBars
+        {
+            repaintTilingOffStandDowns()  // #3089
+        }
         if new.modifierSides != old.modifierSides {
             keys.modifierSides = new.modifierSides
         }

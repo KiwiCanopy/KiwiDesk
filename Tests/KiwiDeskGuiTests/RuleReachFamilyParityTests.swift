@@ -37,12 +37,13 @@ struct RuleReachFamilyParityTests {
         "keyLayers": nil,
     ]
 
-    /// Families the apply helper does not resolve, with the reason.
-    private static let resolvedAtRead: Set<String> = [
-        // A profile's own value rides its `settings`, which the
-        // apply installs whole, and is read over the app-wide base
-        // where it is used (#3089, `TilingToggleSettings`).
-        "tilingStart", "tilingOffHides",
+    /// Families the apply helper does not resolve → the resolver
+    /// each Core reader calls instead. A profile's own value rides
+    /// its `settings`, which the apply installs whole, and is read
+    /// over the app-wide base where it is used (#3089).
+    private static let resolvedAtRead: [String: [String]] = [
+        "tilingStart": ["start(global:"],
+        "tilingOffHides": ["offHidesBorders(base:", "offHidesBars(base:"],
     ]
 
     /// `text` with every whitespace run one space, so a needle
@@ -190,13 +191,33 @@ struct RuleReachFamilyParityTests {
         let rules = try windowRuleOverridesInit()
         let body = helper + rules
         for family in try families() {
-            guard !Self.resolvedAtRead.contains(family),
+            guard Self.resolvedAtRead[family] == nil,
                 let fields = Self.profileField[family] ?? nil
             else { continue }
             for field in fields {
                 #expect(
                     body.contains("profile?.\(field)"),
                     "\(family) never resolves on a profile apply"
+                )
+            }
+        }
+    }
+
+    @Test("a family resolved at the read calls its resolver there")
+    func readResolversAreCalled() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+TilingToggle.swift"
+            )
+        let text = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        let found = try families()
+        for (family, needles) in Self.resolvedAtRead {
+            #expect(found.contains(family), "\(family) is no family")
+            for needle in needles {
+                #expect(
+                    text.contains(".\(needle)".filter { !$0.isWhitespace }),
+                    "\(family) is never read through \(needle)"
                 )
             }
         }
