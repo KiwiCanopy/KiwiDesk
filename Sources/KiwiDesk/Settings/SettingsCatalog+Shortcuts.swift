@@ -144,7 +144,9 @@ struct ShortcutsControls: Sendable {
         "Lua bindings"
     )
     /// The Mouse & Trackpad part (#3184) with its settings, then its
-    /// groups: a hit on a setting picks the part.
+    /// groups. A drawer no disclosure draws: a hit on a setting
+    /// "opens" it by picking the part (`ShortcutsSegmentTests` ▸
+    /// `hitPicksThePart`).
     let gestures = SettingsDrawer(
         "shortcuts.gestures.title",
         "Mouse & Trackpad",
