@@ -104,6 +104,11 @@ struct RuleReachSequenceKeyTests {
         #expect(
             KeyRivals(t).rival(of: key, for: "Home", combo: leader) == row
         )
+        // The other way round: a row asks a profile holding the tree.
+        #expect(t.rival(of: row, for: "Work", combo: leader) == key)
+        #expect(
+            KeyRivals(t).rival(of: row, for: "Work", combo: leader) == key
+        )
     }
 
     @Test("a tick never takes a chord across a sequence and a row")
