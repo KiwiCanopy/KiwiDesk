@@ -14374,13 +14374,24 @@ outside its scrolling list (owner, 2026-11-09). KiwiHub's
 Shortcuts side lists an end key by its path (past four keys, the
 leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
-card already do. A sequence has no "Applies to"
-column yet: the key table keys a row by its Lua, which a leader has
-none of, so a stored profile's Save, which writes through that
-table, would drop a sequence edited there. A sequence edited on the
-loaded profile's page is saved in the layer's shared rows, whole,
-so every profile without its own override has it, and the card is
-greyed, never hidden, while a stored profile is edited (#3124).
+card already do.
+:::
+
+:::unreleased
+*Amended (#3124, owner, 2026-11-10): a key sequence has a reach.*
+The key table keys a sequence by its layer and leader chord, its
+value the whole tree, so the leader's row carries an "Applies to"
+like any shortcut and the card edits on every profile's page: a
+profile holds or overrides the tree whole, never a key inside it.
+Ticking a profile where a key sequence and a row would share one
+chord is refused, the box greyed with the row it clashes with:
+taking the chord over would delete a whole tree there, or bury a
+row under one, without the user seeing either. A re-recorded leader
+keeps its reach, since the user moved the chord of one sequence
+rather than making another. Removing a sequence from Lua or the CLI
+is its own verb, `shortcut.remove_sequence`, destructive like
+`shortcut.remove`, because a whole tree goes with one call;
+`shortcut.remove` refuses a leader and names that verb.
 :::
 
 :::unreleased
@@ -15104,6 +15115,70 @@ takes the same rule along a line and across its lines, keeping
 the position (#2309 ruling 11). `JumpListTests`,
 `ViewPickListTests`, `JumpModelTests`, `JumpScopeModelTests` and
 `JumpPanelEventTests` hold it.
+
+:::unreleased
+**KiwiHub's app strip orders by recency because the order is on
+screen and the pick is explicit (#3135, owner ruling 2026-11-09).**
+[Rationale] #637 rejected recency for a *repeating* gesture: a ring
+that reorders itself under a key pressed again and again makes the
+third press land where nobody can predict, because the order it
+walks is history the user cannot see. #1840 kept Open or Focus a
+fixed ring for that reason, and #3131 deferred a recency order for
+`focus_app_window` for the same one. The strip is the other case.
+Its order is drawn before any key acts, snapshot when the panel
+opens and never moved while it is up, and nothing lands until ↩ or
+a click names the row. A step along the strip moves a selection the
+user is watching; it does not focus anything. That is the line:
+recency may order what is shown, never what a blind repeated key
+acts on. So the strip and `focus_app_window` never share an order.
+The hold-and-release form was ruled out on its costs — ⌘⇥ and
+⌃⌥J ↩ already flip back in one tap, the release raised a Secure
+Input spike and picked early on a slipped key, it lost ⌥↩ Swap,
+and it was harder to follow with VoiceOver — and on the ruling's
+own line that a pick by recency is a deliberate press.
+
+Narrowing to one app squares with #2103's "the switcher orders and
+never filters". That rule keeps a lens from hiding windows the user
+did not ask to hide: a filter the user did not set would make other
+apps' windows unfindable from KiwiDesk. The strip narrows only to
+an app the user picked, or the app the last-app shortcut was
+pressed for, and All stays on the same strip: ⌃⌥J and every query
+start there, and ← or a click reaches it from any tile. No window
+is out of reach and none is dropped behind the user's back. Search
+keeps the same guarantee: typing returns the strip to All, so a
+query always covers every window, and a tile with no match dims in
+place rather than leaving the strip. Filtering inside one app was
+rejected, because a query that empties one app's list ("No windows
+match in Xcode") is a dead end the user has to back out of, where
+All with dimmed tiles shows at once which apps hold a match.
+
+← → belong to the strip whether or not a query is typed (owner
+amendment on #3135): under a query they step through only the apps
+with a match, so a query narrowed to one app is a key away, and a
+dimmed tile is never landed on. The field gives up its in-text
+cursor movement for it, which costs little because a query is a
+few letters typed and corrected from the end.
+
+The opener is its own verb, `kiwihub.show_last_app`, rather than an
+option on `kiwihub.show`: a side and an opening are two questions,
+and an option would put a second meaning on a call every existing
+binding and `UIBridgeHooks` field already spells one way. It lands
+on the window Core last saw focused, never on row 1, which a lens
+reorders. It is seeded on ⌥⇥ (owner, 2026-11-09), off the ⌃⌥ ladder
+like ⌘⌘: the chord sits beside ⌘⇥ for the same "go back" job, and a
+page's ⌥⇥ item-to-item move in Safari is the cost a user meets.
+Pressed again while the switcher is up it steps the strip to the
+next app, ⇧ stepping back, as ⌘⇥ steps macOS's switcher (owner,
+2026-11-09). The back key is the opener's own chord with ⇧, read from
+the live bindings, never a chord of its own: a rebound opener takes
+its back key with it, and the ⇧ form is never registered system-wide,
+so the app in front keeps it until the switcher is up. A separate
+back shortcut was weighed and left out for the same two reasons — it
+would drift from a rebound opener, and claim a second chord from
+every app. That is no blind gesture: each press moves a selection
+drawn before it, and nothing lands until ↩ — releasing ⌥ picks
+nothing, so the hold-and-release form stays ruled out.
+:::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**

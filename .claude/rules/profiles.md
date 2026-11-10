@@ -56,8 +56,10 @@ because two real clients now remove drift — see
   pressed exception rides `⌥⌘`". Every other pressed verb off
   the ladder — the toggles, the layout cycle, app chrome — stays on
   the base tier as a mnemonic letter, save the Pocket's list on
-  `⌃⌥⌘P` (#2974), the one letter on `⌃⌥⌘`, a further one being a
-  ruling of its own (`SizeLayerSeedTests` ▸
+  `⌃⌥⌘P` (#2974), the one letter on `⌃⌥⌘`, and the window
+  switcher's last-app opener on `⌥⇥` (#3135, owner 2026-11-09),
+  which no base moves, a further one being a ruling of its own
+  (`WindowSwitcherLastAppSeedTests`, `SizeLayerSeedTests` ▸
   `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
   `LayoutCycleSeedTests`).
 - **App chrome is seeded from the ONE `appChromeRows`, and
@@ -207,16 +209,26 @@ its `steps` with it. A new reader classifies itself in
 `KeySequenceReaderCensusTests` (Core) or
 `KeySequenceGuiReaderCensusTests` (the GUI tree). A profile holds
 or overrides a whole sequence, never a key inside one
-(`KeySequenceReaderTests`). A writer of a sequence from Settings
-saves it whole through the loaded profile's layer rows, never
-through the key table (`KeySequenceCardSaveTests`), and a Save of
-that page keeps a sequence the profile's own override holds out of
-the shared base (`KeySequenceCardSaveTests` ▸ `ownSequenceStaysOwn`).
-Until a sequence has a reach (#3124), the Key sequences card stays
-greyed on a stored profile's page and where the loaded profile keeps
-its own sequences in the layer (`KeySequenceCardTests` ▸
-`storedPageGreys`, `KeySequenceCardSaveTests` ▸ `editBlocks`); the
-argument is `docs/design-decisions.md`'s #1871 amendment.
+(`KeySequenceReaderTests`). A reader of the
+key reach table asking what chord a key holds, or whether a key is a
+sequence, goes through `RuleReach+KeySequences` (`chord(of:value:)`,
+`leader(of:)`, `key(of:layer:)`, `clashes`) — a sequence is keyed
+there by its layer and leader chord, its value the whole tree
+(#3124) — never `keyParts(…).lua` read as an action or a value read
+as a combo; a new `keyParts(` reader classifies itself in
+`KeyPartsReaderCensusTests` (`RuleReachSequenceKeyTests` holds the
+helpers). A Save of a page keeps a sequence the profile's own
+override holds out of the shared base (`KeySequenceCardSaveTests` ▸
+`ownSequenceStaysOwn`), and a stored page's sequence lands in that
+profile (`KeySequenceReachSaveTests`). A tick where a sequence and a
+row would share a chord is refused, never a takeover
+(`KeySequenceReachSaveTests` ▸ `clashingTickIsRefused`); a writer
+that changes a leader's chord carries its reach through
+`carrySequenceReach` (`KeySequenceReachSaveTests` ▸
+`reRecordCarriesTheReach`); a CLI or Lua removal of a sequence is
+`shortcut.remove_sequence`, and `shortcut.remove` refuses a leader
+by naming it (`ShortcutSequenceCommandsTests`). The argument is
+`docs/design-decisions.md`'s #1871 and #3124 amendments.
 
 **A writer that compares or copies what a binding says of itself
 goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`

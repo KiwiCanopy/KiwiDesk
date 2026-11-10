@@ -14,7 +14,8 @@ enum MCPWording {
     /// Shortcuts load only from saved files, so their verbs save at
     /// once (#1685 ▸ Ruling 6c): the model asks before writing.
     static let shortcutsSave =
-        "shortcut.set and shortcut.remove save at once and are not "
+        "shortcut.set, shortcut.remove and shortcut.remove_sequence "
+        + "save at once and are not "
         + "undone by a reload: show the user the whole mapping and get "
         + "a yes before calling them."
 

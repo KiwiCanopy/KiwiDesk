@@ -36,16 +36,12 @@ extension SettingsModel {
                 stored.keyLayers,
                 encoded.keyLayers,
                 editing: editing,
+                // A key sequence's edit has no ↺ of its own (#1871),
+                // so its reach has none either (#3124).
+                revertable: { !RuleReachTable<String>.isSequenceKey($0) },
                 explained: explainedBySwitch,
-                name: { key in
-                    encoded.keyTemplates[key].map {
-                        KeybindingCatalog.localizedName(
-                            of: $0,
-                            config: config
-                        )
-                    } ?? RuleReachTable<String>.keyParts(key).lua
-                },
-                describe: { ShortcutsReferenceBuilder.glyphs($0) }
+                name: { keyName($0, templates: encoded.keyTemplates) },
+                describe: Self.keyValueWords
             )
     }
 
@@ -74,7 +70,7 @@ extension SettingsModel {
         _ stored: RuleReachTable<V>,
         _ encoded: RuleReachTable<V>,
         editing: String,
-        revertable: Bool = true,
+        revertable: (String) -> Bool = { _ in true },
         explained: (V?, V?) -> Bool = { _, _ in false },
         name: (String) -> String = {
             KeybindingCatalog.displayName(forBundleID: $0)
@@ -166,7 +162,7 @@ extension SettingsModel {
             }
             // The app's rule and its reach go back as one (#792).
             for var row in appRows {
-                row.revert = revertable ? .ruleReach(app: app) : .none
+                row.revert = revertable(app) ? .ruleReach(app: app) : .none
                 result.append(row)
             }
         }
@@ -235,5 +231,26 @@ extension SettingsModel {
                 "New profiles won't get this setting"
             )
         }
+    }
+}
+
+extension SettingsModel {
+    /// A shortcut key's name in the reach rows and checklists: its
+    /// row's, or a key sequence's (#3124).
+    func keyName(_ key: String, templates: [String: KeyBinding]) -> String {
+        guard let row = templates[key] else {
+            return RuleReachTable<String>.leader(of: key)
+                .map(ShortcutsReferenceBuilder.glyphs)
+                ?? RuleReachTable<String>.keyParts(key).lua
+        }
+        return KeybindingCatalog.localizedName(of: row, config: config)
+    }
+
+    /// A shortcut key's value in words: its chord, a key sequence's
+    /// leader (#3124).
+    static func keyValueWords(_ value: String) -> String {
+        let chord =
+            RuleReachTable<String>.sequenceTree(value)?.combo ?? value
+        return ShortcutsReferenceBuilder.glyphs(chord)
     }
 }

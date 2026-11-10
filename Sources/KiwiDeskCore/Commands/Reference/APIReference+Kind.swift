@@ -66,6 +66,7 @@ extension APIReference {
         // Wears a look's values live, as its setters would.
         "look.apply": .setting,
         "shortcut.remove": .setting,
+        "shortcut.remove_sequence": .setting,
         "look.save": .setting,
         "look.delete": .setting,
         "kiwivision.define_lens": .setting,

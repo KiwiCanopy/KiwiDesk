@@ -319,7 +319,7 @@ public enum APIReference {
             "set_clear_wallpaper", "set_clear_app", "set_never_dimmed",
             "set_maximize", "define_lens", "delete_lens",
         ],
-        "kiwihub": ["show", "set_key"],
+        "kiwihub": ["show", "show_last_app", "set_key"],
         "look": [
             "list", "current", "apply", "save", "delete",
         ],
@@ -327,7 +327,9 @@ public enum APIReference {
             "list", "set_space", "remove_space", "set_float",
             "remove_float",
         ],
-        "shortcut": ["list", "set", "remove", "list_groups"],
+        "shortcut": [
+            "list", "set", "remove", "remove_sequence", "list_groups",
+        ],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).

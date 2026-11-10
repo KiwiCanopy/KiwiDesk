@@ -7049,6 +7049,22 @@ selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
+:::unreleased
+Above the list sits the **app strip**: **All** first, then one tile
+per app the list holds and per app you brought forward since
+KiwiDesk started that is still running with no window, most
+recently used first, with a count on an app with two windows or
+more. **←** and **→** move along it and a click picks a tile; the
+list then holds that app's windows alone, its most recent window
+selected. An app with no window shows **No windows**, and
+**Return** or a click opens it again, as
+[focus_or_spawn](#focus_or_spawn) does. Typing puts the strip back
+on **All** and dims each app with no match; **←** and **→** then
+step through the apps with a match, never the text, and narrow the
+matches to that app. [kiwihub.show_last_app](#kiwihubshow_last_app)
+opens this side with the strip on the app of the window you used last.
+:::
+
 The `"view"` side is the **view picker**, three lines in one
 panel, the current item on each marked ✓. The menu bar's **Open
 KiwiHub…** row opens it too, its bound combo shown beside that
@@ -7163,6 +7179,30 @@ KiwiDesk.bind("alt+space", function()
     kiwihub.show("windows")
 end)
 ```
+
+:::unreleased
+### kiwihub.show_last_app
+
+**Expects:** nothing.
+
+**Does:** opens KiwiHub's window switcher with its app strip on
+the app of the window you used last, that window selected — while
+a [KiwiVision lens](#kiwivisiondefine_lens) is on too — so
+**Return** goes back to it. It switches to the window switcher from
+another side. Pressed again while the window switcher is up, it
+steps the app strip to the next app, as **→** does, and the same
+key with **⇧** steps back (**⇧⌥⇥** by default); **Esc** closes
+KiwiHub.
+It is bound to `⌥⇥` by default, listed under Shortcuts & Gestures ▸
+KiwiHub as **Show window switcher for last app**.
+Over the CLI it is `kiwidesk kiwihub.show_last_app`.
+
+```lua
+KiwiDesk.bind("ctrl+alt+y", function()
+    kiwihub.show_last_app()
+end)
+```
+:::
 
 ### kiwihub.set_key
 
@@ -7769,8 +7809,9 @@ the leader's modifiers still held, `w` does not fire, and
 and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
-and is flagged. The CLI can neither bind nor remove a sequence. In
-Settings, Shortcuts & Gestures ▸ Key sequences records one.
+and is flagged. The CLI cannot bind a sequence;
+`shortcut.remove_sequence` removes one. In Settings, Shortcuts &
+Gestures ▸ Key sequences records one.
 Under Secure Input see
 [Accepted Limitations](accepted-limitations.md).
 
@@ -7879,12 +7920,33 @@ chord, is refused; remove the old binding first.
 **Does:** unbinds it, from every profile holding it when it is a
 shared shortcut. A chord with no shortcut is refused.
 
+:::unreleased
+A chord that opens a key sequence is refused: remove it with
+`shortcut.remove_sequence`.
+:::
+
 **Example:**
 
 ```lua
 shortcut.set("ctrl+alt+h", "focus", "left")
 shortcut.remove("ctrl+alt+h")
 ```
+
+:::unreleased
+#### shortcut.remove_sequence
+
+**Expects:** the chord that opens a key sequence.
+
+**Does:** removes that sequence from the default layer, with every
+key under it, from every profile holding it when it is shared, and
+saves at once. A chord that opens no sequence is refused.
+
+**Example:**
+
+```lua
+shortcut.remove_sequence("ctrl+alt+space")
+```
+:::
 
 #### shortcut.list_groups
 

@@ -97,6 +97,9 @@ struct RuleReachChecklist: View {
         // A shortcut's box greys where its layer is not (#2022): a
         // tick there would make the layer of one row.
         let lacking = reading.lacking.contains(profile)
+        // A key sequence on either side of a taken chord refuses the
+        // tick (#3124 ▸ Ruling 1).
+        let clashing = reading.clashing.contains(profile)
         return VStack(alignment: .leading, spacing: 1) {
             Toggle(
                 isOn: Binding(
@@ -112,12 +115,21 @@ struct RuleReachChecklist: View {
                 }
             }
             .toggleStyle(.checkbox)
-            .disabled(locked || follows || lacking)
+            .disabled(locked || follows || lacking || clashing)
             .help(hint(locked: locked, follows: follows))
             if lacking {
                 caption(
                     LayerReachWords.lacking(
                         RuleReachTable<String>.keyParts(app).layer
+                    ),
+                    warning: true
+                )
+            } else if clashing, let taker = reading.takenBy[profile] {
+                caption(
+                    L(
+                        "app_rules.reach.key_sequence_clash",
+                        "⚠ Key is used for %1$@; remove it there first",
+                        taker
                     ),
                     warning: true
                 )

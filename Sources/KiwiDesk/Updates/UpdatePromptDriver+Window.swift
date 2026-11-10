@@ -73,6 +73,21 @@ extension UpdatePromptDriver {
         }
     }
 
+    /// Answers a scheduled offer never shown Later, so the user's
+    /// check that starts at the cycle's end reads the feed afresh
+    /// (#3139). Only before its download: Sparkle resumes a
+    /// downloaded or installing update without a fetch. Every
+    /// stage it drops must end Sparkle's cycle, or the flag waits.
+    func dropParkedOffer() -> Bool {
+        guard prompts.updatePending, let window,
+            window.session.phase == .found,
+            window.session.downloadsOnInstall
+        else { return false }
+        checksAtCycleEnd = true
+        window.session.later()
+        return true
+    }
+
     /// Shows the offer: it got the user's attention.
     func presentWindow() {
         prompts.offerGotAttention()

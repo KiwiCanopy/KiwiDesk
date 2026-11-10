@@ -315,6 +315,10 @@ extension APIReference {
                 + "it if that side is open.",
             .choice("side", KiwiHubSide.self)
         ),
+        "show_last_app": APIRecord(
+            "Opens the window switcher on the app used last, or steps "
+                + "it to the next app while it is up."
+        ),
         "set_key": APIRecord(
             "Sets a second chord for a KiwiHub navigation key; no "
                 + "chord clears it.",

@@ -79,6 +79,13 @@ struct ShortcutsPanelNounTests {
             opener: "keybinding.show_window_switcher",
             translated: true
         ),
+        // The switcher's last-app opener names the same panel
+        // (#3135).
+        Pair(
+            panelName: "jump.panel.ax_label",
+            opener: "keybinding.show_window_switcher_last_app",
+            translated: true
+        ),
         Pair(
             panelName: "view_picker.panel.ax_label",
             opener: "keybinding.show_view_picker",
@@ -117,11 +124,11 @@ struct ShortcutsPanelNounTests {
 
     @Test(
         "the panel's own name is the noun its opener uses",
-        arguments: pairs.map(\.panelName)
+        arguments: pairs.map(\.opener)
     )
-    func oneNounPerCatalog(panelName: String) throws {
+    func oneNounPerCatalog(opener: String) throws {
         let pair = try #require(
-            Self.pairs.first { $0.panelName == panelName }
+            Self.pairs.first { $0.opener == opener }
         )
         var compared = 0
         for locale in try Self.catalogNames() {

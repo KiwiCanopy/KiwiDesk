@@ -29,10 +29,13 @@ extension KiwiCore {
     /// inside the press grace.
     /// A rule-placed window that arrived after the press and before
     /// this activation is paid here rather than owed.
+    /// Every activation first stamps its app's recency, which
+    /// KiwiHub's app strip orders by (#3135).
     func noteAppActivation(
         _ activation: AppActivation,
         now: Date = Date()
     ) {
+        state.stampAppRecency(activation.pid)
         if launchFollow.owed(at: now) != activation.bundleID {
             launchFollow.forget(keeping: activation.bundleID)
         }

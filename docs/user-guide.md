@@ -993,6 +993,12 @@ which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
 :::unreleased
+`⌥⇥` opens the window switcher on the app of the window you used
+last, that window selected
+([`kiwihub.show_last_app`](lua-reference.md#kiwihubshow_last_app)).
+:::
+
+:::unreleased
 `⌘⌘`, either ⌘ tapped twice (the same key both times), opens
 KiwiHub's **Desktop overview**, and closes it again. While KiwiHub
 has the keyboard, only a modifier tap set to one of its sides
@@ -1183,9 +1189,10 @@ own. Ticking a profile that uses the key for something else
 gives the key to this shortcut there.
 
 :::unreleased
-A key sequence has no **Applies to**: every profile without its
-own override uses it, and it is edited on the loaded profile's
-page.
+A key sequence's **Applies to** is on its first key's row and
+covers the whole sequence. Where a sequence and a shortcut would
+share one key in a profile, that profile cannot be ticked: the key
+is never taken over.
 :::
 
 A new layer also carries the `⌃⌥,` Open Settings row.

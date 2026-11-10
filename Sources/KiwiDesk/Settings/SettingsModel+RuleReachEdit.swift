@@ -37,10 +37,12 @@ extension SettingsModel {
                 key,
                 reach.unreadable,
                 picked: reachEdits.reach[.key]?[key],
-                { ShortcutsReferenceBuilder.glyphs($0) }
+                Self.keyValueWords
             )
         else { return nil }
-        row.takenBy = keyTakers(key, editing: row.editing)
+        let takers = keyTakers(key, editing: row.editing)
+        row.takenBy = takers.names
+        row.clashing = takers.clashing
         let layer = RuleReachTable<String>.keyParts(key).layer
         if let layerRow = layerReach(layer) {
             row.lacking = Set(row.profiles).subtracting(layerRow.users)
@@ -75,28 +77,31 @@ extension SettingsModel {
         )
     }
 
-    /// Who binds this row's combo to another action, per profile,
-    /// read off the encoded table — the action ticking would take
-    /// the key from.
+    /// Who binds this row's chord to another key, per profile, read
+    /// off the encoded table — the one ticking would take the chord
+    /// from — and where that is refused: a key sequence on either
+    /// side, which a tick never takes nor loses (#3124 ▸ Ruling 1).
     private func keyTakers(
         _ key: String,
         editing: String
-    ) -> [String: String] {
+    ) -> (names: [String: String], clashing: Set<String>) {
         guard let reach = encodedReach, let rivals = encodedKeyRivals
-        else { return [:] }
+        else { return ([:], []) }
         let table = reach.keyLayers
-        guard let combo = table.resolved(key, for: editing), !combo.isEmpty
-        else { return [:] }
-        var result: [String: String] = [:]
+        guard let value = table.resolved(key, for: editing), !value.isEmpty
+        else { return ([:], []) }
+        let combo = RuleReachTable<String>.chord(of: key, value: value)
+        var names: [String: String] = [:]
+        var clashing: Set<String> = []
         for profile in table.profiles where profile != editing {
             guard let rival = rivals.rival(of: key, for: profile, combo: combo)
             else { continue }
-            result[profile] =
-                reach.keyTemplates[rival].map {
-                    KeybindingCatalog.localizedName(of: $0, config: config)
-                } ?? RuleReachTable<String>.keyParts(rival).lua
+            names[profile] = keyName(rival, templates: reach.keyTemplates)
+            if RuleReachTable<String>.clashes(key, rival) {
+                clashing.insert(profile)
+            }
         }
-        return result
+        return (names, clashing)
     }
 
     /// Whether the column is drawn at all: a profile loaded, and
@@ -150,8 +155,11 @@ extension SettingsModel {
     ) {
         guard let row = reading(family, app), profile != row.editing
         else { return }
-        // A box greyed for a missing layer is refused here too.
-        if on && row.lacking.contains(profile) { return }
+        // A box greyed for a missing layer, or for a chord a key
+        // sequence clashes on, is refused here too.
+        let refused =
+            row.lacking.contains(profile) || row.clashing.contains(profile)
+        if on && refused { return }
         switch reach(family, app, row: row) {
         case .shared(let joining):
             // A tick under All profiles is a join the Save has not made
@@ -169,6 +177,20 @@ extension SettingsModel {
             let users =
                 on ? members.union([profile]) : members.subtracting([profile])
             setReach(family, app, .listed(users))
+        }
+    }
+
+    /// Moves the reach `old` has now — picked or stored — to `new`,
+    /// a pick equal to `new`'s own default being no pick (#3124).
+    func carryPick(_ family: RuleFamily, from old: String, to new: String) {
+        guard let row = reading(family, old) else { return }
+        let carried = reach(family, old, row: row)
+        reachEdits.reach[family]?[family.key(old)] = nil
+        reachEdits.removal[family]?[family.key(old)] = nil
+        if storedDefault(family, new) == carried {
+            reachEdits.reach[family]?[family.key(new)] = nil
+        } else {
+            setReach(family, new, carried)
         }
     }
 
@@ -262,83 +284,7 @@ extension SettingsModel {
         return row.shared ? .shared(joining: []) : .listed(row.users)
     }
 
-    /// The reach the draft encodes a row at when nothing is picked —
-    /// the encoder's own `RuleReachDraft.defaultReach`, one copy.
-    private func storedDefault(
-        _ family: RuleFamily,
-        _ app: String
-    ) -> RuleReach? {
-        guard let stored = layeredReach, let editing = reachProfile
-        else { return nil }
-        let key = family.key(app)
-        switch family {
-        case .space:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.appRules,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .float:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.floatRules,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .key:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.keyLayers,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .scroll:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.scrollGestures,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .history:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.spaceHistory,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .wrap:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.focusWrap,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .cycle:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.modeCycle,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .tile:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.tileRules,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        case .autoFloat:
-            return RuleReachDraft.defaultReach(
-                of: key,
-                in: stored.floatAutomatically,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            )
-        }
-    }
-
-    private func setReach(
+    func setReach(
         _ family: RuleFamily,
         _ app: String,
         _ reach: RuleReach
