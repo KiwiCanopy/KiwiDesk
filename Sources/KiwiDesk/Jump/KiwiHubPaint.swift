@@ -80,13 +80,19 @@ struct KiwiHubPaint {
 }
 
 /// A KiwiHub divider: the look's hairline under the toggle, the
-/// system separator off it (#2596).
+/// system separator off it (#2596); `.vertical` stands between
+/// two columns (#3164).
 struct PanelDivider: View {
+    var axis: Axis = .horizontal
+
     @Environment(\.kiwiHubPaint) private var paint
 
     var body: some View {
         if let hairline = paint.divider {
-            Rectangle().fill(hairline).frame(height: 1)
+            Rectangle().fill(hairline).frame(
+                width: axis == .vertical ? 1 : nil,
+                height: axis == .horizontal ? 1 : nil
+            )
         } else {
             Divider()
         }

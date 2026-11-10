@@ -39,12 +39,24 @@ struct DesktopsSideCeilingTests {
         let height = host.fittingSize.height
         // Both rows stand whole: the cap the side is handed does not
         // cut them.
-        let cap = model.sheetCap
-        let whole = DesktopsSideView.height(rows: 2, cap: .infinity)
-        #expect(DesktopsSideView.height(rows: 2, cap: cap) == whole)
+        let overview = DesktopsStateTests.overview()
+        let side = DesktopsGeometry(
+            overview: overview,
+            width: JumpPanelView.width,
+            cap: model.sheetCap
+        )
+        let whole = DesktopsGeometry(
+            overview: overview,
+            width: JumpPanelView.width,
+            cap: .infinity
+        )
+        #expect(side.height == whole.height)
         // Whole means each row's own height at least.
-        #expect(whole >= 2 * DesktopsSideView.rowHeight)
-        #expect(height >= whole + JumpPanelView.fieldHeight, "\(height)")
+        #expect(whole.height >= 2 * whole.rowHeight)
+        #expect(
+            height >= whole.height + JumpPanelView.fieldHeight,
+            "\(height)"
+        )
         #expect(height <= JumpPanelController.maxPanelHeight, "\(height)")
     }
 }

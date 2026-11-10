@@ -3,11 +3,15 @@ import KiwiDeskCore
 import SwiftUI
 
 /// KiwiHub's Desktops side (#1229): one row per screen in physical
-/// order, the screen's name as its header, its Desktop cards in a
-/// row that scrolls sideways; past two rows the side scrolls down.
+/// order, the screen's name as its header, its Desktops as columns
+/// split by dividers, sharing the row's width down to a floor past
+/// which the row scrolls sideways; past two rows the side scrolls
+/// down (#3164).
 struct DesktopsSideView: View {
     let state: DesktopsState
     let icons: [pid_t: NSImage]
+    /// The panel's width, which the columns share.
+    let width: CGFloat
     /// The tallest the side stands before it scrolls.
     let maxHeight: CGFloat
     let onPlace: (DesktopsPlace, Int, NSEvent.ModifierFlags, Bool) -> Void
@@ -17,28 +21,25 @@ struct DesktopsSideView: View {
     /// The panel's VoiceOver action for ⌘,.
     let onSettings: () -> Void
 
-    /// A screen row: its header and one card's height.
-    static var rowHeight: CGFloat { 22 + DesktopCardView.height }
-
-    /// The side's height for `rows` screen rows: every row whole,
-    /// up to `cap`, past which it scrolls.
-    static func height(rows: Int, cap: CGFloat) -> CGFloat {
-        let count = CGFloat(rows)
-        let full = count * rowHeight + max(count - 1, 0) * 8 + 16
-        return min(full, cap)
+    private var geometry: DesktopsGeometry {
+        DesktopsGeometry(
+            overview: state.overview,
+            width: width,
+            cap: maxHeight
+        )
     }
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {
                     ForEach(state.overview.screens.indices, id: \.self) {
-                        row($0).id($0)
+                        row($0, geometry).id($0)
                     }
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, DesktopsGeometry.sidePadding)
             }
-            .frame(height: height)
+            .frame(height: geometry.height)
             .accessibilityAction(
                 named: Text(DesktopsText.editInSettings),
                 onSettings
@@ -50,24 +51,27 @@ struct DesktopsSideView: View {
         }
     }
 
-    private var height: CGFloat {
-        Self.height(rows: state.overview.screens.count, cap: maxHeight)
-    }
-
-    private func row(_ screen: Int) -> some View {
+    private func row(
+        _ screen: Int,
+        _ geometry: DesktopsGeometry
+    ) -> some View {
         let row = state.overview.screens[screen]
         let selected = state.place.flatMap {
             $0.screen == screen ? $0.desktop : nil
         }
-        return VStack(alignment: .leading, spacing: 4) {
+        return VStack(alignment: .leading, spacing: DesktopsGeometry.headerGap)
+        {
             header(row)
-            ViewLine(selected: selected) {
-                HStack(spacing: 10) {
+            ViewLine(selected: selected, inset: DesktopsGeometry.rowInset) {
+                HStack(spacing: 0) {
                     ForEach(row.desktops.indices, id: \.self) { index in
+                        if index > 0 { PanelDivider(axis: .vertical) }
                         DesktopCardView(
                             state: state,
                             screen: screen,
                             index: index,
+                            geometry: geometry,
+                            width: geometry.columns[screen],
                             icons: icons,
                             onPlace: onPlace,
                             onWindow: onWindow,
@@ -99,7 +103,7 @@ struct DesktopsSideView: View {
         }
         .foregroundStyle(.secondary)
         .lineLimit(1)
-        .padding(.horizontal, KeyPanelStyle.selectionInset + 10)
+        .padding(.horizontal, DesktopsGeometry.rowInset)
     }
 
     /// "main", "here" or both, the row header's one caption.

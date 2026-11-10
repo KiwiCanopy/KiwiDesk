@@ -2,31 +2,29 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// One Desktop's card on the Desktops side (#1229): its title line —
-/// "Desktop N", ✓ while its screen shows it, the bound profile on
-/// the right — and one line per Space. Every card is one size.
+/// One Desktop's column on the Desktops side (#1229): its title
+/// line — "Desktop N", ✓ while its screen shows it, the bound
+/// profile on the right — and one line per Space, on the panel's
+/// own ground (#3164). A row's columns share one width.
 struct DesktopCardView: View {
     let state: DesktopsState
     let screen: Int
     let index: Int
+    let geometry: DesktopsGeometry
+    /// The column's width (`DesktopsGeometry.columns`).
+    let width: CGFloat
     let icons: [pid_t: NSImage]
     let onPlace: (DesktopsPlace, Int, NSEvent.ModifierFlags, Bool) -> Void
     let onWindow: (WindowID, DesktopsPlace, Int, NSEvent.ModifierFlags) -> Void
     let onMore: (DesktopsPlace, Bool) -> Void
     let onDrop: ([WindowID], DesktopsPlace) -> Void
 
-    @Environment(\.kiwiHubPaint) private var paint
-
-    static var width: CGFloat { 224 }
-    static var height: CGFloat { 170 }
-    static var titleHeight: CGFloat { 22 }
-
     private var desktop: DesktopOverview.Desktop {
         state.overview.screens[screen].desktops[index]
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: DesktopsGeometry.titleGap) {
             title
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
@@ -43,13 +41,10 @@ struct DesktopCardView: View {
                     proxy.scrollTo(line)
                 }
             }
+            .frame(height: geometry.lines, alignment: .top)
         }
-        .padding(6)
-        .frame(width: Self.width, height: Self.height, alignment: .top)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(paint.fill(paint.rowHover))
-        )
+        .padding(.horizontal, DesktopsGeometry.columnInset)
+        .frame(width: width, alignment: .top)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(DesktopsText.desktop(desktop.label))
     }
@@ -66,6 +61,7 @@ struct DesktopCardView: View {
         DesktopLineView(
             state: state,
             place: DesktopsPlace(screen: screen, desktop: index, line: line),
+            geometry: geometry,
             icons: icons,
             onPlace: onPlace,
             onWindow: onWindow,
@@ -93,7 +89,7 @@ struct DesktopCardView: View {
         }
         .lineLimit(1)
         .padding(.horizontal, 4)
-        .frame(height: Self.titleHeight)
+        .frame(height: DesktopsGeometry.titleHeight)
         .contentShape(Rectangle())
         .onTapGesture { click() }
     }

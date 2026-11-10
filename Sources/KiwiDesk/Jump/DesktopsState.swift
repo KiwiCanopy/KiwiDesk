@@ -14,10 +14,13 @@ struct DesktopsPlace: Hashable {
 /// panel. Places are Space lines; inside one, a window is selected;
 /// carried windows ride along until a drop or a cancel.
 struct DesktopsState: Equatable {
-    /// The icons a Space line shows at once; more fold into "+n".
-    static let slots = 5
+    /// A line's icon slots where the side handed none.
+    static let fallbackSlots = 5
 
     let overview: DesktopOverview
+    /// Each screen row's icon slots, from the side's widths
+    /// (`DesktopsGeometry.slots`, #3164); more fold into "+n".
+    let slotCounts: [Int]
     private(set) var place: DesktopsPlace?
     /// The selected window: non-nil while inside a Space.
     private(set) var window: WindowID?
@@ -31,8 +34,9 @@ struct DesktopsState: Equatable {
     var isCarrying: Bool { !carried.isEmpty }
 
     /// Opens on the Space line the KiwiHub screen shows.
-    init(overview: DesktopOverview) {
+    init(overview: DesktopOverview, slots: [Int] = []) {
         self.overview = overview
+        slotCounts = slots
         place = Self.startPlace(in: overview)
     }
 
@@ -92,18 +96,24 @@ struct DesktopsState: Equatable {
         query.isEmpty || ordered(place).contains(where: matches)
     }
 
+    /// The icons `place`'s line shows at once.
+    func slots(_ place: DesktopsPlace) -> Int {
+        slotCounts.indices.contains(place.screen)
+            ? slotCounts[place.screen] : Self.fallbackSlots
+    }
+
     /// The first slot a line shows.
     func offset(_ place: DesktopsPlace) -> Int {
         let count = ordered(place).count
         let stored = offsets[place] ?? 0
-        return max(0, min(stored, count - Self.slots))
+        return max(0, min(stored, count - slots(place)))
     }
 
     /// How many windows sit off each edge of the line's slots.
     func hidden(_ place: DesktopsPlace) -> (before: Int, after: Int) {
         let count = ordered(place).count
         let first = offset(place)
-        return (first, max(0, count - first - Self.slots))
+        return (first, max(0, count - first - slots(place)))
     }
 
     /// The selected window's index in its line, as drawn.
@@ -150,8 +160,8 @@ struct DesktopsState: Equatable {
         let first = offset(place)
         if index < first {
             offsets[place] = index
-        } else if index >= first + Self.slots {
-            offsets[place] = index - Self.slots + 1
+        } else if index >= first + slots(place) {
+            offsets[place] = index - slots(place) + 1
         }
     }
 
@@ -159,7 +169,7 @@ struct DesktopsState: Equatable {
     mutating func revealMore(_ place: DesktopsPlace, forward: Bool) {
         let drawn = ordered(place)
         let first = offset(place)
-        let next = forward ? first + Self.slots : first - 1
+        let next = forward ? first + slots(place) : first - 1
         guard drawn.indices.contains(next) else { return }
         offsets[place] = forward ? first + 1 : first - 1
         select(window: drawn[next].id, in: place)

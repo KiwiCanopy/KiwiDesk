@@ -95,6 +95,9 @@ final class JumpModel: ObservableObject {
     /// The tallest the Shortcuts side's sheet stands, from the
     /// screen it opens on (`JumpPanelController.sheetCap`).
     let sheetCap: CGFloat
+    /// The panel's width on that screen
+    /// (`JumpPanelController.width`).
+    let panelWidth: CGFloat
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
     /// A pick Core refuses at the press: what VoiceOver hears. The
@@ -154,6 +157,7 @@ final class JumpModel: ObservableObject {
         icons: [pid_t: NSImage],
         rowCap: Int,
         sheetCap: CGFloat = 400,
+        panelWidth: CGFloat = JumpPanelView.width,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -162,6 +166,7 @@ final class JumpModel: ObservableObject {
         self.icons = icons
         self.rowCap = rowCap
         self.sheetCap = sheetCap
+        self.panelWidth = panelWidth
         noteModifiers(modifiers)
     }
 
