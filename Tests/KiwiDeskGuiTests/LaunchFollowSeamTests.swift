@@ -147,6 +147,14 @@ struct LaunchFollowSeamTests {
         ("holds.lift(", "LaunchFollowIntent.swift", 1),
         ("launchFollow.holds.claim(", "KiwiCore+BackgroundHold.swift", 2),
         (
+            "launchFollow.holds.markHandedBack(",
+            "KiwiCore+BackgroundHold.swift", 1
+        ),
+        (
+            "launchFollow.holds.noteActivation(",
+            "KiwiCore+BackgroundHold.swift", 1
+        ),
+        (
             "handBackBackgroundActivation(activation, now: now)",
             followFile, 1
         ),

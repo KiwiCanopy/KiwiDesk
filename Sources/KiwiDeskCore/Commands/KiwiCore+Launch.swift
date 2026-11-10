@@ -115,4 +115,22 @@ extension KiwiCore {
     func launchInBackground(_ bundleID: String) -> Bool {
         openOrFocus.openApp(bundleID.lowercased(), .background)
     }
+
+    /// Whether a running app has no window to show: none up or
+    /// minimized in its own list, and none on record on an away
+    /// Desktop that `reach` (read only past the census) does not
+    /// rule out. The one test Open or Focus's reopen (#1840) and
+    /// `open_in_background` take.
+    func isWindowless(
+        _ bundleID: String,
+        census: AppWindowCensus,
+        reach: @autoclosure () -> AwayReach?
+    ) -> Bool {
+        guard census.visible == 0, census.minimized.isEmpty else {
+            return false
+        }
+        let away =
+            reach()?.listsAny ?? !awayWindows(bundleID: bundleID).isEmpty
+        return !away
+    }
 }

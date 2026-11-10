@@ -45,10 +45,7 @@ extension KiwiCore {
         now: Date
     ) {
         guard let app = activation.bundleID?.lowercased() else { return }
-        // A later activation is a new take: its report is no echo.
-        if launchFollow.holds.opened[app] == nil {
-            launchFollow.holds.endEcho(app)
-        }
+        launchFollow.holds.noteActivation(app)
         guard let focus = focusedWindowID,
             let left = state.windows[focus]?.appRef.listKey, left != app,
             launchFollow.holds.claim(app, at: now)

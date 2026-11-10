@@ -2,7 +2,8 @@ import Foundation
 
 /// `open_in_background`'s holds (#3141), a slot of the launch
 /// follow's ledger: per app, when it was opened behind the focus,
-/// owed ONE hand-back of the focus it takes within `grace`. Stamped
+/// owed ONE hand-back of the focus it takes within `grace`, and when
+/// an activation of it was handed back, whose own reports echo it. Stamped
 /// per app, so a run of opens grants each its own grace; lifted by
 /// the user naming the app (`LaunchFollowIntent.record`), and never
 /// by an activation, since the user working on is the case it is for.
@@ -19,6 +20,7 @@ struct BackgroundHolds {
     /// VS Code on the owner's Mac (2026-11-09 log).
     static let echoGrace: TimeInterval = 2
 
+    /// Read by tests; written through the methods below alone.
     private(set) var opened: [String: Date] = [:]
     /// When each app's activation was handed back; never renewed.
     private(set) var handedBack: [String: Date] = [:]
@@ -48,9 +50,10 @@ struct BackgroundHolds {
             ?? false
     }
 
-    /// Ends `app`'s echo: its next activation is a take of its own.
-    mutating func endEcho(_ app: String) {
-        handedBack[app] = nil
+    /// Notes `app` coming forward: with no hold left it is a take
+    /// of its own, which ends the echo of the last hand-back.
+    mutating func noteActivation(_ app: String) {
+        if opened[app] == nil { handedBack[app] = nil }
     }
 
     /// Drops `app`'s hand-back unpaid, and its echo.
