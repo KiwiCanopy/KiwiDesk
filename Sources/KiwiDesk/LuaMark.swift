@@ -7,3 +7,10 @@ import Foundation
 enum LuaMark {
     static let symbol = "chevron.left.forwardslash.chevron.right"
 }
+
+/// What a key that opens more keys wears without a symbol of its
+/// own (#3162 ▸ Ruling amendment): the Key sequences card's popover
+/// and the hint panel's branch rows.
+enum BranchMark {
+    static let symbol = "folder"
+}

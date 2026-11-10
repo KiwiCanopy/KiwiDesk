@@ -8,10 +8,11 @@ import KiwiDeskCore
 /// reads the stored tree it names.
 struct KeySequenceHint: Equatable {
     /// One key the breadcrumb or the branch list draws: its chord,
-    /// drawn, and its name.
+    /// drawn, its name and the symbol it leads with (#3162).
     struct Key: Equatable, Identifiable {
         var chord: String
         var name: String
+        var symbol = BranchMark.symbol
         var id: String { chord }
     }
 
@@ -50,7 +51,11 @@ struct KeySequenceHint: Equatable {
             title: crumbs[0].name.isEmpty ? crumbs[0].chord : crumbs[0].name,
             crumbs: crumbs,
             branches: keys.filter(\.isSequence).map {
-                Key(chord: drawn($0.combo), name: $0.label)
+                Key(
+                    chord: drawn($0.combo),
+                    name: $0.label,
+                    symbol: $0.meta.usableSymbol ?? BranchMark.symbol
+                )
             },
             endKeys: KeyLayer(
                 name: layer.name,

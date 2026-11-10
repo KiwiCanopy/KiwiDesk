@@ -1,11 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One node of a key sequence's outline (#1871 ▸ Settings): the
-/// leader or a key that opens more keys — a disclosure, a name and
-/// its key count — or an end key with its action pop-up; each with
-/// its recorder and trash. An open branch draws its keys indented
-/// behind a 1 pt rail that runs down to its "Add Key".
+/// One node of a key sequence's outline (#1871 ▸ Settings; #3162 ▸
+/// Ruling): the leader, with its name, reach, recorder and trash;
+/// every other key one line — its recorder, then one container
+/// saying what it does, then its remove. A command or an app on the
+/// plain pop-up face, a Lua key's description dashed, a key that
+/// opens more keys tinted with its name. An open branch draws its
+/// keys indented behind a 1 pt rail that runs down to its "Add Key".
 struct SequenceNodeRow: View {
     @ObservedObject var model: SettingsModel
     let editing: SequenceEditing
@@ -17,11 +19,15 @@ struct SequenceNodeRow: View {
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @State private var confirmingDelete = false
-    @State private var editingLua: LuaEditRequest?
+    @State var editingLua: LuaEditRequest?
+    @State var editingBranch: SequenceBranchRequest?
+    @State var picking: SequencePickRequest?
+    /// "App…" swapped the app list in for the action picker.
+    @State private var choosingApp = false
     @Environment(\.keybindingLayerName) var layerName
 
     var isLeader: Bool { node.id == editing.rootID }
-    private var isOpen: Bool { !collapsed.contains(node.id) }
+    var isOpen: Bool { !collapsed.contains(node.id) }
     var name: String {
         SequenceNames.name(of: node, catalog: catalog, config: model.config)
     }
@@ -29,24 +35,7 @@ struct SequenceNodeRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                if node.isSequence { branchLine } else { endKeyLine }
-                Spacer(minLength: 8)
-                // The leader's row carries the sequence's reach, as a
-                // shortcut row does (#3124).
-                if isLeader { reachColumn }
-                recorder
-                if isLeader {
-                    KeyReachTrash(
-                        model: model,
-                        layer: layerName,
-                        binding: node
-                    ) { requestDelete() }
-                } else {
-                    AppRuleDeleteButton(
-                        help: L("shortcuts.sequence.remove", "Remove key"),
-                        sharedFrom: nil
-                    ) { _ in requestDelete() }
-                }
+                if isLeader { leaderLine } else { keyLine }
             }
             if node.isSequence, node.steps?.isEmpty ?? true {
                 Text(L("shortcuts.sequence.empty", "Does nothing yet"))
@@ -76,139 +65,136 @@ struct SequenceNodeRow: View {
 
     // MARK: - Lines
 
-    private var reachColumn: some View {
+    /// The leader's row carries the sequence's reach, as a shortcut
+    /// row does (#3124).
+    @ViewBuilder private var leaderLine: some View {
+        disclosure(width: SettingsMetrics.shortcutIconSlot)
+        TextField(
+            L("shortcuts.sequence.name", "Name"),
+            text: editing.field(node.id, \.label)
+        )
+        .textFieldStyle(.roundedBorder)
+        .frame(maxWidth: 180)
+        .accessibilityLabel(nameLabel)
+        Text(
+            L(
+                "shortcuts.sequence.key_count",
+                "Keys: %1$d",
+                node.steps?.count ?? 0
+            )
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        // The name field gives way first at a narrow width.
+        .fixedSize()
+        Spacer(minLength: 8)
         KeyReachColumn(model: model, layer: layerName, binding: node)
+        recorder
+        KeyReachTrash(
+            model: model,
+            layer: layerName,
+            binding: node
+        ) { requestDelete() }
     }
 
-    private var branchLine: some View {
-        HStack(spacing: 8) {
-            Button {
-                if isOpen {
-                    collapsed.insert(node.id)
-                } else {
-                    collapsed.remove(node.id)
-                }
-            } label: {
-                Image(systemName: "chevron.right")
-                    .rotationEffect(.degrees(isOpen ? 90 : 0))
-                    .frame(width: SettingsMetrics.shortcutIconSlot)
+    /// The key, its one container, then remove (#3162 ▸ Ruling).
+    @ViewBuilder private var keyLine: some View {
+        recorder.fixedSize()
+        if node.isSequence { branchContainer } else { endKeyContainer }
+        Spacer(minLength: 8)
+        AppRuleDeleteButton(
+            help: L("shortcuts.sequence.remove", "Remove key"),
+            sharedFrom: nil
+        ) { _ in requestDelete() }
+    }
+
+    /// The fold, its own button so it never shares the name's click
+    /// (#3162 ▸ Ruling amendment).
+    func disclosure(width: CGFloat) -> some View {
+        Button {
+            if isOpen {
+                collapsed.insert(node.id)
+            } else {
+                collapsed.remove(node.id)
             }
-            .buttonStyle(.borderless)
-            .foregroundStyle(SettingsTheme.ink2)
-            .accessibilityLabel(name)
-            .accessibilityValue(
-                isOpen
-                    ? L("settings.disclosure.ax_expanded", "expanded")
-                    : L("settings.disclosure.ax_collapsed", "collapsed")
+        } label: {
+            Image(systemName: "chevron.right")
+                .rotationEffect(.degrees(isOpen ? 90 : 0))
+                .frame(width: width)
+                .contentShape(Rectangle())
+        }
+        // Plain, not borderless: an AppKit-backed button clips the
+        // tinted container it sits in (#3162).
+        .buttonStyle(.plain)
+        .foregroundStyle(SettingsTheme.ink2)
+        .accessibilityLabel(name)
+        .accessibilityValue(
+            isOpen
+                ? L("settings.disclosure.ax_expanded", "expanded")
+                : L("settings.disclosure.ax_collapsed", "collapsed")
+        )
+    }
+
+    @ViewBuilder private var endKeyContainer: some View {
+        if choosingApp {
+            AppPickerButton(
+                placeholder: L("shortcuts.choose_app", "Choose app…"),
+                selection: node.kind == .application ? name : nil,
+                onPick: pickApp,
+                escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
+                onEscape: {
+                    if let app = AppBundlePanel.pick() { pickApp(app) }
+                },
+                opensOnAppear: true,
+                onClose: { choosingApp = false }
             )
-            TextField(
-                L("shortcuts.sequence.name", "Name"),
-                text: editing.field(node.id, \.label)
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(maxWidth: 180)
-            .accessibilityLabel(
-                nameLabel
-            )
-            Text(
-                L(
-                    "shortcuts.sequence.key_count",
-                    "Keys: %1$d",
-                    node.steps?.count ?? 0
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            // The name field gives way first at a narrow width.
             .fixedSize()
+            .accessibilityLabel(actionLabel)
+        } else {
+            actionMenu
         }
     }
 
-    private var endKeyLine: some View {
-        HStack(spacing: 8) {
-            Color.clear
-                .frame(width: SettingsMetrics.shortcutIconSlot)
-                .overlay { glyph }
-            SequenceActionMenu(
-                node: node,
-                catalog: catalog,
-                spokenLabel: actionLabel,
-                onBranch: {
-                    // A name field and an armed child well (#1871).
-                    let key = SequenceTree.newEndKey()
-                    editing.update(node.id) {
-                        $0 = SequenceTree.branch($0)
-                        $0.steps = [key]
-                    }
-                    collapsed.remove(node.id)
-                    fresh = key.id
-                },
-                onPick: { command in
-                    editing.update(node.id) {
-                        $0 = SequenceTree.endKey($0, running: command)
-                    }
-                },
-                onLua: {
-                    editing.update(node.id) { $0 = SequenceTree.luaKey($0) }
-                    editingLua = LuaEditRequest(id: node.id)
+    private var actionMenu: some View {
+        SequenceActionMenu(
+            node: node,
+            catalog: catalog,
+            spokenLabel: actionLabel,
+            onBranch: {
+                // A named branch and an armed child well (#1871).
+                let key = SequenceTree.newEndKey()
+                editing.update(node.id) {
+                    $0 = SequenceTree.branch($0)
+                    $0.steps = [key]
                 }
-            )
-            if node.kind == .custom { luaFields }
-        }
-    }
-
-    @ViewBuilder private var glyph: some View {
-        if node.kind == .custom {
-            IconGlyphLabel(icon: LuaMark.symbol)
-        } else if let command = catalog.command(running: node.lua),
-            let icon = ShortcutsReferenceBuilder.icon(for: command)
-        {
-            IconGlyphLabel(icon: icon)
-        }
-    }
-
-    /// A Lua end key's Description, named in the hint panel, and the
-    /// button opening its body in the Lua bindings drawer's editor.
-    private var luaFields: some View {
-        HStack(spacing: 6) {
-            TextField(
-                L("shortcuts.lua.desc_placeholder", "Description"),
-                text: editing.field(node.id, \.desc)
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(maxWidth: 200)
-            .accessibilityLabel(
-                L("shortcuts.lua.desc_ax", "Description for %1$@", name)
-            )
-            let help = L("shortcuts.lua.edit_ax", "Edit Lua for %1$@", name)
-            Button {
+                collapsed.remove(node.id)
+                fresh = key.id
+            },
+            onPick: { command in
+                editing.update(node.id) {
+                    $0 = SequenceTree.endKey($0, running: command)
+                }
+            },
+            onApp: { choosingApp = true },
+            onLua: {
+                editing.update(node.id) { $0 = SequenceTree.luaKey($0) }
                 editingLua = LuaEditRequest(id: node.id)
-            } label: {
-                Image(systemName: "arrow.up.left.and.arrow.down.right")
-                    .font(.system(size: 11, weight: .medium))
-            }
-            .buttonStyle(.borderless)
-            .iconHoverChip()
-            .foregroundStyle(SettingsTheme.ink2)
-            .help(help)
-            .accessibilityLabel(help)
-            .popover(item: $editingLua) { _ in
-                LuaBindingEditor(
-                    title: AdvancedLuaGroup.editorTitle(node),
-                    spokenName: L(
-                        "shortcuts.lua.body_ax",
-                        "Lua for %1$@",
-                        name
-                    ),
-                    placeholder: L(
-                        "shortcuts.lua_placeholder",
-                        "Lua, e.g. KiwiDesk.reload_config()"
-                    ),
-                    text: editing.field(node.id, \.lua),
-                    dismiss: { editingLua = nil }
-                )
-                .settingsPopoverChrome()
-            }
+            },
+            onEditLua: { editingLua = LuaEditRequest(id: node.id) },
+            request: $picking
+        )
+        .popover(item: $editingLua) { _ in
+            luaPopover.settingsPopoverChrome()
+        }
+    }
+
+    private func pickApp(_ app: KeybindingCatalog.InstalledApp) {
+        editing.update(node.id) {
+            $0 = SequenceTree.appKey(
+                $0,
+                bundleID: app.bundleID,
+                name: app.name
+            )
         }
     }
 

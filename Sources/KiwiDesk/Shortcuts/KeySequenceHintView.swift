@@ -70,12 +70,14 @@ struct KeySequenceHintView: View {
         .foregroundStyle(.secondary)
     }
 
-    /// A key that opens more keys, as a Shortcuts row marked ›.
+    /// A key that opens more keys, as a Shortcuts row led by its
+    /// symbol and marked › (#3162).
     static func branchRow(_ key: KeySequenceHint.Key) -> ShortcutRow {
         ShortcutRow(
             id: "branch." + key.chord,
             label: key.name,
             combo: key.chord,
+            icon: key.symbol,
             accessoryIcon: "chevron.forward",
             accessoryHelp: L(
                 "key_sequence.hint.opens_more",

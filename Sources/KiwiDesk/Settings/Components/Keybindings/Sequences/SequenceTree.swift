@@ -78,6 +78,31 @@ enum SequenceTree {
         return key
     }
 
+    /// `node` opening `bundleID`'s app as the Apps section's rows
+    /// store it (#3162 ▸ Ruling amendment): Open or Focus, or the
+    /// action it already ran.
+    static func appKey(
+        _ node: KeyBinding,
+        bundleID: String,
+        name: String
+    ) -> KeyBinding {
+        let action =
+            node.kind == .application
+            ? KeybindingCatalog.appShortcutAction(from: node.lua)
+            : nil
+        var key = KeyBinding(
+            combo: node.combo,
+            lua: KeybindingCatalog.appCommand(
+                bundleID,
+                action: action ?? .openOrFocus
+            ),
+            kind: .application,
+            label: name
+        )
+        key.id = node.id
+        return key
+    }
+
     /// `node` running the user's own Lua, kept where it already did.
     static func luaKey(_ node: KeyBinding) -> KeyBinding {
         guard node.kind != .custom else { return node }

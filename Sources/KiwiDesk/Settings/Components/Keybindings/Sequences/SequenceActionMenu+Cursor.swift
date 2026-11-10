@@ -2,8 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The action picker's one cursor (`DropdownCursor`): over the
-/// pinned "Opens more keys ›", the commands the search left and the
-/// pinned "Lua…", in that order.
+/// pinned "Extend Sequence", the commands the search left and the
+/// pinned "App…" and "Lua…", in that order.
 extension SequenceActionMenu {
     /// The catalogue groups narrowed to the query's matches.
     var shownGroups: [SequenceActionCatalog.Group] {
@@ -16,7 +16,7 @@ extension SequenceActionMenu {
     ) -> [SequencePickSlot] {
         [.branch]
             + groups.flatMap(\.commands).map { .command($0.lua) }
-            + [.lua]
+            + [.app, .lua]
     }
 
     /// The popover opens on the current pick, else the first command.
@@ -84,6 +84,10 @@ extension SequenceActionMenu {
         case .branch:
             request = nil
             onBranch()
+        case .app:
+            request = nil
+            // The app list opens once this popover has gone.
+            DispatchQueue.main.async { onApp() }
         case .lua:
             request = nil
             // The editor opens once this popover has gone.
@@ -106,6 +110,7 @@ extension SequenceActionMenu {
     private func name(of slot: SequencePickSlot) -> String {
         switch slot {
         case .branch: return Self.branchLabel
+        case .app: return Self.appLabel
         case .lua: return Self.luaLabel
         case .command(let lua):
             return catalog.command(running: lua)?.resolvedLabel ?? lua

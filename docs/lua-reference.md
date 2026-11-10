@@ -7909,7 +7909,8 @@ KiwiDesk.define_layer("resize", {
   chord.
 - A table of step keys. Each value is a function, a
   `{ fn = …, name = …, desc = …, group = …, symbol = … }` table, or
-  `{ name = "…", keys = { … } }`, a key that opens a further step.
+  `{ name = "…", keys = { … } }`, a key that opens a further step,
+  which may take a `symbol` for the panel (`folder` when absent).
   A step key is a combo; a modifier tap, a Hyper chord and a plain
   `escape` or `delete` are refused and logged.
 - Optionally, a table with `name`, the leader's name, `layer`, the

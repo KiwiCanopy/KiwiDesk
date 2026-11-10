@@ -12,6 +12,8 @@ struct SettingsCollapsibleSection<Content: View>: View {
     private let control: SettingsControl
     private let drawer: any AnySettingsDrawer
     private let summary: String
+    /// The title's `?`: a concept the card names (#3162).
+    private let help: String?
     /// Drawn under the disclosure while shut only — the Mouse &
     /// trackpad card's pictures (owner ruling 2026-10-17).
     private let preview: AnyView?
@@ -25,6 +27,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
         _ drawer: SettingsDrawer<Children>,
         isExpanded: Binding<Bool>,
         summary: String,
+        help: String? = nil,
         preview: AnyView? = nil,
         onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -34,12 +37,13 @@ struct SettingsCollapsibleSection<Content: View>: View {
         self.drawer = drawer
         self._isExpanded = isExpanded
         self.summary = summary
+        self.help = help
         self.preview = preview
         self.content = content
     }
 
     var body: some View {
-        SettingsSection(control) {
+        SettingsSection(control, help: help) {
             // Not a heading: the section's title above is, and one
             // card lists once in the rotor.
             SettingsDisclosureButton(

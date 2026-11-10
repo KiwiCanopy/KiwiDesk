@@ -131,18 +131,26 @@ struct KeySequenceCardTests {
             at: dir.appendingPathComponent("SequenceNodeRow+Recorder.swift")
         )
         let flat = row.filter { !$0.isWhitespace }
-        #expect(flat.contains("ifisLeader{reachColumn}"))
+        // The leader's line alone carries reach and its trash; a
+        // step key's line ends in a plain remove (#3162).
+        #expect(flat.contains("ifisLeader{leaderLine}else{keyLine}"))
+        let leader = try #require(
+            SourceScan.declarationBody(
+                after: "private var leaderLine",
+                in: row
+            )
+        ).filter { !$0.isWhitespace }
         #expect(
-            flat.contains(
-                "ifisLeader{KeyReachTrash(model:model,layer:layerName,"
+            leader.contains(
+                "KeyReachColumn(model:model,layer:layerName,binding:node)"
+                    + "recorderKeyReachTrash(model:model,layer:layerName,"
                     + "binding:node){requestDelete()}"
             )
         )
-        #expect(
-            flat.contains(
-                "KeyReachColumn(model:model,layer:layerName,binding:node)"
-            )
+        let key = try #require(
+            SourceScan.declarationBody(after: "private var keyLine", in: row)
         )
+        #expect(!key.contains("KeyReach"))
         let carry = recorder.filter { !$0.isWhitespace }
         #expect(
             carry.contains(
