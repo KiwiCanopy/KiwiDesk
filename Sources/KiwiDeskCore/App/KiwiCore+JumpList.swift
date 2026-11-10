@@ -22,16 +22,15 @@ extension KiwiCore {
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon),
             swapsInHere: jumpHereFocus(in: here) != nil,
-            // Your app takes its tile by recency, as ⌘⇥ lists the
-            // app in front first (#3168).
-            apps: jumpApps(for: entries + [yours].compactMap { $0 }),
+            apps: jumpApps(for: entries, first: yours),
             lastUsed: jumpLastUsed(in: entries),
             yours: yours
         )
     }
 
     /// The window a Swap here from `here`'s screen trades with, as
-    /// a row would draw it.
+    /// a row would draw it; the list leaves it out, so its blocks
+    /// are for display only.
     private func jumpYours(
         here: SpaceID?,
         hub: DisplayID?
@@ -62,11 +61,14 @@ extension KiwiCore {
             let right = jumpRecency(rhs.element)
             return left != right ? left > right : lhs.offset < rhs.offset
         }
-        let focused = jumpFocusedWindow().map {
-            JumpEntry.Target.window($0)
-        }
+        // Neither the window you are in nor the one the snapshot
+        // names as yours is a row (#3168).
+        let left = Set(
+            [jumpFocusedWindow(), partner].compactMap { $0 }
+                .map(JumpEntry.Target.window)
+        )
         let listed = ordered.map(\.element).filter {
-            $0.target != focused
+            !left.contains($0.target)
         }
         // The pocket after Hidden (#2446).
         let rows =

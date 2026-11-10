@@ -46,6 +46,13 @@ struct JumpYoursTests {
         #expect(yours.title == "W2")
         #expect(yours.space == "1")
         #expect(yours.swapBlock == .yours)
+        // No front app is tracked here, so only the snapshot's own
+        // reading leaves it out of the list.
+        #expect(
+            !core.jumpSnapshot().entries.contains {
+                $0.target == .window(WindowID(2))
+            }
+        )
     }
 
     /// Your app keeps its tile with no other window listed, as ⌘⇥
@@ -64,9 +71,12 @@ struct JumpYoursTests {
         core.state.workspaces.add(WindowID(1), to: "1")
         track(core, 2, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
+        // Another app used more recently still comes after yours.
+        core.state.stampAppRecency(900_001)
         let snapshot = core.jumpSnapshot()
         #expect(snapshot.yours?.pid == 900_002)
-        #expect(snapshot.apps.contains { $0.pid == 900_002 })
+        #expect(!snapshot.entries.contains { $0.pid == 900_002 })
+        #expect(snapshot.apps.map(\.pid) == [900_002, 900_001])
     }
 
     @Test("with no window tracked there is none")

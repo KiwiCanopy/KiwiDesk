@@ -15333,8 +15333,7 @@ shows it on All because the dimmed tiles are then the answer to
 never moves (#2246), and the panel grows downward rather than
 keeping room for it, since a reserved band would be the very row
 the calm opening removes. Under a query ← → still step through only
-the apps with a match. Its tiles grew to about 92 pt with 48 pt
-icons, as the strip now only shows when it is being read.
+the apps with a match.
 
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,

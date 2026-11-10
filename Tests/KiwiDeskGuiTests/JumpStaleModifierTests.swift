@@ -48,7 +48,7 @@ struct JumpStaleModifierTests {
             backing: .buffered,
             defer: true
         )
-        panel.stale = { stale }
+        panel.pickModifiers = { $0.subtracting(stale) }
         return panel
     }
 
@@ -121,6 +121,20 @@ struct JumpStaleModifierTests {
         #expect(panel(stale: []).key(for: one) == .quickSwap(0))
     }
 
+    /// ⌃ held from ⌃⌥J would make every chord a dead one; the
+    /// stale read reaches ↩ and the digits first.
+    @Test("under a stale ⌃⌥, ↩ jumps and ⌘1 quick-jumps")
+    func staleControlOption() {
+        let panel = panel(stale: [.control, .option])
+        let ret = keyDown(36, "\r", [.control, .option])
+        let one = keyDown(18, "1", [.control, .option, .command])
+        #expect(panel.key(for: ret) == .pick(moveHere: false))
+        #expect(panel.key(for: one) == .quick(0, moveHere: false))
+        // A fresh ⇧ beside the stale pair still moves here.
+        let shift = keyDown(36, "\r", [.control, .option, .shift])
+        #expect(panel.key(for: shift) == .pick(moveHere: true))
+    }
+
     @Test("a non-pick key keeps every modifier; the back chord latches")
     func otherKeysKeepTheirModifiers() {
         let panel = panel(stale: [.shift, .option])
@@ -160,8 +174,15 @@ struct JumpStaleModifierTests {
         )
         #expect(
             controller.contains(
-                "panel.stale={[weakmodel]inmodel?.staleModifiers??[]}"
+                "panel.pickModifiers={[weakmodel]in"
+                    + "model?.pickModifiers($0)??$0}"
             )
+        )
+        // Desktops clicks read the same set as its ↩.
+        #expect(
+            try squash("JumpModel+Desktops.swift").components(
+                separatedBy: "letmodifiers=pickModifiers(modifiers)"
+            ).count == 3
         )
         #expect(
             controller.contains(

@@ -7190,8 +7190,8 @@ last.
 
 With nothing typed, the window you are in, the one **⌥Return**
 swaps with, sits greyed at the top of **All** and of its app's tile,
-marked **Current window**; the arrows, the digits and search skip
-it.
+marked **Current window**. It is never a row you pick: the arrows,
+the digits and search skip it.
 
 A modifier still held from the shortcut that opened KiwiHub, or
 from a step of `kiwihub.show_last_app`, counts for nothing until

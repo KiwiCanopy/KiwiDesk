@@ -263,7 +263,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.onModifiers = { [weak model] in
             model?.noteModifiers($0)
         }
-        panel.stale = { [weak model] in model?.staleModifiers ?? [] }
+        panel.pickModifiers = { [weak model] in
+            model?.pickModifiers($0) ?? $0
+        }
         panel.onBackChord = { [weak model] in model?.latchOpener($0) }
         model.onPick = { [weak self] entry, pick in
             self?.pick(entry, pick)

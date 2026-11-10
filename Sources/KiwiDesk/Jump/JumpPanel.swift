@@ -23,9 +23,11 @@ final class JumpPanel: NSPanel {
     /// The Windows side's back key, the last-app opener's chord
     /// with ⇧ (`JumpKey.back(of:)`, #3135); nil where none.
     var back: () -> KeyCombo? = { nil }
-    /// The modifiers still held from the chord that opened or
-    /// stepped the panel, which a pick does not read (#3168).
-    var stale: () -> NSEvent.ModifierFlags = { [] }
+    /// The modifiers a pick reads: those held, less any still held
+    /// from the opener (`JumpModel.pickModifiers`, #3168).
+    var pickModifiers: (NSEvent.ModifierFlags) -> NSEvent.ModifierFlags = {
+        $0
+    }
     /// The back key was pressed with these modifiers held.
     var onBackChord: (NSEvent.ModifierFlags) -> Void = { _ in }
 
@@ -105,19 +107,25 @@ final class JumpPanel: NSPanel {
 }
 
 extension JumpPanel {
-    /// What `event` means: a pick reads the modifiers pressed since
-    /// the opener, so ↩ under the ⌥ still held from ⌥⇥ jumps
-    /// rather than swaps; every other key reads them all (#3168).
+    /// What `event` means: a pick reads `pickModifiers`, so ↩ under
+    /// the ⌥ still held from ⌥⇥ jumps rather than swaps; every
+    /// other key reads all the event's modifiers (#3168). The
+    /// Windows back chord latches its own modifiers.
     func key(for event: NSEvent) -> JumpKey? {
         let flags = event.modifierFlags
+        let fresh = pickModifiers(flags)
+        if fresh != flags, let pick = key(event.keyCode, fresh),
+            pick.picks
+        {
+            return pick
+        }
         let key = key(event.keyCode, flags)
-        if let chord = back(),
+        if key == .side(-1), scope() == .windows, let chord = back(),
             JumpKey.presses(chord, keyCode: event.keyCode, modifiers: flags)
         {
             onBackChord(flags)
         }
-        guard let key, key.picks else { return key }
-        return self.key(event.keyCode, flags.subtracting(stale()))
+        return key
     }
 
     private func key(

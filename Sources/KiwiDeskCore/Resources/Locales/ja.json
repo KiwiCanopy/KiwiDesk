@@ -905,7 +905,7 @@
   "jump.place.way_swap": "%1$@ ⇄ %2$@",
   "jump.row.ax.away": "%1$@、デスクトップ%2$d",
   "jump.row.ax.away_screen": "%1$@、%3$@のデスクトップ%2$d",
-  "jump.row.ax.current": "現在のウインドウ: %1$@",
+  "jump.row.ax.current": "現在のウインドウ：%1$@",
   "jump.row.ax.desktop_screen": "%2$@のデスクトップ%1$d",
   "jump.row.ax.full": "%1$@、%2$@、%3$@",
   "jump.row.ax.move_here": "ここに移動",

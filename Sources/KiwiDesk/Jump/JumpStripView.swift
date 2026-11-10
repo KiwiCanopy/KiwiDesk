@@ -167,11 +167,9 @@ struct JumpStripTile: View {
     }
 }
 
-/// The current window's row (#3168): the window ⌥↩ swaps with
-/// (#2885), at the top of All and of its app's tile, drawn as a
-/// list row in grey — no plate, no hover — and named on the right.
-/// Not one of the results: the arrows, the digits and search never
-/// reach it, and VoiceOver reads it as text, unannounced.
+/// The current window, greyed atop All and its app's tile (#3168):
+/// not a result, so the arrows, digits and search skip it, and
+/// VoiceOver reads it as text, unannounced.
 struct JumpYoursLine: View {
     let entry: JumpEntry
     let icon: NSImage?

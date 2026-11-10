@@ -2218,6 +2218,15 @@ a modifier test beside it; a ↩ chord it answers nil for is
 `JumpKey.dead`, the system beep wired in the controller, and never
 a refusal (`JumpChordTableTests`).
 
+**A KiwiHub pick — ↩, a ⌘ digit or a click, on any side — reads its
+modifiers through `JumpModel.pickModifiers`, never
+`NSEvent.modifierFlags` or an event's flags beside it, and every
+door that opens KiwiHub or steps its strip latches what is held
+through `JumpModel.latchOpener`** (#3168): a modifier still held
+from the opener counts for nothing until it is let go, so ↩ under
+the ⌥ of ⌥⇥ jumps. A new opener door or a new pick reader joins
+`JumpStaleModifierTests` ▸ `wiring`.
+
 ## A sideways strip fades, follows and keeps its scroller (#2901)
 
 **A Settings strip that scrolls sideways is a `SidewaysStrip` handed
