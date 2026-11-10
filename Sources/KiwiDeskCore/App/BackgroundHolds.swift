@@ -48,6 +48,11 @@ struct BackgroundHolds {
             ?? false
     }
 
+    /// Ends `app`'s echo: its next activation is a take of its own.
+    mutating func endEcho(_ app: String) {
+        handedBack[app] = nil
+    }
+
     /// Drops `app`'s hand-back unpaid, and its echo.
     mutating func lift(_ app: String) {
         opened[app] = nil

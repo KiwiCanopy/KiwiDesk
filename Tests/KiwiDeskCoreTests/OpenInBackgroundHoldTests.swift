@@ -178,4 +178,13 @@ struct OpenInBackgroundHoldTests {
         core.handle(.windowFocused(WindowID(7)))
         #expect(core.focusedWindowID == WindowID(7))
     }
+
+    @Test("a second activation inside the echo is the app's")
+    func secondActivationKept() {
+        let core = F.taken()
+        Self.activate(core)
+        Self.activate(core)
+        core.handle(.windowFocused(WindowID(7)))
+        #expect(core.focusedWindowID == WindowID(7))
+    }
 }
