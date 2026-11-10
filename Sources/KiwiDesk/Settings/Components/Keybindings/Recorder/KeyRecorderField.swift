@@ -82,13 +82,6 @@ struct KeyRecorderField: View {
         .onDisappear(perform: stop)
     }
 
-    /// Fixed width for trailing action icon slots (#264).
-    static let iconSlotWidth: CGFloat = 20
-    /// The chord label's least width, so recorders line up; a
-    /// sided chord fits it in every catalog
-    /// (`ChordGlyphsWidthTests`).
-    static let labelMinWidth: CGFloat = 110
-
     /// Fixed-width slot reserving space across icon states (#264).
     func iconSlot<Content: View>(
         @ViewBuilder _ content: () -> Content
@@ -116,33 +109,43 @@ struct KeyRecorderField: View {
         }
     }
 
-    private var recordButton: some View {
-        Button(action: toggle) {
-            Text(label)
-                .frame(minWidth: Self.labelMinWidth)
+    /// The record button's well, its width included; the footprint
+    /// draws it hidden, so a setting row lines up (#3160). The tint
+    /// and chrome a caller adds paint and leave the width alone.
+    static func recordWell(
+        _ label: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(verbatim: label)
+                .frame(minWidth: labelMinWidth)
                 .monospaced()
         }
         .buttonStyle(.bordered)
         .controlSize(.regular)
-        .tint(buttonTint)
-        .foregroundStyle(buttonTint)
-        .modifier(
-            RecorderButtonChrome(
-                recording: recording,
-                dead: isDead,
-                flashing: flashing
+    }
+
+    private var recordButton: some View {
+        Self.recordWell(label, action: toggle)
+            .tint(buttonTint)
+            .foregroundStyle(buttonTint)
+            .modifier(
+                RecorderButtonChrome(
+                    recording: recording,
+                    dead: isDead,
+                    flashing: flashing
+                )
             )
-        )
-        // Dim, never disable: re-recording is how a row leaves
-        // Hyper (#1870, `keybindingRowStyle`'s rule).
-        .opacity(hyperDormant ? 0.55 : 1)
-        .help(helpText)
-        .accessibilityHint(hint ?? "")
-        .accessibilityLabel(name)
-        // The cost is announced ONCE, by the badge that precedes
-        // this button in the row (#1126) — a second copy here
-        // read the same sentence on two adjacent VoiceOver stops.
-        .accessibilityValue(spokenTap ?? SidedChordWords.label(label))
+            // Dim, never disable: re-recording is how a row leaves
+            // Hyper (#1870, `keybindingRowStyle`'s rule).
+            .opacity(hyperDormant ? 0.55 : 1)
+            .help(helpText)
+            .accessibilityHint(hint ?? "")
+            .accessibilityLabel(name)
+            // The cost is announced ONCE, by the badge that precedes
+            // this button in the row (#1126) — a second copy here
+            // read the same sentence on two adjacent VoiceOver stops.
+            .accessibilityValue(spokenTap ?? SidedChordWords.label(label))
     }
 
     /// Why the row would not fire as drawn: a Hyper chord with no
