@@ -39,7 +39,8 @@ struct FloatRegionSeamTests {
 
     /// A scan for a retired API keeps it retired (tests.md): the
     /// #1091 fit, its refusal memo and the #1427 drop fit resized a
-    /// float the user had placed.
+    /// float the user had placed, and the four-edge push moved one
+    /// off a bottom or side bar.
     @Test("No float fit is left in Core")
     func noFloatFitInCore() throws {
         let core = Self.root.appendingPathComponent(
@@ -53,6 +54,8 @@ struct FloatRegionSeamTests {
             "floatFitCorrection",
             "floorWinsExtent",
             "bottomFit(",
+            "clampClear(",
+            "keepingNearEdges(",
         ]
         var hits: [String: [String]] = [:]
         let files = try SourceScan.swiftSources(under: core)

@@ -3068,14 +3068,16 @@ editing here:
   Three obligations fall out. **Never resize a float to fit, and
   move one only off a TOP bar** (#3163, owner ruling 2026-11-10):
   a path that corrects a placed float's frame — a net, a drop, a
-  re-home — does so only through `floatFrameClampedClearOfBars`
-  (its verdict `floatBarPush`), which pushes down clear of a
-  reserved, painted top strip at the window's own size, and never
-  writes the size or answers another edge; a new correcting door
-  takes that push. The region bounds what a float VERB does
+  re-home — never writes its size. Its one bar correction is
+  `floatFrameClampedClearOfBars` (verdict `floatBarPush`), a push
+  down clear of a reserved, painted top strip, and no other edge
+  moves it; a stranded float with no original is re-centred at its
+  own size (`FloatRecovery.centredAtSize`). A new correcting door
+  takes one of those two. The region bounds what a float VERB does
   (`resize`, `move_floating`, `make_floating`'s derived size, the
   gather), never a float the user placed (`FloatNeverResizedTests`,
-  `FloatingModeBarClampTests`). `FloatRegionSeamTests` ▸
+  `FloatingModeBarClampTests`, `FloatStrandRecoveryTests` ▸
+  `recentresAtOwnSize`). `FloatRegionSeamTests` ▸
   `noFloatFitInCore` bans only the retired names, so a new fit
   spelled otherwise is review's. The argument is
   `docs/design-decisions.md` ▸ *A float is never resized to fit*.
