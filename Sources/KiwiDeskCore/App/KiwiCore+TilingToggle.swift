@@ -149,7 +149,7 @@ extension KiwiCore {
     }
 
     /// Whether the Space `display` shows has tiling off and the
-    /// profile hides the bars for it — `shelfStandsDown`'s one
+    /// profile hides the bars for it — `shelfSettings(on:)`'s one
     /// tiling-off read (bars.md).
     func tilingOffHidesShelf(on display: DisplayID) -> Bool {
         guard

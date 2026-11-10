@@ -79,8 +79,9 @@ extension KiwiCore {
         var pocketStrips: [DisplayID: CGRect] = [:]
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
-            // the plan and every style a bar draws carry it.
-            let shown = settings.onScreen(display.fingerprint)
+            // the plan and every style a bar draws carry it, and a
+            // tiling-off Space's Hidden bars (#3151).
+            let shown = shelfSettings(on: display.id)
             let look = shown.spaceBarLook
             // A fullscreen space hosts the panels by construction
             // (`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so

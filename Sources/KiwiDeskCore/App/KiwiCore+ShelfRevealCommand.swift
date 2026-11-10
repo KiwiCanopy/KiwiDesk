@@ -24,7 +24,8 @@ extension KiwiCore {
             return .fail("bars stay hidden while a window fills the screen")
         }
         let mode = workspaces[space]?.mode ?? .bsp
-        let settings = tiler.settings
+        // A tiling-off Space's bars read Hidden here (#3151).
+        let settings = shelfSettings(on: display)
         guard bar == .space || settings.appBarVisibility(in: mode) != nil
         else {
             cueRevealRefusal(.noAppBarHere, display: display)
@@ -67,11 +68,11 @@ extension KiwiCore {
         _ bar: ShelfBar,
         on display: DisplayID
     ) -> RevealRefusal? {
-        let settings = tiler.settings
+        let live = tiler.settings
         let empty =
             bar == .app
-            ? appBarContent(on: display, settings: settings) == nil
-            : spaceBarContent(on: display, style: settings.spaceBarLook)
+            ? appBarContent(on: display, settings: live) == nil
+            : spaceBarContent(on: display, style: live.spaceBarLook)
                 == nil
         return empty ? .nothingToShow(bar) : nil
     }

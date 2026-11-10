@@ -6489,8 +6489,9 @@ tiling.set_start(false, "Share")
 **Does:** sets whether a Space with tiling off hides its focus
 border, for every profile without its own value — the All profiles
 value of Settings' "Hide the focus border while tiling is off"
-row under Shortcuts & Gestures ▸ Size & float. Default `false`. A profile's own value wins. For this session
-only. Sticky and floating marks stay.
+row under Shortcuts & Gestures ▸ Size & float. Default `false`. A
+profile's own value wins. For this session only. Sticky and
+floating marks stay.
 
 **Example:**
 
@@ -6507,9 +6508,11 @@ tiling.set_off_hides_borders(true)
 **Does:** sets whether a Space with tiling off hides the bars on
 its screen, for every profile without its own value — the All
 profiles value of Settings' "Hide the bars while tiling is off"
-row under Shortcuts & Gestures ▸ Size & float. Default `false`. A profile's own value wins. For this session
-only. Where the Space Bar is hidden, the menu-bar item shows the
-Space with the pause symbol.
+row under Shortcuts & Gestures ▸ Size & float. Default `false`. A
+profile's own value wins. For this session only. Every bar and the Pocket then act as if set to Hidden on that
+Space: gone at rest, and a bar's shortcut still shows it. Where the
+Space Bar is hidden, the menu-bar item shows the Space with the
+pause symbol.
 
 **Example:**
 

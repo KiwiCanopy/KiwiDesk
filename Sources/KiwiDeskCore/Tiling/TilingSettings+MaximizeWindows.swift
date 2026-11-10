@@ -22,6 +22,20 @@ extension TilingSettings {
         return (.hidden, app.map { _ in .hidden })
     }
 
+    /// These settings with every bar and the Pocket set to Hidden in
+    /// every layout: what a tiling-off Space whose tick hides the
+    /// bars draws (#3151).
+    public func hidingEveryBar() -> TilingSettings {
+        var out = self
+        out.spaceBarStyle.visibility = .hidden
+        for mode in LayoutMode.allCases {
+            guard let path = Self.appBarPath(for: mode) else { continue }
+            out[keyPath: path].visibility = .hidden
+        }
+        out.kiwishelf.pocketVisibility = .hidden
+        return out
+    }
+
     /// `barEdges(space:app:)` over the visibilities `mode` reads.
     public func barEdges(in mode: LayoutMode) -> [ShelfEdge] {
         let shown = barVisibilities(in: mode)
