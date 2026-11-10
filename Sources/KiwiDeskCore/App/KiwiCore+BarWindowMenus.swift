@@ -209,7 +209,7 @@ extension KiwiCore {
             "bar.menu.pocket_keyed",
             "Its Pocket key keeps it — %1$@ ▸ %2$@ ▸ %3$@",
             L("home.title", "Settings"),
-            L("destination.shortcuts", "Shortcuts & Gestures"),
+            L("destination.shortcuts", "Shortcuts"),
             L("shortcuts.section.pocket", "Pocket")
         )
     }

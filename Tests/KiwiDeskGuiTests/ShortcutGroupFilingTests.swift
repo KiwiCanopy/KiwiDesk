@@ -132,7 +132,7 @@ struct ShortcutGroupFilingTests {
         let apps = titles.firstIndex(of: L("shortcuts.panel.apps", "Apps"))
         let mine = titles.firstIndex(of: "Mine")
         let custom = titles.firstIndex(
-            of: L("shortcuts.panel.custom", "Custom")
+            of: L("shortcuts.panel.custom", "Personal")
         )
         #expect(apps != nil && mine != nil && custom != nil)
         if let apps, let mine, let custom {

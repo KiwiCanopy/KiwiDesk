@@ -296,7 +296,7 @@ struct KiwiDeskKeyRows: View {
             followsGroup: true
         )
         ForEach(
-            ShortcutsRowOrder.openApplicationsKiwiDesk,
+            ShortcutsRowOrder.showHideKiwiDesk,
             id: \.id
         ) { key in
             anchored(key) {

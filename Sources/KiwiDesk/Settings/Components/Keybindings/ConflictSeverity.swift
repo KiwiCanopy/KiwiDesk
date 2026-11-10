@@ -36,6 +36,16 @@ enum ConflictSeverity: Equatable {
     /// The chord string does not parse.
     case unrecognized
 
+    /// The other row holding the chord, for a duplicate or a side
+    /// collapse.
+    var otherBinding: KeyBinding? {
+        switch self {
+        case .duplicate(let other), .sideCollapse(let other):
+            return other
+        default: return nil
+        }
+    }
+
     /// The reading of `conflict` on a machine whose switched-off
     /// system shortcuts are `disabled`
     /// (`SettingsModel.disabledSystemShortcuts()`).

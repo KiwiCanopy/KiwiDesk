@@ -15,9 +15,11 @@ struct ShortcutsSection: View {
     var reduceMotion
     @ObservedObject var model: SettingsModel
     @State var advancedExpanded = false
-    /// Lifted so the Mouse & trackpad chip opens the card (#1520);
-    /// still shut on every visit.
-    @State var gesturesExpanded = false
+    /// Armed by the user's own click on Mouse & Trackpad, once per
+    /// visit, and spent by the part's first picture (owner ruling
+    /// 2026-09-29, carried to the segment by #3184).
+    @State var gesturesPlay = false
+    @State var gesturesPlayed = false
     /// `@State`, never an observed object: the body must not
     /// subscribe to the reading only the bar draws (#1520).
     @State var jumpTracker = ShortcutsJumpTracker()
@@ -47,12 +49,20 @@ struct ShortcutsSection: View {
         model.nav.shortcutsLayerSelection
     }
 
+    /// The part shown (#3184), on `nav` like the layer.
+    var segment: ShortcutsSegment {
+        model.nav.shortcutsSegmentSelection
+    }
+
     var body: some View {
         // Once per pass: every group reads it (#3060).
         let expander = self.expander
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
-                jumpBar(proxy, expander: expander)
+                segmentControl
+                if segment == .builtIn {
+                    jumpBar(proxy, expander: expander)
+                }
                 page(expander)
             }
             // A container, so the pane's title names it rather
@@ -144,22 +154,25 @@ struct ShortcutsSection: View {
         )
     }
 
-    /// One lazily built child per `ShortcutsPagePart`, so a visit
-    /// builds the parts on screen rather than every row (#3060). Rows
-    /// appear as a list's rows do, with no motion of their own (owner
-    /// ruling on #3060).
+    /// One lazily built child per `ShortcutsPagePart` of the part
+    /// shown, so a visit builds the parts on screen rather than
+    /// every row (#3060, #3184). Rows appear as a list's rows do,
+    /// with no motion of their own (owner ruling on #3060).
     func page(_ expander: ShortcutsFamilyRows) -> some View {
-        ScrollView {
+        let segment = self.segment
+        return ScrollView {
             stack {
-                ForEach(ShortcutsPagePart.allCases) { part in
+                ForEach(ShortcutsPagePart.parts(in: segment)) { part in
                     // `ShortcutsPageState` states the set's contract.
-                    ruled(part) { self.part(part, expander: expander) }
-                        .onAppear {
-                            model.shortcutsPage.built.insert(part)
-                        }
-                        .onDisappear {
-                            model.shortcutsPage.built.remove(part)
-                        }
+                    ruled(part, in: segment) {
+                        self.part(part, expander: expander)
+                    }
+                    .onAppear {
+                        model.shortcutsPage.built.insert(part)
+                    }
+                    .onDisappear {
+                        model.shortcutsPage.built.remove(part)
+                    }
                 }
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
@@ -169,6 +182,7 @@ struct ShortcutsSection: View {
             }
             .shortcutsJumpSlot(.content)
             .environment(\.keybindingLayerName, selected)
+            .environment(\.shortcutsSegment, segment)
             // One live read per section render (#1105), so
             // every row narrates the same verdict (#1126).
             .environment(
@@ -192,9 +206,10 @@ struct ShortcutsSection: View {
     /// The part, under the jump bar's rule where the bar draws one.
     @ViewBuilder private func ruled(
         _ part: ShortcutsPagePart,
+        in segment: ShortcutsSegment,
         @ViewBuilder _ content: () -> some View
     ) -> some View {
-        if part.ruledAbove {
+        if part.ruledAbove(in: segment) {
             VStack(alignment: .leading, spacing: 16) {
                 SettingsTheme.hairlineSubtle
                     .frame(height: 1)
@@ -224,14 +239,13 @@ struct ShortcutsSection: View {
         switch part {
         case .conflictBanner:
             KeybindingConflictBanner(model: model)
-        // Above the layer header, set off by the jump bar's rule
-        // after its chip, so nothing in it reads as per-layer
-        // (#1726, #1520; amending the 2026-08-04 ruling that the
-        // layers card leads the section).
+        // Above the layer header, set off by the page's rule, so
+        // nothing in it reads as per-layer (#1726, #1520; amending
+        // the 2026-08-04 ruling that the layers card leads).
         case .modifierKeys:
             ModifierKeysCard(model: model)
         case .gestures:
-            GesturesDrawer(model: model, expanded: $gesturesExpanded)
+            GesturesPart(model: model, playArmed: $gesturesPlay)
         case .layers:
             LayersCard(
                 model: model,
@@ -245,8 +259,6 @@ struct ShortcutsSection: View {
                 bindings: bindingsBinding,
                 expander: expander
             )
-        // Under the layer pick that gates it, above the groups it
-        // rewrites (#3074).
         case .defaultShortcuts:
             DefaultShortcutsRow(model: model, selected: selection)
         case .showHide, .focus, .moveWindows, .macosDesktops, .layout,
@@ -262,64 +274,6 @@ struct ShortcutsSection: View {
             )
         case .luaBindings:
             luaDrawer
-        }
-    }
-
-    @ViewBuilder private func actionGroup(
-        _ part: ShortcutsPagePart,
-        expander: ShortcutsFamilyRows
-    ) -> some View {
-        switch part {
-        case .showHide:
-            ShowHideGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .focus:
-            FocusGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .moveWindows:
-            MoveWindowsGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .macosDesktops:
-            MacOSDesktopsGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .layout:
-            LayoutGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .sizeFloat:
-            SizeFloatGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .pocket:
-            PocketGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        case .openApplications:
-            ApplicationsGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        default:
-            EmptyView()
         }
     }
 
@@ -344,7 +298,5 @@ struct ShortcutsSection: View {
             }
             .padding(.top, 8)
         }
-        // Its jump chip's anchor (#2544).
-        .reportsSectionFrame(SettingsCatalog.shortcuts.luaBindings.control)
     }
 }

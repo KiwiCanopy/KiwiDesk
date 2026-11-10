@@ -19,7 +19,7 @@ struct ShortcutsJumpInvalidationTests {
     /// Focus's header at the bar, the content scrolled under it.
     private var focusUnderTheBar: [String: CGRect] {
         [
-            ShortcutsJumpGroup.gestures.control.id: frame(-300, 80),
+            ShortcutsJumpGroup.showHide.control.id: frame(-300, 80),
             ShortcutsJumpGroup.focus.control.id: frame(0, 400),
         ]
     }

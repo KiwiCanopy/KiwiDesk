@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & trackpad ▸ Scroll gestures (#1656, #1519): the drawer's
+/// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): its
 /// first group. The ⌃⌥ entry with its recorder and swipe length,
 /// the ⌃⌥⌘ entry with its recorder, then the two Natural scrolling
 /// rows both gestures share. Each
@@ -12,7 +12,7 @@ import SwiftUI
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
     /// The entry that plays once as it appears, spending this
-    /// (`GesturesDrawer`).
+    /// (`GesturesPart`).
     @Binding var playing: GestureItem?
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }

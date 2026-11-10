@@ -577,8 +577,8 @@ slot size's "Default — orientation standard") renders in the
 same capsule language rather than as bare gray prose.
 
 **Jump chips are the capsule language as buttons** (#1520). A long
-page whose groups the reader needs a map of — Shortcuts & Gestures
-is the one — pins a row of chips over its scroll, one per group,
+page whose groups the reader needs a map of — Shortcuts ▸
+Built-in is the one — pins a row of chips over its scroll, one per group,
 in page order, each labelled by its group's own title. A chip is
 content-sized and wears its own edge over the chip rest fill —
 never the passive capsule's hairline — lifting on hover and
@@ -596,17 +596,17 @@ shadow. A chip is a button, the marked one
 announced as selected, and the row is one container named
 and captioned "Jump to", the caption on a line of its own above
 the chips. A click puts the group's header under the bar, and
-arrives without travelling under Reduce Motion. A chip whose
-card is collapsible opens it too. A thin rule may separate chips
-whose scope differs; it rides the chip before it, so a wrap never
-starts a line with it. The bar sits on the page ground and grows
+arrives without travelling under Reduce Motion. The bar sits on the page ground and grows
 its lower hairline only once content slides under it. The
 caption line carries a readout at its trailing end, wrapping
 under the caption where both do not fit; the line is header
 chrome, the first thing a narrowing window drops — a name
 inside the readout is shortened before the sentence ever is,
-and the bare chips remain. Chips jump within one page; tabs,
-which show one view at a time, stay the update window's control.
+and the bare chips remain. Chips jump within one view; a
+segmented control picks between whole views shown one at a time
+— the Shortcuts page's three parts, the update window — and sits
+centred above the chips, which lead, so the two never read as one
+control (#3184).
 
 **An "Automatic" color well shows adaptivity as a shape, not
 an absence** (#429). Almost every color setting stores a

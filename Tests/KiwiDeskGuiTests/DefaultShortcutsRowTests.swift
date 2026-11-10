@@ -4,9 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Shortcuts & Gestures ▸ Default shortcuts (#3074): the row sits
-/// under the Layers card, is always drawn, and greys Restore with
-/// the reason its caption names.
+/// Shortcuts ▸ Built-in ▸ Default shortcuts (#3074, #3179): the row
+/// sits under the Layers card, right above the groups it rewrites,
+/// is always drawn, and greys Restore with the reason its caption
+/// names.
 @Suite("Default shortcuts row")
 struct DefaultShortcutsRowTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -54,12 +55,12 @@ struct DefaultShortcutsRowTests {
         }
     }
 
-    @Test("the row mounts once, under the Layers card")
+    @Test("the row mounts once, between Layers and the groups")
     func mountsUnderLayers() throws {
-        // The page draws its parts in case order.
-        let parts = ShortcutsPagePart.allCases
+        let parts = ShortcutsPagePart.parts(in: .builtIn)
         let layers = try #require(parts.firstIndex(of: .layers))
         #expect(parts.firstIndex(of: .defaultShortcuts) == layers + 1)
+        #expect(parts.firstIndex(of: .showHide) == layers + 2)
         #expect(
             ShortcutsPagePart(SettingsContainer.defaultShortcuts)
                 == .defaultShortcuts

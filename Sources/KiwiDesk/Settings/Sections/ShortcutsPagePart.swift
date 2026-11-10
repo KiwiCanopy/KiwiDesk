@@ -2,17 +2,18 @@ import Foundation
 import KiwiDeskCore
 
 /// One child of the Shortcuts page's lazy stack, in page order
-/// (#3060). The stack builds a part only once it nears the
-/// viewport, so a scroll to a row inside an unbuilt part goes to the
-/// part first: its `id` is known to the stack before the part is
-/// built, a row's id is not.
+/// (#3060), each drawn in the segments `segments` names (#3184).
+/// The stack builds a part only once it nears the viewport, so a
+/// scroll to a row inside an unbuilt part goes to the part first:
+/// its `id` is known to the stack before the part is built, a row's
+/// id is not.
 enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     case conflictBanner
     case modifierKeys
-    case gestures
     case layers
+    // Under the layer pick that gates it, above the groups it
+    // rewrites (#3074, #3179).
     case defaultShortcuts
-    case keySequences
     case showHide
     case focus
     case moveWindows
@@ -20,11 +21,37 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     case layout
     case sizeFloat
     case pocket
-    case openApplications
     case inactive
+    case openApplications
+    case keySequences
     case luaBindings
+    case gestures
 
     var id: String { "shortcuts.part." + rawValue }
+
+    /// The segments drawing this part. Layers draws on both key
+    /// parts, reading the one `nav.shortcutsLayer`; the conflict
+    /// banner on both too (#3184).
+    var segments: [ShortcutsSegment] {
+        switch self {
+        case .conflictBanner, .layers: return [.builtIn, .personal]
+        case .openApplications, .keySequences, .luaBindings:
+            return [.personal]
+        case .gestures: return [.mouse]
+        default: return [.builtIn]
+        }
+    }
+
+    /// The segment a reveal of this part lands on: the one shown
+    /// when it draws there, its first otherwise.
+    func segment(from shown: ShortcutsSegment) -> ShortcutsSegment {
+        segments.contains(shown) ? shown : segments[0]
+    }
+
+    /// `segment`'s parts, in page order.
+    static func parts(in segment: ShortcutsSegment) -> [Self] {
+        allCases.filter { $0.segments.contains(segment) }
+    }
 
     /// The part a jump chip's group is drawn in: its container's
     /// (`ShortcutsPagePartTests` ▸ `chipsMatchParts`).
@@ -37,19 +64,15 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         ShortcutsJumpGroup.allCases.first { Self($0) == self }
     }
 
-    /// Whether the page draws the jump bar's rule above this part:
-    /// the part after the one whose chip the bar rules after
-    /// (`ShortcutsJumpGroup.ruledAfter`), so the page splits what
-    /// applies everywhere from the layer's own rows where the bar
-    /// does (owner 2026-11-08). `.layers` stays the part right
-    /// after the ruled chip's, since the rule marks the first
-    /// layer-scoped part (`ShortcutsPagePartTests`).
-    var ruledAbove: Bool {
-        let parts = Self.allCases
+    /// Whether the page draws a rule above this part in `segment`:
+    /// between Built-in's Modifier keys, which apply on every layer,
+    /// and the layer's own rows (owner 2026-11-08).
+    func ruledAbove(in segment: ShortcutsSegment) -> Bool {
+        let parts = Self.parts(in: segment)
         guard let at = parts.firstIndex(of: self), at > 0 else {
             return false
         }
-        return parts[at - 1].group?.ruledAfter == true
+        return self == .layers && parts[at - 1] == .modifierKeys
     }
 
     /// The part that draws a census container's rows; nil for a
@@ -119,8 +142,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
 
     /// Catalog controls no census row labels — the cards' own titles,
     /// the sub-headings and drawers inside them — and the Mouse &
-    /// trackpad entries a strip click lands on. A control added to the
-    /// page or moved between cards is placed here.
+    /// Trackpad entries. A control added to the page or moved
+    /// between cards is placed here.
     @MainActor private static let catalogOwners: [String: Self] = {
         let catalog = SettingsCatalog.shortcuts
         var owners: [String: Self] = [:]
@@ -128,6 +151,12 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
             owners[group.control.id] = Self(group)
         }
         let more: [(SettingsControl, Self)] = [
+            (catalog.gestures.control, .gestures),
+            (catalog.gesturesOnWindows, .gestures),
+            (catalog.gesturesModifier, .gestures),
+            (catalog.gesturesOnShelf, .gestures),
+            (catalog.openApplications, .openApplications),
+            (catalog.luaBindings.control, .luaBindings),
             (catalog.modifierKeys.control, .modifierKeys),
             (catalog.layersCard.control, .layers),
             (catalog.keySequencesCard.control, .keySequences),

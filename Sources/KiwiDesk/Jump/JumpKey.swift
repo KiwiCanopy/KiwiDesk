@@ -36,7 +36,7 @@ enum JumpKey: Equatable {
     /// ⌘S in Layouts: Keep in Profile.
     case keep
     /// ⌘, in Layouts or Shortcuts: that side's Settings page —
-    /// Layout Defaults, or Shortcuts & Gestures.
+    /// Layout Defaults, or Shortcuts.
     case settings
     /// Tab with ⌃, or with ⌥ off the Windows side, stays in the
     /// field.

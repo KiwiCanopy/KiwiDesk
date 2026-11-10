@@ -20,6 +20,20 @@ extension SettingsModel {
         }
     }
 
+    /// Shows the Shortcuts page's part drawing `anchor` (#3184);
+    /// an anchor no part is known to hold leaves the part shown.
+    func showShortcutsSegment(holding anchor: String) {
+        let owner = ShortcutsPagePart.owner(
+            of: anchor,
+            expander: .ofDraft(self, layer: nav.shortcutsLayerSelection),
+            bindings: shortcutsLayerBindings
+        )
+        guard let owner else { return }
+        nav.shortcutsSegment = owner.segment(
+            from: nav.shortcutsSegmentSelection
+        )
+    }
+
     /// The selected Shortcuts layer's rows, falling back to the first
     /// layer as the page's binding does while a selection is stale.
     var shortcutsLayerBindings: [KeyBinding] {

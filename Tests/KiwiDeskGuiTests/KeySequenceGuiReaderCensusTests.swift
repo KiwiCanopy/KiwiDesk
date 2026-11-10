@@ -55,8 +55,6 @@ struct KeySequenceGuiReaderCensusTests {
             (1, "KiwiHub's chord by Lua: a leader never matches"),
         "Settings/Components/Simple/SimpleShortcutCards.swift":
             (2, "the apps card's rows: a sequence rides whole"),
-        "Settings/HomeCardContent.swift":
-            (1, "a sequence is one bound shortcut, keyed by its leader"),
         "Settings/HomeCardPreview.swift":
             (1, "key caps of chords: a leader is a chord"),
         "Settings/Sections/ShortcutsSection.swift":

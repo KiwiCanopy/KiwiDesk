@@ -169,12 +169,24 @@ struct ShortcutsControls: Sendable {
         "shortcuts.advanced.title",
         "Lua bindings"
     )
-    /// The Mouse & trackpad drawer (#1726), declared with its
-    /// settings so a search hit on either opens it.
+    /// The Mouse & Trackpad part (#3184) with its settings, then its
+    /// groups: a hit on a setting picks the part.
     let gestures = SettingsDrawer(
         "shortcuts.gestures.title",
-        "Mouse & trackpad",
+        "Mouse & Trackpad",
         children: GesturesControls()
+    )
+    let gesturesOnWindows = SettingsControl(
+        "shortcuts.gestures.group.windows",
+        "On your windows"
+    )
+    let gesturesModifier = SettingsControl(
+        "shortcuts.gestures.group.modifier",
+        "Holding a modifier"
+    )
+    let gesturesOnShelf = SettingsControl(
+        "shortcuts.gestures.group.shelf",
+        "On the KiwiShelf"
     )
 }
 

@@ -264,31 +264,22 @@ restated `20...80` satisfies on the day it is written.
   arrival (`LayoutStoryArrangementTests` ▸ `identitiesAreStable`).
   `docs/design-decisions.md` ▸ *A thumbnail that is read rather
   than compared* carries why.
-- **A gesture picture is not a schematic.** A Mouse & trackpad
-  entry on the Shortcuts & Gestures page teaches a gesture rather
-  than a rest state, so its picture may move: while hovered, and
-  once on the user's own click alone — the card's first entry
-  when a click opens the card, at most once per visit (owner
-  ruling 2026-09-29), and the entry a click on its picture in the
-  shut card's strip lands on, once per such click (owner ruling
-  2026-10-17) — never on a search, Go to or diff-jump expansion,
-  never looped, and never in the shut card's strip, whose
-  pictures stay still (owner ruling 2026-10-18). Otherwise it
-  rests on its
-  key frame, and always under Reduce Motion, never a bundled clip,
-  with the gate named per call (`ReduceMotionGateTests`).
-  `GestureAutoplayWiringTests` holds the click as the only
-  trigger. A strip picture's hover and click live in
-  `GestureStripHoverCue`, which holds the picture as a stored value,
-  never in the view that draws the picture, so a hover never
-  re-renders it (#2537, #3042,
-  `GestureAutoplayWiringTests` ▸ `stripRests`, `GestureStripTests`
-  ▸ `plateHoverCue`). An entry's sentence, picture, surface and pace live
-  once, on `GestureItem`, which the entry and the strip both read
-  (`GesturesDrawerTests` ▸ `entriesAreTheItems`, `GestureStripTests`).
-  Whether it actually moves is a device check, since no headless
-  suite sees an animation run (#1726; `docs/design-decisions.md`
-  ▸ Shortcuts carries why).
+- **A gesture picture is not a schematic.** A Mouse & Trackpad
+  entry on the Shortcuts page teaches a gesture rather than a rest
+  state, so its picture may move: while hovered, and once on the
+  user's own click alone — the part's first entry when a click on
+  the Mouse & Trackpad segment opens it, at most once per visit
+  (owner ruling 2026-09-29, carried to the segment by #3184) —
+  never on a search, Go to or diff-jump landing, and never looped.
+  Otherwise it rests on its key frame, and always under Reduce
+  Motion, never a bundled clip, with the gate named per call
+  (`ReduceMotionGateTests`). `GestureAutoplayWiringTests` holds
+  the click as the only trigger. An entry's sentence, picture,
+  surface and pace live once, on `GestureItem`
+  (`GesturesPartTests` ▸ `entriesAreTheItems`). Whether it
+  actually moves is a device check, since no headless suite sees
+  an animation run (#1726; `docs/design-decisions.md` ▸ Shortcuts
+  carries why).
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by
   skipping the drawing rather than leaving it to the frame's
@@ -1165,7 +1156,9 @@ must keep:
   (`HomeCardContentTests` holds the derivations), save AI's,
   which is fixed because KiwiDesk cannot read an AI app's state
   (`docs/design-decisions.md` ▸ The AI page sets an AI app up
-  and never reports on it), previews
+  and never reports on it), and Shortcuts', which names its
+  page's parts from `ShortcutsSegment`'s titles while its
+  conflicts take the shout (#3184), previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
   hue alone. A profile card's picture rides the desktop plate
@@ -2323,13 +2316,23 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   of SwiftUI's sight, and it must find its rows when called, since a
   skipped render keeps the last binding that drew
   (`NavRowRenderSeamTests`, `NavRowEqualityTests`).
-- **A scroll into the Shortcuts page reaches the row's part
-  first** (#3060). The page builds its parts lazily, so a scroll
-  to an id inside a part not yet built finds nothing: a reveal
-  (through `SettingsModel.revealLanding(for:)`), a recorder's Go
-  to and a jump chip scroll to the part's id, which
+- **A scroll into the Shortcuts page reaches the row's segment,
+  then its part** (#3060, #3184). The page shows one of three
+  segments, kept on `SettingsNavigation.shortcutsSegment`, and
+  builds that segment's parts lazily, so a scroll to an id inside
+  a part not shown or not yet built finds nothing: a reveal
+  selects the segment through `SettingsModel.showShortcutsSegment`
+  before it scrolls, and goes on through
+  `SettingsModel.revealLanding(for:)`; a recorder's Go to switches
+  the segment in `ShortcutsSection.scroll(to:)`; both, and a jump
+  chip, scroll to the part's id, which
   `ShortcutsPagePart.owner(of:expander:bindings:)` answers, and an
-  anchor it cannot place builds the whole page. A catalog control
+  anchor it cannot place builds the whole segment
+  (`ShortcutsSegmentTests` ▸ `wiring`). A conflict naming a row
+  of the other key segment links to it, read from the
+  `\.shortcutsSegment` environment value (`ShortcutsSegmentTests`
+  ▸ `conflictLink`); a new conflict surface on the page owes the
+  same link. A catalog control
   or census container added to the page, or moved between its
   cards, is placed there in the same change — a stale placement
   scrolls to the wrong part and skips the fallback, which no test

@@ -14,7 +14,7 @@ setting lives, why a move was refused, and the files behind it.
 Open Settings from the KiwiDesk menu in the menu bar, or press
 **⌘,** while a KiwiDesk window is key.
 
-**Shortcuts & Gestures ▸ Open applications** offers a rebindable
+**Shortcuts ▸ Personal ▸ Open applications** offers a rebindable
 **Open Settings** row for a global key, under **KiwiDesk**.
 
 That row ships on **`⌃⌥,`**, a [default
@@ -389,7 +389,7 @@ What the fields' own notes do not say:
   limitations](accepted-limitations.md)).
 - **Scrolling** — its focus animation and duration live here,
   beside the layout rather than with the other animations.
-- **Track** — the track shortcuts sit in Shortcuts & Gestures ▸
+- **Track** — the track shortcuts sit in Shortcuts ▸ Built-in ▸
   Move windows. Previous is the column to the left (or the row
   above), next the column to the right (or the row below),
   whichever way the axis runs.
@@ -823,7 +823,7 @@ time: until then KiwiDesk detects no screens either.
 
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
-loaded and edit its Shortcuts & Gestures page.
+loaded and edit its Shortcuts page.
 
 ### Built-in Standards & Presets
 
@@ -985,14 +985,14 @@ the window and follows. Resizing has its own layer, `⌥⌘`, which
 also carries the space history on `Tab`, `⇧` stepping it the
 other way as it does everywhere on macOS. A space past the tenth,
 or one with a name, has no digit: the space steps and the history
-reach it, and Shortcuts & Gestures can give it a key of its own.
+reach it, and Shortcuts can give it a key of its own.
 
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J`, `⌃⌥K`
 and `⌃⌥L` open **KiwiHub**
 ([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel whose
-sides are listed together under Shortcuts & Gestures ▸ KiwiHub:
+sides are listed together under Shortcuts ▸ Built-in ▸ KiwiHub:
 `⌃⌥J` the **window switcher**, `⌃⌥K` the **shortcuts panel**, where
 typing searches your shortcuts, and `⌃⌥L` the **view picker**,
 which switches the layout of the space under the pointer, the
@@ -1013,20 +1013,20 @@ KiwiDesk panel has it, no modifier tap does.
 
 `⌃⌥R` returns the focused space's sizes to what your profile set
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
-listed under Shortcuts & Gestures ▸ Size & float.
+listed under Shortcuts ▸ Built-in ▸ Size & float.
 
 `⌃⌥G` shows or hides the Space Bar and `⌃⌥H` the App Bar
 ([`space_bar.toggle_reveal`](lua-reference.md#space_bartoggle_reveal),
 [`app_bar.toggle_reveal`](lua-reference.md#app_bartoggle_reveal)),
-listed under Shortcuts & Gestures ▸ Show & hide ▸ KiwiShelf.
+listed under Shortcuts ▸ Built-in ▸ Show & hide ▸ KiwiShelf.
 
 `⌃⌥M` makes the focused window fill its screen and hides the bars
 there, until you press it again or move focus to another tiled window
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)), listed
-under Shortcuts & Gestures ▸ Size & float.
+under Shortcuts ▸ Built-in ▸ Size & float.
 
 `⌃⌥⇧P` is **Toggle Pocket**, and `⌃⌥P` is **Pocket or take out**,
-under Shortcuts & Gestures ▸ Pocket
+under Shortcuts ▸ Built-in ▸ Pocket
 ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window),
 [`pocket`](lua-reference.md#pocket)). A pocketed window leaves
 the screen and every bar, and comes out on the screen you are on,
@@ -1117,7 +1117,7 @@ the caps print, not which key fires.
 
 :::unreleased
 A key sequence — a leader chord, then one key after another — is
-recorded in Shortcuts & Gestures ▸ Key sequences, or written with
+recorded in Shortcuts ▸ Personal ▸ Key sequences, or written with
 [`define_sequence`](lua-reference.md#define_sequence).
 :::
 
@@ -1174,7 +1174,7 @@ is in front ([limitations](accepted-limitations.md)).
 ### Import & Adopt
 
 If `init.lua` holds custom keybindings, **Import from
-init.lua…** (in the Shortcuts & Gestures header) reads them for
+init.lua…** (Shortcuts ▸ Built-in ▸ Default shortcuts) reads them for
 review before you Save; each binding must be an inline
 `function() … end` on one line. **Adopt into the GUI** imports
 the whole file's managed settings and keeps your custom Lua live.
@@ -1182,7 +1182,7 @@ the whole file's managed settings and keeps your custom Lua live.
 Import and Adopt bring in one key per action: a key is left out
 when its action already has one, on the Shortcuts page or earlier
 in `init.lua` — a Space keeps its own digit where it has one — and
-the Shortcuts header names each key left out.
+that row names each key left out.
 
 ### Shortcut Layers
 

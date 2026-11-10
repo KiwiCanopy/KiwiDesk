@@ -99,9 +99,8 @@ struct ShortcutsPagePartTests {
         }
     }
 
-    /// A Mouse & trackpad strip click lands on its entry, inside the
-    /// built gestures part: no whole-page rebuild, which would end the
-    /// play the click started.
+    /// A hit on a Mouse & Trackpad entry lands in the gestures part,
+    /// never on a whole-page rebuild.
     @Test("every gesture entry is in the gestures part")
     func gestureEntriesHaveTheirPart() {
         let expander = Self.expander()
@@ -166,27 +165,22 @@ struct ShortcutsPagePartTests {
         #expect(model.revealLanding(for: "no such row") == .wholePage)
     }
 
-    /// The page draws the jump bar's rule where the bar does: above
-    /// the part after the ruled chip's, which is the Layers card
-    /// (owner 2026-11-08).
-    @Test("the page rule sits where the jump bar's does")
-    func pageRuleFollowsTheBar() throws {
-        let ruled = ShortcutsPagePart.allCases.filter(\.ruledAbove)
-        let after = ShortcutsJumpGroup.allCases.filter(\.ruledAfter)
-            .compactMap { group -> ShortcutsPagePart? in
-                let parts = ShortcutsPagePart.allCases
-                guard let at = parts.firstIndex(of: .init(group)),
-                    at + 1 < parts.count
-                else { return nil }
-                return parts[at + 1]
+    /// The page rules Built-in between Modifier keys and the layer's
+    /// own rows (owner 2026-11-08), and no other part.
+    @Test("the page rule sits above Built-in's Layers card")
+    func pageRuleSplitsTheLayer() throws {
+        for segment in ShortcutsSegment.allCases {
+            let ruled = ShortcutsPagePart.parts(in: segment).filter {
+                $0.ruledAbove(in: segment)
             }
-        #expect(ruled == after)
-        #expect(ruled == [.layers])
+            #expect(ruled == (segment == .builtIn ? [.layers] : []))
+        }
         let page = try Self.source("Sections/ShortcutsSection.swift")
         #expect(
             page.contains(
-                "ifpart.ruledAbove{VStack(alignment:.leading,spacing:16){"
-                    + "SettingsTheme.hairlineSubtle.frame(height:1)"
+                "ifpart.ruledAbove(in:segment){VStack(alignment:.leading,"
+                    + "spacing:16){SettingsTheme.hairlineSubtle"
+                    + ".frame(height:1)"
             )
         )
     }
@@ -199,9 +193,9 @@ struct ShortcutsPagePartTests {
         let parts = try Self.source("Sections/ShortcutsSection.swift")
         #expect(
             parts.contains(
-                "ForEach(ShortcutsPagePart.allCases){partin"
-                    + "ruled(part){self.part(part,expander:expander)}"
-                    + ".onAppear{"
+                "ForEach(ShortcutsPagePart.parts(in:segment)){partin"
+                    + "ruled(part,in:segment){"
+                    + "self.part(part,expander:expander)}.onAppear{"
             )
         )
         #expect(

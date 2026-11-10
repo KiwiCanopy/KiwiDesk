@@ -15759,8 +15759,56 @@ Borders" pairs two nouns; *Controls* was refused because every row
 in Settings is a control, and *gesture* is Apple's own word for
 trackpad and mouse input.
 
+:::unreleased
+*One page, three parts (#3184, owner and ui-designer 2026-11-10).*
+The page outgrew one map: the built-in shortcuts, everything the
+user adds and the mouse and trackpad took twelve chips, three lines
+in German, with the trackpad rows (#3183) still to come. So the
+Home tile is *Shortcuts*, its subtitle names the parts, and the
+page opens with a centred segmented control, **Built-in | Personal
+| Mouse & Trackpad**. This amends #1520's "chips keep the page one
+page" below: tabs were refused there for the groups of ONE view,
+while three whole parts are separate views shown one at a time,
+which is what a segment is for on macOS (System Settings ▸
+Trackpad's top segment). Three Home tiles, tabs per group and a
+nested sidebar were refused: the first splits one subject across
+Home, the other two add a navigator.
+
+- **Built-in** opens first and alone keeps chips, Show & hide
+  through Pocket, being the one part long enough to need a map.
+  The segment is centred and the chips lead, so the two read
+  apart. Open Settings moves into Show & hide, being a built-in;
+  Restore sits right under Layers, above the groups it rewrites
+  (#3179), its explanation in its `?` (#3178).
+- **Personal** holds Layers, Open applications, Key sequences and
+  Lua shortcuts: no chips, and no Restore, nothing shipped being
+  there to restore. Its name is KiwiHub's word for the user's own
+  shortcut groups, one word in every catalog. Open applications
+  now follows Layers, so #1520's refusal to move it up concerned
+  the one long page and is spent.
+- **Mouse & Trackpad** holds open groups ordered by where the hand
+  is — on your windows, holding a modifier, on the KiwiShelf — each
+  with its own pictures, and no Layers card, since a layer does
+  not act on a gesture. This retires #1726's collapsed card, its
+  picture strip, and Mouse & trackpad's first chip and rule. Its
+  first picture still plays once per visit on the user's own
+  click, now on the segment.
+- Layers draws on both key parts and reads the one
+  `nav.shortcutsLayer`, so the layer picked survives a switch. The
+  part shown is a `SettingsNavigation` reading too (#1127):
+  Built-in on a first visit, the last part for the window's
+  session after that. Only the part shown is built.
+- **A sibling is never out of sight.** A search hit, ⌘K and the
+  recorder's Go to select the part holding the row before they
+  scroll, and a conflict between a Personal row and a built-in
+  carries a link to the other part. Without that link #1520's
+  objection to tabs — a conflict landing on a page whose sibling is
+  hidden — would stand, which is why it is a condition of the
+  ruling rather than a nicety.
+:::
+
 **The Mouse & trackpad card sits above the layer header, and is
-collapsed on every visit.** Everything under "Editing the X layer"
+collapsed on every visit** (retired by #3184's part, above). Everything under "Editing the X layer"
 reads as belonging to that layer; the card's settings do not, so
 it cannot sit there, and the layers card leads only what is
 layer-scoped. It opens shut every time because a
@@ -16044,7 +16092,8 @@ burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 
 **The page is mapped by pinned jump chips, never split into tabs**
-(#1520, owner ruling 2026-10-01). A group well below the fold of
+(#1520, owner ruling 2026-10-01; amended by #3184, *One page,
+three parts*, for Built-in's groups). A group well below the fold of
 a long list is undiscoverable without a map — the per-app
 shortcut, which answers "switch to the Space an app has windows
 in", is the costly case. Tabs are easier to click but hide every
@@ -16066,7 +16115,7 @@ neighbour. The bar carries the edited
 layer's name instead, in words, at the trailing end of the
 caption line over the chips, and that line is the first thing a
 narrowing window drops since it is header chrome. **Mouse &
-trackpad gets the first chip**, set off
+trackpad gets the first chip** (until #3184 made it a part), set off
 by a rule because everything after it is scoped to one layer and
 it is not; its click opens the card as well, which stays fully
 collapsed otherwise — a first-item-open state would be a third

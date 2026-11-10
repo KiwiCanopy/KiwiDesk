@@ -126,27 +126,23 @@ struct ShortcutsCensusRenderTests {
         )
     }
 
-    /// Two lists, one tier (#1520): the app list is drawn by its
-    /// own view — membership only (see the suite note) — and the
-    /// KiwiDesk rows the retired General drawer held are walked
-    /// under their subheading. The pair partitions the
-    /// container, so a family moved between them still reds on
-    /// the duplicate.
+    /// One list, one tier: the app list is drawn by its own view —
+    /// membership only (see the suite note). Its KiwiDesk rows moved
+    /// to Show & hide with #3184.
     @Test("Open applications renders the census's families")
     func openApplicationsTier() {
         let apps = ShortcutsRowOrder.openApplicationsAtRest
-        let own = ShortcutsRowOrder.openApplicationsKiwiDesk
-        pin(apps + own, .openApplications, .atRest, "open applications")
-        #expect(!apps.isEmpty && !own.isEmpty)
+        pin(apps, .openApplications, .atRest, "open applications")
+        #expect(!apps.isEmpty)
         #expect(censusRows(.openApplications, .showMore).isEmpty)
     }
 
-    /// The walked half of Open applications draws its WHOLE list:
-    /// the `ForEach` takes `openApplicationsKiwiDesk` as it stands
-    /// (a `.prefix` or filter on it drops a row the census still
-    /// places), each key has its own anchored arm, and the group
-    /// mounts the rows.
-    @Test("Open applications draws every KiwiDesk row")
+    /// Show & hide ▸ KiwiDesk draws its WHOLE list: the `ForEach`
+    /// takes `showHideKiwiDesk` as it stands (a `.prefix` or filter
+    /// on it drops a row the census still places), each key has its
+    /// own anchored arm, and Show & hide alone mounts the rows
+    /// (#3184).
+    @Test("Show & hide draws every KiwiDesk row")
     func kiwiDeskRowsAreAllDrawn() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -171,11 +167,11 @@ struct ShortcutsCensusRenderTests {
         )
         #expect(
             rows.contains(
-                "ForEach(ShortcutsRowOrder.openApplicationsKiwiDesk,"
+                "ForEach(ShortcutsRowOrder.showHideKiwiDesk,"
                     + "id:\\.id)"
             )
         )
-        for key in ShortcutsRowOrder.openApplicationsKiwiDesk {
+        for key in ShortcutsRowOrder.showHideKiwiDesk {
             guard case .shortcuts(let family) = key else {
                 Issue.record("not a shortcuts key: \(key)")
                 continue
@@ -186,7 +182,9 @@ struct ShortcutsCensusRenderTests {
             )
         }
         let apps = try squeezed("KeybindingAppGroup.swift")
-        #expect(apps.occurrences(of: "KiwiDeskKeyRows(") == 1)
+        #expect(apps.occurrences(of: "KiwiDeskKeyRows(") == 0)
+        let card = try squeezed("ShowHideGroup.swift")
+        #expect(card.occurrences(of: "KiwiDeskKeyRows(") == 1)
     }
 
     /// The strip is the offer, `.showMore`; the rows that exist
