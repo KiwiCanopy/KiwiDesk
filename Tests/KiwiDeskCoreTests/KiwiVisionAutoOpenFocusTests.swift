@@ -42,9 +42,12 @@ struct KiwiVisionAutoOpenFocusTests {
     @Test("the first member window to arrive takes the focus")
     func firstArrivalTakesFocus() {
         let core = Self.owing()
+        var log: [String] = []
+        core.onLog = { log.append($0) }
         Self.arrive(7, bundleID: F.music, on: core)
         #expect(core.focusedWindowID == WindowID(7))
         #expect(core.launchFollow.quietOpen == nil)
+        #expect(log.contains("kiwivision: focus handed to w7"))
     }
 
     @Test("a later arrival opens without taking the focus")
@@ -163,11 +166,17 @@ struct KiwiVisionAutoOpenFocusTests {
         let ruled = SpaceID("2")
         core.state.workspaces.ensureSpace(ruled)
         core.state.appRules[F.music] = ruled
+        var log: [String] = []
+        core.onLog = { log.append($0) }
         Self.arrive(7, bundleID: F.music, on: core)
         #expect(core.state.workspaces.space(of: WindowID(7)) == ruled)
         #expect(core.state.workspaces.activeSpace == home)
         #expect(core.focusedWindowID == WindowID(1))
         #expect(core.launchFollow.quietOpen == nil)
+        // A focus write in the hidden Space would leave the anchor
+        // reads above alone and still raise and warp onto w7.
+        #expect(log.contains("kiwivision: w7 arrived — focus stays"))
+        #expect(!log.contains("kiwivision: focus handed to w7"))
     }
 
     /// The control owes: the same press and start make another app's
