@@ -273,6 +273,12 @@
           "lua" : "kiwihub.show(\"windows\")"
         },
         {
+          "combo" : "option+tab",
+          "kind" : "navigation",
+          "label" : "Show window switcher for last app",
+          "lua" : "kiwihub.show_last_app()"
+        },
+        {
           "combo" : "cmd+cmd",
           "kind" : "navigation",
           "label" : "Show Desktop overview",

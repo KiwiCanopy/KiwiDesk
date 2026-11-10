@@ -30,14 +30,16 @@ enum JumpKey: Equatable {
     /// ⇥ (forward) or ⇧⇥ (back): the next side, wrapping, with
     /// the query cleared.
     case stepScope(forward: Bool)
-    /// ← / → in Layouts: one tile (#2897).
+    /// ← / → in Layouts and Desktops, and on Windows' app strip,
+    /// typed or not: one tile (#2897, #3135).
     case side(Int)
     /// ⌘S in Layouts: Keep in Profile.
     case keep
     /// ⌘, in Layouts or Shortcuts: that side's Settings page —
     /// Layout Defaults, or Shortcuts & Gestures.
     case settings
-    /// Tab with ⌃ or ⌥ stays in the field.
+    /// Tab with ⌃, or with ⌥ off the Windows side, stays in the
+    /// field.
     case swallow
     /// ⌘↓ on Desktops: open the selected Space (#1229).
     case openSpace
@@ -73,7 +75,8 @@ enum JumpKey: Equatable {
         modifiers: NSEvent.ModifierFlags,
         scope: JumpScope = .windows,
         naming: Bool,
-        keys: KiwiHubKeys = KiwiHubKeys()
+        keys: KiwiHubKeys = KiwiHubKeys(),
+        back: KeyCombo? = nil
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
@@ -89,6 +92,22 @@ enum JumpKey: Equatable {
         }
         if scope == .desktops, let key = desktops(keyCode, held) {
             return key
+        }
+        // The last-app opener's own key with ⇧ steps the strip
+        // back, as ⇧⌘⇥ does macOS's switcher; ahead of every key
+        // a Lua alternative or ⇥ could shadow it with (#3135).
+        if scope == .windows, let back,
+            combo(keyCode, held) == back
+        {
+            return .side(-1)
+        }
+        // ← → walk the strip, never the caret, while a query is
+        // typed too (#3135 ▸ Amendment).
+        if scope == .windows,
+            keyCode == left || keyCode == right,
+            held.subtracting(.shift).isEmpty
+        {
+            return .side(keyCode == left ? -1 : 1)
         }
         if scope != .windows, keyCode == comma, held == .command {
             return .settings
@@ -193,6 +212,22 @@ enum JumpKey: Equatable {
         }
     }
 
+    /// The Windows side's back key: the last-app opener's chord
+    /// with ⇧ added, as registered (#3135, owner 2026-11-09). None
+    /// for no opener, a tap, a chord already holding ⇧, or a bare
+    /// ⇥, whose ⇧ form is the previous side.
+    static func back(of opener: KeyCombo?) -> KeyCombo? {
+        guard let opener, !opener.isTap else { return nil }
+        let chord = opener.registered
+        guard !chord.modifiers.contains(.shift),
+            !(UInt16(chord.keyCode) == tab && chord.modifiers.isEmpty)
+        else { return nil }
+        return KeyCombo(
+            keyCode: chord.keyCode,
+            modifiers: chord.modifiers.union(.shift)
+        )
+    }
+
     /// The press as `KiwiHubKeys` spells it.
     private static func combo(
         _ keyCode: UInt16,
@@ -208,8 +243,8 @@ enum JumpKey: Equatable {
 
     /// What a Lua alternative does: its built-in key's move. ⇧
     /// previews Move here, so an alternative moves under it too, as
-    /// the arrows do. ← and → move only in View and Desktops, so
-    /// elsewhere theirs is typing.
+    /// the arrows do. ← and → move in View, Desktops and Windows'
+    /// strip; on Shortcuts theirs is typing.
     private static func alternative(
         _ keyCode: UInt16,
         _ held: NSEvent.ModifierFlags,
@@ -236,7 +271,7 @@ enum JumpKey: Equatable {
 
     /// The sides whose ← and → move a selection.
     private static func sideways(_ scope: JumpScope) -> Bool {
-        scope == .view || scope == .desktops
+        scope == .view || scope == .desktops || scope == .windows
     }
 
     private static func quick(

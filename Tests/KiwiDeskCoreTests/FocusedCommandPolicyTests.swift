@@ -60,6 +60,7 @@ struct FocusedCommandPolicyTests {
         // Opens a KiwiHub side, moving no window (#2265); a focus
         // command here would refuse ⌃⌥J/K/L under an ignored panel.
         "kiwihub.show",
+        "kiwihub.show_last_app",
         // Reads KiwiVision's state, naming no window (#2103).
         "kiwivision.current",
         // The look library and the live look: no window is

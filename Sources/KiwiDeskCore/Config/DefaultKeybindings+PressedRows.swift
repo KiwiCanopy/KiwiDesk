@@ -34,6 +34,18 @@ extension DefaultKeybindings {
         )
     }
 
+    /// The window switcher on its last app on `⌥⇥` (#3135, owner
+    /// 2026-11-09): off the `⌃⌥` ladder by ruling, so no base moves
+    /// it.
+    public static func windowSwitcherLastAppRow() -> KeyBinding {
+        KeyBinding(
+            combo: "option+tab",
+            lua: KiwiHubSide.lastAppLua,
+            kind: .navigation,
+            label: "Show window switcher for last app"
+        )
+    }
+
     /// The Desktop overview on a double tap of either `⌘`, the same
     /// key twice (#1229, owner 2026-11-01). A tap rides the keyboard
     /// tap, never Carbon, so no base moves it.

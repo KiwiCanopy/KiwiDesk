@@ -993,6 +993,12 @@ which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
 :::unreleased
+`⌥⇥` opens the window switcher on the app of the window you used
+last, that window selected
+([`kiwihub.show_last_app`](lua-reference.md#kiwihubshow_last_app)).
+:::
+
+:::unreleased
 `⌘⌘`, either ⌘ tapped twice (the same key both times), opens
 KiwiHub's **Desktop overview**, and closes it again. While KiwiHub
 has the keyboard, only a modifier tap set to one of its sides

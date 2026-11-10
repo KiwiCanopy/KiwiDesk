@@ -52,11 +52,11 @@ struct JumpKeyAlternativeTests {
         }
     }
 
-    @Test("← and → move only in View; elsewhere they type")
+    @Test("← and → move in View and Windows; on Shortcuts they type")
     func sidesOnlyInView() {
         #expect(key(Self.f, scope: .view) == .side(1))
         #expect(key(Self.b, scope: .view) == .side(-1))
-        #expect(key(Self.f, scope: .windows) == nil)
+        #expect(key(Self.f, scope: .windows) == .side(1))
         #expect(key(Self.b, scope: .shortcuts) == nil)
     }
 
