@@ -157,6 +157,11 @@ struct LaunchFollowSeamTests {
             "KiwiCore+Events.swift", 1
         ),
         ("let answer = moveToDesktop(", "KiwiCore+QuietDesktop.swift", 1),
+        // …and once a late create settles (#2630).
+        (
+            "if created, !departing { _ = sendQuietArrival(id) }",
+            "KiwiCore+ArrivalProvenance.swift", 1
+        ),
         (
             "launchFollow.noteQuietApps([bundleID], at: now, place: place)",
             "KiwiCore+OpenInBackground.swift", 1

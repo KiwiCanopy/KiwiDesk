@@ -36,31 +36,51 @@ extension LaunchFollowIntent {
 
 /// `open_in_background`'s Desktop (#3153 ▸ Ruling): each window the
 /// app CREATES while its quiet mark stands is sent on through
-/// `move_to_desktop`'s own body, in place of the arrival retile. A
-/// reveal or a re-track is no open, a Desktop shown by now needs no
-/// move, and a pocket or full-screen window is not sent, so the
-/// send never meets the verb's focus or refusal cues; a refusal
-/// left for the window is logged and the arrival retile runs.
+/// `move_to_desktop`'s own body, at the arrival in place of its
+/// retile, or where the create trails the arrival, once the
+/// provenance door settles it (#2630). A reveal or a re-track is no
+/// open, a Desktop shown by now needs no move, and a pocket or
+/// full-screen window is not sent, so the send never meets the
+/// verb's focus or refusal cues; a refusal left for the window is
+/// logged and the arrival retile runs.
 extension KiwiCore {
-    /// Sends `window` on; true where it departed.
+    /// The arrival's door: sends `window` on where it reads as new,
+    /// and leaves one awaiting its create to `settleArrival`. True
+    /// where it departed.
     func moveQuietArrival(
         _ window: ManagedWindow,
         provenance: ArrivalProvenance
     ) -> Bool {
         guard
+            launchFollow.quietDesktop(
+                window.appRef.listKey,
+                at: wallClock()
+            ) != nil
+        else { return false }
+        switch provenance.isNew {
+        case true?:
+            return sendQuietArrival(window.id)
+        case nil:
+            onLog(
+                "open_in_background: w\(window.id.raw) waits for its "
+                    + "create"
+            )
+            return false
+        case false?:
+            return false
+        }
+    }
+
+    /// The one send, from either door; true where it departed.
+    func sendQuietArrival(_ id: WindowID) -> Bool {
+        guard let window = state.windows[id],
             let desktop = launchFollow.quietDesktop(
                 window.appRef.listKey,
                 at: wallClock()
             ),
-            state.pocketPhase(of: window.id) == nil,
+            state.pocketPhase(of: id) == nil,
             !window.isFullscreen
         else { return false }
-        // A create landing after its arrival is not waited for: a
-        // background open's window was adopted on sight (#3153).
-        guard provenance.isNew == true else {
-            onLog("open_in_background: w\(window.id.raw) stays — not new")
-            return false
-        }
         // The verb re-reads the topology below; both reads run in
         // this one main-actor turn, so a switch cannot land between.
         let snapshot = desktopMemory.readDesktops()
@@ -68,8 +88,8 @@ extension KiwiCore {
             snapshot.currentSpaces.values.contains(desktop.id) == false
         else {
             onLog(
-                "open_in_background: w\(window.id.raw) stays — its "
-                    + "Desktop is gone or showing"
+                "open_in_background: w\(id.raw) stays — its Desktop "
+                    + "is gone or showing"
             )
             return false
         }
@@ -78,21 +98,18 @@ extension KiwiCore {
             [
                 .number(Double(number)),
                 desktop.space.map { .string($0.raw) } ?? .null,
-                .number(Double(window.id.raw)),
+                .number(Double(id.raw)),
             ],
             follow: false
         )
         if let error = answer.error {
             onLog(
-                "open_in_background: w\(window.id.raw) stays — move "
-                    + "to Desktop \(number) refused: \(error)"
+                "open_in_background: w\(id.raw) stays — move to "
+                    + "Desktop \(number) refused: \(error)"
             )
             return false
         }
-        onLog(
-            "open_in_background: w\(window.id.raw) sent to Desktop "
-                + "\(number)"
-        )
+        onLog("open_in_background: w\(id.raw) sent to Desktop \(number)")
         return true
     }
 }

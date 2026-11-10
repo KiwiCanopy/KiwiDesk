@@ -159,22 +159,67 @@ struct OpenInBackgroundDesktopTests {
         #expect(recorder.opened.isEmpty)
     }
 
-    /// An arrival the door does not read as new is not sent: a
-    /// reveal or re-track, and the accepted residue of a create that
-    /// lands after its arrival (#2630, #3153 ▸ Ruling).
-    @Test("an arrival not yet known to be created is not sent")
-    func uncreatedArrivalStays() {
+    /// The core on a live create route, the app opened, and w7
+    /// arrived ahead of its create.
+    private func awaitingCreate() -> KiwiCore {
         let (core, _) = makeCore()
-        defer { teardown() }
         core.windowCreates.isLive = true
         core.boot.reachedReady = true
         #expect(open(core).isSuccess)
         F.arrive(7, bundleID: F.app, on: core)
         #expect(moved().isEmpty)
-        // The control: the same arrival with its create sent on.
-        core.windowCreates.noteCreated(WindowID(8), at: core.wallClock())
-        F.arrive(8, bundleID: F.app, on: core)
-        #expect(moved() == [[NSNumber(value: 8)]])
+        return core
+    }
+
+    /// The send `settleArrival` makes once a late create lands (its
+    /// call and gate are `LaunchFollowSeamTests`'), driven here in
+    /// one synchronous body, since the bridge override is
+    /// process-global and an await would hand it to another suite.
+    @Test("a late create's send moves the window")
+    func lateCreateSends() {
+        let core = awaitingCreate()
+        defer { teardown() }
+        #expect(core.sendQuietArrival(WindowID(7)))
+        #expect(moved() == [[NSNumber(value: 7)]])
+    }
+
+    @Test("a click on the app before the create sends nothing")
+    func clickBeforeCreateStays() {
+        let core = awaitingCreate()
+        defer { teardown() }
+        core.lastLeftClick = (core.wallClock(), .zero, WindowID(7))
+        core.handle(.windowFocused(WindowID(7)))
+        #expect(!core.sendQuietArrival(WindowID(7)))
+        #expect(moved().isEmpty)
+    }
+
+    @Test("a window gone before its create sends nothing")
+    func goneBeforeCreateStays() {
+        let core = awaitingCreate()
+        defer { teardown() }
+        core.handle(.windowDestroyed(WindowID(7), wasMinimized: false))
+        #expect(!core.sendQuietArrival(WindowID(7)))
+        #expect(moved().isEmpty)
+    }
+
+    /// A reveal or re-track of the app is no open.
+    @Test("an arrival read as existing is not sent")
+    func existingArrivalStays() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        #expect(open(core).isSuccess)
+        let window = ManagedWindow(
+            id: WindowID(7),
+            pid: 900_307,
+            appName: "App 7",
+            appBundleID: F.app,
+            frame: CGRect(x: 0, y: 30, width: 400, height: 300)
+        )
+        core.state.apply(.windowCreated(window))
+        #expect(
+            !core.moveQuietArrival(window, provenance: .existing)
+        )
+        #expect(moved().isEmpty)
     }
 
     @Test("a move refused at the arrival leaves the window here")

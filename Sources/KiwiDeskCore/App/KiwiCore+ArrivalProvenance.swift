@@ -122,6 +122,8 @@ extension KiwiCore {
     ) {
         let id = held.window.id
         settlePocketClaim(id, created: created, departing: departing)
+        // A late create sends a quiet open's window on (#3153).
+        if created, !departing { _ = sendQuietArrival(id) }
         if held.eventOwed {
             emitWindowCreated(
                 state.windows[id] ?? held.window,

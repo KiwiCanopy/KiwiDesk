@@ -648,10 +648,12 @@ editing here:
   needs no window up front (`spaceLandingRefusal`, a Desktop already
   shown), so a refusal left for the arrival is the window's own
   (`OpenInBackgroundDesktopTests`, `LaunchFollowSeamTests` ▸
-  `wiringsArePinned`). Two residues are accepted rather than waited
-  for: a window whose create lands after its arrival is not sent,
-  and on a host with no create route a re-track of a window moved
-  back by hand is sent again. A new door claims through
+  `wiringsArePinned`). A create trailing its arrival waits through
+  the door's hold: `settleArrival` sends the window through the same
+  `sendQuietArrival` once it lands, standing down on `departing`,
+  and an expired one stays. Accepted residue: on a host with no
+  create route, a re-track of a window moved back by hand is sent
+  again. A new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register
   (`OpenInBackgroundHoldTests`, `OpenInBackgroundSeamTests`).
   **Every reader of "was this arrival created" goes through ONE
