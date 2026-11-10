@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// When "What's new" is owed (#1542 ruling ▸ After the update): on
 /// the first launch of a newer version whose notes the user did
@@ -46,7 +47,7 @@ struct WhatsNewRecord {
 
     let defaults: UserDefaults
 
-    init(_ defaults: UserDefaults = .standard) {
+    init(_ defaults: UserDefaults = AppDefaults.store) {
         self.defaults = defaults
     }
 

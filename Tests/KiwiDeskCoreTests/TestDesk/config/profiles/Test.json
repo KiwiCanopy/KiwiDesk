@@ -1,0 +1,303 @@
+{
+  "default" : true,
+  "format" : 35,
+  "id" : "test-desk-1",
+  "main_spaces" : [
+
+  ],
+  "monitor_sets" : [
+    {
+      "monitors" : [
+        "Fixture A:2560x1440"
+      ],
+      "space_monitor_map" : {
+
+      }
+    }
+  ],
+  "name" : "Test",
+  "saved_at" : "2026-11-04T00:00:00Z",
+  "settings" : {
+    "animations" : {
+      "duration" : 150,
+      "expand_duration" : 750,
+      "on_expand" : true,
+      "on_peek" : true,
+      "on_relayout" : true,
+      "on_scrolling" : true,
+      "on_state_change" : true,
+      "on_window_resize" : true,
+      "on_window_swap" : true,
+      "reveal_duration" : 300,
+      "scroll_duration" : 150
+    },
+    "app_bar" : {
+      "active_indicator" : "edge_mark",
+      "edge" : "top",
+      "group_adjacent_windows" : true,
+      "reserve" : true,
+      "title_cap" : 10
+    },
+    "border" : {
+      "corner_style" : "rounded",
+      "draw_order" : "behind",
+      "enabled" : true,
+      "focused_color" : "#4A9816",
+      "glow" : false,
+      "glow_size" : 0,
+      "sheen" : 0.5,
+      "unfocused_color" : "#8E8E93CC",
+      "unfocused_enabled" : false,
+      "width" : 5
+    },
+    "drag" : {
+      "drop_zone" : {
+        "enabled" : true
+      },
+      "ghost" : {
+        "enabled" : false
+      },
+      "liquid_glass" : true
+    },
+    "float_placement" : "center",
+    "float_scale_on_display_change" : true,
+    "floating" : {
+      "color" : "",
+      "mark" : true
+    },
+    "gap" : {
+      "global" : {
+        "inner" : {
+          "horizontal" : 10,
+          "vertical" : 10
+        },
+        "outer" : {
+          "bottom" : 10,
+          "left" : 10,
+          "right" : 10,
+          "top" : 10
+        }
+      },
+      "override" : {
+
+      }
+    },
+    "kiwishelf" : {
+      "active_item_color" : "#8DB354",
+      "alignment" : "center",
+      "background_fit" : "hug",
+      "background_style" : "plain",
+      "border" : false,
+      "border_color" : "#EAF3EE59",
+      "border_width" : 1,
+      "corner_roundness" : 50,
+      "dim_factor" : 0.4,
+      "fill_color" : "#14201CB3",
+      "fill_fade" : 100,
+      "font_family" : "System",
+      "font_size" : 0,
+      "font_weight" : 400,
+      "glyph_size" : 0,
+      "group_badge_color" : "#636366",
+      "group_badge_text_color" : "#FFFFFF",
+      "highlight_color" : "#8DB354",
+      "highlight_width" : 2,
+      "hover_fill_color" : "#AACB5D80",
+      "hover_item_color" : "#EAF3EE",
+      "icon_source" : "app_image",
+      "inner_margin" : 0,
+      "item_color" : "#EAF3EE",
+      "item_gap" : 6,
+      "liquid_glass" : true,
+      "minimum" : 30,
+      "order" : "spaces_first",
+      "outer_margin" : 0,
+      "pocket_edge" : "bottom",
+      "pocket_position" : 82,
+      "pocket_visibility" : "always",
+      "reading_contrast" : 2.2,
+      "reveal_style" : "slide",
+      "reveal_timeout" : 0,
+      "thickness" : 40,
+      "tint_hub_and_plates" : true
+    },
+    "layout" : {
+      "bsp" : {
+        "new_window_placement" : "after_focused",
+        "ratio_h" : 0.5,
+        "ratio_v" : 0.5,
+        "strategy" : "alternating"
+      },
+      "grid" : {
+        "auto_size" : false,
+        "columns" : 3,
+        "fill_empty_cells" : true,
+        "new_window_placement" : "last",
+        "rows" : 2,
+        "split_direction" : "horizontal",
+        "type" : "dynamic"
+      },
+      "monocle" : {
+        "app_bar" : {
+          "visibility" : "always"
+        },
+        "hide_style" : "stack",
+        "maximize_windows" : false,
+        "new_window_placement" : "first",
+        "orientation" : "horizontal"
+      },
+      "scroll" : {
+        "anchor" : "follow",
+        "app_bar" : {
+          "visibility" : "always"
+        },
+        "fill_when_alone" : true,
+        "new_window_placement" : "after_focused",
+        "orientation" : "horizontal",
+        "slot_size" : 0
+      },
+      "stack" : {
+        "fill_when_alone" : true,
+        "master_count" : 1,
+        "master_orientation" : "horizontal",
+        "master_ratio" : 0.6,
+        "new_window_placement" : "first",
+        "stack_position" : "right"
+      },
+      "track" : {
+        "auto_tracks" : true,
+        "axis" : "vertical",
+        "limit" : 3,
+        "new_window" : "focused_track",
+        "new_window_position" : "first"
+      }
+    },
+    "maximize" : {
+      "anchor" : {
+        "laptop" : "center",
+        "portrait" : "center",
+        "super_ultrawide" : "in_place",
+        "ultrawide" : "in_place",
+        "widescreen" : "center"
+      },
+      "follow_focus" : false,
+      "share" : {
+        "height" : {
+          "laptop" : 0.75,
+          "portrait" : 0.75,
+          "super_ultrawide" : 0.25,
+          "ultrawide" : 0.3333333333333333,
+          "widescreen" : 0.5
+        },
+        "width" : {
+          "laptop" : 0.6666666666666666,
+          "portrait" : 0.5,
+          "super_ultrawide" : 0.5,
+          "ultrawide" : 0.5,
+          "widescreen" : 0.5
+        }
+      }
+    },
+    "min_window_size" : {
+      "bsp" : {
+        "height" : 300,
+        "width" : 300
+      },
+      "floating" : {
+        "height" : 300,
+        "width" : 300
+      },
+      "grid" : {
+        "height" : 300,
+        "width" : 300
+      },
+      "scrolling" : {
+        "height" : 300,
+        "width" : 300
+      },
+      "stack" : {
+        "height" : 300,
+        "width" : 300
+      },
+      "track" : {
+        "height" : 300,
+        "width" : 300
+      }
+    },
+    "min_window_size_override" : {
+
+    },
+    "mouse" : {
+      "follows_focus" : false,
+      "hover_focus" : false,
+      "hover_focus_delay" : 200
+    },
+    "mouse_resize" : "layout",
+    "new_window_placement_override" : {
+
+    },
+    "pocket" : {
+      "color" : ""
+    },
+    "resize" : {
+      "step" : 50
+    },
+    "shortcut_panel" : {
+      "liquid_glass" : true
+    },
+    "space" : {
+      "icon" : {
+
+      }
+    },
+    "space_bar" : {
+      "active_dim_factor" : 0.6,
+      "active_indicator" : "outline",
+      "edge" : "top",
+      "focused_highlight_color" : "",
+      "focused_item_color" : "#C2790A",
+      "front_app_title_cap" : 10,
+      "glyph_gap" : 0,
+      "glyph_span" : 5,
+      "group_adjacent_windows" : true,
+      "hide_empty" : false,
+      "inactive_content" : "apps",
+      "item_label" : "identifier",
+      "reserve" : true,
+      "show_front_app" : false,
+      "spring_delay" : 1500,
+      "sticky_badge" : true,
+      "visibility" : "always"
+    },
+    "sticky" : {
+      "color" : "",
+      "desktop_reach" : true,
+      "liquid_glass" : true,
+      "mark" : true
+    },
+    "swap_skips_cascade" : true,
+    "tiling" : {
+      "off_hides_bars" : false,
+      "off_hides_borders" : false,
+      "start_override" : {
+
+      }
+    }
+  },
+  "space_modes" : {
+    "2" : "scrolling",
+    "3" : "stack",
+    "4" : "monocle",
+    "5" : "grid",
+    "6" : "floating"
+  },
+  "spaces" : [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+  ],
+  "starter_setup" : false
+}

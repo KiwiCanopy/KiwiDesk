@@ -39,7 +39,7 @@ final class RestoreKeyLog {
 
     /// The opt-in read; a test injects its answer.
     var isOptedIn: () -> Bool = {
-        UserDefaults.standard.bool(forKey: RestoreKeyLog.defaultsKey)
+        AppDefaults.store.bool(forKey: RestoreKeyLog.defaultsKey)
     }
     private lazy var enabled = isOptedIn()
     private var lastAutosave: [String]?

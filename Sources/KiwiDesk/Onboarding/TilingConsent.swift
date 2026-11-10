@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// Whether the user has asked KiwiDesk to start tiling (#2050).
 ///
@@ -11,7 +12,7 @@ enum TilingConsent {
     /// Whether this launch may start managing windows.
     static func hasStarted(
         isTrusted: Bool,
-        _ defaults: UserDefaults = .standard
+        _ defaults: UserDefaults = AppDefaults.store
     ) -> Bool {
         guard defaults.object(forKey: key) != nil else {
             return isTrusted
@@ -25,7 +26,7 @@ enum TilingConsent {
     /// run, which waits for Start Tiling.
     static func seedAtLaunch(
         isTrusted: Bool,
-        _ defaults: UserDefaults = .standard
+        _ defaults: UserDefaults = AppDefaults.store
     ) {
         guard defaults.object(forKey: key) == nil else { return }
         defaults.set(
@@ -36,7 +37,7 @@ enum TilingConsent {
 
     /// Records the press; every later launch and re-grant starts
     /// on its own.
-    static func markStarted(_ defaults: UserDefaults = .standard) {
+    static func markStarted(_ defaults: UserDefaults = AppDefaults.store) {
         defaults.set(true, forKey: key)
     }
 }

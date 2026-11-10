@@ -15,12 +15,14 @@ import Foundation
 /// it back off `self`: the initializer needs them all before the
 /// stored properties are assigned.
 extension KiwiCore {
-    /// `~/.config/KiwiDesk/` unless the caller names its own.
+    /// `~/.config/KiwiDesk/` unless the caller names its own or
+    /// a test desk is set (`TestDesk`, #3121).
     /// `makeTestCore` always names one — a bare `KiwiCore()`
     /// would otherwise read and write the developer's live
     /// config, which is half of what `MachineTouchTests` pins.
     static func resolveConfigDirectory(_ override: URL?) -> URL {
         override
+            ?? TestDesk.root.map(TestDesk.configDirectory(under:))
             ?? FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config/KiwiDesk")
     }

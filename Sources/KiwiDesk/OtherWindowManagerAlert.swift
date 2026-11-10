@@ -82,7 +82,7 @@ final class OtherWindowManagerAlert: NSObject {
     /// asks Core to quit the manager.
     static func present(
         for manager: OtherWindowManager,
-        defaults: UserDefaults = .standard,
+        defaults: UserDefaults = AppDefaults.store,
         quit: @escaping () -> Void
     ) {
         guard shouldPresent(manager, defaults: defaults) else { return }

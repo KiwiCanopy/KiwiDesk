@@ -111,6 +111,10 @@ load, and report the deltas. Three readings to keep straight:
 
 ## 6. A release comparison: the fixed desk (#1910)
 
+A bundle built since #3121 can run on the test desk instead (the
+`test-desk` skill), which never swaps the config symlink. This
+fixed desk stays for a comparison that includes an older bundle.
+
 A per-change pair runs on whatever the desk holds that day, so its
 absolute numbers do not carry across days. A release row in
 `docs/performance.md` is measured on the fixed desk instead, every

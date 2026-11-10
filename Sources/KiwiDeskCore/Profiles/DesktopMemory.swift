@@ -130,7 +130,7 @@ final class DesktopMemory {
     /// once (`crossLegacyShortcutOffer`); nil where neither is set.
     /// Pinned by both `makeTestCore` twins.
     var readLegacyShortcutOffer: @MainActor () -> ShortcutOffer? = {
-        let defaults = UserDefaults.standard
+        let defaults = AppDefaults.store
         let keys = [shortcutMarkKey, defaultsGenerationKey]
         guard keys.contains(where: { defaults.object(forKey: $0) != nil })
         else { return nil }
@@ -140,8 +140,8 @@ final class DesktopMemory {
         )
     }
     var clearLegacyShortcutOffer: @MainActor () -> Void = {
-        UserDefaults.standard.removeObject(forKey: shortcutMarkKey)
-        UserDefaults.standard.removeObject(forKey: defaultsGenerationKey)
+        AppDefaults.store.removeObject(forKey: shortcutMarkKey)
+        AppDefaults.store.removeObject(forKey: defaultsGenerationKey)
     }
     nonisolated static let shortcutMarkKey = "desktopShortcutMark"
     nonisolated static let defaultsGenerationKey =

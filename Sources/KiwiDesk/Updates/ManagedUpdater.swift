@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// The channel of a copy a package manager installs (#2909): no
 /// Sparkle, since the manager's next switch would undo its install,
@@ -34,7 +35,7 @@ final class ManagedUpdater: AppUpdating {
     /// (`ManagedUpdaterTests`).
     static func feedURL(
         of host: Bundle,
-        defaults: UserDefaults = .standard
+        defaults: UserDefaults = AppDefaults.store
     ) -> URL? {
         let spelled =
             defaults.string(forKey: "SUFeedURL")

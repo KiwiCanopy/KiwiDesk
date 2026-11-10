@@ -52,7 +52,7 @@ public final class SyncFollower {
     /// The folder the app's defaults say to follow, read when boot
     /// is ready; pinned to none by both `makeTestCore` twins.
     var storedFolder: @MainActor () -> URL? = {
-        SyncFolderLocation.followed(in: .standard)
+        SyncFolderLocation.followed(in: AppDefaults.store)
     }
     /// Starts the live folder watch; pinned inert by both
     /// `makeTestCore` twins, whose suites run the pass directly.
