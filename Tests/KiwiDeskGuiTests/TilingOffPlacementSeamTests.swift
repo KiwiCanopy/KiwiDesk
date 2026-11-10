@@ -110,8 +110,9 @@ struct TilingOffPlacementSeamTests {
         #expect(body.contains("space.mode == .floating"))
     }
 
-    /// The shelf's tiling-off read has its one other reader, the
-    /// menu-bar mark (bars.md); the mirror has one writer.
+    /// The shelf's tiling-off read has one home, the shelf's
+    /// settings door (#3151, bars.md; its readers are
+    /// `TilingOffBarsHiddenSeamTests`'); the mirror has one writer.
     @Test("the shelf read and the mirror keep their sites")
     func singleSites() throws {
         let sources = try Self.coreSources()
@@ -120,10 +121,7 @@ struct TilingOffPlacementSeamTests {
         }
         #expect(
             callers("tilingOffHidesShelf(on:")
-                == [
-                    "App/KiwiCore+ScreenCovering.swift",
-                    "App/KiwiCore+StatusSpaceMark.swift",
-                ]
+                == ["App/KiwiCore+ScreenEdges.swift"]
         )
         #expect(
             callers("state.tilingStart = ")
@@ -135,7 +133,7 @@ struct TilingOffPlacementSeamTests {
     func sitesAreWired() throws {
         let sites: [(String, String, String, String)] = [
             (
-                "shelfStandsDown", "KiwiCore+ScreenCovering.swift", "App",
+                "shelfSettings", "KiwiCore+ScreenEdges.swift", "App",
                 "tilingOffHidesShelf(on: display)"
             ),
             (
@@ -168,12 +166,20 @@ struct TilingOffPlacementSeamTests {
         for (function, file, directory, needle) in sites {
             let body = try SourceScan.functionBody(
                 of: function,
-                labeled: function == "shelfStandsDown"
-                    ? "on display: DisplayID, covered" : "",
+                labeled: "",
                 in: file,
                 under: directory
             )
             #expect(body.contains(needle), "\(function) lost \(needle)")
         }
+        // The stand-down no longer reads the tick: a tiling-off
+        // Space hides its bars as Hidden, not as a full screen.
+        let standDown = try SourceScan.functionBody(
+            of: "shelfStandsDown",
+            labeled: "on display: DisplayID, covered",
+            in: "KiwiCore+ScreenCovering.swift",
+            under: "App"
+        )
+        #expect(!standDown.contains("tilingOffHidesShelf"))
     }
 }

@@ -82,9 +82,10 @@ extension KiwiCore {
     }
 
     /// Whether the shelf stands down on `display`: the screen is
-    /// covered (`overlaysStandDown`), the Space it shows holds a
-    /// maximized window (#2448), or has tiling off with the bars'
-    /// tick on (#3008). Both bars ask this one answer.
+    /// covered (`overlaysStandDown`) or the Space it shows holds a
+    /// maximized window (#2448). Both bars ask this one answer; a
+    /// tiling-off Space's tick reads its bars Hidden instead
+    /// (`shelfSettings(on:)`, #3151).
     func shelfStandsDown(on display: DisplayID) -> Bool {
         shelfStandsDown(on: display, covered: overlaysStandDown(on: display))
     }
@@ -94,7 +95,6 @@ extension KiwiCore {
     /// KiwiVision plate alike.
     func shelfStandsDown(on display: DisplayID, covered: Bool) -> Bool {
         covered || showsMaximized(on: display)
-            || tilingOffHidesShelf(on: display)
     }
 
     /// Whether `display` shows something no overlay draws over:

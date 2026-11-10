@@ -183,15 +183,18 @@ extension KiwiCore {
         let mode = state.workspaces[space]?.mode ?? .bsp
         let display = state.workspaces.display(of: space)
         let screen = display.flatMap(screenFingerprint(of:))
-        let reserved = tiler.settings.shelfEdges(in: mode, on: screen)
+        // Through the shelf's door: a tiling-off Space's Hidden bars
+        // and Pocket reserve nothing (#3151).
+        let shown = display.map(shelfSettings(on:)) ?? tiler.settings
+        let reserved = shown.shelfEdges(in: mode, on: screen)
         let bars = paintedStrips(forSpace: space).filter {
             reserved.contains($0.edge)
         }
         // The whole pocket reserves a shelf's strip, so a float keeps
         // clear of it as of a bar (#2784).
-        guard tiler.settings.pocketRests,
-            tiler.settings.pocketRest(in: mode, on: screen) == .mark,
-            tiler.settings.pocketReservation(in: mode, on: screen) != nil,
+        guard shown.pocketRests,
+            shown.pocketRest(in: mode, on: screen) == .mark,
+            shown.pocketReservation(in: mode, on: screen) != nil,
             let display, let mark = pocketMarkFrame(on: display)
         else { return bars }
         return bars + [(mark, tiler.settings.kiwishelf.pocketEdge)]

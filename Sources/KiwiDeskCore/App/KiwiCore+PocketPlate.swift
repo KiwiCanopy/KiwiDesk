@@ -18,7 +18,7 @@ extension KiwiCore {
     /// (#2976 ▸ 4) — the one per-screen answer the bar plan, the
     /// pocket's place and its specs read.
     func pocketRests(on display: DisplayID) -> Bool {
-        tiler.settings.pocketRests(in: shownMode(on: display))
+        shelfSettings(on: display).pocketRests(in: shownMode(on: display))
     }
 
     /// The layout `display`'s shown Space is laid out in, or bsp

@@ -8451,10 +8451,13 @@ cost, on a `main` build only, is a profile holding an explicit
 no row, and a Space's Customize badge and Reset leave it alone: a
 Lua-set value is the script's to clear.
 
-*The bars row greys only when no bar rests on screen.* A bar set
-to Hidden in every layout on every screen hides nothing at rest;
-one a shortcut reveals is not counted, so the row greys only where
-nothing shows by itself.
+*Hiding the bars reads them Hidden, never a stand-down* (#3151).
+On a tiling-off Space with the tick on, every bar and the Pocket act
+as if set to Hidden: gone at rest, while a bar's shortcut still
+shows it, since the user paused tiling and not the shelf. A full-
+screen window or a Maximize still stands the shelf down. So the row
+greys exactly where every bar is already Hidden in every layout on
+every screen: the tick then changes nothing.
 :::
 
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
