@@ -6104,7 +6104,10 @@ which still stop at `floatBounds`. A verb stopping at a bar limits
 a step the user asked for; it moves no float the user placed. The
 stranded-float recovery (#1352) is a net, so it re-centres a float
 at its own size, its top-left edge kept in the region so the title
-bar stays in reach.
+bar stays in reach. A Pocket take-out and a Maximize's return to another
+screen still shrink a window to the region (owner ruling 2026-11-10):
+neither is a sweep, and each is a return the user starts, where a fit
+is the support the user expects.
 
 The cost accepted: a float can sit with its bottom under a bottom
 bar or off the screen, and a float its own app grew past the room
