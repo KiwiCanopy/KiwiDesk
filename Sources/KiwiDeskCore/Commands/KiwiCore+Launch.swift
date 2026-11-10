@@ -83,9 +83,7 @@ extension KiwiCore {
             // the way a Dock click does (#1840). An away entry an
             // unreadable census could not confirm keeps the
             // activate; one the census no longer lists does not.
-            if census.visible == 0, census.minimized.isEmpty,
-                !(reach?.listsAny
-                    ?? !awayWindows(bundleID: bundleID).isEmpty),
+            if isWindowless(bundleID, census: census, reach: reach),
                 openOrFocus.openApp(bundleID, .reopen)
             {
                 return .ok()

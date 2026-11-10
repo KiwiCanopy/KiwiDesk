@@ -486,8 +486,8 @@ that way, stopping at the edge; neither takes other arguments
 `open_in_background` takes an app bundle id and opens the app
 without taking the focus: it launches it, or asks a running app
 with no window for one, and does nothing when the app has a
-window anywhere. An app that brings itself forward anyway gives
-the focus back once
+window anywhere. When the app brings itself forward anyway,
+KiwiDesk hands the focus back once
 ([`open_in_background`](lua-reference.md#open_in_background)).
 :::
 

@@ -6964,6 +6964,10 @@ KiwiDesk.bind("ctrl+alt+return", function()
 end)
 ```
 
+Both launch verbs are also reachable from the Settings app, from
+the per-row menu of an Open applications shortcut: *Open or Focus*
+(`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
+
 :::unreleased
 ### open_in_background
 
@@ -6979,16 +6983,12 @@ still tiles into the Space you are in, or into its
 [app rule](#app_rules)'s Space without taking you there, and the
 layout makes room for it.
 
-Some apps bring themselves forward on launch anyway (Electron
-apps such as Visual Studio Code and Obsidian did, about 1.5 s
-after opening). KiwiDesk hands the focus back to the window it
-was taken from, once per app, within 10 seconds of the call. If
-the app takes the focus a second time, it keeps it. A click on
-the app's window keeps the focus there, and a switch to the app by
+Some apps, Electron ones among them, bring themselves forward on
+launch anyway. KiwiDesk hands the focus back to the window it was
+taken from, once per app, within 10 seconds of the call. If the
+app takes the focus a second time, it keeps it. A click on the app
+or its Dock icon keeps the focus there; a switch to the app by
 keyboard (⌘Tab) within those 10 seconds is handed back once too.
-
-It is the verb for a script or an AI app that opens the apps it
-needs while you keep working.
 
 **Example:**
 
@@ -6999,9 +6999,6 @@ end)
 ```
 :::
 
-Both launch verbs are also reachable from the Settings app, from
-the per-row menu of an Open applications shortcut: *Open or Focus*
-(`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
 
 ### gather
 

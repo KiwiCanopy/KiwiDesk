@@ -6,10 +6,8 @@ import Testing
 
 /// `open_in_background` (#3141 ▸ Ruling): it opens an app through
 /// the one launcher's background mode only where the app has no
-/// window, its window arrives taking no focus, and an app that
-/// takes the focus anyway gives it back once per app, through the
-/// real `.windowFocused` arm. Each let-out sits beside the paid
-/// case it differs from by one input.
+/// window, and its window arrives taking no focus. The hand-back's
+/// two doors are `OpenInBackgroundHoldTests`'.
 @Suite("open_in_background opens an app quietly (#3141)", .serialized)
 @MainActor
 struct OpenInBackgroundTests {
@@ -92,7 +90,7 @@ struct OpenInBackgroundTests {
         #expect(recorder.opened.map(\.0) == [Self.app])
         #expect(recorder.opened.map(\.1) == [.background])
         #expect(recorder.activated.isEmpty)
-        #expect(core.launchFollow.quietOpen?.purpose == .hold)
+        #expect(core.launchFollow.holds.opened[Self.app] != nil)
         #expect(core.launchFollow.owed(at: core.wallClock()) == nil)
     }
 
@@ -105,7 +103,7 @@ struct OpenInBackgroundTests {
     }
 
     @Test(
-        "an app with a window up, parked or tracked opens nothing",
+        "an app with a window up or parked opens nothing",
         arguments: [(1, [UInt32]()), (0, [UInt32(5)])]
     )
     func windowUpOpensNothing(visible: Int, minimized: [UInt32]) {
@@ -116,15 +114,7 @@ struct OpenInBackgroundTests {
         )
         #expect(Self.open(core).isSuccess)
         #expect(recorder.opened.isEmpty)
-        #expect(core.launchFollow.quietOpen == nil)
-    }
-
-    @Test("a tracked window of the app opens nothing")
-    func trackedWindowOpensNothing() {
-        let (core, recorder) = Self.makeCore()
-        Self.arrive(7, bundleID: Self.app, on: core)
-        #expect(Self.open(core).isSuccess)
-        #expect(recorder.opened.isEmpty)
+        #expect(core.launchFollow.holds.opened.isEmpty)
     }
 
     @Test("an id LaunchServices cannot resolve is refused")
@@ -132,7 +122,7 @@ struct OpenInBackgroundTests {
         let (core, _) = Self.makeCore(found: false)
         let answer = Self.open(core)
         #expect(answer.error == "app not found: \(Self.app)")
-        #expect(core.launchFollow.quietOpen == nil)
+        #expect(core.launchFollow.holds.opened.isEmpty)
     }
 
     @Test("its window arrives without taking the focus")
@@ -142,78 +132,13 @@ struct OpenInBackgroundTests {
         #expect(core.state.windows[WindowID(7)] != nil)
     }
 
-    @Test("the app taking the focus is handed back once, then kept")
-    func takeHandedBackOnce() {
-        let core = Self.taken()
-        var log: [String] = []
-        core.onLog = { log.append($0) }
-        core.handle(.windowFocused(WindowID(7)))
-        #expect(core.focusedWindowID == WindowID(1))
-        #expect(
-            log.contains(
-                "open_in_background: w7 took the focus — handed back to w1"
-            )
-        )
-        #expect(core.launchFollow.quietOpen == nil)
-        // A second take is the app's.
-        core.handle(.windowFocused(WindowID(7)))
-        #expect(core.focusedWindowID == WindowID(7))
-    }
-
-    @Test("a click on the app's window keeps the focus there")
-    func clickKeeps() {
-        let core = Self.taken()
-        core.lastLeftClick = (core.wallClock(), .zero, WindowID(7))
-        core.handle(.windowFocused(WindowID(7)))
-        #expect(core.focusedWindowID == WindowID(7))
-        #expect(core.launchFollow.quietOpen == nil)
-    }
-
-    /// The user working on in their own app spends nothing.
-    @Test("a click in the user's own window leaves the hold standing")
-    func ownClickLeavesHold() {
-        let core = Self.taken()
-        core.lastLeftClick = (core.wallClock(), .zero, WindowID(1))
-        core.handle(.windowFocused(WindowID(7)))
-        #expect(core.focusedWindowID == WindowID(1))
-    }
-
-    @Test("past the grace the take is kept")
-    func lateTakeKept() {
-        let core = Self.taken()
-        let late = core.wallClock().addingTimeInterval(
-            LaunchFollowIntent.holdGrace + 1
-        )
-        core.wallClock = { late }
-        core.handle(.windowFocused(WindowID(7)))
-        #expect(core.focusedWindowID == WindowID(7))
-        #expect(core.launchFollow.quietOpen == nil)
-    }
-
-    /// Another app's activation retires a lens's debt, never a hold.
-    @Test("the user switching apps leaves the hold standing")
-    func otherActivationLeavesHold() {
-        let core = Self.taken()
-        core.noteAppActivation(
-            AppActivation(pid: 900_500, bundleID: Self.other, launchedAt: nil),
-            now: core.wallClock()
-        )
-        #expect(core.launchFollow.quietOpen?.purpose == .hold)
-    }
-
-    @Test("two opens in a row each hand the focus back")
-    func runOfOpensJoins() {
-        let core = Self.taken()
+    /// A lens's focus move and a hold live in separate slots.
+    @Test("an open leaves a lens's owed focus move standing")
+    func lensDebtSurvives() {
+        let core = KiwiVisionAutoOpenFocusTests.owing()
         #expect(Self.open(core, Self.other).isSuccess)
-        #expect(
-            core.launchFollow.quietOpen?.bundleIDs == [Self.app, Self.other]
-        )
-        Self.arrive(8, bundleID: Self.other, on: core)
-        core.handle(.windowFocused(WindowID(7)))
-        #expect(core.focusedWindowID == WindowID(1))
-        core.handle(.windowFocused(WindowID(8)))
-        #expect(core.focusedWindowID == WindowID(1))
-        #expect(core.launchFollow.quietOpen == nil)
+        #expect(core.launchFollow.quietOpen != nil)
+        #expect(core.launchFollow.holds.opened[Self.other] != nil)
     }
 
     @Test("Open or Focus on the app lifts its hold alone")
@@ -221,6 +146,6 @@ struct OpenInBackgroundTests {
         let core = Self.taken()
         #expect(Self.open(core, Self.other).isSuccess)
         core.oweLaunchFollow(Self.app, at: core.wallClock())
-        #expect(core.launchFollow.quietOpen?.bundleIDs == [Self.other])
+        #expect(Array(core.launchFollow.holds.opened.keys) == [Self.other])
     }
 }

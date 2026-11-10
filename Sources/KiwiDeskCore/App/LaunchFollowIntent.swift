@@ -197,13 +197,10 @@ final class LaunchFollowIntent {
     /// follow; replaces any earlier debt.
     func record(_ bundleID: String, at now: Date) {
         // The user named an app: no quiet open stands over it.
-        let app = bundleID.lowercased()
-        quietApps[app] = nil
-        if let open = quietOpen, open.bundleIDs.contains(app) {
-            let rest = open.bundleIDs.subtracting([app])
-            quietOpen =
-                open.purpose == .hold && !rest.isEmpty
-                ? open.owing(rest) : nil
+        quietApps[bundleID.lowercased()] = nil
+        holds.lift(bundleID.lowercased())
+        if quietOpen?.bundleIDs.contains(bundleID.lowercased()) == true {
+            quietOpen = nil
         }
         pending = (bundleID, now)
     }
@@ -235,23 +232,38 @@ final class LaunchFollowIntent {
     static let quietBound: TimeInterval =
         coldStartGrace + drainWindow - FollowFocusIntent.drainWindow
 
-    /// The quiet open's one debt (`QuietOpen`): a lens's focus
-    /// move or a background open's hand-back.
+    /// A lens's quiet open (#3122), owed through `oweLaunchFollow`:
+    /// the apps it opened in the background, owed ONE focus move to
+    /// the first of their windows to arrive. Stamped with the focus
+    /// and the front app at the press; within `quietBound`, and
+    /// retired with the debt below. Its own slot, since the debt
+    /// names a set of apps and the press's focus.
+    struct QuietOpen {
+        let bundleIDs: Set<String>
+        let lens: String
+        let focus: WindowID?
+        /// The front app at the press, whose own activation is no
+        /// change of focus.
+        let front: String?
+        let at: Date
+
+        /// Whether `bundleID`'s activation leaves the debt: one of
+        /// its own apps, or the app that was in front.
+        func survives(_ bundleID: String?) -> Bool {
+            guard let app = bundleID?.lowercased() else { return false }
+            return bundleIDs.contains(app) || app == front
+        }
+    }
     private(set) var quietOpen: QuietOpen?
 
-    /// Records a quiet open's debt; replaces any earlier one, save
-    /// that a hold onto a live hold joins it, so a script's run of
-    /// opens hands each app back (#3141).
+    /// Records a quiet open's debt; replaces any earlier one.
     func recordQuiet(_ open: QuietOpen) {
-        if let held = quietOpen, held.purpose == .hold,
-            open.purpose == .hold,
-            open.at.timeIntervalSince(held.at) < Self.holdGrace
-        {
-            quietOpen = open.joining(held.bundleIDs)
-            return
-        }
         quietOpen = open
     }
+
+    /// `open_in_background`'s holds (#3141): one hand-back per app,
+    /// never retired by an activation.
+    var holds = BackgroundHolds()
 
     /// The apps a lens opened in the background and when: within
     /// `quietBound` the create fold grants their arrivals no focus
@@ -274,13 +286,10 @@ final class LaunchFollowIntent {
         return quietApps[bundleID] != nil
     }
 
-    /// Takes a lens's debt for a window of `bundleID`, once, within
-    /// the bound; another app's window leaves it standing, and a
-    /// hold is never taken at an arrival.
+    /// Takes the quiet open's debt for a window of `bundleID`, once,
+    /// within the bound; another app's window leaves it standing.
     func claimQuiet(_ bundleID: String, at now: Date) -> QuietOpen? {
-        guard let open = quietOpen, case .lens = open.purpose else {
-            return nil
-        }
+        guard let open = quietOpen else { return nil }
         guard now.timeIntervalSince(open.at) < Self.quietBound else {
             quietOpen = nil
             return nil
@@ -288,23 +297,6 @@ final class LaunchFollowIntent {
         guard open.bundleIDs.contains(bundleID) else { return nil }
         quietOpen = nil
         return open
-    }
-
-    /// Takes a background open's hold for a focus report of
-    /// `bundleID` (#3141): once per app, within `holdGrace`; the
-    /// hold stands for its other apps. True where it was owed.
-    func claimHold(_ bundleID: String, at now: Date) -> Bool {
-        guard let open = quietOpen, open.purpose == .hold else {
-            return false
-        }
-        guard now.timeIntervalSince(open.at) < Self.holdGrace else {
-            quietOpen = nil
-            return false
-        }
-        guard open.bundleIDs.contains(bundleID) else { return false }
-        let rest = open.bundleIDs.subtracting([bundleID])
-        quietOpen = rest.isEmpty ? nil : open.owing(rest)
-        return true
     }
 
     /// Retires `bundleID`'s debt alone, leaving any placement: a

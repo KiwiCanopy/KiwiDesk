@@ -8891,6 +8891,7 @@ and never on a relaunch, a reload, a profile switch or `init.lua`'s
 run. When nothing is open and nothing opens, the pill says so, on
 the screen's centre where no window holds the focus.
 
+:::unreleased
 ### Opening an app in the background hands the focus back once (#3141)
 
 **[Rationale]**
@@ -8899,15 +8900,20 @@ the screen's centre where no window holds the focus.
 apps it needs while you keep working. `NSWorkspace`'s
 `activates = false`, the same as `open -g`, is not enough on its
 own: Visual Studio Code and Obsidian brought themselves forward
-about 1.5 s after it (the owner's probe, 2026-11-09). So KiwiDesk
-hands the focus back to the window it was taken from, once per
-app, within a short grace, through the focus command, so the
-hand-back reports as intended. A second take is the app's:
+about 1.5 s after `open -g` (the owner's probe, 2026-11-09). So
+KiwiDesk hands the focus back to the window it was taken from,
+once per app, within a short grace, through the focus command, so
+the hand-back reports as intended. A second take is the app's:
 fighting an app that insists turns into a loop. Retiring the hold
 when another app comes forward was rejected, since you working on
 is the case the verb is for. The trade is that a switch to the app
-by keyboard inside the grace is handed back once; a click on its
-window is not.
+by keyboard inside the grace is handed back once; a click is not.
+
+The hand-back is owed at the app's activation as well as at a
+focus report, since a launched app's first window is adopted up
+to seconds after it comes forward (#1599), and a report-only
+hand-back would leave the app holding the keys with the ring on
+your window.
 
 The verb is one launcher's background mode (#3122), never a second
 launcher, and its name says what it does in all three cases it
@@ -8915,6 +8921,8 @@ covers: it opens the app, and it does so behind you. `open_app`
 says nothing about the focus, `launch_in_background` names one of
 the three, and a `focus = false` flag on `focus_or_spawn` would be
 a flag that turns off the focus in a verb named for focusing.
+
+:::
 
 ### A lens holds a stray landing, never refuses it (#2103)
 
