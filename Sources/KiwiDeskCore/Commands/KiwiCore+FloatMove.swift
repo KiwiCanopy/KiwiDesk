@@ -10,7 +10,11 @@ extension KiwiCore {
         let id: WindowID
         let window: ManagedWindow
         let space: SpaceID
+        /// The float region, where `center_floating` centres.
         let region: CGRect
+        /// Where a step may take it: the screen less a top strip
+        /// (#3163), as far as a hand drag reaches.
+        let reach: CGRect
     }
 
     /// What a float-move verb acts on, or the answer it gives instead.
@@ -36,7 +40,8 @@ extension KiwiCore {
             return .answered(.fail("the focused window is not floating"))
         }
         guard let space = floatPlacementSpace(of: id),
-            let region = floatBounds(on: space)
+            let region = floatBounds(on: space),
+            let reach = floatReachBounds(on: space)
         else {
             return .answered(.fail("no screen to lay the space out on"))
         }
@@ -48,7 +53,8 @@ extension KiwiCore {
                 id: id,
                 window: window,
                 space: space,
-                region: region
+                region: region,
+                reach: reach
             )
         )
     }
@@ -98,9 +104,10 @@ extension KiwiCore {
     }
 
     /// `move_floating`: `delta` points along `axis`, positive y moving
-    /// down, stopping at the float region, so it never reaches another
-    /// screen. A tap and a glide both write instantly. It ends the
-    /// float's own Maximize first (#3036), never one standing on a tile
+    /// down, stopping at the screen's visible edge or a top bar, as a
+    /// hand drag does (#3163), so it never reaches another screen. A
+    /// tap and a glide both write instantly. It ends the float's own
+    /// Maximize first (#3036), never one standing on a tile
     /// beneath, which is that tile's (#2972). Base and retire as
     /// `resizeFloating`, whose comments argue them.
     func moveFloating(_ args: [JSONValue]) -> CommandResponse {
@@ -132,7 +139,7 @@ extension KiwiCore {
                     base,
                     horizontal: horizontal,
                     delta: delta,
-                    bounds: target.region
+                    bounds: target.reach
                 ),
                 for: target
             ),

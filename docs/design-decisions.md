@@ -5764,9 +5764,9 @@ Bars vary per space (one or two, on any edge), so it folds both
 strip lists; two strips on one edge leave the deeper carve
 standing, which is what makes the fold need no ordering rule.
 
-*The region bounds the float verbs, never a placed float.*
-`resize`, `move_floating`, `center_floating` and the gather stop
-at it. No retile net fits a float into it, and none enforces the
+*The region bounds the gather and `center_floating`, never a
+placed float.* `move_floating` and `resize` reach the screen's edge
+instead (#3163). No retile net fits a float into it, and none enforces the
 screen edge: that net runs for every float on every retile, so
 either would undo a placement the user chose (*A float is never
 resized to fit*, below, #3163).
@@ -6099,9 +6099,14 @@ What it retires, and why each part goes:
 
 Not affected, since each is an act the user starts rather than a
 sweep: `make_floating`'s derived size (#1674), the floating gather,
-and the float verbs (`resize`, `move_floating`, `center_floating`),
-which still stop at `floatBounds`. A verb stopping at a bar limits
-a step the user asked for; it moves no float the user placed. The
+and `center_floating`, which centres in `floatBounds`. The verbs
+that step or grow (`move_floating`, the grow side of `resize`)
+follow the drag instead (owner ruling 2026-11-10): they run to the
+screen's visible edge, and a top bar alone stops them
+(`floatReachBounds`), so the push-down never fights a keyboard move
+and a key and the mouse reach the same place by one rule. No flag
+and no warning: a bottom bar over part of a float is the state a
+drag can leave too. The
 stranded-float recovery (#1352) is a net, so it re-centres a float
 at its own size, its top-left edge kept in the region so the title
 bar stays in reach. A Pocket take-out and a Maximize's return to another

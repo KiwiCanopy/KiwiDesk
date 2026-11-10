@@ -544,7 +544,9 @@ window keeps its own Space.
 :::unreleased
 A floating window keeps the size and place you give it. Only a bar
 on the top edge moves one: down, at the same size, until its title
-bar shows. A bar on the bottom or a side never moves it.
+bar shows. A bar on the bottom or a side never moves it, and a
+shortcut that moves or grows a floating window runs past such a bar
+to the screen's edge.
 :::
 
 ### Sticky Windows

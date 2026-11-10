@@ -85,14 +85,12 @@ extension KiwiCore {
             )
             ?? (lockedRatio == nil ? nil : shown)
             ?? window.frame
-        // The region the float may occupy — screen bounds less
-        // every painted bar strip (#1091). The resize needs the
-        // whole rect rather than a clamp, because pinning is a
-        // question about how much room each EDGE has, and a
-        // clamp that only pushes can answer neither that nor
-        // "this window is already wider than the space between
-        // the bars".
-        let region = floatGrowBounds(of: id)
+        // Where a grow may reach: the screen less a top strip, as a
+        // hand drag reaches (#3163), the ring held clear. A rect, not
+        // a clamp, because pinning asks how much room each EDGE has.
+        let region = state.workspaces.space(of: id).flatMap {
+            floatReachBounds(on: $0, ringInset: true)
+        }
         let outcome: FloatResize.Outcome
         if let lockedRatio, base.height > 0 {
             let ratio = FloatResize.heldRatio(

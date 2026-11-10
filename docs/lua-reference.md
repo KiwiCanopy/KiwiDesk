@@ -5966,12 +5966,17 @@ end)
 - A delta in points. A positive `"x"` moves right and a positive `"y"`
   moves down.
 
+:::unreleased
 **Does:** moves the focused floating window by the delta, at once,
-with no animation. It stops at the edge of the area its screen leaves
-clear of the bars and never crosses onto another screen. Stopping
-there shows a pill. A window you dragged past that edge stays where it
-is if you move it further out, and comes back freely. A window larger
-than the area reaches its top or left edge and goes no further.
+with no animation. It runs to its screen's visible edge, as a drag
+does, and never crosses onto another screen. A bar on the top edge
+stops it going up; a bar on the bottom or a side does not stop it
+(#3163). Stopping shows a pill. A window you dragged past the
+screen's edge stays where it is if you move it further out, and
+comes back freely. A window larger than the screen reaches its top
+or left edge and goes no further.
+:::
+
 Two calls closer together than the app reports the first move can
 land as one, as a fast run of `resize` presses can
 ([accepted limitations](accepted-limitations.md)).
@@ -7553,10 +7558,14 @@ its space uses: its width for `"x"`, its height for `"y"`.
 The delta is split between **both** edges (#1091), so a float
 grows and shrinks around its own centre. An edge already against
 the boundary is *pinned* and the whole delta goes to the other
-side; the boundary is the screen's visible bounds less any bar
-strips on that space, so a float cannot be grown underneath a
-bar, and when both edges are against it a grow refuses and
+side, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
+
+:::unreleased
+The boundary is the screen's visible bounds, less a bar on the top
+edge and the focus ring's reach: a float grows under a bottom or side
+bar to the screen's edge, as a drag can take it (#3163).
+:::
 
 A window whose app refuses the size stays where it is and `resize`
 still reports success; one that takes part of the size moves only as

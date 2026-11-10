@@ -40,9 +40,10 @@ extension KiwiCore {
         ).rounded(.up)
     }
 
-    /// **The one derivation of the region**: the bound the float
-    /// verbs and the gather act within. No sweep fits a float into
-    /// it (#3163).
+    /// **The one derivation of the region**: the bound
+    /// `center_floating` and the gather act within. No sweep fits a
+    /// float into it (#3163), and the stepping verbs reach
+    /// `floatReachBounds` instead.
     ///
     /// It reserves nothing for the focus ring — at a bar edge
     /// as much as at a screen edge. `floatGrowBounds` below
@@ -53,9 +54,10 @@ extension KiwiCore {
     /// far may a deliberate grow take it" have different answers,
     /// because a clipped ring is a blemish.
     ///
-    /// Each consumer states its own scope. The resize takes
-    /// `floatGrowBounds`, because pinning is a question about
-    /// how much room each EDGE has, and
+    /// Each consumer states its own scope. A placement nothing
+    /// corrects takes `floatGrowBounds`, the resize takes
+    /// `floatReachBounds(ringInset:)`, because pinning is a
+    /// question about how much room each EDGE has, and
     /// `floatFrameClampedClearOfBars` pushes off a top bar alone
     /// (#3163): it runs for every float on every retile, so any
     /// other edge would move a window the user placed.
@@ -99,7 +101,7 @@ extension KiwiCore {
         return region
     }
 
-    /// Where a deliberate GROW may take a float: the region
+    /// Where a placement may lay a float: the region
     /// above with the focus ring's own outward reach reserved
     /// ONCE on every edge — bars and screen edges alike, and
     /// once rather than twice, which is why the bound above
@@ -150,6 +152,38 @@ extension KiwiCore {
         region.origin.x += inset
         region.origin.y += inset
         return region
+    }
+
+    /// Where a float VERB that steps or grows may take a window
+    /// (#3163, owner ruling 2026-11-10): the screen's visible bounds
+    /// with only a reserved TOP strip carved off, the place a hand
+    /// drag reaches, so a bottom or side bar stops neither route.
+    /// `ringInset` reserves the focus ring's reach on every edge, as
+    /// `floatGrowBounds` does for the region.
+    func floatReachBounds(
+        on space: SpaceID,
+        ringInset: Bool = false
+    ) -> CGRect? {
+        guard
+            let screen = TilingEngine.screen(for: space, in: state)
+        else { return nil }
+        var reach = tiler.visibleBounds(screen)
+        for (strip, edge) in reservedStrips(forSpace: space)
+        where edge == .top {
+            reach = AppBarGeometry.regionClear(
+                reach,
+                of: strip,
+                edge: edge
+            )
+        }
+        guard ringInset else { return reach }
+        let inset = floatRingInset
+        return CGRect(
+            x: reach.minX + inset,
+            y: reach.minY + inset,
+            width: max(0, reach.width - inset * 2),
+            height: max(0, reach.height - inset * 2)
+        )
     }
 
     /// EVERY painted strip covering `space` on an edge the
