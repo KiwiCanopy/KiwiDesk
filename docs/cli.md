@@ -882,6 +882,12 @@ any other side is refused, naming the sides it takes. See
 It also takes `desktops`, the Desktop overview.
 :::
 
+:::unreleased
+`kiwihub.show_last_app` opens the window switcher on the app of
+the window you used last. See
+[kiwihub.show_last_app](lua-reference.md#kiwihubshow_last_app).
+:::
+
 `kiwihub.set_key` takes a built-in KiwiHub key (`up`, `down`,
 `page_up`, `page_down`, `left`, `right`) and a combo, and makes the
 combo a second key for it while KiwiHub is open; no combo clears it.

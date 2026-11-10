@@ -7,6 +7,8 @@ import KiwiDeskCore
 enum JumpHover: Equatable {
     case row(Int)
     case item(ViewPickList.Pick)
+    /// A tile of the Windows side's app strip (#3135).
+    case tile(Int)
 
     /// Whether `target` draws the lift: the item under the pointer,
     /// never the selected one, whose accent wins (#1173), and never
@@ -44,6 +46,11 @@ extension JumpModel {
     func hoverRow(_ index: Int, pointer: CGPoint) {
         guard scope == .windows else { return }
         noteHover(.row(index), pointer: pointer)
+    }
+
+    func hoverTile(_ index: Int, pointer: CGPoint) {
+        guard scope == .windows else { return }
+        noteHover(.tile(index), pointer: pointer)
     }
 
     func hoverItem(_ pick: ViewPickList.Pick, pointer: CGPoint) {

@@ -102,17 +102,28 @@ public struct JumpSnapshot: Sendable, Equatable {
     /// Space has no focus it trades with the global one (#2885), and
     /// no row draws a route to `here`.
     public let swapsInHere: Bool
+    /// The app strip's apps, most recently used first (#3135).
+    public let apps: [JumpApp]
+    /// The listed window focused most recently, which the last-app
+    /// opener selects whatever order a lens gives the rows; nil
+    /// where none was ever focused.
+    public let lastUsed: JumpEntry.Target?
 
     public init(
         entries: [JumpEntry],
         here: SpaceID?,
         hereIcon: SpaceGlyph?,
-        swapsInHere: Bool = false
+        swapsInHere: Bool = false,
+        apps: [JumpApp]? = nil,
+        lastUsed: JumpEntry.Target? = nil
     ) {
         self.entries = entries
         self.here = here
         self.hereIcon = hereIcon
         self.swapsInHere = swapsInHere
+        // A fixture's strip; Core always hands its own.
+        self.apps = apps ?? JumpApp.listed(in: entries)
+        self.lastUsed = lastUsed
     }
 }
 

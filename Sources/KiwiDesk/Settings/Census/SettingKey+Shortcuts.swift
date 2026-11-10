@@ -21,6 +21,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// The window switcher (#1875), its row named "Show" and the
     /// side's VoiceOver name (#2245).
     case jumpToWindow = "keybinding.show_jump_to_window"
+    /// The window switcher opened on the last app's strip tile
+    /// (#3135).
+    case jumpToLastApp = "keybinding.show_window_switcher_last_app"
     case toggleKiwiVision = "keybinding.toggle_kiwivision"
     /// One row per live lens (#2103 ruling 42).
     case toggleLens = "keybinding.toggle_lens (x N lenses)"
@@ -128,7 +131,7 @@ extension ShortcutsKey {
             return .row(.shortcuts, .focus, .atRest)
         // One card for what shows and hides: KiwiHub's sides
         // (#2265), the bars (#761), KiwiVision and its lenses.
-        case .jumpToWindow, .showShortcuts, .viewPicker,
+        case .jumpToWindow, .jumpToLastApp, .showShortcuts, .viewPicker,
             .desktopOverview, .toggleSpaceBar, .toggleAppBar,
             .toggleKiwiVision, .toggleLens:
             return .row(.shortcuts, .showHide, .atRest)

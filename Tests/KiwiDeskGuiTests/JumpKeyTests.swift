@@ -117,8 +117,9 @@ struct JumpKeyTests {
         #expect(layouts(48) == .stepScope(forward: true))
         #expect(layouts(36) == .pick(moveHere: false))
         #expect(layouts(19, .command) == .quick(1, moveHere: false))
-        // In Windows the arrows move the caret and ⌘S, ⌘, type.
-        #expect(key(123) == nil)
+        // In Windows the arrows walk the app strip (#3135), and
+        // ⌘S, ⌘, type.
+        #expect(key(123) == .side(-1))
         #expect(key(1, .command) == nil)
         #expect(key(43, .command) == nil)
         // A plain S types a filter.

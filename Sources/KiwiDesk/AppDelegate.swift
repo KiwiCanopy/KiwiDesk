@@ -123,6 +123,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.uiBridge.onKiwihubShow = { [weak jumpPanel] side in
             jumpPanel?.toggle(side)
         }
+        core.uiBridge.onKiwihubShowLastApp = { [weak jumpPanel] in
+            jumpPanel?.toggleLastApp()
+        }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in
             self?.dashboard.show()

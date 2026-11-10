@@ -319,7 +319,7 @@ public enum APIReference {
             "set_clear_wallpaper", "set_clear_app", "set_never_dimmed",
             "set_maximize", "define_lens", "delete_lens",
         ],
-        "kiwihub": ["show", "set_key"],
+        "kiwihub": ["show", "show_last_app", "set_key"],
         "look": [
             "list", "current", "apply", "save", "delete",
         ],
