@@ -41,7 +41,7 @@ struct DesktopCardView: View {
                     proxy.scrollTo(line)
                 }
             }
-            .frame(height: geometry.lines, alignment: .top)
+            .frame(height: geometry.lines[screen], alignment: .top)
         }
         .padding(.horizontal, DesktopsGeometry.columnInset)
         .frame(width: width, alignment: .top)

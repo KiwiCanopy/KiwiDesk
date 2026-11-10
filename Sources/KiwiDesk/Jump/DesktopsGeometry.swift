@@ -39,9 +39,9 @@ struct DesktopsGeometry: Equatable {
 
     /// Every Space line's height.
     let line: CGFloat
-    /// A column's line area: every line where they fit, else the
-    /// cap's share, which scrolls.
-    let lines: CGFloat
+    /// Each screen row's line area: every line of its deepest
+    /// Desktop where they fit, else the cap's share, which scrolls.
+    let lines: [CGFloat]
     /// Each screen row's column width, in overview order.
     let columns: [CGFloat]
     /// The side's height: every row whole up to the cap, past which
@@ -57,13 +57,17 @@ struct DesktopsGeometry: Equatable {
         let budget = (cap - Self.chrome(rows: fitted)) / fitted
         let fit = most > 0 ? (budget / CGFloat(most)).rounded(.down) : 0
         line = min(max(fit, Self.shortestLine), Self.tallestLine)
-        lines = min(CGFloat(most) * line, max(budget, line))
+        let share = max(budget, line)
+        lines = screens.map { screen in
+            let deepest = screen.desktops.map(\.spaces.count).max() ?? 0
+            return min(CGFloat(deepest) * line, share)
+        }
         let room = width - 2 * Self.rowInset
         columns = screens.map {
             Self.column(count: $0.desktops.count, room: room)
         }
         let rows = CGFloat(screens.count)
-        height = min(Self.chrome(rows: rows) + rows * lines, cap)
+        height = min(Self.chrome(rows: rows) + lines.reduce(0, +), cap)
     }
 
     /// A Space line's icon: the line height less 8, never under the
@@ -72,7 +76,9 @@ struct DesktopsGeometry: Equatable {
 
     /// One screen row's height: its header, a column's title and
     /// its lines.
-    var rowHeight: CGFloat { Self.rowChrome + lines }
+    func rowHeight(_ screen: Int) -> CGFloat {
+        Self.rowChrome + lines[screen]
+    }
 
     /// The icon slots each screen row's lines show at once; more
     /// fold into "+n".

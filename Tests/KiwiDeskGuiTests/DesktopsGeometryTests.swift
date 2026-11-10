@@ -62,7 +62,7 @@ struct DesktopsGeometryTests {
         #expect(two.line == 35)
         // A typed constant: the macro types a bare `4 * 35` apart.
         let fourLines: CGFloat = 4 * 35
-        #expect(two.lines == fourLines)
+        #expect(two.lines == [fourLines, 2 * 35])
         #expect(two.height <= Self.cap)
         #expect(
             Self.geometry(
@@ -82,7 +82,8 @@ struct DesktopsGeometryTests {
             Self.screen(2, desktops: 1, spaces: 1),
         ])
         #expect(deep.line == G.shortestLine)
-        #expect(deep.lines < 8 * G.shortestLine)
+        #expect(deep.lines[0] < 8 * G.shortestLine)
+        #expect(deep.lines[1] == G.shortestLine)
         #expect(deep.height <= Self.cap)
         // A third screen sizes lines as two do, and the side scrolls.
         let three = Self.geometry([

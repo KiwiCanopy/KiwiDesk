@@ -52,7 +52,7 @@ struct DesktopsSideCeilingTests {
         )
         #expect(side.height == whole.height)
         // Whole means each row's own height at least.
-        #expect(whole.height >= 2 * whole.rowHeight)
+        #expect(whole.height >= whole.rowHeight(0) + whole.rowHeight(1))
         #expect(
             height >= whole.height + JumpPanelView.fieldHeight,
             "\(height)"
