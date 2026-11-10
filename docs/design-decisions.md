@@ -14555,6 +14555,28 @@ the front app before the main actor heard of it
 hides key presses from it ([accepted limitations](accepted-limitations.md)).
 :::
 
+:::unreleased
+*Amended (#3173, owner, 2026-11-10): an open sequence lets macOS's
+own shortcuts through.* "Every key press" no longer holds. Swallowing
+every key cost the user macOS itself: ⌘⇧4 beeped and took no
+screenshot, which a macOS menu never does while it is open. A key no
+step of the sequence names now goes one of three ways, read from
+`SystemShortcuts.map` and the live `com.apple.symbolichotkeys` chord,
+so a remapped shortcut is known by its new chord and one switched off
+is not passed. A shortcut that takes no keyboard (screenshots, Zoom,
+Invert colours and contrast, Dock hiding) passes and the panel stays
+up. One that takes the keyboard or moves the user (Spotlight, Finder
+search, the app switcher, Force Quit, Mission Control, Desktop
+switching, the next input source) passes and closes the sequence,
+since the panel would otherwise sit over a field typing elsewhere.
+An app's own menu chords (⌘Q, ⌘W, ⌘M, ⌘H) stay swallowed: the
+sequence shields the front app, and those would act on it. A
+recorded step key wins first, so #1871's strict step keys hold, and
+the recorder warns when a step key takes a macOS chord. User-defined
+App Shortcuts and third-party global shortcuts stay swallowed: no
+list of them exists to read.
+:::
+
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the
 current profile: it stays Carbon-registered (pressing it recreates

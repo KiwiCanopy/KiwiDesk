@@ -83,8 +83,10 @@ extension KeybindingManager {
         case .stepped, .back:
             sequenceOpen = true
             onSequenceProgress(decision.progress)
-        case .closed:
+        case .closed, .passed(closing: true):
             noteSequenceClosed()
+        case .passed(closing: false):
+            return
         case .fired(let ref):
             noteSequenceClosed()
             sequenceFire(ref: ref)

@@ -7,7 +7,8 @@ import Foundation
 /// key after a leader can never reach the front app
 /// (input-and-animation.md).
 struct KeySequenceRouter: Sendable {
-    /// What a key-down did. Everything but `.pass` swallows it.
+    /// What a key-down did. `swallows` says whether the front app
+    /// is kept from it.
     enum Outcome: Equatable, Sendable {
         /// No sequence is open and the key is no leader.
         case pass
@@ -24,16 +25,34 @@ struct KeySequenceRouter: Sendable {
         case unbound
         /// A key repeat while open: swallowed, nothing moves.
         case repeated
+        /// A macOS shortcut while open (#3173): it reaches macOS, and
+        /// `closing` closes the sequence first.
+        case passed(closing: Bool)
+
+        var swallows: Bool {
+            switch self {
+            case .pass, .passed: return false
+            case .stepped, .back, .closed, .fired, .unbound, .repeated:
+                return true
+            }
+        }
     }
 
     private(set) var sequences: [KeySequence] = []
+    /// The macOS shortcuts an open sequence lets through (#3173).
+    private(set) var passing = SequencePassChords.none
     /// The open sequence, and the index of each step key taken.
     private var open: (sequence: Int, path: [Int])?
 
-    /// Replaces the sequences, closing any that is open: the step
-    /// it stood on may be gone.
-    mutating func setSequences(_ sequences: [KeySequence]) {
+    /// Replaces the sequences and the macOS shortcuts they let
+    /// through, closing any that is open: the step it stood on may
+    /// be gone.
+    mutating func setSequences(
+        _ sequences: [KeySequence],
+        passing: SequencePassChords = .none
+    ) {
         self.sequences = sequences
+        self.passing = passing
         open = nil
     }
 
@@ -68,6 +87,8 @@ struct KeySequenceRouter: Sendable {
 
     /// Decides one key-down. A step key matches only the chord
     /// recorded for it, held modifiers included (#1871 ▸ step keys).
+    /// While open: esc and ⌫, the leader, a step key, then a macOS
+    /// shortcut's tier (#3173), else the beep.
     mutating func press(
         keyCode: UInt32,
         held: HotkeyModifiers,
@@ -110,7 +131,7 @@ struct KeySequenceRouter: Sendable {
                 keyCode: keyCode,
                 held: held
             )
-        else { return .unbound }
+        else { return passOrBeep(keyCode: keyCode, held: held) }
         switch keys[index].action {
         case .run(let ref):
             open = nil
@@ -119,6 +140,22 @@ struct KeySequenceRouter: Sendable {
             open?.path.append(index)
             return .stepped
         }
+    }
+
+    /// A macOS shortcut no step key took: through to macOS, the
+    /// sequence closed first where it takes the keyboard.
+    private mutating func passOrBeep(
+        keyCode: UInt32,
+        held: HotkeyModifiers
+    ) -> Outcome {
+        if Self.match(passing.staysOpen, keyCode: keyCode, held: held) != nil {
+            return .passed(closing: false)
+        }
+        if Self.match(passing.closes, keyCode: keyCode, held: held) != nil {
+            open = nil
+            return .passed(closing: true)
+        }
+        return .unbound
     }
 
     private static func keys(

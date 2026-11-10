@@ -64,6 +64,9 @@ func makeTestCore(
         hotkeyRegistrar: hotkeyRegistrar
     )
     core.tiler.animation.reduceMotion = { false }
+    // The host's symbolic hotkeys never shape a sequence's pass-
+    // through (#3173).
+    core.keys.readSymbolicHotkey = { _ in nil }
     // The pocket's Show pinned Hidden, the old One-window default, so
     // no fixture inherits its resting strip; a suite of it states one
     // (#2978).

@@ -1368,7 +1368,7 @@ and clicks, and acts only on the taps.
 A [key sequence](#define_sequence) is read the same way whatever
 this says: while one is defined, KiwiDesk reads key presses and
 clicks, takes its leader and, while a sequence is open, every key
-press, and acts on nothing else.
+press but macOS's own shortcuts, and acts on nothing else.
 :::
 
 The GUI twin is **Tell left and right modifiers apart** in
@@ -7927,6 +7927,12 @@ cancels. A key the step does not hold leaves the step open and
 plays the refusal sound while
 [`set_refusal_sound`](#set_refusal_sound) is on, off by default
 ([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
+macOS's own shortcuts still work while a sequence is open: a
+screenshot, Zoom, Invert colours, contrast and Dock hiding leave the
+panel up; Spotlight, Finder search, the app switcher, Force Quit,
+Mission Control, Desktop switching and the next input source close
+the sequence first. **⌘Q**, **⌘W**, **⌘M** and **⌘H** stay with the
+sequence, and a step key on any of these chords wins it.
 
 A step key matches its chord exactly, modifiers included: with
 the leader's modifiers still held, `w` does not fire, and

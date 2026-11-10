@@ -117,6 +117,10 @@ public final class KeybindingManager {
     /// macOS refused the tap; asked again only once the switch
     /// moves, or every `bind` of a load would spawn and refuse.
     var keyboardTapRefused = false
+    /// Reads one `com.apple.symbolichotkeys` entry for an open key
+    /// sequence's pass-through (#3173); a seam for suites.
+    var readSymbolicHotkey: (Int) -> SymbolicHotkeyEntry? =
+        SymbolicHotkeys.liveRead
     /// `sideTapStatus` changed: Settings re-reads it (#96).
     var onSideTapStatusChange: @MainActor () -> Void = {}
     /// The keyboard tap's rows by id, side chords and modifier

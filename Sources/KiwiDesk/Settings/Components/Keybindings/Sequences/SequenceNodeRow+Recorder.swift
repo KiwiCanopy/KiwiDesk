@@ -59,7 +59,7 @@ extension SequenceNodeRow {
                 besides: node.id,
                 in: root
             )
-        else { return nil }
+        else { return systemReading }
         return ConflictReading(
             severity: .duplicate(holder),
             sentence: L(
@@ -67,6 +67,24 @@ extension SequenceNodeRow {
                 "Also bound at this point in the sequence to %1$@ — only "
                     + "one of the two will fire.",
                 holderName(holder)
+            )
+        )
+    }
+
+    /// A step key macOS owns: a recorded step key wins its chord
+    /// while the sequence is open (#3173), so macOS loses it then.
+    /// A shortcut switched off in System Settings costs nothing.
+    private var systemReading: ConflictReading? {
+        guard let key = KeyCombo.parse(node.combo),
+            let shortcut = SystemShortcuts.map[key.unsided],
+            !disabledSystemShortcuts.contains(shortcut)
+        else { return nil }
+        return ConflictReading(
+            severity: .shadowsApps(shortcut),
+            sentence: L(
+                "keybinding.conflict.tooltip.step_system",
+                "Takes %1$@ away from macOS while this sequence is open.",
+                shortcut.localizedName
             )
         )
     }

@@ -37,6 +37,9 @@ struct KeyboardTapRows: Equatable, Sendable {
     /// The current layer's key sequences (#1871); a tap leader also
     /// rides `taps`, under `KeyboardTap.leaderID(_:)`.
     var sequences: [KeySequence] = []
+    /// The macOS shortcuts an open sequence lets through (#3173),
+    /// handed to the router with the sequences.
+    var sequencePassing = SequencePassChords.none
     /// The epoch every sequence decision made over these rows
     /// carries.
     var sequenceGeneration: UInt64 = 0
