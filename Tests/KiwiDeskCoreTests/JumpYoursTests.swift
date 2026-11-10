@@ -5,8 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// KiwiHub's current window (#3168): the snapshot names the window
-/// Swap here trades with — the focus of KiwiHub's Space, else the
-/// global one — and gives its app a tile on the strip.
+/// the list leaves out — the focus, while its app is in front — and
+/// gives its app the strip's first tile.
 @Suite("KiwiHub snapshot names your window (#3168)")
 @MainActor
 struct JumpYoursTests {
@@ -34,20 +34,19 @@ struct JumpYoursTests {
         core.state.workspaces.add(WindowID(id), to: space)
     }
 
-    @Test("the focus of the Space shown is yours, as a row draws it")
-    func namesTheSwapPartner() throws {
+    @Test("the window the list leaves out is yours, as a row draws it")
+    func namesTheWindowYouAreIn() throws {
         let core = makeCore()
         track(core, 1, in: "1")
         track(core, 2, in: "1")
         track(core, 3, in: "2")
         core.state.workspaces.focus(WindowID(2), in: "1")
+        core.frontmostPIDProvider = { 900_001 }
         let yours = try #require(core.jumpSnapshot().yours)
         #expect(yours.target == .window(WindowID(2)))
         #expect(yours.title == "W2")
         #expect(yours.space == "1")
         #expect(yours.swapBlock == .yours)
-        // No front app is tracked here, so only the snapshot's own
-        // reading leaves it out of the list.
         #expect(
             !core.jumpSnapshot().entries.contains {
                 $0.target == .window(WindowID(2))
@@ -71,12 +70,29 @@ struct JumpYoursTests {
         core.state.workspaces.add(WindowID(1), to: "1")
         track(core, 2, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
+        core.frontmostPIDProvider = { 900_002 }
         // Another app used more recently still comes after yours.
         core.state.stampAppRecency(900_001)
         let snapshot = core.jumpSnapshot()
         #expect(snapshot.yours?.pid == 900_002)
         #expect(!snapshot.entries.contains { $0.pid == 900_002 })
         #expect(snapshot.apps.map(\.pid) == [900_002, 900_001])
+    }
+
+    /// A focus whose app is not in front stays a row, so it is not
+    /// drawn as yours as well (the 2026-10-12 ruling's own case).
+    @Test("a focus under another app is a row, not yours")
+    func staleFocusIsNoCurrentWindow() {
+        let core = makeCore()
+        track(core, 1, in: "1")
+        track(core, 2, in: "1")
+        core.state.workspaces.focus(WindowID(2), in: "1")
+        core.frontmostPIDProvider = { 999 }
+        let snapshot = core.jumpSnapshot()
+        #expect(snapshot.yours == nil)
+        #expect(
+            snapshot.entries.contains { $0.target == .window(WindowID(2)) }
+        )
     }
 
     @Test("with no window tracked there is none")

@@ -28,17 +28,22 @@ extension KiwiCore {
         )
     }
 
-    /// The window a Swap here from `here`'s screen trades with, as
-    /// a row would draw it; the list leaves it out, so its blocks
-    /// are for display only.
+    /// The window you are in, as a row would draw it: the one the
+    /// list leaves out (`jumpFocusedWindow`), so the two never
+    /// disagree (#3168). Its blocks are for display only.
     private func jumpYours(
         here: SpaceID?,
         hub: DisplayID?
     ) -> JumpEntry? {
-        guard let id = jumpSwapPartner(in: here),
+        guard let id = jumpFocusedWindow(),
             let window = state.windows[id]
         else { return nil }
-        return trackedJumpEntry(window, here: here, hub: hub, partner: id)
+        return trackedJumpEntry(
+            window,
+            here: here,
+            hub: hub,
+            partner: jumpSwapPartner(in: here)
+        )
     }
 
     func jumpEntries(
@@ -61,14 +66,11 @@ extension KiwiCore {
             let right = jumpRecency(rhs.element)
             return left != right ? left > right : lhs.offset < rhs.offset
         }
-        // Neither the window you are in nor the one the snapshot
-        // names as yours is a row (#3168).
-        let left = Set(
-            [jumpFocusedWindow(), partner].compactMap { $0 }
-                .map(JumpEntry.Target.window)
-        )
+        let focused = jumpFocusedWindow().map {
+            JumpEntry.Target.window($0)
+        }
         let listed = ordered.map(\.element).filter {
-            !left.contains($0.target)
+            $0.target != focused
         }
         // The pocket after Hidden (#2446).
         let rows =

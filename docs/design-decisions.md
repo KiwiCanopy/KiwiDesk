@@ -15375,7 +15375,10 @@ plate and no hover, at the top of All and of its own app's tile,
 because it is a statement and not a choice. It hides under a query,
 whose dimmed tiles are the thing to read. VoiceOver reads it as
 text and does not announce it on open, since the selected row is
-what the open speaks.
+what the open speaks. It is the very window the list leaves out — the
+focus, while its app is in front — read once, so it is never drawn
+twice; a focus under an app KiwiDesk does not track stays a row, as
+the 2026-10-12 ruling has it, and is then not drawn as yours.
 
 A running app with no listed window has no tile (ui-designer
 advised, owner ruling 2026-11-10, reversing #3135's "No windows"

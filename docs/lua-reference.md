@@ -7188,10 +7188,9 @@ matches to that app. [kiwihub.show_last_app](#kiwihubshow_last_app)
 opens this side with the strip on the app of the window you used
 last.
 
-With nothing typed, the window you are in, the one **⌥Return**
-swaps with, sits greyed at the top of **All** and of its app's tile,
-marked **Current window**. It is never a row you pick: the arrows,
-the digits and search skip it.
+With nothing typed, the window you are in sits greyed at the top
+of **All** and of its app's tile, marked **Current window**. It is
+never a row you pick: the arrows, the digits and search skip it.
 
 A modifier still held from the shortcut that opened KiwiHub, or
 from a step of `kiwihub.show_last_app`, counts for nothing until

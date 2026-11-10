@@ -1312,10 +1312,10 @@ editing here:
   ▸ KiwiHub's app strip; `JumpAppStripTests`).
 - **KiwiHub's "your window" is one reading per snapshot (#3168):**
   the window the list leaves out and the greyed current window it
-  names come from the same `jumpSwapPartner` read in
-  `jumpSnapshot`, and its app's tile is placed first there, never
-  left to recency; a second reader of "the window you are in" in
-  the list takes that value (`JumpYoursTests`).
+  names are both `jumpFocusedWindow()`, and its app's tile is
+  placed first in `jumpSnapshot`, never left to recency; a second
+  reader of "the window you are in" in the list takes that value
+  (`JumpYoursTests`).
 - **A focused float schedules no float-tier raise of its own, so a
   raise owed ahead of it and any mode's restore ending under it pay
   through `raiseFloatsForFocusedFloat` (#2985,
