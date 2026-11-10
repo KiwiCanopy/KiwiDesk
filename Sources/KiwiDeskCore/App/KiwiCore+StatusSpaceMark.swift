@@ -77,14 +77,14 @@ extension KiwiCore {
                 )
             else { return nil }
             let mode = state.workspaces[space]?.mode ?? .bsp
-            // A tiling-off Space whose tick hides the bars shows no
-            // Space Bar either (#3008, bars.md).
+            // A tiling-off Space whose tick hides the bars reads its
+            // Space Bar Hidden (#3008, #3151, bars.md).
             guard
-                !settings.drawsAtRest(
+                !shelfSettings(on: display.id).drawsAtRest(
                     .space,
                     in: mode,
                     on: display.fingerprint
-                ) || tilingOffHidesShelf(on: display.id)
+                )
             else { return nil }
             var screen = StatusSpaceMark.Screen(
                 display: display,

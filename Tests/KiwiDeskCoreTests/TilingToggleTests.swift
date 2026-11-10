@@ -135,7 +135,7 @@ struct TilingToggleTests {
         #expect(core.state.tilingToggles[SpaceID("2")] == nil)
     }
 
-    @Test("the ticks stand the rings and the shelf down, only when on")
+    @Test("the ticks hide the rings and the bars, only when on")
     func ticksStandDown() {
         let core = makeCore()
         let display = DisplayID(7)
@@ -148,7 +148,8 @@ struct TilingToggleTests {
         core.execute("tiling.set_off_hides_bars", args: [.bool(true)])
         #expect(core.tilingOffHidesRings(on: space))
         #expect(core.tilingOffHidesShelf(on: display))
-        #expect(core.shelfStandsDown(on: display, covered: false))
+        // The bars read Hidden rather than standing down (#3151).
+        #expect(!core.shelfStandsDown(on: display, covered: false))
         core.execute("set_tiling", args: [.bool(true)])
         #expect(!core.tilingOffHidesRings(on: space))
         #expect(!core.tilingOffHidesShelf(on: display))

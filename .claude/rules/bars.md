@@ -445,13 +445,16 @@ twice, was a question the user answered twice. The argument is
   (`MonocleMaximizeBarTests`, `MonocleMaximizeWiringTests`); a new
   reader routing beside either is review's, since nothing scans for
   it.
-  A Space with tiling off stands the shelf down only where the
-  `tiling.off_hides_bars` tick resolves on — the profile's own
-  value, else the app-wide base, through
-  `TilingToggleSettings.offHidesBars(base:)` (#3089) — through the
-  one named `KiwiCore.tilingOffHidesShelf(on:)` inside
-  `shelfStandsDown` (#3008); its one other reader is the menu-bar
-  Space mark, which lists that screen (`TilingOffPlacementSeamTests`).
+  **A Space with tiling off never stands the shelf down; where
+  its `tiling.off_hides_bars` tick resolves on, every bar and the
+  Pocket read Hidden** (#3151), so a shortcut still shows one. The
+  tick resolves the profile's own value, else the app-wide base,
+  through `TilingToggleSettings.offHidesBars(base:)` (#3089), read
+  only by `KiwiCore.tilingOffHidesShelf(on:)` inside the one
+  `KiwiCore.shelfSettings(on:)` door, which the shelf pass, the
+  reveal verb, the menu-bar Space mark and the Pocket's rest take;
+  a new reader of a screen's bar visibility takes it too
+  (`TilingOffPlacementSeamTests`, `TilingOffBarsHiddenTests`).
   `ShelfStandDownSeamTests` holds the bar-building files to that,
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸

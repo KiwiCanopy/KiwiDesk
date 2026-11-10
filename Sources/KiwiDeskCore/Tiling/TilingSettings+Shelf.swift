@@ -76,6 +76,20 @@ extension TilingSettings {
         }
     }
 
+    /// These settings with every bar and the Pocket set to Hidden in
+    /// every layout: what a tiling-off Space whose tick hides the
+    /// bars draws (#3151).
+    public func hidingEveryBar() -> TilingSettings {
+        var out = self
+        out.spaceBarStyle.visibility = .hidden
+        for mode in LayoutMode.allCases {
+            guard let path = Self.appBarPath(for: mode) else { continue }
+            out[keyPath: path].visibility = .hidden
+        }
+        out.kiwishelf.pocketVisibility = .hidden
+        return out
+    }
+
     /// Whether some bar rests on screen — Always or Auto — in some
     /// layout on some screen: what Settings' "Hide the bars while
     /// tiling is off" row asks to grey (#3089).
