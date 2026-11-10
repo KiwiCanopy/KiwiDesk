@@ -51,12 +51,7 @@ struct KiwiVisionClearCard: View {
                 get: { model.appWide.visionClearApp },
                 set: { on in model.setAppWide { $0.visionClearApp = on } }
             ),
-            help: L(
-                "kiwivision.clear_app.help",
-                "Keeps every window of the focused app clear, not only "
-                    + "the focused one. Focus a window of another app "
-                    + "and its windows become the clear ones."
-            ),
+            help: Self.appHelp,
             disabled: reason(for: .kiwiVision(.clearApp)) != nil
         )
         .searchAnchored(SettingsCatalog.kiwiVision.clearApp)
@@ -71,14 +66,28 @@ struct KiwiVisionClearCard: View {
                     model.setAppWide { $0.visionClearWallpaper = on }
                 }
             ),
-            help: L(
-                "kiwivision.clear_wallpaper.help",
-                "Only the windows behind the focused one are dimmed "
-                    + "and blurred; the wallpaper around them and in the "
-                    + "gaps between them stays as it is."
-            ),
+            help: Self.wallpaperHelp,
             disabled: reason(for: .kiwiVision(.clearWallpaper)) != nil
         )
         .searchAnchored(SettingsCatalog.kiwiVision.clearWallpaper)
+    }
+
+    /// The rows' `?`, a lens's override rows' too (#3176).
+    static var appHelp: String {
+        L(
+            "kiwivision.clear_app.help",
+            "Keeps every window of the focused app clear, not only "
+                + "the focused one. Focus a window of another app "
+                + "and its windows become the clear ones."
+        )
+    }
+
+    static var wallpaperHelp: String {
+        L(
+            "kiwivision.clear_wallpaper.help",
+            "Only the windows behind the focused one are dimmed "
+                + "and blurred; the wallpaper around them and in the "
+                + "gaps between them stays as it is."
+        )
     }
 }

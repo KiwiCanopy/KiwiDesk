@@ -8781,6 +8781,7 @@ curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
 
+:::unreleased
 With KiwiVision's maximize on (#3064, below), the arrival is still
 instant but no longer still: the window you focus clears at its
 slot and then grows into the fill, while the window you leave fades
@@ -8788,7 +8789,9 @@ as it shrinks back to its slot. The leave fade masks the slot the
 window is heading for, so for the length of the spring the part of
 the shrinking window outside that slot dims at once rather than
 fading; the plates owe a re-mask once the springs settle.
+:::
 
+:::unreleased
 ### KiwiVision's maximize is derived, never stored per Space (#3064)
 
 **[Rationale]**
@@ -8800,7 +8803,8 @@ Width read the share and the anchor Layout Defaults store for the
 screen's shape, the same table a hand Maximize reads, so KiwiVision
 has no anchor of its own (owner, 2026-11-09). A lens overrides the
 mode alone, one optional row like its other overrides, so a
-"Writing" lens can ask for Height.
+"Writing" lens can ask for Height. That row is a pop-up
+(`ui-patterns.md` ▸ Choosing a control).
 
 The verdict is computed on every read from what state holds —
 KiwiVision's ask, copied in through `VisionLook` at every change,
@@ -8839,6 +8843,7 @@ The new `kiwivision.maximize` key is encoded only when it is not
 Off, so files written before it decode unchanged and it owes no
 crossing. It has no per-profile predecessor either: KiwiVision's
 settings were app-wide from their first release.
+:::
 
 ### KiwiVision switches the appearance and owes it back (#2103)
 
