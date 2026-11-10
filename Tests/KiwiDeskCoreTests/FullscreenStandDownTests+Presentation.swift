@@ -6,7 +6,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A window covering its whole screen is presenting (#1787) —
-/// PowerPoint's slide show. The float fit leaves it where its
+/// PowerPoint's slide show. The bar push leaves it where its
 /// app put it, and a screen showing one in FRONT stands the
 /// shelf down as a native-fullscreen Space does. An extension of
 /// this suite, not a second one: every case holds the
@@ -80,12 +80,12 @@ extension FullscreenStandDownTests {
         return core
     }
 
-    @Test("The float fit neither moves nor stamps a covering float")
-    func fitLeavesACoveringFloat() throws {
+    @Test("The bar push neither moves nor stamps a covering float")
+    func pushLeavesACoveringFloat() throws {
         let screen = try #require(screenFrame)
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         // The negative twin first: one edge short of covering,
-        // the same window IS fitted and stamped, so the
+        // the same window IS pushed and stamped, so the
         // assertions below cannot pass on an inert fixture.
         var short = screen
         short.size.height -= 100
@@ -128,7 +128,7 @@ extension FullscreenStandDownTests {
 
     /// A float maximised by Fill under an auto-hiding menu bar
     /// covers its screen with its title bar: the shelf stays, and
-    /// the fit takes it like any float (#1788 item 5).
+    /// the push takes it like any float (#1788 item 5).
     @Test("A titled float covering its screen is no show")
     func titledFloatKeepsTheShelf() throws {
         let screen = try #require(screenFrame)
@@ -143,7 +143,7 @@ extension FullscreenStandDownTests {
         #expect(core.tiler.recentInstantTarget(Self.show) != nil)
 
         // Control: the show's own subrole stands the shelf down
-        // over the same frames, and the fit leaves it.
+        // over the same frames, and the push leaves it.
         let show = try #require(
             makeShelfCore(frame: screen, subrole: "AXUnknown")
         )
@@ -205,7 +205,7 @@ extension FullscreenStandDownTests {
         core.updateBars()
         #expect(!core.spaceBars.shownStrips.isEmpty)
 
-        // A resize to the cover retiles nothing: the fit leaves a
+        // A resize to the cover retiles nothing: the push leaves a
         // presenting float alone, so only the crossing re-reads.
         core.handle(.windowResized(Self.show, screen))
 

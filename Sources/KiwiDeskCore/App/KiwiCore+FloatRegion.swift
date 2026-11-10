@@ -2,12 +2,10 @@ import CoreGraphics
 
 /// Where a floating window may sit, derived once (#1091).
 ///
-/// Split from `KiwiCore+FloatClamp` at §2.1's ceiling rather
-/// than after crossing it. That file holds the two things that
-/// ACT on a float — the bar clamp and the retile-time fit; this
-/// one holds the region they act against, and the ring
-/// reservation that separates the correctness bound from the
-/// grow bound.
+/// Split from `KiwiCore+FloatClamp`, which holds the top-bar push
+/// that ACTS on a float; this one holds the region the float verbs
+/// and the gather act within, and the ring reservation that
+/// separates the correctness bound from the grow bound.
 ///
 /// Reads the display through `TilingEngine.visibleBounds`
 /// (#531), never `GeometryUtils.axVisibleFrame` — a direct call
@@ -44,8 +42,9 @@ extension KiwiCore {
 
     /// **The one derivation of the region**, and the CORRECTNESS
     /// bound: a float larger than this has part of itself under
-    /// a bar, which is unreachable. The retile fit measures
-    /// against it.
+    /// a bar, which is unreachable. The float verbs and the
+    /// gather bound against it; no sweep fits a float into it
+    /// (#3163).
     ///
     /// It reserves nothing for the focus ring — at a bar edge
     /// as much as at a screen edge. `floatGrowBounds` below
@@ -55,19 +54,14 @@ extension KiwiCore {
     /// 2026-08-29): "is this window unusably large" and "how far
     /// may a deliberate grow take it" have different answers,
     /// because a clipped ring is a blemish and a window under a
-    /// bar is not usable. Reserving the ring here instead would
-    /// make the retile pull in a float the user had resized
-    /// flush by hand — the fit fighting the hand, which the
-    /// rule below forbids.
+    /// bar is not usable.
     ///
     /// Each consumer states its own scope. The resize takes
     /// `floatGrowBounds`, because pinning is a question about
-    /// how much room each EDGE has; the fit takes this; and
-    /// `floatFrameClampedClearOfBars` above keeps pushing off
-    /// bar edges alone — that one runs for every float on every
-    /// retile, so enforcing the screen edge there would drag
-    /// back a window parked half off-screen by hand, which macOS
-    /// allows and this issue never asked for.
+    /// how much room each EDGE has, and
+    /// `floatFrameClampedClearOfBars` pushes off a top bar alone
+    /// (#3163): it runs for every float on every retile, so any
+    /// other edge would move a window the user placed.
     ///
     /// Bars vary per space — one bar or two, on any edge — so
     /// this folds both strip lists exactly as the clamp does
@@ -97,13 +91,8 @@ extension KiwiCore {
         var region = tiler.visibleBounds(screen)
         for (strip, edge) in reservedStrips(forSpace: space) {
             // No ring reservation here, at a bar edge any more
-            // than at a screen edge (guard-prover, 2026-08-29).
-            // Carving one made this bound reserve at bars while
-            // claiming to reserve nowhere, which cost two things:
-            // `floatGrowBounds` then took TWO reaches at a bar,
-            // and the retile fit pulled in a float the user had
-            // resized flush against one — the fit fighting the
-            // hand, surviving on the axis the split forgot.
+            // than at a screen edge: `floatGrowBounds` adds one
+            // reach, and a carve here made it take two at a bar.
             region = AppBarGeometry.regionClear(
                 region,
                 of: strip,
