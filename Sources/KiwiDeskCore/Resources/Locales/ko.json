@@ -2449,6 +2449,8 @@
   "space_override.floating.no_layout": "플로팅에는 레이아웃 재정의가 없습니다.",
   "space_override.fraction": "%2$d개 중 %1$d개 설정됨",
   "space_override.gaps.floating": "플로팅은 윈도우를 배치하지 않으므로, 이 간격은 이 공간이 타일링될 때 적용됩니다.",
+  "space_override.gaps.monocle_maximizes": "모노클에서 ‘%1$@’이(가) 켜져 있어 이 공간에는 간격이 표시되지 않습니다.",
+  "space_override.gaps.monocle_maximizes.xref": "모노클에서 ‘%1$@’이(가) 켜져 있어 이 공간에는 간격이 표시되지 않습니다. %2$@에서 변경하십시오.",
   "space_override.gaps.value": "바깥쪽 %1$@, 안쪽 %2$@",
   "space_override.inherits": "%1$@ 기본값 따름 · %2$@",
   "space_override.inherits_page": "%1$@ 따름 · %2$@",

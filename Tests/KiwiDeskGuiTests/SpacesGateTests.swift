@@ -225,6 +225,65 @@ struct SpacesGateTests {
         )
     }
 
+    /// The gaps row asks both inputs (#3123): Monocle's global
+    /// "Maximize windows" and the Space's own layout. Floating
+    /// keeps its own reason, whatever the switch says.
+    @MainActor
+    @Test("gaps grey while Monocle maximizes")
+    func gapsGreyWhileMonocleMaximizes() {
+        let key = SettingKey.gaps(.perSpaceOverride)
+        let on: (inout TilingSettings) -> Void = {
+            $0.monocle.maximizeWindows = true
+        }
+        #expect(
+            gates(mode: .monocle, on).inertReason(for: key)
+                == .monocleMaximizes
+        )
+        #expect(
+            gates(mode: .monocle) {
+                $0.monocle.maximizeWindows = false
+            }
+            .inertReason(for: key) == nil
+        )
+        for mode in LayoutMode.allCases
+        where mode != .monocle && mode != .floating {
+            #expect(gates(mode: mode, on).inertReason(for: key) == nil)
+        }
+        #expect(
+            gates(mode: .floating, on).inertReason(for: key)
+                == .floatingPlacesNone
+        )
+    }
+
+    /// Each reason's owners are owners the census names for its
+    /// row, and a reason that names them all takes the row's
+    /// census channel (#3123). A row whose owners span two
+    /// destinations takes its channel per reason.
+    @Test("each reason's owners agree with the census")
+    func reasonsAgreeWithTheCensus() {
+        for reason in SpacesGates.InertReason.allCases {
+            let gate = reason.row.placement.gate
+            let declared = Set(gate?.settings ?? [])
+            #expect(
+                Set(reason.owners).isSubset(of: declared),
+                "\(reason) names an owner its row's gate does not"
+            )
+            guard !reason.owners.isEmpty,
+                Set(reason.owners) == declared
+            else { continue }
+            #expect(
+                reason.isRemote
+                    == (GateReasonPlacement.channel(reason.row)
+                        == .remote),
+                "\(reason) disagrees with its row's channel"
+            )
+        }
+        #expect(
+            Set(SpacesGates.InertReason.allCases.map(\.row))
+                .isSubset(of: SpacesGates.resolved)
+        )
+    }
+
     /// Every reason renders a distinct, non-empty sentence: a
     /// collapsed pair would send the reader to the wrong fix.
     @MainActor
