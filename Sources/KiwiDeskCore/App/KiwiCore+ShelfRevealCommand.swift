@@ -68,11 +68,11 @@ extension KiwiCore {
         _ bar: ShelfBar,
         on display: DisplayID
     ) -> RevealRefusal? {
-        let settings = tiler.settings
+        let live = tiler.settings
         let empty =
             bar == .app
-            ? appBarContent(on: display, settings: settings) == nil
-            : spaceBarContent(on: display, style: settings.spaceBarLook)
+            ? appBarContent(on: display, settings: live) == nil
+            : spaceBarContent(on: display, style: live.spaceBarLook)
                 == nil
         return empty ? .nothingToShow(bar) : nil
     }
