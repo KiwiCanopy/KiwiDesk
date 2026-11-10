@@ -246,18 +246,16 @@ struct CrossReferenceRowSlotTests {
                 "\(reason) never places its link"
             )
         }
-        // And a reason that is NOT remote draws none: an inline
-        // grey answers from its own container, so a pointer
-        // there would send the reader away from the switch that
-        // is already beside them.
-        for reason in [
-            SpacesGates.InertReason.noOverrides, .oneMaster,
-            .rigidGrid,
-        ] {
+        // A reason has prose exactly when it is remote: an inline
+        // pointer sends the reader away from the switch beside
+        // them, and prose outside `remote` sends gapsRow down a
+        // branch that draws no reason at all (#3123).
+        for reason in SpacesGates.InertReason.allCases {
             #expect(
-                SpacesGateHelp.crossReference(for: reason) == nil
+                (SpacesGateHelp.crossReference(for: reason) != nil)
+                    == SpacesGateHelp.remote.contains(reason),
+                "\(reason): prose and channel disagree"
             )
-            #expect(!SpacesGateHelp.remote.contains(reason))
         }
     }
 
