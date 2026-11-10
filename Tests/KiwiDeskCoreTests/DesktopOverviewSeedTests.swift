@@ -44,7 +44,7 @@ struct DesktopOverviewSeedTests {
                 existing: [],
                 above: 12,
                 base: .hyper
-            ) == [row]
+            ) == [row] + DefaultKeybindings.rows(ofGeneration: 14)
         )
     }
 
@@ -61,7 +61,7 @@ struct DesktopOverviewSeedTests {
                 existing: [mine],
                 above: 12,
                 base: .standard
-            ).isEmpty
+            ) == DefaultKeybindings.rows(ofGeneration: 14)
         )
     }
 
@@ -78,7 +78,7 @@ struct DesktopOverviewSeedTests {
                 existing: [mine],
                 above: 12,
                 base: .standard
-            ).isEmpty
+            ) == DefaultKeybindings.rows(ofGeneration: 14)
         )
     }
 }

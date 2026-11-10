@@ -316,8 +316,8 @@ extension APIReference {
             .choice("side", KiwiHubSide.self)
         ),
         "show_last_app": APIRecord(
-            "Opens KiwiHub's window switcher on the app of the window "
-                + "used last; while it is up, steps to the next app."
+            "Opens the window switcher on the app used last, or steps "
+                + "it to the next app while it is up."
         ),
         "set_key": APIRecord(
             "Sets a second chord for a KiwiHub navigation key; no "
