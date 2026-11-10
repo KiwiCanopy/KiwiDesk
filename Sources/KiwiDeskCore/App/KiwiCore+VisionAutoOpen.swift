@@ -74,8 +74,8 @@ extension KiwiCore {
     /// switches no Space or Desktop for it, so a window its app rule
     /// files in a hidden Space spends the move and stays there.
     func claimQuietOpen(arrived window: ManagedWindow) -> Bool {
-        guard !eventLoop.switchReads.applying,
-            state.windows[window.id]?.isTransientOverlay == false,
+        guard !eventLoop.switchReads.applying else { return false }
+        guard state.windows[window.id]?.isTransientOverlay == false,
             let owed = launchFollow.claimQuiet(
                 window.appRef.listKey,
                 at: wallClock()

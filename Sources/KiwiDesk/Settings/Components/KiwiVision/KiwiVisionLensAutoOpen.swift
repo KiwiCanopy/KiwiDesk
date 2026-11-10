@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// An Apps-card row's Auto-open switch (#3122): off by default,
+/// An Apps-card row's Auto-open checkbox (#3122, #2439): off by default,
 /// greyed with its reason where Core says it cannot open the app.
 struct KiwiVisionLensAutoOpenToggle: View {
     let lens: VisionLens
@@ -13,13 +13,13 @@ struct KiwiVisionLensAutoOpenToggle: View {
         let name = KeybindingCatalog.displayName(forBundleID: app)
         let hint = KiwiVisionLensAutoOpenWords.hint(name)
         Toggle(
-            KiwiVisionLensAutoOpenWords.label,
+            KiwiVisionLensAutoOpenWords.title,
             isOn: Binding(
                 get: { block == nil && lens.openApps.contains(app) },
                 set: { on in set(on) }
             )
         )
-        .toggleStyle(.switch)
+        .toggleStyle(.checkbox)
         .controlSize(.small)
         .disabled(block != nil)
         .help(block.map(KiwiVisionLensAutoOpenWords.blocked) ?? hint)
@@ -29,11 +29,11 @@ struct KiwiVisionLensAutoOpenToggle: View {
     }
 }
 
-/// The Auto-open switch's words, one home for the drawn and the
+/// The Auto-open checkbox's words, one home for the drawn and the
 /// spoken form.
 @MainActor
 enum KiwiVisionLensAutoOpenWords {
-    static var label: String {
+    static var title: String {
         L("kiwivision.lens.apps.auto_open", "Auto-open")
     }
 

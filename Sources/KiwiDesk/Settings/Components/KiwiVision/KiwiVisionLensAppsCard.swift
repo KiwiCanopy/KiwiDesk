@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A lens's Apps card (#2103 rulings 29, 31, 32, 51): the member
-/// apps, each with its Auto-open switch (#3122) and "All windows"
+/// apps, each with its Auto-open checkbox (#3122) and "All windows"
 /// or "Windows titled…" through the shared title editor, and "Add
 /// an app…" through the one app picker.
 struct KiwiVisionLensAppsCard: View {

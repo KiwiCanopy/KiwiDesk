@@ -8840,7 +8840,7 @@ to be seen, not worked in.
 **[Rationale]**
 
 A lens turning on with none of its apps open left dead keys and a
-nagging pill. The answer is a per-app **Auto-open** switch, off by
+nagging pill. The answer is a per-app **Auto-open** checkbox, off by
 default, rather than a lens that launches its apps unasked: a
 visual mode never starts apps on its own, as Focus modes and Stage
 Manager don't. A lens-wide "open the first app" was rejected,

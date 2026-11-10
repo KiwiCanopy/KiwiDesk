@@ -99,7 +99,7 @@ struct KiwiVisionAutoOpenWiringTests {
         )
     }
 
-    @Test("each Apps row draws the switch and removes through Core")
+    @Test("each Apps row draws the checkbox and removes through Core")
     func appsRowWiring() throws {
         let card = try Self.flat(
             "Sources/KiwiDesk/Settings/Components/KiwiVision/"
@@ -121,7 +121,7 @@ struct KiwiVisionAutoOpenWiringTests {
         for needle in [
             "letblock=lens.autoOpenBlock(app)",
             ".disabled(block!=nil)",
-            ".toggleStyle(.switch)",
+            ".toggleStyle(.checkbox)",
             ".controlSize(.small)",
             ".accessibilityHint(",
         ] {
@@ -143,7 +143,7 @@ struct KiwiVisionAutoOpenWiringTests {
         )
     }
 
-    @Test("a greyed switch gives its reason")
+    @Test("a greyed checkbox gives its reason")
     @MainActor
     func greyedReasons() {
         LocalizationManager.shared.select("en")

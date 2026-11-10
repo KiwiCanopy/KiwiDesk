@@ -42,6 +42,11 @@ struct SwitchReconcileSeamTests {
             "guard !eventLoop.switchReads.applying,",
             "KiwiCore+LaunchFollow.swift", 1
         ),
+        // Nor the quiet open's one focus move (#3122).
+        (
+            "guard !eventLoop.switchReads.applying else { return false }",
+            "KiwiCore+VisionAutoOpen.swift", 1
+        ),
         // A per-app read the batch awaits is held for the fold.
         (
             "if switchReads.holdsApply(pid) {",
