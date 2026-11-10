@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// One-time UserDefaults gate for the shortcuts discovery page (#331).
 /// Persisted separately from AX trust so revoke/re-grant does not repeat it.
@@ -7,7 +8,7 @@ enum OnboardingDiscovery {
 
     /// Whether the discovery beat has already been shown.
     static func hasShown(
-        _ defaults: UserDefaults = .standard
+        _ defaults: UserDefaults = AppDefaults.store
     ) -> Bool {
         defaults.bool(forKey: key)
     }
@@ -16,14 +17,14 @@ enum OnboardingDiscovery {
     /// granted but the first-run window closed before this page.
     static func shouldResume(
         isTrusted: Bool,
-        _ defaults: UserDefaults = .standard
+        _ defaults: UserDefaults = AppDefaults.store
     ) -> Bool {
         isTrusted && !hasShown(defaults)
     }
 
     /// Records that the beat ran, so it never repeats.
     static func markShown(
-        _ defaults: UserDefaults = .standard
+        _ defaults: UserDefaults = AppDefaults.store
     ) {
         defaults.set(true, forKey: key)
     }

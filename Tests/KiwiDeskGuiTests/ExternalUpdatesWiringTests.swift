@@ -60,7 +60,7 @@ struct ExternalUpdatesWiringTests {
             "case.managed(letmanager):returnManagedUpdater("
                 + "manager:manager,host:main,record:WhatsNewRecord())",
             "case.sparkle:returnSparkleUpdater()",
-            "ExternalUpdates.current(defaults:.standard,"
+            "ExternalUpdates.current(defaults:AppDefaults.store,"
                 + "bundlePath:main.bundlePath)",
         ] {
             #expect(source.contains(arm), Comment(rawValue: arm))

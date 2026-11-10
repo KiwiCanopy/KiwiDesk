@@ -7750,8 +7750,9 @@ the leader's modifiers still held, `w` does not fire, and
 and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
-and is flagged. The CLI can neither bind nor remove a sequence. In
-Settings, Shortcuts & Gestures ▸ Key sequences records one.
+and is flagged. The CLI cannot bind a sequence;
+`shortcut.remove_sequence` removes one. In Settings, Shortcuts &
+Gestures ▸ Key sequences records one.
 Under Secure Input see
 [Accepted Limitations](accepted-limitations.md).
 
@@ -7860,12 +7861,33 @@ chord, is refused; remove the old binding first.
 **Does:** unbinds it, from every profile holding it when it is a
 shared shortcut. A chord with no shortcut is refused.
 
+:::unreleased
+A chord that opens a key sequence is refused: remove it with
+`shortcut.remove_sequence`.
+:::
+
 **Example:**
 
 ```lua
 shortcut.set("ctrl+alt+h", "focus", "left")
 shortcut.remove("ctrl+alt+h")
 ```
+
+:::unreleased
+#### shortcut.remove_sequence
+
+**Expects:** the chord that opens a key sequence.
+
+**Does:** removes that sequence from the default layer, with every
+key under it, from every profile holding it when it is shared, and
+saves at once. A chord that opens no sequence is refused.
+
+**Example:**
+
+```lua
+shortcut.remove_sequence("ctrl+alt+space")
+```
+:::
 
 #### shortcut.list_groups
 

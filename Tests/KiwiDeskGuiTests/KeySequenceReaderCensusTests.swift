@@ -51,17 +51,17 @@ struct KeySequenceReaderCensusTests {
             ),
         "KiwiDeskCore/Config/NavigationChords.swift":
             (2, "the dedupe: it groups navigation rows alone"),
-        "KiwiDeskCore/Config/RuleReach+KeyBase.swift":
+        "KiwiDeskCore/Config/RuleReach+KeySequences.swift":
             (
                 3,
-                "the loaded page's base keeps the profile's own sequences"
-                    + " out by leader (KeySequenceCardSaveTests)"
+                "the key table names a sequence by its leader and"
+                    + " writes its tree whole (RuleReachSequenceKeyTests)"
             ),
         "KiwiDeskCore/Config/RuleReach+Keys.swift":
             (
-                7,
-                "key reach keys rows by Lua, so a sequence rides the"
-                    + " resolve whole, and sameShortcuts reads its tree"
+                4,
+                "key reach keys a row by Lua, a sequence by its leader"
+                    + " (keyedRows), and sameShortcuts reads its tree"
                     + " (KeySequenceReaderTests ▸ shapeSeesSteps)"
             ),
         "KiwiDeskCore/Config/ShortcutBaseSwitch.swift":

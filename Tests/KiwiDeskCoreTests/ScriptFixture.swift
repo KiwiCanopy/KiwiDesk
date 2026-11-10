@@ -106,6 +106,8 @@ func spawn(
     var childEnvironment =
         environment ?? ProcessInfo.processInfo.environment
     childEnvironment["TMPDIR"] = testTemporaryDirectory.path + "/"
+    // A developer's exported test desk never reaches a child (#3121).
+    childEnvironment["KIWIDESK_HOME"] = nil
     process.environment = childEnvironment
     if let currentDirectory {
         process.currentDirectoryURL = currentDirectory

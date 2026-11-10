@@ -6,8 +6,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// What the Key sequences card writes reaches the files (#1871): a
-/// sequence has no Lua, so the key table never names it, and it
-/// rides the layer's rows whole.
+/// sequence rides the key table whole, keyed by its leader (#3124).
 @Suite("Key sequence card save (#1871)", .serialized)
 @MainActor
 struct KeySequenceCardSaveTests {
@@ -51,28 +50,6 @@ struct KeySequenceCardSaveTests {
 
     private func stored(_ model: SettingsModel) -> [KeyBinding] {
         model.core.guiConfigStore.load()?.layers.first?.sequences ?? []
-    }
-
-    @Test("the card blocks a stored page and a profile's own copy")
-    func editBlocks() throws {
-        let model = try makeModel()
-        #expect(model.sequenceEditBlock(in: KeyLayer.defaultName) == nil)
-        var work = try model.core.profiles.read(name: "Work")
-        work.layers = KeyLayerOverride(
-            layers: [
-                KeyLayer(name: KeyLayer.defaultName, bindings: [sequence()])
-            ]
-        )
-        try model.core.profiles.write(work)
-        model.reload()
-        #expect(
-            model.sequenceEditBlock(in: KeyLayer.defaultName)
-                == .profileOwnsSequences
-        )
-        model.selectEditTarget("Home")
-        #expect(
-            model.sequenceEditBlock(in: KeyLayer.defaultName) == .storedPage
-        )
     }
 
     @Test("a profile's own sequence stays out of the shared rows")

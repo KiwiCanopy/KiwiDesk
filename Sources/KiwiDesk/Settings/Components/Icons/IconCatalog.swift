@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// Curated glyph and search tag pair for icon picker (#68 §6.4).
 struct IconChoice: Identifiable, Hashable {
@@ -238,7 +239,7 @@ enum IconCatalog {
     private static let recentsLimit = 8
 
     static func recents() -> [String] {
-        UserDefaults.standard.stringArray(
+        AppDefaults.store.stringArray(
             forKey: recentsKey
         ) ?? []
     }
@@ -247,7 +248,7 @@ enum IconCatalog {
         guard !glyph.isEmpty else { return }
         var list = recents().filter { $0 != glyph }
         list.insert(glyph, at: 0)
-        UserDefaults.standard.set(
+        AppDefaults.store.set(
             Array(list.prefix(recentsLimit)),
             forKey: recentsKey
         )

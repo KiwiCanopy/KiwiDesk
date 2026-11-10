@@ -224,14 +224,23 @@ enum AppUpdaterFactory {
         return manager.map { .managed(by: $0) } ?? .sparkle
     }
 
+    /// Whether `main` is a bundle with a feed to update from; a
+    /// test desk never updates the bundle under it (#3121).
+    static func isBundled(
+        _ main: Bundle,
+        testDesk: Bool = TestDesk.isActive
+    ) -> Bool {
+        !testDesk
+            && main.bundleIdentifier != nil
+            && main.object(forInfoDictionaryKey: "SUFeedURL") != nil
+    }
+
     /// Builds the updater `choice` picks for the running copy.
     static func make() -> any AppUpdating {
         let main = Bundle.main
-        let bundled =
-            main.bundleIdentifier != nil
-            && main.object(forInfoDictionaryKey: "SUFeedURL") != nil
+        let bundled = isBundled(main)
         let manager = ExternalUpdates.current(
-            defaults: .standard,
+            defaults: AppDefaults.store,
             bundlePath: main.bundlePath
         )
         switch choice(bundled: bundled, manager: manager) {

@@ -6,7 +6,7 @@ import Foundation
 /// answers exactly what `RuleReachTable.rival` answers
 /// (`KeyRivalsTests`).
 public struct KeyRivals: Equatable, Sendable {
-    /// Layer → profile → combo → keys, in `rivals(of:)` order.
+    /// Layer → profile → chord → keys, in `rivals(of:)` order.
     private let keys: [String: [String: [String: [String]]]]
 
     public init(_ table: RuleReachTable<String>) {
@@ -14,8 +14,13 @@ public struct KeyRivals: Equatable, Sendable {
         for key in table.keyIDs {
             let layer = RuleReachTable<String>.keyParts(key).layer
             for profile in table.profiles {
-                guard let combo = table.resolved(key, for: profile)
+                guard let value = table.resolved(key, for: profile)
                 else { continue }
+                // A sequence files under its leader (#3124).
+                let combo = RuleReachTable<String>.chord(
+                    of: key,
+                    value: value
+                )
                 keys[layer, default: [:]][profile, default: [:]][
                     combo,
                     default: []

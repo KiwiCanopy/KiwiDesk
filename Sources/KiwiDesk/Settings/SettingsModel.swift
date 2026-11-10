@@ -325,7 +325,7 @@ final class SettingsModel: ObservableObject {
     /// Injected preferences seam allowing scratch domain in tests.
     init(
         core: KiwiCore,
-        preferences: UserDefaults = .standard
+        preferences: UserDefaults = AppDefaults.store
     ) {
         self.core = core
         self.config = GuiConfig()
