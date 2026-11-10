@@ -8,9 +8,11 @@ import Testing
 /// A float is never resized to fit, and only a TOP bar moves one
 /// (#3163, owner ruling 2026-11-10). The push clear of a top strip
 /// is `FloatingModeBarClampTests`'; this suite holds the other
-/// half: a bottom bar moves no float on the sweep, the drop or the
-/// unsolicited-resize arm, and a drop under a top bar keeps its
-/// size.
+/// half: a bottom or side bar moves no float on the sweep, the
+/// drop or the unsolicited-resize arm's verdict (`floatBarPush`),
+/// a top bar pushes one at its own size, and the sweep judges the
+/// frame the window would show. The traveler re-home's push is
+/// `TravelerRehomeConsumerTests`'.
 @Suite("Floats never resized (#3163)", .serialized)
 @MainActor
 struct FloatNeverResizedTests {
@@ -98,6 +100,93 @@ struct FloatNeverResizedTests {
 
         #expect(core.tiler.recentInstantTarget(Self.window) == nil)
         #expect(core.floatBarPush(Self.window, frame: frame) == nil)
+    }
+
+    @Test(
+        "The sweep pushes a float under a top bar, at its size",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func sweepPushesATopOverlap() throws {
+        // The positive control for the sweep's absences below: the
+        // same fixture, a top strip, and the verdict's guards pass.
+        let screen = try #require(NSScreen.screens.first)
+        let frame = CGRect(
+            x: screen.frame.minX + 100,
+            y: screen.frame.minY,
+            width: 600,
+            height: 400
+        )
+        let core = try #require(
+            makeBarredCore(edge: .top, frame: frame)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let strip = try reservedStrip(core, edge: .top)
+
+        core.clampFloatsClearOfBars()
+
+        let commanded = try #require(
+            core.tiler.recentInstantTarget(Self.window)
+        )
+        #expect(commanded.minY >= strip.maxY)
+        #expect(commanded.size == frame.size)
+    }
+
+    @Test(
+        "The sweep judges a frame sent and not yet echoed",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func sweepJudgesTheSentFrame() throws {
+        // The state frame is under the top strip, the frame just sent
+        // is clear of it: a push of the stale one would land after
+        // the delivery and undo it (#3157).
+        let screen = try #require(NSScreen.screens.first)
+        let under = CGRect(
+            x: screen.frame.minX + 100,
+            y: screen.frame.minY,
+            width: 600,
+            height: 400
+        )
+        let core = try #require(
+            makeBarredCore(edge: .top, frame: under)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let strip = try reservedStrip(core, edge: .top)
+        let sent = under.offsetBy(dx: 200, dy: strip.maxY + 200)
+        core.tiler.applyFrame(
+            Self.window,
+            from: under,
+            to: sent,
+            animated: false
+        )
+        #expect(core.tiler.recentInstantTarget(Self.window) == sent)
+
+        core.clampFloatsClearOfBars()
+
+        #expect(core.tiler.recentInstantTarget(Self.window) == sent)
+    }
+
+    @Test(
+        "The sweep moves no float under a side bar",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func sweepLeavesASideOverlap() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let frame = CGRect(
+            x: screen.frame.minX,
+            y: screen.frame.minY + 300,
+            width: 600,
+            height: 400
+        )
+        let core = try #require(
+            makeBarredCore(edge: .left, frame: frame)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let strip = try reservedStrip(core, edge: .left)
+        #expect(frame.minX < strip.maxX)
+
+        core.clampFloatsClearOfBars()
+
+        #expect(core.tiler.recentInstantTarget(Self.window) == nil)
     }
 
     @Test(

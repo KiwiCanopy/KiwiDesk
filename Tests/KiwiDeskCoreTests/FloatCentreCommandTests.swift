@@ -119,40 +119,6 @@ struct FloatCentreCommandTests {
         #expect(core.tiler.recentInstantTarget(one)?.midX == screen.midX)
     }
 
-    @Test("a bar's push leaves a near edge where the region has it")
-    func nearEdgeKept() {
-        let region = CGRect(x: 0, y: 40, width: 800, height: 500)
-        let frame = CGRect(x: 0, y: 40, width: 400, height: 900)
-        let pushed = frame.offsetBy(dx: 0, dy: -400)
-        #expect(
-            FloatMove.keepingNearEdges(pushed, of: frame, in: region)
-                == frame
-        )
-        // A window parked past the edge by hand may stay past it.
-        let parked = frame.offsetBy(dx: 0, dy: -100)
-        #expect(
-            FloatMove.keepingNearEdges(
-                parked.offsetBy(dx: 0, dy: -50),
-                of: parked,
-                in: region
-            ) == parked
-        )
-        // The left edge the same, on a right bar's push.
-        let wide = CGRect(x: 0, y: 40, width: 1200, height: 100)
-        #expect(
-            FloatMove.keepingNearEdges(
-                wide.offsetBy(dx: -400, dy: 0),
-                of: wide,
-                in: region
-            ) == wide
-        )
-        // A push down, off a top bar, is the clamp's to make.
-        let down = frame.offsetBy(dx: 0, dy: 20)
-        #expect(
-            FloatMove.keepingNearEdges(down, of: frame, in: region) == down
-        )
-    }
-
     @Test("a tiled focus refuses with a pill and is not floated")
     func tiledRefuses() {
         var cues: [ResizeRefusal] = []

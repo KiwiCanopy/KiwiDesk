@@ -53,20 +53,16 @@ extension KiwiCore {
         )
     }
 
-    /// `frame` clear of the bars of the Space `target` renders on,
-    /// with no bar's push taking its top or left edge out of reach.
+    /// `frame` pushed clear of a top bar of the Space `target`
+    /// renders on.
     func floatMoveFrame(
         _ frame: CGRect,
         for target: FloatMoveTarget
     ) -> CGRect {
-        FloatMove.keepingNearEdges(
-            floatFrameClampedClearOfBars(
-                target.id,
-                frame: frame,
-                space: target.space
-            ),
-            of: frame,
-            in: target.region
+        floatFrameClampedClearOfBars(
+            target.id,
+            frame: frame,
+            space: target.space
         )
     }
 

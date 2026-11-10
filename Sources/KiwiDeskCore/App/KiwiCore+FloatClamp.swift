@@ -33,10 +33,9 @@ extension KiwiCore {
         // edge the deeper one's push subsumes the other's.
         for (strip, edge) in reservedStrips(forSpace: space)
         where edge == .top {
-            result = AppBarGeometry.clampClear(
+            result = AppBarGeometry.pushedBelow(
                 result,
-                of: strip,
-                edge: edge,
+                strip: strip,
                 inset: inset
             )
         }

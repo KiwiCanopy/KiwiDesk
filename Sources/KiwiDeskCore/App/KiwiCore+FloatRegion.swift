@@ -40,21 +40,18 @@ extension KiwiCore {
         ).rounded(.up)
     }
 
-    /// **The one derivation of the region**, and the CORRECTNESS
-    /// bound: a float larger than this has part of itself under
-    /// a bar, which is unreachable. The float verbs and the
-    /// gather bound against it; no sweep fits a float into it
-    /// (#3163).
+    /// **The one derivation of the region**: the bound the float
+    /// verbs and the gather act within. No sweep fits a float into
+    /// it (#3163).
     ///
     /// It reserves nothing for the focus ring — at a bar edge
     /// as much as at a screen edge. `floatGrowBounds` below
     /// reserves exactly one reach on every edge of it, and the
     /// two are a genuine pair of questions
     /// rather than one rect wearing two meanings (device QA,
-    /// 2026-08-29): "is this window unusably large" and "how far
-    /// may a deliberate grow take it" have different answers,
-    /// because a clipped ring is a blemish and a window under a
-    /// bar is not usable.
+    /// 2026-08-29): "where may a verb take this window" and "how
+    /// far may a deliberate grow take it" have different answers,
+    /// because a clipped ring is a blemish.
     ///
     /// Each consumer states its own scope. The resize takes
     /// `floatGrowBounds`, because pinning is a question about

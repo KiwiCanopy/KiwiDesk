@@ -6077,7 +6077,10 @@ taller than the room below the bar keeps its height and runs off
 the screen's bottom: the title bar is what has to be reachable, and
 the rest is reachable by moving it. The push reads only the
 reserved, painted strips, so a bar on a second screen, or one
-revealed later, counts once it draws.
+revealed later, counts once it draws. It judges the frame the
+window would show, never a stale state frame: a Maximize's fill
+echo sits under the top strip, and a push of it still overwrites
+the return (#3157), so that base outlives the fit.
 
 What it retires, and why each part goes:
 
@@ -6097,7 +6100,11 @@ What it retires, and why each part goes:
 Not affected, since each is an act the user starts rather than a
 sweep: `make_floating`'s derived size (#1674), the floating gather,
 and the float verbs (`resize`, `move_floating`, `center_floating`),
-which still stop at `floatBounds`.
+which still stop at `floatBounds`. A verb stopping at a bar limits
+a step the user asked for; it moves no float the user placed. The
+stranded-float recovery (#1352) is a net, so it re-centres a float
+at its own size, its top-left edge kept in the region so the title
+bar stays in reach.
 
 The cost accepted: a float can sit with its bottom under a bottom
 bar or off the screen, and a float its own app grew past the room

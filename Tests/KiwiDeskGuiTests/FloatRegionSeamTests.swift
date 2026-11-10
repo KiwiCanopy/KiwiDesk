@@ -50,6 +50,9 @@ struct FloatRegionSeamTests {
             "floatFrameFittedClearOfBars",
             "floatFrameFittedOnDrop",
             "shouldIssueFloatFit",
+            "floatFitCorrection",
+            "floorWinsExtent",
+            "bottomFit(",
         ]
         var hits: [String: [String]] = [:]
         let files = try SourceScan.swiftSources(under: core)

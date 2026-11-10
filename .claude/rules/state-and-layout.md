@@ -263,8 +263,8 @@ editing here:
   writes the same way (#3007, `FloatCentreCommandTests`). A verb moving
   a float at its own size resolves it through `floatMoveFocus` and
   clamps through `floatMoveFrame`, never the raw clamp, which reads a
-  traveler's home and can carry a top edge out of reach
-  (`FloatCentreRenderSpaceTests`); one stepping by a delta also takes
+  traveler's home (`FloatCentreRenderSpaceTests`); one stepping by a
+  delta also takes
   `FloatMove.holdingTheAsk` against that clamp's push
   (`FloatNudgeRenderSpaceTests`).
 - The **create fold's spawn grant** — the focus a fresh window
@@ -1860,7 +1860,7 @@ editing here:
   `SplitOverflow.placed` on the issued frames, #934). Every
   SIZING reader — a run planning its members along its axis
   (`LayoutContext.plannedFloor`), a resize clamp, the split and
-  track floor heals, the float fits (`plannedMinSize`) — reads a
+  track floor heals, the float resize (`plannedMinSize`) — reads a
   window no smaller than its least refusal: the least answer
   among its entries that answered more than `refusalMargin` above
   their ask (`EffectiveSizeBound.refusedFloor`), stood down on a
@@ -2864,7 +2864,8 @@ editing here:
   frame it is leaving: a pending capture, corrected WITH the
   window, or a frame sent and not yet echoed (#3157), since a
   push of the stale frame lands after the delivery and undoes it
-  (`FloatClampPendingCaptureTests`, `FloatRegionSeamTests`). A
+  (`FloatClampPendingCaptureTests`, `FloatNeverResizedTests` ▸
+  `sweepJudgesTheSentFrame`). A
   NEW writer of the seed states what it seeds, why it is no
   corner and where in the pass it lands, and joins
   `StashSeederCensusTests`' map, which reds an unclassified
@@ -3066,15 +3067,17 @@ editing here:
   ordering rule.
   Three obligations fall out. **Never resize a float to fit, and
   move one only off a TOP bar** (#3163, owner ruling 2026-11-10):
-  the one correction a sweep, a drop, a re-home or the
-  unsolicited-resize arm makes is `floatFrameClampedClearOfBars`'
-  push down clear of a reserved, painted top strip, at the
-  window's own size, its bottom free to run off the screen; a
-  bottom or side bar moves no float. The region bounds what a
-  float VERB does (`resize`, `move_floating`, `make_floating`'s
-  derived size, the gather), never a float the user placed
-  (`FloatNeverResizedTests`, `FloatingModeBarClampTests`,
-  `FloatRegionSeamTests` ▸ `noFloatFitInCore`). The argument is
+  a path that corrects a placed float's frame — a net, a drop, a
+  re-home — does so only through `floatFrameClampedClearOfBars`
+  (its verdict `floatBarPush`), which pushes down clear of a
+  reserved, painted top strip at the window's own size, and never
+  writes the size or answers another edge; a new correcting door
+  takes that push. The region bounds what a float VERB does
+  (`resize`, `move_floating`, `make_floating`'s derived size, the
+  gather), never a float the user placed (`FloatNeverResizedTests`,
+  `FloatingModeBarClampTests`). `FloatRegionSeamTests` ▸
+  `noFloatFitInCore` bans only the retired names, so a new fit
+  spelled otherwise is review's. The argument is
   `docs/design-decisions.md` ▸ *A float is never resized to fit*.
   **A float's aspect lock is
   judged apart from `SizeBoundLearner` (#2973)**, through the one
