@@ -67,11 +67,13 @@ struct VisionLensAutoOpenCodingTests {
     @Test("a titled member and a process-name member cannot open")
     func blocks() {
         var lens = VisionLens(name: "W")
-        lens.apps = ["com.a.one", "com.b.two", "my tool"]
+        lens.apps = ["com.a.one", "com.b.two", "my tool", "my.tool app"]
         lens.titles = ["com.b.two": []]
         #expect(lens.autoOpenBlock("com.a.one") == nil)
         #expect(lens.autoOpenBlock("com.b.two") == .titled)
         #expect(lens.autoOpenBlock("my tool") == .noBundleID)
         #expect(lens.autoOpenBlock("mytool") == .noBundleID)
+        // Dotted, so only the whitespace clause blocks it.
+        #expect(lens.autoOpenBlock("my.tool app") == .noBundleID)
     }
 }

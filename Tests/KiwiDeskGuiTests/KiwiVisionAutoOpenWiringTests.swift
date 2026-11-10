@@ -53,6 +53,8 @@ struct KiwiVisionAutoOpenWiringTests {
             "config.activates=mode!=.background",
             "Commands/KiwiCore+LaunchRestore.swift", 1
         ),
+        // And nothing overrides it after: the last write wins.
+        ("config.activates=", "Commands/KiwiCore+LaunchRestore.swift", 1),
     ]
 
     @Test("Core's wirings sit where they are owed")
