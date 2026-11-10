@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Shortcuts ▸ Built-in ▸ Default shortcuts (#3074, #3179): the row
-/// sits under the Layers card, right above the groups it rewrites,
-/// is always drawn, and greys Restore with the reason its caption
-/// names.
+/// Shortcuts ▸ Built-in ▸ Default shortcuts (#3074, #3178, #3179):
+/// the row sits under the Layers card, right above the groups it
+/// rewrites, is always drawn, greys Restore with the reason its
+/// caption names, and keeps what Restore does in its `?`.
 @Suite("Default shortcuts row")
 struct DefaultShortcutsRowTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -130,7 +130,7 @@ struct DefaultShortcutsRowTests {
         #expect(
             button.contains(
                 "GreyOut(active: reason != nil, "
-                    + "help: caption(reason))"
+                    + "help: caption(reason) ?? \"\")"
             )
         )
         // GreyOut is the button's one dim: nothing else hides it.
@@ -139,5 +139,39 @@ struct DefaultShortcutsRowTests {
         }
         // The row's caption names the reason the button greys for.
         #expect(squashed.contains("caption:caption(reason),"))
+    }
+
+    /// While Restore acts the row carries no caption, so it stays one
+    /// line at every band; what Restore does is the `?` (#3178).
+    @Test("the explanation is the ?, the caption a live state")
+    func explanationInTheHelp() throws {
+        let row = try Self.source(
+            "Sources/KiwiDesk/Settings/Sections/DefaultShortcutsRow.swift"
+        ).filter { !$0.isWhitespace }
+        let caption = try #require(
+            SourceScan.declarationBody(
+                after: "privatefunccaption(",
+                in: row
+            )
+        )
+        #expect(caption.contains("casenil:returnnil"))
+        #expect(!caption.contains("shortcuts.restore_defaults.help"))
+        #expect(
+            row.contains(
+                "privatevarrestoreExplain:String{"
+                    + "restoresWhat+\"\\n\\n\"+restoreAsks}"
+            )
+        )
+        #expect(row.contains("help:restoreExplain,"))
+        let action = try Self.source(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "SettingsActionRow.swift"
+        ).filter { !$0.isWhitespace }
+        #expect(action.contains("staysInline:caption==nil"))
+        let shape = try Self.source(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "SettingsRowShape.swift"
+        ).filter { !$0.isWhitespace }
+        #expect(shape.contains("letstacked=width.stacksRows&&!staysInline"))
     }
 }
