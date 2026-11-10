@@ -10,6 +10,8 @@ paths:
   - "scripts/update-homebrew-cask.py"
   - "scripts/update-nix-source.py"
   - "scripts/pre-commit"
+  - "scripts/gate-lock"
+  - "scripts/prune-builds"
   - "Package.swift"
   - ".github/workflows/**"
   - "plugins/**"
@@ -712,6 +714,37 @@ after deleting `.build` — it matches neither candidate and calls
 to defaults. Verifying that the files are *present* in the bundle
 proves nothing about this; only launching a copy with `.build`
 moved aside does.
+
+## Pruning build output (#3186)
+
+**A script that deletes build output calls `scripts/prune-builds`;
+it never re-derives the predicate.** Every worktree keeps a
+SwiftPM `.build` of several GB, and 61 idle ones filled the disk
+on 2026-11-10. The script owns the four clauses that make a
+deletion safe — it holds `kiwidesk-gate.lock` for the whole
+sweep, one `lsof -a -d cwd,txt` pass rules out a tree a process
+uses, the caller's own tree is skipped, and the build markers
+must be idle for 12 hours — and its header states them. A second
+copy that dropped one would delete a `.build` under a running
+compile or a launched binary. It deletes only `.build`,
+`site/node_modules` and `site/.astro`, never a worktree or a
+branch, and only reports DerivedData.
+
+**The idle clause reads `.build`'s children, never the yaml files
+alone.** The ruling named `.build/*.yaml` and `build.db`; Swift
+Build writes neither in a lane tree (measured 2026-11-10: only
+`CACHEDIR.TAG`, `manifest.pif`, `workspace-state.json` and the
+product folders move), so those markers alone call every lane
+unbuilt. The children's newest mtime is a superset, so it never
+calls a tree idler than the ruling's list would.
+
+**`scripts/gate-lock` prunes from inside its lock, before the
+`exec`, when the volume has under 40 GB free** — `--apply
+--gate-held`, under a 180 s alarm and `|| true`, so a prune can
+neither fail nor hang a gate. The nested `KIWIDESK_GATE_LOCK_HELD`
+path skips it. `ExecTestsPruneBuilds` runs both scripts on
+fixture worktrees with their own lock: gate held, a process cwd
+inside, own tree, a recent build, and the trigger's three paths.
 
 ## Git hooks
 

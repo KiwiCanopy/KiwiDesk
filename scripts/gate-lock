@@ -20,7 +20,10 @@ fi
 
 # The per-user temp dir, not $TMPDIR: a sandboxed session may
 # remap $TMPDIR, and every session must meet at one file.
-DIR="$(getconf DARWIN_USER_TEMP_DIR 2>/dev/null || echo /tmp/)"
+# KIWIDESK_GATE_DIR points the tests at a lock of their own.
+DIR="${KIWIDESK_GATE_DIR:-$(getconf DARWIN_USER_TEMP_DIR \
+    2>/dev/null || echo /tmp/)}"
+DIR="${DIR%/}/"
 LOCK="${DIR}kiwidesk-gate.lock"
 HOLDER="${DIR}kiwidesk-gate.holder"
 WAIT="${KIWIDESK_GATE_WAIT:-1800}"
@@ -30,10 +33,20 @@ if ! /usr/bin/lockf -k -s -t 0 "$LOCK" true; then
         echo unknown holder)); waiting up to ${WAIT}s" >&2
 fi
 
+# Low disk: clear idle worktrees' build output inside the lock
+# (#3186). Never fails or stalls the gate: own timeout, || true.
+export KIWIDESK_GATE_PRUNE
+KIWIDESK_GATE_PRUNE="$(cd "$(dirname "$0")" && pwd)/prune-builds"
+export KIWIDESK_GATE_PRUNE_BELOW_GB="${KIWIDESK_GATE_PRUNE_BELOW_GB:-40}"
+
 export KIWIDESK_GATE_LOCK_HELD=1
 export KIWIDESK_GATE_HOLDER="$PWD pid $$ since $(date +%T)"
 /usr/bin/lockf -k -t "$WAIT" "$LOCK" /bin/sh -c \
     'printf "%s\n" "$KIWIDESK_GATE_HOLDER" > "$0"
+     /usr/bin/perl -e "alarm shift; exec @ARGV" 180 \
+         "$KIWIDESK_GATE_PRUNE" --apply --gate-held \
+         --if-below-gb "$KIWIDESK_GATE_PRUNE_BELOW_GB" \
+         < /dev/null > /dev/null || true
      exec /usr/bin/nice -n 10 "$@"' "$HOLDER" "$@"
 STATUS=$?
 if [ "$STATUS" -eq 75 ]; then

@@ -1,0 +1,157 @@
+#!/bin/bash
+# Clear regenerable build output in worktrees nothing is using
+# (#3186). Dry run by default; --apply deletes.
+# Usage: scripts/prune-builds [--apply] [--idle-hours N]
+#        [--if-below-gb N]
+#
+# Sweeps every `git worktree list` entry. Deletes only .build,
+# site/node_modules and site/.astro, and only in a tree passing
+# every clause below; DerivedData is reported, never touched. Never
+# removes a worktree or a branch. packaging-and-release.md owns
+# the predicate: anything else that deletes build output calls
+# this script rather than re-deriving it.
+#
+#   1. The gate is free: kiwidesk-gate.lock is taken with
+#      `lockf -t 0` and held for the whole sweep. --gate-held says
+#      the caller holds it: gate-lock, or this script's re-run.
+#   2. No process has its cwd or executable inside the tree: one
+#      `lsof -a -d cwd,txt -Fn` pass, prefix-matched on the real
+#      path. Never `lsof +D`, which walks every file.
+#   3. Not the caller's own tree.
+#   4. Idle >= N hours (default 12) by the newest build marker:
+#      .build's children and `.build/*/debug.yaml` (Swift Build
+#      writes no top-level yaml), never .build's own mtime.
+#
+# --if-below-gb N exits at once unless the volume has under N GB
+# free (gate-lock's trigger). Exit 75: --apply found the gate busy.
+set -uo pipefail
+
+ARGS=("$@")
+APPLY=0 IDLE_HOURS=12 BELOW_GB="" GATE_HELD=0
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --apply) APPLY=1 ;;
+        --gate-held) GATE_HELD=1 ;;
+        --idle-hours) IDLE_HOURS="${2:?}"; shift ;;
+        --if-below-gb) BELOW_GB="${2:?}"; shift ;;
+        *) echo "usage: scripts/prune-builds [--apply]" \
+            "[--idle-hours N] [--if-below-gb N]" >&2; exit 64 ;;
+    esac
+    shift
+done
+
+free_kb() { df -k "$PWD" | awk 'NR == 2 { print $4 }'; }
+gb() { awk -v k="$1" 'BEGIN { printf "%.1f", k / 1048576 }'; }
+
+BEFORE_KB="$(free_kb)"
+if [ -n "$BELOW_GB" ] &&
+    [ "${BEFORE_KB:-0}" -ge $((BELOW_GB * 1048576)) ]; then
+    exit 0
+fi
+
+# The file gate-lock takes; KIWIDESK_GATE_DIR points tests at theirs.
+DIR="${KIWIDESK_GATE_DIR:-$(getconf DARWIN_USER_TEMP_DIR \
+    2>/dev/null || echo /tmp/)}"
+LOCK="${DIR%/}/kiwidesk-gate.lock"
+
+if [ "$GATE_HELD" = 0 ]; then
+    /usr/bin/lockf -k -t 0 "$LOCK" \
+        "$0" ${ARGS[@]+"${ARGS[@]}"} --gate-held
+    STATUS=$?
+    [ "$STATUS" -ne 75 ] && exit "$STATUS"
+    if [ "$APPLY" = 1 ]; then
+        echo "prune-builds: gate busy; nothing pruned" >&2
+        exit 75
+    fi
+    echo "prune-builds: gate busy; listing only" >&2
+fi
+
+OWN="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "prune-builds: not inside a git worktree" >&2
+    exit 1
+}
+OWN="$(cd "$OWN" && pwd -P)"
+TREES="$(git worktree list --porcelain | sed -n 's/^worktree //p')"
+
+# Clause 2's one pass. Our own shell is always in it, so an empty
+# answer means lsof failed, and nothing is provably unused.
+USED="$(/usr/sbin/lsof -a -d cwd,txt -Fn 2>/dev/null |
+    sed -n 's/^n//p')"
+if [ -z "$USED" ]; then
+    echo "prune-builds: lsof listed no process; refusing" >&2
+    exit 1
+fi
+
+# A here-string, never a pipe: awk exits at the first match, and
+# under pipefail the writer's SIGPIPE would read as "unused".
+in_use() {
+    awk -v r="$1" '
+        $0 == r || index($0, r "/") == 1 { found = 1; exit }
+        END { exit !found }' <<< "$USED"
+}
+
+newest_marker() {
+    local newest=0 m f
+    for f in "$1"/.build/* "$1"/.build/.[!.]* \
+        "$1"/.build/*/debug.yaml \
+        "$1"/site/node_modules/.package-lock.json "$1"/site/.astro
+    do
+        [ -e "$f" ] || [ -L "$f" ] || continue
+        m="$(stat -f %m "$f")"
+        [ "$m" -gt "$newest" ] && newest="$m"
+    done
+    echo "$newest"
+}
+
+NOW="$(date +%s)"
+COUNT=0
+while IFS= read -r TREE; do
+    [ -d "$TREE" ] || continue
+    REAL="$(cd "$TREE" && pwd -P)"
+    TARGETS=()
+    for d in .build site/node_modules site/.astro; do
+        if [ -e "$REAL/$d" ] || [ -L "$REAL/$d" ]; then
+            TARGETS+=("$d")
+        fi
+    done
+    [ "${#TARGETS[@]}" -eq 0 ] && continue
+    if [ "$REAL" = "$OWN" ]; then
+        echo "keep  $REAL (own tree)"; continue
+    fi
+    if in_use "$REAL"; then
+        echo "keep  $REAL (a process uses it)"; continue
+    fi
+    NEWEST="$(newest_marker "$REAL")"
+    if [ "$NEWEST" = 0 ]; then
+        echo "keep  $REAL (no build marker)"; continue
+    fi
+    IDLE=$(((NOW - NEWEST) / 3600))
+    if [ "$IDLE" -lt "$IDLE_HOURS" ]; then
+        echo "keep  $REAL (idle ${IDLE}h)"; continue
+    fi
+    COUNT=$((COUNT + 1))
+    if [ "$APPLY" = 1 ]; then
+        for d in "${TARGETS[@]}"; do rm -rf -- "${REAL:?}/$d"; done
+        echo "prune $REAL (idle ${IDLE}h): ${TARGETS[*]}"
+    else
+        SIZE="$(cd "$REAL" && du -sch "${TARGETS[@]}" 2>/dev/null |
+            tail -1 | cut -f1)"
+        echo "would $REAL (idle ${IDLE}h, $SIZE): ${TARGETS[*]}"
+    fi
+done <<< "$TREES"
+
+for d in "$HOME"/Library/Developer/Xcode/DerivedData/KiwiDesk-*; do
+    [ -d "$d" ] && echo "note  $d (DerivedData; not touched)"
+done
+
+if [ "$APPLY" = 1 ]; then
+    AFTER_KB="$(free_kb)"
+    FREED_KB=$((AFTER_KB - BEFORE_KB))
+    [ "$FREED_KB" -lt 0 ] && FREED_KB=0
+    echo "prune-builds: cleared $COUNT tree(s)," \
+        "$(gb "$FREED_KB") GB freed," \
+        "$(gb "$AFTER_KB") GB free" >&2
+else
+    echo "prune-builds: $COUNT tree(s) would be cleared" \
+        "(dry run; --apply deletes)" >&2
+fi
