@@ -44,21 +44,24 @@ extension SegmentedPicker {
                 pointer: pointerIndex,
                 index: index
             )
-        // The wider of the two holds the width either way.
+        // The wider of the two holds the width either way; the
+        // clip makes the swap a reel inside the segment.
         return ZStack {
             titleText(title, selected: selected, index: index)
-                .opacity(shown ? 0 : 1)
+                .modifier(SegmentRoll(hint: false, shown: shown))
             if let hint {
                 hintText(
                     hint,
                     selected: selected,
                     hovered: hoveredIndex == index
                 )
-                .opacity(shown ? 1 : 0)
+                .modifier(SegmentRoll(hint: true, shown: shown))
             }
         }
+        .coordinateSpace(.named(SegmentRoll.reel))
+        .clipped()
         .animation(
-            reduceMotion ? nil : .easeOut(duration: 0.12),
+            reduceMotion ? nil : .easeOut(duration: 0.18),
             value: shown
         )
         .lineLimit(1)
@@ -90,9 +93,9 @@ extension SegmentedPicker {
             )
     }
 
-    /// The selected segment's ink is one value, measured on each
-    /// mode's fill; the hover lift takes full ink, `ink2`
-    /// falling under 4.5:1 on it in dark.
+    /// The selected segment's chord takes its title's ink; the
+    /// hover lift takes full ink, `ink2` falling under 4.5:1 on it
+    /// in dark.
     func hintText(
         _ hint: String,
         selected: Bool,
@@ -101,8 +104,8 @@ extension SegmentedPicker {
         Text(hint)
             .font(.callout)
             .foregroundStyle(
-                selected
-                    ? AnyShapeStyle(paint.selectionInkSecondary)
+                selected && !neutral
+                    ? AnyShapeStyle(paint.selectionInk)
                     : paint.tinted
                         ? hovered
                             ? AnyShapeStyle(paint.hoverInk ?? .primary)
@@ -112,5 +115,38 @@ extension SegmentedPicker {
                         )
             )
             .accessibilityHidden(true)
+    }
+}
+
+/// Rolls a segment's label along its reel: the title out downward
+/// as the hint drops in from above (#3172).
+struct SegmentRoll: ViewModifier {
+    nonisolated static let reel = "SegmentRoll.reel"
+    let hint: Bool
+    let shown: Bool
+
+    /// The vertical offset in points. `reach` is the label's bottom
+    /// edge in the reel; a centred label moved by it clears the
+    /// reel's bottom, and moved back by it clears the top.
+    nonisolated static func offset(
+        hint: Bool,
+        shown: Bool,
+        reach: CGFloat
+    ) -> CGFloat {
+        hint ? (shown ? 0 : -reach) : (shown ? reach : 0)
+    }
+
+    func body(content: Content) -> some View {
+        let hint = hint
+        let shown = shown
+        return content.visualEffect { effect, proxy in
+            effect.offset(
+                y: Self.offset(
+                    hint: hint,
+                    shown: shown,
+                    reach: proxy.frame(in: .named(Self.reel)).maxY
+                )
+            )
+        }
     }
 }

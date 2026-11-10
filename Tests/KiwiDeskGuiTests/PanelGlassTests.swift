@@ -215,7 +215,8 @@ struct PanelGlassTests {
         #expect(picker.contains("@Environment(\\.kiwiHubPaint)"))
         #expect(picker.contains(".fill(paint.selection)"))
         #expect(picker.contains("paint.selectionInk"))
-        #expect(picker.contains("paint.selectionInkSecondary"))
+        // The selected chord wears the title's ink (#3172).
+        #expect(!picker.contains("paint.selectionInkSecondary"))
         #expect(
             picker.contains(
                 "? paint.fill(paint.rowHover) : AnyShapeStyle(.clear)"
