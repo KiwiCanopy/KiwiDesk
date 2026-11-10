@@ -7,6 +7,8 @@ import Testing
 /// the real scripts on a fixture repository with worktrees of its
 /// own and a gate lock of its own, never the developer's. Named
 /// into the `ExecTests` partition: it holds real child processes.
+/// `ExecTestsPruneBuildsTrigger` holds the gate-lock trigger and
+/// the timeout.
 @Suite("prune-builds clears only idle, unused worktrees")
 struct ExecTestsPruneBuilds {
     @Test("an idle tree is cleared, the caller's own is kept")
@@ -62,6 +64,36 @@ struct ExecTestsPruneBuilds {
         #expect(!desk.hasOutput(desk.tree("a")), "\(run.stdout)")
     }
 
+    /// The match first, then far more than a pipe buffer: a reader
+    /// that stops at the match must not read as "unused" (a pipe
+    /// into it dies on SIGPIPE under pipefail).
+    @Test("a match early in a long process listing keeps the tree")
+    func earlyMatchInLongListingKeepsTree() throws {
+        let desk = try PruneDesk()
+        defer { desk.remove() }
+        let env = try desk.stubEnvironment(
+            "lsof",
+            """
+            #!/bin/sh
+            echo p1
+            echo "n$(cd '\(desk.tree("b").path)' && pwd -P)/.build"
+            i=0
+            while [ $i -lt 20000 ]; do
+                echo "n/nowhere/padding/line/$i"; i=$((i + 1))
+            done
+            """
+        )
+        let run = try spawn(
+            "/bin/bash",
+            [desk.script("prune-builds").path, "--apply"],
+            environment: env,
+            currentDirectory: desk.repo
+        )
+        #expect(run.status == 0, "\(run.stderr)")
+        #expect(desk.hasOutput(desk.tree("b")), "\(run.stdout)")
+        #expect(!desk.hasOutput(desk.tree("a")), "\(run.stdout)")
+    }
+
     @Test("a tree built within the idle window is kept")
     func recentBuildKeepsTree() throws {
         let desk = try PruneDesk(freshTree: "b")
@@ -72,45 +104,11 @@ struct ExecTestsPruneBuilds {
         #expect(!desk.hasOutput(desk.tree("a")), "\(run.stdout)")
     }
 
-    /// A trigger moved ahead of gate-lock's own lockf would prune
-    /// while another gate step runs.
-    @Test("gate-lock never prunes before it holds the gate")
-    func gateLockPrunesOnlyInsideTheLock() throws {
-        let desk = try PruneDesk()
-        defer { desk.remove() }
-        let holder = try desk.hold(
-            "/usr/bin/lockf",
-            ["-k", desk.lock.path, "/bin/cat"]
-        )
-        defer { holder.release() }
-        try desk.waitUntilGateHeld()
-        let run = try desk.gateLock(lowDisk: true, wait: "1")
-        #expect(run.status == 75, "\(run.stdout)\(run.stderr)")
-        #expect(desk.hasOutput(desk.tree("a")), "\(run.stderr)")
-    }
-
-    /// The trigger itself: gate-lock prunes on low disk, inside its
-    /// own lock, and never on the nested path.
-    @Test("gate-lock prunes on low disk, never when nested")
-    func gateLockTriggersPrune() throws {
-        let desk = try PruneDesk()
-        defer { desk.remove() }
-        let nested = try desk.gateLock(lowDisk: true, nested: true)
-        #expect(nested.status == 0, "\(nested.stderr)")
-        #expect(desk.hasOutput(desk.tree("a")), "nested path pruned")
-        let roomy = try desk.gateLock(lowDisk: false)
-        #expect(roomy.status == 0, "\(roomy.stderr)")
-        #expect(desk.hasOutput(desk.tree("a")), "pruned with room")
-        let low = try desk.gateLock(lowDisk: true)
-        #expect(low.status == 0, "\(low.stderr)")
-        #expect(low.stdout == "gated\n", "\(low.stdout)")
-        #expect(!desk.hasOutput(desk.tree("a")), "\(low.stderr)")
-    }
 }
 
 /// A process the test keeps alive until `release`: `cat` on an open
 /// pipe exits when the pipe closes.
-private struct Holder {
+struct Holder {
     let process: Process
     let input: Pipe
 
@@ -122,7 +120,7 @@ private struct Holder {
 
 /// A fixture repository with worktrees `a` and `b`, each holding a
 /// `.build` whose markers are two days old.
-private struct PruneDesk {
+struct PruneDesk {
     let root: URL
     var repo: URL { root.appendingPathComponent("repo") }
     var lock: URL {
@@ -241,7 +239,7 @@ private struct PruneDesk {
         Issue.record("the holder never took the fixture gate")
     }
 
-    private func script(_ name: String) -> URL {
+    func script(_ name: String) -> URL {
         scriptFixtureRepoRoot()
             .appendingPathComponent("scripts/\(name)")
     }

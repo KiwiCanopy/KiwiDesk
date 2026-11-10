@@ -728,8 +728,7 @@ branch.
 
 **The idle clause takes the newest mtime over all of `.build`'s
 children**, never named build files alone: a marker the toolchain
-stops writing turns into "never built" on every lane (#3186 ▸
-Ruling).
+stops writing turns into "never built" on every lane (#3186).
 
 **`scripts/gate-lock` prunes from inside its lock, before the
 `exec`, on low disk, and a prune can neither fail nor hang the

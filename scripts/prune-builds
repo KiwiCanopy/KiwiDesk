@@ -2,7 +2,7 @@
 # Clear regenerable build output in worktrees nothing is using
 # (#3186). Dry run by default; --apply deletes.
 # Usage: scripts/prune-builds [--apply] [--idle-hours N]
-#        [--if-below-gb N]
+#        [--if-below-gb N] [--timeout S]
 #
 # Sweeps every `git worktree list` entry. Deletes only .build,
 # site/node_modules and site/.astro, and only in a tree passing
@@ -46,18 +46,21 @@ while [ "$#" -gt 0 ]; do
 done
 
 # In its own process group, so the deadline stops an in-flight rm
-# too, and waited for, so nothing outlives the caller's lock.
+# too, and waited for, so nothing outlives the caller's lock. A
+# signal to the wrapper is passed to the group: it left the
+# caller's, so the caller's Ctrl-C no longer reaches it.
 if [ -n "$TIMEOUT" ]; then
-    exec /usr/bin/perl -e '
+    exec /usr/bin/perl -MPOSIX=setpgid -e '
         my $t = shift;
-        my $pid = fork() // exit 0;
-        if ($pid == 0) { setpgrp(0, 0); exec(@ARGV) or exit 1 }
-        $SIG{ALRM} = sub {
-            kill("TERM", -$pid);
-            waitpid($pid, 0);
-            print STDERR "prune-builds: stopped after ${t}s\n";
+        my $pid = 0;
+        $SIG{$_} = sub {
+            if ($pid) { kill("TERM", -$pid); waitpid($pid, 0) }
+            print STDERR "prune-builds: stopped ($_[0])\n";
             exit 124;
-        };
+        } for qw(ALRM INT TERM HUP);
+        $pid = fork() // exit 0;
+        if ($pid == 0) { setpgrp(0, 0); exec(@ARGV) or exit 1 }
+        setpgid($pid, $pid);
         alarm($t);
         waitpid($pid, 0);
         exit($? >> 8);' "$TIMEOUT" "$0" ${REST[@]+"${REST[@]}"}
@@ -98,8 +101,9 @@ OWN="$(cd "$OWN" && pwd -P)"
 TREES="$(git worktree list --porcelain | sed -n 's/^worktree //p')"
 
 # Clause 2's one pass. Our own shell is always in it, so an empty
-# answer means lsof failed, and nothing is provably unused.
-USED="$(/usr/sbin/lsof -a -d cwd,txt -Fn 2>/dev/null |
+# answer means lsof failed, and nothing is provably unused. Found on
+# PATH, like git, so the tests can hand it a listing.
+USED="$(PATH="$PATH:/usr/sbin" lsof -a -d cwd,txt -Fn 2>/dev/null |
     sed -n 's/^n//p')"
 if [ -z "$USED" ]; then
     echo "prune-builds: lsof listed no process; refusing" >&2
