@@ -125,6 +125,15 @@ struct LaunchFollowSeamTests {
         ("launchFollow.noteSpawn(", followFile, 1),
         ("launchFollow.takeSpawn(", followFile, 1),
         ("followSwitch(to: spawn.space, focusing: id)", followFile, 1),
+        // A lens's quiet open (#3122): owed through the one door,
+        // claimed ahead of the follow, mirrored into the fold, and
+        // standing the activation's owe down.
+        ("launchFollow.recordQuiet(", followFile, 1),
+        ("oweLaunchFollow(quietly:", "KiwiCore+VisionAutoOpen.swift", 1),
+        ("launchFollow.claimQuiet(", "KiwiCore+VisionAutoOpen.swift", 1),
+        ("claimQuietOpen(arrived: window)", followFile, 1),
+        ("launchFollow.noteQuietApps(", "KiwiCore+VisionAutoOpen.swift", 1),
+        ("state.arrivesQuietly = launchFollow", "KiwiCore+Events.swift", 1),
     ]
 
     @Test("each wiring exists exactly as often as pinned, in its file")

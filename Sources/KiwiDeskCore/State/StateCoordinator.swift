@@ -10,7 +10,7 @@ public struct StateCoordinator: Sendable {
     /// `app_rules` routing new windows of these apps to a fixed space.
     public var appRules: [String: SpaceID] = [:]
 
-    /// `new_window_placement` per layout mode, mirrored from tiler settings.
+    /// `new_window_placement` per layout mode, from tiler settings.
     public var spawnPlacements: [LayoutMode: SpawnPlacement] = [
         .bsp: BspParams().newWindowPlacement,
         .stack: StackParams().newWindowPlacement,
@@ -25,14 +25,14 @@ public struct StateCoordinator: Sendable {
     public var trackParams = TrackParams()
     /// Per-space fill-then-spill track capacity (#437), geometry-derived.
     public var trackCapacities: [SpaceID: Int] = [:]
-
     /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
     /// The arrival a `pocket_app` press claims (#2612), likewise.
     public var pocketClaimed: PocketArrivalClaim?
-
     /// A Desktop return's owed focus (#1207), mirrored likewise.
     public var returningFocus: WindowID?
+    /// An arrival a lens opened quietly (#3122): granted no focus.
+    public var arrivesQuietly = false
 
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]

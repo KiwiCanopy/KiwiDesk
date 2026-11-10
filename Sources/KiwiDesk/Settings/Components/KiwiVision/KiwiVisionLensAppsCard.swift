@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A lens's Apps card (#2103 rulings 29, 31, 32, 51): the member
-/// apps, each "All windows" or "Windows titled…" through the shared
-/// title editor, and "Add an app…" through the one app picker.
+/// apps, each with its Auto-open checkbox (#3122) and "All windows"
+/// or "Windows titled…" through the shared title editor, and "Add
+/// an app…" through the one app picker.
 struct KiwiVisionLensAppsCard: View {
     @ObservedObject var model: SettingsModel
     let lens: VisionLens
@@ -35,12 +36,12 @@ struct KiwiVisionLensAppsCard: View {
         HStack(spacing: 6) {
             AppPickerRowLabel(key: app)
             Spacer(minLength: 0)
+            KiwiVisionLensAutoOpenToggle(lens: lens, app: app) { on in
+                update { $0.setOpensApp(app, on) }
+            }
             scopeMenu(app, titled: titled)
             AppRuleDeleteButton(help: KiwiVisionLensWords.removeApp) { _ in
-                update {
-                    $0.apps.removeAll { $0 == app }
-                    $0.titles[app] = nil
-                }
+                update { $0.removeApp(app) }
             }
         }
         if titled {

@@ -44,6 +44,8 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
+        let quiet = arrivesQuietly
+        arrivesQuietly = false
         let claim = pocketClaimed
         pocketClaimed = nil
         let claimed = claim == .claimed(window.id)
@@ -67,8 +69,9 @@ extension StateCoordinator {
         // Only the rule's own verdict may earn the launch follow
         // (#1599), and only into a Space the user is not in.
         // A Pocket key's candidate keeps its rule but follows none.
+        // Nor does a lens's quiet open (#3122).
         if let ruled, ruled != workspaces.activeSpace,
-            claim != .awaited(window.id)
+            claim != .awaited(window.id), !quiet
         {
             effects.placedByAppRule = ruled
         }
@@ -156,7 +159,8 @@ extension StateCoordinator {
                     && rememberedSpaces[$0] == .departed(target)
                     && windows[$0] == nil
             } ?? false
-        guard windows[window.id]?.isTransientOverlay != true
+        // A window a lens opened quietly takes no focus (#3122).
+        guard windows[window.id]?.isTransientOverlay != true, !quiet
         else { return }
         if effects.hadRememberedSpace, owed == window.id,
             target == workspaces.activeSpace

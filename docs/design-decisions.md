@@ -8835,6 +8835,36 @@ exists to save. A Never dimmed app's windows stay clear on screen
 but are no member, so a step skips them too: they are kept clear
 to be seen, not worked in.
 
+### A lens opens only the apps you switched on, and moves the focus once (#3122)
+
+**[Rationale]**
+
+A lens turning on with none of its apps open left dead keys and a
+nagging pill. The answer is a per-app **Auto-open** checkbox, off by
+default, rather than a lens that launches its apps unasked: a
+visual mode never starts apps on its own, as Focus modes and Stage
+Manager don't. A lens-wide "open the first app" was rejected,
+since the list's order would then carry a hidden meaning.
+
+Every Auto-open app with no window opens in the background,
+through the one launcher, and none takes the focus. Where none of
+the lens's apps had a window, the focus moves once, to the first
+member window to ARRIVE rather than the first in lens order, and
+only while the focus, the clicks and the lens stand as they were at
+the press, and a screen shows the window's Space. KiwiDesk switches
+no Space or Desktop for it; a keystroke into a window is no choice
+of it. A minimized window, or one on another Desktop, counts as
+open. The move is owed through the launch follow's door (#1599)
+and bounded by the slowest cold start, since a background launch
+has no activation to time from.
+
+It fires only where the user turned the lens on: in the doors a
+chord, the menu, the CLI and the GUI take, never in the one writer
+of what KiwiDesk draws, which also carries renames and turn-offs,
+and never on a relaunch, a reload, a profile switch or `init.lua`'s
+run. When nothing is open and nothing opens, the pill says so, on
+the screen's centre where no window holds the focus.
+
 ### A lens holds a stray landing, never refuses it (#2103)
 
 **[Rationale]**
