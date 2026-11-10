@@ -8965,11 +8965,16 @@ ungranted until a device log shows the race matters.
 
 `open_in_background` can also name a Space, and its app's windows
 go there with nothing switched, ahead of the app's rule, since the
-caller named the place. Only a KiwiDesk Space can be named for now.
-A macOS Desktop no screen shows would leave the window on your
-Space until KiwiDesk adopts it and only then move it, and a refusal
-that depends on the window could come only after the call had
-answered; both are measured before a Desktop is offered.
+caller named the place. A macOS Desktop can be named too (#3153):
+each window is sent on at its arrival through `move_to_desktop`'s
+own body. On the owner's Mac a background-opened window was adopted
+the moment it appeared, so it spends no visible time on your Space,
+and an app activating itself with its only window on a hidden
+Desktop switched no Desktop, on either of two screens, so the
+hand-back still works where you are. A refusal only the window can
+meet (a cross-screen move macOS turns down, full screen) comes after
+the call has answered, so it is logged and the window stays where it
+opened, the one answer left once the verb has returned.
 :::
 
 :::unreleased

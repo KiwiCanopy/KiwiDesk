@@ -6985,7 +6985,7 @@ the per-row menu of an Open applications shortcut: *Open or Focus*
 ### open_in_background
 
 **Expects:** an app bundle identifier (e.g. `com.apple.Notes`)
-and, optionally, a Space id. See
+and, optionally, a Space id and a macOS Desktop number. See
 [Finding a bundle identifier](#finding-a-bundle-identifier).
 
 **Does:** opens an app without taking the focus from the window
@@ -7001,10 +7001,26 @@ With a Space named, the app's windows go into that Space instead,
 ahead of its app rule, and KiwiDesk switches nothing: you stay
 where you are and find them there. A Space that does not exist is
 refused, and so is the call when the app already has a window,
-since nothing would move. Only a KiwiDesk Space can be named, not
-a macOS Desktop. A click on the app, or
-[`focus_or_spawn`](#focus_or_spawn) naming it, ends this, so a
-window you open of it yourself lands where you are.
+since nothing would move.
+
+With a Desktop named, each window the app opens is sent to that
+Desktop as soon as it appears, as
+[`move_to_desktop`](#move_to_desktop) would send it, and a Space
+named with it is the Space it joins there. You stay on the Desktop
+you are on. Like `move_to_desktop`, this needs the Desktop bridge.
+Without it, for a Desktop that does not exist or one a screen is
+already showing (name its Space instead), or for a Space that lays
+out on another screen, the call is refused before anything opens.
+A move only the window itself can turn down, such as one onto
+another screen that macOS refuses, is noted in the log, and the
+window stays where it opened. A full-screen window, or one your
+Pocket key claims, is not sent. To name
+a Desktop without a Space, pass `nil` for the Space (`""` on the
+command line).
+
+A click on the app, or [`focus_or_spawn`](#focus_or_spawn) naming
+it, ends the Space or Desktop it was sent to, so a window you open
+of it yourself lands where you are.
 
 Some apps, Electron ones among them, bring themselves forward on
 launch anyway. KiwiDesk hands the focus back to the window it was
@@ -7021,6 +7037,8 @@ KiwiDesk.bind("ctrl+alt+m", function()
 end)
 -- Mail opens in Space 3, out of the way.
 KiwiDesk.open_in_background("com.apple.mail", "3")
+-- Music opens on Desktop 2, which you are not looking at.
+KiwiDesk.open_in_background("com.apple.Music", nil, 2)
 ```
 :::
 

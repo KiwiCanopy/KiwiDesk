@@ -629,16 +629,32 @@ editing here:
   retires. The hand-back is `focusWindow`, the command
   path (#1281), and drops the app's windows from the #1161 ledger
   so a second take is honored. **A Space the open named (#3152)
-  is the quiet mark's own** (`noteQuietApps(_:at:into:)`, read as
+  is the quiet mark's own** (`noteQuietApps(_:at:place:)`, read as
   `.quiet(into:)`): it takes the app rule's place in the fold,
   below `held` and through the rule's gate, is re-checked against
   a living Space there, and never follows. A new quiet-mark writer
-  files a Space only through that `into:`, and a new "the user took
+  files a Space or a Desktop only through that `place`, and a new "the user took
   the app" moment lifts it with `liftQuietSpace`, beside the two
   doors' click reads and `record`, whatever the hold's state
   (`OpenInBackgroundSpaceTests`). The arrival's #1322 read is the
   one arrival read that may ask LaunchServices, for sibling-process
-  apps only, and is no precedent for another. A new door claims through
+  apps only, and is no precedent for another. **A Desktop the open named (#3153) is the
+  mark's own place too**, one `QuietPlace`, so the fold never files
+  a window the arrival also moves. The arrival sends only an arrival
+  the provenance door reads as new, never a reveal or re-track, and
+  only through `moveQuietArrival`'s call of `moveToDesktop`'s own
+  body, never a copy, in place of the arrival retile, which still
+  runs when the send is refused. The verb asks every check that
+  needs no window up front (`spaceLandingRefusal`, shared with
+  `resolveSpaceTarget` and held by `DesktopMoveSpaceGateTests`; a
+  Desktop already shown), so a refusal left for the arrival is the window's own
+  (`OpenInBackgroundDesktopTests`, `LaunchFollowSeamTests` ▸
+  `wiringsArePinned`). A create trailing its arrival waits through
+  the door's hold: `settleArrival` hands it to `settleQuietArrival`, which sends it
+  through the same `sendQuietArrival` once it lands, standing down
+  on `departing`, and logs an expired one where it stays. Accepted residue: on a host with no
+  create route, a re-track of a window moved back by hand is sent
+  again. A new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register
   (`OpenInBackgroundHoldTests`, `OpenInBackgroundSeamTests`).
   **Every reader of "was this arrival created" goes through ONE

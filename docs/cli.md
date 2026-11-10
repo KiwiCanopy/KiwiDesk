@@ -484,7 +484,9 @@ that way, stopping at the edge; neither takes other arguments
 
 :::unreleased
 `open_in_background` takes an app bundle id, and optionally a
-Space id to put its windows in, and opens the app
+Space id to put its windows in and a Desktop number to send them
+to (`kiwidesk open_in_background com.apple.Music "" 2`), and opens
+the app
 without taking the focus: it launches it, or asks a running app
 with no window for one, and does nothing when the app has a
 window anywhere. When the app brings itself forward anyway,

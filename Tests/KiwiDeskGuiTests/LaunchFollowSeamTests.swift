@@ -150,8 +150,25 @@ struct LaunchFollowSeamTests {
             "KiwiCore+ArrivalFocus.swift", 1
         ),
         ("launchFollow.liftQuietSpace(", "KiwiCore+BackgroundHold.swift", 2),
+        // A named Desktop (#3153): sent on at the arrival, through
+        // move_to_desktop's own body, in place of the arrival retile.
         (
-            "launchFollow.noteQuietApps([bundleID], at: now, into: space)",
+            "sentAway = moveQuietArrival(window, provenance: provenance)",
+            "KiwiCore+Events.swift", 1
+        ),
+        ("let answer = moveToDesktop(", "KiwiCore+QuietDesktop.swift", 1),
+        // …and once a late create settles (#2630).
+        (
+            "if !departing { settleQuietArrival(id, created: created) }",
+            "KiwiCore+ArrivalProvenance.swift", 1
+        ),
+        // The arrival retile's one gate, past a sent window.
+        (
+            "if willRetile, followed != true, !sentAway {",
+            "KiwiCore+Events.swift", 1
+        ),
+        (
+            "launchFollow.noteQuietApps([bundleID], at: now, place: place)",
             "KiwiCore+OpenInBackground.swift", 1
         ),
         // `open_in_background` (#3141): marked quiet, a hold owed
@@ -290,7 +307,7 @@ struct LaunchFollowSeamTests {
         )
         let pay = try #require(body.range(of: "payLaunchFollow("))
         let gate = try #require(
-            body.range(of: "if willRetile, followed != true {")
+            body.range(of: "if willRetile, followed != true, !sentAway {")
         )
         let retile = try #require(
             body.range(of: "retile(newlyCreatedWindow:")

@@ -74,6 +74,7 @@ extension KiwiCore {
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
+        var sentAway = false
         var goneReason: WindowGoneReason? = nil
         // A settled monitor change takes its own one retile (#1612).
         var settleRetiles = false
@@ -158,6 +159,7 @@ extension KiwiCore {
                 provenance: provenance,
                 effects: effects
             ).map { (window.id, $0) }
+            sentAway = moveQuietArrival(window, provenance: provenance)
             // #1362: the snapshot frame the restore could not set
             // on an untracked window, seeded before the arrival
             // retile below delivers it.
@@ -303,7 +305,7 @@ extension KiwiCore {
         let followed = launchFollow.map {
             payLaunchFollow($0.0, into: $0.1)
         }
-        if willRetile, followed != true {
+        if willRetile, followed != true, !sentAway {
             // A Desktop switch's re-sync takes one pass at its end.
             if !foldIntoSwitchResync() {
                 // The user's own close or open runs now (#2187).
