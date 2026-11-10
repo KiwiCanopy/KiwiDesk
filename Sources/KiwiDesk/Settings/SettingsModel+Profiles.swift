@@ -127,6 +127,15 @@ extension SettingsModel {
             from: cleanConfig.settings,
             onto: core.tiler.settings
         )
+        // A tiling-off value the checklist shares stays shared on
+        // live and in the file (#3089).
+        if let reach = encodedReach {
+            committing.settings.tiling = sparseTilingToggle(
+                committing.settings.tiling,
+                in: reach,
+                for: name
+            )
+        }
         core.withUserMotion {
             core.applyProfileScopedState(
                 from: committing,

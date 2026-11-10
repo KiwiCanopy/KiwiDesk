@@ -45,12 +45,17 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
-    /// `gui.json`'s `tiling` group (#3008) — additive, as `desktop`.
+    /// `gui.json`'s `tiling` group (#3008) — additive, as `desktop`;
+    /// the two hide ticks' bases joined it with no crossing (#3089).
     struct Tiling: Codable {
         var startGlobal: Bool?
+        var offHidesBorders: Bool?
+        var offHidesBars: Bool?
 
         enum CodingKeys: String, CodingKey {
             case startGlobal = "start_global"
+            case offHidesBorders = "off_hides_borders"
+            case offHidesBars = "off_hides_bars"
         }
     }
 
@@ -163,6 +168,10 @@ extension AppWideSettings {
         }
         if let cue = mode?.cue { modeCue = cue }
         if let start = tiling?.startGlobal { tilingStartGlobal = start }
+        if let hides = tiling?.offHidesBorders {
+            tilingOffHidesBorders = hides
+        }
+        if let hides = tiling?.offHidesBars { tilingOffHidesBars = hides }
         hyperKey = hyper?.key
         if let keys = kiwihub?.key { kiwiHubKeys = keys }
         if let sides = modifier?.sides { modifierSides = sides }
@@ -206,7 +215,13 @@ extension AppWideSettings {
         )
     }
     var mode: Mode { Mode(cue: modeCue) }
-    var tiling: Tiling { Tiling(startGlobal: tilingStartGlobal) }
+    var tiling: Tiling {
+        Tiling(
+            startGlobal: tilingStartGlobal,
+            offHidesBorders: tilingOffHidesBorders,
+            offHidesBars: tilingOffHidesBars
+        )
+    }
     var hyper: Hyper { Hyper(key: hyperKey) }
     var kiwihub: KiwiHub { KiwiHub(key: kiwiHubKeys) }
     var modifier: Modifier { Modifier(sides: modifierSides) }

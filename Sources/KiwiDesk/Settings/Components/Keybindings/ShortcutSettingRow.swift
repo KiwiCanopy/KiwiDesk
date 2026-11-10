@@ -8,7 +8,8 @@ import SwiftUI
 struct ShortcutSettingRow<Reach: View, Control: View>: View {
     /// Drawn twin of the control's own spoken name.
     let title: String
-    let help: String
+    /// Its `?`, nil for a row whose title says it all (#3089).
+    let help: String?
     /// What the `?` names for VoiceOver; the title unless a group
     /// heading names the subject better.
     let helpSubject: String
@@ -19,7 +20,7 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
 
     init(
         title: String,
-        help: String,
+        help: String?,
         helpSubject: String? = nil,
         @ViewBuilder reach: () -> Reach,
         @ViewBuilder control: () -> Control
@@ -43,7 +44,9 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
                 .accessibilityHidden(true)
             Text(title)
                 .accessibilityHidden(true)
-            HelpButton(explanation: help, subject: helpSubject)
+            if let help {
+                HelpButton(explanation: help, subject: helpSubject)
+            }
             Spacer()
             reach
             KeyRecorderField.footprint.overlay { control }
@@ -57,7 +60,7 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
 extension ShortcutSettingRow where Reach == EmptyView {
     init(
         title: String,
-        help: String,
+        help: String?,
         @ViewBuilder control: () -> Control
     ) {
         self.init(

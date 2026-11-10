@@ -1,15 +1,5 @@
 import KiwiDeskCore
 
-/// What a Save's rule half did (#1393).
-enum RuleReachWrite: Equatable {
-    /// No checklist, or nothing it reaches changed.
-    case nothing
-    /// Every reached file and the base were written.
-    case landed
-    /// A write failed; some files may have been written.
-    case failed
-}
-
 /// Which profiles an App Rule reaches (#1393): the stored table,
 /// the draft's choices over it, and the writes a Save owes.
 extension SettingsModel {
@@ -43,6 +33,11 @@ extension SettingsModel {
             modeCycle: config.modeCycle,
             tileRules: config.tileRules,
             floatAutomatically: config.floatAutomatically,
+            tilingStart: config.settings.tiling.start,
+            tilingOffHides: [
+                config.settings.tiling.offHidesBorders,
+                config.settings.tiling.offHidesBars,
+            ],
             profile: reachProfile,
             isLoaded: reachIsLoaded,
             switchedBase: switchedShortcutBase,
@@ -161,6 +156,28 @@ extension SettingsModel {
             reach: reachEdits.reach[.autoFloat] ?? [:],
             removal: [:]
         )
+        snapshot.tilingStart = RuleReachDraft.encode(
+            snapshot.tilingStart,
+            current: tilingStartPage(
+                config.settings.tiling,
+                over: snapshot.tilingStart
+            ),
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.tilingStart] ?? [:],
+            removal: [:]
+        )
+        snapshot.tilingOffHides = RuleReachDraft.encode(
+            snapshot.tilingOffHides,
+            current: tilingOffHidesPage(
+                config.settings.tiling,
+                over: snapshot.tilingOffHides
+            ),
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.tilingOffHides] ?? [:],
+            removal: [:]
+        )
         // The loaded page's gui.json layers, derived ONCE so the rule
         // write and the globals write read the same base.
         if reachIsLoaded {
@@ -214,6 +231,16 @@ extension SettingsModel {
                 RuleReachTable<Bool>.floatAutomaticallyKey,
                 for: loaded
             ) ?? stored.floatAutomatically.floatAutomaticallyBase
+        // The page holds the loaded profile's own values, as its
+        // file does (#3089).
+        typealias Table = RuleReachTable<Bool>
+        let start = stored.tilingStart.entries[loaded] ?? [:]
+        let hides = stored.tilingOffHides.entries[loaded] ?? [:]
+        var toggle = config.settings.tiling
+        toggle.start = start[Table.tilingStartKey] ?? nil
+        toggle.offHidesBorders = hides[Table.offHidesBordersKey] ?? nil
+        toggle.offHidesBars = hides[Table.offHidesBarsKey] ?? nil
+        config.settings.tiling = toggle
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -243,51 +270,17 @@ extension SettingsModel {
         )
         sidecar.floatAutomatically =
             reach.floatAutomatically.floatAutomaticallyBase
+        // The base is app-wide, stamped at the write; the page's own
+        // values go back as the profile keeps them (#3089).
+        if let page = reachProfile {
+            sidecar.settings.tiling = sparseTilingToggle(
+                config.settings.tiling,
+                in: reach,
+                for: page
+            )
+        }
         return sidecar
     }
-
-    /// Writes every profile file and the shared rules the draft's
-    /// checklist reached, and says what happened — the one answer
-    /// every Save door reads, so none infers from its own control
-    /// flow which half landed. A stored page's own shortcut
-    /// override is left to its Save's diff (`overwriteProfile`),
-    /// which carries its layer structure too.
-    func saveRuleReach() -> RuleReachWrite {
-        var written = RuleReachWrite.nothing
-        // The lenses after their chords and marks, ahead of every
-        // gui.json write of the Save — on every door (#2103).
-        core.withLensReachHeld {
-            written = writeRuleReach()
-            if written != .failed { saveLensHalf() }
-        }
-        return written
-    }
-
-    private func writeRuleReach() -> RuleReachWrite {
-        // With no page — a built-in live — the layered snapshot
-        // carries the lens crossings alone.
-        guard let reach = encodedReach ?? layeredReach, reach.isEdited
-        else {
-            return .nothing
-        }
-        do {
-            try core.saveRuleReach(reach, keysLeftTo: editingProfile)
-            return .landed
-        } catch {
-            profileWarning = L(
-                "profiles.save_failed",
-                "Saving failed: %1$@",
-                NewerFormatText.detail(error)
-            )
-            core.onLog("rule reach save failed: \(error)")
-            return .failed
-        }
-    }
-
-    /// Whether Save as new profile… waits: a checklist choice
-    /// reaches other profiles, which a copy cannot carry. A plain
-    /// value edit is the copy's own.
-    var copyWaitsOnReach: Bool { !reachEdits.isEmpty }
 
     /// Takes a rule half that landed as the draft's baseline, so
     /// only what did not land stays unsaved.
@@ -301,6 +294,7 @@ extension SettingsModel {
         cleanConfig.focusWrap = config.focusWrap
         cleanConfig.tileRules = config.tileRules
         cleanConfig.floatAutomatically = config.floatAutomatically
+        cleanConfig.settings.tiling = config.settings.tiling
         // Not the layers: a stored page's own shortcut diff is the
         // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
@@ -324,25 +318,7 @@ extension SettingsModel {
         config.focusWrap = cleanConfig.focusWrap
         config.tileRules = cleanConfig.tileRules
         config.floatAutomatically = cleanConfig.floatAutomatically
+        config.settings.tiling = cleanConfig.settings.tiling
         reachEdits = RuleReachEdits()
-    }
-
-    /// Profiles in the order the edit-target menu lists them: the
-    /// loaded one first, then the connected screen count's, then
-    /// the rest by count, each in saved order.
-    var profileMenuOrder: [String] {
-        let loaded = activeProfile
-        let connected = displays.count
-        let rest = profileSummaries.filter { $0.name != loaded }
-        let ordered = rest.enumerated().sorted { lhs, rhs in
-            let l = lhs.element.count
-            let r = rhs.element.count
-            if (l == connected) != (r == connected) {
-                return l == connected
-            }
-            if l != r { return l > r }
-            return lhs.offset < rhs.offset
-        }.map(\.element.name)
-        return (loaded.map { [$0] } ?? []) + ordered
     }
 }

@@ -8419,6 +8419,40 @@ so it may take its old frame on arrival; with separate Spaces on, one
 moved across screens stayed a float on the new screen (measured once,
 2026-11-07).
 
+### The tiling-off options share one value across profiles (#3089)
+
+**[Rationale]**
+
+The three Tiling off rows in Shortcuts ▸ Size & float — where
+Spaces start, and whether a Space with tiling off hides its focus
+border or the bars — each carry their own "Applies to", whose All
+profiles value is `gui.json`'s app-wide `tiling` group:
+`start_global`, `off_hides_borders` and `off_hides_bars`. A
+profile's own value is a sparse leaf of its `settings.tiling`, nil
+where it follows, so the app-wide value has no control of its own:
+a separate General row would answer the same question beside the
+profile's row. A Save of the shared value lays the Spaces out
+through the same door the verbs take, since a start value moves
+every Space not toggled this session at once.
+
+*No crossing for the two ticks.* Before them a tick was always
+written, so every shipped profile holds an explicit value and
+reads as its own entry; one that predates #3008 reads `false` and
+follows a `false` base. Nothing changes meaning, so no
+`ConfigMigration` step is owed. The first Save at All profiles
+collapses an equal value into the shared one. The cost is a
+profile that kept an explicit `false` showing as its own value
+until that Save.
+
+*The per-Space start stays Lua-only.* `tiling.start_override` has
+no row, and a Space's Customize badge and Reset leave it alone: a
+Lua-set value is the script's to clear.
+
+*The bars row greys only when no bar rests on screen.* A bar set
+to Hidden in every layout on every screen hides nothing at rest;
+one a shortcut reveals is not counted, so the row's grey errs
+toward "nothing to hide" only where nothing shows by itself.
+
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
 
 **[Principle]**

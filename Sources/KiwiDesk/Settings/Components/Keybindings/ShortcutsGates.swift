@@ -44,6 +44,12 @@ struct ShortcutsGates {
         /// The default layer already matches the shipped set
         /// (#3074).
         case matchesDefaults
+        /// No bar rests on screen anywhere, so hiding the bars
+        /// while tiling is off hides nothing (#3089).
+        case noBarShows
+        /// The focus border is off, so hiding it while tiling is
+        /// off hides nothing (#3089).
+        case focusBorderOff
     }
 
     /// Evaluates inert reason for setting key.
@@ -65,6 +71,11 @@ struct ShortcutsGates {
         case .shortcuts(.shortcutBase):
             guard guiManaged else { return .appWideLuaOwned }
             return editingStoredProfile ? .storedProfilePage : nil
+        case .behaviour(.tilingOffHidesBars):
+            return config.settings.someBarShows ? nil : .noBarShows
+        case .behaviour(.tilingOffHidesBorders):
+            return config.settings.borderStyle.enabled
+                ? nil : .focusBorderOff
         case .shortcuts(.restoreDefaults):
             if selectedLayer != KeyLayer.defaultName {
                 return .otherLayerPicked
@@ -139,6 +150,8 @@ struct ShortcutsGates {
         .shortcuts(.modifierSides),
         .shortcuts(.shortcutBase),
         .shortcuts(.restoreDefaults),
+        .behaviour(.tilingOffHidesBars),
+        .behaviour(.tilingOffHidesBorders),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's

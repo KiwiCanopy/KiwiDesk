@@ -30,6 +30,8 @@ extension KiwiCore {
         let wrap = snapshot.focusWrap
         let tile = snapshot.tileRules
         let automatic = snapshot.floatAutomatically
+        let start = snapshot.tilingStart
+        let hides = snapshot.tilingOffHides
         var pending: [Profile] = []
         for name in app.profiles {
             let original = snapshot.storedFloatOverrides[name]
@@ -54,6 +56,9 @@ extension KiwiCore {
             )
             let automaticTouched =
                 !(automatic.touched[name] ?? []).isEmpty
+            let tilingTouched =
+                !(start.touched[name] ?? []).isEmpty
+                || !(hides.touched[name] ?? []).isEmpty
             let lensMarks = snapshot.lensReach[name] ?? [:]
             let lensTouched =
                 lensMarks != (snapshot.fileLensReach[name] ?? [:])
@@ -62,7 +67,7 @@ extension KiwiCore {
                     || historyTouched || cycleTouched || wrapTouched
                     || floatOverride != original
                     || tileOverride != tileOriginal || automaticTouched
-                    || lensTouched
+                    || lensTouched || tilingTouched
             else { continue }
             var profile = try profiles.read(name: name)
             if appTouched {
@@ -96,6 +101,14 @@ extension KiwiCore {
             if automaticTouched {
                 profile.floatAutomatically =
                     automatic.floatAutomaticallyOverride(for: name)
+            }
+            if tilingTouched {
+                writeTilingToggle(
+                    start: start,
+                    hides: hides,
+                    for: name,
+                    into: &profile.settings.tiling
+                )
             }
             if lensTouched {
                 profile.lensReach = lensMarks.isEmpty ? nil : lensMarks
@@ -142,6 +155,9 @@ extension KiwiCore {
         }
         for profile in pending { try profiles.write(profile) }
         if let sidecar { try guiConfigStore.save(sidecar) }
+        // After the files: a base write is gui.json's app-wide
+        // group, and the live profile's own values follow its file.
+        settleTilingToggle(start: start, hides: hides, written: pending)
         refreshConfigIssues()
         let keysChanged =
             keysMoved

@@ -28,6 +28,18 @@ struct RuleReachGuiParityTests {
         "focusWrap": "focusWrap",
         "tileRules": "tileRules",
         "floatAutomatically": "floatAutomatically",
+        // Both tiling-off families live in the profile's toggle
+        // group, so its needles cannot tell them apart; the
+        // encode's `snapshot.` needle below can (#3089).
+        "tilingStart": "settings.tiling",
+        "tilingOffHides": "settings.tiling",
+    ]
+
+    /// The memo key's field where a family's draft field is a path
+    /// no `let` can spell.
+    private static let memoField: [String: String] = [
+        "tilingStart": "tilingStart",
+        "tilingOffHides": "tilingOffHides",
     ]
 
     /// Sites a family skips by design, with the reason.
@@ -104,6 +116,22 @@ struct RuleReachGuiParityTests {
         }
     }
 
+    /// The two tiling-off families share a draft field, so the
+    /// encode's own table writes are what tell them apart (#3089).
+    @Test("the encode writes every family's table")
+    func encodeWritesEveryFamily() throws {
+        let text = try body(
+            "func encodeReach()",
+            in: "SettingsModel+RuleReach.swift"
+        )
+        for family in try families() {
+            #expect(
+                text.contains("snapshot.\(family) ="),
+                "encodeReach never encodes \(family)"
+            )
+        }
+    }
+
     /// A row's ↺ settles a family's reach through this table (#792),
     /// so a family it misses leaves its reach behind.
     @Test("the revert's family table names every family's field")
@@ -136,7 +164,9 @@ struct RuleReachGuiParityTests {
             )
         )
         for family in try families() {
-            let field = try #require(Self.draftField[family])
+            let field = try #require(
+                Self.memoField[family] ?? Self.draftField[family]
+            )
             #expect(
                 text.contains("let \(field):"),
                 "EncodedReachCache.Key misses \(family): a stale encode"

@@ -165,6 +165,11 @@ enum ShortcutsRowOrder {
         .shortcuts(.maximizeHeight),
         .shortcuts(.maximizeWidth),
         .shortcuts(.toggleFloating),
+        // Tiling off's options, above its key (#3089): one view
+        // draws the three under their sub-header.
+        .behaviour(.tilingStart),
+        .behaviour(.tilingOffHidesBorders),
+        .behaviour(.tilingOffHidesBars),
         .shortcuts(.toggleTiling),
         .shortcuts(.toggleSticky),
     ]

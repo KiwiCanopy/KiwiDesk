@@ -72,13 +72,13 @@ struct GateReasonPlacementTests {
                 // #2142: the app-wide Desktop switch cue, the same
                 // shape on Shortcuts ▸ macOS Desktops (#2655).
                 .shortcuts(.desktopCue),
-                // #1870: the Hyper key's recorder, the same shape
-                // on its own card above the layer header.
-                .shortcuts(.hyperKey),
-                // #1870: its move offer, on the same card.
-                .shortcuts(.shortcutBase),
-                // #2601: the sides switch, on the same card.
+                // #1870: the Hyper key's recorder and its move offer,
+                // and #2601's sides switch, on one card above the
+                // layer header.
+                .shortcuts(.hyperKey), .shortcuts(.shortcutBase),
                 .shortcuts(.modifierSides),
+                .behaviour(.tilingOffHidesBorders),  // #3089, other pages
+                .behaviour(.tilingOffHidesBars),
                 // #2524, #2971: the Space switch pickers and the
                 // slide's pace, the same shape on Colors ▸ Animations,
                 // one sentence for the group under its first row.

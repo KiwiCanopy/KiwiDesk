@@ -113,6 +113,8 @@ struct AnnouncedValuePinTests {
         "SettingsHeaderBar.swift": 1,
         // #1655: the Space history group's heading.
         "SpaceHistoryRow.swift": 1,
+        // #3089: the Tiling off group's heading.
+        "TilingOffRows.swift": 1,
         // A lens's name and the Every lens rule (#2103 PR 7).
         "KiwiVisionLensHeader.swift": 1,
         "KiwiVisionLensPage.swift": 1,

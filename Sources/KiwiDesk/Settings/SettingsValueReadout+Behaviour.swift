@@ -114,37 +114,36 @@ extension SettingsValueReadout {
                     new: behaviourMouseResize(after.mouseResize)
                 )
             ]
+        // Three states (#3089): unset follows All profiles, whose
+        // value is app-wide and no draft's to narrate.
         case .tilingOffHidesBorders:
             return [
-                behaviourToggleRow(
+                tilingRow(
                     census,
-                    label: label(for: census),
                     old: before.tiling.offHidesBorders,
                     new: after.tiling.offHidesBorders
                 )
             ]
         case .tilingOffHidesBars:
             return [
-                behaviourToggleRow(
+                tilingRow(
                     census,
-                    label: label(for: census),
                     old: before.tiling.offHidesBars,
                     new: after.tiling.offHidesBars
                 )
             ]
-        // Unset follows the app-wide value, on by default (#3008).
         case .tilingStart:
             return [
-                behaviourToggleRow(
+                tilingRow(
                     census,
-                    label: label(for: census),
-                    old: before.tiling.start ?? true,
-                    new: after.tiling.start ?? true
+                    old: before.tiling.start,
+                    new: after.tiling.start
                 )
             ]
         // Lua-only (#3008): no draft writes the per-Space values,
-        // and the app-wide one is undrafted.
-        case .tilingStartOverride, .tilingStartGlobal:
+        // and the app-wide ones are undrafted.
+        case .tilingStartOverride, .tilingStartGlobal,
+            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return []
         case .mouseFollowsFocus:
             return [
@@ -184,6 +183,20 @@ extension SettingsValueReadout {
     }
 
     // MARK: - Helpers
+
+    /// A tiling-off row: follows, on or off (#3089).
+    private static func tilingRow(
+        _ census: SettingKey,
+        old: Bool?,
+        new: Bool?
+    ) -> SettingsDiffRow {
+        .change(
+            census,
+            label: label(for: census),
+            old: TilingOffWords.value(old),
+            new: TilingOffWords.value(new)
+        )
+    }
 
     private static func behaviourToggleRow(
         _ census: SettingKey,

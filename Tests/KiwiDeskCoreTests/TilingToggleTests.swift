@@ -258,6 +258,7 @@ struct TilingToggleTests {
         var settings = TilingToggleSettings()
         settings.start = false
         settings.startOverride = [SpaceID("3"): true]
+        settings.offHidesBorders = false
         settings.offHidesBars = true
         let data = try JSONEncoder().encode(settings)
         let json = try #require(

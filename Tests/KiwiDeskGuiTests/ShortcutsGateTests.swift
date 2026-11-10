@@ -156,6 +156,8 @@ struct ShortcutsGateTests {
                     .appWideLuaOwned, .storedProfilePage,
                     // Restore Defaults' greys (#3074).
                     .otherLayerPicked, .matchesDefaults,
+                    // The Tiling off hide rows' greys (#3089).
+                    .noBarShows, .focusBorderOff,
                 ]
         )
     }

@@ -76,6 +76,19 @@ extension TilingSettings {
         }
     }
 
+    /// Whether some bar rests on screen — Always or Auto — in some
+    /// layout on some screen: what Settings' "Hide the bars while
+    /// tiling is off" row asks to grey (#3089).
+    public var someBarShows: Bool {
+        screenVariants.contains { screen in
+            LayoutMode.allCases.contains { mode in
+                let shown = screen.barVisibilities(in: mode)
+                return shown.space != .hidden
+                    || (shown.app.map { $0 != .hidden } ?? false)
+            }
+        }
+    }
+
     /// These settings as each screen they can draw on shows them
     /// (#1948): the bars' own edges, then every screen with an edge
     /// of its own. A reader asking whether a setting acts on SOME

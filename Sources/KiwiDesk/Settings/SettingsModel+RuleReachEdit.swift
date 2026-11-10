@@ -219,6 +219,8 @@ extension SettingsModel {
         case .cycle: cycleReach()
         case .tile: tileReach(app)
         case .autoFloat: autoFloatReach()
+        case .tilingStart: tilingStartReach()
+        case .tilingOffHides: tilingOffHidesReach(app)
         }
     }
 

@@ -219,13 +219,15 @@ extension SettingsModel {
                 "New profiles won't get this shortcut"
             )
         case (.scroll, true), (.history, true), (.wrap, true),
-            (.cycle, true), (.autoFloat, true):
+            (.cycle, true), (.autoFloat, true), (.tilingStart, true),
+            (.tilingOffHides, true):
             L(
                 "app_rules.reach.diff.new_profiles_get.setting",
                 "New profiles get this setting"
             )
         case (.scroll, false), (.history, false), (.wrap, false),
-            (.cycle, false), (.autoFloat, false):
+            (.cycle, false), (.autoFloat, false), (.tilingStart, false),
+            (.tilingOffHides, false):
             L(
                 "app_rules.reach.diff.new_profiles_lose.setting",
                 "New profiles won't get this setting"

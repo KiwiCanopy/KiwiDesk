@@ -251,6 +251,8 @@ struct EncodedReachCache {
         let modeCycle: [LayoutMode]
         let tileRules: [String]
         let floatAutomatically: Bool
+        let tilingStart: Bool?
+        let tilingOffHides: [Bool?]
         let profile: String?
         let isLoaded: Bool
         let switchedBase: ShortcutBase?

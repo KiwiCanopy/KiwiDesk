@@ -41,6 +41,11 @@ extension KiwiCore {
             existing.focusWrap = stored.focusWrap
             existing.tileRules = stored.tileRules
             existing.floatAutomatically = stored.floatAutomatically
+            existing.settings.tiling.start = stored.settings.tiling.start
+            existing.settings.tiling.offHidesBorders =
+                stored.settings.tiling.offHidesBorders
+            existing.settings.tiling.offHidesBars =
+                stored.settings.tiling.offHidesBars
         }
         try profiles.write(existing)
         refreshConfigIssues()

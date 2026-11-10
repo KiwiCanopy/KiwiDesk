@@ -221,15 +221,16 @@ struct RuleReachIdentityTests {
     /// The page a draft encodes against is the pin, never Core's
     /// live name: a live read is how a mid-save name change baked
     /// one profile's own rules into the shared base. A spelling
-    /// scan over these four files — a fifth reach file is
-    /// review's.
+    /// scan over these files — a further reach file is review's.
     @Test("the rule-reach files read no live profile name")
     func reachFilesReadThePin() throws {
         let settings = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let names = [
             "SettingsModel+RuleReach.swift",
+            "SettingsModel+RuleReachSave.swift",
             "SettingsModel+RuleReachEdit.swift",
+            "SettingsModel+TilingOffReach.swift",
             "SettingsModel+RuleReachDiff.swift",
             "RuleReachDraft.swift",
         ]
