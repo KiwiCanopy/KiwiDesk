@@ -639,10 +639,16 @@ editing here:
   (`OpenInBackgroundSpaceTests`). The arrival's #1322 read is the
   one arrival read that may ask LaunchServices, for sibling-process
   apps only, and is no precedent for another. **A Desktop the open named (#3153) is the
-  mark's too** (the same `place`): the fold files
-  nothing for it, and the arrival arm sends each window on through
-  `moveQuietArrival`, which calls `moveToDesktop`'s own body, never
-  a copy, in place of the arrival retile; the same lift ends it. A new door claims through
+  mark's own place too**, one `QuietPlace`, so the fold never files
+  a window the arrival also moves. The arrival sends only an arrival
+  the provenance door reads as new, never a reveal or re-track, and
+  only through `moveQuietArrival`'s call of `moveToDesktop`'s own
+  body, never a copy, in place of the arrival retile, which still
+  runs when the send is refused. The verb asks every check that
+  needs no window up front (`spaceLandingRefusal`, a Desktop already
+  shown), so a refusal left for the arrival is the window's own
+  (`OpenInBackgroundDesktopTests`, `LaunchFollowSeamTests` ▸
+  `wiringsArePinned`). A new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register
   (`OpenInBackgroundHoldTests`, `OpenInBackgroundSeamTests`).
   **Every reader of "was this arrival created" goes through ONE

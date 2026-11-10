@@ -159,7 +159,7 @@ extension KiwiCore {
                 provenance: provenance,
                 effects: effects
             ).map { (window.id, $0) }
-            sentAway = moveQuietArrival(window)  // #3153
+            sentAway = moveQuietArrival(window, provenance: provenance)
             // #1362: the snapshot frame the restore could not set
             // on an untracked window, seeded before the arrival
             // retile below delivers it.

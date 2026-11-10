@@ -14,17 +14,14 @@ extension KiwiCore {
             return .fail("expected app bundle id")
         }
         // A refusal launches nothing, so the place is read first.
-        var space: SpaceID?
-        var desktop: QuietDesktop?
+        let place: QuietPlace
         switch backgroundPlace(args) {
         case .refused(let response): return response
-        case .space(let named): space = named
-        case .desktop(let named): desktop = named
-        case .here: break
+        case .place(let read): place = read
         }
         if hasWindow(bundleID) {
             onLog("open_in_background: \(bundleID) has a window")
-            return space == nil && desktop == nil
+            return place == .here
                 ? .ok()
                 : .fail(
                     "An app that already has a window is not opened "
@@ -35,46 +32,61 @@ extension KiwiCore {
             return .fail("app not found: \(bundleID)")
         }
         let now = wallClock()
-        let place = (space: space, desktop: desktop)
         launchFollow.noteQuietApps([bundleID], at: now, place: place)
         launchFollow.holds.note(bundleID, at: now)
         return .ok()
     }
 
-    private enum BackgroundPlace {
-        case here
-        case space(SpaceID)
-        case desktop(QuietDesktop)
+    private enum PlaceReading {
+        case place(QuietPlace)
         case refused(CommandResponse)
     }
 
     /// The optional `space` and `desktop` (#3152, #3153). A Space is
     /// skipped by `null`, or by `""` ahead of a Desktop, as
-    /// `move_to_desktop` skips it; with a Desktop it is that
-    /// Desktop's Space, ruled on at the arrival with the window.
-    private func backgroundPlace(_ args: [JSONValue]) -> BackgroundPlace {
+    /// `move_to_desktop` skips it. With a Desktop, a Space need not
+    /// exist yet, as there (#1150), and every check that needs no
+    /// window is asked now; a Desktop already shown is refused, since
+    /// its Space can be named instead.
+    private func backgroundPlace(_ args: [JSONValue]) -> PlaceReading {
         let hasDesktop = args.count > 2 && args[2] != .null
-        var space: SpaceID?
+        var raw: String?
         if args.count > 1, args[1] != .null,
             !(hasDesktop && args[1] == .string(""))
         {
-            guard let raw = args[1].stringValue else {
+            guard let read = args[1].stringValue, !read.isEmpty else {
                 return .refused(.fail("expected space id"))
             }
+            raw = read
+        }
+        guard hasDesktop else {
+            guard let raw else { return .place(.here) }
             guard state.workspaces[SpaceID(raw)] != nil else {
                 return .refused(.fail("unknown space: \(raw)"))
             }
-            space = SpaceID(raw)
+            return .place(.space(SpaceID(raw)))
         }
-        guard hasDesktop else { return space.map { .space($0) } ?? .here }
         switch resolveDesktopArgument([args[2]]) {
         case .refused(let response):
             return .refused(response)
-        case .target:
-            return .desktop(
-                QuietDesktop(
-                    number: args[2].intValue ?? 0,
-                    space: space?.raw
+        case .target(let target):
+            guard !target.isCurrent else {
+                return .refused(
+                    .fail(
+                        "That Desktop is already showing, so name its "
+                            + "Space instead."
+                    )
+                )
+            }
+            if let raw, let refusal = spaceLandingRefusal(raw, for: target) {
+                return .refused(refusal)
+            }
+            return .place(
+                .desktop(
+                    QuietDesktop(
+                        id: target.space,
+                        space: raw.map { SpaceID($0) }
+                    )
                 )
             )
         }

@@ -165,17 +165,12 @@ extension KiwiCore {
         }
         let space = SpaceID(raw)
         let screens = state.workspaces.allDisplays
+        if let refusal = spaceLandingRefusal(raw, for: target) {
+            return .refused(refusal)
+        }
         if let assigned = state.workspaces.display(of: space) {
-            if let screen = display(forUUID: target.displayIdentifier) {
-                guard assigned == screen else {
-                    return .refused(
-                        .fail(
-                            "space \(raw) lays out on another screen "
-                                + "than that Desktop's"
-                        )
-                    )
-                }
-            } else if crossesScreens(window, to: assigned, target),
+            if display(forUUID: target.displayIdentifier) == nil,
+                crossesScreens(window, to: assigned, target),
                 !canWriteCrossing(window)
             {
                 return .refused(
@@ -187,16 +182,31 @@ extension KiwiCore {
             }
             return .space(space, landing: assigned)
         }
-        guard screens.count <= 1 else {
-            return .refused(
-                .fail(
-                    "space \(raw) is on no screen yet — pin it to "
-                        + "that Desktop's screen first "
-                        + "(pin_space_to_display)"
-                )
+        return .space(space, landing: screens.first?.id)
+    }
+
+    /// The half of the Space parse that needs no window, which
+    /// `open_in_background` asks before anything opens (#3153): a
+    /// Space laid out on another screen than the Desktop's, or on no
+    /// screen yet while more than one is connected.
+    func spaceLandingRefusal(
+        _ raw: String,
+        for target: DesktopTarget
+    ) -> CommandResponse? {
+        if let assigned = state.workspaces.display(of: SpaceID(raw)) {
+            guard let screen = display(forUUID: target.displayIdentifier),
+                assigned != screen
+            else { return nil }
+            return .fail(
+                "space \(raw) lays out on another screen than that "
+                    + "Desktop's"
             )
         }
-        return .space(space, landing: screens.first?.id)
+        guard state.workspaces.allDisplays.count > 1 else { return nil }
+        return .fail(
+            "space \(raw) is on no screen yet — pin it to that "
+                + "Desktop's screen first (pin_space_to_display)"
+        )
     }
 
     /// The screen a window's frame sits on, the screen it arrives on;

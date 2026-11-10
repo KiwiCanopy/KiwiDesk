@@ -7007,11 +7007,14 @@ With a Desktop named, each window the app opens is sent to that
 Desktop as soon as it appears, as
 [`move_to_desktop`](#move_to_desktop) would send it, and a Space
 named with it is the Space it joins there. You stay on the Desktop
-you are on. Like `move_to_desktop`, this needs the Desktop bridge,
-and without it, or for a Desktop that does not exist, the call is
-refused before anything opens. A move that only the window itself
-can turn down, such as one onto another screen that macOS refuses,
-is noted in the log and the window stays where it opened. To name
+you are on. Like `move_to_desktop`, this needs the Desktop bridge.
+Without it, for a Desktop that does not exist or one a screen is
+already showing (name its Space instead), or for a Space that lays
+out on another screen, the call is refused before anything opens.
+A move only the window itself can turn down, such as one onto
+another screen that macOS refuses, is noted in the log, and the
+window stays where it opened. A full-screen window, or one your
+Pocket key claims, is not sent. To name
 a Desktop without a Space, pass `nil` for the Space (`""` on the
 command line).
 

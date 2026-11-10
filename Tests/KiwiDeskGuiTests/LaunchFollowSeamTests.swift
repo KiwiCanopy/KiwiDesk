@@ -152,7 +152,10 @@ struct LaunchFollowSeamTests {
         ("launchFollow.liftQuietSpace(", "KiwiCore+BackgroundHold.swift", 2),
         // A named Desktop (#3153): sent on at the arrival, through
         // move_to_desktop's own body, in place of the arrival retile.
-        ("sentAway = moveQuietArrival(window)", "KiwiCore+Events.swift", 1),
+        (
+            "sentAway = moveQuietArrival(window, provenance: provenance)",
+            "KiwiCore+Events.swift", 1
+        ),
         ("let answer = moveToDesktop(", "KiwiCore+QuietDesktop.swift", 1),
         (
             "launchFollow.noteQuietApps([bundleID], at: now, place: place)",

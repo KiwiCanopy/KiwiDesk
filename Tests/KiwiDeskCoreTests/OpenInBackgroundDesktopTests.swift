@@ -108,20 +108,85 @@ struct OpenInBackgroundDesktopTests {
         #expect(moved() == [[NSNumber(value: 7)]])
     }
 
-    /// The Space goes with the Desktop, never filed by the fold too.
-    @Test("a Space named with a Desktop is not filed at the arrival")
-    func spaceRidesTheDesktop() {
+    /// The Space rides the move to the hidden Desktop (#1150), and
+    /// the fold files it nowhere.
+    @Test("a Space named with a Desktop reaches the move")
+    func spaceReachesTheMove() {
         let (core, _) = makeCore()
         defer { teardown() }
-        core.state.workspaces.ensureSpace(SpaceID("2"))
-        #expect(open(core, space: .string("2")).isSuccess)
-        #expect(
-            core.launchFollow.quietDesktop(F.app, at: core.wallClock())
-                == QuietDesktop(number: 2, space: "2")
-        )
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        #expect(open(core, space: .string("mail")).isSuccess)
         #expect(
             core.launchFollow.quietSpace(F.app, at: core.wallClock()) == nil
         )
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(moved() == [[NSNumber(value: 7)]])
+        #expect(log.contains { $0.contains("will join space mail") })
+        #expect(core.state.workspaces[SpaceID("mail")] == nil)
+    }
+
+    @Test("a Desktop already showing is refused")
+    func shownDesktopRefused() {
+        let (core, recorder) = makeCore()
+        defer { teardown() }
+        let answer = open(core, desktop: .number(1))
+        #expect(answer.error?.contains("already showing") == true)
+        #expect(recorder.opened.isEmpty)
+    }
+
+    /// The window-free half of the Space parse answers at the call.
+    @Test("a Space on another screen is refused before anything opens")
+    func spaceOffTheScreenRefused() {
+        let (core, recorder) = makeCore()
+        defer { teardown() }
+        for (index, name) in ["A", "B"].enumerated() {
+            core.state.workspaces.upsertDisplay(
+                Display(
+                    id: DisplayID(UInt32(index + 1)),
+                    name: name,
+                    frame: CGRect(
+                        x: CGFloat(index) * 1920,
+                        y: 0,
+                        width: 1920,
+                        height: 1080
+                    )
+                )
+            )
+        }
+        let answer = open(core, space: .string("mail"))
+        #expect(answer.error?.contains("on no screen yet") == true)
+        #expect(recorder.opened.isEmpty)
+    }
+
+    /// A reveal or re-track of the app is no open (#2630).
+    @Test("an arrival not yet known to be created is not sent")
+    func uncreatedArrivalStays() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        core.windowCreates.isLive = true
+        core.boot.reachedReady = true
+        #expect(open(core).isSuccess)
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(moved().isEmpty)
+        // The control: the same arrival with its create sent on.
+        core.windowCreates.noteCreated(WindowID(8), at: core.wallClock())
+        F.arrive(8, bundleID: F.app, on: core)
+        #expect(moved() == [[NSNumber(value: 8)]])
+    }
+
+    @Test("a move refused at the arrival leaves the window here")
+    func refusedSendStays() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        let home = core.state.workspaces.activeSpace
+        #expect(open(core).isSuccess)
+        WMBridge.classResolverOverride = { _ in nil }
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(core.state.workspaces.space(of: WindowID(7)) == home)
+        #expect(log.contains { $0.contains("w7 stays") })
     }
 
     @Test("a click on the app ends the sending")
