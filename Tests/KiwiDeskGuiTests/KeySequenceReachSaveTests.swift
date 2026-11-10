@@ -78,6 +78,13 @@ struct KeySequenceReachSaveTests {
         #expect(try own(model, "Home") == [tree()])
         #expect(try own(model, "Work").isEmpty)
         #expect(base(model).isEmpty)
+
+        // A tick reaches only through the key table, which must name
+        // the page's sequence for Work to get it.
+        model.setProfile(.key, key(), "Work", true)
+        model.saveEditedProfile()
+        #expect(try own(model, "Work") == [tree()])
+        #expect(base(model).isEmpty)
     }
 
     @Test("a listed sequence reaches its profiles and not the base")

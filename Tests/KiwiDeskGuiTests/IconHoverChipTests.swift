@@ -177,5 +177,10 @@ struct IconHoverChipTests {
                 "let lacking = reading.lacking.contains(profile)\n"
             )
         )
+        #expect(
+            checklist.contains(
+                "let clashing = reading.clashing.contains(profile)\n"
+            )
+        )
     }
 }
