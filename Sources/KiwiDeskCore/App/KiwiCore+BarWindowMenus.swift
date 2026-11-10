@@ -207,9 +207,10 @@ extension KiwiCore {
     static var pocketKeyKeepsIt: String {
         L(
             "bar.menu.pocket_keyed",
-            "Its Pocket key keeps it — %1$@ ▸ %2$@ ▸ %3$@",
+            "Its Pocket key keeps it — %1$@ ▸ %2$@ ▸ %3$@ ▸ %4$@",
             L("home.title", "Settings"),
             L("destination.shortcuts", "Shortcuts"),
+            L("shortcuts.segment.built_in", "Built-in"),
             L("shortcuts.section.pocket", "Pocket")
         )
     }

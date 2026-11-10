@@ -74,16 +74,48 @@ struct ShortcutsSegmentTests {
         #expect(model.nav.shortcutsSegment == .builtIn)
     }
 
-    @Test("a binding row is drawn on its kind's part")
+    /// A binding row lands on its kind's part; a shipped action's row
+    /// no family lists — a deleted Space's, a deleted layer's — is an
+    /// inactive one, on Built-in, so the link to it finds its part.
+    @Test("a binding row is placed on its part")
     func bindingParts() {
-        let kinds: [(KeyBinding.Kind, ShortcutsSegment)] = [
-            (.navigation, .builtIn), (.application, .personal),
-            (.sequence, .personal), (.custom, .personal),
+        let model = makeTestModel()
+        let rows = [
+            KeyBinding(combo: "", lua: "x", kind: .sequence, label: ""),
+            KeyBinding(combo: "", lua: "y", kind: .custom, label: ""),
+            KeyBinding(
+                combo: "",
+                lua: "kiwi.focus_space(\"gone\")",
+                kind: .navigation,
+                label: ""
+            ),
         ]
-        for (kind, part) in kinds {
-            let row = KeyBinding(combo: "", lua: "x", kind: kind, label: "")
-            #expect(ShortcutsSegment(row) == part)
-        }
+        model.config.layers[0].bindings = rows
+        let expander = ShortcutsFamilyRows.ofDraft(
+            model,
+            layer: KeyLayer.defaultName
+        )
+        let placed = [rows[0].id.uuidString, rows[1].id.uuidString]
+            .map {
+                ShortcutsPagePart.placing(
+                    $0,
+                    expander: expander,
+                    bindings: rows,
+                    shown: .builtIn
+                )?.segment
+            }
+        #expect(placed == [.personal, .personal])
+        let gone = ShortcutsPagePart.placing(
+            RecorderPreflight.rowID(rows[2]),
+            expander: expander,
+            bindings: rows,
+            shown: .personal
+        )
+        #expect(gone?.part == .inactive && gone?.segment == .builtIn)
+        #expect(
+            model.shortcutsSegment(holding: rows[1].id.uuidString)
+                == .personal
+        )
     }
 
     /// The reveal picks the part before it scrolls, the recorder's
@@ -100,8 +132,8 @@ struct ShortcutsSegmentTests {
         let jump = try Self.source("Sections/ShortcutsSection+Jump.swift")
         #expect(
             jump.contains(
-                "ifletowner,switches{model.nav.shortcutsSegment="
-                    + "owner.segment(from:shown)}"
+                "ifletplaced,switches{model.nav.shortcutsSegment="
+                    + "placed.segment}"
             )
         )
         #expect(jump.contains("!switches&&"))
@@ -117,6 +149,14 @@ struct ShortcutsSegmentTests {
         let page = try Self.source("Sections/ShortcutsSection.swift")
         // Its declaration is the page's one write.
         #expect(page.components(separatedBy: "gesturesPlay=").count == 2)
+        // A pick opens the part at its top, before the part changes.
+        let top = try #require(
+            segment.range(of: "proxy.scrollTo(top.id,anchor:.top)")
+        )
+        let write = try #require(
+            segment.range(of: "model.nav.shortcutsSegment=picked")
+        )
+        #expect(top.lowerBound < write.lowerBound)
         #expect(page.contains(".environment(\\.shortcutsSegment,segment)"))
         #expect(page.contains("ifsegment==.builtIn{jumpBar("))
     }
@@ -132,13 +172,25 @@ struct ShortcutsSegmentTests {
         #expect(
             field.contains(
                 "ifletother=reading?.severity.otherBinding,"
-                    + "letshown=shownSegment,coordinator.scrollsInPlace"
+                    + "letshown=shownSegment,coordinator.scrollsInPlace,"
             )
         )
-        #expect(field.contains("letpart=ShortcutsSegment(other)ifpart!=shown"))
+        #expect(
+            field.contains(
+                "letpart=coordinator.segmentHolding?("
+                    + "RecorderPreflight.rowID(other)){ifpart!=shown{"
+            )
+        )
         #expect(
             field.contains(
                 "coordinator.scrollTarget=RecorderPreflight.rowID(other)"
+            )
+        )
+        let page = try Self.source("Sections/ShortcutsSection.swift")
+        #expect(
+            page.contains(
+                "coordinator.segmentHolding={[model]anchorin"
+                    + "model.shortcutsSegment(holding:anchor)}"
             )
         )
         let other = KeyBinding(

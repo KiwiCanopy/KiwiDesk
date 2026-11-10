@@ -281,9 +281,8 @@ struct SizeFloatGroup: View {
     }
 }
 
-/// KiwiDesk's own chords, folded into Open applications under a
-/// subheading of the app's name since the General drawer retired
-/// (#1520, #330, #602).
+/// KiwiDesk's own chords, under a subheading of the app's name in
+/// the Show & hide card, after KiwiHub (#1520, #602, #3184).
 struct KiwiDeskKeyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]

@@ -20,7 +20,7 @@ struct ShortcutGroupNaming {
                     ($0, $0.title)
                 }
             ),
-            custom: L("shortcuts.panel.custom", "Personal")
+            custom: ShortcutGroup.personalTitle
         )
     }
 

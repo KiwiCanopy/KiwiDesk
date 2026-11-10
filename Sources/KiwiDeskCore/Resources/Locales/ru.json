@@ -197,7 +197,7 @@
   "bar.menu.new_space": "Новое пространство",
   "bar.menu.new_space.temporary": "временное",
   "bar.menu.new_window": "Новое окно",
-  "bar.menu.pocket_keyed": "Его удерживает собственное сочетание клавиш Pocket — %1$@ ▸ %2$@ ▸ %3$@",
+  "bar.menu.pocket_keyed": "Его удерживает собственное сочетание клавиш Pocket — %1$@ ▸ %2$@ ▸ %3$@ ▸ %4$@",
   "bar.menu.pocket_window": "Убрать окно в Pocket",
   "bar.menu.quit_app": "Завершить %1$@",
   "bar.menu.remove_from_pocket": "Убрать из Pocket",

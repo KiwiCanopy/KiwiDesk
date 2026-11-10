@@ -56,7 +56,29 @@ struct GestureAutoplayWiringTests {
                 in: segment
             )
         )
+        // Across every file of the page: the declaration and the
+        // pick's one arming write; and nothing else in Settings arms
+        // the part's binding.
+        let page = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent("Settings/Sections")
+        ).filter { $0.lastPathComponent.hasPrefix("ShortcutsSection") }
+        #expect(page.count >= 4)
+        let writes = try page.map {
+            try Self.squashed($0).components(separatedBy: "gesturesPlay=")
+                .count - 1
+        }.reduce(0, +)
+        #expect(writes == 2)
         #expect(segment.components(separatedBy: "gesturesPlay=").count == 2)
+        let settings = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent("Settings")
+        )
+        #expect(settings.count > 50)
+        for url in settings {
+            #expect(
+                !(try Self.squashed(url).contains("playArmed=true")),
+                Comment(rawValue: url.lastPathComponent)
+            )
+        }
         #expect(
             pick.contains(
                 "ifpicked==.mouse,!gesturesPlayed{gesturesPlayed=true"

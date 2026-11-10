@@ -59,7 +59,7 @@ struct ShortcutsSection: View {
         let expander = self.expander
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
-                segmentControl
+                segmentControl(proxy)
                 if segment == .builtIn {
                     jumpBar(proxy, expander: expander)
                 }
@@ -85,6 +85,9 @@ struct ShortcutsSection: View {
             // (#213).
             coordinator.onArmedChange = { [model] armed in
                 model.setRecorderArmed(armed)
+            }
+            coordinator.segmentHolding = { [model] anchor in
+                model.shortcutsSegment(holding: anchor)
             }
             takeWholePageRequest()
         }
@@ -203,7 +206,8 @@ struct ShortcutsSection: View {
         }
     }
 
-    /// The part, under the jump bar's rule where the bar draws one.
+    /// The part, under the page's rule where `ruledAbove(in:)` asks
+    /// for one.
     @ViewBuilder private func ruled(
         _ part: ShortcutsPagePart,
         in segment: ShortcutsSegment,

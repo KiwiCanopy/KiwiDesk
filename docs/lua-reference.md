@@ -994,8 +994,8 @@ KiwiDesk.set_min_window_size_override("monitoring", 220, 160)
 **Expects:** a number (points).
 
 **Does:** sets the magnitude the **Grow** / **Shrink**
-keybindings nudge the layout by (default 50). The Shortcuts &
-Gestures page authors the four per-axis bindings as
+keybindings nudge the layout by (default 50). The Shortcuts
+page authors the four per-axis bindings as
 `resize("x"|"y", ±step)` from this value, and importing a
 config reads a recovered magnitude back into it. Moves no
 window on its own; it takes effect the next time such a binding
@@ -1248,8 +1248,8 @@ Space.
 
 It is stored like the Space history: `focus_wrap` in `gui.json`
 is the value every profile uses, and a profile may keep its own,
-which the **Wrap focus** row's **Applies to** under Shortcuts &
-Gestures ▸ Focus writes. The verb sets the
+which the **Wrap focus** row's **Applies to** under Shortcuts ▸
+Built-in ▸ Focus writes. The verb sets the
 shared value for the running session and never reaches a file; a
 profile's own value still wins.
 
@@ -5162,7 +5162,7 @@ profile starts with. A profile file may carry a sparse
 single-modifier chord in either file turns that gesture off, a
 `space_step` equal to `pan` turns the Space step off, and a
 `step_distance` outside 10–1000 is clamped to the range. In the
-Settings app they are the **Scroll gestures** group under
+Settings app they are the **Holding a modifier** group under
 **Shortcuts ▸ Mouse & Trackpad**, where
 each row's **Applies to** checklist writes the base or chosen
 profiles' overrides.
@@ -6182,8 +6182,9 @@ end)
 (its home screen only) and off. Toggling screen sticky on a
 global-sticky window switches it to screen sticky.
 
-It has no default shortcut and no row in Settings ▸ Shortcuts &
-Gestures; bind it in `init.lua` or the Lua bindings drawer, where
+It has no default shortcut and no row in Settings ▸ Shortcuts;
+bind it in `init.lua` or the Shortcuts ▸ Personal ▸ Lua bindings
+drawer, where
 a shortcut you gave it is listed. A stored `⌃⌥P` running it —
 `✦P` with **Shortcuts use** set to `✦`, and either one in a
 profile's own shortcuts — is moved to [`pocket`](#pocket) once,
@@ -7301,7 +7302,8 @@ you hold **⌘**, one side's while you point at it.
 
 Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
 you create too) and **⌃⌥L** (view), and offered under
-**Shortcuts ▸ Built-in ▸ KiwiHub**, where you can rebind or clear
+**Shortcuts ▸ Built-in ▸ Show & hide ▸ KiwiHub**, where you can
+rebind or clear
 each per layer.
 
 **Example:**
@@ -7326,7 +7328,7 @@ steps the app strip to the next app, as **→** does, and the same
 key with **⇧** steps back (**⇧⌥⇥** by default); **Esc** closes
 KiwiHub.
 It is bound to `⌥⇥` by default, listed under Shortcuts ▸ Built-in ▸
-KiwiHub as **Show window switcher for last app**.
+Show & hide ▸ KiwiHub as **Show window switcher for last app**.
 Over the CLI it is `kiwidesk kiwihub.show_last_app`.
 
 ```lua
@@ -7398,7 +7400,7 @@ only the place you were reading resets.
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
 create in Settings.
 
-Offered under **Shortcuts ▸ Personal ▸ Open applications ▸
+Offered under **Shortcuts ▸ Built-in ▸ Show & hide ▸
 KiwiDesk** ("Open Settings"), where you can rebind it per layer.
 
 **Example:**
@@ -7498,7 +7500,7 @@ A combo is any set of modifiers plus **exactly one key**, or a
 modifier tap (above).
 Multi-key chords (`cmd+j+k`) are not expressible; a hand-written
 combo that doesn't parse is never registered, and the Shortcuts
-& Gestures page flags the row with ⚠ *"isn't a recognized shortcut"*.
+page flags the row with ⚠ *"isn't a recognized shortcut"*.
 
 ### Shortcut Layers
 
@@ -7882,7 +7884,7 @@ table, with any of:
 **Does:** KiwiHub's Shortcuts side lists the shortcut under its
 description instead of its Lua, in its group, wearing its symbol.
 A group of your own is listed after the built-in ones and before
-Custom, under the name as written. Without a symbol a row wears
+Personal, under the name as written. Without a symbol a row wears
 `</>`; a name that is not an SF Symbol shows `</>` too and is
 listed in Config Issues, and the shortcut still works.
 
@@ -7948,8 +7950,8 @@ and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
 and is flagged. The CLI cannot bind a sequence;
-`shortcut.remove_sequence` removes one. In Settings, Shortcuts &
-Gestures ▸ Key sequences records one.
+`shortcut.remove_sequence` removes one. In Settings, Shortcuts ▸
+Personal ▸ Key sequences records one.
 Under Secure Input see
 [Accepted Limitations](accepted-limitations.md).
 

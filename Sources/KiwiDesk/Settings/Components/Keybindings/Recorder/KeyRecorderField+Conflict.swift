@@ -93,9 +93,11 @@ extension KeyRecorderField {
     @ViewBuilder private var otherSegmentLink: some View {
         if let other = reading?.severity.otherBinding,
             let shown = shownSegment,
-            coordinator.scrollsInPlace
+            coordinator.scrollsInPlace,
+            let part = coordinator.segmentHolding?(
+                RecorderPreflight.rowID(other)
+            )
         {
-            let part = ShortcutsSegment(other)
             if part != shown {
                 Button(
                     L(

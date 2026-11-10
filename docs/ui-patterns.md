@@ -364,11 +364,6 @@ rather than under it because it states a VALUE and disappears
 on expand, where a caption explains what a thing IS and stays.
 The ruling is in `docs/design-decisions.md`.
 
-
-A collapsible section may also take a `preview:` drawn under its
-row while shut — the Mouse & trackpad card's picture strip is the
-one instance, ruled in `docs/design-decisions.md` ▸ Shortcuts.
-
 **A section header's trailing readout is words only.** A
 `SettingsSection` takes `trailing:` — a short value at the
 title's far edge, drawn in `ink2` at `.subheadline`, the Mac
@@ -578,8 +573,8 @@ same capsule language rather than as bare gray prose.
 
 **Jump chips are the capsule language as buttons** (#1520). A long
 page whose groups the reader needs a map of — Shortcuts ▸
-Built-in is the one — pins a row of chips over its scroll, one per group,
-in page order, each labelled by its group's own title. A chip is
+Built-in is the one — pins a row of chips over its scroll, one per
+group, in page order, each labelled by its group's own title. A chip is
 content-sized and wears its own edge over the chip rest fill —
 never the passive capsule's hairline — lifting on hover and
 deepening while pressed, at the large-control height with the
@@ -596,8 +591,9 @@ shadow. A chip is a button, the marked one
 announced as selected, and the row is one container named
 and captioned "Jump to", the caption on a line of its own above
 the chips. A click puts the group's header under the bar, and
-arrives without travelling under Reduce Motion. The bar sits on the page ground and grows
-its lower hairline only once content slides under it. The
+arrives without travelling under Reduce Motion. The bar sits on
+the page ground and grows its lower hairline only once content
+slides under it. The
 caption line carries a readout at its trailing end, wrapping
 under the caption where both do not fit; the line is header
 chrome, the first thing a narrowing window drops — a name
@@ -733,7 +729,8 @@ separates geometry controls from the behavior dropdowns
 (new-window placement).
 
 An **action row** (`SettingsActionRow`) is a title, a caption
-and a `?`, with short trailing buttons ("Export…", "Reset…").
+and a `?`, with short trailing buttons ("Export…", "Reset…"). A
+row with no caption stays one line at every width band (#3178).
 Each button is named for VoiceOver and anchored for search by
 its full action name from the destination's catalog, so the
 short word never stands alone. Groups of action rows inside one
@@ -1258,8 +1255,8 @@ On KiwiHub's tinted Fill a button chip's fills fade with the
 panel's other fills (#2725).
 
 **A tile or card answers the pointer with its edge and a rise
-(#3042).** Home cards, Layout, palette, look and dashed tiles, Screen
-cards and the gesture strip's pictures take `hoverEdge`, a neutral
+(#3042).** Home cards, Layout, palette, look and dashed tiles and
+Screen cards take `hoverEdge`, a neutral
 apart from the accent, at `hoverEdgeStroke` and rise on a shadow
 through `hoverRise(_:in:)`, with no fill change and a hit area that stays at rest. They are the
 exception to the ban on movement and shadow on buttons above. A

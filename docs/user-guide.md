@@ -14,7 +14,7 @@ setting lives, why a move was refused, and the files behind it.
 Open Settings from the KiwiDesk menu in the menu bar, or press
 **⌘,** while a KiwiDesk window is key.
 
-**Shortcuts ▸ Personal ▸ Open applications** offers a rebindable
+**Shortcuts ▸ Built-in ▸ Show & hide** offers a rebindable
 **Open Settings** row for a global key, under **KiwiDesk**.
 
 That row ships on **`⌃⌥,`**, a [default
@@ -992,7 +992,8 @@ reach it, and Shortcuts can give it a key of its own.
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J`, `⌃⌥K`
 and `⌃⌥L` open **KiwiHub**
 ([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel whose
-sides are listed together under Shortcuts ▸ Built-in ▸ KiwiHub:
+sides are listed together under Shortcuts ▸ Built-in ▸ Show & hide ▸
+KiwiHub:
 `⌃⌥J` the **window switcher**, `⌃⌥K` the **shortcuts panel**, where
 typing searches your shortcuts, and `⌃⌥L` the **view picker**,
 which switches the layout of the space under the pointer, the

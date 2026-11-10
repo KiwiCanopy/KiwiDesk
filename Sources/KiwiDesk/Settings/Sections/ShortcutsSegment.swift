@@ -12,23 +12,16 @@ enum ShortcutsSegment: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
-    /// The segment's title. Personal shares KiwiHub's word for the
-    /// user's own shortcut groups, so the two never differ.
+    /// The segment's title. Personal is KiwiHub's word for the
+    /// user's own shortcuts (`ShortcutGroup.personalTitle`).
     @MainActor var title: String {
         switch self {
         case .builtIn:
             return L("shortcuts.segment.built_in", "Built-in")
         case .personal:
-            return L("shortcuts.panel.custom", "Personal")
+            return ShortcutGroup.personalTitle
         case .mouse:
             return SettingsCatalog.shortcuts.gestures.control.text
         }
-    }
-
-    /// The part a binding's row is drawn in: a shipped action's row
-    /// on Built-in, an app's, a key sequence's or a Lua shortcut on
-    /// Personal.
-    init(_ binding: KeyBinding) {
-        self = binding.kind == .navigation ? .builtIn : .personal
     }
 }

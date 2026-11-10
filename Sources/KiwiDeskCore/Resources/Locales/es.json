@@ -197,7 +197,7 @@
   "bar.menu.new_space": "Nuevo Espacio",
   "bar.menu.new_space.temporary": "temporal",
   "bar.menu.new_window": "Nueva ventana",
-  "bar.menu.pocket_keyed": "Su atajo de Pocket la retiene — %1$@ ▸ %2$@ ▸ %3$@",
+  "bar.menu.pocket_keyed": "Su atajo de Pocket la retiene — %1$@ ▸ %2$@ ▸ %3$@ ▸ %4$@",
   "bar.menu.pocket_window": "Meter la ventana en el Pocket",
   "bar.menu.quit_app": "Salir de %1$@",
   "bar.menu.remove_from_pocket": "Quitar del Pocket",

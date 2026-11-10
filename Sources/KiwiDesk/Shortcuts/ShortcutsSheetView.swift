@@ -57,7 +57,7 @@ struct ShortcutsSheetView: View {
         }
         out.append(
             Section(
-                title: L("shortcuts.panel.custom", "Personal"),
+                title: ShortcutGroup.personalTitle,
                 rows: reference.custom
             )
         )

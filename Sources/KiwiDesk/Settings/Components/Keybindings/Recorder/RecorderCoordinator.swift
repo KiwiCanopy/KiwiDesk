@@ -38,6 +38,12 @@ final class RecorderCoordinator: ObservableObject {
     /// registration.
     var onArmedChange: (Bool) -> Void = { _ in }
 
+    /// The Shortcuts page's part drawing a row, by the id a Go to
+    /// scrolls to; nil off that page (#3184). The page sets it to
+    /// `SettingsModel.shortcutsSegment(holding:)`, the answer a
+    /// landing takes, so a conflict's link and its landing agree.
+    var segmentHolding: ((String) -> ShortcutsSegment?)?
+
     /// Teardown closure for active event monitor.
     private var stopActive: (() -> Void)?
 

@@ -197,7 +197,7 @@
   "bar.menu.new_space": "New Space",
   "bar.menu.new_space.temporary": "temporary",
   "bar.menu.new_window": "New Window",
-  "bar.menu.pocket_keyed": "Its Pocket key keeps it — %1$@ ▸ %2$@ ▸ %3$@",
+  "bar.menu.pocket_keyed": "Its Pocket key keeps it — %1$@ ▸ %2$@ ▸ %3$@ ▸ %4$@",
   "bar.menu.pocket_window": "Pocket Window",
   "bar.menu.quit_app": "Quit %1$@",
   "bar.menu.remove_from_pocket": "Remove from Pocket",

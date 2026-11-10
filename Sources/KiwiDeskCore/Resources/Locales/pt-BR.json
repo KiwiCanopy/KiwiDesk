@@ -197,7 +197,7 @@
   "bar.menu.new_space": "Novo espaço",
   "bar.menu.new_space.temporary": "temporário",
   "bar.menu.new_window": "Nova janela",
-  "bar.menu.pocket_keyed": "O atalho do Pocket desta janela a mantém — %1$@ ▸ %2$@ ▸ %3$@",
+  "bar.menu.pocket_keyed": "O atalho do Pocket desta janela a mantém — %1$@ ▸ %2$@ ▸ %3$@ ▸ %4$@",
   "bar.menu.pocket_window": "Guardar a janela no Pocket",
   "bar.menu.quit_app": "Encerrar %1$@",
   "bar.menu.remove_from_pocket": "Remover do Pocket",

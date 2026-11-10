@@ -267,8 +267,8 @@ restated `20...80` satisfies on the day it is written.
 - **A gesture picture is not a schematic.** A Mouse & Trackpad
   entry on the Shortcuts page teaches a gesture rather than a rest
   state, so its picture may move: while hovered, and once on the
-  user's own click alone — the part's first entry when a click on
-  the Mouse & Trackpad segment opens it, at most once per visit
+  user's own click alone — the segment's first entry when a click
+  on the Mouse & Trackpad segment opens it, at most once per visit
   (owner ruling 2026-09-29, carried to the segment by #3184) —
   never on a search, Go to or diff-jump landing, and never looped.
   Otherwise it rests on its key frame, and always under Reduce
@@ -1157,8 +1157,8 @@ must keep:
   which is fixed because KiwiDesk cannot read an AI app's state
   (`docs/design-decisions.md` ▸ The AI page sets an AI app up
   and never reports on it), and Shortcuts', which names its
-  page's parts from `ShortcutsSegment`'s titles while its
-  conflicts take the shout (#3184), previews
+  page's segments from `ShortcutsSegment`'s titles while its
+  conflicts take the shout (#3184). Previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
   hue alone. A profile card's picture rides the desktop plate
@@ -2317,23 +2317,25 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   skipped render keeps the last binding that drew
   (`NavRowRenderSeamTests`, `NavRowEqualityTests`).
 - **A scroll into the Shortcuts page reaches the row's segment,
-  then its part** (#3060, #3184). The page shows one of three
-  segments, kept on `SettingsNavigation.shortcutsSegment`, and
-  builds that segment's parts lazily, so a scroll to an id inside
-  a part not shown or not yet built finds nothing: a reveal
-  selects the segment through `SettingsModel.showShortcutsSegment`
-  before it scrolls, and goes on through
-  `SettingsModel.revealLanding(for:)`; a recorder's Go to switches
-  the segment in `ShortcutsSection.scroll(to:)`; both, and a jump
-  chip, scroll to the part's id, which
-  `ShortcutsPagePart.owner(of:expander:bindings:)` answers, and an
-  anchor it cannot place builds the whole segment
-  (`ShortcutsSegmentTests` ▸ `wiring`). A conflict naming a row
-  of the other key segment links to it, read from the
-  `\.shortcutsSegment` environment value (`ShortcutsSegmentTests`
-  ▸ `conflictLink`); a new conflict surface on the page owes the
-  same link. A catalog control
-  or census container added to the page, or moved between its
+  then its part** (#3060, #3184). The page shows one of
+  `ShortcutsSegment`'s cases, kept on
+  `SettingsNavigation.shortcutsSegment`, and builds that
+  segment's parts lazily, so a scroll to an id inside a part not
+  shown or not yet built finds nothing. A reveal and a Go to ask
+  one door, `ShortcutsPagePart.placing(_:expander:bindings:shown:)`,
+  for the part and the segment showing it: a reveal selects the
+  segment through `SettingsModel.showShortcutsSegment` before it
+  scrolls, and goes on through `SettingsModel.revealLanding(for:)`;
+  a recorder's Go to switches the segment in
+  `ShortcutsSection.scroll(to:)`; both, and a jump chip, scroll to
+  the part's id, and an anchor the door cannot place builds the
+  whole segment (`ShortcutsSegmentTests` ▸ `wiring`). A conflict
+  naming a row across Built-in ↔ Personal links to it, asking
+  `RecorderCoordinator.segmentHolding`, which the page sets to
+  `SettingsModel.shortcutsSegment(holding:)` — the same door
+  (`ShortcutsSegmentTests` ▸ `conflictLink`); a new conflict
+  surface on the page owes the same link through it. A catalog
+  control or census container added to the page, or moved between its
   cards, is placed there in the same change — a stale placement
   scrolls to the wrong part and skips the fallback, which no test
   sees (`ShortcutsPagePartTests` ▸ `catalogControlsHaveParts`,

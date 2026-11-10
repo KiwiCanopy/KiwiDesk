@@ -64,16 +64,17 @@ extension ShortcutsSection {
         proxy: ScrollViewProxy,
         expander: ShortcutsFamilyRows
     ) {
-        let owner = ShortcutsPagePart.owner(
-            of: target,
+        let placed = ShortcutsPagePart.placing(
+            target,
             expander: expander,
-            bindings: model.shortcutsLayerBindings
+            bindings: model.shortcutsLayerBindings,
+            shown: segment
         )
+        let owner = placed?.part
         if owner == nil { buildsWholePage = true }
-        let shown = segment
-        let switches = owner.map { !$0.segments.contains(shown) } ?? false
-        if let owner, switches {
-            model.nav.shortcutsSegment = owner.segment(from: shown)
+        let switches = placed.map { $0.segment != segment } ?? false
+        if let placed, switches {
+            model.nav.shortcutsSegment = placed.segment
         }
         let built =
             !switches

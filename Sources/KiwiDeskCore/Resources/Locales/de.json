@@ -197,7 +197,7 @@
   "bar.menu.new_space": "Neuer Space",
   "bar.menu.new_space.temporary": "temporär",
   "bar.menu.new_window": "Neues Fenster",
-  "bar.menu.pocket_keyed": "Sein Pocket-Tastenkürzel hält es fest — %1$@ ▸ %2$@ ▸ %3$@",
+  "bar.menu.pocket_keyed": "Sein Pocket-Tastenkürzel hält es fest — %1$@ ▸ %2$@ ▸ %3$@ ▸ %4$@",
   "bar.menu.pocket_window": "Fenster in die Pocket stecken",
   "bar.menu.quit_app": "%1$@ beenden",
   "bar.menu.remove_from_pocket": "Aus der Pocket entfernen",

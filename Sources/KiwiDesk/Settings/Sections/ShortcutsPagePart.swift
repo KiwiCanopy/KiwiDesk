@@ -99,7 +99,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     /// The part drawing `anchor` — a catalog control's id, a census
     /// row's label key, a shortcut row's command or a binding row's
     /// id among `bindings` — nil when none is known, which builds the
-    /// whole page instead (`ShortcutsPagePartTests`).
+    /// whole page instead (`ShortcutsPagePartTests`). A shipped
+    /// action's row no family lists is an inactive one (#92, #2016).
     @MainActor static func owner(
         of anchor: String,
         expander: ShortcutsFamilyRows,
@@ -127,7 +128,26 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
                 return part
             }
         }
+        if bindings.contains(where: {
+            $0.kind == .navigation && $0.lua == anchor
+        }) {
+            return .inactive
+        }
         return nil
+    }
+
+    /// The part drawing `anchor` and the segment showing it, from the
+    /// segment `shown`: the one answer every landing on the page asks
+    /// (#3184).
+    @MainActor static func placing(
+        _ anchor: String,
+        expander: ShortcutsFamilyRows,
+        bindings: [KeyBinding],
+        shown: ShortcutsSegment
+    ) -> (part: Self, segment: ShortcutsSegment)? {
+        owner(of: anchor, expander: expander, bindings: bindings).map {
+            ($0, $0.segment(from: shown))
+        }
     }
 
     /// The part drawing a binding row the recorder names by id.
@@ -135,7 +155,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         if PocketAppLuaArg.bundleID(of: binding.lua) != nil { return .pocket }
         switch binding.kind {
         case .application: return .openApplications
-        case .custom, .navigation: return .luaBindings
+        case .custom: return .luaBindings
+        case .navigation: return .inactive
         case .sequence: return .keySequences
         }
     }
