@@ -58,7 +58,11 @@ struct OpenInBackgroundDesktopTests {
         defer { teardown() }
         #expect(open(core).isSuccess)
         #expect(recorder.opened.map(\.1) == [.background])
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
         F.arrive(7, bundleID: F.app, on: core)
+        // Sent in place of the arrival retile.
+        #expect(meter.snapshot(reset: false).counts.retiles == 0)
         F.arrive(8, bundleID: F.app, on: core)
         #expect(
             moved() == [[NSNumber(value: 7)], [NSNumber(value: 8)]]
@@ -193,6 +197,8 @@ struct OpenInBackgroundDesktopTests {
         #expect(moved().isEmpty)
     }
 
+    /// The send's own nil guard; `departing` standing the settle
+    /// down is `LaunchFollowSeamTests`' needle.
     @Test("a window gone before its create sends nothing")
     func goneBeforeCreateStays() {
         let core = awaitingCreate()
@@ -266,5 +272,46 @@ struct OpenInBackgroundDesktopTests {
         F.arrive(7, bundleID: F.app, on: core)
         #expect(moved().isEmpty)
         #expect(log.contains { $0.contains("gone or showing") })
+    }
+
+    @Test("a Desktop gone since the call takes no move")
+    func goneSinceStays() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        #expect(open(core).isSuccess)
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        ).filter { $0.id != 11 }
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(moved().isEmpty)
+        #expect(log.contains { $0.contains("gone or showing") })
+    }
+
+    /// The verb's refusal cue never reaches a pocket window.
+    @Test("a pocket window is not sent")
+    func pocketWindowStays() {
+        let core = awaitingCreate()
+        defer { teardown() }
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        core.focusWindow(WindowID(7), warp: false)
+        #expect(core.execute("toggle_pocket_window").isSuccess)
+        #expect(core.state.pocketPhase(of: WindowID(7)) != nil)
+        #expect(!core.sendQuietArrival(WindowID(7)))
+        #expect(!log.contains { $0.contains("refused") })
+    }
+
+    @Test("an expired hold leaves the window, said so")
+    func expiredHoldStays() {
+        let core = awaitingCreate()
+        defer { teardown() }
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        core.settleQuietArrival(WindowID(7), created: false)
+        #expect(moved().isEmpty)
+        #expect(log.contains { $0.contains("no create within") })
     }
 }

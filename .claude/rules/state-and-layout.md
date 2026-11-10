@@ -645,13 +645,14 @@ editing here:
   only through `moveQuietArrival`'s call of `moveToDesktop`'s own
   body, never a copy, in place of the arrival retile, which still
   runs when the send is refused. The verb asks every check that
-  needs no window up front (`spaceLandingRefusal`, a Desktop already
-  shown), so a refusal left for the arrival is the window's own
+  needs no window up front (`spaceLandingRefusal`, shared with
+  `resolveSpaceTarget` and held by `DesktopMoveSpaceGateTests`; a
+  Desktop already shown), so a refusal left for the arrival is the window's own
   (`OpenInBackgroundDesktopTests`, `LaunchFollowSeamTests` ▸
   `wiringsArePinned`). A create trailing its arrival waits through
-  the door's hold: `settleArrival` sends the window through the same
-  `sendQuietArrival` once it lands, standing down on `departing`,
-  and an expired one stays. Accepted residue: on a host with no
+  the door's hold: `settleArrival` hands it to `settleQuietArrival`, which sends it
+  through the same `sendQuietArrival` once it lands, standing down
+  on `departing`, and logs an expired one where it stays. Accepted residue: on a host with no
   create route, a re-track of a window moved back by hand is sent
   again. A new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register

@@ -159,8 +159,13 @@ struct LaunchFollowSeamTests {
         ("let answer = moveToDesktop(", "KiwiCore+QuietDesktop.swift", 1),
         // …and once a late create settles (#2630).
         (
-            "if created, !departing { _ = sendQuietArrival(id) }",
+            "if !departing { settleQuietArrival(id, created: created) }",
             "KiwiCore+ArrivalProvenance.swift", 1
+        ),
+        // The arrival retile's one gate, past a sent window.
+        (
+            "if willRetile, followed != true, !sentAway {",
+            "KiwiCore+Events.swift", 1
         ),
         (
             "launchFollow.noteQuietApps([bundleID], at: now, place: place)",

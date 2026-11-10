@@ -71,6 +71,23 @@ extension KiwiCore {
         }
     }
 
+    /// The held arrival's settle (#2630): a landed create sends it,
+    /// an expired one leaves it where it opened, said so.
+    func settleQuietArrival(_ id: WindowID, created: Bool) {
+        guard created else {
+            if let app = state.windows[id]?.appRef.listKey,
+                launchFollow.quietDesktop(app, at: wallClock()) != nil
+            {
+                onLog(
+                    "open_in_background: w\(id.raw) stays — no create "
+                        + "within \(LaunchFollowIntent.lateCreateBound)s"
+                )
+            }
+            return
+        }
+        _ = sendQuietArrival(id)
+    }
+
     /// The one send, from either door; true where it departed.
     func sendQuietArrival(_ id: WindowID) -> Bool {
         guard let window = state.windows[id],
