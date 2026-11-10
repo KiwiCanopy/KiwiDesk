@@ -110,7 +110,9 @@ extension KiwiCore {
             if effects.closedReturnPlacedAsNew {
                 onLog(
                     "close return: w\(window.id.raw) re-shown — "
-                        + "placed as new, focus taken (#1414/#1561)"
+                        + "placed as new, focus "
+                        + (focusedWindowID == window.id ? "taken" : "left")
+                        + " (#1414/#1561)"
                 )
             }
             guard let provenance else {

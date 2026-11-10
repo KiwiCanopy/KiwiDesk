@@ -20,17 +20,20 @@ extension KiwiCore {
         before: WindowID?,
         now: Date
     ) -> Bool {
-        guard let app = state.windows[id]?.appRef.listKey,
-            let before, before != id,
+        guard let app = state.windows[id]?.appRef.listKey else {
+            return false
+        }
+        // A click on the app's window takes it, whatever the hold.
+        let clicked = recentClickReached(id, now: now)
+        if clicked { launchFollow.liftQuietSpace(app) }  // #3152
+        guard let before, before != id,
             let left = state.windows[before]?.appRef.listKey, left != app,
             launchFollow.holds.echoes(app, at: now)
                 || launchFollow.holds.claim(app, at: now)
         else { return false }
-        guard !recentClickReached(id, now: now),
-            handBack(to: before, from: app, leaving: id)
+        guard !clicked, handBack(to: before, from: app, leaving: id)
         else {
             onLog("open_in_background: w\(id.raw) keeps the focus")
-            launchFollow.holds.liftSpace(app)  // #3152
             return false
         }
         return true
@@ -47,10 +50,7 @@ extension KiwiCore {
     ) {
         guard let app = activation.bundleID?.lowercased() else { return }
         launchFollow.holds.noteActivation(app)
-        guard let focus = focusedWindowID,
-            let left = state.windows[focus]?.appRef.listKey, left != app,
-            launchFollow.holds.claim(app, at: now)
-        else { return }
+        let focus = focusedWindowID
         let clicked =
             lastLeftClick.map {
                 now.timeIntervalSince($0.at) < LaunchFollowIntent.pressGrace
@@ -59,11 +59,16 @@ extension KiwiCore {
         let ours = state.windows.all.contains {
             $0.appRef.listKey == app && freshSelfRaise($0.id, now: now)
         }
+        // The user took the app, whatever the hold (#3152).
+        if clicked || ours { launchFollow.liftQuietSpace(app) }
+        guard let focus,
+            let left = state.windows[focus]?.appRef.listKey, left != app,
+            launchFollow.holds.claim(app, at: now)
+        else { return }
         guard !clicked, !ours,
             handBack(to: focus, from: app, leaving: nil)
         else {
             onLog("open_in_background: \(app) keeps the focus")
-            launchFollow.holds.liftSpace(app)  // #3152
             return
         }
         // The activation's own focus read is asked after this.

@@ -142,17 +142,20 @@ struct LaunchFollowSeamTests {
         ),
         // A quiet open's mark decides the verdict, Space and all.
         (
-            "launchFollow.opensQuietly(app, at: wallClock())",
+            "launchFollow.opensQuietly(app, at: now)",
             "KiwiCore+ArrivalFocus.swift", 1
         ),
-        ("launchFollow.holds.spaces[app]", "KiwiCore+ArrivalFocus.swift", 1),
-        ("launchFollow.holds.liftSpace(", "KiwiCore+BackgroundHold.swift", 2),
-        // `open_in_background` (#3141): marked quiet, a hold owed
-        // per app, lifted by naming the app, claimed at both doors.
         (
-            "launchFollow.noteQuietApps([bundleID]",
+            "launchFollow.quietSpace(app, at: now)",
+            "KiwiCore+ArrivalFocus.swift", 1
+        ),
+        ("launchFollow.liftQuietSpace(", "KiwiCore+BackgroundHold.swift", 2),
+        (
+            "launchFollow.noteQuietApps([bundleID], at: now, into: space)",
             "KiwiCore+OpenInBackground.swift", 1
         ),
+        // `open_in_background` (#3141): marked quiet, a hold owed
+        // per app, lifted by naming the app, claimed at both doors.
         ("launchFollow.holds.note(", "KiwiCore+OpenInBackground.swift", 1),
         ("holds.lift(", "LaunchFollowIntent.swift", 1),
         ("launchFollow.holds.claim(", "KiwiCore+BackgroundHold.swift", 2),

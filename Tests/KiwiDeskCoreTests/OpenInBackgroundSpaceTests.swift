@@ -137,4 +137,34 @@ struct OpenInBackgroundSpaceTests {
         F.arrive(7, bundleID: F.app, on: core)
         #expect(core.state.workspaces.space(of: WindowID(7)) == home)
     }
+
+    /// A paid hand-back leaves no hold, and the user's click still
+    /// ends the filing.
+    @Test("a click after a paid hand-back ends the filing")
+    func clickAfterPaidHandBack() {
+        let (core, _) = Self.makeCore()
+        let home = core.state.workspaces.activeSpace
+        #expect(Self.open(core).isSuccess)
+        F.arrive(7, bundleID: F.app, on: core)
+        core.handle(.windowFocused(WindowID(7)))  // handed back, paid
+        core.lastLeftClick = (core.wallClock(), .zero, WindowID(7))
+        core.handle(.windowFocused(WindowID(7)))
+        F.arrive(8, bundleID: F.app, on: core)
+        #expect(core.state.workspaces.space(of: WindowID(8)) == home)
+    }
+
+    /// The Space is the mark's: a later quiet open names none.
+    @Test("a later quiet open does not inherit the named Space")
+    func spaceEndsWithTheMark() {
+        let (core, _) = Self.makeCore()
+        let home = core.state.workspaces.activeSpace
+        #expect(Self.open(core).isSuccess)
+        let late = core.wallClock().addingTimeInterval(
+            LaunchFollowIntent.quietBound + 1
+        )
+        core.wallClock = { late }
+        core.launchFollow.noteQuietApps([F.app], at: late)
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(core.state.workspaces.space(of: WindowID(7)) == home)
+    }
 }

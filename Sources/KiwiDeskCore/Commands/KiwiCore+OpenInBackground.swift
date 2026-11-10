@@ -36,8 +36,8 @@ extension KiwiCore {
             return .fail("app not found: \(bundleID)")
         }
         let now = wallClock()
-        launchFollow.noteQuietApps([bundleID], at: now)
-        launchFollow.holds.note(bundleID, at: now, into: space)
+        launchFollow.noteQuietApps([bundleID], at: now, into: space)
+        launchFollow.holds.note(bundleID, at: now)
         return .ok()
     }
 

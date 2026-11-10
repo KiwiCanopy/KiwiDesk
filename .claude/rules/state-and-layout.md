@@ -629,12 +629,16 @@ editing here:
   retires. The hand-back is `focusWindow`, the command
   path (#1281), and drops the app's windows from the #1161 ledger
   so a second take is honored. **A Space the open named (#3152)
-  rides the quiet case** (`.quiet(into:)`, from `holds.spaces`):
-  it takes the app rule's place in the fold, below `held` and
-  through the rule's gate, is re-checked against a living Space
-  there, never follows, and ends where the mark ends or where the
-  user takes the app — the doors' unpaid branches lift it
-  (`holds.liftSpace`, `OpenInBackgroundSpaceTests`). A new door claims through
+  is the quiet mark's own** (`noteQuietApps(_:at:into:)`, read as
+  `.quiet(into:)`): it takes the app rule's place in the fold,
+  below `held` and through the rule's gate, is re-checked against
+  a living Space there, and never follows. A new quiet-mark writer
+  files a Space only through that `into:`, and a new "the user took
+  the app" moment lifts it with `liftQuietSpace`, beside the two
+  doors' click reads and `record`, whatever the hold's state
+  (`OpenInBackgroundSpaceTests`). The arrival's #1322 read is the
+  one arrival read that may ask LaunchServices, for sibling-process
+  apps only, and is no precedent for another. A new door claims through
   `holds.claim(` and joins `LaunchFollowSeamTests`' register
   (`OpenInBackgroundHoldTests`, `OpenInBackgroundSeamTests`).
   **Every reader of "was this arrival created" goes through ONE
