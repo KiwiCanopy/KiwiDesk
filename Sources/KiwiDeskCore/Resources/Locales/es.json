@@ -2456,6 +2456,8 @@
   "space_override.floating.no_layout": "Floating no tiene anulaciones de disposición.",
   "space_override.fraction": "%1$d de %2$d establecidos",
   "space_override.gaps.floating": "Floating no coloca ventanas, así que este espaciado se aplica cuando este espacio organice en mosaico.",
+  "space_override.gaps.monocle_maximizes": "«%1$@» está activado para Monocle, así que este espacio no muestra espaciado.",
+  "space_override.gaps.monocle_maximizes.xref": "«%1$@» está activado para Monocle, así que este espacio no muestra espaciado — cámbialo en %2$@.",
   "space_override.gaps.value": "externo %1$@, interno %2$@",
   "space_override.inherits": "sigue los valores predeterminados de %1$@ · %2$@",
   "space_override.inherits_page": "sigue %1$@ · %2$@",

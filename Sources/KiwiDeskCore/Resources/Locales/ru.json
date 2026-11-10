@@ -2456,6 +2456,8 @@
   "space_override.floating.no_layout": "У Floating нет переопределений раскладки.",
   "space_override.fraction": "%1$d из %2$d задано",
   "space_override.gaps.floating": "Floating не расставляет окна, поэтому эти отступы действуют, когда это пространство раскладывает окна плиткой.",
+  "space_override.gaps.monocle_maximizes": "Параметр «%1$@» включён для Monocle, поэтому это пространство отображается без отступов.",
+  "space_override.gaps.monocle_maximizes.xref": "Параметр «%1$@» включён для Monocle, поэтому это пространство отображается без отступов — измени это в разделе %2$@.",
   "space_override.gaps.value": "внешний %1$@, внутренний %2$@",
   "space_override.inherits": "следует значениям по умолчанию %1$@ · %2$@",
   "space_override.inherits_page": "следует %1$@ · %2$@",

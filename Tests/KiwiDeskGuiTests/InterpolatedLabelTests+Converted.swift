@@ -3,11 +3,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// `InterpolatedLabelTests`' floor register, split out under
-/// AGENTS.md §2.1 when the `i18n/residue-round` batch (#830)
-/// took the suite past the 350-line ceiling. It sits in its own
-/// file for the reason `rule-authoring.md` gives for leaving a
-/// count beside its register: an author adding a frame has every
+/// `InterpolatedLabelTests`' floor register, in its own file
+/// for the reason `rule-authoring.md` gives for leaving a count
+/// beside its register: an author adding a frame has every
 /// other frame's count on screen while they do it.
 ///
 /// The assertions, and what this floor can and cannot see, are in
@@ -92,6 +90,8 @@ extension InterpolatedLabelTests {
         "shortcuts.temporary_space.note": 1,
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
+        "space_override.gaps.monocle_maximizes": 1,  // #3123
+        "space_override.gaps.monocle_maximizes.xref": 1,
         // The `.gates` twins of the two above. They quoted the
         // same labels as literal text and were invisible to the
         // scan — a fully-quoting frame has no nested `L(` to

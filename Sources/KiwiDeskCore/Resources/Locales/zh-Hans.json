@@ -2456,6 +2456,8 @@
   "space_override.floating.no_layout": "浮动没有布局覆盖。",
   "space_override.fraction": "已设置 %1$d / %2$d",
   "space_override.gaps.floating": "浮动不排列窗口，因此这些间距在此空间平铺时生效。",
+  "space_override.gaps.monocle_maximizes": "单窗的“%1$@”已开启，因此此空间不显示间距。",
+  "space_override.gaps.monocle_maximizes.xref": "单窗的“%1$@”已开启，因此此空间不显示间距，请在%2$@中更改。",
   "space_override.gaps.value": "外 %1$@，内 %2$@",
   "space_override.inherits": "遵循 %1$@ 默认值 · %2$@",
   "space_override.inherits_page": "遵循 %1$@ · %2$@",
