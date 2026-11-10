@@ -20,7 +20,8 @@ public enum AwayMoveRefusal: Sendable, Equatable {
     /// This macOS has no private Desktop bridge (os-private-apis.md).
     case noDesktopBridge
 
-    /// The verb's failure text.
+    /// The failure text: the verb's own for the window's cases; the
+    /// parse answers `.unreachable` and `.noDesktopBridge` itself.
     var message: String {
         switch self {
         case .pocketed: KiwiCore.pocketedMoveRefusal
@@ -77,8 +78,18 @@ extension KiwiCore {
         if let refusal = awayMoveVerdict(away, to: target, follow: follow) {
             return refusal
         }
-        if awayIsSticky(away) { return .sticky }
-        if desktopMemory.crossingsInFlight.contains(window) {
+        return awayLateRefusal(away, naming: true)
+    }
+
+    /// The half after the Space parse: a sticky window refuses a
+    /// named Space, and any move waits while a crossing lands, since
+    /// the landing would undo it.
+    func awayLateRefusal(
+        _ away: AwayWindow,
+        naming space: Bool
+    ) -> AwayMoveRefusal? {
+        if space, awayIsSticky(away) { return .sticky }
+        if desktopMemory.crossingsInFlight.contains(away.id) {
             return .stillLanding
         }
         return nil

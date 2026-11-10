@@ -46,6 +46,8 @@ extension JumpPanelController {
             model.reloadDesktops(selecting: target)
             if let words = Self.words(failed, in: overview) {
                 model.refuseDesktops(words)
+            } else {
+                model.onAnnounce(model.desktopsSpoken)
             }
             return
         }

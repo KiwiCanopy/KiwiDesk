@@ -26,19 +26,14 @@ extension KiwiCore {
         case .none:
             explicit = nil
         case .space(let space, let landing):
-            guard !awayIsSticky(away) else {
-                return .fail(AwayMoveRefusal.sticky.message)
-            }
             explicit = space
             crossingBase = landing.flatMap {
                 crossesScreens(away.id, to: $0, target)
                     ? crossingBaseOfAway(away.id) : nil
             }
         }
-        // Any move of a window whose crossing is landing, or that
-        // landing would undo it.
-        guard !desktopMemory.crossingsInFlight.contains(away.id) else {
-            return .fail(AwayMoveRefusal.stillLanding.message)
+        if let refusal = awayLateRefusal(away, naming: explicit != nil) {
+            return .fail(refusal.message)
         }
         guard let crossingBase, let explicit else {
             return landAway(away, to: target, explicit, follow: follow)

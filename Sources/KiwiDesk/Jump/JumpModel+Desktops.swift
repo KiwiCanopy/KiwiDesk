@@ -160,8 +160,10 @@ extension JumpModel {
     /// again and selects `target`'s line.
     func reloadDesktops(selecting target: DesktopsTarget) {
         guard scope == .desktops else { return }
+        let query = desktops?.query ?? ""
         enterDesktops()
         guard var state = desktops else { return }
+        if !query.isEmpty { state.setQuery(query) }
         let overview = state.overview
         for (screen, row) in overview.screens.enumerated()
         where row.display == target.display {

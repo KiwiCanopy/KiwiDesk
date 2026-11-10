@@ -29,11 +29,15 @@ struct DesktopOverviewSeedTests {
         #expect(row.kind == .navigation)
     }
 
-    @Test("both bases seed the row unmoved")
+    @Test("each base seeds the row on its own modifiers")
     func seededOnEitherBase() {
         for base in ShortcutBase.allCases {
-            #expect(seeded(base).filter { $0.lua == row.lua } == [row])
+            #expect(
+                seeded(base).filter { $0.lua == row.lua }
+                    == [base.rebased(row)]
+            )
         }
+        #expect(ShortcutBase.standard.rebased(row) == row)
     }
 
     @Test("generation 13 is the row alone")
@@ -45,7 +49,9 @@ struct DesktopOverviewSeedTests {
                 existing: [],
                 above: 12,
                 base: .hyper
-            ) == [row] + DefaultKeybindings.rows(ofGeneration: 14)
+            )
+                == [ShortcutBase.hyper.rebased(row)]
+                + DefaultKeybindings.rows(ofGeneration: 14)
         )
     }
 

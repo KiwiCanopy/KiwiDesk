@@ -999,11 +999,10 @@ last, that window selected
 :::
 
 :::unreleased
-`⌃⌥O` opens KiwiHub's **Desktop overview**, and closes it
-again. While KiwiHub
-has the keyboard, only a modifier tap set to one of its sides
-works, as that side's shortcut does; while another KiwiDesk panel
-has it, no modifier tap does.
+`⌃⌥O` opens KiwiHub's **Desktop overview**, and closes it again.
+While KiwiHub has the keyboard, only a modifier tap set to one of
+its sides works, as that side's shortcut does; while another
+KiwiDesk panel has it, no modifier tap does.
 :::
 
 `⌃⌥R` returns the focused space's sizes to what your profile set

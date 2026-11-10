@@ -22,10 +22,7 @@ struct DesktopsFooterState: Equatable {
         isCarrying = state.isCarrying
         selectionPicked = state.window.map(state.carried.contains) ?? false
         selectionPickable =
-            state.window.map { id in
-                state.carried.contains(id)
-                    || state.overview.window(id)?.block == nil
-            } ?? false
+            state.window.map { state.pickBlock($0) == nil } ?? false
         digits = state.digitCount
         self.refusal = refusal
     }

@@ -142,4 +142,30 @@ struct DesktopOverviewAwayMoveTests {
         )
         #expect(response.error == AwayMoveRefusal.followHidden.message)
     }
+
+    /// The verb fails with the verdict's own words, so the panel's
+    /// reason is the one the move would give.
+    @Test("a sticky window refuses a named Space in both")
+    func stickyAgrees() {
+        let core = makeCore()
+        defer { teardown() }
+        var window = ManagedWindow(
+            id: away,
+            pid: 900_001,
+            appName: "Away",
+            title: "Elsewhere"
+        )
+        window.stickyScope = .global
+        core.state.rememberStickyIntent(of: window)
+        #expect(
+            core.awayMoveRefusal(away, toDesktop: 10, follow: false)
+                == .sticky
+        )
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(1), .string("mail"), .number(Double(away.raw))]
+        )
+        #expect(response.error == AwayMoveRefusal.sticky.message)
+        #expect(DesktopVerbBridge.moves.isEmpty)
+    }
 }
