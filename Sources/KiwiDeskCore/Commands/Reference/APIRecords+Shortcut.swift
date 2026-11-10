@@ -24,8 +24,7 @@ extension APIReference {
         ),
         "remove_sequence": APIRecord(
             "Removes the key sequence a leader chord opens in the "
-                + "default layer, with every key under it, and saves at "
-                + "once.",
+                + "default layer, whole, and saves at once.",
             .text("leader")
         ),
     ]

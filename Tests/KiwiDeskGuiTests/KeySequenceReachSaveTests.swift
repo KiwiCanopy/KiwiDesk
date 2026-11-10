@@ -137,9 +137,10 @@ struct KeySequenceReachSaveTests {
             from: leader,
             to: moved
         )
-        let at = try #require(
-            model.config.layers[0].bindings.firstIndex(where: \.isSequence)
-        )
+        let found = model.config.layers[0].bindings.firstIndex {
+            $0.isSequence
+        }
+        let at = try #require(found)
         model.config.layers[0].bindings[at].combo = moved
         model.updateActiveProfile()
 
@@ -159,9 +160,10 @@ struct KeySequenceReachSaveTests {
         )
         try model.core.profiles.write(work)
         model.reload()
-        let at = try #require(
-            model.config.layers[0].bindings.firstIndex(where: \.isSequence)
-        )
+        let found = model.config.layers[0].bindings.firstIndex {
+            $0.isSequence
+        }
+        let at = try #require(found)
         model.config.layers[0].bindings[at].label = "Mine"
         model.updateActiveProfile()
 
@@ -193,9 +195,10 @@ struct KeySequenceReachSaveTests {
             from: leader,
             to: moved
         )
-        let at = try #require(
-            model.config.layers[0].bindings.firstIndex(where: \.isSequence)
-        )
+        let found = model.config.layers[0].bindings.firstIndex {
+            $0.isSequence
+        }
+        let at = try #require(found)
         model.config.layers[0].bindings[at].combo = moved
         #expect(model.keyReach(key(moved))?.clashing == ["Home"])
         model.updateActiveProfile()
