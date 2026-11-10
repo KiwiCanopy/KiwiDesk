@@ -205,7 +205,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         ticked: Set<String>,
         editing: String,
         chord: (String, Value) -> Chord,
-        clashes: (String, String) -> Bool = { _, _ in false }
+        clashes: (String, String) -> Bool
     ) {
         let combo = chord(key, value)
         let previous = old.map { chord(key, $0) }
