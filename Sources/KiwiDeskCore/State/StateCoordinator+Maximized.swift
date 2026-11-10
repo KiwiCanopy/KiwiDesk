@@ -198,4 +198,24 @@ extension StateCoordinator {
         handMaximizedWindow(of: space) != nil
             && space.maximized?.follows == true
     }
+
+    /// Whether a focus on `space` re-points a maximize: a hand
+    /// Maximize that follows focus (#3063) or KiwiVision's fill
+    /// (#3064).
+    public func maximizeFollowsFocus(on space: Space) -> Bool {
+        followsMaximize(of: space) || visionFillStands(on: space)
+    }
+
+    /// A copy with every maximize a focus on `space` would re-point
+    /// dropped — what a check of a focus's own layout motion
+    /// compares, since that maximize follows the focus by ruling
+    /// (#3177). A hand Maximize that ends on focus stays.
+    func droppingFocusFollowers(on space: SpaceID) -> StateCoordinator {
+        var copy = self
+        _ = copy.setVisionFill(nil)
+        if let held = workspaces[space], followsMaximize(of: held) {
+            copy.workspaces.withSpace(space) { $0.endMaximize() }
+        }
+        return copy
+    }
 }
