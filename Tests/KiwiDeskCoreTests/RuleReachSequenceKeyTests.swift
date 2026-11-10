@@ -105,4 +105,22 @@ struct RuleReachSequenceKeyTests {
             KeyRivals(t).rival(of: key, for: "Home", combo: leader) == row
         )
     }
+
+    @Test("a tick never takes a chord across a sequence and a row")
+    func tickedClashLeavesOut() {
+        let home = KeyLayerOverride(
+            layers: layers([KeyBinding(combo: leader, lua: left)])
+        )
+        var t = table(base: [], home: home)
+        t.applyKey(
+            key,
+            value: Table.value(of: tree()),
+            reach: .listed(["Work", "Home"]),
+            editing: "Work"
+        )
+        let row = Table.keyID(layer: "default", lua: left)
+        #expect(t.resolved(row, for: "Home") == leader)
+        #expect(t.resolved(key, for: "Home") == nil)
+        #expect(t.resolved(key, for: "Work") == Table.value(of: tree()))
+    }
 }

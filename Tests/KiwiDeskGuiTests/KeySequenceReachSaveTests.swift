@@ -169,4 +169,41 @@ struct KeySequenceReachSaveTests {
         #expect(try own(model, "Work") == [tree(nil, "Mine")])
         #expect(try own(model, "Home").isEmpty)
     }
+
+    @Test("a leader re-recorded onto a profile's row keeps that row")
+    func reRecordOntoAClash() throws {
+        let model = try makeModel()
+        let moved = "ctrl+alt+b"
+        var home = try model.core.profiles.read(name: "Home")
+        home.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
+                    bindings: [KeyBinding(combo: moved, lua: left)]
+                )
+            ]
+        )
+        try model.core.profiles.write(home)
+        model.reload()
+        model.config.layers[0].bindings.append(tree())
+        model.setAllProfiles(.key, key(), false)
+        model.setProfile(.key, key(), "Home", true)
+        model.carrySequenceReach(
+            layer: KeyLayer.defaultName,
+            from: leader,
+            to: moved
+        )
+        let at = try #require(
+            model.config.layers[0].bindings.firstIndex(where: \.isSequence)
+        )
+        model.config.layers[0].bindings[at].combo = moved
+        #expect(model.keyReach(key(moved))?.clashing == ["Home"])
+        model.updateActiveProfile()
+
+        let stored = try model.core.profiles.read(name: "Home").layers
+        let homeRows = stored?.layers.first?.bindings ?? []
+        #expect(homeRows.contains { $0.lua == left && $0.combo == moved })
+        #expect(try own(model, "Home").isEmpty)
+        #expect(try own(model, "Work") == [tree(moved)])
+    }
 }

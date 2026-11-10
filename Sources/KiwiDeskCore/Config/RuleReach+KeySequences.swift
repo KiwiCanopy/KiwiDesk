@@ -91,12 +91,12 @@ extension RuleReachTable where Value == String {
             return
         }
         var rows = layers[at].bindings
-        let place = rows.firstIndex { $0.isSequence && $0.combo == leader }
-        rows.removeAll {
-            $0.combo == leader && ($0.isSequence || !trees.isEmpty)
+        if !trees.isEmpty {
+            rows.removeAll { $0.combo == leader && !$0.isSequence }
         }
-        let index = min(place ?? rows.count, rows.count)
-        rows.insert(contentsOf: trees, at: index)
+        let place = rows.firstIndex { $0.isSequence && $0.combo == leader }
+        rows.removeAll { $0.isSequence && $0.combo == leader }
+        rows.insert(contentsOf: trees, at: place ?? rows.count)
         layers[at].bindings = rows
     }
 
@@ -118,6 +118,13 @@ extension RuleReachTable where Value == String {
                 [$0]
             } ?? []
         )
+    }
+
+    /// Whether `key` taking `rival`'s chord in a profile is a clash
+    /// the reach refuses rather than a takeover: a key sequence on
+    /// either side (#3124 ▸ Ruling 1).
+    public static func clashes(_ key: String, _ rival: String) -> Bool {
+        isSequenceKey(key) || isSequenceKey(rival)
     }
 
     /// Whether two of `key`'s values hold the same chord in rival

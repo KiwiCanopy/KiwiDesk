@@ -97,9 +97,7 @@ extension SettingsModel {
             guard let rival = rivals.rival(of: key, for: profile, combo: combo)
             else { continue }
             names[profile] = keyName(rival, templates: reach.keyTemplates)
-            if RuleReachTable<String>.isSequenceKey(key)
-                || RuleReachTable<String>.isSequenceKey(rival)
-            {
+            if RuleReachTable<String>.clashes(key, rival) {
                 clashing.insert(profile)
             }
         }

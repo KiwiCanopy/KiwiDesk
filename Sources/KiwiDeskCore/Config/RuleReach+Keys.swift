@@ -106,7 +106,8 @@ extension RuleReachTable where Value == String {
             rivals: rivals(of: key),
             ticked: ticked,
             editing: editing,
-            chord: Self.chord(of:value:)
+            chord: Self.chord(of:value:),
+            clashes: Self.clashes
         )
     }
 

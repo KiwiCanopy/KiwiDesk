@@ -194,8 +194,9 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     /// a profile the user `ticked` gives its rival up; a profile that
     /// did not keeps its own rival, which wins on that combo, so it
     /// reads as leaving `key` out. `chord` reads the combo a key holds
-    /// at a value — a key sequence carries its leader in its key
-    /// (#3124).
+    /// at a value — a key sequence carries its leader in its key — and
+    /// a tick never gives up a rival `clashes` names, so `key` is left
+    /// out there instead (#3124 ▸ Ruling 1).
     mutating func takeOver<Chord: Equatable>(
         _ key: String,
         value: Value,
@@ -203,7 +204,8 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         rivals: [String],
         ticked: Set<String>,
         editing: String,
-        chord: (String, Value) -> Chord
+        chord: (String, Value) -> Chord,
+        clashes: (String, String) -> Bool = { _, _ in false }
     ) {
         let combo = chord(key, value)
         let previous = old.map { chord(key, $0) }
@@ -222,7 +224,9 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
                 holds($0, resolved($0, for: profile), combo)
             }
             guard !held.isEmpty else { continue }
-            if ticked.contains(profile) {
+            if ticked.contains(profile),
+                !held.contains(where: { clashes(key, $0) })
+            {
                 for rival in held { setEntry(rival, for: profile, .some(nil)) }
             } else {
                 setEntry(key, for: profile, .some(nil))

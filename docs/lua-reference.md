@@ -7750,8 +7750,9 @@ the leader's modifiers still held, `w` does not fire, and
 and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
-and is flagged. The CLI can neither bind nor remove a sequence. In
-Settings, Shortcuts & Gestures ▸ Key sequences records one.
+and is flagged. The CLI cannot bind a sequence;
+`shortcut.remove_sequence` removes one. In Settings, Shortcuts &
+Gestures ▸ Key sequences records one.
 Under Secure Input see
 [Accepted Limitations](accepted-limitations.md).
 

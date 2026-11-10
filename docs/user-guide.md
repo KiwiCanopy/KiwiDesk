@@ -1183,10 +1183,10 @@ own. Ticking a profile that uses the key for something else
 gives the key to this shortcut there.
 
 :::unreleased
-A key sequence's **Applies to** is on its first key's row, and
-covers the whole sequence. A profile that uses that key for a
-shortcut, or a shortcut's key for a sequence, cannot be ticked;
-remove the other one there first.
+A key sequence's **Applies to** is on its first key's row and
+covers the whole sequence. Where a sequence and a shortcut would
+share one key in a profile, that profile cannot be ticked: the key
+is never taken over.
 :::
 
 A new layer also carries the `⌃⌥,` Open Settings row.
