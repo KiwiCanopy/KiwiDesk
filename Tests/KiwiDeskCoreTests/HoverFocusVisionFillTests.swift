@@ -7,17 +7,22 @@ import Testing
 private let bounds = CGRect(x: 0, y: 0, width: 1600, height: 1000)
 private let ids = (1...3).map { WindowID(UInt32($0)) }
 
-/// Hover focus under KiwiVision's maximize (#3177): the fill
-/// follows the focus by ruling (#3064 point 6), so its own move is
-/// no reason for the rest to stand down — a rest on a neighbour the
-/// fill leaves in view focuses it and the fill follows.
-@Suite("Hover focus moves KiwiVision's fill (#3177)", .serialized)
+/// Hover focus under a maximize that follows focus (#3177):
+/// KiwiVision's fill (#3064 point 6) and a following hand Maximize
+/// (#3063) re-point by ruling, so their own move is no reason for
+/// the rest to stand down; a layout's own motion still is.
+@Suite("Hover focus moves a following maximize (#3177)", .serialized)
 @MainActor
 struct HoverFocusVisionFillTests {
-    /// Three tiled BSP windows, the first focused and filled at
-    /// `fill`, state frames where the pass sent them, the filled
-    /// window in front.
-    private func makeCore(fill: String) -> KiwiCore {
+    /// Three tiled windows in `mode`, the first focused and filled
+    /// at `fill` — by KiwiVision, or by a hand Maximize following
+    /// focus as `hand` says — state frames where the pass sent
+    /// them, the focused window in front.
+    private func makeCore(
+        fill: String,
+        mode: String = "bsp",
+        hand: Bool? = nil
+    ) -> KiwiCore {
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -41,11 +46,26 @@ struct HoverFocusVisionFillTests {
         let space = core.state.workspaces.space(of: ids[0])!
         core.execute(
             "set_mode",
-            args: [.string(space.raw), .string("bsp")]
+            args: [.string(space.raw), .string(mode)]
         )
+        if mode == "scrolling" {
+            core.execute("scroll.set_slot_size", args: [.number(600)])
+            core.execute("scroll.set_anchor", args: [.string("center")])
+        }
         core.focusWindow(ids[0], warp: false)
-        core.execute("kiwivision.set_maximize", args: [.string(fill)])
-        core.execute("kiwivision.toggle")
+        if let follow = hand {
+            core.execute(
+                "maximize.set_follow_focus",
+                args: [.bool(follow)]
+            )
+            core.execute("toggle_maximized", args: [.string(fill)])
+        } else {
+            core.execute(
+                "kiwivision.set_maximize",
+                args: [.string(fill)]
+            )
+            core.execute("kiwivision.toggle")
+        }
         core.tiler.settings.mouse.hoverFocus = true
         core.frontmostPIDProvider = { pid(ids[0]) }
         settle(core)
@@ -59,8 +79,10 @@ struct HoverFocusVisionFillTests {
         for (id, frame) in placed {
             core.state.apply(.windowMoved(id, frame))
         }
-        let front = core.focusedWindowID
-        let order = ids.sorted { a, _ in a == front }
+        let order =
+            core.focusedWindowID.map { focused in
+                [focused] + ids.filter { $0 != focused }
+            } ?? ids
         core.frontStack = {
             order.map {
                 KiwiCore.FrontWindow(
@@ -87,6 +109,23 @@ struct HoverFocusVisionFillTests {
         return nil
     }
 
+    /// A neighbour in view and a point on it.
+    private func neighbourInView(
+        _ core: KiwiCore
+    ) throws -> (WindowID, CGPoint) {
+        let neighbour = try #require(
+            ids.dropFirst().first { shown(core, $0) != nil }
+        )
+        return (neighbour, try #require(shown(core, neighbour)))
+    }
+
+    private func rest(_ core: KiwiCore, at point: CGPoint) {
+        core.focusUnderRestingPointer(
+            at: GeometryUtils.axPoint(point),
+            armedFocus: core.focusedWindowID
+        )
+    }
+
     @Test(
         "A rest on a neighbour in view focuses it and moves the fill",
         arguments: ["height", "width"]
@@ -94,17 +133,38 @@ struct HoverFocusVisionFillTests {
     func restMovesTheFill(fill: String) throws {
         let core = makeCore(fill: fill)
         #expect(core.state.visionFill.drawn == [ids[0]])
-        let neighbour = try #require(
-            ids.dropFirst().first { shown(core, $0) != nil }
-        )
-        let point = try #require(shown(core, neighbour))
+        let (neighbour, point) = try neighbourInView(core)
         #expect(core.hoverTarget(at: point)?.id == neighbour)
-        core.focusUnderRestingPointer(
-            at: GeometryUtils.axPoint(point),
-            armedFocus: core.focusedWindowID
-        )
+        rest(core, at: point)
         #expect(core.focusedWindowID == neighbour)
         #expect(core.state.visionFill.drawn == [neighbour])
+    }
+
+    @Test(
+        "A following hand Maximize moves; an ending one stands down",
+        arguments: [true, false]
+    )
+    func handMaximize(follows: Bool) throws {
+        let core = makeCore(fill: "height", hand: follows)
+        let space = try #require(core.activeSpace)
+        #expect(core.state.maximizedWindow(of: space) == ids[0])
+        let (neighbour, point) = try neighbourInView(core)
+        let target = core.hoverTarget(at: point)?.id
+        #expect((target == neighbour) == follows)
+        guard follows else { return }
+        rest(core, at: point)
+        let now = try #require(core.activeSpace)
+        #expect(core.state.maximizedWindow(of: now) == neighbour)
+    }
+
+    /// The fill aside, a focus that pans the row still stands the
+    /// rest down (#1869).
+    @Test("A rest whose focus pans the row still stands down")
+    func panStandsDown() throws {
+        let core = makeCore(fill: "height", mode: "scrolling")
+        #expect(core.state.visionFill.drawn == [ids[0]])
+        let (_, point) = try neighbourInView(core)
+        #expect(core.hoverTarget(at: point) == nil)
     }
 }
 

@@ -115,20 +115,18 @@ extension KiwiCore {
     }
 
     /// Whether focusing `id` would move any window the layouts
-    /// place, KiwiVision's fill aside — the same `placedFrames`
-    /// reading `scrollTargetIsRevealed` takes, over a copy of the
-    /// state with the focus written where `focusWindow` writes it:
-    /// the HOME Space, so a sticky traveler's render Space anchors
-    /// on it.
+    /// place, a maximize that follows the focus aside — the same
+    /// `placedFrames` reading `scrollTargetIsRevealed` takes, over a
+    /// copy of the state with the focus written where `focusWindow`
+    /// writes it: the HOME Space, so a sticky traveler's render
+    /// Space anchors on it.
     private func focusMovesWindows(
         _ id: WindowID,
         in space: SpaceID
     ) -> Bool {
-        // Activated alike, so only the focus's own effect counts.
-        // KiwiVision's fill follows the focus by ruling, so its
-        // move is no reason to stand down (#3064 point 6, #3177).
-        var base = state
-        _ = base.setVisionFill(nil)
+        // Activated alike, so only the focus's own effect counts;
+        // a maximize that follows the focus moves by ruling (#3177).
+        var base = state.droppingFocusFollowers(on: space)
         base.workspaces.activate(space)
         var probe = base
         probe.workspaces.focus(

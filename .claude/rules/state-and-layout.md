@@ -2536,7 +2536,15 @@ editing here:
   `workspaces.activeSpace` alone, its shape resolved for that
   Space's screen, so a path that changes the active Space and reads
   the shape before its own retile calls
-  `refillVision(retiling: false)` first. A float fill
+  `refillVision(retiling: false)` first. A check that compares
+  where windows land before and after a focus — hover focus's
+  #1869 stand-down — judges the copy
+  `StateCoordinator.droppingFocusFollowers(on:)` returns, so a
+  maximize that follows focus (`maximizeFollowsFocus(on:)`, the
+  predicate `focusRetiles` reads too) never stands it down, while
+  a hand Maximize that ends on focus still does (#3177,
+  `HoverFocusVisionFillTests`); a new maximize kind that follows
+  focus joins both. A float fill
   (#3036) widens both float stand-downs together —
   `maximizedTiled` and `visionFilledWindow` — and
   `retileEndingMaximize`'s spring promise with them. **What it fills is read through

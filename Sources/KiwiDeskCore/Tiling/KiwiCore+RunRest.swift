@@ -69,8 +69,7 @@ extension KiwiCore {
     /// and the focus report share.
     func focusRetiles(to id: WindowID) -> Bool {
         activeSpace?.mode.isFocusDriven == true || focusScrollsRun(to: id)
-            || activeSpace.map(state.followsMaximize(of:)) == true
-            || activeSpace.map(state.visionFillStands(on:)) == true
+            || activeSpace.map(state.maximizeFollowsFocus(on:)) == true
     }
 
     /// The windows the active Space's runs would park as the
