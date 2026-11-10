@@ -37,10 +37,13 @@ extension KiwiCore {
                 id,
                 text: L(
                     "maximize.refused.monocle",
-                    "Monocle already fills the screen"
+                    "On %1$@, a tiled window already fills the screen",
+                    L("layout.monocle.name", "Monocle")
                 )
             )
-            return .fail("monocle already fills the screen")
+            return .fail(
+                "on monocle, a tiled window already fills the screen"
+            )
         }
         if state.handMaximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) {

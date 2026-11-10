@@ -53,8 +53,7 @@ extension SpaceOverrideRows {
     private var anchorRow: some View {
         let label = L("layout_defaults.maximize.anchor", "Maximize from")
         let followed =
-            screenShape.map { g.maximize.anchor[$0] }
-            ?? MaximizeSettings.defaultAnchor(.widescreen)
+            g.maximize.anchor[screenShape ?? .widescreen]
         return OverridePickerRow(
             label: label,
             value: $model.config.settings.maximize.anchorOverride[space],
@@ -74,10 +73,12 @@ extension SpaceOverrideRows {
     }
 
     /// The shape of the one screen this Space lays out on: its pin,
-    /// else the only screen connected; nil where it may move.
+    /// the screen an offline pin falls back to, else the only screen
+    /// connected; nil where it may move.
     var screenShape: ScreenShape? {
         switch model.spacePlacement(of: space) {
-        case .pinned(let display)?:
+        case .pinned(let display)?,
+            .pinnedAbsent(intent: _, fallback: let display)?:
             return ScreenShape.of(display)
         default:
             return model.displays.count == 1
@@ -108,9 +109,10 @@ extension SpaceOverrideRows {
         if mode == .monocle {
             return L(
                 "space_override.maximize.caption.monocle",
-                "On Monocle these apply to floating windows: a tiled "
+                "On %1$@ these apply to floating windows: a tiled "
                     + "window already fills the screen. The values stay "
-                    + "with this Space on any screen."
+                    + "with this Space on any screen.",
+                LayoutMode.monocle.displayName
             )
         }
         return L(

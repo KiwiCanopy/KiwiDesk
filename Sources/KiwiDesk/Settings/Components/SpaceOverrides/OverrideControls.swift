@@ -28,7 +28,7 @@ struct OverrideChrome<Content: View>: View {
     var inheritsName: String? = nil
     /// The whole inheriting readout, where no "follows" frame with a
     /// value fits — a Maximize row whose Space has no single screen
-    /// (#3090).
+    /// (#3090). It outranks `inheritsName`.
     var inheritedLine: String? = nil
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed

@@ -172,9 +172,10 @@ struct CoreLocalizationBoundaryTests {
         // Core draws.
         "App/KiwiCore+HyperBarePress.swift": 1,
         // A refused Maximize (#2448, #3036), a Height or Width a
-        // Monocle tile refuses (#3090), and a press KiwiVision's
-        // fill would hide (#3064), on the pill Core draws.
-        "App/KiwiCore+Maximize.swift": 3,
+        // Monocle tile refuses with the layout's name (#3090), and a
+        // press KiwiVision's fill would hide (#3064), on the pill
+        // Core draws.
+        "App/KiwiCore+Maximize.swift": 4,
         // A lens's default reminder, on the hold pill Core draws
         // (#2103 ruling 42a).
         "App/KiwiCore+VisionHold.swift": 1,

@@ -6242,7 +6242,8 @@ A Space's own value, set with
 [`maximize.set_share_override`](#maximizeset_share_override) or
 [`maximize.set_anchor_override`](#maximizeset_anchor_override),
 outranks its screen shape's row. On a Monocle Space a tiled window
-refuses an axis with "Monocle already fills the screen"; a floating
+refuses an axis with "On Monocle, a tiled window already fills the
+screen"; a floating
 window there may still take one, and a full Maximize is unchanged.
 :::
 
@@ -6318,9 +6319,10 @@ share from 0.1 to 1, or `nil` to clear that axis.
 **Does:** sets that Space's own share for the axis, over the row
 [`maximize.set_share`](#maximizeset_share) stores for its screen
 shape. The other axis keeps its screen's row. A binding's own share
-still wins. Settings ▸ Spaces & Layouts sets it in the Space's
-override editor. `get_settings` with the Space reports it folded
-onto every shape.
+still wins. A window already maximized keeps the shape it was
+pressed with. Settings ▸ Spaces sets it in the Space's
+**Customize…** editor, as **Maximize Height** and **Maximize
+Width**; [`get_settings`](#get_settings) with the Space folds it in.
 
 **Example:**
 
@@ -6337,7 +6339,9 @@ clear it.
 
 **Does:** sets where a Maximize Height or Width grows from in that
 Space, over the row [`maximize.set_anchor`](#maximizeset_anchor)
-stores for its screen shape.
+stores for its screen shape. A window already maximized keeps the
+shape it was pressed with. The **Customize…** editor's row is
+**Maximize from**.
 
 **Example:**
 
@@ -6450,7 +6454,7 @@ new value at once.
 **Example:**
 
 ```lua
-KiwiDesk.tiling.set_start(false, "Share")
+tiling.set_start(false, "Share")
 ```
 :::
 
@@ -6465,7 +6469,7 @@ border. Default `false`. Sticky and floating marks stay.
 **Example:**
 
 ```lua
-KiwiDesk.tiling.set_off_hides_borders(true)
+tiling.set_off_hides_borders(true)
 ```
 :::
 
@@ -6481,7 +6485,7 @@ menu-bar item shows the Space with the pause symbol.
 **Example:**
 
 ```lua
-KiwiDesk.tiling.set_off_hides_bars(true)
+tiling.set_off_hides_bars(true)
 ```
 :::
 

@@ -2,7 +2,8 @@ import Foundation
 
 /// KiwiVision's maximize (#3064): while KiwiVision is on, the
 /// active Space's focused tiled window fills its screen, or its
-/// height or width at the Layout Defaults share. The verdict is derived in
+/// height or width at the share a hand press takes on that Space
+/// (#3090). The verdict is derived in
 /// `StateCoordinator+VisionFill`; this file mirrors what the look
 /// asks into state and owes the plates their settle re-mask.
 extension KiwiCore {

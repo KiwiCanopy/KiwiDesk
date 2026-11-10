@@ -118,8 +118,17 @@ struct MaximizeShareSpaceTests {
             "maximize.set_anchor_override",
             args: [.string("1"), .string("center")]
         )
-        core.execute("maximize.set_anchor_override", args: [.string("1")])
+        core.execute(
+            "maximize.set_anchor_override",
+            args: [.string("1"), .null]
+        )
         #expect(core.tiler.settings.maximize.shareOverride[space] == nil)
+        #expect(core.tiler.settings.maximize.anchorOverride[space] == nil)
+        core.execute(
+            "maximize.set_anchor_override",
+            args: [.string("1"), .string("center")]
+        )
+        core.execute("maximize.set_anchor_override", args: [.string("1")])
         #expect(core.tiler.settings.maximize.anchorOverride[space] == nil)
     }
 
@@ -247,5 +256,21 @@ struct MaximizeShareSpaceTests {
         #expect(shape(core) == nil)
         #expect(core.execute("toggle_maximized").isSuccess)
         #expect(shape(core)?.axis == nil)
+    }
+
+    @Test("A float on Monocle still takes Height and Width")
+    func monocleKeepsFloats() {
+        for axis in ["height", "width"] {
+            let core = makeCore(mode: "monocle")
+            core.state.windows.setFloating(w1, true)
+            core.retile()
+            #expect(
+                core.execute(
+                    "toggle_maximized",
+                    args: [.string(axis)]
+                ).isSuccess
+            )
+            #expect(shape(core)?.axis?.rawValue == axis)
+        }
     }
 }

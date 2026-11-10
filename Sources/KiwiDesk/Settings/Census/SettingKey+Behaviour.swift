@@ -136,9 +136,9 @@ extension BehaviourKey {
         case .maximizeAnchor:
             return .text("layout_defaults.maximize.anchor")
         case .maximizeHeightSharePerSpace:
-            return .text("keybinding.maximize_height")
+            return .text("layout_defaults.maximize.height_share")
         case .maximizeWidthSharePerSpace:
-            return .text("keybinding.maximize_width")
+            return .text("layout_defaults.maximize.width_share")
         case .maximizeAnchorPerSpace:
             return .text("layout_defaults.maximize.anchor")
         case .minSizePerSpaceOverride:
