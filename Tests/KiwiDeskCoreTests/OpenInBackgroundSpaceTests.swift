@@ -146,7 +146,10 @@ struct OpenInBackgroundSpaceTests {
         let home = core.state.workspaces.activeSpace
         #expect(Self.open(core).isSuccess)
         F.arrive(7, bundleID: F.app, on: core)
-        core.handle(.windowFocused(WindowID(7)))  // handed back, paid
+        core.handle(.windowFocused(WindowID(7)))
+        // Paid: the click below finds no hold to spend.
+        #expect(core.focusedWindowID == WindowID(1))
+        #expect(core.launchFollow.holds.opened[F.app] == nil)
         core.lastLeftClick = (core.wallClock(), .zero, WindowID(7))
         core.handle(.windowFocused(WindowID(7)))
         F.arrive(8, bundleID: F.app, on: core)
@@ -164,6 +167,22 @@ struct OpenInBackgroundSpaceTests {
         )
         core.wallClock = { late }
         core.launchFollow.noteQuietApps([F.app], at: late)
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(core.state.workspaces.space(of: WindowID(7)) == home)
+    }
+
+    /// The Dock's path: an activation door past a paid hand-back.
+    @Test("a Dock click after a paid hand-back ends the filing")
+    func dockClickAfterPaidHandBack() {
+        let (core, _) = Self.makeCore()
+        let home = core.state.workspaces.activeSpace
+        #expect(Self.open(core).isSuccess)
+        OpenInBackgroundHoldTests.activate(core)
+        // Paid: the second activation finds no hold to spend.
+        #expect(core.launchFollow.holds.opened[F.app] == nil)
+        #expect(core.launchFollow.holds.handedBack[F.app] != nil)
+        core.lastLeftClick = (core.wallClock(), .zero, nil)
+        OpenInBackgroundHoldTests.activate(core)
         F.arrive(7, bundleID: F.app, on: core)
         #expect(core.state.workspaces.space(of: WindowID(7)) == home)
     }
