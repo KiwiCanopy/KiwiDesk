@@ -158,6 +158,28 @@ struct TilingOffReachTests {
         #expect(work.settings.tiling.start == nil)
     }
 
+    @Test("a hide base moved by a Save redraws with no pass of its own")
+    func hideBaseRepaints() throws {
+        let core = try makeCore()
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
+        var snapshot = try #require(core.ruleReachSnapshot())
+        snapshot.tilingOffHides.apply(
+            Table.offHidesBordersKey,
+            value: true,
+            reach: .shared(joining: []),
+            editing: "Work"
+        )
+        _ = meter.snapshot(reset: true)
+        try core.saveRuleReach(snapshot)
+        let counts = meter.snapshot(reset: false).counts
+        #expect(core.appWide.tilingOffHidesBorders)
+        // A tick moves nothing, so no pass runs; the base's own
+        // arm in `appWideLiveChanged` redraws the rings.
+        #expect(counts.retiles == 0)
+        #expect(counts.borderSyncs >= 1)
+    }
+
     @Test("a listed tick lands in that profile alone, the base kept")
     func listedTickIsTheProfiles() throws {
         let core = try makeCore()
