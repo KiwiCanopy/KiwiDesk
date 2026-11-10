@@ -132,8 +132,26 @@ struct LaunchFollowSeamTests {
         ("oweLaunchFollow(quietly:", "KiwiCore+VisionAutoOpen.swift", 1),
         ("launchFollow.claimQuiet(", "KiwiCore+VisionAutoOpen.swift", 1),
         ("claimQuietOpen(arrived: window)", followFile, 1),
-        ("launchFollow.noteQuietApps(", "KiwiCore+VisionAutoOpen.swift", 1),
+        (
+            "launchFollow.noteQuietApps(queued",
+            "KiwiCore+VisionAutoOpen.swift", 1
+        ),
         ("state.arrivesQuietly = launchFollow", "KiwiCore+Events.swift", 1),
+        // `open_in_background` (#3141): the hold owed through the
+        // same door, marked quiet, and paid in the focus handler.
+        (
+            "quietly: LaunchFollowIntent.QuietOpen(",
+            "KiwiCore+OpenInBackground.swift", 1
+        ),
+        (
+            "launchFollow.noteQuietApps([bundleID]",
+            "KiwiCore+OpenInBackground.swift", 1
+        ),
+        ("launchFollow.claimHold(", "KiwiCore+OpenInBackground.swift", 1),
+        (
+            "handBackBackgroundFocus(id, before: effects.focusBefore",
+            "KiwiCore+FocusEvents.swift", 1
+        ),
     ]
 
     @Test("each wiring exists exactly as often as pinned, in its file")

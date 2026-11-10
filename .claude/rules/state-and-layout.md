@@ -606,6 +606,16 @@ editing here:
   stands, `record` and `forget(keeping:)` retire it with the debt,
   and a new owe or retire of it joins `LaunchFollowSeamTests`'
   register (`KiwiVisionAutoOpenFocusTests` holds each cancel).
+  **`open_in_background`'s hold (#3141) is that slot's second
+  purpose, never a second ledger**: `QuietOpen.Purpose.hold`, owed
+  through the same door, joined by a later hold rather than
+  replaced, and claimed by app at a focus REPORT
+  (`claimHold`), never at an arrival. It hands the focus back by
+  `focusWindow` — the command path, so the hand-back reports as
+  intended (#1281) — once per app within `holdGrace`, and it
+  sits ahead of the #1161 re-assert, whose direct raise would
+  report unintended. No activation retires it; a click on the
+  app's window spends it unpaid (`OpenInBackgroundTests`).
   **Every reader of "was this arrival created" goes through ONE
   door with ONE late-create resolution (#2630)** — the follow,
   the `window_created` reason, and any pocket claim (#2629, #2612)

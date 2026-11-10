@@ -249,6 +249,12 @@ not offered.
 The `list_commands` tool also takes `kind` (`action`, `setting` or
 `query`), and each row it returns carries its `kind`.
 
+:::unreleased
+An AI app opens the apps it needs with `run` and
+`open_in_background`, which leaves your focus where it is
+([`open_in_background`](lua-reference.md#open_in_background)).
+:::
+
 An AI app reads Config Issues and the sync folder's status by
 sending `get_config_status` through `run`. When `keep` cannot write
 a change because a newer KiwiDesk wrote the file it goes to, it
@@ -475,6 +481,15 @@ Spaces by their order and by the ones you visited
 `focus_display` takes `left|right|up|down` to the nearest screen
 that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
+
+:::unreleased
+`open_in_background` takes an app bundle id and opens the app
+without taking the focus: it launches it, or asks a running app
+with no window for one, and does nothing when the app has a
+window anywhere. An app that brings itself forward anyway gives
+the focus back once
+([`open_in_background`](lua-reference.md#open_in_background)).
+:::
 
 :::unreleased
 `focus_app_window` takes `next|prev` and focuses the focused app's

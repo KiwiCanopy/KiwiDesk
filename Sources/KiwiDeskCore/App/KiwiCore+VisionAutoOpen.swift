@@ -10,7 +10,7 @@ extension KiwiCore {
     /// never inside a config load.
     func openLensApps(_ lens: VisionLens) {
         guard !vision.configLoading else { return }
-        let open = Set(lens.apps.filter(lensMemberHasWindow))
+        let open = Set(lens.apps.filter(hasWindow(app:)))
         var queued: Set<String> = []
         var missing: [String] = []
         for app in lens.openApps
@@ -36,21 +36,6 @@ extension KiwiCore {
         )
     }
 
-    /// Whether the member `app` has a window: one KiwiDesk tracks
-    /// (the pocket's included, in either phase), one minimized, or
-    /// one on another Desktop. A tracked-state read, never a census;
-    /// a ⌘H-hidden app's windows are in none of the three.
-    func lensMemberHasWindow(_ app: String) -> Bool {
-        func key(_ bundleID: String?, _ name: String) -> String {
-            AppRef(bundleID: bundleID, name: name).listKey
-        }
-        return state.windows.all.contains { $0.appRef.listKey == app }
-            || state.minimizeOrder.contains { key($0.bundleID, $0.app) == app }
-            || state.awayWindows.values.contains {
-                key($0.appBundleID, $0.appName) == app
-            }
-    }
-
     /// The one focus move a quiet open owes (#3122), owed through
     /// the launch follow's door (#1599): stamped with the focus and
     /// the front app at the press, which its cancels compare against.
@@ -58,7 +43,7 @@ extension KiwiCore {
         let focus = focusedWindowID
         let open = LaunchFollowIntent.QuietOpen(
             bundleIDs: apps,
-            lens: lens,
+            purpose: .lens(lens),
             focus: focus,
             front: focus.flatMap { state.windows[$0]?.appBundleID }?
                 .lowercased(),
@@ -82,8 +67,9 @@ extension KiwiCore {
             )
         else { return false }
         let clicked = lastLeftClick.map { $0.at > owed.at } ?? false
+        guard case .lens(let lens) = owed.purpose else { return false }
         let lensOn = visionLensName.map {
-            AppWideSettings.sameLens($0, owed.lens)
+            AppWideSettings.sameLens($0, lens)
         }
         let space = state.workspaces.space(of: window.id)
         let shown =

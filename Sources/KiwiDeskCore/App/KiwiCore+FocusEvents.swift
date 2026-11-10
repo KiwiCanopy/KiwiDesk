@@ -13,38 +13,8 @@ extension KiwiCore {
     ) {
         let now = wallClock()
         // Dismissing an ignored panel (Ghostty's quick terminal)
-        // makes AX re-report the app's managed main window —
-        // possibly on another space — as focused (#21/#244):
-        // consume the flag and restore the pre-panel focus. The
-        // flag outlives the dismissal by a grace, since the stale
-        // re-report wins that race by 125-200 ms (#951);
-        // `shouldConsumeIgnoredPanelReport` owns the machine.
-        if let pid = state.windows[id]?.pid,
-            shouldConsumeIgnoredPanelReport(
-                pid: pid,
-                id: id,
-                now: now
-            )
-        {
-            onLog(
-                "focus: w\(id.raw) re-report consumed "
-                    + "(ignored-panel dismiss, pid "
-                    + "\(pid)); restoring "
-                    + describe(effects.focusBefore)
-            )
-            // The id's self-raise stamp stays: age bounds it,
-            // and the #465 order read needs it as the newer
-            // sibling against the app's next re-report.
-            if let before = effects.focusBefore,
-                let space = state.workspaces.space(
-                    of: before
-                )
-            {
-                state.workspaces.focus(
-                    before,
-                    in: space
-                )
-            }
+        // re-reports the app's main window (#21/#244/#951).
+        if consumeIgnoredPanelReport(id, effects: effects, now: now) {
             return
         }
         // A focus echo from our own z-order raise (#418/#425):
@@ -206,6 +176,14 @@ extension KiwiCore {
             ) {
                 state.workspaces.focus(intended, in: space)
             }
+            return
+        }
+        // A background open's app taking the focus anyway (#3141),
+        // handed back once — ahead of the #1161 re-assert, whose
+        // direct raise would report unintended.
+        if !selfEcho,
+            handBackBackgroundFocus(id, before: effects.focusBefore, now: now)
+        {
             return
         }
         // A placement bounce (#1161): the app answering where we
