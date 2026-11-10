@@ -159,7 +159,9 @@ struct OpenInBackgroundDesktopTests {
         #expect(recorder.opened.isEmpty)
     }
 
-    /// A reveal or re-track of the app is no open (#2630).
+    /// An arrival the door does not read as new is not sent: a
+    /// reveal or re-track, and the accepted residue of a create that
+    /// lands after its arrival (#2630, #3153 ▸ Ruling).
     @Test("an arrival not yet known to be created is not sent")
     func uncreatedArrivalStays() {
         let (core, _) = makeCore()
@@ -184,7 +186,11 @@ struct OpenInBackgroundDesktopTests {
         let home = core.state.workspaces.activeSpace
         #expect(open(core).isSuccess)
         WMBridge.classResolverOverride = { _ in nil }
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
         F.arrive(7, bundleID: F.app, on: core)
+        // The arrival retile still runs.
+        #expect(meter.snapshot(reset: false).counts.retiles >= 1)
         #expect(core.state.workspaces.space(of: WindowID(7)) == home)
         #expect(log.contains { $0.contains("w7 stays") })
     }
@@ -198,5 +204,22 @@ struct OpenInBackgroundDesktopTests {
         OpenInBackgroundHoldTests.activate(core)
         F.arrive(7, bundleID: F.app, on: core)
         #expect(moved().isEmpty)
+    }
+
+    /// The Desktop came into view between the call and the arrival.
+    @Test("a Desktop shown since the call takes no move")
+    func shownSinceStays() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        #expect(open(core).isSuccess)
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 11,
+            secondaryCurrent: 20
+        )
+        F.arrive(7, bundleID: F.app, on: core)
+        #expect(moved().isEmpty)
+        #expect(log.contains { $0.contains("gone or showing") })
     }
 }

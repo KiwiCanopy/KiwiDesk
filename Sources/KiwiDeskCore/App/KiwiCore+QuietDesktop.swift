@@ -47,7 +47,7 @@ extension KiwiCore {
         _ window: ManagedWindow,
         provenance: ArrivalProvenance
     ) -> Bool {
-        guard provenance.isNew == true,
+        guard
             let desktop = launchFollow.quietDesktop(
                 window.appRef.listKey,
                 at: wallClock()
@@ -55,6 +55,14 @@ extension KiwiCore {
             state.pocketPhase(of: window.id) == nil,
             !window.isFullscreen
         else { return false }
+        // A create landing after its arrival is not waited for: a
+        // background open's window was adopted on sight (#3153).
+        guard provenance.isNew == true else {
+            onLog("open_in_background: w\(window.id.raw) stays — not new")
+            return false
+        }
+        // The verb re-reads the topology below; both reads run in
+        // this one main-actor turn, so a switch cannot land between.
         let snapshot = desktopMemory.readDesktops()
         guard let number = snapshot.number(of: desktop.id),
             snapshot.currentSpaces.values.contains(desktop.id) == false

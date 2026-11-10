@@ -7014,7 +7014,8 @@ out on another screen, the call is refused before anything opens.
 A move only the window itself can turn down, such as one onto
 another screen that macOS refuses, is noted in the log, and the
 window stays where it opened. A full-screen window, or one your
-Pocket key claims, is not sent. To name
+Pocket key claims, is not sent, and neither is a window whose
+appearance macOS reports only after KiwiDesk has already seen it. To name
 a Desktop without a Space, pass `nil` for the Space (`""` on the
 command line).
 
