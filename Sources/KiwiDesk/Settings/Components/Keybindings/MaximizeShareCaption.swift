@@ -9,18 +9,25 @@ struct MaximizeShareCaption: View {
     var body: some View {
         CrossReferenceRow(
             prose: Self.prose(axis: axis),
-            linkTitle: L(
-                "shortcuts.maximize.xref_link",
-                "%1$@ ▸ %2$@",
-                SettingsDestination.layoutDefaults.title,
-                SettingsCatalog.layoutDefaults.maximizeCard.text
-            ),
+            linkTitle: Self.linkTitle,
             destination: .layoutDefaults,
-            row: row
+            row: Self.row(axis)
         )
     }
 
-    private var row: SettingsControl {
+    /// "Layout Defaults ▸ Maximize", the link every pointer at the
+    /// Maximize card wears; KiwiVision's summary too (#3161).
+    static var linkTitle: String {
+        L(
+            "shortcuts.maximize.xref_link",
+            "%1$@ ▸ %2$@",
+            SettingsDestination.layoutDefaults.title,
+            SettingsCatalog.layoutDefaults.maximizeCard.text
+        )
+    }
+
+    /// The share column `axis` reads, where the link lands.
+    static func row(_ axis: MaximizeAxis) -> SettingsControl {
         switch axis {
         case .height: SettingsCatalog.layoutDefaults.maximizeHeightShare
         case .width: SettingsCatalog.layoutDefaults.maximizeWidthShare

@@ -128,6 +128,7 @@ struct CrossReferenceRowSlotTests {
         "AILookPointer.swift:Self.prose",
         "KiwiShelfKeyRows.swift:Self.caption(key)",  // #761
         "TilingOffRows.swift:link.prose",  // TilingOffRowsTests
+        "KiwiVisionMaximizeSummary.swift:prose",  // #3161
         // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
         "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests

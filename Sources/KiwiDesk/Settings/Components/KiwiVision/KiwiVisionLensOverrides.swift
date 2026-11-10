@@ -46,7 +46,14 @@ struct KiwiVisionLensOverrides: View {
                 }
             }
             SettingsSection(SettingsCatalog.kiwiVision.fillCard.text) {
-                maximizeRow
+                VStack(alignment: .leading, spacing: 4) {
+                    maximizeRow
+                    // The checked row's own fill; an unchecked one
+                    // follows Default, whose page names it (#3161).
+                    if let fill = lens.overrides.maximize {
+                        KiwiVisionMaximizeSummary(model: model, fill: fill)
+                    }
+                }
             }
             SettingsSection(
                 SettingsCatalog.kiwiVision.appearanceCard.text
