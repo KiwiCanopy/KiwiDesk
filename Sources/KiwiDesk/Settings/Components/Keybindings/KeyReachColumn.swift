@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A shortcut row's "Applies to" column (#1393): the App Rules
-/// checklist, keyed by the row's layer and action. Drawn only for
-/// a bound action, where there is a rule to reach.
+/// checklist, keyed by the row's layer and action — a key sequence's
+/// by its leader, on the leader's row (#3124). Drawn only for a
+/// bound action or a recorded leader, where there is a rule to reach.
 ///
 /// It reads what it draws at init, in its parent's render, and
 /// observes nothing, so a row that skips its render skips this
@@ -56,7 +57,7 @@ struct KeyReachColumn: View, Equatable {
     }
 
     var key: String {
-        RuleReachTable<String>.keyID(layer: layer, lua: binding.lua)
+        RuleReachTable<String>.key(of: binding, layer: layer) ?? ""
     }
 
     /// The checklist a row's column draws: a bound action, on a
@@ -66,12 +67,10 @@ struct KeyReachColumn: View, Equatable {
         layer: String,
         binding: KeyBinding
     ) -> RuleReachReading? {
-        guard model.offersReachColumn, !binding.lua.isEmpty else {
-            return nil
-        }
-        return model.keyReach(
-            RuleReachTable<String>.keyID(layer: layer, lua: binding.lua)
-        )
+        guard model.offersReachColumn,
+            let key = RuleReachTable<String>.key(of: binding, layer: layer)
+        else { return nil }
+        return model.keyReach(key)
     }
 
     static func subject(of binding: KeyBinding, model: SettingsModel)
@@ -104,17 +103,17 @@ struct KeyReachTrash: View {
             help: L("shortcuts.remove_binding", "Remove shortcut"),
             sharedFrom: sharedFrom
         ) { removal in
-            model.recordRemoval(.key, key, removal)
+            if let key = RuleReachTable<String>.key(of: binding, layer: layer)
+            {
+                model.recordRemoval(.key, key, removal)
+            }
             onRemove()
         }
     }
 
-    private var key: String {
-        RuleReachTable<String>.keyID(layer: layer, lua: binding.lua)
-    }
-
     private var sharedFrom: RuleReachReading? {
-        guard model.offersReachColumn, !binding.lua.isEmpty,
+        guard model.offersReachColumn,
+            let key = RuleReachTable<String>.key(of: binding, layer: layer),
             let reading = model.keyReach(key), reading.users.count > 1
         else { return nil }
         return reading

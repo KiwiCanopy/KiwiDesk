@@ -572,6 +572,11 @@ without writing it.
 `shortcut.remove <chord>` read and write the saved shortcuts; a
 write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 
+:::unreleased
+`shortcut.remove_sequence <leader>` removes a whole key sequence
+([`shortcut.remove_sequence`](lua-reference.md#shortcutremove_sequence)).
+:::
+
 `shortcut.list_groups` lists the shortcut groups a binding's `group`
 can name: the built-in tokens and the groups your shortcuts make
 ([`shortcut.list_groups`](lua-reference.md#shortcutlist_groups)).

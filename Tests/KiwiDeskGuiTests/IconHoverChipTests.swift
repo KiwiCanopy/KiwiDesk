@@ -167,7 +167,9 @@ struct IconHoverChipTests {
             "Components/AppRules/RuleReachChecklist.swift"
         )
         #expect(
-            checklist.contains(".disabled(locked || follows || lacking)")
+            checklist.contains(
+                ".disabled(locked || follows || lacking || clashing)"
+            )
         )
         // The view's `lacking` is the model's, not a constant (#2022).
         #expect(

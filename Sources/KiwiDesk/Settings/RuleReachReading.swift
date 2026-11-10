@@ -29,6 +29,9 @@ struct RuleReachReading: Equatable {
     /// different action, in that action's words — ticking takes
     /// the key over.
     var takenBy: [String: String] = [:]
+    /// Of `takenBy`, the profiles where a key sequence is on either
+    /// side: the tick is refused, its box greys (#3124).
+    var clashing: Set<String> = []
     /// Profiles without a shortcut's layer (#2022) — their box
     /// greys.
     var lacking: Set<String> = []

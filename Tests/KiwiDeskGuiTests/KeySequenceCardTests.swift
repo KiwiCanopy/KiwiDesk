@@ -118,16 +118,46 @@ struct KeySequenceCardTests {
         )
     }
 
-    @Test("the card greys on a stored profile's page (#3124)")
-    func storedPageGreys() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
+    @Test("the leader's row carries the sequence's reach (#3124)")
+    func leaderRowCarriesReach() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Sections/KeySequencesCard.swift"
+                "Sources/KiwiDesk/Settings/Components/Keybindings/Sequences"
             )
-        let text = try SourceScan.strippedSource(at: file)
-        #expect(!text.isEmpty)
-        #expect(text.contains(".disabled(block != nil)"))
-        #expect(text.contains("model.sequenceEditBlock(in: layerName)"))
+        let row = try SourceScan.strippedSource(
+            at: dir.appendingPathComponent("SequenceNodeRow.swift")
+        )
+        let recorder = try SourceScan.strippedSource(
+            at: dir.appendingPathComponent("SequenceNodeRow+Recorder.swift")
+        )
+        let flat = row.filter { !$0.isWhitespace }
+        #expect(flat.contains("ifisLeader{reachColumn}"))
+        #expect(
+            flat.contains(
+                "ifisLeader{KeyReachTrash(model:model,layer:layerName,"
+                    + "binding:node){requestDelete()}"
+            )
+        )
+        #expect(
+            flat.contains(
+                "KeyReachColumn(model:model,layer:layerName,binding:node)"
+            )
+        )
+        let carry = recorder.filter { !$0.isWhitespace }
+        #expect(
+            carry.contains(
+                "ifisLeader{model.carrySequenceReach(layer:layerName,"
+                    + "from:node.combo,to:combo)}editing.update(node.id)"
+            )
+        )
+        let card = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Sections/KeySequencesCard.swift"
+                )
+        )
+        #expect(!card.isEmpty)
+        #expect(!card.contains(".disabled("))
     }
 
     @Test("the Also caption's spoken twin is the spoken path")

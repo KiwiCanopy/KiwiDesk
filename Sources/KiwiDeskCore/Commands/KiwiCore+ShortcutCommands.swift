@@ -19,6 +19,8 @@ extension KiwiCore {
             return setShortcut(args)
         case "shortcut.remove":
             return removeShortcut(args)
+        case "shortcut.remove_sequence":
+            return removeSequence(args)
         case "shortcut.list_groups":
             return .ok(shortcutGroupList())
         default:
@@ -101,14 +103,14 @@ extension KiwiCore {
                 return .fail("\(chord) runs \(row.lua); remove it first")
             }
         }
-        // A key sequence's leader holds its chord too (#1871): the
-        // key table, keyed by action, does not list it.
-        let pages = [page] + snapshot.storedKeyOverrides.keys.sorted()
-        let leaders = pages.flatMap {
-            snapshot.storedKeyLayers(for: $0)
-                .first { $0.name == layer }?.sequences ?? []
+        // A key sequence's leader holds its chord too (#1871, #3124).
+        let maps =
+            [table.base] + table.profiles.map { table.resolved(for: $0) }
+        let leaders = maps.flatMap(\.keys).compactMap {
+            RuleReachTable<String>.keyParts($0).layer == layer
+                ? RuleReachTable<String>.leader(of: $0) : nil
         }
-        if leaders.contains(where: { Self.sameChord($0.combo, chord) }) {
+        if leaders.contains(where: { Self.sameChord($0, chord) }) {
             return .fail("\(chord) opens a key sequence; remove it first")
         }
         snapshot.keyTemplates[key] = KeyBinding(combo: chord, lua: lua)
@@ -128,12 +130,55 @@ extension KiwiCore {
         }
         var snapshot = found.0
         let page = found.1
-        guard let layer = Self.defaultLayer(snapshot, page),
-            let key = snapshot.keyLayers.resolved(for: page).first(where: {
-                RuleReachTable<String>.keyParts($0.key).layer == layer
+        guard let layer = Self.defaultLayer(snapshot, page) else {
+            return .fail("no default layer")
+        }
+        let held = snapshot.keyLayers.resolved(for: page).filter {
+            RuleReachTable<String>.keyParts($0.key).layer == layer
+        }
+        if held.contains(where: {
+            RuleReachTable<String>.leader(of: $0.key).map {
+                Self.sameChord($0, chord)
+            } ?? false
+        }) {
+            return .fail(
+                "\(chord) opens a key sequence; use shortcut.remove_sequence"
+            )
+        }
+        guard
+            let key = held.first(where: {
+                !RuleReachTable<String>.isSequenceKey($0.key)
                     && Self.sameChord($0.value, chord)
             })?.key
         else { return .fail("no shortcut on \(chord)") }
+        let table = snapshot.keyLayers
+        snapshot.keyLayers.applyKey(
+            key,
+            value: nil,
+            reach: table.defaultReach(of: key, editing: page, isLoaded: true),
+            editing: page
+        )
+        return writeShortcuts(snapshot)
+    }
+
+    /// Removes a whole key sequence by its leader (#3124), as
+    /// `shortcut.remove` removes a row: at the default reach.
+    private func removeSequence(_ args: [JSONValue]) -> CommandResponse {
+        guard let chord = Self.chord(args.first) else { return Self.noChord }
+        guard let found = shortcutPage() else {
+            return Self.noShortcutPage
+        }
+        var snapshot = found.0
+        let page = found.1
+        guard let layer = Self.defaultLayer(snapshot, page),
+            let key = snapshot.keyLayers.resolved(for: page).keys.sorted()
+                .first(where: {
+                    RuleReachTable<String>.keyParts($0).layer == layer
+                        && RuleReachTable<String>.leader(of: $0).map {
+                            Self.sameChord($0, chord)
+                        } ?? false
+                })
+        else { return .fail("no key sequence on \(chord)") }
         let table = snapshot.keyLayers
         snapshot.keyLayers.applyKey(
             key,
@@ -164,6 +209,10 @@ extension KiwiCore {
             [table.base] + table.profiles.map { table.resolved(for: $0) }
         return maps.flatMap { map in
             map.compactMap { key, combo in
+                // A key sequence's leader is judged on its own.
+                guard !RuleReachTable<String>.isSequenceKey(key) else {
+                    return nil
+                }
                 let parts = RuleReachTable<String>.keyParts(key)
                 return parts.layer == layer
                     ? KeyBinding(combo: combo, lua: parts.lua) : nil

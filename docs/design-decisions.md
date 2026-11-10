@@ -14344,13 +14344,24 @@ outside its scrolling list (owner, 2026-11-09). KiwiHub's
 Shortcuts side lists an end key by its path (past four keys, the
 leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
-card already do. A sequence has no "Applies to"
-column yet: the key table keys a row by its Lua, which a leader has
-none of, so a stored profile's Save, which writes through that
-table, would drop a sequence edited there. A sequence edited on the
-loaded profile's page is saved in the layer's shared rows, whole,
-so every profile without its own override has it, and the card is
-greyed, never hidden, while a stored profile is edited (#3124).
+card already do.
+:::
+
+:::unreleased
+*Amended (#3124, owner, 2026-11-10): a key sequence has a reach.*
+The key table keys a sequence by its layer and leader chord, its
+value the whole tree, so the leader's row carries an "Applies to"
+like any shortcut and the card edits on every profile's page: a
+profile holds or overrides the tree whole, never a key inside it.
+Ticking a profile where a key sequence and a row would share one
+chord is refused, the box greyed with the row it clashes with:
+taking the chord over would delete a whole tree there, or bury a
+row under one, without the user seeing either. A re-recorded leader
+keeps its reach, since the user moved the chord of one sequence
+rather than making another. Removing a sequence from Lua or the CLI
+is its own verb, `shortcut.remove_sequence`, destructive like
+`shortcut.remove`, because a whole tree goes with one call;
+`shortcut.remove` refuses a leader and names that verb.
 :::
 
 :::unreleased

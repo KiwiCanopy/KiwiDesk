@@ -1,10 +1,12 @@
 import Foundation
 
 // Shortcuts as a `RuleReachTable` (#1393): a key is one action in
-// one layer, its value the combo. "Left out" is the override's
-// removed combo (`KeyLayerOverride.removed`), and a row written
-// into a profile takes its combo over from whatever that profile
-// bound there (`applyKey`).
+// one layer, its value the combo — or a key sequence, keyed by its
+// leader, its value the tree (#3124, `RuleReach+KeySequences`).
+// "Left out" is the override's removed combo
+// (`KeyLayerOverride.removed`), and a row written into a profile
+// takes its combo over from whatever that profile bound there
+// (`applyKey`).
 
 extension RuleReachTable where Value == String {
     /// The key of `lua` in `layer`.
@@ -23,26 +25,24 @@ extension RuleReachTable where Value == String {
         return (String(parts[0]), parts.count > 1 ? String(parts[1]) : "")
     }
 
-    /// Each action's combo per layer — the first row where an
-    /// action is bound twice.
+    /// Each key's value per layer — the first row where an action
+    /// is bound twice, or a leader opens two sequences.
     public static func combos(_ layers: [KeyLayer]) -> [String: String] {
         var result: [String: String] = [:]
         for layer in layers {
-            for row in layer.bindings where !row.lua.isEmpty {
-                let key = keyID(layer: layer.name, lua: row.lua)
-                if result[key] == nil { result[key] = row.combo }
+            for (key, row) in keyedRows(layer) where result[key] == nil {
+                result[key] = value(of: row)
             }
         }
         return result
     }
 
-    /// Every combo each action holds per layer, in row order.
+    /// Every value each key holds per layer, in row order.
     static func allCombos(_ layers: [KeyLayer]) -> [String: [String]] {
         var result: [String: [String]] = [:]
         for layer in layers {
-            for row in layer.bindings where !row.lua.isEmpty {
-                result[keyID(layer: layer.name, lua: row.lua), default: []]
-                    .append(row.combo)
+            for (key, row) in keyedRows(layer) {
+                result[key, default: []].append(value(of: row))
             }
         }
         return result
@@ -105,7 +105,9 @@ extension RuleReachTable where Value == String {
             from: old,
             rivals: rivals(of: key),
             ticked: ticked,
-            editing: editing
+            editing: editing,
+            chord: Self.chord(of:value:),
+            clashes: Self.clashes
         )
     }
 
@@ -124,13 +126,15 @@ extension RuleReachTable where Value == String {
         Set(base.keys).union(entries.values.flatMap(\.keys)).sorted()
     }
 
-    /// The action `profile` binds to `key`'s combo instead, if any —
-    /// the one ticking would take the key from. Pages ask the
+    /// The key `profile` binds to `key`'s chord instead, if any —
+    /// the one ticking would take the chord from. Pages ask the
     /// `KeyRivals` index; this scan is its oracle (`KeyRivalsTests`).
     public func rival(of key: String, for profile: String, combo: String)
         -> String?
     {
-        rivals(of: key).first { resolved($0, for: profile) == combo }
+        rivals(of: key).first {
+            Self.holdsChord($0, resolved($0, for: profile), combo)
+        }
     }
 
     /// `profile`'s override: its stored one resolved onto the NEW
@@ -169,7 +173,8 @@ extension RuleReachTable where Value == String {
     }
 
     /// `key`'s rows in `layers` become exactly `combos`, each taking
-    /// its combo over from any row bound to it.
+    /// its combo over from any row bound to it. A sequence key's rows
+    /// are its trees, each written whole on its leader.
     static func setRows(
         _ layers: inout [KeyLayer],
         _ key: String,
@@ -178,8 +183,12 @@ extension RuleReachTable where Value == String {
     ) {
         let (name, lua) = keyParts(key)
         let at = layers.firstIndex { $0.name == name }
+        if let leader = leader(of: key) {
+            setSequences(&layers, at, leader, combos.compactMap(sequenceTree))
+            return
+        }
         if let at {
-            layers[at].bindings.removeAll { $0.lua == lua }
+            layers[at].bindings.removeAll { $0.lua == lua && !$0.isSequence }
         }
         guard !combos.isEmpty, let template else { return }
         // Which layers exist where is the layer pass's alone (#2022):
@@ -223,12 +232,8 @@ extension RuleReachTable where Value == String {
         into templates: inout [String: KeyBinding]
     ) {
         for layer in layers {
-            for row in layer.bindings where !row.lua.isEmpty {
-                let key = keyID(
-                    layer: layer.name,
-                    lua: row.lua
-                )
-                if templates[key] == nil { templates[key] = row }
+            for (key, row) in keyedRows(layer) where templates[key] == nil {
+                templates[key] = row
             }
         }
     }

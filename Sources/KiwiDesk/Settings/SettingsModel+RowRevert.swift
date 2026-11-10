@@ -83,7 +83,9 @@ extension SettingsModel {
         case .appRules(.floatRules):
             SettingsRevertRegister.revertSubject(self, .float, app)
         case .shortcuts(.layers):
-            // A shortcut's reach row: the binding and its reach.
+            // A shortcut's reach row: the binding and its reach. A key
+            // sequence's reach row draws no ↺ (#3124).
+            guard !RuleReachTable<String>.isSequenceKey(app) else { break }
             let parts = RuleReachTable<String>.keyParts(app)
             revertBinding(layer: parts.layer, lua: parts.lua)
         default:
