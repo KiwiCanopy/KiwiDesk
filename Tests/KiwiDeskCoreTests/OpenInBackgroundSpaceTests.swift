@@ -186,4 +186,35 @@ struct OpenInBackgroundSpaceTests {
         F.arrive(7, bundleID: F.app, on: core)
         #expect(core.state.workspaces.space(of: WindowID(7)) == home)
     }
+
+    /// The rule's gate (#1602, #2475): a popup filed into an unshown
+    /// Space is parked the moment it opens.
+    @Test("a popup of the app skips the named Space")
+    func popupSkipsNamedSpace() {
+        let (core, _) = Self.makeCore()
+        let home = core.state.workspaces.activeSpace
+        #expect(Self.open(core).isSuccess)
+        var popup = ManagedWindow(
+            id: WindowID(7),
+            pid: 900_307,
+            appName: "App 7",
+            appBundleID: F.app,
+            frame: CGRect(x: 0, y: 30, width: 400, height: 300)
+        )
+        popup.isTransientOverlay = true
+        popup.hasTitlebarButton = false
+        #expect(popup.isPopup)
+        core.handle(.windowCreated(popup))
+        #expect(core.state.workspaces.space(of: WindowID(7)) == home)
+    }
+
+    @Test("the named Space ends with the mark's bound")
+    func quietSpaceReadsTheBound() {
+        let follow = LaunchFollowIntent()
+        let start = Date(timeIntervalSince1970: 1_000)
+        follow.noteQuietApps([F.app], at: start, into: Self.named)
+        #expect(follow.quietSpace(F.app, at: start) == Self.named)
+        let late = start.addingTimeInterval(LaunchFollowIntent.quietBound + 1)
+        #expect(follow.quietSpace(F.app, at: late) == nil)
+    }
 }
