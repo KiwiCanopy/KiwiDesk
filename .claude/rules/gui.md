@@ -479,9 +479,9 @@ channels whether or not an image exists, since a mode icon that
 is no SF Symbol takes the title fallback; the updates row EXISTS
 only while an update was found — the pending reminder or the
 channel's own answer (#1536) — and reads "Update Available…",
-because `checkForUpdates` is the one door that brings the waiting
-alert forward, and asking for a check is the Settings footer's
-(`UpdateReminderTests`, `UpdatesRowTests`).
+because the row's action is `checkForUpdates`, and asking for a
+check is the Settings footer's (`UpdateReminderTests`,
+`UpdatesRowTests`).
 
 **Every update answer a user can meet is KiwiDesk's own window's
 — a user's check, the offer, "up to date" (#1542, #1849) — and
@@ -504,13 +504,22 @@ update window is open brings that window forward instead of
 narrating a new check, and Try Again's check takes a door past
 that bring-forward (`UpdateUpToDateTests` ▸
 `openSessionNarratesNoCheck`, `UpdatePromptWiringTests` ▸
-`liveUpdaterFeedsTheWindow`). Bypassing `super` there also
+`liveUpdaterFeedsTheWindow`) — save a parked scheduled offer not
+yet downloaded, which the check answers Later through
+`UpdatePromptDriver.dropParkedOffer` and starts afresh at the
+cycle's end through the driver's own one-shot flag, never through
+Try Again's `retry`, whose re-find installs without asking (#3139,
+`UpdateParkedOfferTests` ▸ `freshCheckOffers`). Bypassing `super` there also
 bypasses the policy's delegate answers, so the own path asks the
 policy through its own doors (`offerArrived`,
 `offerGotAttention`) and never writes `updatePending` itself.
-Two orderings are Sparkle 2.10.1's and a bump re-checks them
+Three orderings are Sparkle 2.10.1's and a bump re-checks them
 beside #1011's: the ready-to-install prompt is answered
-`.install` because the window already had its Install; and Try
+`.install` because the window already had its Install; a parked
+offer dismissed before its download leaves Sparkle no resumable
+update, so the check after it fetches the feed (#3139), while a
+downloaded or installing one is resumed without a fetch and is
+not dropped; and Try
 Again's check starts at
 the update cycle's end (`updater(_:didFinishUpdateCycleFor:)`,
 after `sessionInProgress` clears), since a check started inside

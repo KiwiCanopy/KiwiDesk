@@ -8,8 +8,9 @@ extension StatusItemController {
     /// channel's own answer (#1536) — and reads "Update Available…"
     /// (`LayoutMenuEnablementScanTests`). Asking for a check is the
     /// Settings footer's; the menu says something only when there
-    /// is something to say. One row, one action: Sparkle brings the
-    /// waiting alert forward on the same `checkForUpdates`.
+    /// is something to say. One row, one action:
+    /// `checkForUpdates`, which re-reads the feed past a parked
+    /// offer not yet downloaded (#3139).
     func makeUpdatesItem() -> NSMenuItem? {
         guard updatePending || updateFound else { return nil }
         let updates = NSMenuItem(
