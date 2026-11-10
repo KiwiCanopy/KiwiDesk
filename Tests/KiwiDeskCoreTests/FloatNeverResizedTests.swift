@@ -171,22 +171,29 @@ struct FloatNeverResizedTests {
     )
     func sweepLeavesASideOverlap() throws {
         let screen = try #require(NSScreen.screens.first)
-        let frame = CGRect(
-            x: screen.frame.minX,
-            y: screen.frame.minY + 300,
-            width: 600,
-            height: 400
-        )
-        let core = try #require(
-            makeBarredCore(edge: .left, frame: frame)
-        )
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let strip = try reservedStrip(core, edge: .left)
-        #expect(frame.minX < strip.maxX)
+        for edge in [AppBarEdge.left, .right] {
+            // Overlapping the strip on its own edge, clear of the top.
+            let frame = CGRect(
+                x: edge == .left
+                    ? screen.frame.minX : screen.frame.maxX - 600,
+                y: screen.frame.minY + 300,
+                width: 600,
+                height: 400
+            )
+            let core = try #require(
+                makeBarredCore(edge: edge, frame: frame)
+            )
+            defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+            let strip = try reservedStrip(core, edge: edge)
+            #expect(frame.intersects(strip))
 
-        core.clampFloatsClearOfBars()
+            core.clampFloatsClearOfBars()
 
-        #expect(core.tiler.recentInstantTarget(Self.window) == nil)
+            #expect(
+                core.tiler.recentInstantTarget(Self.window) == nil,
+                "a \(edge) bar moved the float"
+            )
+        }
     }
 
     @Test(
