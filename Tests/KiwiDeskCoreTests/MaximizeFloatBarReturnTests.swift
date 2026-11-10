@@ -106,4 +106,37 @@ struct MaximizeFloatBarReturnTests {
         )
         #expect(try roundTrip(core, [.string("height")]) == start)
     }
+
+    @Test(
+        "A float verb's frame outlives the next pass's sweep",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func floatVerbHolds() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let start = start(on: screen)
+        let core = try #require(makeBarredCore(frame: start))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        try #require(
+            core.spaceBars.shownStrips.first != nil,
+            "no bar painted — the clause would pass vacuously"
+        )
+        #expect(core.execute("toggle_maximized").isSuccess)
+        let fill = try #require(
+            core.tiler.recentInstantTarget(Self.window),
+            "the press sent no fill"
+        )
+        core.state.apply(.windowResized(Self.window, fill))
+        core.tiler.clearInstantTarget(Self.window)
+        #expect(core.execute("center_floating").isSuccess)
+        let centred = try #require(
+            core.tiler.recentInstantTarget(Self.window),
+            "the verb sent no frame"
+        )
+        core.retile()
+        let last = try #require(
+            core.tiler.recentInstantTarget(Self.window)
+        )
+        #expect(last == centred)
+        #expect(last.size == start.size)
+    }
 }

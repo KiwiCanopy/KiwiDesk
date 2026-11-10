@@ -187,19 +187,20 @@ extension KiwiCore {
                 // A frame sent and not yet echoed outranks the state
                 // one the same way: a maximized float's return,
                 // judged by its fill's echo, was fitted to the whole
-                // region (#3157).
-                let base =
-                    pending ?? tiler.commandedFrame(of: id)
-                    ?? window.frame
+                // region (#3157). The refusal memo keeps reading what
+                // the app reported, and an unechoed ask clears none.
+                let base = wouldBeFrame(of: window)
+                let seen = pending ?? window.frame
                 guard
                     let clamped = floatFitCorrection(
                         id,
                         frame: base,
-                        in: workspace
+                        in: workspace,
+                        observed: base == seen
                     ),
                     shouldIssueFloatFit(
                         id,
-                        current: base,
+                        current: seen,
                         fitted: clamped
                     )
                 else { continue }
@@ -225,11 +226,14 @@ extension KiwiCore {
     /// fullscreen, its space under no painted bar, or already
     /// fitted. Handed `frame` rather than reading the state
     /// frame, so the resize arm can ask about the frame that
-    /// just arrived.
+    /// just arrived. `observed` says `frame` is one the app
+    /// reported; a fitted ask not yet echoed clears no refusal
+    /// memo (#3157).
     func floatFitCorrection(
         _ id: WindowID,
         frame: CGRect,
-        in workspace: Space? = nil
+        in workspace: Space? = nil,
+        observed: Bool = true
     ) -> CGRect? {
         guard
             let workspace = workspace
@@ -267,7 +271,7 @@ extension KiwiCore {
         guard clamped != frame else {
             // Nothing to correct: drop any refusal memo so a
             // window that later needs a fit is asked afresh.
-            tiler.floatFitLedger.forget(id)
+            if observed { tiler.floatFitLedger.forget(id) }
             return nil
         }
         return clamped
