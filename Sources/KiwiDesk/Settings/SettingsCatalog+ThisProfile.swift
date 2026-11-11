@@ -175,6 +175,11 @@ struct ColorsControls: Sendable {
         "behavior.animations.title",
         "Animations"
     )
+    /// The app-wide card after Animations (#3218).
+    let spaceSwitchCard = SettingsControl(
+        "animations.space_switch.title",
+        "Switching Spaces"
+    )
     let spaceTransition = SettingsControl(
         "animations.space_transition",
         "Space switches"

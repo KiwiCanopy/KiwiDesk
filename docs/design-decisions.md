@@ -4021,9 +4021,11 @@ answer that setting asks for. The duration greys whenever no
 slide would play, read through the same `drawn(reduceMotion:)`,
 and all grey where
 `init.lua` owns the config, as the Desktop cue's row does (#1741,
-#2142). The group ends with the note that it applies at once in
+#2142). The group ended with the note that it applies at once in
 every profile and a divider, so the window rows below it read as
-a second subject.
+a second subject; since #3218 it is a card of its own, after
+Animations, leading with that note (*A setting that skips Save
+says so where it sits*, below).
 
 *App-wide, and crossed from the toggle.* It is stored in
 `gui.json` as `space.transition` and `space.slide_duration`,
@@ -5038,6 +5040,28 @@ switches it marks (#2142, #2655), the layout plate's in Shortcuts
 written the moment it changes, on a page whose other rows wait
 for Save, so it says in its `?` that it applies at once and to
 every profile.
+
+**A setting that skips Save says so where it sits (#3218).**
+[Principle] Eighteen rows on four pages wrote `gui.json` at once
+and said so four ways: a card title, a trailing caption in
+tertiary ink, a `?` nobody opens before changing a value, or
+nothing. A user who changed the Space slide's duration looked for
+the Save pill, since the window durations beside it raise one.
+So one sentence, "Changes apply at once, in every profile.",
+leads the smallest unit that is wholly live, in secondary ink:
+under a card's title, or under a row's label where the row sits
+among a profile's rows; the `?` keeps the why. It has a subject,
+so it reads neither as a command nor as singular over a group.
+Rows are grouped by topic, never by save behaviour, with one
+consequence: a card that mixed the two kinds is split, and the
+live card comes last on a profile's page, beside the Save pill
+it explains the absence of. Animations was the one such card;
+its Space switch rows are the card Switching Spaces. No badge: a
+capsule on eighteen rows reads as state, and on these pages
+colour means "on". The values stay app-wide: each is so by its
+own ruling, and moving them into profiles would owe a crossing
+and change what existing `init.lua` setters reach.
+`LiveSettingNoteTests` holds every app-wide writer to the note.
 
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
@@ -7389,8 +7413,10 @@ and moving a Lua-owned setup into the GUI
 (`adoptConfigIntoGui`) stores the values `init.lua` executed,
 since those are what the user was running.
 
-**In Settings, the rows sit on General's "Applies immediately"
-card and write `gui.json` at once, with no Save.** (#1741,
+**In Settings, the rows sit on General's immediate card
+("Changes apply at once, in every profile" since #3218; "Applies
+immediately" before) and write `gui.json` at once, with no
+Save.** (#1741,
 ui-designer ruling.) Every row on that card does what it was
 just told the moment it is told; a draft-and-Save row there
 would be the only one that does not. That was #1255's argument
@@ -9156,7 +9182,8 @@ on every visit; a picture row there is not drawn yet. Dim, Blur and Appearance w
 ownership](#spaces-profiles--config-ownership), #1741). With KiwiVision
 on, Settings stays clear while every window behind it dims as the
 Dim value steps, which is the best preview there is. Each card says
-"Applies at once, in every profile.", save Never dimmed (below).
+"Changes apply at once, in every profile." (#3218), save Never
+dimmed (below).
 
 *Stored as one group, with no crossing.* The settings live in
 `gui.json` as `kiwivision.{dim, blur, appearance}`, every field
@@ -9195,8 +9222,8 @@ saving](#navigation--saving) ▸ the panel's object is the DRAFT.
 shortcut must not register before Save, the profiles it applies
 to are written to other profiles' files, and a rename rewrites
 stored bindings. The plain settings stay immediate beside them.
-That is why "Applies at once, in every profile." sits on each
-immediate card rather than on the page, and why Never dimmed —
+That is why "Changes apply at once, in every profile." sits on
+each immediate card rather than on the page, and why Never dimmed —
 the one immediate card a lens's page shows — sits last, under
 "Every lens", saying "in every profile and lens": two save
 behaviours on one page each need their own sentence. A lens
@@ -11040,7 +11067,7 @@ page it comes from, the way a look's font link does.
 
 **Settings owns the login item; crash supervision is the CLI's.**
 (#342, #576, #678 item 16, #1071) General shows ONE switch —
-"Start at login", in the "Applies immediately" group — and it
+"Start at login", in General's immediate group — and it
 drives the `SMAppService` login item and nothing else. The
 `kiwidesk service` LaunchAgent, which adds `KeepAlive` crash
 restart, is reachable only from the command line.

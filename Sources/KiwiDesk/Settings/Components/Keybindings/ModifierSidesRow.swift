@@ -30,6 +30,8 @@ struct ModifierSidesRow: View {
                 SettingsCatalog.shortcuts.modifierKeys.children.modifierSides
             )
             if let text = captionText { caption(text) }
+            LiveSettingCaption()
+                .padding(.leading, ToggleRow.captionIndent)
         }
         .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }

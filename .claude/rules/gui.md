@@ -898,6 +898,14 @@ off the main actor.
 EXISTS in the user's config — a layer, an imported binding, an
 override — is drawn on arrival; a disclosure withholds only the
 OFFER to create, and opens on arrival once the first one exists.
+**A row that writes at once draws `LiveSettingNote` (#3218):**
+under its card's title where the whole card is live, under its
+own label where it sits among a profile's rows, and a card that
+would mix the two kinds is split, the live card last
+(`LiveSettingNoteTests` ▸ `writersDrawTheNote`;
+`docs/design-decisions.md` ▸ A setting that skips Save says so
+where it sits). Never a second wording, and never colour.
+
 **Add no window-wide switch beside `Simple | Advanced`, and no
 depth switch inside either root** — new depth goes behind its
 container's disclosure or its row's menu (#2654,

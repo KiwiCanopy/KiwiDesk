@@ -70,6 +70,10 @@ struct ModifierKeysCard: View {
                             .hyperKey
                     )
                 captions
+                // The key is app-wide; "Shortcuts use" below it is
+                // the draft's (#3218).
+                LiveSettingCaption()
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
                 ShortcutBaseRow(model: model, reason: offerReason)
                     .searchAnchored(
                         SettingsCatalog.shortcuts.modifierKeys.children

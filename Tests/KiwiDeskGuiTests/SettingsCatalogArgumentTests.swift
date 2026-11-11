@@ -236,9 +236,9 @@ struct SettingsCatalogArgumentTests {
         // 149 #2676 Animate float, 152 #2680 the Pocket card, its
         // Edge and Position rows, 153 #2678 its Holds row, 154
         // #2941 its add row, 155 #2971 the scroll step's row, 161
-        // #3062's Maximize card and its rows, 162 its drawer, 164
-        // #2447, 165 #3088, 166 #1871, 167 #3064, 170 #3184, 166 #3199.
-        #expect(direct.values.reduce(0, +) == 165)  // #3183
+        // #3062's Maximize card and rows, 162 its drawer, 164 #2447,
+        // 165 #3088, 166 #1871, 167 #3064, 170 #3184, 166 #3199,
+        #expect(direct.values.reduce(0, +) == 166)  // #3183, #3218
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

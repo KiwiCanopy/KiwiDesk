@@ -10,7 +10,8 @@ struct KiwiVisionAppearanceCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.kiwiVision.appearanceCard,
-            caption: KiwiVisionCopy.appliesAtOnce
+            caption: LiveSettingNote.text,
+            captionProminent: true
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(KiwiVisionRowOrder.appearance, id: \.id) { key in

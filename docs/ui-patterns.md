@@ -258,8 +258,8 @@ is selected.
 ## Shared visual language
 
 **A section or disclosure title is sentence case** —
-"Applies immediately", "Drag & drop", "Move windows", not
-"Applies Immediately" or "Drag & Drop" (R5, #406), which is
+"Drag & drop", "Move windows", not "Drag & Drop" (R5, #406),
+which is
 what macOS System Settings uses for its own in-pane headers.
 Three boundaries, because System Settings itself draws them:
 
@@ -1120,15 +1120,25 @@ Accessibility.
 
 The Space switch is on that card: **Space switches** at its top
 picks Slide, Show the Space or None, and **Slide duration**
-beneath the picks paces the slide (#1956, #2524). The **Animate
-windows** master greys none of them, and Reduce Motion greys only
-the duration:
+beneath the picks paces the slide (#1956, #2524). They are a card
+of their own, **Switching Spaces**, after Animations (#3218), so
+the **Animate windows** master greys none of them, and Reduce
+Motion greys only the duration:
 under Reduce Motion a Slide shows the Space instead, which is how
 a switch reads with less motion, and the plate drops only its
 fade. The duration also greys while no slide would play. The
-group closes with "Applies at once, in every profile." and a
-divider above **Animate windows**, and the card's Reduce Motion
-warning names window animations alone.
+card leads with "Changes apply at once, in every profile." under
+its title, and the Animations card's Reduce Motion warning names
+window animations alone.
+
+**A setting that skips Save says so where it sits (#3218).** One
+sentence, "Changes apply at once, in every profile.", in
+secondary ink, leads the smallest unit that is wholly live: under
+a card's title (Switching Spaces, the KiwiVision cards; General's
+card carries it as its title), or under a row's label where the
+row sits among a profile's rows (the Desktop cue, the layout
+plate, the Hyper key, the sides switch). On a page that mixes the
+two kinds the live card comes last. Colour never carries it.
 
 **Step between Spaces (mouse or trackpad)** sits under **Space
 switches** with the same three options, for the scroll Space step
