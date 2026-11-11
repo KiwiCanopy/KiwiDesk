@@ -92,8 +92,8 @@ struct LaunchFollowSeamTests {
             followFile, 1
         ),
         ("launchFollow.noteRider(", "KiwiCore+LaunchRiders.swift", 1),
-        ("launchFollow.takeRiders(", followFile, 1),
-        ("fileLaunchRiders(riders, into: space)", followFile, 1),
+        ("return .init(space: space, riders: riders)", followFile, 1),
+        ("fileLaunchRiders(claim.riders, into: space)", followFile, 1),
         // The unowed arm (#2478): the process age armed with the
         // other machine seams, the create ledger fed and opened
         // by the WindowServer route and closed by `stop()`, the
@@ -307,6 +307,21 @@ struct LaunchFollowSeamTests {
             body.range(of: "reconcileOffMain(")
         )
         #expect(report.lowerBound < reconcile.lowerBound)
+    }
+
+    /// Riders are filed AHEAD of the switch (#3189): filed after
+    /// it, a rider is parked with the Space the switch left and
+    /// stays out of sight until the next retile.
+    @Test("a launch's riders are filed ahead of its switch")
+    func ridersFiledAheadOfTheSwitch() throws {
+        let body = try SourceScan.functionBody(
+            of: "payLaunchFollow",
+            in: Self.followFile,
+            under: "App"
+        )
+        let file = try #require(body.range(of: "fileLaunchRiders("))
+        let follow = try #require(body.range(of: "followSwitch("))
+        #expect(file.lowerBound < follow.lowerBound)
     }
 
     /// The switch REPLACES the arrival's event retile: run after

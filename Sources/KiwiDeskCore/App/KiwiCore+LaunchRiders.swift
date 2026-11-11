@@ -4,15 +4,14 @@ import Foundation
 /// arrival while the debt stands, filed into the rule's Space
 /// when the follow is paid.
 extension KiwiCore {
-    /// Notes `window` where the create fold skipped its app rule
-    /// for a popup, outside a Desktop switch's batch.
+    /// Notes `window` on its app's standing debt where the create
+    /// fold skipped its app rule for a popup.
     func noteLaunchRider(
         arrived window: ManagedWindow,
         effects: AppliedEffects,
         now: Date = Date()
     ) {
         guard effects.popupSkippedRule != nil,
-            !eventLoop.switchReads.applying,
             let bundleID = window.appBundleID,
             let from = state.workspaces.space(of: window.id)
         else { return }
@@ -27,18 +26,16 @@ extension KiwiCore {
     /// switch: each still in the Space it opened in, so one the
     /// user moved since stays. No cue: nobody asked.
     func fileLaunchRiders(
-        _ riders: [LaunchRiders.Rider],
+        _ riders: [LaunchFollowIntent.Rider],
         into space: SpaceID
     ) {
         for rider in riders {
             let window = rider.window
-            let from = rider.from
-            guard from != space,
-                state.workspaces.space(of: window) == from,
+            guard state.workspaces.space(of: window) == rider.from,
                 spaceMoveBlock(window) == nil,
                 stickyMoveBlock(window, to: space) == nil
             else { continue }
-            fileMembership(window, into: space, from: from)
+            fileMembership(window, into: space, from: rider.from)
             onLog(
                 "launch follow: popup w\(window.raw) rides into "
                     + "space \(space.raw)"

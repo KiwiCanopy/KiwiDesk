@@ -76,10 +76,15 @@ struct KiwiVisionAutoOpenWiringTests {
         )
         #expect(Self.count("letfocus=arrivalFocus", in: fold) == 1)
         #expect(Self.count("ifcase.quiet(letinto)=focus", in: fold) == 1)
-        // Nor a rule follow.
+        // Nor a rule follow, nor a popup riding one (#3189): one
+        // gate, read by both arms.
         #expect(
-            Self.count("claim!=.awaited(window.id),!quiet", in: fold) == 1
+            Self.count(
+                "letmayFollow=claim!=.awaited(window.id)&&!quiet",
+                in: fold
+            ) == 1
         )
+        #expect(Self.count("ifmayFollow,", in: fold) == 2)
         #expect(
             Self.count(
                 "guardwindows[window.id]?.isTransientOverlay!=true,!quiet",

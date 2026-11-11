@@ -126,8 +126,9 @@ extension KiwiCore {
     }
 
     /// Claims the follow when the create fold filed `window` by
-    /// its app rule into another Space; the Space to switch to, or
-    /// nil. A transient overlay never claims, so a launch's splash
+    /// its app rule into another Space: the Space to switch to and
+    /// the debt's riders (#3189), or nil. A transient overlay never
+    /// claims, so a launch's splash
     /// panel cannot spend the debt, and neither does a window a
     /// Desktop switch's batch reveals (#2347). Owed nothing, the
     /// window still follows on `spawnVerdict` (#2478). Paid by
@@ -137,7 +138,7 @@ extension KiwiCore {
         provenance: ArrivalProvenance,
         effects: AppliedEffects,
         now: Date = Date()
-    ) -> SpaceID? {
+    ) -> LaunchFollowIntent.Claim? {
         // A lens's quiet open is owed first (#3122).
         if claimQuietOpen(arrived: window) { return nil }
         noteLaunchRider(arrived: window, effects: effects, now: now)
@@ -147,14 +148,14 @@ extension KiwiCore {
             state.workspaces.space(of: window.id) == space,
             state.windows[window.id]?.isTransientOverlay == false
         else { return nil }
-        guard launchFollow.claim(bundleID, at: now) else {
+        guard let riders = launchFollow.claim(bundleID, at: now) else {
             switch spawnVerdict(window, provenance: provenance) {
             case .follows:
                 onLog(
                     "launch follow: w\(window.id.raw), a new window "
                         + "of pid \(window.pid), follows its rule"
                 )
-                return space
+                return .init(space: space)
             case .awaitsCreate:
                 launchFollow.noteSpawn(
                     .init(
@@ -178,7 +179,7 @@ extension KiwiCore {
             )
             return nil
         }
-        return space
+        return .init(space: space, riders: riders)
     }
 
     /// What the unowed arm (#2478) makes of a rule-filed arrival:
@@ -237,19 +238,19 @@ extension KiwiCore {
     /// which would park the new window in its still-hidden Space
     /// only for the switch to bring it back: a whole
     /// `followSwitch` — settle, reissue retile, Monocle drop —
-    /// since no native switch rides along. False when nothing was
-    /// switched, so the caller retiles as usual.
+    /// since no native switch rides along. The claim's riders are
+    /// filed first, so the switch's one pass places them (#3189).
+    /// False when nothing was switched, so the caller retiles as
+    /// usual.
     func payLaunchFollow(
         _ window: WindowID,
-        into space: SpaceID
+        into claim: LaunchFollowIntent.Claim
     ) -> Bool {
-        let riders = launchFollow.takeRiders(
-            of: state.windows[window]?.appBundleID
-        )
+        let space = claim.space
         guard state.workspaces.space(of: window) == space else {
             return false
         }
-        fileLaunchRiders(riders, into: space)
+        fileLaunchRiders(claim.riders, into: space)
         onLog(
             "launch follow: w\(window.raw) opened into its app "
                 + "rule's space \(space.raw)"

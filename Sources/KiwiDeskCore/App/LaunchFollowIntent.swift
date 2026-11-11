@@ -164,10 +164,8 @@ final class LaunchFollowIntent {
         return spawn
     }
 
-    private var pending: (bundleID: String, at: Date)?
-
-    /// The debt's popups (#3189), retired wherever it is.
-    var riders = LaunchRiders()
+    /// The debt and its riders (#3189): one value, one end.
+    private var pending: (bundleID: String, at: Date, riders: [Rider])?
 
     /// A rule-placed window that arrived with NO debt standing — a
     /// reopen or an un-minimize can show the window before macOS
@@ -205,18 +203,27 @@ final class LaunchFollowIntent {
         if quietOpen?.bundleIDs.contains(bundleID.lowercased()) == true {
             quietOpen = nil
         }
-        pending = (bundleID, now)
-        riders.clear()
+        // The same app owed again keeps its riders: one open.
+        let riders = pending?.bundleID == bundleID ? pending?.riders : nil
+        pending = (bundleID, now, riders ?? [])
     }
 
-    /// Claims the follow for a window of `bundleID`; true once,
-    /// within the bound. Another app's live debt is left standing.
-    func claim(_ bundleID: String, at now: Date) -> Bool {
+    /// Claims the follow for a window of `bundleID`, once, within the
+    /// bound: its riders, else nil. Another app's debt stands.
+    func claim(_ bundleID: String, at now: Date) -> [Rider]? {
         guard let owed = owed(at: now), owed == bundleID else {
-            return false
+            return nil
         }
-        pending = nil
-        return true
+        defer { pending = nil }
+        return pending?.riders
+    }
+
+    /// Notes a popup of `bundleID` on its standing debt; owed
+    /// nothing, the popup stays where it opened (#3189).
+    func noteRider(_ rider: Rider, of bundleID: String, at now: Date) {
+        guard owed(at: now) == bundleID else { return }
+        pending?.riders.removeAll { $0.window == rider.window }
+        pending?.riders.append(rider)
     }
 
     /// The owing app, nil once expired (which drops it) or absent.
@@ -225,7 +232,6 @@ final class LaunchFollowIntent {
         guard now.timeIntervalSince(pending.at) < Self.drainWindow
         else {
             self.pending = nil
-            riders.clear()
             return nil
         }
         return pending.bundleID
@@ -320,9 +326,7 @@ final class LaunchFollowIntent {
     /// refused New Window opened nothing, and a placement waits on
     /// its own app's activation (#1518).
     func forget(pending bundleID: String) {
-        guard pending?.bundleID == bundleID else { return }
-        pending = nil
-        riders.clear()
+        if pending?.bundleID == bundleID { pending = nil }
     }
 
     /// Retires the debt unpaid, and any spawn or placement waiting
@@ -331,7 +335,6 @@ final class LaunchFollowIntent {
     /// own apps' activations and the front app's.
     func forget(keeping bundleID: String? = nil) {
         pending = nil
-        riders.clear()
         if let open = quietOpen, !open.survives(bundleID) {
             quietOpen = nil
         }

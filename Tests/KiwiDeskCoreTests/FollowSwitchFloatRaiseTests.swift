@@ -109,7 +109,7 @@ struct FollowSwitchFloatRaiseTests {
     func launchFollowRaises() {
         let core = makeCore()
         seed(core)
-        #expect(core.payLaunchFollow(WindowID(2), into: "2"))
+        #expect(core.payLaunchFollow(WindowID(2), into: .init(space: "2")))
         expectRaised(core)
     }
 

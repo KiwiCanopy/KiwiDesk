@@ -4,14 +4,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The riders' ledger (#3189): noted only while their app's debt
-/// stands, taken once at its payment, and retired wherever the
-/// debt is. Plus the fold's one input to it.
+/// The riders of a launch debt (#3189): noted only while their
+/// app's debt stands, handed out once by its claim, and gone with
+/// the debt, since they are one value. Plus the fold's one input.
 @Suite("Launch riders live and end with the debt (#3189)")
 @MainActor
 struct LaunchRidersLedgerTests {
+    private typealias Rider = LaunchFollowIntent.Rider
     private static let app = "app.launched"
-    private static let rider = LaunchRiders.Rider(
+    private static let rider = Rider(
         window: WindowID(8),
         from: SpaceID("1")
     )
@@ -25,41 +26,51 @@ struct LaunchRidersLedgerTests {
         return ledger
     }
 
-    @Test("a rider is taken once, by its own app")
-    func takenOnce() {
+    @Test("the claim hands the riders out, once")
+    func claimedOnce() {
         let ledger = Self.owing()
-        #expect(ledger.takeRiders(of: Self.app) == [Self.rider])
-        #expect(ledger.takeRiders(of: Self.app).isEmpty)
-        // Another app's payment takes none, and drops them.
-        let other = Self.owing()
-        #expect(other.takeRiders(of: "app.other").isEmpty)
-        #expect(other.takeRiders(of: Self.app).isEmpty)
+        #expect(ledger.claim(Self.app, at: Self.now) == [Self.rider])
+        #expect(ledger.claim(Self.app, at: Self.now) == nil)
+        // Owed again, the app starts with none.
+        ledger.record(Self.app, at: Self.now)
+        #expect(ledger.claim(Self.app, at: Self.now) == [])
     }
 
-    @Test("the claim leaves the riders for its payment")
-    func claimKeepsRiders() {
+    @Test("a window noted twice rides once, with its last Space")
+    func notedOnce() {
         let ledger = Self.owing()
-        #expect(ledger.claim(Self.app, at: Self.now))
-        #expect(ledger.takeRiders(of: Self.app) == [Self.rider])
+        let moved = Rider(window: Self.rider.window, from: SpaceID("3"))
+        ledger.noteRider(moved, of: Self.app, at: Self.now)
+        #expect(ledger.claim(Self.app, at: Self.now) == [moved])
     }
 
     @Test("no debt, or another app's, notes nothing")
     func unowedNotesNothing() {
         let ledger = LaunchFollowIntent()
         ledger.noteRider(Self.rider, of: Self.app, at: Self.now)
-        #expect(ledger.takeRiders(of: Self.app).isEmpty)
+        ledger.record(Self.app, at: Self.now)
+        #expect(ledger.claim(Self.app, at: Self.now) == [])
         ledger.record("app.other", at: Self.now)
         ledger.noteRider(Self.rider, of: Self.app, at: Self.now)
-        #expect(ledger.takeRiders(of: Self.app).isEmpty)
+        #expect(ledger.claim("app.other", at: Self.now) == [])
     }
 
-    @Test("every ender of the debt retires its riders")
+    /// Open or Focus owes at the command and the app's activation
+    /// owes again: one open, so a popup between the two still rides.
+    @Test("the same app owed again keeps its riders")
+    func sameAppKeepsRiders() {
+        let ledger = Self.owing()
+        ledger.record(Self.app, at: Self.now)
+        #expect(ledger.claim(Self.app, at: Self.now) == [Self.rider])
+    }
+
+    @Test("an ended debt takes its riders with it")
     func endersRetire() {
         let late = Self.now.addingTimeInterval(
             LaunchFollowIntent.drainWindow
         )
         let enders: [(String, (LaunchFollowIntent) -> Void)] = [
-            ("a new debt", { $0.record(Self.app, at: Self.now) }),
+            ("another app's debt", { $0.record("app.other", at: Self.now) }),
             ("expiry", { _ = $0.owed(at: late) }),
             ("a refused open", { $0.forget(pending: Self.app) }),
             ("another activation", { $0.forget(keeping: "app.other") }),
@@ -68,15 +79,13 @@ struct LaunchRidersLedgerTests {
         for (name, end) in enders {
             let ledger = Self.owing()
             end(ledger)
+            // Owed afresh, nothing of the ended debt is left.
+            ledger.record(Self.app, at: late)
             #expect(
-                ledger.takeRiders(of: Self.app).isEmpty,
+                ledger.claim(Self.app, at: late) == [],
                 "\(name) left riders"
             )
         }
-        // The control: another app's refused open ends nothing.
-        let ledger = Self.owing()
-        ledger.forget(pending: "app.other")
-        #expect(ledger.takeRiders(of: Self.app) == [Self.rider])
     }
 
     // MARK: The fold's input
@@ -140,5 +149,29 @@ struct LaunchRidersLedgerTests {
             .windowCreated(Self.window(5, popup: true))
         )
         #expect(remembered.popupSkippedRule == nil)
+    }
+
+    /// The follow's own stand-downs: a lens's quiet open (#3122)
+    /// and a Pocket key's window, claimed or awaited (#2612).
+    @Test("a quiet popup and a Pocket key's popup name none")
+    func foldNamesNoneForQuietOrPocket() {
+        var quiet = Self.state()
+        quiet.arrivalFocus = .quiet(into: nil)
+        #expect(
+            quiet.apply(.windowCreated(Self.window(6, popup: true)))
+                .popupSkippedRule == nil
+        )
+        var claimed = Self.state()
+        claimed.pocketClaimed = .claimed(WindowID(6))
+        #expect(
+            claimed.apply(.windowCreated(Self.window(6, popup: true)))
+                .popupSkippedRule == nil
+        )
+        var awaited = Self.state()
+        awaited.pocketClaimed = .awaited(WindowID(6))
+        #expect(
+            awaited.apply(.windowCreated(Self.window(6, popup: true)))
+                .popupSkippedRule == nil
+        )
     }
 }

@@ -8022,7 +8022,7 @@ is enough here and still not there.
 exists because a popup filed into a Space nobody shows is parked
 as it opens. A launch's follow shows that Space, so for the popups
 of that launch the skip only strands them: Lightroom Classic's top
-strip, a panel with no title-bar button, stayed in the Space the
+strip, a panel the rule skips as a popup, stayed in the Space the
 app was launched from. They ride the follow, and are not filed by
 the rule at their arrival: filed at once, a splash would sit
 parked until the main window arrives, seconds on a slow launch.
@@ -8030,9 +8030,11 @@ So a popup still opens where the user is, is noted on the app's
 launch debt, and is filed into the rule's Space when the follow
 is paid, if it is still in the Space it opened in. Only the open
 arm carries riders: its debt is what says "this launch", and a new
-window of a running app has none, so its app's popups stay. A
-window that arrives before its app's activation is followed with
-no debt standing, and that open's popups stay too.
+window of a running app has none, so its app's popups stay. So
+does a popup that opens before the debt is owed: a Dock or
+Spotlight launch owes at the app's activation, and a splash can
+precede it. A window that arrives before its app's activation is
+followed with no debt standing, and that open's popups stay too.
 
 There is no setting and no same-screen narrowing. A user who
 pins an app to a Space has already said where they want it, a

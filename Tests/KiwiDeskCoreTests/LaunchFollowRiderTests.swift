@@ -57,8 +57,13 @@ struct LaunchFollowRiderTests {
         Desk.arrive(Self.main, on: core)
         #expect(core.state.workspaces.activeSpace == Desk.ruled)
         #expect(Self.space(of: Self.popup, on: core) == Desk.ruled)
-        // The follow's focus is its window's, never the rider's.
+        // The follow's focus is its window's, never the rider's,
+        // in the Space's own slot too.
         #expect(core.focusedWindowID == WindowID(Self.main))
+        #expect(
+            core.state.workspaces[Desk.ruled]?.focused
+                == WindowID(Self.main)
+        )
     }
 
     @Test("every popup of the launch rides, not only the last")
@@ -105,6 +110,32 @@ struct LaunchFollowRiderTests {
         core.state.windows.upsert(rider)
         Desk.arrive(Self.main, on: core)
         #expect(Self.space(of: Self.popup, on: core) == Desk.home)
+    }
+
+    @Test("a sticky rider stays: it shows on every Space already")
+    func stickyStays() throws {
+        let core = Desk.makeCore()
+        Desk.activate(core)
+        Self.popupArrives(on: core)
+        var rider = try #require(core.state.windows[Self.popup])
+        rider.stickyScope = .global
+        core.state.windows.upsert(rider)
+        Desk.arrive(Self.main, on: core)
+        #expect(core.state.workspaces.activeSpace == Desk.ruled)
+        #expect(Self.space(of: Self.popup, on: core) == Desk.home)
+    }
+
+    /// Open or Focus owes at the command; the app's activation owes
+    /// again. A popup between the two is the same open's.
+    @Test("a popup between the command's debt and the activation rides")
+    func ridesAcrossTheSecondOwe() {
+        let core = Desk.makeCore()
+        core.oweLaunchFollow(Desk.bundle, at: Desk.ahead)
+        Self.popupArrives(on: core)
+        Desk.activate(core)
+        Desk.arrive(Self.main, on: core)
+        #expect(core.state.workspaces.activeSpace == Desk.ruled)
+        #expect(Self.space(of: Self.popup, on: core) == Desk.ruled)
     }
 
     @Test("a popup after the follow opens in the rule's Space")
