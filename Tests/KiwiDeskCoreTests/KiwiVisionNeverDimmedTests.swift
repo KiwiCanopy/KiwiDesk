@@ -170,8 +170,8 @@ struct KiwiVisionNeverDimmedTests {
         #expect(!core.visionMasks)
     }
 
-    @Test("on screen now lists each app once, beneath the layer too")
-    func appsOnScreen() {
+    @Test("open apps lists each app once, beneath the layer too")
+    func openApps() {
         let core = makeCore()
         let listed = core.vision.listWindows
         core.vision.listWindows = {
@@ -186,15 +186,19 @@ struct KiwiVisionNeverDimmedTests {
                 )
             ] + listed()
         }
-        let apps = core.appsOnScreen(beneathNormal: true)
+        let apps = core.openApps(beneathNormal: true)
         #expect(
-            apps.map(\.key) == ["test.kiwi.music", "other", "sketchybar"]
+            apps.map(\.key)
+                == ["test.kiwi.music", "other", "sketchybar", "front"]
         )
-        #expect(apps.map(\.name) == ["Music", "Other", "sketchybar"])
+        #expect(
+            apps.map(\.name)
+                == ["Music", "Other", "sketchybar", "Front"]
+        )
         #expect(apps.first?.bundleID == "test.kiwi.music")
-        #expect(apps.last?.bundleID == nil)
-        let normal = core.appsOnScreen(beneathNormal: false)
-        #expect(normal.map(\.key) == ["test.kiwi.music", "other"])
+        #expect(apps[2].bundleID == nil)
+        let normal = core.openApps(beneathNormal: false)
+        #expect(normal.map(\.key) == ["test.kiwi.music", "other", "front"])
     }
 
     /// A list read asks LaunchServices nothing while the list is

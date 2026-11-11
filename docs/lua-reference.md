@@ -352,6 +352,32 @@ Restore…**.
 KiwiDesk.focus_space_back()
 ```
 
+:::unreleased
+### focus_space_last
+
+**Expects:** nothing.
+
+**Does:** toggles between your last two Spaces, like ⌘Tab for
+Spaces: it goes to the Space you were on before this one, and used
+again it goes back. It reads the same history as
+[`focus_space_back`](#focus_space_back--focus_space_forward), and
+its arrival is an ordinary visit, so it clears the forward half.
+After a back, it returns to the Space the back left. Where that
+Space has gone, or per screen now lives on another screen, it goes
+to the nearest Space back instead; with nothing to go to, the
+focused window's ring bumps.
+
+It is **Go to last Space** under Settings ▸ Shortcuts, with no key
+by default; the trackpad's three-finger tap runs it
+([trackpad gestures](#trackpad-gestures)).
+
+**Example:**
+
+```lua
+KiwiDesk.focus_space_last()
+```
+:::
+
 ### focus_display_last / focus_display
 
 **Expects:** nothing for `focus_display_last`; a direction
@@ -1197,6 +1223,10 @@ walk. `per_screen` keeps one history per screen and steps the
 screen the focused window is on; `all_screens` keeps one history
 across every screen, so going back may move you to another
 screen. With one screen the two are the same.
+
+:::unreleased
+[`focus_space_last`](#focus_space_last) reads the same history.
+:::
 
 It is stored like the shortcuts: `space_history` in `gui.json` is
 the value every profile uses, and a profile may keep its own,
@@ -5375,7 +5405,7 @@ Out of the box these are bound:
 | Slot | Keys | Action |
 |---|---|---|
 | `tap4` | none | Open KiwiHub's shortcuts panel |
-| `tap3` | none | Go back to the Space you were on before ([`focus_space_back`](#focus_space_back--focus_space_forward)) |
+| `tap3` | none | Go to the last Space, toggling between two ([`focus_space_last`](#focus_space_last)) |
 | `spread` | ⌃⌥ | Toggle maximized |
 | `rotate` | ⌃⌥ | Cycle the layout |
 

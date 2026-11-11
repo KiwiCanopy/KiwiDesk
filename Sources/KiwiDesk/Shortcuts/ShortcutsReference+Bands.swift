@@ -26,6 +26,7 @@ extension ShortcutsReferenceBuilder {
             + [KeybindingCatalog.screenLastRow]
             + KeybindingCatalog.spaceStepRows
             + KeybindingCatalog.spaceHistoryRows
+            + [KeybindingCatalog.spaceLastRow]
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
             + KeybindingCatalog.goToDesktop(
                 desktops.desktops,

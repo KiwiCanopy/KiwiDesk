@@ -88,7 +88,7 @@ public enum TrackpadGestureSeeds {
             modifiers: hyper
         ),
         .tap4: .init(action: KiwiHubSide.shortcuts.lua),
-        .tap3: .init(action: "KiwiDesk.focus_space_back()"),
+        .tap3: .init(action: "KiwiDesk.focus_space_last()"),
     ]
 
     /// The bound slots once `base` lies over the seeds and

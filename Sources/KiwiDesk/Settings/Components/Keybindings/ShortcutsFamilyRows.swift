@@ -47,6 +47,8 @@ struct ShortcutsFamilyRows {
             return KeybindingCatalog.spaceStepRows
         case .spaceHistoryStep:
             return KeybindingCatalog.spaceHistoryRows
+        case .spaceLast:
+            return [KeybindingCatalog.spaceLastRow]
         case .goToSpace:
             return perSpace(KeybindingCatalog.goToSpace)
         case .swapDir:

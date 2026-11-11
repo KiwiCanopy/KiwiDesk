@@ -22,20 +22,12 @@ struct TrackpadGestureConfigTests {
         #expect(seeds[.spread]?.modifiers == Self.hyper)
         #expect(seeds[.tap4]?.action == KiwiHubSide.shortcuts.lua)
         #expect(seeds[.tap4]?.modifiers == [])
-        #expect(seeds[.tap3]?.action == "KiwiDesk.focus_space_back()")
+        // The tap toggles, since a single gesture has no Forward
+        // (#3206).
+        #expect(seeds[.tap3]?.action == "KiwiDesk.focus_space_last()")
         #expect(seeds[.swipe3] == nil)
-        // Each seed runs the Shortcuts catalogue's own Lua, so a row
-        // that recognizes a catalogue action by its text knows it.
-        let catalogue = Set(
-            DefaultKeybindings.bindings(
-                spaces: [SpaceID("1")],
-                resizeStep: 50,
-                base: .standard
-            ).map(\.lua)
-        )
-        for (slot, binding) in TrackpadGestureSeeds.seeds {
-            #expect(catalogue.contains(binding.action), "\(slot)")
-        }
+        // Each seed runs the Shortcuts catalogue's own Lua
+        // (`TrackpadSeedCatalogueTests` in the GUI target).
         // Every seed passes its own slot's refusals.
         for (slot, binding) in TrackpadGestureSeeds.seeds {
             #expect(binding.refusal(on: slot) == nil, "\(slot)")
@@ -68,6 +60,23 @@ struct TrackpadGestureConfigTests {
         )
         #expect(both[.tap3]?.action == "KiwiDesk.cycle_mode()")
         #expect(both[.swipe3] == nil)
+    }
+
+    @Test("an untouched tap3 follows the seed; a stored one wins")
+    func tap3FollowsTheSeed() {
+        let untouched = TrackpadGestureSeeds.resolved(
+            base: TrackpadGestureMap(),
+            profile: nil
+        )
+        #expect(untouched[.tap3]?.action == "KiwiDesk.focus_space_last()")
+        let back = TrackpadGestureBinding(
+            action: "KiwiDesk.focus_space_back()"
+        )
+        let stored = TrackpadGestureSeeds.resolved(
+            base: TrackpadGestureMap([.tap3: .bound(back)]),
+            profile: nil
+        )
+        #expect(stored[.tap3] == back)
     }
 
     @Test("a refused binding a hand edit reached is dropped")

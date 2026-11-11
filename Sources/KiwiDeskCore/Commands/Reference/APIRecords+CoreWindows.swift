@@ -40,6 +40,10 @@ extension APIReference {
             "Goes forward again along the Space history, after "
                 + "focus_space_back."
         ),
+        "focus_space_last": APIRecord(
+            "Goes to the Space you were on before, like Cmd-Tab for "
+                + "Spaces; repeated, it toggles between two."
+        ),
         "focus_space_previous": APIRecord(
             "Switches to the previous Space in the focused "
                 + "screen's order, stopping at the first."

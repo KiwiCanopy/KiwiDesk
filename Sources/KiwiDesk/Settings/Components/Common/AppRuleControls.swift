@@ -34,9 +34,9 @@ struct AppSelector: View {
     /// Called with the bundle id the user committed. The caller
     /// owns normalisation and dedup; this view only says when.
     let onCommit: (String) -> Void
-    /// Where given, the picker leads with the apps on screen now
+    /// Where given, the picker leads with the open apps
     /// that a rule can name (#2297), read from this core.
-    var onScreenOf: KiwiCore?
+    var openAppsOf: KiwiCore?
 
     var body: some View {
         AppPickerButton(
@@ -62,7 +62,7 @@ struct AppSelector: View {
             },
             exclude: exclude,
             guessed: guessed,
-            onScreen: onScreenOf.map { core in
+            openApps: openAppsOf.map { core in
                 { Self.ruleCandidates(core) }
             }
         )
@@ -81,15 +81,15 @@ struct AppSelector: View {
         )
     }
 
-    /// The on-screen apps a rule can name: a normal window's, and
+    /// The open apps a rule can name: a normal window's, and
     /// only with a bundle id, since `AppRef` matches a rule by bundle
     /// id alone — a process without one (SketchyBar) would save a
     /// rule that never matches.
-    static func ruleCandidates(_ core: KiwiCore) -> [OnScreenApp] {
-        ruleCandidates(core.appsOnScreen(beneathNormal: false))
+    static func ruleCandidates(_ core: KiwiCore) -> [OpenApp] {
+        ruleCandidates(core.openApps(beneathNormal: false))
     }
 
-    static func ruleCandidates(_ apps: [OnScreenApp]) -> [OnScreenApp] {
+    static func ruleCandidates(_ apps: [OpenApp]) -> [OpenApp] {
         apps.filter { $0.bundleID != nil }
     }
 
