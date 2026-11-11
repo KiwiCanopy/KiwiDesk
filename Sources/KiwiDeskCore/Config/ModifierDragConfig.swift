@@ -45,7 +45,7 @@ public struct ModifierDragBinding: Equatable, Sendable {
 /// move begins the binding whose keys and start it matches, so one
 /// action may be bound any number of times.
 public struct ModifierDragSettings: Equatable, Sendable {
-    public var bindings: [ModifierDragBinding]
+    public var grabs: [ModifierDragBinding]
 
     /// The seeds' grabs, which hold until the first apply.
     public static let defaults = ModifierDragSettings(
@@ -56,21 +56,21 @@ public struct ModifierDragSettings: Equatable, Sendable {
     /// order, a `drag` row starting on a press and a `hover_move`
     /// row on the keys alone.
     public init(resolved: [GestureKey: GestureAction]) {
-        var bindings: [ModifierDragBinding] = []
+        var rows: [ModifierDragBinding] = []
         for key in resolved.keys.sorted() {
             guard case .grab(let grab) = resolved[key],
                 let start = key.input.grabStart
             else { continue }
-            bindings.append(
-                ModifierDragBinding(grab, chord: key.keys, start: start)
+            rows.append(
+                ModifierDragBinding(grab, chord: key.chord, start: start)
             )
         }
-        self.init(bindings)
+        self.init(rows)
         self = sanitized
     }
 
-    public init(_ bindings: [ModifierDragBinding] = []) {
-        self.bindings = bindings
+    public init(_ grabs: [ModifierDragBinding] = []) {
+        self.grabs = grabs
     }
 
     /// What a hand-edited file can reach, made one set of keys, one
@@ -79,7 +79,7 @@ public struct ModifierDragSettings: Equatable, Sendable {
     /// drag's keys ends at its press.
     public var sanitized: ModifierDragSettings {
         var kept: [ModifierDragBinding] = []
-        for binding in bindings where !binding.isOff {
+        for binding in grabs where !binding.isOff {
             guard !kept.contains(where: { $0.chord == binding.chord })
             else { continue }
             kept.append(binding)
@@ -92,11 +92,11 @@ public struct ModifierDragSettings: Equatable, Sendable {
         chord: ScrollChord,
         start: ModifierDragStart
     ) -> ModifierDragBinding? {
-        bindings.first {
+        grabs.first {
             !$0.isOff && $0.chord == chord && $0.start == start
         }
     }
 
     /// Whether any binding is on.
-    public var isOn: Bool { bindings.contains { !$0.isOff } }
+    public var isOn: Bool { grabs.contains { !$0.isOff } }
 }

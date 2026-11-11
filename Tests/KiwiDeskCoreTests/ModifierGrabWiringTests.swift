@@ -62,7 +62,7 @@ struct ModifierGrabWiringTests {
                         phase: phase,
                         action: action,
                         start: start,
-                        chord: ModifierDragSettings.defaults.bindings
+                        chord: ModifierDragSettings.defaults.grabs
                             .first { $0.action == action }?.chord ?? [],
                         location: point,
                         time: 0

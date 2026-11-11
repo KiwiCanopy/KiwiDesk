@@ -47,9 +47,9 @@ extension KiwiCore {
         var routes: [ScrollChord: ScrollRoute] = [:]
         for (key, action) in resolved {
             switch key.input {
-            case .swipe2: routes[key.keys, default: .init()].swipe = action
-            case .wheel: routes[key.keys, default: .init()].wheel = action
-            case .wheelX: routes[key.keys, default: .init()].wheelX = action
+            case .swipe2: routes[key.chord, default: .init()].swipe = action
+            case .wheel: routes[key.chord, default: .init()].wheel = action
+            case .wheelX: routes[key.chord, default: .init()].wheelX = action
             default: continue
             }
         }

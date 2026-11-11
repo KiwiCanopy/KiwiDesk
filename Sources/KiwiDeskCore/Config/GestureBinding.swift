@@ -6,16 +6,16 @@ import Foundation
 /// appear many times with different keys.
 public struct GestureKey: Hashable, Sendable, Comparable {
     public var input: GestureInput
-    public var keys: ScrollChord
+    public var chord: ScrollChord
 
     public init(_ input: GestureInput, _ keys: ScrollChord = []) {
         self.input = input
-        self.keys = keys
+        self.chord = keys
     }
 
     /// The wire spelling.
     public var spelling: String {
-        keys.isEmpty ? input.rawValue : "\(input.rawValue):\(keys.spelling)"
+        chord.isEmpty ? input.rawValue : "\(input.rawValue):\(chord.spelling)"
     }
 
     /// Reads a wire spelling; nil for an unknown input or keys, and
@@ -43,7 +43,7 @@ public struct GestureKey: Hashable, Sendable, Comparable {
         let order = GestureInput.allCases
         let l = order.firstIndex(of: lhs.input) ?? 0
         let r = order.firstIndex(of: rhs.input) ?? 0
-        return l != r ? l < r : lhs.keys.rawValue < rhs.keys.rawValue
+        return l != r ? l < r : lhs.chord.rawValue < rhs.chord.rawValue
     }
 }
 
@@ -155,13 +155,13 @@ extension GestureAction {
     /// The refusal for this action on `key`; nil when it stands.
     public func refusal(on key: GestureKey) -> GestureRefusal? {
         let input = key.input
-        if input.needsModifier, key.keys.isEmpty { return .needsModifier }
+        if input.needsModifier, key.chord.isEmpty { return .needsModifier }
         if input.isWheel || input.isPhasedScroll,
-            key.keys.rawValue.nonzeroBitCount < 2
+            key.chord.rawValue.nonzeroBitCount < 2
         {
             return .singleModifierScroll
         }
-        if input.isWheel, key.keys.contains(.shift) { return .shiftOnWheel }
+        if input.isWheel, key.chord.contains(.shift) { return .shiftOnWheel }
         switch self {
         case .grab:
             return input.isDrag ? nil : .grabOnlyOnDrag

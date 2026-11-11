@@ -87,7 +87,7 @@ struct PointerConsumersTests {
         let rig = Rig()
         rig.front.start()
         var settings = ModifierDragSettings.defaults
-        settings.bindings.append(
+        settings.grabs.append(
             ModifierDragBinding(.resize, chord: [.control, .command])
         )
         rig.front.configure(grab: settings)

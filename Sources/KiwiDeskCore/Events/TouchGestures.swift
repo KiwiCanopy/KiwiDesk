@@ -137,7 +137,7 @@ public final class TouchGestures {
         guard started else { return [:] }
         var out: [GestureInput: Set<ScrollChord>] = [:]
         for key in bindings.keys where key.input.isGestureEvent {
-            out[key.input, default: []].insert(key.keys)
+            out[key.input, default: []].insert(key.chord)
         }
         return out
     }

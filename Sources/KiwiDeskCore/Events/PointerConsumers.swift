@@ -78,7 +78,7 @@ public final class PointerConsumers {
     func configure(grab settings: ModifierDragSettings) {
         let settings = settings.sanitized
         if let grab = grabInFlight,
-            !settings.bindings.contains(
+            !settings.grabs.contains(
                 ModifierDragBinding(
                     grab.action,
                     chord: grab.chord,

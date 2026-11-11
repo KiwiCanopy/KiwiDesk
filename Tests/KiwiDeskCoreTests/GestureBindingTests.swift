@@ -110,7 +110,7 @@ struct GestureBindingTests {
             GestureKey(.hoverMove, hyper): .grab(.resize),
         ])
         #expect(
-            settings.bindings == [
+            settings.grabs == [
                 ModifierDragBinding(.move, chord: [.control, .command]),
                 ModifierDragBinding(.resize, chord: hyper, start: .hover),
             ]
@@ -200,7 +200,7 @@ struct GestureBindingTests {
             ModifierDragBinding(.move, chord: hyper, start: .hover),
         ]).sanitized
         #expect(
-            settings.bindings == [ModifierDragBinding(.resize, chord: hyper)]
+            settings.grabs == [ModifierDragBinding(.resize, chord: hyper)]
         )
     }
 

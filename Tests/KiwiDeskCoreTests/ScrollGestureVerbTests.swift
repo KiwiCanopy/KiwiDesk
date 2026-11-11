@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -79,7 +80,7 @@ struct ScrollGestureVerbTests {
         )
         #expect(free.isSuccess)
         #expect(
-            core.mouse.pointer.grabSettings.bindings.contains(
+            core.mouse.pointer.grabSettings.grabs.contains(
                 ModifierDragBinding(
                     .move,
                     chord: [.option, .command],

@@ -70,7 +70,7 @@ struct PointerTapRouter {
             // The front ended a grab whose consumer or action went
             // off; the stream is no longer the grab's to swallow.
             guard let settings = snapshot.grab,
-                settings.bindings.contains(owner)
+                settings.grabs.contains(owner)
             else { return reseed(now: now) }
             return continuing(owner, sample, settings, now: now)
         }

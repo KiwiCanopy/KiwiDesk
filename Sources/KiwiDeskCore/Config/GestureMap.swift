@@ -76,7 +76,7 @@ public enum GestureSeeds {
         }
         out = out.filter { $0.value.refusal(on: $0.key) == nil }
         let dragKeys = Set(
-            out.keys.filter { $0.input == .drag }.map(\.keys)
+            out.keys.filter { $0.input == .drag }.map(\.chord)
         )
         return out.filter { key, _ in
             heldByDrag(key, dragKeys: dragKeys) == nil
@@ -90,7 +90,7 @@ public enum GestureSeeds {
     ) -> GestureRefusal? {
         switch key.input {
         case .click, .hoverMove:
-            dragKeys.contains(key.keys) ? .keysHeldByDrag : nil
+            dragKeys.contains(key.chord) ? .keysHeldByDrag : nil
         default: nil
         }
     }
@@ -106,13 +106,13 @@ public enum GestureSeeds {
         let resolved = Self.resolved(base: base, profile: profile)
         if key.input == .drag {
             let shadowed = resolved.keys.contains {
-                $0.keys == key.keys
+                $0.chord == key.chord
                     && ($0.input == .click || $0.input == .hoverMove)
             }
             return shadowed ? .keysHeldByDrag : nil
         }
         let dragKeys = Set(
-            resolved.keys.filter { $0.input == .drag }.map(\.keys)
+            resolved.keys.filter { $0.input == .drag }.map(\.chord)
         )
         return heldByDrag(key, dragKeys: dragKeys)
     }
