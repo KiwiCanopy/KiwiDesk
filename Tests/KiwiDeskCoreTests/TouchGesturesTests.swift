@@ -226,13 +226,17 @@ struct TouchGesturesTests {
         var pushed: [[GestureInput: Set<ScrollChord>]] = []
         gestures.onGestureEventChords = { pushed.append($0) }
         gestures.resolve(
-            map([GestureKey(.rotate, Self.hyper): .run(LuaAction(lua: "r()"))]
-            ),
+            map([
+                GestureKey(.rotate, Self.hyper): .run(LuaAction(lua: "r()")),
+                GestureKey(.rotate, [.option, .command]): .run(
+                    LuaAction(lua: "s()")
+                ),
+            ]),
             natural: true
         )
         #expect(pushed.last == [:], "nothing before the start")
         gestures.start()
-        #expect(pushed.last == [.rotate: [Self.hyper]])
+        #expect(pushed.last == [.rotate: [Self.hyper, [.option, .command]]])
         gestures.receive([event(.gesture(.rotate), 0, Self.hyper)])
         gestures.receive([event(.gesture(.tap3), 0)])
         #expect(box.fired.map(\.0) == [.rotate])

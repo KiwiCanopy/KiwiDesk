@@ -92,6 +92,18 @@ struct PointerConsumersTests {
         )
         rig.front.configure(grab: settings)
         #expect(rig.taps.last?.snapshots.last?.grab == .defaults)
+        // A hover grab on a drag's keys goes too: one set of keys,
+        // one grab, whatever its start.
+        settings = .defaults
+        settings.grabs.append(
+            ModifierDragBinding(
+                .move,
+                chord: [.control, .option],
+                start: .hover
+            )
+        )
+        rig.front.configure(grab: settings)
+        #expect(rig.taps.last?.snapshots.last?.grab == .defaults)
     }
 
     @Test("a refused tap is asked again once its switch moves")
@@ -184,6 +196,17 @@ struct PointerConsumersTests {
         #expect(rig.front.grabInFlight == nil)
         #expect(rig.heard.last?.phase == .ended)
         #expect(rig.heard.last?.location == nil)
+        // The grab's own binding left, its action still bound on
+        // other keys: it ends all the same.
+        rig.front.configure(grab: .defaults)
+        rig.front.receive(.init(grab: [event(.began)], reenabled: false))
+        rig.front.configure(
+            grab: ModifierDragSettings([
+                ModifierDragBinding(.move, chord: [.option, .command]),
+                ModifierDragBinding(.resize, chord: [.control, .option]),
+            ])
+        )
+        #expect(rig.front.grabInFlight == nil)
         rig.front.configure(grab: .defaults)
         rig.front.receive(.init(grab: [event(.began)], reenabled: false))
         rig.front.stop()

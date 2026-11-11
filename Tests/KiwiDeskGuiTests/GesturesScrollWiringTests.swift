@@ -91,6 +91,8 @@ struct GesturesScrollWiringTests {
         let part = Self.squash(try Self.source("GesturesPart.swift"))
         #expect(!part.contains("SettingsGroupHeading("))
         #expect(!part.contains("GestureRule()}SettingsSection("))
+        // No card ends on a rule, the last one included.
+        #expect(!part.contains("GestureRule()}"))
         #expect(
             part.components(separatedBy: "SettingsSection(").count - 1
                 == GestureItem.Group.allCases.count

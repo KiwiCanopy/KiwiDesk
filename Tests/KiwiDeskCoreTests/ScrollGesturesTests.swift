@@ -83,11 +83,21 @@ struct ScrollGesturesTests {
         #expect(made().isEmpty)
         gestures.setHandler { _, _ in }
         #expect(made().count == 1)
-        #expect(made().first?.chords == [Self.pan])
+        // Per input: the routes bind a swipe and a wheel, no tilt.
+        #expect(
+            made().first?.chords
+                == ScrollTapChords(swipe: [Self.pan], wheel: [Self.pan])
+        )
         gestures.setHandler { _, _ in }
         gestures.configure(settings())
         #expect(made().count == 1)
-        #expect(made().first?.chords == [Self.pan, Self.step])
+        #expect(
+            made().first?.chords
+                == ScrollTapChords(
+                    swipe: [Self.pan, Self.step],
+                    wheel: [Self.pan, Self.step]
+                )
+        )
         gestures.configure(settings(pan: nil, step: nil))
         #expect(made().first?.stopped == true)
         #expect(!gestures.isTapped)

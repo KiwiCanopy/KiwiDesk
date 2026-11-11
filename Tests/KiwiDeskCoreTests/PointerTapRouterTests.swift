@@ -165,6 +165,25 @@ struct PointerTapRouterTests {
         #expect(move.grab.first?.chord == hover)
     }
 
+    @Test("one chord's two starts each begin their own binding")
+    func oneChordTwoStarts() {
+        var r = router(
+            ModifierDragSettings([
+                ModifierDragBinding(.move, chord: Self.moveChord),
+                ModifierDragBinding(
+                    .resize,
+                    chord: Self.moveChord,
+                    start: .hover
+                ),
+            ])
+        )
+        let move = r.route(sample(.mouseMoved, Self.moveChord), now: 1)
+        #expect(move.grab.first?.action == .resize)
+        _ = r.route(sample(.flagsChanged, []), now: 2)
+        let press = r.route(sample(.leftDown, Self.moveChord), now: 3)
+        #expect(press.grab.first?.action == .move)
+    }
+
     @Test("a re-seed ends the grab in flight, and is quiet otherwise")
     func reseedEnds() {
         var r = router()

@@ -141,6 +141,46 @@ struct ScrollGestureVerbTests {
         #expect(next?.0 == 1 && next?.1 == .right)
     }
 
+    @Test("a family steps along the axis the latch fired on")
+    func familyStepNamesTheLatchedAxis() {
+        var meter = ScrollStepMeter(longSwipes: false, distance: 60)
+        func event(dx: CGFloat, dy: CGFloat) -> ScrollGestureEvent {
+            ScrollGestureEvent(
+                chord: [.control, .option],
+                kind: .changed,
+                input: .trackpad,
+                delta: CGVector(dx: dx, dy: dy),
+                momentum: false,
+                location: .zero,
+                time: 0
+            )
+        }
+        var began = event(dx: 0, dy: 0)
+        began.kind = .began
+        _ = KiwiCore.familyStep(&meter, began)
+        #expect(KiwiCore.familyStep(&meter, event(dx: 20, dy: 0)) == nil)
+        // Fires on the travel's axis, its own frame mostly vertical.
+        let fired = KiwiCore.familyStep(&meter, event(dx: 10, dy: 15))
+        #expect(meter.firedHorizontal == true)
+        #expect(fired?.1 == .right)
+    }
+
+    @Test("a split's arm fires the hand's way when Natural is off")
+    func latchReadsTheHand() {
+        var latch = GestureMotionLatch()
+        var event = ScrollGestureEvent(
+            chord: [.control, .option],
+            kind: .changed,
+            input: .wheel,
+            delta: CGVector(dx: 0, dy: -5),
+            momentum: false,
+            location: .zero,
+            time: 0
+        )
+        event.reversed = true
+        #expect(latch.feed(event) == .down)
+    }
+
     @Test("gesture.bind refuses a drag over a live hover_move")
     func dragRefusedOverHover() {
         let core = makeTestCore()
