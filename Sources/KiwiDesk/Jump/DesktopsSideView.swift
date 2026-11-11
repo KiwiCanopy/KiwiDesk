@@ -10,10 +10,6 @@ import SwiftUI
 struct DesktopsSideView: View {
     let state: DesktopsState
     let icons: [pid_t: NSImage]
-    /// The panel's width, which the columns share.
-    let width: CGFloat
-    /// The tallest the side stands before it scrolls.
-    let maxHeight: CGFloat
     let onPlace: (DesktopsPlace, Int, NSEvent.ModifierFlags, Bool) -> Void
     let onWindow: (WindowID, DesktopsPlace, Int, NSEvent.ModifierFlags) -> Void
     let onMore: (DesktopsPlace, Bool) -> Void
@@ -21,13 +17,7 @@ struct DesktopsSideView: View {
     /// The panel's VoiceOver action for ⌘,.
     let onSettings: () -> Void
 
-    private var geometry: DesktopsGeometry {
-        DesktopsGeometry(
-            overview: state.overview,
-            width: width,
-            cap: maxHeight
-        )
-    }
+    private var geometry: DesktopsGeometry { state.geometry }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -65,7 +55,12 @@ struct DesktopsSideView: View {
             ViewLine(selected: selected, inset: DesktopsGeometry.rowInset) {
                 HStack(spacing: 0) {
                     ForEach(row.desktops.indices, id: \.self) { index in
-                        if index > 0 { PanelDivider(axis: .vertical) }
+                        if index > 0 {
+                            PanelDivider(
+                                axis: .vertical,
+                                length: geometry.column(screen)
+                            )
+                        }
                         DesktopCardView(
                             state: state,
                             screen: screen,
@@ -103,6 +98,7 @@ struct DesktopsSideView: View {
         }
         .foregroundStyle(.secondary)
         .lineLimit(1)
+        .frame(height: DesktopsGeometry.headerHeight)
         .padding(.horizontal, DesktopsGeometry.rowInset)
     }
 

@@ -130,7 +130,7 @@ struct DesktopsRefusalFooterTests {
             desktops: DesktopsFooterState(state)
         )
         #expect(footer.leading == nil)
-        let open = DesktopsState(overview: DesktopsStateTests.overview())
+        let open = DesktopsStateTests.state(DesktopsStateTests.overview())
         var inside = open
         _ = inside.press(.openSpace, repeated: false)
         footer.desktops = DesktopsFooterState(inside)
@@ -141,7 +141,7 @@ struct DesktopsRefusalFooterTests {
     func reloadSelectsTheTarget() throws {
         let model = model()
         let overview = DesktopsStateTests.overview()
-        let state = DesktopsState(overview: overview)
+        let state = DesktopsStateTests.state(overview)
         let place = DesktopsPlace(screen: 1, desktop: 1, line: 1)
         let target = try #require(state.target(place))
         model.setDesktopsQuery("Safari")

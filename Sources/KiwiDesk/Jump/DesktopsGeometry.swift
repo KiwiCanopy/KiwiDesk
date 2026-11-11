@@ -26,7 +26,7 @@ struct DesktopsGeometry: Equatable {
     /// A column's inner margin on each side, and the divider
     /// between two columns.
     static let columnInset: CGFloat = 6
-    static let divider: CGFloat = 1
+    static let divider = KiwiHubPaint.hairline
     /// The rows' margin inside the panel on each side: the
     /// selection inset plus the header's own indent.
     static let rowInset: CGFloat = KeyPanelStyle.selectionInset + 10
@@ -75,10 +75,9 @@ struct DesktopsGeometry: Equatable {
     /// Windows rows' 22 pt.
     var icon: CGFloat { max(line - 8, 22) }
 
-    /// One screen row's height: its header, a column's title and
-    /// its lines.
-    func rowHeight(_ screen: Int) -> CGFloat {
-        Self.rowChrome + lines[screen]
+    /// A screen row's column height: its title and its lines.
+    func column(_ screen: Int) -> CGFloat {
+        Self.titleHeight + Self.titleGap + lines[screen]
     }
 
     /// The icon slots each screen row's lines show at once; more

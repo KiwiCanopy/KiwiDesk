@@ -552,7 +552,7 @@ synonym:
   (Lua `kiwihub.show("desktops")`, #1229): **Desktops** as the
   side's title, **Desktop overview** as its VoiceOver name and in
   its Shortcuts row, "Show Desktop overview". Inside it a Space's
-  line on a Desktop card is a **place**; a window taken along is
+  line in a Desktop's column is a **place**; a window taken along is
   **picked up** and **dropped**, never *grabbed*, *cut* or
   *pasted*, and **Put back** undoes a pick. A key it adds is a
   stored `KiwiHubKey` name, named for the act, so a rename owes a

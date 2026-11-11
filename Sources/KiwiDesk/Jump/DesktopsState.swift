@@ -14,13 +14,11 @@ struct DesktopsPlace: Hashable {
 /// panel. Places are Space lines; inside one, a window is selected;
 /// carried windows ride along until a drop or a cancel.
 struct DesktopsState: Equatable {
-    /// A line's icon slots where the side handed none.
-    static let fallbackSlots = 5
-
     let overview: DesktopOverview
-    /// Each screen row's icon slots, from the side's widths
-    /// (`DesktopsGeometry.slots`, #3164); more fold into "+n".
-    let slotCounts: [Int]
+    /// The side's sizes for this overview (#3164): its icon slots
+    /// per screen row, which the keys scroll by, and what the side
+    /// draws.
+    let geometry: DesktopsGeometry
     private(set) var place: DesktopsPlace?
     /// The selected window: non-nil while inside a Space.
     private(set) var window: WindowID?
@@ -34,9 +32,9 @@ struct DesktopsState: Equatable {
     var isCarrying: Bool { !carried.isEmpty }
 
     /// Opens on the Space line the KiwiHub screen shows.
-    init(overview: DesktopOverview, slots: [Int] = []) {
+    init(overview: DesktopOverview, geometry: DesktopsGeometry) {
         self.overview = overview
-        slotCounts = slots
+        self.geometry = geometry
         place = Self.startPlace(in: overview)
     }
 
@@ -96,10 +94,10 @@ struct DesktopsState: Equatable {
         query.isEmpty || ordered(place).contains(where: matches)
     }
 
-    /// The icons `place`'s line shows at once.
+    /// The icons `place`'s line shows at once; more fold into "+n".
     func slots(_ place: DesktopsPlace) -> Int {
-        slotCounts.indices.contains(place.screen)
-            ? slotCounts[place.screen] : Self.fallbackSlots
+        let slots = geometry.slots
+        return slots.indices.contains(place.screen) ? slots[place.screen] : 1
     }
 
     /// The first slot a line shows.

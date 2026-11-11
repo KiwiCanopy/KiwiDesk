@@ -135,27 +135,31 @@ struct DesktopsGeometryTests {
         #expect(g.slots.count == 2)
         #expect(g.slots[0] > g.slots[1])
         #expect(g.slots.allSatisfy { $0 >= 1 })
-        // The slots and their "+n" fit inside the column.
-        for (column, slots) in zip(g.columns, g.slots) {
-            let used =
-                CGFloat(slots) * (g.icon + G.iconGap) - G.iconGap
-                + G.labelReserve + G.moreReserve
-                + 2 * (G.columnInset + G.linePadding)
-            #expect(used <= column)
-        }
+        // At 28 pt icons: 688, 343, 228 and 224 pt columns.
+        let rows = Self.geometry([
+            Self.screen(1, desktops: 1, spaces: 2),
+            Self.screen(2, desktops: 2, spaces: 2),
+            Self.screen(3, desktops: 3, spaces: 2),
+            Self.screen(4, desktops: 5, spaces: 2),
+        ])
+        #expect(rows.icon == 28)
+        #expect(rows.slots == [19, 7, 3, 3])
     }
 
     @Test("a line's slots are its screen's")
-    func stateTakesTheSlots() {
+    func stateTakesTheSlots() throws {
         let overview = T.overview()
-        let state = DesktopsState(overview: overview, slots: [2, 3])
-        let place = try! #require(state.place)
+        let state = T.state(overview)
+        let place = try #require(state.place)
         #expect(place.screen == 1)
-        #expect(state.slots(place) == 3)
-        // Seven windows on the line, three shown: four after.
-        #expect(state.hidden(place).after == 4)
-        let none = DesktopsState(overview: overview)
-        #expect(none.slots(place) == DesktopsState.fallbackSlots)
+        let slots = state.geometry.slots
+        #expect(slots[1] == 5)
+        #expect(slots[0] > slots[1])
+        #expect(state.slots(place) == slots[1])
+        // Seven windows on the line, five shown: two after.
+        #expect(state.hidden(place).after == 2)
+        let other = DesktopsPlace(screen: 0, desktop: 0, line: 0)
+        #expect(state.slots(other) == slots[0])
     }
 
     @Test("the model hands the state the side's slots")
@@ -174,7 +178,7 @@ struct DesktopsGeometryTests {
             width: 600,
             cap: Self.cap
         ).slots
-        #expect(model.desktops?.slotCounts == expected)
+        #expect(model.desktops?.geometry.slots == expected)
         #expect(
             expected
                 != G(
@@ -185,7 +189,7 @@ struct DesktopsGeometryTests {
         )
     }
 
-    @Test("the side and the controller read the panel's width")
+    @Test("one geometry, from the panel's width, reaches the side")
     func widthIsWired() throws {
         let jump = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -198,14 +202,11 @@ struct DesktopsGeometryTests {
                 )
             )
         }
-        let panel = try read("JumpPanelView.swift")
+        // The side draws the state's geometry, never one of its own.
+        let side = try read("DesktopsSideView.swift")
             .replacingOccurrences(of: " ", with: "")
-            .replacingOccurrences(of: "\n", with: "")
-        #expect(
-            panel.contains(
-                "icons:model.desktopIcons,width:width,maxHeight:"
-            )
-        )
+        #expect(side.contains("geometry:DesktopsGeometry{state.geometry}"))
+        #expect(side.occurrences(of: "DesktopsGeometry(") == 0)
         let controller = try read("JumpPanelController.swift")
             .replacingOccurrences(of: " ", with: "")
         #expect(controller.contains("panelWidth:width,"))
@@ -213,6 +214,6 @@ struct DesktopsGeometryTests {
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")
         #expect(model.contains("width:panelWidth,cap:sheetCap"))
-        #expect(model.contains("slots:geometry.slots"))
+        #expect(model.contains("geometry:geometry)"))
     }
 }

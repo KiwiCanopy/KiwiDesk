@@ -7245,8 +7245,8 @@ other way. Holding the key down stops at the end instead.
 :::unreleased
 The `"desktops"` side is the **Desktop overview**, the fourth side,
 after View: one row per screen, left to right, each screen's
-Desktops as cards, and on each card the screen's Spaces with their
-windows. A window on a Desktop no screen shows is listed in the
+Desktops as columns, and in each column the screen's Spaces with
+their windows. A window on a Desktop no screen shows is listed in the
 Space it returns to, or under **Not in a Space yet**, which nothing
 can be moved into. The menu bar's **Show Desktop overview** row
 opens it too. The side is seeded on **⌃⌥O**, and **Shortcuts &

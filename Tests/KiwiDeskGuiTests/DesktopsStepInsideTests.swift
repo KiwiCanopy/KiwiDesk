@@ -36,7 +36,7 @@ struct DesktopsStepInsideTests {
     }
 
     static func opened() -> DesktopsState {
-        var state = DesktopsState(overview: overview())
+        var state = DesktopsStateTests.state(overview())
         _ = state.press(.openSpace, repeated: false)
         return state
     }

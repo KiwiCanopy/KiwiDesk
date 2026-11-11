@@ -13,7 +13,7 @@ extension JumpModel {
             width: panelWidth,
             cap: sheetCap
         )
-        desktops = DesktopsState(overview: overview, slots: geometry.slots)
+        desktops = DesktopsState(overview: overview, geometry: geometry)
         let pids = overview.screens.flatMap(\.desktops)
             .flatMap(\.spaces).flatMap(\.windows).map(\.pid)
         desktopIcons = loadIcons(Set(pids))

@@ -6,6 +6,9 @@ import SwiftUI
 /// plates" (`KiwiShelf.panelHighlight`). Rows, chips and tiles read
 /// it from the environment the panel sets once.
 struct KiwiHubPaint {
+    /// A divider's thickness, which the Desktops columns count.
+    static let hairline: CGFloat = 1
+
     var selection = SettingsTheme.accent
     var selectionInk = SettingsTheme.accentInk
     var selectionInkSecondary = SettingsTheme.accentInkSecondary
@@ -81,20 +84,22 @@ struct KiwiHubPaint {
 
 /// A KiwiHub divider: the look's hairline under the toggle, the
 /// system separator off it (#2596); `.vertical` stands between
-/// two columns (#3164).
+/// two columns (#3164), as tall as `length`.
 struct PanelDivider: View {
     var axis: Axis = .horizontal
+    /// A vertical divider's height; a horizontal one fills its width.
+    var length: CGFloat?
 
     @Environment(\.kiwiHubPaint) private var paint
 
     var body: some View {
         if let hairline = paint.divider {
             Rectangle().fill(hairline).frame(
-                width: axis == .vertical ? 1 : nil,
-                height: axis == .horizontal ? 1 : nil
+                width: axis == .vertical ? KiwiHubPaint.hairline : nil,
+                height: axis == .horizontal ? KiwiHubPaint.hairline : length
             )
         } else {
-            Divider()
+            Divider().frame(height: axis == .vertical ? length : nil)
         }
     }
 }

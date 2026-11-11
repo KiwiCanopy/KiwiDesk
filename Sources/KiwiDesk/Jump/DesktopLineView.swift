@@ -38,7 +38,7 @@ struct DesktopLineView: View {
             // The icons keep their slots; a long Space name truncates.
             slots.layoutPriority(1)
         }
-        .padding(.horizontal, 4)
+        .padding(.horizontal, DesktopsGeometry.linePadding)
         .frame(height: geometry.line)
         .background(ground)
         .opacity(state.hasMatch(place) ? 1 : 0.45)
@@ -117,7 +117,7 @@ struct DesktopLineView: View {
                 drawn.dropFirst(first).prefix(state.slots(place))
             )
             let hidden = state.hidden(place)
-            HStack(spacing: 2) {
+            HStack(spacing: DesktopsGeometry.iconGap) {
                 more(hidden.before, forward: false)
                 ForEach(shown, id: \.id) { window in
                     DesktopIconView(

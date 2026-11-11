@@ -202,8 +202,9 @@ struct JumpPanelShapeTests {
         // No typing drawn clear under a stand-in, in any spelling.
         #expect(view.occurrences(of: "Color.clear") == 0)
         #expect(view.occurrences(of: "fieldName }") == 0)
-        // The Shortcuts sheet and the Desktops side share the cap.
-        #expect(view.occurrences(of: "maxHeight: model.sheetCap") == 2)
+        // The Shortcuts sheet takes the cap here; the Desktops side
+        // through its state's geometry (`DesktopsGeometryTests`).
+        #expect(view.occurrences(of: "maxHeight: model.sheetCap") == 1)
     }
 
     @Test("the controller hands the real shelves and area through")

@@ -139,8 +139,6 @@ struct JumpPanelView: View {
                 DesktopsSideView(
                     state: state,
                     icons: model.desktopIcons,
-                    width: width,
-                    maxHeight: model.sheetCap,
                     onPlace: {
                         model.clickPlace(
                             $0,

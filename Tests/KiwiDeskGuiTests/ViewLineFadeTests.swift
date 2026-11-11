@@ -48,6 +48,24 @@ struct ViewLineFadeTests {
         #expect(!cuts(-Self.inset).0)
     }
 
+    @Test("the View side's and the strip's own margin cuts nothing")
+    func defaultInset() {
+        let inset = KeyPanelStyle.selectionInset
+        let content: CGFloat = 900 + 2 * inset
+        func cut(_ offset: CGFloat) -> (Bool, Bool) {
+            let cut = L.cuts(
+                offset: offset,
+                content: content,
+                width: Self.width,
+                inset: inset
+            )
+            return (cut.leading, cut.trailing)
+        }
+        #expect(cut(Self.width + inset - content) == (true, false))
+        #expect(cut(Self.width + inset - content + 1) == (true, true))
+        #expect(cut(-inset) == (false, true))
+    }
+
     @Test("a line that fits fades nowhere")
     func fits() {
         let cut = L.cuts(
