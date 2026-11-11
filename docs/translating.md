@@ -402,7 +402,7 @@ key**; the round-trip tooling (`rename-key --site`) rewrites them
 that way. The keys carry the structure: every key is prefixed by
 its area (`nav_*`, `hero_*`, `feat_*`, `layout_*`, `footer_*` for
 the landing; `guide_*` for the guide page, sub-grouped like
-`guide_faq_*`, `guide_scenario_*`, `guide_tour_*`), so each group
+`guide_faq_*`, `guide_scenario_*`, `guide_profiles_*`), so each group
 clusters in the sorted order. **When you add a string, follow the
 existing area prefix** rather than inventing a bare name; a new
 area gets a new prefix.
