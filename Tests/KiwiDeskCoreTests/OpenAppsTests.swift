@@ -88,7 +88,8 @@ struct OpenAppsTests {
             bundle: "com.apple.Notes",
             in: "1"
         )
-        #expect(core.state.markPocketWindow(WindowID(1)))
+        let marked = core.state.markPocketWindow(WindowID(1))
+        #expect(marked)
         core.state.pocketWindow(WindowID(1))
         #expect(core.state.workspaces.space(of: WindowID(1)) == nil)
         core.state.awayWindows[WindowID(2)] = AwayWindow(
