@@ -383,7 +383,7 @@ focused window's ring bumps and the command fails with `no other screen`;
 [Space history](#focus_space_back--focus_space_forward).
 
 `focus_display_last` is **Go to last screen** under Settings ▸
-Shortcuts & Gestures ▸ Focus, with no default chord; `focus_display` is
+Shortcuts ▸ Built-in ▸ Focus, with no default chord; `focus_display` is
 Lua and CLI only.
 
 **Example:**
@@ -417,7 +417,7 @@ Space`.
 
 `move_to_display_last` and its follow form are **Move to last
 screen** and **Move to last screen & follow** under Settings ▸
-Shortcuts & Gestures ▸ Move windows, with no default chord;
+Shortcuts ▸ Built-in ▸ Move windows, with no default chord;
 `move_to_display` and its follow form are Lua and CLI only.
 
 **Example:**
@@ -591,7 +591,7 @@ another screen re-homes it
 ([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445));
 where it refuses, the whole command is refused and the window
 does not change Desktop. The second argument is Lua's and the
-CLI's; the Shortcuts & Gestures page's Desktop rows bind the
+CLI's; the Shortcuts page's Desktop rows bind the
 one-argument form.
 
 **Example:**
@@ -994,8 +994,8 @@ KiwiDesk.set_min_window_size_override("monitoring", 220, 160)
 **Expects:** a number (points).
 
 **Does:** sets the magnitude the **Grow** / **Shrink**
-keybindings nudge the layout by (default 50). The Shortcuts &
-Gestures page authors the four per-axis bindings as
+keybindings nudge the layout by (default 50). The Shortcuts
+page authors the four per-axis bindings as
 `resize("x"|"y", ±step)` from this value, and importing a
 config reads a recovered magnitude back into it. Moves no
 window on its own; it takes effect the next time such a binding
@@ -1028,14 +1028,14 @@ scrolling anchor and orientation, the track axis and limit, a
 grid's columns and rows, new-window placement. Where a window's
 own minimum binds, the next retile's floor heal moves the ratio
 back off that value by as much. Retiles at once. Bind it from
-`init.lua` or the Shortcuts & Gestures ▸ Lua bindings drawer.
+`init.lua` or the Shortcuts ▸ Personal ▸ Lua bindings drawer.
 
 A grid's column and row sizes from `resize` are sizing too, and
 return to the weights `grid.set_column_weight` and
 `grid.set_row_weight` set.
 
 `⌃⌥R` runs it on the active space by default, listed as **Reset
-sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
+sizes in this Space** under Shortcuts ▸ Built-in ▸ Size & float.
 `"all"` has no default key.
 
 The session layer is kept per macOS Desktop and profile
@@ -1248,8 +1248,8 @@ Space.
 
 It is stored like the Space history: `focus_wrap` in `gui.json`
 is the value every profile uses, and a profile may keep its own,
-which the **Wrap focus** row's **Applies to** under Shortcuts &
-Gestures ▸ Focus writes. The verb sets the
+which the **Wrap focus** row's **Applies to** under Shortcuts ▸
+Built-in ▸ Focus writes. The verb sets the
 shared value for the running session and never reaches a file; a
 profile's own value still wins.
 
@@ -1284,7 +1284,7 @@ On a second screen the plate's number continues the count from
 the first screen, as Mission Control's does: the second screen's
 first Desktop can read 7.
 
-The GUI twin is **Shortcuts & Gestures ▸ macOS Desktops ▸ Show
+The GUI twin is **Shortcuts ▸ Built-in ▸ macOS Desktops ▸ Show
 the Desktop's number after a switch**. Like
 [`set_refusal_sound`](#set_refusal_sound), the setting is
 app-wide, stored in `gui.json` as `desktop.cue`; the verb
@@ -1321,7 +1321,7 @@ chosen key, the Hyper key row's **Take Over** and
 While no shortcut in the active layer uses `hyper`, pressing the
 key does nothing and draws a short note saying so.
 
-The GUI twin is the **Hyper key** row in **Shortcuts & Gestures ▸
+The GUI twin is the **Hyper key** row in **Shortcuts ▸ Built-in ▸
 Modifier keys**, a recorder that takes one key — left and right
 apart. Like
 [`set_desktop_cue`](#set_desktop_cue), the setting is app-wide,
@@ -1372,7 +1372,7 @@ press but macOS's own shortcuts, and acts on nothing else.
 :::
 
 The GUI twin is **Tell left and right modifiers apart** in
-**Shortcuts & Gestures ▸ Modifier keys**. Like
+**Shortcuts ▸ Built-in ▸ Modifier keys**. Like
 [`set_hyper_key`](#set_hyper_key), the setting is app-wide, stored
 in `gui.json` as `modifier.sides`; the verb changes the running
 value only.
@@ -5036,8 +5036,8 @@ A Space switch onto another screen moves the pointer even with
 the setting off ([`focus_space`](#focus_space)); the setting
 governs focus changes within a screen.
 
-Also togglable in the Settings app under **Shortcuts & Gestures ▸
-Mouse & trackpad**.
+Also togglable in the Settings app under **Shortcuts ▸
+Mouse & Trackpad**.
 
 **Example:**
 
@@ -5064,8 +5064,8 @@ focused. A window on another screen makes that screen's Space
 the active one. The pointer is never warped by it, so it works
 beside [`mouse.set_follows_focus`](#mouseset_follows_focus).
 
-Also togglable in the Settings app under **Shortcuts & Gestures ▸
-Mouse & trackpad**.
+Also togglable in the Settings app under **Shortcuts ▸
+Mouse & Trackpad**.
 
 **Example:**
 
@@ -5082,8 +5082,8 @@ mouse.set_hover_focus(true)
 [`mouse.set_hover_focus`](#mouseset_hover_focus) focuses the
 window under it. `0` focuses as soon as the pointer stops moving;
 a longer delay keeps a window you cross on the way to another from
-taking the focus. Settings offers it under Shortcuts & Gestures ▸
-Mouse & trackpad, up to 2000 ms.
+taking the focus. Settings offers it under Shortcuts ▸
+Mouse & Trackpad, up to 2000 ms.
 
 **Example:**
 
@@ -5162,8 +5162,8 @@ profile starts with. A profile file may carry a sparse
 single-modifier chord in either file turns that gesture off, a
 `space_step` equal to `pan` turns the Space step off, and a
 `step_distance` outside 10–1000 is clamped to the range. In the
-Settings app they are the **Scroll gestures** group under
-**Shortcuts & Gestures ▸ Mouse & trackpad**, where
+Settings app they are the **Holding a modifier** group under
+**Shortcuts ▸ Mouse & Trackpad**, where
 each row's **Applies to** checklist writes the base or chosen
 profiles' overrides.
 
@@ -5289,8 +5289,8 @@ object — `move` and `resize`, each with `modifiers` and `start` — for
 every profile alike. A `resize` equal to `move` turns the resize
 off. In the
 Settings app they are the **Move windows from anywhere** and
-**Resize windows from anywhere** rows under **Shortcuts & Gestures
-▸ Mouse & trackpad**.
+**Resize windows from anywhere** rows under **Shortcuts
+▸ Mouse & Trackpad**.
 
 The verbs below change the running value only: nothing reaches
 `gui.json`, and in a setup the Settings app manages the value lasts
@@ -5972,6 +5972,13 @@ clear of the bars and never crosses onto another screen. Stopping
 there shows a pill. A window you dragged past that edge stays where it
 is if you move it further out, and comes back freely. A window larger
 than the area reaches its top or left edge and goes no further.
+
+:::unreleased
+The edge is the screen's visible edge, as a drag reaches it: a bar on
+the top edge stops the window going up, and a bar on the bottom or a
+side does not stop it (#3163).
+:::
+
 Two calls closer together than the app reports the first move can
 land as one, as a fast run of `resize` presses can
 ([accepted limitations](accepted-limitations.md)).
@@ -6175,8 +6182,9 @@ end)
 (its home screen only) and off. Toggling screen sticky on a
 global-sticky window switches it to screen sticky.
 
-It has no default shortcut and no row in Settings ▸ Shortcuts &
-Gestures; bind it in `init.lua` or the Lua bindings drawer, where
+It has no default shortcut and no row in Settings ▸ Shortcuts;
+bind it in `init.lua` or the Shortcuts ▸ Personal ▸ Lua bindings
+drawer, where
 a shortcut you gave it is listed. A stored `⌃⌥P` running it —
 `✦P` with **Shortcuts use** set to `✦`, and either one in a
 profile's own shortcuts — is moved to [`pocket`](#pocket) once,
@@ -6450,7 +6458,7 @@ says. Default `true`. A Space whose tiling a toggle set keeps that
 choice; every other Space follows the new value at once.
 App-wide, for this session only; it never reaches a file. The
 stored value is the "Spaces start with tiling on" row's All
-profiles value, under Shortcuts & Gestures ▸ Size & float.
+profiles value, under Shortcuts ▸ Built-in ▸ Size & float.
 
 **Example:**
 
@@ -6489,7 +6497,7 @@ tiling.set_start(false, "Share")
 **Does:** sets whether a Space with tiling off hides its focus
 border, for every profile without its own value — the All profiles
 value of Settings' "Hide the focus border while tiling is off"
-row under Shortcuts & Gestures ▸ Size & float. Default `false`. A
+row under Shortcuts ▸ Built-in ▸ Size & float. Default `false`. A
 profile's own value wins. For this session only. Sticky and
 floating marks stay.
 
@@ -6508,7 +6516,7 @@ tiling.set_off_hides_borders(true)
 **Does:** sets whether a Space with tiling off hides the bars on
 its screen, for every profile without its own value — the All
 profiles value of Settings' "Hide the bars while tiling is off"
-row under Shortcuts & Gestures ▸ Size & float. Default `false`. A
+row under Shortcuts ▸ Built-in ▸ Size & float. Default `false`. A
 profile's own value wins. For this session only. Every bar and the Pocket then act as if set to Hidden on that
 Space: gone at rest, and a bar's shortcut still shows it. Where the
 Space Bar is hidden, the menu-bar item shows the Space with the
@@ -6683,7 +6691,7 @@ are on; a profile that leaves the shortcut out keeps the tie, and
 the key works again when you switch back. Closing the window or
 quitting the app frees the key, and the next call opens a fresh
 window. If the app is hidden, the call shows it again. Settings ▸
-Shortcuts & Gestures ▸ Pocket writes this shortcut: one row per
+Shortcuts ▸ Built-in ▸ Pocket writes this shortcut: one row per
 app, added with **Give an app its own Pocket key…**.
 
 Called with no such shortcut — from the CLI, say — the window it
@@ -7128,7 +7136,7 @@ live glance at the active layer's bindings.
 - Typing narrows the list by name, the matched letters in bold.
 - **↑** **↓** and **Page Up** / **Page Down** scroll the list;
   **Return** runs nothing.
-- **⌘,** or **Edit in Settings…** opens Shortcuts & Gestures.
+- **⌘,** or **Edit in Settings…** opens Shortcuts.
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every
@@ -7175,19 +7183,26 @@ so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
 :::unreleased
-Above the list sits the **app strip**: **All** first, then one tile
-per app the list holds and per app you brought forward since
-KiwiDesk started that is still running with no window, most
-recently used first, with a count on an app with two windows or
-more. **←** and **→** move along it and a click picks a tile; the
-list then holds that app's windows alone, its most recent window
-selected. An app with no window shows **No windows**, and
-**Return** or a click opens it again, as
-[focus_or_spawn](#focus_or_spawn) does. Typing puts the strip back
-on **All** and dims each app with no match; **←** and **→** then
-step through the apps with a match, never the text, and narrow the
+Under the field sits the **app strip**, shown while you type or
+while it is off **All**; KiwiHub opens on the list alone. It holds
+**All** first, then one tile per app with a window in the list, the
+app you are in first, then most recently used, with a count on an
+app with two windows or more. **←** and **→** move along it and a
+click picks a tile; the list then holds that app's windows alone,
+its most recent window selected. Typing puts the strip back on
+**All** and dims each app with no match; **←** and **→** then step
+through the apps with a match, never the text, and narrow the
 matches to that app. [kiwihub.show_last_app](#kiwihubshow_last_app)
-opens this side with the strip on the app of the window you used last.
+opens this side with the strip on the app of the window you used
+last.
+
+With nothing typed, the window you are in sits greyed at the top
+of **All** and of its app's tile, marked **Current window**. It is
+never a row you pick: the arrows, the digits and search skip it.
+
+A modifier still held from the shortcut that opened KiwiHub, or
+from a step of `kiwihub.show_last_app`, counts for nothing until
+you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 :::
 
 The `"view"` side is the **view picker**, three lines in one
@@ -7242,9 +7257,9 @@ Desktops as cards, and on each card the screen's Spaces with their
 windows. A window on a Desktop no screen shows is listed in the
 Space it returns to, or under **Not in a Space yet**, which nothing
 can be moved into. The menu bar's **Show Desktop overview** row
-opens it too. The side is seeded on **⌃⌥O**, and **Shortcuts &
-Gestures ▸ KiwiHub** lists the row to rebind or clear. While KiwiHub
-has the keyboard, a modifier tap whose Shortcuts & Gestures row
+opens it too. The side is seeded on **⌃⌥O**, and **Shortcuts ▸
+Built-in ▸ Show & hide ▸ KiwiHub** lists the row to rebind or clear.
+While KiwiHub has the keyboard, a modifier tap whose Shortcuts row
 opens one of its sides works as that side's shortcut, so a ⌘⌘ set
 to the overview closes it; a tap bound in `init.lua`, and every
 other modifier tap, does nothing there, or while another KiwiDesk
@@ -7294,7 +7309,8 @@ you hold **⌘**, one side's while you point at it.
 
 Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
 you create too) and **⌃⌥L** (view), and offered under
-**Shortcuts & Gestures ▸ KiwiHub**, where you can rebind or clear
+**Shortcuts ▸ Built-in ▸ Show & hide ▸ KiwiHub**, where you can
+rebind or clear
 each per layer.
 
 **Example:**
@@ -7318,8 +7334,8 @@ another side. Pressed again while the window switcher is up, it
 steps the app strip to the next app, as **→** does, and the same
 key with **⇧** steps back (**⇧⌥⇥** by default); **Esc** closes
 KiwiHub.
-It is bound to `⌥⇥` by default, listed under Shortcuts & Gestures ▸
-KiwiHub as **Show window switcher for last app**.
+It is bound to `⌥⇥` by default, listed under Shortcuts ▸ Built-in ▸
+Show & hide ▸ KiwiHub as **Show window switcher for last app**.
 Over the CLI it is `kiwidesk kiwihub.show_last_app`.
 
 ```lua
@@ -7397,7 +7413,7 @@ only the place you were reading resets.
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
 create in Settings.
 
-Offered under **Shortcuts & Gestures ▸ Open applications ▸
+Offered under **Shortcuts ▸ Built-in ▸ Show & hide ▸
 KiwiDesk** ("Open Settings"), where you can rebind it per layer.
 
 **Example:**
@@ -7497,7 +7513,7 @@ A combo is any set of modifiers plus **exactly one key**, or a
 modifier tap (above).
 Multi-key chords (`cmd+j+k`) are not expressible; a hand-written
 combo that doesn't parse is never registered, and the Shortcuts
-& Gestures page flags the row with ⚠ *"isn't a recognized shortcut"*.
+page flags the row with ⚠ *"isn't a recognized shortcut"*.
 
 ### Shortcut Layers
 
@@ -7563,6 +7579,12 @@ side; the boundary is the screen's visible bounds less any bar
 strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
+
+:::unreleased
+The boundary is the screen's visible bounds, less a bar on the top
+edge and the focus ring's reach: a float grows under a bottom or side
+bar to the screen's edge, as a drag can take it (#3163).
+:::
 
 A window whose app refuses the size stays where it is and `resize`
 still reports success; one that takes part of the size moves only as
@@ -7875,7 +7897,7 @@ table, with any of:
 **Does:** KiwiHub's Shortcuts side lists the shortcut under its
 description instead of its Lua, in its group, wearing its symbol.
 A group of your own is listed after the built-in ones and before
-Custom, under the name as written. Without a symbol a row wears
+Personal, under the name as written. Without a symbol a row wears
 `</>`; a name that is not an SF Symbol shows `</>` too and is
 listed in Config Issues, and the shortcut still works.
 
@@ -7886,7 +7908,7 @@ shortcut stays in its own section whatever its group.
 [`shortcut.list_groups`](#shortcutlist_groups) lists the names in
 use.
 
-A row in Settings ▸ Shortcuts & Gestures ▸ Lua bindings sets the
+A row in Settings ▸ Shortcuts ▸ Personal ▸ Lua bindings sets the
 same three fields for a shortcut Settings made. A shortcut
 `init.lua` binds is not listed there.
 
@@ -7952,8 +7974,8 @@ and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
 and is flagged. The CLI cannot bind a sequence;
-`shortcut.remove_sequence` removes one. In Settings, Shortcuts &
-Gestures ▸ Key sequences records one.
+`shortcut.remove_sequence` removes one. In Settings, Shortcuts ▸
+Personal ▸ Key sequences records one.
 Under Secure Input see
 [Accepted Limitations](accepted-limitations.md).
 
@@ -8637,6 +8659,12 @@ A window the incoming profile remembers in one of its own spaces
 goes there, even out of a held space; a held space keeps only
 the windows that profile has never seen, and is dropped once
 empty.
+
+:::unreleased
+If that move takes the focused window out of the active space and
+leaves the space empty, KiwiDesk switches to the space the window
+went to and focuses it ([#3191](https://github.com/KiwiCanopy/KiwiDesk/issues/3191)).
+:::
 
 A held space is dropped once no window is left in it on any
 Desktop, and by `delete_space`, which forwards its windows to the

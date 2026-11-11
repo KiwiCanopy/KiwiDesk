@@ -1,107 +1,71 @@
 import Foundation
 import Testing
 
-/// The retile-time net routes through the FITTING entry (#1091).
+/// The retile-time float net pushes and never fits (#3163).
 ///
-/// `FloatRegionFitTests` proves the fit itself works; nothing it
-/// can assert proves the retile still calls it. Collapsing
-/// `floatFrameFittedClearOfBars` back to the clamp beside it was
-/// green across all 4239 tests before that suite existed, and
-/// re-pointing the caller is the same defect one level up — a
-/// two-character edit that silently restores "a float grown
-/// before this rule stays unusable under a bar".
-@Suite("Float region seam (#1091)")
+/// `FloatNeverResizedTests` and `FloatingModeBarClampTests` hold the
+/// behaviour; only a scan can see which verdict the sweep routes
+/// through and that the retired fit stays retired.
+@Suite("Float region seam (#3163)")
 struct FloatRegionSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    @Test("The retile net calls the fitting entry, once")
-    func retileNetUsesTheFittingEntry() throws {
+    @Test("The retile net takes the push verdict on the would-be frame")
+    func retileNetUsesThePushVerdict() throws {
         let file = Self.root.appendingPathComponent(
             "Sources/KiwiDeskCore/App/KiwiCore+FloatClamp.swift"
         )
-        let source = try String(contentsOf: file, encoding: .utf8)
-        // A shape pin, not a value one: it holds that the sweep
-        // routes through the fitting entry, never what the fit
-        // computes. `clampFloatsClearOfBars` is the sweep; the
-        // needle is its call, so re-pointing it at the
-        // clamp-only sibling reds.
+        let source = try SourceScan.strippedSource(at: file)
         let sweep = try #require(
             source.range(of: "func clampFloatsClearOfBars()")
         )
-        // Bounded to the function's BRACE-BALANCED body, not the
-        // rest of the file (code review, 2026-08-29): a slice
-        // running to EOF is satisfied by any later mention of
-        // the name — a doc comment on a function appended below
-        // — while the call itself is gone. tests.md: where a
-        // needle is read is as load-bearing as what it reads.
+        // Bounded to the function's brace-balanced body: a slice
+        // running to EOF is satisfied by a later mention.
         let body = try #require(
             Self.balancedBody(of: source, from: sweep.upperBound)
         )
-        // The memo consultation rides the same needle: its
-        // EFFECT is guarded at `KiwiCore` altitude
-        // (`FloatRegionFitTests`), but only a scan can see that
-        // the sweep still asks — deleting the call left the
-        // whole suite green (guard-prover, 2026-08-29).
+        // One verdict the sweep and the resize arm share (#1358).
         #expect(
-            body.contains("shouldIssueFloatFit("),
-            """
-            the retile-time float sweep must consult the refusal \
-            memo — without it an app whose minimum exceeds the \
-            region is re-asked to shrink on every retile, forever
-            """
+            body.contains("floatBarPush("),
+            "the sweep must take its verdict from floatBarPush"
         )
-        // Since #1358 the per-window verdict is ONE copy the
-        // sweep and the resize arm share: the sweep routes
-        // through it, and the fit and the memo drop live inside
-        // it — re-pointing either at the clamp-only sibling reds.
+        // The stale state frame's push lands after a delivery and
+        // undoes it (#3157).
         #expect(
-            body.contains("floatFitCorrection("),
-            "the sweep must take its verdict from floatFitCorrection"
-        )
-        let verdict = try #require(
-            source.range(of: "func floatFitCorrection(")
-        )
-        let verdictBody = try #require(
-            Self.balancedBody(of: source, from: verdict.upperBound)
-        )
-        #expect(
-            verdictBody.contains("floatFitLedger.forget("),
-            """
-            the verdict must drop a window's memo when it needs no \
-            fit, or a window that later needs one is never asked
-            """
-        )
-        #expect(
-            verdictBody.contains("floatFrameFittedClearOfBars("),
-            """
-            the verdict must call floatFrameFittedClearOfBars — \
-            the clamp-only sibling moves a window without ever \
-            bounding its size, which is the #1091 defect
-            """
-        )
-        #expect(
-            !body.contains("floatFrameFittedClearOfBars("),
-            "the sweep must not fit beside the verdict it shares"
+            body.contains("wouldBeFrame(of: window)"),
+            "the sweep must judge the frame the window would show"
         )
     }
 
-    /// The drop's bottom fit (#1427) shrinks a float the user
-    /// pushed past the bottom; called from a retile net it would
-    /// shrink one parked there by hand. One caller, the drop arm.
-    @Test("The drop fit has one caller: the drop arm")
-    func dropFitHasOneCaller() throws {
+    /// A scan for a retired API keeps it retired (tests.md): the
+    /// #1091 fit, its refusal memo and the #1427 drop fit resized a
+    /// float the user had placed, and the four-edge push moved one
+    /// off a bottom or side bar.
+    @Test("No float fit is left in Core")
+    func noFloatFitInCore() throws {
         let core = Self.root.appendingPathComponent(
             "Sources/KiwiDeskCore"
         )
-        var callers: [String: Int] = [:]
-        for file in try SourceScan.swiftSources(under: core) {
+        let retired = [
+            "FloatFitLedger",
+            "floatFrameFittedClearOfBars",
+            "floatFrameFittedOnDrop",
+            "shouldIssueFloatFit",
+            "floatFitCorrection",
+            "floorWinsExtent",
+            "bottomFit(",
+            "clampClear(",
+            "keepingNearEdges(",
+        ]
+        var hits: [String: [String]] = [:]
+        let files = try SourceScan.swiftSources(under: core)
+        #expect(!files.isEmpty)
+        for file in files {
             let source = try SourceScan.strippedSource(at: file)
-            let calls =
-                source.occurrences(of: "floatFrameFittedOnDrop(")
-                - source.occurrences(of: "func floatFrameFittedOnDrop(")
-            if calls > 0 { callers[file.lastPathComponent] = calls }
+            let found = retired.filter { source.contains($0) }
+            if !found.isEmpty { hits[file.lastPathComponent] = found }
         }
-        #expect(callers == ["KiwiCore+Drag.swift": 1])
+        #expect(hits.isEmpty)
     }
 
     /// The brace-balanced body that opens at or after `start`.

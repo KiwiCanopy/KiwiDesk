@@ -118,9 +118,10 @@ struct SettingsAnchorIdentityTests {
         // nothing there is a reveal target.
         "JumpPanelView.swift": 1,
         // Scroll identity: Add binding scrolls the Shortcuts page
-        // to its end, past the floating save pill (#2688). Not a
-        // reveal target — the mark is the page's padded edge.
-        "ShortcutsSection.swift": 1,
+        // to its end, past the floating save pill (#2688), and a
+        // segment pick to its top (#3184). Not reveal targets —
+        // the marks are the page's edges.
+        "ShortcutsSection.swift": 2,
         // Scroll identity: a Tab onto a layout tile scrolls it clear
         // of the strip's fade (#2901). Not a reveal target — the
         // strip's tiles are a picker, and search lands on its card.

@@ -24,7 +24,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     let handBack: PanelHandBack
     var panel: JumpPanel?
     private(set) var currentModel: JumpModel?
-    /// Opens Settings on Shortcuts & Gestures, set by the app.
+    /// Opens Settings on Shortcuts, set by the app.
     var onEditShortcuts: () -> Void = {}
     /// This opening; a fade a later show overtook orders nothing
     /// out.
@@ -62,7 +62,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         ) {
         case .open: show(scope)
         case .close: close()
-        case .switchScope: currentModel?.setScope(scope)
+        case .switchScope:
+            currentModel?.setScope(scope)
+            currentModel?.latchOpener(NSEvent.modifierFlags)
         }
     }
 
@@ -99,7 +101,10 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             sheetCap: Self.sheetCap(visible: visible, area: area),
             modifiers: NSEvent.modifierFlags
         )
+        // The chord that opened the panel is still held (#3168).
+        model.latchOpener(NSEvent.modifierFlags)
         model.chords = liveChords()
+        model.lastAppChord = lastAppChord()
         model.settings = core.tiler.settings
         let panel = self.panel ?? makePanel()
         self.panel = panel
@@ -151,26 +156,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     func settingsChanged(_ settings: TilingSettings) {
         guard !presence.leaving else { return }
         currentModel?.settings = settings
-    }
-
-    /// Each side's chord from the live bindings.
-    func liveChords() -> [JumpScope: String] {
-        Self.chords { [core] lua in
-            ShortcutsOpenBinding.comboGlyphs(core: core, lua: lua)
-        }
-    }
-
-    /// Each side's chord, read by `glyphs` from the live bindings
-    /// for the Lua that side's own shortcut runs, so a rebind
-    /// prints the key that now opens it (#2245).
-    static func chords(
-        glyphs: (String) -> String?
-    ) -> [JumpScope: String] {
-        var chords: [JumpScope: String] = [:]
-        for scope in JumpScope.allCases {
-            chords[scope] = glyphs(scope.lua)
-        }
-        return chords
     }
 
     /// Closes the panel. No close arms the dismiss distrust: the
@@ -278,6 +263,10 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.onModifiers = { [weak model] in
             model?.noteModifiers($0)
         }
+        panel.pickModifiers = { [weak model] in
+            model?.pickModifiers($0) ?? $0
+        }
+        panel.onBackChord = { [weak model] in model?.latchOpener($0) }
         model.onPick = { [weak self] entry, pick in
             self?.pick(entry, pick)
         }
@@ -317,6 +306,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         model.onResultsChange = { [weak self] in
             DispatchQueue.main.async { self?.refit() }
         }
+        model.onStripToggle = { [weak self] in
+            DispatchQueue.main.async { self?.refit(animated: true) }
+        }
         // After the outgoing scope's fade: until it ends, the
         // stack still lays that scope out.
         model.onScopeChange = { [weak self] in
@@ -329,7 +321,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
         panel.naming = { [weak model] in model?.isNaming ?? false }
-        wireStrip(model)
         wireView(model)
         wireDesktops(model)
         wireShortcuts(model)

@@ -16,12 +16,6 @@ enum JumpStripText {
         L("jump.empty.no_match", "No open windows match")
     }
 
-    /// What the "No windows" row's pick does: the macOS menu's own
-    /// verb, which reopens an app already running.
-    static var reopenHint: String {
-        L("jump.strip.ax.reopen", "Opens the app")
-    }
-
     /// A tile as VoiceOver hears it: its name, and its windows
     /// where it has more than one. The count goes last behind a
     /// label, so nothing has to agree with it.
@@ -34,5 +28,30 @@ enum JumpStripText {
     /// row the list now selects or its empty line.
     static func moved(tile: String, row: String) -> String {
         L("jump.strip.ax.moved", "%1$@: %2$@", tile, row)
+    }
+
+    /// The current window's row title (#3168), as a list row
+    /// writes one: the app, then the window's title where it has one.
+    static func yoursTitle(_ entry: JumpEntry) -> String {
+        guard !entry.title.isEmpty else { return entry.app }
+        return L("jump.row.title", "%1$@ · %2$@", entry.app, entry.title)
+    }
+
+    /// The row's right column: "Current window", then where it is, the
+    /// screen named only where it is another (#2792).
+    static func yoursTag(_ entry: JumpEntry) -> String {
+        guard let place = JumpRowText.place(of: entry)?.text else {
+            return L("jump.row.current", "Current window")
+        }
+        return L("jump.row.current_placed", "Current window · %1$@", place)
+    }
+
+    /// The row as VoiceOver reads it.
+    static func yoursSpoken(_ entry: JumpEntry) -> String {
+        L(
+            "jump.row.ax.current",
+            "Current window: %1$@",
+            JumpRowText.spoken(entry)
+        )
     }
 }

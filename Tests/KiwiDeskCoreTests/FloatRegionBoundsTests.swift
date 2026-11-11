@@ -5,10 +5,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The float REGION and its two bounds (#1091), split from
-/// `FloatRegionFitTests` at §2.1's ceiling rather than after
-/// crossing it. That suite keeps the retile fit and the refusal
-/// memo; this one owns the derivation and the ring reservation.
+/// The float REGION and its two bounds (#1091): the derivation
+/// and the ring reservation. `FloatRegionResizeTests` holds the
+/// verbs that act within it.
 ///
 /// **They are two questions, not one rect with two meanings**
 /// (device QA, 2026-08-29). `floatBounds` is the correctness
@@ -16,8 +15,8 @@ import Testing
 /// bar, which is unreachable. `floatGrowBounds` reserves the
 /// focus ring's reach on top, because a clipped ring is a
 /// blemish rather than an unusable window. Reserving the ring in
-/// the correctness bound would make the retile pull in a float
-/// the user had resized flush by hand.
+/// the correctness bound too would make the grow bound take two
+/// reaches at a bar.
 @MainActor
 @Suite("Float region bounds (#1091)")
 struct FloatRegionBoundsTests {
@@ -91,14 +90,13 @@ struct FloatRegionBoundsTests {
     }
 
     @Test(
-        "The grow bound reserves the ring; the fit bound does not",
+        "The grow bound reserves the ring; the region does not",
         .enabled(if: NSScreen.main != nil)
     )
     func theTwoBoundsDiffer() throws {
-        // The split itself. Collapsing them — reserving the ring
-        // in `floatBounds` too — makes the retile fit shrink a
-        // float the user resized flush by hand, which is the fit
-        // fighting the hand that the rule forbids.
+        // The split itself: collapsing them reserves the ring in
+        // `floatBounds` too, so a float verb stops short of an
+        // edge the window may sit flush against.
         let core = makeFloatCore()
         let reach = core.floatRingInset
         #expect(reach > 0)
@@ -119,10 +117,7 @@ struct FloatRegionBoundsTests {
         // which is exactly how two defects got through
         // (guard-prover, 2026-08-29): the correctness bound was
         // carving a reach at bar strips while its docstring said
-        // it reserved none, so the grow bound took TWO there,
-        // and the retile fit pulled in a float the user had
-        // resized flush against a bar — the fit fighting the
-        // hand, surviving on the axis the split forgot.
+        // it reserved none, so the grow bound took TWO there.
         let core = makeFloatCore()
         core.appBars.sync([
             paintedAppBar(items: [appBarItem(1, text: "A")])

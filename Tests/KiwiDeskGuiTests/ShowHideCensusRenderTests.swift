@@ -6,7 +6,7 @@ import Testing
 
 /// The Show & hide card renders FROM the census, split from
 /// `ShortcutsCensusRenderTests` (§2.1): its one tier is the union
-/// of its three sub-group lists, and the card draws each list
+/// of its four sub-group lists, and the card draws each list
 /// whole, under its heading, in the ruled order.
 @Suite("Show & hide render ↔ census parity")
 struct ShowHideCensusRenderTests {
@@ -24,12 +24,13 @@ struct ShowHideCensusRenderTests {
     private var lists: [[SettingKey]] {
         [
             ShortcutsRowOrder.kiwiHubAtRest,
+            ShortcutsRowOrder.showHideKiwiDesk,
             ShortcutsRowOrder.kiwishelfAtRest,
             ShortcutsRowOrder.kiwiVisionAtRest,
         ]
     }
 
-    @Test("the card's one tier is its three lists, each key once")
+    @Test("the card's one tier is its four lists, each key once")
     func showHideTier() {
         let all = lists.flatMap { $0 }
         #expect(Set(all) == censusRows(.atRest))
@@ -119,10 +120,10 @@ struct ShowHideCensusRenderTests {
     }
 
     /// One card, mounted once, its sub-groups in the ruled order:
-    /// KiwiHub, KiwiShelf, then KiwiVision, which grows a row per
-    /// lens and so goes last. Which product a key sits under is
-    /// held by the three lists alone — the tier test pins their
-    /// union — the residue Open applications ▸ KiwiDesk shares.
+    /// KiwiHub, KiwiDesk (#3184), KiwiShelf, then KiwiVision, which
+    /// grows a row per lens and so goes last. Which product a key
+    /// sits under is held by the lists alone — the tier test pins
+    /// their union.
     @Test("the card mounts its sub-groups in order")
     func subGroupsInOrder() throws {
         let card = try #require(
@@ -137,13 +138,16 @@ struct ShowHideCensusRenderTests {
             [
                 "SettingsSection(SettingsCatalog.shortcuts.showHideKeys)",
                 "KiwiHubKeyRows(",
+                "KiwiDeskKeyRows(",
                 "KiwiShelfKeyRows(",
                 "KiwiVisionKeyRows(",
             ],
             in: card,
             "ShowHideGroup"
         )
-        let section = try squeezed("Sections/ShortcutsSection.swift")
+        let section = try squeezed(
+            "Sections/ShortcutsSection+Groups.swift"
+        )
         #expect(section.occurrences(of: "ShowHideGroup(") == 1)
     }
 }

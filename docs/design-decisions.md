@@ -2098,7 +2098,7 @@ chose it: before 3.2.0 it was the default, 3.2.0 kept a stored
 value, and every later build re-stamped the file's format, so the
 format cannot date the choice either. The cost is the user who
 turned focus wrapping off on purpose: it comes back on, and
-Off is one row away under Shortcuts & Gestures ▸ Focus.
+Off is one row away under Shortcuts ▸ Built-in ▸ Focus.
 
 ```mermaid
 flowchart TD
@@ -2490,7 +2490,7 @@ Track's own says what the others' do not: that this layout is
 the harder one. Reword it and the guidance goes with it.
 
 The shortcut half of that copy lives in the rows' own drawer —
-Shortcuts & Gestures ▸ Move windows ▸ **Move windows in the track
+Shortcuts ▸ Built-in ▸ Move windows ▸ **Move windows in the track
 layout**, the #1125 door shape, with a `?` saying what previous and next
 mean in a track (#1440). Nothing is gated, no flag is stored,
 the rows work whether the drawer is open or shut, and a user
@@ -4992,9 +4992,9 @@ own — this sound, the quit layout — and not of every app-wide
 value (owner ruling 2026-10-11). A switch that belongs to a
 feature sits beside that feature, where someone setting the
 feature up looks for it: the Desktop switch cue first in
-Shortcuts & Gestures ▸ macOS Desktops, above the shortcuts whose
+Shortcuts ▸ Built-in ▸ macOS Desktops, above the shortcuts whose
 switches it marks (#2142, #2655), the layout plate's in Shortcuts
-& Gestures ▸ Layout under the Layouts to cycle row (#2144). Such a switch is still
+▸ Built-in ▸ Layout under the Layouts to cycle row (#2144). Such a switch is still
 written the moment it changes, on a page whose other rows wait
 for Save, so it says in its `?` that it applies at once and to
 every profile.
@@ -5764,14 +5764,12 @@ Bars vary per space (one or two, on any edge), so it folds both
 strip lists; two strips on one edge leave the deeper carve
 standing, which is what makes the fold need no ordering rule.
 
-*Size is bounded there; position stays the user's.* The retile-time
-net fits an oversized float back inside the region — the clamp
-beside it only ever **moves** a window, so one larger than the
-space between two bars would be pushed to one side and still
-overflow under the other. It deliberately does not enforce the
-screen edge, because that net runs for every float on every
-retile and would drag back a window parked half off-screen by
-hand, which macOS allows and this change never asked for.
+*The region bounds the gather and `center_floating`, never a
+placed float.* `move_floating` and `resize` reach the screen's edge
+instead (#3163). No retile net fits a float into it, and none enforces the
+screen edge: that net runs for every float on every retile, so
+either would undo a placement the user chose (*A float is never
+resized to fit*, below, #3163).
 
 *And the ring is kept clear, not just the window.* A float is
 held the ring's own outward reach off **every** edge of that
@@ -5790,9 +5788,9 @@ the layout with the same value on all four edges.
 Painted chrome counts only on an edge the layout reserves: a bar
 set not to reserve its strip keeps no float out, as it keeps no
 tiled window out ([*Reserved where a bar draws*](#app-bar), #1524).
-The same holds for the floating gather's strips and for the drop
-fit's lift clear of a bottom bar: both carve or clear only a
-strip on a reserved edge.
+The same holds for the floating gather's strips and for the push
+clear of a top bar: both carve or clear only a strip on a
+reserved edge.
 
 A tempting alternative was rejected on that same principle: to
 follow `gap.outer` instead, so `border.fit_gaps` would cover
@@ -5811,14 +5809,14 @@ is reserved for chrome that is not on screen.
 nets leave it where its app put it (#1787).* A slide show, or a
 borderless-fullscreen game or player, draws over the menu bar,
 the Dock and the shelf on purpose — that is the point of it — so
-a fit pushing it clear of a strip, or a floating-mode entry
+a push clear of a strip, or a floating-mode entry
 laying it into the quit grid, breaks the thing the user just
 started, as either would break native fullscreen, which both
 already skip. The verdict has two inputs: the frame, edge for
 edge with a whole screen, within 2 pt, over every screen's WHOLE
-frame — never larger, which is an oversized float the fit still
+frame — never larger, which is an oversized float the push still
 owes — and the window's AX subrole, below.
-The fit's skip is load-bearing twice: its frame write also
+The push's skip is load-bearing twice: its frame write also
 stamps the #1161 placement ledger, and in a Scrolling Space a
 live entry is the whole bounce verdict, so without the skip the
 show's own first focus reads as an app answering our placement
@@ -6058,31 +6056,70 @@ this issue's strand by another door. This answers ARRIVALS; a
 hand DROP on another display re-files every float, flag or
 floating-mode, at the drop (#1686, below beside #492).
 
-**A float dropped past the bottom is shrunk to fit, never moved
-back** ([#1427](https://github.com/KiwiCanopy/KiwiDesk/issues/1427),
-owner ruling 2026-10-06). [Principle] A window pushed down until its
-bottom passes the usable area — the screen edge, or the top of a
-bar on that edge, less the focus ring's reach as every float
-placement keeps it (`floatGrowBounds`; the outer gap is a layout
-reservation and is not followed) — keeps its top edge where
-it was dropped and loses height from the bottom. Moving it back up
-would undo the move the user just made. A clipped strip below the
-border is not a position anyone chose, so this is a narrower
-reading of #1091's "a float's position is the user's", not an
-exception to it. Three limits keep it narrow:
+:::unreleased
+**A float is never resized to fit, and only a top bar moves one
+([#3163](https://github.com/KiwiCanopy/KiwiDesk/issues/3163), owner
+ruling 2026-11-10; amends #1091, #1427 and #1524).** [Principle] A
+float is a window the user placed and sized on purpose. A net that
+runs on every retile cannot tell a mistake from a choice, so a net
+that shrinks or shoves a float overrides the choice every time: a
+window dragged a little past the bottom bar on a tiling-off Space
+came back shorter, and the user had to undo it by hand. So no path
+fits a float into the float region — not the retile sweep, a drop,
+a traveler's re-home or the unsolicited-resize arm — and none moves
+one off a bottom or side bar. Tiling-off Spaces take the same rule.
 
-- It runs on a hand drop only, never from a retile net, so a
-  float parked half off-screen by any other means stays where
-  it is.
-- It stops at the window's minimum height (the configured
-  minimum, or a corroborated app minimum). Past that, at the
-  screen edge the rest stays clipped rather than the window
-  moving; under a bar on that edge the bar still lifts it
-  clear, since a bar reserves its edge for every window (#242).
-- A window whose top is already past the border is left alone:
-  its title bar is out of reach. A bottom "peek" with the title
-  bar showing is therefore reachable only at the window's
-  minimum height.
+One correction stays, the reason the bar clamp first existed
+(#242): a reserved, painted **top** strip over the title bar takes
+away the handle that moves the window, which the mouse cannot
+repair. That float is pushed straight down at its own size. A float
+taller than the room below the bar keeps its height and runs off
+the screen's bottom: the title bar is what has to be reachable, and
+the rest is reachable by moving it. The push reads only the
+reserved, painted strips, so a bar on a second screen, or one
+revealed later, counts once it draws. It judges the frame the
+window would show, never a stale state frame: a Maximize's fill
+echo sits under the top strip, and a push of it still overwrites
+the return (#3157), so that base outlives the fit.
+
+What it retires, and why each part goes:
+
+- **The #1091 size fit and its refusal memo.** The memo existed
+  because a size is refusable and the sweep re-asked it forever.
+  With no size ask nothing is refused, and a position push
+  converges without a memo.
+- **The #1427 drop fit.** It kept a dropped window's top and shrank
+  it from the bottom. The drop now keeps the whole frame, so the
+  window lands where and how the user left it.
+- **#1524's four-edge nudge (QA 2026-07-19), narrowed to the top.**
+  Its argument — a reserving bar reserves its edge for every window
+  — holds for windows the layout places. A float is the one window
+  the layout does not place, and a bottom or side bar over part of
+  one hides content, not the handle that moves it.
+
+Not affected, since each is an act the user starts rather than a
+sweep: `make_floating`'s derived size (#1674), the floating gather,
+and `center_floating`, which centres in `floatBounds`. The verbs
+that step or grow (`move_floating`, the grow side of `resize`)
+follow the drag instead (owner ruling 2026-11-10): they run to the
+screen's visible edge, and a top bar alone stops them
+(`floatReachBounds`), so the push-down never fights a keyboard move
+and a key and the mouse reach the same place by one rule. No flag
+and no warning: a bottom bar over part of a float is the state a
+drag can leave too. The
+stranded-float recovery (#1352) is a net, so it re-centres a float
+at its own size, its top-left edge kept in the region so the title
+bar stays in reach. A Pocket take-out and a Maximize's return to another
+screen still shrink a window to the region (owner ruling 2026-11-10):
+neither is a sweep, and each is a return the user starts, where a fit
+is the support the user expects.
+
+The cost accepted: a float can sit with its bottom under a bottom
+bar or off the screen, and a float its own app grew past the room
+under a top bar stays that tall. Rejected: keeping the fit on
+tiling-off Spaces only, or on hand drops only. Both keep a net that
+second-guesses a placement, which is the defect.
+:::
 
 **Floating a tiled window centres it at a derived size
 (#1674).** [Principle] The frame a window
@@ -8424,7 +8461,7 @@ moved across screens stayed a float on the new screen (measured once,
 
 **[Rationale]**
 
-The three Tiling off rows in Shortcuts & Gestures ▸ Size & float —
+The three Tiling off rows in Shortcuts ▸ Built-in ▸ Size & float —
 where Spaces start, and whether a Space with tiling off hides its
 focus border or the bars — each carry their own "Applies to" (▸
 Navigation & saving, *Each App Rules row carries an "Applies to"
@@ -8781,6 +8818,7 @@ curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
 
+:::unreleased
 With KiwiVision's maximize on (#3064, below), the arrival is still
 instant but no longer still: the window you focus clears at its
 slot and then grows into the fill, while the window you leave fades
@@ -8788,7 +8826,9 @@ as it shrinks back to its slot. The leave fade masks the slot the
 window is heading for, so for the length of the spring the part of
 the shrinking window outside that slot dims at once rather than
 fading; the plates owe a re-mask once the springs settle.
+:::
 
+:::unreleased
 ### KiwiVision's maximize is derived, never stored per Space (#3064)
 
 **[Rationale]**
@@ -8800,7 +8840,8 @@ Width read the share and the anchor Layout Defaults store for the
 screen's shape, the same table a hand Maximize reads, so KiwiVision
 has no anchor of its own (owner, 2026-11-09). A lens overrides the
 mode alone, one optional row like its other overrides, so a
-"Writing" lens can ask for Height.
+"Writing" lens can ask for Height. That row is a pop-up
+(`ui-patterns.md` ▸ Choosing a control).
 
 The verdict is computed on every read from what state holds —
 KiwiVision's ask, copied in through `VisionLook` at every change,
@@ -8839,6 +8880,7 @@ The new `kiwivision.maximize` key is encoded only when it is not
 Off, so files written before it decode unchanged and it owes no
 crossing. It has no per-profile predecessor either: KiwiVision's
 settings were app-wide from their first release.
+:::
 
 ### KiwiVision switches the appearance and owes it back (#2103)
 
@@ -10374,8 +10416,8 @@ exclusion would have been dead code asserting a fact the type
 system already holds.
 
 The companion affordance: **"Open Settings" is bindable**
-(`KiwiDesk.open_settings()`, offered under Shortcuts & Gestures
-▸ Open applications ▸ KiwiDesk) — a window that lives among the user's tiled windows
+(`KiwiDesk.open_settings()`, offered under Shortcuts ▸ Built-in
+▸ Show & hide ▸ KiwiDesk) — a window that lives among the user's tiled windows
 earns a keyboard road back. Which chord it ships on is the
 seeded ladder's ruling ([Shortcuts](#shortcuts), #1381). It
 opens or raises, never
@@ -11236,8 +11278,8 @@ window count", and exactly one claim ever cleared it: Scrolling's
 `follow` anchor, where the viewport pans the minimum to reveal the
 newly focused window. A still picture cannot show motion.
 (It binds the FRAME, not motion: a picture that teaches a
-GESTURE rather than a rest state — the Shortcuts & Gestures
-drawer's, argued under Shortcuts below — may move.)
+GESTURE rather than a rest state — the Shortcuts page's Mouse &
+Trackpad part's, argued under Shortcuts below — may move.)
 
 A thumbnail that is read rather than compared — the welcome
 tour's and the preset preview's — may move too; *A thumbnail that
@@ -11376,7 +11418,7 @@ this Space behaves. So the rest frame on these two hosts is not
 the chooser's frame: the engine's arrangement, no `+`, and
 possibly a lower count. The story always ends on it, and it is
 the whole of what Reduce Motion shows. It is still not a clip,
-for the reasons the Shortcuts & Gestures entry gives: it follows
+for the reasons the Mouse & Trackpad entry gives: it follows
 the palette and the appearance, carries no text to translate,
 and cannot go stale beside a redesign. Motion is never
 announced, so every story thumbnail speaks the layout's
@@ -12180,10 +12222,12 @@ title component, and a drawer title is one.)
 
 **A collapsible container that is a peer of the page's sections
 is a collapsible SECTION; one that qualifies a card stays a
-drawer.** (#1741, ui-designer ruling.) Shortcuts & Gestures ▸
-Mouse & trackpad is a family of its own beside the page's other
-cards, and drawn as a `.card` drawer — the drawer tier, with no
-section above it — it read as a sub-drawer of nothing. So
+drawer.** (#1741, ui-designer ruling.) A card such as Shortcuts
+▸ Built-in ▸ Modifier keys is a family of its own beside the
+page's other cards, and drawn as a `.card` drawer — the drawer
+tier, with no section above it — it reads as a sub-drawer of
+nothing; the ruling was made on the Mouse & trackpad card, which
+#3184 gave a part of its own. So
 `SettingsCollapsibleSection` is a `SettingsSection`: the same
 plain `.headline` title and plate, with the disclosure as the
 plate's first row — chevron and summary, the whole row one
@@ -12935,8 +12979,8 @@ key event's flags (⌘ `0x08`/`0x10`, ⌥ `0x20`/`0x40`, ⇧ `0x02`/`0x04`,
 with Accessibility alone: the probe was under no Input Monitoring
 grant, and both were refused before Accessibility was granted.
 
-So the switch **Tell left and right modifiers apart** (Shortcuts &
-Gestures ▸ Modifier keys, `set_modifier_sides`) admits the tap,
+So the switch **Tell left and right modifiers apart** (Shortcuts ▸
+Built-in ▸ Modifier keys, `set_modifier_sides`) admits the tap,
 bounded three ways. Every either-side shortcut stays a Carbon hotkey,
 save one on the same keys as a sided shortcut, which moves to the tap
 with it so the two never race for one press. The tap runs only while
@@ -14023,8 +14067,8 @@ comma position), so it is reachable on every board; where that
 key prints another character the board shows that character,
 the trade every lettered default already makes. Which
 population has it follows the seed's own rule below: a new
-setup, or an existing one through Shortcuts & Gestures ▸
-Restore Defaults…, which lands it in the default layer; a layer
+setup, or an existing one through Shortcuts ▸ Built-in ▸
+Default shortcuts ▸ Restore…, which lands it in the default layer; a layer
 made before this carries it only by hand.
 
 **Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner ruling
@@ -14102,8 +14146,8 @@ check is necessary and not sufficient (#1098).
 install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows. The
 four new rows reach it through the generation top-up below, each
 only where its chord is free, so the history pair lands and the
-steps wait on that swap until a Record or Shortcuts & Gestures ▸
-Restore Defaults… moves it.
+steps wait on that swap until a Record or Shortcuts ▸ Built-in ▸
+Default shortcuts ▸ Restore… moves it.
 
 **A default a release adds reaches an existing install once
 (#2211, owner ruling 2026-10-12).** The seed is written at first
@@ -14351,8 +14395,8 @@ an existing install keeps `⌃⌥⌘`+arrows for as long as it lives,
 and `ShortcutsReferenceBuilder` renders the live layer rather
 than the defaults, so its Shortcuts panel stays accurate. The
 cost, accepted rather than discovered: an existing user who
-WANTS the new map takes Shortcuts & Gestures ▸ Restore
-Defaults… (#1096, the one road a later default has into an
+WANTS the new map takes Shortcuts ▸ Built-in ▸ Default
+shortcuts ▸ Restore… (#1096, the one road a later default has into an
 existing install), and prose that names a chord has to say which
 population it means — which is why the resize workaround in
 [Accepted limitations](accepted-limitations.md) points at the
@@ -14624,7 +14668,7 @@ config's shortcuts are `init.lua`'s, which nothing rewrites.
 **No new chords for named Spaces or Spaces past ten.** Once the
 order steps and the history reach every Space, a chord per Space
 past the tenth digit is a want, not a gap: the per-Space rows on
-Shortcuts & Gestures already offer one, unbound, for every live
+the Shortcuts page already offer one, unbound, for every live
 Space, and Settings ▸ Spaces points there rather than growing a
 recorder of its own.
 
@@ -14934,11 +14978,11 @@ each side's live chord (#2245): it follows a rebind, and it shows
 in the empty and unavailable states, which no section does. A row
 would also be self-referential — you just pressed the chord it
 teaches, and no macOS surface lists its own trigger as content —
-and, listed, it would surface in *Custom*, the section that means
+and, listed, it would surface in *Personal*, the section that means
 "user-authored raw Lua". Consequence to keep: a fresh layer seeded
 with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
-re-leaks the seed into Custom. (#602, PR #638, #2246)
+re-leaks the seed into Personal. (#602, PR #638, #2246)
 
 :::unreleased
 The Desktop overview's opener, seeded on ⌃⌥O (#1229, #3167), is a fourth
@@ -15347,6 +15391,20 @@ dimmed tile is never landed on. The field gives up its in-text
 cursor movement for it, which costs little because a query is a
 few letters typed and corrected from the end.
 
+The strip shows only while it is in use (owner amendment on #3168):
+off All, or while a query is typed. ⌃⌥J opens on the list alone,
+because a switcher opened for the window used before is read top
+down and a row of tiles above that window is a second thing to read
+past on every press. Nothing about the strip's reach changes: → from
+an empty field brings it in on the next app, and ← back to All hides
+it again, so no app is a step further away than before. Typing
+shows it on All because the dimmed tiles are then the answer to
+"which apps hold a match". The strip appears under the field, which
+never moves (#2246), and the panel grows downward rather than
+keeping room for it, since a reserved band would be the very row
+the calm opening removes. Under a query ← → still step through only
+the apps with a match.
+
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,
 and an option would put a second meaning on a call every existing
@@ -15366,6 +15424,59 @@ would drift from a rebound opener, and claim a second chord from
 every app. That is no blind gesture: each press moves a selection
 drawn before it, and nothing lands until ↩ — releasing ⌥ picks
 nothing, so the hold-and-release form stays ruled out.
+:::
+
+:::unreleased
+**KiwiHub shows the window you are in, greyed, and its app's tile
+first (#3168, owner rulings 2026-11-10, amending the 2026-10-12
+ruling that the focused window is left out of the list).**
+[Rationale] The 2026-10-12 ruling still holds for what a pick can
+reach: neither a Jump nor Move here does anything for the window the
+user is in, so it is never a result — the arrows skip it, ⌘1 stays on
+the first real row, and search never matches it. What leaving it out
+entirely cost showed once the strip narrowed the list: ⌥↩ swaps the
+picked window with yours (#2885), and nothing on screen said which
+window that was, and the app you were in had no tile, so the strip's
+order disagreed with ⌘⇥'s. So the strip reads as ⌘⇥ does: All, then
+the app you are in, then by recency, and ⌥⇥ lands on the second app.
+The window itself is drawn as a row like every other — icon, app and
+title, "Current window · ‹Space›" on the right — but greyed, with no
+plate and no hover, at the top of All and of its own app's tile,
+because it is a statement and not a choice. It hides under a query,
+whose dimmed tiles are the thing to read. VoiceOver reads it as
+text and does not announce it on open, since the selected row is
+what the open speaks. It is the very window the list leaves out — the
+focus, while its app is in front — read once, so it is never drawn
+twice; a focus under an app KiwiDesk does not track stays a row, as
+the 2026-10-12 ruling has it. And it is drawn only where it is also
+the window ⌥↩ trades with: opened on a screen whose Space holds
+another focus, KiwiHub draws no current window, and the window ⌥↩
+would take names itself in its own row's refusal, rather than the
+greyed row and ⌥↩ naming two windows.
+
+A running app with no listed window has no tile (ui-designer
+advised, owner ruling 2026-11-10, reversing #3135's "No windows"
+row). The strip narrows the list, and a tile for an app All does not
+hold breaks the promise that every tile is a slice of All. Its one
+row was the dead end #3135 rejected for search, it sat dimmed under
+every query, it put ⌥⇥ on a row ↩ could not pick when the app used
+before had closed its window, and it was one more VoiceOver stop
+that led nowhere. Reopening such an app stays with Open or Focus
+(#1840), ⌘⇥ and the Dock.
+
+A modifier still held from the chord that opened KiwiHub or stepped
+the strip counts for nothing until it is let go (ui-designer
+advised, owner ruling 2026-11-10). Without it, ↩ pressed while the ⌥
+of ⌥⇥ is still down is ⌥↩, Swap here, and ↩ after ⌃⌥J with ⌥ still
+down swaps the same way. The latch takes the modifiers held when the
+opener's or a step's key goes down — never the binding's — so a
+rebound opener needs nothing, and ⇧ held since a ⇧⌥⇥ back step is
+covered too. ↩, the ⌘ digits, a click and the footer's lit hint
+read one set, so the hint always names what a press does. Moving the
+opener to ⌃⇥ was rejected, since it is every browser's and
+terminal's tab key, and so was a heavier swap chord, which would
+change #2885's chords for everyone to fix one path. Taking over ⌘⇥
+itself stays the opt-in #3136.
 :::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on
@@ -15417,10 +15528,12 @@ and VoiceOver already use, and the panel's container speaks the
 product name around them, so a side announces "KiwiHub, window
 switcher". The Shortcuts page groups KiwiHub's rows under one
 card, its sides in key order, because the panel is the topic and
-the rows read as one. Open applications ▸ KiwiDesk keeps
-Open Settings under its subheading, one row and all: there the
-heading says whose window the row opens, among rows that open
-other apps, which a lone row still needs.
+the rows read as one. Open Settings keeps its "KiwiDesk"
+subheading, one row and all: the heading says whose window the
+row opens, which a lone row still needs. It sits in Show & hide
+rather than among the rows that open other apps since *One page,
+three parts* (below) moved what the user adds to a part of its
+own.
 
 The three `show_*` verbs became `kiwihub.show(side)`, the side a
 typed argument read off `KiwiHubSide`. Only `show_shortcuts` had
@@ -15741,27 +15854,74 @@ need a home for their modifiers, which are input bindings like
 every chord here. So the page names both inputs, the way "Gaps &
 Borders" pairs two nouns; *Controls* was refused because every row
 in Settings is a control, and *gesture* is Apple's own word for
-trackpad and mouse input.
+trackpad and mouse input. *One page, three parts*, below, renames
+the page.
 
-**The Mouse & trackpad card sits above the layer header, and is
-collapsed on every visit.** Everything under "Editing the X layer"
-reads as belonging to that layer; the card's settings do not, so
-it cannot sit there, and the layers card leads only what is
-layer-scoped. It opens shut every time because a
-card that opens on a first visit needs a stored "seen" flag and
-then changes shape on the second; search opens it on a hit, and its
-summary does the telling while it is shut.
+:::unreleased
+**One page, three parts** (#3184, owner and ui-designer
+2026-11-10). The page outgrew one map: the built-in shortcuts,
+everything the user adds and the mouse and trackpad took ten
+chips, with the trackpad rows (#3183) still to come. So the Home
+tile is *Shortcuts*, its subtitle names the parts, and the page
+opens with a centred segmented control, **Built-in | Personal |
+Mouse & Trackpad**. The name drops *Gestures* without losing what
+#1726's name bought, above: the subtitle on Home and the segment
+on the page's top line both name the mouse and trackpad, so a new
+user still meets them before any keyboard row. This amends
+#1520's "chips keep the page one page" below: tabs were refused
+there for the groups of ONE view,
+while three whole parts are separate views shown one at a time,
+which is what a segment is for on macOS (System Settings ▸
+Trackpad's top segment). Three Home tiles, tabs per group and a
+nested sidebar were refused: the first splits one subject across
+Home, the other two add a navigator.
 
-Since the layer's name moved onto the pinned jump bar (#1520), the
-separation is carried by the rule after the Mouse & trackpad chip
-and by the Layers card, which leads everything layer-scoped: the
-card above it belongs to no layer. The page draws the bar's rule
-too, above the Layers card, so its two bands — what applies
-everywhere, then the layer's own rows — read apart without the bar
-(owner 2026-11-08).
+- **Built-in** opens first and alone keeps chips, Show & hide
+  through Pocket, being the one part long enough to need a map.
+  The segment is centred and the chips lead, so the two read
+  apart. Open Settings sits in Show & hide, being a built-in;
+  Restore sits right under Layers, above the groups it rewrites
+  (#3179), its explanation in its `?` (#3178).
+- **Personal** holds Layers, Open applications, Key sequences and
+  Lua bindings: no chips, and no Restore, nothing shipped being
+  there to restore. Its name is KiwiHub's word for the user's own
+  shortcut groups, one word in every catalog. Open applications
+  now follows Layers, so #1520's refusal to move it up concerned
+  the one long page and is spent.
+- **Mouse & Trackpad** holds open groups ordered by where the hand
+  is — on your windows, holding a modifier, on the KiwiShelf — each
+  with its own pictures, and no Layers card, since a layer does
+  not act on a gesture. The part replaces #1726's collapsed card,
+  the picture strip the shut card drew, and Mouse & trackpad's
+  first chip and the rule after it: open groups need no summary
+  and no strip to be found. Its first picture still plays once per
+  visit on the user's own click, now on the segment.
+- Layers draws on Built-in and Personal and reads the one
+  `nav.shortcutsLayer`, so the layer picked survives a switch. The
+  part shown is a `SettingsNavigation` reading too (#1127):
+  Built-in on a first visit, the last part for the window's
+  session after that. Only the part shown is built: the page
+  builds only the part on screen (#3060), and a part not shown is
+  never on screen.
+- **A sibling is never out of sight.** A search hit, ⌘K and the
+  recorder's Go to select the part holding the row before they
+  scroll, and a conflict between a Personal row and a built-in
+  carries a link to the other part. Without that link #1520's
+  objection to tabs — a conflict landing on a page whose sibling is
+  hidden — would stand, which is why it is a condition of the
+  ruling rather than a nicety.
+:::
+
+**A rule above the Layers card parts what applies everywhere
+from the layer's own rows** (owner 2026-11-08). Everything under
+"Editing the X layer" reads as belonging to that layer, so the
+Layers card leads only what is layer-scoped, and Built-in's
+Modifier keys card above it belongs to no layer. The page draws a
+rule between the two, so its two bands read apart without the
+jump bar.
 
 **Its entries are grouped by where the hand is** — on your
-windows, on the KiwiShelf, anywhere holding a modifier — never by
+windows, anywhere holding a modifier, on the KiwiShelf — never by
 gesture type, which is grouping by widget. That grouping is also
 what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
@@ -15779,61 +15939,22 @@ is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
-When the user's own click opens the card, its first picture also
-plays once and rests (owner ruling 2026-09-29), and the
+When the user's own click opens the Mouse & Trackpad part, its
+first picture also plays once and rests (owner ruling 2026-09-29), and the
 difference from the rest of this page is the reader. The rule's
 other exception, a layout thumbnail that is read rather than
 compared (▸ Navigation & saving), plays once as it appears
 because the tour and the preset preview are opened in order to
-be read. Opening this card is the same kind of act — a request to
+be read. Opening this part is the same kind of act — a request to
 read what is inside — so one picture playing is the content
 arriving, and it tells the user the pictures move. It stays one
-picture: the card is still a reference consulted in the middle of
+picture: the part is still a reference consulted in the middle of
 something else, and a column of gestures playing in turn would be
 motion no one came for. So it plays at most once per visit, only
-on the click — a search hit, Go to or a diff jump opens the card
+on the click — a search hit, Go to or a diff jump opens the part
 to reach one row, whose wash is the motion that answers them —
 and never under Reduce Motion.
 
-
-**Shut, the card shows every entry's picture (owner ruling
-2026-10-17).** A collapsible section's shut state is its summary
-row, and here that was one small `ink3` sentence between two cards
-with real controls — the one card on the page users overlooked.
-So the shut card also draws a strip of every entry's picture at
-rest, in card order with the groups set apart, scrolling sideways
-and fading at an end where it cuts a picture, the KiwiShelf's
-overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
-A picture stays still, shows its entry's own sentence as
-a tooltip after the window's 250 ms delay, marks itself as a link
-under the pointer with an accent edge and the pointing hand
-(#2537) — the accent, not the neutral hover lift, because the
-picture is otherwise read as decoration and its plate carries no
-marking the edge could overwrite — and a click opens the
-card at its entry and plays that one — the same "a click asked to
-read it" argument as the first picture's, aimed. The strip is a
-pointer shortcut: hidden from VoiceOver, never a focus stop, since
-the disclosure above it opens the card where every entry is
-reachable. It breaks the "summary is words only" convention for
-this one card, which is a section — a peer of the page — rather
-than a drawer: a picture is the content arriving, where a drawer's
-summary states a value. Every entry is drawn rather than one per
-group because each picture is its entry's own way in; the cost is
-weight, so a strip that reads as a solid band in light mode is
-the signal to cut it back to one picture per group. It first
-played a picture while hovered, and that cost the page its
-scroll (owner ruling 2026-10-18): each picture the page carried
-under the resting pointer rebuilt and started a loop mid-scroll,
-so a wheel or swipe begun over the strip stuttered. The tooltip
-already names the gesture and the click plays it, so the hover
-loop taught nothing they do not.
-
-The strip's picture takes the edge and rise every tile takes, in place
-of its accent edge (#3042). Its frame moves and its drawing does not,
-which keeps the ruling that the strip's pictures stay still. The edge
-is now the neutral `hoverEdge` (owner 2026-11-08): what the #2537
-argument needs is an edge rather than a fill lift, so the picture
-still reads as a link, and the accent stays selection's.
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
@@ -16028,7 +16149,8 @@ burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 
 **The page is mapped by pinned jump chips, never split into tabs**
-(#1520, owner ruling 2026-10-01). A group well below the fold of
+(#1520, owner ruling 2026-10-01; amended by #3184, *One page,
+three parts*, for Built-in's groups). A group well below the fold of
 a long list is undiscoverable without a map — the per-app
 shortcut, which answers "switch to the Space an app has windows
 in", is the costly case. Tabs are easier to click but hide every
@@ -16049,21 +16171,14 @@ groups it scopes, so a chip for it would point at its own
 neighbour. The bar carries the edited
 layer's name instead, in words, at the trailing end of the
 caption line over the chips, and that line is the first thing a
-narrowing window drops since it is header chrome. **Mouse &
-trackpad gets the first chip**, set off
-by a rule because everything after it is scoped to one layer and
-it is not; its click opens the card as well, which stays fully
-collapsed otherwise — a first-item-open state would be a third
-collapsible kind and split its search children (#277). The chip
-pinned above it is what keeps the shut card from being
-overlooked at the top of the page.
+narrowing window drops since it is header chrome.
 
 **Fewer groups, chosen by what a header tells apart.** The
 General drawer — two rows, Show shortcuts panel and Open
-Settings — folds into Open applications under a "KiwiDesk"
-subheading: both open something by key, and a two-row drawer was
-a disclosure guarding almost nothing. (Show shortcuts panel has
-since moved to the KiwiHub group, #2265.) Focus and Move windows stay
+Settings — was dissolved, a two-row drawer being a disclosure
+guarding almost nothing: Show shortcuts panel went to the KiwiHub
+group (#2265), and Open Settings sits under a "KiwiDesk"
+subheading in Show & hide (*One page, three parts*). Focus and Move windows stay
 apart although they share keys: merged they run 17–23 rows, and
 the header is what tells "where focus goes" from "where a window
 goes" on the same arrows. The section keeps its name: *Controls*
@@ -16076,7 +16191,8 @@ three chips named a product rather than a job. The three are one
 job — each key puts something on screen or takes it away and
 moves no window — so they share one card named by that job,
 *Show & hide*, each product a sub-heading. KiwiHub leads, the
-panel being what a new user reaches for first; KiwiShelf
+panel being what a new user reaches for first, with the KiwiDesk
+sub-heading holding Open Settings after it (#3184); KiwiShelf
 follows; KiwiVision goes last because it grows a row per lens.
 The card leads the page, ahead of Focus, for the same reason
 KiwiHub leads the card. Focus, Move windows and Layout stay
@@ -16093,12 +16209,12 @@ own group (#2544).** A binding's `group` matches a built-in group
 by its Lua token (`focus`, `move_windows`, …), never its English
 title, so the group still reads in the user's language; any other
 name makes a group of its own, shown as written and never
-translated, after the built-in groups and before Custom. An
+translated, after the built-in groups and before Personal. An
 unknown name is never an error: a typo makes a visible group,
 which says more than a refusal would. The fields live on the
 stored binding, so a binding imported into `gui.json` or written
 there by hand carries them as one `init.lua` declares does. `</>`
-marks your own Lua everywhere — Custom rows, a name-less handler,
+marks your own Lua everywhere — Personal rows, a name-less handler,
 the Lua editor's tab — and a symbol that is no SF Symbol falls
 back to it with a Config Issue; braces read as a code block,
 `</>` as code you wrote. `curlybraces` stays in the
@@ -16106,8 +16222,8 @@ icon picker as an icon of its own.
 
 **The marked chip is the group under the bar.** A group is
 current once its header has reached the bar and while its card
-is still under it, so scrolling past Mouse & trackpad into the
-layer chrome marks nothing — no chip names what is there.
+is still under it, so scrolling through Modifier keys and the
+layer chrome above the first group marks nothing — no chip names what is there.
 Unscrolled, the first group is marked, whatever banner sits above
 it. A clicked chip stays marked until the user scrolls, since a
 group near the end may never bring its header to the bar; a
@@ -22255,7 +22371,7 @@ version appears.
   newly-authored Grow/Shrink bindings and is recovered from
   bindings on import, but changing it does **not** rewrite
   existing bound rows (their literal keeps firing). An in-GUI
-  step control (a slider in Shortcuts & Gestures ▸ Size & float)
+  step control (a slider in Shortcuts ▸ Built-in ▸ Size & float)
   and a live-rewrite of already-bound rows are deliberately out of
   scope for now; the reserved slot is additive, so their later
   arrival won't re-layout the section.

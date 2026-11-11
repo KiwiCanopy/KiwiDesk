@@ -52,6 +52,8 @@ enum SettingsSearchSynonyms {
         // The retired page's title (#2389), which a user who
         // learned it still types.
         case .looks: return ["advanced colors", "advanced colours"]
+        // "Shortcuts & Gestures" until #3184, and its third part.
+        case .shortcuts: return ["gestures", "mouse", "trackpad"]
         default: return []
         }
     }

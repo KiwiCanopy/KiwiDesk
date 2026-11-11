@@ -7,11 +7,11 @@ import Testing
 
 /// The retile sweep judges a PENDING capture, never the state
 /// frame it is leaving (#1177/#1352): the restore pass just sent
-/// the window to the capture, and a fit of the stale frame would
+/// the window to the capture, and a push of the stale frame would
 /// land after the delivery and undo it — a scrolled-out column
-/// under a left bar was pushed back to the bar edge instead of
-/// taking its gather target. A capture under the bar is corrected
-/// with the window, so the echo consumes it (#412).
+/// was pushed back to the bar edge instead of taking its gather
+/// target. A capture under the bar is corrected with the window,
+/// so the echo consumes it (#412).
 @Suite("Float clamp judges the pending capture", .serialized)
 @MainActor
 struct FloatClampPendingCaptureTests {

@@ -210,9 +210,6 @@ struct SizeFloatGroup: View {
             ) { key in
                 sizeFloatRow(key)
             }
-            Text(sizeFloatCaption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 
@@ -226,11 +223,12 @@ struct SizeFloatGroup: View {
             expander: expander
         )
         switch key {
-        case .behaviour(.tilingStart):
-            TilingOffRows(model: model)
-        case .behaviour(.tilingOffHidesBorders),
+        case .shortcuts(.toggleTiling):
+            TilingOffRows(model: model) { family }
+        case .behaviour(.tilingStart),
+            .behaviour(.tilingOffHidesBorders),
             .behaviour(.tilingOffHidesBars):
-            // Drawn by `TilingOffRows` under its sub-header.
+            // Drawn by `TilingOffRows` under its key.
             EmptyView()
         case .shortcuts(.maximizeHeight):
             VStack(alignment: .leading, spacing: 4) {
@@ -244,6 +242,11 @@ struct SizeFloatGroup: View {
                 MaximizeShareCaption(axis: .width)
             }
             .searchAnchored(SettingsCatalog.shortcuts.maximizeWidthBinding)
+            // The resize rows' caption closes them, above the
+            // toggles (#3160).
+            Text(sizeFloatCaption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         default:
             family
         }
@@ -253,8 +256,8 @@ struct SizeFloatGroup: View {
     /// verb (owner ruling 2026-08-29) — quoting the rows' labels is
     /// the #818 drift — and scopes by the dimension, plus, since
     /// #1184, by the one per-window state that overrides the
-    /// layout: it renders after SEVEN rows, the four resize ones
-    /// plus three toggles.
+    /// layout: it renders under the resize and Maximize rows, above
+    /// the toggles (#3160).
     ///
     /// The exception clause distinguishes the window's state
     /// from the layout's name by CLAUSE, not by word: three
@@ -278,9 +281,8 @@ struct SizeFloatGroup: View {
     }
 }
 
-/// KiwiDesk's own chords, folded into Open applications under a
-/// subheading of the app's name since the General drawer retired
-/// (#1520, #330, #602).
+/// KiwiDesk's own chords, under a subheading of the app's name in
+/// the Show & hide card, after KiwiHub (#1520, #602, #3184).
 struct KiwiDeskKeyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -293,7 +295,7 @@ struct KiwiDeskKeyRows: View {
             followsGroup: true
         )
         ForEach(
-            ShortcutsRowOrder.openApplicationsKiwiDesk,
+            ShortcutsRowOrder.showHideKiwiDesk,
             id: \.id
         ) { key in
             anchored(key) {

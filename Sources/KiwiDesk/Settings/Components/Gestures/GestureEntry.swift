@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One Mouse & trackpad entry (#1726): a drawn picture, the
+/// One Mouse & Trackpad entry (#1726): a drawn picture, the
 /// sentence that carries the gesture, and the entry's own control
 /// where it has one. The picture moves while hovered, and once as
 /// it appears where `playsOnAppear` says so (owner ruling
@@ -173,7 +173,7 @@ enum GesturePace {
 }
 
 /// The ground every gesture picture sits on, the Home cards'
-/// plate in the paint `GesturesDrawer` resolves (#2859), sized
+/// plate in the paint `GesturesPart` resolves (#2859), sized
 /// once.
 struct GesturePlate<Content: View>: View {
     nonisolated static var size: CGSize {

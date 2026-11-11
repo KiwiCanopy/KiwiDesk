@@ -2,7 +2,7 @@ import AppKit
 
 /// A window covering an entire screen edge for edge — a slide
 /// show, a borderless-fullscreen game or player — is PRESENTING
-/// there (#1787): the float fit and the gather leave it where its
+/// there (#1787): the top-bar push and the gather leave it where its
 /// app put it, and the shelf stands down behind it. Judged on the
 /// frame and the window's subrole (#1788); the residues are the
 /// design entry's.
@@ -13,7 +13,7 @@ extension KiwiCore {
 
     /// Whether `frame` covers `screen` edge for edge, within the
     /// tolerance, both AX coordinates. A window LARGER than its
-    /// screen is not presenting — the #1091 fit still owes it.
+    /// screen is not presenting, and the top-bar push still owes it.
     nonisolated static func covers(
         _ frame: CGRect,
         _ screen: CGRect

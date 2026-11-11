@@ -8,7 +8,7 @@ extension KiwiCore {
     /// Seeds a centred capture for every stranded float on a
     /// shown space, ahead of the retile whose restore pass
     /// delivers it. A pure decision: the delivery, its echo
-    /// bookkeeping and the bar fit stay the restore's and the
+    /// bookkeeping and the top-bar push stay the restore's and the
     /// clamp's.
     func recoverStrandedFloats() {
         for space in state.workspaces.visibleSpaces {
@@ -37,8 +37,9 @@ extension KiwiCore {
 
     /// The one door for a float with no original — stranded at a
     /// corner, or replayed from a corner record (#2130): centred
-    /// at its size in the float region, as a pending capture the
-    /// restore delivers. False where the Space has no region.
+    /// at its own size in the float region, never resized (#3163),
+    /// as a pending capture the restore delivers. False where the
+    /// Space has no region.
     @discardableResult
     func seedWithoutOriginal(_ id: WindowID, in space: SpaceID) -> Bool {
         guard let window = state.windows[id],
@@ -46,7 +47,10 @@ extension KiwiCore {
         else { return false }
         tiler.seedStash(
             id,
-            frame: FloatRecovery.centred(window.frame.size, in: region)
+            frame: FloatRecovery.centredAtSize(
+                window.frame.size,
+                in: region
+            )
         )
         onLog("float \(id) has no original on space \(space); re-centring")
         return true
@@ -103,9 +107,25 @@ extension KiwiCore {
 
 /// The centring arithmetic, pure so a fixture can pin it.
 public enum FloatRecovery {
+    /// `size` centred in `region` and never resized (#3163): a net
+    /// placing a float the user sized. Larger than the region, its
+    /// top-left edge stays in the region, so its title bar is in
+    /// reach, and the rest runs past the far edge.
+    public static func centredAtSize(
+        _ size: CGSize,
+        in region: CGRect
+    ) -> CGRect {
+        CGRect(
+            x: max(region.minX, region.midX - size.width / 2),
+            y: max(region.minY, region.midY - size.height / 2),
+            width: size.width,
+            height: size.height
+        )
+    }
+
     /// `size` centred in `region`, shrunk to fit where it is
-    /// larger: a centred frame that overhangs the region is not
-    /// usable either, and the retile fit would shrink it anyway.
+    /// larger: a placement for a float verb the user started (a
+    /// Pocket take-out, a Maximize's return to another screen).
     public static func centred(
         _ size: CGSize,
         in region: CGRect

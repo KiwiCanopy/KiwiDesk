@@ -30,6 +30,12 @@ struct JumpFooter: View {
     var naming = false
     /// The Desktops side's layer, which picks its hints (#1229).
     var desktops: DesktopsFooterState?
+    /// Whether the Windows strip has more than one app to step
+    /// through (#3159).
+    var stripSteps = false
+    /// The last-app opener's live chord; nil where it is unbound,
+    /// which leaves its hint out (#3159).
+    var lastAppChord: String?
 
     var body: some View {
         if let refusal = desktops?.refusal {
@@ -199,8 +205,7 @@ extension JumpFooter {
                     ? L("jump.footer.swap_here", "%1$@ Swap here", "⌥↩")
                     : L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
                 digitsHint,
-                other,
-            ]
+            ] + windowsNavigation(other)
         case .shortcuts:
             // Edit in Settings… stands beside the hints with its
             // own chord.
@@ -227,6 +232,25 @@ extension JumpFooter {
                 ? [apply, quick, ViewPickText.lineHint("↑↓"), other]
                 : [apply, ViewPickText.lineHint("↑↓"), other]
         }
+    }
+}
+
+extension JumpFooter {
+    /// The Windows side's navigation hints, which never light
+    /// (#2246): ← → along the strip, the side switch, then the
+    /// last-app opener last, so it sheds first (#3159).
+    func windowsNavigation(_ other: String) -> [String] {
+        var hints: [String] = []
+        if stripSteps {
+            hints.append(L("jump.footer.apps", "%1$@ Apps", "← →"))
+        }
+        hints.append(other)
+        if let lastAppChord {
+            hints.append(
+                L("jump.footer.next_app", "%1$@ Next app", lastAppChord)
+            )
+        }
+        return hints
     }
 }
 

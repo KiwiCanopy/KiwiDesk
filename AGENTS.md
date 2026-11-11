@@ -219,6 +219,8 @@ Shared automation lives in `/scripts/`, never in dot-folders.
   machine-wide gate slot, at low priority; `scripts/gate-hook` is
   the `PreToolUse` hook that applies it to every agent's
   `swift build` / `swift test`. A human types the prefix.
+  On low disk it first runs `scripts/prune-builds`, which clears
+  idle worktrees' `.build` (a dry run by hand; `--apply` deletes).
 - `./scripts/build-app.sh` packages, signs and optionally
   notarizes the `.app` (#89).
 - `./scripts/release.sh <version>` runs **twice**: first it stamps

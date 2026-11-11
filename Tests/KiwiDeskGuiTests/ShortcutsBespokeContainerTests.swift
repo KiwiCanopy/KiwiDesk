@@ -86,10 +86,10 @@ struct ShortcutsBespokeContainerTests {
                 "openApplicationsAtRest", .openApplications,
                 ShortcutsRowOrder.openApplicationsAtRest
             ),
-            // The KiwiDesk rows under Open applications (#1520).
+            // Show & hide ▸ KiwiDesk (#1520, #3184).
             (
-                "openApplicationsKiwiDesk", .openApplications,
-                ShortcutsRowOrder.openApplicationsKiwiDesk
+                "showHideKiwiDesk", .showHide,
+                ShortcutsRowOrder.showHideKiwiDesk
             ),
             (
                 "layersMore", .layers,

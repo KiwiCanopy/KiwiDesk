@@ -26,20 +26,17 @@ struct GesturesScrollWiringTests {
         )
     }
 
-    @Test("the scroll group is the drawer's first")
+    /// The scroll gestures open the Holding a modifier card, ahead
+    /// of the modifier drags (#3184).
+    @Test("the scroll entries lead the Holding a modifier card")
     func scrollGroupLeads() throws {
-        let drawer = try Self.source("GesturesDrawer.swift")
-        let scroll = try #require(
-            drawer.range(of: "GesturesScrollEntries(model:")
+        let part = Self.squash(try Self.source("GesturesPart.swift"))
+        #expect(
+            part.contains(
+                "SettingsSection(SettingsCatalog.shortcuts.gesturesModifier)"
+                    + "{GesturesScrollEntries(model:model,"
+            )
         )
-        let windows = try #require(
-            drawer.range(of: "\"shortcuts.gestures.group.windows\"")
-        )
-        let heading = try #require(
-            drawer.range(of: "\"shortcuts.gestures.group.scroll\"")
-        )
-        #expect(heading.lowerBound < scroll.lowerBound)
-        #expect(scroll.lowerBound < windows.lowerBound)
     }
 
     @Test("a recorded chord is judged by Core's refusal before it lands")
@@ -225,28 +222,18 @@ struct GesturesScrollWiringTests {
         #expect(caption.contains("linkTitle:Self.goTo(holder)"))
     }
 
-    /// A group's end is a rule, not a missing one: every heading
-    /// after the first sits under a `GestureRule` and stands off
-    /// it; the first, under the card's own hairline, takes none.
-    @Test("groups close with a rule, and later headings stand off it")
-    func groupsClose() throws {
-        let drawer = Self.squash(try Self.source("GesturesDrawer.swift"))
-        let headings =
-            drawer.components(separatedBy: "SettingsGroupHeading(")
-            .count - 1
-        #expect(headings >= 2)
+    /// Each group is a card of its own (#3184): entries inside a
+    /// card are split by a `GestureRule`, a card's edge needs none,
+    /// and no in-card heading is left from the one-card shape.
+    @Test("each group is its own card, its entries ruled apart")
+    func groupsAreCards() throws {
+        let part = Self.squash(try Self.source("GesturesPart.swift"))
+        #expect(!part.contains("SettingsGroupHeading("))
+        #expect(!part.contains("GestureRule()}SettingsSection("))
         #expect(
-            drawer.components(
-                separatedBy: "GestureRule()SettingsGroupHeading("
-            ).count - 1 == headings - 1
+            part.components(separatedBy: "SettingsSection(").count - 1
+                == GestureItem.Group.allCases.count
         )
-        #expect(
-            drawer.components(separatedBy: "followsGroup:true").count - 1
-                == headings - 1
-        )
-        let first = try #require(drawer.range(of: "SettingsGroupHeading("))
-        #expect(
-            !drawer[..<first.lowerBound].hasSuffix("GestureRule()")
-        )
+        #expect(part.contains("focusEntriesGestureRule()windowEntries"))
     }
 }

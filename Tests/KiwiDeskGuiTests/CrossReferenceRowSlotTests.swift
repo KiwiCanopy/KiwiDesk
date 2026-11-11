@@ -116,7 +116,7 @@ struct CrossReferenceRowSlotTests {
         "WindowMarksColorCard.swift:ColorsAndGlassHelp.unfocusedReference",
         "WindowMarksColorCard.swift:ColorsAndGlassHelp.dimmedReference",
         // Siblings assert these; ShelfBorderColorGateTests the border.
-        "GesturesShelfEntries.swift:prose",  // GesturesDrawerTests
+        "GesturesShelfEntries.swift:prose",  // GesturesPartTests
         "MacHabitRow.swift:prose",  // MacChecklistCrossReferenceTests
         "AppRulesSection+Lists.swift:Self.noSpacesProse",  // AppRulePinTests
         "BarColorCards.swift:ColorsAndGlassHelp.shelfBorderReference",
@@ -128,6 +128,7 @@ struct CrossReferenceRowSlotTests {
         "AILookPointer.swift:Self.prose",
         "KiwiShelfKeyRows.swift:Self.caption(key)",  // #761
         "TilingOffRows.swift:link.prose",  // TilingOffRowsTests
+        "KiwiVisionMaximizeSummary.swift:prose",  // #3161
         // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
         "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests

@@ -69,7 +69,7 @@ struct ShortcutsJumpPairingTests {
             ),
             (
                 "KiwiDeskKeyRows(",
-                ShortcutsRowOrder.openApplicationsKiwiDesk
+                ShortcutsRowOrder.showHideKiwiDesk
             ),
             (
                 "SettingsCatalog.shortcuts.gestures.children",
@@ -133,7 +133,7 @@ struct ShortcutsJumpPairingTests {
         #expect(kiwiDeskRows.count == 1)
         #expect(
             kiwiDeskRows.allSatisfy {
-                $0.contains("ShortcutsRowOrder.openApplicationsKiwiDesk")
+                $0.contains("ShortcutsRowOrder.showHideKiwiDesk")
             }
         )
         // Show & hide's rows views walk their lists:

@@ -70,14 +70,14 @@ struct ShortcutsSheetTests {
         #expect(ShortcutsSheet.matchRange(of: "", in: "Safari") == nil)
     }
 
-    @Test("the column reads Controls, Apps, Custom, Inactive, Unavailable")
+    @Test("the column reads Controls, Apps, Personal, Inactive, Unavailable")
     func sectionOrder() {
         LocalizationManager.shared.select("en")
         let view = ShortcutsSheetView(reference: Self.reference, needle: "")
         let titles = view.sections(Self.reference).map(\.title)
         #expect(
             titles == [
-                "Focus", "Move windows", "Apps", "Custom",
+                "Focus", "Move windows", "Apps", "Personal",
                 "Inactive shortcuts", "Unavailable shortcuts",
             ]
         )

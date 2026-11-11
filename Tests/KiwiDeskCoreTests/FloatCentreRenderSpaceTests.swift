@@ -99,8 +99,7 @@ struct FloatCentreRenderSpaceTests {
     }
 
     /// An axis filling the region reaches the clamp, whose push is
-    /// the render Space's strip, not the home's empty list. The bars'
-    /// retile fit has already sized it to that region by the press.
+    /// the render Space's strip, not the home's empty list.
     @Test(
         "a traveler's clamp reads the Space it renders on",
         .enabled(if: NSScreen.main != nil)

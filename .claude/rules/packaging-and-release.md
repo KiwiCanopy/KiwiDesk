@@ -10,6 +10,8 @@ paths:
   - "scripts/update-homebrew-cask.py"
   - "scripts/update-nix-source.py"
   - "scripts/pre-commit"
+  - "scripts/gate-lock"
+  - "scripts/prune-builds"
   - "Package.swift"
   - ".github/workflows/**"
   - "plugins/**"
@@ -712,6 +714,30 @@ after deleting `.build` — it matches neither candidate and calls
 to defaults. Verifying that the files are *present* in the bundle
 proves nothing about this; only launching a copy with `.build`
 moved aside does.
+
+## Pruning build output (#3186)
+
+**A script that deletes build output calls `scripts/prune-builds`;
+it never re-derives the predicate.** The script's header lists the
+clauses that make a deletion safe — the gate held for the whole
+sweep, no process using the tree, never the caller's tree, idle
+build markers — and is their one home. A copy that dropped one
+would delete a `.build` under a running compile or a launched
+binary. It deletes only regenerable folders, never a worktree or a
+branch.
+
+**The idle clause takes the newest mtime over all of `.build`'s
+children**, never named build files alone: a marker the toolchain
+stops writing turns into "never built" on every lane (#3186).
+
+**`scripts/gate-lock` prunes from inside its lock, before the
+`exec`, on low disk, and a prune can neither fail nor hang the
+gate** — `|| true`, and a timeout that stops the whole sweep's
+process group before the gated command runs. The nested
+`KIWIDESK_GATE_LOCK_HELD` path skips it. Both scripts find the
+lock through `gate-lock --lock-path`, the lock file's one name.
+`ExecTestsPruneBuilds` holds each clause and the trigger on
+fixture worktrees with a lock of their own.
 
 ## Git hooks
 

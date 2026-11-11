@@ -8,10 +8,11 @@ import Testing
 /// A maximized float returns to its old frame where the Space Bar
 /// shows (#3157). The return is paid at the retile's tail and the
 /// bar sweep runs after it: judging the state frame, still the
-/// fill's echo, it fitted the fill into the float region and
-/// overwrote the return. The writes are instant, so the frame last
-/// sent is the applier's instant target; the app's echo is folded
-/// by hand between the presses, as it lands after a pass.
+/// fill's echo under the top strip, its correction overwrote the
+/// return (then a fit, since #3163 a push). The writes are
+/// instant, so the frame last sent is the applier's instant
+/// target; the app's echo is folded by hand between the presses,
+/// as it lands after a pass.
 @Suite("Maximized float returns under a shown bar", .serialized)
 @MainActor
 struct MaximizeFloatBarReturnTests {

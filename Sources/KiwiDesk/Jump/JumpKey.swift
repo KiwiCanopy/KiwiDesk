@@ -36,7 +36,7 @@ enum JumpKey: Equatable {
     /// ⌘S in Layouts: Keep in Profile.
     case keep
     /// ⌘, in Layouts or Shortcuts: that side's Settings page —
-    /// Layout Defaults, or Shortcuts & Gestures.
+    /// Layout Defaults, or Shortcuts.
     case settings
     /// Tab with ⌃, or with ⌥ off the Windows side, stays in the
     /// field.
@@ -96,8 +96,7 @@ enum JumpKey: Equatable {
         // The last-app opener's own key with ⇧ steps the strip
         // back, as ⇧⌘⇥ does macOS's switcher; ahead of every key
         // a Lua alternative or ⇥ could shadow it with (#3135).
-        if scope == .windows, let back,
-            combo(keyCode, held) == back
+        if isBack(keyCode: keyCode, modifiers: held, scope: scope, back: back)
         {
             return .side(-1)
         }
@@ -226,6 +225,33 @@ enum JumpKey: Equatable {
             keyCode: chord.keyCode,
             modifiers: chord.modifiers.union(.shift)
         )
+    }
+
+    /// Whether the press is the Windows side's back key, the one
+    /// match `of` and the panel's opener latch share (#3135, #3168).
+    static func isBack(
+        keyCode: UInt16,
+        modifiers: NSEvent.ModifierFlags,
+        scope: JumpScope,
+        back: KeyCombo?
+    ) -> Bool {
+        guard scope == .windows, let back else { return false }
+        let held = modifiers.intersection(
+            [.shift, .command, .option, .control]
+        )
+        return combo(keyCode, held) == back
+    }
+
+    /// Whether the key is a ↩ chord or a ⌘ digit — a pick, the
+    /// Desktops side's pick-up and follow, or a dead ↩ chord — so it
+    /// reads only the modifiers pressed since the opener (#3168).
+    var picks: Bool {
+        switch self {
+        case .pick, .swapHere, .quick, .quickSwap, .dead, .pickUp,
+            .follow:
+            true
+        default: false
+        }
     }
 
     /// The press as `KiwiHubKeys` spells it.

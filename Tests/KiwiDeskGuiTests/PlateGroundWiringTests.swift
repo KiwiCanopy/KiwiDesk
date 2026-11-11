@@ -27,7 +27,7 @@ struct PlateGroundWiringTests {
             + "cornerRadius:SettingsTheme.panelPlateRadius))",
         "KeyboardPreviewPanel.swift": ".platePaint(model.config.settings)",
         "KeyboardBoard.swift": ".fill((palette??.unresolved).base)",
-        "GesturesDrawer.swift": ".platePaint(settings)",
+        "GesturesPart.swift": ".platePaint(settings)",
         "GestureEntry.swift": ".background((palette??.unresolved).base)",
         "KiwiVisionPanelPreview.swift":
             ".platePaint(model.config.settings)",

@@ -42,6 +42,16 @@ struct SettingsNavigation {
         shortcutsLayer ?? KeyLayer.defaultName
     }
 
+    /// The Shortcuts page's part (#3184), kept for the window's
+    /// session; nil before the first visit. Read it through
+    /// `shortcutsSegmentSelection`.
+    var shortcutsSegment: ShortcutsSegment?
+
+    /// The part shown, coalesced once: Built-in on a first visit.
+    var shortcutsSegmentSelection: ShortcutsSegment {
+        shortcutsSegment ?? .builtIn
+    }
+
     /// The lens chip selected on KiwiVision, nil for Default —
     /// on the model for the same reason as
     /// `shortcutsLayer`: the side panel follows it (#2103 ruling
@@ -102,6 +112,7 @@ struct SettingsNavigation {
     mutating func resetSurfaces() {
         layoutModeTab = nil
         shortcutsLayer = nil
+        shortcutsSegment = nil
         kiwiVisionLens = nil
         kiwiVisionAddRequested = false
         spaceOverridesFocus = nil

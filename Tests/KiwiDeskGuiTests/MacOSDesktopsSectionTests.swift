@@ -90,7 +90,7 @@ struct MacOSDesktopsSectionTests {
     @Test("the section is mounted once, after Move windows")
     func sectionIsMountedAfterMoveWindows() throws {
         let section = try squashed(
-            "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
+            "Sources/KiwiDesk/Settings/Sections/ShortcutsSection+Groups.swift"
         )
         #expect(section.occurrences(of: "MacOSDesktopsGroup(") == 1)
         #expect(
@@ -100,7 +100,7 @@ struct MacOSDesktopsSectionTests {
             )
         )
         // The page draws its parts in `ShortcutsPagePart` order.
-        let parts = ShortcutsPagePart.allCases
+        let parts = ShortcutsPagePart.parts(in: .builtIn)
         #expect(
             parts.firstIndex(of: .macosDesktops)
                 == parts.firstIndex(of: .moveWindows).map { $0 + 1 }

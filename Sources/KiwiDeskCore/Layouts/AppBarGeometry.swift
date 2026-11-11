@@ -74,41 +74,21 @@ public enum AppBarGeometry {
     /// Tolerance for bar frame clamping (2 pt, #148).
     public static let clampTolerance: CGFloat = 2
 
-    /// Nudges `frame` clear of a painted bar strip (#242, QA
-    /// 2026-07-19); position only, size unchanged. `inset` widens
-    /// the strip by the focus ring's width so the RING clears the
-    /// bar too (#1091) — applied whether or not the window is
-    /// FOCUSED, which is the point: a focus-dependent inset would
-    /// move the window on every ring change.
-    public static func clampClear(
+    /// `frame` pushed down clear of a painted TOP strip (#242),
+    /// position only, size unchanged — the one bar correction a
+    /// float takes (#3163). `inset` widens the strip by the focus
+    /// ring's reach so the RING clears the bar too (#1091), applied
+    /// whether or not the window is FOCUSED: a focus-dependent
+    /// inset would move the window on every ring change.
+    public static func pushedBelow(
         _ frame: CGRect,
-        of strip: CGRect,
-        edge: AppBarEdge,
+        strip: CGRect,
         inset: CGFloat = 0
     ) -> CGRect {
+        let clear = strip.maxY + inset
+        guard frame.minY < clear - clampTolerance else { return frame }
         var result = frame
-        switch edge {
-        case .top:
-            let clear = strip.maxY + inset
-            guard frame.minY < clear - clampTolerance
-            else { return frame }
-            result.origin.y = clear
-        case .bottom:
-            let clear = strip.minY - inset
-            guard frame.maxY > clear + clampTolerance
-            else { return frame }
-            result.origin.y = clear - frame.height
-        case .left:
-            let clear = strip.maxX + inset
-            guard frame.minX < clear - clampTolerance
-            else { return frame }
-            result.origin.x = clear
-        case .right:
-            let clear = strip.minX - inset
-            guard frame.maxX > clear + clampTolerance
-            else { return frame }
-            result.origin.x = clear - frame.width
-        }
+        result.origin.y = clear
         return result
     }
 
