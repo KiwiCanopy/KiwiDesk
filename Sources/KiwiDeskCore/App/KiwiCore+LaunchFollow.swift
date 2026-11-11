@@ -140,6 +140,7 @@ extension KiwiCore {
     ) -> SpaceID? {
         // A lens's quiet open is owed first (#3122).
         if claimQuietOpen(arrived: window) { return nil }
+        noteLaunchRider(arrived: window, effects: effects, now: now)
         guard !eventLoop.switchReads.applying,
             let space = effects.placedByAppRule,
             let bundleID = window.appBundleID,
@@ -242,9 +243,13 @@ extension KiwiCore {
         _ window: WindowID,
         into space: SpaceID
     ) -> Bool {
+        let riders = launchFollow.takeRiders(
+            of: state.windows[window]?.appBundleID
+        )
         guard state.workspaces.space(of: window) == space else {
             return false
         }
+        fileLaunchRiders(riders, into: space)
         onLog(
             "launch follow: w\(window.raw) opened into its app "
                 + "rule's space \(space.raw)"

@@ -166,6 +166,9 @@ final class LaunchFollowIntent {
 
     private var pending: (bundleID: String, at: Date)?
 
+    /// The debt's popups (#3189), retired wherever it is.
+    var riders = LaunchRiders()
+
     /// A rule-placed window that arrived with NO debt standing — a
     /// reopen or an un-minimize can show the window before macOS
     /// reports its app active (device, #1599). One slot: the
@@ -203,6 +206,7 @@ final class LaunchFollowIntent {
             quietOpen = nil
         }
         pending = (bundleID, now)
+        riders.clear()
     }
 
     /// Claims the follow for a window of `bundleID`; true once,
@@ -221,6 +225,7 @@ final class LaunchFollowIntent {
         guard now.timeIntervalSince(pending.at) < Self.drainWindow
         else {
             self.pending = nil
+            riders.clear()
             return nil
         }
         return pending.bundleID
@@ -315,7 +320,9 @@ final class LaunchFollowIntent {
     /// refused New Window opened nothing, and a placement waits on
     /// its own app's activation (#1518).
     func forget(pending bundleID: String) {
-        if pending?.bundleID == bundleID { pending = nil }
+        guard pending?.bundleID == bundleID else { return }
+        pending = nil
+        riders.clear()
     }
 
     /// Retires the debt unpaid, and any spawn or placement waiting
@@ -324,6 +331,7 @@ final class LaunchFollowIntent {
     /// own apps' activations and the front app's.
     func forget(keeping bundleID: String? = nil) {
         pending = nil
+        riders.clear()
         if let open = quietOpen, !open.survives(bundleID) {
             quietOpen = nil
         }

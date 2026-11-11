@@ -80,6 +80,20 @@ struct LaunchFollowSeamTests {
             "effects.placedByAppRule =",
             "StateCoordinator+WindowCreated.swift", 1
         ),
+        // A launch's popups ride the follow (#3189): the fold's
+        // input, the note at the claim's door while the debt
+        // stands, and the filing ahead of the switch.
+        (
+            "effects.popupSkippedRule =",
+            "StateCoordinator+WindowCreated.swift", 1
+        ),
+        (
+            "noteLaunchRider(arrived: window, effects: effects, now: now)",
+            followFile, 1
+        ),
+        ("launchFollow.noteRider(", "KiwiCore+LaunchRiders.swift", 1),
+        ("launchFollow.takeRiders(", followFile, 1),
+        ("fileLaunchRiders(riders, into: space)", followFile, 1),
         // The unowed arm (#2478): the process age armed with the
         // other machine seams, the create ledger fed and opened
         // by the WindowServer route and closed by `stop()`, the
