@@ -6,9 +6,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// ⌃⌥ + scroll beyond the Scrolling row (#1656, owner ruling
-/// 2026-09-29): a held chord always does something — every other
-/// layout steps through its windows in array order, wrapping — and
-/// no step moves the pointer, Monocle's flip door included.
+/// 2026-09-29): a held chord always does something — a wheel walks
+/// every other layout's windows in array order, wrapping (#3200;
+/// a swipe is `ScrollPanSwipeTests`') — and no step moves the
+/// pointer, Monocle's flip door included.
 @Suite("Scroll pan on other layouts", .serialized)
 @MainActor
 struct ScrollPanLayoutTests {
@@ -45,14 +46,15 @@ struct ScrollPanLayoutTests {
     private func swipe(
         _ core: KiwiCore,
         _ session: ScrollPanSession,
-        dx: Double
+        dx: Double,
+        input: ScrollGestureEvent.Input = .trackpad
     ) {
         for kind in [ScrollGestureEvent.Kind.began, .changed, .ended] {
             core.handleScrollPan(
                 ScrollGestureEvent(
                     chord: [.control, .option],
                     kind: kind,
-                    input: .trackpad,
+                    input: input,
                     delta: CGVector(dx: kind == .changed ? dx : 0, dy: 0),
                     momentum: false,
                     location: .zero,
@@ -64,17 +66,17 @@ struct ScrollPanLayoutTests {
     }
 
     @Test(
-        "every other layout steps in array order, wrapping",
+        "a wheel steps every other layout in array order, wrapping",
         arguments: ["bsp", "stack", "grid"]
     )
     func otherLayoutsStep(mode: String) {
         let (core, session) = makeCore(mode, focus: WindowID(2))
-        swipe(core, session, dx: -80)
+        swipe(core, session, dx: -80, input: .wheel)
         #expect(core.activeSpace?.focused == WindowID(3))
-        swipe(core, session, dx: -80)
-        swipe(core, session, dx: -80)
+        swipe(core, session, dx: -80, input: .wheel)
+        swipe(core, session, dx: -80, input: .wheel)
         #expect(core.activeSpace?.focused == WindowID(1))
-        swipe(core, session, dx: 80)
+        swipe(core, session, dx: 80, input: .wheel)
         #expect(core.activeSpace?.focused == WindowID(4))
     }
 
@@ -86,7 +88,7 @@ struct ScrollPanLayoutTests {
         core.state.apply(
             .windowFullscreenChanged(WindowID(3), isFullscreen: true)
         )
-        swipe(core, session, dx: -80)
+        swipe(core, session, dx: -80, input: .wheel)
         #expect(core.activeSpace?.focused == WindowID(4))
     }
 
@@ -100,7 +102,13 @@ struct ScrollPanLayoutTests {
         var warps = 0
         core.pointerWarp = { _ in warps += 1 }
         #expect(core.mouseWarpEligible(WindowID(4)))
-        swipe(core, session, dx: -80)
+        // A swipe on BSP goes by direction; a wheel walks to 4.
+        swipe(
+            core,
+            session,
+            dx: -80,
+            input: mode == "bsp" ? .wheel : .trackpad
+        )
         #expect(core.activeSpace?.focused == WindowID(4))
         #expect(warps == 0)
     }

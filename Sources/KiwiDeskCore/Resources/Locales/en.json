@@ -2177,7 +2177,7 @@
   "shortcuts.gestures.scroll.refused_pan": "These keys already move focus window by window. %1$@",
   "shortcuts.gestures.scroll.refused_single": "Hold two or more keys. With one key, scrolling is already taken: ⌃ zooms the screen in macOS, and ⇧, ⌥ or ⌘ do something in many apps.",
   "shortcuts.gestures.scroll.refused_step": "These keys already step between Spaces. %1$@",
-  "shortcuts.gestures.scroll.sentence": "Hold these keys and scroll to move focus window by window along a %1$@ row. On any other Space, focus moves through its windows in order instead.",
+  "shortcuts.gestures.scroll.sentence": "Hold these keys and scroll to move focus window by window along a %1$@ row. On any other Space, a swipe moves focus the way you scroll, and a mouse wheel moves it through the windows in order.",
   "shortcuts.gestures.scroll.space_step": "Step between Spaces",
   "shortcuts.gestures.scroll.space_step_sentence": "Hold these keys and scroll to switch to the next or previous Space on the screen under the pointer, one per swipe or wheel notch.",
   "shortcuts.gestures.scroll.step_distance": "Travel per window",

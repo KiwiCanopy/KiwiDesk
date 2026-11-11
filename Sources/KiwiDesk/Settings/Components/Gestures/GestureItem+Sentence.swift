@@ -9,9 +9,10 @@ extension GestureItem {
             return L(
                 "shortcuts.gestures.scroll.sentence",
                 "Hold these keys and scroll to move focus window by "
-                    + "window along a %1$@ row. On any other Space, "
-                    + "focus moves through its windows in order "
-                    + "instead.",
+                    + "window along a %1$@ row. On any other Space, a "
+                    + "swipe moves focus the way you scroll, and a "
+                    + "mouse wheel moves it through the windows in "
+                    + "order.",
                 L("layout.scrolling.name", "Scrolling")
             )
         case .spaceStep:

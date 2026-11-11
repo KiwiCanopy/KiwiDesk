@@ -2171,7 +2171,7 @@
   "shortcuts.gestures.scroll.refused_pan": "Estas teclas ya mueven el foco de ventana en ventana. %1$@",
   "shortcuts.gestures.scroll.refused_single": "Mantén pulsadas dos o más teclas. Con una sola tecla, el desplazamiento ya está ocupado: en macOS, ⌃ amplía la pantalla con «Zoom», y ⇧, ⌥ o ⌘ hacen algo en muchas aplicaciones.",
   "shortcuts.gestures.scroll.refused_step": "Estas teclas ya sirven para pasar de un Espacio a otro. %1$@",
-  "shortcuts.gestures.scroll.sentence": "Mantén pulsadas estas teclas y desplázate para mover el foco de ventana en ventana a lo largo de una fila de %1$@. En cualquier otro Espacio, en cambio, el foco recorre sus ventanas en orden.",
+  "shortcuts.gestures.scroll.sentence": "Mantén pulsadas estas teclas y desplázate para mover el foco de ventana en ventana a lo largo de una fila de %1$@. En cualquier otro Espacio, un deslizamiento mueve el foco en la dirección en que te desplazas, y la rueda del ratón lo lleva por las ventanas en orden.",
   "shortcuts.gestures.scroll.space_step": "Pasar de un Espacio a otro",
   "shortcuts.gestures.scroll.space_step_sentence": "Mantén pulsadas estas teclas y desplázate para cambiar al Espacio siguiente o anterior de la pantalla que está bajo el puntero, uno por cada deslizamiento o paso de la rueda.",
   "shortcuts.gestures.scroll.step_distance": "Recorrido por ventana",

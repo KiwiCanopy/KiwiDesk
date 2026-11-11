@@ -2171,7 +2171,7 @@
   "shortcuts.gestures.scroll.refused_pan": "这些按键已用于逐个窗口移动焦点。%1$@",
   "shortcuts.gestures.scroll.refused_single": "请按住两个或更多按键。单个按键的滚动已被占用：在 macOS 中，⌃ 通过“缩放”放大屏幕，而 ⇧、⌥ 或 ⌘ 在许多 App 中都有用途。",
   "shortcuts.gestures.scroll.refused_step": "这些按键已用于在空间之间切换。%1$@",
-  "shortcuts.gestures.scroll.sentence": "按住这些按键并滚动，可沿%1$@空间中的那一行窗口逐个移动焦点。在其他任何空间中，焦点则会按顺序在该空间的窗口间移动。",
+  "shortcuts.gestures.scroll.sentence": "按住这些按键并滚动，可沿%1$@空间中的那一行窗口逐个移动焦点。在其他任何空间中，轻扫会按滚动方向移动焦点，鼠标滚轮则会按顺序在窗口间移动焦点。",
   "shortcuts.gestures.scroll.space_step": "在空间之间切换",
   "shortcuts.gestures.scroll.space_step_sentence": "按住这些按键并滚动，可在指针所在的屏幕上切换到下一个或上一个空间，每轻扫一次或滚轮每转一格切换一个。",
   "shortcuts.gestures.scroll.step_distance": "每个窗口的滚动距离",

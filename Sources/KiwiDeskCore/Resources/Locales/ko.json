@@ -2171,7 +2171,7 @@
   "shortcuts.gestures.scroll.refused_pan": "이 키는 이미 포커스를 윈도우 단위로 이동합니다. %1$@",
   "shortcuts.gestures.scroll.refused_single": "두 개 이상의 키를 누르십시오. 키 하나로 하는 스크롤은 이미 사용 중입니다. ⌃는 macOS의 ‘확대/축소’로 화면을 확대하고, ⇧, ⌥ 또는 ⌘는 많은 앱에서 다른 동작을 합니다.",
   "shortcuts.gestures.scroll.refused_step": "이 키는 이미 공간 사이 이동에 사용됩니다. %1$@",
-  "shortcuts.gestures.scroll.sentence": "이 키를 누른 채로 스크롤하면 %1$@ 공간의 행을 따라 포커스가 윈도우 단위로 이동합니다. 다른 공간에서는 대신 포커스가 그 공간의 윈도우를 차례로 이동합니다.",
+  "shortcuts.gestures.scroll.sentence": "이 키를 누른 채로 스크롤하면 %1$@ 공간의 행을 따라 포커스가 윈도우 단위로 이동합니다. 다른 공간에서는 쓸어넘기면 스크롤하는 방향으로 포커스가 이동하고, 마우스 휠로는 포커스가 윈도우를 차례로 이동합니다.",
   "shortcuts.gestures.scroll.space_step": "공간 사이 이동",
   "shortcuts.gestures.scroll.space_step_sentence": "이 키를 누른 채로 스크롤하면 포인터 아래 화면에서 다음 또는 이전 공간으로 전환됩니다. 한 번 쓸어넘기거나 휠을 한 칸 돌릴 때마다 하나씩 전환됩니다.",
   "shortcuts.gestures.scroll.step_distance": "윈도우당 이동 거리",

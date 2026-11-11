@@ -54,4 +54,23 @@ struct ScrollStepLatchTests {
         _ = latch.feed(event(.began))
         #expect(latch.feed(event(.changed, dx: -30, dy: 20)) == -1)
     }
+
+    /// The axis it fired on (#3200), kept until the gesture ends.
+    @Test("it names the axis it fired on until the gesture ends")
+    func firedAxis() {
+        for end in [ScrollGestureEvent.Kind.ended, .began] {
+            var latch = ScrollStepLatch()
+            _ = latch.feed(event(.began))
+            #expect(latch.firedHorizontal == nil)
+            _ = latch.feed(event(.changed, dx: 30, dy: 10))
+            #expect(latch.firedHorizontal == true)
+            _ = latch.feed(event(.changed, dy: 200))
+            #expect(latch.firedHorizontal == true)
+            _ = latch.feed(event(end))
+            #expect(latch.firedHorizontal == nil)
+            _ = latch.feed(event(.began))
+            _ = latch.feed(event(.changed, dx: 10, dy: -30))
+            #expect(latch.firedHorizontal == false)
+        }
+    }
 }

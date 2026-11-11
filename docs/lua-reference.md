@@ -5106,10 +5106,22 @@ does not move, even with `mouse.follows_focus` on.
   focus animation and border, wrapping at the ends as the focus
   keys do.
 - **Monocle:** it steps through the windows, wrapping the same
-  way.
-- **Any other layout:** it steps to the next or previous window
-  in the Space's window order, floating windows included,
-  wrapping at the ends.
+  way: right or down to the next, left or up to the previous.
+
+:::unreleased
+On BSP, Stack, Grid, Track and Floating, a swipe — a scroll with
+a finger phase, on a trackpad or a Magic Mouse — moves focus the
+way the fingers go, through the same step as [`focus`](#focus):
+fingers left focus the window on the left. A wheel notch — a
+notched, tilt or thumb wheel — steps to the next or previous
+window in the Space's window order, floating windows included,
+wrapping at the ends. On every layout a swipe's first step fixes
+its axis until the fingers lift, so a diagonal swipe, and its
+long-swipe steps, move along one axis only. With
+[Natural scrolling](#scroll_gestureset_natural_scrolling) off for
+that input, every direction reverses, the Scrolling row's
+included.
+:::
 
 The gesture never leaves its screen: under
 [`set_focus_wrap("all_screens")`](#set_focus_wrap) it wraps there
