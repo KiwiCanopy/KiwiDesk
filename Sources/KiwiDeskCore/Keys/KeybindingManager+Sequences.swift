@@ -35,6 +35,23 @@ extension KeybindingManager {
         Set(sequences(for: layer).map(\.leader))
     }
 
+    /// New scroll keys reach a running tap alone, so an open
+    /// sequence stays open; the next arming carries them too.
+    func scrollKeysChanged(from old: KiwiHubKeys) {
+        guard sequenceScrollKeys != old else { return }
+        keyboardTap?.setSequenceScrollKeys(sequenceScrollKeys)
+    }
+
+    /// The shortcuts macOS answers and their live chords, read once
+    /// per arming (#3173): the router's pass chords and the step-key
+    /// warning share the snapshot.
+    func systemChords() -> [(combo: KeyCombo, shortcut: SystemShortcut)] {
+        if let answeredChords { return answeredChords }
+        let read = SystemShortcuts.answered(reading: readSymbolicHotkey)
+        answeredChords = read
+        return read
+    }
+
     func releaseSequences(_ held: [String: [KeySequence]]) {
         guard let lua else { return }
         for sequence in held.values.joined() {
@@ -83,8 +100,12 @@ extension KeybindingManager {
         case .stepped, .back:
             sequenceOpen = true
             onSequenceProgress(decision.progress)
-        case .closed:
+        case .closed, .passed(closing: true):
             noteSequenceClosed()
+        case .passed(closing: false):
+            return
+        case .scroll(let scroll):
+            onSequenceScroll(scroll)
         case .fired(let ref):
             noteSequenceClosed()
             sequenceFire(ref: ref)

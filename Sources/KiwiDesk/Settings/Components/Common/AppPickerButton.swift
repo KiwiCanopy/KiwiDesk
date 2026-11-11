@@ -24,6 +24,11 @@ struct AppPickerButton: View {
     /// Where given, the apps on screen lead the list as their own
     /// section, read when the popover opens (#2103 ruling 27).
     var onScreen: (() -> [OnScreenApp])?
+    /// Opens the list on arrival: a key sequence's "App…" swaps
+    /// this trigger in for its action picker (#3162).
+    var opensOnAppear = false
+    /// Every close of the list, a pick or a dismissal.
+    var onClose: (() -> Void)?
 
     @State private var showing = false
     @State private var search = ""
@@ -56,6 +61,10 @@ struct AppPickerButton: View {
         .settingsPopUpTrigger()
         .controlSize(.large)
         .onAppear {
+            // After the action picker's own dismissal has landed.
+            if opensOnAppear {
+                DispatchQueue.main.async { showing = true }
+            }
             AppIconCache.shared.warm()
             Task.detached {
                 _ = KeybindingCatalog.diskAppIconPaths
@@ -75,7 +84,10 @@ struct AppPickerButton: View {
         // reset rides the popover's own dismissal edge, and the
         // on-screen apps are read at the opening one.
         .onChange(of: showing) { _, isShowing in
-            if !isShowing { search = "" }
+            if !isShowing {
+                search = ""
+                onClose?()
+            }
             if isShowing {
                 onScreenApps = onScreen?() ?? []
                 opened()

@@ -1368,7 +1368,7 @@ and clicks, and acts only on the taps.
 A [key sequence](#define_sequence) is read the same way whatever
 this says: while one is defined, KiwiDesk reads key presses and
 clicks, takes its leader and, while a sequence is open, every key
-press, and acts on nothing else.
+press but macOS's own shortcuts, and acts on nothing else.
 :::
 
 The GUI twin is **Tell left and right modifiers apart** in
@@ -7368,6 +7368,12 @@ Refused, naming the reason: a combo it cannot read; one without
 **V**, **X** or **Z**; and a combo already set for another key.
 
 :::unreleased
+The combos for `"up"`, `"down"`, `"page_up"` and `"page_down"`
+also scroll an open [key sequence](#define_sequence)'s panel, as
+the arrows and page keys do, unless a step key takes the combo.
+:::
+
+:::unreleased
 Four more keys name the Desktop overview's own presses:
 `"open_space"` (**⌘↓**), `"leave_space"` (**⌘↑**), `"pick_up"`
 (**⌘Return**) and `"follow"` (**⌃Return**); their combos act on
@@ -7931,7 +7937,8 @@ KiwiDesk.define_layer("resize", {
   chord.
 - A table of step keys. Each value is a function, a
   `{ fn = …, name = …, desc = …, group = …, symbol = … }` table, or
-  `{ name = "…", keys = { … } }`, a key that opens a further step.
+  `{ name = "…", keys = { … } }`, a key that opens a further step,
+  which may take a `symbol` for the panel (`folder` when absent).
   A step key is a combo; a modifier tap, a Hyper chord and a plain
   `escape` or `delete` are refused and logged.
 - Optionally, a table with `name`, the leader's name, `layer`, the
@@ -7944,10 +7951,20 @@ step's keys under the leader's name, the steps taken above them,
 end keys under their `name` or `desc` in their shortcut group.
 `escape` or the leader again cancels; `delete` goes back one step,
 and at step 1 cancels; a click or a Space or Desktop switch
-cancels. A key the step does not hold leaves the step open and
-plays the refusal sound while
+cancels. The panel opens where KiwiHub opens; past KiwiHub's
+height its end keys scroll, with **↑** **↓** **Page Up** **Page
+Down**, the scroll wheel, or a [`kiwihub.set_key`](#kiwihubset_key)
+combo for one of those keys. A key the step does not hold leaves
+the step open and plays the refusal sound while
 [`set_refusal_sound`](#set_refusal_sound) is on, off by default
 ([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
+macOS's own shortcuts still work while a sequence is open: a
+screenshot, Zoom, Invert colours, contrast and Dock hiding leave the
+panel up; Spotlight, Finder search, the app switcher, Force Quit,
+Mission Control, Desktop switching and the next input source close
+the sequence first. **⌘Q**, **⌘W**, **⌘M** and **⌘H** stay with the
+sequence. A step key wins its chord over any of these, and an arrow
+or page key recorded as a step key runs it rather than scrolling.
 
 A step key matches its chord exactly, modifiers included: with
 the leader's modifiers still held, `w` does not fire, and

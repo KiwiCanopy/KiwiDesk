@@ -138,6 +138,12 @@ enum ConflictText {
                     + "bound here.",
                 shortcut.localizedName
             )
+        case .takesFromMacOS(let shortcut):
+            return L(
+                "keybinding.conflict.tooltip.step_system",
+                "Takes %1$@ away from macOS while this sequence is open.",
+                shortcut.localizedName
+            )
         case .dormant(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system_off",

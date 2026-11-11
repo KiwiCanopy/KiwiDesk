@@ -75,6 +75,9 @@ func makeTestCore(
     // silently turn a KiwiCore test's animations into instant
     // snaps (same host-state-leak class as the hotkey registrar).
     core.tiler.animation.reduceMotion = { false }
+    // The host's symbolic hotkeys never shape a sequence's pass-
+    // through (#3173): shipped defaults; a suite of it states them.
+    core.keys.readSymbolicHotkey = { _ in nil }
     // The pocket's Show pinned Hidden, the old One-window default, so
     // no fixture inherits its resting strip; a suite of it states one
     // (#2978).

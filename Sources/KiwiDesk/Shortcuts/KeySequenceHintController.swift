@@ -4,9 +4,11 @@ import SwiftUI
 
 /// The key sequence hint panel's window (#1871 ▸ hint panel): a
 /// non-activating plate on the screen under the pointer, shown once
-/// a sequence has stayed open `delay`, with no timeout once up. It
-/// never takes focus or the mouse: the keyboard tap reads every key
-/// while a sequence is open.
+/// a sequence has stayed open `delay`, with no timeout once up. Its
+/// top stands where KiwiHub's does and it grows down, so a step
+/// never moves the header (#3175). It never takes focus; it takes
+/// the scroll wheel, and a click closes the sequence through the
+/// keyboard tap (#1871).
 @MainActor
 final class KeySequenceHintController {
     /// Before this, a sequence typed quickly shows nothing.
@@ -15,6 +17,8 @@ final class KeySequenceHintController {
     private let core: KiwiCore
     private var panel: ActiveGlassPanel?
     private var showWork: DispatchWorkItem?
+    /// The drawn step's scroll, which a scroll key moves.
+    private var sheetScroll = KeySequenceHintScroll()
     /// The step the panel draws or is about to.
     private(set) var progress: KeySequenceProgress?
 
@@ -73,6 +77,12 @@ final class KeySequenceHintController {
         return found.map { ($0, reference) }
     }
 
+    /// A scroll key's press: the sheet moves, where it overflows.
+    func scroll(_ scroll: KeySequenceScroll) {
+        guard panel?.isVisible == true else { return }
+        sheetScroll.take(scroll)
+    }
+
     private func draw() {
         guard let (hint, reference) = hint(),
             let screen = PanelHandBack.screenUnderPointer() ?? NSScreen.main
@@ -81,10 +91,21 @@ final class KeySequenceHintController {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         panel.wearsActiveLook = glass.enabled && glass.wearsActiveLook
+        let visible = screen.visibleFrame
+        let area = JumpPanelController.clearArea(
+            visible: visible,
+            shelves: core.shelfFrames()
+        )
+        sheetScroll = KeySequenceHintScroll()
         let view = KeySequenceHintView(
             hint: hint,
             reference: reference,
-            glass: glass
+            glass: glass,
+            sheetCap: JumpPanelController.sheetCap(
+                visible: visible,
+                area: area
+            ),
+            scroll: sheetScroll
         )
         let host = NSHostingView(
             rootView: LocaleScopedRoot { view }
@@ -92,13 +113,14 @@ final class KeySequenceHintController {
         )
         let size = host.fittingSize
         panel.contentView = host
-        let visible = screen.visibleFrame
         panel.setFrame(
             CGRect(
-                x: visible.midX - size.width / 2,
-                y: visible.midY - size.height / 2,
-                width: size.width,
-                height: size.height
+                origin: JumpPanelController.origin(
+                    size: size,
+                    visible: visible,
+                    area: area
+                ),
+                size: size
             ),
             display: true
         )
@@ -128,7 +150,8 @@ final class KeySequenceHintController {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
-        panel.ignoresMouseEvents = true
+        // The wheel scrolls the sheet; a click reaches the tap first.
+        panel.ignoresMouseEvents = false
         panel.hidesOnDeactivate = false
         return panel
     }

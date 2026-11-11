@@ -14560,8 +14560,9 @@ refuses two siblings on one key ("Assigned to … at this point in
 the sequence"), and the action's own row names the sequence in a
 caption ("Also ⌃⌥Space → W → H"). An end key's action is picked
 in a searchable popover over the whole catalogue in the page's
-groups, never folded, with "Opens more keys ›" and "Lua…" pinned
-outside its scrolling list (owner, 2026-11-09). KiwiHub's
+groups, never folded, with "+ Extend Sequence" pinned above and
+"App…" and "Lua…" below its scrolling list (owner, 2026-11-09;
+#3162). KiwiHub's
 Shortcuts side lists an end key by its path (past four keys, the
 leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
@@ -14597,6 +14598,31 @@ the tap's own thread, or the first keys after a leader would reach
 the front app before the main actor heard of it
 (`.claude/rules/input-and-animation.md`). Accepted: Secure Input
 hides key presses from it ([accepted limitations](accepted-limitations.md)).
+:::
+
+:::unreleased
+*Amended (#3173, owner, 2026-11-10): an open sequence lets macOS's
+own shortcuts through.* "Every key press" no longer holds. Swallowing
+every key cost the user macOS itself: ⌘⇧4 beeped and took no
+screenshot, which a macOS menu never does while it is open. A key no
+step of the sequence names now goes one of three ways, read from
+`SystemShortcuts.map` and the live `com.apple.symbolichotkeys` chord,
+so a remapped shortcut is known by its new chord and one switched off
+is not passed. The plist is read when the keyboard tap is armed (a
+load, a layer switch, a shortcut edit), so a change in System Settings
+reaches the sequence at the next arming, as #1105's ⌃⌥⌘8 read does
+for Settings. A shortcut that takes no keyboard (screenshots, Zoom,
+Invert colours and contrast, Dock hiding) passes and the panel stays
+up. One that takes the keyboard or moves the user (Spotlight, Finder
+search, the app switcher, Force Quit, Mission Control, Desktop
+switching, the next input source) passes and closes the sequence,
+since the panel would otherwise sit over a field typing elsewhere.
+An app's own menu chords (⌘Q, ⌘W, ⌘M, ⌘H) stay swallowed: the
+sequence shields the front app, and those would act on it. A
+recorded step key wins first, so #1871's strict step keys hold, and
+the recorder warns when a step key takes a macOS chord. User-defined
+App Shortcuts and third-party global shortcuts stay swallowed: no
+list of them exists to read.
 :::
 
 **Orphaned space shortcuts are surfaced, never pruned.** A binding

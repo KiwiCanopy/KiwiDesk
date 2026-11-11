@@ -47,8 +47,6 @@ struct KeySequenceGuiReaderCensusTests {
             (1, "the Lua drawer lists .custom rows; a sequence is none"),
         "Settings/Components/KiwiVision/KiwiVisionLensHeader.swift":
             (3, "lens chord by Lua; the default layer's rows ride whole"),
-        "Settings/Components/Lua/AdvancedLuaGroup.swift":
-            (1, "groups in use: a leader files in no group"),
         "Settings/Components/Simple/SimpleCoverage.swift":
             (1, "an Open application row by kind: a sequence is none"),
         "Settings/Components/Simple/SimpleKiwiHubKeys.swift":

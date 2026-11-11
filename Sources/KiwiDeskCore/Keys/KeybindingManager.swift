@@ -26,16 +26,20 @@ public final class KeybindingManager {
     /// loop cannot clear the outer fire's flag.
     public internal(set) var isFiring = false
     /// Combos rejected during the most recent activation.
-    public internal(set) var activationFailures: Set<KeyCombo> =
-        []
+    public internal(set) var activationFailures: Set<KeyCombo> = []
     private var layers: [String: [KeyCombo: Int32]] = [:]
     /// Each layer's key sequences (#1871), beside `layers`: the
     /// keyboard tap answers the current layer's, never Carbon.
     var sequences: [String: [KeySequence]] = [:]
     /// Where an open sequence stands, nil once it closes (#1871):
     /// the hint panel's one input.
-    var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void = {
-        _ in
+    var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void =
+        { _ in }
+    /// A scroll key while a sequence is open (#3175).
+    var onSequenceScroll: @MainActor (KeySequenceScroll) -> Void = { _ in }
+    /// KiwiHub's second chords, which scroll the sequence panel (#3175).
+    var sequenceScrollKeys = KiwiHubKeys() {
+        didSet { scrollKeysChanged(from: oldValue) }
     }
     /// The unbound-key sound: the core wires the refusal sound
     /// (#1871 ▸ unbound step key, `KiwiCore+Bootstrap`), so a bare
@@ -117,6 +121,11 @@ public final class KeybindingManager {
     /// macOS refused the tap; asked again only once the switch
     /// moves, or every `bind` of a load would spawn and refuse.
     var keyboardTapRefused = false
+    /// A `com.apple.symbolichotkeys` read for #3173's pass-through.
+    var readSymbolicHotkey: (Int) -> SymbolicHotkeyEntry? =
+        SymbolicHotkeys.liveRead
+    /// `systemChords()`'s snapshot, dropped at each arming.
+    var answeredChords: [(combo: KeyCombo, shortcut: SystemShortcut)]?
     /// `sideTapStatus` changed: Settings re-reads it (#96).
     var onSideTapStatusChange: @MainActor () -> Void = {}
     /// The keyboard tap's rows by id, side chords and modifier
@@ -334,12 +343,5 @@ public final class KeybindingManager {
         }
         releaseBinding(ref)
         activate(currentLayer)
-    }
-
-    /// Releases one binding's ref and its KiwiHub side mark, since
-    /// Lua reuses a freed ref for the next binding (#1229).
-    func releaseBinding(_ ref: Int32) {
-        lua?.release(ref: ref)
-        kiwiHubSideRefs.remove(ref)
     }
 }

@@ -12,6 +12,8 @@ struct SettingsCollapsibleSection<Content: View>: View {
     private let control: SettingsControl
     private let drawer: any AnySettingsDrawer
     private let summary: String
+    /// The title's `?`: a concept the card names (#3162).
+    private let help: String?
     @Binding private var isExpanded: Bool
     private let onToggle: ((Bool) -> Void)?
     @ViewBuilder private let content: () -> Content
@@ -22,6 +24,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
         _ drawer: SettingsDrawer<Children>,
         isExpanded: Binding<Bool>,
         summary: String,
+        help: String? = nil,
         onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -30,11 +33,12 @@ struct SettingsCollapsibleSection<Content: View>: View {
         self.drawer = drawer
         self._isExpanded = isExpanded
         self.summary = summary
+        self.help = help
         self.content = content
     }
 
     var body: some View {
-        SettingsSection(control) {
+        SettingsSection(control, help: help) {
             // Not a heading: the section's title above is, and one
             // card lists once in the rotor.
             SettingsDisclosureButton(

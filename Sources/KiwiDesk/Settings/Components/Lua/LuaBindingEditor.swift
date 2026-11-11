@@ -13,7 +13,11 @@ struct LuaEditRequest: Identifiable, Equatable {
 /// land after a Save or a Revert; Cancel (Escape) puts back the body
 /// the row had when the editor opened, unless a Save or a Revert has
 /// moved the draft since the editor last wrote it.
-struct LuaBindingEditor: View {
+///
+/// A key sequence's Lua key (#3162) draws its Icon, Description and
+/// Group above the body as `fields`, and a "Change action…" button
+/// that turns it back into a normal key.
+struct LuaBindingEditor<Fields: View>: View {
     /// Always drawn, so an empty binding's editor still names what
     /// it edits (#2688).
     let title: String
@@ -23,6 +27,9 @@ struct LuaBindingEditor: View {
     let placeholder: String
     @Binding var text: String
     let dismiss: () -> Void
+    /// Turns the binding back into a normal key; nil draws no button.
+    var changeAction: (() -> Void)?
+    let fields: Fields
 
     @State private var seed: String
     /// The body this editor last wrote into the draft.
@@ -33,8 +40,12 @@ struct LuaBindingEditor: View {
         spokenName: String,
         placeholder: String,
         text: Binding<String>,
-        dismiss: @escaping () -> Void
+        changeAction: (() -> Void)? = nil,
+        dismiss: @escaping () -> Void,
+        @ViewBuilder fields: () -> Fields
     ) {
+        self.changeAction = changeAction
+        self.fields = fields()
         self.title = title
         self.spokenName = spokenName
         self.placeholder = placeholder
@@ -52,6 +63,7 @@ struct LuaBindingEditor: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .accessibilityAddTraits(.isHeader)
+            fields
             LuaSourceEditor(
                 text: typed,
                 spokenName: spokenName,
@@ -73,6 +85,16 @@ struct LuaBindingEditor: View {
             HStack {
                 actionsLink
                 Spacer()
+                if let changeAction {
+                    Button(
+                        L(
+                            "shortcuts.sequence.change_action",
+                            "Change action…"
+                        ),
+                        action: changeAction
+                    )
+                    .settingsActionButton()
+                }
                 Button(L("footer.cancel", "Cancel"), action: cancel)
                     .settingsActionButton()
                     .keyboardShortcut(.cancelAction)
@@ -86,7 +108,7 @@ struct LuaBindingEditor: View {
     }
 
     /// The text's room inside the bordered box (#2688).
-    static let textInset = NSSize(width: 6, height: 6)
+    static var textInset: NSSize { NSSize(width: 6, height: 6) }
 
     @ViewBuilder private var placeholderText: some View {
         if text.isEmpty {
@@ -133,6 +155,25 @@ struct LuaBindingEditor: View {
     private func cancel() {
         if text == written { text = seed }
         dismiss()
+    }
+}
+
+extension LuaBindingEditor where Fields == EmptyView {
+    /// A Lua binding's body alone, as Settings ▸ Lua draws it.
+    init(
+        title: String,
+        spokenName: String,
+        placeholder: String,
+        text: Binding<String>,
+        dismiss: @escaping () -> Void
+    ) {
+        self.init(
+            title: title,
+            spokenName: spokenName,
+            placeholder: placeholder,
+            text: text,
+            dismiss: dismiss
+        ) { EmptyView() }
     }
 }
 

@@ -7,7 +7,8 @@ import Foundation
 /// key after a leader can never reach the front app
 /// (input-and-animation.md).
 struct KeySequenceRouter: Sendable {
-    /// What a key-down did. Everything but `.pass` swallows it.
+    /// What a key-down did. `swallows` says whether the front app
+    /// is kept from it.
     enum Outcome: Equatable, Sendable {
         /// No sequence is open and the key is no leader.
         case pass
@@ -24,16 +25,42 @@ struct KeySequenceRouter: Sendable {
         case unbound
         /// A key repeat while open: swallowed, nothing moves.
         case repeated
+        /// A macOS shortcut while open (#3173): it reaches macOS, and
+        /// `closing` closes the sequence first.
+        case passed(closing: Bool)
+        /// A scroll key while open (#3175): the sheet moves a line or
+        /// a page.
+        case scroll(KeySequenceScroll)
+
+        var swallows: Bool {
+            switch self {
+            case .pass, .passed: return false
+            case .stepped, .back, .closed, .fired, .unbound, .repeated,
+                .scroll:
+                return true
+            }
+        }
     }
 
     private(set) var sequences: [KeySequence] = []
+    /// The macOS shortcuts an open sequence lets through (#3173).
+    private(set) var passing = SequencePassChords.none
+    /// KiwiHub's second chords for ↑ ↓ Page Up Page Down (#3175):
+    /// set apart from the sequences, so a change to them alone
+    /// (`KeyboardTapHandle.setSequenceScrollKeys`) closes nothing.
+    var scrollKeys = KiwiHubKeys()
     /// The open sequence, and the index of each step key taken.
     private var open: (sequence: Int, path: [Int])?
 
-    /// Replaces the sequences, closing any that is open: the step
-    /// it stood on may be gone.
-    mutating func setSequences(_ sequences: [KeySequence]) {
+    /// Replaces the sequences and the macOS shortcuts they let
+    /// through, closing any that is open: the step it stood on may
+    /// be gone.
+    mutating func setSequences(
+        _ sequences: [KeySequence],
+        passing: SequencePassChords = .none
+    ) {
         self.sequences = sequences
+        self.passing = passing
         open = nil
     }
 
@@ -68,6 +95,9 @@ struct KeySequenceRouter: Sendable {
 
     /// Decides one key-down. A step key matches only the chord
     /// recorded for it, held modifiers included (#1871 ▸ step keys).
+    /// While open: esc and ⌫, the leader, a step key, a scroll key
+    /// (#3175), then a macOS shortcut's tier (#3173), else the beep.
+    /// A repeat moves nothing but a scroll and a macOS shortcut.
     mutating func press(
         keyCode: UInt32,
         held: HotkeyModifiers,
@@ -84,7 +114,7 @@ struct KeySequenceRouter: Sendable {
             open = (index, [])
             return .stepped
         }
-        if isRepeat { return .repeated }
+        if isRepeat { return repeated(current, keyCode: keyCode, held: held) }
         let plain = held.unsided.isEmpty
         if plain, keyCode == UInt32(kVK_Escape) {
             open = nil
@@ -110,7 +140,10 @@ struct KeySequenceRouter: Sendable {
                 keyCode: keyCode,
                 held: held
             )
-        else { return .unbound }
+        else {
+            return Self.scroll(keyCode: keyCode, held: held, keys: scrollKeys)
+                ?? passOrBeep(keyCode: keyCode, held: held)
+        }
         switch keys[index].action {
         case .run(let ref):
             open = nil
@@ -119,6 +152,93 @@ struct KeySequenceRouter: Sendable {
             open?.path.append(index)
             return .stepped
         }
+    }
+
+    /// A held key: a scroll repeats and a macOS shortcut passes;
+    /// esc, ⌫, the leader and a step key stay still.
+    private mutating func repeated(
+        _ current: (sequence: Int, path: [Int]),
+        keyCode: UInt32,
+        held: HotkeyModifiers
+    ) -> Outcome {
+        let plain = held.unsided.isEmpty
+        let fixed = [kVK_Escape, kVK_Delete].map(UInt32.init)
+        let sequence = sequences[current.sequence]
+        let keys = Self.keys(of: sequence, at: current.path)
+        if plain && fixed.contains(keyCode)
+            || Self.match([sequence.leader], keyCode: keyCode, held: held)
+                != nil
+            || Self.match(keys.map(\.combo), keyCode: keyCode, held: held)
+                != nil
+        {
+            return .repeated
+        }
+        if let scroll = Self.scroll(
+            keyCode: keyCode,
+            held: held,
+            keys: scrollKeys
+        ) {
+            return scroll
+        }
+        let pass = passOrBeep(keyCode: keyCode, held: held)
+        return pass == .unbound ? .repeated : pass
+    }
+
+    /// KiwiHub's navigation keys as the sheet's scroll (#3175): the
+    /// plain arrows and page keys, or the user's second chord for
+    /// one, matched whole — no ⇧ strip.
+    static func scroll(
+        keyCode: UInt32,
+        held: HotkeyModifiers,
+        keys: KiwiHubKeys
+    ) -> Outcome? {
+        let builtIn: [UInt32: KiwiHubKey] = [
+            UInt32(kVK_UpArrow): .up, UInt32(kVK_DownArrow): .down,
+            UInt32(kVK_PageUp): .pageUp, UInt32(kVK_PageDown): .pageDown,
+        ]
+        let key =
+            held.unsided.isEmpty
+            ? builtIn[keyCode]
+            : keys.key(
+                for: KeyCombo(keyCode: keyCode, modifiers: held.unsided)
+            )
+        switch key {
+        case .up: return .scroll(.step(-1))
+        case .down: return .scroll(.step(1))
+        case .pageUp: return .scroll(.page(-1))
+        case .pageDown: return .scroll(.page(1))
+        default: return nil
+        }
+    }
+
+    /// The shortcut macOS answers on a step key's `combo`, through
+    /// the router's own matcher (#3173): what that key takes from
+    /// macOS while its sequence is open. Nil for none.
+    static func systemShortcut(
+        on combo: KeyCombo,
+        in answered: [(combo: KeyCombo, shortcut: SystemShortcut)]
+    ) -> SystemShortcut? {
+        match(
+            answered.map(\.combo),
+            keyCode: combo.keyCode,
+            held: combo.modifiers
+        ).map { answered[$0].shortcut }
+    }
+
+    /// A macOS shortcut no step key took: through to macOS, the
+    /// sequence closed first where it takes the keyboard.
+    private mutating func passOrBeep(
+        keyCode: UInt32,
+        held: HotkeyModifiers
+    ) -> Outcome {
+        if Self.match(passing.staysOpen, keyCode: keyCode, held: held) != nil {
+            return .passed(closing: false)
+        }
+        if Self.match(passing.closes, keyCode: keyCode, held: held) != nil {
+            open = nil
+            return .passed(closing: true)
+        }
+        return .unbound
     }
 
     private static func keys(

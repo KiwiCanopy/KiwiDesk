@@ -12,6 +12,10 @@ struct JumpShortcutsView: View {
     let scroll: SheetScroll
     /// The tallest the sheet stands (`JumpPanelController.sheetCap`).
     let maxHeight: CGFloat
+    /// The sheet's room inside the scroll view: KiwiHub's selection
+    /// inset; the key sequence panel's own padding stands instead.
+    var horizontalInset = KeyPanelStyle.selectionInset + 10
+    var verticalInset: CGFloat = 12
     /// Whether the sheet runs past what the cap shows — the one
     /// verdict the cue reads (#1292).
     static func overflows(content: CGFloat, cap: CGFloat) -> Bool {
@@ -24,8 +28,8 @@ struct JumpShortcutsView: View {
                 reference: sheet.shown,
                 needle: sheet.needle
             )
-            .padding(.horizontal, KeyPanelStyle.selectionInset + 10)
-            .padding(.vertical, 12)
+            .padding(.horizontal, horizontalInset)
+            .padding(.vertical, verticalInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(SheetScrollDriver(scroll: scroll))
             .background(

@@ -7,19 +7,23 @@ struct SequencePickRequest: Identifiable, Equatable {
 }
 
 /// A row the action picker's one cursor stops on (`DropdownCursor`):
-/// "Opens more keys ›" pinned above the list, a catalogue command,
-/// or "Lua…" pinned below it.
+/// "Extend Sequence" pinned above the list, a catalogue command, or
+/// "App…" and "Lua…" pinned below it (#3162).
 enum SequencePickSlot: Hashable {
     case branch
     case command(String)
+    case app
     case lua
 }
 
-/// An end key's action picker (#1871, owner 2026-11-09): a search
-/// field over the whole catalogue in the page's groups, opened on
-/// the current pick, with "Opens more keys ›" and "Lua…" pinned
-/// outside the scrolling list. ↑/↓ and real pointer motion move one
-/// cursor (`SequenceActionMenu+Cursor`); Return picks it.
+/// An end key's container and action picker (#1871, owner
+/// 2026-11-09; #3162): a search field over the whole catalogue in the
+/// page's groups, opened on the current pick, with "Extend Sequence"
+/// above and "App…" and "Lua…" below the scrolling list. ↑/↓ and real
+/// pointer motion move one cursor (`SequenceActionMenu+Cursor`);
+/// Return picks it. The trigger is the row's one container: a command
+/// or an app on the plain pop-up face, a Lua key's description
+/// dashed, which opens the Lua popover instead (`onEditLua`).
 struct SequenceActionMenu: View {
     let node: KeyBinding
     let catalog: SequenceActionCatalog
@@ -27,9 +31,13 @@ struct SequenceActionMenu: View {
     let spokenLabel: String
     let onBranch: () -> Void
     let onPick: (NavCommand) -> Void
+    let onApp: () -> Void
     let onLua: () -> Void
+    /// A click on a Lua key's dashed container.
+    let onEditLua: () -> Void
 
-    @State var request: SequencePickRequest?
+    /// Open while set; the row's "Change action…" sets it too.
+    @Binding var request: SequencePickRequest?
     @State var search = ""
     @State var cursor = DropdownCursor<SequencePickSlot>()
     /// Where the list scrolls — set by the keyboard alone, so the
@@ -38,27 +46,55 @@ struct SequenceActionMenu: View {
     @FocusState private var searchFocused: Bool
 
     var body: some View {
-        Button {
-            request = SequencePickRequest(id: node.id)
-        } label: {
-            HStack(spacing: 4) {
-                Text(title).lineLimit(1)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+        trigger
+            .accessibilityLabel(spokenLabel)
+            .accessibilityValue(title)
+            .popover(item: $request) { _ in
+                popover.settingsPopoverChrome()
             }
-            .fixedSize(horizontal: true, vertical: false)
+            // Every open starts with an empty search (#1357).
+            .onChange(of: request) { _, open in
+                if open == nil { search = "" } else { opened() }
+            }
+    }
+
+    @ViewBuilder private var trigger: some View {
+        if node.kind == .custom {
+            Button(action: onEditLua) {
+                Text(title).fixedSize(horizontal: true, vertical: false)
+            }
+            .buttonStyle(SequenceDashedStyle())
+        } else {
+            Button {
+                request = SequencePickRequest(id: node.id)
+            } label: {
+                HStack(spacing: 4) {
+                    appIcon
+                    Text(title).lineLimit(1)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .fixedSize(horizontal: true, vertical: false)
+            }
+            .settingsPopUpTrigger()
         }
-        .settingsPopUpTrigger()
-        .accessibilityLabel(spokenLabel)
-        .accessibilityValue(title)
-        .popover(item: $request) { _ in
-            popover.settingsPopoverChrome()
+    }
+
+    /// An app key's icon, as the Apps section's rows draw it.
+    @ViewBuilder private var appIcon: some View {
+        if let bundleID {
+            Image(nsImage: AppIconCache.shared.icon(forBundleID: bundleID))
+                .resizable()
+                .frame(width: 16, height: 16)
+                .accessibilityHidden(true)
         }
-        // Every open starts with an empty search (#1357).
-        .onChange(of: request) { _, open in
-            if open == nil { search = "" } else { opened() }
-        }
+    }
+
+    /// The app an app key opens; nil for every other key.
+    private var bundleID: String? {
+        guard node.kind == .application else { return nil }
+        return KeybindingCatalog.appBundleID(from: node.lua)
     }
 
     private var popover: some View {
@@ -74,10 +110,11 @@ struct SequenceActionMenu: View {
             .onKeyPress(.downArrow) { move(1, in: groups) }
             .onKeyPress(.upArrow) { move(-1, in: groups) }
             .onChange(of: search) { _, _ in searched() }
-            pinned(.branch, Self.branchLabel, symbol: "chevron.right")
+            pinned(.branch, Self.branchLabel, symbol: "plus")
             Divider()
             list(groups)
             Divider()
+            pinned(.app, Self.appLabel, symbol: "app")
             pinned(
                 .lua,
                 Self.luaLabel,
@@ -209,19 +246,27 @@ struct SequenceActionMenu: View {
         return text
     }
 
+    /// Drawn after a `plus` mark: "+ Extend Sequence" (#3162).
     static var branchLabel: String {
-        L("shortcuts.sequence.opens_more", "Opens more keys ›")
+        L("shortcuts.sequence.opens_more", "Extend Sequence")
+    }
+
+    static var appLabel: String {
+        L("shortcuts.sequence.app", "App…")
     }
 
     static var luaLabel: String {
         L("shortcuts.sequence.lua", "Lua…")
     }
 
-    /// The action's name, "Lua…" for the user's own, "Choose…" for
-    /// none yet.
+    /// The action's name, "Lua…" for the user's own, the app's name
+    /// for an app key, "Choose…" for none yet.
     private var title: String {
         if node.kind == .custom {
             return node.desc.trimmed.isEmpty ? Self.luaLabel : node.desc
+        }
+        if let bundleID {
+            return KeybindingCatalog.displayName(forBundleID: bundleID)
         }
         if let command = catalog.command(running: node.lua) {
             return command.resolvedLabel

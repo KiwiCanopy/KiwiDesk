@@ -13,7 +13,8 @@ struct SequenceTapState: Sendable {
     /// New rows: the open sequence closes, and nothing decided over
     /// the old rows is left to drain.
     mutating func reset(_ rows: KeyboardTapRows) {
-        router.setSequences(rows.sequences)
+        router.setSequences(rows.sequences, passing: rows.sequencePassing)
+        router.scrollKeys = rows.sequenceScrollKeys
         generation = rows.sequenceGeneration
         waiting = []
         closeRequested = nil
@@ -32,7 +33,10 @@ struct SequenceTapState: Sendable {
     /// Records a decision the main actor must take; false for one
     /// it need not hear.
     mutating func record(_ outcome: KeySequenceRouter.Outcome) -> Bool {
-        guard outcome != .pass, outcome != .repeated else { return false }
+        switch outcome {
+        case .pass, .repeated, .passed(closing: false): return false
+        default: break
+        }
         waiting.append(
             KeySequenceDecision(
                 outcome: outcome,
@@ -60,8 +64,9 @@ extension KeyboardTap {
     }
 
     /// Whether `event` is the consumer's to swallow: a leader, and
-    /// every key-down while a sequence is open. A mouse-down closes
-    /// an open one and passes, the one door a click closes by.
+    /// every key-down while a sequence is open save a macOS shortcut
+    /// it lets through (#3173). A mouse-down closes an open one and
+    /// passes, the one door a click closes by.
     func sequenceEvent(_ type: CGEventType, _ event: CGEvent) -> Bool {
         let code = UInt32(event.getIntegerValueField(.keyboardEventKeycode))
         let held = HotkeyModifiers.held(by: event.flags)
@@ -78,7 +83,7 @@ extension KeyboardTap {
                     held: held,
                     isRepeat: isRepeat
                 )
-                swallow = outcome != .pass
+                swallow = outcome.swallows
                 _ = state.record(outcome)
             case .leftMouseDown, .rightMouseDown, .otherMouseDown:
                 if state.router.isOpen {
