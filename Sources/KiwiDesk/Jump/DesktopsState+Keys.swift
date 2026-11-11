@@ -66,7 +66,7 @@ extension DesktopsState {
         switch key {
         case .step(let delta):
             if isInside {
-                stepLineInside(delta)
+                stepLineInside(delta, wrap: !repeated)
             } else {
                 moveLine(delta, wrap: !repeated)
             }
@@ -85,6 +85,7 @@ extension DesktopsState {
             if isInside { return .moved }
             return open() ? .moved : .refuse(.emptySpace)
         case .leaveSpace:
+            guard isInside else { return .dead }
             leave()
             return .moved
         case .escape:

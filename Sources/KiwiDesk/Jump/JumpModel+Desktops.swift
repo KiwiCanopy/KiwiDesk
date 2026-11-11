@@ -6,6 +6,7 @@ import KiwiDeskCore
 extension JumpModel {
     /// Reads the desk now and opens on the KiwiHub screen's line.
     func enterDesktops() {
+        endDesktopsRefusal()
         let overview = loadDesktops()
         desktops = DesktopsState(overview: overview)
         let pids = overview.screens.flatMap(\.desktops)
@@ -15,11 +16,13 @@ extension JumpModel {
 
     func setDesktopsQuery(_ query: String) {
         guard desktops != nil else { return }
+        endDesktopsRefusal()
         desktops?.setQuery(query)
         onAnnounce(desktopsSpoken)
     }
 
     func handleDesktops(_ key: JumpKey, repeated: Bool) {
+        endDesktopsRefusal()
         if key == .settings {
             onDesktopsSettings()
             return
@@ -40,6 +43,7 @@ extension JumpModel {
         opens: Bool
     ) {
         guard scope == .desktops, var state = desktops else { return }
+        endDesktopsRefusal()
         restPointerForClick()
         state.select(place)
         if state.isCarrying {
@@ -76,6 +80,7 @@ extension JumpModel {
         modifiers: NSEvent.ModifierFlags
     ) {
         guard scope == .desktops, var state = desktops else { return }
+        endDesktopsRefusal()
         restPointerForClick()
         if state.isCarrying, !modifiers.contains(.command) {
             state.select(place)
@@ -103,6 +108,7 @@ extension JumpModel {
     /// that side, one more per click (#1229 ▸ Mouse).
     func clickMore(_ place: DesktopsPlace, forward: Bool) {
         guard scope == .desktops, var state = desktops else { return }
+        endDesktopsRefusal()
         state.revealMore(place, forward: forward)
         desktops = state
     }
@@ -110,6 +116,7 @@ extension JumpModel {
     /// A drop of dragged windows on a place: a move, and you stay.
     func dropWindows(_ ids: [WindowID], on place: DesktopsPlace) {
         guard scope == .desktops, let state = desktops else { return }
+        endDesktopsRefusal()
         guard let target = state.target(place) else {
             return answer(.refuse(.noSpace))
         }
@@ -135,13 +142,44 @@ extension JumpModel {
             onAnnounce(desktopsSpoken)
         case .act(let action):
             onDesktopsAction(action)
+        case .refuse(.carryBlocked(let window, let block)):
+            refuseDesktops(
+                DesktopsText.refusal(.carryBlocked(window, block)),
+                swelling: .window(window.id)
+            )
         case .refuse(let refusal):
-            onRefuse(DesktopsText.refusal(refusal))
+            refuseDesktops(DesktopsText.refusal(refusal))
         case .close:
             onClose()
         case .dead:
             onDeadKey()
         }
+    }
+
+    /// After a drop that keeps KiwiHub open (#3165): reads the desk
+    /// again and selects `target`'s line.
+    func reloadDesktops(selecting target: DesktopsTarget) {
+        guard scope == .desktops else { return }
+        let query = desktops?.query ?? ""
+        enterDesktops()
+        guard var state = desktops else { return }
+        if !query.isEmpty { state.setQuery(query) }
+        let overview = state.overview
+        for (screen, row) in overview.screens.enumerated()
+        where row.display == target.display {
+            for (desktop, card) in row.desktops.enumerated()
+            where card.native == target.desktop.native {
+                guard
+                    let line = card.spaces.firstIndex(where: {
+                        $0.space == target.space
+                    })
+                else { continue }
+                state.select(
+                    DesktopsPlace(screen: screen, desktop: desktop, line: line)
+                )
+            }
+        }
+        desktops = state
     }
 
     /// What VoiceOver hears for the selection now.

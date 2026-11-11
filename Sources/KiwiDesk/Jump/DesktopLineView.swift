@@ -19,6 +19,7 @@ struct DesktopLineView: View {
     let onDrop: ([WindowID], DesktopsPlace) -> Void
 
     @Environment(\.kiwiHubPaint) private var paint
+    @Environment(\.desktopsSwell) private var swell
     @State private var dropTargeted = false
 
     static var height: CGFloat { 30 }
@@ -101,6 +102,7 @@ struct DesktopLineView: View {
                 }
             }
             .foregroundStyle(ink)
+            .desktopsSwell(swell == .place(place), anchor: .leading)
         }
     }
 
@@ -131,6 +133,10 @@ struct DesktopLineView: View {
                         onClick: { count, modifiers in
                             onWindow(window.id, place, count, modifiers)
                         }
+                    )
+                    .desktopsSwell(
+                        swell == .window(window.id),
+                        anchor: .center
                     )
                 }
                 more(hidden.after, forward: true)

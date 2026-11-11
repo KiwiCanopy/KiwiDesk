@@ -155,6 +155,7 @@ struct JumpPanelView: View {
                     onDrop: { model.dropWindows($0, on: $1) },
                     onSettings: { model.handle(.settings, repeated: false) }
                 )
+                .environment(\.desktopsSwell, model.desktopsSwell)
                 .transition(.opacity)
             } else if let view = model.view {
                 JumpViewSide(

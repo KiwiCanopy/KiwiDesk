@@ -7242,13 +7242,13 @@ Desktops as cards, and on each card the screen's Spaces with their
 windows. A window on a Desktop no screen shows is listed in the
 Space it returns to, or under **Not in a Space yet**, which nothing
 can be moved into. The menu bar's **Show Desktop overview** row
-opens it too. The side is seeded on **⌘⌘**, either ⌘ tapped twice (the
-same key both times), and **Shortcuts & Gestures ▸ KiwiHub** lists
-the row to rebind or clear. While KiwiHub has the keyboard, a
-modifier tap whose Shortcuts & Gestures row opens one of its
-sides works as that side's shortcut, so ⌘⌘ closes the overview;
-a tap bound in `init.lua`, and every other modifier tap, does
-nothing there, or while another KiwiDesk panel has the keyboard.
+opens it too. The side is seeded on **⌃⌥O**, and **Shortcuts &
+Gestures ▸ KiwiHub** lists the row to rebind or clear. While KiwiHub
+has the keyboard, a modifier tap whose Shortcuts & Gestures row
+opens one of its sides works as that side's shortcut, so a ⌘⌘ set
+to the overview closes it; a tap bound in `init.lua`, and every
+other modifier tap, does nothing there, or while another KiwiDesk
+panel has the keyboard.
 
 - **↑** **↓** **←** **→** choose a Space; **Return** goes there,
   **⇧Return** moves your window there, **⌃Return** moves it and

@@ -174,9 +174,14 @@ struct DesktopsState: Equatable {
             carried.remove(at: index)
             return nil
         }
-        if let block = overview.window(id)?.block { return block }
+        if let block = pickBlock(id) { return block }
         carried.append(id)
         return nil
+    }
+
+    /// Why ⌘↩ would refuse `id`; nil where it picks up or puts back.
+    func pickBlock(_ id: WindowID) -> DesktopOverview.CarryBlock? {
+        carried.contains(id) ? nil : overview.window(id)?.block
     }
 
     mutating func cancelCarry() { carried = [] }

@@ -42,9 +42,9 @@ extension OnboardingKeys {
 
     /// The chords collapsed over their shared modifiers on one
     /// keycap, at the first chord's place, and each modifier tap on
-    /// a keycap of its own in side order — `⌃⌥ J K L` and `⌘⌘`
-    /// (#1229); nil where no tap stands apart or the chords share
-    /// no prefix.
+    /// a keycap of its own in side order — `⌃⌥ J K L` and a `⌘⌘`
+    /// the user set (#1229); nil where no tap stands apart or the
+    /// chords share no prefix.
     private static func tapsApart(_ combos: [String]) -> OnboardingChord? {
         let isTap = { KeyCombo.parse($0)?.isTap == true }
         let chords = combos.filter { !isTap($0) }

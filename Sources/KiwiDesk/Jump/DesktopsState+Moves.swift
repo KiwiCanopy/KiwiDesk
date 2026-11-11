@@ -2,9 +2,9 @@ import KiwiDeskCore
 
 /// The Desktops side's arrows (#1229). Among places ↑↓ walk a
 /// card's lines and on to the screen row above or below, ←→ walk a
-/// row's cards; inside a Space ←→ walk its windows and ↑↓ go to the
-/// nearest window in the neighbouring line. A fresh press wraps at
-/// an end, a held key stops there (#2897).
+/// row's cards; inside a Space ←→ walk its windows and ↑↓ take the
+/// places' route, re-entering where a line holds windows (#3169). A
+/// fresh press wraps at an end, a held key stops there (#2897).
 extension DesktopsState {
     /// ↑ / ↓ among places.
     mutating func moveLine(_ delta: Int, wrap: Bool) {
@@ -42,28 +42,22 @@ extension DesktopsState {
         select(window: drawn[next].id, in: place)
     }
 
-    /// ↑ / ↓ inside a Space: the window under the same slot in the
-    /// nearest line of the card that holds one.
-    mutating func stepLineInside(_ delta: Int) {
-        guard let place, let index = windowIndex,
-            let desktop = desktop(place)
-        else { return }
+    /// ↑ / ↓ inside a Space: the same route as among places
+    /// (#3169). A line with windows is re-entered on the window
+    /// under the slot it left; an empty line is selected, leaving
+    /// the Space.
+    mutating func stepLineInside(_ delta: Int, wrap: Bool) {
+        guard let place, let index = windowIndex else { return }
         let slot = index - offset(place)
-        var line = place.line + delta
-        while desktop.spaces.indices.contains(line) {
-            let target = DesktopsPlace(
-                screen: place.screen,
-                desktop: place.desktop,
-                line: line
-            )
-            let drawn = ordered(target)
-            if !drawn.isEmpty {
-                let pick = min(offset(target) + slot, drawn.count - 1)
-                select(window: drawn[pick].id, in: target)
-                return
-            }
-            line += delta
-        }
+        let order = verticalOrder(column: place.desktop)
+        guard let at = order.firstIndex(of: place),
+            let next = Self.step(at, delta, count: order.count, wrap: wrap)
+        else { return }
+        let target = order[next]
+        let drawn = ordered(target)
+        guard !drawn.isEmpty else { return select(target) }
+        let pick = min(offset(target) + slot, drawn.count - 1)
+        select(window: drawn[pick].id, in: target)
     }
 
     /// The Desktop ⌘ and digit `index` (0-based) names on the
