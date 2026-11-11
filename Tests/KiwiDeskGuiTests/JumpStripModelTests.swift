@@ -5,9 +5,9 @@ import Testing
 @testable import KiwiDesk
 
 /// The app strip through the panel's model (#3135): ← → reach it on
-/// Windows, a click on a dimmed tile does nothing, ↩ on an app with
-/// no window reopens it, every chord still picks from the narrowed
-/// list, and VoiceOver hears the tile with the row it selects.
+/// Windows, a click on a dimmed tile does nothing, every chord
+/// still picks from the narrowed list, and VoiceOver hears the tile
+/// with the row it selects.
 @Suite("KiwiHub app strip model")
 @MainActor
 struct JumpStripModelTests {
@@ -40,20 +40,6 @@ struct JumpStripModelTests {
         #expect(picked.map(\.1) == [.moveHere, .swapHere, .jump])
     }
 
-    @Test("↩ on an app with no window reopens it; ⇧↩ does not")
-    func reopens() {
-        LocalizationManager.shared.select("en")
-        let model = model()
-        var reopened: [String] = []
-        model.onReopen = { reopened.append($0.bundleID ?? "") }
-        model.clickTile(3)
-        #expect(model.emptyText == "No windows")
-        model.handle(.pick(moveHere: true), repeated: false)
-        #expect(reopened.isEmpty)
-        model.handle(.pick(moveHere: false), repeated: false)
-        #expect(reopened == ["com.apple.dt"])
-    }
-
     @Test("a side switch lands Windows back on All")
     func sideSwitchResetsTheStrip() {
         let model = model()
@@ -64,18 +50,6 @@ struct JumpStripModelTests {
         model.openOnLastApp()
         #expect(model.list.stripApp?.name == "Mail")
         #expect(model.list.selected?.entry.title == "Draft")
-    }
-
-    @Test("the No windows row's click reopens, as ↩ does")
-    func rowClickReopens() {
-        let model = model()
-        var reopened: [String] = []
-        model.onReopen = { reopened.append($0.bundleID ?? "") }
-        model.reopenStripApp()
-        #expect(reopened.isEmpty)
-        model.clickTile(3)
-        model.reopenStripApp()
-        #expect(reopened == ["com.apple.dt"])
     }
 
     @Test("a click on a dimmed tile does nothing")
@@ -99,7 +73,7 @@ struct JumpStripModelTests {
         model.handle(.side(1), repeated: false)
         #expect(heard.last?.hasPrefix("Notes: ") == true)
         model.clickTile(3)
-        #expect(heard.last == "Xcode: No windows")
+        #expect(heard.last == "Xcode: No open windows match")
     }
 
     /// The pointer lifts a tile through the model (#2365): a real
@@ -155,7 +129,7 @@ struct JumpStripModelTests {
     }
 
     /// The controller wires the strip at every opening.
-    @Test("the controller wires the strip's reopen")
+    @Test("the controller wires the strip's back key")
     func stripWiring() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Jump")
@@ -164,12 +138,9 @@ struct JumpStripModelTests {
                 at: root.appendingPathComponent(file)
             ).split(whereSeparator: \.isWhitespace).joined()
         }
-        #expect(
-            try squash("JumpPanelController.swift")
-                .contains("wireStrip(model)")
-        )
-        // Back reads the opener's live chord at each press, through
-        // both of the panel's key doors.
+        // Back reads the opener's live chord at each press: the one
+        // key reader both key doors call, and the opener latch's back
+        // match (`JumpStaleModifierTests` ▸ `wiring` counts the doors).
         #expect(
             try squash("JumpPanelController.swift")
                 .contains("panel.back={[core]inSelf.backKey(core)}")
@@ -186,8 +157,5 @@ struct JumpStripModelTests {
                 "case.step:currentModel?.handle(.side(1),repeated:false)"
             )
         )
-        // The pick reaches Core's reopen after the panel's close.
-        #expect(squashed.contains("model.onReopen={[weakself]appin"))
-        #expect(squashed.contains("core.reopenJumpApp(bundleID:bundleID)"))
     }
 }

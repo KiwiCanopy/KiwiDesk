@@ -64,8 +64,9 @@ struct JumpSideNameTests {
         // A layer switch re-reads them on whatever side shows.
         let reload = try Self.source("JumpPanelController+Shortcuts.swift")
         #expect(reload.occurrences(of: "model.chords = liveChords()") == 1)
+        // The chords' readers live beside the layer switch's reload.
         #expect(
-            controller.occurrences(
+            reload.occurrences(
                 of: "ShortcutsOpenBinding.comboGlyphs(core: core, lua:"
             ) == 1
         )

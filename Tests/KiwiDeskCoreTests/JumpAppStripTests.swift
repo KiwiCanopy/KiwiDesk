@@ -6,9 +6,7 @@ import Testing
 /// KiwiHub's app strip (#3135): the apps the Windows side lists,
 /// most recently used first, an app's recency being its own
 /// activation or its windows' latest focus on one tick. An app
-/// activated with no row is listed with its bundle id so its pick
-/// can reopen it; the app in front, KiwiDesk and an app with no
-/// bundle id are not.
+/// with no listed window has no tile (#3168).
 @Suite("KiwiHub app strip (#3135)", .serialized)
 @MainActor
 struct JumpAppStripTests {
@@ -80,46 +78,17 @@ struct JumpAppStripTests {
         #expect(pids(core) == [900_002, 900_001])
     }
 
-    @Test("an activated app with no row is listed to reopen")
-    func emptyAppIsListed() {
+    /// The ruling reversed on #3168: a running app with no listed
+    /// window has no tile, whatever its stamp, beside a control
+    /// that keeps one.
+    @Test("an activated app with no row has no tile")
+    func emptyAppIsLeftOut() {
         let core = makeCore(apps: [app(900_003)])
         defer { resetAuthorityOverrides() }
         track(core, 1, pid: 900_001)
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampAppRecency(900_003)
-        let apps = core.jumpSnapshot().apps
-        #expect(apps.map(\.pid) == [900_003, 900_001])
-        #expect(apps.first?.bundleID == "app.test.900003")
-        #expect(apps.last?.bundleID == nil)
-    }
-
-    @Test("the app in front with no row is left out")
-    func frontAppIsLeftOut() {
-        let core = makeCore(apps: [app(900_003)])
-        defer { resetAuthorityOverrides() }
-        core.frontmostPIDProvider = { 900_003 }
-        core.state.stampAppRecency(900_003)
-        #expect(pids(core).isEmpty)
-    }
-
-    /// Each exclusion alone: a stamped app with no row that the
-    /// strip leaves out, beside a control it keeps.
-    @Test(
-        "no bundle id, KiwiDesk itself and a non-regular app are left out",
-        arguments: ["bundle", "own", "accessory"]
-    )
-    func exclusions(_ kind: String) {
-        let pid: pid_t = kind == "own" ? getpid() : 900_005
-        let excluded = app(
-            pid,
-            bundle: kind == "bundle" ? nil : "",
-            policy: kind == "accessory" ? .accessory : .regular
-        )
-        let core = makeCore(apps: [excluded, app(900_006)])
-        defer { resetAuthorityOverrides() }
-        core.state.stampAppRecency(pid)
-        core.state.stampAppRecency(900_006)
-        #expect(pids(core) == [900_006])
+        #expect(pids(core) == [900_001])
     }
 
     @Test("an app's exit ends its stamp")

@@ -58,8 +58,6 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
         // KiwiHub's Swap here (#2885).
         "KiwiDeskCore/App/KiwiCore+JumpSwap.swift": 1,
-        // The app strip's reopen of an app with no window (#3135).
-        "KiwiDeskCore/App/KiwiCore+JumpApps.swift": 1,
         // KiwiHub's Desktops side sends its verbs through one
         // scoped door (#1229).
         "KiwiDeskCore/App/KiwiCore+DesktopOverviewMoves.swift": 1,

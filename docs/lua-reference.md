@@ -7183,19 +7183,26 @@ so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
 :::unreleased
-Above the list sits the **app strip**: **All** first, then one tile
-per app the list holds and per app you brought forward since
-KiwiDesk started that is still running with no window, most
-recently used first, with a count on an app with two windows or
-more. **←** and **→** move along it and a click picks a tile; the
-list then holds that app's windows alone, its most recent window
-selected. An app with no window shows **No windows**, and
-**Return** or a click opens it again, as
-[focus_or_spawn](#focus_or_spawn) does. Typing puts the strip back
-on **All** and dims each app with no match; **←** and **→** then
-step through the apps with a match, never the text, and narrow the
+Under the field sits the **app strip**, shown while you type or
+while it is off **All**; KiwiHub opens on the list alone. It holds
+**All** first, then one tile per app with a window in the list, the
+app you are in first, then most recently used, with a count on an
+app with two windows or more. **←** and **→** move along it and a
+click picks a tile; the list then holds that app's windows alone,
+its most recent window selected. Typing puts the strip back on
+**All** and dims each app with no match; **←** and **→** then step
+through the apps with a match, never the text, and narrow the
 matches to that app. [kiwihub.show_last_app](#kiwihubshow_last_app)
-opens this side with the strip on the app of the window you used last.
+opens this side with the strip on the app of the window you used
+last.
+
+With nothing typed, the window you are in sits greyed at the top
+of **All** and of its app's tile, marked **Current window**. It is
+never a row you pick: the arrows, the digits and search skip it.
+
+A modifier still held from the shortcut that opened KiwiHub, or
+from a step of `kiwihub.show_last_app`, counts for nothing until
+you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 :::
 
 The `"view"` side is the **view picker**, three lines in one
@@ -8635,6 +8642,12 @@ A window the incoming profile remembers in one of its own spaces
 goes there, even out of a held space; a held space keeps only
 the windows that profile has never seen, and is dropped once
 empty.
+
+:::unreleased
+If that move takes the focused window out of the active space and
+leaves the space empty, KiwiDesk switches to the space the window
+went to and focuses it ([#3191](https://github.com/KiwiCanopy/KiwiDesk/issues/3191)).
+:::
 
 A held space is dropped once no window is left in it on any
 Desktop, and by `delete_space`, which forwards its windows to the

@@ -1297,7 +1297,9 @@ editing here:
   states that it owes none; a Desktop follow whose window held no
   focus, or whose Space is not shown, takes `followSwitch`
   (#2888, `DesktopMoveNamedFocusTests` ▸
-  `focusedFollowToUnshownSpace`). The focus the raise hands back, and the one
+  `focusedFollowToUnshownSpace`); a profile restore's follow
+  takes `followSwitch` too (#3191, profiles.md). The
+  focus the raise hands back, and the one
   `raiseFloatsAbove` re-reads, is the focus ANCHOR, never the
   Space's slot, or a sticky traveler loses it
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
@@ -1310,6 +1312,14 @@ editing here:
   app-recency store, and never let the strip's order and
   `focus_app_window`'s cycle share one (`docs/design-decisions.md`
   ▸ KiwiHub's app strip; `JumpAppStripTests`).
+- **KiwiHub's "your window" is one reading per snapshot (#3168):**
+  the window the list leaves out and the greyed current window it
+  names are both `jumpFocusedWindow()`, drawn only where it is also
+  `jumpSwapPartner`'s answer so the row and ⌥↩ never name two
+  windows, and its app's tile is
+  placed first in `jumpSnapshot`, never left to recency; a second
+  reader of "the window you are in" in the list takes that value
+  (`JumpYoursTests`).
 - **A focused float schedules no float-tier raise of its own, so a
   raise owed ahead of it and any mode's restore ending under it pay
   through `raiseFloatsForFocusedFloat` (#2985,

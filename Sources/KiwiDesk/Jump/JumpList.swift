@@ -160,6 +160,24 @@ extension JumpList {
     /// How many tiles the strip draws, All included.
     var tileCount: Int { snapshot.apps.count + 1 }
 
+    /// Whether the strip shows (#3168): off All, or under a query,
+    /// so ⌃⌥J opens on the list alone.
+    var stripShown: Bool { tile != 0 || !query.isEmpty }
+
+    /// The current window, drawn greyed at the top of All and of
+    /// its app's tile (#3168); nil under a query, which never
+    /// matches it, and where KiwiDesk tracks none.
+    var yours: JumpEntry? {
+        guard query.isEmpty, let yours = snapshot.yours,
+            tile == 0 || stripApp?.pid == yours.pid
+        else { return nil }
+        return yours
+    }
+
+    /// The list's rows as drawn: the results, and the current
+    /// window above them where it shows.
+    var drawnRows: Int { results.count + (yours == nil ? 0 : 1) }
+
     /// Whether tile `index` holds a match for the query; All always.
     func tileMatches(_ index: Int) -> Bool {
         guard index > 0, snapshot.apps.indices.contains(index - 1) else {
@@ -168,12 +186,13 @@ extension JumpList {
         return matchedApps.contains(snapshot.apps[index - 1].pid)
     }
 
-    /// How many windows the app's rows list; a hidden app's row is
-    /// no window.
+    /// How many windows the app has: its rows, a hidden app's row
+    /// being none, and the current window where it is the app's.
     func windowCount(of app: JumpApp) -> Int {
-        snapshot.entries.filter {
+        let listed = snapshot.entries.filter {
             $0.pid == app.pid && !$0.isHiddenApp
         }.count
+        return listed + (snapshot.yours?.pid == app.pid ? 1 : 0)
     }
 
     /// Moves the strip by `delta` tiles, over the tiles with a

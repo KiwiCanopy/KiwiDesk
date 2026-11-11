@@ -337,13 +337,14 @@ struct DesktopBindingPerCountTests {
         )
         var log: [String] = []
         core.onLog = { log.append($0) }
-        core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
+        let live = NativeSpaces.desktopSnapshot
+        core.applyDesktopBinding(in: live(), cause: .event)
         #expect(core.profiles.currentName == "Laptop")
         #expect(!log.contains { $0.contains("no longer exist") })
         // The stand-down is for a live profile that FITS: with
         // the screens changed under it, the gate re-judges.
         connect(core, 2)
-        core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
+        core.applyDesktopBinding(in: live(), cause: .event)
         #expect(log.contains { $0.contains("no longer exist") })
     }
 }
