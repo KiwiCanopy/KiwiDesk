@@ -60,20 +60,25 @@ struct FadingColumnTests {
         let side = try read("DesktopsSideView.swift")
         #expect(
             side.contains(
-                "FadingColumn(selected:state.place?.screen,"
-                    + "ids:Array(state.overview.screens.indices),"
+                "FadingColumn(selected:state.place.map"
+                    + "{DesktopsScrollID.screen($0.screen)},"
+                    + "ids:state.overview.screens.indices"
+                    + ".map(DesktopsScrollID.screen),"
                     + "inset:DesktopsGeometry.sidePadding)"
             )
         )
-        #expect(side.contains("row($0,geometry).id($0)"))
+        #expect(
+            side.contains("row($0,geometry).id(DesktopsScrollID.screen($0))")
+        )
+        #expect(side.contains(".id(DesktopsScrollID.desktop(screen,index))"))
         let card = try read("DesktopCardView.swift")
         #expect(
             card.contains(
-                "FadingColumn(selected:selectedLine,"
-                    + "ids:Array(desktop.spaces.indices))"
+                "FadingColumn(selected:selectedLine.map(lineID),"
+                    + "ids:desktop.spaces.indices.map(lineID))"
             )
         )
-        #expect(card.contains("line($0).id($0)"))
+        #expect(card.contains("line($0).id(lineID($0))"))
         for source in [side, card] {
             #expect(source.occurrences(of: "ScrollView(") == 0)
         }

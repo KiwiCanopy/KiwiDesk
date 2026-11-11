@@ -21,13 +21,13 @@ struct DesktopsSideView: View {
 
     var body: some View {
         FadingColumn(
-            selected: state.place?.screen,
-            ids: Array(state.overview.screens.indices),
+            selected: state.place.map { DesktopsScrollID.screen($0.screen) },
+            ids: state.overview.screens.indices.map(DesktopsScrollID.screen),
             inset: DesktopsGeometry.sidePadding
         ) {
             VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {
                 ForEach(state.overview.screens.indices, id: \.self) {
-                    row($0, geometry).id($0)
+                    row($0, geometry).id(DesktopsScrollID.screen($0))
                 }
             }
         }
@@ -44,7 +44,8 @@ struct DesktopsSideView: View {
     ) -> some View {
         let row = state.overview.screens[screen]
         let selected = state.place.flatMap {
-            $0.screen == screen ? $0.desktop : nil
+            $0.screen == screen
+                ? DesktopsScrollID.desktop($0.screen, $0.desktop) : nil
         }
         return VStack(alignment: .leading, spacing: DesktopsGeometry.headerGap)
         {
@@ -70,7 +71,7 @@ struct DesktopsSideView: View {
                             onMore: onMore,
                             onDrop: onDrop
                         )
-                        .id(index)
+                        .id(DesktopsScrollID.desktop(screen, index))
                     }
                 }
             }
@@ -106,4 +107,13 @@ struct DesktopsSideView: View {
             + (row.isHere ? [DesktopsText.here] : [])
         return words.isEmpty ? nil : words.joined(separator: " · ")
     }
+}
+
+/// The Desktops side's scroll ids, one space for its three nested
+/// scrolls: a reveal resolves a bare index in whichever scroll
+/// holds it, and nudged another (#3164).
+enum DesktopsScrollID: Hashable {
+    case screen(Int)
+    case desktop(Int, Int)
+    case line(DesktopsPlace)
 }

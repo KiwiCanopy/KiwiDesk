@@ -29,12 +29,12 @@ struct DesktopCardView: View {
             // A column cut short by the cap keeps the selected line
             // clear of its fade.
             FadingColumn(
-                selected: selectedLine,
-                ids: Array(desktop.spaces.indices)
+                selected: selectedLine.map(lineID),
+                ids: desktop.spaces.indices.map(lineID)
             ) {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(desktop.spaces.indices, id: \.self) {
-                        line($0).id($0)
+                        line($0).id(lineID($0))
                     }
                 }
             }
@@ -52,6 +52,10 @@ struct DesktopCardView: View {
             place.desktop == index
         else { return nil }
         return place.line
+    }
+
+    private func lineID(_ line: Int) -> DesktopsScrollID {
+        .line(DesktopsPlace(screen: screen, desktop: index, line: line))
     }
 
     private func line(_ line: Int) -> some View {
