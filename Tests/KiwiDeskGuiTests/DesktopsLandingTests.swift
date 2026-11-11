@@ -224,7 +224,7 @@ struct DesktopsLandingTests {
         // The bound, the in-place read and the end once it shows.
         #expect(
             landing.contains(
-                "ProcessInfo.processInfo.systemUptime<landing.deadline"
+                "DesktopsLanding.uptime()<landing.deadline"
                     + "else{returnendLanding()}model.refreshDesktops()"
             )
         )

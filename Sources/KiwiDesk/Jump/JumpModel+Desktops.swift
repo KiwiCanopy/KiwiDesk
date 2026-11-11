@@ -77,8 +77,8 @@ extension JumpModel {
         endDesktopsRefusal()
         restPointerForClick()
         guard count < 2 else { return }
-        let held = pickModifiers(modifiers)
-            .intersection([.shift, .option, .command])
+        let modifiers = pickModifiers(modifiers)
+        let held = modifiers.intersection([.shift, .option, .command])
         // ⌥↩ swaps no window while windows ride along.
         if state.isCarrying, held.contains(.option) { return }
         if state.isCarrying, !held.contains(.command) {

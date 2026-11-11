@@ -13,6 +13,11 @@ struct DesktopsLanding {
     /// Uptime seconds past which the panel stops waiting.
     let deadline: TimeInterval
 
+    /// The wait's clock in uptime seconds, a seam over the host read.
+    @MainActor static var uptime: () -> TimeInterval = {
+        ProcessInfo.processInfo.systemUptime
+    }
+
     /// How long a drop waits for its moves to land.
     static let bound: TimeInterval = 3
 
@@ -54,7 +59,7 @@ extension JumpPanelController {
         let landing = DesktopsLanding(
             ids: Set(ids),
             target: target,
-            deadline: ProcessInfo.processInfo.systemUptime
+            deadline: DesktopsLanding.uptime()
                 + DesktopsLanding.bound
         )
         guard !landing.landed(in: overview) else { return }
@@ -76,7 +81,7 @@ extension JumpPanelController {
     /// side or the bound passed, and once the drop shows.
     private func reread(_ landing: DesktopsLanding, model: JumpModel) {
         guard isOpen, model.scope == .desktops,
-            ProcessInfo.processInfo.systemUptime < landing.deadline
+            DesktopsLanding.uptime() < landing.deadline
         else { return endLanding() }
         model.refreshDesktops()
         if let overview = model.desktops?.overview,

@@ -46,13 +46,18 @@ final class PanelPresence: ObservableObject {
         }
     }
 
+    /// The hold's clock in uptime seconds, a seam over the host read.
+    static var uptime: () -> TimeInterval = {
+        ProcessInfo.processInfo.systemUptime
+    }
+
     /// `clickHold` for the event being handled now on `panel`; read
     /// at the press, since a close may finish a turn later.
     static func clickHoldNow(on panel: NSWindow?) -> TimeInterval {
         clickHold(
             after: NSApp?.currentEvent,
             on: panel?.windowNumber,
-            now: ProcessInfo.processInfo.systemUptime,
+            now: uptime(),
             interval: NSEvent.doubleClickInterval
         )
     }
