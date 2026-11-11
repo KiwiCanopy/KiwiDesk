@@ -1,0 +1,184 @@
+#!/bin/bash
+# Clear regenerable build output in worktrees nothing is using
+# (#3186). Dry run by default; --apply deletes.
+# Usage: scripts/prune-builds [--apply] [--idle-hours N]
+#        [--if-below-gb N] [--timeout S]
+#
+# Sweeps every `git worktree list` entry. Deletes only .build,
+# site/node_modules and site/.astro, and only in a tree passing
+# every clause below; DerivedData is reported, never touched. Never
+# removes a worktree or a branch. Anything else that deletes build
+# output calls this script (packaging-and-release.md).
+#
+#   1. The gate is free: --apply takes gate-lock's lock with
+#      `lockf -t 0` and holds it for the whole sweep, or runs
+#      inside gate-lock (KIWIDESK_GATE_LOCK_HELD=1).
+#   2. No process has its cwd or executable inside the tree: one
+#      `lsof -a -d cwd,txt -Fn` pass, prefix-matched on the real
+#      path. Never `lsof +D`, which walks every file.
+#   3. Not the caller's own tree.
+#   4. Idle >= N hours (default 12) by the newest of .build's
+#      children and `.build/*/debug.yaml`, never .build's own
+#      mtime: Swift Build writes no top-level yaml or build.db.
+#
+# A dry run takes no lock, so it never queues a gate. --if-below-gb
+# N exits at once unless the volume has under N GB free; --timeout
+# S kills the whole sweep, children included, after S seconds.
+# Exit 75: --apply found the gate busy.
+set -uo pipefail
+
+ARGS=("$@")
+APPLY=0 IDLE_HOURS=12 BELOW_GB="" TIMEOUT=""
+REST=()
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --apply) APPLY=1; REST+=("$1") ;;
+        --idle-hours) IDLE_HOURS="${2:?}"
+            REST+=("$1" "$2"); shift ;;
+        --if-below-gb) BELOW_GB="${2:?}"
+            REST+=("$1" "$2"); shift ;;
+        --timeout) TIMEOUT="${2:?}"; shift ;;
+        *) echo "usage: scripts/prune-builds [--apply]" \
+            "[--idle-hours N] [--if-below-gb N] [--timeout S]" >&2
+            exit 64 ;;
+    esac
+    shift
+done
+
+# Own process group, waited for: a deadline or a signal to the
+# wrapper stops the whole sweep, so nothing outlives the caller's lock.
+if [ -n "$TIMEOUT" ]; then
+    exec /usr/bin/perl -MPOSIX=setpgid -e '
+        my $t = shift;
+        my $pid = 0;
+        $SIG{$_} = sub {
+            if ($pid) { kill("TERM", -$pid); waitpid($pid, 0) }
+            print STDERR "prune-builds: stopped ($_[0])\n";
+            exit 124;
+        } for qw(ALRM INT TERM HUP);
+        $pid = fork() // exit 0;
+        if ($pid == 0) { setpgrp(0, 0); exec(@ARGV) or exit 1 }
+        setpgid($pid, $pid);
+        alarm($t);
+        waitpid($pid, 0);
+        exit($? & 127 ? 128 + ($? & 127) : $? >> 8);' \
+        "$TIMEOUT" "$0" ${REST[@]+"${REST[@]}"}
+fi
+
+free_kb() {
+    df -k "$PWD" 2>/dev/null | awk 'NR == 2 { print $4 }'
+}
+gb() { awk -v k="$1" 'BEGIN { printf "%.1f", k / 1048576 }'; }
+
+BEFORE_KB="$(free_kb)"
+case "$BEFORE_KB" in
+    '' | *[!0-9]*)
+        echo "prune-builds: df failed; nothing pruned" >&2
+        exit 0 ;;
+esac
+if [ -n "$BELOW_GB" ] &&
+    [ "$BEFORE_KB" -ge $((BELOW_GB * 1048576)) ]; then
+    exit 0
+fi
+
+if [ "$APPLY" = 1 ] && [ "${KIWIDESK_GATE_LOCK_HELD:-}" != 1 ]; then
+    LOCK="$("$(dirname "$0")/gate-lock" --lock-path)" || exit 1
+    KIWIDESK_GATE_LOCK_HELD=1 /usr/bin/lockf -k -t 0 "$LOCK" \
+        "$0" ${ARGS[@]+"${ARGS[@]}"}
+    STATUS=$?
+    if [ "$STATUS" -eq 75 ]; then
+        echo "prune-builds: gate busy; nothing pruned" >&2
+    fi
+    exit "$STATUS"
+fi
+
+OWN="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "prune-builds: not inside a git worktree" >&2
+    exit 1
+}
+OWN="$(cd "$OWN" && pwd -P)"
+TREES="$(git worktree list --porcelain | sed -n 's/^worktree //p')"
+
+# Clause 2's one pass. Our own shell is always in it, so an empty
+# answer means lsof failed, and nothing is provably unused. Found on
+# PATH, like git, so the tests can hand it a listing.
+USED="$(PATH="$PATH:/usr/sbin" lsof -a -d cwd,txt -Fn 2>/dev/null |
+    sed -n 's/^n//p')"
+if [ -z "$USED" ]; then
+    echo "prune-builds: lsof listed no process; refusing" >&2
+    exit 1
+fi
+
+# A here-string, never a pipe: awk exits at the first match, and
+# under pipefail the writer's SIGPIPE would read as "unused".
+in_use() {
+    awk -v r="$1" '
+        $0 == r || index($0, r "/") == 1 { found = 1; exit }
+        END { exit !found }' <<< "$USED"
+}
+
+newest_marker() {
+    local newest=0 m f
+    for f in "$1"/.build/* "$1"/.build/.[!.]* \
+        "$1"/.build/*/debug.yaml \
+        "$1"/site/node_modules/.package-lock.json "$1"/site/.astro
+    do
+        [ -e "$f" ] || [ -L "$f" ] || continue
+        m="$(stat -f %m "$f")"
+        [ "$m" -gt "$newest" ] && newest="$m"
+    done
+    echo "$newest"
+}
+
+NOW="$(date +%s)"
+COUNT=0
+while IFS= read -r TREE; do
+    [ -d "$TREE" ] || continue
+    REAL="$(cd "$TREE" && pwd -P)"
+    TARGETS=()
+    for d in .build site/node_modules site/.astro; do
+        if [ -e "$REAL/$d" ] || [ -L "$REAL/$d" ]; then
+            TARGETS+=("$d")
+        fi
+    done
+    [ "${#TARGETS[@]}" -eq 0 ] && continue
+    if [ "$REAL" = "$OWN" ]; then
+        echo "keep  $REAL (own tree)"; continue
+    fi
+    if in_use "$REAL"; then
+        echo "keep  $REAL (a process uses it)"; continue
+    fi
+    NEWEST="$(newest_marker "$REAL")"
+    if [ "$NEWEST" = 0 ]; then
+        echo "keep  $REAL (no build marker)"; continue
+    fi
+    IDLE=$(((NOW - NEWEST) / 3600))
+    if [ "$IDLE" -lt "$IDLE_HOURS" ]; then
+        echo "keep  $REAL (idle ${IDLE}h)"; continue
+    fi
+    COUNT=$((COUNT + 1))
+    if [ "$APPLY" = 1 ]; then
+        for d in "${TARGETS[@]}"; do rm -rf -- "${REAL:?}/$d"; done
+        echo "prune $REAL (idle ${IDLE}h): ${TARGETS[*]}"
+    else
+        SIZE="$(cd "$REAL" && du -sch "${TARGETS[@]}" 2>/dev/null |
+            tail -1 | cut -f1)"
+        echo "would $REAL (idle ${IDLE}h, $SIZE): ${TARGETS[*]}"
+    fi
+done <<< "$TREES"
+
+for d in "$HOME"/Library/Developer/Xcode/DerivedData/KiwiDesk-*; do
+    [ -d "$d" ] && echo "note  $d (DerivedData; not touched)"
+done
+
+if [ "$APPLY" = 1 ]; then
+    AFTER_KB="$(free_kb)"
+    FREED_KB=$((AFTER_KB - BEFORE_KB))
+    [ "$FREED_KB" -lt 0 ] && FREED_KB=0
+    echo "prune-builds: cleared $COUNT tree(s)," \
+        "$(gb "$FREED_KB") GB freed," \
+        "$(gb "$AFTER_KB") GB free" >&2
+else
+    echo "prune-builds: $COUNT tree(s) would be cleared" \
+        "(dry run; --apply deletes)" >&2
+fi
