@@ -154,6 +154,34 @@ struct ShortcutsPagePartTests {
         )
     }
 
+    /// A row is found by what it runs, not its own spelling alone: a
+    /// lens toggle stored in another case is its lens row's, in Show
+    /// & hide (#2103 ruling 39), never Inactive.
+    @Test("a spelling a row owns finds that row's part")
+    func ownedSpellingsFindTheirPart() {
+        let model = makeTestModel()
+        let stored = KeyBinding(
+            combo: "",
+            lua: KeybindingCatalog.toggleLens("Writing").lua,
+            kind: .navigation,
+            label: ""
+        )
+        model.config.layers[0].bindings = [stored]
+        let expander = ShortcutsFamilyRows.ofDraft(
+            model,
+            layer: KeyLayer.defaultName
+        )
+        let other = KeybindingCatalog.toggleLens("writing").lua
+        #expect(other != stored.lua)
+        #expect(
+            ShortcutsPagePart.owner(
+                of: other,
+                expander: expander,
+                bindings: [stored]
+            ) == .showHide
+        )
+    }
+
     /// A reveal outside Shortcuts takes no detour; inside, a held part
     /// needs none, an unbuilt one is reached first, and an unplaceable
     /// anchor asks for the whole page.
