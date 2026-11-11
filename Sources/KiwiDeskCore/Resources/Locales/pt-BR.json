@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, pegada",
   "desktop_overview.card.shown": "visível",
+  "desktop_overview.card.switch_to": "Alternar para a Mesa %1$d",
   "desktop_overview.card.title": "Mesa %1$d",
   "desktop_overview.field.label": "Buscar janelas",
   "desktop_overview.footer.back": "%1$@ Voltar",

@@ -18,6 +18,7 @@ struct DesktopLineView: View {
     let onWindow: (WindowID, DesktopsPlace, Int, NSEvent.ModifierFlags) -> Void
     let onMore: (DesktopsPlace, Bool) -> Void
     let onDrop: ([WindowID], DesktopsPlace) -> Void
+    let pointer: DesktopsPointer
 
     @Environment(\.kiwiHubPaint) private var paint
     @Environment(\.desktopsSwell) private var swell
@@ -29,6 +30,10 @@ struct DesktopLineView: View {
     private var isTarget: Bool {
         (isSelected && state.isCarrying && !state.isInside)
             || dropTargeted
+    }
+    /// The pointer lifts the line, grey, never the selected one.
+    private var isLifted: Bool {
+        pointer.lifts(.place(place), selected: isSelected && !state.isInside)
     }
 
     var body: some View {
@@ -44,6 +49,7 @@ struct DesktopLineView: View {
         .opacity(state.hasMatch(place) ? 1 : 0.45)
         .contentShape(Rectangle())
         .onTapGesture { click() }
+        .desktopsHover(.place(place), pointer)
         .onDrop(of: [.plainText], isTargeted: $dropTargeted) { items in
             DesktopsDrag.receive(items) { onDrop($0, place) }
         }
@@ -64,12 +70,19 @@ struct DesktopLineView: View {
                 .overlay(shape.strokeBorder(paint.selection, lineWidth: 2))
         } else if isSelected, !state.isInside {
             shape.fill(paint.fill(paint.selection))
+        } else if isLifted {
+            shape.fill(paint.fill(paint.rowHover))
         }
     }
 
     private var ink: AnyShapeStyle {
-        isSelected && !state.isInside && !isTarget
-            ? AnyShapeStyle(paint.selectionInk) : AnyShapeStyle(.primary)
+        if isSelected, !state.isInside, !isTarget {
+            return AnyShapeStyle(paint.selectionInk)
+        }
+        if isLifted, !isTarget, let hoverInk = paint.hoverInk {
+            return AnyShapeStyle(hoverInk)
+        }
+        return AnyShapeStyle(.primary)
     }
 
     @ViewBuilder private var label: some View {
@@ -129,6 +142,7 @@ struct DesktopLineView: View {
                         isLast: line?.lastFocused == window.id,
                         isMatch: state.matches(window),
                         dragged: dragged(window.id),
+                        pointer: pointer,
                         onClick: { count, modifiers in
                             onWindow(window.id, place, count, modifiers)
                         }

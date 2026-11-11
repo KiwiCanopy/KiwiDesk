@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, presa",
   "desktop_overview.card.shown": "visibile",
+  "desktop_overview.card.switch_to": "Passa alla Scrivania %1$d",
   "desktop_overview.card.title": "Scrivania %1$d",
   "desktop_overview.field.label": "Cerca finestre",
   "desktop_overview.footer.back": "%1$@ Indietro",

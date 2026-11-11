@@ -9,6 +9,11 @@ enum JumpHover: Equatable {
     case item(ViewPickList.Pick)
     /// A tile of the Windows side's app strip (#3135).
     case tile(Int)
+    /// The Desktops side (#3209): a Desktop card's title, a Space's
+    /// line, a window's icon.
+    case desktop(screen: Int, index: Int)
+    case place(DesktopsPlace)
+    case window(WindowID)
 
     /// Whether `target` draws the lift: the item under the pointer,
     /// never the selected one, whose accent wins (#1173), and never
@@ -56,6 +61,26 @@ extension JumpModel {
     func hoverItem(_ pick: ViewPickList.Pick, pointer: CGPoint) {
         guard scope == .view else { return }
         noteHover(.item(pick), pointer: pointer)
+    }
+
+    /// The pointer over a Desktops title, line or icon (#3209). An
+    /// icon sits inside its line and both report each move, so the
+    /// icon keeps the lift while it is under the pointer.
+    func hoverDesktops(_ target: JumpHover, pointer: CGPoint) {
+        guard scope == .desktops else { return }
+        switch (target, hover) {
+        case (.place(let place), .window(let id)):
+            if desktops?.line(place)?.windows.contains(where: {
+                $0.id == id
+            }) == true {
+                return
+            }
+        case (.window, .place):
+            return noteHover(target, pointer: pointer, inside: hover)
+        default:
+            break
+        }
+        noteHover(target, pointer: pointer)
     }
 
     /// The pointer left `target`.

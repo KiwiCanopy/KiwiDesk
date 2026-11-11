@@ -39,8 +39,9 @@ extension JumpModel {
     }
 
     /// A click on a Space line, or a card's title for its shown
-    /// line: one click selects, and a line also opens its Space; a
-    /// double click acts; ⇧ moves your window there (#1229 ▸ Mouse).
+    /// line, is ↩ there on release (#3209): a line goes to its Space,
+    /// a title to its Desktop, and a carry drops; ⇧ moves your window
+    /// there. A double click's second press acts on nothing.
     func clickPlace(
         _ place: DesktopsPlace,
         count: Int,
@@ -49,36 +50,28 @@ extension JumpModel {
     ) {
         guard scope == .desktops, var state = desktops else { return }
         endDesktopsRefusal()
-        let modifiers = pickModifiers(modifiers)
         restPointerForClick()
+        guard count < 2 else { return }
+        let modifiers = pickModifiers(modifiers)
         state.select(place)
-        if state.isCarrying {
-            desktops = state
-            if count > 1 {
-                handleDesktops(.pick(moveHere: false), repeated: false)
-            }
-            return
-        }
-        if modifiers.contains(.shift) {
-            desktops = state
-            handleDesktops(.pick(moveHere: true), repeated: false)
-            return
-        }
-        if count > 1 {
-            desktops = state
-            if opens {
-                handleDesktops(.pick(moveHere: false), repeated: false)
-            } else if let desktop = state.desktop(place) {
-                onDesktopsAction(.jumpDesktop(desktop))
-            }
-            return
-        }
-        if opens { _ = state.open() }
         desktops = state
+        if state.isCarrying || modifiers.contains(.shift) {
+            let moveHere = !state.isCarrying
+            return handleDesktops(.pick(moveHere: moveHere), repeated: false)
+        }
+        // ⌘↩ and ⌥↩ name a window, which a place is not.
+        guard modifiers.isDisjoint(with: [.option, .command]) else { return }
+        if opens {
+            handleDesktops(.pick(moveHere: false), repeated: false)
+        } else if let desktop = state.desktop(place) {
+            onDesktopsAction(.jumpDesktop(desktop))
+        }
     }
 
-    /// A click on a window's icon: selects it; a double click jumps;
-    /// ⇧ Move here, ⌥ Swap here, ⌘ pick up or put back.
+    /// A click on a window's icon is ↩ on it on release (#3209):
+    /// it jumps there, and a carry drops on its Space; ⇧ Move here,
+    /// ⌥ Swap here, ⌘ pick up or put back. A double click's second
+    /// press acts on nothing.
     func clickWindow(
         _ id: WindowID,
         in place: DesktopsPlace,
@@ -87,27 +80,24 @@ extension JumpModel {
     ) {
         guard scope == .desktops, var state = desktops else { return }
         endDesktopsRefusal()
-        let modifiers = pickModifiers(modifiers)
         restPointerForClick()
-        if state.isCarrying, !modifiers.contains(.command) {
+        guard count < 2 else { return }
+        let held = pickModifiers(modifiers)
+            .intersection([.shift, .option, .command])
+        if state.isCarrying, !held.contains(.command) {
             state.select(place)
             desktops = state
-            if count > 1 {
-                handleDesktops(.pick(moveHere: false), repeated: false)
-            }
-            return
+            return handleDesktops(.pick(moveHere: false), repeated: false)
         }
         state.select(window: id, in: place)
         desktops = state
-        let held = modifiers.intersection([.shift, .option, .command])
         if held.contains(.command) {
             handleDesktops(.pickUp, repeated: false)
         } else if held.contains(.option) {
             handleDesktops(.swapHere, repeated: false)
-        } else if held.contains(.shift) {
-            handleDesktops(.pick(moveHere: true), repeated: false)
-        } else if count > 1 {
-            handleDesktops(.pick(moveHere: false), repeated: false)
+        } else {
+            let moveHere = held.contains(.shift)
+            handleDesktops(.pick(moveHere: moveHere), repeated: false)
         }
     }
 

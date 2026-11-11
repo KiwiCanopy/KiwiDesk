@@ -128,6 +128,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         // A field editor left by the last opening would keep the
         // keys from the new content's field.
         panel.makeFirstResponder(nil)
+        // A close's unseen hold may still be under way (#3209).
+        panel.alphaValue = 1
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
         if screen != nil {
@@ -202,19 +204,23 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         guard panel?.isVisible != false, !presence.leaving else {
             return false
         }
+        // Read at the press: the release below may run a turn later.
+        let hold = PanelPresence.clickHoldNow()
         handBack.release(distrusting: distrusting) { [weak self] in
-            self?.fadeOut()
+            self?.fadeOut(holdUnseen: hold)
         }
         return true
     }
 
     /// Fades the panel out, then orders it out; it stops taking
-    /// keys the moment the fade starts.
-    private func fadeOut() {
+    /// keys and clicks the moment the fade starts.
+    private func fadeOut(holdUnseen: TimeInterval) {
         currentModel?.leave()
-        presence.fadeOut(panel, reduceMotion: reduceMotion()) {
-            [weak self] in self?.presence === $0
-        }
+        presence.fadeOut(
+            panel,
+            reduceMotion: reduceMotion(),
+            holdUnseen: holdUnseen
+        ) { [weak self] in self?.presence === $0 }
     }
 
     // MARK: - Construction
@@ -254,6 +260,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.onCancel = { [weak self] in
             self?.close()
         }
+        panel.leaving = { [weak self] in self?.presence.leaving ?? false }
         return panel
     }
 

@@ -78,6 +78,20 @@ final class JumpModel: ObservableObject {
             clearHover()
         }
     }
+
+    /// Lifts `target` where it sits inside `container`, which took
+    /// the same pointer move first.
+    func noteHover(
+        _ target: JumpHover,
+        pointer: CGPoint,
+        inside container: JumpHover?
+    ) {
+        if pointer == lastPointer, hover == container {
+            hover = target
+        } else {
+            noteHover(target, pointer: pointer)
+        }
+    }
     /// The pointer now — the panel's one live read; a test pins
     /// it, and passes `pointer:` to `init`.
     static let livePointer: () -> CGPoint = { NSEvent.mouseLocation }
