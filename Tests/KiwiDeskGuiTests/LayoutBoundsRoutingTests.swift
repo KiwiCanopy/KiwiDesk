@@ -99,7 +99,8 @@ struct LayoutBoundsRoutingTests {
         // the strips the bar managers actually drew, so routing
         // through `layoutBounds` would bound a float out of a
         // region no bar occupies whenever an empty bar is
-        // suppressed.
+        // suppressed. The float verbs' reach (#3163) is the same
+        // derivation, carving a top strip alone.
         "App/KiwiCore+FloatRegion.swift": 1,
         // The traveler re-home (#1217), a float NET on the same
         // grounds: its destination is the display a floating

@@ -5,7 +5,7 @@ import Foundation
 /// double-click's expand, an app re-sizing itself — is corrected
 /// NOW rather than at the next unrelated retile (#1358, owner
 /// ruling 2026-09-13): a tiled window goes back into its slot, an
-/// effective float is fitted clear of the bars. Both are the
+/// effective float is pushed clear of a top bar. Both are the
 /// ordinary retile's own work; this only decides whether one is
 /// owed, and bounds how often.
 extension KiwiCore {
@@ -24,7 +24,7 @@ extension KiwiCore {
         if let issued = tiler.placedFrames(state: state)[id] {
             return !TilingEngine.close(frame, to: issued)
         }
-        return floatFitCorrection(id, frame: frame) != nil
+        return floatBarPush(id, frame: frame) != nil
     }
 
     /// The `.windowResized` arm's correction for a resize that is

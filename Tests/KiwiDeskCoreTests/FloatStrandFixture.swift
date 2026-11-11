@@ -27,7 +27,7 @@ enum FloatStrandFixture {
     )
 
     static var centred: CGRect {
-        FloatRecovery.centred(size, in: bounds)
+        FloatRecovery.centredAtSize(size, in: bounds)
     }
 
     static func parked(

@@ -78,20 +78,13 @@ struct TravelerRehomeSeamTests {
             Issue.record("rehomeTraveler missing")
             return
         }
-        // Both the fit and the fallback clamp take the render
-        // arm — two `space: space` inside the net's own body, so
-        // the outer `space: spaceID` cannot satisfy this.
+        // The top-bar push takes the render arm — a `space: space`
+        // inside the net's own body, so the outer `space: spaceID`
+        // cannot satisfy this.
         #expect(
-            net.contains("floatFrameFittedClearOfBars(")
-                && net.components(separatedBy: "space: space")
-                    .count >= 3,
-            "the net fits and clamps through the RENDER space arm"
-        )
-        // The fit is memo-gated like the home net's (#1091): an
-        // app that refused a size is not re-asked every retile.
-        #expect(
-            net.contains("shouldIssueFloatFit("),
-            "the traveler's fit consults the refusal memo"
+            net.contains("floatFrameClampedClearOfBars(")
+                && net.contains("space: space"),
+            "the net pushes through the RENDER space arm"
         )
         #expect(
             net.contains("forgetSizeBound("),
