@@ -179,4 +179,27 @@ struct SettingsSearchCatalogSynonymTests {
         ).settings
         #expect(hits.contains { $0.anchor.anchor == anchor })
     }
+
+    /// The footer's "Report a problem" has no search entry, so the
+    /// words for it reach the log a report asks for (#3214).
+    @Test("report, bug and feedback find the Log row")
+    func reportWordsFindTheLog() throws {
+        pinEnglish()
+        defer { reset() }
+        let row = try #require(
+            SettingsSearchIndex.rows().first {
+                $0.key == .general(.advancedExportLog)
+            }
+        )
+        for word in ["report", "bug", "problem", "issue", "feedback"] {
+            let hits = SettingsSearch.results(
+                query: word,
+                context: SettingsSearchContext()
+            ).settings
+            #expect(
+                hits.contains { $0.anchor == row.anchor },
+                Comment(rawValue: word)
+            )
+        }
+    }
 }

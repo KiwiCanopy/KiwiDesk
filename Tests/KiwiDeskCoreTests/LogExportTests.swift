@@ -74,11 +74,29 @@ struct LogExportTests {
         let url = scratch()
         defer { try? FileManager.default.removeItem(at: url) }
         let export = fake(Self.header + "a\nb\nc\n")
-        let outcome = try export.export(.last(60), to: url)
+        let outcome = try export.export(.last(60), to: url, header: "")
         #expect(outcome == .written(lines: 3))
         let text = try String(contentsOf: url, encoding: .utf8)
         #expect(text.contains("Timestamp"))
         #expect(text.hasSuffix("c\n"))
+    }
+
+    @Test("a header opens the file, and an empty range still writes none")
+    func headerOpensTheFile() throws {
+        let url = scratch()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let outcome = try fake(Self.header + "a\n")
+            .export(.last(60), to: url, header: "KiwiDesk 1\n\n")
+        #expect(outcome == .written(lines: 1))
+        let text = try String(contentsOf: url, encoding: .utf8)
+        #expect(text.hasPrefix("KiwiDesk 1\n\nTimestamp"))
+        let empty = scratch()
+        #expect(
+            try fake(Self.header)
+                .export(.last(60), to: empty, header: "KiwiDesk 1\n\n")
+                == .empty
+        )
+        #expect(!FileManager.default.fileExists(atPath: empty.path))
     }
 
     @Test("a range the store answers nothing for writes no file")
@@ -86,7 +104,7 @@ struct LogExportTests {
         let url = scratch()
         defer { try? FileManager.default.removeItem(at: url) }
         let export = fake(Self.header)
-        #expect(try export.export(.last(60), to: url) == .empty)
+        #expect(try export.export(.last(60), to: url, header: "") == .empty)
         #expect(!FileManager.default.fileExists(atPath: url.path))
     }
 
@@ -95,10 +113,10 @@ struct LogExportTests {
         let url = scratch()
         let refused = fake("", status: 64, stderr: "bad predicate")
         #expect(throws: LogExport.Failure.self) {
-            try refused.export(.last(60), to: url)
+            try refused.export(.last(60), to: url, header: "")
         }
         do {
-            _ = try refused.export(.last(60), to: url)
+            _ = try refused.export(.last(60), to: url, header: "")
         } catch let LogExport.Failure.toolFailed(status, stderr) {
             #expect(status == 64)
             #expect(stderr == "bad predicate")
@@ -108,7 +126,7 @@ struct LogExportTests {
         let unwritable = URL(fileURLWithPath: "/dev/null/nope/x.txt")
         let ok = fake(Self.header + "a\n")
         #expect(throws: LogExport.Failure.self) {
-            try ok.export(.last(60), to: unwritable)
+            try ok.export(.last(60), to: unwritable, header: "")
         }
     }
 

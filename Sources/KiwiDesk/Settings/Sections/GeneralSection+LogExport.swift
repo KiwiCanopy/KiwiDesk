@@ -19,10 +19,11 @@ extension GeneralSection {
                 "If you can make the problem happen again, "
                     + "do that first, then export — the range "
                     + "counts back from now. The file holds "
-                    + "only what KiwiDesk itself wrote to the "
-                    + "macOS log; it names the apps and "
-                    + "windows it managed in that time, so "
-                    + "glance through it before attaching."
+                    + "the settings you changed and what "
+                    + "KiwiDesk itself wrote to the macOS log; "
+                    + "it names the apps and windows it managed "
+                    + "in that time, so glance through it "
+                    + "before attaching."
             ),
             helpSubject: SettingsCatalog.general.generalAdvanced
                 .children.exportLog.text

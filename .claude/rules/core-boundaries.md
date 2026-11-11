@@ -38,6 +38,11 @@ itself when an eighth is added.
   [localization.md](localization.md).
 - **CLI/IPC error strings stay English** — they are a machine
   contract, not UI copy. The deliberate exception to the above.
+  Text written into a diagnostic artifact a maintainer reads (the
+  exported log's header, a prefilled issue-form field) stays
+  English too, and never reaches a GUI surface (#3214,
+  `ProblemReportTests`; `HomeSupportStripTests` ▸
+  `footerCarriesTheReportDoor` holds its one reader).
 - **A refusal states the rule that forbids the act, and names a
   value only to say which (#3033).** Write `This window can only
   cross screens on the visible Desktop.`, never `Space 5 is on

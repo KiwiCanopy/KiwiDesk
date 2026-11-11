@@ -76,12 +76,16 @@ public struct LogExport: Sendable {
         return arguments
     }
 
-    /// Runs the query and writes every line to `destination`. A
-    /// runner that cannot even start the tool is named here as
-    /// `toolFailed`, so the GUI meets no unnamed error.
-    public func export(_ range: Range, to destination: URL)
-        throws(Failure) -> Outcome
-    {
+    /// Runs the query and writes `header`, then every line, to
+    /// `destination`. A runner that cannot even start the tool is
+    /// named here as `toolFailed`, so the GUI meets no unnamed
+    /// error. An empty range still writes no file. `header` takes
+    /// no default: a caller says what the file opens with (#3214).
+    public func export(
+        _ range: Range,
+        to destination: URL,
+        header: String
+    ) throws(Failure) -> Outcome {
         let result: ToolResult
         do {
             result = try run(Self.arguments(for: range))
@@ -98,7 +102,8 @@ public struct LogExport: Sendable {
         let lines = Self.logLines(in: text)
         guard lines > 0 else { return .empty }
         do {
-            try Data(text.utf8).write(to: destination, options: .atomic)
+            try Data((header + text).utf8)
+                .write(to: destination, options: .atomic)
         } catch {
             throw Failure.writeFailed(destination)
         }
