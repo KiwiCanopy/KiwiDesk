@@ -187,6 +187,19 @@ struct DesktopsGeometryTests {
         more.revealMore(place, forward: true)
         #expect(more.window == windows[6].id)
         #expect(more.offset(place) == 1)
+        // 540 pt: four slots, so a reveal or a clamp by a fixed five
+        // lands one slot off.
+        let narrow = DesktopsState(
+            overview: overview,
+            geometry: G(overview: overview, width: 540, cap: Self.cap)
+        )
+        #expect(narrow.slots(place) == 4)
+        var fifth = narrow
+        fifth.select(window: windows[4].id, in: place)
+        #expect(fifth.offset(place) == 1)
+        var last = narrow
+        last.select(window: windows[6].id, in: place)
+        #expect(last.offset(place) == 3)
     }
 
     @Test("the model hands the state the side's slots")
@@ -233,18 +246,26 @@ struct DesktopsGeometryTests {
         let side = try read("DesktopsSideView.swift")
             .replacingOccurrences(of: " ", with: "")
         #expect(side.contains("geometry:DesktopsGeometry{state.geometry}"))
-        // One construction in the Jump tree: the model's.
-        let files = try FileManager.default.contentsOfDirectory(
-            atPath: jump.path
+        // One construction in the whole GUI tree: the model's.
+        let gui = jump.deletingLastPathComponent()
+        let walker = try #require(
+            FileManager.default.enumerator(atPath: gui.path)
         )
-        .filter { $0.hasSuffix(".swift") }
-        #expect(files.count > 10)
+        let files = walker.compactMap { $0 as? String }
+            .filter { $0.hasSuffix(".swift") }
+        #expect(files.count > 100)
         var built: [String: Int] = [:]
-        for name in files {
-            let count = try read(name).occurrences(of: "DesktopsGeometry(")
-            if count > 0 { built[name] = count }
+        for path in files {
+            let source = SourceScan.stripComments(
+                try String(
+                    contentsOf: gui.appendingPathComponent(path),
+                    encoding: .utf8
+                )
+            )
+            let count = source.occurrences(of: "DesktopsGeometry(")
+            if count > 0 { built[path] = count }
         }
-        #expect(built == ["JumpModel+Desktops.swift": 1])
+        #expect(built == ["Jump/JumpModel+Desktops.swift": 1])
         let controller = try read("JumpPanelController.swift")
             .replacingOccurrences(of: " ", with: "")
         #expect(controller.contains("panelWidth:width,"))
