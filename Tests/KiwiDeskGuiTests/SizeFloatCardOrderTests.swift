@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Shortcuts & Gestures ▸ Size & float (#3160): sticky under float,
+/// Shortcuts ▸ Built-in ▸ Size & float (#3160): sticky under float,
 /// the layouts caption under the Maximize rows, and the Tiling off
 /// block closing the card behind a rule, its key row first. The
 /// order list is walked by a `ForEach`, but the block and the
