@@ -115,8 +115,13 @@ extension JumpPanel {
         let flags = event.modifierFlags
         let full = key(event.keyCode, flags)
         // The back chord is matched first, as `JumpKey.of` does.
-        if full == .side(-1), scope() == .windows, let chord = back(),
-            JumpKey.presses(chord, keyCode: event.keyCode, modifiers: flags)
+        if full == .side(-1),
+            JumpKey.isBack(
+                keyCode: event.keyCode,
+                modifiers: flags,
+                scope: scope(),
+                back: back()
+            )
         {
             onBackChord(flags)
             return full

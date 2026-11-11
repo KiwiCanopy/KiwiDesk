@@ -108,9 +108,9 @@ public struct JumpSnapshot: Sendable, Equatable {
     /// opener selects whatever order a lens gives the rows; nil
     /// where none was ever focused.
     public let lastUsed: JumpEntry.Target?
-    /// The window you are in — the one the list leaves out — which
-    /// the panel draws greyed as the current window (#3168); nil
-    /// where its app is not in front or KiwiDesk tracks none.
+    /// The window you are in — the one the list leaves out, where
+    /// it is also the one Swap here trades with — which the panel
+    /// draws greyed as the current window (#3168); nil otherwise.
     public let yours: JumpEntry?
 
     public init(

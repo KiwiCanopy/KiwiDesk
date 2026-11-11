@@ -138,16 +138,16 @@ struct JumpStripModelTests {
                 at: root.appendingPathComponent(file)
             ).split(whereSeparator: \.isWhitespace).joined()
         }
-        // Back reads the opener's live chord at each press, through
-        // the one key reader both of the panel's key doors call
-        // (`JumpStaleModifierTests` ▸ `wiring` counts the doors).
+        // Back reads the opener's live chord at each press: the one
+        // key reader both key doors call, and the opener latch's back
+        // match (`JumpStaleModifierTests` ▸ `wiring` counts the doors).
         #expect(
             try squash("JumpPanelController.swift")
                 .contains("panel.back={[core]inSelf.backKey(core)}")
         )
         #expect(
             try squash("JumpPanel.swift")
-                .components(separatedBy: "back:back()").count == 2
+                .components(separatedBy: "back:back()").count == 3
         )
         let squashed = try squash("JumpPanelController+Strip.swift")
         #expect(squashed.contains("lua:KiwiHubSide.lastAppLua"))

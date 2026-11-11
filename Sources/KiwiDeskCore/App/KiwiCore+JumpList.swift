@@ -29,21 +29,18 @@ extension KiwiCore {
     }
 
     /// The window you are in, as a row would draw it: the one the
-    /// list leaves out (`jumpFocusedWindow`), so the two never
-    /// disagree (#3168). Its blocks are for display only.
+    /// list leaves out (`jumpFocusedWindow`), and only where it is
+    /// also the one Swap here trades with, so the greyed row and ⌥↩
+    /// never name two windows (#3168). Its blocks are display only.
     private func jumpYours(
         here: SpaceID?,
         hub: DisplayID?
     ) -> JumpEntry? {
-        guard let id = jumpFocusedWindow(),
+        let partner = jumpSwapPartner(in: here)
+        guard let id = jumpFocusedWindow(), id == partner,
             let window = state.windows[id]
         else { return nil }
-        return trackedJumpEntry(
-            window,
-            here: here,
-            hub: hub,
-            partner: jumpSwapPartner(in: here)
-        )
+        return trackedJumpEntry(window, here: here, hub: hub, partner: id)
     }
 
     func jumpEntries(

@@ -95,6 +95,28 @@ struct JumpYoursTests {
         )
     }
 
+    /// Where the focus and the window Swap here trades with differ
+    /// — KiwiHub opened on a Space whose own focus is another — no
+    /// greyed row names one of them while ⌥↩ acts on the other.
+    @Test("a swap partner apart from the focus draws no current window")
+    func partnerApartFromFocus() {
+        let core = makeCore()
+        track(core, 1, in: "1")
+        track(core, 3, in: "2")
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        core.state.workspaces.focus(WindowID(3), in: "2")
+        core.state.workspaces.activate("1")
+        core.frontmostPIDProvider = { 900_001 }
+        let snapshot = core.jumpSnapshot()
+        #expect(core.jumpSwapPartner(in: "1") == WindowID(1))
+        #expect(core.jumpFocusedWindow() == WindowID(3))
+        #expect(snapshot.yours == nil)
+        let partner = snapshot.entries.first {
+            $0.target == .window(WindowID(1))
+        }
+        #expect(partner?.swapBlock == .yours)
+    }
+
     @Test("with no window tracked there is none")
     func noWindowNoLine() {
         let core = makeCore()

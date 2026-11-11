@@ -15378,7 +15378,11 @@ text and does not announce it on open, since the selected row is
 what the open speaks. It is the very window the list leaves out — the
 focus, while its app is in front — read once, so it is never drawn
 twice; a focus under an app KiwiDesk does not track stays a row, as
-the 2026-10-12 ruling has it, and is then not drawn as yours.
+the 2026-10-12 ruling has it. And it is drawn only where it is also
+the window ⌥↩ trades with: opened on a screen whose Space holds
+another focus, KiwiHub draws no current window, and the window ⌥↩
+would take names itself in its own row's refusal, rather than the
+greyed row and ⌥↩ naming two windows.
 
 A running app with no listed window has no tile (ui-designer
 advised, owner ruling 2026-11-10, reversing #3135's "No windows"

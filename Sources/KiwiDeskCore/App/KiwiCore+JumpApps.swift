@@ -11,7 +11,7 @@ extension KiwiCore {
     /// strip never holds an app All does not.
     func jumpApps(
         for entries: [JumpEntry],
-        first yours: JumpEntry? = nil
+        first yours: JumpEntry?
     ) -> [JumpApp] {
         let listed = JumpApp.listed(in: entries).enumerated()
         let ranked = listed.sorted { lhs, rhs in
