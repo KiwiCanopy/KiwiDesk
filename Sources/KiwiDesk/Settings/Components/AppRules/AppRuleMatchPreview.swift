@@ -92,7 +92,9 @@ struct AppRuleMatchPreview: View {
     var windows: [PreviewWindow] {
         var byTitle: [String: Bool] = [:]
         for window in model.core.state.windows.all
-        where window.appBundleID == app && !window.title.isEmpty {
+        where AppRef(bundleID: window.appBundleID, name: window.appName)
+            .listKey == app && !window.title.isEmpty
+        {
             byTitle[window.title] =
                 (byTitle[window.title] ?? false) || window.isFloating
         }

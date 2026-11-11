@@ -83,6 +83,8 @@ struct AppRuleProcessNameTests {
             )
         )
         #expect(state.workspaces.space(of: WindowID(1)) == "2")
+        // A rule keyed by the placeholder never files a nameless one.
+        state.appRules[AppRef.unnamed] = "2"
         state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -133,7 +135,7 @@ struct AppRuleProcessNameTests {
             Issue.record("no app answer: \(app.error ?? "")")
             return
         }
-        #expect(known["rule_key"] == .string(emulator))
+        #expect(known["bundle_id"] == .null)
         #expect(windows.count == 1)
     }
 

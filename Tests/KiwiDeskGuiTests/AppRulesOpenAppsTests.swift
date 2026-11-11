@@ -35,6 +35,30 @@ struct AppRulesOpenAppsTests {
         #expect(lists.openApps.map(\.key) == ["qemu-system-aarch64"])
     }
 
+    @Test("a bundle-less app's rule previews its open windows (#3211)")
+    func previewListsBundleLessWindows() {
+        let model = makeTestModel()
+        model.core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(9),
+                    pid: 900_401,
+                    appName: "qemu-system-aarch64",
+                    appBundleID: nil,
+                    title: "Android Emulator - kc-api37:5554"
+                )
+            )
+        )
+        let preview = AppRuleMatchPreview(
+            model: model,
+            app: "qemu-system-aarch64"
+        )
+        #expect(
+            preview.windows.map(\.title)
+                == ["Android Emulator - kc-api37:5554"]
+        )
+    }
+
     @Test("Space and Float take the section, Tile does not")
     func wiring() throws {
         let needle = "openAppsOf: model.core"
@@ -47,7 +71,7 @@ struct AppRulesOpenAppsTests {
         )
         #expect(
             selector.occurrences(
-                of: "core.openApps(beneathNormal: false)"
+                of: "{ core.openApps(beneathNormal: false) }"
             ) == 1
         )
     }
