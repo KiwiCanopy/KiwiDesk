@@ -83,7 +83,7 @@
   "app_bar.title_cap": "제목 길이",
   "app_bar.title_cap.help": "항목이 윈도우 제목을 몇 글자까지 표시할지입니다. 이를 넘으면 줄어듭니다. 그룹으로 묶인 윈도우는 대신 앱 이름을 표시하며, 앱 이름은 줄어들지 않습니다.",
   "app_picker.no_match": "일치하는 앱이 없습니다.",
-  "app_picker.search.placeholder": "검색 apps",
+  "app_picker.search.placeholder": "앱 검색",
   "app_picker.section.all": "모든 앱",
   "app_picker.section.open": "열려 있는 앱",
   "app_rules.add": "추가",
