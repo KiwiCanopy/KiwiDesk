@@ -81,6 +81,24 @@ struct LogExportTests {
         #expect(text.hasSuffix("c\n"))
     }
 
+    @Test("a header opens the file, and an empty range still writes none")
+    func headerOpensTheFile() throws {
+        let url = scratch()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let outcome = try fake(Self.header + "a\n")
+            .export(.last(60), to: url, header: "KiwiDesk 1\n\n")
+        #expect(outcome == .written(lines: 1))
+        let text = try String(contentsOf: url, encoding: .utf8)
+        #expect(text.hasPrefix("KiwiDesk 1\n\nTimestamp"))
+        let empty = scratch()
+        #expect(
+            try fake(Self.header)
+                .export(.last(60), to: empty, header: "KiwiDesk 1\n\n")
+                == .empty
+        )
+        #expect(!FileManager.default.fileExists(atPath: empty.path))
+    }
+
     @Test("a range the store answers nothing for writes no file")
     func emptyRangeWritesNothing() throws {
         let url = scratch()

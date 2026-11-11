@@ -46,6 +46,11 @@ struct LogExportModelTests {
         #expect(model.logExportProblem == nil)
         #expect(!model.isExportingLog)
         #expect(FileManager.default.fileExists(atPath: url.path))
+        // The file opens with the facts and the changed settings
+        // (#3214), ahead of the log's own column header.
+        let text = try? String(contentsOf: url, encoding: .utf8)
+        #expect(text?.hasPrefix("KiwiDesk ") == true)
+        #expect(text?.contains("Settings changed from the defaults:") == true)
     }
 
     @Test("an empty range and a refused tool land as problems")

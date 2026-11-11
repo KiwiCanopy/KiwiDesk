@@ -13,10 +13,11 @@ body:
         something that only happens sometimes?** Then the log
         helps us most — a plainly broken setting or wrong label
         doesn't need one. If you can, make the problem happen
-        again first. Then open KiwiDesk Settings ▸ General ▸
-        Advanced, and on the **Log** row pick a time range that
-        reaches back to before it happened, press **Export…**, and
-        drag the file into *Extra context* below. Can't open
+        again first. Then open KiwiDesk Settings ▸ Advanced ▸
+        General ▸ Files & Reset, and on the **Log** row pick a
+        time range that reaches back to before it happened, press
+        **Export…**, and drag the file into *Extra context* below.
+        It also lists the settings you changed. Can't open
         Settings? The CLI reference shows the same export from a
         terminal:
         https://kiwidesk.app/docs/cli/#exporting-the-log

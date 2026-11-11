@@ -95,6 +95,10 @@ enum SettingsSearchSynonyms {
         // "Monitor fingerprints" until #865 retired the noun.
         case .screens(.fingerprints):
             return ["monitor fingerprints", "display fingerprints"]
+        // The footer's "Report a problem" takes no search entry
+        // (#3214), so the words for it reach the log it asks for.
+        case .general(.advancedExportLog):
+            return ["report", "bug", "problem", "issue", "feedback"]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]
         case .borders(.borderEnabled):

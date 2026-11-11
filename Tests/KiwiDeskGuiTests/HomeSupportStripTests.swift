@@ -118,6 +118,37 @@ struct HomeSupportStripTests {
         #expect(whatsNew.upperBound < tour.lowerBound)
     }
 
+    /// The bug form's one door (#3214): the footer link, between
+    /// the tour and About, and no second caller beside it.
+    @Test("The footer carries Report a problem, its one door")
+    func footerCarriesTheReportDoor() throws {
+        let source = try strip.split(whereSeparator: \.isWhitespace)
+            .joined()
+        let tour = try #require(
+            source.range(of: "Button(action:{model.onShowTour()})")
+        )
+        let report = try #require(
+            source.range(of: "Button(action:{model.reportProblem()})")
+        )
+        let about = try #require(source.range(of: "Button(action:openAbout)"))
+        #expect(tour.upperBound < report.lowerBound)
+        #expect(report.upperBound < about.lowerBound)
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let files = try SourceScan.swiftSources(under: root)
+        #expect(files.count > 50)
+        var callers: Set<String> = []
+        for url in files {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            if text.contains(".reportProblem()") {
+                callers.insert(url.lastPathComponent)
+            }
+        }
+        #expect(callers == ["HomeSupportStrip.swift"])
+    }
+
     /// One door to the notes (#2308, amending #1536's exclusive
     /// placement): Home's footer browses, and About no longer
     /// carries a Release Notes link beside it.

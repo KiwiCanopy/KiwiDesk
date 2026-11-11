@@ -22509,6 +22509,17 @@ the window narrows: below its width the links wrap to a second,
 trailing line, the way every other control keeps its reach
 (*Narrow windows drop the preview before they drop a control*).
 
+**"Report a problem" sits before About (#3214).** Simple has no
+General page, so a report door there reaches half the users; the
+footer is on Home and Simple both. It opens the bug form with the
+version, macOS, screen count and Desktop mode filled in, and
+nothing else: the form is public, so the settings a report needs
+ride in the exported log's header, which the user attaches by
+hand. That drag is the consent, so the link asks nothing. It is
+the form's one door: the Log row gains search words, not a
+button. "Report a problem" names the act; "bug report" stays the
+name of the thing filed.
+
 **The update state is one component.** What the channel last
 said lands in one store (`UpdateStateStore`, written by the
 updater and its Sparkle delegate) and one view draws it, on
