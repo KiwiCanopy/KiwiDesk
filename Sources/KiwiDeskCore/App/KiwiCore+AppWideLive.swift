@@ -35,9 +35,8 @@ extension KiwiCore {
         if new.modifierSides != old.modifierSides {
             keys.modifierSides = new.modifierSides
         }
-        if new.kiwiHubKeys != old.kiwiHubKeys {
-            keys.sequenceScrollKeys = new.kiwiHubKeys  // #3175
-        }
+        // #3175; the manager ignores an unchanged value.
+        keys.sequenceScrollKeys = new.kiwiHubKeys.sequenceScroll
         refillVision()  // #3064
         onAppWideChange()
     }

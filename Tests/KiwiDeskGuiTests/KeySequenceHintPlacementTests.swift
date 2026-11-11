@@ -43,23 +43,30 @@ struct KeySequenceHintPlacementTests {
         )
     }
 
-    @Test("The end-key cap leaves room for the branch rows")
+    @Test("The end-key cap gives way to each branch row, to a floor")
     func capLessBranches() {
         let key = KeySequenceHint.Key(chord: "W", name: "Windows")
-        let hint = KeySequenceHint(
-            title: "Leader",
-            crumbs: [key],
-            branches: [key, key],
-            endKeys: KeyLayer(name: KeyLayer.defaultName, bindings: [])
-        )
-        let view = KeySequenceHintView(
-            hint: hint,
-            reference: nil,
-            glass: PanelGlass(settings: TilingSettings()),
-            sheetCap: 400
-        )
-        #expect(view.endKeyCap == 344)
-        #expect(!view.overflows)
+        func cap(branches: Int, sheetCap: CGFloat = 400) -> CGFloat {
+            KeySequenceHintView(
+                hint: KeySequenceHint(
+                    title: "Leader",
+                    crumbs: [key],
+                    branches: Array(repeating: key, count: branches),
+                    endKeys: KeyLayer(name: KeyLayer.defaultName, bindings: [])
+                ),
+                reference: nil,
+                glass: PanelGlass(settings: TilingSettings()),
+                sheetCap: sheetCap
+            ).endKeyCap
+        }
+        #expect(cap(branches: 0) == 400)
+        let row =
+            KeySequenceHintView.branchRowHeight
+            + KeySequenceHintView.branchSpacing
+        #expect(cap(branches: 1) == 400 - row)
+        #expect(cap(branches: 2) < cap(branches: 1))
+        #expect(cap(branches: 100) == cap(branches: 200))
+        #expect(cap(branches: 100) > 0)
     }
 
     @Test("A scroll key moves the sheet by lines or pages")

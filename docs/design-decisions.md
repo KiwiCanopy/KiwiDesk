@@ -14564,7 +14564,10 @@ screenshot, which a macOS menu never does while it is open. A key no
 step of the sequence names now goes one of three ways, read from
 `SystemShortcuts.map` and the live `com.apple.symbolichotkeys` chord,
 so a remapped shortcut is known by its new chord and one switched off
-is not passed. A shortcut that takes no keyboard (screenshots, Zoom,
+is not passed. The plist is read when the keyboard tap is armed (a
+load, a layer switch, a shortcut edit), so a change in System Settings
+reaches the sequence at the next arming, as #1105's ⌃⌥⌘8 read does
+for Settings. A shortcut that takes no keyboard (screenshots, Zoom,
 Invert colours and contrast, Dock hiding) passes and the panel stays
 up. One that takes the keyboard or moves the user (Spotlight, Finder
 search, the app switcher, Force Quit, Mission Control, Desktop

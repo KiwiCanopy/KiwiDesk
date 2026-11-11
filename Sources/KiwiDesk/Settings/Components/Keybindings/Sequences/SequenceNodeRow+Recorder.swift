@@ -71,20 +71,17 @@ extension SequenceNodeRow {
         )
     }
 
-    /// A step key macOS owns: a recorded step key wins its chord
-    /// while the sequence is open (#3173), so macOS loses it then.
-    /// A shortcut switched off in System Settings costs nothing.
+    /// A step key on a chord macOS answers wins it while the
+    /// sequence is open (#3173): Core's own reading of the chord.
     private var systemReading: ConflictReading? {
-        guard let key = KeyCombo.parse(node.combo),
-            let shortcut = SystemShortcuts.map[key.unsided],
-            !disabledSystemShortcuts.contains(shortcut)
+        guard let shortcut = model.core.sequenceStepTakes(node.combo)
         else { return nil }
+        let severity = ConflictSeverity.takesFromMacOS(shortcut)
         return ConflictReading(
-            severity: .shadowsApps(shortcut),
-            sentence: L(
-                "keybinding.conflict.tooltip.step_system",
-                "Takes %1$@ away from macOS while this sequence is open.",
-                shortcut.localizedName
+            severity: severity,
+            sentence: ConflictText.sentence(
+                for: severity,
+                config: model.config
             )
         )
     }

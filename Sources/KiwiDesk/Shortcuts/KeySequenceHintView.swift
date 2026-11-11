@@ -21,6 +21,10 @@ struct KeySequenceHintView: View {
     @State private var sheetHeight: CGFloat = 0
 
     static let width: CGFloat = 360
+    /// One branch row and the gap under it: the end keys' cap
+    /// leaves room for each (#3175).
+    static let branchRowHeight: CGFloat = 26
+    static let branchSpacing: CGFloat = 2
     static let corner: CGFloat = 16
 
     var body: some View {
@@ -28,10 +32,10 @@ struct KeySequenceHintView: View {
             header
             PanelDivider()
             if !hint.branches.isEmpty {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Self.branchSpacing) {
                     ForEach(hint.branches) { key in
                         ShortcutRowView(row: Self.branchRow(key))
-                            .frame(height: 26)
+                            .frame(height: Self.branchRowHeight)
                     }
                 }
             }
@@ -79,7 +83,8 @@ struct KeySequenceHintView: View {
     /// What the end keys may stand: the cap less the branch rows
     /// above them, which never scroll away.
     var endKeyCap: CGFloat {
-        max(sheetCap - CGFloat(hint.branches.count) * 28, 120)
+        let row = Self.branchRowHeight + Self.branchSpacing
+        return max(sheetCap - CGFloat(hint.branches.count) * row, 120)
     }
 
     var overflows: Bool {

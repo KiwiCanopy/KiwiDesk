@@ -46,6 +46,14 @@ extension SystemShortcut {
         }
     }
 
+    /// Whether macOS answers this shortcut, given its plist
+    /// `enabled` bit (nil for no entry): a symbolic hotkey by that
+    /// bit or its shipped state, any other always (#1105, #3173).
+    public func isAnswered(enabled: Bool?) -> Bool {
+        guard let hotkey = symbolicHotkey else { return true }
+        return enabled ?? hotkey.shipsEnabled
+    }
+
     /// What an open key sequence does with this shortcut (#3173 ▸
     /// Ruling). A `switch`, so a new case cannot ship without an
     /// answer.
@@ -128,11 +136,40 @@ public enum SymbolicHotkeys {
     }
 }
 
+extension SystemShortcuts {
+    /// Every shortcut macOS answers now, on the chord it answers:
+    /// the live symbolic-hotkey chord where the plist has one, else
+    /// the map's; one switched off is left out (#3173).
+    public static func answered(
+        reading read: (Int) -> SymbolicHotkeyEntry?
+    ) -> [(combo: KeyCombo, shortcut: SystemShortcut)] {
+        map.sorted {
+            ($0.key.comboString() ?? "") < ($1.key.comboString() ?? "")
+        }
+        .compactMap { combo, shortcut in
+            let entry = shortcut.symbolicHotkey.flatMap { read($0.id) }
+            guard shortcut.isAnswered(enabled: entry?.enabled) else {
+                return nil
+            }
+            return (entry?.combo ?? combo, shortcut)
+        }
+    }
+
+    /// The shortcut macOS answers on `combo` now, nil for none —
+    /// what a step key on it takes from macOS while its sequence
+    /// is open. The router's chords come from the same read.
+    public static func answering(
+        _ combo: KeyCombo,
+        reading read: (Int) -> SymbolicHotkeyEntry?
+    ) -> SystemShortcut? {
+        answered(reading: read).first { $0.combo == combo.unsided }?
+            .shortcut
+    }
+}
+
 /// The macOS shortcuts an open key sequence lets through (#3173 ▸
-/// Ruling), handed to the router with its sequences. Each is the
-/// chord macOS answers today: the live symbolic-hotkey chord where
-/// the plist has one, else `SystemShortcuts.map`'s; one switched
-/// off is left out, since macOS answers nothing there.
+/// Ruling), handed to the router with its sequences, read at each
+/// arming from `SystemShortcuts.answered`.
 struct SequencePassChords: Equatable, Sendable {
     var staysOpen: [KeyCombo] = []
     var closes: [KeyCombo] = []
@@ -143,16 +180,7 @@ struct SequencePassChords: Equatable, Sendable {
         reading read: (Int) -> SymbolicHotkeyEntry?
     ) -> SequencePassChords {
         var chords = SequencePassChords()
-        let defaults = SystemShortcuts.map.sorted {
-            ($0.key.comboString() ?? "") < ($1.key.comboString() ?? "")
-        }
-        for (combo, shortcut) in defaults {
-            var chord = combo
-            if let hotkey = shortcut.symbolicHotkey {
-                let entry = read(hotkey.id)
-                guard entry?.enabled ?? hotkey.shipsEnabled else { continue }
-                chord = entry?.combo ?? combo
-            }
+        for (chord, shortcut) in SystemShortcuts.answered(reading: read) {
             switch shortcut.sequenceTier {
             case .staysOpen: chords.staysOpen.append(chord)
             case .closes: chords.closes.append(chord)

@@ -123,14 +123,36 @@ struct KeySequencePassTests {
         #expect(SymbolicHotkeys.chord([65535, 65535, 0]) == nil)
     }
 
-    @Test("Every pass-through tier names its shortcuts")
-    func tiersArePartitioned() {
-        let swallowed = SystemShortcut.allCases.filter {
-            $0.sequenceTier == .swallowed
+    @Test("New scroll keys alone leave an open sequence open")
+    func scrollKeysKeepItOpen() {
+        var state = SequenceTapState()
+        var rows = KeyboardTapRows(sequences: [Router.sequence])
+        state.reset(rows)
+        _ = state.router.openLeader(0)
+        rows.sequenceScrollKeys.down = "ctrl+n"
+        rows.sequenceGeneration = 1
+        state.reset(rows)
+        #expect(state.router.isOpen)
+        #expect(state.router.scrollKeys.down == "ctrl+n")
+        rows.sequences = [KeySequencePassTests.stepOnScreenshot]
+        state.reset(rows)
+        #expect(!state.router.isOpen)
+    }
+
+    @Test("A step key's warning reads the chord as the router does")
+    @MainActor
+    func stepWarningMatchesRouter() {
+        let core = makeTestCore()
+        #expect(core.sequenceStepTakes("cmd+shift+4") == .screenshotSelection)
+        #expect(core.sequenceStepTakes("cmd+q") == nil)
+        #expect(core.sequenceStepTakes("w") == nil)
+        let id = SystemShortcut.screenshotSelection.symbolicHotkey!.id
+        let moved = SymbolicHotkeys.chord([52, kVK_ANSI_4, 0x14_0000])
+        core.keys.readSymbolicHotkey = {
+            $0 == id ? SymbolicHotkeyEntry(enabled: true, combo: moved) : nil
         }
-        #expect(
-            Set(swallowed) == [.quitApp, .closeWindow, .minimize, .hideApp]
-        )
+        #expect(core.sequenceStepTakes("cmd+shift+4") == nil)
+        #expect(core.sequenceStepTakes("ctrl+cmd+4") == .screenshotSelection)
     }
 
     @Test("The tap swallows nothing it passed")

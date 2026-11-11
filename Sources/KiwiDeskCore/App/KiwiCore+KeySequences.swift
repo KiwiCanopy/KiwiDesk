@@ -16,6 +16,21 @@ extension KiwiCore {
         set { keys.onSequenceScroll = newValue }
     }
 
+    /// The macOS shortcut a step key on `combo` takes from macOS
+    /// while its sequence is open (#3173): one the router would
+    /// pass, read as the router reads it. Nil for none, and for an
+    /// app's menu chord, which an open sequence swallows anyway.
+    public func sequenceStepTakes(_ combo: String) -> SystemShortcut? {
+        guard let key = KeyCombo.parse(combo),
+            let shortcut = SystemShortcuts.answering(
+                key,
+                reading: keys.readSymbolicHotkey
+            ),
+            shortcut.sequenceTier != .swallowed
+        else { return nil }
+        return shortcut
+    }
+
     /// The tree the running sequence on `leader` answers, in the
     /// active layer: what the hint panel draws where the installed
     /// snapshot does not hold it, a Lua sequence whose end key read

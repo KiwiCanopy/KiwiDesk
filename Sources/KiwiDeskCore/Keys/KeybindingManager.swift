@@ -41,7 +41,9 @@ public final class KeybindingManager {
     var sequenceScrollKeys = KiwiHubKeys() {
         didSet { scrollKeysChanged(from: oldValue) }
     }
-    /// The unbound-key sound (#1871); a bare manager stays silent.
+    /// The unbound-key sound: the core wires the refusal sound
+    /// (#1871 ▸ unbound step key, `KiwiCore+Bootstrap`), so a bare
+    /// manager stays silent.
     var beep: @MainActor () -> Void = {}
     /// Whether the hint panel was last told a sequence is open.
     var sequenceOpen = false
@@ -339,12 +341,5 @@ public final class KeybindingManager {
         }
         releaseBinding(ref)
         activate(currentLayer)
-    }
-
-    /// Releases one binding's ref and its KiwiHub side mark, since
-    /// Lua reuses a freed ref for the next binding (#1229).
-    func releaseBinding(_ ref: Int32) {
-        lua?.release(ref: ref)
-        kiwiHubSideRefs.remove(ref)
     }
 }

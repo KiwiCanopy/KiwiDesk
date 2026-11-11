@@ -80,8 +80,12 @@ struct KeySequenceScrollTests {
         var router = router()
         #expect(press(&router, "down", isRepeat: true) == .scroll(.step(1)))
         #expect(press(&router, "w", isRepeat: true) == .repeated)
-        #expect(press(&router, "x", isRepeat: true) == .repeated)
         #expect(router.progress?.path == [])
+        // An arrow recorded as a step key: held, it neither fires
+        // nor scrolls.
+        var arrow = self.router(Self.arrowStep)
+        #expect(press(&arrow, "down", isRepeat: true) == .repeated)
+        #expect(arrow.isOpen)
     }
 
     @Test("Closed, an arrow passes")

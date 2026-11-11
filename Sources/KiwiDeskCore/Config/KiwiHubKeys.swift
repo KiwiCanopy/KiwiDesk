@@ -71,6 +71,16 @@ public struct KiwiHubKeys: Sendable, Equatable, Codable {
         set { self[keyPath: Self.path(key)] = newValue }
     }
 
+    /// The four that also scroll an open key sequence's panel
+    /// (#3175): up, down, page up, page down; the rest cleared.
+    public var sequenceScroll: KiwiHubKeys {
+        var keys = KiwiHubKeys()
+        for key in [KiwiHubKey.up, .down, .pageUp, .pageDown] {
+            keys[key] = self[key]
+        }
+        return keys
+    }
+
     /// The built-in key whose alternative `combo` is. A stored
     /// chord the verb would refuse — a file edited by hand — never
     /// answers.

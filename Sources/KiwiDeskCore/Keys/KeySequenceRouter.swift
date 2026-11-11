@@ -45,8 +45,9 @@ struct KeySequenceRouter: Sendable {
     private(set) var sequences: [KeySequence] = []
     /// The macOS shortcuts an open sequence lets through (#3173).
     private(set) var passing = SequencePassChords.none
-    /// KiwiHub's second chords for ↑ ↓ Page Up Page Down (#3175),
-    /// set apart from the sequences so a change closes nothing.
+    /// KiwiHub's second chords for ↑ ↓ Page Up Page Down (#3175):
+    /// their own field, so a change to them alone leaves an open
+    /// sequence open (`SequenceTapState.reset`).
     var scrollKeys = KiwiHubKeys()
     /// The open sequence, and the index of each step key taken.
     private var open: (sequence: Int, path: [Int])?

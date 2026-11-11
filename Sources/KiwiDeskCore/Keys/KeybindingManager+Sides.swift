@@ -170,3 +170,12 @@ extension KeybindingManager {
         pressFire(ref: live.ref, combo: live.combo, id: nil)
     }
 }
+
+extension KeybindingManager {
+    /// Releases one binding's ref and its KiwiHub side mark, since
+    /// Lua reuses a freed ref for the next binding (#1229).
+    func releaseBinding(_ ref: Int32) {
+        lua?.release(ref: ref)
+        kiwiHubSideRefs.remove(ref)
+    }
+}

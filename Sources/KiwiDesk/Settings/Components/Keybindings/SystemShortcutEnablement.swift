@@ -3,8 +3,8 @@ import KiwiDeskCore
 
 /// The live half of a system-shortcut conflict verdict (#1105):
 /// whether macOS currently ANSWERS a chord `SystemShortcuts.map`
-/// records. GUI-boundary on purpose (core-boundaries.md #96;
-/// tests.md's injected-seam row) — reached only through
+/// records. Core owns the ids and the one plist reader (#3173);
+/// the GUI keeps its injected `enabled` read, reached only through
 /// `SettingsModel`'s accessors and `readSymbolicHotkey` seam.
 enum SystemShortcutEnablement {
     /// Reads one hotkey id's `enabled` bit from
@@ -24,10 +24,10 @@ enum SystemShortcutEnablement {
     ) -> Set<SystemShortcut> {
         Set(
             SystemShortcut.allCases.filter { shortcut in
-                guard
-                    let entry = shortcut.symbolicHotkey
-                else { return false }
-                return !(read(entry.id) ?? entry.shipsEnabled)
+                guard let entry = shortcut.symbolicHotkey else {
+                    return false
+                }
+                return !shortcut.isAnswered(enabled: read(entry.id))
             }
         )
     }
