@@ -128,7 +128,8 @@ struct HomeSupportStrip: View {
     }
 
     /// What's new beside the version it describes (#2308), the
-    /// tour's permanent door (#1754), then About.
+    /// tour's permanent door (#1754), the bug form's one door
+    /// (#3214), then About.
     @ViewBuilder private var links: some View {
         Group {
             Button(action: { model.updater.whatsNew?.browse() }) {
@@ -141,6 +142,14 @@ struct HomeSupportStrip: View {
             separator
             Button(action: { model.onShowTour() }) {
                 Text(L("home.footer.tour", "Show me around")).underline()
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12))
+            .linkHover()
+            separator
+            Button(action: { model.reportProblem() }) {
+                Text(L("home.footer.report", "Report a problem"))
+                    .underline()
             }
             .buttonStyle(.plain)
             .font(.system(size: 12))

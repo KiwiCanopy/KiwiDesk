@@ -410,8 +410,15 @@ report, export the last stretch to a file:
 Reach back to just before the problem happened — `--last 15m`,
 `--last 2h`, or `--start "2026-09-02 09:40:00"` for an exact
 window — and attach the whole file to the issue. Spell out
-`/usr/bin/log`: a shell alias named `log` is common. To watch
-live while reproducing:
+`/usr/bin/log`: a shell alias named `log` is common.
+
+:::unreleased
+The file Settings exports also opens with the version, the
+screen count and the settings changed from the defaults; this
+command writes the log lines only.
+:::
+
+To watch live while reproducing:
 
 ```sh
 /usr/bin/log stream --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact

@@ -38,14 +38,25 @@ struct LogExportModelTests {
     }
 
     @Test("a written export leaves no problem and lowers the flag")
-    func successIsSilent() async {
+    func successIsSilent() async throws {
         let url = scratch()
         defer { try? FileManager.default.removeItem(at: url) }
         let model = model(answering: Self.header + "a\n")
+        let wrap = try #require(
+            FocusWrap.allCases.first { $0 != FocusWrap.defaultMode }
+        )
+        model.core.focusWrap.base = wrap
         await model.exportLog(.last(60), to: url)
         #expect(model.logExportProblem == nil)
         #expect(!model.isExportingLog)
         #expect(FileManager.default.fileExists(atPath: url.path))
+        // The file opens with the facts and the changed settings
+        // (#3214), ahead of the log's own column header.
+        let text = try? String(contentsOf: url, encoding: .utf8)
+        #expect(text?.hasPrefix("KiwiDesk ") == true)
+        #expect(
+            text?.contains("/focus_wrap = \"\(wrap.rawValue)\"\n") == true
+        )
     }
 
     @Test("an empty range and a refused tool land as problems")

@@ -1321,6 +1321,13 @@ and windows KiwiDesk managed, so glance through it before
 attaching it. The terminal form is in the [CLI
 reference](cli.md#exporting-the-log).
 
+:::unreleased
+**Report a problem**, at the foot of Home and of the Simple page,
+opens a GitHub bug report with your KiwiDesk and macOS versions,
+screen count and Desktop mode filled in. The exported log also
+lists the settings you changed.
+:::
+
 **Shortcut not working?**  
 Check Shortcuts for a ⚠️ marker ([Conflict
 Detection](#conflict-detection)). If you hand-edited, run
