@@ -135,6 +135,22 @@ struct ShortcutSequenceKeyCommandsTests {
         #expect(sequence(core) == nil)
     }
 
+    @Test("shortcut.set refuses a chord a sequence's leader holds")
+    func setRefusesALeader() throws {
+        let core = try KeepFixture.core()
+        #expect(
+            run(core, "set_sequence_key", [leader, "w", "focus", "left"])
+                .isSuccess
+        )
+        let before = sequence(core)
+        #expect(
+            run(core, "set", [leader, "focus", "right"]).error
+                == "control+option+space opens a key sequence; remove it "
+                + "first"
+        )
+        #expect(sequence(core) == before)
+    }
+
     @Test("name labels a leader or branch and refuses an end key")
     func name() throws {
         let core = try KeepFixture.core()
