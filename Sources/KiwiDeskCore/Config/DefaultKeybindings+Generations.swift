@@ -39,7 +39,7 @@ extension DefaultKeybindings {
         case 11: directionalMaximizeRows()
         // Tiling off for this Space (#3008).
         case 12: [toggleTilingRow()]
-        // The Desktop overview on ⌘⌘ (#1229).
+        // The Desktop overview on ⌃⌥O (#1229, #3167).
         case 13: [desktopOverviewRow()]
         // The window switcher's last-app opener on ⌥⇥ (#3135).
         case 14: [windowSwitcherLastAppRow()]

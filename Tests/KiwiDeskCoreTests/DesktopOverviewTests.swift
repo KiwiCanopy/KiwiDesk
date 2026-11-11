@@ -137,7 +137,8 @@ struct DesktopOverviewTests {
         #expect(desktop.spaces.map(\.space) == ["1", "2", nil])
         #expect(desktop.spaces[0].windows.isEmpty)
         #expect(desktop.spaces[1].windows.map(\.id) == [WindowID(7)])
-        #expect(desktop.spaces[1].windows.first?.block == .otherDesktop)
+        // A hidden Desktop's window is picked up like any (#3171).
+        #expect(desktop.spaces[1].windows.first?.block == nil)
         // Unfiled windows close the card on a line of their own.
         #expect(desktop.spaces[2].windows.map(\.id) == [WindowID(8)])
     }

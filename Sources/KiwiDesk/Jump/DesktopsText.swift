@@ -117,11 +117,6 @@ enum DesktopsText {
     /// (core-boundaries.md ▸ #3033).
     static func refusal(_ refusal: DesktopsRefusal) -> String {
         switch refusal {
-        case .carryBlocked(_, .otherDesktop):
-            return L(
-                "desktop_overview.refusal.hidden_desktop",
-                "Windows on a hidden Desktop can’t be picked up"
-            )
         case .carryBlocked(_, .fullScreen):
             return L(
                 "desktop_overview.refusal.full_screen_window",

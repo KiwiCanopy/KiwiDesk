@@ -17,7 +17,9 @@ extension JumpPanelView {
                 quickCount: model.viewQuickCount,
                 turnsOff: model.view?.selectionTurnsOff ?? false,
                 naming: model.isNaming,
-                desktops: model.desktops.map(DesktopsFooterState.init)
+                desktops: model.desktops.map {
+                    DesktopsFooterState($0, refusal: model.desktopsRefusal)
+                }
             ),
             // Desktops draws its tray, no button (#1229).
             carriesControls: model.scope != .windows

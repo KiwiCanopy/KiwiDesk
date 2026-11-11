@@ -59,10 +59,10 @@ struct OnboardingKeysHubTests {
         #expect(spoken.contains("View ⌃⌥L"))
     }
 
-    /// The seeded ⌘⌘ (#1229) stands on its own keycap after the
-    /// J K L collapse, read off the seed itself.
-    @Test("the seeded overview tap stands apart from J K L")
-    func seededTapStandsApart() {
+    /// The seeded ⌃⌥O (#3167) joins the J K L collapse, and a ⌘⌘ the
+    /// user set stands on its own keycap after it (#1229).
+    @Test("the seeded overview chord joins J K L; a set tap stands apart")
+    func seededOverviewCollapses() {
         LocalizationManager.shared.select("en")
         var seeded = KeyLayer.defaultLayer
         seeded.bindings = DefaultKeybindings.bindings(
@@ -71,10 +71,20 @@ struct OnboardingKeysHubTests {
             base: .standard
         )
         let row = OnboardingKeys.kiwiHubFamily(layer: seeded)
-        #expect(row?.chord == .mixed(["⌃⌥ J K L", "⌘⌘"]))
+        #expect(
+            row?.chord == .shared([.control, .option], keys: "J K L O")
+        )
         #expect(
             row?.label == "KiwiHub: Windows, Shortcuts, View, and Desktops"
         )
+        seeded.bindings = seeded.bindings.map {
+            guard $0.lua == KiwiHubSide.desktops.lua else { return $0 }
+            var tap = $0
+            tap.combo = "cmd+cmd"
+            return tap
+        }
+        let tapped = OnboardingKeys.kiwiHubFamily(layer: seeded)
+        #expect(tapped?.chord == .mixed(["⌃⌥ J K L", "⌘⌘"]))
     }
 
     @Test("an unbound side is left out, and no side means no row")

@@ -46,12 +46,13 @@ extension DefaultKeybindings {
         )
     }
 
-    /// The Desktop overview on a double tap of either `⌘`, the same
-    /// key twice (#1229, owner 2026-11-01). A tap rides the keyboard
-    /// tap, never Carbon, so no base moves it.
+    /// The Desktop overview on `⌃⌥O` (#3167), O for overview: a
+    /// plain chord, so a default install runs no keyboard tap
+    /// (#2601). Free in `SystemShortcuts.map` and macOS's symbolic
+    /// hotkeys (read 2026-11-10).
     public static func desktopOverviewRow() -> KeyBinding {
         KeyBinding(
-            combo: "cmd+cmd",
+            combo: "control+option+o",
             lua: KiwiHubSide.desktops.lua,
             kind: .navigation,
             label: "Show Desktop overview"

@@ -279,7 +279,7 @@
           "lua" : "kiwihub.show_last_app()"
         },
         {
-          "combo" : "cmd+cmd",
+          "combo" : "control+option+o",
           "kind" : "navigation",
           "label" : "Show Desktop overview",
           "lua" : "kiwihub.show(\"desktops\")"

@@ -30,7 +30,7 @@ extension KeybindingCatalog {
     )
 
     /// The Desktop overview, KiwiHub's Desktops side (#1229),
-    /// seeded on ⌘⌘.
+    /// seeded on ⌃⌥O (#3167).
     static let showDesktopOverview = NavCommand(
         label: "Show Desktop overview",
         lua: KiwiHubSide.desktops.lua,

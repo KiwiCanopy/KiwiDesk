@@ -220,7 +220,7 @@ extension KiwiCore {
             pid: entry.pid,
             app: entry.appName,
             title: entry.title,
-            block: .otherDesktop
+            block: nil
         )
     }
 }

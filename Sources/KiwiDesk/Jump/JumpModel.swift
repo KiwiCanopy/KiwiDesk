@@ -20,6 +20,10 @@ final class JumpModel: ObservableObject {
     @Published var desktops: DesktopsState?
     /// Its windows' app icons, read with it.
     @Published var desktopIcons: [pid_t: NSImage] = [:]
+    /// The Desktops refusal the footer shows until the next input,
+    /// and what swells for a beat (#3170).
+    @Published var desktopsRefusal: String?
+    @Published var desktopsSwell: DesktopsSwell?
     /// The scroll the Shortcuts side's keys last asked for.
     @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
