@@ -19,8 +19,8 @@ struct DesktopsLanding {
     /// Whether `overview` lists every moved window on the target's
     /// line.
     func landed(in overview: DesktopOverview) -> Bool {
+        // A Desktop's native id names it on every screen.
         let line = overview.screens
-            .filter { $0.display == target.display }
             .flatMap(\.desktops)
             .filter { $0.native == target.desktop.native }
             .flatMap(\.spaces)
@@ -59,8 +59,8 @@ extension JumpPanelController {
         )
         guard !landing.landed(in: overview) else { return }
         landingSink = core.bus.addSink { [weak self, weak model] event, _ in
-            guard let self, let model, DesktopsLanding.reads(event)
-            else { return }
+            guard let self, DesktopsLanding.reads(event) else { return }
+            guard let model else { return self.endLanding() }
             self.reread(landing, model: model)
         }
     }
@@ -72,17 +72,13 @@ extension JumpPanelController {
         landingSink = nil
     }
 
-    /// Reads the desk again on the line selected now, or ends the
-    /// wait where KiwiHub left the side or the bound passed. A carry
-    /// begun since keeps its state and waits.
+    /// Reads the desk again, or ends the wait where KiwiHub left the
+    /// side or the bound passed, and once the drop shows.
     private func reread(_ landing: DesktopsLanding, model: JumpModel) {
         guard isOpen, model.scope == .desktops,
-            ProcessInfo.processInfo.systemUptime < landing.deadline,
-            let state = model.desktops
+            ProcessInfo.processInfo.systemUptime < landing.deadline
         else { return endLanding() }
-        guard !state.isCarrying else { return }
-        let target = state.place.flatMap(state.target) ?? landing.target
-        model.reloadDesktops(selecting: target)
+        model.refreshDesktops()
         if let overview = model.desktops?.overview,
             landing.landed(in: overview)
         {

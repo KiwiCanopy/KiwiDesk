@@ -8,12 +8,7 @@ extension JumpModel {
     func enterDesktops() {
         endDesktopsRefusal()
         let overview = loadDesktops()
-        let geometry = DesktopsGeometry(
-            overview: overview,
-            width: panelWidth,
-            cap: sheetCap
-        )
-        desktops = DesktopsState(overview: overview, geometry: geometry)
+        desktops = state(of: overview)
         let pids = overview.screens.flatMap(\.desktops)
             .flatMap(\.spaces).flatMap(\.windows).map(\.pid)
         desktopIcons = loadIcons(Set(pids))
@@ -179,6 +174,43 @@ extension JumpModel {
             }
         }
         desktops = state
+    }
+
+    /// Reads the desk again under the open side, for a drop still
+    /// landing (#3208): the place, and the window inside it, stay
+    /// selected where they still exist, and the search and a shown
+    /// refusal stay as they are. A carry waits for the next read.
+    func refreshDesktops() {
+        guard scope == .desktops, let old = desktops, !old.isCarrying
+        else { return }
+        let overview = loadDesktops()
+        var fresh = state(of: overview)
+        if !old.query.isEmpty { fresh.setQuery(old.query) }
+        if let place = old.place, let line = fresh.line(place) {
+            if let id = old.window,
+                line.windows.contains(where: { $0.id == id })
+            {
+                fresh.select(window: id, in: place)
+            } else {
+                fresh.select(place)
+            }
+        }
+        let pids = Set(
+            overview.screens.flatMap(\.desktops).flatMap(\.spaces)
+                .flatMap(\.windows).map(\.pid)
+        ).subtracting(desktopIcons.keys)
+        if !pids.isEmpty { desktopIcons.merge(loadIcons(pids)) { $1 } }
+        desktops = fresh
+    }
+
+    /// The side's state over `overview`, sized from the panel.
+    private func state(of overview: DesktopOverview) -> DesktopsState {
+        let geometry = DesktopsGeometry(
+            overview: overview,
+            width: panelWidth,
+            cap: sheetCap
+        )
+        return DesktopsState(overview: overview, geometry: geometry)
     }
 
     /// What VoiceOver hears for the selection now.
