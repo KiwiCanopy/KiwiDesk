@@ -31,7 +31,7 @@ struct WindowFactsTests {
         var asked = false
         let reason = FloatDetection.autoFloatReason(
             Self.facts(subrole: kAXDialogSubrole) { asked = true },
-            bundleID: "com.example.app",
+            app: "com.example.app",
             rules: FloatRules(["com.example.app"])
         )
         #expect(reason == .panel)
@@ -45,7 +45,7 @@ struct WindowFactsTests {
             Self.facts(subrole: kAXStandardWindowSubrole) {
                 asked = true
             },
-            bundleID: "com.example.app",
+            app: "com.example.app",
             rules: FloatRules(["com.example.app:Title"])
         )
         #expect(reason == .rule)
@@ -56,7 +56,7 @@ struct WindowFactsTests {
     func raisedLayerFloats() {
         let reason = FloatDetection.autoFloatReason(
             Self.facts(subrole: kAXStandardWindowSubrole, layer: 3) {},
-            bundleID: nil,
+            app: nil,
             rules: FloatRules()
         )
         #expect(reason == .raisedLayer)
@@ -74,7 +74,7 @@ struct WindowFactsTests {
             pid: 1,
             activationPolicy: .accessory,
             tilesAsOwnWindow: false,
-            bundleID: "com.example.app",
+            app: "com.example.app",
             rules: FloatRules(["com.example.app:Title"])
         )
         #expect(verdict == .floats(.accessoryApp))
@@ -88,7 +88,7 @@ struct WindowFactsTests {
             pid: 1,
             activationPolicy: .regular,
             tilesAsOwnWindow: false,
-            bundleID: nil,
+            app: nil,
             rules: FloatRules()
         )
         #expect(verdict == .tiles)
@@ -98,7 +98,7 @@ struct WindowFactsTests {
                 pid: 1,
                 activationPolicy: .regular,
                 tilesAsOwnWindow: false,
-                bundleID: nil,
+                app: nil,
                 rules: FloatRules()
             ) == .floats(.rule)
         )

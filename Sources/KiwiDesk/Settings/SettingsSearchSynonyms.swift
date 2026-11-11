@@ -77,17 +77,6 @@ enum SettingsSearchSynonyms {
             return ["columns"]
         case .layout(.gridRows):
             return ["rows"]
-        // What other tilers call ⌃⌥ + scroll (#1656): niri's
-        // column scroll, and the words a mouse user searches.
-        case .shortcuts(.scrollPan):
-            return ["pan", "swipe", "wheel", "modifier", "gesture"]
-        // #1519: the words for a Desktop swipe, and macOS's own
-        // name for a Space.
-        case .shortcuts(.scrollSpaceStep):
-            return [
-                "space", "desktop", "switch", "swipe", "wheel",
-                "modifier", "gesture",
-            ]
         case .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse):
             // The rows are labelled by their input; the setting's
@@ -106,6 +95,10 @@ enum SettingsSearchSynonyms {
         // "Monitor fingerprints" until #865 retired the noun.
         case .screens(.fingerprints):
             return ["monitor fingerprints", "display fingerprints"]
+        // The footer's "Report a problem" takes no search entry
+        // (#3214), so the words for it reach the log it asks for.
+        case .general(.advancedExportLog):
+            return ["report", "bug", "problem", "issue", "feedback"]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]
         case .borders(.borderEnabled):

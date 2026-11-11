@@ -148,6 +148,7 @@ func makeTestCore(
     // The event taps (#1656, #2601, #2447) are session-wide when live;
     // a suite that means one injects its own.
     core.mouse.scroll.makeTap = { _ in nil }
+    core.mouse.scroll.host = .unset
     core.mouse.pointer.makeTap = { _, _ in nil }
     core.keys.makeKeyboardTap = { _, _, _ in nil }
     // The touch reader reads the host's trackpad (#1873).

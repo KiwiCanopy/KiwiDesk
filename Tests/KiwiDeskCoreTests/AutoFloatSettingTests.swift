@@ -108,8 +108,8 @@ struct AutoFloatSettingTests {
         let core = try makeCore()
         try load(profile("Home"), into: core)
         #expect(guess(core).enabled)
-        #expect(!guess(core).applies(to: Self.steam))
-        #expect(guess(core).applies(to: Self.mail))
+        #expect(!guess(core).applies(toApp: Self.steam))
+        #expect(guess(core).applies(toApp: Self.mail))
     }
 
     @Test("a profile's override wins over the base, and leaves with it")

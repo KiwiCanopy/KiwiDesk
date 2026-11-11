@@ -111,7 +111,10 @@ extension KiwiCore {
         if let parked = minimized(id) {
             // An un-minimize is an open: the launch follow carries
             // the user to the Space it lands in (#1599).
-            if let unminimized = parked.bundleID {
+            if let unminimized = AppRef(
+                bundleID: parked.bundleID,
+                name: parked.app
+            ).listKey {
                 oweLaunchFollow(unminimized)
             }
             // Where no rule carries it away it lands here, and is

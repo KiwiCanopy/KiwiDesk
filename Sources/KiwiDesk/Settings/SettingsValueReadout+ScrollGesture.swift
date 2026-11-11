@@ -33,23 +33,11 @@ enum ScrollGestureWords {
     /// The census key's field.
     static func field(of key: ShortcutsKey) -> ScrollGestureField? {
         switch key {
-        case .scrollPan: .pan
         case .scrollLongSwipes: .longSwipes
         case .scrollStepDistance: .stepDistance
         case .scrollNaturalTrackpad: .naturalTrackpad
         case .scrollNaturalMouse: .naturalMouse
-        case .scrollSpaceStep: .spaceStep
         default: nil
-        }
-    }
-
-    /// The row a gesture's chord is stored in.
-    static func field(
-        of consumer: ScrollGestures.Consumer
-    ) -> ScrollGestureField {
-        switch consumer {
-        case .pan: .pan
-        case .step: .spaceStep
         }
     }
 
@@ -82,6 +70,16 @@ enum ScrollGestureWords {
         L("shortcuts.gestures.scroll.natural", "Natural scrolling")
     }
 
+    /// One Natural scrolling choice: macOS's, or pinned.
+    static func natural(_ value: NaturalScrolling) -> String {
+        switch value {
+        case .system:
+            L("shortcuts.gestures.scroll.natural_system", "System")
+        case .on: SettingsValueReadout.onOff(true)
+        case .off: SettingsValueReadout.onOff(false)
+        }
+    }
+
     /// Apple's subtitle under it (`GNAME_SCROLL_LABEL`).
     static var naturalCaption: String {
         L(
@@ -93,9 +91,6 @@ enum ScrollGestureWords {
     /// A row's label as the diff and the checklist name it.
     static func label(_ field: ScrollGestureField) -> String {
         switch field {
-        case .pan: pan
-        case .spaceStep:
-            L("shortcuts.gestures.scroll.space_step", "Step between Spaces")
         case .longSwipes: longSwipes
         case .stepDistance: stepDistance
         case .naturalTrackpad:
@@ -105,14 +100,11 @@ enum ScrollGestureWords {
         }
     }
 
-    /// A value in words: a chord's keycaps, On/Off, points.
+    /// A value in words: On/Off, a Natural scrolling choice, points.
     static func value(_ value: ScrollGestureValue) -> String {
         switch value {
-        case .chord(let chord):
-            chord.isEmpty
-                ? SettingsValueReadout.onOff(false)
-                : ScrollChordGlyphs.text(chord)
         case .flag(let on): SettingsValueReadout.onOff(on)
+        case .natural(let natural): ScrollGestureWords.natural(natural)
         case .points(let points):
             SettingsValueReadout.points(CGFloat(points))
         }

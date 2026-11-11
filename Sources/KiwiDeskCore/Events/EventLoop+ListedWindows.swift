@@ -105,7 +105,9 @@ struct ListedWindowReader: @unchecked Sendable {
     let resolve: (AXUIElement) -> WindowID?
     let fullscreen: (AXUIElement) -> Bool
     let traits: (AXUIElement, WindowID?) -> WindowTraits?
-    let bundleID: String?
+    /// The app the windows belong to: its bundle id for the built-in
+    /// lists, its `AppRef.listKey` for the user's rules (#3211).
+    let app: AppRef
     let rules: FloatRules
     let facts: (AXUIElement, Int?) -> WindowFacts
     let tracked: Set<WindowID>
@@ -152,7 +154,7 @@ struct ListedWindowReader: @unchecked Sendable {
         let asksButton = FloatDetection.needsTitlebarButton(
             layer: layer,
             isAccessory: isAccessory,
-            bundleID: bundleID,
+            bundleID: app.bundleID,
             subrole: facts.subrole
         )
         let isTracked = id.map { tracked.contains($0) }
@@ -162,7 +164,7 @@ struct ListedWindowReader: @unchecked Sendable {
             && facts.role == kAXWindowRole
             && id.map(shadowed.contains) == false
             && !FloatDetection.shouldIgnore(
-                bundleID: bundleID,
+                app: app,
                 layer: layer,
                 isAccessory: isAccessory,
                 rules: ignoreRules,
@@ -176,7 +178,7 @@ struct ListedWindowReader: @unchecked Sendable {
         let detect = {
             FloatDetection.autoFloatReason(
                 facts,
-                bundleID: bundleID,
+                app: app.listKey,
                 rules: rules
             )
         }
@@ -246,14 +248,14 @@ extension EventLoop {
     /// The reader for `pid`'s next off-main list read.
     func listedWindowReader(
         pid: pid_t,
-        bundleID: String?,
+        app: AppRef,
         tracked: Set<WindowID>
     ) -> ListedWindowReader {
         ListedWindowReader(
             resolve: resolveWindowID,
             fullscreen: readFullscreen,
             traits: shadows.traits,
-            bundleID: bundleID,
+            app: app,
             rules: floatRules,
             facts: offMain.readFacts,
             tracked: tracked,
@@ -275,7 +277,7 @@ extension EventLoop {
     ) -> @Sendable () -> WindowListReading {
         let reader = listedWindowReader(
             pid: pid,
-            bundleID: app.bundleID,
+            app: app,
             tracked: tracked
         )
         nonisolated(unsafe) let read = axWindows

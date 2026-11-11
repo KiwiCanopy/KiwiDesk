@@ -7,7 +7,7 @@
 
   ],
   "focus_wrap" : "all_screens",
-  "format" : 20,
+  "format" : 21,
   "ignore_rules" : [
 
   ],
@@ -353,24 +353,12 @@
     "scrolling",
     "floating"
   ],
-  "modifier_drag" : {
-    "move" : {
-      "modifiers" : "control+command",
-      "start" : "drag"
-    },
-    "resize" : {
-      "modifiers" : "control+option",
-      "start" : "drag"
-    }
-  },
   "scroll_gesture" : {
     "long_swipes" : false,
     "natural_scrolling" : {
-      "mouse" : true,
-      "trackpad" : true
+      "mouse" : "system",
+      "trackpad" : "system"
     },
-    "pan" : "control+option",
-    "space_step" : "control+option+command",
     "step_distance" : 60
   },
   "shortcut_base" : "control+option",

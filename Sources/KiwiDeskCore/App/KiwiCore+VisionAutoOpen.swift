@@ -61,8 +61,9 @@ extension KiwiCore {
     func claimQuietOpen(arrived window: ManagedWindow) -> Bool {
         guard !eventLoop.switchReads.applying else { return false }
         guard state.windows[window.id]?.isTransientOverlay == false,
+            let key = window.appRef.listKey,
             let owed = launchFollow.claimQuiet(
-                window.appRef.listKey,
+                key,
                 at: wallClock()
             )
         else { return false }

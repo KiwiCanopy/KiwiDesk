@@ -276,6 +276,13 @@ folder together.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
+:::unreleased
+An app with no bundle identifier, such as the Android Emulator's
+`qemu-system-aarch64`, is named in these rules by its process name,
+lowercased. An app that has a bundle identifier is named by it,
+whatever its process is called.
+:::
+
 A row may also carry **`desc`**, **`group`** and **`symbol`**,
 written only when set ([Describing a
 Shortcut](lua-reference.md#describing-a-shortcut)).
@@ -1320,6 +1327,13 @@ problem happen again first: the range counts back from now, and
 and windows KiwiDesk managed, so glance through it before
 attaching it. The terminal form is in the [CLI
 reference](cli.md#exporting-the-log).
+
+:::unreleased
+**Report a problem**, at the foot of Home and of the Simple page,
+opens a GitHub bug report with your KiwiDesk and macOS versions,
+screen count and Desktop mode filled in. The exported log also
+lists the settings you changed.
+:::
 
 **Shortcut not working?**  
 Check Shortcuts for a ⚠️ marker ([Conflict

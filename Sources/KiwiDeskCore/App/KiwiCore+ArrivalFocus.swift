@@ -8,9 +8,10 @@ import Foundation
 /// always take it, since the GUI fronts them (#1281, #1414).
 extension KiwiCore {
     func arrivalFocus(of window: ManagedWindow) -> ArrivalFocus {
-        let app = window.appRef.listKey
         let now = wallClock()
-        if launchFollow.opensQuietly(app, at: now) {
+        if let app = window.appRef.listKey,
+            launchFollow.opensQuietly(app, at: now)
+        {
             return .quiet(into: launchFollow.quietSpace(app, at: now))
         }
         return EventLoop.isOwnProcess(window.pid)

@@ -45,9 +45,7 @@ extension KiwiCore {
         var open: [String: [String]] = [:]
         for window in state.windows.all
         where tileRefusal(of: window.id)?.isGuess == true {
-            guard let app = window.appBundleID?.lowercased() else {
-                continue
-            }
+            guard let app = window.appRef.listKey else { continue }
             open[app, default: []].append(window.title)
         }
         let apps = eventLoop.guessedApps.entries.map {
@@ -65,7 +63,7 @@ extension KiwiCore {
             GuessedFloatApp(
                 bundleID: app,
                 name: state.windows.all.first {
-                    $0.appBundleID?.lowercased() == app
+                    $0.appRef.listKey == app
                 }?.appName ?? app,
                 titles: open[app] ?? []
             )

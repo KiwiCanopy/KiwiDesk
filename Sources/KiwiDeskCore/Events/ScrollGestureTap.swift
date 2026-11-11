@@ -6,7 +6,7 @@ import os
 protocol ScrollTapHandle: AnyObject {
     /// The chords whose scrolls the tap consumes; read per event
     /// on the tap thread.
-    func setChords(_ chords: Set<ScrollChord>)
+    func setChords(_ chords: ScrollTapChords)
     func stop()
 }
 
@@ -23,7 +23,7 @@ protocol ScrollTapHandle: AnyObject {
 final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
     typealias Deliver = @Sendable ([ScrollGestureEvent]) -> Void
 
-    private let chords = OSAllocatedUnfairLock<Set<ScrollChord>>(
+    private let chords = OSAllocatedUnfairLock<ScrollTapChords>(
         initialState: []
     )
     private let deliver: Deliver
@@ -46,7 +46,7 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         return tap.start() ? tap : nil
     }
 
-    func setChords(_ chords: Set<ScrollChord>) {
+    func setChords(_ chords: ScrollTapChords) {
         self.chords.withLock { $0 = chords }
     }
 

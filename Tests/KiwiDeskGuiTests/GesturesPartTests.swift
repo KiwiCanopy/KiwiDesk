@@ -83,11 +83,11 @@ struct GesturesPartTests {
             "SettingsCatalog.shortcuts.gesturesOnWindows",
             "focusEntries", "windowEntries",
             "SettingsCatalog.shortcuts.gesturesModifier",
-            "GesturesScrollEntries(", "GesturesModifierDragRows(",
+            "GesturesScrollEntries(",
             "SettingsCatalog.shortcuts.gesturesOnShelf",
             "GesturesShelfEntries(",
         ].compactMap { drawer.range(of: $0)?.lowerBound }
-        #expect(order.count == 8 && order == order.sorted())
+        #expect(order.count == 7 && order == order.sorted())
         // Group order follows the items' declared groups.
         let ranks = GestureItem.allCases.compactMap {
             GestureItem.Group.allCases.firstIndex(of: $0.group)

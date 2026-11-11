@@ -26,10 +26,8 @@ struct ScrollGestureConfigParityTests {
     func resolveAndDiffCarryEveryField() {
         let base = ScrollGestureBase.defaults
         let edited = ScrollGestureBase(
-            pan: [.command, .shift],
-            spaceStep: [],
-            naturalTrackpad: false,
-            naturalMouse: false,
+            naturalTrackpad: .off,
+            naturalMouse: .off,
             longSwipes: true,
             stepDistance: 120
         )
@@ -49,10 +47,8 @@ struct ScrollGestureConfigParityTests {
     func fieldsCoverTheBase() {
         let base = ScrollGestureBase.defaults
         let edited = ScrollGestureBase(
-            pan: [.command, .shift],
-            spaceStep: [],
-            naturalTrackpad: false,
-            naturalMouse: false,
+            naturalTrackpad: .off,
+            naturalMouse: .off,
             longSwipes: true,
             stepDistance: 120
         )
@@ -68,10 +64,8 @@ struct ScrollGestureConfigParityTests {
     @Test("every field round-trips through JSON")
     func everyFieldRoundTrips() throws {
         let edited = ScrollGestureBase(
-            pan: [.command, .shift],
-            spaceStep: [],
-            naturalTrackpad: false,
-            naturalMouse: false,
+            naturalTrackpad: .off,
+            naturalMouse: .off,
             longSwipes: true,
             stepDistance: 120
         )

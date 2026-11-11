@@ -21,7 +21,7 @@ extension Profile {
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case scrollGesture = "scroll_gesture"
-        case trackpadGesture = "trackpad_gesture"
+        case gesture
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
         case focusWrap = "focus_wrap"

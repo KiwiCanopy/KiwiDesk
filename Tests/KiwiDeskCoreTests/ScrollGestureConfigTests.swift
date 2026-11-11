@@ -43,58 +43,13 @@ struct ScrollGestureConfigTests {
         let text = try json(ScrollGestureBase.defaults)
         #expect(
             text == "{\"long_swipes\":false,"
-                + "\"natural_scrolling\":{\"mouse\":true,\"trackpad\":true},"
-                + "\"pan\":\"control+option\","
-                + "\"space_step\":\"control+option+command\","
+                + "\"natural_scrolling\":"
+                + "{\"mouse\":\"system\",\"trackpad\":\"system\"},"
                 + "\"step_distance\":60}"
         )
         #expect(
             try decode(ScrollGestureBase.self, text) == .defaults
         )
-    }
-
-    @Test("a key the file does not carry takes its default")
-    func missingKeysDefault() throws {
-        let base = try decode(ScrollGestureBase.self, "{\"pan\": \"\"}")
-        #expect(base.pan == [])
-        #expect(base.spaceStep == ScrollGestureBase.defaults.spaceStep)
-        #expect(!base.longSwipes)
-        #expect(base.stepDistance == 60)
-    }
-
-    @Test("an override writes only what it changes")
-    func overrideIsSparse() throws {
-        let over = ScrollGestureOverride(pan: [])
-        #expect(try json(over) == "{\"pan\":\"\"}")
-        #expect(try decode(ScrollGestureOverride.self, "{}").isEmpty)
-    }
-
-    @Test("resolve lays the override over the base, diff inverts it")
-    func resolveAndDiff() {
-        let base = ScrollGestureBase.defaults
-        let over = ScrollGestureOverride(
-            spaceStep: [.control, .shift],
-            naturalMouse: false
-        )
-        let resolved = over.resolved(onto: base)
-        #expect(resolved.pan == base.pan)
-        #expect(resolved.spaceStep == [.control, .shift])
-        #expect(!resolved.naturalMouse)
-        #expect(resolved.naturalTrackpad)
-        #expect(
-            ScrollGestureOverride.diff(base: base, edited: resolved) == over
-        )
-        #expect(ScrollGestureOverride.diff(base: base, edited: base) == nil)
-    }
-
-    @Test("gui.json without the group decodes the defaults")
-    func sidecarAbsentIsDefaults() throws {
-        let config = try decode(GuiConfig.self, "{\"format\": 4}")
-        #expect(config.scrollGesture == .defaults)
-        var edited = config
-        edited.scrollGesture.pan = [.command, .shift]
-        let back = try decode(GuiConfig.self, try json(edited))
-        #expect(back.scrollGesture.pan == [.command, .shift])
     }
 
     @Test("a profile carries its override, and none by default")
@@ -108,7 +63,7 @@ struct ScrollGestureConfigTests {
         #expect(
             try decode(Profile.self, try json(profile)).scrollGesture == nil
         )
-        profile.scrollGesture = ScrollGestureOverride(naturalTrackpad: false)
+        profile.scrollGesture = ScrollGestureOverride(naturalTrackpad: .off)
         #expect(
             try json(profile.scrollGesture!)
                 == "{\"natural_scrolling\":{\"trackpad\":false}}"

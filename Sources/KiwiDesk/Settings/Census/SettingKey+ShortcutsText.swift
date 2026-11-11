@@ -89,8 +89,6 @@ extension ShortcutsKey {
                 "shortcuts.restore_defaults",
                 help: "shortcuts.restore_defaults.explain"
             )
-        case .scrollPan:
-            return .text("shortcuts.gestures.scroll.pan")
         case .scrollLongSwipes:
             return .text("shortcuts.gestures.scroll.long_swipes")
         case .scrollStepDistance:
@@ -99,12 +97,6 @@ extension ShortcutsKey {
             return .text("shortcuts.gestures.scroll.trackpad")
         case .scrollNaturalMouse:
             return .text("shortcuts.gestures.scroll.mouse")
-        case .scrollSpaceStep:
-            return .text("shortcuts.gestures.scroll.space_step")
-        case .modifierDragMove:
-            return .text("shortcuts.gestures.modifier_drag.move")
-        case .modifierDragResize:
-            return .text("shortcuts.gestures.modifier_drag.resize")
         case .focusWrap:
             return .text(
                 "shortcuts.focus_wrap",

@@ -1,25 +1,64 @@
 import CoreGraphics
 import Foundation
 
-/// The resolved scroll-gesture settings (#1656 ruling: a global
-/// base plus a per-profile override, resolved before they get
-/// here). A consumer missing from `chords`, or given an empty
-/// chord, is off: a plain scroll always belongs to the window.
+/// What one held chord does with a scroll (#3199): a phased swipe's
+/// binding, a vertical wheel's and a sideways wheel's. A chord with
+/// none of the three is not in the tap's set.
+public struct ScrollRoute: Equatable, Sendable {
+    public var swipe: GestureAction?
+    public var wheel: GestureAction?
+    public var wheelX: GestureAction?
+
+    public init(
+        swipe: GestureAction? = nil,
+        wheel: GestureAction? = nil,
+        wheelX: GestureAction? = nil
+    ) {
+        self.swipe = swipe
+        self.wheel = wheel
+        self.wheelX = wheelX
+    }
+
+    var isEmpty: Bool { swipe == nil && wheel == nil && wheelX == nil }
+
+    /// The binding a scroll reaches: a phased one the swipe's, a
+    /// wheel burst's by the axis the router owned it on.
+    func action(for event: ScrollGestureEvent) -> GestureAction? {
+        switch event.input {
+        case .trackpad: swipe
+        case .wheel: event.sideways ? wheelX : wheel
+        }
+    }
+}
+
+/// The resolved scroll-gesture settings (#1656, #3199): the routes
+/// the gesture bindings resolved to and the per-input Natural
+/// scrolling, resolved before they get here. A plain scroll always
+/// belongs to the window: an empty chord never routes.
 public struct ScrollGestureSettings: Equatable, Sendable {
-    public private(set) var chords: [ScrollGestures.Consumer: ScrollChord]
-    /// KiwiDesk's own Natural scrolling per input, independent
-    /// of macOS's.
+    public private(set) var routes: [ScrollChord: ScrollRoute]
+    /// KiwiDesk's own Natural scrolling per input.
     public let naturalTrackpad: Bool
     public let naturalMouse: Bool
 
     public init(
-        chords: [ScrollGestures.Consumer: ScrollChord] = [:],
+        routes: [ScrollChord: ScrollRoute] = [:],
         naturalTrackpad: Bool = true,
         naturalMouse: Bool = true
     ) {
-        self.chords = chords.filter { !$0.value.isEmpty }
+        self.routes = routes.filter { !$0.key.isEmpty && !$0.value.isEmpty }
         self.naturalTrackpad = naturalTrackpad
         self.naturalMouse = naturalMouse
+    }
+
+    /// The chords the tap consumes, per input.
+    var tapChords: ScrollTapChords {
+        let routes = self.routes
+        return ScrollTapChords(
+            swipe: Set(routes.filter { $0.value.swipe != nil }.keys),
+            wheel: Set(routes.filter { $0.value.wheel != nil }.keys),
+            wheelX: Set(routes.filter { $0.value.wheelX != nil }.keys)
+        )
     }
 
     /// Whether `input`'s scrolls keep the natural direction.
@@ -28,27 +67,15 @@ public struct ScrollGestureSettings: Equatable, Sendable {
     }
 }
 
-/// The main-actor front of the scroll-gesture tap (#1656, #1519).
-/// Two jobs, two doors: `setHandler` wires a consumer once, and
-/// `configure` takes the resolved settings on every apply. The one
-/// machine tap exists only while a wired consumer has a chord and
-/// the core is started — so a user with both gestures off has no
-/// tap.
-///
-/// Chords are keyed by CONSUMER, never the other way round: a
-/// profile switch can hand the two gestures each other's chords,
-/// and one `configure` lands both.
+/// The main-actor front of the scroll-gesture tap (#1656, #1519,
+/// #3199). Two jobs, two doors: `setHandler` wires the one consumer
+/// once, and `configure` takes the resolved settings on every
+/// apply. The machine tap exists only while a chord routes and the
+/// core is started.
 @MainActor
 public final class ScrollGestures {
-    /// The two gestures, in the precedence a shared chord takes.
-    public enum Consumer: CaseIterable, Hashable, Sendable {
-        /// Steps focus window by window on every layout (#1656).
-        case pan
-        /// Steps between the Spaces of a screen (#1519).
-        case step
-    }
-
-    public typealias Handler = @MainActor (ScrollGestureEvent) -> Void
+    public typealias Handler =
+        @MainActor (ScrollGestureEvent, ScrollRoute) -> Void
     typealias MakeTap =
         @MainActor (@escaping ScrollGestureTap.Deliver)
         -> ScrollTapHandle?
@@ -57,20 +84,29 @@ public final class ScrollGestures {
     /// Builds the machine tap. Live in production; `makeTestCore`
     /// pins one that touches nothing.
     var makeTap: MakeTap = { ScrollGestureTap.live(deliver: $0) }
+    /// macOS's own Natural scrolling (#3200). Live in production;
+    /// `makeTestCore` pins it unset.
+    var host = HostNaturalScrolling.live
+    /// The cached host value a `.system` input follows: read at the
+    /// first start and on each change notice, never per event.
+    private(set) var hostNatural = true
+    private var followingHost = false
+    /// Re-runs the resolve; wired once at bootstrap.
+    var onHostChange: @MainActor () -> Void = {}
 
     public private(set) var settings = ScrollGestureSettings()
-    /// The inputs `KiwiCore.applyScrollGestures` resolves from:
-    /// the base a config load or a verb wrote, and the live
-    /// profile's override — written through `adopt` alone.
+    /// The inputs `KiwiCore.applyScrollGestures` resolves from: the
+    /// base a config load or a verb wrote, and the live profile's
+    /// override — written through `adoptResolution` alone.
     private(set) var base = ScrollGestureBase.defaults
     private(set) var profileOverride: ScrollGestureOverride?
     /// The two resolved: what a consumer reads for its stepping.
     private(set) var resolved = ScrollGestureBase.defaults
-    private var handlers: [Consumer: Handler] = [:]
-    /// The consumer each chord's in-flight gesture began with, and
-    /// its last event, so a change mid-gesture never hands one
-    /// consumer a gesture another began.
-    private var inFlight: [ScrollChord: (Consumer, ScrollGestureEvent)] =
+    private var handler: Handler?
+    /// Each chord's gesture in flight: the route it began with and
+    /// its last event, so a change mid-gesture never hands a
+    /// gesture to a binding it did not begin with.
+    private var inFlight: [ScrollChord: (ScrollRoute, ScrollGestureEvent)] =
         [:]
     private var tap: ScrollTapHandle?
     private var started = false
@@ -80,38 +116,57 @@ public final class ScrollGestures {
     /// Whether the machine tap is live.
     public var isTapped: Bool { tap != nil }
 
-    /// Wires `consumer`'s handler; once, at bootstrap.
-    public func setHandler(
-        _ consumer: Consumer,
-        _ handler: @escaping Handler
-    ) {
-        handlers[consumer] = handler
+    /// Wires the consumer; once, at bootstrap.
+    public func setHandler(_ handler: @escaping Handler) {
+        self.handler = handler
         sync()
     }
 
-    /// Applies resolved settings. A consumer whose chord changed has
-    /// its gesture in flight ended; an unchanged chord keeps it.
+    /// Applies resolved settings. A chord whose route changed has
+    /// its gesture in flight ended; an unchanged route keeps it.
     public func configure(_ settings: ScrollGestureSettings) {
-        for consumer in Consumer.allCases
-        where settings.chords[consumer] != self.settings.chords[consumer] {
-            endInFlight(of: consumer)
+        for chord in Array(inFlight.keys)
+        where settings.routes[chord] != inFlight[chord]?.0 {
+            endInFlight(of: chord)
         }
         self.settings = settings
         sync()
     }
 
     /// The one write of the resolve's inputs and output, ending in
-    /// the tap's `configure` — `KiwiCore.applyScrollGestures`'s
-    /// door (#1656, `ScrollGestureConfigureSeamTests`).
+    /// the tap's `configure` — `KiwiCore.applyScrollGestures`'s door
+    /// (#1656, `ScrollGestureConfigureSeamTests`).
     func adoptResolution(
         base: ScrollGestureBase,
         profileOverride: ScrollGestureOverride?,
-        resolved: ScrollGestureBase
+        resolved: ScrollGestureBase,
+        routes: [ScrollChord: ScrollRoute]
     ) {
         self.base = base
         self.profileOverride = profileOverride
         self.resolved = resolved
-        configure(resolved.tapSettings)
+        configure(
+            resolved.tapSettings(routes: routes, hostNatural: hostNatural)
+        )
+    }
+
+    /// Follows macOS's Natural scrolling from the first start on:
+    /// reads it, watches its change notice, and calls
+    /// `onHostChange` whenever the cached value moves.
+    func followHost() {
+        guard !followingHost else { return }
+        followingHost = true
+        let first = host.read() ?? true
+        host.watch { [weak self] in
+            guard let self else { return }
+            let now = host.read() ?? true
+            guard now != hostNatural else { return }
+            hostNatural = now
+            onHostChange()
+        }
+        guard first != hostNatural else { return }
+        hostNatural = first
+        onHostChange()
     }
 
     /// A config load's reset: the inputs return to the defaults
@@ -124,79 +179,56 @@ public final class ScrollGestures {
     /// Called once the Accessibility grant is in hand.
     func start() {
         started = true
+        followHost()
         sync()
     }
 
     /// Ends every gesture in flight first: what the tap still had
     /// queued is dropped with it.
     func stop() {
-        Consumer.allCases.forEach(endInFlight(of:))
+        Array(inFlight.keys).forEach(endInFlight(of:))
         inFlight = [:]
         started = false
         sync()
     }
 
-    /// Hands routed events to the consumer that owns the gesture,
-    /// with Natural scrolling applied — here, once, for both.
+    /// Hands routed events to the consumer with the route the
+    /// gesture began with, Natural scrolling applied — here, once.
     func receive(_ events: [ScrollGestureEvent]) {
         // Events queued before a stop are dropped with the tap.
-        guard started else { return }
+        guard started, let handler else { return }
         for var event in events {
             if event.kind == .began {
-                guard let consumer = owner(of: event.chord) else {
+                guard let route = settings.routes[event.chord] else {
                     continue
                 }
-                inFlight[event.chord] = (consumer, event)
+                inFlight[event.chord] = (route, event)
             }
-            guard let (consumer, _) = inFlight[event.chord],
-                let handler = handlers[consumer]
-            else { continue }
+            guard let (route, _) = inFlight[event.chord] else { continue }
             inFlight[event.chord] =
-                event.kind == .ended ? nil : (consumer, event)
+                event.kind == .ended ? nil : (route, event)
             if !settings.isNatural(event.input) {
                 event.delta.dx = -event.delta.dx
                 event.delta.dy = -event.delta.dy
+                event.reversed = true
             }
-            handler(event)
+            handler(event, route)
         }
     }
 
-    /// The wired consumers' chords, the set the tap consumes.
-    private var liveChords: Set<ScrollChord> {
-        Set(
-            Consumer.allCases.compactMap { consumer in
-                handlers[consumer].flatMap { _ in
-                    settings.chords[consumer]
-                }
-            }
-        )
-    }
-
-    /// The consumer a chord reaches: the first wired one in
-    /// `Consumer` order, so a shared chord is never a coin flip.
-    private func owner(of chord: ScrollChord) -> Consumer? {
-        Consumer.allCases.first {
-            handlers[$0] != nil && settings.chords[$0] == chord
-        }
-    }
-
-    private func endInFlight(of consumer: Consumer) {
-        guard
-            let (chord, (_, last)) = inFlight.first(where: {
-                $0.value.0 == consumer
-            })
-        else { return }
+    private func endInFlight(of chord: ScrollChord) {
+        guard let (route, last) = inFlight[chord] else { return }
         inFlight[chord] = nil
         var ended = last
         ended.kind = .ended
         ended.delta = .zero
         ended.momentum = false
-        handlers[consumer]?(ended)
+        handler?(ended, route)
     }
 
     private func sync() {
-        let chords = liveChords
-        guard started, !chords.isEmpty else {
+        let chords = settings.tapChords
+        guard started, handler != nil, !chords.isEmpty else {
             tap?.stop()
             tap = nil
             return

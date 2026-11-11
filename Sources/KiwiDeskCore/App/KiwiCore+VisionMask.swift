@@ -161,7 +161,8 @@ extension KiwiCore {
     /// Whether the Never dimmed list names `app`.
     func isNeverDimmed(_ app: AppRef) -> Bool {
         let list = visionLook.neverDimmed
-        return !list.isEmpty && list.contains(app.listKey)
+        guard let key = app.listKey else { return false }
+        return list.contains(key)
     }
 
     /// The desktop icons' level: a hole there would clear the

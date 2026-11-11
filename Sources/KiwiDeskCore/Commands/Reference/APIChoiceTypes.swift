@@ -25,8 +25,8 @@ extension HyperSourceKey: APIChoiceType {}
 extension MaximizeAxis: APIChoiceType {}
 extension MaximizeAnchor: APIChoiceType {}
 extension ScreenShape: APIChoiceType {}
-extension TrackpadGestureSlot: APIChoiceType {}
-extension TrackpadSwipeFamily: APIChoiceType {}
+extension GestureInput: APIChoiceType {}
+extension GestureFamily: APIChoiceType {}
 
 extension BspParams.Strategy: APIChoiceType {}
 extension ScrollingParams.Anchor: APIChoiceType {}

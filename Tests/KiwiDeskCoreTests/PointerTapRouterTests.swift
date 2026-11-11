@@ -103,8 +103,9 @@ struct PointerTapRouterTests {
 
     @Test("an off action, or an off consumer, begins nothing")
     func offBeginsNothing() {
-        var settings = ModifierDragSettings.defaults
-        settings.move.chord = []
+        let settings = ModifierDragSettings([
+            ModifierDragBinding(.resize, chord: Self.resizeChord)
+        ])
         var r = router(settings)
         #expect(r.route(sample(.leftDown, Self.moveChord), now: 1) == .pass)
         var off = PointerTapRouter()
@@ -113,8 +114,10 @@ struct PointerTapRouterTests {
 
     @Test("a hover grab begins on a move, passes it, ends on a key")
     func hoverGrab() {
-        var settings = ModifierDragSettings.defaults
-        settings.move.start = .hover
+        let settings = ModifierDragSettings([
+            ModifierDragBinding(.move, chord: Self.moveChord, start: .hover),
+            ModifierDragBinding(.resize, chord: Self.resizeChord),
+        ])
         var r = router(settings)
         // The press is no longer the move's to take.
         #expect(r.route(sample(.leftDown, Self.moveChord), now: 0) == .pass)
@@ -133,13 +136,52 @@ struct PointerTapRouterTests {
 
     @Test("a hover grab ends on a click, which stays the app's")
     func hoverEndsOnClick() {
-        var settings = ModifierDragSettings.defaults
-        settings.move.start = .hover
+        let settings = ModifierDragSettings([
+            ModifierDragBinding(.move, chord: Self.moveChord, start: .hover),
+            ModifierDragBinding(.resize, chord: Self.resizeChord),
+        ])
         var r = router(settings)
         _ = r.route(sample(.mouseMoved, Self.moveChord), now: 1)
         let click = r.route(sample(.leftDown, Self.moveChord), now: 2)
         #expect(!click.swallow)
         #expect(click.grab.map(\.phase) == [.ended])
+    }
+
+    @Test("one action holds two bindings; each starts its own way")
+    func twoBindingsOfOneAction() {
+        let hover: ScrollChord = [.option, .command]
+        var r = router(
+            ModifierDragSettings([
+                ModifierDragBinding(.move, chord: Self.moveChord),
+                ModifierDragBinding(.move, chord: hover, start: .hover),
+            ])
+        )
+        let press = r.route(sample(.leftDown, Self.moveChord), now: 1)
+        #expect(press.grab.first?.start == .drag)
+        _ = r.route(sample(.leftUp, Self.moveChord), now: 2)
+        let move = r.route(sample(.mouseMoved, hover), now: 3)
+        #expect(move.grab.first?.action == .move)
+        #expect(move.grab.first?.start == .hover)
+        #expect(move.grab.first?.chord == hover)
+    }
+
+    @Test("one chord's two starts each begin their own binding")
+    func oneChordTwoStarts() {
+        var r = router(
+            ModifierDragSettings([
+                ModifierDragBinding(.move, chord: Self.moveChord),
+                ModifierDragBinding(
+                    .resize,
+                    chord: Self.moveChord,
+                    start: .hover
+                ),
+            ])
+        )
+        let move = r.route(sample(.mouseMoved, Self.moveChord), now: 1)
+        #expect(move.grab.first?.action == .resize)
+        _ = r.route(sample(.flagsChanged, []), now: 2)
+        let press = r.route(sample(.leftDown, Self.moveChord), now: 3)
+        #expect(press.grab.first?.action == .move)
     }
 
     @Test("a re-seed ends the grab in flight, and is quiet otherwise")
@@ -159,8 +201,9 @@ struct PointerTapRouterTests {
     func actionOffEnds() {
         var r = router()
         _ = r.route(sample(.leftDown, Self.moveChord), now: 1)
-        var settings = ModifierDragSettings.defaults
-        settings.move.chord = []
+        let settings = ModifierDragSettings([
+            ModifierDragBinding(.resize, chord: Self.resizeChord)
+        ])
         r.snapshot = PointerTapSnapshot(grab: settings)
         let routed = r.route(sample(.leftDragged, []), now: 2)
         #expect(!routed.swallow)

@@ -156,14 +156,15 @@ because two real clients now remove drift — see
   the shortcut base above, its chord judged free as registered
   (`ResetSizesSeedTests` ▸ `movedLayerGetsHyper`,
   `bareRHoldsHyperR`).
-- **A trackpad gesture seed reaches every install that never
-  touched its slot (#1873)**: the stored slot map is sparse over the
-  seeds in code, so a seed added later needs no generation, and
-  CHANGING a shipped seed changes it for everyone who kept it — a
-  ruling, never a tidy-up. A seed runs the Shortcuts catalogue's own
-  Lua, judged against the GUI's catalogue since a gesture-only verb
-  has no keyboard default (`TrackpadSeedCatalogueTests` ▸
-  `seedsAreCatalogueRows`).
+- **A gesture seed reaches every install that never touched its
+  key (#1873, #3199)**: the stored `gesture` map is sparse over
+  `GestureSeeds.seeds` in code, so a seed added later needs no
+  generation, and CHANGING a shipped seed changes it for everyone
+  who kept it — a ruling, never a tidy-up. The default rows and
+  Restore Defaults read that one list, never a hand copy. A Lua
+  seed runs the Shortcuts catalogue's own Lua, judged against the
+  GUI's catalogue since a gesture-only verb has no keyboard default
+  (`TrackpadSeedCatalogueTests` ▸ `seedsAreCatalogueRows`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took
@@ -1775,7 +1776,11 @@ fact about its command*. The obligations:
   the switch path answers from adoption state instead.
   Settings' **Live, not saved** rows (#2262) and `revert_settings`
   (the bullet below) are the ruled readers that diff the settings
-  root itself. The rows: `unsavedLiveSettings`
+  root itself. A reader that diffs live against what an install
+  starts from says nothing about saved or stored, feeds no keep
+  or revert, and is no reader of that shape: the exported log's
+  header (#3214, `ProblemReportRootsTests`). The rows:
+  `unsavedLiveSettings`
   judges each leaf through the same `KeepJudge` and hands Settings
   its leaves by keep id (`UnsavedLiveSettings.leaves`); a row's
   Keep takes its ids from there alone, never derived in the GUI,

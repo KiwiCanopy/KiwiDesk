@@ -161,7 +161,7 @@ struct HoverLiftAdoptionTests {
                 )
             }
         }
-        #expect(callers >= 3)
+        #expect(callers >= 2)
         let well = squash(chrome)
         #expect(well.contains(".fill(lifted?SettingsTheme."))
         #expect(well.contains(".animation(reduceMotion?nil:"))
