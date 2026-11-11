@@ -1,12 +1,12 @@
 import Foundation
 import SwiftUI
 
-/// A group the Shortcuts & Gestures jump chips lead to (#1520), in
-/// page order. Layers and Modifier keys take no chip: they scope
-/// or precede the groups below rather than being destinations.
-/// macOS Desktops takes one only while its section draws (#2655).
+/// A group the Built-in part's jump chips lead to (#1520, #3184),
+/// in page order; no other part draws chips. Layers and Modifier
+/// keys take no chip: they scope or precede the groups below rather
+/// than being destinations. macOS Desktops takes one only while its
+/// section draws (#2655).
 enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
-    case gestures
     case showHide
     case focus
     case moveWindows
@@ -14,8 +14,6 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case layout
     case sizeFloat
     case pocket
-    case openApplications
-    case luaBindings
 
     /// The group's own title control: its text is the chip's
     /// label, and its id both the card's scroll anchor and the key
@@ -23,7 +21,6 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     /// three.
     @MainActor var control: SettingsControl {
         switch self {
-        case .gestures: return SettingsCatalog.shortcuts.gestures.control
         case .showHide: return SettingsCatalog.shortcuts.showHideKeys
         case .focus: return SettingsCatalog.shortcuts.focusKeys
         case .moveWindows: return SettingsCatalog.shortcuts.moveWindows
@@ -32,17 +29,12 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
         case .pocket: return SettingsCatalog.shortcuts.pocketCard
-        case .openApplications:
-            return SettingsCatalog.shortcuts.openApplications
-        case .luaBindings:
-            return SettingsCatalog.shortcuts.luaBindings.control
         }
     }
 
     /// The census container the chip leads to.
     var container: SettingsContainer {
         switch self {
-        case .gestures: return .gestures
         case .showHide: return .showHide
         case .focus: return .focus
         case .moveWindows: return .moveWindows
@@ -50,14 +42,8 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
         case .pocket: return .pocket
-        case .openApplications: return .openApplications
-        case .luaBindings: return .luaBindings
         }
     }
-
-    /// The chip a rule follows: everything after it is scoped to
-    /// one layer, this card to none.
-    var ruledAfter: Bool { self == .gestures }
 
     /// The chips drawn: a drawer or section not drawn has nowhere
     /// to jump, so its chip is left out rather than greyed (#2544,

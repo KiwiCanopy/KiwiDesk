@@ -52,6 +52,7 @@ extension KeybindingManager {
     ) -> Bool {
         tapBindings = [:]
         sequenceGeneration &+= 1
+        answeredChords = nil
         let rows = KeyboardTapRows(
             sides: sideTapRows(sides),
             taps: taps.map { combo, ref in
@@ -69,6 +70,9 @@ extension KeybindingManager {
                     )
                 },
             sequences: sequences,
+            sequencePassing: sequences.isEmpty
+                ? .none : .of(systemChords()),
+            sequenceScrollKeys: sequenceScrollKeys,
             sequenceGeneration: sequenceGeneration
         )
         let wanted = rows.consumers
@@ -165,5 +169,14 @@ extension KeybindingManager {
         }
         guard !isSuspended, let live = tapBindings[id] else { return }
         pressFire(ref: live.ref, combo: live.combo, id: nil)
+    }
+}
+
+extension KeybindingManager {
+    /// Releases one binding's ref and its KiwiHub side mark, since
+    /// Lua reuses a freed ref for the next binding (#1229).
+    func releaseBinding(_ ref: Int32) {
+        lua?.release(ref: ref)
+        kiwiHubSideRefs.remove(ref)
     }
 }

@@ -118,6 +118,34 @@ struct KeySequenceCardTests {
         )
     }
 
+    @Test("the recorder's sibling check is Core's (#3174)")
+    func siblingRuleIsCores() throws {
+        let tree = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                        + "Sequences/SequenceTree.swift"
+                )
+        )
+        #expect(tree.contains("KeyBinding.stepKey("))
+        #expect(!tree.contains("KeyCombo.equivalent"))
+        // The node being recorded is never its own sibling.
+        let own = KeyBinding(combo: "w", lua: "x")
+        let other = KeyBinding(combo: "h", lua: "y")
+        let root = KeyBinding.sequence(
+            combo: "ctrl+alt+space",
+            steps: [own, other]
+        )
+        #expect(
+            SequenceTree.sibling(holding: "w", besides: own.id, in: root)
+                == nil
+        )
+        #expect(
+            SequenceTree.sibling(holding: "w", besides: other.id, in: root)?
+                .id == own.id
+        )
+    }
+
     @Test("the leader's row carries the sequence's reach (#3124)")
     func leaderRowCarriesReach() throws {
         let dir = SourceScan.repoRoot(from: #filePath)
@@ -131,18 +159,26 @@ struct KeySequenceCardTests {
             at: dir.appendingPathComponent("SequenceNodeRow+Recorder.swift")
         )
         let flat = row.filter { !$0.isWhitespace }
-        #expect(flat.contains("ifisLeader{reachColumn}"))
+        // The leader's line alone carries reach and its trash; a
+        // step key's line ends in a plain remove (#3162).
+        #expect(flat.contains("ifisLeader{leaderLine}else{keyLine}"))
+        let leader = try #require(
+            SourceScan.declarationBody(
+                after: "private var leaderLine",
+                in: row
+            )
+        ).filter { !$0.isWhitespace }
         #expect(
-            flat.contains(
-                "ifisLeader{KeyReachTrash(model:model,layer:layerName,"
+            leader.contains(
+                "KeyReachColumn(model:model,layer:layerName,binding:node)"
+                    + "recorderKeyReachTrash(model:model,layer:layerName,"
                     + "binding:node){requestDelete()}"
             )
         )
-        #expect(
-            flat.contains(
-                "KeyReachColumn(model:model,layer:layerName,binding:node)"
-            )
+        let key = try #require(
+            SourceScan.declarationBody(after: "private var keyLine", in: row)
         )
+        #expect(!key.contains("KeyReach"))
         let carry = recorder.filter { !$0.isWhitespace }
         #expect(
             carry.contains(

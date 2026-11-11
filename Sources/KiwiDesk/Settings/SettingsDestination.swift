@@ -54,7 +54,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .bars: return L("destination.bars", "KiwiShelf")
         case .profiles: return L("destination.profiles", "Profiles")
         case .shortcuts:
-            return L("destination.shortcuts", "Shortcuts & Gestures")
+            return L("destination.shortcuts", "Shortcuts")
         case .appRules:
             return L("destination.app_rules", "App Rules")
         case .kiwiVision:

@@ -59,7 +59,7 @@ extension SequenceNodeRow {
                 besides: node.id,
                 in: root
             )
-        else { return nil }
+        else { return systemReading }
         return ConflictReading(
             severity: .duplicate(holder),
             sentence: L(
@@ -67,6 +67,21 @@ extension SequenceNodeRow {
                 "Also bound at this point in the sequence to %1$@ — only "
                     + "one of the two will fire.",
                 holderName(holder)
+            )
+        )
+    }
+
+    /// A step key on a chord macOS answers wins it while the
+    /// sequence is open (#3173): Core's own reading of the chord.
+    private var systemReading: ConflictReading? {
+        guard let shortcut = model.core.sequenceStepTakes(node.combo)
+        else { return nil }
+        let severity = ConflictSeverity.takesFromMacOS(shortcut)
+        return ConflictReading(
+            severity: severity,
+            sentence: ConflictText.sentence(
+                for: severity,
+                config: model.config
             )
         )
     }

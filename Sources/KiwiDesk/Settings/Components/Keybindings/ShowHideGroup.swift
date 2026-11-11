@@ -1,9 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Show & hide card: what the panels, the bars and KiwiVision
-/// put on screen, one card named by its job, each product a
-/// sub-group drawing its own heading as `KiwiDeskKeyRows` does.
+/// The Show & hide card: what the panels, the Settings window, the
+/// bars and KiwiVision put on screen, one card named by its job,
+/// each product a sub-group drawing its own heading as
+/// `KiwiDeskKeyRows` does. Open Settings sits under its own
+/// KiwiDesk sub-heading after KiwiHub, being a built-in (#3184).
 /// KiwiVision is last because it grows a row per lens
 /// (`docs/design-decisions.md` ▸ Shortcuts).
 struct ShowHideGroup: View {
@@ -14,6 +16,11 @@ struct ShowHideGroup: View {
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.showHideKeys) {
             KiwiHubKeyRows(
+                model: model,
+                bindings: $bindings,
+                expander: expander
+            )
+            KiwiDeskKeyRows(
                 model: model,
                 bindings: $bindings,
                 expander: expander

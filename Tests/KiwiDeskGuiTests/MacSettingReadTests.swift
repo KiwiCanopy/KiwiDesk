@@ -160,11 +160,8 @@ struct MacSettingReadTests {
         }
         #expect(mentions == 2)
         #expect(liveReads == 1)
-        #expect(
-            Set(cfReads) == [
-                "SystemShortcutEnablement.swift", "MacSetting.swift",
-            ]
-        )
+        // The symbolic-hotkey read is Core's `SymbolicHotkeys` (#3173).
+        #expect(Set(cfReads) == ["MacSetting.swift"])
         let factory = try Self.stripped(
             "Tests/KiwiDeskGuiTests/TestModel.swift"
         )

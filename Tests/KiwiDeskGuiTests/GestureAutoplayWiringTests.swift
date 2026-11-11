@@ -4,13 +4,11 @@ import Testing
 @testable import KiwiDesk
 
 /// A gesture picture plays by itself once per visit, on the user's
-/// own click alone: the card's first entry on a click open (owner
-/// ruling 2026-09-29), or the entry a click on its picture in the
-/// shut card's strip lands on (owner ruling 2026-10-17; gui.md ▸
-/// "A gesture picture is not a schematic"). A search, Go to or
-/// diff jump expands the card through
-/// `SettingsCollapsibleSection.expand(revealing:)`, which must
-/// never reach `onToggle`.
+/// own click alone: the part's first entry when a click on the
+/// Mouse & Trackpad segment opens it (owner ruling 2026-09-29,
+/// carried to the segment by #3184; gui.md ▸ "A gesture picture is
+/// not a schematic"). A search, Go to or diff jump lands on the
+/// part through `nav` and arms nothing.
 @Suite("Gesture autoplay wiring (#1726)")
 struct GestureAutoplayWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -44,89 +42,75 @@ struct GestureAutoplayWiringTests {
         #expect(item.contains("get:{playing.wrappedValue==item}"))
     }
 
-    @Test("only the disclosure's own click reaches onToggle")
-    func clickOnly() throws {
-        let file =
-            "Settings/Components/Common/"
-            + "SettingsCollapsibleSection.swift"
-        let source = try Self.squashed(file)
-        #expect(
-            source.contains(
-                "SettingsDisclosureButton(isExpanded:clicked,"
-            )
-        )
-        #expect(source.components(separatedBy: "onToggle?(").count == 2)
-        let clicked = try #require(
-            SourceScan.declarationBody(
-                after: "privatevarclicked:Binding<Bool>",
-                in: source
-            )
-        )
-        #expect(clicked.contains("onToggle?(open)"))
-        let expand = try #require(
-            SourceScan.declarationBody(
-                after: "privatefuncexpand(",
-                in: source
-            )
-        )
-        #expect(!expand.contains("onToggle"))
-        // Nor one hop away: only the disclosure writes `clicked`.
-        #expect(!expand.contains("clicked"))
-        #expect(source.components(separatedBy: "clicked").count == 3)
-    }
-
-    /// Armed only by a click: the open's hook, once per visit
-    /// through `played`, or a strip picture's land, once per such
-    /// click; spent by the entry that plays, so a search open or a
-    /// re-mount rests.
-    @Test("the drawer plays once per visit, on a click")
+    /// Armed only by the segment's own pick, once per visit through
+    /// `gesturesPlayed`; spent by the part on its appear, so a
+    /// search landing or a re-mount rests.
+    @Test("the part plays once per visit, on a click")
     func oncePerVisit() throws {
-        let drawer = try Self.squashed(
-            "Settings/Components/Gestures/GesturesDrawer.swift"
+        let segment = try Self.squashed(
+            "Settings/Sections/ShortcutsSection+Segment.swift"
         )
-        let hook = try #require(
-            SourceScan.declarationBody(after: "onToggle:", in: drawer)
-        )
-        let land = try #require(
+        let pick = try #require(
             SourceScan.declarationBody(
-                after: "privatevarstrip:someView",
-                in: drawer
+                after: "privatefuncsegmentBinding(",
+                in: segment
             )
         )
-        // Two arming sites besides the declaration: the hook, read
-        // against `played`, and the land, which spends the visit.
-        #expect(drawer.components(separatedBy: "playing=").count == 3)
-        #expect(hook.contains("ifopen,!played{playing=.scrollStep}"))
-        #expect(land.contains("playing=item"))
-        #expect(drawer.components(separatedBy: "played=true").count == 3)
-        #expect(hook.contains("played=true"))
-        #expect(land.contains("played=true"))
-        // The entry spends the flag before it plays.
+        // Across every file of the page: the declaration and the
+        // pick's one arming write; and nothing else in Settings arms
+        // the part's binding.
+        let page = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent("Settings/Sections")
+        ).filter { $0.lastPathComponent.hasPrefix("ShortcutsSection") }
+        #expect(page.count >= 4)
+        let writes = try page.map {
+            try Self.squashed($0).components(separatedBy: "gesturesPlay=")
+                .count - 1
+        }.reduce(0, +)
+        #expect(writes == 2)
+        #expect(segment.components(separatedBy: "gesturesPlay=").count == 2)
+        let settings = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent("Settings")
+        )
+        #expect(settings.count > 50)
+        for url in settings {
+            #expect(
+                !(try Self.squashed(url).contains("playArmed=true")),
+                Comment(rawValue: url.lastPathComponent)
+            )
+        }
+        #expect(
+            pick.contains(
+                "ifpicked==.mouse,!gesturesPlayed{gesturesPlayed=true"
+                    + "gesturesPlay=true}"
+            )
+        )
+        let part = try Self.squashed(
+            "Settings/Components/Gestures/GesturesPart.swift"
+        )
+        let appear = try #require(
+            SourceScan.declarationBody(after: ".onAppear", in: part)
+        )
+        // Spent before it plays, and only while armed.
+        #expect(appear.hasPrefix("guardplayArmedelse{return}"))
+        let spent = try #require(appear.range(of: "playArmed=false"))
+        let plays = try #require(
+            appear.range(of: "playing=GestureItem.allCases.first")
+        )
+        #expect(spent.lowerBound < plays.lowerBound)
+        // The entry spends its own flag before it plays.
         let entry = try Self.squashed(
             "Settings/Components/Gestures/GestureEntry.swift"
         )
-        let appear = try #require(
+        let entryAppear = try #require(
             SourceScan.declarationBody(after: ".onAppear", in: entry)
         )
-        // Plays only while armed: the read gates the whole body.
-        #expect(appear.hasPrefix("guardplaysOnAppearelse{return}"))
-        let spent = try #require(appear.range(of: "playsOnAppear=false"))
-        let plays = try #require(appear.range(of: "autoplay()"))
-        #expect(spent.lowerBound < plays.lowerBound)
-    }
-
-    /// A strip picture never moves: a hover loop rebuilt each
-    /// picture the page scrolled under the pointer and stuttered
-    /// the scroll (owner ruling 2026-10-18).
-    @Test("a strip picture rests on its key frame")
-    func stripRests() throws {
-        let plate = try Self.squashed(
-            "Settings/Components/Gestures/GestureStripPlate.swift"
+        #expect(entryAppear.hasPrefix("guardplaysOnAppearelse{return}"))
+        let entrySpent = try #require(
+            entryAppear.range(of: "playsOnAppear=false")
         )
-        #expect(plate.contains("item.picture(t:1,gestures:gestures)"))
-        #expect(!plate.contains("onHover"))
-        #expect(!plate.contains("withAnimation"))
-        #expect(!plate.contains("@State"))
+        let entryPlays = try #require(entryAppear.range(of: "autoplay()"))
+        #expect(entrySpent.lowerBound < entryPlays.lowerBound)
     }
 
     /// Reduce Motion: the run is refused before it starts, and the
@@ -151,13 +135,13 @@ struct GestureAutoplayWiringTests {
     }
 
     /// The click is the only trigger tree-wide: nothing in the
-    /// card's files writes `playing` but the drawer's two arming
-    /// sites and the item initializer's spend, so an entry file
-    /// cannot start a play on its own appear.
-    @Test("only the drawer arms a play; only the entry spends it")
+    /// part's files writes `playing` but the part's one arming site
+    /// and the item initializer's spend, so an entry file cannot
+    /// start a play on its own appear.
+    @Test("only the part arms a play; only the entry spends it")
     func playWriters() throws {
         let allowed: [String: Int] = [
-            "GesturesDrawer.swift": 2,
+            "GesturesPart.swift": 1,
             "GestureEntry+Item.swift": 1,
         ]
         let dir = Self.root.appendingPathComponent(

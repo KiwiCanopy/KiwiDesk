@@ -152,7 +152,8 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .unrecognized:
+            case .dormant, .duplicate, .sideCollapse, .unrecognized,
+                .takesFromMacOS:
                 break
             }
             return L(
@@ -214,7 +215,8 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .unrecognized:
+            case .dormant, .duplicate, .sideCollapse, .unrecognized,
+                .takesFromMacOS:
                 break
             }
             return L(

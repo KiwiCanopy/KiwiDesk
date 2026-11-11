@@ -23,12 +23,16 @@ struct KeyPartsReaderCensusTests {
                     + " branches on leader(of:) first"
             ),
         "KiwiDeskCore/Config/RuleReach+KeySequences.swift":
-            (2, "the seam itself: leader(of:) and the layer it writes"),
+            (
+                3,
+                "the seam itself: leader(of:), the layer it writes and"
+                    + " sequenceKey(on:), the verbs' one lookup (#3174)"
+            ),
         "KiwiDeskCore/Config/RuleReach+KeyRivals.swift":
             (2, "the layer only; chords read through chord(of:value:)"),
         "KiwiDeskCore/Commands/KiwiCore+ShortcutCommands.swift":
             (
-                4,
+                3,
                 "layers, and rows(of:), which skips a sequence key"
                     + " (ShortcutSequenceCommandsTests)"
             ),

@@ -10,7 +10,7 @@ extension AdvancedLuaGroup {
         let name = rowName(binding.wrappedValue)
         return VStack(alignment: .leading, spacing: 6) {
             HStack {
-                symbolPicker(binding, name: name)
+                ShortcutSymbolPicker.lua(binding.symbol, name: name)
                 TextField(
                     descPlaceholder(binding.wrappedValue),
                     text: binding.desc
@@ -45,27 +45,6 @@ extension AdvancedLuaGroup {
         .accessibilityLabel(name)
         .id(binding.wrappedValue.id.uuidString)
         .onAppear { judge(binding.wrappedValue.id) }
-    }
-
-    private func symbolPicker(
-        _ binding: Binding<KeyBinding>,
-        name: String
-    ) -> some View {
-        IconPicker(
-            icon: binding.symbol,
-            preview: .chip,
-            symbolsOnly: true,
-            placeholder: LuaMark.symbol
-        )
-        .accessibilityLabel(
-            L("shortcuts.lua.symbol_ax", "Symbol for %1$@", name)
-        )
-        // `</>` is shown, never named (config-vocabulary.md).
-        .accessibilityValue(
-            binding.wrappedValue.symbol.isEmpty
-                ? L("shortcuts.lua.default_symbol", "</>")
-                : binding.wrappedValue.symbol
-        )
     }
 
     /// The name KiwiHub lists the row under: its description, else

@@ -7,7 +7,7 @@ import Testing
 @testable import KiwiDesk
 
 /// How a Mouse & trackpad entry lays out (#1726), and the Behavior
-/// card's quit-grid readout, split from `GesturesDrawerTests` for
+/// card's quit-grid readout, split from `GesturesPartTests` for
 /// size. `@MainActor` for the renderer; a handful of small renders.
 @Suite("Mouse & trackpad layout")
 @MainActor

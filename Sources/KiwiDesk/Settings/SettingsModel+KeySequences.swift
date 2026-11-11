@@ -17,3 +17,16 @@ extension SettingsModel {
         )
     }
 }
+
+extension SettingsModel {
+    /// The groups bindings make of their own (#2544): the installed
+    /// ones in KiwiHub's order, then any only this draft names — a
+    /// sequence's end keys included (#3162). The group field's menu
+    /// on the Lua rows and in the Key sequences card alike.
+    func shortcutGroupsInUse() -> [String] {
+        ShortcutGroup.custom(
+            in: core.customShortcutGroups()
+                + config.layers.flatMap(\.actionBindings).map(\.group)
+        )
+    }
+}

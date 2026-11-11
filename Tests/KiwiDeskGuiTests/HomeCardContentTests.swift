@@ -110,46 +110,21 @@ struct HomeCardContentTests {
         #expect(!off.contains("3 pt"))
     }
 
-    @Test("the shortcuts answer counts default-layer bindings")
+    /// The tile names the page's three parts (#3184), in segment
+    /// order; its conflicts are the shout's.
+    @Test("the shortcuts subtitle names the three parts")
     func shortcutsAnswer() {
         pinEnglish()
-        let model = model()
-        var layer = KeyLayer.defaultLayer
-        layer.bindings = [
-            KeyBinding(
-                combo: "alt+h",
-                lua: "kiwi.focus('left')",
-                kind: .navigation,
-                label: "Focus left"
-            ),
-            KeyBinding(
-                combo: "alt+l",
-                lua: "kiwi.focus('right')",
-                kind: .navigation,
-                label: "Focus right"
-            ),
-        ]
-        // A second, non-default layer with its own binding: the
-        // count is the DEFAULT layer's, so an all-layers sum
-        // would read 3 here (guard-prover found the one-layer
-        // fixture blind to exactly that).
-        var resize = KeyLayer.defaultLayer
-        resize.name = "resize"
-        resize.bindings = [
-            KeyBinding(
-                combo: "alt+r",
-                lua: "kiwi.grow('width')",
-                kind: .navigation,
-                label: "Grow"
-            )
-        ]
-        model.config.layers = [layer, resize]
         let line = HomeCardContent.subtitle(
             for: .shortcuts,
-            model: model
+            model: model()
         )
-        #expect(line.contains("2"))
-        #expect(!line.contains("3"))
+        #expect(line == "Built-in · Personal · Mouse & Trackpad")
+        #expect(
+            line
+                == ShortcutsSegment.allCases.map(\.title)
+                .joined(separator: " · ")
+        )
     }
 
     @Test("the conflict shout appears only with conflicts")

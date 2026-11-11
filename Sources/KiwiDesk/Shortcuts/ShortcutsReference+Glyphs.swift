@@ -198,12 +198,14 @@ extension ShortcutsReferenceBuilder {
     }
 
     /// The symbols the Shortcuts side draws on no command row —
-    /// Custom's Lua mark and the gather badge — for the resolve
+    /// Custom's Lua mark, the gather badge and a sequence's branch
+    /// mark — for the resolve
     /// guard; a command row's symbol is resolved from the rows
     /// themselves (`ShortcutRowSymbolTests`).
     static let verbSymbols = [
         LuaMark.symbol,
         "rectangle.stack",
+        BranchMark.symbol,
     ]
 
     /// Extracts the first quoted argument from a Lua call string.

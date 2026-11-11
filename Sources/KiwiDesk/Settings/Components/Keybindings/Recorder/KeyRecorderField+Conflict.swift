@@ -59,6 +59,7 @@ extension KeyRecorderField {
                                 vertical: true
                             )
                         sideSwitchLink
+                        otherSegmentLink
                         fixElsewhereLink
                     }
                     .frame(maxWidth: 320, alignment: .leading)
@@ -83,6 +84,35 @@ extension KeyRecorderField {
             }
             .buttonStyle(.link)
             .font(.callout)
+        }
+    }
+
+    /// The other row's part, where the row it collides with is
+    /// drawn on the Shortcuts page's other key part (#3184), so the
+    /// sibling is never out of sight.
+    @ViewBuilder private var otherSegmentLink: some View {
+        if let other = reading?.severity.otherBinding,
+            let shown = shownSegment,
+            coordinator.scrollsInPlace,
+            let part = coordinator.segmentHolding?(
+                RecorderPreflight.rowID(other)
+            )
+        {
+            if part != shown {
+                Button(
+                    L(
+                        "shortcuts.conflict.show_in",
+                        "Show in %1$@",
+                        part.title
+                    )
+                ) {
+                    conflictPopoverShown = false
+                    coordinator.scrollTarget =
+                        RecorderPreflight.rowID(other)
+                }
+                .buttonStyle(.link)
+                .font(.callout)
+            }
         }
     }
 

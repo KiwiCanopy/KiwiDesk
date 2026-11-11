@@ -26,6 +26,9 @@ enum ConflictSeverity: Equatable {
     /// A chord every app's menus carry: the row works and every
     /// app loses that item's shortcut while it is bound.
     case shadowsApps(SystemShortcut)
+    /// A sequence's step key on a chord macOS answers: the key wins
+    /// it while the sequence is open, macOS loses it then (#3173).
+    case takesFromMacOS(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
     case duplicate(KeyBinding)
@@ -35,6 +38,16 @@ enum ConflictSeverity: Equatable {
     case sideCollapse(KeyBinding)
     /// The chord string does not parse.
     case unrecognized
+
+    /// The other row holding the chord, for a duplicate or a side
+    /// collapse.
+    var otherBinding: KeyBinding? {
+        switch self {
+        case .duplicate(let other), .sideCollapse(let other):
+            return other
+        default: return nil
+        }
+    }
 
     /// The reading of `conflict` on a machine whose switched-off
     /// system shortcuts are `disabled`

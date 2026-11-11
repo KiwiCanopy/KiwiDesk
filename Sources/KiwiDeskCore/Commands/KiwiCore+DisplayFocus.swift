@@ -112,13 +112,18 @@ extension KiwiCore {
     /// likely belongs there too.) The landing lifts the float
     /// layer above the tiled plane as `focusSpace` does (#412),
     /// after the retile placed it — for every caller (#1727).
+    /// `leaving` names the screen and front app a caller read
+    /// before it activated `target` itself (#3191); nil reads them.
     func followSwitch(
         to target: SpaceID,
         focusing id: WindowID,
-        arriving: Bool = false
+        arriving: Bool = false,
+        leaving: (screen: DisplayID?, frontmost: pid_t?)? = nil
     ) {
-        let priorFrontmost = frontmostPIDProvider?()
-        let priorScreen = focusedScreen
+        let priorFrontmost =
+            leaving.map(\.frontmost)
+            ?? frontmostPIDProvider?()
+        let priorScreen = leaving.map(\.screen) ?? focusedScreen
         // A launch follow arrives with its rule's undeclared Space
         // filed but unplaced: place it before the slide reads it.
         placeUnplacedSpaces()

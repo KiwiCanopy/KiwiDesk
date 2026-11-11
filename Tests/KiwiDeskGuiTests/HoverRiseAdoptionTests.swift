@@ -31,10 +31,6 @@ struct HoverRiseAdoptionTests {
                 ".hoverRise(risen&&rises,in:"
             ),
             ("Components/Screens/ScreenCard.swift", ".hoverRise(risen,in:"),
-            (
-                "Components/Gestures/GestureStripHoverCue.swift",
-                ".hoverRise(hovering,in:"
-            ),
         ] {
             let source = try squashed(path)
             #expect(source.contains(needle), Comment(rawValue: path))
@@ -75,10 +71,6 @@ struct HoverRiseAdoptionTests {
                 ".zIndex(hovered==mode?1:0)"
             ),
             ("Components/Screens/ScreenCard.swift", ".zIndex(risen?1:0)"),
-            (
-                "Components/Gestures/GestureStripHoverCue.swift",
-                ".zIndex(hovering?1:0)"
-            ),
         ] {
             #expect(
                 try squashed(path).contains(needle),
@@ -229,8 +221,7 @@ struct HoverRiseAdoptionTests {
         #expect(strip.contains(".padding(.horizontal,run.endRoom)"))
         #expect(strip.contains(".padding(.horizontal,-run.endRoom)"))
         for path in [
-            "Components/Gestures/GestureStrip.swift",
-            "Components/Simple/SimpleLookCard.swift",
+            "Components/Simple/SimpleLookCard.swift"
         ] {
             #expect(
                 try squashed(path).contains("endRoom:endRoom"),

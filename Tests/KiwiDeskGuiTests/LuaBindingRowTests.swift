@@ -67,7 +67,8 @@ struct LuaBindingRowTests {
         #expect(
             row.contains(
                 "VStack(alignment:.leading,spacing:6){HStack{"
-                    + "symbolPicker(binding,name:name)TextField("
+                    + "ShortcutSymbolPicker.lua(binding.symbol,name:name)"
+                    + "TextField("
             )
         )
         #expect(
@@ -82,18 +83,26 @@ struct LuaBindingRowTests {
         let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
         #expect(row.contains("text:binding.desc)"))
         #expect(
-            row.contains(
-                "IconPicker(icon:binding.symbol,preview:.chip,"
-                    + "symbolsOnly:true,placeholder:LuaMark.symbol)"
+            row.contains("ShortcutSymbolPicker.lua(binding.symbol,name:name)")
+        )
+        // One picker for every symbol field (#3162): `</>` for none,
+        // and it speaks the symbol it shows (gui.md, #812).
+        let picker = try Self.source("Lua/ShortcutSymbolPicker.swift")
+        #expect(
+            picker.contains(
+                "IconPicker(icon:$symbol,preview:.chip,"
+                    + "symbolsOnly:true,placeholder:placeholder)"
             )
         )
-        #expect(row.contains("ShortcutGroupField(group:binding.group,"))
-        // The picker speaks the symbol it shows (gui.md, #812).
         #expect(
-            row.contains(
-                ".accessibilityValue(binding.wrappedValue.symbol.isEmpty"
-                    + "?L(\"shortcuts.lua.default_symbol\",\"</>\")"
-                    + ":binding.wrappedValue.symbol)"
+            picker.contains(
+                ".accessibilityValue(symbol.isEmpty?spokenDefault:symbol)"
+            )
+        )
+        #expect(
+            picker.contains(
+                "placeholder:LuaMark.symbol,spokenDefault:"
+                    + "L(\"shortcuts.lua.default_symbol\",\"</>\")"
             )
         )
         let group = try Self.source("Lua/AdvancedLuaGroup.swift")

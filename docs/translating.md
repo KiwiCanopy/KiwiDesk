@@ -67,7 +67,7 @@ UI structure: `general.language.display`, `menu.quit`,
 `shortcuts.section.focus`, `app_bar.active_indicator.label`. A new
 string follows the existing area prefix of the file it lands in
 (`menu.*` for the quick menu, `general.*` for the General tab,
-`shortcuts.*` for Shortcuts & Gestures, and so on).
+`shortcuts.*` for Shortcuts, and so on).
 
 ## Interpolating a value into a sentence
 

@@ -22,18 +22,10 @@ struct KeySequencesCard: View {
         return SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.keySequencesCard,
             isExpanded: $expanded,
-            summary: summary(catalog)
+            summary: summary(catalog),
+            help: Self.help
         ) {
             VStack(alignment: .leading, spacing: 12) {
-                Text(
-                    L(
-                        "shortcuts.sequence.caption",
-                        "The first key opens a list of next keys; only "
-                            + "the last key runs something."
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
                 rows(catalog)
             }
         }
@@ -68,6 +60,17 @@ struct KeySequencesCard: View {
             )
         }
         .settingsActionButton()
+    }
+
+    /// The concept, in the title's `?` (#3162 ▸ second amendment).
+    static var help: String {
+        L(
+            "shortcuts.sequence.caption",
+            "Also known as a leader key. Press the first chord (the "
+                + "leader) and a panel lists the next keys. A key can "
+                + "open more keys; the last key runs its action. esc "
+                + "cancels, ⌫ goes back one step."
+        )
     }
 
     private func add() {

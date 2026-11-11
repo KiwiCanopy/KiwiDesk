@@ -43,4 +43,19 @@ struct MCPKeepRulesTests {
         let text = tool["description"]?.stringValue ?? ""
         #expect(text.contains(MCPWording.shortcutsSave))
     }
+
+    @Test("the save warning names every shortcut verb that writes")
+    func shortcutsSaveNamesEveryWriter() {
+        let writers = APIReference.entries.filter {
+            $0.group == "shortcut" && $0.command != nil
+                && APIReference.kind(of: $0) != .query
+        }
+        #expect(!writers.isEmpty)
+        for entry in writers {
+            #expect(
+                MCPWording.shortcutsSave.contains(entry.qualifiedName),
+                "\(entry.qualifiedName) is missing from shortcutsSave"
+            )
+        }
+    }
 }

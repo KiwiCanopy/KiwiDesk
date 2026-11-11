@@ -71,6 +71,9 @@ protocol KeyboardTapHandle: AnyObject {
     /// The taps held while an own floating panel is key (#1229);
     /// the detector keeps counting.
     func holdTaps(_ hold: ModifierTapHold)
+    /// KiwiHub's scroll chords alone (#3175): an open sequence stays
+    /// open, where new rows would close it.
+    func setSequenceScrollKeys(_ keys: KiwiHubKeys)
 }
 
 /// The one keyboard event tap (#2601, #1872, #1871), run only
@@ -156,6 +159,10 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
 
     func holdTaps(_ hold: ModifierTapHold) {
         tapHold.withLock { $0 = hold }
+    }
+
+    func setSequenceScrollKeys(_ keys: KiwiHubKeys) {
+        sequenceState.withLock { $0.router.scrollKeys = keys }
     }
 
     func setRows(_ rows: KeyboardTapRows) {

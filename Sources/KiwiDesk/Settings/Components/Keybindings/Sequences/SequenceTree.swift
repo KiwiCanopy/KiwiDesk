@@ -78,6 +78,31 @@ enum SequenceTree {
         return key
     }
 
+    /// `node` opening `bundleID`'s app as the Apps section's rows
+    /// store it (#3162 ▸ Ruling amendment): Open or Focus, or the
+    /// action it already ran.
+    static func appKey(
+        _ node: KeyBinding,
+        bundleID: String,
+        name: String
+    ) -> KeyBinding {
+        let action =
+            node.kind == .application
+            ? KeybindingCatalog.appShortcutAction(from: node.lua)
+            : nil
+        var key = KeyBinding(
+            combo: node.combo,
+            lua: KeybindingCatalog.appCommand(
+                bundleID,
+                action: action ?? .openOrFocus
+            ),
+            kind: .application,
+            label: name
+        )
+        key.id = node.id
+        return key
+    }
+
     /// `node` running the user's own Lua, kept where it already did.
     static func luaKey(_ node: KeyBinding) -> KeyBinding {
         guard node.kind != .custom else { return node }
@@ -87,19 +112,19 @@ enum SequenceTree {
     }
 
     /// The other key of `node`'s step holding `combo`, nil where
-    /// none does — step keys match strictly, held modifiers
-    /// included (#1871 ▸ step keys).
+    /// none does — Core's one sibling rule (`KeyBinding.stepKey`,
+    /// #3174).
     static func sibling(
         holding combo: String,
         besides node: UUID,
         in root: KeyBinding
     ) -> KeyBinding? {
-        guard !combo.isEmpty, let parent = parent(of: node, in: root)
-        else { return nil }
-        return parent.steps?.first {
-            $0.id != node && !$0.combo.isEmpty
-                && KeyCombo.equivalent($0.combo, combo)
-        }
+        guard let parent = parent(of: node, in: root) else { return nil }
+        return KeyBinding.stepKey(
+            holding: combo,
+            in: parent.steps ?? [],
+            besides: node
+        )
     }
 
     /// The node whose keys hold `id`, nil for `root` itself.

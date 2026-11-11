@@ -36,6 +36,9 @@ extension APIReference {
         "shortcut.remove",
         // A whole key sequence, every key under its leader (#3124).
         "shortcut.remove_sequence",
+        // A removed branch can hold Lua keys, descriptions and
+        // groups set_sequence_key cannot rebuild (#3174, owner).
+        "shortcut.remove_sequence_key",
         // Drops unsaved live changes (#2411).
         KiwiCore.revertSettingsCommand,
         ServiceManager.prepareRestartCommand,

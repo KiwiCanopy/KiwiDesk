@@ -6,7 +6,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Shortcuts & Gestures jump chips (#1520): which groups get
+/// The Built-in part's jump chips (#1520, #3184): which groups get
 /// one, which chip the bar marks as the page scrolls, and the
 /// wiring a reading of the pure parts cannot see.
 @Suite("Shortcuts jump chips")
@@ -18,7 +18,6 @@ struct ShortcutsJumpTests {
     func chipsAreTheRuledGroups() {
         #expect(
             ShortcutsJumpGroup.allCases.map(\.control.id) == [
-                SettingsCatalog.shortcuts.gestures.control.id,
                 SettingsCatalog.shortcuts.showHideKeys.id,
                 SettingsCatalog.shortcuts.focusKeys.id,
                 SettingsCatalog.shortcuts.moveWindows.id,
@@ -26,13 +25,7 @@ struct ShortcutsJumpTests {
                 SettingsCatalog.shortcuts.layoutKeys.id,
                 SettingsCatalog.shortcuts.sizeFloat.id,
                 SettingsCatalog.shortcuts.pocketCard.id,
-                SettingsCatalog.shortcuts.openApplications.id,
-                SettingsCatalog.shortcuts.luaBindings.control.id,
             ]
-        )
-        #expect(
-            ShortcutsJumpGroup.allCases.filter(\.ruledAfter)
-                == [.gestures]
         )
     }
 
@@ -47,6 +40,8 @@ struct ShortcutsJumpTests {
             .defaultShortcuts,
             // One card above the first chip's card (#1870).
             .modifierKeys,
+            // Built-in alone draws chips (#3184).
+            .gestures, .openApplications, .luaBindings,
         ]
         let chipped = Set(ShortcutsJumpGroup.allCases.map(\.container))
         let rendered = ShortcutsCensusRenderTests.containers(
@@ -61,10 +56,9 @@ struct ShortcutsJumpTests {
         CGRect(x: 0, y: top, width: 400, height: height)
     }
 
-    /// A page laid out the way the section draws it, content at
-    /// the viewport's top: an optional banner, Mouse & trackpad,
-    /// the layer chrome no chip names, then the four action
-    /// groups, scrolled up by `offset`.
+    /// A page of chipped groups, content at the viewport's top: an
+    /// optional banner, Show & hide, a stretch no chip names, then
+    /// four more groups, scrolled up by `offset`.
     private func page(
         scrolledBy offset: CGFloat,
         banner: CGFloat = 0,
@@ -76,11 +70,11 @@ struct ShortcutsJumpTests {
         }
         return ShortcutsJumpPage(
             sections: [
-                id(.gestures): frame(top, 80),
+                id(.showHide): frame(top, 80),
                 id(.focus): frame(top + 300, 400),
                 id(.moveWindows): frame(top + 716, 500),
                 id(.sizeFloat): frame(top + 1232, 300),
-                id(.openApplications): frame(top + 1548, 300),
+                id(.pocket): frame(top + 1548, 300),
             ],
             content: frame(-offset, 1900 + banner),
             viewport: frame(0, viewport)
@@ -90,18 +84,18 @@ struct ShortcutsJumpTests {
     @Test("at rest the first group is current, nothing underlaps")
     func atRest() {
         let reading = ShortcutsJumpReading.read(page(scrolledBy: 0))
-        #expect(reading.marked == .gestures)
+        #expect(reading.marked == .showHide)
         #expect(!reading.underlapped)
     }
 
-    /// The conflict banner pushes Mouse & trackpad's header past
+    /// The conflict banner pushes Show & hide's header past
     /// the bar's reach; unscrolled, its chip is still current.
     @Test("a banner above the first group leaves it marked")
     func bannerAtRest() {
         let reading = ShortcutsJumpReading.read(
             page(scrolledBy: 0, banner: 120)
         )
-        #expect(reading.marked == .gestures)
+        #expect(reading.marked == .showHide)
     }
 
     @Test("the group whose header reached the bar is marked")
@@ -125,7 +119,7 @@ struct ShortcutsJumpTests {
         #expect(short.marked == nil)
     }
 
-    /// Scrolled past Mouse & trackpad into the layer chrome, no
+    /// Scrolled past Show & hide into a stretch no chip names, no
     /// chip is current: none of them names what is under the bar.
     @Test("chrome no chip names marks nothing")
     func betweenGroups() {
@@ -139,7 +133,7 @@ struct ShortcutsJumpTests {
     @Test("the end of the scroll marks the last group")
     func endMarksTheLast() {
         let reading = ShortcutsJumpReading.read(page(scrolledBy: 1400))
-        #expect(reading.marked == .openApplications)
+        #expect(reading.marked == .pocket)
     }
 
     /// Guards only the two-edit regression while the branch order
@@ -151,7 +145,7 @@ struct ShortcutsJumpTests {
         let reading = ShortcutsJumpReading.read(
             page(scrolledBy: 0, viewport: 3000)
         )
-        #expect(reading.marked == .gestures)
+        #expect(reading.marked == .showHide)
     }
 
     private func slots(
@@ -199,7 +193,7 @@ struct ShortcutsJumpTests {
         let atEnd = page(scrolledBy: 1400)
         tracker.sections(atEnd.sections)
         tracker.slots(slots(atEnd))
-        #expect(tracker.reading.marked == .openApplications)
+        #expect(tracker.reading.marked == .pocket)
     }
 
     // MARK: - Wiring
@@ -220,8 +214,8 @@ struct ShortcutsJumpTests {
 
     /// A section card reports its frame under the id its anchor
     /// takes — one key for the jump target and the marking — and
-    /// the page opts in; the click opens the first chip's card.
-    @Test("cards report under their anchor ids, and the card opens")
+    /// the page opts in; a click scrolls to the chip's part.
+    @Test("cards report under their anchor ids")
     func framesShareTheAnchorKey() throws {
         let card = try Self.source(
             "Components/Common/SettingsSection.swift"
@@ -251,13 +245,7 @@ struct ShortcutsJumpTests {
                     + ".coordinateSpace(name:SettingsSectionFrames.space)"
             )
         )
-        #expect(
-            section.contains(
-                "GesturesDrawer(model:model,expanded:$gesturesExpanded)"
-            )
-        )
         let jump = try Self.source("Sections/ShortcutsSection+Jump.swift")
-        #expect(jump.contains("ifgroup==.gestures{gesturesExpanded=true}"))
         #expect(
             jump.contains(
                 "letpart=ShortcutsPagePart(group).id"

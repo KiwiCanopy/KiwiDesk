@@ -109,12 +109,5 @@ struct AdvancedLuaGroup: View {
         bindings.removeAll { $0.id == id }
     }
 
-    /// The groups bindings make of their own: the installed ones in
-    /// KiwiHub's order, then any only this draft names.
-    func groupsInUse() -> [String] {
-        ShortcutGroup.custom(
-            in: model.core.customShortcutGroups()
-                + model.config.layers.flatMap(\.bindings).map(\.group)
-        )
-    }
+    func groupsInUse() -> [String] { model.shortcutGroupsInUse() }
 }

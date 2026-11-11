@@ -227,7 +227,15 @@ that changes a leader's chord carries its reach through
 `carrySequenceReach` (`KeySequenceReachSaveTests` ▸
 `reRecordCarriesTheReach`); a CLI or Lua removal of a sequence is
 `shortcut.remove_sequence`, and `shortcut.remove` refuses a leader
-by naming it (`ShortcutSequenceCommandsTests`). The argument is
+by naming it (`ShortcutSequenceCommandsTests`). A door that adds a
+key at a step asks Core's one sibling rule, `KeyBinding.stepKey`,
+never a chord compare over `steps` of its own
+(`KeySequenceCardTests` ▸ `siblingRuleIsCores`); a verb finds a
+sequence by its leader through `RuleReachTable.sequenceKey(on:)`,
+and the `shortcut.*` key verbs edit the tree the loaded page
+resolves and write it whole at that key's `defaultReach`, never a
+key inside a profile's override (#3174,
+`ShortcutSequenceKeyCommandsTests`). The argument is
 `docs/design-decisions.md`'s #1871 and #3124 amendments.
 
 **A writer that compares or copies what a binding says of itself
@@ -1493,6 +1501,19 @@ incoming arrangement does not name*. The obligations:
   `HeldSpaceRestoreTests` ▸ `replugRestoresFromMemory`). A path a
   switching apply runs that moves windows across Spaces takes no
   exemption for a held Space's members.
+- **A restore that empties the active Space of its focus is
+  followed (#3191).** `restorePartitioning` returns the
+  `RestoreFollow` it owes, and each apply door hands it to the
+  one `retileFollowing` IN PLACE of its own retile: the landing
+  Space is activated ahead of the door's pass, never after it,
+  which would park the moved window for a switch to bring back
+  (the launch follow's #1599 rule) — re-judged there, since the
+  mode loop, the pins and `refileHeldSpaces` ran since the
+  restore — and pays it through `followSwitch`, never a copy of
+  its steps. A bound Desktop switch's apply (`.event`) follows
+  nothing, its handler activating the arriving Space itself
+  (`RestoreFollowTests`). A new apply door that restores owes the
+  same hand-off, and the result is never discarded.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call

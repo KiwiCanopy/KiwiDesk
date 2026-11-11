@@ -205,8 +205,8 @@ enum ShortcutsRowOrder {
         .shortcuts(.openApplications)
     ]
 
-    /// Open applications ▸ KiwiDesk, below the app list (#1520).
-    static let openApplicationsKiwiDesk: [SettingKey] = [
+    /// Show & hide ▸ KiwiDesk, below KiwiVision (#1520, #3184).
+    static let showHideKiwiDesk: [SettingKey] = [
         .shortcuts(.openSettings)
     ]
 

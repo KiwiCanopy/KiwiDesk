@@ -89,15 +89,15 @@ struct SettingsSearchDrawerAnchorTests {
                 [SettingsCatalog.colors.colorsDrawer]
             ),
             (
-                .shortcuts, "Shortcuts & Gestures", .gestures,
+                .shortcuts, "Shortcuts", .gestures,
                 [SettingsCatalog.shortcuts.gestures]
             ),
             (
-                .shortcuts, "Shortcuts & Gestures", .modifierKeys,
+                .shortcuts, "Shortcuts", .modifierKeys,
                 [SettingsCatalog.shortcuts.modifierKeys]
             ),
             (
-                .shortcuts, "Shortcuts & Gestures", .layers,
+                .shortcuts, "Shortcuts", .layers,
                 [SettingsCatalog.shortcuts.layersCard]
             ),
         ]

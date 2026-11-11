@@ -155,7 +155,8 @@ editing here:
     never from a main-actor hop, or the first keys after a leader
     reach the front app. It is declared first, so an open sequence
     outranks a sided chord, swallows every key-down while one is
-    open, which `.modifierTaps` still hears, and closes one on a
+    open save a macOS shortcut it passes (#3173, below), which
+    `.modifierTaps` still hears, and closes one on a
     mouse-down, the one click door. A leader never reaches Carbon:
     activation skips a press row on its chord, and a refused tap
     lists the leader in `activationFailures`
@@ -170,6 +171,18 @@ editing here:
     `KeySequenceTapThreadTests`). An end key is never disabled on a
     failure: the hint panel reads the stored tree, which would
     still list it.
+  - **While a sequence is open, a recorded step key outranks a
+    scroll key, and a scroll key outranks macOS's pass-through
+    (#3175, #3173).** The router's order is esc / ⌫, the leader, a
+    step key, a scroll key (the plain arrows and page keys, then
+    `kiwihub.set_key`'s second chords, matched whole), the macOS
+    tiers, the beep. A new kind of key while open takes its place
+    in that order in `KeySequenceRouter.press`, and the scroll
+    keys reach the router in their own `KeyboardTapRows` field and,
+    on a change, through `KeyboardTapHandle.setSequenceScrollKeys`
+    alone, never a re-arm, which would close an open sequence
+    (`KeySequenceScrollTests` ▸ `stepKeyBeatsArrow`,
+    `KeySequenceTapTests` ▸ `scrollKeysKeepItOpen`).
   - **`.sides` answers only the chords a sided row names**, the
     either-side row on such a chord included, and only while
     `modifierSides` is on; every other chord stays a Carbon

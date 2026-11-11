@@ -16,7 +16,7 @@ struct GesturesHoverDelayWiringTests {
                 contentsOf: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent(
                         "Sources/KiwiDesk/Settings/Components/Gestures/"
-                            + "GesturesDrawer.swift"
+                            + "GesturesPart.swift"
                     ),
                 encoding: .utf8
             )
@@ -69,7 +69,7 @@ struct GesturesHoverDelayWiringTests {
     @MainActor
     func floorIsCore() {
         #expect(
-            GesturesDrawer.hoverDelayRange.lowerBound
+            GesturesPart.hoverDelayRange.lowerBound
                 == MouseSettings.hoverFocusDelayFloorMS
         )
         let below = MouseSettings.hoverFocusDelayFloorMS - 50

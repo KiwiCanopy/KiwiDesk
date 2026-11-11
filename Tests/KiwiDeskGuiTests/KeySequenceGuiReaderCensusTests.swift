@@ -47,16 +47,12 @@ struct KeySequenceGuiReaderCensusTests {
             (1, "the Lua drawer lists .custom rows; a sequence is none"),
         "Settings/Components/KiwiVision/KiwiVisionLensHeader.swift":
             (3, "lens chord by Lua; the default layer's rows ride whole"),
-        "Settings/Components/Lua/AdvancedLuaGroup.swift":
-            (1, "groups in use: a leader files in no group"),
         "Settings/Components/Simple/SimpleCoverage.swift":
             (1, "an Open application row by kind: a sequence is none"),
         "Settings/Components/Simple/SimpleKiwiHubKeys.swift":
             (1, "KiwiHub's chord by Lua: a leader never matches"),
         "Settings/Components/Simple/SimpleShortcutCards.swift":
             (2, "the apps card's rows: a sequence rides whole"),
-        "Settings/HomeCardContent.swift":
-            (1, "a sequence is one bound shortcut, keyed by its leader"),
         "Settings/HomeCardPreview.swift":
             (1, "key caps of chords: a leader is a chord"),
         "Settings/Sections/ShortcutsSection.swift":

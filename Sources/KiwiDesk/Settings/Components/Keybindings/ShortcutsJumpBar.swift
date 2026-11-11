@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The pinned jump bar over Shortcuts & Gestures (#1520): a "Jump
-/// to" caption line carrying the edited layer's name at its
+/// The pinned jump bar over Shortcuts ▸ Built-in (#1520, #3184): a
+/// "Jump to" caption line carrying the edited layer's name at its
 /// trailing end, over one chip per group, wrapping rather than
 /// scrolling. It sits on the page ground, and draws its lower
 /// hairline once content slides under it.
@@ -87,7 +87,7 @@ struct ShortcutsJumpBar: View {
     private var chips: some View {
         FlowLayout(spacing: Self.spacing) {
             ForEach(groups, id: \.self) { group in
-                ruledChip(group)
+                chip(group)
             }
         }
         .accessibilityElement(children: .contain)
@@ -106,23 +106,6 @@ struct ShortcutsJumpBar: View {
             .lineLimit(1)
             .fixedSize()
             .accessibilityHidden(true)
-    }
-
-    /// A rule rides the chip it follows, so a wrap can never start
-    /// a line with it.
-    @ViewBuilder private func ruledChip(
-        _ group: ShortcutsJumpGroup
-    ) -> some View {
-        if group.ruledAfter {
-            HStack(spacing: Self.spacing) {
-                chip(group)
-                SettingsTheme.hairlineSubtle
-                    .frame(width: 1, height: 18)
-                    .accessibilityHidden(true)
-            }
-        } else {
-            chip(group)
-        }
     }
 
     private func chip(_ group: ShortcutsJumpGroup) -> some View {
