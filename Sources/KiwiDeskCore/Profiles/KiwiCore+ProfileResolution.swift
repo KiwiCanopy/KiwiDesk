@@ -109,7 +109,7 @@ extension KiwiCore {
         }
         // #1230: put this profile's windows back in its own Spaces,
         // after the prune, so what it never saw is in its fallback.
-        let follow =
+        let restored =
             switching ? restoreProfilePartitioning(of: profile) : nil
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
@@ -161,6 +161,8 @@ extension KiwiCore {
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
+        // A bound Desktop switch's handler activates its own Space.
+        let follow = cause == .event ? nil : restored
         retileFollowing(follow, pass: forceRetile ? .apply : .event)
         // #1145: a profile may override `desktop_reach` — after
         // the pins and the space→display resolve the carry's

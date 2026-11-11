@@ -1501,8 +1501,9 @@ incoming arrangement does not name*. The obligations:
   which would park the moved window for a switch to bring back
   (the launch follow's #1599 rule) — re-judged there, since the
   mode loop, the pins and `refileHeldSpaces` ran since the
-  restore. A bound Desktop switch's apply follows nothing, its
-  handler activating the arriving Space itself
+  restore — and pays it through `followSwitch`, never a copy of
+  its steps. A bound Desktop switch's apply (`.event`) follows
+  nothing, its handler activating the arriving Space itself
   (`RestoreFollowTests`). A new apply door that restores owes the
   same hand-off, and the result is never discarded.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`

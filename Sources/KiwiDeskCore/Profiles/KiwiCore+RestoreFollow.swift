@@ -28,43 +28,31 @@ extension KiwiCore {
         return RestoreFollow(left: active, space: landed, window: focused)
     }
 
-    /// The apply's own pass, landing where an owed follow goes: the
+    /// The apply's own pass, landing where an owed follow goes. The
     /// landing Space is made active ahead of the pass, so the pass
     /// draws it once rather than parking the window the restore
-    /// moved for a switch to bring back (the launch follow's
-    /// #1599 rule), then the focus and the landing float raise
-    /// (#412) are paid. Re-judged first, since the apply's held
-    /// returns ran since the restore. A bound Desktop switch's
-    /// apply follows nothing: its handler activates the arriving
-    /// Space itself (the scope `defersRuleSweepToSwitchPass` marks).
+    /// moved (the launch follow's #1599 rule), and `followSwitch`
+    /// then pays the switch whole — focus, warp, settle, the #412
+    /// raise and its own exempt pass, which also lays out a pass
+    /// the #804 gate held. Re-judged first, since the apply's held
+    /// returns ran since the restore.
     func retileFollowing(_ follow: RestoreFollow?, pass: RetilePass) {
-        let owed = follow.flatMap { stillOwed($0) ? $0 : nil }
-        let priorFrontmost = frontmostPIDProvider?()
-        let priorScreen = focusedScreen
-        if let owed {
-            onLog(
-                "restore follow: w\(owed.window.raw) into space "
-                    + "\(owed.space.raw), the one it left empty"
-            )
-            state.workspaces.activate(owed.space)
+        guard let owed = follow, stillOwed(owed) else {
+            retile(pass: pass)
+            emitSpaceChange()
+            return
         }
+        onLog(
+            "restore follow: w\(owed.window.raw) into space "
+                + "\(owed.space.raw), the one it left empty"
+        )
+        state.workspaces.activate(owed.space)
         retile(pass: pass)
-        emitSpaceChange()
-        guard let owed else { return }
-        if focusWindow(owed.window, refocusRetile: false, warp: false) {
-            warpForSwitch(
-                to: owed.space,
-                focusing: owed.window,
-                leaving: priorScreen
-            )
-        }
-        scheduleSpaceSettle(owed.space, priorFrontmost: priorFrontmost)
-        raiseLandingFloats(thenFocus: owed.window)
+        followSwitch(to: owed.space, focusing: owed.window)
     }
 
     private func stillOwed(_ follow: RestoreFollow) -> Bool {
-        !defersRuleSweepToSwitchPass
-            && state.workspaces.activeSpace == follow.left
+        state.workspaces.activeSpace == follow.left
             && leftEmpty(follow.left)
             && state.workspaces.space(of: follow.window) == follow.space
     }

@@ -1298,7 +1298,7 @@ editing here:
   focus, or whose Space is not shown, takes `followSwitch`
   (#2888, `DesktopMoveNamedFocusTests` ▸
   `focusedFollowToUnshownSpace`); a profile restore's follow
-  pays the raise in `retileFollowing` (#3191, profiles.md). The
+  takes `followSwitch` too (#3191, profiles.md). The
   focus the raise hands back, and the one
   `raiseFloatsAbove` re-reads, is the focus ANCHOR, never the
   Space's slot, or a sticky traveler loses it

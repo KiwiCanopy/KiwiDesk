@@ -35,10 +35,14 @@ struct RestoreFollowTests {
 
     private enum Home { case profileA, standard }
 
-    private func applyHome(_ core: KiwiCore, _ home: Home) {
+    private func applyHome(
+        _ core: KiwiCore,
+        _ home: Home,
+        cause: ProfileApplyCause = .monitorChange
+    ) {
         switch home {
         case .profileA:
-            core.apply(profile: profile("A"), cause: .event)
+            core.apply(profile: profile("A"), cause: cause)
         case .standard:
             core.apply(composed: standard, forceRetile: false)
         }
@@ -77,11 +81,14 @@ struct RestoreFollowTests {
         return core
     }
 
-    @Test("Emptying the active Space follows its focused window")
-    func emptiedSpaceFollows() {
+    @Test(
+        "Emptying the active Space follows its focused window",
+        arguments: [ProfileApplyCause.monitorChange, .explicit]
+    )
+    func emptiedSpaceFollows(cause: ProfileApplyCause) {
         let core = makeCore()
         #expect(core.state.workspaces.activeSpace == "1")
-        applyHome(core, .profileA)
+        applyHome(core, .profileA, cause: cause)
         #expect(core.state.workspaces.space(of: w1) == "2")
         #expect(core.state.workspaces.activeSpace == "2")
         #expect(core.focusedWindowID == w1)
@@ -109,9 +116,7 @@ struct RestoreFollowTests {
     @Test("A bound Desktop switch's apply follows nothing")
     func boundDesktopSwitchStandsDown() {
         let core = makeCore()
-        core.defersRuleSweepToSwitchPass = true
-        applyHome(core, .profileA)
-        core.defersRuleSweepToSwitchPass = false
+        applyHome(core, .profileA, cause: .event)
         #expect(core.state.workspaces.space(of: w1) == "2")
         #expect(core.state.workspaces.activeSpace == "1")
     }

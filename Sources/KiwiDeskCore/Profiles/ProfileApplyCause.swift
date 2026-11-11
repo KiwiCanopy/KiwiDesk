@@ -16,7 +16,8 @@ enum ProfileApplyCause {
     /// The post-reload re-apply: forced, prunes nothing.
     case reapply
     /// A Desktop binding switch: un-forced, so AX-echo lag
-    /// cannot wobble windows.
+    /// cannot wobble windows. Its handler activates the arriving
+    /// Space, so a restore's follow stands down (#3191).
     case event
     /// A monitor change: un-forced like `event`, and a departing
     /// Space on a screen that is gone is HELD rather than
