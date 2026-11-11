@@ -127,10 +127,10 @@ struct ViewLineFadeTests {
         }
         let side = try read("DesktopsSideView.swift")
         #expect(side.contains("FadingColumn(selected:state.place?.screen,"))
-        #expect(side.contains("row($0,geometry).fadingTarget($0)"))
+        #expect(side.contains("row($0,geometry).id($0)"))
         let card = try read("DesktopCardView.swift")
         #expect(card.contains("FadingColumn(selected:selectedLine)"))
-        #expect(card.contains("line($0).fadingTarget($0)"))
+        #expect(card.contains("line($0).id($0)"))
         for source in [side, card] {
             #expect(source.occurrences(of: "ScrollView(") == 0)
         }
@@ -138,7 +138,12 @@ struct ViewLineFadeTests {
         #expect(column.contains("EdgeFade.cuts(offset:offset,"))
         #expect(column.contains("viewport:height,inset:inset)"))
         #expect(column.contains(".padding(.vertical,inset)"))
-        #expect(column.contains(".padding(.vertical,-EdgeFade.depth)"))
+        #expect(
+            column.contains(
+                ".contentMargins(.vertical,overflows?Self.fade:0,"
+            )
+        )
+        #expect(column.contains("geometry.frame(in:.named(space))"))
         #expect(column.contains("proxy.scrollTo(selected)"))
     }
 }

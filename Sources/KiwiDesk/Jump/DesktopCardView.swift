@@ -31,7 +31,7 @@ struct DesktopCardView: View {
             FadingColumn(selected: selectedLine) {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(desktop.spaces.indices, id: \.self) {
-                        line($0).fadingTarget($0)
+                        line($0).id($0)
                     }
                 }
             }

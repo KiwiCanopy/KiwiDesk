@@ -132,10 +132,8 @@ struct SettingsAnchorIdentityTests {
         // selected screen row, card and line into view (#1229). Not
         // a Settings destination, so nothing there is a reveal
         // target.
-        "DesktopsSideView.swift": 1,
-        // Scroll identity: a vertical KiwiHub list's reveal target,
-        // which the Desktops side's rows and lines take (#3164).
-        "FadingColumn.swift": 1,
+        "DesktopsSideView.swift": 2,
+        "DesktopCardView.swift": 1,
         // Scroll identity: KiwiHub's app strip follows its selected
         // tile clear of the fade (#3135, #2901). Not a Settings
         // destination, so nothing there is a reveal target.

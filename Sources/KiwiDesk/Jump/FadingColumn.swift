@@ -2,11 +2,13 @@ import SwiftUI
 
 /// A KiwiHub list that scrolls down: it fades its top or bottom
 /// edge only while content lies beyond it, and scrolls the
-/// selected item clear of the fade (#3164). The Desktops side's
-/// screen rows and each Desktop's Space lines take it.
+/// selected item clear of the fade (#3164): while it overflows, the
+/// fade's depth is a content margin, which a `scrollTo` keeps the
+/// item inside (measured on macOS 27, 2026-11-11). The
+/// Desktops side's screen rows and each Desktop's Space lines take
+/// it.
 struct FadingColumn<Selected: Hashable, Content: View>: View {
-    /// The selected item's id, where it is in this list; items
-    /// mark themselves with `fadingTarget(_:)`.
+    /// The selected item's id, where it is in this list.
     let selected: Selected?
     /// The margin above the first item and below the last.
     var inset: CGFloat = 0
@@ -15,11 +17,12 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
     @State private var offset: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
     @State private var height: CGFloat = 0
+    /// Its own coordinate space: a column nests inside the side.
+    @State private var space = UUID()
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
     static var fade: CGFloat { EdgeFade.depth }
-    private static var space: String { "fadingColumn" }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -28,7 +31,12 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
                     .padding(.vertical, inset)
                     .background(measure)
             }
-            .coordinateSpace(name: Self.space)
+            .contentMargins(
+                .vertical,
+                overflows ? Self.fade : 0,
+                for: .scrollContent
+            )
+            .coordinateSpace(.named(space))
             .onGeometryChange(for: CGFloat.self) {
                 $0.size.height
             } action: {
@@ -37,8 +45,12 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
             .mask(mask)
             .onAppear { reveal(proxy, animated: false) }
             .onChange(of: selected) { reveal(proxy, animated: true) }
+            .onChange(of: overflows) { reveal(proxy, animated: false) }
         }
     }
+
+    /// Whether the content runs past the viewport, so it scrolls.
+    private var overflows: Bool { contentHeight > height + 0.5 }
 
     private func reveal(_ proxy: ScrollViewProxy, animated: Bool) {
         guard let selected else { return }
@@ -53,14 +65,14 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
         GeometryReader { geometry in
             Color.clear
                 .onAppear { read(geometry) }
-                .onChange(of: geometry.frame(in: .named(Self.space))) {
+                .onChange(of: geometry.frame(in: .named(space))) {
                     read(geometry)
                 }
         }
     }
 
     private func read(_ geometry: GeometryProxy) {
-        let frame = geometry.frame(in: .named(Self.space))
+        let frame = geometry.frame(in: .named(space))
         offset = frame.minY
         contentHeight = frame.height
     }
@@ -104,18 +116,5 @@ enum EdgeFade {
         inset: CGFloat
     ) -> (start: Bool, end: Bool) {
         (offset < -inset - 0.5, offset + content > viewport + inset + 0.5)
-    }
-}
-
-extension View {
-    /// Marks an item a `FadingColumn` scrolls to: a reveal brings
-    /// it in with a fade's depth to spare on each side, so the
-    /// selected item never sits under the fade.
-    func fadingTarget<ID: Hashable>(_ id: ID) -> some View {
-        background {
-            Color.clear
-                .padding(.vertical, -EdgeFade.depth)
-                .id(id)
-        }
     }
 }

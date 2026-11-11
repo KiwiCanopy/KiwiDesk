@@ -26,7 +26,7 @@ struct DesktopsSideView: View {
         ) {
             VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {
                 ForEach(state.overview.screens.indices, id: \.self) {
-                    row($0, geometry).fadingTarget($0)
+                    row($0, geometry).id($0)
                 }
             }
         }
