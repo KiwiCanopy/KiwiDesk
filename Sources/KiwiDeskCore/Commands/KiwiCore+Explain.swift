@@ -157,15 +157,15 @@ extension KiwiCore {
     /// KiwiDesk knows by that key; nil for an app nothing knows
     /// (#3211).
     private func knownApp(_ app: String) -> AppRef? {
-        state.windows.all.lazy.map(\.appRef).first { $0.listKey == app }
-            ?? state.minimizeOrder.lazy.map {
-                AppRef(bundleID: $0.bundleID, name: $0.app)
-            }.first { $0.listKey == app }
-            ?? state.awayWindows.values.lazy.map {
-                AppRef(bundleID: $0.appBundleID, name: $0.appName)
-            }.first { $0.listKey == app }
-            ?? eventLoop.liveApps().lazy.map(\.ref)
-            .first { $0.listKey == app }
+        var refs: [AppRef] = state.windows.all.map(\.appRef)
+        refs += state.minimizeOrder.map {
+            AppRef(bundleID: $0.bundleID, name: $0.app)
+        }
+        refs += state.awayWindows.values.map {
+            AppRef(bundleID: $0.appBundleID, name: $0.appName)
+        }
+        refs += eventLoop.liveApps().map(\.ref)
+        return refs.first { $0.listKey == app }
     }
 
     /// The app's live processes, each with whether KiwiDesk
