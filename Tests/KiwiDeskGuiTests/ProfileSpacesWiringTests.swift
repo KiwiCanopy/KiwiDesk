@@ -159,19 +159,22 @@ struct ProfileSpacesWiringTests {
             in: "Profiles/KiwiCore+DesktopBindings.swift"
         )
         #expect(wrapper?.contains("cause: .desktopSwitch") == true)
-        let callers = try SourceScan.swiftSources(under: coreRoot)
-            .filter {
-                let text = try String(contentsOf: $0, encoding: .utf8)
-                return SourceScan.stripComments(text).range(
-                    of: #"\.desktopSwitch\b"#,
-                    options: .regularExpression
-                ) != nil
-            }
-            .map(\.lastPathComponent).sorted()
+        // Counted per file, comments stripped: a second door in
+        // either file is a second classification, and reds.
+        var sites: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: coreRoot) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            let count = text.ranges(
+                of: #/\.desktopSwitch\b/#
+            ).count
+            if count > 0 { sites[url.lastPathComponent] = count }
+        }
         #expect(
-            callers == [
-                "KiwiCore+DesktopBindings.swift",
-                "KiwiCore+ProfileResolution.swift",
+            sites == [
+                "KiwiCore+DesktopBindings.swift": 1,
+                "KiwiCore+ProfileResolution.swift": 1,
             ]
         )
     }
