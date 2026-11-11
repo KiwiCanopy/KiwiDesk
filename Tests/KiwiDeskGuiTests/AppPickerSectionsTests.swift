@@ -3,9 +3,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The shared app picker's two sections (#2103 ruling 27): an app
-/// on screen is listed there only, a listed app is left out of
-/// both, the search filters both, and "On screen now" is sorted.
+/// The shared app picker's two sections (#2103 ruling 27): an open
+/// app is listed there only, a listed app is left out of both,
+/// the search filters both, and "Open apps" is sorted.
 struct AppPickerSectionsTests {
     private typealias App = KeybindingCatalog.InstalledApp
 
@@ -15,7 +15,7 @@ struct AppPickerSectionsTests {
         .init(bundleID: "com.apple.TextEdit", name: "TextEdit"),
     ]
 
-    private let onScreen: [OnScreenApp] = [
+    private let open: [OpenApp] = [
         .init(
             app: AppRef(bundleID: "com.apple.TextEdit", name: "TextEdit"),
             name: "TextEdit"
@@ -26,15 +26,15 @@ struct AppPickerSectionsTests {
         ),
     ]
 
-    @Test func onScreenAppIsListedOnce() {
+    @Test func openAppIsListedOnce() {
         let lists = AppPickerSections.lists(
-            onScreen: onScreen,
+            open: open,
             installed: installed,
             exclude: [],
             query: ""
         )
         #expect(
-            lists.onScreen.map(\.key)
+            lists.open.map(\.key)
                 == ["sketchybar", "com.apple.textedit"]
         )
         #expect(lists.all.map(\.name) == ["Safari", "Finder"])
@@ -42,41 +42,41 @@ struct AppPickerSectionsTests {
 
     @Test func listedAppsLeaveBothSections() {
         let lists = AppPickerSections.lists(
-            onScreen: onScreen,
+            open: open,
             installed: installed,
             exclude: ["SketchyBar", "com.apple.safari"],
             query: ""
         )
-        #expect(lists.onScreen.map(\.key) == ["com.apple.textedit"])
+        #expect(lists.open.map(\.key) == ["com.apple.textedit"])
         #expect(lists.all.map(\.name) == ["Finder"])
     }
 
-    @Test func listedOnScreenAppStaysOutOfAllApps() {
+    @Test func listedOpenAppStaysOutOfAllApps() {
         let lists = AppPickerSections.lists(
-            onScreen: onScreen,
+            open: open,
             installed: installed,
             exclude: ["com.apple.textedit"],
             query: ""
         )
         #expect(!lists.all.contains { $0.name == "TextEdit" })
-        #expect(!lists.onScreen.contains { $0.name == "TextEdit" })
+        #expect(!lists.open.contains { $0.name == "TextEdit" })
     }
 
     @Test func searchFiltersBothSections() {
         let lists = AppPickerSections.lists(
-            onScreen: onScreen,
+            open: open,
             installed: installed,
             exclude: [],
             query: "sketchy"
         )
-        #expect(lists.onScreen.map(\.key) == ["sketchybar"])
+        #expect(lists.open.map(\.key) == ["sketchybar"])
         #expect(lists.all.isEmpty)
         let none = AppPickerSections.lists(
-            onScreen: onScreen,
+            open: open,
             installed: installed,
             exclude: [],
             query: "zzz"
         )
-        #expect(none.onScreen.isEmpty && none.all.isEmpty)
+        #expect(none.open.isEmpty && none.all.isEmpty)
     }
 }

@@ -85,7 +85,7 @@
   "app_picker.no_match": "一致するアプリはありません。",
   "app_picker.search.placeholder": "検索 apps",
   "app_picker.section.all": "すべてのアプリ",
-  "app_picker.section.on_screen": "いま画面に表示中",
+  "app_picker.section.open": "開いているアプリ",
   "app_rules.add": "追加",
   "app_rules.add_float": "Appをフローティングにする…",
   "app_rules.add_space": "Appをスペースで開く…",

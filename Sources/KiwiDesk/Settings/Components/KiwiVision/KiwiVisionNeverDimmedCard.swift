@@ -4,7 +4,7 @@ import SwiftUI
 /// KiwiVision ▸ Never dimmed (#2103 rulings 26–27): the apps whose
 /// windows KiwiVision never dims or blurs, focused or not. A row is
 /// an app's bundle id, or its process name where it has none
-/// (SketchyBar); the add picker leads with what is on screen now.
+/// (SketchyBar); the add picker leads with the open apps.
 struct KiwiVisionNeverDimmedCard: View {
     @ObservedObject var model: SettingsModel
 
@@ -72,7 +72,7 @@ struct KiwiVisionNeverDimmedCard: View {
                     if let app = AppBundlePanel.pick() { add(app.bundleID) }
                 },
                 exclude: Set(apps),
-                onScreen: { model.core.appsOnScreen(beneathNormal: true) }
+                open: { model.core.openApps(beneathNormal: true) }
             )
             .fixedSize()
             .accessibilityLabel(SettingsCatalog.kiwiVision.neverDimmed.text)

@@ -4,13 +4,13 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// App Rules' Space and Float pickers lead with the apps on screen
-/// now (#2297): only those with a bundle id, since a rule matches
-/// by bundle id alone, and never the windows beneath the normal
+/// App Rules' Space and Float pickers lead with the open apps (#2297):
+/// only those with a bundle id, since a rule matches by bundle id
+/// alone, and never the windows beneath the normal
 /// layer; the Tile picker keeps its guessed list (#2071).
-@Suite("App Rules ▸ On screen now (#2297)")
+@Suite("App Rules ▸ Open apps (#2297)")
 @MainActor
-struct AppRulesOnScreenTests {
+struct AppRulesOpenAppsTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
         .appendingPathComponent("Sources/KiwiDesk/Settings")
 
@@ -23,11 +23,11 @@ struct AppRulesOnScreenTests {
     @Test("a process without a bundle id is never offered for a rule")
     func bundledOnly() {
         let apps = [
-            OnScreenApp(
+            OpenApp(
                 app: AppRef(bundleID: "com.apple.Safari", name: "Safari"),
                 name: "Safari"
             ),
-            OnScreenApp(
+            OpenApp(
                 app: AppRef(bundleID: nil, name: "sketchybar"),
                 name: "sketchybar"
             ),
@@ -40,11 +40,11 @@ struct AppRulesOnScreenTests {
 
     @Test("Space and Float take the section, Tile does not")
     func wiring() throws {
-        let needle = "onScreenOf: model.core"
+        let needle = "openAppsOf: model.core"
         let lists = try source("Sections/AppRulesSection+Lists.swift")
         #expect(lists.occurrences(of: needle) == 2)
         let tile = try source("Sections/AppRulesSection+Automatic.swift")
-        #expect(tile.occurrences(of: "onScreen:") == 0)
+        #expect(tile.occurrences(of: "open:") == 0)
         let selector = try source(
             "Components/Common/AppRuleControls.swift"
         )
@@ -55,7 +55,7 @@ struct AppRulesOnScreenTests {
         )
         #expect(
             selector.occurrences(
-                of: "core.appsOnScreen(beneathNormal: false)"
+                of: "core.openApps(beneathNormal: false)"
             ) == 1
         )
     }

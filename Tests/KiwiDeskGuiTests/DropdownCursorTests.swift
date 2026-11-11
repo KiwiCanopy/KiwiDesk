@@ -102,8 +102,8 @@ struct DropdownCursorTests {
     @Test("the app picker's escape joins the sequence after the apps")
     func escapeIsReachable() {
         let lists: AppPickerSlot.Lists = (
-            onScreen: [
-                OnScreenApp(
+            open: [
+                OpenApp(
                     app: AppRef(bundleID: "com.x", name: "X"),
                     name: "X"
                 )
@@ -113,7 +113,7 @@ struct DropdownCursorTests {
         let sequence = AppPickerSlot.sequence(of: lists)
         #expect(
             sequence == [
-                .onScreen(lists.onScreen[0].key),
+                .open(lists.open[0].key),
                 .installed("com.y"), .escape,
             ]
         )
@@ -122,7 +122,7 @@ struct DropdownCursorTests {
         cursor.opened(at: sequence[0], pointer: rest)
         cursor.keyMove(1, in: sequence, pointer: rest)
         #expect(cursor.keyMove(1, in: sequence, pointer: rest) == .escape)
-        let none: AppPickerSlot.Lists = (onScreen: [], all: [])
+        let none: AppPickerSlot.Lists = (open: [], all: [])
         #expect(AppPickerSlot.firstApp(of: none) == nil)
         #expect(AppPickerSlot.sequence(of: none) == [.escape])
     }
