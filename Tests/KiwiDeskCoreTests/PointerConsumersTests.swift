@@ -51,6 +51,7 @@ struct PointerConsumersTests {
             phase: phase,
             action: .move,
             start: .drag,
+            chord: [.control, .command],
             location: CGPoint(x: x, y: 0),
             time: 0
         )
@@ -72,9 +73,7 @@ struct PointerConsumersTests {
     func offRemovesTheTap() {
         let rig = Rig()
         rig.front.start()
-        var off = ModifierDragSettings.defaults
-        off.move.chord = []
-        off.resize.chord = []
+        let off = ModifierDragSettings()
         rig.front.configure(grab: off)
         #expect(!rig.front.isTapped)
         #expect(rig.taps.first?.stopped == true)
@@ -88,9 +87,11 @@ struct PointerConsumersTests {
         let rig = Rig()
         rig.front.start()
         var settings = ModifierDragSettings.defaults
-        settings.resize.chord = settings.move.chord
+        settings.bindings.append(
+            ModifierDragBinding(.resize, chord: [.control, .command])
+        )
         rig.front.configure(grab: settings)
-        #expect(rig.taps.last?.snapshots.last?.grab?.resize.isOff == true)
+        #expect(rig.taps.last?.snapshots.last?.grab == .defaults)
     }
 
     @Test("a refused tap is asked again once its switch moves")
@@ -99,9 +100,7 @@ struct PointerConsumersTests {
         rig.refuse = true
         rig.front.start()
         rig.refuse = false
-        var off = ModifierDragSettings.defaults
-        off.move.chord = []
-        off.resize.chord = []
+        let off = ModifierDragSettings()
         rig.front.configure(grab: off)
         rig.front.configure(grab: .defaults)
         #expect(rig.masks.count == 2)
@@ -178,8 +177,9 @@ struct PointerConsumersTests {
         let rig = Rig()
         rig.front.start()
         rig.front.receive(.init(grab: [event(.began)], reenabled: false))
-        var off = ModifierDragSettings.defaults
-        off.move.chord = []
+        let off = ModifierDragSettings([
+            ModifierDragBinding(.resize, chord: [.control, .option])
+        ])
         rig.front.configure(grab: off)
         #expect(rig.front.grabInFlight == nil)
         #expect(rig.heard.last?.phase == .ended)

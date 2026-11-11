@@ -40,6 +40,7 @@ extension KiwiCore {
             return .fail("unknown command: \(command)")
         }
         applyGestures(base: base, profile: mouse.gestures.profileOverride)
+        applyScrollGestures(profile: mouse.scroll.profileOverride)
         return .ok()
     }
 
@@ -51,7 +52,7 @@ extension KiwiCore {
                 return .family(family)
             }
             if let grab = ModifierDragAction(rawValue: text) {
-                return .grab(GestureGrab(grab))
+                return .grab(grab)
             }
             return text.isEmpty ? nil : .run(LuaAction(lua: text))
         }

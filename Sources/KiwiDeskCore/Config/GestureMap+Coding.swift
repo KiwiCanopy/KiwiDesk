@@ -57,7 +57,26 @@ extension GestureAction: Codable {
         case family, grab, split
     }
 
+    /// The keys a body of each kind may carry, so a body naming two
+    /// actions or a stray key fails rather than picking one.
+    private static func check(_ decoder: Decoder) throws {
+        let all = try decoder.container(keyedBy: GestureMap.Key.self)
+        let names = Set(all.allKeys.map(\.stringValue))
+        let action = names.intersection(["family", "grab", "split"])
+        let lua: Set = ["lua", "kind", "desc", "group", "symbol"]
+        let allowed = action.count == 1 ? action : lua
+        guard action.count <= 1, names.isSubset(of: allowed) else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "expected one action"
+                )
+            )
+        }
+    }
+
     public init(from decoder: Decoder) throws {
+        try Self.check(decoder)
         let c = try decoder.container(keyedBy: Keys.self)
         if let family = try c.decodeIfPresent(
             GestureFamily.self,
@@ -75,7 +94,7 @@ extension GestureAction: Codable {
                     debugDescription: "expected move or resize"
                 )
             }
-            self = .grab(GestureGrab(action))
+            self = .grab(action)
         } else if c.contains(.split) {
             let arms = try c.decode(
                 [String: LuaAction].self,
@@ -92,7 +111,14 @@ extension GestureAction: Codable {
                 }
                 split[direction] = action
             }
-            self = .split(split)
+            guard let action = GestureAction.split(normalizing: split) else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .split,
+                    in: c,
+                    debugDescription: "an empty table binds nothing"
+                )
+            }
+            self = action
         } else {
             self = .run(try LuaAction(from: decoder))
         }
@@ -107,7 +133,7 @@ extension GestureAction: Codable {
             try c.encode(family, forKey: .family)
         case .grab(let grab):
             var c = encoder.container(keyedBy: Keys.self)
-            try c.encode(grab.action.rawValue, forKey: .grab)
+            try c.encode(grab.rawValue, forKey: .grab)
         case .split(let arms):
             var c = encoder.container(keyedBy: Keys.self)
             let byName = Dictionary(

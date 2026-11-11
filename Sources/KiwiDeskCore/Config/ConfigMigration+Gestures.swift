@@ -22,6 +22,7 @@ extension ConfigMigration {
     static let retiredTrackpadKey = "trackpad_gesture"
     static let retiredDragKey = "modifier_drag"
     static let retiredScrollKey = "scroll_gesture"
+    static let profileMonitorSetsKey = "monitor_sets"
 
     /// The shipped defaults the old keys fell back to.
     static let seededPan = "control+option"
@@ -51,9 +52,13 @@ extension ConfigMigration {
         guard var root = node as? [String: Any] else {
             return (node, false)
         }
-        var changed = foldGestures(&root)
+        // A profile root carries `monitor_sets`; gui.json does not.
+        var changed = foldGestures(
+            &root,
+            inProfile: root[profileMonitorSetsKey] != nil
+        )
         if var config = root["config"] as? [String: Any],
-            foldGestures(&config)
+            foldGestures(&config, inProfile: false)
         {
             root["config"] = config
             changed = true
@@ -61,7 +66,7 @@ extension ConfigMigration {
         if var profiles = root[barEdgeProfilesKey] as? [[String: Any]] {
             var did = false
             for index in profiles.indices
-            where foldGestures(&profiles[index]) {
+            where foldGestures(&profiles[index], inProfile: true) {
                 did = true
             }
             if did {
@@ -72,8 +77,20 @@ extension ConfigMigration {
         return (root, changed)
     }
 
-    /// One object's fold; true where it changed.
-    static func foldGestures(_ object: inout [String: Any]) -> Bool {
+    /// A stored chord in the one spelling a gesture key takes: the
+    /// old decoders read aliases and any order, and two spellings
+    /// of one key would collide.
+    static func canonicalChord(_ text: String) -> String {
+        ScrollChord(spelling: text)?.spelling ?? text
+    }
+
+    /// One object's fold; true where it changed. A profile stored
+    /// the pan or the Space step only where it differed from the
+    /// base, so its value is written whole even on the seed's keys.
+    static func foldGestures(
+        _ object: inout [String: Any],
+        inProfile: Bool
+    ) -> Bool {
         var map = object[gestureKey] as? [String: Any] ?? [:]
         var changed = false
         if let slots = object.removeValue(forKey: retiredTrackpadKey)
@@ -90,6 +107,11 @@ extension ConfigMigration {
             changed = true
         }
         if var scroll = object[retiredScrollKey] as? [String: Any] {
+            for key in ["pan", "space_step"] {
+                if let chord = scroll[key] as? String {
+                    scroll[key] = canonicalChord(chord)
+                }
+            }
             // The old resolve kept the pan where both named one chord.
             if let pan = scroll["pan"] as? String,
                 scroll["space_step"] as? String == pan, !pan.isEmpty
@@ -102,7 +124,13 @@ extension ConfigMigration {
             ] {
                 guard let chord = scroll.removeValue(forKey: key) as? String
                 else { continue }
-                foldScroll(chord, family: family, seed: seed, &map)
+                foldScroll(
+                    chord,
+                    family: family,
+                    seed: seed,
+                    inProfile: inProfile,
+                    &map
+                )
                 changed = true
             }
             object[retiredScrollKey] = scroll
@@ -123,7 +151,7 @@ extension ConfigMigration {
                 map[slot] = NSNull()
                 continue
             }
-            let keys = binding["modifiers"] as? String ?? ""
+            let keys = canonicalChord(binding["modifiers"] as? String ?? "")
             let key = keys.isEmpty ? slot : "\(slot):\(keys)"
             if let family = binding["family"] as? String {
                 map[key] = ["family": family]
@@ -144,7 +172,7 @@ extension ConfigMigration {
         _ map: inout [String: Any]
     ) {
         guard let binding = value as? [String: Any] else { return }
-        let chord = binding["modifiers"] as? String ?? seed
+        let chord = canonicalChord(binding["modifiers"] as? String ?? seed)
         let hover = binding["start"] as? String == "hover"
         guard chord != seed || hover else { return }
         // The other grab may already have moved onto this seed.
@@ -156,18 +184,23 @@ extension ConfigMigration {
 
     /// The pan or the Space step: a swipe row and a wheel row for
     /// each axis, as 4.2.x read a tilt wheel. The pan's wheels walk
-    /// the list (#3200).
+    /// the list (#3200). The seed's tombstone never lands on a row
+    /// the other gesture already moved onto it.
     static func foldScroll(
         _ chord: String,
         family: String,
         seed: String,
+        inProfile: Bool,
         _ map: inout [String: Any]
     ) {
-        guard chord != seed else { return }
+        guard chord != seed || inProfile else { return }
         let wheelFamily = family == "focus" ? "walk" : family
-        map["swipe2:\(seed)"] = NSNull()
-        map["wheel:\(seed)"] = NSNull()
-        map["wheel_x:\(seed)"] = NSNull()
+        if chord != seed {
+            for input in ["swipe2", "wheel", "wheel_x"]
+            where map["\(input):\(seed)"] == nil {
+                map["\(input):\(seed)"] = NSNull()
+            }
+        }
         guard !chord.isEmpty else { return }
         map["swipe2:\(chord)"] = ["family": family]
         map["wheel:\(chord)"] = ["family": wheelFamily]

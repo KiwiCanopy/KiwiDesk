@@ -4,10 +4,10 @@ import Testing
 @testable import KiwiDeskCore
 
 private final class FakeTap: ScrollTapHandle {
-    var chords: Set<ScrollChord> = []
+    var chords: ScrollTapChords = []
     var deliver: ScrollGestureTap.Deliver?
     var stopped = false
-    func setChords(_ chords: Set<ScrollChord>) { self.chords = chords }
+    func setChords(_ chords: ScrollTapChords) { self.chords = chords }
     func stop() { stopped = true }
 }
 

@@ -18,20 +18,24 @@ public struct GestureKey: Hashable, Sendable, Comparable {
         keys.isEmpty ? input.rawValue : "\(input.rawValue):\(keys.spelling)"
     }
 
-    /// Reads a wire spelling; nil for an unknown input or keys.
+    /// Reads a wire spelling; nil for an unknown input or keys, and
+    /// for any spelling but the canonical one, so two spellings
+    /// never name one key.
     public init?(spelling text: String) {
         let parts = text.split(separator: ":", maxSplits: 1)
         guard let first = parts.first,
             let input = GestureInput(rawValue: String(first))
         else { return nil }
-        guard parts.count == 2 else {
-            self.init(input)
-            return
+        var keys: ScrollChord = []
+        if parts.count == 2 {
+            guard let chord = ScrollChord(spelling: String(parts[1])) else {
+                return nil
+            }
+            keys = chord
         }
-        guard let keys = ScrollChord(spelling: String(parts[1])),
-            !keys.isEmpty
-        else { return nil }
-        self.init(input, keys)
+        let key = GestureKey(input, keys)
+        guard key.spelling == text else { return nil }
+        self = key
     }
 
     /// Input order, then the keys' bits: the order a list shows.
@@ -59,18 +63,6 @@ public enum GestureFamily: String, CaseIterable, Codable, Sendable {
     case space
     /// The window list in order (#3200: a wheel's walk).
     case walk
-}
-
-/// A pointer gesture's grab: the window moves, or resizes from the
-/// edge or corner nearest the pointer, while the keys are held
-/// (#2447's modifier drags, folded in by #3199). Whether it starts
-/// on a press is the input's (`GestureInput.grabStart`).
-public struct GestureGrab: Hashable, Sendable {
-    public var action: ModifierDragAction
-
-    public init(_ action: ModifierDragAction) {
-        self.action = action
-    }
 }
 
 /// A built-in or Lua action as an end key stores it (#3199 ▸ the
@@ -112,7 +104,11 @@ public enum GestureAction: Hashable, Sendable {
     case family(GestureFamily)
     /// One action per direction; a missing direction does nothing.
     case split([GestureDirection: LuaAction])
-    case grab(GestureGrab)
+    /// A pointer gesture's grab: the window moves, or resizes from
+    /// the edge or corner nearest the pointer, while the keys are
+    /// held; whether it starts on a press is the input's
+    /// (`GestureInput.grabStart`).
+    case grab(ModifierDragAction)
 
     /// A split, folded: an empty one is nil, which binds nothing.
     /// The one home of the fold every writer takes.

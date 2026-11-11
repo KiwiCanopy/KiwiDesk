@@ -40,7 +40,7 @@ struct GestureBindingTests {
             GestureKey(.tap4, hyper): .bound(.run(lua)),
             GestureKey(.swipe2, hyper): .bound(.family(.focus)),
             GestureKey(.hoverMove, [.option]): .bound(
-                .grab(GestureGrab(.resize))
+                .grab(.resize)
             ),
             GestureKey(.wheel, hyper): .bound(
                 .split([.up: lua, .down: LuaAction(lua: "x()")])
@@ -74,10 +74,10 @@ struct GestureBindingTests {
         #expect(resolved[GestureKey(.wheelX, step)] == .family(.space))
         #expect(
             resolved[GestureKey(.drag, [.control, .command])]
-                == .grab(GestureGrab(.move))
+                == .grab(.move)
         )
         #expect(
-            resolved[GestureKey(.drag, hyper)] == .grab(GestureGrab(.resize))
+            resolved[GestureKey(.drag, hyper)] == .grab(.resize)
         )
         #expect(!resolved.keys.contains { $0.input == .hoverMove })
     }
@@ -102,12 +102,15 @@ struct GestureBindingTests {
     @MainActor
     func grabStart() {
         let settings = KiwiCore.grabSettings([
-            GestureKey(.drag, [.control, .command]): .grab(GestureGrab(.move)),
-            GestureKey(.hoverMove, hyper): .grab(GestureGrab(.resize)),
+            GestureKey(.drag, [.control, .command]): .grab(.move),
+            GestureKey(.hoverMove, hyper): .grab(.resize),
         ])
-        #expect(settings.move.start == .drag)
-        #expect(settings.resize.start == .hover)
-        #expect(settings.resize.chord == hyper)
+        #expect(
+            settings.bindings == [
+                ModifierDragBinding(.move, chord: [.control, .command]),
+                ModifierDragBinding(.resize, chord: hyper, start: .hover),
+            ]
+        )
     }
 
     @Test("the base lies over the seeds, a profile over the base")
@@ -140,7 +143,7 @@ struct GestureBindingTests {
             ),
             (GestureKey(.wheel, hyper), .family(.focus), .familyNotOffered),
             (
-                GestureKey(.click, hyper), .grab(GestureGrab(.move)),
+                GestureKey(.click, hyper), .grab(.move),
                 .grabOnlyOnDrag
             ),
             (GestureKey(.drag, hyper), .family(.focus), .grabOnlyOnDrag),
@@ -186,6 +189,45 @@ struct GestureBindingTests {
             GestureAction.split(normalizing: [.up: LuaAction(lua: "x()")])
                 == .split([.up: LuaAction(lua: "x()")])
         )
+    }
+
+    /// A gesture row codes the meta by hand beside the end key's
+    /// coder (parity-tests.md): every field `KeyBindingMeta` stores
+    /// must reach the wire, or a new one drops on a gesture row.
+    @Test("every meta field reaches a gesture row's wire")
+    func metaFieldsReachTheWire() throws {
+        let labels = Set(
+            Mirror(reflecting: KeyBindingMeta()).children.compactMap(\.label)
+        )
+        #expect(labels.count >= 3)
+        let action = LuaAction(
+            lua: "x()",
+            meta: KeyBindingMeta(desc: "d", group: "g", symbol: "s")
+        )
+        let data = try JSONEncoder().encode(action)
+        let object = try #require(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        #expect(Set(object.keys).subtracting(["lua", "kind"]) == labels)
+    }
+
+    @Test("two actions in one body, or an empty table, fail the decode")
+    func oneActionPerBody() {
+        for json in [
+            #"{"tap4": {"family": "focus", "grab": "move"}}"#,
+            #"{"tap4": {"family": "focus", "lua": "x()"}}"#,
+            #"{"tap4": {"lua": "x()", "bogus": 1}}"#,
+            #"{"wheel:control+option": {"split": {}}}"#,
+            #"{"tap4:": null}"#,
+            #"{"wheel:option+control": null}"#,
+        ] {
+            #expect(throws: (any Error).self, "\(json)") {
+                try JSONDecoder().decode(
+                    GestureMap.self,
+                    from: Data(json.utf8)
+                )
+            }
+        }
     }
 
     @Test("an end key's action is its own three halves")

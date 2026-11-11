@@ -101,7 +101,6 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case scrollStepDistance = "config.scrollGesture.stepDistance"
     case scrollNaturalTrackpad = "config.scrollGesture.naturalTrackpad"
     case scrollNaturalMouse = "config.scrollGesture.naturalMouse"
-    // The modifier drags (#2447): each row's chord and start.
 }
 
 extension ShortcutsKey {

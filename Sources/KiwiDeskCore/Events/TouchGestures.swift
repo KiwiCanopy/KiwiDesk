@@ -51,7 +51,7 @@ public final class TouchGestures {
     }
 
     /// The one write of the resolve's inputs and output.
-    /// The one door: `KiwiCore.applyGestures`'s, with the
+    /// The one door: `KiwiCore.applyScrollGestures`'s, with the
     /// resolved bindings and the trackpad's Natural scrolling.
     func resolve(
         _ resolved: [GestureKey: GestureAction],
@@ -118,38 +118,37 @@ public final class TouchGestures {
         switch event.kind {
         case .tap: return .tap(fingers: event.fingers)
         case .swipe: return .swipe(fingers: event.fingers)
-        case .gesture(let slot):
-            guard slot.source == .gestureEvents else { return nil }
-            return GestureInput(rawValue: slot.rawValue)
+        case .gesture(let input):
+            return input.isGestureEvent ? input : nil
         }
     }
 
-    /// The chords the gesture-event consumer swallows, per slot —
+    /// The chords the gesture-event consumer swallows, per input —
     /// the one door #2447's tap takes them through, handed on every
     /// change and empty while stopped, so no binding arms no mask.
     /// Its gestures come back through `receive`.
     var onGestureEventChords:
-        (@MainActor ([TrackpadGestureSlot: ScrollChord]) -> Void)?
+        (@MainActor ([GestureInput: Set<ScrollChord>]) -> Void)?
     {
         didSet { sync() }
     }
 
-    private var gestureEventChords: [TrackpadGestureSlot: ScrollChord] {
+    private var gestureEventChords: [GestureInput: Set<ScrollChord>] {
         guard started else { return [:] }
-        var out: [TrackpadGestureSlot: ScrollChord] = [:]
-        for key in bindings.keys {
-            guard let slot = TrackpadGestureSlot(rawValue: key.input.rawValue),
-                slot.source == .gestureEvents
-            else { continue }
-            out[slot] = key.keys
+        var out: [GestureInput: Set<ScrollChord>] = [:]
+        for key in bindings.keys where key.input.isGestureEvent {
+            out[key.input, default: []].insert(key.keys)
         }
         return out
     }
 
-    /// Whether a bound slot needs the touch reader.
+    /// Whether a bound slot needs the touch reader: one the touch
+    /// router fires.
     private var needsReader: Bool {
         handler != nil
-            && bindings.keys.contains { $0.input.fingers != nil }
+            && bindings.keys.contains {
+                $0.input.fingers != nil && $0.input.isFired
+            }
     }
 
     private func sync() {

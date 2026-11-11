@@ -91,7 +91,11 @@ extension KiwiCore {
             }
             let steps = session.meter.feed(event)
             guard steps != 0 else { return }
-            let direction = Self.direction(of: event.delta, sign: steps)
+            let direction = Self.direction(
+                of: event.delta,
+                sign: steps,
+                horizontal: session.meter.firedHorizontal
+            )
             guard let code = family.lua(direction) else { return }
             for _ in 0..<abs(steps) { runGestureLua(code, "scroll") }
         case .split(let arms):
@@ -104,13 +108,15 @@ extension KiwiCore {
         }
     }
 
-    /// The direction a step of `sign` runs along a delta's larger
-    /// axis — the hand's, since deltas arrive natural.
+    /// The direction a step of `sign` runs: along the axis the
+    /// meter's latch fired on, never a second reading of the travel
+    /// (input-and-animation.md), else the delta's larger one.
     static func direction(
         of delta: CGVector,
-        sign: Int
+        sign: Int,
+        horizontal: Bool?
     ) -> GestureDirection {
-        abs(delta.dx) > abs(delta.dy)
+        (horizontal ?? (abs(delta.dx) > abs(delta.dy)))
             ? (sign > 0 ? .right : .left)
             : (sign > 0 ? .down : .up)
     }

@@ -52,6 +52,16 @@ public struct ScrollGestureSettings: Equatable, Sendable {
         self.naturalMouse = naturalMouse
     }
 
+    /// The chords the tap consumes, per input.
+    var tapChords: ScrollTapChords {
+        let routes = self.routes
+        return ScrollTapChords(
+            swipe: Set(routes.filter { $0.value.swipe != nil }.keys),
+            wheel: Set(routes.filter { $0.value.wheel != nil }.keys),
+            wheelX: Set(routes.filter { $0.value.wheelX != nil }.keys)
+        )
+    }
+
     /// Whether `input`'s scrolls keep the natural direction.
     func isNatural(_ input: ScrollGestureEvent.Input) -> Bool {
         input == .wheel ? naturalMouse : naturalTrackpad
@@ -218,7 +228,7 @@ public final class ScrollGestures {
     }
 
     private func sync() {
-        let chords = Set(settings.routes.keys)
+        let chords = settings.tapChords
         guard started, handler != nil, !chords.isEmpty else {
             tap?.stop()
             tap = nil

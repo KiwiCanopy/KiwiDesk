@@ -111,12 +111,24 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// Read by a reader; the pinches and Force Click wait for
-    /// #2447.
+    /// One of macOS's own gesture events, which only a tap with the
+    /// gesture-event mask can swallow (#2447's `PointerTap`); no
+    /// reader exists for these yet.
+    public var isGestureEvent: Bool {
+        switch self {
+        case .spread, .pinchTogether, .rotate, .forceClick: true
+        default: false
+        }
+    }
+
+    /// Whether a front fires this input today. The clicks and side
+    /// buttons wait for the pointer tap's buttons, a two-finger tap
+    /// for the touch router, the pinches and Force Click for #2447.
     public var isFired: Bool {
         switch self {
-        case .spread, .pinchTogether, .rotate, .forceClick: false
-        default: true
+        case .drag, .hoverMove, .wheel, .wheelX, .swipe2: true
+        case .tap3, .tap4, .tap5, .swipe3, .swipe4, .swipe5: true
+        default: false
         }
     }
 

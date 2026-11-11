@@ -13231,8 +13231,11 @@ binding list (▸ Shortcuts, *Mouse and trackpad gestures are one
 list of bindings*), on the `drag` input with the button held and
 on `hover_move` for "+ move (no click)", so they take the profile
 layer, and the "global, crosses nothing" above holds no longer.
-The one-modifier choice and the move's priority over a resize on
-the same keys stand.
+The one-modifier choice stands. "The two rows never share a chord"
+has nothing left to rule: one input with one set of keys is one
+key of the list, so a press can start only one grab, and each
+action may be bound under as many keys as the user wants, every
+`drag` and `hover_move` binding firing on its own.
 :::
 
 **An absent capability is not a greyed one, and an absent
@@ -16126,11 +16129,17 @@ click or a tilt wheel. A list keyed by `input:keys` makes one
 gesture bindable many times, and makes a clash impossible by
 construction: the same input with the same keys is one key in the
 map, so the cross-refusal that kept the pan off the Space step's
-chord have nothing left to rule. A swipe and each wheel axis
+chord has nothing left to rule. A swipe and each wheel axis
 under one chord are separate keys, which is how the pan's split
 by kind (above) is stored; the seeds bind both wheel axes under
 ⌃⌥ and ⌃⌥⌘, so a tilt or thumb wheel keeps the pan and the Space
-step it reached before the list (orchestrator ruling 2026-11-11). An input
+step it reached before the list (orchestrator ruling 2026-11-11).
+Because they are separate keys, a chord takes only the scroll
+inputs a binding of it answers — a swipe, a vertical wheel burst,
+a sideways one, judged by the burst's first notch — and an input
+left unbound under a bound chord reaches the window: taking it
+would do nothing with it, and a press that does nothing must say
+why (above). An input
 with directions binds a family, whose argument is the direction,
 or one action per direction; a single Lua for every direction is
 refused, since it would throw away the one thing the hand said.
@@ -16162,14 +16171,23 @@ pays one trade for it** (`ConfigMigration+Gestures.swift`).
 and `space_step` leave the file, each value becoming its key; a
 value that moved off its seed also tombstones the seed's key,
 because the map lies over the seeds and the seed would otherwise
-keep firing beside it. A profile file is migrated alone and cannot
-read `gui.json`, so its override tombstones the SEED's key, never
-the base's: where the base had also moved off the seed, the base's
-binding fires in that profile beside the profile's own. Reading
-`gui.json` from a profile's step would make one file's migration
-depend on another file's state and on the order the two are read;
-the doubled binding is visible instead, and a `null` on its key
-in the profile removes it.
+keep firing beside it. A seed's tombstone never lands on a key the
+other gesture already moved onto, so a pan and a Space step that
+swapped chords, or shared one, keep the pan. Every chord is written
+in the one canonical spelling, since the old decoders read aliases
+and any order and two spellings of one key would collide in the
+map. A profile stored its `pan` or `space_step` only where it
+differed from the base, so the step writes a profile's value as its
+own rows even on the seed's keys. A profile file is migrated alone
+and cannot read `gui.json`, so its override tombstones the SEED's
+key, never the base's: where the base had also moved off the seed,
+the base's binding fires in that profile beside the profile's own,
+and a profile's `pan` of `""`, meant as off in that profile, turns
+off only the seed's keys and leaves the base's moved binding on.
+Reading `gui.json` from a profile's step would make one file's
+migration depend on another file's state and on the order the two
+are read; the doubled or surviving binding is visible instead, and
+a `null` on its key in the profile removes it.
 :::
 
 **One swipe moves one window by default, and long swipes are a

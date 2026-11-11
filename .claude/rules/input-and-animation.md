@@ -124,10 +124,10 @@ editing here:
   - **Resolve the gesture bindings in ONE home,
     `KiwiCore.applyGestures`** (#3199): the seeds, the base and the
     live profile's override through `GestureInputs.adopt`, then the
-    pointer tap's grab, and the scroll tap and the touch reader
-    through `applyScrollGestures`, which reads the resolved list
-    and never a map of its own. Nothing scans for a second resolve,
-    so it is review's.
+    pointer tap's grab; the scroll tap and the touch reader through
+    `applyScrollGestures`, which a caller runs right after it and
+    which reads the resolved list, never a map of its own. Nothing
+    scans for a second resolve, so it is review's.
   - **Natural scrolling is applied ONCE, upstream**: the scroll
     front flips a reversed event in `ScrollGestures.receive`, and
     the touch reader's resolve takes the trackpad's verdict, which
@@ -146,9 +146,9 @@ editing here:
     `KiwiCore.applyScrollGestures`, the one caller of the front's
     door `ScrollGestures.adoptResolution`** (#1656): the global base with
     the live profile's override on top, run through
-    `ScrollGestureBase.sanitized` — the verdict the Settings
-    entry reads too — since a hand-edited file reaches what the
-    recorder refuses. A path that changes either input reaches
+    `ScrollGestureBase.sanitized`, since a hand-edited file
+    reaches what a verb refuses; a binding's refusals are
+    `GestureSeeds.resolved`'s. A path that changes either input reaches
     the tap by calling it; the one deferred writer is the config
     load's `resetInputs`, whose load configures at its tail. The
     inputs stay `private(set)`, and a `ScrollGestureSettings` is
@@ -1070,7 +1070,7 @@ editing here:
   (#804)**, and the motion gate reads mouse quiet and buttons
   through seams `makeTestCore` pins — state-and-layout.md ▸
   Window motion says whose it is.
-- **Trackpad gesture slots read fingers through ONE reader,
+- **Trackpad gestures read fingers through ONE reader,
   `TouchReader`, reached only through `MouseTracker.trackpad`
   (#1873).** MultitouchSupport delivers every frame with no
   permission (probed 2026-10-31, macOS 27) and swallows nothing.
@@ -1082,10 +1082,11 @@ editing here:
     load's tail. Nothing scans for a second caller, so it is
     review's.
   - **No touch binding, no reader.** `TouchGestures` starts the
-    reader only while the core runs and a bound slot's `source`
-    is `.touches`; the live factory is pinned inert in both
-    `makeTestCore` twins, with the trackpad-preference read
-    (`TouchReaderSeamTests`, `TouchGesturesTests`).
+    reader only while the core runs and a bound input is one the
+    touch router fires (`GestureInput.isFired`); the live
+    factory is pinned inert in both `makeTestCore` twins, with
+    the trackpad-preference read (`TouchReaderSeamTests`,
+    `TouchGesturesTests` ▸ `unfiredStartsNoReader`).
   - **The decision is the pure `TrackpadGestureRouter`'s, on the
     framework's thread**, fed a Sendable `TouchFrame`; the main
     actor hears only a recognized tap or swipe, and a swipe is one
@@ -1100,10 +1101,10 @@ editing here:
     ruling's `PointerTap`), never a tap of its own and never this
     reader**, which cannot swallow. The tap takes the chords it
     swallows through the one `TouchGestures.onGestureEventChords`,
-    which hands an empty map while no such slot is bound or the
+    which hands an empty map while no such input is bound or the
     core is stopped, so no binding arms no mask; it decides on its
     own thread from that pushed copy and hands each gesture back
-    through `TouchGestures.receive` as `.gesture(slot)`, so the
+    through `TouchGestures.receive` as `.gesture(input)`, so the
     exact-modifier match and the handler stay one
     (`TouchGesturesTests` ▸ `gestureEventChordsReachTheDoor`).
     Residue: the reader takes the devices connected when it is

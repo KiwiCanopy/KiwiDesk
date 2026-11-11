@@ -38,6 +38,47 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     }
 }
 
+/// The chords the tap consumes, per input (#3199): a chord owns
+/// only the scrolls a binding answers, so an input left unbound
+/// under a bound chord still reaches the window. An array literal
+/// names chords bound on every input.
+public struct ScrollTapChords: Equatable, Sendable,
+    ExpressibleByArrayLiteral
+{
+    /// Phased scrolls: a trackpad or Magic Mouse swipe.
+    public var swipe: Set<ScrollChord>
+    /// A wheel burst whose first notch runs vertically.
+    public var wheel: Set<ScrollChord>
+    /// A wheel burst whose first notch runs sideways.
+    public var wheelX: Set<ScrollChord>
+
+    public init(
+        swipe: Set<ScrollChord> = [],
+        wheel: Set<ScrollChord> = [],
+        wheelX: Set<ScrollChord> = []
+    ) {
+        self.swipe = swipe
+        self.wheel = wheel
+        self.wheelX = wheelX
+    }
+
+    public init(arrayLiteral chords: ScrollChord...) {
+        let all = Set(chords)
+        self.init(swipe: all, wheel: all, wheelX: all)
+    }
+
+    var isEmpty: Bool { swipe.isEmpty && wheel.isEmpty && wheelX.isEmpty }
+
+    /// Whether a gesture of `input` on `chord` may keep going.
+    func holds(_ chord: ScrollChord, _ input: ScrollGestureEvent.Input)
+        -> Bool
+    {
+        input == .trackpad
+            ? swipe.contains(chord)
+            : wheel.contains(chord) || wheelX.contains(chord)
+    }
+}
+
 /// Decides, per scroll event, whether a registered chord owns it
 /// — and so the tap CONSUMES it — and what its consumer hears.
 ///
@@ -65,7 +106,7 @@ struct ScrollGestureRouter {
         var location: CGPoint
     }
 
-    var chords: Set<ScrollChord> = []
+    var chords: ScrollTapChords = []
     private var owner: Owner?
     /// A touch passed through without moving (`.mayBegin`): the
     /// `.began` that follows stays the app's even if the chord is
@@ -85,7 +126,7 @@ struct ScrollGestureRouter {
     ) -> (consume: Bool, events: [ScrollGestureEvent]) {
         clock = now
         var released: [ScrollGestureEvent] = []
-        if let owner, !chords.contains(owner.chord) {
+        if let owner, !chords.holds(owner.chord, owner.input) {
             released = end(at: sample.location)
         }
         let routed = routeSample(sample, now: now)
@@ -108,7 +149,7 @@ struct ScrollGestureRouter {
             }
             passing = false
             var events = end(at: sample.location)
-            guard owns(sample.chord) else {
+            guard owns(sample.chord, in: chords.swipe) else {
                 passing = sample.phase == .mayBegin
                 return (false, events)
             }
@@ -150,8 +191,11 @@ struct ScrollGestureRouter {
 
     /// A bound chord that is not empty: a plain scroll is never
     /// owned, whatever chord set the tap was handed.
-    private func owns(_ chord: ScrollChord) -> Bool {
-        !chord.isEmpty && chords.contains(chord)
+    private func owns(
+        _ chord: ScrollChord,
+        in bound: Set<ScrollChord>
+    ) -> Bool {
+        !chord.isEmpty && bound.contains(chord)
     }
 
     /// Ends an owned gesture whose deadline has passed, where it
@@ -185,7 +229,15 @@ struct ScrollGestureRouter {
             events = end(at: sample.location)
         }
         if owner == nil {
-            guard owns(sample.chord) else {
+            // A burst's first notch names its axis, as the runner
+            // reads it (`ScrollRoute.action(for:)`).
+            let sideways = abs(sample.delta.dx) > abs(sample.delta.dy)
+            guard
+                owns(
+                    sample.chord,
+                    in: sideways ? chords.wheelX : chords.wheel
+                )
+            else {
                 return (false, events)
             }
             owner = Owner(

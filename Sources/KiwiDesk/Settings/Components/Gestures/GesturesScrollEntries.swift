@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): its
-/// first group. The ⌃⌥ entry with its recorder and swipe length,
-/// the ⌃⌥⌘ entry with its recorder, then the two Natural scrolling
-/// rows both gestures share. Each
+/// first group. The ⌃⌥ entry with its swipe length, the ⌃⌥⌘ entry,
+/// then the two Natural scrolling rows both gestures share. The
+/// chords are bound through `gesture.bind` until #3183's list card
+/// (#3199). Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's

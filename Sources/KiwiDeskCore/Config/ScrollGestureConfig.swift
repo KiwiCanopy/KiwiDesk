@@ -60,8 +60,7 @@ public struct ScrollGestureBase: Equatable, Sendable {
 
 extension ScrollGestureBase {
     /// The step distance clamped, the one refusal a hand-edited
-    /// file can still reach. The tap and the Settings entry both
-    /// read this one verdict.
+    /// file can still reach; the tap reads this verdict.
     public var sanitized: ScrollGestureBase {
         var result = self
         result.stepDistance = min(

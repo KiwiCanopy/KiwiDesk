@@ -22,9 +22,9 @@ public final class GestureInputs {
         resolved = GestureSeeds.resolved(base: base, profile: profileOverride)
     }
 
-    /// A config load's reset: the load applies at its tail.
+    /// A config load's reset: the load applies at its tail. The
+    /// resolution follows, so nothing reads the last load's.
     func resetInputs() {
-        base = GestureMap()
-        profileOverride = nil
+        adopt(base: GestureMap(), profileOverride: nil)
     }
 }

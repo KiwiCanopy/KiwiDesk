@@ -140,6 +140,17 @@ struct TouchGesturesTests {
         #expect(box.fired.first?.1.kind == .swipe(.up))
     }
 
+    @Test("an input the touch router never fires starts no reader")
+    func unfiredStartsNoReader() {
+        let (gestures, box) = front()
+        gestures.resolve(
+            map([GestureKey(.tap2): .run(LuaAction(lua: "a()"))]),
+            natural: true
+        )
+        gestures.start()
+        #expect(box.readers.isEmpty)
+    }
+
     @Test("Natural off flips a family's swipe, never a table's arm")
     func naturalOffFlipsFamiliesOnly() {
         let (gestures, box) = front()
@@ -212,7 +223,7 @@ struct TouchGesturesTests {
     @Test("the gesture-event chords reach their door, empty when off")
     func gestureEventChordsReachTheDoor() {
         let (gestures, box) = front()
-        var pushed: [[TrackpadGestureSlot: ScrollChord]] = []
+        var pushed: [[GestureInput: Set<ScrollChord>]] = []
         gestures.onGestureEventChords = { pushed.append($0) }
         gestures.resolve(
             map([GestureKey(.rotate, Self.hyper): .run(LuaAction(lua: "r()"))]
@@ -221,7 +232,7 @@ struct TouchGesturesTests {
         )
         #expect(pushed.last == [:], "nothing before the start")
         gestures.start()
-        #expect(pushed.last == [.rotate: Self.hyper])
+        #expect(pushed.last == [.rotate: [Self.hyper]])
         gestures.receive([event(.gesture(.rotate), 0, Self.hyper)])
         gestures.receive([event(.gesture(.tap3), 0)])
         #expect(box.fired.map(\.0) == [.rotate])

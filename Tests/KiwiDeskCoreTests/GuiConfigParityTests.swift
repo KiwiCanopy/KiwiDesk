@@ -107,7 +107,7 @@ struct GuiConfigParityTests {
                 .family(.focus)
             ),
             GestureKey(.hoverMove, [.option, .command]): .bound(
-                .grab(GestureGrab(.move))
+                .grab(.move)
             ),
         ])
         config.spaceHistory = .allScreens

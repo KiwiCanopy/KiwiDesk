@@ -59,8 +59,8 @@ extension KiwiCore {
             // tail that would configure them is not reached: the
             // defaults, the profile's override dropped with the
             // rest of its state on this branch.
-            applyScrollGestures(profile: nil)
             applyGestures(profile: nil)
+            applyScrollGestures(profile: nil)
             applySpaceHistory(profile: nil)
             applyFocusWrap(profile: nil)
             return
@@ -188,8 +188,8 @@ extension KiwiCore {
             seedFirstRunStarterProfile()
         }
         retirePlaceholderSpace()
-        applyScrollGestures(profile: mouse.scroll.profileOverride)
         applyGestures(profile: mouse.gestures.profileOverride)
+        applyScrollGestures(profile: mouse.scroll.profileOverride)
         retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON

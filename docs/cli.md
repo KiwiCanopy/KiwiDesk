@@ -736,9 +736,9 @@ every lens with why it cannot turn on.
 | | `animations.set_reveal_duration` | ms (0 or 150–800, default 300; 0 is instant); a hidden bar's reveal |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
-| Gestures | `gesture.bind` | input, keys joined by `+` (`""` none), action — a family, `move\|resize` or Lua |
-| | `gesture.unbind` | input, keys — turns that binding off, a default included |
-| Scroll gestures | `scroll_gesture.set_natural_scrolling` | `system`\|true\|false, [`trackpad\|mouse`] (default `system` for both) |
+| Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
+| | `scroll_gesture.set_space_step` | modifiers (default `control+option+command`; `""` off) — held with a scroll to step between the Spaces of the screen under the pointer |
+| | `scroll_gesture.set_natural_scrolling` | true\|false, [`trackpad\|mouse`] (default `true` for both) |
 | | `scroll_gesture.set_long_swipes` | true\|false (default `false`) |
 | | `scroll_gesture.set_step_distance` | pt (10–1000, default 60) — travel per extra window of a long swipe |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
@@ -850,7 +850,8 @@ input held with keys — `drag`, `hover_move`, `wheel`, `swipe2`,
 `tap4` and the rest of the
 [Gesture inputs](lua-reference.md#gesture-inputs) — to a family
 (`focus|walk|swap|display|track|space`), `move|resize` or Lua, and
-`gesture.unbind <input> <keys>` turns one off; `""` holds no keys
+`gesture.unbind <input> <keys>` turns one off, a default included;
+`""` holds no keys
 ([`gesture.bind`](lua-reference.md#gesturebind)). The CLI passes
 every argument as a string, so a table of directions is Lua's
 alone. `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,

@@ -5191,12 +5191,10 @@ letting a key go, or clicking, ends it. A press over anything but
 a window KiwiDesk can move there — the Dock, the menu bar, a bar,
 a window in full screen — does nothing, and the app under the
 pointer does not get the click. A grab needs only the
-Accessibility permission, never Input Monitoring. One modifier is accepted on a
-grab, and that key's own click — ⌃-click, ⌘-drag — is then the
-grab's. Each grab fires from one binding: where `drag` and
-`hover_move` hold it several times, the first in the list's order
-— `drag` before `hover_move` — fires and the rest are kept. A `resize` on the
-keys a `move` holds does nothing.
+Accessibility permission, never Input Monitoring. One modifier is
+accepted on a grab, and that key's own click — ⌃-click, ⌘-drag — is
+then the grab's. Every `drag` and `hover_move` binding fires on its
+own keys, so `move` and `resize` may each be bound under several.
 
 A trackpad gesture macOS answers itself, set in System Settings ▸
 Trackpad, does nothing here, since both would act on it: a
@@ -5228,8 +5226,9 @@ Out of the box these are bound:
 
 ### Scroll focus and Space step
 
-Hold **⌃⌥** (the default) and scroll — a two-finger swipe on a
-trackpad or the mouse wheel, along either axis — and focus moves
+Hold **⌃⌥** (the default; [`set_pan`](#scroll_gestureset_pan)
+changes it) and scroll — a two-finger swipe on a trackpad or the
+mouse wheel, along either axis — and focus moves
 one window on the Space shown on the screen under the pointer,
 menu bar and Dock included. That Space becomes the active one. The
 pointer does not move, even with `mouse.follows_focus` on.
@@ -5277,13 +5276,14 @@ travel, which macOS's own Scrolling speed scales. The direction
 follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
 per input.
 
-Hold **⌃⌥⌘** (the default) and scroll to switch to the next or
-previous Space on the screen under the pointer, in that screen's
-Space order — the Space Bar's, empty Spaces included. A swipe
-steps one Space, and so does a notch of a mouse wheel; a fast roll
-or a free-spinning wheel steps one for the whole burst, and each
-notch counts again once the wheel pauses between notches. The
-pointer does not move.
+Hold **⌃⌥⌘** (the default;
+[`set_space_step`](#scroll_gestureset_space_step) changes it) and
+scroll to switch to the next or previous Space on the screen under
+the pointer, in that screen's Space order — the Space Bar's, empty
+Spaces included. A swipe steps one Space, and so does a notch of a
+mouse wheel; a fast roll or a free-spinning wheel steps one for the
+whole burst, and each notch counts again once the wheel pauses
+between notches. The pointer does not move.
 
 Past the first or last Space it wraps or stops as
 [`focus_space_next`](#focus_space_previous--focus_space_next)
@@ -5300,6 +5300,14 @@ scroll that began before the keys went down stays the window's.
 It needs only the Accessibility permission, never Input
 Monitoring.
 
+:::unreleased
+Under a set of keys, KiwiDesk takes only the scrolls a binding of
+those keys answers: a swipe where `swipe2` is bound, a wheel burst
+whose first notch runs up or down where `wheel` is, and one whose
+first notch runs sideways where `wheel_x` is. Any other scroll
+under those keys reaches the window under the pointer.
+:::
+
 ### Gesture storage
 
 :::unreleased
@@ -5307,8 +5315,9 @@ The bindings are stored in `gui.json` as the `gesture` object, the
 base every profile starts with, laid over the defaults above. A
 profile file may carry a `gesture` object of the same shape, which
 outranks the base key by key. A key is the input, then `:` and its
-keys spelled in the order `control+option+shift+command`, or the
-input alone where it holds none. A key the object leaves out
+keys by their full names in the order `control+option+shift+command`
+(`"wheel:control+option"`), or the input alone where it holds
+none. A key the object leaves out
 inherits, and `null` turns it off, a default included. A binding
 stores Lua under `lua`, with the shortcut row's optional `kind`,
 `desc`, `group` and `symbol`; a family under `family`; a grab
@@ -5327,24 +5336,31 @@ direction holding a Lua binding:
 }
 ```
 
-An unknown input, modifier, family, grab or direction, or a body
-naming no action, makes the file unreadable. A binding
-[`gesture.bind`](#gesturebind) would refuse is kept and does
-nothing.
+Any of these makes the file unreadable: a key spelled any other way
+— an alias such as `ctrl`, the keys in another order, a `:` with no
+keys after it; an unknown input, modifier, family, grab or
+direction; a body naming no action, or two; a body carrying a field
+its action does not take; and an empty table of directions. A
+binding [`gesture.bind`](#gesturebind) would refuse is kept and
+does nothing.
 
 A file a release before this one wrote is moved on its next load:
 `trackpad_gesture`'s slots, `modifier_drag`'s `move` and `resize`
 — a `"drag"` start becoming a `drag` binding and a `"hover"` start
 a `hover_move` one — and `scroll_gesture`'s `pan` and `space_step`,
 each as a `swipe2`, a `wheel` and a `wheel_x` binding, become
-`gesture` keys.
+`gesture` keys, spelled as above.
 Where `pan` and `space_step` named one chord, the pan keeps it and
 the Space step moves as off. A chord holding `shift` moves only as
 its `swipe2` binding: its `wheel` and `wheel_x` bindings are
 refused, and do nothing.
-A profile's own value turns the default's key off beside its own,
-so where `gui.json` also moved off a default, both the base's and
-the profile's bindings fire in that profile.
+A profile's own `pan` or `space_step` moves as its own bindings,
+and where it moved off the default it turns off the default's keys,
+never the ones `gui.json` moved it to: where `gui.json` also moved
+off a default, the base's bindings still fire in that profile
+beside the profile's own, and a profile's `""` leaves them on. A
+`null` on such a key in the profile's `gesture` object turns it
+off.
 
 The other scroll settings are stored in `gui.json` as the
 `scroll_gesture` object — `natural_scrolling` (`trackpad`,
@@ -5411,23 +5427,93 @@ gesture.unbind("drag", "control+option")
 ```
 :::
 
-### scroll_gesture.set_natural_scrolling
+### scroll_gesture.set_pan
+
+**Expects:** modifiers joined by `+` — `control` (`ctrl`),
+`option` (`opt`, `alt`), `shift`, `command` (`cmd`) — default
+`"control+option"`; `""` turns the gesture off.
+
+**Does:** sets the keys held with a scroll to move focus window
+by window. It takes two or more modifiers: one alone fails, as
+does an unknown or repeated name, and so does the chord
+[`set_space_step`](#scroll_gestureset_space_step) holds, whether
+in the base or in the live profile's override.
+
+**Example:**
+
+```lua
+scroll_gesture.set_pan("control+option+shift")
+scroll_gesture.set_pan("")   -- off
+```
 
 :::unreleased
-**Expects:** `"system"`, `true` or `false`, then optionally
-`"trackpad"` or `"mouse"` (default `"system"` for both).
+The pan under a set of keys is three bindings of those keys: the
+`swipe2` binding's `focus` and the `wheel` and `wheel_x` bindings'
+`walk`, written with [`gesture.bind`](#gesturebind) and turned off
+with [`gesture.unbind`](#gestureunbind):
 
-**Does:** `"system"` follows macOS's own Natural scrolling, and
-follows it again when it changes there; `true` makes a scroll
-gesture step the way Natural scrolling moves content, and `false`
-the other way. Named, the input takes the value alone; left out,
-both do. A swipe on a trackpad or Magic Mouse reads the
-trackpad's value and a notched mouse wheel the mouse's.
+```lua
+gesture.bind("swipe2", "option+command", "focus")
+gesture.bind("wheel", "option+command", "walk")
+gesture.bind("wheel_x", "option+command", "walk")
+```
+:::
+
+### scroll_gesture.set_space_step
+
+**Expects:** modifiers, as for
+[`set_pan`](#scroll_gestureset_pan) (default
+`"control+option+command"`); `""` turns the gesture off.
+
+**Does:** sets the keys held with a scroll to step between the
+Spaces of the screen under the pointer. It fails on the same
+chords `set_pan` does, with the pan's chord in place of its own;
+`set_pan` cannot take this one.
+
+**Example:**
+
+```lua
+scroll_gesture.set_space_step("control+option+shift")
+scroll_gesture.set_space_step("")   -- off
+```
+
+:::unreleased
+The Space step under a set of keys is the `space` family on the
+`swipe2`, `wheel` and `wheel_x` bindings of those keys, written with
+[`gesture.bind`](#gesturebind):
+
+```lua
+gesture.bind("swipe2", "control+command", "space")
+gesture.bind("wheel", "control+command", "space")
+gesture.bind("wheel_x", "control+command", "space")
+```
+:::
+
+### scroll_gesture.set_natural_scrolling
+
+**Expects:** a boolean, then optionally `"trackpad"` or
+`"mouse"` (default `true` for both).
+
+**Does:** on, a scroll gesture steps the way Natural scrolling
+moves content; off, the other way. Named, the input
+takes the value alone; left out, both do. A swipe on a trackpad
+or Magic Mouse reads the trackpad's value and a notched mouse
+wheel the mouse's, whatever macOS's Natural scrolling is set
+to.
 
 **Example:**
 
 ```lua
 scroll_gesture.set_natural_scrolling(false, "mouse")
+```
+
+:::unreleased
+It also takes `"system"`, the default for both inputs, which
+follows macOS's own Natural scrolling and follows it again when it
+changes there; `true` and `false` pin the input whatever macOS's
+is set to.
+
+```lua
 scroll_gesture.set_natural_scrolling("system")
 ```
 :::

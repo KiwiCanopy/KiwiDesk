@@ -73,11 +73,19 @@ public final class PointerConsumers {
         sync()
     }
 
-    /// Applies the grab's settings. A grab in flight whose action
-    /// turned off ends here.
+    /// Applies the grab's settings. A grab in flight whose binding
+    /// left ends here.
     func configure(grab settings: ModifierDragSettings) {
         let settings = settings.sanitized
-        if let action = grabInFlight?.action, settings[action].isOff {
+        if let grab = grabInFlight,
+            !settings.bindings.contains(
+                ModifierDragBinding(
+                    grab.action,
+                    chord: grab.chord,
+                    start: grab.start
+                )
+            )
+        {
             endGrab()
         }
         grabSettings = settings

@@ -15,8 +15,7 @@ public enum GestureEntry: Hashable, Sendable {
 /// The sparse binding map (#3199 ruling ▸ Storage): keyed by input
 /// and keys, a key it does not name inherits. The same shape stores
 /// the global base in `gui.json`, laid over the seeds, and a
-/// profile's override, laid over the base — `TrackpadGestureMap`'s
-/// shape, which this replaces.
+/// profile's override, laid over the base.
 public struct GestureMap: Hashable, Sendable {
     public var entries: [GestureKey: GestureEntry]
 
@@ -50,8 +49,8 @@ public enum GestureSeeds {
         GestureKey(.tap3): .run(
             LuaAction(lua: "KiwiDesk.focus_space_back()", kind: .navigation)
         ),
-        GestureKey(.drag, [.control, .command]): .grab(GestureGrab(.move)),
-        GestureKey(.drag, pan): .grab(GestureGrab(.resize)),
+        GestureKey(.drag, [.control, .command]): .grab(.move),
+        GestureKey(.drag, pan): .grab(.resize),
         GestureKey(.swipe2, pan): .family(.focus),
         GestureKey(.wheel, pan): .family(.walk),
         GestureKey(.wheelX, pan): .family(.walk),

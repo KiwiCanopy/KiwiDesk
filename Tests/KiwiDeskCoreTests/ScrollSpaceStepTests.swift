@@ -244,7 +244,7 @@ struct ScrollSpaceStepTests {
 }
 
 private final class RecordingTap: ScrollTapHandle {
-    var chords: Set<ScrollChord> = []
-    func setChords(_ chords: Set<ScrollChord>) { self.chords = chords }
+    var chords: ScrollTapChords = []
+    func setChords(_ chords: ScrollTapChords) { self.chords = chords }
     func stop() {}
 }

@@ -20,12 +20,19 @@ public enum ModifierDragStart: String, CaseIterable, Sendable {
     case hover
 }
 
-/// One action's chord and start; an empty chord is off.
+/// One grab binding: the action, its keys and how it starts. An
+/// empty chord is off.
 public struct ModifierDragBinding: Equatable, Sendable {
+    public var action: ModifierDragAction
     public var chord: ScrollChord
     public var start: ModifierDragStart
 
-    public init(chord: ScrollChord, start: ModifierDragStart = .drag) {
+    public init(
+        _ action: ModifierDragAction,
+        chord: ScrollChord,
+        start: ModifierDragStart = .drag
+    ) {
+        self.action = action
         self.chord = chord
         self.start = start
     }
@@ -33,66 +40,48 @@ public struct ModifierDragBinding: Equatable, Sendable {
     public var isOff: Bool { chord.isEmpty }
 }
 
-/// Why a modifier drag's chord is refused: the two actions never
-/// share a chord, since the press could start only the first. One
-/// modifier alone is the user's to choose (owner, 2026-11-08), for
-/// the click it costs. Core names it; the CLI and the recorder
-/// word it.
-public enum ModifierDragRefusal: Equatable, Sendable {
-    /// The other action, named, already holds these keys.
-    case otherAction(ModifierDragAction)
-
-    /// The refusal for `chord` beside `other`, the chord `heldBy`
-    /// holds; empty (off) is always accepted.
-    public static func of(
-        _ chord: ScrollChord,
-        other: ScrollChord,
-        heldBy: ModifierDragAction
-    ) -> ModifierDragRefusal? {
-        guard !chord.isEmpty, chord == other else { return nil }
-        return .otherAction(heldBy)
-    }
-}
-
-/// The modifier drags' settings (#2447): global, in `gui.json`,
-/// on by default with the button held. Lua writes them through
-/// `modifier_drag.*`; the tap reads `sanitized`.
+/// The pointer tap's grab bindings (#2447, #3199): every `drag` and
+/// `hover_move` row of the gesture list, in its order. A press or a
+/// move begins the binding whose keys and start it matches, so one
+/// action may be bound any number of times.
 public struct ModifierDragSettings: Equatable, Sendable {
-    public var move: ModifierDragBinding
-    public var resize: ModifierDragBinding
+    public var bindings: [ModifierDragBinding]
 
-    public static let defaults = ModifierDragSettings(
-        move: ModifierDragBinding(chord: [.control, .command]),
-        resize: ModifierDragBinding(chord: [.control, .option])
-    )
+    public static let defaults = ModifierDragSettings([
+        ModifierDragBinding(.move, chord: [.control, .command]),
+        ModifierDragBinding(.resize, chord: [.control, .option]),
+    ])
 
-    public init(move: ModifierDragBinding, resize: ModifierDragBinding) {
-        self.move = move
-        self.resize = resize
+    public init(_ bindings: [ModifierDragBinding] = []) {
+        self.bindings = bindings
     }
 
-    public subscript(action: ModifierDragAction) -> ModifierDragBinding {
-        get { action == .move ? move : resize }
-        set {
-            if action == .move { move = newValue } else { resize = newValue }
-        }
-    }
-
-    /// The recorder's and the verbs' refusal, applied once more to
-    /// what a hand-edited file can reach: a shared chord stays the
-    /// move's.
+    /// What a hand-edited file can reach, made one press, one grab:
+    /// off bindings leave, and of two on the same keys and start the
+    /// first stays.
     public var sanitized: ModifierDragSettings {
-        var result = self
-        if ModifierDragRefusal.of(
-            resize.chord,
-            other: result.move.chord,
-            heldBy: .move
-        ) != nil {
-            result.resize.chord = []
+        var kept: [ModifierDragBinding] = []
+        for binding in bindings where !binding.isOff {
+            guard
+                !kept.contains(where: {
+                    $0.chord == binding.chord && $0.start == binding.start
+                })
+            else { continue }
+            kept.append(binding)
         }
-        return result
+        return ModifierDragSettings(kept)
     }
 
-    /// Whether any action is on.
-    public var isOn: Bool { !move.isOff || !resize.isOff }
+    /// The binding a sample on `chord` starting as `start` begins.
+    public func binding(
+        chord: ScrollChord,
+        start: ModifierDragStart
+    ) -> ModifierDragBinding? {
+        bindings.first {
+            !$0.isOff && $0.chord == chord && $0.start == start
+        }
+    }
+
+    /// Whether any binding is on.
+    public var isOn: Bool { bindings.contains { !$0.isOff } }
 }
