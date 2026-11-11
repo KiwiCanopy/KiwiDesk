@@ -19,7 +19,7 @@ struct SpaceHistoryState {
 /// `focus_space_back` / `focus_space_forward` walk the history and
 /// `focus_space_last` toggles along it (#3206);
 /// `focus_space_previous` / `focus_space_next` step the Space
-/// order (#1655, rulings 2026-10-09). All four act on the focused
+/// order (#1655, rulings 2026-10-09). All of them act on the focused
 /// screen and never create a Space; the history refuses at an end
 /// with the row-end bump the ⌃⌥⌘ + scroll step makes (#1519), and
 /// the order step wraps unless Wrap focus is Off (#2592).
@@ -55,7 +55,9 @@ extension KiwiCore {
 
     /// The trail the setting names for the focused screen, the
     /// Space it shows, and which entries a step may land on: a
-    /// living Space and, per screen, one still on that screen.
+    /// living Space and, per screen, one still on that screen. A
+    /// hidden Space passes — the switch shows it — and so does one
+    /// another Desktop's windows use, Spaces being shared.
     /// Both history verbs read it (#3206); nil per screen with
     /// no focused screen.
     func spaceHistoryWalk() -> (

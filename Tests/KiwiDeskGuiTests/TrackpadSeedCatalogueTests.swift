@@ -12,11 +12,15 @@ import Testing
 struct TrackpadSeedCatalogueTests {
     @Test("every seed's action is a catalogue row")
     func seedsAreCatalogueRows() {
-        let rows =
-            KeybindingCatalog.navigationGroups(spaces: [SpaceID("1")])
-            .flatMap(\.commands)
-            + KeybindingCatalog.resizeAndFloat(step: 50)
+        let rows = KeybindingCatalog.namedCommands(
+            spaces: [SpaceID("1")],
+            layerNames: [],
+            steps: [50],
+            bindings: []
+        )
         let catalogue = Set(rows.map(\.lua))
+        #expect(!TrackpadGestureSeeds.seeds.isEmpty)
+        #expect(!catalogue.isEmpty)
         for (slot, binding) in TrackpadGestureSeeds.seeds {
             #expect(catalogue.contains(binding.action), "\(slot)")
         }

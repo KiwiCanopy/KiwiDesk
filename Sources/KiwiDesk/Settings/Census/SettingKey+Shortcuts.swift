@@ -14,7 +14,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case spaceStep = "keybinding.space_{previous,next}"
     /// Back / forward through the Space history (#1655).
     case spaceHistoryStep = "keybinding.space_{back,forward}"
-    /// Which history those two walk (#1655).
+    /// Which history the history verbs walk (#1655, #3206).
     case spaceHistory = "config.spaceHistory"
     /// Toggle to the Space you were on before (#3206).
     case spaceLast = "keybinding.focus_space_last"

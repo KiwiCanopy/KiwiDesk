@@ -13054,8 +13054,9 @@ binding may run a reader of the trackpad on a default install.**
 The bound above, "a default install, and one that never records a
 side, sees no keystroke", is retired for one seed only: #1873's
 seeded gesture slots, which ship bound and on — a four-finger tap
-opens KiwiHub's shortcuts panel and a three-finger tap goes back to
-the Space you were on (since #3206 a toggle, `focus_space_last`). It cannot be anything else: a pinch or a tap
+opens KiwiHub's shortcuts panel and a three-finger tap goes to the
+last Space you were on (`focus_space_last`). It cannot be anything
+else: a pinch or a tap
 is a trackpad reader or nothing. And a seed nobody can find is no
 seed: putting it behind a switch first would make the tour teach a
 switch. The keystroke bound stands (#3167, owner 2026-11-10): the

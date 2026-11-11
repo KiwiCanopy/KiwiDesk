@@ -35,16 +35,18 @@ struct SpaceHistoryLastTests {
     }
 
     @Test("after a Back, last is the Space the Back left")
-    func backThenLast() {
+    func backThenLast() throws {
         var history = trail(["A", "B", "C"])
-        let found = history.step(
-            under: key,
-            by: -1,
-            shown: "C",
-            reachable: { _ in true }
+        let found = try #require(
+            history.step(
+                under: key,
+                by: -1,
+                shown: "C",
+                reachable: { _ in true }
+            )
         )
-        #expect(found?.space == "B")
-        history.move(under: key, to: found!.index)
+        #expect(found.space == "B")
+        history.move(under: key, to: found.index)
         #expect(last(history, shown: "B") == "C")
     }
 

@@ -110,6 +110,13 @@ struct SpaceLastVerbTests {
         core.state.workspaces.assign(SpaceID("2"), to: Self.displayB)
         #expect(run(core, "focus_space_last"))
         #expect(shown(core) == "1")
+
+        let gone = makeCore(shown: "1")
+        gone.execute("focus_space", args: [.string("2")])
+        gone.execute("focus_space", args: [.string("3")])
+        gone.state.workspaces.removeSpace(SpaceID("2"))
+        #expect(run(gone, "focus_space_last"))
+        #expect(shown(gone) == "1")
     }
 
     @Test("nothing to return to bumps and refuses")
