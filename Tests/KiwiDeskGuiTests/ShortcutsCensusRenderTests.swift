@@ -182,6 +182,7 @@ struct ShortcutsCensusRenderTests {
             )
         }
         let apps = try squeezed("KeybindingAppGroup.swift")
+        #expect(!ShortcutsRowOrder.showHideKiwiDesk.isEmpty)
         #expect(apps.occurrences(of: "KiwiDeskKeyRows(") == 0)
         let card = try squeezed("ShowHideGroup.swift")
         #expect(card.occurrences(of: "KiwiDeskKeyRows(") == 1)

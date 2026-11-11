@@ -209,6 +209,15 @@ struct ShortcutsSegmentTests {
                 "coordinator.scrollTarget=RecorderPreflight.rowID(other)"
             )
         )
+        // The row reads the part the page hands it.
+        let recorder = try Self.source(
+            "Components/Keybindings/Recorder/KeyRecorderField.swift"
+        )
+        #expect(
+            recorder.contains(
+                "@Environment(\\.shortcutsSegment)varshownSegment"
+            )
+        )
         let page = try Self.source("Sections/ShortcutsSection.swift")
         #expect(
             page.contains(

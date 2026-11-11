@@ -66,7 +66,10 @@ struct GesturesPartTests {
                 "\(item) is not anchored"
             )
         }
-        #expect(all.components(separatedBy: "GestureEntry(").count == 15)
+        #expect(
+            all.components(separatedBy: "GestureEntry(").count
+                == GestureItem.allCases.count + 1
+        )
         // Within a group, the items' order; across groups, the
         // drawer body's.
         let items = GestureItem.allCases
@@ -143,6 +146,7 @@ struct GesturesPartTests {
     @Test("the part mounts once, alone on Mouse & Trackpad")
     func mountsAlone() throws {
         #expect(ShortcutsPagePart.parts(in: .mouse) == [.gestures])
+        #expect(ShortcutsPagePart.gestures.segments == [.mouse])
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )

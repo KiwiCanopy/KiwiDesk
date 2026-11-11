@@ -132,10 +132,16 @@ struct ShortcutsPagePartTests {
             kind: .custom,
             label: ""
         )
+        let sequence = KeyBinding(
+            combo: "",
+            lua: "",
+            kind: .sequence,
+            label: ""
+        )
         // An app's pocket key is a navigation row, named by its Lua.
         let pocket = KeybindingCatalog.pocketApp("com.apple.Safari").lua
         let expander = Self.expander()
-        let rows = [app, lua]
+        let rows = [app, lua, sequence]
         let parts = (rows.map(\.id.uuidString) + [pocket]).map {
             ShortcutsPagePart.owner(
                 of: $0,
@@ -143,7 +149,9 @@ struct ShortcutsPagePartTests {
                 bindings: rows
             )
         }
-        #expect(parts == [.openApplications, .luaBindings, .pocket])
+        #expect(
+            parts == [.openApplications, .luaBindings, .keySequences, .pocket]
+        )
     }
 
     /// A reveal outside Shortcuts takes no detour; inside, a held part

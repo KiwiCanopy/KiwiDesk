@@ -52,7 +52,7 @@ struct GestureAutoplayWiringTests {
         )
         let pick = try #require(
             SourceScan.declarationBody(
-                after: "privatevarsegmentBinding:Binding<ShortcutsSegment>",
+                after: "privatefuncsegmentBinding(",
                 in: segment
             )
         )
