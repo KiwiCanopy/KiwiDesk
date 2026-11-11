@@ -37,10 +37,10 @@ public struct ScrollGestureBase: Equatable, Sendable {
     public var pan: ScrollChord
     /// ⌃⌥⌘ + scroll steps between Spaces (#1519); empty is off.
     public var spaceStep: ScrollChord
-    /// KiwiDesk's own Natural scrolling, per input and whatever
-    /// macOS says (ruling 2026-09-29).
-    public var naturalTrackpad: Bool
-    public var naturalMouse: Bool
+    /// KiwiDesk's own Natural scrolling, per input (ruling
+    /// 2026-09-29): macOS's choice followed live, or pinned (#3200).
+    public var naturalTrackpad: NaturalScrolling
+    public var naturalMouse: NaturalScrolling
     /// A trackpad swipe moves one window; with this on, one more
     /// every `stepDistance` of further travel.
     public var longSwipes: Bool
@@ -53,8 +53,8 @@ public struct ScrollGestureBase: Equatable, Sendable {
     public static let defaults = ScrollGestureBase(
         pan: [.control, .option],
         spaceStep: [.control, .option, .command],
-        naturalTrackpad: true,
-        naturalMouse: true,
+        naturalTrackpad: .system,
+        naturalMouse: .system,
         longSwipes: false,
         stepDistance: 60
     )
@@ -62,8 +62,8 @@ public struct ScrollGestureBase: Equatable, Sendable {
     public init(
         pan: ScrollChord,
         spaceStep: ScrollChord,
-        naturalTrackpad: Bool,
-        naturalMouse: Bool,
+        naturalTrackpad: NaturalScrolling,
+        naturalMouse: NaturalScrolling,
         longSwipes: Bool,
         stepDistance: Double
     ) {
@@ -75,12 +75,13 @@ public struct ScrollGestureBase: Equatable, Sendable {
         self.stepDistance = stepDistance
     }
 
-    /// What the tap is configured with.
-    public var tapSettings: ScrollGestureSettings {
+    /// What the tap is configured with, given macOS's own Natural
+    /// scrolling for a `.system` input.
+    public func tapSettings(hostNatural: Bool) -> ScrollGestureSettings {
         ScrollGestureSettings(
             chords: [.pan: pan, .step: spaceStep],
-            naturalTrackpad: naturalTrackpad,
-            naturalMouse: naturalMouse
+            naturalTrackpad: naturalTrackpad.isNatural(host: hostNatural),
+            naturalMouse: naturalMouse.isNatural(host: hostNatural)
         )
     }
 }
@@ -119,16 +120,16 @@ extension ScrollGestureBase {
 public struct ScrollGestureOverride: Equatable, Sendable {
     public var pan: ScrollChord?
     public var spaceStep: ScrollChord?
-    public var naturalTrackpad: Bool?
-    public var naturalMouse: Bool?
+    public var naturalTrackpad: NaturalScrolling?
+    public var naturalMouse: NaturalScrolling?
     public var longSwipes: Bool?
     public var stepDistance: Double?
 
     public init(
         pan: ScrollChord? = nil,
         spaceStep: ScrollChord? = nil,
-        naturalTrackpad: Bool? = nil,
-        naturalMouse: Bool? = nil,
+        naturalTrackpad: NaturalScrolling? = nil,
+        naturalMouse: NaturalScrolling? = nil,
         longSwipes: Bool? = nil,
         stepDistance: Double? = nil
     ) {

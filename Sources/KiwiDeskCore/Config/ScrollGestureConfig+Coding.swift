@@ -30,10 +30,13 @@ extension ScrollGestureOverride: Codable {
                 forKey: .naturalScrolling
             )
             naturalTrackpad = try n.decodeIfPresent(
-                Bool.self,
+                NaturalScrolling.self,
                 forKey: .trackpad
             )
-            naturalMouse = try n.decodeIfPresent(Bool.self, forKey: .mouse)
+            naturalMouse = try n.decodeIfPresent(
+                NaturalScrolling.self,
+                forKey: .mouse
+            )
         }
         longSwipes = try c.decodeIfPresent(Bool.self, forKey: .longSwipes)
         stepDistance = try c.decodeIfPresent(

@@ -21,7 +21,7 @@ struct ScrollGestureReachModelTests {
         config.spaces = [SpaceID("1")]
         try core.guiConfigStore.save(config)
         var work = profile("Work")
-        work.scrollGesture = ScrollGestureOverride(naturalMouse: false)
+        work.scrollGesture = ScrollGestureOverride(naturalMouse: .off)
         try core.profiles.save(work)
         try core.profiles.write(profile("Home"))
         let model = makeTestModel(core: core)
@@ -42,7 +42,7 @@ struct ScrollGestureReachModelTests {
     @Test("the loaded page shows its own value, listed as its own")
     func ownValueIsListed() throws {
         let model = try makeModel()
-        #expect(model.config.scrollGesture.naturalMouse == false)
+        #expect(model.config.scrollGesture.naturalMouse == .off)
         let row = try #require(model.scrollReach(natural))
         #expect(!row.shared && row.users == ["Work"])
         #expect(try #require(model.scrollReach(pan)).shared)
@@ -63,7 +63,7 @@ struct ScrollGestureReachModelTests {
         )
         #expect(
             try core.profiles.read(name: "Work").scrollGesture
-                == ScrollGestureOverride(naturalMouse: false)
+                == ScrollGestureOverride(naturalMouse: .off)
         )
         #expect(try core.profiles.read(name: "Home").scrollGesture == nil)
     }
@@ -75,7 +75,7 @@ struct ScrollGestureReachModelTests {
         model.updateActiveProfile()
         #expect(
             try model.core.profiles.read(name: "Home").scrollGesture
-                == ScrollGestureOverride(naturalMouse: false)
+                == ScrollGestureOverride(naturalMouse: .off)
         )
         #expect(model.core.guiConfigStore.load()?.scrollGesture == .defaults)
     }

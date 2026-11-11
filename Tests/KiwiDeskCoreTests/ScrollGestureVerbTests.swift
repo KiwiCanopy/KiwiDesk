@@ -56,7 +56,7 @@ struct ScrollGestureVerbTests {
         #expect(core.mouse.scroll.base == .defaults)
     }
 
-    @Test("Natural scrolling is a boolean on the base")
+    @Test("Natural scrolling is a boolean or \"system\" on the base")
     func naturalScrolling() {
         let core = makeTestCore()
         #expect(
@@ -75,6 +75,13 @@ struct ScrollGestureVerbTests {
         )
         #expect(!tapChords(core).naturalTrackpad)
         #expect(tapChords(core).naturalMouse)
+        #expect(
+            core.execute(
+                "scroll_gesture.set_natural_scrolling",
+                args: [.string("system"), .string("trackpad")]
+            ).isSuccess
+        )
+        #expect(core.mouse.scroll.base.naturalTrackpad == .system)
         #expect(
             !core.execute(
                 "scroll_gesture.set_natural_scrolling",
@@ -110,7 +117,7 @@ struct ScrollGestureVerbTests {
     func profileApplyKeepsBase() {
         let core = makeTestCore()
         var base = ScrollGestureBase.defaults
-        base.naturalTrackpad = false
+        base.naturalTrackpad = .off
         core.applyScrollGestures(base: base, profile: nil)
         core.applyScrollGestures(
             profile: ScrollGestureOverride(spaceStep: [])

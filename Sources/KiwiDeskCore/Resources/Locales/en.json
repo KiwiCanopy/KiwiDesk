@@ -2172,6 +2172,7 @@
   "shortcuts.gestures.scroll.natural": "Natural scrolling",
   "shortcuts.gestures.scroll.natural_caption": "Content tracks finger movement",
   "shortcuts.gestures.scroll.natural_spoken": "%1$@, %2$@",
+  "shortcuts.gestures.scroll.natural_system": "System",
   "shortcuts.gestures.scroll.pan": "Scroll through windows",
   "shortcuts.gestures.scroll.points": "pt",
   "shortcuts.gestures.scroll.refused_pan": "These keys already move focus window by window. %1$@",

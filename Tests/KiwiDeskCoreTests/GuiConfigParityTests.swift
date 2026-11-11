@@ -98,8 +98,8 @@ struct GuiConfigParityTests {
         config.scrollGesture = ScrollGestureBase(
             pan: [.command, .shift],
             spaceStep: [],
-            naturalTrackpad: false,
-            naturalMouse: false,
+            naturalTrackpad: .off,
+            naturalMouse: .off,
             longSwipes: true,
             stepDistance: 120
         )

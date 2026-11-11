@@ -18,7 +18,7 @@ struct ScrollGestureReachTests {
             base: .defaults,
             overrides: [
                 ("Home", nil),
-                ("Work", ScrollGestureOverride(naturalMouse: false)),
+                ("Work", ScrollGestureOverride(naturalMouse: .off)),
             ]
         )
     }
@@ -26,8 +26,8 @@ struct ScrollGestureReachTests {
     @Test("a profile's override reads as its own value")
     func overrideIsOwn() {
         let t = table
-        #expect(t.resolved(natural, for: "Work") == .flag(false))
-        #expect(t.resolved(natural, for: "Home") == .flag(true))
+        #expect(t.resolved(natural, for: "Work") == .natural(.off))
+        #expect(t.resolved(natural, for: "Home") == .natural(.system))
         #expect(t.reach(of: natural, editing: "Home").isShared)
         #expect(!t.reach(of: natural, editing: "Work").isShared)
         #expect(t.differing(natural, editing: "Home") == ["Work"])
@@ -50,7 +50,7 @@ struct ScrollGestureReachTests {
         )
         #expect(
             t.scrollGestureOverride(for: "Work", original: .defaults)
-                == ScrollGestureOverride(naturalMouse: false)
+                == ScrollGestureOverride(naturalMouse: .off)
         )
     }
 
@@ -59,14 +59,14 @@ struct ScrollGestureReachTests {
         var t = table
         t.apply(
             natural,
-            value: .flag(false),
+            value: .natural(.off),
             reach: .shared(joining: []),
             editing: "Home"
         )
         var expected = ScrollGestureBase.defaults
-        expected.naturalMouse = false
+        expected.naturalMouse = .off
         #expect(t.scrollGestureBase(original: .defaults) == expected)
-        // Work's own `false` now equals the base: it follows.
+        // Work's own `.off` now equals the base: it follows.
         #expect(
             t.scrollGestureOverride(for: "Work", original: .defaults)
                 == nil
@@ -143,7 +143,7 @@ struct ScrollGestureReachTests {
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
         #expect(page.scrollGesture.stepDistance == 90)
-        page.scrollGesture.naturalTrackpad = false
+        page.scrollGesture.naturalTrackpad = .off
         try core.overwriteProfile(
             named: "Work",
             with: page,
@@ -152,7 +152,7 @@ struct ScrollGestureReachTests {
         #expect(
             try core.profiles.read(name: "Work").scrollGesture
                 == ScrollGestureOverride(
-                    naturalTrackpad: false,
+                    naturalTrackpad: .off,
                     stepDistance: 90
                 )
         )

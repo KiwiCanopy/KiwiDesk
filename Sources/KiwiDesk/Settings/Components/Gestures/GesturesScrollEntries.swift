@@ -156,36 +156,38 @@ struct GesturesScrollEntries: View {
         )
     }
 
-    /// Apple's own toggle, its input named in the picture's gutter
-    /// so both boxes start on the sentence's column.
+    /// Apple's own name over System · On · Off (#3200), its input
+    /// named in the picture's gutter so every row starts on the
+    /// sentence's column.
     private func naturalRow(
         _ field: ScrollGestureField,
         _ input: String,
-        _ isOn: Binding<Bool>
+        _ value: Binding<NaturalScrolling>
     ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: Self.columnGap) {
             Text(input)
                 .frame(width: Self.gutter, alignment: .trailing)
                 .accessibilityHidden(true)
             reachRow(field) {
-                Toggle(isOn: isOn) {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(ScrollGestureWords.natural)
-                        Text(ScrollGestureWords.naturalCaption)
-                            .font(.caption)
-                            .foregroundStyle(SettingsTheme.ink3)
-                    }
-                }
-                .toggleStyle(.checkbox)
-                .accessibilityLabel(
-                    L(
-                        "shortcuts.gestures.scroll.natural_spoken",
-                        "%1$@, %2$@",
-                        input,
-                        ScrollGestureWords.natural
+                VStack(alignment: .leading, spacing: 4) {
+                    SegmentedPicker(
+                        ScrollGestureWords.natural,
+                        spokenLabel: L(
+                            "shortcuts.gestures.scroll.natural_spoken",
+                            "%1$@, %2$@",
+                            input,
+                            ScrollGestureWords.natural
+                        ),
+                        hugsLabels: true,
+                        selection: value,
+                        options: NaturalScrolling.allCases.map {
+                            (ScrollGestureWords.natural($0), $0)
+                        }
                     )
-                )
-                .accessibilityHint(ScrollGestureWords.naturalCaption)
+                    Text(ScrollGestureWords.naturalCaption)
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.ink3)
+                }
             }
         }
         .padding(.vertical, 2)

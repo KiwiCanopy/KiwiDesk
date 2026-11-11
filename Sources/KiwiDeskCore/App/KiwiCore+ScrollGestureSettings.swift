@@ -41,17 +41,17 @@ extension KiwiCore {
         var base = mouse.scroll.base
         switch command {
         case "scroll_gesture.set_natural_scrolling":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
+            guard let value = Self.naturalScrolling(args.first) else {
+                return .fail("expected boolean or \"system\"")
             }
             guard let raw = args.dropFirst().first?.stringValue else {
-                base.naturalTrackpad = enabled
-                base.naturalMouse = enabled
+                base.naturalTrackpad = value
+                base.naturalMouse = value
                 break
             }
             switch ScrollInput(rawValue: raw) {
-            case .trackpad: base.naturalTrackpad = enabled
-            case .mouse: base.naturalMouse = enabled
+            case .trackpad: base.naturalTrackpad = value
+            case .mouse: base.naturalMouse = value
             case nil: return .expected(ScrollInput.self)
             }
         case "scroll_gesture.set_long_swipes":
@@ -108,6 +108,14 @@ extension KiwiCore {
             profile: mouse.scroll.profileOverride
         )
         return .ok()
+    }
+
+    /// A Natural scrolling argument: a boolean pins it, `"system"`
+    /// follows macOS (#3200).
+    static func naturalScrolling(_ arg: JSONValue?) -> NaturalScrolling? {
+        if let flag = arg?.boolValue { return .pinned(flag) }
+        return arg?.stringValue == NaturalScrolling.systemSpelling
+            ? .system : nil
     }
 
     /// The #1656 ruling's refusals, in CLI English.

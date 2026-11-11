@@ -82,6 +82,16 @@ enum ScrollGestureWords {
         L("shortcuts.gestures.scroll.natural", "Natural scrolling")
     }
 
+    /// One Natural scrolling choice: macOS's, or pinned.
+    static func natural(_ value: NaturalScrolling) -> String {
+        switch value {
+        case .system:
+            L("shortcuts.gestures.scroll.natural_system", "System")
+        case .on: SettingsValueReadout.onOff(true)
+        case .off: SettingsValueReadout.onOff(false)
+        }
+    }
+
     /// Apple's subtitle under it (`GNAME_SCROLL_LABEL`).
     static var naturalCaption: String {
         L(
@@ -113,6 +123,7 @@ enum ScrollGestureWords {
                 ? SettingsValueReadout.onOff(false)
                 : ScrollChordGlyphs.text(chord)
         case .flag(let on): SettingsValueReadout.onOff(on)
+        case .natural(let natural): ScrollGestureWords.natural(natural)
         case .points(let points):
             SettingsValueReadout.points(CGFloat(points))
         }

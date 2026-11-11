@@ -57,6 +57,15 @@ public final class ScrollGestures {
     /// Builds the machine tap. Live in production; `makeTestCore`
     /// pins one that touches nothing.
     var makeTap: MakeTap = { ScrollGestureTap.live(deliver: $0) }
+    /// macOS's own Natural scrolling (#3200). Live in production;
+    /// `makeTestCore` pins it unset.
+    var host = HostNaturalScrolling.live
+    /// The cached host value a `.system` input follows: read at
+    /// `watchHost` and on each change notice, never per event.
+    private(set) var hostNatural = true
+    private var followingHost = false
+    /// Re-runs the resolve; wired once at bootstrap.
+    var onHostChange: @MainActor () -> Void = {}
 
     public private(set) var settings = ScrollGestureSettings()
     /// The inputs `KiwiCore.applyScrollGestures` resolves from:
@@ -111,7 +120,26 @@ public final class ScrollGestures {
         self.base = base
         self.profileOverride = profileOverride
         self.resolved = resolved
-        configure(resolved.tapSettings)
+        configure(resolved.tapSettings(hostNatural: hostNatural))
+    }
+
+    /// Follows macOS's Natural scrolling from the first start on:
+    /// reads it, watches its change notice, and calls
+    /// `onHostChange` whenever the cached value moves.
+    func followHost() {
+        guard !followingHost else { return }
+        followingHost = true
+        let first = host.read() ?? true
+        host.watch { [weak self] in
+            guard let self else { return }
+            let now = host.read() ?? true
+            guard now != hostNatural else { return }
+            hostNatural = now
+            onHostChange()
+        }
+        guard first != hostNatural else { return }
+        hostNatural = first
+        onHostChange()
     }
 
     /// A config load's reset: the inputs return to the defaults
@@ -124,6 +152,7 @@ public final class ScrollGestures {
     /// Called once the Accessibility grant is in hand.
     func start() {
         started = true
+        followHost()
         sync()
     }
 

@@ -5,6 +5,7 @@ import Foundation
 public enum ScrollGestureValue: Hashable, Sendable {
     case chord(ScrollChord)
     case flag(Bool)
+    case natural(NaturalScrolling)
     case points(Double)
 }
 
@@ -24,8 +25,8 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         switch self {
         case .pan: .chord(base.pan)
         case .spaceStep: .chord(base.spaceStep)
-        case .naturalTrackpad: .flag(base.naturalTrackpad)
-        case .naturalMouse: .flag(base.naturalMouse)
+        case .naturalTrackpad: .natural(base.naturalTrackpad)
+        case .naturalMouse: .natural(base.naturalMouse)
         case .longSwipes: .flag(base.longSwipes)
         case .stepDistance: .points(base.stepDistance)
         }
@@ -38,8 +39,9 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         switch self {
         case .pan: override.pan.map { .chord($0) }
         case .spaceStep: override.spaceStep.map { .chord($0) }
-        case .naturalTrackpad: override.naturalTrackpad.map { .flag($0) }
-        case .naturalMouse: override.naturalMouse.map { .flag($0) }
+        case .naturalTrackpad:
+            override.naturalTrackpad.map { .natural($0) }
+        case .naturalMouse: override.naturalMouse.map { .natural($0) }
         case .longSwipes: override.longSwipes.map { .flag($0) }
         case .stepDistance: override.stepDistance.map { .points($0) }
         }
@@ -54,8 +56,10 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         switch (self, value) {
         case (.pan, .chord(let chord)): base.pan = chord
         case (.spaceStep, .chord(let chord)): base.spaceStep = chord
-        case (.naturalTrackpad, .flag(let on)): base.naturalTrackpad = on
-        case (.naturalMouse, .flag(let on)): base.naturalMouse = on
+        case (.naturalTrackpad, .natural(let value)):
+            base.naturalTrackpad = value
+        case (.naturalMouse, .natural(let value)):
+            base.naturalMouse = value
         case (.longSwipes, .flag(let on)): base.longSwipes = on
         case (.stepDistance, .points(let points)):
             base.stepDistance = points

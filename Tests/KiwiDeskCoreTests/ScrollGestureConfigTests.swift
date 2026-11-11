@@ -43,7 +43,8 @@ struct ScrollGestureConfigTests {
         let text = try json(ScrollGestureBase.defaults)
         #expect(
             text == "{\"long_swipes\":false,"
-                + "\"natural_scrolling\":{\"mouse\":true,\"trackpad\":true},"
+                + "\"natural_scrolling\":"
+                + "{\"mouse\":\"system\",\"trackpad\":\"system\"},"
                 + "\"pan\":\"control+option\","
                 + "\"space_step\":\"control+option+command\","
                 + "\"step_distance\":60}"
@@ -74,13 +75,13 @@ struct ScrollGestureConfigTests {
         let base = ScrollGestureBase.defaults
         let over = ScrollGestureOverride(
             spaceStep: [.control, .shift],
-            naturalMouse: false
+            naturalMouse: .off
         )
         let resolved = over.resolved(onto: base)
         #expect(resolved.pan == base.pan)
         #expect(resolved.spaceStep == [.control, .shift])
-        #expect(!resolved.naturalMouse)
-        #expect(resolved.naturalTrackpad)
+        #expect(resolved.naturalMouse == .off)
+        #expect(resolved.naturalTrackpad == .system)
         #expect(
             ScrollGestureOverride.diff(base: base, edited: resolved) == over
         )
@@ -108,7 +109,7 @@ struct ScrollGestureConfigTests {
         #expect(
             try decode(Profile.self, try json(profile)).scrollGesture == nil
         )
-        profile.scrollGesture = ScrollGestureOverride(naturalTrackpad: false)
+        profile.scrollGesture = ScrollGestureOverride(naturalTrackpad: .off)
         #expect(
             try json(profile.scrollGesture!)
                 == "{\"natural_scrolling\":{\"trackpad\":false}}"

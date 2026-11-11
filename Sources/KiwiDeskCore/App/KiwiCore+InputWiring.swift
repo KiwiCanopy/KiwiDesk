@@ -9,5 +9,11 @@ extension KiwiCore {
         wireModifierGrab()
         wireScrollSpaceStep()
         wireTrackpadGestures()
+        // A `.system` Natural scrolling follows macOS live (#3200).
+        mouse.scroll.onHostChange = { [weak self] in
+            self?.applyScrollGestures(
+                profile: self?.mouse.scroll.profileOverride
+            )
+        }
     }
 }
