@@ -50,6 +50,38 @@ struct SpaceHistoryLastTests {
         #expect(last(history, shown: "B") == "C")
     }
 
+    @Test("a visit after a Back leaves the Space the Back landed on")
+    func visitAfterBack() throws {
+        var history = trail(["A", "B", "C"])
+        let found = try #require(
+            history.step(
+                under: key,
+                by: -1,
+                shown: "C",
+                reachable: { _ in true }
+            )
+        )
+        history.move(under: key, to: found.index)
+        history.visit("D", under: key)
+        #expect(last(history, shown: "D") == "B")
+    }
+
+    @Test("forgetting another Space keeps the one left")
+    func forgetKeepsLeft() throws {
+        var history = trail(["A", "B", "C"])
+        let found = try #require(
+            history.step(
+                under: key,
+                by: -1,
+                shown: "C",
+                reachable: { _ in true }
+            )
+        )
+        history.move(under: key, to: found.index)
+        history.forget("A")
+        #expect(last(history, shown: "B") == "C")
+    }
+
     @Test("an unreachable last falls back to the nearest entry back")
     func unreachableFallsBack() {
         let history = trail(["1", "2", "3"])

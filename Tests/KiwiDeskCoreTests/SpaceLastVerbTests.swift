@@ -102,6 +102,27 @@ struct SpaceLastVerbTests {
         #expect(!run(core, "focus_space_forward"))
     }
 
+    @Test("an arrival, not a cursor move: Forward is gone after it")
+    func arrivalNotMove() {
+        let core = makeCore(shown: "1")
+        core.execute("focus_space", args: [.string("2")])
+        core.execute("focus_space", args: [.string("3")])
+        #expect(run(core, "focus_space_back"))
+        #expect(run(core, "focus_space_back"))
+        #expect(run(core, "focus_space_last"))
+        #expect(shown(core) == "2")
+        // A cursor move onto 2 would keep 3 ahead.
+        #expect(!run(core, "focus_space_forward"))
+    }
+
+    @Test("a Space shown without an event counts before the toggle")
+    func unrecordedArrivalCounts() {
+        let core = makeCore(shown: "1")
+        core.state.workspaces.activate(SpaceID("2"))
+        #expect(run(core, "focus_space_last"))
+        #expect(shown(core) == "1")
+    }
+
     @Test("a gone or moved last falls back to the nearest entry back")
     func unreachableFallsBack() {
         let core = makeCore(shown: "1")
@@ -111,7 +132,9 @@ struct SpaceLastVerbTests {
         #expect(run(core, "focus_space_last"))
         #expect(shown(core) == "1")
 
+        // All screens: the per-screen term would skip it anyway.
         let gone = makeCore(shown: "1")
+        gone.execute("set_space_history", args: [.string("all_screens")])
         gone.execute("focus_space", args: [.string("2")])
         gone.execute("focus_space", args: [.string("3")])
         gone.state.workspaces.removeSpace(SpaceID("2"))
