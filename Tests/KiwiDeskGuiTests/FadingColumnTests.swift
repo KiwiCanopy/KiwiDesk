@@ -26,6 +26,21 @@ struct FadingColumnTests {
         #expect(cut(0) == (false, true))
         #expect(cut(-100) == (true, true))
         #expect(cut(120 - content) == (true, false))
+        // The side's own padding off an edge cuts nothing.
+        let pad = DesktopsGeometry.sidePadding
+        let padded = { (offset: CGFloat) -> (Bool, Bool) in
+            let cut = EdgeFade.cuts(
+                offset: offset,
+                content: content,
+                viewport: 120,
+                inset: pad
+            )
+            return (cut.start, cut.end)
+        }
+        #expect(padded(-pad) == (false, true))
+        #expect(padded(-pad - 1).0)
+        #expect(!padded(120 + pad - content).1)
+        #expect(padded(120 + pad - content + 1).1)
     }
 
     @Test("the Desktops side's vertical lists fade through FadingColumn")
@@ -47,6 +62,7 @@ struct FadingColumnTests {
             side.contains(
                 "FadingColumn(selected:state.place?.screen,"
                     + "ids:Array(state.overview.screens.indices),"
+                    + "inset:DesktopsGeometry.sidePadding)"
             )
         )
         #expect(side.contains("row($0,geometry).id($0)"))
@@ -75,6 +91,17 @@ struct FadingColumnTests {
         #expect(column.contains("contentHeight=frame.height"))
         #expect(column.contains("$0.size.height}action:{height=$0}"))
         #expect(column.contains(".mask(mask)"))
+        #expect(column.contains(".background(measure)"))
+        #expect(
+            column.contains(
+                "privatevarfade:CGFloat{EdgeFade.depth(viewport:height)}"
+            )
+        )
+        #expect(column.contains("[top?.clear:.black,.black]"))
+        #expect(column.contains("[.black,bottom?.clear:.black]"))
+        #expect(
+            column.contains(".onAppear{reveal(proxy,from:nil,animated:false)}")
+        )
         #expect(
             column.contains(
                 ".onChange(of:selected){old,_in"

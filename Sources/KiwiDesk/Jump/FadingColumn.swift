@@ -66,7 +66,7 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
     /// What a reveal scrolls to: the item past `new` in the
     /// direction it moved from `old` (down when it did not move), or
     /// `new` itself at an end.
-    static func target(
+    nonisolated static func target(
         from old: Selected?,
         to new: Selected?,
         in ids: [Selected]

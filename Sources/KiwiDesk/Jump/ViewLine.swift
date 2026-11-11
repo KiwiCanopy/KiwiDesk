@@ -68,7 +68,7 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
 
     /// Which edges cut an item: off an edge by the margin alone,
     /// as a `scrollTo` leaves the end item, cuts nothing (#3166).
-    static func cuts(
+    nonisolated static func cuts(
         offset: CGFloat,
         content: CGFloat,
         width: CGFloat,
