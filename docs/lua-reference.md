@@ -5966,15 +5966,17 @@ end)
 - A delta in points. A positive `"x"` moves right and a positive `"y"`
   moves down.
 
-:::unreleased
 **Does:** moves the focused floating window by the delta, at once,
-with no animation. It runs to its screen's visible edge, as a drag
-does, and never crosses onto another screen. A bar on the top edge
-stops it going up; a bar on the bottom or a side does not stop it
-(#3163). Stopping shows a pill. A window you dragged past the
-screen's edge stays where it is if you move it further out, and
-comes back freely. A window larger than the screen reaches its top
-or left edge and goes no further.
+with no animation. It stops at the edge of the area its screen leaves
+clear of the bars and never crosses onto another screen. Stopping
+there shows a pill. A window you dragged past that edge stays where it
+is if you move it further out, and comes back freely. A window larger
+than the area reaches its top or left edge and goes no further.
+
+:::unreleased
+The edge is the screen's visible edge, as a drag reaches it: a bar on
+the top edge stops the window going up, and a bar on the bottom or a
+side does not stop it (#3163).
 :::
 
 Two calls closer together than the app reports the first move can

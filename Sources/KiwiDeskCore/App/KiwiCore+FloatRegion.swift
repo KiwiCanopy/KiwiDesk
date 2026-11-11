@@ -63,7 +63,8 @@ extension KiwiCore {
     /// other edge would move a window the user placed.
     ///
     /// Bars vary per space — one bar or two, on any edge — so
-    /// this folds both strip lists exactly as the clamp does
+    /// this folds both strip lists, every edge, where the clamp
+    /// folds the top edge alone,
     /// rather than assuming a count or an edge. Two strips on
     /// ONE edge leave the deeper carve standing, which is the
     /// monotonicity `AppBarGeometry.regionClear` provides and

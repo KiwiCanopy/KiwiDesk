@@ -538,8 +538,8 @@ and cannot be dropped onto a tiled slot; use *make tiled* first
 ([Accepted limitations](accepted-limitations.md)).
 
 A floating window dropped on another screen moves into the Space
-that screen shows, and stays where you let go of it. A sticky
-window keeps its own Space.
+that screen shows, and stays where you let go of it, clear of
+the bars. A sticky window keeps its own Space.
 
 :::unreleased
 A floating window keeps the size and place you give it. Only a bar
