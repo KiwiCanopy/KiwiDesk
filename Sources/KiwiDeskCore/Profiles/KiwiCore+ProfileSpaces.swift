@@ -111,7 +111,6 @@ extension KiwiCore {
         recordOutgoingPartitioning(before: .profile(profile.name))
     }
 
-    @discardableResult
     func restoreProfilePartitioning(
         of profile: Profile
     ) -> RestoreFollow? {
@@ -206,7 +205,6 @@ extension KiwiCore {
     ///
     /// Returns the follow it owes where it emptied the active Space
     /// of its focus (#3191), which the apply pays after its pass.
-    @discardableResult
     func restorePartitioning(
         of arrangement: HeldOrigin.Arrangement,
         declaring declared: Set<SpaceID>

@@ -161,9 +161,7 @@ extension KiwiCore {
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
-        retile(pass: forceRetile ? .apply : .event)
-        emitSpaceChange()
-        payRestoreFollow(follow)  // #3191
+        retileFollowing(follow, pass: forceRetile ? .apply : .event)
         // #1145: a profile may override `desktop_reach` — after
         // the pins and the space→display resolve the carry's
         // home-screen read rests on. Its own topology read on
@@ -250,9 +248,7 @@ extension KiwiCore {
         reapplyStructuredOverrides(nil)
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
-        retile(pass: forceRetile ? .apply : .event)
-        emitSpaceChange()
-        payRestoreFollow(follow)  // #3191
+        retileFollowing(follow, pass: forceRetile ? .apply : .event)
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
         // Last, like `apply(profile:)`'s `becameLive`: the filing

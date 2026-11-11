@@ -5,9 +5,10 @@ import Foundation
 /// Ruling): the user lands where the window went, as a
 /// move-and-follow would, never in the empty Space it left.
 extension KiwiCore {
-    /// What a restore owes: the Space the focused window went to,
-    /// and the window.
+    /// What a restore owes: the Space it left empty, the Space the
+    /// focused window went to, and the window.
     struct RestoreFollow: Equatable {
+        let left: SpaceID
         let space: SpaceID
         let window: WindowID
     }
@@ -22,24 +23,56 @@ extension KiwiCore {
     ) -> RestoreFollow? {
         guard let focused, let active,
             let landed = state.workspaces.space(of: focused),
-            landed != active,
-            let left = state.workspaces[active],
-            state.effectiveMembers(of: left).isEmpty
+            landed != active, leftEmpty(active)
         else { return nil }
-        return RestoreFollow(space: landed, window: focused)
+        return RestoreFollow(left: active, space: landed, window: focused)
     }
 
-    /// Pays a restore's follow once the apply has laid out the
-    /// arrangement — a whole switch, so the landing Space's float
-    /// layer lifts too (#412).
-    func payRestoreFollow(_ follow: RestoreFollow?) {
-        guard let follow,
-            state.workspaces.space(of: follow.window) == follow.space
-        else { return }
-        onLog(
-            "restore follow: w\(follow.window.raw) into space "
-                + "\(follow.space.raw), the one it left empty"
-        )
-        followSwitch(to: follow.space, focusing: follow.window)
+    /// The apply's own pass, landing where an owed follow goes: the
+    /// landing Space is made active ahead of the pass, so the pass
+    /// draws it once rather than parking the window the restore
+    /// moved for a switch to bring back (the launch follow's
+    /// #1599 rule), then the focus and the landing float raise
+    /// (#412) are paid. Re-judged first, since the apply's held
+    /// returns ran since the restore. A bound Desktop switch's
+    /// apply follows nothing: its handler activates the arriving
+    /// Space itself (the scope `defersRuleSweepToSwitchPass` marks).
+    func retileFollowing(_ follow: RestoreFollow?, pass: RetilePass) {
+        let owed = follow.flatMap { stillOwed($0) ? $0 : nil }
+        let priorFrontmost = frontmostPIDProvider?()
+        let priorScreen = focusedScreen
+        if let owed {
+            onLog(
+                "restore follow: w\(owed.window.raw) into space "
+                    + "\(owed.space.raw), the one it left empty"
+            )
+            state.workspaces.activate(owed.space)
+        }
+        retile(pass: pass)
+        emitSpaceChange()
+        guard let owed else { return }
+        if focusWindow(owed.window, refocusRetile: false, warp: false) {
+            warpForSwitch(
+                to: owed.space,
+                focusing: owed.window,
+                leaving: priorScreen
+            )
+        }
+        scheduleSpaceSettle(owed.space, priorFrontmost: priorFrontmost)
+        raiseLandingFloats(thenFocus: owed.window)
+    }
+
+    private func stillOwed(_ follow: RestoreFollow) -> Bool {
+        !defersRuleSweepToSwitchPass
+            && state.workspaces.activeSpace == follow.left
+            && leftEmpty(follow.left)
+            && state.workspaces.space(of: follow.window) == follow.space
+    }
+
+    /// Whether `space` shows no window now.
+    private func leftEmpty(_ space: SpaceID) -> Bool {
+        state.workspaces[space].map {
+            state.effectiveMembers(of: $0).isEmpty
+        } ?? false
     }
 }
