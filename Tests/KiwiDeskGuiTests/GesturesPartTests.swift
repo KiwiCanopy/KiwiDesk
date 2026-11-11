@@ -6,11 +6,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Shortcuts & Gestures ▸ Mouse & trackpad (#1726): where the
-/// drawer mounts, what left Behavior for it, how its entries grey,
-/// and the Behavior card's replacement picture.
-@Suite("Mouse & trackpad drawer")
-struct GesturesDrawerTests {
+/// Shortcuts ▸ Mouse & Trackpad (#1726, #3184): where the part
+/// mounts, its groups and their entries, and how the entries grey.
+@Suite("Mouse & Trackpad part")
+struct GesturesPartTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let gestures =
         "Sources/KiwiDesk/Settings/Components/Gestures/"
@@ -36,14 +35,14 @@ struct GesturesDrawerTests {
         #expect(GesturesShelfEntries.springLinkProse.contains(slot))
     }
 
-    /// Every entry is built from its item and anchored so a strip
-    /// click lands on it, and the card draws the items in their
-    /// declared order — the strip's order IS the card's.
+    /// Every entry is built from its item and anchored so a hit
+    /// lands on it, and the part draws the items in their declared
+    /// order, its groups by where the hand is.
     @Test("the entries are the items, in order, each anchored")
     func entriesAreTheItems() throws {
         var all = ""
         for file in [
-            "GesturesScrollEntries.swift", "GesturesDrawer.swift",
+            "GesturesPart.swift", "GesturesScrollEntries.swift",
             "GesturesShelfEntries.swift",
         ] {
             all += Self.squash(try Self.source(Self.gestures + file))
@@ -67,7 +66,10 @@ struct GesturesDrawerTests {
                 "\(item) is not anchored"
             )
         }
-        #expect(all.components(separatedBy: "GestureEntry(").count == 15)
+        #expect(
+            all.components(separatedBy: "GestureEntry(").count
+                == GestureItem.allCases.count + 1
+        )
         // Within a group, the items' order; across groups, the
         // drawer body's.
         let items = GestureItem.allCases
@@ -75,13 +77,22 @@ struct GesturesDrawerTests {
             #expect(try #require(at[a]) < (try #require(at[b])), "\(a) \(b)")
         }
         let drawer = Self.squash(
-            try Self.source(Self.gestures + "GesturesDrawer.swift")
+            try Self.source(Self.gestures + "GesturesPart.swift")
         )
         let order = [
-            "GesturesScrollEntries(", "focusEntries", "windowEntries",
+            "SettingsCatalog.shortcuts.gesturesOnWindows",
+            "focusEntries", "windowEntries",
+            "SettingsCatalog.shortcuts.gesturesModifier",
+            "GesturesScrollEntries(", "GesturesModifierDragRows(",
+            "SettingsCatalog.shortcuts.gesturesOnShelf",
             "GesturesShelfEntries(",
         ].compactMap { drawer.range(of: $0)?.lowerBound }
-        #expect(order.count == 4 && order == order.sorted())
+        #expect(order.count == 8 && order == order.sorted())
+        // Group order follows the items' declared groups.
+        let ranks = GestureItem.allCases.compactMap {
+            GestureItem.Group.allCases.firstIndex(of: $0.group)
+        }
+        #expect(ranks.count == items.count && ranks == ranks.sorted())
     }
 
     /// A reason is readable while what it explains is dimmed: the
@@ -95,7 +106,7 @@ struct GesturesDrawerTests {
         #expect(!group.contains("GreyOut("))
         #expect(!group.contains("offReasons"))
         let drawer = try Self.source(
-            Self.gestures + "GesturesDrawer.swift"
+            Self.gestures + "GesturesPart.swift"
         )
         #expect(!drawer.contains("GreyOut("))
         let entry = Self.squash(
@@ -132,26 +143,23 @@ struct GesturesDrawerTests {
         #expect(!entry[control.upperBound..<end.lowerBound].contains("dim"))
     }
 
-    @Test("the drawer mounts above the layer header")
-    func mountsAboveTheLayerHeader() throws {
-        let parts = ShortcutsPagePart.allCases
-        let drawer = try #require(parts.firstIndex(of: .gestures))
-        let layers = try #require(parts.firstIndex(of: .layers))
-        #expect(drawer < layers)
+    @Test("the part mounts once, alone on Mouse & Trackpad")
+    func mountsAlone() throws {
+        #expect(ShortcutsPagePart.parts(in: .mouse) == [.gestures])
+        #expect(ShortcutsPagePart.gestures.segments == [.mouse])
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
         let squashed = body.filter { !$0.isWhitespace }
         #expect(
             squashed.contains(
-                "case.gestures:GesturesDrawer(model:model,"
+                "case.gestures:GesturesPart(model:model,"
             ),
-            "the gestures part draws the drawer"
+            "the gestures part draws the groups"
         )
         #expect(
-            body.components(separatedBy: "GesturesDrawer(").count
-                == 2,
-            "the drawer mounts exactly once"
+            body.components(separatedBy: "GesturesPart(").count == 2,
+            "the part mounts exactly once"
         )
     }
 }

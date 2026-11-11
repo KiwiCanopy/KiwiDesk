@@ -1,8 +1,7 @@
 import KiwiDeskCore
 
 extension GestureItem {
-    /// The entry's sentence — the card's, and the strip's tooltip
-    /// (#1726, owner ruling 2026-10-17). The Spring delay is read
+    /// The entry's sentence (#1726). The Spring delay is read
     /// from the draft, in the diff readout's own seconds form.
     @MainActor func sentence(_ settings: TilingSettings) -> String {
         switch self {

@@ -8,7 +8,7 @@ import Testing
 /// A rule row's trash keeps ONE width whichever form it draws, and
 /// a trash-less row beside trash rows holds that width, so a
 /// card's trailing reach and key columns line up — the Open
-/// applications card's KiwiDesk rows sat one trash-width off.
+/// applications card's KiwiDesk rows once sat one trash-width off.
 ///
 /// Main-actor spend: six `NSHostingView` fitting sizes, once.
 @Suite("Rule trash column width")
@@ -87,16 +87,20 @@ struct OpenApplicationsTrashSlotTests {
     }
 
     /// The card asks, and the row ends in the slot right after its
-    /// key field, where an app row's trash stands.
-    @Test("the KiwiDesk rows hold the slot in the apps card")
+    /// key field, where an app row's trash stands. Pocket is the card
+    /// asking since Open Settings left Open applications (#3184).
+    @Test("a trash-less row holds the slot where its card asks")
     func kiwiDeskRowsHoldTheSlot() throws {
-        let group = try source("KeybindingAppGroup.swift")
+        let group = try source("PocketGroup.swift")
         #expect(
             group.contains(
-                "KiwiDeskKeyRows(model:model,bindings:$bindings,"
-                    + "expander:expander)"
-                    + ".environment(\\.keybindingReservesTrashSlot,true)"
+                "}.environment(\\.keybindingReservesTrashSlot,true)"
+                    + "PocketAppRows("
             )
+        )
+        #expect(
+            try !source("KeybindingAppGroup.swift")
+                .contains("keybindingReservesTrashSlot")
         )
         let row = try source("KeybindingNavRow.swift")
         #expect(

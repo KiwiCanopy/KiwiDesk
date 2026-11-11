@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The pinned jump bar's wiring (#1520): the chips read the
 /// page's geometry, and a click puts the group's header under the
-/// bar — Mouse & trackpad opening its card on the way.
+/// bar. Built-in alone draws it (#3184).
 extension ShortcutsSection {
     func jumpBar(
         _ proxy: ScrollViewProxy,
@@ -40,8 +40,6 @@ extension ShortcutsSection {
         proxy: ScrollViewProxy
     ) {
         jumpTracker.jump(to: group)
-        if group == .gestures { gesturesExpanded = true }
-        if group == .luaBindings { advancedExpanded = true }
         // The part's id: the lazy stack knows it before the part is
         // built, unlike the card's own (#3060).
         let part = ShortcutsPagePart(group).id
@@ -58,22 +56,40 @@ extension ShortcutsSection {
         }
     }
 
-    /// Scrolls to a row the recorder names: to its part first unless
-    /// the page holds it built, then to the row (#3060).
+    /// Scrolls to a row the recorder names: to the part of the page
+    /// drawing it first, then to its part unless the page holds it
+    /// built, then to the row (#3060, #3184).
     func scroll(
         to target: String,
         proxy: ScrollViewProxy,
         expander: ShortcutsFamilyRows
     ) {
-        let owner = ShortcutsPagePart.owner(
-            of: target,
+        let placed = ShortcutsPagePart.placing(
+            target,
             expander: expander,
-            bindings: model.shortcutsLayerBindings
+            bindings: model.shortcutsLayerBindings,
+            shown: segment
         )
+        let owner = placed?.part
         if owner == nil { buildsWholePage = true }
-        let built = owner.map(model.shortcutsPage.built.contains) ?? false
+        let switches = placed.map { $0.segment != segment } ?? false
+        if let placed, switches {
+            model.nav.shortcutsSegment = placed.segment
+        }
+        let built =
+            !switches
+            && (owner.map(model.shortcutsPage.built.contains) ?? false)
         targetScroll?.cancel()
         targetScroll = Task { @MainActor in
+            if switches {
+                // The other part's stack has to exist first.
+                try? await Task.sleep(
+                    nanoseconds: SettingsReveal.nanoseconds(
+                        SettingsReveal.settle
+                    )
+                )
+                guard !Task.isCancelled else { return }
+            }
             if !built {
                 if let owner { proxy.scrollTo(owner.id, anchor: .top) }
                 // A yield does not promise layout (`SettingsView.reveal`).

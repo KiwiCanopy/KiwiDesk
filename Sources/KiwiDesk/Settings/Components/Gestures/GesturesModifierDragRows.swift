@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & trackpad ▸ On your windows: the modifier drags (#2447
+/// Mouse & Trackpad ▸ Holding a modifier: the modifier drags (#2447
 /// ruling 2026-11-08). Two rows, "Move windows from anywhere" and
 /// "Resize windows from anywhere", each a modifiers-only recorder
 /// and a pop-up for how it starts; the recorder's × turns it off.

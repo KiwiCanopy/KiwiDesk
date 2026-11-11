@@ -183,8 +183,10 @@ struct AICensusRenderTests {
                 )
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(
-            row.occurrences(of: "SettingsRowShape(controlTrails:true)")
-                == 1
+            row.occurrences(
+                of: "SettingsRowShape(controlTrails:true,"
+                    + "staysInline:caption==nil)"
+            ) == 1
         )
         // The button names itself, so the title is drawn, not spoken.
         #expect(

@@ -24,7 +24,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     let handBack: PanelHandBack
     var panel: JumpPanel?
     private(set) var currentModel: JumpModel?
-    /// Opens Settings on Shortcuts & Gestures, set by the app.
+    /// Opens Settings on Shortcuts, set by the app.
     var onEditShortcuts: () -> Void = {}
     /// This opening; a fade a later show overtook orders nothing
     /// out.

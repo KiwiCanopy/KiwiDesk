@@ -83,12 +83,11 @@ enum HomeCardContent {
                 displayCount: model.displays.count,
                 pinCount: model.config.spacePins.count
             )
+        // Names the page's three parts (#3184); its conflicts are
+        // the shout's.
         case .shortcuts:
-            return L(
-                "home.card.shortcuts.subtitle",
-                "%1$d bound",
-                boundCount(model)
-            )
+            return ShortcutsSegment.allCases.map(\.title)
+                .joined(separator: " · ")
         case .profiles:
             let summaries = model.profileSummaries
             guard !summaries.isEmpty else {
@@ -179,15 +178,6 @@ enum HomeCardContent {
                 model.config.spaceModes[$0] ?? .bsp
             }
         ).count
-    }
-
-    /// Bound shortcuts count on default layer.
-    private static func boundCount(
-        _ model: SettingsModel
-    ) -> Int {
-        model.config.layers
-            .first { $0.isDefault }?
-            .bindings.count ?? 0
     }
 
     private static func edgeName(_ edge: AppBarEdge) -> String {

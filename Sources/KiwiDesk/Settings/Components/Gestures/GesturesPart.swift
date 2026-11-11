@@ -1,135 +1,48 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Shortcuts & Gestures ▸ Mouse & trackpad (#1726): what the mouse
-/// and trackpad do, grouped by where the hand is. Above the layer
-/// header, so nothing here reads as per-layer; a collapsible
-/// section card (#1741), collapsed on every visit. An entry lands
-/// with its feature, never before, and one whose surface is off
-/// greys with a pointer to where it turns on. The user's own click
-/// open plays the first picture once per visit (owner ruling
-/// 2026-09-29); a search, Go to or its jump chip (#1520) opens it
-/// without. It mounts
+/// Shortcuts ▸ Mouse & Trackpad (#1726, #3184): what the mouse and
+/// trackpad do, in open groups ordered by where the hand is — on
+/// your windows, holding a modifier, on the KiwiShelf. An entry
+/// lands with its feature, never before, and one whose surface is
+/// off greys with a pointer to where it turns on. The user's own
+/// click on the part plays the first picture once per visit (owner
+/// ruling 2026-09-29); a search or Go to lands without. It mounts
 /// inside the section's `keybindingLayerName` scope, so a gesture
-/// recorder (#1656, #1519) must never read that value: a gesture modifier
-/// belongs to no layer.
-struct GesturesDrawer: View {
+/// recorder (#1656, #1519) must never read that value: a gesture
+/// modifier belongs to no layer.
+struct GesturesPart: View {
     @ObservedObject var model: SettingsModel
-    /// The section's, so its jump chip can open the card (#1520).
-    @Binding var expanded: Bool
-    /// Per visit, like `expanded`: the first click open arms the
-    /// first entry's play, a picture's click its own entry's, and
-    /// the entry that plays spends it.
-    @State private var played = false
+    /// The section's, set by a click on the segment; spent here.
+    @Binding var playArmed: Bool
+    /// The entry that plays once as it appears, spending this.
     @State private var playing: GestureItem?
 
     private var settings: TilingSettings { model.config.settings }
 
     var body: some View {
-        SettingsCollapsibleSection(
-            SettingsCatalog.shortcuts.gestures,
-            isExpanded: $expanded,
-            summary: summary,
-            preview: AnyView(strip),
-            onToggle: { open in
-                if open, !played { playing = .scrollStep }
-                if open { played = true }
-            }
-        ) {
-            VStack(alignment: .leading, spacing: 10) {
-                SettingsGroupHeading(
-                    title: L(
-                        "shortcuts.gestures.group.scroll",
-                        "Scroll gestures — anywhere, holding a modifier"
-                    )
-                )
-                GesturesScrollEntries(model: model, playing: $playing)
-                GestureRule()
-                SettingsGroupHeading(
-                    title: L(
-                        "shortcuts.gestures.group.focus",
-                        "Focus and the pointer"
-                    ),
-                    followsGroup: true
-                )
+        VStack(alignment: .leading, spacing: 16) {
+            SettingsSection(SettingsCatalog.shortcuts.gesturesOnWindows) {
                 focusEntries
                 GestureRule()
-                SettingsGroupHeading(
-                    title: L(
-                        "shortcuts.gestures.group.windows",
-                        "On your windows"
-                    ),
-                    followsGroup: true
-                )
                 windowEntries
+            }
+            SettingsSection(SettingsCatalog.shortcuts.gesturesModifier) {
+                GesturesScrollEntries(model: model, playing: $playing)
                 GestureRule()
-                SettingsGroupHeading(
-                    title: L(
-                        "shortcuts.gestures.group.shelf",
-                        "On the KiwiShelf"
-                    ),
-                    followsGroup: true
-                )
+                GesturesModifierDragRows(model: model)
+            }
+            SettingsSection(SettingsCatalog.shortcuts.gesturesOnShelf) {
                 GesturesShelfEntries(model: model, playing: $playing)
             }
-            .platePaint(settings)
-        }
-    }
-
-    private var summary: String {
-        L(
-            "shortcuts.gestures.summary",
-            "Scroll with held keys, focus by pointing, drag and "
-                + "resize windows, and click or drag on the KiwiShelf"
-        )
-    }
-
-    /// The shut card's pictures; a click opens the card at that
-    /// entry and plays it once, spending the visit's first play.
-    private var strip: some View {
-        GestureStrip(
-            settings: settings,
-            gestures: model.config.scrollGesture
-        ) { item in
-            playing = item
-            played = true
-            expanded = true
-            model.nav.pendingReveal = SettingsAnchor(
-                destination: .shortcuts,
-                anchor: item.anchor
-            )
         }
         .platePaint(settings)
-    }
-
-    @ViewBuilder private var windowEntries: some View {
-        GestureEntry(
-            .swap,
-            settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
-        )
-        .gestureAnchored(.swap)
-        GestureRule()
-        GestureEntry(
-            .edge,
-            settings: settings,
-            gestures: model.config.scrollGesture,
-            help: MouseResizePicker.help,
-            helpSubject: MouseResizePicker.spokenLabel,
-            playing: $playing
-        ) {
-            MouseResizePicker(
-                selection: $model.config.settings.mouseResize
-            )
-            .searchAnchored(
-                SettingsCatalog.shortcuts.gestures.children
-                    .mouseResize
-            )
+        .searchAnchored(SettingsCatalog.shortcuts.gestures.control)
+        .onAppear {
+            guard playArmed else { return }
+            playArmed = false
+            playing = GestureItem.allCases.first
         }
-        .gestureAnchored(.edge)
-        GestureRule()
-        GesturesModifierDragRows(model: model)
     }
 
     /// Hover focus, then its inverse: the hand acts, then the
@@ -177,9 +90,37 @@ struct GesturesDrawer: View {
         }
         .gestureAnchored(.followFocus)
     }
+
+    @ViewBuilder private var windowEntries: some View {
+        GestureEntry(
+            .swap,
+            settings: settings,
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.swap)
+        GestureRule()
+        GestureEntry(
+            .edge,
+            settings: settings,
+            gestures: model.config.scrollGesture,
+            help: MouseResizePicker.help,
+            helpSubject: MouseResizePicker.spokenLabel,
+            playing: $playing
+        ) {
+            MouseResizePicker(
+                selection: $model.config.settings.mouseResize
+            )
+            .searchAnchored(
+                SettingsCatalog.shortcuts.gestures.children
+                    .mouseResize
+            )
+        }
+        .gestureAnchored(.edge)
+    }
 }
 
-extension GesturesDrawer {
+extension GesturesPart {
     /// How long the pointer rests first (#2379): indented under the
     /// switch it depends on, greyed — never hidden — while it is off.
     var hoverDelayRow: some View {

@@ -3,11 +3,12 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The jump bar's Lua bindings chip (#2544): last, always drawn
-/// since the drawer always is (#2654), and a jump opens the drawer
-/// it lands on.
-@Suite("Shortcuts jump: Lua bindings chip")
-struct ShortcutsJumpLuaTests {
+/// Which chips the jump bar draws: every Built-in group's, the
+/// macOS Desktops chip only while its section does (#2655). Lua
+/// bindings, Open applications and Mouse & Trackpad lost theirs to
+/// their parts (#3184).
+@Suite("Shortcuts jump: drawn chips")
+struct ShortcutsJumpShownTests {
     private static func source(_ path: String) throws -> String {
         SourceScan.stripComments(
             try String(
@@ -22,13 +23,12 @@ struct ShortcutsJumpLuaTests {
         .joined()
     }
 
-    @Test("the chip is last and always drawn")
-    func chipIsLast() {
+    @Test("every chip draws while the Desktops section does")
+    func allChipsDraw() {
         #expect(
             ShortcutsJumpGroup.shown(desktopsDrawn: true)
                 == ShortcutsJumpGroup.allCases
         )
-        #expect(ShortcutsJumpGroup.allCases.last == .luaBindings)
     }
 
     /// The macOS Desktops chip follows its section (#2655): a
@@ -43,7 +43,7 @@ struct ShortcutsJumpLuaTests {
         )
     }
 
-    @Test("the bar draws the offered chips, and a jump opens the drawer")
+    @Test("the bar draws the offered chips")
     func wiring() throws {
         let bar = try Self.source(
             "Components/Keybindings/ShortcutsJumpBar.swift"
@@ -55,16 +55,6 @@ struct ShortcutsJumpLuaTests {
                 "groups:ShortcutsJumpGroup.shown("
                     + "desktopsDrawn:MacOSDesktopsGroup"
                     + ".hasRows(expander))"
-            )
-        )
-        #expect(
-            jump.contains("ifgroup==.luaBindings{advancedExpanded=true}")
-        )
-        let section = try Self.source("Sections/ShortcutsSection.swift")
-        #expect(
-            section.contains(
-                ".reportsSectionFrame("
-                    + "SettingsCatalog.shortcuts.luaBindings.control)"
             )
         )
     }

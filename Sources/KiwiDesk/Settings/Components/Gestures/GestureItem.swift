@@ -1,32 +1,30 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Mouse & trackpad card's entries in card order (#1726): each
-/// one's sentence, picture, surface and pace, read by its entry
-/// and by the shut card's picture strip alike, so the two can
-/// never show a gesture differently.
+/// The Mouse & Trackpad part's entries in page order (#1726,
+/// #3184): each one's sentence, picture, surface and pace, read by
+/// its entry alone.
 enum GestureItem: String, CaseIterable, Identifiable {
-    case scrollStep, spaceStep
     case hoverFocus, followFocus
     case swap, edge
+    case scrollStep, spaceStep
     case dropOnSpace, spring, glyphClick, glyphPeek, shelfScroll
     case contextMenu, appBarReorder, appBarHover
 
-    /// Where the hand is: the card's four headings.
+    /// Where the hand is: the part's groups.
     enum Group: CaseIterable {
-        case scroll, focus, windows, shelf
+        case windows, modifier, shelf
     }
 
     var id: String { rawValue }
 
-    /// The entry's reveal anchor, which a strip click lands on.
+    /// The entry's reveal anchor.
     var anchor: String { "shortcuts.gestures.entry.\(rawValue)" }
 
     var group: Group {
         switch self {
-        case .scrollStep, .spaceStep: return .scroll
-        case .hoverFocus, .followFocus: return .focus
-        case .swap, .edge: return .windows
+        case .scrollStep, .spaceStep: return .modifier
+        case .hoverFocus, .followFocus, .swap, .edge: return .windows
         default: return .shelf
         }
     }

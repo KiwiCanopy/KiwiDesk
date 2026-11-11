@@ -27,7 +27,6 @@ struct SimpleShortcutCards: View {
             model: model,
             bindings: bindings,
             expander: expander,
-            drawsKiwiDeskKeys: false,
             // Simple's card has no Shortcuts page around it to say
             // what it holds (owner 2026-10-29).
             caption: Self.caption,
