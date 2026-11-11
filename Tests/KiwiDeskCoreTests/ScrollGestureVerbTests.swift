@@ -53,4 +53,59 @@ struct ScrollGestureVerbTests {
         )
     }
 
+    @Test("gesture.bind refuses a click or hover_move on a drag's keys")
+    func bindRefusesAShadowedRow() {
+        let core = makeTestCore()
+        let hover = core.execute(
+            "gesture.bind",
+            args: [
+                .string("hover_move"), .string("control+option"),
+                .string("move"),
+            ]
+        )
+        #expect(!hover.isSuccess)
+        #expect(
+            core.mouse.gestures.base[
+                GestureKey(.hoverMove, [.control, .option])
+            ]
+                == nil
+        )
+        let free = core.execute(
+            "gesture.bind",
+            args: [
+                .string("hover_move"), .string("option+command"),
+                .string("move"),
+            ]
+        )
+        #expect(free.isSuccess)
+        #expect(
+            core.mouse.pointer.grabSettings.bindings.contains(
+                ModifierDragBinding(
+                    .move,
+                    chord: [.option, .command],
+                    start: .hover
+                )
+            )
+        )
+    }
+
+    @Test("a locked swipe keeps its axis and its sign")
+    func lockedKeepsTheAxis() {
+        var event = ScrollGestureEvent(
+            chord: [.control, .option],
+            kind: .changed,
+            input: .trackpad,
+            delta: CGVector(dx: 2, dy: -9),
+            momentum: false,
+            location: .zero,
+            time: 0
+        )
+        #expect(event.locked(horizontal: nil).delta == event.delta)
+        #expect(event.locked(horizontal: true).delta == CGVector(dx: 2, dy: 0))
+        #expect(
+            event.locked(horizontal: false).delta == CGVector(dx: 0, dy: -9)
+        )
+        event.momentum = true
+        #expect(event.locked(horizontal: true).delta == event.delta)
+    }
 }

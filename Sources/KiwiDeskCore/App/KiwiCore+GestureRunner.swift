@@ -89,19 +89,9 @@ extension KiwiCore {
                     distance: resolved.stepDistance
                 )
             }
-            // Projected onto the axis the latch fired on, as the pan
-            // does: a long swipe's later steps take their sign there.
-            var along = event
-            if event.input == .trackpad, !event.momentum,
-                let horizontal = session.meter.firedHorizontal
-            {
-                if horizontal {
-                    along.delta.dy = 0
-                } else {
-                    along.delta.dx = 0
-                }
-            }
-            let steps = session.meter.feed(along)
+            let steps = session.meter.feed(
+                event.locked(horizontal: session.meter.firedHorizontal)
+            )
             guard steps != 0 else { return }
             let direction = Self.direction(
                 of: event.delta,

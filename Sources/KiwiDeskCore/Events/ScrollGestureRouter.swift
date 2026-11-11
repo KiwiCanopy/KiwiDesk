@@ -26,9 +26,26 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     /// hand's own spacing, which a busy main actor would squash.
     /// No default: an event built without it reads as a spin.
     public var time: Double
+    /// A wheel burst's axis, which the router names from its first
+    /// notch and owns the burst by; the runner picks the burst's
+    /// binding from it, never from a reading of its own.
+    public var sideways = false
     /// True where Natural scrolling off reversed `delta`; set by
     /// `ScrollGestures.receive` alone.
     public var reversed = false
+
+    /// A swipe's event as a consumer stepping by direction hears it
+    /// (input-and-animation.md): whole until `horizontal` names the
+    /// axis the latch fired on, then along that axis alone, so a
+    /// diagonal never changes the axis or the sign mid-swipe.
+    public func locked(horizontal: Bool?) -> ScrollGestureEvent {
+        guard input == .trackpad, !momentum, kind == .changed,
+            let horizontal
+        else { return self }
+        var along = self
+        if horizontal { along.delta.dy = 0 } else { along.delta.dx = 0 }
+        return along
+    }
 
     /// The hand's own motion, whatever Natural scrolling says: a
     /// direction table's arm means the fingers' way (#3199 ▸ it
@@ -288,7 +305,8 @@ struct ScrollGestureRouter {
                 delta: .zero,
                 momentum: false,
                 location: location,
-                time: clock
+                time: clock,
+                sideways: current.sideways
             )
         ]
     }
@@ -305,7 +323,8 @@ struct ScrollGestureRouter {
             delta: sample.delta,
             momentum: momentum,
             location: sample.location,
-            time: clock
+            time: clock,
+            sideways: owner?.sideways ?? false
         )
     }
 }

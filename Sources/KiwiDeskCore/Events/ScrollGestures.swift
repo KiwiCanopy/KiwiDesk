@@ -22,12 +22,11 @@ public struct ScrollRoute: Equatable, Sendable {
     var isEmpty: Bool { swipe == nil && wheel == nil && wheelX == nil }
 
     /// The binding a scroll reaches: a phased one the swipe's, a
-    /// wheel's by its larger axis.
+    /// wheel burst's by the axis the router owned it on.
     func action(for event: ScrollGestureEvent) -> GestureAction? {
         switch event.input {
         case .trackpad: swipe
-        case .wheel:
-            abs(event.delta.dx) > abs(event.delta.dy) ? wheelX : wheel
+        case .wheel: event.sideways ? wheelX : wheel
         }
     }
 }

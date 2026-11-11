@@ -127,7 +127,8 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     public var isFired: Bool {
         switch self {
         case .drag, .hoverMove, .wheel, .wheelX, .swipe2: true
-        case .tap3, .tap4, .tap5, .swipe3, .swipe4, .swipe5: true
+        case .tap2, .tap3, .tap4, .tap5, .swipe3, .swipe4, .swipe5:
+            fingers.map(TrackpadGestureRouter.fingerRange.contains) ?? false
         default: false
         }
     }

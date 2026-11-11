@@ -47,10 +47,27 @@ public struct ModifierDragBinding: Equatable, Sendable {
 public struct ModifierDragSettings: Equatable, Sendable {
     public var bindings: [ModifierDragBinding]
 
-    public static let defaults = ModifierDragSettings([
-        ModifierDragBinding(.move, chord: [.control, .command]),
-        ModifierDragBinding(.resize, chord: [.control, .option]),
-    ])
+    /// The seeds' grabs, which hold until the first apply.
+    public static let defaults = ModifierDragSettings(
+        resolved: GestureSeeds.seeds
+    )
+
+    /// Every `drag` and `hover_move` row of a resolved list, in its
+    /// order, a `drag` row starting on a press and a `hover_move`
+    /// row on the keys alone.
+    public init(resolved: [GestureKey: GestureAction]) {
+        var bindings: [ModifierDragBinding] = []
+        for key in resolved.keys.sorted() {
+            guard case .grab(let grab) = resolved[key],
+                let start = key.input.grabStart
+            else { continue }
+            bindings.append(
+                ModifierDragBinding(grab, chord: key.keys, start: start)
+            )
+        }
+        self.init(bindings)
+        self = sanitized
+    }
 
     public init(_ bindings: [ModifierDragBinding] = []) {
         self.bindings = bindings

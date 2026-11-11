@@ -5225,7 +5225,9 @@ Accessibility permission, never Input Monitoring. One modifier is
 accepted on a grab, and that key's own click — ⌃-click, ⌘-drag — is
 then the grab's. Every `drag` and `hover_move` binding fires on its
 own keys, so `move` and `resize` may each be bound under several. A
-`hover_move` or a `click` on keys a `drag` holds does nothing.
+`hover_move` or a `click` may not share a `drag`'s keys:
+`gesture.bind` refuses one, and one a file already holds does
+nothing.
 
 A trackpad gesture macOS answers itself, set in System Settings ▸
 Trackpad, does nothing here, since both would act on it: a

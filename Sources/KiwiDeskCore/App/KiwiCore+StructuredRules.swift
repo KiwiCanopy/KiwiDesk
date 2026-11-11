@@ -85,10 +85,11 @@ extension KiwiCore {
     func applyBehaviorOverrides(base: GuiConfig?, profile: Profile?) {
         if let base { captureGlobalWindowRuleBase(from: base) }
         setResolvedWindowRules(WindowRuleOverrides(profile))
-        applyGestures(base: base?.gesture, profile: profile?.gesture)
-        applyScrollGestures(
-            base: base?.scrollGesture,
-            profile: profile?.scrollGesture
+        applyGestures(
+            base: base?.gesture,
+            profile: profile?.gesture,
+            scrollBase: base?.scrollGesture,
+            scrollProfile: profile?.scrollGesture
         )
         applySpaceHistory(
             base: base?.spaceHistory,

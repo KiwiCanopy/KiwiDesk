@@ -146,6 +146,9 @@ public enum GestureRefusal: Equatable, Sendable {
     /// A drag binds a grab alone; nothing else binds one.
     case grabOnlyOnDrag
     case noDirections
+    /// A click or a hover_move on keys a drag holds: one press
+    /// starts one thing, and a hover grab there would end at it.
+    case keysHeldByDrag
 }
 
 extension GestureAction {

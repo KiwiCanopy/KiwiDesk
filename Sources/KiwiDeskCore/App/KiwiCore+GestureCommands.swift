@@ -36,11 +36,21 @@ extension KiwiCore {
                 return .fail(Self.gestureRefusal(refusal, key))
             }
             base[key] = .bound(action)
+            if let refusal = GestureSeeds.shadowRefusal(
+                of: key,
+                base: base,
+                profile: mouse.gestures.profileOverride
+            ) {
+                return .fail(Self.gestureRefusal(refusal, key))
+            }
         default:
             return .fail("unknown command: \(command)")
         }
-        applyGestures(base: base, profile: mouse.gestures.profileOverride)
-        applyScrollGestures(profile: mouse.scroll.profileOverride)
+        applyGestures(
+            base: base,
+            profile: mouse.gestures.profileOverride,
+            scrollProfile: mouse.scroll.profileOverride
+        )
         return .ok()
     }
 
@@ -90,6 +100,8 @@ extension KiwiCore {
             return "\(input) takes a family or a table of directions"
         case .noDirections:
             return "\(input) has no such direction"
+        case .keysHeldByDrag:
+            return "a click or hover_move cannot share a drag's keys"
         }
     }
 }

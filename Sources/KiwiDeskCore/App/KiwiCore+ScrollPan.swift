@@ -87,14 +87,7 @@ extension KiwiCore {
             session.horizontal = nil
             return event
         }
-        guard let horizontal = session.horizontal else { return event }
-        var along = event
-        if horizontal {
-            along.delta.dy = 0
-        } else {
-            along.delta.dx = 0
-        }
-        return along
+        return event.locked(horizontal: session.horizontal)
     }
 
     /// Fixes the gesture's Space and makes it the active one, so

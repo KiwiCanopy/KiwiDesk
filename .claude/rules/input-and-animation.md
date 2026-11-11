@@ -124,10 +124,10 @@ editing here:
   - **Resolve the gesture bindings in ONE home,
     `KiwiCore.applyGestures`** (#3199): the seeds, the base and the
     live profile's override through `GestureInputs.adopt`, then the
-    pointer tap's grab; the scroll tap and the touch reader through
-    `applyScrollGestures`, which a caller runs right after it and
-    which reads the resolved list, never a map of its own. Nothing
-    scans for a second resolve, so it is review's.
+    pointer tap's grab, then the scroll tap and the touch reader
+    through `applyScrollGestures`, which reads the resolved list,
+    never a map of its own; a scroll setting alone calls that half.
+    Nothing scans for a second resolve, so it is review's.
   - **Natural scrolling is applied ONCE, upstream**: the scroll
     front flips a reversed event in `ScrollGestures.receive`, and
     the touch reader's resolve takes the trackpad's verdict, which

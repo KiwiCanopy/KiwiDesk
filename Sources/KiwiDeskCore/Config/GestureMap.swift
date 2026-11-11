@@ -79,10 +79,33 @@ public enum GestureSeeds {
             out.keys.filter { $0.input == .drag }.map(\.keys)
         )
         return out.filter { key, _ in
-            switch key.input {
-            case .click, .hoverMove: !dragKeys.contains(key.keys)
-            default: true
-            }
+            heldByDrag(key, dragKeys: dragKeys) == nil
         }
+    }
+
+    /// The refusal of a click or a hover_move on keys a drag holds.
+    static func heldByDrag(
+        _ key: GestureKey,
+        dragKeys: Set<ScrollChord>
+    ) -> GestureRefusal? {
+        switch key.input {
+        case .click, .hoverMove:
+            dragKeys.contains(key.keys) ? .keysHeldByDrag : nil
+        default: nil
+        }
+    }
+
+    /// The verb's question: would `key` fire once `map` holds it, or
+    /// does a drag the resolve keeps hold its keys?
+    public static func shadowRefusal(
+        of key: GestureKey,
+        base: GestureMap,
+        profile: GestureMap?
+    ) -> GestureRefusal? {
+        let resolved = Self.resolved(base: base, profile: profile)
+        let dragKeys = Set(
+            resolved.keys.filter { $0.input == .drag }.map(\.keys)
+        )
+        return heldByDrag(key, dragKeys: dragKeys)
     }
 }
