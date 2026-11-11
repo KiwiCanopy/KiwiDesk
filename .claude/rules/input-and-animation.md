@@ -155,7 +155,8 @@ editing here:
     never from a main-actor hop, or the first keys after a leader
     reach the front app. It is declared first, so an open sequence
     outranks a sided chord, swallows every key-down while one is
-    open, which `.modifierTaps` still hears, and closes one on a
+    open save a macOS shortcut it passes (#3173, below), which
+    `.modifierTaps` still hears, and closes one on a
     mouse-down, the one click door. A leader never reaches Carbon:
     activation skips a press row on its chord, and a refused tap
     lists the leader in `activationFailures`

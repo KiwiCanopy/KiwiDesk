@@ -7941,7 +7941,8 @@ screenshot, Zoom, Invert colours, contrast and Dock hiding leave the
 panel up; Spotlight, Finder search, the app switcher, Force Quit,
 Mission Control, Desktop switching and the next input source close
 the sequence first. **⌘Q**, **⌘W**, **⌘M** and **⌘H** stay with the
-sequence, and a step key on any of these chords wins it.
+sequence. A step key wins its chord over any of these, and an arrow
+or page key recorded as a step key runs it rather than scrolling.
 
 A step key matches its chord exactly, modifiers included: with
 the leader's modifiers still held, `w` does not fire, and

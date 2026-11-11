@@ -14516,8 +14516,9 @@ refuses two siblings on one key ("Assigned to … at this point in
 the sequence"), and the action's own row names the sequence in a
 caption ("Also ⌃⌥Space → W → H"). An end key's action is picked
 in a searchable popover over the whole catalogue in the page's
-groups, never folded, with "Opens more keys ›" and "Lua…" pinned
-outside its scrolling list (owner, 2026-11-09). KiwiHub's
+groups, never folded, with "+ Extend Sequence" pinned above and
+"App…" and "Lua…" below its scrolling list (owner, 2026-11-09;
+#3162). KiwiHub's
 Shortcuts side lists an end key by its path (past four keys, the
 leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
