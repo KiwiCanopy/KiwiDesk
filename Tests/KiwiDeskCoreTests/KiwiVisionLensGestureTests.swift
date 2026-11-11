@@ -43,6 +43,9 @@ struct KiwiVisionLensGestureTests {
             "set_mode",
             args: [.string(space.raw), .string(mode)]
         )
+        // Wrap off, so a swipe the wrong way meets a wall rather
+        // than wrapping onto the expected window.
+        core.execute("set_focus_wrap", args: [.string("off")])
         let lens: [String: JSONValue] = [
             "name": .string("Writing"),
             "apps": .array([.string(member)]),

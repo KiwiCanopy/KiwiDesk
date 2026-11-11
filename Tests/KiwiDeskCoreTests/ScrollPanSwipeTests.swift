@@ -178,6 +178,18 @@ struct ScrollPanSwipeTests {
         #expect(focused(core) == WindowID(1))
     }
 
+    @Test("a swipe never moves the pointer")
+    func noWarp() {
+        let (core, session) = makeCore(focus: WindowID(1))
+        core.tiler.settings.mouse.followsFocus = true
+        var warps = 0
+        core.pointerWarp = { _ in warps += 1 }
+        #expect(core.mouseWarpEligible(WindowID(2)))
+        gesture(core, session, [(80, 0)])
+        #expect(focused(core) == WindowID(2))
+        #expect(warps == 0)
+    }
+
     @Test("a border with no neighbour bumps, as the keys do")
     func borderBumps() {
         let (core, session) = makeCore(focus: WindowID(2))
