@@ -278,6 +278,39 @@ struct GestureMigrationTests {
         )
     }
 
+    @Test("a resize on the move's chord stays the move's")
+    func sharedDragChordIsTheMoves() throws {
+        let root = try migrated(
+            gui: #"""
+                {"modifier_drag": {
+                   "resize": {"modifiers": "control+command",
+                     "start": "drag"}}}
+                """#
+        )
+        let gestures = try map(root)
+        #expect(gestures[GestureKey(.drag, [.control, .command])] == nil)
+        #expect(gestures[GestureKey(.drag, [.control, .option])] == .unbound)
+        let resolved = GestureSeeds.resolved(base: gestures, profile: nil)
+        #expect(
+            resolved[GestureKey(.drag, [.control, .command])] == .grab(.move)
+        )
+    }
+
+    @Test("a bundle's profile writes a seed-chord pan as its own rows")
+    func bundleProfileSeedChord() throws {
+        let root = try migrated([
+            "format": 44,
+            "writtenBy": "test",
+            "profiles": [
+                try profile(#"{"scroll_gesture": {"pan": "control+option"}}"#)
+            ],
+        ])
+        let profiles = try #require(root["profiles"] as? [[String: Any]])
+        let own = try map(profiles.first)
+        let seed: ScrollChord = [.control, .option]
+        #expect(own[GestureKey(.swipe2, seed)] == .bound(.family(.focus)))
+    }
+
     @Test("a crossed file has nothing left to fold")
     func idempotent() throws {
         let once = try JSONSerialization.data(

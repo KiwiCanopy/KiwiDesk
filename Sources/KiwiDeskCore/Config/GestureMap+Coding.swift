@@ -53,7 +53,7 @@ extension GestureMap: Codable {
 }
 
 extension GestureAction: Codable {
-    private enum Keys: String, CodingKey {
+    private enum Keys: String, CodingKey, CaseIterable {
         case family, grab, split
     }
 
@@ -62,8 +62,8 @@ extension GestureAction: Codable {
     private static func check(_ decoder: Decoder) throws {
         let all = try decoder.container(keyedBy: GestureMap.Key.self)
         let names = Set(all.allKeys.map(\.stringValue))
-        let action = names.intersection(["family", "grab", "split"])
-        let lua: Set = ["lua", "kind", "desc", "group", "symbol"]
+        let action = names.intersection(Keys.allCases.map(\.rawValue))
+        let lua = Set(LuaAction.Keys.allCases.map(\.rawValue))
         let allowed = action.count == 1 ? action : lua
         guard action.count <= 1, names.isSubset(of: allowed) else {
             throw DecodingError.dataCorrupted(
@@ -145,7 +145,7 @@ extension GestureAction: Codable {
 }
 
 extension LuaAction: Codable {
-    private enum Keys: String, CodingKey {
+    enum Keys: String, CodingKey, CaseIterable {
         case lua, kind, desc, group, symbol
     }
 

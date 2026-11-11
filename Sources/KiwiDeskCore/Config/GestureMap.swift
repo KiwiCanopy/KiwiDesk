@@ -61,8 +61,9 @@ public enum GestureSeeds {
 
     /// The bound keys once `base` lies over the seeds and `profile`
     /// over that. A refused binding is dropped, since a hand-edited
-    /// file reaches what the verb refuses, and so is a click whose
-    /// keys a drag holds: one press starts one thing.
+    /// file reaches what the verb refuses, and so is a click or a
+    /// hover_move whose keys a drag holds: one press starts one
+    /// thing, and a hover grab on those keys would end at the press.
     public static func resolved(
         base: GestureMap,
         profile: GestureMap?
@@ -79,7 +80,7 @@ public enum GestureSeeds {
         )
         return out.filter { key, _ in
             switch key.input {
-            case .click: !dragKeys.contains(key.keys)
+            case .click, .hoverMove: !dragKeys.contains(key.keys)
             default: true
             }
         }

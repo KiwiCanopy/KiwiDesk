@@ -69,13 +69,12 @@ public struct ScrollTapChords: Equatable, Sendable,
 
     var isEmpty: Bool { swipe.isEmpty && wheel.isEmpty && wheelX.isEmpty }
 
-    /// Whether a gesture of `input` on `chord` may keep going.
-    func holds(_ chord: ScrollChord, _ input: ScrollGestureEvent.Input)
-        -> Bool
-    {
-        input == .trackpad
-            ? swipe.contains(chord)
-            : wheel.contains(chord) || wheelX.contains(chord)
+    /// The chords a gesture of `input` on that axis is owned on.
+    func owners(
+        _ input: ScrollGestureEvent.Input,
+        sideways: Bool
+    ) -> Set<ScrollChord> {
+        input == .trackpad ? swipe : sideways ? wheelX : wheel
     }
 }
 
@@ -101,6 +100,8 @@ struct ScrollGestureRouter {
     private struct Owner {
         var chord: ScrollChord
         var input: ScrollGestureEvent.Input
+        /// A wheel burst's axis, named by its first notch.
+        var sideways = false
         var began: Bool
         /// Where the gesture last was: an expiry ends it there.
         var location: CGPoint
@@ -126,7 +127,10 @@ struct ScrollGestureRouter {
     ) -> (consume: Bool, events: [ScrollGestureEvent]) {
         clock = now
         var released: [ScrollGestureEvent] = []
-        if let owner, !chords.holds(owner.chord, owner.input) {
+        if let owner,
+            !chords.owners(owner.input, sideways: owner.sideways)
+                .contains(owner.chord)
+        {
             released = end(at: sample.location)
         }
         let routed = routeSample(sample, now: now)
@@ -149,7 +153,12 @@ struct ScrollGestureRouter {
             }
             passing = false
             var events = end(at: sample.location)
-            guard owns(sample.chord, in: chords.swipe) else {
+            guard
+                owns(
+                    sample.chord,
+                    in: chords.owners(.trackpad, sideways: false)
+                )
+            else {
                 passing = sample.phase == .mayBegin
                 return (false, events)
             }
@@ -235,7 +244,7 @@ struct ScrollGestureRouter {
             guard
                 owns(
                     sample.chord,
-                    in: sideways ? chords.wheelX : chords.wheel
+                    in: chords.owners(.wheel, sideways: sideways)
                 )
             else {
                 return (false, events)
@@ -243,6 +252,7 @@ struct ScrollGestureRouter {
             owner = Owner(
                 chord: sample.chord,
                 input: .wheel,
+                sideways: sideways,
                 began: false,
                 location: sample.location
             )

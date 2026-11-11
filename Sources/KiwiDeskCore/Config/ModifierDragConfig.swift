@@ -56,16 +56,14 @@ public struct ModifierDragSettings: Equatable, Sendable {
         self.bindings = bindings
     }
 
-    /// What a hand-edited file can reach, made one press, one grab:
-    /// off bindings leave, and of two on the same keys and start the
-    /// first stays.
+    /// What a hand-edited file can reach, made one set of keys, one
+    /// grab: off bindings leave, and of two on the same keys the
+    /// first stays, whatever their start, since a hover grab on a
+    /// drag's keys ends at its press.
     public var sanitized: ModifierDragSettings {
         var kept: [ModifierDragBinding] = []
         for binding in bindings where !binding.isOff {
-            guard
-                !kept.contains(where: {
-                    $0.chord == binding.chord && $0.start == binding.start
-                })
+            guard !kept.contains(where: { $0.chord == binding.chord })
             else { continue }
             kept.append(binding)
         }

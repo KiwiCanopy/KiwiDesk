@@ -186,6 +186,24 @@ struct GestureBindingTests {
         #expect(resolved[GestureKey(.click, [.shift, .command])] != nil)
     }
 
+    @Test("a hover_move on a drag's keys is dropped, both ways")
+    func hoverYieldsToADrag() {
+        let resolved = GestureSeeds.resolved(
+            base: GestureMap([
+                GestureKey(.hoverMove, hyper): .bound(.grab(.move))
+            ]),
+            profile: nil
+        )
+        #expect(resolved[GestureKey(.hoverMove, hyper)] == nil)
+        let settings = ModifierDragSettings([
+            ModifierDragBinding(.resize, chord: hyper),
+            ModifierDragBinding(.move, chord: hyper, start: .hover),
+        ]).sanitized
+        #expect(
+            settings.bindings == [ModifierDragBinding(.resize, chord: hyper)]
+        )
+    }
+
     @Test("an empty split binds nothing")
     func emptySplit() {
         #expect(GestureAction.split(normalizing: [:]) == nil)

@@ -78,6 +78,17 @@ struct ScrollGestureRouterTests {
         #expect(router.route(sample(Self.pan, .began), now: 4).consume)
     }
 
+    @Test("a wheel burst ends when its own axis is unbound")
+    func wheelAxisRebindReleases() {
+        var router = ScrollGestureRouter()
+        router.chords = ScrollTapChords(wheel: [Self.pan], wheelX: [Self.pan])
+        #expect(router.route(sample(Self.pan, dy: 5), now: 0).consume)
+        router.chords = ScrollTapChords(wheelX: [Self.pan])
+        let next = router.route(sample(Self.pan, dy: 5), now: 0.05)
+        #expect(!next.consume)
+        #expect(next.events.map(\.kind) == [.ended])
+    }
+
     @Test("a trackpad gesture owns its momentum after the keys lift")
     func trackpadKeepsMomentum() {
         var router = router()

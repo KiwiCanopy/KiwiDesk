@@ -22,7 +22,6 @@ extension ConfigMigration {
     static let retiredTrackpadKey = "trackpad_gesture"
     static let retiredDragKey = "modifier_drag"
     static let retiredScrollKey = "scroll_gesture"
-    static let profileMonitorSetsKey = "monitor_sets"
 
     /// The shipped defaults the old keys fell back to.
     static let seededPan = "control+option"
@@ -52,10 +51,9 @@ extension ConfigMigration {
         guard var root = node as? [String: Any] else {
             return (node, false)
         }
-        // A profile root carries `monitor_sets`; gui.json does not.
         var changed = foldGestures(
             &root,
-            inProfile: root[profileMonitorSetsKey] != nil
+            inProfile: shape(of: root) == .profile
         )
         if var config = root["config"] as? [String: Any],
             foldGestures(&config, inProfile: false)
@@ -102,8 +100,17 @@ extension ConfigMigration {
         if let drags = object.removeValue(forKey: retiredDragKey)
             as? [String: Any]
         {
+            // The old resolve kept a shared chord the move's.
+            var resize = drags["resize"] as? [String: Any]
+            if let chord = resize.map(dragChord(seededResize)),
+                !chord.isEmpty,
+                chord == (drags["move"] as? [String: Any])
+                    .map(dragChord(seededMove)) ?? seededMove
+            {
+                resize?["modifiers"] = ""
+            }
             foldDrag(drags["move"], "move", seededMove, &map)
-            foldDrag(drags["resize"], "resize", seededResize, &map)
+            foldDrag(resize, "resize", seededResize, &map)
             changed = true
         }
         if var scroll = object[retiredScrollKey] as? [String: Any] {
@@ -162,6 +169,12 @@ extension ConfigMigration {
         }
     }
 
+    /// A stored move or resize's chord, canonical; the seed's where
+    /// it stored none.
+    static func dragChord(_ seed: String) -> ([String: Any]) -> String {
+        { canonicalChord($0["modifiers"] as? String ?? seed) }
+    }
+
     /// A move or resize's row: `drag` where it started on a press,
     /// `hover_move` where it started on the keys alone. Either seed
     /// is a `drag` row, tombstoned where the value left it.
@@ -172,7 +185,7 @@ extension ConfigMigration {
         _ map: inout [String: Any]
     ) {
         guard let binding = value as? [String: Any] else { return }
-        let chord = canonicalChord(binding["modifiers"] as? String ?? seed)
+        let chord = dragChord(seed)(binding)
         let hover = binding["start"] as? String == "hover"
         guard chord != seed || hover else { return }
         // The other grab may already have moved onto this seed.
