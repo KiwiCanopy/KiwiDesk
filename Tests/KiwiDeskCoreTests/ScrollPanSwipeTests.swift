@@ -165,14 +165,14 @@ struct ScrollPanSwipeTests {
         #expect(focused(core) == WindowID(1))
     }
 
-    /// Stack: master 1 beside 2 over 3. A list walk from 3 would
-    /// land on 2; the swipe goes left, to the master.
+    /// Stack: master 1 beside 2 over 3. From 2 a list walk would
+    /// land on 3; the swipe goes left, to the master.
     @Test("a Stack swipe reaches the master beside it")
     func stackStepsLeft() {
         let (core, session) = makeCore(
             "stack",
             windows: 3,
-            focus: WindowID(3)
+            focus: WindowID(2)
         )
         gesture(core, session, [(-80, 0)])
         #expect(focused(core) == WindowID(1))

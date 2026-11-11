@@ -65,8 +65,9 @@ extension KiwiCore {
             session.horizontal = session.meter.firedHorizontal
         }
         let swipe = event.input == .trackpad ? session.horizontal : nil
-        // Content follows the fingers: moving it back brings the
-        // NEXT window in, so a step runs against the delta's sign.
+        // The step a row slides by: content follows the fingers,
+        // so it runs against the delta's sign. A swipe off a row
+        // turns it back in `stepScrollPan`.
         let step = steps > 0 ? -1 : 1
         for _ in 0..<abs(steps) {
             // A Space no longer active is no longer the gesture's;

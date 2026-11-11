@@ -103,7 +103,7 @@ editing here:
     reading of the travel beside it, and the projection onto it
     lives in the consumer that steps by direction, never in the
     shared meter, whose Space-step consumer hears raw events
-    (`ScrollPanSwipeTests`).
+    (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel`).
     The #292 preflight in `execute` is skipped on purpose — the
     gesture acts on the Space under the pointer — which the
     pan's docstring states.
