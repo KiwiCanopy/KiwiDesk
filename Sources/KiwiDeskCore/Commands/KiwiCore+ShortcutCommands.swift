@@ -21,6 +21,12 @@ extension KiwiCore {
             return removeShortcut(args)
         case "shortcut.remove_sequence":
             return removeSequence(args)
+        case "shortcut.set_sequence_key":
+            return setSequenceKey(args)
+        case "shortcut.name_sequence_key":
+            return nameSequenceKey(args)
+        case "shortcut.remove_sequence_key":
+            return removeSequenceKey(args)
         case "shortcut.list_groups":
             return .ok(shortcutGroupList())
         default:
@@ -30,7 +36,7 @@ extension KiwiCore {
 
     /// The rule snapshot and the live page a write edits; nil where
     /// `init.lua` owns the shortcuts or no saved profile is live.
-    private func shortcutPage() -> (RuleReachSnapshot, String)? {
+    func shortcutPage() -> (RuleReachSnapshot, String)? {
         guard let snapshot = ruleReachSnapshot(),
             let page = profiles.currentName
         else { return nil }
@@ -93,25 +99,14 @@ extension KiwiCore {
         // row reaches them all: never a second chord for an action
         // (profiles.md ▸ one chord per layer), never a chord taken.
         let wanted = KeyBinding(combo: chord, lua: lua)
-        for row in Self.rows(of: table, layer: layer) {
-            if NavigationChords.sameAction(row, wanted) {
-                return .fail(
-                    "\(lua) is bound to \(row.combo); remove it first"
-                )
-            }
-            if Self.sameChord(row.combo, chord) {
-                return .fail("\(chord) runs \(row.lua); remove it first")
-            }
+        for row in Self.rows(of: table, layer: layer)
+        where NavigationChords.sameAction(row, wanted) {
+            return .fail(
+                "\(lua) is bound to \(row.combo); remove it first"
+            )
         }
-        // A key sequence's leader holds its chord too (#1871, #3124).
-        let maps =
-            [table.base] + table.profiles.map { table.resolved(for: $0) }
-        let leaders = maps.flatMap(\.keys).compactMap {
-            RuleReachTable<String>.keyParts($0).layer == layer
-                ? RuleReachTable<String>.leader(of: $0) : nil
-        }
-        if leaders.contains(where: { Self.sameChord($0, chord) }) {
-            return .fail("\(chord) opens a key sequence; remove it first")
+        if let taken = Self.chordTaken(chord, in: table, layer: layer) {
+            return .fail(taken)
         }
         snapshot.keyTemplates[key] = KeyBinding(combo: chord, lua: lua)
         snapshot.keyLayers.applyKey(
@@ -189,7 +184,7 @@ extension KiwiCore {
         return writeShortcuts(snapshot)
     }
 
-    private func writeShortcuts(_ snapshot: RuleReachSnapshot)
+    func writeShortcuts(_ snapshot: RuleReachSnapshot)
         -> CommandResponse
     {
         do {
@@ -200,8 +195,36 @@ extension KiwiCore {
         }
     }
 
+    /// Why `chord` is not free in `layer` — a row or a key
+    /// sequence's leader holds it in the base or a profile — nil
+    /// where it is free. Judged across them all, since a shared
+    /// write reaches every profile (profiles.md ▸ one chord per
+    /// layer).
+    static func chordTaken(
+        _ chord: String,
+        in table: RuleReachTable<String>,
+        layer: String
+    ) -> String? {
+        if let row = rows(of: table, layer: layer).first(where: {
+            sameChord($0.combo, chord)
+        }) {
+            return "\(chord) runs \(row.lua); remove it first"
+        }
+        // A key sequence's leader holds its chord too (#1871, #3124).
+        let maps =
+            [table.base] + table.profiles.map { table.resolved(for: $0) }
+        let leaders = maps.flatMap(\.keys).compactMap {
+            RuleReachTable<String>.keyParts($0).layer == layer
+                ? RuleReachTable<String>.leader(of: $0) : nil
+        }
+        if leaders.contains(where: { sameChord($0, chord) }) {
+            return "\(chord) opens a key sequence; remove it first"
+        }
+        return nil
+    }
+
     /// Every row `layer` holds in the base or any profile.
-    private static func rows(
+    static func rows(
         of table: RuleReachTable<String>,
         layer: String
     ) -> [KeyBinding] {
@@ -220,7 +243,7 @@ extension KiwiCore {
         }
     }
 
-    private static func defaultLayer(
+    static func defaultLayer(
         _ snapshot: RuleReachSnapshot,
         _ page: String
     ) -> String? {
@@ -228,7 +251,7 @@ extension KiwiCore {
     }
 
     /// A chord `KeyCombo` can register, as given.
-    private static func chord(_ value: JSONValue?) -> String? {
+    static func chord(_ value: JSONValue?) -> String? {
         guard
             let text = value?.stringValue?
                 .trimmingCharacters(in: .whitespaces),
@@ -239,15 +262,15 @@ extension KiwiCore {
         return combo.comboString()
     }
 
-    private static func sameChord(_ a: String, _ b: String) -> Bool {
+    static func sameChord(_ a: String, _ b: String) -> Bool {
         KeyCombo.parse(a).map { $0 == KeyCombo.parse(b) } ?? false
     }
 
-    private static var noChord: CommandResponse {
+    static var noChord: CommandResponse {
         .fail("expected a chord such as ctrl+alt+h")
     }
 
-    private static var noShortcutPage: CommandResponse {
+    static var noShortcutPage: CommandResponse {
         .fail(
             "shortcuts are writable only with a saved profile live and "
                 + "no init.lua"

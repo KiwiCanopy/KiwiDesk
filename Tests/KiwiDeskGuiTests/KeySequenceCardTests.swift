@@ -118,6 +118,19 @@ struct KeySequenceCardTests {
         )
     }
 
+    @Test("the recorder's sibling check is Core's (#3174)")
+    func siblingRuleIsCores() throws {
+        let tree = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                        + "Sequences/SequenceTree.swift"
+                )
+        )
+        #expect(tree.contains("KeyBinding.stepKey("))
+        #expect(!tree.contains("KeyCombo.equivalent"))
+    }
+
     @Test("the leader's row carries the sequence's reach (#3124)")
     func leaderRowCarriesReach() throws {
         let dir = SourceScan.repoRoot(from: #filePath)

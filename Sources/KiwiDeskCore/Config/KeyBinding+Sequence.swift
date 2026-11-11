@@ -119,3 +119,22 @@ extension KeyLayer {
         return layer
     }
 }
+
+extension KeyBinding {
+    /// The key of `step` already on `combo`, nil where none is: one
+    /// step holds one key per chord, held modifiers included (#1871
+    /// ▸ step keys). Settings' recorder and the `shortcut.*`
+    /// sequence verbs both ask it (#3174); `besides` leaves the key
+    /// being edited out.
+    public static func stepKey(
+        holding combo: String,
+        in step: [KeyBinding],
+        besides id: UUID? = nil
+    ) -> KeyBinding? {
+        guard !combo.isEmpty else { return nil }
+        return step.first {
+            $0.id != id && !$0.combo.isEmpty
+                && KeyCombo.equivalent($0.combo, combo)
+        }
+    }
+}

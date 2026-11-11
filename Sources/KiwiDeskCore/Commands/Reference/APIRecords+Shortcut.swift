@@ -27,5 +27,27 @@ extension APIReference {
                 + "default layer, whole, and saves at once.",
             .text("leader")
         ),
+        "set_sequence_key": APIRecord(
+            "Binds a command to the last key of a sequence path (w,h), "
+                + "making missing keys; saved at once.",
+            .text("leader"),
+            .text("path"),
+            .text("command"),
+            .text("arguments", optional: true)
+        ),
+        "name_sequence_key": APIRecord(
+            "Names a sequence's leader (empty path) or branch and sets "
+                + "its symbol; saved at once.",
+            .text("leader"),
+            .text("path"),
+            .text("name"),
+            .text("symbol", optional: true)
+        ),
+        "remove_sequence_key": APIRecord(
+            "Removes one key of a key sequence, with every key under "
+                + "it; saved at once.",
+            .text("leader"),
+            .text("path")
+        ),
     ]
 }

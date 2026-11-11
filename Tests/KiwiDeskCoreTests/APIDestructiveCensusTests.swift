@@ -39,6 +39,8 @@ struct APIDestructiveCensusTests {
             + "back, and only a keep writes (#1685 ▸ Ruling 6c)",
         "kiwivision.delete_lens": "a session value: a reload or a "
             + "define_lens puts the lens back (#2103 ruling 40)",
+        "shortcut.remove_sequence_key": "binds commands alone, so "
+            + "set_sequence_key puts every key back (#3174 ▸ Ruling)",
     ]
 
     @Test("every registered name is a command a caller can run")

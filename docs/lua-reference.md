@@ -7951,7 +7951,8 @@ the leader's modifiers still held, `w` does not fire, and
 and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
-and is flagged. The CLI cannot bind a sequence;
+and is flagged. The CLI and an AI app build a sequence one key at a
+time with [`shortcut.set_sequence_key`](#shortcutset_sequence_key);
 `shortcut.remove_sequence` removes one. In Settings, Shortcuts &
 Gestures ▸ Key sequences records one.
 Under Secure Input see
@@ -8087,6 +8088,47 @@ saves at once. A chord that opens no sequence is refused.
 
 ```lua
 shortcut.remove_sequence("ctrl+alt+space")
+```
+
+#### shortcut.set_sequence_key
+
+**Expects:** the leader chord, a path — the step keys after the
+leader, as `"w,h"` or a list — a command's name, and that command's
+arguments.
+
+**Does:** binds the last key of the path to one call of the
+command, built as [`shortcut.set`](#shortcutset) builds it, so it
+never runs other Lua. A leader no sequence holds starts a sequence,
+and a missing key on the way becomes a key that opens more keys. It
+replaces nothing: a key already bound at that step, a path through
+a key that runs a command, a leader chord another shortcut holds,
+and a step key the sequence cannot match are refused, each with the
+reason. One step holds one key per chord, as in Settings.
+
+#### shortcut.name_sequence_key
+
+**Expects:** the leader chord, a path (empty for the leader
+itself), a name, and optionally an SF Symbol name.
+
+**Does:** names the leader or the key that opens more keys, and
+sets its icon when a symbol is given; a key with no icon shows
+`folder`. A key that runs a command is refused, and so is a symbol
+that is no SF Symbol.
+
+#### shortcut.remove_sequence_key
+
+**Expects:** the leader chord and a path.
+
+**Does:** removes the key at the end of the path, with every key
+under it. An empty path is refused: `shortcut.remove_sequence`
+removes a whole sequence.
+
+**Example:**
+
+```lua
+shortcut.set_sequence_key("ctrl+alt+space", "w,h", "focus", "left")
+shortcut.name_sequence_key("ctrl+alt+space", "w", "Windows", "macwindow")
+shortcut.remove_sequence_key("ctrl+alt+space", "w,h")
 ```
 :::
 
