@@ -102,7 +102,13 @@ struct ScrollPanLayoutTests {
         var warps = 0
         core.pointerWarp = { _ in warps += 1 }
         #expect(core.mouseWarpEligible(WindowID(4)))
-        swipe(core, session, dx: -80)
+        // A swipe on BSP goes by direction; a wheel walks to 4.
+        swipe(
+            core,
+            session,
+            dx: -80,
+            input: mode == "bsp" ? .wheel : .trackpad
+        )
         #expect(core.activeSpace?.focused == WindowID(4))
         #expect(warps == 0)
     }

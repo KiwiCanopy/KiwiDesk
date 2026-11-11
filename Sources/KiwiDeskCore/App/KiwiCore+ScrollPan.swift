@@ -20,8 +20,6 @@ final class ScrollPanSession {
     /// A swipe's axis, locked by its first step and held to the
     /// lift (#3200); nil before it and for a wheel.
     fileprivate var horizontal: Bool?
-    /// A swipe's travel until its axis locks.
-    fileprivate var travel = CGVector.zero
 
     init() {}
 }
@@ -30,9 +28,10 @@ final class ScrollPanSession {
 /// moves window to window — one per swipe or notch by default
 /// (`ScrollStepMeter`). A Scrolling row pans with the ordinary
 /// focus animation and a Monocle stack flips. On every other
-/// layout a swipe — a scroll with a finger phase — steps the way
-/// it goes, on the axis its first step locks, and a wheel notch
-/// walks the windows in array order (#3200). A step that
+/// layout a swipe — a scroll with a finger phase — steps focus
+/// the way the fingers go, on the axis its first step locks, and
+/// a wheel notch walks the windows in array order (#3200; Natural
+/// scrolling off reverses both senses upstream). A step that
 /// lands on nothing — a row end with wrap off, a lone window —
 /// bumps the ring as the arrow keys do (#436), once per event.
 ///
@@ -63,8 +62,7 @@ extension KiwiCore {
         if event.kind == .ended { session.space = nil }
         guard steps != 0, let id = session.space else { return }
         if event.input == .trackpad, session.horizontal == nil {
-            let travel = session.travel
-            session.horizontal = abs(travel.dx) > abs(travel.dy)
+            session.horizontal = session.meter.firedHorizontal
         }
         let swipe = event.input == .trackpad ? session.horizontal : nil
         // Content follows the fingers: moving it back brings the
@@ -92,14 +90,9 @@ extension KiwiCore {
         }
         guard event.kind == .changed else {
             session.horizontal = nil
-            session.travel = .zero
             return event
         }
-        guard let horizontal = session.horizontal else {
-            session.travel.dx += event.delta.dx
-            session.travel.dy += event.delta.dy
-            return event
-        }
+        guard let horizontal = session.horizontal else { return event }
         var along = event
         if horizontal {
             along.delta.dy = 0
@@ -142,13 +135,16 @@ extension KiwiCore {
         swipe: Bool?
     ) -> Bool {
         let row = space.mode == .scrolling || space.mode == .monocle
-        let direction = Self.direction(
-            step,
-            horizontal: row ? rowIsHorizontal(space) : swipe ?? true
-        )
         guard row || swipe != nil else {
+            let direction = Self.direction(step, horizontal: true)
             return stepInOrder(space, toward: direction, by: step)
         }
+        // A row slides with the fingers; any other layout's focus
+        // moves with them, so its step runs with the delta (#3200).
+        let direction =
+            row
+            ? Self.direction(step, horizontal: rowIsHorizontal(space))
+            : Self.direction(-step, horizontal: swipe ?? true)
         return navigate(
             [.string(direction.rawValue)],
             swapping: false,

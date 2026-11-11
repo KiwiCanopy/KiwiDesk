@@ -63,13 +63,18 @@ struct KiwiVisionLensGestureTests {
     ) -> WindowID? {
         let space = core.state.workspaces.space(of: WindowID(1))!
         core.state.workspaces.focus(WindowID(1), in: space)
+        // A row slides with the fingers, so fingers left bring the
+        // next window in; elsewhere a swipe focuses where they go.
+        let mode = core.state.workspaces[space]?.mode
+        let row = mode == .scrolling || mode == .monocle
+        let dx: Double = input == .trackpad && !row ? 80 : -80
         for kind in [ScrollGestureEvent.Kind.began, .changed, .ended] {
             core.handleScrollPan(
                 ScrollGestureEvent(
                     chord: [.control, .option],
                     kind: kind,
                     input: input,
-                    delta: CGVector(dx: kind == .changed ? -80 : 0, dy: 0),
+                    delta: CGVector(dx: kind == .changed ? dx : 0, dy: 0),
                     momentum: false,
                     location: .zero,
                     time: 0
@@ -82,7 +87,7 @@ struct KiwiVisionLensGestureTests {
 
     @Test(
         "a swipe skips the other app's window",
-        arguments: ["scrolling", "monocle", "bsp"]
+        arguments: ["scrolling", "monocle", "bsp", "stack"]
     )
     func swipeSkips(mode: String) {
         let (core, session) = makeCore(mode)

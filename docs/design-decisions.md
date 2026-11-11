@@ -16020,10 +16020,11 @@ layout (owner ruling 2026-09-29).
 
 **A held chord always does something, on every layout** (#1656,
 owner and ui-designer ruling 2026-09-29). A Scrolling row pans,
-a Monocle stack steps, and every other layout — BSP, Stack,
-Grid, Track, Floating — steps focus to the next or previous
-window in the Space's own order, floating windows included,
-wrapping at the ends. The scroll is taken on every Space while
+a Monocle stack steps, and on every other layout — BSP, Stack,
+Grid, Track, Floating — a wheel notch steps focus to the next or
+previous window in the Space's own order, floating windows
+included, wrapping at the ends, while a swipe steps by direction
+(below). The scroll is taken on every Space while
 the chord is held, rather than passed through where the layout
 has no row, because a chord has one owner: passed through, the
 same hand would do two things depending on where the pointer
@@ -16038,7 +16039,8 @@ across the store*) — while here there is nothing to refuse,
 since the flat window array gives every Space a well-defined
 next and previous window whatever its geometry. Where a step
 still lands on nothing — a Scrolling or Monocle row's end with
-the focus wrap off, or a Space holding one window — the ring takes
+the focus wrap off, a swipe toward a border with no neighbour, or
+a Space holding one window — the ring takes
 the arrow keys' own dead-end bump toward the step (#436; owner
 ruling 2026-09-29), once per event and never a pill: the
 gesture should answer a wall the way the keys do, and a worded
@@ -16047,8 +16049,8 @@ simply restarts. A pill is for a refusal whose reason the user
 cannot see; a row end is on the screen.
 
 :::unreleased
-**A swipe moves focus the way it goes; a wheel notch walks the
-list** (#3200, owner ruling 2026-11-11, ui-designer advised). On
+**A swipe moves focus by direction; a wheel notch walks the
+list** (#3200, owner rulings 2026-11-11, ui-designer advised). On
 every layout without a row — BSP, Stack, Grid, Track, Floating —
 the pan splits by the scroll's KIND, not its device: a scroll
 with a finger phase (a trackpad, a Magic Mouse) is a swipe and
@@ -16063,17 +16065,36 @@ no reliable second, so a direction would strand half the windows.
 mouse drivers report precise deltas too, while the phase is what
 only fingers produce. Monocle keeps its flip — right or down is
 the next window, left or up the previous — and a Scrolling row
-steps along the row, as the paragraphs above rule. The sense is
-the row's: content follows the fingers, so fingers left bring in
-the window to the right, and the per-input Natural scrolling flag
-flips it. **The swipe's first step locks its axis until the
-fingers lift**: a hand's diagonal drifts, and an axis read per
-event would turn a long swipe's later repeats onto the other
-axis, so `step_distance` repeats count the locked axis alone.
-This changed no stored value, so it took no `ConfigMigration`.
-The three-finger `swipe3` `focus` binding stays an option,
-unbound by default: macOS's own "Swipe between full-screen apps"
-owns the three- and four-finger horizontal swipe on most Macs.
+steps along the row, as the paragraphs above rule. **The swipe's
+first step locks its axis until the fingers lift**, on every
+layout: a hand's diagonal drifts, and an axis read per event
+would turn a long swipe's later repeats onto the other axis, so
+`step_distance` repeats count the locked axis alone. The lock is
+read from the axis the meter's latch fired on, never a second
+reading of the travel, so the first step's sign and the locked
+axis cannot disagree. This changed no stored value, so it took
+no `ConfigMigration`. The three-finger `swipe3` `focus` binding
+stays an option, unbound by default: macOS's own "Swipe between
+full-screen apps" owns the three- and four-finger horizontal
+swipe on most Macs.
+
+**What moves on screen follows the fingers, and Natural
+scrolling is the one switch for it** (#3200 amendment, owner
+2026-11-11, ui-designer advised). On a Scrolling row the moving
+thing is the row, so it slides with the fingers and fingers left
+bring in the window on the right; on every other layout the
+moving thing is the focus, so fingers left focus the window on
+the left — the same sense the `swipe3` `focus` family has. The two
+read as opposite only on paper: each is "the thing you watch goes
+where your hand goes", which is macOS's own natural scrolling. So
+the per-input `natural_scrolling` flag reverses both together,
+`trackpad` for a phased scroll (a Magic Mouse included) and
+`mouse` for a wheel notch, each governing every directional
+family of its input — the swipes, the pan, the Space step and the
+wheel walk (the multi-finger swipe families take it with the
+binding list, #3199). It never flips a stored per-direction arm: ↑ means
+fingers up and is stored as such, so a binding reads the same in
+the file whatever the flag says.
 :::
 
 **One swipe moves one window by default, and long swipes are a

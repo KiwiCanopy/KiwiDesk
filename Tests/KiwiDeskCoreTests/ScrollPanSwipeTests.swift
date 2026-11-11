@@ -5,17 +5,21 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// ⌃⌥ + a swipe (#3200, owner ruling 2026-11-11): a scroll with a
-/// finger phase moves focus the way it goes on every layout without
-/// a row, through the arrow keys' step, on the axis its first step
-/// locks until the fingers lift; a wheel notch keeps the list walk
-/// (`ScrollPanLayoutTests`).
+/// ⌃⌥ + a swipe (#3200, owner rulings 2026-11-11): a scroll with a
+/// finger phase moves focus the way the fingers go on every layout
+/// without a row, through the arrow keys' step, on the axis its
+/// first step locks until the fingers lift; a wheel notch keeps the
+/// list walk (`ScrollPanLayoutTests`). Deltas here are in the
+/// natural convention the router hands on: their sign is the
+/// fingers'.
 @Suite("Scroll pan swipes", .serialized)
 @MainActor
 struct ScrollPanSwipeTests {
-    /// Four windows in a 2 × 2 grid — 1 2 over 3 4 — on a pinned
-    /// display, focus on `focus`.
+    /// `count` windows in `mode` — by default a 2 × 2 grid, 1 2
+    /// over 3 4 — on a pinned display, focus on `focus`.
     private func makeCore(
+        _ mode: String = "grid",
+        windows count: Int = 4,
         focus: WindowID,
         wrap: String = "off"
     ) -> (KiwiCore, ScrollPanSession) {
@@ -23,7 +27,7 @@ struct ScrollPanSwipeTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }
-        for id in 1...4 {
+        for id in 1...count {
             core.state.apply(
                 .windowCreated(
                     ManagedWindow(
@@ -35,7 +39,7 @@ struct ScrollPanSwipeTests {
             )
         }
         let space = core.state.workspaces.space(of: WindowID(1))!
-        core.execute("set_mode", args: [.string(space.raw), .string("grid")])
+        core.execute("set_mode", args: [.string(space.raw), .string(mode)])
         core.execute("set_focus_wrap", args: [.string(wrap)])
         core.state.workspaces.focus(focus, in: space)
         let session = ScrollPanSession()
@@ -88,18 +92,18 @@ struct ScrollPanSwipeTests {
         core.activeSpace?.focused
     }
 
-    /// Content follows the fingers, as on a Scrolling row: fingers
-    /// left bring the right-hand window in.
-    @Test("a swipe steps the way it goes, on both axes")
+    /// Focus follows the fingers: fingers right focus the
+    /// right-hand window.
+    @Test("a swipe steps the way the fingers go, on both axes")
     func stepsByDirection() {
         let (core, session) = makeCore(focus: WindowID(1))
-        gesture(core, session, [(-80, 0)])
-        #expect(focused(core) == WindowID(2))
-        gesture(core, session, [(0, -80)])
-        #expect(focused(core) == WindowID(4))
         gesture(core, session, [(80, 0)])
-        #expect(focused(core) == WindowID(3))
+        #expect(focused(core) == WindowID(2))
         gesture(core, session, [(0, 80)])
+        #expect(focused(core) == WindowID(4))
+        gesture(core, session, [(-80, 0)])
+        #expect(focused(core) == WindowID(3))
+        gesture(core, session, [(0, -80)])
         #expect(focused(core) == WindowID(1))
     }
 
@@ -107,15 +111,26 @@ struct ScrollPanSwipeTests {
     @Test("a vertical swipe never walks the list")
     func notTheList() {
         let (core, session) = makeCore(focus: WindowID(1))
-        gesture(core, session, [(0, -80)])
+        gesture(core, session, [(0, 80)])
         #expect(focused(core) == WindowID(3))
     }
 
+    /// From 2, up is a wall and down is 4; only the list gives 3.
     @Test("a wheel notch walks the list")
     func wheelWalks() {
-        let (core, session) = makeCore(focus: WindowID(1))
+        let (core, session) = makeCore(focus: WindowID(2))
         gesture(core, session, [(0, -80)], input: .wheel)
-        #expect(focused(core) == WindowID(2))
+        #expect(focused(core) == WindowID(3))
+    }
+
+    /// The axis is the one the travel so far fired on, not the
+    /// last event's: mostly-down travel, then a mostly-sideways
+    /// event that crosses the threshold, steps down.
+    @Test("the lock takes the axis of the travel that fired")
+    func lockReadsTheTravel() {
+        let (core, session) = makeCore(focus: WindowID(1))
+        gesture(core, session, [(2, 20), (20, 10)])
+        #expect(focused(core) == WindowID(3))
     }
 
     /// The first step locks the horizontal axis; the larger
@@ -127,8 +142,11 @@ struct ScrollPanSwipeTests {
         base.longSwipes = true
         base.stepDistance = 10
         core.applyScrollGestures(base: base, profile: nil)
-        gesture(core, session, [(-30, -10), (0, -200), (-2, -200)])
+        var bumps: [Direction] = []
+        core.borders.deadEndProbe = { bumps.append($1) }
+        gesture(core, session, [(30, 10), (0, 200), (2, 200)])
         #expect(focused(core) == WindowID(2))
+        #expect(bumps.isEmpty)
     }
 
     /// Long swipes repeat along the locked axis.
@@ -142,8 +160,21 @@ struct ScrollPanSwipeTests {
         base.longSwipes = true
         base.stepDistance = 50
         core.applyScrollGestures(base: base, profile: nil)
-        gesture(core, session, [(-30, 0), (-50, 400)])
+        gesture(core, session, [(30, 0), (50, 400)])
         // 1 → 2, then wrapping back to 1 within the screen.
+        #expect(focused(core) == WindowID(1))
+    }
+
+    /// Stack: master 1 beside 2 over 3. A list walk from 3 would
+    /// land on 2; the swipe goes left, to the master.
+    @Test("a Stack swipe reaches the master beside it")
+    func stackStepsLeft() {
+        let (core, session) = makeCore(
+            "stack",
+            windows: 3,
+            focus: WindowID(3)
+        )
+        gesture(core, session, [(-80, 0)])
         #expect(focused(core) == WindowID(1))
     }
 
@@ -152,7 +183,7 @@ struct ScrollPanSwipeTests {
         let (core, session) = makeCore(focus: WindowID(2))
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
-        gesture(core, session, [(-80, 0)])
+        gesture(core, session, [(80, 0)])
         #expect(focused(core) == WindowID(2))
         #expect(bumps == [.right])
     }

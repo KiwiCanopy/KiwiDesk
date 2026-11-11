@@ -22,6 +22,10 @@ public struct ScrollStepMeter: Sendable {
     private var travel = 0.0
     private var lastNotch: (time: Double, sign: Int)?
 
+    /// A trackpad gesture's first step's axis, from the latch that
+    /// fired it; nil before it and for a wheel.
+    public var firedHorizontal: Bool? { latch.firedHorizontal }
+
     public init(longSwipes: Bool, distance: Double) {
         self.longSwipes = longSwipes
         self.distance = max(distance, 1)

@@ -97,7 +97,8 @@ struct ScrollGestureDeadEndTests {
             focus: WindowID(1)
         )
         swipe(core, session, dx: 80)
-        #expect(bumps().map(\.direction) == [.left])
+        // A row slides with the fingers; BSP's focus follows them.
+        #expect(bumps().map(\.direction) == [.right])
     }
 
     /// A long swipe asking for several windows past the end bumps

@@ -14,6 +14,9 @@ public struct ScrollStepLatch: Sendable {
 
     private var travel = CGVector.zero
     private var fired = false
+    /// The axis the step fired on — horizontal or not — until the
+    /// gesture ends; nil before it fires.
+    public private(set) var firedHorizontal: Bool?
 
     public init() {}
 
@@ -25,18 +28,19 @@ public struct ScrollStepLatch: Sendable {
         case .began, .ended:
             travel = .zero
             fired = false
+            firedHorizontal = nil
             return nil
         case .changed:
             guard !fired else { return nil }
             travel.dx += event.delta.dx
             travel.dy += event.delta.dy
-            let along =
-                abs(travel.dx) > abs(travel.dy)
-                ? travel.dx : travel.dy
+            let horizontal = abs(travel.dx) > abs(travel.dy)
+            let along = horizontal ? travel.dx : travel.dy
             guard abs(along) >= Self.trackpadThreshold else {
                 return nil
             }
             fired = true
+            firedHorizontal = horizontal
             return along > 0 ? 1 : -1
         }
     }
