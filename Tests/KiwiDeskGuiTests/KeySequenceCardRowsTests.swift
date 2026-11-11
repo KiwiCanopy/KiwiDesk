@@ -78,6 +78,10 @@ struct KeySequenceCardRowsTests {
         #expect(menu.contains(".buttonStyle(SequenceDashedStyle())"))
         #expect(menu.contains("}else{Button{request=SequencePickRequest("))
         #expect(menu.contains(".settingsPopUpTrigger()"))
+        // The rows the menu draws, not only its cursor's list.
+        #expect(menu.contains("pinned(.branch,Self.branchLabel"))
+        #expect(menu.contains("pinned(.app,Self.appLabel"))
+        #expect(menu.contains("pinned(.lua,Self.luaLabel"))
         let row = Self.flat(try Self.source("SequenceNodeRow+Popovers.swift"))
         #expect(row.contains("SequenceContainerFace(face:.tinted){"))
         // The fold and the name are two buttons (amendment).

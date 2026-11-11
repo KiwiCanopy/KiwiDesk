@@ -70,6 +70,17 @@ struct KeySequenceTapTests {
         #expect(manager.activeBindings.isEmpty)
     }
 
+    @Test("the manager hands the tap the macOS chords to let through")
+    func passChordsReachTheTap() throws {
+        let (manager, taps) = rig()
+        manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
+        let tap = try #require(taps().last)
+        let screenshot = try #require(KeyCombo.parse("cmd+shift+4"))
+        let spotlight = try #require(KeyCombo.parse("cmd+space"))
+        #expect(tap.passing.staysOpen.contains(screenshot))
+        #expect(tap.passing.closes.contains(spotlight))
+    }
+
     @Test("new scroll keys reach the tap alone and close nothing")
     func scrollKeysKeepItOpen() throws {
         let (manager, taps) = rig()

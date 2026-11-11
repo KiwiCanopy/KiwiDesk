@@ -23,7 +23,16 @@ struct KeySequenceHintPlacementTests {
         #expect(draw.contains("origin:JumpPanelController.origin("))
         #expect(draw.contains("JumpPanelController.clearArea("))
         #expect(draw.contains("sheetCap:JumpPanelController.sheetCap("))
-        #expect(!draw.contains("visible.midY"))
+        // Never re-centred, under any spelling.
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "privatefuncdraw()",
+                in: draw
+            )
+        )
+        #expect(!body.contains(".midY"))
+        #expect(!body.contains("setFrameOrigin("))
+        #expect(body.occurrences(of: "panel.setFrame(") == 1)
         // The wheel scrolls; a click reaches the tap (#1871).
         #expect(draw.contains("panel.ignoresMouseEvents=false"))
     }
