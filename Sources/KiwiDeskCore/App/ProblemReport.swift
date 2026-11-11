@@ -58,17 +58,24 @@ public struct ProblemReport: Sendable, Equatable {
         return parts.url!
     }
 
-    /// The exported log's header: the facts, then every value
-    /// that differs from its built-in default, ended by a blank
-    /// line so the log's own column header follows apart.
-    public func logHeader(changedSettings: [String]) -> String {
-        let changed =
-            changedSettings.isEmpty
-            ? ["  (none)"] : changedSettings.map { "  \($0)" }
+    /// The exported log's header: the facts, each Space's
+    /// layout, then every value that differs from what an install
+    /// starts from, ended by a blank line so the log's own column
+    /// header follows apart.
+    public func logHeader(
+        spaceLayouts: [String],
+        changedSettings: [String]
+    ) -> String {
         let lines =
             ["KiwiDesk \(version)", "macOS \(macOS)"] + deskLines
-            + ["Settings changed from the defaults:"] + changed
+            + ["Space layouts:"] + Self.indented(spaceLayouts)
+            + ["Settings changed from the defaults:"]
+            + Self.indented(changedSettings)
         return lines.joined(separator: "\n") + "\n\n"
+    }
+
+    private static func indented(_ lines: [String]) -> [String] {
+        lines.isEmpty ? ["  (none)"] : lines.map { "  \($0)" }
     }
 }
 

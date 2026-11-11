@@ -1776,10 +1776,11 @@ fact about its command*. The obligations:
   the switch path answers from adoption state instead.
   Settings' **Live, not saved** rows (#2262) and `revert_settings`
   (the bullet below) are the ruled readers that diff the settings
-  root itself. A reader that diffs live against the BUILT-IN
-  defaults says nothing about saved or stored, feeds no keep or
-  revert, and is no reader of that shape: the exported log's
-  header (#3214, `ProblemReportRootsTests`). The rows: `unsavedLiveSettings`
+  root itself. A reader that diffs live against what an install
+  starts from says nothing about saved or stored, feeds no keep
+  or revert, and is no reader of that shape: the exported log's
+  header (#3214, `ProblemReportRootsTests`). The rows:
+  `unsavedLiveSettings`
   judges each leaf through the same `KeepJudge` and hands Settings
   its leaves by keep id (`UnsavedLiveSettings.leaves`); a row's
   Keep takes its ids from there alone, never derived in the GUI,

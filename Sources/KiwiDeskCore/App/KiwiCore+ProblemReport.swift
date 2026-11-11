@@ -5,7 +5,7 @@ import AppKit
 extension KiwiCore {
     public var problemReport: ProblemReport {
         ProblemReport(
-            version: KiwiDeskVersion.displayString,
+            version: KiwiDeskVersion.semantic,
             macOS: Self.macOSVersion,
             screens: ScreenList.all.count,
             separateSpaces: tiler.applier.separateSpaces()
@@ -30,13 +30,21 @@ extension KiwiCore {
         KeepRoot.appWide: AppWideSettings().groupsJSON,
         KeepRoot.focusWrap: .string(FocusWrap.defaultMode.rawValue),
         KeepRoot.floatAutomatically: .bool(FloatGuess.enabledByDefault),
-        // No default to differ from: each Space's layout is listed.
-        KeepRoot.spaceModes: .object([:]),
     ]
+    /// Listed whole under its own heading: a Space's layout has no
+    /// default to differ from.
+    static let headerListed = KeepRoot.spaceModes
     /// A rule list is one leaf, so a diff would print it whole.
     static let headerLeftOut: Set<String> = [
         KeepRoot.appRules, KeepRoot.floatRules,
     ]
+
+    /// Each Space's layout, `id = layout`, by id.
+    var spaceLayoutLines: [String] {
+        state.workspaces.allSpaces
+            .map { "\($0.id.raw) = \($0.mode.rawValue)" }
+            .sorted()
+    }
 
     /// Every live value that differs from its built-in default.
     var changedSettingsLines: [String] {
@@ -52,6 +60,9 @@ extension KiwiCore {
 
     /// The header an exported log opens with.
     public var logExportHeader: String {
-        problemReport.logHeader(changedSettings: changedSettingsLines)
+        problemReport.logHeader(
+            spaceLayouts: spaceLayoutLines,
+            changedSettings: changedSettingsLines
+        )
     }
 }

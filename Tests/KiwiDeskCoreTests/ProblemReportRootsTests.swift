@@ -21,6 +21,7 @@ struct ProblemReportRootsTests {
         #expect(roots.count >= 7)
         let ruled = Set(KiwiCore.headerDefaults.keys)
             .union(KiwiCore.headerLeftOut)
+            .union([KiwiCore.headerListed])
         #expect(roots == ruled)
         #expect(
             Set(KiwiCore.headerDefaults.keys)
@@ -29,14 +30,14 @@ struct ProblemReportRootsTests {
     }
 
     @Test("a live value off its default reaches the header")
-    func liveValuesReachTheHeader() {
+    func liveValuesReachTheHeader() throws {
         let core = makeTestCore()
         let before = core.changedSettingsLines
         #expect(!before.contains { $0.hasPrefix("/focus_wrap") })
-        let wrap = FocusWrap.allCases.first {
-            $0 != FocusWrap.defaultMode
-        }
-        guard let wrap else { return }
+        let wrap = try #require(
+            FocusWrap.allCases.first { $0 != FocusWrap.defaultMode }
+        )
+        #expect(!before.contains { $0.hasPrefix("/space_modes") })
         core.focusWrap.base = wrap
         #expect(
             core.changedSettingsLines.contains(

@@ -53,6 +53,7 @@ struct ProblemReportTests {
     @Test("the log header names the facts, then each changed setting")
     func headerListsChangedSettings() {
         let header = report.logHeader(
+            spaceLayouts: ["1 = bsp"],
             changedSettings: ["/settings/gap/global = 4"]
         )
         #expect(
@@ -61,13 +62,16 @@ struct ProblemReportTests {
                 macOS Version 27.2 (Build 26C5)
                 Screens: 2
                 Displays have separate Spaces: on
+                Space layouts:
+                  1 = bsp
                 Settings changed from the defaults:
                   /settings/gap/global = 4
 
 
                 """
         )
-        let none = report.logHeader(changedSettings: [])
+        let none = report.logHeader(spaceLayouts: [], changedSettings: [])
+        #expect(none.contains("layouts:\n  (none)\nSettings"))
         #expect(none.contains("defaults:\n  (none)\n\n"))
     }
 
