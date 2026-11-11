@@ -95,14 +95,22 @@ public enum GestureSeeds {
         }
     }
 
-    /// The verb's question: would `key` fire once `map` holds it, or
-    /// does a drag the resolve keeps hold its keys?
+    /// The verb's question before `key` joins `base`: would a drag
+    /// hold a click's or a hover_move's keys, either way round? A
+    /// drag bound over a live click or hover_move would silence it.
     public static func shadowRefusal(
         of key: GestureKey,
         base: GestureMap,
         profile: GestureMap?
     ) -> GestureRefusal? {
         let resolved = Self.resolved(base: base, profile: profile)
+        if key.input == .drag {
+            let shadowed = resolved.keys.contains {
+                $0.keys == key.keys
+                    && ($0.input == .click || $0.input == .hoverMove)
+            }
+            return shadowed ? .keysHeldByDrag : nil
+        }
         let dragKeys = Set(
             resolved.keys.filter { $0.input == .drag }.map(\.keys)
         )

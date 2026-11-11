@@ -108,4 +108,53 @@ struct ScrollGestureVerbTests {
         event.momentum = true
         #expect(event.locked(horizontal: true).delta == event.delta)
     }
+
+    @Test("a long family swipe's later steps keep the latched axis")
+    func familyStepKeepsTheAxis() {
+        var meter = ScrollStepMeter(longSwipes: true, distance: 60)
+        func event(
+            _ kind: ScrollGestureEvent.Kind,
+            dx: CGFloat = 0,
+            dy: CGFloat = 0
+        ) -> ScrollGestureEvent {
+            ScrollGestureEvent(
+                chord: [.control, .option],
+                kind: kind,
+                input: .trackpad,
+                delta: CGVector(dx: dx, dy: dy),
+                momentum: false,
+                location: .zero,
+                time: 0
+            )
+        }
+        #expect(KiwiCore.familyStep(&meter, event(.began)) == nil)
+        let first = KiwiCore.familyStep(&meter, event(.changed, dx: 30))
+        #expect(first?.0 == 1 && first?.1 == .right)
+        // A diagonal frame: its larger axis is the other one.
+        let diagonal = KiwiCore.familyStep(
+            &meter,
+            event(.changed, dx: 5, dy: -70)
+        )
+        #expect(diagonal == nil)
+        let next = KiwiCore.familyStep(&meter, event(.changed, dx: 60))
+        #expect(next?.0 == 1 && next?.1 == .right)
+    }
+
+    @Test("gesture.bind refuses a drag over a live hover_move")
+    func dragRefusedOverHover() {
+        let core = makeTestCore()
+        let keys: [JSONValue] = [.string("option+command")]
+        #expect(
+            core.execute(
+                "gesture.bind",
+                args: [.string("hover_move")] + keys + [.string("move")]
+            ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "gesture.bind",
+                args: [.string("drag")] + keys + [.string("resize")]
+            ).isSuccess
+        )
+    }
 }

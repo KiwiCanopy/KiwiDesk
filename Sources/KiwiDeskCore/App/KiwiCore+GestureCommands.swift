@@ -35,7 +35,6 @@ extension KiwiCore {
             if let refusal = action.refusal(on: key) {
                 return .fail(Self.gestureRefusal(refusal, key))
             }
-            base[key] = .bound(action)
             if let refusal = GestureSeeds.shadowRefusal(
                 of: key,
                 base: base,
@@ -43,6 +42,7 @@ extension KiwiCore {
             ) {
                 return .fail(Self.gestureRefusal(refusal, key))
             }
+            base[key] = .bound(action)
         default:
             return .fail("unknown command: \(command)")
         }

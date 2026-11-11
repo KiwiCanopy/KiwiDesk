@@ -89,17 +89,14 @@ extension KiwiCore {
                     distance: resolved.stepDistance
                 )
             }
-            let steps = session.meter.feed(
-                event.locked(horizontal: session.meter.firedHorizontal)
-            )
-            guard steps != 0 else { return }
-            let direction = Self.direction(
-                of: event.delta,
-                sign: steps,
-                horizontal: session.meter.firedHorizontal
-            )
-            guard let code = family.lua(direction) else { return }
-            for _ in 0..<abs(steps) { runGestureLua(code, "scroll") }
+            guard
+                let (steps, direction) = Self.familyStep(
+                    &session.meter,
+                    event
+                ),
+                let code = family.lua(direction)
+            else { return }
+            for _ in 0..<steps { runGestureLua(code, "scroll") }
         case .split(let arms):
             guard let direction = session.latch.feed(event),
                 let arm = arms[direction]
@@ -108,6 +105,25 @@ extension KiwiCore {
         case .run, .grab:
             return
         }
+    }
+
+    /// How many steps a family takes for `event` and which way:
+    /// the event projected onto the axis the latch fired on, so a
+    /// long swipe's later steps keep its axis and its sign. Pure.
+    static func familyStep(
+        _ meter: inout ScrollStepMeter,
+        _ event: ScrollGestureEvent
+    ) -> (Int, GestureDirection)? {
+        let steps = meter.feed(
+            event.locked(horizontal: meter.firedHorizontal)
+        )
+        guard steps != 0 else { return nil }
+        let way = Self.direction(
+            of: event.delta,
+            sign: steps,
+            horizontal: meter.firedHorizontal
+        )
+        return (abs(steps), way)
     }
 
     /// The direction a step of `sign` runs: along the axis the
