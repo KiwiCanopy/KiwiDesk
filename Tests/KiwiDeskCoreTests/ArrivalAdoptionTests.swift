@@ -172,7 +172,7 @@ struct ArrivalAdoptionTests {
         listing.layers = [arrivals[0]: 3]
         let reader = loop.listedWindowReader(
             pid: pid,
-            bundleID: ref.bundleID,
+            app: ref,
             tracked: [tracked]
         )
         let (windows, layers) = reader.read(elements) {

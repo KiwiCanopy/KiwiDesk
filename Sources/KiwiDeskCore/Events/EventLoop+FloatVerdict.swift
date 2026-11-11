@@ -32,12 +32,7 @@ extension EventLoop {
             rules: floatRules
         )
         let forced = forceFloatReason(pid: pid, id: id)
-        noteGuess(
-            verdict,
-            forced: forced,
-            pid: pid,
-            bundleID: app.bundleID
-        )
+        noteGuess(verdict, forced: forced, pid: pid, app: app)
         return verdict
     }
 
@@ -48,13 +43,13 @@ extension EventLoop {
         _ verdict: FloatVerdict,
         forced: AutoFloatReason?,
         pid: pid_t,
-        bundleID: String?
+        app: AppRef
     ) {
-        guard let bundleID,
+        guard let key = app.listKey,
             forced?.isGuess == true
                 || verdict.reason?.isGuess == true
         else { return }
-        guessedApps.note(bundleID: bundleID, name: appRef(of: pid).name)
+        guessedApps.note(bundleID: key, name: app.name)
     }
 
     /// Forgets the verdict of every tracked window of an app whose

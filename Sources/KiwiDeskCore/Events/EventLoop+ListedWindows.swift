@@ -105,9 +105,9 @@ struct ListedWindowReader: @unchecked Sendable {
     let resolve: (AXUIElement) -> WindowID?
     let fullscreen: (AXUIElement) -> Bool
     let traits: (AXUIElement, WindowID?) -> WindowTraits?
-    let bundleID: String?
-    /// The app's `AppRef.listKey`, which its rules name (#3211).
-    let appKey: String?
+    /// The app the windows belong to: its bundle id for the built-in
+    /// lists, its `AppRef.listKey` for the user's rules (#3211).
+    let app: AppRef
     let rules: FloatRules
     let facts: (AXUIElement, Int?) -> WindowFacts
     let tracked: Set<WindowID>
@@ -154,7 +154,7 @@ struct ListedWindowReader: @unchecked Sendable {
         let asksButton = FloatDetection.needsTitlebarButton(
             layer: layer,
             isAccessory: isAccessory,
-            bundleID: bundleID,
+            bundleID: app.bundleID,
             subrole: facts.subrole
         )
         let isTracked = id.map { tracked.contains($0) }
@@ -164,8 +164,7 @@ struct ListedWindowReader: @unchecked Sendable {
             && facts.role == kAXWindowRole
             && id.map(shadowed.contains) == false
             && !FloatDetection.shouldIgnore(
-                bundleID: bundleID,
-                app: appKey,
+                app: app,
                 layer: layer,
                 isAccessory: isAccessory,
                 rules: ignoreRules,
@@ -179,7 +178,7 @@ struct ListedWindowReader: @unchecked Sendable {
         let detect = {
             FloatDetection.autoFloatReason(
                 facts,
-                app: appKey,
+                app: app.listKey,
                 rules: rules
             )
         }
@@ -256,8 +255,7 @@ extension EventLoop {
             resolve: resolveWindowID,
             fullscreen: readFullscreen,
             traits: shadows.traits,
-            bundleID: app.bundleID,
-            appKey: app.listKey,
+            app: app,
             rules: floatRules,
             facts: offMain.readFacts,
             tracked: tracked,

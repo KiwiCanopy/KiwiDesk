@@ -126,8 +126,7 @@ struct FloatRuleTests {
         // (#448), never blanket raised-layer.
         #expect(
             !FloatDetection.shouldIgnore(
-                bundleID: "com.apple.finder",
-                app: "com.apple.finder",
+                app: AppRef(bundleID: "com.apple.finder", name: ""),
                 layer: 3,
                 isAccessory: false,
                 rules: noRules,
@@ -141,8 +140,7 @@ struct FloatRuleTests {
         let rules = IgnoreRules(["IO.TAILSCALE.IPN.MACOS"])
         #expect(
             FloatDetection.shouldIgnore(
-                bundleID: "io.tailscale.ipn.macos",
-                app: "io.tailscale.ipn.macos",
+                app: AppRef(bundleID: "io.tailscale.ipn.macos", name: ""),
                 layer: 0,
                 isAccessory: false,
                 rules: rules,
@@ -151,8 +149,7 @@ struct FloatRuleTests {
         )
         #expect(
             FloatDetection.shouldIgnore(
-                bundleID: "io.tailscale.ipn.macos",
-                app: "io.tailscale.ipn.macos",
+                app: AppRef(bundleID: "io.tailscale.ipn.macos", name: ""),
                 layer: 9,
                 isAccessory: true,
                 rules: rules,
@@ -161,8 +158,7 @@ struct FloatRuleTests {
         )
         #expect(
             !FloatDetection.shouldIgnore(
-                bundleID: "com.apple.finder",
-                app: "com.apple.finder",
+                app: AppRef(bundleID: "com.apple.finder", name: ""),
                 layer: 0,
                 isAccessory: false,
                 rules: rules,
@@ -185,8 +181,7 @@ struct FloatRuleTests {
             )
             #expect(
                 FloatDetection.shouldIgnore(
-                    bundleID: bundleID,
-                    app: bundleID,
+                    app: AppRef(bundleID: bundleID, name: ""),
                     layer: 0,
                     isAccessory: false,
                     rules: IgnoreRules(),

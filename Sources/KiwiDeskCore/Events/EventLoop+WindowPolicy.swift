@@ -306,8 +306,7 @@ extension EventLoop {
             ? titlebarButton ?? Self.readsTitlebarButton(element, id: id)
             : false
         return FloatDetection.shouldIgnore(
-            bundleID: app.bundleID,
-            app: app.listKey,
+            app: app,
             layer: resolved,
             isAccessory: isAccessory,
             rules: ignoreRules,

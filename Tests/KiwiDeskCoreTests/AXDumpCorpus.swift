@@ -187,8 +187,7 @@ extension AXDump {
         guard role != nil, let layer, let isAccessory, let bundleID
         else { return nil }
         let ignored = FloatDetection.shouldIgnore(
-            bundleID: bundleID,
-            app: bundleID,
+            app: AppRef(bundleID: bundleID, name: ""),
             layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),

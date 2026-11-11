@@ -20,6 +20,21 @@ struct AppRulesOpenAppsTests {
         )
     }
 
+    @Test("a bundle-less app is offered, keyed by its name (#3211)")
+    func bundleLessIsOffered() {
+        let app = OpenApp(
+            app: AppRef(bundleID: nil, name: "QEMU-System-AArch64"),
+            name: "qemu-system-aarch64"
+        )
+        let lists = AppPickerSections.lists(
+            openApps: [app],
+            installed: [],
+            exclude: [],
+            query: ""
+        )
+        #expect(lists.openApps.map(\.key) == ["qemu-system-aarch64"])
+    }
+
     @Test("Space and Float take the section, Tile does not")
     func wiring() throws {
         let needle = "openAppsOf: model.core"

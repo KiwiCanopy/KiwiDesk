@@ -120,20 +120,23 @@ extension KiwiCore {
                 } ?? .null,
             ])
         }
+        // A key nothing knows is taken as the bundle id it reads as.
+        let known = knownApp(app)
+        let bundle = known.map(\.bundleID) ?? app
         return .ok(
             .object([
-                "bundle_id": namesProcess(app) ? .null : .string(app),
+                "bundle_id": bundle.map(JSONValue.string) ?? .null,
                 "rule_key": .string(app),
                 "ignored": .object([
                     "by_rule": .bool(
                         eventLoop.ignoreRules.matches(app: app)
                     ),
                     "built_in": .bool(
-                        FloatDetection.isBuiltInIgnoredApp(bundleID: app)
+                        FloatDetection.isBuiltInIgnoredApp(bundleID: bundle)
                     ),
                     "built_in_raised": .bool(
                         FloatDetection.ignoresRaisedWindows(
-                            bundleID: app
+                            bundleID: bundle
                         )
                     ),
                 ]),
@@ -150,15 +153,19 @@ extension KiwiCore {
         .object(["id": .number(Double(id.raw)), "title": .string(title)])
     }
 
-    /// Whether `app` names a process with no bundle id (#3211):
-    /// every window or process KiwiDesk knows by that key has none.
-    private func namesProcess(_ app: String) -> Bool {
-        let known =
-            state.windows.all.filter { $0.appRef.listKey == app }
-            .map(\.appBundleID)
-            + eventLoop.liveApps().filter { $0.ref.listKey == app }
-            .map(\.ref.bundleID)
-        return !known.isEmpty && known.allSatisfy { $0 == nil }
+    /// The app `app` names, read from the first window or process
+    /// KiwiDesk knows by that key; nil for an app nothing knows
+    /// (#3211).
+    private func knownApp(_ app: String) -> AppRef? {
+        state.windows.all.lazy.map(\.appRef).first { $0.listKey == app }
+            ?? state.minimizeOrder.lazy.map {
+                AppRef(bundleID: $0.bundleID, name: $0.app)
+            }.first { $0.listKey == app }
+            ?? state.awayWindows.values.lazy.map {
+                AppRef(bundleID: $0.appBundleID, name: $0.appName)
+            }.first { $0.listKey == app }
+            ?? eventLoop.liveApps().lazy.map(\.ref)
+            .first { $0.listKey == app }
     }
 
     /// The app's live processes, each with whether KiwiDesk

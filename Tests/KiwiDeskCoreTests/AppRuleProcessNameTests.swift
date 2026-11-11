@@ -41,6 +41,30 @@ struct AppRuleProcessNameTests {
         #expect(guess.applies(toApp: "com.apple.mail"))
     }
 
+    @Test("the ignore doors take the name, the built-ins the bundle")
+    func ignoreDoorsTakeTheName() {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("rule-name-\(UUID().uuidString)")
+        )
+        core.eventLoop.ignoreRules = IgnoreRules([emulator])
+        let bare = AppRef(bundleID: nil, name: "qemu-system-aarch64")
+        #expect(core.eventLoop.shouldIgnoreApp(bare))
+        #expect(
+            FloatDetection.shouldIgnore(
+                app: bare,
+                layer: 0,
+                isAccessory: false,
+                rules: IgnoreRules([emulator]),
+                titlebarButton: false
+            )
+        )
+        // A name equal to a rule never stands in for a bundle id.
+        let named = AppRef(bundleID: "com.example.qemu", name: emulator)
+        #expect(!core.eventLoop.shouldIgnoreApp(named))
+    }
+
     @Test("a Space rule files the bundle-less window")
     func spaceRuleFiles() {
         var state = StateCoordinator()
@@ -113,13 +137,13 @@ struct AppRuleProcessNameTests {
         #expect(windows.count == 1)
     }
 
-    @Test("a launch debt folds its key, whoever owes it")
-    func launchDebtFolds() {
+    @Test("a launch debt is owed and claimed by the process name")
+    func launchDebtByName() {
         let intent = LaunchFollowIntent()
         let now = Date()
-        intent.record("Com.Example.App", at: now)
-        #expect(intent.claim("com.example.app", at: now) != nil)
+        let key = AppRef(bundleID: nil, name: "QEMU-System-AArch64").listKey
+        #expect(key == emulator)
         intent.record(emulator, at: now)
-        #expect(intent.claim(emulator, at: now) != nil)
+        #expect(intent.claim(key ?? "", at: now) != nil)
     }
 }

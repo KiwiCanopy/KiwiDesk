@@ -20,8 +20,7 @@ struct SystemDialogEscapeTests {
         subrole: String
     ) -> Bool {
         FloatDetection.shouldIgnore(
-            bundleID: bundleID,
-            app: bundleID,
+            app: AppRef(bundleID: bundleID, name: ""),
             layer: layer,
             isAccessory: true,
             rules: noRules,
