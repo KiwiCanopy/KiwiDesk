@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import Testing
 
 @testable import KiwiDeskCore
@@ -130,6 +130,13 @@ struct OpenAppsTests {
             app: "KiwiDesk",
             bundle: "com.kiwicanopy.kiwidesk",
             in: "1"
+        )
+        core.state.awayWindows[WindowID(4)] = AwayWindow(
+            id: WindowID(4),
+            pid: getpid(),
+            appName: "KiwiDesk",
+            appBundleID: "com.kiwicanopy.kiwidesk",
+            nativeSpace: 4
         )
         core.eventLoop.processIdentity.note(
             RunningApp(
