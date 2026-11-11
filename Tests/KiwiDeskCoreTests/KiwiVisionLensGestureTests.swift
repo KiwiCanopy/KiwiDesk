@@ -6,8 +6,8 @@ import Testing
 
 /// A scroll gesture skips like the keys (#2103 ruling 45): ⌃⌥ +
 /// scroll steps past the windows a lens keeps hazed on both of its
-/// routes — the arrow keys' `navigate` for a Scrolling row or a
-/// Monocle stack, the Space's own order everywhere else.
+/// routes — the arrow keys' `navigate` for a row and for a swipe
+/// (#3200), the Space's own order for a wheel everywhere else.
 @Suite("KiwiVision lens scroll gesture", .serialized)
 @MainActor
 struct KiwiVisionLensGestureTests {
@@ -54,10 +54,12 @@ struct KiwiVisionLensGestureTests {
         return (core, session)
     }
 
-    /// One swipe bringing the next window in, from window 1.
+    /// One swipe (or wheel notch) bringing the next window in,
+    /// from window 1.
     private func swipeNext(
         _ core: KiwiCore,
-        _ session: ScrollPanSession
+        _ session: ScrollPanSession,
+        input: ScrollGestureEvent.Input = .trackpad
     ) -> WindowID? {
         let space = core.state.workspaces.space(of: WindowID(1))!
         core.state.workspaces.focus(WindowID(1), in: space)
@@ -66,7 +68,7 @@ struct KiwiVisionLensGestureTests {
                 ScrollGestureEvent(
                     chord: [.control, .option],
                     kind: kind,
-                    input: .trackpad,
+                    input: input,
                     delta: CGVector(dx: kind == .changed ? -80 : 0, dy: 0),
                     momentum: false,
                     location: .zero,
@@ -80,13 +82,24 @@ struct KiwiVisionLensGestureTests {
 
     @Test(
         "a swipe skips the other app's window",
-        arguments: ["scrolling", "monocle", "bsp", "grid"]
+        arguments: ["scrolling", "monocle", "bsp"]
     )
     func swipeSkips(mode: String) {
         let (core, session) = makeCore(mode)
         #expect(swipeNext(core, session) == WindowID(2))
         core.setKiwiVision(.lens("Writing"))
         #expect(swipeNext(core, session) == WindowID(3))
+    }
+
+    @Test(
+        "a wheel notch skips the other app's window",
+        arguments: ["bsp", "grid"]
+    )
+    func wheelSkips(mode: String) {
+        let (core, session) = makeCore(mode)
+        #expect(swipeNext(core, session, input: .wheel) == WindowID(2))
+        core.setKiwiVision(.lens("Writing"))
+        #expect(swipeNext(core, session, input: .wheel) == WindowID(3))
     }
 
     /// The gesture follows the same switch as the keys (ruling 45).

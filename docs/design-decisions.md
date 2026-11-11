@@ -16046,6 +16046,36 @@ cue would repeat per notch and per swipe where a rubber-band
 simply restarts. A pill is for a refusal whose reason the user
 cannot see; a row end is on the screen.
 
+:::unreleased
+**A swipe moves focus the way it goes; a wheel notch walks the
+list** (#3200, owner ruling 2026-11-11, ui-designer advised). On
+every layout without a row — BSP, Stack, Grid, Track, Floating —
+the pan splits by the scroll's KIND, not its device: a scroll
+with a finger phase (a trackpad, a Magic Mouse) is a swipe and
+steps focus through the arrow keys' own `navigate`, bump and
+wrap included; a scroll without one (a notched, tilt or thumb
+wheel) keeps the array-order walk above. A swipe has a direction
+the hand chose, and on a two-dimensional layout the next window
+in the array is often not the one the fingers point at, so a
+list walk there reads as random. A wheel has one useful axis and
+no reliable second, so a direction would strand half the windows.
+`hasPreciseScrollingDeltas` is not the split: smooth-scrolling
+mouse drivers report precise deltas too, while the phase is what
+only fingers produce. Monocle keeps its flip — right or down is
+the next window, left or up the previous — and a Scrolling row
+steps along the row, as the paragraphs above rule. The sense is
+the row's: content follows the fingers, so fingers left bring in
+the window to the right, and the per-input Natural scrolling flag
+flips it. **The swipe's first step locks its axis until the
+fingers lift**: a hand's diagonal drifts, and an axis read per
+event would turn a long swipe's later repeats onto the other
+axis, so `step_distance` repeats count the locked axis alone.
+This changed no stored value, so it took no `ConfigMigration`.
+The three-finger `swipe3` `focus` binding stays an option,
+unbound by default: macOS's own "Swipe between full-screen apps"
+owns the three- and four-finger horizontal swipe on most Macs.
+:::
+
 **One swipe moves one window by default, and long swipes are a
 tick box.** Counting by distance — a window per ~60 pt of finger
 travel — makes a single window hard to hit (measured on a device

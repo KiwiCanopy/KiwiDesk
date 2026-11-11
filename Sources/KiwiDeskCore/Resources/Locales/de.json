@@ -2177,7 +2177,7 @@
   "shortcuts.gestures.scroll.refused_pan": "Diese Tasten bewegen den Fokus bereits von Fenster zu Fenster. %1$@",
   "shortcuts.gestures.scroll.refused_single": "Halte zwei oder mehr Tasten. Mit einer Taste ist das Scrollen schon belegt: ⌃ vergrößert in macOS mit „Zoomen“ den Bildschirm, und ⇧, ⌥ oder ⌘ lösen in vielen Apps etwas aus.",
   "shortcuts.gestures.scroll.refused_step": "Diese Tasten wechseln bereits zwischen Spaces. %1$@",
-  "shortcuts.gestures.scroll.sentence": "Halte diese Tasten und scrolle, um den Fokus entlang einer %1$@-Reihe von Fenster zu Fenster zu bewegen. In jedem anderen Space geht der Fokus stattdessen der Reihe nach durch dessen Fenster.",
+  "shortcuts.gestures.scroll.sentence": "Halte diese Tasten und scrolle, um den Fokus entlang einer %1$@-Reihe von Fenster zu Fenster zu bewegen. In jedem anderen Space bewegt eine Wischbewegung den Fokus in die Richtung, in die du scrollst, und das Mausrad führt ihn der Reihe nach durch die Fenster.",
   "shortcuts.gestures.scroll.space_step": "Zwischen Spaces wechseln",
   "shortcuts.gestures.scroll.space_step_sentence": "Halte diese Tasten und scrolle, um auf dem Bildschirm unter dem Mauszeiger zum nächsten oder vorherigen Space zu wechseln – einen pro Wischbewegung oder Raste des Mausrads.",
   "shortcuts.gestures.scroll.step_distance": "Weg pro Fenster",

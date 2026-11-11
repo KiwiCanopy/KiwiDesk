@@ -17,6 +17,11 @@ final class ScrollPanSession {
 
     fileprivate var space: SpaceID?
     fileprivate var meter = ScrollStepMeter(longSwipes: false, distance: 1)
+    /// A swipe's axis, locked by its first step and held to the
+    /// lift (#3200); nil before it and for a wheel.
+    fileprivate var horizontal: Bool?
+    /// A swipe's travel until its axis locks.
+    fileprivate var travel = CGVector.zero
 
     init() {}
 }
@@ -24,9 +29,10 @@ final class ScrollPanSession {
 /// ⌃⌥ + scroll (#1656): on the Space under the pointer, focus
 /// moves window to window — one per swipe or notch by default
 /// (`ScrollStepMeter`). A Scrolling row pans with the ordinary
-/// focus animation, a Monocle stack flips, and every other layout
-/// steps through its windows in array order, so a held chord
-/// always does something (owner ruling 2026-09-29). A step that
+/// focus animation and a Monocle stack flips. On every other
+/// layout a swipe — a scroll with a finger phase — steps the way
+/// it goes, on the axis its first step locks, and a wheel notch
+/// walks the windows in array order (#3200). A step that
 /// lands on nothing — a row end with wrap off, a lone window —
 /// bumps the ring as the arrow keys do (#436), once per event.
 ///
@@ -53,9 +59,14 @@ extension KiwiCore {
         if event.kind == .began {
             beginScrollPan(at: event.location, session: session)
         }
-        let steps = session.meter.feed(event)
+        let steps = session.meter.feed(locked(event, session))
         if event.kind == .ended { session.space = nil }
         guard steps != 0, let id = session.space else { return }
+        if event.input == .trackpad, session.horizontal == nil {
+            let travel = session.travel
+            session.horizontal = abs(travel.dx) > abs(travel.dy)
+        }
+        let swipe = event.input == .trackpad ? session.horizontal : nil
         // Content follows the fingers: moving it back brings the
         // NEXT window in, so a step runs against the delta's sign.
         let step = steps > 0 ? -1 : 1
@@ -64,9 +75,38 @@ extension KiwiCore {
             // a step that lands on nothing has said so already.
             guard id == state.workspaces.activeSpace,
                 let space = state.workspaces[id],
-                stepScrollPan(space, by: step)
+                stepScrollPan(space, by: step, swipe: swipe)
             else { return }
         }
+    }
+
+    /// A swipe's event as the meter hears it: whole until the
+    /// axis locks, then along the locked axis alone, so a
+    /// diagonal never changes axis before the fingers lift.
+    private func locked(
+        _ event: ScrollGestureEvent,
+        _ session: ScrollPanSession
+    ) -> ScrollGestureEvent {
+        guard event.input == .trackpad, !event.momentum else {
+            return event
+        }
+        guard event.kind == .changed else {
+            session.horizontal = nil
+            session.travel = .zero
+            return event
+        }
+        guard let horizontal = session.horizontal else {
+            session.travel.dx += event.delta.dx
+            session.travel.dy += event.delta.dy
+            return event
+        }
+        var along = event
+        if horizontal {
+            along.delta.dy = 0
+        } else {
+            along.delta.dx = 0
+        }
+        return along
     }
 
     /// Fixes the gesture's Space and makes it the active one, so
@@ -91,25 +131,30 @@ extension KiwiCore {
     }
 
     /// One window on `space`; false where it landed on nothing.
-    /// A row goes through the arrow keys' own `navigate` — row
-    /// step, wrap, float tier (#488), dead-end bump (#436), deferred
-    /// raise and a lens's skip alike — without warping the pointer.
-    private func stepScrollPan(_ space: Space, by step: Int) -> Bool {
+    /// `swipe` is a swipe's locked axis (horizontal or not), nil
+    /// for a wheel. A row, and a swipe on any layout, go through
+    /// the arrow keys' own `navigate` — row step, wrap, float tier
+    /// (#488), dead-end bump (#436), deferred raise and a lens's
+    /// skip alike — without warping the pointer.
+    private func stepScrollPan(
+        _ space: Space,
+        by step: Int,
+        swipe: Bool?
+    ) -> Bool {
+        let row = space.mode == .scrolling || space.mode == .monocle
         let direction = Self.direction(
             step,
-            horizontal: rowIsHorizontal(space)
+            horizontal: row ? rowIsHorizontal(space) : swipe ?? true
         )
-        switch space.mode {
-        case .scrolling, .monocle:
-            return navigate(
-                [.string(direction.rawValue)],
-                swapping: false,
-                warp: false,
-                wrap: focusWrap.mode.withinScreen
-            ).isSuccess
-        default:
+        guard row || swipe != nil else {
             return stepInOrder(space, toward: direction, by: step)
         }
+        return navigate(
+            [.string(direction.rawValue)],
+            swapping: false,
+            warp: false,
+            wrap: focusWrap.mode.withinScreen
+        ).isSuccess
     }
 
     /// The axis a step on `space` runs along: the row's own where
@@ -126,8 +171,8 @@ extension KiwiCore {
         }
     }
 
-    /// Any other layout: the next or previous window in the
-    /// Space's own order, floats included, wrapping at the ends,
+    /// A wheel on any other layout: the next or previous window
+    /// in the Space's own order, floats included, wrapping at the ends,
     /// past every window a lens leaves out (#2103 ruling 45). A
     /// native-fullscreen member is left out: it sits on a Desktop
     /// nobody shows, so the focus gate refuses it (#1345).

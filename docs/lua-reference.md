@@ -5107,9 +5107,17 @@ does not move, even with `mouse.follows_focus` on.
   keys do.
 - **Monocle:** it steps through the windows, wrapping the same
   way.
-- **Any other layout:** it steps to the next or previous window
-  in the Space's window order, floating windows included,
-  wrapping at the ends.
+
+:::unreleased
+On any other layout, a swipe — a scroll with a finger phase, on a
+trackpad or a Magic Mouse — moves focus the way it goes, through
+the same step as [`focus`](#focus): fingers left bring in the
+window to the right, as on a Scrolling row. Its first step fixes
+the axis until the fingers lift, so a diagonal swipe moves along
+one axis only. A wheel notch — a notched, tilt or thumb wheel —
+steps to the next or previous window in the Space's window order,
+floating windows included, wrapping at the ends.
+:::
 
 The gesture never leaves its screen: under
 [`set_focus_wrap("all_screens")`](#set_focus_wrap) it wraps there

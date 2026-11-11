@@ -2171,7 +2171,7 @@
   "shortcuts.gestures.scroll.refused_pan": "Ces touches déplacent déjà le focus de fenêtre en fenêtre. %1$@",
   "shortcuts.gestures.scroll.refused_single": "Maintenez au moins deux touches. Avec une seule touche, le défilement est déjà pris : dans macOS, ⌃ agrandit l'écran avec « Réduire/agrandir », et ⇧, ⌥ ou ⌘ ont une action dans de nombreuses apps.",
   "shortcuts.gestures.scroll.refused_step": "Ces touches servent déjà à passer d'un espace à l'autre. %1$@",
-  "shortcuts.gestures.scroll.sentence": "Maintenez ces touches et faites défiler pour déplacer le focus de fenêtre en fenêtre le long d'une rangée %1$@. Dans tout autre espace, le focus parcourt plutôt ses fenêtres dans l'ordre.",
+  "shortcuts.gestures.scroll.sentence": "Maintenez ces touches et faites défiler pour déplacer le focus de fenêtre en fenêtre le long d'une rangée %1$@. Dans tout autre espace, un balayage déplace le focus dans le sens du défilement, et la molette de la souris le fait passer d'une fenêtre à l'autre dans l'ordre.",
   "shortcuts.gestures.scroll.space_step": "Passer d'un espace à l'autre",
   "shortcuts.gestures.scroll.space_step_sentence": "Maintenez ces touches et faites défiler pour passer à l'espace suivant ou précédent sur l'écran situé sous le pointeur, un par balayage ou par cran de molette.",
   "shortcuts.gestures.scroll.step_distance": "Distance par fenêtre",
