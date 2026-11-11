@@ -16,9 +16,10 @@ struct SpaceHistoryState {
     var kind: SpaceHistoryKind { profileOverride ?? base }
 }
 
-/// `focus_space_back` / `focus_space_forward` walk the history;
+/// `focus_space_back` / `focus_space_forward` walk the history and
+/// `focus_space_last` toggles along it (#3206);
 /// `focus_space_previous` / `focus_space_next` step the Space
-/// order (#1655, rulings 2026-10-09). All four act on the focused
+/// order (#1655, rulings 2026-10-09). All of them act on the focused
 /// screen and never create a Space; the history refuses at an end
 /// with the row-end bump the ⌃⌥⌘ + scroll step makes (#1519), and
 /// the order step wraps unless Wrap focus is Off (#2592).
@@ -52,36 +53,53 @@ extension KiwiCore {
         }
     }
 
+    /// The trail the setting names for the focused screen, the
+    /// Space it shows, and which entries a step may land on: a
+    /// living Space and, per screen, one still on that screen. A
+    /// hidden Space passes — the switch shows it — and so does one
+    /// another Desktop's windows use, Spaces being shared.
+    /// Both history verbs read it (#3206); nil per screen with
+    /// no focused screen.
+    func spaceHistoryWalk() -> (
+        key: SpaceHistory.Key,
+        shown: SpaceID?,
+        reachable: (SpaceID) -> Bool
+    )? {
+        let screen = focusedScreen
+        let perScreen = spaceHistory.kind == .perScreen
+        let key: SpaceHistory.Key
+        let shown: SpaceID?
+        if perScreen {
+            guard let screen else { return nil }
+            key = .screen(screen)
+            shown = state.workspaces.activeSpace(on: screen)
+        } else {
+            key = .allScreens
+            shown = state.workspaces.activeSpace
+        }
+        let workspaces = state.workspaces
+        let reachable: (SpaceID) -> Bool = { space in
+            workspaces[space] != nil
+                && (!perScreen || workspaces.display(of: space) == screen)
+        }
+        return (key, shown, reachable)
+    }
+
     /// One step back (−1) or forward (+1) through the history the
     /// setting names: a cursor, never a visit. An entry whose
     /// Space is gone — or, per screen, now lives on another
     /// screen — is skipped.
     func focusSpaceInHistory(by direction: Int) -> CommandResponse {
         noteSpaceVisits()
-        let screen = focusedScreen
-        let key: SpaceHistory.Key
-        let shown: SpaceID?
-        switch spaceHistory.kind {
-        case .perScreen:
-            guard let screen else { return .fail("no focused screen") }
-            key = .screen(screen)
-            shown = state.workspaces.activeSpace(on: screen)
-        case .allScreens:
-            key = .allScreens
-            shown = state.workspaces.activeSpace
+        guard let walk = spaceHistoryWalk() else {
+            return .fail("no focused screen")
         }
-        let perScreen = spaceHistory.kind == .perScreen
         guard
             let found = spaceHistory.trails.step(
-                under: key,
+                under: walk.key,
                 by: direction,
-                shown: shown,
-                reachable: { space in
-                    state.workspaces[space] != nil
-                        && (!perScreen
-                            || state.workspaces.display(of: space)
-                                == screen)
-                }
+                shown: walk.shown,
+                reachable: walk.reachable
             )
         else {
             bumpAtSpaceEnd(direction)
@@ -90,8 +108,30 @@ extension KiwiCore {
                     + "in the history"
             )
         }
-        spaceHistory.trails.move(under: key, to: found.index)
+        spaceHistory.trails.move(under: walk.key, to: found.index)
         switchSpace(to: found.space, warp: true)
+        return .ok()
+    }
+
+    /// `focus_space_last`: like ⌘Tab for Spaces (#3206). The
+    /// Space the history last left, as an ordinary arrival — a
+    /// visit, so repeated use toggles between two.
+    func focusSpaceLast() -> CommandResponse {
+        noteSpaceVisits()
+        guard let walk = spaceHistoryWalk() else {
+            return .fail("no focused screen")
+        }
+        guard
+            let target = spaceHistory.trails.last(
+                under: walk.key,
+                shown: walk.shown,
+                reachable: walk.reachable
+            )
+        else {
+            bumpAtSpaceEnd(-1)
+            return .fail("no last Space in the history")
+        }
+        switchSpace(to: target, warp: true)
         return .ok()
     }
 

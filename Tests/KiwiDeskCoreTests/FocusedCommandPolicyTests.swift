@@ -24,6 +24,7 @@ struct FocusedCommandPolicyTests {
         "focus_space_next",
         "focus_space_back",
         "focus_space_forward",
+        "focus_space_last",
         // Switch the focused screen (#2512), moving no window.
         "focus_display_last",
         "focus_display",

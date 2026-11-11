@@ -983,6 +983,7 @@
   "keybinding.focus_desktop": "Перейти на Рабочий стол %1$@",
   "keybinding.focus_dir": "Фокус на окно %1$@",
   "keybinding.focus_display_last": "Перейти на последний использованный экран",
+  "keybinding.focus_space_last": "Перейти в последнее использованное пространство",
   "keybinding.go_to_space": "Перейти в пространство %1$@",
   "keybinding.grow_height": "Увеличить высоту",
   "keybinding.grow_width": "Увеличить ширину",

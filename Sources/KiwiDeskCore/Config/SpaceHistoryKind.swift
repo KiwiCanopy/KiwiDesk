@@ -1,7 +1,8 @@
 import Foundation
 
-/// Which history `focus_space_back` and `focus_space_forward`
-/// walk (#1655, `space_history`): each screen's own, or one
+/// Which history `focus_space_back`, `focus_space_forward` and
+/// `focus_space_last` walk (#1655, #3206, `space_history`): each
+/// screen's own, or one
 /// across every screen. With one screen the two are the same.
 public enum SpaceHistoryKind: String, CaseIterable, Codable, Sendable {
     case perScreen = "per_screen"

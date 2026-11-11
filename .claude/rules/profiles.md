@@ -161,7 +161,9 @@ because two real clients now remove drift — see
   seeds in code, so a seed added later needs no generation, and
   CHANGING a shipped seed changes it for everyone who kept it — a
   ruling, never a tidy-up. A seed runs the Shortcuts catalogue's own
-  Lua (`TrackpadGestureConfigTests` ▸ `seedsAreRuled`).
+  Lua, judged against the GUI's catalogue since a gesture-only verb
+  has no keyboard default (`TrackpadSeedCatalogueTests` ▸
+  `seedsAreCatalogueRows`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

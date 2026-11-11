@@ -18,6 +18,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`focus_space`](lua-reference.md#focus_space) | Switches to a Space, hiding the current Space's windows. |
 | [`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward) | Goes back to the Space shown before, along the history space_history names. |
 | [`focus_space_forward`](lua-reference.md#focus_space_back--focus_space_forward) | Goes forward again along the Space history, after focus_space_back. |
+| [`focus_space_last`](lua-reference.md#focus_space_last) | Goes to the Space you were on before, like Cmd-Tab for Spaces; repeated, it toggles between two. |
 | [`focus_space_previous`](lua-reference.md#focus_space_previous--focus_space_next) | Switches to the previous Space in the focused screen's order, stopping at the first. |
 | [`focus_space_next`](lua-reference.md#focus_space_previous--focus_space_next) | Switches to the next Space in the focused screen's order, stopping at the last. |
 | [`focus_display_last`](lua-reference.md#focus_display_last--focus_display) | Goes to the screen you were on before, like Cmd-Tab for screens. |
