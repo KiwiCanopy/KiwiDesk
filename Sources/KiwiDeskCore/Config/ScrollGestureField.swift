@@ -3,7 +3,6 @@ import Foundation
 /// One scroll-gesture setting's value, as the "Applies to"
 /// checklist compares it across profiles (#1656).
 public enum ScrollGestureValue: Hashable, Sendable {
-    case chord(ScrollChord)
     case flag(Bool)
     case natural(NaturalScrolling)
     case points(Double)
@@ -13,8 +12,6 @@ public enum ScrollGestureValue: Hashable, Sendable {
 /// the `RuleReachTable` a Settings row's checklist edits. One case
 /// per `ScrollGestureBase` field (`ScrollGestureConfigParityTests`).
 public enum ScrollGestureField: String, CaseIterable, Sendable {
-    case pan
-    case spaceStep = "space_step"
     case naturalTrackpad = "natural_trackpad"
     case naturalMouse = "natural_mouse"
     case longSwipes = "long_swipes"
@@ -23,8 +20,6 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
     /// This field's value in `base`.
     public func value(in base: ScrollGestureBase) -> ScrollGestureValue {
         switch self {
-        case .pan: .chord(base.pan)
-        case .spaceStep: .chord(base.spaceStep)
         case .naturalTrackpad: .natural(base.naturalTrackpad)
         case .naturalMouse: .natural(base.naturalMouse)
         case .longSwipes: .flag(base.longSwipes)
@@ -37,8 +32,6 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         in override: ScrollGestureOverride
     ) -> ScrollGestureValue? {
         switch self {
-        case .pan: override.pan.map { .chord($0) }
-        case .spaceStep: override.spaceStep.map { .chord($0) }
         case .naturalTrackpad:
             override.naturalTrackpad.map { .natural($0) }
         case .naturalMouse: override.naturalMouse.map { .natural($0) }
@@ -54,8 +47,6 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         into base: inout ScrollGestureBase
     ) {
         switch (self, value) {
-        case (.pan, .chord(let chord)): base.pan = chord
-        case (.spaceStep, .chord(let chord)): base.spaceStep = chord
         case (.naturalTrackpad, .natural(let value)):
             base.naturalTrackpad = value
         case (.naturalMouse, .natural(let value)):

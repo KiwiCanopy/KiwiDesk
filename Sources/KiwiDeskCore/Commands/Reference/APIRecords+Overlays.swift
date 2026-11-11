@@ -192,16 +192,6 @@ extension APIReference {
     ]
 
     static let scrollGestureRecords: [String: APIRecord] = [
-        "set_pan": APIRecord(
-            "Sets the modifiers that move focus by scrolling, like "
-                + "\"control+option\"; \"\" is off.",
-            .text("modifiers")
-        ),
-        "set_space_step": APIRecord(
-            "Sets the modifiers that step between Spaces by "
-                + "scrolling; \"\" is off.",
-            .text("modifiers")
-        ),
         "set_long_swipes": APIRecord(
             "Lets a long trackpad swipe move one more window every "
                 + "step distance of travel.",
@@ -213,36 +203,26 @@ extension APIReference {
             .number("points")
         ),
         "set_natural_scrolling": APIRecord(
-            "Makes a scroll gesture follow the fingers; an input, "
-                + "trackpad or mouse, sets only that one.",
+            "Sets Natural scrolling for scroll gestures: on, off or "
+                + "\"system\" (follow macOS).",
             .boolean("enabled"),
             .choice("input", ScrollInput.self, optional: true)
         ),
     ]
 
-    static let modifierDragRecords: [String: APIRecord] = [
-        "set_move": APIRecord(
-            "Sets the modifiers that move the window under the "
-                + "pointer, and whether a click starts it.",
-            .text("modifiers"),
-            .choice("start", ModifierDragStart.self, optional: true)
-        ),
-        "set_resize": APIRecord(
-            "Sets the modifiers that resize the window under the "
-                + "pointer from its nearest corner.",
-            .text("modifiers"),
-            .choice("start", ModifierDragStart.self, optional: true)
-        ),
-    ]
-
-    static let trackpadGestureRecords: [String: APIRecord] = [
+    static let gestureRecords: [String: APIRecord] = [
         "bind": APIRecord(
-            "Binds a trackpad gesture slot to Lua or a swipe family, "
-                + "with modifiers; no action is None.",
-            .choice("slot", TrackpadGestureSlot.self),
-            .text("action", optional: true),
-            .text("modifiers", optional: true)
-        )
+            "Binds a gesture held with keys to a family, move or "
+                + "resize, Lua, or a direction table.",
+            .choice("gesture", GestureInput.self),
+            .text("keys"),
+            .text("action")
+        ),
+        "unbind": APIRecord(
+            "Turns a gesture held with keys off, a default included.",
+            .choice("gesture", GestureInput.self),
+            .text("keys")
+        ),
     ]
 
     static let quitRecords: [String: APIRecord] = [

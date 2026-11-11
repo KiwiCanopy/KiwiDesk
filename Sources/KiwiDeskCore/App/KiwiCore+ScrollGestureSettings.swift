@@ -19,10 +19,16 @@ extension KiwiCore {
         if resolved != raw, resolved != gestures.resolved {
             onLog("scroll_gesture: refused values turned off or clamped")
         }
+        let bindings = mouse.gestures.resolved
         gestures.adoptResolution(
             base: base,
             profileOverride: profile,
-            resolved: resolved
+            resolved: resolved,
+            routes: Self.scrollRoutes(bindings)
+        )
+        mouse.trackpad.resolve(
+            bindings,
+            natural: gestures.settings.naturalTrackpad
         )
     }
 
@@ -70,36 +76,6 @@ extension KiwiCore {
                 )
             }
             base.stepDistance = points
-        case "scroll_gesture.set_pan", "scroll_gesture.set_space_step":
-            guard
-                let text = args.first?.stringValue,
-                let chord = ScrollChord(spelling: text)
-            else {
-                return .fail(
-                    "expected modifiers like \"control+option\", "
-                        + "or \"\" for off"
-                )
-            }
-            let pan = command.hasSuffix("pan")
-            let resolved =
-                mouse.scroll.profileOverride?.resolved(onto: base)
-                ?? base
-            // The base is written, and the live profile resolves
-            // over it: the chord must clear the other in both.
-            let others =
-                pan
-                ? [base.spaceStep, resolved.spaceStep]
-                : [base.pan, resolved.pan]
-            for other in others {
-                if let refusal = Self.scrollChordRefusal(
-                    chord,
-                    other: other,
-                    heldBy: pan ? .step : .pan
-                ) {
-                    return .fail(refusal)
-                }
-            }
-            if pan { base.pan = chord } else { base.spaceStep = chord }
         default:
             return .fail("unknown command: \(command)")
         }
@@ -116,20 +92,5 @@ extension KiwiCore {
         if let flag = arg?.boolValue { return .pinned(flag) }
         return arg?.stringValue == NaturalScrolling.systemSpelling
             ? .system : nil
-    }
-
-    /// The #1656 ruling's refusals, in CLI English.
-    static func scrollChordRefusal(
-        _ chord: ScrollChord,
-        other: ScrollChord,
-        heldBy: ScrollGestures.Consumer
-    ) -> String? {
-        switch ScrollChordRefusal.of(chord, other: other, heldBy: heldBy) {
-        case nil: return nil
-        case .singleModifier: return "needs two or more modifiers"
-        case .otherGesture:
-            return "the other scroll gesture already uses "
-                + chord.spelling
-        }
     }
 }

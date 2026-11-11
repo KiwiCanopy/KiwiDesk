@@ -45,10 +45,11 @@ extension Profile {
     /// since the seeded pin row on ⌃⌥P runs Pocket (#2446), 32 the
     /// pocket's place is KiwiShelf's (#2678), 33 the drag markers'
     /// look retired (#2797), 34 its Show is the profile's (#2978),
-    /// 35 a binding may be a key sequence, with no step (#1871).
+    /// 35 a binding may be a key sequence, with no step (#1871),
+    /// 36 the gestures are one `gesture` map (#3199).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 35
+    public static let currentFormat = 36
 }

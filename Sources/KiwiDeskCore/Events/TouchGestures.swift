@@ -1,18 +1,15 @@
 import Foundation
 
-/// The main-actor front of the touch reader (#1873). One door,
-/// `resolve`, takes the resolve's inputs; the reader runs only
-/// while the core is started AND a bound slot reads touches, so a
-/// user with every touch slot unbound has no reader (ruling ▸
-/// Reader: no binding, no reader).
+/// The main-actor front of the touch reader (#1873, #3199). One
+/// door, `resolve`, takes the resolved gesture bindings; the reader
+/// runs only while the core is started AND a bound key reads
+/// touches, so a user with every touch gesture unbound has no
+/// reader (ruling ▸ Reader: no binding, no reader).
 @MainActor
 public final class TouchGestures {
     public typealias Handler =
-        @MainActor (
-            TrackpadGestureSlot,
-            TrackpadGestureBinding,
-            TrackpadGestureEvent
-        ) -> Void
+        @MainActor (GestureKey, GestureAction, TrackpadGestureEvent)
+        -> Void
     typealias MakeReader =
         @MainActor (@escaping TouchReader.Deliver) -> TouchReaderHandle?
 
@@ -27,15 +24,14 @@ public final class TouchGestures {
         TrackpadSystemGestures.readLive()
     }
 
-    /// The seeds until the first resolve, as on a fresh install.
-    public private(set) var bindings = TrackpadGestureSeeds.resolved(
-        base: TrackpadGestureMap(),
-        profile: nil
+    /// The touch inputs' bindings; the seeds' until the first
+    /// resolve, as on a fresh install.
+    public private(set) var bindings = TouchGestures.touchBindings(
+        GestureSeeds.resolved(base: GestureMap(), profile: nil)
     )
-    /// The inputs `KiwiCore.applyTrackpadGestures` resolves from,
-    /// written through `resolve` alone.
-    private(set) var base = TrackpadGestureMap()
-    private(set) var profileOverride: TrackpadGestureMap?
+    /// Whether a swipe keeps its direction: the trackpad's Natural
+    /// scrolling, the one flip a swipe takes (#3200 amendment).
+    private(set) var natural = true
     private var handler: Handler?
     private var reader: TouchReaderHandle?
     /// The last reader verdict logged, so a Mac with no trackpad
@@ -55,23 +51,24 @@ public final class TouchGestures {
     }
 
     /// The one write of the resolve's inputs and output.
+    /// The one door: `KiwiCore.applyGestures`'s, with the
+    /// resolved bindings and the trackpad's Natural scrolling.
     func resolve(
-        base: TrackpadGestureMap,
-        profileOverride: TrackpadGestureMap?
+        _ resolved: [GestureKey: GestureAction],
+        natural: Bool
     ) {
-        self.base = base
-        self.profileOverride = profileOverride
-        bindings = TrackpadGestureSeeds.resolved(
-            base: base,
-            profile: profileOverride
-        )
+        bindings = Self.touchBindings(resolved)
+        self.natural = natural
         sync()
     }
 
-    /// A config load's reset: the load configures at its tail.
-    func resetInputs() {
-        base = TrackpadGestureMap()
-        profileOverride = nil
+    /// The bindings the touch reader or a gesture event fires.
+    static func touchBindings(
+        _ resolved: [GestureKey: GestureAction]
+    ) -> [GestureKey: GestureAction] {
+        resolved.filter { key, _ in
+            key.input.device == .trackpad && key.input != .swipe2
+        }
     }
 
     func start() {
@@ -99,22 +96,31 @@ public final class TouchGestures {
     func receive(_ events: [TrackpadGestureEvent]) {
         guard started, let handler else { return }
         let system = readSystemGestures()
-        for event in events {
-            guard let slot = Self.slot(of: event),
-                let binding = bindings[slot],
-                binding.modifiers == event.modifiers,
+        for var event in events {
+            guard let input = Self.input(of: event),
+                let action = bindings[GestureKey(input, event.modifiers)],
                 !system.owns(event)
             else { continue }
-            handler(slot, binding, event)
+            // Natural scrolling off reverses a family's swipe, the one
+            // flip; a direction table's arm keeps the fingers' way.
+            if !natural, case .family = action,
+                case .swipe(let direction) = event.kind
+            {
+                event.kind = .swipe(direction.opposite)
+            }
+            handler(GestureKey(input, event.modifiers), action, event)
         }
     }
 
-    static func slot(of event: TrackpadGestureEvent) -> TrackpadGestureSlot? {
+    /// The input a recognized gesture is: a tap or a swipe by its
+    /// fingers, a gesture event by its slot.
+    static func input(of event: TrackpadGestureEvent) -> GestureInput? {
         switch event.kind {
         case .tap: return .tap(fingers: event.fingers)
         case .swipe: return .swipe(fingers: event.fingers)
         case .gesture(let slot):
-            return slot.source == .gestureEvents ? slot : nil
+            guard slot.source == .gestureEvents else { return nil }
+            return GestureInput(rawValue: slot.rawValue)
         }
     }
 
@@ -130,14 +136,20 @@ public final class TouchGestures {
 
     private var gestureEventChords: [TrackpadGestureSlot: ScrollChord] {
         guard started else { return [:] }
-        return bindings.filter { $0.key.source == .gestureEvents }
-            .mapValues(\.modifiers)
+        var out: [TrackpadGestureSlot: ScrollChord] = [:]
+        for key in bindings.keys {
+            guard let slot = TrackpadGestureSlot(rawValue: key.input.rawValue),
+                slot.source == .gestureEvents
+            else { continue }
+            out[slot] = key.keys
+        }
+        return out
     }
 
     /// Whether a bound slot needs the touch reader.
     private var needsReader: Bool {
         handler != nil
-            && bindings.keys.contains { $0.source == .touches }
+            && bindings.keys.contains { $0.input.fingers != nil }
     }
 
     private func sync() {

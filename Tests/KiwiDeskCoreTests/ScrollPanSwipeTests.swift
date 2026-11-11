@@ -72,7 +72,11 @@ struct ScrollPanSwipeTests {
         _ deltas: [(Double, Double)],
         input: ScrollGestureEvent.Input = .trackpad
     ) {
-        core.handleScrollPan(event(.began, input: input), session: session)
+        core.handleScrollPan(
+            event(.began, input: input),
+            session: session,
+            directional: true
+        )
         for (index, delta) in deltas.enumerated() {
             core.handleScrollPan(
                 event(
@@ -82,10 +86,15 @@ struct ScrollPanSwipeTests {
                     input: input,
                     time: Double(index)
                 ),
-                session: session
+                session: session,
+                directional: true
             )
         }
-        core.handleScrollPan(event(.ended, input: input), session: session)
+        core.handleScrollPan(
+            event(.ended, input: input),
+            session: session,
+            directional: true
+        )
     }
 
     private func focused(_ core: KiwiCore) -> WindowID? {

@@ -30,19 +30,6 @@ struct GesturesScrollEntries: View {
             playing: $playing
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                reachRow(.pan) {
-                    ScrollChordRecorderField(
-                        name: ScrollGestureWords.pan,
-                        chord: $model.config.scrollGesture.pan,
-                        other: gestures.spaceStep,
-                        otherGesture: .step,
-                        reveal: reveal
-                    )
-                    .searchAnchored(
-                        SettingsCatalog.shortcuts.gestures.children
-                            .scrollPan
-                    )
-                }
                 reachRow(.longSwipes) {
                     Toggle(
                         ScrollGestureWords.longSwipes,
@@ -94,35 +81,9 @@ struct GesturesScrollEntries: View {
             gestures: gestures,
             playing: $playing
         ) {
-            reachRow(.spaceStep) {
-                ScrollChordRecorderField(
-                    name: ScrollGestureWords.label(.spaceStep),
-                    chord: $model.config.scrollGesture.spaceStep,
-                    other: gestures.pan,
-                    otherGesture: .pan,
-                    reveal: reveal
-                )
-                .searchAnchored(
-                    SettingsCatalog.shortcuts.gestures.children
-                        .scrollSpaceStep
-                )
-            }
+            EmptyView()
         }
         .gestureAnchored(.spaceStep)
-    }
-
-    /// Go to: a gesture's recorder row, through the one reveal
-    /// channel the diff rows take.
-    private func reveal(_ consumer: ScrollGestures.Consumer) {
-        let control =
-            switch consumer {
-            case .pan: Self.controls.scrollPan
-            case .step: Self.controls.scrollSpaceStep
-            }
-        model.nav.pendingReveal = SettingsAnchor(
-            destination: .shortcuts,
-            anchor: control.id
-        )
     }
 
     /// Indented under the box it depends on, and greyed — never

@@ -268,14 +268,12 @@ extension KiwiCore {
             // nothing (#1685).
             return lookCommand(command, args)
         case let gesture where gesture.hasPrefix("scroll_gesture."):
-            // No window moves: the tap's chords change, nothing
+            // No window moves: the tap's settings change, nothing
             // else, so no retile trailer (#1656).
             return scrollGestureCommand(command, args)
-        // No window moves, only chords change (#2447, #1873).
-        case let drag where drag.hasPrefix("modifier_drag."):
-            return modifierDragCommand(command, args)
-        case let gesture where gesture.hasPrefix("trackpad_gesture."):
-            return trackpadGestureCommand(command, args)
+        // No window moves, only bindings change (#3199).
+        case let gesture where gesture.hasPrefix("gesture."):
+            return gestureCommand(command, args)
         default:
             return layoutCommand(command, args)
         }

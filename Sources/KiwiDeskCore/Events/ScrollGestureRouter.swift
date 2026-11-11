@@ -26,6 +26,16 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     /// hand's own spacing, which a busy main actor would squash.
     /// No default: an event built without it reads as a spin.
     public var time: Double
+    /// True where Natural scrolling off reversed `delta`; set by
+    /// `ScrollGestures.receive` alone.
+    public var reversed = false
+
+    /// The hand's own motion, whatever Natural scrolling says: a
+    /// direction table's arm means the fingers' way (#3199 ▸ it
+    /// never flips a per-direction arm).
+    public var hand: CGVector {
+        reversed ? CGVector(dx: -delta.dx, dy: -delta.dy) : delta
+    }
 }
 
 /// Decides, per scroll event, whether a registered chord owns it

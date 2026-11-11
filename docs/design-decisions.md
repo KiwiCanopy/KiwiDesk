@@ -13098,6 +13098,9 @@ different ground:
   (toggle maximized) and ⌃⌥ + rotate (cycle the layout), which ship
   bound but fire nothing until it lands. Its mask arms only while such
   a slot is bound, so the seeds put it on every default install too.
+  *Amended (#3199): the spread and rotate seeds are dropped*, since
+  those gestures stay hidden until this consumer fires them; its
+  mask now arms only for a user's own binding.
   Which TCC service that mask asks for at `.cgSessionEventTap` is
   unmeasured: the ruling owes that measurement before #2447 builds,
   and this entry claims nothing for it.
@@ -13122,6 +13125,11 @@ bump: an older build ignores it, and its Save drops it. The map itself
 decodes strictly, so a slot a later release adds is a name this build
 refuses, and adding one bumps `GuiConfig.currentFormat` and
 `Profile.currentFormat`.
+
+*Amended (#3199): the slots are keys of the one binding list*
+(▸ Shortcuts, *Mouse and trackpad gestures are one list of
+bindings*), stored as `gesture` in the same sparse shape, keyed by
+input and keys.
 :::
 
 :::unreleased
@@ -13216,6 +13224,15 @@ gesture keeps one rule, and no click reached the app that would
 otherwise have focused a float. The press moves no focus, so a press
 that never becomes a drag takes none; a float dropped by its own
 title bar is macOS's to focus (owner with ui-designer, 2026-11-08).
+
+*Amended (#3199, owner 2026-11-11): the grabs are bindings.* The
+move and the resize are the `move` and `resize` actions of the
+binding list (▸ Shortcuts, *Mouse and trackpad gestures are one
+list of bindings*), on the `drag` input with the button held and
+on `hover_move` for "+ move (no click)", so they take the profile
+layer, and the "global, crosses nothing" above holds no longer.
+The one-modifier choice and the move's priority over a resize on
+the same keys stand.
 :::
 
 **An absent capability is not a greyed one, and an absent
@@ -16097,6 +16114,64 @@ fingers up and is stored as such, so a binding reads the same in
 the file whatever the flag says.
 :::
 
+:::unreleased
+**Mouse and trackpad gestures are one list of bindings, keyed by
+the input and the keys held with it** (#3199, owner rulings
+2026-11-11; ui-designer and architect-reviewer advised). Fixed
+slots — a pan chord, a Space-step chord, a move and a resize
+chord, a trackpad slot list — each owed their own verb, their own
+refusals against each other and their own Settings row, and none
+could answer "the same gesture with other keys" or reach a middle
+click or a tilt wheel. A list keyed by `input:keys` makes one
+gesture bindable many times, and makes a clash impossible by
+construction: the same input with the same keys is one key in the
+map, so the cross-refusal that kept the pan off the Space step's
+chord have nothing left to rule. A swipe and each wheel axis
+under one chord are separate keys, which is how the pan's split
+by kind (above) is stored; the seeds bind both wheel axes under
+⌃⌥ and ⌃⌥⌘, so a tilt or thumb wheel keeps the pan and the Space
+step it reached before the list (orchestrator ruling 2026-11-11). An input
+with directions binds a family, whose argument is the direction,
+or one action per direction; a single Lua for every direction is
+refused, since it would throw away the one thing the hand said.
+
+**The list layers like the shortcuts, the drag chords included.**
+The base sits in `gui.json` over the code's seeds and a profile's
+sparse override over the base, a key left out inheriting and
+`null` the tombstone — the trackpad slots' shape, which this
+replaces. A seed is a real binding, so a seed a later release adds
+reaches every install that never touched its key, and changing a
+shipped seed is a ruling, for the mirror reason. The modifier
+drags were global because no per-profile value preceded them;
+as bindings of the same list they take the profile layer with the
+rest (owner, 2026-11-11), since a user who gives two profiles
+different keys expects every chord on the page to follow.
+
+**Click-free grabs are their own input, `hover_move`, not a
+`start` field** (owner, 2026-11-11). Whether the button is held is
+part of what the hand does, so it belongs in the key, where it
+can carry its own keys and be bound or left unbound like any
+other gesture; a `start` on the action made one binding mean two
+gestures. There is no edge input either: a resize already picks
+its edge or corner from where the pointer sits in the window, so
+the edge is not something the hand chooses apart from the grab.
+
+**The migration folds every old key into the list, and a profile
+pays one trade for it** (`ConfigMigration+Gestures.swift`).
+`trackpad_gesture`, `modifier_drag` and `scroll_gesture`'s `pan`
+and `space_step` leave the file, each value becoming its key; a
+value that moved off its seed also tombstones the seed's key,
+because the map lies over the seeds and the seed would otherwise
+keep firing beside it. A profile file is migrated alone and cannot
+read `gui.json`, so its override tombstones the SEED's key, never
+the base's: where the base had also moved off the seed, the base's
+binding fires in that profile beside the profile's own. Reading
+`gui.json` from a profile's step would make one file's migration
+depend on another file's state and on the order the two are read;
+the doubled binding is visible instead, and a `null` on its key
+in the profile removes it.
+:::
+
 **One swipe moves one window by default, and long swipes are a
 tick box.** Counting by distance — a window per ~60 pt of finger
 travel — makes a single window hard to hit (measured on a device
@@ -16135,6 +16210,14 @@ never leaves a value out, so there is no "Not here", and turning
 the gesture off in one profile is an empty chord stored as that
 profile's override.
 
+:::unreleased
+*Amended (#3199): the chords left these settings for the binding
+list above.* `scroll_gesture` keeps Natural scrolling, long swipes
+and the step distance, which still store every field in the base;
+turning a gesture off in one profile is that profile's `null` on
+its key.
+:::
+
 **Natural scrolling is KiwiDesk's own, per input, and on by
 default.** The gesture moves windows, not the content under the
 pointer, so the direction a user chose for documents in macOS
@@ -16148,6 +16231,22 @@ quote Apple's own **Natural scrolling** and *Content tracks
 finger movement*, so the concept is the one the user already
 knows from System Settings, and the default matches macOS's
 own.
+
+:::unreleased
+*Amended (#3200 ruling ▸ "System" as a third value, owner
+2026-11-11; ui-designer advised): the default is `"system"`, which
+follows macOS live.* Each flag stores `"system"`, `true` or
+`false`. "On, as macOS's" was right only for a Mac whose owner
+kept macOS's default, and a seed copied once at first run would
+go stale the day the user flipped macOS's switch — the inverse of
+what someone who never touched KiwiDesk's row expects. `"system"`
+reads macOS's one global default (`com.apple.swipescrolldirection`)
+at the first start and again on its change notice, never per
+scroll event, so a scroll pays nothing for it; `true` and `false`
+still pin each input apart for the user who wants the gesture
+against their documents. The decoder accepts exactly the three, so
+a stored bool keeps its meaning and no `ConfigMigration` is owed.
+:::
 
 **The chord takes two or more modifiers, and that is why there
 is no Zoom warning.** Measured on macOS 27 with Zoom's "Use
@@ -16177,6 +16276,15 @@ existed, so it was written for the pan. The refusal under either
 recorder offers **Go to** and nothing else — the other gesture's
 row is where the user decides which of the two gives the keys
 up.
+
+:::unreleased
+*Amended (#3199): the refusal is retired with the fixed chords.*
+The pan and the Space step are bindings of the one list, and one
+input with one set of keys is one binding, so the two can no
+longer meet on a chord. ⇧ stays allowed on a swipe and is refused
+on a wheel, since macOS turns ⇧ + wheel into a sideways scroll,
+which is `wheel_x`'s.
+:::
 
 **⌃⌥⌘ + scroll steps through the Space order of the screen under
 the pointer, one Space per swipe or notch** (#1519, owner and

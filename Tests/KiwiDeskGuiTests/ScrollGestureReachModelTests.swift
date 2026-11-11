@@ -11,7 +11,6 @@ import Testing
 @MainActor
 struct ScrollGestureReachModelTests {
     private let natural = ScrollGestureField.naturalMouse.rawValue
-    private let pan = ScrollGestureField.pan.rawValue
 
     /// Work (loaded) turns Natural scrolling off for the mouse;
     /// Home is stored and follows the base.
@@ -37,35 +36,6 @@ struct ScrollGestureReachModelTests {
             spaceModes: [:],
             settings: TilingSettings()
         )
-    }
-
-    @Test("the loaded page shows its own value, listed as its own")
-    func ownValueIsListed() throws {
-        let model = try makeModel()
-        #expect(model.config.scrollGesture.naturalMouse == .off)
-        let row = try #require(model.scrollReach(natural))
-        #expect(!row.shared && row.users == ["Work"])
-        #expect(try #require(model.scrollReach(pan)).shared)
-        // gui.json keeps the shared value, whatever the page shows.
-        #expect(model.sidecarConfig.scrollGesture == .defaults)
-    }
-
-    @Test("a shared edit writes gui.json and leaves the profiles")
-    func sharedEditWritesTheBase() throws {
-        let model = try makeModel()
-        model.config.scrollGesture.pan = [.command, .option]
-        #expect(model.globalsChanged)
-        model.updateActiveProfile()
-        let core = model.core
-        #expect(
-            core.guiConfigStore.load()?.scrollGesture.pan
-                == [.command, .option]
-        )
-        #expect(
-            try core.profiles.read(name: "Work").scrollGesture
-                == ScrollGestureOverride(naturalMouse: .off)
-        )
-        #expect(try core.profiles.read(name: "Home").scrollGesture == nil)
     }
 
     @Test("ticking Home writes Work's own value into Home's file")

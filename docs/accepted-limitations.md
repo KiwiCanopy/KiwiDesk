@@ -172,7 +172,7 @@ again if a burst comes up short. No fix is planned.
 
 :::unreleased
 A ⌃⌘ or ⌃⌥ press of a
-[modifier drag](lua-reference.md#modifier-drags) over anything
+[`move` or `resize` grab](lua-reference.md#gesture-actions) over anything
 KiwiDesk cannot move there — the desktop, the Dock, the menu bar, a
 bar, a window in full screen or on a Space nobody shows — does
 nothing, and the app under the pointer never gets the click. The

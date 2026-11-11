@@ -97,15 +97,11 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case `import` = "(action) shortcuts.import"
     case restoreDefaults = "(action) shortcuts.restore_defaults"
     // The scroll gestures (#1656, #1519).
-    case scrollPan = "config.scrollGesture.pan"
     case scrollLongSwipes = "config.scrollGesture.longSwipes"
     case scrollStepDistance = "config.scrollGesture.stepDistance"
     case scrollNaturalTrackpad = "config.scrollGesture.naturalTrackpad"
     case scrollNaturalMouse = "config.scrollGesture.naturalMouse"
-    case scrollSpaceStep = "config.scrollGesture.spaceStep"
     // The modifier drags (#2447): each row's chord and start.
-    case modifierDragMove = "config.modifierDrag.move"
-    case modifierDragResize = "config.modifierDrag.resize"
 }
 
 extension ShortcutsKey {
@@ -211,13 +207,9 @@ extension ShortcutsKey {
                 .atRest,
                 gate: .runtime(.luaImportAvailable)
             )
-        case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
-            .scrollSpaceStep, .scrollNaturalTrackpad,
-            .scrollNaturalMouse:
+        case .scrollLongSwipes, .scrollStepDistance,
+            .scrollNaturalTrackpad, .scrollNaturalMouse:
             // The Mouse & trackpad drawer's first group (#1656).
-            return .row(.shortcuts, .gestures, .showMore)
-        case .modifierDragMove, .modifierDragResize:
-            // Mouse & trackpad ▸ On your windows (#2447).
             return .row(.shortcuts, .gestures, .showMore)
         case .restoreDefaults:
             // Always drawn; greys at the defaults or on another layer (#3074).

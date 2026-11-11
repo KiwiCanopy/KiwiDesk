@@ -156,12 +156,14 @@ because two real clients now remove drift — see
   the shortcut base above, its chord judged free as registered
   (`ResetSizesSeedTests` ▸ `movedLayerGetsHyper`,
   `bareRHoldsHyperR`).
-- **A trackpad gesture seed reaches every install that never
-  touched its slot (#1873)**: the stored slot map is sparse over the
-  seeds in code, so a seed added later needs no generation, and
-  CHANGING a shipped seed changes it for everyone who kept it — a
-  ruling, never a tidy-up. A seed runs the Shortcuts catalogue's own
-  Lua (`TrackpadGestureConfigTests` ▸ `seedsAreRuled`).
+- **A gesture seed reaches every install that never touched its
+  key (#1873, #3199)**: the stored `gesture` map is sparse over
+  `GestureSeeds.seeds` in code, so a seed added later needs no
+  generation, and CHANGING a shipped seed changes it for everyone
+  who kept it — a ruling, never a tidy-up. The default rows and
+  Restore Defaults read that one list, never a hand copy. A Lua
+  seed runs the Shortcuts catalogue's own Lua
+  (`GestureBindingTests` ▸ `seedsAreRuled`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

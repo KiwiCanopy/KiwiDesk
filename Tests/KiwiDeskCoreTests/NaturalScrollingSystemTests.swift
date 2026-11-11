@@ -44,10 +44,11 @@ struct NaturalScrollingSystemTests {
     @Test("a system input follows macOS's change; a pinned one does not")
     func followsTheHost() {
         let core = makeTestCore()
-        var host: Bool? = false
+        final class Host: @unchecked Sendable { var value: Bool? = false }
+        let host = Host()
         var notice: (@MainActor () -> Void)?
         core.mouse.scroll.host = HostNaturalScrolling(
-            read: { host },
+            read: { host.value },
             watch: { notice = $0 }
         )
         var base = ScrollGestureBase.defaults
@@ -56,7 +57,7 @@ struct NaturalScrollingSystemTests {
         core.mouse.scroll.followHost()
         #expect(!core.mouse.scroll.settings.naturalTrackpad)
         #expect(core.mouse.scroll.settings.naturalMouse)
-        host = true
+        host.value = true
         notice?()
         #expect(core.mouse.scroll.settings.naturalTrackpad)
         #expect(core.mouse.scroll.settings.naturalMouse)

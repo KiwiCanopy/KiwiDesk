@@ -89,16 +89,12 @@ extension KiwiCore {
             base: base?.scrollGesture,
             profile: profile?.scrollGesture
         )
-        applyTrackpadGestures(
-            base: base?.trackpadGesture,
-            profile: profile?.trackpadGesture
-        )
+        applyGestures(base: base?.gesture, profile: profile?.gesture)
         applySpaceHistory(
             base: base?.spaceHistory,
             profile: profile?.spaceHistory
         )
         applyModeCycle(base: base?.modeCycle, profile: profile?.modeCycle)
-        applyModifierDrag(base?.modifierDrag)
         applyFocusWrap(base: base?.focusWrap, profile: profile?.focusWrap)
     }
 

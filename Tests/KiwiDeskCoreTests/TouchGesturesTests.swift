@@ -16,7 +16,7 @@ private final class FakeReader: TouchReaderHandle {
 @Suite("Touch gestures front")
 struct TouchGesturesTests {
     private static let hyper: ScrollChord = [.control, .option]
-    private typealias Fired = (TrackpadGestureSlot, TrackpadGestureEvent)
+    private typealias Fired = (GestureInput, TrackpadGestureEvent)
 
     private final class Box {
         var readers: [FakeReader] = []
@@ -36,41 +36,33 @@ struct TouchGesturesTests {
             box.readers.append(reader)
             return reader
         }
-        gestures.setHandler { slot, _, event in
-            box.fired.append((slot, event))
+        gestures.setHandler { key, _, event in
+            box.fired.append((key.input, event))
         }
         return (gestures, box)
     }
 
-    /// `entries`, with every other touch slot unbound, so only
-    /// `entries` read touches.
+    /// `entries` alone, the seeds left out, so only `entries`
+    /// read touches.
     private func map(
-        _ entries: [TrackpadGestureSlot: TrackpadGestureEntry]
-    ) -> TrackpadGestureMap {
-        var all = entries
-        for slot in TrackpadGestureSlot.allCases
-        where slot.source == .touches && all[slot] == nil {
-            all[slot] = .unbound
-        }
-        return TrackpadGestureMap(all)
+        _ entries: [GestureKey: GestureAction]
+    ) -> [GestureKey: GestureAction] {
+        entries
     }
 
     @Test("no touch slot bound, no reader; one bound starts it")
     func readerFollowsTheBindings() {
         let (gestures, box) = front()
-        gestures.resolve(base: map([:]), profileOverride: nil)
+        gestures.resolve(map([:]), natural: true)
         gestures.start()
         #expect(box.readers.isEmpty, "a pinch slot reads no touches")
         #expect(!gestures.isReading)
         gestures.resolve(
-            base: map([.tap4: .bound(.init(action: "x()"))]),
-            profileOverride: nil
+            map([GestureKey(.tap4): .run(LuaAction(lua: "x()"))]),
+            natural: true
         )
         #expect(box.readers.count == 1)
-        gestures.resolve(
-            base: map([:]),
-            profileOverride: nil
-        )
+        gestures.resolve(map([:]), natural: true)
         #expect(box.readers.first?.stopped == true)
         #expect(!gestures.isReading)
     }
@@ -79,8 +71,8 @@ struct TouchGesturesTests {
     func seedsStartTheReader() {
         let (gestures, box) = front()
         gestures.resolve(
-            base: TrackpadGestureMap(),
-            profileOverride: nil
+            GestureSeeds.resolved(base: GestureMap(), profile: nil),
+            natural: true
         )
         #expect(box.readers.isEmpty, "not before the start")
         gestures.start()
@@ -106,10 +98,10 @@ struct TouchGesturesTests {
     func exactModifiers() {
         let (gestures, box) = front()
         gestures.resolve(
-            base: map([
-                .swipe3: .bound(.init(action: "focus", modifiers: Self.hyper))
+            map([
+                GestureKey(.swipe3, Self.hyper): .family(.focus)
             ]),
-            profileOverride: nil
+            natural: true
         )
         gestures.start()
         gestures.receive([
@@ -130,12 +122,12 @@ struct TouchGesturesTests {
         )
         let (gestures, box) = front(system: system)
         gestures.resolve(
-            base: map([
-                .tap3: .bound(.init(action: "a()")),
-                .tap4: .bound(.init(action: "b()")),
-                .swipe3: .bound(.init(action: "focus", modifiers: Self.hyper)),
+            map([
+                GestureKey(.tap3): .run(LuaAction(lua: "a()")),
+                GestureKey(.tap4): .run(LuaAction(lua: "b()")),
+                GestureKey(.swipe3, Self.hyper): .family(.focus),
             ]),
-            profileOverride: nil
+            natural: true
         )
         gestures.start()
         gestures.receive([
@@ -148,6 +140,26 @@ struct TouchGesturesTests {
         #expect(box.fired.first?.1.kind == .swipe(.up))
     }
 
+    @Test("Natural off flips a family's swipe, never a table's arm")
+    func naturalOffFlipsFamiliesOnly() {
+        let (gestures, box) = front()
+        gestures.resolve(
+            map([
+                GestureKey(.swipe3, Self.hyper): .family(.focus),
+                GestureKey(.swipe4, Self.hyper): .split([
+                    .up: LuaAction(lua: "a()")
+                ]),
+            ]),
+            natural: false
+        )
+        gestures.start()
+        gestures.receive([
+            event(.swipe(.up), 3, Self.hyper),
+            event(.swipe(.up), 4, Self.hyper),
+        ])
+        #expect(box.fired.map(\.1.kind) == [.swipe(.down), .swipe(.up)])
+    }
+
     @Test("the preferences are read afresh for each batch")
     func prefsReadPerBatch() {
         final class Prefs { var system = TrackpadSystemGestures.unread }
@@ -155,8 +167,8 @@ struct TouchGesturesTests {
         let (gestures, box) = front()
         gestures.readSystemGestures = { prefs.system }
         gestures.resolve(
-            base: map([.tap3: .bound(.init(action: "a()"))]),
-            profileOverride: nil
+            map([GestureKey(.tap3): .run(LuaAction(lua: "a()"))]),
+            natural: true
         )
         gestures.start()
         gestures.receive([event(.tap, 3)])
@@ -171,8 +183,8 @@ struct TouchGesturesTests {
     func rearmRebuilds() {
         let (gestures, box) = front()
         gestures.resolve(
-            base: map([.tap4: .bound(.init(action: "b()"))]),
-            profileOverride: nil
+            map([GestureKey(.tap4): .run(LuaAction(lua: "b()"))]),
+            natural: true
         )
         gestures.rearm()
         #expect(box.readers.isEmpty, "stopped: nothing to rebuild")
@@ -187,8 +199,8 @@ struct TouchGesturesTests {
     func stoppedDropsEvents() {
         let (gestures, box) = front()
         gestures.resolve(
-            base: map([.tap4: .bound(.init(action: "b()"))]),
-            profileOverride: nil
+            map([GestureKey(.tap4): .run(LuaAction(lua: "b()"))]),
+            natural: true
         )
         gestures.receive([event(.tap, 4)])
         gestures.start()
@@ -203,8 +215,9 @@ struct TouchGesturesTests {
         var pushed: [[TrackpadGestureSlot: ScrollChord]] = []
         gestures.onGestureEventChords = { pushed.append($0) }
         gestures.resolve(
-            base: TrackpadGestureMap([.spread: .unbound]),
-            profileOverride: nil
+            map([GestureKey(.rotate, Self.hyper): .run(LuaAction(lua: "r()"))]
+            ),
+            natural: true
         )
         #expect(pushed.last == [:], "nothing before the start")
         gestures.start()

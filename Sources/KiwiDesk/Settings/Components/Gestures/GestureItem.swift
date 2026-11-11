@@ -37,23 +37,18 @@ enum GestureItem: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Whether the gesture does nothing on this draft: its chord is
-    /// cleared (Core's verdict, so a hand-edited lone ⌃ greys too).
-    func isOff(_ gestures: ScrollGestureBase) -> Bool {
-        switch self {
-        case .scrollStep: return gestures.sanitized.pan.isEmpty
-        case .spaceStep: return gestures.sanitized.spaceStep.isEmpty
-        default: return false
-        }
-    }
+    /// Whether the gesture does nothing on this draft. The scroll
+    /// chords are gesture bindings (#3199), which #3183's card draws
+    /// and judges; until then no entry greys.
+    func isOff(_ gestures: ScrollGestureBase) -> Bool { false }
 
     @MainActor @ViewBuilder
     func picture(t: CGFloat, gestures: ScrollGestureBase) -> some View {
         switch self {
         case .scrollStep:
-            GesturePicture.ScrollStep(t: t, chord: gestures.pan)
+            GesturePicture.ScrollStep(t: t, chord: GestureSeeds.panKeys)
         case .spaceStep:
-            GesturePicture.SpaceStep(t: t, chord: gestures.spaceStep)
+            GesturePicture.SpaceStep(t: t, chord: GestureSeeds.stepKeys)
         case .hoverFocus: GesturePicture.HoverFocus(t: t)
         case .followFocus: GesturePicture.FollowFocus(t: t)
         case .swap: GesturePicture.Swap(t: t)

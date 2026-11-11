@@ -50,8 +50,9 @@ extension APIReference {
         PrivatePathSelfTest.command: .query,
         "enable_wake_restore": .setting,
         "bind_profile_to_desktop": .setting,
-        // A gesture slot's binding, stored as a shortcut is (#1873).
-        "trackpad_gesture.bind": .setting,
+        // A gesture's binding, stored as a shortcut is (#3199).
+        "gesture.bind": .setting,
+        "gesture.unbind": .setting,
         // The Screen pin, stored as the Desktop binding is.
         "pin_space_to_display": .setting,
         // Config-time declarations: they do nothing on a key.

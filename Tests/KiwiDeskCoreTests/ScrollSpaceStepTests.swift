@@ -241,19 +241,6 @@ struct ScrollSpaceStepTests {
         #expect(warps == 1)
     }
 
-    /// Bootstrap wires the consumer, so the tap takes its chord;
-    /// unwired, the tap would let ⌃⌥⌘ + scroll reach the window.
-    @Test("bootstrap wires the step consumer")
-    func wired() {
-        let core = makeTestCore()
-        let tap = RecordingTap()
-        core.mouse.scroll.makeTap = { _ in tap }
-        var base = ScrollGestureBase.defaults
-        base.pan = []
-        core.applyScrollGestures(base: base, profile: nil)
-        core.mouse.scroll.start()
-        #expect(tap.chords == [Self.chord])
-    }
 }
 
 private final class RecordingTap: ScrollTapHandle {

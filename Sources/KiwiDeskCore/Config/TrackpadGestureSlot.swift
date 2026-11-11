@@ -1,8 +1,8 @@
 import Foundation
 
-/// One fixed trackpad gesture a binding can take (#1873 ruling
-/// 2026-11-08). The raw values are the Lua and JSON names, chosen
-/// Lua-first: `trackpad_gesture.bind("tap4", …)`.
+/// One gesture the touch router and the gesture-event tap
+/// recognize (#1873). Its raw value is the `GestureInput` a binding
+/// names (#3199), which is what matches the two.
 public enum TrackpadGestureSlot: String, CaseIterable, Codable, Sendable {
     case tap3, tap4, tap5
     case swipe3, swipe4, swipe5
@@ -68,34 +68,5 @@ public enum TrackpadGestureSlot: String, CaseIterable, Codable, Sendable {
 
     static func swipe(fingers: Int) -> TrackpadGestureSlot? {
         allCases.first { $0.isSwipe && $0.fingers == fingers }
-    }
-}
-
-/// The directional families a swipe slot binds; the swipe's
-/// direction supplies the argument (#1873 ruling). `move_to_space`
-/// and `desktop` wait for a relative target their verbs do not
-/// take yet.
-public enum TrackpadSwipeFamily: String, CaseIterable, Codable, Sendable {
-    case focus, swap, display, track, space
-
-    /// The Lua one swipe runs. Fingers moving left reach the
-    /// window, screen or track on the left; a Space step follows
-    /// macOS's Desktop swipe, where fingers moving left show the
-    /// next one.
-    func lua(_ direction: Direction) -> String {
-        switch self {
-        case .focus: return "KiwiDesk.focus(\"\(direction.rawValue)\")"
-        case .swap: return "KiwiDesk.swap(\"\(direction.rawValue)\")"
-        case .display:
-            return "KiwiDesk.focus_display(\"\(direction.rawValue)\")"
-        case .track:
-            let back = direction == .left || direction == .up
-            let step = back ? "prev" : "next"
-            return "KiwiDesk.move_to_track(\"\(step)\")"
-        case .space:
-            return direction == .left || direction == .up
-                ? "KiwiDesk.focus_space_next()"
-                : "KiwiDesk.focus_space_previous()"
-        }
     }
 }

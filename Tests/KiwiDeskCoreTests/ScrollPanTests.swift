@@ -79,15 +79,35 @@ struct ScrollPanTests {
     @Test("a swipe moves one window, against the fingers")
     func oneWindowPerSwipe() {
         let (core, _, session) = makeCore("scrolling")
-        core.handleScrollPan(event(.began), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
         // Fingers left: content left, the NEXT window comes in.
         for _ in 0..<5 {
-            core.handleScrollPan(event(.changed, dx: -80), session: session)
+            core.handleScrollPan(
+                event(.changed, dx: -80),
+                session: session,
+                directional: true
+            )
         }
         #expect(focused(core) == WindowID(4))
-        core.handleScrollPan(event(.ended), session: session)
-        core.handleScrollPan(event(.began), session: session)
-        core.handleScrollPan(event(.changed, dx: 80), session: session)
+        core.handleScrollPan(
+            event(.ended),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.changed, dx: 80),
+            session: session,
+            directional: true
+        )
         #expect(focused(core) == WindowID(3))
     }
 
@@ -95,15 +115,28 @@ struct ScrollPanTests {
     func longSwipesStep() {
         let (core, _, session) = makeCore("scrolling")
         byLength(core)
-        core.handleScrollPan(event(.began), session: session)
-        core.handleScrollPan(event(.changed, dx: -30), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.changed, dx: -30),
+            session: session,
+            directional: true
+        )
         #expect(focused(core) == WindowID(4))
         core.handleScrollPan(
             event(.changed, dx: -(stride - 1)),
-            session: session
+            session: session,
+            directional: true
         )
         #expect(focused(core) == WindowID(4))
-        core.handleScrollPan(event(.changed, dx: -1), session: session)
+        core.handleScrollPan(
+            event(.changed, dx: -1),
+            session: session,
+            directional: true
+        )
         #expect(focused(core) == WindowID(5))
     }
 
@@ -111,11 +144,20 @@ struct ScrollPanTests {
     func longSwipe() {
         let (core, _, session) = makeCore("scrolling", focus: WindowID(1))
         byLength(core)
-        core.handleScrollPan(event(.began), session: session)
-        core.handleScrollPan(event(.changed, dx: -30), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.changed, dx: -30),
+            session: session,
+            directional: true
+        )
         core.handleScrollPan(
             event(.changed, dx: -2 * stride),
-            session: session
+            session: session,
+            directional: true
         )
         #expect(focused(core) == WindowID(4))
     }
@@ -124,10 +166,15 @@ struct ScrollPanTests {
     func momentumIgnored() {
         let (core, _, session) = makeCore("scrolling")
         byLength(core)
-        core.handleScrollPan(event(.began), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
         core.handleScrollPan(
             event(.changed, dx: -10 * stride, momentum: true),
-            session: session
+            session: session,
+            directional: true
         )
         #expect(focused(core) == WindowID(3))
     }
@@ -135,14 +182,20 @@ struct ScrollPanTests {
     @Test("a wheel moves one window per notch, either axis")
     func wheelNotches() {
         let (core, _, session) = makeCore("scrolling")
-        core.handleScrollPan(event(.began, input: .wheel), session: session)
+        core.handleScrollPan(
+            event(.began, input: .wheel),
+            session: session,
+            directional: true
+        )
         core.handleScrollPan(
             event(.changed, dy: -1, input: .wheel),
-            session: session
+            session: session,
+            directional: true
         )
         core.handleScrollPan(
             event(.changed, dy: -40, input: .wheel, time: 1),
-            session: session
+            session: session,
+            directional: true
         )
         #expect(focused(core) == WindowID(5))
     }
@@ -152,7 +205,11 @@ struct ScrollPanTests {
     @Test("a spinning wheel moves one window")
     func spinMovesOne() {
         let (core, _, session) = makeCore("scrolling", focus: WindowID(1))
-        core.handleScrollPan(event(.began, input: .wheel), session: session)
+        core.handleScrollPan(
+            event(.began, input: .wheel),
+            session: session,
+            directional: true
+        )
         for tick in 0..<30 {
             core.handleScrollPan(
                 event(
@@ -161,7 +218,8 @@ struct ScrollPanTests {
                     input: .wheel,
                     time: Double(tick) * 0.01
                 ),
-                session: session
+                session: session,
+                directional: true
             )
         }
         #expect(focused(core) == WindowID(2))
@@ -170,14 +228,34 @@ struct ScrollPanTests {
     @Test("a Monocle Space steps once per gesture")
     func monocleOncePerGesture() {
         let (core, _, session) = makeCore("monocle")
-        core.handleScrollPan(event(.began), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
         for _ in 0..<5 {
-            core.handleScrollPan(event(.changed, dx: -40), session: session)
+            core.handleScrollPan(
+                event(.changed, dx: -40),
+                session: session,
+                directional: true
+            )
         }
         #expect(focused(core) == WindowID(4))
-        core.handleScrollPan(event(.ended), session: session)
-        core.handleScrollPan(event(.began), session: session)
-        core.handleScrollPan(event(.changed, dx: 40), session: session)
+        core.handleScrollPan(
+            event(.ended),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.changed, dx: 40),
+            session: session,
+            directional: true
+        )
         #expect(focused(core) == WindowID(3))
     }
 
@@ -185,10 +263,15 @@ struct ScrollPanTests {
     func noSpaceUnderPointer() {
         let (core, _, session) = makeCore("scrolling")
         session.spaceAt = { _, _ in nil }
-        core.handleScrollPan(event(.began), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
         core.handleScrollPan(
             event(.changed, dx: -5 * stride),
-            session: session
+            session: session,
+            directional: true
         )
         #expect(focused(core) == WindowID(3))
     }
@@ -196,11 +279,20 @@ struct ScrollPanTests {
     @Test("an ended gesture stops acting")
     func endedStops() {
         let (core, _, session) = makeCore("scrolling")
-        core.handleScrollPan(event(.began), session: session)
-        core.handleScrollPan(event(.ended), session: session)
+        core.handleScrollPan(
+            event(.began),
+            session: session,
+            directional: true
+        )
+        core.handleScrollPan(
+            event(.ended),
+            session: session,
+            directional: true
+        )
         core.handleScrollPan(
             event(.changed, dx: -5 * stride),
-            session: session
+            session: session,
+            directional: true
         )
         #expect(focused(core) == WindowID(3))
     }

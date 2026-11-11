@@ -1423,7 +1423,7 @@ screen that switched:
   and leaves without the fade.
 - `"none"`: the screen changes at once.
 
-The [scroll Space step](#scroll_gestureset_space_step) has its own
+The [scroll Space step](#scroll-focus-and-space-step) has its own
 choice, [`set_space_scroll_transition`](#set_space_scroll_transition).
 
 The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
@@ -1450,7 +1450,7 @@ KiwiDesk.set_space_transition("show")
 **Expects:** `"slide"`, `"show"` or `"none"` (default `"slide"`).
 
 **Does:** sets how the
-[scroll Space step](#scroll_gestureset_space_step) shows itself,
+[scroll Space step](#scroll-focus-and-space-step) shows itself,
 apart from every other Space switch. The three values mean what
 they mean for [`set_space_transition`](#set_space_transition), and
 with Reduce Motion on `"slide"` shows the Space there too. So a
@@ -4187,7 +4187,7 @@ space_bar.set_group_adjacent_windows(false)
 **Does:** hides Spaces with no windows from the bar, except the
 Space you are currently on, which always stays. Hidden Spaces
 remain reachable by shortcut and by the
-[Space step](#scroll-gestures).
+[Space step](#scroll-focus-and-space-step).
 
 **Example:**
 
@@ -4729,7 +4729,7 @@ whose titles it can read.
 
 With `keep_focus` on (the default), [`focus`](#focus) and
 [`swap`](#swap) — from a key, the CLI or Lua — and a
-[scroll gesture](#scroll-gestures) skip every window the lens leaves
+[scroll gesture](#scroll-focus-and-space-step) skip every window the lens leaves
 out, in every layout: other apps' windows — never-dimmed ones
 included — and a member's windows its `titles` do not match. A
 click, the bars and hover focus skip nothing.
@@ -5024,7 +5024,7 @@ KiwiDesk.set_mouse_resize("snap_back")
 **Does:** when `true`, a focus change warps the mouse pointer to
 the center of the newly-focused window. The pointer never moves
 while a mouse button is held down or when it is already inside
-the focused window, nor for a [scroll gesture](#scroll-gestures).
+the focused window, nor for a [scroll gesture](#scroll-focus-and-space-step).
 While KiwiDesk performs its own z-order
 maintenance raises the warp is held, and it fires once they
 settle, for the window focus finally landed on. When focus lands
@@ -5092,14 +5092,147 @@ mouse.set_hover_focus_delay(80)
 ```
 
 
-## Scroll Gestures
+## Gestures
 
-Hold **⌃⌥** (the default; [`set_pan`](#scroll_gestureset_pan)
-changes it) and scroll — a two-finger swipe on a trackpad or the
-mouse wheel, along either axis — and focus moves one window on
-the Space shown on the screen under the pointer, menu bar and
-Dock included. That Space becomes the active one. The pointer
-does not move, even with `mouse.follows_focus` on.
+:::unreleased
+A gesture binding is an input — what the hand does on the mouse
+or the trackpad — held with keys, bound to an action. One input
+may be bound several times with different keys, and the keys must
+be exactly the ones bound: ⌃⌥⌘ + scroll is not ⌃⌥ + scroll.
+[`gesture.bind`](#gesturebind) and
+[`gesture.unbind`](#gestureunbind) write the bindings; they have
+no Settings rows yet
+([#3183](https://github.com/KiwiCanopy/KiwiDesk/issues/3183)).
+:::
+
+### Gesture inputs
+
+:::unreleased
+| Input | What the hand does | Binds |
+|---|---|---|
+| `drag` | Moves the pointer with the button held | `move` or `resize` |
+| `hover_move` | Moves the pointer with no button held | `move` or `resize` |
+| `click`, `right_click` | A click, a secondary click | Lua |
+| `middle_click` | Presses the wheel (button 2) | Lua |
+| `side_buttons` | Presses back or forward (buttons 3 and 4) | `focus` or `space`, or a table of `back` and `forward` |
+| `wheel` | Scrolls with no finger phase, up or down: a notched mouse wheel | `walk` or `space`, or a table of `up` and `down` |
+| `wheel_x` | Scrolls sideways with no finger phase: a tilt or thumb wheel | `walk` or `space`, or a table of `left` and `right` |
+| `swipe2` | Scrolls with a finger phase: a two-finger swipe on a trackpad or a Magic Mouse | any family, or a table of `up`, `down`, `left` and `right` |
+| `swipe3`, `swipe4`, `swipe5` | Swipes three, four or five fingers on a trackpad | any family, or a table of the four directions |
+| `tap2`, `tap3`, `tap4`, `tap5` | Taps two, three, four or five fingers | Lua |
+| `spread`, `pinch_together`, `rotate`, `force_click` | Moves fingers apart, closes them, rotates them, presses a Force Click | Lua |
+
+`click`, `right_click`, `middle_click`, `side_buttons`, `tap2`,
+`spread`, `pinch_together`, `rotate` and `force_click` keep their
+bindings but do nothing yet. A scroll with no finger phase reaches
+the `wheel` or the `wheel_x` binding of its keys by the axis its
+first movement takes most.
+
+The keys are modifiers joined by `+` — `control` (`ctrl`),
+`option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
+holds none. A tap, `middle_click` and `side_buttons` may hold
+none; every other input needs at least one. `wheel`, `wheel_x`
+and `swipe2` need two or more, and `wheel` and `wheel_x` refuse
+`shift`, which macOS turns into a sideways scroll.
+:::
+
+### Gesture actions
+
+:::unreleased
+A binding does one of four things:
+
+- **Lua**, on an input with no direction: a click, a tap, a pinch.
+- **A family**, on an input with directions: the motion's
+  direction is its argument, so one binding covers every
+  direction. Which input takes which family is in the table
+  above.
+- **A grab**, `move` or `resize`, on `drag` and `hover_move` only,
+  which bind nothing else.
+- **A table of directions**, each mapped to Lua, on an input with
+  directions; a direction the table leaves out does nothing. A
+  direction is the way the fingers or the wheel move, whatever
+  [Natural scrolling](#scroll_gestureset_natural_scrolling) says:
+  `up` is fingers up. On a scroll it runs once per motion, and
+  again only after the scroll pauses or turns; on a multi-finger
+  swipe, once per swipe.
+
+The families:
+
+| Family | One step |
+|---|---|
+| `focus` | Moves focus that way, as the [scroll focus step](#scroll-focus-and-space-step) does: on a Scrolling row the row slides with the fingers, and Monocle steps to the next or previous window |
+| `walk` | Focuses the next or previous window in the Space's window order |
+| `swap` | [`swap`](#swap) with the window that way |
+| `display` | [`focus_display`](#focus_display_last--focus_display) that way |
+| `track` | [`move_to_track`](#move_to_track): fingers moving left or up go to the previous track |
+| `space` | The next or previous Space: on a multi-finger swipe, fingers moving left or up show the next one, as a macOS Desktop swipe does; on a scroll, the [Space step](#scroll-focus-and-space-step) |
+
+On `swipe2`, `wheel` and `wheel_x`, `focus`, `walk` and `space`
+act on the screen under the pointer; on a multi-finger swipe they
+act on the active Space, and `swap`, `display` and `track` act on
+the focused window everywhere. Each family takes one step per
+swipe or wheel notch, and its direction follows
+[Natural scrolling](#scroll_gestureset_natural_scrolling);
+[long swipes](#scroll_gestureset_long_swipes) add a step per
+[step distance](#scroll_gestureset_step_distance) to every
+`swipe2` family but `space`.
+
+`move` moves the window under the pointer, as a drag by its title
+bar does: a tiled window swaps with the one under the pointer at
+the drop, a floating window takes the new frame, and a drop on
+another screen or on the Space Bar moves it there. `resize`
+resizes it: a grab in the middle third of an edge moves that edge,
+and anywhere else the nearest corner. A tiled window's resize
+changes its layout's split, as dragging its edge does. On `drag`
+the keys count only at the press, and the grab goes on to the
+release whatever the keys do; on `hover_move`, holding the keys
+and moving the pointer moves or resizes the window under it, and
+letting a key go, or clicking, ends it. A press over anything but
+a window KiwiDesk can move there — the Dock, the menu bar, a bar,
+a window in full screen — does nothing, and the app under the
+pointer does not get the click. A grab needs only the
+Accessibility permission, never Input Monitoring. One modifier is accepted on a
+grab, and that key's own click — ⌃-click, ⌘-drag — is then the
+grab's. Each grab fires from one binding: where `drag` and
+`hover_move` hold it several times, the first in the list's order
+— `drag` before `hover_move` — fires and the rest are kept. A `resize` on the
+keys a `move` holds does nothing.
+
+A trackpad gesture macOS answers itself, set in System Settings ▸
+Trackpad, does nothing here, since both would act on it: a
+three-finger tap set to Look up, a three- or four-finger swipe
+along an axis macOS uses, and any three-finger swipe while
+three-finger drag is on. KiwiDesk reads those settings each time a
+gesture lands. Reading the trackpad's taps and multi-finger swipes
+needs no permission; where macOS no longer offers the private
+framework KiwiDesk reads them through, those bindings do nothing,
+and `swipe2`, the wheels and the grabs keep working.
+
+Out of the box these are bound:
+
+| Input | Keys | Action |
+|---|---|---|
+| `tap4` | none | Open KiwiHub's shortcuts panel |
+| `tap3` | none | Go back to the Space you were on before ([`focus_space_back`](#focus_space_back--focus_space_forward)) |
+| `drag` | ⌃⌘ | `move` |
+| `drag` | ⌃⌥ | `resize` |
+| `swipe2` | ⌃⌥ | `focus` |
+| `wheel` | ⌃⌥ | `walk` |
+| `wheel_x` | ⌃⌥ | `walk` |
+| `swipe2` | ⌃⌥⌘ | `space` |
+| `wheel` | ⌃⌥⌘ | `space` |
+| `wheel_x` | ⌃⌥⌘ | `space` |
+
+`hover_move` is unbound.
+:::
+
+### Scroll focus and Space step
+
+Hold **⌃⌥** (the default) and scroll — a two-finger swipe on a
+trackpad or the mouse wheel, along either axis — and focus moves
+one window on the Space shown on the screen under the pointer,
+menu bar and Dock included. That Space becomes the active one. The
+pointer does not move, even with `mouse.follows_focus` on.
 
 - **Scrolling:** focus moves along the row through the same step
   as [`focus`](#focus) in the row's direction, with the ordinary
@@ -5121,6 +5254,10 @@ long-swipe steps, move along one axis only. With
 [Natural scrolling](#scroll_gestureset_natural_scrolling) off for
 that input, every direction reverses, the Scrolling row's
 included.
+
+These are the `swipe2` binding's `focus` family and the `wheel`
+and `wheel_x` bindings' `walk`, which any other keys may hold too
+([Gesture actions](#gesture-actions)).
 :::
 
 The gesture never leaves its screen: under
@@ -5137,18 +5274,16 @@ move to, the focused window's border bumps toward the step. With
 its first window as it starts and one more every
 [step distance](#scroll_gestureset_step_distance) of further
 travel, which macOS's own Scrolling speed scales. The direction
-follows KiwiDesk's own
-[Natural scrolling](#scroll_gestureset_natural_scrolling), per
-input, whatever macOS's is set to.
+follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
+per input.
 
-Hold **⌃⌥⌘** (the default;
-[`set_space_step`](#scroll_gestureset_space_step) changes it) and
-scroll to switch to the next or previous Space on the screen under
-the pointer, in that screen's Space order — the Space Bar's, empty
-Spaces included. A swipe steps one Space, and so does a notch of a
-mouse wheel; a fast roll or a free-spinning wheel steps one for the
-whole burst, and each notch counts again once the wheel pauses
-between notches. The pointer does not move.
+Hold **⌃⌥⌘** (the default) and scroll to switch to the next or
+previous Space on the screen under the pointer, in that screen's
+Space order — the Space Bar's, empty Spaces included. A swipe
+steps one Space, and so does a notch of a mouse wheel; a fast roll
+or a free-spinning wheel steps one for the whole burst, and each
+notch counts again once the wheel pauses between notches. The
+pointer does not move.
 
 Past the first or last Space it wraps or stops as
 [`focus_space_next`](#focus_space_previous--focus_space_next)
@@ -5159,86 +5294,143 @@ The direction follows
 [Natural scrolling](#scroll_gestureset_natural_scrolling), as
 the window step's does.
 
-The keys must be exactly the ones set: ⌃⌥⌘ + scroll is not
-⌃⌥ + scroll. While they are held, KiwiDesk takes the scroll on
-every Space, so the window under the pointer does not scroll; a
+While a scroll binding's keys are held, KiwiDesk takes the scroll
+on every Space, so the window under the pointer does not scroll; a
 scroll that began before the keys went down stays the window's.
 It needs only the Accessibility permission, never Input
 Monitoring.
 
-The settings are stored in `gui.json` as the `scroll_gesture`
-object — `pan`, `space_step`, `natural_scrolling` (`trackpad`,
-`mouse`), `long_swipes`, `step_distance` — the base every
-profile starts with. A profile file may carry a sparse
-`scroll_gesture` object that overrides any of them. A
-single-modifier chord in either file turns that gesture off, a
-`space_step` equal to `pan` turns the Space step off, and a
+### Gesture storage
+
+:::unreleased
+The bindings are stored in `gui.json` as the `gesture` object, the
+base every profile starts with, laid over the defaults above. A
+profile file may carry a `gesture` object of the same shape, which
+outranks the base key by key. A key is the input, then `:` and its
+keys spelled in the order `control+option+shift+command`, or the
+input alone where it holds none. A key the object leaves out
+inherits, and `null` turns it off, a default included. A binding
+stores Lua under `lua`, with the shortcut row's optional `kind`,
+`desc`, `group` and `symbol`; a family under `family`; a grab
+under `grab`; and a table of directions under `split`, each
+direction holding a Lua binding:
+
+```json
+"gesture": {
+  "tap3": null,
+  "tap5": { "lua": "KiwiDesk.cycle_mode()", "kind": "custom" },
+  "swipe3:control+option": { "family": "focus" },
+  "hover_move:control+command": { "grab": "move" },
+  "wheel:control+option+command": {
+    "split": { "up": { "lua": "KiwiDesk.focus_space_back()" } }
+  }
+}
+```
+
+An unknown input, modifier, family, grab or direction, or a body
+naming no action, makes the file unreadable. A binding
+[`gesture.bind`](#gesturebind) would refuse is kept and does
+nothing.
+
+A file a release before this one wrote is moved on its next load:
+`trackpad_gesture`'s slots, `modifier_drag`'s `move` and `resize`
+— a `"drag"` start becoming a `drag` binding and a `"hover"` start
+a `hover_move` one — and `scroll_gesture`'s `pan` and `space_step`,
+each as a `swipe2`, a `wheel` and a `wheel_x` binding, become
+`gesture` keys.
+Where `pan` and `space_step` named one chord, the pan keeps it and
+the Space step moves as off. A chord holding `shift` moves only as
+its `swipe2` binding: its `wheel` and `wheel_x` bindings are
+refused, and do nothing.
+A profile's own value turns the default's key off beside its own,
+so where `gui.json` also moved off a default, both the base's and
+the profile's bindings fire in that profile.
+
+The other scroll settings are stored in `gui.json` as the
+`scroll_gesture` object — `natural_scrolling` (`trackpad`,
+`mouse`), `long_swipes`, `step_distance` — which a profile's
+sparse `scroll_gesture` object overrides field by field; a
 `step_distance` outside 10–1000 is clamped to the range. In the
-Settings app they are the **Holding a modifier** group under
-**Shortcuts ▸ Mouse & Trackpad**, where
-each row's **Applies to** checklist writes the base or chosen
-profiles' overrides.
+Settings app they are under **Shortcuts ▸ Mouse & Trackpad**,
+where each row's **Applies to** checklist writes the base or
+chosen profiles' overrides.
 
 The verbs below change the running base only: a profile's own
-override still wins, nothing reaches `gui.json`, and the value
-lasts until KiwiDesk next loads its config. In a Lua-owned setup
+value still wins, nothing reaches `gui.json`, and the value lasts
+until KiwiDesk next loads its config. In a Lua-owned setup
 `init.lua` is where it is kept, and **Adopt into the GUI** keeps
 the base it set.
+:::
 
-### scroll_gesture.set_pan
+### gesture.bind
 
-**Expects:** modifiers joined by `+` — `control` (`ctrl`),
-`option` (`opt`, `alt`), `shift`, `command` (`cmd`) — default
-`"control+option"`; `""` turns the gesture off.
+:::unreleased
+**Expects:** an input; keys, spelled as in
+[Gesture inputs](#gesture-inputs), `""` for none; then an action:
+a family name, `"move"` or `"resize"`, a string of Lua, or a table
+mapping directions to Lua.
 
-**Does:** sets the keys held with a scroll to move focus window
-by window. It takes two or more modifiers: one alone fails, as
-does an unknown or repeated name, and so does the chord
-[`set_space_step`](#scroll_gestureset_space_step) holds, whether
-in the base or in the live profile's override.
-
-**Example:**
-
-```lua
-scroll_gesture.set_pan("control+option+shift")
-scroll_gesture.set_pan("")   -- off
-```
-
-### scroll_gesture.set_space_step
-
-**Expects:** modifiers, as for
-[`set_pan`](#scroll_gestureset_pan) (default
-`"control+option+command"`); `""` turns the gesture off.
-
-**Does:** sets the keys held with a scroll to step between the
-Spaces of the screen under the pointer. It fails on the same
-chords `set_pan` does, with the pan's chord in place of its own;
-`set_pan` cannot take this one.
+**Does:** binds the input held with those keys, replacing what
+they held. It fails on an unknown input or modifier, a repeated
+modifier, no action, and every binding the input does not take:
+too few keys, `shift` on a wheel, a family the input does not
+offer, a grab off `drag` and `hover_move` or anything else on
+them, Lua on an input with directions, and a table on an input
+without them or naming a direction it lacks.
+`scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
+`modifier_drag.set_move`, `modifier_drag.set_resize` and
+`trackpad_gesture.bind` are retired and fail, naming it.
 
 **Example:**
 
 ```lua
-scroll_gesture.set_space_step("control+option+shift")
-scroll_gesture.set_space_step("")   -- off
+gesture.bind("swipe3", "control+option", "focus")
+gesture.bind("drag", "control+command", "move")
+gesture.bind("tap5", "", "KiwiDesk.cycle_mode()")
+gesture.bind("wheel", "control+option+command", {
+  up = "KiwiDesk.focus_space_back()",
+  down = "KiwiDesk.focus_space_forward()",
+})
 ```
+:::
+
+### gesture.unbind
+
+:::unreleased
+**Expects:** an input and keys, as for
+[`gesture.bind`](#gesturebind).
+
+**Does:** turns that input held with those keys off, a default
+included.
+
+**Example:**
+
+```lua
+gesture.unbind("tap3", "")
+gesture.unbind("drag", "control+option")
+```
+:::
 
 ### scroll_gesture.set_natural_scrolling
 
-**Expects:** a boolean, then optionally `"trackpad"` or
-`"mouse"` (default `true` for both).
+:::unreleased
+**Expects:** `"system"`, `true` or `false`, then optionally
+`"trackpad"` or `"mouse"` (default `"system"` for both).
 
-**Does:** on, a scroll gesture steps the way Natural scrolling
-moves content; off, the other way. Named, the input
-takes the value alone; left out, both do. A swipe on a trackpad
-or Magic Mouse reads the trackpad's value and a notched mouse
-wheel the mouse's, whatever macOS's Natural scrolling is set
-to.
+**Does:** `"system"` follows macOS's own Natural scrolling, and
+follows it again when it changes there; `true` makes a scroll
+gesture step the way Natural scrolling moves content, and `false`
+the other way. Named, the input takes the value alone; left out,
+both do. A swipe on a trackpad or Magic Mouse reads the
+trackpad's value and a notched mouse wheel the mouse's.
 
 **Example:**
 
 ```lua
 scroll_gesture.set_natural_scrolling(false, "mouse")
+scroll_gesture.set_natural_scrolling("system")
 ```
+:::
 
 ### scroll_gesture.set_long_swipes
 
@@ -5271,168 +5463,6 @@ does nothing, while long swipes are off.
 ```lua
 scroll_gesture.set_step_distance(120)
 ```
-
-## Modifier Drags
-
-:::unreleased
-Hold **⌃⌘** (the default; [`set_move`](#modifier_dragset_move)
-changes it) and drag anywhere inside a window to move it, as a
-drag by its title bar does: a tiled window swaps with the one
-under the pointer at the drop, a floating window takes the new
-frame, and a drop on another screen or on the Space Bar moves it
-there. Hold **⌃⌥** (the default;
-[`set_resize`](#modifier_dragset_resize)) and drag to resize it:
-a grab in the middle third of an edge moves that edge, and
-anywhere else the nearest corner. A tiled window's resize
-changes its layout's split, as dragging its edge does.
-
-The keys must be exactly the ones set, and they count only at the
-press: the drag goes on to the release whatever the keys do. With
-the start `hover`, no click is needed: holding the keys and moving
-the pointer moves or resizes the window under it, and letting a
-key go, or clicking, ends it. A press over anything but a window
-KiwiDesk can move there — the Dock, the menu bar, a bar, a window
-in full screen — does nothing, and the app under the pointer does
-not get the click. It needs only the Accessibility permission, never Input
-Monitoring.
-
-The settings are stored in `gui.json` as the `modifier_drag`
-object — `move` and `resize`, each with `modifiers` and `start` — for
-every profile alike. A `resize` equal to `move` turns the resize
-off. In the
-Settings app they are the **Move windows from anywhere** and
-**Resize windows from anywhere** rows under **Shortcuts
-▸ Mouse & Trackpad**.
-
-The verbs below change the running value only: nothing reaches
-`gui.json`, and in a setup the Settings app manages the value lasts
-until a profile load or a config reload sets it again. In a
-Lua-owned setup `init.lua` is where it is kept, and **Adopt into
-the GUI** keeps what it set.
-:::
-
-### modifier_drag.set_move
-
-:::unreleased
-**Expects:** modifiers, as for
-[`scroll_gesture.set_pan`](#scroll_gestureset_pan) (default
-`"control+command"`), `""` for off; then optionally the start,
-`"drag"` (the default, the button held) or `"hover"` (no click).
-
-**Does:** sets the keys that move the window under the pointer,
-and how the move starts. One modifier is accepted, and that key's
-own click — ⌃-click, ⌘-drag — is then the move's; the chord
-[`set_resize`](#modifier_dragset_resize) holds fails.
-
-**Example:**
-
-```lua
-modifier_drag.set_move("control+option+command")
-modifier_drag.set_move("control+command", "hover")
-modifier_drag.set_move("")   -- off
-```
-:::
-
-### modifier_drag.set_resize
-
-:::unreleased
-**Expects:** modifiers and a start, as for
-[`set_move`](#modifier_dragset_move) (default
-`"control+option"`).
-
-**Does:** sets the keys that resize the window under the pointer
-from its nearest corner or edge, and how the resize starts. It
-fails on the same chords `set_move` does, with the move's chord
-in place of its own.
-
-**Example:**
-
-```lua
-modifier_drag.set_resize("control+option", "hover")
-```
-:::
-
-## Trackpad Gestures
-
-:::unreleased
-A fixed list of trackpad gesture slots, each bound to an action.
-The slots are `tap3`, `tap4` and `tap5` (a tap with three, four or
-five fingers), `swipe3`, `swipe4` and `swipe5` (a swipe with that
-many fingers), `spread` (fingers moving apart), `pinch_together`
-(fingers closing), `rotate` and `force_click`.
-
-A tap slot runs Lua. A swipe slot binds a family — `focus`, `swap`,
-`display` (`focus_display`), `track` (`move_to_track`) or `space`
-(the next or previous Space) — and the swipe's direction supplies
-the argument: fingers moving left focus, swap or go to the screen
-on the left, and step to the next Space, as a macOS Desktop swipe
-does. For `track` and `space` a swipe up counts as one to the left:
-fingers moving left or up go to the previous track and the next
-Space. A swipe moves one step, however long it is.
-
-Out of the box these are bound:
-
-| Slot | Keys | Action |
-|---|---|---|
-| `tap4` | none | Open KiwiHub's shortcuts panel |
-| `tap3` | none | Go back to the Space you were on before ([`focus_space_back`](#focus_space_back--focus_space_forward)) |
-| `spread` | ⌃⌥ | Toggle maximized |
-| `rotate` | ⌃⌥ | Cycle the layout |
-
-`spread`, `pinch_together`, `rotate` and `force_click` keep their
-bindings but do nothing yet.
-
-The keys must be exactly the ones bound. A swipe, a pinch, a
-rotation and a Force Click need at least one modifier; a tap may
-take none. A gesture macOS answers itself, set in System Settings
-▸ Trackpad, does nothing here, since both would act on it: a
-three-finger tap set to Look up, a three- or four-finger swipe
-along an axis macOS uses, and any three-finger swipe while
-three-finger drag is on. KiwiDesk reads those settings each
-time a gesture lands. Reading the trackpad needs no
-permission; where macOS no longer offers the private framework
-KiwiDesk reads it through, no slot fires, and the scroll gestures
-above keep working.
-
-The bindings are stored in `gui.json` as the `trackpad_gesture`
-object, keyed by slot: a swipe slot's family under `family`, any
-other slot's Lua under `lua`. A slot it leaves out keeps its default, and
-`null` turns it off. A slot name it does not know makes the file
-unreadable, and a binding the verb would refuse leaves its slot off.
-A profile file may carry a `trackpad_gesture` object of the same
-shape, which outranks it slot by slot:
-
-```json
-"trackpad_gesture": {
-  "tap3": null,
-  "tap5": { "lua": "KiwiDesk.cycle_mode()", "modifiers": "" },
-  "swipe3": { "family": "focus", "modifiers": "control+option" }
-}
-```
-
-### trackpad_gesture.bind
-
-**Expects:** a slot; then an action — Lua, or a swipe family for a
-`swipe` slot; then optionally modifiers joined by `+`, spelled as
-for [`scroll_gesture.set_pan`](#scroll_gestureset_pan); one is
-enough. No action turns the slot off.
-
-**Does:** binds the slot in the running base: a profile's own
-binding still wins, nothing reaches `gui.json`, and the binding
-lasts until KiwiDesk next loads its config. In a Lua-owned setup
-`init.lua` is where it is kept, and **Adopt into the GUI** keeps the
-bindings it set. It fails on an unknown slot or family, an unknown
-or repeated modifier, and on a slot that needs a modifier bound
-without one.
-
-**Example:**
-
-```lua
-trackpad_gesture.bind("swipe3", "focus", "control+option")
-trackpad_gesture.bind("tap5", "KiwiDesk.cycle_mode()")
-trackpad_gesture.bind("tap3")   -- off
-```
-:::
 
 ## When Windows No Longer Fit
 

@@ -75,8 +75,8 @@ editing here:
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the
   Accessibility-class `PostEvent` service alone, never
-  `ListenEvent` (tccd log, device build, 2026-09-28). Seven
-  obligations:
+  `ListenEvent` (tccd log, device build, 2026-09-28). Its
+  obligations are the bullets immediately below:
   - **One tap, scroll-only.** A mask widened past `.scrollWheel`
     asks macOS for more than the gesture needs; the other taps are
     the keyboard tap and the pointer tap below (`ScrollTapSeamTests`
@@ -113,13 +113,35 @@ editing here:
     drops an empty chord, the router never owns one whatever it
     is handed, and a chord matches exactly
     (`ScrollGesturesTests`, `ScrollGestureRouterTests`).
-  - **Key chords by CONSUMER, and set them through the one
-    `configure` door** — handlers are wired once with
-    `setHandler`: a profile switch can hand the two gestures each
-    other's chords, and one resolved settings value lands both;
-    and no tap exists while no wired consumer has a chord, the
-    live factory pinned inert in both `makeTestCore` twins
-    (`ScrollGesturesTests`, `ScrollTapSeamTests`).
+  - **Key routes by CHORD, and set them through the one
+    `configure` door** — the one handler is wired once with
+    `setHandler` and dispatches by the route's action (#3199): a
+    profile switch can move a family to another chord, and one
+    resolved settings value lands every route; and no tap exists
+    while no route has an action, the live factory pinned inert in
+    both `makeTestCore` twins (`ScrollGesturesTests`,
+    `ScrollTapSeamTests`).
+  - **Resolve the gesture bindings in ONE home,
+    `KiwiCore.applyGestures`** (#3199): the seeds, the base and the
+    live profile's override through `GestureInputs.adopt`, then the
+    pointer tap's grab, and the scroll tap and the touch reader
+    through `applyScrollGestures`, which reads the resolved list
+    and never a map of its own. Nothing scans for a second resolve,
+    so it is review's.
+  - **Natural scrolling is applied ONCE, upstream**: the scroll
+    front flips a reversed event in `ScrollGestures.receive`, and
+    the touch reader's resolve takes the trackpad's verdict, which
+    flips a family's swipe there; a consumer reads the event's
+    direction and never `isNatural` or the host's setting itself.
+    A direction table's arm is the fingers' way, never flipped: it
+    reads `ScrollGestureEvent.hand`, and the touch flip skips a
+    table (#3199; `ScrollGesturesTests` ▸ `reversedKeepsTheHand`,
+    `TouchGesturesTests` ▸ `naturalOffFlipsFamiliesOnly`).
+    `"system"` follows macOS's `com.apple.swipescrolldirection`
+    through `HostNaturalScrolling`, read at the first start and on
+    its distributed change notice alone, its reads pinned in both
+    `makeTestCore` twins (`NaturalScrollingSystemTests`,
+    `MouseButtonSeamGuardTests`).
   - **Resolve the settings in ONE home,
     `KiwiCore.applyScrollGestures`, the one caller of the front's
     door `ScrollGestures.adoptResolution`** (#1656): the global base with
@@ -1053,8 +1075,9 @@ editing here:
   (#1873).** MultitouchSupport delivers every frame with no
   permission (probed 2026-10-31, macOS 27) and swallows nothing.
   Five obligations:
-  - **Resolve the slots in ONE home, `KiwiCore.applyTrackpadGestures`,
-    the one caller of `TouchGestures.resolve`**; the config load's
+  - **Resolve the bindings in ONE home, `KiwiCore.applyScrollGestures`,
+    the one caller of `TouchGestures.resolve`**, which hands it the
+    trackpad's bindings from `applyGestures`; the config load's
     `resetInputs` is the one deferred writer, configured at the
     load's tail. Nothing scans for a second caller, so it is
     review's.

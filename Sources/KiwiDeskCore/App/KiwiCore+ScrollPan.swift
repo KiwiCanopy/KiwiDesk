@@ -41,19 +41,12 @@ final class ScrollPanSession {
 /// screen, since the frontmost app is still the old screen's. The
 /// flip's owed focus is the one part of that preamble it keeps.
 extension KiwiCore {
-    /// Wires the consumer; once, at bootstrap.
-    func wireScrollPan() {
-        let session = ScrollPanSession()
-        mouse.scroll.setHandler(.pan) { [weak self] event in
-            self?.withUserMotion {
-                self?.handleScrollPan(event, session: session)
-            }
-        }
-    }
-
+    /// `directional` is the focus family's: a swipe steps the way
+    /// it goes off a row; the walk family keeps the list.
     func handleScrollPan(
         _ event: ScrollGestureEvent,
-        session: ScrollPanSession
+        session: ScrollPanSession,
+        directional: Bool
     ) {
         if event.kind == .began {
             beginScrollPan(at: event.location, session: session)
@@ -64,7 +57,8 @@ extension KiwiCore {
         if event.input == .trackpad, session.horizontal == nil {
             session.horizontal = session.meter.firedHorizontal
         }
-        let swipe = event.input == .trackpad ? session.horizontal : nil
+        let swipe =
+            directional && event.input == .trackpad ? session.horizontal : nil
         // The step a row slides by: content follows the fingers,
         // so it runs against the delta's sign. A swipe off a row
         // turns it back in `stepScrollPan`.
@@ -130,7 +124,7 @@ extension KiwiCore {
     /// the arrow keys' own `navigate` — row step, wrap, float tier
     /// (#488), dead-end bump (#436), deferred raise and a lens's
     /// skip alike — without warping the pointer.
-    private func stepScrollPan(
+    func stepScrollPan(
         _ space: Space,
         by step: Int,
         swipe: Bool?

@@ -30,16 +30,6 @@ final class ScrollSpaceStepSession {
 /// stops, where the shown Space's focus bumps its ring toward the
 /// step as a row end does (#436), and it never moves the pointer.
 extension KiwiCore {
-    /// Wires the consumer; once, at bootstrap.
-    func wireScrollSpaceStep() {
-        let session = ScrollSpaceStepSession()
-        mouse.scroll.setHandler(.step) { [weak self] event in
-            self?.withUserMotion {
-                self?.handleScrollSpaceStep(event, session: session)
-            }
-        }
-    }
-
     func handleScrollSpaceStep(
         _ event: ScrollGestureEvent,
         session: ScrollSpaceStepSession
