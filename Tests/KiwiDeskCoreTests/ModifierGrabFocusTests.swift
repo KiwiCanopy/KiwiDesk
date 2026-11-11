@@ -56,6 +56,7 @@ struct ModifierGrabFocusTests {
                         phase: phase,
                         action: .move,
                         start: .drag,
+                        chord: [.control, .command],
                         location: point,
                         time: 0
                     )

@@ -746,8 +746,6 @@ every lens with why it cannot turn on.
 | | `scroll_gesture.set_natural_scrolling` | true\|false, [`trackpad\|mouse`] (default `true` for both) |
 | | `scroll_gesture.set_long_swipes` | true\|false (default `false`) |
 | | `scroll_gesture.set_step_distance` | pt (10–1000, default 60) — travel per extra window of a long swipe |
-| Modifier drags | `modifier_drag.set_move` | modifiers (default `control+command`; `""` off), [`drag\|hover`] (default `drag`) — held to move the window under the pointer |
-| | `modifier_drag.set_resize` | modifiers (default `control+option`; `""` off), [`drag\|hover`] (default `drag`) — held to resize it from its nearest corner or edge |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_drop_zone_enabled` | true\|false (default `true`) |
@@ -852,11 +850,19 @@ it, and the `stack_position` that `get_state` reports, are in the
 [Lua reference](lua-reference.md#stacktoggle_stack_position).
 
 :::unreleased
-`trackpad_gesture.bind <slot> [action] [modifiers]` binds a trackpad
-gesture slot (`tap3`–`tap5`, `swipe3`–`swipe5`, `spread`,
-`pinch_together`, `rotate`, `force_click`) to Lua, or a swipe slot to
-a family (`focus|swap|display|track|space`); no action turns the slot
-off ([`trackpad_gesture.bind`](lua-reference.md#trackpad_gesturebind)).
+`gesture.bind <input> <keys> <action>` binds a mouse or trackpad
+input held with keys — `drag`, `hover_move`, `wheel`, `swipe2`,
+`tap4` and the rest of the
+[Gesture inputs](lua-reference.md#gesture-inputs) — to a family
+(`focus|walk|swap|display|track|space`), `move|resize` or Lua, and
+`gesture.unbind <input> <keys>` turns one off, a default included;
+`""` holds no keys
+([`gesture.bind`](lua-reference.md#gesturebind)). The CLI passes
+every argument as a string, so a table of directions is Lua's
+alone. `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
+`modifier_drag.set_move`, `modifier_drag.set_resize` and
+`trackpad_gesture.bind` are retired and fail naming
+`gesture.bind`.
 :::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
@@ -975,11 +981,12 @@ close button, is refused by a pill on screen, not in the reply —
 see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
 
 The `scroll_gesture.*` commands set the scroll gestures; see
-[Scroll Gestures](lua-reference.md#scroll-gestures).
+[Gestures](lua-reference.md#gestures).
 
 :::unreleased
-The `modifier_drag.*` commands set the modifier drags; see
-[Modifier Drags](lua-reference.md#modifier-drags).
+`scroll_gesture.set_natural_scrolling` takes `system`, the default,
+which follows macOS's own Natural scrolling
+([`scroll_gesture.set_natural_scrolling`](lua-reference.md#scroll_gestureset_natural_scrolling)).
 :::
 
 `animations.set_on_expand` and `animations.set_expand_duration` set

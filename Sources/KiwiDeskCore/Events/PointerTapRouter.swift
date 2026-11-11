@@ -32,6 +32,8 @@ public struct ModifierGrabEvent: Equatable, Sendable {
     public var action: ModifierDragAction
     /// How the grab started: `.drag` swallowed its press stream.
     public var start: ModifierDragStart
+    /// The keys its binding holds.
+    public var chord: ScrollChord
     /// The event's own location, AX space; nil where the grab was
     /// ended for it, with no event of its own.
     public var location: CGPoint?
@@ -54,10 +56,10 @@ struct PointerTapRouter {
         static let pass = Routed(swallow: false, grab: [])
     }
 
-    typealias Owner = (action: ModifierDragAction, start: ModifierDragStart)
+    typealias Owner = ModifierDragBinding
 
     var snapshot = PointerTapSnapshot.off
-    /// The grab in flight: its action and how it started.
+    /// The grab in flight: the binding it began.
     private(set) var owner: Owner?
 
     mutating func route(
@@ -68,7 +70,7 @@ struct PointerTapRouter {
             // The front ended a grab whose consumer or action went
             // off; the stream is no longer the grab's to swallow.
             guard let settings = snapshot.grab,
-                !settings[owner.action].isOff
+                settings.grabs.contains(owner)
             else { return reseed(now: now) }
             return continuing(owner, sample, settings, now: now)
         }
@@ -107,18 +109,14 @@ struct PointerTapRouter {
         default: return .pass
         }
         guard
-            let action = ModifierDragAction.allCases.first(where: {
-                let binding = settings[$0]
-                return !binding.isOff && binding.start == start
-                    && binding.chord == sample.chord
-            })
+            let binding = settings.binding(chord: sample.chord, start: start)
         else { return .pass }
-        owner = (action, start)
+        owner = binding
         return Routed(
             // A hover grab's moves are the pointer's own; only a
             // press stream is the grab's to take.
             swallow: start == .drag,
-            grab: [event(.began, (action, start), sample.location, now)]
+            grab: [event(.began, binding, sample.location, now)]
         )
     }
 
@@ -146,8 +144,7 @@ struct PointerTapRouter {
             // stream: its up was lost. The grab ends where its
             // last drag left it, and this event starts afresh.
             return restarting(owner, sample, settings, now: now)
-        case (.hover, .mouseMoved)
-        where sample.chord == settings[owner.action].chord:
+        case (.hover, .mouseMoved) where sample.chord == owner.chord:
             return Routed(
                 swallow: false,
                 grab: [event(.moved, owner, at, now)]
@@ -155,8 +152,7 @@ struct PointerTapRouter {
         case (.hover, .mouseMoved), (.hover, .flagsChanged),
             (.hover, .leftDown):
             guard
-                sample.chord != settings[owner.action].chord
-                    || sample.kind == .leftDown
+                sample.chord != owner.chord || sample.kind == .leftDown
             else { return .pass }
             // A key let go, or a click: the grab ends and the
             // event is the app's.
@@ -193,6 +189,7 @@ struct PointerTapRouter {
             phase: phase,
             action: owner.action,
             start: owner.start,
+            chord: owner.chord,
             location: location,
             time: time
         )

@@ -91,13 +91,9 @@ config.layers[].icon
 config.layers[].reach
 config.mainSpaces
 config.modeCycle
-config.modifierDrag.move
-config.modifierDrag.resize
 config.scrollGesture.longSwipes
 config.scrollGesture.naturalMouse
 config.scrollGesture.naturalTrackpad
-config.scrollGesture.pan
-config.scrollGesture.spaceStep
 config.scrollGesture.stepDistance
 config.shortcutBase
 config.spaceHistory

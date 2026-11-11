@@ -63,6 +63,32 @@ struct ScrollGestureRouterTests {
         #expect(!touch.consume)
     }
 
+    @Test("a chord owns only the inputs a binding answers (#3199)")
+    func perInputOwnership() {
+        var router = ScrollGestureRouter()
+        router.chords = ScrollTapChords(wheel: [Self.pan])
+        #expect(!router.route(sample(Self.pan, .began), now: 0).consume)
+        var sideways = sample(Self.pan)
+        sideways.delta = CGVector(dx: 5, dy: 0)
+        #expect(!router.route(sideways, now: 1).consume)
+        #expect(router.route(sample(Self.pan, dy: 5), now: 2).consume)
+        router = ScrollGestureRouter()
+        router.chords = ScrollTapChords(swipe: [Self.pan])
+        #expect(!router.route(sample(Self.pan, dy: 5), now: 3).consume)
+        #expect(router.route(sample(Self.pan, .began), now: 4).consume)
+    }
+
+    @Test("a wheel burst ends when its own axis is unbound")
+    func wheelAxisRebindReleases() {
+        var router = ScrollGestureRouter()
+        router.chords = ScrollTapChords(wheel: [Self.pan], wheelX: [Self.pan])
+        #expect(router.route(sample(Self.pan, dy: 5), now: 0).consume)
+        router.chords = ScrollTapChords(wheelX: [Self.pan])
+        let next = router.route(sample(Self.pan, dy: 5), now: 0.05)
+        #expect(!next.consume)
+        #expect(next.events.map(\.kind) == [.ended])
+    }
+
     @Test("a trackpad gesture owns its momentum after the keys lift")
     func trackpadKeepsMomentum() {
         var router = router()

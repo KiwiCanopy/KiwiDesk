@@ -215,12 +215,12 @@ struct MouseButtonSeamGuardTests {
     /// The live host reads `wireDrag` and the seam defaults
     /// leave on every core a suite builds — the button mask, the
     /// cursor, since #1532 the reveal-strip read, since #2224 the
-    /// revealed app's open-menu read, and since #2548 the pointer's
-    /// screen. Deleting a pin from
-    /// BOTH twins is otherwise silent: the twins-identical scan
-    /// sees only a one-sided deletion, and a behavioural read
-    /// answers 0 on a quiet host either way — which is exactly
-    /// the run where the defect is invisible. The
+    /// revealed app's open-menu read, since #2548 the pointer's
+    /// screen, and since #3200 macOS's Natural scrolling. Deleting
+    /// a pin from BOTH twins is otherwise silent: the
+    /// twins-identical scan sees only a one-sided deletion, and a
+    /// behavioural read answers 0 on a quiet host either way —
+    /// which is exactly the run where the defect is invisible. The
     /// `DesktopCensusSeamTests` shape, one subsystem over.
     ///
     /// Residue, same class as the read census above: the needles
@@ -266,6 +266,10 @@ struct MouseButtonSeamGuardTests {
                     )
                     && source.contains(
                         "shelves.reveal.location = {"
+                    )
+                    // macOS's Natural scrolling (#3200).
+                    && source.contains(
+                        "mouse.scroll.host = .unset"
                     ),
                 .init(rawValue: "\(target) misses a pin")
             )

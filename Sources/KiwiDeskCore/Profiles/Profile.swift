@@ -45,8 +45,8 @@ public struct Profile: Codable, Sendable, Equatable {
     public var ignoreRules: RuleListOverride?
     /// Sparse scroll-gesture overrides (#1656).
     public var scrollGesture: ScrollGestureOverride?
-    /// Sparse trackpad gesture slots (#1873); nil follows the base.
-    public var trackpadGesture: TrackpadGestureMap?
+    /// Sparse gesture bindings (#3199); nil follows the base.
+    public var gesture: GestureMap?
     /// Sparse Space history override (#1655); nil follows the base.
     public var spaceHistory: SpaceHistoryKind?
     /// Sparse layout-cycle override (#453); nil follows the base.
@@ -85,7 +85,7 @@ public struct Profile: Codable, Sendable, Equatable {
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
-        trackpadGesture: TrackpadGestureMap? = nil,
+        gesture: GestureMap? = nil,
         spaceHistory: SpaceHistoryKind? = nil,
         modeCycle: [LayoutMode]? = nil,
         focusWrap: FocusWrap? = nil,
@@ -113,7 +113,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.floatRules = floatRules
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
-        self.trackpadGesture = trackpadGesture
+        self.gesture = gesture
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
         self.focusWrap = focusWrap
@@ -232,9 +232,9 @@ public struct Profile: Codable, Sendable, Equatable {
             ScrollGestureOverride.self,
             forKey: .scrollGesture
         )
-        trackpadGesture = try container.decodeIfPresent(
-            TrackpadGestureMap.self,
-            forKey: .trackpadGesture
+        gesture = try container.decodeIfPresent(
+            GestureMap.self,
+            forKey: .gesture
         )
         spaceHistory = try container.decodeIfPresent(
             SpaceHistoryKind.self,

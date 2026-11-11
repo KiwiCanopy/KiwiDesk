@@ -84,5 +84,9 @@ extension GuiConfig {
     /// **20 (#1871)**: a binding may be a key sequence
     /// (`"kind": "sequence"` with its `steps`), which an older
     /// build cannot decode; no step, the bump is the refusal.
-    public static let currentFormat = 20
+    ///
+    /// **21 (#3199)**: mouse and trackpad gestures are one `gesture`
+    /// map; `trackpad_gesture`, `modifier_drag` and the scroll
+    /// chords fold into it (`migratingGesturesIntoBindings`).
+    public static let currentFormat = 21
 }

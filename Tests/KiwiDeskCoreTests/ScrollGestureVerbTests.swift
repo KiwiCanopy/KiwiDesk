@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -13,50 +14,7 @@ struct ScrollGestureVerbTests {
         core.mouse.scroll.settings
     }
 
-    @Test("set_pan writes the base and reaches the tap")
-    func setPan() {
-        let core = makeTestCore()
-        #expect(
-            core.execute(
-                "scroll_gesture.set_pan",
-                args: [.string("command+shift")]
-            ).isSuccess
-        )
-        #expect(core.mouse.scroll.base.pan == [.command, .shift])
-        #expect(tapChords(core).chords[.pan] == [.command, .shift])
-    }
-
-    @Test("empty turns a gesture off")
-    func emptyIsOff() {
-        let core = makeTestCore()
-        #expect(
-            core.execute("scroll_gesture.set_space_step", args: [.string("")])
-                .isSuccess
-        )
-        #expect(tapChords(core).chords[.step] == nil)
-    }
-
-    @Test(
-        "one modifier alone, an unknown one, or the other's chord is refused"
-    )
-    func refusals() {
-        let core = makeTestCore()
-        for bad in ["control", "shift", "control+fn"] {
-            #expect(
-                !core.execute("scroll_gesture.set_pan", args: [.string(bad)])
-                    .isSuccess
-            )
-        }
-        #expect(
-            !core.execute(
-                "scroll_gesture.set_pan",
-                args: [.string("control+option+command")]
-            ).isSuccess
-        )
-        #expect(core.mouse.scroll.base == .defaults)
-    }
-
-    @Test("Natural scrolling is a boolean on the base")
+    @Test("Natural scrolling is a boolean or \"system\" on the base")
     func naturalScrolling() {
         let core = makeTestCore()
         #expect(
@@ -76,6 +34,13 @@ struct ScrollGestureVerbTests {
         #expect(!tapChords(core).naturalTrackpad)
         #expect(tapChords(core).naturalMouse)
         #expect(
+            core.execute(
+                "scroll_gesture.set_natural_scrolling",
+                args: [.string("system"), .string("trackpad")]
+            ).isSuccess
+        )
+        #expect(core.mouse.scroll.base.naturalTrackpad == .system)
+        #expect(
             !core.execute(
                 "scroll_gesture.set_natural_scrolling",
                 args: [.string("no")]
@@ -89,65 +54,147 @@ struct ScrollGestureVerbTests {
         )
     }
 
-    @Test("a profile's override outranks the base a verb writes")
-    func overrideOutranksVerb() {
+    @Test("gesture.bind refuses a click or hover_move on a drag's keys")
+    func bindRefusesAShadowedRow() {
         let core = makeTestCore()
-        core.applyScrollGestures(
-            base: .defaults,
-            profile: ScrollGestureOverride(pan: [.control, .shift])
+        let hover = core.execute(
+            "gesture.bind",
+            args: [
+                .string("hover_move"), .string("control+option"),
+                .string("move"),
+            ]
         )
+        #expect(!hover.isSuccess)
+        #expect(
+            core.mouse.gestures.base[
+                GestureKey(.hoverMove, [.control, .option])
+            ]
+                == nil
+        )
+        let free = core.execute(
+            "gesture.bind",
+            args: [
+                .string("hover_move"), .string("option+command"),
+                .string("move"),
+            ]
+        )
+        #expect(free.isSuccess)
+        #expect(
+            core.mouse.pointer.grabSettings.grabs.contains(
+                ModifierDragBinding(
+                    .move,
+                    chord: [.option, .command],
+                    start: .hover
+                )
+            )
+        )
+    }
+
+    @Test("a locked swipe keeps its axis and its sign")
+    func lockedKeepsTheAxis() {
+        var event = ScrollGestureEvent(
+            chord: [.control, .option],
+            kind: .changed,
+            input: .trackpad,
+            delta: CGVector(dx: 2, dy: -9),
+            momentum: false,
+            location: .zero,
+            time: 0
+        )
+        #expect(event.locked(horizontal: nil).delta == event.delta)
+        #expect(event.locked(horizontal: true).delta == CGVector(dx: 2, dy: 0))
+        #expect(
+            event.locked(horizontal: false).delta == CGVector(dx: 0, dy: -9)
+        )
+        event.momentum = true
+        #expect(event.locked(horizontal: true).delta == event.delta)
+    }
+
+    @Test("a long family swipe's later steps keep the latched axis")
+    func familyStepKeepsTheAxis() {
+        var meter = ScrollStepMeter(longSwipes: true, distance: 60)
+        func event(
+            _ kind: ScrollGestureEvent.Kind,
+            dx: CGFloat = 0,
+            dy: CGFloat = 0
+        ) -> ScrollGestureEvent {
+            ScrollGestureEvent(
+                chord: [.control, .option],
+                kind: kind,
+                input: .trackpad,
+                delta: CGVector(dx: dx, dy: dy),
+                momentum: false,
+                location: .zero,
+                time: 0
+            )
+        }
+        #expect(KiwiCore.familyStep(&meter, event(.began)) == nil)
+        let first = KiwiCore.familyStep(&meter, event(.changed, dx: 30))
+        #expect(first?.0 == 1 && first?.1 == .right)
+        // A diagonal frame: its larger axis is the other one.
+        let diagonal = KiwiCore.familyStep(
+            &meter,
+            event(.changed, dx: 5, dy: -70)
+        )
+        #expect(diagonal == nil)
+        let next = KiwiCore.familyStep(&meter, event(.changed, dx: 60))
+        #expect(next?.0 == 1 && next?.1 == .right)
+    }
+
+    @Test("a family steps along the axis the latch fired on")
+    func familyStepNamesTheLatchedAxis() {
+        var meter = ScrollStepMeter(longSwipes: false, distance: 60)
+        func event(dx: CGFloat, dy: CGFloat) -> ScrollGestureEvent {
+            ScrollGestureEvent(
+                chord: [.control, .option],
+                kind: .changed,
+                input: .trackpad,
+                delta: CGVector(dx: dx, dy: dy),
+                momentum: false,
+                location: .zero,
+                time: 0
+            )
+        }
+        var began = event(dx: 0, dy: 0)
+        began.kind = .began
+        _ = KiwiCore.familyStep(&meter, began)
+        #expect(KiwiCore.familyStep(&meter, event(dx: 20, dy: 0)) == nil)
+        // Fires on the travel's axis, its own frame mostly vertical.
+        let fired = KiwiCore.familyStep(&meter, event(dx: 10, dy: 15))
+        #expect(meter.firedHorizontal == true)
+        #expect(fired?.1 == .right)
+    }
+
+    @Test("a split's arm fires the hand's way when Natural is off")
+    func latchReadsTheHand() {
+        var latch = GestureMotionLatch()
+        var event = ScrollGestureEvent(
+            chord: [.control, .option],
+            kind: .changed,
+            input: .wheel,
+            delta: CGVector(dx: 0, dy: -5),
+            momentum: false,
+            location: .zero,
+            time: 0
+        )
+        event.reversed = true
+        #expect(latch.feed(event) == .down)
+    }
+
+    @Test("gesture.bind refuses a drag over a live hover_move")
+    func dragRefusedOverHover() {
+        let core = makeTestCore()
+        let keys: [JSONValue] = [.string("option+command")]
         #expect(
             core.execute(
-                "scroll_gesture.set_pan",
-                args: [.string("command+option")]
+                "gesture.bind",
+                args: [.string("hover_move")] + keys + [.string("move")]
             ).isSuccess
-        )
-        #expect(core.mouse.scroll.base.pan == [.command, .option])
-        #expect(tapChords(core).chords[.pan] == [.control, .shift])
-    }
-
-    @Test("a profile apply keeps the base and swaps the override")
-    func profileApplyKeepsBase() {
-        let core = makeTestCore()
-        var base = ScrollGestureBase.defaults
-        base.naturalTrackpad = false
-        core.applyScrollGestures(base: base, profile: nil)
-        core.applyScrollGestures(
-            profile: ScrollGestureOverride(spaceStep: [])
-        )
-        #expect(!tapChords(core).naturalTrackpad)
-        #expect(tapChords(core).chords[.step] == nil)
-        core.applyScrollGestures(profile: nil)
-        #expect(
-            tapChords(core).chords[.step] == [.control, .option, .command]
-        )
-    }
-
-    /// The verb writes the base and the live profile resolves over
-    /// it, so the other gesture's chord in EITHER is refused.
-    @Test("the other gesture's base and resolved chords are refused")
-    func refusalReadsBothOthers() {
-        let core = makeTestCore()
-        core.applyScrollGestures(
-            base: .defaults,
-            profile: ScrollGestureOverride(spaceStep: [.command, .shift])
         )
         #expect(
             !core.execute(
-                "scroll_gesture.set_pan",
-                args: [.string("command+shift")]
-            ).isSuccess
-        )
-        #expect(
-            !core.execute(
-                "scroll_gesture.set_pan",
-                args: [.string("control+option+command")]
-            ).isSuccess
-        )
-        #expect(
-            core.execute(
-                "scroll_gesture.set_pan",
-                args: [.string("command+option")]
+                "gesture.bind",
+                args: [.string("drag")] + keys + [.string("resize")]
             ).isSuccess
         )
     }

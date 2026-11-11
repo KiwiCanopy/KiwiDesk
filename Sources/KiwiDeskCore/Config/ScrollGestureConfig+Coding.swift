@@ -1,12 +1,10 @@
 import Foundation
 
-/// The wire shape both types share (#1656): `pan`, `space_step`,
+/// The wire shape both types share (#1656):
 /// `natural_scrolling: { trackpad, mouse }`, `long_swipes`,
 /// `step_distance`. The base takes a default for every key a file
 /// does not carry; the override writes only what it sets.
 enum ScrollGestureKeys: String, CodingKey {
-    case pan
-    case spaceStep = "space_step"
     case naturalScrolling = "natural_scrolling"
     case longSwipes = "long_swipes"
     case stepDistance = "step_distance"
@@ -19,21 +17,19 @@ enum NaturalScrollingKeys: String, CodingKey {
 extension ScrollGestureOverride: Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: ScrollGestureKeys.self)
-        pan = try c.decodeIfPresent(ScrollChord.self, forKey: .pan)
-        spaceStep = try c.decodeIfPresent(
-            ScrollChord.self,
-            forKey: .spaceStep
-        )
         if c.contains(.naturalScrolling) {
             let n = try c.nestedContainer(
                 keyedBy: NaturalScrollingKeys.self,
                 forKey: .naturalScrolling
             )
             naturalTrackpad = try n.decodeIfPresent(
-                Bool.self,
+                NaturalScrolling.self,
                 forKey: .trackpad
             )
-            naturalMouse = try n.decodeIfPresent(Bool.self, forKey: .mouse)
+            naturalMouse = try n.decodeIfPresent(
+                NaturalScrolling.self,
+                forKey: .mouse
+            )
         }
         longSwipes = try c.decodeIfPresent(Bool.self, forKey: .longSwipes)
         stepDistance = try c.decodeIfPresent(
@@ -44,8 +40,6 @@ extension ScrollGestureOverride: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: ScrollGestureKeys.self)
-        try c.encodeIfPresent(pan, forKey: .pan)
-        try c.encodeIfPresent(spaceStep, forKey: .spaceStep)
         if naturalTrackpad != nil || naturalMouse != nil {
             var n = c.nestedContainer(
                 keyedBy: NaturalScrollingKeys.self,
@@ -70,8 +64,6 @@ extension ScrollGestureBase: Codable {
     /// Every key, always: `gui.json` states the whole base.
     public func encode(to encoder: Encoder) throws {
         try ScrollGestureOverride(
-            pan: pan,
-            spaceStep: spaceStep,
             naturalTrackpad: naturalTrackpad,
             naturalMouse: naturalMouse,
             longSwipes: longSwipes,

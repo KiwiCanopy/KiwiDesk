@@ -7,8 +7,9 @@ public struct TrackpadGestureEvent: Equatable, Sendable {
     public enum Kind: Equatable, Sendable {
         case tap
         case swipe(Direction)
-        /// A `.gestureEvents` slot's gesture; `fingers` is unread.
-        case gesture(TrackpadGestureSlot)
+        /// A gesture event's input (`GestureInput.isGestureEvent`);
+        /// `fingers` is unread.
+        case gesture(GestureInput)
     }
 
     public var kind: Kind

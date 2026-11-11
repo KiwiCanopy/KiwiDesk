@@ -29,8 +29,6 @@ struct GesturesPart: View {
             }
             SettingsSection(SettingsCatalog.shortcuts.gesturesModifier) {
                 GesturesScrollEntries(model: model, playing: $playing)
-                GestureRule()
-                GesturesModifierDragRows(model: model)
             }
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnShelf) {
                 GesturesShelfEntries(model: model, playing: $playing)

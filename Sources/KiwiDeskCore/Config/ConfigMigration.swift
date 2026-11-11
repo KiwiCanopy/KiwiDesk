@@ -57,6 +57,7 @@ public enum ConfigMigration {
         migratingRetiredDragLook,
         migratingAbsentPocketCapacity,
         migratingPocketCapacityOntoShelf,
+        migratingGesturesIntoBindings,
     ]
 
     /// Runs after `steps`, and is skipped by

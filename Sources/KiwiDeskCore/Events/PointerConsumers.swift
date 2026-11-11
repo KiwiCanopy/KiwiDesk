@@ -45,11 +45,8 @@ public final class PointerConsumers {
     var makeTap: MakeTap = { PointerTap.live(mask: $0, deliver: $1) }
 
     /// The grab's settings as the tap reads them, sanitised; written
-    /// by `KiwiCore.applyModifierDrag` alone.
+    /// by `KiwiCore.applyGestures` alone, from the drag bindings.
     public private(set) var grabSettings = ModifierDragSettings.defaults
-    /// The base those were sanitised from, as written — by
-    /// `KiwiCore+ModifierDragSettings` alone.
-    var grabBase = ModifierDragSettings.defaults
     private var grabHandler: GrabHandler?
     /// The grab the main actor has heard begin and not yet end, as
     /// it began.
@@ -76,11 +73,19 @@ public final class PointerConsumers {
         sync()
     }
 
-    /// Applies the grab's settings. A grab in flight whose action
-    /// turned off ends here.
+    /// Applies the grab's settings. A grab in flight whose binding
+    /// left ends here.
     func configure(grab settings: ModifierDragSettings) {
         let settings = settings.sanitized
-        if let action = grabInFlight?.action, settings[action].isOff {
+        if let grab = grabInFlight,
+            !settings.grabs.contains(
+                ModifierDragBinding(
+                    grab.action,
+                    chord: grab.chord,
+                    start: grab.start
+                )
+            )
+        {
             endGrab()
         }
         grabSettings = settings

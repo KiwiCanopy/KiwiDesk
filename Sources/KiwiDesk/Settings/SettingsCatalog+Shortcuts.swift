@@ -199,10 +199,6 @@ struct ModifierKeysControls: Sendable {
 /// Shortcuts ▸ Mouse & trackpad rows, keyed on their census label
 /// keys (moved from Behavior ▸ Mouse with #1726).
 struct GesturesControls: Sendable {
-    let scrollPan = SettingsControl(
-        "shortcuts.gestures.scroll.pan",
-        "Scroll through windows"
-    )
     let longSwipes = SettingsControl(
         "shortcuts.gestures.scroll.long_swipes",
         "Long swipes move more windows"
@@ -210,10 +206,6 @@ struct GesturesControls: Sendable {
     let stepDistance = SettingsControl(
         "shortcuts.gestures.scroll.step_distance",
         "Travel per window"
-    )
-    let scrollSpaceStep = SettingsControl(
-        "shortcuts.gestures.scroll.space_step",
-        "Step between Spaces"
     )
     let naturalTrackpad = SettingsControl(
         "shortcuts.gestures.scroll.trackpad",
@@ -226,14 +218,6 @@ struct GesturesControls: Sendable {
     let mouseResize = SettingsControl(
         "behavior.mouse.resize_action",
         "Mouse resize action"
-    )
-    let modifierDragMove = SettingsControl(
-        "shortcuts.gestures.modifier_drag.move",
-        "Move windows from anywhere"
-    )
-    let modifierDragResize = SettingsControl(
-        "shortcuts.gestures.modifier_drag.resize",
-        "Resize windows from anywhere"
     )
     let hoverFocus = SettingsControl(
         "behavior.mouse.hover_focus",

@@ -49,12 +49,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The scroll gestures' global base (#1656); a profile
     /// diverges through `Profile.scrollGesture`.
     public var scrollGesture: ScrollGestureBase = .defaults
-    /// The modifier drags (#2447); global, no profile override.
-    public var modifierDrag: ModifierDragSettings = .defaults
-    /// The trackpad gesture slots' global base over the seeds
-    /// (#1873), sparse; a profile diverges through
-    /// `Profile.trackpadGesture`.
-    public var trackpadGesture = TrackpadGestureMap()
+    /// The mouse and trackpad gesture bindings' global base over
+    /// the seeds (#3199), sparse; a profile diverges through
+    /// `Profile.gesture`.
+    public var gesture = GestureMap()
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
@@ -100,11 +98,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// `appWide` (#1741) and the shared `look` (#1752) are
     /// stamped the same way, and `shortcutOffer` (#2324) is the
     /// top-ups' bookkeeping, merged at the write.
-    /// `trackpadGesture` (#1873) has no Settings row yet; the lane
-    /// that adds its rows drafts it and leaves this list.
+    /// `gesture` (#3199) has no Settings row yet; #3183's card
+    /// drafts it and leaves this list.
     public static let undraftedFields: Set<String> = [
         "format", "desktopSpaces", "appWide", "look", "shortcutOffer",
-        "trackpadGesture",
+        "gesture",
     ]
 
     /// Fields `gui.json` never carries: they mean something on
@@ -129,8 +127,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case ignoreRules = "ignore_rules"
         case layers
         case scrollGesture = "scroll_gesture"
-        case modifierDrag = "modifier_drag"
-        case trackpadGesture = "trackpad_gesture"
+        case gesture
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
         case focusWrap = "focus_wrap"
@@ -205,18 +202,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 ScrollGestureBase.self,
                 forKey: .scrollGesture
             ) ?? .defaults
-        // Additive since #2447: absence is the defaults.
-        modifierDrag =
+        // Additive since #3199: absence follows the seeds.
+        gesture =
             try container.decodeIfPresent(
-                ModifierDragSettings.self,
-                forKey: .modifierDrag
-            ) ?? .defaults
-        // Additive since #1873: absence follows the seeds.
-        trackpadGesture =
-            try container.decodeIfPresent(
-                TrackpadGestureMap.self,
-                forKey: .trackpadGesture
-            ) ?? TrackpadGestureMap()
+                GestureMap.self,
+                forKey: .gesture
+            ) ?? GestureMap()
         // Additive since #1655: absence is the default.
         spaceHistory =
             try container.decodeIfPresent(

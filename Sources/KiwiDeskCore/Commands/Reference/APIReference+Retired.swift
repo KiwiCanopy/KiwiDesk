@@ -96,6 +96,15 @@ extension APIReference {
         for move in ConfigMigration.pocketPlacementMoves {
             map["pocket.set_\(move.retired)"] = "kiwishelf.set_\(move.target)"
         }
+        // Mouse and trackpad gestures are one list of bindings
+        // (#3199): every fixed verb gives way to `gesture.bind`.
+        for verb in [
+            "scroll_gesture.set_pan", "scroll_gesture.set_space_step",
+            "modifier_drag.set_move", "modifier_drag.set_resize",
+            "trackpad_gesture.bind",
+        ] {
+            map[verb] = "gesture.bind"
+        }
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()

@@ -202,9 +202,8 @@ extension KiwiCore {
         config.floatAutomatically = globalRuleBase.floatAutomatically
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
-        config.modifierDrag = modifierDragBase
-        // The slots `init.lua`'s `trackpad_gesture.bind` wrote (#1873).
-        config.trackpadGesture = mouse.trackpad.base
+        // The bindings `init.lua`'s `gesture.bind` wrote (#3199).
+        config.gesture = mouse.gestures.base
         config.spaceHistory = spaceHistory.base
         config.modeCycle = modeCycle.base
         config.focusWrap = focusWrap.base

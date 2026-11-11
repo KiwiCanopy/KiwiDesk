@@ -5,9 +5,13 @@ import Foundation
 /// and the trackpad gesture slots (#1873).
 extension KiwiCore {
     func wireInputHandlers() {
-        wireScrollPan()
+        wireGestures()
         wireModifierGrab()
-        wireScrollSpaceStep()
-        wireTrackpadGestures()
+        // A `.system` Natural scrolling follows macOS live (#3200).
+        mouse.scroll.onHostChange = { [weak self] in
+            self?.applyScrollGestures(
+                profile: self?.mouse.scroll.profileOverride
+            )
+        }
     }
 }

@@ -282,11 +282,10 @@ public enum APIReference {
             "set_hover_focus_delay",
         ],
         "scroll_gesture": [
-            "set_pan", "set_space_step", "set_natural_scrolling",
-            "set_long_swipes", "set_step_distance",
+            "set_natural_scrolling", "set_long_swipes",
+            "set_step_distance",
         ],
-        "modifier_drag": ["set_move", "set_resize"],
-        "trackpad_gesture": ["bind"],
+        "gesture": ["bind", "unbind"],
         "quit": [
             "set_layout", "set_grid_target_depth",
         ],
