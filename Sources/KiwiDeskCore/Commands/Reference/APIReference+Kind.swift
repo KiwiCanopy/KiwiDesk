@@ -67,6 +67,8 @@ extension APIReference {
         "look.apply": .setting,
         "shortcut.remove": .setting,
         "shortcut.remove_sequence": .setting,
+        "shortcut.name_sequence_key": .setting,
+        "shortcut.remove_sequence_key": .setting,
         "look.save": .setting,
         "look.delete": .setting,
         "kiwivision.define_lens": .setting,

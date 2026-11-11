@@ -593,6 +593,18 @@ write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 :::unreleased
 `shortcut.remove_sequence <leader>` removes a whole key sequence
 ([`shortcut.remove_sequence`](lua-reference.md#shortcutremove_sequence)).
+
+`shortcut.set_sequence_key <leader> <path> <command> [argument…]`,
+`shortcut.name_sequence_key <leader> <path> <name> [symbol]` and
+`shortcut.remove_sequence_key <leader> <path>` build a key sequence
+one key at a time, a path's keys comma-separated
+([`shortcut.set_sequence_key`](lua-reference.md#shortcutset_sequence_key)):
+
+```bash
+kiwidesk shortcut.set_sequence_key ctrl+alt+space w,h focus left
+kiwidesk shortcut.name_sequence_key ctrl+alt+space w Windows macwindow
+kiwidesk shortcut.remove_sequence_key ctrl+alt+space w,h
+```
 :::
 
 `shortcut.list_groups` lists the shortcut groups a binding's `group`

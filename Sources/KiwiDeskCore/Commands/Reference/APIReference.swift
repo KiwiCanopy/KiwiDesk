@@ -333,6 +333,8 @@ public enum APIReference {
         ],
         "shortcut": [
             "list", "set", "remove", "remove_sequence", "list_groups",
+            "set_sequence_key", "name_sequence_key",
+            "remove_sequence_key",
         ],
     ]
 
