@@ -1,3 +1,4 @@
+import Combine
 import KiwiDeskCore
 import SwiftUI
 
@@ -5,12 +6,19 @@ import SwiftUI
 /// key panel's Shortcuts side: the leader's name, the breadcrumb,
 /// the keys that open more keys marked ›, then the step's end keys
 /// as the Shortcuts side files them, and how to leave. It takes no
-/// keys of its own: the keyboard tap reads every press.
+/// keys of its own: the keyboard tap reads every press. Past
+/// KiwiHub's sheet cap only the end keys scroll, under a fade, and
+/// the footer says how (#3175).
 struct KeySequenceHintView: View {
     let hint: KeySequenceHint
     /// The end keys as the Shortcuts side files them.
     let reference: ShortcutsReference?
     let glass: PanelGlass
+    /// KiwiHub's sheet cap on this screen
+    /// (`JumpPanelController.sheetCap`).
+    var sheetCap: CGFloat = 400
+    @ObservedObject var scroll = KeySequenceHintScroll()
+    @State private var sheetHeight: CGFloat = 0
 
     static let width: CGFloat = 360
     static let corner: CGFloat = 16
@@ -27,8 +35,16 @@ struct KeySequenceHintView: View {
                     }
                 }
             }
-            if reference?.isEmpty == false {
-                ShortcutsSheetView(reference: reference, needle: "")
+            if let reference, !reference.isEmpty {
+                JumpShortcutsView(
+                    sheet: ShortcutsSheet(reference: reference),
+                    scroll: scroll.value,
+                    maxHeight: endKeyCap,
+                    horizontalInset: 0,
+                    verticalInset: 0
+                )
+                .moreBelowFade()
+                .onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }
             }
             PanelDivider()
             footer
@@ -60,8 +76,22 @@ struct KeySequenceHintView: View {
         }
     }
 
+    /// What the end keys may stand: the cap less the branch rows
+    /// above them, which never scroll away.
+    var endKeyCap: CGFloat {
+        max(sheetCap - CGFloat(hint.branches.count) * 28, 120)
+    }
+
+    var overflows: Bool {
+        JumpShortcutsView.overflows(content: sheetHeight, cap: endKeyCap)
+    }
+
     private var footer: some View {
         HStack(spacing: 8) {
+            if overflows {
+                Text(L("key_sequence.hint.scroll", "%1$@ Scroll", "↑↓"))
+                Text(verbatim: "·").accessibilityHidden(true)
+            }
             Text(L("key_sequence.hint.back", "%1$@ Back", "⌫"))
             Text(verbatim: "·").accessibilityHidden(true)
             Text(L("key_sequence.hint.cancel", "%1$@ Cancel", "Esc"))
@@ -84,5 +114,26 @@ struct KeySequenceHintView: View {
                 "Opens more keys"
             )
         )
+    }
+}
+
+/// The scroll a scroll key asks of the hint panel's sheet (#3175),
+/// held across one step's drawing so a press never rebuilds it.
+@MainActor
+final class KeySequenceHintScroll: ObservableObject {
+    @Published var value = SheetScroll()
+
+    func take(_ scroll: KeySequenceScroll) {
+        var next = value
+        next.serial += 1
+        switch scroll {
+        case .step(let lines):
+            next.lines = lines
+            next.pages = 0
+        case .page(let pages):
+            next.lines = 0
+            next.pages = pages
+        }
+        value = next
     }
 }

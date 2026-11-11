@@ -194,6 +194,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onKeySequence = { [weak self] progress in
             self?.keySequenceHint.follow(progress)
         }
+        core.onKeySequenceScroll = { [weak self] scroll in
+            self?.keySequenceHint.scroll(scroll)
+        }
         wireKiwiVision()
         wireSettingsReaders()
 

@@ -40,6 +40,9 @@ struct KeyboardTapRows: Equatable, Sendable {
     /// The macOS shortcuts an open sequence lets through (#3173),
     /// handed to the router with the sequences.
     var sequencePassing = SequencePassChords.none
+    /// KiwiHub's second chords, which also scroll the sequence
+    /// panel (#3175); a field of their own, beside the sequences.
+    var sequenceScrollKeys = KiwiHubKeys()
     /// The epoch every sequence decision made over these rows
     /// carries.
     var sequenceGeneration: UInt64 = 0

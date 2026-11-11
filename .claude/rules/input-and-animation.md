@@ -170,6 +170,16 @@ editing here:
     `KeySequenceTapThreadTests`). An end key is never disabled on a
     failure: the hint panel reads the stored tree, which would
     still list it.
+  - **While a sequence is open, a recorded step key outranks a
+    scroll key, and a scroll key outranks macOS's pass-through
+    (#3175, #3173).** The router's order is esc / ⌫, the leader, a
+    step key, a scroll key (the plain arrows and page keys, then
+    `kiwihub.set_key`'s second chords, matched whole), the macOS
+    tiers, the beep. A new kind of key while open takes its place
+    in that order in `KeySequenceRouter.press`, and the scroll
+    keys reach the router in their own `KeyboardTapRows` field,
+    never through `setSequences`
+    (`KeySequenceScrollTests` ▸ `stepKeyBeatsArrow`).
   - **`.sides` answers only the chords a sided row names**, the
     either-side row on such a chord included, and only while
     `modifierSides` is on; every other chord stays a Carbon

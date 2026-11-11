@@ -7352,6 +7352,12 @@ Refused, naming the reason: a combo it cannot read; one without
 **V**, **X** or **Z**; and a combo already set for another key.
 
 :::unreleased
+The combos for `"up"`, `"down"`, `"page_up"` and `"page_down"`
+also scroll an open [key sequence](#define_sequence)'s panel, as
+the arrows and page keys do, unless a step key takes the combo.
+:::
+
+:::unreleased
 Four more keys name the Desktop overview's own presses:
 `"open_space"` (**⌘↓**), `"leave_space"` (**⌘↑**), `"pick_up"`
 (**⌘Return**) and `"follow"` (**⌃Return**); their combos act on
@@ -7923,8 +7929,11 @@ step's keys under the leader's name, the steps taken above them,
 end keys under their `name` or `desc` in their shortcut group.
 `escape` or the leader again cancels; `delete` goes back one step,
 and at step 1 cancels; a click or a Space or Desktop switch
-cancels. A key the step does not hold leaves the step open and
-plays the refusal sound while
+cancels. The panel opens where KiwiHub opens; past KiwiHub's
+height its end keys scroll, with **↑** **↓** **Page Up** **Page
+Down**, the scroll wheel, or a [`kiwihub.set_key`](#kiwihubset_key)
+combo for one of those keys. A key the step does not hold leaves
+the step open and plays the refusal sound while
 [`set_refusal_sound`](#set_refusal_sound) is on, off by default
 ([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
 macOS's own shortcuts still work while a sequence is open: a

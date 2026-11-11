@@ -9,6 +9,13 @@ extension KiwiCore {
         set { keys.onSequenceProgress = newValue }
     }
 
+    /// A scroll key while a sequence is open (#3175): the hint
+    /// panel's one scroll input. One slot: the app assigns it once.
+    public var onKeySequenceScroll: @MainActor (KeySequenceScroll) -> Void {
+        get { keys.onSequenceScroll }
+        set { keys.onSequenceScroll = newValue }
+    }
+
     /// The tree the running sequence on `leader` answers, in the
     /// active layer: what the hint panel draws where the installed
     /// snapshot does not hold it, a Lua sequence whose end key read

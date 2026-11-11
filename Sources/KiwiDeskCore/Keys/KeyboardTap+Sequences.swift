@@ -14,6 +14,7 @@ struct SequenceTapState: Sendable {
     /// the old rows is left to drain.
     mutating func reset(_ rows: KeyboardTapRows) {
         router.setSequences(rows.sequences, passing: rows.sequencePassing)
+        router.scrollKeys = rows.sequenceScrollKeys
         generation = rows.sequenceGeneration
         waiting = []
         closeRequested = nil

@@ -333,8 +333,9 @@ extension APIReference {
                 + "it to the next app while it is up."
         ),
         "set_key": APIRecord(
-            "Sets a second chord for a KiwiHub navigation key; no "
-                + "chord clears it.",
+            "Sets a second chord for a KiwiHub navigation key, which "
+                + "also scrolls an open key sequence's panel; no chord "
+                + "clears it.",
             .choice("key", KiwiHubKey.self),
             .text("combo", optional: true)
         ),

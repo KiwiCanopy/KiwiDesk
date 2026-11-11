@@ -26,20 +26,22 @@ public final class KeybindingManager {
     /// loop cannot clear the outer fire's flag.
     public internal(set) var isFiring = false
     /// Combos rejected during the most recent activation.
-    public internal(set) var activationFailures: Set<KeyCombo> =
-        []
+    public internal(set) var activationFailures: Set<KeyCombo> = []
     private var layers: [String: [KeyCombo: Int32]] = [:]
     /// Each layer's key sequences (#1871), beside `layers`: the
     /// keyboard tap answers the current layer's, never Carbon.
     var sequences: [String: [KeySequence]] = [:]
     /// Where an open sequence stands, nil once it closes (#1871):
     /// the hint panel's one input.
-    var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void = {
-        _ in
+    var onSequenceProgress: @MainActor (KeySequenceProgress?) -> Void =
+        { _ in }
+    /// A scroll key while a sequence is open (#3175).
+    var onSequenceScroll: @MainActor (KeySequenceScroll) -> Void = { _ in }
+    /// KiwiHub's second chords, which scroll the sequence panel (#3175).
+    var sequenceScrollKeys = KiwiHubKeys() {
+        didSet { scrollKeysChanged(from: oldValue) }
     }
-    /// The unbound-key sound: the core wires the refusal sound
-    /// (#1871 ▸ unbound step key, `KiwiCore+Bootstrap`), so a bare
-    /// manager stays silent.
+    /// The unbound-key sound (#1871); a bare manager stays silent.
     var beep: @MainActor () -> Void = {}
     /// Whether the hint panel was last told a sequence is open.
     var sequenceOpen = false
@@ -117,8 +119,7 @@ public final class KeybindingManager {
     /// macOS refused the tap; asked again only once the switch
     /// moves, or every `bind` of a load would spawn and refuse.
     var keyboardTapRefused = false
-    /// Reads one `com.apple.symbolichotkeys` entry for an open key
-    /// sequence's pass-through (#3173); a seam for suites.
+    /// A `com.apple.symbolichotkeys` read for #3173's pass-through.
     var readSymbolicHotkey: (Int) -> SymbolicHotkeyEntry? =
         SymbolicHotkeys.liveRead
     /// `sideTapStatus` changed: Settings re-reads it (#96).

@@ -71,6 +71,7 @@ extension KeybindingManager {
             sequences: sequences,
             sequencePassing: sequences.isEmpty
                 ? .none : .live(reading: readSymbolicHotkey),
+            sequenceScrollKeys: sequenceScrollKeys,
             sequenceGeneration: sequenceGeneration
         )
         let wanted = rows.consumers

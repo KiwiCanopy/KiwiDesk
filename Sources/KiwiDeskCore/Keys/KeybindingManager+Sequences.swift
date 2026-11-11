@@ -35,6 +35,14 @@ extension KeybindingManager {
         Set(sequences(for: layer).map(\.leader))
     }
 
+    /// New scroll keys re-arm the tap while a sequence is defined.
+    func scrollKeysChanged(from old: KiwiHubKeys) {
+        guard sequenceScrollKeys != old,
+            !sequences(for: currentLayer).isEmpty
+        else { return }
+        activate(currentLayer)
+    }
+
     func releaseSequences(_ held: [String: [KeySequence]]) {
         guard let lua else { return }
         for sequence in held.values.joined() {
@@ -87,6 +95,8 @@ extension KeybindingManager {
             noteSequenceClosed()
         case .passed(closing: false):
             return
+        case .scroll(let scroll):
+            onSequenceScroll(scroll)
         case .fired(let ref):
             noteSequenceClosed()
             sequenceFire(ref: ref)
