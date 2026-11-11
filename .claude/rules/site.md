@@ -709,3 +709,33 @@ sitemap entry — and adds three:
   PR that touches `ROADMAP.md`. The section's shape is stated once,
   in a comment above it in `ROADMAP.md`, where whoever edits the
   list will be.
+
+## `/llms.txt` and `/llms/` are permanent paths (#3213)
+
+`src/pages/llms.txt.ts` lists the user-facing docs pages for an
+agent without the MCP, and `src/pages/llms/[...path].ts` serves
+each one's raw Markdown body. They inherit the feed's obligations
+above — a program reads them, so no locale route and no sitemap
+entry — and add four:
+
+- **Both paths are permanent once an agent has cached them.** A
+  rename strands the cached link with no build to red, so
+  `scripts/check-site-tokens.py` ▸ `check_llms_txt` pins both by
+  name.
+- **The page list is the sidebar's, never a second list.**
+  `src/lib/llms.ts` reads the groups from Starlight's resolved
+  config and drops the contributor group, so a new sidebar page
+  joins on its own. Rename that group and the build refuses until
+  `CONTRIBUTOR_GROUP` follows; put a contributor page in any other
+  group and it is published.
+- **A copy is the page's body, untouched.** An `:::unreleased`
+  marker stays literal, since stripping it would present unshipped
+  behavior as shipped, and reading it would be the second parser
+  the marker's section forbids. The check compares each copy with
+  its `docs/` source as bytes.
+- **Every copy stays under the one prefix `public/_headers` marks
+  `noindex`**, and no HTML page links one: a copy duplicates its
+  `/docs/` page, and a site-relative `.md` href reds
+  `check_markdown_pipeline`. Whether Cloudflare applies that rule
+  is not checked by the gate: read the response header on a
+  preview deploy after editing it.

@@ -75,6 +75,13 @@ count in this sentence for the next author to falsify.
    carries, and no element uses an `on*` attribute, which a hash
    cannot allow.
 
+13. `/llms.txt` lists the user-facing docs pages and nothing else
+   (#3213): every link is a built raw copy under `/llms/` of the
+   stated size, each copy is its `docs/` source past the frontmatter,
+   the set is the sidebar minus its contributor group, and the
+   prefix is noindex and in no sitemap. Both paths are permanent,
+   so they are pinned here by name.
+
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
 two role-mapping stylesheets by hand; add any future consumer there.
@@ -1536,6 +1543,148 @@ def check_roadmap_feed(dist: pathlib.Path) -> None:
     )
 
 
+def sidebar_groups() -> dict[str, list[str]]:
+    """The Starlight sidebar's groups and their page slugs, read
+    from `astro.config.mjs` by pattern: a group is a `label`
+    followed by `items`, and no item nests a bracket."""
+    config = source_without_comments(REPO / "site" / "astro.config.mjs")
+    groups = {
+        label: re.findall(r'slug:\s*"([^"]+)"', items)
+        for label, items in re.findall(
+            r'label:\s*"([^"]+)",\s*items:\s*\[(.*?)\]', config, re.S
+        )
+    }
+    if not groups or not all(groups.values()):
+        fail(
+            "llms: read no sidebar group, or an empty one, from "
+            "site/astro.config.mjs; the page list is unguarded "
+            "until this pattern is fixed"
+        )
+    return groups
+
+
+def check_llms_txt(dist: pathlib.Path) -> None:
+    """`/llms.txt` and the raw copies under `/llms/` (#3213).
+
+    An agent caches both paths, so they are permanent and named
+    here rather than derived: a rename must red. What IS derived
+    is the page set, from the sidebar, read here by pattern and by
+    `site/src/lib/llms.ts` from Starlight's resolved config, so
+    the two readings hold each other.
+
+    A copy is compared with its `docs/` source as bytes past the
+    frontmatter. That holds the passthrough, an `:::unreleased`
+    marker included, without reading the marker's grammar.
+
+    Not covered: that Cloudflare applies the header. `_headers` is
+    read as text, for a rule on the prefix.
+
+    On the SITE gate for `check_appcast`'s reason.
+    """
+    index_name, prefix, contributor = "llms.txt", "/llms/", "Contributing"
+    index = dist / index_name
+    if not index.is_file():
+        fail(f"llms: this build serves no /{index_name}")
+    host = canonical_host()
+    entry = re.compile(
+        r"- \[[^\]]+\]\((\S+)\): \S.* \((\d+) bytes\)"
+    )
+    lines = index.read_text(encoding="utf-8").splitlines()
+    links = [
+        entry.fullmatch(line) for line in lines if line.startswith("- ")
+    ]
+    if not links:
+        fail(f"llms: /{index_name} lists no page")
+    if not all(links):
+        fail(
+            f"llms: /{index_name} carries a list line that is not "
+            "`- [title](url): description (N bytes)`"
+        )
+    listed: set[str] = set()
+    for url, size in (match.groups() for match in links):
+        parts = urllib.parse.urlsplit(url)
+        if parts.netloc != host or not parts.path.startswith(prefix):
+            fail(f"llms: {url} is not under {host}{prefix}")
+        relative = parts.path[len(prefix):]
+        copy = dist / prefix.strip("/") / relative
+        if not relative.endswith(".md") or not copy.is_file():
+            fail(f"llms: {url} resolves to no built Markdown file")
+        raw = copy.read_bytes()
+        if len(raw) != int(size) or not raw:
+            fail(
+                f"llms: {url} is {len(raw)} bytes, listed as {size}"
+            )
+        origin = (REPO / "docs" / relative).read_bytes().rstrip()
+        front = origin[: len(origin) - len(raw.rstrip())].strip()
+        if not origin.endswith(raw.rstrip()) or not (
+            front.startswith(b"---") and front.endswith(b"---")
+        ):
+            fail(
+                f"llms: {url} is not docs/{relative} past its "
+                "frontmatter, so the copy is no longer raw"
+            )
+        slug = "docs/" + relative[: -len(".md")]
+        slug = re.sub(r"/index$", "", slug)
+        listed.add(slug)
+
+    groups = sidebar_groups()
+    if contributor not in groups:
+        fail(f"llms: the sidebar has no {contributor!r} group")
+    excluded = set(groups[contributor])
+    wanted = {
+        slug
+        for label, slugs in groups.items()
+        if label != contributor
+        for slug in slugs
+    }
+    if listed != wanted:
+        fail(
+            f"llms: /{index_name} and the sidebar disagree; "
+            f"unlisted {sorted(wanted - listed)}, "
+            f"not user-facing {sorted(listed - wanted)}"
+        )
+    built = {
+        path.relative_to(dist / prefix.strip("/")).as_posix()
+        for path in (dist / prefix.strip("/")).rglob("*")
+        if path.is_file()
+    }
+    if len(built) != len(listed):
+        fail(
+            f"llms: {prefix} holds {len(built)} file(s) and "
+            f"/{index_name} lists {len(listed)}: {sorted(built)}"
+        )
+    for slug in sorted(excluded):
+        name = slug.split("/", 1)[1]
+        if f"{name}.md" in built or f"{name}/index.md" in built:
+            fail(f"llms: contributor page {slug} is under {prefix}")
+
+    sitemaps = sorted(dist.glob("sitemap*.xml"))
+    if not sitemaps:
+        fail("llms: found no sitemap to hold the copies out of")
+    for sitemap in sitemaps:
+        if prefix in sitemap.read_text(encoding="utf-8"):
+            fail(f"llms: {sitemap.name} submits a page under {prefix}")
+    headers = (dist / "_headers").read_text(encoding="utf-8")
+    rule = re.search(
+        r"^" + re.escape(prefix) + r"\*\n((?:[ \t]+\S.*\n?)+)",
+        headers,
+        re.M,
+    )
+    if not rule or not re.search(
+        r"^[ \t]+X-Robots-Tag:.*\bnoindex\b", rule[1], re.M | re.I
+    ):
+        fail(
+            f"llms: _headers has no `{prefix}*` rule sending "
+            "`X-Robots-Tag: noindex`, so each copy is indexed as a "
+            "duplicate of its /docs/ page"
+        )
+    print(
+        f"llms: /{index_name} lists {len(listed)} page(s), each a "
+        f"raw copy under {prefix}; {len(excluded)} contributor "
+        "page(s) absent, prefix noindex"
+    )
+
+
 def check_raster_favicon(dist: pathlib.Path) -> None:
     """Every built page links a PNG favicon, not only the SVG.
 
@@ -2187,6 +2336,7 @@ def main() -> None:
     check_unreleased_markers(dist)
     check_typed_changelog(dist)
     check_roadmap_feed(dist)
+    check_llms_txt(dist)
     check_raster_favicon(dist)
     check_inline_scripts_hashed(dist)
     check_no_sanity_in_dist(dist)
