@@ -113,19 +113,21 @@ extension JumpPanel {
     /// Windows back chord latches its own modifiers.
     func key(for event: NSEvent) -> JumpKey? {
         let flags = event.modifierFlags
+        let full = key(event.keyCode, flags)
+        // The back chord is matched first, as `JumpKey.of` does.
+        if full == .side(-1), scope() == .windows, let chord = back(),
+            JumpKey.presses(chord, keyCode: event.keyCode, modifiers: flags)
+        {
+            onBackChord(flags)
+            return full
+        }
         let fresh = pickModifiers(flags)
         if fresh != flags, let pick = key(event.keyCode, fresh),
             pick.picks
         {
             return pick
         }
-        let key = key(event.keyCode, flags)
-        if key == .side(-1), scope() == .windows, let chord = back(),
-            JumpKey.presses(chord, keyCode: event.keyCode, modifiers: flags)
-        {
-            onBackChord(flags)
-        }
-        return key
+        return full
     }
 
     private func key(

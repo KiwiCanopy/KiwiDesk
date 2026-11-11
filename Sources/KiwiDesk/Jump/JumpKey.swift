@@ -240,12 +240,14 @@ enum JumpKey: Equatable {
         return combo(keyCode, held) == chord
     }
 
-    /// Whether the key picks a row — ↩, a ⌘ digit or a dead ↩
-    /// chord — so it reads only the modifiers pressed since the
-    /// opener (#3168).
+    /// Whether the key is a ↩ chord or a ⌘ digit — a pick, the
+    /// Desktops side's pick-up and follow, or a dead ↩ chord — so it
+    /// reads only the modifiers pressed since the opener (#3168).
     var picks: Bool {
         switch self {
-        case .pick, .swapHere, .quick, .quickSwap, .dead: true
+        case .pick, .swapHere, .quick, .quickSwap, .dead, .pickUp,
+            .follow:
+            true
         default: false
         }
     }

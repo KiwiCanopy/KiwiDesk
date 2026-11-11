@@ -135,6 +135,20 @@ struct JumpStaleModifierTests {
         #expect(panel.key(for: shift) == .pick(moveHere: true))
     }
 
+    /// Desktops answers a ↩ chord it does not list as dead; the
+    /// stale read reaches its follow and pick-up first.
+    @Test("on Desktops a stale modifier leaves ⌃↩ and ⌘↩ alive")
+    func desktopsChordsSurvive() {
+        let option = panel(stale: [.option])
+        option.scope = { .desktops }
+        let follow = keyDown(36, "\r", [.control, .option])
+        #expect(option.key(for: follow) == .follow)
+        let control = panel(stale: [.control])
+        control.scope = { .desktops }
+        let pickUp = keyDown(36, "\r", [.control, .command])
+        #expect(control.key(for: pickUp) == .pickUp)
+    }
+
     @Test("a non-pick key keeps every modifier; the back chord latches")
     func otherKeysKeepTheirModifiers() {
         let panel = panel(stale: [.shift, .option])
@@ -150,6 +164,22 @@ struct JumpStaleModifierTests {
         #expect(latched == [[.shift, .option]])
         _ = panel.key(for: keyDown(36, "\r", [.shift, .option]))
         #expect(latched.count == 1)
+    }
+
+    /// The back chord is the Windows side's alone: elsewhere it
+    /// latches nothing.
+    @Test("the back chord latches on Windows only")
+    func backChordIsWindowsOnly() {
+        let panel = panel(stale: [])
+        panel.scope = { .desktops }
+        panel.back = { KeyCombo(keyCode: 48, modifiers: [.shift, .option]) }
+        var latched = 0
+        panel.onBackChord = { _ in latched += 1 }
+        _ = panel.key(for: keyDown(48, "\t", [.shift, .option]))
+        #expect(latched == 0)
+        panel.scope = { .windows }
+        _ = panel.key(for: keyDown(48, "\t", [.shift, .option]))
+        #expect(latched == 1)
     }
 
     /// Every opener door latches, and a click reads the same set.
