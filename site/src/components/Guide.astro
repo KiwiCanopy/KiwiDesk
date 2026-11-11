@@ -101,6 +101,7 @@ const toc = [
   { id: "layouts", label: s.guide_toc_layouts },
   { id: "favorite", label: s.guide_toc_favorite },
   { id: "settings", label: s.guide_toc_settings },
+  { id: "profiles", label: s.guide_toc_profiles },
   { id: "shortcuts", label: s.guide_toc_shortcuts },
   { id: "faq", label: s.guide_toc_faq },
   { id: "is-it-for-me", label: s.guide_toc_is_it_for_me },
@@ -119,73 +120,14 @@ const layouts = [
   { name: "floating", label: "Floating", desc: s.guide_layout_floating },
 ];
 
-// The Settings window's destinations, in the order Home groups
-// them (`SettingsDestination.thisProfile`, then `.wholeApp`).
-//
-// Not one card per destination. Two destinations fold into a
-// card beside them, on the same reading each time: this is a
-// walkthrough for someone deciding whether to install, so a card
-// is a thing you would go and do, not a tile on Home.
-//   • General folds into App Rules, as it always has.
-//   • Mac Checklist folds into App Rules & General too, named
-//     there: a one-time list of macOS settings is not a thing a
-//     reader comes back to.
-// Everything else keeps its own card, including Gaps & Borders —
-// it is a rename (from Appearance), so the new name has to be on
-// the page or a reader scanning Home for what they read
-// here finds nothing. Every colour is part of Looks & Animations
-// itself, in its Colors & glass section (#2389), so its card
-// names that section rather than a second page.
-const tour = [
-  { title: s.guide_tour_spaces_title, body: s.guide_tour_spaces_body },
-  { title: s.guide_tour_layout_title, body: s.guide_tour_layout_body },
-  {
-    title: s.guide_tour_monitors_title,
-    body: s.guide_tour_monitors_body,
-  },
-  {
-    title: s.guide_tour_gapsborders_title,
-    body: s.guide_tour_gapsborders_body,
-  },
-  {
-    title: s.guide_tour_bars_title,
-    body: s.guide_tour_bars_body,
-  },
-  {
-    title: s.guide_tour_colors_title,
-    body: s.guide_tour_colors_body,
-  },
-  {
-    title: s.guide_tour_profiles_title,
-    body: s.guide_tour_profiles_body,
-  },
-  {
-    title: s.guide_tour_shortcuts_title,
-    body: s.guide_tour_shortcuts_body,
-  },
-  {
-    title: s.guide_tour_apprules_title,
-    body: s.guide_tour_apprules_body,
-  },
-  {
-    title: s.guide_tour_kiwivision_title,
-    body: s.guide_tour_kiwivision_body,
-  },
-  { title: s.guide_tour_ai_title, body: s.guide_tour_ai_body },
-];
-
-// The "choosing your own shortcuts" section (#1097). Keys are
-// `guide_keys_*` rather than `guide_shortcuts_*` because
-// `guide_tour_shortcuts_*` above is already the Settings tour's
-// card for the same destination — one prefix per meaning, so a
-// translator never has to guess which of two near-identical key
-// names a string belongs to.
+// The "choosing your own shortcuts" section (#1097), keyed
+// `guide_keys_*`.
 //
 // Both lists carry inline <strong> lead-ins, so they render with
 // set:html below. Each entry is ONE sentence with its own opening
-// clause emphasized — not a title/body pair like the tour cards —
-// because the emphasis is a lead-in the sentence continues from,
-// and splitting it would force a rewrite of every line.
+// clause emphasized — not a title/body pair — because the
+// emphasis is a lead-in the sentence continues from, and
+// splitting it would force a rewrite of every line.
 const tryChord = [
   s.guide_keys_try_1,
   s.guide_keys_try_2,
@@ -586,37 +528,10 @@ const jsonLd = [
                      text, never styled as something tappable. */}
                 <p class="learn-install__later"
                   >{s.guide_gs_install_updates}</p>
-                <p class="learn-install__later">{s.guide_gs_a11y}</p>
               </div>
 
               <p class="learn-sub">{s.guide_gs_perm_sub}</p>
               <p set:html={s.guide_gs_perm_p}></p>
-
-              <div class="learn-callout learn-callout--trust">
-                <span class="learn-callout__icon" aria-hidden="true">
-                  <Icon name="lucide:shield-check" />
-                </span>
-                <div class="learn-callout__body">
-                  <h3>{s.guide_gs_trust_title}</h3>
-                  <p>{s.guide_gs_trust_p}</p>
-                  <ul class="learn-checklist">
-                    <li>
-                      <span class="learn-checklist__check"
-                        aria-hidden="true">
-                        <Icon name="lucide:check" />
-                      </span>
-                      {s.guide_gs_trust_1}
-                    </li>
-                    <li>
-                      <span class="learn-checklist__check"
-                        aria-hidden="true">
-                        <Icon name="lucide:check" />
-                      </span>
-                      {s.guide_gs_trust_2}
-                    </li>
-                  </ul>
-                </div>
-              </div>
 
               <p class="learn-sub">{s.guide_gs_first_sub}</p>
               <p>{s.guide_gs_first_p}</p>
@@ -696,21 +611,30 @@ const jsonLd = [
                 <h2>{s.guide_settings_title}</h2>
               </div>
               <p set:html={s.guide_settings_p}></p>
-              <ul class="learn-tour">
-                {tour.map((sec) => (
-                  <li>
-                    <h3>{sec.title}</h3>
-                    <p>{sec.body}</p>
-                  </li>
-                ))}
-              </ul>
             </section>
 
-            {/* ===== 5. Choosing your own shortcuts ===== */}
-            {/* A section, not a page (#1097). The Shortcuts tour
-                 card sits in the Settings section right above, so
-                 this reads as its depth tier rather than a
-                 destination of its own — and a /guide/shortcuts/
+            {/* ===== 5. Profiles ===== */}
+            <section class="learn-section" id="profiles">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_profiles_eyebrow}</span>
+                <h2>{s.guide_profiles_title}</h2>
+              </div>
+              <p set:html={s.guide_profiles_p1}></p>
+              <p>{s.guide_profiles_p2}</p>
+              <div class="learn-callout">
+                <span class="learn-callout__icon" aria-hidden="true">
+                  <Icon name="lucide:info" />
+                </span>
+                <div class="learn-callout__body">
+                  <h3>{s.guide_profiles_callout_title}</h3>
+                  <p set:html={s.guide_profiles_callout_p}></p>
+                </div>
+              </div>
+            </section>
+
+            {/* ===== 6. Choosing your own shortcuts ===== */}
+            {/* A section, not a page (#1097): a /guide/shortcuts/
                  route would be an orphan the footer nav never
                  carries, on a URL the app could pin (#1019) with
                  no guard behind it.
@@ -779,7 +703,7 @@ const jsonLd = [
               <p>{s.guide_keys_bonus}</p>
             </section>
 
-            {/* ===== 6. FAQ ===== */}
+            {/* ===== 7. FAQ ===== */}
             <section class="learn-section" id="faq">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -802,7 +726,7 @@ const jsonLd = [
               </div>
             </section>
 
-            {/* ===== 7. Is KiwiDesk for you? ===== */}
+            {/* ===== 8. Is KiwiDesk for you? ===== */}
             <section class="learn-section" id="is-it-for-me">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
