@@ -84,7 +84,10 @@ extension KiwiCore {
         // write went through a reload — unless the engine has not
         // started (a paused cold boot), which applies it at start.
         if changed, lua != nil {
-            _ = applyDesktopBinding(in: desktopMemory.readDesktops())
+            _ = applyDesktopBinding(
+                in: desktopMemory.readDesktops(),
+                cause: .event
+            )
         }
     }
 

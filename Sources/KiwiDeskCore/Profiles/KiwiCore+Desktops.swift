@@ -82,7 +82,7 @@ extension KiwiCore {
                     + "'\(profile)' does not exist (yet)"
             )
         }
-        applyDesktopBinding(in: snapshot)
+        applyDesktopBinding(in: snapshot, cause: .event)
         return .ok()
     }
 
@@ -318,7 +318,7 @@ extension KiwiCore {
     @discardableResult
     func applyDesktopBinding(
         in snapshot: DesktopSnapshot,
-        cause: ProfileApplyCause = .event
+        cause: ProfileApplyCause
     ) -> String? {
         guard let binding = mainDesktopBinding(in: snapshot)
         else { return nil }
