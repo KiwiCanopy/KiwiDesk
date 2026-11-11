@@ -14,8 +14,10 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case spaceStep = "keybinding.space_{previous,next}"
     /// Back / forward through the Space history (#1655).
     case spaceHistoryStep = "keybinding.space_{back,forward}"
-    /// Which history those two walk (#1655).
+    /// Which history the history verbs walk (#1655, #3206).
     case spaceHistory = "config.spaceHistory"
+    /// Toggle to the Space you were on before (#3206).
+    case spaceLast = "keybinding.focus_space_last"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
     /// The window switcher (#1875), its row named "Show" and the
@@ -122,7 +124,7 @@ extension ShortcutsKey {
                 gate: .runtime(.layersExist)
             )
         case .focusWrap, .focusDir, .screenLast, .spaceStep,
-            .spaceHistoryStep, .spaceHistory, .goToSpace:
+            .spaceHistoryStep, .spaceHistory, .spaceLast, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         // One card for what shows and hides: KiwiHub's sides
         // (#2265), the bars (#761), KiwiVision and its lenses.

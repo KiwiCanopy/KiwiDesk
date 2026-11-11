@@ -73,7 +73,7 @@ extension KiwiCore {
             event.goneWindowID == nil ? nil : focusedWindowID  // #2888
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
-        var launchFollow: (WindowID, SpaceID)? = nil
+        var launchFollow: (WindowID, LaunchFollowIntent.Claim)? = nil
         var sentAway = false
         var goneReason: WindowGoneReason? = nil
         // A settled monitor change takes its own one retile (#1612).

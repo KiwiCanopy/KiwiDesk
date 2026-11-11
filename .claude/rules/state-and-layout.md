@@ -29,7 +29,11 @@ editing here:
   end (#1655).** One keyed by `SpaceID` rekeys where a held Space
   is renumbered (`moveMembers`) and forgets in the one Space drop,
   `forwardWindows(of:to:)`; the Space history's trails are the
-  instance (`SpaceDropHookNeedleTests`). A Space-keyed CONFIG map
+  instance (`SpaceDropHookNeedleTests`). A verb walking that
+  history resolves its trail, shown Space and reachability through
+  the one `spaceHistoryWalk()`, and a toggle reads the trail's
+  `left`, never the entry behind the cursor (#3206,
+  `SpaceHistoryLastTests`). A Space-keyed CONFIG map
   in `TilingSettings` (`gap.override`, `min_window_size_override`)
   does neither: it belongs to the arrangement that declared the
   Space and returns with it (`MinWindowSizeOverrideHoldTests`
@@ -606,6 +610,18 @@ editing here:
   `placedByAppRule` alone, so a door that must not follow keeps it
   unset rather than adding a check at the claim
   (`LaunchFollowSpawnTests`, `LaunchFollowSeamTests`).
+  **A launch's popups ride the owed follow (#3189).** The fold
+  names the rule it skipped for a popup
+  (`AppliedEffects.popupSkippedRule`) and files it where the user
+  is, as before; the claim's door notes it on the debt only
+  while that app's debt stands, and
+  `payLaunchFollow` files each rider still in the Space it opened
+  in through `fileMembership`, ahead of the switch
+  (`LaunchFollowSeamTests` ▸ `ridersFiledAheadOfTheSwitch`). Keep
+  the riders inside the debt's one value, handed out by its claim
+  alone, so nothing that ends the debt can leave them, and the
+  unowed arm carries none (`LaunchFollowRiderTests`,
+  `LaunchRidersLedgerTests` ▸ `endersRetire`).
   **A lens's quiet open (#3122) is owed through the same door**,
   `oweLaunchFollow(quietly:)`, onto the ledger's `quietOpen` slot:
   one focus move, claimed ahead of the follow at the first member

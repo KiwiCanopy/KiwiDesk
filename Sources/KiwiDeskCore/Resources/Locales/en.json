@@ -983,6 +983,7 @@
   "keybinding.focus_desktop": "Go to Desktop %1$@",
   "keybinding.focus_dir": "Focus window %1$@",
   "keybinding.focus_display_last": "Go to last screen",
+  "keybinding.focus_space_last": "Go to last Space",
   "keybinding.go_to_space": "Go to Space %1$@",
   "keybinding.grow_height": "Grow height",
   "keybinding.grow_width": "Grow width",

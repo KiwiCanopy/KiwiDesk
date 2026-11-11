@@ -82,20 +82,24 @@ struct GestureBindingTests {
         #expect(!resolved.keys.contains { $0.input == .hoverMove })
     }
 
-    @Test("each Lua seed runs the Shortcuts catalogue's own Lua")
-    func seedsAreRuled() {
-        let catalogue = Set(
-            DefaultKeybindings.bindings(
-                spaces: [SpaceID("1")],
-                resizeStep: 50,
-                base: .standard
-            ).map(\.lua)
-        )
+    /// Whether each Lua seed is a catalogue row is the GUI target's
+    /// (`TrackpadSeedCatalogueTests`), whose catalogue holds verbs no
+    /// keyboard default binds.
+    @Test("every seed passes its own key's refusals")
+    func seedsPassTheirRefusals() {
         for (key, action) in GestureSeeds.seeds {
             #expect(action.refusal(on: key) == nil, "\(key.spelling)")
-            guard case .run(let lua) = action else { continue }
-            #expect(catalogue.contains(lua.lua), "\(key.spelling)")
         }
+        let tap3 = GestureSeeds.seeds[GestureKey(.tap3)]
+        #expect(
+            tap3
+                == .run(
+                    LuaAction(
+                        lua: "KiwiDesk.focus_space_last()",
+                        kind: .navigation
+                    )
+                )
+        )
     }
 
     @Test("a grab starts on a press for drag, on the keys for hover_move")

@@ -47,7 +47,7 @@ public enum GestureSeeds {
             LuaAction(lua: KiwiHubSide.shortcuts.lua, kind: .navigation)
         ),
         GestureKey(.tap3): .run(
-            LuaAction(lua: "KiwiDesk.focus_space_back()", kind: .navigation)
+            LuaAction(lua: "KiwiDesk.focus_space_last()", kind: .navigation)
         ),
         GestureKey(.drag, [.control, .command]): .grab(.move),
         GestureKey(.drag, pan): .grab(.resize),

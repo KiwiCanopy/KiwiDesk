@@ -61,6 +61,16 @@ extension KeybindingCatalog {
         ),
     ]
 
+    /// Go to the Space you were on before, ⌘⇥-style (#3206); the
+    /// trackpad's three-finger tap runs it by default.
+    static let spaceLastRow = NavCommand(
+        label: "Go to last Space",
+        lua: "KiwiDesk.focus_space_last()",
+        displayLabel: {
+            L("keybinding.focus_space_last", "Go to last Space")
+        }
+    )
+
     /// Go back / forward in the Space history.
     static let spaceHistoryRows: [NavCommand] = [
         NavCommand(

@@ -7,7 +7,8 @@ extension ShortcutsKey {
             return .none
         case .layers, .openApplications, .pocketApps, .advanced,
             .focusDir,
-            .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
+            .screenLast, .spaceStep, .spaceHistoryStep, .spaceLast,
+            .goToSpace,
             .swapDir, .screenMove,
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,

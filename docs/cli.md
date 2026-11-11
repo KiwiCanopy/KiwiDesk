@@ -483,6 +483,11 @@ that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
 
 :::unreleased
+`focus_space_last` toggles between the last two Spaces you visited
+([`focus_space_last`](lua-reference.md#focus_space_last)).
+:::
+
+:::unreleased
 `open_in_background` takes an app bundle id, and optionally a
 Space id to put its windows in and a Desktop number to send them
 to (`kiwidesk open_in_background com.apple.Music "" 2`), and opens

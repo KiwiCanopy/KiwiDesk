@@ -19,6 +19,7 @@ public enum APIReference {
             ("focus_space", "focus_space"),
             ("focus_space_back", "focus_space_back"),
             ("focus_space_forward", "focus_space_forward"),
+            ("focus_space_last", "focus_space_last"),
             ("focus_space_previous", "focus_space_previous"),
             ("focus_space_next", "focus_space_next"),
             ("focus_display_last", "focus_display_last"),

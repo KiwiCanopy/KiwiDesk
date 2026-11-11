@@ -983,6 +983,7 @@
   "keybinding.focus_desktop": "Zu Schreibtisch %1$@ wechseln",
   "keybinding.focus_dir": "Fenster %1$@ fokussieren",
   "keybinding.focus_display_last": "Zum zuletzt genutzten Bildschirm wechseln",
+  "keybinding.focus_space_last": "Zum letzten Space",
   "keybinding.go_to_space": "Zu Space %1$@ wechseln",
   "keybinding.grow_height": "Höhe vergrößern",
   "keybinding.grow_width": "Breite vergrößern",

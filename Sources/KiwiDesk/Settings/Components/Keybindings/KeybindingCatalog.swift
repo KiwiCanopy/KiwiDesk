@@ -155,7 +155,8 @@ enum KeybindingCatalog {
                 title: "Focus",
                 commands: focusDirections + [screenLastRow]
                     + spaceStepRows
-                    + spaceHistoryRows + goToSpace(spaces)
+                    + spaceHistoryRows + [spaceLastRow]
+                    + goToSpace(spaces)
             ),
             NavGroup(title: "KiwiVision", commands: [toggleKiwiVision]),
             NavGroup(

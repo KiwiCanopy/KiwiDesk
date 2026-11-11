@@ -8018,6 +8018,24 @@ arm judges a window WindowServer just created, one the user will
 look for. So a press — or none, from an app past its cold start —
 is enough here and still not there.
 
+**A launch's popups ride the follow (#3189).** The popup skip
+exists because a popup filed into a Space nobody shows is parked
+as it opens. A launch's follow shows that Space, so for the popups
+of that launch the skip only strands them: Lightroom Classic's top
+strip, a panel the rule skips as a popup, stayed in the Space the
+app was launched from. They ride the follow, and are not filed by
+the rule at their arrival: filed at once, a splash would sit
+parked until the main window arrives, seconds on a slow launch.
+So a popup still opens where the user is, is noted on the app's
+launch debt, and is filed into the rule's Space when the follow
+is paid, if it is still in the Space it opened in. Only the open
+arm carries riders: its debt is what says "this launch", and a new
+window of a running app has none, so its app's popups stay. So
+does a popup that opens before the debt is owed: a Dock or
+Spotlight launch owes at the app's activation, and a splash can
+precede it. A window that arrives before its app's activation is
+followed with no debt standing, and that open's popups stay too.
+
 There is no setting and no same-screen narrowing. A user who
 pins an app to a Space has already said where they want it, a
 per-app follow flag is a third rule the App Rules lists would
@@ -13036,8 +13054,9 @@ binding may run a reader of the trackpad on a default install.**
 The bound above, "a default install, and one that never records a
 side, sees no keystroke", is retired for one seed only: #1873's
 seeded gesture slots, which ship bound and on — a four-finger tap
-opens KiwiHub's shortcuts panel and a three-finger tap goes back to
-the Space you were on. It cannot be anything else: a pinch or a tap
+opens KiwiHub's shortcuts panel and a three-finger tap goes to the
+last Space you were on (`focus_space_last`). It cannot be anything
+else: a pinch or a tap
 is a trackpad reader or nothing. And a seed nobody can find is no
 seed: putting it behind a switch first would make the tour teach a
 switch. The keystroke bound stands (#3167, owner 2026-11-10): the
@@ -14208,6 +14227,24 @@ already bounces between them, and the first Back is the same in
 every kind, so it bought nothing a user could feel. Both
 histories are recorded all the time, so changing the setting
 loses nothing.
+
+:::unreleased
+**Amended (#3206; owner, 2026-11-11): the toggle is a verb of its
+own.** "Back then Forward bounces" holds for two keys, not for a
+single gesture: the seeded three-finger tap ran Back, so a second
+tap went further back or did nothing, and a tap has no Forward.
+`focus_space_last` goes to the Space the history last left, ⌘Tab's
+reading, and counts as an ordinary arrival, so repeated use gives
+1, 2, 1, 2. Each trail keeps the Space its cursor left beside the
+cursor, set by a visit and by a Back or Forward, since after a
+Back the entry behind the cursor is not where you came from (A B C
+with the cursor on B: the toggle means C). It reads the same
+per-screen or all-screens history as Back, through one resolution
+of the trail, the shown Space and which entries are reachable;
+where the Space left is unreachable it takes the nearest reachable
+entry back. The three-finger tap binds it; Back and Forward keep
+their browser meaning and their keys.
+:::
 
 **Stored like the shortcuts.** The setting is a global base in
 `gui.json` that every profile uses, and a profile may keep its own

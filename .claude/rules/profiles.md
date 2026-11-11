@@ -162,8 +162,9 @@ because two real clients now remove drift — see
   generation, and CHANGING a shipped seed changes it for everyone
   who kept it — a ruling, never a tidy-up. The default rows and
   Restore Defaults read that one list, never a hand copy. A Lua
-  seed runs the Shortcuts catalogue's own Lua
-  (`GestureBindingTests` ▸ `seedsAreRuled`).
+  seed runs the Shortcuts catalogue's own Lua, judged against the
+  GUI's catalogue since a gesture-only verb has no keyboard default
+  (`TrackpadSeedCatalogueTests` ▸ `seedsAreCatalogueRows`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took
