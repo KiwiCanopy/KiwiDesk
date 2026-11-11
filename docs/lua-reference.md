@@ -8641,6 +8641,12 @@ goes there, even out of a held space; a held space keeps only
 the windows that profile has never seen, and is dropped once
 empty.
 
+:::unreleased
+If that move takes the focused window out of the active space and
+leaves the space empty, KiwiDesk switches to the space the window
+went to and focuses it ([#3191](https://github.com/KiwiCanopy/KiwiDesk/issues/3191)).
+:::
+
 A held space is dropped once no window is left in it on any
 Desktop, and by `delete_space`, which forwards its windows to the
 fallback space; resetting every setting ends every hold. A

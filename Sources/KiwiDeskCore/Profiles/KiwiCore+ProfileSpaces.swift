@@ -111,10 +111,23 @@ extension KiwiCore {
         recordOutgoingPartitioning(before: .profile(profile.name))
     }
 
-    func restoreProfilePartitioning(of profile: Profile) {
+    @discardableResult
+    func restoreProfilePartitioning(
+        of profile: Profile
+    ) -> RestoreFollow? {
         restorePartitioning(
             of: .profile(profile.name),
             declaring: profile.declaredSpaces
+        )
+    }
+
+    /// A composed Standard's entry to the restore (#1829).
+    func restoreStandardPartitioning(
+        _ composed: ProfileComposition.Composed
+    ) -> RestoreFollow? {
+        restorePartitioning(
+            of: .standard(composed.sourceName),
+            declaring: Set(composed.spaces)
         )
     }
 
@@ -190,15 +203,21 @@ extension KiwiCore {
     /// A window in a held Space is placed like any other: the
     /// record outranks the hold, which keeps only what this
     /// arrangement never saw (#1790, reversing #1728).
+    ///
+    /// Returns the follow it owes where it emptied the active Space
+    /// of its focus (#3191), which the apply pays after its pass.
+    @discardableResult
     func restorePartitioning(
         of arrangement: HeldOrigin.Arrangement,
         declaring declared: Set<SpaceID>
-    ) {
+    ) -> RestoreFollow? {
         guard
             let remembered = state.profilePartitioning.remembered(
                 for: arrangement
             )
-        else { return }
+        else { return nil }
+        let active = state.workspaces.activeSpace
+        let activeFocus = active.flatMap { state.workspaces[$0]?.focused }
         // `WorkspaceManager.add` calls `remove` first, which nils
         // both focus trackers when the moved window holds them
         // (`moveWindow` re-establishes focus for exactly this
@@ -264,5 +283,6 @@ extension KiwiCore {
                         ? ", re-filed \(refiled) absent" : "")
             )
         }
+        return restoreFollow(focused: activeFocus, leaving: active)
     }
 }

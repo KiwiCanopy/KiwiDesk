@@ -1493,6 +1493,13 @@ incoming arrangement does not name*. The obligations:
   `HeldSpaceRestoreTests` ▸ `replugRestoresFromMemory`). A path a
   switching apply runs that moves windows across Spaces takes no
   exemption for a held Space's members.
+- **A restore that empties the active Space of its focus is
+  followed (#3191).** `restorePartitioning` returns the
+  `RestoreFollow` it owes, and each apply door pays it through
+  `payRestoreFollow` after its own pass, never inside the
+  restore, whose moves the prune and the modes still follow
+  (`RestoreFollowTests`). A new apply door that restores owes the
+  same payment.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call
