@@ -120,7 +120,7 @@ extension SequenceNodeRow {
                 )
             }
             GridRow {
-                fieldLabel(L("shortcuts.sequence.group", "Group"))
+                fieldLabel(L("shortcuts.sequence.group", "Shortcut group"))
                 ShortcutGroupField(
                     group: editing.field(node.id, \.group),
                     inUse: { model.shortcutGroupsInUse() },
