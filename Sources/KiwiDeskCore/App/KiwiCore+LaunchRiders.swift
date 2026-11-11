@@ -9,7 +9,7 @@ extension KiwiCore {
     func noteLaunchRider(
         arrived window: ManagedWindow,
         effects: AppliedEffects,
-        now: Date = Date()
+        now: Date
     ) {
         guard effects.popupSkippedRule != nil,
             let bundleID = window.appBundleID,
