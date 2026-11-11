@@ -120,6 +120,22 @@ struct LaunchFollowRiderTests {
         var rider = try #require(core.state.windows[Self.popup])
         rider.stickyScope = .global
         core.state.windows.upsert(rider)
+        // A rider that stays stops none after it.
+        Self.popupArrives(on: core, id: WindowID(6))
+        Desk.arrive(Self.main, on: core)
+        #expect(core.state.workspaces.activeSpace == Desk.ruled)
+        #expect(Self.space(of: Self.popup, on: core) == Desk.home)
+        #expect(Self.space(of: WindowID(6), on: core) == Desk.ruled)
+    }
+
+    /// The fold names no rule for a popup it holds elsewhere, and
+    /// the note reads that: a standing debt alone notes nothing.
+    @Test("a popup the fold names no rule for never rides")
+    func unnamedPopupStays() {
+        let core = Desk.makeCore()
+        core.state.rememberedSpaces[Self.popup] = .restored(Desk.home)
+        Desk.activate(core)
+        Self.popupArrives(on: core)
         Desk.arrive(Self.main, on: core)
         #expect(core.state.workspaces.activeSpace == Desk.ruled)
         #expect(Self.space(of: Self.popup, on: core) == Desk.home)
