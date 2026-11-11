@@ -56,6 +56,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.spaceStep),
         .shortcuts(.spaceHistory),
         .shortcuts(.spaceHistoryStep),
+        .shortcuts(.spaceLast),
         .shortcuts(.goToSpace),
     ]
 

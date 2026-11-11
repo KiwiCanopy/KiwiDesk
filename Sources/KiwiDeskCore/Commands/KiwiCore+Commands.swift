@@ -32,6 +32,8 @@ extension KiwiCore {
             return focusSpaceInHistory(by: -1)
         case "focus_space_forward":
             return focusSpaceInHistory(by: 1)
+        case "focus_space_last":
+            return focusSpaceLast()
         case "focus_space_previous":
             return focusSpaceInOrder(by: -1)
         case "focus_space_next":

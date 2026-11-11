@@ -13055,7 +13055,7 @@ The bound above, "a default install, and one that never records a
 side, sees no keystroke", is retired for one seed only: #1873's
 seeded gesture slots, which ship bound and on — a four-finger tap
 opens KiwiHub's shortcuts panel and a three-finger tap goes back to
-the Space you were on. It cannot be anything else: a pinch or a tap
+the Space you were on (since #3206 a toggle, `focus_space_last`). It cannot be anything else: a pinch or a tap
 is a trackpad reader or nothing. And a seed nobody can find is no
 seed: putting it behind a switch first would make the tour teach a
 switch. The keystroke bound stands (#3167, owner 2026-11-10): the
@@ -14206,6 +14206,24 @@ already bounces between them, and the first Back is the same in
 every kind, so it bought nothing a user could feel. Both
 histories are recorded all the time, so changing the setting
 loses nothing.
+
+:::unreleased
+**Amended (#3206; owner, 2026-11-11): the toggle is a verb of its
+own.** "Back then Forward bounces" holds for two keys, not for a
+single gesture: the seeded three-finger tap ran Back, so a second
+tap went further back or did nothing, and a tap has no Forward.
+`focus_space_last` goes to the Space the history last left, ⌘Tab's
+reading, and counts as an ordinary arrival, so repeated use gives
+1, 2, 1, 2. Each trail keeps the Space its cursor left beside the
+cursor, set by a visit and by a Back or Forward, since after a
+Back the entry behind the cursor is not where you came from (A B C
+with the cursor on B: the toggle means C). It reads the same
+per-screen or all-screens history as Back, through one resolution
+of the trail, the shown Space and which entries are reachable;
+where the Space left is unreachable it takes the nearest reachable
+entry back. The three-finger tap binds it; Back and Forward keep
+their browser meaning and their keys.
+:::
 
 **Stored like the shortcuts.** The setting is a global base in
 `gui.json` that every profile uses, and a profile may keep its own

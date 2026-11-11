@@ -18,6 +18,9 @@ public struct SpaceHistory: Sendable, Equatable {
     struct Trail: Sendable, Equatable {
         var visits: [SpaceID] = []
         var cursor = 0
+        /// The Space the cursor stood on before its last `visit`
+        /// or `move`: what `focus_space_last` returns to (#3206).
+        var left: SpaceID?
     }
 
     /// Entries kept per trail; the oldest goes first.
@@ -38,6 +41,7 @@ public struct SpaceHistory: Sendable, Equatable {
             return
         }
         if !trail.visits.isEmpty {
+            trail.left = trail.visits[trail.cursor]
             trail.visits.removeSubrange((trail.cursor + 1)...)
         }
         trail.visits.append(space)
@@ -71,11 +75,33 @@ public struct SpaceHistory: Sendable, Equatable {
         return nil
     }
 
+    /// The Space to toggle back to (#3206): the one the cursor
+    /// left, else the nearest reachable entry back; nil where
+    /// neither is reachable or both are `shown`.
+    public func last(
+        under key: Key,
+        shown: SpaceID?,
+        reachable: (SpaceID) -> Bool
+    ) -> SpaceID? {
+        if let left = trails[key]?.left, left != shown, reachable(left) {
+            return left
+        }
+        return step(
+            under: key,
+            by: -1,
+            shown: shown,
+            reachable: reachable
+        )?.space
+    }
+
     /// Stands the cursor on `index`, which `step` returned.
     public mutating func move(under key: Key, to index: Int) {
         guard var trail = trails[key],
             trail.visits.indices.contains(index)
         else { return }
+        if index != trail.cursor {
+            trail.left = trail.visits[trail.cursor]
+        }
         trail.cursor = index
         trails[key] = trail
     }
@@ -85,6 +111,7 @@ public struct SpaceHistory: Sendable, Equatable {
         trails = trails.mapValues { trail in
             var trail = trail
             trail.visits = trail.visits.map { $0 == old ? new : $0 }
+            if trail.left == old { trail.left = new }
             return trail
         }
     }
@@ -94,6 +121,7 @@ public struct SpaceHistory: Sendable, Equatable {
     public mutating func forget(_ space: SpaceID) {
         for (key, trail) in trails {
             var kept = Trail()
+            kept.left = trail.left == space ? nil : trail.left
             for (index, entry) in trail.visits.enumerated()
             where entry != space {
                 // Collapse a repeat the removal made adjacent.
