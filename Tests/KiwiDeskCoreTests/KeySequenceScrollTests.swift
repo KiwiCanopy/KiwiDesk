@@ -99,6 +99,7 @@ struct KeySequenceScrollTests {
     @MainActor
     func managerHandsOnScroll() {
         let manager = KeybindingManager(registrar: NoopHotkeyRegistrar())
+        manager.readSymbolicHotkey = { _ in nil }
         var heard: [KeySequenceScroll] = []
         manager.onSequenceScroll = { heard.append($0) }
         manager.sequenceDecided(.init(outcome: .scroll(.step(1))))

@@ -124,6 +124,8 @@ public final class KeybindingManager {
     /// A `com.apple.symbolichotkeys` read for #3173's pass-through.
     var readSymbolicHotkey: (Int) -> SymbolicHotkeyEntry? =
         SymbolicHotkeys.liveRead
+    /// `systemChords()`'s snapshot, dropped at each arming.
+    var answeredChords: [(combo: KeyCombo, shortcut: SystemShortcut)]?
     /// `sideTapStatus` changed: Settings re-reads it (#96).
     var onSideTapStatusChange: @MainActor () -> Void = {}
     /// The keyboard tap's rows by id, side chords and modifier

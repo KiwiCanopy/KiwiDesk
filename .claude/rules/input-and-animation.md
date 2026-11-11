@@ -178,9 +178,11 @@ editing here:
     `kiwihub.set_key`'s second chords, matched whole), the macOS
     tiers, the beep. A new kind of key while open takes its place
     in that order in `KeySequenceRouter.press`, and the scroll
-    keys reach the router in their own `KeyboardTapRows` field,
-    never through `setSequences`
-    (`KeySequenceScrollTests` ▸ `stepKeyBeatsArrow`).
+    keys reach the router in their own `KeyboardTapRows` field and,
+    on a change, through `KeyboardTapHandle.setSequenceScrollKeys`
+    alone, never a re-arm, which would close an open sequence
+    (`KeySequenceScrollTests` ▸ `stepKeyBeatsArrow`,
+    `KeySequenceTapTests` ▸ `scrollKeysKeepItOpen`).
   - **`.sides` answers only the chords a sided row names**, the
     either-side row on such a chord included, and only while
     `modifierSides` is on; every other chord stays a Carbon

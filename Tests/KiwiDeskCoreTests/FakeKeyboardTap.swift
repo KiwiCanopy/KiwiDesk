@@ -37,6 +37,9 @@ final class FakeKeyboardTap: KeyboardTapHandle {
     /// The hold the manager last handed it (#1229).
     var held = ModifierTapHold.none
     func holdTaps(_ hold: ModifierTapHold) { held = hold }
+    /// The scroll keys handed through their own door (#3175).
+    var scrollKeys: KiwiHubKeys?
+    func setSequenceScrollKeys(_ keys: KiwiHubKeys) { scrollKeys = keys }
     func drainSequenceDecisions() -> [KeySequenceDecision] {
         defer { decisions = [] }
         return decisions

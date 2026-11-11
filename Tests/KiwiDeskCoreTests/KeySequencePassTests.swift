@@ -123,22 +123,6 @@ struct KeySequencePassTests {
         #expect(SymbolicHotkeys.chord([65535, 65535, 0]) == nil)
     }
 
-    @Test("New scroll keys alone leave an open sequence open")
-    func scrollKeysKeepItOpen() {
-        var state = SequenceTapState()
-        var rows = KeyboardTapRows(sequences: [Router.sequence])
-        state.reset(rows)
-        _ = state.router.openLeader(0)
-        rows.sequenceScrollKeys.down = "ctrl+n"
-        rows.sequenceGeneration = 1
-        state.reset(rows)
-        #expect(state.router.isOpen)
-        #expect(state.router.scrollKeys.down == "ctrl+n")
-        rows.sequences = [KeySequencePassTests.stepOnScreenshot]
-        state.reset(rows)
-        #expect(!state.router.isOpen)
-    }
-
     @Test("A step key's warning reads the chord as the router does")
     @MainActor
     func stepWarningMatchesRouter() {
@@ -151,6 +135,8 @@ struct KeySequencePassTests {
         core.keys.readSymbolicHotkey = {
             $0 == id ? SymbolicHotkeyEntry(enabled: true, combo: moved) : nil
         }
+        // The read is taken once per arming.
+        core.keys.answeredChords = nil
         #expect(core.sequenceStepTakes("cmd+shift+4") == nil)
         #expect(core.sequenceStepTakes("ctrl+cmd+4") == .screenshotSelection)
     }

@@ -35,12 +35,21 @@ extension KeybindingManager {
         Set(sequences(for: layer).map(\.leader))
     }
 
-    /// New scroll keys re-arm the tap while a sequence is defined.
+    /// New scroll keys reach a running tap alone, so an open
+    /// sequence stays open; the next arming carries them too.
     func scrollKeysChanged(from old: KiwiHubKeys) {
-        guard sequenceScrollKeys != old,
-            !sequences(for: currentLayer).isEmpty
-        else { return }
-        activate(currentLayer)
+        guard sequenceScrollKeys != old else { return }
+        keyboardTap?.setSequenceScrollKeys(sequenceScrollKeys)
+    }
+
+    /// The shortcuts macOS answers and their live chords, read once
+    /// per arming (#3173): the router's pass chords and the step-key
+    /// warning share the snapshot.
+    func systemChords() -> [(combo: KeyCombo, shortcut: SystemShortcut)] {
+        if let answeredChords { return answeredChords }
+        let read = SystemShortcuts.answered(reading: readSymbolicHotkey)
+        answeredChords = read
+        return read
     }
 
     func releaseSequences(_ held: [String: [KeySequence]]) {

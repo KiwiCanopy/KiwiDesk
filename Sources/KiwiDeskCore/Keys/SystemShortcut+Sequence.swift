@@ -160,10 +160,17 @@ extension SystemShortcuts {
     /// is open. The router's chords come from the same read.
     public static func answering(
         _ combo: KeyCombo,
-        reading read: (Int) -> SymbolicHotkeyEntry?
+        in answered: [(combo: KeyCombo, shortcut: SystemShortcut)]
     ) -> SystemShortcut? {
-        answered(reading: read).first { $0.combo == combo.unsided }?
-            .shortcut
+        let key = combo.unsided
+        let codes =
+            [key.keyCode]
+            + [KeypadKeys.keypadTwin(of: key.keyCode)]
+            .compactMap { $0 }
+        return answered.first {
+            codes.contains($0.combo.keyCode)
+                && $0.combo.modifiers == key.modifiers
+        }?.shortcut
     }
 }
 
@@ -179,8 +186,14 @@ struct SequencePassChords: Equatable, Sendable {
     static func live(
         reading read: (Int) -> SymbolicHotkeyEntry?
     ) -> SequencePassChords {
+        of(SystemShortcuts.answered(reading: read))
+    }
+
+    static func of(
+        _ answered: [(combo: KeyCombo, shortcut: SystemShortcut)]
+    ) -> SequencePassChords {
         var chords = SequencePassChords()
-        for (chord, shortcut) in SystemShortcuts.answered(reading: read) {
+        for (chord, shortcut) in answered {
             switch shortcut.sequenceTier {
             case .staysOpen: chords.staysOpen.append(chord)
             case .closes: chords.closes.append(chord)

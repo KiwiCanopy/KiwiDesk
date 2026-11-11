@@ -52,6 +52,7 @@ extension KeybindingManager {
     ) -> Bool {
         tapBindings = [:]
         sequenceGeneration &+= 1
+        answeredChords = nil
         let rows = KeyboardTapRows(
             sides: sideTapRows(sides),
             taps: taps.map { combo, ref in
@@ -70,7 +71,7 @@ extension KeybindingManager {
                 },
             sequences: sequences,
             sequencePassing: sequences.isEmpty
-                ? .none : .live(reading: readSymbolicHotkey),
+                ? .none : .of(systemChords()),
             sequenceScrollKeys: sequenceScrollKeys,
             sequenceGeneration: sequenceGeneration
         )

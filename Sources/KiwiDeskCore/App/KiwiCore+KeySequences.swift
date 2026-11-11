@@ -24,7 +24,7 @@ extension KiwiCore {
         guard let key = KeyCombo.parse(combo),
             let shortcut = SystemShortcuts.answering(
                 key,
-                reading: keys.readSymbolicHotkey
+                in: keys.systemChords()
             ),
             shortcut.sequenceTier != .swallowed
         else { return nil }

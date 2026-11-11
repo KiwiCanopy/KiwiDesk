@@ -10,15 +10,10 @@ struct SequenceTapState: Sendable {
     var closeRequested: UInt64?
     var generation: UInt64 = 0
 
-    /// New rows: nothing decided over the old rows is left to drain,
-    /// and the open sequence closes where its sequences or macOS
-    /// chords changed — not for new scroll keys alone (#3175).
+    /// New rows: the open sequence closes, and nothing decided over
+    /// the old rows is left to drain.
     mutating func reset(_ rows: KeyboardTapRows) {
-        if router.sequences != rows.sequences
-            || router.passing != rows.sequencePassing
-        {
-            router.setSequences(rows.sequences, passing: rows.sequencePassing)
-        }
+        router.setSequences(rows.sequences, passing: rows.sequencePassing)
         router.scrollKeys = rows.sequenceScrollKeys
         generation = rows.sequenceGeneration
         waiting = []
