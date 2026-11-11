@@ -74,7 +74,13 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
         width: CGFloat,
         inset: CGFloat
     ) -> (leading: Bool, trailing: Bool) {
-        (offset < -inset - 0.5, offset + content > width + inset + 0.5)
+        let cut = EdgeFade.cuts(
+            offset: offset,
+            content: content,
+            viewport: width,
+            inset: inset
+        )
+        return (cut.start, cut.end)
     }
 
     /// Opaque where nothing is cut; each cut edge fades out.

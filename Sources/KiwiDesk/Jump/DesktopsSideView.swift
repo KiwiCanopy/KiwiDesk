@@ -20,25 +20,21 @@ struct DesktopsSideView: View {
     private var geometry: DesktopsGeometry { state.geometry }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {
-                    ForEach(state.overview.screens.indices, id: \.self) {
-                        row($0, geometry).id($0)
-                    }
+        FadingColumn(
+            selected: state.place?.screen,
+            inset: DesktopsGeometry.sidePadding
+        ) {
+            VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {
+                ForEach(state.overview.screens.indices, id: \.self) {
+                    row($0, geometry).fadingTarget($0)
                 }
-                .padding(.vertical, DesktopsGeometry.sidePadding)
-            }
-            .frame(height: geometry.height)
-            .accessibilityAction(
-                named: Text(DesktopsText.editInSettings),
-                onSettings
-            )
-            .onAppear { proxy.scrollTo(state.place?.screen) }
-            .onChange(of: state.place?.screen) { _, screen in
-                proxy.scrollTo(screen)
             }
         }
+        .frame(height: geometry.height)
+        .accessibilityAction(
+            named: Text(DesktopsText.editInSettings),
+            onSettings
+        )
     }
 
     private func row(

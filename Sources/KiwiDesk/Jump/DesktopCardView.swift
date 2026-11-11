@@ -26,19 +26,13 @@ struct DesktopCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DesktopsGeometry.titleGap) {
             title
-            ScrollViewReader { proxy in
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(desktop.spaces.indices, id: \.self) {
-                            line($0).id($0)
-                        }
+            // A column cut short by the cap keeps the selected line
+            // clear of its fade.
+            FadingColumn(selected: selectedLine) {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(desktop.spaces.indices, id: \.self) {
+                        line($0).fadingTarget($0)
                     }
-                }
-                // A column cut short by the cap keeps the selected one in
-                // view.
-                .onAppear { proxy.scrollTo(selectedLine) }
-                .onChange(of: selectedLine) { _, line in
-                    proxy.scrollTo(line)
                 }
             }
             .frame(height: geometry.lines[screen], alignment: .top)
