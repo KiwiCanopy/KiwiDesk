@@ -29,15 +29,26 @@ extension JumpPanelController {
     }
 
     /// Refuses in the panel what Core refuses at the press; else
-    /// closes it and runs the pick. A window that did not move is
-    /// named after the close.
+    /// runs the pick. A plain drop keeps KiwiHub open on the target
+    /// line and shows a window that did not move (#3165); every
+    /// other pick closes it first and names one after the close.
     func perform(
         _ action: DesktopsAction,
         in overview: DesktopOverview,
         model: JumpModel
     ) {
         if let refusal = refusal(of: action) {
-            model.onRefuse(refusal)
+            model.refuseDesktops(refusal)
+            return
+        }
+        if case .drop(let ids, let target, follow: false) = action {
+            let failed = move(ids, to: target, follow: false)
+            model.reloadDesktops(selecting: target)
+            if let words = Self.words(failed, in: overview) {
+                model.refuseDesktops(words)
+            } else {
+                model.onAnnounce(model.desktopsSpoken)
+            }
             return
         }
         let own = ProcessInfo.processInfo.processIdentifier
@@ -50,17 +61,29 @@ extension JumpPanelController {
             )
         else { return }
         let failed = run(action, in: overview)
-        guard !failed.isEmpty else { return }
         // Spoken only: the refusal sound answers an in-panel
         // refusal alone (`JumpRefusalRowTests`).
-        let words = failed.compactMap(overview.window)
-            .map(DesktopsText.notMoved)
-            .joined(separator: ". ")
+        guard let words = Self.words(failed, in: overview) else { return }
         NSAccessibility.post(
             element: NSApp as Any,
             notification: .announcementRequested,
             userInfo: [.announcement: words, .priority: 90]
         )
+    }
+
+    /// What a move left behind says: Core's reason where it gave
+    /// one, else that the window did not move.
+    private static func words(
+        _ failed: [Failure],
+        in overview: DesktopOverview
+    ) -> String? {
+        let words = failed.compactMap { failure -> String? in
+            if let reason = failure.reason {
+                return DesktopsText.awayRefusal(reason)
+            }
+            return overview.window(failure.id).map(DesktopsText.notMoved)
+        }
+        return words.isEmpty ? nil : words.joined(separator: ". ")
     }
 
     /// What Core refuses for `action` now, in the panel's words.
@@ -83,9 +106,21 @@ extension JumpPanelController {
             return !target.desktop.isShown && target.desktop.number == nil
                 && target.lastFocused == nil
                 ? DesktopsText.refusal(.unreachable) : nil
-        case .moveYours(let target, _), .drop(_, let target, _):
+        case .moveYours(let target, _):
             return !target.desktop.isShown && target.desktop.number == nil
                 ? DesktopsText.refusal(.unreachable) : nil
+        case .drop(let ids, let target, let follow):
+            if !target.desktop.isShown, target.desktop.number == nil {
+                return DesktopsText.refusal(.unreachable)
+            }
+            // A follow's window is asked before the switch, so its
+            // refusal stays in the panel (#3171).
+            guard follow, let first = ids.first else { return nil }
+            return core.awayMoveRefusal(
+                first,
+                toDesktop: target.desktop.native,
+                follow: true
+            ).map(DesktopsText.awayRefusal)
         case .jumpWindow:
             return nil
         }
@@ -109,11 +144,18 @@ extension JumpPanelController {
         }
     }
 
+    /// A window a move left where it was, with Core's reason where
+    /// it gave one.
+    struct Failure {
+        let id: WindowID
+        let reason: AwayMoveRefusal?
+    }
+
     /// Runs `action`; the windows a move refused.
     private func run(
         _ action: DesktopsAction,
         in overview: DesktopOverview
-    ) -> [WindowID] {
+    ) -> [Failure] {
         switch action {
         case .jump(let target):
             core.overviewJump(
@@ -129,7 +171,7 @@ extension JumpPanelController {
         case .moveYoursToDesktop(let desktop):
             guard let yours = overview.yours else { return [] }
             let moved = core.overviewMove(yours, toDesktop: desktop.native)
-            return moved ? [] : [yours]
+            return moved ? [] : [Failure(id: yours, reason: nil)]
         case .jumpWindow(let id):
             core.jump(to: .window(id))
         case .moveWindowHere(let id):
@@ -144,32 +186,41 @@ extension JumpPanelController {
 
     /// One move per window in pick order; a follow goes last, on
     /// the first-picked window, so the others leave before the
-    /// Desktop switches and focus lands on it.
+    /// Desktop switches and focus lands on it. A window on a hidden
+    /// Desktop is asked first, so its refusal keeps Core's reason.
     private func move(
         _ ids: [WindowID],
         to target: DesktopsTarget,
         follow: Bool
-    ) -> [WindowID] {
+    ) -> [Failure] {
         guard let first = ids.first else { return [] }
         let rest = follow ? Array(ids.dropFirst()) : ids
-        var failed = rest.filter {
-            !core.overviewMove(
-                $0,
-                into: target.space,
-                onDesktop: target.desktop.native,
-                follow: false
-            )
-        }
-        if follow,
-            !core.overviewMove(
-                first,
-                into: target.space,
-                onDesktop: target.desktop.native,
-                follow: true
-            )
-        {
-            failed.insert(first, at: 0)
+        var failed = rest.compactMap { move($0, to: target, follow: false) }
+        if follow, let failure = move(first, to: target, follow: true) {
+            failed.insert(failure, at: 0)
         }
         return failed
+    }
+
+    private func move(
+        _ id: WindowID,
+        to target: DesktopsTarget,
+        follow: Bool
+    ) -> Failure? {
+        let native = target.desktop.native
+        if let reason = core.awayMoveRefusal(
+            id,
+            toDesktop: native,
+            follow: follow
+        ) {
+            return Failure(id: id, reason: reason)
+        }
+        let moved = core.overviewMove(
+            id,
+            into: target.space,
+            onDesktop: native,
+            follow: follow
+        )
+        return moved ? nil : Failure(id: id, reason: nil)
     }
 }

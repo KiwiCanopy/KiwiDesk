@@ -3,8 +3,10 @@ import Foundation
 /// What a Desktop move owes the window itself (#2888), split from
 /// `KiwiCore+DesktopMove.swift` at the §2.1 target.
 extension KiwiCore {
-    static let pocketedMoveRefusal = "a pocketed window cannot change Desktop"
-    static let outPocketMoveRefusal = "a pocket window cannot change Desktop"
+    nonisolated static let pocketedMoveRefusal =
+        "a pocketed window cannot change Desktop"
+    nonisolated static let outPocketMoveRefusal =
+        "a pocket window cannot change Desktop"
 
     /// The refusal of a window no Desktop move may take, in either
     /// form of the verb, ahead of the Space parse. A pocketed
