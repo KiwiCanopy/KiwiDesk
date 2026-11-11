@@ -72,4 +72,44 @@ struct SegmentedPickerHintsOnDemandTests {
         // ⌘ held reaches the label, not only the picker's input.
         #expect(source.contains("showsAll:showsHints,"))
     }
+
+    /// The swap is a reel, not a fade (#3172): a centred label moved
+    /// by its bottom edge clears the reel either way.
+    @Test("the title rolls out downward as the chord drops in")
+    func swapRolls() {
+        let roll = SegmentRoll.offset(hint:shown:reach:)
+        #expect(roll(false, false, 20) == 0)
+        #expect(roll(false, true, 20) == 20)
+        #expect(roll(true, false, 20) == -20)
+        #expect(roll(true, true, 20) == 0)
+    }
+
+    /// No fixture can sample a running animation; the wiring is the
+    /// claim: both labels on the reel, clipped, 0.18 s ease-out, and
+    /// an instant swap under Reduce Motion.
+    @Test("both labels ride the clipped reel, never a fade")
+    func reelWiring() throws {
+        let source = try SourceScan.segmentedPickerSource(from: #filePath)
+            .split(whereSeparator: \.isWhitespace).joined()
+        for hint in [false, true] {
+            #expect(
+                source.contains(
+                    ".modifier(SegmentRoll(hint:\(hint),shown:shown))"
+                )
+            )
+        }
+        #expect(
+            source.contains(
+                ".coordinateSpace(.named(SegmentRoll.reel)).clipped()"
+                    + ".animation(reduceMotion?nil:.easeOut(duration:0.18),"
+                    + "value:shown)"
+            )
+        )
+        #expect(
+            source.contains("reach:proxy.frame(in:.named(Self.reel)).maxY")
+        )
+        // The reel runs vertically.
+        #expect(source.contains("effect.offset(y:Self.offset("))
+        #expect(!source.contains(".opacity(shown"))
+    }
 }

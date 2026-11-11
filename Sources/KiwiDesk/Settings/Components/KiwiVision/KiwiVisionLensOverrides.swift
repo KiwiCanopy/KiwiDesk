@@ -16,16 +16,18 @@ struct KiwiVisionLensOverrides: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SettingsSection(
-                SettingsCatalog.kiwiVision.levelsCard.text,
-                caption: KiwiVisionLensWords.followsCaption
-            ) {
+            // The form's caption, above all four cards (#3176).
+            Text(KiwiVisionLensWords.followsCaption)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink3)
+            SettingsSection(SettingsCatalog.kiwiVision.levelsCard.text) {
                 VStack(alignment: .leading, spacing: 4) {
                     dimRow
                     toggleRow(
                         SettingsCatalog.kiwiVision.blur.text,
                         \.blur,
-                        plain.visionBlur
+                        plain.visionBlur,
+                        help: KiwiVisionLevelsCard.blurHelp
                     )
                     fadeDurationRow
                     fadeCurveRow
@@ -36,17 +38,26 @@ struct KiwiVisionLensOverrides: View {
                     toggleRow(
                         SettingsCatalog.kiwiVision.clearApp.text,
                         \.clearApp,
-                        plain.visionClearApp
+                        plain.visionClearApp,
+                        help: KiwiVisionClearCard.appHelp
                     )
                     toggleRow(
                         SettingsCatalog.kiwiVision.clearWallpaper.text,
                         \.clearWallpaper,
-                        plain.visionClearWallpaper
+                        plain.visionClearWallpaper,
+                        help: KiwiVisionClearCard.wallpaperHelp
                     )
                 }
             }
             SettingsSection(SettingsCatalog.kiwiVision.fillCard.text) {
-                maximizeRow
+                VStack(alignment: .leading, spacing: 4) {
+                    maximizeRow
+                    // The checked row's own fill; an unchecked one
+                    // follows Default, whose page names it (#3161).
+                    if let fill = lens.overrides.maximize {
+                        KiwiVisionMaximizeSummary(model: model, fill: fill)
+                    }
+                }
             }
             SettingsSection(
                 SettingsCatalog.kiwiVision.appearanceCard.text
@@ -102,6 +113,8 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, Self.milliseconds(global)),
+            help: KiwiVisionLevelsCard.fadeDurationHelp,
+            subject: label,
             inheritsName: defaultName
         ) {
             SettingsRowShape(controlTrails: true) {
@@ -130,6 +143,8 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, KiwiVisionLevelsCard.curveTitle(global)),
+            help: KiwiVisionLevelsCard.fadeCurveHelp,
+            subject: label,
             inheritsName: defaultName
         ) {
             DropdownRow(
@@ -160,6 +175,8 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, KiwiVisionMaximizeRow.title(global)),
+            help: KiwiVisionMaximizeRow.help,
+            subject: label,
             inheritsName: defaultName
         ) {
             DropdownRow(
@@ -185,12 +202,15 @@ struct KiwiVisionLensOverrides: View {
     private func toggleRow(
         _ label: String,
         _ path: WritableKeyPath<VisionLens.Overrides, Bool?>,
-        _ global: Bool
+        _ global: Bool,
+        help: String
     ) -> some View {
         let value = override(path)
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, Self.onOff(global)),
+            help: help,
+            subject: label,
             inheritsName: defaultName
         ) {
             ToggleRow(
@@ -212,6 +232,8 @@ struct KiwiVisionLensOverrides: View {
             inherited: (
                 label, KiwiVisionAppearanceCard.title(plain.visionAppearance)
             ),
+            help: KiwiVisionAppearanceCard.help,
+            subject: label,
             inheritsName: defaultName
         ) {
             DropdownRow(

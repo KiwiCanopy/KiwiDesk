@@ -28,10 +28,16 @@ struct KiwiVisionMaximizeCard: View {
     @ViewBuilder private func row(_ key: SettingKey) -> some View {
         switch key {
         case .kiwiVision(.maximize):
-            KiwiVisionMaximizeRow(
-                model: model,
-                disabled: reason(for: key) != nil
-            )
+            VStack(alignment: .leading, spacing: 4) {
+                KiwiVisionMaximizeRow(
+                    model: model,
+                    disabled: reason(for: key) != nil
+                )
+                KiwiVisionMaximizeSummary(
+                    model: model,
+                    fill: model.appWide.visionMaximize
+                )
+            }
         default:
             let _ = assertionFailure(
                 "unrendered KiwiVision census key: \(key.id)"
@@ -91,10 +97,9 @@ struct KiwiVisionMaximizeRow: View {
         L(
             "kiwivision.maximize.help",
             "While KiwiVision is on, the focused window fills the "
-                + "screen, or its full height or width at the shares "
-                + "set in %1$@. Focus another window and it takes the "
-                + "room. Monocle and floating windows keep their size.",
-            SettingsDestination.layoutDefaults.title
+                + "screen, or its full height or width. Focus another "
+                + "window and it takes the room. Monocle and floating "
+                + "windows keep their size."
         )
     }
 }
