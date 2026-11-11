@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "Épaisseur",
   "kiwishelf.thickness.help": "Une seule épaisseur pour les deux barres. Une taille de glyphe automatique la suit.",
   "kiwishelf.tint_hub_and_plates": "Teinter %1$@ et les plaques",
-  "kiwishelf.tint_hub_and_plates.help": "%1$@ et les plaques qu'affiche un changement d'espace, de bureau ou de disposition prennent le « %2$@ » et les couleurs des barres sur le verre transparent. Désactivé, ils affichent un simple verre dépoli.",
+  "kiwishelf.tint_hub_and_plates.help": "%1$@ et les plaques qu'affiche un changement d'espace, de bureau ou de disposition prennent le « %2$@ » et les couleurs des barres. Désactivé, ils conservent l'apparence du système.",
   "kiwivision.announce.off": "KiwiVision désactivé",
   "kiwivision.announce.on": "KiwiVision activé",
   "kiwivision.appearance": "Apparence quand il est activé",

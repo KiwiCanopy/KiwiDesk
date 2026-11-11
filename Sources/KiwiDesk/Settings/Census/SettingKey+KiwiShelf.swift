@@ -131,7 +131,7 @@ extension KiwiShelfKey {
         case .readingContrast:
             // A power-user floor: GUI curates, Lua is open (#2569).
             return .luaOnly
-        case .fillFade, .tintHubAndPlates:
+        case .fillFade:
             // The Liquid Glass group, under its switch (#2569):
             // hidden below macOS 26 as the switch is; greyed while
             // it is off or the Fill has no colour, by wiring.
@@ -140,6 +140,17 @@ extension KiwiShelfKey {
                 .glass,
                 .atRest,
                 gate: .runtime(.liquidGlassUnavailable)
+            )
+        case .tintHubAndPlates:
+            // The Fill tints the panels over their material too
+            // (#2569 ▸ amendment): shown on every macOS, live under
+            // Reduce transparency, greyed while the Fill has no
+            // colour, by wiring.
+            return .row(
+                .coloursAndMotion,
+                .glass,
+                .atRest,
+                exemptFromContainerGate: true
             )
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).

@@ -69,6 +69,9 @@ final class SpaceSlideOverlay {
         /// The Fill the plates wear, nil for today's frosted,
         /// untinted plates (#2569 ▸ the toggle).
         let tint: GlassFill?
+        /// The Fill they wear flat over the material, where no
+        /// glass draws (#2569 ▸ amendment).
+        var frost: FrostFill?
         let pace: Double
     }
 
@@ -90,6 +93,7 @@ final class SpaceSlideOverlay {
         let strip: NSView
         var glass: Bool
         var tint: GlassFill?
+        var frost: FrostFill?
         var pace: Double
         var pages: [CGFloat: NSView] = [:]
         var motion = SpaceSlideStrip()
@@ -131,6 +135,7 @@ final class SpaceSlideOverlay {
             current = play
             current.glass = press.glass
             current.tint = press.tint
+            current.frost = press.frost
             Self.wearActiveLook(current)
             current.pace = press.pace
             if now >= play.liftAt {

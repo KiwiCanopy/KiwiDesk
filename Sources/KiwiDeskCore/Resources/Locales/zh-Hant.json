@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "粗細",
   "kiwishelf.thickness.help": "兩個列共用一種粗細。自動圖形大小會跟隨它。",
   "kiwishelf.tint_hub_and_plates": "為 %1$@ 與薄板著色",
-  "kiwishelf.tint_hub_and_plates.help": "%1$@ 與空間、桌面或佈局切換時顯示的薄板，會在透明玻璃上呈現列的「%2$@」與顏色。關閉時，它們會顯示為一般的毛玻璃。",
+  "kiwishelf.tint_hub_and_plates.help": "%1$@ 與空間、桌面或佈局切換時顯示的薄板，會呈現列的「%2$@」與顏色。關閉時，它們會維持系統外觀。",
   "kiwivision.announce.off": "KiwiVision 已關閉",
   "kiwivision.announce.on": "KiwiVision 已開啟",
   "kiwivision.appearance": "開啟時的外觀",

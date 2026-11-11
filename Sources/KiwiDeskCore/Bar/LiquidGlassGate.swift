@@ -75,6 +75,16 @@ enum LiquidGlassGate {
         stored && drawsGlass
     }
 
+    /// The ground KiwiHub's Core plates draw on (#2569): the
+    /// shelf's answer, handed KiwiHub's leaf as drawn and this
+    /// gate's own read of Reduce transparency.
+    static func panelGround(_ settings: TilingSettings) -> PanelGround {
+        settings.kiwishelf.panelGround(
+            glassDrawn: rendered(glass: settings.shortcutPanelLiquidGlass),
+            reduceTransparency: reducesTransparency
+        )
+    }
+
     /// The drag drop zone's frost as drawn (#2797): glass where the
     /// stored leaf draws it, the blur material where it does not,
     /// flat grey while transparency is reduced. A surface, not a

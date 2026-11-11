@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "Spessore",
   "kiwishelf.thickness.help": "Un solo spessore per entrambe le barre. La dimensione glifi automatica lo segue.",
   "kiwishelf.tint_hub_and_plates": "Tingi %1$@ e le piastre",
-  "kiwishelf.tint_hub_and_plates.help": "%1$@ e le piastre che un cambio di spazio, di Scrivania o di layout mostra assumono il «%2$@» e i colori delle barre sul vetro trasparente. Disattivato, mostrano un semplice vetro smerigliato.",
+  "kiwishelf.tint_hub_and_plates.help": "%1$@ e le piastre che un cambio di spazio, di Scrivania o di layout mostra assumono il «%2$@» e i colori delle barre. Disattivato, mantengono l'aspetto del sistema.",
   "kiwivision.announce.off": "KiwiVision disattivata",
   "kiwivision.announce.on": "KiwiVision attivata",
   "kiwivision.appearance": "Aspetto quando è attiva",

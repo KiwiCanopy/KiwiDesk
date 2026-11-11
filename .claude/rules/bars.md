@@ -1806,6 +1806,14 @@ Obligations:
   joins
   `GlassTintPinDarkCallerTests`' `followPick` register, for the
   reason `pinDark`'s has one.
+  **A Core plate's material wears the Fill only through
+  `FrostPlate.make`**, which paints it flat beneath the content
+  and pins the material to the Fill's scheme through
+  `GlassTint.pinFrost` — light as well as dark, since a material
+  takes both (#2569 ▸ amendment, `FrostPlateTests`). Its Fill is
+  `KiwiShelf.frostFill(opaque:)`'s, asked of the one
+  `LiquidGlassGate.panelGround`, and a new caller of `pinFrost`
+  joins `GlassTintPinDarkCallerTests`' `pinFrost` register.
 - **A `Sources/KiwiDesk` surface that tints glass takes a
   `GlassPaint` from `GlassTint.paint` and derives no colour from a
   Fill itself.** `GlassPaint` has no initializer outside Core, so

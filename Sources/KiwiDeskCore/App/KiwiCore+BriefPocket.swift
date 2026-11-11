@@ -22,6 +22,7 @@ extension KiwiCore {
         else { return nil }
         let style = tiler.settings.pocketStyle
         let glass = briefPocketPlateGlass()
+        let ground = LiquidGlassGate.panelGround(tiler.settings)
         let flight = BriefPocketPlan.flight(
             durationMS: tiler.settings.animations.durationMS
         )
@@ -44,8 +45,9 @@ extension KiwiCore {
                 iconPid: state.windows[id]?.pid,
                 markHex: style.color,
                 plateGlass: glass,
-                plateTint: tiler.settings.panelsWearFill(glassDrawn: glass)
+                plateTint: ground == .glass
                     ? tiler.settings.kiwishelf.glassFill : nil,
+                plateFrost: ground.frost,
                 flight: flight
             )
         // A pocket on this screen is the pocket (#2678).

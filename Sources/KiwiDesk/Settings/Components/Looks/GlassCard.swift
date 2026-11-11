@@ -4,8 +4,9 @@ import SwiftUI
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
 /// shortcuts panel (#1307), the Fill and the two rows it greys —
 /// "Tint KiwiHub and plates" and "Fill fade" (#2569, #2593) — and
-/// the sheen's own row last (#1644); the Fill and the sheen alone
-/// show below macOS 26. The open group of Colors & glass (#2389).
+/// the sheen's own row last (#1644); the Fill, the tint row and
+/// the sheen alone show below macOS 26. The open group of Colors &
+/// glass (#2389).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -62,19 +63,24 @@ struct GlassCard: View {
     /// less the census's exemption.
     private func greyed(_ key: SettingKey) -> Bool {
         (reduceTransparency && !key.placement.exemptFromContainerGate)
-            || (Self.followsTheFill(key) && fillIdle)
+            || (Self.followsTheFill(key) && !shelf.hasFill)
+            || (Self.followsTheSwitch(key) && switchOff)
     }
 
-    /// The rows the switch and the Fill both gate (#2569).
+    /// The rows a Fill with no colour leaves idle (#2569 ▸ "No
+    /// Colour").
     static func followsTheFill(_ key: SettingKey) -> Bool {
         key == .kiwishelf(.tintHubAndPlates) || key == .kiwishelf(.fillFade)
     }
 
-    /// The Fill's rows have nothing to do: the switch is off, or
-    /// the Fill has no colour (#2569 ▸ "No Colour").
-    private var fillIdle: Bool {
-        !model.liquidGlassMaster.wrappedValue || !shelf.hasFill
+    /// The row the switch gates too: the fade is glass's alone,
+    /// while the panels wear the Fill over their material (#2569 ▸
+    /// amendment).
+    static func followsTheSwitch(_ key: SettingKey) -> Bool {
+        key == .kiwishelf(.fillFade)
     }
+
+    private var switchOff: Bool { !model.liquidGlassMaster.wrappedValue }
 
     private var shelf: KiwiShelf { model.config.settings.kiwishelf }
 
@@ -115,9 +121,8 @@ struct GlassCard: View {
                 help: L(
                     "kiwishelf.tint_hub_and_plates.help",
                     "%1$@ and the plates a Space, Desktop or layout "
-                        + "switch shows wear the bars' %2$@ and colors "
-                        + "on clear glass. Off, they draw plain frosted "
-                        + "glass.",
+                        + "switch shows wear the bars' %2$@ and colors. "
+                        + "Off, they keep the system look.",
                     JumpScope.panelName,
                     L("kiwishelf.color.fill", "Fill")
                 )

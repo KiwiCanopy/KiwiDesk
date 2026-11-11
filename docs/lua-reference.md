@@ -3025,6 +3025,12 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
+:::unreleased
+The panel and the plates wear the fill there too, where
+[`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
+on.
+:::
+
 The Space switch's plates draw their material then too.
 
 A hidden bar's Space dots and line wear the glass too, tinted by
@@ -3107,9 +3113,15 @@ black or white text, whichever reads on it, and a hovered row
 takes `hover_fill_color` and `hover_item_color`. A light fill
 keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
-They draw as with `false` while the fill has no color, while
-their glass is off or stood down by Reduce transparency, and
-below macOS 26.
+They draw as with `false` while the fill has no color.
+
+:::unreleased
+While their glass is off, and below macOS 26, they wear the fill
+at its own alpha, as one even color over their blurred
+background, with the same text and row colors and no bright edge.
+While macOS's Reduce transparency is on, the fill is opaque.
+:::
+
 `false` draws them in frosted, untinted glass that follows
 Settings' Appearance, with KiwiHub's kiwi-green selection. The
 glass itself turns on and off with
@@ -3117,8 +3129,7 @@ glass itself turns on and off with
 Stored as `kiwishelf.tint_hub_and_plates`.
 
 The GUI twin is **Tint KiwiHub and plates** under the **Liquid
-Glass** switch on Looks &amp; Animations; it is hidden below
-macOS 26 and greys while glass is off or stood down, or while the
+Glass** switch on Looks &amp; Animations; it greys while the
 fill has no color.
 
 **Example:**

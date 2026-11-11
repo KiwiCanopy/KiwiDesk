@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "Espessura",
   "kiwishelf.thickness.help": "Uma só espessura para as duas barras. Um tamanho do glifo automático a acompanha.",
   "kiwishelf.tint_hub_and_plates": "Tingir o %1$@ e as placas",
-  "kiwishelf.tint_hub_and_plates.help": "O %1$@ e as placas que uma troca de espaço, de Mesa ou de layout mostra usam o “%2$@” e as cores das barras sobre o vidro transparente. Desativado, eles mostram um simples vidro fosco.",
+  "kiwishelf.tint_hub_and_plates.help": "O %1$@ e as placas que uma troca de espaço, de Mesa ou de layout mostra usam o “%2$@” e as cores das barras. Desativado, eles mantêm a aparência do sistema.",
   "kiwivision.announce.off": "KiwiVision desativado",
   "kiwivision.announce.on": "KiwiVision ativado",
   "kiwivision.appearance": "Aparência enquanto ativado",

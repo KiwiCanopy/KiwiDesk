@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "두께",
   "kiwishelf.thickness.help": "두 바에 공통인 두께입니다. 자동 글리프 크기는 이 두께를 따릅니다.",
   "kiwishelf.tint_hub_and_plates": "%1$@ 및 판에 색 입히기",
-  "kiwishelf.tint_hub_and_plates.help": "%1$@ 및 공간, 데스크탑 또는 레이아웃 전환 때 표시되는 판은 투명한 유리 위에 바의 ‘%2$@’과(와) 색상을 그대로 입습니다. 끄면 평범한 젖빛 유리로 그려집니다.",
+  "kiwishelf.tint_hub_and_plates.help": "%1$@ 및 공간, 데스크탑 또는 레이아웃 전환 때 표시되는 판은 바의 ‘%2$@’과(와) 색상을 그대로 입습니다. 끄면 시스템 외관을 유지합니다.",
   "kiwivision.announce.off": "KiwiVision 끔",
   "kiwivision.announce.on": "KiwiVision 켬",
   "kiwivision.appearance": "켜져 있는 동안의 외관",

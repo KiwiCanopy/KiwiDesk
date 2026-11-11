@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "Dicke",
   "kiwishelf.thickness.help": "Eine Dicke für beide Leisten. Eine automatische Glyphengröße folgt ihr.",
   "kiwishelf.tint_hub_and_plates": "%1$@ und Flächen tönen",
-  "kiwishelf.tint_hub_and_plates.help": "%1$@ und die Flächen, die ein Space-, Schreibtisch- oder Layout-Wechsel zeigt, tragen auf klarem Glas die „%2$@“ und die Farben der Leisten. Ausgeschaltet zeigen sie schlichtes Milchglas.",
+  "kiwishelf.tint_hub_and_plates.help": "%1$@ und die Flächen, die ein Space-, Schreibtisch- oder Layout-Wechsel zeigt, tragen die „%2$@“ und die Farben der Leisten. Ausgeschaltet behalten sie das Erscheinungsbild des Systems.",
   "kiwivision.announce.off": "KiwiVision aus",
   "kiwivision.announce.on": "KiwiVision an",
   "kiwivision.appearance": "Erscheinungsbild, solange aktiv",

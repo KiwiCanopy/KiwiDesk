@@ -1216,7 +1216,7 @@
   "kiwishelf.thickness": "Grosor",
   "kiwishelf.thickness.help": "Un solo grosor para ambas barras. Un tamaño de glifo automático lo sigue.",
   "kiwishelf.tint_hub_and_plates": "Teñir %1$@ y placas",
-  "kiwishelf.tint_hub_and_plates.help": "%1$@ y las placas que muestra un cambio de espacio, de Escritorio o de diseño llevan el «%2$@» y los colores de las barras sobre el vidrio transparente. Desactivado, muestran un simple vidrio esmerilado.",
+  "kiwishelf.tint_hub_and_plates.help": "%1$@ y las placas que muestra un cambio de espacio, de Escritorio o de diseño llevan el «%2$@» y los colores de las barras. Desactivado, conservan la apariencia del sistema.",
   "kiwivision.announce.off": "KiwiVision desactivado",
   "kiwivision.announce.on": "KiwiVision activado",
   "kiwivision.appearance": "Apariencia mientras está activado",

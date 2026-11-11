@@ -32,6 +32,8 @@ struct GlassTintCensusTests {
         "pinDark": ["darkAqua"],
         // The Space-switch plates: no Fill, the Appearance pick.
         "followPick": ["darkAqua", "bestMatch"],
+        // A plate's material under a flat Fill (#2569 ▸ amendment).
+        "pinFrost": ["darkAqua", "aqua"],
         // The one painter (#1946's uniform tint retired, #2569).
         "apply": ["pinnedAppearance(", "setBackdrop(", "colour("],
         // The handles' Fill beneath their glass (#2569 ▸ owner).

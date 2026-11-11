@@ -52,9 +52,9 @@ extension SpaceSlideOverlay {
 
     /// One plate: Liquid Glass — `.clear` wearing the Fill under
     /// "Tint KiwiHub and plates", `.regular` otherwise (#2569) —
-    /// or, where the gate stands glass down, the behind-window blur
-    /// nearest the shortcuts panel's `.regularMaterial` (owner,
-    /// device, #1956), dark where the Appearance pick is — with the
+    /// or, where the gate stands glass down, `FrostPlate`'s
+    /// material, wearing the Fill flat under the toggle and dark
+    /// where the Appearance pick is otherwise — with the
     /// app icon centred
     /// on the part of the window the page shows, wherever it fits
     /// (#2837).
@@ -97,14 +97,9 @@ extension SpaceSlideOverlay {
             )
             return glass
         }
-        let material = NSVisualEffectView(frame: rect)
-        material.material = .popover
-        material.blendingMode = .behindWindow
-        material.state = .active
-        material.wantsLayer = true
+        let material = FrostPlate.make(content: content, fill: current.frost)
+        material.frame = rect
         material.layer?.cornerRadius = radius
-        material.layer?.masksToBounds = true
-        material.addSubview(content)
         return material
     }
 }
