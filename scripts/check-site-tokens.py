@@ -1546,7 +1546,11 @@ def check_roadmap_feed(dist: pathlib.Path) -> None:
 def sidebar_groups() -> dict[str, list[str]]:
     """The Starlight sidebar's groups and their page slugs, read
     from `astro.config.mjs` by pattern: a group is a `label`
-    followed by `items`, and no item nests a bracket."""
+    followed by `items`, and no item nests a bracket.
+
+    The trade: a group or an item spelled any other way is lost,
+    which fails here on the slug count, or in the caller as a
+    disagreement that blames the page list."""
     config = source_without_comments(REPO / "site" / "astro.config.mjs")
     groups = {
         label: re.findall(r'slug:\s*"([^"]+)"', items)
@@ -1559,6 +1563,13 @@ def sidebar_groups() -> dict[str, list[str]]:
             "llms: read no sidebar group, or an empty one, from "
             "site/astro.config.mjs; the page list is unguarded "
             "until this pattern is fixed"
+        )
+    grouped = sum(len(slugs) for slugs in groups.values())
+    spelled = len(re.findall(r'slug:\s*"', config))
+    if grouped != spelled:
+        fail(
+            f"llms: site/astro.config.mjs spells {spelled} slug(s) "
+            f"and the sidebar pattern placed {grouped} in a group"
         )
     return groups
 
@@ -1576,8 +1587,9 @@ def check_llms_txt(dist: pathlib.Path) -> None:
     frontmatter. That holds the passthrough, an `:::unreleased`
     marker included, without reading the marker's grammar.
 
-    Not covered: that Cloudflare applies the header. `_headers` is
-    read as text, for a rule on the prefix.
+    Not covered: that Cloudflare applies the header, since
+    `_headers` is read as text; and the titles and descriptions,
+    which only a YAML reader could compare with the frontmatter.
 
     On the SITE gate for `check_appcast`'s reason.
     """
@@ -1601,6 +1613,7 @@ def check_llms_txt(dist: pathlib.Path) -> None:
             "`- [title](url): description (N bytes)`"
         )
     listed: set[str] = set()
+    fence = b"\n---\n"
     for url, size in (match.groups() for match in links):
         parts = urllib.parse.urlsplit(url)
         if parts.netloc != host or not parts.path.startswith(prefix):
@@ -1614,10 +1627,14 @@ def check_llms_txt(dist: pathlib.Path) -> None:
             fail(
                 f"llms: {url} is {len(raw)} bytes, listed as {size}"
             )
-        origin = (REPO / "docs" / relative).read_bytes().rstrip()
-        front = origin[: len(origin) - len(raw.rstrip())].strip()
-        if not origin.endswith(raw.rstrip()) or not (
-            front.startswith(b"---") and front.endswith(b"---")
+        origin = (REPO / "docs" / relative).read_bytes()
+        # The first fence after the opening one closes the
+        # frontmatter; a later `---` is the body's own rule.
+        _, closed, body = origin.partition(fence)
+        if (
+            not origin.startswith(b"---\n")
+            or not closed
+            or raw != body.strip()
         ):
             fail(
                 f"llms: {url} is not docs/{relative} past its "
@@ -1626,6 +1643,18 @@ def check_llms_txt(dist: pathlib.Path) -> None:
         slug = "docs/" + relative[: -len(".md")]
         slug = re.sub(r"/index$", "", slug)
         listed.add(slug)
+
+    if len(listed) != len(links):
+        fail(f"llms: /{index_name} lists a page twice")
+    named = {
+        path.relative_to(dist).as_posix()
+        for path in dist.rglob("llms*")
+    }
+    if named != {index_name, prefix.strip("/")}:
+        fail(
+            f"llms: only /{index_name} and {prefix} may carry the "
+            f"name, with no locale twin; found {sorted(named)}"
+        )
 
     groups = sidebar_groups()
     if contributor not in groups:
@@ -1641,7 +1670,8 @@ def check_llms_txt(dist: pathlib.Path) -> None:
         fail(
             f"llms: /{index_name} and the sidebar disagree; "
             f"unlisted {sorted(wanted - listed)}, "
-            f"not user-facing {sorted(listed - wanted)}"
+            f"not user-facing {sorted(listed - wanted)}. If the "
+            "list is right, `sidebar_groups` misread the config"
         )
     built = {
         path.relative_to(dist / prefix.strip("/")).as_posix()
@@ -1662,21 +1692,27 @@ def check_llms_txt(dist: pathlib.Path) -> None:
     if not sitemaps:
         fail("llms: found no sitemap to hold the copies out of")
     for sitemap in sitemaps:
-        if prefix in sitemap.read_text(encoding="utf-8"):
-            fail(f"llms: {sitemap.name} submits a page under {prefix}")
+        if prefix.rstrip("/") in sitemap.read_text(encoding="utf-8"):
+            fail(
+                f"llms: {sitemap.name} submits /{index_name} or a "
+                f"page under {prefix}"
+            )
     headers = (dist / "_headers").read_text(encoding="utf-8")
-    rule = re.search(
+    # Exactly one rule, and its value exact: a second block can
+    # detach the header with `! X-Robots-Tag`, and a `bot: noindex`
+    # value reaches one crawler.
+    rules = re.findall(
         r"^" + re.escape(prefix) + r"\*\n((?:[ \t]+\S.*\n?)+)",
         headers,
         re.M,
     )
-    if not rule or not re.search(
-        r"^[ \t]+X-Robots-Tag:.*\bnoindex\b", rule[1], re.M | re.I
-    ):
+    if len(rules) != 1 or [
+        line.strip().lower() for line in rules[0].splitlines()
+    ] != ["x-robots-tag: noindex"]:
         fail(
-            f"llms: _headers has no `{prefix}*` rule sending "
-            "`X-Robots-Tag: noindex`, so each copy is indexed as a "
-            "duplicate of its /docs/ page"
+            f"llms: _headers must carry one `{prefix}*` rule "
+            "sending `X-Robots-Tag: noindex` and nothing else, or "
+            "each copy is indexed as a duplicate of its /docs/ page"
         )
     print(
         f"llms: /{index_name} lists {len(listed)} page(s), each a "
