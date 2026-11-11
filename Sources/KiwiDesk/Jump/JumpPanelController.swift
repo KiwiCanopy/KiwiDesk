@@ -94,11 +94,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             shelves: core.shelfFrames()
         )
         let snapshot = core.jumpSnapshot(on: hubDisplay)
+        let width = Self.width(visibleWidth: area.width)
         let model = JumpModel(
             snapshot: snapshot,
             icons: Self.icons(for: snapshot),
             rowCap: Self.rowCap,
             sheetCap: Self.sheetCap(visible: visible, area: area),
+            panelWidth: width,
             modifiers: NSEvent.modifierFlags
         )
         // The chord that opened the panel is still held (#3168).
@@ -112,7 +114,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         let presence = PanelPresence()
         self.presence = presence
         wire(model, panel)
-        let width = Self.width(visibleWidth: area.width)
         if scope != .windows { model.setScope(scope) }
         if lastApp { model.openOnLastApp() }
         let root = JumpPanelView(

@@ -3,15 +3,16 @@ import KiwiDeskCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// One Space's line on a Desktop card (#1229): the shown-Space
-/// capsule, the layout symbol, the Space's name, then a fixed
-/// window of five 22 pt app icons with "+n" counts off each edge.
+/// One Space's line in a Desktop's column (#1229): the shown-Space
+/// capsule, the layout symbol, the Space's name, then as many app
+/// icons as its width holds with "+n" counts off each edge (#3164).
 /// Colour carries nothing alone: the capsule, an underline under
 /// the last-focused window, a dashed outline on a picked one and a
 /// solid stroke on a carry's target.
 struct DesktopLineView: View {
     let state: DesktopsState
     let place: DesktopsPlace
+    let geometry: DesktopsGeometry
     let icons: [pid_t: NSImage]
     let onPlace: (DesktopsPlace, Int, NSEvent.ModifierFlags, Bool) -> Void
     let onWindow: (WindowID, DesktopsPlace, Int, NSEvent.ModifierFlags) -> Void
@@ -21,9 +22,6 @@ struct DesktopLineView: View {
     @Environment(\.kiwiHubPaint) private var paint
     @Environment(\.desktopsSwell) private var swell
     @State private var dropTargeted = false
-
-    static var height: CGFloat { 30 }
-    static var icon: CGFloat { 22 }
 
     private var line: DesktopOverview.SpaceLine? { state.line(place) }
     private var isSelected: Bool { state.place == place }
@@ -40,8 +38,8 @@ struct DesktopLineView: View {
             // The icons keep their slots; a long Space name truncates.
             slots.layoutPriority(1)
         }
-        .padding(.horizontal, 4)
-        .frame(height: Self.height)
+        .padding(.horizontal, DesktopsGeometry.linePadding)
+        .frame(height: geometry.line)
         .background(ground)
         .opacity(state.hasMatch(place) ? 1 : 0.45)
         .contentShape(Rectangle())
@@ -116,14 +114,15 @@ struct DesktopLineView: View {
         } else {
             let first = state.offset(place)
             let shown = Array(
-                drawn.dropFirst(first).prefix(DesktopsState.slots)
+                drawn.dropFirst(first).prefix(state.slots(place))
             )
             let hidden = state.hidden(place)
-            HStack(spacing: 2) {
+            HStack(spacing: DesktopsGeometry.iconGap) {
                 more(hidden.before, forward: false)
                 ForEach(shown, id: \.id) { window in
                     DesktopIconView(
                         window: window,
+                        size: geometry.icon,
                         image: icons[window.pid],
                         isSelected: state.window == window.id,
                         isPicked: state.carried.contains(window.id),

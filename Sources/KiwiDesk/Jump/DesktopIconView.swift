@@ -9,6 +9,8 @@ import SwiftUI
 /// one of them.
 struct DesktopIconView: View {
     let window: DesktopOverview.Window
+    /// The icon's side, from the line height (`DesktopsGeometry.icon`).
+    let size: CGFloat
     let image: NSImage?
     let isSelected: Bool
     let isPicked: Bool
@@ -22,9 +24,9 @@ struct DesktopIconView: View {
 
     var body: some View {
         icon
-            .frame(width: DesktopLineView.icon, height: DesktopLineView.icon)
+            .frame(width: size, height: size)
             .opacity(isPicked ? 0.5 : isMatch ? 1 : 0.35)
-            // Drawn outside the 22 pt slot, so five fit a card.
+            // Drawn outside the slot, so slots keep their count.
             .overlay { outline.padding(-2) }
             .overlay(alignment: .bottom) { underline }
             .contentShape(Rectangle())

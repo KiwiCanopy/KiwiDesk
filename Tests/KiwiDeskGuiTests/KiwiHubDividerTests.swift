@@ -81,6 +81,11 @@ struct KiwiHubDividerTests {
             .filter { !$0.isWhitespace }
         #expect(paint.contains("iflethairline=paint.divider{"))
         #expect(paint.contains(".fill(hairline)"))
-        #expect(paint.contains("}else{Divider()}"))
+        // The system separator untinted, sized for a column (#3164).
+        #expect(
+            paint.contains(
+                "}else{Divider().frame(height:axis==.vertical?length:nil)}"
+            )
+        )
     }
 }

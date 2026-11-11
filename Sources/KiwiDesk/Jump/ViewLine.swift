@@ -3,11 +3,14 @@ import SwiftUI
 
 /// One line of the View side (#2309 ruling 3): it never wraps; a
 /// line longer than the panel scrolls sideways, keeps the
-/// selection in view and fades at each edge it cuts.
-/// The Desktops side's screen rows take it too (#1229).
+/// selection in view and fades at each edge with content cut
+/// beyond it (#3166). The Desktops side's screen rows take it too
+/// (#1229).
 struct ViewLine<Selected: Hashable, Content: View>: View {
     /// The selected item's id, where it is on this line.
     let selected: Selected?
+    /// The margin before the first item and after the last.
+    var inset: CGFloat = KeyPanelStyle.selectionInset
     @ViewBuilder let content: Content
 
     @State private var offset: CGFloat = 0
@@ -23,7 +26,7 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 content
-                    .padding(.horizontal, KeyPanelStyle.selectionInset)
+                    .padding(.horizontal, inset)
                     .background(measure)
             }
             .coordinateSpace(name: Self.space)
@@ -63,10 +66,31 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
         contentWidth = frame.width
     }
 
+    /// Which edges cut an item: off an edge by the margin alone,
+    /// as a `scrollTo` leaves the end item, cuts nothing (#3166).
+    nonisolated static func cuts(
+        offset: CGFloat,
+        content: CGFloat,
+        width: CGFloat,
+        inset: CGFloat
+    ) -> (leading: Bool, trailing: Bool) {
+        let cut = EdgeFade.cuts(
+            offset: offset,
+            content: content,
+            viewport: width,
+            inset: inset
+        )
+        return (cut.start, cut.end)
+    }
+
     /// Opaque where nothing is cut; each cut edge fades out.
     private var mask: some View {
-        let leading = offset < -0.5
-        let trailing = offset + contentWidth > width + 0.5
+        let (leading, trailing) = Self.cuts(
+            offset: offset,
+            content: contentWidth,
+            width: width,
+            inset: inset
+        )
         return HStack(spacing: 0) {
             LinearGradient(
                 colors: [leading ? .clear : .black, .black],

@@ -7,12 +7,12 @@ import Testing
 
 /// The Desktops side's two screen rows stand inside KiwiHub's one
 /// ceiling (#1229, the 488 pt the ruling raised it to): the
-/// RENDERED panel, field, footer and both rows of cards, measured
+/// RENDERED panel, field, footer and both rows of columns, measured
 /// as AppKit sizes it.
 @Suite("Desktops side height")
 @MainActor
 struct DesktopsSideCeilingTests {
-    @Test("two screen rows of cards fit under the ceiling")
+    @Test("two screen rows of columns fit under the ceiling")
     func twoRowsFit() {
         LocalizationManager.shared.select("en")
         let visible = CGRect(x: 0, y: 0, width: 1440, height: 900)
@@ -39,12 +39,22 @@ struct DesktopsSideCeilingTests {
         let height = host.fittingSize.height
         // Both rows stand whole: the cap the side is handed does not
         // cut them.
-        let cap = model.sheetCap
-        let whole = DesktopsSideView.height(rows: 2, cap: .infinity)
-        #expect(DesktopsSideView.height(rows: 2, cap: cap) == whole)
-        // Whole means each row's own height at least.
-        #expect(whole >= 2 * DesktopsSideView.rowHeight)
-        #expect(height >= whole + JumpPanelView.fieldHeight, "\(height)")
+        let overview = DesktopsStateTests.overview()
+        let side = DesktopsGeometry(
+            overview: overview,
+            width: JumpPanelView.width,
+            cap: model.sheetCap
+        )
+        let whole = DesktopsGeometry(
+            overview: overview,
+            width: JumpPanelView.width,
+            cap: .infinity
+        )
+        #expect(side.height == whole.height)
+        #expect(
+            height >= whole.height + JumpPanelView.fieldHeight,
+            "\(height)"
+        )
         #expect(height <= JumpPanelController.maxPanelHeight, "\(height)")
     }
 }

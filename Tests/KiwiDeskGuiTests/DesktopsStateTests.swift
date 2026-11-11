@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -53,6 +54,23 @@ struct DesktopsStateTests {
         )
     }
 
+    /// KiwiHub's sheet cap on a 1440×900 screen, which the slot pins
+    /// in this suite and `DesktopsGeometryTests` reason from.
+    static let cap: CGFloat = 411
+
+    /// The state on a 600 pt panel: five icon slots on the KiwiHub
+    /// screen's row, so its seven-window line scrolls.
+    static func state(_ overview: DesktopOverview) -> DesktopsState {
+        DesktopsState(
+            overview: overview,
+            geometry: DesktopsGeometry(
+                overview: overview,
+                width: 600,
+                cap: cap
+            )
+        )
+    }
+
     static func overview(yours: UInt32? = 1) -> DesktopOverview {
         let other = DesktopOverview.Screen(
             display: DisplayID(2),
@@ -103,13 +121,13 @@ struct DesktopsStateTests {
 
     @Test("opens on the line the KiwiHub screen shows")
     func opensHere() {
-        let state = DesktopsState(overview: Self.overview())
+        let state = Self.state(Self.overview())
         #expect(state.place == DesktopsPlace(screen: 1, desktop: 0, line: 0))
     }
 
     @Test("↑↓ walk lines and screens; a held key stops at an end")
     func verticalSteps() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         _ = state.press(.step(1), repeated: false)
         #expect(state.place == DesktopsPlace(screen: 1, desktop: 0, line: 1))
         _ = state.press(.step(1), repeated: true)
@@ -120,7 +138,7 @@ struct DesktopsStateTests {
 
     @Test("⌘↓ opens on the last-focused window, scrolled into view")
     func openSpace() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         #expect(state.press(.openSpace, repeated: false) == .moved)
         #expect(state.window == WindowID(6))
         #expect(state.offset(state.place!) == 1)
@@ -131,7 +149,7 @@ struct DesktopsStateTests {
 
     @Test("an empty Space does not open")
     func emptySpaceRefuses() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         _ = state.press(.step(1), repeated: false)
         #expect(
             state.press(.openSpace, repeated: false) == .refuse(.emptySpace)
@@ -140,7 +158,7 @@ struct DesktopsStateTests {
 
     @Test("↩ jumps, ⇧↩ moves yours there, ⌃↩ also follows")
     func placePicks() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         _ = state.press(.side(1), repeated: false)
         let target = state.target(state.place!)!
         #expect(target.desktop.label == 2)
@@ -156,7 +174,7 @@ struct DesktopsStateTests {
             state.press(.follow, repeated: false)
                 == .act(.moveYours(target, follow: true))
         )
-        var none = DesktopsState(overview: Self.overview(yours: nil))
+        var none = Self.state(Self.overview(yours: nil))
         #expect(
             none.press(.pick(moveHere: true), repeated: false)
                 == .refuse(.nothingYours)
@@ -165,7 +183,7 @@ struct DesktopsStateTests {
 
     @Test("windows are carried in pick order and dropped where chosen")
     func carry() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         _ = state.press(.openSpace, repeated: false)
         _ = state.press(.pickUp, repeated: false)
         _ = state.press(.side(-1), repeated: false)
@@ -184,7 +202,7 @@ struct DesktopsStateTests {
 
     @Test("a window on a hidden Desktop is picked up (#3171)")
     func hiddenWindowPicks() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         _ = state.press(.side(1), repeated: false)
         _ = state.press(.openSpace, repeated: false)
         #expect(state.press(.pickUp, repeated: false) == .moved)
@@ -203,9 +221,7 @@ struct DesktopsStateTests {
                 Self.desktop(1, shown: true, [Self.line("1", [blocked])])
             ]
         )
-        var state = DesktopsState(
-            overview: DesktopOverview(screens: [screen], yours: nil)
-        )
+        var state = Self.state(DesktopOverview(screens: [screen], yours: nil))
         _ = state.press(.openSpace, repeated: false)
         #expect(
             state.press(.pickUp, repeated: false)
@@ -216,7 +232,7 @@ struct DesktopsStateTests {
 
     @Test("a drop where every window already is refuses")
     func dropInPlace() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         _ = state.press(.openSpace, repeated: false)
         _ = state.press(.pickUp, repeated: false)
         _ = state.press(.leaveSpace, repeated: false)
@@ -228,7 +244,7 @@ struct DesktopsStateTests {
 
     @Test("Esc steps back: carry, Space, search, then close")
     func escapeLayers() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         state.setQuery("App")
         _ = state.press(.openSpace, repeated: false)
         _ = state.press(.pickUp, repeated: false)
@@ -243,7 +259,7 @@ struct DesktopsStateTests {
 
     @Test("matches move to the front of their Space; nothing hides")
     func searchOrder() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         state.setQuery("App 7")
         let drawn = state.ordered(state.place!).map(\.id.raw)
         #expect(drawn == [7, 1, 2, 3, 4, 5, 6])
@@ -253,7 +269,7 @@ struct DesktopsStateTests {
 
     @Test("⌘ digits name the selected row's Desktops; ⇧ moves yours")
     func digits() {
-        var state = DesktopsState(overview: Self.overview())
+        var state = Self.state(Self.overview())
         let second = Self.overview().screens[1].desktops[1]
         #expect(
             state.press(.quick(1, moveHere: false), repeated: false)

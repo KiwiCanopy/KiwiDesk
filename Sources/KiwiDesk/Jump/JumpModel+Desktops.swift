@@ -8,7 +8,12 @@ extension JumpModel {
     func enterDesktops() {
         endDesktopsRefusal()
         let overview = loadDesktops()
-        desktops = DesktopsState(overview: overview)
+        let geometry = DesktopsGeometry(
+            overview: overview,
+            width: panelWidth,
+            cap: sheetCap
+        )
+        desktops = DesktopsState(overview: overview, geometry: geometry)
         let pids = overview.screens.flatMap(\.desktops)
             .flatMap(\.spaces).flatMap(\.windows).map(\.pid)
         desktopIcons = loadIcons(Set(pids))

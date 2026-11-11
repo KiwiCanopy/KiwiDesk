@@ -15292,12 +15292,22 @@ its Shortcuts row "Show Desktop overview".
 One row per screen in physical order, left to right read top to
 bottom, the screen's name as the row header; the current screen is
 marked, never moved, so a row is always in the same place and the
-side reads like the desk itself. Each row holds that screen's Desktop cards,
-all one size, scrolling sideways; a card lists the screen's Spaces,
-one line each, empty ones included, and a line its windows as app
-icons in a fixed window of five slots with "+n" counts off each
-edge. A card's height follows its Space count, never its window
-count, because icons squeezed below a readable size answer nothing.
+side reads like the desk itself. Each row holds that screen's
+Desktops as columns on the panel's own ground, each headed by its
+title and split from the next by a divider. A column lists the
+screen's Spaces, one line each, empty ones included, and a line
+lists its windows as app icons, as many as its width holds, with
+"+n" counts off each edge. The selected line is the only fill
+(#3164): a plate under each Desktop wore the hover ink, so every
+card read as hovered and a selection was a lift on a lift. A
+row's columns share its width equally down to a floor, past which
+the row scrolls sideways, so a screen with fewer Desktops gets
+wider lines rather than empty room. One line height serves the
+whole side: the tallest, within a readable range, at which two
+screen rows stand whole under the panel's cap (`DesktopsGeometry`
+holds the numbers). A row stands as tall as its own deepest
+Desktop and never grows with window count, because icons squeezed
+below a readable size answer nothing.
 KiwiDesk keeps no Space set per Desktop (state-and-layout.md), so
 every Desktop of a screen lists that screen's live Spaces: a
 hidden Desktop's windows come from the away ledger, each in the

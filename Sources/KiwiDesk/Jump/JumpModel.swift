@@ -63,7 +63,7 @@ final class JumpModel: ObservableObject {
 
     /// A key, a re-rank or a side switch slides items under a still
     /// pointer: the lift clears until the next real move (#2365).
-    private func restPointer() {
+    func restPointer() {
         lastPointer = currentPointer()
         clearHover()
     }
@@ -98,6 +98,9 @@ final class JumpModel: ObservableObject {
     /// The tallest the Shortcuts side's sheet stands, from the
     /// screen it opens on (`JumpPanelController.sheetCap`).
     let sheetCap: CGFloat
+    /// The panel's width on that screen
+    /// (`JumpPanelController.width`).
+    let panelWidth: CGFloat
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
     /// A pick Core refuses at the press: what VoiceOver hears. The
@@ -158,6 +161,7 @@ final class JumpModel: ObservableObject {
         icons: [pid_t: NSImage],
         rowCap: Int,
         sheetCap: CGFloat = 400,
+        panelWidth: CGFloat = JumpPanelView.width,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -166,6 +170,7 @@ final class JumpModel: ObservableObject {
         self.icons = icons
         self.rowCap = rowCap
         self.sheetCap = sheetCap
+        self.panelWidth = panelWidth
         noteModifiers(modifiers)
     }
 
@@ -202,64 +207,6 @@ final class JumpModel: ObservableObject {
             list.setQuery(newValue)
             listChanged(stripWas: stripWas)
             onAnnounce(resultsSpoken)
-        }
-    }
-
-    /// `repeated` is a key held down: a step then stops at an end
-    /// rather than wrapping past it (#2897).
-    func handle(_ key: JumpKey, repeated: Bool) {
-        guard !leaving else { return }
-        restPointer()
-        if case .stepScope(let forward) = key {
-            setScope(scope.stepped(forward: forward))
-            return
-        }
-        if isNaming {
-            handleNaming(key)
-            return
-        }
-        switch scope {
-        case .windows: break
-        case .shortcuts:
-            handleShortcuts(key)
-            return
-        case .view:
-            handleView(key, repeated: repeated)
-            return
-        case .desktops:
-            handleDesktops(key, repeated: repeated)
-            return
-        }
-        switch key {
-        case .step(let delta):
-            move(by: delta, wrap: !repeated)
-        case .page(let direction):
-            move(by: direction * rowCap)
-        case .pick(let moveHere):
-            if let index = list.selection {
-                pick(index, moveHere ? .moveHere : .jump)
-            }
-        case .swapHere:
-            if let index = list.selection { pick(index, .swapHere) }
-        case .quick(let index, let moveHere):
-            if list.quick(index) != nil {
-                pick(index, moveHere ? .moveHere : .jump)
-            }
-        case .quickSwap(let index):
-            if list.quick(index) != nil { pick(index, .swapHere) }
-        case .escape:
-            if list.query.isEmpty {
-                onClose()
-            } else {
-                query = ""
-            }
-        case .dead:
-            onDeadKey()
-        case .side(let delta):
-            stepTile(delta, wrap: !repeated)
-        case .stepScope, .keep, .settings, .swallow, .openSpace,
-            .leaveSpace, .pickUp, .follow:
-            break
         }
     }
 
@@ -337,7 +284,7 @@ final class JumpModel: ObservableObject {
         listChanged(stripWas: stripWas)
     }
 
-    private func move(by delta: Int, wrap: Bool = false) {
+    func move(by delta: Int, wrap: Bool = false) {
         let before = list.selection
         list.step(delta, wrap: wrap)
         if list.selection != before, let match = list.selected {
