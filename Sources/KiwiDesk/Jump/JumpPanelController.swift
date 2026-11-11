@@ -29,6 +29,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// This opening; a fade a later show overtook orders nothing
     /// out.
     private var presence = PanelPresence()
+    /// The bus sink a stay-open drop reads the desk through (#3208).
+    var landingSink: UUID?
     /// Seam for the system Reduce Motion flag (#565).
     var reduceMotion: () -> Bool = {
         NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
@@ -214,6 +216,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// Fades the panel out, then orders it out; it stops taking
     /// keys and clicks the moment the fade starts.
     private func fadeOut(holdUnseen: TimeInterval) {
+        endLanding()
         currentModel?.leave()
         presence.fadeOut(
             panel,
