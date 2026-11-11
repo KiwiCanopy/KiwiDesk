@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): its
-/// first group. The ⌃⌥ entry with its recorder and swipe length,
-/// the ⌃⌥⌘ entry with its recorder, then the two Natural scrolling
-/// rows both gestures share. Each
+/// first group. The ⌃⌥ entry with its swipe length, the ⌃⌥⌘ entry,
+/// then the two Natural scrolling rows both gestures share. The
+/// chords are bound through `gesture.bind` until #3183's list card
+/// (#3199). Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's
@@ -30,19 +31,6 @@ struct GesturesScrollEntries: View {
             playing: $playing
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                reachRow(.pan) {
-                    ScrollChordRecorderField(
-                        name: ScrollGestureWords.pan,
-                        chord: $model.config.scrollGesture.pan,
-                        other: gestures.spaceStep,
-                        otherGesture: .step,
-                        reveal: reveal
-                    )
-                    .searchAnchored(
-                        SettingsCatalog.shortcuts.gestures.children
-                            .scrollPan
-                    )
-                }
                 reachRow(.longSwipes) {
                     Toggle(
                         ScrollGestureWords.longSwipes,
@@ -94,35 +82,9 @@ struct GesturesScrollEntries: View {
             gestures: gestures,
             playing: $playing
         ) {
-            reachRow(.spaceStep) {
-                ScrollChordRecorderField(
-                    name: ScrollGestureWords.label(.spaceStep),
-                    chord: $model.config.scrollGesture.spaceStep,
-                    other: gestures.pan,
-                    otherGesture: .pan,
-                    reveal: reveal
-                )
-                .searchAnchored(
-                    SettingsCatalog.shortcuts.gestures.children
-                        .scrollSpaceStep
-                )
-            }
+            EmptyView()
         }
         .gestureAnchored(.spaceStep)
-    }
-
-    /// Go to: a gesture's recorder row, through the one reveal
-    /// channel the diff rows take.
-    private func reveal(_ consumer: ScrollGestures.Consumer) {
-        let control =
-            switch consumer {
-            case .pan: Self.controls.scrollPan
-            case .step: Self.controls.scrollSpaceStep
-            }
-        model.nav.pendingReveal = SettingsAnchor(
-            destination: .shortcuts,
-            anchor: control.id
-        )
     }
 
     /// Indented under the box it depends on, and greyed — never
@@ -156,36 +118,38 @@ struct GesturesScrollEntries: View {
         )
     }
 
-    /// Apple's own toggle, its input named in the picture's gutter
-    /// so both boxes start on the sentence's column.
+    /// Apple's own name over System · On · Off (#3200), its input
+    /// named in the picture's gutter so every row starts on the
+    /// sentence's column.
     private func naturalRow(
         _ field: ScrollGestureField,
         _ input: String,
-        _ isOn: Binding<Bool>
+        _ value: Binding<NaturalScrolling>
     ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: Self.columnGap) {
             Text(input)
                 .frame(width: Self.gutter, alignment: .trailing)
                 .accessibilityHidden(true)
             reachRow(field) {
-                Toggle(isOn: isOn) {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(ScrollGestureWords.natural)
-                        Text(ScrollGestureWords.naturalCaption)
-                            .font(.caption)
-                            .foregroundStyle(SettingsTheme.ink3)
-                    }
-                }
-                .toggleStyle(.checkbox)
-                .accessibilityLabel(
-                    L(
-                        "shortcuts.gestures.scroll.natural_spoken",
-                        "%1$@, %2$@",
-                        input,
-                        ScrollGestureWords.natural
+                VStack(alignment: .leading, spacing: 4) {
+                    SegmentedPicker(
+                        ScrollGestureWords.natural,
+                        spokenLabel: L(
+                            "shortcuts.gestures.scroll.natural_spoken",
+                            "%1$@, %2$@",
+                            input,
+                            ScrollGestureWords.natural
+                        ),
+                        hugsLabels: true,
+                        selection: value,
+                        options: NaturalScrolling.allCases.map {
+                            (ScrollGestureWords.natural($0), $0)
+                        }
                     )
-                )
-                .accessibilityHint(ScrollGestureWords.naturalCaption)
+                    Text(ScrollGestureWords.naturalCaption)
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.ink3)
+                }
             }
         }
         .padding(.vertical, 2)

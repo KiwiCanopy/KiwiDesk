@@ -50,7 +50,6 @@ extension SettingsRevertRegister {
         ).then { model, _ in settle(model, .wrap, nil) },
         .shortcuts(.modeCycle): RevertWriter.leaf(\.modeCycle)
             .then { model, _ in settle(model, .cycle, nil) },
-        .shortcuts(.scrollPan): scroll(\.scrollGesture.pan),
         .shortcuts(.scrollLongSwipes): scroll(\.scrollGesture.longSwipes),
         .shortcuts(.scrollStepDistance): scroll(
             \.scrollGesture.stepDistance
@@ -61,9 +60,6 @@ extension SettingsRevertRegister {
         .shortcuts(.scrollNaturalMouse): scroll(
             \.scrollGesture.naturalMouse
         ),
-        .shortcuts(.scrollSpaceStep): scroll(\.scrollGesture.spaceStep),
-        .shortcuts(.modifierDragMove): .leaf(\.modifierDrag.move),
-        .shortcuts(.modifierDragResize): .leaf(\.modifierDrag.resize),
         .kiwishelf(.pocketEdge): .leaf(\.settings.kiwishelf.pocketEdge),
         .kiwishelf(.pocketPosition): .leaf(
             \.settings.kiwishelf.pocketPosition

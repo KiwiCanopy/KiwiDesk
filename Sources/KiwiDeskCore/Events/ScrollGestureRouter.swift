@@ -26,6 +26,73 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     /// hand's own spacing, which a busy main actor would squash.
     /// No default: an event built without it reads as a spin.
     public var time: Double
+    /// A wheel burst's axis, which the router names from its first
+    /// notch and owns the burst by; the runner picks the burst's
+    /// binding from it, never from a reading of its own.
+    public var sideways = false
+    /// True where Natural scrolling off reversed `delta`; set by
+    /// `ScrollGestures.receive` alone.
+    public var reversed = false
+
+    /// A swipe's event as a consumer stepping by direction hears it
+    /// (input-and-animation.md): whole until `horizontal` names the
+    /// axis the latch fired on, then along that axis alone, so a
+    /// diagonal never changes the axis or the sign mid-swipe.
+    public func locked(horizontal: Bool?) -> ScrollGestureEvent {
+        guard input == .trackpad, !momentum, kind == .changed,
+            let horizontal
+        else { return self }
+        var along = self
+        if horizontal { along.delta.dy = 0 } else { along.delta.dx = 0 }
+        return along
+    }
+
+    /// The hand's own motion, whatever Natural scrolling says: a
+    /// direction table's arm means the fingers' way (#3199 ▸ it
+    /// never flips a per-direction arm).
+    public var hand: CGVector {
+        reversed ? CGVector(dx: -delta.dx, dy: -delta.dy) : delta
+    }
+}
+
+/// The chords the tap consumes, per input (#3199): a chord owns
+/// only the scrolls a binding answers, so an input left unbound
+/// under a bound chord still reaches the window. An array literal
+/// names chords bound on every input.
+public struct ScrollTapChords: Equatable, Sendable,
+    ExpressibleByArrayLiteral
+{
+    /// Phased scrolls: a trackpad or Magic Mouse swipe.
+    public var swipe: Set<ScrollChord>
+    /// A wheel burst whose first notch runs vertically.
+    public var wheel: Set<ScrollChord>
+    /// A wheel burst whose first notch runs sideways.
+    public var wheelX: Set<ScrollChord>
+
+    public init(
+        swipe: Set<ScrollChord> = [],
+        wheel: Set<ScrollChord> = [],
+        wheelX: Set<ScrollChord> = []
+    ) {
+        self.swipe = swipe
+        self.wheel = wheel
+        self.wheelX = wheelX
+    }
+
+    public init(arrayLiteral chords: ScrollChord...) {
+        let all = Set(chords)
+        self.init(swipe: all, wheel: all, wheelX: all)
+    }
+
+    var isEmpty: Bool { swipe.isEmpty && wheel.isEmpty && wheelX.isEmpty }
+
+    /// The chords a gesture of `input` on that axis is owned on.
+    func owners(
+        _ input: ScrollGestureEvent.Input,
+        sideways: Bool
+    ) -> Set<ScrollChord> {
+        input == .trackpad ? swipe : sideways ? wheelX : wheel
+    }
 }
 
 /// Decides, per scroll event, whether a registered chord owns it
@@ -50,12 +117,14 @@ struct ScrollGestureRouter {
     private struct Owner {
         var chord: ScrollChord
         var input: ScrollGestureEvent.Input
+        /// A wheel burst's axis, named by its first notch.
+        var sideways = false
         var began: Bool
         /// Where the gesture last was: an expiry ends it there.
         var location: CGPoint
     }
 
-    var chords: Set<ScrollChord> = []
+    var chords: ScrollTapChords = []
     private var owner: Owner?
     /// A touch passed through without moving (`.mayBegin`): the
     /// `.began` that follows stays the app's even if the chord is
@@ -75,7 +144,10 @@ struct ScrollGestureRouter {
     ) -> (consume: Bool, events: [ScrollGestureEvent]) {
         clock = now
         var released: [ScrollGestureEvent] = []
-        if let owner, !chords.contains(owner.chord) {
+        if let owner,
+            !chords.owners(owner.input, sideways: owner.sideways)
+                .contains(owner.chord)
+        {
             released = end(at: sample.location)
         }
         let routed = routeSample(sample, now: now)
@@ -98,7 +170,12 @@ struct ScrollGestureRouter {
             }
             passing = false
             var events = end(at: sample.location)
-            guard owns(sample.chord) else {
+            guard
+                owns(
+                    sample.chord,
+                    in: chords.owners(.trackpad, sideways: false)
+                )
+            else {
                 passing = sample.phase == .mayBegin
                 return (false, events)
             }
@@ -140,8 +217,11 @@ struct ScrollGestureRouter {
 
     /// A bound chord that is not empty: a plain scroll is never
     /// owned, whatever chord set the tap was handed.
-    private func owns(_ chord: ScrollChord) -> Bool {
-        !chord.isEmpty && chords.contains(chord)
+    private func owns(
+        _ chord: ScrollChord,
+        in bound: Set<ScrollChord>
+    ) -> Bool {
+        !chord.isEmpty && bound.contains(chord)
     }
 
     /// Ends an owned gesture whose deadline has passed, where it
@@ -175,12 +255,21 @@ struct ScrollGestureRouter {
             events = end(at: sample.location)
         }
         if owner == nil {
-            guard owns(sample.chord) else {
+            // A burst's first notch names its axis, as the runner
+            // reads it (`ScrollRoute.action(for:)`).
+            let sideways = abs(sample.delta.dx) > abs(sample.delta.dy)
+            guard
+                owns(
+                    sample.chord,
+                    in: chords.owners(.wheel, sideways: sideways)
+                )
+            else {
                 return (false, events)
             }
             owner = Owner(
                 chord: sample.chord,
                 input: .wheel,
+                sideways: sideways,
                 began: false,
                 location: sample.location
             )
@@ -216,7 +305,8 @@ struct ScrollGestureRouter {
                 delta: .zero,
                 momentum: false,
                 location: location,
-                time: clock
+                time: clock,
+                sideways: current.sideways
             )
         ]
     }
@@ -233,7 +323,8 @@ struct ScrollGestureRouter {
             delta: sample.delta,
             momentum: momentum,
             location: sample.location,
-            time: clock
+            time: clock,
+            sideways: owner?.sideways ?? false
         )
     }
 }

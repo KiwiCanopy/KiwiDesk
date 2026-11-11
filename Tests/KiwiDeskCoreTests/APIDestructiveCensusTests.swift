@@ -26,8 +26,10 @@ struct APIDestructiveCensusTests {
     /// Commands whose name reads destructive and which lose
     /// nothing, each with its reason.
     static let ruledSafe: [String: String] = [
-        "trackpad_gesture.bind": "binds a gesture slot in the "
-            + "running base; another bind puts it back (#1873)",
+        "gesture.bind": "binds a gesture in the running base; "
+            + "another bind puts it back (#3199)",
+        "gesture.unbind": "turns a gesture off in the running base; "
+            + "a bind puts it back (#3199)",
         "look.apply": "a live paint like a batch of setters: it "
             + "writes nothing, and a set or another apply puts the "
             + "values back (#1685)",

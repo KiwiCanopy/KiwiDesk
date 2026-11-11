@@ -29,6 +29,10 @@ struct FloatRuleGrammarSeamTests {
         "ShortcutFold.swift": 1,
         "DisplayModel.swift": 1,
         "ExecLauncher.swift": 1,
+        // A gesture key's `input:keys` spelling and its parse, and
+        // the migration that writes those keys (#3199).
+        "GestureBinding.swift": 2,
+        "ConfigMigration+Gestures.swift": 4,
     ]
 
     @Test("the grammar is read and spelled only through FloatRules")

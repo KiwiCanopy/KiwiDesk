@@ -32,6 +32,8 @@ public final class MouseTracker {
     public let pointer = PointerConsumers()
     /// Trackpad gesture slots through the touch reader (#1873).
     public let trackpad = TouchGestures()
+    /// The gesture bindings every front above reads (#3199).
+    public let gestures = GestureInputs()
     /// The pointer coming to rest, hover focus's trigger (#1869).
     public let rest = PointerRest()
 

@@ -7,7 +7,7 @@ import Foundation
 /// home of the three fields: `KeyBinding.meta` reads and writes them
 /// whole, and every comparison or copy goes through it
 /// (`ShortcutMetaCarryTests` ▸ `metaIsTheOneHome`).
-public struct KeyBindingMeta: Equatable, Sendable {
+public struct KeyBindingMeta: Hashable, Sendable {
     public var desc = ""
     public var group = ""
     public var symbol = ""

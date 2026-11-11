@@ -63,7 +63,8 @@ struct ScrollGestureDeadEndTests {
                     location: .zero,
                     time: 0
                 ),
-                session: session
+                session: session,
+                directional: true
             )
         }
     }
@@ -124,7 +125,8 @@ struct ScrollGestureDeadEndTests {
                     location: .zero,
                     time: 0
                 ),
-                session: session
+                session: session,
+                directional: true
             )
         }
         // The first window moved; the next twenty had nowhere.

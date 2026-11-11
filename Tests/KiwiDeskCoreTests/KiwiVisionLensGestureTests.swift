@@ -82,7 +82,8 @@ struct KiwiVisionLensGestureTests {
                     location: .zero,
                     time: 0
                 ),
-                session: session
+                session: session,
+                directional: true
             )
         }
         return core.activeSpace?.focused

@@ -14,12 +14,8 @@ extension GuiConfig {
         try container.encode(ignoreRules, forKey: .ignoreRules)
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
-        try container.encode(modifierDrag, forKey: .modifierDrag)
-        if !trackpadGesture.isEmpty {
-            try container.encode(
-                trackpadGesture,
-                forKey: .trackpadGesture
-            )
+        if !gesture.isEmpty {
+            try container.encode(gesture, forKey: .gesture)
         }
         try container.encode(spaceHistory, forKey: .spaceHistory)
         try container.encode(modeCycle, forKey: .modeCycle)

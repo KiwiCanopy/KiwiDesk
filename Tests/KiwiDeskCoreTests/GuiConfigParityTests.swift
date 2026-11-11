@@ -49,7 +49,7 @@ struct GuiConfigParityTests {
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
-                "scrollGesture", "modifierDrag", "trackpadGesture",
+                "scrollGesture", "gesture",
                 "appWide", "look",
                 "spaceHistory",
                 "modeCycle", "focusWrap",
@@ -96,24 +96,18 @@ struct GuiConfigParityTests {
         // Every field off its default: the base's coding is
         // hand-listed, so a field left default is one unwatched.
         config.scrollGesture = ScrollGestureBase(
-            pan: [.command, .shift],
-            spaceStep: [],
-            naturalTrackpad: false,
-            naturalMouse: false,
+            naturalTrackpad: .off,
+            naturalMouse: .off,
             longSwipes: true,
             stepDistance: 120
         )
-        config.modifierDrag = ModifierDragSettings(
-            move: ModifierDragBinding(chord: [.option, .command]),
-            resize: ModifierDragBinding(
-                chord: [.control, .shift],
-                start: .hover
-            )
-        )
-        config.trackpadGesture = TrackpadGestureMap([
-            .tap3: .unbound,
-            .swipe3: .bound(
-                .init(action: "focus", modifiers: [.control, .option])
+        config.gesture = GestureMap([
+            GestureKey(.tap3): .unbound,
+            GestureKey(.swipe3, [.control, .option]): .bound(
+                .family(.focus)
+            ),
+            GestureKey(.hoverMove, [.option, .command]): .bound(
+                .grab(.move)
             ),
         ])
         config.spaceHistory = .allScreens
@@ -149,7 +143,7 @@ struct GuiConfigParityTests {
         #expect(back.appWide == config.appWide)
         #expect(back.look == config.look)
         #expect(back.scrollGesture == config.scrollGesture)
-        #expect(back.trackpadGesture == config.trackpadGesture)
+        #expect(back.gesture == config.gesture)
         #expect(back.spaceHistory == config.spaceHistory)
         #expect(back.modeCycle == config.modeCycle)
         #expect(back.focusWrap == config.focusWrap)

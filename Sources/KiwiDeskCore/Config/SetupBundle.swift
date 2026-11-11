@@ -104,7 +104,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// bundle's `config` into its `[Profile]`.
     /// 44 = a binding may be a key sequence (#1871), in a bundle's
     /// `config` and its `[Profile]` alike, with no step.
-    public static let currentFormat = 44
+    /// 45 = mouse and trackpad gestures are one `gesture` map
+    /// (#3199), in a bundle's `config` and its `[Profile]` alike.
+    public static let currentFormat = 45
 
     public let format: Int
 

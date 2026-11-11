@@ -139,10 +139,9 @@ struct ShortcutsFamilyRows {
         case .layers, .layersIcon, .layersReach, .openApplications,
             .pocketApps,
             .advanced,
-            .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
+            .`import`, .restoreDefaults, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
-            .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
-            .modifierDragMove, .modifierDragResize,
+            .scrollNaturalMouse, .spaceHistory,
             .focusWrap, .modeCycle, .modeCue, .desktopCue, .hyperKey,
             .shortcutBase, .kiwiHubNavigationKeys, .modifierSides:
             return nil
