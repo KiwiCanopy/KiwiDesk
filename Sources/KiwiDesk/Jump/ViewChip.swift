@@ -2,7 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// One item on the View side's Profile or KiwiVision line (#2309):
-/// its name, a ✓ where it is current, its shortcut and, greyed,
+/// its name, semibold behind a filled check circle where it is
+/// current (#3210) — both in the chip's own ink, never the accent,
+/// and every name holding its semibold width so the line never
+/// shifts — its shortcut and, greyed,
 /// why it cannot be applied. Its ⌘ number shows in a slot every
 /// chip reserves, so holding ⌘ never reflows the line; at rest the
 /// name sits centred in the same width (ruling 5).
@@ -80,8 +83,7 @@ struct ViewChip: View {
     private var label: some View {
         HStack(spacing: 4) {
             if item.isCurrent {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 10, weight: .bold))
+                Image(systemName: "checkmark.circle.fill")
             }
             // A create chip leads with an unfilled plus; its label
             // is its name (#2359 ruling 2).
@@ -90,7 +92,7 @@ struct ViewChip: View {
                     .font(.system(size: 10, weight: .semibold))
                     .accessibilityHidden(true)
             }
-            Text(item.name).lineLimit(1)
+            name
             if let chord = item.chord {
                 Text(chord).foregroundStyle(secondaryInk)
             }
@@ -101,6 +103,19 @@ struct ViewChip: View {
         .font(Self.font)
         .foregroundStyle(ink)
         .fixedSize()
+    }
+
+    /// The name in its weight, over the room its semibold takes.
+    private var name: some View {
+        Text(item.name)
+            .fontWeight(.semibold)
+            .hidden()
+            .overlay {
+                Text(item.name)
+                    .fontWeight(item.isCurrent ? .semibold : .regular)
+                    .lineLimit(1)
+            }
+            .lineLimit(1)
     }
 
     private var ink: AnyShapeStyle {

@@ -1329,6 +1329,18 @@ must keep:
   and nowhere else — a list whose selection anything beyond
   Return reads keeps the pointer apart, as KiwiHub does
   (`JumpHoverTests`).
+- **In KiwiHub, rows fill and tiles ring (#3210).** A list row — a
+  Windows row, a Desktops line — shows its selection as the solid
+  `paint.selection` fill, as native lists do. A tile — the app
+  strip, a layout tile, a Desktops icon — shows it as a 2 pt
+  `paint.selection` ring with no fill and its unselected inks, and
+  a tile both selected and under the pointer shows the ring alone.
+  KiwiHub's tiles are an owner exception to #3042: the pointer lifts
+  them with `paint.rowHover`, the palette's hover fill, never with
+  `hoverEdge` or `hoverRise`. A resting plate on a tile, such as
+  All's plate or a count capsule, takes a neutral fill that is no
+  hover colour. A view chip keeps its tick for active and its fill
+  for selected (`KiwiHubTileSelectionTests`).
 
 ## A diff row's ↺ (#792)
 

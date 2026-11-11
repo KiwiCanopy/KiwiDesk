@@ -87,8 +87,9 @@ struct DesktopCardView: View {
             Text(DesktopsText.desktop(desktop.label))
                 .font(.callout.weight(.semibold))
             if desktop.isShown {
-                Image(systemName: "checkmark")
-                    .font(.caption.weight(.bold))
+                // KiwiHub's one "in use" mark, as a current chip's.
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.callout)
                     .accessibilityLabel(DesktopsText.shown)
             }
             Spacer(minLength: 4)
