@@ -162,7 +162,7 @@ extension KiwiCore {
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         // A bound Desktop switch's handler activates its own Space.
-        let follow = cause == .event ? nil : restored
+        let follow = cause == .desktopSwitch ? nil : restored
         retileFollowing(follow, pass: forceRetile ? .apply : .event)
         // #1145: a profile may override `desktop_reach` — after
         // the pins and the space→display resolve the carry's

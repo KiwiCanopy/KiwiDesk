@@ -148,4 +148,31 @@ struct ProfileSpacesWiringTests {
             )
         )
     }
+
+    /// The switch handler activates the arriving Space itself, so
+    /// its binding load alone stands a restore's follow down
+    /// (#3191); every other binding load keeps `.event`.
+    @Test("Only the Desktop switch's binding load takes .desktopSwitch")
+    func desktopSwitchCauseHasOneDoor() throws {
+        let wrapper = try body(
+            of: "func applyBindingDeferringRuleSweep",
+            in: "Profiles/KiwiCore+DesktopBindings.swift"
+        )
+        #expect(wrapper?.contains("cause: .desktopSwitch") == true)
+        let callers = try SourceScan.swiftSources(under: coreRoot)
+            .filter {
+                let text = try String(contentsOf: $0, encoding: .utf8)
+                return SourceScan.stripComments(text).range(
+                    of: #"\.desktopSwitch\b"#,
+                    options: .regularExpression
+                ) != nil
+            }
+            .map(\.lastPathComponent).sorted()
+        #expect(
+            callers == [
+                "KiwiCore+DesktopBindings.swift",
+                "KiwiCore+ProfileResolution.swift",
+            ]
+        )
+    }
 }

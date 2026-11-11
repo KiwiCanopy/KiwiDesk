@@ -311,15 +311,15 @@ extension KiwiCore {
     /// (#1394). All native Desktops without a binding share
     /// whatever profile is current.
     ///
-    /// A caller holding a `DesktopSnapshot` passes its
-    /// `authority` rather than letting this re-read the topology
-    /// (review round 2, 2026-08-18); `desktop: nil` from such a
-    /// caller means "no authoritative Desktop", which no-ops, so
-    /// the live read belongs to the no-argument convenience
-    /// alone. Returns the profile it loaded — the Desktop cue's
-    /// caption (#2142) — and nil where it loaded none.
+    /// A snapshot holder passes its `authority`, never a re-read;
+    /// nil is a no-op. `cause` is `.desktopSwitch` from the switch
+    /// handler alone (#3191). Returns the profile loaded (the
+    /// Desktop cue's caption, #2142), nil where none.
     @discardableResult
-    func applyDesktopBinding(in snapshot: DesktopSnapshot) -> String? {
+    func applyDesktopBinding(
+        in snapshot: DesktopSnapshot,
+        cause: ProfileApplyCause = .event
+    ) -> String? {
         guard let binding = mainDesktopBinding(in: snapshot)
         else { return nil }
         // The gate's pick is the profile ALREADY live: stand down
@@ -333,7 +333,7 @@ extension KiwiCore {
             guard profile.name != profiles.currentName else {
                 return nil
             }
-            apply(profile: profile, cause: .event)
+            apply(profile: profile, cause: cause)
             onLog(
                 "Desktop \(binding.desktop): loaded profile "
                     + "'\(profile.name)'"

@@ -46,9 +46,14 @@ extension KiwiCore {
             "restore follow: w\(owed.window.raw) into space "
                 + "\(owed.space.raw), the one it left empty"
         )
+        let leaving = (focusedScreen, frontmostPIDProvider?())
         state.workspaces.activate(owed.space)
         retile(pass: pass)
-        followSwitch(to: owed.space, focusing: owed.window)
+        followSwitch(
+            to: owed.space,
+            focusing: owed.window,
+            leaving: leaving
+        )
     }
 
     private func stillOwed(_ follow: RestoreFollow) -> Bool {

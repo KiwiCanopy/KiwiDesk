@@ -245,6 +245,6 @@ extension KiwiCore {
         let deferring = defersRuleSweepToSwitchPass
         defersRuleSweepToSwitchPass = true
         defer { defersRuleSweepToSwitchPass = deferring }
-        return applyDesktopBinding(in: snapshot)
+        return applyDesktopBinding(in: snapshot, cause: .desktopSwitch)
     }
 }

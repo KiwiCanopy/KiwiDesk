@@ -5,8 +5,9 @@ import Testing
 
 /// A profile switch's restore that takes the focused window out of
 /// the active Space and leaves it empty is followed (#3191 ▸
-/// Ruling), through both apply doors; one that leaves a window
-/// there, or runs inside a bound Desktop switch, moves no focus.
+/// Ruling), through both apply doors and every cause but the
+/// Desktop switch's, whose handler activates its own Space; one
+/// that leaves a window there moves no focus.
 @Suite("A restore that empties the focused Space follows (#3191)")
 @MainActor
 struct RestoreFollowTests {
@@ -83,7 +84,7 @@ struct RestoreFollowTests {
 
     @Test(
         "Emptying the active Space follows its focused window",
-        arguments: [ProfileApplyCause.monitorChange, .explicit]
+        arguments: [ProfileApplyCause.monitorChange, .explicit, .event]
     )
     func emptiedSpaceFollows(cause: ProfileApplyCause) {
         let core = makeCore()
@@ -116,7 +117,7 @@ struct RestoreFollowTests {
     @Test("A bound Desktop switch's apply follows nothing")
     func boundDesktopSwitchStandsDown() {
         let core = makeCore()
-        applyHome(core, .profileA, cause: .event)
+        applyHome(core, .profileA, cause: .desktopSwitch)
         #expect(core.state.workspaces.space(of: w1) == "2")
         #expect(core.state.workspaces.activeSpace == "1")
     }
