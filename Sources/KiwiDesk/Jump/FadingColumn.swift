@@ -22,8 +22,6 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    static var fade: CGFloat { EdgeFade.depth }
-
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical, showsIndicators: false) {
@@ -33,7 +31,7 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
             }
             .contentMargins(
                 .vertical,
-                overflows ? Self.fade : 0,
+                overflows ? fade : 0,
                 for: .scrollContent
             )
             .coordinateSpace(.named(space))
@@ -48,6 +46,10 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
             .onChange(of: overflows) { reveal(proxy, animated: false) }
         }
     }
+
+    /// The fade's depth here: a viewport too short for two fades
+    /// and a line between them takes a shallower one.
+    private var fade: CGFloat { EdgeFade.depth(viewport: height) }
 
     /// Whether the content runs past the viewport, so it scrolls.
     private var overflows: Bool { contentHeight > height + 0.5 }
@@ -91,14 +93,14 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .frame(height: Self.fade)
+            .frame(height: fade)
             Rectangle()
             LinearGradient(
                 colors: [.black, bottom ? .clear : .black],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .frame(height: Self.fade)
+            .frame(height: fade)
         }
     }
 }
@@ -108,6 +110,12 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
 enum EdgeFade {
     /// How deep a vertical KiwiHub list's edge fades.
     static let depth: CGFloat = 20
+
+    /// The depth in a `viewport` this tall: never more than a
+    /// quarter of it, so half stays clear between the two fades.
+    static func depth(viewport: CGFloat) -> CGFloat {
+        min(depth, max(viewport, 0) / 4)
+    }
 
     static func cuts(
         offset: CGFloat,
