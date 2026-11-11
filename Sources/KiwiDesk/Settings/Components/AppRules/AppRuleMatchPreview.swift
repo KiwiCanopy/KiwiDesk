@@ -109,7 +109,7 @@ struct AppRuleMatchPreview: View {
             staged.append(FloatRules.rule(app: app, title: typed))
         }
         if FloatRules(staged)
-            .matches(bundleID: app, title: window.title)
+            .matches(app: app, title: window.title)
         {
             return .floatsByRule
         }

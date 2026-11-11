@@ -29,7 +29,7 @@ struct AutoFloatEscapeTests {
     ) -> AutoFloatReason? {
         FloatDetection.autoFloatReason(
             facts,
-            bundleID: Self.app,
+            app: Self.app,
             rules: rules
         )
     }
@@ -37,12 +37,12 @@ struct AutoFloatEscapeTests {
     @Test("a guess floats only where it applies")
     func guessApplies() {
         let on = FloatGuess()
-        #expect(on.applies(to: Self.app))
-        #expect(on.applies(to: nil))
+        #expect(on.applies(toApp: Self.app))
+        #expect(on.applies(toApp: nil))
         let tiled = FloatGuess(tileRules: ["COM.valvesoftware.Steam"])
-        #expect(!tiled.applies(to: Self.app))
-        #expect(tiled.applies(to: "com.apple.mail"))
-        #expect(!FloatGuess(enabled: false).applies(to: "com.apple.mail"))
+        #expect(!tiled.applies(toApp: Self.app))
+        #expect(tiled.applies(toApp: "com.apple.mail"))
+        #expect(!FloatGuess(enabled: false).applies(toApp: "com.apple.mail"))
         #expect(tiled.tileRules == [Self.app])
     }
 
@@ -85,7 +85,7 @@ struct AutoFloatEscapeTests {
                 pid: 1,
                 activationPolicy: .accessory,
                 tilesAsOwnWindow: false,
-                bundleID: Self.app,
+                app: Self.app,
                 rules: rules
             )
         }
@@ -110,7 +110,7 @@ struct AutoFloatEscapeTests {
             pid: getpid(),
             activationPolicy: .accessory,
             tilesAsOwnWindow: false,
-            bundleID: Self.app,
+            app: Self.app,
             rules: FloatRules(guess: FloatGuess(enabled: false))
         )
         #expect(verdict == .floats(.panel))

@@ -18,6 +18,7 @@ struct GhosttyButtonEscapeTests {
     ) -> Bool {
         FloatDetection.shouldIgnore(
             bundleID: bundleID,
+            app: bundleID,
             layer: layer,
             isAccessory: accessory,
             rules: IgnoreRules(),

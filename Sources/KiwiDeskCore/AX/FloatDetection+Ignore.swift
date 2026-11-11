@@ -61,12 +61,13 @@ extension FloatDetection {
     /// `needsTitlebarButton` says one of them decides.
     public static func shouldIgnore(
         bundleID: String?,
+        app: String?,
         layer: Int,
         isAccessory: Bool,
         rules: IgnoreRules,
         titlebarButton: Bool
     ) -> Bool {
-        rules.matches(bundleID: bundleID)
+        rules.matches(app: app)
             || isBuiltInIgnoredApp(bundleID: bundleID)
             || layer >= screenSaverLayer
             || layer != 0
@@ -133,6 +134,7 @@ extension FloatDetection {
         }
         return shouldIgnore(
             bundleID: bundleID,
+            app: nil,
             layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),
@@ -258,6 +260,7 @@ extension FloatDetection {
             } == true
         return shouldIgnore(
             bundleID: bundleID,
+            app: nil,
             layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),

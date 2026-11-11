@@ -21,7 +21,7 @@ extension KiwiCore {
     /// Nil when the app has no away entry or no census can be
     /// read — the topology is read only where an entry exists.
     func awayReach(bundleID: String) -> AwayReach? {
-        let away = awayWindows(bundleID: bundleID)
+        let away = awayWindows(app: bundleID)
         guard !away.isEmpty else { return nil }
         let snapshot = desktopMemory.readDesktops()
         guard let census = desktopMemory.readCensus(snapshot.spaces) else {
@@ -31,7 +31,7 @@ extension KiwiCore {
         // and the bar read (#1146): fold before deciding — hosts
         // and parking only, never a prune's emit mid-command.
         fold(census, pruning: false)
-        let windows = awayWindows(bundleID: bundleID).compactMap {
+        let windows = awayWindows(app: bundleID).compactMap {
             entry -> (AwayWindow, Int)? in
             guard let host = census.hosts[entry.id],
                 host.isUp, census.isAway(entry.id),
@@ -44,7 +44,7 @@ extension KiwiCore {
             snapshot: snapshot,
             // A window kept on its full-screen Space is listed
             // too (#2930): its app is activated, never reopened.
-            listsAny: awayWindows(bundleID: bundleID).contains {
+            listsAny: awayWindows(app: bundleID).contains {
                 census.hosts[$0.id] != nil
                     || census.fullScreen.contains($0.nativeSpace)
             }

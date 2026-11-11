@@ -106,6 +106,8 @@ struct ListedWindowReader: @unchecked Sendable {
     let fullscreen: (AXUIElement) -> Bool
     let traits: (AXUIElement, WindowID?) -> WindowTraits?
     let bundleID: String?
+    /// The app's `AppRef.listKey`, which its rules name (#3211).
+    let appKey: String?
     let rules: FloatRules
     let facts: (AXUIElement, Int?) -> WindowFacts
     let tracked: Set<WindowID>
@@ -163,6 +165,7 @@ struct ListedWindowReader: @unchecked Sendable {
             && id.map(shadowed.contains) == false
             && !FloatDetection.shouldIgnore(
                 bundleID: bundleID,
+                app: appKey,
                 layer: layer,
                 isAccessory: isAccessory,
                 rules: ignoreRules,
@@ -176,7 +179,7 @@ struct ListedWindowReader: @unchecked Sendable {
         let detect = {
             FloatDetection.autoFloatReason(
                 facts,
-                bundleID: bundleID,
+                app: appKey,
                 rules: rules
             )
         }
@@ -246,14 +249,15 @@ extension EventLoop {
     /// The reader for `pid`'s next off-main list read.
     func listedWindowReader(
         pid: pid_t,
-        bundleID: String?,
+        app: AppRef,
         tracked: Set<WindowID>
     ) -> ListedWindowReader {
         ListedWindowReader(
             resolve: resolveWindowID,
             fullscreen: readFullscreen,
             traits: shadows.traits,
-            bundleID: bundleID,
+            bundleID: app.bundleID,
+            appKey: app.listKey,
             rules: floatRules,
             facts: offMain.readFacts,
             tracked: tracked,
@@ -275,7 +279,7 @@ extension EventLoop {
     ) -> @Sendable () -> WindowListReading {
         let reader = listedWindowReader(
             pid: pid,
-            bundleID: app.bundleID,
+            app: app,
             tracked: tracked
         )
         nonisolated(unsafe) let read = axWindows

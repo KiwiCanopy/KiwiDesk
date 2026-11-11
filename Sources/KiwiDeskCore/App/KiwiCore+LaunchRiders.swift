@@ -12,7 +12,7 @@ extension KiwiCore {
         now: Date
     ) {
         guard effects.popupSkippedRule != nil,
-            let bundleID = window.appBundleID,
+            let bundleID = window.appRef.listKey,
             let from = state.workspaces.space(of: window.id)
         else { return }
         launchFollow.noteRider(

@@ -18,6 +18,7 @@ struct CommandBarIgnoreTests {
         #expect(
             FloatDetection.shouldIgnore(
                 bundleID: "com.raycast.macos",
+                app: "com.raycast.macos",
                 layer: 8,
                 isAccessory: true,
                 rules: noRules,
@@ -28,6 +29,7 @@ struct CommandBarIgnoreTests {
         #expect(
             FloatDetection.shouldIgnore(
                 bundleID: "com.example.somelauncher",
+                app: "com.example.somelauncher",
                 layer: 3,
                 isAccessory: true,
                 rules: noRules,
@@ -46,6 +48,7 @@ struct CommandBarIgnoreTests {
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.apple.captivenetworkassistant",
+                app: "com.apple.captivenetworkassistant",
                 layer: 8,
                 isAccessory: true,
                 rules: noRules,
@@ -55,6 +58,7 @@ struct CommandBarIgnoreTests {
         #expect(
             FloatDetection.shouldIgnore(
                 bundleID: "com.raycast.macos",
+                app: "com.raycast.macos",
                 layer: 8,
                 isAccessory: false,
                 rules: noRules,
@@ -68,6 +72,7 @@ struct CommandBarIgnoreTests {
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.raycast.macos",
+                app: "com.raycast.macos",
                 layer: 0,
                 isAccessory: true,
                 rules: noRules,
@@ -77,6 +82,7 @@ struct CommandBarIgnoreTests {
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.example.menubarapp",
+                app: "com.example.menubarapp",
                 layer: 0,
                 isAccessory: true,
                 rules: noRules,
@@ -93,6 +99,7 @@ struct CommandBarIgnoreTests {
         #expect(
             FloatDetection.shouldIgnore(
                 bundleID: "com.raycast.macos",
+                app: "com.raycast.macos",
                 layer: 8,
                 isAccessory: false,
                 rules: noRules,
@@ -102,6 +109,7 @@ struct CommandBarIgnoreTests {
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.raycast.macos",
+                app: "com.raycast.macos",
                 layer: 0,
                 isAccessory: false,
                 rules: noRules,
@@ -112,6 +120,7 @@ struct CommandBarIgnoreTests {
         #expect(
             FloatDetection.shouldIgnore(
                 bundleID: "com.raycast-x.macos",
+                app: "com.raycast-x.macos",
                 layer: 8,
                 isAccessory: false,
                 rules: noRules,
@@ -125,6 +134,7 @@ struct CommandBarIgnoreTests {
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.apple.finder",
+                app: "com.apple.finder",
                 layer: 8,
                 isAccessory: false,
                 rules: noRules,
@@ -141,6 +151,7 @@ struct CommandBarIgnoreTests {
         func ignored(_ layer: Int, button: Bool = false) -> Bool {
             FloatDetection.shouldIgnore(
                 bundleID: "com.tinyspeck.slackmacgap",
+                app: "com.tinyspeck.slackmacgap",
                 layer: layer,
                 isAccessory: false,
                 rules: noRules,

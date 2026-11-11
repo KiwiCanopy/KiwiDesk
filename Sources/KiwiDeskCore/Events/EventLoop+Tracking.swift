@@ -133,7 +133,7 @@ extension EventLoop {
             detection,
             id: window.id,
             pid: pid,
-            bundleID: app.bundleID
+            app: app
         )
         window.isFloating = verdict.floats
         window.isTransientOverlay = Self.isOverlay(
@@ -193,7 +193,7 @@ extension EventLoop {
             .element(element, layer: FloatDetection.windowLayer(of: id)),
             id: id,
             pid: pid,
-            bundleID: app.bundleID
+            app: app
         )
         applyFloatVerdict(verdict, id: id, pid: pid)
     }
@@ -287,7 +287,7 @@ extension EventLoop {
             .read(reading.autoReason),
             id: id,
             pid: pid,
-            bundleID: app.bundleID
+            app: app
         )
         applyFloatVerdict(verdict, id: id, pid: pid)
     }

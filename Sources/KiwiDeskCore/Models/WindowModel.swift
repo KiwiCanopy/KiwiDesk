@@ -28,9 +28,20 @@ public struct AppRef: Sendable, Equatable {
         self.name = name
     }
 
-    /// How a user's app list names this app (#2103 ruling 26): its
-    /// bundle id, or its process name where it has none, lowercased.
-    public var listKey: String { bundleID ?? name.lowercased() }
+    /// How a user's app list and an app rule name this app (#2103
+    /// ruling 26, #3211): its bundle id, or its process name where
+    /// it has none, lowercased; nil for a process with neither — an
+    /// empty name or the `"?"` placeholder of a lost record — which
+    /// no list or rule may name.
+    public var listKey: String? {
+        if let bundleID { return bundleID }
+        let name = name.lowercased()
+        return name.isEmpty || name == Self.unnamed ? nil : name
+    }
+
+    /// The name a process takes while LaunchServices has no record
+    /// of it (#1785).
+    public static let unnamed = "?"
 }
 
 /// Stickiness scope across Spaces (#414, #445).

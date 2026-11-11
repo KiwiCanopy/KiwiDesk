@@ -31,11 +31,13 @@ struct AppSelector: View {
     var exclude: Set<String> = []
     /// The Tile role's list: the apps the guess floated (#2071).
     var guessed: (() -> [GuessedFloatApp])?
-    /// Called with the bundle id the user committed. The caller
+    /// Called with the rule key the user committed: a bundle id,
+    /// or a process name where the app has none (#3211). The caller
     /// owns normalisation and dedup; this view only says when.
     let onCommit: (String) -> Void
-    /// Where given, the picker leads with the open apps
-    /// that a rule can name (#2297), read from this core.
+    /// Where given, the picker leads with the open apps (#2297),
+    /// one without a bundle id by its process name (#3211),
+    /// read from this core.
     var openAppsOf: KiwiCore?
 
     var body: some View {
@@ -63,7 +65,7 @@ struct AppSelector: View {
             exclude: exclude,
             guessed: guessed,
             openApps: openAppsOf.map { core in
-                { Self.ruleCandidates(core) }
+                { core.openApps(beneathNormal: false) }
             }
         )
         // Hug the content (no fixed column to align with) instead
@@ -79,18 +81,6 @@ struct AppSelector: View {
                 ? roleLabel
                 : KeybindingCatalog.displayName(forBundleID: name)
         )
-    }
-
-    /// The open apps a rule can name: a normal window's, and
-    /// only with a bundle id, since `AppRef` matches a rule by bundle
-    /// id alone — a process without one (SketchyBar) would save a
-    /// rule that never matches.
-    static func ruleCandidates(_ core: KiwiCore) -> [OpenApp] {
-        ruleCandidates(core.openApps(beneathNormal: false))
-    }
-
-    static func ruleCandidates(_ apps: [OpenApp]) -> [OpenApp] {
-        apps.filter { $0.bundleID != nil }
     }
 
     /// Drawn as the button's placeholder and spoken as its name,

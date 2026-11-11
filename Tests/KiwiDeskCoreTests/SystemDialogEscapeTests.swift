@@ -21,6 +21,7 @@ struct SystemDialogEscapeTests {
     ) -> Bool {
         FloatDetection.shouldIgnore(
             bundleID: bundleID,
+            app: bundleID,
             layer: layer,
             isAccessory: true,
             rules: noRules,

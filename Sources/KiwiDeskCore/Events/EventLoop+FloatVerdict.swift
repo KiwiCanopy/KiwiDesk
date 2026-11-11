@@ -21,18 +21,23 @@ extension EventLoop {
         _ source: FloatDetectionSource,
         id: WindowID,
         pid: pid_t,
-        bundleID: String?
+        app: AppRef
     ) -> FloatVerdict {
         let verdict = Self.composeVerdict(
             source,
             pid: pid,
             activationPolicy: policy(of: pid),
             tilesAsOwnWindow: tilesAsOwnWindow(pid: pid, id: id),
-            bundleID: bundleID,
+            app: app.listKey,
             rules: floatRules
         )
         let forced = forceFloatReason(pid: pid, id: id)
-        noteGuess(verdict, forced: forced, pid: pid, bundleID: bundleID)
+        noteGuess(
+            verdict,
+            forced: forced,
+            pid: pid,
+            bundleID: app.bundleID
+        )
         return verdict
     }
 
@@ -57,8 +62,10 @@ extension EventLoop {
     /// size as at adoption (#2173).
     func rejudgeGuesses(from old: FloatGuess) {
         for (pid, windows) in elements {
-            let app = appRef(of: pid).bundleID
-            guard old.applies(to: app) != floatRules.guess.applies(to: app)
+            let app = appRef(of: pid).listKey
+            guard
+                old.applies(toApp: app)
+                    != floatRules.guess.applies(toApp: app)
             else { continue }
             for id in windows.keys { detectedFloating[id] = nil }
         }
@@ -72,14 +79,14 @@ extension EventLoop {
         pid: pid_t,
         activationPolicy: NSApplication.ActivationPolicy,
         tilesAsOwnWindow: Bool,
-        bundleID: String?,
+        app: String?,
         rules: FloatRules
     ) -> FloatVerdict {
         if let forced = forceFloatReason(
             pid: pid,
             activationPolicy: activationPolicy,
             tilesAsOwnWindow: tilesAsOwnWindow
-        ), forced != .accessoryApp || rules.guess.applies(to: bundleID) {
+        ), forced != .accessoryApp || rules.guess.applies(toApp: app) {
             return .floats(forced)
         }
         let facts: WindowFacts
@@ -94,7 +101,7 @@ extension EventLoop {
         return FloatVerdict(
             FloatDetection.autoFloatReason(
                 facts,
-                bundleID: bundleID,
+                app: app,
                 rules: rules
             )
         )

@@ -187,16 +187,19 @@ final class LaunchFollowIntent {
     /// Takes the placement for `bundleID` if it arrived no earlier
     /// than `since` — after the press that caused the activation.
     func takePlacement(_ bundleID: String, since: Date) -> Placement? {
-        guard let placement, placement.bundleID == bundleID,
+        guard let placement,
+            placement.bundleID.lowercased() == bundleID.lowercased(),
             placement.at >= since
         else { return nil }
         self.placement = nil
         return placement
     }
 
-    /// Records that `bundleID`'s next rule-placed window is owed a
-    /// follow; replaces any earlier debt.
-    func record(_ bundleID: String, at now: Date) {
+    /// Records that `app`'s next rule-placed window is owed a
+    /// follow; replaces any earlier debt. `app` is its rule key,
+    /// `AppRef.listKey` (#3211), folded here as every door's is.
+    func record(_ app: String, at now: Date) {
+        let bundleID = app.lowercased()
         // The user named an app: no quiet open stands over it.
         quietApps[bundleID.lowercased()] = nil
         holds.lift(bundleID.lowercased())
@@ -211,9 +214,7 @@ final class LaunchFollowIntent {
     /// Claims the follow for a window of `bundleID`, once, within the
     /// bound: its riders, else nil. Another app's debt stands.
     func claim(_ bundleID: String, at now: Date) -> [Rider]? {
-        guard let owed = owed(at: now), owed == bundleID else {
-            return nil
-        }
+        guard owed(at: now) == bundleID.lowercased() else { return nil }
         defer { pending = nil }
         return pending?.riders
     }
@@ -221,7 +222,7 @@ final class LaunchFollowIntent {
     /// Notes a popup of `bundleID` on its standing debt; owed
     /// nothing, the popup stays where it opened (#3189).
     func noteRider(_ rider: Rider, of bundleID: String, at now: Date) {
-        guard owed(at: now) == bundleID else { return }
+        guard owed(at: now) == bundleID.lowercased() else { return }
         pending?.riders.removeAll { $0.window == rider.window }
         pending?.riders.append(rider)
     }
@@ -326,7 +327,7 @@ final class LaunchFollowIntent {
     /// refused New Window opened nothing, and a placement waits on
     /// its own app's activation (#1518).
     func forget(pending bundleID: String) {
-        if pending?.bundleID == bundleID { pending = nil }
+        if pending?.bundleID == bundleID.lowercased() { pending = nil }
     }
 
     /// Retires the debt unpaid, and any spawn or placement waiting

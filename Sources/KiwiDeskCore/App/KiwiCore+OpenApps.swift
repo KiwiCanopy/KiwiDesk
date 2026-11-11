@@ -14,8 +14,9 @@ public struct OpenApp: Equatable, Sendable {
         self.name = name
     }
 
-    /// What a list stores for it (`AppRef.listKey`).
-    public var key: String { app.listKey }
+    /// What a list stores for it (`AppRef.listKey`); `openApps`
+    /// builds no row whose app has none.
+    public var key: String { app.listKey ?? "" }
     /// The bundle id, nil for a process without one.
     public var bundleID: String? { app.bundleID }
 }
@@ -38,8 +39,8 @@ extension KiwiCore {
         let own = getpid()
         func add(_ app: AppRef, named name: String) {
             let shown = name.isEmpty ? app.bundleID ?? "" : name
-            guard !app.listKey.isEmpty, !shown.isEmpty,
-                seen.insert(app.listKey).inserted
+            guard let key = app.listKey, !shown.isEmpty,
+                seen.insert(key).inserted
             else { return }
             apps.append(OpenApp(app: app, name: shown))
         }

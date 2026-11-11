@@ -153,10 +153,10 @@ extension KiwiCore {
     /// them, those whose title holds one of the patterns, or none
     /// (ruling 32).
     func visionLensClear(_ app: AppRef) -> VisionLensClear {
-        guard let lens = visionLook.lens,
-            lens.apps.contains(app.listKey)
+        guard let lens = visionLook.lens, let key = app.listKey,
+            lens.apps.contains(key)
         else { return .none }
-        guard let patterns = lens.titles[app.listKey], !patterns.isEmpty
+        guard let patterns = lens.titles[key], !patterns.isEmpty
         else { return .all }
         return .titled(patterns)
     }

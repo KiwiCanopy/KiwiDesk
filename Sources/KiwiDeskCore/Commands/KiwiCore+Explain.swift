@@ -26,6 +26,9 @@ extension KiwiCore {
                     "bundle_id": window.appBundleID.map {
                         .string($0)
                     } ?? .null,
+                    "rule_key": window.appRef.listKey.map {
+                        .string($0)
+                    } ?? .null,
                     "space_id": space.map { .string($0.raw) } ?? .null,
                     "mode": mode.map { .string($0.rawValue) } ?? .null,
                     "floating": .bool(window.isFloating),
@@ -37,7 +40,7 @@ extension KiwiCore {
                             state.placementMode(of: $0)
                         }
                     ),
-                    "app_rule": appRuleFacts(window.appBundleID),
+                    "app_rule": appRuleFacts(window.appRef.listKey),
                     "sticky": .string(window.stickyScope.rawValue),
                     "fullscreen": .bool(window.isFullscreen),
                     "presenting": .bool(presents(id, at: window.frame)),
@@ -86,25 +89,29 @@ extension KiwiCore {
         ])
     }
 
-    /// `explain_app <bundle_id>`: what KiwiDesk knows of an app
-    /// whose window `get_state` may not list — ignored, minimized,
-    /// hidden or away. An app nothing knows answers empty lists.
+    /// `explain_app <app>`: what KiwiDesk knows of an app whose
+    /// window `get_state` may not list — ignored, minimized, hidden
+    /// or away. `app` is its rule key (`AppRef.listKey`, #3211): a
+    /// bundle id, or a process name where the app has none. An app
+    /// nothing knows answers empty lists.
     func explainApp(_ args: [JSONValue]) -> CommandResponse {
         let app = args.first?.stringValue?
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
         guard let app, !app.isEmpty else {
-            return .fail("expected an app's bundle id")
+            return .fail("expected an app's bundle id or process name")
         }
         // Each window is `{id, title}`, as `list_windows` names one
         // (#2895); a minimized or away title is the one it left with.
         let windows = state.windows.all
-            .filter { $0.appBundleID?.lowercased() == app }
+            .filter { $0.appRef.listKey == app }
             .map { Self.named($0.id, $0.title) }
         let minimized = state.minimizeOrder
-            .filter { $0.bundleID?.lowercased() == app }
+            .filter {
+                AppRef(bundleID: $0.bundleID, name: $0.app).listKey == app
+            }
             .map { Self.named($0.id, $0.title) }
-        let away = awayWindows(bundleID: app).map {
+        let away = awayWindows(app: app).map {
             JSONValue.object([
                 "id": .number(Double($0.id.raw)),
                 "title": .string($0.title),
@@ -115,10 +122,11 @@ extension KiwiCore {
         }
         return .ok(
             .object([
-                "bundle_id": .string(app),
+                "bundle_id": namesProcess(app) ? .null : .string(app),
+                "rule_key": .string(app),
                 "ignored": .object([
                     "by_rule": .bool(
-                        eventLoop.ignoreRules.matches(bundleID: app)
+                        eventLoop.ignoreRules.matches(app: app)
                     ),
                     "built_in": .bool(
                         FloatDetection.isBuiltInIgnoredApp(bundleID: app)
@@ -142,6 +150,17 @@ extension KiwiCore {
         .object(["id": .number(Double(id.raw)), "title": .string(title)])
     }
 
+    /// Whether `app` names a process with no bundle id (#3211):
+    /// every window or process KiwiDesk knows by that key has none.
+    private func namesProcess(_ app: String) -> Bool {
+        let known =
+            state.windows.all.filter { $0.appRef.listKey == app }
+            .map(\.appBundleID)
+            + eventLoop.liveApps().filter { $0.ref.listKey == app }
+            .map(\.ref.bundleID)
+        return !known.isEmpty && known.allSatisfy { $0 == nil }
+    }
+
     /// The app's live processes, each with whether KiwiDesk
     /// observes it, its activation policy and whether it is
     /// hidden — through the event loop's one reading of each.
@@ -150,7 +169,7 @@ extension KiwiCore {
     /// files their identities as the next reconcile would.
     private func runningProcesses(of app: String) -> [JSONValue] {
         eventLoop.liveApps()
-            .filter { $0.ref.bundleID == app }
+            .filter { $0.ref.listKey == app }
             .map { running in
                 .object([
                     "pid": .number(Double(running.pid)),

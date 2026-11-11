@@ -279,7 +279,7 @@ struct AwayLedgerTests {
         )
         #expect(core.awayMembers(of: "1") == [WindowID(2)])
         #expect(
-            core.awayWindows(bundleID: "app.test.100").map(\.id)
+            core.awayWindows(app: "app.test.100").map(\.id)
                 == [WindowID(2), WindowID(50)]
         )
     }
