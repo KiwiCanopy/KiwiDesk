@@ -88,7 +88,9 @@ extension KiwiCore {
         // Where a grow may reach: the screen less a top strip, as a
         // hand drag reaches (#3163), the ring held clear. A rect, not
         // a clamp, because pinning asks how much room each EDGE has.
-        // Judged where the window RENDERS (#1217), as move_floating.
+        // Judged where the window renders (#1217), as move_floating;
+        // a float resize routes only for the active Space's own focus
+        // (`resizeRoutesAsFloat`), so that is its home Space today.
         let space = floatPlacementSpace(of: id)
         let region = space.flatMap {
             floatReachBounds(on: $0, ringInset: true)
