@@ -13025,25 +13025,27 @@ Escape does, which is #1874's to measure.
 
 :::unreleased
 **Amended (#1872, #1229, #1873; owner, 2026-11-08): a seeded
-binding may run a reader of keys or of the trackpad on a default
-install.** The bound above, "a default install, and one that never
-records a side, sees no keystroke", is retired for two seeds only:
-#1229's ⌘⌘ (Show Desktop overview) and #1873's seeded gesture
-slots, which ship bound and on — a four-finger tap opens KiwiHub's
-shortcuts panel and a three-finger tap goes back to the Space you
-were on. Neither can be anything else. Carbon registers no binding
-without a non-modifier key, so a modifier tap is a keyboard tap or
-nothing; a pinch or a tap is a trackpad reader or nothing. And a seed nobody can
-find is no seed: putting the overview's opener behind a switch first
-would make the tour teach a switch.
+binding may run a reader of the trackpad on a default install.**
+The bound above, "a default install, and one that never records a
+side, sees no keystroke", is retired for one seed only: #1873's
+seeded gesture slots, which ship bound and on — a four-finger tap
+opens KiwiHub's shortcuts panel and a three-finger tap goes back to
+the Space you were on. It cannot be anything else: a pinch or a tap
+is a trackpad reader or nothing. And a seed nobody can find is no
+seed: putting it behind a switch first would make the tour teach a
+switch. The keystroke bound stands (#3167, owner 2026-11-10): the
+Desktop overview seeds `⌃⌥O`, a plain chord Carbon registers, in
+place of #1229's ⌘⌘, so a default install runs no keyboard tap. A
+double tap is harder to find than a chord and needs the tap; a
+profile that already holds ⌘⌘ keeps it.
 
 What bounds each input is #2601's other rule, applied per input: no
 binding, no reader. Three inputs answer it, and they stand on
 different ground:
 
 - **The keyboard tap** serves the modifier taps. It runs while a
-  modifier-tap binding exists, a seeded one included, so clearing
-  every tap stops it. Of modifier changes, key presses (to tell a
+  modifier-tap binding exists, which no seed is, so clearing every
+  tap stops it. Of modifier changes, key presses (to tell a
   tap from a chord's start) and mouse-down (so ⌘-click in Finder
   never counts) it swallows, records and stores none, and it is
   listen-only unless a sided shortcut also needs it. It asks for
@@ -14950,7 +14952,7 @@ with only the openers shows Open Settings alone, under Apps.
 re-leaks the seed into Custom. (#602, PR #638, #2246)
 
 :::unreleased
-The Desktop overview's opener, seeded on ⌘⌘ (#1229), is a fourth
+The Desktop overview's opener, seeded on ⌃⌥O (#1229, #3167), is a fourth
 and is dropped the same way; the side switch prints it beside the
 Desktops title.
 :::
@@ -15277,10 +15279,25 @@ all four sides; ⌘, still opens Settings.
 The keys the side adds are stored names, `open_space`,
 `leave_space`, `pick_up` and `follow`, so `kiwihub.set_key` can add
 an alternative to each; the built-in key keeps working (#2600).
-Windows on a hidden Desktop, pocketed and full-screen windows
-cannot be picked up: macOS lists no element for the first until
-#2884, the pocket is no Space, and a full-screen window owns its
-own macOS Space.
+Full-screen windows cannot be picked up: a full-screen window owns
+its own macOS Space. A window on a hidden Desktop can (#3171): its
+drop is `move_to_desktop`'s, onto a shown Desktop too, since
+`move_to_space` names only windows a screen shows, and never Move
+here's hop, whose filing would be a second payer beside the Desktop
+move's (#2883). What that verb refuses — pocketed, full screen,
+sticky with a named Space, still landing, a follow of a minimized
+or hidden window, no Desktop bridge — is asked of it before the
+move and shown in the panel.
+
+A refusal is shown in the footer, its hints replaced by ⛔ and the
+reason until the next key, click or selection change, and the
+refused icon or line swells once (#3170). The line is a fixed
+30 pt with no caption, and a pill answers a change after the panel
+closes, so neither carries it. A plain drop keeps KiwiHub open on
+the target line, so a sort goes on; Drop & follow switches the
+screen and closes it (#3165). Inside a Space ↑ ↓ take the places'
+route (#3169): a line with windows is re-entered on the slot the
+selection left, an empty one selected.
 :::
 
 **A KiwiHub list wraps on a fresh press and stops on a held key
