@@ -54,15 +54,17 @@ struct DesktopsGeometryTests {
     func lineHeight() {
         let one = Self.geometry([Self.screen(1, desktops: 1, spaces: 4)])
         #expect(one.line == G.tallestLine)
-        // Two screens of four Spaces: 35 pt fits under 411, 36 not.
+        // Two screens, four Spaces deep: each row's share of the cap
+        // over four lines, rounded down, inside 30...36.
         let two = Self.geometry([
             Self.screen(1, desktops: 2, spaces: 4),
             Self.screen(2, desktops: 1, spaces: 2),
         ])
-        #expect(two.line == 35)
-        // A typed constant: the macro types a bare `4 * 35` apart.
-        let fourLines: CGFloat = 4 * 35
-        #expect(two.lines == [fourLines, 2 * 35])
+        let share = (Self.cap - G.chrome(rows: 2)) / 2
+        let fit = (share / 4).rounded(.down)
+        #expect(fit < G.tallestLine && fit > G.shortestLine)
+        #expect(two.line == fit)
+        #expect(two.lines == [4 * fit, 2 * fit])
         #expect(two.height <= Self.cap)
         #expect(
             Self.geometry(
@@ -132,6 +134,8 @@ struct DesktopsGeometryTests {
             Self.screen(2, desktops: 1, spaces: 8),
         ])
         #expect(short.icon == 22)
+        // The floor of 22 holds by construction at the shortest line.
+        #expect(G.shortestLine - 8 == 22)
         #expect(g.slots.count == 2)
         #expect(g.slots[0] > g.slots[1])
         #expect(g.slots.allSatisfy { $0 >= 1 })
@@ -160,6 +164,28 @@ struct DesktopsGeometryTests {
         #expect(state.hidden(place).after == 2)
         let other = DesktopsPlace(screen: 0, desktop: 0, line: 0)
         #expect(state.slots(other) == slots[0])
+    }
+
+    @Test("reveals and +n step by the line's own slots")
+    func keysStepBySlots() throws {
+        // 640 pt: six slots on the KiwiHub screen's seven-window line.
+        let overview = T.overview()
+        let geometry = G(overview: overview, width: 640, cap: Self.cap)
+        let fresh = DesktopsState(overview: overview, geometry: geometry)
+        let place = try #require(fresh.place)
+        #expect(fresh.slots(place) == 6)
+        let windows = fresh.ordered(place)
+        // The seventh window revealed: one slot scrolled, not two.
+        var state = fresh
+        state.select(window: windows[6].id, in: place)
+        #expect(state.offset(place) == 1)
+        #expect(state.hidden(place).before == 1)
+        #expect(state.hidden(place).after == 0)
+        // "+n" forward opens the window just past six slots.
+        var more = fresh
+        more.revealMore(place, forward: true)
+        #expect(more.window == windows[6].id)
+        #expect(more.offset(place) == 1)
     }
 
     @Test("the model hands the state the side's slots")

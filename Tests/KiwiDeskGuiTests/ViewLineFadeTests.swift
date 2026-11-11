@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import Testing
 
@@ -75,5 +76,20 @@ struct ViewLineFadeTests {
             inset: Self.inset
         )
         #expect(!cut.leading && !cut.trailing)
+    }
+
+    @Test("the mask fades by the line's own inset")
+    func maskReadsTheInset() throws {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .appendingPathComponent("../../Sources/KiwiDesk/Jump")
+            .appendingPathComponent("ViewLine.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .filter { !$0.isWhitespace }
+        #expect(source.contains("Self.cuts(offset:offset,"))
+        #expect(source.contains("width:width,inset:inset)"))
+        #expect(source.contains(".padding(.horizontal,inset)"))
     }
 }

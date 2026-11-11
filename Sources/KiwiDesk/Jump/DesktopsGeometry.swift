@@ -71,9 +71,9 @@ struct DesktopsGeometry: Equatable {
         height = min(Self.chrome(rows: rows) + lines.reduce(0, +), cap)
     }
 
-    /// A Space line's icon: the line height less 8, never under the
-    /// Windows rows' 22 pt.
-    var icon: CGFloat { max(line - 8, 22) }
+    /// A Space line's icon: the line height less 8, so never under
+    /// the Windows rows' 22 pt at the shortest line.
+    var icon: CGFloat { line - 8 }
 
     /// A screen row's column height: its title and its lines.
     func column(_ screen: Int) -> CGFloat {
