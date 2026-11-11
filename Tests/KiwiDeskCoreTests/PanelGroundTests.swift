@@ -62,7 +62,7 @@ struct PanelGroundTests {
         #expect(abs(faint.alpha - 0x40 / 255.0) < 0.001)
     }
 
-    @Test("The Fill's lightness pins the frost, whatever its alpha")
+    @Test("The Fill's lightness pins the frost")
     func lightnessPins() throws {
         let dark = try #require(
             shelf(fill: "#14201C20").frostFill(opaque: false)
@@ -167,7 +167,7 @@ struct FrostPlateTests {
         overlay.reduceMotion = { false }
         overlay.icon = { _ in nil }
         defer { overlay.end() }
-        var press = SpaceSlideOverlay.Press(
+        let press = SpaceSlideOverlay.Press(
             display: DisplayID(1),
             screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
             axis: .horizontal,
@@ -177,9 +177,9 @@ struct FrostPlateTests {
             space: SpaceID("2"),
             glass: false,
             tint: nil,
+            frost: tinted ? try fill("#14201CB3") : nil,
             pace: 1
         )
-        press.frost = tinted ? try fill("#14201CB3") : nil
         _ = overlay.press(press)
         let play = try #require(overlay.play)
         #expect((play.panel as? ActiveGlassPanel)?.wearsActiveLook == false)
@@ -198,6 +198,36 @@ struct FrostPlateTests {
         #expect(plates.count == 1)
         for plate in plates {
             #expect((FrostPlate.washColour(of: plate) != nil) == tinted)
+        }
+    }
+
+    /// A second press inside one play carries its own frost: a
+    /// toggle flipped mid-slide lands on the next page.
+    @Test("A re-press takes the new press's frost")
+    func rePressTakesTheFrost() throws {
+        let overlay = SpaceSlideOverlay()
+        overlay.present = { _ in }
+        overlay.reduceMotion = { false }
+        overlay.icon = { _ in nil }
+        defer { overlay.end() }
+        let frost = try fill("#14201CB3")
+        for wears in [false, true, false] {
+            _ = overlay.press(
+                SpaceSlideOverlay.Press(
+                    display: DisplayID(1),
+                    screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+                    axis: .horizontal,
+                    direction: 1,
+                    outgoing: [],
+                    holes: [],
+                    space: SpaceID("2"),
+                    glass: false,
+                    tint: nil,
+                    frost: wears ? frost : nil,
+                    pace: 1
+                )
+            )
+            #expect(overlay.play?.frost == (wears ? frost : nil))
         }
     }
 

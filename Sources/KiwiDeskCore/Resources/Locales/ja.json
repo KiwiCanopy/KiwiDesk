@@ -1097,7 +1097,7 @@
   "kiwishelf.color.border": "ボーダー",
   "kiwishelf.color.border.a11y": "KiwiShelfのボーダーのカラー",
   "kiwishelf.color.fill": "塗りつぶし",
-  "kiwishelf.color.fill.help": "KiwiShelfのカラーです。両方のバー、+n マークとそのリスト、ホバー時に項目が表示する内容に使われ、「%2$@」がオンの間は%1$@とスペースの切り替えのプレートにも使われます。どこまで薄れるかは「%3$@」で決まります。「%4$@」にすると色付けのないガラスのままです。",
+  "kiwishelf.color.fill.help": "KiwiShelfのカラーです。両方のバー、+n マークとそのリスト、ホバー時に項目が表示する内容に使われ、「%2$@」がオンの間は%1$@とスペースの切り替えのプレートにも使われます。どこまで薄れるかは「%3$@」で決まります。「%4$@」にすると、いずれも色付けされません。",
   "kiwishelf.color.group_badge": "グループバッジ",
   "kiwishelf.color.highlight": "ハイライト",
   "kiwishelf.color.hover_fill": "ホバー時の塗りつぶし",

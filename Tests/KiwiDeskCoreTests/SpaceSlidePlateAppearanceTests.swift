@@ -45,6 +45,7 @@ struct SpaceSlidePlateAppearanceTests {
                 space: SpaceID("2"),
                 glass: true,
                 tint: tint,
+                frost: nil,
                 pace: 1
             )
         )

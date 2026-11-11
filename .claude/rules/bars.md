@@ -1784,7 +1784,8 @@ Obligations:
   restated here. SwiftUI glass can pin light, so a SwiftUI
   surface takes both verdicts of the one `GlassTint.pin` through
   `GlassPaint.pin` (#2569; `GlassPaintTests`) and never derives a
-  scheme of its own.
+  scheme of its own; over its material it takes `FrostFill.pin`,
+  the same verdict, through the one `GlassPaint.Pin.scheme`.
   The threshold is `wantsLightInk`'s — one copy with the mark
   glyphs — and `GlassTintPinTests` holds the consumer,
   including that a light Fill LIFTS a pin the previous Fill left.
@@ -1812,8 +1813,11 @@ Obligations:
   `GlassTint.pinFrost` — light as well as dark, since a material
   takes both (#2569 ▸ amendment, `FrostPlateTests`). Its Fill is
   `KiwiShelf.frostFill(opaque:)`'s, asked of the one
-  `LiquidGlassGate.panelGround`, and a new caller of `pinFrost`
-  joins `GlassTintPinDarkCallerTests`' `pinFrost` register.
+  `LiquidGlassGate.panelGround` with the caller's one read of the
+  leaf, and a new caller of `pinFrost` joins
+  `GlassTintPinDarkCallerTests`' `pinFrost` register. A wash
+  painted without the pin, or a ground asked beside the gate, is
+  review's: the register sees `pinFrost`'s callers alone.
 - **A `Sources/KiwiDesk` surface that tints glass takes a
   `GlassPaint` from `GlassTint.paint` and derives no colour from a
   Fill itself.** `GlassPaint` has no initializer outside Core, so

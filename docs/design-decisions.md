@@ -4057,6 +4057,12 @@ a second needs no switch of its own, and one leaf fewer is one
 fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
+
+:::unreleased
+Under the toggle that blur wears the Fill flat (▸ the shortcuts
+panel entry).
+:::
+
 A tinted plate's variant is pinned dark by a dark Fill, as a
 bar's is (▸ Liquid Glass). Under a light Fill, and untinted, a
 plate follows the Appearance pick as KiwiHub does, since AppKit
@@ -15011,10 +15017,12 @@ three reasons are answered one by one:
    may equal the highlight. A hovered row takes the hover fill
    and the Hover item colour (`PanelHighlightTests`).
 
+:::unreleased
 **Amended: without glass the panel wears the Fill flat over its
-material** (#2569, owner ruling 2026-11-11, overturning "a
-Fill-matched ink on the fallback material is a pairing nobody
-measured"). With KiwiHub's glass off or below macOS 26, the same
+material** (#2569, owner ruling 2026-11-11). The first ruling
+kept the fallback untinted because the look's inks on the
+fallback material were a pairing nobody had measured; item 3
+measures it. With KiwiHub's glass off or below macOS 26, the same
 surfaces paint the Fill at its stored alpha, one even colour,
 over the material they already drew there, and take the look's
 inks and highlight as on glass. Under Reduce transparency the
@@ -15041,14 +15049,17 @@ by one:
    on glass (#1857).
 4. *No rim.* The rim is glass's finish; over the material the
    panel keeps its shadow alone.
-5. *Same toggle.* Off is one switch away in every state, so the
-   setting no longer depends on a second one the user cannot see
-   from its row.
+5. *Same toggle.* Off is one switch away in every state. A
+   second setting would only restate what the row cannot show:
+   Reduce transparency, the macOS version, or a KiwiHub leaf a
+   config split from the switch.
+
+:::
 
 **The brief pocket's flying plate is one of these plates.** It
-wears the Fill under the toggle, so its panel wears the key-window
-rim too, decided from the same tint the slide's plates read
-(`BriefPocketPanelGlassTests`).
+wears the Fill under the toggle, and on glass its panel wears the
+key-window rim too, decided from the same tint the slide's plates
+read (`BriefPocketPanelGlassTests`).
 
 **`.clear`, not `.regular`.** `.regular` is frosted, and it hides
 the rim. That, not the missing active state, is why KiwiHub and
@@ -15079,7 +15090,7 @@ panel would put them on plain `.clear` glass under KiwiHub's dense
 text, which is `.clear` without a Fill, the case this entry found
 unreadable. The fallback replaces the re-measure of that case that
 the earlier ruling asked for (`PanelGlassTests`,
-`SpaceSlideSwitchTests`, `PanelsWearFillTests`).
+`SpaceSlideSwitchTests`, `PanelGroundTests`).
 
 **The chip stays at 0.2 on glass, and that is a decision rather
 than an oversight.** Its separation from the ground is
@@ -20363,6 +20374,12 @@ profile travels: writing the leaf off would flip the user's
 choice on every Mac the profile reaches and leave it flipped when
 the setting goes back off. It is read at render time instead.
 
+:::unreleased
+Under *Tint KiwiHub and plates* the panel's off state carries the
+Fill, so there it is the Fill at full alpha over that material (▸
+the shortcuts panel entry).
+:::
+
 **A Fill with no colour is one state, and it paints nothing on
 any path** (#2569, owner ruling 2026-10-24, after an HTML preview;
 `ui-designer` concurred). An empty Fill, an unparseable one and
@@ -20609,7 +20626,8 @@ the added method uncalled, so the glass falls back to the
 inactive look and nothing breaks (`os-private-apis.md` owns the
 door). The bars, the marks, their list and the peek always wear
 the rim, since they are KiwiShelf's look. The plates wear it
-only while they wear the Fill (▸ the shortcuts panel entry),
+only while they wear the Fill on glass (▸ the shortcuts panel
+entry),
 whose off state is today's look. The panels that answer are
 `GlassActiveAppearance.classes`, so the sticky mark, the drag
 ghost and drop zone, the hidden shelf's handle and the boot

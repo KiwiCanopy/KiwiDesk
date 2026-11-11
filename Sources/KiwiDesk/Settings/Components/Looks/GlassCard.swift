@@ -59,8 +59,9 @@ struct GlassCard: View {
         }
     }
 
-    /// Whether Reduce transparency greys `key`: the card's gate,
-    /// less the census's exemption.
+    /// Whether `key` greys: under Reduce transparency unless the
+    /// census exempts it, for a Fill with no colour, or with the
+    /// switch off.
     private func greyed(_ key: SettingKey) -> Bool {
         (reduceTransparency && !key.placement.exemptFromContainerGate)
             || (Self.followsTheFill(key) && !shelf.hasFill)
@@ -122,7 +123,7 @@ struct GlassCard: View {
                     "kiwishelf.tint_hub_and_plates.help",
                     "%1$@ and the plates a Space, Desktop or layout "
                         + "switch shows wear the bars' %2$@ and colors. "
-                        + "Off, they keep the system look.",
+                        + "Off, they keep the system appearance.",
                     JumpScope.panelName,
                     L("kiwishelf.color.fill", "Fill")
                 )

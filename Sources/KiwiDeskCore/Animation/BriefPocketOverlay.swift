@@ -63,7 +63,7 @@ final class BriefPocketOverlay {
         let plateTint: GlassFill?
         /// The Fill it wears flat over the material, where no
         /// glass draws (#2569 ▸ amendment).
-        var plateFrost: FrostFill?
+        let plateFrost: FrostFill?
         let flight: TimeInterval
     }
 

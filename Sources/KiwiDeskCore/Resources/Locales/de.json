@@ -1097,7 +1097,7 @@
   "kiwishelf.color.border": "Rahmen",
   "kiwishelf.color.border.a11y": "KiwiShelf-Rahmenfarbe",
   "kiwishelf.color.fill": "Füllung",
-  "kiwishelf.color.fill.help": "Die KiwiShelf-Farbe: beide Leisten, die +n-Markierungen samt ihren Listen und das, was ein Element beim Darüberfahren zeigt, dazu %1$@ und die Flächen eines Space-Wechsels, solange „%2$@“ an ist. Wie weit sie verblasst, legt „%3$@“ fest. „%4$@“ lässt schlichtes Glas.",
+  "kiwishelf.color.fill.help": "Die KiwiShelf-Farbe: beide Leisten, die +n-Markierungen samt ihren Listen und das, was ein Element beim Darüberfahren zeigt, dazu %1$@ und die Flächen eines Space-Wechsels, solange „%2$@“ an ist. Wie weit sie verblasst, legt „%3$@“ fest. „%4$@“ lässt alles ungetönt.",
   "kiwishelf.color.group_badge": "Gruppen-Badge",
   "kiwishelf.color.highlight": "Hervorhebung",
   "kiwishelf.color.hover_fill": "Hover-Füllung",

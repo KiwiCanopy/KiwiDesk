@@ -1097,7 +1097,7 @@
   "kiwishelf.color.border": "邊框",
   "kiwishelf.color.border.a11y": "KiwiShelf 邊框顏色",
   "kiwishelf.color.fill": "填色",
-  "kiwishelf.color.fill.help": "KiwiShelf 的顏色：用於兩個列、+n 標記及其列表、指標懸停在項目上時顯示的內容，以及「%2$@」開啟時的 %1$@ 與空間切換時的薄板。漸淡的程度由「%3$@」決定。「%4$@」則保留未著色的玻璃。",
+  "kiwishelf.color.fill.help": "KiwiShelf 的顏色：用於兩個列、+n 標記及其列表、指標懸停在項目上時顯示的內容，以及「%2$@」開啟時的 %1$@ 與空間切換時的薄板。漸淡的程度由「%3$@」決定。「%4$@」則讓它們保持未著色。",
   "kiwishelf.color.group_badge": "群組徽章",
   "kiwishelf.color.highlight": "高亮",
   "kiwishelf.color.hover_fill": "指標懸停填色",

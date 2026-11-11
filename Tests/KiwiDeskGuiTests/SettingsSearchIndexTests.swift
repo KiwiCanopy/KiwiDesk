@@ -219,7 +219,9 @@ struct SettingsSearchIndexTests {
                 // section, so it carries an anchor. 16 since
                 // #2593: the Sheen and the Fill at rest again.
                 // 18 since #1740: the gallery's two header doors.
-                .looks: 18,
+                // 19: "Tint KiwiHub and plates" lost its Liquid
+                // Glass gate (#2569 ▸ amendment), so it counts.
+                .looks: 19,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the

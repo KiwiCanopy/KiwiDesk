@@ -85,7 +85,12 @@ struct GlassSettingsRowsTests {
         // Reduce transparency and a Mac without glass keep the row.
         let placement = SettingKey.kiwishelf(.tintHubAndPlates).placement
         #expect(placement.exemptFromContainerGate)
-        #expect(!placement.hiddenWithoutGlass)
+        // The stored fact: `hiddenWithoutGlass` is false on any
+        // Mac that draws glass, whatever the census says.
+        #expect(
+            placement.gate?.runtimeConditions
+                .contains(.liquidGlassUnavailable) != true
+        )
     }
 
     /// 0 reads "Off" on the row and in the diff row alike.

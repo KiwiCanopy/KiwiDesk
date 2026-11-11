@@ -52,6 +52,12 @@ extension KiwiShelf {
         return FrostFill(rgba, opaque: opaque)
     }
 
+    /// The Fill a Core plate's glass wears on `ground`: the shelf's
+    /// on glass, nil on any other ground.
+    public func glassFill(on ground: PanelGround) -> GlassFill? {
+        ground == .glass ? glassFill : nil
+    }
+
     /// The one answer for every panel that wears the Fill.
     /// `glassDrawn` is the caller's read of KiwiHub's leaf as drawn
     /// — `LiquidGlassGate.rendered(glass:)` in Core, `PanelGlass`

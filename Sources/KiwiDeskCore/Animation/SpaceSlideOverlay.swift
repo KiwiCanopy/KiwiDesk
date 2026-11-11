@@ -71,7 +71,7 @@ final class SpaceSlideOverlay {
         let tint: GlassFill?
         /// The Fill they wear flat over the material, where no
         /// glass draws (#2569 ▸ amendment).
-        var frost: FrostFill?
+        let frost: FrostFill?
         let pace: Double
     }
 

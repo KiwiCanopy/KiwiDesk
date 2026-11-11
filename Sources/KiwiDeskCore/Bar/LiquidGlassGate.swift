@@ -76,11 +76,17 @@ enum LiquidGlassGate {
     }
 
     /// The ground KiwiHub's Core plates draw on (#2569): the
-    /// shelf's answer, handed KiwiHub's leaf as drawn and this
-    /// gate's own read of Reduce transparency.
-    static func panelGround(_ settings: TilingSettings) -> PanelGround {
-        settings.kiwishelf.panelGround(
-            glassDrawn: rendered(glass: settings.shortcutPanelLiquidGlass),
+    /// shelf's answer, handed `glass` — the caller's one read of
+    /// KiwiHub's leaf as drawn, `rendered(glass:)` — and this
+    /// gate's own read of Reduce transparency. Its `.frost` is the
+    /// Fill over a plate's material, never `rendered(frost:)`'s
+    /// drop-zone surface.
+    static func panelGround(
+        _ shelf: KiwiShelf,
+        glass: Bool
+    ) -> PanelGround {
+        shelf.panelGround(
+            glassDrawn: glass,
             reduceTransparency: reducesTransparency
         )
     }

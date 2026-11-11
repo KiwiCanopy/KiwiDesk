@@ -1097,7 +1097,7 @@
   "kiwishelf.color.border": "테두리",
   "kiwishelf.color.border.a11y": "KiwiShelf 테두리 색상",
   "kiwishelf.color.fill": "채우기",
-  "kiwishelf.color.fill.help": "KiwiShelf의 색상입니다. 두 바, +n 마크와 그 목록, 항목 위에 포인터를 올릴 때 표시되는 내용에 쓰이며, ‘%2$@’이(가) 켜져 있는 동안에는 %1$@ 및 공간 전환 때의 판에도 쓰입니다. 얼마나 옅어질지는 ‘%3$@’에서 정합니다. ‘%4$@’은(는) 색을 입히지 않은 유리로 둡니다.",
+  "kiwishelf.color.fill.help": "KiwiShelf의 색상입니다. 두 바, +n 마크와 그 목록, 항목 위에 포인터를 올릴 때 표시되는 내용에 쓰이며, ‘%2$@’이(가) 켜져 있는 동안에는 %1$@ 및 공간 전환 때의 판에도 쓰입니다. 얼마나 옅어질지는 ‘%3$@’에서 정합니다. ‘%4$@’은(는) 모두 색을 입히지 않은 채로 둡니다.",
   "kiwishelf.color.group_badge": "그룹 배지",
   "kiwishelf.color.highlight": "하이라이트",
   "kiwishelf.color.hover_fill": "호버 채우기",

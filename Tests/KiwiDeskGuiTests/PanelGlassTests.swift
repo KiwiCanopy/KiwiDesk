@@ -1,5 +1,6 @@
-import Foundation
+import AppKit
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -89,10 +90,11 @@ struct PanelGlassTests {
         let glass = PanelGlass(settings: settings)
         #expect(glass.ground(reduceTransparency: false).frost != nil)
         #expect(!glass.wearsActiveLook)
-        let paint = Self.paint(glass)
-        #expect(paint.tinted)
-        // Flat: KiwiHub's fills fade along the glass's paint alone.
-        #expect(paint.fadeShare == nil)
+        #expect(Self.paint(glass).tinted)
+        // Flat: the fade's paint is minted on glass alone.
+        let ground = glass.ground(reduceTransparency: false)
+        #expect(glass.paint(on: ground, increaseContrast: false) == nil)
+        #expect(glass.paint(on: .untinted, increaseContrast: false) == nil)
         // The toggle off is the untinted material.
         settings.kiwishelf.tintHubAndPlates = false
         #expect(
@@ -110,6 +112,22 @@ struct PanelGlassTests {
         settings.kiwishelf.fillColor = "#14201C00"
         #expect(PanelGlass(settings: settings).shelf == nil)
         #expect(!Self.paint(PanelGlass(settings: settings)).tinted)
+    }
+
+    /// What the chrome draws over the material: the Fill at its own
+    /// alpha, and the scheme its lightness decides.
+    @Test(
+        "The frost draws the Fill's alpha and scheme",
+        arguments: [("#14201CB3", true), ("#F2F2F7B3", false)]
+    )
+    func frostDrawsTheFill(hex: String, dark: Bool) throws {
+        var shelf = KiwiShelf()
+        shelf.fillColor = hex
+        let frost = try #require(shelf.frostFill(opaque: false))
+        #expect(frost.scheme == (dark ? .dark : .light))
+        let drawn = try #require(NSColor(frost.color).usingColorSpace(.sRGB))
+        #expect(abs(drawn.alphaComponent - 0xB3 / 255.0) < 0.01)
+        #expect(abs(drawn.redComponent - frost.red) < 0.01)
     }
 
     @Test("Every cue view and KiwiHub draw through the panel glass")
@@ -178,10 +196,8 @@ struct PanelGlassTests {
         // KiwiHub's fade alike.
         #expect(
             chrome.contains(
-                "lettint=ground==.glass?glass.shelf.flatMap{"
-                    + "GlassTint.paint("
-                    + "$0.panelGlassFill(increaseContrast:increased),"
-                    + "edge:.top)}:nil"
+                "lettint=glass.paint(on:ground,"
+                    + "increaseContrast:increased)"
             )
         )
         #expect(chrome.contains("tint:tint,fallback:fallback)"))

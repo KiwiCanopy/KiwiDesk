@@ -1043,12 +1043,15 @@ editing here:
   its park. When a pocket press raises is the timeline's
   `handOff`, and its obligations are
   [state-and-layout.md](state-and-layout.md)'s (#2703, #2845).
-  **A panel whose plate wears the Fill under *Tint KiwiHub and
-  plates* is an `ActiveGlassPanel`, its `wearsActiveLook` set from
-  that tint on every play** — the slide's and the flying plate's
-  alike, never a plain `NSPanel`, which draws the plate without the
+  **A panel whose plate wears the Fill on glass under *Tint
+  KiwiHub and plates* is an `ActiveGlassPanel`, its
+  `wearsActiveLook` set from that tint on every play, and never
+  from a Fill worn over the material** — the slide's and the
+  flying plate's alike, never a plain `NSPanel`, which draws the plate without the
   key-window rim (#2569, `SpaceSlidePlateAppearanceTests`,
-  `BriefPocketPanelGlassTests`; the mechanism is
+  `BriefPocketPanelGlassTests`, `FrostPlateTests`; a plate's
+  material where no glass draws is `FrostPlate.make`'s, which is
+  [bars.md](bars.md)'s; the mechanism is
   [os-private-apis.md](os-private-apis.md)'s). The switch follows
   the plate: glass added to anything else in that panel argues its
   own look.

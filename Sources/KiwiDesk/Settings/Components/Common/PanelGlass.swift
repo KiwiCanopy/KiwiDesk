@@ -41,10 +41,22 @@ struct PanelGlass: Equatable {
         ) ?? .untinted
     }
 
+    /// The Fill as the glass paints it, fading: on glass alone.
+    /// Over the material the Fill is flat, so nothing fades.
+    @MainActor
+    func paint(on ground: PanelGround, increaseContrast: Bool) -> GlassPaint? {
+        guard ground == .glass, let shelf else { return nil }
+        return GlassTint.paint(
+            shelf.panelGlassFill(increaseContrast: increaseContrast),
+            edge: .top
+        )
+    }
+
     var variant: GlassChromeVariant { shelf == nil ? .regular : .clear }
 
     /// Whether the panel wears the key-window rim: glass's finish,
-    /// so never over the material.
+    /// so never with the leaf off or below macOS 26. Reduce
+    /// transparency is not asked: the rim alters glass alone.
     var wearsActiveLook: Bool { shelf != nil && drawable }
 }
 
@@ -105,16 +117,8 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
         let frost = ground.frost
         // The one place Increase Contrast becomes the panel's inks.
         let ink = glass.shelf?.panelInk(increaseContrast: increased)
-        // One mint: the glass and KiwiHub's fills fade alike. Over
-        // the material the Fill is flat, so nothing fades.
-        let tint =
-            ground == .glass
-            ? glass.shelf.flatMap {
-                GlassTint.paint(
-                    $0.panelGlassFill(increaseContrast: increased),
-                    edge: .top
-                )
-            } : nil
+        // One mint: the glass and KiwiHub's fills fade alike.
+        let tint = glass.paint(on: ground, increaseContrast: increased)
         inked(content, ink)
             .environment(
                 \.kiwiHubPaint,
@@ -146,5 +150,5 @@ extension FrostFill {
     }
 
     /// The scheme the Fill pins on its frost.
-    var scheme: ColorScheme { pin == .dark ? .dark : .light }
+    var scheme: ColorScheme { pin.scheme }
 }

@@ -1097,7 +1097,7 @@
   "kiwishelf.color.border": "Contorno",
   "kiwishelf.color.border.a11y": "Cor do contorno do KiwiShelf",
   "kiwishelf.color.fill": "Preenchimento",
-  "kiwishelf.color.fill.help": "A cor do KiwiShelf: as duas barras, as marcas +n e suas listas e o que um item mostra ao passar o mouse, além do %1$@ e das placas de uma troca de espaço enquanto “%2$@” estiver ativado. Até onde ela esmaece é definido em “%3$@”. “%4$@” deixa o vidro sem tingimento.",
+  "kiwishelf.color.fill.help": "A cor do KiwiShelf: as duas barras, as marcas +n e suas listas e o que um item mostra ao passar o mouse, além do %1$@ e das placas de uma troca de espaço enquanto “%2$@” estiver ativado. Até onde ela esmaece é definido em “%3$@”. “%4$@” deixa tudo sem tingimento.",
   "kiwishelf.color.group_badge": "Selo de grupo",
   "kiwishelf.color.highlight": "Destaque",
   "kiwishelf.color.hover_fill": "Preenchimento ao passar o mouse",

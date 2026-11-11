@@ -153,7 +153,7 @@ extension APIReference {
         ),
         "set_tint_hub_and_plates": APIRecord(
             "Gives KiwiHub and the switch plates the Fill; off, the "
-                + "untinted system look.",
+                + "untinted system appearance.",
             .boolean("enabled")
         ),
         "set_fill_fade": APIRecord(
