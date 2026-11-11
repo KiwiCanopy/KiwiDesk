@@ -196,6 +196,21 @@ struct ScrollGesturesTests {
         )
     }
 
+    @Test("a wheel burst's binding is the axis the router owned it on")
+    func routeReadsTheOwnedAxis() {
+        let route = ScrollRoute(
+            wheel: .family(.walk),
+            wheelX: .family(.space)
+        )
+        var burst = event(Self.pan, .changed, dx: 0, dy: 5)
+        burst.input = .wheel
+        burst.sideways = true
+        #expect(route.action(for: burst) == .family(.space))
+        burst.sideways = false
+        burst.delta = CGVector(dx: 5, dy: 0)
+        #expect(route.action(for: burst) == .family(.walk))
+    }
+
     @Test("a reversed event still carries the hand's own motion")
     func reversedKeepsTheHand() {
         let (gestures, _) = front()
