@@ -22,8 +22,8 @@ extension KiwiCore {
     /// app's menu chord, which an open sequence swallows anyway.
     public func sequenceStepTakes(_ combo: String) -> SystemShortcut? {
         guard let key = KeyCombo.parse(combo),
-            let shortcut = SystemShortcuts.answering(
-                key,
+            let shortcut = KeySequenceRouter.systemShortcut(
+                on: key,
                 in: keys.systemChords()
             ),
             shortcut.sequenceTier != .swallowed

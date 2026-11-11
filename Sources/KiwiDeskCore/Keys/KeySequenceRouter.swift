@@ -211,6 +211,20 @@ struct KeySequenceRouter: Sendable {
         }
     }
 
+    /// The shortcut macOS answers on a step key's `combo`, through
+    /// the router's own matcher (#3173): what that key takes from
+    /// macOS while its sequence is open. Nil for none.
+    static func systemShortcut(
+        on combo: KeyCombo,
+        in answered: [(combo: KeyCombo, shortcut: SystemShortcut)]
+    ) -> SystemShortcut? {
+        match(
+            answered.map(\.combo),
+            keyCode: combo.keyCode,
+            held: combo.modifiers
+        ).map { answered[$0].shortcut }
+    }
+
     /// A macOS shortcut no step key took: through to macOS, the
     /// sequence closed first where it takes the keyboard.
     private mutating func passOrBeep(

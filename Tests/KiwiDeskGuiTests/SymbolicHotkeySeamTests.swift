@@ -7,7 +7,9 @@ import Testing
 /// The host's `com.apple.symbolichotkeys` is read through two seams
 /// alone (#1105, #3173): Settings' `readSymbolicHotkey` and the key
 /// manager's. A direct read beside them reads the developer's plist
-/// in every suite that reaches it.
+/// in every suite that reaches it. Trade: the needle is the reader's
+/// name, so a call or a function value counts alike; a reader
+/// reached under another name is review's.
 @Suite("Symbolic hotkey seams (#3173)")
 struct SymbolicHotkeySeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -22,12 +24,16 @@ struct SymbolicHotkeySeamTests {
             #expect(!files.isEmpty)
             for url in files {
                 let count = try SourceScan.strippedSource(at: url)
-                    .occurrences(of: "SymbolicHotkeys.liveRead(")
+                    .occurrences(of: "SymbolicHotkeys.liveRead")
                 if count > 0 { hits[url.lastPathComponent] = count }
             }
         }
-        // The manager's default names the reader without calling it.
-        #expect(hits == ["SystemShortcutEnablement.swift": 1])
+        #expect(
+            hits == [
+                "SystemShortcutEnablement.swift": 1,
+                "KeybindingManager.swift": 1,
+            ]
+        )
         let manager = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
                 "Sources/KiwiDeskCore/Keys/KeybindingManager.swift"

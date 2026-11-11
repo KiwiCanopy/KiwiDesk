@@ -154,24 +154,6 @@ extension SystemShortcuts {
             return (entry?.combo ?? combo, shortcut)
         }
     }
-
-    /// The shortcut macOS answers on `combo` now, nil for none —
-    /// what a step key on it takes from macOS while its sequence
-    /// is open. The router's chords come from the same read.
-    public static func answering(
-        _ combo: KeyCombo,
-        in answered: [(combo: KeyCombo, shortcut: SystemShortcut)]
-    ) -> SystemShortcut? {
-        let key = combo.unsided
-        let codes =
-            [key.keyCode]
-            + [KeypadKeys.keypadTwin(of: key.keyCode)]
-            .compactMap { $0 }
-        return answered.first {
-            codes.contains($0.combo.keyCode)
-                && $0.combo.modifiers == key.modifiers
-        }?.shortcut
-    }
 }
 
 /// The macOS shortcuts an open key sequence lets through (#3173 ▸
