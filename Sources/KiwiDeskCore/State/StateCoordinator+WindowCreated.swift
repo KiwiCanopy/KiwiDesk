@@ -70,18 +70,23 @@ extension StateCoordinator {
         // window a Pocket key claims (#2612 ▸ 7); a Space a quiet
         // open named stands in for the rule, through its gate (#3152).
         let popup = windows[window.id]?.isPopup ?? false
+        let rule = window.appBundleID.flatMap { appRules[$0] }
         let ruled =
-            held == nil && !popup && !claimed
-            ? named ?? window.appBundleID.flatMap { appRules[$0] }
-            : nil
+            held == nil && !popup && !claimed ? named ?? rule : nil
         // Only the rule's own verdict may earn the launch follow
         // (#1599), and only into a Space the user is not in.
         // A Pocket key's candidate keeps its rule but follows none.
         // Nor does a lens's quiet open (#3122).
-        if let ruled, ruled != workspaces.activeSpace,
-            claim != .awaited(window.id), !quiet
-        {
+        let mayFollow = claim != .awaited(window.id) && !quiet
+        let active = workspaces.activeSpace
+        if mayFollow, let ruled, ruled != active {
             effects.placedByAppRule = ruled
+        }
+        // A popup the rule skipped may ride that follow (#3189).
+        if mayFollow, held == nil, popup, !claimed, let rule,
+            rule != active
+        {
+            effects.popupSkippedRule = rule
         }
         let target = held ?? ruled ?? workspaces.activeSpace
         guard let target else { return }

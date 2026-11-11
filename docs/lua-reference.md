@@ -5741,6 +5741,14 @@ A popup with no title-bar button, such as a browser extension's
 popup, is not filed by the rule either
 ([#2475](https://github.com/KiwiCanopy/KiwiDesk/issues/2475)).
 
+:::unreleased
+When opening the app takes you to its space, a popup it opened
+after it came forward, such as a toolbar strip, moves there with
+you ([#3189](https://github.com/KiwiCanopy/KiwiDesk/issues/3189)).
+Any other popup stays in the space it opened in; see
+[accepted limitations](accepted-limitations.md).
+:::
+
 **Example:**
 
 ```lua

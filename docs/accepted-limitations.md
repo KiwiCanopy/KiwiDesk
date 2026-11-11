@@ -381,6 +381,17 @@ WindowServer's create notification; where that route is
 unavailable, only opening the app takes you along. Use
 `focus_space` to reach the window when you are left behind.
 
+:::unreleased
+A popup an app opens while you are opening it moves to the app's
+space with you
+([#3189](https://github.com/KiwiCanopy/KiwiDesk/issues/3189)).
+What remains: a popup that opens before the app comes forward
+stays in the space it opened in, and so does every popup of an
+open whose window showed before the app came forward. KiwiDesk
+ties a popup to an open through the app coming forward, which
+macOS reports after such a window.
+:::
+
 The [`window_created`](lua-reference.md#events) event reads the
 same notification to tell `new` from `existing`
 ([#2630](https://github.com/KiwiCanopy/KiwiDesk/issues/2630)). An

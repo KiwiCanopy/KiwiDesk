@@ -15,9 +15,9 @@ struct LaunchFollowIntentTests {
     func claimsOnceForItsApp() {
         let intent = LaunchFollowIntent()
         intent.record("app.a", at: t0)
-        #expect(!intent.claim("app.b", at: t0))
-        #expect(intent.claim("app.a", at: t0))
-        #expect(!intent.claim("app.a", at: t0))
+        #expect(intent.claim("app.b", at: t0) == nil)
+        #expect(intent.claim("app.a", at: t0) != nil)
+        #expect(intent.claim("app.a", at: t0) == nil)
     }
 
     @Test("A debt past its bound is dropped unpaid")
@@ -31,7 +31,7 @@ struct LaunchFollowIntentTests {
         let past = t0.addingTimeInterval(
             LaunchFollowIntent.drainWindow + 0.01
         )
-        #expect(!intent.claim("app.a", at: past))
+        #expect(intent.claim("app.a", at: past) == nil)
         #expect(intent.owed(at: inside) == nil)
     }
 
@@ -47,7 +47,7 @@ struct LaunchFollowIntentTests {
         let intent = LaunchFollowIntent()
         intent.record("app.a", at: t0)
         intent.record("app.b", at: t0)
-        #expect(!intent.claim("app.a", at: t0))
+        #expect(intent.claim("app.a", at: t0) == nil)
         #expect(intent.owed(at: t0) == "app.b")
         intent.forget()
         #expect(intent.owed(at: t0) == nil)

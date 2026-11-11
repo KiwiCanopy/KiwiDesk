@@ -37,6 +37,11 @@ public struct AppliedEffects: Sendable {
     /// (#1599, `LaunchFollowTests`).
     var placedByAppRule: SpaceID?
 
+    /// The Space the app rule named for a popup the fold filed
+    /// where the user is instead, when it is not the active one:
+    /// the popup may ride its app's launch follow (#3189).
+    var popupSkippedRule: SpaceID?
+
     /// Whether the create paid a Desktop return's owed focus
     /// (`ReturningFocusFoldTests`, #1207).
     var paidReturningFocus = false
