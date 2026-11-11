@@ -78,6 +78,18 @@ struct StashCornerLiftTests {
         #expect(engine.stashOriginal(WindowID(1)) == nil)
     }
 
+    @Test("A net's centring keeps an oversized frame's size")
+    func centredAtSizeKeepsSize() {
+        // A stranded float is re-centred, never fitted (#3163); its
+        // top-left stays in the region so the title bar is in reach.
+        let region = CGRect(x: 10, y: 20, width: 500, height: 400)
+        let size = CGSize(width: 900, height: 300)
+        let frame = FloatRecovery.centredAtSize(size, in: region)
+        #expect(frame.size == size)
+        #expect(frame.minX == region.minX)
+        #expect(frame.midY == region.midY)
+    }
+
     @Test("Centring shrinks an oversized frame to the region")
     func centredShrinks() {
         let region = CGRect(x: 10, y: 20, width: 500, height: 400)
@@ -124,6 +136,31 @@ struct FloatStrandRecoveryTests {
         )
         core.recoverStrandedFloats()
         #expect(core.tiler.stashOriginal(F.window) == F.centred)
+    }
+
+    @Test(
+        "An oversized stranded float is re-centred at its own size",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func recentresAtOwnSize() throws {
+        // No net fits a float (#3163): the recovery keeps the size.
+        let big = CGSize(
+            width: F.bounds.width + 200,
+            height: F.bounds.height + 200
+        )
+        let parked = TilingEngine.stashFrame(
+            CGRect(origin: .zero, size: big),
+            in: F.bounds,
+            corner: .bottomRight
+        )
+        let core = try #require(
+            F.makeCore(mode: .floating, frame: parked)
+        )
+        #expect(core.tiler.looksStashed(parked))
+        core.recoverStrandedFloats()
+        let seeded = try #require(core.tiler.stashOriginal(F.window))
+        #expect(seeded.size == big)
+        #expect(seeded.minY == F.bounds.minY)
     }
 
     @Test(

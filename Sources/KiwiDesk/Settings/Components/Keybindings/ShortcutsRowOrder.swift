@@ -154,7 +154,9 @@ enum ShortcutsRowOrder {
     ]
 
     /// Size & float order: resize pairs and the reset that undoes
-    /// them (#2303), followed by state toggles.
+    /// them (#2303), the Maximize rows, the float and sticky
+    /// toggles, then the Tiling off block closing the card, its
+    /// key first (#3160).
     static let sizeAndFloatAtRest: [SettingKey] = [
         .shortcuts(.growWidth),
         .shortcuts(.shrinkWidth),
@@ -165,13 +167,13 @@ enum ShortcutsRowOrder {
         .shortcuts(.maximizeHeight),
         .shortcuts(.maximizeWidth),
         .shortcuts(.toggleFloating),
-        // Tiling off's options, above its key (#3089): one view
-        // draws the three under their sub-header.
+        .shortcuts(.toggleSticky),
+        // One view draws the key and its three options under the
+        // block's sub-header (#3089, #3160).
+        .shortcuts(.toggleTiling),
         .behaviour(.tilingStart),
         .behaviour(.tilingOffHidesBorders),
         .behaviour(.tilingOffHidesBars),
-        .shortcuts(.toggleTiling),
-        .shortcuts(.toggleSticky),
     ]
 
     /// The Pocket card (#2680): what it holds (`pocketList`, drawn

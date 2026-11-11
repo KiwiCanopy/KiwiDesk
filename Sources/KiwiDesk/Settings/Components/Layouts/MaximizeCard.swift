@@ -19,7 +19,14 @@ struct MaximizeCard: View {
     }
 
     private var shown: [ScreenShape] {
-        ScreenShape.allCases.filter { screens[$0] != nil }
+        Self.shownShapes(of: model.displays)
+    }
+
+    /// The connected screens' shapes, in the card's order; KiwiVision's
+    /// summary names the same ones (#3161).
+    static func shownShapes(of displays: [Display]) -> [ScreenShape] {
+        let connected = Set(displays.map(ScreenShape.of))
+        return ScreenShape.allCases.filter(connected.contains)
     }
 
     private var hidden: [ScreenShape] {

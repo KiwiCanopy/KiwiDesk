@@ -86,16 +86,21 @@ struct KiwiVisionLevelsCard: View {
                 get: { model.appWide.visionBlur },
                 set: { on in model.setAppWide { $0.visionBlur = on } }
             ),
-            help: L(
-                "kiwivision.blur.help",
-                "Blurs the windows behind the focused one as well as "
-                    + "dimming them. If you notice a faint flicker, "
-                    + "turn %1$@ off; the dim alone does not flicker.",
-                SettingsCatalog.kiwiVision.blur.text
-            ),
+            help: Self.blurHelp,
             disabled: gates.inertReason(for: .kiwiVision(.blur)) != nil
         )
         .searchAnchored(SettingsCatalog.kiwiVision.blur)
+    }
+
+    /// The Blur row's `?`, a lens's override row's too (#3176).
+    static var blurHelp: String {
+        L(
+            "kiwivision.blur.help",
+            "Blurs the windows behind the focused one as well as "
+                + "dimming them. If you notice a faint flicker, "
+                + "turn %1$@ off; the dim alone does not flicker.",
+            SettingsCatalog.kiwiVision.blur.text
+        )
     }
 
     /// Nothing to fade while the dim is 0 % and the blur is off.

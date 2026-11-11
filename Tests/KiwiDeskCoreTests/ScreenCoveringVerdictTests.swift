@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The screen-covering verdict's algebra (#1787). Its consumers
-/// — the float fit and the shelf stand-down — hold the
+/// — the top-bar push and the shelf stand-down — hold the
 /// process-global `isUser` override, so they live in
 /// `FullscreenStandDownTests+Presentation.swift`.
 @Suite("Screen-covering verdict (#1787)")
@@ -25,7 +25,7 @@ struct ScreenCoveringVerdictTests {
         belowMenuBar.origin.y = 32
         belowMenuBar.size.height -= 32
         #expect(!KiwiCore.covers(belowMenuBar, screen))
-        // Where the fit had put the show: pushed under the shelf.
+        // Where the push would put the show: below the shelf.
         #expect(
             !KiwiCore.covers(
                 CGRect(x: 0, y: 77, width: 1728, height: 1117),

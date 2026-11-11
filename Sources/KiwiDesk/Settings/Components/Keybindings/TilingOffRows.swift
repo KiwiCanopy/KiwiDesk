@@ -1,24 +1,37 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Size & float ▸ Tiling off (#3089): a sub-header and the three
-/// options of the tiling toggle, directly above its key row, each
-/// in the shared setting row's shape (#2670) with its own "Applies
-/// to". Drawn whatever the key's binding, as Wrap focus is: the
-/// menu row and Lua pause tiling too. The hide rows grey with
-/// their reason where they would hide nothing.
-struct TilingOffRows: View {
+/// Size & float ▸ Tiling off (#3089, #3160): the block closing the
+/// card behind a divider — a sub-header, the tiling toggle's key
+/// row, then its three options, each in the shared setting row's
+/// shape (#2670) with its own "Applies to". Drawn whatever the
+/// key's binding, as Wrap focus is: the menu row and Lua pause
+/// tiling too. The hide rows grey with their reason where they
+/// would hide nothing.
+struct TilingOffRows<Key: View>: View {
     @ObservedObject var model: SettingsModel
+    /// The ⌃⌥T key row, drawn first under the sub-header.
+    let key: Key
+
+    init(model: SettingsModel, @ViewBuilder key: () -> Key) {
+        self.model = model
+        self.key = key()
+    }
 
     private typealias Table = RuleReachTable<Bool>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            // A rule between a card's groups (gui.md ▸ Colour).
+            SettingsTheme.hairlineSubtle
+                .frame(height: 1)
+                .padding(.vertical, 4)
+                .accessibilityHidden(true)
             Text(TilingOffWords.title)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .padding(.top, 4)
                 .accessibilityAddTraits(.isHeader)
+            key
             startRow
             hideRow(
                 .behaviour(.tilingOffHidesBorders),

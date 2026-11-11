@@ -138,9 +138,16 @@ struct JumpSideNameTests {
         #expect(hintBody.contains(".accessibilityHidden(true)"))
         // The inks the contrast suite measures, drawn here — the
         // pairing reads the token and cannot see the site. The
-        // selected ink is KiwiHub's paint, whose default is the token
-        // (`PanelGlassTests` ▸ `scopeSwitchReadsThePaint`).
-        #expect(hintBody.contains("paint.selectionInkSecondary"))
+        // selected chord takes its title's ink on the title's own
+        // condition (#3172).
+        let squashed = hintBody.split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(
+            squashed.contains(
+                "selected&&!neutral?AnyShapeStyle(paint.selectionInk)"
+            )
+        )
+        #expect(!hintBody.contains("selectionInkSecondary"))
         #expect(hintBody.contains(": SettingsTheme.ink2"))
     }
 

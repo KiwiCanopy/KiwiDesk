@@ -5764,14 +5764,12 @@ Bars vary per space (one or two, on any edge), so it folds both
 strip lists; two strips on one edge leave the deeper carve
 standing, which is what makes the fold need no ordering rule.
 
-*Size is bounded there; position stays the user's.* The retile-time
-net fits an oversized float back inside the region — the clamp
-beside it only ever **moves** a window, so one larger than the
-space between two bars would be pushed to one side and still
-overflow under the other. It deliberately does not enforce the
-screen edge, because that net runs for every float on every
-retile and would drag back a window parked half off-screen by
-hand, which macOS allows and this change never asked for.
+*The region bounds the gather and `center_floating`, never a
+placed float.* `move_floating` and `resize` reach the screen's edge
+instead (#3163). No retile net fits a float into it, and none enforces the
+screen edge: that net runs for every float on every retile, so
+either would undo a placement the user chose (*A float is never
+resized to fit*, below, #3163).
 
 *And the ring is kept clear, not just the window.* A float is
 held the ring's own outward reach off **every** edge of that
@@ -5790,9 +5788,9 @@ the layout with the same value on all four edges.
 Painted chrome counts only on an edge the layout reserves: a bar
 set not to reserve its strip keeps no float out, as it keeps no
 tiled window out ([*Reserved where a bar draws*](#app-bar), #1524).
-The same holds for the floating gather's strips and for the drop
-fit's lift clear of a bottom bar: both carve or clear only a
-strip on a reserved edge.
+The same holds for the floating gather's strips and for the push
+clear of a top bar: both carve or clear only a strip on a
+reserved edge.
 
 A tempting alternative was rejected on that same principle: to
 follow `gap.outer` instead, so `border.fit_gaps` would cover
@@ -5811,14 +5809,14 @@ is reserved for chrome that is not on screen.
 nets leave it where its app put it (#1787).* A slide show, or a
 borderless-fullscreen game or player, draws over the menu bar,
 the Dock and the shelf on purpose — that is the point of it — so
-a fit pushing it clear of a strip, or a floating-mode entry
+a push clear of a strip, or a floating-mode entry
 laying it into the quit grid, breaks the thing the user just
 started, as either would break native fullscreen, which both
 already skip. The verdict has two inputs: the frame, edge for
 edge with a whole screen, within 2 pt, over every screen's WHOLE
-frame — never larger, which is an oversized float the fit still
+frame — never larger, which is an oversized float the push still
 owes — and the window's AX subrole, below.
-The fit's skip is load-bearing twice: its frame write also
+The push's skip is load-bearing twice: its frame write also
 stamps the #1161 placement ledger, and in a Scrolling Space a
 live entry is the whole bounce verdict, so without the skip the
 show's own first focus reads as an app answering our placement
@@ -6058,31 +6056,70 @@ this issue's strand by another door. This answers ARRIVALS; a
 hand DROP on another display re-files every float, flag or
 floating-mode, at the drop (#1686, below beside #492).
 
-**A float dropped past the bottom is shrunk to fit, never moved
-back** ([#1427](https://github.com/KiwiCanopy/KiwiDesk/issues/1427),
-owner ruling 2026-10-06). [Principle] A window pushed down until its
-bottom passes the usable area — the screen edge, or the top of a
-bar on that edge, less the focus ring's reach as every float
-placement keeps it (`floatGrowBounds`; the outer gap is a layout
-reservation and is not followed) — keeps its top edge where
-it was dropped and loses height from the bottom. Moving it back up
-would undo the move the user just made. A clipped strip below the
-border is not a position anyone chose, so this is a narrower
-reading of #1091's "a float's position is the user's", not an
-exception to it. Three limits keep it narrow:
+:::unreleased
+**A float is never resized to fit, and only a top bar moves one
+([#3163](https://github.com/KiwiCanopy/KiwiDesk/issues/3163), owner
+ruling 2026-11-10; amends #1091, #1427 and #1524).** [Principle] A
+float is a window the user placed and sized on purpose. A net that
+runs on every retile cannot tell a mistake from a choice, so a net
+that shrinks or shoves a float overrides the choice every time: a
+window dragged a little past the bottom bar on a tiling-off Space
+came back shorter, and the user had to undo it by hand. So no path
+fits a float into the float region — not the retile sweep, a drop,
+a traveler's re-home or the unsolicited-resize arm — and none moves
+one off a bottom or side bar. Tiling-off Spaces take the same rule.
 
-- It runs on a hand drop only, never from a retile net, so a
-  float parked half off-screen by any other means stays where
-  it is.
-- It stops at the window's minimum height (the configured
-  minimum, or a corroborated app minimum). Past that, at the
-  screen edge the rest stays clipped rather than the window
-  moving; under a bar on that edge the bar still lifts it
-  clear, since a bar reserves its edge for every window (#242).
-- A window whose top is already past the border is left alone:
-  its title bar is out of reach. A bottom "peek" with the title
-  bar showing is therefore reachable only at the window's
-  minimum height.
+One correction stays, the reason the bar clamp first existed
+(#242): a reserved, painted **top** strip over the title bar takes
+away the handle that moves the window, which the mouse cannot
+repair. That float is pushed straight down at its own size. A float
+taller than the room below the bar keeps its height and runs off
+the screen's bottom: the title bar is what has to be reachable, and
+the rest is reachable by moving it. The push reads only the
+reserved, painted strips, so a bar on a second screen, or one
+revealed later, counts once it draws. It judges the frame the
+window would show, never a stale state frame: a Maximize's fill
+echo sits under the top strip, and a push of it still overwrites
+the return (#3157), so that base outlives the fit.
+
+What it retires, and why each part goes:
+
+- **The #1091 size fit and its refusal memo.** The memo existed
+  because a size is refusable and the sweep re-asked it forever.
+  With no size ask nothing is refused, and a position push
+  converges without a memo.
+- **The #1427 drop fit.** It kept a dropped window's top and shrank
+  it from the bottom. The drop now keeps the whole frame, so the
+  window lands where and how the user left it.
+- **#1524's four-edge nudge (QA 2026-07-19), narrowed to the top.**
+  Its argument — a reserving bar reserves its edge for every window
+  — holds for windows the layout places. A float is the one window
+  the layout does not place, and a bottom or side bar over part of
+  one hides content, not the handle that moves it.
+
+Not affected, since each is an act the user starts rather than a
+sweep: `make_floating`'s derived size (#1674), the floating gather,
+and `center_floating`, which centres in `floatBounds`. The verbs
+that step or grow (`move_floating`, the grow side of `resize`)
+follow the drag instead (owner ruling 2026-11-10): they run to the
+screen's visible edge, and a top bar alone stops them
+(`floatReachBounds`), so the push-down never fights a keyboard move
+and a key and the mouse reach the same place by one rule. No flag
+and no warning: a bottom bar over part of a float is the state a
+drag can leave too. The
+stranded-float recovery (#1352) is a net, so it re-centres a float
+at its own size, its top-left edge kept in the region so the title
+bar stays in reach. A Pocket take-out and a Maximize's return to another
+screen still shrink a window to the region (owner ruling 2026-11-10):
+neither is a sweep, and each is a return the user starts, where a fit
+is the support the user expects.
+
+The cost accepted: a float can sit with its bottom under a bottom
+bar or off the screen, and a float its own app grew past the room
+under a top bar stays that tall. Rejected: keeping the fit on
+tiling-off Spaces only, or on hand drops only. Both keep a net that
+second-guesses a placement, which is the defect.
+:::
 
 **Floating a tiled window centres it at a derived size
 (#1674).** [Principle] The frame a window
@@ -8781,6 +8818,7 @@ curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
 
+:::unreleased
 With KiwiVision's maximize on (#3064, below), the arrival is still
 instant but no longer still: the window you focus clears at its
 slot and then grows into the fill, while the window you leave fades
@@ -8788,7 +8826,9 @@ as it shrinks back to its slot. The leave fade masks the slot the
 window is heading for, so for the length of the spring the part of
 the shrinking window outside that slot dims at once rather than
 fading; the plates owe a re-mask once the springs settle.
+:::
 
+:::unreleased
 ### KiwiVision's maximize is derived, never stored per Space (#3064)
 
 **[Rationale]**
@@ -8800,7 +8840,8 @@ Width read the share and the anchor Layout Defaults store for the
 screen's shape, the same table a hand Maximize reads, so KiwiVision
 has no anchor of its own (owner, 2026-11-09). A lens overrides the
 mode alone, one optional row like its other overrides, so a
-"Writing" lens can ask for Height.
+"Writing" lens can ask for Height. That row is a pop-up
+(`ui-patterns.md` ▸ Choosing a control).
 
 The verdict is computed on every read from what state holds —
 KiwiVision's ask, copied in through `VisionLook` at every change,
@@ -8839,6 +8880,7 @@ The new `kiwivision.maximize` key is encoded only when it is not
 Off, so files written before it decode unchanged and it owes no
 crossing. It has no per-profile predecessor either: KiwiVision's
 settings were app-wide from their first release.
+:::
 
 ### KiwiVision switches the appearance and owes it back (#2103)
 

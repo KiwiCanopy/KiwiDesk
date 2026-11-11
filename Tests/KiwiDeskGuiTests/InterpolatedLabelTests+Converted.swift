@@ -334,7 +334,6 @@ extension InterpolatedLabelTests {
         // A layer's locked box points at Delete layer (#2022).
         "shortcuts.layer_reach.locked_help": 1,
         "kiwivision.xref_link": 1,  // Shortcuts ▸ Focus (#2103)
-        "kiwivision.maximize.help": 1,  // Layout Defaults (#3064)
         // Maximize's links and its `?` (#3062).
         "layout_defaults.maximize.xref_link": 1,
         "shortcuts.maximize.xref_link": 1,

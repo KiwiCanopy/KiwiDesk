@@ -263,8 +263,8 @@ editing here:
   writes the same way (#3007, `FloatCentreCommandTests`). A verb moving
   a float at its own size resolves it through `floatMoveFocus` and
   clamps through `floatMoveFrame`, never the raw clamp, which reads a
-  traveler's home and can carry a top edge out of reach
-  (`FloatCentreRenderSpaceTests`); one stepping by a delta also takes
+  traveler's home (`FloatCentreRenderSpaceTests`); one stepping by a
+  delta also takes
   `FloatMove.holdingTheAsk` against that clamp's push
   (`FloatNudgeRenderSpaceTests`).
 - The **create fold's spawn grant** — the focus a fresh window
@@ -1868,7 +1868,7 @@ editing here:
   `SplitOverflow.placed` on the issued frames, #934). Every
   SIZING reader — a run planning its members along its axis
   (`LayoutContext.plannedFloor`), a resize clamp, the split and
-  track floor heals, the float fits (`plannedMinSize`) — reads a
+  track floor heals, the float resize (`plannedMinSize`) — reads a
   window no smaller than its least refusal: the least answer
   among its entries that answered more than `refusalMargin` above
   their ask (`EffectiveSizeBound.refusedFloor`), stood down on a
@@ -2879,11 +2879,9 @@ editing here:
   window WOULD show, through `wouldBeFrame`, never the state
   frame it is leaving: a pending capture, corrected WITH the
   window, or a frame sent and not yet echoed (#3157), since a
-  fit of the stale frame lands after the delivery and undoes it
-  — a maximized float's return was fitted to the region that
-  way. Its refusal memo reads what the app reported, and an
-  unechoed ask judged fitted clears no memo
-  (`FloatFitMemoGraceTests`). A
+  push of the stale frame lands after the delivery and undoes it
+  (`FloatClampPendingCaptureTests`, `FloatNeverResizedTests` ▸
+  `sweepJudgesTheSentFrame`). A
   NEW writer of the seed states what it seeds, why it is no
   corner and where in the pass it lands, and joins
   `StashSeederCensusTests`' map, which reds an unclassified
@@ -3070,8 +3068,8 @@ editing here:
   exactly what a re-file changes (`FloatFlagReaderCensusTests`,
   whose `ruledToStay` class is the site's census entry). Held
   by `RestoredFrameDebtTests`.
-- **Derive where a float may sit in ONE place, and bound its
-  SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
+- **Derive where a float may sit in ONE place** (#1091).
+  `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off
   its own edge — and a new consumer takes it rather than
   re-deriving a boundary beside a call site. It carves painted
@@ -3083,27 +3081,29 @@ editing here:
   — a space shows one bar or two, on any edge — and rely on
   `AppBarGeometry.regionClear` being monotonic rather than on an
   ordering rule.
-  Three obligations fall out. **Bound the SIZE there and leave
-  the POSITION to the user**: the retile-time net fits an
-  oversized float back inside the region, but must not enforce
-  the screen edge, because it runs for every float on every
-  retile and would drag back a window parked half off-screen by
-  hand (`FloatRegionFitTests`; the net's own routing is
-  `FloatRegionSeamTests`, since no behavioural test can see
-  which entry the sweep calls). The one bottom-edge fit — a
-  float dropped past the bottom keeps its top and is shrunk —
-  runs on a hand DROP alone, through the one
-  `floatFrameFittedOnDrop`, and never from a retile net, which
-  would shrink a window parked there by hand (#1427,
-  `FloatDropBottomFitTests`, `FloatRegionSeamTests` ▸
-  `dropFitHasOneCaller`). **A SIZE ask that an app can
-  refuse owes a memo** — that net runs every retile, and unlike
-  a position, a size is genuinely refusable, so an app whose
-  minimum exceeds the region is re-asked forever without one;
-  `FloatFitLedger` is #677's shape one subsystem over, and it is
-  deliberately NOT an entry in `SizeBoundLearner`, which only
-  the layout loop may record into. **A float's aspect lock is
-  judged apart from that learner too (#2973)**, through the one
+  Three obligations fall out. **Never resize a float to fit, and
+  move one only off a TOP bar** (#3163, owner ruling 2026-11-10):
+  a path that corrects a placed float's frame — a net, a drop, a
+  re-home — never writes its size. Its one bar correction is
+  `floatFrameClampedClearOfBars` (verdict `floatBarPush`), a push
+  down clear of a reserved, painted top strip, and no other edge
+  moves it; a stranded float with no original is re-centred at its
+  own size (`FloatRecovery.centredAtSize`). A new correcting door
+  takes one of those two. The region bounds `center_floating`,
+  `make_floating`'s derived size and the gather, never a float the
+  user placed; `move_floating` and the grow side of `resize`
+  reach `floatReachBounds`, the screen less a top strip, as a drag
+  does — a step to the bare edge, a grow with the ring held clear.
+  A reader of the strips that stop or push a placed float takes
+  `floatStoppingStrips`, so the push and the reach never part
+  (`FloatVerbReachTests`, `FloatNeverResizedTests`,
+  `FloatingModeBarClampTests`, `FloatStrandRecoveryTests` ▸
+  `recentresAtOwnSize`). `FloatRegionSeamTests` ▸
+  `noFloatFitInCore` bans only the retired names, so a new fit
+  spelled otherwise is review's. The argument is
+  `docs/design-decisions.md` ▸ *A float is never resized to fit*.
+  **A float's aspect lock is
+  judged apart from `SizeBoundLearner` (#2973)**, through the one
   `floatAspects` record, which a close, a gone-for-good retire and the
   app's exit end as they end `floatFrames`, so a new such ender takes
   both (`FloatAspectJudgementTests`). And
@@ -3256,7 +3256,7 @@ editing here:
   door retiles only where the window is off the frame a SHOWN
   space gives it, and asks the owners rather than copying them:
   `calculatedFrames` for a tiled slot (every display's shown
-  space, beyond `retileTolerance`), `floatFitCorrection` — the
+  space, beyond `retileTolerance`), `floatBarPush` — the
   bar sweep's own per-window verdict, one copy for both — for a
   float. It stands down while `defersEventRetiles` holds (#672)
   and past `UnsolicitedResizeMemo`'s bound, since a correction

@@ -80,7 +80,7 @@ enum ResizeRefusal: Equatable {
     /// A float-move verb on a tiled focus (#3007): the layout places
     /// it, and the verb never floats it.
     case moveNeedsFloat(WindowID)
-    /// `move_floating` stopped at the float region (#2972), going
+    /// `move_floating` stopped at its reach (#2972, #3163), going
     /// `direction`. A wall reached, so it bumps the way it was going.
     case moveAtBoundary(WindowID, direction: Direction)
 }

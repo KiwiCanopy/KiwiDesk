@@ -71,8 +71,8 @@ extension SettingsThemeContrastTests {
             floor: 3.0
         ),
         // The scope switch's chord hints (#2245): the selected
-        // segment's is `accentInkSecondary` on the accent, above,
-        // and a hovered one's is `ink`, which the segment
+        // segment's takes its title's ink on the accent (#3172),
+        // and a hovered one's is `ink`, both of which the segment
         // pairings measure.
         Pairing(
             "ink2 chord on the Jump scope switch's track",

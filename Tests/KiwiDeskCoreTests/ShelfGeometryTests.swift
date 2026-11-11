@@ -133,10 +133,9 @@ struct ShelfGeometryTests {
             width: 400,
             height: 300
         )
-        let clamped = AppBarGeometry.clampClear(
+        let clamped = AppBarGeometry.pushedBelow(
             float,
-            of: strip,
-            edge: .top
+            strip: strip
         )
         #expect(clamped.minY == strip.maxY)
         #expect(clamped.size == float.size)
@@ -148,66 +147,10 @@ struct ShelfGeometryTests {
             height: 300
         )
         #expect(
-            AppBarGeometry.clampClear(
+            AppBarGeometry.pushedBelow(
                 clear,
-                of: strip,
-                edge: .top
+                strip: strip
             ) == clear
-        )
-    }
-
-    @Test("Float clamp nudges off every edge")
-    func floatClampAllEdges() {
-        // AX coordinates, y grows downward; a 1000x800 screen.
-        let float = CGRect(
-            x: 100,
-            y: 100,
-            width: 400,
-            height: 300
-        )
-        // Bottom bar at y 768...800: the float's bottom (400)
-        // is clear; one overlapping is pushed up.
-        let bottom = CGRect(x: 0, y: 768, width: 1000, height: 32)
-        #expect(
-            AppBarGeometry.clampClear(
-                float,
-                of: bottom,
-                edge: .bottom
-            ) == float
-        )
-        let low = CGRect(x: 100, y: 600, width: 400, height: 300)
-        #expect(
-            AppBarGeometry.clampClear(
-                low,
-                of: bottom,
-                edge: .bottom
-            ).maxY == bottom.minY
-        )
-        // Left bar at x 0...32.
-        let left = CGRect(x: 0, y: 0, width: 32, height: 800)
-        #expect(
-            AppBarGeometry.clampClear(
-                CGRect(x: 4, y: 100, width: 400, height: 300),
-                of: left,
-                edge: .left
-            ).minX == left.maxX
-        )
-        // Right bar at x 968...1000.
-        let right = CGRect(x: 968, y: 0, width: 32, height: 800)
-        #expect(
-            AppBarGeometry.clampClear(
-                CGRect(x: 700, y: 100, width: 400, height: 300),
-                of: right,
-                edge: .right
-            ).maxX == right.minX
-        )
-        // Sizes never change.
-        #expect(
-            AppBarGeometry.clampClear(
-                low,
-                of: bottom,
-                edge: .bottom
-            ).size == low.size
         )
     }
 }

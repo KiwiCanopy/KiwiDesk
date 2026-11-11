@@ -6,7 +6,7 @@ import Testing
 /// TRACKED window is presenting takes `KiwiCore.presents`, which
 /// rules the float gate once; the raw `covers` / `coversAScreen`
 /// is for a CANDIDATE frame whose float ruling the caller already
-/// made (the fit, the gather, through `coversAsShow`) and for
+/// made (the push, the gather, through `coversAsShow`) and for
 /// the verdict's own home. A new raw caller is the drift #1788
 /// closes, so it reds here until it routes through the door or
 /// names its reason.
