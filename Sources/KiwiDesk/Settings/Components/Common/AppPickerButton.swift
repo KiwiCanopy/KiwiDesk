@@ -21,9 +21,9 @@ struct AppPickerButton: View {
     /// Where given, the list is these apps instead of every
     /// installed one, read when the popover opens (#2071).
     var guessed: (() -> [GuessedFloatApp])?
-    /// Where given, the apps on screen lead the list as their own
+    /// Where given, the open apps lead the list as their own
     /// section, read when the popover opens (#2103 ruling 27).
-    var onScreen: (() -> [OnScreenApp])?
+    var openApps: (() -> [OpenApp])?
     /// Opens the list on arrival: a key sequence's "App…" swaps
     /// this trigger in for its action picker (#3162).
     var opensOnAppear = false
@@ -32,7 +32,7 @@ struct AppPickerButton: View {
 
     @State private var showing = false
     @State private var search = ""
-    @State private var onScreenApps: [OnScreenApp] = []
+    @State private var openAppList: [OpenApp] = []
     @State var cursor = DropdownCursor<AppPickerSlot>()
     /// Where the list scrolls — set by the keyboard alone, so the
     /// pointer never scrolls the list out from under itself.
@@ -89,7 +89,7 @@ struct AppPickerButton: View {
                 onClose?()
             }
             if isShowing {
-                onScreenApps = onScreen?() ?? []
+                openAppList = openApps?() ?? []
                 opened()
             }
         }
@@ -132,9 +132,9 @@ struct AppPickerButton: View {
         .onAppear { searchFocused = true }
     }
 
-    var sections: (onScreen: [OnScreenApp], all: [InstalledApp]) {
+    var sections: (openApps: [OpenApp], all: [InstalledApp]) {
         AppPickerSections.lists(
-            onScreen: onScreenApps,
+            openApps: openAppList,
             installed: KeybindingCatalog.installedAppsSnapshot,
             exclude: exclude,
             query: search
@@ -144,10 +144,10 @@ struct AppPickerButton: View {
     typealias InstalledApp = KeybindingCatalog.InstalledApp
 
     @ViewBuilder private func sectionsBody(
-        _ lists: (onScreen: [OnScreenApp], all: [InstalledApp])
+        _ lists: (openApps: [OpenApp], all: [InstalledApp])
     ) -> some View {
-        let both = !lists.onScreen.isEmpty && !lists.all.isEmpty
-        if lists.onScreen.isEmpty, lists.all.isEmpty {
+        let both = !lists.openApps.isEmpty && !lists.all.isEmpty
+        if lists.openApps.isEmpty, lists.all.isEmpty {
             Text(
                 L("app_picker.no_match", "No matching apps.")
             )
@@ -155,10 +155,10 @@ struct AppPickerButton: View {
             .foregroundStyle(SettingsTheme.ink3)
             .padding(.vertical, 6)
         }
-        if !lists.onScreen.isEmpty {
-            section(Self.onScreenTitle, headed: both) {
-                ForEach(lists.onScreen, id: \.key) { app in
-                    let slot = AppPickerSlot.onScreen(app.key)
+        if !lists.openApps.isEmpty {
+            section(Self.openTitle, headed: both) {
+                ForEach(lists.openApps, id: \.key) { app in
+                    let slot = AppPickerSlot.openApp(app.key)
                     AppPickerRow(
                         name: app.name,
                         bundleID: app.bundleID,
@@ -207,8 +207,8 @@ struct AppPickerButton: View {
         .accessibilityLabel(headed ? title : "")
     }
 
-    static var onScreenTitle: String {
-        L("app_picker.section.on_screen", "On screen now")
+    static var openTitle: String {
+        L("app_picker.section.open", "Open apps")
     }
 
     static var allTitle: String {

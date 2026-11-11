@@ -85,7 +85,7 @@
   "app_picker.no_match": "Keine passenden Apps.",
   "app_picker.search.placeholder": "Apps suchen",
   "app_picker.section.all": "Alle Apps",
-  "app_picker.section.on_screen": "Gerade auf dem Bildschirm",
+  "app_picker.section.open": "Geöffnete Apps",
   "app_rules.add": "Hinzufügen",
   "app_rules.add_float": "App schweben lassen…",
   "app_rules.add_space": "App in einem Space öffnen…",

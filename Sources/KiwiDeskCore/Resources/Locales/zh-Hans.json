@@ -85,7 +85,7 @@
   "app_picker.no_match": "没有匹配的 App。",
   "app_picker.search.placeholder": "搜索 App",
   "app_picker.section.all": "所有 App",
-  "app_picker.section.on_screen": "当前在屏幕上",
+  "app_picker.section.open": "已打开的 App",
   "app_rules.add": "添加",
   "app_rules.add_float": "让 App 浮动…",
   "app_rules.add_space": "在空间中打开 App…",

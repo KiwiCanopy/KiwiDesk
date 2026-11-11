@@ -53,8 +53,8 @@ extension AppPickerButton {
             pointer: DropdownPointer.live()
         )
         switch picked {
-        case .onScreen(let key):
-            guard let app = lists.onScreen.first(where: { $0.key == key })
+        case .openApp(let key):
+            guard let app = lists.openApps.first(where: { $0.key == key })
             else { return }
             pick(.init(bundleID: app.key, name: app.name))
         case .installed(let id):
@@ -70,8 +70,8 @@ extension AppPickerButton {
 
     private func name(of slot: AppPickerSlot, in lists: Lists) -> String {
         switch slot {
-        case .onScreen(let key):
-            return lists.onScreen.first { $0.key == key }?.name ?? ""
+        case .openApp(let key):
+            return lists.openApps.first { $0.key == key }?.name ?? ""
         case .installed(let id):
             return lists.all.first { $0.bundleID == id }?.name ?? ""
         case .escape:
