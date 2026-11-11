@@ -77,6 +77,33 @@ struct OpenAppsTests {
         )
     }
 
+    @Test("a pocketed window's app and a parked, unfiled one are open")
+    func pocketAndParkedAway() {
+        let core = makeCore()
+        track(
+            core,
+            1,
+            pid: 900_101,
+            app: "Notes",
+            bundle: "com.apple.Notes",
+            in: "1"
+        )
+        #expect(core.state.markPocketWindow(WindowID(1)))
+        core.state.pocketWindow(WindowID(1))
+        #expect(core.state.workspaces.space(of: WindowID(1)) == nil)
+        core.state.awayWindows[WindowID(2)] = AwayWindow(
+            id: WindowID(2),
+            pid: 900_102,
+            appName: "",
+            appBundleID: "com.apple.Mail",
+            nativeSpace: 4,
+            isUp: false
+        )
+        let apps = core.openApps(beneathNormal: false)
+        #expect(apps.map(\.key) == ["com.apple.notes", "com.apple.mail"])
+        #expect(apps.last?.name == "com.apple.mail")
+    }
+
     @Test("an app listed and tracked is one row; KiwiDesk is none")
     func oneRowPerApp() {
         let core = makeCore()

@@ -97,7 +97,7 @@ struct KiwiVisionLensAppsCard: View {
                 if let app = AppBundlePanel.pick() { add(app.bundleID) }
             },
             exclude: Set(lens.apps),
-            open: { model.core.openApps(beneathNormal: false) }
+            openApps: { model.core.openApps(beneathNormal: false) }
         )
         .fixedSize()
         .accessibilityLabel(KiwiVisionLensWords.appsTitle)

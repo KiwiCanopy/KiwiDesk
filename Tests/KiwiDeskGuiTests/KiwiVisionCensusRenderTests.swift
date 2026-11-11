@@ -133,7 +133,7 @@ struct KiwiVisionCensusRenderTests {
         #expect(card.contains("exclude:Set(apps)"))
         #expect(
             card.contains(
-                "open:{model.core.openApps(beneathNormal:true)}"
+                "openApps:{model.core.openApps(beneathNormal:true)}"
             )
         )
     }

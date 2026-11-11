@@ -44,7 +44,7 @@ struct AppRulesOpenAppsTests {
         let lists = try source("Sections/AppRulesSection+Lists.swift")
         #expect(lists.occurrences(of: needle) == 2)
         let tile = try source("Sections/AppRulesSection+Automatic.swift")
-        #expect(tile.occurrences(of: "open:") == 0)
+        #expect(tile.occurrences(of: "openAppsOf:") == 0)
         let selector = try source(
             "Components/Common/AppRuleControls.swift"
         )

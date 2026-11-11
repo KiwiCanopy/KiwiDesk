@@ -72,7 +72,7 @@ struct KiwiVisionNeverDimmedCard: View {
                     if let app = AppBundlePanel.pick() { add(app.bundleID) }
                 },
                 exclude: Set(apps),
-                open: { model.core.openApps(beneathNormal: true) }
+                openApps: { model.core.openApps(beneathNormal: true) }
             )
             .fixedSize()
             .accessibilityLabel(SettingsCatalog.kiwiVision.neverDimmed.text)

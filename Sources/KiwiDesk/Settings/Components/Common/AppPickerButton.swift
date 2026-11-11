@@ -23,7 +23,7 @@ struct AppPickerButton: View {
     var guessed: (() -> [GuessedFloatApp])?
     /// Where given, the open apps lead the list as their own
     /// section, read when the popover opens (#2103 ruling 27).
-    var open: (() -> [OpenApp])?
+    var openApps: (() -> [OpenApp])?
     /// Opens the list on arrival: a key sequence's "App…" swaps
     /// this trigger in for its action picker (#3162).
     var opensOnAppear = false
@@ -89,7 +89,7 @@ struct AppPickerButton: View {
                 onClose?()
             }
             if isShowing {
-                openAppList = open?() ?? []
+                openAppList = openApps?() ?? []
                 opened()
             }
         }
@@ -132,9 +132,9 @@ struct AppPickerButton: View {
         .onAppear { searchFocused = true }
     }
 
-    var sections: (open: [OpenApp], all: [InstalledApp]) {
+    var sections: (openApps: [OpenApp], all: [InstalledApp]) {
         AppPickerSections.lists(
-            open: openAppList,
+            openApps: openAppList,
             installed: KeybindingCatalog.installedAppsSnapshot,
             exclude: exclude,
             query: search
@@ -144,10 +144,10 @@ struct AppPickerButton: View {
     typealias InstalledApp = KeybindingCatalog.InstalledApp
 
     @ViewBuilder private func sectionsBody(
-        _ lists: (open: [OpenApp], all: [InstalledApp])
+        _ lists: (openApps: [OpenApp], all: [InstalledApp])
     ) -> some View {
-        let both = !lists.open.isEmpty && !lists.all.isEmpty
-        if lists.open.isEmpty, lists.all.isEmpty {
+        let both = !lists.openApps.isEmpty && !lists.all.isEmpty
+        if lists.openApps.isEmpty, lists.all.isEmpty {
             Text(
                 L("app_picker.no_match", "No matching apps.")
             )
@@ -155,10 +155,10 @@ struct AppPickerButton: View {
             .foregroundStyle(SettingsTheme.ink3)
             .padding(.vertical, 6)
         }
-        if !lists.open.isEmpty {
+        if !lists.openApps.isEmpty {
             section(Self.openTitle, headed: both) {
-                ForEach(lists.open, id: \.key) { app in
-                    let slot = AppPickerSlot.open(app.key)
+                ForEach(lists.openApps, id: \.key) { app in
+                    let slot = AppPickerSlot.openApp(app.key)
                     AppPickerRow(
                         name: app.name,
                         bundleID: app.bundleID,

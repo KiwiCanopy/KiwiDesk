@@ -14,14 +14,14 @@ enum AppPickerSections {
     /// compare lowercased: `AppRef` lowercases a bundle id, and an
     /// entry may be a process name.
     static func lists(
-        open: [OpenApp],
+        openApps: [OpenApp],
         installed: [App],
         exclude: Set<String>,
         query: String
-    ) -> (open: [OpenApp], all: [App]) {
+    ) -> (openApps: [OpenApp], all: [App]) {
         let excluded = Set(exclude.map { $0.lowercased() })
         let shown =
-            open
+            openApps
             .filter { !excluded.contains($0.key) }
             .sorted {
                 $0.name.localizedStandardCompare($1.name)
@@ -46,20 +46,20 @@ enum AppPickerSections {
 /// A row the app picker's cursor can sit on: an app in either
 /// section, or the escape pinned below them.
 enum AppPickerSlot: Hashable {
-    case open(String)
+    case openApp(String)
     case installed(String)
     case escape
 
     typealias Lists = (
-        open: [OpenApp],
+        openApps: [OpenApp],
         all: [KeybindingCatalog.InstalledApp]
     )
 
-    /// The cursor's sequence over `lists`, in drawn order: on
-    /// screen, all apps, then the escape, which ↓ past the last
+    /// The cursor's sequence over `lists`, in drawn order: open
+    /// apps, all apps, then the escape, which ↓ past the last
     /// app reaches.
     static func sequence(of lists: Lists) -> [AppPickerSlot] {
-        lists.open.map { .open($0.key) }
+        lists.openApps.map { .openApp($0.key) }
             + lists.all.map { .installed($0.bundleID) } + [.escape]
     }
 
@@ -74,7 +74,7 @@ enum AppPickerSlot: Hashable {
     /// which sits outside the list.
     var rowID: String? {
         switch self {
-        case .open(let key): return key
+        case .openApp(let key): return key
         case .installed(let id): return id
         case .escape: return nil
         }

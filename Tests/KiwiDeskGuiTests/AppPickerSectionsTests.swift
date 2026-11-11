@@ -15,7 +15,7 @@ struct AppPickerSectionsTests {
         .init(bundleID: "com.apple.TextEdit", name: "TextEdit"),
     ]
 
-    private let open: [OpenApp] = [
+    private let openApps: [OpenApp] = [
         .init(
             app: AppRef(bundleID: "com.apple.TextEdit", name: "TextEdit"),
             name: "TextEdit"
@@ -28,13 +28,13 @@ struct AppPickerSectionsTests {
 
     @Test func openAppIsListedOnce() {
         let lists = AppPickerSections.lists(
-            open: open,
+            openApps: openApps,
             installed: installed,
             exclude: [],
             query: ""
         )
         #expect(
-            lists.open.map(\.key)
+            lists.openApps.map(\.key)
                 == ["sketchybar", "com.apple.textedit"]
         )
         #expect(lists.all.map(\.name) == ["Safari", "Finder"])
@@ -42,41 +42,41 @@ struct AppPickerSectionsTests {
 
     @Test func listedAppsLeaveBothSections() {
         let lists = AppPickerSections.lists(
-            open: open,
+            openApps: openApps,
             installed: installed,
             exclude: ["SketchyBar", "com.apple.safari"],
             query: ""
         )
-        #expect(lists.open.map(\.key) == ["com.apple.textedit"])
+        #expect(lists.openApps.map(\.key) == ["com.apple.textedit"])
         #expect(lists.all.map(\.name) == ["Finder"])
     }
 
     @Test func listedOpenAppStaysOutOfAllApps() {
         let lists = AppPickerSections.lists(
-            open: open,
+            openApps: openApps,
             installed: installed,
             exclude: ["com.apple.textedit"],
             query: ""
         )
         #expect(!lists.all.contains { $0.name == "TextEdit" })
-        #expect(!lists.open.contains { $0.name == "TextEdit" })
+        #expect(!lists.openApps.contains { $0.name == "TextEdit" })
     }
 
     @Test func searchFiltersBothSections() {
         let lists = AppPickerSections.lists(
-            open: open,
+            openApps: openApps,
             installed: installed,
             exclude: [],
             query: "sketchy"
         )
-        #expect(lists.open.map(\.key) == ["sketchybar"])
+        #expect(lists.openApps.map(\.key) == ["sketchybar"])
         #expect(lists.all.isEmpty)
         let none = AppPickerSections.lists(
-            open: open,
+            openApps: openApps,
             installed: installed,
             exclude: [],
             query: "zzz"
         )
-        #expect(none.open.isEmpty && none.all.isEmpty)
+        #expect(none.openApps.isEmpty && none.all.isEmpty)
     }
 }

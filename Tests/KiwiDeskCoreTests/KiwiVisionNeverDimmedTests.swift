@@ -189,16 +189,16 @@ struct KiwiVisionNeverDimmedTests {
         let apps = core.openApps(beneathNormal: true)
         #expect(
             apps.map(\.key)
-                == ["front", "test.kiwi.music", "other", "sketchybar"]
+                == ["test.kiwi.music", "other", "sketchybar", "front"]
         )
         #expect(
             apps.map(\.name)
-                == ["Front", "Music", "Other", "sketchybar"]
+                == ["Music", "Other", "sketchybar", "Front"]
         )
-        #expect(apps[1].bundleID == "test.kiwi.music")
-        #expect(apps.last?.bundleID == nil)
+        #expect(apps.first?.bundleID == "test.kiwi.music")
+        #expect(apps[2].bundleID == nil)
         let normal = core.openApps(beneathNormal: false)
-        #expect(normal.map(\.key) == ["front", "test.kiwi.music", "other"])
+        #expect(normal.map(\.key) == ["test.kiwi.music", "other", "front"])
     }
 
     /// A list read asks LaunchServices nothing while the list is

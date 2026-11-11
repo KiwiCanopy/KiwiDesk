@@ -62,7 +62,7 @@ struct AppSelector: View {
             },
             exclude: exclude,
             guessed: guessed,
-            open: openAppsOf.map { core in
+            openApps: openAppsOf.map { core in
                 { Self.ruleCandidates(core) }
             }
         )
@@ -81,7 +81,7 @@ struct AppSelector: View {
         )
     }
 
-    /// The on-screen apps a rule can name: a normal window's, and
+    /// The open apps a rule can name: a normal window's, and
     /// only with a bundle id, since `AppRef` matches a rule by bundle
     /// id alone — a process without one (SketchyBar) would save a
     /// rule that never matches.
