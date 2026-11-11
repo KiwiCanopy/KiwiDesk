@@ -179,7 +179,8 @@ struct JumpRefusalRowTests {
             optionHeld: option,
             wayHere: nil,
             refusal: JumpRowRefusal(swap: "Floating", move: "Sticky"),
-            onActivate: { _ in }
+            onActivate: { _ in },
+            pickModifiers: { [] }
         )
     }
 

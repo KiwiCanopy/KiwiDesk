@@ -45,7 +45,7 @@ struct JumpStripTests {
             apps: [
                 JumpApp(pid: 20, name: "Notes"),
                 JumpApp(pid: 10, name: "Mail"),
-                JumpApp(pid: 30, name: "Xcode", bundleID: "com.apple.dt"),
+                JumpApp(pid: 30, name: "Xcode"),
             ]
         )
     }
@@ -73,7 +73,7 @@ struct JumpStripTests {
         list.pickTile(3)
         #expect(list.results.isEmpty)
         #expect(list.selection == nil)
-        #expect(list.stripApp?.bundleID == "com.apple.dt")
+        #expect(list.stripApp?.name == "Xcode")
     }
 
     @Test("the last-app opener keeps row 1, the window used before")

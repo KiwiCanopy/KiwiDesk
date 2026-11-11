@@ -108,6 +108,10 @@ public struct JumpSnapshot: Sendable, Equatable {
     /// opener selects whatever order a lens gives the rows; nil
     /// where none was ever focused.
     public let lastUsed: JumpEntry.Target?
+    /// The window you are in — the one the list leaves out, where
+    /// it is also the one Swap here trades with — which the panel
+    /// draws greyed as the current window (#3168); nil otherwise.
+    public let yours: JumpEntry?
 
     public init(
         entries: [JumpEntry],
@@ -115,15 +119,18 @@ public struct JumpSnapshot: Sendable, Equatable {
         hereIcon: SpaceGlyph?,
         swapsInHere: Bool = false,
         apps: [JumpApp]? = nil,
-        lastUsed: JumpEntry.Target? = nil
+        lastUsed: JumpEntry.Target? = nil,
+        yours: JumpEntry? = nil
     ) {
         self.entries = entries
         self.here = here
         self.hereIcon = hereIcon
         self.swapsInHere = swapsInHere
         // A fixture's strip; Core always hands its own.
-        self.apps = apps ?? JumpApp.listed(in: entries)
+        self.apps =
+            apps ?? JumpApp.listed(in: [yours].compactMap { $0 } + entries)
         self.lastUsed = lastUsed
+        self.yours = yours
     }
 }
 
