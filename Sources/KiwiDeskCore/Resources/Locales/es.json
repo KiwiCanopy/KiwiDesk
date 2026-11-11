@@ -85,7 +85,7 @@
   "app_picker.no_match": "No hay apps que coincidan.",
   "app_picker.search.placeholder": "Buscar apps",
   "app_picker.section.all": "Todas las apps",
-  "app_picker.section.on_screen": "En pantalla ahora",
+  "app_picker.section.open": "Apps abiertas",
   "app_rules.add": "Añadir",
   "app_rules.add_float": "Hacer flotar una app…",
   "app_rules.add_space": "Abrir una app en un espacio…",

@@ -92,7 +92,7 @@ struct KiwiVisionCensusRenderTests {
     }
 
     /// Never dimmed sits last, every lens's, and walks its list; its
-    /// picker leads with what is on screen (#2103 rulings 26–27).
+    /// picker leads with the open apps (#2103 rulings 26–27).
     @Test("the Never dimmed card walks its list below Stays clear")
     func neverDimmedCardWiring() throws {
         let section = try Self.squashed(
@@ -133,7 +133,7 @@ struct KiwiVisionCensusRenderTests {
         #expect(card.contains("exclude:Set(apps)"))
         #expect(
             card.contains(
-                "onScreen:{model.core.appsOnScreen(beneathNormal:true)}"
+                "openApps:{model.core.openApps(beneathNormal:true)}"
             )
         )
     }
