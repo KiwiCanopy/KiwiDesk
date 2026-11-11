@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The Mouse & trackpad pictures (#1726). Each takes the gesture's
+/// The Mouse & Trackpad pictures (#1726). Each takes the gesture's
 /// phase `t`, 0 → 1, and rests on its key frame at 1 — the frame
 /// Reduce Motion shows. Coordinates are the 120 × 72 plate's.
 enum GesturePicture {

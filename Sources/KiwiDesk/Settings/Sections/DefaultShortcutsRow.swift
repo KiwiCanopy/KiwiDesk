@@ -4,7 +4,8 @@ import SwiftUI
 /// The Default shortcuts row under the Layers card (#3074): Restore
 /// and, while `init.lua` holds shortcuts, Import (#4, #1096), in
 /// the `SettingsActionRow` shape Files & Reset uses. Always drawn;
-/// Restore greys with its reason as the caption.
+/// what Restore does is its `?`, and a caption states only a live
+/// state: why it greys, or that nothing is left to restore (#3178).
 struct DefaultShortcutsRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
@@ -102,7 +103,7 @@ struct DefaultShortcutsRow: View {
         .settingsActionButton()
         .accessibilityLabel(restoreName)
         .modifier(
-            GreyOut(active: reason != nil, help: caption(reason))
+            GreyOut(active: reason != nil, help: caption(reason) ?? "")
         )
         .confirmationDialog(
             L(
@@ -159,19 +160,14 @@ struct DefaultShortcutsRow: View {
         )
     }
 
-    private func caption(_ reason: ShortcutsGates.InertReason?) -> String {
+    /// The live state's line; nil while Restore acts, its fixed
+    /// explanation being the `?`'s (#3178).
+    private func caption(
+        _ reason: ShortcutsGates.InertReason?
+    ) -> String? {
         switch reason {
         case nil:
-            return L(
-                "shortcuts.restore_defaults.help",
-                "Puts back the shortcuts KiwiDesk provides, "
-                    + "including ones added since you installed "
-                    + "it. Shortcuts you added under "
-                    + "\u{201C}%1$@\u{201D} and \u{201C}%2$@\u{201D} "
-                    + "are kept.",
-                SettingsCatalog.shortcuts.openApplications.text,
-                SettingsCatalog.shortcuts.luaBindings.control.text
-            )
+            return nil
         case .otherLayerPicked?:
             return L(
                 "shortcuts.restore_defaults.other_layer",
@@ -191,7 +187,25 @@ struct DefaultShortcutsRow: View {
         }
     }
 
+    /// What Restore puts back and keeps, then how it asks.
     private var restoreExplain: String {
+        restoresWhat + "\n\n" + restoreAsks
+    }
+
+    private var restoresWhat: String {
+        L(
+            "shortcuts.restore_defaults.help",
+            "Puts back the shortcuts KiwiDesk provides, "
+                + "including ones added since you installed "
+                + "it. Shortcuts you added under "
+                + "\u{201C}%1$@\u{201D} and \u{201C}%2$@\u{201D} "
+                + "are kept.",
+            SettingsCatalog.shortcuts.openApplications.text,
+            SettingsCatalog.shortcuts.luaBindings.control.text
+        )
+    }
+
+    private var restoreAsks: String {
         L(
             "shortcuts.restore_defaults.explain",
             "Only the “default” layer has shipped shortcuts; "

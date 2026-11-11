@@ -223,7 +223,7 @@ extension KiwiCore {
         cueResizeRefusal(.moveNeedsFloat(window))
     }
 
-    /// `move_floating` stopped at the float region (#2972).
+    /// `move_floating` stopped at its reach (#2972, #3163).
     func refuseMoveAtBoundary(_ window: WindowID, _ to: Direction) {
         cueResizeRefusal(.moveAtBoundary(window, direction: to))
     }

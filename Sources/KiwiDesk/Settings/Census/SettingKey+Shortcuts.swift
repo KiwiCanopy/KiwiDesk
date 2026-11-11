@@ -196,10 +196,10 @@ extension ShortcutsKey {
             return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
-        // KiwiDesk's own chord, under the group's "KiwiDesk"
-        // subheading since the General drawer folded in (#1520).
+        // KiwiDesk's own chord, a built-in, under Show & hide's
+        // "KiwiDesk" subheading (#1520, #3184).
         case .openSettings:
-            return .row(.shortcuts, .openApplications, .atRest)
+            return .row(.shortcuts, .showHide, .atRest)
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:

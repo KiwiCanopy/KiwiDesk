@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & trackpad ▸ On the KiwiShelf (#1726). The Spring delay is
+/// Mouse & Trackpad ▸ On the KiwiShelf (#1726). The Spring delay is
 /// read and linked, never copied: its control is the Space Bar's.
 struct GesturesShelfEntries: View {
     @ObservedObject var model: SettingsModel
-    /// The entry that plays once as it appears (`GesturesDrawer`).
+    /// The entry that plays once as it appears (`GesturesPart`).
     @Binding var playing: GestureItem?
 
     private var settings: TilingSettings { model.config.settings }

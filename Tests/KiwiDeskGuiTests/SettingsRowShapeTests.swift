@@ -212,18 +212,34 @@ struct SettingsRowShapeTests {
     func compactControlsTrail() throws {
         let root = Self.root.appendingPathComponent("Sources/KiwiDesk")
         var found: [String: Int] = [:]
+        var inline: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
             .filter { !$0.isWhitespace }
             let name = file.lastPathComponent
-            let n = source.occurrences(
-                of: "SettingsRowShape(controlTrails:true){"
-            )
+            let n =
+                source.occurrences(
+                    of: "SettingsRowShape(controlTrails:true){"
+                )
+                + source.occurrences(
+                    of: "SettingsRowShape(controlTrails:true,staysInline:"
+                )
             if n > 0 { found[name] = n }
+            // One row may refuse the stack, and only while it has
+            // no caption (#3178).
+            if source.contains("staysInline:") {
+                inline.insert(name)
+            }
         }
         #expect(found == Self.trailing)
+        #expect(inline == ["SettingsActionRow.swift"])
+        let action = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "SettingsActionRow.swift"
+        )
+        #expect(action.contains("staysInline:caption==nil"))
         // The menu row adds no `Spacer` of its own, which is what
         // pinned the menu to the axis before.
         let dropdown = try squashed(

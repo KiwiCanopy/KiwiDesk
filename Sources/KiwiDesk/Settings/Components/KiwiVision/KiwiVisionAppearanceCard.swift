@@ -46,7 +46,7 @@ struct KiwiVisionAppearanceCard: View {
         return DropdownRow(
             label: SettingsCatalog.kiwiVision.appearance.text,
             spokenValue: Self.title(selection),
-            help: help
+            help: Self.help
         ) {
             Picker(
                 SettingsCatalog.kiwiVision.appearance.text,
@@ -85,8 +85,9 @@ struct KiwiVisionAppearanceCard: View {
         }
     }
 
-    /// The option's own label is interpolated (#818).
-    private var help: String {
+    /// The option's own label is interpolated (#818); a lens's
+    /// override row takes it too (#3176).
+    static var help: String {
         L(
             "kiwivision.appearance.help",
             "Switches macOS — every app, not only KiwiDesk — to this "

@@ -5,39 +5,23 @@ import AppKit
 /// opens. An app's recency is its own activation or its windows'
 /// latest focus, on one tick (`appRecencyRank`).
 extension KiwiCore {
-    /// Every app a row lists, then each app activated since
-    /// KiwiDesk started that lists none — a regular app still
-    /// running, not KiwiDesk, not the one in front — ordered by
-    /// recency; ties keep the rows' order.
-    func jumpApps(for entries: [JumpEntry]) -> [JumpApp] {
-        var apps = JumpApp.listed(in: entries)
-        let seen = Set(apps.map(\.pid))
-        let stamped = state.appRecency.keys.filter { !seen.contains($0) }
-        if !stamped.isEmpty {
-            apps += emptyJumpApps(Set(stamped))
-        }
-        return apps.enumerated().sorted { lhs, rhs in
+    /// Every app a row lists, ordered by recency, ties keeping the
+    /// rows' order, with your app first, as ⌘⇥ lists the app in
+    /// front (#3168). An app with no listed window has no tile: the
+    /// strip never holds an app All does not.
+    func jumpApps(
+        for entries: [JumpEntry],
+        first yours: JumpEntry?
+    ) -> [JumpApp] {
+        let listed = JumpApp.listed(in: entries).enumerated()
+        let ranked = listed.sorted { lhs, rhs in
             let left = state.appRecencyRank(of: lhs.element.pid)
             let right = state.appRecencyRank(of: rhs.element.pid)
             return left != right ? left > right : lhs.offset < rhs.offset
         }.map(\.element)
-    }
-
-    /// The stamped apps with no row: their pick reopens them, so
-    /// each carries its bundle id; one without is left out.
-    private func emptyJumpApps(_ pids: Set<pid_t>) -> [JumpApp] {
-        eventLoop.liveApps(owners: []).filter { app in
-            pids.contains(app.pid) && app.ref.bundleID != nil
-                && !EventLoop.isOwnProcess(app.pid)
-                && app.activationPolicy == .regular
-                && !frontmostOwns(pid: app.pid)
-        }.map { app in
-            JumpApp(
-                pid: app.pid,
-                name: app.ref.name,
-                bundleID: app.ref.bundleID
-            )
-        }
+        guard let yours else { return ranked }
+        return [JumpApp(pid: yours.pid, name: yours.app)]
+            + ranked.filter { $0.pid != yours.pid }
     }
 
     /// The listed window with the newest focus stamp (#1840), nil
@@ -49,17 +33,5 @@ extension KiwiCore {
             return rank > 0 ? (entry.target, rank) : nil
         }
         .max { $0.1 < $1.1 }?.0
-    }
-
-    /// Reopens an app the strip lists with no window, as Open or
-    /// Focus does for an app with nothing up (#1840): its launch
-    /// follow included.
-    public func reopenJumpApp(bundleID: String) {
-        let response = withUserMotion {
-            launch([.string(bundleID)], newInstance: false)
-        }
-        if !response.isSuccess {
-            onLog("jump: reopen \(bundleID) refused")
-        }
     }
 }

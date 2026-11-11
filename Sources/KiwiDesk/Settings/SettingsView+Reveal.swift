@@ -42,6 +42,11 @@ extension SettingsView {
         case .newLens:
             model.nav.kiwiVisionAddRequested = true
         }
+        // A hit picks the Shortcuts part that holds it, over the
+        // one remembered (#3184).
+        if resolved.destination == .shortcuts, let scroll {
+            model.showShortcutsSegment(holding: scroll)
+        }
         // Unconditional, nil included: guarding a nil→nil publish
         // would stop a destination-only request from CLEARING an
         // unconsumed `pendingScroll`, and the driver would wash

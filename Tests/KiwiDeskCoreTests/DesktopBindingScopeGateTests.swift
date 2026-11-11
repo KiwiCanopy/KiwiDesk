@@ -123,7 +123,7 @@ struct DesktopBindingScopeGateTests {
         core.desktopBindings[key]?.bind(
             .init(name: "Vision", setup: here)
         ) { _ in 1 }
-        core.applyDesktopBinding(in: snapshot)
+        core.applyDesktopBinding(in: snapshot, cause: .event)
         #expect(core.profiles.currentName == "Vision")
         // Live AND the pick: stands down with no file read.
         try FileManager.default.removeItem(

@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Shortcuts & Gestures jump chips' pairings (#1520) and the
+/// The Shortcuts jump chips' pairings (#1520) and the
 /// icon picker cells that share their mark, measured
 /// by the one contrast suite and kept here for their length: the
 /// label over the chip's rest fill, its hover lift and its press

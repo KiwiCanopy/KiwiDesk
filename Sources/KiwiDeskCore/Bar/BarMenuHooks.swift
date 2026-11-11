@@ -23,7 +23,7 @@ public enum SettingsLanding: Equatable, Sendable {
     case kiwiVision
     /// KiwiVision with its add-lens popover open (#2359 ruling 4).
     case newLens
-    /// Shortcuts & Gestures, on its Pocket card (#2941).
+    /// Shortcuts, on its Pocket card (#2941).
     case pocketShortcuts
     /// The Pocket card's add row, "Give an app its own Pocket key…"
     /// (#2941).

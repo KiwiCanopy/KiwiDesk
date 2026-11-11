@@ -157,7 +157,10 @@ struct DesktopBindingFitTests {
         // The verb itself takes the binding door.
         bind(core, "Golden")
         #expect(core.profiles.currentName == "Desk")
-        core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
+        core.applyDesktopBinding(
+            in: NativeSpaces.desktopSnapshot(),
+            cause: .event
+        )
         #expect(core.profiles.currentName == "Desk")
         #expect(
             log.contains {

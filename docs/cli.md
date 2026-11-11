@@ -1047,6 +1047,12 @@ in a floating-layout space, which places nothing.
 That floor is Floating's `min_window_size` on the axis
 resized, whatever layout the window's space uses.
 
+:::unreleased
+A floating window's `resize` and `move_floating` run to the screen's
+visible edge; a bar on the top edge stops them, a bottom or side bar
+does not (#3163).
+:::
+
 A focused window in native full screen is refused ahead of every layout,
 whatever its float state, with `the focused window is
 fullscreen` (#1298): nothing is written and no neighbour moves;

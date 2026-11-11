@@ -17,4 +17,11 @@ extension ShortcutGroup {
         case .apps: L("shortcuts.panel.apps", "Apps")
         }
     }
+
+    /// The word for the user's own shortcuts: KiwiHub's band for
+    /// them and the Shortcuts page's Personal part (#3184), one
+    /// string so the two never differ.
+    @MainActor static var personalTitle: String {
+        L("shortcuts.panel.custom", "Personal")
+    }
 }

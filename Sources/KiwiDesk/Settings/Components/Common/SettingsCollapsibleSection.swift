@@ -14,9 +14,6 @@ struct SettingsCollapsibleSection<Content: View>: View {
     private let summary: String
     /// The title's `?`: a concept the card names (#3162).
     private let help: String?
-    /// Drawn under the disclosure while shut only — the Mouse &
-    /// trackpad card's pictures (owner ruling 2026-10-17).
-    private let preview: AnyView?
     @Binding private var isExpanded: Bool
     private let onToggle: ((Bool) -> Void)?
     @ViewBuilder private let content: () -> Content
@@ -28,7 +25,6 @@ struct SettingsCollapsibleSection<Content: View>: View {
         isExpanded: Binding<Bool>,
         summary: String,
         help: String? = nil,
-        preview: AnyView? = nil,
         onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -38,7 +34,6 @@ struct SettingsCollapsibleSection<Content: View>: View {
         self._isExpanded = isExpanded
         self.summary = summary
         self.help = help
-        self.preview = preview
         self.content = content
     }
 
@@ -57,7 +52,6 @@ struct SettingsCollapsibleSection<Content: View>: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .accessibilityLabel(summary)
-            if !isExpanded, let preview { preview }
             if isExpanded {
                 SettingsTheme.hairlineSubtle.frame(height: 1)
                 content()
