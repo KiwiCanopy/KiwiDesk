@@ -39,10 +39,12 @@ extension KiwiCore {
         handBackBackgroundActivation(activation, now: now)  // #3141
         // Keyed as a rule names the app (#3211): its bundle id, or
         // its process name where it has none.
-        let app = AppRef(
-            bundleID: activation.bundleID,
-            name: eventLoop.appRef(of: activation.pid).name
-        ).listKey
+        // The name is read only where no bundle id answers: an
+        // unobserved process's costs a LaunchServices lookup.
+        let app =
+            activation.bundleID != nil
+            ? AppRef(bundleID: activation.bundleID, name: "").listKey
+            : eventLoop.appRef(of: activation.pid).listKey
         if launchFollow.owed(at: now) != app {
             launchFollow.forget(keeping: app)
         }
