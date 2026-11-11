@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// What the pointer lifts on the Desktops side (#3209): a Desktop's
@@ -9,13 +10,18 @@ struct DesktopsPointer {
     var onHover: (JumpHover) -> Void = { _ in }
     var onHoverEnd: (JumpHover) -> Void = { _ in }
 
-    /// Whether `target`, selected or not, draws the lift.
-    func lifts(_ target: JumpHover, selected: Bool) -> Bool {
+    /// Whether `target`, selected or not, draws the lift; one a
+    /// click would leave alone never does.
+    func lifts(
+        _ target: JumpHover,
+        selected: Bool,
+        clickable: Bool = true
+    ) -> Bool {
         JumpHover.lifts(
             target,
             hover: hover,
             selected: selected,
-            clickable: true
+            clickable: clickable
         )
     }
 }
@@ -33,5 +39,19 @@ extension View {
                 pointer.onHoverEnd(target)
             }
         }
+    }
+}
+
+/// The click a Desktops tap answers: its count and modifiers, read
+/// only from a mouse event, since `clickCount` traps on any other
+/// and VoiceOver's press has no event of its own (#3209).
+enum DesktopsClick {
+    static func of(
+        _ event: NSEvent?
+    ) -> (count: Int, modifiers: NSEvent.ModifierFlags) {
+        guard let event,
+            [.leftMouseUp, .leftMouseDown].contains(event.type)
+        else { return (1, []) }
+        return (event.clickCount, event.modifierFlags)
     }
 }

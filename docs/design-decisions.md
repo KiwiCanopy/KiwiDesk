@@ -11817,8 +11817,8 @@ reads mainly while it moves, so a still frame cannot lean on it. So
 the weights differ, a tile whose click changes nothing stays flat, and a selected
 Layout tile gains a check, which is what a colour-blind reader and a
 screenshot have left. A chip, a row and a Space card's menu face keep
-the fill, and KiwiHub does because it marks selection with a fill the
-split still protects. The setup tour's tiles take the edge alone: its
+the fill. KiwiHub's rows keep it too, while its tiles ring their
+selection (▸ *KiwiHub's rows fill and its tiles ring*). The setup tour's tiles take the edge alone: its
 scrollers leave no room for a rise, and its ground is not a card's.
 
 **The hover edge takes a neutral of its own (owner 2026-11-08).**
@@ -15201,10 +15201,28 @@ no tile below it.
 
 The pointer lifts and the keys select (▸ *In KiwiHub the pointer
 lifts and the keys select*). The ✓ never moves with the
-selection: the pill marks where ↩ goes, the ✓ what the Space
+selection: the ring marks where ↩ goes, the ✓ what the Space
 shows. One verb opens every side, `kiwihub.show`, and the CLI
 reaches it (▸ *The key panel is KiwiHub*). `JumpScopeModelTests`,
 `ViewPickListTests` and `JumpKeyTests` hold the keys. (#2229)
+
+:::unreleased
+**KiwiHub's rows fill and its tiles ring (#3210, owner ruling
+2026-11-11).** A row marks its selection as native lists do, with
+the solid selection fill. A tile — the app strip's, a layout tile, a
+Desktops icon — carries an icon or a schematic, so it takes a 2 pt
+selection ring over its unselected inks. Selection and hover were
+two greens told apart only by strength, which #1173 forbids; a ring
+and a fill differ in shape. The pointer lifts a KiwiHub tile with the
+palette's hover fill, never #3042's edge and rise: a ring beside an
+edge on one tile would be two near-identical strokes. A selected
+tile under the pointer shows the ring alone. A resting plate on a
+tile takes a neutral fill, so it never reads as hovered. The item in
+use — the active profile or lens chip, the shown Desktop — wears a
+filled check circle in its own ink, never the accent, and a chip's
+name goes semibold over a width every chip reserves, so the line
+never shifts.
+:::
 
 **In KiwiHub the pointer lifts and the keys select (#2365, owner
 ruling 2026-10-17).** The item under the pointer takes a neutral
@@ -15341,7 +15359,9 @@ one may be picked, and ↩ drops them where the arrows chose, one
 move per window in pick order. ⇧ always means "a window moves, you
 stay" and ⌃ means "and follow" across KiwiHub, so one modifier
 never means opposites in one panel; ⌃-click is the secondary click
-on a Mac, so the mouse has no follow and a drop means stay. Esc
+on a Mac, so the mouse has no follow and a drop means stay. A
+click is ↩ on what it lands on, and a double click acts once, so a
+habit of double-clicking never acts twice (#3209). Esc
 steps back one layer per press: the carry, the open Space, the
 search, then the panel. The footer is the only hint surface: no
 Settings button and no overlay listing every key, which would be a

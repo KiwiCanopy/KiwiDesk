@@ -10,6 +10,9 @@ final class PanelPresence: ObservableObject {
     @Published private(set) var leaving = false
     /// How long the fade out takes.
     static let leaveDuration: TimeInterval = 0.15
+    /// A held panel's alpha: at 0 a window passes clicks through
+    /// (measured 2026-11-11, macOS 27.2), so it keeps a trace.
+    nonisolated static let holdAlpha: CGFloat = 0.01
 
     /// Starts the fade, then orders `panel` out once it lands — at
     /// once under Reduce Motion — unless a later opening of the
@@ -32,7 +35,8 @@ final class PanelPresence: ObservableObject {
                 panel?.orderOut(nil)
                 return
             }
-            panel?.alphaValue = 0
+            panel?.ignoresMouseEvents = false
+            panel?.alphaValue = Self.holdAlpha
             DispatchQueue.main.asyncAfter(deadline: .now() + rest) {
                 [weak self, weak panel] in
                 guard let self, stillCurrent(self) else { return }
@@ -42,25 +46,30 @@ final class PanelPresence: ObservableObject {
         }
     }
 
-    /// `clickHold` for the event being handled now.
-    static func clickHoldNow() -> TimeInterval {
+    /// `clickHold` for the event being handled now on `panel`; read
+    /// at the press, since a close may finish a turn later.
+    static func clickHoldNow(on panel: NSWindow?) -> TimeInterval {
         clickHold(
-            after: NSApp.currentEvent,
+            after: NSApp?.currentEvent,
+            on: panel?.windowNumber,
             now: ProcessInfo.processInfo.systemUptime,
             interval: NSEvent.doubleClickInterval
         )
     }
 
     /// How long a close holds its panel up: what is left of the
-    /// double-click interval after the release that made it, and
-    /// nothing for a close no click made. Times are uptime seconds,
-    /// `NSEvent.timestamp`'s clock.
+    /// double-click interval after the release on the panel
+    /// `window` that made it, and nothing for a close no click on it
+    /// made. Times are uptime seconds, `NSEvent.timestamp`'s clock.
     static func clickHold(
         after event: NSEvent?,
+        on window: Int?,
         now: TimeInterval,
         interval: TimeInterval
     ) -> TimeInterval {
-        guard let event, event.type == .leftMouseUp else { return 0 }
+        guard let event, event.type == .leftMouseUp,
+            event.windowNumber == window
+        else { return 0 }
         return max(0, interval - (now - event.timestamp))
     }
 }

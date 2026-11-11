@@ -55,12 +55,12 @@ extension JumpModel {
         let modifiers = pickModifiers(modifiers)
         state.select(place)
         desktops = state
+        // ⌘↩ and ⌥↩ name a window, which a place is not.
+        guard modifiers.isDisjoint(with: [.option, .command]) else { return }
         if state.isCarrying || modifiers.contains(.shift) {
             let moveHere = !state.isCarrying
             return handleDesktops(.pick(moveHere: moveHere), repeated: false)
         }
-        // ⌘↩ and ⌥↩ name a window, which a place is not.
-        guard modifiers.isDisjoint(with: [.option, .command]) else { return }
         if opens {
             handleDesktops(.pick(moveHere: false), repeated: false)
         } else if let desktop = state.desktop(place) {
@@ -71,7 +71,7 @@ extension JumpModel {
     /// A click on a window's icon is ↩ on it on release (#3209):
     /// it jumps there, and a carry drops on its Space; ⇧ Move here,
     /// ⌥ Swap here, ⌘ pick up or put back. A double click's second
-    /// press acts on nothing.
+    /// press acts on nothing, and ⌥ during a carry nothing, as ⌥↩.
     func clickWindow(
         _ id: WindowID,
         in place: DesktopsPlace,
@@ -84,6 +84,8 @@ extension JumpModel {
         guard count < 2 else { return }
         let held = pickModifiers(modifiers)
             .intersection([.shift, .option, .command])
+        // ⌥↩ swaps no window while windows ride along.
+        if state.isCarrying, held.contains(.option) { return }
         if state.isCarrying, !held.contains(.command) {
             state.select(place)
             desktops = state

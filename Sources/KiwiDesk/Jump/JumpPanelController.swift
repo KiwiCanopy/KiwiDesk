@@ -204,8 +204,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         guard panel?.isVisible != false, !presence.leaving else {
             return false
         }
-        // Read at the press: the release below may run a turn later.
-        let hold = PanelPresence.clickHoldNow()
+        let hold = PanelPresence.clickHoldNow(on: panel)
         handBack.release(distrusting: distrusting) { [weak self] in
             self?.fadeOut(holdUnseen: hold)
         }

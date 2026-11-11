@@ -123,11 +123,8 @@ struct DesktopCardView: View {
     /// The title is ↩ on the Desktop it names (#3209): it jumps
     /// there; during a carry it drops on the line the Desktop shows.
     private func click() {
-        let event = NSApp.currentEvent
-        click(
-            count: event?.clickCount ?? 1,
-            modifiers: event?.modifierFlags ?? []
-        )
+        let click = DesktopsClick.of(NSApp.currentEvent)
+        self.click(count: click.count, modifiers: click.modifiers)
     }
 
     private func click(count: Int, modifiers: NSEvent.ModifierFlags) {

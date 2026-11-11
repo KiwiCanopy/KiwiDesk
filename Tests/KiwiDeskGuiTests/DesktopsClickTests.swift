@@ -97,7 +97,41 @@ struct DesktopsClickTests {
         #expect(model.desktops?.place == line)
     }
 
-    @Test("a close a click made holds for the rest of the double click")
+    @Test("⌥ and ⌘ on a place, and ⌥ on an icon, drop no carry")
+    func carryIgnoresWindowModifiers() {
+        let box = Box()
+        let model = model(box)
+        model.clickWindow(
+            WindowID(5),
+            in: first,
+            count: 1,
+            modifiers: .command
+        )
+        model.clickPlace(line, count: 1, modifiers: .option, opens: true)
+        model.clickPlace(line, count: 1, modifiers: .command, opens: true)
+        model.clickWindow(
+            WindowID(20),
+            in: line,
+            count: 1,
+            modifiers: .option
+        )
+        #expect(box.actions.isEmpty)
+        #expect(model.desktops?.carried == [WindowID(5)])
+    }
+
+    @Test("an icon on another line takes no lift on a still pointer")
+    func strangerIconNeedsAMove() {
+        let model = model(Box())
+        let point = CGPoint(x: 1, y: 1)
+        model.currentPointer = { point }
+        model.hoverDesktops(.place(line), pointer: point)
+        #expect(model.hover == .place(line))
+        // Window 3 sits on `first`, not on the lifted line.
+        model.hoverDesktops(.window(WindowID(3)), pointer: point)
+        #expect(model.hover == nil)
+    }
+
+    @Test("a close a click on the panel made holds for the double click")
     func clickHoldLastsTheInterval() throws {
         let up = try #require(
             NSEvent.mouseEvent(
@@ -105,29 +139,35 @@ struct DesktopsClickTests {
                 location: .zero,
                 modifierFlags: [],
                 timestamp: 100,
-                windowNumber: 0,
+                windowNumber: 42,
                 context: nil,
                 eventNumber: 0,
                 clickCount: 1,
                 pressure: 0
             )
         )
-        let hold = PanelPresence.clickHold(
-            after: up,
-            now: 100.1,
-            interval: 0.5
-        )
-        #expect(abs(hold - 0.4) < 0.0001)
-        #expect(
-            PanelPresence.clickHold(after: up, now: 101, interval: 0.5) == 0
-        )
+        func hold(_ event: NSEvent?, on window: Int?, at now: Double)
+            -> Double
+        {
+            PanelPresence.clickHold(
+                after: event,
+                on: window,
+                now: now,
+                interval: 0.5
+            )
+        }
+        #expect(abs(hold(up, on: 42, at: 100.1) - 0.4) < 0.0001)
+        #expect(hold(up, on: 42, at: 101) == 0)
+        // A release on another window, or none, made no close.
+        #expect(hold(up, on: 7, at: 100.1) == 0)
+        #expect(hold(up, on: nil, at: 100.1) == 0)
         let key = try #require(
             NSEvent.keyEvent(
                 with: .keyDown,
                 location: .zero,
                 modifierFlags: [],
                 timestamp: 100,
-                windowNumber: 0,
+                windowNumber: 42,
                 context: nil,
                 characters: "\r",
                 charactersIgnoringModifiers: "\r",
@@ -135,12 +175,8 @@ struct DesktopsClickTests {
                 keyCode: 36
             )
         )
-        #expect(
-            PanelPresence.clickHold(after: key, now: 100, interval: 0.5) == 0
-        )
-        #expect(
-            PanelPresence.clickHold(after: nil, now: 100, interval: 0.5) == 0
-        )
+        #expect(hold(key, on: 42, at: 100) == 0)
+        #expect(hold(nil, on: 42, at: 100) == 0)
     }
 
     @Test("an icon keeps the lift over its own line")

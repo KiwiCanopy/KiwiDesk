@@ -70,17 +70,20 @@ extension JumpModel {
         guard scope == .desktops else { return }
         switch (target, hover) {
         case (.place(let place), .window(let id)):
-            if desktops?.line(place)?.windows.contains(where: {
-                $0.id == id
-            }) == true {
-                return
+            if holds(place, id) { return }
+        case (.window(let id), .place(let place)):
+            if holds(place, id) {
+                return noteHover(target, pointer: pointer, inside: hover)
             }
-        case (.window, .place):
-            return noteHover(target, pointer: pointer, inside: hover)
         default:
             break
         }
         noteHover(target, pointer: pointer)
+    }
+
+    /// Whether `place`'s line lists window `id`.
+    private func holds(_ place: DesktopsPlace, _ id: WindowID) -> Bool {
+        desktops?.line(place)?.windows.contains { $0.id == id } == true
     }
 
     /// The pointer left `target`.

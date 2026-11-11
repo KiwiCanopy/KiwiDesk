@@ -33,7 +33,11 @@ struct DesktopLineView: View {
     }
     /// The pointer lifts the line, grey, never the selected one.
     private var isLifted: Bool {
-        pointer.lifts(.place(place), selected: isSelected && !state.isInside)
+        pointer.lifts(
+            .place(place),
+            selected: isSelected && !state.isInside,
+            clickable: state.target(place) != nil
+        )
     }
 
     var body: some View {
@@ -178,12 +182,7 @@ struct DesktopLineView: View {
     }
 
     private func click() {
-        let event = NSApp.currentEvent
-        onPlace(
-            place,
-            event?.clickCount ?? 1,
-            event?.modifierFlags ?? [],
-            true
-        )
+        let click = DesktopsClick.of(NSApp.currentEvent)
+        onPlace(place, click.count, click.modifiers, true)
     }
 }

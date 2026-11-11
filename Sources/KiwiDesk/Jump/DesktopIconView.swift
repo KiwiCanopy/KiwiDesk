@@ -34,9 +34,10 @@ struct DesktopIconView: View {
             .overlay(alignment: .bottom) { underline }
             .contentShape(Rectangle())
             .onTapGesture {
-                let event = NSApp.currentEvent
-                onClick(event?.clickCount ?? 1, event?.modifierFlags ?? [])
+                let click = DesktopsClick.of(NSApp.currentEvent)
+                onClick(click.count, click.modifiers)
             }
+            .accessibilityAction { onClick(1, []) }
             .onDrag { DesktopsDrag.provider(dragged) }
             .desktopsHover(.window(window.id), pointer)
             .accessibilityElement()

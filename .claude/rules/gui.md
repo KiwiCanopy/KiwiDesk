@@ -1304,7 +1304,8 @@ must keep:
   is the owner's exception (#3042):** it answers the pointer with
   `hoverEdge` and `hoverRise(_:in:)`, no fill change
   (`HoverRiseAdoptionTests`; `docs/ui-patterns.md` ▸ *Hover confirms
-  custom hit areas* names the surfaces). The pointer still never
+  custom hit areas* names the surfaces), KiwiHub's tiles excepted
+  (▸ *In KiwiHub, rows fill and tiles ring*). The pointer still never
   replaces a marked stroke: selection's colour and weight win, and a
   selected stroke stays heavier than `hoverEdgeStroke`. `hoverEdge` is
   a neutral of its own, apart from `accent` by `ColorVision`'s
@@ -1330,17 +1331,21 @@ must keep:
   Return reads keeps the pointer apart, as KiwiHub does
   (`JumpHoverTests`).
 - **In KiwiHub, rows fill and tiles ring (#3210).** A list row — a
-  Windows row, a Desktops line — shows its selection as the solid
-  `paint.selection` fill, as native lists do. A tile — the app
-  strip, a layout tile, a Desktops icon — shows it as a 2 pt
-  `paint.selection` ring with no fill and its unselected inks, and
-  a tile both selected and under the pointer shows the ring alone.
-  KiwiHub's tiles are an owner exception to #3042: the pointer lifts
-  them with `paint.rowHover`, the palette's hover fill, never with
-  `hoverEdge` or `hoverRise`. A resting plate on a tile, such as
-  All's plate or a count capsule, takes a neutral fill that is no
-  hover colour. A view chip keeps its tick for active and its fill
-  for selected (`KiwiHubTileSelectionTests`).
+  Windows row, a Desktops line — takes the solid `paint.selection`
+  fill for its selection, as native lists do. A tile — the app strip,
+  a layout tile, a Desktops icon — takes a 2 pt `paint.selection`
+  ring with no fill over its unselected inks, and the ring alone
+  while it is also under the pointer
+  (`KiwiHubTileSelectionTests` ▸ `tilesRing`, `rowsFill`). KiwiHub's
+  tiles are an owner exception to #3042: the pointer lifts them with
+  `paint.rowHover`, never `hoverEdge` or `hoverRise`. A resting
+  plate on a tile, such as All's plate or a count capsule, takes a
+  neutral fill that is no hover colour
+  (`KiwiHubTileSelectionTests` ▸ `stripPlatesAreNeutral`). An item
+  in use — a current view chip, the shown Desktop's title — takes a
+  filled check circle in its own ink, never the accent, and a chip's
+  name goes semibold over the width every chip reserves; the
+  #3042 exception and the mark are review's.
 
 ## A diff row's ↺ (#792)
 
