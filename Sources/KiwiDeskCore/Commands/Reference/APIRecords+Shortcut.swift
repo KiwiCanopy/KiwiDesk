@@ -28,8 +28,8 @@ extension APIReference {
             .text("leader")
         ),
         "set_sequence_key": APIRecord(
-            "Binds a command to the last key of a sequence path (w,h), "
-                + "making missing keys; saved at once.",
+            "Binds a command, its arguments a list or one by one, to "
+                + "a sequence path's last key (w,h).",
             .text("leader"),
             .text("path"),
             .text("command"),

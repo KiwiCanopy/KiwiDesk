@@ -8101,9 +8101,9 @@ command, built as [`shortcut.set`](#shortcutset) builds it, so it
 never runs other Lua. A leader no sequence holds starts a sequence,
 and a missing key on the way becomes a key that opens more keys. It
 replaces nothing: a key already bound at that step, a path through
-a key that runs a command, a leader chord another shortcut holds,
-and a step key the sequence cannot match are refused, each with the
-reason. One step holds one key per chord, as in Settings.
+a key that runs a command, a leader chord another shortcut holds, a
+Hyper leader and a step key the sequence cannot match are refused,
+each with the reason.
 
 #### shortcut.name_sequence_key
 
@@ -8111,8 +8111,8 @@ reason. One step holds one key per chord, as in Settings.
 itself), a name, and optionally an SF Symbol name.
 
 **Does:** names the leader or the key that opens more keys, and
-sets its icon when a symbol is given; a key with no icon shows
-`folder`. A key that runs a command is refused, and so is a symbol
+sets its icon when a symbol is given; an empty symbol clears it,
+and a key with no icon shows `folder`. A key that runs a command is refused, and so is a symbol
 that is no SF Symbol.
 
 #### shortcut.remove_sequence_key

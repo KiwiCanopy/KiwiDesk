@@ -597,8 +597,8 @@ write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 `shortcut.set_sequence_key <leader> <path> <command> [argument…]`,
 `shortcut.name_sequence_key <leader> <path> <name> [symbol]` and
 `shortcut.remove_sequence_key <leader> <path>` build a key sequence
-one key at a time; a path lists the step keys after the leader,
-comma-separated ([Key sequence verbs](lua-reference.md#shortcutset_sequence_key)):
+one key at a time, a path's keys comma-separated
+([`shortcut.set_sequence_key`](lua-reference.md#shortcutset_sequence_key)):
 
 ```bash
 kiwidesk shortcut.set_sequence_key ctrl+alt+space w,h focus left

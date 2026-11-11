@@ -32,6 +32,8 @@ extension KiwiCore {
         case .failure(let refusal): return .fail(refusal.reason)
         case .success(let call): lua = call
         }
+        // Stored as `shortcut.set` stores a row; Settings files its
+        // kind and label on load (`KeybindingImportClassifier`).
         return editSequence(leader, creating: true) { root in
             SequenceKeyEdit.adding(
                 KeyBinding(lua: lua),
@@ -106,19 +108,17 @@ extension KiwiCore {
             return .fail("no default layer")
         }
         let table = snapshot.keyLayers
-        let held = table.resolved(for: page).sorted { $0.key < $1.key }
-            .first {
-                RuleReachTable<String>.keyParts($0.key).layer == layer
-                    && RuleReachTable<String>.leader(of: $0.key).map {
-                        Self.sameChord($0, leader)
-                    } ?? false
-            }
+        let map = table.resolved(for: page)
         let key: String
         let root: KeyBinding
-        if let held,
-            let tree = RuleReachTable<String>.sequenceTree(held.value)
+        if let held = RuleReachTable<String>.sequenceKey(
+            on: leader,
+            layer: layer,
+            in: map
+        ),
+            let tree = map[held].flatMap(RuleReachTable<String>.sequenceTree)
         {
-            key = held.key
+            key = held
             root = tree
         } else {
             guard creating else {

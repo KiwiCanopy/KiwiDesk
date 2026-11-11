@@ -128,14 +128,15 @@ extension KiwiCore {
         guard let layer = Self.defaultLayer(snapshot, page) else {
             return .fail("no default layer")
         }
-        let held = snapshot.keyLayers.resolved(for: page).filter {
+        let map = snapshot.keyLayers.resolved(for: page)
+        let held = map.filter {
             RuleReachTable<String>.keyParts($0.key).layer == layer
         }
-        if held.contains(where: {
-            RuleReachTable<String>.leader(of: $0.key).map {
-                Self.sameChord($0, chord)
-            } ?? false
-        }) {
+        if RuleReachTable<String>.sequenceKey(
+            on: chord,
+            layer: layer,
+            in: map
+        ) != nil {
             return .fail(
                 "\(chord) opens a key sequence; use shortcut.remove_sequence"
             )
@@ -166,13 +167,11 @@ extension KiwiCore {
         var snapshot = found.0
         let page = found.1
         guard let layer = Self.defaultLayer(snapshot, page),
-            let key = snapshot.keyLayers.resolved(for: page).keys.sorted()
-                .first(where: {
-                    RuleReachTable<String>.keyParts($0).layer == layer
-                        && RuleReachTable<String>.leader(of: $0).map {
-                            Self.sameChord($0, chord)
-                        } ?? false
-                })
+            let key = RuleReachTable<String>.sequenceKey(
+                on: chord,
+                layer: layer,
+                in: snapshot.keyLayers.resolved(for: page)
+            )
         else { return .fail("no key sequence on \(chord)") }
         let table = snapshot.keyLayers
         snapshot.keyLayers.applyKey(

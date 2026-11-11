@@ -14543,6 +14543,17 @@ is its own verb, `shortcut.remove_sequence`, destructive like
 :::
 
 :::unreleased
+*Amended (#3174, owner, 2026-11-11): the CLI builds a sequence one
+key at a time.* `shortcut.set_sequence_key` and
+`shortcut.name_sequence_key` only add or name, and an end key they
+write runs a command `ShortcutCall` builds, never raw Lua, so a
+model can call them without asking. `shortcut.remove_sequence_key`
+is destructive: a branch it removes can hold Lua keys, descriptions
+and groups made in Settings, which `set_sequence_key` cannot
+rebuild, so an AI app reaches it only through `run_destructive`.
+:::
+
+:::unreleased
 *Amended (#1871, owner, 2026-11-08): a key sequence runs the
 keyboard tap too.* A key sequence joins the one tap as a consumer,
 so while one is defined the tap runs, active, whatever the sides

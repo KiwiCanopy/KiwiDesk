@@ -22,6 +22,22 @@ extension RuleReachTable where Value == String {
         return String(lua.dropFirst(sequenceMark.count))
     }
 
+    /// The key of the sequence `leader` opens in `layer` among `map`'s
+    /// keys, matched by chord, not spelling; nil where none does —
+    /// the one lookup every `shortcut.*` verb takes (#3174).
+    public static func sequenceKey(
+        on leader: String,
+        layer: String,
+        in map: [String: String]
+    ) -> String? {
+        map.keys.sorted().first {
+            keyParts($0).layer == layer
+                && Self.leader(of: $0).map {
+                    KeyCombo.equivalent($0, leader)
+                } ?? false
+        }
+    }
+
     /// Whether `key` names a key sequence.
     public static func isSequenceKey(_ key: String) -> Bool {
         leader(of: key) != nil

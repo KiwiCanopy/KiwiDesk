@@ -205,13 +205,16 @@ struct ShortcutSequenceKeyCommandsTests {
         #expect(KeyBinding.stepKey(holding: "", in: step) == nil)
     }
 
-    @Test("registered as settings, safe for run")
+    @Test("all settings; only the removal is destructive")
     func registered() {
         for verb in [
             "set_sequence_key", "name_sequence_key", "remove_sequence_key",
         ] {
             let name = "shortcut." + verb
-            #expect(!APIReference.destructive.contains(name))
+            #expect(
+                APIReference.destructive.contains(name)
+                    == (verb == "remove_sequence_key")
+            )
             let entry = APIReference.entry(named: name)
             #expect(entry.map(APIReference.kind(of:)) == .setting)
         }

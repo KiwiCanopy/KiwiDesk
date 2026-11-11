@@ -48,22 +48,18 @@ enum SequenceKeyEdit {
     static func admission(_ path: [String], under leader: String)
         -> Refusal?
     {
-        guard let lead = KeyCombo.parse(leader) else { return nil }
-        guard KeySequence.admitsLeader(lead) else {
+        // The recorder's own doors, so both ask one check (#3174).
+        guard KeyBinding.admitsLeader(leader) else {
             return Refusal(
                 reason: "a key sequence can't start on a Hyper chord"
             )
         }
-        for key in path {
-            guard let combo = KeyCombo.parse(key),
-                KeySequence.admitsStep(combo, under: lead)
-            else {
-                return Refusal(
-                    reason: "\(key) can't be a key in a sequence: a "
-                        + "modifier tapped alone, a Hyper chord, the "
-                        + "leader, or esc or delete on its own"
-                )
-            }
+        for key in path where !KeyBinding.admitsStepKey(key, under: leader) {
+            return Refusal(
+                reason: "\(key) can't be a key in a sequence: a "
+                    + "modifier tapped alone, a Hyper chord, the "
+                    + "leader, or esc or delete on its own"
+            )
         }
         return nil
     }

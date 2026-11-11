@@ -227,7 +227,15 @@ that changes a leader's chord carries its reach through
 `carrySequenceReach` (`KeySequenceReachSaveTests` ▸
 `reRecordCarriesTheReach`); a CLI or Lua removal of a sequence is
 `shortcut.remove_sequence`, and `shortcut.remove` refuses a leader
-by naming it (`ShortcutSequenceCommandsTests`). The argument is
+by naming it (`ShortcutSequenceCommandsTests`). A door that adds a
+key at a step asks Core's one sibling rule, `KeyBinding.stepKey`,
+never a chord compare over `steps` of its own
+(`KeySequenceCardTests` ▸ `siblingRuleIsCores`); a verb finds a
+sequence by its leader through `RuleReachTable.sequenceKey(on:)`,
+and the `shortcut.*` key verbs edit the tree the loaded page
+resolves and write it whole at that key's `defaultReach`, never a
+key inside a profile's override (#3174,
+`ShortcutSequenceKeyCommandsTests`). The argument is
 `docs/design-decisions.md`'s #1871 and #3124 amendments.
 
 **A writer that compares or copies what a binding says of itself
