@@ -49,6 +49,7 @@ extension JumpModel {
     ) {
         guard scope == .desktops, var state = desktops else { return }
         endDesktopsRefusal()
+        let modifiers = pickModifiers(modifiers)
         restPointerForClick()
         state.select(place)
         if state.isCarrying {
@@ -86,6 +87,7 @@ extension JumpModel {
     ) {
         guard scope == .desktops, var state = desktops else { return }
         endDesktopsRefusal()
+        let modifiers = pickModifiers(modifiers)
         restPointerForClick()
         if state.isCarrying, !modifiers.contains(.command) {
             state.select(place)

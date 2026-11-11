@@ -15373,6 +15373,20 @@ dimmed tile is never landed on. The field gives up its in-text
 cursor movement for it, which costs little because a query is a
 few letters typed and corrected from the end.
 
+The strip shows only while it is in use (owner amendment on #3168):
+off All, or while a query is typed. ⌃⌥J opens on the list alone,
+because a switcher opened for the window used before is read top
+down and a row of tiles above that window is a second thing to read
+past on every press. Nothing about the strip's reach changes: → from
+an empty field brings it in on the next app, and ← back to All hides
+it again, so no app is a step further away than before. Typing
+shows it on All because the dimmed tiles are then the answer to
+"which apps hold a match". The strip appears under the field, which
+never moves (#2246), and the panel grows downward rather than
+keeping room for it, since a reserved band would be the very row
+the calm opening removes. Under a query ← → still step through only
+the apps with a match.
+
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,
 and an option would put a second meaning on a call every existing
@@ -15392,6 +15406,59 @@ would drift from a rebound opener, and claim a second chord from
 every app. That is no blind gesture: each press moves a selection
 drawn before it, and nothing lands until ↩ — releasing ⌥ picks
 nothing, so the hold-and-release form stays ruled out.
+:::
+
+:::unreleased
+**KiwiHub shows the window you are in, greyed, and its app's tile
+first (#3168, owner rulings 2026-11-10, amending the 2026-10-12
+ruling that the focused window is left out of the list).**
+[Rationale] The 2026-10-12 ruling still holds for what a pick can
+reach: neither a Jump nor Move here does anything for the window the
+user is in, so it is never a result — the arrows skip it, ⌘1 stays on
+the first real row, and search never matches it. What leaving it out
+entirely cost showed once the strip narrowed the list: ⌥↩ swaps the
+picked window with yours (#2885), and nothing on screen said which
+window that was, and the app you were in had no tile, so the strip's
+order disagreed with ⌘⇥'s. So the strip reads as ⌘⇥ does: All, then
+the app you are in, then by recency, and ⌥⇥ lands on the second app.
+The window itself is drawn as a row like every other — icon, app and
+title, "Current window · ‹Space›" on the right — but greyed, with no
+plate and no hover, at the top of All and of its own app's tile,
+because it is a statement and not a choice. It hides under a query,
+whose dimmed tiles are the thing to read. VoiceOver reads it as
+text and does not announce it on open, since the selected row is
+what the open speaks. It is the very window the list leaves out — the
+focus, while its app is in front — read once, so it is never drawn
+twice; a focus under an app KiwiDesk does not track stays a row, as
+the 2026-10-12 ruling has it. And it is drawn only where it is also
+the window ⌥↩ trades with: opened on a screen whose Space holds
+another focus, KiwiHub draws no current window, and the window ⌥↩
+would take names itself in its own row's refusal, rather than the
+greyed row and ⌥↩ naming two windows.
+
+A running app with no listed window has no tile (ui-designer
+advised, owner ruling 2026-11-10, reversing #3135's "No windows"
+row). The strip narrows the list, and a tile for an app All does not
+hold breaks the promise that every tile is a slice of All. Its one
+row was the dead end #3135 rejected for search, it sat dimmed under
+every query, it put ⌥⇥ on a row ↩ could not pick when the app used
+before had closed its window, and it was one more VoiceOver stop
+that led nowhere. Reopening such an app stays with Open or Focus
+(#1840), ⌘⇥ and the Dock.
+
+A modifier still held from the chord that opened KiwiHub or stepped
+the strip counts for nothing until it is let go (ui-designer
+advised, owner ruling 2026-11-10). Without it, ↩ pressed while the ⌥
+of ⌥⇥ is still down is ⌥↩, Swap here, and ↩ after ⌃⌥J with ⌥ still
+down swaps the same way. The latch takes the modifiers held when the
+opener's or a step's key goes down — never the binding's — so a
+rebound opener needs nothing, and ⇧ held since a ⇧⌥⇥ back step is
+covered too. ↩, the ⌘ digits, a click and the footer's lit hint
+read one set, so the hint always names what a press does. Moving the
+opener to ⌃⇥ was rejected, since it is every browser's and
+terminal's tab key, and so was a heavier swap chord, which would
+change #2885's chords for everyone to fix one path. Taking over ⌘⇥
+itself stays the opt-in #3136.
 :::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on

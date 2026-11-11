@@ -124,7 +124,11 @@ struct JumpPanelView: View {
         ZStack(alignment: .top) {
             if model.scope == .windows {
                 VStack(spacing: 0) {
-                    JumpStripView(model: model)
+                    // Under the field, which never moves (#2246);
+                    // the panel grows down to take it (#3168).
+                    if model.list.stripShown {
+                        JumpStripView(model: model)
+                    }
                     results
                 }
                 .transition(.opacity)
@@ -175,15 +179,7 @@ struct JumpPanelView: View {
     }
 
     @ViewBuilder private var results: some View {
-        if model.list.stripApp?.bundleID != nil {
-            JumpReopenRow(
-                text: model.emptyText,
-                app: model.list.stripApp?.name ?? "",
-                onActivate: { model.reopenStripApp() }
-            )
-            .padding(.vertical, Self.listPadding)
-            .padding(.horizontal, KeyPanelStyle.selectionInset)
-        } else if model.list.results.isEmpty {
+        if model.list.drawnRows == 0 {
             Text(model.emptyText)
                 .font(.body)
                 .foregroundStyle(.secondary)
@@ -193,12 +189,18 @@ struct JumpPanelView: View {
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
-                    rows
-                        .padding(.vertical, Self.listPadding)
-                        .padding(
-                            .horizontal,
-                            KeyPanelStyle.selectionInset
-                        )
+                    VStack(spacing: 0) {
+                        // Greyed and never a row the keys reach.
+                        if let yours = model.list.yours {
+                            JumpYoursLine(
+                                entry: yours,
+                                icon: model.icons[yours.pid]
+                            )
+                        }
+                        rows
+                    }
+                    .padding(.vertical, Self.listPadding)
+                    .padding(.horizontal, KeyPanelStyle.selectionInset)
                 }
                 .frame(height: listHeight)
                 .onChange(of: model.list.selection) { _, selection in
@@ -279,6 +281,7 @@ struct JumpPanelView: View {
             onActivate: { pick in
                 model.clickRow(index, pick: pick)
             },
+            pickModifiers: { model.pickModifiers(NSEvent.modifierFlags) },
             onHover: {
                 model.hoverRow(index, pointer: model.currentPointer())
             },
@@ -300,7 +303,7 @@ struct JumpPanelView: View {
     /// The list's height: what its rows take, up to `rowCap` rows.
     private var listHeight: CGFloat {
         Self.listHeight(
-            rows: model.list.results.count,
+            rows: model.list.drawnRows,
             headers: model.list.sectionCount,
             rowCap: model.rowCap
         )
@@ -309,7 +312,7 @@ struct JumpPanelView: View {
     /// Whether the Windows list runs past what it shows.
     var listOverflows: Bool {
         Self.overflows(
-            rows: model.list.results.count,
+            rows: model.list.drawnRows,
             headers: model.list.sectionCount,
             rowCap: model.rowCap
         )

@@ -7,14 +7,10 @@ import Foundation
 public struct JumpApp: Sendable, Equatable {
     public let pid: pid_t
     public let name: String
-    /// Set for an app no row lists, whose pick reopens it (#1840);
-    /// nil where its rows say the rest.
-    public let bundleID: String?
 
-    public init(pid: pid_t, name: String, bundleID: String? = nil) {
+    public init(pid: pid_t, name: String) {
         self.pid = pid
         self.name = name
-        self.bundleID = bundleID
     }
 }
 
