@@ -18,7 +18,7 @@ body:
         time range that reaches back to before it happened, press
         **Export…**, and drag the file into *Extra context* below.
         It also lists the settings you changed. Can't open
-        Settings? The CLI reference shows the same export from a
+        Settings? The CLI reference shows the log export from a
         terminal:
         https://kiwidesk.app/docs/cli/#exporting-the-log
 

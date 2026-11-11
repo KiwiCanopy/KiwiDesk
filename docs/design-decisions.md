@@ -22502,16 +22502,17 @@ inside the app — a user who jumped 2.3 to 3.1 and pressed Done
 could not go back to 3.0.0's highlights. They are a question
 about the app itself, like the tour and About, so they join the
 same line, first, beside the version they describe: "What's new
-· Show me around · About KiwiDesk". It is the notes' one
-permanent door, so About's *Release Notes* link left with it
+· Show me around · Report a problem · About KiwiDesk". It is the
+notes' one permanent door, so About's *Release Notes* link left
+with it
 (the exclusive placement below). The line never sheds a link as
 the window narrows: below its width the links wrap to a second,
 trailing line, the way every other control keeps its reach
 (*Narrow windows drop the preview before they drop a control*).
 
 **"Report a problem" sits before About (#3214).** Simple has no
-General page, so a report door there reaches half the users; the
-footer is on Home and Simple both. It opens the bug form with the
+General page, so a report door in General would miss every Simple
+user; the footer is on Home and Simple both. It opens the bug form with the
 version, macOS, screen count and Desktop mode filled in, and
 nothing else: the form is public, so the settings a report needs
 ride in the exported log's header, which the user attaches by

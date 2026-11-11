@@ -138,15 +138,22 @@ struct HomeSupportStripTests {
         let files = try SourceScan.swiftSources(under: root)
         #expect(files.count > 50)
         var callers: Set<String> = []
+        var readers: Set<String> = []
         for url in files {
             let text = SourceScan.stripComments(
                 try String(contentsOf: url, encoding: .utf8)
             )
-            if text.contains(".reportProblem()") {
+            if text.contains(".reportProblem") {
                 callers.insert(url.lastPathComponent)
+            }
+            // The form's address has one reader, the action itself:
+            // a door that opened it past the action would pass above.
+            if text.contains("problemReport") {
+                readers.insert(url.lastPathComponent)
             }
         }
         #expect(callers == ["HomeSupportStrip.swift"])
+        #expect(readers == ["SettingsModel+LogExport.swift"])
     }
 
     /// One door to the notes (#2308, amending #1536's exclusive

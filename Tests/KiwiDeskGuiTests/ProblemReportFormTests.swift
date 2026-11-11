@@ -11,7 +11,9 @@ struct ProblemReportFormTests {
     @Test("every prefilled field is one the bug form declares")
     func fieldsAreTheForms() throws {
         let templates = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(".github/ISSUE_TEMPLATE")
+            // The trailing slash is what `CiPathFilterTests` reads
+            // as a read of this directory, should it be ignored.
+            .appendingPathComponent(".github/ISSUE_TEMPLATE/")
         let report = ProblemReport(
             version: "1",
             macOS: "2",

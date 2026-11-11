@@ -79,11 +79,12 @@ public struct LogExport: Sendable {
     /// Runs the query and writes `header`, then every line, to
     /// `destination`. A runner that cannot even start the tool is
     /// named here as `toolFailed`, so the GUI meets no unnamed
-    /// error. An empty range still writes no file (#3214).
+    /// error. An empty range still writes no file. `header` takes
+    /// no default: a caller says what the file opens with (#3214).
     public func export(
         _ range: Range,
         to destination: URL,
-        header: String = ""
+        header: String
     ) throws(Failure) -> Outcome {
         let result: ToolResult
         do {

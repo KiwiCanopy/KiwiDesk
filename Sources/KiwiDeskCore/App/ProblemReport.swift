@@ -58,8 +58,8 @@ public struct ProblemReport: Sendable, Equatable {
         return parts.url!
     }
 
-    /// The exported log's header: the facts, then every setting
-    /// that differs from the built-in defaults, ended by a blank
+    /// The exported log's header: the facts, then every value
+    /// that differs from its built-in default, ended by a blank
     /// line so the log's own column header follows apart.
     public func logHeader(changedSettings: [String]) -> String {
         let changed =
