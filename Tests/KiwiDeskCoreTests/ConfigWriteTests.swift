@@ -120,7 +120,7 @@ struct ConfigWriteTests {
         #expect(core.tiler.settings == config.settings)
         #expect(
             core.eventLoop.ignoreRules.matches(
-                bundleID: "io.tailscale.ipn.macos"
+                app: "io.tailscale.ipn.macos"
             )
         )
         #expect(

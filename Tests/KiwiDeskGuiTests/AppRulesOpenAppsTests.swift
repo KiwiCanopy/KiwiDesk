@@ -4,10 +4,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// App Rules' Space and Float pickers lead with the open apps (#2297):
-/// only those with a bundle id, since a rule matches by bundle id
-/// alone, and never the windows beneath the normal
-/// layer; the Tile picker keeps its guessed list (#2071).
+/// App Rules' Space and Float pickers lead with the open apps (#2297),
+/// one without a bundle id named by its process name, which a rule
+/// matches (#3211), never the windows beneath the normal layer; the
+/// Tile picker keeps its guessed list (#2071).
 @Suite("App Rules ▸ Open apps (#2297)")
 @MainActor
 struct AppRulesOpenAppsTests {
@@ -20,21 +20,42 @@ struct AppRulesOpenAppsTests {
         )
     }
 
-    @Test("a process without a bundle id is never offered for a rule")
-    func bundledOnly() {
-        let apps = [
-            OpenApp(
-                app: AppRef(bundleID: "com.apple.Safari", name: "Safari"),
-                name: "Safari"
-            ),
-            OpenApp(
-                app: AppRef(bundleID: nil, name: "sketchybar"),
-                name: "sketchybar"
-            ),
-        ]
+    @Test("a bundle-less app is offered, keyed by its name (#3211)")
+    func bundleLessIsOffered() {
+        let app = OpenApp(
+            app: AppRef(bundleID: nil, name: "QEMU-System-AArch64"),
+            name: "qemu-system-aarch64"
+        )
+        let lists = AppPickerSections.lists(
+            openApps: [app],
+            installed: [],
+            exclude: [],
+            query: ""
+        )
+        #expect(lists.openApps.map(\.key) == ["qemu-system-aarch64"])
+    }
+
+    @Test("a bundle-less app's rule previews its open windows (#3211)")
+    func previewListsBundleLessWindows() {
+        let model = makeTestModel()
+        model.core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(9),
+                    pid: 900_401,
+                    appName: "qemu-system-aarch64",
+                    appBundleID: nil,
+                    title: "Android Emulator - kc-api37:5554"
+                )
+            )
+        )
+        let preview = AppRuleMatchPreview(
+            model: model,
+            app: "qemu-system-aarch64"
+        )
         #expect(
-            AppSelector.ruleCandidates(apps).map(\.key)
-                == ["com.apple.safari"]
+            preview.windows.map(\.title)
+                == ["Android Emulator - kc-api37:5554"]
         )
     }
 
@@ -50,12 +71,7 @@ struct AppRulesOpenAppsTests {
         )
         #expect(
             selector.occurrences(
-                of: "{ Self.ruleCandidates(core) }"
-            ) == 1
-        )
-        #expect(
-            selector.occurrences(
-                of: "core.openApps(beneathNormal: false)"
+                of: "{ core.openApps(beneathNormal: false) }"
             ) == 1
         )
     }

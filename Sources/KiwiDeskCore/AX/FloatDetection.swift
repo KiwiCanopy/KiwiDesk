@@ -258,7 +258,7 @@ public enum FloatDetection {
     /// floats reports `.raisedLayer` (#2572).
     public static func autoFloatReason(
         _ facts: WindowFacts,
-        bundleID: String?,
+        app: String?,
         rules: FloatRules
     ) -> AutoFloatReason? {
         let structural: AutoFloatReason? =
@@ -281,12 +281,12 @@ public enum FloatDetection {
             // marks as fixed-size — and only where a guess may
             // float the app (#2173).
             fixedSize: {
-                rules.guess.applies(to: bundleID)
+                rules.guess.applies(toApp: app)
                     && (facts.zoomable() == false
                         || facts.cancelsInsteadOfClosing())
             },
             ruleMatches: {
-                rules.matches(bundleID: bundleID, title: facts.title())
+                rules.matches(app: app, title: facts.title())
             }
         )
     }

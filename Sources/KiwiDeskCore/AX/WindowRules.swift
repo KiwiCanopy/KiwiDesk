@@ -9,8 +9,9 @@ public enum WindowTitleMatch {
     }
 }
 
-/// Float rules matching bundle IDs and optional case-sensitive
-/// title fragments.
+/// Float rules matching an app's rule key — its bundle id, or its
+/// process name where it has none (#3211) — and optional
+/// case-sensitive title fragments.
 public struct FloatRules: Sendable, Equatable {
     private let rules: [(app: String, title: String?)]
     /// Where detection may float a window on a guess (#2173).
@@ -78,25 +79,22 @@ public struct FloatRules: Sendable, Equatable {
             .map { Self.rule(app: $0.app, title: $0.title) }
     }
 
-    /// Cheap gate before title-change float detection.
-    public func hasTitleRule(bundleID: String?) -> Bool {
-        guard let bundleID = bundleID.map(Self.appKey) else {
-            return false
-        }
-        return rules.contains {
-            $0.app == bundleID && $0.title != nil
-        }
+    /// Cheap gate before title-change float detection; `app` is
+    /// the window's `AppRef.listKey` (#3211).
+    public func hasTitleRule(app: String?) -> Bool {
+        guard let app = app.map(Self.appKey) else { return false }
+        return rules.contains { $0.app == app && $0.title != nil }
     }
 
+    /// Whether a rule floats a window of `app`, its
+    /// `AppRef.listKey` (#3211), titled `title`.
     public func matches(
-        bundleID: String?,
+        app: String?,
         title: String
     ) -> Bool {
-        guard let bundleID = bundleID.map(Self.appKey) else {
-            return false
-        }
+        guard let app = app.map(Self.appKey) else { return false }
         return rules.contains { rule in
-            guard rule.app == bundleID else { return false }
+            guard rule.app == app else { return false }
             guard let fragment = rule.title else { return true }
             return WindowTitleMatch.matches(title, fragment)
         }
@@ -109,8 +107,9 @@ public struct FloatRules: Sendable, Equatable {
     }
 }
 
-/// App-level bundle identifiers KiwiDesk never manages. Matching
-/// is case-insensitive, like LaunchServices and other app rules.
+/// Apps KiwiDesk never manages, each by its rule key — a bundle id,
+/// or a process name where the app has none (#3211). Matching is
+/// case-insensitive, like LaunchServices and other app rules.
 public struct IgnoreRules: Sendable, Equatable {
     private let bundleIDs: Set<String>
 
@@ -128,9 +127,10 @@ public struct IgnoreRules: Sendable, Equatable {
         bundleIDs.sorted()
     }
 
-    public func matches(bundleID: String?) -> Bool {
-        guard let bundleID else { return false }
-        return bundleIDs.contains(bundleID.lowercased())
+    /// Whether a rule names `app`, its `AppRef.listKey` (#3211).
+    public func matches(app: String?) -> Bool {
+        guard let app else { return false }
+        return bundleIDs.contains(app.lowercased())
     }
 }
 
@@ -159,11 +159,13 @@ public struct FloatGuess: Sendable, Equatable {
         rule.lowercased()
     }
 
-    /// Whether a guess may float `bundleID`'s windows.
-    public func applies(to bundleID: String?) -> Bool {
+    /// Whether a guess may float the windows of `app`, its
+    /// `AppRef.listKey` (#3211); an app with no key has no Tile
+    /// rule.
+    public func applies(toApp app: String?) -> Bool {
         guard enabled else { return false }
-        guard let bundleID else { return true }
-        return !tiled.contains(Self.normalizedRule(bundleID))
+        guard let app else { return true }
+        return !tiled.contains(Self.normalizedRule(app))
     }
 
     /// The Tile rules, normalized for matching and config seeding.

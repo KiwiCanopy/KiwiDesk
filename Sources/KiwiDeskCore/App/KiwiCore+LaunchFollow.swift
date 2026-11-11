@@ -37,10 +37,18 @@ extension KiwiCore {
     ) {
         state.stampAppRecency(activation.pid)
         handBackBackgroundActivation(activation, now: now)  // #3141
-        if launchFollow.owed(at: now) != activation.bundleID {
-            launchFollow.forget(keeping: activation.bundleID)
+        // Keyed as a rule names the app (#3211): its bundle id, or
+        // its process name where it has none.
+        // The name is read only where no bundle id answers: an
+        // unobserved process's costs a LaunchServices lookup.
+        let app =
+            activation.bundleID != nil
+            ? AppRef(bundleID: activation.bundleID, name: "").listKey
+            : eventLoop.appRef(of: activation.pid).listKey
+        if launchFollow.owed(at: now) != app {
+            launchFollow.forget(keeping: app)
         }
-        guard let bundleID = activation.bundleID,
+        guard let bundleID = app,
             let press = openingPress(of: activation, now: now)
         else { return }
         // A lens's quiet open is no press of the app's (#3122).
@@ -144,7 +152,7 @@ extension KiwiCore {
         noteLaunchRider(arrived: window, effects: effects, now: now)
         guard !eventLoop.switchReads.applying,
             let space = effects.placedByAppRule,
-            let bundleID = window.appBundleID,
+            let bundleID = window.appRef.listKey,
             state.workspaces.space(of: window.id) == space,
             state.windows[window.id]?.isTransientOverlay == false
         else { return nil }

@@ -263,11 +263,12 @@ extension KiwiCore {
 
     /// An app's away windows, spaces in canonical order and by
     /// rank inside each; parked and unfiled entries last, by id.
-    /// `bundleID` arrives lowercased (the command's
-    /// normalization).
-    func awayWindows(bundleID: String) -> [AwayWindow] {
+    /// `app` is its `AppRef.listKey` (#3211) — a bundle id
+    /// arrives lowercased, the command's normalization.
+    func awayWindows(app: String) -> [AwayWindow] {
         let entries = state.awayWindows.values.filter {
-            $0.appBundleID?.lowercased() == bundleID
+            AppRef(bundleID: $0.appBundleID, name: $0.appName).listKey
+                == app
         }
         guard !entries.isEmpty else { return [] }
         var ordered: [AwayWindow] = []

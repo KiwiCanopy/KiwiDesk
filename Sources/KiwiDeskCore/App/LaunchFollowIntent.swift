@@ -195,7 +195,8 @@ final class LaunchFollowIntent {
     }
 
     /// Records that `bundleID`'s next rule-placed window is owed a
-    /// follow; replaces any earlier debt.
+    /// follow; replaces any earlier debt. Every key here is an
+    /// `AppRef.listKey` (#3211), lowercase as each door hands it.
     func record(_ bundleID: String, at now: Date) {
         // The user named an app: no quiet open stands over it.
         quietApps[bundleID.lowercased()] = nil

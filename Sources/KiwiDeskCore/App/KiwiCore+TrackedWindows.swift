@@ -9,7 +9,7 @@ extension KiwiCore {
     /// one on another Desktop. A tracked-state read, never a census;
     /// a ⌘H-hidden app's windows are in none of the three.
     func hasTrackedWindow(app: String) -> Bool {
-        func key(_ bundleID: String?, _ name: String) -> String {
+        func key(_ bundleID: String?, _ name: String) -> String? {
             AppRef(bundleID: bundleID, name: name).listKey
         }
         return state.windows.all.contains { $0.appRef.listKey == app }

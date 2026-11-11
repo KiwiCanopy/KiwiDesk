@@ -60,19 +60,19 @@ extension FloatDetection {
     /// (#2067); `titlebarButton` is read only where
     /// `needsTitlebarButton` says one of them decides.
     public static func shouldIgnore(
-        bundleID: String?,
+        app: AppRef?,
         layer: Int,
         isAccessory: Bool,
         rules: IgnoreRules,
         titlebarButton: Bool
     ) -> Bool {
-        rules.matches(bundleID: bundleID)
-            || isBuiltInIgnoredApp(bundleID: bundleID)
+        rules.matches(app: app?.listKey)
+            || isBuiltInIgnoredApp(bundleID: app?.bundleID)
             || layer >= screenSaverLayer
             || layer != 0
                 && (isAccessory && !titlebarButton
-                    || ignoresRaisedWindows(bundleID: bundleID)
-                        && !(escapesWithButton(bundleID)
+                    || ignoresRaisedWindows(bundleID: app?.bundleID)
+                        && !(escapesWithButton(app?.bundleID)
                             && (titlebarButton || layer == modalPanelLayer)))
     }
 
@@ -132,7 +132,7 @@ extension FloatDetection {
             return false
         }
         return shouldIgnore(
-            bundleID: bundleID,
+            app: AppRef(bundleID: bundleID, name: ""),
             layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),
@@ -257,7 +257,7 @@ extension FloatDetection {
                 ) && titlebarButton($0)
             } == true
         return shouldIgnore(
-            bundleID: bundleID,
+            app: AppRef(bundleID: bundleID, name: ""),
             layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),

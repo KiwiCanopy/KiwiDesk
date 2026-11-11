@@ -174,8 +174,8 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "explain_app": APIRecord(
-            "Explains what KiwiDesk knows of an app by bundle id: "
-                + "ignores, processes and windows.",
+            "Explains what KiwiDesk knows of an app, by bundle id "
+                + "or process name: ignores and windows.",
             .text("app")
         ),
         "get_layout_info": APIRecord(

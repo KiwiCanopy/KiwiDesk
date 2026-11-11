@@ -45,7 +45,7 @@ struct AppRuleCommandsTests {
         #expect(core.eventLoop.floatRules.rawRules.contains(rule))
         #expect(
             core.eventLoop.floatRules.matches(
-                bundleID: "com.apple.finder",
+                app: "com.apple.finder",
                 title: "Get Info — Disk"
             )
         )

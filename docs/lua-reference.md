@@ -5939,6 +5939,12 @@ and the live `profile`.
 **Expects:** a bundle identifier, and for `set_space` a Space that
 exists.
 
+:::unreleased
+An app with no bundle identifier is named by its process name, here
+and in `app_rule.set_float`, `explain_app` and the `app_rules`,
+`float_rules` and `ignore_rules` lists.
+:::
+
 **Does:** the app's NEXT windows open in that Space, or stop
 doing so; windows already open stay where they are.
 `remove_space` refuses an app with no rule.
@@ -9677,6 +9683,13 @@ Each entry of `windows`, `minimized` and `away` is the window's
 `id` and `title`; a minimized or away window's title is the one it
 had when it left, and a window found away at start has none
 (`""`).
+
+:::unreleased
+`explain_app` also takes a process name, and both commands return
+`rule_key`, the name app rules know the app by: its bundle
+identifier, or its process name where it has none, when
+`bundle_id` is `null`.
+:::
 
 ### get_config_status
 
