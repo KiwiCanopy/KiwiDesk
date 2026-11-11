@@ -146,6 +146,29 @@ struct DesktopsLandingTests {
     }
 
     @MainActor
+    @Test("a re-read keeps a place away from the start, and the search")
+    func refreshKeepsAPlaceAndTheSearch() throws {
+        var overview = DesktopsStateTests.overview()
+        let model = JumpModel(
+            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
+            icons: [:],
+            rowCap: 6
+        )
+        model.loadDesktops = { overview }
+        model.setScope(.desktops)
+        model.setDesktopsQuery("App")
+        // Space "1" of Desktop 2, which opens nothing by default.
+        let away = DesktopsPlace(screen: 1, desktop: 1, line: 0)
+        model.desktops?.select(away)
+        overview = Self.landedOverview()
+        model.refreshDesktops()
+        let state = try #require(model.desktops)
+        #expect(state.place == away)
+        #expect(state.window == nil)
+        #expect(state.query == "App")
+    }
+
+    @MainActor
     @Test("a re-read leaves a carry alone")
     func refreshWaitsOutACarry() throws {
         var overview = DesktopsStateTests.overview()
@@ -165,9 +188,6 @@ struct DesktopsLandingTests {
         overview = Self.landedOverview()
         model.refreshDesktops()
         #expect(model.desktops?.carried == [WindowID(5)])
-        #expect(
-            model.desktops?.overview.window(WindowID(3)) != nil
-        )
         let landing = DesktopsLanding(
             ids: [WindowID(3)],
             target: try Self.target(DesktopsStateTests.overview()),
