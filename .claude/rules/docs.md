@@ -101,8 +101,9 @@ OS-blocked-by-SIP items are a separate class kept here, with no
 in-app escape hatch.
 
 Every docs page needs Starlight frontmatter or the site build
-breaks. A new page also needs a sidebar entry — see
-[site.md](site.md).
+breaks, and a page in a user-facing sidebar group needs a
+`description`, which `/llms.txt` prints. A new page also needs a
+sidebar entry — see [site.md](site.md).
 
 **A block describing behavior no release has yet carries
 `:::unreleased` in the same change set that writes it.** The site

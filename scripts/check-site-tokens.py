@@ -1588,7 +1588,8 @@ def check_llms_txt(dist: pathlib.Path) -> None:
     marker included, without reading the marker's grammar.
 
     Not covered: that Cloudflare applies the header, since
-    `_headers` is read as text; and the titles and descriptions,
+    `_headers` is read as text; that a relative link in a copy
+    reaches another copy; and the titles and descriptions,
     which only a YAML reader could compare with the frontmatter.
 
     On the SITE gate for `check_appcast`'s reason.
@@ -1616,18 +1617,31 @@ def check_llms_txt(dist: pathlib.Path) -> None:
     fence = b"\n---\n"
     for url, size in (match.groups() for match in links):
         parts = urllib.parse.urlsplit(url)
-        if parts.netloc != host or not parts.path.startswith(prefix):
-            fail(f"llms: {url} is not under {host}{prefix}")
+        if (
+            parts.scheme != "https"
+            or parts.netloc != host
+            or not parts.path.startswith(prefix)
+        ):
+            fail(f"llms: {url} is not under https://{host}{prefix}")
         relative = parts.path[len(prefix):]
         copy = dist / prefix.strip("/") / relative
-        if not relative.endswith(".md") or not copy.is_file():
-            fail(f"llms: {url} resolves to no built Markdown file")
+        origin_path = REPO / "docs" / relative
+        if (
+            not re.fullmatch(r"[A-Za-z0-9._/-]+\.md", relative)
+            or ".." in relative
+            or not copy.is_file()
+            or not origin_path.is_file()
+        ):
+            fail(
+                f"llms: {url} resolves to no built Markdown file "
+                "with a source under docs/"
+            )
         raw = copy.read_bytes()
-        if len(raw) != int(size) or not raw:
+        if len(raw) != int(size):
             fail(
                 f"llms: {url} is {len(raw)} bytes, listed as {size}"
             )
-        origin = (REPO / "docs" / relative).read_bytes()
+        origin = origin_path.read_bytes()
         # The first fence after the opening one closes the
         # frontmatter; a later `---` is the body's own rule.
         _, closed, body = origin.partition(fence)
@@ -1684,7 +1698,7 @@ def check_llms_txt(dist: pathlib.Path) -> None:
             f"/{index_name} lists {len(listed)}: {sorted(built)}"
         )
     for slug in sorted(excluded):
-        name = slug.split("/", 1)[1]
+        name = slug.partition("/")[2] or "index"
         if f"{name}.md" in built or f"{name}/index.md" in built:
             fail(f"llms: contributor page {slug} is under {prefix}")
 
@@ -1698,17 +1712,24 @@ def check_llms_txt(dist: pathlib.Path) -> None:
                 f"page under {prefix}"
             )
     headers = (dist / "_headers").read_text(encoding="utf-8")
-    # Exactly one rule, and its value exact: a second block can
-    # detach the header with `! X-Robots-Tag`, and a `bot: noindex`
-    # value reaches one crawler.
+    # One rule on the prefix, its value exact, and no detach line
+    # anywhere: `! X-Robots-Tag` under any pattern can remove the
+    # header, and a `bot: noindex` value reaches one crawler.
     rules = re.findall(
         r"^" + re.escape(prefix) + r"\*\n((?:[ \t]+\S.*\n?)+)",
         headers,
         re.M,
     )
-    if len(rules) != 1 or [
-        line.strip().lower() for line in rules[0].splitlines()
-    ] != ["x-robots-tag: noindex"]:
+    under = re.findall(
+        r"^\S*" + re.escape(prefix.rstrip("/")) + r".*$", headers, re.M
+    )
+    if (
+        len(rules) != 1
+        or [line.strip().lower() for line in rules[0].splitlines()]
+        != ["x-robots-tag: noindex"]
+        or under != [prefix + "*"]
+        or re.search(r"^[ \t]+!\s*x-robots-tag", headers, re.M | re.I)
+    ):
         fail(
             f"llms: _headers must carry one `{prefix}*` rule "
             "sending `X-Robots-Tag: noindex` and nothing else, or "

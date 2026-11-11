@@ -1,9 +1,6 @@
-// Emits /llms.txt: the user-facing docs pages with title,
-// description and size, each linking its raw Markdown copy under
-// /llms/ (#3213). For an agent without the MCP; a program reads it,
-// so it has no locale route and no sitemap entry. The path is
-// permanent, and check-site-tokens.py ▸ check_llms_txt holds the
-// built file.
+// Emits /llms.txt: the user-facing docs pages, each linking its
+// raw Markdown copy under /llms/ (#3213). The path is permanent;
+// check-site-tokens.py ▸ check_llms_txt holds the built file.
 import type { APIRoute } from "astro";
 import {
   LLMS_PREFIX,

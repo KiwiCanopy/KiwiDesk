@@ -725,17 +725,19 @@ entry — and add four:
 - **The page list is the sidebar's, never a second list.**
   `src/lib/llms.ts` reads the groups from Starlight's resolved
   config and drops the contributor group, so a new sidebar page
-  joins on its own. Rename that group and the build refuses until
-  `CONTRIBUTOR_GROUP` follows; put a contributor page in any other
-  group and it is published.
+  joins on its own, and `scripts/check-site-tokens.py` ▸
+  `check_llms_txt` holds the built list to the sidebar minus that
+  group. Rename that group and the build refuses until
+  `CONTRIBUTOR_GROUP` follows. A contributor page goes in that
+  group; in any other group it is listed.
 - **A copy is the page's body, untouched.** An `:::unreleased`
   marker stays literal, since stripping it would present unshipped
   behavior as shipped, and reading it would be the second parser
   the marker's section forbids. The check compares each copy with
   its `docs/` source as bytes.
 - **Every copy stays under the one prefix `public/_headers` marks
-  `noindex`**, and no HTML page links one: a copy duplicates its
+  `noindex`**, and no HTML page links a copy: a copy duplicates its
   `/docs/` page, and a site-relative `.md` href reds
-  `check_markdown_pipeline`. Whether Cloudflare applies that rule
-  is not checked by the gate: read the response header on a
-  preview deploy after editing it.
+  `check-site-tokens.py` ▸ `check_markdown_pipeline`. Whether
+  Cloudflare applies that rule is not checked by the gate: read
+  the response header on a preview deploy after editing it.

@@ -1,8 +1,6 @@
 // The pages /llms.txt lists and /llms/ serves as raw Markdown
-// (#3213). The list is the Starlight sidebar minus its contributor
-// group, read from the resolved config, so a page added to the
-// sidebar joins without an edit here. Both paths are permanent once
-// an agent has cached them (.claude/rules/site.md).
+// (#3213): the Starlight sidebar minus its contributor group.
+// Both paths are permanent (.claude/rules/site.md).
 import { getCollection } from "astro:content";
 import starlightConfig from "virtual:starlight/user-config";
 
@@ -79,6 +77,10 @@ export async function llmsPages(): Promise<LlmsPage[]> {
             `under ${DOCS_ROOT}`,
         );
       }
+      // The path becomes a URL and the gate reads it back as one.
+      if (!/^[A-Za-z0-9._\/-]+\.md$/.test(file.slice(DOCS_ROOT.length))) {
+        throw new Error(`llms: "${file}" needs a plain file name`);
+      }
       if (!entry.data.description) {
         throw new Error(`llms: "${slug}" has no description`);
       }
@@ -105,5 +107,9 @@ export function siteTitle(): string {
 }
 
 export function siteDescription(): string {
-  return starlightConfig.description ?? "";
+  const description = starlightConfig.description;
+  if (!description) {
+    throw new Error("llms: the site has no description to summarize");
+  }
+  return description;
 }
