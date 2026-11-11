@@ -54,6 +54,10 @@ struct DesktopsStateTests {
         )
     }
 
+    /// KiwiHub's sheet cap on a 1440×900 screen, which the slot pins
+    /// in this suite and `DesktopsGeometryTests` reason from.
+    static let cap: CGFloat = 411
+
     /// The state on a 600 pt panel: five icon slots on the KiwiHub
     /// screen's row, so its seven-window line scrolls.
     static func state(_ overview: DesktopOverview) -> DesktopsState {
@@ -62,7 +66,7 @@ struct DesktopsStateTests {
             geometry: DesktopsGeometry(
                 overview: overview,
                 width: 600,
-                cap: 411
+                cap: cap
             )
         )
     }

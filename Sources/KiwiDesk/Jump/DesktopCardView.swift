@@ -34,7 +34,7 @@ struct DesktopCardView: View {
                         }
                     }
                 }
-                // A card past four Spaces keeps the selected one in
+                // A column cut short by the cap keeps the selected one in
                 // view.
                 .onAppear { proxy.scrollTo(selectedLine) }
                 .onChange(of: selectedLine) { _, line in
@@ -49,7 +49,7 @@ struct DesktopCardView: View {
         .accessibilityLabel(DesktopsText.desktop(desktop.label))
     }
 
-    /// The selected line, where the selection is on this card.
+    /// The selected line, where the selection is in this column.
     private var selectedLine: Int? {
         guard let place = state.place, place.screen == screen,
             place.desktop == index

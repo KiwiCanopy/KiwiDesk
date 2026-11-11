@@ -15,7 +15,7 @@ import Testing
 struct DesktopsGeometryTests {
     typealias G = DesktopsGeometry
     typealias T = DesktopsStateTests
-    static let cap: CGFloat = 411
+    static let cap = T.cap
 
     /// `desktops` Desktops of `spaces` Space lines each.
     static func screen(
@@ -63,6 +63,7 @@ struct DesktopsGeometryTests {
         let share = (Self.cap - G.chrome(rows: 2)) / 2
         let fit = (share / 4).rounded(.down)
         #expect(fit < G.tallestLine && fit > G.shortestLine)
+        #expect(fit == 35)
         #expect(two.line == fit)
         #expect(two.lines == [4 * fit, 2 * fit])
         #expect(two.height <= Self.cap)
@@ -232,7 +233,18 @@ struct DesktopsGeometryTests {
         let side = try read("DesktopsSideView.swift")
             .replacingOccurrences(of: " ", with: "")
         #expect(side.contains("geometry:DesktopsGeometry{state.geometry}"))
-        #expect(side.occurrences(of: "DesktopsGeometry(") == 0)
+        // One construction in the Jump tree: the model's.
+        let files = try FileManager.default.contentsOfDirectory(
+            atPath: jump.path
+        )
+        .filter { $0.hasSuffix(".swift") }
+        #expect(files.count > 10)
+        var built: [String: Int] = [:]
+        for name in files {
+            let count = try read(name).occurrences(of: "DesktopsGeometry(")
+            if count > 0 { built[name] = count }
+        }
+        #expect(built == ["JumpModel+Desktops.swift": 1])
         let controller = try read("JumpPanelController.swift")
             .replacingOccurrences(of: " ", with: "")
         #expect(controller.contains("panelWidth:width,"))

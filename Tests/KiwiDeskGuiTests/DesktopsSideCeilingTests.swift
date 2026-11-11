@@ -7,12 +7,12 @@ import Testing
 
 /// The Desktops side's two screen rows stand inside KiwiHub's one
 /// ceiling (#1229, the 488 pt the ruling raised it to): the
-/// RENDERED panel, field, footer and both rows of cards, measured
+/// RENDERED panel, field, footer and both rows of columns, measured
 /// as AppKit sizes it.
 @Suite("Desktops side height")
 @MainActor
 struct DesktopsSideCeilingTests {
-    @Test("two screen rows of cards fit under the ceiling")
+    @Test("two screen rows of columns fit under the ceiling")
     func twoRowsFit() {
         LocalizationManager.shared.select("en")
         let visible = CGRect(x: 0, y: 0, width: 1440, height: 900)

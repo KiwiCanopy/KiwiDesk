@@ -3,7 +3,7 @@ import KiwiDeskCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// One Space's line on a Desktop card (#1229): the shown-Space
+/// One Space's line in a Desktop's column (#1229): the shown-Space
 /// capsule, the layout symbol, the Space's name, then as many app
 /// icons as its width holds with "+n" counts off each edge (#3164).
 /// Colour carries nothing alone: the capsule, an underline under

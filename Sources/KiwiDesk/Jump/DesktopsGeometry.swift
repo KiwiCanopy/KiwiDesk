@@ -31,7 +31,8 @@ struct DesktopsGeometry: Equatable {
     /// selection inset plus the header's own indent.
     static let rowInset: CGFloat = KeyPanelStyle.selectionInset + 10
     /// A line's horizontal padding, its Space name's least width
-    /// and the two "+n" counts, which icon slots never take.
+    /// and the two "+n" counts, which icon slots never take; the
+    /// line's own spacing between those comes out of the name's.
     static let linePadding: CGFloat = 4
     static let labelReserve: CGFloat = 64
     static let moreReserve: CGFloat = 32
