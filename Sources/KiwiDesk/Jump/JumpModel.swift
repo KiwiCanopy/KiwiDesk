@@ -63,7 +63,7 @@ final class JumpModel: ObservableObject {
 
     /// A key, a re-rank or a side switch slides items under a still
     /// pointer: the lift clears until the next real move (#2365).
-    private func restPointer() {
+    func restPointer() {
         lastPointer = currentPointer()
         clearHover()
     }
@@ -210,64 +210,6 @@ final class JumpModel: ObservableObject {
         }
     }
 
-    /// `repeated` is a key held down: a step then stops at an end
-    /// rather than wrapping past it (#2897).
-    func handle(_ key: JumpKey, repeated: Bool) {
-        guard !leaving else { return }
-        restPointer()
-        if case .stepScope(let forward) = key {
-            setScope(scope.stepped(forward: forward))
-            return
-        }
-        if isNaming {
-            handleNaming(key)
-            return
-        }
-        switch scope {
-        case .windows: break
-        case .shortcuts:
-            handleShortcuts(key)
-            return
-        case .view:
-            handleView(key, repeated: repeated)
-            return
-        case .desktops:
-            handleDesktops(key, repeated: repeated)
-            return
-        }
-        switch key {
-        case .step(let delta):
-            move(by: delta, wrap: !repeated)
-        case .page(let direction):
-            move(by: direction * rowCap)
-        case .pick(let moveHere):
-            if let index = list.selection {
-                pick(index, moveHere ? .moveHere : .jump)
-            }
-        case .swapHere:
-            if let index = list.selection { pick(index, .swapHere) }
-        case .quick(let index, let moveHere):
-            if list.quick(index) != nil {
-                pick(index, moveHere ? .moveHere : .jump)
-            }
-        case .quickSwap(let index):
-            if list.quick(index) != nil { pick(index, .swapHere) }
-        case .escape:
-            if list.query.isEmpty {
-                onClose()
-            } else {
-                query = ""
-            }
-        case .dead:
-            onDeadKey()
-        case .side(let delta):
-            stepTile(delta, wrap: !repeated)
-        case .stepScope, .keep, .settings, .swallow, .openSpace,
-            .leaveSpace, .pickUp, .follow:
-            break
-        }
-    }
-
     /// Switches to `scope` with every query cleared (owner
     /// ruling, #2229) — a query means different things in each.
     /// View and Shortcuts read their content fresh.
@@ -342,7 +284,7 @@ final class JumpModel: ObservableObject {
         listChanged(stripWas: stripWas)
     }
 
-    private func move(by delta: Int, wrap: Bool = false) {
+    func move(by delta: Int, wrap: Bool = false) {
         let before = list.selection
         list.step(delta, wrap: wrap)
         if list.selection != before, let match = list.selected {
