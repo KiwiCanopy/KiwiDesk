@@ -116,13 +116,14 @@ struct MCPToolsEdgeTests {
             guard case .object(let fields) = tool else { return nil }
             return fields["name"]?.stringValue
         }
-        // The ruled tool set (#1685 ▸ Ruling 2–4); a domain tool
+        // The ruled tool set (#1685 ▸ Ruling 2–4, #3213); a tool
         // joins it by ruling.
         #expect(
             Set(names) == [
                 "list_commands", "help", "get_state", "run",
                 "run_batch", "run_destructive", "keep", "looks",
                 "app_rules", "diagnose_window", "kiwivision",
+                "docs_search", "docs_get",
             ]
         )
         #expect(Set(names).count == names.count)

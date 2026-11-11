@@ -10,6 +10,13 @@ enum MCPToolSchema {
         ])
     }
 
+    static func integer(_ description: String) -> JSONValue {
+        .object([
+            "type": .string("integer"),
+            "description": .string(description),
+        ])
+    }
+
     /// A string property limited to `values`.
     static func choice(
         _ description: String,

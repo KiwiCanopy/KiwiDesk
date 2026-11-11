@@ -40,7 +40,9 @@ extension MCPTools {
             help,
             title: "Describe a KiwiDesk command",
             "Shows one command's arguments, their types and allowed "
-                + "values, and whether it is destructive.",
+                + "values, whether it is destructive, its init.lua "
+                + "call (lua) and where the docs describe it (docs, "
+                + "for \(docsGet)).",
             properties: ["name": MCPToolSchema.string("The command name.")],
             required: ["name"],
             readOnly: true
@@ -94,12 +96,15 @@ extension MCPTools {
             ? "No command matches \"\(filter ?? "")\"."
             : lines.joined(separator: "\n")
         let commands = rows.map { entry -> JSONValue in
-            .object([
+            let fields: [String: JSONValue] = [
                 "name": .string(entry.qualifiedName),
                 "summary": .string(entry.record.summary),
                 "destructive": .bool(APIReference.isDestructive(entry)),
                 "kind": .string(APIReference.kind(of: entry).rawValue),
-            ])
+            ]
+            return .object(
+                fields.merging(docsFields(for: entry)) { field, _ in field }
+            )
         }
         return result(
             text,
@@ -115,6 +120,12 @@ extension MCPTools {
         guard response.isSuccess, let data = response.data else {
             return failure(response.error ?? "no answer")
         }
-        return result(text(of: data), structured: data)
+        guard case .object(let fields) = data,
+            let entry = APIReference.entry(named: name)
+        else { return result(text(of: data), structured: data) }
+        let linked = JSONValue.object(
+            fields.merging(docsFields(for: entry)) { field, _ in field }
+        )
+        return result(text(of: linked), structured: linked)
     }
 }

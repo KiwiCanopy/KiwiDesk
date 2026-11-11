@@ -243,6 +243,14 @@ for b in "${bundles[@]}"; do
     echo "    resource bundle: $(basename "$b")"
 done
 
+# The docs `kiwidesk mcp` serves ride the GUI resource bundle
+# (#3213). A stale index would ship text that is not this build's.
+if ! python3 "$ROOT/scripts/docs-index" --check; then
+    echo "error: the bundled docs index is stale — run" \
+         "scripts/docs-index and commit the result" >&2
+    exit 1
+fi
+
 # License texts (#1407, packaging-and-release.md). `.txt` so a
 # double-click opens TextEdit; `LicenseDocuments.Document` in the
 # GUI spells the same two names.

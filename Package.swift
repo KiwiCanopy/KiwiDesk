@@ -104,6 +104,9 @@ let package = Package(
                 .copy("Resources/MarkDiscord.png"),
                 .copy("Resources/MarkGitHub.png"),
                 .copy("Resources/MarkKofi.png"),
+                // The docs `kiwidesk mcp` serves (#3213),
+                // written by scripts/docs-index.
+                .copy("Resources/DocsIndex.json"),
             ],
             swiftSettings: swiftSettings
         ),

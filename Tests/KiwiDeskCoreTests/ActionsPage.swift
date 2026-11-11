@@ -97,13 +97,9 @@ enum ActionsPage {
 
         """
 
-    /// The Lua table a core command is spelled on in a heading.
-    private static let luaTable = "KiwiDesk."
-
     /// Command name → anchor of the `###` or deeper heading naming
-    /// it. A heading may name several commands, split on ` / ` or
-    /// `, `, and may spell one on its Lua table; the
-    /// anchors follow GitHub's slugger, as the site's do,
+    /// it, as `APIReference.commandNames(inHeading:)` reads one;
+    /// the anchors follow GitHub's slugger, as the site's do,
     /// counting every heading for the duplicate suffix.
     static func headingAnchors(
         in text: String
@@ -135,14 +131,9 @@ enum ActionsPage {
                 seen[slug] = 1
             }
             guard hashes.count >= 3 else { continue }
-            let names = title.replacingOccurrences(of: "`", with: "")
-                .replacingOccurrences(of: " / ", with: ", ")
-                .components(separatedBy: ", ")
-            for name in names {
-                let bare =
-                    name.hasPrefix(luaTable)
-                    ? String(name.dropFirst(luaTable.count)) : name
-                if anchors[bare] == nil { anchors[bare] = slug }
+            for name in APIReference.commandNames(inHeading: title)
+            where anchors[name] == nil {
+                anchors[name] = slug
             }
         }
         return anchors
