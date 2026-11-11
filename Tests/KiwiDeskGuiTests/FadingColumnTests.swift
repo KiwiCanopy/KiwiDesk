@@ -26,10 +26,6 @@ struct FadingColumnTests {
         #expect(cut(0) == (false, true))
         #expect(cut(-100) == (true, true))
         #expect(cut(120 - content) == (true, false))
-        // Overflowing, the margin shifts the content: at rest it
-        // starts a fade's depth down; at the end it stops one short.
-        #expect(cut(EdgeFade.depth) == (false, true))
-        #expect(cut(120 - EdgeFade.depth - content) == (true, false))
     }
 
     @Test("the Desktops side's vertical lists fade through FadingColumn")
@@ -47,10 +43,20 @@ struct FadingColumnTests {
             .filter { !$0.isWhitespace }
         }
         let side = try read("DesktopsSideView.swift")
-        #expect(side.contains("FadingColumn(selected:state.place?.screen,"))
+        #expect(
+            side.contains(
+                "FadingColumn(selected:state.place?.screen,"
+                    + "ids:Array(state.overview.screens.indices),"
+            )
+        )
         #expect(side.contains("row($0,geometry).id($0)"))
         let card = try read("DesktopCardView.swift")
-        #expect(card.contains("FadingColumn(selected:selectedLine)"))
+        #expect(
+            card.contains(
+                "FadingColumn(selected:selectedLine,"
+                    + "ids:Array(desktop.spaces.indices))"
+            )
+        )
         #expect(card.contains("line($0).id($0)"))
         for source in [side, card] {
             #expect(source.occurrences(of: "ScrollView(") == 0)
@@ -59,12 +65,9 @@ struct FadingColumnTests {
         #expect(column.contains("EdgeFade.cuts(offset:offset,"))
         #expect(column.contains("viewport:height,inset:inset)"))
         #expect(column.contains(".padding(.vertical,inset)"))
-        #expect(
-            column.contains(
-                ".contentMargins(.vertical,overflows?fade:0,"
-                    + "for:.scrollContent)"
-            )
-        )
+        // No band: nothing reserves room at the ends (owner via
+        // the ui-designer, 2026-11-11).
+        #expect(column.occurrences(of: "contentMargins") == 0)
         #expect(column.contains(".coordinateSpace(.named(space))"))
         #expect(column.contains("@Stateprivatevarspace=UUID()"))
         #expect(column.contains("geometry.frame(in:.named(space))"))
@@ -74,15 +77,16 @@ struct FadingColumnTests {
         #expect(column.contains(".mask(mask)"))
         #expect(
             column.contains(
-                ".onChange(of:selected){reveal(proxy,animated:true)}"
+                ".onChange(of:selected){old,_in"
+                    + "reveal(proxy,from:old,animated:true)}"
             )
         )
         #expect(
             column.contains(
-                ".onChange(of:overflows){reveal(proxy,animated:false)}"
+                "guardlettarget=Self.target(from:old,to:selected,in:ids)"
             )
         )
-        #expect(column.contains("proxy.scrollTo(selected)"))
+        #expect(column.contains("proxy.scrollTo(target)"))
         #expect(column.occurrences(of: ".frame(height:fade)") == 2)
     }
 
@@ -95,5 +99,23 @@ struct FadingColumnTests {
         for viewport: CGFloat in [20, 38, 60, 80, 120] {
             #expect(2 * EdgeFade.depth(viewport: viewport) <= viewport / 2)
         }
+    }
+
+    @Test("a reveal scrolls to the item past the selection")
+    func lookAhead() {
+        typealias C = FadingColumn<Int, EmptyView>
+        let ids = Array(0..<8)
+        // Down: the next item; up: the one before.
+        #expect(C.target(from: 2, to: 3, in: ids) == 4)
+        #expect(C.target(from: 5, to: 4, in: ids) == 3)
+        // A jump keeps its direction.
+        #expect(C.target(from: 0, to: 5, in: ids) == 6)
+        #expect(C.target(from: 7, to: 2, in: ids) == 1)
+        // At an end, the item itself, which then shows whole.
+        #expect(C.target(from: 6, to: 7, in: ids) == 7)
+        #expect(C.target(from: 1, to: 0, in: ids) == 0)
+        // Opening looks down; nothing selected reveals nothing.
+        #expect(C.target(from: nil, to: 3, in: ids) == 4)
+        #expect(C.target(from: 3, to: nil, in: ids) == nil)
     }
 }

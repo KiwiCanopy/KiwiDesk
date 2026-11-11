@@ -22,6 +22,7 @@ struct DesktopsSideView: View {
     var body: some View {
         FadingColumn(
             selected: state.place?.screen,
+            ids: Array(state.overview.screens.indices),
             inset: DesktopsGeometry.sidePadding
         ) {
             VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {

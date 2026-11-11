@@ -2,14 +2,16 @@ import SwiftUI
 
 /// A KiwiHub list that scrolls down: it fades its top or bottom
 /// edge only while content lies beyond it, and scrolls the
-/// selected item clear of the fade (#3164): while it overflows, the
-/// fade's depth is a content margin, which a `scrollTo` keeps the
-/// item inside (measured on macOS 27, 2026-11-11). The
+/// selected item clear of the fade by revealing the item past it in
+/// the direction of travel, which fills the fade instead (#3164;
+/// the ui-designer's call, delegated by the owner 2026-11-11). The
 /// Desktops side's screen rows and each Desktop's Space lines take
 /// it.
 struct FadingColumn<Selected: Hashable, Content: View>: View {
     /// The selected item's id, where it is in this list.
     let selected: Selected?
+    /// Every item's id, in order.
+    let ids: [Selected]
     /// The margin above the first item and below the last.
     var inset: CGFloat = 0
     @ViewBuilder let content: Content
@@ -29,11 +31,6 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
                     .padding(.vertical, inset)
                     .background(measure)
             }
-            .contentMargins(
-                .vertical,
-                overflows ? fade : 0,
-                for: .scrollContent
-            )
             .coordinateSpace(.named(space))
             .onGeometryChange(for: CGFloat.self) {
                 $0.size.height
@@ -41,9 +38,10 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
                 height = $0
             }
             .mask(mask)
-            .onAppear { reveal(proxy, animated: false) }
-            .onChange(of: selected) { reveal(proxy, animated: true) }
-            .onChange(of: overflows) { reveal(proxy, animated: false) }
+            .onAppear { reveal(proxy, from: nil, animated: false) }
+            .onChange(of: selected) { old, _ in
+                reveal(proxy, from: old, animated: true)
+            }
         }
     }
 
@@ -51,16 +49,35 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
     /// and a line between them takes a shallower one.
     private var fade: CGFloat { EdgeFade.depth(viewport: height) }
 
-    /// Whether the content runs past the viewport, so it scrolls.
-    private var overflows: Bool { contentHeight > height + 0.5 }
-
-    private func reveal(_ proxy: ScrollViewProxy, animated: Bool) {
-        guard let selected else { return }
+    private func reveal(
+        _ proxy: ScrollViewProxy,
+        from old: Selected?,
+        animated: Bool
+    ) {
+        guard let target = Self.target(from: old, to: selected, in: ids)
+        else { return }
         withAnimation(
             animated && !reduceMotion ? .easeOut(duration: 0.15) : nil
         ) {
-            proxy.scrollTo(selected)
+            proxy.scrollTo(target)
         }
+    }
+
+    /// What a reveal scrolls to: the item past `new` in the
+    /// direction it moved from `old` (down when it did not move), or
+    /// `new` itself at an end.
+    static func target(
+        from old: Selected?,
+        to new: Selected?,
+        in ids: [Selected]
+    ) -> Selected? {
+        guard let new, let index = ids.firstIndex(of: new) else {
+            return new
+        }
+        let before = old.flatMap { ids.firstIndex(of: $0) }
+        let step = before.map { $0 > index ? -1 : 1 } ?? 1
+        let next = index + step
+        return ids.indices.contains(next) ? ids[next] : new
     }
 
     private var measure: some View {

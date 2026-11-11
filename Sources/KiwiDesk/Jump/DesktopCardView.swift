@@ -28,7 +28,10 @@ struct DesktopCardView: View {
             title
             // A column cut short by the cap keeps the selected line
             // clear of its fade.
-            FadingColumn(selected: selectedLine) {
+            FadingColumn(
+                selected: selectedLine,
+                ids: Array(desktop.spaces.indices)
+            ) {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(desktop.spaces.indices, id: \.self) {
                         line($0).id($0)
