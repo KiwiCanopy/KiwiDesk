@@ -317,10 +317,9 @@ struct CombinedClampTests {
         #expect(segments.count == 2)
         var clamped = CGRect(x: 10, y: 5, width: 400, height: 300)
         for segment in segments {
-            clamped = AppBarGeometry.clampClear(
+            clamped = AppBarGeometry.pushedBelow(
                 clamped,
-                of: segment,
-                edge: .top
+                strip: segment
             )
         }
         #expect(clamped.minY == 32)

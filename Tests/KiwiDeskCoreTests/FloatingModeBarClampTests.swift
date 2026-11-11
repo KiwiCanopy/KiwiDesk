@@ -101,24 +101,19 @@ struct FloatingModeBarClampTests {
             """
         )
         #expect(commanded.minY >= painted.maxY)
-        // Position-only, because this one FITS: the clamp
-        // writes `origin` and never `size`. The oversized case
-        // is its own test below — asserting an untouched size on
-        // a window that could not have been resized proves
-        // nothing (code review, 2026-08-31).
+        // Position-only: the push writes `origin` and never
+        // `size`; the oversized case is its own test below.
         #expect(commanded.size == frame.size)
     }
 
     @Test(
-        "An oversized floating-MODE member is fitted too",
+        "An oversized floating-MODE member is pushed at its own size",
         .enabled(if: NSScreen.main != nil)
     )
-    func sweepFitsAnOversizedFloatingModeMember() throws {
-        // The size half of the same widening: #1091's fit runs
-        // in the same sweep, so a floating-MODE member larger
-        // than the region between the bars was equally
-        // unreachable. Oversized on purpose, so the fit arm
-        // engages rather than being asserted about in absentia.
+    func sweepPushesAnOversizedMemberUnresized() throws {
+        // Larger than the room below the strip on purpose: the
+        // sweep pushes it down whole and its bottom runs off the
+        // screen (#3163); no fit shrinks it.
         let screen = try #require(NSScreen.screens.first)
         let frame = CGRect(
             x: screen.frame.minX,
@@ -130,17 +125,16 @@ struct FloatingModeBarClampTests {
             makeBarredCore(mode: .floating, frame: frame)
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        _ = try #require(strip(core))
-        let region = try #require(core.floatBounds(of: Self.window))
+        let painted = try #require(strip(core))
 
         core.clampFloatsClearOfBars()
 
         let commanded = try #require(
             core.tiler.recentInstantTarget(Self.window),
-            "the oversized floating-MODE member was never fitted"
+            "the oversized member was never pushed clear"
         )
-        #expect(commanded.width <= region.width)
-        #expect(commanded.height <= region.height)
+        #expect(commanded.minY >= painted.maxY)
+        #expect(commanded.size == frame.size)
     }
 
     @Test(
@@ -201,8 +195,8 @@ struct FloatingModeBarClampTests {
         // A native-fullscreen window keeps its slot (#670) and
         // reaches this sweep only now that a floating-MODE
         // space's members do — poking a fullscreen app with a
-        // position clamp AND a size fit is the frame set the
-        // stash already refuses. Unguarded when it landed:
+        // position clamp is the frame set the stash already
+        // refuses. Unguarded when it landed:
         // deleting the clause left all 4300 tests green
         // (guard-prover, 2026-08-31).
         let screen = try #require(NSScreen.screens.first)

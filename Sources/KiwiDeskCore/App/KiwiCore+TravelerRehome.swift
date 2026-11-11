@@ -64,18 +64,13 @@ extension KiwiCore {
                 scaleSize: tiler.settings.floatScaleOnDisplayChange
             )
         else { return }
-        // Fitted and clamped for the RENDER space (#1091/#242):
-        // the home-keyed nets never see a traveler. A refused fit
-        // falls back to the position clamp alone.
-        let fitted = floatFrameFittedClearOfBars(
+        // Pushed clear of a top bar on the RENDER space (#242): the
+        // home-keyed net never sees a traveler.
+        let target = floatFrameClampedClearOfBars(
             id,
             frame: moved,
             space: space
         )
-        let target =
-            shouldIssueFloatFit(id, current: window.frame, fitted: fitted)
-            ? fitted
-            : floatFrameClampedClearOfBars(id, frame: moved, space: space)
         tiler.forgetStash(id)
         tiler.applyFrame(
             id,

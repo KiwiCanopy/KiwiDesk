@@ -85,14 +85,16 @@ extension KiwiCore {
             )
             ?? (lockedRatio == nil ? nil : shown)
             ?? window.frame
-        // The region the float may occupy — screen bounds less
-        // every painted bar strip (#1091). The resize needs the
-        // whole rect rather than a clamp, because pinning is a
-        // question about how much room each EDGE has, and a
-        // clamp that only pushes can answer neither that nor
-        // "this window is already wider than the space between
-        // the bars".
-        let region = floatGrowBounds(of: id)
+        // Where a grow may reach: the screen less a top strip, as a
+        // hand drag reaches (#3163), the ring held clear. A rect, not
+        // a clamp, because pinning asks how much room each EDGE has.
+        // Judged where the window renders (#1217), as move_floating;
+        // a float resize routes only for the active Space's own focus
+        // (`resizeRoutesAsFloat`), so that is its home Space today.
+        let space = floatPlacementSpace(of: id)
+        let region = space.flatMap {
+            floatReachBounds(on: $0, ringInset: true)
+        }
         let outcome: FloatResize.Outcome
         if let lockedRatio, base.height > 0 {
             let ratio = FloatResize.heldRatio(
@@ -128,7 +130,8 @@ extension KiwiCore {
         // never saw.
         let target = floatFrameClampedClearOfBars(
             id,
-            frame: outcome.frame
+            frame: outcome.frame,
+            space: space
         )
         // A grow the boundary blocks or TRUNCATES cues (#1091).
         // It used to do neither: the float path cued on shrink

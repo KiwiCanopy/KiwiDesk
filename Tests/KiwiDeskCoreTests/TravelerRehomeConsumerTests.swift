@@ -136,14 +136,14 @@ struct TravelerRehomeConsumerTests {
         #expect(commanded.minY >= strip.maxY)
     }
 
-    /// The SIZE half (#1091): a traveler taller than the region
-    /// between the render screen's bars is fitted into it, or the
-    /// position clamp pushes it past the opposite edge.
+    /// A traveler taller than the room below the render screen's
+    /// top bar is pushed down at its own size, never fitted
+    /// (#3163).
     @Test(
-        "an oversized traveler is fitted into the render region",
+        "an oversized traveler is pushed at its own size",
         .enabled(if: NSScreen.main != nil)
     )
-    func oversizedTravelerIsFitted() throws {
+    func oversizedTravelerIsPushedUnresized() throws {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.spaceBarStyle.visibility = .always
@@ -153,6 +153,7 @@ struct TravelerRehomeConsumerTests {
         f.core.updateBars()
         _ = try #require(f.core.spaceBars.shownStrips.first?.1)
         let region = try #require(f.core.floatBounds(on: SpaceID("2")))
+        #expect(region.minY > f.other.minY)
         let tall = CGRect(
             x: f.other.minX,
             y: f.other.minY,
@@ -164,10 +165,7 @@ struct TravelerRehomeConsumerTests {
         let commanded = try #require(
             f.core.tiler.recentInstantTarget(Self.traveler)
         )
-        // The SIZE is bounded by the region; the position is
-        // only pushed clear of the bar (by the ring inset), the
-        // way the home-keyed net leaves position to the user.
-        #expect(commanded.height <= region.height)
+        #expect(commanded.size == tall.size)
         #expect(commanded.minY >= region.minY)
     }
 

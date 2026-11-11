@@ -28,9 +28,8 @@ struct FloatDropOrderSeamTests {
         let steps = [
             "state.apply(.windowMoved(id, frame))",
             "relocateDroppedFloat(id)",
-            // The drop's one entry composes the clamp with the
-            // #1427 bottom fit (`FloatDropBottomFitTests`).
-            "floatFrameFittedOnDrop(",
+            // The top-bar push (#3163, `FloatNeverResizedTests`).
+            "floatFrameClampedClearOfBars(",
         ]
         let offsets = try steps.map { step in
             try #require(
