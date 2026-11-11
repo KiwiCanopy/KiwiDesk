@@ -1297,7 +1297,9 @@ editing here:
   states that it owes none; a Desktop follow whose window held no
   focus, or whose Space is not shown, takes `followSwitch`
   (#2888, `DesktopMoveNamedFocusTests` ▸
-  `focusedFollowToUnshownSpace`). The focus the raise hands back, and the one
+  `focusedFollowToUnshownSpace`); a profile restore's follow
+  takes `followSwitch` too (#3191, profiles.md). The
+  focus the raise hands back, and the one
   `raiseFloatsAbove` re-reads, is the focus ANCHOR, never the
   Space's slot, or a sticky traveler loses it
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred

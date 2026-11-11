@@ -1493,6 +1493,19 @@ incoming arrangement does not name*. The obligations:
   `HeldSpaceRestoreTests` ▸ `replugRestoresFromMemory`). A path a
   switching apply runs that moves windows across Spaces takes no
   exemption for a held Space's members.
+- **A restore that empties the active Space of its focus is
+  followed (#3191).** `restorePartitioning` returns the
+  `RestoreFollow` it owes, and each apply door hands it to the
+  one `retileFollowing` IN PLACE of its own retile: the landing
+  Space is activated ahead of the door's pass, never after it,
+  which would park the moved window for a switch to bring back
+  (the launch follow's #1599 rule) — re-judged there, since the
+  mode loop, the pins and `refileHeldSpaces` ran since the
+  restore — and pays it through `followSwitch`, never a copy of
+  its steps. A bound Desktop switch's apply (`.event`) follows
+  nothing, its handler activating the arriving Space itself
+  (`RestoreFollowTests`). A new apply door that restores owes the
+  same hand-off, and the result is never discarded.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call

@@ -107,10 +107,10 @@ extension KiwiCore {
             // swapping profiles under them must not rewrite it.
             syncGuiSpacesToLive()
         }
-        // #1230: and now put this profile's own windows back into
-        // its own Spaces. After the prune, so what the profile has
-        // never seen is already in its `fallback_space`.
-        if switching { restoreProfilePartitioning(of: profile) }
+        // #1230: put this profile's windows back in its own Spaces,
+        // after the prune, so what it never saw is in its fallback.
+        let restored =
+            switching ? restoreProfilePartitioning(of: profile) : nil
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
@@ -161,8 +161,9 @@ extension KiwiCore {
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
-        retile(pass: forceRetile ? .apply : .event)
-        emitSpaceChange()
+        // A bound Desktop switch's handler activates its own Space.
+        let follow = cause == .desktopSwitch ? nil : restored
+        retileFollowing(follow, pass: forceRetile ? .apply : .event)
         // #1145: a profile may override `desktop_reach` — after
         // the pins and the space→display resolve the carry's
         // home-screen read rests on. Its own topology read on
@@ -237,9 +238,7 @@ extension KiwiCore {
             composed,
             keepingPinsOf: temporaries.subtracting(composed.spaces)
         )
-        if switching {
-            restorePartitioning(of: standard, declaring: Set(composed.spaces))
-        }
+        let follow = switching ? restoreStandardPartitioning(composed) : nil
         refileHeldSpaces(
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
@@ -251,8 +250,7 @@ extension KiwiCore {
         reapplyStructuredOverrides(nil)
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
-        retile(pass: forceRetile ? .apply : .event)
-        emitSpaceChange()
+        retileFollowing(follow, pass: forceRetile ? .apply : .event)
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
         // Last, like `apply(profile:)`'s `becameLive`: the filing
