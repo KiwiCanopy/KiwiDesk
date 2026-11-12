@@ -221,7 +221,7 @@ struct GestureListRow: View {
         clash = nil
         guard target != key, !others.contains(target) else { return }
         if action != nil {
-            model.moveGestureReach(from: key, to: target)
+            model.carryPick(.gesture, from: key.spelling, to: target.spelling)
             guard
                 GestureListEdits.rekey(
                     key,

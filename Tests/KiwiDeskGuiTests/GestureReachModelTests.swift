@@ -61,17 +61,42 @@ struct GestureReachModelTests {
         #expect(model.core.guiConfigStore.load()?.gesture[own] == nil)
     }
 
-    @Test("a re-keyed row keeps its reach")
+    @Test("a re-keyed row keeps its reach in every profile it held")
     func rekeyCarriesTheReach() throws {
         let model = try makeModel()
+        model.setProfile(.gesture, own.spelling, "Home", true)
+        model.updateActiveProfile()
+
         let moved = GestureKey(.rightClick, [.option])
-        model.moveGestureReach(from: own, to: moved)
+        model.carryPick(.gesture, from: own.spelling, to: moved.spelling)
         model.config.gesture[own] = nil
         model.config.gesture[moved] = .bound(.run(lua))
         model.updateActiveProfile()
-        let work = try model.core.profiles.read(name: "Work").gesture
-        #expect(work?[moved] == .bound(.run(lua)))
-        #expect(work?[own] == nil)
+
+        for name in ["Work", "Home"] {
+            let map = try model.core.profiles.read(name: name).gesture
+            #expect(map?[moved] == .bound(.run(lua)), "\(name)")
+            #expect(map?[own] == nil, "\(name)")
+        }
         #expect(model.core.guiConfigStore.load()?.gesture[moved] == nil)
+    }
+
+    @Test("a listed re-key reads as one move row, its reach folded")
+    func rekeyIsOneRow() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeModel()
+        model.setProfile(.gesture, own.spelling, "Home", true)
+        model.updateActiveProfile()
+
+        let moved = GestureKey(.rightClick, [.option])
+        model.carryPick(.gesture, from: own.spelling, to: moved.spelling)
+        model.config.gesture[own] = nil
+        model.config.gesture[moved] = .bound(.run(lua))
+
+        let rows = SettingsDiffRowSource.rows(for: model).filter {
+            $0.key == .shortcuts(.gestureBindings)
+        }
+        #expect(rows.count == 1)
+        #expect(rows.first?.reach != nil)
     }
 }

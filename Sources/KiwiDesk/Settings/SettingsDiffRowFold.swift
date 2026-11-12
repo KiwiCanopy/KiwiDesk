@@ -23,7 +23,9 @@ enum SettingsDiffRowFold {
         var rest: [SettingsDiffRow] = []
         for var row in reach {
             let matches = own.indices.filter {
-                own[$0].subject != nil && own[$0].subject == row.subject
+                guard let subject = row.subject else { return false }
+                return own[$0].subject == subject
+                    || own[$0].pairedSubject == subject
             }
             guard let words = row.reach, !matches.isEmpty else {
                 row.reach = nil
