@@ -29,6 +29,10 @@ struct ModifierSidesRow: View {
             .searchAnchored(
                 SettingsCatalog.shortcuts.modifierKeys.children.modifierSides
             )
+            if reason != .appWideLuaOwned {
+                LiveSettingCaption()
+                    .padding(.leading, ToggleRow.captionIndent)
+            }
             if let text = captionText { caption(text) }
         }
         .padding(.leading, SettingsMetrics.shortcutTextIndent)

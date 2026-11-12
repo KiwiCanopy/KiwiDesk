@@ -40,11 +40,7 @@ struct MotionCard: View {
                 // gate (#171) — per row, less the census's
                 // exemption; parallel `GreyOut`s, never nested
                 // (gui.md).
-                ForEach(ColorsRowOrder.motionSpaceSwitch, id: \.id) { key in
-                    row(for: key).modifier(GreyOut(active: greyed(key)))
-                }
-                spaceSwitchGroupEnd
-                ForEach(windowRows, id: \.id) { key in
+                ForEach(ColorsRowOrder.motionAtRest, id: \.id) { key in
                     row(for: key).modifier(GreyOut(active: greyed(key)))
                 }
                 disclosure.modifier(GreyOut(active: reduceMotion))
@@ -68,25 +64,11 @@ struct MotionCard: View {
         }
     }
 
-    /// The at-rest rows after the Space switch group.
-    private var windowRows: [SettingKey] {
-        Array(
-            ColorsRowOrder.motionAtRest.dropFirst(
-                ColorsRowOrder.motionSpaceSwitch.count
-            )
-        )
-    }
-
-    /// Whether `key` greys: the card's Reduce Motion gate, less the
-    /// census's exemption — and the slide's duration while neither
-    /// pick draws a slide (#2524, #2971), one `GreyOut` per row, never
-    /// nested (gui.md).
+    /// Whether `key` greys: the card's Reduce Motion gate, less any
+    /// row the census exempts, one `GreyOut` per row, never nested
+    /// (gui.md).
     private func greyed(_ key: SettingKey) -> Bool {
-        if reduceMotion && !key.placement.exemptFromContainerGate {
-            return true
-        }
-        return key == .colours(.spaceSlideDuration)
-            && spaceSlideDurationInert
+        reduceMotion && !key.placement.exemptFromContainerGate
     }
 
     private var disclosure: some View {
@@ -197,7 +179,7 @@ struct MotionCard: View {
     private var caption: String {
         L(
             "motion.caption",
-            "How a Space switch shows itself, and how windows move."
+            "How windows move into place."
         )
     }
 

@@ -258,8 +258,8 @@ is selected.
 ## Shared visual language
 
 **A section or disclosure title is sentence case** —
-"Applies immediately", "Drag & drop", "Move windows", not
-"Applies Immediately" or "Drag & Drop" (R5, #406), which is
+"Drag & drop", "Move windows", not "Drag & Drop" (R5, #406),
+which is
 what macOS System Settings uses for its own in-pane headers.
 Three boundaries, because System Settings itself draws them:
 
@@ -1118,17 +1118,18 @@ names it. While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 
-The Space switch is on that card: **Space switches** at its top
-picks Slide, Show the Space or None, and **Slide duration**
-beneath the picks paces the slide (#1956, #2524). The **Animate
-windows** master greys none of them, and Reduce Motion greys only
-the duration:
+The Space switch is not on that card either: **Switching
+Spaces**, the card after Animations (#3218), holds **Space
+switches**, which picks Slide, Show the Space or None, and
+**Slide duration** beneath the picks (#1956, #2524). The
+**Animate windows** master greys none of them, and Reduce Motion
+greys only the duration:
 under Reduce Motion a Slide shows the Space instead, which is how
 a switch reads with less motion, and the plate drops only its
 fade. The duration also greys while no slide would play. The
-group closes with "Applies at once, in every profile." and a
-divider above **Animate windows**, and the card's Reduce Motion
-warning names window animations alone.
+card leads with "Changes apply at once, in every profile." under
+its title, and the Animations card's Reduce Motion warning names
+window animations alone.
 
 **Step between Spaces (mouse or trackpad)** sits under **Space
 switches** with the same three options, for the scroll Space step
@@ -1136,6 +1137,11 @@ alone; **Space switches** keeps every other switch. Its caption
 shows only while its pick differs from the row above, which says
 the same sentence otherwise. **Slide duration** stays live while
 either pick draws a slide (#2971).
+
+**A setting that skips Save carries one sentence where it sits
+(#3218)**: under its card's title, or under its row's label among
+a profile's rows ([design decisions](design-decisions.md) ▸ *A
+setting that skips Save says so where it sits*).
 
 Three bar motions keep playing under Reduce Motion, by the owner's
 ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
