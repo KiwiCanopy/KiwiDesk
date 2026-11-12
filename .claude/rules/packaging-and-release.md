@@ -7,7 +7,6 @@ paths:
   - "scripts/release.sh"
   - "scripts/bump-version.sh"
   - "scripts/install-hooks.sh"
-  - "scripts/update-homebrew-cask.py"
   - "scripts/update-nix-source.py"
   - "scripts/pre-commit"
   - "scripts/gate-lock"
@@ -306,10 +305,11 @@ relax. `AppcastParserTests` holds both halves: the refusal it
 must keep, and the image-beside-the-archive case it must never
 fire on. The feed is also not the only reader of a release's
 asset list, so an artifact added to a release answers to every
-one of them — `.github/workflows/homebrew.yml` and
-`.github/workflows/nix.yml` select the archive by exact name
-(`HomebrewCaskUpdateTests`, `NixSourceUpdateTests`), which is what
-makes a third asset harmless there.
+one of them — `.github/workflows/nix.yml` selects the archive by
+exact name (`NixSourceUpdateTests`), which is what makes a third
+asset harmless there. The Homebrew cask's `url` names the archive
+too, so renaming the release ZIP owes a Homebrew/homebrew-cask PR
+changing that `url` in step.
 
 No version cutoff is written anywhere and none should be — the
 releases
@@ -649,25 +649,26 @@ change that step to publish without changing that entry first —
 restating its argument here is how the two copies came to
 disagree about a draft's reach on the day they were written.
 
-**Advance Homebrew only after publication.**
-`.github/workflows/homebrew.yml` owns the tap update: the
-`release.published` event is the distribution boundary, never the
-tag push or draft creation. It must verify the release's one ZIP
-against GitHub's SHA-256 digest before changing the cask, and its
-write credential stays scoped to `KiwiCanopy/homebrew-tap`. A
-manual dispatch is a retry of that same published asset, not an
-alternate way to build or publish one.
+**Homebrew advances itself; nothing here writes the cask.** The
+cask lives in Homebrew/homebrew-cask and its autobump bumps it;
+*Homebrew is the deliberate exception* in `docs/design-decisions.md`
+owns why and what a stale cask costs. Never add a `no_autobump!` to
+it, a workflow here that pushes to that repository, or a cask back
+in `KiwiCanopy/homebrew-tap` (retired by KiwiCanopy/homebrew-tap#4).
+A cask PR changing its `livecheck` keeps it reading a source only
+publication advances — the latest release or the appcast — so a
+draft never reaches Homebrew.
 
-**Advance the Nix flake the same way (#2909).**
-`.github/workflows/nix.yml` is the Homebrew workflow's twin: the
-same `release.published` boundary, the same by-name asset pick and
-digest check, and a write credential scoped to `KiwiCanopy/nix`
-(`NIX_REPO_DEPLOY_KEY`). It rewrites only
+**Advance the Nix flake only after publication (#2909).**
+`.github/workflows/nix.yml` owns it: the `release.published` event
+is the distribution boundary, never the tag push or draft
+creation. It picks the release's one ZIP by name, verifies it
+against GitHub's SHA-256 digest, and writes with a credential
+scoped to `KiwiCanopy/nix` (`NIX_REPO_DEPLOY_KEY`). It rewrites only
 `pkgs/kiwidesk/source.json`, through `scripts/update-nix-source.py`,
 which refuses a downgrade and a new hash for a published version
-(`NixSourceUpdateTests`). A change to the verification steps in one
-workflow lands in both (`NixSourceUpdateTests` ▸
-`verificationMatchesHomebrew`).
+(`NixSourceUpdateTests`). A manual dispatch is a retry of that same
+published asset, not an alternate way to build or publish one.
 
 **Advance the Claude Code plugin only after publication, and only
 from `plugins/` (#2258).** `.github/workflows/claude-plugin.yml`

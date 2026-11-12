@@ -54,6 +54,12 @@ the cask additionally puts the `kiwidesk` CLI on your `PATH`,
 which [the CLI page](cli.md) shows how to link after a `.dmg`
 install. Either way KiwiDesk checks for updates itself.
 
+Installed from the old `kiwicanopy/tap`? KiwiDesk keeps updating
+itself. To move it to the official cask, keeping your settings, run
+`brew uninstall --cask kiwidesk && brew install --cask kiwidesk`,
+then `brew untap kiwicanopy/tap`. Open KiwiDesk again afterwards,
+and rerun `kiwidesk service start` if you used it.
+
 With Nix, the [KiwiCanopy flake](https://github.com/KiwiCanopy/nix)
 installs the same app through Home Manager (`programs.kiwidesk`),
 with the CLI on your `PATH`. That copy updates with

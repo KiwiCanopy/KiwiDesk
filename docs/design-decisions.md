@@ -417,18 +417,20 @@ deliberately installs from the repository instead of Homebrew has
 chosen a manual update path.
 
 The Release must be published before Homebrew can fetch its ZIP,
-so publication and the tap update cannot be atomic. The accepted
-failure model is a short, visible stale-cask window: the release
-is not operationally complete until the `Update Homebrew Cask`
-workflow is green. That workflow queues every publication,
-verifies the published bytes, and permits a retry only when the
-same version still has the same digest. On failure, retry the
-workflow or publish a newer version; never replace an existing
-version's bytes.
+so publication and the cask update cannot be atomic. The cask
+lives in Homebrew/homebrew-cask, whose scheduled autobump reads
+the latest published release and opens the bump PR, so the
+accepted failure model is a visible stale-cask window until
+homebrew-cask merges that PR. The release is complete for
+Homebrew once `brew info --cask kiwidesk` reports its version.
+On a failure, find why the autobump run failed, open the bump PR
+by hand (version and `sha256`; `brew bump-cask-pr` refuses an
+autobumped cask) or publish a newer version; never replace an
+existing version's bytes, since the cask pins their digest.
 
-This exception holds only while the release workflow actually
-bumps the tap — if the cask goes stale the exception lapses and
-the cask users are the stranded ones. It is an obligation on the cask
+This exception holds only while the cask keeps up with releases —
+if it goes stale the exception lapses and the cask users are the
+stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
 

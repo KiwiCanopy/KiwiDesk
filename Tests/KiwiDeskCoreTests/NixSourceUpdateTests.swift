@@ -1,8 +1,7 @@
 import Foundation
 import Testing
 
-/// The KiwiCanopy/nix pin updater and its workflow (#2909), the
-/// Nix twin of `HomebrewCaskUpdateTests`.
+/// The KiwiCanopy/nix pin updater and its workflow (#2909).
 @Suite("Nix source updater")
 struct NixSourceUpdateTests {
     /// 4.1.0's published ZIP: its GitHub digest and the SRI hash the
@@ -131,7 +130,6 @@ struct NixSourceUpdateTests {
         ] {
             #expect(yaml.contains(needle), Comment(rawValue: needle))
         }
-        #expect(!yaml.contains("HOMEBREW_TAP_DEPLOY_KEY"))
 
         let pick = try workflowStep(
             "Verify the published release asset",
@@ -162,48 +160,6 @@ struct NixSourceUpdateTests {
             in: yaml
         )
         #expect(push.contains("git -C kiwicanopy-nix push origin HEAD:main"))
-    }
-
-    /// The two channels verify a release the same way: a check
-    /// tightened in one workflow and not the other leaves a channel
-    /// shipping bytes the other would refuse. Compared: the trigger,
-    /// the tag, the permissions, the updater checkout and both
-    /// verification steps. Not compared, since they must differ: the
-    /// concurrency group, the target repository and its deploy key.
-    @Test("both workflows verify the release identically")
-    func verificationMatchesHomebrew() throws {
-        let nix = try workflowSource("nix.yml")
-        let brew = try workflowSource("homebrew.yml")
-        for step in [
-            "Verify the published release asset",
-            "Download and verify the archive bytes",
-        ] {
-            #expect(
-                try Self.lines(of: step, in: nix)
-                    == Self.lines(of: step, in: brew),
-                Comment(rawValue: step)
-            )
-        }
-        for shared in [
-            "types: [published]",
-            "TAG: ${{ github.event.release.tag_name || inputs.tag }}",
-            "contents: read",
-            "ref: ${{ github.event.repository.default_branch }}",
-        ] {
-            #expect(nix.contains(shared), Comment(rawValue: shared))
-            #expect(brew.contains(shared), Comment(rawValue: shared))
-        }
-    }
-
-    /// A step's non-blank lines: stripping a comment block leaves
-    /// blank lines whose count differs between the twins.
-    private static func lines(
-        of step: String,
-        in yaml: String
-    ) throws -> [Substring] {
-        try workflowStep(step, in: yaml)
-            .split(separator: "\n")
-            .filter { !$0.allSatisfy(\.isWhitespace) }
     }
 }
 
