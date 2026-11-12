@@ -9875,8 +9875,14 @@ holds each chord at revert time, never from a stored history, so a
 later edit still counts; it never crosses a layer or takes an
 unchanged binding, and one pure function (`BindingRevertSet`) gives
 the ↺ both its set and its words ("Revert, with Swap Left"). The
-binding's reach picks go with it. The alternative, taking the chord
-back alone, leaves the binding it was moved to unbound — a state
+binding's reach picks go with it. A gesture row moved to other keys
+or another gesture (#3183) is the same shape: the key it left and the
+key it took read as one row, paired as a key that lost an action and
+a key that gained that same action, and its ↺ takes both back. The
+pairing reads the map, not the edit, so a row deleted beside one
+added with the same action reads as a move; its ↺ still takes back
+exactly what changed. The
+alternative, taking the chord back alone, leaves the binding it was moved to unbound — a state
 nobody saved — and still needs a second press. A ↺ that takes more
 than its own words name asks first (a binding's names every
 binding it takes): a layer's or a lens's create, delete
@@ -15999,7 +16005,7 @@ the page.
 **One page, three parts** (#3184, owner and ui-designer
 2026-11-10). The page outgrew one map: the built-in shortcuts,
 everything the user adds and the mouse and trackpad took ten
-chips, with the trackpad rows (#3183) still to come. So the Home
+chips, and #3183's trackpad rows were still to come. So the Home
 tile is *Shortcuts*, its subtitle names the parts, and the page
 opens with a centred segmented control, **Built-in | Personal |
 Mouse & Trackpad**. The name drops *Gestures* without losing what
@@ -16063,6 +16069,23 @@ windows, anywhere holding a modifier, on the KiwiShelf — never by
 gesture type, which is grouping by widget. That grouping is also
 what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
+
+:::unreleased
+**The bindings themselves are a list per device, between the
+modifier group and the shelf group** (#3199 ▸ Ruling, owner
+2026-11-11; #3183). One **Mouse** card and one **Trackpad** card,
+each a list of rows as macOS's App Shortcuts are, rather than a
+fixed slot per gesture: one gesture may be bound several times with
+different keys, and a slot per combination would be a grid of mostly
+empty rows. The defaults are real rows — deletable, each card with
+its own Restore Defaults — so what fires is always what is listed.
+The cards stay open: what a config binds is drawn on arrival (#3184),
+and a collapsed card would hide a binding the user is pressing. Each
+card leads with its input's Natural scrolling, under Apple's name,
+since a direction on that card reads through it. An input no front
+fires yet has no row, so the list never offers a binding that would
+do nothing.
+:::
 
 **An entry is one drawn picture and one sentence, and the picture
 animates on hover.** The one-frame rule (▸ Navigation & saving,
@@ -16240,6 +16263,22 @@ why (above). An input
 with directions binds a family, whose argument is the direction,
 or one action per direction; a single Lua for every direction is
 refused, since it would throw away the one thing the hand said.
+
+**A family row's directions open pre-filled, and the row stays the
+family while they match** (#3183 ▸ Ruling: directions of a family
+row, owner 2026-11-12; ui-designer advised). In Settings each
+direction of a swipe or scroll row on a family shows that family's
+one-shot step — `focus` that way for `focus`, `focus_space_window`
+for `walk` — so opening the directions changes nothing. A family is
+more than its steps: it slides a Scrolling row with the fingers,
+adds a step per step distance on a long two-finger swipe, and
+follows Natural scrolling, and a direction's Lua does none of these.
+So arms that still match a family's steps save as that family, and
+only a row whose arms differ stores them, each acting once per
+motion, with a caption saying what the row gave up. Editing the
+arms back into a family's steps, or picking a family on the row,
+folds it back without asking. Empty directions were refused:
+editing one would have turned the other three off without a word.
 
 **The list layers like the shortcuts, the drag chords included.**
 The base sits in `gui.json` over the code's seeds and a profile's

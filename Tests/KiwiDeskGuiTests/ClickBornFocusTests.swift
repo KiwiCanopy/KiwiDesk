@@ -146,6 +146,9 @@ struct ClickBornFocusTests {
             "SegmentedPicker.swift": "false",
             // A greyed row of the layout cycle popover (#2673).
             "LayoutCycleList.swift": "false",
+            // The pinned-only action picker's cursor list (#3183):
+            // its rows are buttons, no text field inside it.
+            "SequenceActionMenu.swift": "false",
         ]
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")

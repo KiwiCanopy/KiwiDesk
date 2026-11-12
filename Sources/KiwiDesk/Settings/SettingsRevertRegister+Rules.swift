@@ -60,6 +60,7 @@ extension SettingsRevertRegister {
         .shortcuts(.scrollNaturalMouse): scroll(
             \.scrollGesture.naturalMouse
         ),
+        .shortcuts(.gestureBindings): gestureRow,
         .kiwishelf(.pocketEdge): .leaf(\.settings.kiwishelf.pocketEdge),
         .kiwishelf(.pocketPosition): .leaf(
             \.settings.kiwishelf.pocketPosition
@@ -182,6 +183,21 @@ extension SettingsRevertRegister {
         return a.combo == b.combo
             || (KeyCombo.parse(a.combo).map { $0 == KeyCombo.parse(b.combo) }
                 ?? false)
+    }
+
+    /// A gesture row back to the baseline: every key its instance
+    /// names — a re-key's two together — or the whole map for a row
+    /// that names none (#3183).
+    private static let gestureRow = RevertWriter(
+        paths: ["config.gesture"]
+    ) { model, instance in
+        guard let row = instance.flatMap(GestureRowInstance.init) else {
+            model.config.gesture = model.cleanConfig.gesture
+            return
+        }
+        for key in row.keys {
+            model.config.gesture[key] = model.cleanConfig.gesture[key]
+        }
     }
 
     private static func scroll<V>(

@@ -83,13 +83,13 @@ struct SettingsCatalogArgumentTests {
         "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
         // Simple's cards, UNANCHORED: it has no search (#2737).
         "SimpleCard.swift: title",
+        "GestureListCard.swift: control",  // its Natural row's, #3183
     ]
 
-    /// Sanctioned literal-`L()` `SettingsSection` titles —
-    /// currently none: the last one (the per-layout `"%1$@
-    /// bar"` heading) died with the per-layout bar override
-    /// GUI (GUI_REMOVED_2026-08). The set stays, fail-shut,
-    /// for the next computed heading.
+    /// Sanctioned literal-`L()` `SettingsSection` titles — currently
+    /// none: the last one (the per-layout `"%1$@ bar"` heading) died
+    /// with the per-layout bar override GUI (GUI_REMOVED_2026-08).
+    /// The set stays, fail-shut, for the next computed heading.
     private let literalTitleSites: Set<String> = []
 
     /// Direct catalog references legitimately mounted at two
@@ -238,7 +238,7 @@ struct SettingsCatalogArgumentTests {
         // #2941 its add row, 155 #2971 the scroll step's row, 161
         // #3062's Maximize card and its rows, 162 its drawer, 164
         // #2447, 165 #3088, 166 #1871, 167 #3064, 170 #3184, 166 #3199.
-        #expect(direct.values.reduce(0, +) == 166)
+        #expect(direct.values.reduce(0, +) == 165)  // #3183
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

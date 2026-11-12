@@ -93,9 +93,9 @@ extension KiwiCore {
                 let (steps, direction) = Self.familyStep(
                     &session.meter,
                     event
-                ),
-                let code = family.lua(direction)
+                )
             else { return }
+            let code = family.lua(direction)
             for _ in 0..<steps { runGestureLua(code, "scroll") }
         case .split(let arms):
             guard let direction = session.latch.feed(event),
@@ -176,7 +176,11 @@ extension KiwiCore {
             guard let space = activeSpace else { return }
             // A row slides with the fingers: its step runs against
             // the hand, which `stepScrollPan` turns back off a row.
-            let step = direction.isBackward ? 1 : -1
+            // The walk's way is `stepsForward`'s, the one its
+            // one-shot Lua reads too.
+            let forward =
+                family.stepsForward(direction) ?? direction.isBackward
+            let step = forward ? 1 : -1
             let horizontal =
                 direction == .left || direction == .right
                 || direction == .back || direction == .forward
@@ -186,8 +190,7 @@ extension KiwiCore {
                 swipe: family == .focus ? horizontal : nil
             )
         case .space, .swap, .display, .track:
-            guard let code = family.lua(direction) else { return }
-            runGestureLua(code, key.spelling)
+            runGestureLua(family.lua(direction), key.spelling)
         }
     }
 
@@ -200,24 +203,42 @@ extension KiwiCore {
 }
 
 extension GestureFamily {
+    /// Whether a list family's step toward `direction` goes to the
+    /// next item (the next window, track or Space); nil for a family
+    /// that steps by direction. The Lua below and Settings' arm words
+    /// both read it, so the two never disagree.
+    public func stepsForward(_ direction: GestureDirection) -> Bool? {
+        switch self {
+        // The list scrolls against the hand: fingers up or left
+        // show the next window, as macOS's Desktop swipe does.
+        case .walk, .space: direction.isBackward
+        case .track: !direction.isBackward
+        case .focus, .swap, .display: nil
+        }
+    }
+
     /// The Lua one step runs `direction`'s way. Fingers moving left
     /// reach the window, screen or track on the left; a Space step
     /// follows macOS's Desktop swipe, where fingers moving left show
-    /// the next one. Nil for the pan's own families, which step
-    /// through the pan's session instead.
-    func lua(_ direction: GestureDirection) -> String? {
+    /// the next one. A focus or walk family runs the pan instead;
+    /// its Lua is the one-shot step a split direction pre-fills
+    /// with (#3183 ▸ Ruling: directions of a family row).
+    public func lua(_ direction: GestureDirection) -> String {
         let way = direction.layout.rawValue
+        let next = stepsForward(direction) == true
         switch self {
         case .swap: return "KiwiDesk.swap(\"\(way)\")"
         case .display: return "KiwiDesk.focus_display(\"\(way)\")"
+        case .focus: return "KiwiDesk.focus(\"\(way)\")"
         case .track:
-            let step = direction.isBackward ? "prev" : "next"
-            return "KiwiDesk.move_to_track(\"\(step)\")"
+            return "KiwiDesk.move_to_track(\"\(next ? "next" : "prev")\")"
         case .space:
-            return direction.isBackward
+            return next
                 ? "KiwiDesk.focus_space_next()"
                 : "KiwiDesk.focus_space_previous()"
-        case .focus, .walk: return nil
+        case .walk:
+            let step = next ? "next" : "prev"
+            return "KiwiDesk.focus_space_window(\"\(step)\")"
         }
     }
 }

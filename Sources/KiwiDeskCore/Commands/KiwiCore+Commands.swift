@@ -120,6 +120,8 @@ extension KiwiCore {
             return namingBundleID(launch(args, newInstance: false), args)
         case "focus_app_window":
             return focusAppWindow(args)
+        case "focus_space_window":
+            return focusSpaceWindow(args)
         case "spawn_new":
             return namingBundleID(launch(args, newInstance: true), args)
         case "open_in_background":

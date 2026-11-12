@@ -63,6 +63,32 @@ struct NaturalScrollingSystemTests {
         #expect(core.mouse.scroll.settings.naturalMouse)
     }
 
+    @Test("a host change logs what each input then scrolls with")
+    func hostChangeIsLogged() {
+        let core = makeTestCore()
+        final class Host: @unchecked Sendable { var value: Bool? = true }
+        let host = Host()
+        var notice: (@MainActor () -> Void)?
+        core.mouse.scroll.host = HostNaturalScrolling(
+            read: { host.value },
+            watch: { notice = $0 }
+        )
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
+        var base = ScrollGestureBase.defaults
+        base.naturalMouse = .on
+        core.applyScrollGestures(base: base, profile: nil)
+        core.mouse.scroll.followHost()
+        #expect(lines.allSatisfy { !$0.hasPrefix("natural scrolling") })
+        host.value = false
+        notice?()
+        #expect(
+            lines.last
+                == "natural scrolling: macOS off; trackpad standard, "
+                + "mouse natural"
+        )
+    }
+
     @Test("an unset key reads as on")
     func unsetIsOn() {
         let core = makeTestCore()

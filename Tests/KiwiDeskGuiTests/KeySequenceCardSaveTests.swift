@@ -130,8 +130,13 @@ struct KeySequenceCardSaveTests {
             }
         )
         #expect(catalog.matching("zzqq").isEmpty)
-        let slots = SequenceActionMenu.sequence(hits)
-        #expect(slots.first == .branch && slots.last == .lua)
+        let slots = SequenceActionMenu.sequence(
+            hits,
+            pinned: ["branch"],
+            catalogue: true,
+            tail: [.app, .lua]
+        )
+        #expect(slots.first == .pinned("branch") && slots.last == .lua)
     }
 
     @Test("a sequence recorded on the live page lands whole")

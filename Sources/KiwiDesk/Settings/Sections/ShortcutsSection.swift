@@ -255,7 +255,11 @@ struct ShortcutsSection: View {
         case .modifierKeys:
             ModifierKeysCard(model: model)
         case .gestures:
-            GesturesPart(model: model, playArmed: $gesturesPlay)
+            GesturesPart(
+                model: model,
+                playArmed: $gesturesPlay,
+                expander: expander
+            )
         case .layers:
             LayersCard(
                 model: model,

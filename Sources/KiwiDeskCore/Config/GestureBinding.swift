@@ -151,17 +151,27 @@ public enum GestureRefusal: Equatable, Sendable {
     case keysHeldByDrag
 }
 
-extension GestureAction {
-    /// The refusal for this action on `key`; nil when it stands.
-    public func refusal(on key: GestureKey) -> GestureRefusal? {
-        let input = key.input
-        if input.needsModifier, key.chord.isEmpty { return .needsModifier }
+extension GestureKey {
+    /// The refusal of these keys for this input, whatever the
+    /// action; nil when they stand. Settings judges a row's keys
+    /// with it before an action is picked.
+    public var refusal: GestureRefusal? {
+        if input.needsModifier, chord.isEmpty { return .needsModifier }
         if input.isWheel || input.isPhasedScroll,
-            key.chord.rawValue.nonzeroBitCount < 2
+            chord.rawValue.nonzeroBitCount < 2
         {
             return .singleModifierScroll
         }
-        if input.isWheel, key.chord.contains(.shift) { return .shiftOnWheel }
+        if input.isWheel, chord.contains(.shift) { return .shiftOnWheel }
+        return nil
+    }
+}
+
+extension GestureAction {
+    /// The refusal for this action on `key`; nil when it stands.
+    public func refusal(on key: GestureKey) -> GestureRefusal? {
+        if let refusal = key.refusal { return refusal }
+        let input = key.input
         switch self {
         case .grab:
             return input.isDrag ? nil : .grabOnlyOnDrag

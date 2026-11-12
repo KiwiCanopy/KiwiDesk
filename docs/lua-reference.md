@@ -205,6 +205,30 @@ end)
 ```
 :::
 
+:::unreleased
+### focus_space_window
+
+**Expects:** a direction, `"next"` or `"prev"`.
+
+**Does:** focuses the next or previous window of the Space you
+are on: along the row on Scrolling and Monocle, as the focus keys
+step there, and elsewhere in the Space's own order, floating
+windows included and one in native full screen skipped, wrapping
+at the ends. It skips a window a KiwiVision lens leaves out. It is
+refused with no focused window or no other window to reach. It
+is the `walk` gesture family's one step
+([Gesture actions](#gesture-actions)).
+
+**Example:**
+
+```lua
+gesture.bind("wheel", "control+option", {
+  up = "KiwiDesk.focus_space_window(\"next\")",
+  down = "KiwiDesk.focus_space_window(\"prev\")",
+})
+```
+:::
+
 ### swap
 
 **Expects:** a direction (`"left"`, `"right"`, `"up"`, or
@@ -5130,9 +5154,15 @@ or the trackpad — held with keys, bound to an action. One input
 may be bound several times with different keys, and the keys must
 be exactly the ones bound: ⌃⌥⌘ + scroll is not ⌃⌥ + scroll.
 [`gesture.bind`](#gesturebind) and
-[`gesture.unbind`](#gestureunbind) write the bindings; they have
-no Settings rows yet
-([#3183](https://github.com/KiwiCanopy/KiwiDesk/issues/3183)).
+[`gesture.unbind`](#gestureunbind) write the bindings. In the
+Settings app they are the rows of the **Mouse** and **Trackpad**
+cards under **Shortcuts ▸ Mouse & Trackpad**, where an input that
+does nothing yet ([Gesture inputs](#gesture-inputs)) has no row.
+The cards edit the base in `gui.json`, so a row applies to every
+profile; a profile's own
+bindings are set in its file
+([Gesture storage](#gesture-storage)) until rows gain a profile
+choice ([#3225](https://github.com/KiwiCanopy/KiwiDesk/issues/3225)).
 :::
 
 ### Gesture inputs
@@ -5191,7 +5221,7 @@ The families:
 | Family | One step |
 |---|---|
 | `focus` | Moves focus that way, as the [scroll focus step](#scroll-focus-and-space-step) does: on a Scrolling row the row slides with the fingers, and Monocle steps to the next or previous window |
-| `walk` | Focuses the next or previous window in the Space's window order |
+| `walk` | Focuses the next or previous window: along the row on Scrolling and Monocle, in the Space's window order elsewhere; one step is [`focus_space_window`](#focus_space_window) |
 | `swap` | [`swap`](#swap) with the window that way |
 | `display` | [`focus_display`](#focus_display_last--focus_display) that way |
 | `track` | [`move_to_track`](#move_to_track): fingers moving left or up go to the previous track |

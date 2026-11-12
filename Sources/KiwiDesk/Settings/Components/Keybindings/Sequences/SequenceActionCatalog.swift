@@ -1,8 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// What an end key may run (#1871 ▸ Settings): every Shortcuts-page
-/// row, grouped and ordered as the page draws its groups.
+/// What an end key or a gesture row may run (#1871 ▸ Settings,
+/// #3183): every Shortcuts-page row, grouped and ordered as the
+/// page draws its groups.
 @MainActor
 struct SequenceActionCatalog {
     struct Group: Identifiable {
@@ -13,11 +14,11 @@ struct SequenceActionCatalog {
 
     let groups: [Group]
 
-    /// The page parts whose rows an end key may run, in page order.
-    static let parts: [ShortcutsPagePart] = [
-        .showHide, .focus, .moveWindows, .macosDesktops, .layout,
-        .sizeFloat, .pocket,
-    ]
+    /// The page parts whose rows an action may run, in page order:
+    /// the Built-in segment's, without the inactive layer's rows
+    /// (#3199 ▸ One catalogue). A part with no rows drops out below.
+    static let parts: [ShortcutsPagePart] =
+        ShortcutsPagePart.parts(in: .builtIn).filter { $0 != .inactive }
 
     init(expander: ShortcutsFamilyRows) {
         groups = Self.parts.compactMap { part in

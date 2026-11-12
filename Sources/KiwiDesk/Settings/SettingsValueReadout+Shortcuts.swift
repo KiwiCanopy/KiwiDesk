@@ -40,6 +40,8 @@ extension SettingsValueReadout {
         case .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse:
             return scrollGestureRows(key, old: old, new: new)
+        case .gestureBindings:
+            return gestureRows(old: old.gesture, new: new.gesture)
         case .shortcutBase:
             return [
                 .change(

@@ -60,8 +60,28 @@ struct KeySequenceCardRowsTests {
 
     @Test("The picker pins Extend Sequence above, App… then Lua… below")
     func pickerSlots() {
-        let slots = SequenceActionMenu.sequence([])
-        #expect(slots == [.branch, .app, .lua])
+        let group = SequenceActionCatalog.Group(
+            title: "Focus",
+            commands: [NavCommand(label: "Left", lua: "KiwiDesk.x()")]
+        )
+        let slots = SequenceActionMenu.sequence(
+            [group],
+            pinned: ["branch"],
+            catalogue: true,
+            tail: [.app, .lua]
+        )
+        #expect(
+            slots == [
+                .pinned("branch"), .command("KiwiDesk.x()"), .app, .lua,
+            ]
+        )
+        let pinsOnly = SequenceActionMenu.sequence(
+            [],
+            pinned: ["family", "split"],
+            catalogue: false,
+            tail: [.app, .lua]
+        )
+        #expect(pinsOnly == [.pinned("family"), .pinned("split")])
         LocalizationManager.shared.select("en")
         #expect(SequenceActionMenu.branchLabel == "Extend Sequence")
         #expect(SequenceActionMenu.appLabel == "App…")
@@ -72,16 +92,37 @@ struct KeySequenceCardRowsTests {
         let menu = Self.flat(try Self.source("SequenceActionMenu.swift"))
         #expect(
             menu.contains(
-                "ifnode.kind==.custom{Button(action:onEditLua){"
+                "ifface.kind==.custom,letonEditLua{"
+                    + "Button(action:onEditLua){"
             )
         )
         #expect(menu.contains(".buttonStyle(SequenceDashedStyle())"))
         #expect(menu.contains("}else{Button{request=SequencePickRequest("))
         #expect(menu.contains(".settingsPopUpTrigger()"))
         // The rows the menu draws, not only its cursor's list.
-        #expect(menu.contains("pinned(.branch,Self.branchLabel"))
+        // Both pickers draw the pinned rows, each in its own body.
+        let raw = try Self.source("SequenceActionMenu.swift")
+        for body in ["private var popover:", "private var pinsOnly:"] {
+            let scoped = try #require(
+                SourceScan.declarationBody(after: body, in: raw)
+            )
+            #expect(
+                Self.flat(scoped).contains(
+                    "ForEach(pins){pininpinned(.pinned(pin.id),pin.title,"
+                ),
+                "\(body) draws no pinned rows"
+            )
+        }
         #expect(menu.contains("pinned(.app,Self.appLabel"))
         #expect(menu.contains("pinned(.lua,Self.luaLabel"))
+        // An end key pins Extend Sequence above its catalogue.
+        let node = Self.flat(try Self.source("SequenceNodeRow.swift"))
+        #expect(
+            node.contains(
+                "SequencePickPin(id:\"branch\","
+                    + "title:SequenceActionMenu.branchLabel"
+            )
+        )
         let row = Self.flat(try Self.source("SequenceNodeRow+Popovers.swift"))
         #expect(row.contains("SequenceContainerFace(face:.tinted){"))
         // The fold and the name are two buttons (amendment).

@@ -87,6 +87,7 @@ config.appRules[app]
 config.floatAutomatically
 config.floatRules
 config.focusWrap
+config.gesture
 config.layers[].icon
 config.layers[].reach
 config.mainSpaces

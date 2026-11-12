@@ -6,6 +6,8 @@ public enum FocusedCommandPolicy {
     /// Dispatcher command names operating on implicit focused window.
     public static let focusedCommands: Set<String> = [
         "focus",
+        // Steps from the focused window along its Space (#3183).
+        "focus_space_window",
         "swap",
         "swap_here",
         "resize",

@@ -15,6 +15,8 @@ struct GesturesPart: View {
     @ObservedObject var model: SettingsModel
     /// The section's, set by a click on the segment; spent here.
     @Binding var playArmed: Bool
+    /// The page's rows, for the gesture cards' action catalogue.
+    let expander: ShortcutsFamilyRows
     /// The entry that plays once as it appears, spending this.
     @State private var playing: GestureItem?
 
@@ -30,6 +32,7 @@ struct GesturesPart: View {
             SettingsSection(SettingsCatalog.shortcuts.gesturesModifier) {
                 GesturesScrollEntries(model: model, playing: $playing)
             }
+            gestureCards
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnShelf) {
                 GesturesShelfEntries(model: model, playing: $playing)
             }
@@ -119,6 +122,30 @@ struct GesturesPart: View {
 }
 
 extension GesturesPart {
+    /// The Mouse and Trackpad binding lists (#3183, #3199 ▸ Ruling),
+    /// over one catalogue.
+    var gestureCards: some View {
+        let catalog = SequenceActionCatalog(expander: expander)
+        let children = SettingsCatalog.shortcuts.gestures.children
+        return VStack(alignment: .leading, spacing: 16) {
+            GestureListCard(
+                model: model,
+                device: .mouse,
+                control: children.naturalMouse,
+                catalog: catalog
+            )
+            GestureListCard(
+                model: model,
+                device: .trackpad,
+                control: children.naturalTrackpad,
+                catalog: catalog
+            )
+        }
+        .searchAnchored(
+            SettingsCatalog.shortcuts.gestures.children.gestureBindings
+        )
+    }
+
     /// How long the pointer rests first (#2379): indented under the
     /// switch it depends on, greyed — never hidden — while it is off.
     var hoverDelayRow: some View {

@@ -68,19 +68,35 @@ struct GesturesScrollWiringTests {
         ] {
             #expect(group.contains(field), "\(field) has no column")
         }
-        // Both Natural rows, one per input, through the one row
-        // builder that itself carries the column.
-        let squashed = Self.squash(group)
-        #expect(squashed.contains("naturalRow(.naturalTrackpad,"))
-        #expect(squashed.contains("naturalRow(.naturalMouse,"))
-        let natural = try #require(
-            SourceScan.declarationBody(
-                after: "private func naturalRow(",
-                in: group
+        #expect(group.contains("family: .scroll"))
+        // Both Natural rows lead their device's card (#3183), each
+        // naming its own input's field, through the one row that
+        // carries the column.
+        let card = try Self.source("GestureListCard.swift")
+        #expect(
+            Self.squash(card).contains(
+                "device==.mouse?.naturalMouse:.naturalTrackpad"
             )
         )
-        #expect(natural.contains("reachRow(field)"))
-        #expect(group.contains("family: .scroll"))
+        let natural = try #require(
+            SourceScan.declarationBody(
+                after: "private var naturalRow:",
+                in: card
+            )
+        )
+        #expect(natural.contains("naturalReach"))
+        let body = try #require(
+            SourceScan.declarationBody(after: "var body:", in: card)
+        )
+        #expect(body.contains("naturalRow"))
+        let reach = try #require(
+            SourceScan.declarationBody(
+                after: "private var naturalReach:",
+                in: card
+            )
+        )
+        #expect(reach.contains("model.scrollReach(field.rawValue)"))
+        #expect(reach.contains("family: .scroll"))
     }
 
     /// Each group is a card of its own (#3184): entries inside a
