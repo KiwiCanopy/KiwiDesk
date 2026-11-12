@@ -67,7 +67,8 @@ struct KeySequenceCardRowsTests {
         let slots = SequenceActionMenu.sequence(
             [group],
             pinned: ["branch"],
-            catalogue: true
+            catalogue: true,
+            tail: [.app, .lua]
         )
         #expect(
             slots == [
@@ -77,7 +78,8 @@ struct KeySequenceCardRowsTests {
         let pinsOnly = SequenceActionMenu.sequence(
             [],
             pinned: ["family", "split"],
-            catalogue: false
+            catalogue: false,
+            tail: [.app, .lua]
         )
         #expect(pinsOnly == [.pinned("family"), .pinned("split")])
         LocalizationManager.shared.select("en")

@@ -60,15 +60,6 @@ enum GestureListEdits {
         .run(LuaAction(lua: command.lua, kind: .navigation))
     }
 
-    /// A stand-in action `input` takes, so its keys are judged
-    /// before a row picks one: a grab on a drag, a family where the
-    /// gesture has directions, else Lua.
-    static func probe(for input: GestureInput) -> GestureAction {
-        if input.isDrag { return .grab(.move) }
-        if let family = input.families.first { return .family(family) }
-        return .run(LuaAction(lua: "probe"))
-    }
-
     /// The refusal of a click or hover_move whose keys a drag in
     /// `base` holds, which Core drops (`GestureSeeds.resolved`).
     static func heldByDrag(

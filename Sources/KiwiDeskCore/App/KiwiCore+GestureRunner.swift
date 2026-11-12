@@ -176,7 +176,11 @@ extension KiwiCore {
             guard let space = activeSpace else { return }
             // A row slides with the fingers: its step runs against
             // the hand, which `stepScrollPan` turns back off a row.
-            let step = direction.isBackward ? 1 : -1
+            // The walk's way is `stepsForward`'s, the one its
+            // one-shot Lua reads too.
+            let forward =
+                family.stepsForward(direction) ?? direction.isBackward
+            let step = forward ? 1 : -1
             let horizontal =
                 direction == .left || direction == .right
                 || direction == .back || direction == .forward

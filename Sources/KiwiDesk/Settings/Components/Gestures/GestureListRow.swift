@@ -176,10 +176,7 @@ struct GestureListRow: View {
     /// else what a row of mixed directions gave up; nil for neither.
     private var hint: String? {
         if let clash { return clash }
-        let probe = action ?? GestureListEdits.probe(for: key.input)
-        if let refusal = probe.refusal(on: key),
-            action != nil || refusal != .emptyAction
-        {
+        if let refusal = key.refusal ?? action?.refusal(on: key) {
             return GestureRefusalWords.sentence(refusal)
         }
         if let held = GestureListEdits.heldByDrag(
@@ -202,10 +199,7 @@ struct GestureListRow: View {
         if others.contains(target) {
             return GestureRefusalWords.taken
         }
-        let probe = action ?? GestureListEdits.probe(for: key.input)
-        if let refusal = probe.refusal(on: target),
-            refusal != .emptyAction
-        {
+        if let refusal = target.refusal ?? action?.refusal(on: target) {
             return GestureRefusalWords.sentence(refusal)
         }
         var base = model.config.gesture

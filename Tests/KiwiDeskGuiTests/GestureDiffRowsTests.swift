@@ -28,10 +28,9 @@ struct GestureDiffRowsTests {
         )
         #expect(rows.count == 1)
         let row = try #require(rows.first)
-        let separator = SettingsValueReadout.gestureMoveSeparator
-        #expect(
-            row.id.contains(from.spelling + String(separator) + to.spelling)
-        )
+        let move = GestureRowInstance.move(from: from, to: to)
+        #expect(row.id.contains(move.spelling))
+        #expect(GestureRowInstance(instance: move.spelling) == move)
     }
 
     @Test("a move row's revert takes both keys back")
@@ -42,10 +41,9 @@ struct GestureDiffRowsTests {
         let writer = try #require(
             SettingsRevertRegister.writers[.shortcuts(.gestureBindings)]
         )
-        let separator = SettingsValueReadout.gestureMoveSeparator
         writer.apply(
             model,
-            from.spelling + String(separator) + to.spelling
+            GestureRowInstance.move(from: from, to: to).spelling
         )
         #expect(model.config.gesture == GestureMap())
     }

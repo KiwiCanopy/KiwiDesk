@@ -30,7 +30,7 @@ extension SequenceActionMenu {
         _ groups: [SequenceActionCatalog.Group],
         pinned: [String],
         catalogue: Bool,
-        tail: [SequencePickSlot] = [.app, .lua]
+        tail: [SequencePickSlot]
     ) -> [SequencePickSlot] {
         let top = pinned.map { SequencePickSlot.pinned($0) }
         guard catalogue else { return top }

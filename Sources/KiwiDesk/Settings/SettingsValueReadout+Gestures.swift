@@ -4,12 +4,12 @@ import KiwiDeskCore
 /// stored entry changed, named by its gesture and keys. A re-key
 /// writes two keys together — the old one left, the new one bound
 /// to the same action — so it narrates as ONE row naming both,
-/// whose ↺ takes both back (gui.md ▸ A diff row's ↺).
+/// whose ↺ takes both back (gui.md ▸ A diff row's ↺). A move is
+/// read from the map, a key that lost an action beside one that
+/// gained it, so a row deleted and another added with that action
+/// reads as a move too — its ↺ still takes back exactly what
+/// changed.
 extension SettingsValueReadout {
-    /// The separator of a move row's instance: no key spelling
-    /// holds it.
-    static let gestureMoveSeparator: Character = "|"
-
     static func gestureRows(
         old: GestureMap,
         new: GestureMap
@@ -31,8 +31,10 @@ extension SettingsValueReadout {
             rows.append(
                 .change(
                     .shortcuts(.gestureBindings),
-                    instance: from.spelling
-                        + String(gestureMoveSeparator) + key.spelling,
+                    instance: GestureRowInstance.move(
+                        from: from,
+                        to: key
+                    ).spelling,
                     label: GestureListWords.value(action),
                     old: GestureListWords.rowName(from),
                     new: GestureListWords.rowName(key)
@@ -43,7 +45,7 @@ extension SettingsValueReadout {
             rows.append(
                 .change(
                     .shortcuts(.gestureBindings),
-                    instance: key.spelling,
+                    instance: GestureRowInstance.key(key).spelling,
                     label: GestureListWords.rowName(key),
                     old: GestureListWords.value(before(key)),
                     new: GestureListWords.value(after(key))

@@ -63,6 +63,26 @@ struct FocusSpaceWindowTests {
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
+    @Test("a walk arm's one-shot step is the family's own step")
+    func armMatchesTheFamily() {
+        for direction in GestureInput.wheel.directions {
+            let family = makeCore(focus: WindowID(2))
+            family.stepFamily(
+                .walk,
+                toward: direction,
+                key: GestureKey(.wheel, [.control, .option])
+            )
+            let arm = makeCore(focus: WindowID(2))
+            let lua = GestureFamily.walk.lua(direction)
+            let way = lua.contains("\"next\"") ? "next" : "prev"
+            #expect(step(arm, way).isSuccess)
+            #expect(
+                arm.activeSpace?.focused == family.activeSpace?.focused,
+                "\(direction): the arm and the family differ"
+            )
+        }
+    }
+
     @Test("an unknown direction is refused, naming the choices")
     func unknownDirection() {
         let core = makeCore(focus: WindowID(1))

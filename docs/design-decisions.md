@@ -9879,6 +9879,9 @@ binding's reach picks go with it. A gesture row moved to other keys
 or another gesture (#3183) is the same shape: the key it left and the
 key it took read as one row, paired as a key that lost an action and
 a key that gained that same action, and its ↺ takes both back. The
+pairing reads the map, not the edit, so a row deleted beside one
+added with the same action reads as a move; its ↺ still takes back
+exactly what changed. The
 alternative, taking the chord back alone, leaves the binding it was moved to unbound — a state
 nobody saved — and still needs a second press. A ↺ that takes more
 than its own words name asks first (a binding's names every

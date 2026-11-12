@@ -133,7 +133,8 @@ struct KeySequenceCardSaveTests {
         let slots = SequenceActionMenu.sequence(
             hits,
             pinned: ["branch"],
-            catalogue: true
+            catalogue: true,
+            tail: [.app, .lua]
         )
         #expect(slots.first == .pinned("branch") && slots.last == .lua)
     }

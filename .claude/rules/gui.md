@@ -1363,7 +1363,9 @@ its reach through the one `RuleFamilyField` table, held to every
 family beside `dropRuleHalf` and `adoptRuleHalf` by
 `RuleReachGuiParityTests`, a shortcut binding with the bindings its
 chord moved between, read from the one `BindingRevertSet` the ↺'s
-words read too (#2412, `BindingRevertSetTests`) — and a ↺ that
+words read too (#2412, `BindingRevertSetTests`), a gesture row with
+the key it moved from, through the one `GestureRowInstance`
+(#3183, `GestureDiffRowsTests`) — and a ↺ that
 takes more than its row asks first, a whole layer or lens and the
 "Layers edited" row (`SettingsRowRevertGroupTests` ▸
 `onlyShortcutsAsk`) — and the

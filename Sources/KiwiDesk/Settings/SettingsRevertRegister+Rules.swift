@@ -191,16 +191,11 @@ extension SettingsRevertRegister {
     private static let gestureRow = RevertWriter(
         paths: ["config.gesture"]
     ) { model, instance in
-        let keys = instance.map {
-            $0.split(
-                separator: SettingsValueReadout.gestureMoveSeparator
-            ).compactMap { GestureKey(spelling: String($0)) }
-        }
-        guard let keys, !keys.isEmpty else {
+        guard let row = instance.flatMap(GestureRowInstance.init) else {
             model.config.gesture = model.cleanConfig.gesture
             return
         }
-        for key in keys {
+        for key in row.keys {
             model.config.gesture[key] = model.cleanConfig.gesture[key]
         }
     }
