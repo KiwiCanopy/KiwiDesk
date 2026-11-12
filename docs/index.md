@@ -44,7 +44,7 @@ the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
 Requirements: macOS 14 or later on Apple silicon.
 
 ```sh
-brew install --cask kiwicanopy/tap/kiwidesk
+brew install --cask kiwidesk
 ```
 
 Or download the signed, notarized `.dmg` from

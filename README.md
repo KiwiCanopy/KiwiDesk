@@ -19,7 +19,7 @@ Powerful when you reach for it, never in your way.
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 [![License BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-8DB354)](LICENSE)
-[![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
+[![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://formulae.brew.sh/cask/kiwidesk)
 [![Release](https://img.shields.io/github/v/release/KiwiCanopy/KiwiDesk?color=8DB354&label=Release)](https://github.com/KiwiCanopy/KiwiDesk/releases/latest)
 
 [Website](https://kiwidesk.kiwicanopy.com/) · [Docs](https://kiwidesk.kiwicanopy.com/docs/) · [Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/) · [Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) · [Changelog](https://kiwidesk.kiwicanopy.com/changelog/) · [Roadmap](ROADMAP.md) · [Discord](https://discord.gg/bYeTrJyZyS) · [Sponsor](https://github.com/sponsors/KiwiCanopy)
@@ -65,7 +65,7 @@ I want KiwiDesk to be different. A few ideas drive how I build it:
 Requirements: macOS 14 or later, on Apple silicon.
 
 ```sh
-brew install --cask kiwicanopy/tap/kiwidesk
+brew install --cask kiwidesk
 ```
 
 Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** — the

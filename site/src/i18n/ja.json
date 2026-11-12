@@ -329,7 +329,6 @@
   "guide_gs_install_copy": "コピー",
   "guide_gs_install_copy_aria": "インストールコマンドをコピー",
   "guide_gs_install_lead": "Homebrew を使う場合は、ターミナルを開いて（⌘スペースを押し、「Terminal」と入力してエンター）、この 1 行を貼り付けてエンターを押してください:",
-  "guide_gs_install_source": "KiwiCanopy 自身の Homebrew タップからインストールします。KiwiDesk を作っているのと同じチームです。",
   "guide_gs_install_updates": "KiwiDesk はこのあと自分で最新に保ちます。新しいバージョンが出たら知らせて、インストールまで済ませます。",
   "guide_gs_p1": "KiwiDesk のインストールは 1 分ほどで終わります。",
   "guide_gs_perm_p": "KiwiDesk を初めて開くと、macOS が<strong>アクセシビリティ</strong>の許可を求めます。これは想定どおりの通常の確認で、KiwiDesk があなたに求めるのは、これとその後の<strong>タイル表示を開始</strong>のひと押しだけです。画面を整えるにはウインドウを移動・サイズ変更できる必要があり、macOS はその機能をこの許可の背後に置いています。短い初期設定ウィザードが<strong>システム設定 › プライバシーとセキュリティ › アクセシビリティ</strong>の該当箇所まで案内し、オンにするお手伝いをします。",
