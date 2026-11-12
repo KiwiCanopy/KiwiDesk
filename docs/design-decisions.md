@@ -3986,6 +3986,14 @@ and the plate both ask, reads through it, and so do the Settings
 rows, so neither the two cues nor the card can disagree about
 which one a switch draws.
 
+:::unreleased
+*KiwiDesk's own Off joins the fallback (#3238).* Core's read and the
+card's captions both take macOS's setting or the speed preset's Off
+(*Off is Reduce Motion for KiwiDesk*, under Spaces, profiles &
+config ownership), so under Off a Slide draws, and the card says,
+Show the Space.
+:::
+
 *Show the Space shows everywhere.* A user who picks the plate has
 asked for it, so it shows on a screen that draws a Space Bar too.
 Standing it down there made the setting look dead to anyone whose
@@ -4027,6 +4035,14 @@ and all grey where
 #2142). The card leads with the note that its rows apply at once
 in every profile (*A setting that skips Save says so where it
 sits*, under Navigation & saving).
+
+:::unreleased
+*The slide's length leaves the card (#3238).* **Slide duration**
+has no row: the speed preset is Settings' one pace control
+(*The speed preset is Settings' one pace control*, under Spaces,
+profiles & config ownership), so the card holds the two pickers,
+and the duration's grey above has no row left to apply to.
+:::
 
 *App-wide, and crossed from the toggle.* It is stored in
 `gui.json` as `space.transition` and `space.slide_duration`,
@@ -7437,6 +7453,94 @@ Settings row at all (owner ruling 2026-11-12, #3238, reversing the
 first #3237 ruling that kept Scroll duration in Layout Defaults):
 the speed preset is ruled to be Settings' one pace control
 (#3238), and Lua sets an exact length.
+:::
+
+:::unreleased
+**The speed preset is Settings' one pace control (#3238, owner
+ruling 2026-11-12).** [Principle] Settings sets how fast KiwiDesk
+animates through **Animation speed** alone — Off, Slow, Default,
+Fast, at the top of Looks & Animations ▸ Animations and on Simple —
+and Lua sets an exact length. A row of millisecond steppers asks a
+question in a unit nobody thinks in, and a length tuned alone puts
+one motion out of step with the rest; a speed answers the question
+users actually have. So window, scroll, Space slide and KiwiVision
+fade lengths, and the shelf's reveal and expand, have no Settings
+row, and each speed writes one fixed table of all six, a single
+ratio per speed rounded to the 50 ms step and held inside each
+band. A table, not a scale factor: the bands clamp, so half of the
+750 ms expand would land on the 500 ms floor anyway, and a factor
+would claim a ratio the clamp breaks. Accepted: that floor makes
+Fast's expand only 1.5× quicker. The segment shown is derived by
+comparing the live lengths with the tables, never stored, so a Lua
+call that sets an exact length makes the preset read custom rather
+than lie; and a pick writes `gui.json` at once, never through
+Save, because the lengths are app-wide (above) and a profile draft
+cannot hold them. What stays is everything that is not pace: the
+on/off switches, style choices (the fade curve, the reveal style,
+the Space switch look), the shelf's fill fade, and waits, which are
+delays rather than motion (hover focus, the Space Bar's spring, the
+lens reminder).
+
+*This reverses two earlier rulings.* #3238 first kept every length
+row on Advanced below the preset, and #3237 kept Scroll duration in
+Layout Defaults ▸ Scrolling. With either, two controls write one
+value, and a row on another page silently flips the preset to
+custom — the preset would then read as broken, which is the cost
+the reversal removes. [Trade-off] Settings can no longer tune one
+motion's speed alone, and the KiwiVision fade curve, which stays in
+Settings, shapes a fade whose length Settings does not show (the
+owner's taste); the limitation is on the
+[Accepted limitations](accepted-limitations.md) page.
+
+**Off is Reduce Motion for KiwiDesk, not a durations write (#3238,
+owner ruling 2026-11-12).** [Rationale] The preset's Off sets one
+app-wide flag, `animations.reduce_motion` in `gui.json`, and Core
+reads it ORed with macOS's Reduce Motion in one place
+(`ReduceMotion.isOn`); every Core motion gate that asked macOS asks
+that instead. It does not write lengths: five of the six bands stop
+above 0 (the window spring and the scroll at 50 ms, the slide at
+150, and #3236 took 0 from the two bar lengths), so 0 cannot mean
+off, and a write
+would destroy the pace the user had, so leaving Off would need a
+remembered table beside the live one. As a flag it changes no
+length, and turning it off restores the exact previous pace, a
+custom one included. It
+inherits Reduce Motion's contract instead of inventing one: motion
+drops, the affordance stays — a Slide draws Show the Space through
+`drawn(reduceMotion:)`, a list peek cross-fades, the KiwiVision
+fade cuts — so every rule this file argues for less motion holds
+under Off with no second branch to keep in step. Where Off goes
+further than macOS's setting it says so in one reading: the shelf's
+reveal and expand keep playing under macOS's Reduce Motion by
+ruling (*The bars honour Reduce Motion*), but Off is offered as
+stopping the bars' animations with the windows', scrolling's, the
+Space switches' and KiwiVision's, and a shelf still sliding in
+under it would read as Off not working; so `expandSeconds(at:)` and
+`revealSeconds(at:)`, the one reading of a switch with its length
+(#3237), answer 0 under it, and no bar member's gate changes.
+
+*Off reaches Core alone.* The flag is ruled over the desk's motion
+— windows, bars, the marks on windows, the Space switch and
+KiwiVision — so it joins the one Core read and nothing in
+`Sources/KiwiDesk`. Stated residue: the GUI's own panels — KiwiHub,
+the cue plates, the slow-boot notice and the Settings window — keep
+following macOS's setting alone, so under Off a cue plate still
+fades. Settings reads the flag only to narrate it: the Animations
+card's box and greys, and the Switching Spaces captions, which
+say what the desk draws (*Reduce Motion shows the Space*, above).
+
+*Two offs, both kept.* Off covers every profile and applies at
+once; a profile's own **Animate windows** covers that profile and
+is saved with Save, which is what a "snappy" profile needs. While
+Off holds, the Animations card says so in a warning box with **Turn
+On** and greys the rows below the preset, the same shape the card
+takes under macOS's setting (*A whole card an OS accessibility
+switch greys also says so in a warning box*); under macOS's
+setting its own box wins and Off shows picked and takes no input:
+the cause is outside KiwiDesk, and the box carries its one fix.
+Where `init.lua` owns the config, the preset and **Turn On** grey,
+as the Switching Spaces pickers do (#2142): the flag is app-wide,
+so a Lua-owned setup sets it in `init.lua`.
 :::
 
 **Floating windows hide with their space; visible-everywhere
@@ -19853,11 +19957,13 @@ gliding — so it greys only while its switch is off.
 
 :::unreleased
 The drawer shows the two motions' switches and no length: both
-lengths are Lua-only, and the speed preset (#3238) is to be
-Settings' one pace control for the shelf (owner ruling, 2026-11-12, amended the
-same day, #3236; ui-designer advised). Once neither band holds a 0,
-a switch is the only way to an instant reveal or expand; each stays
-because the shelf's motion plays with Reduce Motion on and the
+lengths are Lua-only, and the speed preset is Settings' one pace
+control for the shelf (*The speed preset is Settings' one pace
+control*, under Spaces, profiles & config ownership; owner ruling,
+2026-11-12, amended the same day, #3236; ui-designer advised).
+Once neither band holds a 0, a switch is the only way to an
+instant reveal or expand; each stays because the shelf's motion
+plays with Reduce Motion on and the
 crossing turns a stored 0 into it, so a choice made in Settings
 keeps a way back there. Rejected: dropping a switch, which strands a
 migrated 0; one central Durations group.

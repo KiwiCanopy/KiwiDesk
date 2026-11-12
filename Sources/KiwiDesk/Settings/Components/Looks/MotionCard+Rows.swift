@@ -11,6 +11,8 @@ extension MotionCard {
                 "\(key) is SpaceSwitchCard's row (#3218)"
             )
             EmptyView()
+        case .animationSpeed:
+            AnimationSpeedRow(model: model)
         case .animationsMaster:
             ToggleRow(
                 label: L(

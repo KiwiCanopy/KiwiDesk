@@ -84,12 +84,13 @@ struct GateReasonPlacementTests {
                 // both on other pages, so each links there.
                 .behaviour(.tilingOffHidesBorders),
                 .behaviour(.tilingOffHidesBars),
-                // #2524, #2971: the Space switch pickers and the
-                // slide's pace, the same shape on Colors ▸ Animations,
-                // one sentence for the group under its first row.
+                // #2524, #2971: the Space switch pickers, the same
+                // shape on Colors ▸ Animations, one sentence for the
+                // group under its first row.
                 .colours(.spaceTransition),
                 .colours(.spaceScrollTransition),
-                .colours(.spaceSlideDuration),
+                // #3238: the speed preset, the same shape.
+                .colours(.animationSpeed),
                 // The Reveal row beside it greys while no bar hides:
                 // the bars' values sit above it, not that a reveal
                 // needs a hiding bar (owner ruling, 2026-10-21).
@@ -121,8 +122,8 @@ struct GateReasonPlacementTests {
                 // Lua-owned config, a cause shown nowhere on its
                 // page, so each draws its sentence.
                 .kiwiVision(.dim), .kiwiVision(.blur), .kiwiVision(.maximize),
-                .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
-                .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
+                .kiwiVision(.fadeCurve), .kiwiVision(.appearance),
+                .kiwiVision(.clearWallpaper),
                 .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
                 // A lens's page draws it under its draft cards.
                 .kiwiVision(.lenses),
@@ -149,10 +150,16 @@ struct GateReasonPlacementTests {
         .split(whereSeparator: \.isWhitespace).joined()
         #expect(
             source.contains(
-                "ifreduceMotion{WarningBox(text:Self.reduceMotionWarning)"
+                "ifreduceMotion{Self.reduceMotionBox}"
             )
         )
-        #expect(source.contains("Self.openAccessibilityDisplay()"))
+        #expect(
+            source.contains(
+                "WarningBox(text:reduceMotionWarning)"
+                    + "{Button(openAccessibilityTitle)"
+                    + "{openAccessibilityDisplay()}"
+            )
+        )
     }
 
     /// The other two channels, pinned by one member each — a

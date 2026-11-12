@@ -4,7 +4,7 @@
 enum KiwiVisionRowOrder {
     static let levels: [SettingKey] = [
         .kiwiVision(.dim), .kiwiVision(.blur),
-        .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
+        .kiwiVision(.fadeCurve),
     ]
 
     static let clear: [SettingKey] = [

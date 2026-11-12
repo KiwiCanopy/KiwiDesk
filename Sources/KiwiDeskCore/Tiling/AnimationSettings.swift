@@ -122,11 +122,13 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
 }
 
 extension AnimationSettings {
-    /// The expand's length in seconds at the app-wide pace,
-    /// nothing while this profile turns it off — the one reading
-    /// of a switch with its length (#3237).
+    /// The expand's length in seconds at the app-wide pace, nothing
+    /// while this profile turns it off or KiwiDesk's own Off holds —
+    /// the one reading of a switch with its length (#3237, #3238).
+    /// macOS Reduce Motion leaves it playing, by ruling.
     public func expandSeconds(at pace: AppWideSettings) -> TimeInterval {
-        onExpand ? TimeInterval(pace.animationExpandDurationMS) / 1000 : 0
+        onExpand && !pace.animationReduceMotion
+            ? TimeInterval(pace.animationExpandDurationMS) / 1000 : 0
     }
 
     /// The window spring's length in ms at the app-wide pace — the
@@ -137,7 +139,8 @@ extension AnimationSettings {
 
     /// The reveal's length in seconds, the same reading.
     public func revealSeconds(at pace: AppWideSettings) -> TimeInterval {
-        onReveal ? TimeInterval(pace.animationRevealDurationMS) / 1000 : 0
+        onReveal && !pace.animationReduceMotion
+            ? TimeInterval(pace.animationRevealDurationMS) / 1000 : 0
     }
 
     /// `self` with the stored field `key` set to `value`, read

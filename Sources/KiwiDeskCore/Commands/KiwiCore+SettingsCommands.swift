@@ -132,6 +132,13 @@ extension KiwiCore {
             tiler.settings.animations.onPeek = on
             updateBars()
             return .ok()
+        case "animations.set_reduce_motion":
+            // KiwiDesk's own Off, app-wide, the session alone (#3238).
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            setAppWide(persisting: false) { $0.animationReduceMotion = on }
+            return .ok()
         case "animations.set_on_reveal":
             // A hidden shelf's reveal on and off (#3236).
             guard let on = args.first?.boolValue else {

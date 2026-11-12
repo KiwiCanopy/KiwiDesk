@@ -222,6 +222,28 @@ struct AppWideCrossingEndTests {
         )
     }
 
+    /// KiwiDesk's own Off from the verb lasts the session; a
+    /// Settings pick is what stores it (#3238).
+    @Test("the Off verb never persists")
+    func offVerbNeverPersists() throws {
+        let core = try makeGuiCore()
+        defer { ReduceMotion.kiwiDesk = false }
+        core.setAppWide(persisting: true) { $0.animationReduceMotion = false }
+        #expect(
+            core.execute(
+                "animations.set_reduce_motion",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+        #expect(core.appWide.animationReduceMotion)
+        let config = try #require(core.guiConfigStore.load())
+        try core.guiConfigStore.save(config)
+        #expect(
+            core.guiConfigStore.load()?.appWide?.animationReduceMotion
+                == false
+        )
+    }
+
     /// Lua-to-GUI adoption carries what init.lua executed.
     @Test("adopting a Lua config carries its values")
     func luaAdoptionCarries() throws {

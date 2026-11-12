@@ -108,12 +108,12 @@ struct KiwiVisionLensOverrides: View {
 
     private var fadeDurationRow: some View {
         let value = override(\.fadeDuration)
-        let label = SettingsCatalog.kiwiVision.fadeDuration.text
+        let label = Self.fadeDurationLabel
         let global = plain.visionFadeDuration
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, Self.milliseconds(global)),
-            help: KiwiVisionLevelsCard.fadeDurationHelp,
+            help: Self.fadeDurationHelp,
             subject: label,
             inheritsName: defaultName
         ) {
@@ -257,6 +257,21 @@ struct KiwiVisionLensOverrides: View {
                 }
             }
         }
+    }
+
+    /// The fade length's override row (#2417); the global row is
+    /// Lua-only since #3238, so the label and help live here.
+    static var fadeDurationLabel: String {
+        L("kiwivision.fade_duration", "Fade duration")
+    }
+
+    static var fadeDurationHelp: String {
+        L(
+            "kiwivision.fade_duration.help",
+            "How long the window you leave takes to dim and blur. The "
+                + "window you focus clears at once; at 0, or with "
+                + "Reduce Motion, the change is instant."
+        )
     }
 
     static func percent(_ dim: Double) -> String {

@@ -757,7 +757,10 @@ render content into it (#1517). Obligations:
   2026-10-21;
   `docs/design-decisions.md` ▸ The bars honour Reduce Motion) —
   so their members are in `BarMotionSeamTests`' `ungated` map and
-  read no flag. `ShelfRevealMotionTests`, `ShelfRevealGrowTests`
+  read no flag. KiwiDesk's own Off (#3238) stops the reveal and the
+  expand through their one length reading, `expandSeconds(at:)` and
+  `revealSeconds(at:)`, never through a member's gate, so the map
+  stays as it is (`AnimationPacePresetTests` ▸ `offStopsBarMotion`). `ShelfRevealMotionTests`, `ShelfRevealGrowTests`
   and `ShelfRevealUnfoldTests` hold the decisions,
   `ShelfRevealSlideEdgeTests` the slide's direction on every edge
   as drawn, `ShelfRevealStartTests` the start order, and

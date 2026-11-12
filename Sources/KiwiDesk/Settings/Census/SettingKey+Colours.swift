@@ -9,6 +9,9 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
+    /// App-wide (#3238): the speed preset, its Off the stored flag;
+    /// its speeds write the lengths, which are Lua-only rows.
+    case animationSpeed = "appWide.animationReduceMotion"
     /// App-wide (#1741), not an `AnimationSettings` field: how a
     /// Space switch shows itself and the slide's pace (#2524).
     case spaceTransition = "appWide.spaceTransition"
@@ -86,10 +89,22 @@ extension ColoursKey {
             )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
-        case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
+        case .animationSpeed:
+            // App-wide (#3238), so it greys where init.lua owns the
+            // config, as the Space switch pickers do (#2142).
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
+        case .spaceSlideDuration:
+            // Lua-only: the speed preset is Settings' one pace
+            // control (owner ruling, 2026-11-12, #3238).
+            return .luaOnly
+        case .spaceTransition, .spaceScrollTransition:
             // App-wide (#1741), so they grey where init.lua owns
-            // the config (#2142); the duration's grey off Slide is
-            // wiring's (#2524, #3218).
+            // the config (#2142).
             return .row(
                 .coloursAndMotion,
                 .spaceSwitch,
@@ -196,6 +211,11 @@ extension ColoursKey {
                 "behavior.animations.master",
                 help: "behavior.animations.master.help"
             )
+        case .animationSpeed:
+            return .text(
+                "behavior.animations.speed",
+                help: "behavior.animations.speed.help"
+            )
         case .spaceTransition:
             return .text(
                 "animations.space_transition",
@@ -204,10 +224,7 @@ extension ColoursKey {
         case .spaceScrollTransition:
             return .text("animations.space_scroll_transition")
         case .spaceSlideDuration:
-            return .text(
-                "animations.space_slide_duration",
-                help: "animations.space_slide_duration.help"
-            )
+            return .none
         case .animationsOnWindowResize:
             return .text("behavior.animations.window_resize")
         case .animationsOnWindowSwap:

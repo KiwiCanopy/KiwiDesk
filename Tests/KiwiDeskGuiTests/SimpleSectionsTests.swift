@@ -120,6 +120,10 @@ struct SimpleSectionsTests {
         #expect(!SimpleCoverage.draws(row(.spaces(.fallbackSpace)), in: model))
         #expect(SimpleCoverage.draws(row(.spaces(.spaceIcon)), in: model))
         #expect(SimpleCoverage.draws(row(.spaces(.spaceList)), in: model))
+        // The speed preset, the Simple Animations card's (#3238).
+        #expect(
+            SimpleCoverage.draws(row(.colours(.animationSpeed)), in: model)
+        )
         // A look's rows stay with the Look line; a bar's on/off,
         // which no look paints, leaves.
         #expect(SimpleCoverage.draws(row(.gaps(.outerTop)), in: model))

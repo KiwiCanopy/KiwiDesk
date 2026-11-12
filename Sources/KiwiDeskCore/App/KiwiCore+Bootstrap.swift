@@ -128,10 +128,7 @@ extension KiwiCore {
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.animationsDidSettle()
         }
-        tiler.animation.reduceMotion = {
-            NSWorkspace.shared
-                .accessibilityDisplayShouldReduceMotion
-        }
+        tiler.animation.reduceMotion = { ReduceMotion.isOn }
         strandDetector.configureFromEnvironment()
         strandDetector.frameReader = { [weak self] id in
             guard let element = self?.eventLoop.element(for: id)

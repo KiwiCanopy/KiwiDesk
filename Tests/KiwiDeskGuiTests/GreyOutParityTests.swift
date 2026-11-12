@@ -121,7 +121,8 @@ struct GreyOutParityTests {
         // needle.
         (
             "MotionCard.swift",
-            "reduceMotion && !key.placement.exemptFromContainerGate",
+            "if reduceMotion { return "
+                + "!key.placement.exemptFromContainerGate }",
             1
         ),
         // `StickyMarkEditor` is deliberately absent: its coverage

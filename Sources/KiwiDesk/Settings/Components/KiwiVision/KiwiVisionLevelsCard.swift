@@ -38,7 +38,6 @@ struct KiwiVisionLevelsCard: View {
         switch key {
         case .kiwiVision(.dim): dimRow
         case .kiwiVision(.blur): blurRow
-        case .kiwiVision(.fadeDuration): fadeDurationRow
         case .kiwiVision(.fadeCurve): fadeCurveRow
         default:
             let _ = assertionFailure(
@@ -112,30 +111,6 @@ struct KiwiVisionLevelsCard: View {
         nothingFades || gates.inertReason(for: key) != nil
     }
 
-    /// 0–1000 ms in 50 ms steps; 0 is instant (#2417).
-    private var fadeDurationRow: some View {
-        let label = SettingsCatalog.kiwiVision.fadeDuration.text
-        return SettingsRowShape(controlTrails: true) {
-            SettingsRowLabel(label: label, help: Self.fadeDurationHelp)
-        } control: {
-            StepperRow(
-                label: label,
-                value: Binding(
-                    get: { model.appWide.visionFadeDuration },
-                    set: { ms in
-                        model.setAppWide { $0.visionFadeDuration = ms }
-                    }
-                ),
-                in: AppWideSettings.visionFadeRange,
-                step: 50,
-                suffix: "ms",
-                labelHidden: true
-            )
-            .disabled(fadeInert(.kiwiVision(.fadeDuration)))
-        }
-        .searchAnchored(SettingsCatalog.kiwiVision.fadeDuration)
-    }
-
     private var fadeCurveRow: some View {
         let label = SettingsCatalog.kiwiVision.fadeCurve.text
         let current = model.appWide.visionFadeCurve
@@ -160,15 +135,6 @@ struct KiwiVisionLevelsCard: View {
             .disabled(fadeInert(.kiwiVision(.fadeCurve)))
         }
         .searchAnchored(SettingsCatalog.kiwiVision.fadeCurve)
-    }
-
-    static var fadeDurationHelp: String {
-        L(
-            "kiwivision.fade_duration.help",
-            "How long the window you leave takes to dim and blur. The "
-                + "window you focus clears at once; at 0, or with "
-                + "Reduce Motion, the change is instant."
-        )
     }
 
     static var fadeCurveHelp: String {

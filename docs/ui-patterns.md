@@ -1123,6 +1123,21 @@ While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 
+:::unreleased
+**Animation speed** leads the Animations card: Off · Slow · Default
+· Fast, drawn by the same row in Simple's Animations card (#3238).
+Its Off is KiwiDesk's own Reduce Motion, which the windows, the bars
+and the marks on windows read with macOS's; KiwiHub, the cue plates
+and the Settings window read macOS's alone. While it is on, the card
+shows a warning box with **Turn On**, and every row below the preset
+greys; while macOS's Reduce Motion is on, that box wins and Off
+shows picked and takes no input. Where `init.lua` owns the config,
+the preset and **Turn On** grey and the row says why. A pick writes
+at once, in every profile, and durations that match no speed show
+the preset with nothing picked over a caption saying they are
+custom. Its drawer is **Per event**.
+:::
+
 The Space switch is not on that card either: **Switching
 Spaces**, the card after Animations (#3218), holds **Space
 switches**, which picks Slide, Show the Space or None, and
@@ -1142,6 +1157,14 @@ alone; **Space switches** keeps every other switch. Its caption
 shows only while its pick differs from the row above, which says
 the same sentence otherwise. **Slide duration** stays live while
 either pick draws a slide (#2971).
+
+:::unreleased
+**Slide duration** is gone from the card, which holds the two
+pickers alone: the slide's length is the speed preset's, and Lua's
+`set_space_slide_duration` (#3238). A picker's caption says a Slide
+shows the Space under the preset's Off as it does under Reduce
+Motion.
+:::
 
 **A setting that skips Save carries one sentence where it sits
 (#3218)**: under its card's title, or under its row's label among

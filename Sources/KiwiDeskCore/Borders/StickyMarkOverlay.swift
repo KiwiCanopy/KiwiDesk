@@ -250,9 +250,7 @@ final class StickyMarkOverlay {
     private var reduceMotion: Bool { readReduceMotion() }
 
     /// Reduce Motion, read live; a test pins it.
-    var readReduceMotion: () -> Bool = {
-        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-    }
+    var readReduceMotion: @MainActor () -> Bool = { ReduceMotion.isOn }
 
     /// Rests the plate at `mark` (screen coordinates) in a room
     /// fitted to it.

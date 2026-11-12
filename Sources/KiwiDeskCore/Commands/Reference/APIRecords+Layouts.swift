@@ -50,6 +50,11 @@ extension APIReference {
                 + "fade and the overflow list's growth.",
             .boolean("enabled")
         ),
+        "set_reduce_motion": APIRecord(
+            "Turns KiwiDesk's own Reduce Motion on or off in every "
+                + "profile; the lengths are kept.",
+            .boolean("enabled")
+        ),
         "set_on_reveal": APIRecord(
             "Enables or disables a hidden bar's reveal; off, it shows "
                 + "and hides at once.",

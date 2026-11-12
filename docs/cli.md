@@ -777,6 +777,7 @@ every lens with why it cannot turn on.
 | | `animations.set_expand_duration` | ms (500–2000, default 750); the KiwiShelf expand's length |
 | | `animations.set_on_reveal` | true\|false (default true); a hidden bar's reveal |
 | | `animations.set_reveal_duration` | ms (150–800, default 300); a hidden bar's reveal length |
+| | `animations.set_reduce_motion` | true\|false (default false); KiwiDesk's own Reduce Motion, in every profile |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
@@ -1045,6 +1046,13 @@ Both durations refuse `0` and below with `a duration must be above
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired and fail naming their replacements.
+
+:::unreleased
+`animations.set_reduce_motion` (true|false) is the Off of Settings'
+speed preset: motion drops in every profile and the lengths are
+kept; it changes the running value only
+([animations.set_reduce_motion](lua-reference.md#animationsset_reduce_motion)).
+:::
 
 `animations.set_on_peek` (true|false, default true) turns the bars'
 peeks instant; see

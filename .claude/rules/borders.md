@@ -894,7 +894,8 @@ buy churn. What that leaves is an obligation with no guard
 behind it, which is exactly why it is written down:
 
 **A cue that starts an animation names its Reduce Motion read at
-the site that starts it** — read in the overlay
+the site that starts it**, and the read is `ReduceMotion.isOn`
+(input-and-animation.md, #3238) — read in the overlay
 (`StickyMarkOverlay`, `SizeLimitOverlay`) or handed in as an
 argument (the dead-end bump takes one from
 `KiwiCore+DeadEndCue`). A new cue that names it in neither place
