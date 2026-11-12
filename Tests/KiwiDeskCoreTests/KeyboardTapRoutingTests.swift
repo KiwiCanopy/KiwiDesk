@@ -138,6 +138,44 @@ struct KeyboardTapRoutingTests {
         #expect(ModifierTapRouter.match(rows, single) == nil)
     }
 
+    /// An either-side single tap fires from both keys alone, from the
+    /// free key only beside a sided row, and never with a key or a
+    /// click between press and release (#3259).
+    @Test("an either-side single tap fires from a free key alone")
+    func eitherSideSingle() throws {
+        let either = ModifierTapRow(
+            combo: try #require(KeyCombo.tap(.command, side: nil, count: 1)),
+            id: 2
+        )
+        let left = ModifierTapRow(
+            combo: try #require(
+                KeyCombo.tap(.command, side: .left, count: 1)
+            ),
+            id: 1
+        )
+        let press = { (side: ModifierSide) in
+            HotkeyModifiers.command.union(.side(side, of: .command))
+        }
+        let fired = {
+            (
+                rows: [ModifierTapRow],
+                side: ModifierSide,
+                between: ModifierTapDetector.Input?
+            ) -> [UInt32] in
+            var router = ModifierTapRouter()
+            router.setRows(rows)
+            _ = router.feed(.flags(press(side), at: 0))
+            if let between { _ = router.feed(between) }
+            return router.feed(.flags([], at: 0.1)).ids
+        }
+        #expect(fired([either], .left, nil) == [2])
+        #expect(fired([either], .right, nil) == [2])
+        #expect(fired([left, either], .left, nil) == [1])
+        #expect(fired([left, either], .right, nil) == [2])
+        #expect(fired([either], .left, .key).isEmpty)
+        #expect(fired([either], .right, .mouseDown).isEmpty)
+    }
+
     @Test("a single tap waits only on a key a double tap listens on")
     func immediateKeys() {
         let rows = [

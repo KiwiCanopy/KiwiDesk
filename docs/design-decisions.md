@@ -13276,9 +13276,10 @@ recording.* While the switch is on, a **Sides** pull-down sits
 before each row's recorder well, its slot held on every row so the
 wells line up. It lists each sided modifier of the shortcut with
 Left, Right and Either side, so `Right ⌘ ⌥ H` can keep Right ⌘ and
-make ⌥ either-side; a single modifier tap offers no Either side,
-since it names a side (#1872), and the modifier one of whose keys
-is the Hyper key offers no side at all (Ruling 4 above). It is the
+make ⌥ either-side; a single modifier tap offers Either side too,
+though it records the side pressed (#3259), and the modifier one
+of whose keys is the Hyper key offers no side at all (Ruling 4
+above). It is the
 GUI's route to an either-side shortcut; the switch and Lua's
 `cmd+h` stay. It works at rest only: the well is
 one button whose click re-records and any click while recording
@@ -13412,9 +13413,17 @@ place. Three bounds keep it from firing by accident:
   come, so every extra count makes the shorter one wait: with
   triples, ⌘⌘ would fire 300 ms late. Triples also go off while
   typing (⇧⇧⇧ for capitals), and Mac conventions stop at twice.
-- **A single tap names a side.** An either-side single tap would
-  fire each time someone presses and lets go of a modifier without
-  a key. Right ⌘ alone is rare; ⌘ alone is everyone, every day.
+- **A single tap records a side, and takes either side by
+  choice** (#3259, amending #1872). The recorder keeps the side
+  pressed, so the safe form is the default: an either-side single
+  tap fires each time someone presses and lets go of a modifier
+  without a key, and Right ⌘ alone is rare where ⌘ alone is
+  everyone's. Either side is still a choice in the Sides menu,
+  with no warning on it: what it fires on is narrow, a modifier
+  pressed and released alone inside the press limit, and a user
+  who finds it firing too often moves it to one side or another
+  key (#1857's no-nanny rule). Beside a sided single tap on the
+  same modifier it keeps the other key, as a double tap does.
 - **An either-side double tap is the same key twice.** Left then
   right is what two-handed typing does on its own, so `cmd+cmd`
   means left twice or right twice. A double tap records its side

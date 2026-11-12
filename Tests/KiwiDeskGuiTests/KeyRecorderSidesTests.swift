@@ -100,4 +100,20 @@ struct KeyRecorderSidesTests {
         #expect(pick(.right) == "rcmd+h")
         #expect(pick(.left) == "lcmd+h")
     }
+
+    /// A single tap is recorded on its side, and the menu offers
+    /// Either side for it too (#3259).
+    @Test("a single tap's menu offers Either side")
+    func singleTapTakesEither() throws {
+        let stored = try #require(KeyCombo.parse("rcmd"))
+        #expect(
+            stored.pickingSide(nil, of: .command, hyperKey: nil) != nil
+        )
+        let pick = { (side: ModifierSide?) in
+            KeyRecorderField.pickedText(side, of: .command, in: stored, nil)
+        }
+        #expect(pick(nil) == "cmd")
+        #expect(pick(.left) == "lcmd")
+        #expect(pick(.right) == nil)
+    }
 }
