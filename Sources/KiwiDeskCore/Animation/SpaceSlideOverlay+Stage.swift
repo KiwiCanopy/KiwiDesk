@@ -35,6 +35,7 @@ extension SpaceSlideOverlay {
             strip: strip,
             glass: press.glass,
             tint: press.tint,
+            frost: press.frost,
             pace: press.pace,
             space: press.space
         )

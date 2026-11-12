@@ -1,14 +1,17 @@
-import Foundation
+import AppKit
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
 
-/// **KiwiHub and the cue plates wear the Fill under the toggle,
-/// follow KiwiHub's Liquid Glass leaf, and their panels wear the
-/// rim** (#2569 ▸ Ruling). The value is `PanelGlass`; the wiring
-/// no behavioural test can reach — which view draws through it,
-/// which panel wears the rim — is needled on its use sites.
+/// **KiwiHub and the cue plates wear the Fill under the toggle —
+/// on glass where KiwiHub's Liquid Glass leaf draws, flat over the
+/// material where it does not — and their panels wear the rim on
+/// glass alone** (#2569 ▸ Ruling and its amendment). The value is
+/// `PanelGlass`; the wiring no behavioural test can reach — which
+/// view draws through it, which panel wears the rim — is needled
+/// on its use sites.
 @Suite("KiwiHub and cue plate glass (#2569)")
 @MainActor
 struct PanelGlassTests {
@@ -45,24 +48,26 @@ struct PanelGlassTests {
         #expect(glass.wearsActiveLook == tinted)
     }
 
-    /// Reduce transparency draws the fallback, so the Fill, its
-    /// inks and KiwiHub's paint stand down with the glass, live.
-    @Test("Reduce transparency stands the Fill down")
-    func reduceTransparencyStandsDown() throws {
+    /// Reduce transparency draws the fallback, where the Fill is
+    /// opaque over the material and the inks and paint stay, live.
+    @Test("Reduce transparency moves the Fill onto the material")
+    func reduceTransparencyMovesTheFill() throws {
         try #require(GlassChromeVariant.drawable, "no glass below 26")
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = true
         let glass = PanelGlass(settings: settings)
-        try #require(glass.shelf != nil)
-        #expect(glass.drawn(reduceTransparency: false) == glass)
-        let reduced = glass.drawn(reduceTransparency: true)
-        #expect(reduced.shelf == nil)
-        #expect(reduced.enabled == glass.enabled)
-        #expect(!Self.paint(reduced).tinted)
-        // A leaf turned off after the read draws the fallback too.
+        #expect(glass.ground(reduceTransparency: false) == .glass)
+        let reduced = try #require(
+            glass.ground(reduceTransparency: true).frost
+        )
+        #expect(reduced.alpha == 1)
+        #expect(Self.paint(glass).tinted)
+        // A leaf turned off after the read draws the material too,
+        // at the Fill's own alpha.
         var off = glass
         off.enabled = false
-        #expect(off.drawn(reduceTransparency: false).shelf == nil)
+        let frost = try #require(off.ground(reduceTransparency: false).frost)
+        #expect(frost.alpha < 1)
     }
 
     @Test(
@@ -75,15 +80,27 @@ struct PanelGlassTests {
         #expect(PanelGlass(settings: settings).enabled == on)
     }
 
-    /// KiwiHub's leaf off leaves KiwiHub and the cues untinted though
-    /// the toggle is on: the answer is Core's, not the toggle's.
-    @Test("KiwiHub's glass off leaves the panels untinted")
-    func leafOffLeavesThemUntinted() {
+    /// KiwiHub's leaf off keeps KiwiHub and the cues tinted, flat
+    /// over the material, with no rim: the rim is glass's finish.
+    @Test("KiwiHub's glass off wears the Fill over the material")
+    func leafOffWearsTheFillFlat() {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = true
         settings.shortcutPanelLiquidGlass = false
-        #expect(PanelGlass(settings: settings).shelf == nil)
-        #expect(!Self.paint(PanelGlass(settings: settings)).tinted)
+        let glass = PanelGlass(settings: settings)
+        #expect(glass.ground(reduceTransparency: false).frost != nil)
+        #expect(!glass.wearsActiveLook)
+        #expect(Self.paint(glass).tinted)
+        // Flat: the fade's paint is minted on glass alone.
+        let ground = glass.ground(reduceTransparency: false)
+        #expect(glass.paint(on: ground, increaseContrast: false) == nil)
+        #expect(glass.paint(on: .untinted, increaseContrast: false) == nil)
+        // The toggle off is the untinted material.
+        settings.kiwishelf.tintHubAndPlates = false
+        #expect(
+            PanelGlass(settings: settings).ground(reduceTransparency: false)
+                == .untinted
+        )
     }
 
     /// A Fill without colour leaves KiwiHub and the cues untinted,
@@ -95,6 +112,22 @@ struct PanelGlassTests {
         settings.kiwishelf.fillColor = "#14201C00"
         #expect(PanelGlass(settings: settings).shelf == nil)
         #expect(!Self.paint(PanelGlass(settings: settings)).tinted)
+    }
+
+    /// What the chrome draws over the material: the Fill at its own
+    /// alpha, and the scheme its lightness decides.
+    @Test(
+        "The frost draws the Fill's alpha and scheme",
+        arguments: [("#14201CB3", true), ("#F2F2F7B3", false)]
+    )
+    func frostDrawsTheFill(hex: String, dark: Bool) throws {
+        var shelf = KiwiShelf()
+        shelf.fillColor = hex
+        let frost = try #require(shelf.frostFill(opaque: false))
+        #expect(frost.scheme == (dark ? .dark : .light))
+        let drawn = try #require(NSColor(frost.color).usingColorSpace(.sRGB))
+        #expect(abs(drawn.alphaComponent - 0xB3 / 255.0) < 0.01)
+        #expect(abs(drawn.redComponent - frost.red) < 0.01)
     }
 
     @Test("Every cue view and KiwiHub draw through the panel glass")
@@ -127,14 +160,16 @@ struct PanelGlassTests {
         #expect(
             chrome.contains(
                 "inked(content,ink).environment(\\.kiwiHubPaint,"
-                    + "KiwiHubPaint.of(drawn,ink:ink,tint:tint,"
-                    + "increaseContrast:increased)).glassChrome("
+                    + "KiwiHubPaint.of(glass,ink:ink,tint:tint,"
+                    + "increaseContrast:increased))"
+                    + ".background{frost.map{shape.fill($0.color)}}"
+                    + ".glassChrome("
             )
         )
         // One read of Increase Contrast resolves the inks for both.
         #expect(
             chrome.contains(
-                "letink=drawn.shelf?.panelInk(increaseContrast:increased)"
+                "letink=glass.shelf?.panelInk(increaseContrast:increased)"
             )
         )
         #expect(
@@ -148,25 +183,30 @@ struct PanelGlassTests {
         // Reduce transparency read live, in the chrome itself.
         #expect(
             chrome.contains(
-                "glass.drawn(reduceTransparency:reduceTransparency)"
+                "glass.ground(reduceTransparency:reduceTransparency)"
             )
         )
         #expect(
             chrome.contains(
-                "glassChrome(in:shape,enabled:drawn.enabled,"
-                    + "variant:drawn.variant,tint:"
+                "glassChrome(in:shape,enabled:glass.enabled,"
+                    + "variant:glass.variant,tint:"
             )
         )
         // One paint, minted once, lands as the chrome's tint and
         // KiwiHub's fade alike.
         #expect(
             chrome.contains(
-                "lettint=drawn.shelf.flatMap{GlassTint.paint("
-                    + "$0.panelGlassFill(increaseContrast:increased),"
-                    + "edge:.top)}"
+                "lettint=glass.paint(on:ground,"
+                    + "increaseContrast:increased)"
             )
         )
         #expect(chrome.contains("tint:tint,fallback:fallback)"))
+        // The frost and its content take the Fill's scheme.
+        #expect(
+            chrome.contains(
+                ".environment(\\.colorScheme,frost?.scheme??colorScheme)"
+            )
+        )
         #expect(chrome.occurrences(of: "GlassTint.paint(") == 1)
     }
 
@@ -299,7 +339,7 @@ struct PanelGlassTests {
         ).filter { !$0.isWhitespace }
         #expect(
             chrome.contains(
-                ".environment(\\.kiwiHubPaint,KiwiHubPaint.of(drawn,"
+                ".environment(\\.kiwiHubPaint,KiwiHubPaint.of(glass,"
                     + "ink:ink,tint:tint,increaseContrast:increased))"
             )
         )

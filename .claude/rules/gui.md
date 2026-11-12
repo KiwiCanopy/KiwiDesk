@@ -1947,18 +1947,26 @@ Obligations:
   approximation (owner, 2026-09-07). *Keep the old design* and
   *keep the design language* are different answers and the first
   is ours: a surface degrading to something nearly glass claims a
-  finish the machine cannot draw.
+  finish the machine cannot draw. **A fallback carries a Fill
+  only by ruling**: KiwiHub and the cue plates wear it flat over
+  their material, minted by `KiwiShelf.frostFill(opaque:)` and
+  drawn by `panelGlassChrome` alone, with no fade and no rim
+  (#2569 ▸ amendment; `PanelGlassTests`, `PanelGroundTests`). A
+  further fallback wearing a colour argues its own entry in
+  `docs/design-decisions.md`; no scan holds a second reader of
+  `PanelGround.frost` in this tree, so that half is review's.
 - **Glass here carries a Fill only by ruling, and only as the
   `tint` parameter's `GlassPaint`** — minted by `GlassTint.paint`
   alone, nil for an untinted surface (bars.md ▸ A stored Fill
   becomes a colour on glass in ONE place). The ruled surfaces are
   KiwiHub and the cue plates while Core's pure
-  `TilingSettings.panelsWearFill(glassDrawn:)` holds (#2569), drawn
+  `KiwiShelf.panelGround(glassDrawn:reduceTransparency:)` answers
+  `.glass` (#2569), drawn
   through the one `panelGlassChrome`, which picks the Fill, the
-  variant, the inks and KiwiHub's paint from `PanelGlass` as drawn
+  variant, the inks and KiwiHub's paint from `PanelGlass`'s ground
   under the live Reduce transparency (`PanelGlassTests`), each
-  plate on an `ActiveGlassPanel` whose rim follows that same
-  answer (#2569; input-and-animation.md for Core's plates); otherwise
+  plate on an `ActiveGlassPanel` whose rim is glass's alone
+  (#2569; input-and-animation.md for Core's plates); otherwise
   they hand `tint` nil,
   as does every surface no ruling names. Never reach for
   `Glass.tint(_:)`: it is a **dimmer** — measured 2026-09-07, a
@@ -1982,8 +1990,8 @@ Obligations:
   not a tidy-up; `GlassChromeSeamTests` holds that both
   parameters reach the branch.
 - **A tinted panel's text takes the hierarchical styles `panelGlassChrome`
-  sets, never an ink by name.** While the panel wears the Fill
-  (`PanelGlass` as drawn) it sets
+  sets, never an ink by name.** While the panel wears the Fill, on
+  glass or over its material (`PanelGlass.shelf`), it sets
   `KiwiShelf.panelInk(increaseContrast:)` as the `.primary` / `.secondary` /
   `.tertiary` styles beneath the glass, and the reading floor is measured on
   exactly those (`GlassPaintTests`). So content inside KiwiHub or a cue plate
@@ -2030,7 +2038,10 @@ Obligations:
   `enabled && !reduceTransparency`, so the setting lands on the
   caller's `fallback`, the same one its off state and the pre-26
   branch draw — measured opaque under the setting, 2026-09-13 —
-  and the stored `liquid_glass` value is untouched. The glass
+  and the stored `liquid_glass` value is untouched. A panel
+  wearing the Fill paints it at full alpha there, asked of
+  `PanelGlass.ground(reduceTransparency:)` (`PanelGlassTests` ▸
+  `reduceTransparencyMovesTheFill`). The glass
   BRANCH has that one gate; the Liquid Glass row reads the same
   value only to grey with its reason (#1418,
   `GreyOutParityTests`, `GreyOutAnchorTests`), a further reader

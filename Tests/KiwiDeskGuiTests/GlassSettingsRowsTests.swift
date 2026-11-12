@@ -6,10 +6,10 @@ import Testing
 
 /// **The Liquid Glass group's Fill rows and "No Color"** (#2569 ▸
 /// Ruling): "No Color" is the Fill at zero opacity with its hue
-/// kept; the Tint and Fill fade rows grey while the switch is off
-/// or the Fill has no colour, the reason said inline under the
-/// slider. The greys and the menu item are wiring no behavioural
-/// test can reach, so they are needled on their use sites.
+/// kept; the Tint and Fill fade rows grey while the Fill has no
+/// colour, and the fade while the switch is off. The greys and the
+/// menu item are wiring no behavioural test can reach, so they are
+/// needled on their use sites.
 @Suite("Liquid Glass Fill rows (#2569)")
 struct GlassSettingsRowsTests {
     private static let gui = SourceScan.repoRoot(from: #filePath)
@@ -62,14 +62,34 @@ struct GlassSettingsRowsTests {
         )
     }
 
-    @Test("The rows grey on the switch and the Fill")
+    /// The fade is glass's alone; the Tint switch works over the
+    /// material too, so the Liquid Glass switch leaves it live
+    /// (#2569 ▸ amendment).
+    @Test("Both rows grey on the Fill, the fade on the switch too")
+    @MainActor
     func greysAreWired() throws {
         let card = try Self.squashed("Components/Looks/GlassCard.swift")
-        #expect(card.contains("(Self.followsTheFill(key)&&fillIdle)"))
+        #expect(
+            card.contains("(Self.followsTheFill(key)&&!shelf.hasFill)")
+        )
+        #expect(
+            card.contains("(Self.followsTheSwitch(key)&&switchOff)")
+        )
         #expect(
             card.contains(
-                "!model.liquidGlassMaster.wrappedValue||!shelf.hasFill"
+                "varswitchOff:Bool{!model.liquidGlassMaster.wrappedValue}"
             )
+        )
+        #expect(GlassCard.followsTheSwitch(.kiwishelf(.fillFade)))
+        #expect(!GlassCard.followsTheSwitch(.kiwishelf(.tintHubAndPlates)))
+        // Reduce transparency and a Mac without glass keep the row.
+        let placement = SettingKey.kiwishelf(.tintHubAndPlates).placement
+        #expect(placement.exemptFromContainerGate)
+        // The stored fact: `hiddenWithoutGlass` is false on any
+        // Mac that draws glass, whatever the census says.
+        #expect(
+            placement.gate?.runtimeConditions
+                .contains(.liquidGlassUnavailable) != true
         )
     }
 

@@ -20,7 +20,7 @@ extension ColorsAndGlassRow {
                         + "and %1$@ and the switch plates while "
                         + "\u{201C}%2$@\u{201D} is on. How far it fades "
                         + "is \u{201C}%3$@\u{201D}. \u{201C}%4$@\u{201D} "
-                        + "leaves plain glass.",
+                        + "leaves them uncolored.",
                     JumpScope.panelName,
                     GlassCard.tintLabel,
                     L("kiwishelf.fill_fade", "Fill fade"),

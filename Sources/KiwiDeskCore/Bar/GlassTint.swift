@@ -174,6 +174,16 @@ public enum GlassTint {
         glass.appearance = dark ? NSAppearance(named: .darkAqua) : nil
     }
 
+    /// Pins `frost` — a plate's material where no glass draws — to
+    /// the scheme its flat Fill decided, light as well as dark: a
+    /// material takes both, unlike AppKit glass (#2569 ▸ amendment).
+    @MainActor
+    static func pinFrost(_ frost: NSView, to pin: GlassPaint.Pin) {
+        frost.appearance = NSAppearance(
+            named: pin == .dark ? .darkAqua : .aqua
+        )
+    }
+
     /// Makes the backdrop `glass`'s content — above the material,
     /// beneath what the glass hosts (#2569) — and colours it,
     /// fading from `edge` — the shelf's screen edge, or `.top` for

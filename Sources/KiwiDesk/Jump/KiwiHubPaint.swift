@@ -53,7 +53,8 @@ struct KiwiHubPaint {
     /// The paint KiwiHub wears on `glass` as drawn, its divider from
     /// `ink`, the inks the panel chrome resolved for that glass;
     /// its fills fade along `tint`, the glass's own paint, to the
-    /// shelf's highlight share under `increaseContrast`.
+    /// shelf's highlight share under `increaseContrast`; nil over
+    /// the material, where they are flat.
     static func of(
         _ glass: PanelGlass,
         ink: PanelInk?,

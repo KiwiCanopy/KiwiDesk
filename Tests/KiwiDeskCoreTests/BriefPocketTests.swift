@@ -119,6 +119,8 @@ struct BriefPocketTests {
                 == PocketPlateView.room(in: mark, edge: .right, outer: outer)
         )
         #expect(!request.plateGlass)
+        // …and wears the Fill opaque over its material (#2569).
+        #expect(request.plateFrost?.alpha == 1)
     }
 
     @Test("taking out plays the pocket and holds the one write")

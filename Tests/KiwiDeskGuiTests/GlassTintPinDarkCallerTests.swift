@@ -31,6 +31,27 @@ struct GlassTintPinDarkCallerTests {
             "the brief pocket's plate: the slide's, untinted",
     ]
 
+    /// The files that may call `pinFrost`, each with its reason —
+    /// the one copy.
+    private static let frostPinners: [String: String] = [
+        "Bar/FrostPlate.swift":
+            "the Core plates' material, wearing the Fill flat"
+    ]
+
+    @Test("only the frost plate calls pinFrost (#2569)")
+    func pinFrostHasItsCaller() throws {
+        let found = try Self.callers(of: "GlassTint.pinFrost")
+        #expect(
+            found == Set(Self.frostPinners.keys),
+            """
+            pinFrost's callers and the register disagree — a glass \
+            surface takes GlassTint.apply, and a material wearing \
+            the Fill is built by FrostPlate: \
+            \(found.symmetricDifference(Self.frostPinners.keys))
+            """
+        )
+    }
+
     @Test("only the ruled surfaces call pinDark")
     func pinDarkHasItsCallers() throws {
         let found = try Self.callers(of: "GlassTint.pinDark")

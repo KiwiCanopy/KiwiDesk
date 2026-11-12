@@ -4056,6 +4056,12 @@ a second needs no switch of its own, and one leaf fewer is one
 fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
+
+:::unreleased
+Under the toggle that blur wears the Fill flat (▸ the shortcuts
+panel entry).
+:::
+
 A tinted plate's variant is pinned dark by a dark Fill, as a
 bar's is (▸ Liquid Glass). Under a light Fill, and untinted, a
 plate follows the Appearance pick as KiwiHub does, since AppKit
@@ -14992,15 +14998,13 @@ wears the Fill on `.clear` glass** (#2569, owner rulings
 While KiwiHub, the cue plates (Space, Desktop, layout) and the
 Space-switch slide plates wear the Fill, they wear KiwiShelf's
 Fill on `.clear` glass, fading top to bottom. One Core answer,
-`TilingSettings.panelsWearFill(glassDrawn:)`, decides that for all
-of them — the glass, the inks, the highlight and the rim: the
-toggle on, a Fill with a colour, and KiwiHub's Liquid Glass leaf
-as drawn. The answer is pure; Core hands it the gate's read, the
-GUI its live Reduce transparency, so a flip while KiwiHub is open
-stands the Fill down at once. With KiwiHub's glass off, under Reduce transparency or
-below macOS 26 they draw the untinted look, since a Fill-matched
-ink on the fallback material is a pairing nobody measured. The
-plates also wear the key-window rim (▸ Liquid Glass). Off is
+`KiwiShelf.panelGround(glassDrawn:reduceTransparency:)`, decides
+the ground for all of them: the toggle on and a Fill with a
+colour decide whether they wear it, and KiwiHub's Liquid Glass
+leaf as drawn decides on what. The answer is pure; Core hands it
+the gate's reads, the GUI its live Reduce transparency, so a flip
+while KiwiHub is open moves the Fill at once. On glass the plates
+also wear the key-window rim (▸ Liquid Glass). Off is
 exactly the look this entry ruled: frosted, untinted, following
 Appearance, with no rim and KiwiHub's kiwi green. That keeps the
 system-chrome panel one switch away. The untinted ruling is
@@ -15039,10 +15043,49 @@ three reasons are answered one by one:
    may equal the highlight. A hovered row takes the hover fill
    and the Hover item colour (`PanelHighlightTests`).
 
+:::unreleased
+**Amended: without glass the panel wears the Fill flat over its
+material** (#2569, owner ruling 2026-11-11). The first ruling
+kept the fallback untinted because the look's inks on the
+fallback material were a pairing nobody had measured; item 3
+measures it. With KiwiHub's glass off or below macOS 26, the same
+surfaces paint the Fill at its stored alpha, one even colour,
+over the material they already drew there, and take the look's
+inks and highlight as on glass. Under Reduce transparency the
+Fill is at full alpha, the bars' own answer. The material and
+its content take the scheme the Fill's lightness decides, dark or
+light, so a dark Fill never sits on light frost. The rulings, one
+by one:
+
+1. *Over the material, where the bars paint bare.* The two
+   diverge on purpose. KiwiHub is a reading surface with small
+   text and long lists, and its fallback already blurred what is
+   behind it; a bare Fill would remove that blur and leave a
+   low-alpha Fill with no lever but its alpha. The bars carry a
+   few glyphs and keep their bare Fill.
+2. *Flat.* Fill fade is glass's (▸ Liquid Glass, *With the finish
+   off … the Fill renders flat*), so the panel's selection and
+   hover fills are flat too.
+3. *The pairing is measured as a bound.* The look's inks on the
+   Fill bare over white and over black hold the reading floor on
+   every bundled palette, and the increased floor on the opaque
+   Fill (`PanelGroundTests`). The material between the Fill and
+   the windows only moves the ground toward the Fill's own
+   polarity. A user's own low-alpha Fill is unguarded, as it is
+   on glass (#1857).
+4. *No rim.* The rim is glass's finish; over the material the
+   panel keeps its shadow alone.
+5. *Same toggle.* Off is one switch away in every state. A
+   second setting would only restate what the row cannot show:
+   Reduce transparency, the macOS version, or a KiwiHub leaf a
+   config split from the switch.
+
+:::
+
 **The brief pocket's flying plate is one of these plates.** It
-wears the Fill under the toggle, so its panel wears the key-window
-rim too, decided from the same tint the slide's plates read
-(`BriefPocketPanelGlassTests`).
+wears the Fill under the toggle, and on glass its panel wears the
+key-window rim too, decided from the same tint the slide's plates
+read (`BriefPocketPanelGlassTests`).
 
 **`.clear`, not `.regular`.** `.regular` is frosted, and it hides
 the rim. That, not the missing active state, is why KiwiHub and
@@ -15066,13 +15109,14 @@ light limit is AppKit's*).
 2026-10-24). While the Fill has no colour, KiwiHub, the cue plates
 and the slide plates fall back to their untinted,
 Appearance-following look, exactly as with the toggle off
-(`panelsWearFill(glassDrawn:)`). Settings greys the toggle with that reason.
+(`panelGround(glassDrawn:reduceTransparency:)`). Settings greys
+the toggle with that reason.
 The look's inks were chosen to read on the Fill. Without one, the
 panel would put them on plain `.clear` glass under KiwiHub's dense
 text, which is `.clear` without a Fill, the case this entry found
 unreadable. The fallback replaces the re-measure of that case that
 the earlier ruling asked for (`PanelGlassTests`,
-`SpaceSlideSwitchTests`, `PanelsWearFillTests`).
+`SpaceSlideSwitchTests`, `PanelGroundTests`).
 
 **The chip stays at 0.2 on glass, and that is a decision rather
 than an oversight.** Its separation from the ground is
@@ -20356,6 +20400,12 @@ profile travels: writing the leaf off would flip the user's
 choice on every Mac the profile reaches and leave it flipped when
 the setting goes back off. It is read at render time instead.
 
+:::unreleased
+Under *Tint KiwiHub and plates* the panel's off state carries the
+Fill, so there it is the Fill at full alpha over that material (▸
+the shortcuts panel entry).
+:::
+
 **A Fill with no colour is one state, and it paints nothing on
 any path** (#2569, owner ruling 2026-10-24, after an HTML preview;
 `ui-designer` concurred). An empty Fill, an unparseable one and
@@ -20602,7 +20652,8 @@ the added method uncalled, so the glass falls back to the
 inactive look and nothing breaks (`os-private-apis.md` owns the
 door). The bars, the marks, their list and the peek always wear
 the rim, since they are KiwiShelf's look. The plates wear it
-only while they wear the Fill (▸ the shortcuts panel entry),
+only while they wear the Fill on glass (▸ the shortcuts panel
+entry),
 whose off state is today's look. The panels that answer are
 `GlassActiveAppearance.classes`, so the sticky mark, the drag
 ghost and drop zone, the hidden shelf's handle and the boot

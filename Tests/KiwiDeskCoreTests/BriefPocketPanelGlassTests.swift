@@ -13,12 +13,20 @@ import Testing
 )
 @MainActor
 struct BriefPocketPanelGlassTests {
-    private func presentedPanel(tint: GlassFill?) throws -> NSPanel {
+    private func presentedPanel(
+        tint: GlassFill?,
+        frost: FrostFill? = nil,
+        onPresent: ((NSPanel) -> Void)? = nil
+    ) throws -> NSPanel {
         let screen = try #require(NSScreen.screens.first)
         let display = try #require(screen.kiwiDisplayID)
         let overlay = BriefPocketOverlay()
         var presented: NSPanel?
-        overlay.present = { presented = $0 }
+        // Read while the play stands: its end drops the content.
+        overlay.present = {
+            presented = $0
+            onPresent?($0)
+        }
         overlay.makeFrames = { _, _ in nil }
         overlay.icon = { _ in nil }
         defer { overlay.end() }
@@ -31,8 +39,9 @@ struct BriefPocketPanelGlassTests {
                 pocket: CGRect(x: 20, y: 20, width: 32, height: 32),
                 iconPid: nil,
                 markHex: "",
-                plateGlass: true,
+                plateGlass: frost == nil,
                 plateTint: tint,
+                plateFrost: frost,
                 flight: 0.3
             )
         )
@@ -47,5 +56,34 @@ struct BriefPocketPanelGlassTests {
         let active = panel as? ActiveGlassPanel
         #expect(active != nil, "the plate's panel answers the question")
         #expect(active?.wearsActiveLook == tinted)
+    }
+
+    /// Glass stood down: the play hands its plate the frost, and
+    /// the panel wears no rim, which is glass's finish.
+    @Test("a frost plate wears the Fill over its material, no rim")
+    func frostReachesThePlate() throws {
+        var shelf = KiwiShelf()
+        shelf.fillColor = "#14201CB3"
+        let frost = try #require(shelf.frostFill(opaque: false))
+        var washes: Int?
+        var rim: Bool?
+        _ = try presentedPanel(tint: nil, frost: frost) { panel in
+            rim = (panel as? ActiveGlassPanel)?.wearsActiveLook
+            washes = panel.contentView.map {
+                Self.materials(in: $0)
+                    .compactMap { FrostPlate.washColour(of: $0) }.count
+            }
+        }
+        #expect(rim == false)
+        #expect(washes == 1)
+    }
+
+    private static func materials(in view: NSView) -> [NSVisualEffectView] {
+        var found: [NSVisualEffectView] = []
+        if let material = view as? NSVisualEffectView {
+            found.append(material)
+        }
+        for sub in view.subviews { found += materials(in: sub) }
+        return found
     }
 }

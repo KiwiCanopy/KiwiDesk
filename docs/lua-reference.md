@@ -1598,6 +1598,13 @@ is off. On, its default, KiwiHub draws `.clear` glass wearing the
 shelf's fill (#2569). The Space, Desktop and layout plates read
 this leaf too, and draw `.regularMaterial` while it is off.
 
+:::unreleased
+While this is off, and below macOS 26, KiwiHub and those plates
+still wear the shelf's fill where
+[`kiwishelf.set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
+is on, flat over that material.
+:::
+
 The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
 leaf sets the material of all of KiwiHub — the window switcher,
 the shortcuts panel and the view picker.
@@ -3027,6 +3034,13 @@ setting goes off (#1374).
 
 The Space switch's plates draw their material then too.
 
+:::unreleased
+While Reduce transparency is on, the panel and the plates wear
+the fill, opaque, where
+[`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
+on.
+:::
+
 A hidden bar's Space dots and line wear the glass too, tinted by
 the same fill, and draw that fill flat when the glass is off or
 stood down.
@@ -3107,9 +3121,17 @@ black or white text, whichever reads on it, and a hovered row
 takes `hover_fill_color` and `hover_item_color`. A light fill
 keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
-They draw as with `false` while the fill has no color, while
-their glass is off or stood down by Reduce transparency, and
-below macOS 26.
+They draw as with `false` while the fill has no color.
+
+:::unreleased
+While their glass is off, and below macOS 26, they wear the fill
+at its own alpha, as one even color over their blurred
+background, with the same text and row colors and no bright edge.
+Their background is light under a light fill and dark under a
+dark one. While macOS's Reduce transparency is on, the fill is
+opaque.
+:::
+
 `false` draws them in frosted, untinted glass that follows
 Settings' Appearance, with KiwiHub's kiwi-green selection. The
 glass itself turns on and off with
@@ -3117,9 +3139,13 @@ glass itself turns on and off with
 Stored as `kiwishelf.tint_hub_and_plates`.
 
 The GUI twin is **Tint KiwiHub and plates** under the **Liquid
-Glass** switch on Looks &amp; Animations; it is hidden below
-macOS 26 and greys while glass is off or stood down, or while the
+Glass** switch on Looks &amp; Animations; it greys while the
 fill has no color.
+
+:::unreleased
+The row shows on every macOS and stays live while glass is off
+or macOS's Reduce transparency is on.
+:::
 
 **Example:**
 
