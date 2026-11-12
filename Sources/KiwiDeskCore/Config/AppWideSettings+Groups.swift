@@ -48,8 +48,10 @@ extension AppWideSettings {
         var scrollDuration: Int?
         var expandDuration: Int?
         var revealDuration: Int?
+        var reduceMotion: Bool?
 
         enum CodingKeys: String, CodingKey {
+            case reduceMotion = "reduce_motion"
             case duration
             case scrollDuration = "scroll_duration"
             case expandDuration = "expand_duration"
@@ -239,7 +241,8 @@ extension AppWideSettings {
             duration: animationDurationMS,
             scrollDuration: animationScrollDurationMS,
             expandDuration: animationExpandDurationMS,
-            revealDuration: animationRevealDurationMS
+            revealDuration: animationRevealDurationMS,
+            reduceMotion: animationReduceMotion
         )
     }
 
@@ -255,6 +258,7 @@ extension AppWideSettings {
         if let ms = group.scrollDuration { animationScrollDurationMS = ms }
         if let ms = group.expandDuration { animationExpandDurationMS = ms }
         if let ms = group.revealDuration { animationRevealDurationMS = ms }
+        if let off = group.reduceMotion { animationReduceMotion = off }
     }
     var tiling: Tiling {
         Tiling(

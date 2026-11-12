@@ -210,7 +210,7 @@ final class SizeLimitOverlay {
         pill.panel.alphaValue = 1
 
         if symbol != nil || !shown,
-            !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+            !ReduceMotion.isOn
         {
             popEntrance(pill.plate)
         }
@@ -235,7 +235,7 @@ final class SizeLimitOverlay {
             retire(window)
             return
         }
-        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+        if ReduceMotion.isOn {
             pill.panel.orderOut(nil)
             retire(window)
             return

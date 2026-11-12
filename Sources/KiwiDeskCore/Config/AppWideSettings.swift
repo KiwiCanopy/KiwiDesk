@@ -121,6 +121,10 @@ public struct AppWideSettings: Equatable, Sendable {
             )
         }
     }
+    /// KiwiDesk's own Reduce Motion (`animations.reduce_motion`,
+    /// #3238): the speed preset's Off, in every profile. OFF by
+    /// default; ORed into `ReduceMotion.isOn`.
+    public var animationReduceMotion = false
     /// Whether `gui.json` holds the four lengths above: false while
     /// their crossing from the profiles is owed (#3237), so a
     /// `gui.json` write before the adoption keeps the signal.

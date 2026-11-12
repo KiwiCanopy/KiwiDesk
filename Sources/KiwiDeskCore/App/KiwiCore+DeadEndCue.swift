@@ -25,8 +25,7 @@ extension KiwiCore {
             colorHex: style.focusedColor,
             width: style.clampedWidth,
             cornerStyle: style.cornerStyle,
-            reduceMotion: NSWorkspace.shared
-                .accessibilityDisplayShouldReduceMotion
+            reduceMotion: ReduceMotion.isOn
         )
     }
 }

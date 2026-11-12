@@ -183,6 +183,7 @@ public enum APIReference {
             "set_on_relayout", "set_on_state_change",
             "set_on_expand", "set_expand_duration", "set_on_peek",
             "set_on_reveal", "set_reveal_duration",
+            "set_reduce_motion",
             "set_size_policy", "set_size_rate",
         ],
         "stack": [

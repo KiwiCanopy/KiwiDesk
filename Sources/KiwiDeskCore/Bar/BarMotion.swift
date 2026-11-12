@@ -19,14 +19,13 @@ enum BarMotion {
         @MainActor static var reducedOverride: Bool? = nil
     #endif
 
-    /// Whether the user asked the system for less motion.
+    /// Whether KiwiDesk plays less motion (`ReduceMotion`, #3238).
     @MainActor
     static var isReduced: Bool {
         #if DEBUG
             if let reducedOverride { return reducedOverride }
         #endif
-        return NSWorkspace.shared
-            .accessibilityDisplayShouldReduceMotion
+        return ReduceMotion.isOn
     }
 
     /// Item-run slide, long enough to read as one run moving and
