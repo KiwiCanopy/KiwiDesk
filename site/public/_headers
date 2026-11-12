@@ -18,3 +18,9 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
+
+# The raw Markdown copies /llms.txt links (#3213). Each repeats a
+# /docs/ page, so no search engine indexes one. Keep them under this
+# one prefix: check-site-tokens.py ▸ check_llms_txt reads this rule.
+/llms/*
+  X-Robots-Tag: noindex
