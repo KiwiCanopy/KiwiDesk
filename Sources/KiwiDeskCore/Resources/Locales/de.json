@@ -2329,6 +2329,7 @@
   "shortcuts.layer_rename.clash": "%1$@ hat bereits eine Ebene „%2$@“.",
   "shortcuts.layer_rename.count": "Benennt sie in Profilen um: %1$d.",
   "shortcuts.layer_rename.everywhere": "Benennt sie in jedem Profil um.",
+  "shortcuts.layer_rename.on_page": "Dieses Profil hat bereits eine Ebene „%1$@“.",
   "shortcuts.layer_rename.pair": "Benennt sie in %1$@ und %2$@ um.",
   "shortcuts.layer_rename.shared": "„%1$@“ ist eine gemeinsame Ebene. Füge sie per Namen hinzu, um ihr beizutreten.",
   "shortcuts.layers.help": "Ebenen sind alternative Tastenkürzel-Sets — es reagieren immer nur die Kürzel der aktiven Ebene. Weise unten eine Taste zu, um zwischen ihnen zu wechseln. „default“ ist die Standard-Ebene und nach dem Start der App immer die aktive.",

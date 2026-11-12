@@ -2323,6 +2323,7 @@
   "shortcuts.layer_rename.clash": "%1$@ ha già un livello «%2$@».",
   "shortcuts.layer_rename.count": "Lo rinomina nei profili: %1$d.",
   "shortcuts.layer_rename.everywhere": "Lo rinomina in tutti i profili.",
+  "shortcuts.layer_rename.on_page": "Questo profilo ha già un livello «%1$@».",
   "shortcuts.layer_rename.pair": "Lo rinomina in %1$@ e %2$@.",
   "shortcuts.layer_rename.shared": "«%1$@» è un livello condiviso. Aggiungilo per nome per unirti a esso.",
   "shortcuts.layers.help": "I livelli sono insiemi alternativi di scorciatoie: si attivano solo quelle del livello attivo. Associa un tasto qui sotto per passare dall'uno all'altro. «default» è il livello standard ed è sempre quello attivo all'avvio dell'app.",

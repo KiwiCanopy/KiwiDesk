@@ -2323,6 +2323,7 @@
   "shortcuts.layer_rename.clash": "%1$@에 이미 ‘%2$@’ 레이어가 있습니다.",
   "shortcuts.layer_rename.count": "이름을 변경하는 프로필: %1$d.",
   "shortcuts.layer_rename.everywhere": "모든 프로필에서 이름을 변경합니다.",
+  "shortcuts.layer_rename.on_page": "이 프로필에 이미 ‘%1$@’ 레이어가 있습니다.",
   "shortcuts.layer_rename.pair": "%1$@ 및 %2$@에서 이름을 변경합니다.",
   "shortcuts.layer_rename.shared": "‘%1$@’은(는) 공유 레이어입니다. 참여하려면 이름으로 추가하십시오.",
   "shortcuts.layers.help": "레이어는 대체 단축키 세트로, 활성 레이어의 단축키만 동작합니다. 레이어를 전환할 키를 아래에서 할당하십시오. ‘default’는 표준 레이어이며 앱 시작 후에는 항상 이 레이어가 활성화됩니다.",

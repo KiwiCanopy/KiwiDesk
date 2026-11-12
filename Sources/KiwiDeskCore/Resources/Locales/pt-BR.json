@@ -2323,6 +2323,7 @@
   "shortcuts.layer_rename.clash": "%1$@ já tem uma camada “%2$@”.",
   "shortcuts.layer_rename.count": "Renomeia-a em perfis: %1$d.",
   "shortcuts.layer_rename.everywhere": "Renomeia-a em todos os perfis.",
+  "shortcuts.layer_rename.on_page": "Este perfil já tem uma camada “%1$@”.",
   "shortcuts.layer_rename.pair": "Renomeia-a em %1$@ e %2$@.",
   "shortcuts.layer_rename.shared": "“%1$@” é uma camada compartilhada. Adicione-a pelo nome para entrar nela.",
   "shortcuts.layers.help": "As camadas são conjuntos alternativos de atalhos — só os atalhos da camada ativa funcionam. Associe uma tecla abaixo para alternar entre elas. “default” é a camada padrão e é sempre a ativa depois que o app inicia.",

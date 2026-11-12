@@ -2323,6 +2323,7 @@
   "shortcuts.layer_rename.clash": "%1$@ ya tiene una capa «%2$@».",
   "shortcuts.layer_rename.count": "La renombra en perfiles: %1$d.",
   "shortcuts.layer_rename.everywhere": "La renombra en todos los perfiles.",
+  "shortcuts.layer_rename.on_page": "Este perfil ya tiene una capa «%1$@».",
   "shortcuts.layer_rename.pair": "La renombra en %1$@ y %2$@.",
   "shortcuts.layer_rename.shared": "«%1$@» es una capa compartida. Añádela por su nombre para unirte a ella.",
   "shortcuts.layers.help": "Las capas son conjuntos de atajos alternativos — solo se activan los atajos de la capa activa. Asigna una tecla abajo para cambiar entre ellas. «default» es la capa estándar y siempre es la activa al iniciar la aplicación.",

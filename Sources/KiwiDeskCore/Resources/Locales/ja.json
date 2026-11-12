@@ -2323,6 +2323,7 @@
   "shortcuts.layer_rename.clash": "%1$@には「%2$@」レイヤーがすでにあります。",
   "shortcuts.layer_rename.count": "名前を変更するプロファイル: %1$d。",
   "shortcuts.layer_rename.everywhere": "すべてのプロファイルで名前を変更します。",
+  "shortcuts.layer_rename.on_page": "このプロファイルには「%1$@」レイヤーがすでにあります。",
   "shortcuts.layer_rename.pair": "%1$@と%2$@で名前を変更します。",
   "shortcuts.layer_rename.shared": "「%1$@」は共有レイヤーです。参加するには、名前を指定して追加してください。",
   "shortcuts.layers.help": "レイヤーは代替のショートカットセットで、有効なレイヤーのショートカットだけが動作します。切り替えるキーを下で割り当ててください。「default」は標準のレイヤーで、App起動後は常にこれが有効です。",

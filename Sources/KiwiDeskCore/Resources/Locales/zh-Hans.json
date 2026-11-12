@@ -2323,6 +2323,7 @@
   "shortcuts.layer_rename.clash": "%1$@ 已有“%2$@”层。",
   "shortcuts.layer_rename.count": "将重命名的描述文件：%1$d。",
   "shortcuts.layer_rename.everywhere": "将在所有描述文件中重命名。",
+  "shortcuts.layer_rename.on_page": "此描述文件已有“%1$@”层。",
   "shortcuts.layer_rename.pair": "将在 %1$@ 和 %2$@ 中重命名。",
   "shortcuts.layer_rename.shared": "“%1$@”是共享层。按名称添加即可加入。",
   "shortcuts.layers.help": "层是可切换的快捷键集合 — 只有当前层的快捷键会生效。请在下方绑定一个按键以在层之间切换。“default”是标准层，App 启动后始终由它生效。",
