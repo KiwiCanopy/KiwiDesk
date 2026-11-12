@@ -84,7 +84,7 @@ struct JumpFooterKeycapTests {
         // The hint each chord lights, stated apart from the code:
         // ⌘ the digits, else ⌥ Swap here, else ⇧ Move here.
         let expected: [(NSEvent.ModifierFlags, Int)] = [
-            (.shift, 1), (.option, 2), ([.shift, .option], 2),
+            ([], 0), (.shift, 1), (.option, 2), ([.shift, .option], 2),
             (.command, 3), ([.shift, .command], 3),
             ([.option, .command], 3), ([.shift, .option, .command], 3),
         ]
@@ -97,6 +97,21 @@ struct JumpFooterKeycapTests {
                 #expect(drawn[lit] == full, "\(held) at \(level)")
             }
         }
+        // A pick the selection refuses lights nothing (#2885).
+        #expect(
+            JumpFooter(
+                scope: .windows,
+                modifiers: .shift,
+                selectionMoves: false
+            ).leading == nil
+        )
+        #expect(
+            JumpFooter(
+                scope: .windows,
+                modifiers: .option,
+                selectionSwaps: false
+            ).leading == nil
+        )
         let rest = JumpFooter(scope: .windows).windowsSlots(held: [])
         #expect(rest.allSatisfy { !$0.held })
         #expect(rest[0].keycap == nil)
@@ -125,6 +140,9 @@ struct JumpFooterKeycapTests {
                 + "windowsRow(held:$0,level:level).hidden()}",
             "windowsRow(held:modifiers,level:level,lit:leading)",
             "collapsed.contains(index)&&!slot.held",
+            // The row draws what `windowsDrawn` decided.
+            "ForEach(Array(drawn.enumerated()),id:\\.offset)",
+            "iftext==slots[index].keycap{JumpKeycap(glyph:text)",
             "reduceMotion?nil:.easeOut(", "value:drawn",
         ] {
             #expect(text.occurrences(of: needle) == 1, "\(needle)")
