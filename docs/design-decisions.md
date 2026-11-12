@@ -420,11 +420,11 @@ The Release must be published before Homebrew can fetch its ZIP,
 so publication and the cask update cannot be atomic. The cask
 lives in Homebrew/homebrew-cask, whose scheduled autobump reads
 the latest published release and opens the bump PR, so the
-accepted failure model is a short, visible stale-cask window of a
-few hours. On a failure, bump the cask by hand
-(`brew bump-cask-pr kiwidesk`) or publish a newer version; never
-replace an existing version's bytes, since the cask pins their
-digest.
+accepted failure model is a visible stale-cask window until
+homebrew-cask merges that PR. On a failure, open the bump PR by
+hand (version and `sha256`; `brew bump-cask-pr` refuses an
+autobumped cask) or publish a newer version; never replace an
+existing version's bytes, since the cask pins their digest.
 
 This exception holds only while the cask keeps up with releases —
 if it goes stale the exception lapses and the cask users are the

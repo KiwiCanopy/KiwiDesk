@@ -307,9 +307,9 @@ fire on. The feed is also not the only reader of a release's
 asset list, so an artifact added to a release answers to every
 one of them — `.github/workflows/nix.yml` selects the archive by
 exact name (`NixSourceUpdateTests`), which is what makes a third
-asset harmless there, and the official Homebrew cask's `url`
-spells `KiwiDesk-#{version}.zip`, so renaming the archive breaks
-every `brew install` until a cask PR follows it.
+asset harmless there. The Homebrew cask's `url` names the archive
+too, so renaming the release ZIP owes a Homebrew/homebrew-cask PR
+changing that `url` in step.
 
 No version cutoff is written anywhere and none should be — the
 releases
@@ -654,9 +654,11 @@ cask lives in Homebrew/homebrew-cask, whose scheduled autobump
 reads the latest *published* release (`livecheck` `:github_latest`,
 so a draft is invisible to it) and opens the bump PR. Never add a
 `no_autobump!` to it or a workflow here that pushes to that
-repository: a stale cask is fixed by a manual `brew bump-cask-pr`,
-not by a second writer. The old `KiwiCanopy/homebrew-tap` keeps
-only its `tap_migrations.json`.
+repository, and never put a cask back in `KiwiCanopy/homebrew-tap`
+(retired by KiwiCanopy/homebrew-tap#4). A stale cask is fixed by
+finding why the autobump run failed or by a hand-edited
+homebrew-cask PR (version and `sha256`); `brew bump-cask-pr`
+refuses an autobumped cask.
 
 **Advance the Nix flake only after publication (#2909).**
 `.github/workflows/nix.yml` owns it: the `release.published` event
