@@ -68,8 +68,10 @@ extension JumpFooter {
     /// refuse it (#2885).
     var windowsLeading: Int? {
         switch windowsPick(modifiers) {
-        case .moveHere: return selectionMoves ? 1 : nil
-        case .swapHere: return selectionSwaps ? 2 : nil
+        case .moveHere:
+            return selectionMoves ? WindowsHint.moveHere.rawValue : nil
+        case .swapHere:
+            return selectionSwaps ? WindowsHint.swapHere.rawValue : nil
         case let pick: return pick?.rawValue
         }
     }

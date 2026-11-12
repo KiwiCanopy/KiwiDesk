@@ -67,7 +67,8 @@ struct JumpShortcutsView: View {
     }
 }
 
-/// The Shortcuts sheet's own height; 0 while no sheet is drawn.
+/// The Shortcuts sheet's own height, its vertical inset left out; 0
+/// while no sheet is drawn.
 struct SheetHeightKey: PreferenceKey {
     static let defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
