@@ -1195,6 +1195,7 @@
   "kiwishelf.pocket_position.help": "在列所在的邊緣，Pocket 會位於該列較近的一端。",
   "kiwishelf.reveal_duration": "出現效果時間長度",
   "kiwishelf.reveal_duration.help": "隱藏的列出現所需的時間，無論以哪種方式出現；隱藏時會稍快一些。",
+  "kiwishelf.reveal_duration.off": "開啟「%1$@」即可設定時間長度。",
   "kiwishelf.reveal_style.fade": "淡入",
   "kiwishelf.reveal_style.grow": "放大",
   "kiwishelf.reveal_style.grow_boxed": "在「%1$@」背景下，「%2$@」會以「%3$@」播放。",

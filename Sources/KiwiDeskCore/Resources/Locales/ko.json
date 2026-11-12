@@ -1195,6 +1195,7 @@
   "kiwishelf.pocket_position.help": "바가 있는 가장자리에서는 Pocket이 그 바의 더 가까운 끝에 놓입니다.",
   "kiwishelf.reveal_duration": "나타내기 지속 시간",
   "kiwishelf.reveal_duration.help": "가려진 바가 나타나는 데 걸리는 시간이며, 나타나는 방식과 관계없이 적용됩니다. 사라질 때는 조금 더 빠릅니다.",
+  "kiwishelf.reveal_duration.off": "지속 시간을 설정하려면 ‘%1$@’을(를) 켜십시오.",
   "kiwishelf.reveal_style.fade": "페이드",
   "kiwishelf.reveal_style.grow": "확대",
   "kiwishelf.reveal_style.grow_boxed": "배경이 ‘%1$@’이면 ‘%2$@’은(는) ‘%3$@’(으)로 재생됩니다.",

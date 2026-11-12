@@ -1195,6 +1195,7 @@
   "kiwishelf.pocket_position.help": "バーのある端では、Pocket はそのバーの近いほうの端に寄ります。",
   "kiwishelf.reveal_duration": "表示エフェクトの継続時間",
   "kiwishelf.reveal_duration.help": "非表示のバーが現れるまでにかかる時間です。現れ方に関わらず適用され、隠れるときは少し速くなります。",
+  "kiwishelf.reveal_duration.off": "継続時間を設定するには「%1$@」をオンにしてください。",
   "kiwishelf.reveal_style.fade": "フェード",
   "kiwishelf.reveal_style.grow": "拡大",
   "kiwishelf.reveal_style.grow_boxed": "背景が「%1$@」のとき、「%2$@」は「%3$@」として再生されます。",

@@ -1195,6 +1195,7 @@
   "kiwishelf.pocket_position.help": "У края панели Pocket занимает ближний конец этой панели.",
   "kiwishelf.reveal_duration": "Длительность появления",
   "kiwishelf.reveal_duration.help": "Сколько времени появляется скрытая панель, каким бы способом она ни появлялась; исчезает она чуть быстрее.",
+  "kiwishelf.reveal_duration.off": "Включи «%1$@», чтобы задать длительность.",
   "kiwishelf.reveal_style.fade": "Проявление",
   "kiwishelf.reveal_style.grow": "Увеличение",
   "kiwishelf.reveal_style.grow_boxed": "На фоне «%1$@» «%2$@» проигрывается как «%3$@».",

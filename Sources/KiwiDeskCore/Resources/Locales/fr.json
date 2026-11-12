@@ -1195,6 +1195,7 @@
   "kiwishelf.pocket_position.help": "Sur le bord d'une barre, la Pocket prend l'extrémité la plus proche de cette barre.",
   "kiwishelf.reveal_duration": "Durée d'apparition",
   "kiwishelf.reveal_duration.help": "Le temps que met une barre masquée pour apparaître, quelle que soit sa façon d'apparaître ; elle disparaît un peu plus vite.",
+  "kiwishelf.reveal_duration.off": "Activez « %1$@ » pour régler sa durée.",
   "kiwishelf.reveal_style.fade": "Fondu",
   "kiwishelf.reveal_style.grow": "Agrandir",
   "kiwishelf.reveal_style.grow_boxed": "Sur un fond « %1$@ », « %2$@ » s'exécute comme « %3$@ ».",
