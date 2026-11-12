@@ -25,6 +25,7 @@ extension KiwiCore {
         let app = snapshot.appRules
         let float = snapshot.floatRules
         let scroll = snapshot.scrollGestures
+        let gesture = snapshot.gestures
         let history = snapshot.spaceHistory
         let cycle = snapshot.modeCycle
         let wrap = snapshot.focusWrap
@@ -46,6 +47,7 @@ extension KiwiCore {
                     || snapshot.storedKeyOverrides[name]
                         != snapshot.fileKeyOverrides[name])
             let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
+            let gestureTouched = !(gesture.touched[name] ?? []).isEmpty
             let historyTouched = !(history.touched[name] ?? []).isEmpty
             let cycleTouched = !(cycle.touched[name] ?? []).isEmpty
             let wrapTouched = !(wrap.touched[name] ?? []).isEmpty
@@ -63,7 +65,7 @@ extension KiwiCore {
             let lensTouched =
                 lensMarks != (snapshot.fileLensReach[name] ?? [:])
             guard
-                appTouched || keyTouched || scrollTouched
+                appTouched || keyTouched || scrollTouched || gestureTouched
                     || historyTouched || cycleTouched || wrapTouched
                     || floatOverride != original
                     || tileOverride != tileOriginal || automaticTouched
@@ -86,6 +88,9 @@ extension KiwiCore {
                     for: name,
                     original: snapshot.storedScrollBase
                 )
+            }
+            if gestureTouched {
+                profile.gesture = gesture.gestureOverride(for: name)
             }
             if historyTouched {
                 profile.spaceHistory = history.spaceHistoryOverride(
@@ -126,6 +131,7 @@ extension KiwiCore {
             )
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
             || !scroll.baseTouched.isEmpty
+            || !gesture.baseTouched.isEmpty
             || !history.baseTouched.isEmpty
             || !cycle.baseTouched.isEmpty || keysMoved
             || !wrap.baseTouched.isEmpty
@@ -143,6 +149,9 @@ extension KiwiCore {
             stored.layers = snapshot.keyBase
             stored.scrollGesture = scroll.scrollGestureBase(
                 original: snapshot.storedScrollBase
+            )
+            stored.gesture = gesture.gestureBase(
+                original: snapshot.storedGestureBase
             )
             stored.spaceHistory = history.spaceHistoryBase
             stored.modeCycle = cycle.modeCycleBase

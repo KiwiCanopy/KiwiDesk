@@ -10,6 +10,10 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// The scroll gestures, one field per key (#1656).
     public var scrollGestures: RuleReachTable<ScrollGestureValue>
     public let storedScrollBase: ScrollGestureBase
+    /// The gesture bindings, one `GestureKey` per key (#3225), and
+    /// the base map as `gui.json` holds it.
+    public var gestures: RuleReachTable<GestureAction>
+    public let storedGestureBase: GestureMap
     /// The Space history setting, one key (#1655).
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
     /// The layout cycle, one key (#453).
@@ -59,6 +63,11 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         keyLayers: RuleReachTable<String>,
         scrollGestures: RuleReachTable<ScrollGestureValue>,
         storedScrollBase: ScrollGestureBase,
+        gestures: RuleReachTable<GestureAction> = .gestures(
+            base: GestureMap(),
+            overrides: []
+        ),
+        storedGestureBase: GestureMap = GestureMap(),
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
         focusWrap: RuleReachTable<FocusWrap>,
@@ -91,6 +100,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.keyLayers = keyLayers
         self.scrollGestures = scrollGestures
         self.storedScrollBase = storedScrollBase
+        self.gestures = gestures
+        self.storedGestureBase = storedGestureBase
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
         self.focusWrap = focusWrap
@@ -118,6 +129,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         !appRules.baseTouched.isEmpty || !floatRules.baseTouched.isEmpty
             || !keyLayers.baseTouched.isEmpty
             || !scrollGestures.baseTouched.isEmpty
+            || !gestures.baseTouched.isEmpty
             || !spaceHistory.baseTouched.isEmpty
             || !modeCycle.baseTouched.isEmpty
             || !focusWrap.baseTouched.isEmpty
@@ -131,6 +143,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || floatRules.touched.values.contains { !$0.isEmpty }
             || keyLayers.touched.values.contains { !$0.isEmpty }
             || scrollGestures.touched.values.contains { !$0.isEmpty }
+            || gestures.touched.values.contains { !$0.isEmpty }
             || spaceHistory.touched.values.contains { !$0.isEmpty }
             || modeCycle.touched.values.contains { !$0.isEmpty }
             || focusWrap.touched.values.contains { !$0.isEmpty }
@@ -214,6 +227,11 @@ extension KiwiCore {
                 overrides: stored.map { ($0.name, $0.scrollGesture) }
             ),
             storedScrollBase: sidecar.scrollGesture,
+            gestures: .gestures(
+                base: sidecar.gesture,
+                overrides: stored.map { ($0.name, $0.gesture) }
+            ),
+            storedGestureBase: sidecar.gesture,
             spaceHistory: .spaceHistory(
                 base: sidecar.spaceHistory,
                 overrides: stored.map { ($0.name, $0.spaceHistory) }

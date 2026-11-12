@@ -23,6 +23,7 @@ struct RuleReachGuiParityTests {
         "floatRules": "floatRules",
         "keyLayers": "layers",
         "scrollGestures": "scrollGesture",
+        "gestures": "gesture",
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
         "focusWrap": "focusWrap",

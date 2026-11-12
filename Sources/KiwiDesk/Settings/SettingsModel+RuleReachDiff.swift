@@ -43,6 +43,20 @@ extension SettingsModel {
                 name: { keyName($0, templates: encoded.keyTemplates) },
                 describe: Self.keyValueWords
             )
+            + rows(
+                .shortcuts(.gestureBindings),
+                .gesture,
+                stored.gestures,
+                encoded.gestures,
+                editing: editing,
+                name: Self.gestureName
+            ) { GestureListWords.value($0) }
+    }
+
+    /// A gesture key's row name in the reach rows (#3225).
+    static func gestureName(_ spelling: String) -> String {
+        GestureKey(spelling: spelling).map(GestureListWords.rowName)
+            ?? spelling
     }
 
     /// A shortcut another profile reached moved by the base switch
@@ -207,6 +221,16 @@ extension SettingsModel {
             L(
                 "app_rules.reach.diff.new_profiles_lose",
                 "New profiles won't get this rule"
+            )
+        case (.gesture, true):
+            L(
+                "app_rules.reach.diff.new_profiles_get.gesture",
+                "New profiles get this gesture"
+            )
+        case (.gesture, false):
+            L(
+                "app_rules.reach.diff.new_profiles_lose.gesture",
+                "New profiles won't get this gesture"
             )
         case (.key, true):
             L(

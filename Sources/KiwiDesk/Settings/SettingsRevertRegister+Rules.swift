@@ -99,6 +99,10 @@ extension SettingsRevertRegister {
                 family,
                 subject
             )
+        case .gesture:
+            if let key = GestureKey(spelling: subject) {
+                config.gesture[key] = clean.gesture[key]
+            }
         default:
             break
         }
@@ -187,16 +191,19 @@ extension SettingsRevertRegister {
 
     /// A gesture row back to the baseline: every key its instance
     /// names — a re-key's two together — or the whole map for a row
-    /// that names none (#3183).
+    /// that names none (#3183),
+    /// each key's reach settling with it (#3225).
     private static let gestureRow = RevertWriter(
         paths: ["config.gesture"]
     ) { model, instance in
         guard let row = instance.flatMap(GestureRowInstance.init) else {
             model.config.gesture = model.cleanConfig.gesture
+            settle(model, .gesture, nil)
             return
         }
         for key in row.keys {
             model.config.gesture[key] = model.cleanConfig.gesture[key]
+            settle(model, .gesture, key.spelling)
         }
     }
 
@@ -252,6 +259,11 @@ extension SettingsRevertRegister {
             return config.tileRules.filter {
                 family.subject(ofRule: $0) == subject
             }
+        case .gesture:
+            let entry = GestureKey(spelling: subject).flatMap {
+                config.gesture[$0]
+            }
+            return [entry.map { "\($0)" } ?? "follows"]
         case .tilingOffHides:
             let toggle = config.settings.tiling
             let value =

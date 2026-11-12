@@ -21,6 +21,7 @@ struct RuleReachFamilyParityTests {
         "appRules": ["appRules"],
         "floatRules": ["floatRules"],
         "scrollGestures": ["scrollGesture"],
+        "gestures": ["gesture"],
         "spaceHistory": ["spaceHistory"],
         "modeCycle": ["modeCycle"],
         "focusWrap": ["focusWrap"],
