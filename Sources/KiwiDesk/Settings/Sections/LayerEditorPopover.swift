@@ -129,6 +129,9 @@ struct LayerEditorPopover: View {
                     delete(current)
                 }
                 .buttonStyle(.bordered)
+                // The window's accent tint would replace the system
+                // red the role draws (#3263 amendment).
+                .tint(SettingsTheme.danger)
             }
             Spacer(minLength: 8)
             Button(LayerEditorWords.done) {

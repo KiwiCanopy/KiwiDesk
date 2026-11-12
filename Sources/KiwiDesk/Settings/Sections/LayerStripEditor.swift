@@ -20,52 +20,60 @@ struct LayerStripEditor: View {
     private static let ringRoom: CGFloat = 4
 
     var body: some View {
-        // Top-aligned, the trailing group given the strip's top
-        // room, so + and ✎ sit level with the chips in both shapes.
-        HStack(alignment: .top, spacing: 8) {
-            strip
-            HStack(spacing: Self.gap) {
-                Rectangle()
-                    .fill(SettingsTheme.hairlineSubtle)
-                    .frame(width: 1, height: 16)
-                    .padding(.trailing, 2)
-                    .accessibilityHidden(true)
-                addButton
-                editButton
+        let names = model.config.layers.map(\.name)
+        // ✎ and + follow the last chip while the chips fit, and pin
+        // to the trailing edge once they scroll (#3263 amendment).
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: 8) {
+                chipLine(names).padding(.top, SettingsTheme.hoverTopRoom)
+                controls
             }
-            // The icon row's search anchor; ✎ holds Applies to's,
-            // so each `.id` sits on its own view (#1250).
-            .searchAnchored(
-                SettingsCatalog.shortcuts.layersCard.children.menuBarIcon
-            )
-            .padding(.top, SettingsTheme.hoverTopRoom)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(alignment: .top, spacing: 8) {
+                strip(names)
+                controls
+            }
         }
         .modifier(LayerDeleteDialog(request: $deleteRequest, delete: delete))
     }
 
+    /// The hairline, ✎ and +, given the strip's top room so they sit
+    /// level with the chips in both shapes.
+    private var controls: some View {
+        HStack(spacing: Self.gap) {
+            Rectangle()
+                .fill(SettingsTheme.hairlineSubtle)
+                .frame(width: 1, height: 16)
+                .padding(.trailing, 2)
+                .accessibilityHidden(true)
+            editButton
+            addButton
+        }
+        // The icon row's search anchor; ✎ holds Applies to's, so
+        // each `.id` sits on its own view (#1250).
+        .searchAnchored(
+            SettingsCatalog.shortcuts.layersCard.children.menuBarIcon
+        )
+        .padding(.top, SettingsTheme.hoverTopRoom)
+    }
+
     // MARK: - The chips
 
-    /// The chips in a line while they fit; past that a `SidewaysStrip`
-    /// following the focused chip, else the selected one, its
-    /// scroller under the chips only. Its run reads the chips'
-    /// measured sizes, since a name sets each chip's width.
-    private var strip: some View {
-        let names = model.config.layers.map(\.name)
-        return ViewThatFits(in: .horizontal) {
+    /// The chips past what fits: a `SidewaysStrip` following the
+    /// focused chip, else the selected one, its scroller under the
+    /// chips only. Its run reads the chips' measured sizes, since a
+    /// name sets each chip's width.
+    private func strip(_ names: [String]) -> some View {
+        SidewaysStrip(
+            run: StripRun(
+                lengths: names.map { chipSizes[$0]?.width ?? 0 },
+                gap: Self.gap,
+                depth: chipSizes.values.map(\.height).max() ?? 0,
+                endRoom: Self.ringRoom
+            ),
+            followed: followed(in: names)
+        ) {
             chipLine(names)
-                .padding(.top, SettingsTheme.hoverTopRoom)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            SidewaysStrip(
-                run: StripRun(
-                    lengths: names.map { chipSizes[$0]?.width ?? 0 },
-                    gap: Self.gap,
-                    depth: chipSizes.values.map(\.height).max() ?? 0,
-                    endRoom: Self.ringRoom
-                ),
-                followed: followed(in: names)
-            ) {
-                chipLine(names)
-            }
         }
     }
 
