@@ -92,5 +92,9 @@ extension GuiConfig {
     /// **22 (#3236)**: the shared look's 0 reveal or expand
     /// duration is its toggle off
     /// (`migratingInstantDurationsOntoToggles`).
-    public static let currentFormat = 22
+    ///
+    /// **23 (#3237)**: the animation lengths are app-wide, in the
+    /// `animations` group, and the shared look carries none
+    /// (`migratingLookPaceOut`).
+    public static let currentFormat = 23
 }

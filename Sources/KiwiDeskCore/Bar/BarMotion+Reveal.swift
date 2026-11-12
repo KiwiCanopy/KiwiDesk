@@ -58,12 +58,13 @@ extension BarMotion {
         var horizontal: Bool { edge.isHorizontal }
         /// The user's `animations.reveal_duration`, in seconds, every
         /// style plays inside.
-        var length = AnimationSettings().revealSeconds
+        var length = AnimationSettings().revealSeconds(at: AppWideSettings())
     }
 
     /// The user's `animations.reveal_duration` in seconds, kept
     /// current by `KiwiCore.updateBars()`.
-    @MainActor static var revealLength = AnimationSettings().revealSeconds
+    @MainActor static var revealLength = AnimationSettings()
+        .revealSeconds(at: AppWideSettings())
 
     /// The slide's length and curve (owner ruling, #2497): the
     /// prototype's numbers, fixed like the mark's own timings.

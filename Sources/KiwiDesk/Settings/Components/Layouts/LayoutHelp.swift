@@ -131,10 +131,7 @@ enum LayoutHelp {
             "scroll_grid.animate_focus_shifts.help",
             "Moves windows smoothly when focus changes in a "
                 + "Scrolling Space. Turn this off to move the "
-                + "layout immediately. %1$@ sets how long "
-                + "the movement takes and has no effect while "
-                + "animation is off.",
-            L("scroll_grid.scroll_duration", "Scroll duration")
+                + "layout immediately."
         )
     }
 

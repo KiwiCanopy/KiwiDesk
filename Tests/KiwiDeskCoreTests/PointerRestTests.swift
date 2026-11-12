@@ -96,7 +96,7 @@ struct PointerRestTests {
         var heard: [Bool] = []
         core.tiler.onMouseSettings = { heard.append($0.hoverFocus) }
         core.tiler.settings.mouse.hoverFocus = true
-        core.tiler.settings.animations.durationMS = 123
+        core.tiler.settings.animations.onRelayout = false
         core.tiler.settings.mouse.hoverFocus = false
         #expect(heard == [true, false], "an unrelated write is silent")
     }

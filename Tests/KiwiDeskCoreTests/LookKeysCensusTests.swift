@@ -96,13 +96,9 @@ struct LookKeysCensusTests {
                 "animations.on_window_swap",
                 "animations.on_relayout",
                 "animations.on_state_change",
-                "animations.duration",
-                "animations.scroll_duration",
                 "animations.on_expand",
                 "animations.on_peek",
                 "animations.on_reveal",
-                "animations.expand_duration",
-                "animations.reveal_duration",
             ]
         )
     }

@@ -295,7 +295,7 @@ struct ResetEscapeHatchTests {
         // and only the reset clears on this path: a space, an
         // undeclared settings field, a pin, a Main role.
         core.state.workspaces.ensureSpace(SpaceID("poison"))
-        core.tiler.settings.animations.durationMS = 999
+        core.tiler.settings.animations.onStateChange = false
         core.spacePins[SpaceID(1)] = "A:1x1"
         core.mainSpaces.insert(SpaceID(1))
 

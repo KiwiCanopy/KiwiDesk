@@ -361,12 +361,17 @@ the switch replaces — the profile's own look, or the shared look
 that **Make This the Shared Look** replaces — is gone unless it is
 in **My looks**.
 
-The animations are part of the look too: a profile using the
-shared look takes its animations, and a look you save keeps them.
+The animation switches are part of the look too: a profile using
+the shared look takes its switches, and a look you save keeps them.
 Applying a bundled look, or picking one in the tour, leaves your
 animations as they are. When you first run this version, a profile
 whose animations differ from the shared look's starts keeping its
 own look, so nothing changes on screen.
+
+:::unreleased
+How fast the animations play is the same in every profile and no
+look carries it.
+:::
 
 The General section leaves the grid while you edit a stored
 profile without switching to it.
@@ -394,13 +399,18 @@ What the fields' own notes do not say:
   master count exceeds one; switch the orientation to vertical
   for individually resizable masters ([Accepted
   limitations](accepted-limitations.md)).
-- **Scrolling** — its focus animation and duration live here,
-  beside the layout rather than with the other animations.
+- **Scrolling** — its focus animation switch lives here, beside
+  the layout rather than with the other animations.
 - **Track** — the track shortcuts sit in Shortcuts ▸ Built-in ▸
   Move windows. Previous is the column to the left (or the row
   above), next the column to the right (or the row below),
   whichever way the axis runs.
   Track sizes and in-track shares are session-only.
+
+:::unreleased
+Scrolling's duration has no row; it is
+`animations.set_scroll_duration` in Lua.
+:::
 
 The track shortcuts sit behind "Move windows in the track
 layout", open from the start once you have a Track Space or a

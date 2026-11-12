@@ -750,6 +750,19 @@ editing here:
   `FocusedCommandGuardTests` ▸ `allowsOnSiblingForeground`,
   `ProcessIdentitySeamTests` ▸ `focusArmDropsTheShadow`,
   `announcedPidHasOneReading`, `ShadowWindowFocusTests`).
+- **An animation length is app-wide, and is read with its switch
+  in one place (#3237).** A reader pairing a profile's
+  `animations.on_*` switch with an app-wide length goes through
+  `AnimationSettings`' `expandSeconds(at:)`, `revealSeconds(at:)`
+  or `windowMS(at:)`, never `appWide.animation*DurationMS` beside
+  its own switch check, so a gate that joins the length (#3238's
+  Reduce Motion) reaches every reader at once. The window engine's
+  two cached lengths are written only by
+  `KiwiCore.syncAnimationEngine`, reached from
+  `animationPaceChanged` on every change of the live app-wide
+  values; the engine's own stored defaults are the app-wide
+  defaults until the first change, so a default moved on one side
+  is moved on both (`AnimationPersistenceTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

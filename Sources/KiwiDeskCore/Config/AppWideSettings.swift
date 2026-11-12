@@ -85,6 +85,46 @@ public struct AppWideSettings: Equatable, Sendable {
     /// Whether shortcuts tell left and right modifiers apart
     /// (`modifier.sides`, #2601). Off by default: no keyboard tap.
     public var modifierSides = false
+    /// The window spring's length in ms (`animations.duration`,
+    /// #3237), inside `AnimationSettings.durationBand`.
+    public var animationDurationMS = 150 {
+        didSet {
+            animationDurationMS = AnimationSettings.clampMS(
+                animationDurationMS
+            )
+        }
+    }
+    /// The scrolling layout's shift in ms
+    /// (`animations.scroll_duration`, #3237), the same band.
+    public var animationScrollDurationMS = 150 {
+        didSet {
+            animationScrollDurationMS = AnimationSettings.clampMS(
+                animationScrollDurationMS
+            )
+        }
+    }
+    /// The shelf's expand in ms (`animations.expand_duration`,
+    /// #3237), inside `AnimationSettings.expandDurationBand`.
+    public var animationExpandDurationMS = 750 {
+        didSet {
+            animationExpandDurationMS = AnimationSettings.clampExpandMS(
+                animationExpandDurationMS
+            )
+        }
+    }
+    /// A hidden shelf's reveal in ms (`animations.reveal_duration`,
+    /// #3237), inside `AnimationSettings.revealDurationBand`.
+    public var animationRevealDurationMS = 300 {
+        didSet {
+            animationRevealDurationMS = AnimationSettings.clampRevealMS(
+                animationRevealDurationMS
+            )
+        }
+    }
+    /// Whether `gui.json` holds the four lengths above: false while
+    /// their crossing from the profiles is owed (#3237), so a
+    /// `gui.json` write before the adoption keeps the signal.
+    var animationPaceStored = true
 
     public init() {}
 

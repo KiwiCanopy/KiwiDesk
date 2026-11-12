@@ -89,20 +89,6 @@ extension LayoutCard {
         )
     }
 
-    var scrollDurationRow: some View {
-        StepperRow(
-            label: L(
-                "scroll_grid.scroll_duration",
-                "Scroll duration"
-            ),
-            value: $model.config.settings.animations
-                .scrollDurationMS,
-            in: AnimationSettings.durationBand,
-            step: 10,
-            suffix: "ms"
-        )
-    }
-
     var gridTypeRow: some View {
         SegmentedPicker(
             L("scroll_grid.grid_type", "Grid type"),

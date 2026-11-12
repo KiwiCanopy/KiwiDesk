@@ -240,6 +240,8 @@ struct SettingKeyModelParityTests {
         let fields = Set(
             Mirror(reflecting: AppWideSettings()).children
                 .compactMap(\.label)
+                // Whether gui.json holds the group (#3237), no setting.
+                .filter { $0 != "animationPaceStored" }
         )
         #expect(!fields.isEmpty)
         let rows = Set(

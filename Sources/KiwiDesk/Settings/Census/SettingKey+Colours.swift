@@ -19,17 +19,17 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
     case animationsOnStateChange = "settings.animations.onStateChange"
-    case animationsDurationMS = "settings.animations.durationMS"
+    case animationsDurationMS = "appWide.animationDurationMS"
     case animationsOnScrolling = "settings.animations.onScrolling"
     case animationsScrollDurationMS =
-        "settings.animations.scrollDurationMS"
+        "appWide.animationScrollDurationMS"
     case animationsOnExpand = "settings.animations.onExpand"
     case animationsOnPeek = "settings.animations.onPeek"
     case animationsOnReveal = "settings.animations.onReveal"
     case animationsExpandDurationMS =
-        "settings.animations.expandDurationMS"
+        "appWide.animationExpandDurationMS"
     case animationsRevealDurationMS =
-        "settings.animations.revealDurationMS"
+        "appWide.animationRevealDurationMS"
     case paletteApply = "(action) palette.apply"
     case paletteSave = "(action) palette.save"
     case paletteRename = "(action) palette.rename"
@@ -98,7 +98,7 @@ extension ColoursKey {
             )
         case .animationsOnWindowResize,
             .animationsOnWindowSwap, .animationsOnRelayout,
-            .animationsOnStateChange, .animationsDurationMS:
+            .animationsOnStateChange:
             return .row(
                 .coloursAndMotion,
                 .motion,
@@ -131,13 +131,10 @@ extension ColoursKey {
             return .luaOnly
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
-        case .animationsScrollDurationMS:
-            return .row(
-                .layoutDefaults,
-                .scrolling,
-                .atRest,
-                gate: .setting(.colours(.animationsOnScrolling))
-            )
+        case .animationsDurationMS, .animationsScrollDurationMS:
+            // Lua-only: the speed preset is to be Settings' one pace
+            // control (owner ruling, 2026-11-12, #3238).
+            return .luaOnly
         case .paletteApply, .paletteSave, .paletteImport:
             return .row(.coloursAndMotion, .palettes, .atRest)
         case .paletteRename, .paletteExport, .paletteDelete:
@@ -222,11 +219,6 @@ extension ColoursKey {
                 "behavior.animations.state_change",
                 help: "behavior.animations.state_change.help"
             )
-        case .animationsDurationMS:
-            return .text(
-                "behavior.animations.window_duration",
-                help: "behavior.animations.window_duration.help"
-            )
         case .animationsOnExpand:
             return .text(
                 "kiwishelf.on_expand",
@@ -246,8 +238,8 @@ extension ColoursKey {
                 "scroll_grid.animate_focus_shifts",
                 help: "scroll_grid.animate_focus_shifts.help"
             )
-        case .animationsScrollDurationMS:
-            return .text("scroll_grid.scroll_duration")
+        case .animationsDurationMS, .animationsScrollDurationMS:
+            return .none
         case .paletteApply:
             return .dynamic
         case .paletteSave:

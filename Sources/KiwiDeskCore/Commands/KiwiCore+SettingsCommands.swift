@@ -101,13 +101,11 @@ extension KiwiCore {
         // knob whose arm was gone (#1009, `CommandDispatchReachTests`).
         switch command {
         case "animations.set_duration":
-            // Live only: a later save_profile captures it, into
-            // the shared look for a profile wearing it (#1685).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            // Engine syncs via TilingEngine.settings.didSet.
-            tiler.settings.animations.durationMS = ms
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationDurationMS = ms }
             return .ok()
         case "animations.set_scroll_duration":
             // The scroll-specific duration knob, split from
@@ -115,7 +113,8 @@ extension KiwiCore {
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            tiler.settings.animations.scrollDurationMS = ms
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationScrollDurationMS = ms }
             return .ok()
         case "animations.set_on_expand":
             // The shelf's expand on and off (#1838).
@@ -153,8 +152,8 @@ extension KiwiCore {
                         + "animations.set_on_expand(false) turns it off"
                 )
             }
-            tiler.settings.animations.expandDurationMS = ms
-            updateBars()
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationExpandDurationMS = ms }
             return .ok()
         case "animations.set_reveal_duration":
             // A hidden shelf's reveal length (owner ruling,
@@ -168,8 +167,8 @@ extension KiwiCore {
                         + "animations.set_on_reveal(false) turns it off"
                 )
             }
-            tiler.settings.animations.revealDurationMS = ms
-            updateBars()
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationRevealDurationMS = ms }
             return .ok()
         case "animations.set_size_policy":
             // Experimental (#47), engine-only — not persisted to a

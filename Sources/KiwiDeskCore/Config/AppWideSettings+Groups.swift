@@ -40,6 +40,23 @@ extension AppWideSettings {
         }
     }
 
+    /// `gui.json`'s app-wide `animations` group (#3237): the four
+    /// lengths that left each profile's `animations`. Its absence is
+    /// the crossing's signal (`KiwiCore.prepareAppWide`).
+    struct Animations: Codable, Equatable {
+        var duration: Int?
+        var scrollDuration: Int?
+        var expandDuration: Int?
+        var revealDuration: Int?
+
+        enum CodingKeys: String, CodingKey {
+            case duration
+            case scrollDuration = "scroll_duration"
+            case expandDuration = "expand_duration"
+            case revealDuration = "reveal_duration"
+        }
+    }
+
     /// `gui.json`'s `mode` group (#2144) — additive, as `desktop`.
     struct Mode: Codable {
         var cue: Bool?
@@ -152,10 +169,12 @@ extension AppWideSettings {
         vision: Vision? = nil,
         hyper: Hyper? = nil,
         kiwihub: KiwiHub? = nil,
-        modifier: Modifier? = nil
+        modifier: Modifier? = nil,
+        animations: Animations? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
+        adoptPace(animations)
         if let cue = desktop?.cue { desktopCue = cue }
         if let transition = space?.transition {
             spaceTransition = transition
@@ -215,6 +234,28 @@ extension AppWideSettings {
         )
     }
     var mode: Mode { Mode(cue: modeCue) }
+    var animations: Animations {
+        Animations(
+            duration: animationDurationMS,
+            scrollDuration: animationScrollDurationMS,
+            expandDuration: animationExpandDurationMS,
+            revealDuration: animationRevealDurationMS
+        )
+    }
+
+    /// `group`'s lengths, each through its setter's clamp; nil is a
+    /// file from before the group, whose lengths are owed.
+    mutating func adoptPace(_ group: Animations?) {
+        guard let group else {
+            animationPaceStored = false
+            return
+        }
+        animationPaceStored = true
+        if let ms = group.duration { animationDurationMS = ms }
+        if let ms = group.scrollDuration { animationScrollDurationMS = ms }
+        if let ms = group.expandDuration { animationExpandDurationMS = ms }
+        if let ms = group.revealDuration { animationRevealDurationMS = ms }
+    }
     var tiling: Tiling {
         Tiling(
             startGlobal: tilingStartGlobal,

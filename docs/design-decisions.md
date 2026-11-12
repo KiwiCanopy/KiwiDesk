@@ -7415,6 +7415,30 @@ than kept for an empty card: This Profile on Home now holds
 exactly the profile-scoped cards, which is what its heading
 says.
 
+:::unreleased
+**Animation pace is app-wide; animation on and off stays per
+profile (#3237, owner ruling 2026-11-12).** [Principle] Nobody
+tunes how fast windows move per profile, and a Desktop binding that
+switches profile changed the pace silently. A "snappy" profile is still wanted, so the switches
+stay in each profile and only the four lengths (`duration`,
+`scroll_duration`, `expand_duration`, `reveal_duration`) move, into
+`gui.json`'s app-wide `animations` group. The verbs keep their
+names in the one `animations` namespace, which mixes scopes as
+`tiling` does: no other noun fits (*motion* quotes Apple's Reduce
+Motion, *speed* was retired by #1020), and the most common
+`init.lua` animation line keeps working. [Trade-off] The lengths
+cross by adoption with a crossing of their own, owed while
+`gui.json` lacks the group, read from each profile's migrated
+bytes (so a #3236 0 arrives as the switch off) and stripped from
+every profile file once stored; an install that had ended #1741's
+crossing would otherwise inherit nothing. Looks stop carrying pace,
+a step dropping the four paths from every look. The lengths have no
+Settings row at all (owner ruling 2026-11-12, #3238, reversing the
+first #3237 ruling that kept Scroll duration in Layout Defaults):
+the speed preset is ruled to be Settings' one pace control
+(#3238), and Lua sets an exact length.
+:::
+
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** A floating window exempt from
 the inactive-space stash, following you across spaces (once
@@ -11250,7 +11274,7 @@ Before #3218, eighteen rows on four pages wrote `gui.json` at once
 and said so four ways: a card title, a trailing caption in
 tertiary ink, a `?` nobody opens before changing a value, or
 nothing. A user who changed the Space slide's duration looked for
-the Save pill, since the window durations beside it raise one.
+the Save pill, since the window durations beside it raised one.
 So one sentence, "Changes apply at once, in every profile.",
 leads the smallest unit that is wholly live, in secondary ink:
 under a card's title, or under a row's label where the row sits

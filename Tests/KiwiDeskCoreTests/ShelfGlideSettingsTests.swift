@@ -3,38 +3,38 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The shelf glide's two `animations` leaves (#1838): their
-/// defaults, their clamp, their wire keys, the verbs that write
-/// them, and that the glide the bars play reads them.
+/// The shelf glide's switch (per profile) and length (app-wide
+/// since #3237, #1838): their defaults, the clamp, the wire keys,
+/// the verbs that write them, and that the glide the bars play
+/// reads them.
 @Suite("Shelf glide settings (#1838)")
 struct ShelfGlideSettingsTests {
     @Test("Defaults: on, 750 ms")
     func defaults() {
         let animations = AnimationSettings()
         #expect(animations.onExpand)
-        #expect(animations.expandDurationMS == 750)
-        #expect(animations.expandSeconds == 0.75)
+        #expect(AppWideSettings().animationExpandDurationMS == 750)
+        #expect(animations.expandSeconds(at: AppWideSettings()) == 0.75)
     }
 
     @Test("Off, the glide takes no time")
     func offLands() {
         var animations = AnimationSettings()
         animations.onExpand = false
-        #expect(animations.expandSeconds == 0)
+        #expect(animations.expandSeconds(at: AppWideSettings()) == 0)
     }
 
     @Test("The wire keys are the Lua names with set_ stripped")
     func wireKeys() throws {
         var settings = TilingSettings()
         settings.animations.onExpand = false
-        settings.animations.expandDurationMS = 1500
         let data = try JSONEncoder().encode(settings)
         let object =
             try JSONSerialization.jsonObject(with: data)
             as? [String: Any]
         let animations = object?["animations"] as? [String: Any]
         #expect(animations?["on_expand"] as? Bool == false)
-        #expect(animations?["expand_duration"] as? Int == 1500)
+        #expect(animations?["expand_duration"] == nil)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: data
@@ -42,20 +42,14 @@ struct ShelfGlideSettingsTests {
         #expect(decoded.animations == settings.animations)
     }
 
-    @Test("The duration clamps to its band on decode and on write")
-    func clamp() throws {
+    @Test("The length clamps to its band on write")
+    func clamp() {
         let band = AnimationSettings.expandDurationBand
-        var animations = AnimationSettings()
-        animations.expandDurationMS = band.lowerBound - 1
-        #expect(animations.expandDurationMS == band.lowerBound)
-        animations.expandDurationMS = band.upperBound + 1
-        #expect(animations.expandDurationMS == band.upperBound)
-        let json = #"{"animations":{"expand_duration":20}}"#
-        let decoded = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: Data(json.utf8)
-        )
-        #expect(decoded.animations.expandDurationMS == band.lowerBound)
+        var wide = AppWideSettings()
+        wide.animationExpandDurationMS = band.lowerBound - 1
+        #expect(wide.animationExpandDurationMS == band.lowerBound)
+        wide.animationExpandDurationMS = band.upperBound + 1
+        #expect(wide.animationExpandDurationMS == band.upperBound)
     }
 
     /// The verbs write the settings AND the pace the bars glide
@@ -72,7 +66,7 @@ struct ShelfGlideSettingsTests {
                 args: [.number(1200)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.animations.expandDurationMS == 1200)
+        #expect(core.appWide.animationExpandDurationMS == 1200)
         #expect(BarMotion.shelfGlide == 1.2)
         #expect(
             core.execute(
@@ -105,9 +99,8 @@ struct ShelfGlideSettingsTests {
         defer { BarMotion.shelfGlide = saved }
         BarMotion.shelfGlide = 0.75
         #expect(BarMotion.shelfGlideLength == 0.75)
-        BarMotion.shelfGlide = AnimationSettings().expandSeconds
         var off = AnimationSettings()
         off.onExpand = false
-        #expect(off.expandSeconds == 0)
+        #expect(off.expandSeconds(at: AppWideSettings()) == 0)
     }
 }

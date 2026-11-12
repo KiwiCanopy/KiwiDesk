@@ -11,11 +11,8 @@ import Foundation
 /// keyed by — in a profile's own look, `gui.json`'s shared look,
 /// `looks.json` and a bundle's inline copies of all of them.
 ///
-/// Idempotent by construction: the step writes no 0, and neither
-/// does the encoder, so a second run finds nothing. Ungated by
-/// format, the trade stated (profiles.md, a meaning change): a 0
-/// typed by hand into a current file reads as the floor until the
-/// next format bump, then as the switch off.
+/// Gated by the format it introduced (`instantDurationFormats`), a
+/// meaning change's obligation (profiles.md).
 extension ConfigMigration {
     /// One duration and the toggle that now says "instant".
     struct InstantDuration {
@@ -49,10 +46,32 @@ extension ConfigMigration {
         ),
     ]
 
+    /// The formats this step introduced, spelled as history: a file
+    /// at or above its shape's stands down, so the step never reads
+    /// the app-wide `animations` group `gui.json` gained after it
+    /// (#3237), and a 0 typed into a current file stays the floor.
+    /// An exported look file reads as `.gui` here; `lookExportSteps`
+    /// gates it by its own format instead.
+    static let instantDurationFormats: [FileShape: Int] = [
+        .profile: 37, .gui: 22, .looks: 4, .bundle: 46,
+    ]
+
+    /// Whether `data` is below the format this step introduced for
+    /// its shape. An unreadable root stands down.
+    static func instantDurationsApply(to data: Data) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any],
+            let floor = instantDurationFormats[shape(of: root)]
+        else { return false }
+        return (root["format"] as? Int ?? 0) < floor
+    }
+
     @Sendable
     static func migratingInstantDurationsOntoToggles(
         _ data: Data
     ) -> Data? {
+        guard instantDurationsApply(to: data) else { return nil }
         let needles = instantDurations.map {
             Data("\"\($0.duration)\"".utf8)
         }

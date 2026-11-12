@@ -15,209 +15,108 @@ private func makeCore() -> KiwiCore {
     )
 }
 
-private func display(
-    _ id: UInt32,
-    _ name: String
-) -> Display {
-    Display(
-        id: DisplayID(id),
-        name: name,
-        frame: CGRect(x: 0, y: 0, width: 100, height: 100)
-    )
-}
-
-/// Pins the issue #51 split: `animations.duration` and
-/// `animations.scroll_duration` are separate persisted knobs,
-/// each synced to the AnimationEngine on profile apply.
-@Suite("Animation duration persistence", .serialized)
+/// The four animation lengths are app-wide (#3237): the verbs keep
+/// their names, write the session alone, clamp to their bands, and
+/// reach the window engine and the bars; a profile apply never
+/// moves them.
+@Suite("Animation pace (#3237)", .serialized)
 @MainActor
 struct AnimationPersistenceTests {
-    // MARK: - Round-trip
-
-    @Test("duration and scroll_duration round-trip through JSON")
+    @Test("the group round-trips through gui.json")
     func roundTrip() throws {
-        var settings = TilingSettings()
-        settings.animations.durationMS = 350
-        settings.animations.scrollDurationMS = 150
-        let data = try JSONEncoder().encode(settings)
-        let decoded = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: data
-        )
-        #expect(decoded.animations.durationMS == 350)
-        #expect(decoded.animations.scrollDurationMS == 150)
-    }
-
-    @Test("Pre-issue-51 profile (no keys) keeps 150 ms defaults")
-    func legacyProfileDefaults() throws {
-        // A profile saved before issue #51 has no duration keys.
-        let json = #"{"animations":{"on_scrolling":false}}"#
-        let decoded = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: Data(json.utf8)
-        )
-        #expect(decoded.animations.durationMS == 150)
-        #expect(decoded.animations.scrollDurationMS == 150)
-    }
-
-    // MARK: - Commands
-
-    @Test("animations.set_duration persists in settings")
-    func setDurationPersists() {
-        let core = makeCore()
-        let response = core.execute(
-            "animations.set_duration",
-            args: [.number(400)]
-        )
-        #expect(response.isSuccess)
-        #expect(core.tiler.animation.durationMS == 400)
-        // Persisted so a profile save captures it.
-        #expect(
-            core.tiler.settings.animations.durationMS == 400
-        )
-    }
-
-    @Test("animations.set_scroll_duration persists in settings")
-    func setScrollDurationPersists() {
-        let core = makeCore()
-        let response = core.execute(
-            "animations.set_scroll_duration",
-            args: [.number(150)]
-        )
-        #expect(response.isSuccess)
-        #expect(
-            core.tiler.animation.scrollDurationMS == 150
-        )
-        #expect(
-            core.tiler.settings.animations.scrollDurationMS == 150
-        )
-    }
-
-    @Test("duration clamped to 50–1000 on engine AND settings")
-    func durationClamping() {
-        let core = makeCore()
-        core.execute(
-            "animations.set_duration",
-            args: [.number(10)]
-        )
-        #expect(core.tiler.animation.durationMS == 50)
-        // The persisted copy must clamp too, else the profile
-        // JSON and the GUI stepper show an out-of-range value.
-        #expect(
-            core.tiler.settings.animations.durationMS == 50
-        )
-        core.execute(
-            "animations.set_duration",
-            args: [.number(5000)]
-        )
-        #expect(core.tiler.animation.durationMS == 1000)
-        #expect(
-            core.tiler.settings.animations.durationMS == 1000
-        )
-    }
-
-    @Test("scroll_duration clamps on the settings copy too")
-    func scrollDurationClampingPersists() {
-        let core = makeCore()
-        core.execute(
-            "animations.set_scroll_duration",
-            args: [.number(9000)]
-        )
-        #expect(
-            core.tiler.settings.animations.scrollDurationMS == 1000
-        )
-        #expect(
-            core.tiler.animation.scrollDurationMS == 1000
-        )
-    }
-
-    @Test("hand-edited out-of-range JSON decodes clamped")
-    func decodeClampsOutOfRange() throws {
-        let json = #"""
-            {"animations":{"duration":5000,"scroll_duration":5}}
-            """#
-        let decoded = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: Data(json.utf8)
-        )
-        #expect(decoded.animations.durationMS == 1000)
-        #expect(decoded.animations.scrollDurationMS == 50)
-    }
-
-    // MARK: - Profile apply sync
-
-    @Test("apply(profile:) syncs both durations to engine")
-    func profileApplySyncs() throws {
-        let core = makeCore()
-        core.state.workspaces.upsertDisplay(display(1, "A"))
-        var settings = TilingSettings()
-        settings.animations.durationMS = 450
-        settings.animations.scrollDurationMS = 120
-        let profile = Profile(
-            name: "test",
-            monitorSets: [
-                MonitorSet(monitors: ["A:100x100"])
-            ],
-            spaceModes: [SpaceID(1): .bsp],
-            settings: settings
-        )
-        try core.profiles.save(profile)
-        core.execute(
-            "load_profile",
-            args: [.string("test")]
-        )
-        #expect(core.tiler.animation.durationMS == 450)
-        #expect(
-            core.tiler.animation.scrollDurationMS == 120
-        )
-    }
-
-    @Test("applyProfileScopedState syncs the engine (GUI apply)")
-    func guiApplySyncsEngine() {
-        let core = makeCore()
-        core.state.workspaces.upsertDisplay(display(1, "A"))
-        // Engine starts at defaults; a GUI live-apply must push
-        // the incoming settings onto the engine so the retile it
-        // triggers doesn't animate at the stale duration.
         var config = GuiConfig()
-        config.settings.animations.durationMS = 470
-        config.settings.animations.scrollDurationMS = 130
-        config.spaces = [SpaceID(1)]
-        core.applyProfileScopedState(from: config)
-        #expect(core.tiler.animation.durationMS == 470)
-        #expect(
-            core.tiler.animation.scrollDurationMS == 130
-        )
+        var wide = AppWideSettings()
+        wide.animationDurationMS = 350
+        wide.animationRevealDurationMS = 500
+        config.appWide = wide
+        let data = try JSONEncoder().encode(config)
+        let back = try JSONDecoder().decode(GuiConfig.self, from: data)
+        #expect(back.appWide?.animationDurationMS == 350)
+        #expect(back.appWide?.animationRevealDurationMS == 500)
+        #expect(back.appWide?.animationPaceStored == true)
     }
 
-    @Test("profile round-trip: save then load restores values")
-    func profileSaveLoad() throws {
+    @Test("a gui.json from before the group owes the crossing")
+    func absenceIsOwed() throws {
+        var config = GuiConfig()
+        var wide = AppWideSettings()
+        wide.animationPaceStored = false
+        config.appWide = wide
+        let data = try JSONEncoder().encode(config)
+        let text = try #require(String(data: data, encoding: .utf8))
+        #expect(!text.contains("\"animations\""))
+        let back = try JSONDecoder().decode(GuiConfig.self, from: data)
+        #expect(back.appWide?.animationPaceStored == false)
+    }
+
+    @Test("the verbs write the live app-wide values and the engine")
+    func verbsWriteAppWide() {
+        let glide = BarMotion.shelfGlide
+        let reveal = BarMotion.revealLength
+        defer {
+            BarMotion.shelfGlide = glide
+            BarMotion.revealLength = reveal
+        }
         let core = makeCore()
-        core.state.workspaces.upsertDisplay(display(1, "A"))
-        // Set via commands — both are now persisted.
-        core.execute(
-            "animations.set_duration",
-            args: [.number(380)]
+        let verbs: [(String, Int)] = [
+            ("animations.set_duration", 400),
+            ("animations.set_scroll_duration", 420),
+            ("animations.set_expand_duration", 1000),
+            ("animations.set_reveal_duration", 500),
+        ]
+        for (verb, ms) in verbs {
+            #expect(core.execute(verb, args: [.number(Double(ms))]).isSuccess)
+        }
+        #expect(core.appWide.animationDurationMS == 400)
+        #expect(core.appWide.animationScrollDurationMS == 420)
+        #expect(core.appWide.animationExpandDurationMS == 1000)
+        #expect(core.appWide.animationRevealDurationMS == 500)
+        #expect(core.tiler.animation.durationMS == 400)
+        #expect(core.tiler.animation.scrollDurationMS == 420)
+    }
+
+    @Test("the verbs clamp to their bands")
+    func verbsClamp() {
+        let core = makeCore()
+        core.execute("animations.set_duration", args: [.number(10)])
+        #expect(core.appWide.animationDurationMS == 50)
+        #expect(core.tiler.animation.durationMS == 50)
+        core.execute("animations.set_scroll_duration", args: [.number(5000)])
+        #expect(core.appWide.animationScrollDurationMS == 1000)
+        #expect(core.tiler.animation.scrollDurationMS == 1000)
+    }
+
+    @Test("a hand-edited out-of-range group decodes clamped")
+    func decodeClamps() throws {
+        let data = Data(
+            """
+            {"refusal":{},"quit":{},"animations":\
+            {"duration":5000,"scroll_duration":1,\
+            "expand_duration":9,"reveal_duration":9999}}
+            """.utf8
         )
-        core.execute(
-            "animations.set_scroll_duration",
-            args: [.number(160)]
+        let back = try JSONDecoder().decode(GuiConfig.self, from: data)
+        let wide = try #require(back.appWide)
+        #expect(wide.animationDurationMS == 1000)
+        #expect(wide.animationScrollDurationMS == 50)
+        #expect(wide.animationExpandDurationMS == 500)
+        #expect(wide.animationRevealDurationMS == 800)
+    }
+
+    @Test("a profile apply leaves the pace alone")
+    func applyKeepsPace() throws {
+        let core = makeCore()
+        core.execute("animations.set_duration", args: [.number(450)])
+        try core.profiles.save(
+            Profile(
+                name: "other",
+                monitorSets: [],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
         )
-        // Save and wipe.
-        core.execute(
-            "save_profile",
-            args: [.string("durtest")]
-        )
-        core.tiler.animation.durationMS = 250
-        core.tiler.animation.scrollDurationMS = 250
-        // Load should restore both.
-        core.execute(
-            "load_profile",
-            args: [.string("durtest")]
-        )
-        #expect(core.tiler.animation.durationMS == 380)
-        #expect(
-            core.tiler.animation.scrollDurationMS == 160
-        )
+        core.execute("load_profile", args: [.string("other")])
+        #expect(core.appWide.animationDurationMS == 450)
+        #expect(core.tiler.animation.durationMS == 450)
     }
 }

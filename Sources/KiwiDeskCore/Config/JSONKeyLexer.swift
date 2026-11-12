@@ -15,6 +15,8 @@ enum JSONKeyLexer {
         let valueRange: Range<Int>
         /// The byte offset of the owning object's `{`.
         let object: Int
+        /// The byte offset of the key's opening quote.
+        let keyStart: Int
     }
 
     private struct Frame {
@@ -27,6 +29,7 @@ enum JSONKeyLexer {
         let bytes = Array(text.utf8)
         var stack: [Frame] = []
         var pendingKey: String?
+        var pendingKeyStart = 0
         var out: [Entry] = []
         var index = 0
         while index < bytes.count {
@@ -60,6 +63,7 @@ enum JSONKeyLexer {
                     stack[top].expectsKey
                 {
                     pendingKey = String(literal.dropFirst().dropLast())
+                    pendingKeyStart = index
                     stack[top].expectsKey = false
                 } else if let key = pendingKey, let top = stack.last {
                     out.append(
@@ -67,7 +71,8 @@ enum JSONKeyLexer {
                             key: key,
                             value: literal,
                             valueRange: index..<end,
-                            object: top.open
+                            object: top.open,
+                            keyStart: pendingKeyStart
                         )
                     )
                     pendingKey = nil
@@ -87,7 +92,8 @@ enum JSONKeyLexer {
                                 as: UTF8.self
                             ),
                             valueRange: index..<end,
-                            object: top.open
+                            object: top.open,
+                            keyStart: pendingKeyStart
                         )
                     )
                     pendingKey = nil

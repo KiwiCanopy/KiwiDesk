@@ -24,7 +24,10 @@ struct AppWideKeepGroupsTests {
         }
         // KiwiVision's maximize is absent while off (#3064).
         settings.visionMaximize = .full
-        let members = Mirror(reflecting: settings).children.count
+        // `animationPaceStored` is where the group is, not a value
+        // (#3237), so it is no leaf.
+        let members = Mirror(reflecting: settings).children
+            .filter { $0.label != "animationPaceStored" }.count
         #expect(members > 0)
         #expect(
             leaves(settings.groupsJSON).count

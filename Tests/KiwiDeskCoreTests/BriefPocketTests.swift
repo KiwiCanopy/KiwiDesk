@@ -215,7 +215,7 @@ struct BriefPocketTests {
         let timeline = BriefPocketPlan.timeline(
             .outOf,
             flight: BriefPocketPlan.flight(
-                durationMS: core.tiler.settings.animations.durationMS
+                durationMS: core.appWide.animationDurationMS
             )
         )
         // The sleep seam is shared by every deferred key, so the

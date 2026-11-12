@@ -9,8 +9,9 @@ struct LookDocument: Codable {
     /// `animations.on_shelf` / `shelf_duration` paths became
     /// `on_expand` / `expand_duration` (owner ruling, 2026-10-21), 3
     /// since the drag markers' palette paths retired (#2797), 4
-    /// since a 0 reveal or expand duration is its toggle off (#3236).
-    static let currentFormat = 4
+    /// since a 0 reveal or expand duration is its toggle off (#3236),
+    /// 5 since a look carries no animation length (#3237).
+    static let currentFormat = 5
 
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()

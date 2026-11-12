@@ -9468,20 +9468,32 @@ KiwiDesk.set_wake_restore_delay(1500)
 
 ### Animation Cascade
 
-**Profiles own all animation settings.** Like every other tiling
-setting, `animations.*` — the duration knobs included — is saved
-in a profile. When a profile is bound to a macOS Desktop
+**Profiles own the animation switches.** Like every other tiling
+setting, the `animations.set_on_*` switches are saved in a profile.
+When a profile is bound to a macOS Desktop
 (`bind_profile_to_desktop`), switching to that Desktop loads the
-profile and **replaces** the live settings, so `animations.*`
-calls in `init.lua` apply only until a bound profile activates.
-To make a value stick on a bound Desktop, set it and re-save
-that profile (or edit the profile JSON).
+profile and **replaces** the live settings, so those calls in
+`init.lua` apply only until a bound profile activates. To make a
+switch stick on a bound Desktop, set it and re-save that profile
+(or edit the profile JSON).
 
-With a GUI-managed configuration the animations are part of the
+With a GUI-managed configuration the switches are part of the
 look: a profile using the shared look runs the shared look's
-`animations.*`, and a profile with its own look keeps its own.
-A saved look carries them; a bundled look carries none, so
-applying one leaves the animations unchanged.
+switches, and a profile with its own look keeps its own. A saved
+look carries them; a bundled look carries none, so applying one
+leaves them unchanged.
+
+:::unreleased
+**The four lengths are app-wide**, in no profile and no look:
+`animations.set_duration`, `set_scroll_duration`,
+`set_expand_duration` and `set_reveal_duration`, none of which has
+a Settings row. A GUI-managed setup takes them once from the first
+saved profile it loads after the update, keeps them in `gui.json`'s
+`animations` group, and drops them from every profile file. A verb
+changes the running value only: it never reaches `gui.json`. In a
+Lua-owned setup, `init.lua` is where they are kept; Adopt into the
+GUI keeps the values it set.
+:::
 
 ### Quit & Restart
 

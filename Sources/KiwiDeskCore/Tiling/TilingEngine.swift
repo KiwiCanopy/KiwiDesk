@@ -18,19 +18,11 @@ public final class TilingEngine {
     /// apply pays it (`TrackCapPlumbingNeedleTests`).
     var probeBeyondBoundsPass = false
 
-    /// The live tiling settings. The animation engine caches
-    /// the two duration knobs for its hot path, so mirror them
-    /// onto it here: this `didSet` fires on a whole-settings
-    /// assignment (profile apply, GUI live-apply) AND on nested
-    /// writes like `settings.animations.durationMS = ms` (value
-    /// type), so no mutation site can forget the sync — the
-    /// invariant lives with the two copies it relates (#51).
+    /// The live tiling settings. The animation engine's two
+    /// lengths are app-wide, mirrored onto it by
+    /// `KiwiCore.animationPaceChanged` (#3237).
     public var settings = TilingSettings() {
         didSet {
-            animation.durationMS =
-                settings.animations.durationMS
-            animation.scrollDurationMS =
-                settings.animations.scrollDurationMS
             if settings.mouse != oldValue.mouse {
                 onMouseSettings?(settings.mouse)
             }

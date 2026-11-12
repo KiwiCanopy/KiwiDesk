@@ -82,31 +82,6 @@ extension MotionCard {
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animateStateChanges
             )
-        case .animationsDurationMS:
-            // Paces the window toggles above and the window moves
-            // no toggle governs, so it greys only with the master
-            // (#51, #1932).
-            StepperRow(
-                label: L(
-                    "behavior.animations.window_duration",
-                    "Window duration"
-                ),
-                value: animations.durationMS,
-                in: AnimationSettings.durationBand,
-                step: 10,
-                suffix: "ms",
-                help: L(
-                    "behavior.animations.window_duration.help",
-                    "How long a window takes to reach its new place "
-                        + "when it moves, resizes, swaps, reflows or "
-                        + "changes state — floating, maximizing, or "
-                        + "going into the Pocket and out. A longer "
-                        + "duration is slower."
-                )
-            )
-            .searchAnchored(
-                SettingsCatalog.colors.motionMore.children.animationDuration
-            )
         default:
             let _ = assertionFailure(
                 "non-Motion Colours key in the Motion card: "

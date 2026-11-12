@@ -32,11 +32,18 @@ extension MCPWording {
     /// `kiwivision`), and its lens list inside it.
     static let visionLeaf = "/app_wide/kiwivision/"
     static let lensLeaf = visionLeaf + "lenses"
+    /// The app-wide animation lengths (`gui.json`'s `animations`).
+    static let paceLeaf = "/app_wide/animations/"
 
     /// Why an app-wide leaf cannot be kept, and the Settings page
     /// that keeps it: KiwiVision's own, which lists only the lenses
     /// saved there (#2103 ruling 40); General for every other.
     static func appWideHome(_ id: String) -> String {
+        // The animation lengths have no Settings row (#3237).
+        if id.hasPrefix(paceLeaf) {
+            return "it is app-wide and lasts until a config reload or "
+                + "restart; only init.lua keeps an animation length"
+        }
         let page =
             id.hasPrefix(visionLeaf)
             ? "Settings ▸ KiwiVision" : "Settings ▸ General"

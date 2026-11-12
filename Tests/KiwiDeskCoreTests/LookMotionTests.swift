@@ -12,7 +12,7 @@ import Testing
 struct LookMotionTests {
     private var tuned: TilingSettings {
         var settings = TilingSettings()
-        settings.animations.durationMS = 400
+        settings.animations.onRelayout = false
         settings.animations.onExpand = false
         return settings
     }
@@ -56,7 +56,7 @@ struct LookMotionTests {
         var settings = tuned
         glass.apply(to: &settings)
         #expect(glass.isStyleApplied(to: settings))
-        #expect(settings.animations.durationMS == 400)
+        #expect(!settings.animations.onRelayout)
     }
 
     @Test("a saved look carries motion and applies it")
@@ -82,21 +82,19 @@ struct LookMotionTests {
         let look = ShelfLook(
             name: "Mine",
             style: [
-                "animations.duration": .number(5000),
                 "animations.on_expand": .bool(false),
                 "animations.on_window_swap": .bool(false),
-                "animations.scroll_duration": .string("fast"),
+                "animations.on_relayout": .string("fast"),
             ],
             colors: [:]
         )
         var settings = TilingSettings()
         // Off its default, so a skip and a reset tell apart.
-        settings.animations.scrollDurationMS = 400
+        settings.animations.onRelayout = false
         look.apply(to: &settings)
-        // Clamped as a stored file would be; a wrong type skipped.
-        #expect(settings.animations.durationMS == 1000)
+        // A wrong type skipped, as a stored file would refuse it.
         #expect(!settings.animations.onExpand)
         #expect(!settings.animations.onWindowSwap)
-        #expect(settings.animations.scrollDurationMS == 400)
+        #expect(!settings.animations.onRelayout)
     }
 }

@@ -34,8 +34,10 @@ extension KiwiCore {
         }
         syncDerivedIssues()
         let settings = tiler.settings
-        BarMotion.shelfGlide = settings.animations.expandSeconds
-        BarMotion.revealLength = settings.animations.revealSeconds
+        BarMotion.shelfGlide = settings.animations.expandSeconds(at: appWide)
+        BarMotion.revealLength = settings.animations.revealSeconds(
+            at: appWide
+        )
         BarMotion.peekMotion = settings.animations.onPeek
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {

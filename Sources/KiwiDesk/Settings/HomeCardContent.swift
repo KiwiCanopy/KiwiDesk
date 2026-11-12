@@ -69,7 +69,7 @@ enum HomeCardContent {
                 return L(
                     "home.card.colors.subtitle",
                     "Animations on · %1$d ms",
-                    settings.animations.durationMS
+                    model.appWide.animationDurationMS
                 )
             }
             return L(

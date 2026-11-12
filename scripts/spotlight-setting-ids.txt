@@ -120,7 +120,6 @@ keybinding.toggle_sticky
 keybinding.toggle_tiling
 profile.isDefault
 settings.animations (master)
-settings.animations.durationMS
 settings.animations.onExpand
 settings.animations.onRelayout
 settings.animations.onReveal
@@ -128,7 +127,6 @@ settings.animations.onScrolling
 settings.animations.onStateChange
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
-settings.animations.scrollDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge
 settings.appBarStyle.edgeOverride[screen]

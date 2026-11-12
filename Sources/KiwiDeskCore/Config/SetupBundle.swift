@@ -108,7 +108,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#3199), in a bundle's `config` and its `[Profile]` alike.
     /// 46 = a 0 reveal or expand duration is its toggle off
     /// (#3236), in every shape a bundle carries.
-    public static let currentFormat = 46
+    /// 47 = a look carries no animation length (#3237), in every
+    /// look a bundle carries.
+    public static let currentFormat = 47
 
     public let format: Int
 
