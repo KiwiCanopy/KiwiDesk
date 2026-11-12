@@ -58,6 +58,17 @@ struct HomebrewCaskWatchTests {
         #expect(run.stderr.contains("not a published final release"))
     }
 
+    @Test("a prerelease is never the release judged")
+    func prereleaseRefused() throws {
+        let run = try WatchFixture.check(
+            cask: "4.2.0",
+            now: "2026-11-20T00:00:00Z",
+            prerelease: true
+        )
+        #expect(run.status == 2)
+        #expect(run.stderr.contains("not a published final release"))
+    }
+
     @Test("the workflow only reads, on a schedule")
     func workflowOnlyReads() throws {
         let yaml = try workflowSource("homebrew-watch.yml")
@@ -90,7 +101,8 @@ private enum WatchFixture {
         cask version: String,
         now: String,
         tag: String = "v4.2.1",
-        draft: Bool = false
+        draft: Bool = false,
+        prerelease: Bool = false
     ) throws -> ScriptRun {
         let root =
             testTemporaryDirectory
@@ -104,7 +116,7 @@ private enum WatchFixture {
         let cask = root.appendingPathComponent("cask.json")
         let releaseJSON = """
             {"tag_name": "\(tag)", "draft": \(draft), \
-            "prerelease": false, \
+            "prerelease": \(prerelease), \
             "published_at": "\(published)"}
             """
         try releaseJSON.write(

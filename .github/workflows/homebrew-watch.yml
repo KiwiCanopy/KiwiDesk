@@ -2,10 +2,10 @@ name: Watch Homebrew Cask
 
 # homebrew-cask's autobump updates the official cask from the latest
 # published release; nothing in this repo writes it. This run only
-# reads both sides and goes red once the cask lags a release by more
-# than a day, so a stale cask is seen (docs/design-decisions.md ▸
-# Homebrew is the deliberate exception). It holds no write
-# credential, by design.
+# reads both sides and goes red once the cask lags a release past
+# the grace in scripts/check-homebrew-cask.py, so a stale cask is
+# seen (docs/design-decisions.md ▸ Homebrew is the deliberate
+# exception).
 on:
   schedule:
     # Daily, 06:41 UTC, off the hour.

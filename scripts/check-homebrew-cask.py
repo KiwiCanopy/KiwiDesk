@@ -62,6 +62,8 @@ def main(argv: list[str]) -> int:
         )
     except (OSError, ValueError) as error:
         return fail(str(error))
+    if not isinstance(release, dict) or not isinstance(cask, dict):
+        return fail("a JSON input is not an object")
 
     tag = release.get("tag_name")
     match = TAG.fullmatch(tag) if isinstance(tag, str) else None
@@ -93,9 +95,9 @@ def main(argv: list[str]) -> int:
         )
         return 0
     print(
-        f"::error::Homebrew cask is at {version}, but {tag} was "
-        f"published {hours:.1f} h ago. Check homebrew-cask's autobump "
-        "PR for kiwidesk, or open the bump PR by hand."
+        f"::error::Homebrew cask is at {version}; the latest release, "
+        f"{tag}, was published {hours:.1f} h ago. Check homebrew-cask's "
+        "autobump PR for kiwidesk, or open the bump PR by hand."
     )
     return 1
 
