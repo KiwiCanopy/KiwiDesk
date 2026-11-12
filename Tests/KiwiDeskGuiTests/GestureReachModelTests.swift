@@ -158,7 +158,12 @@ struct GestureReachModelTests {
             under: "Settings/Components/Gestures",
             root: "Sources/KiwiDesk"
         )
-        #expect(body.contains("model.dropGesturePick(key.spelling"))
+        #expect(
+            body.contains(
+                "model.dropGesturePick(key.spelling, "
+                    + "shared: sharedReach != nil)"
+            )
+        )
         let card = try SourceScan.strippedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent("Sources/KiwiDesk/Settings")
