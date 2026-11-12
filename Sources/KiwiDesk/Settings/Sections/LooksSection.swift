@@ -15,6 +15,8 @@ struct LooksSection: View {
                 PaletteShelf(model: model)
                 ColorsAndGlassSection(model: model)
                 MotionCard(model: model)
+                // Live cards last on a profile's page (#3218).
+                SpaceSwitchCard(model: model)
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()

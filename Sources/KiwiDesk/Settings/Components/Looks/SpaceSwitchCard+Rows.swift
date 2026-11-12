@@ -3,10 +3,9 @@ import SwiftUI
 
 /// The Space switch rows (#2524): Slide, Show the Space or None for
 /// every switch, the same for the scroll step (#2971), and the
-/// slide's pace beneath. App-wide (#1741), written at once
-/// like the Desktop cue's row, above the window master and outside
-/// Reduce Motion's grey. The caption follows the selection.
-extension MotionCard {
+/// slide's pace beneath. App-wide (#1741), written at once like
+/// the Desktop cue's row. The caption follows the selection.
+extension SpaceSwitchCard {
     /// Why the Space switch rows are inert: `init.lua` owns the
     /// config, so an app-wide row it does not store is not the
     /// GUI's to write (#1741).
@@ -115,18 +114,6 @@ extension MotionCard {
             )
         )
         .searchAnchored(SettingsCatalog.colors.spaceSlideDuration)
-    }
-
-    /// Closes the Space switch group: its rows are app-wide on a
-    /// profile's page, so it says so, as KiwiVision's immediate
-    /// cards do (#1741); the divider parts it from the window
-    /// master, which does not reach it (#1932, #2524).
-    @ViewBuilder var spaceSwitchGroupEnd: some View {
-        Text(KiwiVisionCopy.appliesAtOnce)
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink3)
-            .fixedSize(horizontal: false, vertical: true)
-        Divider()
     }
 
     /// Greys the duration while no slide plays — neither pick on

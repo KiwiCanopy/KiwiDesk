@@ -80,6 +80,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case sharedLook
     case sizeAndFloat
     case spaceBar
+    /// Looks & Animations' app-wide Space switch card (#3218).
+    case spaceSwitch
     case spaceList
     case spacePlacement
     case spaceRules
@@ -125,7 +127,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .profilesPerMacOSSpace, .floatRules, .secondAccent,
             .spaceRules, .automaticFloating,
             .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,
-            .spaceList, .spacePlacement, .stack,
+            .spaceList, .spacePlacement, .spaceSwitch, .stack,
             .stickyWindows, .track, .windowMarks:
             return nil
         }

@@ -11,7 +11,7 @@ struct KiwiVisionClearCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.kiwiVision.clearCard,
-            caption: KiwiVisionCopy.appliesAtOnce
+            liveNote: LiveSettingNote.text
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(KiwiVisionRowOrder.clear, id: \.id) { key in
