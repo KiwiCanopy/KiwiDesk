@@ -159,6 +159,8 @@ struct ShelfRevealDurationTests {
 
     @Test("set_on_reveal reaches the bars; a 0 length is refused")
     func verbs() {
+        let saved = BarMotion.revealLength
+        defer { BarMotion.revealLength = saved }
         let core = makeTestCore()
         #expect(
             core.execute("animations.set_on_reveal", args: [.bool(false)])
