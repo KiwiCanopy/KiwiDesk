@@ -229,7 +229,6 @@
   "behavior.animations.reduce_motion.open": "打開輔助使用設定",
   "behavior.animations.reduce_motion.warning": "系統設定中的減少動態效果已開啟，因此視窗動畫不會播放。",
   "behavior.animations.relayout": "為佈局重排加上動畫",
-  "behavior.animations.scrolling_xref": "捲動佈局的焦點切換在%1$@中有自己的開關與時間長度。",
   "behavior.animations.scrolling_xref_link": "預設佈局 ▸ 捲動",
   "behavior.animations.state_change": "為浮動、Pocket 與最大化加上動畫",
   "behavior.animations.state_change.help": "視窗在浮動或回到並排、最大化或還原、放入 Pocket 或取出時，會移動到新位置，而不是直接跳過去。周圍的視窗跟隨「%1$@」。",

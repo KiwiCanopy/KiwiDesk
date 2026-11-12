@@ -135,7 +135,7 @@ struct MotionCard: View {
         L(
             "behavior.animations.scrolling_xref",
             "Scrolling-layout focus shifts have their own "
-                + "toggle and duration in %1$@.",
+                + "toggle in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }
