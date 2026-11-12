@@ -118,11 +118,8 @@ const buildCmd =
   `git clone ${repo}.git\ncd KiwiDesk\nswift build -c release`;
 // The ONE place the install command is spelled out on this page
 // (Guide.astro deliberately holds no copy of it — it bridges here
-// instead). The beta ships from a personal tap; a fully-qualified
-// token auto-taps, so this stays a single command. If KiwiDesk is
-// later accepted into homebrew-cask it shortens to
-// `brew install --cask kiwidesk` — a one-line edit here.
-const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
+// instead). The cask is in homebrew-cask, so no tap is needed.
+const installCmd = "brew install --cask kiwidesk";
 
 // The Home Manager rung (#2909): the one line a reader adds; the
 // flake input, the module import and copyApps are its README's.
@@ -1219,8 +1216,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
          The install bridge target. Simple-mode readers and the
          /guide/ arrive here via #start, which the head script
          resolves into Nerd mode before paint (this section is
-         .dev-only). Homebrew leads because it is how the beta
-         actually ships; building from source stays directly
+         .dev-only). Homebrew leads; building from source stays directly
          beneath it — contributors still need it, newcomers
          landing from the bridge should not meet it first. */}
     {isDev && (
