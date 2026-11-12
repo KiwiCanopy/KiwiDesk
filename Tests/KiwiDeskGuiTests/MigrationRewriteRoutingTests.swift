@@ -20,6 +20,9 @@ struct MigrationRewriteRoutingTests {
         "Appearance/PaletteStore.swift",
         "Appearance/LookStore.swift",
         "Profiles/ProfileManager.swift",
+        // The pace crossing's strip migrates a profile before it
+        // cuts the lengths (#3237).
+        "App/KiwiCore+AppWide.swift",
     ]
     /// Readers that migrate in memory only: the settle's crossing
     /// check would stamp the file it asks about (#1530), and a
