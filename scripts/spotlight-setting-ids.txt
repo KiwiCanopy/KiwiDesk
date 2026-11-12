@@ -64,6 +64,7 @@ UserDefaults.appearance
 UserDefaults.general.syncFolder
 UserDefaults.general.syncFollows
 UserDefaults.language
+appWide.animationReduceMotion
 appWide.desktopCue
 appWide.hyperKey
 appWide.modeCue
@@ -71,7 +72,6 @@ appWide.modifierSides
 appWide.quitGridTargetDepth
 appWide.refusalSound
 appWide.spaceScrollTransition
-appWide.spaceSlideDuration
 appWide.spaceTransition
 appWide.visionAppearance
 appWide.visionBlur
@@ -79,7 +79,6 @@ appWide.visionClearApp
 appWide.visionClearWallpaper
 appWide.visionDim
 appWide.visionFadeCurve
-appWide.visionFadeDuration
 appWide.visionLenses
 appWide.visionMaximize
 appWide.visionNeverDimmed

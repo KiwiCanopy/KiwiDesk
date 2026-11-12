@@ -14,11 +14,12 @@ import Testing
 @MainActor
 struct ReduceMotionFlagTests {
     private func withOff(_ body: () throws -> Void) rethrows {
+        let system = ReduceMotion.systemOverride
         ReduceMotion.systemOverride = false
         ReduceMotion.kiwiDesk = true
         defer {
             ReduceMotion.kiwiDesk = false
-            ReduceMotion.systemOverride = nil
+            ReduceMotion.systemOverride = system
         }
         try body()
     }
@@ -56,7 +57,7 @@ struct ReduceMotionFlagTests {
         #expect(
             !core.execute(
                 "animations.set_reduce_motion",
-                args: [.string("on")]
+                args: []
             ).isSuccess
         )
     }

@@ -10,11 +10,15 @@ struct KiwiVisionGateCensusTests {
     /// owns the config, as the resolver answers.
     @Test("every row's gate is the Lua-owned one, resolved here")
     @MainActor func rowGates() {
-        // Every key draws a row since the lens page (#2103 PR 7).
+        // Every key draws a row since the lens page (#2103 PR 7),
+        // save the fade length, Lua-only since #3238.
         let drawn = KiwiVisionKey.allCases.filter {
             SettingKey.kiwiVision($0).placement.area == .kiwiVision
         }
-        #expect(drawn.count == KiwiVisionKey.allCases.count)
+        #expect(drawn.count == KiwiVisionKey.allCases.count - 1)
+        #expect(
+            SettingKey.kiwiVision(.fadeDuration).placement == .luaOnly
+        )
         for key in drawn {
             #expect(
                 SettingKey.kiwiVision(key).placement.gate

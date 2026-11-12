@@ -16,7 +16,7 @@ struct AnimationSpeedRow: View {
             if model.appWide.animationReduceMotion, !systemReduced {
                 WarningBox(text: Self.offWarning) {
                     Button(Self.turnOnTitle) {
-                        model.setAppWide { $0.animationReduceMotion = false }
+                        write { $0.animationReduceMotion = false }
                     }
                     .settingsActionButton()
                 }
@@ -54,9 +54,14 @@ struct AnimationSpeedRow: View {
             get: { shown },
             set: { pick in
                 guard let pick else { return }
-                model.setAppWide { $0.applyPace(pick) }
+                write { $0.applyPace(pick) }
             }
         )
+    }
+
+    /// The row's one app-wide write, beside its one live caption.
+    private func write(_ edit: (inout AppWideSettings) -> Void) {
+        model.setAppWide { edit(&$0) }
     }
 
     private var spoken: String {

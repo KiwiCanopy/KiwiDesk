@@ -52,8 +52,7 @@ extension APIReference {
         ),
         "set_reduce_motion": APIRecord(
             "Turns KiwiDesk's own Reduce Motion on or off in every "
-                + "profile, as macOS's Reduce Motion does: motion "
-                + "drops, the lengths are kept.",
+                + "profile; the lengths are kept.",
             .boolean("enabled")
         ),
         "set_on_reveal": APIRecord(

@@ -228,6 +228,7 @@ struct AppWideCrossingEndTests {
     func offVerbNeverPersists() throws {
         let core = try makeGuiCore()
         defer { ReduceMotion.kiwiDesk = false }
+        core.setAppWide(persisting: true) { $0.animationReduceMotion = false }
         #expect(
             core.execute(
                 "animations.set_reduce_motion",

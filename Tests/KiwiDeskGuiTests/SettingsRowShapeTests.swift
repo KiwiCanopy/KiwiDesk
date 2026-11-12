@@ -193,7 +193,7 @@ struct SettingsRowShapeTests {
         // Steppers: the labelled row, and those a parent labels.
         "StepperRow.swift": 1,
         "GeneralSection+AppWide.swift": 1,
-        "KiwiVisionLevelsCard.swift": 2,
+        "KiwiVisionLevelsCard.swift": 1,
         "KiwiVisionLensOverrides.swift": 2,
         // The minimum window size master and its layout rows.
         "MinWindowSizeRows.swift": 2,
