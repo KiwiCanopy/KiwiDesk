@@ -23,6 +23,9 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
     @State private var space = UUID()
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.panelSettled) private var settled
+    /// Whether a key moved the selection since the list opened.
+    @State private var moved = false
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -40,7 +43,11 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
             .mask(mask)
             .onAppear { reveal(proxy, from: nil, animated: false) }
             .onChange(of: selected) { old, _ in
+                moved = true
                 reveal(proxy, from: old, animated: true)
+            }
+            .onChange(of: settled) { _, settled in
+                if settled { settle(proxy) }
             }
         }
     }
@@ -61,6 +68,19 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
         ) {
             proxy.scrollTo(target)
         }
+    }
+
+    /// Puts the list back where it opened, once the panel's
+    /// entrance has left it a few points off (#3203); a key that
+    /// moved the selection meanwhile keeps the place it scrolled to.
+    /// Bottom-anchored, the opening target lands where the opening
+    /// reveal put it, a list whose target fits clamping at its top.
+    private func settle(_ proxy: ScrollViewProxy) {
+        guard !moved,
+            let target = Self.target(from: nil, to: selected, in: ids)
+                ?? ids.first
+        else { return }
+        proxy.scrollTo(target, anchor: .bottom)
     }
 
     /// What a reveal scrolls to: the item past `new` in the

@@ -2183,6 +2183,19 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
+## A KiwiHub scroll settles after the entrance (#3203)
+
+**A scroll under `.panelEntrance` whose edge fade spares it less
+than about 5 pt of margin settles on `\.panelSettled`, back to
+where it opened, unless a key has moved it since.** The
+entrance's scale leaves every SwiftUI scroll beneath it a few
+points off its rest (0.5–2.9 pt in a hosted render and 4.4 pt on
+a device, both 2026-11-11) and nothing moves it back, so a fade
+judged on that offset reads a line as cut. `FadingColumn` is the
+instance (`FadingColumnTests` ▸ `settlesAfterTheEntrance`); a
+change that trims another panel scroll's margin under that bound
+adds the settle with it.
+
 ## The palette and look libraries are Core's (#2875, #2952)
 
 **A `Sources/KiwiDesk` file reads and writes palettes and looks

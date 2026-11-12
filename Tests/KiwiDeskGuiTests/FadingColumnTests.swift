@@ -109,7 +109,7 @@ struct FadingColumnTests {
         )
         #expect(
             column.contains(
-                ".onChange(of:selected){old,_in"
+                ".onChange(of:selected){old,_inmoved=true"
                     + "reveal(proxy,from:old,animated:true)}"
             )
         )
@@ -120,6 +120,59 @@ struct FadingColumnTests {
         )
         #expect(column.contains("proxy.scrollTo(target)"))
         #expect(column.occurrences(of: ".frame(height:fade)") == 2)
+    }
+
+    @Test("a list settles back to its rest once the entrance lands")
+    func settlesAfterTheEntrance() throws {
+        // The entrance's scale leaves a nested list a few points
+        // off its rest, which faded its top at rest (#3203).
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .appendingPathComponent("../../Sources/KiwiDesk")
+        func read(_ path: String) throws -> String {
+            SourceScan.stripComments(
+                try String(
+                    contentsOf: root.appendingPathComponent(path),
+                    encoding: .utf8
+                )
+            )
+            .filter { !$0.isWhitespace }
+        }
+        let entrance = try read("PanelEntrance.swift")
+        #expect(entrance.contains("@EntryvarpanelSettled=true"))
+        #expect(entrance.contains("@Stateprivatevarsettled=false"))
+        #expect(
+            entrance.contains(
+                ".environment(\\.panelSettled,settled||reduceMotion)"
+            )
+        )
+        #expect(entrance.contains("completionCriteria:.removed"))
+        #expect(entrance.contains("appeared=true}completion:{settled=true}"))
+        // Declared, read, set in the completion: nowhere else.
+        #expect(entrance.occurrences(of: "settled") == 3)
+        let panel = try read("Jump/JumpPanelView.swift")
+        #expect(panel.contains(".panelEntrance(presence)"))
+        let column = try read("Jump/FadingColumn.swift")
+        #expect(
+            column.contains("@Environment(\\.panelSettled)privatevarsettled")
+        )
+        #expect(
+            column.contains(
+                ".onChange(of:settled){_,settledin"
+                    + "ifsettled{settle(proxy)}}"
+            )
+        )
+        // A key press during the entrance keeps its own place: the
+        // reveal's onChange sets it (pinned above), nothing else.
+        #expect(column.occurrences(of: "moved=") == 2)
+        let settle: String = [
+            "privatefuncsettle(_proxy:ScrollViewProxy){",
+            "guard!moved,",
+            "lettarget=Self.target(from:nil,to:selected,in:ids)",
+            "??ids.firstelse{return}",
+            "proxy.scrollTo(target,anchor:.bottom)}",
+        ].joined()
+        #expect(column.contains(settle))
     }
 
     @Test("a short viewport takes a shallower fade")

@@ -88,9 +88,11 @@ private struct PanelEntrance: ViewModifier {
     @ObservedObject var presence: PanelPresence
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
+    @State private var settled = false
 
     func body(content: Content) -> some View {
         content
+            .environment(\.panelSettled, settled || reduceMotion)
             .scaleEffect(appeared && !presence.leaving ? 1 : 0.94)
             .animation(
                 reduceMotion
@@ -99,9 +101,12 @@ private struct PanelEntrance: ViewModifier {
             )
             .onAppear {
                 withAnimation(
-                    reduceMotion ? nil : .spring(duration: 0.22, bounce: 0)
+                    reduceMotion ? nil : .spring(duration: 0.22, bounce: 0),
+                    completionCriteria: .removed
                 ) {
                     appeared = true
+                } completion: {
+                    settled = true
                 }
             }
     }
@@ -128,6 +133,14 @@ private struct PanelContentFade: ViewModifier {
                 }
             }
     }
+}
+
+extension EnvironmentValues {
+    /// False while a key panel's entrance is still scaling it in
+    /// (#3203): the scale rounds a scroll inside a few points off
+    /// its rest, so a list settles back once this turns true. True
+    /// wherever no entrance runs, and under Reduce Motion.
+    @Entry var panelSettled = true
 }
 
 extension View {

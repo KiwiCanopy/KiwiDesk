@@ -77,7 +77,7 @@ struct GesturesPart: View {
             Toggle(
                 L(
                     "behavior.mouse.follows_focus",
-                    "Move the pointer to the window that gets focus"
+                    "Pointer follows focus"
                 ),
                 isOn: $model.config.settings.mouse.followsFocus
             )
@@ -146,7 +146,7 @@ extension GesturesPart {
     static var hoverFocusLabel: String {
         L(
             "behavior.mouse.hover_focus",
-            "Focus the window the pointer rests on"
+            "Focus follows the pointer"
         )
     }
 
