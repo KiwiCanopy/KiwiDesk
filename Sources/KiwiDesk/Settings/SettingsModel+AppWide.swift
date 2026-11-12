@@ -1,9 +1,9 @@
 import Combine
 import KiwiDeskCore
 
-/// General's app-wide rows (#1741): read live from the core and
-/// written at once, never through the draft — the card they sit
-/// on promises "applies immediately".
+/// The app-wide rows (#1741): read live from the core and written
+/// at once, never through the draft, which `LiveSettingNote` says
+/// where each one sits (#3218).
 extension SettingsModel {
     var appWide: AppWideSettings { core.appWide }
 

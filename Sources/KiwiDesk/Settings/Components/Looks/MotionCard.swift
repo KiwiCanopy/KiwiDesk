@@ -64,8 +64,8 @@ struct MotionCard: View {
         }
     }
 
-    /// Whether `key` greys: the card's Reduce Motion gate, less the
-    /// census's exemption, one `GreyOut` per row, never nested
+    /// Whether `key` greys: the card's Reduce Motion gate, less any
+    /// row the census exempts, one `GreyOut` per row, never nested
     /// (gui.md).
     private func greyed(_ key: SettingKey) -> Bool {
         reduceMotion && !key.placement.exemptFromContainerGate

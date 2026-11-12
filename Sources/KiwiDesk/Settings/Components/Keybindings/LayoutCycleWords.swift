@@ -84,8 +84,7 @@ enum LayoutCycleWords {
         L(
             "shortcuts.mode_cue.help",
             "After “%1$@” or “%2$@”, KiwiDesk shows the cycle list "
-                + "for a moment with the new layout in the middle. This "
-                + "switch applies at once, to every profile.",
+                + "for a moment with the new layout in the middle.",
             nextLayout,
             previousLayout
         )

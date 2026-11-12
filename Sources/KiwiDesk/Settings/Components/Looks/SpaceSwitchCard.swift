@@ -13,8 +13,7 @@ struct SpaceSwitchCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.colors.spaceSwitchCard,
-            caption: LiveSettingNote.text,
-            captionProminent: true
+            liveNote: spaceTransitionLuaOwned ? nil : LiveSettingNote.text
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(ColorsRowOrder.spaceSwitch, id: \.id) { key in

@@ -13,8 +13,7 @@ struct KiwiVisionLevelsCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.kiwiVision.levelsCard,
-            caption: LiveSettingNote.text,
-            captionProminent: true
+            liveNote: LiveSettingNote.text
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(KiwiVisionRowOrder.levels, id: \.id) { key in

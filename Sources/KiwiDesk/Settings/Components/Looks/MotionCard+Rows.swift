@@ -7,7 +7,9 @@ extension MotionCard {
         switch key {
         case .spaceTransition, .spaceScrollTransition,
             .spaceSlideDuration:
-            // `SpaceSwitchCard`'s rows (#3218).
+            let _ = assertionFailure(
+                "\(key) is SpaceSwitchCard's row (#3218)"
+            )
             EmptyView()
         case .animationsMaster:
             ToggleRow(

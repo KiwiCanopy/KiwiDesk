@@ -116,8 +116,9 @@ struct GreyOutParityTests {
             1
         ),
         // Reduce Motion dims the Animations card's at-rest rows
-        // (#171) per row, so the Space switch picker's exemption
-        // holds (#2143); both conjuncts are the needle.
+        // (#171) per row, less any the census exempts (none since
+        // #3218 moved the Space rows out); both conjuncts are the
+        // needle.
         (
             "MotionCard.swift",
             "reduceMotion && !key.placement.exemptFromContainerGate",

@@ -39,9 +39,12 @@ struct DesktopCueRow: View {
             disabled: luaOwned
         )
         .searchAnchored(SettingsCatalog.shortcuts.desktopCue)
-        // App-wide on a profile's page, so the row says so (#3218).
-        LiveSettingCaption()
-            .padding(.leading, ToggleRow.captionIndent)
+        // App-wide on a profile's page, so the row says so (#3218),
+        // unless init.lua owns it and nothing here can change.
+        if !luaOwned {
+            LiveSettingCaption()
+                .padding(.leading, ToggleRow.captionIndent)
+        }
         if luaOwned {
             Text(GeneralGateHelp.sentence(for: .luaOwned))
                 .font(.caption)

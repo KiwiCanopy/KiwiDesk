@@ -2333,7 +2333,7 @@
   "shortcuts.maximize_width.by_shape": "視窗高度取決於螢幕形狀，可在%1$@中設定。",
   "shortcuts.menu_bar_icon": "選單列圖像",
   "shortcuts.mode_cue": "切換後顯示佈局",
-  "shortcuts.mode_cue.help": "使用「%1$@」或「%2$@」後，KiwiDesk 會短暫顯示循環列表，新的佈局位於中間。此開關會立即生效，並套用至所有描述檔。",
+  "shortcuts.mode_cue.help": "使用「%1$@」或「%2$@」後，KiwiDesk 會短暫顯示循環列表，新的佈局位於中間。",
   "shortcuts.mode_cycle": "循環切換的佈局",
   "shortcuts.mode_cycle.ax.placed": "%1$@，%2$@",
   "shortcuts.mode_cycle.drag": "拖移即可重新排序",

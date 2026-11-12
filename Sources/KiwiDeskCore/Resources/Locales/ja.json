@@ -2333,7 +2333,7 @@
   "shortcuts.maximize_width.by_shape": "ウインドウの高さは画面の形によって変わります。%1$@で設定します。",
   "shortcuts.menu_bar_icon": "メニューバーのアイコン",
   "shortcuts.mode_cue": "切り替え後にレイアウトを表示",
-  "shortcuts.mode_cue.help": "「%1$@」または「%2$@」の後、KiwiDeskは新しいレイアウトを中央にしたリストを一瞬表示します。この設定はすぐに、すべてのプロファイルに適用されます。",
+  "shortcuts.mode_cue.help": "「%1$@」または「%2$@」の後、KiwiDeskは新しいレイアウトを中央にしたリストを一瞬表示します。",
   "shortcuts.mode_cycle": "切り替えるレイアウト",
   "shortcuts.mode_cycle.ax.placed": "%1$@、%2$@",
   "shortcuts.mode_cycle.drag": "ドラッグして並べ替え",

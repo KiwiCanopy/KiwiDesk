@@ -21,9 +21,9 @@ struct SettingsSection<Content: View>: View {
     private let control: SettingsControl?
     let symbol: String?
     let caption: String?
-    /// Secondary ink for a caption that states a rule, not a
-    /// description: `LiveSettingNote` (#3218).
-    let captionProminent: Bool
+    /// `LiveSettingNote`'s sentence under the title, in secondary
+    /// ink (#3218). Nothing else takes this slot or that ink here.
+    let liveNote: String?
     let subsection: Bool
     let help: String?
     /// A short readout at the header's trailing edge — the Mac
@@ -40,7 +40,7 @@ struct SettingsSection<Content: View>: View {
         _ title: String,
         symbol: String? = nil,
         caption: String? = nil,
-        captionProminent: Bool = false,
+        liveNote: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
         trailing: String? = nil,
@@ -52,7 +52,7 @@ struct SettingsSection<Content: View>: View {
         self.plated = plated
         self.symbol = symbol
         self.caption = caption
-        self.captionProminent = captionProminent
+        self.liveNote = liveNote
         self.subsection = subsection
         self.help = help
         self.trailing = trailing
@@ -64,7 +64,7 @@ struct SettingsSection<Content: View>: View {
         _ control: SettingsControl,
         symbol: String? = nil,
         caption: String? = nil,
-        captionProminent: Bool = false,
+        liveNote: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
         trailing: String? = nil,
@@ -76,7 +76,7 @@ struct SettingsSection<Content: View>: View {
         self.plated = plated
         self.symbol = symbol
         self.caption = caption
-        self.captionProminent = captionProminent
+        self.liveNote = liveNote
         self.subsection = subsection
         self.help = help
         self.trailing = trailing
@@ -191,10 +191,12 @@ struct SettingsSection<Content: View>: View {
             if let caption {
                 Text(caption)
                     .font(.caption)
-                    .foregroundStyle(
-                        captionProminent
-                            ? SettingsTheme.ink2 : SettingsTheme.ink3
-                    )
+                    .foregroundStyle(SettingsTheme.ink3)
+            }
+            if let liveNote {
+                Text(liveNote)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
             }
         }
     }

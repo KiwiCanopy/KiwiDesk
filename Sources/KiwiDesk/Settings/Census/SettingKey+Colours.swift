@@ -86,12 +86,9 @@ extension ColoursKey {
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
-            // A card of their own (#3218), outside Reduce Motion's
-            // grey: the slide falls back to Show the Space there
-            // (#2524). App-wide (#1741), so they grey where
-            // init.lua owns the config, as the Desktop cue does
-            // (#2142). The duration's grey while the picker is off
-            // Slide is wiring's (gui.md).
+            // App-wide (#1741), so they grey where init.lua owns
+            // the config (#2142); the duration's grey off Slide is
+            // wiring's (#2524, #3218).
             return .row(
                 .coloursAndMotion,
                 .spaceSwitch,

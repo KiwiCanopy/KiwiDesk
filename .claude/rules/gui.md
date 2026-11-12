@@ -292,8 +292,9 @@ restated `20...80` satisfies on the day it is written.
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to
-  label what's shown, not to teach — with one carve-out, named
-  here so the two rules are not read as contradicting: **a
+  label what's shown, not to teach — with two carve-outs, named
+  here so the rules are not read as contradicting:
+  `LiveSettingNote` (#3218, below), and **a
   schematic's caption also carries whatever its one frame cannot
   denote.** That is the one-frame bullet above, and it is not
   licence to gloss: it applies where the picture is the
@@ -898,13 +899,18 @@ off the main actor.
 EXISTS in the user's config — a layer, an imported binding, an
 override — is drawn on arrival; a disclosure withholds only the
 OFFER to create, and opens on arrival once the first one exists.
-**A row that writes at once draws `LiveSettingNote` (#3218):**
-under its card's title where the whole card is live, under its
-own label where it sits among a profile's rows, and a card that
+
+**A row that writes through `SettingsModel.setAppWide` draws
+`LiveSettingNote` (#3218):** under its card's title where the
+whole card is live, under its own label where it sits among a
+profile's rows, hidden where `init.lua` owns the row, and a card
+that
 would mix the two kinds is split, the live card last
 (`LiveSettingNoteTests` ▸ `writersDrawTheNote`;
 `docs/design-decisions.md` ▸ A setting that skips Save says so
-where it sits). Never a second wording, and never colour.
+where it sits; the split, the order and a live row through any
+other door are review's). Never a second wording, save Never
+dimmed's "and lens", and never colour.
 
 **Add no window-wide switch beside `Simple | Advanced`, and no
 depth switch inside either root** — new depth goes behind its

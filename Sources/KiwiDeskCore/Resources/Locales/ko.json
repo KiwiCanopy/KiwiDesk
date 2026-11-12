@@ -2333,7 +2333,7 @@
   "shortcuts.maximize_width.by_shape": "윈도우 높이는 화면 모양에 따라 달라지며, %1$@에서 설정합니다.",
   "shortcuts.menu_bar_icon": "메뉴 막대 아이콘",
   "shortcuts.mode_cue": "전환 후 레이아웃 표시",
-  "shortcuts.mode_cue.help": "‘%1$@’ 또는 ‘%2$@’ 단축키를 누르면 KiwiDesk가 새 레이아웃을 가운데에 둔 순환 목록을 잠시 표시합니다. 이 설정은 즉시 모든 프로필에 적용됩니다.",
+  "shortcuts.mode_cue.help": "‘%1$@’ 또는 ‘%2$@’ 단축키를 누르면 KiwiDesk가 새 레이아웃을 가운데에 둔 순환 목록을 잠시 표시합니다.",
   "shortcuts.mode_cycle": "순환할 레이아웃",
   "shortcuts.mode_cycle.ax.placed": "%1$@, %2$@",
   "shortcuts.mode_cycle.drag": "드래그하여 순서 변경",
