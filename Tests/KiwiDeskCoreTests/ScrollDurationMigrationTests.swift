@@ -45,21 +45,12 @@ struct ScrollDurationMigrationTests {
         let knobs = try animations(out)
         #expect(knobs["scroll_duration"] as? Int == 420)
         #expect(knobs["scroll_speed"] == nil)
-        // ...and the whole point: decoding it back gives the
-        // tuned value rather than the 150 ms default.
-        let settings = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: try #require(
-                JSONSerialization.data(
-                    withJSONObject: try #require(
-                        (try JSONSerialization.jsonObject(
-                            with: out
-                        ) as? [String: Any])?["settings"]
-                    )
-                )
-            )
+        // ...and the whole point: the app-wide crossing reads the
+        // tuned value rather than the 150 ms default (#3237).
+        #expect(
+            ConfigMigration.legacyPace(inProfile: data)?.scrollDuration
+                == 420
         )
-        #expect(settings.animations.scrollDurationMS == 420)
     }
 
     /// The bump is what RUNS the crossing.

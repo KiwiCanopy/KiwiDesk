@@ -102,7 +102,9 @@ struct ShelfSplitDriverTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         // The band's floor: `updateBars()` derives the glide from
         // the setting, so a fixture pins what the path reads.
-        core.tiler.settings.animations.expandDurationMS = 500
+        core.setAppWide(persisting: false) {
+            $0.animationExpandDurationMS = 500
+        }
         core.tiler.settings.appBarStyle.edge = .top
         core.updateBars()
         // The second shelf fades out and is retired once its fade
@@ -137,7 +139,9 @@ struct ShelfSplitDriverTests {
             makeCore(space: .top, app: .top)
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.tiler.settings.animations.expandDurationMS = 500
+        core.setAppWide(persisting: false) {
+            $0.animationExpandDurationMS = 500
+        }
         core.tiler.settings.appBarStyle.edge = .bottom
         core.updateBars()
         let bottom = try #require(

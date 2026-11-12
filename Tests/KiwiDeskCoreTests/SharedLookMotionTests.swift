@@ -40,7 +40,7 @@ struct SharedLookMotionTests {
         look: LookReference? = nil
     ) -> Profile {
         var settings = TilingSettings()
-        settings.animations.durationMS = duration
+        Self.mark(&settings.animations, duration)
         settings.kiwishelf.fillColor = fill
         return Profile(
             name: name,
@@ -62,8 +62,26 @@ struct SharedLookMotionTests {
         )
     }
 
+    /// A profile's motion, told apart by one switch per code: the
+    /// lengths left the looks with #3237, so a fixture that needs
+    /// several distinct motions spells them as switches.
+    private static let codes: [Int: WritableKeyPath<AnimationSettings, Bool>] =
+        [100: \.onRelayout, 500: \.onWindowSwap, 50: \.onStateChange]
+
+    private static func mark(
+        _ animations: inout AnimationSettings,
+        _ code: Int
+    ) {
+        animations = AnimationSettings()
+        if let path = codes[code] { animations[keyPath: path] = false }
+    }
+
+    private static func code(of animations: AnimationSettings) -> Int {
+        codes.first { !animations[keyPath: $0.value] }?.key ?? 300
+    }
+
     private func duration(_ name: String, _ core: KiwiCore) throws -> Int {
-        try stored(name, core).settings.animations.durationMS
+        Self.code(of: try stored(name, core).settings.animations)
     }
 
     /// The boot shape: nothing adopted, so the load elects nothing
@@ -80,7 +98,7 @@ struct SharedLookMotionTests {
         load("Fast", core)
         #expect(!core.sharedLookLedger.motionOwed)
         let shared = core.guiConfigStore.load()?.look
-        #expect(shared?.style["animations.duration"] == .number(100))
+        #expect(shared?.style["animations.on_relayout"] == .bool(false))
         #expect(try stored("Fast", core).look == nil)
         // Another follower that differs keeps its own, and its speed.
         #expect(try stored("Calm", core).look == .own)
@@ -119,7 +137,7 @@ struct SharedLookMotionTests {
             stale.settings.kiwishelf.fillColor
                 == TilingSettings().kiwishelf.fillColor
         )
-        #expect(stale.settings.animations.durationMS == 100)
+        #expect(Self.code(of: stale.settings.animations) == 100)
     }
 
     /// The real write shape with the crossing still owed: the file
@@ -134,7 +152,7 @@ struct SharedLookMotionTests {
         core.profiles.resetAdoption()
         core.prepareSharedLook()
         var work = try stored("Work", core)
-        work.settings.animations.durationMS = 500
+        Self.mark(&work.settings.animations, 500)
         work.settings.kiwishelf.fillColor = "#102030"
         try core.profiles.write(work)
         core.commitSharedLook(ofProfile: "Work")
@@ -224,22 +242,19 @@ struct SharedLookMotionTests {
         let core = try makeCore()
         var config = try #require(core.guiConfigStore.load())
         var look = LookBody(of: TilingSettings())
-        look.style["animations.expand_duration"] = nil
+        look.style["animations.on_peek"] = nil
         config.look = look
         try core.guiConfigStore.save(config)
         var work = profile("Work", duration: 300)
-        work.settings.animations.expandDurationMS = 900
+        work.settings.animations.onPeek = false
         try core.profiles.save(work)
         core.profiles.resetAdoption()
         core.prepareSharedLook()
         #expect(core.sharedLookLedger.motionOwed)
         load("Work", core)
         let shared = try #require(core.guiConfigStore.load()?.look)
-        #expect(shared.style["animations.expand_duration"] == .number(900))
-        #expect(
-            shared.style["animations.duration"]
-                == .number(Double(TilingSettings().animations.durationMS))
-        )
+        #expect(shared.style["animations.on_peek"] == .bool(false))
+        #expect(shared.style["animations.on_relayout"] == .bool(true))
         #expect(try stored("Work", core).look == nil)
     }
 

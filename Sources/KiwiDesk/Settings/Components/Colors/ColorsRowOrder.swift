@@ -52,7 +52,6 @@ enum ColorsRowOrder {
         .colours(.animationsOnWindowSwap),
         .colours(.animationsOnRelayout),
         .colours(.animationsOnStateChange),
-        .colours(.animationsDurationMS),
     ]
 
     // MARK: - Colors & glass (#2389)

@@ -187,10 +187,9 @@ struct SettingsCodingTests {
         #expect(animations["on_window_resize"] as? Bool == true)
         #expect(animations["on_window_swap"] as? Bool == true)
         #expect(animations["on_relayout"] as? Bool == true)
-        // `animations.set_duration` → JSON `animations.duration`
-        #expect(animations["duration"] as? Int == 150)
-        // `animations.set_scroll_duration` → `animations.scroll_duration`
-        #expect(animations["scroll_duration"] as? Int == 150)
+        // The lengths are app-wide since #3237, never a profile's.
+        #expect(animations["duration"] == nil)
+        #expect(animations["scroll_duration"] == nil)
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [

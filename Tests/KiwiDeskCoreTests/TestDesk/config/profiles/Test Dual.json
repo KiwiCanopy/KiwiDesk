@@ -1,6 +1,6 @@
 {
   "default" : true,
-  "format" : 37,
+  "format" : 38,
   "id" : "test-desk-2",
   "main_spaces" : [
 
@@ -20,8 +20,6 @@
   "saved_at" : "2026-11-04T00:00:00Z",
   "settings" : {
     "animations" : {
-      "duration" : 150,
-      "expand_duration" : 750,
       "on_expand" : true,
       "on_peek" : true,
       "on_relayout" : true,
@@ -29,9 +27,7 @@
       "on_scrolling" : true,
       "on_state_change" : true,
       "on_window_resize" : true,
-      "on_window_swap" : true,
-      "reveal_duration" : 300,
-      "scroll_duration" : 150
+      "on_window_swap" : true
     },
     "app_bar" : {
       "active_indicator" : "edge_mark",

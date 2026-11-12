@@ -52,8 +52,7 @@ struct SettingsCodingDecodeTests {
         settings.animations.onWindowResize = false
         settings.animations.onWindowSwap = false
         settings.animations.onRelayout = false
-        settings.animations.durationMS = 400
-        settings.animations.scrollDurationMS = 180
+        settings.animations.onStateChange = false
         settings.mouse.followsFocus = true
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(

@@ -221,10 +221,6 @@ struct MotionMoreControls: Sendable {
         "behavior.animations.state_change",
         "Animate float, Pocket & maximize"
     )
-    let animationDuration = SettingsControl(
-        "behavior.animations.window_duration",
-        "Window duration"
-    )
 }
 
 /// Colors & glass ▸ Colors (#2389, #2593): each group's title,

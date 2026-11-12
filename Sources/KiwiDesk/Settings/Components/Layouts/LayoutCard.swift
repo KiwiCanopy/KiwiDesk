@@ -66,8 +66,6 @@ struct LayoutCard: View {
             layoutRow(k)
         case .colours(.animationsOnScrolling):
             animateFocusShiftsRow
-        case .colours(.animationsScrollDurationMS):
-            scrollDurationRow
         default:
             let _ = assertionFailure(
                 "unrendered Layout Defaults key: \(key.id)"

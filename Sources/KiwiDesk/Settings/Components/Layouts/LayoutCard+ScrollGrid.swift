@@ -89,32 +89,6 @@ extension LayoutCard {
         )
     }
 
-    var scrollDurationRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            StepperRow(
-                label: L(
-                    "scroll_grid.scroll_duration",
-                    "Scroll duration"
-                ),
-                value: Binding(
-                    get: { model.appWide.animationScrollDurationMS },
-                    set: { ms in
-                        model.setAppWide {
-                            $0.animationScrollDurationMS = ms
-                        }
-                    }
-                ),
-                in: AnimationSettings.durationBand,
-                step: 10,
-                suffix: "ms"
-            )
-            // App-wide among a profile's rows (#3237, #3218).
-            if model.guiManaged {
-                LiveSettingCaption()
-            }
-        }
-    }
-
     var gridTypeRow: some View {
         SegmentedPicker(
             L("scroll_grid.grid_type", "Grid type"),

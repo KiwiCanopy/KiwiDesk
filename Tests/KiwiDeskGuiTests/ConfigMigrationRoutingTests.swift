@@ -149,8 +149,12 @@ struct ConfigMigrationRoutingTests {
         // which is not a key declaration and cannot be reached by
         // the walk. A third entry of the first kind is the defect
         // this guards.
+        // Since #3237 the key is the app-wide group's: gui.json
+        // never stored `scroll_speed`, so the walk never reaches it,
+        // and the pace crossing reads it from the profiles.
         let allowedLive: Set<String> = [
-            "Tiling/AnimationSettings.swift",
+            "Config/AppWideSettings+Groups.swift",
+            "Config/ConfigMigration+AnimationPace.swift",
             "Config/ConfigMigration+ScrollDuration.swift",
         ]
         // The retired key: only the migration that retires it may

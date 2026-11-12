@@ -44,7 +44,6 @@ enum LayoutDefaultsRowOrder {
         .layout(.scrollingFillWhenAlone),
         .layout(.scrollingNewWindowPlacement),
         .colours(.animationsOnScrolling),
-        .colours(.animationsScrollDurationMS),
     ]
 
     static let grid: [SettingKey] = [

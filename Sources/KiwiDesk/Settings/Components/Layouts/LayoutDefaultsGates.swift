@@ -12,7 +12,6 @@ struct LayoutDefaultsGates {
         case rigidGrid
         case autoSizedGrid
         case autoTracks
-        case scrollAnimationOff
     }
 
     /// Resolves inert reason for setting key (fail-open if unhandled).
@@ -27,9 +26,6 @@ struct LayoutDefaultsGates {
             return dimensionsAreInert ? .autoSizedGrid : nil
         case .layout(.trackLimit):
             return settings.track.autoTracks ? .autoTracks : nil
-        case .colours(.animationsScrollDurationMS):
-            return settings.animations.onScrolling
-                ? nil : .scrollAnimationOff
         default:
             assertionFailure(
                 "unhandled Layout Defaults gate: \(key.id)"
@@ -44,7 +40,6 @@ struct LayoutDefaultsGates {
         .layout(.gridColumns),
         .layout(.gridRows),
         .layout(.trackLimit),
-        .colours(.animationsScrollDurationMS),
     ]
 
     /// Gated rows the area declares but resolves elsewhere. Empty
@@ -91,7 +86,6 @@ enum LayoutDefaultsGateHelp {
         case .rigidGrid: return rigidGrid
         case .autoSizedGrid: return autoSizedGrid
         case .autoTracks: return autoTracks
-        case .scrollAnimationOff: return scrollAnimationOff
         }
     }
 
@@ -131,15 +125,4 @@ enum LayoutDefaultsGateHelp {
         )
     }
 
-    static var scrollAnimationOff: String {
-        L(
-            "scroll_grid.scroll_duration.animation_off",
-            "Focus shifts jump straight to the slot while "
-                + "%1$@ is off.",
-            L(
-                "scroll_grid.animate_focus_shifts",
-                "Animate focus shifts"
-            )
-        )
-    }
 }

@@ -98,18 +98,14 @@ struct ShelfRevealDurationTests {
 
     @Test("The reveal duration is stored, clamped and set by its verb")
     func storedAndClamped() throws {
-        var animations = AnimationSettings()
-        #expect(animations.revealDurationMS == 300)
+        var wide = AppWideSettings()
+        #expect(wide.animationRevealDurationMS == 300)
         let band = AnimationSettings.revealDurationBand
-        animations.revealDurationMS = band.upperBound + 1
-        #expect(animations.revealDurationMS == band.upperBound)
-        animations.revealDurationMS = band.lowerBound - 1
-        #expect(animations.revealDurationMS == band.lowerBound)
-        let data = try JSONEncoder().encode(animations)
-        let json = try #require(
-            JSONSerialization.jsonObject(with: data) as? [String: Any]
-        )
-        #expect(json["reveal_duration"] as? Int == band.lowerBound)
+        wide.animationRevealDurationMS = band.upperBound + 1
+        #expect(wide.animationRevealDurationMS == band.upperBound)
+        wide.animationRevealDurationMS = band.lowerBound - 1
+        #expect(wide.animationRevealDurationMS == band.lowerBound)
+        #expect(wide.animations.revealDuration == band.lowerBound)
         let core = makeTestCore()
         #expect(
             core.execute(
@@ -117,7 +113,7 @@ struct ShelfRevealDurationTests {
                 args: [.number(500)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.animations.revealDurationMS == 500)
+        #expect(core.appWide.animationRevealDurationMS == 500)
     }
 
     /// The reveal's switch is its "instant" (#3236): off, every
@@ -126,30 +122,31 @@ struct ShelfRevealDurationTests {
     @Test("Off is instant, and a 0 rises to the band")
     func offIsInstant() {
         var animations = AnimationSettings()
+        var wide = AppWideSettings()
         let reveal = AnimationSettings.revealDurationBand
         let expand = AnimationSettings.expandDurationBand
-        animations.revealDurationMS = 0
-        #expect(animations.revealDurationMS == reveal.lowerBound)
-        animations.expandDurationMS = 0
-        #expect(animations.expandDurationMS == expand.lowerBound)
-        #expect(animations.revealSeconds == 0.15)
+        wide.animationRevealDurationMS = 0
+        #expect(wide.animationRevealDurationMS == reveal.lowerBound)
+        wide.animationExpandDurationMS = 0
+        #expect(wide.animationExpandDurationMS == expand.lowerBound)
+        #expect(animations.revealSeconds(at: wide) == 0.15)
         animations.onReveal = false
-        #expect(animations.revealSeconds == 0)
-        #expect(animations.revealDurationMS == reveal.lowerBound)
+        #expect(animations.revealSeconds(at: wide) == 0)
+        #expect(wide.animationRevealDurationMS == reveal.lowerBound)
         for kind in [BarMotion.RevealKind.slide, .grow, .unfold, .fade] {
             let content = NSView(frame: Self.plate)
             let items = NSView(frame: Self.plate)
             let span = BarMotion.playReveal(
                 content,
                 items: items,
-                path: path(kind, length: animations.revealSeconds),
+                path: path(kind, length: animations.revealSeconds(at: wide)),
                 entering: true
             )
             #expect(span == 0)
             #expect(content.layer?.animationKeys() == nil, "\(kind)")
         }
         let saved = BarMotion.revealLength
-        BarMotion.revealLength = animations.revealSeconds
+        BarMotion.revealLength = animations.revealSeconds(at: wide)
         defer { BarMotion.revealLength = saved }
         let mark = NSView()
         BarMotion.fadeMark(mark, showing: false, reveal: .slide)
@@ -175,8 +172,8 @@ struct ShelfRevealDurationTests {
             let reply = core.execute(verb, args: [.number(0)])
             #expect(!reply.isSuccess, "\(verb)")
         }
-        #expect(core.tiler.settings.animations.revealDurationMS == 300)
-        #expect(core.tiler.settings.animations.expandDurationMS == 750)
+        #expect(core.appWide.animationRevealDurationMS == 300)
+        #expect(core.appWide.animationExpandDurationMS == 750)
         core.execute("animations.set_on_reveal", args: [.bool(true)])
         #expect(BarMotion.revealLength == 0.3)
     }

@@ -16,8 +16,19 @@ struct ExpandDurationMigrationTests {
     private func legacy<T: Encodable>(_ value: T) throws -> Data {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
+        // Since #3237 the type encodes no length: put the tuned
+        // 1250 back beside its switch, the profile's and a look's.
         let text = try #require(
             String(data: encoder.encode(value), encoding: .utf8)
+        )
+        .replacingOccurrences(
+            of: "\"on_expand\":false",
+            with: "\"on_expand\":false,\"expand_duration\":1250"
+        )
+        .replacingOccurrences(
+            of: "\"animations.on_expand\":false",
+            with: "\"animations.on_expand\":false,"
+                + "\"animations.expand_duration\":1250"
         )
         #expect(text.contains("expand_duration\""))
         let old =
@@ -34,7 +45,6 @@ struct ExpandDurationMigrationTests {
     private var tuned: TilingSettings {
         var settings = TilingSettings()
         settings.animations.onExpand = false
-        settings.animations.expandDurationMS = 1250
         return settings
     }
 
@@ -50,14 +60,19 @@ struct ExpandDurationMigrationTests {
         )
     }
 
-    private func check(_ animations: AnimationSettings) {
-        #expect(!animations.onExpand)
-        #expect(animations.expandDurationMS == 1250)
+    /// A profile's raw `settings.animations` after the rename.
+    private func check(_ settings: Any?) throws {
+        let animations = try #require(
+            (settings as? [String: Any])?["animations"] as? [String: Any]
+        )
+        #expect(animations["on_expand"] as? Bool == false)
+        #expect(animations["expand_duration"] as? Int == 1250)
     }
 
     private func checkLook(_ body: LookBody?) throws {
         let style = try #require(body?.style)
-        #expect(style["animations.expand_duration"] == .number(1250))
+        // A look carries no length since #3237's step.
+        #expect(style["animations.expand_duration"] == nil)
         #expect(style["animations.on_expand"] == .bool(false))
         #expect(style["animations.shelf_duration"] == nil)
     }
@@ -96,7 +111,7 @@ struct ExpandDurationMigrationTests {
     @Test("a profile's tuned expand moves to the new keys")
     func profileMoves() throws {
         let out = try root(migrated(legacy(profile(format: 27))))
-        check(try decode(TilingSettings.self, out["settings"]).animations)
+        try check(out["settings"])
         #expect(out["format"] as? Int == Profile.currentFormat)
     }
 
@@ -139,10 +154,7 @@ struct ExpandDurationMigrationTests {
         )
         let out = try root(migrated(legacy(bundle)))
         let profiles = try #require(out["profiles"] as? [[String: Any]])
-        check(
-            try decode(TilingSettings.self, profiles.first?["settings"])
-                .animations
-        )
+        try check(profiles.first?["settings"])
         try checkLook(decode(GuiConfig.self, out["config"]).look)
         let looks = try decode([ShelfLook].self, out["looks"])
         try checkLook(

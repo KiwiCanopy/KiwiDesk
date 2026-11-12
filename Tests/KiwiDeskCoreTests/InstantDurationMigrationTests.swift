@@ -11,44 +11,48 @@ import Testing
 /// hand-typed JSON.
 @Suite("Instant duration migration")
 struct InstantDurationMigrationTests {
-    /// Settings whose reveal and expand were tuned (any value the
-    /// encoder can write), so their text can carry the old 0.
-    private var tuned: TilingSettings {
-        var settings = TilingSettings()
-        settings.animations.revealDurationMS = 450
-        settings.animations.expandDurationMS = 1250
-        return settings
-    }
+    /// The type's own settings: since #3237 it encodes no length,
+    /// so `legacy` writes the older build's 0s back in.
+    private var tuned: TilingSettings { TilingSettings() }
 
     /// `value` encoded, then put back in the older build's shape:
-    /// no reveal switch (it is new), each tuned length spelled as
-    /// its 0, the look paths included, and `format` stamped.
+    /// no reveal switch (it is new), each length a 0 in the
+    /// profile's `animations` and in a look's style map, and
+    /// `format` stamped.
     private func legacy<T: Encodable>(
         _ value: T,
         format: Int
     ) throws -> Data {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        var text = try #require(
-            String(data: encoder.encode(value), encoding: .utf8)
-        )
-        #expect(text.contains(": 450"))
-        #expect(text.contains(": 1250"))
-        text = text.replacingOccurrences(of: ": 450", with: ": 0")
-            .replacingOccurrences(of: ": 1250", with: ": 0")
-            .replacingOccurrences(
-                of: #"\s*"(animations\.)?on_reveal" : (true|false),"#,
-                with: "",
-                options: .regularExpression
-            )
-        #expect(!text.contains("on_reveal"))
         var root = try #require(
-            JSONSerialization.jsonObject(with: Data(text.utf8))
+            JSONSerialization.jsonObject(with: encoder.encode(value))
                 as? [String: Any]
         )
+        root = try #require(Self.oldShape(root) as? [String: Any])
         root["format"] = format
-        return try JSONSerialization.data(withJSONObject: root)
+        let data = try JSONSerialization.data(withJSONObject: root)
+        let text = try #require(String(data: data, encoding: .utf8))
+        #expect(!text.contains("on_reveal"))
+        #expect(text.contains("reveal_duration\":0"))
+        return data
+    }
+
+    /// Every profile `animations` object and look style map, as
+    /// the build before #3236 wrote it.
+    private static func oldShape(_ node: Any) -> Any {
+        if var dict = node as? [String: Any] {
+            for (key, value) in dict { dict[key] = oldShape(value) }
+            for prefix in ["", "animations."]
+            where dict[prefix + "on_window_swap"] != nil {
+                dict[prefix + "on_reveal"] = nil
+                dict[prefix + "reveal_duration"] = 0
+                dict[prefix + "expand_duration"] = 0
+            }
+            return dict
+        }
+        if let array = node as? [Any] { return array.map(oldShape) }
+        return node
     }
 
     private var look: LookBody { LookBody(of: tuned) }
@@ -63,19 +67,26 @@ struct InstantDurationMigrationTests {
         )
     }
 
-    private func check(_ animations: AnimationSettings) {
-        #expect(!animations.onReveal)
-        #expect(animations.revealDurationMS == 300)
-        #expect(!animations.onExpand)
-        #expect(animations.expandDurationMS == 750)
+    /// A profile's raw `settings.animations` after the step: both
+    /// switches off, both lengths at their defaults.
+    private func check(_ settings: Any?) throws {
+        let animations = try #require(
+            (settings as? [String: Any])?["animations"] as? [String: Any]
+        )
+        #expect(animations["on_reveal"] as? Bool == false)
+        #expect(animations["reveal_duration"] as? Int == 300)
+        #expect(animations["on_expand"] as? Bool == false)
+        #expect(animations["expand_duration"] as? Int == 750)
     }
 
+    /// A look after the full migration: both switches off, and no
+    /// length, which #3237's step strips.
     private func checkLook(_ body: LookBody?) throws {
         let style = try #require(body?.style)
-        #expect(style["animations.reveal_duration"] == .number(300))
         #expect(style["animations.on_reveal"] == .bool(false))
-        #expect(style["animations.expand_duration"] == .number(750))
         #expect(style["animations.on_expand"] == .bool(false))
+        #expect(style["animations.reveal_duration"] == nil)
+        #expect(style["animations.expand_duration"] == nil)
     }
 
     private var decoder: JSONDecoder {
@@ -104,17 +115,19 @@ struct InstantDurationMigrationTests {
     func profileCrosses() throws {
         let data = try legacy(profile(format: 36), format: 36)
         let out = try root(#require(ConfigMigration.migrated(data)))
-        check(try decode(TilingSettings.self, out["settings"]).animations)
+        try check(out["settings"])
         #expect(out["format"] as? Int == Profile.currentFormat)
     }
 
-    @Test("without the step the decoder reads a 0 as the floor")
-    func decoderAloneAnimates() throws {
+    /// #3237's capture reads the migrated bytes, so a 0 is adopted
+    /// as the switch off at the default length, never as the floor
+    /// (profiles.md).
+    @Test("the app-wide capture reads the crossed length")
+    func captureReadsTheCrossing() throws {
         let data = try legacy(profile(format: 36), format: 36)
-        let raw = try root(data)
-        let settings = try decode(TilingSettings.self, raw["settings"])
-        #expect(settings.animations.onReveal)
-        #expect(settings.animations.revealDurationMS == 150)
+        let pace = try #require(ConfigMigration.legacyPace(inProfile: data))
+        #expect(pace.revealDuration == 300)
+        #expect(pace.expandDuration == 750)
     }
 
     @Test("the shared look in gui.json crosses")
@@ -155,10 +168,7 @@ struct InstantDurationMigrationTests {
             #require(ConfigMigration.migrated(legacy(bundle, format: 45)))
         )
         let profiles = try #require(out["profiles"] as? [[String: Any]])
-        check(
-            try decode(TilingSettings.self, profiles.first?["settings"])
-                .animations
-        )
+        try check(profiles.first?["settings"])
         try checkLook(decode(GuiConfig.self, out["config"]).look)
         let looks = try decode([ShelfLook].self, out["looks"])
         try checkLook(
@@ -217,12 +227,10 @@ struct InstantDurationMigrationTests {
     /// down, so it still plays over a profile the step turned off.
     @Test("an older look's in-band reveal keeps playing")
     func lookAbsenceCrosses() throws {
-        var settings = TilingSettings()
-        settings.animations.revealDurationMS = 450
-        let style = LookKeys.extract(from: settings)
-        #expect(style["animations.on_reveal"] != nil)
-        var old = style
+        var old = LookKeys.extract(from: TilingSettings())
+        #expect(old["animations.on_reveal"] != nil)
         old["animations.on_reveal"] = nil
+        old["animations.reveal_duration"] = .number(450)
         let document = LookDocument(
             format: 3,
             looks: [ShelfLook(name: "Old", style: old, colors: [:])]
@@ -255,10 +263,9 @@ struct InstantDurationMigrationTests {
     /// lands, right after its length.
     @Test("the look insert is surgical")
     func lookInsertIsSurgical() throws {
-        var settings = TilingSettings()
-        settings.animations.revealDurationMS = 450
-        var style = LookKeys.extract(from: settings)
+        var style = LookKeys.extract(from: TilingSettings())
         style["animations.on_reveal"] = nil
+        style["animations.reveal_duration"] = .number(450)
         let document = LookDocument(
             format: 3,
             looks: [ShelfLook(name: "Old", style: style, colors: [:])]

@@ -64,8 +64,6 @@ UserDefaults.appearance
 UserDefaults.general.syncFolder
 UserDefaults.general.syncFollows
 UserDefaults.language
-appWide.animationDurationMS
-appWide.animationScrollDurationMS
 appWide.desktopCue
 appWide.hyperKey
 appWide.modeCue

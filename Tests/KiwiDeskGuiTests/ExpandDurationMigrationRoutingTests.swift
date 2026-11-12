@@ -26,6 +26,11 @@ struct ExpandDurationMigrationRoutingTests {
             "Tiling/AnimationSettings.swift",
             "Config/ConfigMigration+ExpandDuration.swift",
             "Config/ConfigMigration+InstantDurations.swift",
+            // #3237's app-wide group and its crossing: gui.json
+            // never stored `shelf_duration`, so the rename's walk
+            // never reaches them.
+            "Config/AppWideSettings+Groups.swift",
+            "Config/ConfigMigration+AnimationPace.swift",
         ]
         // Only the migration may still name the retired keys.
         let allowedRetired: Set<String> = [
@@ -75,9 +80,14 @@ struct ExpandDurationMigrationRoutingTests {
     @Test("the reveal keys stay scoped to their declarer")
     func revealKeysStayUnique() throws {
         let prefix = coreRoot.path + "/"
+        // #3237's app-wide group and its crossing spell
+        // `reveal_duration` too; the step stands down by format
+        // before gui.json gained the group, which is the scoping.
         let allowed: Set<String> = [
             "Tiling/AnimationSettings.swift",
             "Config/ConfigMigration+InstantDurations.swift",
+            "Config/AppWideSettings+Groups.swift",
+            "Config/ConfigMigration+AnimationPace.swift",
         ]
         var live: Set<String> = []
         for file in try SourceScan.swiftSources(under: coreRoot) {
