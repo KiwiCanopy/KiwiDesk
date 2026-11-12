@@ -650,15 +650,14 @@ restating its argument here is how the two copies came to
 disagree about a draft's reach on the day they were written.
 
 **Homebrew advances itself; nothing here writes the cask.** The
-cask lives in Homebrew/homebrew-cask, whose scheduled autobump
-reads the latest *published* release (`livecheck` `:github_latest`,
-so a draft is invisible to it) and opens the bump PR. Never add a
-`no_autobump!` to it or a workflow here that pushes to that
-repository, and never put a cask back in `KiwiCanopy/homebrew-tap`
-(retired by KiwiCanopy/homebrew-tap#4). A stale cask is fixed by
-finding why the autobump run failed or by a hand-edited
-homebrew-cask PR (version and `sha256`); `brew bump-cask-pr`
-refuses an autobumped cask.
+cask lives in Homebrew/homebrew-cask and its autobump bumps it;
+*Homebrew is the deliberate exception* in `docs/design-decisions.md`
+owns why and what a stale cask costs. Never add a `no_autobump!` to
+it, a workflow here that pushes to that repository, or a cask back
+in `KiwiCanopy/homebrew-tap` (retired by KiwiCanopy/homebrew-tap#4).
+A cask PR changing its `livecheck` keeps it reading a source only
+publication advances — the latest release or the appcast — so a
+draft never reaches Homebrew.
 
 **Advance the Nix flake only after publication (#2909).**
 `.github/workflows/nix.yml` owns it: the `release.published` event

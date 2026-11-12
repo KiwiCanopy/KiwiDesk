@@ -421,8 +421,10 @@ so publication and the cask update cannot be atomic. The cask
 lives in Homebrew/homebrew-cask, whose scheduled autobump reads
 the latest published release and opens the bump PR, so the
 accepted failure model is a visible stale-cask window until
-homebrew-cask merges that PR. On a failure, open the bump PR by
-hand (version and `sha256`; `brew bump-cask-pr` refuses an
+homebrew-cask merges that PR. The release is complete for
+Homebrew once `brew info --cask kiwidesk` reports its version.
+On a failure, find why the autobump run failed, open the bump PR
+by hand (version and `sha256`; `brew bump-cask-pr` refuses an
 autobumped cask) or publish a newer version; never replace an
 existing version's bytes, since the cask pins their digest.
 
