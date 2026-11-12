@@ -214,6 +214,7 @@ extension SettingsModel {
         case .float: floatReach(app) { $0.joined(separator: ", ") }
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
+        case .gesture: gestureReach(app)
         case .history: historyReach()
         case .wrap: wrapReach()
         case .cycle: cycleReach()

@@ -1389,7 +1389,9 @@ takes more than its row asks first, a whole layer or lens and the
 profiles that changed exactly as the edited one did fold into its
 row as a reach label, joined on `SettingsDiffRow.subject` and
 never on the label** — in `SettingsDiffRowFold`, which review
-holds as the one fold — and a producer whose rows another
+holds as the one fold; a row whose one change is two rules joins
+on its second through `pairedSubject` alone, read there alone (a
+gesture move, #3225) — and a producer whose rows another
 profile's reach can name states the subject's family, the list
 producer taking it as a required argument (`ReachRowFoldTests`,
 and `ReachRowFoldFamilyTests` per family, which reds on a reach

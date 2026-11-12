@@ -62,6 +62,8 @@ enum GestureListEdits {
 
     /// The refusal of a click or hover_move whose keys a drag in
     /// `base` holds, which Core drops (`GestureSeeds.resolved`).
+    /// The page's map is the edited profile's resolved one (#3225),
+    /// so no profile layer goes over it.
     static func heldByDrag(
         _ key: GestureKey,
         in base: GestureMap

@@ -10,6 +10,8 @@ enum RuleFamily: Hashable {
     /// A scroll-gesture setting, keyed by `ScrollGestureField`
     /// (#1656).
     case scroll
+    /// A gesture binding, keyed by `GestureKey.spelling` (#3225).
+    case gesture
     /// The Space history setting, keyed by
     /// `RuleReachTable.spaceHistoryKey` (#1655).
     case history
@@ -37,7 +39,7 @@ enum RuleFamily: Hashable {
     /// scroll setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
-        case .key, .scroll, .history, .wrap, .cycle, .autoFloat,
+        case .key, .scroll, .gesture, .history, .wrap, .cycle, .autoFloat,
             .tilingStart, .tilingOffHides:
             subject
         case .float: FloatRules.appKey(subject)

@@ -56,6 +56,7 @@ extension KiwiCore {
         config.scrollGesture =
             profile.scrollGesture?.resolved(onto: config.scrollGesture)
             ?? config.scrollGesture
+        config.gesture = config.gesture.overlaid(by: profile.gesture)
         config.spaceHistory = profile.spaceHistory ?? config.spaceHistory
         config.modeCycle = profile.modeCycle ?? config.modeCycle
         config.focusWrap = profile.focusWrap ?? config.focusWrap

@@ -246,6 +246,7 @@ struct EncodedReachCache {
         let floatRules: [String]
         let layers: [KeyLayer]
         let scrollGesture: ScrollGestureBase
+        let gesture: GestureMap
         let spaceHistory: SpaceHistoryKind
         let focusWrap: FocusWrap
         let modeCycle: [LayoutMode]

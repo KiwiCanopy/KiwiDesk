@@ -25,6 +25,38 @@ public struct GestureMap: Hashable, Sendable {
 
     public var isEmpty: Bool { entries.isEmpty }
 
+    /// This map with `profile`'s entries laid over it: what a
+    /// profile resolves, still sparse over the seeds.
+    public func overlaid(by profile: GestureMap?) -> GestureMap {
+        GestureMap(
+            entries.merging(profile?.entries ?? [:]) { _, own in own }
+        )
+    }
+
+    /// The sparse override that turns `base` into `edited`, both
+    /// laid over the seeds; nil where they resolve alike.
+    public static func diff(
+        base: GestureMap,
+        edited: GestureMap
+    ) -> GestureMap? {
+        var out = GestureMap()
+        let keys = Set(base.entries.keys).union(edited.entries.keys)
+        for key in keys {
+            let new = edited.resolved(key)
+            guard base.resolved(key) != new else { continue }
+            out[key] = new.map(GestureEntry.bound) ?? .unbound
+        }
+        return out.isEmpty ? nil : out
+    }
+
+    /// What `key` resolves to with this map over the seeds.
+    func resolved(_ key: GestureKey) -> GestureAction? {
+        guard let entry = entries[key] else {
+            return GestureSeeds.seeds[key]
+        }
+        return entry.action
+    }
+
     public subscript(key: GestureKey) -> GestureEntry? {
         get { entries[key] }
         set { entries[key] = newValue }

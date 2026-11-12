@@ -60,6 +60,7 @@ struct GestureListRow: View {
                     actionContainer
                 }
                 Spacer(minLength: 8)
+                reachColumn
                 GestureChordRecorder(
                     name: recorderName,
                     chord: key.chord,
@@ -72,8 +73,14 @@ struct GestureListRow: View {
                     help: L(
                         "shortcuts.gestures.remove",
                         "Remove gesture"
-                    )
-                ) { _ in onRemove() }
+                    ),
+                    sharedFrom: sharedReach
+                ) { removal in
+                    if action != nil {
+                        model.recordRemoval(.gesture, key.spelling, removal)
+                    }
+                    onRemove()
+                }
             }
             if let hint {
                 Text(hint)
@@ -214,13 +221,12 @@ struct GestureListRow: View {
         clash = nil
         guard target != key, !others.contains(target) else { return }
         if action != nil {
-            guard
-                GestureListEdits.rekey(
-                    key,
-                    to: target,
-                    in: &model.config.gesture
-                )
+            var map = model.config.gesture
+            guard GestureListEdits.rekey(key, to: target, in: &map)
             else { return }
+            // The pick moves while the old key still reads (#3225).
+            model.carryPick(.gesture, from: key.spelling, to: target.spelling)
+            model.config.gesture = map
         }
         entry.key = target
     }
@@ -241,6 +247,7 @@ struct GestureListRow: View {
             return
         }
         if action != nil {
+            model.dropGesturePick(key.spelling, shared: sharedReach != nil)
             GestureListEdits.remove(key, in: &model.config.gesture)
         }
         onUnbound()

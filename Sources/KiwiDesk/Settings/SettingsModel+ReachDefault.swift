@@ -39,6 +39,13 @@ extension SettingsModel {
                 editing: editing,
                 isLoaded: reachIsLoaded
             )
+        case .gesture:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.gestures,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
         case .history:
             return RuleReachDraft.defaultReach(
                 of: key,
