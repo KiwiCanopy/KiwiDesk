@@ -13622,6 +13622,24 @@ it below a Desktop drawer in the same card, by audience size;
 #2655 below supersedes that ranking, and the Track drawer is the
 card's only one.
 
+:::unreleased
+**A drawer of settings opens when asked** (#3261). *Config
+presence expands the surface* protects what a user *made*; a value
+a user *chose* — the Hyper key, the ✦ base, the sides switch — is
+not a thing that can be lost, only a setting, and a drawer folding
+open on every visit because one is set spends the page's top on
+controls the user already finished with. So such a drawer stays
+shut on arrival and its shut summary states the values ("Hyper:
+Caps Lock · Shortcuts use ✦"), which tells the user what is set
+without the rows, and the description returns only when nothing
+is; a Hyper key that is not in effect says so there. The one
+exception is a broken state with a fix beside it — Hyper's remap
+refused with Take Over — which opens the drawer, since a fault
+folded out of sight reads as working. This narrows #2654's
+Modifier keys card: it no longer opens on arrival because a key is
+set.
+:::
+
 **The Desktop verbs share one always-mounted macOS Desktops
 section (#2655, owner ruling 2026-10-26), superseding the two
 Desktop drawers above.** Seeding Go to Desktop (2026-10-10, below)
