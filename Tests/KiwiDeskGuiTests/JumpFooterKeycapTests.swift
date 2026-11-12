@@ -80,14 +80,22 @@ struct JumpFooterKeycapTests {
     /// the lit hint is never a bare key.
     @Test("the lit hint is the worded one under every chord")
     func litIsWorded() {
-        for held in JumpFooter.heldStates where held != [] {
+        LocalizationManager.shared.select("en")
+        // The hint each chord lights, stated apart from the code:
+        // ⌘ the digits, else ⌥ Swap here, else ⇧ Move here.
+        let expected: [(NSEvent.ModifierFlags, Int)] = [
+            (.shift, 1), (.option, 2), ([.shift, .option], 2),
+            (.command, 3), ([.shift, .command], 3),
+            ([.option, .command], 3), ([.shift, .option, .command], 3),
+        ]
+        for (held, lit) in expected {
             let footer = JumpFooter(scope: .windows, modifiers: held)
-            #expect(
-                footer.leading == footer.windowsPick(held)?.rawValue,
-                "\(held)"
-            )
-            let slots = JumpFooter(scope: .windows).windowsSlots(held: held)
-            #expect(slots.filter(\.held).count == 1, "\(held)")
+            #expect(footer.leading == lit, "\(held)")
+            let full = footer.windowsSlots(held: held)[lit].text
+            for level in 0...JumpFooter.collapseOrder.count {
+                let drawn = footer.windowsDrawn(held: held, level: level)
+                #expect(drawn[lit] == full, "\(held) at \(level)")
+            }
         }
         let rest = JumpFooter(scope: .windows).windowsSlots(held: [])
         #expect(rest.allSatisfy { !$0.held })

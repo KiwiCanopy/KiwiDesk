@@ -184,11 +184,7 @@ extension JumpFooter {
     ) -> some View {
         let all = windowsSlots(held: held)
         let slots = Array(all.prefix(shown ?? all.count))
-        let collapsed = Set(Self.collapseOrder.prefix(level).map(\.rawValue))
-        let drawn = slots.enumerated().map { index, slot in
-            collapsed.contains(index) && !slot.held
-                ? slot.keycap ?? slot.text : slot.text
-        }
+        let drawn = windowsDrawn(held: held, level: level, shown: shown)
         return HStack(spacing: 8) {
             ForEach(Array(drawn.enumerated()), id: \.offset) { index, text in
                 if index > 0 { Text(verbatim: "·") }
@@ -211,6 +207,25 @@ extension JumpFooter {
             value: drawn
         )
         .fixedSize(horizontal: true, vertical: false)
+    }
+}
+
+extension JumpFooter {
+    /// What each slot of a Windows line draws: its words, or its
+    /// keycap where `level` collapses it and `held` does not word it.
+    func windowsDrawn(
+        held: NSEvent.ModifierFlags,
+        level: Int,
+        shown: Int? = nil
+    ) -> [String] {
+        let all = windowsSlots(held: held)
+        let collapsed = Set(Self.collapseOrder.prefix(level).map(\.rawValue))
+        let slots = Array(all.prefix(shown ?? all.count))
+        return slots.indices.map { index in
+            let slot = slots[index]
+            return collapsed.contains(index) && !slot.held
+                ? slot.keycap ?? slot.text : slot.text
+        }
     }
 }
 
