@@ -86,15 +86,14 @@ struct JumpPanelShapeTests {
         ) -> Int? {
             JumpFooter(
                 scope: scope,
-                overflows: false,
                 modifiers: modifiers,
                 hasSelection: selection
             ).leading
         }
         #expect(lit(.windows) == 0)
         #expect(lit(.windows, .shift) == 1)
-        #expect(lit(.windows, .command) == 2)
-        #expect(lit(.windows, [.shift, .command]) == 2)
+        #expect(lit(.windows, .command) == 3)
+        #expect(lit(.windows, [.shift, .command]) == 3)
         #expect(lit(.view) == 0)
         // ⇧ moves nothing here, so nothing lights under it (#2309).
         #expect(lit(.view, .shift) == nil)
@@ -160,15 +159,14 @@ struct JumpPanelShapeTests {
     @Test("⇧ rewrites the digits to what they then do")
     func digitHintFollowsShift() {
         LocalizationManager.shared.select("en")
-        let rest = JumpFooter(scope: .windows, overflows: false).hints
+        let rest = JumpFooter(scope: .windows).hints
         let shifted = JumpFooter(
             scope: .windows,
-            overflows: false,
             modifiers: .shift
         ).hints
-        #expect(rest[2] == "⌘1–9 Quick jump")
-        #expect(shifted[2] == "⇧⌘1–9 Quick move here")
-        #expect(rest[0] == shifted[0] && rest[1] == shifted[1])
+        #expect(rest[3] == "⌘1–9 Quick jump")
+        #expect(shifted[3] == "⇧⌘1–9 Quick move here")
+        #expect(Array(rest.prefix(3)) == Array(shifted.prefix(3)))
     }
 
     @Test("the footer and the field read the model")

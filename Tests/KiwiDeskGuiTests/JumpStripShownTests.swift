@@ -155,7 +155,6 @@ struct JumpStripShownTests {
     private func footer(steps: Bool, chord: String?) -> [String] {
         JumpFooter(
             scope: .windows,
-            overflows: false,
             stripSteps: steps,
             lastAppChord: chord
         ).hints
@@ -174,7 +173,6 @@ struct JumpStripShownTests {
         // Navigation never lights: ↩ Jump stays the lit hint.
         let lit = JumpFooter(
             scope: .windows,
-            overflows: false,
             stripSteps: true,
             lastAppChord: "⌥⇥"
         ).leading
@@ -187,7 +185,6 @@ struct JumpStripShownTests {
         for scope in [JumpScope.shortcuts, .view, .desktops] {
             let hints = JumpFooter(
                 scope: scope,
-                overflows: false,
                 stripSteps: true,
                 lastAppChord: "⌥⇥"
             ).hints
@@ -225,7 +222,8 @@ struct JumpStripShownTests {
         // results, and the list's height counts it.
         #expect(
             view.contains(
-                "ScrollView{VStack(spacing:0){ifletyours=model.list.yours"
+                "inset:Self.listPadding){VStack(spacing:0)"
+                    + "{ifletyours=model.list.yours"
                     + "{JumpYoursLine(entry:yours,"
                     + "icon:model.icons[yours.pid])}"
                     + "rows}"

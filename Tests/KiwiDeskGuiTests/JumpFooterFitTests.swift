@@ -7,8 +7,9 @@ import Testing
 
 /// KiwiHub's footer row carries a side's controls beside its key
 /// hints, so in every shipped language the controls leave room
-/// for what must stay — View's first hint, Shortcuts' scroll cue —
-/// and the rest shed from the end. Measured on each side's widest
+/// for what must stay — View's and Shortcuts' first hint — and the
+/// rest shed from the end; the Windows side first collapses its
+/// modifier hints to keycaps (#3249). Measured on each side's widest
 /// case as AppKit sizes the real views: one hosting measurement
 /// per piece per locale on the main actor.
 @Suite("KiwiHub footer fit")
@@ -71,7 +72,7 @@ struct JumpFooterFitTests {
         defer { LocalizationManager.shared.select("en") }
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
-            let footer = JumpFooter(scope: .view, overflows: false)
+            let footer = JumpFooter(scope: .view)
             // The Settings button reserves its widest label.
             let leading = width(
                 KeyPanelChordButton(
@@ -96,27 +97,18 @@ struct JumpFooterFitTests {
         }
     }
 
-    /// The cue stands whole in the leading slot, and leaves the
-    /// centred hints their first one, in every language.
-    @Test("the Shortcuts side keeps its scroll cue in every language")
-    func shortcutsKeepItsCue() throws {
+    /// The layer chip stands at its cap in the leading slot, and
+    /// leaves the centred hints their first one, in every language.
+    @Test("the Shortcuts side keeps its first hint in every language")
+    func shortcutsKeepTheirFirstHint() throws {
         defer { LocalizationManager.shared.select("en") }
-        typealias Row = JumpFooterRow<EmptyView, EmptyView>
-        let rowWidth = JumpPanelView.width - 2 * Row.inset
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
-            let text = try #require(JumpFooter.scrollHint(for: .shortcuts))
-            let cue = width(JumpScrollCue(text: text).font(.caption))
-            #expect(cue > 0, "\(code)")
-            #expect(
-                cue <= rowWidth * JumpFooterMidline.controlShare,
-                "\(code): cue \(cue) pt passes the slot"
-            )
             let capped = width(JumpLayerLabel(name: Self.layer), cap: 280)
             #expect(capped <= 280, "\(code): the layer chip passes its cap")
-            let footer = JumpFooter(scope: .shortcuts, overflows: true)
+            let footer = JumpFooter(scope: .shortcuts)
             let room = room(
-                leading: cue,
+                leading: capped,
                 trailing: width(
                     button(
                         L(
@@ -201,7 +193,7 @@ struct JumpFooterFitTests {
     func chromeMatchesTheDrawing() {
         LocalizationManager.shared.select("en")
         let row = JumpFooterRow(
-            footer: JumpFooter(scope: .shortcuts, overflows: true),
+            footer: JumpFooter(scope: .shortcuts),
             carriesControls: true,
             leading: { JumpLayerLabel(name: "Hyper") },
             trailing: { button("Edit in Settings…", "⌘,") }
@@ -264,7 +256,7 @@ struct JumpFooterFitTests {
         func drawn(_ scope: JumpScope, controls: Bool) -> CGFloat {
             size(
                 JumpFooterRow(
-                    footer: JumpFooter(scope: scope, overflows: false),
+                    footer: JumpFooter(scope: scope),
                     carriesControls: controls,
                     leading: { EmptyView() },
                     trailing: { EmptyView() }

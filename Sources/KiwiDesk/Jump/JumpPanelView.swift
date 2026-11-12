@@ -13,9 +13,6 @@ struct JumpPanelView: View {
     /// The panel's width on its screen, from the controller.
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
-    /// The Shortcuts sheet's own height, which the footer's
-    /// scroll cue reads; 0 on the other sides.
-    @State var sheetHeight: CGFloat = 0
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
@@ -136,7 +133,8 @@ struct JumpPanelView: View {
                 JumpShortcutsView(
                     sheet: sheet,
                     scroll: model.sheetScroll,
-                    maxHeight: model.sheetCap
+                    maxHeight: model.sheetCap,
+                    fades: true
                 )
                 .transition(.opacity)
             } else if model.scope == .desktops, let state = model.desktops {
@@ -185,7 +183,6 @@ struct JumpPanelView: View {
                 .transition(.opacity)
             }
         }
-        .onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }
     }
 
     @ViewBuilder private var results: some View {
@@ -197,26 +194,26 @@ struct JumpPanelView: View {
                 .frame(height: JumpRowView.height)
                 .padding(.vertical, Self.listPadding)
         } else {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Greyed and never a row the keys reach.
-                        if let yours = model.list.yours {
-                            JumpYoursLine(
-                                entry: yours,
-                                icon: model.icons[yours.pid]
-                            )
-                        }
-                        rows
+            // Its edges fade where rows run past them, the side's one
+            // cue that it scrolls (#3249).
+            FadingColumn(
+                selected: model.list.selection,
+                ids: Array(model.list.results.indices),
+                inset: Self.listPadding
+            ) {
+                VStack(spacing: 0) {
+                    // Greyed and never a row the keys reach.
+                    if let yours = model.list.yours {
+                        JumpYoursLine(
+                            entry: yours,
+                            icon: model.icons[yours.pid]
+                        )
                     }
-                    .padding(.vertical, Self.listPadding)
-                    .padding(.horizontal, KeyPanelStyle.selectionInset)
+                    rows
                 }
-                .frame(height: listHeight)
-                .onChange(of: model.list.selection) { _, selection in
-                    if let selection { proxy.scrollTo(selection) }
-                }
+                .padding(.horizontal, KeyPanelStyle.selectionInset)
             }
+            .frame(height: listHeight)
         }
     }
 
@@ -317,20 +314,6 @@ struct JumpPanelView: View {
             headers: model.list.sectionCount,
             rowCap: model.rowCap
         )
-    }
-
-    /// Whether the Windows list runs past what it shows.
-    var listOverflows: Bool {
-        Self.overflows(
-            rows: model.list.drawnRows,
-            headers: model.list.sectionCount,
-            rowCap: model.rowCap
-        )
-    }
-
-    static func overflows(rows: Int, headers: Int, rowCap: Int) -> Bool {
-        content(rows: rows, headers: headers)
-            > CGFloat(rowCap) * JumpRowView.height
     }
 
     private static func content(rows: Int, headers: Int) -> CGFloat {

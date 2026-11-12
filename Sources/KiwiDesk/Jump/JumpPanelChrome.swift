@@ -2,14 +2,12 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The panel's static key hints for its scope — hidden from
-/// VoiceOver, whose row actions say the same (#1875 ▸ footer);
-/// the scroll cue is spoken. Short of room, it sheds hints from
-/// the end, then truncates the scroll cue; a hint keeps its index,
-/// so the lit one stays lit while it is shown.
+/// VoiceOver, whose row actions say the same (#1875 ▸ footer).
+/// Short of room, it sheds hints from the end, the Windows side
+/// first collapsing its modifier hints to keycaps (#3249); a hint
+/// keeps its index, so the lit one stays lit while it is shown.
 struct JumpFooter: View {
     let scope: JumpScope
-    /// Whether the side runs past what it shows.
-    let overflows: Bool
     /// The modifiers held now, which decide the one lit hint.
     var modifiers: NSEvent.ModifierFlags = []
     /// Whether a row or tile is selected; with none, nothing lights.
@@ -37,9 +35,16 @@ struct JumpFooter: View {
     /// which leaves its hint out (#3159).
     var lastAppChord: String?
 
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+
     var body: some View {
         if let refusal = desktops?.refusal {
             desktopsRefusal(refusal)
+        } else if scope == .windows {
+            windowsFitted
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         } else {
             fitted
         }
@@ -52,7 +57,7 @@ struct JumpFooter: View {
             ForEach((keeps...hints.count).reversed(), id: \.self) {
                 row(Array(hints.prefix($0)))
             }
-            // Past every candidate the cue truncates rather than
+            // Past every candidate the line truncates rather than
             // spill onto the side's controls.
             row([], fixed: false)
         }
@@ -61,17 +66,10 @@ struct JumpFooter: View {
         .lineLimit(1)
     }
 
-    /// One candidate line: the scroll cue, then `shown`; a line
-    /// that is not `fixed` truncates to the room it is given.
+    /// One candidate line of `shown`; a line that is not `fixed`
+    /// truncates to the room it is given.
     func row(_ shown: [String], fixed: Bool = true) -> some View {
         HStack(spacing: 8) {
-            // The Shortcuts side draws its cue in the leading slot.
-            if overflows, scope != .shortcuts, let cue = scrollHint {
-                JumpScrollCue(text: cue)
-                if !shown.isEmpty {
-                    Text(verbatim: "·").accessibilityHidden(true)
-                }
-            }
             ForEach(Array(shown.enumerated()), id: \.offset) { index, hint in
                 if index > 0 { Text(verbatim: "·") }
                 Text(hint)
@@ -98,23 +96,6 @@ struct JumpFooter: View {
             return 0
         }
     }
-
-    /// The side's scroll cue; the View side never scrolls.
-    var scrollHint: String? { Self.scrollHint(for: scope) }
-
-    static func scrollHint(for scope: JumpScope) -> String? {
-        switch scope {
-        case .windows:
-            return JumpRowText.scrollHint
-        case .shortcuts:
-            return L(
-                "shortcuts.panel.scroll_hint",
-                "Scroll for more shortcuts"
-            )
-        case .view, .desktops:
-            return nil
-        }
-    }
 }
 
 extension JumpFooter {
@@ -123,89 +104,51 @@ extension JumpFooter {
     /// itself — ↩ where it picks, else the ⌘ digits. Navigation and
     /// bridges never light; the Shortcuts side picks nothing (#2246).
     /// The index is into `hints`, whose order it follows: Jump,
-    /// Move here (Swap here under ⌥), the digits on Windows; Apply,
+    /// Move here, Swap here, the digits on Windows (#3249); Apply,
     /// the digits on View.
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
         if scope == .desktops { return desktopsLeading }
-        // ⌃ is left out: the chord that opened the panel may still
-        // be held when it draws.
+        if scope == .windows { return windowsLeading }
         let held = modifiers.intersection([.shift, .option, .command])
         let one = UInt16(JumpKey.digitRows[0])
-        let digit = JumpKey.of(
+        if case .quick(_, let moveHere) = JumpKey.of(
             keyCode: one,
             modifiers: held,
             scope: scope,
             naming: naming
-        )
-        // A held chord the digits answer lights them first, though
-        // ↩ under it picks as well (#2931 ▸ Ruling 5).
-        if case .quickSwap = digit { return 2 }
-        if case .quick(_, let moveHere) = digit {
-            if scope == .windows { return 2 }
+        ) {
             return moveHere ? nil : 1
         }
+        // View: ↩ Apply.
         switch JumpKey.of(
             keyCode: JumpKey.returnKey,
             modifiers: held,
             scope: scope,
             naming: naming
         ) {
-        // Windows: ↩ Jump, ⇧↩ Move here; View: ↩ Apply.
-        case .pick(let moveHere):
-            guard scope == .windows else { return moveHere ? nil : 0 }
-            guard moveHere else { return 0 }
-            return selectionMoves ? 1 : nil
-        case .swapHere:
-            return selectionSwaps ? 1 : nil
-        default:
-            return nil
+        case .pick(let moveHere): return moveHere ? nil : 0
+        default: return nil
         }
     }
 
-    private var shiftHeld: Bool { modifiers.contains(.shift) }
-    private var optionHeld: Bool { modifiers.contains(.option) }
-
-    /// The Windows digits' hint: ⇧ and ⌥ already rewrite it to
-    /// what the digits then do; ⌘ joining only lights it.
-    private var digitsHint: String {
-        if optionHeld {
-            return L(
-                "jump.footer.quick_swap_here",
-                "%1$@ Quick swap here",
-                "⌥⌘1–9"
-            )
-        }
-        if shiftHeld {
-            return L(
-                "jump.footer.quick_move_here",
-                "%1$@ Quick move here",
-                "⇧⌘1–9"
-            )
-        }
-        return L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9")
-    }
-
-    var hints: [String] {
-        let other = L(
+    /// ⇥ and the side it steps to.
+    var sideHint: String {
+        L(
             "jump.footer.scope",
             "%1$@ %2$@",
             "⇥",
             scope.stepped(forward: true).title
         )
+    }
+
+    var hints: [String] {
+        let other = sideHint
         switch scope {
         case .desktops:
             return desktopsHints
         case .windows:
-            return [
-                L("jump.footer.jump", "%1$@ Jump", "↩"),
-                // ⌥ rewrites the slot to Swap here, as ⇧ rewrites the
-                // digits; the digits take no ⌥.
-                optionHeld
-                    ? L("jump.footer.swap_here", "%1$@ Swap here", "⌥↩")
-                    : L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
-                digitsHint,
-            ] + windowsNavigation(other)
+            return windowsSlots(held: modifiers).map(\.text)
         case .shortcuts:
             // Edit in Settings… stands beside the hints with its
             // own chord.
@@ -231,39 +174,6 @@ extension JumpFooter {
             return quickCount > 0
                 ? [apply, quick, ViewPickText.lineHint("↑↓"), other]
                 : [apply, ViewPickText.lineHint("↑↓"), other]
-        }
-    }
-}
-
-extension JumpFooter {
-    /// The Windows side's navigation hints, which never light
-    /// (#2246): ← → along the strip, the side switch, then the
-    /// last-app opener last, so it sheds first (#3159).
-    func windowsNavigation(_ other: String) -> [String] {
-        var hints: [String] = []
-        if stripSteps {
-            hints.append(L("jump.footer.apps", "%1$@ Apps", "← →"))
-        }
-        hints.append(other)
-        if let lastAppChord {
-            hints.append(
-                L("jump.footer.next_app", "%1$@ Next app", lastAppChord)
-            )
-        }
-        return hints
-    }
-}
-
-/// A side's scroll cue, worded rather than positional so it stays
-/// true at any scroll offset (#1292); spoken, its chevron silent.
-struct JumpScrollCue: View {
-    let text: String
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "chevron.down")
-                .accessibilityHidden(true)
-            Text(text)
         }
     }
 }

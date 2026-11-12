@@ -202,7 +202,7 @@ struct JumpProfileNamingTests {
     @Test("the footer says ↩ saves and Esc goes back while naming")
     func footerWhileNaming() {
         LocalizationManager.shared.select("en")
-        let footer = JumpFooter(scope: .view, overflows: false, naming: true)
+        let footer = JumpFooter(scope: .view, naming: true)
         #expect(Array(footer.hints.prefix(2)) == ["↩ Save", "Esc Back"])
         #expect(footer.leading == 0)
         // A held ⌘ lights no digit: none picks while naming.

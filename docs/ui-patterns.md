@@ -915,6 +915,13 @@ shape. The side says "Scroll for more shortcuts" and counts
 nothing; it is read-only, so the hidden items have no
 controls to lose and a label is admissible.
 
+:::unreleased
+*Amended (#3249): KiwiHub's scrolling lists cue their fold by
+fading the edge that cuts them*, through `FadingScroll`, and count
+nothing; the Shortcuts side no longer says "Scroll for more
+shortcuts".
+:::
+
 The middle clause is arithmetic, so it is code:
 `OverflowSplit.shown(of:fitting:withMarker:)` is the one
 statement of it, and a surface that caps a run routes through

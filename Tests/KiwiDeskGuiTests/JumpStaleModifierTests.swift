@@ -92,7 +92,6 @@ struct JumpStaleModifierTests {
         model.latchOpener([.option])
         let stale = JumpFooter(
             scope: .windows,
-            overflows: false,
             modifiers: model.heldModifiers
         )
         #expect(stale.leading == 0)
@@ -100,10 +99,9 @@ struct JumpStaleModifierTests {
         model.noteModifiers([.option])
         let fresh = JumpFooter(
             scope: .windows,
-            overflows: false,
             modifiers: model.heldModifiers
         )
-        #expect(fresh.leading == 1)
+        #expect(fresh.leading == 2)
     }
 
     @Test("↩ and a digit under a stale ⌥ jump; a fresh ⌥ swaps")
