@@ -3,7 +3,8 @@ import SwiftUI
 
 /// +'s popover (#3263), the layer editor titled "New layer": its
 /// name field focused, its icon unset, and Applies to shown where
-/// `layerAdmission` places the layer, settable once it exists. Add
+/// `layerAdmission` places the layer, settable once it exists. A
+/// rejoined shared layer shows its own icon, which it keeps. Add
 /// stays greyed until the decider takes the name; Cancel, Escape
 /// and a close add nothing.
 struct LayerAddPopover: View {
@@ -20,15 +21,15 @@ struct LayerAddPopover: View {
             Text(LayerEditorWords.newLayer)
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
-            LayerEditorGrid {
+            LayerEditorForm.grid {
                 LayerEditorForm.row(LayerEditorWords.name) {
                     nameField
                 }
                 LayerEditorForm.row(LayerEditorWords.icon) {
-                    IconPicker(icon: $icon, preview: .menuBar)
+                    iconPicker(typed)
                 }
                 if let reading = model.layerReach(typed),
-                    LayerEditorWords.offersReach(reading)
+                    LayerEditorForm.offersReach(reading)
                 {
                     LayerEditorForm.row(LayerEditorWords.reach) {
                         reach(reading)
@@ -64,11 +65,23 @@ struct LayerAddPopover: View {
         }
     }
 
+    /// A rejoined shared layer's own icon, greyed: the rejoin
+    /// caption under the name says why.
+    @ViewBuilder
+    private func iconPicker(_ typed: String) -> some View {
+        if let shared = model.rejoinedLayerIcon(typed) {
+            IconPicker(icon: .constant(shared), preview: .menuBar)
+                .disabled(true)
+        } else {
+            IconPicker(icon: $icon, preview: .menuBar)
+        }
+    }
+
     /// Where the layer will start, drawn dimmed with its reason: the
     /// checklist edits a layer the page has, and this one has none
     /// yet.
     private func reach(_ reading: RuleReachReading) -> some View {
-        let start = LayerEditorWords.startingReach(reading)
+        let start = RuleReachWords.label(reading)
         return VStack(alignment: .leading, spacing: 4) {
             Text(start)
                 .foregroundStyle(SettingsTheme.ink3)
@@ -92,67 +105,16 @@ struct LayerAddPopover: View {
             return (LayerReachWords.joinOnLoadedPage, true)
         case .rejoin?:
             return (LayerReachWords.rejoins(typed), false)
-        case .new?, nil:
+        case .new?:
             return nil
+        case nil:
+            return model.layerOnPageRefusal(typed).map { ($0, true) }
         }
     }
 
     private func add() {
         let typed = name.trimmed
-        guard model.addLayer(typed) else { return }
-        if !icon.isEmpty,
-            let index = model.config.layers.firstIndex(where: {
-                $0.name == typed
-            })
-        {
-            model.config.layers[index].icon = icon
-        }
+        guard model.addLayer(typed, icon: icon) else { return }
         done(typed)
-    }
-}
-
-/// The layer editor's label column and its captions, shared by the
-/// add and edit popovers so the two draw one form.
-struct LayerEditorGrid<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        Grid(
-            alignment: .leadingFirstTextBaseline,
-            horizontalSpacing: 10,
-            verticalSpacing: 8
-        ) {
-            content()
-        }
-    }
-}
-
-/// The layer editor's form pieces, shared by both popovers.
-@MainActor
-enum LayerEditorForm {
-    static let width: CGFloat = 340
-
-    /// One labelled row. The label is drawn, not spoken: every
-    /// control here names itself (#812).
-    static func row(
-        _ label: String,
-        @ViewBuilder control: () -> some View
-    ) -> some View {
-        GridRow {
-            Text(label)
-                .foregroundStyle(.secondary)
-                .gridColumnAlignment(.trailing)
-                .accessibilityHidden(true)
-            control()
-        }
-    }
-
-    static func caption(_ text: String, refused: Bool) -> some View {
-        Text(text)
-            .font(.caption)
-            .foregroundStyle(
-                refused ? SettingsTheme.danger : SettingsTheme.ink3
-            )
-            .fixedSize(horizontal: false, vertical: true)
     }
 }

@@ -65,18 +65,4 @@ enum LayerEditorWords {
     static var add: String {
         L("shortcuts.add", "Add")
     }
-
-    /// The row is drawn where there is a second profile to name.
-    static func offersReach(_ reading: RuleReachReading) -> Bool {
-        reading.profiles.count + reading.unreadable.count >= 2
-    }
-
-    /// Where a layer not yet on the page starts: shared, or the
-    /// edited profile alone, which the reading of a name no file
-    /// holds leaves out until the add records it.
-    static func startingReach(_ reading: RuleReachReading) -> String {
-        var start = reading
-        if !start.shared { start.users.insert(start.editing) }
-        return RuleReachWords.label(start)
-    }
 }

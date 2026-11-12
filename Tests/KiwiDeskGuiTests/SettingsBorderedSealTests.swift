@@ -85,10 +85,8 @@ struct SettingsBorderedSealTests {
             ),
             "LayerEditorPopover.swift": (
                 1, "role: .destructive",
-                "Delete Layer…; #770's hand-pairing suppressed "
-                    + "its red, carried through by #771's seal "
-                    + "until this fix (moved into ✎'s popover, "
-                    + "#3263)"
+                "Delete Layer…: #770's hand-pairing suppressed "
+                    + "its red, carried through by #771's seal"
             ),
             "KiwiVisionLensHeader.swift": (
                 1, "role: .destructive",

@@ -35,19 +35,29 @@ extension SettingsModel {
         let known =
             table.base[name] != nil
             || everyone.contains { table.resolved(name, for: $0) != nil }
-        let shared =
+        // A name no file holds reads where the add would record it
+        // (`recordCreated`), from the same default.
+        let start: RuleReach? =
             known
-            ? table.base[name] != nil
+            ? nil
             : RuleReachDraft.defaultReach(
                 of: name,
                 in: table,
                 editing: editing,
                 isLoaded: reachIsLoaded
-            ).isShared
-        let users =
-            known
-            ? Set(everyone.filter { table.resolved(name, for: $0) != nil })
-            : (shared ? Set(everyone) : [])
+            )
+        let shared = start.map(\.isShared) ?? (table.base[name] != nil)
+        let users: Set<String>
+        switch start {
+        case nil:
+            users = Set(
+                everyone.filter { table.resolved(name, for: $0) != nil }
+            )
+        case .shared?:
+            users = Set(everyone)
+        case .listed(let profiles)?:
+            users = profiles
+        }
         let page = config.layers.first { $0.name == name }
         var own: [String: String] = [:]
         for profile in users where profile != editing {

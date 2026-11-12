@@ -89,10 +89,12 @@ struct NameEditSeedTests {
     /// correctly dead until the user types, which is the same
     /// thing the defect looked like and is not it. Keyed by
     /// file, so a second popover in one of these files still has
-    /// to be read by a human. None is today: the layer strip's
-    /// add-a-layer popover, the one there was, is presented by
-    /// item since #3263.
-    private let emptySeeded: [String: String] = [:]
+    /// to be read by a human.
+    private let emptySeeded: [String: String] = [
+        "KiwiShelfCard+Font.swift":
+            "`FontFamilyPicker`'s field is a search that opens "
+            + "empty, with no seed to go stale"
+    ]
 
     @Test("a popover with a text field is presented by item")
     func nameEditingPopoversPresentByItem() throws {
@@ -100,20 +102,26 @@ struct NameEditSeedTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let files = try SourceScan.swiftSources(under: root)
         #expect(files.count > 50)
-        for file in files {
-            let name = file.lastPathComponent
-            guard emptySeeded[name] == nil else { continue }
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
+        let sources = try files.map { file in
+            (
+                file.lastPathComponent,
+                SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                .split(whereSeparator: \.isWhitespace)
+                .joined()
             )
-            .split(whereSeparator: \.isWhitespace)
-            .joined()
+        }
+        let fields = fieldViews(in: sources.map(\.1))
+        #expect(fields.contains("NameEditPopover"))
+        #expect(fields.contains("LayerAddPopover"))
+        for (name, source) in sources where emptySeeded[name] == nil {
             for block in presentedBlocks(
                 in: source,
                 after: ".popover(isPresented:"
             )
             where block.contains("TextField(")
-                || block.contains("NameEditPopover(")
+                || fields.contains(where: { block.contains($0 + "(") })
             {
                 Issue.record(
                     Comment(
@@ -130,6 +138,26 @@ struct NameEditSeedTests {
                 )
             }
         }
+    }
+
+    /// The views declared in a file that holds a `TextField(`: a
+    /// popover building one holds a field as surely as one spelling
+    /// it inline. Trade: it asks per file, so a field-less view
+    /// declared beside one with a field is counted too.
+    private func fieldViews(in sources: [String]) -> Set<String> {
+        var names: Set<String> = []
+        for source in sources where source.contains("TextField(") {
+            for tail in source.components(separatedBy: "struct").dropFirst() {
+                let name = tail.prefix { $0.isLetter || $0.isNumber }
+                if !name.isEmpty,
+                    tail.dropFirst(name.count)
+                        .hasPrefix(":View")
+                {
+                    names.insert(String(name))
+                }
+            }
+        }
+        return names
     }
 
     /// The brace-balanced content of each `.popover(` whose head

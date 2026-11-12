@@ -61,14 +61,14 @@ struct LayerEditorPopover: View {
         let reading = model.layerReach(current)
         let locked = model.layerLockedHere(current)
         VStack(alignment: .leading, spacing: 10) {
-            LayerEditorGrid {
+            LayerEditorForm.grid {
                 LayerEditorForm.row(LayerEditorWords.name) {
                     nameField(locked: locked, reading: reading)
                 }
                 LayerEditorForm.row(LayerEditorWords.icon) {
                     IconPicker(icon: iconBinding, preview: .menuBar)
                 }
-                if let reading, LayerEditorWords.offersReach(reading) {
+                if let reading, LayerEditorForm.offersReach(reading) {
                     LayerEditorForm.row(LayerEditorWords.reach) {
                         LayerReachControl(
                             model: model,
@@ -85,8 +85,7 @@ struct LayerEditorPopover: View {
         .padding(12)
         .frame(width: LayerEditorForm.width, alignment: .leading)
         .onExitCommand {
-            dropsName = true
-            name = current
+            drop()
             close()
         }
         .onAppear {
@@ -126,7 +125,7 @@ struct LayerEditorPopover: View {
                     .fixedSize(horizontal: false, vertical: true)
             } else {
                 Button(LayerEditorWords.deleteLayer, role: .destructive) {
-                    dropsName = true
+                    drop()
                     delete(current)
                 }
                 .buttonStyle(.bordered)
@@ -138,6 +137,13 @@ struct LayerEditorPopover: View {
             }
             .buttonStyle(.borderedProminent)
         }
+    }
+
+    /// Drops an uncommitted name before a close, which the field's
+    /// blur would otherwise commit.
+    private func drop() {
+        dropsName = true
+        name = current
     }
 
     private var refusal: String? {
@@ -167,9 +173,7 @@ struct LayerEditorPopover: View {
     /// screen until it is fixed or dropped.
     private func commitName() {
         let typed = name.trimmed
-        guard typed != current else { return }
-        guard !typed.isEmpty,
-            !model.config.layers.contains(where: { $0.name == typed }),
+        guard !dropsName, typed != current, !typed.isEmpty,
             model.layerRenameRefusal(current, typed) == nil
         else { return }
         let old = current

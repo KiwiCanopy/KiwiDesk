@@ -45,6 +45,7 @@ extension SettingsModel {
     /// joins — and never one a profile the rename reaches holds.
     func layerRenameRefusal(_ old: String, _ new: String) -> String? {
         guard new != old else { return nil }
+        if let refusal = layerOnPageRefusal(new) { return refusal }
         if let holder = layerRenameClash(old, new) {
             return LayerReachWords.clash(holder, new)
         }
@@ -54,6 +55,23 @@ extension SettingsModel {
         case .rejoin?: return LayerReachWords.renameOntoShared(new)
         case .sharedElsewhere?: return LayerReachWords.joinOnLoadedPage
         }
+    }
+
+    /// Why `name` is refused because the page already has it; nil
+    /// otherwise. Add and Rename both say it (#3263).
+    func layerOnPageRefusal(_ name: String) -> String? {
+        guard config.layers.contains(where: { $0.name == name }) else {
+            return nil
+        }
+        return LayerReachWords.onPage(name)
+    }
+
+    /// The icon a rejoined shared layer brings, which Add keeps,
+    /// empty for none; nil where Add would not rejoin.
+    func rejoinedLayerIcon(_ name: String) -> String? {
+        guard layerAdmission(name) == .rejoin else { return nil }
+        let shared = layeredReach?.storedKeyBase.first { $0.name == name }
+        return shared?.icon ?? ""
     }
 
     /// Whether Add may take `name`.
@@ -70,9 +88,10 @@ extension SettingsModel {
         layerAdmission(name) == .rejoin
     }
 
-    /// Adds `name` to the page and says whether it did.
+    /// Adds `name` to the page and says whether it did. A new layer
+    /// takes `icon`; a rejoined shared one keeps its own.
     @discardableResult
-    func addLayer(_ name: String) -> Bool {
+    func addLayer(_ name: String, icon: String? = nil) -> Bool {
         switch layerAdmission(name) {
         case .rejoin?:
             guard
@@ -90,13 +109,13 @@ extension SettingsModel {
         case .new?:
             // Every layer carries the app-chrome rows (#602, #1381),
             // on the shortcut base (#2460).
-            config.layers.append(
-                KeyLayer(
-                    name: name,
-                    bindings: DefaultKeybindings.appChromeRows()
-                        .map(config.shortcutBase.rebased)
-                )
+            var layer = KeyLayer(
+                name: name,
+                bindings: DefaultKeybindings.appChromeRows()
+                    .map(config.shortcutBase.rebased)
             )
+            layer.icon = icon.flatMap { $0.isEmpty ? nil : $0 }
+            config.layers.append(layer)
             recordCreated([name])
             return true
         case .clash?, .sharedElsewhere?, nil:
