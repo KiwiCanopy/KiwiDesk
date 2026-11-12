@@ -112,4 +112,41 @@ struct ReachRowFoldFamilyTests {
         #expect(rows.count == 1)
         #expect(rows.first?.reach != nil)
     }
+
+    @Test("a move whose keys reached apart keeps one label, one row")
+    func pairedWordsDisagree() {
+        let left = ReachSubject(family: .gesture, key: "a")
+        let took = ReachSubject(family: .gesture, key: "b")
+        var move = SettingsDiffRow.change(
+            .shortcuts(.gestureBindings),
+            instance: "a|b",
+            label: "Move",
+            old: "a",
+            new: "b"
+        )
+        move.subject = took
+        move.pairedSubject = left
+        func reach(
+            _ subject: ReachSubject,
+            _ words: String
+        ) -> SettingsDiffRow {
+            var row = SettingsDiffRow.change(
+                .shortcuts(.gestureBindings),
+                instance: "reach.\(words).\(subject.key)",
+                label: words,
+                old: nil,
+                new: nil
+            )
+            row.subject = subject
+            row.reach = words
+            return row
+        }
+        let rows = SettingsDiffRowFold.folded(
+            [move],
+            reach: [reach(took, "Home"), reach(left, "Away")]
+        )
+        #expect(rows.count == 2)
+        #expect(rows.first?.reach == "Home")
+        #expect(rows.last?.reach == nil)
+    }
 }

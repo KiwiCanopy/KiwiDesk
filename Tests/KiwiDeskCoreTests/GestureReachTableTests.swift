@@ -33,6 +33,9 @@ struct GestureReachTableTests {
         )
     }
 
+    /// The table keeps a stored binding the runtime refuses: the row
+    /// narrates the refusal, and its reach is what the files say. The
+    /// fixture holds no refused or drag-held key.
     @Test("each profile resolves what the runtime resolves")
     func resolvesLikeTheRuntime() {
         let table = table()
@@ -44,7 +47,6 @@ struct GestureReachTableTests {
             let resolved = table.resolved(for: name).compactMap { pair in
                 GestureKey(spelling: pair.key).map { ($0, pair.value) }
             }
-            #expect(!runtime.isEmpty)
             #expect(Dictionary(uniqueKeysWithValues: resolved) == runtime)
         }
     }

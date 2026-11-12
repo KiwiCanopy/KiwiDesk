@@ -63,11 +63,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         keyLayers: RuleReachTable<String>,
         scrollGestures: RuleReachTable<ScrollGestureValue>,
         storedScrollBase: ScrollGestureBase,
-        gestures: RuleReachTable<GestureAction> = .gestures(
-            base: GestureMap(),
-            overrides: []
-        ),
-        storedGestureBase: GestureMap = GestureMap(),
+        gestures: RuleReachTable<GestureAction>,
+        storedGestureBase: GestureMap,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
         focusWrap: RuleReachTable<FocusWrap>,

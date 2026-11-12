@@ -27,7 +27,11 @@ enum SettingsDiffRowFold {
                 return own[$0].subject == subject
                     || own[$0].pairedSubject == subject
             }
-            guard let words = row.reach, !matches.isEmpty else {
+            // A paired row already naming other words keeps them, and
+            // this reach row stays its own (#3225).
+            guard let words = row.reach, !matches.isEmpty,
+                matches.allSatisfy({ (own[$0].reach ?? words) == words })
+            else {
                 row.reach = nil
                 rest.append(row)
                 continue

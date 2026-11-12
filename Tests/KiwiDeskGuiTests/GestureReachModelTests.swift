@@ -101,9 +101,10 @@ struct GestureReachModelTests {
     }
 
     /// The model tests above call `carryPick` themselves, so the row
-    /// that re-keys is held to it here: it carries the pick and
-    /// records no removal of its own, which would strand the old key
-    /// in a listed profile.
+    /// that re-keys is held to it here: it carries the pick once the
+    /// move is known to land and before the draft takes it, while the
+    /// old key still reads, and records no removal of its own, which
+    /// would strand the old key in a listed profile.
     @Test("the row's re-key carries its reach through carryPick")
     func rekeyWiring() throws {
         let body = try SourceScan.functionBody(
@@ -112,7 +113,16 @@ struct GestureReachModelTests {
             under: "Settings/Components/Gestures",
             root: "Sources/KiwiDesk"
         )
-        #expect(body.contains("model.carryPick(.gesture"))
+        let carry = body.range(of: "model.carryPick(.gesture")
+        let move = body.range(of: "GestureListEdits.rekey(")
+        #expect(carry != nil && move != nil)
+        let lands = body.range(of: "model.config.gesture = map")
+        if let carry, let move, let lands {
+            #expect(move.lowerBound < carry.lowerBound)
+            #expect(carry.lowerBound < lands.lowerBound)
+        } else {
+            Issue.record("rekey lost a step the order reads")
+        }
         #expect(!body.contains("recordRemoval("))
     }
 }

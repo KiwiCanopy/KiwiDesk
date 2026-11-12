@@ -221,14 +221,12 @@ struct GestureListRow: View {
         clash = nil
         guard target != key, !others.contains(target) else { return }
         if action != nil {
-            model.carryPick(.gesture, from: key.spelling, to: target.spelling)
-            guard
-                GestureListEdits.rekey(
-                    key,
-                    to: target,
-                    in: &model.config.gesture
-                )
+            var map = model.config.gesture
+            guard GestureListEdits.rekey(key, to: target, in: &map)
             else { return }
+            // The pick moves while the old key still reads (#3225).
+            model.carryPick(.gesture, from: key.spelling, to: target.spelling)
+            model.config.gesture = map
         }
         entry.key = target
     }
@@ -249,6 +247,7 @@ struct GestureListRow: View {
             return
         }
         if action != nil {
+            model.dropGesturePick(key.spelling, shared: sharedReach != nil)
             GestureListEdits.remove(key, in: &model.config.gesture)
         }
         onUnbound()

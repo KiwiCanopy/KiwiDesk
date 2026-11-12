@@ -191,8 +191,8 @@ extension SettingsRevertRegister {
 
     /// A gesture row back to the baseline: every key its instance
     /// names — a re-key's two together — or the whole map for a row
-    /// that names none (#3183),
-    /// each key's reach settling with it (#3225).
+    /// that names none (#3183), each key's reach settling with it
+    /// (#3225).
     private static let gestureRow = RevertWriter(
         paths: ["config.gesture"]
     ) { model, instance in

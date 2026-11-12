@@ -4,7 +4,9 @@ import Foundation
 // `GestureKey` by its spelling, its value the whole action. The base
 // is the seeds with `gui.json`'s map laid over them, so a seed the
 // base turns off is a key the base lacks, and a profile's tombstone
-// is a profile leaving the key out.
+// is a profile leaving the key out. It holds what the files say: a
+// binding `GestureSeeds.resolved` refuses still reaches, and its row
+// narrates the refusal.
 
 extension RuleReachTable where Value == GestureAction {
     /// The family, from the stored base and each profile's sparse

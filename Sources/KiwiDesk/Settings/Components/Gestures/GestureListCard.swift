@@ -50,10 +50,8 @@ struct GestureListCard: View {
         }
         .onAppear(perform: snapshot)
         // Another profile's page is a fresh list, sorted (#3225).
-        .onChange(of: model.target) {
-            pending = []
-            reload()
-        }
+        .onChange(of: model.target) { reload() }
+        .onChange(of: model.reachPage) { reload() }
         .onChange(of: model.config.gesture) { _, base in
             entries = GestureListEdits.reconcile(
                 entries,
