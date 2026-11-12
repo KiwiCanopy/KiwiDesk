@@ -74,10 +74,8 @@ struct BarsGateWiringTests {
                 // Grow's Unfold note on a Boxed shelf (#2556).
                 "ifreason==nil,gates.growPlaysAsUnfold{"
                     + "note(BarsGateHelp.growPlaysAsUnfold)",
-                ".inertReason(for:.colours(.animationsRevealDurationMS))",
+                ".inertReason(for:.colours(.animationsOnReveal))",
                 "GreyOut(active:revealInert)",
-                ".inertReason(for:.colours(.animationsExpandDurationMS))",
-                "GreyOut(active:reason==.expandOff)",
             ],
         ]
         for (path, needles) in consults {
@@ -157,7 +155,7 @@ struct BarsGateWiringTests {
     @Test("each reason has its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
-            .boxedShelf, .barsSplit, .noBarHides, .expandOff,
+            .boxedShelf, .barsSplit, .noBarHides,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }
@@ -200,17 +198,19 @@ struct BarsGateWiringTests {
         #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
     }
 
-    /// The expand plays with every bar on Always, so its length
-    /// greys only while its hidden switch is off (2026-10-21).
-    @Test("the Expand duration greys only while the expand is off")
-    func expandGreysOnlyWhenOff() {
+    /// The reveal's switch greys while no bar hides, as the picker
+    /// does, whatever the switch reads (#3236).
+    @Test("the reveal's switch greys while no bar hides")
+    func revealSwitchGreysWhileNoBarHides() {
         var settings = TilingSettings()
-        let key = SettingKey.colours(.animationsExpandDurationMS)
+        let toggle = SettingKey.colours(.animationsOnReveal)
+        settings.spaceBarStyle.visibility = .hidden
+        settings.animations.onReveal = false
+        #expect(BarsGates(settings: settings).inertReason(for: toggle) == nil)
         settings.setEveryBarVisibility(.always)
-        #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
-        settings.animations.onExpand = false
         #expect(
-            BarsGates(settings: settings).inertReason(for: key) == .expandOff
+            BarsGates(settings: settings).inertReason(for: toggle)
+                == .noBarHides
         )
     }
 }

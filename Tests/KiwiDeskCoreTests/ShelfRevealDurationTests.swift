@@ -120,37 +120,36 @@ struct ShelfRevealDurationTests {
         #expect(core.tiler.settings.animations.revealDurationMS == 500)
     }
 
-    /// 0 is no animation (owner ruling, 2026-10-21): every style
-    /// lands at once, the mark swaps, and a value between 0 and the
-    /// band rises to its floor, so nothing blinks.
-    @Test("0 is instant, and the gap below the band rises to it")
-    func zeroIsInstant() {
+    /// The reveal's switch is its "instant" (#3236): off, every
+    /// style lands at once and the mark swaps; the bands hold no 0,
+    /// so a value below one rises to its floor.
+    @Test("Off is instant, and a 0 rises to the band")
+    func offIsInstant() {
         var animations = AnimationSettings()
         let reveal = AnimationSettings.revealDurationBand
         let expand = AnimationSettings.expandDurationBand
         animations.revealDurationMS = 0
-        #expect(animations.revealDurationMS == 0)
-        animations.revealDurationMS = 1
         #expect(animations.revealDurationMS == reveal.lowerBound)
         animations.expandDurationMS = 0
-        #expect(animations.expandDurationMS == 0)
-        #expect(animations.expandSeconds == 0)
-        animations.expandDurationMS = expand.lowerBound - 1
         #expect(animations.expandDurationMS == expand.lowerBound)
+        #expect(animations.revealSeconds == 0.15)
+        animations.onReveal = false
+        #expect(animations.revealSeconds == 0)
+        #expect(animations.revealDurationMS == reveal.lowerBound)
         for kind in [BarMotion.RevealKind.slide, .grow, .unfold, .fade] {
             let content = NSView(frame: Self.plate)
             let items = NSView(frame: Self.plate)
             let span = BarMotion.playReveal(
                 content,
                 items: items,
-                path: path(kind, length: 0),
+                path: path(kind, length: animations.revealSeconds),
                 entering: true
             )
             #expect(span == 0)
             #expect(content.layer?.animationKeys() == nil, "\(kind)")
         }
         let saved = BarMotion.revealLength
-        BarMotion.revealLength = 0
+        BarMotion.revealLength = animations.revealSeconds
         defer { BarMotion.revealLength = saved }
         let mark = NSView()
         BarMotion.fadeMark(mark, showing: false, reveal: .slide)
@@ -158,24 +157,27 @@ struct ShelfRevealDurationTests {
         #expect(mark.layer?.animationKeys() == nil)
     }
 
-    /// Settings' stepper walks 0 → floor → … and back, never into
-    /// the gap; a typed value in the gap rises to the floor.
-    @Test("The stepper skips the gap below the band")
-    func stepperSkipsTheGap() {
-        let band = AnimationSettings.revealDurationBand
-        let step = AnimationSettings.revealDurationStep
-        let next = { (new: Int, current: Int) in
-            AnimationSettings.stepped(
-                new,
-                from: current,
-                band: band,
-                step: step
-            )
+    @Test("set_on_reveal reaches the bars; a 0 length is refused")
+    func verbs() {
+        let saved = BarMotion.revealLength
+        defer { BarMotion.revealLength = saved }
+        let core = makeTestCore()
+        #expect(
+            core.execute("animations.set_on_reveal", args: [.bool(false)])
+                .isSuccess
+        )
+        #expect(!core.tiler.settings.animations.onReveal)
+        #expect(BarMotion.revealLength == 0)
+        for verb in [
+            "animations.set_reveal_duration",
+            "animations.set_expand_duration",
+        ] {
+            let reply = core.execute(verb, args: [.number(0)])
+            #expect(!reply.isSuccess, "\(verb)")
         }
-        #expect(next(step, 0) == band.lowerBound)
-        #expect(next(band.lowerBound - step, band.lowerBound) == 0)
-        #expect(next(band.lowerBound + step, band.lowerBound) == 200)
-        #expect(next(100, 300) == band.lowerBound)
-        #expect(next(0, 300) == 0)
+        #expect(core.tiler.settings.animations.revealDurationMS == 300)
+        #expect(core.tiler.settings.animations.expandDurationMS == 750)
+        core.execute("animations.set_on_reveal", args: [.bool(true)])
+        #expect(BarMotion.revealLength == 0.3)
     }
 }

@@ -11,6 +11,7 @@ extension ConfigMigration {
         [
             (to: 2, step: migratingShelfGlideOntoExpand),
             (to: 3, step: migratingRetiredDragLook),
+            (to: 4, step: migratingInstantDurationsOntoToggles),
         ]
 
     /// `data`, written at `format`, with every step above it applied.

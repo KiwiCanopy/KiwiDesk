@@ -50,14 +50,19 @@ extension APIReference {
                 + "fade and the overflow list's growth.",
             .boolean("enabled")
         ),
+        "set_on_reveal": APIRecord(
+            "Enables or disables a hidden bar's reveal; off, it shows "
+                + "and hides at once.",
+            .boolean("enabled")
+        ),
         "set_expand_duration": APIRecord(
             "Sets the shelf's expand in milliseconds, clamped to its "
-                + "band.",
+                + "band; 0 is refused.",
             .integer("milliseconds")
         ),
         "set_reveal_duration": APIRecord(
             "Sets how long a hidden bar's reveal takes in "
-                + "milliseconds, clamped to its band.",
+                + "milliseconds, clamped to its band; 0 is refused.",
             .integer("milliseconds")
         ),
         "set_size_policy": APIRecord(

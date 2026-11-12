@@ -133,10 +133,25 @@ extension KiwiCore {
             tiler.settings.animations.onPeek = on
             updateBars()
             return .ok()
+        case "animations.set_on_reveal":
+            // A hidden shelf's reveal on and off (#3236).
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.animations.onReveal = on
+            updateBars()
+            return .ok()
         case "animations.set_expand_duration":
             // The shelf expand's pace (#1838).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
+            }
+            // 0 left the band (#3236): say which verb is off.
+            guard ms > 0 else {
+                return .fail(
+                    "a duration must be above 0; "
+                        + "animations.set_on_expand(false) turns it off"
+                )
             }
             tiler.settings.animations.expandDurationMS = ms
             updateBars()
@@ -146,6 +161,12 @@ extension KiwiCore {
             // 2026-10-21).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
+            }
+            guard ms > 0 else {
+                return .fail(
+                    "a duration must be above 0; "
+                        + "animations.set_on_reveal(false) turns it off"
+                )
             }
             tiler.settings.animations.revealDurationMS = ms
             updateBars()

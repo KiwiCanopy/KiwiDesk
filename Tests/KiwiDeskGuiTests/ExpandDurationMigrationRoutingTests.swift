@@ -25,6 +25,7 @@ struct ExpandDurationMigrationRoutingTests {
         let allowedLive: Set<String> = [
             "Tiling/AnimationSettings.swift",
             "Config/ConfigMigration+ExpandDuration.swift",
+            "Config/ConfigMigration+InstantDurations.swift",
         ]
         // Only the migration may still name the retired keys.
         let allowedRetired: Set<String> = [
@@ -64,6 +65,40 @@ struct ExpandDurationMigrationRoutingTests {
             Comment(
                 rawValue: "a retired shelf-glide key is still named "
                     + "in: \(retired.sorted()) — only the migration may"
+            )
+        )
+    }
+
+    /// The instant-durations step (#3236) rewrites
+    /// `reveal_duration` and `on_reveal` by KEY at any depth too, so
+    /// the same scope holds for the reveal's two keys.
+    @Test("the reveal keys stay scoped to their declarer")
+    func revealKeysStayUnique() throws {
+        let prefix = coreRoot.path + "/"
+        let allowed: Set<String> = [
+            "Tiling/AnimationSettings.swift",
+            "Config/ConfigMigration+InstantDurations.swift",
+        ]
+        var live: Set<String> = []
+        for file in try SourceScan.swiftSources(under: coreRoot) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            guard
+                source.contains("\"reveal_duration\"")
+                    || source.contains("\"on_reveal\"")
+            else { continue }
+            live.insert(
+                file.path.hasPrefix(prefix)
+                    ? String(file.path.dropFirst(prefix.count))
+                    : file.path
+            )
+        }
+        #expect(
+            live == allowed,
+            Comment(
+                rawValue: "reveal key declarations: \(live.sorted())"
+                    + " — a second one owes the step a path"
             )
         )
     }

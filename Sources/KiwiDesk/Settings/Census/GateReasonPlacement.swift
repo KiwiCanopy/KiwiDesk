@@ -81,7 +81,7 @@ extension SettingRuntimeGate {
             .runningCopyTranslocated,
             .automaticInstallUnavailable, .luaOwnsConfig,
             .noBarHides, .noBarShows, .focusBorderOff,
-            .expandOffInConfig, .spaceHasNoOverrides,
+            .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
             .noBindingStore, .defaultsToRestore:
@@ -111,9 +111,6 @@ extension SettingRuntimeGate {
         case .noBarHides:
             // The bars' values sit above it, but not that a reveal
             // needs a hiding bar (owner ruling, 2026-10-21).
-            return false
-        case .expandOffInConfig:
-            // Its knob has no row anywhere.
             return false
         case .noBarShows, .focusBorderOff:
             // Their causes are on other pages (#3089).

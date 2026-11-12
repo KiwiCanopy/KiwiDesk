@@ -1109,12 +1109,17 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/gui.md` ▸ the Reduce Motion gate and
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
-The bars' own animations are not on that card: their lengths —
-**Reveal duration** and **Expand duration** — sit in KiwiShelf ▸
-KiwiShelf ▸ Show ▸ Durations beside the Reveal picker, and the
-card points there. Animate KiwiShelf has no row; while the
-Lua-only `animations.on_expand` is off, Expand duration greys and
-names it. While Reduce Motion is on, the card also says so in a
+The bars' own animations are not on that card: they sit in
+KiwiShelf ▸ KiwiShelf ▸ Show ▸ Durations beside the Reveal picker,
+and the card points there.
+
+:::unreleased
+The drawer holds two switches, **Animate the reveal** and **Animate
+the expand**. Both lengths are Lua-only
+(`animations.set_reveal_duration`, `animations.set_expand_duration`).
+:::
+
+While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 

@@ -9,7 +9,9 @@ import Foundation
 /// re-serializing re-encodes every Double (`0.4` became
 /// `0.40000000000000002`, five places, for a one-value migration
 /// — measured 2026-08-20), and a rewrite of the user's file may
-/// touch only what it came for.
+/// touch only what it came for. An edit scoped to one object — a
+/// key's sibling in the same object — finds it through
+/// `JSONKeyLexer` rather than a scanner of its own.
 extension ConfigMigration {
     /// Rewrites `data` using surgical text edits when verified by re-parsing,
     /// or falls back to serialized JSON tree; returns nil if unchanged.

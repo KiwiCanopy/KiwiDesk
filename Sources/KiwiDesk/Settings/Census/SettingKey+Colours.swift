@@ -25,6 +25,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.animations.scrollDurationMS"
     case animationsOnExpand = "settings.animations.onExpand"
     case animationsOnPeek = "settings.animations.onPeek"
+    case animationsOnReveal = "settings.animations.onReveal"
     case animationsExpandDurationMS =
         "settings.animations.expandDurationMS"
     case animationsRevealDurationMS =
@@ -105,15 +106,19 @@ extension ColoursKey {
                 gate: .setting(.colours(.animationsMaster))
             )
         case .animationsOnExpand:
-            // A hidden knob: its duration row says when it is off
-            // (owner ruling, 2026-10-21).
-            return .luaOnly
+            // KiwiShelf ▸ Show ▸ Durations; its length is Lua-only
+            // (#3236).
+            return .row(.bars, .kiwishelf, .showMore)
         case .animationsOnPeek:
             // The peeks' motion off, Lua-only (#2563).
             return .luaOnly
         case .animationsRevealDurationMS:
+            // Lua-only, as the expand's length (owner ruling,
+            // 2026-11-12, #3236).
+            return .luaOnly
+        case .animationsOnReveal:
             // KiwiShelf ▸ Show ▸ Durations, greyed with the Reveal
-            // row while no bar hides (owner ruling, 2026-10-21).
+            // row while no bar hides (owner ruling, 2026-10-21, #3236).
             return .row(
                 .bars,
                 .kiwishelf,
@@ -121,14 +126,9 @@ extension ColoursKey {
                 gate: .runtime(.noBarHides)
             )
         case .animationsExpandDurationMS:
-            // The expand plays with every bar on Always, so it greys
-            // only while its hidden switch is off (2026-10-21).
-            return .row(
-                .bars,
-                .kiwishelf,
-                .showMore,
-                gate: .runtime(.expandOffInConfig)
-            )
+            // Lua-only beside its Settings switch (owner ruling,
+            // 2026-11-12, #3236).
+            return .luaOnly
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .animationsScrollDurationMS:
@@ -227,18 +227,20 @@ extension ColoursKey {
                 "behavior.animations.window_duration",
                 help: "behavior.animations.window_duration.help"
             )
-        case .animationsOnExpand, .animationsOnPeek:
+        case .animationsOnExpand:
+            return .text(
+                "kiwishelf.on_expand",
+                help: "kiwishelf.on_expand.help"
+            )
+        case .animationsOnPeek:
             return .none
-        case .animationsRevealDurationMS:
+        case .animationsOnReveal:
             return .text(
-                "kiwishelf.reveal_duration",
-                help: "kiwishelf.reveal_duration.help"
+                "kiwishelf.on_reveal",
+                help: "kiwishelf.on_reveal.help"
             )
-        case .animationsExpandDurationMS:
-            return .text(
-                "kiwishelf.expand_duration",
-                help: "kiwishelf.expand_duration.help"
-            )
+        case .animationsRevealDurationMS, .animationsExpandDurationMS:
+            return .none
         case .animationsOnScrolling:
             return .text(
                 "scroll_grid.animate_focus_shifts",

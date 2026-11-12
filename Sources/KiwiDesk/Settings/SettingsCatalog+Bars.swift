@@ -71,13 +71,13 @@ struct BarsControls: Sendable {
 /// KiwiShelf ▸ Show ▸ Durations rows (owner ruling, 2026-10-21),
 /// in `BarsRowOrder.kiwishelfDurations`' order.
 struct KiwiShelfDurationControls: Sendable {
-    let revealDuration = SettingsControl(
-        "kiwishelf.reveal_duration",
-        "Reveal duration"
+    let onReveal = SettingsControl(
+        "kiwishelf.on_reveal",
+        "Animate the reveal"
     )
-    let expandDuration = SettingsControl(
-        "kiwishelf.expand_duration",
-        "Expand duration"
+    let onExpand = SettingsControl(
+        "kiwishelf.on_expand",
+        "Animate the expand"
     )
 }
 
