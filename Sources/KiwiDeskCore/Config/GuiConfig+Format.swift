@@ -96,5 +96,9 @@ extension GuiConfig {
     /// **23 (#3237)**: the animation lengths are app-wide, in the
     /// `animations` group, and the shared look carries none
     /// (`migratingLookPaceOut`).
-    public static let currentFormat = 23
+    ///
+    /// **24 (#3246)**: a lens's fade length and curve overrides are
+    /// cleared, since Settings no longer draws them
+    /// (`migratingLensFadeOut`).
+    public static let currentFormat = 24
 }

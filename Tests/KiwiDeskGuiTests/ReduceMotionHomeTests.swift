@@ -67,7 +67,8 @@ struct ReduceMotionHomeTests {
             .filter { !$0.isWhitespace }
         #expect(
             source.contains(
-                "publicstaticvarisOn:Bool{system||kiwiDesk}"
+                "publicstaticvarisOn:Bool{"
+                    + "joined(system:system,kiwiDesk:kiwiDesk)}"
             )
         )
     }

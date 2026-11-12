@@ -25,5 +25,10 @@ public enum ReduceMotion {
     }
 
     /// Whether KiwiDesk plays less motion: macOS's setting or its own.
-    public static var isOn: Bool { system || kiwiDesk }
+    public static var isOn: Bool { joined(system: system, kiwiDesk: kiwiDesk) }
+
+    /// The one join of the two reads, pure so a test needs no global.
+    static func joined(system: Bool, kiwiDesk: Bool) -> Bool {
+        system || kiwiDesk
+    }
 }

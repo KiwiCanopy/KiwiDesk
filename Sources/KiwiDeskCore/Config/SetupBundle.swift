@@ -110,7 +110,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#3236), in every shape a bundle carries.
     /// 47 = a look carries no animation length (#3237), in every
     /// look a bundle carries.
-    public static let currentFormat = 47
+    /// 48 = a lens's fade length and curve overrides are cleared
+    /// (#3246), in a bundle's `config`.
+    public static let currentFormat = 48
 
     public let format: Int
 

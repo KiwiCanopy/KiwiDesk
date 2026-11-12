@@ -60,6 +60,7 @@ public enum ConfigMigration {
         migratingGesturesIntoBindings,
         migratingInstantDurationsOntoToggles,
         migratingLookPaceOut,
+        migratingLensFadeOut,
     ]
 
     /// Runs after `steps`, and is skipped by

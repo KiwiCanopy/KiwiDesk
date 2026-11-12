@@ -3,10 +3,11 @@ import SwiftUI
 
 /// A lens's own values for the Default cards (#2103 rulings
 /// 23, 29, 46): Dim and blur, Stays clear, Maximize (#3064) and
-/// System appearance,
-/// one override checkbox per ROW — a lens often changes the dim and
-/// keeps the blur. An unchecked row reads "follows Default ·
-/// <value>"; checking it seeds the lens with that value.
+/// System appearance, one override checkbox per ROW — a lens often
+/// changes the dim and keeps the blur. An unchecked row reads
+/// "follows Default · <value>"; checking it seeds the lens with that
+/// value. A lens's fade is the global one's, Lua-only on a lens
+/// (#3246).
 struct KiwiVisionLensOverrides: View {
     @ObservedObject var model: SettingsModel
     let lens: VisionLens
@@ -29,8 +30,6 @@ struct KiwiVisionLensOverrides: View {
                         plain.visionBlur,
                         help: KiwiVisionLevelsCard.blurHelp
                     )
-                    fadeDurationRow
-                    fadeCurveRow
                 }
             }
             SettingsSection(SettingsCatalog.kiwiVision.clearCard.text) {
@@ -102,67 +101,6 @@ struct KiwiVisionLensOverrides: View {
                     suffix: "%",
                     labelHidden: true
                 )
-            }
-        }
-    }
-
-    private var fadeDurationRow: some View {
-        let value = override(\.fadeDuration)
-        let label = Self.fadeDurationLabel
-        let global = plain.visionFadeDuration
-        return OverrideChrome(
-            isOn: overrideToggle(value, global: global),
-            inherited: (label, Self.milliseconds(global)),
-            help: Self.fadeDurationHelp,
-            subject: label,
-            inheritsName: defaultName
-        ) {
-            SettingsRowShape(controlTrails: true) {
-                SettingsRowLabel(label: label, help: nil)
-            } control: {
-                StepperRow(
-                    label: label,
-                    value: Binding(
-                        get: { value.wrappedValue ?? global },
-                        set: { value.wrappedValue = $0 }
-                    ),
-                    in: AppWideSettings.visionFadeRange,
-                    step: 50,
-                    suffix: "ms",
-                    labelHidden: true
-                )
-            }
-        }
-    }
-
-    private var fadeCurveRow: some View {
-        let value = override(\.fadeCurve)
-        let label = SettingsCatalog.kiwiVision.fadeCurve.text
-        let global = plain.visionFadeCurve
-        let current = value.wrappedValue ?? global
-        return OverrideChrome(
-            isOn: overrideToggle(value, global: global),
-            inherited: (label, KiwiVisionLevelsCard.curveTitle(global)),
-            help: KiwiVisionLevelsCard.fadeCurveHelp,
-            subject: label,
-            inheritsName: defaultName
-        ) {
-            DropdownRow(
-                label: label,
-                spokenValue: KiwiVisionLevelsCard.curveTitle(current),
-                help: nil
-            ) {
-                Picker(
-                    label,
-                    selection: Binding(
-                        get: { current },
-                        set: { value.wrappedValue = $0 }
-                    )
-                ) {
-                    ForEach(VisionFadeCurve.allCases, id: \.self) {
-                        Text(KiwiVisionLevelsCard.curveTitle($0)).tag($0)
-                    }
-                }
             }
         }
     }
@@ -259,27 +197,8 @@ struct KiwiVisionLensOverrides: View {
         }
     }
 
-    /// The fade length's override row (#2417); the global row is
-    /// Lua-only since #3238, so the label and help live here.
-    static var fadeDurationLabel: String {
-        L("kiwivision.fade_duration", "Fade duration")
-    }
-
-    static var fadeDurationHelp: String {
-        L(
-            "kiwivision.fade_duration.help",
-            "How long the window you leave takes to dim and blur. The "
-                + "window you focus clears at once; at 0, or with "
-                + "Reduce Motion, the change is instant."
-        )
-    }
-
     static func percent(_ dim: Double) -> String {
         L("kiwivision.lens.value.percent", "%1$d %%", Int(dim.rounded()))
-    }
-
-    static func milliseconds(_ ms: Int) -> String {
-        L("kiwivision.lens.value.milliseconds", "%1$d ms", ms)
     }
 
     static func onOff(_ on: Bool) -> String {

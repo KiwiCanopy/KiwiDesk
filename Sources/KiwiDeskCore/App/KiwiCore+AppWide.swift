@@ -217,10 +217,12 @@ extension KiwiCore {
     /// Lua-to-GUI adoption, the one stamp of `live`: there the
     /// verbs `init.lua` executed ARE the stored config. Called
     /// before the seeded `gui.json` is written; the caller strips
-    /// once that write landed.
+    /// once that write landed. A lens leaves its Lua-only overrides
+    /// behind, which Settings draws no row for (#3246).
     func storeLiveAppWide() {
         var value = appWideLedger.live
         value.adoptPace(value.animations)
+        value.visionLenses = value.visionLenses.map(\.settingsDrawn)
         appWideLedger = AppWideLedger(value, stored: true)
     }
 

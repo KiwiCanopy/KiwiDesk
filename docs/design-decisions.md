@@ -7543,6 +7543,40 @@ as the Switching Spaces pickers do (#2142): the flag is app-wide,
 so a Lua-owned setup sets it in `init.lua`.
 :::
 
+:::unreleased
+**A lens's stored fade is cleared, not shown read-only (#3246,
+owner ruling 2026-11-12).** [Rationale] A custom lens differs from
+Default in its **Dim and blur** card by Dim and Blur alone: its
+fade length and fade curve override rows leave Settings, and the
+lens takes the plain KiwiVision fade whole. With the speed preset
+Settings' one pace control (above), a lens row setting its own
+length would bring back, one lens at a time, the stepper the global
+page lost, and a length the preset never moves. Removing the rows
+leaves the stored overrides, and those cannot stay as they are: a
+lens's override wins over the plain value it is read against, so a
+lens kept fading at its own pace while its page showed nothing, and
+the preset changed every fade but that one with no control on
+screen to explain it. A read-only line would explain it and still
+offer no way to change it in Settings. So a one-shot
+`ConfigMigration` step, `migratingLensFadeOut` (`gui.json` format
+24, a backup's format 48), removes `fade_duration` and `fade_curve`
+from every `kiwivision.lenses` entry and leaves the plain group's
+own pair: no override is left that nothing on screen shows. This
+reverses #3238's first ruling that a lens overriding
+`fade_duration` keeps its override.
+
+*The keys stay in the lens shape.* A `define_lens` table still
+sets both, so the lens decoder reads them, and `init.lua` keeps an
+override because no crossing reaches it. Moving that setup to
+Settings stores its lenses without the pair, since Settings would
+then own a fade it shows nowhere, and a session `define_lens` fade
+ends when Settings saves that lens. Stated residue: a pair written
+into `gui.json` by hand after the update is read, and acts unseen. [Trade-off] A user who tuned a lens's fade in Settings
+loses it on the update and gets it back only from Lua; the
+limitation is on the
+[Accepted limitations](accepted-limitations.md) page.
+:::
+
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** A floating window exempt from
 the inactive-space stash, following you across spaces (once
