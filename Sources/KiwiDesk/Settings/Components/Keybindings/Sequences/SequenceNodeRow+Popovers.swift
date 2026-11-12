@@ -14,25 +14,33 @@ struct SequenceBranchRequest: Identifiable, Equatable {
 extension SequenceNodeRow {
     /// "▾ Windows": the fold, then the name that opens the popover.
     var branchContainer: some View {
+        // The fold sits outside, before the key (#3241); the pencil
+        // gives the container's one click a visible target.
         SequenceContainerFace(face: .tinted) {
-            HStack(spacing: 4) {
-                disclosure(width: 12)
-                    .font(.caption.weight(.semibold))
-                Button {
-                    editingBranch = SequenceBranchRequest(id: node.id)
-                } label: {
+            Button {
+                editingBranch = SequenceBranchRequest(id: node.id)
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: Self.branchSymbol)
+                        .accessibilityHidden(true)
                     branchTitle.fixedSize(horizontal: true, vertical: false)
+                    Image(systemName: "pencil")
+                        .foregroundStyle(SettingsTheme.ink2)
+                        .accessibilityHidden(true)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(nameLabel)
-                .accessibilityValue(node.label)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(nameLabel)
+            .accessibilityValue(node.label)
         }
         .fixedSize()
         .popover(item: $editingBranch) { _ in
             branchPopover.settingsPopoverChrome()
         }
     }
+
+    /// A branch container's leading symbol (#3241).
+    static let branchSymbol = "square.stack.3d.up"
 
     @ViewBuilder private var branchTitle: some View {
         if node.label.trimmed.isEmpty {

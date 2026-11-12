@@ -97,8 +97,17 @@ struct SequenceNodeRow: View {
         ) { requestDelete() }
     }
 
-    /// The key, its one container, then remove (#3162 ▸ Ruling).
+    /// The fold, the key, its one container, then remove (#3162 ▸
+    /// Ruling; #3241): the fold sits outside a branch's container,
+    /// and every other key keeps its slot so the keys line up.
     @ViewBuilder private var keyLine: some View {
+        if node.isSequence {
+            disclosure(width: Self.foldSlot)
+                .font(.caption.weight(.semibold))
+        } else {
+            Color.clear.frame(width: Self.foldSlot, height: 1)
+                .accessibilityHidden(true)
+        }
         recorder.fixedSize()
         if node.isSequence { branchContainer } else { endKeyContainer }
         Spacer(minLength: 8)
@@ -107,6 +116,9 @@ struct SequenceNodeRow: View {
             sharedFrom: nil
         ) { _ in requestDelete() }
     }
+
+    /// A key line's fold slot, in points (#3241).
+    static let foldSlot: CGFloat = 12
 
     /// The fold, its own button so it never shares the name's click
     /// (#3162 ▸ Ruling amendment).
@@ -176,6 +188,7 @@ struct SequenceNodeRow: View {
                     fresh = key.id
                 }
             ],
+            marksKind: true,
             onPick: { command in
                 editing.update(node.id) {
                     $0 = SequenceTree.endKey($0, running: command)

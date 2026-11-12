@@ -26,6 +26,11 @@ struct SequenceActionMenu: View {
     let pins: [SequencePickPin]
     /// Whether the catalogue, App… and Lua… are offered at all.
     var showsCatalogue = true
+    /// Whether the trigger leads with its kind's symbol: an action's
+    /// catalogue glyph, Lua's mark, and a Lua key ends in the expand
+    /// glyph. A key sequence row's alone: #3241 rules that card, and
+    /// the gesture rows keep their faces.
+    var marksKind = false
     let onPick: (NavCommand) -> Void
     /// App… and Lua… are offered only where the caller takes them,
     /// and a Lua action wears the dashed container only where it
@@ -57,45 +62,6 @@ struct SequenceActionMenu: View {
             }
     }
 
-    @ViewBuilder private var trigger: some View {
-        if face.kind == .custom, let onEditLua {
-            Button(action: onEditLua) {
-                Text(title).fixedSize(horizontal: true, vertical: false)
-            }
-            .buttonStyle(SequenceDashedStyle())
-        } else {
-            Button {
-                request = SequencePickRequest(id: face.id)
-            } label: {
-                HStack(spacing: 4) {
-                    appIcon
-                    Text(title).lineLimit(1)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-                .fixedSize(horizontal: true, vertical: false)
-            }
-            .settingsPopUpTrigger()
-        }
-    }
-
-    /// An app key's icon, as the Apps section's rows draw it.
-    @ViewBuilder private var appIcon: some View {
-        if let bundleID {
-            Image(nsImage: AppIconCache.shared.icon(forBundleID: bundleID))
-                .resizable()
-                .frame(width: 16, height: 16)
-                .accessibilityHidden(true)
-        }
-    }
-
-    /// The app an app key opens; nil for every other key.
-    private var bundleID: String? {
-        guard face.kind == .application else { return nil }
-        return KeybindingCatalog.appBundleID(from: face.lua)
-    }
-
     private var popover: some View {
         let groups = shownGroups
         return VStack(spacing: 6) {
@@ -124,11 +90,7 @@ struct SequenceActionMenu: View {
                 pinned(.app, Self.appLabel, symbol: "app")
             }
             if onLua != nil {
-                pinned(
-                    .lua,
-                    Self.luaLabel,
-                    symbol: "chevron.left.forwardslash.chevron.right"
-                )
+                pinned(.lua, Self.luaLabel, symbol: Self.luaSymbol)
             }
         }
         .padding(12)
@@ -306,25 +268,10 @@ struct SequenceActionMenu: View {
         L("shortcuts.sequence.app", "App…")
     }
 
+    /// Lua's mark: the "Lua…" entry's and a Lua key's (#3241).
+    static let luaSymbol = "chevron.left.forwardslash.chevron.right"
+
     static var luaLabel: String {
         L("shortcuts.sequence.lua", "Lua…")
-    }
-
-    /// The action's name, "Lua…" for the user's own, the app's name
-    /// for an app key, the face's own words for a family, "Choose…"
-    /// for none yet.
-    private var title: String {
-        if let title = face.title { return title }
-        if face.kind == .custom {
-            return face.desc.trimmed.isEmpty ? Self.luaLabel : face.desc
-        }
-        if let bundleID {
-            return KeybindingCatalog.displayName(forBundleID: bundleID)
-        }
-        if let command = catalog.command(running: face.lua) {
-            return command.resolvedLabel
-        }
-        return face.lua.isEmpty
-            ? L("shortcuts.sequence.choose", "Choose…") : face.lua
     }
 }
