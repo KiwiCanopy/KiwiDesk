@@ -59,7 +59,9 @@ struct KiwiShelfCard: View {
             kiwishelfRow(k)
         case .spaceBar(.spaceBarVisibility), .layoutAppBar:
             showRow(key)
-        case .colours(.animationsRevealDurationMS),
+        case .colours(.animationsOnReveal),
+            .colours(.animationsRevealDurationMS),
+            .colours(.animationsOnExpand),
             .colours(.animationsExpandDurationMS):
             durationRow(key)
         default:

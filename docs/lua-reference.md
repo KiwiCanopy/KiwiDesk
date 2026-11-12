@@ -9351,9 +9351,14 @@ next write.
 **Expects:**
 
 - `set_on_expand(bool)` — `true` or `false` (default `true`).
-- `set_expand_duration(ms)` — a number (milliseconds: `0`, or
-  500–2000; default `750`). `0` snaps the bars into place; a value
-  from 1 to 499 becomes 500.
+- `set_expand_duration(ms)` — a number (milliseconds: 500–2000;
+  default `750`). A value outside the band is clamped to it.
+
+:::unreleased
+`set_expand_duration(0)` is refused; turn the expand off with
+`set_on_expand(false)`. A saved profile, look or backup storing `0`
+is read as the expand off at its default length.
+:::
 
 **Does:** the KiwiShelf expand when you switch Spaces: a bar
 sharing a shelf grows out of the other bar and shrinks back into
@@ -9361,9 +9366,12 @@ it, a bar on an edge of its own fades in and out, the App Bar's row
 dissolves to the new Space's, and the bars glide to their new
 places. Off, they move at once. It is not under the
 window-animation switches, and it plays with Reduce Motion on too.
-Lua-only: no Settings row turns it off; while it is off, KiwiShelf ▸
-KiwiShelf ▸ Show ▸ Durations ▸ Expand duration greys and names
-`animations.on_expand`.
+
+:::unreleased
+Both are KiwiShelf ▸ Show ▸ Durations rows in Settings: the switch
+sits above Expand duration, which greys while it is off.
+:::
+
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired → these two; a saved profile, look or backup carrying the
 old names is renamed on its next read.
@@ -9374,21 +9382,30 @@ old names is renamed on its next read.
 animations.set_expand_duration(1000)
 ```
 
-### animations.set_reveal_duration
+### animations.set_on_reveal, animations.set_reveal_duration
 
-**Expects:** milliseconds: `0`, or 150–800 (default `300`). `0`
-shows and hides the bar at once; a value from 1 to 149 becomes
-150.
+:::unreleased
+**Expects:**
 
-**Does:** how long a hidden bar takes to come in, whichever
-[`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays;
-it goes back out in a little less. It plays with Reduce Motion on
-too.
+- `set_on_reveal(bool)` — `true` or `false` (default `true`).
+- `set_reveal_duration(ms)` — milliseconds: 150–800 (default
+  `300`). `0` is refused; any other value outside the band is
+  clamped to it.
+
+**Does:** how a hidden bar comes in, whichever
+[`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays,
+and how long it takes; it goes back out in a little less. Off, the
+bar shows and hides at once. Both play with Reduce Motion on too,
+and both are KiwiShelf ▸ Show ▸ Durations rows in Settings. A saved
+profile, look or backup storing a reveal duration of `0` is read as
+the reveal off at its default length.
+:::
 
 **Example:**
 
 ```lua
 animations.set_reveal_duration(400)
+animations.set_on_reveal(false)
 ```
 
 ### animations.set_on_peek

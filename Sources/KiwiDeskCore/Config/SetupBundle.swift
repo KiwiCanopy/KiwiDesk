@@ -106,7 +106,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `config` and its `[Profile]` alike, with no step.
     /// 45 = mouse and trackpad gestures are one `gesture` map
     /// (#3199), in a bundle's `config` and its `[Profile]` alike.
-    public static let currentFormat = 45
+    /// 46 = a 0 reveal or expand duration is its toggle off
+    /// (#3236), in every shape a bundle carries.
+    public static let currentFormat = 46
 
     public let format: Int
 

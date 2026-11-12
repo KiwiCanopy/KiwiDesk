@@ -102,6 +102,9 @@ extension SettingRuntimeGate {
         switch self {
         case .spaceHasNoOverrides:
             return true
+        case .expandOffInConfig:
+            // Its switch sits right above it (#3236).
+            return true
         case .reduceMotion, .reduceTransparency,
             .loginItemServiceStatus, .autoStartServiceLoaded,
             .runningCopyTranslocated,
@@ -111,9 +114,6 @@ extension SettingRuntimeGate {
         case .noBarHides:
             // The bars' values sit above it, but not that a reveal
             // needs a hiding bar (owner ruling, 2026-10-21).
-            return false
-        case .expandOffInConfig:
-            // Its knob has no row anywhere.
             return false
         case .noBarShows, .focusBorderOff:
             // Their causes are on other pages (#3089).

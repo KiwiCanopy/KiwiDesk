@@ -102,6 +102,8 @@ extension SettingsValueReadout {
             return coloursOnOffRow(census, o.onExpand, n.onExpand)
         case .animationsOnPeek:
             return coloursOnOffRow(census, o.onPeek, n.onPeek)
+        case .animationsOnReveal:
+            return coloursOnOffRow(census, o.onReveal, n.onReveal)
         case .animationsExpandDurationMS:
             return coloursRow(
                 census,

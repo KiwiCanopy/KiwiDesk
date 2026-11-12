@@ -18564,11 +18564,20 @@ not retune them without the owner. Every style plays inside one length, the
 user's `animations.reveal_duration` (150–800 ms, 300 by default),
 its own timings stretched or squeezed as a whole and a retract in
 four fifths of it — one value rather than one per style, since the
-user tunes how quick a bar feels, not a style's choreography. 0
-means no animation, as KiwiVision's fade does, and the expand's
-duration takes the same 0; a value between 0 and the band rises
-to its floor, since a 50 ms reveal reads as a blink rather than a
-motion (owner ruling, 2026-10-21). Fade
+user tunes how quick a bar feels, not a style's choreography. A
+value below the band rises to its floor, since a 50 ms reveal
+reads as a blink rather than a motion (owner ruling, 2026-10-21).
+No motion at all is `animations.on_reveal`, a switch beside
+`on_expand` and `on_peek`, never a duration of 0 (owner ruling,
+2026-11-12, #3236): a 0 that doubles as an off switch cannot leave
+the profile once the durations become app-wide, and a "snappy"
+profile still wants an instant reveal. The expand's band dropped
+its 0 for the same reason, `on_expand` covering it. A stored 0
+crosses to the switch off at the default length
+(`ConfigMigration`'s instant-durations step); a Lua script
+spelling `set_reveal_duration(0)` or `set_expand_duration(0)`,
+which no crossing reaches, is refused naming the switch, so the
+change is loud rather than a silent floor. Fade
 cross-fades the bar where it stands, for
 a user who wants no travel at all. One picker serves Auto and Hidden
 alike: a Hidden bar has no handle, so Grow and Unfold start from a

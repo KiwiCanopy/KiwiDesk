@@ -33,6 +33,7 @@ struct BarsGates {
     /// row's `.setting` gate is wiring's, as gui.md rules.
     static let resolved: Set<SettingKey> = [
         .kiwishelf(.revealStyle),
+        .colours(.animationsOnReveal),
         .colours(.animationsRevealDurationMS),
         .colours(.animationsExpandDurationMS),
     ]
@@ -44,6 +45,7 @@ struct BarsGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         switch key {
         case .kiwishelf(.revealStyle),
+            .colours(.animationsOnReveal),
             .colours(.animationsRevealDurationMS):
             return settings.someBarHides ? nil : .noBarHides
         case .colours(.animationsExpandDurationMS):

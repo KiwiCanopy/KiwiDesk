@@ -88,5 +88,9 @@ extension GuiConfig {
     /// **21 (#3199)**: mouse and trackpad gestures are one `gesture`
     /// map; `trackpad_gesture`, `modifier_drag` and the scroll
     /// chords fold into it (`migratingGesturesIntoBindings`).
-    public static let currentFormat = 21
+    ///
+    /// **22 (#3236)**: the shared look's 0 reveal or expand
+    /// duration is its toggle off
+    /// (`migratingInstantDurationsOntoToggles`).
+    public static let currentFormat = 22
 }

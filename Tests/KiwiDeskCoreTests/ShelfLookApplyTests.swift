@@ -178,6 +178,7 @@ struct ShelfLookApplyTests {
         source.animations.scrollDurationMS = 260
         source.animations.onExpand = false
         source.animations.onPeek = false
+        source.animations.onReveal = false
         source.animations.expandDurationMS = 900
         source.animations.revealDurationMS = 500
         let saved = ShelfLook(

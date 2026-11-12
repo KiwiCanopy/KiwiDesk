@@ -59,27 +59,6 @@ extension KiwiShelfCard {
         }
     }
 
-    /// `value` stepped over 0 and `band`, so a step from the floor
-    /// lands on 0 and never on a blink in between — Core's
-    /// `AnimationSettings.stepped`.
-    static func instantOr(
-        _ value: Binding<Int>,
-        band: ClosedRange<Int>,
-        step: Int
-    ) -> Binding<Int> {
-        Binding(
-            get: { value.wrappedValue },
-            set: { new in
-                value.wrappedValue = AnimationSettings.stepped(
-                    new,
-                    from: value.wrappedValue,
-                    band: band,
-                    step: step
-                )
-            }
-        )
-    }
-
     /// Whether no bar hides, so the reveal's rows take no input.
     private var revealInert: Bool {
         BarsGates(
@@ -101,35 +80,65 @@ extension KiwiShelfCard {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// The reveal's and the expand's lengths (owner ruling,
-    /// 2026-10-21), in the Durations drawer: the reveal's greys with
-    /// the picker, the expand's only while its switch is off.
+    /// The reveal's switch and length
+    /// and the expand's switch and length (owner rulings
+    /// 2026-10-21, #3236), in the Durations drawer: the reveal's rows
+    /// grey with the picker, its length also while its switch is
+    /// off; the expand's length only while its switch is off.
     @ViewBuilder func durationRow(_ key: SettingKey) -> some View {
         let animations = $model.config.settings.animations
         let children = SettingsCatalog.bars.kiwishelfDurations.children
         switch key {
-        case .colours(.animationsRevealDurationMS):
-            StepperRow(
-                label: children.revealDuration.text,
-                value: Self.instantOr(
-                    animations.revealDurationMS,
-                    band: AnimationSettings.revealDurationBand,
-                    step: AnimationSettings.revealDurationStep
-                ),
-                in: 0...AnimationSettings.revealDurationBand.upperBound,
-                step: AnimationSettings.revealDurationStep,
-                suffix: "ms",
+        case .colours(.animationsOnReveal):
+            ToggleRow(
+                label: children.onReveal.text,
+                isOn: animations.onReveal,
                 help: L(
-                    "kiwishelf.reveal_duration.help",
-                    "How long a hidden bar takes to appear, whichever "
-                        + "way it reveals; it leaves a little quicker. "
-                        + "0 makes it instant."
+                    "kiwishelf.on_reveal.help",
+                    "Off, a hidden bar appears and leaves at once."
                 )
             )
             .modifier(GreyOut(active: revealInert))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
+                    .onReveal
+            )
+        case .colours(.animationsRevealDurationMS):
+            StepperRow(
+                label: children.revealDuration.text,
+                value: animations.revealDurationMS,
+                in: AnimationSettings.revealDurationBand,
+                step: AnimationSettings.revealDurationStep,
+                suffix: "ms",
+                help: L(
+                    "kiwishelf.reveal_duration.help",
+                    "How long a hidden bar takes to appear, whichever "
+                        + "way it reveals; it leaves a little quicker."
+                )
+            )
+            .modifier(
+                GreyOut(
+                    active: revealInert
+                        || !model.config.settings.animations.onReveal
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfDurations.children
                     .revealDuration
+            )
+        case .colours(.animationsOnExpand):
+            ToggleRow(
+                label: children.onExpand.text,
+                isOn: animations.onExpand,
+                help: L(
+                    "kiwishelf.on_expand.help",
+                    "Off, the bars land in place at once when you "
+                        + "switch Spaces."
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfDurations.children
+                    .onExpand
             )
         default:
             let reason = BarsGates(
@@ -138,19 +147,15 @@ extension KiwiShelfCard {
             ).inertReason(for: .colours(.animationsExpandDurationMS))
             StepperRow(
                 label: children.expandDuration.text,
-                value: Self.instantOr(
-                    animations.expandDurationMS,
-                    band: AnimationSettings.expandDurationBand,
-                    step: 50
-                ),
-                in: 0...AnimationSettings.expandDurationBand.upperBound,
+                value: animations.expandDurationMS,
+                in: AnimationSettings.expandDurationBand,
                 step: 50,
                 suffix: "ms",
                 help: L(
                     "kiwishelf.expand_duration.help",
                     "How long the bars take to grow out of each "
                         + "other, shrink back, fade and glide into "
-                        + "place. 0 makes it instant."
+                        + "place."
                 )
             )
             .modifier(GreyOut(active: reason == .expandOff))
@@ -158,9 +163,6 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .expandDuration
             )
-            if reason == .expandOff {
-                caption(.expandOff)
-            }
         }
     }
 }

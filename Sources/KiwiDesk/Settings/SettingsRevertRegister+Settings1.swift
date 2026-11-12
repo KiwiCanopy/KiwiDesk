@@ -121,6 +121,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.animations.onExpand),
         .colours(.animationsOnPeek):
             .leaf(\.settings.animations.onPeek),
+        .colours(.animationsOnReveal):
+            .leaf(\.settings.animations.onReveal),
         .colours(.animationsExpandDurationMS):
             .leaf(\.settings.animations.expandDurationMS),
         .colours(.animationsRevealDurationMS):
