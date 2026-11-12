@@ -142,6 +142,18 @@ struct ColorsCensusRenderTests {
         )
     }
 
+    /// The Space switch card is one tier, apart from Motion (#3218).
+    @Test("the Space switch card's rows are the census's")
+    func spaceSwitchTier() {
+        pin(
+            ColorsRowOrder.spaceSwitch,
+            .coloursAndMotion,
+            .spaceSwitch,
+            .atRest,
+            "space switch"
+        )
+    }
+
     /// The area's greying container gates are exactly the two OS
     /// accessibility flags — the Motion card under Reduce Motion,
     /// the Liquid Glass card under Reduce transparency (#1418) —
@@ -179,6 +191,7 @@ struct ColorsCensusRenderTests {
                 == [
                     .sharedLook, .looks, .palettes, .glass, .accent,
                     .secondAccent, .kiwishelf, .windowMarks, .motion,
+                    .spaceSwitch,
                 ]
         )
     }

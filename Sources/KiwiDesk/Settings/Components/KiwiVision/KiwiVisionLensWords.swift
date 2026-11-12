@@ -288,7 +288,7 @@ enum KiwiVisionLensWords {
     static var neverDimmedCaption: String {
         L(
             "kiwivision.never_dimmed.caption",
-            "Applies at once, in every profile and lens."
+            "Changes apply at once, in every profile and lens."
         )
     }
 

@@ -145,10 +145,10 @@ struct SettingsSearchTests {
     func reachabilityFilter() {
         pinEnglish()
         defer { reset() }
-        let live = settings("Applies immediately")
+        let live = settings("Changes apply at once")
         #expect(live.map(\.destination) == [.general])
         let editing = settings(
-            "Applies immediately",
+            "Changes apply at once",
             context: SettingsSearchContext(
                 editingStoredProfile: true
             )

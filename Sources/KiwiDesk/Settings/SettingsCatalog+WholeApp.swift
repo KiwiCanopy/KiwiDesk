@@ -51,7 +51,7 @@ struct GeneralControls: Sendable {
     // audit, fourth finding).
     let appliesImmediatelyCard = SettingsControl(
         "general.applies_immediately.title",
-        "Applies immediately"
+        "Changes apply at once, in every profile"
     )
     /// The Sync across Macs group, where the quick menu's Sync
     /// Paused… row lands (#3088); keyed on its census label.

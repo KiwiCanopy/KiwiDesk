@@ -10,7 +10,7 @@ struct KiwiVisionMaximizeCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.kiwiVision.fillCard,
-            caption: KiwiVisionCopy.appliesAtOnce
+            liveNote: LiveSettingNote.text
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(KiwiVisionRowOrder.maximize, id: \.id) { key in

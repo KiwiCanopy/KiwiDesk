@@ -13,7 +13,7 @@ struct KiwiVisionLevelsCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.kiwiVision.levelsCard,
-            caption: KiwiVisionCopy.appliesAtOnce
+            liveNote: LiveSettingNote.text
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(KiwiVisionRowOrder.levels, id: \.id) { key in
@@ -213,15 +213,11 @@ struct KiwiVisionLevelsCard: View {
     }
 }
 
-/// Strings and the reason line the KiwiVision cards share.
+/// The reason line the KiwiVision cards share. Each immediate
+/// card leads with `LiveSettingNote` (#1741, #3218), since the
+/// lens cards beside them save through Save.
 @MainActor
 enum KiwiVisionCopy {
-    /// Each immediate card says so (#1741), since v3's lens cards
-    /// beside them save through Save.
-    static var appliesAtOnce: String {
-        L("kiwivision.applies_at_once", "Applies at once, in every profile.")
-    }
-
     static func reason(_ text: String) -> some View {
         Text(text)
             .font(.caption)
