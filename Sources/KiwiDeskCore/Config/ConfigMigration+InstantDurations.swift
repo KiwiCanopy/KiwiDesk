@@ -1,6 +1,7 @@
 import Foundation
 
-/// A stored `reveal_duration` or `expand_duration` of 0 becomes its
+/// A stored `reveal_duration` or `expand_duration` of 0 or below —
+/// what the old decoder read as instant — becomes its
 /// toggle off plus the default duration (#3236,
 /// `InstantDurationMigrationTests`): 0 left both bands, and the
 /// decoder now clamps it to the floor, so without the step a shelf
@@ -11,7 +12,10 @@ import Foundation
 /// `looks.json` and a bundle's inline copies of all of them.
 ///
 /// Idempotent by construction: the step writes no 0, and neither
-/// does the encoder, so a second run finds nothing.
+/// does the encoder, so a second run finds nothing. Ungated by
+/// format, the trade stated (profiles.md, a meaning change): a 0
+/// typed by hand into a current file reads as the floor until the
+/// next format bump, then as the switch off.
 extension ConfigMigration {
     /// One duration and the toggle that now says "instant".
     struct InstantDuration {
@@ -60,24 +64,45 @@ extension ConfigMigration {
         )
     }
 
-    /// Whether `value` is a JSON number equal to 0 — never a Bool,
+    /// Whether `value` is a JSON number at or below 0 — never a Bool,
     /// which `JSONSerialization` also bridges to `NSNumber`.
-    static func isStoredZero(_ value: Any?) -> Bool {
+    static func isStoredInstant(_ value: Any?) -> Bool {
         guard let number = value as? NSNumber,
             CFGetTypeID(number) != CFBooleanGetTypeID()
         else { return false }
-        return number.doubleValue == 0
+        return number.doubleValue <= 0
     }
 
-    /// The walk: every object carrying a 0 duration takes the
+    /// A look path that is new with the step: an older look's style
+    /// map carries a reveal length but no switch, and its absence
+    /// meant "the reveal plays" (profiles.md, an absence is a
+    /// value), so a look that animates keeps animating over a
+    /// profile the step turned off.
+    static let lookRevealDuration = "animations.reveal_duration"
+    static let lookRevealToggle = "animations.on_reveal"
+
+    /// Whether `dict` is a look style map with an in-band reveal
+    /// length and no switch beside it.
+    static func lookLacksRevealToggle(_ dict: [String: Any]) -> Bool {
+        guard let length = dict[lookRevealDuration],
+            dict[lookRevealToggle] == nil
+        else { return false }
+        return length is NSNumber && !isStoredInstant(length)
+    }
+
+    /// The walk: every object carrying an instant duration takes the
     /// fallback and its toggle off.
     static func withInstantDurationsCrossed(_ node: Any) -> (Any, Bool) {
         if var dict = node as? [String: Any] {
             var changed = false
             for entry in instantDurations
-            where isStoredZero(dict[entry.duration]) {
+            where isStoredInstant(dict[entry.duration]) {
                 dict[entry.duration] = entry.fallback
                 dict[entry.toggle] = false
+                changed = true
+            }
+            if lookLacksRevealToggle(dict) {
+                dict[lookRevealToggle] = true
                 changed = true
             }
             for (key, value) in dict {
@@ -101,7 +126,7 @@ extension ConfigMigration {
     }
 
     /// The textual edit, judged against the walk by
-    /// `surgicallyApplying`: each 0 duration's literal becomes the
+    /// `surgicallyApplying`: each instant duration's literal becomes the
     /// fallback, and its object's toggle becomes `false` — the
     /// toggle's own literal where the object states one, else a
     /// new entry right after the duration.
@@ -113,7 +138,7 @@ extension ConfigMigration {
         for entry in instantDurations {
             for duration in entries
             where duration.key == entry.duration
-                && Double(duration.value) == 0
+                && (Double(duration.value) ?? 1) <= 0
             {
                 let toggle = entries.first {
                     $0.key == entry.toggle
@@ -131,6 +156,20 @@ extension ConfigMigration {
                     )
                 }
             }
+        }
+        for duration in entries
+        where duration.key == lookRevealDuration
+            && (Double(duration.value) ?? 0) > 0
+            && !entries.contains(where: {
+                $0.key == lookRevealToggle && $0.object == duration.object
+            })
+        {
+            edits.append(
+                (
+                    duration.valueRange,
+                    "\(duration.value), \"\(lookRevealToggle)\": true"
+                )
+            )
         }
         guard !edits.isEmpty else { return nil }
         var bytes = Array(text.utf8)

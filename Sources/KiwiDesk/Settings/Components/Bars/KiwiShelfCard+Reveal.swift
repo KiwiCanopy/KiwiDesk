@@ -59,12 +59,12 @@ extension KiwiShelfCard {
         }
     }
 
-    /// Whether no bar hides, so the reveal's rows take no input.
+    /// Whether no bar hides, so the reveal's switch takes no input.
     private var revealInert: Bool {
         BarsGates(
             settings: model.config.settings,
             guiManaged: model.guiManaged
-        ).inertReason(for: .colours(.animationsRevealDurationMS)) != nil
+        ).inertReason(for: .colours(.animationsOnReveal)) != nil
     }
 
     /// A reason sentence under what it greys, outside the grey.
@@ -104,6 +104,10 @@ extension KiwiShelfCard {
                     .onReveal
             )
         case .colours(.animationsRevealDurationMS):
+            let reason = BarsGates(
+                settings: model.config.settings,
+                guiManaged: model.guiManaged
+            ).inertReason(for: .colours(.animationsRevealDurationMS))
             StepperRow(
                 label: children.revealDuration.text,
                 value: animations.revealDurationMS,
@@ -116,12 +120,7 @@ extension KiwiShelfCard {
                         + "way it reveals; it leaves a little quicker."
                 )
             )
-            .modifier(
-                GreyOut(
-                    active: revealInert
-                        || !model.config.settings.animations.onReveal
-                )
-            )
+            .modifier(GreyOut(active: reason != nil))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .revealDuration

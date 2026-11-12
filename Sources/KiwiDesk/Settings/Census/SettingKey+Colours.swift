@@ -124,7 +124,7 @@ extension ColoursKey {
             )
         case .animationsExpandDurationMS:
             // The expand plays with every bar on Always, so it greys
-            // only while its hidden switch is off (2026-10-21).
+            // only while its switch above is off (#3236).
             return .row(
                 .bars,
                 .kiwishelf,

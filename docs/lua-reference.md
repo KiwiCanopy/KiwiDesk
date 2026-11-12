@@ -9352,13 +9352,13 @@ next write.
 
 - `set_on_expand(bool)` — `true` or `false` (default `true`).
 - `set_expand_duration(ms)` — a number (milliseconds: 500–2000;
-  default `750`). A value other than `0` outside the band is
+  default `750`). A value above `0` outside the band is
   clamped to it.
 
 :::unreleased
-`set_expand_duration(0)` is refused; turn the expand off with
+`set_expand_duration(0)` and below are refused; turn the expand off with
 `set_on_expand(false)`. A saved profile, look or backup storing `0`
-is read as the expand off at its default length.
+or below is read as the expand off at its default length.
 :::
 
 **Does:** the KiwiShelf expand when you switch Spaces: a bar
@@ -9384,8 +9384,8 @@ animations.set_expand_duration(1000)
 
 ### animations.set_reveal_duration
 
-**Expects:** milliseconds: 150–800 (default `300`). A value other
-than `0` outside the band is clamped to it.
+**Expects:** milliseconds: 150–800 (default `300`). A value above
+`0` outside the band is clamped to it.
 
 **Does:** how long a hidden bar takes to come in, whichever
 [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays;
@@ -9393,10 +9393,10 @@ it goes back out in a little less. It plays with Reduce Motion on
 too.
 
 :::unreleased
-`set_reveal_duration(0)` is refused; turn the reveal off with
+`set_reveal_duration(0)` and below are refused; turn the reveal off with
 [`animations.set_on_reveal(false)`](#animationsset_on_reveal). A
-saved profile, look or backup storing `0` is read as the reveal
-off at its default length.
+saved profile, look or backup storing `0` or below is read as the
+reveal off at its default length.
 :::
 
 **Example:**

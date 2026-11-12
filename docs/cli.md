@@ -1039,9 +1039,8 @@ hidden bar's reveal; see
 [animations.set_on_expand](lua-reference.md#animationsset_on_expand).
 
 :::unreleased
-Both durations refuse `0`
-with `a duration cannot be 0; …`, naming the `set_on_*` verb that
-turns the motion off.
+Both durations refuse `0` and below with `a duration must be above
+0; …`, naming the `set_on_*` verb that turns the motion off.
 :::
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are

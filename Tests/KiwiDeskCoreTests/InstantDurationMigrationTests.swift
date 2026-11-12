@@ -20,8 +20,9 @@ struct InstantDurationMigrationTests {
         return settings
     }
 
-    /// `value` encoded, then each tuned length spelled as the older
-    /// build's 0, the look paths included, and `format` stamped.
+    /// `value` encoded, then put back in the older build's shape:
+    /// no reveal switch (it is new), each tuned length spelled as
+    /// its 0, the look paths included, and `format` stamped.
     private func legacy<T: Encodable>(
         _ value: T,
         format: Int
@@ -36,6 +37,12 @@ struct InstantDurationMigrationTests {
         #expect(text.contains(": 1250"))
         text = text.replacingOccurrences(of: ": 450", with: ": 0")
             .replacingOccurrences(of: ": 1250", with: ": 0")
+            .replacingOccurrences(
+                of: #"\s*"(animations\.)?on_reveal" : (true|false),"#,
+                with: "",
+                options: .regularExpression
+            )
+        #expect(!text.contains("on_reveal"))
         var root = try #require(
             JSONSerialization.jsonObject(with: Data(text.utf8))
                 as? [String: Any]
@@ -181,11 +188,7 @@ struct InstantDurationMigrationTests {
             )
             .replacingOccurrences(
                 of: "\"reveal_duration\":0",
-                with: "\"reveal_duration\":300"
-            )
-            .replacingOccurrences(
-                of: "\"on_reveal\":true",
-                with: "\"on_reveal\":false"
+                with: "\"reveal_duration\":300, \"on_reveal\": false"
             )
         #expect(edited == expected)
     }
@@ -201,10 +204,50 @@ struct InstantDurationMigrationTests {
         )
     }
 
-    @Test("a Bool false is no 0")
-    func boolIsNoZero() {
-        #expect(!ConfigMigration.isStoredZero(false))
-        #expect(ConfigMigration.isStoredZero(0))
-        #expect(!ConfigMigration.isStoredZero(300))
+    @Test("0 and below are instant, a Bool false is not")
+    func instantReading() {
+        #expect(!ConfigMigration.isStoredInstant(false))
+        #expect(ConfigMigration.isStoredInstant(0))
+        #expect(ConfigMigration.isStoredInstant(-5))
+        #expect(!ConfigMigration.isStoredInstant(300))
+    }
+
+    /// An older look's style map carries a reveal length and no
+    /// switch, which meant the reveal plays; the step writes that
+    /// down, so it still plays over a profile the step turned off.
+    @Test("an older look's in-band reveal keeps playing")
+    func lookAbsenceCrosses() throws {
+        var settings = TilingSettings()
+        settings.animations.revealDurationMS = 450
+        let style = LookKeys.extract(from: settings)
+        #expect(style["animations.on_reveal"] != nil)
+        var old = style
+        old["animations.on_reveal"] = nil
+        let document = LookDocument(
+            format: 3,
+            looks: [ShelfLook(name: "Old", style: old, colors: [:])]
+        )
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(document)
+        let out = try #require(
+            ConfigMigration.migratingInstantDurationsOntoToggles(data)
+        )
+        let back = try decoder.decode(LookDocument.self, from: out)
+        let crossed = try #require(back.looks.first?.style)
+        #expect(crossed["animations.on_reveal"] == .bool(true))
+        #expect(crossed["animations.reveal_duration"] == .number(450))
+    }
+
+    @Test("an exported look file crosses on import")
+    func lookExportCrosses() throws {
+        let document = LookDocument(format: 3, looks: [look.named("Mine")])
+        let data = try legacy(document, format: 3)
+        let crossed = ConfigMigration.crossingLookExport(data, from: 3)
+        let back = try decoder.decode(LookDocument.self, from: crossed)
+        try checkLook(
+            back.looks.first.map {
+                LookBody(style: $0.style, colors: $0.colors)
+            }
+        )
     }
 }

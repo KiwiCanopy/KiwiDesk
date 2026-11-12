@@ -147,9 +147,9 @@ extension KiwiCore {
                 return .fail("expected milliseconds")
             }
             // 0 left the band (#3236): say which verb is off.
-            guard ms != 0 else {
+            guard ms > 0 else {
                 return .fail(
-                    "a duration cannot be 0; "
+                    "a duration must be above 0; "
                         + "animations.set_on_expand(false) turns it off"
                 )
             }
@@ -162,9 +162,9 @@ extension KiwiCore {
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            guard ms != 0 else {
+            guard ms > 0 else {
                 return .fail(
-                    "a duration cannot be 0; "
+                    "a duration must be above 0; "
                         + "animations.set_on_reveal(false) turns it off"
                 )
             }

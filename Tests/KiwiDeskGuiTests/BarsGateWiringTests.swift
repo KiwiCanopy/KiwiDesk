@@ -74,8 +74,10 @@ struct BarsGateWiringTests {
                 // Grow's Unfold note on a Boxed shelf (#2556).
                 "ifreason==nil,gates.growPlaysAsUnfold{"
                     + "note(BarsGateHelp.growPlaysAsUnfold)",
-                ".inertReason(for:.colours(.animationsRevealDurationMS))",
+                ".inertReason(for:.colours(.animationsOnReveal))",
                 "GreyOut(active:revealInert)",
+                ".inertReason(for:.colours(.animationsRevealDurationMS))"
+                    + "StepperRow(",
                 ".inertReason(for:.colours(.animationsExpandDurationMS))",
                 "GreyOut(active:reason==.expandOff)",
             ],
@@ -158,6 +160,7 @@ struct BarsGateWiringTests {
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
             .boxedShelf, .barsSplit, .noBarHides, .expandOff,
+            .revealOff,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }
@@ -211,6 +214,28 @@ struct BarsGateWiringTests {
         settings.animations.onExpand = false
         #expect(
             BarsGates(settings: settings).inertReason(for: key) == .expandOff
+        )
+    }
+
+    /// The reveal's length greys while no bar hides, and then
+    /// while its own switch is off (#3236); the switch itself greys
+    /// only while no bar hides.
+    @Test("the Reveal duration greys with its switch")
+    func revealDurationGreysWithItsSwitch() {
+        var settings = TilingSettings()
+        let length = SettingKey.colours(.animationsRevealDurationMS)
+        let toggle = SettingKey.colours(.animationsOnReveal)
+        settings.spaceBarStyle.visibility = .hidden
+        settings.animations.onReveal = false
+        #expect(
+            BarsGates(settings: settings).inertReason(for: length)
+                == .revealOff
+        )
+        #expect(BarsGates(settings: settings).inertReason(for: toggle) == nil)
+        settings.setEveryBarVisibility(.always)
+        #expect(
+            BarsGates(settings: settings).inertReason(for: length)
+                == .noBarHides
         )
     }
 }

@@ -772,6 +772,11 @@ holds the secondary-switch decision including its nil case.
     or the rewrite destroys the copy the election reads
     (`AppWideSeamTests` ▸ `captureBeforeSettle`,
     `AppWideCrossingEndTests` ▸ `captureBeforeRewrite`).
+  - Read a key a `ConfigMigration` step rewrites from the bytes
+    `ConfigMigration.migrated` returns, in the capture and in the
+    strip alike, never raw: a raw capture adopts the old meaning,
+    and a raw strip deletes the value before the step can cross
+    it (#3236's stored 0 under #3237's adoption).
   - End the crossing in the FILES: the adoption strips the
     retired groups from every profile file, so no reader of them
     is left; never leave a lenient reader to drain them
