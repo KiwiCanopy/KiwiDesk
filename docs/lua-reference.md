@@ -5185,8 +5185,9 @@ Settings app they are the rows of the **Mouse** and **Trackpad**
 cards under **Shortcuts ▸ Mouse & Trackpad**, where an input that
 does nothing yet ([Gesture inputs](#gesture-inputs)) has no row.
 Each row's **Applies to** picks the profiles it reaches, as a
-shortcut row's does: the shared base in `gui.json`, or a profile's
-own bindings ([Gesture storage](#gesture-storage)).
+[shortcut row's](user-guide.md#shortcut-layers) does; each pick is
+written to the base or a profile's own bindings
+([Gesture storage](#gesture-storage)).
 :::
 
 ### Gesture inputs
