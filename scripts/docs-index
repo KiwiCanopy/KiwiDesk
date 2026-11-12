@@ -1,0 +1,357 @@
+#!/usr/bin/env python3
+"""Builds the docs index `kiwidesk mcp` serves (#3213).
+
+The app answers `docs_search` and `docs_get` from one bundled
+resource, so the text an AI app reads is the installed build's.
+This script writes that resource from the user-facing pages under
+`docs/`, one section per heading.
+
+The contract:
+
+  scripts/docs-index                  rewrite the committed index
+  scripts/docs-index --check          exit 1 when it is stale
+  scripts/docs-index --docs DIR --out FILE
+                                      index a fixture tree
+
+The index is committed because `swift build` runs no script: a
+debug build, a test run and the packaged app all read the same
+file. `DocsIndexDriftTests` and `scripts/build-app.sh` run
+`--check`, so a docs edit without a regenerate reds before it
+ships.
+
+`:::unreleased` fences are removed and their text kept: the pages
+are indexed from the tree the binary is built from, so a marked
+block describes this build. The marker's grammar is
+`scripts/unreleased-strip`'s, loaded from there and never spelled
+here (`.claude/rules/site.md`); the release sweep therefore leaves
+the index unchanged.
+
+An inline `<svg>` figure is indexed as `[Figure: …]` carrying
+its `aria-label`: the drawing is markup, and its label is the
+text a reader without the picture gets.
+
+Anchors follow GitHub's slugger, as the site's do, counting every
+heading of a page for the duplicate suffix. `DocsIndexDriftTests`
+▸ `anchorsMatchTheActionsPage` holds them to the anchors
+`docs/commands.md` links.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import pathlib
+import re
+import sys
+
+REPO = pathlib.Path(__file__).resolve().parent.parent
+INDEX = REPO / "Sources" / "KiwiDesk" / "Resources" / "DocsIndex.json"
+REGENERATE = "scripts/docs-index"
+
+# The user-facing pages, in the order an empty search lists them.
+# This list owns what the app bundles; a contributor page
+# (`design-decisions.md`, `architecture.md`, `ui-patterns.md`, the
+# translation pages) never joins.
+PAGES = (
+    "lua-reference.md",
+    "user-guide.md",
+    "spaces-and-desktops.md",
+    "cli.md",
+    "commands.md",
+    "accepted-limitations.md",
+)
+# Every page under this directory is indexed, so a new recipe
+# joins without an edit here.
+RECIPES = "recipes"
+
+# The size a section's part aims to stay under, in characters. A
+# longer section is split where a block ends, so one answer stays
+# readable; a single block longer than this stands alone.
+PART_LIMIT = 6000
+
+# A closing run of `#` counts only after whitespace, as in
+# CommonMark, so a heading ending in `C#` keeps its `#`.
+HEADING = re.compile(r"^(#{1,6}) +(.*?)(?:\s+#+)?\s*$")
+TABLE_RULE = re.compile(r"^\|[\s:|-]+$")
+FIGURE = re.compile(r"^<svg\b.*</svg>\s*$")
+FIGURE_LABEL = re.compile(r'\baria-label="([^"]*)"')
+FRONTMATTER_FIELD = re.compile(r"^([A-Za-z]+):\s*(.*)$")
+
+
+def strip_module():
+    """`scripts/unreleased-strip`, the marker grammar's one home."""
+    path = pathlib.Path(__file__).resolve().parent / "unreleased-strip"
+    loader = importlib.machinery.SourceFileLoader(
+        "unreleased_strip", str(path)
+    )
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
+STRIP = strip_module()
+# The code-fence rule is the marker parser's own, read from it.
+CODE_FENCE = STRIP.CODE_FENCE
+
+
+class Refused(Exception):
+    """A corpus this script will not index."""
+
+
+def slugged(title: str) -> str:
+    """GitHub's slug of a heading, before the duplicate suffix."""
+    out = []
+    for char in title.lower():
+        if char == " ":
+            out.append("-")
+        elif char.isalnum() or char in "-_":
+            out.append(char)
+    return "".join(out)
+
+
+def frontmatter(text: str) -> tuple[dict[str, str], str]:
+    """A page's frontmatter fields and the text after them."""
+    lines = text.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return ({}, text)
+    fields: dict[str, str] = {}
+    last: str | None = None
+    for number, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            return (fields, "\n".join(lines[number + 1:]))
+        found = FRONTMATTER_FIELD.match(line)
+        if found:
+            last = found.group(1)
+            fields[last] = found.group(2).strip().strip('"')
+        elif last and line[:1] in " \t" and line.strip():
+            # A folded value continues on an indented line.
+            fields[last] = (fields[last] + " " + line.strip()).strip()
+    raise Refused("frontmatter never closes")
+
+
+def fence_steps(lines: list[str]) -> list[bool]:
+    """Per line, whether it sits inside a code block; a fence
+    line counts as inside."""
+    inside: list[bool] = []
+    fence: str | None = None
+    for line in lines:
+        found = CODE_FENCE.match(line)
+        if fence is not None:
+            inside.append(True)
+            if (
+                found
+                and found.group(1)[0] == fence[0]
+                and len(found.group(1)) >= len(fence)
+                and not found.group(2).strip()
+            ):
+                fence = None
+            continue
+        if found:
+            fence = found.group(1)
+            inside.append(True)
+            continue
+        inside.append(False)
+    return inside
+
+
+def figures_as_labels(body: str) -> str:
+    """`body` with each one-line `<svg>` figure outside a code
+    block replaced by its label. A figure with no label is
+    refused: it would vanish from the index without a trace."""
+    lines = body.split("\n")
+    inside = fence_steps(lines)
+    for number, line in enumerate(lines):
+        if inside[number] or not FIGURE.match(line):
+            continue
+        label = FIGURE_LABEL.search(line)
+        if not label:
+            raise Refused(f"a figure has no label: {line[:60]}")
+        lines[number] = f"[Figure: {label.group(1)}]"
+    return "\n".join(lines)
+
+
+def table_row(lines: list[str], number: int) -> bool:
+    """Whether line `number` is a table row a part may open on:
+    neither the header, the rule under it, nor the first row."""
+    if not lines[number].startswith("|") or number < 3:
+        return False
+    before = lines[number - 3:number]
+    return all(line.startswith("|") for line in before) and not (
+        TABLE_RULE.match(lines[number])
+        or TABLE_RULE.match(lines[number - 1])
+    )
+
+
+def parts(lines: list[str], limit: int) -> list[str]:
+    """A section's text in parts of about `limit` characters,
+    cut only where a block ends: before a line that follows a
+    blank one, or before a table row past the table's first. A
+    code block is never cut, and a table keeps its header, its
+    rule and its first row together.
+    """
+    while lines and not lines[-1].strip():
+        lines = lines[:-1]
+    inside = fence_steps(lines)
+    out: list[str] = []
+    current: list[str] = []
+    size = 0
+    for number, line in enumerate(lines):
+        boundary = not inside[number] and (
+            table_row(lines, number)
+            or (number > 0 and not lines[number - 1].strip())
+        )
+        if current and boundary and size + len(line) + 1 > limit:
+            out.append("\n".join(current).rstrip("\n"))
+            current, size = [], 0
+        current.append(line)
+        size += len(line) + 1
+    if current:
+        out.append("\n".join(current).rstrip("\n"))
+    return out
+
+
+def sections(body: str, limit: int) -> list[dict]:
+    """A page's body, one entry per heading. Text before the
+    first heading joins nothing and is refused: every indexed
+    page opens on its title."""
+    lines = body.split("\n")
+    inside = fence_steps(lines)
+    found: list[tuple[int, str, int]] = []
+    for number, line in enumerate(lines):
+        if inside[number]:
+            continue
+        heading = HEADING.match(line)
+        if heading:
+            found.append(
+                (number, heading.group(2), len(heading.group(1)))
+            )
+    if not found:
+        raise Refused("no heading")
+    if any(line.strip() for line in lines[: found[0][0]]):
+        raise Refused("text before the first heading")
+    seen: dict[str, int] = {}
+    out: list[dict] = []
+    for position, (start, title, level) in enumerate(found):
+        end = (
+            found[position + 1][0]
+            if position + 1 < len(found)
+            else len(lines)
+        )
+        slug = slugged(title)
+        count = seen.get(slug, 0)
+        seen[slug] = count + 1
+        if count:
+            slug += f"-{count}"
+        out.append(
+            {
+                "anchor": slug,
+                "heading": title,
+                "level": level,
+                "parts": parts(lines[start:end], limit),
+            }
+        )
+    return out
+
+
+def page_paths(docs: pathlib.Path) -> list[pathlib.Path]:
+    paths = [docs / name for name in PAGES]
+    paths += sorted((docs / RECIPES).glob("*.md"))
+    missing = [str(p) for p in paths if not p.is_file()]
+    if missing:
+        raise Refused("missing page: " + ", ".join(missing))
+    return paths
+
+
+def build(docs: pathlib.Path, limit: int = PART_LIMIT) -> list[dict]:
+    """Every indexed page, in listing order."""
+    strip = STRIP
+    try:
+        name = strip.directive()
+    except strip.Malformed as error:
+        raise Refused(str(error)) from error
+    pages: list[dict] = []
+    for path in page_paths(docs):
+        where = path.relative_to(docs).as_posix()
+        raw = path.read_text(encoding="utf-8")
+        try:
+            fields, body = frontmatter(raw)
+            body, _ = strip.strip(body, name)
+            body = figures_as_labels(body)
+            entries = sections(body, limit)
+        except (Refused, strip.Malformed) as error:
+            raise Refused(f"{where}: {error}") from error
+        pages.append(
+            {
+                "page": where[: -len(".md")],
+                "title": fields.get("title", entries[0]["heading"]),
+                "description": fields.get("description", ""),
+                "sections": entries,
+            }
+        )
+    return pages
+
+
+def render(pages: list[dict]) -> str:
+    """The index as JSON, one section per line: a docs edit then
+    changes the lines of the sections it touched and no others, so
+    two branches editing different sections merge."""
+
+    def dumped(value) -> str:
+        return json.dumps(value, ensure_ascii=False)
+
+    out = ['{"pages":[']
+    for number, page in enumerate(pages):
+        head = {k: v for k, v in page.items() if k != "sections"}
+        out.append(dumped(head)[:-1] + ',"sections":[')
+        rows = [dumped(section) for section in page["sections"]]
+        out.append(",\n".join(rows))
+        out.append("]}" + ("," if number + 1 < len(pages) else ""))
+    out.append("]}")
+    return "\n".join(out) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="compare with the written index; write nothing",
+    )
+    parser.add_argument(
+        "--docs",
+        default=str(REPO / "docs"),
+        help="the docs tree to index (default: the repo's)",
+    )
+    parser.add_argument(
+        "--out",
+        default=str(INDEX),
+        help="the index file (default: the bundled resource)",
+    )
+    args = parser.parse_args()
+    out = pathlib.Path(args.out)
+    try:
+        text = render(build(pathlib.Path(args.docs)))
+    except Refused as error:
+        sys.exit(f"docs-index: {error}")
+    if not args.check:
+        out.write_text(text, encoding="utf-8")
+        print(f"docs-index: wrote {out} ({len(text.encode())} bytes)")
+        return 0
+    try:
+        written = out.read_text(encoding="utf-8")
+    except OSError:
+        written = None
+    if written != text:
+        print(
+            f"docs-index: {out} is stale; run: {REGENERATE}",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

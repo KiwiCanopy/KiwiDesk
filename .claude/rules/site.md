@@ -188,10 +188,13 @@ what actually shipped — re-adding the marker is then one edit on
 a PR they are already reading.
 
 **One parser of the marker's grammar.** The corpus IS the state
-here, so every reader of it — the sweep, the artifact check —
-has to agree on the spelling, the fence rule and the nesting
-rule. `scripts/unreleased-strip` owns all three and
-`check-site-tokens.py` loads it rather than restating them; the
+here, so every reader of it — the sweep, the artifact check,
+`scripts/docs-index` — has to agree on the spelling, the fence
+rule and the nesting rule. `scripts/unreleased-strip` owns all
+three and `check-site-tokens.py` loads it rather than restating
+them, as `scripts/docs-index` does (`DocsIndexDriftTests` ▸
+`sweepChangesNothing`, the one check on the release sweep's
+unreviewed sync PR); the
 first draft spelled the fence rule twice with different coverage,
 which would have redded the site build on a `~~~`-fenced EXAMPLE
 with the diagnosis "the plugin stopped running".

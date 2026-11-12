@@ -120,6 +120,21 @@ merge, without `:::unreleased`, and a reader on the last release
 meets the old label for a release. A change to what a control
 DOES still owes the marker, label rename or not.
 
+**An edit to an indexed page regenerates the docs index in the
+same change set (#3213).** `kiwidesk mcp` serves
+`Sources/KiwiDesk/Resources/DocsIndex.json`, which
+`scripts/docs-index` writes from the pages its `PAGES` and
+`RECIPES` name. Run it after the last docs edit — a regenerated
+`docs/commands.md` counts as one — and commit the result; never
+edit the file by hand (`DocsIndexDriftTests` ▸
+`indexMatchesTheDocs`, and `scripts/build-app.sh` refuses to
+package a stale one). A new user-facing page joins `PAGES` and
+the page list in `docs/cli.md` ▸ *Using KiwiDesk from AI Apps*;
+a contributor page never joins (`DocsIndexDriftTests` ▸
+`contributorPagesStayOut`). The argument is
+`docs/design-decisions.md` ▸ *The MCP serves the docs the build
+ships*.
+
 ## `docs/accepted-limitations.md`
 
 When a review or manual pass classifies a behavior as

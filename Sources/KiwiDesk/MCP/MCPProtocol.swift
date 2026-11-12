@@ -32,7 +32,8 @@ enum MCPProtocol {
         "KiwiDesk is a tiling window manager for macOS. Find a "
         + "command with list_commands, read its arguments with help, "
         + "and run it with run (or run_batch for several). get_state "
-        + "shows the Spaces and windows. Commands that cannot be "
+        + "shows the Spaces and windows. docs_search and docs_get "
+        + "read this build's documentation. Commands that cannot be "
         + "undone go only through run_destructive, so ask the user "
         + "before calling it. " + MCPWording.liveNotKept
 

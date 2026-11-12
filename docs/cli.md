@@ -221,7 +221,7 @@ It finds KiwiDesk in `/Applications`, in `~/Applications` or as
 `kiwidesk` on your `PATH`.
 
 The server speaks MCP `2026-07-28` and, after an `initialize`,
-`2025-11-25` and `2025-06-18`. It offers eleven tools:
+`2025-11-25` and `2025-06-18`. It offers these tools:
 
 | Tool | Does |
 |---|---|
@@ -248,6 +248,30 @@ not offered.
 
 The `list_commands` tool also takes `kind` (`action`, `setting` or
 `query`), and each row it returns carries its `kind`.
+
+:::unreleased
+Two more tools read the documentation the running copy of KiwiDesk
+ships, without the network:
+
+| Tool | Does |
+|---|---|
+| `docs_search` | Ranked sections for `query`: page, anchor, heading and a snippet. `section` narrows to a page or to `page#anchor`; `limit` is 1 to 20, 5 when omitted. An empty `query` lists the pages, their sections and the app version |
+| `docs_get` | The exact text of the section `page` and `anchor` name, the page's opening without `anchor`; a long section comes in parts, picked with `part` |
+
+They cover this page, the [Lua reference](lua-reference.md), the
+[user guide](user-guide.md),
+[Spaces and Desktops](spaces-and-desktops.md), the
+[actions](commands.md), the
+[accepted limitations](accepted-limitations.md) and the
+[recipes](recipes/index.md), and answer without the app. A figure
+is returned as its description.
+
+`help` and each `list_commands` row carry `lua`, the command's
+`init.lua` call, and `docs`, the `page` and `anchor` of its Lua
+reference section for `docs_get`. A command Lua cannot call has no
+`lua`, and one no Lua reference heading names has no `docs`.
+`kiwidesk help <name> --json` carries `lua` too.
+:::
 
 :::unreleased
 An AI app opens the apps it needs with `run` and

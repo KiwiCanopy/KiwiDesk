@@ -12,6 +12,16 @@ struct MCPTools {
     var send: (CommandRequest) throws -> CommandResponse =
         MCPTools.sendToApp
 
+    /// Loads the docs on first use, so a server that never reads
+    /// them never opens their bundle.
+    private var loadDocs: () -> DocsIndex? = { DocsIndex.bundled }
+
+    /// The docs the docs tools read; tests inject a fixture.
+    var docs: DocsIndex? {
+        get { loadDocs() }
+        set { loadDocs = { newValue } }
+    }
+
     /// This server's unkept changes, shared by every copy.
     let ledger = MCPKeepLedger()
 
@@ -28,7 +38,7 @@ struct MCPTools {
         [
             listCommandsTool, helpTool, getStateTool,
             runTool, runBatchTool, runDestructiveTool, keepTool,
-            diagnoseWindowTool,
+            diagnoseWindowTool, docsSearchTool, docsGetTool,
         ] + groupTools.map(groupTool)
 
     /// Every domain tool over a command group (#1685 ▸ Ruling 2).

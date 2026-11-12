@@ -16,6 +16,11 @@ leaves out.
 - `list_commands` and `help` name every command the tools can send
   and its arguments. Read `help` before calling a command you have
   not used.
+- `docs_search` finds the documentation section for a setting or a
+  behavior, and `docs_get` returns its exact text. `help` names a
+  command's section (`docs`) and its `init.lua` call (`lua`). Read
+  the section before changing a setting you do not know, and quote
+  it when you explain what you did.
 - For "why does this window float / not tile / open there", call
   `diagnose_window` with the window's id (from `get_state`), or with
   the app's bundle id when KiwiDesk does not manage the window. Do

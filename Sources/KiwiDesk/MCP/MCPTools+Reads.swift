@@ -26,10 +26,11 @@ extension MCPTools {
             ],
             readOnly: true
         ),
-        handle: { _, arguments in
+        handle: { tools, arguments in
             listing(
                 filter: arguments["filter"]?.stringValue,
-                kind: arguments["kind"]
+                kind: arguments["kind"],
+                links: tools.commandLinks
             )
         }
     )
@@ -40,13 +41,18 @@ extension MCPTools {
             help,
             title: "Describe a KiwiDesk command",
             "Shows one command's arguments, their types and allowed "
-                + "values, and whether it is destructive.",
+                + "values, whether it is destructive, its init.lua "
+                + "call (lua) and where the docs describe it (docs, "
+                + "for \(docsGet)).",
             properties: ["name": MCPToolSchema.string("The command name.")],
             required: ["name"],
             readOnly: true
         ),
-        handle: { _, arguments in
-            describe(arguments["name"]?.stringValue)
+        handle: { tools, arguments in
+            describe(
+                arguments["name"]?.stringValue,
+                links: tools.commandLinks
+            )
         }
     )
 
@@ -71,7 +77,8 @@ extension MCPTools {
     /// refuses.
     static func listing(
         filter: String?,
-        kind: JSONValue? = nil
+        kind: JSONValue? = nil,
+        links: [String: DocsIndex.Link] = [:]
     ) -> JSONValue {
         let wanted = kind?.stringValue.flatMap(APIKind.init(rawValue:))
         if let kind, kind != .null, wanted == nil {
@@ -94,12 +101,19 @@ extension MCPTools {
             ? "No command matches \"\(filter ?? "")\"."
             : lines.joined(separator: "\n")
         let commands = rows.map { entry -> JSONValue in
-            .object([
+            var fields: [String: JSONValue] = [
                 "name": .string(entry.qualifiedName),
                 "summary": .string(entry.record.summary),
                 "destructive": .bool(APIReference.isDestructive(entry)),
                 "kind": .string(APIReference.kind(of: entry).rawValue),
-            ])
+            ]
+            if let call = APIReference.luaCall(for: entry) {
+                fields["lua"] = .string(call)
+            }
+            fields.merge(docsFields(for: entry, links: links)) { field, _ in
+                field
+            }
+            return .object(fields)
         }
         return result(
             text,
@@ -107,7 +121,10 @@ extension MCPTools {
         )
     }
 
-    static func describe(_ name: String?) -> JSONValue {
+    static func describe(
+        _ name: String?,
+        links: [String: DocsIndex.Link] = [:]
+    ) -> JSONValue {
         guard let name, !name.isEmpty else {
             return failure("help needs a command name")
         }
@@ -115,6 +132,14 @@ extension MCPTools {
         guard response.isSuccess, let data = response.data else {
             return failure(response.error ?? "no answer")
         }
-        return result(text(of: data), structured: data)
+        guard case .object(let fields) = data,
+            let entry = APIReference.entry(named: name)
+        else { return result(text(of: data), structured: data) }
+        let linked = JSONValue.object(
+            fields.merging(docsFields(for: entry, links: links)) { field, _ in
+                field
+            }
+        )
+        return result(text(of: linked), structured: linked)
     }
 }
