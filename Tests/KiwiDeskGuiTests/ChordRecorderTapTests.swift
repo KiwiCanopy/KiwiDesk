@@ -93,6 +93,26 @@ struct ChordRecorderTapTests {
         #expect(capture.locked == "rcmd")
     }
 
+    /// The recorder's own single tap, committed at its gap's end,
+    /// earns the caption from the recorded combo alone; the pending
+    /// tap it last reported is nil by then (#3257).
+    @Test("a recorded single tap leaves the caption")
+    func singleTapLeavesTheCaption() async throws {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = TapCapture()
+        capture.attach(recorder)
+        tap(recorder, down: 0, up: 0.1)
+        let wait = try #require(recorder.tapWait)
+        await wait.value
+        #expect(capture.pending.last == .some(nil))
+        let recorded = try #require(capture.locked)
+        #expect(
+            KeyRecorderField.tapOnceNote(for: recorded, held: "")
+                == KeyCombo.parse("rcmd")
+        )
+    }
+
     @Test("a held modifier records nothing; a key after a tap is a chord")
     func heldAndChord() {
         let recorder = ChordRecorder()

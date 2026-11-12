@@ -956,6 +956,8 @@
   "key_recorder.sides.label": "%1$@ の左右",
   "key_recorder.steal": "割り当て直す",
   "key_recorder.tap_again": "もう一度押すと%1$@",
+  "key_recorder.tap_once_recorded": "%1$@を記録しました。%2$@にするには、すばやく2回押してください。",
+  "key_recorder.tap_once_recorded.spoken": "記録しました：%1$@、1回押し。2回押しにするには、%2$@をすばやく2回押してください。",
   "key_sequence.hint.back": "%1$@ 戻る",
   "key_sequence.hint.cancel": "%1$@ キャンセル",
   "key_sequence.hint.opens_more": "次のキーを開きます",

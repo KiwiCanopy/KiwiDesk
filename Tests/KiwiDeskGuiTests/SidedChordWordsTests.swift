@@ -183,6 +183,11 @@ struct SidedChordWordsTests {
                     + "SidedChordWords.label(label))"
             )
         )
+        // A recorded single tap's caption speaks it (#3257).
+        #expect(
+            try read(keys + "Recorder/KeyRecorderField+Captions.swift")
+                .contains(".accessibilityLabel(words.spoken)")
+        )
         // A Pocket key's refusal pill speaks it (#2612).
         #expect(
             try read("Shortcuts/ShortcutsOpenBinding.swift").contains(

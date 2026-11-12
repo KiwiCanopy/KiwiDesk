@@ -956,6 +956,8 @@
   "key_recorder.sides.label": "%1$@ 的侧别",
   "key_recorder.steal": "重新指定",
   "key_recorder.tap_again": "再按一次即可录制 %1$@",
+  "key_recorder.tap_once_recorded": "已录制 %1$@。要录制 %2$@，请快速按两次。",
+  "key_recorder.tap_once_recorded.spoken": "已录制：%1$@，按一次。要录制按两次，请快速按两次 %2$@。",
   "key_sequence.hint.back": "%1$@ 返回",
   "key_sequence.hint.cancel": "%1$@ 取消",
   "key_sequence.hint.opens_more": "打开更多按键",

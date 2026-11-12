@@ -956,6 +956,8 @@
   "key_recorder.sides.label": "Lati per %1$@",
   "key_recorder.steal": "Riassegna",
   "key_recorder.tap_again": "Premi di nuovo per %1$@",
+  "key_recorder.tap_once_recorded": "Pressione registrata: %1$@. Per %2$@, premi due volte in rapida successione.",
+  "key_recorder.tap_once_recorded.spoken": "Pressione registrata: %1$@, una volta. Per una doppia pressione, premi %2$@ due volte in rapida successione.",
   "key_sequence.hint.back": "%1$@ Indietro",
   "key_sequence.hint.cancel": "%1$@ Annulla",
   "key_sequence.hint.opens_more": "Apre altri tasti",

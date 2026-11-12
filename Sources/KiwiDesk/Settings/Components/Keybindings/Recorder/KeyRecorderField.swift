@@ -40,6 +40,9 @@ struct KeyRecorderField: View {
     /// click lands right after the mouse monitor and must not
     /// immediately restart it.
     @State private var cancelledByClick: Date?
+    /// A single tap this field just recorded (#3257), until its next
+    /// edit; local state, no timer.
+    @State var tapOnceNote: KeyCombo?
     @State private var rejection: RecorderRejection?
     @State private var flashing = false
     @State var conflictPopoverShown = false
@@ -67,11 +70,13 @@ struct KeyRecorderField: View {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
             }
+            tapOnceCaption
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
         }
         .onChange(of: coordinator.generation) { _, _ in
+            tapOnceNote = nil
             rejection = nil
             recorder.stop()
             preview = ""
@@ -79,8 +84,12 @@ struct KeyRecorderField: View {
         .onChange(of: liveRejection == nil) { _, clear in
             if clear { rejection = nil }
         }
+        .onChange(of: combo) { _, now in keepTapOnceNote(now) }
         .onAppear { if armsOnAppear, combo.isEmpty { start() } }
-        .onDisappear(perform: stop)
+        .onDisappear {
+            stop()
+            tapOnceNote = nil
+        }
     }
 
     /// Fixed-width slot reserving space across icon states (#264).
@@ -95,7 +104,10 @@ struct KeyRecorderField: View {
     private var clearButton: some View {
         iconSlot {
             if !combo.isEmpty && !recording {
-                Button(action: onClear) {
+                Button {
+                    tapOnceNote = nil
+                    onClear()
+                } label: {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(.borderless)
@@ -159,21 +171,6 @@ struct KeyRecorderField: View {
             recording: recording,
             hyperDormant: hyperDormant
         )
-    }
-
-    static func rowHint(
-        combo: String,
-        sidesOn: Bool,
-        recording: Bool,
-        hyperDormant: Bool
-    ) -> String? {
-        if hyperDormant { return ShortcutBaseWords.dormantHint }
-        if !sidesOn, !recording, let parsed = KeyCombo.parse(combo),
-            parsed.modifiers.isSided, !parsed.isTap
-        {
-            return ModifierSidesWords.eitherSideHint
-        }
-        return nil
     }
 
     /// The hover text: a sided chord in words, then the hint or how
@@ -276,6 +273,7 @@ struct KeyRecorderField: View {
     }
 
     private func start() {
+        tapOnceNote = nil
         rejection = nil
         preview = ""
         pendingTap = nil
@@ -306,8 +304,9 @@ struct KeyRecorderField: View {
         // Release coordinator before committing hotkey (#213).
         coordinator.release(fieldID)
         switch outcome {
-        case .chord(let combo):
-            commit(combo)
+        case .chord(let recorded):
+            let note = tapOnceNote(for: recorded)
+            if commit(recorded) { tapOnceNote = note }
         case .clickAway:
             cancelledByClick = Date()
         case .cancelled, .modifiers, .sourceKey:
@@ -325,14 +324,16 @@ struct KeyRecorderField: View {
         coordinator.release(fieldID)
     }
 
-    /// Validates preflight and commits recorded combo string (#34).
-    func commit(_ string: String) {
+    /// Validates preflight and commits recorded combo string (#34);
+    /// false where a rejection stopped it.
+    @discardableResult func commit(_ string: String) -> Bool {
         if let found = preflight?(string) {
             rejection = found
             flash()
-            return
+            return false
         }
         onRecord(string)
+        return true
     }
 
     private func flash() {

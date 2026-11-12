@@ -956,6 +956,8 @@
   "key_recorder.sides.label": "Стороны: %1$@",
   "key_recorder.steal": "Забрать",
   "key_recorder.tap_again": "Нажми ещё раз для %1$@",
+  "key_recorder.tap_once_recorded": "Записано: %1$@. Для %2$@ нажми дважды подряд.",
+  "key_recorder.tap_once_recorded.spoken": "Записано: %1$@, одно нажатие. Для двойного нажатия нажми %2$@ дважды подряд.",
   "key_sequence.hint.back": "%1$@ Назад",
   "key_sequence.hint.cancel": "%1$@ Отменить",
   "key_sequence.hint.opens_more": "Открывает следующие клавиши",

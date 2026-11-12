@@ -956,6 +956,8 @@
   "key_recorder.sides.label": "좌우 설정: %1$@",
   "key_recorder.steal": "다시 할당",
   "key_recorder.tap_again": "한 번 더 누르면 %1$@",
+  "key_recorder.tap_once_recorded": "%1$@ 기록됨. %2$@을(를) 기록하려면 빠르게 두 번 누르세요.",
+  "key_recorder.tap_once_recorded.spoken": "기록됨: %1$@, 한 번 누름. 두 번 누르기로 기록하려면 %2$@ 키를 빠르게 두 번 누르세요.",
   "key_sequence.hint.back": "%1$@ 돌아가기",
   "key_sequence.hint.cancel": "%1$@ 취소",
   "key_sequence.hint.opens_more": "다음 키를 엽니다",
