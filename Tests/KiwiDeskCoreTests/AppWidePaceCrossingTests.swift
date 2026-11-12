@@ -125,7 +125,7 @@ struct AppWidePaceCrossingTests {
         load("Work", core)
         let after = try text("Work", core)
         let removed = before.components(separatedBy: "\n")
-            .filter { !after.contains($0) }
+            .filter { !$0.isEmpty && !after.contains($0) }
         #expect(removed.count == 4, "\(removed)")
         #expect(removed.allSatisfy { $0.contains("duration\"") })
     }
