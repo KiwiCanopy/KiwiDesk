@@ -33,8 +33,8 @@ struct LayerStripEditor: View {
                 addButton
                 editButton
             }
-            // ✎ holds the editor's other row's anchor too, on its
-            // own view: one `.id` each (#1250).
+            // The icon row's search anchor; ✎ holds Applies to's,
+            // so each `.id` sits on its own view (#1250).
             .searchAnchored(
                 SettingsCatalog.shortcuts.layersCard.children.menuBarIcon
             )
@@ -130,15 +130,16 @@ struct LayerStripEditor: View {
                 editor = nil
                 guard let added else { return }
                 selected = added
-                focusedChip = added
+                // A turn later, once the chip is drawn.
+                DispatchQueue.main.async { focusedChip = added }
             }
             .settingsPopoverChrome()
         }
     }
 
-    /// ✎ edits the selected layer, greyed on `default`; the editor's
-    /// rows anchor their search hits here, since a shut popover
-    /// draws no anchor (#1250).
+    /// ✎ edits the selected layer, greyed on `default`. Its group
+    /// carries the editor rows' search anchors, since a shut popover
+    /// draws none (#1250).
     private var editButton: some View {
         let fixed = selected == KeyLayer.defaultName
         return glyphButton(

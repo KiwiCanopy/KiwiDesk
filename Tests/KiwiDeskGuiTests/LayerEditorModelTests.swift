@@ -76,13 +76,19 @@ struct LayerEditorModelTests {
         #expect(icon(model, "Gaming") == "gamecontroller")
     }
 
+    /// On the loaded page and on a stored one, where a new layer is
+    /// the edited profile's alone.
     @Test("a name not yet added reads where Add records it")
     func pendingReachIsWhatAddRecords() throws {
-        let model = try makeModel()
-        let before = try #require(model.layerReach("Fresh"))
-        #expect(model.addLayer("Fresh"))
-        let after = try #require(model.layerReach("Fresh"))
-        #expect(before.shared == after.shared)
-        #expect(before.users == after.users)
+        for target in [nil, "Travel"] {
+            let model = try makeModel()
+            model.selectEditTarget(target)
+            let before = try #require(model.layerReach("Fresh"))
+            #expect(model.addLayer("Fresh"))
+            let after = try #require(model.layerReach("Fresh"))
+            #expect(before.shared == after.shared)
+            #expect(before.users == after.users)
+            #expect(before.shared == (target == nil))
+        }
     }
 }

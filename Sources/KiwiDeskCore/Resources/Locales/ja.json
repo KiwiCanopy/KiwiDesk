@@ -2300,7 +2300,7 @@
   "shortcuts.layer_delete.pair": "%1$@と%2$@から削除",
   "shortcuts.layer_delete.title": "「%1$@」レイヤーを削除しますか？",
   "shortcuts.layer_edit.default_help": "「default」レイヤーは、名前の変更、削除、アイコンの設定ができません。",
-  "shortcuts.layer_edit.help": "レイヤー「%1$@」を編集…",
+  "shortcuts.layer_edit.help": "「%1$@」レイヤーを編集…",
   "shortcuts.layer_editor.delete": "レイヤーを削除…",
   "shortcuts.layer_editor.name": "名前",
   "shortcuts.layer_menu.delete": "削除…",
