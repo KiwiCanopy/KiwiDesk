@@ -250,4 +250,30 @@ struct InstantDurationMigrationTests {
             }
         )
     }
+
+    /// The look insert keeps the file's bytes: only the new switch
+    /// lands, right after its length.
+    @Test("the look insert is surgical")
+    func lookInsertIsSurgical() throws {
+        var settings = TilingSettings()
+        settings.animations.revealDurationMS = 450
+        var style = LookKeys.extract(from: settings)
+        style["animations.on_reveal"] = nil
+        let document = LookDocument(
+            format: 3,
+            looks: [ShelfLook(name: "Old", style: style, colors: [:])]
+        )
+        let data = try JSONEncoder().encode(document)
+        let text = try #require(String(data: data, encoding: .utf8))
+        let needle = "\"animations.reveal_duration\":450"
+        #expect(text.contains(needle))
+        let out = try #require(
+            ConfigMigration.migratingInstantDurationsOntoToggles(data)
+        )
+        let expected = text.replacingOccurrences(
+            of: needle,
+            with: needle + ", \"animations.on_reveal\": true"
+        )
+        #expect(String(data: out, encoding: .utf8) == expected)
+    }
 }

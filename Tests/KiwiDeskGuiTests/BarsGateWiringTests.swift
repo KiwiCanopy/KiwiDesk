@@ -78,8 +78,15 @@ struct BarsGateWiringTests {
                 "GreyOut(active:revealInert)",
                 ".inertReason(for:.colours(.animationsRevealDurationMS))"
                     + "StepperRow(",
+                // Bound to their rows: the picker's grey also reads
+                // `reason != nil`, so a bare needle matched it.
+                "GreyOut(active:reason!=nil)).searchAnchored("
+                    + "SettingsCatalog.bars.kiwishelfDurations.children"
+                    + ".revealDuration",
                 ".inertReason(for:.colours(.animationsExpandDurationMS))",
-                "GreyOut(active:reason==.expandOff)",
+                "GreyOut(active:reason==.expandOff)).searchAnchored("
+                    + "SettingsCatalog.bars.kiwishelfDurations.children"
+                    + ".expandDuration",
             ],
         ]
         for (path, needles) in consults {
