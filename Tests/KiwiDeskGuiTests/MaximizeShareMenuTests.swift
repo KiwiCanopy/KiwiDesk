@@ -99,11 +99,7 @@ struct MaximizeShareMenuTests {
             source.components(separatedBy: "privatefuncanchorMenu(").last
         )
         #expect(anchor.contains(".controlSize(.large).fixedSize()"))
-        #expect(
-            source.contains(
-                "cell(key).frame(width:Self.columnWidth,alignment:.leading)"
-            )
-        )
+        // The column each cell leads is `MaximizeColumnFitTests`'.
     }
 
     /// The popover's "%" sits beside "Share" in a row laid out at

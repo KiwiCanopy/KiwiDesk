@@ -118,7 +118,7 @@ struct SettingsSection<Content: View>: View {
     ) -> some View {
         if plated {
             inner()
-                .padding(12)
+                .padding(SettingsMetrics.sectionPlateInset)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(plateShape)
         } else {
