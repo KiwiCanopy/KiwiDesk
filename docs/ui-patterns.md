@@ -454,6 +454,13 @@ are equal-width across the track (full-bleed, like a native
 window-toolbar switcher), a deliberate trade against
 content-sized segments. One control, one look.
 
+A strip fills the control column only on a full-width labeled row
+on the label axis. Inside a column or a footprint — a Shortcuts
+setting row, an override column, a table cell — it hugs its labels
+(`hugsLabels`, which keeps the segments equal at the widest label,
+and `.fixedSize()`, since a hugging strip still takes a width
+proposed to it) and sits there as a compact control (#3262).
+
 One switch takes a neutral pill: `SegmentedPicker(neutral: true)`
 fills the selection with the chip-hover fill and keeps the rest
 ink, for the `Simple | Advanced` switch, a choice no hue may mark
