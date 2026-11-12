@@ -89,6 +89,27 @@ struct ScrollGestureRouterTests {
         #expect(next.events.map(\.kind) == [.ended])
     }
 
+    @Test("a wheel burst keeps its first notch's axis on every event")
+    func wheelBurstHoldsItsAxis() {
+        for firstSideways in [false, true] {
+            var router = ScrollGestureRouter()
+            router.chords = ScrollTapChords(
+                wheel: [Self.pan],
+                wheelX: [Self.pan]
+            )
+            let vertical = sample(Self.pan, dy: 5)
+            var sideways = sample(Self.pan)
+            sideways.delta = CGVector(dx: 5, dy: 0)
+            let order =
+                firstSideways ? [sideways, vertical] : [vertical, sideways]
+            var events = router.route(order[0], now: 0).events
+            events += router.route(order[1], now: 0.05).events
+            events += router.expire(now: 1)
+            #expect(events.count >= 4)
+            #expect(events.allSatisfy { $0.sideways == firstSideways })
+        }
+    }
+
     @Test("a trackpad gesture owns its momentum after the keys lift")
     func trackpadKeepsMomentum() {
         var router = router()
