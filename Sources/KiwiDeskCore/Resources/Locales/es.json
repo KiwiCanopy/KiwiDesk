@@ -229,6 +229,7 @@
   "behavior.animations.reduce_motion.open": "Abrir ajustes de Accesibilidad",
   "behavior.animations.reduce_motion.warning": "Reducir movimiento está activado en Ajustes del Sistema, así que las animaciones de ventanas no se reproducen.",
   "behavior.animations.relayout": "Animar los reajustes del diseño",
+  "behavior.animations.scrolling_xref": "Los cambios de foco del diseño Scrolling tienen su propio interruptor en %1$@.",
   "behavior.animations.scrolling_xref_link": "Diseño por defecto ▸ Scrolling",
   "behavior.animations.state_change": "Animar flotación, Pocket y maximización",
   "behavior.animations.state_change.help": "Una ventana que pasa a flotar o vuelve al mosaico, que se maximiza o recupera su sitio, o que entra en el Pocket y sale de él se desplaza hasta allí en lugar de saltar. Las ventanas de alrededor siguen a «%1$@».",
