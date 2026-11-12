@@ -156,7 +156,17 @@ struct JumpPanelView: View {
                     },
                     onMore: { model.clickMore($0, forward: $1) },
                     onDrop: { model.dropWindows($0, on: $1) },
-                    onSettings: { model.handle(.settings, repeated: false) }
+                    onSettings: { model.handle(.settings, repeated: false) },
+                    pointer: DesktopsPointer(
+                        hover: model.hover,
+                        onHover: {
+                            model.hoverDesktops(
+                                $0,
+                                pointer: model.currentPointer()
+                            )
+                        },
+                        onHoverEnd: { model.endHover($0) }
+                    )
                 )
                 .environment(\.desktopsSwell, model.desktopsSwell)
                 .transition(.opacity)

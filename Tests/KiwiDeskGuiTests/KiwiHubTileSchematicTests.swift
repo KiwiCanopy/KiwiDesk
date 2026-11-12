@@ -5,10 +5,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A layout tile's schematic takes its fill's ink: the selection's
-/// selected, the hover ink lifted under "Tint KiwiHub and plates",
-/// so no accent stroke sits on a highlight (#2569); untinted, the
-/// grey lift keeps the brand's schematic.
+/// A layout tile's schematic takes the hover ink lifted under "Tint
+/// KiwiHub and plates", so no accent stroke sits on a highlight
+/// (#2569); a selected tile's ring leaves the brand's schematic
+/// (#3210), and so does the grey lift untinted.
 @Suite("A KiwiHub tile's schematic takes its fill's ink")
 struct KiwiHubTileSchematicTests {
     private func tinted() -> KiwiHubPaint {
@@ -29,39 +29,26 @@ struct KiwiHubTileSchematicTests {
         let paint = tinted()
         let ink = try #require(paint.hoverInk)
         let palette = try #require(
-            paint.schematicPalette(selected: false, lifted: true)
+            paint.schematicPalette(lifted: true)
         )
         #expect(palette.accent == ink)
         #expect(palette.ink == ink)
         #expect(palette.base == paint.rowHover)
     }
 
-    @Test("a selected tile's schematic is drawn in the selection ink")
-    func selectedTakesSelectionInk() throws {
-        let paint = tinted()
-        let palette = try #require(
-            paint.schematicPalette(selected: true, lifted: true)
-        )
-        #expect(palette.accent == paint.selectionInk)
-        #expect(palette.ink == paint.selectionInk)
-        #expect(palette.base == paint.selection)
-    }
-
     @Test("a resting tile, or a lifted one untinted, keeps the brand's")
     func restAndUntintedKeepBrand() {
         #expect(
-            tinted().schematicPalette(selected: false, lifted: false)
-                == nil
+            tinted().schematicPalette(lifted: false) == nil
         )
         #expect(
-            KiwiHubPaint().schematicPalette(selected: false, lifted: true)
-                == nil
+            KiwiHubPaint().schematicPalette(lifted: true) == nil
         )
         // Untinted reads `tinted`, never a nil hover ink alone.
         var untinted = KiwiHubPaint()
         untinted.hoverInk = .white
         #expect(
-            untinted.schematicPalette(selected: false, lifted: true) == nil
+            untinted.schematicPalette(lifted: true) == nil
         )
     }
 
@@ -78,8 +65,7 @@ struct KiwiHubTileSchematicTests {
         )
         #expect(
             source.occurrences(
-                of: "paint.schematicPalette(selected: isSelected, "
-                    + "lifted: isLifted)"
+                of: "paint.schematicPalette(lifted: isLifted)"
             ) == 1
         )
         #expect(source.occurrences(of: "\\.schematicPalette,") == 1)

@@ -3,7 +3,9 @@ import SwiftUI
 
 /// One tile on the View side's Layout line (#2229, #2309): its
 /// schematic and its name, the current one marked with a ✓ glyph
-/// rather than a second green.
+/// rather than a second green. Rows fill, tiles ring (#3210): the
+/// selected tile wears a 2 pt ring over the unselected inks, a
+/// lifted one the hover ground.
 struct JumpLayoutTile: View {
     let mode: LayoutMode
     /// Its ⌘ number among the line's matches; nil past nine.
@@ -30,11 +32,7 @@ struct JumpLayoutTile: View {
 
     var body: some View {
         Button(action: onActivate) {
-            content.kiwiHubRowInk(
-                paint,
-                selected: isSelected,
-                lifted: isLifted
-            )
+            content.kiwiHubRowInk(paint, selected: false, lifted: isLifted)
         }
         .buttonStyle(.plain)
         .focusable(false)
@@ -50,9 +48,9 @@ struct JumpLayoutTile: View {
         }
     }
 
-    /// The tile proper on its selection fill, then the chord line
-    /// under it, outside the fill: the fill keeps one shape with
-    /// ⌘ up or down.
+    /// The tile proper on its ring or hover ground, then the chord
+    /// line under it, outside both: they keep one shape with ⌘ up
+    /// or down.
     private var content: some View {
         VStack(spacing: 2) {
             tile
@@ -75,11 +73,9 @@ struct JumpLayoutTile: View {
             }
             .font(.caption)
             .foregroundStyle(
-                isSelected
-                    ? AnyShapeStyle(paint.selectionInk)
-                    : isLifted && paint.hoverInk != nil
-                        ? AnyShapeStyle(paint.hoverInk ?? .primary)
-                        : AnyShapeStyle(.primary)
+                isLifted && paint.hoverInk != nil
+                    ? AnyShapeStyle(paint.hoverInk ?? .primary)
+                    : AnyShapeStyle(.primary)
             )
         }
         .padding(.vertical, 7)
@@ -106,24 +102,20 @@ struct JumpLayoutTile: View {
         )
         .environment(
             \.schematicPalette,
-            paint.schematicPalette(selected: isSelected, lifted: isLifted)
+            paint.schematicPalette(lifted: isLifted)
         )
         .accessibilityHidden(true)
     }
 
     @ViewBuilder private var selection: some View {
+        let shape = RoundedRectangle(
+            cornerRadius: KeyPanelStyle.selectionRadius,
+            style: .continuous
+        )
         if isSelected {
-            RoundedRectangle(
-                cornerRadius: KeyPanelStyle.selectionRadius,
-                style: .continuous
-            )
-            .fill(paint.fill(paint.selection))
+            shape.strokeBorder(paint.selection, lineWidth: 2)
         } else if isLifted {
-            RoundedRectangle(
-                cornerRadius: KeyPanelStyle.selectionRadius,
-                style: .continuous
-            )
-            .fill(paint.fill(paint.rowHover))
+            shape.fill(paint.fill(paint.rowHover))
         }
     }
 

@@ -7454,11 +7454,12 @@ panel has the keyboard.
   the first, **⌘1**–**⌘9** drop them on that Desktop's shown
   Space. A window on a Desktop no screen shows, a pocketed one and
   a full-screen one cannot be picked up.
-- A click on a Space opens it, a double click goes there, and a
-  double click on a Desktop's title goes to that Desktop;
-  **⇧**-click moves,
-  **⌥**-click swaps, **⌘**-click picks up. Dragging an icon onto
-  a Space moves it, and you stay.
+- A click does what **Return** does on what you clicked: on a
+  Space it goes there, on a window's icon it jumps to the window,
+  on a Desktop's title it goes to that Desktop, and while windows
+  ride along it drops them there. **⇧**-click moves, **⌥**-click
+  swaps, **⌘**-click picks up. A double click acts once. Dragging
+  an icon onto a Space moves it, and you stay.
 - Typing finds windows by app and title; matches move to the
   front of their Space and the rest dim.
 - **Escape** steps back: the picked windows, the open Space, the

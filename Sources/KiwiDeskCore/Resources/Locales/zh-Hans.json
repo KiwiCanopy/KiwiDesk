@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@，%2$@",
   "desktop_overview.ax.window_picked": "%1$@，%2$@，已拿起",
   "desktop_overview.card.shown": "已显示",
+  "desktop_overview.card.switch_to": "切换到桌面 %1$d",
   "desktop_overview.card.title": "桌面 %1$d",
   "desktop_overview.field.label": "搜索窗口",
   "desktop_overview.footer.back": "%1$@ 返回",

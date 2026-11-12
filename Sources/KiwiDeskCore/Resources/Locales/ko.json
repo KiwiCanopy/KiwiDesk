@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, 집음",
   "desktop_overview.card.shown": "표시됨",
+  "desktop_overview.card.switch_to": "데스크탑 %1$d(으)로 전환",
   "desktop_overview.card.title": "데스크탑 %1$d",
   "desktop_overview.field.label": "윈도우 검색",
   "desktop_overview.footer.back": "%1$@ 돌아가기",

@@ -126,18 +126,11 @@ extension KiwiHubPaint {
         return lifted ? hoverInk : nil
     }
 
-    /// A layout tile's schematic inks on its fill: the selection's
-    /// ink selected, the hover ink lifted under the toggle, so no
-    /// accent stroke sits on a highlight; nil keeps the brand's.
-    func schematicPalette(selected: Bool, lifted: Bool) -> SchematicPalette? {
-        if selected {
-            return SchematicPalette(
-                accent: selectionInk,
-                ink: selectionInk,
-                base: selection,
-                ground: .dark
-            )
-        }
+    /// A layout tile's schematic inks on the hover ground: the hover
+    /// ink lifted under the toggle, so no accent stroke sits on a
+    /// highlight; nil keeps the brand's, a selected tile's included,
+    /// since its ring leaves its ground bare (#3210).
+    func schematicPalette(lifted: Bool) -> SchematicPalette? {
         guard tinted, lifted, let hoverInk else { return nil }
         return SchematicPalette(
             accent: hoverInk,
