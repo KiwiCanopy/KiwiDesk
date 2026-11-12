@@ -7383,6 +7383,31 @@ carry them, and a bundle is the second reader of that shape — so
 them, and the restore owes them to the first profile it applies.
 A backup written after carries them in its settings.
 
+:::unreleased
+**Animation pace is app-wide; animation on and off stays per
+profile (#3237, owner ruling 2026-11-12).** [Principle] Nobody
+tunes how fast windows move per profile, and a Desktop binding that
+switches profile changed the pace silently — the case this entry
+exists for. A "snappy" profile is still wanted, so the switches
+stay in each profile and only the four lengths (`duration`,
+`scroll_duration`, `expand_duration`, `reveal_duration`) move, into
+`gui.json`'s app-wide `animations` group. The verbs keep their
+names in the one `animations` namespace, which mixes scopes as
+`tiling` does: no other noun fits (*motion* quotes Apple's Reduce
+Motion, *speed* was retired by #1020), and the most common
+`init.lua` animation line keeps working. [Trade-off] The lengths
+cross by adoption with a crossing of their own, owed while
+`gui.json` lacks the group, read from each profile's migrated
+bytes (so a #3236 0 arrives as the switch off) and stripped from
+every profile file once stored; an install that had ended #1741's
+crossing would otherwise inherit nothing. Looks stop carrying pace,
+a step dropping the four paths from every look. The lengths have no
+Settings row at all (owner ruling 2026-11-12, #3238, reversing the
+first #3237 ruling that kept Scroll duration in Layout Defaults):
+the speed preset is to be Settings' one pace control, and Lua sets
+an exact length.
+:::
+
 **A verb changes the running value; only a General row or an
 adoption stores one.** `KiwiCore+AppWide` holds them apart —
 what the engine reads, the value no verb has touched, and what

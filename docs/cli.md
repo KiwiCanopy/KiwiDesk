@@ -766,8 +766,8 @@ every lens with why it cannot turn on.
 | | `list_monitors` | — |
 | | `list_windows` | [space] |
 | | `debug_log` | [message] |
-| Animation | `animations.set_duration` | ms (50–1000) |
-| | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration |
+| Animation | `animations.set_duration` | ms (50–1000); app-wide |
+| | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, app-wide |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |

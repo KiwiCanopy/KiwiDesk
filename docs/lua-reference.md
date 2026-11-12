@@ -9468,6 +9468,16 @@ KiwiDesk.set_wake_restore_delay(1500)
 
 ### Animation Cascade
 
+:::unreleased
+**The four lengths are app-wide.** `animations.set_duration`,
+`set_scroll_duration`, `set_expand_duration` and
+`set_reveal_duration` set one value for every profile, stored in
+`gui.json`'s `animations` group; a profile switch never changes
+them, and a look never carries them. Each is Lua-only: Settings has
+no row for a length. The first profile applied after updating lends
+its lengths to `gui.json`, once, and they leave every profile file.
+:::
+
 **Profiles own all animation settings.** Like every other tiling
 setting, `animations.*` — the duration knobs included — is saved
 in a profile. When a profile is bound to a macOS Desktop
