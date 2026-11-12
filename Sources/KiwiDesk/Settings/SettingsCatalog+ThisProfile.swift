@@ -188,6 +188,10 @@ struct ColorsControls: Sendable {
         "animations.space_scroll_transition",
         "Step between Spaces (mouse or trackpad)"
     )
+    let animationSpeed = SettingsControl(
+        "behavior.animations.speed",
+        "Animation speed"
+    )
     let spaceSlideDuration = SettingsControl(
         "animations.space_slide_duration",
         "Slide duration"

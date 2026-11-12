@@ -58,7 +58,8 @@ extension SettingsValueReadout {
             )
         case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration,
             .animationsDurationMS, .animationsScrollDurationMS,
-            .animationsExpandDurationMS, .animationsRevealDurationMS:
+            .animationsExpandDurationMS, .animationsRevealDurationMS,
+            .animationSpeed:
             // No model path: the rows write at once (#1741, #3237).
             return []
         case .animationsMaster:

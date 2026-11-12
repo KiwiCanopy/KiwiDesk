@@ -43,7 +43,8 @@ enum ColorsRowOrder {
 
     /// The Motion card's at-rest row: the window animations' master.
     static let motionAtRest: [SettingKey] = [
-        .colours(.animationsMaster)
+        .colours(.animationSpeed),
+        .colours(.animationsMaster),
     ]
 
     /// Motion card disclosure rows.

@@ -9,6 +9,9 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
+    /// App-wide (#3238): the speed preset, its Off the stored flag;
+    /// its speeds write the lengths, which are Lua-only rows.
+    case animationSpeed = "appWide.animationReduceMotion"
     /// App-wide (#1741), not an `AnimationSettings` field: how a
     /// Space switch shows itself and the slide's pace (#2524).
     case spaceTransition = "appWide.spaceTransition"
@@ -84,7 +87,7 @@ extension ColoursKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
-        case .animationsMaster:
+        case .animationsMaster, .animationSpeed:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
             // App-wide (#1741), so they grey where init.lua owns
@@ -195,6 +198,11 @@ extension ColoursKey {
             return .text(
                 "behavior.animations.master",
                 help: "behavior.animations.master.help"
+            )
+        case .animationSpeed:
+            return .text(
+                "behavior.animations.speed",
+                help: "behavior.animations.speed.help"
             )
         case .spaceTransition:
             return .text(
