@@ -2192,7 +2192,7 @@
   "shortcuts.gestures.list.add": "追加",
   "shortcuts.gestures.list.gesture": "ジェスチャ",
   "shortcuts.gestures.list.magic_mouse": "Magic Mouseにも適用されます。",
-  "shortcuts.gestures.list.mouse_help": "キーを押したままのドラッグ、ポインタ移動、スクロールに操作を割り当てます。すべての方向に1つの操作を割り当てると、スクロールは指の動きに合わせて、スクロールした分だけ進みます。1つの方向を変えると、各方向はスクロール1回につき1回ずつ動作します。",
+  "shortcuts.gestures.list.mouse_help": "キーを押したままのドラッグ、ポインタ移動、スクロールに操作を割り当てます。すべての方向に1つの操作を割り当てると、スクロールした分だけ進みます。1つの方向に別の操作を割り当てると、各方向はスクロール1回につき1回ずつ動作します。",
   "shortcuts.gestures.list.restore": "デフォルトに戻す",
   "shortcuts.gestures.list.trackpad_help": "タップやスワイプに操作を割り当てます。タップはキーなしでも使えます。すべての方向に1つの操作を割り当てると、スワイプは指の動きに合わせてスライドし、スワイプした分だけ進みます。1つの方向を変えると、各方向はスワイプ1回につき1回ずつ動作します。",
   "shortcuts.gestures.mixed_caption": "各方向はスワイプ1回につき1回ずつ動作し、指の動きに合わせてスライドしなくなります。",

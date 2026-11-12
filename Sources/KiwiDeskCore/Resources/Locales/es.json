@@ -2192,7 +2192,7 @@
   "shortcuts.gestures.list.add": "Añadir",
   "shortcuts.gestures.list.gesture": "Gesto",
   "shortcuts.gestures.list.magic_mouse": "También se aplica al Magic Mouse.",
-  "shortcuts.gestures.list.mouse_help": "Asigna una acción a un arrastre, un movimiento o un desplazamiento con teclas pulsadas. Con una acción para todas las direcciones, el desplazamiento sigue tus dedos y avanza tanto como te desplazas; si cambias una dirección, cada dirección actúa una vez por desplazamiento.",
+  "shortcuts.gestures.list.mouse_help": "Asigna una acción a un arrastre, un movimiento o un desplazamiento con teclas pulsadas. Con una acción para todas las direcciones, el desplazamiento avanza tanto como te desplazas; si das a una dirección su propia acción, cada dirección actúa una vez por desplazamiento.",
   "shortcuts.gestures.list.restore": "Restaurar predeterminados",
   "shortcuts.gestures.list.trackpad_help": "Asigna una acción a un toque o a un deslizamiento; un toque puede no usar teclas. Con una acción para todas las direcciones, el deslizamiento sigue tus dedos y avanza tanto como deslizas; si cambias una dirección, cada dirección actúa una vez por deslizamiento.",
   "shortcuts.gestures.mixed_caption": "Cada dirección actúa una vez por deslizamiento y ya no sigue tus dedos.",

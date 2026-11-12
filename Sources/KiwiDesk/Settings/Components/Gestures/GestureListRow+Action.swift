@@ -56,7 +56,7 @@ extension GestureListRow {
         case .grab(let grab): GestureListWords.grab(grab)
         case .run(let run):
             catalog.command(running: run.lua)?.resolvedLabel
-                ?? run.meta.desc.nonEmpty ?? run.lua
+                ?? GestureListWords.value(action)
         }
     }
 
@@ -108,13 +108,9 @@ extension GestureListRow {
     /// Binds `action` on the row's key; a family folds the arms
     /// back into one. The directions stay as open as they were.
     func bind(_ action: GestureAction) {
+        clash = nil
         GestureListEdits.set(action, at: key, in: &model.config.gesture)
     }
-}
-
-extension String {
-    /// Self, or nil when blank.
-    fileprivate var nonEmpty: String? { trimmed.isEmpty ? nil : self }
 }
 
 /// A row's gesture icon (#3199 ▸ Ruling): the gesture's symbol, a

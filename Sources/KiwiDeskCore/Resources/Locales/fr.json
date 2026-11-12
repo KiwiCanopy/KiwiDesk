@@ -2192,7 +2192,7 @@
   "shortcuts.gestures.list.add": "Ajouter",
   "shortcuts.gestures.list.gesture": "Geste",
   "shortcuts.gestures.list.magic_mouse": "S'applique aussi à la Magic Mouse.",
-  "shortcuts.gestures.list.mouse_help": "Associez une action à un glissement, un mouvement ou un défilement avec des touches maintenues. Avec une action pour toutes les directions, le défilement suit vos doigts et avance autant que vous faites défiler ; modifiez une direction et chaque direction agit plutôt une fois par défilement.",
+  "shortcuts.gestures.list.mouse_help": "Associez une action à un glissement, un mouvement ou un défilement avec des touches maintenues. Avec une action pour toutes les directions, le défilement avance autant que vous faites défiler ; donnez à une direction sa propre action et chaque direction agit plutôt une fois par défilement.",
   "shortcuts.gestures.list.restore": "Rétablir les valeurs par défaut",
   "shortcuts.gestures.list.trackpad_help": "Associez une action à un toucher ou à un balayage ; un toucher peut se passer de touches. Avec une action pour toutes les directions, le balayage glisse avec vos doigts et avance autant que vous balayez ; modifiez une direction et chaque direction agit plutôt une fois par balayage.",
   "shortcuts.gestures.mixed_caption": "Chaque direction agit une fois par balayage et ne glisse plus avec vos doigts.",

@@ -10,8 +10,11 @@ import Testing
 @Suite("Focus space window", .serialized)
 @MainActor
 struct FocusSpaceWindowTests {
-    /// Three windows in a grid on a pinned display, focus on `focus`.
-    private func makeCore(focus: WindowID) -> KiwiCore {
+    /// Three windows in `mode` on a pinned display, focus on `focus`.
+    private func makeCore(
+        focus: WindowID,
+        mode: String = "grid"
+    ) -> KiwiCore {
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
@@ -28,7 +31,7 @@ struct FocusSpaceWindowTests {
             )
         }
         let space = core.state.workspaces.space(of: WindowID(1))!
-        core.execute("set_mode", args: [.string(space.raw), .string("grid")])
+        core.execute("set_mode", args: [.string(space.raw), .string(mode)])
         core.state.workspaces.focus(focus, in: space)
         return core
     }
@@ -46,6 +49,18 @@ struct FocusSpaceWindowTests {
         #expect(core.activeSpace?.focused == WindowID(1))
         #expect(step(core, "prev").isSuccess)
         #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
+    @Test("on a Scrolling row it steps as the row does, wrap and all")
+    func rowStepsAlongTheRow() {
+        let core = makeCore(focus: WindowID(3), mode: "scrolling")
+        core.execute("set_focus_wrap", args: [.string("off")])
+        // The list walk would wrap to the first window; the row's own
+        // step stops at its end with wrap off.
+        #expect(!step(core, "next").isSuccess)
+        #expect(core.activeSpace?.focused == WindowID(3))
+        #expect(step(core, "prev").isSuccess)
+        #expect(core.activeSpace?.focused == WindowID(2))
     }
 
     @Test("an unknown direction is refused, naming the choices")

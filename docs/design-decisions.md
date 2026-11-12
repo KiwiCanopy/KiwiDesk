@@ -9875,8 +9875,11 @@ holds each chord at revert time, never from a stored history, so a
 later edit still counts; it never crosses a layer or takes an
 unchanged binding, and one pure function (`BindingRevertSet`) gives
 the ↺ both its set and its words ("Revert, with Swap Left"). The
-binding's reach picks go with it. The alternative, taking the chord
-back alone, leaves the binding it was moved to unbound — a state
+binding's reach picks go with it. A gesture row moved to other keys
+or another gesture (#3183) is the same shape: the key it left and the
+key it took read as one row, paired as a key that lost an action and
+a key that gained that same action, and its ↺ takes both back. The
+alternative, taking the chord back alone, leaves the binding it was moved to unbound — a state
 nobody saved — and still needs a second press. A ↺ that takes more
 than its own words name asks first (a binding's names every
 binding it takes): a layer's or a lens's create, delete

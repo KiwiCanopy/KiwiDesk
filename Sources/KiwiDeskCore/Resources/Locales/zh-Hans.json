@@ -2192,7 +2192,7 @@
   "shortcuts.gestures.list.add": "添加",
   "shortcuts.gestures.list.gesture": "手势",
   "shortcuts.gestures.list.magic_mouse": "也适用于妙控鼠标。",
-  "shortcuts.gestures.list.mouse_help": "为按住按键时的拖动、指针移动或滚动指定操作。为所有方向指定同一个操作时，滚动会跟随手指，滚多远就走多远；更改其中一个方向后，每个方向改为每次滚动执行一次。",
+  "shortcuts.gestures.list.mouse_help": "为按住按键时的拖移、指针移动或滚动指定操作。所有方向使用同一操作时，滚动多少就前进多少；为某个方向指定单独的操作后，每个方向每次滚动只执行一次。",
   "shortcuts.gestures.list.restore": "恢复默认",
   "shortcuts.gestures.list.trackpad_help": "为轻点或轻扫指定操作；轻点可以不使用按键。为所有方向指定同一个操作时，轻扫会随手指滑动，扫多远就走多远；更改其中一个方向后，每个方向改为每次轻扫执行一次。",
   "shortcuts.gestures.mixed_caption": "每个方向每次轻扫执行一次，不再随手指滑动。",

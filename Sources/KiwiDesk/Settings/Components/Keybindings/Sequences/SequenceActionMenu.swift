@@ -166,7 +166,13 @@ struct SequenceActionMenu: View {
             commit([])
             return .handled
         }
-        .onAppear { searchFocused = true }
+        // A keyboard open takes the cursor; a click draws no ring
+        // around the list (#991, `ClickBornFocus`).
+        .onAppear {
+            if !ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
+                searchFocused = true
+            }
+        }
     }
 
     @ViewBuilder private func list(

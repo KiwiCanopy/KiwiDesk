@@ -54,6 +54,8 @@ struct GestureCatalogueTests {
                 continue
             }
             #expect(catalog.command(running: stored.lua)?.lua == command.lua)
+            // Stored as a built-in, as an end key stores one.
+            #expect(stored == LuaAction(lua: command.lua, kind: .navigation))
         }
     }
 

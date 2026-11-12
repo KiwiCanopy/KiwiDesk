@@ -16,7 +16,7 @@ extension KiwiCore {
         else { return .fail("no focused window") }
         let step = direction == .next ? 1 : -1
         guard stepScrollPan(space, by: step, swipe: nil) else {
-            return .fail("the Space has no other window to focus")
+            return .fail("no window to focus that way")
         }
         return .ok()
     }

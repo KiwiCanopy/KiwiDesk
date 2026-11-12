@@ -40,7 +40,7 @@ struct GestureListRow: View {
     /// so their actions line up under the row's.
     @State private var gestureColumn: CGFloat = 0
     /// A gesture pop-up pick refused for the keys another row holds.
-    @State private var clash: String?
+    @State var clash: String?
 
     var key: GestureKey { entry.key }
 
@@ -218,6 +218,7 @@ struct GestureListRow: View {
     }
 
     func rekey(to target: GestureKey) {
+        clash = nil
         guard target != key, !others.contains(target) else { return }
         if action != nil {
             guard

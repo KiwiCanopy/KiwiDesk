@@ -74,7 +74,8 @@ extension GestureListRow {
             .run(
                 LuaAction(
                     lua: KeybindingCatalog.appCommand(app.bundleID),
-                    kind: .application
+                    kind: .application,
+                    meta: KeyBindingMeta(desc: app.name)
                 )
             )
         )

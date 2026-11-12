@@ -2192,7 +2192,7 @@
   "shortcuts.gestures.list.add": "加入",
   "shortcuts.gestures.list.gesture": "手勢",
   "shortcuts.gestures.list.magic_mouse": "也適用於巧控滑鼠。",
-  "shortcuts.gestures.list.mouse_help": "為按住按鍵時的拖移、指標移動或捲動指定操作。為所有方向指定同一個操作時，捲動會跟隨手指，捲多遠就走多遠；變更其中一個方向後，每個方向改為每次捲動執行一次。",
+  "shortcuts.gestures.list.mouse_help": "為按住按鍵時的拖移、指標移動或捲動指定操作。所有方向使用同一操作時，捲動多少就前進多少；為某個方向指定單獨的操作後，每個方向每次捲動只執行一次。",
   "shortcuts.gestures.list.restore": "回復預設值",
   "shortcuts.gestures.list.trackpad_help": "為點一下或滑動指定操作；點一下可以不使用按鍵。為所有方向指定同一個操作時，滑動會隨手指移動，滑多遠就走多遠；變更其中一個方向後，每個方向改為每次滑動執行一次。",
   "shortcuts.gestures.mixed_caption": "每個方向每次滑動執行一次，不再隨手指移動。",

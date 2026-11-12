@@ -153,6 +153,19 @@ enum GestureListWords {
 
     static var add: String { L("shortcuts.gestures.list.add", "Add") }
 
+    /// A Lua or app action read without the catalogue: its
+    /// description, an app's name, else its Lua — "Lua…" while it
+    /// has none.
+    static func runName(_ run: LuaAction) -> String {
+        if !run.meta.desc.trimmed.isEmpty { return run.meta.desc }
+        if run.kind == .application,
+            let bundleID = KeybindingCatalog.appBundleID(from: run.lua)
+        {
+            return KeybindingCatalog.displayName(forBundleID: bundleID)
+        }
+        return run.lua.trimmed.isEmpty ? SequenceActionMenu.luaLabel : run.lua
+    }
+
     /// A row named by its gesture and the keys held with it.
     static func rowName(_ key: GestureKey) -> String {
         guard !key.chord.isEmpty else { return input(key.input) }
@@ -173,7 +186,7 @@ enum GestureListWords {
         case .family(let family): Self.family(family)
         case .grab(let grab): Self.grab(grab)
         case .split: perDirection
-        case .run(let run): run.meta.desc.isEmpty ? run.lua : run.meta.desc
+        case .run(let run): runName(run)
         }
     }
 
