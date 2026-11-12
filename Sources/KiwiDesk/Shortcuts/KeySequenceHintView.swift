@@ -45,7 +45,8 @@ struct KeySequenceHintView: View {
                     scroll: scroll.value,
                     maxHeight: endKeyCap,
                     horizontalInset: 0,
-                    verticalInset: 0
+                    verticalInset: 0,
+                    fades: false
                 )
                 .moreBelowFade()
                 .onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }

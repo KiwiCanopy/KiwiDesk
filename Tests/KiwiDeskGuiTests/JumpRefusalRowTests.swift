@@ -206,7 +206,6 @@ struct JumpRefusalRowTests {
     func footerUnderShift() {
         let footer = JumpFooter(
             scope: .windows,
-            overflows: false,
             modifiers: .shift,
             selectionMoves: false
         )

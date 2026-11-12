@@ -9,7 +9,6 @@ extension JumpPanelView {
         return JumpFooterRow(
             footer: JumpFooter(
                 scope: model.scope,
-                overflows: footerOverflows,
                 modifiers: model.heldModifiers,
                 hasSelection: model.hasSelection,
                 selectionSwaps: selected?.swapBlock == nil,
@@ -31,22 +30,6 @@ extension JumpPanelView {
         )
     }
 
-    /// Whether the side runs past what it shows, which the footer's
-    /// scroll cue says.
-    private var footerOverflows: Bool {
-        switch model.scope {
-        case .windows:
-            return listOverflows
-        case .shortcuts:
-            return JumpShortcutsView.overflows(
-                content: sheetHeight,
-                cap: model.sheetCap
-            )
-        case .view, .desktops:
-            return false
-        }
-    }
-
     @ViewBuilder private var footerLeading: some View {
         switch model.scope {
         case .windows:
@@ -56,21 +39,10 @@ extension JumpPanelView {
                 DesktopsTray(state: state, icons: model.desktopIcons)
             }
         case .shortcuts:
-            // The scroll cue reads first, beside the active layer.
-            HStack(spacing: 8) {
-                if let name = model.shortcuts?.reference?.layerName,
-                    name != KeyLayer.defaultName
-                {
-                    JumpLayerLabel(name: name)
-                }
-                if footerOverflows,
-                    let cue = JumpFooter.scrollHint(for: .shortcuts)
-                {
-                    JumpScrollCue(text: cue)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
+            if let name = model.shortcuts?.reference?.layerName,
+                name != KeyLayer.defaultName
+            {
+                JumpLayerLabel(name: name)
             }
         case .view:
             let line = model.view?.selection?.line ?? .layout

@@ -229,7 +229,7 @@ struct ViewPickItemsTests {
     func footerDropsDigitsWithoutMatches() {
         LocalizationManager.shared.select("en")
         func hints(_ count: Int) -> [String] {
-            JumpFooter(scope: .view, overflows: false, quickCount: count)
+            JumpFooter(scope: .view, quickCount: count)
                 .hints
         }
         #expect(hints(3).contains("⌘1–3 Quick apply"))

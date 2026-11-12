@@ -125,7 +125,6 @@ struct DesktopsRefusalFooterTests {
         let state = try #require(model.desktops)
         var footer = JumpFooter(
             scope: .desktops,
-            overflows: false,
             modifiers: .command,
             desktops: DesktopsFooterState(state)
         )

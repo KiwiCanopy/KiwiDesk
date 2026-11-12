@@ -111,11 +111,6 @@ enum JumpRowText {
         }
     }
 
-    /// The footer's cue while the list runs past what it shows.
-    static var scrollHint: String {
-        L("jump.footer.scroll_hint", "Scroll for more windows")
-    }
-
     /// What the row shows as its title: the window's title after
     /// its app, or the app alone where the window has none.
     static var titleFrame: String {

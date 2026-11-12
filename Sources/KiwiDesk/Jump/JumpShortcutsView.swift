@@ -4,9 +4,9 @@ import SwiftUI
 
 /// The key panel's Shortcuts side (#2246): the active layer's
 /// shortcuts, narrowed by the field, scrolling under a capped
-/// height, reporting that height as `SheetHeightKey` for the
-/// footer's scroll cue. Its layer name, scroll cue and Edit in
-/// Settings… sit in the panel's footer row.
+/// height, its cut edges fading, and reporting that height as
+/// `SheetHeightKey`. Its layer name and Edit in Settings… sit in
+/// the panel's footer row.
 struct JumpShortcutsView: View {
     let sheet: ShortcutsSheet
     let scroll: SheetScroll
@@ -16,36 +16,50 @@ struct JumpShortcutsView: View {
     /// inset; the key sequence panel's own padding stands instead.
     var horizontalInset = KeyPanelStyle.selectionInset + 10
     var verticalInset: CGFloat = 12
+    /// Whether the sheet fades its own cut edges.
+    var fades = true
     /// Whether the sheet runs past what the cap shows — the one
-    /// verdict the cue reads (#1292).
+    /// verdict the key sequence panel's Scroll hint reads (#3175).
     static func overflows(content: CGFloat, cap: CGFloat) -> Bool {
         content > cap
     }
 
     var body: some View {
-        ScrollView {
-            ShortcutsSheetView(
-                reference: sheet.shown,
-                needle: sheet.needle
-            )
-            .padding(.horizontal, horizontalInset)
-            .padding(.vertical, verticalInset)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(SheetScrollDriver(scroll: scroll))
-            .background(
-                GeometryReader { proxy in
-                    Color.clear.preference(
-                        key: SheetHeightKey.self,
-                        value: proxy.size.height
-                    )
-                }
-            )
+        scrollView
+            .frame(maxHeight: maxHeight)
+            .fixedSize(horizontal: false, vertical: true)
+            // VoiceOver lands on the scroll view as a bare "scroll
+            // area" before interacting into it (#812).
+            .accessibilityLabel(JumpScope.shortcuts.panelName)
+    }
+
+    /// KiwiHub's sheet fades its cut edges, its one cue that it
+    /// scrolls (#3249); the key sequence panel fades its own.
+    @ViewBuilder private var scrollView: some View {
+        if fades {
+            FadingScroll { sheetContent }
+        } else {
+            ScrollView { sheetContent }
         }
-        .frame(maxHeight: maxHeight)
-        .fixedSize(horizontal: false, vertical: true)
-        // VoiceOver lands on the scroll view as a bare "scroll
-        // area" before interacting into it (#812).
-        .accessibilityLabel(JumpScope.shortcuts.panelName)
+    }
+
+    private var sheetContent: some View {
+        ShortcutsSheetView(
+            reference: sheet.shown,
+            needle: sheet.needle
+        )
+        .padding(.horizontal, horizontalInset)
+        .padding(.vertical, verticalInset)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SheetScrollDriver(scroll: scroll))
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: SheetHeightKey.self,
+                    value: proxy.size.height
+                )
+            }
+        )
     }
 }
 

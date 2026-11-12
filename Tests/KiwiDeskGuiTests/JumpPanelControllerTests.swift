@@ -11,15 +11,6 @@ import Testing
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
-    /// The footer's scroll cue shows exactly when the content runs
-    /// past the cap — headers included.
-    @Test("the list overflows only past the cap")
-    func overflow() {
-        #expect(!JumpPanelView.overflows(rows: 6, headers: 0, rowCap: 6))
-        #expect(JumpPanelView.overflows(rows: 7, headers: 0, rowCap: 6))
-        #expect(JumpPanelView.overflows(rows: 6, headers: 1, rowCap: 6))
-    }
-
     @Test("the panel keeps its width, narrowed on a small screen")
     func width() {
         let full = JumpPanelView.width

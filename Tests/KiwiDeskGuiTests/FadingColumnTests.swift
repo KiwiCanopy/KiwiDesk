@@ -43,7 +43,7 @@ struct FadingColumnTests {
         #expect(padded(120 + pad - content + 1).1)
     }
 
-    @Test("the Desktops side's vertical lists fade through FadingColumn")
+    @Test("KiwiHub's vertical lists fade through FadingColumn")
     func desktopsListsFade() throws {
         let jump = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -82,28 +82,42 @@ struct FadingColumnTests {
         for source in [side, card] {
             #expect(source.occurrences(of: "ScrollView(") == 0)
         }
+        // The Windows list takes the same column (#3249).
+        let panel = try read("JumpPanelView.swift")
+        #expect(
+            panel.contains(
+                "FadingColumn(selected:model.list.selection,"
+                    + "ids:Array(model.list.results.indices),"
+                    + "inset:Self.listPadding)"
+            )
+        )
+        #expect(panel.contains(".id(index)"))
+        #expect(panel.occurrences(of: "ScrollView(") == 0)
+        let fading = try read("FadingScroll.swift")
         let column = try read("FadingColumn.swift")
-        #expect(column.contains("EdgeFade.cuts(offset:offset,"))
-        #expect(column.contains("viewport:height,inset:inset)"))
-        #expect(column.contains(".padding(.vertical,inset)"))
+        #expect(column.contains("FadingScroll(inset:inset){content}"))
+        #expect(column.occurrences(of: "ScrollView(") == 0)
+        #expect(fading.contains("EdgeFade.cuts(offset:offset,"))
+        #expect(fading.contains("viewport:height,inset:inset)"))
+        #expect(fading.contains(".padding(.vertical,inset)"))
         // No band: nothing reserves room at the ends (owner via
         // the ui-designer, 2026-11-11).
-        #expect(column.occurrences(of: "contentMargins") == 0)
-        #expect(column.contains(".coordinateSpace(.named(space))"))
-        #expect(column.contains("@Stateprivatevarspace=UUID()"))
-        #expect(column.contains("geometry.frame(in:.named(space))"))
-        #expect(column.contains("offset=frame.minY"))
-        #expect(column.contains("contentHeight=frame.height"))
-        #expect(column.contains("$0.size.height}action:{height=$0}"))
-        #expect(column.contains(".mask(mask)"))
-        #expect(column.contains(".background(measure)"))
+        #expect(fading.occurrences(of: "contentMargins") == 0)
+        #expect(fading.contains(".coordinateSpace(.named(space))"))
+        #expect(fading.contains("@Stateprivatevarspace=UUID()"))
+        #expect(fading.contains("geometry.frame(in:.named(space))"))
+        #expect(fading.contains("offset=frame.minY"))
+        #expect(fading.contains("contentHeight=frame.height"))
+        #expect(fading.contains("$0.size.height}action:{height=$0}"))
+        #expect(fading.contains(".mask(mask)"))
+        #expect(fading.contains(".background(measure)"))
         #expect(
-            column.contains(
+            fading.contains(
                 "privatevarfade:CGFloat{EdgeFade.depth(viewport:height)}"
             )
         )
-        #expect(column.contains("[top?.clear:.black,.black]"))
-        #expect(column.contains("[.black,bottom?.clear:.black]"))
+        #expect(fading.contains("[top?.clear:.black,.black]"))
+        #expect(fading.contains("[.black,bottom?.clear:.black]"))
         #expect(
             column.contains(".onAppear{reveal(proxy,from:nil,animated:false)}")
         )
@@ -119,7 +133,7 @@ struct FadingColumnTests {
             )
         )
         #expect(column.contains("proxy.scrollTo(target)"))
-        #expect(column.occurrences(of: ".frame(height:fade)") == 2)
+        #expect(fading.occurrences(of: ".frame(height:fade)") == 2)
     }
 
     @Test("a list settles back to its rest once the entrance lands")
