@@ -157,19 +157,25 @@ struct SequenceNodeRow: View {
 
     private var actionMenu: some View {
         SequenceActionMenu(
-            node: node,
+            face: SequencePickFace(node),
             catalog: catalog,
             spokenLabel: actionLabel,
-            onBranch: {
-                // A named branch and an armed child well (#1871).
-                let key = SequenceTree.newEndKey()
-                editing.update(node.id) {
-                    $0 = SequenceTree.branch($0)
-                    $0.steps = [key]
+            pins: [
+                SequencePickPin(
+                    id: "branch",
+                    label: SequenceActionMenu.branchLabel,
+                    symbol: "plus"
+                ) {
+                    // A named branch and an armed child well (#1871).
+                    let key = SequenceTree.newEndKey()
+                    editing.update(node.id) {
+                        $0 = SequenceTree.branch($0)
+                        $0.steps = [key]
+                    }
+                    collapsed.remove(node.id)
+                    fresh = key.id
                 }
-                collapsed.remove(node.id)
-                fresh = key.id
-            },
+            ],
             onPick: { command in
                 editing.update(node.id) {
                     $0 = SequenceTree.endKey($0, running: command)

@@ -2,10 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): its
-/// first group. The ⌃⌥ entry with its swipe length, the ⌃⌥⌘ entry,
-/// then the two Natural scrolling rows both gestures share. The
-/// chords are bound through `gesture.bind` until #3183's list card
-/// (#3199). Each
+/// first group. The ⌃⌥ entry with its swipe length, then the ⌃⌥⌘
+/// entry; their chords and Natural scrolling live in the Mouse and
+/// Trackpad cards below (#3183). Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's
@@ -17,11 +16,6 @@ struct GesturesScrollEntries: View {
     @Binding var playing: GestureItem?
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
-
-    /// Where the sentence column starts: the picture and the
-    /// layout's own gap.
-    private static var gutter: CGFloat { GesturePlate<EmptyView>.size.width }
-    private static let columnGap: CGFloat = GestureEntryLayout().spacing
 
     var body: some View {
         GestureEntry(
@@ -50,23 +44,6 @@ struct GesturesScrollEntries: View {
         .gestureAnchored(.scrollStep)
         GestureRule()
         spaceStepEntry
-        GestureRule()
-        naturalRow(
-            .naturalTrackpad,
-            ScrollGestureWords.trackpad,
-            $model.config.scrollGesture.naturalTrackpad
-        )
-        .searchAnchored(
-            SettingsCatalog.shortcuts.gestures.children.naturalTrackpad
-        )
-        naturalRow(
-            .naturalMouse,
-            ScrollGestureWords.mouse,
-            $model.config.scrollGesture.naturalMouse
-        )
-        .searchAnchored(
-            SettingsCatalog.shortcuts.gestures.children.naturalMouse
-        )
     }
 
     private static var controls: GesturesControls {
@@ -116,43 +93,6 @@ struct GesturesScrollEntries: View {
             get: { Int(model.config.scrollGesture.stepDistance.rounded()) },
             set: { model.config.scrollGesture.stepDistance = Double($0) }
         )
-    }
-
-    /// Apple's own name over System · On · Off (#3200), its input
-    /// named in the picture's gutter so every row starts on the
-    /// sentence's column.
-    private func naturalRow(
-        _ field: ScrollGestureField,
-        _ input: String,
-        _ value: Binding<NaturalScrolling>
-    ) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: Self.columnGap) {
-            Text(input)
-                .frame(width: Self.gutter, alignment: .trailing)
-                .accessibilityHidden(true)
-            reachRow(field) {
-                VStack(alignment: .leading, spacing: 4) {
-                    SegmentedPicker(
-                        ScrollGestureWords.natural,
-                        spokenLabel: L(
-                            "shortcuts.gestures.scroll.natural_spoken",
-                            "%1$@, %2$@",
-                            input,
-                            ScrollGestureWords.natural
-                        ),
-                        hugsLabels: true,
-                        selection: value,
-                        options: NaturalScrolling.allCases.map {
-                            (ScrollGestureWords.natural($0), $0)
-                        }
-                    )
-                    Text(ScrollGestureWords.naturalCaption)
-                        .font(.caption)
-                        .foregroundStyle(SettingsTheme.ink3)
-                }
-            }
-        }
-        .padding(.vertical, 2)
     }
 
     /// A value's control with its "Applies to" column trailing.

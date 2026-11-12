@@ -60,8 +60,18 @@ struct KeySequenceCardRowsTests {
 
     @Test("The picker pins Extend Sequence above, App… then Lua… below")
     func pickerSlots() {
-        let slots = SequenceActionMenu.sequence([])
-        #expect(slots == [.branch, .app, .lua])
+        let slots = SequenceActionMenu.sequence(
+            [],
+            pinned: ["branch"],
+            catalogue: true
+        )
+        #expect(slots == [.pinned("branch"), .app, .lua])
+        let pinsOnly = SequenceActionMenu.sequence(
+            [],
+            pinned: ["family", "split"],
+            catalogue: false
+        )
+        #expect(pinsOnly == [.pinned("family"), .pinned("split")])
         LocalizationManager.shared.select("en")
         #expect(SequenceActionMenu.branchLabel == "Extend Sequence")
         #expect(SequenceActionMenu.appLabel == "App…")
@@ -72,16 +82,28 @@ struct KeySequenceCardRowsTests {
         let menu = Self.flat(try Self.source("SequenceActionMenu.swift"))
         #expect(
             menu.contains(
-                "ifnode.kind==.custom{Button(action:onEditLua){"
+                "ifface.kind==.custom{Button(action:onEditLua){"
             )
         )
         #expect(menu.contains(".buttonStyle(SequenceDashedStyle())"))
         #expect(menu.contains("}else{Button{request=SequencePickRequest("))
         #expect(menu.contains(".settingsPopUpTrigger()"))
         // The rows the menu draws, not only its cursor's list.
-        #expect(menu.contains("pinned(.branch,Self.branchLabel"))
+        #expect(
+            menu.contains(
+                "ForEach(pins){pininpinned(.pinned(pin.id),pin.label,"
+            )
+        )
         #expect(menu.contains("pinned(.app,Self.appLabel"))
         #expect(menu.contains("pinned(.lua,Self.luaLabel"))
+        // An end key pins Extend Sequence above its catalogue.
+        let node = Self.flat(try Self.source("SequenceNodeRow.swift"))
+        #expect(
+            node.contains(
+                "SequencePickPin(id:\"branch\","
+                    + "label:SequenceActionMenu.branchLabel"
+            )
+        )
         let row = Self.flat(try Self.source("SequenceNodeRow+Popovers.swift"))
         #expect(row.contains("SequenceContainerFace(face:.tinted){"))
         // The fold and the name are two buttons (amendment).

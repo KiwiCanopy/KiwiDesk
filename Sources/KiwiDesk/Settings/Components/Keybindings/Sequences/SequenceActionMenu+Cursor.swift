@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The action picker's one cursor (`DropdownCursor`): over the
-/// pinned "Extend Sequence", the commands the search left and the
-/// pinned "App…" and "Lua…", in that order.
+/// pinned entries, the commands the search left and the pinned
+/// "App…" and "Lua…", in that order — the pinned entries alone where
+/// the picker offers no catalogue.
 extension SequenceActionMenu {
     /// The catalogue groups narrowed to the query's matches.
     var shownGroups: [SequenceActionCatalog.Group] {
@@ -11,20 +12,43 @@ extension SequenceActionMenu {
     }
 
     /// Every row the cursor stops on, top to bottom.
-    static func sequence(
+    func sequence(
         _ groups: [SequenceActionCatalog.Group]
     ) -> [SequencePickSlot] {
-        [.branch]
+        Self.sequence(
+            groups,
+            pinned: pins.map(\.id),
+            catalogue: showsCatalogue
+        )
+    }
+
+    /// The rows for pinned ids `pinned` over `groups`, the catalogue
+    /// and its App… and Lua… only where `catalogue` offers them.
+    static func sequence(
+        _ groups: [SequenceActionCatalog.Group],
+        pinned: [String],
+        catalogue: Bool
+    ) -> [SequencePickSlot] {
+        let top = pinned.map { SequencePickSlot.pinned($0) }
+        guard catalogue else { return top }
+        return top
             + groups.flatMap(\.commands).map { .command($0.lua) }
             + [.app, .lua]
     }
 
     /// The popover opens on the current pick, else the first command.
     func opened() {
-        let current = catalog.command(running: node.lua).map {
+        let pinnedPick = pins.first(where: \.picked).map {
+            SequencePickSlot.pinned($0.id)
+        }
+        let current = catalog.command(running: face.lua).map {
             SequencePickSlot.command($0.lua)
         }
-        let start = current ?? firstCommand(shownGroups)
+        let start =
+            pinnedPick ?? current
+            ?? (showsCatalogue
+                ? firstCommand(shownGroups)
+                : pins.first.map { .pinned($0.id) })
         cursor.opened(at: start, pointer: DropdownPointer.live())
         scrollTarget = start
     }
@@ -54,7 +78,7 @@ extension SequenceActionMenu {
         guard
             let slot = cursor.keyMove(
                 step,
-                in: Self.sequence(groups),
+                in: sequence(groups),
                 pointer: DropdownPointer.live()
             )
         else { return .handled }
@@ -69,7 +93,7 @@ extension SequenceActionMenu {
     func commit(_ groups: [SequenceActionCatalog.Group]) {
         guard
             let slot = cursor.commit(
-                in: Self.sequence(groups),
+                in: sequence(groups),
                 pointer: DropdownPointer.live()
             )
         else { return }
@@ -81,9 +105,9 @@ extension SequenceActionMenu {
         in groups: [SequenceActionCatalog.Group]
     ) {
         switch slot {
-        case .branch:
+        case .pinned(let id):
             request = nil
-            onBranch()
+            pins.first { $0.id == id }?.action()
         case .app:
             request = nil
             // The app list opens once this popover has gone.
@@ -109,7 +133,8 @@ extension SequenceActionMenu {
 
     private func name(of slot: SequencePickSlot) -> String {
         switch slot {
-        case .branch: return Self.branchLabel
+        case .pinned(let id):
+            return pins.first { $0.id == id }?.label ?? id
         case .app: return Self.appLabel
         case .lua: return Self.luaLabel
         case .command(let lua):

@@ -52,6 +52,7 @@ struct SettingsValueReadoutTests {
         "config.tileRules",
         "config.mainSpaces",
         "config.layers",
+        "config.gesture",
     ]
 
     @Test("every scalar model-path key narrates on defaults")
@@ -137,6 +138,10 @@ struct SettingsValueReadoutTests {
         edited = clean
         edited.floatRules = ["com.apple.calculator"]
         expectRows(.appRules(.floatRules), clean, edited)
+
+        edited = clean
+        edited.gesture[GestureKey(.tap5)] = .bound(.family(.space))
+        expectRows(.shortcuts(.gestureBindings), clean, edited)
 
         edited = clean
         edited.settings.placementOverride[SpaceID("a")] =

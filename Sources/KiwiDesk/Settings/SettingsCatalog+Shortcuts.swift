@@ -215,6 +215,10 @@ struct GesturesControls: Sendable {
         "shortcuts.gestures.scroll.mouse",
         "Mouse"
     )
+    let bindings = SettingsControl(
+        "shortcuts.gestures.bindings",
+        "Gestures"
+    )
     let mouseResize = SettingsControl(
         "behavior.mouse.resize_action",
         "Mouse resize action"

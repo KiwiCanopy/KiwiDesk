@@ -5153,9 +5153,13 @@ or the trackpad — held with keys, bound to an action. One input
 may be bound several times with different keys, and the keys must
 be exactly the ones bound: ⌃⌥⌘ + scroll is not ⌃⌥ + scroll.
 [`gesture.bind`](#gesturebind) and
-[`gesture.unbind`](#gestureunbind) write the bindings; they have
-no Settings rows yet
-([#3183](https://github.com/KiwiCanopy/KiwiDesk/issues/3183)).
+[`gesture.unbind`](#gestureunbind) write the bindings. In the
+Settings app they are the rows of the **Mouse** and **Trackpad**
+cards under **Shortcuts ▸ Mouse & Trackpad**, which edit the base
+in `gui.json`, so a row applies to every profile; a profile's own
+bindings are set in its file
+([Gesture storage](#gesture-storage)) until rows gain a profile
+choice ([#3225](https://github.com/KiwiCanopy/KiwiDesk/issues/3225)).
 :::
 
 ### Gesture inputs

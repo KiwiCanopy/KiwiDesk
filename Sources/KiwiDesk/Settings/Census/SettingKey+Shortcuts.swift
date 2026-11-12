@@ -103,6 +103,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case scrollStepDistance = "config.scrollGesture.stepDistance"
     case scrollNaturalTrackpad = "config.scrollGesture.naturalTrackpad"
     case scrollNaturalMouse = "config.scrollGesture.naturalMouse"
+    /// The Mouse and Trackpad cards' rows (#3183): one sparse map.
+    case gestureBindings = "config.gesture"
 }
 
 extension ShortcutsKey {
@@ -209,7 +211,8 @@ extension ShortcutsKey {
                 gate: .runtime(.luaImportAvailable)
             )
         case .scrollLongSwipes, .scrollStepDistance,
-            .scrollNaturalTrackpad, .scrollNaturalMouse:
+            .scrollNaturalTrackpad, .scrollNaturalMouse,
+            .gestureBindings:
             // The Mouse & trackpad drawer's first group (#1656).
             return .row(.shortcuts, .gestures, .showMore)
         case .restoreDefaults:

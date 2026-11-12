@@ -6,30 +6,26 @@ struct SequencePickRequest: Identifiable, Equatable {
     let id: UUID
 }
 
-/// A row the action picker's one cursor stops on (`DropdownCursor`):
-/// "Extend Sequence" pinned above the list, a catalogue command, or
-/// "App…" and "Lua…" pinned below it (#3162).
-enum SequencePickSlot: Hashable {
-    case branch
-    case command(String)
-    case app
-    case lua
-}
-
-/// An end key's container and action picker (#1871, owner
-/// 2026-11-09; #3162): a search field over the whole catalogue in the
-/// page's groups, opened on the current pick, with "Extend Sequence"
-/// above and "App…" and "Lua…" below the scrolling list. ↑/↓ and real
-/// pointer motion move one cursor (`SequenceActionMenu+Cursor`);
-/// Return picks it. The trigger is the row's one container: a command
-/// or an app on the plain pop-up face, a Lua key's description
-/// dashed, which opens the Lua popover instead (`onEditLua`).
+/// The one catalogue-backed action picker (#1871, owner 2026-11-09;
+/// #3162; #3183 ▸ the action picker): a search field over the whole
+/// catalogue in the page's groups, opened on the current pick, with
+/// the caller's pinned entries above and "App…" and "Lua…" below the
+/// scrolling list — or the pinned entries alone, where the caller
+/// offers no catalogue (a gesture's families, a drag's grabs). ↑/↓
+/// and real pointer motion move one cursor
+/// (`SequenceActionMenu+Cursor`); Return picks it. The trigger is the
+/// row's one container: a command or an app on the plain pop-up face,
+/// a Lua action's description dashed, which opens the Lua popover
+/// instead (`onEditLua`).
 struct SequenceActionMenu: View {
-    let node: KeyBinding
+    let face: SequencePickFace
     let catalog: SequenceActionCatalog
     /// What VoiceOver calls the trigger.
     let spokenLabel: String
-    let onBranch: () -> Void
+    /// Above the list: "Extend Sequence", or a gesture's families.
+    let pins: [SequencePickPin]
+    /// Whether the catalogue, App… and Lua… are offered at all.
+    var showsCatalogue = true
     let onPick: (NavCommand) -> Void
     let onApp: () -> Void
     let onLua: () -> Void
@@ -50,7 +46,11 @@ struct SequenceActionMenu: View {
             .accessibilityLabel(spokenLabel)
             .accessibilityValue(title)
             .popover(item: $request) { _ in
-                popover.settingsPopoverChrome()
+                if showsCatalogue {
+                    popover.settingsPopoverChrome()
+                } else {
+                    pinsOnly.settingsPopoverChrome()
+                }
             }
             // Every open starts with an empty search (#1357).
             .onChange(of: request) { _, open in
@@ -59,14 +59,14 @@ struct SequenceActionMenu: View {
     }
 
     @ViewBuilder private var trigger: some View {
-        if node.kind == .custom {
+        if face.kind == .custom {
             Button(action: onEditLua) {
                 Text(title).fixedSize(horizontal: true, vertical: false)
             }
             .buttonStyle(SequenceDashedStyle())
         } else {
             Button {
-                request = SequencePickRequest(id: node.id)
+                request = SequencePickRequest(id: face.id)
             } label: {
                 HStack(spacing: 4) {
                     appIcon
@@ -93,8 +93,8 @@ struct SequenceActionMenu: View {
 
     /// The app an app key opens; nil for every other key.
     private var bundleID: String? {
-        guard node.kind == .application else { return nil }
-        return KeybindingCatalog.appBundleID(from: node.lua)
+        guard face.kind == .application else { return nil }
+        return KeybindingCatalog.appBundleID(from: face.lua)
     }
 
     private var popover: some View {
@@ -110,7 +110,14 @@ struct SequenceActionMenu: View {
             .onKeyPress(.downArrow) { move(1, in: groups) }
             .onKeyPress(.upArrow) { move(-1, in: groups) }
             .onChange(of: search) { _, _ in searched() }
-            pinned(.branch, Self.branchLabel, symbol: "plus")
+            ForEach(pins) { pin in
+                pinned(
+                    .pinned(pin.id),
+                    pin.label,
+                    symbol: pin.symbol,
+                    picked: pin.picked
+                )
+            }
             Divider()
             list(groups)
             Divider()
@@ -124,6 +131,23 @@ struct SequenceActionMenu: View {
         .padding(12)
         .frame(width: 280, height: 360)
         .onAppear { searchFocused = true }
+    }
+
+    /// A pinned-only picker: no search, no catalogue (#3183 ▸ help,
+    /// not in-picker hints).
+    private var pinsOnly: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ForEach(pins) { pin in
+                pinned(
+                    .pinned(pin.id),
+                    pin.label,
+                    symbol: pin.symbol,
+                    picked: pin.picked
+                )
+            }
+        }
+        .padding(10)
+        .frame(width: 260)
     }
 
     @ViewBuilder private func list(
@@ -181,7 +205,7 @@ struct SequenceActionMenu: View {
     private func row(_ command: NavCommand) -> some View {
         let slot = SequencePickSlot.command(command.lua)
         let onCursor = cursor.highlighted == slot
-        let picked = node.kind != .custom && command.runs(node.lua)
+        let picked = face.kind != .custom && command.runs(face.lua)
         return Button {
             pick(command)
         } label: {
@@ -207,14 +231,15 @@ struct SequenceActionMenu: View {
     private func pinned(
         _ slot: SequencePickSlot,
         _ label: String,
-        symbol: String
+        symbol: String,
+        picked: Bool = false
     ) -> some View {
         let onCursor = cursor.highlighted == slot
         return Button {
             take(slot, in: shownGroups)
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: symbol)
+                Image(systemName: picked ? "checkmark" : symbol)
                     .font(.caption.weight(.semibold))
                     .frame(width: 12)
                     .accessibilityHidden(true)
@@ -228,6 +253,7 @@ struct SequenceActionMenu: View {
         }
         .buttonStyle(.plain)
         .dropdownCursorRow(onCursor) { hover(slot) }
+        .accessibilityAddTraits(picked ? .isSelected : [])
     }
 
     /// `label` with the query's match in bold, as the Shortcuts
@@ -260,18 +286,20 @@ struct SequenceActionMenu: View {
     }
 
     /// The action's name, "Lua…" for the user's own, the app's name
-    /// for an app key, "Choose…" for none yet.
+    /// for an app key, the face's own words for a family, "Choose…"
+    /// for none yet.
     private var title: String {
-        if node.kind == .custom {
-            return node.desc.trimmed.isEmpty ? Self.luaLabel : node.desc
+        if let title = face.title { return title }
+        if face.kind == .custom {
+            return face.desc.trimmed.isEmpty ? Self.luaLabel : face.desc
         }
         if let bundleID {
             return KeybindingCatalog.displayName(forBundleID: bundleID)
         }
-        if let command = catalog.command(running: node.lua) {
+        if let command = catalog.command(running: face.lua) {
             return command.resolvedLabel
         }
-        return node.lua.isEmpty
-            ? L("shortcuts.sequence.choose", "Choose…") : node.lua
+        return face.lua.isEmpty
+            ? L("shortcuts.sequence.choose", "Choose…") : face.lua
     }
 }
