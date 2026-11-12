@@ -106,16 +106,15 @@ extension ColoursKey {
                 gate: .setting(.colours(.animationsMaster))
             )
         case .animationsOnExpand:
-            // KiwiShelf ▸ Show ▸ Durations, above the length it
-            // gates, since the length lost its 0 (#3236).
+            // KiwiShelf ▸ Show ▸ Durations; its length is Lua-only
+            // (#3236).
             return .row(.bars, .kiwishelf, .showMore)
         case .animationsOnPeek:
             // The peeks' motion off, Lua-only (#2563).
             return .luaOnly
         case .animationsRevealDurationMS:
-            // Lua-only, as the expand's length; the speed preset is
-            // Settings' pace control (owner ruling, 2026-11-12,
-            // #3236).
+            // Lua-only, as the expand's length (owner ruling,
+            // 2026-11-12, #3236).
             return .luaOnly
         case .animationsOnReveal:
             // KiwiShelf ▸ Show ▸ Durations, greyed with the Reveal

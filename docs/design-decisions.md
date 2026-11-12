@@ -19828,8 +19828,8 @@ gliding — so it greys only while its switch is off.
 
 :::unreleased
 The drawer shows the two motions' switches and no length: both
-lengths are Lua-only, and the speed preset (#3238) is Settings' one
-pace control for the shelf (owner ruling, 2026-11-12, amended the
+lengths are Lua-only, and the speed preset (#3238) is to be
+Settings' one pace control for the shelf (owner ruling, 2026-11-12, amended the
 same day, #3236; ui-designer advised). Once neither band holds a 0,
 a switch is the only way to an instant reveal or expand; each stays
 because the shelf's motion plays with Reduce Motion on and the

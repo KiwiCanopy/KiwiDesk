@@ -1116,8 +1116,7 @@ and the card points there.
 :::unreleased
 The drawer holds two switches, **Animate the reveal** and **Animate
 the expand**. Both lengths are Lua-only
-(`animations.set_reveal_duration`, `animations.set_expand_duration`);
-the speed preset is Settings' pace control.
+(`animations.set_reveal_duration`, `animations.set_expand_duration`).
 :::
 
 While Reduce Motion is on, the card also says so in a
