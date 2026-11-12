@@ -137,7 +137,7 @@ extension SequenceActionMenu {
     private func name(of slot: SequencePickSlot) -> String {
         switch slot {
         case .pinned(let id):
-            return pins.first { $0.id == id }?.label ?? id
+            return pins.first { $0.id == id }?.title ?? id
         case .app: return Self.appLabel
         case .lua: return Self.luaLabel
         case .command(let lua):

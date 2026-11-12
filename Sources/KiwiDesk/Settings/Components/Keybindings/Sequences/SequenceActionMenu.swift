@@ -112,7 +112,7 @@ struct SequenceActionMenu: View {
             ForEach(pins) { pin in
                 pinned(
                     .pinned(pin.id),
-                    pin.label,
+                    pin.title,
                     symbol: pin.symbol,
                     picked: pin.picked
                 )
@@ -150,7 +150,7 @@ struct SequenceActionMenu: View {
             ForEach(pins) { pin in
                 pinned(
                     .pinned(pin.id),
-                    pin.label,
+                    pin.title,
                     symbol: pin.symbol,
                     picked: pin.picked
                 )

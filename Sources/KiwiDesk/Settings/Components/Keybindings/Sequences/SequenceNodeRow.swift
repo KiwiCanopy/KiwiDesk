@@ -163,7 +163,7 @@ struct SequenceNodeRow: View {
             pins: [
                 SequencePickPin(
                     id: "branch",
-                    label: SequenceActionMenu.branchLabel,
+                    title: SequenceActionMenu.branchLabel,
                     symbol: "plus"
                 ) {
                     // A named branch and an armed child well (#1871).

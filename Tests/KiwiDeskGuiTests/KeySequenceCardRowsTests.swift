@@ -108,7 +108,7 @@ struct KeySequenceCardRowsTests {
             )
             #expect(
                 Self.flat(scoped).contains(
-                    "ForEach(pins){pininpinned(.pinned(pin.id),pin.label,"
+                    "ForEach(pins){pininpinned(.pinned(pin.id),pin.title,"
                 ),
                 "\(body) draws no pinned rows"
             )
@@ -120,7 +120,7 @@ struct KeySequenceCardRowsTests {
         #expect(
             node.contains(
                 "SequencePickPin(id:\"branch\","
-                    + "label:SequenceActionMenu.branchLabel"
+                    + "title:SequenceActionMenu.branchLabel"
             )
         )
         let row = Self.flat(try Self.source("SequenceNodeRow+Popovers.swift"))

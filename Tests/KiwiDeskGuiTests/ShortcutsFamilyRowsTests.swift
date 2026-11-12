@@ -69,6 +69,8 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.scrollStepDistance),
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
+            // The gesture cards' rows, drawn by `GestureListCard`.
+            .shortcuts(.gestureBindings),
             .shortcuts(.spaceHistory),
             .shortcuts(.focusWrap),
             // The Tiling off rows, drawn by `TilingOffRows` (#3089).

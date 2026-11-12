@@ -84,7 +84,7 @@ extension GestureListRow {
             return ModifierDragAction.allCases.map { grab in
                 SequencePickPin(
                     id: grab.rawValue,
-                    label: GestureListWords.grab(grab),
+                    title: GestureListWords.grab(grab),
                     symbol: grab == .move
                         ? "arrow.up.and.down.and.arrow.left.and.right"
                         : "arrow.up.left.and.arrow.down.right",
@@ -98,7 +98,7 @@ extension GestureListRow {
         return key.input.families.map { family in
             SequencePickPin(
                 id: family.rawValue,
-                label: GestureListWords.family(family),
+                title: GestureListWords.family(family),
                 symbol: "arrow.left.arrow.right",
                 picked: action == .family(family)
             ) { bind(.family(family)) }

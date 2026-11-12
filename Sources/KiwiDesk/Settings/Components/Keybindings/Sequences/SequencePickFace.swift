@@ -17,7 +17,7 @@ enum SequencePickSlot: Hashable {
 /// current pick, and what picking it does.
 struct SequencePickPin: Identifiable {
     let id: String
-    let label: String
+    let title: String
     let symbol: String
     var picked = false
     let action: () -> Void

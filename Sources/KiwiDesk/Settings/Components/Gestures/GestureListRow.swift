@@ -90,7 +90,6 @@ struct GestureListRow: View {
                 )
             }
         }
-        .id(entry.id.uuidString)
     }
 
     /// Where a caption under the row starts: past the disclosure
