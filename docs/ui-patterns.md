@@ -1109,15 +1109,15 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/gui.md` ▸ the Reduce Motion gate and
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
-The bars' own animations are not on that card: their lengths —
-**Reveal duration** and **Expand duration** — sit in KiwiShelf ▸
-KiwiShelf ▸ Show ▸ Durations beside the Reveal picker, and the
-card points there.
+The bars' own animations are not on that card: they sit in
+KiwiShelf ▸ KiwiShelf ▸ Show ▸ Durations beside the Reveal picker,
+and the card points there.
 
 :::unreleased
-The drawer also carries each length's switch above it, **Animate
-the reveal** and **Animate the expand**; a length greys while its
-switch is off.
+The drawer holds two switches, **Animate the reveal** and **Animate
+the expand**. Both lengths are Lua-only
+(`animations.set_reveal_duration`, `animations.set_expand_duration`);
+the speed preset is Settings' pace control.
 :::
 
 While Reduce Motion is on, the card also says so in a

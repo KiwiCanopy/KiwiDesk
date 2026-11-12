@@ -112,10 +112,14 @@ extension ColoursKey {
         case .animationsOnPeek:
             // The peeks' motion off, Lua-only (#2563).
             return .luaOnly
-        case .animationsOnReveal, .animationsRevealDurationMS:
+        case .animationsRevealDurationMS:
+            // Lua-only, as the expand's length; the speed preset is
+            // Settings' pace control (owner ruling, 2026-11-12,
+            // #3236).
+            return .luaOnly
+        case .animationsOnReveal:
             // KiwiShelf ▸ Show ▸ Durations, greyed with the Reveal
-            // row while no bar hides (owner ruling, 2026-10-21); the
-            // switch sits above the length it gates (#3236).
+            // row while no bar hides (owner ruling, 2026-10-21, #3236).
             return .row(
                 .bars,
                 .kiwishelf,
@@ -123,14 +127,9 @@ extension ColoursKey {
                 gate: .runtime(.noBarHides)
             )
         case .animationsExpandDurationMS:
-            // The expand plays with every bar on Always, so it greys
-            // only while its switch above is off (#3236).
-            return .row(
-                .bars,
-                .kiwishelf,
-                .showMore,
-                gate: .runtime(.expandOffInConfig)
-            )
+            // Lua-only beside its Settings switch (owner ruling,
+            // 2026-11-12, #3236).
+            return .luaOnly
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .animationsScrollDurationMS:
@@ -241,16 +240,8 @@ extension ColoursKey {
                 "kiwishelf.on_reveal",
                 help: "kiwishelf.on_reveal.help"
             )
-        case .animationsRevealDurationMS:
-            return .text(
-                "kiwishelf.reveal_duration",
-                help: "kiwishelf.reveal_duration.help"
-            )
-        case .animationsExpandDurationMS:
-            return .text(
-                "kiwishelf.expand_duration",
-                help: "kiwishelf.expand_duration.help"
-            )
+        case .animationsRevealDurationMS, .animationsExpandDurationMS:
+            return .none
         case .animationsOnScrolling:
             return .text(
                 "scroll_grid.animate_focus_shifts",

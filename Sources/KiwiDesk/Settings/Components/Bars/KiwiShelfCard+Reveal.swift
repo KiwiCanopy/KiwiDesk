@@ -80,11 +80,9 @@ extension KiwiShelfCard {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// The reveal's switch and length
-    /// and the expand's switch and length (owner rulings
-    /// 2026-10-21, #3236), in the Durations drawer: the reveal's rows
-    /// grey with the picker, its length also while its switch is
-    /// off; the expand's length only while its switch is off.
+    /// The reveal's and the expand's switches (owner rulings
+    /// 2026-10-21 and 2026-11-12, #3236), in the Durations drawer:
+    /// the reveal's greys with the picker. Both lengths are Lua-only.
     @ViewBuilder func durationRow(_ key: SettingKey) -> some View {
         let animations = $model.config.settings.animations
         let children = SettingsCatalog.bars.kiwishelfDurations.children
@@ -103,28 +101,6 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .onReveal
             )
-        case .colours(.animationsRevealDurationMS):
-            let reason = BarsGates(
-                settings: model.config.settings,
-                guiManaged: model.guiManaged
-            ).inertReason(for: .colours(.animationsRevealDurationMS))
-            StepperRow(
-                label: children.revealDuration.text,
-                value: animations.revealDurationMS,
-                in: AnimationSettings.revealDurationBand,
-                step: AnimationSettings.revealDurationStep,
-                suffix: "ms",
-                help: L(
-                    "kiwishelf.reveal_duration.help",
-                    "How long a hidden bar takes to appear, whichever "
-                        + "way it reveals; it leaves a little quicker."
-                )
-            )
-            .modifier(GreyOut(active: reason != nil))
-            .searchAnchored(
-                SettingsCatalog.bars.kiwishelfDurations.children
-                    .revealDuration
-            )
         case .colours(.animationsOnExpand):
             ToggleRow(
                 label: children.onExpand.text,
@@ -140,28 +116,8 @@ extension KiwiShelfCard {
                     .onExpand
             )
         default:
-            let reason = BarsGates(
-                settings: model.config.settings,
-                guiManaged: model.guiManaged
-            ).inertReason(for: .colours(.animationsExpandDurationMS))
-            StepperRow(
-                label: children.expandDuration.text,
-                value: animations.expandDurationMS,
-                in: AnimationSettings.expandDurationBand,
-                step: 50,
-                suffix: "ms",
-                help: L(
-                    "kiwishelf.expand_duration.help",
-                    "How long the bars take to grow out of each "
-                        + "other, shrink back, fade and glide into "
-                        + "place."
-                )
-            )
-            .modifier(GreyOut(active: reason == .expandOff))
-            .searchAnchored(
-                SettingsCatalog.bars.kiwishelfDurations.children
-                    .expandDuration
-            )
+            let _ = assertionFailure("not a Durations row: \(key.id)")
+            EmptyView()
         }
     }
 }

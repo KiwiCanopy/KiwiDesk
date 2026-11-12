@@ -12,9 +12,7 @@ enum BarsRowOrder {
     /// (owner ruling, 2026-10-21).
     static let kiwishelfDurations: [SettingKey] = [
         .colours(.animationsOnReveal),
-        .colours(.animationsRevealDurationMS),
         .colours(.animationsOnExpand),
-        .colours(.animationsExpandDurationMS),
     ]
 
     /// KiwiShelf card, behind Show's Each bar and Pocket

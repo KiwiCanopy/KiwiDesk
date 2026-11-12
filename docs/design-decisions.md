@@ -19827,10 +19827,15 @@ every bar on Always — a bar joining a fused shelf, the plate
 gliding — so it greys only while its switch is off.
 
 :::unreleased
-Each length has its switch on the row above it, the reveal's and
-the expand's (owner ruling, 2026-11-12, #3236): once neither band
-holds a 0, the switch is the only way to an instant reveal or
-expand, and a Settings user may want one in a "snappy" profile.
+The drawer shows the two motions' switches and no length: both
+lengths are Lua-only, and the speed preset (#3238) is Settings' one
+pace control for the shelf (owner ruling, 2026-11-12, amended the
+same day, #3236; ui-designer advised). Once neither band holds a 0,
+a switch is the only way to an instant reveal or expand; each stays
+because the shelf's motion plays with Reduce Motion on and the
+crossing turns a stored 0 into it, so a choice made in Settings
+keeps a way back there. Rejected: dropping a switch, which strands a
+migrated 0; one central Durations group.
 :::
 
 **The bars ship one thickness, 40 pt, on every screen, and the

@@ -95,7 +95,6 @@ struct GateReasonPlacementTests {
                 // needs a hiding bar (owner ruling, 2026-10-21).
                 .kiwishelf(.revealStyle),
                 .colours(.animationsOnReveal),
-                .colours(.animationsRevealDurationMS),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

@@ -22,12 +22,6 @@ struct BarsGates {
         /// Every bar reads Always, so nothing reveals (owner
         /// ruling, 2026-10-21).
         case noBarHides
-        /// The expand's own switch is off (`animations.on_expand`),
-        /// on the row above its length (#3236).
-        case expandOff
-        /// The reveal's own switch is off (`animations.on_reveal`,
-        /// #3236), on the row above its length.
-        case revealOff
     }
 
     /// Runtime-gated keys this resolver answers directly. Data, so
@@ -37,8 +31,6 @@ struct BarsGates {
     static let resolved: Set<SettingKey> = [
         .kiwishelf(.revealStyle),
         .colours(.animationsOnReveal),
-        .colours(.animationsRevealDurationMS),
-        .colours(.animationsExpandDurationMS),
     ]
 
     /// Runtime-gated bars keys answered elsewhere.
@@ -50,13 +42,6 @@ struct BarsGates {
         case .kiwishelf(.revealStyle),
             .colours(.animationsOnReveal):
             return settings.someBarHides ? nil : .noBarHides
-        case .colours(.animationsRevealDurationMS):
-            // No hiding bar first, as the picker's; then the switch
-            // above it (#3236).
-            guard settings.someBarHides else { return .noBarHides }
-            return settings.animations.onReveal ? nil : .revealOff
-        case .colours(.animationsExpandDurationMS):
-            return settings.animations.onExpand ? nil : .expandOff
         default:
             assertionFailure("BarsGates does not own \(key.id)")
             return nil
@@ -177,19 +162,6 @@ enum BarsGateHelp {
             return L(
                 "kiwishelf.reveal_style.no_bar_hides",
                 "No bar ever hides, so there is nothing to reveal."
-            )
-        case .expandOff:
-            return L(
-                "kiwishelf.expand_duration.off",
-                "Off in your config (%1$@).",
-                "animations.on_expand"
-            )
-        case .revealOff:
-            return L(
-                "kiwishelf.reveal_duration.off",
-                "Turn on \u{201C}%1$@\u{201D} to set its length.",
-                SettingsCatalog.bars.kiwishelfDurations.children
-                    .onReveal.text
             )
         }
     }

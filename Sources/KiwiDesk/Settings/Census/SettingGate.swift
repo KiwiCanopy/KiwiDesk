@@ -29,9 +29,6 @@ enum SettingRuntimeGate: Hashable {
     /// The focus border is off, so the tiling-off border tick
     /// hides nothing (#3089).
     case focusBorderOff
-    /// `init.lua` or a profile turned the shelf's expand off
-    /// (`animations.on_expand`), a knob with no row of its own.
-    case expandOffInConfig
     /// Space reset is inert when no overrides exist.
     case spaceHasNoOverrides
     /// macOS Reduce Motion greys animations card.

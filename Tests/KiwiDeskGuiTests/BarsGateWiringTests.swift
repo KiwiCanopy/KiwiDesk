@@ -76,17 +76,6 @@ struct BarsGateWiringTests {
                     + "note(BarsGateHelp.growPlaysAsUnfold)",
                 ".inertReason(for:.colours(.animationsOnReveal))",
                 "GreyOut(active:revealInert)",
-                ".inertReason(for:.colours(.animationsRevealDurationMS))"
-                    + "StepperRow(",
-                // Bound to their rows: the picker's grey also reads
-                // `reason != nil`, so a bare needle matched it.
-                "GreyOut(active:reason!=nil)).searchAnchored("
-                    + "SettingsCatalog.bars.kiwishelfDurations.children"
-                    + ".revealDuration",
-                ".inertReason(for:.colours(.animationsExpandDurationMS))",
-                "GreyOut(active:reason==.expandOff)).searchAnchored("
-                    + "SettingsCatalog.bars.kiwishelfDurations.children"
-                    + ".expandDuration",
             ],
         ]
         for (path, needles) in consults {
@@ -166,8 +155,7 @@ struct BarsGateWiringTests {
     @Test("each reason has its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
-            .boxedShelf, .barsSplit, .noBarHides, .expandOff,
-            .revealOff,
+            .boxedShelf, .barsSplit, .noBarHides,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }
@@ -210,38 +198,18 @@ struct BarsGateWiringTests {
         #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
     }
 
-    /// The expand plays with every bar on Always, so its length
-    /// greys only while its hidden switch is off (2026-10-21).
-    @Test("the Expand duration greys only while the expand is off")
-    func expandGreysOnlyWhenOff() {
+    /// The reveal's switch greys while no bar hides, as the picker
+    /// does, whatever the switch reads (#3236).
+    @Test("the reveal's switch greys while no bar hides")
+    func revealSwitchGreysWhileNoBarHides() {
         var settings = TilingSettings()
-        let key = SettingKey.colours(.animationsExpandDurationMS)
-        settings.setEveryBarVisibility(.always)
-        #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
-        settings.animations.onExpand = false
-        #expect(
-            BarsGates(settings: settings).inertReason(for: key) == .expandOff
-        )
-    }
-
-    /// The reveal's length greys while no bar hides, and then
-    /// while its own switch is off (#3236); the switch itself greys
-    /// only while no bar hides.
-    @Test("the Reveal duration greys with its switch")
-    func revealDurationGreysWithItsSwitch() {
-        var settings = TilingSettings()
-        let length = SettingKey.colours(.animationsRevealDurationMS)
         let toggle = SettingKey.colours(.animationsOnReveal)
         settings.spaceBarStyle.visibility = .hidden
         settings.animations.onReveal = false
-        #expect(
-            BarsGates(settings: settings).inertReason(for: length)
-                == .revealOff
-        )
         #expect(BarsGates(settings: settings).inertReason(for: toggle) == nil)
         settings.setEveryBarVisibility(.always)
         #expect(
-            BarsGates(settings: settings).inertReason(for: length)
+            BarsGates(settings: settings).inertReason(for: toggle)
                 == .noBarHides
         )
     }

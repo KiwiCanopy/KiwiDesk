@@ -9369,7 +9369,8 @@ places. Off, they move at once. It is not under the
 window-animation switches, and it plays with Reduce Motion on too.
 
 :::unreleased
-Both are KiwiShelf ▸ Show ▸ Durations rows in Settings.
+The switch is KiwiShelf ▸ Show ▸ Durations ▸ Animate the expand in
+Settings; the length is Lua-only.
 :::
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
@@ -9411,8 +9412,9 @@ animations.set_reveal_duration(400)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** a hidden bar's reveal. Off, the bar shows and hides at
-once. It plays with Reduce Motion on too. Both it and Reveal
-duration are KiwiShelf ▸ Show ▸ Durations rows in Settings.
+once. It plays with Reduce Motion on too. In Settings it is
+KiwiShelf ▸ Show ▸ Durations ▸ Animate the reveal; the length,
+`animations.set_reveal_duration`, is Lua-only.
 
 **Example:**
 

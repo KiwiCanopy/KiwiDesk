@@ -75,17 +75,9 @@ struct KiwiShelfDurationControls: Sendable {
         "kiwishelf.on_reveal",
         "Animate the reveal"
     )
-    let revealDuration = SettingsControl(
-        "kiwishelf.reveal_duration",
-        "Reveal duration"
-    )
     let onExpand = SettingsControl(
         "kiwishelf.on_expand",
         "Animate the expand"
-    )
-    let expandDuration = SettingsControl(
-        "kiwishelf.expand_duration",
-        "Expand duration"
     )
 }
 

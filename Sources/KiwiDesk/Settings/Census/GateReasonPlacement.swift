@@ -81,7 +81,7 @@ extension SettingRuntimeGate {
             .runningCopyTranslocated,
             .automaticInstallUnavailable, .luaOwnsConfig,
             .noBarHides, .noBarShows, .focusBorderOff,
-            .expandOffInConfig, .spaceHasNoOverrides,
+            .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
             .noBindingStore, .defaultsToRestore:
@@ -101,9 +101,6 @@ extension SettingRuntimeGate {
     var causeIsOnSurface: Bool {
         switch self {
         case .spaceHasNoOverrides:
-            return true
-        case .expandOffInConfig:
-            // Its switch sits right above it (#3236).
             return true
         case .reduceMotion, .reduceTransparency,
             .loginItemServiceStatus, .autoStartServiceLoaded,
