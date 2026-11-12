@@ -2013,6 +2013,7 @@
   "scroll_grid.anchor.start_h": "Gauche",
   "scroll_grid.anchor.start_v": "Haut",
   "scroll_grid.animate_focus_shifts": "Animer les déplacements de focus",
+  "scroll_grid.animate_focus_shifts.help": "Déplace les fenêtres en douceur lors des changements de focus dans un espace défilant. Désactivez ce paramètre pour déplacer la disposition immédiatement.",
   "scroll_grid.app_bar_xref_hidden": "L'App Bar de Scrolling (actuellement masquée) se configure dans %1$@.",
   "scroll_grid.app_bar_xref_link": "%1$@ ▸ %2$@",
   "scroll_grid.app_bar_xref_on": "L'App Bar de Scrolling (actuellement activée) se configure dans %1$@.",

@@ -2013,6 +2013,7 @@
   "scroll_grid.anchor.start_h": "左",
   "scroll_grid.anchor.start_v": "上",
   "scroll_grid.animate_focus_shifts": "フォーカスの移動をアニメーション表示",
+  "scroll_grid.animate_focus_shifts.help": "スクロールスペースでフォーカスが変わったときに、ウインドウをなめらかに移動します。オフにするとレイアウトが即座に移動します。",
   "scroll_grid.app_bar_xref_hidden": "スクロール用の App Bar（現在は非表示）は%1$@で設定します。",
   "scroll_grid.app_bar_xref_link": "%1$@ ▸ %2$@",
   "scroll_grid.app_bar_xref_on": "スクロール用の App Bar（現在はオン）は%1$@で設定します。",

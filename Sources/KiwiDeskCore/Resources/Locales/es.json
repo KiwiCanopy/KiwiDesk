@@ -2013,6 +2013,7 @@
   "scroll_grid.anchor.start_h": "Izquierda",
   "scroll_grid.anchor.start_v": "Arriba",
   "scroll_grid.animate_focus_shifts": "Animar cambios de foco",
+  "scroll_grid.animate_focus_shifts.help": "Mueve las ventanas suavemente al cambiar el foco en un espacio desplazable. Desactiva esto para mover el diseño de inmediato.",
   "scroll_grid.app_bar_xref_hidden": "La App Bar de Scrolling (actualmente oculta) se configura en %1$@.",
   "scroll_grid.app_bar_xref_link": "%1$@ ▸ %2$@",
   "scroll_grid.app_bar_xref_on": "La App Bar de Scrolling (actualmente activada) se configura en %1$@.",

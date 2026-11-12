@@ -2019,6 +2019,7 @@
   "scroll_grid.anchor.start_h": "Links",
   "scroll_grid.anchor.start_v": "Oben",
   "scroll_grid.animate_focus_shifts": "Fokuswechsel animieren",
+  "scroll_grid.animate_focus_shifts.help": "Bewegt Fenster flüssig, wenn sich der Fokus in einem Scrolling-Space ändert. Deaktiviere dies, um das Layout sofort zu bewegen.",
   "scroll_grid.app_bar_xref_hidden": "Die App Bar für Scrolling (aktuell ausgeblendet) wird unter %1$@ konfiguriert.",
   "scroll_grid.app_bar_xref_link": "%1$@ ▸ %2$@",
   "scroll_grid.app_bar_xref_on": "Die App Bar für Scrolling (aktuell an) wird unter %1$@ konfiguriert.",
