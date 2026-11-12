@@ -246,7 +246,7 @@ struct MCPDocsToolsTests {
             let fields = Self.structured(result)
             #expect(
                 fields["version"]
-                    == .string(KiwiDeskVersion.displayString)
+                    == .string(KiwiDeskVersion.semantic)
             )
             let pages = Self.rows(result, "pages")
             #expect(

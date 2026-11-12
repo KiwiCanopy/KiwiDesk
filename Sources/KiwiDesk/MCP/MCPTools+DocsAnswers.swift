@@ -38,7 +38,7 @@ extension MCPTools {
                 "parts": .number(Double(section.parts.count)),
                 "text": .string(text),
                 "subsections": .array(children.map(sectionRow)),
-                "version": .string(KiwiDeskVersion.displayString),
+                "version": .string(KiwiDeskVersion.semantic),
             ])
         )
     }
@@ -81,7 +81,7 @@ extension MCPTools {
         _ index: DocsIndex,
         scope: DocsIndex.Scope?
     ) -> JSONValue {
-        var lines = ["KiwiDesk \(KiwiDeskVersion.displayString)"]
+        var lines = ["KiwiDesk \(KiwiDeskVersion.semantic)"]
         var rows: [JSONValue] = []
         let scopes =
             scope.map { [$0] }
@@ -114,7 +114,7 @@ extension MCPTools {
         return result(
             lines.joined(separator: "\n"),
             structured: .object([
-                "version": .string(KiwiDeskVersion.displayString),
+                "version": .string(KiwiDeskVersion.semantic),
                 "pages": .array(rows),
             ])
         )
