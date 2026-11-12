@@ -4854,6 +4854,18 @@ until a config reload or restart and is not listed on Settings ▸
 KiwiVision; a lens made there is stored in `gui.json` and saved
 with Save, and `define_lens` never writes there.
 
+:::unreleased
+A lens made in Settings sets no fade of its own: its **Dim and
+blur** card holds Dim and Blur alone, and the lens follows
+[`set_fade_duration`](#kiwivisionset_fade_duration) and
+[`set_fade_curve`](#kiwivisionset_fade_curve). The update clears
+`fade_duration` and `fade_curve` from every lens stored in
+`gui.json`, and from a backup's lenses when it is restored
+([#3246](https://github.com/KiwiCanopy/KiwiDesk/issues/3246)); a
+`define_lens` table still sets both, and `init.lua` is never
+rewritten.
+:::
+
 **Example:**
 
 ```lua

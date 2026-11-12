@@ -130,16 +130,28 @@ struct KiwiVisionLensWiringTests {
     /// Every lens override has a row: a field added to
     /// `VisionLens.Overrides` resolves and saves, and without this
     /// would have no row on the page.
-    @Test("every lens override field has a row")
+    /// The fade's length and curve are Lua's alone on a lens
+    /// (#3246): the editor draws no row for either.
+    static let luaOnlyOverrides: Set<String> = ["fadeDuration", "fadeCurve"]
+
+    @Test("every lens override field has a row, save the fade's")
     func overridesHaveRows() throws {
         let fields = Mirror(reflecting: VisionLens.Overrides()).children
             .compactMap(\.label)
         #expect(!fields.isEmpty)
+        #expect(Self.luaOnlyOverrides.isSubset(of: Set(fields)))
         let page = try Self.squashed(
             Self.dir + "KiwiVisionLensOverrides.swift"
         )
         for field in fields {
-            #expect(page.contains("\\.\(field)"), "\(field) has no row")
+            let drawn = page.contains("\\.\(field)")
+            if Self.luaOnlyOverrides.contains(field) {
+                #expect(!drawn, "\(field) has a row")
+            } else {
+                #expect(drawn, "\(field) has no row")
+            }
         }
+        #expect(!page.contains("fadeCurve"))
+        #expect(!page.contains("fadeDuration"))
     }
 }

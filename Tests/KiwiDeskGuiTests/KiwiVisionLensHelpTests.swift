@@ -26,8 +26,6 @@ struct KiwiVisionLensHelpTests {
         let source = try Self.squashed()
         for help in [
             "help:KiwiVisionLevelsCard.blurHelp",
-            "help:Self.fadeDurationHelp,subject:label",
-            "help:KiwiVisionLevelsCard.fadeCurveHelp,subject:label",
             "help:KiwiVisionClearCard.appHelp",
             "help:KiwiVisionClearCard.wallpaperHelp",
             "help:KiwiVisionMaximizeRow.help,subject:label",

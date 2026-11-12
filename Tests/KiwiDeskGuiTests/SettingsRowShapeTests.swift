@@ -194,7 +194,7 @@ struct SettingsRowShapeTests {
         "StepperRow.swift": 1,
         "GeneralSection+AppWide.swift": 1,
         "KiwiVisionLevelsCard.swift": 1,
-        "KiwiVisionLensOverrides.swift": 2,
+        "KiwiVisionLensOverrides.swift": 1,
         // The minimum window size master and its layout rows.
         "MinWindowSizeRows.swift": 2,
         // A Space's own minimum window size (#2422).
