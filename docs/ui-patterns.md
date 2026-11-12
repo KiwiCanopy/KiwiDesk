@@ -1112,9 +1112,15 @@ windows* move; the system setting wins over both. (#989, #1069,
 The bars' own animations are not on that card: their lengths —
 **Reveal duration** and **Expand duration** — sit in KiwiShelf ▸
 KiwiShelf ▸ Show ▸ Durations beside the Reveal picker, and the
-card points there. Animate KiwiShelf has no row; while the
-Lua-only `animations.on_expand` is off, Expand duration greys and
-names it. While Reduce Motion is on, the card also says so in a
+card points there.
+
+:::unreleased
+The drawer also carries each length's switch above it, **Animate
+the reveal** and **Animate the expand**; a length greys while its
+switch is off.
+:::
+
+While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 

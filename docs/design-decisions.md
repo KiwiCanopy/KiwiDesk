@@ -18567,18 +18567,7 @@ four fifths of it — one value rather than one per style, since the
 user tunes how quick a bar feels, not a style's choreography. A
 value below the band rises to its floor, since a 50 ms reveal
 reads as a blink rather than a motion (owner ruling, 2026-10-21).
-No motion at all is `animations.on_reveal`, a switch beside
-`on_expand` and `on_peek`, never a duration of 0 (owner ruling,
-2026-11-12, #3236): a 0 that doubles as an off switch cannot leave
-the profile once the durations become app-wide, and a "snappy"
-profile still wants an instant reveal. The expand's band dropped
-its 0 for the same reason, `on_expand` covering it. A stored 0
-crosses to the switch off at the default length
-(`ConfigMigration`'s instant-durations step); a Lua script
-spelling `set_reveal_duration(0)` or `set_expand_duration(0)`,
-which no crossing reaches, is refused naming the switch, so the
-change is loud rather than a silent floor. Fade
-cross-fades the bar where it stands, for
+Fade cross-fades the bar where it stands, for
 a user who wants no travel at all. One picker serves Auto and Hidden
 alike: a Hidden bar has no handle, so Grow and Unfold start from a
 point at the middle of its screen side rather than offering a
@@ -18605,6 +18594,20 @@ drift from its tint (#2095); a fade alone read as cheap beside the
 other two. The reveal plays under Reduce Motion too, and so does the mark's hover
 growth (owner ruling, 2026-10-21; ▸ The bars honour Reduce Motion
 argues why).
+
+:::unreleased
+No motion at all is `animations.on_reveal`, a switch beside
+`on_expand` and `on_peek`, never a duration of 0 (owner ruling,
+2026-11-12, #3236): a 0 that doubles as an off switch cannot leave
+the profile once the durations become app-wide, and a "snappy"
+profile still wants an instant reveal. The expand's band has no 0
+either, `on_expand` covering it. A stored 0 crosses to the switch
+off at the default length (`ConfigMigration`'s instant-durations
+step); a Lua script spelling `set_reveal_duration(0)` or
+`set_expand_duration(0)`, which no crossing reaches, is refused
+naming the switch, so the change is loud rather than a silent
+floor.
+:::
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing
@@ -19821,11 +19824,14 @@ bar hide, and the picker and the Reveal
 duration grey with it while no bar hides (owner ruling,
 2026-10-21). The Expand duration does not: the expand plays with
 every bar on Always — a bar joining a fused shelf, the plate
-gliding — so it greys only while its switch is off. The Animate KiwiShelf switch has
-no row any more: the expand is the shelf's own way of changing
-shape, which a user tunes by its length and has no reason to stop
-once Reduce Motion no longer does it for them, so `on_expand`
-stays a Lua knob and the Expand duration says so where it greys.
+gliding — so it greys only while its switch is off.
+
+:::unreleased
+Each length has its switch on the row above it, the reveal's and
+the expand's (owner ruling, 2026-11-12, #3236): once neither band
+holds a 0, the switch is the only way to an instant reveal or
+expand, and a Settings user may want one in a "snappy" profile.
+:::
 
 **The bars ship one thickness, 40 pt, on every screen, and the
 slider's floor is the Core floor by derivation.** (#1359, owner

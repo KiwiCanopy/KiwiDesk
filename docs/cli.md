@@ -822,6 +822,11 @@ every lens with why it cannot turn on.
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
+:::unreleased
+`animations.set_on_reveal` is new; see
+[animations.set_on_reveal](lua-reference.md#animationsset_on_reveal).
+:::
+
 `toggle_maximized` also takes `height|width`, then an optional share
 from 0.1 to 1 and `center|in_place`: the window fills that axis at a
 share of the other. `maximize.set_share <height|width> <share>
@@ -1034,10 +1039,11 @@ hidden bar's reveal; see
 [animations.set_on_expand](lua-reference.md#animationsset_on_expand).
 
 :::unreleased
-`animations.set_on_reveal` is new, and both durations refuse `0`
+Both durations refuse `0`
 with `a duration cannot be 0; …`, naming the `set_on_*` verb that
 turns the motion off.
 :::
+
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired and fail naming their replacements.
 
