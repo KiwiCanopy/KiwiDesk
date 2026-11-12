@@ -129,6 +129,12 @@ extension AnimationSettings {
         onExpand ? TimeInterval(pace.animationExpandDurationMS) / 1000 : 0
     }
 
+    /// The window spring's length in ms at the app-wide pace — the
+    /// one reading for a reader that names its own switch (#3237).
+    public func windowMS(at pace: AppWideSettings) -> Int {
+        pace.animationDurationMS
+    }
+
     /// The reveal's length in seconds, the same reading.
     public func revealSeconds(at pace: AppWideSettings) -> TimeInterval {
         onReveal ? TimeInterval(pace.animationRevealDurationMS) / 1000 : 0

@@ -16,7 +16,7 @@ enum JSONKeyLexer {
         /// The byte offset of the owning object's `{`.
         let object: Int
         /// The byte offset of the key's opening quote.
-        var keyStart = 0
+        let keyStart: Int
     }
 
     private struct Frame {

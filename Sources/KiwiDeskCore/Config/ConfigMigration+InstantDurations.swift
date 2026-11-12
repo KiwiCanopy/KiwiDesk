@@ -50,6 +50,8 @@ extension ConfigMigration {
     /// at or above its shape's stands down, so the step never reads
     /// the app-wide `animations` group `gui.json` gained after it
     /// (#3237), and a 0 typed into a current file stays the floor.
+    /// An exported look file reads as `.gui` here; `lookExportSteps`
+    /// gates it by its own format instead.
     static let instantDurationFormats: [FileShape: Int] = [
         .profile: 37, .gui: 22, .looks: 4, .bundle: 46,
     ]

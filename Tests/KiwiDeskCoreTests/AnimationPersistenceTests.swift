@@ -51,6 +51,12 @@ struct AnimationPersistenceTests {
 
     @Test("the verbs write the live app-wide values and the engine")
     func verbsWriteAppWide() {
+        let glide = BarMotion.shelfGlide
+        let reveal = BarMotion.revealLength
+        defer {
+            BarMotion.shelfGlide = glide
+            BarMotion.revealLength = reveal
+        }
         let core = makeCore()
         let verbs: [(String, Int)] = [
             ("animations.set_duration", 400),

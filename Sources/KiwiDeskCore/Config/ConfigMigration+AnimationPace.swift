@@ -26,16 +26,23 @@ extension ConfigMigration {
         let bytes = migrated(data) ?? data
         guard
             let root = try? JSONSerialization.jsonObject(with: bytes)
-                as? [String: Any],
-            let settings = root[glassSettingsKey] as? [String: Any],
-            let group = settings[paceGroupKey] as? [String: Any]
+                as? [String: Any]
         else { return nil }
-        let pace = AppWideSettings.Animations(
-            duration: group["duration"] as? Int,
-            scrollDuration: group["scroll_duration"] as? Int,
-            expandDuration: group["expand_duration"] as? Int,
-            revealDuration: group["reveal_duration"] as? Int
-        )
+        return legacyPace(inProfileRoot: root)
+    }
+
+    /// The group one (already migrated) profile root carries.
+    static func legacyPace(
+        inProfileRoot root: [String: Any]
+    ) -> AppWideSettings.Animations? {
+        guard let settings = root[glassSettingsKey] as? [String: Any],
+            let group = settings[paceGroupKey] as? [String: Any],
+            let bytes = try? JSONSerialization.data(withJSONObject: group),
+            let pace = try? JSONDecoder().decode(
+                AppWideSettings.Animations.self,
+                from: bytes
+            )
+        else { return nil }
         guard
             pace.duration != nil || pace.scrollDuration != nil
                 || pace.expandDuration != nil || pace.revealDuration != nil
@@ -55,11 +62,9 @@ extension ConfigMigration {
         else { return [:] }
         var out: [String: AppWideSettings.Animations] = [:]
         for profile in profiles {
+            // Migrated once with the bundle, never again per profile.
             guard let name = profile["name"] as? String,
-                let one = try? JSONSerialization.data(
-                    withJSONObject: profile
-                ),
-                let pace = legacyPace(inProfile: one)
+                let pace = legacyPace(inProfileRoot: profile)
             else { continue }
             out[name] = pace
         }
@@ -112,7 +117,7 @@ extension ConfigMigration {
             .map { memberCut($0, in: bytes) }
         guard !cuts.isEmpty else { return nil }
         var out = bytes
-        for cut in merged(cuts).reversed() {
+        for cut in merged(cuts, in: bytes).reversed() {
             out.removeSubrange(cut)
         }
         return Data(out)
@@ -139,8 +144,32 @@ extension ConfigMigration {
         return start..<end
     }
 
+    /// `ranges` sorted, overlapping ones joined, and each that ends
+    /// an object (a `}` or `]` next) widened back over the comma
+    /// before it, so no cut leaves a trailing comma.
+    static func merged(
+        _ ranges: [Range<Int>],
+        in bytes: [UInt8]
+    ) -> [Range<Int>] {
+        let space: Set<UInt8> = Set(" \n\t\r".utf8)
+        return joined(ranges).map { range in
+            var next = range.upperBound
+            while next < bytes.count, space.contains(bytes[next]) { next += 1 }
+            guard next < bytes.count,
+                bytes[next] == UInt8(ascii: "}")
+                    || bytes[next] == UInt8(ascii: "]")
+            else { return range }
+            var back = range.lowerBound - 1
+            while back >= 0, space.contains(bytes[back]) { back -= 1 }
+            guard back >= 0, bytes[back] == UInt8(ascii: ",") else {
+                return range
+            }
+            return back..<range.upperBound
+        }
+    }
+
     /// `ranges` sorted, overlapping ones joined.
-    static func merged(_ ranges: [Range<Int>]) -> [Range<Int>] {
+    static func joined(_ ranges: [Range<Int>]) -> [Range<Int>] {
         var out: [Range<Int>] = []
         for range in ranges.sorted(by: { $0.lowerBound < $1.lowerBound }) {
             if let last = out.last, range.lowerBound <= last.upperBound {

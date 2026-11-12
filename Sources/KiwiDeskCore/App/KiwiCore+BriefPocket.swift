@@ -25,7 +25,7 @@ extension KiwiCore {
         let shelf = tiler.settings.kiwishelf
         let ground = LiquidGlassGate.panelGround(shelf, glass: glass)
         let flight = BriefPocketPlan.flight(
-            durationMS: appWide.animationDurationMS
+            durationMS: tiler.settings.animations.windowMS(at: appWide)
         )
         let timeline = BriefPocketPlan.timeline(direction, flight: flight)
         // Held out first, so the pocket stands where the play lands.

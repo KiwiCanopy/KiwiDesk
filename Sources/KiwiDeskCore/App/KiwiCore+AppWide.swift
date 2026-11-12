@@ -54,7 +54,11 @@ extension KiwiCore {
     /// (`GuiConfigStore.liveAppWide`): the settled values once
     /// stored, never a verb's session change.
     var appWideStamp: AppWideSettings? {
-        appWideLedger.isStored ? appWideLedger.settled : nil
+        guard appWideLedger.isStored else { return nil }
+        // The ledger decides whether the lengths are stored (#3237).
+        var stamp = appWideLedger.settled
+        stamp.animationPaceStored = appWideLedger.owedPace == nil
+        return stamp
     }
 
     /// Reads `gui.json` at a config load, AHEAD of anything that
@@ -125,18 +129,6 @@ extension KiwiCore {
         appWideLedger.owedPace = owed
     }
 
-    /// What a crossing ends on for the profile `name`: its captured
-    /// values over the settled ones, for each crossing owed.
-    private func crossingValue(for name: String?) -> AppWideSettings {
-        var value =
-            appWideLedger.owed.flatMap { owed in name.flatMap { owed[$0] } }
-            ?? appWideLedger.settled
-        if let pace = appWideLedger.owedPace {
-            value.adoptPace(name.flatMap { pace[$0] } ?? value.animations)
-        }
-        return value
-    }
-
     /// A capture is the FILE's, filed under its name (#1975): a
     /// deleted profile's leaves with it, and a renamed one's
     /// follows it, so a later profile under that name never
@@ -174,7 +166,7 @@ extension KiwiCore {
     /// upgrade, this Mac's own at a restore).
     func adoptAppWide(from profile: Profile) {
         guard appWideLedger.owes, isGuiManaged else { return }
-        endCrossing(adopting: crossingValue(for: profile.name))
+        endCrossing(adopting: appWideLedger.crossingValue(for: profile.name))
     }
 
     /// The settled lenses: what the Settings lens page seeds its
@@ -212,7 +204,7 @@ extension KiwiCore {
         // A Lua-owned config has no store to write (its rows grey).
         guard persisting, isGuiManaged else { return }
         if appWideLedger.owes {
-            var value = crossingValue(for: profiles.currentName)
+            var value = appWideLedger.crossingValue(for: profiles.currentName)
             change(&value)
             endCrossing(adopting: value)
             return
@@ -282,6 +274,8 @@ extension KiwiCore {
         let before = appWideLedger
         appWideLedger.settled = value
         appWideLedger.isStored = true
+        // The stamp reads the ledger: nothing is owed once stored.
+        appWideLedger.owedPace = nil
         guard persistAppWide() else {
             appWideLedger = before
             return false
@@ -313,10 +307,18 @@ extension KiwiCore {
     func stripLegacyAppWide() {
         for name in profiles.list() {
             guard let url = try? profiles.fileURL(name: name),
-                let data = try? Data(contentsOf: url),
+                let raw = try? Data(contentsOf: url),
                 // A newer build's file is not this build's (#2325).
-                (try? NewerFormatOnDisk.refuseProfile(url)) != nil,
-                let stripped = Self.withoutRetiredAppWide(data)
+                (try? NewerFormatOnDisk.refuseProfile(url)) != nil
+            else { continue }
+            // Migrated first: a step that rewrites a stripped key
+            // (#3236's 0) reads it before the strip (profiles.md).
+            let data = MigrationBackup.migrateInPlace(
+                raw,
+                at: url,
+                backups: profiles.migrationBackups
+            )
+            guard let stripped = AppWideLedger.withoutRetiredAppWide(data)
             else { continue }
             do {
                 try stripped.write(to: url, options: .atomic)
@@ -324,13 +326,5 @@ extension KiwiCore {
                 onLog("app-wide settings: \(name) not rewritten: \(error)")
             }
         }
-    }
-
-    /// `data` without #1741's groups and #3237's lengths, nil when
-    /// it carries neither.
-    private static func withoutRetiredAppWide(_ data: Data) -> Data? {
-        let groups = ConfigMigration.withoutLegacyAppWide(data)
-        let pace = ConfigMigration.withoutLegacyPace(groups ?? data)
-        return pace ?? groups
     }
 }

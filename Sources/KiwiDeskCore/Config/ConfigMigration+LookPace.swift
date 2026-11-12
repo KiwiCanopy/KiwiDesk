@@ -6,7 +6,7 @@ import Foundation
 /// a word. Matched by KEY at any depth — a profile's own look,
 /// `gui.json`'s shared look, `looks.json` and a bundle's inline
 /// copies — since only a look path spells these keys
-/// (`LookPaceMigrationTests`).
+/// (`InstantDurationMigrationTests` ▸ `checkLook`).
 extension ConfigMigration {
     /// Spelled as history: `LookKeys` no longer derives them.
     static let retiredLookPacePaths = [
@@ -61,7 +61,7 @@ extension ConfigMigration {
             .map { memberCut($0, in: bytes) }
         guard !cuts.isEmpty else { return nil }
         var out = bytes
-        for cut in merged(cuts).reversed() {
+        for cut in merged(cuts, in: bytes).reversed() {
             out.removeSubrange(cut)
         }
         return Data(out)

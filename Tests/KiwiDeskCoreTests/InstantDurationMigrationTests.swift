@@ -283,4 +283,35 @@ struct InstantDurationMigrationTests {
         )
         #expect(String(data: out, encoding: .utf8) == expected)
     }
+
+    /// The step stands down at the format it introduced for each
+    /// shape, so it never reads #3237's app-wide group.
+    @Test("the step stands down at its own formats")
+    func standsDownAtItsFormats() throws {
+        for (shape, format) in ConfigMigration.instantDurationFormats {
+            var root: [String: Any] = [
+                "format": format,
+                "style": ["animations.reveal_duration": 0],
+            ]
+            switch shape {
+            case .profile: root["monitor_sets"] = []
+            case .looks: root["looks"] = []
+            case .bundle: root[SetupBundle.shapeMarker] = "x"
+            default: break
+            }
+            let data = try JSONSerialization.data(withJSONObject: root)
+            #expect(
+                ConfigMigration.migratingInstantDurationsOntoToggles(data)
+                    == nil,
+                "\(shape)"
+            )
+            root["format"] = format - 1
+            let below = try JSONSerialization.data(withJSONObject: root)
+            #expect(
+                ConfigMigration.migratingInstantDurationsOntoToggles(below)
+                    != nil,
+                "\(shape)"
+            )
+        }
+    }
 }

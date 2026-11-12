@@ -12,7 +12,9 @@ extension KiwiCore {
     /// The engine caches its two lengths for its hot path; this is
     /// the one writer of them outside its own init.
     func syncAnimationEngine() {
-        tiler.animation.durationMS = appWide.animationDurationMS
+        tiler.animation.durationMS = tiler.settings.animations.windowMS(
+            at: appWide
+        )
         tiler.animation.scrollDurationMS = appWide.animationScrollDurationMS
     }
 }

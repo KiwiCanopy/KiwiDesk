@@ -247,7 +247,7 @@ extension KiwiCore {
         guard tiler.settings.animations.onRelayout else {
             return 0.05
         }
-        return Double(appWide.animationDurationMS) / 1000
+        return Double(tiler.settings.animations.windowMS(at: appWide)) / 1000
             + 0.08
     }
 

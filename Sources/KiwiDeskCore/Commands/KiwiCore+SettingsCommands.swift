@@ -101,12 +101,9 @@ extension KiwiCore {
         // knob whose arm was gone (#1009, `CommandDispatchReachTests`).
         switch command {
         case "animations.set_duration":
-            // Live only: a later save_profile captures it, into
-            // the shared look for a profile wearing it (#1685).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            // Engine syncs via TilingEngine.settings.didSet.
             // App-wide, the session alone (#3237).
             setAppWide(persisting: false) { $0.animationDurationMS = ms }
             return .ok()
@@ -157,7 +154,6 @@ extension KiwiCore {
             }
             // App-wide, the session alone (#3237).
             setAppWide(persisting: false) { $0.animationExpandDurationMS = ms }
-            updateBars()
             return .ok()
         case "animations.set_reveal_duration":
             // A hidden shelf's reveal length (owner ruling,
@@ -173,7 +169,6 @@ extension KiwiCore {
             }
             // App-wide, the session alone (#3237).
             setAppWide(persisting: false) { $0.animationRevealDurationMS = ms }
-            updateBars()
             return .ok()
         case "animations.set_size_policy":
             // Experimental (#47), engine-only — not persisted to a

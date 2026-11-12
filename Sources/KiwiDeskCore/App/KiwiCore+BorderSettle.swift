@@ -52,7 +52,7 @@ extension KiwiCore {
     func scheduleBorderDropReconcile(lone: Bool = false) {
         let animationMS =
             tiler.animation.activeCount > 0
-            ? appWide.animationDurationMS : 0
+            ? tiler.settings.animations.windowMS(at: appWide) : 0
         let wait = borders.dropSettleBurst.wait(
             asking: wallClock(),
             early: Double(animationMS + 50) / 1_000,
