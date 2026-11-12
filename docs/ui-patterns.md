@@ -1123,25 +1123,39 @@ While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 
+:::unreleased
+**Animation speed** leads the Animations card: Off · Slow · Default
+· Fast, drawn by the same row in Simple's Animations card (#3238).
+Its Off is KiwiDesk's own Reduce Motion, which the bars, the marks,
+the cues and the windows read with macOS's; the Settings window
+reads macOS's alone. While it is on, the card shows a warning box
+with **Turn On**, and every row below the preset greys; while
+macOS's Reduce Motion is on, that box wins and Off shows picked and
+takes no input. A pick writes at once, in every profile, and lengths
+that match no speed show the preset with nothing picked over a
+custom-lengths caption. Its drawer is **Per event**.
+:::
+
 The Space switch is not on that card either: **Switching
 Spaces**, the card after Animations (#3218), holds **Space
-switches**, which picks Slide, Show the Space or None, and
-**Slide duration** beneath the picks (#1956, #2524). The
-**Animate windows** master greys none of them, and Reduce Motion
-greys only the duration:
-under Reduce Motion a Slide shows the Space instead, which is how
-a switch reads with less motion, and the plate drops only its
-fade. The duration also greys while no slide would play. The
-card leads with "Changes apply at once, in every profile." under
-its title, and the Animations card's Reduce Motion warning names
-window animations alone.
+switches**, which picks Slide, Show the Space or None (#1956,
+#2524). Neither the **Animate windows** master nor Reduce Motion
+greys it: under Reduce Motion a Slide shows the Space instead,
+which is how a switch reads with less motion, and the plate drops
+only its fade. The card leads with "Changes apply at once, in
+every profile." under its title, and the Animations card's Reduce
+Motion warning names window animations alone.
+
+:::unreleased
+The card has no length row: the slide's length is the speed
+preset's, and Lua's `set_space_slide_duration`.
+:::
 
 **Step between Spaces (mouse or trackpad)** sits under **Space
 switches** with the same three options, for the scroll Space step
 alone; **Space switches** keeps every other switch. Its caption
 shows only while its pick differs from the row above, which says
-the same sentence otherwise. **Slide duration** stays live while
-either pick draws a slide (#2971).
+the same sentence otherwise (#2971).
 
 **A setting that skips Save carries one sentence where it sits
 (#3218)**: under its card's title, or under its row's label among

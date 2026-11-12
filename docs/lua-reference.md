@@ -1537,12 +1537,16 @@ no effect where no slide plays, as while Reduce Motion is on. Window motion keep
 ([animations.set_duration](#animationsset_duration)). Read at the
 next switch.
 
-The GUI twin is **Looks &amp; Animations ▸ Switching Spaces ▸
-Slide duration**, grey while no slide would play. The
-setting is app-wide, stored in `gui.json` as
+The setting is app-wide, stored in `gui.json` as
 `space.slide_duration`; the verb changes the running value only.
 It replaces `animations.set_space_change_duration`, which is
 refused, naming it.
+
+:::unreleased
+No Settings row sets it alone: the speed preset in **Looks &amp;
+Animations ▸ Animations ▸ Animation speed** writes it with the
+other lengths ([Animation Cascade](#animation-cascade)).
+:::
 
 A slide plays where [`set_space_transition`](#set_space_transition),
 or for the scroll step
@@ -4893,6 +4897,12 @@ blur; the window you focus clears at once. 0 makes the change
 instant, as Reduce Motion in macOS does. A Space switch is always
 instant. Stored as `fade_duration` in the `kiwivision` group, and a
 lens table takes it too.
+
+:::unreleased
+No Settings row sets it alone: the speed preset writes it with the
+other lengths ([Animation Cascade](#animation-cascade)), and
+**Fade curve** stays in Settings.
+:::
 
 ### kiwivision.set_fade_curve
 
@@ -9368,6 +9378,12 @@ places. Off, they move at once. It is not under the
 window-animation switches, and it plays with Reduce Motion on too.
 
 :::unreleased
+KiwiDesk's own Off
+([`animations.set_reduce_motion`](#animationsset_reduce_motion))
+stops it.
+:::
+
+:::unreleased
 The switch is KiwiShelf ▸ Show ▸ Durations ▸ Animate the expand in
 Settings; the length is Lua-only.
 :::
@@ -9393,6 +9409,12 @@ it goes back out in a little less. It plays with Reduce Motion on
 too.
 
 :::unreleased
+KiwiDesk's own Off
+([`animations.set_reduce_motion`](#animationsset_reduce_motion))
+stops it.
+:::
+
+:::unreleased
 `set_reveal_duration(0)` and below are refused; turn the reveal off with
 [`animations.set_on_reveal(false)`](#animationsset_on_reveal). A
 saved profile, look or backup storing `0` or below is read as the
@@ -9411,7 +9433,9 @@ animations.set_reveal_duration(400)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** a hidden bar's reveal. Off, the bar shows and hides at
-once. It plays with Reduce Motion on too. In Settings it is
+once. It plays with macOS's Reduce Motion on too, and KiwiDesk's
+own Off ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
+stops it. In Settings it is
 KiwiShelf ▸ Show ▸ Durations ▸ Animate the reveal; the length,
 `animations.set_reveal_duration`, is Lua-only.
 
@@ -9440,6 +9464,34 @@ turns it off.
 ```lua
 animations.set_on_peek(false)
 ```
+
+### animations.set_reduce_motion
+
+:::unreleased
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** KiwiDesk's own Reduce Motion, in every profile: while it
+is on, the windows, bars, marks and cues move as they do with
+Reduce Motion on in macOS — windows move at once, a `"slide"` Space
+switch shows the Space, the KiwiVision fade is instant. It also
+stops a hidden bar's reveal and the KiwiShelf expand, which macOS's
+Reduce Motion lets play. No length changes, so turning it off
+brings back the same pace. The Settings window follows macOS's
+setting alone.
+
+It is the **Off** of **Looks &amp; Animations ▸ Animations ▸
+Animation speed**, which Simple shows too. The setting is app-wide,
+stored in `gui.json` as `animations.reduce_motion`; the verb changes
+the running value only. Each profile's own switches, such as
+**Animate windows**, are apart from it and saved with that profile
+([Animation Cascade](#animation-cascade)).
+
+**Example:**
+
+```lua
+animations.set_reduce_motion(true)
+```
+:::
 
 ### enable_wake_restore, set_wake_restore_delay
 
@@ -9493,6 +9545,29 @@ saved profile it loads after the update, keeps them in `gui.json`'s
 changes the running value only: it never reaches `gui.json`. In a
 Lua-owned setup, `init.lua` is where they are kept; Adopt into the
 GUI keeps the values it set.
+
+**Animation speed** in **Looks &amp; Animations ▸ Animations** sets
+them in Settings, with
+[`set_space_slide_duration`](#set_space_slide_duration) and
+[`kiwivision.set_fade_duration`](#kiwivisionset_fade_duration): each
+speed writes one table of the six lengths to `gui.json` at once, in
+ms, and the speed shown is the one whose table matches the current
+lengths. Lengths that match no table, as a Lua call leaves them, read
+as custom, with no speed picked. With a Lua-owned `init.lua` the
+control is greyed.
+
+| Length | Fast | Default | Slow |
+|---|---|---|---|
+| `set_duration` | 100 | 150 | 250 |
+| `set_scroll_duration` | 100 | 150 | 250 |
+| `set_expand_duration` | 500 | 750 | 1250 |
+| `set_reveal_duration` | 200 | 300 | 500 |
+| `set_space_slide_duration` | 200 | 300 | 500 |
+| `kiwivision.set_fade_duration` | 200 | 300 | 500 |
+
+Its **Off** is
+[`animations.set_reduce_motion`](#animationsset_reduce_motion), which
+leaves the six lengths alone; picking a speed turns it off.
 :::
 
 ### Quit & Restart
