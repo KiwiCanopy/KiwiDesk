@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 import SwiftUI
 import Testing
 
@@ -178,5 +179,79 @@ extension SettingsThemeContrastTests {
                 "var selectionInkSecondary = SettingsTheme.accentInkSecondary"
             )
         )
+    }
+}
+
+/// An untinted KiwiHub's filled row (#3264): a tile's hover lifts in
+/// `accentInk` at the paint's `filledLift` over the `accent` fill, the
+/// lift its polarity picks, and separates by `ColorVision`'s floor in
+/// both appearances. The tinted palettes are
+/// `HighlightFadeContrastTests`'.
+extension SettingsThemeContrastTests {
+    @Test("a hover on a filled KiwiHub row separates from the fill")
+    func filledRowLiftSeparates() throws {
+        let paint = KiwiHubPaint()
+        for dark in [false, true] {
+            let row = try Self.opaqueHex(paint.selection, dark: dark)
+            let ink = try Self.opaqueHex(paint.selectionInk, dark: dark)
+            #expect(paint.filledLift == KiwiShelf.filledRowLift(ink: ink))
+            let alpha = String(
+                format: "%02X",
+                Int((paint.filledLift * 255).rounded())
+            )
+            let lifted = try #require(
+                ColorVision.composite(ink + alpha, over: row)
+            )
+            let separation = try #require(
+                ColorVision.separation(lifted, row)
+            )
+            #expect(
+                separation >= ColorVision.separationFloor,
+                Comment(
+                    rawValue: (dark ? "dark" : "light")
+                        + String(format: ": %.1f", separation)
+                )
+            )
+        }
+    }
+
+    /// A tinted paint takes the lift its palette's ink picks, and some
+    /// bundled palette's ink is light, so the dark default cannot pass
+    /// for it (#3264).
+    @Test("a tinted paint's lift follows its ink")
+    func tintedLiftFollowsTheInk() {
+        var light = 0
+        for palette in PaletteCatalog.bundled() {
+            var settings = TilingSettings()
+            palette.apply(to: &settings)
+            let shelf = settings.kiwishelf
+            let paint = KiwiHubPaint(
+                shelf,
+                divider: "#FFFFFF33",
+                axis: nil,
+                increaseContrast: false
+            )
+            let ink = shelf.panelHighlight.selectionInk
+            #expect(
+                paint.filledLift == KiwiShelf.filledRowLift(ink: ink),
+                "\(palette.name)"
+            )
+            if KiwiShelf.filledRowLift(ink: ink) == KiwiShelf.lightInkLift {
+                light += 1
+            }
+        }
+        #expect(light > 0)
+    }
+
+    /// A token resolved in one appearance, as `#RRGGBB`.
+    private static func opaqueHex(
+        _ color: Color,
+        dark: Bool
+    ) throws -> String {
+        let rgb = try ThemeContrast.resolved(color, dark: dark)
+        return "#"
+            + [rgb.r, rgb.g, rgb.b]
+            .map { String(format: "%02X", Int(($0 * 255).rounded())) }
+            .joined()
     }
 }

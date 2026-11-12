@@ -17,6 +17,9 @@ struct DesktopIconView: View {
     let isPicked: Bool
     let isLast: Bool
     let isMatch: Bool
+    /// Whether the icon's line wears a fill (selected or a drop
+    /// target): the hover then lifts in the line's ink, not `rowHover`.
+    let onFill: Bool
     /// What a drag from this icon carries.
     let dragged: [WindowID]
     let pointer: DesktopsPointer
@@ -62,7 +65,13 @@ struct DesktopIconView: View {
     @ViewBuilder private var ground: some View {
         if pointer.lifts(.window(window.id), selected: isSelected) {
             RoundedRectangle(cornerRadius: 5)
-                .fill(paint.fill(paint.rowHover))
+                .fill(
+                    onFill
+                        ? AnyShapeStyle(
+                            paint.selectionInk.opacity(paint.filledLift)
+                        )
+                        : paint.fill(paint.rowHover)
+                )
         }
     }
 

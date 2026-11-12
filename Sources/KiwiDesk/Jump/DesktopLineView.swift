@@ -67,12 +67,22 @@ struct DesktopLineView: View {
         return DesktopsText.spoken(line, on: desktop)
     }
 
+    /// Whether the line wears the selection's whole fill and ink: the
+    /// selected line, never a drop target's tint (#3264).
+    private var wearsFill: Bool {
+        !isTarget && isSelected && !state.isInside
+    }
+
     @ViewBuilder private var ground: some View {
         let shape = RoundedRectangle(cornerRadius: 6)
         if isTarget {
-            shape.fill(paint.fill(paint.selection.opacity(0.35)))
-                .overlay(shape.strokeBorder(paint.selection, lineWidth: 2))
-        } else if isSelected, !state.isInside {
+            shape.fill(
+                paint.fill(
+                    paint.selection.opacity(0.35)
+                )
+            )
+            .overlay(shape.strokeBorder(paint.selection, lineWidth: 2))
+        } else if wearsFill {
             shape.fill(paint.fill(paint.selection))
         } else if isLifted {
             shape.fill(paint.fill(paint.rowHover))
@@ -80,7 +90,7 @@ struct DesktopLineView: View {
     }
 
     private var ink: AnyShapeStyle {
-        if isSelected, !state.isInside, !isTarget {
+        if wearsFill {
             return AnyShapeStyle(paint.selectionInk)
         }
         if isLifted, !isTarget, let hoverInk = paint.hoverInk {
@@ -145,6 +155,7 @@ struct DesktopLineView: View {
                         isPicked: state.carried.contains(window.id),
                         isLast: line?.lastFocused == window.id,
                         isMatch: state.matches(window),
+                        onFill: wearsFill,
                         dragged: dragged(window.id),
                         pointer: pointer,
                         onClick: { count, modifiers in

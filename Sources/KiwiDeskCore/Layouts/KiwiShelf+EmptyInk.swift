@@ -19,7 +19,7 @@ extension KiwiShelf {
     public static let emptyInkStep = 1.3
 
     /// The wallpaper extremes every ink is measured over.
-    private static let inkGrounds = ["#FFFFFF", "#000000"]
+    static let inkGrounds = ["#FFFFFF", "#000000"]
 
     /// The share of `itemColor`'s own alpha an empty identifier
     /// draws at, or nil where no share holds both

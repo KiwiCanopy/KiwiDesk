@@ -118,6 +118,27 @@ extension KiwiShelf {
         }
         return high
     }
+
+    /// Whether `lift` over `layer` at `share` on `fill` separates from
+    /// the layer alone over either wallpaper.
+    func liftSeparates(
+        _ lift: String,
+        over layer: String,
+        at share: CGFloat,
+        on fill: String
+    ) -> Bool {
+        Self.inkGrounds.allSatisfy { ground in
+            guard let shelf = ColorVision.composite(fill, over: ground),
+                let row = ColorVision.composite(
+                    Self.hex(layer, atShare: share),
+                    over: shelf
+                ),
+                let lifted = ColorVision.composite(lift, over: row),
+                let separation = ColorVision.separation(lifted, row)
+            else { return false }
+            return separation >= ColorVision.separationFloor
+        }
+    }
 }
 
 extension KiwiShelf {
@@ -127,11 +148,26 @@ extension KiwiShelf {
     /// carries its own.
     static let highlightFloorShare: CGFloat = 0.4
 
+    /// The opacity a tile's hover on a filled row lifts in, of the
+    /// row's selection ink, by the ink's polarity (#3264 ▸ Ruling
+    /// amendment). The fade share keeps it apart from the fill by
+    /// `ColorVision.separationFloor` (`HighlightFadeContrastTests`).
+    public static let lightInkLift = 0.42
+    public static let darkInkLift = 0.55
+
+    /// The lift `ink` takes: `lightInkLift` for a light ink, else
+    /// `darkInkLift`. A tinted `selectionInk` is white or black
+    /// (`contrastingGlyph`), so the split never meets a mid grey.
+    public static func filledRowLift(ink: String) -> Double {
+        (ColorVision.luminance(ink) ?? 0) > 0.5 ? lightInkLift : darkInkLift
+    }
+
     /// The far end of KiwiHub's selection and hover fills: Fill
     /// fade's own share, never below `highlightFloorShare`, and
     /// raised to the share at which each fill's ink holds the
-    /// reading floor (`readingFloor(increaseContrast:)`) over the
-    /// panel's both ends (`HighlightFadeContrastTests`).
+    /// reading floor (`readingFloor(increaseContrast:)`), and a
+    /// filled row's hover lift separates from its fill (#3264), over
+    /// the panel's both ends (`HighlightFadeContrastTests`).
     public func highlightFadeShare(increaseContrast: Bool) -> CGFloat {
         let floor = readingFloor(increaseContrast: increaseContrast)
         let base = max(
@@ -148,17 +184,27 @@ extension KiwiShelf {
             (paint.selectionInk, paint.selection),
             (paint.hoverInk, paint.hover),
         ]
+        let lift = Self.hex(
+            paint.selectionInk,
+            atShare: Self.filledRowLift(ink: paint.selectionInk)
+        )
         func holds(_ share: CGFloat) -> Bool {
             grounds.allSatisfy { ground in
-                pairs.allSatisfy { ink, layer in
-                    let ratio = worstContrast(
-                        ink,
-                        nil,
-                        on: ground,
-                        beneath: Self.hex(layer, atShare: share)
-                    )
-                    return (ratio ?? 0) >= floor
-                }
+                liftSeparates(
+                    lift,
+                    over: paint.selection,
+                    at: share,
+                    on: ground
+                )
+                    && pairs.allSatisfy { ink, layer in
+                        let ratio = worstContrast(
+                            ink,
+                            nil,
+                            on: ground,
+                            beneath: Self.hex(layer, atShare: share)
+                        )
+                        return (ratio ?? 0) >= floor
+                    }
             }
         }
         guard !holds(base) else { return base }
