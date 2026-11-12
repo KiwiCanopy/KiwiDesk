@@ -19,17 +19,17 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
     case animationsOnStateChange = "settings.animations.onStateChange"
-    case animationsDurationMS = "settings.animations.durationMS"
+    case animationsDurationMS = "appWide.animationDurationMS"
     case animationsOnScrolling = "settings.animations.onScrolling"
     case animationsScrollDurationMS =
-        "settings.animations.scrollDurationMS"
+        "appWide.animationScrollDurationMS"
     case animationsOnExpand = "settings.animations.onExpand"
     case animationsOnPeek = "settings.animations.onPeek"
     case animationsOnReveal = "settings.animations.onReveal"
     case animationsExpandDurationMS =
-        "settings.animations.expandDurationMS"
+        "appWide.animationExpandDurationMS"
     case animationsRevealDurationMS =
-        "settings.animations.revealDurationMS"
+        "appWide.animationRevealDurationMS"
     case paletteApply = "(action) palette.apply"
     case paletteSave = "(action) palette.save"
     case paletteRename = "(action) palette.rename"

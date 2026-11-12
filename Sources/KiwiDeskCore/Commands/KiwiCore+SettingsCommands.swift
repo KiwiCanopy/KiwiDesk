@@ -107,7 +107,8 @@ extension KiwiCore {
                 return .fail("expected milliseconds")
             }
             // Engine syncs via TilingEngine.settings.didSet.
-            tiler.settings.animations.durationMS = ms
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationDurationMS = ms }
             return .ok()
         case "animations.set_scroll_duration":
             // The scroll-specific duration knob, split from
@@ -115,7 +116,8 @@ extension KiwiCore {
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            tiler.settings.animations.scrollDurationMS = ms
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationScrollDurationMS = ms }
             return .ok()
         case "animations.set_on_expand":
             // The shelf's expand on and off (#1838).
@@ -153,7 +155,8 @@ extension KiwiCore {
                         + "animations.set_on_expand(false) turns it off"
                 )
             }
-            tiler.settings.animations.expandDurationMS = ms
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationExpandDurationMS = ms }
             updateBars()
             return .ok()
         case "animations.set_reveal_duration":
@@ -168,7 +171,8 @@ extension KiwiCore {
                         + "animations.set_on_reveal(false) turns it off"
                 )
             }
-            tiler.settings.animations.revealDurationMS = ms
+            // App-wide, the session alone (#3237).
+            setAppWide(persisting: false) { $0.animationRevealDurationMS = ms }
             updateBars()
             return .ok()
         case "animations.set_size_policy":

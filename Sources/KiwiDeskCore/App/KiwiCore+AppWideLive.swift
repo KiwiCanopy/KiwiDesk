@@ -32,6 +32,7 @@ extension KiwiCore {
         {
             repaintTilingOffStandDowns()  // #3089
         }
+        if new.animations != old.animations { animationPaceChanged() }
         if new.modifierSides != old.modifierSides {
             keys.modifierSides = new.modifierSides
         }

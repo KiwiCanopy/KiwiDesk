@@ -1,6 +1,8 @@
 import Foundation
 
-/// Per-trigger animation configuration and duration settings (#11, #50).
+/// Per-trigger animation switches (#11, #50), one profile's; the
+/// lengths they play at are app-wide (`AppWideSettings`, #3237),
+/// whose bands and clamps live here.
 public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Animate scrolling layout viewport shifts.
     public var onScrolling = true
@@ -19,19 +21,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// follows it; its neighbours keep `onRelayout`.
     public var onStateChange = true
 
-    /// Spring animation duration in milliseconds (50–1000 ms).
-    public var durationMS = 150 {
-        didSet { durationMS = Self.clampMS(durationMS) }
-    }
-
-    /// Scrolling layout shift duration in milliseconds
-    /// (50–1000 ms, #51, #1020, `ConfigMigration`).
-    public var scrollDurationMS = 150 {
-        didSet {
-            scrollDurationMS = Self.clampMS(scrollDurationMS)
-        }
-    }
-
     /// The shelf's expand (#1838): a section growing in or out, the
     /// plate and sections re-placing, a group folding — one motion
     /// on one pace. Off, the shelf lands; not under `anyEnabled`.
@@ -46,20 +35,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// A hidden shelf's reveal (#3236). Off, the shelf shows and
     /// hides at once; not under `anyEnabled`.
     public var onReveal = true
-
-    /// The expand in milliseconds (500–2000 ms, #1838, #3236);
-    /// was `shelf_duration`. `onExpand` is its off switch.
-    public var expandDurationMS = 750 {
-        didSet { expandDurationMS = Self.clampExpandMS(expandDurationMS) }
-    }
-
-    /// A hidden shelf's reveal in milliseconds (150–800 ms, owner
-    /// rulings 2026-10-21, #3236): every `reveal_style` plays inside
-    /// it, a retract inside `retractShare` of it. `onReveal` is its
-    /// off switch.
-    public var revealDurationMS = 300 {
-        didSet { revealDurationMS = Self.clampRevealMS(revealDurationMS) }
-    }
 
     /// The band every spring duration clamps to, and the one a
     /// control's edges derive from (gui.md, #1359).
@@ -98,13 +73,9 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onWindowSwap = "on_window_swap"
         case onRelayout = "on_relayout"
         case onStateChange = "on_state_change"
-        case durationMS = "duration"
-        case scrollDurationMS = "scroll_duration"
         case onExpand = "on_expand"
         case onPeek = "on_peek"
         case onReveal = "on_reveal"
-        case expandDurationMS = "expand_duration"
-        case revealDurationMS = "reveal_duration"
     }
 
     public init() {}
@@ -138,20 +109,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Bool.self,
                 forKey: .onStateChange
             ) ?? true
-        // `didSet` observers don't fire during init, so clamp the
-        // decoded values explicitly through the same helper.
-        durationMS = Self.clampMS(
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .durationMS
-            ) ?? 150
-        )
-        scrollDurationMS = Self.clampMS(
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .scrollDurationMS
-            ) ?? 150
-        )
         onExpand =
             try container.decodeIfPresent(Bool.self, forKey: .onExpand)
             ?? true
@@ -161,32 +118,22 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         onReveal =
             try container.decodeIfPresent(Bool.self, forKey: .onReveal)
             ?? true
-        expandDurationMS = Self.clampExpandMS(
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .expandDurationMS
-            ) ?? 750
-        )
-        revealDurationMS = Self.clampRevealMS(
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .revealDurationMS
-            ) ?? 300
-        )
-    }
-
-    /// The expand's length in seconds, nothing while it is off.
-    public var expandSeconds: TimeInterval {
-        onExpand ? TimeInterval(expandDurationMS) / 1000 : 0
-    }
-
-    /// The reveal's length in seconds, nothing while it is off.
-    public var revealSeconds: TimeInterval {
-        onReveal ? TimeInterval(revealDurationMS) / 1000 : 0
     }
 }
 
 extension AnimationSettings {
+    /// The expand's length in seconds at the app-wide pace,
+    /// nothing while this profile turns it off — the one reading
+    /// of a switch with its length (#3237).
+    public func expandSeconds(at pace: AppWideSettings) -> TimeInterval {
+        onExpand ? TimeInterval(pace.animationExpandDurationMS) / 1000 : 0
+    }
+
+    /// The reveal's length in seconds, the same reading.
+    public func revealSeconds(at pace: AppWideSettings) -> TimeInterval {
+        onReveal ? TimeInterval(pace.animationRevealDurationMS) / 1000 : 0
+    }
+
     /// `self` with the stored field `key` set to `value`, read
     /// through the config's own decoder — its clamps included — so
     /// a look never sets a value a stored file could not (#2176).

@@ -56,8 +56,10 @@ extension SettingsValueReadout {
                 LiquidGlassAgreement(settings: old.settings).allOn,
                 LiquidGlassAgreement(settings: new.settings).allOn
             )
-        case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
-            // No model path: the rows write at once (#1741).
+        case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration,
+            .animationsDurationMS, .animationsScrollDurationMS,
+            .animationsExpandDurationMS, .animationsRevealDurationMS:
+            // No model path: the rows write at once (#1741, #3237).
             return []
         case .animationsMaster:
             // The master is derived, not stored (`anyEnabled`) —
@@ -92,41 +94,17 @@ extension SettingsValueReadout {
                 o.onStateChange,
                 n.onStateChange
             )
-        case .animationsDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.durationMS)),
-                milliseconds(Double(n.durationMS))
-            )
         case .animationsOnExpand:
             return coloursOnOffRow(census, o.onExpand, n.onExpand)
         case .animationsOnPeek:
             return coloursOnOffRow(census, o.onPeek, n.onPeek)
         case .animationsOnReveal:
             return coloursOnOffRow(census, o.onReveal, n.onReveal)
-        case .animationsExpandDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.expandDurationMS)),
-                milliseconds(Double(n.expandDurationMS))
-            )
-        case .animationsRevealDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.revealDurationMS)),
-                milliseconds(Double(n.revealDurationMS))
-            )
         case .animationsOnScrolling:
             return coloursOnOffRow(
                 census,
                 o.onScrolling,
                 n.onScrolling
-            )
-        case .animationsScrollDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.scrollDurationMS)),
-                milliseconds(Double(n.scrollDurationMS))
             )
         case .paletteApply, .paletteSave, .paletteRename,
             .paletteExport, .paletteDelete, .paletteImport,

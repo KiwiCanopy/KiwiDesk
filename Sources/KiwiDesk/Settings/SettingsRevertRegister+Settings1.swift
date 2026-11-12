@@ -111,22 +111,14 @@ extension SettingsRevertRegister {
             .leaf(\.settings.animations.onStateChange),
         .colours(.animationsOnRelayout):
             .leaf(\.settings.animations.onRelayout),
-        .colours(.animationsDurationMS):
-            .leaf(\.settings.animations.durationMS),
         .colours(.animationsOnScrolling):
             .leaf(\.settings.animations.onScrolling),
-        .colours(.animationsScrollDurationMS):
-            .leaf(\.settings.animations.scrollDurationMS),
         .colours(.animationsOnExpand):
             .leaf(\.settings.animations.onExpand),
         .colours(.animationsOnPeek):
             .leaf(\.settings.animations.onPeek),
         .colours(.animationsOnReveal):
             .leaf(\.settings.animations.onReveal),
-        .colours(.animationsExpandDurationMS):
-            .leaf(\.settings.animations.expandDurationMS),
-        .colours(.animationsRevealDurationMS):
-            .leaf(\.settings.animations.revealDurationMS),
         .gaps(.outerTop): .leaf(\.settings.gapsGlobal.outer.top),
         .gaps(.outerBottom): .leaf(\.settings.gapsGlobal.outer.bottom),
         .gaps(.outerLeft): .leaf(\.settings.gapsGlobal.outer.left),

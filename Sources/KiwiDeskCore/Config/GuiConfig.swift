@@ -133,6 +133,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case shortcutBase = "shortcut_base"
         case refusal
         case quit
+        case animations
         case desktop
         case space
         case mode
@@ -278,6 +279,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             modifier: try container.decodeIfPresent(
                 AppWideSettings.Modifier.self,
                 forKey: .modifier
+            ),
+            animations: try container.decodeIfPresent(
+                AppWideSettings.Animations.self,
+                forKey: .animations
             )
         )
         // Additive since #1752: absence is "no shared look adopted

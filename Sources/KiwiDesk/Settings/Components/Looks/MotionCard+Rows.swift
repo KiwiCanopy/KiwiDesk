@@ -91,7 +91,12 @@ extension MotionCard {
                     "behavior.animations.window_duration",
                     "Window duration"
                 ),
-                value: animations.durationMS,
+                value: Binding(
+                    get: { model.appWide.animationDurationMS },
+                    set: { ms in
+                        model.setAppWide { $0.animationDurationMS = ms }
+                    }
+                ),
                 in: AnimationSettings.durationBand,
                 step: 10,
                 suffix: "ms",
@@ -107,6 +112,10 @@ extension MotionCard {
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animationDuration
             )
+            // App-wide among a profile's rows (#3237, #3218).
+            if model.guiManaged {
+                LiveSettingCaption()
+            }
         default:
             let _ = assertionFailure(
                 "non-Motion Colours key in the Motion card: "

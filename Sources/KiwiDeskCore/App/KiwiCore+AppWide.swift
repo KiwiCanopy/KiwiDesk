@@ -18,6 +18,16 @@ struct AppWideLedger {
     /// the bundle they were read from: a restore owes them only
     /// for that same bundle.
     var backup: (bundle: SetupBundle, owed: [String: AppWideSettings])?
+    /// The animation lengths by profile name (#3237), owed while
+    /// `gui.json` lacks their group — a crossing of its own, since
+    /// an install that adopted #1741's has ended that one.
+    var owedPace: [String: AppWideSettings.Animations]?
+    /// A backup's inline lengths, paired with its bundle as above.
+    var backupPace:
+        (bundle: SetupBundle, owed: [String: AppWideSettings.Animations])?
+
+    /// Whether either crossing is owed.
+    var owes: Bool { owed != nil || owedPace != nil }
 
     /// Every state at one value — a load, a restore, an adoption.
     init(
@@ -73,14 +83,19 @@ extension KiwiCore {
             appWideLedger.live.tilingStartGlobal = true
             appWideLedger.live.tilingOffHidesBorders = false
             appWideLedger.live.tilingOffHidesBars = false
+            // The lengths too (#3237): a line removed reads the default.
+            appWideLedger.owedPace = nil
+            appWideLedger.live.adoptPace(AppWideSettings().animations)
             return
         }
         guard let config = guiConfigStore.load() else { return }
         if let stored = config.appWide {
             appWideLedger = AppWideLedger(stored, stored: true)
+            if !stored.animationPaceStored { capturePace() }
             return
         }
         appWideLedger.isStored = false
+        capturePace()
         guard appWideLedger.owed == nil else { return }
         var owed: [String: AppWideSettings] = [:]
         for name in profiles.list() {
@@ -95,12 +110,40 @@ extension KiwiCore {
         appWideLedger.owed = owed
     }
 
+    /// The lengths every profile file carries, read from its
+    /// migrated bytes, owed until the crossing ends (#3237).
+    private func capturePace() {
+        guard appWideLedger.owedPace == nil else { return }
+        var owed: [String: AppWideSettings.Animations] = [:]
+        for name in profiles.list() {
+            guard let url = try? profiles.fileURL(name: name),
+                let data = try? Data(contentsOf: url),
+                let pace = ConfigMigration.legacyPace(inProfile: data)
+            else { continue }
+            owed[name] = pace
+        }
+        appWideLedger.owedPace = owed
+    }
+
+    /// What a crossing ends on for the profile `name`: its captured
+    /// values over the settled ones, for each crossing owed.
+    private func crossingValue(for name: String?) -> AppWideSettings {
+        var value =
+            appWideLedger.owed.flatMap { owed in name.flatMap { owed[$0] } }
+            ?? appWideLedger.settled
+        if let pace = appWideLedger.owedPace {
+            value.adoptPace(name.flatMap { pace[$0] } ?? value.animations)
+        }
+        return value
+    }
+
     /// A capture is the FILE's, filed under its name (#1975): a
     /// deleted profile's leaves with it, and a renamed one's
     /// follows it, so a later profile under that name never
     /// adopts another file's values.
     func forgetAppWideCapture(of name: String) {
         appWideLedger.owed?[name] = nil
+        appWideLedger.owedPace?[name] = nil
     }
 
     /// A restore that replaces the profiles without a `gui.json`
@@ -109,13 +152,20 @@ extension KiwiCore {
     func forgetAppWideCaptures() {
         appWideLedger.owed = nil
         appWideLedger.backup = nil
+        appWideLedger.owedPace = nil
+        appWideLedger.backupPace = nil
     }
 
     /// `forgetAppWideCapture`'s rename twin (#1975).
     func renameAppWideCapture(_ old: String, to new: String) {
-        guard let captured = appWideLedger.owed?[old] else { return }
-        appWideLedger.owed?[old] = nil
-        appWideLedger.owed?[new] = captured
+        if let captured = appWideLedger.owed?[old] {
+            appWideLedger.owed?[old] = nil
+            appWideLedger.owed?[new] = captured
+        }
+        if let pace = appWideLedger.owedPace?[old] {
+            appWideLedger.owedPace?[old] = nil
+            appWideLedger.owedPace?[new] = pace
+        }
     }
 
     /// Ends an owed crossing at the first profile apply with the
@@ -123,10 +173,8 @@ extension KiwiCore {
     /// carried none keeps the settled ones (the defaults at an
     /// upgrade, this Mac's own at a restore).
     func adoptAppWide(from profile: Profile) {
-        guard let owed = appWideLedger.owed, isGuiManaged else {
-            return
-        }
-        endCrossing(adopting: owed[profile.name] ?? appWideLedger.settled)
+        guard appWideLedger.owes, isGuiManaged else { return }
+        endCrossing(adopting: crossingValue(for: profile.name))
     }
 
     /// The settled lenses: what the Settings lens page seeds its
@@ -163,10 +211,8 @@ extension KiwiCore {
         change(&appWideLedger.live)
         // A Lua-owned config has no store to write (its rows grey).
         guard persisting, isGuiManaged else { return }
-        if let owed = appWideLedger.owed {
-            var value =
-                profiles.currentName.flatMap { owed[$0] }
-                ?? appWideLedger.settled
+        if appWideLedger.owes {
+            var value = crossingValue(for: profiles.currentName)
             change(&value)
             endCrossing(adopting: value)
             return
@@ -181,7 +227,9 @@ extension KiwiCore {
     /// before the seeded `gui.json` is written; the caller strips
     /// once that write landed.
     func storeLiveAppWide() {
-        appWideLedger = AppWideLedger(appWideLedger.live, stored: true)
+        var value = appWideLedger.live
+        value.adoptPace(value.animations)
+        appWideLedger = AppWideLedger(value, stored: true)
     }
 
     /// A backup read: the retired values its inline profiles
@@ -191,6 +239,10 @@ extension KiwiCore {
             bundle,
             ConfigMigration.legacyAppWide(inBundle: bytes)
         )
+        appWideLedger.backupPace = (
+            bundle,
+            ConfigMigration.legacyPace(inBundle: bytes)
+        )
     }
 
     /// A restore takes the bundle's values. A bundle from before
@@ -199,14 +251,22 @@ extension KiwiCore {
     /// `readBackup`, and only if this is that same bundle.
     func takeRestoredAppWide(from bundle: SetupBundle) {
         let read = appWideLedger.backup
+        let readPace = appWideLedger.backupPace
         appWideLedger.backup = nil
+        appWideLedger.backupPace = nil
+        let owedPace =
+            readPace.map { $0.bundle == bundle ? $0.owed : [:] } ?? [:]
         guard let bundled = bundle.config?.appWide else {
             appWideLedger.isStored = false
             appWideLedger.owed =
                 read.map { $0.bundle == bundle ? $0.owed : [:] } ?? [:]
+            appWideLedger.owedPace = owedPace
             return
         }
         appWideLedger = AppWideLedger(bundled, stored: true)
+        if !bundled.animationPaceStored {
+            appWideLedger.owedPace = owedPace
+        }
     }
 
     /// The #634 reset, which discards `gui.json` itself.
@@ -256,9 +316,7 @@ extension KiwiCore {
                 let data = try? Data(contentsOf: url),
                 // A newer build's file is not this build's (#2325).
                 (try? NewerFormatOnDisk.refuseProfile(url)) != nil,
-                let stripped = ConfigMigration.withoutLegacyAppWide(
-                    data
-                )
+                let stripped = Self.withoutRetiredAppWide(data)
             else { continue }
             do {
                 try stripped.write(to: url, options: .atomic)
@@ -266,5 +324,13 @@ extension KiwiCore {
                 onLog("app-wide settings: \(name) not rewritten: \(error)")
             }
         }
+    }
+
+    /// `data` without #1741's groups and #3237's lengths, nil when
+    /// it carries neither.
+    private static func withoutRetiredAppWide(_ data: Data) -> Data? {
+        let groups = ConfigMigration.withoutLegacyAppWide(data)
+        let pace = ConfigMigration.withoutLegacyPace(groups ?? data)
+        return pace ?? groups
     }
 }

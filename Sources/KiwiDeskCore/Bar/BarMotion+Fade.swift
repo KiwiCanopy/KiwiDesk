@@ -9,7 +9,7 @@ extension BarMotion {
     /// `animations.expand_duration` — nothing while `on_expand` is
     /// off — kept current by `KiwiCore.updateBars()`.
     @MainActor static var shelfGlide: TimeInterval =
-        AnimationSettings().expandSeconds
+        AnimationSettings().expandSeconds(at: AppWideSettings())
 
     /// The plate glide's live length, the user's `shelfGlide` —
     /// what a stand reads to know whether anything will travel at

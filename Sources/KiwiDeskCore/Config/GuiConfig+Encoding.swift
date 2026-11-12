@@ -40,6 +40,13 @@ extension GuiConfig {
             try container.encode(appWide.hyper, forKey: .hyper)
             try container.encode(appWide.kiwihub, forKey: .kiwihub)
             try container.encode(appWide.modifier, forKey: .modifier)
+            // Left out while its crossing is owed (#3237).
+            if appWide.animationPaceStored {
+                try container.encode(
+                    appWide.animations,
+                    forKey: .animations
+                )
+            }
         }
         try container.encodeIfPresent(look, forKey: .look)
         try container.encodeIfPresent(
