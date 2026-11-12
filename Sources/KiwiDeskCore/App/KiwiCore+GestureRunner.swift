@@ -93,9 +93,9 @@ extension KiwiCore {
                 let (steps, direction) = Self.familyStep(
                     &session.meter,
                     event
-                ),
-                let code = family.lua(direction)
+                )
             else { return }
+            let code = family.lua(direction)
             for _ in 0..<steps { runGestureLua(code, "scroll") }
         case .split(let arms):
             guard let direction = session.latch.feed(event),
@@ -186,8 +186,7 @@ extension KiwiCore {
                 swipe: family == .focus ? horizontal : nil
             )
         case .space, .swap, .display, .track:
-            guard let code = family.lua(direction) else { return }
-            runGestureLua(code, key.spelling)
+            runGestureLua(family.lua(direction), key.spelling)
         }
     }
 
@@ -203,9 +202,10 @@ extension GestureFamily {
     /// The Lua one step runs `direction`'s way. Fingers moving left
     /// reach the window, screen or track on the left; a Space step
     /// follows macOS's Desktop swipe, where fingers moving left show
-    /// the next one. Nil for the pan's own families, which step
-    /// through the pan's session instead.
-    func lua(_ direction: GestureDirection) -> String? {
+    /// the next one. A focus or walk family runs the pan instead;
+    /// its Lua is the one-shot step a split direction pre-fills
+    /// with (#3183 ▸ Ruling: directions of a family row).
+    public func lua(_ direction: GestureDirection) -> String {
         let way = direction.layout.rawValue
         switch self {
         case .swap: return "KiwiDesk.swap(\"\(way)\")"
@@ -217,7 +217,12 @@ extension GestureFamily {
             return direction.isBackward
                 ? "KiwiDesk.focus_space_next()"
                 : "KiwiDesk.focus_space_previous()"
-        case .focus, .walk: return nil
+        case .focus: return "KiwiDesk.focus(\"\(way)\")"
+        case .walk:
+            // The pan steps the list against the hand: fingers up
+            // or left show the next window.
+            let step = direction.isBackward ? "next" : "prev"
+            return "KiwiDesk.focus_space_window(\"\(step)\")"
         }
     }
 }

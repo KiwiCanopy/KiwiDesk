@@ -539,6 +539,12 @@ order a repeat `focus_or_spawn` press walks; unlike macOS's own
 :::
 
 :::unreleased
+`focus_space_window` takes `next|prev` and focuses the Space's
+next or previous window in its own order, wrapping at the ends
+([`focus_space_window`](lua-reference.md#focus_space_window)).
+:::
+
+:::unreleased
 `move_to_display_last` and `move_to_display` move the focused
 window into the Space another screen shows, the screen
 `focus_display_last` or `focus_display` would go to; their

@@ -252,6 +252,11 @@ extension APIReference {
                 + "any Space, screen or Desktop.",
             .choice("direction", ModeCycleDirection.self)
         ),
+        "focus_space_window": APIRecord(
+            "Focuses the Space's next or previous window in its own "
+                + "order, wrapping at the ends.",
+            .choice("direction", ModeCycleDirection.self)
+        ),
         "spawn_new": APIRecord(
             "Launches a new instance of an app by bundle "
                 + "identifier.",
