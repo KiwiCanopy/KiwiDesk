@@ -61,7 +61,7 @@ struct KeyRecorderSidesTests {
         #expect(!sides.contains("onRecord("))
         #expect(
             sides.contains(
-                #"systemImage: "arrow.left.and.right")"#
+                "systemImage: \"keyboard.badge.ellipsis\"\n"
             )
         )
         #expect(!sides.contains("Image(systemName:"))

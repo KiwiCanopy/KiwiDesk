@@ -68,8 +68,11 @@ extension KeyRecorderField {
                 .pickerStyle(.inline)
             }
         } label: {
-            Label(Self.sidesLabel(name), systemImage: "arrow.left.and.right")
-                .labelStyle(.iconOnly)
+            Label(
+                Self.sidesLabel(name),
+                systemImage: "keyboard.badge.ellipsis"
+            )
+            .labelStyle(.iconOnly)
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
