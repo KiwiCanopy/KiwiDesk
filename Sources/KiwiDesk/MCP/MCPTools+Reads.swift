@@ -26,10 +26,11 @@ extension MCPTools {
             ],
             readOnly: true
         ),
-        handle: { _, arguments in
+        handle: { tools, arguments in
             listing(
                 filter: arguments["filter"]?.stringValue,
-                kind: arguments["kind"]
+                kind: arguments["kind"],
+                links: tools.commandLinks
             )
         }
     )
@@ -47,8 +48,11 @@ extension MCPTools {
             required: ["name"],
             readOnly: true
         ),
-        handle: { _, arguments in
-            describe(arguments["name"]?.stringValue)
+        handle: { tools, arguments in
+            describe(
+                arguments["name"]?.stringValue,
+                links: tools.commandLinks
+            )
         }
     )
 
@@ -73,7 +77,8 @@ extension MCPTools {
     /// refuses.
     static func listing(
         filter: String?,
-        kind: JSONValue? = nil
+        kind: JSONValue? = nil,
+        links: [String: DocsIndex.Link] = [:]
     ) -> JSONValue {
         let wanted = kind?.stringValue.flatMap(APIKind.init(rawValue:))
         if let kind, kind != .null, wanted == nil {
@@ -96,15 +101,19 @@ extension MCPTools {
             ? "No command matches \"\(filter ?? "")\"."
             : lines.joined(separator: "\n")
         let commands = rows.map { entry -> JSONValue in
-            let fields: [String: JSONValue] = [
+            var fields: [String: JSONValue] = [
                 "name": .string(entry.qualifiedName),
                 "summary": .string(entry.record.summary),
                 "destructive": .bool(APIReference.isDestructive(entry)),
                 "kind": .string(APIReference.kind(of: entry).rawValue),
             ]
-            return .object(
-                fields.merging(docsFields(for: entry)) { field, _ in field }
-            )
+            if let call = APIReference.luaCall(for: entry) {
+                fields["lua"] = .string(call)
+            }
+            fields.merge(docsFields(for: entry, links: links)) { field, _ in
+                field
+            }
+            return .object(fields)
         }
         return result(
             text,
@@ -112,7 +121,10 @@ extension MCPTools {
         )
     }
 
-    static func describe(_ name: String?) -> JSONValue {
+    static func describe(
+        _ name: String?,
+        links: [String: DocsIndex.Link] = [:]
+    ) -> JSONValue {
         guard let name, !name.isEmpty else {
             return failure("help needs a command name")
         }
@@ -124,7 +136,9 @@ extension MCPTools {
             let entry = APIReference.entry(named: name)
         else { return result(text(of: data), structured: data) }
         let linked = JSONValue.object(
-            fields.merging(docsFields(for: entry)) { field, _ in field }
+            fields.merging(docsFields(for: entry, links: links)) { field, _ in
+                field
+            }
         )
         return result(text(of: linked), structured: linked)
     }

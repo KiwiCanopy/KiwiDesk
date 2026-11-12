@@ -69,6 +69,9 @@ extension APIReference {
         if let command = entry.command {
             object["command"] = .string(command)
         }
+        if let call = luaCall(for: entry) {
+            object["lua"] = .string(call)
+        }
         if !entry.aliases.isEmpty {
             object["aliases"] = .array(
                 entry.aliases.map(JSONValue.string)

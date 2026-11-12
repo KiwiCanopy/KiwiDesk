@@ -132,6 +132,36 @@ struct DocsIndexScriptTests {
         #expect(first.contains("# not a heading"))
     }
 
+    @Test("a folded description is kept whole; a table keeps its head")
+    func frontmatterAndTables() throws {
+        let cell = String(repeating: "word ", count: 500)
+        let rows = (1...6).map { "| row \($0) | \(cell) |" }
+        let page =
+            ([
+                "---", "title: CLI", "description: Every command, the",
+                "  event stream.", "---", "", "# CLI", "", "## C#", "",
+                "| Name | Does |", "|---|---|",
+            ] + rows).joined(separator: "\n") + "\n"
+        let indexed = try Self.index(["cli.md": page])
+        #expect(indexed.run.status == 0, "\(indexed.run.stderr)")
+        let data = try Data(contentsOf: indexed.out)
+        let object = try #require(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        let pages = try #require(object["pages"] as? [[String: Any]])
+        let cli = try #require(pages.first { $0["page"] as? String == "cli" })
+        #expect(
+            cli["description"] as? String
+                == "Every command, the event stream."
+        )
+        let sections = try #require(indexed.pages["cli"])
+        #expect(sections.last?["heading"] as? String == "C#")
+        let parts = Self.parts(try #require(sections.last))
+        #expect(parts.count > 2)
+        #expect(parts[0].contains("| Name | Does |\n|---|---|\n| row 1 |"))
+        #expect(parts.dropFirst().allSatisfy { $0.hasPrefix("| row") })
+    }
+
     @Test("a figure is indexed as its label")
     func figureBecomesItsLabel() throws {
         let svg =
@@ -160,7 +190,7 @@ struct DocsIndexScriptTests {
         #expect(indexed.run.status == 0, "\(indexed.run.stderr)")
         let parts = Self.parts(try #require(indexed.pages["cli"]?.first))
         #expect(parts.count > 3)
-        // The code block is longer than a part and still whole.
+        // A cut would fall inside the code block; it stays whole.
         let holders = parts.filter { $0.contains("line of code") }
         #expect(holders.count == 1)
         let kept = parts.joined(separator: "\n")

@@ -79,4 +79,12 @@ elif [ "${#STAGED_LOCALES[@]}" -gt 0 ]; then
     fi
 fi
 
+# The docs index `kiwidesk mcp` serves follows the docs (#3213).
+if git diff --cached --name-only | grep -q '^docs/\|^scripts/docs-index$'
+then
+    if ! python3 "$ROOT/scripts/docs-index" --check; then
+        STATUS=1
+    fi
+fi
+
 exit $STATUS

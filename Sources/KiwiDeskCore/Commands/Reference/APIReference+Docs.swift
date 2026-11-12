@@ -18,21 +18,13 @@ extension APIReference {
             }
     }
 
-    /// The `init.lua` call of a command, its arguments by name and
-    /// an optional one in brackets; nil for a command Lua never
-    /// registers.
+    /// The `init.lua` call of a command, its arguments by name —
+    /// the one spelling `help` prints and its JSON carries; nil for
+    /// a command Lua never registers.
     public static func luaCall(for entry: APIEntry) -> String? {
         guard entry.channel != .cli else { return nil }
-        let function =
-            entry.group == coreGroup
-            ? "\(coreGroup).\(entry.name)" : entry.qualifiedName
-        var arguments = ""
-        for (index, argument) in entry.record.arguments.enumerated() {
-            let lead = index == 0 ? "" : ", "
-            arguments +=
-                argument.isOptional
-                ? "[\(lead)\(argument.name)]" : lead + argument.name
-        }
-        return "\(function)(\(arguments))"
+        let arguments = entry.record.arguments.map(\.name)
+            .joined(separator: ", ")
+        return "\(luaFunction(of: entry))(\(arguments))"
     }
 }

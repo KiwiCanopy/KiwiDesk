@@ -47,12 +47,46 @@ struct MCPDocsBundledTests {
         for entry in Self.bindable {
             let name = entry.qualifiedName
             let link = try #require(links[name], "\(name) has no docs")
-            let page = try #require(index.page(named: link.page))
-            #expect(
-                page.sections.contains { $0.anchor == link.anchor },
-                "\(name): #\(link.anchor) is not in \(link.page)"
+            // Through the door an AI app takes with help's answer.
+            let read = try MCPToolsTests.call(
+                MCPToolsTests.FakeApp().tools,
+                MCPTools.docsGet,
+                ["page": .string(link.page), "anchor": .string(link.anchor)]
+            )
+            #expect(read["isError"] == .bool(false), "\(name)")
+        }
+    }
+
+    @Test("a command two headings name links to the first")
+    func firstHeadingWins() {
+        func section(_ anchor: String, _ level: Int) -> DocsIndex.Section {
+            DocsIndex.Section(
+                anchor: anchor,
+                heading: "twice",
+                level: level,
+                parts: ["### twice"]
             )
         }
+        let index = DocsIndex(pages: [
+            DocsIndex.Page(
+                page: DocsIndex.commandPage,
+                title: "Lua",
+                description: "",
+                sections: [
+                    section("group", 2), section("twice", 3),
+                    section("twice-1", 3),
+                ]
+            )
+        ])
+        #expect(
+            index.commandLinks
+                == [
+                    "twice": DocsIndex.Link(
+                        page: DocsIndex.commandPage,
+                        anchor: "twice"
+                    )
+                ]
+        )
     }
 
     @Test("the links are the ones the actions page carries")
@@ -135,10 +169,37 @@ struct MCPDocsBundledTests {
             #expect(row["lua"] != nil, "\(entry.qualifiedName)")
         }
         // A command with no Lua call and no section carries neither.
-        let subscribe = try #require(
-            APIReference.entry(named: APIReference.socketOnlyCommand)
+        let subscribe = APIReference.socketOnlyCommand
+        #expect(links[subscribe] == nil)
+        let bare = try MCPToolsTests.call(
+            tools,
+            MCPTools.help,
+            ["name": .string(subscribe)]
         )
-        #expect(MCPTools.docsFields(for: subscribe, links: [:]).isEmpty)
+        guard case .object(let none)? = bare["structuredContent"] else {
+            Issue.record("help answered no structure")
+            return
+        }
+        #expect(none["docs"] == nil)
+        #expect(none["lua"] == nil)
+        #expect(none["arguments"] != nil)
+    }
+
+    @Test("help links into the docs its own server reads")
+    func linksFollowTheServersDocs() throws {
+        var tools = MCPToolsTests.FakeApp().tools
+        tools.docs = nil
+        let help = try MCPToolsTests.call(
+            tools,
+            MCPTools.help,
+            ["name": .string("focus")]
+        )
+        guard case .object(let fields)? = help["structuredContent"] else {
+            Issue.record("help answered no structure")
+            return
+        }
+        #expect(fields["docs"] == nil)
+        #expect(fields["lua"] == .string("KiwiDesk.focus(direction)"))
     }
 
     @Test("a linked section reads back through docs_get")

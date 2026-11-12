@@ -43,8 +43,40 @@ extension MCPTools {
         )
     }
 
-    /// The page and section index: every page with its top
-    /// sections, or one scope's sections in full.
+    /// Ranked hits as `docs_search` returns them.
+    static func docsHits(
+        _ hits: [DocsIndex.Hit],
+        for query: String
+    ) -> JSONValue {
+        guard !hits.isEmpty else {
+            return result(
+                "No section matches \"\(query)\".",
+                structured: .object(["results": .array([])])
+            )
+        }
+        let lines = hits.map { hit in
+            let part = hit.parts > 1 ? " (part \(hit.part))" : ""
+            return "\(hit.page)#\(hit.anchor)\(part) — \(hit.heading)\n"
+                + "  \(hit.snippet)"
+        }
+        let rows = hits.map { hit -> JSONValue in
+            .object([
+                "page": .string(hit.page),
+                "anchor": .string(hit.anchor),
+                "heading": .string(hit.heading),
+                "part": .number(Double(hit.part)),
+                "parts": .number(Double(hit.parts)),
+                "snippet": .string(hit.snippet),
+            ])
+        }
+        return result(
+            lines.joined(separator: "\n"),
+            structured: .object(["results": .array(rows)])
+        )
+    }
+
+    /// The page and section index: every page with its title and
+    /// top sections, or one scope's sections in full.
     static func docsListing(
         _ index: DocsIndex,
         scope: DocsIndex.Scope?
@@ -59,11 +91,16 @@ extension MCPTools {
         for listed in scopes {
             let page = listed.page
             let sections = listed.range.map { page.sections[$0] }
-                .filter { scope != nil || $0.level == 2 }
+                .filter { scope != nil || $0.level <= 2 }
             lines.append("\(page.page) — \(page.title): \(page.description)")
             for section in sections {
                 let indent = String(repeating: "  ", count: section.level - 1)
-                lines.append("\(indent)#\(section.anchor) \(section.heading)")
+                let parts =
+                    section.parts.count > 1
+                    ? " (\(section.parts.count) parts)" : ""
+                lines.append(
+                    "\(indent)#\(section.anchor) \(section.heading)\(parts)"
+                )
             }
             rows.append(
                 .object([
@@ -90,6 +127,7 @@ extension MCPTools {
             "anchor": .string(section.anchor),
             "heading": .string(section.heading),
             "level": .number(Double(section.level)),
+            "parts": .number(Double(section.parts.count)),
         ])
     }
 
@@ -108,24 +146,23 @@ extension MCPTools {
         }
     }
 
-    /// The fields `help` and `list_commands` add to a command:
-    /// `docs`, where the bundled docs describe it, and `lua`, the
-    /// call a config writes. Either is left out where there is
-    /// none.
+    /// The field `help` and `list_commands` add to a command:
+    /// `docs`, where `links` say the docs describe it.
     static func docsFields(
         for entry: APIEntry,
-        links: [String: DocsIndex.Link] = DocsIndex.bundledCommandLinks
+        links: [String: DocsIndex.Link]
     ) -> [String: JSONValue] {
-        var fields: [String: JSONValue] = [:]
-        if let link = links[entry.qualifiedName] {
-            fields["docs"] = .object([
+        guard let link = links[entry.qualifiedName] else { return [:] }
+        return [
+            "docs": .object([
                 "page": .string(link.page),
                 "anchor": .string(link.anchor),
             ])
-        }
-        if let call = APIReference.luaCall(for: entry) {
-            fields["lua"] = .string(call)
-        }
-        return fields
+        ]
+    }
+
+    /// Where this server's docs describe each command.
+    var commandLinks: [String: DocsIndex.Link] {
+        docs?.commandLinks ?? [:]
     }
 }

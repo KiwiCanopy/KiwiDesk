@@ -251,12 +251,12 @@ The `list_commands` tool also takes `kind` (`action`, `setting` or
 
 :::unreleased
 Two more tools read the documentation the running copy of KiwiDesk
-ships, so an AI app needs no web access to look a setting up:
+ships, without the network:
 
 | Tool | Does |
 |---|---|
 | `docs_search` | Ranked sections for `query`: page, anchor, heading and a snippet. `section` narrows to a page or to `page#anchor`; `limit` is 1 to 20, 5 when omitted. An empty `query` lists the pages, their sections and the app version |
-| `docs_get` | The exact text of the section `page` and `anchor` name; a long section comes in parts, picked with `part` |
+| `docs_get` | The exact text of the section `page` and `anchor` name, the page's opening without `anchor`; a long section comes in parts, picked with `part` |
 
 They cover this page, the [Lua reference](lua-reference.md), the
 [user guide](user-guide.md),
@@ -267,10 +267,10 @@ They cover this page, the [Lua reference](lua-reference.md), the
 is returned as its description.
 
 `help` and each `list_commands` row carry `lua`, the command's
-`init.lua` call with an optional argument in brackets, and `docs`,
-the `page` and `anchor` of its Lua reference section for `docs_get`.
-A command Lua cannot call has no `lua`, and one with no section of
-its own has no `docs`.
+`init.lua` call, and `docs`, the `page` and `anchor` of its Lua
+reference section for `docs_get`. A command Lua cannot call has no
+`lua`, and one no Lua reference heading names has no `docs`.
+`kiwidesk help <name> --json` carries `lua` too.
 :::
 
 :::unreleased

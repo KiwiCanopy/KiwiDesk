@@ -17,55 +17,25 @@ extension DocsIndex {
         let snippet: String
     }
 
-    /// The sections a search may read: a page, or one section of
-    /// it with everything nested under it.
-    struct Scope: Sendable {
-        let page: Page
-        let range: Range<Int>
-    }
-
-    /// Why a `section` argument names nothing.
-    enum ScopeRefusal: Error, Equatable {
-        case noPage(String)
-        case noAnchor(page: String, anchor: String)
-    }
-
-    /// The scope `section` names: `page` or `page#anchor`.
-    func scope(_ section: String) -> Result<Scope, ScopeRefusal> {
-        let pieces = section.split(
-            separator: "#",
-            maxSplits: 1,
-            omittingEmptySubsequences: false
-        )
-        let name = String(pieces.first ?? "")
-        guard let page = page(named: name) else {
-            return .failure(.noPage(name))
-        }
-        guard pieces.count == 2, !pieces[1].isEmpty else {
-            return .success(
-                Scope(page: page, range: page.sections.indices)
-            )
-        }
-        let anchor = String(pieces[1])
-        guard
-            let index = page.sections.firstIndex(where: {
-                $0.anchor == anchor
-            })
-        else {
-            return .failure(.noAnchor(page: page.page, anchor: anchor))
-        }
-        return .success(Scope(page: page, range: page.subtree(of: index)))
-    }
-
     /// Words that carry no topic in a plain request.
     private static let stopWords: Set<String> = [
         "a", "an", "and", "can", "do", "for", "how", "i", "in", "is",
         "it", "me", "my", "of", "on", "or", "the", "to", "what", "with",
     ]
 
-    /// The query's terms: lowercased, split on anything but
-    /// letters, digits, `_` and `.`, a plural's `s` dropped so
-    /// "borders" finds "border".
+    /// A word as search compares it: lowercased, a plural's `s`
+    /// dropped, so "borders" finds "border". Every side of a
+    /// comparison goes through it, so `focus` still finds `focus`.
+    static func stem(_ word: String) -> String {
+        var word = word.lowercased()
+        if word.count > 3, word.hasSuffix("s"), !word.hasSuffix("ss") {
+            word.removeLast()
+        }
+        return word
+    }
+
+    /// The query's terms: split on anything but letters, digits,
+    /// `_` and `.`, stemmed, without stop words or repeats.
     static func terms(of query: String) -> [String] {
         var seen: Set<String> = []
         let words = query.lowercased().split { character in
@@ -73,15 +43,11 @@ extension DocsIndex {
                 || character == "_" || character == ".")
         }
         return words.compactMap { word -> String? in
-            var term = String(word)
-            while term.hasSuffix(".") { term.removeLast() }
-            if term.count > 3, term.hasSuffix("s"), !term.hasSuffix("ss") {
-                term.removeLast()
-            }
-            guard !term.isEmpty, !stopWords.contains(term),
-                seen.insert(term).inserted
-            else { return nil }
-            return term
+            var raw = String(word)
+            while raw.hasSuffix(".") { raw.removeLast() }
+            guard !raw.isEmpty, !stopWords.contains(raw) else { return nil }
+            let term = stem(raw)
+            return seen.insert(term).inserted ? term : nil
         }
     }
 
@@ -93,19 +59,12 @@ extension DocsIndex {
     private static let bodyWeight = 0.4
     private static let bodyCeiling = 5
 
-    /// The words of a heading: split on anything but letters and
-    /// digits, a plural's `s` dropped as `terms(of:)` drops it.
+    /// The words of a heading, stemmed: split on anything but
+    /// letters and digits.
     private static func words(ofHeading heading: String) -> Set<String> {
         Set(
-            heading.split { !($0.isLetter || $0.isNumber) }.map { word in
-                var word = String(word)
-                if word.count > 3, word.hasSuffix("s"),
-                    !word.hasSuffix("ss")
-                {
-                    word.removeLast()
-                }
-                return word
-            }
+            heading.split { !($0.isLetter || $0.isNumber) }
+                .map { stem(String($0)) }
         )
     }
 
@@ -154,7 +113,8 @@ extension DocsIndex {
                 let section = scope.page.sections[index]
                 let heading = section.heading.lowercased()
                 let names = Set(
-                    APIReference.commandNames(inHeading: heading)
+                    APIReference.commandNames(inHeading: section.heading)
+                        .map(Self.stem)
                 )
                 let words = Self.words(ofHeading: heading)
                 for (number, text) in section.parts.enumerated() {
@@ -210,7 +170,8 @@ extension DocsIndex {
                 parts: candidate.section.parts.count,
                 snippet: Self.snippet(
                     of: candidate.section.parts[candidate.part],
-                    around: terms
+                    around: terms,
+                    skippingHeading: candidate.part == 0
                 )
             )
         }
@@ -224,15 +185,23 @@ extension DocsIndex {
     private static let snippetLead = 80
     private static let snippetTail = 200
 
-    /// A stretch of `text` around the first term its body holds,
-    /// else the body's opening; whitespace runs become one space.
-    static func snippet(of text: String, around terms: [String]) -> String {
-        let body =
-            text.split(
-                separator: "\n",
-                maxSplits: 1,
-                omittingEmptySubsequences: false
-            ).dropFirst().first.map(String.init) ?? ""
+    /// A stretch of `text` around the first term it holds, else
+    /// its opening; whitespace runs become one space. A section's
+    /// first part opens on its heading line, which is skipped.
+    static func snippet(
+        of text: String,
+        around terms: [String],
+        skippingHeading: Bool
+    ) -> String {
+        var body = text
+        if skippingHeading {
+            body =
+                text.split(
+                    separator: "\n",
+                    maxSplits: 1,
+                    omittingEmptySubsequences: false
+                ).dropFirst().first.map(String.init) ?? ""
+        }
         let lowered = body.lowercased()
         let found = terms.compactMap { lowered.range(of: $0)?.lowerBound }
             .min()

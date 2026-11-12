@@ -9,19 +9,29 @@ import Testing
 /// from the index this build ships, without the app.
 @Suite("MCP docs tools (#3213)")
 struct MCPDocsToolsTests {
-    private static let fixture = DocsIndex(pages: [
+    /// The Gaps section's first part: it mentions `set_gap` more
+    /// often than that command's own section does.
+    static let gapsOpening =
+        "## Gaps\n\nThe gap between windows: set_gap, set_gap, set_gap."
+
+    static let fixture = DocsIndex(pages: [
         DocsIndex.Page(
             page: "guide",
             title: "Guide",
             description: "How it works.",
             sections: [
-                section("guide", "Guide", 1, ["# Guide\n\nWelcome."]),
+                section(
+                    "guide",
+                    "Guide",
+                    1,
+                    ["# Guide\n\nWelcome. A border, a border, a border."]
+                ),
                 section(
                     "gaps",
                     "Gaps",
                     2,
                     [
-                        "## Gaps\n\nThe gap between windows.",
+                        gapsOpening,
                         "More about the outer gap.",
                     ]
                 ),
@@ -44,12 +54,33 @@ struct MCPDocsToolsTests {
             title: "Other",
             description: "The rest.",
             sections: [
-                section("other", "Other", 1, ["# Other\n\nA gap note."])
+                section("other", "Other", 1, ["# Other\n\nA gap note."]),
+                section(
+                    "app_ruleset_float",
+                    "app_rule.set_float",
+                    3,
+                    [
+                        "### app_rule.set_float\n\napp_rules, app_rules, "
+                            + "app_rules, app_rules and app_rules."
+                    ]
+                ),
+                section(
+                    "app_rules",
+                    "app_rules",
+                    3,
+                    ["### app_rules\n\nThe table."]
+                ),
+                section(
+                    "kiwideskexec",
+                    "`KiwiDesk.exec`",
+                    3,
+                    ["### `KiwiDesk.exec`\n\nRuns a program."]
+                ),
             ]
         ),
     ])
 
-    private static func section(
+    static func section(
         _ anchor: String,
         _ heading: String,
         _ level: Int,
@@ -63,7 +94,7 @@ struct MCPDocsToolsTests {
         )
     }
 
-    private static func call(
+    static func call(
         _ name: String,
         _ arguments: [String: JSONValue],
         docs: DocsIndex? = fixture
@@ -77,7 +108,7 @@ struct MCPDocsToolsTests {
         return result
     }
 
-    private static func structured(
+    static func structured(
         _ result: [String: JSONValue]
     ) -> [String: JSONValue] {
         guard case .object(let fields)? = result["structuredContent"]
@@ -85,7 +116,7 @@ struct MCPDocsToolsTests {
         return fields
     }
 
-    private static func rows(
+    static func rows(
         _ result: [String: JSONValue],
         _ key: String
     ) -> [[String: JSONValue]] {
@@ -114,6 +145,29 @@ struct MCPDocsToolsTests {
         #expect(
             Self.rows(plural, "results").first?["anchor"]
                 == .string("borders")
+        )
+        // A name ending in s, and one spelled on its Lua table.
+        for (query, anchor) in [
+            ("app_rules", "app_rules"), ("exec", "kiwideskexec"),
+        ] {
+            let named = try Self.call(
+                MCPTools.docsSearch,
+                ["query": .string(query)]
+            )
+            #expect(
+                Self.rows(named, "results").first?["anchor"]
+                    == .string(anchor),
+                "\(query)"
+            )
+        }
+        // A later part has no heading line to skip.
+        let later = try Self.call(
+            MCPTools.docsSearch,
+            ["query": .string("outer")]
+        )
+        #expect(
+            Self.rows(later, "results").first?["snippet"]
+                == .string("More about the outer gap.")
         )
         let none = try Self.call(
             MCPTools.docsSearch,
@@ -161,12 +215,25 @@ struct MCPDocsToolsTests {
             ["query": .string("gap"), "limit": .null]
         )
         #expect(Self.rows(all, "results").count > 1)
-        for bad: JSONValue in [.number(0), .number(21), .string("3")] {
+        let bad: [JSONValue] = [
+            .number(0), .number(21), .number(2.5), .string("3"),
+        ]
+        for bad in bad {
             let refused = try Self.call(
                 MCPTools.docsSearch,
                 ["query": .string("gap"), "limit": bad]
             )
             #expect(refused["isError"] == .bool(true), "\(bad)")
+        }
+    }
+
+    @Test("a query or section that is not text is refused")
+    func wrongTypesRefuse() throws {
+        for arguments: [String: JSONValue] in [
+            ["query": .number(5)], ["section": .bool(true)],
+        ] {
+            let refused = try Self.call(MCPTools.docsSearch, arguments)
+            #expect(refused["isError"] == .bool(true), "\(arguments)")
         }
     }
 
@@ -186,12 +253,12 @@ struct MCPDocsToolsTests {
                 pages.map { $0["page"] }
                     == [.string("guide"), .string("other")]
             )
-            // Top sections only, until a page is named.
+            // The title and top sections only, until a page is named.
             guard case .array(let sections)? = pages[0]["sections"] else {
                 Issue.record("no sections")
                 continue
             }
-            #expect(sections.count == 2)
+            #expect(sections.count == 3)
         }
         let scoped = try Self.call(
             MCPTools.docsSearch,
@@ -207,92 +274,4 @@ struct MCPDocsToolsTests {
         #expect(all.count == 4)
     }
 
-    @Test("docs_get returns the section's text word for word")
-    func getReturnsTheText() throws {
-        let result = try Self.call(
-            MCPTools.docsGet,
-            ["page": .string("guide.md"), "anchor": .string("gaps")]
-        )
-        let fields = Self.structured(result)
-        #expect(
-            fields["text"] == .string("## Gaps\n\nThe gap between windows.")
-        )
-        #expect(fields["parts"] == .number(2))
-        #expect(
-            Self.rows(result, "subsections").map { $0["anchor"] }
-                == [.string("set_gap")]
-        )
-        let text = MCPToolsTests.text(result)
-        #expect(text.hasPrefix("## Gaps\n\nThe gap between windows."))
-        #expect(text.contains("Part 1 of 2"))
-        let second = try Self.call(
-            MCPTools.docsGet,
-            [
-                "page": .string("guide"), "anchor": .string("gaps"),
-                "part": .number(2),
-            ]
-        )
-        #expect(
-            Self.structured(second)["text"]
-                == .string("More about the outer gap.")
-        )
-        let opening = try Self.call(
-            MCPTools.docsGet,
-            ["page": .string("guide")]
-        )
-        #expect(Self.structured(opening)["anchor"] == .string("guide"))
-        #expect(
-            Self.rows(opening, "subsections").map { $0["anchor"] }
-                == [.string("gaps"), .string("borders")]
-        )
-    }
-
-    @Test("docs_get refuses what the index does not hold")
-    func getRefuses() throws {
-        let cases: [[String: JSONValue]] = [
-            [:],
-            ["page": .string("nowhere")],
-            ["page": .string("guide"), "anchor": .string("nowhere")],
-            [
-                "page": .string("guide"), "anchor": .string("gaps"),
-                "part": .number(3),
-            ],
-        ]
-        for arguments in cases {
-            let refused = try Self.call(MCPTools.docsGet, arguments)
-            #expect(refused["isError"] == .bool(true), "\(arguments)")
-        }
-        let named = try Self.call(
-            MCPTools.docsGet,
-            ["page": .string("nowhere")]
-        )
-        #expect(MCPToolsTests.text(named).contains("guide, other"))
-    }
-
-    @Test("a build with no index says so")
-    func missingIndex() throws {
-        for name in [MCPTools.docsSearch, MCPTools.docsGet] {
-            let result = try Self.call(
-                name,
-                ["page": .string("guide"), "query": .string("gap")],
-                docs: nil
-            )
-            #expect(result["isError"] == .bool(true))
-            #expect(MCPToolsTests.text(result) == MCPTools.docsMissing)
-        }
-    }
-
-    @Test("both tools are read-only")
-    func toolsAreReadOnly() throws {
-        for tool in [MCPTools.docsSearchTool, MCPTools.docsGetTool] {
-            guard case .object(let fields) = tool.definition,
-                case .object(let notes)? = fields["annotations"]
-            else {
-                Issue.record("\(tool.name) has no annotations")
-                continue
-            }
-            #expect(notes["readOnlyHint"] == .bool(true))
-            #expect(notes["destructiveHint"] == .bool(false))
-        }
-    }
 }

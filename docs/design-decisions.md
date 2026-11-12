@@ -1193,9 +1193,9 @@ holds is re-checked on each spec revision (#2257).
 
 It holds no KiwiDesk state: `list_commands` and `help` answer from
 `APIReference`, compiled into the same binary (the entry above),
-and every other tool forwards one request to the running app over
-its socket, a connection per call so a relaunched app is reached
-again. A new tool is backed by a Core verb with an `APIRecord`,
+and every other tool but the two docs tools (below) forwards one
+request to the running app over its socket, a connection per call
+so a relaunched app is reached again. A new tool is backed by a Core verb with an `APIRecord`,
 so the CLI and Lua get it too; a tool that computed a verdict
 beside Core would be its second home. Nothing but JSON-RPC lines
 may reach stdout, and the window manager never listens on HTTP:
@@ -1210,7 +1210,7 @@ tunnel.
 the GUI bundle, the user-facing pages of `docs/` cut into a section
 per heading. An AI app otherwise fetches the site, which describes
 `main` rather than the installed build and reaches the model as a
-summary of a 400 KB page. They are the one exception to "a new
+summary of its largest page. They are the one exception to "a new
 tool is backed by a Core verb" above: they read text and decide
 nothing about KiwiDesk, so there is no verdict to keep in Core, and
 a config has no use for them.
@@ -1232,7 +1232,9 @@ build; the marker tells a site reader about the last release, which
 is not the reader here. The release sweep therefore leaves the
 index unchanged. An inline figure is indexed as its `aria-label`.
 Contributor pages stay out: this page alone would more than double
-the index.
+the index. Which pages are bundled is the script's `PAGES` list
+alone; the site's sidebar decides what the site publishes, a
+different question.
 
 `help` and `list_commands` name a command's section by reading the
 index's headings the way `docs/commands.md`'s generator does

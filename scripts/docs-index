@@ -31,8 +31,9 @@ its `aria-label`: the drawing is markup, and its label is the
 text a reader without the picture gets.
 
 Anchors follow GitHub's slugger, as the site's do, counting every
-heading of a page for the duplicate suffix. `DocsCommandLinkTests`
-holds them to the anchors `docs/commands.md` links.
+heading of a page for the duplicate suffix. `DocsIndexDriftTests`
+▸ `anchorsMatchTheActionsPage` holds them to the anchors
+`docs/commands.md` links.
 """
 
 from __future__ import annotations
@@ -50,9 +51,9 @@ INDEX = REPO / "Sources" / "KiwiDesk" / "Resources" / "DocsIndex.json"
 REGENERATE = "scripts/docs-index"
 
 # The user-facing pages, in the order an empty search lists them.
-# A contributor page (`design-decisions.md`, `architecture.md`,
-# `ui-patterns.md`, the translation pages) never joins: it argues
-# with a contributor, and it would triple the bundle.
+# This list owns what the app bundles; a contributor page
+# (`design-decisions.md`, `architecture.md`, `ui-patterns.md`, the
+# translation pages) never joins.
 PAGES = (
     "lua-reference.md",
     "user-guide.md",
@@ -70,15 +71,13 @@ RECIPES = "recipes"
 # readable; a single block longer than this stands alone.
 PART_LIMIT = 6000
 
-CODE_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
-HEADING = re.compile(r"^(#{1,6}) +(.*?)\s*#*\s*$")
+# A closing run of `#` counts only after whitespace, as in
+# CommonMark, so a heading ending in `C#` keeps its `#`.
+HEADING = re.compile(r"^(#{1,6}) +(.*?)(?:\s+#+)?\s*$")
+TABLE_RULE = re.compile(r"^\|[\s:|-]+$")
 FIGURE = re.compile(r"^<svg\b.*</svg>\s*$")
 FIGURE_LABEL = re.compile(r'\baria-label="([^"]*)"')
 FRONTMATTER_FIELD = re.compile(r"^([A-Za-z]+):\s*(.*)$")
-
-
-class Refused(Exception):
-    """A corpus this script will not index."""
 
 
 def strip_module():
@@ -91,6 +90,15 @@ def strip_module():
     module = importlib.util.module_from_spec(spec)
     loader.exec_module(module)
     return module
+
+
+STRIP = strip_module()
+# The code-fence rule is the marker parser's own, read from it.
+CODE_FENCE = STRIP.CODE_FENCE
+
+
+class Refused(Exception):
+    """A corpus this script will not index."""
 
 
 def slugged(title: str) -> str:
@@ -110,12 +118,17 @@ def frontmatter(text: str) -> tuple[dict[str, str], str]:
     if not lines or lines[0].strip() != "---":
         return ({}, text)
     fields: dict[str, str] = {}
+    last: str | None = None
     for number, line in enumerate(lines[1:], start=1):
         if line.strip() == "---":
             return (fields, "\n".join(lines[number + 1:]))
         found = FRONTMATTER_FIELD.match(line)
         if found:
-            fields[found.group(1)] = found.group(2).strip().strip('"')
+            last = found.group(1)
+            fields[last] = found.group(2).strip().strip('"')
+        elif last and line[:1] in " \t" and line.strip():
+            # A folded value continues on an indented line.
+            fields[last] = (fields[last] + " " + line.strip()).strip()
     raise Refused("frontmatter never closes")
 
 
@@ -155,15 +168,29 @@ def figures_as_labels(body: str) -> str:
             continue
         label = FIGURE_LABEL.search(line)
         if not label:
-            raise Refused(f"line {number + 1}: a figure has no label")
+            raise Refused(f"a figure has no label: {line[:60]}")
         lines[number] = f"[Figure: {label.group(1)}]"
     return "\n".join(lines)
+
+
+def table_row(lines: list[str], number: int) -> bool:
+    """Whether line `number` is a table row a part may open on:
+    neither the header, the rule under it, nor the first row."""
+    if not lines[number].startswith("|") or number < 3:
+        return False
+    before = lines[number - 3:number]
+    return all(line.startswith("|") for line in before) and not (
+        TABLE_RULE.match(lines[number])
+        or TABLE_RULE.match(lines[number - 1])
+    )
 
 
 def parts(lines: list[str], limit: int) -> list[str]:
     """A section's text in parts of about `limit` characters,
     cut only where a block ends: before a line that follows a
-    blank one, or before a table row. A code block is never cut.
+    blank one, or before a table row past the table's first. A
+    code block is never cut, and a table keeps its header, its
+    rule and its first row together.
     """
     while lines and not lines[-1].strip():
         lines = lines[:-1]
@@ -173,7 +200,7 @@ def parts(lines: list[str], limit: int) -> list[str]:
     size = 0
     for number, line in enumerate(lines):
         boundary = not inside[number] and (
-            line.startswith("|")
+            table_row(lines, number)
             or (number > 0 and not lines[number - 1].strip())
         )
         if current and boundary and size + len(line) + 1 > limit:
@@ -240,7 +267,7 @@ def page_paths(docs: pathlib.Path) -> list[pathlib.Path]:
 
 def build(docs: pathlib.Path, limit: int = PART_LIMIT) -> list[dict]:
     """Every indexed page, in listing order."""
-    strip = strip_module()
+    strip = STRIP
     try:
         name = strip.directive()
     except strip.Malformed as error:
@@ -275,7 +302,7 @@ def render(pages: list[dict]) -> str:
     def dumped(value) -> str:
         return json.dumps(value, ensure_ascii=False)
 
-    out = ['{"format":1,"pages":[']
+    out = ['{"pages":[']
     for number, page in enumerate(pages):
         head = {k: v for k, v in page.items() if k != "sections"}
         out.append(dumped(head)[:-1] + ',"sections":[')

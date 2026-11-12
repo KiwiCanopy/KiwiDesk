@@ -64,7 +64,18 @@ struct DocsIndex: Decodable, Sendable {
             ),
             let data = try? Data(contentsOf: url)
         else { return nil }
-        return try? JSONDecoder().decode(DocsIndex.self, from: data)
+        return (try? JSONDecoder().decode(DocsIndex.self, from: data))
+            .flatMap { $0.isWellFormed ? $0 : nil }
+    }
+
+    /// Whether every page has a section and every section a part,
+    /// which the tools index without asking.
+    var isWellFormed: Bool {
+        !pages.isEmpty
+            && pages.allSatisfy { page in
+                !page.sections.isEmpty
+                    && page.sections.allSatisfy { !$0.parts.isEmpty }
+            }
     }
 
     /// A page by its name, with or without `.md`.
@@ -100,7 +111,43 @@ struct DocsIndex: Decodable, Sendable {
         return links
     }
 
-    /// `commandLinks` of the bundled index, read once.
-    static let bundledCommandLinks: [String: Link] =
-        bundled?.commandLinks ?? [:]
+    /// The sections a search may read: a page, or one section of
+    /// it with everything nested under it.
+    struct Scope: Sendable {
+        let page: Page
+        let range: Range<Int>
+    }
+
+    /// Why a `section` argument names nothing.
+    enum ScopeRefusal: Error, Equatable {
+        case noPage(String)
+        case noAnchor(page: String, anchor: String)
+    }
+
+    /// The scope `section` names: `page` or `page#anchor`.
+    func scope(_ section: String) -> Result<Scope, ScopeRefusal> {
+        let pieces = section.split(
+            separator: "#",
+            maxSplits: 1,
+            omittingEmptySubsequences: false
+        )
+        let name = String(pieces.first ?? "")
+        guard let page = page(named: name) else {
+            return .failure(.noPage(name))
+        }
+        guard pieces.count == 2, !pieces[1].isEmpty else {
+            return .success(
+                Scope(page: page, range: page.sections.indices)
+            )
+        }
+        let anchor = String(pieces[1])
+        guard
+            let index = page.sections.firstIndex(where: {
+                $0.anchor == anchor
+            })
+        else {
+            return .failure(.noAnchor(page: page.page, anchor: anchor))
+        }
+        return .success(Scope(page: page, range: page.subtree(of: index)))
+    }
 }

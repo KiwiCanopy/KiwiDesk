@@ -124,13 +124,8 @@ enum CLIHelpText {
         _ entry: APIEntry
     ) -> [String] {
         var lines: [String] = []
-        if entry.channel != .cli {
-            let arguments = entry.record.arguments
-                .map(\.name)
-                .joined(separator: ", ")
-            lines.append(
-                "  lua: \(luaCall(of: entry))(\(arguments))"
-            )
+        if let call = APIReference.luaCall(for: entry) {
+            lines.append("  lua: \(call)")
         }
         if entry.channel == .lua {
             lines.append(
@@ -145,9 +140,5 @@ enum CLIHelpText {
             : "\(entry.qualifiedName) \(arguments)"
         lines.append("  cli: kiwidesk \(call)")
         return lines
-    }
-
-    private static func luaCall(of entry: APIEntry) -> String {
-        APIReference.luaFunction(of: entry)
     }
 }
