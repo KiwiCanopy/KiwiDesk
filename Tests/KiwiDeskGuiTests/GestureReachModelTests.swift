@@ -99,4 +99,20 @@ struct GestureReachModelTests {
         #expect(rows.count == 1)
         #expect(rows.first?.reach != nil)
     }
+
+    /// The model tests above call `carryPick` themselves, so the row
+    /// that re-keys is held to it here: it carries the pick and
+    /// records no removal of its own, which would strand the old key
+    /// in a listed profile.
+    @Test("the row's re-key carries its reach through carryPick")
+    func rekeyWiring() throws {
+        let body = try SourceScan.functionBody(
+            of: "rekey",
+            in: "GestureListRow.swift",
+            under: "Settings/Components/Gestures",
+            root: "Sources/KiwiDesk"
+        )
+        #expect(body.contains("model.carryPick(.gesture"))
+        #expect(!body.contains("recordRemoval("))
+    }
 }
