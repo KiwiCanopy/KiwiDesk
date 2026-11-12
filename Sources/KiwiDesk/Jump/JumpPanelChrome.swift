@@ -109,38 +109,26 @@ extension JumpFooter {
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
         if scope == .desktops { return desktopsLeading }
-        // ⌃ is left out: the chord that opened the panel may still
-        // be held when it draws.
+        if scope == .windows { return windowsLeading }
         let held = modifiers.intersection([.shift, .option, .command])
         let one = UInt16(JumpKey.digitRows[0])
-        let digit = JumpKey.of(
+        if case .quick(_, let moveHere) = JumpKey.of(
             keyCode: one,
             modifiers: held,
             scope: scope,
             naming: naming
-        )
-        // A held chord the digits answer lights them first, though
-        // ↩ under it picks as well (#2931 ▸ Ruling 5).
-        if case .quickSwap = digit { return 3 }
-        if case .quick(_, let moveHere) = digit {
-            if scope == .windows { return 3 }
+        ) {
             return moveHere ? nil : 1
         }
+        // View: ↩ Apply.
         switch JumpKey.of(
             keyCode: JumpKey.returnKey,
             modifiers: held,
             scope: scope,
             naming: naming
         ) {
-        // Windows: ↩ Jump, ⇧↩ Move here; View: ↩ Apply.
-        case .pick(let moveHere):
-            guard scope == .windows else { return moveHere ? nil : 0 }
-            guard moveHere else { return 0 }
-            return selectionMoves ? 1 : nil
-        case .swapHere:
-            return selectionSwaps ? 2 : nil
-        default:
-            return nil
+        case .pick(let moveHere): return moveHere ? nil : 0
+        default: return nil
         }
     }
 

@@ -906,14 +906,21 @@ because a chip that is merely counted has lost its clear button
 and its menu.
 
 **"+N" governs a bounded container that cannot scroll; content
-past the fold of a SCROLLING container is cued by fading the
-edge that cuts it** (#1292, #3249). KiwiHub's lists are the
-case (#2246): the Shortcuts sheet's sections are non-uniform
-(titles, a caption), the fold cuts *through* a row, and the
-sheet knows heights rather than rows, so any N would be an
-estimate wearing a precise shape. Each list fades its cut edge
-through `FadingScroll` and counts nothing; the sheet is
-read-only, so the hidden items have no controls to lose.
+past the fold of a SCROLLING container is cued in words
+instead** (#1292). KiwiHub's Shortcuts side is the case
+(#2246): its sections are non-uniform (titles, a caption), the
+fold cuts *through* a row, and the sheet knows heights rather
+than rows, so any N would be an estimate wearing a precise
+shape. The side says "Scroll for more shortcuts" and counts
+nothing; it is read-only, so the hidden items have no
+controls to lose and a label is admissible.
+
+:::unreleased
+*Amended (#3249): KiwiHub's scrolling lists cue their fold by
+fading the edge that cuts them*, through `FadingScroll`, and count
+nothing; the Shortcuts side no longer says "Scroll for more
+shortcuts".
+:::
 
 The middle clause is arithmetic, so it is code:
 `OverflowSplit.shown(of:fitting:withMarker:)` is the one

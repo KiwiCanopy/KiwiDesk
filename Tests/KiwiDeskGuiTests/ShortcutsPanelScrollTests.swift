@@ -70,18 +70,30 @@ struct ShortcutsPanelScrollTests {
             )
         )
         #expect(scroll.contains("if fades {"))
-        #expect(scroll.contains("FadingScroll { sheetContent }"))
-        #expect(text.contains("var fades = true"))
+        #expect(
+            scroll.contains(
+                "FadingScroll(inset: verticalInset) { sheetContent }"
+            )
+        )
+        // Each host says whether the sheet fades.
+        #expect(text.contains("let fades: Bool"))
+        let panel = try Self.source("JumpPanelView.swift")
+        #expect(panel.occurrences(of: "fades: true") == 1)
         let hint = try Self.source(
             "KeySequenceHintView.swift",
             in: "Shortcuts"
         )
         #expect(hint.occurrences(of: "fades: false") == 1)
         #expect(hint.occurrences(of: ".moreBelowFade()") == 1)
-        // The cue is gone from KiwiHub's footer.
-        let footer = try Self.source("JumpPanelView+Footer.swift")
-        #expect(footer.occurrences(of: "scrollHint") == 0)
-        #expect(footer.occurrences(of: "overflows") == 0)
+        // No scroll line in KiwiHub's footer, under any name: the
+        // footer files draw no scroll key at all.
+        for name in [
+            "JumpPanelView+Footer.swift", "JumpPanelChrome.swift",
+            "JumpFooter+Windows.swift",
+        ] {
+            let footer = try Self.source(name)
+            #expect(footer.occurrences(of: "scroll") == 0, "\(name)")
+        }
     }
 
     /// The fold's verdict is arithmetic and lives in ONE place,
@@ -116,6 +128,9 @@ struct ShortcutsPanelScrollTests {
                 hint,
                 "onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }"
             ),
+            // The cap the sheet is drawn under is the one it is judged
+            // against.
+            (hint, "maxHeight: endKeyCap,"),
             (
                 hint,
                 "JumpShortcutsView.overflows(content: sheetHeight, "
@@ -127,6 +142,17 @@ struct ShortcutsPanelScrollTests {
                 "\(needle): expected exactly one site"
             )
         }
+        // The Scroll hint is drawn only on the verdict.
+        let footer = try #require(
+            SourceScan.declarationBody(after: "private var footer", in: hint)
+        )
+        .filter { !$0.isWhitespace }
+        #expect(
+            footer.contains(
+                "ifoverflows{Text(L(\"key_sequence.hint.scroll\""
+            )
+        )
+        #expect(footer.occurrences(of: "key_sequence.hint.scroll") == 1)
     }
 
     /// Each section title carries the heading trait, asked of

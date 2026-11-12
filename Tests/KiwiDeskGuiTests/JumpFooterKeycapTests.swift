@@ -80,13 +80,12 @@ struct JumpFooterKeycapTests {
     /// the lit hint is never a bare key.
     @Test("the lit hint is the worded one under every chord")
     func litIsWorded() {
-        let chords: [NSEvent.ModifierFlags] = [
-            .shift, .option, .command, [.shift, .option],
-            [.shift, .command], [.option, .command],
-        ]
-        for held in chords {
-            let lit = JumpFooter(scope: .windows, modifiers: held).leading
-            #expect(lit == JumpFooter.wordedSlot(held), "\(held)")
+        for held in JumpFooter.heldStates where held != [] {
+            let footer = JumpFooter(scope: .windows, modifiers: held)
+            #expect(
+                footer.leading == footer.windowsPick(held)?.rawValue,
+                "\(held)"
+            )
             let slots = JumpFooter(scope: .windows).windowsSlots(held: held)
             #expect(slots.filter(\.held).count == 1, "\(held)")
         }
@@ -112,13 +111,13 @@ struct JumpFooterKeycapTests {
         for needle in [
             "ViewThatFits(in:.horizontal){ForEach(0...levels,id:\\.self)"
                 + "{windowsStable($0)}",
-            "windowsRow(held:modifiers,level:levels,shown:$0)}"
+            "windowsRow(held:modifiers,level:levels,shown:$0,lit:leading)}"
                 + "row([],fixed:false)",
             "ForEach(Self.heldStates,id:\\.rawValue){"
                 + "windowsRow(held:$0,level:level).hidden()}",
             "windowsRow(held:modifiers,level:level,lit:leading)",
             "collapsed.contains(index)&&!slot.held",
-            "reduceMotion?nil:.easeOut(duration:0.15),value:drawn",
+            "reduceMotion?nil:.easeOut(", "value:drawn",
         ] {
             #expect(text.occurrences(of: needle) == 1, "\(needle)")
         }

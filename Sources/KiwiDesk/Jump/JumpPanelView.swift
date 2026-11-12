@@ -133,7 +133,8 @@ struct JumpPanelView: View {
                 JumpShortcutsView(
                     sheet: sheet,
                     scroll: model.sheetScroll,
-                    maxHeight: model.sheetCap
+                    maxHeight: model.sheetCap,
+                    fades: true
                 )
                 .transition(.opacity)
             } else if model.scope == .desktops, let state = model.desktops {

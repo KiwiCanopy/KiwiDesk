@@ -16,8 +16,9 @@ struct JumpShortcutsView: View {
     /// inset; the key sequence panel's own padding stands instead.
     var horizontalInset = KeyPanelStyle.selectionInset + 10
     var verticalInset: CGFloat = 12
-    /// Whether the sheet fades its own cut edges.
-    var fades = true
+    /// Whether the sheet fades its own cut edges; each host says,
+    /// so no sheet fades twice.
+    let fades: Bool
     /// Whether the sheet runs past what the cap shows — the one
     /// verdict the key sequence panel's Scroll hint reads (#3175).
     static func overflows(content: CGFloat, cap: CGFloat) -> Bool {
@@ -36,10 +37,14 @@ struct JumpShortcutsView: View {
     /// KiwiHub's sheet fades its cut edges, its one cue that it
     /// scrolls (#3249); the key sequence panel fades its own.
     @ViewBuilder private var scrollView: some View {
+        // The fade judges its cut past the margin, so the margin is
+        // its inset rather than content (#3166).
         if fades {
-            FadingScroll { sheetContent }
+            FadingScroll(inset: verticalInset) { sheetContent }
         } else {
-            ScrollView { sheetContent }
+            ScrollView {
+                sheetContent.padding(.vertical, verticalInset)
+            }
         }
     }
 
@@ -49,7 +54,6 @@ struct JumpShortcutsView: View {
             needle: sheet.needle
         )
         .padding(.horizontal, horizontalInset)
-        .padding(.vertical, verticalInset)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SheetScrollDriver(scroll: scroll))
         .background(

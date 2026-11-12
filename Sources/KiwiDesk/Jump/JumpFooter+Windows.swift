@@ -2,6 +2,12 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
+/// The Windows footer's own hints, in their order; the lit index
+/// and the collapse both count by it (#3249).
+enum WindowsHint: Int, CaseIterable {
+    case jump, moveHere, swapHere, digits
+}
+
 /// One Windows footer hint: its words, and the keycap it collapses
 /// to where the line runs short (#3249); nil for a hint that only
 /// sheds.
@@ -14,53 +20,85 @@ struct JumpFooterSlot: Equatable {
 }
 
 extension JumpFooter {
-    /// The slots that collapse, in order: Swap here, the digits,
-    /// then Move here (#3249 ▸ Ruling 3). ↩ Jump never does.
-    static let collapseOrder = [2, 3, 1]
-
-    /// The held states a collapse level must fit in all of, so a
-    /// press of one modifier never changes which hints are keycaps.
-    /// A two-modifier chord re-words only the digits; where that
-    /// overflows the line, it takes one keycap more while held.
-    static let heldStates: [NSEvent.ModifierFlags] = [
-        [], .shift, .option, .command,
+    /// The hints that collapse, in order (#3249 ▸ Ruling 3); ↩ Jump
+    /// never does.
+    static let collapseOrder: [WindowsHint] = [
+        .swapHere, .digits, .moveHere,
     ]
 
-    /// The one slot `held` keeps worded: the hint its pick lights,
-    /// the digits under ⌘, Swap here under ⌥, Move here under ⇧.
-    static func wordedSlot(_ held: NSEvent.ModifierFlags) -> Int? {
-        if held.contains(.command) { return 3 }
-        if held.contains(.option) { return 2 }
-        if held.contains(.shift) { return 1 }
-        return nil
+    /// Every chord of the three modifiers. A collapse level is chosen
+    /// only where all of them fit, so a press never changes which
+    /// hints are keycaps.
+    static let heldStates: [NSEvent.ModifierFlags] = [
+        [], .shift, .option, .command, [.shift, .option],
+        [.shift, .command], [.option, .command],
+        [.shift, .option, .command],
+    ]
+
+    /// The hint `held` picks, read off `JumpKey` as the lit hint is:
+    /// the digits where they answer the chord, else ↩'s pick.
+    func windowsPick(_ held: NSEvent.ModifierFlags) -> WindowsHint? {
+        // ⌃ is left out: the chord that opened the panel may still
+        // be held when it draws.
+        let held = held.intersection([.shift, .option, .command])
+        switch JumpKey.of(
+            keyCode: UInt16(JumpKey.digitRows[0]),
+            modifiers: held,
+            scope: .windows,
+            naming: naming
+        ) {
+        // A held chord the digits answer lights them first, though
+        // ↩ under it picks as well (#2931 ▸ Ruling 5).
+        case .quick, .quickSwap: return .digits
+        default: break
+        }
+        switch JumpKey.of(
+            keyCode: JumpKey.returnKey,
+            modifiers: held,
+            scope: .windows,
+            naming: naming
+        ) {
+        case .pick(let moveHere): return moveHere ? .moveHere : .jump
+        case .swapHere: return .swapHere
+        default: return nil
+        }
+    }
+
+    /// The lit Windows hint: the pick, unless the selection would
+    /// refuse it (#2885).
+    var windowsLeading: Int? {
+        switch windowsPick(modifiers) {
+        case .moveHere: return selectionMoves ? 1 : nil
+        case .swapHere: return selectionSwaps ? 2 : nil
+        case let pick: return pick?.rawValue
+        }
     }
 
     /// Jump, Move here, Swap here, the digits, then the navigation
     /// hints, worded for `held`.
     func windowsSlots(held: NSEvent.ModifierFlags) -> [JumpFooterSlot] {
-        let worded = Self.wordedSlot(held)
-        return [
-            JumpFooterSlot(
-                text: L("jump.footer.jump", "%1$@ Jump", "↩"),
-                keycap: nil,
-                held: false
+        let worded = windowsPick(held)
+        let own: [(WindowsHint, String, String?)] = [
+            (.jump, L("jump.footer.jump", "%1$@ Jump", "↩"), nil),
+            (
+                .moveHere,
+                L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
+                "⇧"
             ),
-            JumpFooterSlot(
-                text: L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
-                keycap: "⇧",
-                held: worded == 1
+            (
+                .swapHere,
+                L("jump.footer.swap_here", "%1$@ Swap here", "⌥↩"),
+                "⌥"
             ),
-            JumpFooterSlot(
-                text: L("jump.footer.swap_here", "%1$@ Swap here", "⌥↩"),
-                keycap: "⌥",
-                held: worded == 2
-            ),
-            JumpFooterSlot(
-                text: Self.digitsHint(held),
-                keycap: "⌘",
-                held: worded == 3
-            ),
+            (.digits, Self.digitsHint(held), "⌘"),
         ]
+        return own.map { hint, text, keycap in
+            JumpFooterSlot(
+                text: text,
+                keycap: keycap,
+                held: keycap != nil && hint == worded
+            )
+        }
             + windowsNavigation(sideHint).map {
                 JumpFooterSlot(text: $0, keycap: nil, held: false)
             }
@@ -111,7 +149,12 @@ extension JumpFooter {
         return ViewThatFits(in: .horizontal) {
             ForEach(0...levels, id: \.self) { windowsStable($0) }
             ForEach((0...count).reversed(), id: \.self) {
-                windowsRow(held: modifiers, level: levels, shown: $0)
+                windowsRow(
+                    held: modifiers,
+                    level: levels,
+                    shown: $0,
+                    lit: leading
+                )
             }
             row([], fixed: false)
         }
@@ -141,7 +184,7 @@ extension JumpFooter {
     ) -> some View {
         let all = windowsSlots(held: held)
         let slots = Array(all.prefix(shown ?? all.count))
-        let collapsed = Set(Self.collapseOrder.prefix(level))
+        let collapsed = Set(Self.collapseOrder.prefix(level).map(\.rawValue))
         let drawn = slots.enumerated().map { index, slot in
             collapsed.contains(index) && !slot.held
                 ? slot.keycap ?? slot.text : slot.text

@@ -14993,43 +14993,15 @@ profile's list. Listing a working chord under Inactive, captioned
 "pressing one recreates its Space", told the user the opposite of
 what a press does; Inactive keeps only #92's true orphans.
 
-**KiwiHub's lists say they scroll by fading their cut edges
-(#3249, owner via the ui-designer, 2026-11-12, superseding
-#1292's worded cue).** The Shortcuts sheet is a glance surface
-but not a small one: the seeded keymap grows three rows per
-Space, so a stock setup runs past the cap
-`JumpPanelController.sheetCap` derives from the screen (#2246),
-and the Windows list runs past its nine rows on any busy desk.
-Both now fade the edge that cuts content, through the one
-`FadingScroll` the Desktops side's lists take (#3164, #3166), and
-neither footer carries "Scroll for more…" any longer.
-
-Why the fade wins where words once did. #1292 argued that a
-partial row is no fold cue when a strip of chrome sits under it:
-the chrome says *this is the bottom* and cancels the cut. A fade
-is not a partial row. It marks the cut edge itself, rows thinning
-into the ground, which is the platform's own "more this way" and
-which no terminator below it cancels; the Desktops side has shown
-it reading so since #3164. The earlier refusal's two grounds do
-not hold for a mask: it fades alpha, painting nothing, so the
-rows dissolve into whatever ground the panel shows — glass or
-material — and the colour-vision clauses have no paint to
-measure; and it removes no information a key cannot reach, since
-it covers at most 20 pt, a quarter of a short viewport, only
-while content lies past that edge, and the Windows list's reveal
-scrolls the selection clear of it (`FadingColumn`). What the words
-cost was the footer's room: 93–222 pt by language, the room Swap
-here needed to be worded at all (▸ *The footer lights one hint*).
-
-The verdict is the scroll's own. A fade reads the measured
-offset and content (`EdgeFade.cuts`), so it cannot disagree with
-the clamp; `JumpShortcutsView.overflows(content:cap:)` stays the
-one home of the key sequence panel's Scroll hint (#3175), which
-keeps its own bottom fade, so KiwiHub's sheet fades and that
-panel's does not fade twice. VoiceOver no longer hears a scroll
-line: it reaches every row by moving through the named scroll
-area, as on the Desktops side, and the footer it never read
-(#1875) loses nothing it spoke.
+**The shortcuts sheet scrolls, and says so — in words.** The
+sheet is a glance surface but not a small one: the seeded keymap
+grows three rows per Space, so a stock setup runs to more rows
+than fit under the cap `JumpPanelController.sheetCap` derives from
+the screen (#2246). It may therefore exceed the viewport, and the
+fold is cued by a line beside the sheet's buttons drawn only when
+the measured sheet runs past that cap —
+`JumpShortcutsView.overflows(content:cap:)`, one home, so the cue
+cannot disagree with the clamp that causes it.
 
 **The platform's own indicator does not work.**
 `.scrollIndicators(.visible)`, measured on device (macOS 26.6.2,
@@ -15082,8 +15054,8 @@ the hosting hierarchy for a class SwiftUI does not promise to
 keep. That is the same species of bet
 `.scrollIndicators(.visible)` loses, and it fails *silently*: the
 traversal returns nil, no cue is drawn, and nothing says so —
-which means the fade is owed as its fallback, and once the fade
-exists the traversal buys nothing. `flashScrollers()` dies the same
+which means the words are owed as its fallback, and once the words
+exist the traversal buys nothing. `flashScrollers()` dies the same
 way, plus transience. The door is open by ownership: if this panel
 is ever rebuilt as an `NSViewRepresentable` over a scroll view it
 constructs, `.legacy` becomes legitimate and is re-argued then.
@@ -15091,9 +15063,41 @@ constructs, `.legacy` becomes legitimate and is re-argued then.
 Making the content *fit* (#1294) lowers how often the fold
 appears and cannot retire the cue — 45 rows do not fit under a
 screen-derived cap, and an install with many app or raw-Lua rows
-overflows any fixed size. The fade is permanent, not a stopgap.
+overflows any fixed size. The cue is permanent, not a stopgap.
 The panel's width is ruled under ▸ *The shortcuts sheet is the
 key panel's middle side*.
+
+:::unreleased
+*Superseded (#3249, owner via the ui-designer, 2026-11-12): KiwiHub's
+lists say they scroll by fading their cut edges.* The Windows list
+and the Shortcuts sheet fade the edge that cuts content through the
+one `FadingScroll` the Desktops side's lists take (#3164, #3166),
+and neither footer carries "Scroll for more…" any longer. The fold
+argument above holds for a partial row and not for a fade: the
+chrome under a cut row says *this is the bottom* and cancels the
+cut, but a fade marks the cut edge itself, rows thinning into the
+ground, and no terminator below it cancels that; the Desktops side
+has read so since #3164. Neither ground of the bottom-fade
+rejection holds for a mask. It fades alpha and paints nothing, so
+the rows dissolve into whatever the panel shows, glass or
+material, and the colour-vision clauses have no paint to measure.
+And it hides nothing a key cannot reach: it covers at most 20 pt,
+a quarter of a short viewport, only while content lies past that
+edge, and the Windows list's reveal scrolls the selection clear of
+it (`FadingColumn`). What the words cost was the footer's room,
+which Swap here needed to be worded at all (▸ *The footer lights
+one hint*). The fade reads the measured scroll itself
+(`EdgeFade.cuts`), so it cannot disagree with the clamp, and
+judges its cut past the sheet's margin, its inset.
+`JumpShortcutsView.overflows(content:cap:)` stays the one home of
+the key sequence panel's Scroll hint (#3175); that panel keeps its
+own bottom fade, and each host of the sheet says whether it fades,
+so none fades twice. VoiceOver hears no scroll line any more: it
+reaches every row by moving through the named scroll area, as on
+the Desktops side. The platform indicator and `.legacy` paragraphs
+above stand, the fade now being what the traversal would fall back
+to.
+:::
 
 **The shortcuts panel takes UNTINTED Liquid Glass, and the
 untinted half is a ruling rather than a limit.** (#1295/#1293,
@@ -15437,6 +15441,13 @@ shows only the typing: the selection is the green row or tile,
 shown once, and inline completion — weighed — reads as native
 only where → or Tab would accept it, which here they never do.
 
+:::unreleased
+*Amended (#3249): the Shortcuts sheet scrolling past the ceiling,
+and the Windows list past its nine rows, fade the edge that cuts
+them rather than cueing it in words* (▸ *Superseded (#3249)* under
+the shortcuts sheet's scroll).
+:::
+
 **The shortcuts sheet folds what reads as one, and nothing the
 user changed (#2312, owner ruling 2026-10-16).** A digit ladder
 — Go to Space 1, 2, 3 — and a mirrored set — the four focus
@@ -15464,8 +15475,7 @@ lights ↩ Apply, or its digits under ⌘. Navigation (⇥, ← →) and
 bridges (⌘, Edit) never light, the Shortcuts side lights nothing
 since ↩ runs nothing there, and an empty list lights nothing. Ink
 alone carries it, with no tint or weight, and it swaps without
-motion; a hint whose words change under the press eases its width
-over 150 ms, the curve a row's ⌘ digit takes (#1875, #3249). The way here follows the chord's reach: ⇧ alone moves one
+motion. The way here follows the chord's reach: ⇧ alone moves one
 row — the hovered row where its ⇧-click moves a window, else the
 selected row ⇧↩ moves (#2808) — so only that row shows its
 "Space n → Space m"; under ⇧⌘ every numbered row is a target
@@ -15473,11 +15483,8 @@ through its digit, so each shows its own. Lighting every row under
 ⇧ would answer no "what does pressing now do", and repaint the
 whole list on the lighter chord.
 
-Swap here has its own hint beside Move here, worded at rest so it
-is found without holding ⌥ (#3249, owner via the ui-designer,
-2026-11-12, amending #2885, whose Move here slot read "⌥↩ Swap
-here" only under ⌥), and under ⌥ or ⇧⌥ it is the lit hint,
-unless the swap would refuse the selection; the
+Under ⌥ or ⇧⌥ (#2885) the Move here slot reads "⌥↩ Swap here" and
+is the lit hint, unless the swap would refuse the selection; the
 digits read "⌥⌘1–9 Quick swap here", lit under ⌥⌘; and the row ⌥
 acts on — the hovered row, else the selection, as for ⇧ — shows
 "Space n ⇄ Space m" where the trade is with a window in the current
@@ -15488,22 +15495,31 @@ once (none under Reduce Motion), the refusal sound plays where it is
 on, and VoiceOver hears "Can't swap: …". Refusal and dead-end
 feedback stay apart (#435/#436), so the panel never shakes.
 
+:::unreleased
+*Amended (#3249, owner via the ui-designer, 2026-11-12): Swap here
+has its own hint beside Move here*, worded at rest so it is found
+without holding ⌥; Move here no longer reads Swap here under ⌥, and
+under ⌥ or ⇧⌥ the Swap here hint is the lit one, unless the swap
+would refuse the selection. A hint whose words change under a
+press eases its width and fades its words over 150 ms, none under
+Reduce Motion, the curve a row's ⌘ digit takes (#1875).
+
 **Short of room, a modifier hint becomes its key before any hint
 goes (#3249).** Where a language's Windows line does not fit, Swap
 here, then the digits, then Move here draw as a bare keycap — ⌥,
 ⌘, ⇧ — so the user still learns the modifier does something there,
 and holding it words that hint again; only past all three do hints
 shed from the end, Next app first (#3159). The keycaps are chosen
-once per language, on its widest held state, so a press re-words
-the line and never changes which hints are keys, and the hint a
-held chord lights is always worded, so the lit hint is never a
-bare key. ↩ Jump never collapses: a line of symbols alone tells a
-new user nothing, which is why keycaps-at-rest everywhere was
-refused (ui-designer, 2026-11-12). Measured at 688 pt: every
-shipped language shows the whole line but German (⌥ and ⌘ keys)
-and Russian (all three, and Next app sheds under ⌥);
-`JumpFooterFitTests` ▸ `windowsKeycapsArePinned` pins each, so a
-catalog edit moving a language is a ruling.
+once per language, on the widest of every chord of the three
+modifiers, so a press re-words the line and never changes which
+hints are keys, and the hint a held chord lights is always worded,
+so the lit hint is never a bare key. ↩ Jump never collapses: a line
+of symbols alone tells a new user nothing, which is why keycaps at
+rest everywhere was refused (ui-designer, 2026-11-12).
+`JumpFooterKeycapTests` ▸ `windowsKeycapsArePinned` pins each
+language's keycaps, so a catalog edit moving a language is a
+ruling.
+:::
 
 **⌥ is Swap here, and ⇧ never means "there" (#2885, owner ruling
 2026-11-01).** ⌥↩ and ⇧⌥↩ both bring the selected window into your
