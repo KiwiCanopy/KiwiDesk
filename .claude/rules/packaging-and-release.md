@@ -8,6 +8,7 @@ paths:
   - "scripts/bump-version.sh"
   - "scripts/install-hooks.sh"
   - "scripts/update-nix-source.py"
+  - "scripts/check-homebrew-cask.py"
   - "scripts/pre-commit"
   - "scripts/gate-lock"
   - "scripts/prune-builds"
@@ -657,7 +658,10 @@ it, a workflow here that pushes to that repository, or a cask back
 in `KiwiCanopy/homebrew-tap` (retired by KiwiCanopy/homebrew-tap#4).
 A cask PR changing its `livecheck` keeps it reading a source only
 publication advances — the latest release or the appcast — so a
-draft never reaches Homebrew.
+draft never reaches Homebrew. `.github/workflows/homebrew-watch.yml`
+only reads: it reds once the cask lags the latest release past the
+grace in `scripts/check-homebrew-cask.py`, and it holds no write
+credential (`HomebrewCaskWatchTests`).
 
 **Advance the Nix flake only after publication (#2909).**
 `.github/workflows/nix.yml` owns it: the `release.published` event
