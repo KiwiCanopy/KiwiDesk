@@ -1480,8 +1480,8 @@ screen that switched:
 The [scroll Space step](#scroll-focus-and-space-step) has its own
 choice, [`set_space_scroll_transition`](#set_space_scroll_transition).
 
-The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
-switches**, which neither Reduce Motion nor the **Animate
+The GUI twin is **Looks &amp; Animations ▸ Switching Spaces ▸
+Space switches**, which neither Reduce Motion nor the **Animate
 windows** switch greys. Like [`set_desktop_cue`](#set_desktop_cue),
 the setting is app-wide, stored in `gui.json` as
 `space.transition`; the verb changes the running value only. It
@@ -1511,8 +1511,8 @@ with Reduce Motion on `"slide"` shows the Space there too. So a
 press can switch at once while a swipe still slides:
 `set_space_transition("none")` beside the default here.
 
-The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Step between
-Spaces (mouse or trackpad)**. The setting is app-wide, stored in
+The GUI twin is **Looks &amp; Animations ▸ Switching Spaces ▸ Step
+between Spaces (mouse or trackpad)**. The setting is app-wide, stored in
 `gui.json` as `space.scroll_transition`; the verb changes the
 running value only. Neither `set_space_transition` nor a stored
 `space.transition` sets it.
@@ -1537,8 +1537,8 @@ no effect where no slide plays, as while Reduce Motion is on. Window motion keep
 ([animations.set_duration](#animationsset_duration)). Read at the
 next switch.
 
-The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Slide
-duration**, grey while no slide would play. The
+The GUI twin is **Looks &amp; Animations ▸ Switching Spaces ▸
+Slide duration**, grey while no slide would play. The
 setting is app-wide, stored in `gui.json` as
 `space.slide_duration`; the verb changes the running value only.
 It replaces `animations.set_space_change_duration`, which is

@@ -4011,19 +4011,18 @@ the Show plate there, since that plate stands down for the same
 reason (`FullscreenStandDownTests` ▸
 `fullScreenKeepsTheSlideAway`).
 
-*On the Animations card, apart from the window rows.* The
-pickers and **Slide duration** sit at the top of Looks &
-Animations ▸ Animations, above **Animate windows**, which does
-not reach them:
+*On a card of their own, after Animations.* The pickers and
+**Slide duration** are Looks & Animations ▸ Switching Spaces
+(#3218), outside **Animate windows**, which does not reach them:
 that master paces windows, and the slide moves none. Reduce
 Motion does not grey a picker, since the fallback above is the
 answer that setting asks for. The duration greys whenever no
 slide would play, read through the same `drawn(reduceMotion:)`,
 and all grey where
 `init.lua` owns the config, as the Desktop cue's row does (#1741,
-#2142). The group ends with the note that it applies at once in
-every profile and a divider, so the window rows below it read as
-a second subject.
+#2142). The card leads with the note that its rows apply at once
+in every profile (*A setting that skips Save says so where it
+sits*, under Navigation & saving).
 
 *App-wide, and crossed from the toggle.* It is stored in
 `gui.json` as `space.transition` and `space.slide_duration`,
@@ -5042,8 +5041,9 @@ Shortcuts ▸ Built-in ▸ macOS Desktops, above the shortcuts whose
 switches it marks (#2142, #2655), the layout plate's in Shortcuts
 ▸ Built-in ▸ Layout under the Layouts to cycle row (#2144). Such a switch is still
 written the moment it changes, on a page whose other rows wait
-for Save, so it says in its `?` that it applies at once and to
-every profile.
+for Save, so it carries the note under its label (#3218, *A
+setting that skips Save says so where it sits*); its `?` keeps
+the why.
 
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
@@ -7395,8 +7395,9 @@ and moving a Lua-owned setup into the GUI
 (`adoptConfigIntoGui`) stores the values `init.lua` executed,
 since those are what the user was running.
 
-**In Settings, the rows sit on General's "Applies immediately"
-card and write `gui.json` at once, with no Save.** (#1741,
+**In Settings, the rows sit on General's "Changes apply at once,
+in every profile" card and write `gui.json` at once, with no
+Save.** (#1741,
 ui-designer ruling.) Every row on that card does what it was
 just told the moment it is told; a draft-and-Save row there
 would be the only one that does not. That was #1255's argument
@@ -9162,7 +9163,8 @@ on every visit; a picture row there is not drawn yet. Dim, Blur and Appearance w
 ownership](#spaces-profiles--config-ownership), #1741). With KiwiVision
 on, Settings stays clear while every window behind it dims as the
 Dim value steps, which is the best preview there is. Each card says
-"Applies at once, in every profile.", save Never dimmed (below).
+"Changes apply at once, in every profile." (#3218), save Never
+dimmed (below).
 
 *Stored as one group, with no crossing.* The settings live in
 `gui.json` as `kiwivision.{dim, blur, appearance}`, every field
@@ -9201,8 +9203,8 @@ saving](#navigation--saving) ▸ the panel's object is the DRAFT.
 shortcut must not register before Save, the profiles it applies
 to are written to other profiles' files, and a rename rewrites
 stored bindings. The plain settings stay immediate beside them.
-That is why "Applies at once, in every profile." sits on each
-immediate card rather than on the page, and why Never dimmed —
+That is why "Changes apply at once, in every profile." sits on
+each immediate card rather than on the page, and why Never dimmed —
 the one immediate card a lens's page shows — sits last, under
 "Every lens", saying "in every profile and lens": two save
 behaviours on one page each need their own sentence. A lens
@@ -11046,7 +11048,7 @@ page it comes from, the way a look's font link does.
 
 **Settings owns the login item; crash supervision is the CLI's.**
 (#342, #576, #678 item 16, #1071) General shows ONE switch —
-"Start at login", in the "Applies immediately" group — and it
+"Start at login", in General's immediate group — and it
 drives the `SMAppService` login item and nothing else. The
 `kiwidesk service` LaunchAgent, which adds `KeepAlive` crash
 restart, is reachable only from the command line.
@@ -11237,6 +11239,30 @@ can pin only dark because that is AppKit's limit, not a ruling
 ### Navigation & saving
 
 **[Principle]**
+
+**A setting that skips Save says so where it sits (#3218).**
+Before #3218, eighteen rows on four pages wrote `gui.json` at once
+and said so four ways: a card title, a trailing caption in
+tertiary ink, a `?` nobody opens before changing a value, or
+nothing. A user who changed the Space slide's duration looked for
+the Save pill, since the window durations beside it raise one.
+So one sentence, "Changes apply at once, in every profile.",
+leads the smallest unit that is wholly live, in secondary ink:
+under a card's title, or under a row's label where the row sits
+among a profile's rows; the `?` keeps the why. It has a subject,
+so it reads neither as a command nor as singular over a group.
+Rows are grouped by topic, never by save behaviour, with one
+consequence: a card that mixed the two kinds is split, and the
+live card comes last on a profile's page, beside the Save pill
+it explains the absence of. Animations was the one such card;
+its Space switch rows are the card Switching Spaces. No badge: a
+capsule on eighteen rows reads as state, and on these pages
+colour means "on". The values stay app-wide: each is so by its
+own ruling, and moving them into profiles would owe a crossing
+and change what existing `init.lua` setters reach.
+Never dimmed keeps the sentence with "and lens" added, since a
+lens's page shows it beside rows that save. `LiveSettingNoteTests`
+holds every app-wide writer to the note.
 
 **A layout is chosen by its picture, not by its name.** Layout
 Defaults selects one of the tunable layouts — every layout but
@@ -13482,7 +13508,7 @@ a user who presses them, and that user sets it up here. It keeps
 its own gate: it greys, with its sentence, only where `init.lua`
 owns the config, apart from anything that greys the shortcut
 rows. Looks & Animations was the other candidate and lost twice:
-that card greys under Reduce Motion, where the cue must keep
+the Animations card greys under Reduce Motion, where the cue must keep
 working since it replaces the motion, and a look is per profile
 while the cue is app-wide. Profiles ▸ Desktops, left with the
 bindings alone, stays collapsed while nothing is bound
