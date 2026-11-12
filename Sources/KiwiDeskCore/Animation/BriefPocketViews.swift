@@ -155,8 +155,14 @@ final class BriefPocketPlateView: NSView {
     override var isFlipped: Bool { true }
 
     /// `glass`: whether the plate draws Liquid Glass; `tintFill`:
-    /// the Fill it wears, nil for the untinted `.regular` glass.
-    init(glass drawsGlass: Bool, tint tintFill: GlassFill?, image: NSImage?) {
+    /// the Fill it wears there, nil for the untinted `.regular`
+    /// glass; `frost`: the Fill it wears flat over the material.
+    init(
+        glass drawsGlass: Bool,
+        tint tintFill: GlassFill?,
+        frost: FrostFill?,
+        image: NSImage?
+    ) {
         self.tintFill = tintFill
         super.init(frame: .zero)
         wantsLayer = true
@@ -170,13 +176,7 @@ final class BriefPocketPlateView: NSView {
             addSubview(made)
             GlassPlate.setContent(made, content)
         } else {
-            let view = NSVisualEffectView()
-            view.material = .popover
-            view.blendingMode = .behindWindow
-            view.state = .active
-            view.wantsLayer = true
-            view.layer?.masksToBounds = true
-            view.addSubview(content)
+            let view = FrostPlate.make(content: content, fill: frost)
             material = view
             addSubview(view)
         }

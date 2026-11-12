@@ -152,8 +152,8 @@ extension APIReference {
             .choice("style", KiwiShelf.RevealStyle.self)
         ),
         "set_tint_hub_and_plates": APIRecord(
-            "Gives KiwiHub and the switch plates the Fill on clear "
-                + "glass; off, plain frosted glass.",
+            "Gives KiwiHub and the switch plates the Fill; off, the "
+                + "untinted system appearance.",
             .boolean("enabled")
         ),
         "set_fill_fade": APIRecord(

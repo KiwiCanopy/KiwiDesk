@@ -201,6 +201,9 @@ struct PlateGroundWiringTests {
         // Forces only under a ruled tint (`panelGlassChrome`, #2569),
         // whose surfaces paint their own palette and draw no plate.
         "GlassChrome.swift": 1,
+        // The same surfaces over their material, under the flat
+        // Fill alone (#2569 ▸ amendment).
+        "PanelGlass.swift": 1,
         // The user's app-wide appearance, which the paint follows.
         "AppearanceChoice+Scheme.swift": 1,
     ]

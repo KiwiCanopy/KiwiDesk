@@ -39,6 +39,7 @@ struct SpaceSlideBurstTests {
                 space: SpaceID("2"),
                 glass: false,
                 tint: nil,
+                frost: nil,
                 pace: 1
             )
         )

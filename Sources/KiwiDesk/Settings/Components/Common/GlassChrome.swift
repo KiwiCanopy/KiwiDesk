@@ -112,15 +112,14 @@ enum GlassChromeVariant {
     }
 }
 
+extension GlassPaint.Pin {
+    /// The scheme a Fill's pin is in SwiftUI, on glass or frost.
+    var scheme: ColorScheme { self == .dark ? .dark : .light }
+}
+
 extension GlassPaint {
     /// The scheme the Fill pins, nil where it pins none.
-    var scheme: ColorScheme? {
-        switch pin {
-        case .dark?: .dark
-        case .light?: .light
-        case nil: nil
-        }
-    }
+    var scheme: ColorScheme? { pin?.scheme }
 
     /// The Fill's fade as SwiftUI draws it.
     var gradient: LinearGradient {

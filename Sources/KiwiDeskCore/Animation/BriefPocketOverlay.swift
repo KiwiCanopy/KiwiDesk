@@ -61,6 +61,9 @@ final class BriefPocketOverlay {
         /// wears there, nil for the untinted glass.
         let plateGlass: Bool
         let plateTint: GlassFill?
+        /// The Fill it wears flat over the material, where no
+        /// glass draws (#2569 ▸ amendment).
+        let plateFrost: FrostFill?
         let flight: TimeInterval
     }
 
@@ -108,6 +111,7 @@ final class BriefPocketOverlay {
         let plate = BriefPocketPlateView(
             glass: request.plateGlass,
             tint: request.plateTint,
+            frost: request.plateFrost,
             image: request.iconPid.flatMap { icon($0) }
         )
         plateHost.addSubview(plate)

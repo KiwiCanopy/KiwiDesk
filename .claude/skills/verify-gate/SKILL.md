@@ -29,6 +29,12 @@ suite a change runs locally:
   few minutes sooner while holding the machine-wide gate slot
   other sessions wait on. Fix a red and push again. Still run
   `scripts/unreleased-strip --check` locally: it takes a second.
+  An edit to an indexed page also owes `scripts/docs-index`, and
+  again after a rebase onto changed docs
+  ([docs.md](../../rules/docs.md), #3213). The regenerated
+  `Sources/KiwiDesk/Resources/DocsIndex.json` is generated
+  output, so a diff of `docs/` plus that one file is still this
+  case; `scripts/docs-index --check` is the local check.
 - **Anything else runs the gate.** `AGENTS.md`,
   `.claude/rules/**`, `.claude/agents/**` and this skill tree are
   instructions every session reasons from, and a prose-only edit
