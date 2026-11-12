@@ -9,7 +9,8 @@ import Testing
 /// the Space slide draws Show the Space, the bars' gate reads
 /// reduced. `ReduceMotion.kiwiDesk` is process-global, so each test
 /// pins the OS read, sets the flag for its body alone and puts both
-/// back.
+/// back; every test that writes the flag lives in this one
+/// serialized suite.
 @Suite("KiwiDesk's own Reduce Motion (#3238)", .serialized)
 @MainActor
 struct ReduceMotionFlagTests {
@@ -26,11 +27,10 @@ struct ReduceMotionFlagTests {
 
     @Test("the read ORs the flag into macOS's")
     func readJoinsBoth() {
-        ReduceMotion.systemOverride = false
-        defer { ReduceMotion.systemOverride = nil }
-        #expect(!ReduceMotion.isOn)
+        #expect(!ReduceMotion.joined(system: false, kiwiDesk: false))
+        #expect(ReduceMotion.joined(system: false, kiwiDesk: true))
+        #expect(ReduceMotion.joined(system: true, kiwiDesk: false))
         withOff { #expect(ReduceMotion.isOn) }
-        #expect(!ReduceMotion.isOn)
     }
 
     /// The verb writes the session value, and the live change sets
@@ -103,5 +103,33 @@ struct ReduceMotionFlagTests {
             )
             #expect(drawn == .show)
         }
+    }
+
+    private func directory() -> URL {
+        testTemporaryDirectory
+            .appendingPathComponent("kiwi-off-\(UUID().uuidString)")
+    }
+
+    /// KiwiDesk's own Off from the verb lasts the session; a
+    /// Settings pick is what stores it (#3238).
+    @Test("the Off verb never persists")
+    func offVerbNeverPersists() throws {
+        let core = makeTestCore(configDirectory: directory())
+        try core.guiConfigStore.save(GuiConfig())
+        defer { ReduceMotion.kiwiDesk = false }
+        core.setAppWide(persisting: true) { $0.animationReduceMotion = false }
+        #expect(
+            core.execute(
+                "animations.set_reduce_motion",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+        #expect(core.appWide.animationReduceMotion)
+        let config = try #require(core.guiConfigStore.load())
+        try core.guiConfigStore.save(config)
+        #expect(
+            core.guiConfigStore.load()?.appWide?.animationReduceMotion
+                == false
+        )
     }
 }
