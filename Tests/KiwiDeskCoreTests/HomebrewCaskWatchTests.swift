@@ -45,12 +45,18 @@ struct HomebrewCaskWatchTests {
         )
         #expect(run.status == 2)
         #expect(run.stderr.contains("vMAJOR.MINOR.PATCH"))
+        let bare = try WatchFixture.check(
+            cask: "4.2.1",
+            now: "2026-11-20T00:00:00Z",
+            tag: "4.2.1"
+        )
+        #expect(bare.status == 2)
     }
 
     @Test("a draft is never the release judged")
     func draftRefused() throws {
         let run = try WatchFixture.check(
-            cask: "4.2.0",
+            cask: "4.2.1",
             now: "2026-11-20T00:00:00Z",
             draft: true
         )
@@ -61,7 +67,7 @@ struct HomebrewCaskWatchTests {
     @Test("a prerelease is never the release judged")
     func prereleaseRefused() throws {
         let run = try WatchFixture.check(
-            cask: "4.2.0",
+            cask: "4.2.1",
             now: "2026-11-20T00:00:00Z",
             prerelease: true
         )
@@ -72,11 +78,14 @@ struct HomebrewCaskWatchTests {
     @Test("the workflow only reads, on a schedule")
     func workflowOnlyReads() throws {
         let yaml = try workflowSource("homebrew-watch.yml")
-        #expect(yaml.contains("schedule:"))
+        #expect(yaml.contains("schedule:\n    - cron:"))
         #expect(yaml.contains("workflow_dispatch:"))
         #expect(yaml.contains("permissions:\n  contents: read"))
-        #expect(!yaml.contains("secrets."))
-        #expect(!yaml.contains(": write"))
+        // Bare words, so a quoted value, a job-level block, `write-all`
+        // and `secrets[...]` / `toJSON(secrets)` all red. Trade: any
+        // later use of either word, even harmless, reds too.
+        #expect(!yaml.lowercased().contains("write"))
+        #expect(!yaml.contains("secrets"))
         let read = try workflowStep(
             "Read the latest release and the cask",
             in: yaml
@@ -85,6 +94,11 @@ struct HomebrewCaskWatchTests {
         #expect(read.contains("formulae.brew.sh/api/cask/kiwidesk.json"))
         let check = try workflowStep("Fail when the cask lags", in: yaml)
         #expect(check.contains("scripts/check-homebrew-cask.py"))
+        // A red must reach the run: nothing swallows the exit or
+        // widens the script's own grace.
+        for swallow in ["||", "continue-on-error", "--grace-hours"] {
+            #expect(!check.contains(swallow), Comment(rawValue: swallow))
+        }
     }
 }
 
