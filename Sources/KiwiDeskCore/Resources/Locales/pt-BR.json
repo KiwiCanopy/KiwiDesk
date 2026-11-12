@@ -233,7 +233,7 @@
   "behavior.animations.speed.custom": "Durações personalizadas. Escolha uma velocidade para substituí-las.",
   "behavior.animations.speed.default": "Padrão",
   "behavior.animations.speed.fast": "Rápida",
-  "behavior.animations.speed.help": "A rapidez com que o KiwiDesk anima, em todos os perfis: janelas, rolagem, as barras, trocas de espaço e KiwiVision. Desativado não reproduz nenhuma animação, como o Reduzir movimento do macOS, e mantém os interruptores de cada perfil.",
+  "behavior.animations.speed.help": "A rapidez com que o KiwiDesk anima, em todos os perfis: janelas, rolagem, as barras, trocas de espaço e KiwiVision. “%1$@” interrompe essas animações e mantém os interruptores de cada perfil.",
   "behavior.animations.speed.off": "Desativado",
   "behavior.animations.speed.off_warning": "As animações estão desativadas em todos os perfis.",
   "behavior.animations.speed.slow": "Lenta",

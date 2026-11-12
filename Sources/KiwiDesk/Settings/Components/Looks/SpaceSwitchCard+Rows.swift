@@ -120,7 +120,11 @@ extension SpaceSwitchCard {
     /// What the selection does; under Reduce Motion, Slide shows
     /// the Space instead, which its caption says.
     func spaceTransitionCaption(_ style: SpaceTransition) -> String {
-        let drawn = style.drawn(reduceMotion: reduceMotion)
+        // The desk's answer: macOS's setting or KiwiDesk's Off.
+        let drawn = style.drawn(
+            reduceMotion: reduceMotion
+                || model.appWide.animationReduceMotion
+        )
         switch style {
         case .slide where drawn != .slide:
             return L(

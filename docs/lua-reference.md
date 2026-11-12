@@ -1537,15 +1537,18 @@ no effect where no slide plays, as while Reduce Motion is on. Window motion keep
 ([animations.set_duration](#animationsset_duration)). Read at the
 next switch.
 
-The setting is app-wide, stored in `gui.json` as
+The GUI twin is **Looks &amp; Animations ▸ Switching Spaces ▸
+Slide duration**, grey while no slide would play. The
+setting is app-wide, stored in `gui.json` as
 `space.slide_duration`; the verb changes the running value only.
 It replaces `animations.set_space_change_duration`, which is
 refused, naming it.
 
 :::unreleased
-No Settings row sets it alone: the speed preset in **Looks &amp;
-Animations ▸ Animations ▸ Animation speed** writes it with the
-other lengths ([Animation Cascade](#animation-cascade)).
+The Slide duration row is gone, and no Settings row sets the length
+alone: the speed preset in **Looks &amp; Animations ▸ Animations ▸
+Animation speed** writes it with the other lengths
+([Animation Cascade](#animation-cascade)).
 :::
 
 A slide plays where [`set_space_transition`](#set_space_transition),
@@ -9471,13 +9474,14 @@ animations.set_on_peek(false)
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** KiwiDesk's own Reduce Motion, in every profile: while it
-is on, the windows, bars, marks and cues move as they do with
-Reduce Motion on in macOS — windows move at once, a `"slide"` Space
-switch shows the Space, the KiwiVision fade is instant. It also
-stops a hidden bar's reveal and the KiwiShelf expand, which macOS's
-Reduce Motion lets play. No length changes, so turning it off
-brings back the same pace. The Settings window follows macOS's
-setting alone.
+is on, the windows, the bars and the marks on windows move as they
+do with Reduce Motion on in macOS — windows move at once, a
+`"slide"` Space switch shows the Space, the KiwiVision fade is
+instant. It also stops a hidden bar's reveal and the KiwiShelf
+expand, which macOS's Reduce Motion lets play. No length changes,
+so turning it off brings back the same pace. KiwiHub, the plates
+that name a Space, a layout or a Desktop, the slow-boot notice and
+the Settings window follow macOS's setting alone.
 
 It is the **Off** of **Looks &amp; Animations ▸ Animations ▸
 Animation speed**, which Simple shows too. The setting is app-wide,

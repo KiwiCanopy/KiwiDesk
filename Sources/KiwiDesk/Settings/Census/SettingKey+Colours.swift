@@ -87,8 +87,17 @@ extension ColoursKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
-        case .animationsMaster, .animationSpeed:
+        case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
+        case .animationSpeed:
+            // App-wide (#3238), so it greys where init.lua owns the
+            // config, as the Space switch pickers do (#2142).
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
         case .spaceSlideDuration:
             // Lua-only: the speed preset is Settings' one pace
             // control (owner ruling, 2026-11-12, #3238).

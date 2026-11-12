@@ -233,7 +233,7 @@
   "behavior.animations.speed.custom": "自訂時間長度。選擇一種速度即可取代。",
   "behavior.animations.speed.default": "預設",
   "behavior.animations.speed.fast": "快",
-  "behavior.animations.speed.help": "KiwiDesk 動畫的快慢，適用於所有描述檔：視窗、捲動、列、空間切換與 KiwiVision。關閉時，如同 macOS 的減少動態效果，不播放任何動畫，並保留每個描述檔的開關。",
+  "behavior.animations.speed.help": "KiwiDesk 動畫的快慢，適用於所有描述檔：視窗、捲動、列、空間切換與 KiwiVision。「%1$@」會停止這些動畫，並保留每個描述檔的開關。",
   "behavior.animations.speed.off": "關閉",
   "behavior.animations.speed.off_warning": "所有描述檔中的動畫均已關閉。",
   "behavior.animations.speed.slow": "慢",

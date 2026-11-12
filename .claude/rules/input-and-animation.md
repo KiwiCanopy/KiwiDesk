@@ -763,6 +763,16 @@ editing here:
   values; the engine's own stored defaults are the app-wide
   defaults until the first change, so a default moved on one side
   is moved on both (`AnimationPersistenceTests`).
+- **A Reduce Motion gate in Core reads `ReduceMotion.isOn`, and
+  `ReduceMotion.kiwiDesk` has one writer (#3238).** The home ORs
+  macOS's setting with KiwiDesk's own Off, so a gate that reads
+  `NSWorkspace` itself plays motion while the speed preset says Off
+  (`ReduceMotionHomeTests` ▸ `oneRead`). The flag is a mirror of
+  `appWide.animationReduceMotion`, written only by
+  `appWideLiveChanged`, so a second writer would let the two
+  disagree (`ReduceMotionHomeTests` ▸ `gatesAreWired`). The GUI
+  tree's panels and Settings read macOS's setting alone, by the
+  ruling's scope.
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

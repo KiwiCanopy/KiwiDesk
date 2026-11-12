@@ -19,6 +19,7 @@ struct AnimationSpeedRow: View {
                         write { $0.animationReduceMotion = false }
                     }
                     .settingsActionButton()
+                    .disabled(!model.guiManaged)
                 }
             }
             SegmentedPicker(
@@ -39,6 +40,12 @@ struct AnimationSpeedRow: View {
             }
             if model.guiManaged {
                 LiveSettingCaption()
+            } else {
+                // The census's Lua gate (#1741), drawn inline.
+                Text(GeneralGateHelp.sentence(for: .luaOwned))
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -82,15 +89,16 @@ struct AnimationSpeedRow: View {
             "behavior.animations.speed.help",
             "How fast KiwiDesk animates, in every profile: windows, "
                 + "scrolling, the bars, Space switches and KiwiVision. "
-                + "Off plays no animation anywhere, as macOS's Reduce "
-                + "Motion does, and keeps each profile's switches."
+                + "%1$@ stops those animations and keeps each "
+                + "profile's switches.",
+            title(of: .off)
         )
     }
 
     static var customReadout: String {
         L(
             "behavior.animations.speed.custom",
-            "Custom lengths. Pick a speed to replace them."
+            "Custom durations. Pick a speed to replace them."
         )
     }
 

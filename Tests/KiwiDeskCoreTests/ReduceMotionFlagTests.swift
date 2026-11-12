@@ -13,7 +13,7 @@ import Testing
 @Suite("KiwiDesk's own Reduce Motion (#3238)", .serialized)
 @MainActor
 struct ReduceMotionFlagTests {
-    private func withOff(_ body: () throws -> Void) rethrows {
+    private func withOff(_ body: () -> Void) {
         let system = ReduceMotion.systemOverride
         ReduceMotion.systemOverride = false
         ReduceMotion.kiwiDesk = true
@@ -21,7 +21,7 @@ struct ReduceMotionFlagTests {
             ReduceMotion.kiwiDesk = false
             ReduceMotion.systemOverride = system
         }
-        try body()
+        body()
     }
 
     @Test("the read ORs the flag into macOS's")
@@ -62,23 +62,40 @@ struct ReduceMotionFlagTests {
         )
     }
 
-    /// The engine's gate as Bootstrap wires it: under Off a frame
-    /// change lands at once, with no animation started.
+    /// The engine on the home, as Bootstrap wires it
+    /// (`ReduceMotionHomeTests` ▸ `gatesAreWired`): under Off a
+    /// frame change lands at once, and no animation is left running.
     @Test("the engine starts no animation under Off")
-    func engineStartsNothing() {
+    func engineStartsNothing() throws {
+        let screen = try #require(NSScreen.screens.first)
         let engine = AnimationEngine()
         engine.reduceMotion = { ReduceMotion.isOn }
-        withOff { #expect(engine.reduceMotion()) }
-        ReduceMotion.systemOverride = false
-        defer { ReduceMotion.systemOverride = nil }
-        #expect(!engine.reduceMotion())
+        var landed: [(WindowID, CGRect, Bool)] = []
+        engine.apply = { landed.append(($0, $1, $2)) }
+        let target = CGRect(x: 100, y: 100, width: 400, height: 300)
+        withOff {
+            engine.animate(
+                window: WindowID(7),
+                on: screen,
+                from: CGRect(x: 0, y: 0, width: 300, height: 200),
+                to: target
+            )
+        }
+        #expect(landed.count == 1)
+        #expect(landed.first?.1 == target)
+        #expect(landed.first?.2 == true)
+        let running = engine.animations.values.reduce(0) { $0 + $1.count }
+        #expect(running == 0)
     }
 
-    /// The overlays' default gate is the bars' one, which reads the
-    /// home: a Slide pick draws Show the Space under Off.
-    @Test("the Space slide draws Show the Space under Off")
+    /// Off is a Reduce Motion read, so a Slide pick falls back to
+    /// Show the Space through the one `drawn(reduceMotion:)`; the
+    /// overlays' default reads the home (`gatesAreWired`).
+    @Test("a Slide pick draws Show the Space under Off")
     func slideFallsBack() {
+        let saved = BarMotion.reducedOverride
         BarMotion.reducedOverride = nil
+        defer { BarMotion.reducedOverride = saved }
         withOff {
             #expect(BarMotion.isReduced)
             let drawn = SpaceTransition.slide.drawn(

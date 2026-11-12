@@ -11,14 +11,7 @@ struct SimpleAnimationsCard: View {
     var body: some View {
         SimpleCard(title: SettingsCatalog.colors.motionCard.text) {
             VStack(alignment: .leading, spacing: 8) {
-                if reduceMotion {
-                    WarningBox(text: MotionCard.reduceMotionWarning) {
-                        Button(MotionCard.openAccessibilityTitle) {
-                            MotionCard.openAccessibilityDisplay()
-                        }
-                        .settingsActionButton()
-                    }
-                }
+                if reduceMotion { MotionCard.reduceMotionBox }
                 AnimationSpeedRow(model: model)
             }
         }

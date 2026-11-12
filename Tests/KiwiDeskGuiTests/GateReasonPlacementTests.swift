@@ -89,6 +89,8 @@ struct GateReasonPlacementTests {
                 // group under its first row.
                 .colours(.spaceTransition),
                 .colours(.spaceScrollTransition),
+                // #3238: the speed preset, the same shape.
+                .colours(.animationSpeed),
                 // The Reveal row beside it greys while no bar hides:
                 // the bars' values sit above it, not that a reveal
                 // needs a hiding bar (owner ruling, 2026-10-21).
@@ -148,10 +150,16 @@ struct GateReasonPlacementTests {
         .split(whereSeparator: \.isWhitespace).joined()
         #expect(
             source.contains(
-                "ifreduceMotion{WarningBox(text:Self.reduceMotionWarning)"
+                "ifreduceMotion{Self.reduceMotionBox}"
             )
         )
-        #expect(source.contains("Self.openAccessibilityDisplay()"))
+        #expect(
+            source.contains(
+                "WarningBox(text:reduceMotionWarning)"
+                    + "{Button(openAccessibilityTitle)"
+                    + "{openAccessibilityDisplay()}"
+            )
+        )
     }
 
     /// The other two channels, pinned by one member each — a

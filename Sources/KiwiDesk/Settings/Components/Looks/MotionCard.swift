@@ -26,14 +26,7 @@ struct MotionCard: View {
                 // A whole card an OS switch greys says so in a box
                 // with its one fix, beside the header's `?` (owner
                 // ruling, 2026-10-21).
-                if reduceMotion {
-                    WarningBox(text: Self.reduceMotionWarning) {
-                        Button(Self.openAccessibilityTitle) {
-                            Self.openAccessibilityDisplay()
-                        }
-                        .settingsActionButton()
-                    }
-                }
+                if reduceMotion { Self.reduceMotionBox }
                 // Reduce Motion greys the CONTENT, never the
                 // header, so the `?` stays a live #527 anchor —
                 // the `.motion` container's `.runtime` census
@@ -69,7 +62,8 @@ struct MotionCard: View {
     /// Whether `key` greys: the card's Reduce Motion gate, less any
     /// row the census exempts, one `GreyOut` per row, never nested
     /// (gui.md). KiwiDesk's own Off greys every row below the speed
-    /// preset, whose box carries the way back (#3238).
+    /// preset (#3238): a wiring predicate, since its reason and fix
+    /// are the preset row's own box, which no census gate draws.
     private func greyed(_ key: SettingKey) -> Bool {
         if reduceMotion { return !key.placement.exemptFromContainerGate }
         return kiwiDeskOff && key != .colours(.animationSpeed)
@@ -155,6 +149,15 @@ struct MotionCard: View {
             "The bars' animations are in %1$@.",
             CrossReferenceRow.linkSlot
         )
+    }
+
+    /// macOS Reduce Motion's box with its one fix, which Simple's
+    /// Animations card draws too (#3238).
+    static var reduceMotionBox: some View {
+        WarningBox(text: reduceMotionWarning) {
+            Button(openAccessibilityTitle) { openAccessibilityDisplay() }
+                .settingsActionButton()
+        }
     }
 
     static var reduceMotionWarning: String {
