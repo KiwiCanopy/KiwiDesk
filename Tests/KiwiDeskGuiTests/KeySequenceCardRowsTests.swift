@@ -60,12 +60,20 @@ struct KeySequenceCardRowsTests {
 
     @Test("The picker pins Extend Sequence above, App… then Lua… below")
     func pickerSlots() {
+        let group = SequenceActionCatalog.Group(
+            title: "Focus",
+            commands: [NavCommand(label: "Left", lua: "KiwiDesk.x()")]
+        )
         let slots = SequenceActionMenu.sequence(
-            [],
+            [group],
             pinned: ["branch"],
             catalogue: true
         )
-        #expect(slots == [.pinned("branch"), .app, .lua])
+        #expect(
+            slots == [
+                .pinned("branch"), .command("KiwiDesk.x()"), .app, .lua,
+            ]
+        )
         let pinsOnly = SequenceActionMenu.sequence(
             [],
             pinned: ["family", "split"],
@@ -82,18 +90,27 @@ struct KeySequenceCardRowsTests {
         let menu = Self.flat(try Self.source("SequenceActionMenu.swift"))
         #expect(
             menu.contains(
-                "ifface.kind==.custom{Button(action:onEditLua){"
+                "ifface.kind==.custom,letonEditLua{"
+                    + "Button(action:onEditLua){"
             )
         )
         #expect(menu.contains(".buttonStyle(SequenceDashedStyle())"))
         #expect(menu.contains("}else{Button{request=SequencePickRequest("))
         #expect(menu.contains(".settingsPopUpTrigger()"))
         // The rows the menu draws, not only its cursor's list.
-        #expect(
-            menu.contains(
-                "ForEach(pins){pininpinned(.pinned(pin.id),pin.label,"
+        // Both pickers draw the pinned rows, each in its own body.
+        let raw = try Self.source("SequenceActionMenu.swift")
+        for body in ["private var popover:", "private var pinsOnly:"] {
+            let scoped = try #require(
+                SourceScan.declarationBody(after: body, in: raw)
             )
-        )
+            #expect(
+                Self.flat(scoped).contains(
+                    "ForEach(pins){pininpinned(.pinned(pin.id),pin.label,"
+                ),
+                "\(body) draws no pinned rows"
+            )
+        }
         #expect(menu.contains("pinned(.app,Self.appLabel"))
         #expect(menu.contains("pinned(.lua,Self.luaLabel"))
         // An end key pins Extend Sequence above its catalogue.

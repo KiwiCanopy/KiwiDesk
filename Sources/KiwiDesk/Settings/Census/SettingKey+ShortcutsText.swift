@@ -98,7 +98,7 @@ extension ShortcutsKey {
         case .scrollNaturalMouse:
             return .text("shortcuts.gestures.scroll.mouse")
         case .gestureBindings:
-            return .text("shortcuts.gestures.bindings")
+            return .text("shortcuts.gestures.rows")
         case .focusWrap:
             return .text(
                 "shortcuts.focus_wrap",

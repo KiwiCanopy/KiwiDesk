@@ -2,7 +2,7 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// A gesture row's keys (#3183 ▸ Ruling): the shortcut recorder's
+/// A gesture row's keys (#3199 ▸ Ruling): the shortcut recorder's
 /// well, recording modifiers alone — the largest set held commits
 /// when every key is released. A gesture that may hold no keys
 /// (`allowsNone`) reads "None" while empty and keeps its × to clear
@@ -18,7 +18,7 @@ struct GestureChordRecorder: View {
     /// Core's verdict on a recorded chord; nil accepts it.
     let refuse: (ScrollChord) -> String?
     let onRecord: (ScrollChord) -> Void
-    /// Arms on arrival — a new row's keys (#3183 ▸ new row).
+    /// Arms on arrival — a new row's keys (#3199 ▸ Ruling).
     var armsOnAppear = false
 
     @EnvironmentObject private var coordinator: RecorderCoordinator

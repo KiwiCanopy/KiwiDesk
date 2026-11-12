@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One device's gesture list (#3183 ▸ Cards): Natural scrolling
+/// One device's gesture list (#3199 ▸ Ruling): Natural scrolling
 /// first, then a row per bound gesture, the seeds included as real
 /// rows, then Add and Restore Defaults. Rows are sorted when the
 /// card appears (gesture, then keys) and never re-sorted while
@@ -16,6 +16,8 @@ struct GestureListCard: View {
 
     @State private var entries: [GestureListEntry] = []
     @State private var open: Set<UUID> = []
+    /// Rows with no action yet, which the map does not hold.
+    @State private var pending: Set<UUID> = []
     /// The row whose recorder arms as it appears.
     @State private var fresh: UUID?
     @State private var seeded = false
@@ -39,6 +41,7 @@ struct GestureListCard: View {
                         catalog: catalog,
                         open: $open,
                         armsOnAppear: fresh == entry.id,
+                        onUnbound: { pending.insert(entry.id) },
                         onRemove: { remove(entry) }
                     )
                 }
@@ -46,6 +49,20 @@ struct GestureListCard: View {
             }
         }
         .onAppear(perform: snapshot)
+        .onChange(of: model.config.gesture) { _, base in
+            entries = GestureListEdits.reconcile(
+                entries,
+                pending: pending,
+                in: base,
+                on: device
+            )
+            // A row that took an action is the map's from here on.
+            pending = pending.filter { id in
+                entries.first { $0.id == id }.map {
+                    GestureListEdits.action(of: $0.key, in: base) == nil
+                } ?? false
+            }
+        }
     }
 
     /// Apple's own name over System · On · Off (#3200), with the
@@ -133,19 +150,19 @@ struct GestureListCard: View {
             L(
                 "shortcuts.gestures.list.mouse_help",
                 "Bind a drag, a move or a scroll with keys held to an "
-                    + "action. A scroll's family follows your fingers "
-                    + "and steps as far as you scroll; change one "
-                    + "direction and each direction acts once per "
-                    + "scroll instead."
+                    + "action. With one action for every direction, a "
+                    + "scroll steps as far as you scroll; give one "
+                    + "direction its own action and each direction acts "
+                    + "once per scroll instead."
             )
         case .trackpad:
             L(
                 "shortcuts.gestures.list.trackpad_help",
                 "Bind a tap or a swipe to an action; a tap may take "
-                    + "no keys. A swipe's family slides with your "
-                    + "fingers and steps as far as you swipe; change one "
-                    + "direction and each direction acts once per swipe "
-                    + "instead."
+                    + "no keys. With one action for every direction, a "
+                    + "swipe slides with your fingers and steps as far "
+                    + "as you swipe; give one direction its own action "
+                    + "and each direction acts once per swipe instead."
             )
         }
     }
@@ -153,7 +170,7 @@ struct GestureListCard: View {
     // MARK: - Rows
 
     /// The rows as the map binds them; mixed rows open, the rest
-    /// closed (#3183 ▸ Expansion and sort).
+    /// closed (#3199 ▸ Ruling).
     private func snapshot() {
         guard !seeded else { return }
         seeded = true
@@ -176,6 +193,7 @@ struct GestureListCard: View {
             .map(\.id)
         )
         fresh = nil
+        pending = []
     }
 
     /// A new row suggests the last gesture and arms its recorder.
@@ -189,6 +207,7 @@ struct GestureListCard: View {
         else { return }
         let entry = GestureListEntry(key)
         entries.append(entry)
+        pending.insert(entry.id)
         fresh = entry.id
     }
 
@@ -200,6 +219,7 @@ struct GestureListCard: View {
         }
         entries.removeAll { $0.id == entry.id }
         open.remove(entry.id)
+        pending.remove(entry.id)
     }
 
     private func restore() {

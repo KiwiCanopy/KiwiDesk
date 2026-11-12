@@ -185,17 +185,24 @@ extension SettingsRevertRegister {
                 ?? false)
     }
 
-    /// One gesture row back to the baseline, keyed by its spelling;
-    /// a row that names none takes the whole map (#3183).
+    /// A gesture row back to the baseline: every key its instance
+    /// names — a re-key's two together — or the whole map for a row
+    /// that names none (#3183).
     private static let gestureRow = RevertWriter(
         paths: ["config.gesture"]
     ) { model, instance in
-        guard let instance, let key = GestureKey(spelling: instance)
-        else {
+        let keys = instance.map {
+            $0.split(
+                separator: SettingsValueReadout.gestureMoveSeparator
+            ).compactMap { GestureKey(spelling: String($0)) }
+        }
+        guard let keys, !keys.isEmpty else {
             model.config.gesture = model.cleanConfig.gesture
             return
         }
-        model.config.gesture[key] = model.cleanConfig.gesture[key]
+        for key in keys {
+            model.config.gesture[key] = model.cleanConfig.gesture[key]
+        }
     }
 
     private static func scroll<V>(

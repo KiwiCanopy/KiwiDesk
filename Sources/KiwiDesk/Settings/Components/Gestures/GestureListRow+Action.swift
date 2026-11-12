@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A gesture row's action picker (#3183 ▸ Action picker): the one
+/// A gesture row's action picker (#3199 ▸ Ruling): the one
 /// `SequenceActionMenu`, handed the pins the gesture binds — a
 /// swipe's or a scroll's families and "Per direction", a drag's
 /// grabs — and the whole catalogue only where the gesture runs one
@@ -18,14 +18,28 @@ extension GestureListRow {
             ),
             pins: pins,
             showsCatalogue: offersCatalogue,
-            onPick: { command in
-                bind(.run(LuaAction(lua: command.lua, kind: .navigation)))
-            },
-            onApp: {},
-            onLua: {},
-            onEditLua: {},
+            onPick: { bind(GestureListEdits.action(picking: $0)) },
+            onApp: appDoor,
+            onLua: luaDoor,
+            onEditLua: editLuaDoor,
             request: $picking
         )
+    }
+
+    /// App… and Lua…, offered only where the row runs one action.
+    private var appDoor: (() -> Void)? {
+        guard offersCatalogue else { return nil }
+        return { choosingApp = true }
+    }
+
+    private var luaDoor: (() -> Void)? {
+        guard offersCatalogue else { return nil }
+        return { startLua() }
+    }
+
+    private var editLuaDoor: (() -> Void)? {
+        guard offersCatalogue else { return nil }
+        return { editingLua = LuaEditRequest(id: entry.id) }
     }
 
     /// A gesture with directions or a grab picks from its pins
@@ -78,8 +92,10 @@ extension GestureListRow {
                 ) { bind(.grab(grab)) }
             }
         }
-        guard !key.input.directions.isEmpty else { return [] }
-        let families = key.input.families.map { family in
+        // The directions open through the disclosure alone, never a
+        // pinned entry (#3199 ▸ Ruling amendment: directions without
+        // a split button).
+        return key.input.families.map { family in
             SequencePickPin(
                 id: family.rawValue,
                 label: GestureListWords.family(family),
@@ -87,20 +103,12 @@ extension GestureListRow {
                 picked: action == .family(family)
             ) { bind(.family(family)) }
         }
-        let split = SequencePickPin(
-            id: "per_direction",
-            label: GestureListWords.perDirectionPick,
-            symbol: "arrow.triangle.branch",
-            picked: { if case .split = action { true } else { false } }()
-        ) { open.insert(entry.id) }
-        return families + [split]
     }
 
     /// Binds `action` on the row's key; a family folds the arms
-    /// back into one.
+    /// back into one. The directions stay as open as they were.
     func bind(_ action: GestureAction) {
         GestureListEdits.set(action, at: key, in: &model.config.gesture)
-        if case .family = action { open.remove(entry.id) }
     }
 }
 
@@ -109,7 +117,7 @@ extension String {
     fileprivate var nonEmpty: String? { trimmed.isEmpty ? nil : self }
 }
 
-/// A row's gesture icon (#3183 ▸ Row): the gesture's symbol, a
+/// A row's gesture icon (#3199 ▸ Ruling): the gesture's symbol, a
 /// swipe or a tap carrying its finger count as a badge.
 struct GestureIcon: View {
     let input: GestureInput

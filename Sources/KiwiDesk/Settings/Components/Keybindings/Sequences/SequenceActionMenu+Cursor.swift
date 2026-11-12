@@ -18,22 +18,25 @@ extension SequenceActionMenu {
         Self.sequence(
             groups,
             pinned: pins.map(\.id),
-            catalogue: showsCatalogue
+            catalogue: showsCatalogue,
+            tail: (onApp == nil ? [] : [.app]) + (onLua == nil ? [] : [.lua])
         )
     }
 
     /// The rows for pinned ids `pinned` over `groups`, the catalogue
-    /// and its App… and Lua… only where `catalogue` offers them.
+    /// and the `tail` of App… and Lua… only where `catalogue`
+    /// offers them.
     static func sequence(
         _ groups: [SequenceActionCatalog.Group],
         pinned: [String],
-        catalogue: Bool
+        catalogue: Bool,
+        tail: [SequencePickSlot] = [.app, .lua]
     ) -> [SequencePickSlot] {
         let top = pinned.map { SequencePickSlot.pinned($0) }
         guard catalogue else { return top }
         return top
             + groups.flatMap(\.commands).map { .command($0.lua) }
-            + [.app, .lua]
+            + tail
     }
 
     /// The popover opens on the current pick, else the first command.
@@ -111,11 +114,11 @@ extension SequenceActionMenu {
         case .app:
             request = nil
             // The app list opens once this popover has gone.
-            DispatchQueue.main.async { onApp() }
+            DispatchQueue.main.async { onApp?() }
         case .lua:
             request = nil
             // The editor opens once this popover has gone.
-            DispatchQueue.main.async { onLua() }
+            DispatchQueue.main.async { onLua?() }
         case .command(let lua):
             guard
                 let command = groups.flatMap(\.commands).first(where: {

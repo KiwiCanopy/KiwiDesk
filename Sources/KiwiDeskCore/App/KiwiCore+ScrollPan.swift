@@ -160,7 +160,7 @@ extension KiwiCore {
     /// past every window a lens leaves out (#2103 ruling 45). A
     /// native-fullscreen member is left out: it sits on a Desktop
     /// nobody shows, so the focus gate refuses it (#1345).
-    func stepInOrder(
+    private func stepInOrder(
         _ space: Space,
         toward direction: Direction,
         by step: Int

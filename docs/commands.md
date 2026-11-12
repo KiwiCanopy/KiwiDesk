@@ -57,7 +57,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`move_to_track`](lua-reference.md#move_to_track) | Moves the focused window one track along; takes prev or next. |
 | [`focus_or_spawn`](lua-reference.md#focus_or_spawn) | Focuses an app's window, or launches a new instance. |
 | [`focus_app_window`](lua-reference.md#focus_app_window) | Focuses the focused app's next or previous window, on any Space, screen or Desktop. |
-| [`focus_space_window`](lua-reference.md#focus_space_window) | Focuses the Space's next or previous window in its own order, wrapping at the ends. |
+| [`focus_space_window`](lua-reference.md#focus_space_window) | Focuses the Space's next or previous window, along the row on Scrolling and Monocle. |
 | [`spawn_new`](lua-reference.md#spawn_new) | Launches a new instance of an app by bundle identifier. |
 | [`open_in_background`](lua-reference.md#open_in_background) | Opens an app without taking focus, in a Space or on a Desktop you name, or where you are. |
 | [`gather`](lua-reference.md#gather) | Moves every window of an app into the Space you are on, from other Desktops too. |

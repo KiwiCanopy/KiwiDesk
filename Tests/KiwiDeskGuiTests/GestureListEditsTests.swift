@@ -78,4 +78,27 @@ struct GestureListEditsTests {
         #expect(!GestureListEdits.differsFromDefaults(on: .mouse, in: base))
         #expect(GestureListEdits.action(of: mine, in: base) == .family(.walk))
     }
+
+    @Test("rows follow the map: kept, pending, gone and new")
+    func reconcile() {
+        var base = GestureMap()
+        let rows = GestureListEdits.rows(in: base, on: .mouse)
+            .map { GestureListEntry($0) }
+        let pending = GestureListEntry(GestureKey(.wheel, [.shift]))
+        let dropped = rows[0]
+        GestureListEdits.remove(dropped.key, in: &base)
+        let mine = GestureKey(.wheel, [.control, .shift])
+        GestureListEdits.set(.family(.walk), at: mine, in: &base)
+        let next = GestureListEdits.reconcile(
+            rows + [pending],
+            pending: [pending.id],
+            in: base,
+            on: .mouse
+        )
+        #expect(!next.contains { $0.id == dropped.id })
+        #expect(next.contains { $0.id == pending.id })
+        #expect(next.last?.key == mine)
+        let kept = rows.dropFirst().map(\.id)
+        #expect(next.prefix(kept.count).map(\.id) == Array(kept))
+    }
 }

@@ -142,7 +142,7 @@ extension GesturesPart {
             )
         }
         .searchAnchored(
-            SettingsCatalog.shortcuts.gestures.children.bindings
+            SettingsCatalog.shortcuts.gestures.children.gestureBindings
         )
     }
 

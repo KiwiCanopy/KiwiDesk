@@ -40,9 +40,7 @@ struct GestureCatalogueTests {
         let commands = catalog.groups.flatMap(\.commands)
         #expect(commands.count > 10)
         for command in commands {
-            let action = GestureAction.run(
-                LuaAction(lua: command.lua, kind: .navigation)
-            )
+            let action = GestureListEdits.action(picking: command)
             var base = GestureMap()
             let key = GestureKey(.tap5)
             GestureListEdits.set(action, at: key, in: &base)
@@ -57,6 +55,22 @@ struct GestureCatalogueTests {
             }
             #expect(catalog.command(running: stored.lua)?.lua == command.lua)
         }
+    }
+
+    @Test("a row's pick goes through the one pick door")
+    func rowPicksThroughTheDoor() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Gestures/"
+                    + "GestureListRow+Action.swift"
+            )
+        let text = try SourceScan.strippedSource(at: file)
+            .filter { !$0.isWhitespace }
+        #expect(
+            text.contains(
+                "onPick:{bind(GestureListEdits.action(picking:$0))}"
+            )
+        )
     }
 
     @Test("only the key-sequence card and the gesture cards build one")

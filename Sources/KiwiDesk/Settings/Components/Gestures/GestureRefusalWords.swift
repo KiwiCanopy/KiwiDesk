@@ -1,8 +1,8 @@
 import KiwiDeskCore
 
-/// Why a gesture row's keys or action are refused (#3183 ▸ Hints
-/// and clashes): Core names the refusal, the card words it under
-/// the row or in the recorder.
+/// Why a gesture row's keys or action are refused (#3199 ▸ Ruling):
+/// Core names the refusal, the card words it under the row or in
+/// the recorder, each as the rule that forbids it.
 @MainActor
 enum GestureRefusalWords {
     static func sentence(_ refusal: GestureRefusal) -> String {
@@ -27,12 +27,13 @@ enum GestureRefusalWords {
         case .familyNotOffered:
             L(
                 "shortcuts.gestures.refusal.family",
-                "This gesture can't do that."
+                "This gesture offers other actions; choose one of those."
             )
         case .directionalNeedsFamily:
             L(
                 "shortcuts.gestures.refusal.directional",
-                "Choose an action for each direction."
+                "A swipe or scroll takes one action for every direction, "
+                    + "or one per direction."
             )
         case .grabOnlyOnDrag:
             L(
@@ -53,11 +54,10 @@ enum GestureRefusalWords {
     }
 
     /// A clash: another row of the card stands on these keys.
-    static func taken(_ input: GestureInput) -> String {
+    static var taken: String {
         L(
             "shortcuts.gestures.refusal.taken",
-            "Another %1$@ row holds these keys.",
-            GestureListWords.input(input)
+            "Another row already holds these keys."
         )
     }
 }

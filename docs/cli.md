@@ -540,7 +540,7 @@ order a repeat `focus_or_spawn` press walks; unlike macOS's own
 
 :::unreleased
 `focus_space_window` takes `next|prev` and focuses the Space's
-next or previous window in its own order, wrapping at the ends
+next or previous window, along the row on Scrolling and Monocle
 ([`focus_space_window`](lua-reference.md#focus_space_window)).
 :::
 

@@ -41,7 +41,7 @@ enum GestureListWords {
             L("shortcuts.gestures.input.swipe4", "Four-finger swipe")
         case .swipe5:
             L("shortcuts.gestures.input.swipe5", "Five-finger swipe")
-        // Never offered: no front fires them (#3183 ▸ hidden).
+        // Never offered: no front fires them (#3199 ▸ Ruling).
         case .spread, .pinchTogether, .rotate, .forceClick:
             input.rawValue
         }
@@ -89,15 +89,12 @@ enum GestureListWords {
         _ family: GestureFamily,
         toward direction: GestureDirection
     ) -> String {
-        let backward = direction.isBackwardStep
-        switch family {
-        case .walk, .space, .track:
-            return backward
-                ? L("shortcuts.gestures.arm.previous", "Previous")
-                : L("shortcuts.gestures.arm.next", "Next")
-        case .focus, .swap, .display:
+        guard let forward = family.stepsForward(direction) else {
             return Self.direction(direction)
         }
+        return forward
+            ? L("shortcuts.gestures.arm.next", "Next")
+            : L("shortcuts.gestures.arm.previous", "Previous")
     }
 
     static func direction(_ direction: GestureDirection) -> String {
@@ -133,23 +130,20 @@ enum GestureListWords {
         L("shortcuts.gestures.per_direction", "Per direction")
     }
 
-    static var perDirectionPick: String {
-        L("shortcuts.gestures.per_direction_pick", "Per direction…")
-    }
-
     /// A row of mixed directions' caption: a swipe gave up its
     /// slide, a wheel its steps as far as it scrolls.
     static func mixedCaption(_ input: GestureInput) -> String {
         guard input.isWheel else {
             return L(
                 "shortcuts.gestures.mixed_caption",
-                "Directions act once per swipe; the row no longer "
+                "Each direction acts once per swipe and no longer "
                     + "slides with your fingers."
             )
         }
         return L(
             "shortcuts.gestures.mixed_caption_wheel",
-            "Directions act once per scroll, however far you scroll."
+            "Each direction acts once per scroll, however far you "
+                + "scroll."
         )
     }
 
@@ -196,12 +190,5 @@ enum GestureListWords {
 
     static var gesture: String {
         L("shortcuts.gestures.list.gesture", "Gesture")
-    }
-}
-
-extension GestureDirection {
-    /// Up, left and back step toward the start of a list.
-    var isBackwardStep: Bool {
-        self == .up || self == .left || self == .back
     }
 }

@@ -85,6 +85,10 @@ struct GesturesScrollWiringTests {
             )
         )
         #expect(natural.contains("naturalReach"))
+        let body = try #require(
+            SourceScan.declarationBody(after: "var body:", in: card)
+        )
+        #expect(body.contains("naturalRow"))
         let reach = try #require(
             SourceScan.declarationBody(
                 after: "private var naturalReach:",

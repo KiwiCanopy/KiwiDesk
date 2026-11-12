@@ -234,6 +234,12 @@ GLOSSARY = {
     # example (#2103), the same class: a proper noun no locale
     # translates.
     "sketchybar",
+    # Apple's Magic Mouse, named in the Trackpad gesture card's
+    # caption (#3183): ja, ko and ru ship Apple's own Latin name.
+    # Trade: a stray English "magic" or "mouse" in non-Latin prose
+    # is no longer caught.
+    "magic",
+    "mouse",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     # The one edge both bars sit on (#1517): a product name, kept

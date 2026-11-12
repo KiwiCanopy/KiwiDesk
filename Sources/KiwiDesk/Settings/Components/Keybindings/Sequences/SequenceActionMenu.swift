@@ -7,7 +7,7 @@ struct SequencePickRequest: Identifiable, Equatable {
 }
 
 /// The one catalogue-backed action picker (#1871, owner 2026-11-09;
-/// #3162; #3183 ▸ the action picker): a search field over the whole
+/// #3162; #3199 ▸ Ruling): a search field over the whole
 /// catalogue in the page's groups, opened on the current pick, with
 /// the caller's pinned entries above and "App…" and "Lua…" below the
 /// scrolling list — or the pinned entries alone, where the caller
@@ -27,10 +27,13 @@ struct SequenceActionMenu: View {
     /// Whether the catalogue, App… and Lua… are offered at all.
     var showsCatalogue = true
     let onPick: (NavCommand) -> Void
-    let onApp: () -> Void
-    let onLua: () -> Void
+    /// App… and Lua… are offered only where the caller takes them,
+    /// and a Lua action wears the dashed container only where it
+    /// can be edited (#3183: no affordance for a missing channel).
+    var onApp: (() -> Void)?
+    var onLua: (() -> Void)?
     /// A click on a Lua key's dashed container.
-    let onEditLua: () -> Void
+    var onEditLua: (() -> Void)?
 
     /// Open while set; the row's "Change action…" sets it too.
     @Binding var request: SequencePickRequest?
@@ -46,11 +49,7 @@ struct SequenceActionMenu: View {
             .accessibilityLabel(spokenLabel)
             .accessibilityValue(title)
             .popover(item: $request) { _ in
-                if showsCatalogue {
-                    popover.settingsPopoverChrome()
-                } else {
-                    pinsOnly.settingsPopoverChrome()
-                }
+                content.settingsPopoverChrome()
             }
             // Every open starts with an empty search (#1357).
             .onChange(of: request) { _, open in
@@ -59,7 +58,7 @@ struct SequenceActionMenu: View {
     }
 
     @ViewBuilder private var trigger: some View {
-        if face.kind == .custom {
+        if face.kind == .custom, let onEditLua {
             Button(action: onEditLua) {
                 Text(title).fixedSize(horizontal: true, vertical: false)
             }
@@ -120,21 +119,32 @@ struct SequenceActionMenu: View {
             }
             Divider()
             list(groups)
-            Divider()
-            pinned(.app, Self.appLabel, symbol: "app")
-            pinned(
-                .lua,
-                Self.luaLabel,
-                symbol: "chevron.left.forwardslash.chevron.right"
-            )
+            if onApp != nil || onLua != nil { Divider() }
+            if onApp != nil {
+                pinned(.app, Self.appLabel, symbol: "app")
+            }
+            if onLua != nil {
+                pinned(
+                    .lua,
+                    Self.luaLabel,
+                    symbol: "chevron.left.forwardslash.chevron.right"
+                )
+            }
         }
         .padding(12)
         .frame(width: 280, height: 360)
         .onAppear { searchFocused = true }
     }
 
-    /// A pinned-only picker: no search, no catalogue (#3183 ▸ help,
-    /// not in-picker hints).
+    /// The popover's content: the searchable picker, or the pinned
+    /// entries alone where the caller offers no catalogue.
+    @ViewBuilder private var content: some View {
+        if showsCatalogue { popover } else { pinsOnly }
+    }
+
+    /// A pinned-only picker: no search, no catalogue (#3199 ▸ Help,
+    /// not in-picker hints), and the one cursor the keyboard moves
+    /// and Return picks, as the searchable picker's does.
     private var pinsOnly: some View {
         VStack(alignment: .leading, spacing: 2) {
             ForEach(pins) { pin in
@@ -148,6 +158,15 @@ struct SequenceActionMenu: View {
         }
         .padding(10)
         .frame(width: 260)
+        .focusable()
+        .focused($searchFocused)
+        .onKeyPress(.downArrow) { move(1, in: []) }
+        .onKeyPress(.upArrow) { move(-1, in: []) }
+        .onKeyPress(.return) {
+            commit([])
+            return .handled
+        }
+        .onAppear { searchFocused = true }
     }
 
     @ViewBuilder private func list(

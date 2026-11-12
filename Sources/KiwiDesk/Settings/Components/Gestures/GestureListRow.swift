@@ -3,7 +3,7 @@ import SwiftUI
 
 /// One row of the gesture list a card holds: the key it stands on,
 /// and an id that outlives a re-key so the row keeps its place
-/// (#3183 ▸ Expansion and sort).
+/// (#3199 ▸ Ruling).
 struct GestureListEntry: Identifiable, Equatable {
     let id: UUID
     var key: GestureKey
@@ -14,7 +14,7 @@ struct GestureListEntry: Identifiable, Equatable {
     }
 }
 
-/// A gesture list row (#3183 ▸ Row): disclosure, the gesture's icon,
+/// A gesture list row (#3199 ▸ Ruling): disclosure, the gesture's icon,
 /// its pop-up and its action, then the keys and the trash on the
 /// right, every key on the page in one column. A row with
 /// directions opens to a rail of direction sub-rows
@@ -29,12 +29,18 @@ struct GestureListRow: View {
     let catalog: SequenceActionCatalog
     @Binding var open: Set<UUID>
     var armsOnAppear = false
+    /// The row now binds nothing the map holds: it stays as pending.
+    let onUnbound: () -> Void
     let onRemove: () -> Void
 
     @State var picking: SequencePickRequest?
+    @State var choosingApp = false
+    @State var editingLua: LuaEditRequest?
     /// The gesture pop-up's drawn width, the directions' name column,
     /// so their actions line up under the row's.
     @State private var gestureColumn: CGFloat = 0
+    /// A gesture pop-up pick refused for the keys another row holds.
+    @State private var clash: String?
 
     var key: GestureKey { entry.key }
 
@@ -51,7 +57,7 @@ struct GestureListRow: View {
                     disclosureSlot
                     GestureIcon(input: key.input)
                     gesturePicker
-                    actionMenu
+                    actionContainer
                 }
                 Spacer(minLength: 8)
                 GestureChordRecorder(
@@ -165,12 +171,22 @@ struct GestureListRow: View {
         )
     }
 
-    /// Why the row would not fire as it stands, else what a row of
-    /// mixed directions gave up; nil for neither.
+    /// Why the row would not fire as it stands — its keys judged
+    /// even before an action is picked, a drag's keys included —
+    /// else what a row of mixed directions gave up; nil for neither.
     private var hint: String? {
-        guard let action else { return nil }
-        if let refusal = action.refusal(on: key) {
+        if let clash { return clash }
+        let probe = action ?? GestureListEdits.probe(for: key.input)
+        if let refusal = probe.refusal(on: key),
+            action != nil || refusal != .emptyAction
+        {
             return GestureRefusalWords.sentence(refusal)
+        }
+        if let held = GestureListEdits.heldByDrag(
+            key,
+            in: model.config.gesture
+        ) {
+            return GestureRefusalWords.sentence(held)
         }
         if case .split = action {
             return GestureListWords.mixedCaption(key.input)
@@ -184,10 +200,12 @@ struct GestureListRow: View {
     func refusal(of chord: ScrollChord) -> String? {
         let target = GestureKey(key.input, chord)
         if others.contains(target) {
-            return GestureRefusalWords.taken(target.input)
+            return GestureRefusalWords.taken
         }
-        guard let action else { return nil }
-        if let refusal = action.refusal(on: target) {
+        let probe = action ?? GestureListEdits.probe(for: key.input)
+        if let refusal = probe.refusal(on: target),
+            refusal != .emptyAction
+        {
             return GestureRefusalWords.sentence(refusal)
         }
         var base = model.config.gesture
@@ -217,7 +235,13 @@ struct GestureListRow: View {
     /// new gesture takes it; otherwise the row asks for one again.
     private func rekeyInput(to input: GestureInput) {
         let target = GestureKey(input, key.chord)
-        guard target != key, !others.contains(target) else { return }
+        clash = nil
+        guard target != key else { return }
+        guard !others.contains(target) else {
+            // The pop-up snaps back; the row says why.
+            clash = GestureRefusalWords.taken
+            return
+        }
         if let action, action.kindFits(input) {
             rekey(to: target)
             return
@@ -225,8 +249,8 @@ struct GestureListRow: View {
         if action != nil {
             GestureListEdits.remove(key, in: &model.config.gesture)
         }
+        onUnbound()
         entry.key = target
-        open.remove(entry.id)
     }
 }
 

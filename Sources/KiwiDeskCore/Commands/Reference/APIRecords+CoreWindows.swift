@@ -253,8 +253,8 @@ extension APIReference {
             .choice("direction", ModeCycleDirection.self)
         ),
         "focus_space_window": APIRecord(
-            "Focuses the Space's next or previous window in its own "
-                + "order, wrapping at the ends.",
+            "Focuses the Space's next or previous window, along the "
+                + "row on Scrolling and Monocle.",
             .choice("direction", ModeCycleDirection.self)
         ),
         "spawn_new": APIRecord(

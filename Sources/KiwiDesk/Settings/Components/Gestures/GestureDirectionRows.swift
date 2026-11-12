@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// An open row's directions (#3183 ▸ Directions): a hairline rail
+/// An open row's directions (#3199 ▸ Ruling): a hairline rail
 /// in the disclosure's slot, then one sub-row per direction on the
 /// row's own columns — the arrow under the icon, the name under the
 /// gesture pop-up, the action under the row's. While the row binds
@@ -73,11 +73,13 @@ struct GestureDirectionRow: View {
                 ),
                 pins: [],
                 onPick: { command in
-                    pick(LuaAction(lua: command.lua, kind: .navigation))
+                    guard
+                        case .run(let arm) = GestureListEdits.action(
+                            picking: command
+                        )
+                    else { return }
+                    pick(arm)
                 },
-                onApp: {},
-                onLua: {},
-                onEditLua: {},
                 request: $picking
             )
             .foregroundStyle(

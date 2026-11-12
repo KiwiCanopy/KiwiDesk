@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// The gesture list's edits over the draft's base map (#3183, #3199
@@ -13,17 +14,75 @@ enum GestureListEdits {
         GestureInput.allCases.filter { $0.device == device && $0.isFired }
     }
 
-    /// The card's rows: every bound key of the device, in the list's
-    /// order (gesture, then keys). The card snapshots this on
-    /// appear and never re-sorts while editing.
+    /// The card's rows: every key of the device the base and the
+    /// seeds bind, in the list's order (gesture, then keys) — one
+    /// Core refuses included, which its row's caption explains. The
+    /// card snapshots this on appear and never re-sorts while
+    /// editing.
     static func rows(
         in base: GestureMap,
         on device: GestureInput.Device
     ) -> [GestureKey] {
         let offered = Set(inputs(on: device))
-        return GestureSeeds.resolved(base: base, profile: nil).keys
-            .filter { offered.contains($0.input) }
-            .sorted()
+        let keys = Set(GestureSeeds.seeds.keys).union(base.entries.keys)
+        return keys.filter {
+            offered.contains($0.input) && action(of: $0, in: base) != nil
+        }
+        .sorted()
+    }
+
+    /// The card's rows after the map moved under them — a revert, a
+    /// Save, a reload: a row whose key is still bound keeps its id
+    /// and place, a `pending` row (added, or re-keyed onto a
+    /// gesture that dropped its action) stays, any other row whose
+    /// key left goes, and a key newly bound joins at the bottom.
+    static func reconcile(
+        _ entries: [GestureListEntry],
+        pending: Set<UUID>,
+        in base: GestureMap,
+        on device: GestureInput.Device
+    ) -> [GestureListEntry] {
+        let bound = rows(in: base, on: device)
+        let kept = entries.filter {
+            bound.contains($0.key) || pending.contains($0.id)
+        }
+        let held = Set(kept.map(\.key))
+        return kept
+            + bound.filter { !held.contains($0) }.map {
+                GestureListEntry($0)
+            }
+    }
+
+    /// The action a catalogue pick binds: the command's Lua as a
+    /// built-in, read back through `catalog.command(running:)`
+    /// (#3199 ▸ Stored value). The row and its guard share it.
+    static func action(picking command: NavCommand) -> GestureAction {
+        .run(LuaAction(lua: command.lua, kind: .navigation))
+    }
+
+    /// A stand-in action `input` takes, so its keys are judged
+    /// before a row picks one: a grab on a drag, a family where the
+    /// gesture has directions, else Lua.
+    static func probe(for input: GestureInput) -> GestureAction {
+        if input.isDrag { return .grab(.move) }
+        if let family = input.families.first { return .family(family) }
+        return .run(LuaAction(lua: "probe"))
+    }
+
+    /// The refusal of a click or hover_move whose keys a drag in
+    /// `base` holds, which Core drops (`GestureSeeds.resolved`).
+    static func heldByDrag(
+        _ key: GestureKey,
+        in base: GestureMap
+    ) -> GestureRefusal? {
+        guard key.input == .hoverMove || key.input == .click else {
+            return nil
+        }
+        return GestureSeeds.shadowRefusal(
+            of: key,
+            base: base,
+            profile: nil
+        )
     }
 
     /// What `key` binds once the base lies over the seeds.
