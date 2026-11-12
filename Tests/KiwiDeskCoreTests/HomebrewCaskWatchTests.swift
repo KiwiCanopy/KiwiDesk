@@ -78,7 +78,13 @@ struct HomebrewCaskWatchTests {
     @Test("the workflow only reads, on a schedule")
     func workflowOnlyReads() throws {
         let yaml = try workflowSource("homebrew-watch.yml")
-        #expect(yaml.contains("schedule:\n    - cron:"))
+        // Stripped comments leave blank lines between the two.
+        #expect(
+            yaml.range(
+                of: #"schedule:\s*\n\s*- cron:"#,
+                options: .regularExpression
+            ) != nil
+        )
         #expect(yaml.contains("workflow_dispatch:"))
         #expect(yaml.contains("permissions:\n  contents: read"))
         // Bare words, so a quoted value, a job-level block, `write-all`
