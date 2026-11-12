@@ -1,10 +1,9 @@
 name: Update Nix flake
 
-# The Nix twin of homebrew.yml (#2909): the owner's publication is
-# the event that advances KiwiCanopy/nix's KiwiDesk pin, and a manual
-# dispatch retries an existing published release. Nix users have no
-# Sparkle to fall back on, so a release is not complete until this
-# run is green (docs/design-decisions.md).
+# The owner's publication is the event that advances KiwiCanopy/nix's
+# KiwiDesk pin, and a manual dispatch retries an existing published
+# release. Nix users have no Sparkle to fall back on, so a release is
+# not complete until this run is green (docs/design-decisions.md).
 on:
   release:
     types: [published]
@@ -57,8 +56,7 @@ jobs:
             exit 1
           fi
           # Selected BY NAME, never by counting and indexing: a
-          # release also carries the .edsig and the .dmg
-          # (homebrew.yml carries the history).
+          # release also carries the .edsig and the .dmg.
           MATCHES="$(jq -c --arg want "$EXPECTED" \
             '[.assets[] | select(.name == $want)]' <<< "$RELEASE")"
           COUNT="$(jq 'length' <<< "$MATCHES")"

@@ -4,7 +4,7 @@ name: Sync Claude Code plugin
 # KiwiCanopy/KiwiDesk-Claude, because Claude Code clones the whole
 # repository a marketplace is in (#2258 ▸ Ruling 3). This copies the
 # released tag's `plugins/` folder there with the release's version,
-# on publication — the same boundary the Homebrew cask advances on.
+# on publication — the same boundary the Nix flake advances on.
 # KiwiDesk-Claude is an EXACT mirror of `plugins/` plus the LICENSE:
 # never edit it by hand, the next sync deletes what `plugins/` lacks.
 on:

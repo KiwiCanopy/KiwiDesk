@@ -58,7 +58,7 @@ struct ClaudePluginSyncWorkflowTests {
     }
 
     /// A manual retry is a retry of a PUBLISHED release, as the
-    /// Homebrew cask's is.
+    /// Nix flake's is.
     @Test("a manual run refuses a draft's tag")
     func refusesDrafts() throws {
         let yaml = try workflowSource(Self.file)
