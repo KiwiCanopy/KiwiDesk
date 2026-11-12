@@ -1,0 +1,46 @@
+name: Watch Homebrew Cask
+
+# homebrew-cask's autobump updates the official cask from the latest
+# published release; nothing in this repo writes it. This run only
+# reads both sides and goes red once the cask lags a release past
+# the grace in scripts/check-homebrew-cask.py, so a stale cask is
+# seen (docs/design-decisions.md ▸ Homebrew is the deliberate
+# exception).
+on:
+  schedule:
+    # Daily, 06:41 UTC, off the hour.
+    - cron: '41 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: homebrew-watch
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    name: Compare cask and release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read the latest release and the cask
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/latest" \
+            > "$RUNNER_TEMP/release.json"
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --max-time 30 \
+            https://formulae.brew.sh/api/cask/kiwidesk.json \
+            > "$RUNNER_TEMP/cask.json"
+
+      - name: Fail when the cask lags
+        run: |
+          python3 scripts/check-homebrew-cask.py \
+            --release "$RUNNER_TEMP/release.json" \
+            --cask "$RUNNER_TEMP/cask.json"
