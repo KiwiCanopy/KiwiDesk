@@ -72,7 +72,7 @@ struct AutoFloatReasonTests {
         let reason = { (facts: WindowFacts) in
             FloatDetection.autoFloatReason(
                 facts,
-                bundleID: "com.apple.mail",
+                app: "com.apple.mail",
                 rules: FloatRules()
             )
         }
@@ -102,7 +102,7 @@ struct AutoFloatReasonTests {
                     zoomable: { true },
                     cancelsInsteadOfClosing: { cancels }
                 ) { "Archive Utility" },
-                bundleID: "com.apple.archiveutility",
+                app: "com.apple.archiveutility",
                 rules: rules
             )
         }

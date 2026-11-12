@@ -58,7 +58,7 @@ extension EventLoop {
         // without a recheck (#160). Gated on a titled rule
         // for this app so ordinary title churn (browsers,
         // terminals) never pays the window-server lookup.
-        if floatRules.hasTitleRule(bundleID: app.bundleID) {
+        if floatRules.hasTitleRule(app: app.listKey) {
             recheckFloat(
                 element,
                 id: id,

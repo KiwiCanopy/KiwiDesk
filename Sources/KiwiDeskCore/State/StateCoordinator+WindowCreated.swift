@@ -70,7 +70,7 @@ extension StateCoordinator {
         // window a Pocket key claims (#2612 ▸ 7); a Space a quiet
         // open named stands in for the rule, through its gate (#3152).
         let popup = windows[window.id]?.isPopup ?? false
-        let rule = window.appBundleID.flatMap { appRules[$0] }
+        let rule = window.appRef.listKey.flatMap { appRules[$0] }
         let ruled =
             held == nil && !popup && !claimed ? named ?? rule : nil
         // Only the rule's own verdict may earn the launch follow

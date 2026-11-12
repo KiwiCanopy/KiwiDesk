@@ -51,9 +51,7 @@ extension EventLoop {
                 hasObserver: observers[pid] != nil,
                 pid: pid,
                 activationPolicy: activationPolicy,
-                isIgnored: shouldIgnoreApp(
-                    bundleID: app.bundleID
-                )
+                isIgnored: shouldIgnoreApp(app)
             )
         else {
             detach(pid: pid, restoreEnhancedUI: true)
@@ -227,7 +225,7 @@ extension EventLoop {
                 // immediately; the one-reading grace below is
                 // only for the layer-scoped classes (built-in
                 // panels, accessory command bars #448).
-                if shouldIgnoreApp(bundleID: app.bundleID) {
+                if shouldIgnoreApp(app) {
                     ignorePending.remove(id)
                     continue
                 }

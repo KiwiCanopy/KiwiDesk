@@ -23,9 +23,7 @@ extension EventLoop {
         scanWindowsAtAttach: Bool
     ) {
         guard Self.isProcessID(app.pid) else { return }
-        let isIgnored = shouldIgnoreApp(
-            bundleID: app.ref.bundleID
-        )
+        let isIgnored = shouldIgnoreApp(app.ref)
         guard
             Self.shouldAttach(
                 pid: app.pid,
@@ -77,9 +75,7 @@ extension EventLoop {
             Self.shouldAttach(
                 pid: pid,
                 activationPolicy: activationPolicy,
-                isIgnored: shouldIgnoreApp(
-                    bundleID: ref.bundleID
-                )
+                isIgnored: shouldIgnoreApp(ref)
             )
         else { return }
         // Per-app timing (#672): every AX round trip below can

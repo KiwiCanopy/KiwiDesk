@@ -16,13 +16,13 @@ struct FloatRuleTests {
         let rules = FloatRules(["com.apple.calculator"])
         #expect(
             rules.matches(
-                bundleID: "com.apple.calculator",
+                app: "com.apple.calculator",
                 title: "X"
             )
         )
         #expect(
             !rules.matches(
-                bundleID: "com.apple.finder",
+                app: "com.apple.finder",
                 title: "X"
             )
         )
@@ -36,18 +36,18 @@ struct FloatRuleTests {
         let rules = FloatRules(["com.apple.Calculator"])
         #expect(
             rules.matches(
-                bundleID: "com.apple.calculator",
+                app: "com.apple.calculator",
                 title: "X"
             )
         )
         #expect(
             rules.matches(
-                bundleID: "com.apple.CALCULATOR",
+                app: "com.apple.CALCULATOR",
                 title: "X"
             )
         )
         #expect(
-            rules.hasTitleRule(bundleID: "COM.APPLE.CALCULATOR")
+            rules.hasTitleRule(app: "COM.APPLE.CALCULATOR")
                 == false
         )
     }
@@ -55,8 +55,8 @@ struct FloatRuleTests {
     @Test("A nil bundle id matches no rule")
     func nilBundleID() throws {
         let rules = FloatRules(["com.apple.calculator"])
-        #expect(!rules.matches(bundleID: nil, title: "X"))
-        #expect(!rules.hasTitleRule(bundleID: nil))
+        #expect(!rules.matches(app: nil, title: "X"))
+        #expect(!rules.hasTitleRule(app: nil))
     }
 
     @Test("App:Title rule needs the title fragment")
@@ -64,13 +64,13 @@ struct FloatRuleTests {
         let rules = FloatRules(["com.apple.finder:Get Info"])
         #expect(
             rules.matches(
-                bundleID: "com.apple.finder",
+                app: "com.apple.finder",
                 title: "Report.pdf Get Info"
             )
         )
         #expect(
             !rules.matches(
-                bundleID: "com.apple.finder",
+                app: "com.apple.finder",
                 title: "Desktop"
             )
         )
@@ -126,7 +126,7 @@ struct FloatRuleTests {
         // (#448), never blanket raised-layer.
         #expect(
             !FloatDetection.shouldIgnore(
-                bundleID: "com.apple.finder",
+                app: AppRef(bundleID: "com.apple.finder", name: ""),
                 layer: 3,
                 isAccessory: false,
                 rules: noRules,
@@ -140,7 +140,7 @@ struct FloatRuleTests {
         let rules = IgnoreRules(["IO.TAILSCALE.IPN.MACOS"])
         #expect(
             FloatDetection.shouldIgnore(
-                bundleID: "io.tailscale.ipn.macos",
+                app: AppRef(bundleID: "io.tailscale.ipn.macos", name: ""),
                 layer: 0,
                 isAccessory: false,
                 rules: rules,
@@ -149,7 +149,7 @@ struct FloatRuleTests {
         )
         #expect(
             FloatDetection.shouldIgnore(
-                bundleID: "io.tailscale.ipn.macos",
+                app: AppRef(bundleID: "io.tailscale.ipn.macos", name: ""),
                 layer: 9,
                 isAccessory: true,
                 rules: rules,
@@ -158,7 +158,7 @@ struct FloatRuleTests {
         )
         #expect(
             !FloatDetection.shouldIgnore(
-                bundleID: "com.apple.finder",
+                app: AppRef(bundleID: "com.apple.finder", name: ""),
                 layer: 0,
                 isAccessory: false,
                 rules: rules,
@@ -181,7 +181,7 @@ struct FloatRuleTests {
             )
             #expect(
                 FloatDetection.shouldIgnore(
-                    bundleID: bundleID,
+                    app: AppRef(bundleID: bundleID, name: ""),
                     layer: 0,
                     isAccessory: false,
                     rules: IgnoreRules(),

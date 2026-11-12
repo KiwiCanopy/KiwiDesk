@@ -51,9 +51,9 @@ extension KiwiCore {
         _ window: ManagedWindow,
         provenance: ArrivalProvenance
     ) -> Bool {
-        guard
+        guard let app = window.appRef.listKey,
             launchFollow.quietDesktop(
-                window.appRef.listKey,
+                app,
                 at: wallClock()
             ) != nil
         else { return false }
@@ -91,8 +91,9 @@ extension KiwiCore {
     /// The one send, from either door; true where it departed.
     func sendQuietArrival(_ id: WindowID) -> Bool {
         guard let window = state.windows[id],
+            let app = window.appRef.listKey,
             let desktop = launchFollow.quietDesktop(
-                window.appRef.listKey,
+                app,
                 at: wallClock()
             ),
             state.pocketPhase(of: id) == nil,

@@ -73,9 +73,10 @@ extension KiwiCore {
     }
 
     /// One app's live rules, the slice `app_rule.list` holds for
-    /// it: `explain_window` and `explain_app` both read this.
-    func appRuleFacts(_ bundleID: String?) -> JSONValue {
-        guard let app = bundleID?.lowercased() else { return .null }
+    /// it: `explain_window` and `explain_app` both read this. `app`
+    /// is its rule key, `AppRef.listKey` (#3211).
+    func appRuleFacts(_ app: String?) -> JSONValue {
+        guard let app = app?.lowercased() else { return .null }
         let floats = eventLoop.floatRules
         let mine = floats.rules(of: app)
         return .object([
@@ -96,8 +97,10 @@ extension KiwiCore {
         if mayReconcileWindowRulesNow { eventLoop.reconcileAll() }
     }
 
-    /// The first argument as a lowercased bundle id; nil when empty
-    /// or when it carries a title, which only a float rule takes.
+    /// The first argument as a lowercased rule key — a bundle id,
+    /// or a process name where the app has none (#3211); nil when
+    /// empty or when it carries a title, which only a float rule
+    /// takes.
     private func ruleApp(_ args: [JSONValue]) -> String? {
         let app = args.first?.stringValue?
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -118,6 +121,6 @@ extension KiwiCore {
     }
 
     private var noApp: CommandResponse {
-        .fail("expected an app's bundle id")
+        .fail("expected an app's bundle id or process name")
     }
 }

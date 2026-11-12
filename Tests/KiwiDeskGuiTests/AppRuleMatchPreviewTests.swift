@@ -30,13 +30,13 @@ struct AppRuleMatchPreviewTests {
     func titleIsCaseSensitive() {
         #expect(
             rules(["Info"]).matches(
-                bundleID: app,
+                app: app,
                 title: "Downloads Info"
             )
         )
         #expect(
             !rules(["info"]).matches(
-                bundleID: app,
+                app: app,
                 title: "Downloads Info"
             )
         )
@@ -64,7 +64,7 @@ struct AppRuleMatchPreviewTests {
                 isFloating: false
             )
             let engine = FloatRules(model.config.floatRules)
-                .matches(bundleID: app, title: title)
+                .matches(app: app, title: title)
             #expect(
                 (preview.verdict(for: window) == .floatsByRule)
                     == engine,
@@ -124,7 +124,7 @@ struct AppRuleMatchPreviewTests {
         // arithmetic test above reds on exactly that, which is
         // where the coverage actually lives.
         #expect(source.contains("FloatRules(staged)"))
-        #expect(source.contains(".matches(bundleID:"))
+        #expect(source.contains(".matches(app:"))
         #expect(
             !source.contains("title.contains("),
             Comment(

@@ -73,7 +73,7 @@ extension KiwiCore {
     ) -> MoveHerePick {
         let away =
             canDriveDesktops
-            ? Set(awayWindows(bundleID: bundleID).filter(\.isUp).map(\.id))
+            ? Set(awayWindows(app: bundleID).filter(\.isUp).map(\.id))
             : []
         let ring = cycleRing(bundleID: bundleID, away: away)
         let known = jump.knownWindows()

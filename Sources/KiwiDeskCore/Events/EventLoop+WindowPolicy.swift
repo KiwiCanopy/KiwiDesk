@@ -190,10 +190,10 @@ extension EventLoop {
     /// App-wide hard gate shared by attachment, queued AX
     /// callbacks, and reconcile. Built-in system overlays use
     /// the same no-observer path as user `ignore_rules`.
-    func shouldIgnoreApp(bundleID: String?) -> Bool {
-        ignoreRules.matches(bundleID: bundleID)
+    func shouldIgnoreApp(_ app: AppRef) -> Bool {
+        ignoreRules.matches(app: app.listKey)
             || FloatDetection.isBuiltInIgnoredApp(
-                bundleID: bundleID
+                bundleID: app.bundleID
             )
     }
 
@@ -230,9 +230,7 @@ extension EventLoop {
             || Self.shouldAttach(
                 pid: app.pid,
                 activationPolicy: app.activationPolicy,
-                isIgnored: shouldIgnoreApp(
-                    bundleID: app.ref.bundleID
-                )
+                isIgnored: shouldIgnoreApp(app.ref)
             )
     }
 
@@ -288,7 +286,7 @@ extension EventLoop {
                 isVisible: window.isVisible
             )
         }
-        if shouldIgnoreApp(bundleID: app.bundleID) {
+        if shouldIgnoreApp(app) {
             return true
         }
         guard let id = known ?? AXHelper.windowID(of: element) else {
@@ -308,7 +306,7 @@ extension EventLoop {
             ? titlebarButton ?? Self.readsTitlebarButton(element, id: id)
             : false
         return FloatDetection.shouldIgnore(
-            bundleID: app.bundleID,
+            app: app,
             layer: resolved,
             isAccessory: isAccessory,
             rules: ignoreRules,
