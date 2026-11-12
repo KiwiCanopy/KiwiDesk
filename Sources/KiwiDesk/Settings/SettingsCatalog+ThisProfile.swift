@@ -192,20 +192,16 @@ struct ColorsControls: Sendable {
         "behavior.animations.speed",
         "Animation speed"
     )
-    let spaceSlideDuration = SettingsControl(
-        "animations.space_slide_duration",
-        "Slide duration"
-    )
     /// Declared with its children so a hit on a per-event
     /// toggle opens the drawer (#1250, #277).
     let motionMore = SettingsDrawer(
         "motion.more",
-        "Per-event and duration",
+        "Per event",
         children: MotionMoreControls()
     )
 }
 
-/// Animations ▸ Per-event and duration rows, keyed on their
+/// Animations ▸ Per event rows, keyed on their
 /// census label keys and declared in `ColorsRowOrder.motionMore`'s
 /// order.
 struct MotionMoreControls: Sendable {

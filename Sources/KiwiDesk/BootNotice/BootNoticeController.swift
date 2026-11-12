@@ -145,9 +145,7 @@ final class BootNoticeController {
     private func hide() {
         guard model.visible else { return }
         model.visible = false
-        let fade =
-            NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-            ? 0 : BootNoticeModel.fade
+        let fade = ReduceMotion.isOn ? 0 : BootNoticeModel.fade
         DispatchQueue.main.asyncAfter(deadline: .now() + fade) {
             [weak self] in
             guard let self, !self.model.visible else { return }

@@ -31,10 +31,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     private var presence = PanelPresence()
     /// The bus sink a stay-open drop reads the desk through (#3208).
     var landingSink: UUID?
-    /// Seam for the system Reduce Motion flag (#565).
-    var reduceMotion: () -> Bool = {
-        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-    }
+    /// Seam for Reduce Motion, macOS's or KiwiDesk's own (#565,
+    /// #3238).
+    var reduceMotion: @MainActor () -> Bool = { ReduceMotion.isOn }
 
     init(core: KiwiCore) {
         self.core = core

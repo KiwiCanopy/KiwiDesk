@@ -32,16 +32,16 @@ enum ColorsRowOrder {
         .colours(.borderSheen),
     ]
 
-    /// The Space switch card (#3218): how a switch shows itself,
-    /// how the scroll step does (#2971), and the slide's pace
-    /// beneath them (#2524).
+    /// The Space switch card (#3218): how a switch shows itself
+    /// and how the scroll step does (#2971); the slide's pace is
+    /// the speed preset's (#3238).
     static let spaceSwitch: [SettingKey] = [
         .colours(.spaceTransition),
         .colours(.spaceScrollTransition),
-        .colours(.spaceSlideDuration),
     ]
 
-    /// The Motion card's at-rest row: the window animations' master.
+    /// The Motion card's at-rest rows: the speed preset (#3238),
+    /// then the window animations' master.
     static let motionAtRest: [SettingKey] = [
         .colours(.animationSpeed),
         .colours(.animationsMaster),

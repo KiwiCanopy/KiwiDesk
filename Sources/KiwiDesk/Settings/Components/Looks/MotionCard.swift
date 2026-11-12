@@ -43,7 +43,9 @@ struct MotionCard: View {
                 ForEach(ColorsRowOrder.motionAtRest, id: \.id) { key in
                     row(for: key).modifier(GreyOut(active: greyed(key)))
                 }
-                disclosure.modifier(GreyOut(active: reduceMotion))
+                disclosure.modifier(
+                    GreyOut(active: reduceMotion || kiwiDeskOff)
+                )
                 // Signpost stays outside the Reduce Motion gate
                 // (#171; `LinkedCaption`).
                 CrossReferenceRow(
@@ -66,10 +68,15 @@ struct MotionCard: View {
 
     /// Whether `key` greys: the card's Reduce Motion gate, less any
     /// row the census exempts, one `GreyOut` per row, never nested
-    /// (gui.md).
+    /// (gui.md). KiwiDesk's own Off greys every row below the speed
+    /// preset, whose box carries the way back (#3238).
     private func greyed(_ key: SettingKey) -> Bool {
-        reduceMotion && !key.placement.exemptFromContainerGate
+        if reduceMotion { return !key.placement.exemptFromContainerGate }
+        return kiwiDeskOff && key != .colours(.animationSpeed)
     }
+
+    /// The speed preset's Off, app-wide (#3238).
+    private var kiwiDeskOff: Bool { model.appWide.animationReduceMotion }
 
     private var disclosure: some View {
         SettingsDisclosure(

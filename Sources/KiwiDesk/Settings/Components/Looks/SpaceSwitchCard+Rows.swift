@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The Space switch rows (#2524): Slide, Show the Space or None for
-/// every switch, the same for the scroll step (#2971), and the
-/// slide's pace beneath. App-wide (#1741), written at once like
-/// the Desktop cue's row. The caption follows the selection.
+/// every switch and the same for the scroll step (#2971).
+/// App-wide (#1741), written at once like the Desktop cue's row.
+/// The caption follows the selection.
 extension SpaceSwitchCard {
     /// Why the Space switch rows are inert: `init.lua` owns the
     /// config, so an app-wide row it does not store is not the
@@ -89,42 +89,6 @@ extension SpaceSwitchCard {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-    }
-
-    var spaceSlideDurationRow: some View {
-        StepperRow(
-            label: L(
-                "animations.space_slide_duration",
-                "Slide duration"
-            ),
-            value: Binding(
-                get: { model.appWide.spaceSlideDuration },
-                set: { ms in
-                    model.setAppWide { $0.spaceSlideDuration = ms }
-                }
-            ),
-            in: AppWideSettings.spaceSlideDurationRange,
-            step: 10,
-            suffix: "ms",
-            help: L(
-                "animations.space_slide_duration.help",
-                "How long the plates take to slide to the Space "
-                    + "you're switching to. A longer duration is "
-                    + "slower."
-            )
-        )
-        .searchAnchored(SettingsCatalog.colors.spaceSlideDuration)
-    }
-
-    /// Greys the duration while no slide plays — neither pick on
-    /// Slide (#2971), or under Reduce Motion — a wiring predicate on
-    /// Core's one fallback, beside the census's Lua gate.
-    var spaceSlideDurationInert: Bool {
-        spaceTransitionLuaOwned
-            || ![
-                model.appWide.spaceTransition,
-                model.appWide.spaceScrollTransition,
-            ].contains { $0.drawn(reduceMotion: reduceMotion) == .slide }
     }
 
     static var spaceTransitionLabel: String {

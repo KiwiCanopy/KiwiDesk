@@ -84,12 +84,11 @@ struct GateReasonPlacementTests {
                 // both on other pages, so each links there.
                 .behaviour(.tilingOffHidesBorders),
                 .behaviour(.tilingOffHidesBars),
-                // #2524, #2971: the Space switch pickers and the
-                // slide's pace, the same shape on Colors ▸ Animations,
-                // one sentence for the group under its first row.
+                // #2524, #2971: the Space switch pickers, the same
+                // shape on Colors ▸ Animations, one sentence for the
+                // group under its first row.
                 .colours(.spaceTransition),
                 .colours(.spaceScrollTransition),
-                .colours(.spaceSlideDuration),
                 // The Reveal row beside it greys while no bar hides:
                 // the bars' values sit above it, not that a reveal
                 // needs a hiding bar (owner ruling, 2026-10-21).
@@ -121,8 +120,8 @@ struct GateReasonPlacementTests {
                 // Lua-owned config, a cause shown nowhere on its
                 // page, so each draws its sentence.
                 .kiwiVision(.dim), .kiwiVision(.blur), .kiwiVision(.maximize),
-                .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
-                .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
+                .kiwiVision(.fadeCurve), .kiwiVision(.appearance),
+                .kiwiVision(.clearWallpaper),
                 .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
                 // A lens's page draws it under its draft cards.
                 .kiwiVision(.lenses),

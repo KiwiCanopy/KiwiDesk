@@ -5,7 +5,8 @@
 enum KiwiVisionKey: String, CaseIterable, Hashable {
     case dim = "appWide.visionDim"
     case blur = "appWide.visionBlur"
-    /// The leave fade's length and curve (#2417).
+    /// The leave fade's length and curve (#2417); the length is
+    /// Lua-only, the speed preset's (#3238).
     case fadeDuration = "appWide.visionFadeDuration"
     case fadeCurve = "appWide.visionFadeCurve"
     case appearance = "appWide.visionAppearance"
@@ -37,8 +38,12 @@ extension KiwiVisionKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
+        case .fadeDuration:
+            // Lua-only: the speed preset is Settings' one pace
+            // control (owner ruling, 2026-11-12, #3238).
+            return .luaOnly
         // The dim still fades under Reduce transparency.
-        case .fadeDuration, .fadeCurve:
+        case .fadeCurve:
             return .row(
                 .kiwiVision,
                 .kiwiVisionLevels,
@@ -91,10 +96,7 @@ extension KiwiVisionKey {
         case .blur:
             return .text("kiwivision.blur", help: "kiwivision.blur.help")
         case .fadeDuration:
-            return .text(
-                "kiwivision.fade_duration",
-                help: "kiwivision.fade_duration.help"
-            )
+            return .none
         case .fadeCurve:
             return .text(
                 "kiwivision.fade_curve",

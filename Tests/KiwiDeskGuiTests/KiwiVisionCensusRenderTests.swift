@@ -52,7 +52,7 @@ struct KiwiVisionCensusRenderTests {
             KiwiVisionRowOrder.levels
                 == [
                     .kiwiVision(.dim), .kiwiVision(.blur),
-                    .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
+                    .kiwiVision(.fadeCurve),
                 ]
         )
         #expect(

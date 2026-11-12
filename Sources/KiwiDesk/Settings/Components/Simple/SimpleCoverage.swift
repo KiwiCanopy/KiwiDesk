@@ -30,6 +30,9 @@ import KiwiDeskCore
             return true
         case .screens(.spacePins), .screens(.mainSpaces):
             return screenMenu
+        // The speed preset (#3238); app-wide, so no pill row today.
+        case .colours(.animationSpeed):
+            return true
         case .shortcuts(.layers):
             return binding(row.revert)
         default:

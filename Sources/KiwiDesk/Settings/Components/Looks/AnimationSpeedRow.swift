@@ -85,7 +85,7 @@ struct AnimationSpeedRow: View {
     static var customReadout: String {
         L(
             "behavior.animations.speed.custom",
-            "Custom: init.lua or the CLI set the lengths."
+            "Custom lengths. Pick a speed to replace them."
         )
     }
 

@@ -9,10 +9,6 @@ struct KiwiVisionControls: Sendable {
     )
     let dim = SettingsControl("kiwivision.dim", "Dim")
     let blur = SettingsControl("kiwivision.blur", "Blur")
-    let fadeDuration = SettingsControl(
-        "kiwivision.fade_duration",
-        "Fade duration"
-    )
     let fadeCurve = SettingsControl("kiwivision.fade_curve", "Fade curve")
     let clearCard = SettingsControl(
         "kiwivision.section.clear",

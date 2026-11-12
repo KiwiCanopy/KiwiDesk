@@ -123,8 +123,12 @@ enum SettingsSearchSynonyms {
             return ["slide", "transition", "space change", "cue"]
         case .colours(.spaceScrollTransition):
             return ["scroll", "gesture", "swipe", "slide", "transition"]
-        case .colours(.spaceSlideDuration):
-            return ["speed", "space speed", "slide speed", "transition"]
+        // The preset took over every length's row (#3238).
+        case .colours(.animationSpeed):
+            return [
+                "speed", "pace", "duration", "slow", "fast",
+                "reduce motion", "slide speed", "fade speed",
+            ]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         // Each well is labelled by its group (#2389), so the

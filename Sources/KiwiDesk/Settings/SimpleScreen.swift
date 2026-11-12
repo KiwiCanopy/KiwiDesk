@@ -1,9 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Simple's one page (#2737, #2777): KiwiHub, Look, a card per
-/// Space and Open applications, ended by the support strip and
-/// Home's footer, in one centred column at every width. Simple owns
+/// Simple's one page (#2737, #2777): KiwiHub, Look, the speed
+/// preset (#3238), a card per Space and Open applications, ended by
+/// the support strip and Home's footer, in one centred column at
+/// every width. Simple owns
 /// layout only — every control it draws is Advanced's own.
 struct SimpleScreen: View {
     @ObservedObject var model: SettingsModel
@@ -34,12 +35,14 @@ struct SimpleScreen: View {
                         .modifier(converge(0, geo.size))
                     SimpleLookCard(model: model)
                         .modifier(converge(1, geo.size))
-                    SimpleSpacesCard(model: model)
+                    SimpleAnimationsCard(model: model)
                         .modifier(converge(2, geo.size))
-                    SimpleShortcutCards(model: model)
+                    SimpleSpacesCard(model: model)
                         .modifier(converge(3, geo.size))
-                    HomeSupportStrip(model: model)
+                    SimpleShortcutCards(model: model)
                         .modifier(converge(4, geo.size))
+                    HomeSupportStrip(model: model)
+                        .modifier(converge(5, geo.size))
                 }
                 .frame(
                     width: max(

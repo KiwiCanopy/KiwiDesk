@@ -34,8 +34,7 @@ final class CuePlateController {
         model.glass = glass
         model.present(
             content,
-            reduceMotion: NSWorkspace.shared
-                .accessibilityDisplayShouldReduceMotion
+            reduceMotion: ReduceMotion.isOn
         )
         let panel = self.panel ?? makePanel()
         self.panel = panel
@@ -66,9 +65,7 @@ final class CuePlateController {
 
     private func hide() {
         model.visible = false
-        let fade =
-            NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-            ? 0 : CuePlateModel.fade
+        let fade = ReduceMotion.isOn ? 0 : CuePlateModel.fade
         schedule(&orderOutWork, after: fade) { [weak self] in
             guard let self, !self.model.visible else { return }
             self.panel?.orderOut(nil)

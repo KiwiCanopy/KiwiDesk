@@ -89,10 +89,13 @@ extension ColoursKey {
             )
         case .animationsMaster, .animationSpeed:
             return .row(.coloursAndMotion, .motion, .atRest)
-        case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
+        case .spaceSlideDuration:
+            // Lua-only: the speed preset is Settings' one pace
+            // control (owner ruling, 2026-11-12, #3238).
+            return .luaOnly
+        case .spaceTransition, .spaceScrollTransition:
             // App-wide (#1741), so they grey where init.lua owns
-            // the config (#2142); the duration's grey off Slide is
-            // wiring's (#2524, #3218).
+            // the config (#2142).
             return .row(
                 .coloursAndMotion,
                 .spaceSwitch,
@@ -212,10 +215,7 @@ extension ColoursKey {
         case .spaceScrollTransition:
             return .text("animations.space_scroll_transition")
         case .spaceSlideDuration:
-            return .text(
-                "animations.space_slide_duration",
-                help: "animations.space_slide_duration.help"
-            )
+            return .none
         case .animationsOnWindowResize:
             return .text("behavior.animations.window_resize")
         case .animationsOnWindowSwap:
