@@ -16,8 +16,8 @@ extension SettingsModel {
     }
 
     /// A row whose new gesture refuses its action loses it: the old
-    /// key's pick goes, and it leaves this profile alone where another
-    /// holds it too, as the trash's default would ask.
+    /// key's pick goes, and its removal is `.here` where another
+    /// profile holds the row, `.everywhere` otherwise.
     func dropGesturePick(_ key: String, shared: Bool) {
         reachEdits.reach[.gesture]?[key] = nil
         recordRemoval(.gesture, key, shared ? .here : .everywhere)

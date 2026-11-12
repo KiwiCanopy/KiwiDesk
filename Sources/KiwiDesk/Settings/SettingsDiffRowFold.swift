@@ -21,14 +21,21 @@ enum SettingsDiffRowFold {
     ) -> [SettingsDiffRow] {
         var own = own
         var rest: [SettingsDiffRow] = []
-        for var row in reach {
+        // A row's own subject folds before its paired one, so a move
+        // names the reach of the key it took; a paired reach row
+        // whose words differ stays its own (#3225).
+        let primary = reach.filter { row in
+            own.contains { $0.subject != nil && $0.subject == row.subject }
+        }
+        let paired = reach.filter { row in
+            !own.contains { $0.subject != nil && $0.subject == row.subject }
+        }
+        for var row in primary + paired {
             let matches = own.indices.filter {
                 guard let subject = row.subject else { return false }
                 return own[$0].subject == subject
                     || own[$0].pairedSubject == subject
             }
-            // A paired row already naming other words keeps them, and
-            // this reach row stays its own (#3225).
             guard let words = row.reach, !matches.isEmpty,
                 matches.allSatisfy({ (own[$0].reach ?? words) == words })
             else {

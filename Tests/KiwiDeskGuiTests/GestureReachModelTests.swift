@@ -124,5 +124,47 @@ struct GestureReachModelTests {
             Issue.record("rekey lost a step the order reads")
         }
         #expect(!body.contains("recordRemoval("))
+        #expect(!body.contains("dropGesturePick("))
+    }
+
+    @Test("a shared row that drops its action leaves the others theirs")
+    func sharedDropStaysHere() throws {
+        let core = makeTestCore()
+        var config = GuiConfig()
+        config.spaces = [SpaceID("1")]
+        config.gesture[own] = .bound(.run(lua))
+        try core.guiConfigStore.save(config)
+        try core.profiles.save(profile("Work"))
+        try core.profiles.write(profile("Home"))
+        let model = makeTestModel(core: core)
+        model.reload()
+
+        model.dropGesturePick(own.spelling, shared: true)
+        GestureListEdits.remove(own, in: &model.config.gesture)
+        model.updateActiveProfile()
+
+        #expect(core.guiConfigStore.load()?.gesture[own] == .bound(.run(lua)))
+        #expect(try core.profiles.read(name: "Work").gesture?[own] == .unbound)
+        #expect(try core.profiles.read(name: "Home").gesture?[own] == nil)
+    }
+
+    /// The wiring the model tests above cannot reach: the refused
+    /// action's drop and the card's re-sort on a page change.
+    @Test("the row's drop and the card's re-sort are wired")
+    func dropAndResortWiring() throws {
+        let body = try SourceScan.functionBody(
+            of: "rekeyInput",
+            in: "GestureListRow.swift",
+            under: "Settings/Components/Gestures",
+            root: "Sources/KiwiDesk"
+        )
+        #expect(body.contains("model.dropGesturePick(key.spelling"))
+        let card = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources/KiwiDesk/Settings")
+                .appendingPathComponent("Components/Gestures")
+                .appendingPathComponent("GestureListCard.swift")
+        )
+        #expect(card.contains(".onChange(of: model.reachPage) { reload() }"))
     }
 }

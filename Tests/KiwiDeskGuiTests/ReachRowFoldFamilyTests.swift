@@ -141,12 +141,13 @@ struct ReachRowFoldFamilyTests {
             row.reach = words
             return row
         }
-        let rows = SettingsDiffRowFold.folded(
-            [move],
-            reach: [reach(took, "Home"), reach(left, "Away")]
-        )
-        #expect(rows.count == 2)
-        #expect(rows.first?.reach == "Home")
-        #expect(rows.last?.reach == nil)
+        let tookRow = reach(took, "Home")
+        let leftRow = reach(left, "Away")
+        for order in [[tookRow, leftRow], [leftRow, tookRow]] {
+            let rows = SettingsDiffRowFold.folded([move], reach: order)
+            #expect(rows.count == 2)
+            #expect(rows.first?.reach == "Home")
+            #expect(rows.last?.reach == nil)
+        }
     }
 }
