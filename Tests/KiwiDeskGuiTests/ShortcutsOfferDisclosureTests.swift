@@ -205,10 +205,11 @@ struct ShortcutsOfferDisclosureTests {
     /// deleted `.searchAnchored` opens the card onto nothing.
     @Test("each card row a hit lands on carries its anchor")
     func rowsCarryTheirAnchors() throws {
-        let header = try squashed("Sections/LayerHeader.swift")
+        // On ✎, since the rows live in its shut popover (#3263).
+        let strip = try squashed("Sections/LayerStripEditor.swift")
         for row in ["reach", "menuBarIcon"] {
             #expect(
-                header.contains(
+                strip.contains(
                     ".searchAnchored(SettingsCatalog.shortcuts"
                         + ".layersCard.children.\(row))"
                 ),

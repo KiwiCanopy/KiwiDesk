@@ -83,12 +83,12 @@ struct SettingsBorderedSealTests {
             "SpaceOverrideRows+Footer.swift": (
                 1, "role: .destructive", "reset-all"
             ),
-            "LayerHeader.swift": (
+            "LayerEditorPopover.swift": (
                 1, "role: .destructive",
-                "delete layer; #770's hand-pairing suppressed "
+                "Delete Layer…; #770's hand-pairing suppressed "
                     + "its red, carried through by #771's seal "
-                    + "until this fix — its sealed sibling is "
-                    + "rename (moved from the strip, #2022)"
+                    + "until this fix (moved into ✎'s popover, "
+                    + "#3263)"
             ),
             "KiwiVisionLensHeader.swift": (
                 1, "role: .destructive",

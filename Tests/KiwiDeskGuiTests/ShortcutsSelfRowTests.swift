@@ -46,7 +46,7 @@ struct ShortcutsSelfRowTests {
         #expect(reference.isEmpty)
     }
 
-    /// The rows `LayerStripEditor.addLayer` seeds a fresh layer
+    /// The rows `SettingsModel.addLayer` seeds a fresh layer
     /// with (#1381): the opener is dropped, the Settings row
     /// stays — so a fresh layer's panel is no longer empty.
     @Test("a fresh layer shows Open Settings and not the opener")

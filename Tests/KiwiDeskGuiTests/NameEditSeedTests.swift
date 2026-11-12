@@ -84,20 +84,15 @@ struct NameEditSeedTests {
     /// stale value and the fresh one alike) — a needle keyed on
     /// today's spellings would have called that clean (code
     /// review, 2026-08-12).
-    /// The one exemption, and why: a popover whose field starts
+    /// What may be exempt, and why: a popover whose field starts
     /// EMPTY has no seed to be stale about. Its confirm is
     /// correctly dead until the user types, which is the same
     /// thing the defect looked like and is not it. Keyed by
     /// file, so a second popover in one of these files still has
-    /// to be read by a human — which is how the layer strip's
-    /// add-a-layer popover came to be checked at all.
-    private let emptySeeded: [String: String] = [
-        "LayerStripEditor.swift":
-            "the add-a-layer popover names something that does "
-            + "not exist yet, so it opens with an empty field "
-            + "and a correctly disabled confirm — the RENAME "
-            + "popover, in `LayerHeader`, is presented by item"
-    ]
+    /// to be read by a human. None is today: the layer strip's
+    /// add-a-layer popover, the one there was, is presented by
+    /// item since #3263.
+    private let emptySeeded: [String: String] = [:]
 
     @Test("a popover with a text field is presented by item")
     func nameEditingPopoversPresentByItem() throws {
