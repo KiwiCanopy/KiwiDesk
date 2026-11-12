@@ -50,7 +50,7 @@ struct LaunchFollowSeamTests {
         ("launchFollow.record(", followFile, 1),
         ("oweLaunchFollow(bundleID, at: now)", followFile, 1),
         ("oweLaunchFollow(bundleID)", "KiwiCore+Launch.swift", 2),
-        ("oweLaunchFollow(bundle)", "KiwiCore+WindowActions.swift", 1),
+        ("oweLaunchFollow(app)", "KiwiCore+WindowActions.swift", 1),
         ("oweLaunchFollow(unminimized)", "KiwiCore+JumpActions.swift", 1),
         // The claim at the arrival, the switch in place of its
         // retile, and the arrival's #45 start-at-target carried

@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import os
 
 /// Jump to window's key window (#1875). Borderless, so it opts
 /// into key status and answers File ▸ Close itself (#1533). The
@@ -30,6 +31,9 @@ final class JumpPanel: NSPanel {
     }
     /// The back key was pressed with these modifiers held.
     var onBackChord: (NSEvent.ModifierFlags) -> Void = { _ in }
+    /// Whether the close has begun: a click then lands on nothing,
+    /// a double click's second press included (#3209).
+    var leaving: () -> Bool = { false }
 
     override var canBecomeKey: Bool { true }
 
@@ -91,6 +95,14 @@ final class JumpPanel: NSPanel {
         case .keyDown:
             if !composing, let key = key(for: event) {
                 onKey(key, event.isARepeat)
+                return
+            }
+        case .leftMouseDown, .leftMouseUp, .leftMouseDragged,
+            .rightMouseDown, .rightMouseUp, .otherMouseDown, .otherMouseUp:
+            if leaving() {
+                if event.type == .leftMouseDown {
+                    jumpLog.log("KiwiDesk: jump press while leaving")
+                }
                 return
             }
         default:

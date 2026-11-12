@@ -39,7 +39,7 @@ struct TitlebarButtonWiringTests {
     func readersPassTheBundleID() throws {
         let readers = [
             "EventLoop+ListedWindows.swift": [
-                "bundleID: bundleID", "subrole: facts.subrole",
+                "bundleID: app.bundleID", "subrole: facts.subrole",
             ],
             "EventLoop+WindowPolicy.swift": [
                 "bundleID: app.bundleID",

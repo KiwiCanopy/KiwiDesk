@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, recogida",
   "desktop_overview.card.shown": "visible",
+  "desktop_overview.card.switch_to": "Cambiar al Escritorio %1$d",
   "desktop_overview.card.title": "Escritorio %1$d",
   "desktop_overview.field.label": "Buscar ventanas",
   "desktop_overview.footer.back": "%1$@ Volver",

@@ -311,7 +311,7 @@ extension AppRef {
     init(_ app: NSRunningApplication) {
         self.init(
             bundleID: app.bundleIdentifier,
-            name: app.localizedName ?? "?"
+            name: app.localizedName ?? AppRef.unnamed
         )
     }
 
@@ -324,7 +324,7 @@ extension AppRef {
         let app = NSRunningApplication(processIdentifier: pid)
         self.init(
             bundleID: app?.bundleIdentifier,
-            name: app?.localizedName ?? "?"
+            name: app?.localizedName ?? AppRef.unnamed
         )
     }
 }

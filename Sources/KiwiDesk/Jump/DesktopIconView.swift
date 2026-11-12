@@ -3,9 +3,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// One window's app icon on a Space line (#1229): a ring where it
-/// is selected, an ink underline where it is its Space's
-/// last-focused window, a dashed outline at 50 % where it is
-/// picked up. A drag carries it — or the picked set, where it is
+/// is selected and the grey hover ground under the pointer — rows
+/// fill, tiles ring (#3210) — an ink underline where it is its
+/// Space's last-focused window, a dashed outline at 50 % where it
+/// is picked up. A drag carries it — or the picked set, where it is
 /// one of them.
 struct DesktopIconView: View {
     let window: DesktopOverview.Window
@@ -18,6 +19,7 @@ struct DesktopIconView: View {
     let isMatch: Bool
     /// What a drag from this icon carries.
     let dragged: [WindowID]
+    let pointer: DesktopsPointer
     let onClick: (Int, NSEvent.ModifierFlags) -> Void
 
     @Environment(\.kiwiHubPaint) private var paint
@@ -27,15 +29,18 @@ struct DesktopIconView: View {
             .frame(width: size, height: size)
             .opacity(isPicked ? 0.5 : isMatch ? 1 : 0.35)
             // Drawn outside the slot, so slots keep their count.
+            .background { ground.padding(-2) }
             .overlay { outline.padding(-2) }
             .overlay(alignment: .bottom) { underline }
             .contentShape(Rectangle())
             .onTapGesture {
-                let event = NSApp.currentEvent
-                onClick(event?.clickCount ?? 1, event?.modifierFlags ?? [])
+                let click = DesktopsClick.of(NSApp.currentEvent)
+                onClick(click.count, click.modifiers)
             }
             .onDrag { DesktopsDrag.provider(dragged) }
+            .desktopsHover(.window(window.id), pointer)
             .accessibilityElement()
+            .accessibilityAction { onClick(1, []) }
             .accessibilityLabel(
                 DesktopsText.spoken(window, picked: isPicked)
             )
@@ -51,6 +56,13 @@ struct DesktopIconView: View {
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder private var ground: some View {
+        if pointer.lifts(.window(window.id), selected: isSelected) {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(paint.fill(paint.rowHover))
         }
     }
 

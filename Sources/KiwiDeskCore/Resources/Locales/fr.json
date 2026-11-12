@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, prise",
   "desktop_overview.card.shown": "affiché",
+  "desktop_overview.card.switch_to": "Passer au Bureau %1$d",
   "desktop_overview.card.title": "Bureau %1$d",
   "desktop_overview.field.label": "Rechercher des fenêtres",
   "desktop_overview.footer.back": "%1$@ Revenir",

@@ -130,7 +130,7 @@ extension KiwiCore {
             return false
         }
         let away =
-            reach()?.listsAny ?? !awayWindows(bundleID: bundleID).isEmpty
+            reach()?.listsAny ?? !awayWindows(app: bundleID).isEmpty
         return !away
     }
 }

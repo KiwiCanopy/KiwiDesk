@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, aufgenommen",
   "desktop_overview.card.shown": "angezeigt",
+  "desktop_overview.card.switch_to": "Zu Schreibtisch %1$d wechseln",
   "desktop_overview.card.title": "Schreibtisch %1$d",
   "desktop_overview.field.label": "Fenster suchen",
   "desktop_overview.footer.back": "%1$@ Zurück",

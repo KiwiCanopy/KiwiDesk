@@ -16,6 +16,8 @@ struct DesktopsSideView: View {
     let onDrop: ([WindowID], DesktopsPlace) -> Void
     /// The panel's VoiceOver action for ⌘,.
     let onSettings: () -> Void
+    /// The pointer's lift over a title, a line or an icon (#3209).
+    let pointer: DesktopsPointer
 
     private var geometry: DesktopsGeometry { state.geometry }
 
@@ -69,7 +71,8 @@ struct DesktopsSideView: View {
                             onPlace: onPlace,
                             onWindow: onWindow,
                             onMore: onMore,
-                            onDrop: onDrop
+                            onDrop: onDrop,
+                            pointer: pointer
                         )
                         .id(DesktopsScrollID.desktop(screen, index))
                     }

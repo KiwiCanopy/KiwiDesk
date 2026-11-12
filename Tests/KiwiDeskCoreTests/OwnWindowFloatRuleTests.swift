@@ -28,7 +28,7 @@ struct OwnWindowFloatRuleTests {
             pid: getpid(),
             activationPolicy: .regular,
             tilesAsOwnWindow: true,
-            bundleID: bundle,
+            app: bundle,
             rules: FloatRules(rules)
         )
     }

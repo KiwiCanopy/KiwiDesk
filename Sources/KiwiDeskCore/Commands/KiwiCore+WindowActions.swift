@@ -58,13 +58,13 @@ extension KiwiCore {
         }
         // A window its App Rule files elsewhere is followed there,
         // as an Open or Focus launch is (#1599).
-        if let bundle = window.appBundleID { oweLaunchFollow(bundle) }
+        if let app = window.appRef.listKey { oweLaunchFollow(app) }
         openOrFocus.activate(window.pid)
         windowActions.newWindow(window.pid) { [weak self] pressed in
             guard !pressed, let self else { return }
             // Nothing opened, so nothing is owed (#1599).
-            if let bundle = window.appBundleID {
-                launchFollow.forget(pending: bundle)
+            if let app = window.appRef.listKey {
+                launchFollow.forget(pending: app)
             }
             cueWindowAction(
                 .noNewWindow(app: window.appName),

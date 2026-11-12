@@ -1267,7 +1267,8 @@ A selected stroke and check fade in over 0.12 s (`SelectionStroke`,
 `selectionFade(_:)`).
 Under Reduce Motion the rise and the fade arrive at once. The setup
 tour's tiles take the edge without the rise. A chip, a row, a KiwiHub
-item and a Space card's menu face keep their fill.
+row and a Space card's menu face keep their fill; KiwiHub's tiles ring
+their selection and lift with the hover fill.
 
 A borderless value-menu or
 popover trigger whose label is text takes the glyph chip's lift

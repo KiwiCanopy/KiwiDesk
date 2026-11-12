@@ -47,7 +47,7 @@ struct IgnoreRulesConfigTests {
         )
         #expect(
             core.eventLoop.ignoreRules.matches(
-                bundleID: "IO.TAILSCALE.IPN.MACOS"
+                app: "IO.TAILSCALE.IPN.MACOS"
             )
         )
     }
@@ -62,7 +62,7 @@ struct IgnoreRulesConfigTests {
         core.loadConfig()
         #expect(
             core.eventLoop.ignoreRules.matches(
-                bundleID: "io.tailscale.ipn.macos"
+                app: "io.tailscale.ipn.macos"
             )
         )
 
@@ -71,7 +71,7 @@ struct IgnoreRulesConfigTests {
 
         #expect(
             !core.eventLoop.ignoreRules.matches(
-                bundleID: "io.tailscale.ipn.macos"
+                app: "io.tailscale.ipn.macos"
             )
         )
     }

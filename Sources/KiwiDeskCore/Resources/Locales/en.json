@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, picked up",
   "desktop_overview.card.shown": "shown",
+  "desktop_overview.card.switch_to": "Switch to Desktop %1$d",
   "desktop_overview.card.title": "Desktop %1$d",
   "desktop_overview.field.label": "Search windows",
   "desktop_overview.footer.back": "%1$@ Back",

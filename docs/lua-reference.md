@@ -5939,6 +5939,12 @@ and the live `profile`.
 **Expects:** a bundle identifier, and for `set_space` a Space that
 exists.
 
+:::unreleased
+An app with no bundle identifier is named by its process name, here
+and in `app_rule.set_float`, `explain_app` and the `app_rules`,
+`float_rules` and `ignore_rules` lists.
+:::
+
 **Does:** the app's NEXT windows open in that Space, or stop
 doing so; windows already open stay where they are.
 `remove_space` refuses an app with no rule.
@@ -7448,11 +7454,12 @@ panel has the keyboard.
   the first, **⌘1**–**⌘9** drop them on that Desktop's shown
   Space. A window on a Desktop no screen shows, a pocketed one and
   a full-screen one cannot be picked up.
-- A click on a Space opens it, a double click goes there, and a
-  double click on a Desktop's title goes to that Desktop;
-  **⇧**-click moves,
-  **⌥**-click swaps, **⌘**-click picks up. Dragging an icon onto
-  a Space moves it, and you stay.
+- A click does what **Return** does on what you clicked: on a
+  Space it goes there, on a window's icon it jumps to the window,
+  on a Desktop's title it goes to that Desktop, and while windows
+  ride along it drops them there. **⇧**-click moves, **⌥**-click
+  swaps, **⌘**-click picks up. A double click acts once. Dragging
+  an icon onto a Space moves it, and you stay.
 - Typing finds windows by app and title; matches move to the
   front of their Space and the rest dim.
 - **Escape** steps back: the picked windows, the open Space, the
@@ -9677,6 +9684,13 @@ Each entry of `windows`, `minimized` and `away` is the window's
 `id` and `title`; a minimized or away window's title is the one it
 had when it left, and a window found away at start has none
 (`""`).
+
+:::unreleased
+`explain_app` also takes a process name, and both commands return
+`rule_key`, the name app rules know the app by: its bundle
+identifier, or its process name where it has none, when
+`bundle_id` is `null`.
+:::
 
 ### get_config_status
 

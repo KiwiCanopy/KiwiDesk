@@ -26,7 +26,7 @@ struct RaisedLayerLatchTests {
     private func reason(_ facts: WindowFacts) -> AutoFloatReason? {
         FloatDetection.autoFloatReason(
             facts,
-            bundleID: "com.brave.Browser",
+            app: "com.brave.Browser",
             rules: FloatRules()
         )
     }
@@ -74,7 +74,7 @@ struct RaisedLayerLatchTests {
             pid: pid,
             activationPolicy: .regular,
             tilesAsOwnWindow: false,
-            bundleID: "com.brave.Browser",
+            app: "com.brave.Browser",
             rules: FloatRules(["com.brave.Browser"])
         )
         #expect(verdict == .floats(.raisedLayer))

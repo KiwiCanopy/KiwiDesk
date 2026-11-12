@@ -103,35 +103,35 @@ struct ProfileListRulesApplyTests {
     private func expectOverrides(_ core: KiwiCore) {
         #expect(
             !core.eventLoop.floatRules.matches(
-                bundleID: "base.float",
+                app: "base.float",
                 title: ""
             )
         )
         #expect(
             core.eventLoop.floatRules.matches(
-                bundleID: "profile.float",
+                app: "profile.float",
                 title: ""
             )
         )
         #expect(
             core.eventLoop.floatRules.matches(
-                bundleID: "shared.app",
+                app: "shared.app",
                 title: "Base Panel"
             )
         )
         #expect(
             !core.eventLoop.ignoreRules.matches(
-                bundleID: "base.ignore"
+                app: "base.ignore"
             )
         )
         #expect(
             core.eventLoop.ignoreRules.matches(
-                bundleID: "profile.ignore"
+                app: "profile.ignore"
             )
         )
         #expect(
             core.eventLoop.ignoreRules.matches(
-                bundleID: "shared.ignore"
+                app: "shared.ignore"
             )
         )
     }
@@ -151,24 +151,24 @@ struct ProfileListRulesApplyTests {
 
         #expect(
             core.eventLoop.floatRules.matches(
-                bundleID: "base.float",
+                app: "base.float",
                 title: ""
             )
         )
         #expect(
             !core.eventLoop.floatRules.matches(
-                bundleID: "profile.float",
+                app: "profile.float",
                 title: ""
             )
         )
         #expect(
             core.eventLoop.ignoreRules.matches(
-                bundleID: "base.ignore"
+                app: "base.ignore"
             )
         )
         #expect(
             !core.eventLoop.ignoreRules.matches(
-                bundleID: "profile.ignore"
+                app: "profile.ignore"
             )
         )
     }
@@ -191,13 +191,13 @@ struct ProfileListRulesApplyTests {
         expectOverrides(core)
         #expect(
             !core.eventLoop.floatRules.matches(
-                bundleID: "wrong.float",
+                app: "wrong.float",
                 title: ""
             )
         )
         #expect(
             !core.eventLoop.ignoreRules.matches(
-                bundleID: "wrong.ignore"
+                app: "wrong.ignore"
             )
         )
     }
@@ -238,10 +238,10 @@ struct ProfileListRulesApplyTests {
         )
 
         #expect(result.isSuccess)
-        #expect(!core.eventLoop.ignoreRules.matches(bundleID: target))
+        #expect(!core.eventLoop.ignoreRules.matches(app: target))
         #expect(
             core.eventLoop.floatRules.matches(
-                bundleID: target,
+                app: target,
                 title: ""
             )
         )

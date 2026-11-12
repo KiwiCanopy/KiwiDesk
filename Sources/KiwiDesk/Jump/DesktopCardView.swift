@@ -18,6 +18,9 @@ struct DesktopCardView: View {
     let onWindow: (WindowID, DesktopsPlace, Int, NSEvent.ModifierFlags) -> Void
     let onMore: (DesktopsPlace, Bool) -> Void
     let onDrop: ([WindowID], DesktopsPlace) -> Void
+    let pointer: DesktopsPointer
+
+    @Environment(\.kiwiHubPaint) private var paint
 
     private var desktop: DesktopOverview.Desktop {
         state.overview.screens[screen].desktops[index]
@@ -67,17 +70,26 @@ struct DesktopCardView: View {
             onPlace: onPlace,
             onWindow: onWindow,
             onMore: onMore,
-            onDrop: onDrop
+            onDrop: onDrop,
+            pointer: pointer
         )
     }
 
+    private var titleTarget: JumpHover {
+        .desktop(screen: screen, index: index)
+    }
+
+    /// The title, a button to its Desktop (#3209): the grey hover
+    /// ground under the pointer, and `.help` as a second cue.
     private var title: some View {
-        HStack(spacing: 4) {
+        let lifted = pointer.lifts(titleTarget, selected: false)
+        return HStack(spacing: 4) {
             Text(DesktopsText.desktop(desktop.label))
                 .font(.callout.weight(.semibold))
             if desktop.isShown {
-                Image(systemName: "checkmark")
-                    .font(.caption.weight(.bold))
+                // KiwiHub's one "in use" mark, as a current chip's.
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.callout)
                     .accessibilityLabel(DesktopsText.shown)
             }
             Spacer(minLength: 4)
@@ -91,19 +103,36 @@ struct DesktopCardView: View {
         .lineLimit(1)
         .padding(.horizontal, 4)
         .frame(height: DesktopsGeometry.titleHeight)
+        .kiwiHubRowInk(paint, selected: false, lifted: lifted)
+        .background {
+            if lifted {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(paint.fill(paint.rowHover))
+            }
+        }
         .contentShape(Rectangle())
         .onTapGesture { click() }
+        .desktopsHover(titleTarget, pointer)
+        .help(DesktopsText.switchTo(desktop.label))
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(DesktopsText.switchTo(desktop.label))
+        .accessibilityAction { click(count: 1, modifiers: []) }
     }
 
-    /// The title selects the line the Desktop shows; a double click
-    /// jumps to the Desktop.
+    /// The title is ↩ on the Desktop it names (#3209): it jumps
+    /// there; during a carry it drops on the line the Desktop shows.
     private func click() {
+        let click = DesktopsClick.of(NSApp.currentEvent)
+        self.click(count: click.count, modifiers: click.modifiers)
+    }
+
+    private func click(count: Int, modifiers: NSEvent.ModifierFlags) {
         let line = desktop.spaces.firstIndex(where: \.isShown) ?? 0
-        let event = NSApp.currentEvent
         onPlace(
             DesktopsPlace(screen: screen, desktop: index, line: line),
-            event?.clickCount ?? 1,
-            event?.modifierFlags ?? [],
+            count,
+            modifiers,
             false
         )
     }

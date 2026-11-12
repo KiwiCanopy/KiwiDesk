@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@、%2$@",
   "desktop_overview.ax.window_picked": "%1$@、%2$@、持ち上げ中",
   "desktop_overview.card.shown": "表示中",
+  "desktop_overview.card.switch_to": "デスクトップ%1$dに切り替える",
   "desktop_overview.card.title": "デスクトップ%1$d",
   "desktop_overview.field.label": "ウインドウを検索",
   "desktop_overview.footer.back": "%1$@ 戻る",

@@ -391,6 +391,7 @@
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, взято",
   "desktop_overview.card.shown": "показан",
+  "desktop_overview.card.switch_to": "Перейти на Рабочий стол %1$d",
   "desktop_overview.card.title": "Рабочий стол %1$d",
   "desktop_overview.field.label": "Поиск окон",
   "desktop_overview.footer.back": "%1$@ Назад",

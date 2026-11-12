@@ -8,12 +8,7 @@ extension JumpModel {
     func enterDesktops() {
         endDesktopsRefusal()
         let overview = loadDesktops()
-        let geometry = DesktopsGeometry(
-            overview: overview,
-            width: panelWidth,
-            cap: sheetCap
-        )
-        desktops = DesktopsState(overview: overview, geometry: geometry)
+        desktops = state(of: overview)
         let pids = overview.screens.flatMap(\.desktops)
             .flatMap(\.spaces).flatMap(\.windows).map(\.pid)
         desktopIcons = loadIcons(Set(pids))
@@ -39,8 +34,9 @@ extension JumpModel {
     }
 
     /// A click on a Space line, or a card's title for its shown
-    /// line: one click selects, and a line also opens its Space; a
-    /// double click acts; ⇧ moves your window there (#1229 ▸ Mouse).
+    /// line, is ↩ there on release (#3209): a line goes to its Space,
+    /// a title to its Desktop, and a carry drops; ⇧ moves your window
+    /// there. A double click's second press acts on nothing.
     func clickPlace(
         _ place: DesktopsPlace,
         count: Int,
@@ -49,36 +45,28 @@ extension JumpModel {
     ) {
         guard scope == .desktops, var state = desktops else { return }
         endDesktopsRefusal()
-        let modifiers = pickModifiers(modifiers)
         restPointerForClick()
+        guard count < 2 else { return }
+        let modifiers = pickModifiers(modifiers)
         state.select(place)
-        if state.isCarrying {
-            desktops = state
-            if count > 1 {
-                handleDesktops(.pick(moveHere: false), repeated: false)
-            }
-            return
-        }
-        if modifiers.contains(.shift) {
-            desktops = state
-            handleDesktops(.pick(moveHere: true), repeated: false)
-            return
-        }
-        if count > 1 {
-            desktops = state
-            if opens {
-                handleDesktops(.pick(moveHere: false), repeated: false)
-            } else if let desktop = state.desktop(place) {
-                onDesktopsAction(.jumpDesktop(desktop))
-            }
-            return
-        }
-        if opens { _ = state.open() }
         desktops = state
+        // ⌘↩ and ⌥↩ name a window, which a place is not.
+        guard modifiers.isDisjoint(with: [.option, .command]) else { return }
+        if state.isCarrying || modifiers.contains(.shift) {
+            let moveHere = !state.isCarrying
+            return handleDesktops(.pick(moveHere: moveHere), repeated: false)
+        }
+        if opens {
+            handleDesktops(.pick(moveHere: false), repeated: false)
+        } else if let desktop = state.desktop(place) {
+            onDesktopsAction(.jumpDesktop(desktop))
+        }
     }
 
-    /// A click on a window's icon: selects it; a double click jumps;
-    /// ⇧ Move here, ⌥ Swap here, ⌘ pick up or put back.
+    /// A click on a window's icon is ↩ on it on release (#3209):
+    /// it jumps there, and a carry drops on its Space; ⇧ Move here,
+    /// ⌥ Swap here, ⌘ pick up or put back. A double click's second
+    /// press acts on nothing, and ⌥ during a carry nothing, as ⌥↩.
     func clickWindow(
         _ id: WindowID,
         in place: DesktopsPlace,
@@ -87,27 +75,26 @@ extension JumpModel {
     ) {
         guard scope == .desktops, var state = desktops else { return }
         endDesktopsRefusal()
-        let modifiers = pickModifiers(modifiers)
         restPointerForClick()
-        if state.isCarrying, !modifiers.contains(.command) {
+        guard count < 2 else { return }
+        let modifiers = pickModifiers(modifiers)
+        let held = modifiers.intersection([.shift, .option, .command])
+        // ⌥↩ swaps no window while windows ride along.
+        if state.isCarrying, held.contains(.option) { return }
+        if state.isCarrying, !held.contains(.command) {
             state.select(place)
             desktops = state
-            if count > 1 {
-                handleDesktops(.pick(moveHere: false), repeated: false)
-            }
-            return
+            return handleDesktops(.pick(moveHere: false), repeated: false)
         }
         state.select(window: id, in: place)
         desktops = state
-        let held = modifiers.intersection([.shift, .option, .command])
         if held.contains(.command) {
             handleDesktops(.pickUp, repeated: false)
         } else if held.contains(.option) {
             handleDesktops(.swapHere, repeated: false)
-        } else if held.contains(.shift) {
-            handleDesktops(.pick(moveHere: true), repeated: false)
-        } else if count > 1 {
-            handleDesktops(.pick(moveHere: false), repeated: false)
+        } else {
+            let moveHere = held.contains(.shift)
+            handleDesktops(.pick(moveHere: moveHere), repeated: false)
         }
     }
 
@@ -187,6 +174,43 @@ extension JumpModel {
             }
         }
         desktops = state
+    }
+
+    /// Reads the desk again under the open side, for a drop still
+    /// landing (#3208): the place, and the window inside it, stay
+    /// selected where they still exist, and the search and a shown
+    /// refusal stay as they are. A carry waits for the next read.
+    func refreshDesktops() {
+        guard scope == .desktops, let old = desktops, !old.isCarrying
+        else { return }
+        let overview = loadDesktops()
+        var fresh = state(of: overview)
+        if !old.query.isEmpty { fresh.setQuery(old.query) }
+        if let place = old.place, let line = fresh.line(place) {
+            if let id = old.window,
+                line.windows.contains(where: { $0.id == id })
+            {
+                fresh.select(window: id, in: place)
+            } else {
+                fresh.select(place)
+            }
+        }
+        let pids = Set(
+            overview.screens.flatMap(\.desktops).flatMap(\.spaces)
+                .flatMap(\.windows).map(\.pid)
+        ).subtracting(desktopIcons.keys)
+        if !pids.isEmpty { desktopIcons.merge(loadIcons(pids)) { $1 } }
+        desktops = fresh
+    }
+
+    /// The side's state over `overview`, sized from the panel.
+    private func state(of overview: DesktopOverview) -> DesktopsState {
+        let geometry = DesktopsGeometry(
+            overview: overview,
+            width: panelWidth,
+            cap: sheetCap
+        )
+        return DesktopsState(overview: overview, geometry: geometry)
     }
 
     /// What VoiceOver hears for the selection now.

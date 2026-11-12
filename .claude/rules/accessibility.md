@@ -212,6 +212,14 @@ editing AX code:
   `FloatRuleGrammarSeamTests` counts every colon split, colon test
   and `\(…):\(…)` spelling in both trees against its register,
   and `FloatRuleGrammarTests` holds the grammar itself.
+- **A user rule names an app by `AppRef.listKey`, never by its
+  bundle id (#3211).** A float, Tile, ignore or Space rule matches
+  the key — the bundle id, or the lowercased process name where the
+  app has none — so a matcher takes the key or the `AppRef`, never
+  a bare bundle id, and a process with no key matches nothing, a
+  guard that lives in `listKey` alone. Only the built-in lists
+  (`isBuiltInIgnoredApp`, `ignoresRaisedWindows`) stay keyed by
+  bundle id (`AppRuleProcessNameTests`).
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

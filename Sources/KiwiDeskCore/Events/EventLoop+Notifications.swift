@@ -22,9 +22,7 @@ extension EventLoop {
                 hasObserver: observers[pid] != nil,
                 pid: pid,
                 activationPolicy: activationPolicy,
-                isIgnored: shouldIgnoreApp(
-                    bundleID: app.bundleID
-                )
+                isIgnored: shouldIgnoreApp(app)
             )
         else {
             detach(pid: pid, restoreEnhancedUI: true)
