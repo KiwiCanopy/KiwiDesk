@@ -706,6 +706,13 @@ Obligations:
   length the one `VisionMask.walkedCount` (`VisionMaskTests` ▸
   `walkedCountStopsAtTheLastHole`), and builds nothing for an
   unchanged input (`VisionMaskPlateTests` ▸ `reshapeOnlyOnChange`).
+- **A lens override Settings draws no row for is listed in
+  `VisionLens.luaOnlyOverrides`, cleared by the crossing and left
+  out by every door that stores running lenses into a `gui.json`
+  the GUI manages (#3246)**: the Lua-to-GUI adoption takes
+  `VisionLens.settingsDrawn`, and a new such door takes it too
+  (`KiwiVisionLensWiringTests` ▸ `overridesHaveRows`,
+  `AppWideCrossingEndTests` ▸ `luaAdoptionDropsLensFade`).
 - **What KiwiVision draws — off, plain or a lens — is one value
   with one writer, `setVision`, and the lens on follows the stored
   lenses through the one `followActiveLens`**: a write that removes

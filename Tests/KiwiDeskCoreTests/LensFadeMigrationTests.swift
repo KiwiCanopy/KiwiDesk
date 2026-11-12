@@ -6,7 +6,7 @@ import Testing
 /// A lens's fade length and curve overrides are cleared (#3246):
 /// Settings no longer draws them, so each lens follows the global
 /// fade again. Reached in `gui.json` and a backup's `config`
-/// from the format the last release stamped; the global fade and
+/// from the format the last release (4.2.1) stamped; the global fade and
 /// every other override stay. Fixtures are the encoder's own output.
 @Suite("Lens fade migration (#3246)")
 struct LensFadeMigrationTests {
@@ -23,6 +23,7 @@ struct LensFadeMigrationTests {
         lens.overrides.fadeCurve = .easeIn
         var plain = VisionLens(name: "Plain")
         plain.apps = ["com.apple.notes"]
+        plain.overrides.fadeCurve = .easeInOut
         pace.visionLenses = [lens, plain]
         return pace
     }
@@ -43,7 +44,10 @@ struct LensFadeMigrationTests {
             ) as? [String: Any]
         )
         root["format"] = format
-        let data = try JSONSerialization.data(withJSONObject: root)
+        let data = try JSONSerialization.data(
+            withJSONObject: root,
+            options: [.prettyPrinted, .sortedKeys]
+        )
         #expect(String(decoding: data, as: UTF8.self).contains("700"))
         return data
     }
@@ -52,31 +56,35 @@ struct LensFadeMigrationTests {
         let pace = try #require(config?.appWide)
         #expect(pace.visionFadeDuration == 450)
         #expect(pace.visionFadeCurve == .linear)
-        let lens = try #require(pace.visionLenses.first)
-        #expect(lens.overrides.fadeDuration == nil)
-        #expect(lens.overrides.fadeCurve == nil)
-        #expect(lens.overrides.dim == 40)
         #expect(pace.visionLenses.count == 2)
+        for lens in pace.visionLenses {
+            #expect(lens.overrides.fadeDuration == nil)
+            #expect(lens.overrides.fadeCurve == nil)
+        }
+        #expect(pace.visionLenses.first?.overrides.dim == 40)
     }
 
-    @Test("gui.json crosses from 23")
-    func guiCrosses() throws {
-        let data = try stamped(config, format: 23)
+    /// From 4.2.1's stamp (19), so every later step runs ahead of
+    /// this one, and from the format below this step's (23).
+    @Test("gui.json crosses", arguments: [19, 23])
+    func guiCrosses(from format: Int) throws {
+        let data = try stamped(config, format: format)
         let out = try #require(ConfigMigration.migrated(data))
         try check(JSONDecoder().decode(GuiConfig.self, from: out))
     }
 
-    @Test("a backup's config crosses from 47")
-    func bundleCrosses() throws {
+    /// From 4.2.1's backup stamp (43) and from 47.
+    @Test("a backup's config crosses", arguments: [43, 47])
+    func bundleCrosses(from format: Int) throws {
         let bundle = SetupBundle(
-            format: 47,
+            format: format,
             writtenBy: "test",
             config: config,
             profiles: [],
             palettes: []
         )
         let out = try #require(
-            ConfigMigration.migrated(stamped(bundle, format: 47))
+            ConfigMigration.migrated(stamped(bundle, format: format))
         )
         let root = try #require(
             JSONSerialization.jsonObject(with: out) as? [String: Any]
@@ -101,6 +109,8 @@ struct LensFadeMigrationTests {
         #expect(out.contains("\"linear\""))
         #expect(out.count < text.count)
         _ = try JSONSerialization.jsonObject(with: edited)
+        // The step keeps the edit rather than re-serializing.
+        #expect(ConfigMigration.migratingLensFadeOut(data) == edited)
     }
 
     /// At the formats it introduced the step stands down, so a

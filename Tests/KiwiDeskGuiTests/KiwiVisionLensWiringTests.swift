@@ -129,23 +129,45 @@ struct KiwiVisionLensWiringTests {
 
     /// Every lens override has a row: a field added to
     /// `VisionLens.Overrides` resolves and saves, and without this
-    /// would have no row on the page.
-    /// The fade's length and curve are Lua's alone on a lens
-    /// (#3246): the editor draws no row for either.
-    static let luaOnlyOverrides: Set<String> = ["fadeDuration", "fadeCurve"]
-
+    /// would have no row on the page. The Lua-only ones
+    /// (`VisionLens.luaOnlyOverrides`, #3246) have none; the scan
+    /// reads the editor's one file.
     @Test("every lens override field has a row, save the fade's")
     func overridesHaveRows() throws {
         let fields = Mirror(reflecting: VisionLens.Overrides()).children
             .compactMap(\.label)
         #expect(!fields.isEmpty)
-        #expect(Self.luaOnlyOverrides.isSubset(of: Set(fields)))
+        // The fields the GUI's store strips, read off a lens with
+        // every override set.
+        var full = VisionLens(name: "All")
+        full.overrides = VisionLens.Overrides(
+            dim: 40,
+            blur: true,
+            appearance: .dark,
+            fadeDuration: 500,
+            fadeCurve: .linear,
+            clearWallpaper: true,
+            clearApp: true,
+            maximize: .full
+        )
+        let luaOnly = Set(
+            Mirror(reflecting: full.settingsDrawn.overrides).children
+                .filter { "\($0.value)" == "nil" }
+                .compactMap(\.label)
+        )
+        #expect(luaOnly == ["fadeDuration", "fadeCurve"])
+        #expect(luaOnly.count == VisionLens.luaOnlyOverrides.count)
+        // The crossing clears exactly the register's wire keys.
+        #expect(
+            Set(VisionLens.luaOnlyOverrides.map(\.rawValue))
+                == Set(ConfigMigration.retiredLensFadeKeys)
+        )
         let page = try Self.squashed(
             Self.dir + "KiwiVisionLensOverrides.swift"
         )
         for field in fields {
             let drawn = page.contains("\\.\(field)")
-            if Self.luaOnlyOverrides.contains(field) {
+            if luaOnly.contains(field) {
                 #expect(!drawn, "\(field) has a row")
             } else {
                 #expect(drawn, "\(field) has no row")

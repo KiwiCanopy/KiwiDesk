@@ -3,11 +3,11 @@ import SwiftUI
 
 /// A lens's own values for the Default cards (#2103 rulings
 /// 23, 29, 46): Dim and blur, Stays clear, Maximize (#3064) and
-/// System appearance — the fade is the global one's, so Dim and
-/// blur holds only Dim and Blur (#3246) — one override checkbox per
-/// ROW — a lens often changes the dim and
-/// keeps the blur. An unchecked row reads "follows Default ·
-/// <value>"; checking it seeds the lens with that value.
+/// System appearance, one override checkbox per ROW — a lens often
+/// changes the dim and keeps the blur. An unchecked row reads
+/// "follows Default · <value>"; checking it seeds the lens with that
+/// value. A lens's fade is the global one's, Lua-only on a lens
+/// (#3246).
 struct KiwiVisionLensOverrides: View {
     @ObservedObject var model: SettingsModel
     let lens: VisionLens

@@ -4863,7 +4863,9 @@ blur** card holds Dim and Blur alone, and the lens follows
 `gui.json`, and from a backup's lenses when it is restored
 ([#3246](https://github.com/KiwiCanopy/KiwiDesk/issues/3246)); a
 `define_lens` table still sets both, and `init.lua` is never
-rewritten.
+rewritten. Moving a Lua-owned setup to Settings stores its lenses
+without the two keys, and a lens Settings saves drops a fade a
+session `define_lens` gave it.
 :::
 
 **Example:**

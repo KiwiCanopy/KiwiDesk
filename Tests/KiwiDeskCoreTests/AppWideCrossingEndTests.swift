@@ -267,4 +267,32 @@ struct AppWideCrossingEndTests {
         // The crossing ends in the files on this door too.
         #expect(!(try text("Work", core)).contains("grid_target_depth"))
     }
+
+    /// A Lua lens's fade is Lua's alone: the adoption leaves it out
+    /// of the `gui.json` Settings will own, which draws no row for
+    /// it, and keeps the rest of the lens (#3246).
+    @Test("adopting a Lua lens drops its fade overrides")
+    func luaAdoptionDropsLensFade() throws {
+        let core = makeTestCore(configDirectory: directory())
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
+        )
+        try """
+        kiwivision.define_lens({
+            name = "Writing", apps = { "com.apple.Notes" },
+            dim = 40, fade_duration = 700, fade_curve = "ease_in",
+        })
+        """.write(to: core.configURL, atomically: true, encoding: .utf8)
+        core.loadConfig()
+        let live = try #require(core.appWide.visionLenses.first)
+        #expect(live.overrides.fadeDuration == 700)
+        try core.adoptConfigIntoGui { _ in }
+        let stored = try #require(
+            core.guiConfigStore.load()?.appWide?.visionLenses.first
+        )
+        #expect(stored.overrides.fadeDuration == nil)
+        #expect(stored.overrides.fadeCurve == nil)
+        #expect(stored.overrides.dim == 40)
+    }
 }

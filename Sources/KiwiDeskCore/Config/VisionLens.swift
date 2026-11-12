@@ -251,3 +251,19 @@ extension AppWideSettings {
         }
     }
 }
+
+extension VisionLens {
+    /// The overrides Settings draws no row for: the fade's length
+    /// and curve, Lua's alone on a lens (#3246). The one register,
+    /// held to the crossing's keys (`KiwiVisionLensWiringTests`).
+    static let luaOnlyOverrides: [CodingKeys] = [.fadeDuration, .fadeCurve]
+
+    /// `self` without its Lua-only overrides, as a `gui.json` the
+    /// GUI manages stores it (#3246).
+    var settingsDrawn: VisionLens {
+        var lens = self
+        lens.overrides.fadeDuration = nil
+        lens.overrides.fadeCurve = nil
+        return lens
+    }
+}

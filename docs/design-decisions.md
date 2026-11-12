@@ -7567,9 +7567,11 @@ reverses #3238's first ruling that a lens overriding
 
 *The keys stay in the lens shape.* A `define_lens` table still
 sets both, so the lens decoder reads them, and `init.lua` keeps an
-override because no crossing reaches it. Stated residue: a pair
-written into `gui.json` by hand after the update is read, and acts
-unseen. [Trade-off] A user who tuned a lens's fade in Settings
+override because no crossing reaches it. Moving that setup to
+Settings stores its lenses without the pair, since Settings would
+then own a fade it shows nowhere, and a session `define_lens` fade
+ends when Settings saves that lens. Stated residue: a pair written
+into `gui.json` by hand after the update is read, and acts unseen. [Trade-off] A user who tuned a lens's fade in Settings
 loses it on the update and gets it back only from Lua; the
 limitation is on the
 [Accepted limitations](accepted-limitations.md) page.
