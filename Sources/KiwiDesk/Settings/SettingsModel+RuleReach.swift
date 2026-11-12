@@ -28,6 +28,7 @@ extension SettingsModel {
             floatRules: config.floatRules,
             layers: config.layers,
             scrollGesture: config.scrollGesture,
+            gesture: config.gesture,
             spaceHistory: config.spaceHistory,
             focusWrap: config.focusWrap,
             modeCycle: config.modeCycle,
@@ -102,6 +103,16 @@ extension SettingsModel {
             isLoaded: reachIsLoaded,
             reach: reachEdits.reach[.scroll] ?? [:],
             removal: [:]
+        )
+        snapshot.gestures = RuleReachDraft.encode(
+            snapshot.gestures,
+            current: RuleReachTable<GestureAction>.gestureSeedsUnder(
+                config.gesture
+            ),
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.gesture] ?? [:],
+            removal: reachEdits.removal[.gesture] ?? [:]
         )
         snapshot.spaceHistory = RuleReachDraft.encode(
             snapshot.spaceHistory,
@@ -208,6 +219,9 @@ extension SettingsModel {
         config.scrollGesture = stored.storedScrollBase.writing(
             stored.scrollGestures.resolved(for: loaded)
         )
+        config.gesture = RuleReachTable<GestureAction>.gestureMap(
+            over: stored.gestures.resolved(for: loaded)
+        )
         config.spaceHistory =
             stored.spaceHistory.resolved(
                 RuleReachTable<SpaceHistoryKind>.spaceHistoryKey,
@@ -259,6 +273,9 @@ extension SettingsModel {
         sidecar.scrollGesture = reach.scrollGestures.scrollGestureBase(
             original: reach.storedScrollBase
         )
+        sidecar.gesture = reach.gestures.gestureBase(
+            original: reach.storedGestureBase
+        )
         sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
         sidecar.modeCycle = reach.modeCycle.modeCycleBase
         sidecar.focusWrap = reach.focusWrap.focusWrapBase
@@ -286,6 +303,7 @@ extension SettingsModel {
         cleanConfig.appRules = config.appRules
         cleanConfig.floatRules = config.floatRules
         cleanConfig.scrollGesture = config.scrollGesture
+        cleanConfig.gesture = config.gesture
         cleanConfig.spaceHistory = config.spaceHistory
         cleanConfig.modeCycle = config.modeCycle
         cleanConfig.focusWrap = config.focusWrap
@@ -310,6 +328,7 @@ extension SettingsModel {
         // without them.
         config.shortcutBase = cleanConfig.shortcutBase
         config.scrollGesture = cleanConfig.scrollGesture
+        config.gesture = cleanConfig.gesture
         config.spaceHistory = cleanConfig.spaceHistory
         config.modeCycle = cleanConfig.modeCycle
         config.focusWrap = cleanConfig.focusWrap

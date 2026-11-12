@@ -84,6 +84,9 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// can name the same one: the fold joins on it, never on the
     /// label (#792).
     var subject: ReachSubject?
+    /// A second rule the row changes with its subject, which the
+    /// fold joins on too: the key a gesture move left (#3225).
+    var pairedSubject: ReachSubject?
     /// The profiles a change also reached, drawn after the label. A
     /// reach row sets it where its change is the edited profile's
     /// own, and `SettingsDiffRowFold` moves it onto the rows of its

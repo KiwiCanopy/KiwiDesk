@@ -5184,11 +5184,10 @@ be exactly the ones bound: ⌃⌥⌘ + scroll is not ⌃⌥ + scroll.
 Settings app they are the rows of the **Mouse** and **Trackpad**
 cards under **Shortcuts ▸ Mouse & Trackpad**, where an input that
 does nothing yet ([Gesture inputs](#gesture-inputs)) has no row.
-The cards edit the base in `gui.json`, so a row applies to every
-profile; a profile's own
-bindings are set in its file
-([Gesture storage](#gesture-storage)) until rows gain a profile
-choice ([#3225](https://github.com/KiwiCanopy/KiwiDesk/issues/3225)).
+Each row's **Applies to** picks the profiles it reaches, as a
+[shortcut row's](user-guide.md#shortcut-layers) does; each pick is
+written to the base or a profile's own bindings
+([Gesture storage](#gesture-storage)).
 :::
 
 ### Gesture inputs

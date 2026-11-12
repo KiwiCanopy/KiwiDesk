@@ -18,8 +18,8 @@ extension KiwiCore {
     /// empty here anyway).
     ///
     /// `writingRules: false` leaves the app rule, float rule,
-    /// scroll-gesture, Space history and layout cycle overrides as
-    /// stored (`RuleReachFamilyParityTests`), for a caller whose
+    /// scroll-gesture, gesture, Space history and layout cycle
+    /// overrides as stored (`RuleReachFamilyParityTests`), for a caller whose
     /// `saveRuleReach` writes them — one encoder per field
     /// (#1393). The shortcut
     /// override is always this diff, against the base as stored
@@ -36,6 +36,7 @@ extension KiwiCore {
             existing.appRules = stored.appRules
             existing.floatRules = stored.floatRules
             existing.scrollGesture = stored.scrollGesture
+            existing.gesture = stored.gesture
             existing.spaceHistory = stored.spaceHistory
             existing.modeCycle = stored.modeCycle
             existing.focusWrap = stored.focusWrap
@@ -181,6 +182,10 @@ extension KiwiCore {
             profile.scrollGesture = ScrollGestureOverride.diff(
                 base: base.scrollGesture,
                 edited: config.scrollGesture
+            )
+            profile.gesture = GestureMap.diff(
+                base: base.gesture,
+                edited: config.gesture
             )
             profile.spaceHistory = .sparse(
                 config.spaceHistory,

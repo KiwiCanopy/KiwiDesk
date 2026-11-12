@@ -23,6 +23,7 @@ struct RuleReachGuiParityTests {
         "floatRules": "floatRules",
         "keyLayers": "layers",
         "scrollGestures": "scrollGesture",
+        "gestures": "gesture",
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
         "focusWrap": "focusWrap",
@@ -170,6 +171,26 @@ struct RuleReachGuiParityTests {
             #expect(
                 text.contains("let \(field):"),
                 "EncodedReachCache.Key misses \(family): a stale encode"
+            )
+        }
+    }
+
+    /// A key field fed a constant serves a stale encode as surely as
+    /// a missing one, so the memo's one build names each draft field
+    /// for its own. The tiling-off families read a toggle group and
+    /// are the `Key` declaration's alone.
+    @Test("the encode memo is fed every family's draft field")
+    func memoIsFedEveryFamily() throws {
+        let text = try body(
+            "var encodedReach:",
+            in: "SettingsModel+RuleReach.swift"
+        )
+        #expect(text.contains("EncodedReachCache.Key("))
+        for family in try families() where Self.memoField[family] == nil {
+            let field = try #require(Self.draftField[family])
+            #expect(
+                text.contains("\(field): config.\(field)"),
+                "the memo key is not fed config.\(field)"
             )
         }
     }

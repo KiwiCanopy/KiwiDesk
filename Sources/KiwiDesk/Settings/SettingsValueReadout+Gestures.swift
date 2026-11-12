@@ -28,30 +28,37 @@ extension SettingsValueReadout {
             else { continue }
             let from = left.remove(at: index)
             moved.formUnion([from, key])
-            rows.append(
-                .change(
-                    .shortcuts(.gestureBindings),
-                    instance: GestureRowInstance.move(
-                        from: from,
-                        to: key
-                    ).spelling,
-                    label: GestureListWords.value(action),
-                    old: GestureListWords.rowName(from),
-                    new: GestureListWords.rowName(key)
-                )
+            var row = SettingsDiffRow.change(
+                .shortcuts(.gestureBindings),
+                instance: GestureRowInstance.move(
+                    from: from,
+                    to: key
+                ).spelling,
+                label: GestureListWords.value(action),
+                old: GestureListWords.rowName(from),
+                new: GestureListWords.rowName(key)
             )
+            row.subject = subject(key)
+            row.pairedSubject = subject(from)
+            rows.append(row)
         }
         for key in changed where !moved.contains(key) {
-            rows.append(
-                .change(
-                    .shortcuts(.gestureBindings),
-                    instance: GestureRowInstance.key(key).spelling,
-                    label: GestureListWords.rowName(key),
-                    old: GestureListWords.value(before(key)),
-                    new: GestureListWords.value(after(key))
-                )
+            var row = SettingsDiffRow.change(
+                .shortcuts(.gestureBindings),
+                instance: GestureRowInstance.key(key).spelling,
+                label: GestureListWords.rowName(key),
+                old: GestureListWords.value(before(key)),
+                new: GestureListWords.value(after(key))
             )
+            row.subject = subject(key)
+            rows.append(row)
         }
         return rows
+    }
+
+    /// The reach subject a gesture row folds on (#3225): its key; a
+    /// move folds on both of its keys.
+    private static func subject(_ key: GestureKey) -> ReachSubject {
+        ReachSubject(family: .gesture, key: key.spelling)
     }
 }

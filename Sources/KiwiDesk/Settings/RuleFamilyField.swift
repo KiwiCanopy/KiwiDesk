@@ -23,6 +23,7 @@ struct RuleFamilyField {
             }
         ),
         field(.scroll, \.scrollGesture),
+        field(.gesture, \.gesture),
         field(.history, \.spaceHistory),
         field(.wrap, \.focusWrap),
         field(.cycle, \.modeCycle),

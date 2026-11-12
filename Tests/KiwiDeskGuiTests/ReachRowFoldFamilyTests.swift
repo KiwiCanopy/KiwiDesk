@@ -5,7 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The fold for each family the reach rows name beyond App Rules —
-/// a shortcut, the owner's report, and a float rule — each joined
+/// a shortcut, the owner's report, a float rule and a gesture
+/// binding (#3225) — each joined
 /// on its producer's own subject (#792). A producer that forgets
 /// its subject leaves a reach row unfolded, which every case reds.
 @Suite("Reach rows fold per family (#792)", .serialized)
@@ -91,5 +92,62 @@ struct ReachRowFoldFamilyTests {
         // Two Added and one Removed note, all of one app.
         #expect(rows.count == 3)
         #expect(rows.allSatisfy { $0.reach != nil })
+    }
+
+    @Test("a gesture binding changed alike reads as one row")
+    func gestureFolds() throws {
+        LocalizationManager.shared.select("en")
+        let key = GestureKey(.rightClick, [.control])
+        var config = GuiConfig()
+        config.spaces = [SpaceID("1")]
+        config.gesture[key] = .bound(
+            .run(LuaAction(lua: lua, kind: .custom))
+        )
+        let model = try makeModel(config, others: ["Home", "Away"])
+        model.config.gesture[key] = .bound(
+            .run(LuaAction(lua: "KiwiDesk.cycle_mode()", kind: .custom))
+        )
+
+        let rows = folded(model, .gesture)
+        #expect(rows.count == 1)
+        #expect(rows.first?.reach != nil)
+    }
+
+    @Test("a move whose keys reached apart keeps one label, one row")
+    func pairedWordsDisagree() {
+        let left = ReachSubject(family: .gesture, key: "a")
+        let took = ReachSubject(family: .gesture, key: "b")
+        var move = SettingsDiffRow.change(
+            .shortcuts(.gestureBindings),
+            instance: "a|b",
+            label: "Move",
+            old: "a",
+            new: "b"
+        )
+        move.subject = took
+        move.pairedSubject = left
+        func reach(
+            _ subject: ReachSubject,
+            _ words: String
+        ) -> SettingsDiffRow {
+            var row = SettingsDiffRow.change(
+                .shortcuts(.gestureBindings),
+                instance: "reach.\(words).\(subject.key)",
+                label: words,
+                old: nil,
+                new: nil
+            )
+            row.subject = subject
+            row.reach = words
+            return row
+        }
+        let tookRow = reach(took, "Home")
+        let leftRow = reach(left, "Away")
+        for order in [[tookRow, leftRow], [leftRow, tookRow]] {
+            let rows = SettingsDiffRowFold.folded([move], reach: order)
+            #expect(rows.count == 2)
+            #expect(rows.first?.reach == "Home")
+            #expect(rows.last?.reach == nil)
+        }
     }
 }

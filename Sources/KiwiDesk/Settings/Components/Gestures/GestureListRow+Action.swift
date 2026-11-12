@@ -139,3 +139,33 @@ struct GestureIcon: View {
             .accessibilityHidden(true)
     }
 }
+
+extension GestureListRow {
+    /// The row's "Applies to" column (#3225): drawn for a bound row
+    /// on a page with profiles to reach.
+    @ViewBuilder var reachColumn: some View {
+        if let reading = reachReading, let action {
+            RuleReachControl(
+                model: model,
+                family: .gesture,
+                app: key.spelling,
+                subject: GestureListWords.rowName(key),
+                reading: reading,
+                value: GestureListWords.value(action)
+            )
+        }
+    }
+
+    var reachReading: RuleReachReading? {
+        guard model.offersReachColumn, action != nil else { return nil }
+        return model.gestureReach(key.spelling)
+    }
+
+    /// The trash asks how far a removal reaches only where another
+    /// profile holds the row too.
+    var sharedReach: RuleReachReading? {
+        guard let reading = reachReading, reading.users.count > 1
+        else { return nil }
+        return reading
+    }
+}
