@@ -5,7 +5,8 @@ import KiwiDeskCore
 /// rest" (withheld behind the offer), with no inline sentence —
 /// save the layout plate's switch, which greys with General's
 /// Lua-owned sentence (#2144), and Restore Defaults, which greys
-/// with its row's caption (#3074). `LayersCard` asks this
+/// with its row's caption (#3074) and leaves with the `default`
+/// layer (#3260). `LayersCard` asks this
 /// rather than re-deriving — a renderer whose predicate silently
 /// disagreed once hid a user's own configured layers
 /// (`ShortcutsGateTests`).
@@ -18,8 +19,8 @@ struct ShortcutsGates {
     /// switch alone, whose Save must write the shared rows (#2460).
     var editingStoredProfile = false
     /// The layer the page edits; read by Restore Defaults alone,
-    /// which only the default layer can answer (#3074). Both
-    /// defaults grey, so a site that drops one never lights it.
+    /// which only the default layer can answer (#3074). Neither
+    /// default lights it: an empty layer hides it, no count greys.
     var selectedLayer = ""
     /// `SettingsModel.hasDefaultsToRestore`; read by Restore
     /// Defaults alone (#3074).
@@ -39,7 +40,8 @@ struct ShortcutsGates {
         /// write (#2460).
         case storedProfilePage
         /// Another layer is picked, and only the default layer has
-        /// shipped shortcuts (#3074).
+        /// shipped shortcuts: the Default shortcuts container is not
+        /// drawn, its object being unselected (#3260).
         case otherLayerPicked
         /// The default layer already matches the shipped set
         /// (#3074).
@@ -86,6 +88,22 @@ struct ShortcutsGates {
                 "ShortcutsGates does not own \(key.id)"
             )
             return nil
+        }
+    }
+
+    /// The rows the Default shortcuts container draws, so only the
+    /// `default` layer shows them (#3260): Restore, and Import from
+    /// init.lua, whose census row is Lua bindings'.
+    static let defaultLayerRows = Set(
+        ShortcutsRowOrder.defaultShortcutsAtRest + [.shortcuts(.`import`)]
+    )
+
+    /// Whether `anchor`, a census row's label key, is one of those
+    /// rows, so a reveal selects `default` before it lands.
+    static func drawnOnDefaultLayerAlone(_ anchor: String) -> Bool {
+        defaultLayerRows.contains {
+            if case .key(let label) = $0.text.label { return label == anchor }
+            return false
         }
     }
 

@@ -216,7 +216,7 @@ extension ShortcutsKey {
             // The Mouse & trackpad drawer's first group (#1656).
             return .row(.shortcuts, .gestures, .showMore)
         case .restoreDefaults:
-            // Always drawn; greys at the defaults or on another layer (#3074).
+            // Drawn on `default` alone (#3260); greys at the defaults.
             return .row(
                 .shortcuts,
                 .defaultShortcuts,

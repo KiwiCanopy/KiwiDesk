@@ -116,8 +116,8 @@ extension SettingRuntimeGate {
             // Their causes are on other pages (#3089).
             return false
         case .defaultsToRestore:
-            // The layer pick sits above it, but not that the
-            // default layer matches the shipped set (#3074).
+            // Nothing on the surface says the default layer
+            // matches the shipped set (#3074).
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true

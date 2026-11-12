@@ -2376,7 +2376,6 @@
   "shortcuts.restore_defaults.help": "Remet les raccourcis fournis par KiwiDesk, y compris ceux ajoutés depuis que vous l'avez installé. Les raccourcis que vous avez ajoutés sous « %1$@ » et « %2$@ » sont conservés.",
   "shortcuts.restore_defaults.message": "Vos propres raccourcis sont conservés, sauf ceux qui utilisent une touche requise par les raccourcis par défaut. Raccourcis rétablis : %1$d · vos raccourcis perdus : %2$d",
   "shortcuts.restore_defaults.message_clean": "Aucun de vos raccourcis n'est perdu. Raccourcis rétablis : %1$d",
-  "shortcuts.restore_defaults.other_layer": "Seul le calque « default » a des valeurs par défaut à rétablir. Choisissez-le plus haut, dans %1$@.",
   "shortcuts.restore_defaults.row": "Raccourcis par défaut",
   "shortcuts.restore_defaults.short": "Rétablir…",
   "shortcuts.restore_defaults.title": "Rétablir les raccourcis par défaut ?",

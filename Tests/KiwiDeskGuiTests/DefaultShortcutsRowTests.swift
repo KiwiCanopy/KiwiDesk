@@ -6,8 +6,9 @@ import Testing
 
 /// Shortcuts ▸ Built-in ▸ Default shortcuts (#3074, #3178, #3179):
 /// the row sits under the Layers card, right above the groups it
-/// rewrites, is always drawn, greys Restore with the reason its
-/// caption names, and keeps what Restore does in its `?`.
+/// rewrites, is drawn while `default` is selected alone (#3260),
+/// greys Restore with the reason its caption names, and keeps what
+/// Restore does in its `?`.
 @Suite("Default shortcuts row")
 struct DefaultShortcutsRowTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -55,6 +56,59 @@ struct DefaultShortcutsRowTests {
         }
     }
 
+    /// A selection is not a mode (#3260): off `default` the
+    /// container is not drawn, its one surfacing branch needled.
+    @Test("the container leaves with the default layer")
+    func containerLeavesWithItsLayer() throws {
+        let body = try Self.source(
+            "Sources/KiwiDesk/Settings/Sections/DefaultShortcutsRow.swift"
+        ).filter { !$0.isWhitespace }
+        #expect(
+            body.contains(
+                "varbody:someView{letreason=restoreReason"
+                    + "ifreason!=.otherLayerPicked{container(reason)}}"
+            )
+        )
+        #expect(
+            !body.contains("shortcuts.restore_defaults.other_layer")
+        )
+    }
+
+    /// A hit on a row the container draws — Restore, or Import from
+    /// init.lua, whose census row is Lua bindings' — while another
+    /// layer is selected selects `default` first, so it lands on a
+    /// drawn row (#3260).
+    @Test("a hit on the container's rows selects the default layer")
+    @MainActor
+    func restoreHitSelectsDefault() throws {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let model = makeTestModel()
+        #expect(
+            ShortcutsGates.defaultLayerRows.contains(.shortcuts(.`import`))
+        )
+        for key in ShortcutsGates.defaultLayerRows.sorted(by: { $0.id < $1.id }
+        ) {
+            // The census row's label key, the anchor its hit carries.
+            guard case .key(let anchor) = key.text.label else {
+                Issue.record("\(key.id) names no label key")
+                continue
+            }
+            model.nav.shortcutsLayer = "work"
+            model.showShortcutsSegment(holding: anchor)
+            #expect(
+                model.nav.shortcutsLayer == KeyLayer.defaultName,
+                "\(key.id)"
+            )
+        }
+        // Any other hit leaves the layer picked.
+        model.nav.shortcutsLayer = "work"
+        model.showShortcutsSegment(
+            holding: SettingsCatalog.shortcuts.focusKeys.id
+        )
+        #expect(model.nav.shortcutsLayer == "work")
+    }
+
     @Test("the row mounts once, between Layers and the groups")
     func mountsUnderLayers() throws {
         let parts = ShortcutsPagePart.parts(in: .builtIn)
@@ -81,7 +135,7 @@ struct DefaultShortcutsRowTests {
         )
     }
 
-    @Test("Restore is greyed by its state, never withheld")
+    @Test("Restore greys by its count, never withheld for it")
     func restoreGreysNeverHides() throws {
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/DefaultShortcutsRow.swift"

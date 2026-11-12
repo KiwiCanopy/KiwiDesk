@@ -154,7 +154,7 @@ struct ShortcutsGateTests {
                 == [
                     .onlyDefaultLayer, .trackUnused,
                     .appWideLuaOwned, .storedProfilePage,
-                    // Restore Defaults' greys (#3074).
+                    // Restore Defaults' presence and grey (#3260).
                     .otherLayerPicked, .matchesDefaults,
                     // The Tiling off hide rows' greys (#3089).
                     .noBarShows, .focusBorderOff,

@@ -2376,7 +2376,6 @@
   "shortcuts.restore_defaults.help": "KiwiDesk が用意しているショートカットを復元します。インストール後に追加されたものも含まれます。「%1$@」と「%2$@」で追加したショートカットはそのまま残ります。",
   "shortcuts.restore_defaults.message": "自分で作成したショートカットはそのまま残りますが、デフォルトに必要なキーを使っているものは除きます。復元されるショートカット: %1$d · 失われる独自のショートカット: %2$d",
   "shortcuts.restore_defaults.message_clean": "自分で作成したショートカットは何も失われません。復元されるショートカット: %1$d",
-  "shortcuts.restore_defaults.other_layer": "デフォルトに戻せるのは「default」レイヤーだけです。上の「%1$@」で選択してください。",
   "shortcuts.restore_defaults.row": "デフォルトのショートカット",
   "shortcuts.restore_defaults.short": "戻す…",
   "shortcuts.restore_defaults.title": "デフォルトのショートカットに戻しますか？",

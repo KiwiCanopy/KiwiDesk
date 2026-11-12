@@ -2382,7 +2382,6 @@
   "shortcuts.restore_defaults.help": "Puts back the shortcuts KiwiDesk provides, including ones added since you installed it. Shortcuts you added under “%1$@” and “%2$@” are kept.",
   "shortcuts.restore_defaults.message": "Your own shortcuts are kept, except any that use a key the defaults need. Shortcuts restored: %1$d · your own that are lost: %2$d",
   "shortcuts.restore_defaults.message_clean": "Nothing of yours is lost. Shortcuts restored: %1$d",
-  "shortcuts.restore_defaults.other_layer": "Only the “default” layer has defaults to restore. Pick it in %1$@ above.",
   "shortcuts.restore_defaults.row": "Default shortcuts",
   "shortcuts.restore_defaults.short": "Restore…",
   "shortcuts.restore_defaults.title": "Restore the default shortcuts?",

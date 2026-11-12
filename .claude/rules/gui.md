@@ -78,7 +78,11 @@ restated `20...80` satisfies on the day it is written.
 - **Grey, don't hide** a control with no effect in the current
   mode (#171) — keep it visible and dimmed. This covers a control
   that *would* work in another mode, so dimming says "switch that
-  on and I act".
+  on and I act". **A selection is not a mode: a control owned by
+  an unselected object leaves with it** — the Default shortcuts
+  container is drawn on the `default` layer alone, and a hit on a
+  row it draws selects that layer first (#3260,
+  `DefaultShortcutsRowTests` ▸ `containerLeavesWithItsLayer`).
 - An affordance for a channel that **does not exist yet is removed
   outright**: dimming cannot revoke the promise its shape makes,
   and it reads broken instead of forthcoming (the site's App Store

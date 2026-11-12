@@ -2376,7 +2376,6 @@
   "shortcuts.restore_defaults.help": "Rimette le scorciatoie fornite da KiwiDesk, comprese quelle aggiunte da quando l'hai installato. Le scorciatoie che hai aggiunto in «%1$@» e «%2$@» vengono mantenute.",
   "shortcuts.restore_defaults.message": "Le tue scorciatoie vengono mantenute, tranne quelle che usano un tasto necessario per i valori predefiniti. Scorciatoie ripristinate: %1$d · tue perse: %2$d",
   "shortcuts.restore_defaults.message_clean": "Niente di tuo viene perso. Scorciatoie ripristinate: %1$d",
-  "shortcuts.restore_defaults.other_layer": "Solo il livello «default» ha valori predefiniti da ripristinare. Sceglilo più in alto, in %1$@.",
   "shortcuts.restore_defaults.row": "Scorciatoie predefinite",
   "shortcuts.restore_defaults.short": "Ripristina…",
   "shortcuts.restore_defaults.title": "Ripristinare le scorciatoie predefinite?",

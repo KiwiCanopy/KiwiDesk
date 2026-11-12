@@ -2376,7 +2376,6 @@
   "shortcuts.restore_defaults.help": "回復 KiwiDesk 提供的快速鍵，包括你安裝之後新增的那些。你在「%1$@」和「%2$@」中加入的快速鍵會保留。",
   "shortcuts.restore_defaults.message": "你自己的快速鍵會保留，但使用了預設快速鍵所需按鍵的除外。已回復的快速鍵：%1$d · 遺失的自訂快速鍵：%2$d",
   "shortcuts.restore_defaults.message_clean": "你自己的快速鍵均不會遺失。已回復的快速鍵：%1$d",
-  "shortcuts.restore_defaults.other_layer": "只有「default」層有可回復的預設值。請在上方的「%1$@」中選擇它。",
   "shortcuts.restore_defaults.row": "預設快速鍵",
   "shortcuts.restore_defaults.short": "回復…",
   "shortcuts.restore_defaults.title": "要回復預設快速鍵嗎？",
