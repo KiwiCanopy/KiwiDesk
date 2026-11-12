@@ -54,6 +54,16 @@ struct LayerEditorModelTests {
         #expect(model.layerRenameRefusal("Fresh", "Gaming") == refusal)
         #expect(model.layerRenameRefusal("Fresh", "Fresh") == nil)
         #expect(model.layerOnPageRefusal("Nowhere") == nil)
+        // A name only this page has is this refusal's alone: on a
+        // stored page, a new layer is that profile's alone.
+        model.selectEditTarget("Travel")
+        #expect(model.addLayer("Fresh"))
+        #expect(model.addLayer("Other"))
+        #expect(model.layerRenameClash("Fresh", "Other") == nil)
+        #expect(
+            model.layerRenameRefusal("Fresh", "Other")
+                == model.layerOnPageRefusal("Other")
+        )
         #expect(!model.canAddLayer("Gaming"))
     }
 

@@ -145,7 +145,9 @@ struct NameEditSeedTests {
     /// it inline. Trade: it asks per file, so a field-less view
     /// declared beside one with a field is counted too, and it reads
     /// `struct Name: View` alone, so a generic view or a
-    /// `SwiftUI.View` conformance is not seen.
+    /// `SwiftUI.View` conformance is not seen; and it looks one level
+    /// deep, so a view wrapping a field view from another file is
+    /// not counted.
     private func fieldViews(in sources: [String]) -> Set<String> {
         var names: Set<String> = []
         for source in sources where source.contains("TextField(") {
