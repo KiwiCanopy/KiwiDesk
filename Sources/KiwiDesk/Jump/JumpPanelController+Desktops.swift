@@ -44,6 +44,12 @@ extension JumpPanelController {
         if case .drop(let ids, let target, follow: false) = action {
             let failed = move(ids, to: target, follow: false)
             model.reloadDesktops(selecting: target)
+            let gone = Set(failed.map(\.id))
+            awaitLanding(
+                ids.filter { !gone.contains($0) },
+                on: target,
+                model: model
+            )
             if let words = Self.words(failed, in: overview) {
                 model.refuseDesktops(words)
             } else {

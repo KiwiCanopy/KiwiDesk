@@ -237,8 +237,8 @@ struct JumpStripShownTests {
         #expect(footer.contains("lastAppChord:model.lastAppChord"))
     }
 
-    /// The selected tile is the caret alone; only the pointer's
-    /// lift takes the hover ground (#1173, #3164).
+    /// The selected tile is the ring alone; only the pointer's
+    /// lift takes the hover ground (#1173, #3164, #3210).
     @Test("selection and hover never share the tile's ground")
     func tileGroundIsThePointers() throws {
         let file = SourceScan.repoRoot(from: #filePath)
@@ -254,7 +254,11 @@ struct JumpStripShownTests {
         let end = try #require(rest.range(of: "structJumpYoursLine"))
         let body = String(rest[..<end.lowerBound])
         #expect(body.contains("lifted:isLifted)"))
-        #expect(body.contains("varground:someView{ifisLifted{"))
+        #expect(
+            body.contains(
+                "}elseifisLifted{shape.fill(paint.fill(paint.rowHover))}"
+            )
+        )
         #expect(!body.contains("isSelected||isLifted"))
         #expect(!body.contains("lifted:isSelected"))
     }

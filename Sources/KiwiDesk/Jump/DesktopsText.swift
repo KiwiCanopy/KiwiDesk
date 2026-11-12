@@ -24,6 +24,11 @@ enum DesktopsText {
         L("desktop_overview.card.title", "Desktop %1$d", number)
     }
 
+    /// A card title's VoiceOver hint and its `.help` (#3209).
+    static func switchTo(_ number: Int) -> String {
+        L("desktop_overview.card.switch_to", "Switch to Desktop %1$d", number)
+    }
+
     static func space(_ id: SpaceID) -> String {
         L("desktop_overview.line.space", "Space %1$@", id.raw)
     }

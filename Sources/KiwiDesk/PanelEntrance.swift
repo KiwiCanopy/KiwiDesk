@@ -10,13 +10,19 @@ final class PanelPresence: ObservableObject {
     @Published private(set) var leaving = false
     /// How long the fade out takes.
     static let leaveDuration: TimeInterval = 0.15
+    /// A held panel's alpha: at 0 a window passes clicks through
+    /// (measured 2026-11-11, macOS 27.2), so it keeps a trace.
+    nonisolated static let holdAlpha: CGFloat = 0.01
 
     /// Starts the fade, then orders `panel` out once it lands — at
     /// once under Reduce Motion — unless a later opening of the
-    /// same panel took it over meanwhile.
+    /// same panel took it over meanwhile. Where `holdUnseen` runs
+    /// past the fade the panel stays up, unseen, until it ends, so a
+    /// double click's second press lands on it (#3209).
     func fadeOut(
         _ panel: NSWindow?,
         reduceMotion: Bool,
+        holdUnseen: TimeInterval,
         stillCurrent: @escaping @MainActor (PanelPresence) -> Bool
     ) {
         leaving = true
@@ -24,8 +30,52 @@ final class PanelPresence: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             [weak self, weak panel] in
             guard let self, stillCurrent(self) else { return }
-            panel?.orderOut(nil)
+            let rest = holdUnseen - delay
+            guard rest > 0 else {
+                panel?.orderOut(nil)
+                return
+            }
+            panel?.ignoresMouseEvents = false
+            panel?.alphaValue = Self.holdAlpha
+            DispatchQueue.main.asyncAfter(deadline: .now() + rest) {
+                [weak self, weak panel] in
+                guard let self, stillCurrent(self) else { return }
+                panel?.orderOut(nil)
+                panel?.alphaValue = 1
+            }
         }
+    }
+
+    /// The hold's clock in uptime seconds, a seam over the host read.
+    static var uptime: () -> TimeInterval = {
+        ProcessInfo.processInfo.systemUptime
+    }
+
+    /// `clickHold` for the event being handled now on `panel`; read
+    /// at the press, since a close may finish a turn later.
+    static func clickHoldNow(on panel: NSWindow?) -> TimeInterval {
+        clickHold(
+            after: NSApp?.currentEvent,
+            on: panel?.windowNumber,
+            now: uptime(),
+            interval: NSEvent.doubleClickInterval
+        )
+    }
+
+    /// How long a close holds its panel up: what is left of the
+    /// double-click interval after the release on the panel
+    /// `window` that made it, and nothing for a close no click on it
+    /// made. Times are uptime seconds, `NSEvent.timestamp`'s clock.
+    static func clickHold(
+        after event: NSEvent?,
+        on window: Int?,
+        now: TimeInterval,
+        interval: TimeInterval
+    ) -> TimeInterval {
+        guard let event, event.type == .leftMouseUp,
+            event.windowNumber == window
+        else { return 0 }
+        return max(0, interval - (now - event.timestamp))
     }
 }
 

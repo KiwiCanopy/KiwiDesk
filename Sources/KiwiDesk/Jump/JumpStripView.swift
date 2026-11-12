@@ -58,9 +58,9 @@ struct JumpStripView: View {
 
 /// One tile: the app's icon — All's grid symbol on a neutral plate
 /// — and its name under it, one line, middle-truncated; a neutral
-/// count capsule for two or more windows, never red. The selected
-/// tile takes the hover ground, its ink and a 2 pt accent caret; a
-/// lifted one the ground and ink alone.
+/// count capsule for two or more windows, never red. Rows fill,
+/// tiles ring (#3210): the selected tile wears a 2 pt ring and no
+/// fill, a lifted one the hover ground and its ink.
 struct JumpStripTile: View {
     let name: String
     /// nil draws All's symbol.
@@ -77,12 +77,11 @@ struct JumpStripTile: View {
 
     static let width: CGFloat = 92
     static let iconSize: CGFloat = 48
-    static let caret: CGFloat = 2
 
     var body: some View {
         Button(action: onActivate) {
             // Only the pointer's lift sits on the hover ground and
-            // takes its measured ink; the selection is the caret.
+            // takes its measured ink; the selection is the ring.
             content.kiwiHubRowInk(
                 paint,
                 selected: false,
@@ -112,11 +111,8 @@ struct JumpStripTile: View {
                     isSelected
                         ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary)
                 )
-            Capsule()
-                .fill(isSelected ? paint.selection : .clear)
-                .frame(width: Self.iconSize, height: Self.caret)
         }
-        .padding(.top, 6)
+        .padding(.vertical, 6)
         .padding(.horizontal, 4)
         .frame(width: Self.width)
         .background(ground)
@@ -137,7 +133,7 @@ struct JumpStripTile: View {
                 .frame(width: Self.iconSize, height: Self.iconSize)
                 .background(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(paint.fill(paint.rowHover))
+                        .fill(.quaternary)
                 )
                 .accessibilityHidden(true)
         }
@@ -150,19 +146,21 @@ struct JumpStripTile: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 5)
                 .padding(.vertical, 1)
-                .background(Capsule().fill(paint.fill(paint.rowHover)))
+                .background(Capsule().fill(.quaternary))
                 .offset(x: 10, y: -4)
                 .accessibilityHidden(true)
         }
     }
 
     @ViewBuilder private var ground: some View {
-        if isLifted {
-            RoundedRectangle(
-                cornerRadius: KeyPanelStyle.selectionRadius,
-                style: .continuous
-            )
-            .fill(paint.fill(paint.rowHover))
+        let shape = RoundedRectangle(
+            cornerRadius: KeyPanelStyle.selectionRadius,
+            style: .continuous
+        )
+        if isSelected {
+            shape.strokeBorder(paint.selection, lineWidth: 2)
+        } else if isLifted {
+            shape.fill(paint.fill(paint.rowHover))
         }
     }
 }

@@ -265,17 +265,26 @@ struct PanelGlassTests {
 
     @Test("Rows, chips and tiles paint through KiwiHub's paint")
     func rowsReadThePaint() throws {
-        for path in [
-            "Jump/JumpRowView.swift", "Jump/ViewChip.swift",
-            "Jump/JumpLayoutTile.swift",
+        // A tile rings its selection in its unselected inks (#3210).
+        for (path, selected, mark) in [
+            ("Jump/JumpRowView.swift", "isSelected", "fill(paint.selection))"),
+            ("Jump/ViewChip.swift", "isSelected", "fill(paint.selection))"),
+            (
+                "Jump/JumpLayoutTile.swift", "false",
+                "strokeBorder(paint.selection,"
+            ),
         ] {
             let body = try Self.source(path)
             #expect(body.contains("@Environment(\\.kiwiHubPaint)"), "\(path)")
-            #expect(body.contains("paint.selection)"), "\(path)")
+            #expect(
+                body.filter { !$0.isWhitespace }.contains(mark),
+                "\(path)"
+            )
             // Squashed: the call wraps across lines.
             #expect(
                 body.filter { !$0.isWhitespace }.contains(
-                    "kiwiHubRowInk(paint,selected:isSelected,lifted:isLifted)"
+                    "kiwiHubRowInk(paint,selected:\(selected),"
+                        + "lifted:isLifted)"
                 ),
                 "\(path)"
             )
