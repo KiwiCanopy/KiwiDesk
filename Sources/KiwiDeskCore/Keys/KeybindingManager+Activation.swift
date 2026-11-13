@@ -25,13 +25,9 @@ extension KeybindingManager {
         activationFailures = []
         noteHyperShortcuts()
         guard !isSuspended else {
-            _ = armKeyboardTap(sides: [], taps: [], sequences: [])
+            _ = armKeyboardTap(.empty)
             return
         }
-        var hyperRows: [(KeyCombo, Int32)] = []
-        var sideRows: [(KeyCombo, Int32)] = []
-        let tapped = tappedChords(in: layer)
-        let leaders = sequenceLeaders(in: layer)
         // Either-side rows first, so a pair collapsing onto one
         // Carbon chord keeps the same one every launch (#2601).
         let rows = bindings(for: layer).sorted {
@@ -41,24 +37,17 @@ extension KeybindingManager {
                     $1.key.comboString() ?? ""
                 )
         }
-        for (combo, ref) in rows {
-            // A sequence's leader takes its chord (#1871).
-            if leaders.contains(combo) {
-                activationFailures.insert(combo)
-                onLog("keybinding: a key sequence's leader holds a chord")
-                continue
-            }
-            // A modifier tap is the keyboard tap's alone (#1872).
-            if combo.isTap { continue }
-            // A Hyper combo registers only while the key is held.
-            if combo.modifiers.contains(.hyper) {
-                hyperRows.append((combo, ref))
-                continue
-            }
-            if tapped.contains(combo.unsided) {
-                sideRows.append((combo, ref))
-                continue
-            }
+        let arming = KeyboardTapArming(
+            rows: rows.map { ($0.key, $0.value) },
+            leaders: sequences(for: layer).map { ($0.leader, $0) },
+            distinguishingSides: modifierSides
+        )
+        // A sequence's leader takes its chord (#1871).
+        for (combo, _) in arming.heldByLeader {
+            activationFailures.insert(combo)
+            onLog("keybinding: a key sequence's leader holds a chord")
+        }
+        for (combo, ref) in arming.carbon {
             guard
                 registerPhysical(
                     code: combo.keyCode,
@@ -90,16 +79,14 @@ extension KeybindingManager {
                 )
             }
         }
-        armHyper(hyperRows)
-        let taps = modifierTapRows(in: layer)
-        let held = sequences(for: layer)
-        if !armKeyboardTap(sides: sideRows, taps: taps, sequences: held) {
-            activationFailures.formUnion(taps.map(\.0))
+        armHyper(arming.hyper)
+        if !armKeyboardTap(arming) {
+            activationFailures.formUnion(arming.taps.map(\.0))
             // A leader has no Carbon fallback: the tap is its door.
-            activationFailures.formUnion(held.map(\.leader))
+            activationFailures.formUnion(arming.leaders.map(\.0))
             // No tap: the chord falls back to Carbon either-side,
             // as with the switch off, and a collapse is refused.
-            for (combo, ref) in sideRows {
+            for (combo, ref) in arming.sides {
                 guard
                     registerPhysical(
                         code: combo.keyCode,

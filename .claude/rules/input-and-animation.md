@@ -172,11 +172,16 @@ editing here:
   - **No row, no consumer.** Every consumer's rows reach the tap
     through the one `KeyboardTapRows` value and its `setRows`
     door, and the live consumers are read off its non-empty
-    fields, so a new consumer adds a field there; a new path that
-    routes rows to it goes through `tappedChords`,
-    `modifierTapRows` or `sequences(for:)`, never a row list of
-    its own
-    (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
+    fields, so a new consumer adds a field there. Which row goes
+    to which consumer is `KeyboardTapArming`'s, read by the
+    manager's arming and by `KeybindingConflicts.sideReach`; the
+    reach asks each consumer's `rows(for:)` in
+    `KeyboardTapConsumer`'s order, as the tap does, and the
+    manager builds `.modifierTaps` from the same accessor; a
+    new path that routes rows to a consumer goes through it, never
+    a row list of its own, and no scan holds that, so it is
+    review's (#3278; `KeyboardTapArmingTests` ▸ `sortsRows`,
+    `ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
     `KeyboardTapRoutingTests` ▸ `noTapRowNoConsumer`,
     `rowsNameConsumers`).
   - **`.sequences` decides an open key sequence on the tap's
@@ -214,10 +219,13 @@ editing here:
     alone, never a re-arm, which would close an open sequence
     (`KeySequenceScrollTests` ▸ `stepKeyBeatsArrow`,
     `KeySequenceTapTests` ▸ `scrollKeysKeepItOpen`).
-  - **`.sides` answers only the chords a sided row names**, the
-    either-side row on such a chord included, and only while
+  - **`.sides` answers only the chords a sided row or a sided
+    chord leader names**, the either-side row on such a chord
+    included, and only while
     `modifierSides` is on; every other chord stays a Carbon
-    hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`).
+    hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`,
+    `KeyboardTapArmingTests` ▸ `sidedLeaderTaps`,
+    `managerArmsTheSort`).
   - **A modifier tap is decided by the one pure
     `ModifierTapDetector`**, which the recorder calls too, so what
     records is what fires; its timings are its constants and no

@@ -15,60 +15,41 @@ public enum SideTapStatus: Equatable, Sendable {
     case refused
 }
 
-/// The keyboard tap's rows for KeybindingManager: every
-/// either-side shortcut stays a Carbon hotkey, only the chords a
-/// sided shortcut names move to the tap while the switch is on
-/// (#2601), and every modifier tap rides it (#1872).
+/// The keyboard tap's rows for KeybindingManager, as
+/// `KeyboardTapArming` sorts them (#3278): every either-side
+/// shortcut stays a Carbon hotkey, only the chords a sided shortcut
+/// or leader names move to the tap while the switch is on (#2601),
+/// and every modifier tap rides it (#1872).
 extension KeybindingManager {
-    /// The either-side chords whose rows the tap answers: those a
-    /// sided row in `layer` names, while the switch is on. An
-    /// either-side row on such a chord moves with it, so its press
-    /// on the other side never races Carbon.
-    func tappedChords(in layer: String) -> Set<KeyCombo> {
-        guard modifierSides else { return [] }
-        return Set(
-            bindings(for: layer).map(\.0)
-                .filter {
-                    $0.modifiers.isSided && !$0.modifiers.contains(.hyper)
-                }
-                .map(\.unsided)
-        )
-    }
-
-    /// The modifier-tap rows in `layer` (#1872): every tap, since
-    /// a tap is never a Carbon hotkey.
-    func modifierTapRows(in layer: String) -> [(KeyCombo, Int32)] {
-        bindings(for: layer).filter { $0.key.isTap }.map { ($0.key, $0.value) }
-    }
-
     /// Hands the keyboard tap its rows per consumer, building it for
     /// the first consumer, rebuilding it when the set of consumers
     /// changes and stopping it with the last, so no row means no
     /// tap. False where rows wanted a tap macOS refused.
     func armKeyboardTap(
-        sides: [(KeyCombo, Int32)],
-        taps: [(KeyCombo, Int32)],
-        sequences: [KeySequence]
+        _ arming: KeyboardTapArming<Int32, KeySequence>
     ) -> Bool {
         tapBindings = [:]
         sequenceGeneration &+= 1
         answeredChords = nil
+        let sequences = arming.leaders.map(\.1)
         let rows = KeyboardTapRows(
-            sides: sideTapRows(sides),
-            taps: taps.map { combo, ref in
-                ModifierTapRow(
-                    combo: combo,
-                    id: liveTapID(combo, ref),
-                    opensKiwiHubSide: kiwiHubSideRefs.contains(ref)
-                )
-            }
-                // A tap leader is detected as any tap is (#1871).
-                + sequences.enumerated().filter(\.element.leader.isTap).map {
+            sides: sideTapRows(arming.sides),
+            taps: arming.rows(for: .modifierTaps).map { combo, armed in
+                switch armed {
+                case .row(let ref):
                     ModifierTapRow(
-                        combo: $0.element.leader,
-                        id: KeyboardTap.leaderID($0.offset)
+                        combo: combo,
+                        id: liveTapID(combo, ref),
+                        opensKiwiHubSide: kiwiHubSideRefs.contains(ref)
                     )
-                },
+                // A tap leader is detected as any tap is (#1871).
+                case .leader(let index, _):
+                    ModifierTapRow(
+                        combo: combo,
+                        id: KeyboardTap.leaderID(index)
+                    )
+                }
+            },
             sequences: sequences,
             sequencePassing: sequences.isEmpty
                 ? .none : .of(systemChords()),
