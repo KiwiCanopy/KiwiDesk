@@ -29,33 +29,16 @@ enum HomeCardPreview {
         }
     }
 
-    /// One tick per essential in the rows' own vocabulary, off
-    /// the one `verdicts` value the count reads (#1365); hidden
-    /// from VoiceOver like every preview, the subtitle speaking
-    /// the count.
+    /// The essentials' ticks (`MacChecklistTicks`, #1365); the
+    /// subtitle speaks the count.
     private static func checklistTicks(
         _ model: SettingsModel
     ) -> some View {
-        let verdicts = MacChecklistProgress.verdicts(
-            states: model.macChecklistStates,
-            ticks: model.macChecklistTicks
+        MacChecklistTicks(
+            model,
+            font: .system(size: 16, weight: .medium)
         )
-        return HStack(spacing: 6) {
-            ForEach(verdicts, id: \.setting) { verdict in
-                Image(
-                    systemName: verdict.done
-                        ? "checkmark.circle.fill" : "circle"
-                )
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(
-                    verdict.done
-                        ? SettingsTheme.groupHeading
-                        : SettingsTheme.ink3
-                )
-            }
-        }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityHidden(true)
     }
 
     /// Maximum profile chips drawn before "+N" overflow chip.

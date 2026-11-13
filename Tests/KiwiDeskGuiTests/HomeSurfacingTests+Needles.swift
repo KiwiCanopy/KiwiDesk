@@ -299,12 +299,16 @@ extension HomeSurfacingTests {
                 + "for:destination,model:model)",
             "ifletplate{plate}textBand(plated:plate!=nil)",
         ],
+        // The checklist card's face DRAWS the one `verdicts` value
+        // the count reads (#1365) — a face assembling its own ticks
+        // from `MacSetting.allCases` drew six under "of 4" with
+        // every suite green — through the ticks Simple's checklist
+        // header draws too (#3290).
         "Settings/HomeCardPreview.swift": [
-            // The checklist card's face DRAWS the one `verdicts`
-            // value the count reads (#1365) — a face assembling
-            // its own ticks from `MacSetting.allCases` drew six
-            // under "of 4" with every suite green.
-            "letverdicts=MacChecklistProgress.verdicts("
+            "MacChecklistTicks(model,"
+        ],
+        "Settings/Components/MacChecklist/MacChecklistTicks.swift": [
+            "verdicts=MacChecklistProgress.verdicts("
                 + "states:model.macChecklistStates,"
                 + "ticks:model.macChecklistTicks)",
             "ForEach(verdicts,id:\\.setting){verdictin",

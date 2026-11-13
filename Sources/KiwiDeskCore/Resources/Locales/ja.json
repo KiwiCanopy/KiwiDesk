@@ -2488,6 +2488,7 @@
   "simple.look.browse": "その他のデザイン…",
   "simple.look.hint": "独自のカラーを使いたいときやデザインを保存したいときは、「%2$@」の%1$@をご覧ください。",
   "simple.look.title": "デザイン",
+  "simple.mac_checklist.all_line": "%1$@、%2$@",
   "simple.space.screen.help": "このスペースの画面",
   "simple.spaces.card.ax": "スペース %1$@、%2$@",
   "simple.spaces.hint": "スペースを増やしたいときや、%1$@、スペースごとの調整を変えたいときは、「%3$@」の%2$@をご覧ください。",

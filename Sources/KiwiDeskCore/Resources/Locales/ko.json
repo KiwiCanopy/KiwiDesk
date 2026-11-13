@@ -2488,6 +2488,7 @@
   "simple.look.browse": "디자인 더 보기…",
   "simple.look.hint": "나만의 색상을 쓰거나 디자인을 저장하고 싶다면 ‘%2$@’의 %1$@에서 할 수 있습니다.",
   "simple.look.title": "디자인",
+  "simple.mac_checklist.all_line": "%1$@ · %2$@",
   "simple.space.screen.help": "이 공간의 화면",
   "simple.spaces.card.ax": "공간 %1$@, %2$@",
   "simple.spaces.hint": "공간을 더 만들거나 %1$@, 공간별 조정을 바꾸고 싶다면 ‘%3$@’의 %2$@에서 할 수 있습니다.",

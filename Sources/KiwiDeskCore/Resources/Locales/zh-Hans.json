@@ -2488,6 +2488,7 @@
   "simple.look.browse": "更多造型…",
   "simple.look.hint": "想用自己的颜色或保存造型？前往“%2$@”中的%1$@。",
   "simple.look.title": "造型",
+  "simple.mac_checklist.all_line": "%1$@ · %2$@",
   "simple.space.screen.help": "此空间的显示器",
   "simple.spaces.card.ax": "空间 %1$@，%2$@",
   "simple.spaces.hint": "想要更多空间、%1$@或按空间微调？前往“%3$@”中的%2$@。",

@@ -69,11 +69,11 @@ struct OnboardingCloseSeamTests {
         ],
         "Settings/SettingsWindowController.swift": [
             // …the controller asks the model whether the tour
-            // lands, and the switch stores through `pickRoot`
-            // (#2737).
+            // lands once the open has settled the root (#3290),
+            // and the switch stores through `pickRoot` (#2737).
             "funcshow(landingFromTourdestination:"
                 + "SettingsDestination){"
-                + "model.landFromTour(destination)show()}"
+                + "show{model.landFromTour(destination)}}"
         ],
         "Settings/SettingsRootSwitch.swift": [
             "set:{model.pickRoot($0)}"

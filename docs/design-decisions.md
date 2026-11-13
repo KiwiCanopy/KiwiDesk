@@ -11157,6 +11157,17 @@ habit names the shortcuts panel's LIVE chord, read from the
 resolved layer like the tour's keys, with a second frame for a Mac
 where nothing is bound.
 
+:::unreleased
+*Where Simple shows, the tour lands on Simple's checklist block
+(#3290).* A new install opens Settings on Simple, so the last
+button lands there, scrolled to the block that draws the essentials
+still open and opens this card; a window showing Advanced lands on
+the card itself, whether the user picked Advanced or Simple is
+stored and Advanced shows for that window only (owner, 2026-11-13).
+Either way the closing footnote's "opens Settings at Mac Checklist"
+stays true.
+:::
+
 ### The app links the guide, in a language the site actually serves
 
 **[Rationale]**
@@ -11204,6 +11215,13 @@ a window that never returns — the tour reopens FROM Settings, and
 The default action lands on the Mac Checklist card (#1365); ▸ *The
 Mac Checklist counts what macOS can confirm* argues why that is
 not the Open Settings link coming back.
+
+:::unreleased
+Where Simple shows, the default action lands on Simple's checklist
+block instead (#3290), whose header opens this card, so the guide
+pointer at its foot is one click from the landing rather than on
+screen.
+:::
 
 **The banner is one-shot, so only a permanent pointer closes the
 gap.** Home's first-run banner reaches someone who closed the tour
@@ -12035,6 +12053,19 @@ construction rather than by promise:
   badge, and a pin to a missing screen keeps "Pin offline".
   Hiding a thing the user made without saying so is still
   losing their work; hiding it while naming it is curation.
+
+:::unreleased
+*The Mac Checklist's open essentials join Simple (#3290, owner,
+2026-11-13, amending #2737's scope).* After Open applications and
+before the support strip, a header line — "Mac Checklist", the
+count and the Home card's ticks — is one door into Advanced ▸ Mac
+Checklist, and under it only the essentials not yet done are
+drawn, each as Advanced's own row, leaving once it is done. At 4 of 4 the block folds to one quiet line on the page,
+the same door. A new install opens on Simple, so without the block
+its user never met the four essentials the tour hands them to, and
+the tour's exit now lands Simple scrolled to it. The rows are
+Advanced's, so Simple still owns no editor.
+:::
 
 What changed since #2654 is the premise. That segment's whole
 effect was one card, a decision with no result. This one

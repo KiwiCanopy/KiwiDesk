@@ -8,7 +8,9 @@ extension SettingsModel {
     /// through — a bar menu's row (#1518), a spotlight row
     /// (#2038), the tour (#326), an adoption's dropped chords —
     /// and the one writer of `pendingReveal` here
-    /// (`WhatsNewTrailWiringTests`).
+    /// (`WhatsNewTrailWiringTests`). The tour's landing while
+    /// Simple shows asks Simple's checklist block instead
+    /// (`landFromTour`, #3290).
     func land(on anchor: SettingsAnchor) {
         nav.pendingReveal = anchor
     }

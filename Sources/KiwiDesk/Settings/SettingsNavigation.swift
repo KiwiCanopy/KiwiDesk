@@ -73,6 +73,10 @@ struct SettingsNavigation {
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
+    /// The tour's exit asked Simple to open at its Mac Checklist
+    /// block (#3290); Simple scrolls there once and clears it.
+    var simpleChecklistLanding = false
+
     /// The look the pointer previews on Simple's Space cards, nil
     /// at rest (#2777).
     var simpleHover: SimplePreviewHover?
@@ -117,6 +121,7 @@ struct SettingsNavigation {
         kiwiVisionAddRequested = false
         spaceOverridesFocus = nil
         simpleHover = nil
+        simpleChecklistLanding = false
         convergePending = false
         shortcutsWholePage = false
         // The latch is paired with the write that set it, so it

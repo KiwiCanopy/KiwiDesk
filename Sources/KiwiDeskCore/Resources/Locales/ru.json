@@ -2488,6 +2488,7 @@
   "simple.look.browse": "Ещё облики…",
   "simple.look.hint": "Хочешь свои цвета или сохранить облик? %1$@ — в разделе «%2$@».",
   "simple.look.title": "Облик",
+  "simple.mac_checklist.all_line": "%1$@ · %2$@",
   "simple.space.screen.help": "Экран для этого пространства",
   "simple.spaces.card.ax": "Пространство %1$@, %2$@",
   "simple.spaces.hint": "Хочешь больше пространств, «%1$@» или настройку для каждого пространства? %2$@ — в разделе «%3$@».",

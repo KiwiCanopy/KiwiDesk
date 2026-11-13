@@ -46,6 +46,7 @@ struct SettingsNavigationResetTests {
         nav.kiwiVisionAddRequested = true
         nav.spaceOverridesFocus = SpaceID("code")
         nav.simpleHover = .look("Kiwi")
+        nav.simpleChecklistLanding = true
         nav.convergePending = true
         nav.shortcutsWholePage = true
         nav.homeReturnFocus = .shortcuts

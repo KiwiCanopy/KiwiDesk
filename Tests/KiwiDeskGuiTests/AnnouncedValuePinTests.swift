@@ -167,6 +167,8 @@ struct AnnouncedValuePinTests {
         "DesktopsSideView.swift": 1,
         // The new-layer popover's title (#3263).
         "LayerAddPopover.swift": 1,
+        // Simple's Mac Checklist header, one door (#3290).
+        "SimpleMacChecklist.swift": 1,
     ]
 
     @Test("title components are rotor headings")

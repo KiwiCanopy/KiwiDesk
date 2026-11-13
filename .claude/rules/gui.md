@@ -571,7 +571,10 @@ it, and every way out of the trail ends it (#2038).** Settings
 lands on the row's control through `SettingsModel.land(on:)` —
 the one writer of `pendingReveal` in the window controller and
 the model, so a bar menu's row, the tour and an adoption land
-the same way — and carries a
+the same way; the tour's landing while Simple shows is the one
+other door, written by `landFromTour` alone and spent by
+`SimpleScreen` alone (#3290, `SimpleMacChecklistTests`) — and
+carries a
 banner back; the trail has ONE owner, `WhatsNewCoordinator`,
 which ends it whenever What's new is fronted or answered, so the
 banner never outlives the window its Back returns to, and a

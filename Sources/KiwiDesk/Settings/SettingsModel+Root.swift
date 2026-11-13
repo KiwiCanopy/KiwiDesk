@@ -72,12 +72,18 @@ extension SettingsModel {
         land(on: anchor)
     }
 
-    /// The tour's landing (#2737 ruling 15): its page while the
-    /// stored root is Advanced; Simple's root otherwise.
+    /// The tour's landing, by the root this window shows (#2737
+    /// ruling 15, amended 2026-11-13): on Simple, its Mac
+    /// Checklist block (#3290); on Advanced — stored, or this
+    /// window only — its page. Called once the open has settled
+    /// the root (`SettingsWindowController.show(landingFromTour:)`).
     func landFromTour(_ destination: SettingsDestination) {
-        guard
-            SettingsRootPreference.read(from: preferences) == .advanced
-        else { return }
+        guard !showsSimple else {
+            if destination == .macChecklist {
+                nav.simpleChecklistLanding = true
+            }
+            return
+        }
         land(on: SettingsAnchor(destination: destination))
     }
 

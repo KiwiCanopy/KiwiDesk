@@ -2488,6 +2488,7 @@
   "simple.look.browse": "Mehr Looks…",
   "simple.look.hint": "Eigene Farben verwenden oder einen Look sichern? %1$@ unter „%2$@“.",
   "simple.look.title": "Look",
+  "simple.mac_checklist.all_line": "%1$@ · %2$@",
   "simple.space.screen.help": "Bildschirm für diesen Space",
   "simple.spaces.card.ax": "Space %1$@, %2$@",
   "simple.spaces.hint": "Mehr Spaces, %1$@ oder Feinabstimmung pro Space? %2$@ unter „%3$@“.",
