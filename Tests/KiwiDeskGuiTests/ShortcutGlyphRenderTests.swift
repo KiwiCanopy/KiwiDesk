@@ -72,9 +72,9 @@ struct ShortcutGlyphRenderTests {
         #expect(ShortcutGlyph(icon: nil) == nil)
     }
 
-    @Test("a chip with an icon keeps the plain chip's height")
+    @Test("a chip with an icon draws it and keeps the plain height")
     func chipHeightHolds() {
-        func height(_ icon: ShortcutGlyph?) -> CGFloat {
+        func size(_ icon: ShortcutGlyph?) -> CGSize {
             hosted(
                 ShortcutLayerChip(
                     name: "Gaming",
@@ -82,12 +82,19 @@ struct ShortcutGlyphRenderTests {
                     selected: false,
                     action: {}
                 )
-            ).height
+            )
         }
-        let plain = height(nil)
-        for emoji in Self.emoji {
-            #expect(height(.emoji(emoji)) == plain, "\(emoji)")
+        let plain = size(nil)
+        for glyph in Self.emoji.map(ShortcutGlyph.emoji) + [
+            .symbol("gamecontroller")
+        ] {
+            let drawn = size(glyph)
+            #expect(drawn.height == plain.height, "\(glyph)")
+            // The icon takes its square and a gap before the name.
+            #expect(
+                drawn.width >= plain.width + ShortcutLayerChip.iconSide,
+                "\(glyph)"
+            )
         }
-        #expect(height(.symbol("gamecontroller")) == plain)
     }
 }
