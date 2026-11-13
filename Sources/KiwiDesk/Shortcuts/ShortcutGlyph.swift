@@ -45,7 +45,7 @@ struct ShortcutGlyphView: View {
     @ViewBuilder var mark: some View {
         switch glyph {
         case .symbol(let name):
-            Image(systemName: name)
+            GlyphImage(name)
         case .emoji(let emoji):
             Text(verbatim: emoji)
                 .font(.system(size: Self.emojiSize(side: side)))

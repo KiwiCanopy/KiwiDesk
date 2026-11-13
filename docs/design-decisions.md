@@ -7720,6 +7720,13 @@ mark toggle and color; only the glyph differs — `infinity`
 coincide (`stickyRenderSpace` collapses display to global), so
 nothing changes for single-display users.
 
+*Amended by #3284 (owner, 2026-11-13).* Both glyphs are pins now:
+`pin.fill` for global, and for display the pin with a small
+`display` badge at its top-right (`ComposedSymbol.displaySticky`).
+The owner wants the pin family to mean sticky, so the sibling
+argument above — the pin as `SpaceAssignmentChip`'s "bound to one
+Space" — is retired, and the two meeting on one surface is accepted.
+
 Because a sticky window's whole point is to stay put,
 `move_to_space` on one is *guarded* rather than silently
 rewriting its home membership: a global sticky refuses any
@@ -17512,12 +17519,12 @@ content all day, and the adaptive label color is the only default
 guaranteed legible against anything behind the translucent plate,
 light or dark — a fixed hue can wash out or clash. So the shipped
 look is unchanged for anyone who never opens the grid; color is
-on-demand. The mark glyph is `infinity` ("always / everywhere,"
+on-demand. The mark glyph was `infinity` ("always / everywhere,"
 and a single stroke that stays crisp at the 7–9 pt badge size
-where `square.stack.3d.up.fill`'s perspective smeared); the
-pushpin family is off-limits — `SpaceAssignmentChip` uses
-`pin.fill` for the opposite idea (a window bound to one space).
-(#429)
+where `square.stack.3d.up.fill`'s perspective smeared), keeping
+off the pushpin family `SpaceAssignmentChip` uses (#429); #3284
+moved sticky onto the pin family by owner ruling (the
+`StickyScope` entry's amendment).
 
 `floating.color` paints the floating badge's glyph and the
 on-window floating mark's alike, as `sticky.color` does sticky's

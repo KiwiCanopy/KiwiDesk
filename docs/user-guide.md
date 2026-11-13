@@ -570,10 +570,16 @@ A **sticky** window stays visible on every space. Two scopes
 (stickiness is per window; there is no app-rule list):
 
 - **Toggle sticky everywhere** — every space of every screen
-  (∞ mark).
+  (pin mark).
 - **Toggle sticky on this screen** — every space of its home
-  screen, the one its home space is on (📌 mark). Moving it to a space on another
-  screen re-homes it there.
+  screen, the one its home space is on (pin mark with a small
+  screen). Moving it to a space on another screen re-homes it
+  there.
+
+:::unreleased
+Both sticky marks are pins: global sticky wears a pin, screen
+sticky a pin with a small screen at its corner.
+:::
 
 **Toggle sticky everywhere** is a shortcut under Size & float.
 
@@ -582,8 +588,8 @@ there; bind
 [`toggle_display_sticky`](lua-reference.md#toggle_display_sticky)
 in the Lua bindings drawer.
 
-Moving a ∞ window anywhere, or a 📌 window to another space on
-the same screen, is refused with a brief pill. On a single
+Moving a global sticky window anywhere, or a screen-sticky window
+to another space on the same screen, is refused with a brief pill. On a single
 screen the two are identical. The flag survives closing and
 reopening the window and is independent of floating: a floating
 sticky window keeps its frame everywhere; a tiled one tiles into
@@ -602,7 +608,7 @@ drive Desktops; `override_sticky_reach` in Lua pins a single
 window the other way. Mission Control shows a sticky window on
 one Desktop at a time.
 
-A ∞ window follows the space you focus onto its screen; when
+A global sticky window follows the space you focus onto its screen; when
 that space is a floating-mode space on another screen, KiwiDesk
 moves the window there at its last size, scaled to the screen.
 
@@ -719,13 +725,14 @@ Spaces* hides a Space holding only those. *Open or Focus* still
 reaches such a window and switches Desktops to it.
 
 A sticky window's glyph is listed under one Space only, the one
-it *renders* on: a ∞ window under the Space you are focused on,
-a 📌 window under the current Space of its own screen.
+it *renders* on: a global sticky window under the Space you are
+focused on, a screen-sticky window under the current Space of its
+own screen.
 
 | Mark | Where it sits | Means |
 | --- | --- | --- |
-| ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every screen |
-| 📌 mark | On the window, top-right corner | **Screen sticky** — every Space of its home screen |
+| Pin mark | On the window, top-right corner | **Global sticky** — every Space of every screen |
+| Pin mark with a screen | On the window, top-right corner | **Screen sticky** — every Space of its home screen |
 | Floating mark | On the window, top-right corner — left of a sticky mark | A **floating** window |
 | Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |

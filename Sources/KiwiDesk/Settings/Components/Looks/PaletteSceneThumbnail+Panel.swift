@@ -173,7 +173,7 @@ extension PaletteSceneThumbnail {
             )
             .overlay(alignment: .topLeading) {
                 if let symbol {
-                    Image(systemName: symbol)
+                    GlyphImage(symbol)
                         .font(
                             .system(size: 9 * scale, weight: .bold)
                         )

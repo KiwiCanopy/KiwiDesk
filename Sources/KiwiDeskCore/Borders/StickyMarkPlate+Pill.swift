@@ -64,10 +64,10 @@ extension StickyMarkPlate {
             NSImage.SymbolConfiguration(paletteColors: [markColor])
         )
         guard
-            let image = NSImage(
-                systemSymbolName: symbolName,
-                accessibilityDescription: nil
-            )?.withSymbolConfiguration(config)
+            let image = SymbolImage.named(
+                symbolName,
+                configuration: config
+            )
         else {
             return NSAttributedString(
                 string: symbolName,

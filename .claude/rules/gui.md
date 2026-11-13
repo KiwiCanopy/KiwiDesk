@@ -2203,6 +2203,17 @@ with a stand-in the floor has** (`ShortcutSymbolFloorTests`, read
 from the OS's availability table, since a newer name resolves on
 every machine that runs the suite).
 
+**A glyph SF Symbols lacks as one symbol — a base with a badge in
+its corner — is a `ComposedSymbol` in Core's one table, named
+`kiwi.*`, drawn by `GlyphImage` in SwiftUI and `SymbolImage.named`
+in AppKit, never two symbols stacked at a call site** (#3284); a
+surface that may be handed one draws through either door, and the
+symbol suites check its two parts (`ShortcutSymbolFloorTests`,
+`ComposedSymbolTests`). **A KiwiHub side's symbol is the one
+`ShortcutsReferenceBuilder.sideSymbol(_:)`**, read by its row and
+the menu bar's rows; the View side no longer wears Layout
+Defaults' page symbol (#3284).
+
 **A Settings shortcut row draws the panel's glyph for its action
 through the one `ShortcutsReferenceBuilder.icon(for:)`**, never a
 glyph table of its own (#2670). **Every surface drawing the

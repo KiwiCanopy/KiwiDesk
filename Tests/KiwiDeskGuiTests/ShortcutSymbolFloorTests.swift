@@ -125,6 +125,14 @@ struct ShortcutSymbolFloorTests {
                 )
                 + ShortcutsReferenceBuilder.verbSymbols
         )
+        .reduce(into: Set<String>()) { parts, name in
+            // A composed glyph draws its two symbols (#3284).
+            if let composed = ComposedSymbol(name: name) {
+                parts.formUnion([composed.base, composed.badge])
+            } else {
+                parts.insert(name)
+            }
+        }
         #expect(drawn.count > 20, "the census drew too few symbols")
         let stand = ShortcutsReferenceBuilder.floorSymbols
         // A stand-in wears no other row's glyph (#2529: reset sizing's

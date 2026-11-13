@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -104,10 +105,8 @@ struct ShortcutRowSymbolTests {
                 Issue.record("\(command.lua) draws no symbol")
                 continue
             }
-            let image = NSImage(
-                systemSymbolName: name,
-                accessibilityDescription: nil
-            )
+            // A composed glyph resolves only if both its parts do.
+            let image = SymbolImage.named(name)
             #expect(image != nil, "\(name) does not resolve")
         }
     }
@@ -128,10 +127,7 @@ struct ShortcutRowSymbolTests {
             }
         )
         for symbol in symbols {
-            let image = NSImage(
-                systemSymbolName: symbol,
-                accessibilityDescription: nil
-            )
+            let image = SymbolImage.named(symbol)
             #expect(
                 image != nil,
                 "\(symbol) does not resolve"

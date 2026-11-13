@@ -90,7 +90,7 @@ extension StatusItemController {
             keyEquivalent: ""
         )
         hub.target = self
-        hub.image = symbol("square.grid.2x2")
+        hub.image = symbol(ShortcutsReferenceBuilder.sideSymbol(.view))
         hub.isEnabled = true
         // The status menu is not the app's MainMenu, so its key
         // equivalent is active only while this menu is tracking.
@@ -113,7 +113,9 @@ extension StatusItemController {
             keyEquivalent: ""
         )
         overview.target = self
-        overview.image = symbol("rectangle.3.group")
+        overview.image = symbol(
+            ShortcutsReferenceBuilder.sideSymbol(.desktops)
+        )
         menu.addItem(overview)
         if !tilingIdle, !warning, let tiling = makeTilingItem() {
             menu.addItem(tiling)
