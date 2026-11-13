@@ -162,6 +162,11 @@ struct TourStartReplaceTests {
         #expect(live.count == layout.spaceCount + 1)
         let drawn = plan.flatMap(\.spaces).map(\.id.raw)
         #expect(Set(drawn) == Set(live))
+        // The fifth screen, past the plan, takes the starter's
+        // single-Space rule: a desktop's order Grid · Stack · BSP ·
+        // Scrolling, the one Developer places least — BSP.
+        let fifth = SpaceID(layout.spaceCount + 1)
+        #expect(core.state.workspaces[fifth]?.mode == .bsp)
     }
 
     /// Pins on the live screens follow a replace, and the Revert

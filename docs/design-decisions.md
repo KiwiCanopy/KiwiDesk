@@ -11201,7 +11201,9 @@ Four screens take the three-screen plan plus one Space on the
 fourth — Monocle for Developer, and for Studio Grid on a laptop
 or desktop-class screen, Stack elsewhere (`PresetFamilyTests` ▸
 `studioFourthByShape`) — and each further screen gets one Space
-more.
+in the starter's single-Space rule, the first of its shape's order
+the desk holds least (`TourStartReplaceTests` ▸
+`fiveScreensStart`).
 
 **A pick redraws; Continue saves.** This departs from the Looks
 step's write-through (#1720, above) on purpose: a look is

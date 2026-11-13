@@ -89,12 +89,18 @@ public enum ProfileComposition {
             )
             assignment[space] = ordered[position].id
         }
+        // A screen past the plan holds one Space, in the layout its
+        // shape's single-Space order places least on the desk
+        // (#3294), the starter's own rule.
         var next = layout.spaceCount + 1
         for position in layout.screenCount..<ordered.count {
             let space = SpaceID(next)
             next += 1
             spaces.append(space)
-            modes[space] = .monocle
+            modes[space] = StarterAllocation.singleSpaceLayout(
+                for: ScreenClass.of(ordered[position]),
+                placed: spaces.dropLast().compactMap { modes[$0] }
+            )
             assignment[space] = ordered[position].id
         }
         return Composed(
