@@ -6641,8 +6641,8 @@ maximize.set_anchor_override("editor", "center")
 ### maximize.set_follow_focus
 
 :::unreleased
-**Expects:** `true` or `false` (default `false`). Settings row:
-Layout Defaults ▸ Maximize ▸ Maximize follows focus.
+**Expects:** `true` or `false` (default `false`). Settings ▸ Layout
+Defaults ▸ Maximize ▸ Maximize follows focus.
 
 **Does:** with `true`, a Maximize made after the call moves to the
 tiled window focus lands on instead of ending, in every shape. Only

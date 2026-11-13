@@ -87,19 +87,19 @@ struct LayoutDefaultsCensusRenderTests {
     }
 
     /// The Maximize card beside it (#3062): every census row of
-    /// the container, in the card's order, at rest — its table's
-    /// columns, then the follow-focus row (#3280).
+    /// the container, at rest, the table's columns first and the
+    /// rows the card walks below them after (#3280).
     @Test("the Maximize card draws its container's census rows")
     func maximizeRows() {
+        let all = LayoutDefaultsRowOrder.maximize
+        let columns = LayoutDefaultsRowOrder.maximizeColumns
+        #expect(Set(all) == censusRows(.maximize))
+        #expect(all.count == Set(all).count)
+        #expect(Array(all.prefix(columns.count)) == columns)
+        #expect(columns.count == 3)
         #expect(
-            Set(LayoutDefaultsRowOrder.maximize)
-                == censusRows(.maximize)
-        )
-        #expect(LayoutDefaultsRowOrder.maximize.count == 4)
-        #expect(
-            LayoutDefaultsRowOrder.maximize
-                == LayoutDefaultsRowOrder.maximizeColumns
-                + [.behaviour(.maximizeFollowFocus)]
+            MaximizeCard.rowsBelowTable
+                == [.behaviour(.maximizeFollowFocus)]
         )
     }
 

@@ -5,22 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The Maximize card's "Maximize follows focus" row (#3280) writes
-/// the profile value `maximize.set_follow_focus` writes, and is no
-/// longer a Lua-only census row.
+/// the profile value `maximize.set_follow_focus` writes.
 @Suite("Maximize follows focus row (#3280)")
 struct MaximizeFollowFocusRowTests {
-    @Test("the census places the row in the Maximize card")
-    func censusPlacesTheRow() {
-        let key = SettingKey.behaviour(.maximizeFollowFocus)
-        #expect(key.id == "settings.maximize.followFocus")
-        #expect(key.placement.area == .layoutDefaults)
-        #expect(key.placement.container == .maximize)
-        #expect(key.placement.tier == .atRest)
-        #expect(
-            !LayoutDefaultsRowOrder.maximizeColumns.contains(key)
-        )
-    }
-
     /// The census label, the catalog anchor and the row's label are
     /// one key, so search lands on the row it names.
     @Test("the row's label is the census and catalog key")
@@ -35,21 +22,38 @@ struct MaximizeFollowFocusRowTests {
         )
     }
 
-    /// The toggle binds the draft's `maximize.followFocus`, the leaf
-    /// the Lua verb writes, and anchors the catalog control.
-    @Test("the toggle writes the stored follow-focus value")
-    func toggleWritesTheStoredValue() throws {
+    /// The row's `?` reads the census help key.
+    @Test("the row's help is the census help key")
+    func helpIsTheCensusKey() throws {
+        let help = try #require(BehaviourKey.maximizeFollowFocus.text.helpKey)
+        let needle = "staticvarfollowFocusHelp:String{L(\"\(help)\","
+        let source = try cardSource()
+        #expect(source.contains(needle))
+    }
+
+    /// The card walks its order list below the table, and the
+    /// follow-focus arm binds the draft's `maximize.followFocus`, the
+    /// leaf the Lua verb writes, and anchors the catalog control.
+    @Test("the card walks the list and the toggle writes the value")
+    func cardWalksTheList() throws {
         let source = try cardSource()
         #expect(
             source.contains(
-                "ToggleRow(label:controls.maximizeFollowFocus.text,"
-                    + "isOn:$model.config.settings.maximize.followFocus,"
-                    + "help:Self.followFocusHelp)"
-                    + ".searchAnchored("
-                    + "SettingsCatalog.layoutDefaults.maximizeFollowFocus)"
+                "ForEach(Self.rowsBelowTable,id:\\.id){keyinrow(key)}"
             )
         )
+        #expect(source.contains(Self.toggleArm))
     }
+
+    /// The follow-focus arm, spaces and newlines stripped.
+    private static let toggleArm = [
+        "case.behaviour(.maximizeFollowFocus):",
+        "ToggleRow(label:controls.maximizeFollowFocus.text,",
+        "isOn:$model.config.settings.maximize.followFocus,",
+        "help:Self.followFocusHelp)",
+        ".searchAnchored(",
+        "SettingsCatalog.layoutDefaults.maximizeFollowFocus)",
+    ].joined()
 
     private func cardSource() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)

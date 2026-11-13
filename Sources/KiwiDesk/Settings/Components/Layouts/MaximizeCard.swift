@@ -89,14 +89,9 @@ struct MaximizeCard: View {
                     row: SettingsCatalog.shortcuts.maximizeWidthBinding
                 )
             }
-            ToggleRow(
-                label: controls.maximizeFollowFocus.text,
-                isOn: $model.config.settings.maximize.followFocus,
-                help: Self.followFocusHelp
-            )
-            .searchAnchored(
-                SettingsCatalog.layoutDefaults.maximizeFollowFocus
-            )
+            ForEach(Self.rowsBelowTable, id: \.id) { key in
+                row(key)
+            }
         }
         .onPreferenceChange(MaximizeColumns.Drawn.self) {
             columns = MaximizeColumns(drawn: $0)
@@ -120,6 +115,36 @@ struct MaximizeCard: View {
         .font(.callout)
         .foregroundStyle(SettingsTheme.ink2)
         .accessibilityHidden(true)
+    }
+
+    /// The card's census rows after its table's columns (#3280).
+    static var rowsBelowTable: [SettingKey] {
+        Array(
+            LayoutDefaultsRowOrder.maximize.dropFirst(
+                LayoutDefaultsRowOrder.maximizeColumns.count
+            )
+        )
+    }
+
+    /// A row below the table, the search anchor of its census key.
+    @ViewBuilder
+    private func row(_ key: SettingKey) -> some View {
+        switch key {
+        case .behaviour(.maximizeFollowFocus):
+            ToggleRow(
+                label: controls.maximizeFollowFocus.text,
+                isOn: $model.config.settings.maximize.followFocus,
+                help: Self.followFocusHelp
+            )
+            .searchAnchored(
+                SettingsCatalog.layoutDefaults.maximizeFollowFocus
+            )
+        default:
+            let _ = assertionFailure(
+                "unrendered Maximize row: \(key.id)"
+            )
+            EmptyView()
+        }
     }
 
     /// A column's heading, the search anchor of its census key.
@@ -164,15 +189,17 @@ struct MaximizeCard: View {
     }
 
     /// The follow-focus row's `?` (#3280): what the switch does, its
-    /// two-window cost, and that it reaches only the next Maximize.
+    /// two-window cost (a raise on Monocle, #3063), and that it
+    /// reaches only the next Maximize.
     static var followFocusHelp: String {
         L(
             "layout_defaults.maximize.follow_focus.help",
             "The window you focus takes over the Maximize, in the "
                 + "same shape, and the one you left shrinks back to its "
-                + "place. Each focus step resizes both windows. A change "
-                + "here applies from the next Maximize, not to one "
-                + "already on screen."
+                + "place. Each focus step resizes both windows, except "
+                + "a full Maximize on a Monocle Space, where it only "
+                + "brings the window forward. A change here applies "
+                + "from the next Maximize, not to one already on screen."
         )
     }
 

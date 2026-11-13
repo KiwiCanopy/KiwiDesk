@@ -20,7 +20,8 @@ enum LayoutDefaultsRowOrder {
     ]
 
     /// The whole Maximize card: its table's columns, then whether a
-    /// new Maximize follows focus (#3280).
+    /// new Maximize follows focus (#3280). `MaximizeCard` walks the
+    /// entries after the columns below its table.
     static let maximize: [SettingKey] =
         maximizeColumns + [.behaviour(.maximizeFollowFocus)]
 
