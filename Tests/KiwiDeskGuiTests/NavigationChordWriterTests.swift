@@ -146,7 +146,7 @@ struct NavigationChordWriterTests {
                 kept: row("f2", goTo("1"))
             )
         ]
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         #expect(duplicated(model.config).isEmpty)
         // Vacuity: the seed's own go-to row landed beside the user's.
         #expect(

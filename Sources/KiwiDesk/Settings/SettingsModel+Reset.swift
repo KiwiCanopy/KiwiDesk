@@ -24,23 +24,32 @@ extension SettingsModel {
     /// default layer — the one the seed authors; a GUI-created
     /// layer's chrome rows (`appChromeRows`) are seeded at its
     /// creation and are the user's after that.
-    func resetShortcutsToDefaults() {
+    /// `reach` says how far the Save writes it (#3248): the edited
+    /// profile alone, or every profile's seeded rows.
+    func resetShortcutsToDefaults(reach: RestoreReach) {
         guard
             let index = config.layers.firstIndex(where: {
                 $0.name == KeyLayer.defaultName
-            })
+            }),
+            let restore = shortcutRestore
         else { return }
+        let profiles = encodedReach?.keyLayers.profiles ?? []
+        config.layers[index].bindings = restoredDefaultRows(
+            config.layers[index].bindings
+        )
+        droppedChords = []
+        stageRestore(.key, restore, profiles: profiles, reach: reach)
+    }
+
+    /// The default layer's rows once restored: the seed, then the
+    /// rows of the user's that outlive it.
+    func restoredDefaultRows(_ rows: [KeyBinding]) -> [KeyBinding] {
         let shipped = shippedDefaults(on: config.shortcutBase)
         let orphanLua = orphanLuaInDefaultLayer
-        let kept = config.layers[index].bindings.filter {
-            Self.survivesReset(
-                $0,
-                against: shipped,
-                orphans: orphanLua
-            )
-        }
-        config.layers[index].bindings = shipped + kept
-        droppedChords = []
+        return shipped
+            + rows.filter {
+                Self.survivesReset($0, against: shipped, orphans: orphanLua)
+            }
     }
 
     /// The seed for this config on `base`, the Desktop tier

@@ -194,6 +194,24 @@ enum GestureListWords {
         L("shortcuts.gestures.list.restore", "Restore Defaults")
     }
 
+    /// Restore Defaults' question while another profile changed
+    /// these gestures too (#3248).
+    static var restoreAskTitle: String {
+        L(
+            "shortcuts.gestures.list.restore_ask",
+            "Other profiles changed these gestures too."
+        )
+    }
+
+    /// Who else changed them, then that added rows stay.
+    static func restoreAskMessage(_ others: [String]) -> String {
+        RestoreReachWords.changedIn(others) + " "
+            + L(
+                "shortcuts.gestures.list.restore_keeps",
+                "Gestures you added stay."
+            )
+    }
+
     static var magicMouseCaption: String {
         L(
             "shortcuts.gestures.list.magic_mouse",

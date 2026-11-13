@@ -12,6 +12,9 @@ struct DefaultShortcutsRow: View {
     @Binding var selected: String
     @State private var importedNote = false
     @State private var confirmingReset = false
+    /// Who else changed the seeded rows, read as the dialog opens
+    /// (#3248): empty asks as before, and the restore stays here.
+    @State private var elsewhere: [String] = []
 
     /// Why Restore greys, nil while it acts — the caption reads it.
     private var restoreReason: ShortcutsGates.InertReason? {
@@ -109,6 +112,7 @@ struct DefaultShortcutsRow: View {
         _ reason: ShortcutsGates.InertReason?
     ) -> some View {
         Button(L("shortcuts.restore_defaults.short", "Restore…")) {
+            elsewhere = model.shortcutsRestoreChangedElsewhere
             confirmingReset = true
         }
         .settingsActionButton()
@@ -124,16 +128,7 @@ struct DefaultShortcutsRow: View {
             isPresented: $confirmingReset,
             titleVisibility: .visible
         ) {
-            Button(role: .destructive) {
-                model.resetShortcutsToDefaults()
-            } label: {
-                Text(
-                    L(
-                        "shortcuts.restore_defaults.confirm",
-                        "Restore Defaults"
-                    )
-                )
-            }
+            resetButtons
             Button(role: .cancel) {
             } label: {
                 Text(
@@ -143,8 +138,43 @@ struct DefaultShortcutsRow: View {
         } message: {
             // Counted only while asked: every page render built it
             // (#2783).
-            if confirmingReset { Text(resetMessage) }
+            if confirmingReset { Text(resetMessage + changedLine) }
         }
+    }
+
+    /// One Restore while nobody else changed the seeded rows; else
+    /// this profile (the default) or every profile (#3248).
+    @ViewBuilder private var resetButtons: some View {
+        if let profile = model.reachProfile, !elsewhere.isEmpty {
+            Button {
+                model.resetShortcutsToDefaults(reach: .here)
+            } label: {
+                Text(RestoreReachWords.here(profile))
+            }
+            .keyboardShortcut(.defaultAction)
+            Button(role: .destructive) {
+                model.resetShortcutsToDefaults(reach: .everyProfile)
+            } label: {
+                Text(RestoreReachWords.everyProfile)
+            }
+        } else {
+            Button(role: .destructive) {
+                model.resetShortcutsToDefaults(reach: .here)
+            } label: {
+                Text(
+                    L(
+                        "shortcuts.restore_defaults.confirm",
+                        "Restore Defaults"
+                    )
+                )
+            }
+        }
+    }
+
+    /// Who else changed the seeded rows, after the counts.
+    private var changedLine: String {
+        elsewhere.isEmpty
+            ? "" : "\n\n" + RestoreReachWords.changedIn(elsewhere)
     }
 
     /// Explains restored defaults count and collateral loss count (#1096).
