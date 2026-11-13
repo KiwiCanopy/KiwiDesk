@@ -1,7 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Shortcuts ▸ Mouse & Trackpad (#1726, #3184): what the mouse and
+/// Shortcuts ▸ Mouse & Trackpad (#1726, #3184): the Mouse and
+/// Trackpad binding cards first (#3281), then what the mouse and
 /// trackpad do, in open groups ordered by where the hand is — on
 /// your windows, holding a modifier, on the KiwiShelf. An entry
 /// lands with its feature, never before, and one whose surface is
@@ -24,6 +25,9 @@ struct GesturesPart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            // The cards the user binds in lead the part (owner,
+            // 2026-11-13, #3281); the built-in gestures follow.
+            gestureCards
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnWindows) {
                 focusEntries
                 GestureRule()
@@ -32,7 +36,6 @@ struct GesturesPart: View {
             SettingsSection(SettingsCatalog.shortcuts.gesturesModifier) {
                 GesturesScrollEntries(model: model, playing: $playing)
             }
-            gestureCards
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnShelf) {
                 GesturesShelfEntries(model: model, playing: $playing)
             }
