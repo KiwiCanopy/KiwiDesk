@@ -141,6 +141,26 @@ struct NavigationTests {
         }
     }
 
+    /// An edge lying on the center line is no crossing: with no
+    /// inner gap the column's two halves meet on it, and the half
+    /// whose center is nearer the line still wins.
+    @Test("An edge on the center line is no crossing")
+    func edgeOnTheLineIsNoCrossing() {
+        let origin = CGRect(x: 500, y: 0, width: 500, height: 500)
+        let candidates: [(id: WindowID, frame: CGRect)] = [
+            (WindowID(2), CGRect(x: 0, y: 250, width: 500, height: 750)),
+            (WindowID(1), CGRect(x: 0, y: 0, width: 500, height: 250)),
+        ]
+        #expect(
+            Navigation.neighbor(
+                from: origin,
+                in: .left,
+                candidates: candidates,
+                tie: .none
+            ) == WindowID(1)
+        )
+    }
+
     /// `rect`, drawn facing `.right`, turned to face `direction`
     /// about the point (`c`, `c`).
     private static func turned(

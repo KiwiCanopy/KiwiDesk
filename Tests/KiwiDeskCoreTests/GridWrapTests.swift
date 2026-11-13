@@ -40,6 +40,12 @@ struct GridWrapTests {
             )
         }
         core.retile()
+        // The height above is reasoned from this floor (tests.md).
+        let floor = core.tiler.settings.minWindowSize(
+            for: .grid,
+            in: SpaceID("1")
+        )
+        #expect(floor.height == 300)
         return core
     }
 

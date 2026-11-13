@@ -97,13 +97,14 @@ public enum Navigation {
     }
 
     /// The lateral term: zero for a window whose span holds the
-    /// origin's center, else the centers' offset.
+    /// origin's center strictly — an edge on the line is no
+    /// crossing — else the centers' offset.
     private static func offAxis(
         _ origin: CGFloat,
         _ center: CGFloat,
         _ low: CGFloat,
         _ high: CGFloat
     ) -> CGFloat {
-        (low...high).contains(origin) ? 0 : abs(center - origin)
+        low < origin && origin < high ? 0 : abs(center - origin)
     }
 }
