@@ -7821,37 +7821,64 @@ report 2560 pt and want the same answer, while a Retina laptop
 reports 1728 and wants laptop layouts despite having more pixels
 than either.
 
+:::unreleased
 **Spaces are budgeted, never added up per screen.** A laptop's
 three plus a 27"'s five would be eight keys to learn on day one,
-most of them empty — so the total is 3 · 5 · 7 · 8 · 9 by screen
-count and then one more each, soft-capped at ten, with each
-screen's share proportional to its width and clamped to 1...3.
+most of them empty — so the total is 3 · 5 · 5 · 5 by screen
+count and then one more per screen (N + 1), soft-capped at ten,
+and more screens never get fewer spaces (owner ruling, #3294,
+replacing 3 · 5 · 7 · 8 · 9). Below four screens each screen's
+share is proportional to its width and clamped to 1...3; from
+four, the widest screen holds its lead and the Floating space,
+and every other screen one space.
 The cap is on *spaces*, so min-one-per-screen outranks it:
 eleven displays gets eleven spaces, because a screen with none
 has nowhere for a window to resolve to. Three rules ride on top —
-exactly one Floating space, on the largest screen that has room
+exactly one Floating space, on the widest screen that has room
 beside it; the lead ruled below; and no layout twice unless the
 budget forces it or the lead repeats it deliberately. The
-count tails off because screens four and five are almost always
-glanceable (logs, chat, a stream) and want one space that is
-always the same; the cost of a space is a key to bind and a name
-to recall, not screen area. And we run out of keys before we run
-out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
-left.
+count stops growing past two screens because a third, fourth or
+fifth screen is almost always glanceable (logs, chat, a stream)
+and wants one space that is always the same — the old ladder
+handed a four-screen desk eight, most never used; the cost of a
+space is a key to bind and a name to recall, not screen area.
+And we run out of keys before we run out of spaces: past ⌥1–9
+and ⌥0 there are no default go-to keys left.
+:::
 
+:::unreleased
 **Beside an ultrawide, Scrolling lives on the ultrawide alone.**
 With an ultrawide or super ultrawide among several screens, the
-budget and lead rules around this paragraph give way: the ultrawides lead Scrolling, every
-other screen leads Monocle and never scrolls, and each screen
-gets three spaces ending in its own Floating space — a
-widescreen Monocle · BSP · Floating, a portrait screen Monocle ·
-Grid (one column of three) · Floating, a laptop Monocle · Grid
-(two by two) · Floating. A Scrolling row belongs where it has
-width to run; beside one, the other screen's job is to hold
-whole windows. The total is three a screen, capped at ten, and
-each screen has its own Floating space — the one place the
-budget and the one-Floating rule above do not bind. (Owner
-ruling, #1662.) A laptop's Grid is two by two rather than one
+lead rule around this paragraph gives way: the ultrawides lead
+Scrolling, every other screen of two or more spaces leads Monocle,
+and each such screen ends in its own Floating space. A Scrolling
+row belongs where it has width to run; beside one, the other
+screen's job is to hold whole windows. (Owner ruling, #1662.) The
+budget is the ladder's (#3294; it was three a screen), so below
+four screens a companion holding two spaces — a MacBook beside an
+ultrawide, the common case — is Monocle · Floating, and the one
+screen holding three adds its ruled layout between: a widescreen
+BSP, a portrait or laptop screen Grid, an ultrawide Stack. A
+screen left one space takes the single-Space order below.
+:::
+
+:::unreleased
+**From four screens there is one Floating space, on the widest,
+beside an ultrawide too** (owner ruling, #3294, overriding
+#1662's Floating on every screen). #1662 gave each companion its
+own Floating space when each held three, so a floating window was
+one key away on every screen at the cost of one space in three.
+On the N + 1 ladder every screen past the widest holds one space,
+and a Floating space there would leave that screen tiling
+nothing — the one job a glanceable screen has. The widest screen
+is where a floating window has the most room, and it already
+holds two spaces, so the Floating space goes there and the desk
+keeps the "exactly one" rule the ladder has always had. Below
+four screens the companions keep #1662's own Floating space,
+because there each still holds two.
+:::
+
+A laptop's Grid is two by two rather than one
 row because a laptop alone reaches the same tuning when a Space
 is switched to Grid, and a two-cell cap piles the third window
 into the last cell, which reads as a broken Grid; the dynamic
@@ -7890,6 +7917,23 @@ Monocle — the one per-class exception. And
 Scrolling leads several screens at once, which the
 no-layout-twice rule carves out explicitly: an accidental
 repeat is still a bug, this one is the feature.
+
+:::unreleased
+**A screen holding one space is not led: it takes its shape's
+single-Space order** (owner ruling, #3294, amending #1018). A lead
+introduces the spaces behind it; on a screen with none behind,
+the Scrolling lead would be its only layout, and a four-screen
+desk would open three screens alike. So a one-space screen takes
+the first layout of its order that no other screen on the desk
+holds — laptop Monocle, Scrolling; desktop Grid, Stack, BSP,
+Scrolling; ultrawide Stack, Track, Grid; portrait Stack, Grid,
+Monocle — and once every entry is taken, the one placed least,
+earlier in the order on a tie. A laptop's order leads Monocle,
+against its tiled list, because one space on a small screen is a
+screen of whole windows; that is also what #1018 gave the
+smallest screen, so a laptop on a big desk still opens in
+Monocle.
+:::
 
 **A starter Scrolling slot is set, not left on `auto`.** `auto`
 resolves near-full — one window with a sliver of the next — which

@@ -176,23 +176,23 @@ struct StarterRescaleTests {
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
         // Now on a transient Starter Standard; a THIRD display
-        // must still recompose the setup (the seven-space budget),
-        // not a workflow Standard.
+        // must still recompose the setup (the five-space budget,
+        // #3294), not a workflow Standard.
         connect(core, [display(3, "C", x: 200)])
         core.handleMonitorChange()
         #expect(core.profiles.currentStandard == "Starter")
-        #expect(core.state.workspaces.allSpaces.count == 7)
-        // Space 6 opens the third display's block, so it is that
-        // screen's LEAD (#1018) rather than the head of its list.
+        #expect(core.state.workspaces.allSpaces.count == 5)
+        // Space 5 is the third display's only Space, so it takes
+        // the laptop's single-Space order (#3294).
         #expect(
-            core.state.workspaces[SpaceID(6)]?.mode == .monocle
+            core.state.workspaces[SpaceID(5)]?.mode == .monocle
         )
-        // Three whole blocks, one per display — 3 · 2 · 2, the
-        // widest screen taking the larger share.
+        // Three whole blocks, one per display — 2 · 2 · 1, the
+        // earlier of equal screens taking the larger share.
         let blocks = [
-            displaysOf(core, 1...3),
-            displaysOf(core, 4...5),
-            displaysOf(core, 6...7),
+            displaysOf(core, 1...2),
+            displaysOf(core, 3...4),
+            displaysOf(core, 5...5),
         ]
         #expect(blocks.allSatisfy { $0.count == 1 })
         #expect(Set(blocks.flatMap { $0 }).count == 3)

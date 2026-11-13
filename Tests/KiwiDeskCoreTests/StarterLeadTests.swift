@@ -58,9 +58,10 @@ struct StarterLeadTests {
 
     @Test("the smallest screen leads Monocle, the rest Scrolling")
     func smallestLeadsMonocle() {
-        // Three screens: the smallest carries Monocle and BOTH
-        // others lead Scrolling — the repeat that the no-layout-
-        // twice rule is carved out for.
+        // Three screens: BOTH wider screens lead Scrolling — the
+        // repeat the no-layout-twice rule is carved out for — and
+        // the smallest, left one Space, opens in Monocle through
+        // the laptop's single-Space order (#3294).
         let modes = StarterAllocation.modes(
             sizes: [screen27, laptop, bigDesk]
         )
@@ -110,12 +111,10 @@ struct StarterLeadTests {
         // the refill used to restart at the top of the list and
         // put the duplicate next to its twin.
         //
-        // Both fixtures give a two-entry list a post-lead quota
-        // of two, which is the only shape that reaches the
-        // second refill pass. Three identical laptops do NOT —
-        // their shares are [3, 2, 2] and every post-lead quota
-        // is one — so a fixture that looks like the obvious one
-        // cannot observe this at all (code review, 2026-08-26).
+        // Under the #3294 ladder no screen but the Floating host
+        // holds three Spaces, so no post-lead quota reaches two
+        // and these fixtures exercise the first refill only: a
+        // laptop's own list spoken for by its lead and the desk.
         let fixtures: [[CGSize]] = [
             [laptop, CGSize(width: 1920, height: 1080), small],
             [laptop, laptop, small],

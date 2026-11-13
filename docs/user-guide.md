@@ -937,12 +937,23 @@ ultrawide it is 30%.
 | Portrait (taller than wide) | stack · grid · monocle |
 
 Screens are measured in points, so a 5K 27" and a 1440p 27" get
-the same answer. Every setup gets exactly one Floating space, on
-the largest screen. The total is 3 spaces for one screen, 5 for
-two, 7 for three, then 8, 9 and one more per screen up to ten,
-each screen's share proportional to its width. "Smallest" is
-read from width alone, so a 27" beside an ultrawide opens in
-monocle.
+the same answer. "Smallest" is read from width alone, so a 27"
+beside an ultrawide opens in monocle.
+
+:::unreleased
+The total is 3 spaces for one screen and 5 for two, three or
+four, then one more per screen up to ten. Below four screens each
+screen's share is proportional to its width; from four, the
+widest screen holds its first space and the floating one, and
+every other screen one space. Away from an ultrawide, every setup
+gets exactly one floating space, on the widest screen with room
+beside it.
+
+A screen holding one space opens in the first layout of its list
+here that no other screen holds: laptop monocle · scrolling,
+desktop grid · stack · bsp · scrolling, ultrawide stack · track ·
+grid, portrait stack · grid · monocle.
+:::
 
 Each layout is tuned for the screen it sits on, scrolling for
 the widest screen that opens in it, and the minimum window size
@@ -955,12 +966,15 @@ keeps a lone window at its slot size, and each scrolling space
 scrolls the way its own screen faces — vertically on a portrait
 screen.
 
+:::unreleased
 With an ultrawide beside other screens, scrolling lives on the
-ultrawide alone: every other screen opens in monocle, and each
-screen gets three spaces ending in its own floating one — a
-widescreen monocle · bsp · floating, a portrait screen monocle ·
-grid (one column of three) · floating, a laptop monocle · grid
-(two by two) · floating.
+ultrawide alone: every other screen holding two or more spaces
+opens in monocle and ends in its own floating space. A screen
+holding two gets monocle · floating; the one holding three adds a
+layout between them — bsp on a widescreen, grid on a portrait
+screen (one column of three) or a laptop (two by two). From four
+screens only the widest gets a floating space.
+:::
 
 While you are still on the starter setup, connecting or removing
 a screen re-derives it and the `⌃⌥N` space shortcuts extend to
