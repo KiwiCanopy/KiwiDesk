@@ -742,7 +742,7 @@ every lens with why it cannot turn on.
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
 | | `set_space_transition` | `slide` (default) \| `show` \| `none` — how an explicit Space switch other than the scroll step shows itself: the plate slide, a plate naming the Space, or nothing |
 | | `set_space_scroll_transition` | `slide` (default) \| `show` \| `none` — how the scroll Space step shows itself |
-| | `set_space_slide_duration` | ms (150–1000, default 300) — the plate slide's pace |
+| | `set_space_slide_duration` | ms (150–1000, default 400) — the plate slide's pace |
 | | `set_mode_cue` | true\|false (default `true`) — the plate showing the layout a `cycle_mode` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
@@ -774,9 +774,9 @@ every lens with why it cannot turn on.
 | | `animations.set_on_relayout` | true\|false (default true) |
 | | `animations.set_on_state_change` | true\|false (default true); floating, maximizing and pocketing |
 | | `animations.set_on_expand` | true\|false (default true); the KiwiShelf expand on a Space switch |
-| | `animations.set_expand_duration` | ms (500–2000, default 750); the KiwiShelf expand's length |
+| | `animations.set_expand_duration` | ms (500–2000, default 1000); the KiwiShelf expand's length |
 | | `animations.set_on_reveal` | true\|false (default true); a hidden bar's reveal |
-| | `animations.set_reveal_duration` | ms (150–800, default 300); a hidden bar's reveal length |
+| | `animations.set_reveal_duration` | ms (150–800, default 400); a hidden bar's reveal length |
 | | `animations.set_reduce_motion` | true\|false (default false); KiwiDesk's own Reduce Motion, in every profile |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
@@ -822,6 +822,13 @@ every lens with why it cannot turn on.
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+The defaults of `set_space_slide_duration`,
+`animations.set_expand_duration` and `animations.set_reveal_duration`
+are the Medium speed's
+([Animation Cascade](lua-reference.md#animation-cascade)).
+:::
 
 :::unreleased
 `animations.set_on_reveal` is new; see

@@ -61,8 +61,8 @@ public final class AnimationEngine {
         set { storedSizeRateHz = newValue.map { min(max($0, 1), 120) } }
     }
 
-    private var storedDurationMS = 150
-    private var storedScrollDurationMS = 150
+    private var storedDurationMS = AnimationPacePreset.shipped.window
+    private var storedScrollDurationMS = AnimationPacePreset.shipped.scroll
     var storedSizeRateHz: Int?
     var animations: [DisplayID: [WindowID: FrameAnimation]] = [:]
     var drivers: [DisplayID: DisplayLinkDriver] = [:]

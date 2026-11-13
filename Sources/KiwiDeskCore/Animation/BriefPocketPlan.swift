@@ -32,7 +32,7 @@ enum BriefPocketPlan {
     static let nodScale: CGFloat = 1.12
 
     /// The flight's length at `durationMS`, the window duration:
-    /// twice it, so the default 150 ms flies in 0.3 s.
+    /// twice it, inside 0.2…0.8 s.
     static func flight(durationMS: Int) -> TimeInterval {
         min(max(Double(durationMS) * 2 / 1000, 0.2), 0.8)
     }

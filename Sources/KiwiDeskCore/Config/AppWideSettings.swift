@@ -53,7 +53,7 @@ public struct AppWideSettings: Equatable, Sendable {
     public var visionAppearance = VisionAppearance.unchanged
     /// How long the window focus leaves takes into the dim and the
     /// blur, in ms (`kiwivision.fade_duration`, #2417); 0 cuts.
-    public var visionFadeDuration = 300
+    public var visionFadeDuration = AnimationPacePreset.shipped.fade
     /// The curve of that fade (`kiwivision.fade_curve`, #2417).
     public var visionFadeCurve = VisionFadeCurve.easeOut
     /// Whether KiwiVision leaves the wallpaper clear, dimming only
@@ -87,7 +87,7 @@ public struct AppWideSettings: Equatable, Sendable {
     public var modifierSides = false
     /// The window spring's length in ms (`animations.duration`,
     /// #3237), inside `AnimationSettings.durationBand`.
-    public var animationDurationMS = 150 {
+    public var animationDurationMS = AnimationPacePreset.shipped.window {
         didSet {
             animationDurationMS = AnimationSettings.clampMS(
                 animationDurationMS
@@ -96,7 +96,7 @@ public struct AppWideSettings: Equatable, Sendable {
     }
     /// The scrolling layout's shift in ms
     /// (`animations.scroll_duration`, #3237), the same band.
-    public var animationScrollDurationMS = 150 {
+    public var animationScrollDurationMS = AnimationPacePreset.shipped.scroll {
         didSet {
             animationScrollDurationMS = AnimationSettings.clampMS(
                 animationScrollDurationMS
@@ -105,7 +105,7 @@ public struct AppWideSettings: Equatable, Sendable {
     }
     /// The shelf's expand in ms (`animations.expand_duration`,
     /// #3237), inside `AnimationSettings.expandDurationBand`.
-    public var animationExpandDurationMS = 750 {
+    public var animationExpandDurationMS = AnimationPacePreset.shipped.expand {
         didSet {
             animationExpandDurationMS = AnimationSettings.clampExpandMS(
                 animationExpandDurationMS
@@ -114,7 +114,7 @@ public struct AppWideSettings: Equatable, Sendable {
     }
     /// A hidden shelf's reveal in ms (`animations.reveal_duration`,
     /// #3237), inside `AnimationSettings.revealDurationBand`.
-    public var animationRevealDurationMS = 300 {
+    public var animationRevealDurationMS = AnimationPacePreset.shipped.reveal {
         didSet {
             animationRevealDurationMS = AnimationSettings.clampRevealMS(
                 animationRevealDurationMS
@@ -143,9 +143,9 @@ public struct AppWideSettings: Equatable, Sendable {
     /// Settings stepper all read it.
     public static let visionDimRange: ClosedRange<Double> = 0...100
 
-    /// The slide's default pace in ms. Moving it moves a stored
-    /// default and owes profiles.md's crossing question (#1369).
-    public static let spaceSlideDefaultMS = 300
+    /// The slide's default pace in ms, Medium's (#3254): moved with
+    /// `AnimationPacePreset.shipped`.
+    public static let spaceSlideDefaultMS = AnimationPacePreset.shipped.slide
     /// The slide's band in ms: below it the strip is a jump; above
     /// it a switch outlasts the hand that pressed it.
     public static let spaceSlideDurationRange: ClosedRange<Int> = 150...1000

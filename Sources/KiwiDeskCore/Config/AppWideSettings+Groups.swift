@@ -57,6 +57,18 @@ extension AppWideSettings {
             case expandDuration = "expand_duration"
             case revealDuration = "reveal_duration"
         }
+
+        /// 4.2's four lengths, the meaning of their absence in a file
+        /// from before the group (#3254).
+        static var legacyDefaults: Self {
+            let table = AnimationPacePreset.legacyDefaults
+            return Self(
+                duration: table.window,
+                scrollDuration: table.scroll,
+                expandDuration: table.expand,
+                revealDuration: table.reveal
+            )
+        }
     }
 
     /// `gui.json`'s `mode` group (#2144) — additive, as `desktop`.

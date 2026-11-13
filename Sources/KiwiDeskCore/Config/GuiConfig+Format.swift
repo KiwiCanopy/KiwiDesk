@@ -100,5 +100,9 @@ extension GuiConfig {
     /// **24 (#3246)**: a lens's fade length and curve overrides are
     /// cleared, since Settings no longer draws them
     /// (`migratingLensFadeOut`).
-    public static let currentFormat = 24
+    ///
+    /// **25 (#3254)**: a stored app-wide group's absent slide and
+    /// fade read 4.2's 300 ms, written explicitly
+    /// (`migratingAbsentSlideAndFade`).
+    public static let currentFormat = 25
 }

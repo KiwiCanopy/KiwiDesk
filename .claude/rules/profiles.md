@@ -798,6 +798,13 @@ holds the secondary-switch decision including its nil case.
     General row `true`. The one stamp of `live` is the Lua-to-GUI
     adoption, where the verbs `init.lua` executed ARE the stored
     config (`AppWideCrossingEndTests` ▸ `luaAdoptionCarries`).
+  - Decide a re-default that spans files — the profile's captured
+    values with `gui.json`'s — in `AppWideLedger.crossingValue(for:)`
+    alone, a value a file left out reading what its absence meant
+    there, never at a door; a restore keeps its own capture across
+    exactly one reload (`paceFromRestore`), and every other reload
+    re-captures from the files (#3254, `PaceMediumCrossingTests` ▸
+    `noCaptureKeepsEveryValue`, `backupMovesToMedium`).
   - End the crossing through ONE door, `endCrossing`: the first
     apply and a General row written while it is owed both take
     it, so neither can end it without adopting and stripping

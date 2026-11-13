@@ -112,7 +112,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// look a bundle carries.
     /// 48 = a lens's fade length and curve overrides are cleared
     /// (#3246), in a bundle's `config`.
-    public static let currentFormat = 48
+    /// 49 = an absent slide or fade in a bundle's `config` reads
+    /// 4.2's 300 ms, written explicitly (#3254).
+    public static let currentFormat = 49
 
     public let format: Int
 

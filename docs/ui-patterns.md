@@ -146,6 +146,15 @@ many there are is set by the release feed rather than by us, so
 the strip falls back to a menu on the same selection wherever it
 does not fit.
 
+:::unreleased
+A speed scale read in order is a second carve-out, beside the
+navigation strip, from five or more choices taking a menu:
+**Animation speed**'s five segments stay a segmented strip (#3254).
+Its control sits stacked under its label at every width
+(`SettingsRowShape(alwaysStacks:)`), because five equal segments
+outgrow the label column's row in several catalogs.
+:::
+
 The Highlights tab's spotlight rows (#2038) are the one place a
 link is dropped rather than greyed: "Show me ›" trails a row only
 where this build can land on its setting, because a greyed link
@@ -1138,8 +1147,10 @@ warning box at its top, with a button to System Settings ▸
 Accessibility.
 
 :::unreleased
-**Animation speed** leads the Animations card: Off · Slow · Default
-· Fast, drawn by the same row in Simple's Animations card (#3238).
+**Animation speed** leads the Animations card: Off · Very Slow ·
+Slow · Medium · Fast, drawn by the same row in Simple's Animations
+card (#3238, #3254); no segment is marked as the default, and the
+row's help names Medium as where KiwiDesk starts.
 Its Off is KiwiDesk's own Reduce Motion, which the windows, the bars
 and the marks on windows read with macOS's; KiwiHub, the cue plates
 and the Settings window read macOS's alone. While it is on, the card
