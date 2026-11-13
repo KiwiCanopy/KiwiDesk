@@ -36,6 +36,9 @@ enum ConflictSeverity: Equatable {
     /// not told apart (#2601 ▸ Ruling 5): one of the two fires, and
     /// the switch separates them.
     case sideCollapse(KeyBinding)
+    /// Rows naming each side of this either-side row take every
+    /// key from it (#3256): it never fires.
+    case sidesTaken([KeyBinding])
     /// The chord string does not parse.
     case unrecognized
 
@@ -45,6 +48,8 @@ enum ConflictSeverity: Equatable {
         switch self {
         case .duplicate(let other), .sideCollapse(let other):
             return other
+        case .sidesTaken(let takers):
+            return takers.first
         default: return nil
         }
     }
@@ -65,6 +70,8 @@ enum ConflictSeverity: Equatable {
             return .duplicate(who)
         case .sideCollapse(let who):
             return .sideCollapse(who)
+        case .sidesTaken(let takers):
+            return .sidesTaken(takers)
         case .unrecognized:
             return .unrecognized
         }
@@ -75,7 +82,9 @@ enum ConflictSeverity: Equatable {
     /// one of its two rows works, and which one is the user's to
     /// settle by clearing the other.
     var isDead: Bool {
-        if case .dead = self { return true }
-        return false
+        switch self {
+        case .dead, .sidesTaken: return true
+        default: return false
+        }
     }
 }

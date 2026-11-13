@@ -120,6 +120,15 @@ extension SettingsModel {
                 name(who),
                 ModifierSidesWords.title
             )
+        case .sidesTaken(let takers):
+            return L(
+                "keybinding.conflict.sides_taken",
+                "Shortcut for \"%1$@\" won't work: \"%2$@\" and "
+                    + "\"%3$@\" take one side each.",
+                name(conflict.binding),
+                takerName(takers, 0),
+                takerName(takers, 1)
+            )
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.other_binding",
@@ -152,8 +161,8 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .unrecognized,
-                .takesFromMacOS:
+            case .dormant, .duplicate, .sideCollapse, .sidesTaken,
+                .unrecognized, .takesFromMacOS:
                 break
             }
             return L(
@@ -164,6 +173,11 @@ extension SettingsModel {
                 shortcut.localizedName
             )
         }
+    }
+
+    /// The `index`th row taking a side; Core hands at least two.
+    private func takerName(_ takers: [KeyBinding], _ index: Int) -> String {
+        takers.indices.contains(index) ? name(takers[index]) : ""
     }
 
     /// Formats bullet point text for individual conflict in list.
@@ -186,6 +200,15 @@ extension SettingsModel {
                 name(conflict.binding),
                 name(who),
                 ModifierSidesWords.title
+            )
+        case .sidesTaken(let takers):
+            return L(
+                "keybinding.conflict.bullet.sides_taken",
+                "\"%1$@\" won't work — \"%2$@\" and \"%3$@\" take "
+                    + "one side each",
+                name(conflict.binding),
+                takerName(takers, 0),
+                takerName(takers, 1)
             )
         case .otherBinding(let who):
             return L(
@@ -215,8 +238,8 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .unrecognized,
-                .takesFromMacOS:
+            case .dormant, .duplicate, .sideCollapse, .sidesTaken,
+                .unrecognized, .takesFromMacOS:
                 break
             }
             return L(

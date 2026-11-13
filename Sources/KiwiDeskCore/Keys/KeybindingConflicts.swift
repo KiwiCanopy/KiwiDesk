@@ -91,6 +91,7 @@ public enum KeybindingConflicts {
         // `rowConflicts` hands only rows of the same registered
         // chord, so a clause matching across chords breaks it
         // (`LayerConflictsTests`).
+        let rivals = Array(rivals)
         for (other, otherCombo) in rivals where other.id != binding.id {
             guard otherCombo.registered == combo else { continue }
             let sided =
@@ -109,6 +110,20 @@ public enum KeybindingConflicts {
                     target: .sideCollapse(other)
                 )
             }
+        }
+        // Rows naming each side take every key from this one: it
+        // never fires, so it is counted (#3256); one side taken is
+        // the intended precedence, no conflict.
+        if let reach = sideReach(
+            for: binding,
+            parsed: parsed,
+            among: rivals,
+            distinguishingSides: distinguishingSides
+        ), reach.isDead {
+            return Conflict(
+                binding: binding,
+                target: .sidesTaken(reach.takers)
+            )
         }
         if let system = SystemShortcuts.map[combo] {
             return Conflict(
@@ -152,6 +167,12 @@ public struct Conflict: Equatable, Sendable {
         /// Two shortcuts that differ only in a modifier's side,
         /// read as one while sides are not told apart (#2601).
         case sideCollapse(KeyBinding)
+        /// Rows naming each side of this either-side row take
+        /// every key from it (#3256): each row once, in the order
+        /// they take them. At least two, because a single row taking
+        /// every form is the same chord, which the duplicate arm
+        /// answers first; a surface naming them names the first two.
+        case sidesTaken([KeyBinding])
         case unrecognized
     }
 

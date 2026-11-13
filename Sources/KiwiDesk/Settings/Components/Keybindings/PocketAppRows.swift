@@ -58,6 +58,12 @@ struct PocketAppRows: View {
                     disabled: disabledSystemShortcuts,
                     sides: model.appWide.modifierSides
                 ),
+                narrowing: SideNarrowing.of(
+                    current,
+                    in: bindings,
+                    config: model.config,
+                    sides: model.appWide.modifierSides
+                ),
                 preflight: { combo in
                     RecorderPreflight.rejection(
                         combo: combo,

@@ -13518,6 +13518,21 @@ place. Three bounds keep it from firing by accident:
   side holds with the switch off too, and two taps a side tells
   apart are never a collapse conflict.
 
+**A sided row narrows its either-side twin, and Settings says
+so quietly** (#3256). Beside `lcmd+lcmd`, `cmd+cmd` fires from
+the right ⌘ only. That is the intended precedence, so it is no
+conflict: the either-side row carries a caption naming the side
+that still runs it and the row that has the other, with a Go to.
+A row neither side reaches never fires, so that is a counted
+conflict. A sided chord narrows its twin the same way while
+sides are told apart, and one Core answer, read from the
+routers that fire each row, serves the caption, its spoken
+form and the conflict. A key sequence's tap leader counts among
+the rows that take a side, as it rides the same router; a chord
+leader is the sequence router's and is not yet judged, so a chord
+row a leader narrows goes unsaid until the answer reads the rows
+the keyboard tap is armed with.
+
 There is no hold-alone kind, and no Lua timing override until
 someone asks. A single tap fires at its release when no double
 tap waits on the same key, and 300 ms later when one does. A

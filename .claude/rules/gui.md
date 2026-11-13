@@ -2363,7 +2363,12 @@ VoiceOver reads the glyph as a star (#2700, `SidedChordWordsTests`
 ▸ `hyperIsNamed`); a surface speaking a chord takes `label`, never
 a ✦ replacement of its own. A new chord surface joins
 `SidedChordWordsTests` ▸ `surfacesSpeakTheSide` in the change that
-adds it. **The recorder takes a side only from the
+adds it. **Which keys still fire an either-side row beside sided
+rows is Core's `KeybindingConflicts.sideReach`**, read through
+`LayerConflictMemo.reach` and handed to a recorder as its
+`SideNarrowing`, never a sidedness comparison of the GUI's own
+(#3256, `SideReachTests`, `SideNarrowingCaptionTests`). **The
+recorder takes a side only from the
 `\.recorderSides` environment value**, which each recorder mount
 sets beside `\.hyperKeyIsOff` (`ModifierSideRecorderTests` ▸
 `mountsWireTheSides`); a new mount joins that needle. **A menu key

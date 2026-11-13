@@ -17,6 +17,7 @@ struct KeyRecorderField: View {
     /// memberwise init then REQUIRES it, so a new mount cannot
     /// render the old chrome by forgetting it.
     let reading: ConflictReading?
+    let narrowing: SideNarrowing?
     /// KiwiDesk-collision check run before committing; nil commits
     /// unconditionally.
     var preflight: ((String) -> RecorderRejection?)? = nil
@@ -60,6 +61,7 @@ struct KeyRecorderField: View {
                 clearButton
             }
             deadCaption
+            narrowingCaption
             if recording, let pendingTap,
                 let hint = ModifierTapWords.tapAgain(
                     pendingTap,

@@ -63,6 +63,29 @@ struct ConflictTextMemoTests {
         #expect(off != on)
     }
 
+    /// The memo's reach (#3256) follows an edit and the switch as its
+    /// conflicts do.
+    @Test("The memo's side reach follows edits and the switch")
+    func reachMovesWithTheMemo() {
+        var rows = [row("cmd+h", "a()"), row("rcmd+h", "b()")]
+        let reach = { (sides: Bool) in
+            LayerConflictMemo.reach(for: rows[0], in: rows, sides: sides)
+        }
+        let direct = { (sides: Bool) in
+            KeybindingConflicts.sideReach(
+                for: rows[0],
+                in: rows,
+                distinguishingSides: sides
+            )
+        }
+        #expect(reach(true) != nil)
+        #expect(reach(true) == direct(true))
+        #expect(reach(false) == nil)
+        rows[1].combo = "ralt+h"
+        #expect(reach(true) == direct(true))
+        #expect(reach(true) == nil)
+    }
+
     @Test("A row that is not the layer's own is judged on its own")
     func foreignRowIsDirect() {
         let rows = [row("alt+h", "a()"), row("alt+j", "b()")]

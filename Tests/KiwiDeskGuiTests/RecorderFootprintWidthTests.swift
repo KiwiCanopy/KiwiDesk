@@ -31,6 +31,7 @@ struct RecorderFootprintWidthTests {
                 name: "Toggle tiling",
                 combo: "ctrl+alt+t",
                 reading: nil,
+                narrowing: nil,
                 onRecord: { _ in },
                 onClear: {}
             )
