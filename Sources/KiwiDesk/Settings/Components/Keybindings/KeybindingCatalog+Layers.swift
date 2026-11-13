@@ -103,17 +103,3 @@ extension KeybindingCatalog {
         return result
     }
 }
-
-extension KeyLayer {
-    /// Each layer's icon by name, for the switch rows (#3267); a
-    /// layer with none, or a repeated name, is left out.
-    static func icons(of layers: [KeyLayer]) -> [String: String] {
-        var icons: [String: String] = [:]
-        for layer in layers where icons[layer.name] == nil {
-            if let icon = layer.icon, !icon.isEmpty {
-                icons[layer.name] = icon
-            }
-        }
-        return icons
-    }
-}

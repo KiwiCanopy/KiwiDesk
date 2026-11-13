@@ -24,7 +24,7 @@ struct LayerIconWiringTests {
     }
 
     @Test("a Settings switch row wears the draft layer's icon")
-    func settingsRowsReadTheDraft() {
+    func settingsRowsReadTheDraft() throws {
         let model = makeTestModel()
         model.config.layers += [
             KeyLayer(name: "Gaming", icon: "🎮"),
@@ -40,7 +40,10 @@ struct LayerIconWiringTests {
         )
         #expect(switchGlyph(to: "Plain", in: rows) == Self.generic)
         // A draft edit shows at once: the next build reads it.
-        model.config.layers[1].icon = "🕹️"
+        let gaming = try #require(
+            model.config.layers.firstIndex { $0.name == "Gaming" }
+        )
+        model.config.layers[gaming].icon = "🕹️"
         let edited =
             ShortcutsFamilyRows.ofDraft(model, layer: KeyLayer.defaultName)
             .rows(for: .shortcuts(.switchToLayer)) ?? []
@@ -90,18 +93,18 @@ struct LayerIconWiringTests {
         #expect(flat.contains("layerIcons:KeyLayer.icons(of:layers)"))
     }
 
-    @Test("the icons map skips unset icons and keeps the first name")
+    @Test("the icons map skips default and unset icons")
     func iconsMap() {
         let icons = KeyLayer.icons(of: [
+            KeyLayer(name: KeyLayer.defaultName, icon: "house"),
             KeyLayer(name: "A", icon: "star"),
             KeyLayer(name: "B", icon: ""),
             KeyLayer(name: "C"),
-            KeyLayer(name: "A", icon: "moon"),
         ])
         #expect(icons == ["A": "star"])
     }
 
-    @Test("a chip reads the draft icon and never draws one on default")
+    @Test("a chip reads the draft icon through the rows' one map")
     func chipReadsTheDraft() throws {
         let source = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
@@ -112,8 +115,8 @@ struct LayerIconWiringTests {
         #expect(flat.contains("icon:chipIcon(name),"))
         #expect(
             flat.contains(
-                "guardname!=KeyLayer.defaultNameelse{returnnil}"
-                    + "returnShortcutGlyph(icon:model.config.layers"
+                "ShortcutGlyph(icon:KeyLayer.icons(of:model.config.layers)"
+                    + "[name])"
             )
         )
     }

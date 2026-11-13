@@ -6,9 +6,10 @@ import Testing
 @testable import KiwiDesk
 
 /// A row's glyph slot holds its frame whatever it draws (#3267 ▸
-/// Ruling 2): the widest emoji fits the symbol's square at the size
-/// the view draws it, and the view lays out at that square for an
-/// emoji and a symbol alike, so the label column never shifts.
+/// Ruling 2): every emoji the picker offers, and the ZWJ sequences
+/// a user can paste, draws no wider than the symbol's square, and
+/// the view lays out at that square for an emoji and a symbol alike.
+/// Main actor: one hosting view per emoji per side, a few dozen.
 @Suite("Shortcut glyph render (#3267)")
 @MainActor
 struct ShortcutGlyphRenderTests {
@@ -24,48 +25,42 @@ struct ShortcutGlyphRenderTests {
         ShortcutGlyphView.rowSide, ShortcutLayerChip.iconSide,
     ]
 
-    private func drawnWidth(_ emoji: String, side: CGFloat) -> CGFloat {
-        let font = NSFont.systemFont(
-            ofSize: ShortcutGlyphView.emojiSize(side: side)
-        )
-        return (emoji as NSString).size(withAttributes: [.font: font])
-            .width
-    }
-
-    private func laidOut(_ glyph: ShortcutGlyph, side: CGFloat) -> CGSize {
-        let host = NSHostingView(
-            rootView: ShortcutGlyphView(glyph: glyph, side: side)
-        )
+    private func hosted(_ view: some View) -> CGSize {
+        let host = NSHostingView(rootView: view)
         host.layoutSubtreeIfNeeded()
         return host.fittingSize
     }
 
-    @Test("the widest emoji fits the symbol's square")
+    /// The glyph as the view draws it inside its frame.
+    private func drawn(_ glyph: ShortcutGlyph, side: CGFloat) -> CGSize {
+        hosted(ShortcutGlyphView(glyph: glyph, side: side).mark)
+    }
+
+    @Test("the widest emoji the view draws fits the symbol's square")
     func widestEmojiFits() throws {
         for side in Self.sides {
-            let widest = try #require(
-                Self.emoji.map { drawnWidth($0, side: side) }.max()
-            )
+            let widths = Self.emoji.map { drawn(.emoji($0), side: side) }
+            let widest = try #require(widths.map(\.width).max())
             #expect(widest <= side, "side \(side): \(widest)")
             // Not shrunk past legibility: the widest fills the square.
             #expect(widest >= side * 0.8, "side \(side): \(widest)")
+            let tallest = try #require(widths.map(\.height).max())
+            #expect(tallest <= side, "side \(side): \(tallest)")
         }
     }
 
     @Test("an emoji and a symbol lay out at the same square")
-    func frameIsPinned() throws {
-        let widest = try #require(
-            Self.emoji.max {
-                drawnWidth($0, side: 16) < drawnWidth($1, side: 16)
-            }
-        )
+    func frameIsPinned() {
         for side in Self.sides {
             let square = CGSize(width: side, height: side)
-            #expect(laidOut(.emoji(widest), side: side) == square)
-            #expect(
-                laidOut(.symbol("square.3.layers.3d"), side: side)
-                    == square
-            )
+            for glyph in Self.emoji.map(ShortcutGlyph.emoji) + [
+                .symbol("square.3.layers.3d")
+            ] {
+                #expect(
+                    hosted(ShortcutGlyphView(glyph: glyph, side: side))
+                        == square
+                )
+            }
         }
     }
 
@@ -80,19 +75,19 @@ struct ShortcutGlyphRenderTests {
     @Test("a chip with an icon keeps the plain chip's height")
     func chipHeightHolds() {
         func height(_ icon: ShortcutGlyph?) -> CGFloat {
-            let host = NSHostingView(
-                rootView: ShortcutLayerChip(
+            hosted(
+                ShortcutLayerChip(
                     name: "Gaming",
                     icon: icon,
                     selected: false,
                     action: {}
                 )
-            )
-            host.layoutSubtreeIfNeeded()
-            return host.fittingSize.height
+            ).height
         }
         let plain = height(nil)
-        #expect(height(.emoji(Self.emoji.last ?? "")) == plain)
+        for emoji in Self.emoji {
+            #expect(height(.emoji(emoji)) == plain, "\(emoji)")
+        }
         #expect(height(.symbol("gamecontroller")) == plain)
     }
 }

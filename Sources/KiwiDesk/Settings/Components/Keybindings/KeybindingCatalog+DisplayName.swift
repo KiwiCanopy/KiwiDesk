@@ -97,7 +97,8 @@ extension KeybindingCatalog {
     /// THE roster of nameable commands (#2111): the door and the
     /// settings diff both read it, so a command added here is named
     /// everywhere. Desktop rows read the BINDINGS, never a live
-    /// list, so an unplugged screen's row keeps its name.
+    /// list, so an unplugged screen's row keeps its name. It names,
+    /// so its layer rows carry no icon (#3267).
     @MainActor static func namedCommands(
         spaces: [SpaceID],
         layerNames: [String],
