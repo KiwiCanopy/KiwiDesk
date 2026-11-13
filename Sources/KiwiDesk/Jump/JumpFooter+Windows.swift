@@ -258,7 +258,7 @@ struct JumpKeycap: View {
 
 /// One `windowsFitted` candidate: the line at a keycap collapse
 /// level, or past all of them shedding to `shown` hints.
-enum WindowsFit: Hashable {
+fileprivate enum WindowsFit: Hashable {
     case collapsed(Int)
     case shed(Int)
 

@@ -2357,6 +2357,13 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
 
 ## SwiftUI traps
 
+- **Every child of a `ViewThatFits` carries an id distinct from its
+  siblings'**, so candidates built from more than one `ForEach`
+  come from one list with one id space, or SwiftUI stops the
+  process ("child view IDs must be unique", #3271). A new fit
+  ladder with more than one candidate list takes a hosting-view
+  render test, as the Windows footer's does
+  (`JumpFooterRenderTests` ▸ `windowsFooterLaysOut`).
 - **A field that keeps its typing local commits through the one
   `commitsOnSave`** (#2584) — Return, losing focus, and a commit
   request, which `commitFocusedField()` posts and the focused field
