@@ -19,20 +19,37 @@ struct StarterAllocationTests {
 
     // MARK: - Budget
 
-    @Test("the budget ladder is 3 · 5 · 7 · 8 · 9, then +1")
+    @Test("the budget ladder is 3 · 5 · 5 · 5, then N + 1")
     func budgetLadder() {
-        #expect(StarterAllocation.budget(screenCount: 1) == 3)
-        #expect(StarterAllocation.budget(screenCount: 2) == 5)
-        #expect(StarterAllocation.budget(screenCount: 3) == 7)
-        #expect(StarterAllocation.budget(screenCount: 4) == 8)
-        #expect(StarterAllocation.budget(screenCount: 5) == 9)
-        #expect(StarterAllocation.budget(screenCount: 6) == 10)
+        let expected = [3, 5, 5, 5, 6, 7, 8, 9, 10, 10]
+        for (index, total) in expected.enumerated() {
+            #expect(
+                StarterAllocation.budget(screenCount: index + 1)
+                    == total,
+                "\(index + 1) screens"
+            )
+        }
+    }
+
+    @Test("more screens never get fewer spaces (#3294)")
+    func budgetNeverShrinks() {
+        for count in 1..<12 {
+            #expect(
+                StarterAllocation.budget(screenCount: count + 1)
+                    >= StarterAllocation.budget(screenCount: count),
+                "\(count + 1) screens"
+            )
+        }
     }
 
     @Test("the cap holds, and min-one-per-screen outranks it")
     func capYieldsToTheFloor() {
         #expect(
-            StarterAllocation.budget(screenCount: 8)
+            StarterAllocation.budget(screenCount: 9)
+                == StarterAllocation.softCap
+        )
+        #expect(
+            StarterAllocation.budget(screenCount: 10)
                 == StarterAllocation.softCap
         )
         // The cap is on SPACES, so a screen never ends up with
@@ -65,7 +82,7 @@ struct StarterAllocationTests {
             let budget = StarterAllocation.budget(
                 screenCount: count
             )
-            let shares = StarterAllocation.shares(
+            let shares = StarterAllocation.deskShares(
                 widths: slice,
                 budget: budget
             )
@@ -91,19 +108,26 @@ struct StarterAllocationTests {
     /// review, 2026-08-11).
     @Test("equal screens get equal shares, wider screens more")
     func sharesAreProportional() {
-        // Two identical screens beside a wider one: the twins
-        // must not differ, whatever the budget arithmetic does.
+        // Two identical screens beside a wider one: five Spaces
+        // cannot split them evenly, so the twins differ by one at
+        // most and neither out-ranks the wider screen.
         let twins = StarterAllocation.shares(
             widths: [1080, 1080, 1728],
-            budget: 7
+            budget: 5
         )
-        #expect(twins[0] == twins[1], "identical screens: \(twins)")
-        #expect(twins[2] >= twins[0], "the widest lost: \(twins)")
+        #expect(
+            abs(twins[0] - twins[1]) <= 1,
+            "identical screens: \(twins)"
+        )
+        #expect(
+            twins[2] >= max(twins[0], twins[1]),
+            "the widest lost: \(twins)"
+        )
 
         // The narrowest screen may never out-rank a wider one.
         let mixed = StarterAllocation.shares(
             widths: [1080, 1512, 1512],
-            budget: 7
+            budget: 5
         )
         #expect(
             mixed[0] <= mixed[1] && mixed[0] <= mixed[2],
@@ -114,13 +138,14 @@ struct StarterAllocationTests {
         // only place the clamped-vs-floor remainder distinction
         // exists at all. Every other fixture here sits strictly
         // inside 1...3, where the two formulas are identical by
-        // construction — so measuring the remainder against the
-        // floor went unnoticed by this test and was caught only
-        // by `widthOrderIsNeverInverted` (guard-prover,
-        // 2026-08-11).
+        // construction. On the #3294 ladder this fixture is the
+        // only guard that reds when the remainder is measured
+        // against the floor; `widthOrderIsNeverInverted`, which
+        // caught it first (guard-prover, 2026-08-11), no longer
+        // reaches it (guard-prover, 2026-11-13).
         let clamped = StarterAllocation.shares(
-            widths: [1080, 1440, 1512, 1728, 2560, 3440],
-            budget: 10
+            widths: [1080, 1512, 3440],
+            budget: 5
         )
         #expect(
             clamped[0] <= clamped[1],
@@ -130,17 +155,17 @@ struct StarterAllocationTests {
                     + "wider one: \(clamped)"
             )
         )
-        #expect(clamped.reduce(0, +) == 10)
+        #expect(clamped.reduce(0, +) == 5)
 
-        // Five identical screens split as evenly as the budget
-        // allows — never [3,3,1,1,1].
-        let five = StarterAllocation.shares(
-            widths: Array(repeating: 1920, count: 5),
-            budget: 9
+        // Three identical screens split as evenly as the budget
+        // allows — never [3,1,1].
+        let three = StarterAllocation.shares(
+            widths: Array(repeating: 1920, count: 3),
+            budget: 5
         )
         #expect(
-            (five.max() ?? 0) - (five.min() ?? 0) <= 1,
-            "identical screens split unevenly: \(five)"
+            (three.max() ?? 0) - (three.min() ?? 0) <= 1,
+            "identical screens split unevenly: \(three)"
         )
     }
 
@@ -151,7 +176,7 @@ struct StarterAllocationTests {
         for count in 2...pool.count {
             let widths = Array(pool.prefix(count))
             let budget = StarterAllocation.budget(screenCount: count)
-            let shares = StarterAllocation.shares(
+            let shares = StarterAllocation.deskShares(
                 widths: widths,
                 budget: budget
             )
@@ -171,14 +196,35 @@ struct StarterAllocationTests {
         let widths = [CGFloat](repeating: 1920, count: 3)
         let first = StarterAllocation.shares(
             widths: widths,
-            budget: 7
+            budget: 5
         )
         let second = StarterAllocation.shares(
             widths: widths,
-            budget: 7
+            budget: 5
         )
         #expect(first == second)
-        #expect(first.reduce(0, +) == 7)
+        #expect(first.reduce(0, +) == 5)
+    }
+
+    /// `ruledLayout` keys an ultrawide on Stack alone because no
+    /// second screen can hold three Spaces; a ladder that lets two
+    /// do so owes that walk a second tiled layout again (#3294).
+    @Test("no two screens ever hold three Spaces")
+    func oneScreenAtMostHoldsThree() {
+        let pool: [CGFloat] = [
+            3440, 5120, 2560, 1728, 1440, 2560, 1080, 3840, 1920,
+            1512, 2880,
+        ]
+        for count in 1...pool.count {
+            let shares = StarterAllocation.deskShares(
+                widths: Array(pool.prefix(count)),
+                budget: StarterAllocation.budget(screenCount: count)
+            )
+            #expect(
+                shares.count(where: { $0 >= 3 }) <= 1,
+                "\(count) screens: \(shares)"
+            )
+        }
     }
 
     // MARK: - Modes
@@ -248,32 +294,17 @@ struct StarterAllocationTests {
 
     @Test("same-shaped screens draw in positional order")
     func sameShapedScreensDrawInOrder() {
-        // What is LEFT of "the largest picks first" after #1018,
-        // stated honestly rather than staged.
-        //
-        // The old test paired two screens that wanted each
-        // other's layouts and asserted the wider one kept its
-        // head. That is now unreachable: every screen spends its
-        // first slot on a lead, so a screen draws ONE item from
-        // its own list unless its share is three.
-        //
-        // `fillOrder`'s DIRECTION is still guarded, one rule
-        // over: `smallestScreen` reads its far end, so reversing
-        // it moves the Monocle lead and reds the three lead
-        // tests above. What is left to pin here is the tie-break
-        // among equals — the two 27"s share one list, and the
-        // earlier index draws first.
+        // The tie-break among equals: the two 27"s share one
+        // list, and the earlier index draws first — two Spaces
+        // and Grid beside its lead — while the later one, left
+        // one Space, takes the next unused entry of its
+        // single-Space order (#3294).
         let modes = StarterAllocation.modes(
             sizes: [bigDesk, screen27, screen27]
         )
-        // Grid went to the widest; the earlier 27" draws Stack,
-        // the later one BSP.
-        #expect(modes[0].dropFirst().first == .grid, "\(modes[0])")
-        #expect(modes[1].dropFirst().first == .stack, "\(modes[1])")
-        #expect(modes[2].dropFirst().first == .bsp, "\(modes[2])")
-        // Vacuity: they really do share a contested list, or
-        // "draws first" decides nothing.
-        #expect(ScreenClass.of(screen27).layouts.count >= 2)
+        #expect(modes[0] == [.scrolling, .floating], "\(modes[0])")
+        #expect(modes[1] == [.scrolling, .grid], "\(modes[1])")
+        #expect(modes[2] == [.stack], "\(modes[2])")
     }
 
     @Test("every space gets a layout, and the total is the budget")
@@ -289,12 +320,9 @@ struct StarterAllocationTests {
         for sizes in setups {
             let modes = StarterAllocation.modes(sizes: sizes)
             let total = modes.reduce(0) { $0 + $1.count }
-            let budget =
-                StarterAllocation.hasUltrawideCompanion(sizes)
-                ? StarterAllocation.ultrawideBudget(
-                    screenCount: sizes.count
-                )
-                : StarterAllocation.budget(screenCount: sizes.count)
+            let budget = StarterAllocation.budget(
+                screenCount: sizes.count
+            )
             #expect(
                 total == budget,
                 "\(sizes.count) screens produced \(total) spaces"

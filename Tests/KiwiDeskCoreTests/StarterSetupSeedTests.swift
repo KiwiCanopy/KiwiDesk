@@ -70,11 +70,12 @@ struct StarterSetupSeedTests {
     @Test("space count follows the budget, not the display count")
     func spaceCountFollowsBudget() {
         // The retired ladder gave five per display. The budget
-        // grows sub-linearly instead: eight spaces on day one is
-        // eight keys to learn, most of them empty.
+        // stays at five from two screens to four instead (#3294):
+        // eight spaces on day one is eight keys to learn, most of
+        // them empty.
         #expect(StarterSetup.spaceCount(sizes: sizes(1)) == 3)
         #expect(StarterSetup.spaceCount(sizes: sizes(2)) == 5)
-        #expect(StarterSetup.spaceCount(sizes: sizes(3)) == 7)
+        #expect(StarterSetup.spaceCount(sizes: sizes(3)) == 5)
         // Floored at one screen.
         #expect(StarterSetup.spaceCount(sizes: []) == 3)
     }
@@ -115,7 +116,7 @@ struct StarterSetupSeedTests {
         // no space names a screen that does not exist — the
         // blocks are no longer equal, so `(n - 1) / 5` cannot
         // stand in for this.
-        #expect(all.count == 7)
+        #expect(all.count == 5)
         for space in all {
             let screen = screens[space] ?? 0
             #expect(screen >= 0 && screen < 3)
