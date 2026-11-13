@@ -1990,7 +1990,7 @@
   "profiles.which_loads.placement_by_number": "In questo momento: %1$@ → la tua configurazione Lua continua a definire il layout; KiwiDesk colloca gli spazi sugli schermi in base al loro numero.",
   "profiles.which_loads.placement_by_number_profile": "In questo momento: %1$@ → %2$@ continua a definire il layout; KiwiDesk colloca gli spazi sugli schermi in base al loro numero.",
   "profiles.which_loads.rule": "KiwiDesk usa un solo profilo per tutti i tuoi schermi insieme.",
-  "profiles.which_loads.standard": "In questo momento: %1$@ → il %2$@ integrato (nessun profilo salvato corrisponde).",
+  "profiles.which_loads.standard": "In questo momento: %1$@ → il layout integrato %2$@ (nessun profilo salvato corrisponde).",
   "profiles.which_loads.title": "Quale profilo viene caricato",
   "pull_down.ax_hint": "Apre un menu.",
   "ratio.chips": "%1$@: preset",
