@@ -189,8 +189,9 @@ public enum StarterAllocation {
 
     /// Takes `quota` layouts off the list, never one `used` while
     /// an unused entry remains; past that, an entry this screen
-    /// does not hold yet, so a forced repeat never sits beside its
-    /// twin. Under #3294's ladder `quota` is at most one.
+    /// does not hold yet. Under #3294's ladder `quota` is at most
+    /// one, the only range where a repeat never sits beside its
+    /// twin (`oneScreenAtMostHoldsThree`).
     private static func take(
         _ quota: Int,
         from list: [LayoutMode],

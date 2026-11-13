@@ -1289,7 +1289,7 @@ never joins `ConfigArtifact`.
 ## A screen is never left with zero spaces (#1175)
 
 A connected screen the space→display resolution leaves empty
-gets one numbered space seeded — in `StarterAllocation`'s lead
+gets one numbered space seeded — in `StarterAllocation`'s first
 layout for that screen, pinned to it so the next resolve keeps
 it — by `healEmptyDisplays`. Heal, never refuse; the argument is
 `docs/design-decisions.md` ▸ Profiles ▸ *A screen left with no
