@@ -1797,8 +1797,6 @@
   "onboarding.starter_spaces.behaviour.stack": "Ein Hauptfenster; neue Fenster kommen in den Stack daneben.",
   "onboarding.starter_spaces.behaviour.track": "Fenster reihen sich in Tracks auf, und ein neues kann einen eigenen Track öffnen.",
   "onboarding.starter_spaces.body": "Nutze sie so, wie du die Schreibtische deines Macs genutzt hast — einen Tastendruck entfernt, aber jeder ordnet seine Fenster für dich an. Jeder hat sein eigenes Layout, ausgewählt für dein Setup.",
-  "onboarding.starter_spaces.footer": "Du kannst jeden dieser Spaces jederzeit in den Einstellungen umbenennen oder ändern. Die eigenen Schreibtische deines Macs bestehen darunter weiter — einer von ihnen kann einen ganzen Satz dieser Spaces aufnehmen, auch wenn du das noch lange nicht brauchen wirst.",
-  "onboarding.starter_spaces.hint": "Mehr Spaces oder andere Layouts? Jederzeit in den Einstellungen.",
   "onboarding.starter_spaces.layouts_differ": "Jede Zeile zeigt, wie sich ihr Layout verhält, und du kannst das Layout eines Space später unter %1$@ ▸ %2$@ ändern.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Space %1$@",

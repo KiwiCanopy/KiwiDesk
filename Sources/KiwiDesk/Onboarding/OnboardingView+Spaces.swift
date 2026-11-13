@@ -7,14 +7,7 @@ extension OnboardingView {
         OnboardingPage(
             title: spacesTitle,
             body1: spacesBody,
-            body2: spacesLayoutsDiffer,
-            footnote: spacesFooter,
-            footnoteAtBottom: true,
-            hint: L(
-                "onboarding.starter_spaces.hint",
-                "More Spaces or other layouts? Settings, "
-                    + "whenever you want them."
-            )
+            body2: spacesLayoutsDiffer
         ) {
             spaceStrip
         } action: {
@@ -96,18 +89,6 @@ extension OnboardingView {
                 + "change a Space's layout later under %1$@ ▸ %2$@.",
             L("home.title", "Settings"),
             SettingsDestination.spaces.title
-        )
-    }
-
-    /// Explains how Spaces relate to native macOS Desktops (#828).
-    private var spacesFooter: String {
-        L(
-            "onboarding.starter_spaces.footer",
-            "Rename or change any of these Spaces in Settings, "
-                + "whenever you want to. Your Mac's own Desktops "
-                + "still exist underneath — one of them can hold "
-                + "a whole set of these, though you will not "
-                + "need that for a long time."
         )
     }
 }

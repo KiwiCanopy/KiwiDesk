@@ -1797,8 +1797,6 @@
   "onboarding.starter_spaces.behaviour.stack": "Una ventana principal; las nuevas ventanas se suman al Stack de al lado.",
   "onboarding.starter_spaces.behaviour.track": "Las ventanas se alinean en Tracks, y una nueva puede abrir su propio Track.",
   "onboarding.starter_spaces.body": "Úsalos como usabas los Escritorios de tu Mac: a una tecla de distancia, pero cada uno organiza sus ventanas por ti. Cada uno tiene su propio diseño, elegido para tu configuración.",
-  "onboarding.starter_spaces.footer": "Renombra o modifica cualquiera de estos espacios en Ajustes cuando quieras. Los Escritorios nativos de tu Mac siguen estando debajo: uno de ellos puede contener un conjunto entero de estos espacios, aunque tardarás mucho en necesitarlo.",
-  "onboarding.starter_spaces.hint": "¿Más espacios u otros diseños? En Ajustes, cuando quieras.",
   "onboarding.starter_spaces.layouts_differ": "Cada fila muestra cómo se comporta su diseño, y más adelante puedes cambiar el diseño de un espacio en %1$@ ▸ %2$@.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Espacio %1$@",
