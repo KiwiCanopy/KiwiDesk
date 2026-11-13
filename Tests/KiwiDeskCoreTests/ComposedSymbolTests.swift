@@ -71,9 +71,48 @@ struct ComposedSymbolTests {
 
     @Test("the badge draws heavier than the base")
     func badgeIsHeavier() {
-        let base = SymbolImage.Style(weight: .semibold)
-        #expect(base.badge.weight == .heavy)
+        let ladder: [NSFont.Weight] = [
+            .ultraLight, .thin, .light, .regular, .medium,
+            .semibold, .bold, .heavy, .black,
+        ]
+        let at = 5  // semibold
+        let stepped = ladder[at + ComposedSymbol.badgeWeightSteps]
+        let base = SymbolImage.Style(weight: ladder[at])
+        #expect(ComposedSymbol.badgeWeightSteps > 0)
+        #expect(base.badge.weight == stepped)
         #expect(SymbolImage.Style(weight: .black).badge.weight == .black)
+    }
+
+    @Test("the composed badge is drawn in the heavier style")
+    func composedBadgeIsHeavier() throws {
+        let symbol = ComposedSymbol.desktopOverview
+        let base = try #require(SymbolImage.named(symbol.base, style: style))
+        let up = symbol.layout(in: base.size, flipped: false)
+        let down = symbol.layout(in: base.size, flipped: true)
+        let composed = try #require(
+            bitmap(SymbolImage.named(symbol.name, style: style))
+        )
+        // The badge at the base's own weight, where compose puts it.
+        let plainBadge = try #require(
+            SymbolImage.named(symbol.badge, style: style)
+        )
+        let rect = SymbolImage.fitted(
+            plainBadge.size,
+            into: up.badge,
+            symbol.corner
+        )
+        let reference = NSImage(size: up.canvas.size, flipped: false) { _ in
+            plainBadge.draw(
+                in: rect.offsetBy(dx: -up.canvas.minX, dy: -up.canvas.minY)
+            )
+            return true
+        }
+        let thin = try #require(bitmap(reference))
+        let square = down.badge.offsetBy(
+            dx: -down.canvas.minX,
+            dy: -down.canvas.minY
+        )
+        #expect(ink(composed, in: square) > ink(thin, in: square))
     }
 
     @Test("the base is cleared in the ring around the badge")
@@ -129,6 +168,21 @@ struct ComposedSymbolTests {
         return rep
     }
 
+    /// Inked pixels inside `rect`, in the bitmap's points, y down.
+    private func ink(_ rep: NSBitmapImageRep, in rect: CGRect) -> Int {
+        var count = 0
+        for y in 0..<rep.pixelsHigh {
+            for x in 0..<rep.pixelsWide {
+                let point = CGPoint(x: CGFloat(x) / 2, y: CGFloat(y) / 2)
+                guard rect.contains(point) else { continue }
+                if (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 {
+                    count += 1
+                }
+            }
+        }
+        return count
+    }
+
     /// Inked pixels inside the ring — the knockout less the badge
     /// square, both inset half a pixel so antialiasing at their edges
     /// is not counted — read in base coordinates, y down, `offset` being
@@ -138,7 +192,15 @@ struct ComposedSymbolTests {
         _ layout: ComposedSymbol.Layout,
         offset: CGPoint
     ) -> Int {
-        let ring = layout.knockout.insetBy(dx: 0.25, dy: 0.25)
+        // The composers clear a rounded rect, so its inner corner keeps
+        // base ink the bounding rect would count.
+        let inner = layout.knockout.insetBy(dx: 0.25, dy: 0.25)
+        let ring = CGPath(
+            roundedRect: inner,
+            cornerWidth: max(0, layout.radius - 0.25),
+            cornerHeight: max(0, layout.radius - 0.25),
+            transform: nil
+        )
         let square = layout.badge.insetBy(dx: -0.25, dy: -0.25)
         var count = 0
         for y in 0..<rep.pixelsHigh {

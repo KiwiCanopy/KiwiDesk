@@ -2214,7 +2214,7 @@ and the symbol suites check a composed glyph's two parts
 (`ShortcutSymbolFloorTests`, `ComposedSymbolTests`). **A KiwiHub
 side's symbol is the one `ShortcutsReferenceBuilder.sideSymbol(_:)`**,
 and a surface naming a side reads it, never a symbol of its own
-(#3284); its docstring lists the readers.
+(#3284); its docstring lists the readers, a list review keeps.
 
 **A Settings shortcut row draws the panel's glyph for its action
 through the one `ShortcutsReferenceBuilder.icon(for:)`**, never a

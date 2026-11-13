@@ -1903,6 +1903,8 @@ sites clipped alike.
   anchored the ink correctly would stay green there, so the
   routing is review's.
 
+## A bar image from a symbol name goes through `SymbolImage`
+
 A bar or bar-menu image built from a symbol name the site did not
 spell goes through `SymbolImage.named`; [borders.md](borders.md)
 ▸ A symbol name reaches AppKit through `SymbolImage` owns the rule.

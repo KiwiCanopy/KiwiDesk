@@ -13,8 +13,11 @@ import Testing
 ///
 /// Trades, stated: a spelled literal passes (it can never be
 /// composed), so a constant naming a composed glyph through a
-/// literal-free path is the residue; SwiftUI's `Image(systemName:)`
-/// is not scanned — its door is `GlyphImage`, review's to hold.
+/// literal-free path is the residue; only the `systemSymbolName:`
+/// spelling is scanned, so `NSImage(symbolName:)`, `NSImage(named:)`
+/// handed a name, or a configuration chained on an image built
+/// elsewhere pass it; SwiftUI's `Image(systemName:)` is not scanned
+/// — its door is `GlyphImage`, review's to hold.
 @Suite("Symbol names reach AppKit through SymbolImage (#3284)")
 struct SymbolNameDoorTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -30,7 +33,9 @@ struct SymbolNameDoorTests {
         "KiwiDeskCore/Bar/ShelfHandleSpec+Label.swift": 1,
         "KiwiDeskCore/Bar/ShelfHandleSpec+Count.swift": 1,
         "KiwiDeskCore/Bar/ShelfCountView.swift": 1,
-        // A Space's icon, its marker or its layout's symbol.
+        // A Space's icon, its marker or its layout's symbol: a user
+        // icon reaches them only past `KiwiCore.iconIsSymbol`, which
+        // refuses a composed name (`userIconsNeverCompose`).
         "KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift": 1,
         "KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift": 1,
         "KiwiDeskCore/Bar/SpaceBarItemView+Style.swift": 1,
@@ -67,6 +72,14 @@ struct SymbolNameDoorTests {
         #expect(found == Self.allowed)
     }
 
+    @Test("a user icon spelling a composed name stays text")
+    @MainActor
+    func userIconsNeverCompose() {
+        for symbol in ComposedSymbol.all {
+            #expect(!KiwiCore.iconIsSymbol(symbol.name), "\(symbol.name)")
+        }
+    }
+
     @Test("no composed name is also a GUI custom glyph")
     @MainActor
     func registriesAreDisjoint() {
@@ -84,8 +97,10 @@ struct SymbolNameDoorTests {
         let flat = try SourceScan.strippedSource(at: url)
             .filter { !$0.isWhitespace }
         let reads = flat.components(separatedBy: "symbol.layout(in:").count
-        // The badge and the knockout each ask it.
-        #expect(reads - 1 == 2)
+        // The badge, the knockout and the frame each ask it, and the
+        // frame is the layout's canvas.
+        #expect(reads - 1 == 3)
+        #expect(flat.contains(".canvas"))
         #expect(!flat.contains("scaleEffect"))
     }
 }

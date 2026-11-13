@@ -36,7 +36,7 @@ public enum SymbolImage {
 
         /// The badge's style: `ComposedSymbol.badgeWeightSteps`
         /// heavier, since scaling the badge thins its strokes.
-        var badge: Style {
+        public var badge: Style {
             var style = self
             let ladder: [NSFont.Weight] = [
                 .ultraLight, .thin, .light, .regular, .medium,
