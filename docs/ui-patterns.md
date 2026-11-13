@@ -890,6 +890,11 @@ Live preview and the Home cards stay at rest. Why is
 [design decisions](design-decisions.md) ▸ *A thumbnail that is
 read rather than compared*.
 
+:::unreleased
+A Back return to the tour's Spaces step rests its rows rather than
+playing them again (#3288).
+:::
+
 One schematic serves several surfaces at two scales
 (`SchematicScale`, whose own doc comment is the authority on what
 each scale is *for*): a thumbnail in the "Choose a layout" strip

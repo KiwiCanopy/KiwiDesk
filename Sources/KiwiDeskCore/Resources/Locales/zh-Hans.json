@@ -1734,6 +1734,7 @@
   "motion.more": "按事件",
   "notification.permission_lost.body": "“辅助功能”权限已被撤销。请在“系统设置”>“隐私与安全性”>“辅助功能”中重新启用。",
   "notification.permission_lost.title": "KiwiDesk 已停止管理窗口",
+  "onboarding.back": "返回",
   "onboarding.bars.always": "始终在屏幕上。窗口排在它们旁边。",
   "onboarding.bars.auto": "隐藏成一道细条。将指针停留在细条上即可显示栏。",
   "onboarding.bars.body": "让 Space Bar 和 App Bar 留在屏幕上，或者隐藏它们，把整个屏幕留给窗口。",

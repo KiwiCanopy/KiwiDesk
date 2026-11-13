@@ -4,11 +4,13 @@ import SwiftUI
 /// One seeded Space on the tour's Spaces step: a thumbnail that
 /// plays its layout's story (#1750), its name and where it lives.
 /// The row plays once on first appearance, `delay` after the
-/// page, and again each time the pointer enters it.
+/// page — never on a Back return (#3288) — and again each time
+/// the pointer enters it.
 struct OnboardingSpaceRow: View {
     let card: OnboardingSpaceCard
     let settings: TilingSettings
     let delay: Double
+    var restsOnAppear = false
     @State private var replay = 0
 
     private static let thumbHeight: CGFloat = 46
@@ -62,7 +64,8 @@ struct OnboardingSpaceRow: View {
             settings: settings,
             scale: .tile,
             delay: delay,
-            replay: replay
+            replay: replay,
+            restsOnAppear: restsOnAppear
         )
         .scaleEffect(Self.thumbFactor)
         .frame(width: Self.thumbWidth, height: Self.thumbHeight)

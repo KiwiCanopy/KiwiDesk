@@ -11050,6 +11050,19 @@ colours no palette reads selected until a click, while a look
 whose shape is still live keeps its mark and says "Other colors"
 (`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
 
+:::unreleased
+*Back is navigation, never undo (#3288, owner, 2026-11-13).* Back
+sits bottom-left and Continue (with Revert) bottom-right, as in
+Setup Assistant, on every step whose planned step before it is not
+the grant page: Looks, Bars, Keys and the closing card, never
+Spaces. Going back keeps every pick, so each step's Revert stays
+its one undo, and its baseline is the first paint's, never one
+taken on the way back in. Looks holds the bars revealed again on
+re-entry, a return to Spaces rests its rows rather than playing
+them a second time, and a tour that reached its closing beat stays
+reached (`OnboardingBackTests`).
+:::
+
 The bars step (#2515) is the same act on the bars' visibility:
 a pick writes through, its Revert returns the visibility leaves
 alone, and the two steps' Reverts leave each other's writes
@@ -11727,6 +11740,12 @@ focus and pans, Monocle brings its next window to the front, and
 a Floating window is dragged and left where it lands. Each story
 plays once when its thumbnail first appears — staggered down a
 list — and again on hover, and never loops.
+
+:::unreleased
+A host the user has already watched play may rest a first
+appearance instead: the tour's Back return to Spaces does (#3288,
+▸ *Back is navigation, never undo*).
+:::
 
 This does not reopen the ruling above, which retired a SECOND
 FRAME: a pair shows two states and leaves the tween to the

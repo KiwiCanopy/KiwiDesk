@@ -1734,6 +1734,7 @@
   "motion.more": "Per event",
   "notification.permission_lost.body": "Accessibility permission was revoked. Re-enable it in System Settings > Privacy & Security > Accessibility.",
   "notification.permission_lost.title": "KiwiDesk stopped managing windows",
+  "onboarding.back": "Back",
   "onboarding.bars.always": "Always on screen. Your windows fit beside them.",
   "onboarding.bars.auto": "Hidden to a thin mark. Rest the pointer on it to show the bar.",
   "onboarding.bars.body": "Keep the Space Bar and App Bar on screen, or hide them and give your windows the whole screen.",

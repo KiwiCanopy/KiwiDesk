@@ -7,7 +7,8 @@ extension OnboardingView {
         OnboardingPage(
             title: spacesTitle,
             body1: spacesBody,
-            body2: spacesLayoutsDiffer
+            body2: spacesLayoutsDiffer,
+            back: model.back
         ) {
             spaceStrip
         } action: {
@@ -37,7 +38,8 @@ extension OnboardingView {
                     OnboardingSpaceRow(
                         card: card,
                         settings: settings,
-                        delay: Self.stagger(index)
+                        delay: Self.stagger(index),
+                        restsOnAppear: model.spacesPlayed
                     )
                 }
             }

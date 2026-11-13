@@ -12,7 +12,8 @@ extension OnboardingView {
             hint: L(
                 "onboarding.keys.hint",
                 "Try one now — nothing will break."
-            )
+            ),
+            back: model.back
         ) {
             families(rows)
         } action: {

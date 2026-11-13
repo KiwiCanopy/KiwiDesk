@@ -16,6 +16,10 @@ struct OnboardingPage<Content: View, Action: View>: View {
     var hint: String?
     /// Whether a pulsing dot precedes the hint for in-flight tasks (#802).
     var hintPulses = false
+    /// Back, bottom-left, where the step has one to go to (#3288);
+    /// the hint then takes its own line above the buttons. No
+    /// default: every page states it, from `OnboardingModel.back`.
+    let back: (() -> Void)?
     @ViewBuilder var content: Content
     @ViewBuilder var action: Action
 
@@ -48,25 +52,38 @@ struct OnboardingPage<Content: View, Action: View>: View {
             if let footnote, footnoteAtBottom {
                 footnoteText(footnote)
             }
-            HStack(alignment: .center, spacing: 10) {
-                if let hint {
-                    HStack(alignment: .center, spacing: 9) {
-                        if hintPulses {
-                            WaitingDot(ink: SettingsTheme.ink3)
-                        }
-                        hintText(hint)
+            if let back {
+                VStack(alignment: .leading, spacing: 10) {
+                    if let hint { hintLine(hint) }
+                    HStack(alignment: .center, spacing: 10) {
+                        Button(L("onboarding.back", "Back"), action: back)
+                            .settingsActionButton()
+                        Spacer(minLength: 0)
+                        action
                     }
-                    .frame(
-                        maxWidth: .infinity,
-                        alignment: .leading
-                    )
-                } else {
-                    Spacer(minLength: 0)
                 }
-                action
+            } else {
+                HStack(alignment: .center, spacing: 10) {
+                    if let hint {
+                        hintLine(hint)
+                    } else {
+                        Spacer(minLength: 0)
+                    }
+                    action
+                }
             }
         }
         .frame(maxHeight: .infinity, alignment: .bottom)
+    }
+
+    private func hintLine(_ hint: String) -> some View {
+        HStack(alignment: .center, spacing: 9) {
+            if hintPulses {
+                WaitingDot(ink: SettingsTheme.ink3)
+            }
+            hintText(hint)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func bodyText(_ text: String) -> some View {

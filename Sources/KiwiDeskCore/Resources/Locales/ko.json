@@ -1734,6 +1734,7 @@
   "motion.more": "이벤트별",
   "notification.permission_lost.body": "손쉬운 사용 권한이 취소되었습니다. 시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 다시 활성화하십시오.",
   "notification.permission_lost.title": "KiwiDesk가 윈도우 관리를 중단했습니다",
+  "onboarding.back": "뒤로",
   "onboarding.bars.always": "항상 화면에 표시됩니다. 윈도우는 그 옆에 맞춰집니다.",
   "onboarding.bars.auto": "가는 띠만 남기고 가려집니다. 포인터를 띠 위에 두면 바가 표시됩니다.",
   "onboarding.bars.body": "Space Bar와 App Bar를 화면에 계속 두거나, 가리고 윈도우에 화면 전체를 내어 줄 수 있습니다.",

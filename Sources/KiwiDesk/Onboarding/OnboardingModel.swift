@@ -38,6 +38,9 @@ final class OnboardingModel {
     private(set) var step: Step = .grant {
         didSet {
             if step.isClosingBeat { reachedEnd = true }
+            if oldValue == .spaces, step != .spaces {
+                spacesPlayed = true
+            }
             // The looks step paints bars the user must see; the
             // bars step shows them as the pick leaves them (#2515).
             holdBarsRevealed(step == .looks)
@@ -71,6 +74,7 @@ final class OnboardingModel {
     /// Sets initial `step` and resolves `plannedSteps` for this presentation.
     func beginPresentation(at step: Step) {
         self.step = step
+        spacesPlayed = false
         looksBaseline = nil
         bars.reset()
         plannedSteps = OnboardingEntry.plannedSteps(from: step)
@@ -196,6 +200,30 @@ final class OnboardingModel {
         }
         onPaintShelf(look, palette)
         looksRevision += 1
+    }
+
+    /// Whether this presentation already left the Spaces step,
+    /// whose rows then rest on a return rather than play (#3288).
+    private(set) var spacesPlayed = false
+
+    /// The step Back returns to (#3288): the planned step before
+    /// this one, never the grant page; nil where Back is not drawn.
+    var backStep: Step? {
+        guard let index = progressIndex, index > 0 else { return nil }
+        let previous = plannedSteps[index - 1]
+        return previous == .grant ? nil : previous
+    }
+
+    /// Back is navigation, not undo: picks stay, each step's
+    /// Revert stays its one undo, and `reachedEnd` stays latched.
+    func goBack() {
+        guard let backStep else { return }
+        step = backStep
+    }
+
+    /// The page's Back action, nil where Back is not drawn.
+    var back: (() -> Void)? {
+        backStep == nil ? nil : { [weak self] in self?.goBack() }
     }
 
     /// Advances to the next step in `plannedSteps`.

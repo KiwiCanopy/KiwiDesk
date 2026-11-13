@@ -1734,6 +1734,7 @@
   "motion.more": "Pro Ereignis",
   "notification.permission_lost.body": "Die Erlaubnis für Bedienungshilfen wurde entzogen. Aktiviere sie wieder in Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen.",
   "notification.permission_lost.title": "KiwiDesk hat die Fensterverwaltung gestoppt",
+  "onboarding.back": "Zurück",
   "onboarding.bars.always": "Immer auf dem Bildschirm. Deine Fenster passen daneben.",
   "onboarding.bars.auto": "Ein schmaler Streifen. Ruht der Mauszeiger darauf, erscheint die Leiste.",
   "onboarding.bars.body": "Behalte die Space Bar und die App Bar auf dem Bildschirm, oder blende sie aus und gib deinen Fenstern den ganzen Bildschirm.",

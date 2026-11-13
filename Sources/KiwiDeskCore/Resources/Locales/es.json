@@ -1734,6 +1734,7 @@
   "motion.more": "Por evento",
   "notification.permission_lost.body": "Se ha revocado el permiso de Accesibilidad. Vuelve a activarlo en Ajustes del Sistema > Privacidad y seguridad > Accesibilidad.",
   "notification.permission_lost.title": "KiwiDesk ha dejado de gestionar las ventanas",
+  "onboarding.back": "Atrás",
   "onboarding.bars.always": "Siempre en pantalla. Tus ventanas se ajustan a su lado.",
   "onboarding.bars.auto": "Se reduce a una franja fina. Detén el puntero en ella para ver la barra.",
   "onboarding.bars.body": "Mantén la Space Bar y la App Bar en pantalla, u ocúltalas y da a tus ventanas toda la pantalla.",

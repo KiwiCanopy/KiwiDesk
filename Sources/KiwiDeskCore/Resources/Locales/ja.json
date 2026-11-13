@@ -1734,6 +1734,7 @@
   "motion.more": "イベント別",
   "notification.permission_lost.body": "アクセシビリティの許可が取り消されました。システム設定 > プライバシーとセキュリティ > アクセシビリティで再度有効にしてください。",
   "notification.permission_lost.title": "KiwiDeskがウインドウの管理を停止しました",
+  "onboarding.back": "戻る",
   "onboarding.bars.always": "常に画面に表示。ウインドウはその横に収まります。",
   "onboarding.bars.auto": "細い帯だけ残して隠れます。ポインタを帯に止めるとバーが表示されます。",
   "onboarding.bars.body": "Space BarとApp Barを画面に表示したままにするか、隠して画面全体をウインドウに使えるようにします。",

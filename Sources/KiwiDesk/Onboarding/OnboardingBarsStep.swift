@@ -22,7 +22,8 @@ struct OnboardingBarsStep: View {
                     + "them and give your windows the whole screen."
             ),
             footnote: bars.blocked ? blockedCaption : nil,
-            hint: laterHint
+            hint: laterHint,
+            back: model.back
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 OnboardingBarsTiles(
