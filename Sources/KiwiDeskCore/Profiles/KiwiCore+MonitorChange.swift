@@ -92,24 +92,14 @@ extension KiwiCore {
             }
             profiles.markDirty()
         case .none:
-            // On the starter setup baseline, recompose the
-            // setup at the live display count instead of a
-            // workflow Standard, so the five-per-display shape
-            // survives the change (#485). Any other baseline gets
-            // the count's built-in Standard, unchanged (#53).
-            guard
-                let composed = composeMonitorChangeFallback(
-                    displays: displays
-                )
-            else { return }
-            // A hand-written or hybrid Lua config keeps
-            // owning tiling: the Standard only steers
-            // placement and no transient-standard state is
-            // adopted, so with no active profile the Lua base
-            // survives reloads untouched (#36 promise). A
-            // still-active profile keeps its tiling and its
-            // still-valid pins, but goes dirty — the same
-            // rule as load_profile onto other hardware.
+            // A hand-written or hybrid Lua config keeps owning
+            // tiling: nothing is adopted, so with no active
+            // profile the Lua base survives reloads untouched (#36
+            // promise), and Spaces resolve by pin, Main role, then
+            // the numbered plan (#3294). A still-active profile
+            // keeps its tiling and its still-valid pins, but goes
+            // dirty — the same rule as load_profile onto other
+            // hardware.
             guard isGuiManaged else {
                 if profiles.currentName != nil {
                     profiles.markDirty()
@@ -127,11 +117,22 @@ extension KiwiCore {
                 emitSpaceChange()
                 onLog(
                     "monitor change: no matching profile, "
-                        + "Spaces placed on screens by number "
+                        + "Spaces placed on screens by pin, "
+                        + "else by number "
                         + "(tiling stays Lua/profile-owned)"
                 )
                 return
             }
+            // On the starter setup baseline, recompose the
+            // setup at the live display count instead of a
+            // workflow Standard, so the five-per-display shape
+            // survives the change (#485). Any other baseline gets
+            // the count's built-in Standard, unchanged (#53).
+            guard
+                let composed = composeMonitorChangeFallback(
+                    displays: displays
+                )
+            else { return }
             // `apply(composed:)` adopts the composed placement, so
             // the plan's Spaces land where it put them (not scattered
             // into the resolve's fallback plan), and files the

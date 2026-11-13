@@ -9045,7 +9045,7 @@ in this order:
    `gui.json` sidecar exists *and* `init.lua` holds no code touching
    the managed vocabulary. With a hand-written — or hybrid — config,
    your Lua-declared tiling stays authoritative and spaces are only
-   placed on screens, by number.
+   placed on screens: by their Screen pins, else by number.
 
 Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.

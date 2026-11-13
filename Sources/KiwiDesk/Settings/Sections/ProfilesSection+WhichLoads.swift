@@ -121,9 +121,10 @@ extension ProfilesSection {
             )
         case .placementByNumber(let active):
             // A Lua-owned config keeps owning the tiling, and no
-            // built-in is adopted: Spaces are only placed on screens,
-            // by number (#3294). Naming a built-in here would claim
-            // it replaced a hand-written config (#36).
+            // built-in is adopted (#3294); "by number" names the
+            // rule for an unpinned Space, a Screen pin still winning.
+            // Naming a built-in would claim it replaced the config
+            // (#36).
             guard let active else {
                 return L(
                     "profiles.which_loads.placement_by_number",

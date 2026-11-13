@@ -114,7 +114,7 @@ struct ProfileVerdictTests {
     /// a verdict without this arm states the wrong thing on
     /// every hand-written config.
     @Test("a Lua-owned config gets a placed-by-number verdict")
-    func placementOnlyOnLuaConfig() {
+    func placementByNumberOnLuaConfig() {
         let core = core()
         #expect(!core.isGuiManaged)
         #expect(
