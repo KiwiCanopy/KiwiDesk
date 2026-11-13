@@ -94,10 +94,13 @@ struct SizeBoundGateNeedleTests {
         // a queue that runs late. A reader deduplicating the pair
         // narrows the grace to 1 s from enqueue, and no behavioral
         // fixture writes a stamp to red on it.
-        for function in ["apply", "applyInstant"] {
+        for (function, file) in [
+            ("apply", "FrameApplier.swift"),
+            ("applyInstant", "FrameApplier+Instant.swift"),
+        ] {
             let source = try SourceScan.functionBody(
                 of: function,
-                in: "FrameApplier.swift",
+                in: file,
                 under: "Tiling"
             )
             let stamps =
