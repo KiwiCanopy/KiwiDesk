@@ -31,40 +31,56 @@ struct LicenseDocumentsTests {
         return (try #require(Bundle(url: dir)), dir)
     }
 
-    @Test("a bundled text is opened in place")
+    @Test("a bundled text is shown in KiwiDesk")
     func bundledTextWins() throws {
         let (bundle, dir) = try temporaryBundle()
         defer { try? FileManager.default.removeItem(at: dir) }
         let shipped = dir.appendingPathComponent("LICENSE.txt")
         try "text".write(to: shipped, atomically: true, encoding: .utf8)
 
-        let url = LicenseDocuments.url(for: .license, in: bundle)
-        #expect(url.isFileURL)
+        guard
+            case .bundled(let url) = LicenseDocuments.source(
+                for: .license,
+                in: bundle
+            )
+        else {
+            Issue.record("a bundled text must open in KiwiDesk")
+            return
+        }
         #expect(
-            url.standardizedFileURL.path
-                == shipped.standardizedFileURL.path
+            url.standardizedFileURL.resolvingSymlinksInPath().path
+                == shipped.standardizedFileURL
+                .resolvingSymlinksInPath().path
         )
+        #expect(LicenseDocuments.text(at: url) == "text")
         // The sibling is absent from this bundle, so it falls
         // back — per document, never per bundle.
-        #expect(
-            !LicenseDocuments.url(for: .acknowledgements, in: bundle)
-                .isFileURL
-        )
+        guard
+            case .link = LicenseDocuments.source(
+                for: .acknowledgements,
+                in: bundle
+            )
+        else {
+            Issue.record("a missing text must fall back to a link")
+            return
+        }
     }
 
     /// The dev binary under `.build/` ships no texts, so each
-    /// link opens the same file where GitHub renders it.
+    /// link opens the same file where GitHub renders it — a plain
+    /// link, never an empty sheet (#3286).
     @Test("without a bundled text the link opens GitHub's copy")
     func fallbackIsTheRepositoryFile() throws {
         let (bundle, dir) = try temporaryBundle()
         defer { try? FileManager.default.removeItem(at: dir) }
         for document in LicenseDocuments.Document.allCases {
-            let url = LicenseDocuments.url(for: document, in: bundle)
+            let url = URL(
+                string: SupportLinks.gitHub.absoluteString
+                    + "/blob/main/\(document.rawValue)"
+            )!
             #expect(
-                url.absoluteString
-                    == SupportLinks.gitHub.absoluteString
-                    + "/blob/main/\(document.rawValue)",
-                Comment(rawValue: url.absoluteString)
+                LicenseDocuments.source(for: document, in: bundle)
+                    == .link(url)
             )
         }
         // No plist, no copyright line — About draws nothing
@@ -107,13 +123,13 @@ struct LicenseDocumentsTests {
         )
     }
 
-    /// About MOUNTS the row, and is the only reader of the URLs
+    /// About MOUNTS the row, and is the only reader of the texts
     /// and the copyright line. Keyed on the mount line, not the
     /// declaration — gui.md's rule: key a needle on the site that
     /// USES the value, since a needle on a declaration stayed
     /// green once when About's bare mount line was deleted
     /// (code-reviewer, 2026-08-26).
-    @Test("About draws the row, and nothing else reads the URLs")
+    @Test("About draws the row, and nothing else reads the texts")
     func aboutIsTheOneSurface() throws {
         let about = SourceScan.stripComments(
             try String(
@@ -134,7 +150,7 @@ struct LicenseDocumentsTests {
         // while About draws nothing for it.
         for (needle, count) in [
             (
-                "LicenseDocuments.url(for:",
+                "LicenseDocuments.source(for:",
                 LicenseDocuments.Document.allCases.count
             ),
             ("LicenseDocuments.copyright", 1),

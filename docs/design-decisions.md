@@ -145,6 +145,19 @@ bundle keeps them (#1407; how the bundle carries them and
 derives its copyright line is
 `.claude/rules/packaging-and-release.md`'s).
 
+:::unreleased
+*About shows the texts itself (#3286, owner, 2026-11-13).* A
+`Link` to a bundled file opened nothing on a packaged build — no
+open attempt logged, TextEdit never launched — while handing the
+same file to `NSWorkspace` from a CLI opened it, so the texts no
+longer leave KiwiDesk. Each opens in a second read-only sheet
+stacked on About, its title localized and the legal text English
+as shipped, monospaced and selectable with ⌘F; Return and Escape
+put away that sheet alone. A separate window stays out (#1536).
+Where the bundle carries no text, as under the dev binary, the row
+stays the GitHub link rather than an empty sheet.
+:::
+
 ### Accepted limitations
 
 **[Trade-off]**

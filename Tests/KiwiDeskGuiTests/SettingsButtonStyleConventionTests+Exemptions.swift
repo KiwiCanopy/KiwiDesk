@@ -127,6 +127,12 @@ extension SettingsButtonStyleConventionTests {
                 "Invisible zero-size shortcut sink — Escape, "
                     + "focus-independently"
             ),
+            // And on a license text over About (#3286).
+            "LicenseSheet.swift": (
+                1, "escapeRoute",
+                "Invisible zero-size shortcut sink — Escape, "
+                    + "focus-independently"
+            ),
             // And on Compare and Copy (#2324).
             "SyncCompareSheet.swift": (
                 1, "escapeRoute",
@@ -159,10 +165,10 @@ extension SettingsButtonStyleConventionTests {
                     + "and Ko-fi"
             ),
             "AboutSheet.swift": (
-                1, ".buttonStyle(.plain)",
-                "One Link helper taking plain style — drawn four "
-                    + "times: Release Notes, License, "
-                    + "Acknowledgements and Website"
+                1, ".buttonStyle(PlainButtonStyle())",
+                "One Link helper taking plain style — the Website "
+                    + "link, and License and Acknowledgements where "
+                    + "the bundle carries no text (#3286)"
             ),
             "ContextShortcut.swift": (
                 1, ".buttonStyle(PopoverRowStyle())",
