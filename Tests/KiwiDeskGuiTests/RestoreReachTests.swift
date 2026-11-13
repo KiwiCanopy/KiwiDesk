@@ -29,6 +29,18 @@ struct RestoreReachTests {
         }
     }
 
+    /// A second seeded mouse gesture, which Home changes and Work
+    /// keeps: only "every profile" reaches it.
+    private var second: GestureKey {
+        get throws {
+            try #require(
+                GestureSeeds.seeds.keys.sorted().filter {
+                    $0.input.device == .mouse
+                }.dropFirst().first
+            )
+        }
+    }
+
     private func profile(_ name: String) -> Profile {
         Profile(
             name: name,
@@ -40,10 +52,12 @@ struct RestoreReachTests {
     }
 
     /// The issue's case: Work and Home bind the seed to one action,
-    /// Travel to another; Work also added a row of its own.
-    private func gestureModel(base: GestureMap = GestureMap())
-        throws -> SettingsModel
-    {
+    /// Travel to another; Work also added a row of its own. With
+    /// `travelAdds`, Travel only adds a row and keeps the seed.
+    private func gestureModel(
+        base: GestureMap = GestureMap(),
+        travelAdds: Bool = false
+    ) throws -> SettingsModel {
         let key = try seeded
         let core = makeTestCore()
         var config = GuiConfig()
@@ -56,10 +70,16 @@ struct RestoreReachTests {
         ])
         try core.profiles.save(work)
         var home = profile("Home")
-        home.gesture = GestureMap([key: .bound(.run(lua))])
+        let other2 = try second
+        home.gesture = GestureMap([
+            key: .bound(.run(lua)), other2: .bound(.run(other)),
+        ])
         try core.profiles.write(home)
         var travel = profile("Travel")
-        travel.gesture = GestureMap([key: .bound(.run(other))])
+        travel.gesture = GestureMap(
+            travelAdds
+                ? [added: .bound(.run(lua))] : [key: .bound(.run(other))]
+        )
         try core.profiles.write(travel)
         let model = makeTestModel(core: core)
         model.reload()
@@ -79,8 +99,22 @@ struct RestoreReachTests {
             model.gestureRestoreChangedElsewhere(on: .mouse)
                 == ["Home", "Travel"]
         )
-        // A profile that only added rows has changed no seed.
-        #expect(model.gestureRestoreChangedElsewhere(on: .trackpad) == [])
+        // A profile that only added a row has changed no seed.
+        let adds = try gestureModel(travelAdds: true)
+        #expect(adds.gestureRestoreChangedElsewhere(on: .mouse) == ["Home"])
+    }
+
+    /// Nobody else changed the seed: the restore is the edited
+    /// profile's alone and stages no reach, so the draft's reach is
+    /// what it was (Save as new stays open).
+    @Test("a restore nobody else shares stages no reach")
+    func unsharedRestoreStagesNothing() throws {
+        let model = try gestureModel(travelAdds: true)
+        try model.core.profiles.write(profile("Home"))
+        model.reload()
+        #expect(model.gestureRestoreChangedElsewhere(on: .mouse) == [])
+        model.restoreGestureDefaults(on: .mouse, reach: .here)
+        #expect(model.reachEdits.isEmpty)
     }
 
     @Test("here resets Work alone; Home and Travel keep theirs")
@@ -93,6 +127,9 @@ struct RestoreReachTests {
         #expect(work?[key] == nil)
         #expect(work?[added] == .bound(.run(other)))
         #expect(try gesture(model, "Home")?[key] == .bound(.run(lua)))
+        #expect(
+            try gesture(model, "Home")?[try second] == .bound(.run(other))
+        )
         #expect(try gesture(model, "Travel")?[key] == .bound(.run(other)))
         #expect(model.core.guiConfigStore.load()?.gesture[key] == nil)
     }
@@ -106,6 +143,8 @@ struct RestoreReachTests {
         for name in ["Work", "Home", "Travel"] {
             #expect(try gesture(model, name)?[key] == nil, "\(name)")
         }
+        // A seed Work never moved is reset where Home changed it.
+        #expect(try gesture(model, "Home")?[try second] == nil)
         #expect(try gesture(model, "Work")?[added] == .bound(.run(other)))
         #expect(model.core.guiConfigStore.load()?.gesture[key] == nil)
     }
@@ -127,90 +166,6 @@ struct RestoreReachTests {
         let work = try #require(model.gestureReach(key.spelling))
         #expect(work.users == ["Work"])
         #expect(try gesture(model, "Home")?[key] == .bound(.run(lua)))
-    }
-
-    // MARK: - Shortcuts
-
-    private let custom = "ctrl+alt+shift+f12"
-
-    private func keyID(_ row: KeyBinding) -> String {
-        RuleReachTable<String>.keyID(layer: KeyLayer.defaultName, lua: row.lua)
-    }
-
-    /// gui.json holds the seed this Mac would get; Work and Home move
-    /// one seeded row to a chord of their own, Travel follows the base.
-    private func shortcutModel() throws -> (SettingsModel, KeyBinding) {
-        let core = makeTestCore()
-        let probe = makeTestModel(core: core)
-        probe.config.spaces = [SpaceID("1")]
-        let shipped = probe.shippedDefaults(on: GuiConfig().shortcutBase)
-        let seed = try #require(shipped.first)
-        var config = GuiConfig()
-        config.spaces = [SpaceID("1")]
-        config.layers = [
-            KeyLayer(name: KeyLayer.defaultName, bindings: shipped)
-        ]
-        try core.guiConfigStore.save(config)
-        var moved = seed
-        moved.combo = custom
-        for name in ["Work", "Home"] {
-            var own = profile(name)
-            own.layers = KeyLayerOverride(
-                layers: [
-                    KeyLayer(name: KeyLayer.defaultName, bindings: [moved])
-                ],
-                removed: [KeyLayer.defaultName: [seed.combo]]
-            )
-            if name == "Work" {
-                try core.profiles.save(own)
-            } else {
-                try core.profiles.write(own)
-            }
-        }
-        try core.profiles.write(profile("Travel"))
-        let model = makeTestModel(core: core)
-        model.reload()
-        return (model, seed)
-    }
-
-    private func combo(
-        _ model: SettingsModel,
-        _ name: String,
-        _ row: KeyBinding
-    )
-        throws -> String?
-    {
-        let base = model.core.guiConfigStore.load()?.layers ?? []
-        let layers =
-            try model.core.profiles.read(name: name).layers?
-            .resolved(onto: base) ?? base
-        return RuleReachTable<String>.combos(layers)[keyID(row)]
-    }
-
-    @Test("Shortcuts: Home changed the seeded rows too, Travel did not")
-    func shortcutsWhoChanged() throws {
-        let (model, _) = try shortcutModel()
-        #expect(model.shortcutsRestoreChangedElsewhere == ["Home"])
-    }
-
-    @Test("Shortcuts here restores Work alone")
-    func shortcutsHere() throws {
-        let (model, seed) = try shortcutModel()
-        model.resetShortcutsToDefaults(reach: .here)
-        model.updateActiveProfile()
-        #expect(try combo(model, "Work", seed) == seed.combo)
-        #expect(try combo(model, "Home", seed) == custom)
-        #expect(try combo(model, "Travel", seed) == seed.combo)
-    }
-
-    @Test("Shortcuts every profile restores Home too")
-    func shortcutsEveryProfile() throws {
-        let (model, seed) = try shortcutModel()
-        model.resetShortcutsToDefaults(reach: .everyProfile)
-        model.updateActiveProfile()
-        for name in ["Work", "Home", "Travel"] {
-            #expect(try combo(model, name, seed) == seed.combo, "\(name)")
-        }
     }
 
     @Test("who else changed reads by name, then as a count")

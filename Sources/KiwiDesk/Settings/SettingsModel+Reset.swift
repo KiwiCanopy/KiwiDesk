@@ -33,12 +33,12 @@ extension SettingsModel {
             }),
             let restore = shortcutRestore
         else { return }
-        let profiles = encodedReach?.keyLayers.profiles ?? []
+        let stored = layeredReach?.keyLayers
         config.layers[index].bindings = restoredDefaultRows(
             config.layers[index].bindings
         )
         droppedChords = []
-        stageRestore(.key, restore, profiles: profiles, reach: reach)
+        stageRestore(.key, restore, stored: stored, reach: reach)
     }
 
     /// The default layer's rows once restored: the seed, then the
@@ -55,9 +55,24 @@ extension SettingsModel {
     /// The seed for this config on `base`, the Desktop tier
     /// included for the Desktops this Mac has now (#2460).
     func shippedDefaults(on base: ShortcutBase) -> [KeyBinding] {
-        DefaultKeybindings.bindings(
+        shippedDefaults(
+            on: base,
             spaces: config.spaces,
-            resizeStep: Int(config.settings.resizeStep),
+            resizeStep: config.settings.resizeStep
+        )
+    }
+
+    /// The seed for a setup of `spaces` and `resizeStep` on `base`:
+    /// another profile's own seed, which a restore across profiles
+    /// compares with the page's (#3248).
+    func shippedDefaults(
+        on base: ShortcutBase,
+        spaces: [SpaceID],
+        resizeStep: CGFloat
+    ) -> [KeyBinding] {
+        DefaultKeybindings.bindings(
+            spaces: spaces,
+            resizeStep: Int(resizeStep),
             base: base
         )
             + bindableDesktops.compactMap {

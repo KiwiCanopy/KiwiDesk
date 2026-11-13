@@ -57,8 +57,8 @@ extension SettingsModel {
     ) -> [String] {
         guard let reach = encodedReach, let editing = reachProfile
         else { return [] }
-        return gestureRestore(on: device).changedElsewhere(
-            in: reach.gestures,
+        return reach.gestures.profilesAway(
+            from: gestureRestore(on: device).seeds,
             editing: editing
         )
     }
@@ -70,8 +70,8 @@ extension SettingsModel {
         reach: RestoreReach
     ) {
         let restore = gestureRestore(on: device)
-        let profiles = encodedReach?.gestures.profiles ?? []
+        let stored = layeredReach?.gestures
         GestureListEdits.restoreDefaults(on: device, in: &config.gesture)
-        stageRestore(.gesture, restore, profiles: profiles, reach: reach)
+        stageRestore(.gesture, restore, stored: stored, reach: reach)
     }
 }

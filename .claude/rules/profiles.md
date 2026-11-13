@@ -142,6 +142,15 @@ because two real clients now remove drift — see
   argued in `docs/design-decisions.md` ▸ *One switch puts
   KiwiDesk's shortcuts on `⌃⌥` or on `✦`* (`ShortcutBaseTests` ▸
   `desktopTier`).
+- **A Restore Defaults over a reach family stages its reach on the
+  draft through `SettingsModel.stageRestore` (#3248)**, never
+  leaving it to the encoder's default reach and its match-only
+  `.everywhere` removal, which resets a profile that happens to
+  match unasked. It asks only while `RuleReachTable.profilesAway`
+  names another profile, and "every profile" shares only the seed
+  rows every profile's own seed agrees on, so a row a profile's own
+  Spaces or resize step spell stays its own (`RestoreReachTests`,
+  `RestoreReachShortcutTests`).
 - **A default row added after the first-run seed joins the next
   generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
   and list the row in `rows(ofGeneration:)`, beside adding it to

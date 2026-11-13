@@ -203,9 +203,10 @@ enum GestureListWords {
         )
     }
 
-    /// Who else changed them, then that added rows stay.
+    /// Who else changed them, then that added rows stay: a paragraph
+    /// apart, since a count label ends on its number.
     static func restoreAskMessage(_ others: [String]) -> String {
-        RestoreReachWords.changedIn(others) + " "
+        RestoreReachWords.changedIn(others) + "\n\n"
             + L(
                 "shortcuts.gestures.list.restore_keeps",
                 "Gestures you added stay."

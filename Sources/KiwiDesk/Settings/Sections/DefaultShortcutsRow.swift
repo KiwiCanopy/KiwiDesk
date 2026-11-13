@@ -128,7 +128,30 @@ struct DefaultShortcutsRow: View {
             isPresented: $confirmingReset,
             titleVisibility: .visible
         ) {
-            resetButtons
+            if let profile = model.reachProfile, !elsewhere.isEmpty {
+                Button {
+                    model.resetShortcutsToDefaults(reach: .here)
+                } label: {
+                    Text(RestoreReachWords.here(profile))
+                }
+                .keyboardShortcut(.defaultAction)
+                Button(role: .destructive) {
+                    model.resetShortcutsToDefaults(reach: .everyProfile)
+                } label: {
+                    Text(RestoreReachWords.everyProfile)
+                }
+            } else {
+                Button(role: .destructive) {
+                    model.resetShortcutsToDefaults(reach: .here)
+                } label: {
+                    Text(
+                        L(
+                            "shortcuts.restore_defaults.confirm",
+                            "Restore Defaults"
+                        )
+                    )
+                }
+            }
             Button(role: .cancel) {
             } label: {
                 Text(
@@ -139,35 +162,6 @@ struct DefaultShortcutsRow: View {
             // Counted only while asked: every page render built it
             // (#2783).
             if confirmingReset { Text(resetMessage + changedLine) }
-        }
-    }
-
-    /// One Restore while nobody else changed the seeded rows; else
-    /// this profile (the default) or every profile (#3248).
-    @ViewBuilder private var resetButtons: some View {
-        if let profile = model.reachProfile, !elsewhere.isEmpty {
-            Button {
-                model.resetShortcutsToDefaults(reach: .here)
-            } label: {
-                Text(RestoreReachWords.here(profile))
-            }
-            .keyboardShortcut(.defaultAction)
-            Button(role: .destructive) {
-                model.resetShortcutsToDefaults(reach: .everyProfile)
-            } label: {
-                Text(RestoreReachWords.everyProfile)
-            }
-        } else {
-            Button(role: .destructive) {
-                model.resetShortcutsToDefaults(reach: .here)
-            } label: {
-                Text(
-                    L(
-                        "shortcuts.restore_defaults.confirm",
-                        "Restore Defaults"
-                    )
-                )
-            }
         }
     }
 

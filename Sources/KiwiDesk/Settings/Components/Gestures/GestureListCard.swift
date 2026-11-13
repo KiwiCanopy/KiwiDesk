@@ -151,7 +151,21 @@ struct GestureListCard: View {
                     isPresented: asking,
                     titleVisibility: .visible
                 ) {
-                    restoreChoices
+                    if let profile = model.reachProfile {
+                        Button(RestoreReachWords.here(profile)) {
+                            restore(.here)
+                        }
+                        .keyboardShortcut(.defaultAction)
+                    }
+                    Button(RestoreReachWords.everyProfile, role: .destructive)
+                    {
+                        restore(.everyProfile)
+                    }
+                    Button(
+                        L("spaces.delete_confirm.cancel", "Cancel"),
+                        role: .cancel
+                    ) {
+                    }
                 } message: {
                     Text(GestureListWords.restoreAskMessage(elsewhere))
                 }
@@ -164,19 +178,6 @@ struct GestureListCard: View {
             get: { !elsewhere.isEmpty },
             set: { if !$0 { elsewhere = [] } }
         )
-    }
-
-    /// This profile (Return), every profile, Cancel (Escape).
-    @ViewBuilder private var restoreChoices: some View {
-        Button(RestoreReachWords.here(model.reachProfile ?? "")) {
-            restore(.here)
-        }
-        .keyboardShortcut(.defaultAction)
-        Button(RestoreReachWords.everyProfile, role: .destructive) {
-            restore(.everyProfile)
-        }
-        Button(L("spaces.delete_confirm.cancel", "Cancel"), role: .cancel) {
-        }
     }
 
     private var help: String {

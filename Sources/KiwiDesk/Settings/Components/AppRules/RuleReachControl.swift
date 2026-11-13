@@ -81,23 +81,26 @@ enum RuleReachWords {
     /// a count — the ladder past "only", which a diff row's reach
     /// shares (#792).
     static func group(_ profiles: [String]) -> String {
-        switch profiles.count {
-        case 1:
-            return profiles[0]
-        case 2:
-            return L(
-                "app_rules.reach.pair",
-                "%1$@, %2$@",
-                profiles[0],
-                profiles[1]
-            )
-        default:
+        guard namesEach(profiles) else {
             return L(
                 "app_rules.reach.count",
                 "Profiles: %1$d",
                 profiles.count
             )
         }
+        if profiles.count == 1 { return profiles[0] }
+        return L(
+            "app_rules.reach.pair",
+            "%1$@, %2$@",
+            profiles[0],
+            profiles[1]
+        )
+    }
+
+    /// Whether `group` names each profile rather than counting them:
+    /// the ladder's one cut-off, which a sentence around it reads.
+    static func namesEach(_ profiles: [String]) -> Bool {
+        (1...2).contains(profiles.count)
     }
 
     /// The words beside a profile's box: "this profile" for the

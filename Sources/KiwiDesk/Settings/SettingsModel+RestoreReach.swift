@@ -5,16 +5,16 @@ enum RestoreReach: Equatable {
     /// The edited profile alone; the shared base and every other
     /// profile keep what they hold.
     case here
-    /// Every profile and the shared base: each seeded row goes back
-    /// to its seed, whatever value a profile held.
+    /// Every profile and the shared base: each shared seed goes back,
+    /// whatever value a profile held.
     case everyProfile
 }
 
 /// The seeded rows a Restore Defaults puts back, keyed as the
-/// family's reach table keys them (#3248): what the restore writes
-/// and how far, and who else it would change.
+/// family's reach table keys them (#3248).
 struct RestoreSeeds<Value: Hashable & Sendable> {
-    /// Every seeded key and its seed.
+    /// The seeds every profile shares: what "every profile" writes
+    /// everywhere and what "who changed" is judged against.
     let seeds: [String: Value]
     /// The page's own keys before the restore, and after it.
     let before: [String: Value]
@@ -29,83 +29,49 @@ struct RestoreSeeds<Value: Hashable & Sendable> {
     var dropped: Set<String> {
         Set(before.keys).subtracting(after.keys)
     }
-
-    /// The profiles other than `editing` in which at least one
-    /// seeded key resolves away from its seed — the union across
-    /// the keys, in listing order.
-    func changedElsewhere(
-        in table: RuleReachTable<Value>,
-        editing: String
-    ) -> [String] {
-        table.profiles.filter { profile in
-            profile != editing
-                && seeds.contains {
-                    table.resolved($0.key, for: profile) != $0.value
-                }
-        }
-    }
 }
 
 extension SettingsModel {
-    /// Stages a restore's reach on the draft (#3248): `.here` writes
-    /// each moved key to the edited profile alone and leaves each
-    /// dropped one out there; `.everyProfile` shares every seed with
-    /// every profile joining it. A dropped row is the edited
-    /// profile's in both, since a seed taking its chord elsewhere is
-    /// the encoder's take-over. Nothing is staged without a
-    /// checklist.
+    /// Stages a restore's reach on the draft (#3248) over `stored`,
+    /// the family's table before any row edit. `.here` keeps each
+    /// moved key on the edited profile and leaves each dropped one
+    /// out there. `.everyProfile` shares every shared seed with all
+    /// profiles, and keeps a moved row no seed shares on the edited
+    /// profile, as `.here` does. A pick the stored reach already
+    /// answers is not staged, so a restore nobody else shares leaves
+    /// the draft's reach as it was. A dropped row is the edited
+    /// profile's under both answers: a seed taking its chord
+    /// elsewhere is the encoder's take-over. Nothing is staged
+    /// without a checklist.
     func stageRestore<Value>(
         _ family: RuleFamily,
         _ restore: RestoreSeeds<Value>,
-        profiles: [String],
+        stored: RuleReachTable<Value>?,
         reach: RestoreReach
     ) {
-        guard let editing = reachProfile else { return }
-        switch reach {
-        case .here:
-            for key in restore.moved {
-                reachEdits.reach[family, default: [:]][key] =
-                    .listed([editing])
-            }
-        case .everyProfile:
-            for key in restore.seeds.keys {
-                reachEdits.reach[family, default: [:]][key] =
-                    .shared(joining: Set(profiles))
-            }
+        guard let stored, let editing = reachProfile else { return }
+        let alone = RuleReach.listed([editing])
+        let sharing = reach == .everyProfile ? restore.seeds : [:]
+        for key in restore.moved
+        where sharing[key] == nil
+            && stored.defaultReach(
+                of: key,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            ) != alone
+        {
+            reachEdits.reach[family, default: [:]][key] = alone
         }
-        for key in restore.dropped {
+        for key in sharing.keys {
+            reachEdits.reach[family, default: [:]][key] =
+                .shared(joining: Set(stored.profiles))
+        }
+        for key in restore.dropped
+        where stored.base[key] != nil
+            || stored.reach(of: key, editing: editing) != alone
+        {
             reachEdits.reach[family]?[key] = nil
             recordRemoval(family, key, .here)
         }
-    }
-}
-
-/// The words a Restore Defaults asks with (#3248).
-@MainActor
-enum RestoreReachWords {
-    /// Who else changed the seeded rows: by name for one or two,
-    /// as a count past that.
-    static func changedIn(_ profiles: [String]) -> String {
-        if profiles.count <= 2 {
-            return L(
-                "restore_reach.changed_in",
-                "Changed in %1$@.",
-                RuleReachWords.group(profiles)
-            )
-        }
-        return L(
-            "restore_reach.changed_in_count",
-            "Changed in profiles: %1$d",
-            profiles.count
-        )
-    }
-
-    /// The default answer: the edited profile alone.
-    static func here(_ profile: String) -> String {
-        L("restore_reach.here", "Restore in %1$@", profile)
-    }
-
-    static var everyProfile: String {
-        L("restore_reach.every_profile", "Restore in every profile")
     }
 }
