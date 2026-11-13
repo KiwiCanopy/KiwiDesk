@@ -3,14 +3,13 @@ import Foundation
 /// Sticky window styling and indicator glyph configuration
 /// (`Borders/StickyMarkManager`, `StickyMarkUngatedTests`, #414).
 public struct StickyStyle: Sendable, Equatable {
-    /// SF Symbol for global sticky windows (`infinity`, #414, #429).
-    public static let symbolName = "infinity"
+    /// SF Symbol for global sticky windows (`pin.fill`, #414,
+    /// #3284: the pin family is sticky's).
+    public static let symbolName = "pin.fill"
 
-    /// SF Symbol for display-sticky windows (`pin.fill`, #445).
-    /// A seeded keybinding is NAMED for this glyph (`⌃⌥P`, #1094):
-    /// re-picking the symbol strands that letter's rationale in
-    /// every catalog — re-pick it and re-argue the letter.
-    public static let displaySymbolName = "pin.fill"
+    /// The display-sticky glyph: the pin with a screen badge, a
+    /// `ComposedSymbol` (#445, #3284).
+    public static let displaySymbolName = ComposedSymbol.displaySticky.name
 
     /// Resolves indicator symbol name for given sticky scope.
     public static func symbolName(for scope: StickyScope) -> String? {

@@ -131,7 +131,7 @@ struct FocusBorderPreview: View {
             }
             .overlay(alignment: .topTrailing) {
                 if let mark {
-                    Image(systemName: mark.symbol)
+                    GlyphImage(mark.symbol)
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(mark.tint)
                         .padding(5)

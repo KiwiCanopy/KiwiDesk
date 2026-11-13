@@ -14,8 +14,11 @@ extension StickyMarkOverlay {
             glyph.kind == .sticky
             ? L("sticky.mark.ax", "Sticky window")
             : L("floating.mark.ax", "Floating window")
-        return NSImage(
-            systemSymbolName: glyph.symbolName,
+        // A composed glyph takes no view-level configuration, so it
+        // is styled here (#3284).
+        return SymbolImage.named(
+            glyph.symbolName,
+            style: StickyMarkPlate.symbolStyle,
             accessibilityDescription: label
         )
     }

@@ -45,7 +45,7 @@ extension ShortcutsReferenceBuilder {
             return spaceGroupIcon
         case .focusDirections:
             return "arrow.up.and.down.and.arrow.left.and.right"
-        case .swapDirections: return "dpad.fill"
+        case .swapDirections: return "arrow.triangle.swap"
         case .layoutCycle: return layoutCycle.drawn
         case .goToDesktop, .moveToDesktop, .moveToDesktopFollow,
             .spaceStep, .spaceHistory, .width, .height:
@@ -126,30 +126,31 @@ extension ShortcutsReferenceBuilder {
             return "list.bullet"
         case "KiwiDesk.reset_layout_sizing()":
             return "arrow.counterclockwise"
-        // KiwiHub's sides wear the symbol of the Settings page the
-        // side mirrors; the window switcher, the swap of two windows
-        // (owner, 2026-10-27).
-        // Its last-app opener opens the same side (#3135).
+        // KiwiHub's sides: the window switcher, the swap of two
+        // windows (owner, 2026-10-27), and its last-app opener, which
+        // opens the same side (#3135); the Shortcuts page's symbol;
+        // View's "tune what you see"; the Desktops as a grid (#3284).
+        // Every surface naming a side reads `sideSymbol(_:)`.
         case KiwiHubSide.windows.lua, KeybindingCatalog.jumpToLastApp.lua:
-            return "rectangle.2.swap"
+            return sideSymbol(.windows)
         case KiwiHubSide.shortcuts.lua:
-            return SettingsDestination.shortcuts.symbol
+            return sideSymbol(.shortcuts)
         case KiwiHubSide.view.lua:
-            return SettingsDestination.layoutDefaults.symbol
-        // The Desktop overview wears the quick menu row's symbol.
+            return sideSymbol(.view)
         case KiwiHubSide.desktops.lua:
-            return "rectangle.3.group"
+            return sideSymbol(.desktops)
         // The panel draws KiwiDesk's own icon on this row; a
         // Settings row wears the Settings gear (#2670).
         case KeybindingCatalog.openSettings.lua:
             return "gearshape"
-        // Two screens: back to the one before (#2512), and a window
-        // sent there, staying or following (#3117), as the Space and
-        // Desktop rows share their destination's glyph.
-        case KeybindingCatalog.screenLastRow.lua,
-            KeybindingCatalog.screenMoveRows[0].lua,
+        // Back to the screen before (#2512), and a window sent there,
+        // staying or following (#3117) — each its own glyph, the
+        // next-screen step keeping `display.2` (#3284).
+        case KeybindingCatalog.screenLastRow.lua:
+            return ComposedSymbol.lastScreen.name
+        case KeybindingCatalog.screenMoveRows[0].lua,
             KeybindingCatalog.screenMoveRows[1].lua:
-            return "display.2"
+            return "display.and.arrow.down"
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"
@@ -161,13 +162,13 @@ extension ShortcutsReferenceBuilder {
         // The Space Bar's tiling-off marker (#3008).
         case KeybindingCatalog.toggleTiling.lua:
             return StatusSpaceMark.tilingOffSymbol
-        // The bars' show/hide (#2530): the Space Bar wears the arrowed
-        // symbol the 3.2.0 notes' hiding-bars spotlight wears, the App
-        // Bar the strip along the screen's foot (owner, 2026-10-23).
+        // The bars' show/hide (#2530): two arrowed strips, the Space
+        // Bar's the 3.2.0 hiding-bars spotlight's and the App Bar's
+        // its mirror at the screen's foot (#3284).
         case KeybindingCatalog.toggleSpaceBar.lua:
             return "menubar.arrow.up.rectangle"
         case KeybindingCatalog.toggleAppBar.lua:
-            return "dock.rectangle"
+            return "dock.arrow.down.rectangle"
         // Track's own verbs: to the line before or after (#2530); a
         // swap of two tracks wears the swap's triangle against the
         // track's line (owner, 2026-10-27).
@@ -210,9 +211,24 @@ extension ShortcutsReferenceBuilder {
     /// themselves (`ShortcutRowSymbolTests`).
     static let verbSymbols = [
         LuaMark.symbol,
-        "rectangle.stack",
+        gatherBadge,
         BranchMark.symbol,
     ]
+
+    /// An app row's gather badge, off Desktops' `rectangle.stack`
+    /// (#3284, ui-designer 2026-11-13).
+    static let gatherBadge = "square.and.arrow.down.on.square"
+
+    /// The symbol a KiwiHub side wears on every surface naming it:
+    /// its Shortcuts row, Simple's keys and the menu bar rows (#3284).
+    static func sideSymbol(_ side: KiwiHubSide) -> String {
+        switch side {
+        case .windows: "rectangle.2.swap"
+        case .shortcuts: SettingsDestination.shortcuts.symbol
+        case .view: "slider.horizontal.3"
+        case .desktops: ComposedSymbol.desktopOverview.name
+        }
+    }
 
     /// Extracts the first quoted argument from a Lua call string.
     private static func quotedArg(in lua: String) -> String? {

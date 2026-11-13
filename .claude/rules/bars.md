@@ -1444,7 +1444,8 @@ A bar is built per display, so a per-display value sits in easy
 reach of every derivation inside it. #1214 reached for one: the
 Space Bar handed each screen's own shown Space into #445's render
 verdict as if it were the focused one, and every screen's bar was
-told a ∞ window rendered there while the layout drew it on one.
+told a global-sticky window rendered there while the layout drew it
+on one.
 The `+n` badge's focus tint beside it was the same substitution a
 second time.
 
@@ -1471,8 +1472,8 @@ reading a bar still makes for itself:
   `KiwiCore.barFocus(on:)`: `workspaces.lastFocused`, gated on
   the active Space — never on the display's own shown one and
   never on a Space's remembered `focused` slot
-  (`BarFocusSeamTests`, #2063). Those diverge on an injected ∞
-  traveler, which holds `lastFocused` and can never be the
+  (`BarFocusSeamTests`, #2063). Those diverge on an injected
+  global-sticky traveler, which holds `lastFocused` and can never be the
   membership-guarded `space.focused` (#431), and that is the one
   case the `+n` tint exists for.
 - `currentSpace(on:)` answers *which Space is this screen
@@ -1482,8 +1483,8 @@ reading a bar still makes for itself:
   questions it means in a word beside the call — they are one
   token apart and read identically at a glance.
 - `SpaceBarStickyScreenTests` pins the two-screen half from the
-  driver: the ∞ arm on both sides of a switch, the 📌 arm that
-  refuses the over-broad "prune every sticky off an unfocused
+  driver: the global-sticky arm on both sides of a switch, the
+  screen-sticky arm that refuses the over-broad "prune every sticky off an unfocused
   screen" fix, and the `+n` tint — which on 2026-09-02 was the
   only test in the tree that redded when that gate was reverted.
   The single-screen suites
@@ -1901,6 +1902,12 @@ sites clipped alike.
   and holds their OUTPUT — a hand-copied CoreText read that
   anchored the ink correctly would stay green there, so the
   routing is review's.
+
+## A bar image from a symbol name goes through `SymbolImage`
+
+A bar or bar-menu image built from a symbol name the site did not
+spell goes through `SymbolImage.named`; [borders.md](borders.md)
+▸ A symbol name reaches AppKit through `SymbolImage` owns the rule.
 
 ## A bar badge paints through `BarBadgeFace`
 

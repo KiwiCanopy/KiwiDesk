@@ -75,10 +75,7 @@ final class StateBadgeView: NSView {
         if symbolName == Self.pocketName {
             return PocketMark.badge.image(size: 12, ink: ink)
         }
-        return NSImage(
-            systemSymbolName: symbolName,
-            accessibilityDescription: nil
-        )
+        return SymbolImage.named(symbolName)
     }
 
     override var isFlipped: Bool { true }

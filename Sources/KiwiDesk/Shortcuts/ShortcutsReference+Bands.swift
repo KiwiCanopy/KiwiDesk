@@ -187,7 +187,7 @@ extension ShortcutsReferenceBuilder {
         // shows beside it for a different meaning (#2246).
         case .gather:
             return (
-                "rectangle.stack",
+                gatherBadge,
                 L(
                     "shortcuts.app_behavior.gather.badge",
                     "Gathers its windows here"

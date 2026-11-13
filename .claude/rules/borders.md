@@ -995,6 +995,18 @@ paths. The product
 ruling is `docs/design-decisions.md` ▸ One width and one corner
 style for every window stroke.
 
+## A symbol name reaches AppKit through `SymbolImage` (#3284)
+
+**An AppKit site — in either tree — building an image from a
+symbol name it did not spell goes through `SymbolImage.named`**,
+since the name may be a `ComposedSymbol` (for example
+`StickyStyle.displaySymbolName`), which `NSImage(systemSymbolName:)` answers with nil. A
+site taking only names it knows are plain symbols joins
+`SymbolNameDoorTests`' `allowed` map with its reason. Where a
+composed glyph sits and how its badge draws is
+`ComposedSymbol.layout`'s, which the GUI's SwiftUI twin reads too;
+the SwiftUI half of the rule is [gui.md](gui.md)'s.
+
 ## A state's colour paints its symbol, never the glass or a disc
 
 **A template symbol's tint is read through `Glyph.symbolHex`,

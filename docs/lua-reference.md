@@ -6365,12 +6365,11 @@ overflows in its place.
 Sticky comes in two scopes:
 
 - **Sticky** (`make_sticky` / `toggle_sticky`) — present on
-  every space of **every** screen. Wears the `infinity` (∞)
-  mark.
+  every space of **every** screen. Wears the `pin.fill` mark.
 - **Screen sticky** (`make_display_sticky` /
   `toggle_display_sticky`) — present on every space of **one**
-  screen: the screen its home space lives on. Wears the
-  `pin.fill` (📌) mark.
+  screen: the screen its home space lives on. Wears the pin
+  with a small screen at its corner.
 
 Both share one off-switch (`make_unsticky`), and each verb sets
 its own scope outright — `make_sticky` on a screen-sticky window
@@ -6384,8 +6383,7 @@ to that screen. A refused move shows a brief pill on the
 window.
 
 A sticky window is marked in its top-right corner
-(`sticky.set_mark`; `infinity` for global, `pin.fill` for
-screen), and the same per-scope badge rides its Space Bar
+(`sticky.set_mark`), and the same per-scope badge rides its Space Bar
 glyph, listed under whichever space is current
 (`space_bar.set_sticky_badge`).
 

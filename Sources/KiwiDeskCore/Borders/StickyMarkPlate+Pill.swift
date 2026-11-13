@@ -56,18 +56,12 @@ extension StickyMarkPlate {
         _ symbolName: String,
         attrs: [NSAttributedString.Key: Any]
     ) -> NSAttributedString {
-        let config = NSImage.SymbolConfiguration(
+        let style = SymbolImage.Style(
             pointSize: nameFont.pointSize,
-            weight: .semibold
+            weight: .semibold,
+            palette: markColor
         )
-        .applying(
-            NSImage.SymbolConfiguration(paletteColors: [markColor])
-        )
-        guard
-            let image = NSImage(
-                systemSymbolName: symbolName,
-                accessibilityDescription: nil
-            )?.withSymbolConfiguration(config)
+        guard let image = SymbolImage.named(symbolName, style: style)
         else {
             return NSAttributedString(
                 string: symbolName,

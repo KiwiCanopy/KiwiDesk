@@ -4,5 +4,5 @@
 /// twice, the first divergent edit pictures one concept two
 /// ways and no test would see it.
 enum DesktopGlyph {
-    static let symbol = "square.on.square"
+    static let symbol = "rectangle.stack"
 }

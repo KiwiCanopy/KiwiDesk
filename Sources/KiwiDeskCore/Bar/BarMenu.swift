@@ -148,10 +148,7 @@ enum BarMenu {
         item.isEnabled = row.enabled
         item.state = row.checked ? .on : .off
         if let symbol = row.symbol {
-            let image = NSImage(
-                systemSymbolName: symbol,
-                accessibilityDescription: nil
-            )
+            let image = SymbolImage.named(symbol)
             image?.isTemplate = true
             item.image = image
             SpaceBarWindowMenu.showImage(item)

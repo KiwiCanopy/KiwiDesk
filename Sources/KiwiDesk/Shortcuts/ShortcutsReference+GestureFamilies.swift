@@ -9,7 +9,7 @@ extension ShortcutsReferenceBuilder {
         switch family {
         case .focus:
             foldIcon(for: .focusDirections) ?? "arrow.left.arrow.right"
-        case .swap: foldIcon(for: .swapDirections) ?? "dpad.fill"
+        case .swap: foldIcon(for: .swapDirections) ?? "arrow.triangle.swap"
         case .space: spaceGroupIcon
         case .display: "display.2"
         case .track: "arrow.forward.to.line"

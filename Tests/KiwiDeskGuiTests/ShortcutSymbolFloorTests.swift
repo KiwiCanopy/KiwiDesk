@@ -125,8 +125,20 @@ struct ShortcutSymbolFloorTests {
                 )
                 + ShortcutsReferenceBuilder.verbSymbols
         )
+        .reduce(into: Set<String>()) { parts, name in
+            // A composed glyph draws its two symbols (#3284).
+            if let composed = ComposedSymbol(name: name) {
+                parts.formUnion([composed.base, composed.badge])
+            } else {
+                parts.insert(name)
+            }
+        }
         #expect(drawn.count > 20, "the census drew too few symbols")
         let stand = ShortcutsReferenceBuilder.floorSymbols
+        // A composed part is drawn by its raw name, never `.drawn`, so
+        // it may not be a name the floor lacks (#3284).
+        let parts = ComposedSymbol.all.flatMap { [$0.base, $0.badge] }
+        #expect(Set(parts).isDisjoint(with: stand.map(\.name)))
         // A stand-in wears no other row's glyph (#2529: reset sizing's
         // bare counterclockwise arrow).
         let floors = stand.map(\.floor)

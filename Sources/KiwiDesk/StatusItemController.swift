@@ -237,10 +237,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     func symbol(_ name: String) -> NSImage? {
-        let image = NSImage(
-            systemSymbolName: name,
-            accessibilityDescription: nil
-        )
+        let image = SymbolImage.named(name)
         image?.isTemplate = true
         return image
     }

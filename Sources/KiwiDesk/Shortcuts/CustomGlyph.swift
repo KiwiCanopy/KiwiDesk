@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 import SwiftUI
 
 /// The glyphs SF Symbols has no good answer for (#3281, owner-picked):
@@ -203,8 +204,8 @@ enum CustomGlyph: Hashable {
     }
 }
 
-/// A symbol slot's image: a `kiwi.*` custom glyph, else the SF
-/// Symbol of that name.
+/// A symbol slot's image: a `kiwi.*` custom or composed glyph
+/// (#3284), else the SF Symbol of that name.
 struct GlyphImage: View {
     let name: String
 
@@ -213,6 +214,8 @@ struct GlyphImage: View {
     var body: some View {
         if let glyph = CustomGlyph(name: name) {
             Image(nsImage: glyph.image).renderingMode(.template)
+        } else if let composed = ComposedSymbol(name: name) {
+            ComposedSymbolView(symbol: composed)
         } else {
             Image(systemName: name)
         }

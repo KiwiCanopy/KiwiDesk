@@ -94,7 +94,7 @@ struct SequenceActionMenu: View {
             }
         }
         .padding(12)
-        .frame(width: 280, height: 360)
+        .frame(width: Self.width, height: 360)
         .onAppear { searchFocused = true }
     }
 
@@ -202,6 +202,7 @@ struct SequenceActionMenu: View {
                     .opacity(picked ? 1 : 0)
                     .frame(width: 12)
                     .accessibilityHidden(true)
+                catalogueGlyph(command)
                 Text(bolded(command.resolvedLabel)).lineLimit(1)
                 Spacer(minLength: 0)
             }
@@ -213,6 +214,24 @@ struct SequenceActionMenu: View {
         .buttonStyle(.plain)
         .dropdownCursorRow(onCursor) { hover(slot) }
         .accessibilityAddTraits(picked ? .isSelected : [])
+    }
+
+    /// A catalogue row's glyph, the Shortcuts catalogue's own for its
+    /// command, in the pinned rows' 16 pt column; a command with none
+    /// keeps the empty column, so the titles stay aligned (#3283).
+    @ViewBuilder private func catalogueGlyph(
+        _ command: NavCommand
+    ) -> some View {
+        if let glyph = ShortcutsReferenceBuilder.icon(for: command) {
+            ShortcutGlyphView(glyph: glyph)
+                .font(.caption.weight(.semibold))
+        } else {
+            Color.clear
+                .frame(
+                    width: ShortcutGlyphView.rowSide,
+                    height: ShortcutGlyphView.rowSide
+                )
+        }
     }
 
     private func pinned(
@@ -235,7 +254,7 @@ struct SequenceActionMenu: View {
                     .accessibilityHidden(true)
                 GlyphImage(symbol)
                     .font(.caption.weight(.semibold))
-                    .frame(width: 16)
+                    .frame(width: ShortcutGlyphView.rowSide)
                     .accessibilityHidden(true)
                 Text(label)
                 Spacer(minLength: 0)
@@ -265,6 +284,10 @@ struct SequenceActionMenu: View {
         text[lower..<upper].inlinePresentationIntent = .stronglyEmphasized
         return text
     }
+
+    /// The searchable picker's width: the room its titles had before
+    /// the glyph column (#3283), plus the column and its row gap.
+    static let width: CGFloat = 280 + ShortcutGlyphView.rowSide + 6
 
     /// Drawn after a `plus` mark: "+ Extend Sequence" (#3162).
     static var branchLabel: String {

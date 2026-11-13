@@ -16,6 +16,14 @@ public enum SpaceMark: Equatable {
 final class StickyMarkPlate: NSView {
     /// Collapsed badge square dimension.
     static let size: CGFloat = 20
+
+    /// The mark's glyph style, which a composed glyph takes at its
+    /// image (`SymbolImage`, #3284).
+    static let symbolStyle = SymbolImage.Style(
+        pointSize: size * 0.55,
+        weight: .semibold
+    )
+
     /// Padding and gap metrics.
     static let namePad: CGFloat = 8
     static let nameGap: CGFloat = 4
@@ -71,11 +79,7 @@ final class StickyMarkPlate: NSView {
         }
 
         for glyph in [symbol, innerSymbol] {
-            glyph.symbolConfiguration =
-                NSImage.SymbolConfiguration(
-                    pointSize: Self.size * 0.55,
-                    weight: .semibold
-                )
+            glyph.symbolConfiguration = Self.symbolStyle.configuration
             glyph.contentTintColor = .labelColor
             glyph.imageScaling = .scaleProportionallyDown
         }

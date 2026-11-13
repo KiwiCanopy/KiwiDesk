@@ -26,6 +26,8 @@ struct ShortcutGlyphDoorTests {
         "Settings/Components/Keybindings/KeybindingNavRow.swift",
         "Settings/Components/Keybindings/Sequences/"
             + "SequenceActionMenu+Trigger.swift",
+        "Settings/Components/Keybindings/Sequences/"
+            + "SequenceActionMenu.swift",
         "Settings/Components/Simple/SimpleKiwiHubKeys.swift",
         "Settings/Sections/ShortcutLayerChip.swift",
         "Shortcuts/ShortcutsBands.swift",
