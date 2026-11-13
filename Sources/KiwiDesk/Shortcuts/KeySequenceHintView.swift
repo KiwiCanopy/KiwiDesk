@@ -113,7 +113,7 @@ struct KeySequenceHintView: View {
             id: "branch." + key.chord,
             label: key.name,
             combo: key.chord,
-            icon: key.symbol,
+            icon: .symbol(key.symbol),
             accessoryIcon: "chevron.forward",
             accessoryHelp: L(
                 "key_sequence.hint.opens_more",

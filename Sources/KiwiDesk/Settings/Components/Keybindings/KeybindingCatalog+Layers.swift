@@ -6,10 +6,15 @@ import KiwiDeskCore
 extension KeybindingCatalog {
 
     /// Authors layer switch command matching import classifier syntax (#4).
-    static func switchLayerCommand(_ name: String) -> NavCommand {
+    /// `icon` is the layer's own, which the row draws (#3267).
+    static func switchLayerCommand(
+        _ name: String,
+        icon: String? = nil
+    ) -> NavCommand {
         NavCommand(
             label: "Switch to \(name)",
             lua: "KiwiDesk.switch_layer(\(quote(name)))",
+            icon: icon,
             displayLabel: {
                 L(
                     "keybinding.switch_to_layer",

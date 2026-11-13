@@ -84,7 +84,7 @@ struct ShortcutGroupFilingTests {
             own("alt+u", desc: "Unknown", symbol: "kiwidesk.no.such"),
         ])
         func icon(_ label: String) -> String? {
-            built.custom.first { $0.label == label }?.icon
+            built.custom.first { $0.label == label }?.icon?.symbolName
         }
         #expect(icon("Star") == "star")
         #expect(icon("None") == LuaMark.symbol)
@@ -113,9 +113,9 @@ struct ShortcutGroupFilingTests {
         )
         let mine = try #require(built.groups.first { $0.title == "Mine" })
         #expect(mine.rows.map(\.label) == ["Follow"])
-        #expect(mine.rows.first?.icon == "star")
+        #expect(mine.rows.first?.icon == .symbol("star"))
         let generic = try #require(built.custom.first)
-        #expect(generic.icon == LuaMark.symbol)
+        #expect(generic.icon == .symbol(LuaMark.symbol))
     }
 
     @Test("The panel lists a binding's own groups after Apps, before Custom")

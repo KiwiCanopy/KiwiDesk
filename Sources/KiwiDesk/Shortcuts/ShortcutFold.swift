@@ -185,7 +185,7 @@ enum ShortcutFold {
             label: label,
             combo: combo,
             icon: ShortcutsReferenceBuilder.foldIcon(for: tag.family)
-                ?? first.icon
+                .map(ShortcutGlyph.symbol) ?? first.icon
         )
         row.spokenLabel = spoken
         row.members = group

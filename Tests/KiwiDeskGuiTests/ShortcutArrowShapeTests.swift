@@ -63,7 +63,8 @@ struct ShortcutArrowShapeTests {
             KeybindingCatalog.swapDirections,
         ] {
             for (command, name) in zip(commands, names) {
-                let glyph = ShortcutsReferenceBuilder.icon(for: command)
+                let glyph = ShortcutsReferenceBuilder.icon(for: command)?
+                    .symbolName
                 let named = parts(glyph).intersection(
                     names.map { Substring($0) }
                 )
@@ -75,14 +76,14 @@ struct ShortcutArrowShapeTests {
     @Test("focus and swap wear different shapes")
     func focusAndSwapDiffer() {
         let focus = Set(
-            KeybindingCatalog.focusDirections.compactMap(
-                ShortcutsReferenceBuilder.icon(for:)
-            )
+            KeybindingCatalog.focusDirections.compactMap {
+                ShortcutsReferenceBuilder.icon(for: $0)?.symbolName
+            }
         )
         let swap = Set(
-            KeybindingCatalog.swapDirections.compactMap(
-                ShortcutsReferenceBuilder.icon(for:)
-            )
+            KeybindingCatalog.swapDirections.compactMap {
+                ShortcutsReferenceBuilder.icon(for: $0)?.symbolName
+            }
         )
         #expect(focus.count == 4 && swap.count == 4)
         #expect(focus.isDisjoint(with: swap))
@@ -96,7 +97,8 @@ struct ShortcutArrowShapeTests {
             #expect(row.members.count >= 2, "\(family) did not fold")
             let glyph = try #require(row.icon, "\(family) is bare")
             #expect(
-                glyph == ShortcutsReferenceBuilder.foldIcon(for: family),
+                glyph.symbolName
+                    == ShortcutsReferenceBuilder.foldIcon(for: family),
                 "\(family) wears \(glyph)"
             )
             let own = Set(row.members.compactMap(\.icon))

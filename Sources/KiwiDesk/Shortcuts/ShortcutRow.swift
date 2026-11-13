@@ -6,7 +6,7 @@ struct ShortcutRow: Identifiable {
     let id: String
     let label: String
     let combo: String
-    var icon: String? = nil
+    var icon: ShortcutGlyph? = nil
     var bundleID: String? = nil
     /// App Font ligature name overriding bundle icon (#294).
     var glyph: String? = nil

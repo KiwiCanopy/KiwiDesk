@@ -102,8 +102,8 @@ struct ShortcutRowView: View {
             )
             .resizable()
             .frame(width: 16, height: 16)
-        } else if let icon = row.icon, !icon.isEmpty {
-            IconGlyphLabel(icon: icon)
+        } else if let icon = row.icon {
+            ShortcutGlyphView(glyph: icon)
                 .foregroundStyle(.secondary)
         } else {
             Color.clear

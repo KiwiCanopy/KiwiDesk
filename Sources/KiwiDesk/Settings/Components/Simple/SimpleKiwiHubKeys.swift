@@ -54,7 +54,7 @@ struct SimpleKiwiHubKeys: View {
             // name, over its keys.
             HStack(spacing: 6) {
                 ShortcutsReferenceBuilder.icon(for: side.command).map {
-                    Image(systemName: $0)
+                    ShortcutGlyphView(glyph: $0)
                 }
                 Text(side.scope.title)
             }

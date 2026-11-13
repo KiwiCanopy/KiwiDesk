@@ -8128,6 +8128,13 @@ icon shows the first two characters of its name there,
 uppercased. The default layer (`KiwiDesk.bind`) never takes an
 icon — the status item shows the standard KiwiDesk glyph.
 
+:::unreleased
+The icon also leads the layer's chip in Settings ▸ Shortcuts ▸
+Layers and its Switch to row there and on KiwiHub's Shortcuts
+side; a layer without one keeps the plain chip and the generic
+layers symbol on its row.
+:::
+
 Where a screen's Space Bar draws nothing at rest
 ([`space_bar.set_visibility`](#space_barset_visibility)), the
 status item shows the Space that screen is showing instead

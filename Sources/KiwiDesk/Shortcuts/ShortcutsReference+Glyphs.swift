@@ -4,12 +4,18 @@ import KiwiDeskCore
 /// Shortcut reference row glyphs and combo string formatting
 /// (`ShortcutsReferenceBuilder`, #820).
 extension ShortcutsReferenceBuilder {
-    /// A row's glyph: the command's own, else its direction, its
+    /// A row's glyph: the command's own — a Space's or a layer's
+    /// icon, symbol or emoji (#3267) — else its direction, its
     /// Space, or its verb. Every row the panel draws resolves to
     /// one (#2530, `ShortcutRowSymbolTests`).
-    static func icon(for cmd: NavCommand) -> String? {
-        cmd.icon.flatMap { $0.isEmpty ? nil : $0 }
-            ?? directionIcons[cmd.lua]
+    static func icon(for cmd: NavCommand) -> ShortcutGlyph? {
+        ShortcutGlyph(icon: cmd.icon)
+            ?? symbol(for: cmd).map(ShortcutGlyph.symbol)
+    }
+
+    /// The catalog's symbol for a row with no icon of its own.
+    private static func symbol(for cmd: NavCommand) -> String? {
+        directionIcons[cmd.lua]
             ?? spaceFallbackIcon(for: cmd.lua)
             ?? verbIcon(for: cmd.lua)
     }

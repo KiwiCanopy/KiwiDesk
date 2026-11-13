@@ -185,7 +185,7 @@ struct ShortcutsSheetTests {
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName]
         )
-        let custom = try #require(reference.custom.first?.icon)
+        let custom = try #require(reference.custom.first?.icon?.symbolName)
         let gather = try #require(
             ShortcutsReferenceBuilder.actionBadge(.gather)?.0
         )
