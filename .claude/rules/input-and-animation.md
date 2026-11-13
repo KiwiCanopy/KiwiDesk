@@ -330,8 +330,9 @@ editing here:
     `ModifierGrabWiringTests` ▸ `echoesAreLeftOut`,
     `lateEchoIsLeftOut`). **A grab's frames are latest-wins per
     window; never one queued set per pointer event** (#3266): the
-    grab's one `applyFrame` passes `latestWins`, and any other
-    instant set retires a waiting grab frame
+    grab's one `applyFrame` passes `latestWins`, and every other
+    write to the window, instant or spring, retires a waiting grab
+    frame at its entry point
     (`ModifierGrabLatestWinsTests`). A grab in flight reads as a
     held button
     through `MouseTracker.leftButtonHeld` and `anyButtonHeld`, so a

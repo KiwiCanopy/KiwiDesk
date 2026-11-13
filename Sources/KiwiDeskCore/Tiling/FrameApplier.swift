@@ -162,6 +162,7 @@ final class FrameApplier {
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
+        _ = latestInstants.take(id)  // and a waiting grab frame
         let band = edgeBand(frame, setSize: setSize)
         let lead = takeLead(id)
         if stageHeld(id, frame, setSize: setSize, band: band, lead: lead) {
@@ -239,6 +240,8 @@ final class FrameApplier {
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
+        // A newer ask: a waiting grab frame never lands after it.
+        if !latestWins { _ = latestInstants.take(id) }
         let band = edgeBand(frame, setSize: setSize)
         let run = sizeLedRuns[id]
         let lead = takeLead(id)

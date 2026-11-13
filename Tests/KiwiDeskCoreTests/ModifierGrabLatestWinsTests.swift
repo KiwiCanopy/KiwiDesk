@@ -8,10 +8,11 @@ import os
 
 /// A grab's frame writes are latest-wins per window (#3266): over
 /// a stalled app queue, a run of grab events leaves one waiting
-/// set, which writes the newest frame, and any other instant set
-/// retires a waiting grab frame so it never lands after a newer
-/// ask. The element is the test process's own, so every block
-/// rides the main queue, which stays stalled until `drain`.
+/// set, which writes the newest frame, and every other write,
+/// instant or spring, retires a waiting grab frame so it never
+/// lands after a newer ask. The element is the test process's
+/// own, so every block rides the main queue, which stays stalled
+/// until `drain`.
 @Suite("Modifier grab writes are latest-wins (#3266)", .serialized)
 @MainActor
 struct ModifierGrabLatestWinsTests {
@@ -129,5 +130,23 @@ struct ModifierGrabLatestWinsTests {
         applier.applyInstant(Self.window, placed, setSize: true)
         await drain()
         #expect(log.written == [placed])
+    }
+
+    @Test("A spring frame retires a waiting grab frame")
+    func springWins() async {
+        let log = Log()
+        let core = make(log)
+        let applier = core.tiler.applier
+        let grabbed = Self.frame.offsetBy(dx: 10, dy: 0)
+        let sprung = Self.frame.offsetBy(dx: 50, dy: 0)
+        applier.applyInstant(
+            Self.window,
+            grabbed,
+            setSize: true,
+            latestWins: true
+        )
+        applier.apply(Self.window, sprung, setSize: true)
+        await drain()
+        #expect(log.written == [sprung])
     }
 }

@@ -1,28 +1,24 @@
 import ApplicationServices
 import Foundation
 
-/// The instant set's queue half, split from `FrameApplier.swift`
-/// (350-line ceiling): one block per set inside the batched EUI
-/// hold (#1508), or, latest-wins, at most one block per window
-/// waiting, which writes the newest frame when it runs (#3266).
+/// The instant set's queue half: one block per set inside the
+/// batched EUI hold (#1508), or, latest-wins, at most one block
+/// per window waiting, which writes the newest frame when it runs
+/// (#3266).
 extension FrameApplier {
     /// Queues `entry` on the app's queue. A latest-wins set merges
     /// into a block already waiting for the window and is counted
-    /// as coalesced; any other set retires a waiting latest-wins
-    /// frame, so an older grab frame never lands after it.
+    /// as coalesced; every other write retired a waiting one at
+    /// its entry point, `apply` or `applyInstant`.
     func enqueueInstant(
         _ id: WindowID,
         _ entry: PendingFrames.Entry,
         pid: pid_t,
         latestWins: Bool
     ) {
-        if latestWins {
-            guard !latestInstants.put(id, entry) else {
-                meter.add(\.framesCoalesced)
-                return
-            }
-        } else {
-            _ = latestInstants.take(id)
+        if latestWins, latestInstants.put(id, entry) {
+            meter.add(\.framesCoalesced)
+            return
         }
         nonisolated(unsafe) let entry = entry
         let store = latestInstants

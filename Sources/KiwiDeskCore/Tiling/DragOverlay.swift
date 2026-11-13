@@ -122,6 +122,9 @@ public final class DragOverlay {
         panel.ignoresMouseEvents = true
         panel.level = .normal
         panel.isReleasedWhenClosed = false
+        // Shown only while KiwiDesk orders it in: `hideGhost` reads
+        // `isVisible`, which a deactivation hide would fool (#3266).
+        panel.hidesOnDeactivate = false
         panel.animationBehavior = .none
         panel.collectionBehavior = [
             .canJoinAllSpaces,
