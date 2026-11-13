@@ -165,8 +165,9 @@ struct CoreLocalizationBoundaryTests {
         // (#3117) and a full-screen window's Space move (#3119).
         "Commands/WindowActionRefusal.swift": 21,
         // KiwiVision's out-of-reach pill (#2103 ruling 16) and a lens
-        // notice (#3122).
-        "App/KiwiCore+VisionReach.swift": 3,
+        // notice (#3122), one frame for an app named and one for
+        // an app only its id names (#3276).
+        "App/KiwiCore+VisionReach.swift": 4,
         // A bar shortcut's refusal pill (#761), drawn beside the
         // shelf.
         "App/KiwiCore+ShelfRevealCue.swift": 10,

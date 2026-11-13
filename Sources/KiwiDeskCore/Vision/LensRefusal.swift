@@ -23,8 +23,10 @@ public enum VisionChangeCause: Equatable, Sendable {
 public enum VisionLensNotice: Equatable, Sendable {
     /// No member has a window, and none is set to open.
     case noMemberOpen(lens: String)
-    /// An Auto-open member LaunchServices cannot find.
-    case notInstalled(app: String)
+    /// An Auto-open member LaunchServices cannot find — always a
+    /// bundle id (`autoOpenBlock`) — and its display name, nil
+    /// where nothing on this Mac names it (#3276).
+    case notInstalled(app: String, name: String?)
 }
 
 /// A lens as a picker offers it: its stored name and why it cannot

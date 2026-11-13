@@ -69,6 +69,10 @@ public final class VisionManager {
     var configLoading = false
     /// Hears a lens notice the pill draws, for VoiceOver (#3122).
     public var onNotice: @MainActor (VisionLensNotice) -> Void = { _ in }
+    /// Names a bundle id as the GUI does, nil where nothing on
+    /// this Mac knows it; a notice reads it, never the raw id
+    /// (#3276).
+    public var appName: @MainActor (String) -> String? = { _ in nil }
     /// The lens rename the write in flight carries, set by
     /// `setAppWide(…renamingLens:)` for that write alone (#2103).
     var renamedLens: (from: String, to: String)?

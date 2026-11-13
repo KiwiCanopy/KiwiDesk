@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "このリストから削除",
   "kiwivision.notice.no_member_open": "レンズ「%1$@」はオンですが、このレンズのアプリはどれも開いていません。",
   "kiwivision.notice.not_installed": "「%1$@」はインストールされていません。",
+  "kiwivision.notice.not_installed_id": "バンドル識別子「%1$@」のアプリはインストールされていません。",
   "kiwivision.out_of_reach": "レンズ「%1$@」はオフです。プロファイル「%2$@」には含まれていません。",
   "kiwivision.preview.ax.dim_value": "%1$@減光: %2$@",
   "kiwivision.preview.ax.frame": "KiwiVision のプレビュー: %1$@",

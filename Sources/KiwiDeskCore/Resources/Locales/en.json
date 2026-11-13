@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "Remove from this list",
   "kiwivision.notice.no_member_open": "%1$@ is on: none of its apps is open.",
   "kiwivision.notice.not_installed": "%1$@ is not installed.",
+  "kiwivision.notice.not_installed_id": "No app with the ID %1$@ is installed.",
   "kiwivision.out_of_reach": "%1$@ is off: it does not reach %2$@.",
   "kiwivision.preview.ax.dim_value": "%1$@ Dim: %2$@",
   "kiwivision.preview.ax.frame": "KiwiVision preview: %1$@",

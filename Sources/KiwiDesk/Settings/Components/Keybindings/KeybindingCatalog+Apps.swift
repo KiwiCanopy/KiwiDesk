@@ -224,6 +224,12 @@ extension KeybindingCatalog {
 
     /// Resolves localized display name for bundle identifier (#333).
     static func displayName(forBundleID id: String) -> String {
+        resolvedName(forBundleID: id) ?? id.lowercased()
+    }
+
+    /// The localized display name, nil where neither the snapshot
+    /// nor LaunchServices knows the id (#3276).
+    static func resolvedName(forBundleID id: String) -> String? {
         let id = id.lowercased()
         if let name = installedNameByID[id] { return name }
         if let url = NSWorkspace.shared.urlForApplication(
@@ -231,7 +237,7 @@ extension KeybindingCatalog {
         ) {
             return localizedName(url: url, path: url.path)
         }
-        return id
+        return nil
     }
 
     /// Resolves user-language display name via Spotlight metadata

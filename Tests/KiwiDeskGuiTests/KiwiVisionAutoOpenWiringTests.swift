@@ -103,6 +103,14 @@ struct KiwiVisionAutoOpenWiringTests {
             Self.count(".announcement:Self.announcement(notice)", in: text)
                 == 1
         )
+        // A notice names its app as the lens's card does (#3276).
+        #expect(
+            Self.count(
+                "core.vision.appName="
+                    + "KeybindingCatalog.resolvedName(forBundleID:)",
+                in: text
+            ) == 1
+        )
     }
 
     @Test("each Apps row draws the checkbox and removes through Core")
@@ -144,8 +152,14 @@ struct KiwiVisionAutoOpenWiringTests {
                 == "Writing is on: none of its apps is open."
         )
         #expect(
-            AppDelegate.announcement(.notInstalled(app: "com.x.y"))
-                == "com.x.y is not installed."
+            AppDelegate.announcement(
+                .notInstalled(app: "com.x.y", name: "Bear")
+            ) == "Bear is not installed."
+        )
+        #expect(
+            AppDelegate.announcement(
+                .notInstalled(app: "com.x.y", name: nil)
+            ) == "No app with the ID com.x.y is installed."
         )
     }
 

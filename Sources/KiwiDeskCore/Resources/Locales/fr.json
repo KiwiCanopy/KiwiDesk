@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "Retirer de cette liste",
   "kiwivision.notice.no_member_open": "La lentille « %1$@ » est activée : aucune de ses apps n'est ouverte.",
   "kiwivision.notice.not_installed": "L'app « %1$@ » n'est pas installée.",
+  "kiwivision.notice.not_installed_id": "Aucune app avec l'ID du paquet « %1$@ » n'est installée.",
   "kiwivision.out_of_reach": "La lentille « %1$@ » est désactivée : elle ne s'applique pas au profil « %2$@ ».",
   "kiwivision.preview.ax.dim_value": "%1$@ Assombrissement : %2$@",
   "kiwivision.preview.ax.frame": "Aperçu de KiwiVision : %1$@",
