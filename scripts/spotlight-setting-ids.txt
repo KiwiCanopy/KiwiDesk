@@ -198,6 +198,7 @@ settings.kiwishelf.revealStyle
 settings.kiwishelf.thickness
 settings.kiwishelf.tintHubAndPlates
 settings.maximize.anchor
+settings.maximize.followFocus
 settings.maximize.heightShare
 settings.maximize.widthShare
 settings.minWindowSizes (master)
