@@ -5,8 +5,6 @@ import SwiftUI
 /// read and linked, never copied: its control is the Space Bar's.
 struct GesturesShelfEntries: View {
     @ObservedObject var model: SettingsModel
-    /// The entry that plays once as it appears (`GesturesPart`).
-    @Binding var playing: GestureItem?
 
     private var settings: TilingSettings { model.config.settings }
 
@@ -14,16 +12,14 @@ struct GesturesShelfEntries: View {
         GestureEntry(
             .dropOnSpace,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.dropOnSpace)
         GestureRule()
         GestureEntry(
             .spring,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         ) {
             link(Self.springLinkProse)
         }
@@ -32,48 +28,42 @@ struct GesturesShelfEntries: View {
         GestureEntry(
             .glyphClick,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.glyphClick)
         GestureRule()
         GestureEntry(
             .glyphPeek,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.glyphPeek)
         GestureRule()
         GestureEntry(
             .shelfScroll,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.shelfScroll)
         GestureRule()
         GestureEntry(
             .contextMenu,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.contextMenu)
         GestureRule()
         GestureEntry(
             .appBarReorder,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.appBarReorder)
         GestureRule()
         GestureEntry(
             .appBarHover,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.appBarHover)
     }

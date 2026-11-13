@@ -15,15 +15,13 @@ struct GestureItemPicture: View {
 
 extension GestureEntry where Picture == GestureItemPicture {
     /// The entry for `item`: its sentence, picture and
-    /// pace, greyed where `item.isOff` says. It plays once as it
-    /// appears while `playing` names it, and spends that.
+    /// pace, greyed where `item.isOff` says.
     init(
         _ item: GestureItem,
         settings: TilingSettings,
         gestures: ScrollGestureBase,
         help: String? = nil,
         helpSubject: String? = nil,
-        playing: Binding<GestureItem?>,
         @ViewBuilder control: @escaping () -> Control
     ) {
         self.init(
@@ -32,14 +30,6 @@ extension GestureEntry where Picture == GestureItemPicture {
             off: item.isOff(gestures),
             help: help,
             helpSubject: helpSubject,
-            playsOnAppear: Binding(
-                get: { playing.wrappedValue == item },
-                set: {
-                    if !$0, playing.wrappedValue == item {
-                        playing.wrappedValue = nil
-                    }
-                }
-            ),
             picture: {
                 GestureItemPicture(item: item, t: $0, gestures: gestures)
             },
@@ -53,14 +43,12 @@ where Picture == GestureItemPicture, Control == EmptyView {
     init(
         _ item: GestureItem,
         settings: TilingSettings,
-        gestures: ScrollGestureBase,
-        playing: Binding<GestureItem?>
+        gestures: ScrollGestureBase
     ) {
         self.init(
             item,
             settings: settings,
-            gestures: gestures,
-            playing: playing
+            gestures: gestures
         ) { EmptyView() }
     }
 }

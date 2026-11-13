@@ -21,9 +21,7 @@ extension ShortcutsSection {
 
     /// The user's pick, which opens the part at its top: the page's
     /// one scroll view is kept across parts, so the offset would
-    /// carry over. Only this write arms Mouse & Trackpad's first
-    /// picture, once per visit; a search or Go to lands on the part
-    /// through `nav` and plays nothing.
+    /// carry over.
     private func segmentBinding(
         _ proxy: ScrollViewProxy
     ) -> Binding<ShortcutsSegment> {
@@ -31,10 +29,6 @@ extension ShortcutsSection {
             get: { segment },
             set: { picked in
                 guard picked != segment else { return }
-                if picked == .mouse, !gesturesPlayed {
-                    gesturesPlayed = true
-                    gesturesPlay = true
-                }
                 proxy.scrollTo(Self.pageTop, anchor: .top)
                 model.nav.shortcutsSegment = picked
             }

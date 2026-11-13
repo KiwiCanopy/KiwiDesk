@@ -270,15 +270,13 @@ restated `20...80` satisfies on the day it is written.
   than compared* carries why.
 - **A gesture picture is not a schematic.** A Mouse & Trackpad
   entry on the Shortcuts page teaches a gesture rather than a rest
-  state, so its picture may move: while hovered, and once on the
-  user's own click alone — the segment's first entry when a click
-  on the Mouse & Trackpad segment opens it, at most once per visit
-  (owner ruling 2026-09-29, carried to the segment by #3184) —
-  never on a search, Go to or diff-jump landing, and never looped.
-  Otherwise it rests on its key frame, and always under Reduce
-  Motion, never a bundled clip, with the gate named per call
+  state, so its picture may move while hovered, and never by
+  itself: no play on appear, on a click or on a landing (owner,
+  #3281, retiring 2026-09-29's first-visit play). Otherwise it
+  rests on its key frame, and always under Reduce Motion, never a
+  bundled clip, with the gate named per call
   (`ReduceMotionGateTests`). `GestureAutoplayWiringTests` holds
-  the click as the only trigger. An entry's sentence, picture,
+  hover as the only trigger. An entry's sentence, picture,
   surface and pace live once, on `GestureItem`
   (`GesturesPartTests` ▸ `entriesAreTheItems`). Whether it
   actually moves is a device check, since no headless suite sees

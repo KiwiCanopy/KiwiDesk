@@ -2,31 +2,23 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Shortcuts ▸ Mouse & Trackpad (#1726, #3184): the Mouse and
-/// Trackpad binding cards first (#3281), then what the mouse and
+/// Trackpad binding cards first (#3298), then what the mouse and
 /// trackpad do, in open groups ordered by where the hand is — on
 /// your windows, holding a modifier, on the KiwiShelf. An entry
 /// lands with its feature, never before, and one whose surface is
-/// off greys with a pointer to where it turns on. The user's own
-/// click on the part plays the first picture once per visit (owner
-/// ruling 2026-09-29); a search or Go to lands without. It mounts
+/// off greys with a pointer to where it turns on. It mounts
 /// inside the section's `keybindingLayerName` scope, so a gesture
 /// recorder (#1656, #1519) must never read that value: a gesture
 /// modifier belongs to no layer.
 struct GesturesPart: View {
     @ObservedObject var model: SettingsModel
-    /// The section's, set by a click on the segment; spent here.
-    @Binding var playArmed: Bool
     /// The page's rows, for the gesture cards' action catalogue.
     let expander: ShortcutsFamilyRows
-    /// The entry that plays once as it appears, spending this.
-    @State private var playing: GestureItem?
 
     private var settings: TilingSettings { model.config.settings }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // The cards the user binds in lead the part (owner,
-            // 2026-11-13, #3281); the built-in gestures follow.
             gestureCards
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnWindows) {
                 focusEntries
@@ -34,19 +26,14 @@ struct GesturesPart: View {
                 windowEntries
             }
             SettingsSection(SettingsCatalog.shortcuts.gesturesModifier) {
-                GesturesScrollEntries(model: model, playing: $playing)
+                GesturesScrollEntries(model: model)
             }
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnShelf) {
-                GesturesShelfEntries(model: model, playing: $playing)
+                GesturesShelfEntries(model: model)
             }
         }
         .platePaint(settings)
         .searchAnchored(SettingsCatalog.shortcuts.gestures.control)
-        .onAppear {
-            guard playArmed else { return }
-            playArmed = false
-            playing = GestureItem.allCases.first
-        }
     }
 
     /// Hover focus, then its inverse: the hand acts, then the
@@ -57,8 +44,7 @@ struct GesturesPart: View {
             settings: settings,
             gestures: model.config.scrollGesture,
             help: Self.hoverFocusHelp,
-            helpSubject: Self.hoverFocusLabel,
-            playing: $playing
+            helpSubject: Self.hoverFocusLabel
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 Toggle(
@@ -77,8 +63,7 @@ struct GesturesPart: View {
         GestureEntry(
             .followFocus,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         ) {
             Toggle(
                 L(
@@ -99,8 +84,7 @@ struct GesturesPart: View {
         GestureEntry(
             .swap,
             settings: settings,
-            gestures: model.config.scrollGesture,
-            playing: $playing
+            gestures: model.config.scrollGesture
         )
         .gestureAnchored(.swap)
         GestureRule()
@@ -109,8 +93,7 @@ struct GesturesPart: View {
             settings: settings,
             gestures: model.config.scrollGesture,
             help: MouseResizePicker.help,
-            helpSubject: MouseResizePicker.spokenLabel,
-            playing: $playing
+            helpSubject: MouseResizePicker.spokenLabel
         ) {
             MouseResizePicker(
                 selection: $model.config.settings.mouseResize

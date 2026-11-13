@@ -15,11 +15,6 @@ struct ShortcutsSection: View {
     var reduceMotion
     @ObservedObject var model: SettingsModel
     @State var advancedExpanded = false
-    /// Armed by the user's own click on Mouse & Trackpad, once per
-    /// visit, and spent by the part's first picture (owner ruling
-    /// 2026-09-29, carried to the segment by #3184).
-    @State var gesturesPlay = false
-    @State var gesturesPlayed = false
     /// `@State`, never an observed object: the body must not
     /// subscribe to the reading only the bar draws (#1520).
     @State var jumpTracker = ShortcutsJumpTracker()
@@ -257,7 +252,6 @@ struct ShortcutsSection: View {
         case .gestures:
             GesturesPart(
                 model: model,
-                playArmed: $gesturesPlay,
                 expander: expander
             )
         case .layers:

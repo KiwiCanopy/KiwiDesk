@@ -16570,8 +16570,10 @@ Home, the other two add a navigator.
   shortcut groups, one word in every catalog. Open applications
   now follows Layers, so #1520's refusal to move it up concerned
   the one long page and is spent.
-- **Mouse & Trackpad** holds open groups ordered by where the hand
-  is — on your windows, holding a modifier, on the KiwiShelf — each
+- **Mouse & Trackpad** opens with the Mouse and Trackpad binding
+  cards, the part's own settings (#3298), then holds open groups
+  ordered by where the hand is — on your windows, holding a
+  modifier, on the KiwiShelf — each
   with its own pictures, and no Layers card, since a layer does
   not act on a gesture. The part replaces #1726's collapsed card,
   the picture strip the shut card drew, and Mouse & trackpad's
@@ -16658,21 +16660,14 @@ is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
-When the user's own click opens the Mouse & Trackpad part, its
-first picture also plays once and rests (owner ruling 2026-09-29), and the
-difference from the rest of this page is the reader. The rule's
-other exception, a layout thumbnail that is read rather than
-compared (▸ Navigation & saving), plays once as it appears
-because the tour and the preset preview are opened in order to
-be read. Opening this part is the same kind of act — a request to
-read what is inside — so one picture playing is the content
-arriving, and it tells the user the pictures move. It stays one
-picture: the part is still a reference consulted in the middle of
-something else, and a column of gestures playing in turn would be
-motion no one came for. So it plays at most once per visit, only
-on the click — a search hit, Go to or a diff jump opens the part
-to reach one row, whose wash is the motion that answers them —
-and never under Reduce Motion.
+:::unreleased
+*Amended (#3281, owner 2026-11-13).* No picture plays by itself:
+the first-visit play on the Mouse & Trackpad click is retired.
+The binding cards now lead the part, so its first picture is no
+longer the first thing the click opens, and a picture moving
+below the cards draws the eye away from what the user came to
+edit. Hover is the one trigger, and Reduce Motion still stills it.
+:::
 
 
 **An entry lands with its feature, and greys where its surface is

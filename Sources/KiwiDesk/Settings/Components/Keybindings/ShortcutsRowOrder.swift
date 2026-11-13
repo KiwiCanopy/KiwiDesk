@@ -18,18 +18,19 @@ enum ShortcutsRowOrder {
         .macosDesktops,
     ]
 
-    /// The Mouse & trackpad drawer's settings, in entry order
-    /// (#1726); the drawer's explainer entries are not settings.
+    /// The Mouse & Trackpad part's settings, in the part's order:
+    /// the binding cards (#3298), then the entries (#1726); the
+    /// explainer entries are not settings.
     static let gesturesMore: [SettingKey] = [
-        .shortcuts(.scrollLongSwipes),
-        .shortcuts(.scrollStepDistance),
-        .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.scrollNaturalMouse),
+        .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.gestureBindings),
         .behaviour(.mouseHoverFocus),
         .behaviour(.mouseHoverFocusDelay),
         .behaviour(.mouseFollowsFocus),
         .behaviour(.mouseResize),
+        .shortcuts(.scrollLongSwipes),
+        .shortcuts(.scrollStepDistance),
     ]
 
     /// Show & hide ▸ KiwiHub order: its sides in the order of their keys,

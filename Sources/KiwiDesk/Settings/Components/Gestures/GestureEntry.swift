@@ -3,10 +3,9 @@ import SwiftUI
 
 /// One Mouse & Trackpad entry (#1726): a drawn picture, the
 /// sentence that carries the gesture, and the entry's own control
-/// where it has one. The picture moves while hovered, and once as
-/// it appears where `playsOnAppear` says so (owner ruling
-/// 2026-09-29), and rests on its key frame otherwise; under Reduce
-/// Motion it never moves.
+/// where it has one. The picture moves while hovered and rests on
+/// its key frame otherwise (#3281 retired the first-visit play);
+/// under Reduce Motion it never moves.
 /// An entry whose gesture is off greys its picture and sentence
 /// and never its control — a greyed control says "you cannot
 /// change this", and switching a setting on is always allowed.
@@ -20,18 +19,11 @@ struct GestureEntry<Picture: View, Control: View>: View {
     /// (#94), and what it is about for VoiceOver.
     let help: String?
     let helpSubject: String?
-    /// Plays the picture once as the entry appears while set, and
-    /// spends it, so a re-mount in the same open card rests.
-    @Binding var playsOnAppear: Bool
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
-    @State private var autoplaying = false
     @State private var phase: CGFloat = 0
-
-    /// Lets the card's expansion settle before the picture moves.
-    private static var autoplayDelay: Double { 0.3 }
 
     init(
         _ text: String,
@@ -39,11 +31,9 @@ struct GestureEntry<Picture: View, Control: View>: View {
         off: Bool = false,
         help: String? = nil,
         helpSubject: String? = nil,
-        playsOnAppear: Binding<Bool> = .constant(false),
         @ViewBuilder picture: @escaping (CGFloat) -> Picture,
         @ViewBuilder control: @escaping () -> Control
     ) {
-        self._playsOnAppear = playsOnAppear
         self.help = help
         self.helpSubject = helpSubject
         self.text = text
@@ -68,14 +58,9 @@ struct GestureEntry<Picture: View, Control: View>: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onHover(perform: hover)
-        .onAppear {
-            guard playsOnAppear else { return }
-            playsOnAppear = false
-            autoplay()
-        }
     }
 
-    private var moving: Bool { hovering || autoplaying }
+    private var moving: Bool { hovering }
 
     /// The grey a cleared chord puts on the picture and the
     /// sentence — never on the control, which stays live.
@@ -101,7 +86,6 @@ struct GestureEntry<Picture: View, Control: View>: View {
     /// to where the rest frame already is would animate nothing.
     private func hover(_ inside: Bool) {
         hovering = inside && !reduceMotion
-        autoplaying = false
         phase = 0
         guard hovering else { return }
         DispatchQueue.main.async {
@@ -113,25 +97,6 @@ struct GestureEntry<Picture: View, Control: View>: View {
                     : pace.animation.repeatForever(autoreverses: false)
             ) {
                 phase = 1
-            }
-        }
-    }
-
-    /// One run from the first frame, then the rest frame; a hover
-    /// meanwhile takes over and ends it.
-    private func autoplay() {
-        guard !reduceMotion else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.autoplayDelay) {
-            guard !hovering else { return }
-            autoplaying = true
-            phase = 0
-            DispatchQueue.main.async {
-                guard autoplaying else { return }
-                withAnimation(reduceMotion ? nil : pace.animation) {
-                    phase = 1
-                } completion: {
-                    autoplaying = false
-                }
             }
         }
     }

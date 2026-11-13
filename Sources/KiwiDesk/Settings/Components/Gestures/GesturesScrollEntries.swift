@@ -11,9 +11,6 @@ import SwiftUI
 /// resolved values.
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
-    /// The entry that plays once as it appears, spending this
-    /// (`GesturesPart`).
-    @Binding var playing: GestureItem?
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
 
@@ -21,8 +18,7 @@ struct GesturesScrollEntries: View {
         GestureEntry(
             .scrollStep,
             settings: model.config.settings,
-            gestures: gestures,
-            playing: $playing
+            gestures: gestures
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 reachRow(.longSwipes) {
@@ -57,8 +53,7 @@ struct GesturesScrollEntries: View {
         GestureEntry(
             .spaceStep,
             settings: model.config.settings,
-            gestures: gestures,
-            playing: $playing
+            gestures: gestures
         ) {
             EmptyView()
         }
