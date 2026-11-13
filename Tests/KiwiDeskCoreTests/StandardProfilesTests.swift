@@ -129,10 +129,13 @@ struct StandardCatalogTests {
         #expect(
             StandardProfiles.standard(for: 2)?.screenCount == 2
         )
-        // Past the family's largest count, the largest smaller one.
+        #expect(
+            StandardProfiles.standard(for: 3)?.screenCount == 3
+        )
         #expect(
             StandardProfiles.standard(for: 4)?.screenCount == 4
         )
+        // Past the family's largest count, the largest smaller one.
         #expect(
             StandardProfiles.standard(for: 5)?.screenCount == 4
         )
@@ -172,6 +175,30 @@ struct ProfileCompositionTests {
         for space in composed.spaces {
             #expect(composed.assignment[space] == DisplayID(1))
         }
+    }
+
+    /// An unpinned Space with no role keeps the screen the
+    /// pre-#3294 Standards placed it on, whatever the preset family
+    /// plans (#3294): two screens 1–4 / 5–8, the third screen 8–10,
+    /// a fifth screen the next number past 10.
+    @Test("the placement fallback keeps the old plan")
+    func fallbackKeepsTheOldPlan() {
+        let two = ProfileComposition.fallbackAssignment(
+            displays: displays(2),
+            mainID: DisplayID(1)
+        )
+        #expect(two[SpaceID(4)] == DisplayID(1))
+        #expect(two[SpaceID(5)] == DisplayID(2))
+        #expect(two[SpaceID(8)] == DisplayID(2))
+        #expect(two[SpaceID(9)] == nil)
+        let five = ProfileComposition.fallbackAssignment(
+            displays: displays(5),
+            mainID: DisplayID(1)
+        )
+        #expect(five[SpaceID(7)] == DisplayID(2))
+        #expect(five[SpaceID(10)] == DisplayID(3))
+        #expect(five[SpaceID(11)] == DisplayID(4))
+        #expect(five[SpaceID(12)] == DisplayID(5))
     }
 
     @Test("Every space and screen resolves (total function)")
