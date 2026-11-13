@@ -1437,6 +1437,8 @@
   "layout_defaults.maximize.custom.share": "Доля",
   "layout_defaults.maximize.diff_label": "%1$@, %2$@",
   "layout_defaults.maximize.diff_more": "%1$@ +%2$d",
+  "layout_defaults.maximize.follow_focus": "Разворачивание следует за фокусом",
+  "layout_defaults.maximize.follow_focus.help": "Окно, на которое вы переводите фокус, перенимает разворачивание в той же форме, а покинутое окно сжимается обратно на своё место. Каждый шаг фокуса меняет размер обоих окон. Изменение здесь действует со следующего разворачивания, а не для уже развёрнутого на экране.",
   "layout_defaults.maximize.from": "Положение",
   "layout_defaults.maximize.height_share": "Ширина при развороте по высоте",
   "layout_defaults.maximize.other_shapes": "Другие формы экранов",

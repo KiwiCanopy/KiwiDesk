@@ -21,9 +21,9 @@ struct LayoutDefaultsControls: Sendable {
         "Per layout",
         children: MinSizeDrawerControls()
     )
-    /// The Maximize card and its columns (#3062), each a search and
-    /// link anchor, and the drawer holding the shapes of screens not
-    /// connected.
+    /// The Maximize card, its columns (#3062) and its follow-focus
+    /// row (#3280), each a search and link anchor, and the drawer
+    /// holding the shapes of screens not connected.
     let maximizeCard = SettingsControl(
         "layout_defaults.maximize.title",
         "Maximize"
@@ -39,6 +39,10 @@ struct LayoutDefaultsControls: Sendable {
     let maximizeAnchor = SettingsControl(
         "layout_defaults.maximize.anchor",
         "Maximize from"
+    )
+    let maximizeFollowFocus = SettingsControl(
+        "layout_defaults.maximize.follow_focus",
+        "Maximize follows focus"
     )
     let maximizeOtherShapes = SettingsDrawer(
         "layout_defaults.maximize.other_shapes",

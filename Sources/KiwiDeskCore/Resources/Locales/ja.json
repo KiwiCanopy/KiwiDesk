@@ -1437,6 +1437,8 @@
   "layout_defaults.maximize.custom.share": "割合",
   "layout_defaults.maximize.diff_label": "%1$@、%2$@",
   "layout_defaults.maximize.diff_more": "%1$@ +%2$d",
+  "layout_defaults.maximize.follow_focus": "フォーカスを追って最大化",
+  "layout_defaults.maximize.follow_focus.help": "フォーカスしたウインドウが同じ形で最大化を引き継ぎ、離れたウインドウは元の位置に縮んで戻ります。フォーカスを移すたびに両方のウインドウのサイズが変わります。ここでの変更は次の最大化から適用され、すでに画面上にある最大化には適用されません。",
   "layout_defaults.maximize.from": "基準位置",
   "layout_defaults.maximize.height_share": "高さを最大化するときの幅",
   "layout_defaults.maximize.other_shapes": "その他の画面の形",

@@ -1437,6 +1437,8 @@
   "layout_defaults.maximize.custom.share": "Part",
   "layout_defaults.maximize.diff_label": "%1$@, %2$@",
   "layout_defaults.maximize.diff_more": "%1$@ +%2$d",
+  "layout_defaults.maximize.follow_focus": "La maximisation suit le focus",
+  "layout_defaults.maximize.follow_focus.help": "La fenêtre que vous mettez au focus reprend la maximisation, dans la même forme, et celle que vous quittez reprend sa place. Chaque pas de focus redimensionne les deux fenêtres. Un changement ici s'applique dès la prochaine maximisation, pas à celle déjà à l'écran.",
   "layout_defaults.maximize.from": "Depuis",
   "layout_defaults.maximize.height_share": "Largeur en maximisant la hauteur",
   "layout_defaults.maximize.other_shapes": "Autres formes d'écran",

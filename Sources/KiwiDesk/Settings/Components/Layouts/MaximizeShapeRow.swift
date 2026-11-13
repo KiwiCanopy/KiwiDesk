@@ -29,7 +29,7 @@ struct MaximizeShapeRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            ForEach(LayoutDefaultsRowOrder.maximize, id: \.id) { key in
+            ForEach(LayoutDefaultsRowOrder.maximizeColumns, id: \.id) { key in
                 cell(key)
                     .measuredColumn(key)
                     .frame(width: columns.width(of: key), alignment: .leading)

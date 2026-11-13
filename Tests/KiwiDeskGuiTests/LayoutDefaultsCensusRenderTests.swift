@@ -87,14 +87,20 @@ struct LayoutDefaultsCensusRenderTests {
     }
 
     /// The Maximize card beside it (#3062): every census row of
-    /// the container, in the card's order, at rest.
+    /// the container, in the card's order, at rest — its table's
+    /// columns, then the follow-focus row (#3280).
     @Test("the Maximize card draws its container's census rows")
     func maximizeRows() {
         #expect(
             Set(LayoutDefaultsRowOrder.maximize)
                 == censusRows(.maximize)
         )
-        #expect(LayoutDefaultsRowOrder.maximize.count == 3)
+        #expect(LayoutDefaultsRowOrder.maximize.count == 4)
+        #expect(
+            LayoutDefaultsRowOrder.maximize
+                == LayoutDefaultsRowOrder.maximizeColumns
+                + [.behaviour(.maximizeFollowFocus)]
+        )
     }
 
     /// Tier ↔ chrome. A set-equality guard is blind to chrome: it
