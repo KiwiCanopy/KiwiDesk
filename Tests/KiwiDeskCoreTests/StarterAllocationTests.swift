@@ -138,10 +138,11 @@ struct StarterAllocationTests {
         // only place the clamped-vs-floor remainder distinction
         // exists at all. Every other fixture here sits strictly
         // inside 1...3, where the two formulas are identical by
-        // construction — so measuring the remainder against the
-        // floor went unnoticed by this test and was caught only
-        // by `widthOrderIsNeverInverted` (guard-prover,
-        // 2026-08-11).
+        // construction. On the #3294 ladder this fixture is the
+        // only guard that reds when the remainder is measured
+        // against the floor; `widthOrderIsNeverInverted`, which
+        // caught it first (guard-prover, 2026-08-11), no longer
+        // reaches it (guard-prover, 2026-11-13).
         let clamped = StarterAllocation.shares(
             widths: [1080, 1512, 3440],
             budget: 5
