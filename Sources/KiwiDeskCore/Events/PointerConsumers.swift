@@ -160,7 +160,13 @@ public final class PointerConsumers {
         }.map(\.element)
         for event in delivery.buttons {
             switch event.phase {
-            case .pressed: buttonsHeld.append(event)
+            case .pressed:
+                // A second press with no release between replaces
+                // the first, as the router's does.
+                buttonsHeld.removeAll {
+                    $0.key == event.key && $0.direction == event.direction
+                }
+                buttonsHeld.append(event)
             case .released:
                 guard
                     let held = buttonsHeld.firstIndex(where: {

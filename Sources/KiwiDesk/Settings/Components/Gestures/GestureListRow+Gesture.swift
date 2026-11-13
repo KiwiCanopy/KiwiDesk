@@ -27,6 +27,8 @@ extension GestureListRow {
                     .accessibilityHidden(true)
             }
         }
+        .menuStyle(.button)
+        .neutralMenuLabel()
         .menuIndicator(.hidden)
         .fixedSize()
         .accessibilityLabel(GestureListWords.gesture)

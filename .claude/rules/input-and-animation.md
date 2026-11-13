@@ -339,14 +339,16 @@ editing here:
   - **A bound button press is swallowed with its release, and an
     unbound one passes whole** (#3281): `PointerTapRouter+Buttons`
     takes a press whose button, keys and side the resolved list's
-    `PointerButtonSettings` bind, holds it to its release whatever
-    the keys or the snapshot do meanwhile, and passes every other
+    `PointerButtonSettings` bind, holds it to its release while
+    the tap stands, whatever the keys do, and passes every other
     press and its release untouched. A press of a button no grab
     takes — right, or any other — is decided by the buttons before
     the grab's stream is asked, the ruled exception to the
     `Consumer` order above. A held press survives a torn-down tap
     through the front, which ends it as `endGrab` ends a grab, its
-    release then the app's. A swallowed left press is the click's,
+    release then the app's: an app may act on that bare up (a
+    browser's Back), the residue accepted since only a binding
+    change during the press rebuilds the tap. A swallowed left press is the click's,
     re-delivered through `deliverPress` and the press record like
     the grab's; its swallowed drags reach no `ShelfRevealer`, since
     a click binding is no drag (`PointerTapButtonTests`,
