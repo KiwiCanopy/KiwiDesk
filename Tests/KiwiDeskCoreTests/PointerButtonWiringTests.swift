@@ -150,6 +150,19 @@ struct PointerButtonWiringTests {
         #expect(core.mouse.press?.upAt != nil)
     }
 
+    @Test("a stop ends the held press through the front")
+    func stopEndsTheHeldPress() throws {
+        let core = try core()
+        let key = GestureKey(.click, [.control, .shift])
+        bind(core, [key: .run(LuaAction(lua: "kiwi_clicked = true"))])
+        core.mouse.pointer.makeTap = { _, _ in Tap() }
+        core.mouse.pointer.start()
+        press(core, key)
+        core.mouse.pointer.stop()
+        #expect(core.mouse.pointer.buttonsHeld.isEmpty)
+        #expect(core.mouse.press?.upAt != nil)
+    }
+
     @Test("Back focuses the window on the left on any layout")
     func backFocusesLeft() throws {
         let core = try core()

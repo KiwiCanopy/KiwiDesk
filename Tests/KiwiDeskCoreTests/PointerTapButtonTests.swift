@@ -158,4 +158,28 @@ struct PointerTapButtonTests {
         #expect(click.swallow)
         #expect(click.buttons.first?.key == GestureKey(.click, keys))
     }
+
+    @Test("a re-press that lost its up ends the old press first")
+    func rePressEndsTheLostPress() {
+        var r = router([
+            GestureKey(.sideButtons): .family(.space),
+            GestureKey(.sideButtons, [.option]): .family(.focus),
+        ])
+        _ = r.route(sample(.buttonDown(.other(3)), []), now: 1)
+        // Its up never came; the next press holds other keys.
+        let again = r.route(sample(.buttonDown(.other(3)), [.option]), now: 2)
+        #expect(again.swallow)
+        #expect(again.buttons.map(\.phase) == [.released, .pressed])
+        #expect(again.buttons.first?.key == GestureKey(.sideButtons))
+        #expect(again.buttons.first?.location == nil)
+        #expect(
+            again.buttons.last?.key == GestureKey(.sideButtons, [.option])
+        )
+        // An unbound re-press still ends the old one, and passes.
+        var lone = router([GestureKey(.sideButtons): .family(.space)])
+        _ = lone.route(sample(.buttonDown(.other(3)), []), now: 1)
+        let pass = lone.route(sample(.buttonDown(.other(3)), [.shift]), now: 2)
+        #expect(!pass.swallow)
+        #expect(pass.buttons.map(\.phase) == [.released])
+    }
 }

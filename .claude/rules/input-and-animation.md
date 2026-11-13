@@ -346,14 +346,15 @@ editing here:
     the grab's stream is asked, the ruled exception to the
     `Consumer` order above. A held press survives a torn-down tap
     through the front, which ends it as `endGrab` ends a grab, its
-    release then the app's: an app may act on that bare up (a
-    browser's Back), the residue accepted since only a binding
-    change during the press rebuilds the tap. A swallowed left press is the click's,
+    release then the app's: any teardown or re-enable during a
+    held press hands its release to the app, which may act on that
+    bare up (a browser's Back), an accepted residue that is
+    review's. A swallowed left press is the click's,
     re-delivered through `deliverPress` and the press record like
     the grab's; its swallowed drags reach no `ShelfRevealer`, since
     a click binding is no drag (`PointerTapButtonTests`,
     `PointerButtonWiringTests`). Map a button number to its input
-    through `PointerButton.gesture` alone.
+    through `PointerButton.gesture` alone, which is review's.
   - **A grab feeds the drag pipeline, never a drop path of its
     own**: it writes the frame through `applyFrame`, hands each
     frame to `DragCoordinator.windowMoved`, and its window's AX

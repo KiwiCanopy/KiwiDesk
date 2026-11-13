@@ -83,6 +83,18 @@ struct PointerTapRouter {
         _ sample: PointerSample,
         now: CFAbsoluteTime
     ) -> Routed {
+        // A held button pressed again lost its up: its press ends
+        // first, so the front's record follows this one.
+        let lost = droppingLostPress(sample, now: now)
+        var routed = deciding(sample, now: now)
+        routed.buttons.insert(contentsOf: lost, at: 0)
+        return routed
+    }
+
+    private mutating func deciding(
+        _ sample: PointerSample,
+        now: CFAbsoluteTime
+    ) -> Routed {
         if let held = continuingButton(sample, now: now) { return held }
         switch sample.kind {
         case .buttonDown:

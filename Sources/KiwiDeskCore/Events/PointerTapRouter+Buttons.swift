@@ -27,12 +27,25 @@ extension PointerTapRouter {
             released.time = now
             return Routed(swallow: true, grab: [], buttons: [released])
         case .down:
-            // A second press with no release between: the release
-            // was lost, so the old press ends and this one decides
-            // afresh.
-            heldButtons[button] = nil
+            // `droppingLostPress` ended it ahead of this event.
             return nil
         }
+    }
+
+    /// A second press of a held button with no release between:
+    /// the release was lost, so the old press ends, with no
+    /// location of its own, and the new one decides afresh.
+    mutating func droppingLostPress(
+        _ sample: PointerSample,
+        now: CFAbsoluteTime
+    ) -> [PointerButtonEvent] {
+        guard let (button, edge) = sample.kind.button, edge == .down,
+            var lost = heldButtons.removeValue(forKey: button)
+        else { return [] }
+        lost.phase = .released
+        lost.location = nil
+        lost.time = now
+        return [lost]
     }
 
     /// A press a binding takes: swallowed, fired and held.
