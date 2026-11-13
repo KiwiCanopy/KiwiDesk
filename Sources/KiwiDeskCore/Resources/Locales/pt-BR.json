@@ -2027,7 +2027,6 @@
   "restore_reach.changed_in_count": "Perfis com alterações: %1$d",
   "restore_reach.every_profile": "Restaurar em todos os perfis",
   "restore_reach.here": "Restaurar em %1$@",
-  "restore_reach.lost_elsewhere": "“%1$@” também remove atalhos próprios em outros perfis: %2$d",
   "scroll_grid.anchor.center": "Centro",
   "scroll_grid.anchor.end_h": "Direita",
   "scroll_grid.anchor.end_v": "Inferior",

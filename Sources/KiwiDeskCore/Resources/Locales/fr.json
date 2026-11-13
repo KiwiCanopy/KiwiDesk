@@ -2027,7 +2027,6 @@
   "restore_reach.changed_in_count": "Profils modifiés : %1$d",
   "restore_reach.every_profile": "Rétablir dans tous les profils",
   "restore_reach.here": "Rétablir dans %1$@",
-  "restore_reach.lost_elsewhere": "« %1$@ » supprime aussi vos raccourcis dans d'autres profils : %2$d",
   "scroll_grid.anchor.center": "Centre",
   "scroll_grid.anchor.end_h": "Droite",
   "scroll_grid.anchor.end_v": "Bas",

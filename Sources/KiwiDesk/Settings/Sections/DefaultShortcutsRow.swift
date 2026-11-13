@@ -170,13 +170,14 @@ struct DefaultShortcutsRow: View {
         }
     }
 
-    /// Who else changed the seeded rows, after the counts, then what
-    /// "every profile" takes from them.
+    /// Who else changed the seeded rows, after the counts, then in a
+    /// paragraph of its own what "every profile" loses there.
     private var changedLine: String {
         guard !elsewhere.isEmpty else { return "" }
         let lost =
             lostElsewhere > 0
-            ? "\n" + RestoreReachWords.lostElsewhere(lostElsewhere) : ""
+            ? "\n\n" + RestoreReachWords.lostElsewhere(lostElsewhere)
+            : ""
         return "\n\n" + RestoreReachWords.changedIn(elsewhere) + lost
     }
 

@@ -2027,7 +2027,6 @@
   "restore_reach.changed_in_count": "Profili con modifiche: %1$d",
   "restore_reach.every_profile": "Ripristina in tutti i profili",
   "restore_reach.here": "Ripristina in %1$@",
-  "restore_reach.lost_elsewhere": "«%1$@» rimuove anche scorciatoie tue in altri profili: %2$d",
   "scroll_grid.anchor.center": "Al centro",
   "scroll_grid.anchor.end_h": "A destra",
   "scroll_grid.anchor.end_v": "In basso",

@@ -2027,7 +2027,6 @@
   "restore_reach.changed_in_count": "Geändert in Profilen: %1$d",
   "restore_reach.every_profile": "In allen Profilen wiederherstellen",
   "restore_reach.here": "In %1$@ wiederherstellen",
-  "restore_reach.lost_elsewhere": "„%1$@“ entfernt auch eigene Tastenkürzel in anderen Profilen: %2$d",
   "scroll_grid.anchor.center": "Mitte",
   "scroll_grid.anchor.end_h": "Rechts",
   "scroll_grid.anchor.end_v": "Unten",

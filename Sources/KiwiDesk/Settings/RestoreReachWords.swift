@@ -21,13 +21,13 @@ enum RestoreReachWords {
         )
     }
 
-    /// What "every profile" also removes from the other profiles: the
-    /// user's rows on chords a seed takes over. A count, last.
+    /// What "every profile" also loses in the other profiles: the
+    /// user's rows on chords a seed takes over, in the counts frame's
+    /// own words, the count last (#3248 ▸ Ruling amendment).
     static func lostElsewhere(_ count: Int) -> String {
         L(
             "restore_reach.lost_elsewhere",
-            "\u{201C}%1$@\u{201D} also removes your own shortcuts in "
-                + "other profiles: %2$d",
+            "With %1$@, your own that are lost in other profiles: %2$d",
             everyProfile,
             count
         )

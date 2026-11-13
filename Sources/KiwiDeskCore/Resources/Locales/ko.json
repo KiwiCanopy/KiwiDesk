@@ -2027,7 +2027,6 @@
   "restore_reach.changed_in_count": "변경된 프로필: %1$d",
   "restore_reach.every_profile": "모든 프로필에서 복원",
   "restore_reach.here": "%1$@에서 복원",
-  "restore_reach.lost_elsewhere": "‘%1$@’을(를) 선택하면 다른 프로필의 직접 만든 단축키도 제거됩니다: %2$d",
   "scroll_grid.anchor.center": "중앙",
   "scroll_grid.anchor.end_h": "오른쪽",
   "scroll_grid.anchor.end_v": "아래쪽",
