@@ -48,6 +48,11 @@ struct KiwiVisionAutoOpenWiringTests {
         // to the screen.
         ("vision.onNotice(notice)", "App/KiwiCore+VisionReach.swift", 1),
         ("borders.flashScreenPill(", "App/KiwiCore+VisionReach.swift", 1),
+        // The pill draws the notice it was handed (#3276).
+        (
+            "lettext=Self.lensNoticeText(notice)",
+            "App/KiwiCore+VisionReach.swift", 1
+        ),
         // The background mode reaches the open's configuration.
         (
             "config.activates=mode!=.background",
@@ -110,6 +115,19 @@ struct KiwiVisionAutoOpenWiringTests {
                     + "KeybindingCatalog.snapshotName(forBundleID:)",
                 in: text
             ) == 1
+        )
+        // And nothing overrides it after: the last write wins.
+        #expect(Self.count("core.vision.appName=", in: text) == 1)
+    }
+
+    /// An id nothing installed names reads nil, never the id
+    /// standing in for a name (#3276).
+    @Test("the snapshot names no unknown id")
+    func snapshotNamesNoUnknownID() {
+        #expect(
+            KeybindingCatalog.snapshotName(
+                forBundleID: "com.kiwidesk.test.no-such-app"
+            ) == nil
         )
     }
 
