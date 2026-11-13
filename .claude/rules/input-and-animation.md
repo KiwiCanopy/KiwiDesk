@@ -173,10 +173,11 @@ editing here:
     through the one `KeyboardTapRows` value and its `setRows`
     door, and the live consumers are read off its non-empty
     fields, so a new consumer adds a field there. Which row goes
-    to which consumer, and in what order, is
-    `KeyboardTapArming.rows(for:)`'s, read by the manager's arming
-    and by `KeybindingConflicts.sideReach`, which asks the
-    consumers in `KeyboardTapConsumer`'s order as the tap does; a
+    to which consumer is `KeyboardTapArming`'s, read by the
+    manager's arming and by `KeybindingConflicts.sideReach`; the
+    reach asks each consumer's `rows(for:)` in
+    `KeyboardTapConsumer`'s order, as the tap does, and the
+    manager builds `.modifierTaps` from the same accessor; a
     new path that routes rows to a consumer goes through it, never
     a row list of its own, and no scan holds that, so it is
     review's (#3278; `KeyboardTapArmingTests` ▸ `sortsRows`,

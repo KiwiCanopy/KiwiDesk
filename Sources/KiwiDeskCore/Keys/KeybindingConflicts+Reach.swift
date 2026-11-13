@@ -108,10 +108,7 @@ extension KeybindingConflicts {
             distinguishingSides: distinguishingSides
         )
         let consumers = KeyboardTapConsumer.allCases.map {
-            arming.rows(for: $0).compactMap { combo, armed in
-                combo.isTap == parsed.isTap
-                    ? (combo, armed.binding) : nil
-            }
+            arming.rows(for: $0).map { ($0.0, $0.1.binding) }
         }
         guard consumers.joined().contains(where: { $0.1.id == binding.id })
         else { return nil }

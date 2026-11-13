@@ -111,10 +111,9 @@ public enum KeybindingConflicts {
                 )
             }
         }
-        // Rows taking every key from this one leave it never firing,
-        // so it is counted (#3256); one row taking them all, as an
-        // either-side leader a sided row (#3278), is a plain clash.
-        // One side taken is the intended precedence, no conflict.
+        // Every key taken: it never fires, counted (#3256); one
+        // taker is a plain clash, flagged on both rows as a
+        // duplicate is (#3278). One side taken is precedence.
         if let reach = sideReach(
             for: binding,
             parsed: parsed,
@@ -127,6 +126,17 @@ public enum KeybindingConflicts {
                 target: takers.count == 1
                     ? .otherBinding(takers[0]) : .sidesTaken(takers)
             )
+        }
+        for (other, otherCombo) in rivals
+        where other.id != binding.id && otherCombo.registered == combo {
+            if let reach = sideReach(
+                for: other,
+                parsed: otherCombo,
+                among: rivals,
+                distinguishingSides: distinguishingSides
+            ), reach.isDead, reach.takers.map(\.id) == [binding.id] {
+                return Conflict(binding: binding, target: .otherBinding(other))
+            }
         }
         if let system = SystemShortcuts.map[combo] {
             return Conflict(

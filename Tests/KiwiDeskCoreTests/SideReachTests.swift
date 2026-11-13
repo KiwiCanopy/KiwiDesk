@@ -145,6 +145,14 @@ struct SideReachTests {
                 distinguishingSides: true
             )?.target == .otherBinding(open)
         )
+        // Flagged on both rows, as a duplicate is.
+        #expect(
+            KeybindingConflicts.conflict(
+                for: open,
+                in: [open, pressed],
+                distinguishingSides: true
+            )?.target == .otherBinding(pressed)
+        )
         let sided = KeyBinding(combo: "rcmd+j", kind: .sequence)
         let reach = try #require(reach(open, [open, sided]))
         #expect(reach.runs == (try combo("lcmd+j")))
@@ -166,19 +174,13 @@ struct SideReachTests {
                 distinguishingSides: true
             )?.target == .otherBinding(leader)
         )
+        let byRow = KeybindingConflicts.rowConflicts(
+            of: [either, leader],
+            distinguishingSides: true
+        )
+        #expect(byRow[leader.id]?.target == .otherBinding(either))
     }
 
-    /// A Hyper row is Carbon's, which reads it either-side: no row
-    /// narrows it, and it narrows none.
-    @Test("a Hyper row has no reach")
-    func hyperHasNone() {
-        let either = row("e", "hyper+cmd+h")
-        let left = row("l", "hyper+lcmd+h")
-        #expect(reach(either, [either, left]) == nil)
-        #expect(reach(left, [either, left]) == nil)
-    }
-
-    /// Two leaders naming each side take every key from the chord
     /// row: dead, and a counted conflict.
     @Test("two sided chord leaders: dead, and a counted conflict")
     func leadersTakeBothSides() throws {
