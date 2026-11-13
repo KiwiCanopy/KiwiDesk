@@ -37,8 +37,12 @@ struct ReduceMotionFlagTests {
     /// the flag the read takes.
     @Test("the verb turns the flag on and off")
     func verbSetsTheFlag() {
+        let lengths = BarLengths()
         let core = makeTestCore()
-        defer { ReduceMotion.kiwiDesk = false }
+        defer {
+            ReduceMotion.kiwiDesk = false
+            lengths.restore()
+        }
         #expect(
             core.execute(
                 "animations.set_reduce_motion",
@@ -114,9 +118,13 @@ struct ReduceMotionFlagTests {
     /// Settings pick is what stores it (#3238).
     @Test("the Off verb never persists")
     func offVerbNeverPersists() throws {
+        let lengths = BarLengths()
         let core = makeTestCore(configDirectory: directory())
         try core.guiConfigStore.save(GuiConfig())
-        defer { ReduceMotion.kiwiDesk = false }
+        defer {
+            ReduceMotion.kiwiDesk = false
+            lengths.restore()
+        }
         core.setAppWide(persisting: true) { $0.animationReduceMotion = false }
         #expect(
             core.execute(
@@ -131,5 +139,19 @@ struct ReduceMotionFlagTests {
             core.guiConfigStore.load()?.appWide?.animationReduceMotion
                 == false
         )
+    }
+}
+
+/// The bars' process-global lengths, which the verb's Off writes as
+/// 0 through `updateBars()`; a core left Off leaked a 0 reveal into
+/// every later shelf suite (#3307).
+@MainActor
+private struct BarLengths {
+    let reveal = BarMotion.revealLength
+    let glide = BarMotion.shelfGlide
+
+    func restore() {
+        BarMotion.revealLength = reveal
+        BarMotion.shelfGlide = glide
     }
 }
