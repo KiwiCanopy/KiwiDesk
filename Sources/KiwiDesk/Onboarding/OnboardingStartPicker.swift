@@ -19,9 +19,10 @@ struct OnboardingStartPicker: View {
                 }
             }
             .pickerStyle(.segmented)
+            // A segmented picker keeps its title for VoiceOver under
+            // `labelsHidden` and speaks the picked segment (device,
+            // 2026-11-13); a label here would name it twice.
             .labelsHidden()
-            .accessibilityLabel(title)
-            .accessibilityValue(start.selected.map(Self.label) ?? "")
             if start.replacesCurrent {
                 Text(
                     L(
