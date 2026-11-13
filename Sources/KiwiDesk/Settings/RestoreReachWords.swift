@@ -27,7 +27,8 @@ enum RestoreReachWords {
     static func lostElsewhere(_ count: Int) -> String {
         L(
             "restore_reach.lost_elsewhere",
-            "With %1$@, your own that are lost in other profiles: %2$d",
+            "With \u{201C}%1$@\u{201D}, your own that are lost in other "
+                + "profiles: %2$d",
             everyProfile,
             count
         )

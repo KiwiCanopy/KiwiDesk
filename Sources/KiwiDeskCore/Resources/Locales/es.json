@@ -2027,6 +2027,7 @@
   "restore_reach.changed_in_count": "Perfiles con cambios: %1$d",
   "restore_reach.every_profile": "Restaurar en todos los perfiles",
   "restore_reach.here": "Restaurar en %1$@",
+  "restore_reach.lost_elsewhere": "Con «%1$@», propios perdidos en otros perfiles: %2$d",
   "scroll_grid.anchor.center": "Centro",
   "scroll_grid.anchor.end_h": "Derecha",
   "scroll_grid.anchor.end_v": "Abajo",

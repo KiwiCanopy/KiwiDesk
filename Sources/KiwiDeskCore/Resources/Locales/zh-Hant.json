@@ -2027,6 +2027,7 @@
   "restore_reach.changed_in_count": "已變更的描述檔：%1$d",
   "restore_reach.every_profile": "在所有描述檔中回復",
   "restore_reach.here": "在 %1$@ 中回復",
+  "restore_reach.lost_elsewhere": "若選擇「%1$@」，其他描述檔中遺失的自訂快速鍵：%2$d",
   "scroll_grid.anchor.center": "居中",
   "scroll_grid.anchor.end_h": "右側",
   "scroll_grid.anchor.end_v": "下方",

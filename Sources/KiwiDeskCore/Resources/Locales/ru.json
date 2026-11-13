@@ -2027,6 +2027,7 @@
   "restore_reach.changed_in_count": "Изменено в профилях: %1$d",
   "restore_reach.every_profile": "Вернуть во всех профилях",
   "restore_reach.here": "Вернуть в профиле %1$@",
+  "restore_reach.lost_elsewhere": "Если выбрать «%1$@», в других профилях твоих потеряно: %2$d",
   "scroll_grid.anchor.center": "По центру",
   "scroll_grid.anchor.end_h": "Справа",
   "scroll_grid.anchor.end_v": "Снизу",

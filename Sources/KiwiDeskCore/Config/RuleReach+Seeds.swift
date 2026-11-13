@@ -1,5 +1,14 @@
 import Foundation
 
+extension RuleReach {
+    /// Every profile, joining the shared base — the reach "Restore in
+    /// every profile" writes (#3248), one spelling for the write and
+    /// the count of what it takes.
+    public static func everyProfile(_ profiles: [String]) -> RuleReach {
+        .shared(joining: Set(profiles))
+    }
+}
+
 extension RuleReachTable {
     /// Profiles other than `editing` in which at least one of
     /// `seeds`' keys resolves away from its seed (#3248): the union
@@ -34,7 +43,7 @@ extension RuleReachTable where Value == String {
             after.applyKey(
                 key,
                 value: value,
-                reach: .shared(joining: Set(profiles)),
+                reach: .everyProfile(profiles),
                 editing: editing
             )
         }

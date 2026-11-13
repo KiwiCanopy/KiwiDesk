@@ -66,7 +66,7 @@ extension SettingsModel {
         }
         for key in sharing.keys {
             reachEdits.reach[family, default: [:]][key] =
-                .shared(joining: Set(stored.profiles))
+                .everyProfile(stored.profiles)
         }
         for key in restore.dropped
         where stored.resolved(key, for: editing) != nil

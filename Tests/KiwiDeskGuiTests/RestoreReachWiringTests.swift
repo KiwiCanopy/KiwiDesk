@@ -55,6 +55,9 @@ struct RestoreReachWiringTests {
         )
         #expect(!row.contains("resetShortcutsToDefaults()"))
         // What "every profile" takes elsewhere is said in the message.
-        #expect(row.contains("RestoreReachWords.lostElsewhere(lostElsewhere)"))
+        #expect(
+            row.contains("RestoreReachWords.lostElsewhere(lostElsewhere)")
+                && row.contains("RestoreReachWords.changedIn(elsewhere)+lost")
+        )
     }
 }

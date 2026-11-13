@@ -12855,7 +12855,7 @@ profile's seed agrees on. Rows the user added stay under both
 answers, save, under "every profile", one sitting on a chord a
 seed reclaims, which goes in every profile as it goes in the
 edited one, and the dialog counts those the other profiles lose
-before it is asked (`RestoreReachTests`, `RestoreReachShortcutTests`,
+before the answer is chosen (`RestoreReachTests`, `RestoreReachShortcutTests`,
 `RestoreReachWiringTests`).
 :::
 
