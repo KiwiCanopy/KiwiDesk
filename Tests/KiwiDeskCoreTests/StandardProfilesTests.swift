@@ -129,8 +129,16 @@ struct StandardCatalogTests {
         #expect(
             StandardProfiles.standard(for: 2)?.screenCount == 2
         )
+        // Past the family's largest count, the largest smaller one.
         #expect(
-            StandardProfiles.standard(for: 5)?.screenCount == 3
+            StandardProfiles.standard(for: 4)?.screenCount == 4
+        )
+        #expect(
+            StandardProfiles.standard(for: 5)?.screenCount == 4
+        )
+        #expect(
+            StandardProfiles.standard(for: 9)?.screenCount
+                == StandardProfiles.largestCount
         )
     }
 }
@@ -157,8 +165,10 @@ struct ProfileCompositionTests {
         )
         #expect(composed.sourceName == "Developer")
         #expect(composed.spaces.count == 4)
-        #expect(composed.spaceModes[SpaceID(1)] == .grid)
-        #expect(composed.spaceModes[SpaceID(2)] == .stack)
+        // Developer's one-screen plan: Stack · Scrolling · Grid ·
+        // Monocle (#3294).
+        #expect(composed.spaceModes[SpaceID(1)] == .stack)
+        #expect(composed.spaceModes[SpaceID(2)] == .scrolling)
         for space in composed.spaces {
             #expect(composed.assignment[space] == DisplayID(1))
         }

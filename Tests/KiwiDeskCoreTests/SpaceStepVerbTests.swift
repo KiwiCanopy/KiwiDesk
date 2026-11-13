@@ -41,8 +41,18 @@ struct SpaceStepVerbTests {
                 )
             )
         }
+        // Screen B's Spaces are pinned there: unpinned, a resolve
+        // places them by the count's Standard, whose two-screen plan
+        // ends at Space 6, so they would fall back to A and the heal
+        // would mint a Space on an empty B (#3294).
+        let screenB = core.state.workspaces.allDisplays.first {
+            $0.id == Self.displayB
+        }
         for (index, (raw, display)) in spaces.enumerated() {
             core.state.workspaces.assign(SpaceID(raw), to: display)
+            if display == Self.displayB, let screenB {
+                core.spacePins[SpaceID(raw)] = screenB.fingerprint
+            }
             let id = WindowID(UInt32(index + 1))
             core.state.windows.upsert(
                 ManagedWindow(id: id, pid: pid_t(index + 1), appName: raw)
