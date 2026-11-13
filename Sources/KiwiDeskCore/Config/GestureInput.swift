@@ -78,6 +78,14 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     /// A scroll the tap reads with no phase.
     public var isWheel: Bool { self == .wheel || self == .wheelX }
 
+    /// A press of a mouse button, which the pointer tap fires.
+    public var isButton: Bool {
+        switch self {
+        case .click, .rightClick, .wheelClick, .sideButtons: true
+        default: false
+        }
+    }
+
     /// Every input but a tap, the wheel click and the side buttons
     /// needs a held key: macOS and apps own the bare gesture.
     public var needsModifier: Bool {
@@ -130,7 +138,7 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     public var isFired: Bool {
         switch self {
         case .drag, .hoverMove, .wheel, .wheelX, .swipe2: true
-        case .click, .rightClick, .wheelClick, .sideButtons: true
+        case _ where isButton: true
         case .tap2, .tap3, .tap4, .tap5, .swipe3, .swipe4, .swipe5:
             fingers.map(TrackpadGestureRouter.fingerRange.contains) ?? false
         default: false

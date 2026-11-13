@@ -191,12 +191,15 @@ struct PointerTapRouter {
             guard
                 sample.chord != owner.chord || sample.kind == .leftDown
             else { return .pass }
-            // A key let go, or a click: the grab ends and the
-            // event is the app's.
+            // A key let go, or a click: the grab ends, and the
+            // event is the app's unless a bound click takes it.
             self.owner = nil
-            var routed =
-                sample.kind == .mouseMoved
-                ? beginning(sample, settings, now: now) : .pass
+            var routed: Routed = .pass
+            if sample.kind == .mouseMoved {
+                routed = beginning(sample, settings, now: now)
+            } else if let buttons = snapshot.buttons {
+                routed = pressing(sample, buttons, now: now)
+            }
             routed.grab.insert(event(.ended, owner, at, now), at: 0)
             return routed
         default:

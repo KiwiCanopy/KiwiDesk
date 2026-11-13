@@ -330,6 +330,11 @@ Space included where the bar hides it. It never creates a Space.
 The ⌃⌥⌘ + scroll gesture takes the same step on the screen under
 the pointer.
 
+:::unreleased
+By default the [scroll Space step](#scroll-focus-and-space-step)
+takes it: a swipe with ⌃⌥⌘, a mouse's sideways wheel with ⌃⌥.
+:::
+
 Past the last Space it wraps to the first, and past the first to
 the last, on the same screen — never onto another one. With
 [Wrap focus](#set_focus_wrap) `off` it stops there instead: the
@@ -5246,12 +5251,14 @@ the axis its first movement takes most.
 A bound press of a button — a click, the wheel click, Back or
 Forward with its keys — goes to its binding alone: the app under
 the pointer gets neither the press nor its release. A press no
-binding takes reaches the app as before. On `side_buttons`, `back`
-is the previous one for `space` and the window on the left for
-`focus`, and Natural scrolling never turns it. A side button bound
-with no keys no longer goes back or forward in any app, browsers
-included. Where a mouse's own app, such as Logi Options+, remaps a
-button, KiwiDesk sees what that app sends.
+binding takes reaches the app as it is. On `side_buttons`, `back`
+is the previous Space for `space`, on the active Space's screen,
+and the window on the left for `focus`, and Natural scrolling
+never turns it. A side button bound with no keys goes back or
+forward in no app, browsers included. Where a mouse's own app,
+such as Logi Options+, remaps a button, KiwiDesk sees what that
+app sends. A bound button, like a grab, needs only the
+Accessibility permission, never Input Monitoring.
 
 The keys are modifiers joined by `+` — `control` (`ctrl`),
 `option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
@@ -5371,8 +5378,8 @@ pointer does not move, even with `mouse.follows_focus` on.
 On BSP, Stack, Grid, Track and Floating, a swipe — a scroll with
 a finger phase, on a trackpad or a Magic Mouse — moves focus the
 way the fingers go, through the same step as [`focus`](#focus):
-fingers left focus the window on the left. A wheel notch — a
-notched, tilt or thumb wheel — steps to the next or previous
+fingers left focus the window on the left. A vertical wheel
+notch steps to the next or previous
 window in the Space's window order, floating windows included,
 wrapping at the ends. On every layout a swipe's first step fixes
 its axis until the fingers lift, so a diagonal swipe, and its
@@ -5382,8 +5389,10 @@ that input, every direction reverses, the Scrolling row's
 included.
 
 These are the `swipe2` binding's `focus` family and the `wheel`
-and `wheel_x` bindings' `walk`, which any other keys may hold too
-([Gesture actions](#gesture-actions)).
+binding's `walk`, which any other keys may hold too
+([Gesture actions](#gesture-actions)). Under ⌃⌥ a sideways
+wheel scroll — a tilt or thumb wheel — steps Spaces instead: the
+default `wheel_x` binding is the `space` family.
 :::
 
 The gesture never leaves its screen: under
@@ -5411,6 +5420,15 @@ Spaces included. A swipe steps one Space, and so does a notch of a
 mouse wheel; a fast roll or a free-spinning wheel steps one for the
 whole burst, and each notch counts again once the wheel pauses
 between notches. The pointer does not move.
+
+:::unreleased
+By default ⌃⌥⌘ steps Spaces on a swipe, a trackpad's or a Magic
+Mouse's; a mouse steps them with ⌃⌥ and its sideways wheel, and
+⌃⌥⌘ with a mouse wheel binds nothing. A mouse without a sideways
+wheel has no default way, since ⇧ held with the wheel stays a
+vertical scroll that no `wheel` binding takes; bind one in
+[Gesture actions](#gesture-actions).
+:::
 
 Past the first or last Space it wraps or stops as
 [`focus_space_next`](#focus_space_previous--focus_space_next)

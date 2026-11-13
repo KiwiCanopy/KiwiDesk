@@ -126,4 +126,36 @@ struct PointerTapButtonTests {
         #expect(GestureInput(rawValue: "wheel_click") == .wheelClick)
         #expect(GestureInput(rawValue: "middle_click") == nil)
     }
+
+    @Test("a bound button is decided while a grab owns the stream")
+    func buttonsAheadOfTheGrab() {
+        var r = router([GestureKey(.sideButtons): .family(.space)])
+        r.snapshot.grab = .defaults
+        let grab = r.route(sample(.leftDown, [.control, .command]), now: 1)
+        #expect(grab.grab.first?.phase == .began)
+        let back = r.route(sample(.buttonDown(.other(3)), []), now: 2)
+        #expect(back.swallow)
+        #expect(back.buttons.first?.direction == .back)
+        // The grab still owns its stream.
+        let drag = r.route(
+            sample(.leftDragged, [.control, .command]),
+            now: 3
+        )
+        #expect(drag.grab.first?.phase == .moved)
+    }
+
+    @Test("a click on a hover grab's keys ends the grab and fires")
+    func clickEndsAHoverGrab() {
+        let keys: ScrollChord = [.control, .shift]
+        var r = router([GestureKey(.click, keys): .run(Self.lua)])
+        r.snapshot.grab = ModifierDragSettings(
+            resolved: [GestureKey(.hoverMove, keys): .grab(.move)]
+        )
+        let move = r.route(sample(.mouseMoved, keys), now: 1)
+        #expect(move.grab.first?.phase == .began)
+        let click = r.route(sample(.leftDown, keys), now: 2)
+        #expect(click.grab.first?.phase == .ended)
+        #expect(click.swallow)
+        #expect(click.buttons.first?.key == GestureKey(.click, keys))
+    }
 }

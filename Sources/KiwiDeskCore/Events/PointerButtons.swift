@@ -95,13 +95,3 @@ public struct PointerButtonEvent: Equatable, Sendable {
     /// The tap's clock (`CFAbsoluteTimeGetCurrent`) at the event.
     public var time: CFAbsoluteTime
 }
-
-extension GestureInput {
-    /// A press of a mouse button, which the pointer tap fires.
-    public var isButton: Bool {
-        switch self {
-        case .click, .rightClick, .wheelClick, .sideButtons: true
-        default: false
-        }
-    }
-}

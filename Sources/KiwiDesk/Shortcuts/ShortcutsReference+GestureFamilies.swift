@@ -1,9 +1,9 @@
 import KiwiDeskCore
 
 /// The glyph a gesture family's pin wears in a gesture row's action
-/// pop-up (#3281): the Shortcuts side's own glyph for the set it
-/// steps through, so the card owns no symbol table. A family covers
-/// both ways, so none wears a one-sided line arrow (#2529).
+/// pop-up (#3281, ui-designer and owner): the Shortcuts side's fold
+/// glyph where one names the set, else one picked here for the
+/// family, beside the panel's glyphs rather than in the card.
 extension ShortcutsReferenceBuilder {
     static func familyIcon(for family: GestureFamily) -> String {
         switch family {

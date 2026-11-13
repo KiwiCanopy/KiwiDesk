@@ -131,4 +131,60 @@ struct PointerButtonWiringTests {
         // The wheel keeps the list against the hand.
         #expect(GestureFamily.space.stepsForward(.up) == true)
     }
+
+    @Test("a tap torn down mid-press ends the press through the front")
+    func teardownEndsTheHeldPress() throws {
+        let core = try core()
+        let key = GestureKey(.click, [.control, .shift])
+        bind(core, [key: .run(LuaAction(lua: "kiwi_clicked = true"))])
+        core.mouse.pointer.makeTap = { _, _ in Tap() }
+        core.mouse.pointer.start()
+        press(core, key)
+        #expect(core.mouse.pointer.buttonsHeld.count == 1)
+        #expect(core.mouse.press?.upAt == nil)
+        // The last button binding goes: the union shrinks and the
+        // tap that held the release is rebuilt without it.
+        bind(core, [:])
+        #expect(core.mouse.pointer.buttonsHeld.isEmpty)
+        // The press record closes with it.
+        #expect(core.mouse.press?.upAt != nil)
+    }
+
+    @Test("Back focuses the window on the left on any layout")
+    func backFocusesLeft() throws {
+        let core = try core()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        }
+        for id in 1...3 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(id)),
+                        pid: pid_t(900_300 + id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = try #require(
+            core.state.workspaces.space(of: WindowID(1))
+        )
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("scrolling")]
+        )
+        core.state.workspaces.focus(WindowID(2), in: space)
+        core.stepFamily(
+            .focus,
+            toward: .back,
+            key: GestureKey(.sideButtons)
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
+    private final class Tap: PointerTapHandle {
+        func setSnapshot(_ snapshot: PointerTapSnapshot) {}
+        func stop() {}
+    }
 }

@@ -79,7 +79,7 @@ struct AnnouncedValueTests {
         // #3281: Natural scrolling's pop-up, named for its card, and
         // the gesture pop-up's text-only face, named "Gesture".
         "GestureListCard.swift": 1,
-        "GestureListRow.swift": 1,
+        "GestureListRow+Gesture.swift": 1,
     ]
 
     @Test("a named picker or menu gives its value back")

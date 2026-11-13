@@ -50,8 +50,9 @@ struct GesturesScrollEntries: View {
         SettingsCatalog.shortcuts.gestures.children
     }
 
-    /// ⌃⌥⌘ + scroll (#1519): one Space per swipe or notch, so no
-    /// swipe-length rows.
+    /// ⌃⌥⌘ + swipe (#1519), and a mouse's ⌃⌥ sideways wheel
+    /// (#3281): one Space per swipe or notch, so no swipe-length
+    /// rows.
     private var spaceStepEntry: some View {
         GestureEntry(
             .spaceStep,

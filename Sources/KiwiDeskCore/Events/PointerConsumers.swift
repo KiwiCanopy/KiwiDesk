@@ -69,6 +69,9 @@ public final class PointerConsumers {
     )
     private var grabHandler: GrabHandler?
     private var buttonHandler: ButtonHandler?
+    /// The bound presses the main actor has heard and not yet seen
+    /// released, as they were pressed: a torn-down tap ends them.
+    public private(set) var buttonsHeld: [PointerButtonEvent] = []
     /// The grab the main actor has heard begin and not yet end, as
     /// it began.
     public private(set) var grabInFlight: ModifierGrabEvent?
@@ -101,7 +104,8 @@ public final class PointerConsumers {
     }
 
     /// Applies the bound buttons. A press already taken keeps its
-    /// release, which the tap swallows whatever the bindings say.
+    /// release while the tap stands; a change that rebuilds the tap
+    /// ends it here, and its release is the app's.
     func configure(buttons settings: PointerButtonSettings) {
         buttonSettings = settings
         sync()
@@ -137,6 +141,7 @@ public final class PointerConsumers {
     /// queued is dropped with it.
     func stop() {
         endGrab()
+        endButtons()
         started = false
         sync()
     }
@@ -154,6 +159,17 @@ public final class PointerConsumers {
                 || delivery.grab.dropFirst(index + 1).first?.phase != .moved
         }.map(\.element)
         for event in delivery.buttons {
+            switch event.phase {
+            case .pressed: buttonsHeld.append(event)
+            case .released:
+                guard
+                    let held = buttonsHeld.firstIndex(where: {
+                        $0.key == event.key
+                            && $0.direction == event.direction
+                    })
+                else { continue }
+                buttonsHeld.remove(at: held)
+            }
             buttonHandler?(event)
         }
         for event in events {
@@ -186,6 +202,19 @@ public final class PointerConsumers {
         }
     }
 
+    /// Ends every held press for it, with no event of its own: the
+    /// tap that held its release is gone.
+    private func endButtons() {
+        let held = buttonsHeld
+        buttonsHeld = []
+        for var ended in held {
+            ended.phase = .released
+            ended.location = nil
+            ended.time = CFAbsoluteTimeGetCurrent()
+            buttonHandler?(ended)
+        }
+    }
+
     /// Ends the grab in flight for it, with no event of its own.
     private func endGrab() {
         guard var ended = grabInFlight else { return }
@@ -207,6 +236,7 @@ public final class PointerConsumers {
             tap = nil
             tapMask = 0
             endGrab()
+            endButtons()
         }
         guard started, mask != 0, refusedMask != mask else { return }
         if tap == nil {
@@ -221,7 +251,10 @@ public final class PointerConsumers {
             }
             tapMask = tap == nil ? 0 : mask
             refusedMask = tap == nil ? mask : nil
-            if tap == nil { endGrab() }
+            if tap == nil {
+                endGrab()
+                endButtons()
+            }
             onLog(
                 tap == nil
                     ? "pointer tap: refused by macOS (Accessibility?)"

@@ -330,22 +330,28 @@ editing here:
     swallow reaches a listener not named here names it here, with
     its door or why none is owed (`ModifierGrabWiringTests`). The
     keyboard tap's listen-only mouse-down, which ends a modifier
-    tap's count, has no door: a grab or a bound click swallowed
-    ahead of it leaves a ⌃ released within
-    `ModifierTapDetector.pressLimit` of its press read as a tap,
-    the residue both consumers accept.
+    tap's count and closes an open key sequence (#1871), has no
+    door: a grab or a bound button swallowed ahead of it leaves a
+    ⌃ released within `ModifierTapDetector.pressLimit` of its
+    press read as a tap, and a sequence open through the press
+    still open. Both are residue no test pins, since they ride the
+    taps' install order; they are review's.
   - **A bound button press is swallowed with its release, and an
     unbound one passes whole** (#3281): `PointerTapRouter+Buttons`
     takes a press whose button, keys and side the resolved list's
     `PointerButtonSettings` bind, holds it to its release whatever
     the keys or the snapshot do meanwhile, and passes every other
-    press and its release untouched; the right and other buttons
-    are no grab's, so they reach it ahead of the grab's stream. A
-    swallowed left press is the click's, re-delivered through
-    `deliverPress` and the press record like the grab's
-    (`PointerTapButtonTests`, `PointerButtonWiringTests`). The
-    side buttons are numbers 3 and 4, the wheel press 2 (measured
-    on a Logitech MX Ergo with Logi Options+ running, 2026-11-13).
+    press and its release untouched. A press of a button no grab
+    takes — right, or any other — is decided by the buttons before
+    the grab's stream is asked, the ruled exception to the
+    `Consumer` order above. A held press survives a torn-down tap
+    through the front, which ends it as `endGrab` ends a grab, its
+    release then the app's. A swallowed left press is the click's,
+    re-delivered through `deliverPress` and the press record like
+    the grab's; its swallowed drags reach no `ShelfRevealer`, since
+    a click binding is no drag (`PointerTapButtonTests`,
+    `PointerButtonWiringTests`). Map a button number to its input
+    through `PointerButton.gesture` alone.
   - **A grab feeds the drag pipeline, never a drop path of its
     own**: it writes the frame through `applyFrame`, hands each
     frame to `DragCoordinator.windowMoved`, and its window's AX

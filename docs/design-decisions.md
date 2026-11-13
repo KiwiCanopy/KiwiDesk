@@ -16627,11 +16627,18 @@ do nothing.
 *Amended (#3281, owner 2026-11-13).* A mouse holds one chord, ⌃⌥:
 the wheel walks the window list and the sideways wheel switches
 Spaces, so the step a trackpad reaches with ⌃⌥⌘ costs a mouse no
-third key, and the ⌃⌥⌘ wheel rows are gone. A bound button press
+third key, and the ⌃⌥⌘ wheel rows are gone. This gives up the
+shared-modifier pairing the Space step keys argue below (#1655) on
+a mouse alone: the keys and the trackpad keep ⌃⌥⌘, and one chord
+for the whole mouse is worth the pair. A mouse without a sideways
+wheel gets no fallback (owner, 2026-11-13): ⇧ held with the wheel
+reaches KiwiDesk as a vertical scroll, and routing it sideways
+would make an input act that nobody bound. A bound button press
 is swallowed with its release and an unbound one passes: an app
 that saw half a press would act on a release it never pressed for,
-and a press that no binding takes must cost the app nothing. The
-clicks stay keyed, since a bare click is the app's. The Natural
+and a press that no binding takes must cost the app nothing. A
+click binding needs keys, or every plain click in every app would
+be KiwiDesk's the moment one is bound. The Natural
 scrolling value is a pop-up over the recorder column, in the shared
 setting row: segments break the every-locale fit (#291) on the
 longest *Off*, and the row then lines up with the gesture rows
