@@ -2,7 +2,7 @@ import Foundation
 import KiwiDeskCore
 
 /// The keys step's last row introduces KiwiHub (#2515): its bound
-/// sides in J K L order, the chord collapsed over them, and the
+/// sides in J K L O order, the chord collapsed over them, and the
 /// gateway treatment — the way to every shortcut the step leaves
 /// out.
 @MainActor

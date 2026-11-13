@@ -35,7 +35,8 @@ struct OnboardingLooksStep: View {
                     + "the look you pick."
             ),
             footnote: blocked ? blockedCaption : nil,
-            hint: laterHint
+            hint: laterHint,
+            back: model.back
         ) {
             rows(live)
                 .disabled(blocked)

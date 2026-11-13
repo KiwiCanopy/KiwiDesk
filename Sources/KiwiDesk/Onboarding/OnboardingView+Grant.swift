@@ -9,7 +9,8 @@ extension OnboardingView {
             title: grantTitle,
             body1: grantBody,
             hint: grantHintForPhase,
-            hintPulses: isArranging
+            hintPulses: isArranging,
+            back: model.back
         ) {
             wordmark
             if model.isTrusted {

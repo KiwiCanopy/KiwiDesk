@@ -239,6 +239,37 @@ struct LayoutStoryWiringTests {
         #expect(!spaces.contains("LayoutSchematicView("))
     }
 
+    /// A Back return to Spaces rests its rows (#3288): the tour
+    /// hands the model's flag down the row to the player, whose
+    /// first appearance asks it before it plays.
+    @Test("a Back return to Spaces rests its rows")
+    func backReturnRests() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let spaces = try squashed(
+            root.appendingPathComponent(
+                "Onboarding/OnboardingView+Spaces.swift"
+            )
+        )
+        #expect(spaces.contains("restsOnAppear:model.spacesPlayed"))
+        let row = try squashed(
+            root.appendingPathComponent(
+                "Onboarding/OnboardingSpaceRow.swift"
+            )
+        )
+        #expect(row.contains("restsOnAppear:restsOnAppear"))
+        let player = try squashed(
+            root.appendingPathComponent(
+                "Settings/Components/Layouts/LayoutStoryThumbnail.swift"
+            )
+        )
+        #expect(
+            player.contains(
+                "appeared=trueif!restsOnAppear{play(after:delay)}"
+            )
+        )
+    }
+
     /// Under Reduce Motion the player never leaves its rest
     /// frame: the guard precedes the jump to the start frame,
     /// which no animation gate can stand in for.

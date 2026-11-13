@@ -146,7 +146,7 @@ struct MacSettingRow: View {
             weight: .medium
         )
     }
-    private static var chipFont: Font { Font(chipNSFont) }
+    static var chipFont: Font { Font(chipNSFont) }
     /// The chip's glyph at the caption size, generously.
     private static let glyphWidth: CGFloat = 16
     /// The gap between the glyph and the word.

@@ -11,7 +11,8 @@ extension OnboardingView {
             ),
             body1: doneBody,
             footnote: doneFootnote,
-            footnoteAtBottom: true
+            footnoteAtBottom: true,
+            back: model.back
         ) {
             menuBarIdentity
             OnboardingLoginCheckbox(model: model)

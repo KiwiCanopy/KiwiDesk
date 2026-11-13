@@ -39,6 +39,10 @@ struct SheetPresentationSeamTests {
         // asks for it rebuilds at 900 pt. Its one commit runs
         // through the closures the shell hands it.
         "SettingsView.swift": ["$aboutRequest", "$model.sync.review"],
+        // A license text (#3286) is About's: the link that opens
+        // it sits in About, which outlives it, and the text is
+        // handed in whole, so the content takes no model.
+        "AboutSheet.swift": ["$licenseRequest"],
         // Compare and Copy (#2324) is the row's: it outlives the
         // button that opens it, and its commit runs through the
         // closures the row hands it, so the content takes no model.

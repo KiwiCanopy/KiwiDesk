@@ -2,17 +2,13 @@ import Foundation
 import KiwiDeskCore
 
 /// The single-key toggles the tour teaches (#2515) — maximize,
-/// KiwiVision and the bars' show/hide — read from the live layer
-/// like every family.
+/// Tiling Off, Pocket, KiwiVision, and the bars step's show/hide —
+/// read from the live layer like every family.
 @MainActor
 extension OnboardingKeys {
-    /// The show/hide verbs, Space Bar first, with the bar each
-    /// shows.
-    private static var revealCommands: [(NavCommand, ShelfBar)] {
-        [
-            (KeybindingCatalog.toggleSpaceBar, .space),
-            (KeybindingCatalog.toggleAppBar, .app),
-        ]
+    /// The show/hide verbs, Space Bar first.
+    private static var revealCommands: [NavCommand] {
+        [KeybindingCatalog.toggleSpaceBar, KeybindingCatalog.toggleAppBar]
     }
 
     static func combo(
@@ -31,13 +27,9 @@ extension OnboardingKeys {
 
     /// One row per bar whose show/hide verb is bound, in the
     /// catalog's own words — the bars step's list.
-    static func revealFamilies(
-        layer: KeyLayer,
-        showsBar: (ShelfBar) -> Bool = { _ in true }
-    ) -> [OnboardingKeyFamily] {
-        revealCommands.compactMap { command, bar in
-            guard showsBar(bar) else { return nil }
-            return single(combo: combo(command, in: layer)).map {
+    static func revealFamilies(layer: KeyLayer) -> [OnboardingKeyFamily] {
+        revealCommands.compactMap { command in
+            single(combo: combo(command, in: layer)).map {
                 OnboardingKeyFamily(
                     id: command.lua,
                     label: command.resolvedLabel,
@@ -45,32 +37,6 @@ extension OnboardingKeys {
                 )
             }
         }
-    }
-
-    /// The keys step's one bar row: both chords collapsed where
-    /// both are taught, else the one left under its own label.
-    /// `showsBar` leaves out a bar its shortcut cannot show — one
-    /// set to Always (owner, 2026-10-23).
-    static func revealFamily(
-        layer: KeyLayer,
-        showsBar: (ShelfBar) -> Bool = { _ in true }
-    ) -> OnboardingKeyFamily? {
-        let rows = revealFamilies(layer: layer, showsBar: showsBar)
-        guard rows.count == revealCommands.count else {
-            return rows.first
-        }
-        let combos = revealCommands.compactMap { combo($0.0, in: layer) }
-        guard let chord = collapsed(combos) ?? listed(combos) else {
-            return nil
-        }
-        return OnboardingKeyFamily(
-            id: "bars",
-            label: L(
-                "onboarding.keys.bars",
-                "Show or hide the Space Bar or App Bar"
-            ),
-            chord: chord
-        )
     }
 
     /// The keys step's maximize row.
@@ -84,6 +50,19 @@ extension OnboardingKeys {
                     "onboarding.keys.maximize",
                     "Maximize the window"
                 ),
+                chord: $0
+            )
+        }
+    }
+
+    /// The keys step's Tiling Off row, in the menu's words (#3287).
+    static func tilingOffFamily(layer: KeyLayer) -> OnboardingKeyFamily? {
+        single(
+            combo: combo(KeybindingCatalog.toggleTiling, in: layer)
+        ).map {
+            OnboardingKeyFamily(
+                id: "tiling_off",
+                label: KeybindingCatalog.toggleTiling.resolvedLabel,
                 chord: $0
             )
         }

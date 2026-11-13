@@ -17,6 +17,9 @@ struct LayoutStoryThumbnail: View {
     /// Plays again when the pointer enters the thumbnail itself,
     /// for a host with no row of its own to hover.
     var replaysOnHover = false
+    /// Rests the first appearance, for a host the user has already
+    /// watched play (the tour's Spaces step on Back, #3288).
+    var restsOnAppear = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var atStart = false
@@ -50,7 +53,7 @@ struct LayoutStoryThumbnail: View {
             .onAppear {
                 guard !appeared else { return }
                 appeared = true
-                play(after: delay)
+                if !restsOnAppear { play(after: delay) }
             }
             .onChange(of: replay) { _, _ in play(after: 0) }
             .onHover { inside in

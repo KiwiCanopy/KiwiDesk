@@ -190,18 +190,27 @@ struct SimpleRootTests {
         #expect(!model.showsSimple)
     }
 
-    /// Ruling 15: the tour lands on its page only while the
-    /// stored root is Advanced.
-    @Test("the tour's landing follows the stored root")
+    /// Ruling 15 as amended (owner, 2026-11-13): the tour lands by
+    /// the root this window shows — Simple's Mac Checklist block
+    /// (#3290), else the page, even while Simple is stored.
+    @Test("the tour's landing follows the root shown")
     func tourFollowsStoredRoot() {
         let (_, model) = onSimple()
         model.landFromTour(.macChecklist)
         #expect(model.nav.pendingReveal == nil)
-        // A page shows Advanced; the stored root still decides.
+        #expect(model.nav.simpleChecklistLanding)
+        model.nav.simpleChecklistLanding = false
+        // Simple's block is the checklist's alone.
+        model.landFromTour(.spaces)
+        #expect(!model.nav.simpleChecklistLanding)
+        // A page shows Advanced for this window while Simple stays
+        // stored: the tour lands on the page, not on Simple.
         model.destination = .spaces
-        model.destination = nil
+        #expect(!model.showsSimple)
         model.landFromTour(.macChecklist)
-        #expect(model.nav.pendingReveal == nil)
+        #expect(!model.nav.simpleChecklistLanding)
+        #expect(model.nav.pendingReveal?.destination == .macChecklist)
+        model.nav.pendingReveal = nil
         model.pickRoot(.advanced)
         model.landFromTour(.macChecklist)
         #expect(model.nav.pendingReveal?.destination == .macChecklist)

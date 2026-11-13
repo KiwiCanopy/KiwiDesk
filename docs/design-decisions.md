@@ -145,6 +145,19 @@ bundle keeps them (#1407; how the bundle carries them and
 derives its copyright line is
 `.claude/rules/packaging-and-release.md`'s).
 
+:::unreleased
+*About shows the texts itself (#3286, owner, 2026-11-13).* A
+`Link` to a bundled file opened nothing on a packaged build — no
+open attempt logged, TextEdit never launched — while handing the
+same file to `NSWorkspace` from a CLI opened it, so the texts no
+longer leave KiwiDesk. Each opens in a second read-only sheet
+stacked on About, its title localized and the legal text English
+as shipped, monospaced and selectable with ⌘F; Return and Escape
+put away that sheet alone. A separate window stays out (#1536).
+Where the bundle carries no text, as under the dev binary, the row
+stays the GitHub link rather than an empty sheet.
+:::
+
 ### Accepted limitations
 
 **[Trade-off]**
@@ -10962,11 +10975,12 @@ the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
 **One page's rows are a budget, and the last row is KiwiHub**
-(#2515, owner rulings 2026-10-23). The fixed window holds nine
-one-line rows in every catalog (`OnboardingBarsFitTests`), so a
-row joins only by another leaving. The navigation tiers stay;
+(#2515, owner rulings 2026-10-23). The fixed window holds the
+rows the seeded keymap draws, one line each in every catalog
+(`OnboardingBarsFitTests`), so a row joins only by another
+leaving. The navigation tiers stay;
 then the single-key toggles a new user would never find —
-Maximize, KiwiVision, the bars' show/hide as one row; then
+Maximize, Pocket, KiwiVision, the bars' show/hide as one row; then
 KiwiHub, naming its sides over their chords, which is the way to
 everything the page leaves out. Open Settings gave its row to
 KiwiVision: the menu-bar icon and KiwiHub both reach Settings,
@@ -10976,6 +10990,16 @@ wraps to three lines, so it costs height rather than saving it.
 A bar set to Always leaves the bars row, since its shortcut can
 only refuse — the one place this page reads a setting rather
 than a chord, through the shortcut's own gate.
+
+:::unreleased
+*Tiling Off takes the bars' row (#3287).* The bars step right
+before this page already teaches each bar's show/hide chord, so
+the keys step drops its bars row and, with it, its one read of a
+setting. In its place, right after Maximize, a Tiling Off row in
+the menu's words ("Tiling Off for This Space"): a single key a new
+user would never find, which leaves a Space's windows where they
+are and tiles them again on the next press (owner, 2026-11-13).
+:::
 
 ### The tour's look is written through, and the tour owns its undo
 
@@ -11039,6 +11063,19 @@ colours no palette reads selected until a click, while a look
 whose shape is still live keeps its mark and says "Other colors"
 (`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
 
+:::unreleased
+*Back is navigation, never undo (#3288, owner, 2026-11-13).* Back
+sits bottom-left and Continue (with Revert) bottom-right, as in
+Setup Assistant, on every step whose planned step before it is not
+the grant page: Looks, Bars, Keys and the closing card, never
+Spaces. Going back keeps every pick, so each step's Revert stays
+its one undo, and its baseline is the first paint's, never one
+taken on the way back in. Looks holds the bars revealed again on
+re-entry, a return to Spaces rests its rows rather than playing
+them a second time, and a tour that reached its closing beat stays
+reached (`OnboardingBackTests`).
+:::
+
 The bars step (#2515) is the same act on the bars' visibility:
 a pick writes through, its Revert returns the visibility leaves
 alone, and the two steps' Reverts leave each other's writes
@@ -11070,8 +11107,8 @@ Three rulings follow, and each has a shape someone will want to
 undo:
 
 - **The count is the essentials, and nothing else.** Two
-  settings are optional (the wallpaper click, the double-click
-  zoom — a preference the app can already absorb), and they
+  settings are optional (the double-click zoom — a preference
+  the app can already absorb — and the wallpaper click), and they
   draw their own "Set" / "Not yet" chip but move no number:
   folded in, "3 of 6" reads as half-broken on a Mac where every
   essential is set, and a second count puts two numbers on one
@@ -11133,6 +11170,17 @@ habit names the shortcuts panel's LIVE chord, read from the
 resolved layer like the tour's keys, with a second frame for a Mac
 where nothing is bound.
 
+:::unreleased
+*Where Simple shows, the tour lands on Simple's checklist block
+(#3290).* A new install opens Settings on Simple, so the last
+button lands there, scrolled to the block that draws the essentials
+still open and opens this card; a window showing Advanced lands on
+the card itself, whether the user picked Advanced or Simple is
+stored and Advanced shows for that window only (owner, 2026-11-13).
+Either way the closing footnote's "opens Settings at Mac Checklist"
+stays true.
+:::
+
 ### The app links the guide, in a language the site actually serves
 
 **[Rationale]**
@@ -11180,6 +11228,13 @@ a window that never returns — the tour reopens FROM Settings, and
 The default action lands on the Mac Checklist card (#1365); ▸ *The
 Mac Checklist counts what macOS can confirm* argues why that is
 not the Open Settings link coming back.
+
+:::unreleased
+Where Simple shows, the default action lands on Simple's checklist
+block instead (#3290), whose header opens this card, so the guide
+pointer at its foot is one click from the landing rather than on
+screen.
+:::
 
 **The banner is one-shot, so only a permanent pointer closes the
 gap.** Home's first-run banner reaches someone who closed the tour
@@ -11717,6 +11772,12 @@ a Floating window is dragged and left where it lands. Each story
 plays once when its thumbnail first appears — staggered down a
 list — and again on hover, and never loops.
 
+:::unreleased
+A host the user has already watched play may rest a first
+appearance instead: the tour's Back return to Spaces does (#3288,
+▸ *Back is navigation, never undo*).
+:::
+
 This does not reopen the ruling above, which retired a SECOND
 FRAME: a pair shows two states and leaves the tween to the
 reader, so it bought no motion and cost the strip its
@@ -12005,6 +12066,19 @@ construction rather than by promise:
   badge, and a pin to a missing screen keeps "Pin offline".
   Hiding a thing the user made without saying so is still
   losing their work; hiding it while naming it is curation.
+
+:::unreleased
+*The Mac Checklist's open essentials join Simple (#3290, owner,
+2026-11-13, amending #2737's scope).* After Open applications and
+before the support strip, a header line — "Mac Checklist", the
+count and the Home card's ticks — is one door into Advanced ▸ Mac
+Checklist, and under it only the essentials not yet done are
+drawn, each as Advanced's own row, leaving once it is done. At 4 of 4 the block folds to one quiet line on the page,
+the same door. A new install opens on Simple, so without the block
+its user never met the four essentials the tour hands them to, and
+the tour's exit now lands Simple scrolled to it. The rows are
+Advanced's, so Simple still owns no editor.
+:::
 
 What changed since #2654 is the premise. That segment's whole
 effect was one card, a decision with no result. This one

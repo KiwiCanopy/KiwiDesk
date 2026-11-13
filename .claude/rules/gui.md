@@ -571,7 +571,10 @@ it, and every way out of the trail ends it (#2038).** Settings
 lands on the row's control through `SettingsModel.land(on:)` —
 the one writer of `pendingReveal` in the window controller and
 the model, so a bar menu's row, the tour and an adoption land
-the same way — and carries a
+the same way; the tour's landing while Simple shows is the one
+other door, written by `landFromTour` alone and spent by
+`SimpleScreen` alone (#3290, `SimpleMacChecklistTests`) — and
+carries a
 banner back; the trail has ONE owner, `WhatsNewCoordinator`,
 which ends it whenever What's new is fronted or answered, so the
 banner never outlives the window its Back returns to, and a
@@ -2453,6 +2456,11 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   sees (`ShortcutsPagePartTests` ▸ `catalogControlsHaveParts`,
   `censusContainersArePartsOfThePage`). Rows come into view with
   no motion of their own (owner ruling on #3060).
+- **A text view that offers search takes ⌘F itself, never
+  through a main-menu Find item** (#3286): a Find item would
+  join the chords a key panel hands to the main menu. The view
+  answers ⌘F, ⌘G and ⇧⌘G with its find bar's own actions, as
+  `LicenseTextFinding` does (`LicenseSheetTests`).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
   removed under the pointer (a link that deletes itself, a row
   rebuilt by rename) never delivers the balancing

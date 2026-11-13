@@ -58,6 +58,10 @@ enum QuickMenuBuilders {
             + "SHOULD be enabled and unstated means enabled. Its "
             + "menu is created in StatusItemController.swift, so "
             + "the per-menu flag count cannot pair it here",
+        "LicenseSheet.swift":
+            "builds no menu: one bare NSMenuItem is the tagged "
+            + "sender NSTextView's performFindPanelAction reads its "
+            + "find action from (#3286)",
     ]
 
 }

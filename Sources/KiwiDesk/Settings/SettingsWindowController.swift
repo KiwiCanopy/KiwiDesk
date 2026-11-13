@@ -236,10 +236,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         show()
     }
 
-    /// The tour's closing landing (`SettingsModel.landFromTour`).
+    /// The tour's closing landing (`SettingsModel.landFromTour`),
+    /// asked after the open settles the root it lands on.
     func show(landingFromTour destination: SettingsDestination) {
-        model.landFromTour(destination)
-        show()
+        show { model.landFromTour(destination) }
     }
 
     /// Shows the dashboard window: a fresh open on the stored

@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Simple's one page (#2737, #2777): KiwiHub, Look, the speed
-/// preset (#3238), a card per Space and Open applications, ended by
-/// the support strip and Home's footer, in one centred column at
-/// every width. Simple owns
+/// preset (#3238), a card per Space, Open applications and the Mac
+/// Checklist's open essentials (#3290), ended by the support strip
+/// and Home's footer, in one centred column at every width. Simple
+/// owns
 /// layout only — every control it draws is Advanced's own.
 struct SimpleScreen: View {
     @ObservedObject var model: SettingsModel
@@ -27,42 +28,12 @@ struct SimpleScreen: View {
 
     var body: some View {
         GeometryReader { geo in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // First: it teaches the keys the tour taught,
-                    // before any control (ui-designer, #2737).
-                    SimpleKiwiHubKeys(model: model)
-                        .modifier(converge(0, geo.size))
-                    SimpleLookCard(model: model)
-                        .modifier(converge(1, geo.size))
-                    SimpleAnimationsCard(model: model)
-                        .modifier(converge(2, geo.size))
-                    SimpleSpacesCard(model: model)
-                        .modifier(converge(3, geo.size))
-                    SimpleShortcutCards(model: model)
-                        .modifier(converge(4, geo.size))
-                    HomeSupportStrip(model: model)
-                        .modifier(converge(5, geo.size))
-                }
-                .frame(
-                    width: max(
-                        0,
-                        min(
-                            Self.columnCap,
-                            geo.size.width - 2 * Self.sideRoom
-                        )
-                    )
-                )
-                // The strip's footer reaches the window's bottom
-                // inset, as on Home.
-                .frame(
-                    minHeight: geo.size.height - Self.topGutter
-                        - SettingsMetrics.pageBottom(width),
-                    alignment: .top
-                )
-                .padding(.bottom, SettingsMetrics.pageBottom(width))
-                .padding(.top, Self.topGutter)
-                .frame(maxWidth: .infinity)
+            ScrollViewReader { proxy in
+                page(geo)
+                    .onAppear { landOnChecklist(proxy) }
+                    .onChange(of: model.nav.simpleChecklistLanding) {
+                        landOnChecklist(proxy)
+                    }
             }
         }
         .coordinateSpace(name: HomeConverge.space)
@@ -73,6 +44,59 @@ struct SimpleScreen: View {
         // A row or tile removed under the pointer sends no leave, so
         // a hover must not outlive the page (gui.md ▸ SwiftUI traps).
         .onDisappear { model.nav.simpleHover = nil }
+    }
+
+    private func page(_ geo: GeometryProxy) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // First: it teaches the keys the tour taught,
+                // before any control (ui-designer, #2737).
+                SimpleKiwiHubKeys(model: model)
+                    .modifier(converge(0, geo.size))
+                SimpleLookCard(model: model)
+                    .modifier(converge(1, geo.size))
+                SimpleAnimationsCard(model: model)
+                    .modifier(converge(2, geo.size))
+                SimpleSpacesCard(model: model)
+                    .modifier(converge(3, geo.size))
+                SimpleShortcutCards(model: model)
+                    .modifier(converge(4, geo.size))
+                SimpleMacChecklist(model: model)
+                    .modifier(converge(5, geo.size))
+                HomeSupportStrip(model: model)
+                    .modifier(converge(6, geo.size))
+            }
+            .frame(
+                width: max(
+                    0,
+                    min(
+                        Self.columnCap,
+                        geo.size.width - 2 * Self.sideRoom
+                    )
+                )
+            )
+            // The strip's footer reaches the window's bottom
+            // inset, as on Home.
+            .frame(
+                minHeight: geo.size.height - Self.topGutter
+                    - SettingsMetrics.pageBottom(width),
+                alignment: .top
+            )
+            .padding(.bottom, SettingsMetrics.pageBottom(width))
+            .padding(.top, Self.topGutter)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    /// The tour's landing (#3290): the checklist block at the top,
+    /// once, then the request is spent.
+    private func landOnChecklist(_ proxy: ScrollViewProxy) {
+        guard model.nav.simpleChecklistLanding else { return }
+        model.nav.simpleChecklistLanding = false
+        // Next turn, once the page has laid out what it scrolls.
+        DispatchQueue.main.async {
+            proxy.scrollTo(SimpleMacChecklist.anchor, anchor: .top)
+        }
     }
 
     /// Section `index`'s flight from the window's centre.

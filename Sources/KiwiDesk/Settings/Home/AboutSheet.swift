@@ -9,7 +9,8 @@ struct AboutRequest: Identifiable {
 /// About KiwiDesk (#1536): a read-only sheet over Settings — the
 /// #859 shape, Return and Escape both dismissing. Holds what Home's
 /// footer does not: the wordmark, the version, the update state
-/// once more, License, Acknowledgements, the website.
+/// once more, License, Acknowledgements, the website. A bundled
+/// license text opens in a sheet stacked on this one (#3286).
 struct AboutSheet: View {
     /// The one update store and the check door, handed in by the
     /// shell — the sheet takes no `SettingsModel` (#859).
@@ -17,6 +18,7 @@ struct AboutSheet: View {
     let check: () -> Void
     let onDone: () -> Void
     @Environment(\.colorScheme) private var colorScheme
+    @State private var licenseRequest: LicenseRequest?
 
     var body: some View {
         VStack(spacing: 12) {
@@ -56,6 +58,9 @@ struct AboutSheet: View {
         .background(escapeRoute)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(L("home.footer.about", "About KiwiDesk"))
+        .sheet(item: $licenseRequest) { request in
+            LicenseSheet(request: request) { licenseRequest = nil }
+        }
     }
 
     @ViewBuilder private var brand: some View {
@@ -90,22 +95,44 @@ struct AboutSheet: View {
         HStack(spacing: 16) {
             link(
                 L("general.about.license", "License"),
-                LicenseDocuments.url(for: .license)
+                LicenseDocuments.source(for: .license)
             )
             link(
                 L("general.about.acknowledgements", "Acknowledgements"),
-                LicenseDocuments.url(for: .acknowledgements)
+                LicenseDocuments.source(for: .acknowledgements)
             )
             link(L("about.website", "Website"), SupportLinks.website)
         }
         .padding(.top, 2)
     }
 
-    private func link(_ title: String, _ url: URL) -> some View {
-        Link(destination: url) { Text(title).underline() }
+    /// A bundled text opens in its sheet; without one, the
+    /// GitHub copy as a plain link, never an empty sheet.
+    @ViewBuilder private func link(
+        _ title: String,
+        _ source: LicenseDocuments.Source
+    ) -> some View {
+        switch source {
+        case .bundled(let file):
+            Button {
+                licenseRequest = LicenseDocuments.text(at: file).map {
+                    LicenseRequest(title: title, text: $0)
+                }
+            } label: {
+                Text(title).underline()
+            }
             .buttonStyle(.plain)
-            .font(.system(size: 11))
-            .linkHover()
+            .linkFace()
+        case .link(let url):
+            link(title, url)
+        }
+    }
+
+    private func link(_ title: String, _ url: URL) -> some View {
+        // A `Link` is no `Button`, so it cannot take the seal.
+        Link(destination: url) { Text(title).underline() }
+            .buttonStyle(PlainButtonStyle())
+            .linkFace()
     }
 
     private var doneLabel: String {
@@ -120,5 +147,13 @@ struct AboutSheet: View {
             .frame(width: 0, height: 0)
             .opacity(0)
             .accessibilityHidden(true)
+    }
+}
+
+extension View {
+    /// About's link face: an underlined 11 pt link that answers
+    /// the pointer, whether it opens a sheet or a URL.
+    fileprivate func linkFace() -> some View {
+        font(.system(size: 11)).linkHover()
     }
 }
