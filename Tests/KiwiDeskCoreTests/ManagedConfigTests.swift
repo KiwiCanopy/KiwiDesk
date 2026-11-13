@@ -89,6 +89,13 @@ struct ManagedConfigTests {
             #expect(ManagedConfig.declaresManagedSettings(line))
         }
         #expect(!ManagedConfig.hasForeignCode("local g = gesture"))
+        // A namespace ending in the token is another verb.
+        for line in [
+            #"trackpad_gesture.bind("tap3", "", "x()")"#,
+            #"scroll_gesture.bind("x")"#,
+        ] {
+            #expect(!ManagedConfig.hasForeignCode(line), "\(line)")
+        }
     }
 
     @Test("tiling-only Lua is NOT foreign")

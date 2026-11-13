@@ -78,12 +78,9 @@ the GUI** instead. Settings are:
   `KiwiDesk.bind_profile_to_desktop`.
 
 :::unreleased
-`KiwiDesk.define_sequence` counts as a keybinding too.
-:::
-
-:::unreleased
-A [`gesture.bind`](#gesturebind) or
-[`gesture.unbind`](#gestureunbind) call counts as a keybinding too.
+`KiwiDesk.define_sequence` counts as a keybinding too, and so does a
+[`gesture.bind`](#gesturebind) or [`gesture.unbind`](#gestureunbind)
+call.
 :::
 
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
@@ -5523,12 +5520,11 @@ chosen profiles' overrides.
 
 The verbs below change the running base only: a profile's own
 value still wins, nothing reaches `gui.json`, and the value lasts
-until KiwiDesk next loads its config. A `gesture.bind` or
-`gesture.unbind` line in `init.lua` makes the file the config
-owner, as `KiwiDesk.bind` does
-([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt)):
-`init.lua` is then where the bindings are kept, and **Adopt into
-the GUI** keeps the base it set.
+until KiwiDesk next loads its config. In a Lua-owned setup —
+which a `gesture.bind` or `gesture.unbind` line makes
+([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt))
+— `init.lua` is where it is kept, and **Adopt into the GUI** keeps
+the base it set.
 :::
 
 ### gesture.bind
@@ -5548,7 +5544,11 @@ them, Lua on an input with directions, and a table on an input
 without them or naming a direction it lacks.
 `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
 `modifier_drag.set_move`, `modifier_drag.set_resize` and
-`trackpad_gesture.bind` are retired and fail, naming it.
+`trackpad_gesture.bind` are retired and fail, naming it. Their
+replacement in `init.lua` makes the setup Lua-owned
+([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt));
+to keep it in the Settings app, bind the gesture under
+**Shortcuts ▸ Mouse & Trackpad** instead.
 
 **Example:**
 

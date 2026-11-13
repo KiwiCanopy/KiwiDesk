@@ -708,6 +708,14 @@ holds the secondary-switch decision including its nil case.
 - The GUI-vs-Lua ownership predicate is centralized in
   `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine
   that one predicate, never add a second.
+- **A Lua verb that writes a stored family is seen by the
+  ownership scan (#3297).** A binding verb joins
+  `ManagedConfig.managedTokens`, as `KiwiDesk.bind` and
+  `gesture.bind` do; a setting verb is spelled `set_*`, which
+  `lineHasSettingVerb` reads. A verb neither sees is overwritten by
+  `gui.json`'s base at the load's tail and seeded over on a fresh
+  desk, with nothing to red (`GestureLuaLoadTests`,
+  `ManagedConfigTests` ▸ `gestureBindIsForeign`).
 - **Code renames freely; only a stored value needs a crossing
   (#42).** Command names, Lua/CLI verbs and event names take no
   compatibility aliases or deprecation layers — a retired verb

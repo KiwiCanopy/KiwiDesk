@@ -102,6 +102,11 @@ saved profile.
   as a backup, and keeps your custom Lua (event hooks such as the
   sketchybar bridge) live.
 
+:::unreleased
+A `gesture.bind` or `gesture.unbind` line counts as a keybinding
+here, and on the first launch below.
+:::
+
 Once `gui.json` exists, the visual editor owns tiling, and
 hand-written `set_gap_global` calls stop applying on screen
 changes; persist custom tiling as a profile.

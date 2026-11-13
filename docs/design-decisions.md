@@ -16836,14 +16836,15 @@ under it.
 *Amended (#3297): a gesture binding in `init.lua`
 makes the file the owner.* `gesture.bind` and `gesture.unbind` are
 managed tokens beside `KiwiDesk.bind`, so bindings keep one home.
-Left out, a line in `init.lua` was overwritten by `gui.json`'s base
-on every load, a fresh desk included, since nothing marked it a
+Left out, a line in `init.lua` would be overwritten by `gui.json`'s
+base on every load, a fresh desk included, since nothing marks it a
 setting. Merging the Lua binding over that base was refused: two
 stores would each hold part of one list, and the Settings cards
 could not show where a row came from. The cost is the same as for
 `KiwiDesk.bind`: one gesture line hands the whole setup to
-`init.lua` until Adopt into the GUI, and an aliased receiver
-(`local g = gesture`) escapes the scan.
+`init.lua` until Adopt into the GUI, a setup that rewrites a retired
+gesture verb into `gesture.bind` hands itself over the same way, and
+an aliased receiver (`local g = gesture`) escapes the scan.
 :::
 
 **An entry is one drawn picture and one sentence, and the picture

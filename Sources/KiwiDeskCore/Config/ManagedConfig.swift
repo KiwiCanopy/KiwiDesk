@@ -131,7 +131,17 @@ public enum ManagedConfig {
                 with: "(",
                 options: .regularExpression
             )
-            return norm.contains(token)
+            // No receiver may run into the token: `scroll_gesture`
+            // and the retired `trackpad_gesture` end in it (#3297).
+            // Trade: a token reached through a table
+            // (`_G.gesture.bind(`) escapes, as an alias does.
+            let anchored =
+                #"(?<![\w.])"#
+                + NSRegularExpression.escapedPattern(for: token)
+            return norm.range(
+                of: anchored,
+                options: .regularExpression
+            ) != nil
         }
         let pat =
             #"\b"#
