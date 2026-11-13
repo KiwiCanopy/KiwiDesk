@@ -147,7 +147,8 @@ public enum StarterAllocation {
             &result,
             shares: share,
             shapes: shapes,
-            order: order
+            order: order,
+            besideUltrawide: false
         )
         return result
     }

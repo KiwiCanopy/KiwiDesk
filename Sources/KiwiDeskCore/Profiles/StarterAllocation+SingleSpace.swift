@@ -39,7 +39,7 @@ extension StarterAllocation {
         shares: [Int],
         shapes: [ScreenClass],
         order: [Int],
-        besideUltrawide: Bool = false
+        besideUltrawide: Bool
     ) {
         for index in order where shares[index] == 1 {
             let shape = shapes[index]
