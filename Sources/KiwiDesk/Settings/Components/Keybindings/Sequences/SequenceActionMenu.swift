@@ -226,9 +226,16 @@ struct SequenceActionMenu: View {
             take(slot, in: shownGroups)
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: picked ? "checkmark" : symbol)
+                // The check column the catalogue rows keep, so a
+                // picked pin keeps its own glyph (#3281).
+                Image(systemName: "checkmark")
                     .font(.caption.weight(.semibold))
+                    .opacity(picked ? 1 : 0)
                     .frame(width: 12)
+                    .accessibilityHidden(true)
+                GlyphImage(symbol)
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 16)
                     .accessibilityHidden(true)
                 Text(label)
                 Spacer(minLength: 0)

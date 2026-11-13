@@ -18,9 +18,11 @@ extension GestureItem {
         case .spaceStep:
             return L(
                 "shortcuts.gestures.scroll.space_step_sentence",
-                "Hold these keys and scroll to switch to the next or "
+                "Hold these keys and swipe to switch to the next or "
                     + "previous Space on the screen under the "
-                    + "pointer, one per swipe or wheel notch."
+                    + "pointer, one per swipe. With a mouse, hold %1$@ "
+                    + "and scroll sideways.",
+                ScrollChordGlyphs.text(GestureSeeds.panKeys)
             )
         case .hoverFocus:
             return L(

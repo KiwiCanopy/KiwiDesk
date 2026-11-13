@@ -4,7 +4,8 @@ import SwiftUI
 /// An open row's directions (#3199 ▸ Ruling): a hairline rail
 /// in the disclosure's slot, then one sub-row per direction on the
 /// row's own columns — the arrow under the icon, the name under the
-/// gesture pop-up, the action under the row's. While the row binds
+/// gesture pop-up, the action under the row's, the row's keys
+/// echoed under its recorder. While the row binds
 /// a family each arm reads in secondary text and stays a live
 /// picker; picking one arm splits the row, which then reads "Per
 /// direction".
@@ -65,12 +66,7 @@ struct GestureDirectionRow: View {
             SequenceActionMenu(
                 face: face,
                 catalog: catalog,
-                spokenLabel: L(
-                    "shortcuts.gestures.direction_action",
-                    "%1$@, %2$@",
-                    GestureListWords.input(key.input),
-                    GestureListWords.direction(direction)
-                ),
+                spokenLabel: spokenLabel,
                 pins: [],
                 onPick: { command in
                     guard
@@ -86,7 +82,44 @@ struct GestureDirectionRow: View {
                 inherited ? SettingsTheme.ink2 : SettingsTheme.ink
             )
             Spacer(minLength: 0)
+            heldKeys
+            AppRuleDeleteButton.slot
         }
+    }
+
+    /// The parent row's keys, echoed in its recorder column (#3281,
+    /// owner; ui-designer): plain text, never a well, so it cannot
+    /// read as an empty or dimmed recorder; the action's spoken
+    /// label carries it. A keyless row echoes nothing.
+    private var heldKeys: some View {
+        KeyRecorderField.footprint.overlay {
+            if !key.chord.isEmpty {
+                Text(verbatim: ScrollChordGlyphs.text(key.chord))
+                    .monospaced()
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .accessibilityHidden(true)
+            }
+        }
+    }
+
+    private var spokenLabel: String {
+        let input = GestureListWords.input(key.input)
+        let way = GestureListWords.direction(direction)
+        guard !key.chord.isEmpty else {
+            return L(
+                "shortcuts.gestures.direction_action",
+                "%1$@, %2$@",
+                input,
+                way
+            )
+        }
+        return L(
+            "shortcuts.gestures.direction_action_chord",
+            "%1$@, %2$@, with %3$@",
+            input,
+            way,
+            ScrollChordGlyphs.text(key.chord)
+        )
     }
 
     /// Whether the arm is the family's, not one of its own.

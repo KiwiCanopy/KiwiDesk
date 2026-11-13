@@ -16629,14 +16629,14 @@ Home, the other two add a navigator.
   shortcut groups, one word in every catalog. Open applications
   now follows Layers, so #1520's refusal to move it up concerned
   the one long page and is spent.
-- **Mouse & Trackpad** holds open groups ordered by where the hand
-  is — on your windows, holding a modifier, on the KiwiShelf — each
-  with its own pictures, and no Layers card, since a layer does
-  not act on a gesture. The part replaces #1726's collapsed card,
-  the picture strip the shut card drew, and Mouse & trackpad's
-  first chip and the rule after it: open groups need no summary
-  and no strip to be found. Its first picture still plays once per
-  visit on the user's own click, now on the segment.
+- **Mouse & Trackpad** opens with the Mouse and Trackpad binding
+  cards, the part's own settings (#3298), then holds open groups
+  ordered by where the hand is — on your windows, holding a
+  modifier, on the KiwiShelf — each with its own pictures, and no
+  Layers card, since a layer does not act on a gesture. The part
+  replaces #1726's collapsed card, the picture strip the shut card
+  drew, and Mouse & trackpad's first chip and the rule after it:
+  open groups need no summary and no strip to be found.
 - Layers draws on Built-in and Personal and reads the one
   `nav.shortcutsLayer`, so the layer picked survives a switch. The
   part shown is a `SettingsNavigation` reading too (#1127):
@@ -16668,8 +16668,7 @@ what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
 
 :::unreleased
-**The bindings themselves are a list per device, between the
-modifier group and the shelf group** (#3199 ▸ Ruling, owner
+**The bindings themselves are a list per device** (#3199 ▸ Ruling, owner
 2026-11-11; #3183). One **Mouse** card and one **Trackpad** card,
 each a list of rows as macOS's App Shortcuts are, rather than a
 fixed slot per gesture: one gesture may be bound several times with
@@ -16682,6 +16681,26 @@ card leads with its input's Natural scrolling, under Apple's name,
 since a direction on that card reads through it. An input no front
 fires yet has no row, so the list never offers a binding that would
 do nothing.
+
+*Amended (#3281, owner 2026-11-13).* A mouse holds one chord, ⌃⌥:
+the wheel walks the window list and the sideways wheel switches
+Spaces, so the step a trackpad reaches with ⌃⌥⌘ costs a mouse no
+third key, and the ⌃⌥⌘ wheel rows are gone. This gives up the
+shared-modifier pairing the Space step keys argue below (#1655) on
+a mouse alone: the keys and the trackpad keep ⌃⌥⌘, and one chord
+for the whole mouse is worth the pair. A mouse without a sideways
+wheel gets no fallback (owner, 2026-11-13): ⇧ held with the wheel
+reaches KiwiDesk as a vertical scroll, and routing it sideways
+would make an input act that nobody bound. A bound button press
+is swallowed with its release and an unbound one passes: an app
+that saw half a press would act on a release it never pressed for,
+and a press that no binding takes must cost the app nothing. A
+click binding needs keys, or every plain click in every app would
+be KiwiDesk's the moment one is bound. The Natural
+scrolling value is a pop-up over the recorder column, in the shared
+setting row: segments break the every-locale fit (#291) on the
+longest *Off*, and the row then lines up with the gesture rows
+under it.
 :::
 
 **An entry is one drawn picture and one sentence, and the picture
@@ -16697,21 +16716,13 @@ is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
-When the user's own click opens the Mouse & Trackpad part, its
-first picture also plays once and rests (owner ruling 2026-09-29), and the
-difference from the rest of this page is the reader. The rule's
-other exception, a layout thumbnail that is read rather than
-compared (▸ Navigation & saving), plays once as it appears
-because the tour and the preset preview are opened in order to
-be read. Opening this part is the same kind of act — a request to
-read what is inside — so one picture playing is the content
-arriving, and it tells the user the pictures move. It stays one
-picture: the part is still a reference consulted in the middle of
-something else, and a column of gestures playing in turn would be
-motion no one came for. So it plays at most once per visit, only
-on the click — a search hit, Go to or a diff jump opens the part
-to reach one row, whose wash is the motion that answers them —
-and never under Reduce Motion.
+:::unreleased
+**No picture plays by itself** (#3281, owner 2026-11-13). The
+binding cards lead the part, so a click on Mouse & Trackpad opens
+settings to edit, not a picture to read, and a picture moving
+below the cards draws the eye from them. Hover is the one
+trigger, and Reduce Motion stills it.
+:::
 
 
 **An entry lands with its feature, and greys where its surface is
