@@ -231,7 +231,9 @@ struct SettingsSearchIndexTests {
                 // catalog anchor going missing. 7 since #1530:
                 // `(action) profiles.sets.add`, the screen-setup
                 // `+` on every profile row — a new census row.
-                .profiles: 7,
+                // 5 since #3294: the preset card's Apply and its
+                // preview opener left with the Presets section.
+                .profiles: 5,
                 // 13: `keybinding.open_settings` joined
                 // anchor-less (#678 item 18 — the bindable
                 // "Open Settings" row has no #277 catalog
