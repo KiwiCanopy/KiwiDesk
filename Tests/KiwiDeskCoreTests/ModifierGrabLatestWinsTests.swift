@@ -100,15 +100,23 @@ struct ModifierGrabLatestWinsTests {
     func grabCoalesces() async throws {
         let log = Log()
         let core = make(log)
+        let meter = WorkMeter()
+        core.tiler.meter = meter
+        let moves = 20
         // Bottom-right cell: the bottom-right corner moves.
         send(core, .began, at: CGPoint(x: 480, y: 390))
-        for step in 1...20 {
+        for step in 1...moves {
             let d = CGFloat(step * 5)
             send(core, .moved, at: CGPoint(x: 480 + d, y: 390 + d))
         }
         let last = try #require(core.modifierGrab.session?.last)
         #expect(last.width > Self.frame.width)
         await drain()
+        // Blocks, not only writes: a block that runs and writes
+        // nothing still costs its hold and stamp per event.
+        let counts = meter.snapshot(reset: false).counts
+        #expect(counts.queuedJobs <= 2)
+        #expect(counts.queuedJobs + counts.framesCoalesced == moves)
         #expect(log.count >= 1)
         #expect(log.count <= 2)
         #expect(log.written.last == last)
