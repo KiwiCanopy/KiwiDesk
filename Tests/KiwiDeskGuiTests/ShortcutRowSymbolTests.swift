@@ -97,7 +97,9 @@ struct ShortcutRowSymbolTests {
         }
         #expect(rows.count > 40, "expanded too few rows")
         for command in rows {
-            guard let name = ShortcutsReferenceBuilder.icon(for: command)
+            guard
+                let name = ShortcutsReferenceBuilder.icon(for: command)?
+                    .symbolName
             else {
                 Issue.record("\(command.lua) draws no symbol")
                 continue
@@ -121,7 +123,9 @@ struct ShortcutRowSymbolTests {
     @Test("every symbol a row draws resolves on this macOS")
     func everySymbolResolves() {
         let symbols = Set(
-            Self.drawable().compactMap(ShortcutsReferenceBuilder.icon(for:))
+            Self.drawable().compactMap {
+                ShortcutsReferenceBuilder.icon(for: $0)?.symbolName
+            }
         )
         for symbol in symbols {
             let image = NSImage(
@@ -144,7 +148,8 @@ struct ShortcutRowSymbolTests {
         )
         let focus = Set(KeybindingCatalog.focusDirections.map(\.lua))
         let wearing = Self.drawable().filter {
-            ShortcutsReferenceBuilder.icon(for: $0).map(lines.contains)
+            ShortcutsReferenceBuilder.icon(for: $0)?.symbolName
+                .map(lines.contains)
                 ?? false
         }
         #expect(Set(wearing.map(\.lua)) == focus)

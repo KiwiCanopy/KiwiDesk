@@ -5,7 +5,8 @@ import KiwiDeskCore
 struct NavCommand: Identifiable, Hashable {
     let label: String
     let lua: String
-    /// An identity glyph — a Space's or a Desktop's (#68 §6.5). A
+    /// An identity glyph — a Space's, a Desktop's or a layer's,
+    /// symbol or emoji (#68 §6.5, #3267). A
     /// verb's glyph lives in `ShortcutsReferenceBuilder.verbIcon`,
     /// never here (#2530); both the key panel and Settings draw
     /// through `ShortcutsReferenceBuilder.icon(for:)` (#2670).

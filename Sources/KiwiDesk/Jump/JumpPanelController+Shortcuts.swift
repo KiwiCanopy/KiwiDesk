@@ -99,6 +99,7 @@ extension JumpPanelController {
             landings: core.desktopLandings(in: desktops),
             resizeStep: Int(config.settings.resizeStep),
             layerNames: layers.map(\.name),
+            layerIcons: KeyLayer.icons(of: layers),
             lenses: core.kiwiVisionLensChoices.map(\.name),
             unread: unread
         )

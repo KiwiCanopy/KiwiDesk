@@ -59,7 +59,7 @@ struct ShortcutsInactiveBandTests {
         #expect(row?.monospaced == false)
         #expect(row?.label.contains("KiwiDesk.") == false)
         // It keeps the glyph its live twin would carry.
-        #expect(row?.icon == "6.square")
+        #expect(row?.icon == .symbol("6.square"))
         #expect(row?.combo.isEmpty == false)
         // A band that exists is a panel that is not empty.
         #expect(reference.isEmpty == false)

@@ -23,6 +23,9 @@ struct ShortcutsFamilyRows {
     let resizeStep: Int
     /// Available layer names and active editing layer.
     let layerNames: [String]
+    /// Each layer's icon by name, which its switch row wears
+    /// (#3267); a layer with none is absent.
+    var layerIcons: [String: String] = [:]
     let currentLayer: String
     /// The lenses to draw a row for (`KeybindingCatalog.lensOffer`,
     /// #2103 ruling 42).
@@ -135,7 +138,12 @@ struct ShortcutsFamilyRows {
             return
                 layerNames
                 .filter { $0 != currentLayer }
-                .map(KeybindingCatalog.switchLayerCommand)
+                .map {
+                    KeybindingCatalog.switchLayerCommand(
+                        $0,
+                        icon: layerIcons[$0]
+                    )
+                }
         case .layers, .layersIcon, .layersReach, .openApplications,
             .pocketApps,
             .advanced,

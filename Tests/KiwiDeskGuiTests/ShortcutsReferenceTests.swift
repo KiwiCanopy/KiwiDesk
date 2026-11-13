@@ -64,7 +64,7 @@ struct ShortcutsReferenceTests {
         #expect(focus?.rows.first?.combo.isEmpty == false)
         // Compass directions carry a directional glyph (hybrid
         // symbol scheme); non-spatial commands stay label-only.
-        #expect(focus?.rows.first?.icon == "arrow.left")
+        #expect(focus?.rows.first?.icon == .symbol("arrow.left"))
         // Only the bound preset renders; the other three focus
         // directions have no binding and are absent.
         #expect(reference.apps.isEmpty)
@@ -85,7 +85,7 @@ struct ShortcutsReferenceTests {
         let focus = reference.controls.first {
             $0.title == "Focus"
         }
-        #expect(focus?.rows.first?.icon == "1.square")
+        #expect(focus?.rows.first?.icon == .symbol("1.square"))
     }
 
     @Test("a space named a direction word doesn't get an arrow")
@@ -106,7 +106,7 @@ struct ShortcutsReferenceTests {
         let focus = reference.controls.first {
             $0.title == "Focus"
         }
-        #expect(focus?.rows.first?.icon == "squares.below.rectangle")
+        #expect(focus?.rows.first?.icon == .symbol("squares.below.rectangle"))
     }
 
     @Test("empty bands are dropped, not rendered blank")

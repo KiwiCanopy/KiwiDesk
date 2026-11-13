@@ -23,6 +23,7 @@ extension ShortcutsFamilyRows {
             ),
             resizeStep: Int(model.config.settings.resizeStep),
             layerNames: model.config.layers.map(\.name),
+            layerIcons: KeyLayer.icons(of: model.config.layers),
             currentLayer: layer,
             lenses: KeybindingCatalog.lensOffer(
                 stored: model.draftLenses.map(\.name),

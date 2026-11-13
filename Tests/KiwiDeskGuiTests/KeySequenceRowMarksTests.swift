@@ -144,10 +144,7 @@ struct KeySequenceRowMarksTests {
                 && glyph.contains(
                     "ShortcutsReferenceBuilder.icon(for:command)"
                 )
-                && glyph.contains(
-                    "IconGlyphLabel(icon:glyph).frame(width:16,height:16)"
-                        + ".accessibilityHidden(true)"
-                )
+                && glyph.contains("ShortcutGlyphView(glyph:glyph)")
         )
         let row = try Self.flat("SequenceNodeRow.swift")
         #expect(row.contains("marksKind:true,"))

@@ -57,9 +57,7 @@ extension SequenceActionMenu {
             let command = catalog.command(running: face.lua),
             let glyph = ShortcutsReferenceBuilder.icon(for: command)
         {
-            IconGlyphLabel(icon: glyph)
-                .frame(width: 16, height: 16)
-                .accessibilityHidden(true)
+            ShortcutGlyphView(glyph: glyph)
         }
     }
 

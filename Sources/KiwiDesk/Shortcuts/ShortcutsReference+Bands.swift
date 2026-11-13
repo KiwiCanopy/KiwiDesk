@@ -18,6 +18,7 @@ extension ShortcutsReferenceBuilder {
         desktops: KeybindingCatalog.DesktopOffer = .none,
         resizeStep: Int,
         layerNames: [String],
+        layerIcons: [String: String] = [:],
         lenses: [String] = [],
         rows: ([NavCommand], ShortcutGroup?) -> [ShortcutRow]
     ) -> [ShortcutSubgroup] {
@@ -49,7 +50,12 @@ extension ShortcutsReferenceBuilder {
         let switchLayers =
             layerNames
             .filter { $0 != activeLayer }
-            .map { KeybindingCatalog.switchLayerCommand($0) }
+            .map {
+                KeybindingCatalog.switchLayerCommand(
+                    $0,
+                    icon: layerIcons[$0]
+                )
+            }
         // A band names its group once: its rows are filed against it.
         func band(
             _ title: String,
@@ -230,7 +236,7 @@ extension ShortcutsReferenceBuilder {
         _ end: SequenceEndKey,
         names: [String],
         label: String,
-        icon: String?,
+        icon: ShortcutGlyph?,
         unavailable: Bool = false,
         monospaced: Bool = false
     ) -> ShortcutRow {
@@ -315,7 +321,7 @@ extension ShortcutsReferenceBuilder {
 
     /// A binding's own symbol where it names an SF Symbol, else the
     /// Lua mark; a name that is none is a Config Issue (#2544).
-    static func ownIcon(_ meta: KeyBindingMeta) -> String {
-        meta.usableSymbol ?? LuaMark.symbol
+    static func ownIcon(_ meta: KeyBindingMeta) -> ShortcutGlyph {
+        .symbol(meta.usableSymbol ?? LuaMark.symbol)
     }
 }

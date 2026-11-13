@@ -15,6 +15,7 @@ enum ShortcutsReferenceBuilder {
         landings: [Int: ScreenLabel] = [:],
         resizeStep: Int,
         layerNames: [String],
+        layerIcons: [String: String] = [:],
         lenses: [String] = [],
         unread: [UnreadChord] = []
     ) -> ShortcutsReference {
@@ -119,7 +120,8 @@ enum ShortcutsReferenceBuilder {
                 label: binding.desc.isEmpty
                     ? cmd.resolvedLabel : binding.desc,
                 combo: combo,
-                icon: binding.meta.usableSymbol ?? icon(for: cmd),
+                icon: binding.meta.usableSymbol.map(ShortcutGlyph.symbol)
+                    ?? icon(for: cmd),
                 unavailable: cmd.unavailable != nil,
                 detail: cmd.detail?(),
                 fold: ShortcutFold.tag(
@@ -157,6 +159,7 @@ enum ShortcutsReferenceBuilder {
             desktops: offer,
             resizeStep: resizeStep,
             layerNames: layerNames,
+            layerIcons: layerIcons,
             lenses: lenses,
             rows: { rows($0, band: $1, regroups: true) }
         )

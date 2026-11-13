@@ -206,7 +206,7 @@ struct KeySequenceCardRowsTests {
             hint.branches.map(\.symbol) == [BranchMark.symbol, "app.badge"]
         )
         let row = KeySequenceHintView.branchRow(hint.branches[0])
-        #expect(row.icon == "folder")
+        #expect(row.icon == .symbol("folder"))
         #expect(row.accessoryIcon == "chevron.forward")
         #expect(
             ShortcutsReferenceBuilder.verbSymbols.contains(BranchMark.symbol)

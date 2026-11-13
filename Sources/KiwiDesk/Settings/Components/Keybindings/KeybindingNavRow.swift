@@ -32,7 +32,7 @@ struct NavRow: View, Equatable {
     struct Drawn: Equatable {
         let title: String
         let help: String?
-        let icon: String?
+        let icon: ShortcutGlyph?
         let unavailable: String?
         let detail: String?
         /// The key sequences that also run the action (#1871).
@@ -129,7 +129,7 @@ struct NavRow: View, Equatable {
                         .frame(width: 16, height: 16)
                         .accessibilityHidden(true)
                     } else if let glyph = drawn.icon {
-                        IconGlyphLabel(icon: glyph)
+                        ShortcutGlyphView(glyph: glyph)
                     }
                 }
             VStack(alignment: .leading, spacing: 2) {

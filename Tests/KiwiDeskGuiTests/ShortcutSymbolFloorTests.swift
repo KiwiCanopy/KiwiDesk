@@ -115,9 +115,9 @@ struct ShortcutSymbolFloorTests {
         let since = try firstMacOS()
         #expect(since.count > 1000, "the availability table read empty")
         let drawn = Set(
-            ShortcutRowSymbolTests.drawable().compactMap(
-                ShortcutsReferenceBuilder.icon(for:)
-            )
+            ShortcutRowSymbolTests.drawable().compactMap {
+                ShortcutsReferenceBuilder.icon(for: $0)?.symbolName
+            }
                 + ShortcutFold.Family.allCases.compactMap(
                     ShortcutsReferenceBuilder.foldIcon(for:)
                 )

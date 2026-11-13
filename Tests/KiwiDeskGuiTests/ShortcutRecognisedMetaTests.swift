@@ -50,7 +50,7 @@ struct ShortcutRecognisedMetaTests {
                 ])
             )
         )
-        #expect(own.label == "West" && own.icon == "star")
+        #expect(own.label == "West" && own.icon == .symbol("star"))
         let described = try #require(
             focusRow(
                 reference([
@@ -65,7 +65,7 @@ struct ShortcutRecognisedMetaTests {
         )
         #expect(described.label == "West")
         #expect(described.icon == plain.icon)
-        #expect(plain.icon != LuaMark.symbol)
+        #expect(plain.icon != .symbol(LuaMark.symbol))
     }
 
     @Test("Its own group moves the row, keeping its name and symbol")

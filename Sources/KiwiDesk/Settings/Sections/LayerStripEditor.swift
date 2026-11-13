@@ -97,6 +97,7 @@ struct LayerStripEditor: View {
     private func layerChip(_ name: String) -> some View {
         ShortcutLayerChip(
             name: name,
+            icon: chipIcon(name),
             selected: selected == name
         ) {
             selected = name
@@ -108,6 +109,14 @@ struct LayerStripEditor: View {
             chipSizes[name] = $0
         }
         .rowActions { chipMenu(name) }
+    }
+
+    /// The draft layer's icon, never `default`'s (#3267 ▸ Ruling 3).
+    private func chipIcon(_ name: String) -> ShortcutGlyph? {
+        guard name != KeyLayer.defaultName else { return nil }
+        return ShortcutGlyph(
+            icon: model.config.layers.first { $0.name == name }?.icon
+        )
     }
 
     @ViewBuilder

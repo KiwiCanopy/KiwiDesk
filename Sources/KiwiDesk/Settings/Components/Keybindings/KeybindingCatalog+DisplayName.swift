@@ -106,7 +106,7 @@ extension KeybindingCatalog {
     ) -> [NavCommand] {
         var commands = navigationGroups(spaces: spaces)
             .flatMap(\.commands)
-        commands += layerNames.map(switchLayerCommand)
+        commands += layerNames.map { switchLayerCommand($0) }
         for step in steps {
             commands += resizeAndFloat(step: step)
         }
