@@ -61,7 +61,8 @@ struct GestureListEditsTests {
     @Test("a re-key onto a held key is refused and changes nothing")
     func rekeyRefusesAClash() {
         var base = GestureMap()
-        let held = GestureKey(.wheel, [.control, .option, .command])
+        // A seed holds it (#3281: ⌃⌥ sideways switches Spaces).
+        let held = GestureKey(.wheelX, [.control, .option])
         let before = base
         #expect(!GestureListEdits.rekey(wheel, to: held, in: &base))
         #expect(base == before)
@@ -100,5 +101,25 @@ struct GestureListEditsTests {
         #expect(next.last?.key == mine)
         let kept = rows.dropFirst().map(\.id)
         #expect(next.prefix(kept.count).map(\.id) == Array(kept))
+    }
+
+    /// The gesture pop-up's groups (#3281): every input a card can
+    /// offer lands under exactly one heading, so an input a front
+    /// starts firing never drops out of the menu.
+    @Test("every fired input lands in exactly one pop-up group")
+    @MainActor func everyInputHasAGroup() {
+        for device in [GestureInput.Device.mouse, .trackpad] {
+            let offered = GestureListEdits.inputs(on: device)
+            #expect(!offered.isEmpty)
+            let grouped = GestureListWords.groups(of: offered)
+                .flatMap(\.inputs)
+            #expect(Set(grouped) == Set(offered))
+            #expect(grouped.count == offered.count)
+        }
+        let fired = GestureInput.allCases.filter(\.isFired)
+        let grouped = GestureListWords.groups(of: fired)
+            .flatMap(\.inputs)
+        #expect(Set(grouped) == Set(fired))
+        #expect(grouped.count == fired.count)
     }
 }

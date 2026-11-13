@@ -4,23 +4,50 @@ import Foundation
 /// Determines initial space counts and layout modes per screen (#678).
 /// Budgets total spaces sub-linearly, apportioning by width.
 public enum StarterAllocation {
-    /// Spaces for 1…5 screens.
-    static let ladder = [3, 5, 7, 8, 9]
+    /// Spaces for 1…4 screens (#3294).
+    static let ladder = [3, 5, 5, 5]
     /// Soft cap derived from default shortcut digit capacity.
     public static let softCap = DefaultKeybindings.digitCapacity
     /// Floor outranking `softCap`: at least one space per screen.
     public static let minShare = 1
     /// Upper bound share for a single screen.
     public static let maxShare = 3
+    /// Screen count from which the widest screen alone holds two
+    /// Spaces and every other screen one (#3294).
+    static let wideDeskScreens = 4
 
-    /// Total space budget for `screenCount`; min 1 per screen always wins.
+    /// Total space budget for `screenCount`: the ladder, then one
+    /// per screen plus one, capped at `softCap`; min 1 per screen
+    /// always wins.
     public static func budget(screenCount: Int) -> Int {
         let count = max(1, screenCount)
         let budgeted =
             count <= ladder.count
             ? ladder[count - 1]
-            : min(softCap, ladder[ladder.count - 1] + count - ladder.count)
+            : min(softCap, count + 1)
         return max(budgeted, count)
+    }
+
+    /// Each screen's share of `budget`: proportional by width
+    /// below `wideDeskScreens`; from there one Space a screen and
+    /// the remainder on `widest`, by default the widest by points
+    /// (#3294).
+    static func deskShares(
+        widths: [CGFloat],
+        budget: Int,
+        widest: Int? = nil
+    ) -> [Int] {
+        guard widths.count >= wideDeskScreens else {
+            return shares(widths: widths, budget: budget)
+        }
+        var share = Array(repeating: minShare, count: widths.count)
+        if let widest = widest ?? fillOrder(widths: widths).first {
+            share[widest] += min(
+                maxShare - minShare,
+                max(0, budget - widths.count)
+            )
+        }
+        return share
     }
 
     /// Apportions budget across screens proportionally by width in points,
@@ -68,17 +95,19 @@ public enum StarterAllocation {
     }
 
     /// Layouts per screen in positional order (index 0 = main).
-    /// Each screen's FIRST space is `lead(_:of:)`'s before its own
-    /// list is read (#1018) — the deliberate exception to the
-    /// no-repeat rule, appended without consulting `used` (it
-    /// still JOINS `used` after, so no screen draws it twice).
+    /// A screen of two or more Spaces opens in `lead(_:of:)`'s
+    /// layout before its own list is read (#1018) — the
+    /// deliberate exception to the no-repeat rule, appended
+    /// without consulting `used` (it still JOINS `used` after, so
+    /// no screen draws it twice). A one-Space screen is filled
+    /// last, by `singleSpaceLayout(for:placed:)` (#3294).
     public static func modes(sizes: [CGSize]) -> [[LayoutMode]] {
         guard !sizes.isEmpty else { return [] }
         if hasUltrawideCompanion(sizes) {
             return ultrawideModes(sizes: sizes)
         }
         let widths = sizes.map(\.width)
-        let share = shares(
+        let share = deskShares(
             widths: widths,
             budget: budget(screenCount: sizes.count)
         )
@@ -91,7 +120,7 @@ public enum StarterAllocation {
             repeating: [],
             count: sizes.count
         )
-        for index in order {
+        for index in order where share[index] > 1 {
             var quota = share[index]
             if index == host {
                 quota -= 1
@@ -114,6 +143,13 @@ public enum StarterAllocation {
             if index == host { modes.append(.floating) }
             result[index] = modes
         }
+        fillSingleSpaces(
+            &result,
+            shares: share,
+            shapes: shapes,
+            order: order,
+            besideUltrawide: false
+        )
         return result
     }
 
@@ -152,10 +188,11 @@ public enum StarterAllocation {
         }
     }
 
-    /// Takes `quota` layouts off the list. The obligation: never
-    /// repeat while this screen still has an unheld entry, and
-    /// when the budget forces a repeat, rotate PAST the held one
-    /// so the duplicate is never adjacent to its twin.
+    /// Takes `quota` layouts off the list, never one `used` while
+    /// an unused entry remains; past that, an entry this screen
+    /// does not hold yet. Under #3294's ladder `quota` is at most
+    /// one, the only range where a repeat never sits beside its
+    /// twin (`oneScreenAtMostHoldsThree`).
     private static func take(
         _ quota: Int,
         from list: [LayoutMode],
@@ -168,19 +205,9 @@ public enum StarterAllocation {
             picked.append(mode)
             used.insert(mode)
         }
-        guard !list.isEmpty else { return picked }
-        var cursor = 0
-        while picked.count < quota {
+        while picked.count < quota, let first = list.first {
             let held = Set(picked + beside)
-            if let fresh = list.firstIndex(where: {
-                !held.contains($0)
-            }) {
-                picked.append(list[fresh])
-                cursor = fresh + 1
-            } else {
-                picked.append(list[cursor % list.count])
-                cursor += 1
-            }
+            picked.append(list.first { !held.contains($0) } ?? first)
         }
         return picked
     }

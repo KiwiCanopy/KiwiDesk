@@ -61,17 +61,26 @@ struct GestureBindingTests {
         }
     }
 
-    @Test("the seeds are the ten default rows")
+    @Test("the seeds are the eight default rows")
     func seeds() {
         let step: ScrollChord = [.control, .option, .command]
         let resolved = GestureSeeds.resolved(base: GestureMap(), profile: nil)
-        #expect(resolved.count == 10)
+        #expect(resolved.count == 8)
         #expect(resolved[GestureKey(.swipe2, hyper)] == .family(.focus))
+        #expect(resolved[GestureKey(.swipe2, step)] == .family(.space))
+        // A mouse holds ⌃⌥ alone (#3281): the wheel walks the
+        // list, sideways switches Spaces, and ⌃⌥⌘ binds no wheel.
         #expect(resolved[GestureKey(.wheel, hyper)] == .family(.walk))
-        #expect(resolved[GestureKey(.wheel, step)] == .family(.space))
-        // A tilt wheel keeps 4.2.x's pan and Space step.
-        #expect(resolved[GestureKey(.wheelX, hyper)] == .family(.walk))
-        #expect(resolved[GestureKey(.wheelX, step)] == .family(.space))
+        #expect(resolved[GestureKey(.wheelX, hyper)] == .family(.space))
+        #expect(resolved[GestureKey(.wheel, step)] == nil)
+        #expect(resolved[GestureKey(.wheelX, step)] == nil)
+        // No click or side-button row: a bare click stays the app's.
+        #expect(
+            !resolved.keys.contains {
+                [.click, .rightClick, .wheelClick, .sideButtons]
+                    .contains($0.input)
+            }
+        )
         #expect(
             resolved[GestureKey(.drag, [.control, .command])]
                 == .grab(.move)

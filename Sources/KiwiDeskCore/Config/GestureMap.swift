@@ -85,10 +85,10 @@ public enum GestureSeeds {
         GestureKey(.drag, pan): .grab(.resize),
         GestureKey(.swipe2, pan): .family(.focus),
         GestureKey(.wheel, pan): .family(.walk),
-        GestureKey(.wheelX, pan): .family(.walk),
+        // ⌃⌥ alone on a mouse: the wheel walks, sideways switches
+        // Spaces (#3281); the trackpad keeps ⌃⌥⌘ for the step.
+        GestureKey(.wheelX, pan): .family(.space),
         GestureKey(.swipe2, step): .family(.space),
-        GestureKey(.wheel, step): .family(.space),
-        GestureKey(.wheelX, step): .family(.space),
     ]
 
     /// The bound keys once `base` lies over the seeds and `profile`

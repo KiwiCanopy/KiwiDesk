@@ -136,7 +136,7 @@ struct ShortcutsSegmentTests {
 
     /// The reveal picks the part before it scrolls, the recorder's
     /// Go to switches the part before it reaches the row's, and the
-    /// segment's own pick is the one writer arming the gestures play.
+    /// segment's own pick opens the part at its top.
     @Test("hits, Go to and the pick reach the part")
     func wiring() throws {
         let reveal = try Self.source("SettingsView+Reveal.swift")
@@ -156,15 +156,7 @@ struct ShortcutsSegmentTests {
         let segment = try Self.source(
             "Sections/ShortcutsSection+Segment.swift"
         )
-        #expect(
-            segment.contains(
-                "ifpicked==.mouse,!gesturesPlayed{gesturesPlayed=true"
-                    + "gesturesPlay=true}"
-            )
-        )
         let page = try Self.source("Sections/ShortcutsSection.swift")
-        // Its declaration is the page's one write.
-        #expect(page.components(separatedBy: "gesturesPlay=").count == 2)
         // A pick opens the part at its top — an anchor always laid
         // out — before the part changes.
         #expect(

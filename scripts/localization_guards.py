@@ -240,6 +240,11 @@ GLOSSARY = {
     # is no longer caught.
     "magic",
     "mouse",
+    # Logitech's mouse app, named in the Mouse card's help (#3281),
+    # the same class: a product name no locale translates. Trade: a
+    # stray English "options" in non-Latin prose is no longer caught.
+    "logi",
+    "options",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     # The one edge both bars sit on (#1517): a product name, kept

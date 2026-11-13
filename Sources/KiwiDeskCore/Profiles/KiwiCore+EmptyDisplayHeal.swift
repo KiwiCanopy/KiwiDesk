@@ -7,8 +7,8 @@ import Foundation
 /// pins both call sites and the ledger's writers.
 extension KiwiCore {
     /// Seeds one space on every connected display left empty: a
-    /// fresh number in `StarterAllocation`'s lead layout for that
-    /// screen (#1018), pinned to the monitor so the next resolve
+    /// fresh number in `StarterAllocation`'s first layout for that
+    /// screen (#1018, #3294), pinned to the monitor so the next resolve
     /// keeps it. Heal, never refuse — the argument is
     /// `docs/design-decisions.md` ▸ Profiles.
     ///

@@ -7821,37 +7821,75 @@ report 2560 pt and want the same answer, while a Retina laptop
 reports 1728 and wants laptop layouts despite having more pixels
 than either.
 
+:::unreleased
 **Spaces are budgeted, never added up per screen.** A laptop's
 three plus a 27"'s five would be eight keys to learn on day one,
-most of them empty — so the total is 3 · 5 · 7 · 8 · 9 by screen
-count and then one more each, soft-capped at ten, with each
-screen's share proportional to its width and clamped to 1...3.
+most of them empty — so the total is 3 · 5 · 5 · 5 by screen
+count and then one more per screen (N + 1), soft-capped at ten,
+and more screens never get fewer spaces (owner ruling, #3294,
+replacing 3 · 5 · 7 · 8 · 9). Below four screens each screen's
+share is proportional to its width and clamped to 1...3; from
+four to nine, the widest screen holds its lead and the Floating
+space, and every other screen one space; from ten, where the cap
+meets the count, every screen holds one and there is no Floating
+space.
 The cap is on *spaces*, so min-one-per-screen outranks it:
 eleven displays gets eleven spaces, because a screen with none
 has nowhere for a window to resolve to. Three rules ride on top —
-exactly one Floating space, on the largest screen that has room
+exactly one Floating space, on the widest screen that has room
 beside it; the lead ruled below; and no layout twice unless the
 budget forces it or the lead repeats it deliberately. The
-count tails off because screens four and five are almost always
-glanceable (logs, chat, a stream) and want one space that is
-always the same; the cost of a space is a key to bind and a name
-to recall, not screen area. And we run out of keys before we run
-out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
-left.
+count holds at five from two screens to four because a third or
+fourth screen is almost always glanceable (logs, chat, a stream)
+and wants one space that is always the same — the old ladder
+handed a four-screen desk eight, most never used; the cost of a
+space is a key to bind and a name to recall, not screen area.
+And we run out of keys before we run out of spaces: past ⌥1–9
+and ⌥0 there are no default go-to keys left.
+:::
 
+:::unreleased
 **Beside an ultrawide, Scrolling lives on the ultrawide alone.**
 With an ultrawide or super ultrawide among several screens, the
-budget and lead rules around this paragraph give way: the ultrawides lead Scrolling, every
-other screen leads Monocle and never scrolls, and each screen
-gets three spaces ending in its own Floating space — a
-widescreen Monocle · BSP · Floating, a portrait screen Monocle ·
-Grid (one column of three) · Floating, a laptop Monocle · Grid
-(two by two) · Floating. A Scrolling row belongs where it has
-width to run; beside one, the other screen's job is to hold
-whole windows. The total is three a screen, capped at ten, and
-each screen has its own Floating space — the one place the
-budget and the one-Floating rule above do not bind. (Owner
-ruling, #1662.) A laptop's Grid is two by two rather than one
+lead rule around this paragraph gives way: the ultrawides lead
+Scrolling, every other screen of two or more spaces leads Monocle,
+and each such screen ends in its own Floating space — below four
+screens the one exception to "exactly one Floating space". A
+Scrolling row belongs where it has width to run; beside one, the
+other screen's job is to hold whole windows. (Owner ruling,
+#1662.) The budget is the ladder's (#3294; it was three a
+screen), so below four screens a companion holding two spaces — a
+MacBook beside an ultrawide, the common case — is Monocle ·
+Floating, and the screen holding three, in practice the
+ultrawide, is Scrolling · Stack · Floating; a widescreen companion
+as wide as a short ultrawide takes that third space instead, with
+BSP. Per class again, two rules of #3294 bend here: from four
+screens the lead and the Floating space go to the widest
+*ultrawide*, not the widest screen, and a one-space companion
+whose single-Space order reaches Scrolling takes Monocle instead,
+even as a repeat (ruling, 2026-11-13, #3294, citing #1662).
+:::
+
+:::unreleased
+**From four screens there is one Floating space, on the widest,
+beside an ultrawide too** (owner ruling, #3294, overriding
+#1662's Floating on every screen). #1662 gave each companion its
+own Floating space when each held three, so a floating window was
+one key away on every screen at the cost of one space in three.
+On the N + 1 ladder every screen past the widest holds one space,
+and a Floating space there would leave that screen tiling
+nothing — the one job a glanceable screen has. The widest screen
+is where a floating window has the most room, and it already
+holds two spaces, so the Floating space goes there and the desk
+keeps the "exactly one" rule the ladder has always had. Below
+four screens a companion holding two keeps #1662's own Floating
+space; at three screens width order wins, so the narrowest — a
+MacBook beside an ultrawide and a 27", say — holds one space,
+Monocle, and only a companion holding two keeps Monocle ·
+Floating (owner ruling, 2026-11-13, #3294).
+:::
+
+A laptop's Grid is two by two rather than one
 row because a laptop alone reaches the same tuning when a Space
 is switched to Grid, and a two-cell cap piles the third window
 into the last cell, which reads as a broken Grid; the dynamic
@@ -7890,6 +7928,27 @@ Monocle — the one per-class exception. And
 Scrolling leads several screens at once, which the
 no-layout-twice rule carves out explicitly: an accidental
 repeat is still a bug, this one is the feature.
+
+:::unreleased
+**A screen holding one space is not led: it takes its shape's
+single-Space order** (owner ruling, #3294, amending #1018). A lead
+introduces the spaces behind it; on a screen with none behind,
+the Scrolling lead would be its only layout, and a four-screen
+desk would open three screens alike. So a one-space screen takes
+the first layout of its order that no other screen on the desk
+holds — laptop Monocle, Scrolling; desktop Grid, Stack, BSP,
+Scrolling; ultrawide Stack, Track, Grid; portrait Stack, Grid,
+Monocle — and once every entry is taken, the one placed least,
+earlier in the order on a tie. A laptop's order leads Monocle,
+against its tiled list, because one space on a small screen is a
+screen of whole windows; that is also what #1018 gave the
+smallest screen, so a laptop on a big desk still opens in
+Monocle. Two consequences are accepted: from five screens the
+orders run out and an entry repeats, its tuning staying the
+first screen's (`StarterSetup.hosts`); and from ten, where every
+screen holds one space, a desk may have no Scrolling space at
+all, so #1018's "at least one" holds only below that.
+:::
 
 **A starter Scrolling slot is set, not left on `auto`.** `auto`
 resolves near-full — one window with a sliver of the next — which
@@ -16570,14 +16629,14 @@ Home, the other two add a navigator.
   shortcut groups, one word in every catalog. Open applications
   now follows Layers, so #1520's refusal to move it up concerned
   the one long page and is spent.
-- **Mouse & Trackpad** holds open groups ordered by where the hand
-  is — on your windows, holding a modifier, on the KiwiShelf — each
-  with its own pictures, and no Layers card, since a layer does
-  not act on a gesture. The part replaces #1726's collapsed card,
-  the picture strip the shut card drew, and Mouse & trackpad's
-  first chip and the rule after it: open groups need no summary
-  and no strip to be found. Its first picture still plays once per
-  visit on the user's own click, now on the segment.
+- **Mouse & Trackpad** opens with the Mouse and Trackpad binding
+  cards, the part's own settings (#3298), then holds open groups
+  ordered by where the hand is — on your windows, holding a
+  modifier, on the KiwiShelf — each with its own pictures, and no
+  Layers card, since a layer does not act on a gesture. The part
+  replaces #1726's collapsed card, the picture strip the shut card
+  drew, and Mouse & trackpad's first chip and the rule after it:
+  open groups need no summary and no strip to be found.
 - Layers draws on Built-in and Personal and reads the one
   `nav.shortcutsLayer`, so the layer picked survives a switch. The
   part shown is a `SettingsNavigation` reading too (#1127):
@@ -16609,8 +16668,7 @@ what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
 
 :::unreleased
-**The bindings themselves are a list per device, between the
-modifier group and the shelf group** (#3199 ▸ Ruling, owner
+**The bindings themselves are a list per device** (#3199 ▸ Ruling, owner
 2026-11-11; #3183). One **Mouse** card and one **Trackpad** card,
 each a list of rows as macOS's App Shortcuts are, rather than a
 fixed slot per gesture: one gesture may be bound several times with
@@ -16623,6 +16681,26 @@ card leads with its input's Natural scrolling, under Apple's name,
 since a direction on that card reads through it. An input no front
 fires yet has no row, so the list never offers a binding that would
 do nothing.
+
+*Amended (#3281, owner 2026-11-13).* A mouse holds one chord, ⌃⌥:
+the wheel walks the window list and the sideways wheel switches
+Spaces, so the step a trackpad reaches with ⌃⌥⌘ costs a mouse no
+third key, and the ⌃⌥⌘ wheel rows are gone. This gives up the
+shared-modifier pairing the Space step keys argue below (#1655) on
+a mouse alone: the keys and the trackpad keep ⌃⌥⌘, and one chord
+for the whole mouse is worth the pair. A mouse without a sideways
+wheel gets no fallback (owner, 2026-11-13): ⇧ held with the wheel
+reaches KiwiDesk as a vertical scroll, and routing it sideways
+would make an input act that nobody bound. A bound button press
+is swallowed with its release and an unbound one passes: an app
+that saw half a press would act on a release it never pressed for,
+and a press that no binding takes must cost the app nothing. A
+click binding needs keys, or every plain click in every app would
+be KiwiDesk's the moment one is bound. The Natural
+scrolling value is a pop-up over the recorder column, in the shared
+setting row: segments break the every-locale fit (#291) on the
+longest *Off*, and the row then lines up with the gesture rows
+under it.
 :::
 
 **An entry is one drawn picture and one sentence, and the picture
@@ -16638,21 +16716,13 @@ is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
-When the user's own click opens the Mouse & Trackpad part, its
-first picture also plays once and rests (owner ruling 2026-09-29), and the
-difference from the rest of this page is the reader. The rule's
-other exception, a layout thumbnail that is read rather than
-compared (▸ Navigation & saving), plays once as it appears
-because the tour and the preset preview are opened in order to
-be read. Opening this part is the same kind of act — a request to
-read what is inside — so one picture playing is the content
-arriving, and it tells the user the pictures move. It stays one
-picture: the part is still a reference consulted in the middle of
-something else, and a column of gestures playing in turn would be
-motion no one came for. So it plays at most once per visit, only
-on the click — a search hit, Go to or a diff jump opens the part
-to reach one row, whose wash is the motion that answers them —
-and never under Reduce Motion.
+:::unreleased
+**No picture plays by itself** (#3281, owner 2026-11-13). The
+binding cards lead the part, so a click on Mouse & Trackpad opens
+settings to edit, not a picture to read, and a picture moving
+below the cards draws the eye from them. Hover is the one
+trigger, and Reduce Motion stills it.
+:::
 
 
 **An entry lands with its feature, and greys where its surface is

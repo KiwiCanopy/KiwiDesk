@@ -32,7 +32,7 @@ struct GesturesScrollWiringTests {
         #expect(
             part.contains(
                 "SettingsSection(SettingsCatalog.shortcuts.gesturesModifier)"
-                    + "{GesturesScrollEntries(model:model,"
+                    + "{GesturesScrollEntries(model:model)"
             )
         )
     }

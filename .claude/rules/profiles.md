@@ -335,22 +335,30 @@ change here:
   apply disagree. `SparseModeFallbackTests` holds both arms.
 - **Beside an ultrawide, Scrolling lives on the ultrawides
   alone** (#1662): with an ultrawide among several screens,
-  `StarterAllocation.ultrawideModes` replaces the ladder — every
-  other screen leads Monocle and draws from
-  `companionLayouts`, three spaces a screen, each ending in its
-  own Floating space and each companion its ruled layout,
-  independent of what the others drew. That walk owns its own
-  lead and its Floating; the ladder's lead is `lead(_:of:)`
-  below and its one Floating `floatingHost`. A change to either
+  `StarterAllocation.ultrawideModes` replaces the ladder's walk
+  on the ladder's budget — every other screen of two or more
+  Spaces leads Monocle and ends in its own Floating space, a
+  third Space taking `ruledLayout(for:)`. From `wideDeskScreens`
+  the two Spaces go to the widest ULTRAWIDE (`deskShares`'
+  `widest`), and a one-Space non-ultrawide takes Monocle where
+  its single-Space order reaches Scrolling (`fillSingleSpaces`'
+  `besideUltrawide`, #3294). That walk owns its own lead and its
+  Floating; the ladder's lead is `lead(_:of:)` below and its one
+  Floating `floatingHost`. A change to either
   rule names the allocation it binds — a new lead or Floating
   rule in one is not in the other
   (`StarterUltrawideAllocationTests`).
 - **A screen's FIRST space is the lead, and the lead may
   repeat.** On the ladder, `StarterAllocation.lead(_:of:)`
-  decides it before the
-  screen's own list is read — Scrolling everywhere but the
+  decides it for every screen holding two or more Spaces before
+  the screen's own list is read — Scrolling everywhere but the
   narrowest screen, which leads Monocle — so it is appended
-  WITHOUT consulting `used` and joins it afterwards. A change
+  WITHOUT consulting `used` and joins it afterwards. A screen
+  holding ONE Space is not led: both walks fill it last through
+  `StarterAllocation.singleSpaceLayout(for:placed:)`, its shape's
+  single-Space order against everything already placed (#3294,
+  `StarterSingleSpaceTests`); route a one-Space screen anywhere
+  else and a big desk opens three screens alike. A change
   that folds the lead back into the ordinary fill silently
   restores best-first opening, and a change that makes the
   no-repeat rule absolute breaks the lead; `StarterLeadTests`
@@ -363,10 +371,13 @@ change here:
   is how a space takes its mode from one screen and its pin from
   another (`StarterSetupSeedTests`).
 - **The share arithmetic is proportional, not merely summing.**
-  `StarterAllocation.shares` must keep equal screens equal and
-  never let a narrower screen out-rank a wider one — both are
-  invisible to a sum-and-clamp assertion, and both shipped
-  (`StarterAllocationTests`).
+  Both walks take their shares from
+  `StarterAllocation.deskShares`: below `wideDeskScreens` it is
+  `shares`, which must keep equal screens within one of each
+  other and never let a narrower screen out-rank a wider one —
+  both are invisible to a sum-and-clamp assertion, and both
+  shipped; from `wideDeskScreens` it is one Space a screen and
+  the remainder on the widest (#3294, `StarterAllocationTests`).
 
 ## A Desktop is keyed by its stamp, never by its number (#1147)
 
@@ -1278,7 +1289,7 @@ never joins `ConfigArtifact`.
 ## A screen is never left with zero spaces (#1175)
 
 A connected screen the space→display resolution leaves empty
-gets one numbered space seeded — in `StarterAllocation`'s lead
+gets one numbered space seeded — in `StarterAllocation`'s first
 layout for that screen, pinned to it so the next resolve keeps
 it — by `healEmptyDisplays`. Heal, never refuse; the argument is
 `docs/design-decisions.md` ▸ Profiles ▸ *A screen left with no

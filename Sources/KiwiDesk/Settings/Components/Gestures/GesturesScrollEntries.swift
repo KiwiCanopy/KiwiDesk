@@ -1,19 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): its
-/// first group. The ⌃⌥ entry with its swipe length, then the ⌃⌥⌘
-/// entry; their chords and Natural scrolling live in the Mouse and
-/// Trackpad cards below (#3183). Each
+/// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): the
+/// ⌃⌥ entry with its swipe length, then the ⌃⌥⌘ entry; their chords
+/// and Natural scrolling live in the Mouse and Trackpad cards
+/// (#3183). Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's
 /// resolved values.
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
-    /// The entry that plays once as it appears, spending this
-    /// (`GesturesPart`).
-    @Binding var playing: GestureItem?
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
 
@@ -21,8 +18,7 @@ struct GesturesScrollEntries: View {
         GestureEntry(
             .scrollStep,
             settings: model.config.settings,
-            gestures: gestures,
-            playing: $playing
+            gestures: gestures
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 reachRow(.longSwipes) {
@@ -50,14 +46,14 @@ struct GesturesScrollEntries: View {
         SettingsCatalog.shortcuts.gestures.children
     }
 
-    /// ⌃⌥⌘ + scroll (#1519): one Space per swipe or notch, so no
-    /// swipe-length rows.
+    /// ⌃⌥⌘ + swipe (#1519), and a mouse's ⌃⌥ sideways wheel
+    /// (#3281): one Space per swipe or notch, so no swipe-length
+    /// rows.
     private var spaceStepEntry: some View {
         GestureEntry(
             .spaceStep,
             settings: model.config.settings,
-            gestures: gestures,
-            playing: $playing
+            gestures: gestures
         ) {
             EmptyView()
         }

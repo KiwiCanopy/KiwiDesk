@@ -52,11 +52,11 @@ extension GestureListRow {
         switch action {
         case nil: GestureListWords.chooseAction
         case .family(let family): GestureListWords.family(family)
-        case .split: GestureListWords.perDirection
+        case .split: GestureListWords.perDirection(key.input)
         case .grab(let grab): GestureListWords.grab(grab)
         case .run(let run):
             catalog.command(running: run.lua)?.resolvedLabel
-                ?? GestureListWords.value(action)
+                ?? GestureListWords.value(action, on: key.input)
         }
     }
 
@@ -99,7 +99,7 @@ extension GestureListRow {
             SequencePickPin(
                 id: family.rawValue,
                 title: GestureListWords.family(family),
-                symbol: "arrow.left.arrow.right",
+                symbol: ShortcutsReferenceBuilder.familyIcon(for: family),
                 picked: action == .family(family)
             ) { bind(.family(family)) }
         }
@@ -113,29 +113,19 @@ extension GestureListRow {
     }
 }
 
-/// A row's gesture icon (#3199 ▸ Ruling): the gesture's symbol, a
-/// swipe or a tap carrying its finger count as a badge.
+/// A row's gesture icon (#3199 ▸ Ruling, #3281): the gesture's
+/// symbol or custom glyph.
 struct GestureIcon: View {
     let input: GestureInput
     static let width: CGFloat = 26
 
     var body: some View {
-        Image(systemName: GestureListWords.symbol(input))
-            .font(.body)
+        // A tap's and a swipe's dots count its fingers (#3281).
+        GlyphImage(GestureListWords.symbol(input))
+            .imageScale(.medium)
             .foregroundStyle(SettingsTheme.ink2)
-            .frame(width: Self.width, height: 20)
-            .overlay(alignment: .bottomTrailing) {
-                if let fingers = input.fingers {
-                    Text(verbatim: "\(fingers)")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(SettingsTheme.ink)
-                        .padding(.horizontal, 3)
-                        .background(
-                            Capsule().fill(SettingsTheme.chipRest)
-                        )
-                        .offset(x: 2, y: 2)
-                }
-            }
+            .frame(width: 20, height: 20)
+            .frame(width: Self.width)
             .accessibilityHidden(true)
     }
 }
@@ -151,7 +141,7 @@ extension GestureListRow {
                 app: key.spelling,
                 subject: GestureListWords.rowName(key),
                 reading: reading,
-                value: GestureListWords.value(action)
+                value: GestureListWords.value(action, on: key.input)
             )
         }
     }

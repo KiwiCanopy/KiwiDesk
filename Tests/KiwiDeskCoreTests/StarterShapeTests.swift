@@ -98,10 +98,10 @@ struct StarterShapeTests {
             StarterSetup.settings(sizes: [ultrawide, superWide])
                 .stack.masterCount == 3
         )
-        // Stack lands twice across four screens — three 27"s draw
-        // Grid, Stack and BSP, and the portrait's second space is
-        // a forced repeat of Stack. The FIRST slot (a 27") tunes
-        // it, never the later portrait.
+        // Four screens: the first 27" holds Scrolling and
+        // Floating, the others one Space each — Grid, Stack, and
+        // the portrait, finding both taken, Monocle (#3294). The
+        // Stack sits on a 27", never the portrait.
         let four = StarterSetup.settings(
             sizes: [screen27, screen27, screen27, portrait]
         )
@@ -110,10 +110,12 @@ struct StarterShapeTests {
 
     @Test("Scrolling on a portrait secondary scrolls vertically")
     func portraitSecondaryOverride() throws {
-        // A 1280 pt laptop is narrower than the 1440 pt portrait,
-        // so it leads Monocle and the portrait leads Scrolling.
-        let small = CGSize(width: 1280, height: 800)
-        let sizes = [screen27, portrait, small]
+        // A 1024 pt screen is the narrowest and holds one Space;
+        // the 1512 pt laptop main is the widest and tunes
+        // Scrolling, which the portrait leads too.
+        let small = CGSize(width: 1024, height: 768)
+        let main = CGSize(width: 1512, height: 982)
+        let sizes = [main, portrait, small]
         let overrides = StarterSetup.scrollingOverrides(sizes)
         let portraitScrolling = StarterSetup.slots(sizes)
             .filter { $0.screen == 1 && $0.mode == .scrolling }
@@ -148,12 +150,12 @@ struct StarterShapeTests {
             StarterSetup.settings(sizes: [portrait, ultrawide])
                 .scrolling.anchor == .center
         )
-        // A laptop main beside an ultrawide leads Monocle and never
-        // scrolls; the ultrawide tunes Scrolling.
         // Two screens lead Scrolling — a laptop main and a wider
-        // 27" — and the WIDER one tunes it, never the main.
+        // 1920 pt screen — and the WIDER one tunes it, never the
+        // main.
         let pair = [
-            CGSize(width: 1512, height: 982), screen27,
+            CGSize(width: 1512, height: 982),
+            CGSize(width: 1920, height: 1080),
             CGSize(width: 1024, height: 768),
         ]
         #expect(StarterSetup.scrollingHost(pair) == .desktop)
@@ -174,6 +176,10 @@ struct StarterShapeTests {
             for other in shapes { setups.append([main, other]) }
         }
         setups.append([screen27, portrait, CGSize(width: 1280, height: 800)])
+        setups.append([
+            CGSize(width: 1512, height: 982), portrait,
+            CGSize(width: 1024, height: 768),
+        ])
         // A portrait MAIN that leads Scrolling (the 1280 pt laptop is
         // narrower, so it leads Monocle): vertical is profile-wide,
         // and the laptop's own Scrolling, if any, turns back.

@@ -58,9 +58,10 @@ struct StarterLeadTests {
 
     @Test("the smallest screen leads Monocle, the rest Scrolling")
     func smallestLeadsMonocle() {
-        // Three screens: the smallest carries Monocle and BOTH
-        // others lead Scrolling — the repeat that the no-layout-
-        // twice rule is carved out for.
+        // Three screens: BOTH wider screens lead Scrolling — the
+        // repeat the no-layout-twice rule is carved out for — and
+        // the smallest, left one Space, opens in Monocle through
+        // the laptop's single-Space order (#3294).
         let modes = StarterAllocation.modes(
             sizes: [screen27, laptop, bigDesk]
         )
@@ -99,53 +100,5 @@ struct StarterLeadTests {
         )
         #expect(modes[1].first == .monocle)
         #expect(!ScreenClass.of(screen27).layouts.contains(.monocle))
-    }
-
-    @Test("a screen repeats only when its list cannot fill it")
-    func repeatsOnlyWhenForced() {
-        // Two things are tangled here and only one is avoidable.
-        // A laptop's list holds two layouts, so a laptop granted
-        // three spaces MUST repeat one — no fill can help. What
-        // can be got wrong is which repeat and where it lands:
-        // the refill used to restart at the top of the list and
-        // put the duplicate next to its twin.
-        //
-        // Both fixtures give a two-entry list a post-lead quota
-        // of two, which is the only shape that reaches the
-        // second refill pass. Three identical laptops do NOT —
-        // their shares are [3, 2, 2] and every post-lead quota
-        // is one — so a fixture that looks like the obvious one
-        // cannot observe this at all (code review, 2026-08-26).
-        let fixtures: [[CGSize]] = [
-            [laptop, CGSize(width: 1920, height: 1080), small],
-            [laptop, laptop, small],
-        ]
-        for sizes in fixtures {
-            let modes = StarterAllocation.modes(sizes: sizes)
-            #expect(modes.count == sizes.count)
-            #expect(modes.allSatisfy { !$0.isEmpty })
-            for block in modes {
-                // Adjacency is the whole assertion, and that is a
-                // finding rather than a shortcut. A "distinct up
-                // to capacity" check sat here first —
-                // `Set(tiled).count == min(tiled.count,
-                // reachable.count)` — and guard-prover showed it
-                // was implied: on every block these fixtures
-                // produce, the demand reduces to "not all of them
-                // identical", which adjacency already forbids,
-                // and on the single-space screens it cannot fail
-                // at all. It would only bite on a block of three
-                // drawn from three or more reachable layouts —
-                // a wide screen holding three tiled spaces, which
-                // needs a still wider screen beside it to take
-                // the Floating host role. Add that fixture and
-                // the assertion with it; do not add the
-                // assertion alone (2026-08-26).
-                let tiled = block.filter { $0 != .floating }
-                for pair in zip(tiled, tiled.dropFirst()) {
-                    #expect(pair.0 != pair.1, "adjacent: \(block)")
-                }
-            }
-        }
     }
 }

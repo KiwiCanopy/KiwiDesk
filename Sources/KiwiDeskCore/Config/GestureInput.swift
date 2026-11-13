@@ -10,10 +10,12 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     case drag
     /// Move the pointer with no button held ("Bewegen").
     case hoverMove = "hover_move"
+    /// A primary click with keys held.
     case click
+    /// A secondary click with keys held.
     case rightClick = "right_click"
-    /// The wheel's press, mouse button 2.
-    case middleClick = "middle_click"
+    /// The wheel's press, mouse button 2 ("Wheel click").
+    case wheelClick = "wheel_click"
     /// Buttons 3 (back) and 4 (forward).
     case sideButtons = "side_buttons"
     /// A scroll with no finger phase on the vertical axis.
@@ -37,7 +39,7 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
 
     public var device: Device {
         switch self {
-        case .drag, .hoverMove, .click, .rightClick, .middleClick,
+        case .drag, .hoverMove, .click, .rightClick, .wheelClick,
             .sideButtons, .wheel, .wheelX:
             .mouse
         default: .trackpad
@@ -76,11 +78,19 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     /// A scroll the tap reads with no phase.
     public var isWheel: Bool { self == .wheel || self == .wheelX }
 
-    /// Every input but a tap and the side buttons needs a held key:
-    /// macOS and apps own the bare gesture.
+    /// A press of a mouse button, which the pointer tap fires.
+    public var isButton: Bool {
+        switch self {
+        case .click, .rightClick, .wheelClick, .sideButtons: true
+        default: false
+        }
+    }
+
+    /// Every input but a tap, the wheel click and the side buttons
+    /// needs a held key: macOS and apps own the bare gesture.
     public var needsModifier: Bool {
         switch self {
-        case .tap2, .tap3, .tap4, .tap5, .sideButtons, .middleClick:
+        case .tap2, .tap3, .tap4, .tap5, .sideButtons, .wheelClick:
             false
         default: true
         }
@@ -121,12 +131,14 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// Whether a front fires this input today. The clicks and side
-    /// buttons wait for the pointer tap's buttons, a two-finger tap
-    /// for the touch router, the pinches and Force Click for #2447.
+    /// Whether a front fires this input today: the pointer tap
+    /// fires the drags, the clicks and the side buttons (#3281), the
+    /// scroll tap the wheels and the pan; a two-finger tap waits for
+    /// the touch router, the pinches and Force Click for #2447.
     public var isFired: Bool {
         switch self {
         case .drag, .hoverMove, .wheel, .wheelX, .swipe2: true
+        case _ where isButton: true
         case .tap2, .tap3, .tap4, .tap5, .swipe3, .swipe4, .swipe5:
             fingers.map(TrackpadGestureRouter.fingerRange.contains) ?? false
         default: false
@@ -164,4 +176,9 @@ public enum GestureDirection: String, CaseIterable, Codable, Sendable {
 
     /// Up, left and back step toward the start of a list.
     var isBackward: Bool { self == .up || self == .left || self == .back }
+
+    /// A side button: a press, not a motion, so a list family steps
+    /// the way the button is named (Back = previous) and no Natural
+    /// scrolling reaches it.
+    var isButton: Bool { self == .back || self == .forward }
 }
