@@ -156,6 +156,11 @@ struct WarningGateTests {
         ]
         let log = Self.splicedDeprecation
         #expect(try gate(over: log, flags: flags).status == 0)
+        let older = log.replacingOccurrences(
+            of: "\u{2009}/\u{2009}",
+            with: "/"
+        )
+        #expect(try gate(over: older, flags: flags).status == 0)
         // Cutting the marker hides nothing: undowngraded, the
         // same bytes still red.
         let run = try gate(over: log, flags: [])
@@ -169,7 +174,11 @@ struct WarningGateTests {
     func splicedWarningFails() throws {
         let head = "/r/Sources/A.swift:145:26: war"
         let body = "ning: main actor-isolated static property"
-        for marker in [Self.marker(12), "[12/40] Compiling A\n"] {
+        let markers = [
+            Self.marker(12), "[12 / 40] Compiling A\n",
+            "[12/40] Compiling A\n",
+        ]
+        for marker in markers {
             let mid =
                 "/r/Sources/A.swift:145:26: warning: main actor-iso"
                 + marker + "lated static property 'pad'\n"
@@ -179,6 +188,20 @@ struct WarningGateTests {
             let split = try gate(over: head + marker + body + "\n")
             #expect(split.status == 1, "\(marker)")
         }
+    }
+
+    /// Marker-shaped text in a message is no marker: the next
+    /// diagnostic's exempt tag never lands on the new warning.
+    @Test("A look-alike marker never borrows the next line's tag")
+    func lookAlikeMarkerKeepsItsWarning() throws {
+        let fake = "/r/Sources/A.swift:9:9: warning: pick a[1/2] b\n"
+        let run = try gate(over: fake + Self.tagged + "\n")
+        #expect(run.status == 1)
+        #expect(run.stderr.contains("A.swift:9:9"))
+        // Nor does a source line swallow a macro warning's head.
+        let snippet = "  12 | let y = a[1/2] + b\n"
+        let macro = "macro expansion #expect:2:6: warning: x\n"
+        #expect(try gate(over: snippet + macro).status == 1)
     }
 
     @Test("A failing command keeps its own status")
