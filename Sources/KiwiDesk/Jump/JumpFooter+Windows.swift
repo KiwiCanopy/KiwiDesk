@@ -145,18 +145,28 @@ extension JumpFooter {
 
     /// The fewest keycaps at which every held state fits, then, past
     /// all of them, the line shedding from the end (#3249).
+    /// The candidates are one list of `WindowsFit` steps, so their
+    /// ids never collide: `ViewThatFits` traps on a repeated child id
+    /// (#3271).
     var windowsFitted: some View {
         let levels = Self.collapseOrder.count
         let count = windowsSlots(held: modifiers).count
         return ViewThatFits(in: .horizontal) {
-            ForEach(0...levels, id: \.self) { windowsStable($0) }
-            ForEach((0...count).reversed(), id: \.self) {
-                windowsRow(
-                    held: modifiers,
-                    level: levels,
-                    shown: $0,
-                    lit: leading
-                )
+            ForEach(
+                WindowsFit.steps(levels: levels, count: count),
+                id: \.self
+            ) { step in
+                switch step {
+                case .collapsed(let level):
+                    windowsStable(level)
+                case .shed(let shown):
+                    windowsRow(
+                        held: modifiers,
+                        level: levels,
+                        shown: shown,
+                        lit: leading
+                    )
+                }
             }
             row([], fixed: false)
         }
@@ -243,5 +253,17 @@ struct JumpKeycap: View {
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
                     .strokeBorder(.tertiary, lineWidth: 1)
             )
+    }
+}
+
+/// One `windowsFitted` candidate: the line at a keycap collapse
+/// level, or past all of them shedding to `shown` hints.
+fileprivate enum WindowsFit: Hashable {
+    case collapsed(Int)
+    case shed(Int)
+
+    /// Every collapse level, then the line shedding from the end.
+    static func steps(levels: Int, count: Int) -> [WindowsFit] {
+        (0...levels).map(collapsed) + (0...count).reversed().map(shed)
     }
 }

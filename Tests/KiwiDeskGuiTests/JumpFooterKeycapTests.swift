@@ -132,10 +132,13 @@ struct JumpFooterKeycapTests {
         }
         let text = try read("JumpFooter+Windows.swift")
         for needle in [
-            "ViewThatFits(in:.horizontal){ForEach(0...levels,id:\\.self)"
-                + "{windowsStable($0)}",
-            "windowsRow(held:modifiers,level:levels,shown:$0,lit:leading)}"
-                + "row([],fixed:false)",
+            // Every collapse level, then the shedding line, then
+            // the truncating fallback, in one list of steps (#3271).
+            "(0...levels).map(collapsed)+(0...count).reversed().map(shed)",
+            "ViewThatFits(in:.horizontal){ForEach(WindowsFit.steps(",
+            "case.collapsed(letlevel):windowsStable(level)",
+            "windowsRow(held:modifiers,level:levels,shown:shown,"
+                + "lit:leading)}}row([],fixed:false)",
             "ForEach(Self.heldStates,id:\\.rawValue){"
                 + "windowsRow(held:$0,level:level).hidden()}",
             "windowsRow(held:modifiers,level:level,lit:leading)",
