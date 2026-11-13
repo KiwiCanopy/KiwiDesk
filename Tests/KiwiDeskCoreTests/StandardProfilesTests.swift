@@ -129,10 +129,13 @@ struct StandardCatalogTests {
         #expect(
             StandardProfiles.standard(for: 2)?.screenCount == 2
         )
-        // Past the family's largest count, the largest smaller one.
+        #expect(
+            StandardProfiles.standard(for: 3)?.screenCount == 3
+        )
         #expect(
             StandardProfiles.standard(for: 4)?.screenCount == 4
         )
+        // Past the family's largest count, the largest smaller one.
         #expect(
             StandardProfiles.standard(for: 5)?.screenCount == 4
         )
@@ -172,6 +175,55 @@ struct ProfileCompositionTests {
         for space in composed.spaces {
             #expect(composed.assignment[space] == DisplayID(1))
         }
+    }
+
+    /// An unpinned Space with no role keeps the screen the
+    /// pre-#3294 Standards placed it on, whatever the preset family
+    /// plans (#3294): two screens 1–4 / 5–8, the third screen 8–10,
+    /// a fifth screen the next number past 10.
+    @Test("the placement fallback keeps the old plan")
+    func fallbackKeepsTheOldPlan() {
+        let one = SpacePlacement.numberedPlan(
+            displays: displays(1),
+            mainID: DisplayID(1)
+        )
+        #expect(one[SpaceID(1)] == DisplayID(1))
+        #expect(one[SpaceID(4)] == DisplayID(1))
+        #expect(one[SpaceID(5)] == nil)
+        let three = SpacePlacement.numberedPlan(
+            displays: displays(3),
+            mainID: DisplayID(1)
+        )
+        #expect(three[SpaceID(4)] == DisplayID(1))
+        #expect(three[SpaceID(5)] == DisplayID(2))
+        #expect(three[SpaceID(7)] == DisplayID(2))
+        #expect(three[SpaceID(8)] == DisplayID(3))
+        #expect(three[SpaceID(10)] == DisplayID(3))
+        #expect(three[SpaceID(11)] == nil)
+        let four = SpacePlacement.numberedPlan(
+            displays: displays(4),
+            mainID: DisplayID(1)
+        )
+        #expect(four[SpaceID(4)] == DisplayID(1))
+        #expect(four[SpaceID(8)] == DisplayID(3))
+        #expect(four[SpaceID(11)] == DisplayID(4))
+        #expect(four[SpaceID(12)] == nil)
+        let two = SpacePlacement.numberedPlan(
+            displays: displays(2),
+            mainID: DisplayID(1)
+        )
+        #expect(two[SpaceID(4)] == DisplayID(1))
+        #expect(two[SpaceID(5)] == DisplayID(2))
+        #expect(two[SpaceID(8)] == DisplayID(2))
+        #expect(two[SpaceID(9)] == nil)
+        let five = SpacePlacement.numberedPlan(
+            displays: displays(5),
+            mainID: DisplayID(1)
+        )
+        #expect(five[SpaceID(7)] == DisplayID(2))
+        #expect(five[SpaceID(10)] == DisplayID(3))
+        #expect(five[SpaceID(11)] == DisplayID(4))
+        #expect(five[SpaceID(12)] == DisplayID(5))
     }
 
     @Test("Every space and screen resolves (total function)")

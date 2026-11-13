@@ -26,15 +26,13 @@ public enum ProfileVerdict: Equatable, Sendable {
     /// starter (#1662).
     case builtInStandard(name: String, title: StarterTitle?)
     /// No saved profile matches, and the config is Lua-owned, so
-    /// nothing is adopted: a built-in layout steers PLACEMENT
-    /// while `activeProfile` (when any) keeps owning the tiling.
-    /// A distinct promise from `builtInStandard`, and the GUI
-    /// must not say "the built-in X loads" about it.
-    case placementOnlyStandard(
-        name: String,
-        activeProfile: String?,
-        title: StarterTitle?
-    )
+    /// nothing is adopted: a Space no Screen pin or Main role
+    /// places takes the frozen numbered plan
+    /// (`SpacePlacement.numberedPlan`, #3294), while
+    /// `activeProfile` (when any) keeps owning the tiling. No
+    /// built-in is named, since none places them; the GUI must not
+    /// say "the built-in X loads" about it either.
+    case placementByNumber(activeProfile: String?)
     /// Nothing matches and no built-in plans for this many
     /// screens.
     case none
@@ -61,8 +59,8 @@ extension KiwiCore {
     /// paths use — a binding for the active Desktop first
     /// (`KiwiCore+MonitorChange`: "A native-Space binding wins
     /// over matching (#7)"), then the monitor match, then the
-    /// count's built-in layout, which on a Lua-owned config
-    /// steers placement only.
+    /// count's built-in layout — or, on a Lua-owned config, no
+    /// built-in at all: Spaces placed by number.
     ///
     /// **This query and `handleMonitorChange` read one rule from
     /// two places, so every arm here mirrors an arm there.** Two
@@ -164,25 +162,21 @@ extension KiwiCore {
     }
 
     /// The `.none` arm, mirroring `handleMonitorChange`'s: the
-    /// baseline-aware fallback (the starter setup while on the
-    /// Starter baseline, else the count's Standard), and then the
-    /// `isGuiManaged` split that decides whether the composed
-    /// layout is ADOPTED or merely steers placement.
+    /// `isGuiManaged` split first — a Lua-owned config adopts
+    /// nothing, so its Spaces are placed by pin, else by number —
+    /// then the baseline-aware fallback (the starter setup while
+    /// on the Starter baseline, else the count's Standard).
     private func fallbackVerdict(
         displays: [Display]
     ) -> ProfileVerdict {
+        guard isGuiManaged else {
+            return .placementByNumber(activeProfile: profiles.currentName)
+        }
         guard
             let composed = composeMonitorChangeFallback(
                 displays: displays
             )
         else { return .none }
-        guard isGuiManaged else {
-            return .placementOnlyStandard(
-                name: composed.sourceName,
-                activeProfile: profiles.currentName,
-                title: composed.sourceTitle
-            )
-        }
         return .builtInStandard(
             name: composed.sourceName,
             title: composed.sourceTitle

@@ -333,6 +333,15 @@ change here:
   the apply and the tour's picture both ask (`PresetFamilyTests`
   ▸ `widestTakesTheBigSlot`, `TourStartReplaceTests` ▸
   `fiveScreensStart`).
+- **A Space no pin or role places takes the FROZEN numbered plan
+  (#3294).** `SpacePlacement.numberedPlan` is the positional rung,
+  read by the display resolve and the Settings pictures alone; never
+  derive it from `StandardProfiles`, `StarterAllocation` or a preset's
+  slots. A change to it moves every unpinned Space on upgrade — a
+  profile's, an `init.lua` config's, one made on the fly — so it is a
+  ruling, never a re-pin of `ProfileCompositionTests` ▸
+  `fallbackKeepsTheOldPlan`; a preset's apply pins what it places
+  and needs it for nothing (`SpaceStepVerbTests` ▸ `neverCreates`).
 - **An unlisted mode in a sparse preset follows the screen.**
   `StandardLayout.mode(of:on:)` answers a space the map does not
   declare with that screen's best layout, `ScreenClass.layouts`'

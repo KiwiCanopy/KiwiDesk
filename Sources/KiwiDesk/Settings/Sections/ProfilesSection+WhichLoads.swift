@@ -119,36 +119,27 @@ extension ProfilesSection {
                     title: title
                 )
             )
-        case .placementOnlyStandard(let name, let active, let title):
-            // A Lua-owned config keeps owning the tiling, so the
-            // built-in only steers WHERE spaces sit. Saying "the
-            // built-in X loads" here would claim it replaced a
-            // hand-written config, which is the promise #36
-            // makes in the other direction.
+        case .placementByNumber(let active):
+            // A Lua-owned config keeps owning the tiling, and no
+            // built-in is adopted (#3294); "by number" names the
+            // rule for an unpinned Space, a Screen pin still winning.
+            // Naming a built-in would claim it replaced the config
+            // (#36).
             guard let active else {
                 return L(
-                    "profiles.which_loads.placement_only",
+                    "profiles.which_loads.placement_by_number",
                     "Right now: %1$@ → your Lua config keeps the "
-                        + "layout; the built-in %2$@ only places "
-                        + "Spaces on screens.",
-                    screens,
-                    standardDisplayName(
-                        name,
-                        title: title
-                    )
+                        + "layout; KiwiDesk places Spaces on screens "
+                        + "by number.",
+                    screens
                 )
             }
             return L(
-                "profiles.which_loads.placement_only_profile",
-                "Right now: %1$@ → %2$@ keeps the layout; the "
-                    + "built-in %3$@ only places Spaces on "
-                    + "screens.",
+                "profiles.which_loads.placement_by_number_profile",
+                "Right now: %1$@ → %2$@ keeps the layout; KiwiDesk "
+                    + "places Spaces on screens by number.",
                 screens,
-                active,
-                standardDisplayName(
-                    name,
-                    title: title
-                )
+                active
             )
         case .none:
             return L(

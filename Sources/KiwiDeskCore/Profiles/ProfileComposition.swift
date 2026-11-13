@@ -38,24 +38,6 @@ public enum ProfileComposition {
         )
     }
 
-    /// Where a Space no pin or role places falls back: the count's
-    /// Standard planned main first, never a preset's widest-first
-    /// slots, which its own apply pins (#3294). The display resolve
-    /// and the Settings pictures read this one plan.
-    public static func fallbackAssignment(
-        displays: [Display],
-        mainID: DisplayID?
-    ) -> [SpaceID: DisplayID] {
-        guard var layout = StandardProfiles.standard(for: displays.count)
-        else { return [:] }
-        layout.slotsByWidth = false
-        return compose(
-            layout: layout,
-            displays: displays,
-            mainID: mainID
-        )?.assignment ?? [:]
-    }
-
     /// Composes specific built-in layout onto displays
     /// (`StandardLayout+Screens`).
     public static func compose(

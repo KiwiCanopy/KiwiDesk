@@ -111,12 +111,10 @@ extension KiwiCore {
     /// live `spacePins` + `mainSpaces` — the composed-placement
     /// primitive behind `apply(composed:)`. A space assigned to the
     /// main display (or unassigned) takes the Main role; the rest
-    /// pin to their display's fingerprint. For a workflow Standard
-    /// this equals what `resolveSpaceDisplays` re-derives from the
-    /// count's Standard, so it's a no-op in effect; for the beginner
-    /// setup, whose five-per-display plan is NOT the count's
-    /// Standard, it's load-bearing — without it the blocks scatter
-    /// into the Standard's slots (#485).
+    /// pin to their display's fingerprint. Every composed apply
+    /// relies on it: the resolve's fallback is the frozen plan by
+    /// Space number (`SpacePlacement.numberedPlan`, #3294), which no composed
+    /// plan — the starter's, a preset's — needs to match (#485).
     func adoptComposedPlacement(
         _ composed: ProfileComposition.Composed,
         keepingPinsOf temporaries: Set<SpaceID>
