@@ -839,7 +839,12 @@ type inherits from an SDK class (`NSView`): it stays a warning
 and lands green. The gate fails on any `.swift` warning left in
 the output outside the groups the wrapped command itself
 downgrades with `-Wwarning`, so the exemption is never a second
-list. `WarningGateTests` holds the behaviour and the wiring, and
+list. It matches only after cutting SwiftPM's `[N / M]` progress
+marker, which rejoins a diagnostic the marker split (#3299); the
+cut takes the marker and its newline, never joining a line onto a
+diagnostic's head
+(`WarningGateTests` ▸ `lookAlikeMarkerKeepsItsWarning`).
+`WarningGateTests` holds the behaviour and the wiring, and
 the release step refuses the gate as it refuses the flag
 (`WarningRatchetWorkflowTests` ▸ `releaseStepIsExempt`).
 

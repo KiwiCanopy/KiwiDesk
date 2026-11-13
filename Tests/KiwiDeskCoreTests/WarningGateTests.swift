@@ -120,6 +120,93 @@ struct WarningGateTests {
         #expect(try gate(over: exempt).status == 0)
     }
 
+    /// SwiftPM's progress marker, as CI's terminal-less run
+    /// prints it: thin spaces around the slash.
+    private static func marker(_ step: Int) -> String {
+        "[\(step)\u{2009}/\u{2009}281] KiwiDeskCore\n"
+    }
+
+    /// CI run 43452965885's bytes (#3299): the marker split an
+    /// exempted deprecation, pushing its `[#Group]` tag onto the
+    /// next line.
+    private static let splicedDeprecation: String = {
+        let esc = "\u{1B}"
+        let link =
+            "\(esc)]8;;https://docs.swift.org/compiler/"
+            + "documentation/diagnostics/deprecated-declaration"
+            + "\(esc)\\"
+        return marker(231)
+            + "/Users/runner/work/KiwiDesk/KiwiDesk/Sources/"
+            + "KiwiDeskCore/AX/AXHelper.swift:269:33: "
+            + "\(esc)[1;33mwarning: \(esc)[1;39m"
+            + "'activateIgnoringOtherApps' was deprecated in "
+            + "macOS 14.0: ignoringOtherApps is deprecated in ma"
+            + marker(232)
+            + "cOS 14 and will have no effect.\(esc)[0;0m [#"
+            + link + "DeprecatedDeclaration\(esc)]8;;\(esc)\\]\n"
+            + marker(233)
+    }()
+
+    @Test("A progress marker spliced into an exempt tag passes")
+    func splicedExemptionPasses() throws {
+        let flags = [
+            "-Xswiftc", "-warnings-as-errors",
+            "-Xswiftc", "-Wwarning", "-Xswiftc",
+            "DeprecatedDeclaration",
+        ]
+        let log = Self.splicedDeprecation
+        #expect(try gate(over: log, flags: flags).status == 0)
+        let older = log.replacingOccurrences(
+            of: "\u{2009}/\u{2009}",
+            with: "/"
+        )
+        #expect(try gate(over: older, flags: flags).status == 0)
+        // Cutting the marker hides nothing: undowngraded, the
+        // same bytes still red.
+        let run = try gate(over: log, flags: [])
+        #expect(run.status == 1)
+        #expect(run.stderr.contains("deprecated in macOS 14 and"))
+    }
+
+    /// A marker can split a new warning anywhere, its
+    /// `warning:` word included; the rejoined line still reds.
+    @Test("A warning a progress marker splits still reds the gate")
+    func splicedWarningFails() throws {
+        let head = "/r/Sources/A.swift:145:26: war"
+        let body = "ning: main actor-isolated static property"
+        let markers = [
+            Self.marker(12), "[12 / 40] Compiling A\n",
+            "[12/40] Compiling A\n",
+        ]
+        for marker in markers {
+            let mid =
+                "/r/Sources/A.swift:145:26: warning: main actor-iso"
+                + marker + "lated static property 'pad'\n"
+            let run = try gate(over: mid)
+            #expect(run.status == 1, "\(marker)")
+            #expect(run.stderr.contains("actor-isolated static"))
+            let split = try gate(over: head + marker + body + "\n")
+            #expect(split.status == 1, "\(marker)")
+        }
+    }
+
+    /// Marker-shaped text in a message is no marker: the next
+    /// diagnostic's exempt tag never lands on the new warning.
+    @Test("A look-alike marker never borrows the next line's tag")
+    func lookAlikeMarkerKeepsItsWarning() throws {
+        let fake = "/r/Sources/A.swift:9:9: warning: pick a[1/2] b\n"
+        let run = try gate(over: fake + Self.tagged + "\n")
+        #expect(run.status == 1)
+        #expect(run.stderr.contains("A.swift:9:9"))
+        // Nor does a source line swallow a macro warning's head.
+        let snippet = "  12 | let y = a[1/2] + b\n"
+        let macro = "macro expansion #expect:2:6: warning: x\n"
+        #expect(try gate(over: snippet + macro).status == 1)
+        // A tagged note is a head too.
+        let note = "/r/Sources/B.swift:2:2: note: see [#\(Self.group)]\n"
+        #expect(try gate(over: fake + note).status == 1)
+    }
+
     @Test("A failing command keeps its own status")
     func commandStatusWins() throws {
         let run = try spawn(
