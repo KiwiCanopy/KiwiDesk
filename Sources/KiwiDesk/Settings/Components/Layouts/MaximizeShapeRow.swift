@@ -8,9 +8,9 @@ struct MaximizeShapeRow: View {
     @ObservedObject var model: SettingsModel
     let shape: ScreenShape
     let screens: [Display]
+    /// Each column's width, from `MaximizeColumns`.
+    let columns: MaximizeColumns
 
-    /// A pop-up column's width, the headings' too.
-    static let columnWidth: CGFloat = 120
     /// Between the name and each column.
     static let spacing: CGFloat = 12
 
@@ -31,13 +31,14 @@ struct MaximizeShapeRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(LayoutDefaultsRowOrder.maximize, id: \.id) { key in
                 cell(key)
-                    .frame(width: Self.columnWidth, alignment: .leading)
+                    .measuredColumn(key)
+                    .frame(width: columns.width(of: key), alignment: .leading)
             }
         }
     }
 
     @ViewBuilder
-    private func cell(_ key: SettingKey) -> some View {
+    func cell(_ key: SettingKey) -> some View {
         switch key {
         case .behaviour(.maximizeHeightShare):
             shareMenu(

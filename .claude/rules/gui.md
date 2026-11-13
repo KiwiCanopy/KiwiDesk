@@ -1350,9 +1350,14 @@ must keep:
   a layout tile, a Desktops icon — takes a 2 pt `paint.selection`
   ring with no fill over its unselected inks, and the ring alone
   while it is also under the pointer
-  (`KiwiHubTileSelectionTests` ▸ `tilesRing`, `rowsFill`). KiwiHub's
-  tiles are an owner exception to #3042: the pointer lifts them with
-  `paint.rowHover`, never `hoverEdge` or `hoverRise`. A resting
+  (`KiwiHubTileSelectionTests` ▸ `tilesRing`, `rowsFill`). A
+  tile's hover on a filled row — the selection's whole fill, never
+  a drop target's tint — lifts in the row's selection ink, never
+  `rowHover` (#3264, `KiwiHubTileSelectionTests` ▸
+  `filledLineHover`). KiwiHub's
+  tiles are an owner exception to #3042: on a bare row the pointer
+  lifts them with `paint.rowHover`, never `hoverEdge` or
+  `hoverRise`. A resting
   plate on a tile, such as All's plate or a count capsule, takes a
   neutral fill that is no hover colour
   (`KiwiHubTileSelectionTests` ▸ `stripPlatesAreNeutral`). An item
@@ -2010,9 +2015,11 @@ Obligations:
   floor by `GlassPaintTests` ▸ `hubInksHoldTheFloor` (`PanelGlassTests` ▸
   `rowsReadThePaint`). **A selection or hover fill there draws through
   `KiwiHubPaint.fill`** (#2721), along the panel's axis to the share
-  `KiwiShelf.highlightFadeShare` solves for its own ink, which the paint
-  reads from the shelf (`HighlightFadeContrastTests`,
-  `KiwiHubPaintFadeTests`); the scope
+  `KiwiShelf.highlightFadeShare` solves for its own ink and for a
+  filled row's hover lift, which the paint reads from the shelf
+  (`HighlightFadeContrastTests`, `KiwiHubPaintFadeTests`); a ground
+  drawn over a fade fill joins that solver, since the one share fades
+  every fill (#3264); the scope
   switch, rows, chips and tiles take it, and a button chip on a
   `PanelGlass` surface draws through `ChipFace`, which fades it, never
   a style of its own (#2725). A divider in KiwiHub or a cue plate is a

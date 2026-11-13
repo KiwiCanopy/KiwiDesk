@@ -90,15 +90,20 @@ struct KeySequenceCardRowsTests {
     @Test("Each kind of key wears its container's face")
     func faces() throws {
         let menu = Self.flat(try Self.source("SequenceActionMenu.swift"))
+        let trigger = Self.flat(
+            try Self.source("SequenceActionMenu+Trigger.swift")
+        )
         #expect(
-            menu.contains(
+            trigger.contains(
                 "ifface.kind==.custom,letonEditLua{"
                     + "Button(action:onEditLua){"
             )
         )
-        #expect(menu.contains(".buttonStyle(SequenceDashedStyle())"))
-        #expect(menu.contains("}else{Button{request=SequencePickRequest("))
-        #expect(menu.contains(".settingsPopUpTrigger()"))
+        #expect(trigger.contains(".buttonStyle(SequenceDashedStyle())"))
+        #expect(
+            trigger.contains("}else{Button{request=SequencePickRequest(")
+        )
+        #expect(trigger.contains(".settingsPopUpTrigger()"))
         // The rows the menu draws, not only its cursor's list.
         // Both pickers draw the pinned rows, each in its own body.
         let raw = try Self.source("SequenceActionMenu.swift")
@@ -125,10 +130,11 @@ struct KeySequenceCardRowsTests {
         )
         let row = Self.flat(try Self.source("SequenceNodeRow+Popovers.swift"))
         #expect(row.contains("SequenceContainerFace(face:.tinted){"))
-        // The fold and the name are two buttons (amendment).
+        // The container is one button; the fold is its own, outside
+        // it (amendment; #3241, `KeySequenceRowMarksTests`).
         #expect(
             row.contains(
-                "disclosure(width:12).font(.caption.weight(.semibold))Button{"
+                "SequenceContainerFace(face:.tinted){Button{"
                     + "editingBranch=SequenceBranchRequest(id:node.id)"
             )
         )

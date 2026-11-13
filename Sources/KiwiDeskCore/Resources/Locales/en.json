@@ -2559,7 +2559,7 @@
   "space_override.slot_size.help": "Sets each scrolling window's size along the scroll direction — the column width when the orientation is %1$@, the row height when it is %2$@. As a unit, %3$@ is a share of one window plus one gap, so 50%% is exactly two windows, gaps included (95%% out of the box); %4$@ fixes an exact size.",
   "space_override.title": "%1$@ — %2$@ overrides",
   "spaces.add.help": "Add Space",
-  "spaces.add.placeholder_optional": "New Space (name optional)",
+  "spaces.add.placeholder": "New Space",
   "spaces.add_to_profile": "Add Space %1$@ to this profile",
   "spaces.add_to_profile.no_profile": "Save this setup as a profile first",
   "spaces.caption": "Each Space has its own layout. Add Spaces here; they appear in the shortcut and app-rule lists too. Drag rows to reorder.",

@@ -20,10 +20,7 @@ struct SpaceAddRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 TextField(
-                    L(
-                        "spaces.add.placeholder_optional",
-                        "New Space (name optional)"
-                    ),
+                    L("spaces.add.placeholder", "New Space"),
                     text: $typed
                 )
                 .textFieldStyle(.roundedBorder)

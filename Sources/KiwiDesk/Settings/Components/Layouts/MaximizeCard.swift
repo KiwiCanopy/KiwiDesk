@@ -8,6 +8,7 @@ import SwiftUI
 /// the verb reads every row from Lua and the CLI too.
 struct MaximizeCard: View {
     @ObservedObject var model: SettingsModel
+    @State private var columns = MaximizeColumns()
 
     private var controls: LayoutDefaultsControls {
         SettingsCatalog.layoutDefaults
@@ -52,7 +53,8 @@ struct MaximizeCard: View {
                     MaximizeShapeRow(
                         model: model,
                         shape: shape,
-                        screens: screens[shape] ?? []
+                        screens: screens[shape] ?? [],
+                        columns: columns
                     )
                 }
             }
@@ -67,7 +69,8 @@ struct MaximizeCard: View {
                             MaximizeShapeRow(
                                 model: model,
                                 shape: shape,
-                                screens: []
+                                screens: [],
+                                columns: columns
                             )
                         }
                     }
@@ -86,6 +89,9 @@ struct MaximizeCard: View {
                 )
             }
         }
+        .onPreferenceChange(MaximizeColumns.Drawn.self) {
+            columns = MaximizeColumns(drawn: $0)
+        }
     }
 
     /// The column headings, one per census key in the card's order.
@@ -99,10 +105,7 @@ struct MaximizeCard: View {
                 headingCell(key)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(
-                        width: MaximizeShapeRow.columnWidth,
-                        alignment: .leading
-                    )
+                    .frame(width: columns.width(of: key), alignment: .leading)
             }
         }
         .font(.callout)

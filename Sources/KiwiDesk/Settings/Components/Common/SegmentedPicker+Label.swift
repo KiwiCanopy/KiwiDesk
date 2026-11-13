@@ -118,8 +118,8 @@ extension SegmentedPicker {
     }
 }
 
-/// Rolls a segment's label along its reel: the title out downward
-/// as the hint drops in from above (#3172).
+/// Rolls a segment's label along its reel: the title out upward as
+/// the hint rises from below (#3172, #3240).
 struct SegmentRoll: ViewModifier {
     nonisolated static let reel = "SegmentRoll.reel"
     let hint: Bool
@@ -133,7 +133,7 @@ struct SegmentRoll: ViewModifier {
         shown: Bool,
         reach: CGFloat
     ) -> CGFloat {
-        hint ? (shown ? 0 : -reach) : (shown ? reach : 0)
+        hint ? (shown ? 0 : reach) : (shown ? -reach : 0)
     }
 
     func body(content: Content) -> some View {

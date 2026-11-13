@@ -9,6 +9,9 @@ enum SettingsMetrics {
     /// Gutter around destination pane scrolling content.
     static let paneInset: CGFloat = 16
 
+    /// Inset of a section's plate around its content.
+    static let sectionPlateInset: CGFloat = 12
+
     /// The floating save pill's gap above the pane's bottom edge.
     static let savePillLift: CGFloat = 22
 

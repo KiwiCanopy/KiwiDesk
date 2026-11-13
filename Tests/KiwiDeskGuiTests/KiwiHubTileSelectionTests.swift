@@ -29,6 +29,8 @@ struct KiwiHubTileSelectionTests {
     }
 
     private static let ring = "strokeBorder(paint.selection,lineWidth:2)"
+    private static let filledLift =
+        "paint.selectionInk.opacity(paint.filledLift)"
 
     @Test("each tile rings its selection and never fills it")
     func tilesRing() throws {
@@ -40,14 +42,24 @@ struct KiwiHubTileSelectionTests {
         for (name, body) in tiles {
             #expect(!body.isEmpty, "\(name)")
             #expect(body.occurrences(of: Self.ring) == 1, "\(name)")
+            // `selectionInk` is the filled row's hover lift alone.
+            let lifts = body.occurrences(of: Self.filledLift)
             #expect(
-                body.occurrences(of: "paint.selection")
+                body.occurrences(of: "paint.selection") - lifts
                     == body.occurrences(of: Self.ring),
                 "\(name) draws the selection colour off its ring"
             )
             // Its inks are the unselected ones.
             #expect(!body.contains("selected:isSelected,lifted"), "\(name)")
-            #expect(!body.contains("paint.selectionInk"), "\(name)")
+            #expect(
+                body.occurrences(of: "paint.selectionInk") == lifts,
+                "\(name)"
+            )
+            // Only a Desktops icon sits on a filled row.
+            #expect(
+                lifts == (name == "DesktopIconView" ? 1 : 0),
+                "\(name)"
+            )
         }
     }
 
@@ -60,12 +72,37 @@ struct KiwiHubTileSelectionTests {
         #expect(tile.occurrences(of: ".fill(.quaternary)") == 2)
     }
 
+    /// On a filled line a tile's hover lifts in the line's ink; the
+    /// line decides the fill once and hands it over (#3264).
+    @Test("a tile's hover on a filled line lifts in its ink")
+    func filledLineHover() throws {
+        let icon = try Self.squashed("DesktopIconView.swift")
+        #expect(
+            icon.contains(
+                ".fill(onFill?AnyShapeStyle(\(Self.filledLift))"
+                    + ":paint.fill(paint.rowHover))"
+            )
+        )
+        #expect(icon.occurrences(of: "paint.rowHover") == 1)
+        let line = try Self.squashed("DesktopLineView.swift")
+        #expect(line.contains("onFill:wearsFill,"))
+        // A drop target's tint keeps the bare-row hover (#3264).
+        #expect(
+            line.contains(
+                "privatevarwearsFill:Bool{"
+                    + "!isTarget&&isSelected&&!state.isInside}"
+            )
+        )
+        #expect(line.contains("}elseifwearsFill{shape.fill("))
+        #expect(line.occurrences(of: "onFill:") == 1)
+    }
+
     @Test("a Desktops line keeps the row's selection fill")
     func rowsFill() throws {
         let line = try Self.squashed("DesktopLineView.swift")
         #expect(
             line.contains(
-                "}elseifisSelected,!state.isInside{"
+                "}elseifwearsFill{"
                     + "shape.fill(paint.fill(paint.selection))"
             )
         )

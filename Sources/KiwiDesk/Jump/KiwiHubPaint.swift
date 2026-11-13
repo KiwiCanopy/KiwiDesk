@@ -12,6 +12,9 @@ struct KiwiHubPaint {
     var selection = SettingsTheme.accent
     var selectionInk = SettingsTheme.accentInk
     var selectionInkSecondary = SettingsTheme.accentInkSecondary
+    /// The opacity of `selectionInk` a tile's hover on a filled row
+    /// lifts in (#3264); `accentInk` is dark in both modes.
+    var filledLift = KiwiShelf.darkInkLift
     /// A hovered row's or tile's ground, and a hovered chip's.
     var rowHover = SettingsTheme.chipRest
     var chipHover = SettingsTheme.chipHover
@@ -42,6 +45,7 @@ struct KiwiHubPaint {
         selection = Color(kiwiHex: highlight.selection)
         selectionInk = Color(kiwiHex: highlight.selectionInk)
         selectionInkSecondary = selectionInk.opacity(0.75)
+        filledLift = KiwiShelf.filledRowLift(ink: highlight.selectionInk)
         rowHover = Color(kiwiHex: highlight.hover)
         chipHover = rowHover
         hoverInk = Color(kiwiHex: highlight.hoverInk)
