@@ -226,8 +226,7 @@ struct DesktopBindingGroupTests {
                     desktop: 1
                 )
             ],
-            connectedScreens: 1,
-            presets: []
+            connectedScreens: 1
         )
         #expect(
             expander.rows(for: .profiles(.profileBindings))?.last
@@ -251,8 +250,7 @@ struct DesktopBindingGroupTests {
                     desktop: 1
                 )
             ],
-            connectedScreens: 2,
-            presets: []
+            connectedScreens: 2
         )
         #expect(
             expander.rows(for: .profiles(.profileBindings))

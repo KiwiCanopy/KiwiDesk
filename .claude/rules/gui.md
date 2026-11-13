@@ -138,10 +138,9 @@ restated `20...80` satisfies on the day it is written.
   `Button` cannot carry beside `.defaultAction` so the content
   view takes `.onExitCommand`. `SheetPresentationSeamTests` is the
   register of which files may host one and holds the dismissal
-  contract; `PresetPreviewSheetTests` adds the structural half
-  that matters most — the sheet takes no `SettingsModel`, so
-  reaching the draft is a new stored property rather than a
-  one-token edit. **Why**, in full, is
+  contract, including the structural half that matters most —
+  the sheet takes no `SettingsModel`, so reaching the draft is a
+  new stored property rather than a one-token edit. **Why**, in full, is
   `docs/design-decisions.md` ▸ the panel's object is the DRAFT;
   the popover/alert/sheet split is `docs/ui-patterns.md`'s. Do not
   re-argue either here.

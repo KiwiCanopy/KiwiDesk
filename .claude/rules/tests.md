@@ -698,7 +698,7 @@ hang class — so a green suite here does not cover it.
 measurement per row — backs the main actor up past 30 s in a full
 run, which is where the starvation above comes from. Measured
 twice: the mode-reveal timeline's 0.3 s clear missed a 30 s
-deadline (2026-08-09), and `PresetGridFloorTests` went
+deadline (2026-08-09), and the presets grid's floor suite went
 `@MainActor` wholesale and timed a suite out against a 120 s
 guard while passing in 1.3 s alone (2026-08-17). Two
 obligations: keep off the main actor everything that does not
@@ -852,18 +852,11 @@ the four listen-only `NSEvent` press monitors one bare
 `MouseTracker().start()` adds for the length of
 `ScrollGesturesTests` ▸ `trackerCarriesTheTap` — no permission,
 removed by its `stop()`, and the scroll tap itself a fake.
-**The host text-metric read is
-back** — `PresetGridFloorTests` lays out an `NSButton` per
-shipped catalog and calls `sizeToFit()`, so a run takes host
-font metrics once per catalog per measured key (#862, 2026-08-17).
-It replaces the one that had gone away with the sidebar's fixed
-label column (#678 turn 9), and it is a deliberate re-admission
-rather than a regression: the thing under test IS whether real
-translated labels fit a real control, which no fixture can
-answer. What it inherits is what #523's fixtures inherited from
-`NSScreen` — the host's metrics — so a runner with different
-system font metrics measures different widths, and the suite
-pins no font of its own. The service tests only parse
+A suite that lays out a real
+control to measure translated labels takes host font metrics
+and is a deliberate re-admission of that read: it states so here
+in the same change (the presets grid's floor suite was the last,
+#862, retired with the Profiles presets in #3294). The service tests only parse
 `launchctl` strings; nothing spawns it. **Unit tests never need
 the running app**; its run state is irrelevant to them.
 

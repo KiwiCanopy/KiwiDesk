@@ -13,27 +13,19 @@ import Testing
 /// that does not — and pin that the declared set and the resolved
 /// set are the same set, so a new gated row cannot land in
 /// neither.
-///
-/// The row with TWO reasons is the case to watch. `presetsApply`
-/// declares one gate and dies for two independent reasons, and
-/// the stored-profile one WINS: a user editing a stored profile
-/// on matching hardware must not read "Needs 3 connected
-/// screen(s)" while three are connected.
 @Suite("Profiles gates")
 struct ProfilesGateTests {
     private func gates(
         editing: Bool = false,
         screens: Int = 3,
         guiManaged: Bool = true,
-        sidecar: Bool = true,
-        preset: Int? = nil
+        sidecar: Bool = true
     ) -> ProfilesGates {
         ProfilesGates(
             editingStoredProfile: editing,
             connectedScreens: screens,
             guiManaged: guiManaged,
-            sidecarExists: sidecar,
-            presetScreens: preset
+            sidecarExists: sidecar
         )
     }
 
@@ -174,49 +166,6 @@ struct ProfilesGateTests {
     }
 
     // MARK: - Preset apply
-
-    @Test("a preset for the connected count applies")
-    func presetMatching() {
-        #expect(
-            gates(screens: 3, preset: 3).inertReason(
-                for: .profiles(.presetsApply)
-            ) == nil
-        )
-    }
-
-    /// The reason carries the count the preset needs, not the
-    /// one connected — the sentence tells the user what to plug
-    /// in.
-    @Test("a preset for another count names that count")
-    func presetMismatch() {
-        #expect(
-            gates(screens: 3, preset: 1).inertReason(
-                for: .profiles(.presetsApply)
-            ) == .screenCountMismatch(screens: 1)
-        )
-    }
-
-    /// Both fixtures, because only the second pins the
-    /// PRECEDENCE this test is named for: with the counts equal
-    /// the mismatch branch never fires, so reordering the arms
-    /// leaves the first `#expect` green (guard-prover, 2026-08-04).
-    /// The mismatched one is also the case that matters on
-    /// screen — a user editing a stored profile must not read
-    /// "Needs 1 connected screen(s)" when connecting that screen
-    /// would change nothing.
-    @Test("editing a stored profile outranks any count verdict")
-    func presetEditingStored() {
-        #expect(
-            gates(editing: true, screens: 3, preset: 3)
-                .inertReason(for: .profiles(.presetsApply))
-                == .presetSwitchesLiveLayout
-        )
-        #expect(
-            gates(editing: true, screens: 3, preset: 1)
-                .inertReason(for: .profiles(.presetsApply))
-                == .presetSwitchesLiveLayout
-        )
-    }
 
     /// An ungated key resolves to nil without reaching the
     /// switch at all — the `placement.gate` guard, which is what

@@ -219,10 +219,9 @@ sentence that needs to name a layout interpolates
 `layout.<mode>.name`; prose that merely describes what a Space
 is *for* names no mode at all. This binds the **English** author
 first — one concept, one word, decided in `en` before any catalog
-can disagree. `PresetSummaryVocabularyTests` holds
-`presets.*.summary`, deriving its ban list from `layout.*.name`
-so a renamed or added mode cannot slip past it; a second family
-of prose that names layouts owes its own guard.
+can disagree. A family of prose that names layouts owes a guard
+deriving its ban list from `layout.*.name`, so a renamed or added
+mode cannot slip past it — as the retired preset summaries had.
 
 ### A mode's own structural unit is not a common noun
 

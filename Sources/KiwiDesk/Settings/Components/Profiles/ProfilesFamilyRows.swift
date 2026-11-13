@@ -73,9 +73,6 @@ enum ProfilesRowInstance: Hashable {
     /// about (architect review, 2026-09-04). And by the SLOT
     /// (#1436): one Desktop draws a picker per count group.
     case binding(DesktopKey, BindingSlot)
-    /// By the stable English `StandardLayout.name` — identity must
-    /// not move with the GUI language.
-    case preset(String)
 }
 
 /// Expands Profiles census keys into rendered instances (#678,
@@ -94,7 +91,6 @@ struct ProfilesFamilyRows {
     let bindings: [DesktopKey: DesktopBinding]
     /// Screens connected right now — which count group leads.
     let connectedScreens: Int
-    let presets: [StandardLayout]
     /// Core's verdict per binding entry (#2324); a fixture of
     /// pending entries leaves it empty.
     var resolutions: [DesktopBinding.Entry.Key: BindingResolution] = [:]
@@ -237,23 +233,6 @@ struct ProfilesFamilyRows {
             + [.count(count, setup: nil)]
     }
 
-    /// Presets matching screen count, including starter derivation (#678).
-    static func presets(
-        forScreens screens: Int,
-        sizes: [CGSize]
-    ) -> [StandardLayout] {
-        StandardProfiles.layouts(for: screens, sizes: sizes)
-    }
-
-    /// Presets excluding current connected screen count.
-    static func presets(
-        excludingScreens screens: Int
-    ) -> [StandardLayout] {
-        StandardProfiles.workflows.filter {
-            $0.screenCount != screens
-        }
-    }
-
     /// Expands census family key into row instances, reaching the
     /// same statics the views call — one derivation, the join
     /// proved: mutating it reds `ProfilesFamilyRowsTests` AND
@@ -307,10 +286,6 @@ struct ProfilesFamilyRows {
                         .binding($0.row.key, .orphan($0.profile))
                     }
                 }
-            }
-        case .presetsApply, .presetsLayouts:
-            return presets.map {
-                ProfilesRowInstance.preset($0.name)
             }
         case .isStarterSetup:
             return nil

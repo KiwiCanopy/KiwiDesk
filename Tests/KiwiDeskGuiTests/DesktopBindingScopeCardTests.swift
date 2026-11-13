@@ -129,8 +129,7 @@ struct DesktopBindingScopeCardTests {
             presentKeys: model.presentDesktopKeys,
             desktopScreens: model.desktopScreens,
             bindings: model.config.profileBindings,
-            connectedScreens: 1,
-            presets: []
+            connectedScreens: 1
         )
         .rows(for: .profiles(.profileBindings))
         let scoped = ProfilesRowInstance.binding(

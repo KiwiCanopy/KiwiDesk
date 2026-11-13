@@ -33,8 +33,7 @@ itself when an eighth is added.
   half of the invariant. The other half — a sentence built
   without `L()` — no string scan can see; it is prevented by
   making Core carry *structure*, and by a per-family renderer
-  test (`ConfigIssueTextTests`,
-  `PresetSummaryCoverageTests`). Full argument:
+  test (`ConfigIssueTextTests`). Full argument:
   [localization.md](localization.md).
 - **CLI/IPC error strings stay English** — they are a machine
   contract, not UI copy. The deliberate exception to the above.

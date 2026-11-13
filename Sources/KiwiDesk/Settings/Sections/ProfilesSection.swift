@@ -1,11 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Profiles section: lists saved profiles, loading defaults, and
-/// presets (#36, #53, #68; rebuilt in #678 Phase 3 turn 13a).
+/// Profiles section: lists saved profiles and loading defaults
+/// (#36, #68; rebuilt in #678 Phase 3 turn 13a). Presets live in
+/// the welcome tour (#3294).
 struct ProfilesSection: View {
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
     @ObservedObject var model: SettingsModel
     /// Profile whose rename popover is presented (#843).
     @State var renameRequest: NameEditRequest?
@@ -24,21 +23,9 @@ struct ProfilesSection: View {
                 // What loads right now leads: the page's live answer,
                 // above the cards that decide it (owner, #1609).
                 whichProfileLoads
-                if model.profileSummaries.isEmpty {
-                    // Presets lead when no user profile is saved (#53).
-                    PresetsSection(model: model)
-                    profileSection
-                    DesktopsGroup(model: model)
-                } else {
-                    profileSection
-                    DesktopsGroup(model: model)
-                    PresetsSection(model: model)
-                }
+                profileSection
+                DesktopsGroup(model: model)
             }
-            .animation(
-                reduceMotion ? nil : .default,
-                value: model.profileSummaries.isEmpty
-            )
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()
         }

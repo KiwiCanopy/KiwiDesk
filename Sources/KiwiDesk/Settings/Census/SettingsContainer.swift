@@ -72,7 +72,6 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// brief pocket appears.
     case pocket
     case pinnedToDisconnectedScreens
-    case presets
     case profilesPerMacOSSpace
     case savedProfiles
     case scrolling
@@ -123,7 +122,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .screenFingerprints, .monocle, .gestures, .modifierKeys,
             .moveWindows, .macosDesktops, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides, .pocket,
-            .pinnedToDisconnectedScreens, .presets,
+            .pinnedToDisconnectedScreens,
             .profilesPerMacOSSpace, .floatRules, .secondAccent,
             .spaceRules, .automaticFloating,
             .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,

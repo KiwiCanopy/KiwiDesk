@@ -380,7 +380,7 @@ synonym:
   bullet governs copy alone; naming those here would be one list
   rotting in two files, the same reason the bullet above names
   none. A **proper name** is not the common noun and is not
-  bound here — the `Coder & Monitor` preset keeps its name.
+  bound here — a preset keeps its own name.
 
   Two obligations, and no claim about what the corpus currently
   says: **author every new string to this**, and give a retired

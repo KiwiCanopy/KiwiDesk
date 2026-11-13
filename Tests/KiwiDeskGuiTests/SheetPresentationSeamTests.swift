@@ -26,13 +26,10 @@ struct SheetPresentationSeamTests {
     ///
     /// A new entry is a decision, not a formality: the host has to
     /// be a view whose identity outlives the thing that opens the
-    /// sheet. `PresetsSection` hosts for its cards because they live
-    /// in a `LazyVGrid` that tears down the rows it scrolls past —
-    /// the same reasoning `SettingsView` follows for the one discard
-    /// dialog, hosted above the `editingLua` branch its own confirm
-    /// button flips.
+    /// sheet — the reasoning `SettingsView` follows for the one
+    /// discard dialog, hosted above the `editingLua` branch its own
+    /// confirm button flips.
     private static let allowed: [String: [String]] = [
-        "PresetsSection.swift": ["$previewRequest"],
         // About (#1536) is the shell's: its footer opener sits in
         // Home, which reflows under it, and the shell outlives both.
         // The sync sheet (#2450) is the shell's too: the footer that
@@ -237,7 +234,6 @@ struct SheetPresentationSeamTests {
     /// A read-only sheet takes no `SettingsModel` (#859): reaching
     /// the draft must be a new stored property, never a one-token
     /// edit. Held over every content type the hosts present, since
-    /// `PresetPreviewSheetTests` reads its own sheet alone.
     @Test("no sheet's content reaches the draft")
     func sheetContentTakesNoModel() throws {
         var checked = 0
