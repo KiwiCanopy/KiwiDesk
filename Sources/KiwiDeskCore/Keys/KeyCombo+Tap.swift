@@ -1,27 +1,26 @@
 import Foundation
 
 /// A modifier tap held in a chord's place (#1872): `rcmd` taps
-/// Right ⌘ once, `cmd+cmd` taps either ⌘ twice (the same key both
-/// times), `ropt+ropt` taps Right ⌥ twice. Stored in the chord's
-/// own string and type, so every row and Lua take one alike; its
-/// key code is a sentinel no keyboard sends, so Carbon is never
-/// asked for it (`docs/design-decisions.md` ▸ *A modifier tap is
-/// one binding kind*).
+/// Right ⌘ once, `cmd` either ⌘ once (#3259), `cmd+cmd` taps either
+/// ⌘ twice (the same key both times), `ropt+ropt` taps Right ⌥
+/// twice. Stored in the chord's own string and type, so every row
+/// and Lua take one alike; its key code is a sentinel no keyboard
+/// sends, so Carbon is never asked for it
+/// (`docs/design-decisions.md` ▸ *A modifier tap is one binding
+/// kind*).
 extension KeyCombo {
     /// The sentinel key codes, one per tap count.
     static let tapOnceCode: UInt32 = 0x1_0001
     static let tapTwiceCode: UInt32 = 0x1_0002
 
     /// A tap of `kind` pressed `count` times (1 or 2) on `side`,
-    /// nil for either side; nil where the rules refuse it — a
-    /// single tap names a side.
+    /// nil for either side; nil where the rules refuse it.
     public static func tap(
         _ kind: ModifierKind,
         side: ModifierSide?,
         count: Int
     ) -> KeyCombo? {
         guard count == 1 || count == 2 else { return nil }
-        if count == 1, side == nil { return nil }
         var modifiers = kind.plain
         if let side { modifiers.insert(.side(side, of: kind)) }
         return KeyCombo(
@@ -49,8 +48,8 @@ extension KeyCombo {
         }
     }
 
-    /// `parts` as a tap's spelling: one sided token alone, or the
-    /// same token twice; nil for anything else.
+    /// `parts` as a tap's spelling: one token alone, or the same
+    /// token twice; nil for anything else.
     static func parseTap(_ parts: [String]) -> KeyCombo? {
         guard parts.count == 1 || parts.count == 2,
             Set(parts).count == 1,

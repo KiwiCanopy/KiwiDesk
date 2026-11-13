@@ -7,8 +7,9 @@ import Testing
 /// The Shortcuts offers that Settings' retired Simple / Power User
 /// toggle once withheld (#2654): Layers, Modifier keys and Lua
 /// bindings are collapsible cards, shut until the config uses
-/// them and then open on arrival. Each reads its own hold-open,
-/// and none swaps its container for another once in use — a
+/// them and then open on arrival — save Modifier keys, a drawer of
+/// settings, which opens only in trouble (#3261). Each reads its
+/// own hold-open, and none swaps its container for another once in use — a
 /// recorder inside must survive its first combo (#1125).
 ///
 /// **The half that must never break**: a user's own layers,
@@ -40,36 +41,86 @@ struct ShortcutsOfferDisclosureTests {
         #expect(!gates.luaBindingsExist(in: "default"))
     }
 
-    @Test("Modifier keys hold open on any of their three uses")
-    func modifierKeysHoldOpen() {
-        #expect(
-            !ModifierKeysCard.inUse(
-                key: nil,
-                usesHyper: false,
-                keepsSides: false
+    /// Modifier keys is a drawer of settings (#3261): shut on
+    /// arrival whatever is set, open only while the remap is refused
+    /// with a Take Over to offer.
+    @Test("Modifier keys opens on arrival in trouble alone")
+    func modifierKeysOpenInTrouble() {
+        let offer = HyperForeignRemap(
+            source: .capsLock,
+            destination: .f18,
+            claimable: true
+        )
+        let open = { (status: HyperKeyStatus, lua: Bool) in
+            ModifierKeysCard.opensOnArrival(status: status, luaOwned: lua)
+        }
+        #expect(open(.refused(offer), false))
+        #expect(!open(.refused(offer), true))
+        #expect(!open(.on, false))
+        #expect(!open(.off, false))
+        #expect(!open(.refused(nil), false))
+        let unclaimable = HyperForeignRemap(
+            source: .capsLock,
+            destination: .f18
+        )
+        #expect(!open(.refused(unclaimable), false))
+    }
+
+    /// The shut summary states what is set, by the rows' titles,
+    /// and speaks ✦ in words (#3261).
+    @Test("the shut summary states the values set")
+    func modifierKeysSummary() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let summary = {
+            (
+                key: HyperSourceKey?,
+                base: ShortcutBase,
+                sides: Bool,
+                spoken: Bool
+            ) in
+            ModifierKeysCard.summary(
+                key: key,
+                working: true,
+                base: base,
+                sides: sides,
+                spoken: spoken
             )
+        }
+        #expect(
+            summary(nil, .standard, false, false)
+                == ModifierKeysCard.description
         )
         #expect(
-            ModifierKeysCard.inUse(
+            summary(.capsLock, .hyper, false, false)
+                == "Hyper: Caps Lock · Shortcuts use ✦"
+        )
+        let spoken = summary(.capsLock, .hyper, true, true)
+        #expect(!spoken.contains("✦"))
+        #expect(
+            spoken
+                == "Hyper: Caps Lock · Shortcuts use "
+                + ShortcutBaseWords.spoken(.hyper, keySet: true)
+                + " · " + ModifierSidesWords.title
+        )
+        #expect(
+            summary(nil, .standard, true, false)
+                == ModifierSidesWords.title
+        )
+        // A Hyper key not in effect says so, shut (#3261).
+        #expect(
+            ModifierKeysCard.summary(
                 key: .capsLock,
-                usesHyper: false,
-                keepsSides: false
-            )
+                working: false,
+                base: .standard,
+                sides: false,
+                spoken: false
+            ) == "Hyper: Caps Lock, not working"
         )
-        #expect(
-            ModifierKeysCard.inUse(
-                key: nil,
-                usesHyper: true,
-                keepsSides: false
-            )
-        )
-        #expect(
-            ModifierKeysCard.inUse(
-                key: nil,
-                usesHyper: false,
-                keepsSides: true
-            )
-        )
+        #expect(ModifierKeysCard.hyperWorks(.on))
+        #expect(!ModifierKeysCard.hyperWorks(.off))
+        #expect(!ModifierKeysCard.hyperWorks(.failed))
+        #expect(!ModifierKeysCard.hyperWorks(.refused(nil)))
     }
 
     /// Each card opens on arrival from its own reading and never
@@ -85,8 +136,27 @@ struct ShortcutsOfferDisclosureTests {
         let modifier = try squashed(
             "Components/Keybindings/ModifierKeysCard.swift"
         )
-        #expect(modifier.contains(".onAppear{ifinUse{expanded=true}}"))
-        #expect(modifier.contains("Self.inUse("))
+        #expect(modifier.contains(".onAppear{iftroubled{expanded=true}}"))
+        #expect(modifier.contains("Self.opensOnArrival("))
+        let summary = try squashed(
+            "Components/Keybindings/ModifierKeysCard+Summary.swift"
+        )
+        #expect(
+            summary.contains("working:Self.hyperWorks(model.hyperStatus)")
+        )
+        // The summary and its spoken twin reach the drawer.
+        #expect(
+            modifier.contains(
+                "summary:summary(spoken:false),"
+                    + "spokenSummary:summary(spoken:true)"
+            )
+        )
+        let section = try squashed(
+            "Components/Common/SettingsCollapsibleSection.swift"
+        )
+        #expect(
+            section.contains(".accessibilityLabel(spokenSummary??summary)")
+        )
         #expect(
             try squashed("Sections/ShortcutsSection.swift").contains(
                 ".onAppear{letgates=ShortcutsGates(config:model.config)"

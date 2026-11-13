@@ -124,7 +124,8 @@ struct ShortcutBaseSwitchModelTests {
                 "ShortcutBaseRow(model: model, reason: offerReason)"
             )
         )
-        #expect(card.contains("usesHyper: model.draftUsesHyper"))
+        // The card no longer holds open on a Hyper draft (#3261).
+        #expect(!card.contains("model.draftUsesHyper"))
         #expect(
             card.contains("editingStoredProfile: model.editingStoredProfile")
         )

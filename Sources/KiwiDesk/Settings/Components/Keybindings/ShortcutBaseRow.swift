@@ -33,13 +33,16 @@ struct ShortcutBaseRow: View {
         reason != nil || (!keySet && model.config.shortcutBase == .standard)
     }
 
-    private var picker: some View {
+    /// Hugs its labels in the footprint (#3262): a hugging strip
+    /// still takes a width proposed to it, so it is fixed-size too.
+    var picker: some View {
         SegmentedPicker(
             spokenLabel: ShortcutBaseWords.title,
             spokenValue: ShortcutBaseWords.spoken(
                 model.config.shortcutBase,
                 keySet: keySet
             ),
+            hugsLabels: true,
             spokenTitles: Dictionary(
                 uniqueKeysWithValues: ShortcutBase.allCases.map {
                     ($0, ShortcutBaseWords.spoken($0, keySet: keySet))
@@ -53,6 +56,7 @@ struct ShortcutBaseRow: View {
                 (title: ShortcutBaseWords.glyphs($0), value: $0)
             }
         )
+        .fixedSize()
     }
 
     private var captionText: String {

@@ -32,8 +32,12 @@ extension SettingsModel {
     }
 
     /// Shows the Shortcuts page's part drawing `anchor`; an anchor
-    /// no part is known to hold leaves the part shown.
+    /// no part is known to hold leaves the part shown. A row only
+    /// the `default` layer draws selects that layer first (#3260).
     func showShortcutsSegment(holding anchor: String) {
+        if ShortcutsGates.drawnOnDefaultLayerAlone(anchor) {
+            nav.shortcutsLayer = KeyLayer.defaultName
+        }
         if let part = shortcutsSegment(holding: anchor) {
             nav.shortcutsSegment = part
         }

@@ -7,19 +7,15 @@ import SwiftUI
 /// once like the layout cue (#1741), greyed with its sentence only
 /// where `init.lua` owns the config; "Shortcuts use" (#2460),
 /// drafted with the layers; and the sides switch (#2601). A
-/// collapsible card (#2654), open on arrival once a key is set, the
-/// draft uses Hyper, the switch is on or a row keeps a side.
+/// collapsible card (#2654) of settings, so shut on arrival with
+/// its summary stating what is set, save while Hyper is in trouble
+/// (#3261).
 struct ModifierKeysCard: View {
     @ObservedObject var model: SettingsModel
     /// The take-over's focus destination (#816): the button leaves
     /// once the remap is KiwiDesk's, and the recorder stays drawn.
     @FocusState private var recorderFocused: Bool
     @State private var expanded = false
-
-    /// The switch is on or a draft row keeps a side (#2601).
-    private var keepsSides: Bool {
-        model.appWide.modifierSides || model.sidedShortcutCount > 0
-    }
 
     private var reason: ShortcutsGates.InertReason? {
         ShortcutsGates(config: model.config, guiManaged: model.guiManaged)
@@ -34,22 +30,20 @@ struct ModifierKeysCard: View {
         ).inertReason(for: .shortcuts(.shortcutBase))
     }
 
-    /// The card's hold-open (#2654): a key is set, the draft uses
-    /// Hyper, or sides are kept. Not a census gate — the rows sit
-    /// behind the disclosure either way.
-    static func inUse(
-        key: HyperSourceKey?,
-        usesHyper: Bool,
-        keepsSides: Bool
+    /// The one state that opens the card on arrival (#3261): the
+    /// remap refused with a Take Over to offer, which must not fold
+    /// out of sight. Not a census gate.
+    static func opensOnArrival(
+        status: HyperKeyStatus,
+        luaOwned: Bool
     ) -> Bool {
-        key != nil || usesHyper || keepsSides
+        takeOverOffer(status: status, luaOwned: luaOwned) != nil
     }
 
-    private var inUse: Bool {
-        Self.inUse(
-            key: model.appWide.hyperKey,
-            usesHyper: model.draftUsesHyper,
-            keepsSides: keepsSides
+    private var troubled: Bool {
+        Self.opensOnArrival(
+            status: model.hyperStatus,
+            luaOwned: reason == .appWideLuaOwned
         )
     }
 
@@ -57,11 +51,8 @@ struct ModifierKeysCard: View {
         SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.modifierKeys,
             isExpanded: $expanded,
-            summary: L(
-                "shortcuts.modifier_keys.summary",
-                "Turn a key into Hyper, and choose the modifiers "
-                    + "your shortcuts use"
-            )
+            summary: summary(spoken: false),
+            spokenSummary: summary(spoken: true)
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 keyRow
@@ -89,8 +80,8 @@ struct ModifierKeysCard: View {
                     .padding(.top, 6)
             }
         }
-        // Open on arrival once in use — never forced shut.
-        .onAppear { if inUse { expanded = true } }
+        // Shut on arrival, save in trouble; never forced shut.
+        .onAppear { if troubled { expanded = true } }
     }
 
     /// The recorder in the recorder column, ✦ in the icon slot and

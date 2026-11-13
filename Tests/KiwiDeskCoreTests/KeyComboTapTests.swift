@@ -24,16 +24,25 @@ struct KeyComboTapTests {
         #expect(KeyCombo.parse("command+command") == KeyCombo.parse("cmd+cmd"))
     }
 
-    @Test("a single tap needs a side; mixed or hyper taps are refused")
+    @Test("mixed, triple or hyper taps are refused")
     func refusals() {
         for text in [
-            "cmd", "opt", "lcmd+rcmd", "cmd+rcmd", "cmd+cmd+cmd",
-            "hyper", "hyper+hyper",
+            "lcmd+rcmd", "cmd+rcmd", "cmd+cmd+cmd", "hyper", "hyper+hyper",
         ] {
             #expect(KeyCombo.parse(text) == nil, "\(text)")
         }
-        #expect(KeyCombo.tap(.command, side: nil, count: 1) == nil)
         #expect(KeyCombo.tap(.command, side: .left, count: 3) == nil)
+    }
+
+    /// An either-side single tap is a choice, never recorded (#3259).
+    @Test("an either-side single tap parses and round-trips")
+    func eitherSideSingle() throws {
+        let tap = try #require(KeyCombo.tap(.command, side: nil, count: 1))
+        #expect(tap.tapCount == 1)
+        #expect(tap.modifiers.side(of: .command) == nil)
+        #expect(tap.comboString() == "cmd")
+        #expect(KeyCombo.parse("cmd") == tap)
+        #expect(KeyCombo.parse("opt")?.tapKind == .option)
     }
 
     @Test("a tap is no chord: no key, and chords stay chords")

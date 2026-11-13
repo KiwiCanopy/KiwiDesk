@@ -3,9 +3,10 @@ import SwiftUI
 
 /// The Default shortcuts row under the Layers card (#3074): Restore
 /// and, while `init.lua` holds shortcuts, Import (#4, #1096), in
-/// the `SettingsActionRow` shape Files & Reset uses. Always drawn;
-/// what Restore does is its `?`, and a caption states only a live
-/// state: why it greys, or that nothing is left to restore (#3178).
+/// the `SettingsActionRow` shape Files & Reset uses. Drawn while the
+/// `default` layer is selected alone, since its defaults are that
+/// layer's (#3260); what Restore does is its `?`, and a caption
+/// states only that nothing is left to restore (#3178).
 struct DefaultShortcutsRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
@@ -23,6 +24,16 @@ struct DefaultShortcutsRow: View {
 
     var body: some View {
         let reason = restoreReason
+        // A selection is not a mode: off `default` the container
+        // leaves with the layer it belongs to (#3260).
+        if reason != .otherLayerPicked {
+            container(reason)
+        }
+    }
+
+    private func container(
+        _ reason: ShortcutsGates.InertReason?
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             SettingsActionRow(
                 title: L(
@@ -92,8 +103,8 @@ struct DefaultShortcutsRow: View {
         L("shortcuts.restore_defaults", "Restore Defaults…")
     }
 
-    /// Restores shipped shortcut defaults onto default layer (#1096).
-    /// Greyed, never removed, off the default layer (#171).
+    /// Restores shipped shortcut defaults onto default layer (#1096),
+    /// greyed while they are all in place (#171).
     private func resetButton(
         _ reason: ShortcutsGates.InertReason?
     ) -> some View {
@@ -168,16 +179,10 @@ struct DefaultShortcutsRow: View {
         switch reason {
         case nil:
             return nil
-        case .otherLayerPicked?:
-            return L(
-                "shortcuts.restore_defaults.other_layer",
-                "Only the “default” layer has defaults to "
-                    + "restore. Pick it in %1$@ above.",
-                SettingsCatalog.shortcuts.layersCard.control.text
-            )
-        // The others are other keys' reasons and never reach this
-        // one; listed so a new case asks for its sentence.
-        case .matchesDefaults?, .onlyDefaultLayer?, .trackUnused?,
+        // `.otherLayerPicked` draws no row, and the others are other
+        // keys' reasons; listed so a new case asks for its sentence.
+        case .matchesDefaults?, .otherLayerPicked?, .onlyDefaultLayer?,
+            .trackUnused?,
             .appWideLuaOwned?, .storedProfilePage?, .noBarShows?,
             .focusBorderOff?:
             return L(

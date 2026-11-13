@@ -48,7 +48,8 @@ enum SettingRuntimeGate: Hashable {
     /// Unadopted shortcuts present in init.lua.
     case luaImportAvailable
     /// Restore Defaults greys while the default layer matches the
-    /// shipped set or another layer is picked (#3074).
+    /// shipped set (#3074); off `default` its container is not drawn
+    /// (#3260).
     case defaultsToRestore
     /// Non-default layer exists in configuration.
     case layersExist

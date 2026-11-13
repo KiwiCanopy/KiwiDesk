@@ -78,7 +78,11 @@ restated `20...80` satisfies on the day it is written.
 - **Grey, don't hide** a control with no effect in the current
   mode (#171) — keep it visible and dimmed. This covers a control
   that *would* work in another mode, so dimming says "switch that
-  on and I act".
+  on and I act". **A selection is not a mode: a control owned by
+  an unselected object leaves with it** — the Default shortcuts
+  container is drawn on the `default` layer alone, and a hit on a
+  row it draws selects that layer first (#3260,
+  `DefaultShortcutsRowTests` ▸ `containerLeavesWithItsLayer`).
 - An affordance for a channel that **does not exist yet is removed
   outright**: dimming cannot revoke the promise its shape makes,
   and it reads broken instead of forthcoming (the site's App Store
@@ -895,10 +899,18 @@ the grey and its sentence must not be two decisions that can
 disagree, and a reason CASE keeps the whole resolver assertable
 off the main actor.
 
-**Config presence expands the surface.** Anything that already
-EXISTS in the user's config — a layer, an imported binding, an
-override — is drawn on arrival; a disclosure withholds only the
-OFFER to create, and opens on arrival once the first one exists.
+**Config presence expands the surface.** Anything the user has
+MADE — a layer, an imported binding, an override — is drawn on
+arrival; a disclosure withholds only the OFFER to create, and
+opens on arrival once the first one exists. A drawer of
+*settings* opens only when asked, and its shut summary states
+their current values, a value not in effect saying so; a broken
+state the drawer holds the fix for opens it on arrival (#3261:
+Modifier keys opens only while Hyper's remap is refused with a
+Take Over, `ShortcutsOfferDisclosureTests` ▸
+`modifierKeysOpenInTrouble`;
+`docs/design-decisions.md` ▸ *A drawer of settings opens when
+asked*).
 
 **A row that writes through `SettingsModel.setAppWide` draws
 `LiveSettingNote` (#3218):** under its card's title where the

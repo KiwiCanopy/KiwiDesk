@@ -66,6 +66,11 @@ struct BindingNameDoorTests {
             "a catalogue pick stores its command's English label, as"
                 + " a navigation row does (#1871)"
         ),
+        "ShortcutsGates.swift": (
+            1,
+            "a census row's text label key, matched to a reveal "
+                + "anchor — no binding's label is read (#3260)"
+        ),
         "ShortcutsPagePart.swift": (
             1,
             "a census row's text label key, matched to a reveal "

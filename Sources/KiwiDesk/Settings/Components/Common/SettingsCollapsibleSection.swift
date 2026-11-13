@@ -12,6 +12,9 @@ struct SettingsCollapsibleSection<Content: View>: View {
     private let control: SettingsControl
     private let drawer: any AnySettingsDrawer
     private let summary: String
+    /// The summary's spoken twin where the drawn one holds a glyph
+    /// VoiceOver cannot say (#3261); the summary otherwise.
+    private let spokenSummary: String?
     /// The title's `?`: a concept the card names (#3162).
     private let help: String?
     @Binding private var isExpanded: Bool
@@ -24,6 +27,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
         _ drawer: SettingsDrawer<Children>,
         isExpanded: Binding<Bool>,
         summary: String,
+        spokenSummary: String? = nil,
         help: String? = nil,
         onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -33,6 +37,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
         self.drawer = drawer
         self._isExpanded = isExpanded
         self.summary = summary
+        self.spokenSummary = spokenSummary
         self.help = help
         self.content = content
     }
@@ -51,7 +56,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .accessibilityLabel(summary)
+            .accessibilityLabel(spokenSummary ?? summary)
             if isExpanded {
                 SettingsTheme.hairlineSubtle.frame(height: 1)
                 content()

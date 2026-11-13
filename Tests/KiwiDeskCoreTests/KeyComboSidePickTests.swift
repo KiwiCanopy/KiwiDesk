@@ -29,13 +29,17 @@ struct KeyComboSidePickTests {
         #expect(right == (try combo("rcmd+h")))
     }
 
-    @Test("Hyper takes no side; a single tap keeps one")
+    @Test("Hyper takes no side; a single tap takes either too")
     func refusals() throws {
         let hyper = try combo("hyper+cmd+h")
         #expect(hyper.pickableSideKinds(hyperKey: nil).isEmpty)
         #expect(hyper.pickingSide(.left, of: .command, hyperKey: nil) == nil)
         let single = try combo("rcmd")
-        #expect(single.pickingSide(nil, of: .command, hyperKey: nil) == nil)
+        // Either side by choice (#3259).
+        #expect(
+            single.pickingSide(nil, of: .command, hyperKey: nil)
+                == (try combo("cmd"))
+        )
         #expect(
             single.pickingSide(.left, of: .command, hyperKey: nil)
                 == (try combo("lcmd"))

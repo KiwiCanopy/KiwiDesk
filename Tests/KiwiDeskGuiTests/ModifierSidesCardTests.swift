@@ -41,7 +41,9 @@ struct ModifierSidesCardTests {
         #expect(Set(ShortcutsRowOrder.modifierKeysList) == Set(placed))
     }
 
-    @Test("the card holds open on the sides the model reads")
+    /// The card no longer holds open on sides kept: a drawer of
+    /// settings opens only when asked (#3261).
+    @Test("the card draws the sides row, and keeps no hold-open")
     func cardWiresTheOffer() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -51,16 +53,7 @@ struct ModifierSidesCardTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
-        #expect(
-            source.contains(
-                "model.appWide.modifierSides || model.sidedShortcutCount > 0"
-            )
-        )
-        // The hold-open takes it.
-        #expect(
-            source.components(separatedBy: "keepsSides: keepsSides").count
-                == 2
-        )
+        #expect(!source.contains("keepsSides"))
         #expect(source.contains("ModifierSidesRow(model: model)"))
         let row = SourceScan.stripComments(
             try String(

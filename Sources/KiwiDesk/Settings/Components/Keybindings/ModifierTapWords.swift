@@ -9,15 +9,19 @@ import KiwiDeskCore
 enum ModifierTapWords {
     /// `combo` in words, nil for a chord.
     static func spoken(_ combo: KeyCombo) -> String? {
-        guard let count = combo.tapCount, let kind = combo.tapKind
+        guard let count = combo.tapCount, let name = keyName(combo)
         else { return nil }
-        let name =
-            combo.modifiers.side(of: kind).map {
-                ChordGlyphs.word($0, Self.name(kind))
-            } ?? Self.name(kind)
         return count == 1
             ? L("chord.tap.once", "%1$@, press once", name)
             : L("chord.tap.twice", "%1$@, press twice", name)
+    }
+
+    /// The tapped key in words, its side named: "Right Command".
+    static func keyName(_ combo: KeyCombo) -> String? {
+        guard let kind = combo.tapKind else { return nil }
+        return combo.modifiers.side(of: kind).map {
+            ChordGlyphs.word($0, Self.name(kind))
+        } ?? Self.name(kind)
     }
 
     static func name(_ kind: ModifierKind) -> String {
@@ -35,17 +39,55 @@ enum ModifierTapWords {
         _ pending: KeyCombo,
         sidesKept: Bool
     ) -> String? {
-        guard let kind = pending.tapKind,
-            let double = KeyCombo.tap(
-                kind,
-                side: sidesKept ? pending.modifiers.side(of: kind) : nil,
-                count: 2
-            )
+        guard let double = double(of: pending, sidesKept: sidesKept)
         else { return nil }
         return L(
             "key_recorder.tap_again",
             "Tap again for %1$@",
-            ChordGlyphs.render(double, layoutChar: { _ in nil })
+            drawn(double)
         )
+    }
+
+    /// The double tap one more press of `single` records: its side
+    /// kept only while sides are.
+    static func double(of single: KeyCombo, sidesKept: Bool) -> KeyCombo? {
+        guard let kind = single.tapKind else { return nil }
+        return KeyCombo.tap(
+            kind,
+            side: sidesKept ? single.modifiers.side(of: kind) : nil,
+            count: 2
+        )
+    }
+
+    /// The caption a recorded single tap leaves (#3257), drawn and
+    /// spoken; nil for anything but a single tap.
+    static func tapOnceRecorded(
+        _ single: KeyCombo,
+        sidesKept: Bool
+    ) -> (drawn: String, spoken: String)? {
+        guard single.tapCount == 1,
+            let double = double(of: single, sidesKept: sidesKept),
+            let one = keyName(single), let two = keyName(double)
+        else { return nil }
+        let drawnLine = L(
+            "key_recorder.tap_once_recorded",
+            "%1$@ recorded. For %2$@, tap twice within a moment.",
+            drawn(single),
+            drawn(double)
+        )
+        // Key names, not the drawn glyphs: a glyph run and a word
+        // cannot share one slot in every catalog.
+        let spokenLine = L(
+            "key_recorder.tap_once_recorded.spoken",
+            "Recorded: %1$@, pressed once. For a double press, press "
+                + "%2$@ twice within a moment.",
+            one,
+            two
+        )
+        return (drawnLine, spokenLine)
+    }
+
+    private static func drawn(_ tap: KeyCombo) -> String {
+        ChordGlyphs.render(tap, layoutChar: { _ in nil })
     }
 }
