@@ -22,20 +22,40 @@ struct KeyboardTapArmingTests {
         )
     }
 
+    /// What each consumer is armed with, spelled `row` or
+    /// `leader@index`.
+    private func names(
+        _ arming: KeyboardTapArming<String, String>,
+        _ consumer: KeyboardTapConsumer
+    ) -> [String] {
+        arming.rows(for: consumer).map {
+            switch $0.1 {
+            case .row(let name): name
+            case .leader(let index, let name): "\(name)@\(index)"
+            }
+        }
+    }
+
     @Test("each row goes to one consumer, in its order")
     func sortsRows() throws {
         let arming = try arm(
-            ["ctrl+k", "cmd+cmd", "hyper+h", "rcmd+j", "cmd+j", "opt+l"],
-            leaders: ["ctrl+k", "lopt+lopt"]
+            [
+                "ctrl+k", "cmd+cmd", "hyper+h", "rcmd+j", "cmd+j",
+                "opt+l", "ropt+ropt",
+            ],
+            leaders: ["ctrl+k", "lopt+lopt", "ropt+ropt"]
         )
-        #expect(arming.heldByLeader.map(\.1) == ["ctrl+k"])
-        #expect(arming.taps.map(\.1) == ["cmd+cmd"])
+        // A row on a leader's exact chord, chord or tap, is held.
+        #expect(arming.heldByLeader.map(\.1) == ["ctrl+k", "ropt+ropt"])
         #expect(arming.hyper.map(\.1) == ["hyper+h"])
-        #expect(arming.sides.map(\.1) == ["rcmd+j", "cmd+j"])
         #expect(arming.carbon.map(\.1) == ["opt+l"])
-        #expect(arming.chordLeaders.map(\.1) == ["ctrl+k"])
-        #expect(arming.tapLeaders.map(\.index) == [1])
-        #expect(arming.tapLeaders.map(\.leader) == ["lopt+lopt"])
+        #expect(names(arming, .sequences) == ["ctrl+k@0"])
+        #expect(names(arming, .sides) == ["rcmd+j", "cmd+j"])
+        // Taps first, then the tap leaders, under their own index.
+        #expect(
+            names(arming, .modifierTaps)
+                == ["cmd+cmd", "lopt+lopt@1", "ropt+ropt@2"]
+        )
     }
 
     /// A sided chord leader names its chord as a sided row does, so
@@ -43,14 +63,11 @@ struct KeyboardTapArmingTests {
     @Test("a sided chord leader moves its either-side twin to the tap")
     func sidedLeaderTaps() throws {
         let on = try arm(["cmd+h"], leaders: ["lcmd+h"])
-        #expect(on.sides.map(\.1) == ["cmd+h"])
+        #expect(names(on, .sides) == ["cmd+h"])
         #expect(on.carbon.isEmpty)
         let off = try arm(["cmd+h"], leaders: ["lcmd+h"], sides: false)
-        #expect(off.sides.isEmpty)
+        #expect(names(off, .sides).isEmpty)
         #expect(off.carbon.map(\.1) == ["cmd+h"])
-        // A tap leader is no chord: the row stays Carbon's.
-        let tap = try arm(["cmd+h"], leaders: ["lcmd+lcmd"])
-        #expect(tap.carbon.map(\.1) == ["cmd+h"])
     }
 
     /// The manager arms the tap from the sort: an either-side row

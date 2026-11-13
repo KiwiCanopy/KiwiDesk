@@ -34,20 +34,22 @@ extension KeybindingManager {
         let sequences = arming.leaders.map(\.1)
         let rows = KeyboardTapRows(
             sides: sideTapRows(arming.sides),
-            taps: arming.taps.map { combo, ref in
-                ModifierTapRow(
-                    combo: combo,
-                    id: liveTapID(combo, ref),
-                    opensKiwiHubSide: kiwiHubSideRefs.contains(ref)
-                )
-            }
-                // A tap leader is detected as any tap is (#1871).
-                + arming.tapLeaders.map {
+            taps: arming.rows(for: .modifierTaps).map { combo, armed in
+                switch armed {
+                case .row(let ref):
                     ModifierTapRow(
-                        combo: $0.combo,
-                        id: KeyboardTap.leaderID($0.index)
+                        combo: combo,
+                        id: liveTapID(combo, ref),
+                        opensKiwiHubSide: kiwiHubSideRefs.contains(ref)
                     )
-                },
+                // A tap leader is detected as any tap is (#1871).
+                case .leader(let index, _):
+                    ModifierTapRow(
+                        combo: combo,
+                        id: KeyboardTap.leaderID(index)
+                    )
+                }
+            },
             sequences: sequences,
             sequencePassing: sequences.isEmpty
                 ? .none : .of(systemChords()),

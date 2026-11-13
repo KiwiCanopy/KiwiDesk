@@ -13559,11 +13559,12 @@ sides are told apart, and one Core answer, read from the
 routers that fire each row, serves the caption, its spoken
 form and the conflict. The answer reads the rows the keyboard tap
 is armed with, in the order the tap asks them, so a key
-sequence's leader counts among the rows that take a side: a sided
-chord leader is asked before every sided chord, and a tap leader
+sequence's leader counts among the rows that take a side: a chord
+leader is asked before every chord on the tap, and a tap leader
 rides the tap router (#3278). A sided chord leader also moves its
 either-side twin onto the tap, so that row fires from the other
-side alone, as the caption says.
+side alone, as the caption says, and a sided row an either-side
+leader takes whole is a counted conflict with that leader.
 
 There is no hold-alone kind, and no Lua timing override until
 someone asks. A single tap fires at its release when no double

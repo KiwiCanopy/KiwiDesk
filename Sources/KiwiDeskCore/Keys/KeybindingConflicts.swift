@@ -111,18 +111,21 @@ public enum KeybindingConflicts {
                 )
             }
         }
-        // Rows naming each side take every key from this one: it
-        // never fires, so it is counted (#3256); one side taken is
-        // the intended precedence, no conflict.
+        // Rows taking every key from this one leave it never firing,
+        // so it is counted (#3256); one row taking them all, as an
+        // either-side leader a sided row (#3278), is a plain clash.
+        // One side taken is the intended precedence, no conflict.
         if let reach = sideReach(
             for: binding,
             parsed: parsed,
             among: rivals,
             distinguishingSides: distinguishingSides
         ), reach.isDead {
+            let takers = reach.takers
             return Conflict(
                 binding: binding,
-                target: .sidesTaken(reach.takers)
+                target: takers.count == 1
+                    ? .otherBinding(takers[0]) : .sidesTaken(takers)
             )
         }
         if let system = SystemShortcuts.map[combo] {

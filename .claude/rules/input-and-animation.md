@@ -172,12 +172,15 @@ editing here:
   - **No row, no consumer.** Every consumer's rows reach the tap
     through the one `KeyboardTapRows` value and its `setRows`
     door, and the live consumers are read off its non-empty
-    fields, so a new consumer adds a field there; which row goes
-    to which consumer is `KeyboardTapArming`'s alone, read by the
-    manager's arming and by `KeybindingConflicts.sideReach`, so a
+    fields, so a new consumer adds a field there. Which row goes
+    to which consumer, and in what order, is
+    `KeyboardTapArming.rows(for:)`'s, read by the manager's arming
+    and by `KeybindingConflicts.sideReach`, which asks the
+    consumers in `KeyboardTapConsumer`'s order as the tap does; a
     new path that routes rows to a consumer goes through it, never
-    a row list of its own (#3278, `KeyboardTapArmingTests`)
-    (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
+    a row list of its own, and no scan holds that, so it is
+    review's (#3278; `KeyboardTapArmingTests` ▸ `sortsRows`,
+    `ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`,
     `KeyboardTapRoutingTests` ▸ `noTapRowNoConsumer`,
     `rowsNameConsumers`).
   - **`.sequences` decides an open key sequence on the tap's
@@ -219,7 +222,9 @@ editing here:
     chord leader names**, the either-side row on such a chord
     included, and only while
     `modifierSides` is on; every other chord stays a Carbon
-    hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`).
+    hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`,
+    `KeyboardTapArmingTests` ▸ `sidedLeaderTaps`,
+    `managerArmsTheSort`).
   - **A modifier tap is decided by the one pure
     `ModifierTapDetector`**, which the recorder calls too, so what
     records is what fires; its timings are its constants and no

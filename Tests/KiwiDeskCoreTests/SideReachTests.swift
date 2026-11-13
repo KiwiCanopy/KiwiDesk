@@ -131,11 +131,51 @@ struct SideReachTests {
     @Test("a leader is judged and outranks a sided row")
     func leaderIsJudged() throws {
         let open = KeyBinding(combo: "cmd+j", kind: .sequence)
-        #expect(reach(open, [open, row("p", "lcmd+j")]) == nil)
+        let pressed = row("p", "lcmd+j")
+        #expect(reach(open, [open, pressed]) == nil)
+        // The leader takes the sided row's one form: it never fires,
+        // a plain clash with that leader.
+        let shadowed = try #require(reach(pressed, [open, pressed]))
+        #expect(shadowed.isDead)
+        #expect(shadowed.takers == [open])
+        #expect(
+            KeybindingConflicts.conflict(
+                for: pressed,
+                in: [open, pressed],
+                distinguishingSides: true
+            )?.target == .otherBinding(open)
+        )
         let sided = KeyBinding(combo: "rcmd+j", kind: .sequence)
         let reach = try #require(reach(open, [open, sided]))
         #expect(reach.runs == (try combo("lcmd+j")))
         #expect(reach.takenBy?.by == sided)
+    }
+
+    /// One either-side leader taking both forms of a two-modifier
+    /// row is one taker: a plain clash, never "one side each".
+    @Test("one row taking every form is a plain clash")
+    func oneTakerIsAClash() throws {
+        let either = row("e", "cmd+ropt+h")
+        let leader = KeyBinding(combo: "cmd+opt+h", kind: .sequence)
+        let reach = try #require(reach(either, [either, leader]))
+        #expect(reach.isDead)
+        #expect(
+            KeybindingConflicts.conflict(
+                for: either,
+                in: [either, leader],
+                distinguishingSides: true
+            )?.target == .otherBinding(leader)
+        )
+    }
+
+    /// A Hyper row is Carbon's, which reads it either-side: no row
+    /// narrows it, and it narrows none.
+    @Test("a Hyper row has no reach")
+    func hyperHasNone() {
+        let either = row("e", "hyper+cmd+h")
+        let left = row("l", "hyper+lcmd+h")
+        #expect(reach(either, [either, left]) == nil)
+        #expect(reach(left, [either, left]) == nil)
     }
 
     /// Two leaders naming each side take every key from the chord

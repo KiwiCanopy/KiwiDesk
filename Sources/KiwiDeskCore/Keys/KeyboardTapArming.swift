@@ -8,6 +8,13 @@ import Foundation
 /// whatever names a press row (a Lua ref, a Settings binding) and
 /// `Leader` whatever names a sequence.
 struct KeyboardTapArming<Row, Leader> {
+    /// What a consumer answers with: a press row, or a leader with
+    /// its sequence's index, which `KeyboardTap.leaderID(_:)` names.
+    enum Armed {
+        case row(Row)
+        case leader(index: Int, Leader)
+    }
+
     /// Press rows on a leader's exact chord: the sequence takes the
     /// chord, so the row is never armed (#1871).
     private(set) var heldByLeader: [(KeyCombo, Row)] = []
@@ -55,16 +62,21 @@ struct KeyboardTapArming<Row, Leader> {
         Self(rows: [], leaders: [], distinguishingSides: false)
     }
 
-    /// The leaders `.sequences` matches a key-down against.
-    var chordLeaders: [(KeyCombo, Leader)] {
-        leaders.filter { !$0.0.isTap }
-    }
-
-    /// The tap leaders `.modifierTaps` detects, each with its
-    /// sequence's index, which `KeyboardTap.leaderID(_:)` names.
-    var tapLeaders: [(index: Int, combo: KeyCombo, leader: Leader)] {
-        leaders.enumerated().filter(\.element.0.isTap).map {
-            (index: $0.offset, combo: $0.element.0, leader: $0.element.1)
+    /// The rows `consumer` is armed with, in the order the tap
+    /// hands them to it: `.sequences` the chord leaders, `.sides`
+    /// the side rows, `.modifierTaps` the taps, then the tap leaders.
+    func rows(for consumer: KeyboardTapConsumer) -> [(KeyCombo, Armed)] {
+        let leading = leaders.enumerated().map {
+            ($0.element.0, Armed.leader(index: $0.offset, $0.element.1))
+        }
+        switch consumer {
+        case .sequences:
+            return leading.filter { !$0.0.isTap }
+        case .sides:
+            return sides.map { ($0.0, .row($0.1)) }
+        case .modifierTaps:
+            return taps.map { ($0.0, .row($0.1)) }
+                + leading.filter(\.0.isTap)
         }
     }
 
@@ -79,8 +91,7 @@ struct KeyboardTapArming<Row, Leader> {
         guard distinguishingSides else { return [] }
         return Set(
             combos.filter {
-                !$0.isTap && $0.modifiers.isSided
-                    && !$0.modifiers.contains(.hyper)
+                $0.modifiers.isSided && !$0.modifiers.contains(.hyper)
             }
             .map(\.unsided)
         )
