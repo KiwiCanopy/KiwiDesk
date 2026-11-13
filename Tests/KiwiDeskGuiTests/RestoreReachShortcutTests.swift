@@ -44,10 +44,14 @@ struct RestoreReachShortcutTests {
     /// gui.json holds the seed this Mac would get; Work and Home move
     /// one seeded row to a chord of their own, and with `ownRow` each
     /// also holds a row of its own on that row's seeded chord. Travel
-    /// follows the base, or keeps its own resize step with `step`.
-    private func desk(ownRow: Bool = false, step: CGFloat? = nil)
-        throws -> Desk
-    {
+    /// follows the base, or with `travel` holds its own seed for
+    /// those Spaces and that resize step. With `homeMoves` off, Home
+    /// follows the base too.
+    private func desk(
+        ownRow: Bool = false,
+        homeMoves: Bool = true,
+        travel: (spaces: [SpaceID], step: CGFloat)? = nil
+    ) throws -> Desk {
         let core = makeTestCore()
         let probe = makeTestModel(core: core)
         probe.config.spaces = [SpaceID("1")]
@@ -67,7 +71,7 @@ struct RestoreReachShortcutTests {
         own.combo = seed.combo
         var homeMoved = kept
         homeMoved.combo = elsewhere
-        for name in ["Work", "Home"] {
+        for name in homeMoves ? ["Work", "Home"] : ["Work"] {
             let home = name == "Home"
             var file = profile(name)
             file.layers = KeyLayerOverride(
@@ -89,20 +93,23 @@ struct RestoreReachShortcutTests {
                 try core.profiles.write(file)
             }
         }
-        var travel = profile("Travel")
-        if let step {
-            travel.settings.resizeStep = step
+        if !homeMoves { try core.profiles.write(profile("Home")) }
+        var file = profile("Travel")
+        if let travel {
+            file.spaces = travel.spaces
+            file.settings.resizeStep = travel.step
+            let page = Set(shipped.map(\.lua))
             let theirs = probe.shippedDefaults(
                 on: base,
-                spaces: [SpaceID("1")],
-                resizeStep: step
+                spaces: travel.spaces,
+                resizeStep: travel.step
             )
-            .filter { $0.lua.contains("resize(") }
-            travel.layers = KeyLayerOverride(layers: [
+            .filter { !page.contains($0.lua) }
+            file.layers = KeyLayerOverride(layers: [
                 KeyLayer(name: KeyLayer.defaultName, bindings: theirs)
             ])
         }
-        try core.profiles.write(travel)
+        try core.profiles.write(file)
         let model = makeTestModel(core: core)
         model.reload()
         return Desk(model: model, seed: seed, kept: kept)
@@ -173,7 +180,7 @@ struct RestoreReachShortcutTests {
     /// is not asked about, and "every profile" leaves them be.
     @Test("a row a profile's own step spells is that profile's")
     func ownStepIsKept() throws {
-        let desk = try desk(step: 30)
+        let desk = try desk(travel: ([SpaceID("1")], 30))
         #expect(desk.model.shortcutsRestoreChangedElsewhere == ["Home"])
         desk.model.resetShortcutsToDefaults(reach: .everyProfile)
         desk.model.updateActiveProfile()
@@ -181,5 +188,44 @@ struct RestoreReachShortcutTests {
         let grow = keyID("KiwiDesk.resize(\"x\", 30)")
         #expect(travel[grow] == "option+command+2")
         #expect(travel[keyID("KiwiDesk.resize(\"x\", 50)")] == nil)
+    }
+
+    /// Travel's digit rows are its own Spaces' seed, the same.
+    @Test("a row a profile's own Spaces spell is that profile's")
+    func ownSpacesAreKept() throws {
+        let desk = try desk(travel: ([SpaceID("2")], 50))
+        #expect(desk.model.shortcutsRestoreChangedElsewhere == ["Home"])
+        desk.model.resetShortcutsToDefaults(reach: .everyProfile)
+        desk.model.updateActiveProfile()
+        let travel = try combos(desk.model, "Travel")
+        #expect(travel[keyID("KiwiDesk.focus_space(\"2\")")] != nil)
+        #expect(travel[keyID("KiwiDesk.focus_space(\"1\")")] == nil)
+    }
+
+    /// Nobody else changed a seed, and the row the restore drops is
+    /// Work's alone: the restore stages no reach of its own.
+    @Test("a restore nobody else shares stages no reach")
+    func unsharedRestoreStagesNothing() throws {
+        let desk = try desk(ownRow: true, homeMoves: false)
+        #expect(desk.model.shortcutsRestoreChangedElsewhere == [])
+        desk.model.resetShortcutsToDefaults(reach: .here)
+        #expect(desk.model.reachEdits.isEmpty)
+    }
+
+    /// A row added in this draft on a seeded chord is in no file: the
+    /// restore drops it from the page and stages no removal for it.
+    @Test("a draft-only row the restore drops stages nothing")
+    func draftRowStagesNothing() throws {
+        let desk = try desk(homeMoves: false)
+        var row = mine
+        row.combo = desk.seed.combo
+        let index = try #require(
+            desk.model.config.layers.firstIndex {
+                $0.name == KeyLayer.defaultName
+            }
+        )
+        desk.model.config.layers[index].bindings.append(row)
+        desk.model.resetShortcutsToDefaults(reach: .here)
+        #expect(desk.model.reachEdits.isEmpty)
     }
 }

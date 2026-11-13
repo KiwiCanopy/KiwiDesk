@@ -38,11 +38,11 @@ extension SettingsModel {
     /// out there. `.everyProfile` shares every shared seed with all
     /// profiles, and keeps a moved row no seed shares on the edited
     /// profile, as `.here` does. A pick the stored reach already
-    /// answers is not staged, so a restore nobody else shares leaves
-    /// the draft's reach as it was. A dropped row is the edited
-    /// profile's under both answers: a seed taking its chord
-    /// elsewhere is the encoder's take-over. Nothing is staged
-    /// without a checklist.
+    /// answers is cleared rather than staged, so a restore nobody
+    /// else shares leaves no reach of its own in the draft. A dropped
+    /// row is the edited profile's under both answers: a seed taking
+    /// its chord elsewhere is the encoder's take-over. Nothing is
+    /// staged without a checklist.
     func stageRestore<Value>(
         _ family: RuleFamily,
         _ restore: RestoreSeeds<Value>,
@@ -52,23 +52,26 @@ extension SettingsModel {
         guard let stored, let editing = reachProfile else { return }
         let alone = RuleReach.listed([editing])
         let sharing = reach == .everyProfile ? restore.seeds : [:]
-        for key in restore.moved
-        where sharing[key] == nil
-            && stored.defaultReach(
-                of: key,
-                editing: editing,
-                isLoaded: reachIsLoaded
-            ) != alone
-        {
-            reachEdits.reach[family, default: [:]][key] = alone
+        for key in restore.moved where sharing[key] == nil {
+            // A pick the stored reach already answers is cleared, so
+            // an earlier pick on the row cannot carry the restore.
+            let answered =
+                stored.defaultReach(
+                    of: key,
+                    editing: editing,
+                    isLoaded: reachIsLoaded
+                ) == alone
+            reachEdits.reach[family, default: [:]][key] =
+                answered ? nil : alone
         }
         for key in sharing.keys {
             reachEdits.reach[family, default: [:]][key] =
                 .shared(joining: Set(stored.profiles))
         }
         for key in restore.dropped
-        where stored.base[key] != nil
-            || stored.reach(of: key, editing: editing) != alone
+        where stored.resolved(key, for: editing) != nil
+            && (stored.base[key] != nil
+                || stored.reach(of: key, editing: editing) != alone)
         {
             reachEdits.reach[family]?[key] = nil
             recordRemoval(family, key, .here)

@@ -117,6 +117,20 @@ struct RestoreReachTests {
         #expect(model.reachEdits.isEmpty)
     }
 
+    /// A pick staged on the row earlier in the draft does not carry a
+    /// restore nobody else shares past the edited profile.
+    @Test("a restore here clears an earlier pick on its row")
+    func earlierPickIsCleared() throws {
+        let key = try seeded
+        let model = try gestureModel(travelAdds: true)
+        try model.core.profiles.write(profile("Home"))
+        model.reload()
+        model.reachEdits.reach[.gesture, default: [:]][key.spelling] =
+            .shared(joining: ["Work", "Home", "Travel"])
+        model.restoreGestureDefaults(on: .mouse, reach: .here)
+        #expect(model.reachEdits.reach[.gesture]?[key.spelling] == nil)
+    }
+
     @Test("here resets Work alone; Home and Travel keep theirs")
     func gestureHere() throws {
         let key = try seeded

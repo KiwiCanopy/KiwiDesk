@@ -44,12 +44,11 @@ extension SettingsModel {
         var page = layer
         page.bindings = shippedDefaults(on: config.shortcutBase)
         var shared = RuleReachTable<String>.combos([page])
-        let others = (layeredReach?.keyLayers.profiles ?? []).filter {
-            $0 != reachProfile
-        }
-        for name in others {
-            guard let profile = try? core.profiles.read(name: name)
-            else { continue }
+        let others = Set(layeredReach?.keyLayers.profiles ?? [])
+            .subtracting([reachProfile].compactMap { $0 })
+        // One pass over the files, the read the reach snapshot takes.
+        for profile in core.profiles.allProfiles()
+        where others.contains(profile.name) {
             var own = layer
             own.bindings = shippedDefaults(
                 on: config.shortcutBase,
