@@ -74,6 +74,23 @@ struct TourStartReplaceTests {
         #expect(core.tourDesk(among: offered, copy: nil) == .changed)
     }
 
+    /// A profile live on screens it keeps no layout for (the
+    /// count's default) cannot record a replace's screens: it is
+    /// left as saved and a pick starts a copy.
+    @Test("a profile with no layout for these screens is foreign")
+    func foreignScreens() throws {
+        let core = makeCore()
+        try core.applyStandard(StandardProfiles.developer1)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "Other",
+                frame: CGRect(x: 0, y: 0, width: 1728, height: 1117)
+            )
+        )
+        #expect(core.tourDesk(among: offered, copy: nil) == .foreign)
+    }
+
     @Test("no saved profile live replaces nothing")
     func nothingSavedIsUnsaved() {
         let core = makeCore()

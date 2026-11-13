@@ -67,6 +67,8 @@ final class OnboardingStartModel {
     var restore: (KiwiCore.TourSpacesBaseline) -> Bool = { _ in false }
     /// The copy re-read after a later step of the tour wrote it.
     var rereadCopy: (KiwiCore.TourCopy) -> KiwiCore.TourCopy? = { $0 }
+    /// Whether the copy's file still reads as saved.
+    var copyIntact: (KiwiCore.TourCopy) -> Bool = { _ in true }
 
     /// What a start came to.
     enum StartOutcome {
@@ -81,7 +83,7 @@ final class OnboardingStartModel {
     }
 
     /// Whether the desk changed, so a pick replaces its Spaces.
-    var deskChanged: Bool { desk == .changed }
+    var deskChanged: Bool { desk == .changed || desk == .foreign }
 
     /// Whether Continue now replaces the current Spaces.
     var replacesCurrent: Bool {
@@ -125,6 +127,15 @@ final class OnboardingStartModel {
         }
         confirmReplace(layout) { [weak self] replace in
             guard replace, let self else { return }
+            // A profile with no layout for these screens is left as
+            // saved: the confirmed pick starts a copy instead.
+            if self.desk == .foreign {
+                let outcome = self.start(layout, nil)
+                if case .started(let made) = outcome { self.copy = made }
+                self.refresh()
+                if case .started = outcome { advance() }
+                return
+            }
             if self.baseline == nil { self.baseline = self.captureBaseline() }
             let done = self.replace(layout)
             // What was picked is the desk now: Continue again writes
@@ -143,10 +154,14 @@ final class OnboardingStartModel {
         refresh()
     }
 
-    /// A later step of the tour wrote the live profile (the look,
-    /// the bars): its copy stays this tour's, not the user's.
-    func tourWroteProfile() {
-        copy = copy.flatMap(rereadCopy)
+    /// Runs a later step's write of the live profile (the look,
+    /// the bars): an intact copy stays this tour's, re-read after
+    /// it; one the user changed before it is theirs, never deleted.
+    func writingProfile<T>(_ write: () -> T) -> T {
+        let intact = copy.map(copyIntact) ?? false
+        let result = write()
+        copy = intact ? copy.flatMap(rereadCopy) : nil
+        return result
     }
 
     /// A new presentation starts with no baseline and no pick.

@@ -24,16 +24,18 @@ extension AppDelegate {
             self?.core.describesLiveProfile(baseline) ?? false
         }
         bars.onSetVisibility = { [weak self] visibility in
-            defer { self?.onboardingModel.start.tourWroteProfile() }
-            return self?.core.withUserMotion {
-                self?.core.setBarVisibility(visibility)
-            } ?? false
+            guard let self else { return false }
+            return onboardingModel.start.writingProfile {
+                core.withUserMotion { core.setBarVisibility(visibility) }
+            }
         }
         bars.onRestore = { [weak self] baseline in
-            defer { self?.onboardingModel.start.tourWroteProfile() }
-            return self?.core.withUserMotion {
-                self?.core.restoreBarVisibility(baseline)
-            } ?? false
+            guard let self else { return false }
+            return onboardingModel.start.writingProfile {
+                core.withUserMotion {
+                    core.restoreBarVisibility(baseline)
+                }
+            }
         }
         bars.revealKeys = { [weak self] in
             guard

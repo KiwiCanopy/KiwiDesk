@@ -134,6 +134,21 @@ struct OnboardingStartModelTests {
         #expect(calls.started.map(\.1) == [nil, "Developer"])
     }
 
+    /// A profile with no layout for these screens: Current leads,
+    /// the pick asks once and then starts a copy, never a replace.
+    @Test("a foreign desk asks, then starts a copy")
+    func foreignDesk() {
+        let (start, calls) = model(desk: .foreign)
+        #expect(start.options.first == .current)
+        start.pick(.layout(StandardProfiles.developer1))
+        var advanced = false
+        start.commit { advanced = true }
+        #expect(advanced)
+        #expect(calls.asked == 1)
+        #expect(calls.replaced.isEmpty)
+        #expect(calls.started.count == 1)
+    }
+
     /// No saved profile live: no Current, and a pick starts fresh.
     @Test("an unsaved desk offers no Current and replaces nothing")
     func unsavedDesk() {

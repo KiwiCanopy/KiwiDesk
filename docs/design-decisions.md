@@ -11214,9 +11214,13 @@ piling copies up (`TourStartReplaceTests` ▸
 still exactly as saved: a copy the user edited, or one from an
 earlier tour, is their desk, and no pick deletes it
 (`TourStartReplaceTests` ▸ `editedCopyIsChanged`). With no saved
-profile live for these screens, a pick starts a profile of its
-own and replaces nothing (`TourStartReplaceTests` ▸
-`nothingSavedIsUnsaved`).
+profile live, a pick starts a profile of its own and replaces
+nothing (`TourStartReplaceTests` ▸ `nothingSavedIsUnsaved`); and a
+profile live on screens it keeps no layout for leads with Current
+like any changed desk, but a confirmed pick starts a preset copy
+and leaves that profile as saved, since a replace there could not
+record which screen each Space is on (`TourStartReplaceTests` ▸
+`foreignScreens`).
 
 **On a changed desk the first segment is Current, and a preset
 replaces the Spaces in place behind one confirm.** A replay over

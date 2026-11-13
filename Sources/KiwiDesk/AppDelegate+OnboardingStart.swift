@@ -39,6 +39,9 @@ extension AppDelegate {
         start.captureBaseline = { [weak self] in
             self?.core.tourSpacesBaseline()
         }
+        start.copyIntact = { [weak self] copy in
+            self?.core.tourCopyIntact(copy) ?? false
+        }
         start.rereadCopy = { [weak self] copy in
             self?.core.tourCopyRead(copy)
         }

@@ -21,6 +21,11 @@ extension KiwiCore {
         case unsaved
         /// The user's own Spaces, which a pick replaces in place.
         case changed
+        /// The user's own profile, live for screens it keeps no
+        /// layout for: a replace could not record where its Spaces
+        /// go, so a pick, once confirmed, starts a preset copy and
+        /// leaves that profile as saved.
+        case foreign
     }
 
     /// Reads the desk against `offered`. A preset counts as
@@ -34,6 +39,9 @@ extension KiwiCore {
         // A live profile that cannot be read is still the user's.
         guard let profile = try? profiles.read(name: name) else {
             return .changed
+        }
+        guard profile.set(matching: liveFingerprints) != nil else {
+            return .foreign
         }
         if let copy, copy.profile == profile,
             let layout = offered.first(where: { $0.name == copy.layout })
@@ -87,10 +95,15 @@ extension KiwiCore {
         return made
     }
 
+    /// Whether `copy`'s file still reads as this tour saved it.
+    public func tourCopyIntact(_ copy: TourCopy) -> Bool {
+        (try? profiles.read(name: copy.profile.name)) == copy.profile
+    }
+
     /// `copy` re-read after the tour's own later steps wrote the
-    /// live profile (the look, the bars): still the copy this tour
-    /// saved, not a change of the user's. Nil where it is no longer
-    /// live or readable.
+    /// live profile (the look, the bars); the caller asks
+    /// `tourCopyIntact` before that write, so nothing of the user's
+    /// is taken in. Nil where it is no longer live or readable.
     public func tourCopyRead(_ copy: TourCopy) -> TourCopy? {
         guard profiles.currentName == copy.profile.name,
             let profile = try? profiles.read(name: copy.profile.name)
