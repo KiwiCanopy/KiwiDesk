@@ -81,6 +81,11 @@ the GUI** instead. Settings are:
 `KiwiDesk.define_sequence` counts as a keybinding too.
 :::
 
+:::unreleased
+A [`gesture.bind`](#gesturebind) or
+[`gesture.unbind`](#gestureunbind) call counts as a keybinding too.
+:::
+
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
 
 A [`kiwihub.set_key`](#kiwihubset_key) call counts as a setting too.
@@ -5518,9 +5523,12 @@ chosen profiles' overrides.
 
 The verbs below change the running base only: a profile's own
 value still wins, nothing reaches `gui.json`, and the value lasts
-until KiwiDesk next loads its config. In a Lua-owned setup
-`init.lua` is where it is kept, and **Adopt into the GUI** keeps
-the base it set.
+until KiwiDesk next loads its config. A `gesture.bind` or
+`gesture.unbind` line in `init.lua` makes the file the config
+owner, as `KiwiDesk.bind` does
+([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt)):
+`init.lua` is then where the bindings are kept, and **Adopt into
+the GUI** keeps the base it set.
 :::
 
 ### gesture.bind

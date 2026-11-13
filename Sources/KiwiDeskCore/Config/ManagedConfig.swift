@@ -19,6 +19,10 @@ public enum ManagedConfig {
         "KiwiDesk.define_layer(",
         "KiwiDesk.define_sequence(",
         "KiwiDesk.bind_profile_to_desktop(",
+        // A gesture binding is a binding (#3297): one home, as
+        // `KiwiDesk.bind` (`local g = gesture` escapes too).
+        "gesture.bind(",
+        "gesture.unbind(",
     ]
 
     /// True if code touches GUI-managed vocabulary (`gui.json` ownership).
