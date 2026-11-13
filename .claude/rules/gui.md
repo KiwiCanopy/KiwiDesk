@@ -2206,13 +2206,15 @@ every machine that runs the suite).
 **A glyph SF Symbols lacks as one symbol — a base with a badge in
 its corner — is a `ComposedSymbol` in Core's one table, named
 `kiwi.*`, drawn by `GlyphImage` in SwiftUI and `SymbolImage.named`
-in AppKit, never two symbols stacked at a call site** (#3284); a
-surface that may be handed one draws through either door, and the
-symbol suites check its two parts (`ShortcutSymbolFloorTests`,
-`ComposedSymbolTests`). **A KiwiHub side's symbol is the one
-`ShortcutsReferenceBuilder.sideSymbol(_:)`**, read by its row and
-the menu bar's rows; the View side no longer wears Layout
-Defaults' page symbol (#3284).
+in AppKit, never two symbols stacked at a call site** (#3284). A
+SwiftUI surface handed a symbol name it did not spell draws it
+through `GlyphImage`; the AppKit half is
+[borders.md](borders.md)'s (`SymbolNameDoorTests`),
+and the symbol suites check a composed glyph's two parts
+(`ShortcutSymbolFloorTests`, `ComposedSymbolTests`). **A KiwiHub
+side's symbol is the one `ShortcutsReferenceBuilder.sideSymbol(_:)`**,
+and a surface naming a side reads it, never a symbol of its own
+(#3284); its docstring lists the readers.
 
 **A Settings shortcut row draws the panel's glyph for its action
 through the one `ShortcutsReferenceBuilder.icon(for:)`**, never a

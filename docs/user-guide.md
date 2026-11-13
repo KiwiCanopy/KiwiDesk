@@ -570,16 +570,11 @@ A **sticky** window stays visible on every space. Two scopes
 (stickiness is per window; there is no app-rule list):
 
 - **Toggle sticky everywhere** — every space of every screen
-  (pin mark).
+  (pushpin mark).
 - **Toggle sticky on this screen** — every space of its home
-  screen, the one its home space is on (pin mark with a small
+  screen, the one its home space is on (pushpin mark with a small
   screen). Moving it to a space on another screen re-homes it
   there.
-
-:::unreleased
-Both sticky marks are pins: global sticky wears a pin, screen
-sticky a pin with a small screen at its corner.
-:::
 
 **Toggle sticky everywhere** is a shortcut under Size & float.
 
@@ -731,8 +726,8 @@ own screen.
 
 | Mark | Where it sits | Means |
 | --- | --- | --- |
-| Pin mark | On the window, top-right corner | **Global sticky** — every Space of every screen |
-| Pin mark with a screen | On the window, top-right corner | **Screen sticky** — every Space of its home screen |
+| Global sticky mark | On the window, top-right corner | **Global sticky** — every Space of every screen |
+| Screen sticky mark | On the window, top-right corner | **Screen sticky** — every Space of its home screen |
 | Floating mark | On the window, top-right corner — left of a sticky mark | A **floating** window |
 | Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |

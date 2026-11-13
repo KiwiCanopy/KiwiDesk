@@ -3,29 +3,29 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A `ComposedSymbol` draws through `SymbolImage.named` at its base's
-/// size and template flag, with its badge inside the base and the
-/// base cleared around it (#3284). Main-actor spend: none; each case
-/// draws a few small bitmaps.
+/// A `ComposedSymbol` draws through `SymbolImage.named` on a canvas
+/// holding its base and its overhanging badge, keeping the base's
+/// template flag, with the base cleared in a ring around the badge
+/// (#3284). Main-actor spend: none; each case draws a few small
+/// bitmaps.
 @Suite("Composed symbols (#3284)")
 struct ComposedSymbolTests {
-    private let config = NSImage.SymbolConfiguration(
-        pointSize: 22,
-        weight: .regular
-    )
+    private let style = SymbolImage.Style(pointSize: 22)
 
-    @Test("every composed glyph resolves at its base's size")
+    @Test("every composed glyph resolves on its layout's canvas")
     func composedResolves() throws {
         for symbol in ComposedSymbol.all {
             #expect(ComposedSymbol(name: symbol.name) == symbol)
             let base = try #require(
-                SymbolImage.named(symbol.base, configuration: config)
+                SymbolImage.named(symbol.base, style: style)
             )
             let image = try #require(
-                SymbolImage.named(symbol.name, configuration: config),
+                SymbolImage.named(symbol.name, style: style),
                 "\(symbol.name) does not resolve"
             )
-            #expect(image.size == base.size, "\(symbol.name)")
+            let canvas = symbol.layout(in: base.size, flipped: false)
+                .canvas
+            #expect(image.size == canvas.size, "\(symbol.name)")
             #expect(image.isTemplate == base.isTemplate, "\(symbol.name)")
         }
         #expect(Set(ComposedSymbol.all.map(\.name)).count == 3)
@@ -39,38 +39,64 @@ struct ComposedSymbolTests {
         #expect(SymbolImage.named("kiwi.no.such.glyph") == nil)
     }
 
-    @Test("the badge sits inside the base, in its corner")
-    func badgeInsideTheBase() {
-        let size = NSSize(width: 30, height: 20)
-        let badge = NSSize(width: 10, height: 12)
-        let low = SymbolImage.badgeRect(
-            .bottomTrailing,
-            badge: badge,
-            in: size
-        )
-        let high = SymbolImage.badgeRect(.topTrailing, badge: badge, in: size)
-        let bounds = NSRect(origin: .zero, size: size)
-        #expect(bounds.contains(low) && bounds.contains(high))
-        #expect(low.maxX == size.width && high.maxX == size.width)
-        #expect(low.minY == 0 && high.maxY == size.height)
-        #expect(
-            max(low.width, low.height)
-                == max(size.width, size.height) * ComposedSymbol.badgeShare
-        )
+    @Test("the badge square overhangs its corner, the ring around it")
+    func layoutPlacesTheBadge() {
+        let size = CGSize(width: 30, height: 20)
+        let base = CGRect(origin: .zero, size: size)
+        for symbol in ComposedSymbol.all {
+            let up = symbol.layout(in: size, flipped: false)
+            let down = symbol.layout(in: size, flipped: true)
+            let side = 30 * ComposedSymbol.badgeShare
+            #expect(up.badge.width == side && up.badge.height == side)
+            #expect(up.badge.maxX == 30 + side * symbol.overhang.dx)
+            let low = symbol.corner == .bottomTrailing
+            let reach = side * symbol.overhang.dy
+            #expect(
+                low ? up.badge.minY == -reach : up.badge.maxY == 20 + reach
+            )
+            #expect(up.canvas == base.union(up.badge), "\(symbol.name)")
+            // The ring holds the square and the gap, and the cleared
+            // area reaches past the base in the corner's directions.
+            let gap = side * ComposedSymbol.gapShare
+            let ring = up.badge.insetBy(dx: -gap, dy: -gap)
+            #expect(up.knockout.contains(ring), "\(symbol.name)")
+            #expect(up.knockout.maxX > base.maxX)
+            #expect(low ? up.knockout.minY < 0 : up.knockout.maxY > 20)
+            // Flipped is the same layout, mirrored on y.
+            #expect(down.badge.minY == 20 - up.badge.maxY)
+            #expect(down.knockout.minY == 20 - up.knockout.maxY)
+            #expect(down.canvas.minY == 20 - up.canvas.maxY)
+        }
     }
 
-    @Test("the base is cleared around the badge")
-    func haloClearsTheBase() throws {
-        // `rectangle.stack`'s outline runs under the grid badge's
-        // corner, where the halo must leave the base transparent.
+    @Test("the badge draws heavier than the base")
+    func badgeIsHeavier() {
+        let base = SymbolImage.Style(weight: .semibold)
+        #expect(base.badge.weight == .heavy)
+        #expect(SymbolImage.Style(weight: .black).badge.weight == .black)
+    }
+
+    @Test("the base is cleared in the ring around the badge")
+    func ringClearsTheBase() throws {
+        // `rectangle.stack`'s outline runs through the ring around the
+        // grid badge: inked in the plain base, cleared when composed.
         let symbol = ComposedSymbol.desktopOverview
-        let plain = try #require(
-            bitmap(SymbolImage.named(symbol.base, configuration: config))
+        let plainImage = try #require(
+            SymbolImage.named(symbol.base, style: style)
         )
+        let plain = try #require(bitmap(plainImage))
         let composed = try #require(
-            bitmap(SymbolImage.named(symbol.name, configuration: config))
+            bitmap(SymbolImage.named(symbol.name, style: style))
         )
-        #expect(inked(plain) > inked(composed, outsideBadgeOf: symbol))
+        let layout = symbol.layout(in: plainImage.size, flipped: true)
+        let inPlain = ringInk(plain, layout, offset: .zero)
+        let inComposed = ringInk(
+            composed,
+            layout,
+            offset: CGPoint(x: layout.canvas.minX, y: layout.canvas.minY)
+        )
+        #expect(inPlain > 0, "the ring holds none of the base's ink")
+        #expect(inComposed == 0)
     }
 
     @Test("sticky wears the pin family, display sticky composed")
@@ -103,33 +129,26 @@ struct ComposedSymbolTests {
         return rep
     }
 
-    /// Inked pixels, leaving out the badge's own rect where `symbol`
-    /// is given, so only the base's ink is counted.
-    private func inked(
+    /// Inked pixels inside the ring — the knockout less the badge
+    /// square, both inset half a pixel so antialiasing at their edges
+    /// is not counted — read in base coordinates, y down, `offset` being
+    /// where the bitmap's origin sits in them.
+    private func ringInk(
         _ rep: NSBitmapImageRep,
-        outsideBadgeOf symbol: ComposedSymbol? = nil
+        _ layout: ComposedSymbol.Layout,
+        offset: CGPoint
     ) -> Int {
-        var skip = NSRect.zero
-        if let symbol,
-            let badge = SymbolImage.named(symbol.badge, configuration: config)
-        {
-            let rect = SymbolImage.badgeRect(
-                symbol.corner,
-                badge: badge.size,
-                in: rep.size
-            )
-            // Bitmap rows run top down; the rect is y-up.
-            skip = NSRect(
-                x: rect.minX * 2,
-                y: (rep.size.height - rect.maxY) * 2,
-                width: rect.width * 2,
-                height: rect.height * 2
-            )
-        }
+        let ring = layout.knockout.insetBy(dx: 0.25, dy: 0.25)
+        let square = layout.badge.insetBy(dx: -0.25, dy: -0.25)
         var count = 0
         for y in 0..<rep.pixelsHigh {
-            for x in 0..<rep.pixelsWide
-            where !skip.contains(NSPoint(x: x, y: y)) {
+            for x in 0..<rep.pixelsWide {
+                let point = CGPoint(
+                    x: CGFloat(x) / 2 + offset.x,
+                    y: CGFloat(y) / 2 + offset.y
+                )
+                guard ring.contains(point), !square.contains(point)
+                else { continue }
                 if (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 {
                     count += 1
                 }

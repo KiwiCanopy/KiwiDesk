@@ -6371,11 +6371,6 @@ Sticky comes in two scopes:
   screen: the screen its home space lives on. Wears the pin
   with a small screen at its corner.
 
-:::unreleased
-Global sticky's mark was `infinity` and screen sticky's a bare
-`pin.fill`; both are pins now.
-:::
-
 Both share one off-switch (`make_unsticky`), and each verb sets
 its own scope outright — `make_sticky` on a screen-sticky window
 turns it global, and vice versa. On a single screen the two
@@ -6388,8 +6383,7 @@ to that screen. A refused move shows a brief pill on the
 window.
 
 A sticky window is marked in its top-right corner
-(`sticky.set_mark`; a pin for global, a pin with a screen for
-screen), and the same per-scope badge rides its Space Bar
+(`sticky.set_mark`), and the same per-scope badge rides its Space Bar
 glyph, listed under whichever space is current
 (`space_bar.set_sticky_badge`).
 

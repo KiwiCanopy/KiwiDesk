@@ -8192,8 +8192,8 @@ run, showing a new user a difference they never made.
 **[Principle]**
 
 Sticky promises "always with me", and a Desktop switch that
-leaves the ∞ window behind stops that promise at the edge of
-KiwiDesk's own Spaces. Where the window-management bridge
+leaves the global-sticky window behind stops that promise at the
+edge of KiwiDesk's own Spaces. Where the window-management bridge
 exists, both scopes follow the user across macOS Desktops. The
 rulings:
 
@@ -8215,19 +8215,21 @@ rulings:
   slide until the switch handler places them (#2149). Accepted:
   the carry moves the window under them, and a panel that left
   with the origin Desktop would strand there.
-- **Both scopes carry within the screen they are shown on.** ∞
-  and 📌 differ in which KiwiDesk Spaces a window follows; across
-  Desktops they behave alike — each follows the Desktop switches
-  of the screen KiwiDesk draws it on (∞ the active space's, 📌
-  its home's, the #445 render rule) and never jumps screens
-  because the OTHER screen switched. Without that a two-screen ∞
+- **Both scopes carry within the screen they are shown on.**
+  Global-sticky and screen-sticky differ in which KiwiDesk Spaces a
+  window follows; across Desktops they behave alike — each follows
+  the Desktop switches of the screen KiwiDesk draws it on
+  (global-sticky the active space's, screen-sticky its home's, the
+  #445 render rule) and never jumps screens because the OTHER
+  screen switched. Without that a two-screen global-sticky
   window would ping-pong between screens on every swipe. A
   screen showing a fullscreen app or a system space is no carry
   target, and a native-fullscreen window is never carried; its
   next user Desktop is.
 - **One toggle covers both scopes** (`sticky.desktop_reach`,
   default ON). A per-scope pair was deferred on the evidence
-  rule: nobody has asked for "∞ across Desktops but 📌 not", and
+  rule: nobody has asked for "global-sticky across Desktops but
+  screen-sticky not", and
   the config reshape stays cheap if someone does. Default ON
   because reach is what the sticky glyphs already promise — a
   window marked "always with me" that a Desktop switch strands
@@ -9134,7 +9136,7 @@ focus slot keeps the generic sentence: the members in front of
 the user are still the ones to act on, so the refusal points at
 nothing beyond them.
 
-### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
+### A global-sticky window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**
 
@@ -9142,8 +9144,8 @@ A globally sticky window renders on the space you focus
 ([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445)),
 and on a tiled space that means the layout places it — on
 whichever screen the space lives. A floating-mode space places
-nothing, so a ∞ window entering one on *another* screen keeps the
-frame its previous space drew, physically on the old screen while
+nothing, so a global-sticky window entering one on *another* screen
+keeps the frame its previous space drew, physically on the old screen while
 the Space Bar already lists it on the new one
 ([#1217](https://github.com/KiwiCanopy/KiwiDesk/issues/1217)).
 That is a correction that places a window nothing else will — the

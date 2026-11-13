@@ -8,9 +8,7 @@ public struct StickyStyle: Sendable, Equatable {
     public static let symbolName = "pin.fill"
 
     /// The display-sticky glyph: the pin with a screen badge, a
-    /// `ComposedSymbol` (#445, #3284). A seeded keybinding is NAMED
-    /// for its pin (`⌃⌥P`, #1094): re-picking the base strands that
-    /// letter's rationale in every catalog — re-argue the letter.
+    /// `ComposedSymbol` (#445, #3284).
     public static let displaySymbolName = ComposedSymbol.displaySticky.name
 
     /// Resolves indicator symbol name for given sticky scope.

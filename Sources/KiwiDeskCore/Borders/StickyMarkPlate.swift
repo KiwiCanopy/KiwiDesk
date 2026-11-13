@@ -17,9 +17,9 @@ final class StickyMarkPlate: NSView {
     /// Collapsed badge square dimension.
     static let size: CGFloat = 20
 
-    /// The mark's glyph configuration, which a composed glyph takes
-    /// at its image (`SymbolImage`, #3284).
-    static let symbolConfiguration = NSImage.SymbolConfiguration(
+    /// The mark's glyph style, which a composed glyph takes at its
+    /// image (`SymbolImage`, #3284).
+    static let symbolStyle = SymbolImage.Style(
         pointSize: size * 0.55,
         weight: .semibold
     )
@@ -79,7 +79,7 @@ final class StickyMarkPlate: NSView {
         }
 
         for glyph in [symbol, innerSymbol] {
-            glyph.symbolConfiguration = Self.symbolConfiguration
+            glyph.symbolConfiguration = Self.symbolStyle.configuration
             glyph.contentTintColor = .labelColor
             glyph.imageScaling = .scaleProportionallyDown
         }

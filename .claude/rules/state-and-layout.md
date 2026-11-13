@@ -1166,8 +1166,8 @@ editing here:
   argument, and across 25 production call sites not one wanted a
   different Space: a caller passing something else was never
   configuring the predicate, it was lying to it. #1214 handed each
-  display's own shown Space in and every screen's bar was told a ∞
-  window rendered on it, twice over (the glyph strip, then the
+  display's own shown Space in and every screen's bar was told a
+  global-sticky window rendered on it, twice over (the glyph strip, then the
   `+n` tint) before the argument came out. So a new consumer takes
   the verdict as it is, and a site that believes it needs a
   counterfactual frame — "this row as it would look if that Space
@@ -1186,8 +1186,8 @@ editing here:
   repeat, quit owes no undo, and a change that adds a membership record
   to reconcile is the #1205 shape and is refused. Three more
   obligations. A carry is scoped to the screen the window RENDERS on —
-  #445's `stickyRenderSpace`, 📌 its home screen and ∞ the active space's
-  — so it lands where the retile draws the window and never crosses
+  #445's `stickyRenderSpace`, screen-sticky its home screen and
+  global-sticky the active space's — so it lands where the retile draws the window and never crosses
   screens because some OTHER screen switched; the eager pass therefore
   runs AFTER the switch handler activates the arriving Space, and a
   screen on a fullscreen or system space is no carry target (#670). A

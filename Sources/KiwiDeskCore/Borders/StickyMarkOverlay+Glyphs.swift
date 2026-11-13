@@ -15,10 +15,10 @@ extension StickyMarkOverlay {
             ? L("sticky.mark.ax", "Sticky window")
             : L("floating.mark.ax", "Floating window")
         // A composed glyph takes no view-level configuration, so it
-        // is configured here (#3284).
+        // is styled here (#3284).
         return SymbolImage.named(
             glyph.symbolName,
-            configuration: StickyMarkPlate.symbolConfiguration,
+            style: StickyMarkPlate.symbolStyle,
             accessibilityDescription: label
         )
     }

@@ -16,8 +16,9 @@ public final class StickyMarkManager {
         }
 
         public let kind: Kind
-        /// SF Symbol name (`infinity` / `pin.fill`, #445;
-        /// `FloatingStyle.symbolName`).
+        /// Symbol name (`StickyStyle.symbolName(for:)`, #445,
+        /// #3284; `FloatingStyle.symbolName`), drawn through
+        /// `SymbolImage`.
         public let symbolName: String
         /// Hex color string; empty = automatic (#429).
         public let color: String
