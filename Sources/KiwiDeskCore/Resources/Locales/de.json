@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "Aus dieser Liste entfernen",
   "kiwivision.notice.no_member_open": "Die Linse „%1$@“ ist an: Keine ihrer Apps ist geöffnet.",
   "kiwivision.notice.not_installed": "%1$@ ist nicht installiert.",
+  "kiwivision.notice.not_installed_id": "Keine App mit der Bundle-ID „%1$@“ ist installiert.",
   "kiwivision.out_of_reach": "Die Linse „%1$@“ ist aus: Sie gilt nicht im Profil „%2$@“.",
   "kiwivision.preview.ax.dim_value": "%1$@ Abdunkeln: %2$@",
   "kiwivision.preview.ax.frame": "KiwiVision-Vorschau: %1$@",

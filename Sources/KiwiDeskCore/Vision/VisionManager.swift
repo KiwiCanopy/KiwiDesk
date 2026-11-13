@@ -69,6 +69,10 @@ public final class VisionManager {
     var configLoading = false
     /// Hears a lens notice the pill draws, for VoiceOver (#3122).
     public var onNotice: @MainActor (VisionLensNotice) -> Void = { _ in }
+    /// A name for a bundle id LaunchServices could not find, so
+    /// nil is the usual answer; only an app removed during this
+    /// session can be named (#3276). Must not block.
+    public var appName: @MainActor (String) -> String? = { _ in nil }
     /// The lens rename the write in flight carries, set by
     /// `setAppWide(…renamingLens:)` for that write alone (#2103).
     var renamedLens: (from: String, to: String)?

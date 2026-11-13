@@ -1,8 +1,8 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A lens's Auto-open (#3122): the wirings no fixture reaches, each
 /// pinned by exact count to its file, and the notice's renderer.
@@ -48,6 +48,11 @@ struct KiwiVisionAutoOpenWiringTests {
         // to the screen.
         ("vision.onNotice(notice)", "App/KiwiCore+VisionReach.swift", 1),
         ("borders.flashScreenPill(", "App/KiwiCore+VisionReach.swift", 1),
+        // The pill draws the notice it was handed (#3276).
+        (
+            "lettext=Self.lensNoticeText(notice)",
+            "App/KiwiCore+VisionReach.swift", 1
+        ),
         // The background mode reaches the open's configuration.
         (
             "config.activates=mode!=.background",
@@ -103,6 +108,27 @@ struct KiwiVisionAutoOpenWiringTests {
             Self.count(".announcement:Self.announcement(notice)", in: text)
                 == 1
         )
+        // A notice names its app as the lens's card does (#3276).
+        #expect(
+            Self.count(
+                "core.vision.appName="
+                    + "KeybindingCatalog.snapshotName(forBundleID:)",
+                in: text
+            ) == 1
+        )
+        // And nothing overrides it after: the last write wins.
+        #expect(Self.count("core.vision.appName=", in: text) == 1)
+    }
+
+    /// An id nothing installed names reads nil, never the id
+    /// standing in for a name (#3276).
+    @Test("the snapshot names no unknown id")
+    func snapshotNamesNoUnknownID() {
+        #expect(
+            KeybindingCatalog.snapshotName(
+                forBundleID: "com.kiwidesk.test.no-such-app"
+            ) == nil
+        )
     }
 
     @Test("each Apps row draws the checkbox and removes through Core")
@@ -144,9 +170,35 @@ struct KiwiVisionAutoOpenWiringTests {
                 == "Writing is on: none of its apps is open."
         )
         #expect(
-            AppDelegate.announcement(.notInstalled(app: "com.x.y"))
-                == "com.x.y is not installed."
+            AppDelegate.announcement(
+                .notInstalled(app: "com.x.y", name: "Bear")
+            ) == "Bear is not installed."
         )
+        #expect(
+            AppDelegate.announcement(
+                .notInstalled(app: "com.x.y", name: nil)
+            ) == "No app with the bundle ID com.x.y is installed."
+        )
+    }
+
+    /// The announcement is "the sentence the pill draws": both
+    /// renderers pick one key and one argument per arm (#3276).
+    @Test("the announcement reads as the pill for every notice")
+    @MainActor
+    func announcementMatchesThePill() {
+        LocalizationManager.shared.select("en")
+        let notices: [VisionLensNotice] = [
+            .noMemberOpen(lens: "Writing"),
+            .notInstalled(app: "com.x.y", name: "Bear"),
+            .notInstalled(app: "com.x.y", name: nil),
+        ]
+        for notice in notices {
+            #expect(
+                AppDelegate.announcement(notice)
+                    == KiwiCore.lensNoticeText(notice),
+                "\(notice)"
+            )
+        }
     }
 
     @Test("a greyed checkbox gives its reason")

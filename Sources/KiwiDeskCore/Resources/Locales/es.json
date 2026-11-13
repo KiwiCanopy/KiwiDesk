@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "Quitar de esta lista",
   "kiwivision.notice.no_member_open": "La lente «%1$@» está activada: ninguna de sus apps está abierta.",
   "kiwivision.notice.not_installed": "La app «%1$@» no está instalada.",
+  "kiwivision.notice.not_installed_id": "No hay ninguna app instalada con el ID de paquete «%1$@».",
   "kiwivision.out_of_reach": "La lente «%1$@» está desactivada: no se aplica en el perfil «%2$@».",
   "kiwivision.preview.ax.dim_value": "%1$@ Oscurecimiento: %2$@",
   "kiwivision.preview.ax.frame": "Vista previa de KiwiVision: %1$@",

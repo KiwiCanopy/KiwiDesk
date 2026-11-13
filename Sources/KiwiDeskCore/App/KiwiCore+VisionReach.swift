@@ -77,21 +77,7 @@ extension KiwiCore {
     /// A lens notice (#3122): one pill on the focused window, else
     /// centred on the active Space's screen; the GUI announces it.
     func noteLensNotice(_ notice: VisionLensNotice) {
-        let text: String
-        switch notice {
-        case .noMemberOpen(let lens):
-            text = L(
-                "kiwivision.notice.no_member_open",
-                "%1$@ is on: none of its apps is open.",
-                lens
-            )
-        case .notInstalled(let app):
-            text = L(
-                "kiwivision.notice.not_installed",
-                "%1$@ is not installed.",
-                app
-            )
-        }
+        let text = Self.lensNoticeText(notice)
         vision.onNotice(notice)
         if let window = focusedWindowID, refusalPillFrame(window) != nil {
             flashRefusalPill(
@@ -115,5 +101,30 @@ extension KiwiCore {
             text: text,
             symbol: "eyeglasses"
         )
+    }
+
+    /// The sentence a lens notice's pill draws; the GUI's
+    /// announcement reads the same keys (#3122, #3276).
+    static func lensNoticeText(_ notice: VisionLensNotice) -> String {
+        switch notice {
+        case .noMemberOpen(let lens):
+            return L(
+                "kiwivision.notice.no_member_open",
+                "%1$@ is on: none of its apps is open.",
+                lens
+            )
+        case .notInstalled(_, let name?):
+            return L(
+                "kiwivision.notice.not_installed",
+                "%1$@ is not installed.",
+                name
+            )
+        case .notInstalled(let app, nil):
+            return L(
+                "kiwivision.notice.not_installed_id",
+                "No app with the bundle ID %1$@ is installed.",
+                app
+            )
+        }
     }
 }

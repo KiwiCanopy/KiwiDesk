@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "从此列表中移除",
   "kiwivision.notice.no_member_open": "镜头“%1$@”已开启：它的 App 都没有打开。",
   "kiwivision.notice.not_installed": "“%1$@”未安装。",
+  "kiwivision.notice.not_installed_id": "未安装捆绑包标识符为“%1$@”的 App。",
   "kiwivision.out_of_reach": "镜头“%1$@”已关闭：描述文件“%2$@”不包含它。",
   "kiwivision.preview.ax.dim_value": "%1$@调暗：%2$@",
   "kiwivision.preview.ax.frame": "KiwiVision 预览：%1$@",

@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "Убрать из этого списка",
   "kiwivision.notice.no_member_open": "Линза «%1$@» включена: ни одно из её приложений не открыто.",
   "kiwivision.notice.not_installed": "Приложение «%1$@» не установлено.",
+  "kiwivision.notice.not_installed_id": "Приложение с идентификатором пакета «%1$@» не установлено.",
   "kiwivision.out_of_reach": "Линза «%1$@» выключена: она не действует в профиле «%2$@».",
   "kiwivision.preview.ax.dim_value": "%1$@ Затемнение: %2$@",
   "kiwivision.preview.ax.frame": "Предпросмотр KiwiVision: %1$@",

@@ -31,7 +31,9 @@ extension KiwiCore {
             return
         }
         noteLensNotice(
-            missing.first.map { .notInstalled(app: $0) }
+            missing.first.map {
+                .notInstalled(app: $0, name: vision.appName($0))
+            }
                 ?? .noMemberOpen(lens: lens.name)
         )
     }

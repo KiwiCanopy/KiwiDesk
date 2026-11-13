@@ -1330,6 +1330,7 @@
   "kiwivision.never_dimmed.remove": "이 목록에서 제거",
   "kiwivision.notice.no_member_open": "렌즈 ‘%1$@’이(가) 켜져 있지만 이 렌즈의 앱이 하나도 열려 있지 않습니다.",
   "kiwivision.notice.not_installed": "‘%1$@’이(가) 설치되어 있지 않습니다.",
+  "kiwivision.notice.not_installed_id": "번들 식별자가 ‘%1$@’인 앱이 설치되어 있지 않습니다.",
   "kiwivision.out_of_reach": "렌즈 ‘%1$@’이(가) 꺼졌습니다. 프로필 ‘%2$@’에는 이 렌즈가 포함되어 있지 않습니다.",
   "kiwivision.preview.ax.dim_value": "%1$@ 밝기 낮춤: %2$@",
   "kiwivision.preview.ax.frame": "KiwiVision 미리보기: %1$@",
