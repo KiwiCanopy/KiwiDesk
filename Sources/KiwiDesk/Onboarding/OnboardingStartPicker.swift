@@ -9,12 +9,18 @@ struct OnboardingStartPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            // The title rides above the control, not beside it: five
+            // segments fill the page's width in several locales.
+            OnboardingRowHeader(text: title)
+                .accessibilityHidden(true)
             Picker(title, selection: selection) {
                 ForEach(start.options) { option in
                     Text(Self.label(of: option)).tag(option.id)
                 }
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
+            .accessibilityLabel(title)
             .accessibilityValue(start.selected.map(Self.label) ?? "")
             if start.replacesCurrent {
                 Text(

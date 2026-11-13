@@ -19,13 +19,28 @@ struct SparseModeFallbackTests {
         )
     }
 
-    /// The shipped presets that carry a sparse map, and the
-    /// reason this ruling exists: `Minimalist` declares nothing
-    /// for space 2 and `Focus Stack` nothing for space 3.
+    /// A sparse one-screen preset, the shape this ruling exists
+    /// for: the retired Minimalist declared nothing for Space 2.
+    /// The shipped family declares every Space, so the sweep takes
+    /// it beside them.
+    private let sparse = StandardLayout(
+        name: "Sparse",
+        screenCount: 1,
+        spaceCount: 4,
+        spaceModes: ["1": .scrolling, "3": .monocle, "4": .floating],
+        spaceScreens: [:],
+        isStandard: false,
+        tuning: .preset(PresetTuning())
+    )
+
+    private var oneScreen: [StandardLayout] {
+        StandardProfiles.workflows.filter { $0.screenCount == 1 }
+            + [sparse]
+    }
+
     @Test("a laptop never receives BSP from a sparse preset")
     func laptopNeverGetsBsp() throws {
-        for layout in StandardProfiles.workflows
-        where layout.screenCount == 1 {
+        for layout in oneScreen {
             let composed = try #require(
                 ProfileComposition.compose(
                     layout: layout,
@@ -59,9 +74,8 @@ struct SparseModeFallbackTests {
         // Vacuity: a sparse preset must exist, or the sweep asks
         // nothing at all.
         #expect(
-            StandardProfiles.workflows.contains {
-                $0.screenCount == 1
-                    && $0.spaceModes.count < $0.spaceCount
+            oneScreen.contains {
+                $0.spaceModes.count < $0.spaceCount
             }
         )
     }
@@ -136,11 +150,7 @@ struct SparseModeFallbackTests {
 
     @Test("a declared mode is never overridden by the screen")
     func declaredModesWin() throws {
-        let layout = try #require(
-            StandardProfiles.workflows.first {
-                $0.name == "Minimalist"
-            }
-        )
+        let layout = sparse
         #expect(!layout.spaceModes.isEmpty)
         for (space, mode) in layout.spaceModes {
             #expect(

@@ -55,9 +55,12 @@ extension StandardLayout {
     }
 
     private func shapeTuning(sizes: [CGSize]?) -> TilingSettings {
-        guard let sizes, !sizes.isEmpty, spaceCount > 0 else {
+        guard let positional = sizes, !positional.isEmpty, spaceCount > 0
+        else {
             return StarterTuning.base()
         }
+        let order = slotOrder(widths: positional.map(\.width))
+        let sizes = order.map { positional[$0] }
         let slots = (1...spaceCount).map { number in
             let space = SpaceID(number)
             let screen = screen(of: space, screens: sizes.count)
@@ -67,6 +70,27 @@ extension StandardLayout {
                 mode: mode(of: space, on: ScreenClass.of(sizes[screen]))
             )
         }
-        return StarterSetup.presetSettings(slots: slots, sizes: sizes)
+        return StarterSetup.presetSettings(
+            slots: slots,
+            sizes: sizes,
+            main: order.firstIndex(of: 0) ?? 0
+        )
+    }
+
+    /// Whether this layout can be applied on `count` screens: its
+    /// own count, or more for a width-first preset, whose extra
+    /// screens get a Space each (#3294). The apply and the tour's
+    /// picture both ask this.
+    public func plans(forScreens count: Int) -> Bool {
+        count == screenCount || (slotsByWidth && count > screenCount)
+    }
+
+    /// The plan's screen slots as indices into positional screens:
+    /// positional, or widest first through the starter's own
+    /// `fillOrder` tie-break where `slotsByWidth` (#3294).
+    func slotOrder(widths: [CGFloat]) -> [Int] {
+        slotsByWidth
+            ? StarterAllocation.fillOrder(widths: widths)
+            : Array(widths.indices)
     }
 }

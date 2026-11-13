@@ -99,18 +99,19 @@ struct PresetFamilyTests {
         for space in ["4", "5", "6"] {
             #expect(composed.assignment[SpaceID(space)] == laptop.id)
         }
-        // Positional order for a starter stays main first.
-        #expect(
-            ProfileComposition.slotOrder([laptop, wide], byWidth: false)
-                .map(\.id) == [laptop.id, wide.id]
+        // Ties keep positional order, the starter's own tie-break.
+        let developer = StandardProfiles.developer3
+        #expect(developer.slotOrder(widths: [1512, 2560, 2560]) == [1, 2, 0])
+        // A starter stays positional, main first.
+        let starter = StarterSetup.standardLayout(
+            sizes: [laptop.frame.size, wide.frame.size]
         )
-        // Ties keep positional order.
-        let twin = display(3, x: 4072, width: 2560)
+        #expect(starter.slotOrder(widths: [1512, 2560]) == [0, 1])
+        // The minimum window size stays the MAIN screen's, though
+        // the wider screen takes the first slot.
         #expect(
-            ProfileComposition.slotOrder(
-                [laptop, wide, twin],
-                byWidth: true
-            ).map(\.id) == [wide.id, twin.id, laptop.id]
+            composed.settings.minWindowSizes
+                == StarterTuning.minWindowSizes(mainWidth: 1512)
         )
     }
 

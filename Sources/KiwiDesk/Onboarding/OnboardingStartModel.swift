@@ -33,25 +33,30 @@ enum OnboardingStartOption: Equatable, Identifiable {
 final class OnboardingStartModel {
     private(set) var options: [OnboardingStartOption] = []
     var selected: OnboardingStartOption?
-    /// The offered layout the desk still is, untouched; nil on a
-    /// changed desk, where "Current" leads.
-    private(set) var untouched: StandardLayout?
+    /// What the desk is to the step: the offered layout it still
+    /// is, the user's own Spaces, or no saved profile at all.
+    private(set) var desk: KiwiCore.TourDesk = .unsaved
+    /// The preset copy this presentation saved: the one profile a
+    /// later pick may delete, and only while it is untouched.
+    private(set) var copy: KiwiCore.TourCopy?
     /// The Spaces before this presentation's first replace.
     private(set) var baseline: KiwiCore.TourSpacesBaseline?
     private(set) var revision = 0
 
     /// The layouts the connected screens are offered, starter first.
     var offered: () -> [StandardLayout] = { [] }
-    var untouchedChoice: ([StandardLayout]) -> StandardLayout? = { _ in
-        nil
-    }
+    var readDesk: ([StandardLayout], KiwiCore.TourCopy?) -> KiwiCore.TourDesk =
+        { _, _ in .unsaved }
     /// The cards an option draws, one column per screen.
     var columns: (OnboardingStartOption) -> [OnboardingScreenColumn] = {
         _ in []
     }
-    /// Makes a pick live on an untouched desk; false where it failed.
-    var start: (StandardLayout, StandardLayout?) -> Bool = { _, _ in
-        false
+    /// Makes a pick live where nothing of the user's is replaced,
+    /// deleting the copy handed in; nil where it failed, else the
+    /// new preset copy it saved, if any.
+    var start: (StandardLayout, KiwiCore.TourCopy?) -> StartOutcome = {
+        _,
+        _ in .failed
     }
     /// Asks once before a changed desk's Spaces are replaced; the
     /// answer comes back through the closure, true for Replace.
@@ -61,8 +66,20 @@ final class OnboardingStartModel {
     var captureBaseline: () -> KiwiCore.TourSpacesBaseline? = { nil }
     var restore: (KiwiCore.TourSpacesBaseline) -> Bool = { _ in false }
 
+    /// What a start came to.
+    enum StartOutcome {
+        case failed
+        case started(KiwiCore.TourCopy?)
+    }
+
+    /// The offered layout the desk still is; nil otherwise.
+    var untouched: StandardLayout? {
+        if case .untouched(let layout) = desk { return layout }
+        return nil
+    }
+
     /// Whether the desk changed, so a pick replaces its Spaces.
-    var deskChanged: Bool { options.first == .current }
+    var deskChanged: Bool { desk == .changed }
 
     /// Whether Continue now replaces the current Spaces.
     var replacesCurrent: Bool {
@@ -75,9 +92,9 @@ final class OnboardingStartModel {
     /// one it still is. A pick already made stays while offered.
     func refresh() {
         let layouts = offered()
-        untouched = untouchedChoice(layouts)
+        desk = readDesk(layouts, copy)
         let picks = layouts.map(OnboardingStartOption.layout)
-        options = untouched == nil ? [.current] + picks : picks
+        options = deskChanged ? [.current] + picks : picks
         if let selected, options.contains(selected) { return }
         selected = untouched.map(OnboardingStartOption.layout) ?? options.first
         revision += 1
@@ -96,9 +113,12 @@ final class OnboardingStartModel {
         guard let layout = selected?.layout else { return advance() }
         guard deskChanged else {
             guard layout != untouched else { return advance() }
-            let done = start(layout, untouched)
+            // Only a copy this presentation saved, still untouched,
+            // is deleted.
+            let outcome = start(layout, untouched == nil ? nil : copy)
+            if case .started(let made) = outcome { copy = made }
             refresh()
-            if done { advance() }
+            if case .started = outcome { advance() }
             return
         }
         confirmReplace(layout) { [weak self] replace in
@@ -124,6 +144,8 @@ final class OnboardingStartModel {
     /// A new presentation starts with no baseline and no pick.
     func reset() {
         baseline = nil
+        copy = nil
+        desk = .unsaved
         selected = nil
         options = []
     }

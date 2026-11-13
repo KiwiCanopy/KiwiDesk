@@ -126,31 +126,6 @@ extension KiwiCore {
         mainSpaces = Set(placement.mains)
     }
 
-    /// Where a composition puts its Spaces on the live screens:
-    /// the main screen's take the Main role, every other is pinned
-    /// to its screen's fingerprint.
-    func composedPlacement(
-        _ composed: ProfileComposition.Composed
-    ) -> (pins: [SpaceID: String], mains: [SpaceID]) {
-        let ordered = PositionalDisplays.ordered(
-            state.workspaces.allDisplays,
-            mainID: PositionalDisplays.liveMainID
-        )
-        var pins: [SpaceID: String] = [:]
-        var mains: [SpaceID] = []
-        for space in composed.spaces {
-            let assigned = composed.assignment[space]
-            if assigned == ordered.first?.id || assigned == nil {
-                mains.append(space)
-            } else if let display = ordered.first(where: {
-                $0.id == assigned
-            }) {
-                pins[space] = display.fingerprint
-            }
-        }
-        return (pins, mains)
-    }
-
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop) — a
     /// temporary Space's only where `extra` names it (#1790).

@@ -22,18 +22,43 @@ struct OnboardingStartModelTests {
         var restored = 0
     }
 
+    private func copy(of layout: StandardLayout) -> KiwiCore.TourCopy {
+        KiwiCore.TourCopy(
+            layout: layout.name,
+            profile: Profile(
+                name: layout.name,
+                monitorSets: [],
+                spaces: [],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+    }
+
     private func model(
-        untouched: StandardLayout?,
+        desk: KiwiCore.TourDesk,
         answer: Bool = true
     ) -> (OnboardingStartModel, Calls) {
         let start = OnboardingStartModel()
         let calls = Calls()
         let offered = [suggested, StandardProfiles.developer1]
         start.offered = { offered }
-        start.untouchedChoice = { _ in untouched }
+        var current = desk
+        start.readDesk = { _, copy in
+            // Once a copy is saved the desk is that copy, untouched.
+            if let copy {
+                return .untouched(
+                    offered.first { $0.name == copy.layout } ?? suggested
+                )
+            }
+            return current
+        }
         start.start = { layout, from in
-            calls.started.append((layout.name, from?.name))
-            return true
+            calls.started.append((layout.name, from?.layout))
+            current = .untouched(layout)
+            return .started(
+                layout.starterTitle == nil ? self.copy(of: layout) : nil
+            )
         }
         start.confirmReplace = { _, reply in
             calls.asked += 1
@@ -54,7 +79,7 @@ struct OnboardingStartModelTests {
 
     @Test("an untouched desk offers no Current and selects itself")
     func untouchedDesk() {
-        let (start, _) = model(untouched: suggested)
+        let (start, _) = model(desk: .untouched(suggested))
         #expect(!start.deskChanged)
         #expect(start.options.map(\.id) == ["suggested", "Developer"])
         #expect(start.selected == .layout(suggested))
@@ -62,7 +87,7 @@ struct OnboardingStartModelTests {
 
     @Test("a changed desk leads with Current, selected")
     func changedDesk() {
-        let (start, _) = model(untouched: nil)
+        let (start, _) = model(desk: .changed)
         #expect(start.deskChanged)
         #expect(start.options.first == .current)
         #expect(start.selected == .current)
@@ -73,7 +98,7 @@ struct OnboardingStartModelTests {
 
     @Test("a pick writes nothing; Continue on the same choice neither")
     func pickWritesNothing() {
-        let (start, calls) = model(untouched: suggested)
+        let (start, calls) = model(desk: .untouched(suggested))
         start.pick(.layout(StandardProfiles.developer1))
         #expect(calls.started.isEmpty)
         start.pick(.layout(suggested))
@@ -85,20 +110,45 @@ struct OnboardingStartModelTests {
 
     @Test("Continue on an untouched desk starts the pick from it")
     func untouchedContinue() {
-        let (start, calls) = model(untouched: suggested)
+        let (start, calls) = model(desk: .untouched(suggested))
         start.pick(.layout(StandardProfiles.developer1))
         var advanced = false
         start.commit { advanced = true }
         #expect(advanced)
         #expect(calls.started.count == 1)
         #expect(calls.started.first?.0 == "Developer")
-        #expect(calls.started.first?.1 == StarterSetup.name)
+        // The starter is no copy, so nothing is handed in to delete.
+        #expect(calls.started.first?.1 == nil)
         #expect(calls.asked == 0)
+    }
+
+    /// A second pick hands in the copy the first saved, the one
+    /// profile a pick may delete.
+    @Test("a second Continue hands in the copy the first saved")
+    func secondContinueHandsTheCopy() {
+        let (start, calls) = model(desk: .untouched(suggested))
+        start.pick(.layout(StandardProfiles.developer1))
+        start.commit {}
+        start.pick(.layout(suggested))
+        start.commit {}
+        #expect(calls.started.map(\.1) == [nil, "Developer"])
+    }
+
+    /// No saved profile live: no Current, and a pick starts fresh.
+    @Test("an unsaved desk offers no Current and replaces nothing")
+    func unsavedDesk() {
+        let (start, calls) = model(desk: .unsaved)
+        #expect(!start.deskChanged)
+        #expect(start.options.first != .current)
+        start.pick(.layout(StandardProfiles.developer1))
+        start.commit {}
+        #expect(calls.asked == 0)
+        #expect(calls.started.count == 1)
     }
 
     @Test("a changed desk asks once; Cancel stays with the pick")
     func changedCancel() {
-        let (start, calls) = model(untouched: nil, answer: false)
+        let (start, calls) = model(desk: .changed, answer: false)
         start.pick(.layout(StandardProfiles.developer1))
         var advanced = false
         start.commit { advanced = true }
@@ -110,7 +160,7 @@ struct OnboardingStartModelTests {
 
     @Test("a replace lands on Current, so a return asks nothing again")
     func changedReplace() {
-        let (start, calls) = model(untouched: nil)
+        let (start, calls) = model(desk: .changed)
         start.pick(.layout(StandardProfiles.developer1))
         var advanced = false
         start.commit { advanced = true }
@@ -123,7 +173,7 @@ struct OnboardingStartModelTests {
 
     @Test("Continue on Current writes nothing")
     func currentWritesNothing() {
-        let (start, calls) = model(untouched: nil)
+        let (start, calls) = model(desk: .changed)
         var advanced = false
         start.commit { advanced = true }
         #expect(advanced)

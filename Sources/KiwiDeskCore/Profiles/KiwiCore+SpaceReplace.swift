@@ -16,7 +16,7 @@ extension KiwiCore {
     /// where it plans more screens than are connected.
     public func spaceSet(for layout: StandardLayout) -> SpaceSet? {
         let displays = state.workspaces.allDisplays
-        guard displays.count >= layout.screenCount,
+        guard layout.plans(forScreens: displays.count),
             let composed = ProfileComposition.compose(
                 layout: layout,
                 displays: displays,
@@ -56,6 +56,8 @@ extension KiwiCore {
     /// profile is live.
     @discardableResult
     public func restoreSpaces(_ baseline: TourSpacesBaseline) -> Bool {
+        // The live-profile rule `TourBaseline` keeps for the looks:
+        // a baseline describes the profile it was taken from.
         guard baseline.profile == profiles.currentName else {
             return false
         }
@@ -74,11 +76,23 @@ extension KiwiCore {
     }
 
     private func writeSpaces(_ set: SpaceSet) -> Bool {
+        let before = capturedSpaces.map(\.id)
         guard writeThroughLiveProfile(.replaceSpaces(set)),
             let name = profiles.currentName,
             let profile = try? profiles.read(name: name)
         else { return false }
         apply(profile: profile, cause: .edit)
+        // A same-profile apply keeps an undeclared Space as a
+        // temporary one (#1790); the replace drops them, through
+        // `delete_space`'s own door, windows forwarded.
+        let kept = Set(set.spaces)
+        for id in before where !kept.contains(id) {
+            guard state.workspaces[id] != nil else { continue }
+            execute("delete_space", args: [.string(id.raw)])
+        }
+        // A larger set than before binds ⌃⌥N for its newcomers, as
+        // `applyStandard` does (#485).
+        topUpDigitShortcuts()
         return true
     }
 }

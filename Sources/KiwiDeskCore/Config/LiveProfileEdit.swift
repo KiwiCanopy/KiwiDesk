@@ -169,7 +169,7 @@ extension GuiConfig {
             spaceModes = set.spaceModes.filter { $0.value != .bsp }
             spacePins = set.pins
             mainSpaces = Set(set.mainSpaces)
-            fallbackSpace = nil
+            fallbackSpace = set.fallbackSpace
         }
     }
 }

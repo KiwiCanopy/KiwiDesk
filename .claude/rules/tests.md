@@ -855,8 +855,7 @@ removed by its `stop()`, and the scroll tap itself a fake.
 A suite that lays out a real
 control to measure translated labels takes host font metrics
 and is a deliberate re-admission of that read: it states so here
-in the same change (the presets grid's floor suite was the last,
-#862, retired with the Profiles presets in #3294). The service tests only parse
+in the same change. The service tests only parse
 `launchctl` strings; nothing spawns it. **Unit tests never need
 the running app**; its run state is irrelevant to them.
 

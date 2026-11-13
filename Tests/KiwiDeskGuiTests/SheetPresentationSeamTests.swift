@@ -233,7 +233,7 @@ struct SheetPresentationSeamTests {
 
     /// A read-only sheet takes no `SettingsModel` (#859): reaching
     /// the draft must be a new stored property, never a one-token
-    /// edit. Held over every content type the hosts present, since
+    /// edit. Held over every content type the hosts present.
     @Test("no sheet's content reaches the draft")
     func sheetContentTakesNoModel() throws {
         var checked = 0

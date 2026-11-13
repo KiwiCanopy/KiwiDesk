@@ -120,9 +120,9 @@ struct MonitorChangeTests {
         #expect(core.profiles.currentName == nil)
         #expect(core.profiles.currentStandard == "Developer")
         #expect(core.profiles.isDirty)
-        // The Developer Standard: 4 spaces, stack on 2.
+        // The Developer Standard: 4 spaces, Scrolling on 2.
         #expect(
-            core.state.workspaces[SpaceID(2)]?.mode == .stack
+            core.state.workspaces[SpaceID(2)]?.mode == .scrolling
         )
         let developer = try #require(
             StandardProfiles.standard(for: 1)

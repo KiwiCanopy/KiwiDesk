@@ -85,28 +85,27 @@ extension StandardProfiles {
 
     /// The fourth screen's Space is Grid on a laptop or desktop
     /// screen, Stack on any other.
-    static let studio4: StandardLayout = {
-        var layout = preset(
-            "Studio",
-            screens: [
-                [.monocle, .floating, .scrolling],
-                [.grid, .monocle],
-                [.scrolling, .monocle],
-                [.stack],
-            ]
-        )
-        layout.shapeModes = ["8": [.laptop: .grid, .desktop: .grid]]
-        return layout
-    }()
+    static let studio4 = preset(
+        "Studio",
+        screens: [
+            [.monocle, .floating, .scrolling],
+            [.grid, .monocle],
+            [.scrolling, .monocle],
+            [.stack],
+        ],
+        lastByShape: [.laptop: .grid, .desktop: .grid]
+    )
 
     // MARK: - Builder
 
     /// A preset from its layouts per screen slot, widest slot
-    /// first; Spaces are numbered in that order.
+    /// first; Spaces are numbered in that order. `lastByShape`
+    /// overrides the last Space's layout on the shapes it names.
     static func preset(
         _ name: String,
         isStandard: Bool = false,
-        screens: [[LayoutMode]]
+        screens: [[LayoutMode]],
+        lastByShape: [ScreenClass: LayoutMode] = [:]
     ) -> StandardLayout {
         var modes: [SpaceID: LayoutMode] = [:]
         var slots: [SpaceID: Int] = [:]
@@ -129,6 +128,9 @@ extension StandardProfiles {
             tuning: .preset(PresetTuning())
         )
         layout.slotsByWidth = true
+        if !lastByShape.isEmpty {
+            layout.shapeModes = [SpaceID(next - 1): lastByShape]
+        }
         return layout
     }
 }

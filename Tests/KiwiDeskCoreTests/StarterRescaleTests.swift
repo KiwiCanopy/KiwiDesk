@@ -208,7 +208,7 @@ struct StarterRescaleTests {
         // and isn't the ladder, so the workflow Standard resolves.
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        #expect(core.profiles.currentStandard == "Dual Developer")
+        #expect(core.profiles.currentStandard == "Developer")
         #expect(!core.isOnStarterBaseline)
     }
 

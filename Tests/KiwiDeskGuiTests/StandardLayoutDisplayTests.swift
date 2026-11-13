@@ -48,20 +48,18 @@ struct StandardLayoutDisplayTests {
         reset()
         LocalizationManager.shared.select("en")
         #expect(
-            standardDisplayName("Command Center", title: nil)
-                == "Command Center"
+            standardDisplayName("Dashboard", title: nil)
+                == "Dashboard"
         )
         LocalizationManager.shared.select("de")
         defer { reset() }
         // Shipped German translates the Standard names; assert it
         // resolved away from English, not the exact wording.
         #expect(
-            standardDisplayName("Command Center", title: nil)
-                != "Command Center"
+            standardDisplayName("Focus", title: nil) != "Focus"
         )
         #expect(
-            standardDisplayName("Coder & Monitor", title: nil)
-                != "Coder & Monitor"
+            standardDisplayName("Developer", title: nil) != "Developer"
         )
     }
 

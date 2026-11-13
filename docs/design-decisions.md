@@ -11180,8 +11180,8 @@ Profiles carried a Presets card whose job was a first desk, and a
 first desk is the tour's; a card that stayed on the page after
 the first profile was saved read as a second, competing way to
 start over. The card goes with no replacement. Core keeps the
-family, `isStandard` and `applyStandard`, which the monitor-change
-fallback and the CLI still reach.
+family, `isStandard` and `applyStandard`, which the first-run
+seed, the tour and the monitor-change fallback reach.
 
 The segmented control's first segment is the Suggested starter,
 then the family for the connected screen count: Developer and
@@ -11210,7 +11210,13 @@ moves windows, so the click previews and Continue commits
 (`OnboardingStartModelTests` ▸ `pickWritesNothing`). On an
 untouched desk Continue swaps the copy the last pick saved, never
 piling copies up (`TourStartReplaceTests` ▸
-`startReplacesTheCopy`).
+`startReplacesTheCopy`). Untouched means the copy this tour saved,
+still exactly as saved: a copy the user edited, or one from an
+earlier tour, is their desk, and no pick deletes it
+(`TourStartReplaceTests` ▸ `editedCopyIsChanged`). With no saved
+profile live for these screens, a pick starts a profile of its
+own and replaces nothing (`TourStartReplaceTests` ▸
+`nothingSavedIsUnsaved`).
 
 **On a changed desk the first segment is Current, and a preset
 replaces the Spaces in place behind one confirm.** A replay over
@@ -13443,8 +13449,10 @@ seen-flag) and vanishes with the first profile.
 
 :::unreleased
 The Presets section leaves Profiles (#3294), so the page has
-nothing to reorder and no spotlight: a first desk is picked on
-the tour's Spaces step.
+nothing to reorder, and a first desk is picked on the tour's
+Spaces step. The Home tile's dot and the search badge still mark
+Profiles while no profile is saved; the page they lead to offers
+saving the live layout as the first profile.
 :::
 
 **A binding row reads "Desktop n", and binding is dropdown-only.**

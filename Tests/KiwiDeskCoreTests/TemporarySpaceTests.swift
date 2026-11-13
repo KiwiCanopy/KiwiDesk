@@ -210,7 +210,9 @@ struct TemporarySpaceTests {
     func sortByNumber() throws {
         let core = try docked()
         let declared = core.state.workspaces.allSpaces.map(\.id)
-        for (id, window) in [("8", 13), ("6", 12), ("7", 11)] {
+        // Ids past the two-screen Standard's plan, so all three
+        // fall back to the main screen and share its slots.
+        for (id, window) in [("9", 13), ("7", 12), ("8", 11)] {
             core.execute(
                 "move_to_space",
                 args: [.string(id), .number(Double(window))]
@@ -219,7 +221,7 @@ struct TemporarySpaceTests {
         let order = core.state.workspaces.allSpaces.map(\.id)
         #expect(Array(order.prefix(declared.count)) == declared)
         let temporaries = order.filter(core.isTemporary)
-        #expect(temporaries == [SpaceID(6), SpaceID(7), SpaceID(8)])
+        #expect(temporaries == [SpaceID(7), SpaceID(8), SpaceID(9)])
     }
 
     @Test("a hidden app's window keeps it")

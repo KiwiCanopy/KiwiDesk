@@ -81,9 +81,12 @@ struct MotionScopeCensusTests {
         // The tour's bar visibility pick and its revert (#2515).
         "KiwiDesk/AppDelegate+OnboardingBars.swift": 2,
         // Settings: Save and its config reload, load, delete, set
-        // default, a preset, a restore, a reset, an app-wide change, a claim,
+        // default, a restore, a reset, an app-wide change, a claim,
         // a stored-profile edit, the Lua editor's apply.
-        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 6,
+        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 5,
+        // The tour's Start with: a Continue, a replace and its
+        // Revert (#3294).
+        "KiwiDesk/AppDelegate+OnboardingStart.swift": 3,
         "KiwiDesk/Settings/SettingsModel+Globals.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ProfileOverrides.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Backup.swift": 1,

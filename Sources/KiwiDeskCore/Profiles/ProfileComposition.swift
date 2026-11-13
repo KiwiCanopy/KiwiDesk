@@ -45,10 +45,13 @@ public enum ProfileComposition {
         displays: [Display],
         mainID: DisplayID?
     ) -> Composed? {
-        let ordered = slotOrder(
-            PositionalDisplays.ordered(displays, mainID: mainID),
-            byWidth: layout.slotsByWidth
+        let positional = PositionalDisplays.ordered(
+            displays,
+            mainID: mainID
         )
+        let ordered = layout.slotOrder(
+            widths: positional.map(\.frame.width)
+        ).map { positional[$0] }
         guard !ordered.isEmpty, layout.spaceCount > 0 else {
             return nil
         }
@@ -82,26 +85,9 @@ public enum ProfileComposition {
             spaceModes: modes,
             assignment: assignment,
             settings: layout.settings(
-                sizes: ordered.map(\.frame.size)
+                sizes: positional.map(\.frame.size)
             ),
             sourceTitle: layout.starterTitle
         )
-    }
-
-    /// The plan's screen slots: positional, or widest first with
-    /// ties kept in positional order (#3294).
-    public static func slotOrder(
-        _ positional: [Display],
-        byWidth: Bool
-    ) -> [Display] {
-        guard byWidth else { return positional }
-        return positional.enumerated()
-            .sorted { lhs, rhs in
-                let left = lhs.element.frame.width
-                let right = rhs.element.frame.width
-                guard left == right else { return left > right }
-                return lhs.offset < rhs.offset
-            }
-            .map(\.element)
     }
 }

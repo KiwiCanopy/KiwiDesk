@@ -84,7 +84,7 @@ struct ProfileCountersTests {
                 Comment(rawValue: file.lastPathComponent)
             )
         }
-        #expect(surfaces >= 2)
+        #expect(surfaces >= 1)
     }
 
     /// The value sits on the NAME, read right after it, and the

@@ -861,9 +861,11 @@ host a sheet, and holds all three.
 
 :::unreleased
 The preset card, its **Layouts** sheet and the card's bare-noun
-action leave Profiles with the Presets section (#3294); presets
-are picked on the tour's Spaces step, whose replace confirm is an
-alert, a question with consequences.
+action leave Profiles with the Presets section (#3294), so the
+bare-noun exception above has no live instance and the preset
+preview no longer hosts a story thumbnail or a sheet; only the
+tour's Spaces step does. Presets are picked there, and its
+replace confirm is an alert, a question with consequences.
 :::
 
 **Layout schematics draw staged values, never live windows

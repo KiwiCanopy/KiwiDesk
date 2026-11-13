@@ -277,7 +277,7 @@ extension KiwiCore {
         _ layout: StandardLayout
     ) throws -> String {
         let displays = state.workspaces.allDisplays
-        guard displays.count == layout.screenCount else {
+        guard layout.plans(forScreens: displays.count) else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: layout.screenCount,
                 live: displays.count

@@ -854,11 +854,10 @@ editable profile; presets cannot be deleted.
 
 :::unreleased
 Presets are picked on the setup tour's Spaces step, under **Start
-with**, and Profiles no longer lists them. Developer is the
-Standard at every screen count. Over Spaces you changed, a preset
-replaces only your Spaces and their layouts, after one confirm;
-app rules, shortcuts and looks stay, and the step's **Revert**
-puts the Spaces back while the tour is open.
+with**; Profiles does not list them. Developer is the Standard at
+every screen count. Over Spaces you changed, a preset replaces
+only your Spaces and their layouts, and the step's **Revert** puts
+them back while the tour is open.
 :::
 
 ## App Rules
@@ -996,8 +995,8 @@ It is saved as an ordinary profile named after your main screen
 and the same setup is always available as a preset of that name.
 
 :::unreleased
-That setup is the tour's **Suggested** choice under **Start
-with** on the Spaces step.
+The tour offers the same setup as **Suggested** under **Start
+with** on the Spaces step, in place of a preset of that name.
 :::
 
 ### Default Shortcuts

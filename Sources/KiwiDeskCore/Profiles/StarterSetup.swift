@@ -205,15 +205,19 @@ public enum StarterSetup {
 
     /// A preset's shape tuning: `slots` is its plan on `sizes`,
     /// each layout hosted by its first slot (#1663). `sizes` is
-    /// non-empty and covers every slot's screen.
+    /// non-empty and covers every slot's screen; `main` indexes the
+    /// main screen in it, which a width-first plan may not lead
+    /// (#3294).
     static func presetSettings(
         slots: [Slot],
-        sizes: [CGSize]
+        sizes: [CGSize],
+        main: Int = 0
     ) -> TilingSettings {
         settings(
             slots: slots,
             sizes: sizes,
-            hosts: firstHosts(of: slots, sizes: sizes)
+            hosts: firstHosts(of: slots, sizes: sizes),
+            main: main
         )
     }
 
@@ -222,14 +226,15 @@ public enum StarterSetup {
     private static func settings(
         slots: [Slot],
         sizes: [CGSize],
-        hosts: [LayoutMode: ScreenClass]
+        hosts: [LayoutMode: ScreenClass],
+        main: Int = 0
     ) -> TilingSettings {
         var settings = StarterTuning.settings(
-            mainShape: ScreenClass.of(sizes[0]),
+            mainShape: ScreenClass.of(sizes[main]),
             hosts: hosts
         )
         settings.minWindowSizes = StarterTuning.minWindowSizes(
-            mainWidth: sizes[0].width
+            mainWidth: sizes[main].width
         )
         settings.scrolling.override = scrollingOverrides(
             of: slots,

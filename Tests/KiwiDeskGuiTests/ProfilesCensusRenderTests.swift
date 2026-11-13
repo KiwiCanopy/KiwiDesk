@@ -199,7 +199,7 @@ struct ProfilesCensusRenderTests {
         }
     }
 
-    /// Each family expands once per INSTANCE, and the three
+    /// Each family expands once per INSTANCE, and the two
     /// instance kinds are distinct. Set equality over
     /// `SettingKey` cannot see any of this: an expansion that
     /// silently collapsed to one row would still satisfy

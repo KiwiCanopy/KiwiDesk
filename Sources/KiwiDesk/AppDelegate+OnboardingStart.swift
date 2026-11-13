@@ -9,22 +9,23 @@ extension AppDelegate {
     func wireOnboardingStart() {
         let start = onboardingModel.start
         start.offered = { [weak self] in self?.offeredTourLayouts() ?? [] }
-        start.untouchedChoice = { [weak self] offered in
-            self?.core.untouchedTourChoice(among: offered)
+        start.readDesk = { [weak self] offered, copy in
+            self?.core.tourDesk(among: offered, copy: copy) ?? .unsaved
         }
         start.columns = { [weak self] option in
             self?.tourColumns(option) ?? []
         }
-        start.start = { [weak self] layout, untouched in
-            guard let core = self?.core else { return false }
+        start.start = { [weak self] layout, copy in
+            guard let core = self?.core else { return .failed }
             do {
-                try core.withUserMotion {
-                    try core.startTour(with: layout, replacing: untouched)
-                }
-                return true
+                return .started(
+                    try core.withUserMotion {
+                        try core.startTour(with: layout, replacing: copy)
+                    }
+                )
             } catch {
                 core.onLog("tour start failed: \(error)")
-                return false
+                return .failed
             }
         }
         start.confirmReplace = { [weak self] layout, answer in
@@ -57,45 +58,23 @@ extension AppDelegate {
         )
     }
 
-    /// An option's Spaces in columns, one per screen, left to right.
+    /// An option's Spaces in columns, one per screen, left to right,
+    /// as Core places them (`tourPlan(for:)`).
     private func tourColumns(
         _ option: OnboardingStartOption
     ) -> [OnboardingScreenColumn] {
-        let displays = core.state.workspaces.allDisplays.sorted {
-            $0.frame.minX < $1.frame.minX
-        }
-        let placed = placedSpaces(option)
-        return displays.compactMap { display in
-            let cards = placed.filter { $0.display == display.id }.map {
-                OnboardingSpaceCard(id: $0.id.raw, mode: $0.mode, screen: nil)
-            }
-            guard !cards.isEmpty else { return nil }
-            return OnboardingScreenColumn(
-                id: display.fingerprint,
-                screen: display.name,
-                cards: cards
+        core.tourPlan(for: option.layout).map { column in
+            OnboardingScreenColumn(
+                id: String(column.display.id.raw),
+                screen: column.display.name,
+                cards: column.spaces.map {
+                    OnboardingSpaceCard(
+                        id: $0.id.raw,
+                        mode: $0.mode,
+                        screen: nil
+                    )
+                }
             )
-        }
-    }
-
-    /// Each Space an option holds, with its layout and its screen.
-    private func placedSpaces(
-        _ option: OnboardingStartOption
-    ) -> [(id: SpaceID, mode: LayoutMode, display: DisplayID?)] {
-        let workspaces = core.state.workspaces
-        guard let layout = option.layout,
-            let set = core.spaceSet(for: layout)
-        else {
-            return workspaces.allSpaces.map {
-                ($0.id, $0.mode, workspaces.display(of: $0.id))
-            }
-        }
-        let main = PositionalDisplays.liveMainID
-        return set.spaces.map { id in
-            let pinned = set.pins[id].flatMap { pin in
-                workspaces.allDisplays.first { $0.fingerprint == pin }?.id
-            }
-            return (id, set.spaceModes[id] ?? .bsp, pinned ?? main)
         }
     }
 
@@ -114,10 +93,11 @@ extension AppDelegate {
         let leftBehind = core.appRulesLeftBehind(by: set)
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = TourReplaceText.title(layout.displayName)
+        let preset = layout.starterTitle == nil ? layout.displayName : nil
+        alert.messageText = TourReplaceText.title(preset)
         alert.informativeText = TourReplaceText.message(
-            current: core.state.workspaces.allSpaces.count,
-            preset: layout.displayName,
+            current: core.capturedSpaces.count,
+            preset: preset,
             spaces: set.spaces.count,
             leftBehind: leftBehind
         )

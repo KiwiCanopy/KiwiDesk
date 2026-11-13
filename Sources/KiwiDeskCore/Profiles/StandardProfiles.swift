@@ -72,8 +72,9 @@ public enum StandardProfiles {
     ) -> [StandardLayout] {
         let planned = min(count, largestCount)
         let starter = StarterSetup.standardLayout(sizes: sizes)
-        return [starter]
-            + workflows.filter { $0.screenCount == planned }
+        // The one Starter is for the screens `sizes` names alone.
+        let lead = starter.screenCount == count ? [starter] : []
+        return lead + workflows.filter { $0.screenCount == planned }
     }
 
     /// Standard fallback layout for a screen count (#485). Reads
@@ -86,16 +87,5 @@ public enum StandardProfiles {
         workflows
             .filter { $0.isStandard && $0.screenCount <= count }
             .max { $0.screenCount < $1.screenCount }
-    }
-
-    // MARK: - Helpers
-
-    private static func secondaryRange(
-        _ spaces: ClosedRange<Int>,
-        screen: Int
-    ) -> [SpaceID: Int] {
-        var map: [SpaceID: Int] = [:]
-        for space in spaces { map[SpaceID(space)] = screen }
-        return map
     }
 }
