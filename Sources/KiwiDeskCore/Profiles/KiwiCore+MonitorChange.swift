@@ -127,9 +127,8 @@ extension KiwiCore {
                 emitSpaceChange()
                 onLog(
                     "monitor change: no matching profile, "
-                        + "placement follows standard "
-                        + "'\(composed.sourceName)' (tiling "
-                        + "stays Lua/profile-owned)"
+                        + "Spaces placed on screens by number "
+                        + "(tiling stays Lua/profile-owned)"
                 )
                 return
             }

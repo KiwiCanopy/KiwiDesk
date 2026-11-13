@@ -107,22 +107,19 @@ struct ProfileVerdictTests {
 
     /// The same state on a LUA-OWNED config is a different
     /// promise, and the card must not describe it the same way:
-    /// nothing is adopted, the built-in only steers placement,
-    /// and whatever profile is active keeps owning the tiling.
+    /// nothing is adopted, Spaces are placed by number and no
+    /// built-in is named, and whatever profile is active keeps
+    /// owning the tiling (#3294).
     /// `handleMonitorChange` branches here on `isGuiManaged`, so
     /// a verdict without this arm states the wrong thing on
     /// every hand-written config.
-    @Test("a Lua-owned config gets a placement-only verdict")
+    @Test("a Lua-owned config gets a placed-by-number verdict")
     func placementOnlyOnLuaConfig() {
         let core = core()
         #expect(!core.isGuiManaged)
         #expect(
             core.profileVerdict(activeBinding: nil).verdict
-                == .placementOnlyStandard(
-                    name: "Developer",
-                    activeProfile: nil,
-                    title: nil
-                )
+                == .placementByNumber(activeProfile: nil)
         )
     }
 
