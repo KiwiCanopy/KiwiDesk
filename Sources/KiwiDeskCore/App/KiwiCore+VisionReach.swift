@@ -122,7 +122,7 @@ extension KiwiCore {
         case .notInstalled(let app, nil):
             return L(
                 "kiwivision.notice.not_installed_id",
-                "No app with the ID %1$@ is installed.",
+                "No app with the bundle ID %1$@ is installed.",
                 app
             )
         }

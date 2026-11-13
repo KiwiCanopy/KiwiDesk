@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import os
 
 /// What an Open applications shortcut does with its app (#334,
 /// #1510), derived from the binding's `lua` verb, never a
@@ -216,20 +217,22 @@ extension KeybindingCatalog {
     static let installedAppsSnapshot: [InstalledApp] = installedApps
 
     /// Process-lifetime dictionary mapping bundle ID to localized name (#333).
-    static let installedNameByID: [String: String] =
-        Dictionary(
+    static let installedNameByID: [String: String] = {
+        let names = Dictionary(
             installedAppsSnapshot.map { ($0.bundleID, $0.name) },
             uniquingKeysWith: { first, _ in first }
         )
+        snapshotBuilt.withLock { $0 = true }
+        return names
+    }()
+
+    /// Whether `installedNameByID` exists yet (#3276).
+    private static let snapshotBuilt = OSAllocatedUnfairLock(
+        initialState: false
+    )
 
     /// Resolves localized display name for bundle identifier (#333).
     static func displayName(forBundleID id: String) -> String {
-        resolvedName(forBundleID: id) ?? id.lowercased()
-    }
-
-    /// The localized display name, nil where neither the snapshot
-    /// nor LaunchServices knows the id (#3276).
-    static func resolvedName(forBundleID id: String) -> String? {
         let id = id.lowercased()
         if let name = installedNameByID[id] { return name }
         if let url = NSWorkspace.shared.urlForApplication(
@@ -237,7 +240,16 @@ extension KeybindingCatalog {
         ) {
             return localizedName(url: url, path: url.path)
         }
-        return nil
+        return id
+    }
+
+    /// The snapshot's name for an id, nil until something built the
+    /// snapshot: never scans, so a hotkey path may ask it. It names
+    /// an app LaunchServices no longer finds only when the snapshot
+    /// predates the app's removal (#3276).
+    static func snapshotName(forBundleID id: String) -> String? {
+        guard snapshotBuilt.withLock({ $0 }) else { return nil }
+        return installedNameByID[id.lowercased()]
     }
 
     /// Resolves user-language display name via Spotlight metadata

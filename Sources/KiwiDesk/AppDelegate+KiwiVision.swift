@@ -43,7 +43,7 @@ extension AppDelegate {
             )
         }
         // A notice names a member as the lens's card does (#3276).
-        core.vision.appName = KeybindingCatalog.resolvedName(forBundleID:)
+        core.vision.appName = KeybindingCatalog.snapshotName(forBundleID:)
         // A lens that turned on with none of its apps open (#3122).
         core.vision.onNotice = { notice in
             NSAccessibility.post(
@@ -127,7 +127,7 @@ extension AppDelegate {
         case .notInstalled(let app, nil):
             return L(
                 "kiwivision.notice.not_installed_id",
-                "No app with the ID %1$@ is installed.",
+                "No app with the bundle ID %1$@ is installed.",
                 app
             )
         }

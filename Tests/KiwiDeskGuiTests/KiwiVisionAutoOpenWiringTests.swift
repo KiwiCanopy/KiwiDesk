@@ -1,8 +1,8 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A lens's Auto-open (#3122): the wirings no fixture reaches, each
 /// pinned by exact count to its file, and the notice's renderer.
@@ -107,7 +107,7 @@ struct KiwiVisionAutoOpenWiringTests {
         #expect(
             Self.count(
                 "core.vision.appName="
-                    + "KeybindingCatalog.resolvedName(forBundleID:)",
+                    + "KeybindingCatalog.snapshotName(forBundleID:)",
                 in: text
             ) == 1
         )
@@ -159,8 +159,28 @@ struct KiwiVisionAutoOpenWiringTests {
         #expect(
             AppDelegate.announcement(
                 .notInstalled(app: "com.x.y", name: nil)
-            ) == "No app with the ID com.x.y is installed."
+            ) == "No app with the bundle ID com.x.y is installed."
         )
+    }
+
+    /// The announcement is "the sentence the pill draws": both
+    /// renderers pick one key and one argument per arm (#3276).
+    @Test("the announcement reads as the pill for every notice")
+    @MainActor
+    func announcementMatchesThePill() {
+        LocalizationManager.shared.select("en")
+        let notices: [VisionLensNotice] = [
+            .noMemberOpen(lens: "Writing"),
+            .notInstalled(app: "com.x.y", name: "Bear"),
+            .notInstalled(app: "com.x.y", name: nil),
+        ]
+        for notice in notices {
+            #expect(
+                AppDelegate.announcement(notice)
+                    == KiwiCore.lensNoticeText(notice),
+                "\(notice)"
+            )
+        }
     }
 
     @Test("a greyed checkbox gives its reason")
