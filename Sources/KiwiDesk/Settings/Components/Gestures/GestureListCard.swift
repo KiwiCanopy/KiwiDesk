@@ -71,13 +71,23 @@ struct GestureListCard: View {
         }
     }
 
-    /// Apple's own name over System · On · Off (#3200), with the
-    /// value's "Applies to" checklist trailing.
+    /// Apple's own name over System · On · Off (#3200) in the shared
+    /// setting row (#2670): the value a pop-up over the recorder
+    /// footprint, its "Applies to" in the reach column.
     private var naturalRow: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            naturalPicker
-            Spacer(minLength: 8)
-            naturalReach
+        VStack(alignment: .leading, spacing: 4) {
+            ShortcutSettingRow(
+                title: ScrollGestureWords.natural,
+                help: nil,
+                reach: { naturalReach },
+                control: { naturalPicker }
+            )
+            if device == .trackpad {
+                Text(GestureListWords.magicMouseCaption)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
+            }
         }
     }
 
@@ -100,28 +110,29 @@ struct GestureListCard: View {
         }
     }
 
+    /// Hugs its value: "Desactivado" and its chevron fit the
+    /// footprint in every locale (#3281).
     private var naturalPicker: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            SegmentedPicker(
-                ScrollGestureWords.natural,
-                spokenLabel: L(
-                    "shortcuts.gestures.scroll.natural_spoken",
-                    "%1$@, %2$@",
-                    GestureListWords.device(device),
-                    ScrollGestureWords.natural
-                ),
-                hugsLabels: true,
-                selection: natural,
-                options: NaturalScrolling.allCases.map {
-                    (ScrollGestureWords.natural($0), $0)
-                }
-            )
-            if device == .trackpad {
-                Text(GestureListWords.magicMouseCaption)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink3)
+        Picker(ScrollGestureWords.natural, selection: natural) {
+            ForEach(NaturalScrolling.allCases, id: \.self) {
+                Text(ScrollGestureWords.natural($0)).tag($0)
             }
         }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .neutralMenuLabel()
+        .fixedSize()
+        .accessibilityLabel(naturalSpoken)
+        .accessibilityValue(ScrollGestureWords.natural(natural.wrappedValue))
+    }
+
+    private var naturalSpoken: String {
+        L(
+            "shortcuts.gestures.scroll.natural_spoken",
+            "%1$@, %2$@",
+            GestureListWords.device(device),
+            ScrollGestureWords.natural
+        )
     }
 
     private var natural: Binding<NaturalScrolling> {
@@ -185,11 +196,16 @@ struct GestureListCard: View {
         case .mouse:
             L(
                 "shortcuts.gestures.list.mouse_help",
-                "Bind a drag, a move or a scroll with keys held to an "
-                    + "action. With one action for every direction, a "
-                    + "scroll steps as far as you scroll; give one "
-                    + "direction its own action and each direction acts "
-                    + "once per scroll instead."
+                "Bind a drag, a move, a click, the wheel click, the "
+                    + "side buttons or a scroll to an action. A click "
+                    + "always takes keys held with it, so a plain click "
+                    + "stays the app's; the wheel click and the side "
+                    + "buttons may take none. With one action for every "
+                    + "direction, a scroll steps as far as you scroll; "
+                    + "give one direction its own action and each "
+                    + "direction acts once per scroll instead. Where a "
+                    + "mouse's own app, such as Logi Options+, remaps a "
+                    + "button, KiwiDesk sees what that app sends."
             )
         case .trackpad:
             L(

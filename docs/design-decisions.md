@@ -16623,6 +16623,19 @@ card leads with its input's Natural scrolling, under Apple's name,
 since a direction on that card reads through it. An input no front
 fires yet has no row, so the list never offers a binding that would
 do nothing.
+
+*Amended (#3281, owner 2026-11-13).* A mouse holds one chord, ⌃⌥:
+the wheel walks the window list and the sideways wheel switches
+Spaces, so the step a trackpad reaches with ⌃⌥⌘ costs a mouse no
+third key, and the ⌃⌥⌘ wheel rows are gone. A bound button press
+is swallowed with its release and an unbound one passes: an app
+that saw half a press would act on a release it never pressed for,
+and a press that no binding takes must cost the app nothing. The
+clicks stay keyed, since a bare click is the app's. The Natural
+scrolling value is a pop-up over the recorder column, in the shared
+setting row: segments break the every-locale fit (#291) on the
+longest *Off*, and the row then lines up with the gesture rows
+under it.
 :::
 
 **An entry is one drawn picture and one sentence, and the picture

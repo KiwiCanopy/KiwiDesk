@@ -36,6 +36,9 @@ extension KiwiCore {
                 self?.runTouchGesture(key, action, event)
             }
         }
+        mouse.pointer.setButtonHandler { [weak self] event in
+            self?.withUserMotion { self?.handleButtonGesture(event) }
+        }
     }
 
     func handleScrollBinding(
@@ -149,6 +152,16 @@ extension KiwiCore {
         if case .swipe(let swipe) = event.kind {
             direction = GestureDirection(rawValue: swipe.rawValue)
         }
+        runGestureStep(key, action, toward: direction)
+    }
+
+    /// One step of a binding with no motion of its own — a tap, a
+    /// swipe, a button press — toward `direction`, nil for none.
+    func runGestureStep(
+        _ key: GestureKey,
+        _ action: GestureAction,
+        toward direction: GestureDirection?
+    ) {
         switch action {
         case .run(let lua):
             runGestureLua(lua.lua, key.spelling)
@@ -172,6 +185,10 @@ extension KiwiCore {
         key: GestureKey
     ) {
         switch family {
+        case .focus where direction.isButton:
+            // A button is no motion: Back focuses the window on the
+            // left, whatever a row does with the fingers.
+            runGestureLua(family.lua(direction), key.spelling)
         case .focus, .walk:
             guard let space = activeSpace else { return }
             // A row slides with the fingers: its step runs against
@@ -181,9 +198,7 @@ extension KiwiCore {
             let forward =
                 family.stepsForward(direction) ?? direction.isBackward
             let step = forward ? 1 : -1
-            let horizontal =
-                direction == .left || direction == .right
-                || direction == .back || direction == .forward
+            let horizontal = direction == .left || direction == .right
             _ = stepScrollPan(
                 space,
                 by: step,
@@ -209,6 +224,10 @@ extension GestureFamily {
     /// both read it, so the two never disagree.
     public func stepsForward(_ direction: GestureDirection) -> Bool? {
         switch self {
+        // A side button names its way: Forward is the next one.
+        case _ where direction.isButton:
+            self == .focus || self == .swap || self == .display
+                ? nil : direction == .forward
         // The list scrolls against the hand: fingers up or left
         // show the next window, as macOS's Desktop swipe does.
         case .walk, .space: direction.isBackward

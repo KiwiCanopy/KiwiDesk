@@ -5229,8 +5229,8 @@ written to the base or a profile's own bindings
 | `drag` | Moves the pointer with the button held | `move` or `resize` |
 | `hover_move` | Moves the pointer with no button held | `move` or `resize` |
 | `click`, `right_click` | A click, a secondary click | Lua |
-| `middle_click` | Presses the wheel (button 2) | Lua |
-| `side_buttons` | Presses back or forward (buttons 3 and 4) | `focus` or `space`, or a table of `back` and `forward` |
+| `wheel_click` | Presses the wheel (button 2) | Lua |
+| `side_buttons` | Presses Back or Forward (buttons 3 and 4) | `focus` or `space`, or a table of `back` and `forward` |
 | `wheel` | Scrolls with no finger phase, up or down: a notched mouse wheel | `walk` or `space`, or a table of `up` and `down` |
 | `wheel_x` | Scrolls sideways with no finger phase: a tilt or thumb wheel | `walk` or `space`, or a table of `left` and `right` |
 | `swipe2` | Scrolls with a finger phase: a two-finger swipe on a trackpad or a Magic Mouse | any family, or a table of `up`, `down`, `left` and `right` |
@@ -5238,16 +5238,26 @@ written to the base or a profile's own bindings
 | `tap2`, `tap3`, `tap4`, `tap5` | Taps two, three, four or five fingers | Lua |
 | `spread`, `pinch_together`, `rotate`, `force_click` | Moves fingers apart, closes them, rotates them, presses a Force Click | Lua |
 
-`click`, `right_click`, `middle_click`, `side_buttons`, `tap2`,
-`spread`, `pinch_together`, `rotate` and `force_click` keep their
-bindings but do nothing yet. A scroll with no finger phase reaches
-the `wheel` or the `wheel_x` binding of its keys by the axis its
-first movement takes most.
+`tap2`, `spread`, `pinch_together`, `rotate` and `force_click`
+keep their bindings but do nothing yet. A scroll with no finger
+phase reaches the `wheel` or the `wheel_x` binding of its keys by
+the axis its first movement takes most.
+
+A bound press of a button — a click, the wheel click, Back or
+Forward with its keys — goes to its binding alone: the app under
+the pointer gets neither the press nor its release. A press no
+binding takes reaches the app as before. On `side_buttons`, `back`
+is the previous one for `space` and the window on the left for
+`focus`, and Natural scrolling never turns it. A side button bound
+with no keys no longer goes back or forward in any app, browsers
+included. Where a mouse's own app, such as Logi Options+, remaps a
+button, KiwiDesk sees what that app sends.
 
 The keys are modifiers joined by `+` — `control` (`ctrl`),
 `option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
-holds none. A tap, `middle_click` and `side_buttons` may hold
-none; every other input needs at least one. `wheel`, `wheel_x`
+holds none. A tap, `wheel_click` and `side_buttons` may hold
+none; every other input needs at least one, so a plain click
+stays the app's. `wheel`, `wheel_x`
 and `swipe2` need two or more, and `wheel` and `wheel_x` refuse
 `shift`, which macOS turns into a sideways scroll.
 :::
@@ -5335,12 +5345,10 @@ Out of the box these are bound:
 | `drag` | ⌃⌥ | `resize` |
 | `swipe2` | ⌃⌥ | `focus` |
 | `wheel` | ⌃⌥ | `walk` |
-| `wheel_x` | ⌃⌥ | `walk` |
+| `wheel_x` | ⌃⌥ | `space` |
 | `swipe2` | ⌃⌥⌘ | `space` |
-| `wheel` | ⌃⌥⌘ | `space` |
-| `wheel_x` | ⌃⌥⌘ | `space` |
 
-`hover_move` is unbound.
+`hover_move`, the clicks and the side buttons are unbound.
 :::
 
 ### Scroll focus and Space step

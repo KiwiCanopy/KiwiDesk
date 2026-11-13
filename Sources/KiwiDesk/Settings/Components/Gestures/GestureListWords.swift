@@ -21,8 +21,8 @@ enum GestureListWords {
         case .click: L("shortcuts.gestures.input.click", "Click")
         case .rightClick:
             L("shortcuts.gestures.input.right_click", "Right-click")
-        case .middleClick:
-            L("shortcuts.gestures.input.middle_click", "Middle click")
+        case .wheelClick:
+            L("shortcuts.gestures.input.wheel_click", "Wheel click")
         case .sideButtons:
             L("shortcuts.gestures.input.side_buttons", "Side buttons")
         case .wheel: L("shortcuts.gestures.input.wheel", "Scroll")
@@ -47,22 +47,68 @@ enum GestureListWords {
         }
     }
 
-    /// The SF Symbol a row's gesture icon wears; a swipe and a tap
-    /// carry their finger count beside it.
+    /// The SF Symbol a row's gesture icon and its pop-up item wear
+    /// (#3281, ui-designer and owner): an SF Symbol, or a `kiwi.*`
+    /// `CustomGlyph` whose dots count a tap's or a swipe's fingers.
     static func symbol(_ input: GestureInput) -> String {
         switch input {
-        case .drag: "hand.draw"
+        case .drag: "cursorarrow.and.square.on.square.dashed"
         case .hoverMove: "cursorarrow.motionlines"
-        case .click, .middleClick: "cursorarrow.click"
-        case .rightClick: "cursorarrow.click.2"
-        case .sideButtons: "computermouse"
-        case .wheel: "arrow.up.and.down"
-        case .wheelX: "arrow.left.and.right"
-        case .tap2, .tap3, .tap4, .tap5: "hand.tap"
-        case .swipe2, .swipe3, .swipe4, .swipe5: "hand.draw"
-        case .spread, .pinchTogether: "hand.pinch"
-        case .rotate: "arrow.clockwise"
-        case .forceClick: "hand.point.up.left"
+        case .wheel: "arrow.up.and.down.text.horizontal"
+        case .wheelX: "arrow.left.and.right.text.vertical"
+        case .click: CustomGlyph.click.name
+        case .rightClick: CustomGlyph.rightClick.name
+        case .wheelClick: CustomGlyph.wheelClick.name
+        case .sideButtons: CustomGlyph.sideButtons.name
+        case .tap2, .tap3, .tap4, .tap5:
+            CustomGlyph.taps(input.fingers ?? 2).name
+        case .swipe2, .swipe3, .swipe4, .swipe5:
+            CustomGlyph.swipes(input.fingers ?? 2).name
+        case .spread: "hand.raised.fingers.spread"
+        case .pinchTogether: pinch.drawn
+        case .rotate: "rotate.right"
+        case .forceClick: forceClick.drawn
+        }
+    }
+
+    /// Two input symbols newer than the deployment floor, each with
+    /// the one the floor's macOS draws.
+    static let pinch = ShortcutsReferenceBuilder.FloorSymbol(
+        name: "hand.pinch",
+        floor: "arrow.down.right.and.arrow.up.left"
+    )
+    static let forceClick = ShortcutsReferenceBuilder.FloorSymbol(
+        name: "hand.rays",
+        floor: "hand.tap.fill"
+    )
+
+    /// The gesture pop-up's groups, in the order a card lists them
+    /// (#3281, owner and ui-designer): each keeps `offered`'s order,
+    /// and a group with nothing offered is left out.
+    static func groups(
+        of offered: [GestureInput]
+    ) -> [(title: String, inputs: [GestureInput])] {
+        let groups: [(String, (GestureInput) -> Bool)] = [
+            (
+                L("shortcuts.gestures.group.move", "Move & Scroll"),
+                { $0.isDrag || $0.isWheel }
+            ),
+            (
+                L("shortcuts.gestures.group.buttons", "Buttons"),
+                { $0.isButton }
+            ),
+            (
+                L("shortcuts.gestures.group.tap", "Tap"),
+                { $0.fingers != nil && $0.directions.isEmpty }
+            ),
+            (
+                L("shortcuts.gestures.group.swipe", "Swipe"),
+                { $0.fingers != nil && !$0.directions.isEmpty }
+            ),
+        ]
+        return groups.compactMap { title, holds in
+            let inputs = offered.filter(holds)
+            return inputs.isEmpty ? nil : (title, inputs)
         }
     }
 
@@ -126,8 +172,33 @@ enum GestureListWords {
         }
     }
 
-    static var perDirection: String {
-        L("shortcuts.gestures.per_direction", "Per direction")
+    /// A split row's action: per button on the side buttons, per
+    /// direction on a motion.
+    static func perDirection(_ input: GestureInput) -> String {
+        guard input == .sideButtons else {
+            return L("shortcuts.gestures.per_direction", "Per direction")
+        }
+        return L("shortcuts.gestures.per_button", "Per button")
+    }
+
+    /// A keyless side-buttons row's caption: the buttons it takes
+    /// from every app (#3199 ▸ Ruling, #3281).
+    static func takenButtons(_ directions: [GestureDirection]) -> String? {
+        if directions == [.back, .forward] {
+            return L(
+                "shortcuts.gestures.side_buttons.takes_both",
+                "Takes Back and Forward from every app, browsers "
+                    + "included."
+            )
+        }
+        guard directions.count == 1, let one = directions.first else {
+            return nil
+        }
+        return L(
+            "shortcuts.gestures.side_buttons.takes_one",
+            "Takes %1$@ from every app, browsers included.",
+            direction(one)
+        )
     }
 
     /// A row of mixed directions' caption: a swipe gave up its
@@ -180,12 +251,15 @@ enum GestureListWords {
     /// What a row binds, read without the catalogue: a family's,
     /// a grab's or a split's words, a Lua action's description or
     /// its Lua, off for none.
-    static func value(_ action: GestureAction?) -> String {
+    static func value(
+        _ action: GestureAction?,
+        on input: GestureInput? = nil
+    ) -> String {
         switch action {
         case nil: SettingsValueReadout.onOff(false)
         case .family(let family): Self.family(family)
         case .grab(let grab): Self.grab(grab)
-        case .split: perDirection
+        case .split: input.map(perDirection) ?? perDirection(.swipe2)
         case .run(let run): runName(run)
         }
     }

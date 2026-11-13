@@ -1,4 +1,6 @@
+import AppKit
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -135,6 +137,46 @@ struct ShortcutSymbolFloorTests {
             if let pair = stand.first(where: { $0.name == symbol }) {
                 let gate = ShortcutsReferenceBuilder.FloorSymbol.since
                 #expect(first <= gate, "\(symbol) needs \(first)")
+                let back = try #require(since[pair.floor])
+                #expect(back <= floor, "\(pair.floor) needs \(back)")
+            } else {
+                #expect(first <= floor, "\(symbol) needs macOS \(first)")
+            }
+        }
+    }
+
+    /// The gesture cards' symbols (#3281): each input's and each
+    /// family's exists on the floor, or is one of the two stand-ins
+    /// `GestureListWords` declares.
+    @Test("every gesture symbol exists on the floor or has a stand-in")
+    func gestureSymbolsExistOnTheFloor() throws {
+        let floor = try floorMajor()
+        let since = try firstMacOS()
+        #expect(since.count > 1000, "the availability table read empty")
+        let pairs = [GestureListWords.pinch, GestureListWords.forceClick]
+        let drawn = Set(
+            GestureInput.allCases.map(GestureListWords.symbol)
+                + GestureFamily.allCases.map(
+                    ShortcutsReferenceBuilder.familyIcon(for:)
+                )
+        )
+        // A custom glyph is drawn, never looked up (#3281).
+        let custom = drawn.filter { CustomGlyph(name: $0) != nil }
+        #expect(!custom.isEmpty)
+        for name in custom {
+            let glyph = try #require(CustomGlyph(name: name))
+            #expect(glyph.image.isTemplate, "\(name)")
+            #expect(glyph.image.size == NSSize(width: 20, height: 20))
+        }
+        for symbol in drawn.subtracting(custom) {
+            let first = try #require(since[symbol], "\(symbol) unlisted")
+            let pair = pairs.first {
+                $0.name == symbol || $0.floor == symbol
+            }
+            if let pair {
+                let gate = ShortcutsReferenceBuilder.FloorSymbol.since
+                let newer = try #require(since[pair.name])
+                #expect(newer <= gate, "\(pair.name) needs \(newer)")
                 let back = try #require(since[pair.floor])
                 #expect(back <= floor, "\(pair.floor) needs \(back)")
             } else {

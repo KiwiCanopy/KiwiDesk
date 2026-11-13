@@ -7,6 +7,11 @@ import Foundation
 struct PointerSample: Equatable, Sendable {
     enum Kind: Equatable, Sendable {
         case leftDown, leftDragged, leftUp, mouseMoved, flagsChanged
+        /// The right button or any other: its press, drag and
+        /// release (#3281).
+        case buttonDown(PointerButton)
+        case buttonDragged(PointerButton)
+        case buttonUp(PointerButton)
     }
 
     var kind: Kind
@@ -20,8 +25,15 @@ struct PointerSample: Equatable, Sendable {
 struct PointerTapSnapshot: Equatable, Sendable {
     /// The modifier grab's (#2447); nil while off.
     var grab: ModifierDragSettings?
+    /// The bound clicks and side buttons (#3281); nil while off.
+    var buttons: PointerButtonSettings?
 
     static let off = PointerTapSnapshot(grab: nil)
+
+    init(grab: ModifierDragSettings?, buttons: PointerButtonSettings? = nil) {
+        self.grab = grab
+        self.buttons = buttons
+    }
 }
 
 /// A modifier grab's phase, as the router decided it.
@@ -52,6 +64,7 @@ struct PointerTapRouter {
     struct Routed: Equatable {
         var swallow: Bool
         var grab: [ModifierGrabEvent]
+        var buttons: [PointerButtonEvent] = []
 
         static let pass = Routed(swallow: false, grab: [])
     }
@@ -61,17 +74,30 @@ struct PointerTapRouter {
     var snapshot = PointerTapSnapshot.off
     /// The grab in flight: the binding it began.
     private(set) var owner: Owner?
+    /// The bound buttons held down, each with the binding its press
+    /// fired: their drags and releases are the binding's too.
+    /// Written by `PointerTapRouter+Buttons` alone.
+    var heldButtons: [PointerButton: PointerButtonEvent] = [:]
 
     mutating func route(
         _ sample: PointerSample,
         now: CFAbsoluteTime
     ) -> Routed {
+        if let held = continuingButton(sample, now: now) { return held }
+        switch sample.kind {
+        case .buttonDown:
+            // No grab owns the right or another button's stream.
+            guard let settings = snapshot.buttons else { return .pass }
+            return pressing(sample, settings, now: now)
+        case .buttonDragged, .buttonUp: return .pass
+        default: break
+        }
         if let owner {
             // The front ended a grab whose consumer or action went
             // off; the stream is no longer the grab's to swallow.
             guard let settings = snapshot.grab,
                 settings.grabs.contains(owner)
-            else { return reseed(now: now) }
+            else { return endingGrab(now: now) }
             return continuing(owner, sample, settings, now: now)
         }
         for consumer in PointerConsumers.Consumer.allCases {
@@ -79,6 +105,10 @@ struct PointerTapRouter {
             case .grab:
                 guard let settings = snapshot.grab else { continue }
                 let routed = beginning(sample, settings, now: now)
+                if routed != .pass { return routed }
+            case .buttons:
+                guard let settings = snapshot.buttons else { continue }
+                let routed = pressing(sample, settings, now: now)
                 if routed != .pass { return routed }
             }
         }
@@ -89,6 +119,13 @@ struct PointerTapRouter {
     /// disabled tap's re-enable, or a snapshot that turned the
     /// consumer off: no event of the grab's says where it ended.
     mutating func reseed(now: CFAbsoluteTime) -> Routed {
+        var routed = endingGrab(now: now)
+        routed.buttons = releasingButtons(now: now)
+        return routed
+    }
+
+    /// Ends the grab in flight alone, with no location of its own.
+    private mutating func endingGrab(now: CFAbsoluteTime) -> Routed {
         guard let owner else { return .pass }
         self.owner = nil
         return Routed(

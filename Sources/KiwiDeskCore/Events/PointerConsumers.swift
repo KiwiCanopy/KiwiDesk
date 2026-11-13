@@ -15,6 +15,9 @@ public final class PointerConsumers {
         /// The modifier grab: ⌃⌘ + drag moves, ⌃⌥ + drag resizes
         /// (#2447). It owns the button stream it began.
         case grab
+        /// The bound clicks and side buttons (#3281). It owns the
+        /// press it took to its release.
+        case buttons
 
         /// The events this consumer needs — its one mask constant.
         /// The grab hears the left-button trio for "+ drag" and
@@ -22,6 +25,7 @@ public final class PointerConsumers {
         public var mask: CGEventMask {
             switch self {
             case .grab: return PointerConsumers.grabMask
+            case .buttons: return PointerConsumers.buttonMask
             }
         }
     }
@@ -34,7 +38,18 @@ public final class PointerConsumers {
         .mouseMoved, .flagsChanged,
     ].reduce(0) { $0 | CGEventMask(1) << $1.rawValue }
 
+    /// The buttons' mask: every button's press, drag and release. A
+    /// tap over it asked tccd for the grab mask's services and no
+    /// other (probe, 2026-11-13).
+    nonisolated static let buttonMask: CGEventMask = [
+        CGEventType.leftMouseDown, .leftMouseDragged, .leftMouseUp,
+        .rightMouseDown, .rightMouseDragged, .rightMouseUp,
+        .otherMouseDown, .otherMouseDragged, .otherMouseUp,
+    ].reduce(0) { $0 | CGEventMask(1) << $1.rawValue }
+
     public typealias GrabHandler = @MainActor (ModifierGrabEvent) -> Void
+    public typealias ButtonHandler =
+        @MainActor (PointerButtonEvent) -> Void
     typealias MakeTap =
         @MainActor (CGEventMask, @escaping PointerTap.Deliver)
         -> PointerTapHandle?
@@ -47,7 +62,13 @@ public final class PointerConsumers {
     /// The grab's settings as the tap reads them, sanitised; written
     /// by `KiwiCore.applyGestures` alone, from the drag bindings.
     public private(set) var grabSettings = ModifierDragSettings.defaults
+    /// The bound buttons as the tap reads them; written by
+    /// `KiwiCore.applyGestures` alone.
+    public private(set) var buttonSettings = PointerButtonSettings(
+        resolved: GestureSeeds.seeds
+    )
     private var grabHandler: GrabHandler?
+    private var buttonHandler: ButtonHandler?
     /// The grab the main actor has heard begin and not yet end, as
     /// it began.
     public private(set) var grabInFlight: ModifierGrabEvent?
@@ -70,6 +91,19 @@ public final class PointerConsumers {
     /// Wires the grab's handler; once, at bootstrap.
     public func setGrabHandler(_ handler: @escaping GrabHandler) {
         grabHandler = handler
+        sync()
+    }
+
+    /// Wires the buttons' handler; once, at bootstrap.
+    public func setButtonHandler(_ handler: @escaping ButtonHandler) {
+        buttonHandler = handler
+        sync()
+    }
+
+    /// Applies the bound buttons. A press already taken keeps its
+    /// release, which the tap swallows whatever the bindings say.
+    func configure(buttons settings: PointerButtonSettings) {
+        buttonSettings = settings
         sync()
     }
 
@@ -119,6 +153,9 @@ public final class PointerConsumers {
             event.phase != .moved
                 || delivery.grab.dropFirst(index + 1).first?.phase != .moved
         }.map(\.element)
+        for event in delivery.buttons {
+            buttonHandler?(event)
+        }
         for event in events {
             switch event.phase {
             case .began: grabInFlight = event
@@ -144,6 +181,7 @@ public final class PointerConsumers {
         Consumer.allCases.filter { consumer in
             switch consumer {
             case .grab: grabHandler != nil && grabSettings.isOn
+            case .buttons: buttonHandler != nil && buttonSettings.isOn
             }
         }
     }
@@ -192,7 +230,8 @@ public final class PointerConsumers {
         }
         tap?.setSnapshot(
             PointerTapSnapshot(
-                grab: live.contains(.grab) ? grabSettings : nil
+                grab: live.contains(.grab) ? grabSettings : nil,
+                buttons: live.contains(.buttons) ? buttonSettings : nil
             )
         )
     }

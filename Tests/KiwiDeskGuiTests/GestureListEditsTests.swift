@@ -61,7 +61,8 @@ struct GestureListEditsTests {
     @Test("a re-key onto a held key is refused and changes nothing")
     func rekeyRefusesAClash() {
         var base = GestureMap()
-        let held = GestureKey(.wheel, [.control, .option, .command])
+        // A seed holds it (#3281: ⌃⌥ sideways switches Spaces).
+        let held = GestureKey(.wheelX, [.control, .option])
         let before = base
         #expect(!GestureListEdits.rekey(wheel, to: held, in: &base))
         #expect(base == before)
