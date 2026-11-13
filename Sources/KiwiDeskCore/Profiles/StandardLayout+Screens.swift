@@ -18,6 +18,9 @@ extension StandardLayout {
         of space: SpaceID,
         on shape: ScreenClass?
     ) -> LayoutMode {
+        if let shape, let fitted = shapeModes[space]?[shape] {
+            return fitted
+        }
         if let declared = spaceModes[space] { return declared }
         return shape?.layouts.first ?? .bsp
     }

@@ -8,97 +8,14 @@ extension StandardLayout {
         switch name {
         case "Developer":
             return L("presets.developer.name", "Developer")
-        case "Minimalist":
-            return L("presets.minimalist.name", "Minimalist")
-        case "Focus Stack":
-            return L("presets.focus_stack.name", "Focus Stack")
-        case "Dual Developer":
-            return L(
-                "presets.dual_developer.name",
-                "Dual Developer"
-            )
-        case "Coder & Monitor":
-            return L(
-                "presets.coder_and_monitor.name",
-                "Coder & Monitor"
-            )
-        case "Command Center":
-            return L(
-                "presets.command_center.name",
-                "Command Center"
-            )
-        case "Design Studio":
-            return L("presets.design_studio.name", "Design Studio")
+        case "Focus":
+            return L("presets.focus.name", "Focus")
+        case "Studio":
+            return L("presets.studio.name", "Studio")
+        case "Dashboard":
+            return L("presets.dashboard.name", "Dashboard")
         default:
             return name
-        }
-    }
-
-    /// Localized summary describing workflow across spaces (#859,
-    /// `PresetSummaryCoverageTests`).
-    @MainActor var displaySummary: String {
-        switch name {
-        // Never name layout modes in prose — ten catalogs drifted
-        // when these did (#859); modes render only through
-        // `LayoutMode.displayName`, under the policy
-        // `LocalizationModeNamePolicyTests` pins.
-        case "Developer":
-            return L(
-                "presets.developer.summary",
-                "An IDE, reference docs, and a full-screen "
-                    + "Space for the running app."
-            )
-        case "Minimalist":
-            return L(
-                "presets.minimalist.summary",
-                "Generous gaps, a Space for reading, and "
-                    + "single-focus work."
-            )
-        case "Focus Stack":
-            return L(
-                "presets.focus_stack.summary",
-                "Two task Spaces, and one kept clear for deep "
-                    + "work."
-            )
-        case "Dual Developer":
-            return L(
-                "presets.dual_developer.summary",
-                "Code and docs on the main screen; mail, "
-                    + "chat, and media on the second."
-            )
-        case "Coder & Monitor":
-            return L(
-                "presets.coder_and_monitor.summary",
-                "Editor and terminals on the main screen; "
-                    + "metrics and logs on the second."
-            )
-        case "Command Center":
-            return L(
-                "presets.command_center.summary",
-                "Work and docs center, communication "
-                    + "left, logs and monitoring right."
-            )
-        case "Design Studio":
-            return L(
-                "presets.design_studio.summary",
-                "Frontend IDE and previews center, design "
-                    + "canvas left, inspectors right."
-            )
-        // ONE key (#601): the Starter's modes derive from the
-        // connected screens, so the summary states the rule rather
-        // than a per-Mac list (#678 Phase 4 pass 11).
-        case StarterSetup.name:
-            return L(
-                "presets.starter.summary",
-                "Spaces chosen for your screens, each with its "
-                    + "own layout."
-            )
-        default:
-            assertionFailure(
-                "preset '\(name)' (\(screenCount) screen) has "
-                    + "no localized summary"
-            )
-            return ""
         }
     }
 }

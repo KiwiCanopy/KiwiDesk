@@ -121,24 +121,34 @@ extension KiwiCore {
         _ composed: ProfileComposition.Composed,
         keepingPinsOf temporaries: Set<SpaceID>
     ) {
+        let placement = composedPlacement(composed)
+        spacePins = keepingPins(of: temporaries, over: placement.pins)
+        mainSpaces = Set(placement.mains)
+    }
+
+    /// Where a composition puts its Spaces on the live screens:
+    /// the main screen's take the Main role, every other is pinned
+    /// to its screen's fingerprint.
+    func composedPlacement(
+        _ composed: ProfileComposition.Composed
+    ) -> (pins: [SpaceID: String], mains: [SpaceID]) {
         let ordered = PositionalDisplays.ordered(
             state.workspaces.allDisplays,
             mainID: PositionalDisplays.liveMainID
         )
         var pins: [SpaceID: String] = [:]
-        var mains: Set<SpaceID> = []
+        var mains: [SpaceID] = []
         for space in composed.spaces {
             let assigned = composed.assignment[space]
             if assigned == ordered.first?.id || assigned == nil {
-                mains.insert(space)
+                mains.append(space)
             } else if let display = ordered.first(where: {
                 $0.id == assigned
             }) {
                 pins[space] = display.fingerprint
             }
         }
-        spacePins = keepingPins(of: temporaries, over: pins)
-        mainSpaces = mains
+        return (pins, mains)
     }
 
     /// The connected monitors as a stored set, carrying the

@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Composes fallback layout when no saved profile matches monitors (#53).
@@ -44,9 +45,9 @@ public enum ProfileComposition {
         displays: [Display],
         mainID: DisplayID?
     ) -> Composed? {
-        let ordered = PositionalDisplays.ordered(
-            displays,
-            mainID: mainID
+        let ordered = slotOrder(
+            PositionalDisplays.ordered(displays, mainID: mainID),
+            byWidth: layout.slotsByWidth
         )
         guard !ordered.isEmpty, layout.spaceCount > 0 else {
             return nil
@@ -85,5 +86,22 @@ public enum ProfileComposition {
             ),
             sourceTitle: layout.starterTitle
         )
+    }
+
+    /// The plan's screen slots: positional, or widest first with
+    /// ties kept in positional order (#3294).
+    public static func slotOrder(
+        _ positional: [Display],
+        byWidth: Bool
+    ) -> [Display] {
+        guard byWidth else { return positional }
+        return positional.enumerated()
+            .sorted { lhs, rhs in
+                let left = lhs.element.frame.width
+                let right = rhs.element.frame.width
+                guard left == right else { return left > right }
+                return lhs.offset < rhs.offset
+            }
+            .map(\.element)
     }
 }

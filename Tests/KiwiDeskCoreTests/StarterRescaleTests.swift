@@ -102,7 +102,7 @@ struct StarterRescaleTests {
     func workflowPresetNotBaseline() throws {
         let core = makeGuiManagedCore()
         connect(core, [display(1, "A")])
-        try core.applyStandard(StandardProfiles.developer)
+        try core.applyStandard(StandardProfiles.developer1)
         #expect(
             try core.profiles.read(name: "Developer")
                 .isStarterSetup == false
