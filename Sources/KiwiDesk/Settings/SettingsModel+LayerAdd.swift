@@ -28,9 +28,7 @@ extension SettingsModel {
     /// What adding `name` would do; nil for an empty name or one
     /// the page already has.
     func layerAdmission(_ name: String) -> LayerAdmission? {
-        guard !name.isEmpty,
-            !config.layers.contains(where: { $0.name == name })
-        else { return nil }
+        guard !name.isEmpty, !pageHasLayer(name) else { return nil }
         if let holder = layerAddClash(name) { return .clash(holder) }
         let shared = layeredReach?.storedKeyBase.contains {
             $0.name == name
@@ -45,6 +43,7 @@ extension SettingsModel {
     /// joins — and never one a profile the rename reaches holds.
     func layerRenameRefusal(_ old: String, _ new: String) -> String? {
         guard new != old else { return nil }
+        if let refusal = layerOnPageRefusal(new) { return refusal }
         if let holder = layerRenameClash(old, new) {
             return LayerReachWords.clash(holder, new)
         }
@@ -54,6 +53,19 @@ extension SettingsModel {
         case .rejoin?: return LayerReachWords.renameOntoShared(new)
         case .sharedElsewhere?: return LayerReachWords.joinOnLoadedPage
         }
+    }
+
+    /// Why `name` is refused because the page already has it; nil
+    /// otherwise. Add and Rename both say it (#3263).
+    func layerOnPageRefusal(_ name: String) -> String? {
+        pageHasLayer(name) ? LayerReachWords.onPage(name) : nil
+    }
+
+    /// The icon a rejoined shared layer brings, which Add keeps,
+    /// empty for none; nil where Add would not rejoin.
+    func rejoinedLayerIcon(_ name: String) -> String? {
+        guard layerAdmission(name) == .rejoin else { return nil }
+        return storedSharedLayer(name)?.icon ?? ""
     }
 
     /// Whether Add may take `name`.
@@ -70,16 +82,13 @@ extension SettingsModel {
         layerAdmission(name) == .rejoin
     }
 
-    /// Adds `name` to the page and says whether it did.
+    /// Adds `name` to the page and says whether it did. A new layer
+    /// takes `icon`; a rejoined shared one keeps its own.
     @discardableResult
-    func addLayer(_ name: String) -> Bool {
+    func addLayer(_ name: String, icon: String? = nil) -> Bool {
         switch layerAdmission(name) {
         case .rejoin?:
-            guard
-                let shared = layeredReach?.storedKeyBase.first(where: {
-                    $0.name == name
-                })
-            else { return false }
+            guard let shared = storedSharedLayer(name) else { return false }
             config.layers = KeybindingCatalog.insertLayer(
                 shared,
                 into: config.layers,
@@ -90,18 +99,29 @@ extension SettingsModel {
         case .new?:
             // Every layer carries the app-chrome rows (#602, #1381),
             // on the shortcut base (#2460).
-            config.layers.append(
-                KeyLayer(
-                    name: name,
-                    bindings: DefaultKeybindings.appChromeRows()
-                        .map(config.shortcutBase.rebased)
-                )
+            var layer = KeyLayer(
+                name: name,
+                bindings: DefaultKeybindings.appChromeRows()
+                    .map(config.shortcutBase.rebased)
             )
+            layer.icon = icon.flatMap { $0.isEmpty ? nil : $0 }
+            config.layers.append(layer)
             recordCreated([name])
             return true
         case .clash?, .sharedElsewhere?, nil:
             return false
         }
+    }
+
+    /// Whether the page already has a layer named `name`.
+    private func pageHasLayer(_ name: String) -> Bool {
+        config.layers.contains { $0.name == name }
+    }
+
+    /// The shared layer by `name` the stored base holds, which a
+    /// rejoin brings back as it is.
+    private func storedSharedLayer(_ name: String) -> KeyLayer? {
+        layeredReach?.storedKeyBase.first { $0.name == name }
     }
 
     /// The profile whose own layer already takes `name`: a new layer

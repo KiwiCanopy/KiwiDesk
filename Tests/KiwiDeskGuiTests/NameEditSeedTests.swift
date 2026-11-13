@@ -84,19 +84,16 @@ struct NameEditSeedTests {
     /// stale value and the fresh one alike) — a needle keyed on
     /// today's spellings would have called that clean (code
     /// review, 2026-08-12).
-    /// The one exemption, and why: a popover whose field starts
+    /// What may be exempt, and why: a popover whose field starts
     /// EMPTY has no seed to be stale about. Its confirm is
     /// correctly dead until the user types, which is the same
     /// thing the defect looked like and is not it. Keyed by
     /// file, so a second popover in one of these files still has
-    /// to be read by a human — which is how the layer strip's
-    /// add-a-layer popover came to be checked at all.
+    /// to be read by a human.
     private let emptySeeded: [String: String] = [
-        "LayerStripEditor.swift":
-            "the add-a-layer popover names something that does "
-            + "not exist yet, so it opens with an empty field "
-            + "and a correctly disabled confirm — the RENAME "
-            + "popover, in `LayerHeader`, is presented by item"
+        "KiwiShelfCard+Font.swift":
+            "`FontFamilyPicker`'s field is a search that opens "
+            + "empty, with no seed to go stale"
     ]
 
     @Test("a popover with a text field is presented by item")
@@ -105,20 +102,26 @@ struct NameEditSeedTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let files = try SourceScan.swiftSources(under: root)
         #expect(files.count > 50)
-        for file in files {
-            let name = file.lastPathComponent
-            guard emptySeeded[name] == nil else { continue }
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
+        let sources = try files.map { file in
+            (
+                file.lastPathComponent,
+                SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                .split(whereSeparator: \.isWhitespace)
+                .joined()
             )
-            .split(whereSeparator: \.isWhitespace)
-            .joined()
+        }
+        let fields = fieldViews(in: sources.map(\.1))
+        #expect(fields.contains("NameEditPopover"))
+        #expect(fields.contains("LayerAddPopover"))
+        for (name, source) in sources where emptySeeded[name] == nil {
             for block in presentedBlocks(
                 in: source,
                 after: ".popover(isPresented:"
             )
             where block.contains("TextField(")
-                || block.contains("NameEditPopover(")
+                || fields.contains(where: { block.contains($0 + "(") })
             {
                 Issue.record(
                     Comment(
@@ -135,6 +138,30 @@ struct NameEditSeedTests {
                 )
             }
         }
+    }
+
+    /// The views declared in a file that holds a `TextField(`: a
+    /// popover building one holds a field as surely as one spelling
+    /// it inline. Trade: it asks per file, so a field-less view
+    /// declared beside one with a field is counted too, and it reads
+    /// `struct Name: View` alone, so a generic view or a
+    /// `SwiftUI.View` conformance is not seen; and it looks one level
+    /// deep, so a view wrapping a field view from another file is
+    /// not counted.
+    private func fieldViews(in sources: [String]) -> Set<String> {
+        var names: Set<String> = []
+        for source in sources where source.contains("TextField(") {
+            for tail in source.components(separatedBy: "struct").dropFirst() {
+                let name = tail.prefix { $0.isLetter || $0.isNumber }
+                if !name.isEmpty,
+                    tail.dropFirst(name.count)
+                        .hasPrefix(":View")
+                {
+                    names.insert(String(name))
+                }
+            }
+        }
+        return names
     }
 
     /// The brace-balanced content of each `.popover(` whose head

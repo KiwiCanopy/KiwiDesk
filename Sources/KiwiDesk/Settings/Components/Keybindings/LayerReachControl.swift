@@ -204,6 +204,15 @@ enum LayerReachWords {
         )
     }
 
+    /// Add or Rename onto a name this page already has.
+    static func onPage(_ name: String) -> String {
+        L(
+            "shortcuts.layer_rename.on_page",
+            "This profile already has a “%1$@” layer.",
+            name
+        )
+    }
+
     static func clash(_ profile: String, _ name: String) -> String {
         L(
             "shortcuts.layer_rename.clash",

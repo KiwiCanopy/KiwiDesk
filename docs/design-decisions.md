@@ -12745,12 +12745,11 @@ one action in one layer, its value the combo:
 **A layer takes the checklist too, and its tick is membership**
 (#2022, owner ruling 2026-10-07). A layer is a set of rows, so
 asking which profiles a layer belongs to row by row hid the one
-question a delete or a rename turns on. The selected layer's
-header leads with an **Applies to** line — the shortcut rows'
-reach column's look, one line that never stacks like the menu bar
-icon line under it (owner ruling 2026-10-08), App Rules' closed
-label and popover — never a control on the chip, which would be a
-channel only a pointer finds:
+question a delete or a rename turns on. The layer's editor, the
+popover ✎ opens (#3263), carries an **Applies to** row — the
+shortcut rows' reach column's look, App Rules' closed label and
+popover — never a control on the chip, which would be a channel
+only a pointer finds:
 
 - **A shared layer may be left out whole.** The base keeps the
   layer and a profile's override marks it left out
@@ -13760,9 +13759,9 @@ today.
 **Switch-layer shortcuts sit right under the layer strip.**
 The rows that switch layers render directly beneath the strip
 that defines the layers, ahead of the action groups — the
-definition and its bindings read as one unit. The strip's
-caption also states that "default" is the standard layer and
-always the active one after an app start. Renaming a layer
+definition and its bindings read as one unit. The Layers card's
+`?` also states that "default" is the standard layer and always
+the active one after an app start. Renaming a layer
 rewrites its switch-layer rows through the catalog's single
 authority, so writer and import classifier keep matching
 byte-for-byte (#4), and reaches every profile that has the

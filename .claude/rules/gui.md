@@ -2309,9 +2309,12 @@ is the one copy of who may hold a sideways scroll view). A bare
 fade draws. The container owns the scroll, so a tick never
 re-evaluates the host. The Spaces preview chips are the held-out
 strip: scroller only, no fade and no follow, until their varying
-widths are measured (#2990). The first-launch tour's rows are outside
-this paragraph: scroller only as well, centring the applied tile
-themselves.
+widths are measured (#2990). A strip whose items vary in width builds
+its run from the sizes they report through `onGeometryChange`, a
+followed run's lengths bare and its depth their drawn height —
+`LayerStripEditor`'s chips are the worked case (#3263). The
+first-launch tour's rows are outside this paragraph: scroller only
+as well, centring the applied tile themselves.
 
 **A strip that scrolls sideways in Settings or the first-launch tour
 keeps the platform's scroller**, which a mouse user drags to reach

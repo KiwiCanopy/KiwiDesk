@@ -17,7 +17,7 @@ struct CommitsOnSaveCensusTests {
         "FontFamilyPicker.swift": "a searchable picker; Return picks",
         "AppPickerButton.swift": "an app search; Return adds",
         "SequenceActionMenu.swift": "an action search; Return picks",
-        "LayerStripEditor.swift": "the add-layer field; Return adds",
+        "LayerAddPopover.swift": "the new-layer field; Return adds",
     ]
 
     private func flat(_ path: String) throws -> String {

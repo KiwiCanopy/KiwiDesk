@@ -51,11 +51,11 @@ struct LayerDeleteTests {
         #expect(out == [base])
     }
 
-    /// The header's Delete takes the model's delete, which takes the
+    /// The Layers card's delete takes the model's delete, which takes the
     /// catalog's, or the rows survive the layer again (#2022 moved
     /// the delete onto the model, where it records its reach).
-    @Test("the header deletes through the catalog")
-    func headerTakesTheCatalogDelete() throws {
+    @Test("the card deletes through the catalog")
+    func cardTakesTheCatalogDelete() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         func count(_ path: String, _ needle: String) throws -> Int {
             let source = try SourceScan.strippedSource(
@@ -66,7 +66,7 @@ struct LayerDeleteTests {
         let settings = "Sources/KiwiDesk/Settings/"
         #expect(
             try count(
-                settings + "Sections/LayerHeader.swift",
+                settings + "Sections/LayerStripEditor.swift",
                 "model.deleteLayer("
             ) == 1
         )

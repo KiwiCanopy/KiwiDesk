@@ -45,15 +45,12 @@ extension SettingsModel {
         reachEdits = edits
     }
 
-    /// The first profile the rename of `old` reaches that already
-    /// has a layer named `new` — the page's own included, by its
-    /// profile's name where it has one.
+    /// The first other profile the rename of `old` reaches that
+    /// already has a layer named `new`; the page's own name is
+    /// `layerOnPageRefusal`'s.
     func layerRenameClash(_ old: String, _ new: String) -> String? {
         guard new != old else { return nil }
         let editing = reachProfile ?? editingProfile ?? activeProfile
-        if let editing, config.layers.contains(where: { $0.name == new }) {
-            return editing
-        }
         guard let editing, let row = layerReach(old),
             let reach = layeredReach
         else { return nil }

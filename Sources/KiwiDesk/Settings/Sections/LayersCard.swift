@@ -24,7 +24,8 @@ struct LayersCard: View {
         SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.layersCard,
             isExpanded: $expanded,
-            summary: summary
+            summary: summary,
+            help: Self.help
         ) {
             VStack(alignment: .leading, spacing: 12) {
                 LayerStripEditor(
@@ -43,6 +44,19 @@ struct LayersCard: View {
         }
         // Open on arrival once in use — never forced shut.
         .onAppear { if layersExist { expanded = true } }
+    }
+
+    /// What a layer is, in the title's `?` (#3263).
+    static var help: String {
+        L(
+            "shortcuts.layers.help",
+            "Layers are alternate shortcut sets — only the "
+                + "active layer's shortcuts fire. Bind a "
+                + "key below to switch between them. "
+                + "\u{201C}default\u{201D} is the standard "
+                + "layer and is always the active one after "
+                + "the app starts."
+        )
     }
 
     /// The layers by name once there is more than one, or what a
