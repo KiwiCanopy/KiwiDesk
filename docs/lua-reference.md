@@ -9044,8 +9044,8 @@ in this order:
    The Standard only *owns tiling* when the config is GUI-managed: a
    `gui.json` sidecar exists *and* `init.lua` holds no code touching
    the managed vocabulary. With a hand-written — or hybrid — config,
-   your Lua-declared tiling stays authoritative and the Standard
-   merely steers the space→screen placement.
+   your Lua-declared tiling stays authoritative and spaces are only
+   placed on screens, by number.
 
 Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.

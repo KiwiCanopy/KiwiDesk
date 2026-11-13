@@ -26,15 +26,12 @@ public enum ProfileVerdict: Equatable, Sendable {
     /// starter (#1662).
     case builtInStandard(name: String, title: StarterTitle?)
     /// No saved profile matches, and the config is Lua-owned, so
-    /// nothing is adopted: a built-in layout steers PLACEMENT
-    /// while `activeProfile` (when any) keeps owning the tiling.
-    /// A distinct promise from `builtInStandard`, and the GUI
-    /// must not say "the built-in X loads" about it.
-    case placementOnlyStandard(
-        name: String,
-        activeProfile: String?,
-        title: StarterTitle?
-    )
+    /// nothing is adopted: Spaces are placed on screens by the
+    /// frozen numbered plan (`SpacePlacement.numberedPlan`, #3294)
+    /// while `activeProfile` (when any) keeps owning the tiling. No
+    /// built-in is named, since none places them; the GUI must not
+    /// say "the built-in X loads" about it either.
+    case placementByNumber(activeProfile: String?)
     /// Nothing matches and no built-in plans for this many
     /// screens.
     case none
@@ -61,8 +58,8 @@ extension KiwiCore {
     /// paths use — a binding for the active Desktop first
     /// (`KiwiCore+MonitorChange`: "A native-Space binding wins
     /// over matching (#7)"), then the monitor match, then the
-    /// count's built-in layout, which on a Lua-owned config
-    /// steers placement only.
+    /// count's built-in layout — or, on a Lua-owned config, no
+    /// built-in at all: Spaces placed by number.
     ///
     /// **This query and `handleMonitorChange` read one rule from
     /// two places, so every arm here mirrors an arm there.** Two
@@ -167,7 +164,8 @@ extension KiwiCore {
     /// baseline-aware fallback (the starter setup while on the
     /// Starter baseline, else the count's Standard), and then the
     /// `isGuiManaged` split that decides whether the composed
-    /// layout is ADOPTED or merely steers placement.
+    /// layout is ADOPTED or nothing is and Spaces are placed by
+    /// number.
     private func fallbackVerdict(
         displays: [Display]
     ) -> ProfileVerdict {
@@ -177,11 +175,7 @@ extension KiwiCore {
             )
         else { return .none }
         guard isGuiManaged else {
-            return .placementOnlyStandard(
-                name: composed.sourceName,
-                activeProfile: profiles.currentName,
-                title: composed.sourceTitle
-            )
+            return .placementByNumber(activeProfile: profiles.currentName)
         }
         return .builtInStandard(
             name: composed.sourceName,
