@@ -52,7 +52,10 @@ struct KiwiVisionLeavingTests {
         let leaving = try #require(
             core.visionLeaving(from: w1.raw, to: w2.raw)
         )
-        #expect(leaving.duration == 0.3)
+        #expect(
+            leaving.duration
+                == Double(AnimationPacePreset.shipped.fade) / 1000
+        )
         #expect(leaving.curve == .easeIn)
     }
 

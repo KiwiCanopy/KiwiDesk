@@ -202,7 +202,10 @@ struct AppWidePaceCrossingTests {
         core.prepareAppWide()
         #expect(core.appWideLedger.owedPace == nil)
         load("Work", core)
-        #expect(core.appWide.animationDurationMS == 150)
+        #expect(
+            core.appWide.animationDurationMS
+                == AnimationPacePreset.shipped.window
+        )
     }
 
     @Test("a failed adoption write strips nothing")
@@ -230,7 +233,10 @@ struct AppWidePaceCrossingTests {
         core.prepareAppWide()
         #expect(core.appWideLedger.owedPace == nil)
         load("Work", core)
-        #expect(core.appWide.animationDurationMS == 150)
+        #expect(
+            core.appWide.animationDurationMS
+                == AnimationPacePreset.shipped.window
+        )
         #expect(try text("Work", core).contains("\"duration\""))
     }
 

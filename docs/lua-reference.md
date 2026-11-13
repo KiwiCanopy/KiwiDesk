@@ -1526,8 +1526,10 @@ KiwiDesk.set_space_scroll_transition("slide")
 
 ### set_space_slide_duration
 
+:::unreleased
 **Expects:** a number (milliseconds, clamped 150–1000; default
-`300`).
+`400`).
+:::
 
 **Does:** sets the pace of the plate slide
 ([`set_space_transition`](#set_space_transition)): how long the
@@ -4907,7 +4909,9 @@ dim stays.
 
 ### kiwivision.set_fade_duration
 
-**Expects:** milliseconds, 0–1000. Default 300.
+:::unreleased
+**Expects:** milliseconds, 0–1000. Default 400.
+:::
 
 **Does:** sets how long the window focus leaves takes to dim and
 blur; the window you focus clears at once. 0 makes the change
@@ -9379,8 +9383,13 @@ next write.
 
 - `set_on_expand(bool)` — `true` or `false` (default `true`).
 - `set_expand_duration(ms)` — a number (milliseconds: 500–2000;
-  default `750`). A value above `0` outside the band is
+  default `1000`). A value above `0` outside the band is
   clamped to it.
+
+:::unreleased
+The default is the Medium speed's
+([Animation Cascade](#animation-cascade)).
+:::
 
 :::unreleased
 `set_expand_duration(0)` and below are refused; turn the expand off with
@@ -9413,13 +9422,15 @@ old names is renamed on its next read.
 **Example:**
 
 ```lua
-animations.set_expand_duration(1000)
+animations.set_expand_duration(1500)
 ```
 
 ### animations.set_reveal_duration
 
-**Expects:** milliseconds: 150–800 (default `300`). A value above
+:::unreleased
+**Expects:** milliseconds: 150–800 (default `400`). A value above
 `0` outside the band is clamped to it.
+:::
 
 **Does:** how long a hidden bar takes to come in, whichever
 [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays;
@@ -9442,7 +9453,7 @@ reveal off at its default length.
 **Example:**
 
 ```lua
-animations.set_reveal_duration(400)
+animations.set_reveal_duration(600)
 ```
 
 ### animations.set_on_reveal
@@ -9575,14 +9586,20 @@ lengths. Lengths that match no table, as a Lua call leaves them, read
 as custom, with no speed picked. With a Lua-owned `init.lua` the
 control is greyed.
 
-| Length | Fast | Default | Slow |
-|---|---|---|---|
-| `set_duration` | 100 | 150 | 250 |
-| `set_scroll_duration` | 100 | 150 | 250 |
-| `set_expand_duration` | 500 | 750 | 1250 |
-| `set_reveal_duration` | 200 | 300 | 500 |
-| `set_space_slide_duration` | 200 | 300 | 500 |
-| `kiwivision.set_fade_duration` | 200 | 300 | 500 |
+| Length | Fast | Medium | Slow | Very Slow |
+|---|---|---|---|---|
+| `set_duration` | 100 | 200 | 300 | 400 |
+| `set_scroll_duration` | 100 | 200 | 300 | 400 |
+| `set_expand_duration` | 500 | 1000 | 1500 | 2000 |
+| `set_reveal_duration` | 200 | 400 | 600 | 800 |
+| `set_space_slide_duration` | 200 | 400 | 600 | 800 |
+| `kiwivision.set_fade_duration` | 200 | 400 | 600 | 800 |
+
+Medium's lengths are the defaults. On the update, a GUI-managed
+setup still on all six of the last release's defaults (150, 150,
+750, 300, 300 and 300) moves to Medium, a length its profile left
+out counting as that default; any other length is kept and reads
+as custom.
 
 Its **Off** is
 [`animations.set_reduce_motion`](#animationsset_reduce_motion), which

@@ -14,11 +14,15 @@ struct SettingsRowShape<Label: View, Control: View>: View {
     /// Keeps label and control side by side at every band: an
     /// action row with no caption is one short line (#3178).
     var staysInline = false
+    /// Stacks the control under its label at every band: a strip too
+    /// wide to share a row with the label column (#3254). Never with
+    /// `staysInline`, which it would override.
+    var alwaysStacks = false
     @ViewBuilder let label: Label
     @ViewBuilder let control: Control
 
     var body: some View {
-        let stacked = width.stacksRows && !staysInline
+        let stacked = width.stacksRows && !staysInline || alwaysStacks
         let column = stacked || controlTrails ? nil : labelColumn
         let layout =
             stacked

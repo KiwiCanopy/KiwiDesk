@@ -99,7 +99,10 @@ struct ShelfRevealDurationTests {
     @Test("The reveal duration is stored, clamped and set by its verb")
     func storedAndClamped() throws {
         var wide = AppWideSettings()
-        #expect(wide.animationRevealDurationMS == 300)
+        #expect(
+            wide.animationRevealDurationMS
+                == AnimationPacePreset.shipped.reveal
+        )
         let band = AnimationSettings.revealDurationBand
         wide.animationRevealDurationMS = band.upperBound + 1
         #expect(wide.animationRevealDurationMS == band.upperBound)
@@ -172,9 +175,12 @@ struct ShelfRevealDurationTests {
             let reply = core.execute(verb, args: [.number(0)])
             #expect(!reply.isSuccess, "\(verb)")
         }
-        #expect(core.appWide.animationRevealDurationMS == 300)
-        #expect(core.appWide.animationExpandDurationMS == 750)
+        let shipped = AnimationPacePreset.shipped
+        #expect(core.appWide.animationRevealDurationMS == shipped.reveal)
+        #expect(core.appWide.animationExpandDurationMS == shipped.expand)
         core.execute("animations.set_on_reveal", args: [.bool(true)])
-        #expect(BarMotion.revealLength == 0.3)
+        #expect(
+            BarMotion.revealLength == TimeInterval(shipped.reveal) / 1000
+        )
     }
 }

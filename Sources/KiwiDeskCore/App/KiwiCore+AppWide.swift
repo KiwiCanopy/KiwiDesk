@@ -26,6 +26,9 @@ struct AppWideLedger {
     var backupPace:
         (bundle: SetupBundle, owed: [String: AppWideSettings.Animations])?
 
+    /// Whether `owedPace` is a restore's, read off the backup's
+    /// bytes, which the reload after it keeps (#3254).
+    var paceFromRestore = false
     /// Whether either crossing is owed.
     var owes: Bool { owed != nil || owedPace != nil }
 
@@ -68,6 +71,10 @@ extension KiwiCore {
     /// file owes nothing, and neither does a Lua-owned config,
     /// whose `init.lua` is the store.
     func prepareAppWide() {
+        // A restore's capture outlives exactly one reload (#3254).
+        let restored =
+            appWideLedger.paceFromRestore ? appWideLedger.owedPace : nil
+        appWideLedger.paceFromRestore = false
         guard isGuiManaged else {
             appWideLedger.owed = nil
             // `init.lua` is the store, and the Hyper key a remapped
@@ -94,8 +101,13 @@ extension KiwiCore {
         }
         guard let config = guiConfigStore.load() else { return }
         if let stored = config.appWide {
+            // A restore's capture, read off the backup's bytes: the
+            // restored profile files no longer carry the lengths.
             appWideLedger = AppWideLedger(stored, stored: true)
-            if !stored.animationPaceStored { capturePace() }
+            if !stored.animationPaceStored {
+                appWideLedger.owedPace = restored
+                capturePace()
+            }
             return
         }
         appWideLedger.isStored = false
@@ -255,11 +267,13 @@ extension KiwiCore {
             appWideLedger.owed =
                 read.map { $0.bundle == bundle ? $0.owed : [:] } ?? [:]
             appWideLedger.owedPace = owedPace
+            appWideLedger.paceFromRestore = true
             return
         }
         appWideLedger = AppWideLedger(bundled, stored: true)
         if !bundled.animationPaceStored {
             appWideLedger.owedPace = owedPace
+            appWideLedger.paceFromRestore = true
         }
     }
 

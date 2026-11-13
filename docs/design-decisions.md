@@ -4175,6 +4175,13 @@ and the fade-in, 80 ms, must leave the plates opaque before the
 outgoing windows park. `animations.duration` keeps pacing windows
 only.
 
+:::unreleased
+*The default is Medium's (#3254).* The 300 ms above was 4.2's
+default; the default is Medium's 400 ms (*Five evenly spaced
+speeds*). The saturated-GPU measurement stands for 300 ms, and 400
+ms was not measured there.
+:::
+
 *One panel per screen, ordered in once.* Moving or re-ordering a
 panel per switch queues behind the compositor exactly when the
 switch is busiest (#1960), so each screen's panel stays ordered
@@ -7461,19 +7468,18 @@ the speed preset is ruled to be Settings' one pace control
 :::unreleased
 **The speed preset is Settings' one pace control (#3238, owner
 ruling 2026-11-12).** [Principle] Settings sets how fast KiwiDesk
-animates through **Animation speed** alone — Off, Slow, Default,
-Fast, at the top of Looks & Animations ▸ Animations and on Simple —
+animates through **Animation speed** alone — Off and four speeds
+(*Five evenly spaced speeds*, below), at the top of Looks &
+Animations ▸ Animations and on Simple —
 and Lua sets an exact length. A row of millisecond steppers asks a
 question in a unit nobody thinks in, and a length tuned alone puts
 one motion out of step with the rest; a speed answers the question
 users actually have. So window, scroll, Space slide and KiwiVision
 fade lengths, and the shelf's reveal and expand, have no Settings
-row, and each speed writes one fixed table of all six, a single
-ratio per speed rounded to the 50 ms step and held inside each
-band. A table, not a scale factor: the bands clamp, so half of the
-750 ms expand would land on the 500 ms floor anyway, and a factor
-would claim a ratio the clamp breaks. Accepted: that floor makes
-Fast's expand only 1.5× quicker. The segment shown is derived by
+row, and each speed writes one fixed table of all six, held inside
+each band. A table, not a scale factor: the bands clamp, so a
+factor would claim a ratio the clamp breaks at a band's end. The
+segment shown is derived by
 comparing the live lengths with the tables, never stored, so a Lua
 call that sets an exact length makes the preset read custom rather
 than lie; and a pick writes `gui.json` at once, never through
@@ -7494,6 +7500,78 @@ motion's speed alone, and the KiwiVision fade curve, which stays in
 Settings, shapes a fade whose length Settings does not show (the
 owner's taste); the limitation is on the
 [Accepted limitations](accepted-limitations.md) page.
+
+**Five evenly spaced speeds, and Medium is where KiwiDesk starts
+(#3254, owner ruling 2026-11-12).** [Rationale] The picker is Off ·
+Very Slow · Slow · Medium · Fast, the slowest moving step first.
+#3238's three speeds sat too close: its Slow, 250 ms on the
+window, still read as fast on the owner's sitting, the scrolling
+layout most of all. So the tables step 100 ms on the window and
+keep one ratio to it — scroll equal, reveal, slide and fade twice
+it, expand five times — and the steps read as a scale: against
+Medium, Fast is half in every length, Slow one and a half times,
+Very Slow twice. Each value sits inside its band, and the expand
+runs from its band's floor (Fast's 500 ms) to its ceiling (Very
+Slow's 2000 ms), so a step past either end would break the ratio
+(the table argument, above).
+
+*The steps are named for speeds.* "Default" named who chose a step,
+not how fast it is, so it is Medium. No word marks the shipped
+step: a fresh install opens with Medium picked, and the row's help
+says that KiwiDesk starts there. "Smooth" was rejected for the new
+step: it names a quality, not a speed, and reads as better rather
+than slower — in every catalog it praises (Flüssig, Fluide,
+Плавная, 流畅) — where "Very Slow" orders itself.
+
+*The shipped lengths are Medium's.* Medium is slower than 4.2's
+defaults (150, 150, 750, 300, 300 and 300 ms for the window,
+scroll, expand, reveal, slide and fade), and the defaults move with
+it, so a fresh install and an install that never touched the pace
+both draw Medium. An `init.lua` that sets no length draws Medium
+too; one that sets them keeps them, since a Lua-owned setup crosses
+nothing (*A setting nobody varies per profile is app-wide*).
+
+*A 4.2 install on all six old defaults moves to Medium.* [Trade-off]
+Such an install stores the old values — a profile encodes
+`animations` whole, and `gui.json` stores the slide and the fade —
+so #3237's crossing would carry them app-wide, where they match no
+table, read as custom and keep the old pace. So an install whose
+six values are exactly 4.2's crosses onto Medium's table; any other
+value is a choice and stays, and the preset reads custom. A length
+a 4.2 profile left out counts as 4.2's default, which its absence
+meant. The test is the six together, never per file: a user with
+untouched lengths and a 500 ms slide keeps every value. A
+`gui.json` that already stores the `animations` group has crossed,
+and is never moved. This re-defaults a leaf the encoder writes
+whole, which profiles.md ▸ *A default flip on a leaf the encoder
+writes WHOLE owes no step (#1359)* bounds: the stored values cannot
+tell "never touched" from "deliberately chose 150 and 300", so no
+stored signal keeps a deliberate choice. The owner accepts moving
+those users too, and the signal relied on is the exact match of all
+six, which a user who tuned any one length fails. The cost to them
+is stated: no speed writes 4.2's table, so Settings cannot put it
+back, and `init.lua` can.
+
+*It crosses at the adoption, not in a byte-level step.* The six
+live in two files — a profile's four `animations` lengths and
+`gui.json`'s slide and fade — and a `ConfigMigration` step reads
+one file, so none can see the six together, and one step per file
+would move a mixed user's half. The check runs where #3237's
+adoption already brings them together
+(`AppWideLedger.crossingValue(for:)`), the ruled shape for a
+per-profile value moving app-wide (profiles.md ▸ *A per-profile
+value moving app-wide crosses by ADOPTION*), on the migrated bytes
+that adoption captures; a restored backup from before the group
+crosses through the same adoption, its capture kept across the
+reload the restore runs (`PaceMediumCrossingTests` ▸
+`backupMovesToMedium`). Two absences are read as what they meant
+then. A slide or a fade a stored `gui.json` or backup config left
+out is written as 4.2's 300 ms by a format-gated step
+(`migratingAbsentSlideAndFade`), since Medium's 400 ms default would
+otherwise answer for it. A profile length with no capture reads
+4.2's default — a composed Standard ran at them, and an absent key
+meant them — and so do the slide and fade of a `gui.json` from
+before #1741, which stores neither.
 
 **Off is Reduce Motion for KiwiDesk, not a durations write (#3238,
 owner ruling 2026-11-12).** [Rationale] The preset's Off sets one
@@ -9051,6 +9129,12 @@ the owner ruled that a matter of taste. macOS's mild `default`
 curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
+
+:::unreleased
+The fade's default is Medium's 400 ms (#3254, *Five evenly spaced
+speeds*), inside the range the owner compared; the 300 ms above was
+4.2's.
+:::
 
 :::unreleased
 With KiwiVision's maximize on (#3064, below), the arrival is still

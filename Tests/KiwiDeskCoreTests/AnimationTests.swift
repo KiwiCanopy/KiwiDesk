@@ -95,7 +95,7 @@ struct AnimationEngineTests {
     @Test("Duration is clamped to 50-1000 ms")
     func durationClamping() {
         let engine = AnimationEngine()
-        #expect(engine.durationMS == 150)
+        #expect(engine.durationMS == AnimationPacePreset.shipped.window)
         engine.durationMS = 10
         #expect(engine.durationMS == 50)
         engine.durationMS = 5000

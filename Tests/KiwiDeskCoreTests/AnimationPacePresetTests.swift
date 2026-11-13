@@ -3,31 +3,46 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The speed preset (#3238): each speed writes its table and reads
-/// back as itself, lengths no table holds read as Custom, and Off
-/// is a flag beside the lengths, so leaving it restores the pace.
+/// The speed preset (#3238, #3254): each speed writes its table and
+/// reads back as itself, lengths no table holds read as Custom, and
+/// Off is a flag beside the lengths, so leaving it restores the pace.
 @Suite("Animation speed preset (#3238)")
 struct AnimationPacePresetTests {
-    private static let speeds: [AnimationPacePreset] = [
-        .slow, .standard, .fast,
-    ]
+    private static let speeds = AnimationPacePreset.allCases.filter {
+        $0 != .off
+    }
 
     @Test("each speed round-trips", arguments: speeds)
     func speedRoundTrips(_ speed: AnimationPacePreset) throws {
         var pace = AppWideSettings()
         pace.applyPace(.slow == speed ? .fast : .slow)
+        #expect(AnimationPacePreset.current(of: pace) != speed)
         pace.applyPace(speed)
         #expect(pace.paceTable == speed.table)
         #expect(AnimationPacePreset.current(of: pace) == speed)
         #expect(!pace.animationReduceMotion)
     }
 
-    /// The shipped defaults are Default's table, so a fresh install
-    /// reads Default rather than Custom.
-    @Test("the defaults read as Default")
-    func defaultsReadDefault() {
+    /// The shipped defaults are Medium's table, so a fresh install
+    /// reads Medium rather than Custom (#3254).
+    @Test("the defaults read as Medium")
+    func defaultsReadMedium() {
         let pace = AppWideSettings()
-        #expect(AnimationPacePreset.current(of: pace) == .standard)
+        #expect(AnimationPacePreset.current(of: pace) == .medium)
+        #expect(
+            AnimationPacePreset.medium.table == AnimationPacePreset.shipped
+        )
+    }
+
+    /// The speeds run slowest moving step first, each window length
+    /// shorter than the one before (#3254 ▸ Ruling).
+    @Test("the speeds step evenly, slowest first")
+    func speedsStepEvenly() throws {
+        let windows = try Self.speeds.map { try #require($0.table).window }
+        #expect(windows.count == 4)
+        let steps = zip(windows, windows.dropFirst()).map { $0 - $1 }
+        #expect(Set(steps).count == 1)
+        #expect(steps.first.map { $0 > 0 } == true)
     }
 
     /// One length off every table reads as Custom, and a speed
