@@ -13,16 +13,11 @@ struct OnboardingStartPicker: View {
             // segments fill the page's width in several locales.
             OnboardingRowHeader(text: title)
                 .accessibilityHidden(true)
-            Picker(title, selection: selection) {
-                ForEach(start.options) { option in
-                    Text(Self.label(of: option)).tag(option.id)
-                }
-            }
-            .pickerStyle(.segmented)
-            // A segmented picker keeps its title for VoiceOver under
-            // `labelsHidden` and speaks the picked segment (device,
-            // 2026-11-13); a label here would name it twice.
-            .labelsHidden()
+            SegmentedPicker(
+                spokenLabel: title,
+                selection: selection,
+                options: start.options.map { (Self.label(of: $0), $0.id) }
+            )
             if start.replacesCurrent {
                 Text(
                     L(

@@ -60,8 +60,11 @@ struct PresetShapeTuningSeamTests {
     }
 
     /// Both the apply door and the monitor-change fallback reach
-    /// the settings through the composition.
-    @Test("the composition hands the merge the ordered screens")
+    /// the settings through the composition, which hands the merge
+    /// the screens in positional order, main first — the order
+    /// `StandardLayout.settings(sizes:)` takes; the merge orders a
+    /// width-first plan's slots itself (#3294).
+    @Test("the composition hands the merge the positional screens")
     func compositionTakesTheMerge() throws {
         let file = try #require(
             try core().first {
@@ -72,7 +75,7 @@ struct PresetShapeTuningSeamTests {
             .filter { !$0.isWhitespace }
         #expect(
             squashed.contains(
-                "settings:layout.settings(sizes:ordered.map(\\.frame.size))"
+                "settings:layout.settings(sizes:positional.map(\\.frame.size))"
             )
         )
     }
