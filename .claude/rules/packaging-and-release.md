@@ -841,7 +841,7 @@ the output outside the groups the wrapped command itself
 downgrades with `-Wwarning`, so the exemption is never a second
 list. It matches only after cutting SwiftPM's `[N / M]` progress
 marker, which rejoins a diagnostic the marker split (#3299); the
-cut removes the marker alone and never joins a line onto a
+cut takes the marker and its newline, never joining a line onto a
 diagnostic's head
 (`WarningGateTests` ▸ `lookAlikeMarkerKeepsItsWarning`).
 `WarningGateTests` holds the behaviour and the wiring, and

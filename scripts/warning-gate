@@ -53,7 +53,7 @@ exempted() {
 # Never rejoined onto a diagnostic's head, so a look-alike in a
 # message cannot borrow the next warning's tag.
 GAP='(?:\xE2\x80\x89| )?'
-HEAD='[^\n]*:[0-9]+:[0-9]+: warning:'
+HEAD='[^\n]*:[0-9]+:[0-9]+: [a-z]+:'
 PROGRESS='s/\[[0-9]+'"$GAP"'\/'"$GAP"'[0-9]+\] [^\n:]*\n(?!'"$HEAD"')//g'
 
 # Strip colour and hyperlink escapes, which a terminal run adds

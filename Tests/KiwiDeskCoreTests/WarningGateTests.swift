@@ -202,6 +202,9 @@ struct WarningGateTests {
         let snippet = "  12 | let y = a[1/2] + b\n"
         let macro = "macro expansion #expect:2:6: warning: x\n"
         #expect(try gate(over: snippet + macro).status == 1)
+        // A tagged note is a head too.
+        let note = "/r/Sources/B.swift:2:2: note: see [#\(Self.group)]\n"
+        #expect(try gate(over: fake + note).status == 1)
     }
 
     @Test("A failing command keeps its own status")
