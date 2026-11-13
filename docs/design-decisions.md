@@ -6572,21 +6572,22 @@ already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 
 :::unreleased
-*It can follow focus (#3063).* `maximize.set_follow_focus(true)`, a
-Lua-only switch, makes a new Maximize move to the tiled window focus
-lands on instead of ending; any shape follows. It is not Monocle:
-only the focused window fills, laid over its own issued frame, and
-every other window keeps its slot, so focus search and drag still
-read the slots — in a 2×2 grid with bottom-left maximized, focus up
-fills top-left. The switch is stamped on the Maximize when it is
+*It can follow focus (#3063).* `maximize.set_follow_focus(true)`, or
+the Maximize card's "Maximize follows focus" row, which writes the
+same profile value (#3280), makes a new Maximize move to the tiled
+window focus lands on instead of ending; any shape follows. It is not
+Monocle: only the focused window fills, laid over its own issued
+frame, and every other window keeps its slot, so focus search and drag
+still read the slots — in a 2×2 grid with bottom-left maximized, focus
+up fills top-left. The switch is stamped on the Maximize when it is
 made, as the share and anchor are, so flipping it never changes one
 already on screen and the retire stays a state pass with no settings
 read. The price is two frame writes into apps per focus step, the
-window arriving growing and the one left shrinking back, which
-Monocle avoids (#2099); so on a Monocle Space a full follow is drawn
-through the "Maximize windows" input transform (#2976), every member
-at the full frame, and a focus step there stays a raise. A Height or
-Width follow on Monocle pays the two writes.
+window arriving growing and the one left shrinking back, which Monocle
+avoids (#2099); so on a Monocle Space a full follow is drawn through
+the "Maximize windows" input transform (#2976), every member at the
+full frame, and a focus step there stays a raise. A Height or Width
+follow on Monocle pays the two writes.
 :::
 
 :::unreleased

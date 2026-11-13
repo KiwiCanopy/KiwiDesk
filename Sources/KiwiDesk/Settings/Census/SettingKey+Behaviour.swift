@@ -27,7 +27,8 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case maximizeWidthSharePerSpace =
         "settings.maximize.shareOverride[space].width"
     case maximizeAnchorPerSpace = "settings.maximize.anchorOverride[space]"
-    /// Whether a new Maximize follows focus (#3063), Lua-only.
+    /// Whether a new Maximize follows focus (#3063), the Maximize
+    /// card's last row (#3280).
     case maximizeFollowFocus = "settings.maximize.followFocus"
     case resizeStep = "settings.resizeStep"
     case swapSkipsCascade = "settings.swapSkipsCascade"
@@ -71,9 +72,10 @@ extension BehaviourKey {
             .minSizeFloatingHeight:
             // The master's "Per layout" drawer (#2237).
             return .row(.layoutDefaults, .general, .showMore)
-        case .maximizeHeightShare, .maximizeWidthShare, .maximizeAnchor:
+        case .maximizeHeightShare, .maximizeWidthShare, .maximizeAnchor,
+            .maximizeFollowFocus:
             // Never greyed: the verb reads them whether or not a
-            // chord is bound (#3062).
+            // chord is bound (#3062, #3280).
             return .row(.layoutDefaults, .maximize, .atRest)
         case .maximizeHeightSharePerSpace, .maximizeWidthSharePerSpace,
             .maximizeAnchorPerSpace:
@@ -91,7 +93,7 @@ extension BehaviourKey {
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
-            .maximizeFollowFocus, .tilingStartOverride, .tilingStartGlobal,
+            .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return .luaOnly
         case .tilingStart:
@@ -168,9 +170,14 @@ extension BehaviourKey {
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
-            .maximizeFollowFocus, .tilingStartOverride, .tilingStartGlobal,
+            .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return .none
+        case .maximizeFollowFocus:
+            return .text(
+                "layout_defaults.maximize.follow_focus",
+                help: "layout_defaults.maximize.follow_focus.help"
+            )
         case .tilingStart:
             return .text(
                 "shortcuts.tiling_off.start",

@@ -4,8 +4,9 @@ import SwiftUI
 /// Layout Defaults' Maximize card (#3062, amendment 2026-11-08): for
 /// each shape of screen, the share each directional Maximize takes
 /// of its other axis and where it grows from. The shapes of the
-/// connected screens show; the rest wait in a drawer. Nothing greys:
-/// the verb reads every row from Lua and the CLI too.
+/// connected screens show; the rest wait in a drawer. Last, whether a
+/// new Maximize follows focus (#3280). Nothing greys: the verb reads
+/// every row from Lua and the CLI too.
 struct MaximizeCard: View {
     @ObservedObject var model: SettingsModel
     @State private var columns = MaximizeColumns()
@@ -88,6 +89,9 @@ struct MaximizeCard: View {
                     row: SettingsCatalog.shortcuts.maximizeWidthBinding
                 )
             }
+            ForEach(Self.rowsBelowTable, id: \.id) { key in
+                row(key)
+            }
         }
         .onPreferenceChange(MaximizeColumns.Drawn.self) {
             columns = MaximizeColumns(drawn: $0)
@@ -101,7 +105,7 @@ struct MaximizeCard: View {
                 L("layout_defaults.maximize.screen_shape", "Screen shape")
             )
             .frame(maxWidth: .infinity, alignment: .leading)
-            ForEach(LayoutDefaultsRowOrder.maximize, id: \.id) { key in
+            ForEach(LayoutDefaultsRowOrder.maximizeColumns, id: \.id) { key in
                 headingCell(key)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
@@ -111,6 +115,36 @@ struct MaximizeCard: View {
         .font(.callout)
         .foregroundStyle(SettingsTheme.ink2)
         .accessibilityHidden(true)
+    }
+
+    /// The card's census rows after its table's columns (#3280).
+    nonisolated static var rowsBelowTable: [SettingKey] {
+        Array(
+            LayoutDefaultsRowOrder.maximize.dropFirst(
+                LayoutDefaultsRowOrder.maximizeColumns.count
+            )
+        )
+    }
+
+    /// A row below the table, the search anchor of its census key.
+    @ViewBuilder
+    private func row(_ key: SettingKey) -> some View {
+        switch key {
+        case .behaviour(.maximizeFollowFocus):
+            ToggleRow(
+                label: controls.maximizeFollowFocus.text,
+                isOn: $model.config.settings.maximize.followFocus,
+                help: Self.followFocusHelp
+            )
+            .searchAnchored(
+                SettingsCatalog.layoutDefaults.maximizeFollowFocus
+            )
+        default:
+            let _ = assertionFailure(
+                "unrendered Maximize row: \(key.id)"
+            )
+            EmptyView()
+        }
     }
 
     /// A column's heading, the search anchor of its census key.
@@ -152,6 +186,21 @@ struct MaximizeCard: View {
         default:
             nil
         }
+    }
+
+    /// The follow-focus row's `?` (#3280): what the switch does, its
+    /// two-window cost (a raise on Monocle, #3063), and that it
+    /// reaches only the next Maximize.
+    static var followFocusHelp: String {
+        L(
+            "layout_defaults.maximize.follow_focus.help",
+            "The window you focus takes over the Maximize, in the "
+                + "same shape, and the one you left shrinks back to its "
+                + "place. Each focus step resizes both windows, except "
+                + "a full Maximize on a Monocle Space, where it only "
+                + "brings the window forward. A change here applies "
+                + "from the next Maximize, not to one already on screen."
+        )
     }
 
     /// An anchor's name, the pop-up's and the diff row's.

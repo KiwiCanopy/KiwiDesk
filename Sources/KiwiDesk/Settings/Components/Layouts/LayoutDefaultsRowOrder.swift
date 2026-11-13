@@ -10,13 +10,20 @@ enum LayoutDefaultsRowOrder {
         [.behaviour(.minWindowSize)]
         + MinSizeText.followers.map(SettingKey.behaviour)
 
-    /// The Maximize card (#3062): the two shares in the Shortcuts
-    /// rows' order, then where both grow from.
-    static let maximize: [SettingKey] = [
+    /// The Maximize card's shape table (#3062): the two shares in
+    /// the Shortcuts rows' order, then where both grow from, one
+    /// column each.
+    static let maximizeColumns: [SettingKey] = [
         .behaviour(.maximizeHeightShare),
         .behaviour(.maximizeWidthShare),
         .behaviour(.maximizeAnchor),
     ]
+
+    /// The whole Maximize card: its table's columns, then whether a
+    /// new Maximize follows focus (#3280). `MaximizeCard` walks the
+    /// entries after the columns below its table.
+    static let maximize: [SettingKey] =
+        maximizeColumns + [.behaviour(.maximizeFollowFocus)]
 
     static let bsp: [SettingKey] = [
         .layout(.bspStrategy),

@@ -676,7 +676,12 @@ a row reds — and another going bespoke has to edit that set;
 check it before assuming an edit will show up. AI's setup card
 is bespoke the same way (`AIRowOrder.bespokeContainers`, its
 mount needled by `AICensusRenderTests`); its ready-made prompts
-walk their list.
+walk their list. Layout Defaults' Maximize card walks two lists: its
+table walks `LayoutDefaultsRowOrder.maximizeColumns`, and a row
+outside the table joins `LayoutDefaultsRowOrder.maximize` after
+those columns, which the card walks below the table
+(`LayoutDefaultsCensusRenderTests` ▸ `maximizeRows`,
+`MaximizeFollowFocusRowTests` ▸ `cardWalksTheList`, #3280).
 
 General, Gaps & Borders, Spaces & Layouts, Profiles, Screens
 and Behaviour push that edge wider: EVERY container in them is

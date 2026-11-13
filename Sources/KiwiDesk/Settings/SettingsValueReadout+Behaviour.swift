@@ -49,10 +49,7 @@ extension SettingsValueReadout {
             return [
                 behaviourToggleRow(
                     census,
-                    label: L(
-                        "diff.label.maximize_follow_focus",
-                        "Maximize follows focus"
-                    ),
+                    label: label(for: census),
                     old: before.maximize.followFocus,
                     new: after.maximize.followFocus
                 )

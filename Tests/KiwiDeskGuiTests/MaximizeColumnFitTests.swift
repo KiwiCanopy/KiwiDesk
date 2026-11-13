@@ -36,7 +36,7 @@ struct MaximizeColumnFitTests {
             columns: MaximizeColumns()
         )
         var out: [String: CGFloat] = [:]
-        for key in LayoutDefaultsRowOrder.maximize {
+        for key in LayoutDefaultsRowOrder.maximizeColumns {
             let host = NSHostingView(rootView: row.cell(key))
             out[key.id] = host.fittingSize.width
         }
@@ -47,7 +47,7 @@ struct MaximizeColumnFitTests {
     func cellsFit() throws {
         defer { LocalizationManager.shared.select("en") }
         #expect(Self.codes.count >= 11, "the catalogs did not list")
-        #expect(LayoutDefaultsRowOrder.maximize.count == 3)
+        #expect(LayoutDefaultsRowOrder.maximizeColumns.count == 3)
         let spacing = MaximizeShapeRow.spacing
         let section = SettingsMetrics.sectionPlateInset * 2
         let pane = SettingsMetrics.paneInset * 2
@@ -60,7 +60,7 @@ struct MaximizeColumnFitTests {
             let drawn = Self.drawn(in: code)
             let columns = MaximizeColumns(drawn: drawn)
             var total = spacing
-            for key in LayoutDefaultsRowOrder.maximize {
+            for key in LayoutDefaultsRowOrder.maximizeColumns {
                 let cell = try #require(drawn[key.id])
                 #expect(cell > 40, "\(code) \(key.id) measured nothing")
                 #expect(
