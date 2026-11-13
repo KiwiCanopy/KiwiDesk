@@ -177,13 +177,6 @@ struct GreyOutParityTests {
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch
         // the live layout while the header promises it won't
-        // (#518). The predicate is the resolver's since #678
-        // turn 13a, so the needle is the `.disabled` reading
-        // ITS reason rather than a hand-rolled comparison.
-        // Moved with Apply itself in #859 — see
-        // `ProfilesGateWiringTests` for why the card is
-        // its own widget now.
-        ("PresetCard.swift", ".disabled(reason != nil)", 1),
         // The automatic-install switch greys where Sparkle
         // refuses it (#1542) — through `ToggleRow`'s `disabled:`,
         // which greys the checkbox and keeps the `?` live (#2032).

@@ -49,7 +49,6 @@ struct DiscardGateParityTests {
         ("model.loadProfile(", 1),
         ("model.deleteProfile(", 2),
         ("model.renameProfile(", 1),
-        ("model.applyStandardPreset(", 1),
         ("model.selectEditTarget(", 1),
         // The broad net the header promises. Everything above is
         // reachable through this one, but naming them separately

@@ -18,15 +18,6 @@ struct ProfilesControls: Sendable {
         "desktops.title",
         "Profiles per macOS Desktop"
     )
-    let presetsCard = SettingsControl(
-        "presets.title",
-        "Start from a preset"
-    )
-    /// Hardware preset disclosures for unconnected monitor setups.
-    let presetsOther = SettingsDrawer(
-        "presets.other_setups",
-        "For other setups"
-    )
 }
 
 struct AppRulesControls: Sendable {

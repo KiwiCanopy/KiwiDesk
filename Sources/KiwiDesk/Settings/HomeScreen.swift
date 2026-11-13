@@ -170,9 +170,6 @@ struct HomeScreen: View {
                     HomeCard(
                         model: model,
                         destination: destination,
-                        spotlighted: model.profileSummaries
-                            .isEmpty
-                            && destination == .profiles,
                         open: { push(destination) }
                     )
                     .focused($focusedCard, equals: destination)

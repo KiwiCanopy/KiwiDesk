@@ -10,7 +10,7 @@ import Testing
 /// As in General, Gaps & Borders and Spaces the promise is the
 /// WEAKER one: every container here is a bespoke view, because
 /// each expands ONE census key into a row per live instance — a
-/// saved profile, a Desktop, a preset — which no `ForEach` over
+/// saved profile, a Desktop — which no `ForEach` over
 /// an order list can express. So the order lists record
 /// membership for the placement table and search without driving
 /// anything on screen. What is guarded is that the lists and the
@@ -19,12 +19,6 @@ import Testing
 /// rows.
 @Suite("Profiles render ↔ census parity")
 struct ProfilesCensusRenderTests {
-    /// The live screens the preset catalog is derived from since
-    /// #678 Phase 4 pass 11. One 27" — a single `.desktop`
-    /// screen, so the catalog this suite reasons over is the
-    /// one-screen one.
-    private let censusSizes = [CGSize(width: 2560, height: 1440)]
-
     /// A summary carrying only what the expansion reads (the
     /// name and the ordering keys) — the rest of the row's
     /// content belongs to the view, not to this seam.
@@ -106,7 +100,7 @@ struct ProfilesCensusRenderTests {
     ///
     /// Stated limit: the needle is `ForEach(ProfilesRowOrder.`,
     /// so a container that walks a LOCAL COPY of a list
-    /// (`let order = ProfilesRowOrder.presets; ForEach(order)`)
+    /// (`let order = ProfilesRowOrder.savedProfiles; ForEach(order)`)
     /// passes. The `files.count` floor below is what keeps the
     /// scan from passing over nothing at all.
     @Test("the bespoke containers really have no ForEach")
@@ -128,7 +122,6 @@ struct ProfilesCensusRenderTests {
         ).filter {
             let name = $0.lastPathComponent
             return name.hasPrefix("ProfilesSection")
-                || name.hasPrefix("PresetsSection")
         }
         // Assert the scan found its input before asserting about
         // it: an enumerator over a renamed directory yields [] and
@@ -174,8 +167,7 @@ struct ProfilesCensusRenderTests {
             presentKeys: [.number(1), .number(2), .number(3)],
             desktopScreens: [:],
             bindings: [:],
-            connectedScreens: 1,
-            presets: StandardProfiles.all(sizes: censusSizes)
+            connectedScreens: 1
         )
         let placed = SettingKey.allCases.filter {
             if case .profiles = $0 { return true }
@@ -207,7 +199,7 @@ struct ProfilesCensusRenderTests {
         }
     }
 
-    /// Each family expands once per INSTANCE, and the three
+    /// Each family expands once per INSTANCE, and the two
     /// instance kinds are distinct. Set equality over
     /// `SettingKey` cannot see any of this: an expansion that
     /// silently collapsed to one row would still satisfy
@@ -230,11 +222,7 @@ struct ProfilesCensusRenderTests {
                 .identity(DesktopIdentity(raw: "GONE")):
                     DesktopBinding(profile: "Desk", desktop: 7)
             ],
-            connectedScreens: 1,
-            presets: StandardProfiles.layouts(
-                for: 1,
-                sizes: censusSizes
-            )
+            connectedScreens: 1
         )
         #expect(
             expander.rows(for: .profiles(.profilesLoad))
@@ -259,36 +247,6 @@ struct ProfilesCensusRenderTests {
                     ),
                 ]
         )
-        // BOTH of the card's actions expand per preset (#859).
-        // `familiesExpand` cannot see a collapse to one row — its
-        // own docstring says so — so a key missing from HERE is a
-        // key whose per-instance expansion nothing holds.
-        for key in [ProfilesKey.presetsApply, .presetsLayouts] {
-            #expect(
-                expander.rows(for: .profiles(key))?.count
-                    == StandardProfiles.layouts(
-                        for: 1,
-                        sizes: censusSizes
-                    ).count,
-                Comment(rawValue: "\(key) lost its per-preset rows")
-            )
-        }
-        // The preset instance carries the STABLE English name,
-        // never the localized one — identity must not move with
-        // the GUI language.
-        //
-        // Stated limit: this assertion cannot be the thing that
-        // holds that. `StandardLayout.displayName` is
-        // `@MainActor` and `ProfilesFamilyRows` is nonisolated,
-        // so the localized substitution does not COMPILE — the
-        // claim is sealed by isolation, and under the English
-        // test locale the two strings would be equal anyway.
-        // Read this as pinning the shape, not as coverage of the
-        // identity rule (guard-prover, 2026-08-04).
-        #expect(
-            expander.rows(for: .profiles(.presetsApply))?
-                .contains(.preset("Developer")) == true
-        )
     }
 
     /// A key outside `ProfilesKey` expands to nil rather than to
@@ -303,8 +261,7 @@ struct ProfilesCensusRenderTests {
             presentKeys: [.number(1)],
             desktopScreens: [:],
             bindings: [:],
-            connectedScreens: 1,
-            presets: []
+            connectedScreens: 1
         )
         #expect(
             expander.rows(for: .spaces(.spaceList)) == nil

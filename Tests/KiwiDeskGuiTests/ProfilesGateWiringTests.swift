@@ -14,10 +14,9 @@ import Testing
 /// wiring half — the behaviour half is `ProfilesGateTests`.
 ///
 /// SCOPE: by explicit path, one entry per GATE rather than per
-/// file. `PresetCard` resolves one gate that has two reasons,
-/// and a file-level "touches the resolver somewhere" check would
-/// pass while one of them went hand-rolled — the very drift
-/// this guard exists to catch. A future gated row in this
+/// file, since a file-level "touches the resolver somewhere"
+/// check would pass while a gate went hand-rolled — the very
+/// drift this guard exists to catch. A future gated row in this
 /// area owes both its resolver consult AND a `consults` entry
 /// naming the file that draws it, in the same change;
 /// `everyGatedRowIsResolved` forces the resolver half, and
@@ -52,18 +51,7 @@ struct ProfilesGateWiringTests {
         let consults: [String: [String]] = [
             "Components/Profiles/DesktopsGroup.swift": [
                 "inertReason(for:.profiles(.profileBindings))"
-            ],
-            // Apply's gate moved to the card widget in #859,
-            // when the section outgrew the 350-line ceiling and
-            // the drawing went to `Components/Profiles/` where
-            // gui.md puts a widget. Re-keyed on the USE site
-            // rather than left pointing at the section, which
-            // still draws the card and would satisfy a
-            // file-level "touches the resolver" check while the
-            // gate itself went hand-rolled one file over.
-            "Components/Profiles/PresetCard.swift": [
-                "inertReason(for:.profiles(.presetsApply))"
-            ],
+            ]
         ]
         for (name, needles) in consults {
             let source = try squashed(name)
@@ -117,50 +105,6 @@ struct ProfilesGateWiringTests {
             ],
             "Components/Profiles/DesktopsGroup.swift": [
                 "ProfilesFamilyRows.desktops("
-            ],
-            "Sections/PresetsSection.swift": [
-                "ProfilesFamilyRows.presets(forScreens:",
-                "ProfilesFamilyRows.presets(excludingScreens:",
-                // The APPLIABLE cards get the live screens; the
-                // drawer gets nil. A card resolving an unlisted
-                // mode without the hardware names a layout Apply
-                // will not produce, and every assertion over the
-                // types passes because both sides are then handed
-                // the same shape by the test (code review,
-                // 2026-08-11).
-                "presetCard($0,sizes:liveSizes)",
-                "presetCard($0,sizes:nil)",
-                // …and the wrapper must SPEND what those two hand
-                // it. Both #859 reviewers found that keeping the
-                // wrapper — done so the two needles above would
-                // not repoint — left every forwarding hop
-                // unpinned: hardcoding `sizes: nil` inside it kept
-                // the whole suite green while the sheet named a
-                // layout Apply will not produce. The needle that
-                // avoided a repoint is worthless without these.
-                //
-                // Spelled WHOLE rather than as a bare
-                // `sizes:sizes`: that label is also
-                // `presets(forScreens:sizes:)`'s in this same file,
-                // so the short form sat one edit away from matching
-                // something incidental (re-review, 2026-08-17).
-                "PresetCard(layout:layout,sizes:sizes",
-                "liveSizes:request.liveSizes",
-            ],
-            // The card's one drawing that reads the displays is
-            // the sheet (#1624 retired its picture), so it must
-            // spend `sizes` on the request it hands over — spelled
-            // WHOLE, since a bare `liveSizes:sizes` matched a
-            // sibling needle and could not fail on its own.
-            "Components/Profiles/PresetCard.swift": [
-                "PresetPreviewRequest(layout:layout,liveSizes:sizes,"
-            ],
-            // The one derivation the preview sheet reads: a plan
-            // that stopped resolving against the live displays
-            // would re-ship the 2026-08-11 defect.
-            "Components/Profiles/PresetPreviewPlan.swift": [
-                "ScreenClass.of(liveSizes[screen])",
-                "on:shape",
             ],
         ]
         for (name, needles) in consults {
@@ -275,8 +219,6 @@ struct ProfilesGateWiringTests {
         for key in [
             "profiles.desktops.lua_owned",
             "profiles.desktops.no_sidecar",
-            "presets.editing_stored",
-            "presets.needs_screens",
         ] {
             #expect(
                 help.contains(key),

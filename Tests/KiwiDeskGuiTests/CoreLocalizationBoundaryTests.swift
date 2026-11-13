@@ -30,7 +30,7 @@ import Testing
 /// What covers it is per family, not global: Core carries
 /// structure instead of copy, and a renderer test proves the
 /// family still resolves through a catalog
-/// (`ConfigIssueTextTests`, `PresetSummaryCoverageTests`). So a
+/// (`ConfigIssueTextTests`). So a
 /// NEW family of Core-authored user-facing text needs its own
 /// renderer test — this suite will not notice it.
 ///

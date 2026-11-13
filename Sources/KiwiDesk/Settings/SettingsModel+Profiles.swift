@@ -229,21 +229,6 @@ extension SettingsModel {
         }
         reload()
     }
-
-    /// Applies standard layout preset as saved profile (#53).
-    func applyStandardPreset(_ layout: StandardLayout) {
-        do {
-            try core.withUserMotion { try core.applyStandard(layout) }
-        } catch {
-            profileWarning = L(
-                "profiles.apply_failed",
-                "Applying failed: %1$@",
-                NewerFormatText.detail(error)
-            )
-            core.onLog("preset apply failed: \(error)")
-        }
-        reload()
-    }
 }
 
 /// Saved profile summary for profile list and resolution (#36, #789, #678).

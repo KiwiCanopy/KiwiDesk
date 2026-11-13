@@ -7,7 +7,7 @@ import Testing
 /// keybinding audit: `StandardLayout.name` stays the stable
 /// English identity that seeds a new saved profile's name
 /// (`freeName(base: layout.name)`) and labels `activeStandard`;
-/// only `displayName`/`displaySummary` (and the
+/// only `displayName` (and the
 /// `standardDisplayName(_:)` lookup used by `ProfileHeader`)
 /// translate. `.serialized` mirrors `LocalizationManagerTests`
 /// (`LocalizationManager` is a process-wide singleton).
@@ -24,7 +24,7 @@ struct StandardLayoutDisplayTests {
     // translations are translator-owned content (refined freely
     // in the locale files) and must not be pinned here, or every
     // wording tweak reddens the suite.
-    @Test("a Standard's display name and summary localize")
+    @Test("a Standard's display name localizes")
     func displayNameLocalizes() throws {
         reset()
         let layout = try #require(
@@ -35,19 +35,12 @@ struct StandardLayoutDisplayTests {
         // Explicit English (not System default) → canonical.
         LocalizationManager.shared.select("en")
         #expect(layout.displayName == layout.name)
-        // `summary` left Core in #601 — the GUI owns preset copy
-        // now, so the English rendering is the catalog's, not a
-        // Core-held duplicate to compare against. Capture it and
-        // require the locale to move it.
-        let englishSummary = layout.displaySummary
-        #expect(!englishSummary.isEmpty)
         // German → localized away from the canonical English,
         // while the stable identity never changes.
         LocalizationManager.shared.select("de")
         defer { reset() }
         #expect(layout.name == "Developer")
         #expect(layout.displayName != layout.name)
-        #expect(layout.displaySummary != englishSummary)
     }
 
     @Test("standardDisplayName localizes a bare name")
@@ -55,20 +48,18 @@ struct StandardLayoutDisplayTests {
         reset()
         LocalizationManager.shared.select("en")
         #expect(
-            standardDisplayName("Command Center", title: nil)
-                == "Command Center"
+            standardDisplayName("Dashboard", title: nil)
+                == "Dashboard"
         )
         LocalizationManager.shared.select("de")
         defer { reset() }
         // Shipped German translates the Standard names; assert it
         // resolved away from English, not the exact wording.
         #expect(
-            standardDisplayName("Command Center", title: nil)
-                != "Command Center"
+            standardDisplayName("Focus", title: nil) != "Focus"
         )
         #expect(
-            standardDisplayName("Coder & Monitor", title: nil)
-                != "Coder & Monitor"
+            standardDisplayName("Developer", title: nil) != "Developer"
         )
     }
 

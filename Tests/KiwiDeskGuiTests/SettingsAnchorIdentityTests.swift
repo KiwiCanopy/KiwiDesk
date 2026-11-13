@@ -112,6 +112,11 @@ struct SettingsAnchorIdentityTests {
         // Settings destination, so nothing there is a reveal
         // target.
         "OnboardingLooksRows.swift": 2,
+        // Restaging identity: a pick on the tour's Spaces step
+        // redraws its cards so each plays its layout's story again,
+        // staggered (#3294). Not a Settings destination, so nothing
+        // there is a reveal target.
+        "OnboardingScreenColumns.swift": 1,
         // Animation identity (#2144): the layout plate's name
         // crossfades on a step, old name out and new one in. Not
         // a Settings destination, so nothing there is a reveal

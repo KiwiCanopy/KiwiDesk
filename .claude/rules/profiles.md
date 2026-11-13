@@ -323,6 +323,16 @@ change here:
   `PresetShapeTuningTests`). A leaf joins `PresetTuning` only
   when a preset sets it on purpose; a value equal to the
   tuning's base is not a choice.
+- **A preset plans its screens widest first; the starter keeps
+  its own walk (#3294).** A preset with `slotsByWidth` orders its
+  slots through `StandardLayout.slotOrder(widths:)`, which takes
+  the starter's `fillOrder` tie-break rather than a second one,
+  and its settings stay the MAIN screen's for the minimum window
+  size and main shape, however the slots fall. Whether a layout
+  can be applied on a screen count is `plans(forScreens:)`, which
+  the apply and the tour's picture both ask (`PresetFamilyTests`
+  ▸ `widestTakesTheBigSlot`, `TourStartReplaceTests` ▸
+  `fiveScreensStart`).
 - **An unlisted mode in a sparse preset follows the screen.**
   `StandardLayout.mode(of:on:)` answers a space the map does not
   declare with that screen's best layout, `ScreenClass.layouts`'
@@ -2028,7 +2038,8 @@ profile (#1790: the bar's confirmed Delete, `create_space` /
 `delete_space` with `profile`, Settings ▸ Spaces' add button,
 which is the one in-Settings caller), and `keep_settings`'s
 settings and layout leaves (#1685; its rule leaves take
-`saveRuleReach`, above) — carrying one
+`saveRuleReach`, above), and the tour's replace of the Spaces and
+its Revert (#3294, `TourStartReplaceTests`) — carrying one
 `LiveProfileEdit` that the file and the draft each apply — which
 writes the file non-adopting and
 then hands the SAME edit to an open draft through
@@ -2059,6 +2070,21 @@ edits over live as it is at the Save (#2262,
 more than the leaves it names — the tour's whole look — refuses
 while a live-profile draft is dirty instead
 (`OnboardingLooksTests` ▸ `draftBlocks`).
+
+**The tour deletes a profile only as the preset copy it saved
+(#3294).** A pick on the Spaces step deletes the copy an earlier
+pick of the same presentation saved, and only while its file
+still reads as that pick wrote it (`KiwiCore.TourCopy`); a copy
+the user edited, or one from before the tour, is their desk, which
+a pick replaces in place and never deletes
+(`TourStartReplaceTests` ▸ `editedCopyIsChanged`,
+`earlierCopyIsChanged`). A later tour step that writes the live
+profile — the look, the bars, their Reverts — goes through
+`OnboardingStartModel.writingProfile`, which re-reads the copy only
+while it was intact before the write (`TourProfileWriteSeamTests`,
+`OnboardingStartModelTests` ▸ `laterWriteRereadsOnlyIntact`). The
+apply, the replace and the tour's picture compose a layout onto the
+live screens through the one `composedOnLive`.
 
 **One draft, one identity, one encoder (#1393).** The page a
 draft resolves and encodes against is `SettingsModel.reachPage`,

@@ -62,6 +62,9 @@ struct MonitorSetClaimSeamTests {
             // share (#1393).
             "KiwiCore+Profiles.swift": 1,
             "ProfileLoadButton.swift": 1,
+            // The tour's Continue onto the starter (#3294): an
+            // explicit load the user chose on the Spaces step.
+            "KiwiCore+TourStart.swift": 1,
         ],
         "claimMonitorSet(": [
             "KiwiCore+MonitorSetClaim.swift": 1,
@@ -99,8 +102,8 @@ struct MonitorSetClaimSeamTests {
         ],
         "applyStandard(": [
             "KiwiCore+ProfileResolution.swift": 1,
-            // Presets ▸ Apply.
-            "SettingsModel+Profiles.swift": 1,
+            // The tour's Continue onto a preset (#3294).
+            "KiwiCore+TourStart.swift": 1,
             // The one boot caller: the first-run Starter seed,
             // which `loadConfig` calls only with no profile saved
             // (`seedStarterProfile`), so its claim has no sibling

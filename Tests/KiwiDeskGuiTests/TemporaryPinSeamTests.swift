@@ -15,7 +15,14 @@ struct TemporaryPinSeamTests {
     /// File → whole-map writes that may skip `keepingPins`, and why.
     private static let allowed: [String: (Int, String)] = [
         "App/KiwiCore+Reset.swift":
-            (1, "resetting every setting clears every pin")
+            (1, "resetting every setting clears every pin"),
+        "Config/LiveProfileEdit.swift":
+            (
+                1,
+                "a Spaces replace's DRAFT mirror (#3294): the draft "
+                    + "lists no temporary Space, and live keeps their "
+                    + "pins through apply(profile:)'s keepingPins"
+            ),
     ]
 
     @Test("every whole-map pin write keeps the temporary pins")

@@ -542,8 +542,7 @@ which a ban phrased around `L()` would never have caught.
 only the `L()`-shaped half; a sentence built *without* `L()` is
 invisible to any string scan, so that half is prevented by
 carrying structure and pinned per family by a renderer test —
-`ConfigIssueTextTests`, and `PresetSummaryCoverageTests` after
-the same defect turned up in the Presets list.
+`ConfigIssueTextTests`.
 
 CLI/IPC error strings are the deliberate exception and stay
 English: they are a machine contract, not UI copy. A Lua

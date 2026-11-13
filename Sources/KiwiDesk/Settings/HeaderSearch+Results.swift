@@ -130,9 +130,6 @@ extension HeaderSearch {
             result: result,
             onCursor: onCursor,
             value: value,
-            badged: spotlightProfiles
-                && result.destination == .profiles,
-            badgeValue: badgeValue(for: result.destination),
             reveal: pick
         )
         .padding(.horizontal, 8)
@@ -140,14 +137,5 @@ extension HeaderSearch {
         .dropdownCursorRow(onCursor) {
             cursor.hover(result.id, pointer: DropdownPointer.live())
         }
-    }
-
-    /// Accessibility description for profiles spotlight badge.
-    func badgeValue(
-        for destination: SettingsDestination
-    ) -> String {
-        guard spotlightProfiles, destination == .profiles
-        else { return "" }
-        return L("home.profiles.badge_ax", "start here")
     }
 }

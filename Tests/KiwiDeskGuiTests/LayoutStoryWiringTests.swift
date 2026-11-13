@@ -16,9 +16,7 @@ struct LayoutStoryWiringTests {
     /// with its reason.
     static let hosts: [String: String] = [
         "Onboarding/OnboardingSpaceRow.swift":
-            "the tour's Spaces step, read once",
-        "Settings/Components/Profiles/PresetPreviewSheet.swift":
-            "a read-only preset preview; nothing in it is edited",
+            "the tour's Spaces step, read once"
     ]
 
     /// Comments stripped, whitespace squashed, and `X.init(`
@@ -224,9 +222,9 @@ struct LayoutStoryWiringTests {
         #expect(canvas.contains("ForEach(space.windows,id:\\.raw)"))
     }
 
-    /// The tour mounts the playing row, lazily, so a row below
-    /// the fold plays when it scrolls in rather than unseen.
-    @Test("the tour mounts the playing rows lazily")
+    /// The tour mounts the playing rows in its screen columns
+    /// (#3294), never a schematic of its own.
+    @Test("the tour mounts the playing rows")
     func tourMountsRows() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let spaces = try squashed(
@@ -234,9 +232,14 @@ struct LayoutStoryWiringTests {
                 "Sources/KiwiDesk/Onboarding/OnboardingView+Spaces.swift"
             )
         )
-        #expect(spaces.contains("LazyVStack("))
-        #expect(spaces.contains("OnboardingSpaceRow("))
+        #expect(spaces.contains("OnboardingScreenColumns("))
         #expect(!spaces.contains("LayoutSchematicView("))
+        let columns = try squashed(
+            root.appendingPathComponent(
+                "Sources/KiwiDesk/Onboarding/OnboardingScreenColumns.swift"
+            )
+        )
+        #expect(columns.contains("OnboardingSpaceRow("))
     }
 
     /// A Back return to Spaces rests its rows (#3288): the tour
@@ -258,6 +261,12 @@ struct LayoutStoryWiringTests {
             )
         )
         #expect(row.contains("restsOnAppear:restsOnAppear"))
+        let columns = try squashed(
+            root.appendingPathComponent(
+                "Onboarding/OnboardingScreenColumns.swift"
+            )
+        )
+        #expect(columns.contains("restsOnAppear:restsOnAppear"))
         let player = try squashed(
             root.appendingPathComponent(
                 "Settings/Components/Layouts/LayoutStoryThumbnail.swift"

@@ -113,15 +113,9 @@ extension SettingsButtonStyleConventionTests {
                 1, "KeyboardSaveButton",
                 "Invisible zero-size shortcut sink — ⌘S"
             ),
-            // The same shape one surface over: a sheet's Escape
-            // needs a carrier that does not depend on focus, and an
-            // invisible one draws nothing to style (#859).
-            "PresetPreviewSheet.swift": (
-                1, "escapeRoute",
-                "Invisible zero-size shortcut sink — Escape, "
-                    + "focus-independently"
-            ),
-            // The same carrier on the About sheet (#1536).
+            // A sheet's Escape needs a carrier that does not depend
+            // on focus, and an invisible one draws nothing to style
+            // (#859) — the About sheet's (#1536).
             "AboutSheet.swift": (
                 1, "escapeRoute",
                 "Invisible zero-size shortcut sink — Escape, "
@@ -189,21 +183,6 @@ extension SettingsButtonStyleConventionTests {
                 1, ".settingsPopUpTrigger()",
                 "The profile chip's Menu taking the pop-up trigger "
                     + "seal, so the whole chip is the menu's hit area"
-            ),
-            // Moved from `PresetsSection.swift` with the card
-            // itself in #859. The reason is also CORRECTED: the
-            // entry said "Picker taking plain style" and this file
-            // has never held a picker or a `.plain`. The real
-            // extra is Apply's zero-profile spotlight — ONE button
-            // naming two styles across the two arms
-            // (`.borderedProminent` when it is the lone primary,
-            // `.settingsActionButton()` otherwise) — so the count
-            // was right for a reason nobody could check against
-            // the prose beside it.
-            "PresetCard.swift": (
-                1,
-                ".buttonStyle(.borderedProminent)",
-                "Apply's spotlight arm — one button, two styles"
             ),
         ]
     }

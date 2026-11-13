@@ -8,8 +8,6 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case profilesAddScreenSetup = "(action) profiles.sets.move"
     case isDefault = "profile.isDefault"
     case isStarterSetup = "profile.isStarterSetup"
-    case presetsApply = "(action) presets.apply"
-    case presetsLayouts = "(action) presets.layouts"
 }
 
 extension ProfilesKey {
@@ -30,20 +28,6 @@ extension ProfilesKey {
             return .row(.profiles, .savedProfiles, .atRest)
         case .isStarterSetup:
             return .luaOnly
-        case .presetsApply:
-            // Greys on screen count mismatch or stored profile edit (#678).
-            return .row(
-                .profiles,
-                .presets,
-                .atRest,
-                gate: .runtimeAnyOf([
-                    .screenCountMismatch,
-                    .editingStoredProfile,
-                ])
-            )
-        case .presetsLayouts:
-            // Ungated preview sheet opener (#859, SettingKeyLocaleTests).
-            return .row(.profiles, .presets, .atRest)
         }
     }
 }
@@ -65,10 +49,6 @@ extension ProfilesKey {
             return .text("profiles.sets.move.help")
         case .isStarterSetup:
             return .none
-        case .presetsApply:
-            return .text("presets.apply")
-        case .presetsLayouts:
-            return .text("presets.layouts")
         }
     }
 }

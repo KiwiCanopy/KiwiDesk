@@ -18,16 +18,33 @@ public struct StandardLayout: Sendable, Equatable {
     let tuning: Tuning
     /// The starter setup's title; nil for every shipped preset.
     public internal(set) var starterTitle: StarterTitle? = nil
+    /// Whether the plan's screen slots go widest first, ties by
+    /// position, rather than main first: every preset's (#3294),
+    /// so a laptop never takes the big slot.
+    public internal(set) var slotsByWidth = false
+    /// A Space's mode on a given screen shape, ahead of
+    /// `spaceModes` — a preset's slot whose layout depends on the
+    /// screen it lands on (#3294).
+    var shapeModes: [SpaceID: [ScreenClass: LayoutMode]] = [:]
 }
 
 /// Catalog of shipped standard layouts and live hardware presets (#53, #485).
 public enum StandardProfiles {
-    /// Workflows planned purely by screen count.
+    /// Workflows planned purely by screen count: one family —
+    /// Developer, Focus, Studio, and Dashboard at two screens
+    /// (#3294) — the 4-screen ones offered on every larger desk.
     public static let workflows: [StandardLayout] = [
-        developer, minimalist, focusStack,
-        dualDeveloper, coderAndMonitor,
-        commandCenter, designStudio,
+        developer1, focus1,
+        developer2, dashboard2, focus2,
+        developer3, studio3, focus3,
+        developer4, studio4,
     ]
+
+    /// The largest planned screen count; a larger desk takes its
+    /// presets, one more Space per extra screen.
+    public static var largestCount: Int {
+        workflows.map(\.screenCount).max() ?? 1
+    }
 
     /// Layout catalog for live screens, leading with the hardware
     /// `Starter` (#678). There is exactly ONE Starter and it is
@@ -47,12 +64,17 @@ public enum StandardProfiles {
         return catalog
     }
 
-    /// Layouts matching exact screen count for given screen sizes.
+    /// Layouts offered for a screen count, the starter first: the
+    /// count's own, or the largest planned count's above it.
     public static func layouts(
         for count: Int,
         sizes: [CGSize]
     ) -> [StandardLayout] {
-        all(sizes: sizes).filter { $0.screenCount == count }
+        let planned = min(count, largestCount)
+        let starter = StarterSetup.standardLayout(sizes: sizes)
+        // The one Starter is for the screens `sizes` names alone.
+        let lead = starter.screenCount == count ? [starter] : []
+        return lead + workflows.filter { $0.screenCount == planned }
     }
 
     /// Standard fallback layout for a screen count (#485). Reads
@@ -65,125 +87,5 @@ public enum StandardProfiles {
         workflows
             .filter { $0.isStandard && $0.screenCount <= count }
             .max { $0.screenCount < $1.screenCount }
-    }
-
-    // MARK: - 1 monitor (4 spaces)
-
-    /// Best-practice single-monitor software development.
-    static let developer = StandardLayout(
-        name: "Developer",
-        screenCount: 1,
-        spaceCount: 4,
-        spaceModes: [
-            "1": .grid, "2": .stack, "3": .scrolling, "4": .monocle,
-        ],
-        spaceScreens: [:],
-        isStandard: true,
-        tuning: .preset(PresetTuning())
-    )
-
-    /// Spacious, distraction-free writing or reading.
-    static let minimalist = StandardLayout(
-        name: "Minimalist",
-        screenCount: 1,
-        spaceCount: 4,
-        spaceModes: ["1": .scrolling, "3": .monocle, "4": .floating],
-        spaceScreens: [:],
-        isStandard: false,
-        tuning: .preset(
-            PresetTuning(gap: 20, scrollingAnchor: .center)
-        )
-    )
-
-    /// Heavy multitasking on stacked panels.
-    static let focusStack = StandardLayout(
-        name: "Focus Stack",
-        screenCount: 1,
-        spaceCount: 4,
-        spaceModes: ["1": .stack, "2": .stack, "4": .monocle],
-        spaceScreens: [:],
-        isStandard: false,
-        tuning: .preset(PresetTuning())
-    )
-
-    // MARK: - 2 monitors (8 spaces, 1–4 main / 5–8 second)
-
-    /// Production on the main display, communication and
-    /// monitoring on the second.
-    static let dualDeveloper = StandardLayout(
-        name: "Dual Developer",
-        screenCount: 2,
-        spaceCount: 8,
-        spaceModes: [
-            "2": .stack, "3": .scrolling, "4": .monocle,
-            "6": .stack, "7": .monocle, "8": .floating,
-        ],
-        spaceScreens: secondaryRange(5...8, screen: 1),
-        isStandard: true,
-        tuning: .preset(PresetTuning())
-    )
-
-    /// Build logs, metrics, and database viewers on screen two.
-    static let coderAndMonitor = StandardLayout(
-        name: "Coder & Monitor",
-        screenCount: 2,
-        spaceCount: 8,
-        spaceModes: [
-            "2": .stack, "3": .stack, "4": .monocle,
-            "5": .stack, "6": .monocle, "7": .floating,
-            "8": .floating,
-        ],
-        spaceScreens: secondaryRange(5...8, screen: 1),
-        isStandard: false,
-        tuning: .preset(PresetTuning())
-    )
-
-    // MARK: - 3 monitors (10 spaces, 1–4 / 5–7 / 8–10)
-
-    /// Maximum real estate for triple-head setups.
-    static let commandCenter = StandardLayout(
-        name: "Command Center",
-        screenCount: 3,
-        spaceCount: 10,
-        spaceModes: [
-            "2": .stack, "3": .scrolling, "4": .monocle,
-            "6": .stack, "7": .monocle,
-            "8": .stack, "9": .scrolling, "10": .monocle,
-        ],
-        spaceScreens: secondaryRange(5...7, screen: 1)
-            .merging(
-                secondaryRange(8...10, screen: 2)
-            ) { first, _ in first },
-        isStandard: true,
-        tuning: .preset(PresetTuning())
-    )
-
-    /// Design and frontend engineering pipelines.
-    static let designStudio = StandardLayout(
-        name: "Design Studio",
-        screenCount: 3,
-        spaceCount: 10,
-        spaceModes: [
-            "1": .scrolling, "2": .monocle, "4": .floating,
-            "5": .monocle, "6": .floating,
-            "8": .stack, "9": .monocle, "10": .floating,
-        ],
-        spaceScreens: secondaryRange(5...7, screen: 1)
-            .merging(
-                secondaryRange(8...10, screen: 2)
-            ) { first, _ in first },
-        isStandard: false,
-        tuning: .preset(PresetTuning())
-    )
-
-    // MARK: - Helpers
-
-    private static func secondaryRange(
-        _ spaces: ClosedRange<Int>,
-        screen: Int
-    ) -> [SpaceID: Int] {
-        var map: [SpaceID: Int] = [:]
-        for space in spaces { map[SpaceID(space)] = screen }
-        return map
     }
 }

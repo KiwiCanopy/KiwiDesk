@@ -1984,7 +1984,6 @@ list:
 | `general.language.display` | "Display language" — the verb sense, not the device |
 | `desktops.help` | quotes Apple's "Displays have separate Spaces" verbatim |
 | `colors.liquid_glass.reduce_transparency.help` | quotes Apple's path, Accessibility ▸ Display ▸ Reduce transparency |
-| `presets.coder_and_monitor.name` | "Coder & Monitor" is a preset's proper name |
 | a `KeyBinding` row's stored `label` (`Toggle display sticky`, `Make display sticky`) | a stored identity in the user's config, resolved to the drawn `keybinding.*_display_sticky` labels, which say *screen* |
 
 **What this does NOT decide: any catalog's own word.** Ruling the
@@ -8014,6 +8013,13 @@ and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
 
+:::unreleased
+The family that replaces these presets (#3294, [below](#the-tours-spaces-step-is-where-a-preset-is-picked))
+names a mode for every Space, so no shipped preset reaches the
+fallback any more; it stays for a layout that leaves one out.
+The **Layouts** sheet leaves with the Presets section.
+:::
+
 **A preset is its own choices over the screen's tuning, and it
 names the workflow, never the hardware** (owner ruling, #1663).
 A preset declares only what it chose on purpose — Minimalist's
@@ -8037,6 +8043,12 @@ counting the others — the same for every card in it, so a
 per-card copy would say nothing about any one preset — and
 nothing stores it.
 
+:::unreleased
+Minimalist retires with the old family (#3294), and the group
+caption goes with the Presets section; the rest of this entry
+holds for the new family, whose presets declare no setting.
+:::
+
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,
 Widescreen, Ultrawide, Super Ultrawide, Portrait, "+ N" for
@@ -8052,6 +8064,15 @@ offers the workflow layouts alone — that is what "For other
 setups" means. The preset's summary names none of its rungs for
 the same reason: a list of modes would be a different sentence
 on every Mac, so it states the rule and its **Layouts** sheet shows the modes.
+
+:::unreleased
+The Starter stays as described, offered first as the tour's
+Suggested choice (#3294). The count-per-preset model is
+replaced: each screen count has its own family, a desk with more
+screens than four is offered the four-screen presets, and with
+the Presets section gone there is no "For other setups" group,
+summary or **Layouts** sheet.
+:::
 
 **A runtime `delete_space` stays a success, and names what brings
 the space back** (#1509, owner ruling). `init.lua` running at
@@ -11148,6 +11169,88 @@ painted onto bars hidden at rest is a click with nothing to see
 that hold, which would otherwise move only what the release
 gives back.
 
+### The tour's Spaces step is where a preset is picked
+
+**[Principle]**
+
+:::unreleased
+**Presets live on the tour's Spaces step, under "Start with", and
+nowhere else** (#3294, owner rulings 2026-11-13). Settings ▸
+Profiles carried a Presets card whose job was a first desk, and a
+first desk is the tour's; a card that stayed on the page after
+the first profile was saved read as a second, competing way to
+start over. The card goes with no replacement. Core keeps the
+family, `isStandard` and `applyStandard`, which the first-run
+seed, the tour and the monitor-change fallback reach.
+
+The segmented control's first segment is the Suggested starter,
+then the family for the connected screen count: Developer and
+Focus on one screen; Developer, Dashboard and Focus on two;
+Developer, Studio and Focus on three; Developer and Studio on
+four or more (`PresetFamilyTests` ▸ `familyPerCount`). Developer
+is every count's `isStandard`, the layout a reload composes while
+no saved profile fits (`PresetFamilyTests` ▸
+`developerIsStandard`): it is the one name offered at every
+count, so the fallback never changes name when a screen comes or
+goes. A multi-screen preset puts at most three Spaces on a
+screen (`PresetFamilyTests` ▸ `threeAScreen`), and its slots go
+by width, widest first, the numbering starting there
+(`PresetFamilyTests` ▸ `widestTakesTheBigSlot`): the busiest set
+belongs on the most room, wherever macOS put the main screen.
+Four screens take the three-screen plan plus one Space on the
+fourth — Monocle for Developer, and for Studio Grid on a laptop
+or desktop-class screen, Stack elsewhere (`PresetFamilyTests` ▸
+`studioFourthByShape`) — and each further screen gets one Space
+in the starter's single-Space rule, the first of its shape's order
+the desk holds least (`TourStartReplaceTests` ▸
+`fiveScreensStart`).
+
+**A pick redraws; Continue saves.** This departs from the Looks
+step's write-through (#1720, above) on purpose: a look is
+watched taking effect, while a preset reshapes every Space and
+moves windows, so the click previews and Continue commits
+(`OnboardingStartModelTests` ▸ `pickWritesNothing`). On an
+untouched desk Continue swaps the copy the last pick saved, never
+piling copies up (`TourStartReplaceTests` ▸
+`startReplacesTheCopy`). Untouched means the copy this tour saved,
+still exactly as saved: a copy the user edited, or one from an
+earlier tour, is their desk, and no pick deletes it
+(`TourStartReplaceTests` ▸ `editedCopyIsChanged`). With no saved
+profile live, a pick starts a profile of its own and replaces
+nothing (`TourStartReplaceTests` ▸ `nothingSavedIsUnsaved`); and a
+profile live on screens it keeps no layout for leads with Current
+like any changed desk, but a confirmed pick starts a preset copy
+and leaves that profile as saved, since a replace there could not
+record which screen each Space is on (`TourStartReplaceTests` ▸
+`foreignScreens`).
+
+**On a changed desk the first segment is Current, and a preset
+replaces the Spaces in place behind one confirm.** A replay over
+a desk the user built leads with that desk, selected, and
+Continue on it writes nothing (`OnboardingStartModelTests` ▸
+`currentWritesNothing`). Picking a preset adds the line
+"Continuing replaces your current Spaces."; Continue then asks
+once, with Cancel the default and Replace Spaces destructive
+(`OnboardingStartModelTests` ▸ `changedCancel`). The replace
+touches only the Spaces, their modes, mains, fallback and pins:
+the profile keeps its identity, name, app rules, layers,
+settings, look and bindings (`TourStartReplaceTests` ▸
+`replaceInPlace`), because a user who asked for different Spaces
+did not ask to lose the rest. An app rule aiming at a dropped
+Space is kept and counted in the dialog
+(`TourStartReplaceTests` ▸ `rulesLeftBehind`). The step's Revert
+puts the Spaces back while the tour is open, refused once another
+profile went live (`TourStartReplaceTests` ▸
+`revertRefusedElsewhere`).
+
+**A retired preset name needs no migration.** A profile saved
+from a retired preset is an ordinary profile under its own name.
+A crash snapshot holding a retired built-in still decodes and
+leaves its held Space where it was (`PresetFamilyTests` ▸
+`retiredStandardDecodes`, `PresetFamilyTests` ▸
+`retiredStandardStaysHeld`); the next reload composes Developer.
+:::
+
 ### The Mac Checklist counts what macOS can confirm
 
 **[Principle]**
@@ -13349,6 +13452,13 @@ profile is deleted, and KiwiDesk tiles fine with no
 profile, so wandering must stay legal. All of it is
 state-driven on "no saved profiles" (no persisted
 seen-flag) and vanishes with the first profile.
+
+:::unreleased
+The Presets section leaves Profiles (#3294), so the page has
+nothing to reorder and nothing to start from, and the spotlight
+leaves with it: no Home tile dot and no "start here" search badge.
+A first desk is picked on the tour's Spaces step.
+:::
 
 **A binding row reads "Desktop n", and binding is dropdown-only.**
 The naming is the product-wide rule — [macOS has Desktops,
@@ -21704,6 +21814,11 @@ One glyph means one count: once `display` beside a number is the
 screen count, the collapsed setups chip counts in words
 ("setups: 3").
 
+:::unreleased
+The preset card leaves with the Presets section (#3294); the
+rule holds for the profile row.
+:::
+
 **[Principle]**
 
 **The rule that picks a profile is written down, not inferred from
@@ -21837,6 +21952,11 @@ profile is saved for draws no rows: a None-only picker is a dead
 control, the affordance-for-a-channel-that-does-not-exist case, so
 a caption takes its place and the other counts follow with
 headers.
+
+:::unreleased
+The Presets card leaves this pane (#3294); the Desktop table's
+own grouping stands without it.
+:::
 
 **[Principle]**
 

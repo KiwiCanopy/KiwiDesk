@@ -138,10 +138,9 @@ restated `20...80` satisfies on the day it is written.
   `Button` cannot carry beside `.defaultAction` so the content
   view takes `.onExitCommand`. `SheetPresentationSeamTests` is the
   register of which files may host one and holds the dismissal
-  contract; `PresetPreviewSheetTests` adds the structural half
-  that matters most — the sheet takes no `SettingsModel`, so
-  reaching the draft is a new stored property rather than a
-  one-token edit. **Why**, in full, is
+  contract, including the structural half that matters most —
+  no sheet's content takes a `SettingsModel`, so reaching the draft is a
+  new stored property rather than a one-token edit. **Why**, in full, is
   `docs/design-decisions.md` ▸ the panel's object is the DRAFT;
   the popover/alert/sheet split is `docs/ui-patterns.md`'s. Do not
   re-argue either here.
@@ -714,7 +713,7 @@ a second seam the plain areas do not — an order list saying
 *where a family sits* and `ShortcutsFamilyRows` saying *what it
 draws*. Profiles has the same pair (`ProfilesFamilyRows`), and
 there the expansion is per live INSTANCE in every container it
-draws — a row per saved profile, per Desktop, per preset, held by
+draws — a row per saved profile, per Desktop, held by
 `instanceCounts` in `ProfilesCensusRenderTests` because set
 equality over `SettingKey` cannot see a collapse to one row.
 Screens has the pair too (`ScreensFamilyRows`), and adds the

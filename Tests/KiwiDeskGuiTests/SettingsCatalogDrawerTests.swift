@@ -15,9 +15,6 @@ struct SettingsCatalogDrawerTests {
     /// both directions: a drawer landing childless joins with its
     /// reason, and one that gains children leaves.
     private let childless: Set<String> = [
-        // Hardware presets for unconnected setups: the rows are
-        // the presets themselves, a browse rather than a search.
-        "presets.other_setups",
         // Monitor fingerprints are per-display readouts, labelled
         // by the display.
         "monitors.advanced.title",

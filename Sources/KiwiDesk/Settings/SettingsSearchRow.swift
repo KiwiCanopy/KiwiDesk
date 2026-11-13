@@ -9,10 +9,6 @@ struct SettingsSearchRow: View {
     var onCursor = false
     /// Enrichment: current setting value evaluated from in-memory draft.
     let value: (SettingKey) -> String?
-    /// Badge indicator status.
-    let badged: Bool
-    /// Accessibility value for badge indicator.
-    let badgeValue: String
     let reveal: (SettingsSearchResult) -> Void
 
     var body: some View {
@@ -23,7 +19,6 @@ struct SettingsSearchRow: View {
         HStack(spacing: 8) {
             SidebarTile(
                 destination: result.destination,
-                badged: badged,
                 edged: onCursor
             )
             VStack(alignment: .leading, spacing: 1) {
@@ -49,7 +44,6 @@ struct SettingsSearchRow: View {
         .onTapGesture { reveal(result) }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(axLabel(shownValue))
-        .accessibilityValue(badgeValue)
         // A tap gesture under a combined element is not reliably
         // reachable by VoiceOver's activate, and no `Button`
         // supplies the trait — both explicit, or the reveal is

@@ -33,8 +33,6 @@
 (action) palette.import
 (action) palette.rename
 (action) palette.save
-(action) presets.apply
-(action) presets.layouts
 (action) profiles.delete
 (action) profiles.load
 (action) profiles.rename

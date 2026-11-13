@@ -14,17 +14,11 @@ struct ProfilesGates {
     /// creates one, so only the stored target greys.
     let guiManaged: Bool
     let sidecarExists: Bool
-    /// Preset row's OWN screen count; nil on every other row — a
-    /// `presetsApply` resolve with nil is a caller that forgot to
-    /// pass it, which asserts rather than silently (not) greying.
-    var presetScreens: Int?
 
     /// Reason why a setting control is currently disabled/inert.
     enum InertReason: Hashable {
         case bindingsOwnedByLua
         case noSidecar
-        case presetSwitchesLiveLayout
-        case screenCountMismatch(screens: Int)
     }
 
     /// Evaluates inert reason for setting key. Fail-OPEN on a
@@ -40,19 +34,6 @@ struct ProfilesGates {
                 return nil
             }
             return sidecarExists ? .bindingsOwnedByLua : .noSidecar
-        case .profiles(.presetsApply):
-            if editingStoredProfile {
-                return .presetSwitchesLiveLayout
-            }
-            guard let screens = presetScreens else {
-                assertionFailure(
-                    "presetsApply resolved without a preset "
-                        + "screen count"
-                )
-                return nil
-            }
-            return screens == connectedScreens
-                ? nil : .screenCountMismatch(screens: screens)
         default:
             assertionFailure(
                 "unhandled Profiles gate: \(key.id)"
@@ -63,8 +44,7 @@ struct ProfilesGates {
 
     /// Gated setting keys resolved by this type (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
-        .profiles(.profileBindings),
-        .profiles(.presetsApply),
+        .profiles(.profileBindings)
     ]
 
     /// Gated setting keys resolved outside this type.
@@ -95,19 +75,6 @@ enum ProfilesGateHelp {
                 "Desktop bindings are kept in gui.json, which "
                     + "doesn't exist yet — switch to Live and "
                     + "save once to create it."
-            )
-        case .presetSwitchesLiveLayout:
-            return L(
-                "presets.editing_stored",
-                "Applying a preset switches your live layout, "
-                    + "which editing a saved profile never does. "
-                    + "Switch to Live to apply one."
-            )
-        case .screenCountMismatch(let screens):
-            return L(
-                "presets.needs_screens",
-                "Needs %1$d connected screen(s).",
-                screens
             )
         }
     }

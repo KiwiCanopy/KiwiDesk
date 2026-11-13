@@ -25,17 +25,21 @@ extension AppDelegate {
             self?.core.tourBaseline()
         }
         onboardingModel.onPaintShelf = { [weak self] look, palette in
-            self?.core.withUserMotion {
-                self?.core.paintShelf(look: look, palette: palette)
+            guard let self else { return }
+            onboardingModel.start.writingProfile {
+                core.withUserMotion {
+                    core.paintShelf(look: look, palette: palette)
+                }
             }
         }
         onboardingModel.baselineIsLive = { [weak self] baseline in
             self?.core.describesLiveProfile(baseline) ?? false
         }
         onboardingModel.onRestoreShelf = { [weak self] baseline in
-            self?.core.withUserMotion {
-                self?.core.restoreShelf(baseline)
-            } ?? false
+            guard let self else { return false }
+            return onboardingModel.start.writingProfile {
+                core.withUserMotion { core.restoreShelf(baseline) }
+            }
         }
     }
 }

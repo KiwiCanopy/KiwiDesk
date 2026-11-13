@@ -12,7 +12,8 @@ public typealias LiveProfileWrite =
 /// takes — the tour's look (#1720), a bar menu's row (#1518), and a
 /// Space added to or removed from the profile (#1790): the bar's
 /// Delete, `create_space`/`delete_space` with `profile`, and
-/// Settings ▸ Spaces' add button — and `keep_settings` (#1685).
+/// Settings ▸ Spaces' add button — `keep_settings` (#1685), and
+/// the tour's replace of the Spaces and its Revert (#3294).
 /// The draft policy that answers it is profiles.md's.
 extension KiwiCore {
     /// `edit` lands in the live profile's file, non-adopting, then

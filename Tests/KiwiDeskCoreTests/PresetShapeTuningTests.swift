@@ -15,11 +15,39 @@ struct PresetShapeTuningTests {
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let superWide = CGSize(width: 5120, height: 1440)
 
-    private func preset(_ name: String) throws -> StandardLayout {
+    private func preset(
+        _ name: String,
+        screens: Int = 1
+    ) throws -> StandardLayout {
         try #require(
-            StandardProfiles.workflows.first { $0.name == name }
+            StandardProfiles.workflows.first {
+                $0.name == name && $0.screenCount == screens
+            }
         )
     }
+
+    /// A sparse one-screen preset that chose a wide gap and a
+    /// centred column: the shape the retired Minimalist had.
+    private let sparse = StandardLayout(
+        name: "Sparse",
+        screenCount: 1,
+        spaceCount: 4,
+        spaceModes: ["1": .scrolling, "3": .monocle, "4": .floating],
+        spaceScreens: [:],
+        isStandard: false,
+        tuning: .preset(PresetTuning(gap: 20, scrollingAnchor: .center))
+    )
+
+    /// A one-screen preset opening on Stack.
+    private let stacked = StandardLayout(
+        name: "Stacked",
+        screenCount: 1,
+        spaceCount: 2,
+        spaceModes: ["1": .stack, "2": .monocle],
+        spaceScreens: [:],
+        isStandard: false,
+        tuning: .preset(PresetTuning())
+    )
 
     private func display(_ size: CGSize) -> Display {
         Display(
@@ -29,9 +57,9 @@ struct PresetShapeTuningTests {
         )
     }
 
-    @Test("Minimalist scrolls vertically on a portrait screen")
+    @Test("a sparse preset scrolls vertically on a portrait screen")
     func minimalistOnPortrait() throws {
-        let minimalist = try preset("Minimalist")
+        let minimalist = sparse
         let settings = minimalist.settings(sizes: [portrait])
         #expect(settings.scrolling.orientation == .vertical)
         #expect(
@@ -42,7 +70,7 @@ struct PresetShapeTuningTests {
 
     @Test("a preset's Stack takes an ultrawide's main count")
     func stackOnUltrawides() throws {
-        let focus = try preset("Focus Stack")
+        let focus = stacked
         #expect(focus.settings(sizes: [ultrawide]).stack.masterCount == 2)
         #expect(focus.settings(sizes: [superWide]).stack.masterCount == 3)
         #expect(
@@ -51,12 +79,12 @@ struct PresetShapeTuningTests {
         )
     }
 
-    /// Minimalist declares gap 20 and a centred anchor; the shape
+    /// `sparse` declares gap 20 and a centred anchor; the shape
     /// tuning keeps the shipped gap and a 27" leaves the anchor at
     /// `follow`.
     @Test("a declared leaf wins over the shape tuning")
     func declaredLeafWins() throws {
-        let minimalist = try preset("Minimalist")
+        let minimalist = sparse
         let onLaptop = minimalist.settings(sizes: [laptop])
         #expect(onLaptop.gapsGlobal == .uniform(20))
         #expect(
@@ -156,24 +184,25 @@ struct PresetShapeTuningTests {
         #expect(scrolling.anchor != .center)
     }
 
-    /// Command Center scrolls on space 3 (main) and space 9 (the
-    /// third screen): a portrait third screen turns space 9 alone.
+    /// Developer scrolls on Space 2 (the widest slot) and Space 6
+    /// (the third slot): a portrait third screen turns 6 alone.
     @Test("a Scrolling space on a turned screen takes its direction")
     func perSpaceDirection() throws {
-        let center = try preset("Command Center")
-        let settings = center.settings(
+        let developer = try preset("Developer", screens: 3)
+        #expect(developer.spaceModes["6"] == .scrolling)
+        let settings = developer.settings(
             sizes: [screen27, screen27, portrait]
         )
         #expect(settings.scrolling.orientation == .horizontal)
         #expect(
-            settings.scrolling.override["9"]?.orientation == .vertical
+            settings.scrolling.override["6"]?.orientation == .vertical
         )
-        #expect(settings.scrolling.override["3"] == nil)
+        #expect(settings.scrolling.override["2"] == nil)
     }
 
     @Test("where the screens are unknown, no shape tuning applies")
     func unknownScreens() throws {
-        let minimalist = try preset("Minimalist")
+        let minimalist = sparse
         var expected = StarterTuning.base()
         expected.gapsGlobal = .uniform(20)
         expected.scrolling.anchor = .center
@@ -193,7 +222,7 @@ struct PresetShapeTuningTests {
     /// so the composition is where the merge must be taken.
     @Test("composing a preset takes the merge for its screens")
     func composeTakesTheMerge() throws {
-        let minimalist = try preset("Minimalist")
+        let minimalist = sparse
         let composed = try #require(
             ProfileComposition.compose(
                 layout: minimalist,

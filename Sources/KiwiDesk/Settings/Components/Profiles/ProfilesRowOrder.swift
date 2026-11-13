@@ -15,17 +15,10 @@ enum ProfilesRowOrder {
         .profiles(.profileBindings)
     ]
 
-    /// Preset card actions in visual order (#859).
-    static let presets: [SettingKey] = [
-        .profiles(.presetsLayouts),
-        .profiles(.presetsApply),
-    ]
-
     /// Rows grouped by settings container.
     static let byContainer: [SettingsContainer: [SettingKey]] = [
         .savedProfiles: savedProfiles,
         .profilesPerMacOSSpace: profilesPerMacOSSpace,
-        .presets: presets,
     ]
 
     /// Containers rendered with custom bespoke views expanding dynamic
@@ -33,6 +26,5 @@ enum ProfilesRowOrder {
     static let bespokeContainers: Set<SettingsContainer> = [
         .savedProfiles,
         .profilesPerMacOSSpace,
-        .presets,
     ]
 }

@@ -852,6 +852,14 @@ a preset does not name a layout for a space, the space takes the
 layout its screen suits. Applying a preset saves it as a real,
 editable profile; presets cannot be deleted.
 
+:::unreleased
+Presets are picked on the setup tour's Spaces step, under **Start
+with**; Profiles does not list them. Developer is the Standard at
+every screen count. Over Spaces you changed, a preset replaces
+only your Spaces and their layouts, and the step's **Revert** puts
+them back while the tour is open.
+:::
+
 ## App Rules
 
 **The title match is case-sensitive**, and "Info" also catches
@@ -985,6 +993,11 @@ new spaces (up to ten).
 It is saved as an ordinary profile named after your main screen
 — **Ultrawide**, say, or **Widescreen + 1** across two screens —
 and the same setup is always available as a preset of that name.
+
+:::unreleased
+The tour offers the same setup as **Suggested** under **Start
+with** on the Spaces step, in place of a preset of that name.
+:::
 
 ### Default Shortcuts
 

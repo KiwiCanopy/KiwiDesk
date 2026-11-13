@@ -18,8 +18,7 @@ extension SettingsValueReadout {
             )
         case .profilesLoad, .profilesDelete, .profilesRename,
             .profilesAddScreenSetup,
-            .isDefault, .isStarterSetup, .presetsApply,
-            .presetsLayouts:
+            .isDefault, .isStarterSetup:
             // no model path — never booked by the diff
             return []
         }

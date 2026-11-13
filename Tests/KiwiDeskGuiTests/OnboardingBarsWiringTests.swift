@@ -18,10 +18,10 @@ struct OnboardingBarsWiringTests {
     func doorsAreWired() throws {
         let wiring = try source("AppDelegate+OnboardingBars.swift")
         #expect(
-            wiring.contains("self?.core.setBarVisibility(visibility)")
+            wiring.contains("core.setBarVisibility(visibility)")
         )
         #expect(
-            wiring.contains("self?.core.restoreBarVisibility(baseline)")
+            wiring.contains("core.restoreBarVisibility(baseline)")
         )
         #expect(
             wiring.contains(

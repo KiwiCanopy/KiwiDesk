@@ -112,10 +112,10 @@ extension KiwiCore {
         _ displays: [Display],
         mainID: DisplayID
     ) -> [SpaceID: DisplayID] {
-        ProfileComposition.compose(
+        ProfileComposition.fallbackAssignment(
             displays: displays,
             mainID: mainID
-        )?.assignment ?? [:]
+        )
     }
 
     /// The one copy of the `SpacePlacement` call every placement

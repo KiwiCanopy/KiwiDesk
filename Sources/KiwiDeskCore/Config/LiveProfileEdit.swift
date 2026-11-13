@@ -14,6 +14,10 @@ public enum LiveProfileEdit {
     /// What `keep_settings` writes (#1685): live leaves and the
     /// layouts of Spaces the profile already declares.
     case kept(KeptLeaves)
+    /// The tour's replay of a preset over a changed desk (#3294):
+    /// the Spaces, their layouts, the Main role, the fallback and
+    /// the live screens' pins, and nothing else.
+    case replaceSpaces(SpaceSet)
 
     /// Whether landing the shared look may repaint the live look:
     /// a keep's values are live already, beside pending ones the
@@ -27,7 +31,7 @@ public enum LiveProfileEdit {
     /// so the adoption record must follow the file (#1245).
     var redeclares: Bool {
         switch self {
-        case .addSpace, .removeSpace: return true
+        case .addSpace, .removeSpace, .replaceSpaces: return true
         case .settings, .kept: return false
         }
     }
@@ -125,6 +129,8 @@ extension Profile {
         case .kept(let leaves):
             settings = leaves.applied(to: settings)
             spaceModes.merge(leaves.spaceModes) { $1 }
+        case .replaceSpaces(let set):
+            replaceSpaces(with: set, monitors: monitors)
         }
     }
 }
@@ -158,6 +164,12 @@ extension GuiConfig {
             for (id, mode) in leaves.spaceModes {
                 spaceModes[id] = mode == .bsp ? nil : mode
             }
+        case .replaceSpaces(let set):
+            spaces = set.spaces
+            spaceModes = set.spaceModes.filter { $0.value != .bsp }
+            spacePins = set.pins
+            mainSpaces = Set(set.mainSpaces)
+            fallbackSpace = set.fallbackSpace
         }
     }
 }

@@ -89,8 +89,6 @@ struct SettingsHeaderBar: View {
             HeaderSearch(
                 expanded: $searchExpanded,
                 context: searchContext,
-                spotlightProfiles:
-                    model.profileSummaries.isEmpty,
                 value: { [weak model] key in
                     model?.searchValue(for: key)
                 },

@@ -84,7 +84,7 @@ struct ProfileCountersTests {
                 Comment(rawValue: file.lastPathComponent)
             )
         }
-        #expect(surfaces >= 2)
+        #expect(surfaces >= 1)
     }
 
     /// The value sits on the NAME, read right after it, and the
@@ -113,29 +113,6 @@ struct ProfileCountersTests {
         // spelling of a caption is a second use (guard-prover).
         #expect(row.occurrences(of: "counters(summary).sentence") == 1)
         #expect(!row.contains("ProfileCounters.sentence"))
-    }
-
-    @Test("the preset card reads the sentence after its title")
-    func presetCardWiring() throws {
-        let card = try squashed("Components/Profiles/PresetCard.swift")
-        #expect(
-            card.contains(
-                "ProfileCounters(screens:layout.screenCount,"
-                    + "spaces:layout.spaceCount)"
-            )
-        )
-        let title = try #require(
-            card.range(of: "Text(layout.displayName)")
-        )
-        let badge = try #require(card.range(of: "iflayout.isStandard"))
-        #expect(title.upperBound < badge.lowerBound)
-        #expect(
-            card[title.upperBound..<badge.lowerBound].contains(
-                ".accessibilityValue(counters.sentence)"
-            )
-        )
-        #expect(card.occurrences(of: "counters.sentence") == 1)
-        #expect(!card.contains("ProfileCounters.sentence"))
     }
 
     /// `display` beside a number is the row's screen count; the
