@@ -92,11 +92,13 @@ struct NavigationTests {
         )
     }
 
+    /// The closer window overlaps the origin by a sliver, so the
+    /// lateral term, not the overlap guard, decides.
     @Test("Straight neighbors beat closer diagonal ones")
     func lateralPenalty() {
         let origin = frame(500, 500)
         let candidates: [(id: WindowID, frame: CGRect)] = [
-            (WindowID(1), frame(650, 350)),
+            (WindowID(1), frame(650, 401)),
             (WindowID(2), frame(800, 500)),
         ]
         #expect(
@@ -107,6 +109,90 @@ struct NavigationTests {
                 tie: .none
             ) == WindowID(2)
         )
+    }
+
+    /// A window lying across the origin's center line reads
+    /// straight however far its own center sits, in all four
+    /// directions (#3207): drawn for `.right` and turned about the
+    /// origin's center for the rest.
+    @Test("A window across the center line reads straight")
+    func spanningWindowIsStraight() {
+        let origin = frame(500, 500)
+        // Nearer, and tall: its center is 250 pt off the line.
+        let across = CGRect(x: 700, y: 0, width: 100, height: 600)
+        // Farther, centered on the line.
+        let ahead = frame(900, 500)
+        for direction in Direction.allCases {
+            let turn = { (rect: CGRect) in
+                Self.turned(rect, to: direction, about: 550)
+            }
+            #expect(
+                Navigation.neighbor(
+                    from: turn(origin),
+                    in: direction,
+                    candidates: [
+                        (WindowID(1), turn(across)),
+                        (WindowID(2), turn(ahead)),
+                    ],
+                    tie: .none
+                ) == WindowID(1),
+                "\(direction)"
+            )
+        }
+    }
+
+    /// An edge lying on the center line is no crossing: with no
+    /// inner gap the column's two halves meet on it, and the half
+    /// whose center is nearer the line still wins.
+    @Test("An edge on the center line is no crossing")
+    func edgeOnTheLineIsNoCrossing() {
+        let origin = CGRect(x: 500, y: 0, width: 500, height: 500)
+        let candidates: [(id: WindowID, frame: CGRect)] = [
+            (WindowID(2), CGRect(x: 0, y: 250, width: 500, height: 750)),
+            (WindowID(1), CGRect(x: 0, y: 0, width: 500, height: 250)),
+        ]
+        #expect(
+            Navigation.neighbor(
+                from: origin,
+                in: .left,
+                candidates: candidates,
+                tie: .none
+            ) == WindowID(1)
+        )
+    }
+
+    /// `rect`, drawn facing `.right`, turned to face `direction`
+    /// about the point (`c`, `c`).
+    private static func turned(
+        _ rect: CGRect,
+        to direction: Direction,
+        about c: CGFloat
+    ) -> CGRect {
+        switch direction {
+        case .right:
+            rect
+        case .left:
+            CGRect(
+                x: 2 * c - rect.maxX,
+                y: rect.minY,
+                width: rect.width,
+                height: rect.height
+            )
+        case .down:
+            CGRect(
+                x: rect.minY,
+                y: rect.minX,
+                width: rect.height,
+                height: rect.width
+            )
+        case .up:
+            CGRect(
+                x: rect.minY,
+                y: 2 * c - rect.maxX,
+                width: rect.height,
+                height: rect.width
+            )
+        }
     }
 
     @Test("No neighbor in an empty direction")

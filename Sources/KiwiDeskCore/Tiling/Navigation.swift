@@ -14,8 +14,9 @@ public enum Navigation {
     /// Candidates must overlap the origin on the cross axis —
     /// otherwise a full-height master would jump diagonally
     /// into the stack — and lateral offset is penalized so
-    /// straight neighbors beat diagonal ones. A tie goes to
-    /// `tie` (#2619).
+    /// straight neighbors beat diagonal ones. A window lying across
+    /// the origin's center line reads straight, however far its own
+    /// center sits (#3207). A tie goes to `tie` (#2619).
     public static func neighbor(
         from origin: CGRect,
         in direction: Direction,
@@ -44,25 +45,37 @@ public enum Navigation {
             )
             let dx = center.x - originCenter.x
             let dy = center.y - originCenter.y
+            let offAxisX = Self.offAxis(
+                originCenter.x,
+                center.x,
+                candidate.frame.minX,
+                candidate.frame.maxX
+            )
+            let offAxisY = Self.offAxis(
+                originCenter.y,
+                center.y,
+                candidate.frame.minY,
+                candidate.frame.maxY
+            )
             let forward: CGFloat
             let lateral: CGFloat
             let edge: CGFloat
             switch direction {
             case .left:
                 forward = -dx
-                lateral = abs(dy)
+                lateral = offAxisY
                 edge = origin.minX - candidate.frame.maxX
             case .right:
                 forward = dx
-                lateral = abs(dy)
+                lateral = offAxisY
                 edge = candidate.frame.minX - origin.maxX
             case .up:
                 forward = -dy
-                lateral = abs(dx)
+                lateral = offAxisX
                 edge = origin.minY - candidate.frame.maxY
             case .down:
                 forward = dy
-                lateral = abs(dx)
+                lateral = offAxisX
                 edge = candidate.frame.minY - origin.maxY
             }
             guard forward > 0.5 else { continue }
@@ -81,5 +94,17 @@ public enum Navigation {
             crossIsY: direction == .left || direction == .right,
             tie: tie
         )
+    }
+
+    /// The lateral term: zero for a window whose span holds the
+    /// origin's center strictly — an edge on the line is no
+    /// crossing — else the centers' offset.
+    private static func offAxis(
+        _ origin: CGFloat,
+        _ center: CGFloat,
+        _ low: CGFloat,
+        _ high: CGFloat
+    ) -> CGFloat {
+        low < origin && origin < high ? 0 : abs(center - origin)
     }
 }

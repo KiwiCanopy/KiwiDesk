@@ -2059,7 +2059,10 @@ that predicate too, or the lens stops steering the keys on it
 first in window order
 ([#2619](https://github.com/KiwiCanopy/KiwiDesk/issues/2619)).**
 The geometric score is forward distance plus twice the lateral
-offset, so where a full-height master faces a stack of three,
+offset — the centers' offset, or none for a window lying across
+the origin's center line, which reads straight however wide
+([#3207](https://github.com/KiwiCanopy/KiwiDesk/issues/3207)) —
+so where a full-height master faces a stack of three,
 every candidate lies at one distance and the lateral term alone
 picks the middle window — an accident of the score that nobody
 can read off the screen. So a tie has a definition, and only two
