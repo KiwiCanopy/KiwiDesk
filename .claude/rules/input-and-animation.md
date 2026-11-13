@@ -328,7 +328,13 @@ editing here:
     since they read as our own animation — every echo arm asks the
     one `modifierGrabTakesEcho(of:)` first (`modifierGrabOwns`,
     `ModifierGrabWiringTests` ▸ `echoesAreLeftOut`,
-    `lateEchoIsLeftOut`). A grab in flight reads as a held button
+    `lateEchoIsLeftOut`). **A grab's frames are latest-wins per
+    window; never one queued set per pointer event** (#3266): the
+    grab's one `applyFrame` passes `latestWins`, and every other
+    write to the window, instant or spring, retires a waiting grab
+    frame at its entry point
+    (`ModifierGrabLatestWinsTests`). A grab in flight reads as a
+    held button
     through `MouseTracker.leftButtonHeld` and `anyButtonHeld`, so a
     later consumer that must act during a grab's stream — #2764's
     crossing routes it — never stands down on those reads.

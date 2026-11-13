@@ -41,11 +41,12 @@ struct InstantLeadLapseSeamTests {
             under: Self.core
         )
         #expect(
-            sites.map(\.file.lastPathComponent) == ["FrameApplier.swift"]
+            sites.map(\.file.lastPathComponent)
+                == ["FrameApplier+Instant.swift"]
         )
         let body = try SourceScan.functionBody(
             of: "applyInstant",
-            in: "FrameApplier.swift",
+            in: "FrameApplier+Instant.swift",
             under: "Tiling"
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(

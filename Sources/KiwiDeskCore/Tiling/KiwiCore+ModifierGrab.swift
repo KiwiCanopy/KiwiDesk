@@ -13,6 +13,40 @@ struct ModifierGrabSession: Equatable {
     let grab: CGPoint
     let handle: ModifierGrabGeometry.Handle
     var last: CGRect
+    /// The moves that reached the main actor, and their age since
+    /// the tap stamped them, for the release's log line (#3266).
+    var pace = ModifierGrabPace()
+}
+
+/// How fast a grab's events reached the main actor (#3266).
+struct ModifierGrabPace: Equatable {
+    var moves = 0
+    var ageSum: CFAbsoluteTime = 0
+    var ageMax: CFAbsoluteTime = 0
+    var first: CFAbsoluteTime?
+    var last: CFAbsoluteTime = 0
+
+    mutating func note(tapped: CFAbsoluteTime, now: CFAbsoluteTime) {
+        moves += 1
+        ageSum += now - tapped
+        ageMax = max(ageMax, now - tapped)
+        if first == nil { first = tapped }
+        last = tapped
+    }
+
+    /// One line: moves per second and the tap-to-main age.
+    var summary: String {
+        let span = first.map { last - $0 } ?? 0
+        let rate = span > 0 ? Double(moves - 1) / span : 0
+        let mean = moves > 0 ? ageSum / Double(moves) : 0
+        return String(
+            format: "%d moves, %.0f/s, age mean %.1f ms max %.1f ms",
+            moves,
+            rate,
+            mean * 1000,
+            ageMax * 1000
+        )
+    }
 }
 
 /// What the modifier grab keeps between its events, written by
@@ -44,6 +78,12 @@ extension KiwiCore {
         switch event.phase {
         case .began: beginModifierGrab(event)
         case .moved:
+            if event.time > 0 {
+                modifierGrab.session?.pace.note(
+                    tapped: event.time,
+                    now: CFAbsoluteTimeGetCurrent()
+                )
+            }
             if let point = event.location { moveModifierGrab(to: point) }
         case .ended: endModifierGrab(event)
         }
@@ -127,7 +167,8 @@ extension KiwiCore {
             session.id,
             from: session.last,
             to: frame,
-            animated: false
+            animated: false,
+            latestWins: true  // one waiting set per window, #3266
         )
         session.last = frame
         modifierGrab.session = session
@@ -142,6 +183,9 @@ extension KiwiCore {
 
     private func endModifierGrab(_ event: ModifierGrabEvent) {
         if let point = event.location { moveModifierGrab(to: point) }
+        if let pace = modifierGrab.session?.pace {
+            onLog("modifier drag: released, \(pace.summary)")
+        }
         modifierGrab.released = modifierGrab.session?.id
         modifierGrab.session = nil
         // The drag coordinator settles the drop itself, now that

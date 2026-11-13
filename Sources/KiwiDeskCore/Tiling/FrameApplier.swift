@@ -9,7 +9,7 @@ final class FrameApplier {
     var elementProvider: @MainActor (WindowID) -> AXUIElement? =
         { _ in nil }
 
-    private var animatingPid: [WindowID: pid_t] = [:]
+    var animatingPid: [WindowID: pid_t] = [:]
     private var pidCounts: [pid_t: Int] = [:]
     /// Where a floating resize's window was at its press (#2981):
     /// lasts a spring or one instant write.
@@ -18,7 +18,9 @@ final class FrameApplier {
     /// Per-app frame queues, made by `queue(for:)`.
     var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
-    private let recent = RecentApplies()
+    /// The grab's waiting instant sets, one per window (#3266).
+    let latestInstants = PendingFrames()
+    let recent = RecentApplies()
     let instantTargets = InstantTargets()
     let enhancedUI = EnhancedUIHolds()
     /// Writes the plate slide holds until it lands (#1956).
@@ -147,7 +149,7 @@ final class FrameApplier {
     }
 
     /// The lead for this write, spent unless a spring carries it.
-    private func takeLead(_ id: WindowID) -> SizeLedWrite.Lead? {
+    func takeLead(_ id: WindowID) -> SizeLedWrite.Lead? {
         guard let run = sizeLedRuns[id] else { return nil }
         if animatingPid[id] == nil { sizeLedRuns[id] = nil }
         return sizeLead(id, run: run)
@@ -160,6 +162,7 @@ final class FrameApplier {
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
+        _ = latestInstants.take(id)  // and a waiting grab frame
         let band = edgeBand(frame, setSize: setSize)
         let lead = takeLead(id)
         if stageHeld(id, frame, setSize: setSize, band: band, lead: lead) {
@@ -213,83 +216,6 @@ final class FrameApplier {
         }
     }
 
-    /// Applies a frame instantly, with EUI held off around the
-    /// set (#881) — one hold for a run of sets queued back to
-    /// back, shared with the animation ref-count through
-    /// `EnhancedUIHolds` (#1508). Position-only unless `setSize`.
-    /// Callers must `animation.cancel(window:)` first (as
-    /// `retile` and `stashInactive` do) so a window is never
-    /// spring-animated and instant-set at once. `resend` writes
-    /// the frame once more after `crossScreenResendDelay` unless a
-    /// newer write reached the window first (#2187).
-    func applyInstant(
-        _ id: WindowID,
-        _ frame: CGRect,
-        setSize: Bool,
-        resend: Bool = false
-    ) {
-        // At enqueue, ahead of the element guard: the overlay sync
-        // wants the commanded frame this same turn (#881).
-        instantTargets.record(id, frame: frame, now: clock())
-        scheduleLapseSweep(after: Self.echoGrace)
-        recent.record(id, now: clock())  // as `apply`, #1254
-        issued(id, frame)
-        pendingResends[id] = resend && setSize ? frame : nil
-        let band = edgeBand(frame, setSize: setSize)
-        let run = sizeLedRuns[id]
-        let lead = takeLead(id)
-        // A held write owes no resend: it lands once, at the
-        // slide's landing, on the screen it was sent to (#2524).
-        if stageHeld(id, frame, setSize: setSize, band: band, lead: lead) {
-            pendingResends[id] = nil
-            return
-        }
-        guard let element = elementProvider(id) else { return }
-        guard
-            let pid = animatingPid[id] ?? Self.pid(of: element)
-        else { return }
-        // Our own window moves now, inside the caller's turn: the
-        // main queue would run it only after that turn (#1956).
-        if pid == getpid(), ownWindowMove(id, frame, setSize) {
-            recentStamp(id)
-            return
-        }
-        nonisolated(unsafe) let target = element
-        let recent = recent
-        let clock = clock
-        let writer = writer
-        let holds = enhancedUI
-        let waited = meter.queued()
-        holds.noteQueued(
-            pid,
-            atRest: enhancedUIAtRest(pid),
-            instant: true
-        )
-        queue(for: pid).async {
-            waited()
-            holds.beginInstant(pid, writer)
-            if let lead {
-                lead.write(frame, target, setSize, band, writer)
-            } else if setSize {
-                EdgeBandWrite.write(
-                    frame,
-                    target,
-                    nearEdgeOf: band,
-                    writer: writer
-                )
-            } else {
-                writer.setPosition(frame.origin, target)
-            }
-            holds.endInstant(pid, writer)
-            recent.record(id, now: clock())  // as `apply`, #1254
-        }
-        if pendingResends[id] != nil {
-            scheduleResend(crossScreenResendDelay) { [weak self] in
-                self?.resendIfCurrent(id, frame, run: run)
-            }
-        }
-    }
-
     /// How long a cross-screen set waits before its second write.
     var crossScreenResendDelay: TimeInterval = 0.2
 
@@ -322,7 +248,7 @@ final class FrameApplier {
     /// The same ask as the first write, so deliberately not an
     /// engine frame: it retires no ask and stamps no placement
     /// (#1694, #1161).
-    private func resendIfCurrent(
+    func resendIfCurrent(
         _ id: WindowID,
         _ frame: CGRect,
         run: SizeLedRun?

@@ -70,12 +70,16 @@ public final class DragOverlay {
         )
     }
 
+    /// Hides only a shown panel: a grab calls it per event, and
+    /// each `orderOut` is a WindowServer round trip (#3266).
     public func hideGhost() {
-        ghost?.panel.orderOut(nil)
+        if let panel = ghost?.panel, panel.isVisible { panel.orderOut(nil) }
     }
 
     public func hideDropZone() {
-        dropZone?.panel.orderOut(nil)
+        if let panel = dropZone?.panel, panel.isVisible {
+            panel.orderOut(nil)
+        }
     }
 
     public func hideAll() {
@@ -118,6 +122,9 @@ public final class DragOverlay {
         panel.ignoresMouseEvents = true
         panel.level = .normal
         panel.isReleasedWhenClosed = false
+        // Shown only while KiwiDesk orders it in: `hideGhost` reads
+        // `isVisible`, which a deactivation hide would fool (#3266).
+        panel.hidesOnDeactivate = false
         panel.animationBehavior = .none
         panel.collectionBehavior = [
             .canJoinAllSpaces,
