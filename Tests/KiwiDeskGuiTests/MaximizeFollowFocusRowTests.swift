@@ -52,16 +52,19 @@ struct MaximizeFollowFocusRowTests {
                 in: source
             )
         )
+        #expect(Self.squeezed(body).hasPrefix("SettingsSection("))
         #expect(Self.squeezed(body).contains(Self.walk))
         #expect(Self.squeezed(row).contains(Self.toggleArm))
     }
 
-    /// The walk, glued to the chord caption before it and the
-    /// section's closing brace after it: the glue keeps the walk out
-    /// of any conditional, and is no value pin.
+    /// The walk, glued to the chord caption before it and to the
+    /// section's closing brace and its first modifier after it, in a
+    /// body that opens on the section: the glue keeps the walk out
+    /// of any wrapper, and is no value pin.
     private static let walk = [
         "row:SettingsCatalog.shortcuts.maximizeWidthBinding)}",
         "ForEach(Self.rowsBelowTable,id:\\.id){keyinrow(key)}}",
+        ".onPreferenceChange(MaximizeColumns.Drawn.self)",
     ].joined()
 
     /// The follow-focus arm, spaces and newlines stripped.
