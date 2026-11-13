@@ -229,11 +229,9 @@ extension KiwiCore {
                 temporaries: temporaries
             )
         }
-        // Honor the composed layout's own positional plan (#485):
-        // for a workflow Standard this equals what
-        // `resolveSpaceDisplays` re-derives below, but the setup's
-        // five-per-display plan is NOT the count's Standard, so its
-        // blocks would otherwise scatter into the Standard's slots.
+        // Honor the composed layout's own plan (#485): the resolve
+        // below falls back to the frozen plan by number (#3294), so
+        // a composed plan's Spaces would otherwise scatter into it.
         adoptComposedPlacement(
             composed,
             keepingPinsOf: temporaries.subtracting(composed.spaces)

@@ -183,7 +183,32 @@ struct ProfileCompositionTests {
     /// a fifth screen the next number past 10.
     @Test("the placement fallback keeps the old plan")
     func fallbackKeepsTheOldPlan() {
-        let two = ProfileComposition.fallbackAssignment(
+        let one = SpacePlacement.numberedPlan(
+            displays: displays(1),
+            mainID: DisplayID(1)
+        )
+        #expect(one[SpaceID(1)] == DisplayID(1))
+        #expect(one[SpaceID(4)] == DisplayID(1))
+        #expect(one[SpaceID(5)] == nil)
+        let three = SpacePlacement.numberedPlan(
+            displays: displays(3),
+            mainID: DisplayID(1)
+        )
+        #expect(three[SpaceID(4)] == DisplayID(1))
+        #expect(three[SpaceID(5)] == DisplayID(2))
+        #expect(three[SpaceID(7)] == DisplayID(2))
+        #expect(three[SpaceID(8)] == DisplayID(3))
+        #expect(three[SpaceID(10)] == DisplayID(3))
+        #expect(three[SpaceID(11)] == nil)
+        let four = SpacePlacement.numberedPlan(
+            displays: displays(4),
+            mainID: DisplayID(1)
+        )
+        #expect(four[SpaceID(4)] == DisplayID(1))
+        #expect(four[SpaceID(8)] == DisplayID(3))
+        #expect(four[SpaceID(11)] == DisplayID(4))
+        #expect(four[SpaceID(12)] == nil)
+        let two = SpacePlacement.numberedPlan(
             displays: displays(2),
             mainID: DisplayID(1)
         )
@@ -191,7 +216,7 @@ struct ProfileCompositionTests {
         #expect(two[SpaceID(5)] == DisplayID(2))
         #expect(two[SpaceID(8)] == DisplayID(2))
         #expect(two[SpaceID(9)] == nil)
-        let five = ProfileComposition.fallbackAssignment(
+        let five = SpacePlacement.numberedPlan(
             displays: displays(5),
             mainID: DisplayID(1)
         )

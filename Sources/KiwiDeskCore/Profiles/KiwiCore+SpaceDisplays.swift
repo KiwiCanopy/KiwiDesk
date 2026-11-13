@@ -112,7 +112,7 @@ extension KiwiCore {
         _ displays: [Display],
         mainID: DisplayID
     ) -> [SpaceID: DisplayID] {
-        ProfileComposition.fallbackAssignment(
+        SpacePlacement.numberedPlan(
             displays: displays,
             mainID: mainID
         )

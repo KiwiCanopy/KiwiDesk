@@ -134,9 +134,9 @@ extension KiwiCore {
                 return
             }
             // `apply(composed:)` adopts the composed placement, so
-            // the setup's five-per-display blocks land correctly
-            // (not scattered into the workflow Standard's slots),
-            // and files the Standard it composed.
+            // the plan's Spaces land where it put them (not scattered
+            // into the resolve's fallback plan), and files the
+            // Standard it composed.
             apply(composed: composed, forceRetile: false)
             // Bind ⌃⌥N for spaces the change added past the
             // first-run seed — additive, never overwriting a
