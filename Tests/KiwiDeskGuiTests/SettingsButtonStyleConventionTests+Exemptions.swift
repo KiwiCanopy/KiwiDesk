@@ -49,6 +49,12 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to the row-menu builder the rowActions "
                     + "seam feeds (#845)"
             ),
+            // The layer chips' menu (#3263).
+            "LayerStripEditor.swift": (
+                3, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
+            ),
             "SpaceAssignmentChip.swift": (
                 3, "rowActions",
                 "Returned to the row-menu builder the rowActions "

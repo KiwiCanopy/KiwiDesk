@@ -40,6 +40,7 @@ struct LayerAddPopover: View {
             HStack(spacing: 10) {
                 Spacer()
                 Button(LayerEditorWords.cancel) { done(nil) }
+                    .settingsActionButton()
                     .keyboardShortcut(.cancelAction)
                 Button(LayerEditorWords.add, action: add)
                     .buttonStyle(.borderedProminent)
