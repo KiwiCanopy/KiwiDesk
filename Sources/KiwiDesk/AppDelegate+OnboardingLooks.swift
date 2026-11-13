@@ -28,12 +28,14 @@ extension AppDelegate {
             self?.core.withUserMotion {
                 self?.core.paintShelf(look: look, palette: palette)
             }
+            self?.onboardingModel.start.tourWroteProfile()
         }
         onboardingModel.baselineIsLive = { [weak self] baseline in
             self?.core.describesLiveProfile(baseline) ?? false
         }
         onboardingModel.onRestoreShelf = { [weak self] baseline in
-            self?.core.withUserMotion {
+            defer { self?.onboardingModel.start.tourWroteProfile() }
+            return self?.core.withUserMotion {
                 self?.core.restoreShelf(baseline)
             } ?? false
         }

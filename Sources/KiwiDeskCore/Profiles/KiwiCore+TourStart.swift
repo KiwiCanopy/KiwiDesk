@@ -16,8 +16,8 @@ extension KiwiCore {
     public enum TourDesk: Equatable, Sendable {
         /// The offered layout the desk still is, untouched.
         case untouched(StandardLayout)
-        /// No saved profile of these screens is live, so a pick
-        /// starts a profile of its own and replaces nothing.
+        /// No saved profile is live, so a pick starts a profile of
+        /// its own and replaces nothing.
         case unsaved
         /// The user's own Spaces, which a pick replaces in place.
         case changed
@@ -30,10 +30,11 @@ extension KiwiCore {
         among offered: [StandardLayout],
         copy: TourCopy?
     ) -> TourDesk {
-        guard let name = profiles.currentName,
-            let profile = try? profiles.read(name: name),
-            profile.set(matching: liveFingerprints) != nil
-        else { return .unsaved }
+        guard let name = profiles.currentName else { return .unsaved }
+        // A live profile that cannot be read is still the user's.
+        guard let profile = try? profiles.read(name: name) else {
+            return .changed
+        }
         if let copy, copy.profile == profile,
             let layout = offered.first(where: { $0.name == copy.layout })
         {
@@ -70,7 +71,11 @@ extension KiwiCore {
                 TourCopy(layout: layout.name, profile: $0)
             }
         }
-        if let left, left != profiles.currentName {
+        // Deleted only while its file still reads as this tour saved
+        // it: an edit or a binding since makes it the user's.
+        if let copy, let left, left != profiles.currentName,
+            (try? profiles.read(name: left)) == copy.profile
+        {
             let deleted = execute("delete_profile", args: [.string(left)])
             if !deleted.isSuccess {
                 onLog(
@@ -80,6 +85,17 @@ extension KiwiCore {
             }
         }
         return made
+    }
+
+    /// `copy` re-read after the tour's own later steps wrote the
+    /// live profile (the look, the bars): still the copy this tour
+    /// saved, not a change of the user's. Nil where it is no longer
+    /// live or readable.
+    public func tourCopyRead(_ copy: TourCopy) -> TourCopy? {
+        guard profiles.currentName == copy.profile.name,
+            let profile = try? profiles.read(name: copy.profile.name)
+        else { return nil }
+        return TourCopy(layout: copy.layout, profile: profile)
     }
 
     /// The saved starter profile for the connected screen count.

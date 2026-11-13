@@ -65,6 +65,8 @@ final class OnboardingStartModel {
     var replace: (StandardLayout) -> Bool = { _ in false }
     var captureBaseline: () -> KiwiCore.TourSpacesBaseline? = { nil }
     var restore: (KiwiCore.TourSpacesBaseline) -> Bool = { _ in false }
+    /// The copy re-read after a later step of the tour wrote it.
+    var rereadCopy: (KiwiCore.TourCopy) -> KiwiCore.TourCopy? = { $0 }
 
     /// What a start came to.
     enum StartOutcome {
@@ -139,6 +141,12 @@ final class OnboardingStartModel {
         self.baseline = nil
         selected = nil
         refresh()
+    }
+
+    /// A later step of the tour wrote the live profile (the look,
+    /// the bars): its copy stays this tour's, not the user's.
+    func tourWroteProfile() {
+        copy = copy.flatMap(rereadCopy)
     }
 
     /// A new presentation starts with no baseline and no pick.

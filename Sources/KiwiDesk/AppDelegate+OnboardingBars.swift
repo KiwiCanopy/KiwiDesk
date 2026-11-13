@@ -24,12 +24,14 @@ extension AppDelegate {
             self?.core.describesLiveProfile(baseline) ?? false
         }
         bars.onSetVisibility = { [weak self] visibility in
-            self?.core.withUserMotion {
+            defer { self?.onboardingModel.start.tourWroteProfile() }
+            return self?.core.withUserMotion {
                 self?.core.setBarVisibility(visibility)
             } ?? false
         }
         bars.onRestore = { [weak self] baseline in
-            self?.core.withUserMotion {
+            defer { self?.onboardingModel.start.tourWroteProfile() }
+            return self?.core.withUserMotion {
                 self?.core.restoreBarVisibility(baseline)
             } ?? false
         }

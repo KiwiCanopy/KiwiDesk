@@ -82,17 +82,32 @@ extension KiwiCore {
             let profile = try? profiles.read(name: name)
         else { return false }
         apply(profile: profile, cause: .edit)
-        // A same-profile apply keeps an undeclared Space as a
-        // temporary one (#1790); the replace drops them, through
-        // `delete_space`'s own door, windows forwarded.
-        let kept = Set(set.spaces)
-        for id in before where !kept.contains(id) {
-            guard state.workspaces[id] != nil else { continue }
-            execute("delete_space", args: [.string(id.raw)])
-        }
+        dropSpaces(
+            before.filter { !set.spaces.contains($0) },
+            into: set.fallbackSpace ?? set.spaces.first
+        )
         // A larger set than before binds ⌃⌥N for its newcomers, as
         // `applyStandard` does (#485).
         topUpDigitShortcuts()
         return true
+    }
+
+    /// Drops the Spaces a replace leaves out — a same-profile apply
+    /// keeps an undeclared Space as a temporary one (#1790) —
+    /// through `delete_space`'s own door, their windows forwarded
+    /// to `target`, a Space the set keeps.
+    private func dropSpaces(_ dropped: [SpaceID], into target: SpaceID?) {
+        let fallback = fallbackSpace
+        fallbackSpace = target
+        defer { fallbackSpace = fallback }
+        for id in dropped where state.workspaces[id] != nil {
+            let response = execute("delete_space", args: [.string(id.raw)])
+            if !response.isSuccess {
+                onLog(
+                    "tour: Space \(id.raw) stays: "
+                        + (response.error ?? response.status)
+                )
+            }
+        }
     }
 }

@@ -112,18 +112,10 @@ extension KiwiCore {
         _ displays: [Display],
         mainID: DisplayID
     ) -> [SpaceID: DisplayID] {
-        guard
-            var layout = StandardProfiles.standard(for: displays.count)
-        else { return [:] }
-        // A Space no pin or role places falls back main first; only
-        // a preset's own apply plans widest first, and pins what it
-        // places (#3294).
-        layout.slotsByWidth = false
-        return ProfileComposition.compose(
-            layout: layout,
+        ProfileComposition.fallbackAssignment(
             displays: displays,
             mainID: mainID
-        )?.assignment ?? [:]
+        )
     }
 
     /// The one copy of the `SpacePlacement` call every placement

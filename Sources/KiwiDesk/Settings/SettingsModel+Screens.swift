@@ -32,10 +32,10 @@ extension SettingsModel {
     /// `SpacePlacement.resolve`: the Screens picture's and Simple's
     /// preview (#2737), so the two read one plan.
     func placementAssignment() -> [SpaceID: DisplayID] {
-        ProfileComposition.compose(
+        ProfileComposition.fallbackAssignment(
             displays: displays,
             mainID: PositionalDisplays.liveMainID
-        )?.assignment ?? [:]
+        )
     }
 
     /// Screens area row expansion model (`ScreensFamilyRows`,

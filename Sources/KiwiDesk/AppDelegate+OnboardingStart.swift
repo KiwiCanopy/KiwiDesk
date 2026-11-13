@@ -39,6 +39,9 @@ extension AppDelegate {
         start.captureBaseline = { [weak self] in
             self?.core.tourSpacesBaseline()
         }
+        start.rereadCopy = { [weak self] copy in
+            self?.core.tourCopyRead(copy)
+        }
         start.restore = { [weak self] baseline in
             self?.core.withUserMotion {
                 self?.core.restoreSpaces(baseline)

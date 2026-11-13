@@ -97,6 +97,41 @@ struct TourStartReplaceTests {
         #expect(!core.profiles.list().contains("Developer"))
     }
 
+    /// A copy changed since this tour saved it — here while another
+    /// profile is live — is no longer the tour's to delete.
+    @Test("a copy edited since it was saved is kept")
+    func editedCopyIsKept() throws {
+        let core = makeCore()
+        let copy = try core.startTour(
+            with: StandardProfiles.developer1,
+            replacing: nil
+        )
+        var profile = try core.profiles.read(name: "Developer")
+        profile.settings.gapsGlobal = .uniform(17)
+        try core.profiles.write(profile)
+        try core.startTour(with: StandardProfiles.focus1, replacing: copy)
+        #expect(core.profiles.list().contains("Developer"))
+    }
+
+    /// The tour's own later write (the look) leaves its copy the
+    /// tour's, once re-read.
+    @Test("a re-read copy is untouched after the tour's own write")
+    func rereadCopyStaysUntouched() throws {
+        let core = makeCore()
+        let saved = try core.startTour(
+            with: StandardProfiles.developer1,
+            replacing: nil
+        )
+        var profile = try core.profiles.read(name: "Developer")
+        profile.settings.gapsGlobal = .uniform(9)
+        try core.profiles.write(profile)
+        let copy = try #require(saved.flatMap(core.tourCopyRead))
+        #expect(
+            core.tourDesk(among: offered, copy: copy)
+                == .untouched(StandardProfiles.developer1)
+        )
+    }
+
     /// Five screens take the four-screen presets, a Space more on
     /// the fifth; the picture and the apply agree.
     @Test("a desk past four screens takes a four-screen preset")
