@@ -11250,7 +11250,7 @@ main screen, 5–8 on a second, 5–7 and 8–10 with three, each further
 screen the next number — rather than following the new family, or an
 upgrade would move Space 4 to the second screen and 7–8 to the main
 one and seed a Space on the screen they left. The display resolve and
-the Settings pictures read that one plan
+the Settings pictures read that one plan, `SpacePlacement.numberedPlan`
 (`ProfileCompositionTests` ▸ `fallbackKeepsTheOldPlan`,
 `SpaceStepVerbTests` ▸ `neverCreates`); a preset's apply pins what
 it places, so the family's own plan never needs it.
