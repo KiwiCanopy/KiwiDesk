@@ -18,6 +18,14 @@ struct StarterSingleSpaceTests {
 
     @Test("each shape's single-Space order is the ruled one")
     func orders() {
+        // The shape's own list, the laptop's reversed.
+        for shape in ScreenClass.allCases {
+            let own = shape.layouts
+            #expect(
+                StarterAllocation.singleSpaceOrder(for: shape)
+                    == (shape == .laptop ? own.reversed() : own)
+            )
+        }
         let order = StarterAllocation.singleSpaceOrder(for:)
         #expect(order(.laptop) == [.monocle, .scrolling])
         #expect(order(.desktop) == [.grid, .stack, .bsp, .scrolling])

@@ -7829,16 +7829,18 @@ count and then one more per screen (N + 1), soft-capped at ten,
 and more screens never get fewer spaces (owner ruling, #3294,
 replacing 3 · 5 · 7 · 8 · 9). Below four screens each screen's
 share is proportional to its width and clamped to 1...3; from
-four, the widest screen holds its lead and the Floating space,
-and every other screen one space.
+four to nine, the widest screen holds its lead and the Floating
+space, and every other screen one space; from ten, where the cap
+meets the count, every screen holds one and there is no Floating
+space.
 The cap is on *spaces*, so min-one-per-screen outranks it:
 eleven displays gets eleven spaces, because a screen with none
 has nowhere for a window to resolve to. Three rules ride on top —
 exactly one Floating space, on the widest screen that has room
 beside it; the lead ruled below; and no layout twice unless the
 budget forces it or the lead repeats it deliberately. The
-count stops growing past two screens because a third, fourth or
-fifth screen is almost always glanceable (logs, chat, a stream)
+count holds at five from two screens to four because a third or
+fourth screen is almost always glanceable (logs, chat, a stream)
 and wants one space that is always the same — the old ladder
 handed a four-screen desk eight, most never used; the cost of a
 space is a key to bind and a name to recall, not screen area.
@@ -7851,15 +7853,21 @@ and ⌥0 there are no default go-to keys left.
 With an ultrawide or super ultrawide among several screens, the
 lead rule around this paragraph gives way: the ultrawides lead
 Scrolling, every other screen of two or more spaces leads Monocle,
-and each such screen ends in its own Floating space. A Scrolling
-row belongs where it has width to run; beside one, the other
-screen's job is to hold whole windows. (Owner ruling, #1662.) The
-budget is the ladder's (#3294; it was three a screen), so below
-four screens a companion holding two spaces — a MacBook beside an
-ultrawide, the common case — is Monocle · Floating, and the one
-screen holding three adds its ruled layout between: a widescreen
-BSP, a portrait or laptop screen Grid, an ultrawide Stack. A
-screen left one space takes the single-Space order below.
+and each such screen ends in its own Floating space — below four
+screens the one exception to "exactly one Floating space". A
+Scrolling row belongs where it has width to run; beside one, the
+other screen's job is to hold whole windows. (Owner ruling,
+#1662.) The budget is the ladder's (#3294; it was three a
+screen), so below four screens a companion holding two spaces — a
+MacBook beside an ultrawide, the common case — is Monocle ·
+Floating, and the screen holding three, in practice the
+ultrawide, is Scrolling · Stack · Floating; a widescreen companion
+as wide as a short ultrawide takes that third space instead, with
+BSP. Per class again, two rules of #3294 bend here: from four
+screens the lead and the Floating space go to the widest
+*ultrawide*, not the widest screen, and a one-space companion
+whose single-Space order reaches Scrolling takes Monocle instead,
+even as a repeat (ruling, 2026-11-13, #3294, citing #1662).
 :::
 
 :::unreleased
@@ -7874,8 +7882,11 @@ nothing — the one job a glanceable screen has. The widest screen
 is where a floating window has the most room, and it already
 holds two spaces, so the Floating space goes there and the desk
 keeps the "exactly one" rule the ladder has always had. Below
-four screens the companions keep #1662's own Floating space,
-because there each still holds two.
+four screens a companion holding two keeps #1662's own Floating
+space; at three screens width order wins, so the narrowest — a
+MacBook beside an ultrawide and a 27", say — holds one space,
+Monocle, and only a companion holding two keeps Monocle ·
+Floating (owner ruling, 2026-11-13, #3294).
 :::
 
 A laptop's Grid is two by two rather than one
@@ -7932,7 +7943,11 @@ earlier in the order on a tie. A laptop's order leads Monocle,
 against its tiled list, because one space on a small screen is a
 screen of whole windows; that is also what #1018 gave the
 smallest screen, so a laptop on a big desk still opens in
-Monocle.
+Monocle. Two consequences are accepted: from five screens the
+orders run out and an entry repeats, its tuning staying the
+first screen's (`StarterSetup.hosts`); and from ten, where every
+screen holds one space, a desk may have no Scrolling space at
+all, so #1018's "at least one" holds only below that.
 :::
 
 **A starter Scrolling slot is set, not left on `auto`.** `auto`

@@ -4,23 +4,14 @@ import Foundation
 /// of its shape's single-Space order that no other screen on the
 /// desk holds, so a four-screen desk keeps its variety.
 extension StarterAllocation {
-    /// A one-Space screen's candidates, best first (#3294). The
-    /// laptop's leads Monocle, the opposite of its
-    /// `ScreenClass.layouts`: one Space on a small screen is a
-    /// screen of whole windows.
+    /// A one-Space screen's candidates, best first (#3294): the
+    /// shape's `ScreenClass.layouts`, the laptop's reversed to lead
+    /// Monocle — one Space on a small screen is a screen of whole
+    /// windows.
     static func singleSpaceOrder(for shape: ScreenClass)
         -> [LayoutMode]
     {
-        switch shape {
-        case .laptop:
-            [.monocle, .scrolling]
-        case .desktop:
-            [.grid, .stack, .bsp, .scrolling]
-        case .superUltrawide, .ultrawide:
-            [.stack, .track, .grid]
-        case .pivoted:
-            [.stack, .grid, .monocle]
-        }
+        shape == .laptop ? shape.layouts.reversed() : shape.layouts
     }
 
     /// The layout a one-Space screen of `shape` takes beside the
@@ -40,19 +31,25 @@ extension StarterAllocation {
     }
 
     /// Fills every screen whose share is one, widest first, after
-    /// the screens of two or more Spaces are placed.
+    /// the screens of two or more Spaces are placed. Beside an
+    /// ultrawide a non-ultrawide never scrolls: its Scrolling pick
+    /// becomes Monocle (#1662, #3294).
     static func fillSingleSpaces(
         _ result: inout [[LayoutMode]],
         shares: [Int],
         shapes: [ScreenClass],
-        order: [Int]
+        order: [Int],
+        besideUltrawide: Bool = false
     ) {
         for index in order where shares[index] == 1 {
+            let shape = shapes[index]
+            let pick = singleSpaceLayout(
+                for: shape,
+                placed: result.flatMap { $0 }
+            )
+            let scrollsHere = !besideUltrawide || shape.isUltrawide
             result[index] = [
-                singleSpaceLayout(
-                    for: shapes[index],
-                    placed: result.flatMap { $0 }
-                )
+                pick == .scrolling && !scrollsHere ? .monocle : pick
             ]
         }
     }

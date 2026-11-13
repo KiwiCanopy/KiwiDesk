@@ -30,16 +30,18 @@ public enum StarterAllocation {
 
     /// Each screen's share of `budget`: proportional by width
     /// below `wideDeskScreens`; from there one Space a screen and
-    /// the remainder on the widest (#3294).
+    /// the remainder on `widest`, by default the widest by points
+    /// (#3294).
     static func deskShares(
         widths: [CGFloat],
-        budget: Int
+        budget: Int,
+        widest: Int? = nil
     ) -> [Int] {
         guard widths.count >= wideDeskScreens else {
             return shares(widths: widths, budget: budget)
         }
         var share = Array(repeating: minShare, count: widths.count)
-        if let widest = fillOrder(widths: widths).first {
+        if let widest = widest ?? fillOrder(widths: widths).first {
             share[widest] += min(
                 maxShare - minShare,
                 max(0, budget - widths.count)
@@ -185,10 +187,10 @@ public enum StarterAllocation {
         }
     }
 
-    /// Takes `quota` layouts off the list. The obligation: never
-    /// repeat while this screen still has an unheld entry, and
-    /// when the budget forces a repeat, rotate PAST the held one
-    /// so the duplicate is never adjacent to its twin.
+    /// Takes `quota` layouts off the list, never one `used` while
+    /// an unused entry remains; past that, an entry this screen
+    /// does not hold yet, so a forced repeat never sits beside its
+    /// twin. Under #3294's ladder `quota` is at most one.
     private static func take(
         _ quota: Int,
         from list: [LayoutMode],
@@ -201,19 +203,9 @@ public enum StarterAllocation {
             picked.append(mode)
             used.insert(mode)
         }
-        guard !list.isEmpty else { return picked }
-        var cursor = 0
-        while picked.count < quota {
+        while picked.count < quota, let first = list.first {
             let held = Set(picked + beside)
-            if let fresh = list.firstIndex(where: {
-                !held.contains($0)
-            }) {
-                picked.append(list[fresh])
-                cursor = fresh + 1
-            } else {
-                picked.append(list[cursor % list.count])
-                cursor += 1
-            }
+            picked.append(list.first { !held.contains($0) } ?? first)
         }
         return picked
     }

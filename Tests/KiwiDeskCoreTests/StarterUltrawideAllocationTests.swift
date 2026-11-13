@@ -15,6 +15,8 @@ struct StarterUltrawideAllocationTests {
     private let screen27 = CGSize(width: 2560, height: 1440)
     private let portrait = CGSize(width: 1440, height: 2560)
     private let laptop = CGSize(width: 1512, height: 982)
+    /// An ultrawide by aspect, no wider than a 27".
+    private let narrowWide = CGSize(width: 2560, height: 1080)
 
     @Test("below four screens a companion is Monocle · Floating")
     func companions() {
@@ -84,6 +86,8 @@ struct StarterUltrawideAllocationTests {
             [superWide, ultrawide],
             [laptop, portrait, superWide],
             [screen27, screen27, ultrawide, portrait],
+            [ultrawide, laptop, laptop, laptop],
+            [screen27, narrowWide, laptop, laptop],
         ]
         for sizes in setups {
             let modes = StarterAllocation.modes(sizes: sizes)
@@ -101,6 +105,49 @@ struct StarterUltrawideAllocationTests {
         }
     }
 
+    /// From four screens the two Spaces go to the widest
+    /// ULTRAWIDE, whatever is wider by points, and a one-Space
+    /// companion takes Monocle where its order reaches Scrolling
+    /// (#1662, #3294).
+    @Test("from four screens the widest ultrawide holds two")
+    func wideDeskLeadIsTheUltrawide() {
+        let bigDesk = CGSize(width: 2880, height: 1620)
+        #expect(
+            StarterAllocation.modes(
+                sizes: [laptop, bigDesk, narrowWide, screen27]
+            )
+                == [
+                    [.monocle], [.grid],
+                    [.scrolling, .floating], [.stack],
+                ]
+        )
+        #expect(
+            StarterAllocation.modes(
+                sizes: [ultrawide, laptop, laptop, laptop]
+            )
+                == [
+                    [.scrolling, .floating],
+                    [.monocle], [.monocle], [.monocle],
+                ]
+        )
+    }
+
+    /// Width order wins at three screens (owner, 2026-11-13,
+    /// #3294): the narrowest MacBook holds one Space.
+    @Test("at three screens the narrowest MacBook holds one")
+    func threeScreenMacBook() {
+        #expect(
+            StarterAllocation.modes(
+                sizes: [ultrawide, screen27, laptop]
+            )
+                == [
+                    [.scrolling, .floating],
+                    [.monocle, .floating],
+                    [.monocle],
+                ]
+        )
+    }
+
     @Test("a lone ultrawide is not a companion setup")
     func budget() {
         #expect(!StarterAllocation.hasUltrawideCompanion([ultrawide]))
@@ -112,8 +159,8 @@ struct StarterUltrawideAllocationTests {
 
     @Test("a companion Grid is tuned for the screen it sits on")
     func companionGridShape() {
-        // The portrait holds one Space; the laptop beside it,
-        // wider, took Monocle, so the portrait draws Grid.
+        // The portrait holds one Space and the ultrawide's three
+        // hold Stack, so the portrait draws Grid.
         let tall = StarterSetup.settings(
             sizes: [ultrawide, portrait, laptop]
         )

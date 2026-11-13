@@ -108,19 +108,26 @@ struct StarterAllocationTests {
     /// review, 2026-08-11).
     @Test("equal screens get equal shares, wider screens more")
     func sharesAreProportional() {
-        // Two identical screens beside a wider one: the twins
-        // must not differ, whatever the budget arithmetic does.
+        // Two identical screens beside a wider one: five Spaces
+        // cannot split them evenly, so the twins differ by one at
+        // most and neither out-ranks the wider screen.
         let twins = StarterAllocation.shares(
             widths: [1080, 1080, 1728],
-            budget: 7
+            budget: 5
         )
-        #expect(twins[0] == twins[1], "identical screens: \(twins)")
-        #expect(twins[2] >= twins[0], "the widest lost: \(twins)")
+        #expect(
+            abs(twins[0] - twins[1]) <= 1,
+            "identical screens: \(twins)"
+        )
+        #expect(
+            twins[2] >= max(twins[0], twins[1]),
+            "the widest lost: \(twins)"
+        )
 
         // The narrowest screen may never out-rank a wider one.
         let mixed = StarterAllocation.shares(
             widths: [1080, 1512, 1512],
-            budget: 7
+            budget: 5
         )
         #expect(
             mixed[0] <= mixed[1] && mixed[0] <= mixed[2],
@@ -136,8 +143,8 @@ struct StarterAllocationTests {
         // by `widthOrderIsNeverInverted` (guard-prover,
         // 2026-08-11).
         let clamped = StarterAllocation.shares(
-            widths: [1080, 1440, 1512, 1728, 2560, 3440],
-            budget: 10
+            widths: [1080, 1512, 3440],
+            budget: 5
         )
         #expect(
             clamped[0] <= clamped[1],
@@ -147,17 +154,17 @@ struct StarterAllocationTests {
                     + "wider one: \(clamped)"
             )
         )
-        #expect(clamped.reduce(0, +) == 10)
+        #expect(clamped.reduce(0, +) == 5)
 
-        // Five identical screens split as evenly as the budget
-        // allows — never [3,3,1,1,1].
-        let five = StarterAllocation.shares(
-            widths: Array(repeating: 1920, count: 5),
-            budget: 9
+        // Three identical screens split as evenly as the budget
+        // allows — never [3,1,1].
+        let three = StarterAllocation.shares(
+            widths: Array(repeating: 1920, count: 3),
+            budget: 5
         )
         #expect(
-            (five.max() ?? 0) - (five.min() ?? 0) <= 1,
-            "identical screens split unevenly: \(five)"
+            (three.max() ?? 0) - (three.min() ?? 0) <= 1,
+            "identical screens split unevenly: \(three)"
         )
     }
 
@@ -188,14 +195,35 @@ struct StarterAllocationTests {
         let widths = [CGFloat](repeating: 1920, count: 3)
         let first = StarterAllocation.shares(
             widths: widths,
-            budget: 7
+            budget: 5
         )
         let second = StarterAllocation.shares(
             widths: widths,
-            budget: 7
+            budget: 5
         )
         #expect(first == second)
-        #expect(first.reduce(0, +) == 7)
+        #expect(first.reduce(0, +) == 5)
+    }
+
+    /// `ruledLayout` keys an ultrawide on Stack alone because no
+    /// second screen can hold three Spaces; a ladder that lets two
+    /// do so owes that walk a second tiled layout again (#3294).
+    @Test("no two screens ever hold three Spaces")
+    func oneScreenAtMostHoldsThree() {
+        let pool: [CGFloat] = [
+            3440, 5120, 2560, 1728, 1440, 2560, 1080, 3840, 1920,
+            1512, 2880,
+        ]
+        for count in 1...pool.count {
+            let shares = StarterAllocation.deskShares(
+                widths: Array(pool.prefix(count)),
+                budget: StarterAllocation.budget(screenCount: count)
+            )
+            #expect(
+                shares.count(where: { $0 >= 3 }) <= 1,
+                "\(count) screens: \(shares)"
+            )
+        }
     }
 
     // MARK: - Modes

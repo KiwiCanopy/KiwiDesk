@@ -943,16 +943,18 @@ beside an ultrawide opens in monocle.
 :::unreleased
 The total is 3 spaces for one screen and 5 for two, three or
 four, then one more per screen up to ten. Below four screens each
-screen's share is proportional to its width; from four, the
-widest screen holds its first space and the floating one, and
-every other screen one space. Away from an ultrawide, every setup
-gets exactly one floating space, on the widest screen with room
-beside it.
+screen's share is proportional to its width; from four to nine,
+the widest screen holds its first space and the floating one, and
+every other screen one space; from ten, every screen holds one.
+Away from an ultrawide, every setup with room for it gets exactly
+one floating space, on the widest screen.
 
-A screen holding one space opens in the first layout of its list
-here that no other screen holds: laptop monocle · scrolling,
-desktop grid · stack · bsp · scrolling, ultrawide stack · track ·
-grid, portrait stack · grid · monocle.
+Only a screen holding two or more spaces opens as above. A screen
+holding one opens in the first layout of its list here that no
+other screen holds, or the one fewest screens hold once all are
+taken: laptop monocle · scrolling, desktop grid · stack · bsp ·
+scrolling, ultrawide stack · track · grid, portrait stack · grid ·
+monocle.
 :::
 
 Each layout is tuned for the screen it sits on, scrolling for
@@ -969,11 +971,11 @@ screen.
 :::unreleased
 With an ultrawide beside other screens, scrolling lives on the
 ultrawide alone: every other screen holding two or more spaces
-opens in monocle and ends in its own floating space. A screen
-holding two gets monocle · floating; the one holding three adds a
-layout between them — bsp on a widescreen, grid on a portrait
-screen (one column of three) or a laptop (two by two). From four
-screens only the widest gets a floating space.
+opens in monocle and ends in its own floating space, so a laptop
+beside an ultrawide gets monocle · floating, and the ultrawide
+scrolling · stack · floating. A screen holding one space takes its
+list above, monocle in place of scrolling. From four screens the
+widest ultrawide holds the two spaces and the only floating one.
 :::
 
 While you are still on the starter setup, connecting or removing
