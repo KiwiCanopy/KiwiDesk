@@ -14,8 +14,10 @@ public enum Navigation {
     /// Candidates must overlap the origin on the cross axis —
     /// otherwise a full-height master would jump diagonally
     /// into the stack — and lateral offset is penalized so
-    /// straight neighbors beat diagonal ones. A tie goes to
-    /// `tie` (#2619).
+    /// straight neighbors beat diagonal ones. The offset is the
+    /// origin's center past the candidate's span, so a window
+    /// spanning it reads straight however wide it is (#3207). A
+    /// tie goes to `tie` (#2619).
     public static func neighbor(
         from origin: CGRect,
         in direction: Direction,
@@ -50,19 +52,35 @@ public enum Navigation {
             switch direction {
             case .left:
                 forward = -dx
-                lateral = abs(dy)
+                lateral = offset(
+                    originCenter.y,
+                    candidate.frame.minY,
+                    candidate.frame.maxY
+                )
                 edge = origin.minX - candidate.frame.maxX
             case .right:
                 forward = dx
-                lateral = abs(dy)
+                lateral = offset(
+                    originCenter.y,
+                    candidate.frame.minY,
+                    candidate.frame.maxY
+                )
                 edge = candidate.frame.minX - origin.maxX
             case .up:
                 forward = -dy
-                lateral = abs(dx)
+                lateral = offset(
+                    originCenter.x,
+                    candidate.frame.minX,
+                    candidate.frame.maxX
+                )
                 edge = origin.minY - candidate.frame.maxY
             case .down:
                 forward = dy
-                lateral = abs(dx)
+                lateral = offset(
+                    originCenter.x,
+                    candidate.frame.minX,
+                    candidate.frame.maxX
+                )
                 edge = candidate.frame.minY - origin.maxY
             }
             guard forward > 0.5 else { continue }
@@ -81,5 +99,14 @@ public enum Navigation {
             crossIsY: direction == .left || direction == .right,
             tie: tie
         )
+    }
+
+    /// How far `value` lies outside `low...high`; zero inside.
+    private static func offset(
+        _ value: CGFloat,
+        _ low: CGFloat,
+        _ high: CGFloat
+    ) -> CGFloat {
+        value < low ? low - value : (value > high ? value - high : 0)
     }
 }
