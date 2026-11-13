@@ -136,7 +136,7 @@ struct MonitorChangeTests {
         )
     }
 
-    @Test("Without gui.json the Standard only steers placement")
+    @Test("Without gui.json nothing is adopted, Lua keeps tiling")
     func luaOwnedTilingSurvives() throws {
         let core = makeCore()
         connect(core, [display(1, "A")])
