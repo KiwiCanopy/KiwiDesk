@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -109,11 +110,9 @@ struct ShortcutsSheetTests {
         for symbol in Set(
             glyphs.compactMap { $0 } + ShortcutsReferenceBuilder.verbSymbols
         ) {
+            // A composed glyph resolves through its door (#3284).
             #expect(
-                NSImage(
-                    systemSymbolName: symbol,
-                    accessibilityDescription: nil
-                ) != nil,
+                SymbolImage.named(symbol) != nil,
                 "\(symbol) does not resolve"
             )
         }

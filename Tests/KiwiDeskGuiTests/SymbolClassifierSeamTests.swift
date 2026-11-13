@@ -7,7 +7,9 @@ import Testing
 /// `KiwiCore.iconIsSymbol` — a hand copy beside a drawing site is
 /// how the Bars preview came to show a symbol's name as text
 /// (#1538). The subject is the LOOKUP: every `systemSymbolName:`
-/// in either tree is listed with what it does, so a new one reds
+/// and every `SymbolImage.named(` — the door a name that may be a
+/// composed glyph takes (#3284) — in either tree is listed with
+/// what it does, so a new one reds
 /// until a reader classifies it; two shape needles beside it
 /// refuse a classifier inside a listed file — the nil-compare
 /// the round-1 copies had, and the `if let` arm that drew a
@@ -23,7 +25,7 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDesk/StatusItemController+Icon.swift":
             "builds the status image; ⚠︎ when a fixed name fails",
         "Sources/KiwiDesk/StatusItemController.swift":
-            "builds a template image from a fixed name",
+            "builds a menu row's template image through the door",
         "Sources/KiwiDesk/StatusItemController+SpaceMark.swift":
             "builds the Space mark's image from a `.symbol` verdict",
         "Sources/KiwiDesk/StatusItemController+Updates.swift":
@@ -35,7 +37,7 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Ends.swift":
             "measures a `.symbol` verdict's ink for a lone chip's ends",
         "Sources/KiwiDeskCore/Bar/StateBadgeView.swift":
-            "builds a badge image from a fixed name",
+            "builds a badge image from a fixed name, through the door",
         "Sources/KiwiDeskCore/Bar/BarPeekBody+More.swift":
             "builds the peek's more-line chevron from a fixed name",
         "Sources/KiwiDeskCore/Bar/BarPeekBody+Parts.swift":
@@ -43,7 +45,11 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":
             "builds the Space marker's image from a fixed name",
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay+Glyphs.swift":
-            "builds the state mark images from fixed names",
+            "builds the state mark images through the door",
+        "Sources/KiwiDeskCore/Borders/SymbolImage.swift":
+            "the door: a composed glyph's image, else the symbol's",
+        "Tests/KiwiDeskCoreTests/ComposedSymbolTests.swift":
+            "asserts composed glyphs draw; classifies nothing",
         "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Pill.swift":
             "render-time net on a name `homeSpaceMark` classified",
         "Tests/KiwiDeskCoreTests/FloatingMarkTests.swift":
@@ -59,7 +65,7 @@ struct SymbolClassifierSeamTests {
         "Tests/KiwiDeskGuiTests/ShortcutRowSymbolTests.swift":
             "asserts every row symbol RESOLVES; classifies nothing",
         "Sources/KiwiDeskCore/Bar/BarMenu.swift":
-            "builds a bar menu row's image from a fixed name",
+            "builds a bar menu row's image through the door",
         "Sources/KiwiDeskCore/Bar/ShelfCountView.swift":
             "builds the overflow count's chevron from a fixed name",
         "Sources/KiwiDeskCore/Bar/FloatBreakMark.swift":
@@ -84,7 +90,9 @@ struct SymbolClassifierSeamTests {
             for file in files {
                 scanned += 1
                 let source = try SourceScan.blankedSource(at: file)
-                if source.contains("systemSymbolName:") {
+                if source.contains("systemSymbolName:")
+                    || source.contains("SymbolImage.named(")
+                {
                     found.insert(
                         file.path.replacingOccurrences(
                             of: root.path + "/",
@@ -135,13 +143,16 @@ struct SymbolClassifierSeamTests {
             "asserts every count chevron resolves",
         "Tests/KiwiDeskGuiTests/ShortcutsSheetTests.swift":
             "asserts every verb glyph resolves",
+        "Tests/KiwiDeskCoreTests/ComposedSymbolTests.swift":
+            "asserts an unknown `kiwi.*` name resolves to nothing",
     ]
 
     @Test("A nil-compared lookup lives in the classifier alone")
     func nilComparedLookupHasOneHome() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let compare = try Regex(
-            #"systemSymbolName:[^;{}]{0,160}?\)\s*[!=]= nil"#
+            #"(systemSymbolName:|SymbolImage\.named\()"#
+                + #"[^;{}]{0,160}?\)\s*[!=]= nil"#
         )
         var found: Set<String> = []
         var scanned = 0
@@ -173,7 +184,8 @@ struct SymbolClassifierSeamTests {
     func classifyByBindingHasOneHome() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let binding = try Regex(
-            #"(if|guard)\s+let\s+\w+\s*=\s*NSImage\(\s*systemSymbolName:"#
+            #"(if|guard)\s+let\s+\w+\s*=\s*"#
+                + #"(NSImage\(\s*systemSymbolName:|SymbolImage\.named\()"#
         )
         var found: Set<String> = []
         var scanned = 0
