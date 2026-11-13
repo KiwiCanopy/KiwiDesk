@@ -94,6 +94,17 @@ extension KiwiCore {
         if scope == .profile, let refusal = profileScopeRefusal(of: space) {
             return .fail(refusal.description)
         }
+        return deleteSpace(space, forwardingTo: target, scope: scope)
+    }
+
+    /// The delete itself, `space`'s windows forwarded to `target`:
+    /// the verb's arm, and the tour's replace, which names a Space
+    /// it keeps (#3294).
+    func deleteSpace(
+        _ space: SpaceID,
+        forwardingTo target: SpaceID,
+        scope: SpaceScope = .session
+    ) -> CommandResponse {
         forwardWindows(of: space, to: target)
         endHold(of: space)
         tiler.settings.removeSpace(space)

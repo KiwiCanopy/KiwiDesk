@@ -31,13 +31,7 @@ extension KiwiCore {
         ).first?.id
         var placed: [(TourSpace, DisplayID?)] = []
         if let layout {
-            guard layout.plans(forScreens: displays.count),
-                let composed = ProfileComposition.compose(
-                    layout: layout,
-                    displays: displays,
-                    mainID: PositionalDisplays.liveMainID
-                )
-            else { return [] }
+            guard let composed = composedOnLive(layout) else { return [] }
             placed = composed.spaces.map { id in
                 (
                     TourSpace(id: id, mode: composed.spaceModes[id] ?? .bsp),

@@ -15,14 +15,7 @@ extension KiwiCore {
     /// `layout` composed onto the live screens as a Space set; nil
     /// where it plans more screens than are connected.
     public func spaceSet(for layout: StandardLayout) -> SpaceSet? {
-        let displays = state.workspaces.allDisplays
-        guard layout.plans(forScreens: displays.count),
-            let composed = ProfileComposition.compose(
-                layout: layout,
-                displays: displays,
-                mainID: PositionalDisplays.liveMainID
-            )
-        else { return nil }
+        guard let composed = composedOnLive(layout) else { return nil }
         let placement = composedPlacement(composed)
         return SpaceSet(
             spaces: composed.spaces,
@@ -48,8 +41,33 @@ extension KiwiCore {
     /// through and applied; false where nothing was written.
     @discardableResult
     public func replaceSpaces(with layout: StandardLayout) -> Bool {
-        guard let set = spaceSet(for: layout) else { return false }
+        guard let name = profiles.currentName,
+            let profile = try? profiles.read(name: name),
+            keepsLiveScreens(profile),
+            let set = spaceSet(for: layout)
+        else { return false }
         return writeSpaces(set)
+    }
+
+    /// Whether `profile` keeps a layout for the connected screens,
+    /// so a replace can record which screen each Space is on.
+    func keepsLiveScreens(_ profile: Profile) -> Bool {
+        profile.set(matching: liveFingerprints) != nil
+    }
+
+    /// `layout` composed onto the live screens — the one composition
+    /// the apply, the replace and the tour's picture take; nil where
+    /// it does not plan for this many screens.
+    func composedOnLive(
+        _ layout: StandardLayout
+    ) -> ProfileComposition.Composed? {
+        let displays = state.workspaces.allDisplays
+        guard layout.plans(forScreens: displays.count) else { return nil }
+        return ProfileComposition.compose(
+            layout: layout,
+            displays: displays,
+            mainID: PositionalDisplays.liveMainID
+        )
     }
 
     /// Puts back the Spaces `baseline` saved; refused once another
@@ -94,14 +112,12 @@ extension KiwiCore {
 
     /// Drops the Spaces a replace leaves out — a same-profile apply
     /// keeps an undeclared Space as a temporary one (#1790) —
-    /// through `delete_space`'s own door, their windows forwarded
+    /// through `delete_space`'s own delete, their windows forwarded
     /// to `target`, a Space the set keeps.
     private func dropSpaces(_ dropped: [SpaceID], into target: SpaceID?) {
-        let fallback = fallbackSpace
-        fallbackSpace = target
-        defer { fallbackSpace = fallback }
+        guard let target else { return }
         for id in dropped where state.workspaces[id] != nil {
-            let response = execute("delete_space", args: [.string(id.raw)])
+            let response = deleteSpace(id, forwardingTo: target)
             if !response.isSuccess {
                 onLog(
                     "tour: Space \(id.raw) stays: "

@@ -2078,7 +2078,13 @@ still reads as that pick wrote it (`KiwiCore.TourCopy`); a copy
 the user edited, or one from before the tour, is their desk, which
 a pick replaces in place and never deletes
 (`TourStartReplaceTests` ▸ `editedCopyIsChanged`,
-`earlierCopyIsChanged`).
+`earlierCopyIsChanged`). A later tour step that writes the live
+profile — the look, the bars, their Reverts — goes through
+`OnboardingStartModel.writingProfile`, which re-reads the copy only
+while it was intact before the write (`TourProfileWriteSeamTests`,
+`OnboardingStartModelTests` ▸ `laterWriteRereadsOnlyIntact`). The
+apply, the replace and the tour's picture compose a layout onto the
+live screens through the one `composedOnLive`.
 
 **One draft, one identity, one encoder (#1393).** The page a
 draft resolves and encodes against is `SettingsModel.reachPage`,

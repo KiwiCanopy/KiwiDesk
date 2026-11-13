@@ -40,9 +40,7 @@ extension KiwiCore {
         guard let profile = try? profiles.read(name: name) else {
             return .changed
         }
-        guard profile.set(matching: liveFingerprints) != nil else {
-            return .foreign
-        }
+        guard keepsLiveScreens(profile) else { return .foreign }
         if let copy, copy.profile == profile,
             let layout = offered.first(where: { $0.name == copy.layout })
         {

@@ -149,6 +149,29 @@ struct OnboardingStartModelTests {
         #expect(calls.started.count == 1)
     }
 
+    /// A later step's write re-reads an intact copy and drops one
+    /// the user changed, so that one is never deleted.
+    @Test("a later write keeps an intact copy, drops a changed one")
+    func laterWriteRereadsOnlyIntact() {
+        let (start, calls) = model(desk: .untouched(suggested))
+        start.pick(.layout(StandardProfiles.developer1))
+        start.commit {}
+        var reread = 0
+        start.rereadCopy = { copy in
+            reread += 1
+            return copy
+        }
+        start.copyIntact = { _ in true }
+        start.writingProfile {}
+        #expect(start.copy != nil)
+        #expect(reread == 1)
+        start.copyIntact = { _ in false }
+        start.writingProfile {}
+        #expect(start.copy == nil)
+        #expect(reread == 1)
+        #expect(calls.started.count == 1)
+    }
+
     /// No saved profile live: no Current, and a pick starts fresh.
     @Test("an unsaved desk offers no Current and replaces nothing")
     func unsavedDesk() {

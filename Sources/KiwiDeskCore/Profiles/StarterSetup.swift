@@ -211,7 +211,7 @@ public enum StarterSetup {
     static func presetSettings(
         slots: [Slot],
         sizes: [CGSize],
-        main: Int = 0
+        main: Int
     ) -> TilingSettings {
         settings(
             slots: slots,

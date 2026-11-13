@@ -276,24 +276,10 @@ extension KiwiCore {
     public func applyStandard(
         _ layout: StandardLayout
     ) throws -> String {
-        let displays = state.workspaces.allDisplays
-        guard layout.plans(forScreens: displays.count) else {
+        guard let composed = composedOnLive(layout) else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: layout.screenCount,
-                live: displays.count
-            )
-        }
-        let mainID = PositionalDisplays.liveMainID
-        guard
-            let composed = ProfileComposition.compose(
-                layout: layout,
-                displays: displays,
-                mainID: mainID
-            )
-        else {
-            throw ProfileSaveError.screenCountMismatch(
-                expected: layout.screenCount,
-                live: displays.count
+                live: state.workspaces.allDisplays.count
             )
         }
         // `apply(composed:)` adopts the composed placement, so the
