@@ -141,7 +141,6 @@ public final class PointerConsumers {
     /// queued is dropped with it.
     func stop() {
         endGrab()
-        endButtons()
         started = false
         sync()
     }
