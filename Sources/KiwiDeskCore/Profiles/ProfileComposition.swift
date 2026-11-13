@@ -89,17 +89,19 @@ public enum ProfileComposition {
             )
             assignment[space] = ordered[position].id
         }
-        // A screen past the plan holds one Space, in the layout its
-        // shape's single-Space order places least on the desk
-        // (#3294), the starter's own rule.
+        // A screen past the plan holds one Space (#3294).
+        let besideUltrawide = StarterAllocation.hasUltrawideCompanion(
+            ordered.map(\.frame.size)
+        )
         var next = layout.spaceCount + 1
         for position in layout.screenCount..<ordered.count {
             let space = SpaceID(next)
             next += 1
             spaces.append(space)
-            modes[space] = StarterAllocation.singleSpaceLayout(
-                for: ScreenClass.of(ordered[position]),
-                placed: spaces.dropLast().compactMap { modes[$0] }
+            modes[space] = extraScreenMode(
+                ScreenClass.of(ordered[position]),
+                placed: spaces.dropLast().compactMap { modes[$0] },
+                besideUltrawide: besideUltrawide
             )
             assignment[space] = ordered[position].id
         }
@@ -113,5 +115,22 @@ public enum ProfileComposition {
             ),
             sourceTitle: layout.starterTitle
         )
+    }
+
+    /// The one Space of a screen past a plan: the starter's
+    /// single-Space pick, with the starter's clamp beside an
+    /// ultrawide, where a non-ultrawide never scrolls (#1662,
+    /// #3294) — the same two steps `fillSingleSpaces` takes.
+    static func extraScreenMode(
+        _ shape: ScreenClass,
+        placed: [LayoutMode],
+        besideUltrawide: Bool
+    ) -> LayoutMode {
+        let pick = StarterAllocation.singleSpaceLayout(
+            for: shape,
+            placed: placed
+        )
+        let scrollsHere = !besideUltrawide || shape.isUltrawide
+        return pick == .scrolling && !scrollsHere ? .monocle : pick
     }
 }

@@ -9039,7 +9039,7 @@ in this order:
    count → loaded with the dirty flag.
 4. **Built-in Standard** — no saved profile for that count → a built-in
    positional layout composes silently; screens beyond its plan each
-   get one monocle space, so no screen is ever blank.
+   get one space, so no screen is ever blank.
 
    The Standard only *owns tiling* when the config is GUI-managed: a
    `gui.json` sidecar exists *and* `init.lua` holds no code touching

@@ -192,21 +192,49 @@ struct ProfileCompositionTests {
         }
     }
 
-    @Test("Extra screens each get one fresh monocle space")
-    func monocleFill() throws {
+    /// The 4-screen Standard (8 Spaces) plus screen 5, which takes
+    /// the starter's single-Space rule: on a desktop-class screen
+    /// the first of Grid · Stack · BSP · Scrolling placed least.
+    @Test("an extra screen gets one Space by the single-Space rule")
+    func extraScreenFill() throws {
         let composed = try #require(
             ProfileComposition.compose(
                 displays: displays(5),
                 mainID: DisplayID(1)
             )
         )
-        // 3-screen Standard (10 spaces) + screens 4 and 5.
-        #expect(composed.sourceName == "Command Center")
-        #expect(composed.spaces.count == 12)
-        #expect(composed.spaceModes[SpaceID(11)] == .monocle)
-        #expect(composed.spaceModes[SpaceID(12)] == .monocle)
-        #expect(composed.assignment[SpaceID(11)] == DisplayID(4))
-        #expect(composed.assignment[SpaceID(12)] == DisplayID(5))
+        #expect(composed.sourceName == "Developer")
+        #expect(composed.spaces.count == 9)
+        #expect(composed.spaceModes[SpaceID(9)] == .bsp)
+        #expect(composed.assignment[SpaceID(9)] == DisplayID(5))
+    }
+
+    /// Beside an ultrawide a non-ultrawide extra screen never
+    /// scrolls (#1662); a laptop leads Monocle.
+    @Test("an extra screen beside an ultrawide never scrolls")
+    func extraScreenClamp() {
+        let unplaced: [LayoutMode] = [.grid, .stack, .bsp]
+        #expect(
+            ProfileComposition.extraScreenMode(
+                .desktop,
+                placed: unplaced,
+                besideUltrawide: false
+            ) == .scrolling
+        )
+        #expect(
+            ProfileComposition.extraScreenMode(
+                .desktop,
+                placed: unplaced,
+                besideUltrawide: true
+            ) == .monocle
+        )
+        #expect(
+            ProfileComposition.extraScreenMode(
+                .laptop,
+                placed: [],
+                besideUltrawide: false
+            ) == .monocle
+        )
     }
 
     @Test("Positional mapping follows the main display")
