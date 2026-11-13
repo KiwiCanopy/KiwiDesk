@@ -41,12 +41,24 @@ enum TourReplaceText {
         return lead + "\n\n" + line
     }
 
+    /// The lead sentence; a one-Space desk takes a `.one` key, the
+    /// two-form shape the catalogs carry, so no count says
+    /// "1 Spaces".
     private static func lead(
         current: Int,
         preset: String?,
         spaces: Int
     ) -> String {
-        guard let preset else {
+        switch (preset, current == 1) {
+        case (nil, true):
+            return L(
+                "onboarding.start_with.replace_message.suggested.one",
+                "Your Space and its layout are replaced by the %1$d "
+                    + "suggested for your screens. App rules, shortcuts "
+                    + "and looks stay as they are.",
+                spaces
+            )
+        case (nil, false):
             return L(
                 "onboarding.start_with.replace_message.suggested",
                 "Your %1$d Spaces and their layouts are replaced by the "
@@ -55,16 +67,26 @@ enum TourReplaceText {
                 current,
                 spaces
             )
+        case (let preset?, true):
+            return L(
+                "onboarding.start_with.replace_message.one",
+                "Your Space and its layout are replaced by %1$@'s "
+                    + "%2$d. App rules, shortcuts and looks stay as "
+                    + "they are.",
+                preset,
+                spaces
+            )
+        case (let preset?, false):
+            return L(
+                "onboarding.start_with.replace_message",
+                "Your %1$d Spaces and their layouts are replaced by "
+                    + "%2$@'s %3$d. App rules, shortcuts and looks stay "
+                    + "as they are.",
+                current,
+                preset,
+                spaces
+            )
         }
-        return L(
-            "onboarding.start_with.replace_message",
-            "Your %1$d Spaces and their layouts are replaced by "
-                + "%2$@'s %3$d. App rules, shortcuts and looks stay as "
-                + "they are.",
-            current,
-            preset,
-            spaces
-        )
     }
 
     private static func named(

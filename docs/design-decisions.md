@@ -13453,10 +13453,9 @@ seen-flag) and vanishes with the first profile.
 
 :::unreleased
 The Presets section leaves Profiles (#3294), so the page has
-nothing to reorder, and a first desk is picked on the tour's
-Spaces step. The Home tile's dot and the search badge still mark
-Profiles while no profile is saved; the page they lead to offers
-saving the live layout as the first profile.
+nothing to reorder and nothing to start from, and the spotlight
+leaves with it: no Home tile dot and no "start here" search badge.
+A first desk is picked on the tour's Spaces step.
 :::
 
 **A binding row reads "Desktop n", and binding is dropdown-only.**

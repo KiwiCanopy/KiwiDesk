@@ -9,9 +9,6 @@ struct HeaderSearch: View {
     /// Whether collapsed entry is expanded.
     @Binding var expanded: Bool
     let context: SettingsSearchContext
-    /// Profiles spotlight badge state — passed through so which
-    /// list renders the tile does not change it.
-    let spotlightProfiles: Bool
     /// A census key's current value, from the draft in memory —
     /// evaluated per rendered row, after the list paints.
     let value: (SettingKey) -> String?

@@ -5,7 +5,6 @@ import SwiftUI
 struct HomeCard: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination
-    let spotlighted: Bool
     let open: () -> Void
     @State private var hovering = false
 
@@ -104,10 +103,7 @@ struct HomeCard: View {
 
     private var titleRow: some View {
         HStack(spacing: 8) {
-            SidebarTile(
-                destination: destination,
-                badged: spotlighted
-            )
+            SidebarTile(destination: destination)
             Text(destination.title)
                 .font(.headline)
                 .foregroundStyle(SettingsTheme.ink)

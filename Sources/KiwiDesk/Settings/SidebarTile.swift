@@ -1,10 +1,8 @@
 import SwiftUI
 
-/// System-Settings-style icon tile with optional badge dot.
+/// System-Settings-style icon tile.
 struct SidebarTile: View {
     let destination: SettingsDestination
-    /// Accent dot on tile corner for notifications.
-    var badged = false
     /// An `accentInk` edge, for a tile drawn on the accent — a
     /// dropdown's cursor row — where Profiles' own accent tile
     /// would otherwise lose its outline.
@@ -26,28 +24,6 @@ struct SidebarTile: View {
                 if edged {
                     RoundedRectangle(cornerRadius: 6)
                         .strokeBorder(SettingsTheme.accentInk)
-                }
-            }
-            // The badge must not be the colour of the tile it
-            // sits on, and one tile IS the accent: Profiles is
-            // the only destination that is ever badged, and its
-            // tint is `SettingsTheme.accent`. So the dot is drawn
-            // in `card` with an accent ring — legible on every
-            // tint, including its own, and for every viewer
-            // rather than only for those who can separate the two
-            // greens.
-            .overlay(alignment: .topTrailing) {
-                if badged {
-                    Circle()
-                        .fill(SettingsTheme.card)
-                        .frame(width: 7, height: 7)
-                        .overlay(
-                            Circle().strokeBorder(
-                                SettingsTheme.ink,
-                                lineWidth: 1
-                            )
-                        )
-                        .offset(x: 2, y: -2)
                 }
             }
             // The soft lift System Settings gives its sidebar
