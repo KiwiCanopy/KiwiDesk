@@ -113,15 +113,53 @@ struct SideReachTests {
         #expect(reach.takenBy?.by == leader)
     }
 
-    /// A chord leader is the sequence router's: neither judged nor
-    /// a rival, a stated residue.
-    @Test("a chord leader is left to its router")
-    func chordLeaderIsLeftOut() {
+    /// A sided chord leader is asked first, as `.sequences` is, so
+    /// it narrows an either-side chord row (#3278).
+    @Test("a sided chord leader narrows an either-side chord")
+    func chordLeaderNarrows() throws {
         let either = row("e", "cmd+h")
         let leader = KeyBinding(combo: "lcmd+h", kind: .sequence)
-        #expect(reach(either, [either, leader]) == nil)
+        let reach = try #require(reach(either, [either, leader]))
+        #expect(reach.runs == (try combo("rcmd+h")))
+        #expect(reach.takenBy?.combo == (try combo("lcmd+h")))
+        #expect(reach.takenBy?.by == leader)
+        #expect(self.reach(either, [either, leader], sides: false) == nil)
+    }
+
+    /// A leader outranks a sided press row on its other side, and a
+    /// sided leader narrows an either-side leader as rows do.
+    @Test("a leader is judged and outranks a sided row")
+    func leaderIsJudged() throws {
         let open = KeyBinding(combo: "cmd+j", kind: .sequence)
         #expect(reach(open, [open, row("p", "lcmd+j")]) == nil)
+        let sided = KeyBinding(combo: "rcmd+j", kind: .sequence)
+        let reach = try #require(reach(open, [open, sided]))
+        #expect(reach.runs == (try combo("lcmd+j")))
+        #expect(reach.takenBy?.by == sided)
+    }
+
+    /// Two leaders naming each side take every key from the chord
+    /// row: dead, and a counted conflict.
+    @Test("two sided chord leaders: dead, and a counted conflict")
+    func leadersTakeBothSides() throws {
+        let either = row("e", "cmd+h")
+        let left = KeyBinding(combo: "lcmd+h", kind: .sequence)
+        let right = KeyBinding(combo: "rcmd+h", kind: .sequence)
+        let rows = [either, left, right]
+        let reach = try #require(reach(either, rows))
+        #expect(reach.isDead)
+        #expect(Set(reach.takers.map(\.id)) == [left.id, right.id])
+        let conflict = KeybindingConflicts.conflict(
+            for: either,
+            in: rows,
+            distinguishingSides: true
+        )
+        #expect(conflict?.target == .sidesTaken([left, right]))
+        let byRow = KeybindingConflicts.rowConflicts(
+            of: rows,
+            distinguishingSides: true
+        )
+        #expect(byRow[either.id]?.target == .sidesTaken([left, right]))
     }
 
     /// The layer pass the page reads answers what the per-row door
@@ -135,6 +173,9 @@ struct SideReachTests {
             row("g", "ropt+ropt"), row("h", "ctrl+k"),
             KeyBinding(combo: "lcmd+j", kind: .sequence),
             row("i", "cmd+j"),
+            KeyBinding(combo: "lopt+m", kind: .sequence),
+            KeyBinding(combo: "ropt+m", kind: .sequence),
+            row("j", "opt+m"),
         ]
         for sides in [true, false] {
             let layer = KeybindingConflicts.rowReaches(

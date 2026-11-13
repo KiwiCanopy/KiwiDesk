@@ -2,15 +2,12 @@ import Foundation
 
 /// Which keys still fire a row whose modifiers take either side,
 /// beside rows of its chord that name a side (#3256). Read from the
-/// routers that fire it — `ModifierTapRouter.match` for a tap,
-/// `SideTapRow.match` for a chord while sides are told apart — so
-/// no reader restates which row wins. A key sequence's tap leader
-/// is a layer row and rides the tap router, so it narrows as any
-/// tap does. Residue, until the reach reads the rows the manager
-/// arms: a chord leader is the sequence router's and is left out,
-/// so a chord row a leader narrows or shadows is not narrated or
-/// counted, and rows meet by registered chord, so a keypad twin's
-/// narrowing goes unsaid.
+/// rows `KeyboardTapArming` arms, asked in the keyboard tap's
+/// consumer order (#3278): a chord's leaders first, as `.sequences`
+/// is, then `.sides`; a tap of `.modifierTaps`, tap leaders
+/// included. Each is asked of the router that fires it, so no
+/// reader restates which row wins. Residue: rows meet by registered
+/// chord, so a keypad twin's narrowing goes unsaid.
 public struct SideReach: Equatable, Sendable {
     /// One way of holding the row's modifiers, sides named, and the
     /// row that a press held that way fires.
@@ -104,28 +101,30 @@ extension KeybindingConflicts {
             parsed.modifiers.contains($0.plain)
                 && parsed.modifiers.side(of: $0) == nil
         }
-        // A chord leader is the sequence router's, which this does
-        // not model: it is neither a rival nor, so, judged.
-        let rows = Array(
-            rivals.filter {
-                $0.1.isTap == parsed.isTap
-                    && (parsed.isTap || !$0.0.isSequence)
-            }
+        guard !open.isEmpty else { return nil }
+        let rivals = Array(rivals)
+        let arming = KeyboardTapArming(
+            rows: rivals.filter { !$0.0.isSequence }.map { ($0.1, $0.0) },
+            leaders: rivals.filter(\.0.isSequence).map { ($0.1, $0.0) },
+            distinguishingSides: distinguishingSides
         )
-        guard !open.isEmpty,
-            let own = rows.firstIndex(where: { $0.0.id == binding.id })
+        // Each consumer's rows, in the order the tap asks them.
+        let consumers: [[(KeyCombo, KeyBinding)]] =
+            parsed.isTap
+            ? [arming.taps + arming.tapLeaders.map { ($0.combo, $0.leader) }]
+            : [arming.chordLeaders, arming.sides]
+        guard consumers.joined().contains(where: { $0.1.id == binding.id })
         else { return nil }
         var answered: [KeyCombo] = []
         var taken: [SideReach.Taken] = []
         for form in forms(of: parsed, opening: open) {
-            guard let winner = winner(form, rows: rows.map(\.1))
-            else {
+            guard let winner = winner(form, asking: consumers) else {
                 continue
             }
-            if winner == own {
+            if winner.id == binding.id {
                 answered.append(form)
             } else {
-                taken.append(.init(combo: form, by: rows[winner].0))
+                taken.append(.init(combo: form, by: winner))
             }
         }
         return taken.isEmpty
@@ -150,6 +149,20 @@ extension KeybindingConflicts {
                 }
             }
         }
+    }
+
+    /// The row a press held as `form` fires: the first consumer
+    /// with a row answering it decides, as the keyboard tap does.
+    private static func winner(
+        _ form: KeyCombo,
+        asking consumers: [[(KeyCombo, KeyBinding)]]
+    ) -> KeyBinding? {
+        for rows in consumers {
+            if let index = winner(form, rows: rows.map(\.0)) {
+                return rows[index].1
+            }
+        }
+        return nil
     }
 
     /// The index among `rows` of the row a press held as `form`

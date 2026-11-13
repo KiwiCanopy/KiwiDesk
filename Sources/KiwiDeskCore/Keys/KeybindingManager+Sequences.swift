@@ -29,12 +29,6 @@ extension KeybindingManager {
         sequences[layer] ?? []
     }
 
-    /// The leaders `layer`'s sequences take, so Carbon never also
-    /// registers a press row on one: the sequence wins its chord.
-    func sequenceLeaders(in layer: String) -> Set<KeyCombo> {
-        Set(sequences(for: layer).map(\.leader))
-    }
-
     /// New scroll keys reach a running tap alone, so an open
     /// sequence stays open; the next arming carries them too.
     func scrollKeysChanged(from old: KiwiHubKeys) {
