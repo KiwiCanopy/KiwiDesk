@@ -19,10 +19,7 @@ extension AppWideLedger {
             ?? settled
         guard let pace = owedPace else { return value }
         let legacy = AnimationPacePreset.legacyDefaults
-        if owed != nil {
-            value.spaceSlideDuration = legacy.slide
-            value.visionFadeDuration = legacy.fade
-        }
+        if owed != nil { value.adoptLegacySlideAndFade() }
         value.adoptPace(AppWideSettings.Animations.legacyDefaults)
         if let captured = name.flatMap({ pace[$0] }) {
             value.adoptPace(captured)

@@ -9,12 +9,16 @@ import Testing
 /// reads them.
 @Suite("Shelf glide settings (#1838)")
 struct ShelfGlideSettingsTests {
-    @Test("Defaults: on, 750 ms")
+    @Test("Defaults: on, Medium's length")
     func defaults() {
         let animations = AnimationSettings()
+        let shipped = AnimationPacePreset.shipped.expand
         #expect(animations.onExpand)
-        #expect(AppWideSettings().animationExpandDurationMS == 750)
-        #expect(animations.expandSeconds(at: AppWideSettings()) == 0.75)
+        #expect(AppWideSettings().animationExpandDurationMS == shipped)
+        #expect(
+            animations.expandSeconds(at: AppWideSettings())
+                == Double(shipped) / 1000
+        )
     }
 
     @Test("Off, the glide takes no time")

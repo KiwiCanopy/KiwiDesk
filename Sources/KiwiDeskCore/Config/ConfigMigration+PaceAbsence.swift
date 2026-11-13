@@ -27,8 +27,36 @@ extension ConfigMigration {
             data,
             gate: belowPaceAbsenceFloor,
             rewriting: withSlideAndFadeStated,
-            editing: { _ in nil }
+            editing: slideAndFadeTextStated
         )
+    }
+
+    /// The same leaves inserted as text into their groups, so the file
+    /// keeps its shape; `surgicallyApplying` checks the result and
+    /// re-serializes where an insert misses (a group absent, a group
+    /// name repeated deeper).
+    static func slideAndFadeTextStated(_ text: String) -> Data? {
+        guard
+            let root = try? JSONSerialization.jsonObject(
+                with: Data(text.utf8)
+            ) as? [String: Any]
+        else { return nil }
+        let config =
+            root[SetupBundle.shapeMarker] != nil
+            ? root["config"] as? [String: Any] : root
+        guard let config else { return nil }
+        var out = text
+        for (group, key, length) in absentPaceLeaves {
+            guard let leaves = config[group] as? [String: Any],
+                leaves[key] == nil
+            else { continue }
+            out = insertingAfterEach(
+                "\"\(key)\":\(length)",
+                pattern: "(\"\(group)\"\\s*:\\s*\\{)(\\s*\\})?",
+                in: out
+            )
+        }
+        return out == text ? nil : out.data(using: .utf8)
     }
 
     private static func belowPaceAbsenceFloor(_ data: Data) -> Bool {

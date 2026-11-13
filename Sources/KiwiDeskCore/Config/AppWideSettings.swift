@@ -132,6 +132,14 @@ public struct AppWideSettings: Equatable, Sendable {
 
     public init() {}
 
+    /// The slide and fade a `gui.json` from before #1741 left out,
+    /// read as what their absence meant then: 4.2's (#3254).
+    mutating func adoptLegacySlideAndFade() {
+        let legacy = AnimationPacePreset.legacyDefaults
+        spaceSlideDuration = legacy.slide
+        visionFadeDuration = legacy.fade
+    }
+
     /// `raw` clamped into the range the verb and the GUI enforce,
     /// so a hand-edited file cannot smuggle a value past it.
     static func clampedDepth(_ raw: Int) -> Int {
