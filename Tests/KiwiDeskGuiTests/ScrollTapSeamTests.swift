@@ -251,6 +251,17 @@ struct ScrollTapSeamTests {
             PointerConsumers.grabMask
                 == types.reduce(0) { $0 | CGEventMask(1) << $1.rawValue }
         )
+        // The buttons' (#3281): every button's press, drag and
+        // release, which a probe saw ask the grab mask's services.
+        let buttons: [CGEventType] = [
+            .leftMouseDown, .leftMouseDragged, .leftMouseUp,
+            .rightMouseDown, .rightMouseDragged, .rightMouseUp,
+            .otherMouseDown, .otherMouseDragged, .otherMouseUp,
+        ]
+        #expect(
+            PointerConsumers.buttonMask
+                == buttons.reduce(0) { $0 | CGEventMask(1) << $1.rawValue }
+        )
         for consumer in PointerConsumers.Consumer.allCases {
             #expect(consumer.mask != 0, "\(consumer)")
         }

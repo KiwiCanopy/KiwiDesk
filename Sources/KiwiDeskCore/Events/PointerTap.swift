@@ -12,6 +12,8 @@ protocol PointerTapHandle: AnyObject {
 /// What the tap hands the main queue, in order.
 struct PointerTapDelivery: Sendable {
     var grab: [ModifierGrabEvent]
+    /// The bound buttons' presses and releases (#3281).
+    var buttons: [PointerButtonEvent] = []
     /// macOS disabled the tap and it was turned back on, which
     /// ended any stream a consumer owned.
     var reenabled: Bool
@@ -121,7 +123,7 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
         _ event: CGEvent
     ) -> Unmanaged<CGEvent>? {
         let now = CFAbsoluteTimeGetCurrent()
-        guard let kind = Self.kind(of: type) else {
+        guard let kind = Self.kind(of: type, event) else {
             // The one re-enable path: a disabled tap passes every
             // event, so turn it back on and end what it owned.
             if type == .tapDisabledByTimeout
@@ -130,7 +132,13 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
             {
                 CGEvent.tapEnable(tap: port, enable: true)
                 let routed = router.reseed(now: now)
-                deliver(.init(grab: routed.grab, reenabled: true))
+                deliver(
+                    .init(
+                        grab: routed.grab,
+                        buttons: routed.buttons,
+                        reenabled: true
+                    )
+                )
             }
             return Unmanaged.passUnretained(event)
         }
@@ -145,21 +153,39 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
                 ),
                 now: now
             )
-            if !routed.grab.isEmpty {
-                deliver(.init(grab: routed.grab, reenabled: false))
+            if !routed.grab.isEmpty || !routed.buttons.isEmpty {
+                deliver(
+                    .init(
+                        grab: routed.grab,
+                        buttons: routed.buttons,
+                        reenabled: false
+                    )
+                )
             }
             return routed.swallow
         }
         return swallow ? nil : Unmanaged.passUnretained(event)
     }
 
-    static func kind(of type: CGEventType) -> PointerSample.Kind? {
+    static func kind(
+        of type: CGEventType,
+        _ event: CGEvent
+    ) -> PointerSample.Kind? {
+        let other = PointerButton.other(
+            Int(event.getIntegerValueField(.mouseEventButtonNumber))
+        )
         switch type {
         case .leftMouseDown: return .leftDown
         case .leftMouseDragged: return .leftDragged
         case .leftMouseUp: return .leftUp
         case .mouseMoved: return .mouseMoved
         case .flagsChanged: return .flagsChanged
+        case .rightMouseDown: return .buttonDown(.right)
+        case .rightMouseDragged: return .buttonDragged(.right)
+        case .rightMouseUp: return .buttonUp(.right)
+        case .otherMouseDown: return .buttonDown(other)
+        case .otherMouseDragged: return .buttonDragged(other)
+        case .otherMouseUp: return .buttonUp(other)
         default: return nil
         }
     }

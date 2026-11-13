@@ -38,7 +38,7 @@ struct GestureListRow: View {
     @State var editingLua: LuaEditRequest?
     /// The gesture pop-up's drawn width, the directions' name column,
     /// so their actions line up under the row's.
-    @State private var gestureColumn: CGFloat = 0
+    @State var gestureColumn: CGFloat = 0
     /// A gesture pop-up pick refused for the keys another row holds.
     @State var clash: String?
 
@@ -143,30 +143,6 @@ struct GestureListRow: View {
         }
     }
 
-    private var gesturePicker: some View {
-        Picker(
-            GestureListWords.gesture,
-            selection: Binding(
-                get: { key.input },
-                set: { input in rekeyInput(to: input) }
-            )
-        ) {
-            ForEach(offered, id: \.self) { input in
-                Text(GestureListWords.input(input)).tag(input)
-            }
-        }
-        .pickerStyle(.menu)
-        .neutralMenuLabel()
-        .labelsHidden()
-        .fixedSize()
-        .accessibilityValue(GestureListWords.input(key.input))
-        .onGeometryChange(for: CGFloat.self) {
-            $0.size.width
-        } action: {
-            gestureColumn = $0
-        }
-    }
-
     /// The recorder names what it binds: the gesture and its action.
     private var recorderName: String {
         L(
@@ -191,7 +167,13 @@ struct GestureListRow: View {
         ) {
             return GestureRefusalWords.sentence(held)
         }
-        if case .split = action {
+        if key.input == .sideButtons, key.chord.isEmpty, let action {
+            return GestureListWords.takenButtons(
+                GestureListEdits.boundDirections(of: action, on: key.input)
+            )
+        }
+        // A button is no motion, so a split gives up nothing.
+        if case .split = action, !key.input.isButton {
             return GestureListWords.mixedCaption(key.input)
         }
         return nil
@@ -233,7 +215,7 @@ struct GestureListRow: View {
 
     /// A new gesture keeps the keys, and the action only where the
     /// new gesture takes it; otherwise the row asks for one again.
-    private func rekeyInput(to input: GestureInput) {
+    func rekeyInput(to input: GestureInput) {
         let target = GestureKey(input, key.chord)
         clash = nil
         guard target != key else { return }

@@ -34,7 +34,7 @@ extension SettingsValueReadout {
                     from: from,
                     to: key
                 ).spelling,
-                label: GestureListWords.value(action),
+                label: GestureListWords.value(action, on: key.input),
                 old: GestureListWords.rowName(from),
                 new: GestureListWords.rowName(key)
             )
@@ -47,8 +47,8 @@ extension SettingsValueReadout {
                 .shortcuts(.gestureBindings),
                 instance: GestureRowInstance.key(key).spelling,
                 label: GestureListWords.rowName(key),
-                old: GestureListWords.value(before(key)),
-                new: GestureListWords.value(after(key))
+                old: GestureListWords.value(before(key), on: key.input),
+                new: GestureListWords.value(after(key), on: key.input)
             )
             row.subject = subject(key)
             rows.append(row)

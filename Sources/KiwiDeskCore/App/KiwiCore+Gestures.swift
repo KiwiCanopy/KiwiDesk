@@ -3,7 +3,8 @@ import Foundation
 /// Where the gesture bindings reach their fronts (#3199).
 extension KiwiCore {
     /// The ONE resolve: the seeds, the base over them and the live
-    /// profile's override on top, handed to the pointer tap's grab,
+    /// profile's override on top, handed to the pointer tap's grab
+    /// and its buttons,
     /// then the scroll settings resolved and the scroll tap and the
     /// touch reader handed the bindings, since a swipe's direction
     /// reads the scroll's Natural scrolling. A config load passes
@@ -23,6 +24,9 @@ extension KiwiCore {
             profileOverride: profile
         )
         mouse.pointer.configure(grab: Self.grabSettings(gestures.resolved))
+        mouse.pointer.configure(
+            buttons: PointerButtonSettings(resolved: gestures.resolved)
+        )
         applyScrollGestures(base: scrollBase, profile: scrollProfile)
     }
 

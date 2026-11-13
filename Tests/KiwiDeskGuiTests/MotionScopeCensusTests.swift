@@ -61,9 +61,10 @@ struct MotionScopeCensusTests {
         // KiwiHub's Desktops side sends its verbs through one
         // scoped door (#1229).
         "KiwiDeskCore/App/KiwiCore+DesktopOverviewMoves.swift": 1,
-        // A gesture binding's run: the scroll tap's and the touch
-        // reader's (#1656, #1873, #3199).
-        "KiwiDeskCore/App/KiwiCore+GestureRunner.swift": 2,
+        // A gesture binding's run: the scroll tap's, the touch
+        // reader's and a bound mouse button's (#1656, #1873, #3199,
+        // #3281).
+        "KiwiDeskCore/App/KiwiCore+GestureRunner.swift": 3,
         // Hover focus at the resting pointer (#1869).
         "KiwiDeskCore/App/KiwiCore+HoverFocus.swift": 1,
         // The modifier grab's every phase (#2447).

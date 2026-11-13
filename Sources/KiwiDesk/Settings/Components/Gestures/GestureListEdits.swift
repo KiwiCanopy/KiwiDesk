@@ -144,6 +144,15 @@ enum GestureListEdits {
         }
     }
 
+    /// The directions `action` fires toward, in `input`'s order.
+    static func boundDirections(
+        of action: GestureAction,
+        on input: GestureInput
+    ) -> [GestureDirection] {
+        let arms = arms(of: action, on: input) ?? [:]
+        return input.directions.filter { arms[$0] != nil }
+    }
+
     /// `family`'s one-shot step toward each of `input`'s directions.
     static func prefill(
         _ family: GestureFamily,
