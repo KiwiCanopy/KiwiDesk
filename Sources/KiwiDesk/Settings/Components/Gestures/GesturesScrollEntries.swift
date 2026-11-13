@@ -1,10 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): its
-/// first group. The ⌃⌥ entry with its swipe length, then the ⌃⌥⌘
-/// entry; their chords and Natural scrolling live in the Mouse and
-/// Trackpad cards below (#3183). Each
+/// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): the
+/// ⌃⌥ entry with its swipe length, then the ⌃⌥⌘ entry; their chords
+/// and Natural scrolling live in the Mouse and Trackpad cards
+/// (#3183). Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's

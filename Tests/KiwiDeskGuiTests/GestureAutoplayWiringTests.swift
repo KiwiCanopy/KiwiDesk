@@ -5,8 +5,9 @@ import Testing
 
 /// A gesture picture moves only while hovered (#1726; #3281
 /// retired the first-visit play; gui.md ▸ "A gesture picture is
-/// not a schematic"): no entry plays on appear, and nothing in
-/// the part or the page arms a play.
+/// not a schematic"): the picture's state is written on hover
+/// alone, nothing in the part animates or starts on its own, and
+/// the retired play's names stay out.
 @Suite("Gesture autoplay stays retired (#3281)")
 struct GestureAutoplayWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -21,17 +22,68 @@ struct GestureAutoplayWiringTests {
         try squashed(root.appendingPathComponent(file))
     }
 
-    /// The entry moves on hover alone: nothing it does on appear,
-    /// and its one moving state is the hover.
+    /// The entry moves on hover alone: its picture's state is
+    /// written only inside `hover(`, besides the declarations.
     @Test("an entry moves only while hovered")
     func hoverOnly() throws {
         let entry = try Self.squashed(
             "Settings/Components/Gestures/GestureEntry.swift"
         )
         #expect(entry.contains(".onHover(perform:hover)"))
-        #expect(!entry.contains(".onAppear"))
-        #expect(!entry.contains(".task"))
-        #expect(entry.contains("privatevarmoving:Bool{hovering}"))
+        let hover = try #require(
+            SourceScan.declarationBody(
+                after: "privatefunchover(",
+                in: entry
+            )
+        )
+        for (write, declared) in [
+            ("phase=", "privatevarphase:CGFloat=0"),
+            ("hovering=", "privatevarhovering=false"),
+        ] {
+            #expect(entry.contains(declared), "\(declared)")
+            let all = entry.components(separatedBy: write).count - 1
+            let inside = hover.components(separatedBy: write).count - 1
+            // The declaration spells `hovering=`; `phase`'s spells
+            // `:CGFloat=` and counts no write.
+            let declarations = write == "hovering=" ? 1 : 0
+            #expect(inside > 0, "\(write)")
+            #expect(all == inside + declarations, "\(write)")
+        }
+    }
+
+    /// Only the entry animates in the gestures part, and none of the
+    /// part's picture files starts anything as it appears or changes.
+    @Test("nothing animates or plays on its own")
+    func noSelfStart() throws {
+        let dir = Self.root.appendingPathComponent(
+            "Settings/Components/Gestures"
+        )
+        let files = try SourceScan.swiftSources(under: dir)
+        #expect(files.count > 10)
+        for url in files {
+            let source = try Self.squashed(url)
+            let animates = ["withAnimation", "repeatForever", "TimelineView"]
+                .contains { source.contains($0) }
+            #expect(
+                !animates || url.lastPathComponent == "GestureEntry.swift",
+                Comment(rawValue: url.lastPathComponent)
+            )
+        }
+        for file in [
+            "GestureEntry.swift", "GestureEntry+Item.swift",
+            "GesturesPart.swift", "GesturesScrollEntries.swift",
+            "GesturesShelfEntries.swift",
+        ] {
+            let source = try Self.squashed(
+                "Settings/Components/Gestures/" + file
+            )
+            for needle in [".onAppear", ".task{", ".task(", ".onChange("] {
+                #expect(
+                    !source.contains(needle),
+                    Comment(rawValue: "\(file): \(needle)")
+                )
+            }
+        }
     }
 
     /// No file of the gestures part or the Shortcuts page carries

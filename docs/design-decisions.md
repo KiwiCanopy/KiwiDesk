@@ -16573,13 +16573,11 @@ Home, the other two add a navigator.
 - **Mouse & Trackpad** opens with the Mouse and Trackpad binding
   cards, the part's own settings (#3298), then holds open groups
   ordered by where the hand is — on your windows, holding a
-  modifier, on the KiwiShelf — each
-  with its own pictures, and no Layers card, since a layer does
-  not act on a gesture. The part replaces #1726's collapsed card,
-  the picture strip the shut card drew, and Mouse & trackpad's
-  first chip and the rule after it: open groups need no summary
-  and no strip to be found. Its first picture still plays once per
-  visit on the user's own click, now on the segment.
+  modifier, on the KiwiShelf — each with its own pictures, and no
+  Layers card, since a layer does not act on a gesture. The part
+  replaces #1726's collapsed card, the picture strip the shut card
+  drew, and Mouse & trackpad's first chip and the rule after it:
+  open groups need no summary and no strip to be found.
 - Layers draws on Built-in and Personal and reads the one
   `nav.shortcutsLayer`, so the layer picked survives a switch. The
   part shown is a `SettingsNavigation` reading too (#1127):
@@ -16611,8 +16609,7 @@ what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
 
 :::unreleased
-**The bindings themselves are a list per device, between the
-modifier group and the shelf group** (#3199 ▸ Ruling, owner
+**The bindings themselves are a list per device** (#3199 ▸ Ruling, owner
 2026-11-11; #3183). One **Mouse** card and one **Trackpad** card,
 each a list of rows as macOS's App Shortcuts are, rather than a
 fixed slot per gesture: one gesture may be bound several times with
@@ -16661,12 +16658,11 @@ on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
 :::unreleased
-*Amended (#3281, owner 2026-11-13).* No picture plays by itself:
-the first-visit play on the Mouse & Trackpad click is retired.
-The binding cards now lead the part, so its first picture is no
-longer the first thing the click opens, and a picture moving
-below the cards draws the eye away from what the user came to
-edit. Hover is the one trigger, and Reduce Motion still stills it.
+**No picture plays by itself** (#3281, owner 2026-11-13). The
+binding cards lead the part, so a click on Mouse & Trackpad opens
+settings to edit, not a picture to read, and a picture moving
+below the cards draws the eye from them. Hover is the one
+trigger, and Reduce Motion stills it.
 :::
 
 

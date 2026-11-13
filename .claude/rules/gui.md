@@ -272,7 +272,7 @@ restated `20...80` satisfies on the day it is written.
   entry on the Shortcuts page teaches a gesture rather than a rest
   state, so its picture may move while hovered, and never by
   itself: no play on appear, on a click or on a landing (owner,
-  #3281, retiring 2026-09-29's first-visit play). Otherwise it
+  #3281). Otherwise it
   rests on its key frame, and always under Reduce Motion, never a
   bundled clip, with the gate named per call
   (`ReduceMotionGateTests`). `GestureAutoplayWiringTests` holds

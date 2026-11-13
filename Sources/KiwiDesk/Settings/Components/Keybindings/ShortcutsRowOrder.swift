@@ -18,9 +18,9 @@ enum ShortcutsRowOrder {
         .macosDesktops,
     ]
 
-    /// The Mouse & Trackpad part's settings, in the part's order:
-    /// the binding cards (#3298), then the entries (#1726); the
-    /// explainer entries are not settings.
+    /// The Mouse & Trackpad part's settings; an edit to the part's
+    /// order reorders this list to match. The explainer entries
+    /// are not settings.
     static let gesturesMore: [SettingKey] = [
         .shortcuts(.scrollNaturalMouse),
         .shortcuts(.scrollNaturalTrackpad),

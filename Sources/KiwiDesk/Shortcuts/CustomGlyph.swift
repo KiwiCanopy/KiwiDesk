@@ -121,7 +121,7 @@ enum CustomGlyph: Hashable {
         case .click: Self.key(from: 5)
         case .rightClick: Self.key(from: 10)
         case .wheelClick:
-            Self.pill(NSRect(x: 8.4, y: 2.8, width: 3.2, height: 3.6))
+            Self.pill(NSRect(x: 8.5, y: 2.6, width: 3.0, height: 4.0))
         case .sideButtons:
             Self.pill(NSRect(x: 1.6, y: 6.4, width: 2.4, height: 3.4))
             Self.pill(NSRect(x: 1.6, y: 10.8, width: 2.4, height: 3.4))
