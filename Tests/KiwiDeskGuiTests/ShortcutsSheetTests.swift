@@ -190,10 +190,7 @@ struct ShortcutsSheetTests {
         )
         for symbol in [custom, gather] {
             #expect(
-                NSImage(
-                    systemSymbolName: symbol,
-                    accessibilityDescription: nil
-                ) != nil,
+                SymbolImage.named(symbol) != nil,
                 "\(symbol) does not resolve"
             )
         }

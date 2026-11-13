@@ -9,11 +9,15 @@ import Testing
 /// (#1538). The subject is the LOOKUP: every `systemSymbolName:`
 /// and every `SymbolImage.named(` — the door a name that may be a
 /// composed glyph takes (#3284) — in either tree is listed with
-/// what it does, so a new one reds
-/// until a reader classifies it; two shape needles beside it
-/// refuse a classifier inside a listed file — the nil-compare
-/// the round-1 copies had, and the `if let` arm that drew a
-/// layer icon's name and which the nil needle alone missed.
+/// what it does, so a new one reds until a reader classifies it;
+/// two shape needles beside it refuse a classifier inside a listed
+/// file — the nil-compare the round-1 copies had, and the `if let`
+/// arm that drew a layer icon's name and which the nil needle
+/// alone missed.
+///
+/// Trade, stated: the door is matched as spelled, so an unqualified
+/// `named(` inside a `SymbolImage` extension in another file, or the
+/// function passed by reference, is review's.
 @Suite("Symbol classifier seam")
 struct SymbolClassifierSeamTests {
     /// Repo-relative path → what its lookup does. Exact both
@@ -25,7 +29,7 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDesk/StatusItemController+Icon.swift":
             "builds the status image; ⚠︎ when a fixed name fails",
         "Sources/KiwiDesk/StatusItemController.swift":
-            "builds a menu row's template image through the door",
+            "builds a fixed name's template image through the door",
         "Sources/KiwiDesk/StatusItemController+SpaceMark.swift":
             "builds the Space mark's image from a `.symbol` verdict",
         "Sources/KiwiDesk/StatusItemController+Updates.swift":
@@ -37,7 +41,7 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Ends.swift":
             "measures a `.symbol` verdict's ink for a lone chip's ends",
         "Sources/KiwiDeskCore/Bar/StateBadgeView.swift":
-            "builds a badge image from a fixed name, through the door",
+            "builds a state badge's symbol through the door",
         "Sources/KiwiDeskCore/Bar/BarPeekBody+More.swift":
             "builds the peek's more-line chevron from a fixed name",
         "Sources/KiwiDeskCore/Bar/BarPeekBody+Parts.swift":
