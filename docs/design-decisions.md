@@ -10962,11 +10962,12 @@ the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
 **One page's rows are a budget, and the last row is KiwiHub**
-(#2515, owner rulings 2026-10-23). The fixed window holds nine
-one-line rows in every catalog (`OnboardingBarsFitTests`), so a
-row joins only by another leaving. The navigation tiers stay;
+(#2515, owner rulings 2026-10-23). The fixed window holds the
+rows the seeded keymap draws, one line each in every catalog
+(`OnboardingBarsFitTests`), so a row joins only by another
+leaving. The navigation tiers stay;
 then the single-key toggles a new user would never find —
-Maximize, KiwiVision, the bars' show/hide as one row; then
+Maximize, Pocket, KiwiVision, the bars' show/hide as one row; then
 KiwiHub, naming its sides over their chords, which is the way to
 everything the page leaves out. Open Settings gave its row to
 KiwiVision: the menu-bar icon and KiwiHub both reach Settings,
@@ -10976,6 +10977,16 @@ wraps to three lines, so it costs height rather than saving it.
 A bar set to Always leaves the bars row, since its shortcut can
 only refuse — the one place this page reads a setting rather
 than a chord, through the shortcut's own gate.
+
+:::unreleased
+*Tiling Off takes the bars' row (#3287).* The bars step right
+before this page already teaches each bar's show/hide chord, so
+the keys step drops its bars row and, with it, its one read of a
+setting. In its place, right after Maximize, a Tiling Off row in
+the menu's words ("Tiling Off for This Space"): a single key a new
+user would never find, which leaves a Space's windows where they
+are and tiles them again on the next press (owner, 2026-11-13).
+:::
 
 ### The tour's look is written through, and the tour owns its undo
 

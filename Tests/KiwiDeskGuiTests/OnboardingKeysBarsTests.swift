@@ -3,11 +3,12 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The bar show/hide and maximize chords the tour teaches (#2515),
-/// read from the live layer: the bars step lists each bar's chord
-/// under the catalog's own words, and the keys step folds both
-/// into one row beside a maximize row.
-@Suite("Onboarding bar and maximize keys (#2515)")
+/// The bar show/hide, maximize and Tiling Off chords the tour
+/// teaches (#2515, #3287), read from the live layer: the bars step
+/// lists each bar's chord under the catalog's own words, and the
+/// keys step leaves the bars to it, teaching Tiling Off right after
+/// Maximize.
+@Suite("Onboarding bar, maximize and Tiling Off keys (#2515)")
 @MainActor
 struct OnboardingKeysBarsTests {
     private func layer(_ bindings: [(String, String)]) -> KeyLayer {
@@ -31,6 +32,12 @@ struct OnboardingKeysBarsTests {
     )
     private let maximize = (
         "control+option+m", KeybindingCatalog.maximize.lua
+    )
+    private let tilingOff = (
+        "control+option+t", KeybindingCatalog.toggleTiling.lua
+    )
+    private let pocket = (
+        "control+option+p", KeybindingCatalog.pocket.lua
     )
 
     @Test("the bars step lists each bound bar, Space Bar first")
@@ -58,31 +65,48 @@ struct OnboardingKeysBarsTests {
         )
     }
 
-    @Test("the keys step folds both bars into one row")
-    func keysStepFoldsBars() {
+    @Test("the keys step leaves the bars to the bars step")
+    func keysStepHasNoBarsRow() {
         let families = OnboardingKeys.families(
             layer: layer([space, app, maximize]),
             spaces: []
         )
-        let bars = families.filter {
-            $0.id == "bars" || $0.id.contains("toggle_reveal")
-        }
-        #expect(bars.count == 1)
         #expect(
-            bars.first?.chord
-                == .shared([.control, .option], keys: "G H")
+            !families.contains {
+                $0.id == "bars" || $0.id.contains("toggle_reveal")
+            }
         )
-        #expect(bars.first?.tier == nil)
     }
 
-    @Test("one bound bar keeps its own label on the keys step")
-    func singleBarKeepsItsLabel() {
-        let bars = OnboardingKeys.revealFamily(layer: layer([space]))
-        #expect(
-            bars?.label
-                == KeybindingCatalog.toggleSpaceBar.resolvedLabel
+    @Test("Tiling Off follows Maximize, in the menu's words")
+    func tilingOffFollowsMaximize() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select("en") }
+        let families = OnboardingKeys.families(
+            layer: layer([pocket, tilingOff, maximize]),
+            spaces: []
         )
-        #expect(OnboardingKeys.revealFamily(layer: layer([])) == nil)
+        #expect(
+            families.map(\.id) == ["maximize", "tiling_off", "pocket"]
+        )
+        let row = families.first { $0.id == "tiling_off" }
+        #expect(row?.label == KeybindingCatalog.toggleTiling.resolvedLabel)
+        // The menu's words in every catalog, not an English copy.
+        LocalizationManager.shared.select("de")
+        let german = OnboardingKeys.families(
+            layer: layer([tilingOff]),
+            spaces: []
+        ).first { $0.id == "tiling_off" }
+        #expect(german?.label == KeybindingCatalog.toggleTiling.resolvedLabel)
+        #expect(german?.label != "Tiling Off for This Space")
+        LocalizationManager.shared.select("en")
+        #expect(row?.chord == .shared([.control, .option], keys: "T"))
+        #expect(row?.tier == nil)
+        let untaught = OnboardingKeys.families(
+            layer: layer([maximize]),
+            spaces: []
+        )
+        #expect(!untaught.contains { $0.id == "tiling_off" })
     }
 
     @Test("a bound maximize is taught, an unbound one is not")

@@ -5,11 +5,9 @@ import KiwiDeskCore
 /// key layer (#678).
 @MainActor
 enum OnboardingKeys {
-    /// `showsBar` leaves a bar set to Always out of the bars row.
     static func families(
         layer: KeyLayer,
-        spaces: [SpaceID],
-        showsBar: (ShelfBar) -> Bool = { _ in true }
+        spaces: [SpaceID]
     ) -> [OnboardingKeyFamily] {
         var families: [OnboardingKeyFamily] = []
         if let focus = directional(
@@ -91,13 +89,13 @@ enum OnboardingKeys {
                 )
             )
         }
-        // Single-key toggles, then the screen's chrome, then the
-        // way into everything else (#2515).
+        // Single-key toggles, then the way into everything else
+        // (#2515); the bars step teaches the bars' chords (#3287).
         families += [
             maximizeFamily(layer: layer),
+            tilingOffFamily(layer: layer),
             pocketFamily(layer: layer),
             kiwiVisionFamily(layer: layer),
-            revealFamily(layer: layer, showsBar: showsBar),
             kiwiHubFamily(layer: layer),
         ].compactMap { $0 }
         return families

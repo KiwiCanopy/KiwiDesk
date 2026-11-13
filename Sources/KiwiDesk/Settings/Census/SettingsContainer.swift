@@ -40,7 +40,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case glass
     case grid
     case habits
-    /// Shortcuts' Show & hide card: KiwiHub's three sides
+    /// Shortcuts' Show & hide card: KiwiHub's sides
     /// (#2265), the bars' show/hide (#761), and KiwiVision's
     /// toggle and lenses (#2312), one sub-group each.
     case showHide
