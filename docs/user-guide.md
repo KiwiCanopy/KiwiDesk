@@ -1069,6 +1069,12 @@ shortcuts you added under **Open applications** and **Lua
 bindings** except one sitting on a key a default needs; the
 confirmation counts those.
 
+:::unreleased
+**Restore…** puts the defaults back in the profile you are
+editing. When another profile has changed them too, the
+confirmation names it and asks whether to restore there as well.
+:::
+
 ### Choosing Your Own Shortcuts
 
 Three things can claim a chord, and they do not lose it the same

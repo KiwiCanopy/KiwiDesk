@@ -62,7 +62,7 @@ struct RestoreDefaultShortcutsTests {
         model.config.settings.resizeStep = 80
         // The Desktop tier is restored for the Mac's Desktops.
         model.bindableDesktops = [1, 2]
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         let expected =
             DefaultKeybindings.bindings(
                 spaces: model.config.spaces,
@@ -92,7 +92,7 @@ struct RestoreDefaultShortcutsTests {
             "Safari"
         )
         setBindings(model, [app])
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         let after = model.config.layers[0].bindings
         #expect(
             after.contains {
@@ -109,12 +109,12 @@ struct RestoreDefaultShortcutsTests {
     @Test("a row on a chord the seed reclaims is discarded")
     func rowsOnShippedChordsGo() {
         let model = model()
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         let taken = model.config.layers[0].bindings[0].combo
         let mine = row(taken, "KiwiDesk.open_or_focus(\"x\")")
         setBindings(model, [mine])
         #expect(model.shortcutsTheResetWouldDiscard == 1)
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         #expect(
             !model.config.layers[0].bindings.contains {
                 $0.lua == mine.lua
@@ -127,7 +127,7 @@ struct RestoreDefaultShortcutsTests {
     @Test("a moved default is replaced, not duplicated")
     func movedDefaultsAreReplaced() {
         let model = model()
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         let shipped = model.config.layers[0].bindings
         let float = shipped.first {
             $0.lua == "KiwiDesk.toggle_floating()"
@@ -140,7 +140,7 @@ struct RestoreDefaultShortcutsTests {
         // which is the whole point of the button. Counting it
         // was the design review's "if you do one thing".
         #expect(model.shortcutsTheResetWouldDiscard == 0)
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         let after = model.config.layers[0].bindings
         #expect(after.filter { $0.lua == float.lua }.count == 1)
         #expect(
@@ -163,7 +163,7 @@ struct RestoreDefaultShortcutsTests {
         model.config.layers.append(
             KeyLayer(name: "Gaming", bindings: [mine])
         )
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         let gaming = model.config.layers.first {
             $0.name == "Gaming"
         }
@@ -191,7 +191,7 @@ struct RestoreDefaultShortcutsTests {
         )
         setBindings(model, [stale])
         #expect(model.shortcutsTheResetWouldDiscard == 0)
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         #expect(
             !model.config.layers[0].bindings.contains {
                 $0.lua == stale.lua

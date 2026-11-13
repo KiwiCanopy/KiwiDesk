@@ -24,31 +24,55 @@ extension SettingsModel {
     /// default layer — the one the seed authors; a GUI-created
     /// layer's chrome rows (`appChromeRows`) are seeded at its
     /// creation and are the user's after that.
-    func resetShortcutsToDefaults() {
+    /// `reach` says how far the Save writes it (#3248): the edited
+    /// profile alone, or every profile's seeded rows.
+    func resetShortcutsToDefaults(reach: RestoreReach) {
         guard
             let index = config.layers.firstIndex(where: {
                 $0.name == KeyLayer.defaultName
-            })
+            }),
+            let restore = shortcutRestore
         else { return }
+        let stored = layeredReach?.keyLayers
+        config.layers[index].bindings = restoredDefaultRows(
+            config.layers[index].bindings
+        )
+        droppedChords = []
+        stageRestore(.key, restore, stored: stored, reach: reach)
+    }
+
+    /// The default layer's rows once restored: the seed, then the
+    /// rows of the user's that outlive it.
+    func restoredDefaultRows(_ rows: [KeyBinding]) -> [KeyBinding] {
         let shipped = shippedDefaults(on: config.shortcutBase)
         let orphanLua = orphanLuaInDefaultLayer
-        let kept = config.layers[index].bindings.filter {
-            Self.survivesReset(
-                $0,
-                against: shipped,
-                orphans: orphanLua
-            )
-        }
-        config.layers[index].bindings = shipped + kept
-        droppedChords = []
+        return shipped
+            + rows.filter {
+                Self.survivesReset($0, against: shipped, orphans: orphanLua)
+            }
     }
 
     /// The seed for this config on `base`, the Desktop tier
     /// included for the Desktops this Mac has now (#2460).
     func shippedDefaults(on base: ShortcutBase) -> [KeyBinding] {
-        DefaultKeybindings.bindings(
+        shippedDefaults(
+            on: base,
             spaces: config.spaces,
-            resizeStep: Int(config.settings.resizeStep),
+            resizeStep: config.settings.resizeStep
+        )
+    }
+
+    /// The seed for a setup of `spaces` and `resizeStep` on `base`:
+    /// another profile's own seed, which a restore across profiles
+    /// compares with the page's (#3248).
+    func shippedDefaults(
+        on base: ShortcutBase,
+        spaces: [SpaceID],
+        resizeStep: CGFloat
+    ) -> [KeyBinding] {
+        DefaultKeybindings.bindings(
+            spaces: spaces,
+            resizeStep: Int(resizeStep),
             base: base
         )
             + bindableDesktops.compactMap {

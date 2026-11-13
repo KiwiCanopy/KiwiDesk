@@ -51,7 +51,7 @@ struct ShortcutBaseDraftTests {
     func restoreDefaultsTakesTheBase() throws {
         let model = try movedModel()
         model.bindableDesktops = [1, 2]
-        model.resetShortcutsToDefaults()
+        model.resetShortcutsToDefaults(reach: .here)
         #expect(desktopCombos(model) == ["hyper+option+1", "hyper+option+2"])
     }
 

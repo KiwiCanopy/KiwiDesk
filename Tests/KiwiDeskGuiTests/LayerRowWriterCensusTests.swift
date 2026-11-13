@@ -57,6 +57,14 @@ struct LayerRowWriterCensusTests {
                 "reset: drops every user row on a shipped verb"
                     + " (driven)"
             ),
+        "KiwiDesk/Settings/SettingsModel+ShortcutRestoreReach.swift":
+            (
+                3,
+                "restore keying (#3248): local copies of the default"
+                    + " layer — restored, the page's seed, each other"
+                    + " profile's seed — read for their keys and never"
+                    + " stored"
+            ),
         "KiwiDeskCore/App/KiwiCore+GuiConfigSeed.swift":
             (1, "first-run seed: one row per action by construction"),
         "KiwiDeskCore/Config/RuleReach+KeySequences.swift":

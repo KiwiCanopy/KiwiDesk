@@ -21,6 +21,9 @@ struct GestureListCard: View {
     /// The row whose recorder arms as it appears.
     @State private var fresh: UUID?
     @State private var seeded = false
+    /// Who else changed this card's seeded gestures, read as
+    /// Restore Defaults asks (#3248); empty draws no dialog.
+    @State private var elsewhere: [String] = []
 
     private var offered: [GestureInput] {
         GestureListEdits.inputs(on: device)
@@ -143,8 +146,38 @@ struct GestureListCard: View {
                         in: model.config.gesture
                     )
                 )
+                .confirmationDialog(
+                    GestureListWords.restoreAskTitle,
+                    isPresented: asking,
+                    titleVisibility: .visible
+                ) {
+                    if let profile = model.reachProfile {
+                        Button(RestoreReachWords.here(profile)) {
+                            restore(.here)
+                        }
+                        .keyboardShortcut(.defaultAction)
+                    }
+                    Button(RestoreReachWords.everyProfile, role: .destructive)
+                    {
+                        restore(.everyProfile)
+                    }
+                    Button(
+                        L("spaces.delete_confirm.cancel", "Cancel"),
+                        role: .cancel
+                    ) {
+                    }
+                } message: {
+                    Text(GestureListWords.restoreAskMessage(elsewhere))
+                }
         }
         .padding(.top, 4)
+    }
+
+    private var asking: Binding<Bool> {
+        Binding(
+            get: { !elsewhere.isEmpty },
+            set: { if !$0 { elsewhere = [] } }
+        )
     }
 
     private var help: String {
@@ -225,11 +258,20 @@ struct GestureListCard: View {
         pending.remove(entry.id)
     }
 
+    /// Asks only while another profile changed these gestures too;
+    /// otherwise restores the edited profile at once (#3248).
     private func restore() {
-        GestureListEdits.restoreDefaults(
-            on: device,
-            in: &model.config.gesture
-        )
+        let others = model.gestureRestoreChangedElsewhere(on: device)
+        if others.isEmpty {
+            restore(.here)
+        } else {
+            elsewhere = others
+        }
+    }
+
+    private func restore(_ reach: RestoreReach) {
+        elsewhere = []
+        model.restoreGestureDefaults(on: device, reach: reach)
         reload()
     }
 }

@@ -69,6 +69,13 @@ struct KeySequenceGuiReaderCensusTests {
             (4, "a written chord takes a leader's chord as a row's"),
         "Settings/SettingsModel+Reset.swift":
             (5, "reset keeps a sequence unless the seed takes its leader"),
+        "Settings/SettingsModel+ShortcutRestoreReach.swift":
+            (
+                4,
+                "restore keying (#3248): local copies of the default"
+                    + " layer keyed for the reach; a sequence keys by its"
+                    + " leader like any row"
+            ),
         "Settings/SettingsModel+RevealLanding.swift":
             (1, "a reveal finds a sequence by id: its card"),
         "Settings/SettingsModel+Root.swift":

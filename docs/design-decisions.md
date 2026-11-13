@@ -12829,6 +12829,36 @@ one action in one layer, its value the combo:
   from the page's own structure, and both the rule write and the
   globals write read that one base.
 
+:::unreleased
+**Restore Defaults asks how far, and only when another profile
+would change** (#3248 ▸ Ruling and Amendment, owner 2026-11-12).
+Shortcuts ▸ Default shortcuts ▸ Restore… and each gesture card's
+Restore Defaults put seeded rows back, and a seeded row has a
+reach like any other. The trap is leaving that reach to the
+encoder: a restored row keeps its stored reach and a discarded
+one is removed from every profile holding the same value, so a
+profile that happens to match the edited one is reset unseen
+while one that differs keeps its own — a reach nobody chose. So
+the restore stages its reach on the draft. While no other profile
+resolves a seeded row away from its seed, it reaches the edited
+profile alone: a gesture card restores at once, and Shortcuts
+keeps its one-button dialog. Otherwise the dialog names who else
+changed, by the `RuleReachWords.group` ladder, and offers
+*Restore in Work* (the default) or *Restore in every profile*.
+"Every profile" means all of them and the shared base, each seed
+whatever the profile held, never the match-only removal reach.
+Who counts is the union over the seeded rows, so a restore asks
+once, not per row. A seed row a profile's own Spaces or resize
+step spell otherwise — its digit rows, its resize rows — stays that
+profile's: the restore shares, and asks about, only the rows every
+profile's seed agrees on. Rows the user added stay under both
+answers, save, under "every profile", one sitting on a chord a
+seed reclaims, which goes in every profile as it goes in the
+edited one, and the dialog counts those the other profiles lose
+before the answer is chosen (`RestoreReachTests`, `RestoreReachShortcutTests`,
+`RestoreReachWiringTests`).
+:::
+
 **A layer takes the checklist too, and its tick is membership**
 (#2022, owner ruling 2026-10-07). A layer is a set of rows, so
 asking which profiles a layer belongs to row by row hid the one
