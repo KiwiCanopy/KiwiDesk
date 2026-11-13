@@ -14,8 +14,8 @@ enum MacChecklistRowOrder {
     ]
 
     static let optionalSettings: [SettingKey] = [
-        .macChecklist(.clickWallpaper),
         .macChecklist(.doubleClickTitle),
+        .macChecklist(.clickWallpaper),
     ]
 
     static let habits: [SettingKey] = [

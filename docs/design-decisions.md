@@ -11070,8 +11070,8 @@ Three rulings follow, and each has a shape someone will want to
 undo:
 
 - **The count is the essentials, and nothing else.** Two
-  settings are optional (the wallpaper click, the double-click
-  zoom — a preference the app can already absorb), and they
+  settings are optional (the double-click zoom — a preference
+  the app can already absorb — and the wallpaper click), and they
   draw their own "Set" / "Not yet" chip but move no number:
   folded in, "3 of 6" reads as half-broken on a Mac where every
   essential is set, and a second count puts two numbers on one
