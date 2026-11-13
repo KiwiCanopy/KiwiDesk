@@ -18,6 +18,8 @@ final class FrameApplier {
     /// Per-app frame queues, made by `queue(for:)`.
     var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
+    /// The grab's waiting instant sets, one per window (#3266).
+    let latestInstants = PendingFrames()
     private let recent = RecentApplies()
     let instantTargets = InstantTargets()
     let enhancedUI = EnhancedUIHolds()
@@ -221,12 +223,14 @@ final class FrameApplier {
     /// `retile` and `stashInactive` do) so a window is never
     /// spring-animated and instant-set at once. `resend` writes
     /// the frame once more after `crossScreenResendDelay` unless a
-    /// newer write reached the window first (#2187).
+    /// newer write reached the window first (#2187). `latestWins`
+    /// keeps one set per window waiting, at the newest frame (#3266).
     func applyInstant(
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool,
-        resend: Bool = false
+        resend: Bool = false,
+        latestWins: Bool = false
     ) {
         // At enqueue, ahead of the element guard: the overlay sync
         // wants the commanded frame this same turn (#881).
@@ -254,35 +258,14 @@ final class FrameApplier {
             recentStamp(id)
             return
         }
-        nonisolated(unsafe) let target = element
-        let recent = recent
-        let clock = clock
-        let writer = writer
-        let holds = enhancedUI
-        let waited = meter.queued()
-        holds.noteQueued(
-            pid,
-            atRest: enhancedUIAtRest(pid),
-            instant: true
+        let entry = PendingFrames.Entry(
+            element: element,
+            frame: frame,
+            setSize: setSize,
+            band: band,
+            lead: lead
         )
-        queue(for: pid).async {
-            waited()
-            holds.beginInstant(pid, writer)
-            if let lead {
-                lead.write(frame, target, setSize, band, writer)
-            } else if setSize {
-                EdgeBandWrite.write(
-                    frame,
-                    target,
-                    nearEdgeOf: band,
-                    writer: writer
-                )
-            } else {
-                writer.setPosition(frame.origin, target)
-            }
-            holds.endInstant(pid, writer)
-            recent.record(id, now: clock())  // as `apply`, #1254
-        }
+        enqueueInstant(id, entry, pid: pid, latestWins: latestWins)
         if pendingResends[id] != nil {
             scheduleResend(crossScreenResendDelay) { [weak self] in
                 self?.resendIfCurrent(id, frame, run: run)

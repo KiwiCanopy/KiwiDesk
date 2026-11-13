@@ -229,6 +229,8 @@ extension TilingEngine {
     /// app's answer to the size (`SizeLedWrite`, #2981). Returns
     /// whether the frame was written instantly, the verdict an
     /// ask's settle probe keys on (#2187).
+    /// `latestWins` keeps at most one instant set per window
+    /// waiting on the app's queue, at the newest frame (#3266).
     @discardableResult
     public func applyFrame(
         _ id: WindowID,
@@ -237,7 +239,8 @@ extension TilingEngine {
         animated: Bool,
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize,
-        sizeLedFrom run: SizeLedRun? = nil
+        sizeLedFrom run: SizeLedRun? = nil,
+        latestWins: Bool = false
     ) -> Bool {
         applier.sizeLedRuns[id] = run
         // Every engine frame retires the open size ask (#1694);
@@ -279,26 +282,24 @@ extension TilingEngine {
                         from: current,
                         to: target,
                         among: allScreenBounds()
-                    )
+                    ),
+                latestWins: latestWins
             )
             return true
         }
     }
 
-    /// Sets a frame directly (no animation) through the frame
-    /// pipeline, so it is echo-tracked like animated frames.
-    /// Uses the EUI-bracketed instant path so an un-animated
-    /// placement (space switch / stash with animation off) snaps
-    /// cleanly instead of triggering the app's own move
-    /// animation (which stutters on slow-AX apps). A park at the
-    /// right corner passes `setSize: false`: its size is the
-    /// window's own, so the move is one AX call, not three
-    /// (#1508).
+    /// Sets a frame with no animation through the EUI-bracketed
+    /// instant path, echo-tracked like animated frames, so an
+    /// un-animated placement never triggers the app's own move
+    /// animation. A right-corner park passes `setSize: false`:
+    /// one AX call, not three (#1508).
     public func setFrame(
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool = true,
-        resend: Bool = false
+        resend: Bool = false,
+        latestWins: Bool = false
     ) {
         boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
@@ -307,7 +308,8 @@ extension TilingEngine {
             id,
             frame,
             setSize: setSize,
-            resend: resend
+            resend: resend,
+            latestWins: latestWins
         )
     }
 
