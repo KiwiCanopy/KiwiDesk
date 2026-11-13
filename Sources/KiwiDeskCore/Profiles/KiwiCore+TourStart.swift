@@ -67,7 +67,13 @@ extension KiwiCore {
         with layout: StandardLayout,
         replacing copy: TourCopy?
     ) throws -> TourCopy? {
-        let left = copy?.profile.name
+        // Judged before the pick's own save, whose claim of the
+        // screens rewrites the copy's file: deleted only while it
+        // reads as this tour saved it, so an edit or a binding since
+        // makes it the user's.
+        let left = copy.flatMap { copy in
+            tourCopyIntact(copy) ? copy.profile.name : nil
+        }
         var made: TourCopy?
         if layout.starterTitle != nil, let starter = starterProfileName() {
             try loadProfile(named: starter)
@@ -77,11 +83,7 @@ extension KiwiCore {
                 TourCopy(layout: layout.name, profile: $0)
             }
         }
-        // Deleted only while its file still reads as this tour saved
-        // it: an edit or a binding since makes it the user's.
-        if let copy, let left, left != profiles.currentName,
-            (try? profiles.read(name: left)) == copy.profile
-        {
+        if let left, left != profiles.currentName {
             let deleted = execute("delete_profile", args: [.string(left)])
             if !deleted.isSuccess {
                 onLog(
