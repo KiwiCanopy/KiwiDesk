@@ -38,22 +38,36 @@ public enum ProfileComposition {
         )
     }
 
-    /// Where a Space no pin or role places falls back: the count's
-    /// Standard planned main first, never a preset's widest-first
-    /// slots, which its own apply pins (#3294). The display resolve
+    /// Where a Space no pin or role places falls back: the plan the
+    /// pre-#3294 Standards drew, kept apart from the preset family
+    /// so an upgrade moves no such Space — Spaces 1–4 on the main
+    /// screen; 5–8 on a second; with three, 5–7 and 8–10; each
+    /// further screen the next number (#3294). The display resolve
     /// and the Settings pictures read this one plan.
     public static func fallbackAssignment(
         displays: [Display],
         mainID: DisplayID?
     ) -> [SpaceID: DisplayID] {
-        guard var layout = StandardProfiles.standard(for: displays.count)
-        else { return [:] }
-        layout.slotsByWidth = false
-        return compose(
-            layout: layout,
-            displays: displays,
-            mainID: mainID
-        )?.assignment ?? [:]
+        let ordered = PositionalDisplays.ordered(displays, mainID: mainID)
+        let plans: [[ClosedRange<Int>]] = [
+            [1...4],
+            [1...4, 5...8],
+            [1...4, 5...7, 8...10],
+        ]
+        guard !ordered.isEmpty else { return [:] }
+        let plan = plans[min(ordered.count, plans.count) - 1]
+        var assignment: [SpaceID: DisplayID] = [:]
+        for (screen, numbers) in plan.enumerated() {
+            for number in numbers {
+                assignment[SpaceID(number)] = ordered[screen].id
+            }
+        }
+        var next = (plan.last?.upperBound ?? 0) + 1
+        for screen in plan.count..<ordered.count {
+            assignment[SpaceID(next)] = ordered[screen].id
+            next += 1
+        }
+        return assignment
     }
 
     /// Composes specific built-in layout onto displays
