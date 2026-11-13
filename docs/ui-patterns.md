@@ -859,6 +859,13 @@ visible Done and Escape is a second, hidden button carrying
 `SheetPresentationSeamTests` is the register of which files may
 host a sheet, and holds all three.
 
+:::unreleased
+The preset card, its **Layouts** sheet and the card's bare-noun
+action leave Profiles with the Presets section (#3294); presets
+are picked on the tour's Spaces step, whose replace confirm is an
+alert, a question with consequences.
+:::
+
 **Layout schematics draw staged values, never live windows
 (#125).** Each layout has one `GapsDiagram`-family schematic
 (`LayoutSchematicKit` / `LayoutSchematicCanvas` hold the shared
@@ -892,7 +899,8 @@ read rather than compared*.
 
 :::unreleased
 A Back return to the tour's Spaces step rests its rows rather than
-playing them again (#3288).
+playing them again (#3288). Picking under **Start with** redraws the rows,
+one column per screen, and plays them again (#3294).
 :::
 
 One schematic serves several surfaces at two scales
