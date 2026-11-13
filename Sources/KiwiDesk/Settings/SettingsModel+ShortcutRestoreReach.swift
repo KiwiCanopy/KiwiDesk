@@ -37,6 +37,17 @@ extension SettingsModel {
         )
     }
 
+    /// The rows of their own the other profiles lose to "every
+    /// profile" (#3248): a row on a chord a shared seed takes over.
+    /// Zero without a checklist.
+    var shortcutsRestoreLostElsewhere: Int {
+        guard let reach = encodedReach, let editing = reachProfile,
+            let restore = shortcutRestore
+        else { return 0 }
+        return reach.keyLayers.lostSharing(restore.seeds, editing: editing)
+            .values.reduce(0, +)
+    }
+
     /// The page's seed, keyed, less every row another profile's own
     /// seed spells differently; a profile whose file will not read
     /// narrows nothing, its write being refused at the Save.

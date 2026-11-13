@@ -2027,6 +2027,7 @@
   "restore_reach.changed_in_count": "已更改的描述文件：%1$d",
   "restore_reach.every_profile": "在所有描述文件中恢复",
   "restore_reach.here": "在 %1$@ 中恢复",
+  "restore_reach.lost_elsewhere": "“%1$@”还会移除其他描述文件中的自定义快捷键：%2$d",
   "scroll_grid.anchor.center": "居中",
   "scroll_grid.anchor.end_h": "右侧",
   "scroll_grid.anchor.end_v": "底部",

@@ -42,6 +42,8 @@ struct RestoreReachWiringTests {
         #expect(
             row.contains(
                 "elsewhere=model.shortcutsRestoreChangedElsewhere"
+                    + "lostElsewhere=elsewhere.isEmpty?0:"
+                    + "model.shortcutsRestoreLostElsewhere"
                     + "confirmingReset=true"
             )
         )
@@ -52,5 +54,7 @@ struct RestoreReachWiringTests {
             row.components(separatedBy: "reach:.everyProfile").count == 2
         )
         #expect(!row.contains("resetShortcutsToDefaults()"))
+        // What "every profile" takes elsewhere is said in the message.
+        #expect(row.contains("RestoreReachWords.lostElsewhere(lostElsewhere)"))
     }
 }

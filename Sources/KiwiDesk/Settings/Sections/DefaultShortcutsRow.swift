@@ -15,6 +15,9 @@ struct DefaultShortcutsRow: View {
     /// Who else changed the seeded rows, read as the dialog opens
     /// (#3248): empty asks as before, and the restore stays here.
     @State private var elsewhere: [String] = []
+    /// The other profiles' own rows "every profile" removes, read
+    /// with `elsewhere`.
+    @State private var lostElsewhere = 0
 
     /// Why Restore greys, nil while it acts — the caption reads it.
     private var restoreReason: ShortcutsGates.InertReason? {
@@ -113,6 +116,8 @@ struct DefaultShortcutsRow: View {
     ) -> some View {
         Button(L("shortcuts.restore_defaults.short", "Restore…")) {
             elsewhere = model.shortcutsRestoreChangedElsewhere
+            lostElsewhere =
+                elsewhere.isEmpty ? 0 : model.shortcutsRestoreLostElsewhere
             confirmingReset = true
         }
         .settingsActionButton()
@@ -165,10 +170,14 @@ struct DefaultShortcutsRow: View {
         }
     }
 
-    /// Who else changed the seeded rows, after the counts.
+    /// Who else changed the seeded rows, after the counts, then what
+    /// "every profile" takes from them.
     private var changedLine: String {
-        elsewhere.isEmpty
-            ? "" : "\n\n" + RestoreReachWords.changedIn(elsewhere)
+        guard !elsewhere.isEmpty else { return "" }
+        let lost =
+            lostElsewhere > 0
+            ? "\n" + RestoreReachWords.lostElsewhere(lostElsewhere) : ""
+        return "\n\n" + RestoreReachWords.changedIn(elsewhere) + lost
     }
 
     /// Explains restored defaults count and collateral loss count (#1096).

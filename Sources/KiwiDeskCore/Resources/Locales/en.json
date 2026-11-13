@@ -2027,6 +2027,7 @@
   "restore_reach.changed_in_count": "Changed in profiles: %1$d",
   "restore_reach.every_profile": "Restore in every profile",
   "restore_reach.here": "Restore in %1$@",
+  "restore_reach.lost_elsewhere": "“%1$@” also removes your own shortcuts in other profiles: %2$d",
   "scroll_grid.anchor.center": "Center",
   "scroll_grid.anchor.end_h": "Right",
   "scroll_grid.anchor.end_v": "Bottom",

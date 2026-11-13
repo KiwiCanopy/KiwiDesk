@@ -228,4 +228,18 @@ struct RestoreReachShortcutTests {
         desk.model.resetShortcutsToDefaults(reach: .here)
         #expect(desk.model.reachEdits.isEmpty)
     }
+
+    /// "Every profile" takes Home's own row on the chord its seed
+    /// takes back; the dialog's count names it before the Save does.
+    @Test("the count of rows other profiles lose matches the Save")
+    func lostElsewhereIsCounted() throws {
+        #expect(try desk().model.shortcutsRestoreLostElsewhere == 0)
+        let desk = try desk(ownRow: true)
+        #expect(desk.model.shortcutsRestoreLostElsewhere == 1)
+        let key = keyID(mine.lua)
+        #expect(try combos(desk.model, "Home")[key] == desk.seed.combo)
+        desk.model.resetShortcutsToDefaults(reach: .everyProfile)
+        desk.model.updateActiveProfile()
+        #expect(try combos(desk.model, "Home")[key] == nil)
+    }
 }

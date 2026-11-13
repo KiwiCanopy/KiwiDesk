@@ -12854,8 +12854,8 @@ profile's: the restore shares, and asks about, only the rows every
 profile's seed agrees on. Rows the user added stay under both
 answers, save, under "every profile", one sitting on a chord a
 seed reclaims, which goes in every profile as it goes in the
-edited one; the dialog's counts name the edited profile's alone
-(`RestoreReachTests`, `RestoreReachShortcutTests`,
+edited one, and the dialog counts those the other profiles lose
+before it is asked (`RestoreReachTests`, `RestoreReachShortcutTests`,
 `RestoreReachWiringTests`).
 :::
 

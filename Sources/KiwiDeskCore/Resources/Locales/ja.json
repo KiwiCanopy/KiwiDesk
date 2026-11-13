@@ -2027,6 +2027,7 @@
   "restore_reach.changed_in_count": "変更されたプロファイル: %1$d",
   "restore_reach.every_profile": "すべてのプロファイルでデフォルトに戻す",
   "restore_reach.here": "%1$@でデフォルトに戻す",
+  "restore_reach.lost_elsewhere": "「%1$@」では、他のプロファイルの独自のショートカットも失われます: %2$d",
   "scroll_grid.anchor.center": "中央",
   "scroll_grid.anchor.end_h": "右",
   "scroll_grid.anchor.end_v": "下",
