@@ -47,10 +47,22 @@ exempted() {
     fi
 }
 
+# SwiftPM's progress marker, `[232 / 281] KiwiDeskCore`: thin
+# spaces (U+2009) around the slash on CI, a plain space or none
+# on older tools.
+# Never rejoined onto a diagnostic's head, so a look-alike in a
+# message cannot borrow the next warning's tag.
+GAP='(?:\xE2\x80\x89| )?'
+HEAD='[^\n]*:[0-9]+:[0-9]+: [a-z]+:'
+PROGRESS='s/\[[0-9]+'"$GAP"'\/'"$GAP"'[0-9]+\] [^\n:]*\n(?!'"$HEAD"')//g'
+
 # Strip colour and hyperlink escapes, which a terminal run adds
-# around the warning and its `[#Group]` tag.
+# around the warning and its `[#Group]` tag. Then cut SwiftPM's
+# `[N / M] Target` progress marker with its newline: one spliced
+# into a diagnostic rejoins the line it split (#3299).
 LEFT="$(
     perl -pe 's/\e\[[0-9;]*m//g; s/\e\]8;;.*?\e\\//g' "$LOG" |
+        perl -0pe "$PROGRESS" |
         grep -E '^(.+\.swift|macro expansion [^:]+):[0-9]+:[0-9]+: warning:' |
         exempted |
         sort -u
