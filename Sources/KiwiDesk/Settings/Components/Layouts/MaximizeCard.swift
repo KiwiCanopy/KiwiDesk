@@ -118,7 +118,7 @@ struct MaximizeCard: View {
     }
 
     /// The card's census rows after its table's columns (#3280).
-    static var rowsBelowTable: [SettingKey] {
+    nonisolated static var rowsBelowTable: [SettingKey] {
         Array(
             LayoutDefaultsRowOrder.maximize.dropFirst(
                 LayoutDefaultsRowOrder.maximizeColumns.count

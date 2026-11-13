@@ -31,19 +31,38 @@ struct MaximizeFollowFocusRowTests {
         #expect(source.contains(needle))
     }
 
-    /// The card walks its order list below the table, and the
-    /// follow-focus arm binds the draft's `maximize.followFocus`, the
-    /// leaf the Lua verb writes, and anchors the catalog control.
+    /// The card's body walks its order list right after the chord
+    /// captions, in the section's own content and under no `if`, and
+    /// `row(_:)`'s follow-focus arm binds the draft's
+    /// `maximize.followFocus`, the leaf the Lua verb writes, and
+    /// anchors the catalog control. Scoped to the two bodies, since
+    /// a needle read over the file passes on a dead helper.
     @Test("the card walks the list and the toggle writes the value")
     func cardWalksTheList() throws {
-        let source = try cardSource()
-        #expect(
-            source.contains(
-                "ForEach(Self.rowsBelowTable,id:\\.id){keyinrow(key)}"
+        let source = try strippedCard()
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "var body: some View",
+                in: source
             )
         )
-        #expect(source.contains(Self.toggleArm))
+        let row = try #require(
+            SourceScan.declarationBody(
+                after: "private func row(_ key: SettingKey)",
+                in: source
+            )
+        )
+        #expect(Self.squeezed(body).contains(Self.walk))
+        #expect(Self.squeezed(row).contains(Self.toggleArm))
     }
+
+    /// The walk, glued to the chord caption before it and the
+    /// section's closing brace after it: the glue keeps the walk out
+    /// of any conditional, and is no value pin.
+    private static let walk = [
+        "row:SettingsCatalog.shortcuts.maximizeWidthBinding)}",
+        "ForEach(Self.rowsBelowTable,id:\\.id){keyinrow(key)}}",
+    ].joined()
 
     /// The follow-focus arm, spaces and newlines stripped.
     private static let toggleArm = [
@@ -55,16 +74,21 @@ struct MaximizeFollowFocusRowTests {
         "SettingsCatalog.layoutDefaults.maximizeFollowFocus)",
     ].joined()
 
-    private func cardSource() throws -> String {
+    private func strippedCard() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Layouts/"
                     + "MaximizeCard.swift"
             )
-        return SourceScan.stripComments(
-            try String(contentsOf: url, encoding: .utf8)
-        )
-        .replacingOccurrences(of: " ", with: "")
-        .replacingOccurrences(of: "\n", with: "")
+        return try SourceScan.strippedSource(at: url)
+    }
+
+    private func cardSource() throws -> String {
+        Self.squeezed(try strippedCard())
+    }
+
+    private static func squeezed(_ text: String) -> String {
+        text.replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "\n", with: "")
     }
 }

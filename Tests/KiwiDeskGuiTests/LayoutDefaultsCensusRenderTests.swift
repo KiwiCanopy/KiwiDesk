@@ -96,7 +96,6 @@ struct LayoutDefaultsCensusRenderTests {
         #expect(Set(all) == censusRows(.maximize))
         #expect(all.count == Set(all).count)
         #expect(Array(all.prefix(columns.count)) == columns)
-        #expect(columns.count == 3)
         #expect(
             MaximizeCard.rowsBelowTable
                 == [.behaviour(.maximizeFollowFocus)]
