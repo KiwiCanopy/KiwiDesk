@@ -56,11 +56,15 @@ struct ShortcutGlyphView: View {
 
 extension KeyLayer {
     /// Each layer's icon by name — what its chip and its switch rows
-    /// draw (#3267). `default` and a layer with none are left out.
+    /// draw (#3267). `default` and a layer with none are left out; a
+    /// repeated name keeps the first, as Core's sanitizer does.
     static func icons(of layers: [KeyLayer]) -> [String: String] {
         var icons: [String: String] = [:]
-        for layer in layers where !layer.isDefault {
-            icons[layer.name] = layer.icon.flatMap { $0.isEmpty ? nil : $0 }
+        var seen: Set<String> = []
+        for layer in layers where seen.insert(layer.name).inserted {
+            guard !layer.isDefault, let icon = layer.icon, !icon.isEmpty
+            else { continue }
+            icons[layer.name] = icon
         }
         return icons
     }

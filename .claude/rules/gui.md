@@ -2200,10 +2200,10 @@ every machine that runs the suite).
 
 **A Settings shortcut row draws the panel's glyph for its action
 through the one `ShortcutsReferenceBuilder.icon(for:)`**, never a
-glyph table of its own (#2670). **It draws the `ShortcutGlyph` that
-returns — a symbol or an emoji, a layer's icon included — through
-`ShortcutGlyphView` alone, never reading its kind or reaching for
-`IconGlyphLabel`** (#3267; `ShortcutGlyphDoorTests` ▸
+glyph table of its own (#2670). **Every surface drawing the
+`ShortcutGlyph` that returns — a Settings row, the panel, a layer
+chip — draws it, symbol or emoji, through `ShortcutGlyphView`
+alone, never reading its kind or reaching for `IconGlyphLabel`** (#3267; `ShortcutGlyphDoorTests` ▸
 `noSurfaceBranches`, whose `drawers` register a new surface
 joins). **A Shortcuts row that holds a setting rather than a key
 lays out through `ShortcutSettingRow`**

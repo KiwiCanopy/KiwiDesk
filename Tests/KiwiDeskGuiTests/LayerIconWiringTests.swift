@@ -93,13 +93,15 @@ struct LayerIconWiringTests {
         #expect(flat.contains("layerIcons:KeyLayer.icons(of:layers)"))
     }
 
-    @Test("the icons map skips default and unset icons")
+    @Test("the icons map skips default and unset icons, first name wins")
     func iconsMap() {
         let icons = KeyLayer.icons(of: [
             KeyLayer(name: KeyLayer.defaultName, icon: "house"),
             KeyLayer(name: "A", icon: "star"),
             KeyLayer(name: "B", icon: ""),
             KeyLayer(name: "C"),
+            KeyLayer(name: "A", icon: "moon"),
+            KeyLayer(name: "B", icon: "moon"),
         ])
         #expect(icons == ["A": "star"])
     }
