@@ -59,9 +59,6 @@ extension AppDelegate {
         }
         onboardingModel.loginItemUnavailable =
             LoginItemManager.unavailableCopy
-        onboardingModel.starterSpaces = { [weak self] in
-            self?.starterSpaceCards() ?? []
-        }
         onboardingModel.starterTitle = { [weak self] in
             self?.core.liveStarterTitle()
         }
@@ -73,6 +70,7 @@ extension AppDelegate {
         }
         wireOnboardingLooks()
         wireOnboardingBars()
+        wireOnboardingStart()
         // Resolved after wiring so step handlers are in place (#828, #888).
         onboardingModel.beginPresentation(at: entry)
 
@@ -171,22 +169,5 @@ extension AppDelegate {
                 core.state.workspaces.allSpaces.map(\.id)
             )
         )
-    }
-
-    /// Returns current space cards from live state.
-    private func starterSpaceCards() -> [OnboardingSpaceCard] {
-        let workspaces = core.state.workspaces
-        return workspaces.allSpaces.map { space in
-            OnboardingSpaceCard(
-                id: space.id.raw,
-                mode: space.mode,
-                screen: workspaces.display(of: space.id)
-                    .flatMap { id in
-                        workspaces.allDisplays.first {
-                            $0.id == id
-                        }?.name
-                    }
-            )
-        }
     }
 }

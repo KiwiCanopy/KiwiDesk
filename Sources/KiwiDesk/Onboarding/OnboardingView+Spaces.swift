@@ -4,45 +4,47 @@ import SwiftUI
 extension OnboardingView {
     /// Tour screen presenting the seeded spaces (#678, #768, #828).
     var spaces: some View {
-        OnboardingPage(
+        let start = model.start
+        return OnboardingPage(
             title: spacesTitle,
             body1: spacesBody,
             body2: spacesLayoutsDiffer,
             back: model.back
         ) {
-            spaceStrip
-        } action: {
-            Button(L("onboarding.continue", "Continue")) {
-                model.continueAfterSpaces()
+            VStack(alignment: .leading, spacing: 12) {
+                OnboardingStartPicker(start: start)
+                spaceColumns(start)
             }
-            .kiwiProminentButton()
-            .keyboardShortcut(.defaultAction)
+        } action: {
+            HStack(spacing: 10) {
+                if start.hasReplaced {
+                    Button(L("onboarding.looks.revert", "Revert")) {
+                        start.revert()
+                    }
+                    .settingsActionButton()
+                }
+                Button(L("onboarding.continue", "Continue")) {
+                    start.commit { model.continueAfterSpaces() }
+                }
+                .kiwiProminentButton()
+                .keyboardShortcut(.defaultAction)
+            }
         }
+        .onAppear { start.refresh() }
     }
 
-    /// Vertical list of space rows, each playing its layout's
-    /// story once, staggered down the first screenful (#1750).
-    /// It takes the height the page has free, ahead of the
-    /// footer's own, and fades its edge while rows overflow
-    /// (#2705).
-    private var spaceStrip: some View {
+    /// The picked option's Spaces, one column per screen, each row
+    /// playing its layout's story once, staggered (#1750, #3294).
+    /// It takes the height the page has free and fades its edge
+    /// while rows overflow (#2705).
+    private func spaceColumns(_ start: OnboardingStartModel) -> some View {
         ScrollView(.vertical) {
-            // Lazy, so a row below the fold plays when it
-            // scrolls into view rather than unseen on arrival.
-            LazyVStack(spacing: 8) {
-                let cards = model.starterSpaces()
-                let settings = model.tilingSettings()
-                ForEach(Array(cards.enumerated()), id: \.element.id) {
-                    index,
-                    card in
-                    OnboardingSpaceRow(
-                        card: card,
-                        settings: settings,
-                        delay: Self.stagger(index),
-                        restsOnAppear: model.spacesPlayed
-                    )
-                }
-            }
+            OnboardingScreenColumns(
+                columns: start.selected.map(start.columns) ?? [],
+                settings: model.tilingSettings(),
+                restsOnAppear: model.spacesPlayed,
+                revision: start.revision
+            )
             .padding(.bottom, 2)
         }
         .moreBelowFade()

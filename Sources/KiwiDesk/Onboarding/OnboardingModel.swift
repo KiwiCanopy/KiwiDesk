@@ -77,6 +77,7 @@ final class OnboardingModel {
         spacesPlayed = false
         looksBaseline = nil
         bars.reset()
+        start.reset()
         plannedSteps = OnboardingEntry.plannedSteps(from: step)
     }
 
@@ -109,9 +110,6 @@ final class OnboardingModel {
     /// Settings, at the Mac Checklist — the card reaches a new
     /// user only if the tour hands them to it.
     var onFinish: () -> Void = {}
-    /// The seeded spaces, in order, each with its layout and the
-    /// screen it landed on.
-    var starterSpaces: () -> [OnboardingSpaceCard] = { [] }
     /// The starter setup's title; read per render, since the seed
     /// lands after a first run's tour is wired (#1662).
     var starterTitle: () -> StarterTitle? = { nil }
@@ -126,6 +124,8 @@ final class OnboardingModel {
     var holdBarsRevealed: (Bool) -> Void = { _ in }
     /// The bars step's own state (#2515).
     let bars = OnboardingBarsModel()
+    /// The Spaces step's "Start with" choice (#3294).
+    let start = OnboardingStartModel()
 
     // MARK: - Looks step (#1720)
 
