@@ -43,6 +43,7 @@ struct NavRow: View, Equatable {
         let binding: KeyBinding?
         let reach: KeyReachColumn?
         let reading: ConflictReading?
+        let narrowing: SideNarrowing?
     }
 
     init(
@@ -93,6 +94,12 @@ struct NavRow: View, Equatable {
                 in: rows,
                 model: model,
                 disabledSystemShortcuts: disabled
+            ),
+            narrowing: SideNarrowing.of(
+                binding,
+                in: rows,
+                config: model.config,
+                sides: model.appWide.modifierSides
             )
         )
     }
@@ -153,6 +160,7 @@ struct NavRow: View, Equatable {
                 name: drawn.title,
                 combo: drawn.binding?.combo ?? "",
                 reading: drawn.reading,
+                narrowing: drawn.narrowing,
                 preflight: preflight,
                 onRecord: record,
                 onClear: clear

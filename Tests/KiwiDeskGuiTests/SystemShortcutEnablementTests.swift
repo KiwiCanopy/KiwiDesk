@@ -134,7 +134,11 @@ struct ConflictAccessorRoutingTests {
             // `rowConflicts` is the per-row entry taken for a
             // whole layer at once (#2783); each row still reads its
             // tier through the disabled set.
-            "ConflictText.swift": ["conflict", "rowConflicts"],
+            // `rowReaches` / `sideReach` are a row's side reach for
+            // its narrowing caption, through the same memo (#3256).
+            "ConflictText.swift": [
+                "conflict", "rowConflicts", "rowReaches", "sideReach",
+            ],
         ]
         var actionableHits = 0
         var familyHits = 0

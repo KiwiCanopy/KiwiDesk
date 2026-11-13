@@ -1099,6 +1099,11 @@ banner. A collision with a shortcut every app carries (⌘W, ⌘Q,
 ⌘H, ⌘M) means your row works and every app loses that item while
 it is bound.
 
+:::unreleased
+It also marks a row whose keys other rows take on each side, so
+it never runs.
+:::
+
 The recorder **suspends your KiwiDesk shortcuts while it is
 open**, so a combo already bound to a window action is recorded
 instead of firing.

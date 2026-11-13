@@ -188,6 +188,11 @@ struct SidedChordWordsTests {
             try read(keys + "Recorder/KeyRecorderField+Captions.swift")
                 .contains(".accessibilityLabel(words.spoken)")
         )
+        // The narrowing caption speaks both chords (#3256).
+        #expect(
+            try read(keys + "Recorder/KeyRecorderField+Narrowing.swift")
+                .contains(".accessibilityLabel(words.spoken)")
+        )
         // A Pocket key's refusal pill speaks it (#2612).
         #expect(
             try read("Shortcuts/ShortcutsOpenBinding.swift").contains(

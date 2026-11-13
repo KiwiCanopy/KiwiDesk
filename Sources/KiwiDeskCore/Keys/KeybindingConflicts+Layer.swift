@@ -40,4 +40,36 @@ extension KeybindingConflicts {
         }
         return result
     }
+
+    /// Every narrowed row's reach in one pass over the layer, keyed
+    /// by row id (#3256): the per-row `sideReach` over the rows of
+    /// its own chord, so the page asks once per layer value.
+    public static func rowReaches(
+        of bindings: [KeyBinding],
+        distinguishingSides: Bool
+    ) -> [UUID: SideReach] {
+        let parsed = bindings.map {
+            $0.combo.isEmpty ? nil : KeyCombo.parse($0.combo)
+        }
+        var byChord: [KeyCombo: [Int]] = [:]
+        for (index, combo) in parsed.enumerated() {
+            if let combo {
+                byChord[combo.registered, default: []].append(index)
+            }
+        }
+        var result: [UUID: SideReach] = [:]
+        for (index, binding) in bindings.enumerated() {
+            guard let combo = parsed[index] else { continue }
+            let rivals = (byChord[combo.registered] ?? []).compactMap {
+                index in parsed[index].map { (bindings[index], $0) }
+            }
+            result[binding.id] = sideReach(
+                for: binding,
+                parsed: combo,
+                among: rivals,
+                distinguishingSides: distinguishingSides
+            )
+        }
+        return result
+    }
 }

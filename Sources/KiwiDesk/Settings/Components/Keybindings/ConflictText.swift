@@ -110,6 +110,17 @@ enum ConflictText {
                     config: config
                 )
             )
+        case .sidesTaken(let takers):
+            let names = takers.map {
+                KeybindingCatalog.localizedName(of: $0, config: config)
+            }
+            return L(
+                "keybinding.conflict.tooltip.sides_taken",
+                "Won't work: %1$@ and %2$@ take one side each of this "
+                    + "shortcut.",
+                names.first ?? "",
+                names.dropFirst().first ?? ""
+            )
         case .sideCollapse(let who):
             return L(
                 "keybinding.conflict.tooltip.side_collapse",
@@ -167,6 +178,7 @@ enum LayerConflictMemo {
         let sides: Bool
         let byID: [UUID: KeyBinding]
         let conflicts: [UUID: Conflict]
+        let reaches: [UUID: SideReach]
     }
 
     private static var last: Taken?
@@ -176,6 +188,41 @@ enum LayerConflictMemo {
         in bindings: [KeyBinding],
         sides: Bool
     ) -> Conflict? {
+        guard let last = taken(bindings, sides: sides, holding: binding)
+        else {
+            return KeybindingConflicts.conflict(
+                for: binding,
+                in: bindings,
+                distinguishingSides: sides
+            )
+        }
+        return last.conflicts[binding.id]
+    }
+
+    /// The row's side reach (#3256), from the same layer pass.
+    static func reach(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding],
+        sides: Bool
+    ) -> SideReach? {
+        guard let last = taken(bindings, sides: sides, holding: binding)
+        else {
+            return KeybindingConflicts.sideReach(
+                for: binding,
+                in: bindings,
+                distinguishingSides: sides
+            )
+        }
+        return last.reaches[binding.id]
+    }
+
+    /// The layer's pass, taken anew when the layer moved; nil for a
+    /// row from outside it, or an edited copy of one.
+    private static func taken(
+        _ bindings: [KeyBinding],
+        sides: Bool,
+        holding binding: KeyBinding
+    ) -> Taken? {
         if last?.rows != bindings || last?.sides != sides {
             last = Taken(
                 rows: bindings,
@@ -187,20 +234,16 @@ enum LayerConflictMemo {
                 conflicts: KeybindingConflicts.rowConflicts(
                     of: bindings,
                     distinguishingSides: sides
+                ),
+                reaches: KeybindingConflicts.rowReaches(
+                    of: bindings,
+                    distinguishingSides: sides
                 )
             )
         }
-        // A row from outside the layer, or an edited copy of one,
-        // is judged on its own.
         guard let last, last.byID[binding.id] == binding,
             bindings.count == last.byID.count
-        else {
-            return KeybindingConflicts.conflict(
-                for: binding,
-                in: bindings,
-                distinguishingSides: sides
-            )
-        }
-        return last.conflicts[binding.id]
+        else { return nil }
+        return last
     }
 }

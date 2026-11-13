@@ -76,6 +76,11 @@ struct BindingNameDoorTests {
             "a census row's text label key, matched to a reveal "
                 + "anchor — no binding's label is read (#3060)"
         ),
+        "KeyRecorderField+Narrowing.swift": (
+            1,
+            "SidedChordWords.label, a chord's spoken words — no "
+                + "binding's label is read (#3256)"
+        ),
         "SimpleKiwiHubKeys.swift": (
             1,
             "SidedChordWords.label, a chord's spoken words — no "

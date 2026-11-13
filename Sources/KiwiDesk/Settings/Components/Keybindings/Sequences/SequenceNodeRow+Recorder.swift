@@ -33,6 +33,9 @@ extension SequenceNodeRow {
             name: name,
             combo: node.combo,
             reading: reading,
+            // A step is the sequence router's; a tap leader's
+            // narrowing is not drawn here (#3256 residue).
+            narrowing: nil,
             preflight: preflight,
             onRecord: record,
             onClear: { editing.update(node.id) { $0.combo = "" } },
