@@ -1990,7 +1990,7 @@
   "profiles.which_loads.placement_by_number": "現在: %1$@ → レイアウトは引き続きLuaの設定に従います。KiwiDeskはスペースをその番号に従って画面に配置します。",
   "profiles.which_loads.placement_by_number_profile": "現在: %1$@ → レイアウトは引き続き%2$@に従います。KiwiDeskはスペースをその番号に従って画面に配置します。",
   "profiles.which_loads.rule": "KiwiDeskは、すべての画面に対して1つのプロファイルだけを使います。",
-  "profiles.which_loads.standard": "現在: %1$@ → 内蔵の%2$@（一致する保存済みプロファイルなし）。",
+  "profiles.which_loads.standard": "現在: %1$@ → 内蔵のレイアウト「%2$@」（一致する保存済みプロファイルなし）。",
   "profiles.which_loads.title": "読み込まれるプロファイル",
   "pull_down.ax_hint": "メニューを開きます。",
   "ratio.chips": "%1$@のプリセット",
