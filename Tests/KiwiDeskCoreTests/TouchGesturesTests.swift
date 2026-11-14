@@ -250,7 +250,7 @@ struct TouchGesturesTests {
         #expect(pushed.last == GestureEventSettings())
     }
 
-    @Test("a swipe is claimed only while its reader runs, on free axes")
+    @Test("a swipe is claimed only while its reader runs")
     func swipeClaimFollowsTheReader() {
         let system = TrackpadSystemGestures(swipes: [3: [.vertical]])
         let (gestures, _) = front(system: system)
@@ -262,7 +262,8 @@ struct TouchGesturesTests {
         )
         gestures.start()
         let h = GestureEventSample.horizontal
-        #expect(pushed.last?.swipeAxes == [3: [Self.hyper: [h]]])
+        let v = GestureEventSample.vertical
+        #expect(pushed.last?.swipeAxes == [3: [Self.hyper: [h, v]]])
         // No reader, nothing fires the swipe: macOS keeps it.
         gestures.stop()
         gestures.makeReader = { _ in nil }

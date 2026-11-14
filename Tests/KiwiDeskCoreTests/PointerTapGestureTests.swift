@@ -226,6 +226,19 @@ struct PointerTapGestureTests {
         #expect(r.route(dock(2, 0.1, []), now: gone) == .pass)
     }
 
+    @Test("touch frames do not keep a Dock stream alive")
+    func framesDoNotRefresh() {
+        var r = router([.spread4: [Self.keys]])
+        _ = r.route(dock(1, 0.02), now: 1)
+        let lapse = PointerTapRouter.dockStreamLapse
+        // Frames with the keys, while the Dock sends nothing.
+        #expect(r.route(g(0, 0), now: 1 + lapse / 2).swallow)
+        #expect(r.route(g(0, 0), now: 1 + lapse - 0.1).swallow)
+        // Past the lapse from the Dock's last event, the stream is
+        // gone: a ⌃⌥ pinch opens its own again.
+        #expect(r.route(g(0, 0), now: 1 + lapse + 0.1) == .pass)
+    }
+
     @Test("a four-finger spread fires on a growing progress")
     func dockSpreadFires() {
         var r = router([.spread4: [Self.keys]])

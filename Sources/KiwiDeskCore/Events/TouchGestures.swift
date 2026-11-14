@@ -133,15 +133,13 @@ public final class TouchGestures {
     }
 
     /// A swipe's stream is claimed only while the reader runs that
-    /// fires it, and never on an axis `receive` would stand down.
+    /// fires it. An axis macOS keeps for an app's page swipe sends
+    /// no Dock stream, so `receive`'s stand-down alone judges it.
     private var gestureEventChords: GestureEventSettings {
         guard started else { return GestureEventSettings() }
-        guard reader != nil else {
-            return GestureEventSettings(bindings: bindings, swipes: false)
-        }
         return GestureEventSettings(
             bindings: bindings,
-            owned: readSystemGestures()
+            swipes: reader != nil
         )
     }
 

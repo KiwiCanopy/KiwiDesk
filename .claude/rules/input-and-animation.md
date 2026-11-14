@@ -1179,10 +1179,9 @@ editing here:
     its phase-1 begin**, never part of one
     (`PointerTapGestureTests` ▸ `dockStreamIsWhole`), and the
     callback stays off the main actor and cheap. A swipe slot
-    claims its axis only while the reader that fires it runs, never
-    on an axis `TrackpadSystemGestures` stands down, for the finger
-    count `TouchFingerCount` reads, or for any bound count with no
-    reading (`PointerTapSwipeTests`, `TouchGesturesTests` ▸
+    claims its axis only while the reader that fires it runs, for
+    the finger count `TouchFingerCount` reads, or for any bound
+    count with no reading (`PointerTapSwipeTests`, `TouchGesturesTests` ▸
     `swipeClaimFollowsTheReader`). **Consuming never takes an
     unmodified gesture**: every consumed input `needsModifier`, and
     `GestureEventSettings` drops an empty chord whatever a file

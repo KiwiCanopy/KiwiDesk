@@ -30,11 +30,10 @@ struct GestureEventSettings: Equatable, Sendable {
 
     /// The consumer's share of the touch front's bindings: the
     /// fired gesture events, and with `swipes` the touch reader's
-    /// swipes on every axis `owned` leaves to them.
+    /// swipes.
     init(
         bindings: [GestureKey: GestureAction],
-        swipes: Bool = true,
-        owned: TrackpadSystemGestures = .unread
+        swipes: Bool = true
     ) {
         var chords: [GestureInput: Set<ScrollChord>] = [:]
         var axes: [Int: [ScrollChord: Set<Int>]] = [:]
@@ -45,14 +44,8 @@ struct GestureEventSettings: Equatable, Sendable {
                 TrackpadGestureRouter.fingerRange.contains(fingers),
                 !key.input.directions.isEmpty
             {
-                let free = Self.axes(of: action).filter {
-                    owned.swipes[fingers]?.contains(
-                        $0 == GestureEventSample.horizontal
-                            ? .horizontal : .vertical
-                    ) != true
-                }
                 axes[fingers, default: [:]][key.chord, default: []]
-                    .formUnion(free)
+                    .formUnion(Self.axes(of: action))
             }
         }
         self.init(chords, swipeAxes: axes)

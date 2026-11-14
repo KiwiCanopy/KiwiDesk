@@ -66,13 +66,15 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     }
 
     func stop() {
+        // The count is reset under the slot's lock, which the frame
+        // write also holds, so no frame lands after the reset.
         let ours = Self.current.withLock { slot -> Bool in
             guard slot === self else { return false }
             slot = nil
+            TouchFingerCount.set(0)
             return true
         }
         guard ours else { return }
-        TouchFingerCount.set(0)
         guard let unregister = MultitouchSupport.unregisterSymbol.function,
             let stop = MultitouchSupport.stopSymbol.function
         else { return }
@@ -118,8 +120,8 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             contacts = []
         }
         // A frame in flight past `stop()` leaves the reset standing.
-        if Self.current.withLock({ $0 === self }) {
-            TouchFingerCount.set(contacts.count)
+        Self.current.withLock { slot in
+            if slot === self { TouchFingerCount.set(contacts.count) }
         }
         let frame = TouchFrame(
             time: time,

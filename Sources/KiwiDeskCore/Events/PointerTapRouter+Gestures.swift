@@ -164,11 +164,12 @@ extension PointerTapRouter {
             )
             return Routed(swallow: true, grab: [])
         }
-        stream.lastEvent = now
+        // Touch frames run while fingers rest: only the Dock's own
+        // events keep its stream alive.
         guard g.dock else {
-            gestureStream = stream
             return Routed(swallow: chord == stream.chord, grab: [])
         }
+        stream.lastEvent = now
         var fires: [TrackpadGestureEvent] = []
         if g.axis == GestureEventSample.dockPinch,
             abs(g.value) >= Self.dockPinchStep
