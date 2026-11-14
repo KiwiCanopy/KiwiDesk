@@ -1730,10 +1730,20 @@ Obligations:
   host's bounds origin. Where the check fails it adds nothing and
   the landing settle below repairs the frame
   (`GlassBoxFollowTests`; `GlassPairMotionSeamTests` ▸
-  `frameWritesAreStill`). Keep the follow within 4 ms of main
-  thread per resizing box (owner budget; measured 3.5 ms in the
-  2026-11-14 prototype), and re-measure it on the device when
-  the glass's tree or the follow changes. A frame write those
+  `frameWritesAreStill`). Force the glass's layout only while
+  its host carries a bounds animation — a plain place, a glide
+  that only moves the box and a host carrying another animation
+  leave it to AppKit's own pass (`GlassBoxLayoutGateTests`) —
+  since that layout is the follow's cost on a growing box. Judge
+  the follow's cost per Space switch, A-B-A on the device against
+  the build before the change: neither the median main-thread busy
+  nor the count of turns of 100 ms or more rises, the trail stays
+  0 pt and no settle snap fires; re-run it when the glass's tree,
+  the follow or the settle changes (owner, 2026-11-14). Measured
+  that day: busy 92.6 / 71.9 / 102.1 ms, turns 8 / 7 / 8, 0.0 pt
+  on all 19 glides; per box 7.5 ms growing and 1.5 ms shrinking,
+  6.3 ms of the growth the glass's own layout, which AppKit's pass
+  would run in that frame anyway. A frame write those
   files need on a layer no view owns widens `writeStill` to take
   the layer; it never goes in raw.
 - **Write a glass's content to the glass after every resize of
