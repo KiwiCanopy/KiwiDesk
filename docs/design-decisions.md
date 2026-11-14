@@ -17152,6 +17152,24 @@ direction moves nothing, so notches clicked one at a time each
 count and a spin cannot race down the row (the Space step's
 paragraph below argues the number).
 
+:::unreleased
+**A multi-finger swipe also fires on a quick flick, at fixed
+distances (#1873).** macOS takes a quick, short swipe as a whole
+one, so a swipe that waits for 12% of the trackpad felt dead
+beside it — and with the chord held the pointer tap swallows
+macOS's own swipe, so the flick did nothing at all. The touch
+router fires on 12% of slow travel or on 5% within a sliding
+200 ms, the window restarting at every change of finger count, so
+a finger landing is no flick, and the flick distance stays above
+the tap's 4%, so a rolling tap still taps. The values are fixed:
+no macOS preference scales touch travel, which is what earned
+*Travel per window* its field above. The Dock's own stream is
+not read for the verdict: it exists for the Dock's axes alone,
+never for five fingers, and it decides only at its end. And no
+gauge shows a swipe's progress, since the step it fires is its
+own feedback.
+:::
+
 **The settings are stored like the shortcuts**: a base in
 `gui.json`, a sparse override per profile, and the **Applies to**
 checklist on each row, with that checklist's semantics

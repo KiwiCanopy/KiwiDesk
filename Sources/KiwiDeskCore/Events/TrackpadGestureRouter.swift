@@ -27,9 +27,10 @@ public struct TrackpadGestureEvent: Equatable, Sendable {
 /// An episode runs from the first finger down to the last one
 /// up. A swipe fires when the fingers' centre has travelled
 /// `swipeDistance` along one axis since the finger count last
-/// changed; a tap fires at the lift when no swipe fired, every
-/// finger stayed within `tapTravel` and the touch lasted at most
-/// `tapDuration`.
+/// changed, or `flickDistance` within the last `flickWindow`, as
+/// macOS takes a quick short swipe; a tap fires at the lift when
+/// no swipe fired, every finger stayed within `tapTravel` and the
+/// touch lasted at most `tapDuration`.
 struct TrackpadGestureRouter {
     /// Normalized pad travel on either axis, so a vertical swipe
     /// fires at about two thirds of a horizontal one's travel, the
@@ -38,6 +39,11 @@ struct TrackpadGestureRouter {
     static let swipeDistance: Float = 0.12
     /// The swipe's own axis must lead the other by this factor.
     static let axisDominance: Float = 1.6
+    /// A flick's travel and the time it must cover it in, measured
+    /// over a sliding window so a pause before the flick still
+    /// counts. Kept above `tapTravel`, or a rolling tap would swipe.
+    static let flickDistance: Float = 0.05
+    static let flickWindow = 0.2
     static let tapTravel: Float = 0.04
     static let tapDuration = 0.35
     static let fingerRange = 3...5
@@ -51,6 +57,10 @@ struct TrackpadGestureRouter {
         var travel: Float = 0
         /// The centre when the count last changed.
         var baseline: (Float, Float)?
+        /// The centres within `flickWindow`, oldest first, since
+        /// the count last changed: a landing or lifting finger
+        /// jumps the centre.
+        var recent: [(time: Double, centre: (Float, Float))] = []
         var count = 0
     }
 
@@ -76,11 +86,15 @@ struct TrackpadGestureRouter {
         if contacts.count != current.count {
             current.count = contacts.count
             current.baseline = centre
+            current.recent = []
         }
+        current.recent.removeAll {
+            frame.time - $0.time > Self.flickWindow
+        }
+        current.recent.append((frame.time, centre))
         var events: [TrackpadGestureEvent] = []
         if !current.fired, Self.fingerRange.contains(contacts.count),
-            let base = current.baseline,
-            let direction = Self.swipe(from: base, to: centre)
+            let direction = Self.direction(of: current, at: centre)
         {
             current.fired = true
             events.append(
@@ -124,17 +138,33 @@ struct TrackpadGestureRouter {
         )
     }
 
-    /// The direction once the travel decides one; y grows up.
+    /// The swipe the travel decides, slow or flicked, if any.
+    private static func direction(
+        of episode: Episode,
+        at centre: (Float, Float)
+    ) -> Direction? {
+        if let base = episode.baseline,
+            let slow = swipe(from: base, to: centre, over: swipeDistance)
+        {
+            return slow
+        }
+        guard let oldest = episode.recent.first?.centre else { return nil }
+        return swipe(from: oldest, to: centre, over: flickDistance)
+    }
+
+    /// The direction once `distance` of travel decides one; y grows
+    /// up.
     private static func swipe(
         from base: (Float, Float),
-        to centre: (Float, Float)
+        to centre: (Float, Float),
+        over distance: Float
     ) -> Direction? {
         let dx = centre.0 - base.0
         let dy = centre.1 - base.1
-        if abs(dx) >= swipeDistance, abs(dx) >= abs(dy) * axisDominance {
+        if abs(dx) >= distance, abs(dx) >= abs(dy) * axisDominance {
             return dx < 0 ? .left : .right
         }
-        if abs(dy) >= swipeDistance, abs(dy) >= abs(dx) * axisDominance {
+        if abs(dy) >= distance, abs(dy) >= abs(dx) * axisDominance {
             return dy < 0 ? .down : .up
         }
         return nil
