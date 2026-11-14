@@ -5280,6 +5280,10 @@ still, while the touch reader runs. Where it has no finger count,
 a swipe with those keys is taken for any finger count bound on that
 axis. `swipe5` is taken alike, unmeasured.
 
+A multi-finger swipe takes its step once the fingers travel 12% of
+the trackpad along its direction, or 5% within 200 ms, a quick
+flick as macOS takes one.
+
 The keys are modifiers joined by `+` — `control` (`ctrl`),
 `option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
 holds none. A tap, `wheel_click` and `side_buttons` may hold
@@ -5329,10 +5333,6 @@ swipe or wheel notch, and its direction follows
 [long swipes](#scroll_gestureset_long_swipes) add a step per
 [step distance](#scroll_gestureset_step_distance) to every
 `swipe2` family but `space`.
-
-A multi-finger swipe takes its step once the fingers travel 12% of
-the trackpad along its direction, or 5% within 200 ms, a quick
-flick as macOS takes one.
 
 `move` moves the window under the pointer, as a drag by its title
 bar does: a tiled window swaps with the one under the pointer at

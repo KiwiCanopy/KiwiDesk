@@ -41,7 +41,8 @@ struct TrackpadGestureRouter {
     static let axisDominance: Float = 1.6
     /// A flick's travel and the time it must cover it in, measured
     /// over a sliding window so a pause before the flick still
-    /// counts. Kept above `tapTravel`, or a rolling tap would swipe.
+    /// counts. Kept above `tapTravel`, or a tap rolling one way
+    /// would swipe.
     static let flickDistance: Float = 0.05
     static let flickWindow = 0.2
     static let tapTravel: Float = 0.04

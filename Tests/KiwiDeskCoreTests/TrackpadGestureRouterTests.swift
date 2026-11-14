@@ -96,6 +96,9 @@ struct TrackpadGestureRouterTests {
     @Test("a short slow or diagonal slide decides nothing")
     func shortOrDiagonalSlide() {
         #expect(run(swipe(4, dx: 0.09, dy: 0, over: 1)).isEmpty)
+        // Just past the flick window: 0.06 spread over 0.3 s covers
+        // under 0.05 in any 0.2 s.
+        #expect(run(swipe(4, dx: 0.06, dy: 0, over: 0.3)).isEmpty)
         #expect(run(swipe(4, dx: 0.2, dy: 0.2)).isEmpty)
     }
 
@@ -162,6 +165,11 @@ struct TrackpadGestureRouterTests {
                 )
             } + [TouchFrame(time: 0.11, contacts: [])]
         #expect(run(frames).map(\.kind) == [.tap])
+        // The roll the tap allows never reaches a flick.
+        #expect(
+            TrackpadGestureRouter.flickDistance
+                > TrackpadGestureRouter.tapTravel
+        )
     }
 
     @Test("a two-finger slide is the scroll gestures', never a swipe")

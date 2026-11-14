@@ -17159,9 +17159,10 @@ one, so a swipe that waits for 12% of the trackpad felt dead
 beside it — and with the chord held the pointer tap swallows
 macOS's own swipe, so the flick did nothing at all. The touch
 router fires on 12% of slow travel or on 5% within a sliding
-200 ms, the window restarting at every change of finger count, so
-a finger landing is no flick, and the flick distance stays above
-the tap's 4%, so a rolling tap still taps. The values are fixed:
+200 ms (`TrackpadGestureRouter.swipeDistance`, `flickDistance`,
+`flickWindow`), the window restarting at every change of finger
+count, so a finger landing is no flick, and the flick distance
+stays above the tap's 4%, so a tap rolling one way still taps. The values are fixed:
 no macOS preference scales touch travel, which is what earned
 *Travel per window* its field above. The Dock's own stream is
 not read for the verdict: it exists for the Dock's axes alone,
