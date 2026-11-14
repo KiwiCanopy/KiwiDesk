@@ -1703,13 +1703,16 @@ Obligations:
   rounds it to the backing, and rewriting that rounding is what
   stranded it (`ShelfPlateGlassHostTests` ▸
   `hostResizeFillsThePair`, `roundedGlassIsNotRewritten`). The
-  host's writer joins the pair's writers below
-  (`GlassPairMotionSeamTests` ▸ `hostLayoutStartsNoMotion`). The pair's own
-  frame writers, `GlassPlate.update` and `GlassTint.apply`, take
-  no motion input and start no motion (`GlassPairMotionSeamTests`),
-  so a call site cannot make either travel.
-- **Write every frame in `GlassBox` and `GlassPlate` through the
-  one no-motion writer, `BarMotion.writeStill`, and let a gliding
+  host's writer joins the pair's writers below: it takes no motion
+  input and starts no motion of its own, only the follow it
+  copies from the host (`GlassPairMotionSeamTests` ▸
+  `hostLayoutOnlyCopiesTheFollow`). The pair's own frame writers,
+  `GlassPlate.update`, `GlassTint.apply` and
+  `GlassTint.applyBehind`, take no motion input and start no
+  motion (`GlassPairMotionSeamTests`), so a call site cannot make
+  either travel.
+- **Write every frame of a glass pair — in `GlassBox`,
+  `GlassPlate` and `GlassTint` — through the one no-motion writer, `BarMotion.writeStill`, and let a gliding
   host's glass follow the host's own animation through
   `BarMotion.followHostResize`** (#2878 ruling amendment, owner
   2026-11-14). A plain glass write inside the host's animation
@@ -1718,10 +1721,13 @@ Obligations:
   `autoresizingMask` (device 2026-11-14: the glass trailed by up
   to 60 pt and cost about 67 ms of main thread a glide). The
   follow lays the glass out at once and copies the host's bounds
-  animation onto the layers at the glass's size, all or nothing
-  behind `BarMotion.followTargets`' shape check, since those
-  layers are the glass's private tree; where the check fails it
-  adds nothing and the landing settle below repairs the frame
+  animation onto every pair layer at the host's size, all or
+  nothing behind `BarMotion.followTargets`' shape check, since
+  most of those layers are the glass's private tree: every pair
+  view and the glass's content among them, one with no view
+  backing it, and each anchored at its origin and standing at the
+  host's bounds origin. Where the check fails it adds nothing and
+  the landing settle below repairs the frame
   (`GlassBoxFollowTests`; `GlassPairMotionSeamTests` ▸
   `frameWritesAreStill`). Keep the follow within 4 ms of main
   thread per resizing box (owner budget; measured 3.5 ms in the
@@ -1747,11 +1753,12 @@ Obligations:
   a superseded landing writes nothing mid-glide
   (`GlassBoxContentFitTests` ▸ `glideLandingSettles`,
   `supersededLandingWritesNothing`; `GlassPairMotionSeamTests` ▸
-  `settleStartsNoMotion`). Since #2878 the settle is the
-  follow's fallback, for a glass off the measured shape and a
-  host moved without a bounds animation; retire it only after a
-  device sitting shows it never changes a frame (owner,
-  2026-11-14).
+  `settleStartsNoMotion`). Keep the settle as the follow's
+  fallback (#2878) — for a glass off the measured shape, and for
+  a host moved without a bounds animation (the `ShelfHandleView`
+  hover, the `AppBarOverlay+GroupGlide` landing) — and retire it
+  only after a device sitting through those paths shows it never
+  changes a frame (owner, 2026-11-14).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

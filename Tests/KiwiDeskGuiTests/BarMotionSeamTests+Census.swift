@@ -100,8 +100,15 @@ extension BarMotionSeamTests {
         // `setFrame`'s gate decided.
         "writeStill": ["still {"],
         "layoutStill": ["still {"],
-        "still": ["duration = 0", "setDisableActions(true)"],
-        "followHostResize": ["animation(forKey:", "followTargets("],
+        // The newline closes the zero: `duration = 0.15` names it
+        // too.
+        "still": [
+            "duration = 0\n", "allowsImplicitAnimation = false",
+            "setDisableActions(true)",
+        ],
+        "carriesResize": ["hostResize("],
+        "hostResize": ["animation(forKey:"],
+        "followHostResize": ["hostResize(", "followTargets("],
         "followTargets": [],
         "isInTree": [],
     ]

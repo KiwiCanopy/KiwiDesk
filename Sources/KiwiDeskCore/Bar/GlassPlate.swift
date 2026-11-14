@@ -101,18 +101,26 @@ enum GlassPlate {
     /// box (#2425, device).
     @MainActor
     static func fitContent(_ view: NSView) {
-        guard #available(macOS 26, *),
-            let glass = view as? NSGlassEffectView,
-            let held = glass.contentView
-        else { return }
-        if !fills(held.frame, glass.bounds) {
-            BarMotion.writeStill(held, glass.bounds)
+        guard let held = contentChain(view).first else { return }
+        if !fills(held.frame, view.bounds) {
+            BarMotion.writeStill(held, view.bounds)
         }
-        guard held is GlassBackdrop else { return }
-        for content in held.subviews
+        for content in contentChain(view).dropFirst()
         where !fills(content.frame, held.bounds) {
             BarMotion.writeStill(content, held.bounds)
         }
+    }
+
+    /// A glass's content view and, where that is its tint, the
+    /// content inside it: the views `fitContent` writes to the
+    /// glass's size. Empty for a view that is no glass.
+    @MainActor
+    static func contentChain(_ view: NSView) -> [NSView] {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView,
+            let held = glass.contentView
+        else { return [] }
+        return [held] + (held is GlassBackdrop ? held.subviews : [])
     }
 
     /// Whether `frame` already fills `bounds`: each edge within

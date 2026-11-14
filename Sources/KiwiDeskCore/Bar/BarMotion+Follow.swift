@@ -38,6 +38,18 @@ extension BarMotion {
     /// The key a follow animation is added under.
     static let followKey = "kiwi.follow.bounds"
 
+    /// Whether `host` is gliding to a new size: it carries a Core
+    /// Animation bounds animation, the one a follow copies.
+    @MainActor
+    static func carriesResize(_ host: NSView) -> Bool {
+        hostResize(host) != nil
+    }
+
+    @MainActor
+    private static func hostResize(_ host: NSView) -> CABasicAnimation? {
+        host.layer?.animation(forKey: "bounds") as? CABasicAnimation
+    }
+
     /// Copies `host`'s Core Animation bounds animation onto every
     /// layer of `pair` — the views the host writes to its bounds —
     /// that stands at the host's size, so glass and host share one
@@ -52,8 +64,7 @@ extension BarMotion {
         pair: [NSView]
     ) -> Bool {
         guard let hostLayer = host.layer,
-            let animation = hostLayer.animation(forKey: "bounds")
-                as? CABasicAnimation,
+            let animation = hostResize(host),
             let targets = followTargets(
                 host: hostLayer,
                 glass: glass,
@@ -66,41 +77,48 @@ extension BarMotion {
         return true
     }
 
-    /// The layers a follow animates, or nil where the glass is not
-    /// the shape the follow was measured on (#2878): the glass's
-    /// own layer filling the host after layout, which rounds it to
-    /// the backing (#2388); at least one layer at the glass's size
-    /// in its private tree that no view backs; and every layer at
-    /// that size anchored at its origin and at the host's bounds
-    /// origin, so a bounds animation alone carries it.
+    /// The layers a follow animates — every layer under `pair` at
+    /// the host's size, within the half point the backing's
+    /// rounding moves one (#2388) — or nil where the box is not the
+    /// shape the follow was measured on (#2878): the glass's own
+    /// layer filling the host; every pair view, and the glass's
+    /// content chain, among the matched; one matched layer in the
+    /// glass's private tree that no view backs; and every matched
+    /// layer anchored at its origin and standing at the host's
+    /// bounds origin, so a bounds animation alone carries it.
     @MainActor
     static func followTargets(
         host: CALayer,
         glass: NSView,
         pair: [NSView]
     ) -> [CALayer]? {
+        let size = host.bounds.size
+        let atSize = { (layer: CALayer) in
+            abs(layer.bounds.width - size.width) <= 0.5
+                && abs(layer.bounds.height - size.height) <= 0.5
+        }
         guard let glassLayer = glass.layer,
             GlassPlate.fills(glassLayer.bounds, host.bounds)
         else { return nil }
-        let size = glassLayer.bounds.size
         var matched: [CALayer] = []
         func walk(_ layer: CALayer) {
-            if layer.bounds.size == size { matched.append(layer) }
+            if atSize(layer) { matched.append(layer) }
             layer.sublayers?.forEach(walk)
         }
         pair.compactMap(\.layer).forEach(walk)
-        let glassTree = Set(
-            matched.filter { isInTree($0, of: glassLayer) }
-                .map(ObjectIdentifier.init)
-        )
+        let ids = Set(matched.map(ObjectIdentifier.init))
+        let required = (pair + GlassPlate.contentChain(glass))
+            .map { $0.layer.map(ObjectIdentifier.init) }
+        let origin = host.bounds.origin
         guard
+            required.allSatisfy({ $0.map(ids.contains) ?? false }),
             matched.contains(where: {
-                glassTree.contains(ObjectIdentifier($0))
-                    && !($0.delegate is NSView)
+                isInTree($0, of: glassLayer) && !($0.delegate is NSView)
             }),
             matched.allSatisfy({
                 $0.anchorPoint == .zero
-                    && $0.bounds.origin == host.bounds.origin
+                    && abs($0.bounds.minX - origin.x) <= 0.5
+                    && abs($0.bounds.minY - origin.y) <= 0.5
             })
         else { return nil }
         return matched

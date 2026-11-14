@@ -8,10 +8,10 @@ import Testing
 /// motion in their bodies, so a call site has no way to make
 /// either travel. A writer that re-grew either input is the
 /// regression: a pair gliding by its own frames trailed a crescent
-/// on the device. Every glass frame write in `GlassBox` and
-/// `GlassPlate` goes through the one no-motion writer, since a
-/// plain write inside the host's group was stepped by AppKit a
-/// frame behind the host (#2878).
+/// on the device. Every pair frame write in `GlassBox`,
+/// `GlassPlate` and `GlassTint` goes through the one no-motion
+/// writer, since a plain write inside the host's group was stepped
+/// by AppKit a frame behind the host (#2878).
 @Suite("Glass pair motion seam")
 struct GlassPairMotionSeamTests {
     private static var bar: URL {
@@ -36,6 +36,17 @@ struct GlassPairMotionSeamTests {
             file: "GlassTint.swift", declaration: "static func apply(",
             input: "in glass: NSView"
         ),
+        (
+            file: "GlassTint.swift",
+            declaration: "static func applyBehind(",
+            input: "below glass: NSView"
+        ),
+    ]
+
+    /// The files whose every pair frame write goes through the
+    /// no-motion writer.
+    private static let pairFiles = [
+        "GlassBox.swift", "GlassPlate.swift", "GlassTint.swift",
     ]
 
     /// Motion inputs a signature may not take.
@@ -63,19 +74,21 @@ struct GlassPairMotionSeamTests {
     }
 
     /// Spellings of a frame write that bypasses the writer: a
-    /// frame (or a member of one) assigned, or a frame setter
-    /// called — `super.setFrameSize(` and the override's own
-    /// declaration excepted, the host's write of itself, and a
-    /// setter named as a function reference (`setFrame(_:`), the
-    /// host's move route. Trade: a setter called with a first
-    /// argument spelled `_:` would pass unscanned; no call takes
-    /// that shape.
+    /// frame or bounds (or a member of one) assigned, compound
+    /// assignment included, or a frame or bounds setter called —
+    /// `super.setFrameSize(` and the override's own declaration
+    /// excepted, the host's write of itself, and a setter named as
+    /// a function reference (`setFrame(_:`), the host's move route.
+    /// Trade: a setter called with a first argument spelled `_:`
+    /// passes unscanned, and so does a bare implicit-self
+    /// `frame =`, which only a view's own member could write; no
+    /// call in these files takes either shape.
     private static func rawWriteCount(in source: String) -> Int {
         let assigned = source.matches(
-            of: #/\.frame(\.\w+)*\s*=(?!=)/#
+            of: #/\.(frame|bounds)(\.\w+)*\s*[-+*\/]?=(?!=)/#
         ).count
         let setters = source.matches(
-            of: #/(super\.|func )?setFrame(Size|Origin)?\((?!_:)/#
+            of: #/(super\.|func )?set(Frame|Bounds)(Size|Origin)?\((?!_:)/#
         ).filter { $0.output.1 == nil }.count
         return assigned + setters
     }
@@ -132,7 +145,7 @@ struct GlassPairMotionSeamTests {
             "\(declaration) is gone from GlassPlate.swift"
         )
         #expect(
-            body.contains("BarMotion.writeStill(held, glass.bounds)"),
+            body.contains("BarMotion.writeStill(held, view.bounds)"),
             "\(body)"
         )
         let rest = Self.unstill(body)
@@ -147,8 +160,8 @@ struct GlassPairMotionSeamTests {
     /// The host writes its pair to every size it takes (#2388): a
     /// writer whose input is the host's size, so it has no frame
     /// signature to read — its body alone starts no motion.
-    @Test("the host's pair layout starts no motion")
-    func hostLayoutStartsNoMotion() throws {
+    @Test("the host's pair layout starts no motion of its own")
+    func hostLayoutOnlyCopiesTheFollow() throws {
         let declaration = "override func setFrameSize("
         let source = try SourceScan.strippedSource(
             at: Self.bar.appendingPathComponent("GlassBox.swift")
@@ -158,11 +171,16 @@ struct GlassPairMotionSeamTests {
             "\(declaration) is gone from GlassBox.swift"
         )
         #expect(
-            body.contains("BarMotion.writeStill(view, bounds)"),
+            body.contains("BarMotion.writeStill($0, bounds)"),
             "\(body)"
         )
         #expect(body.contains("BarMotion.followHostResize("), "\(body)")
-        let rest = Self.unstill(body, ["BarMotion.followHostResize("])
+        // It reads whether the host glides and copies the follow;
+        // neither starts motion of its own.
+        let rest = Self.unstill(
+            body,
+            ["BarMotion.followHostResize(", "BarMotion.carriesResize("]
+        )
         for spelling in Self.motionStarts {
             #expect(
                 !rest.contains(spelling),
@@ -196,16 +214,20 @@ struct GlassPairMotionSeamTests {
         }
     }
 
-    /// Every frame write in the box's two files goes through the
-    /// no-motion writer (#2878): a raw write there, inside a host's
-    /// glide, is the one AppKit steps a frame behind the host.
+    /// Every pair frame write goes through the no-motion writer
+    /// (#2878): a raw write inside a host's glide is the one AppKit
+    /// steps a frame behind the host.
     @Test("glass frame writes go through the no-motion writer")
     func frameWritesAreStill() throws {
         #expect(Self.rawWriteCount(in: "a.frame = b") == 1)
         #expect(Self.rawWriteCount(in: "a.setFrameSize(s)") == 1)
         #expect(Self.rawWriteCount(in: "super.setFrameSize(s)") == 0)
         #expect(Self.rawWriteCount(in: "m = B.setFrame(_:to:)") == 0)
-        for file in ["GlassBox.swift", "GlassPlate.swift"] {
+        #expect(Self.rawWriteCount(in: "a.frame.origin.x += 1") == 1)
+        #expect(Self.rawWriteCount(in: "a.bounds = b") == 1)
+        #expect(Self.rawWriteCount(in: "a.setBoundsSize(s)") == 1)
+        #expect(Self.rawWriteCount(in: "a.frame == b") == 0)
+        for file in Self.pairFiles {
             let source = try SourceScan.strippedSource(
                 at: Self.bar.appendingPathComponent(file)
             )

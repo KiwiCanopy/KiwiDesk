@@ -20,20 +20,20 @@ final class GlassBoxHost: NSView {
 
     /// The host writes its pair, never a rider, to every size it
     /// takes (#2388, device), at once and without motion; where the
-    /// host itself glides, the pair's layers follow its animation
-    /// (#2878).
+    /// host itself glides, the glass is laid out at once and the
+    /// pair's layers follow the host's animation (#2878).
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         let pair = subviews.filter { !($0 is GlassBoxRider) }
-        for view in pair {
-            BarMotion.writeStill(view, bounds)
-            GlassPlate.fitContent(view)
+        pair.forEach { BarMotion.writeStill($0, bounds) }
+        let gliding =
+            BarMotion.carriesResize(self)
+            ? pair.first(where: GlassPlate.isGlass) : nil
+        if let gliding { BarMotion.layoutStill(gliding) }
+        pair.forEach(GlassPlate.fitContent)
+        if let gliding {
+            BarMotion.followHostResize(self, glass: gliding, pair: pair)
         }
-        guard let glass = pair.first(where: GlassPlate.isGlass) else {
-            return
-        }
-        BarMotion.layoutStill(glass)
-        BarMotion.followHostResize(self, glass: glass, pair: pair)
     }
 
     /// Bumped by every glide `GlassBox.place` starts, so only the
