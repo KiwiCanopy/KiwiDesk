@@ -3,7 +3,7 @@ import Foundation
 /// A stored screen setup as the Known screen setups card and
 /// `list_monitor_sets` read it (#3324): one exact combination of
 /// screens and the profile holding it.
-public struct KnownMonitorSet: Equatable, Sendable {
+public struct KnownMonitorSet: Hashable, Sendable {
     /// Sorted `Name:WxH` fingerprints — the setup's identity.
     public let monitors: [String]
     public let profile: String
@@ -11,6 +11,18 @@ public struct KnownMonitorSet: Equatable, Sendable {
     /// The profile holds no other setup, so forgetting this one
     /// leaves it dormant (#1530).
     public let isProfilesLast: Bool
+
+    public init(
+        monitors: [String],
+        profile: String,
+        isConnected: Bool,
+        isProfilesLast: Bool
+    ) {
+        self.monitors = monitors
+        self.profile = profile
+        self.isConnected = isConnected
+        self.isProfilesLast = isProfilesLast
+    }
 }
 
 /// Why a forget wrote nothing — a case, never a GUI sentence
@@ -23,7 +35,7 @@ public enum MonitorSetForgetError: Error, Equatable,
     /// No profile holds the setup.
     case unknown
 
-    /// The `refused` code a command answers with.
+    /// The `reason` code a command answers with.
     public var code: String {
         switch self {
         case .connected: return "connected_setup"
@@ -87,6 +99,9 @@ extension KiwiCore {
             throw MonitorSetForgetError.connected
         }
         var holders: [String] = []
+        // A holder written before a failed write keeps the forget,
+        // so what follows it runs for the holders that landed.
+        defer { followForget(wanted, from: holders) }
         for var holder in profiles.allProfiles() {
             guard ProfileManager.strip(wanted, from: &holder) != nil
             else { continue }
@@ -99,16 +114,21 @@ extension KiwiCore {
         guard !holders.isEmpty else {
             throw MonitorSetForgetError.unknown
         }
+        return holders.sorted()
+    }
+
+    /// The live copy of the holders' edges, the stored bindings
+    /// and an open draft follow the files the forget wrote.
+    private func followForget(_ setup: [String], from holders: [String]) {
+        guard !holders.isEmpty else { return }
         if let current = profiles.currentName, holders.contains(current) {
-            // The live copy of the file's edges, or the next Save
-            // writes them back.
+            // Or the next Save writes the live copy's edges back.
             tiler.settings.keepScreenEdges(in: liveScreenEdgeScope)
         }
-        forgetSetupBindings(wanted)
+        forgetSetupBindings(setup)
         for name in holders {
-            profiles.onCapturedLive(name, .forgottenSetup(monitors: wanted))
+            profiles.onCapturedLive(name, .forgottenSetup(monitors: setup))
         }
-        return holders.sorted()
     }
 
     /// The stored bindings' entries scoped to `setup` go, through
@@ -151,7 +171,7 @@ extension KiwiCore {
         } catch let refusal as MonitorSetForgetError {
             return CommandResponse(
                 status: "error",
-                data: .object(["refused": .string(refusal.code)]),
+                data: .object(["reason": .string(refusal.code)]),
                 error: refusal.description
             )
         } catch {
@@ -166,30 +186,5 @@ extension KiwiCore {
             "connected": .bool(set.isConnected),
             "last_of_profile": .bool(set.isProfilesLast),
         ])
-    }
-}
-
-extension TilingSettings {
-    /// Both bars' per-screen edges kept to `scope` (#3324).
-    public mutating func keepScreenEdges(in scope: ScreenEdgeScope) {
-        spaceBarStyle.keepScreens(in: scope)
-        appBarStyle.keepScreens(in: scope)
-    }
-}
-
-extension Dictionary where Key == DesktopKey, Value == DesktopBinding {
-    /// Every entry scoped to `setup` unbound, a record left empty
-    /// removed (#3324); true when anything changed.
-    @discardableResult
-    public mutating func forgetSetup(_ setup: [String]) -> Bool {
-        var changed = false
-        for (key, binding) in self {
-            var edited = binding
-            let empty = edited.unbind(setup: setup)
-            guard edited != binding else { continue }
-            changed = true
-            self[key] = empty ? nil : edited
-        }
-        return changed
     }
 }

@@ -9144,14 +9144,15 @@ set becomes the default unless the count already has another.
   `last_of_profile` says the setup is its profile's only one.
 - `forget_monitor_set` removes that exact combination from the
   profile holding it, with its pins; every other setup, including
-  ones sharing a screen, stays. Desktop bindings scoped to it lose
-  that entry, and the profile drops its per-screen bar edges for
-  screens none of its remaining setups and no connected screen
-  holds. A profile left with no setup goes dormant and, if it was
+  ones sharing a screen, stays. A binding kept in `bindings.json`
+  loses its entry for that setup, and one left with no entry goes;
+  a `bind_profile_to_desktop` call in `init.lua` stays as written.
+  The profile drops its per-screen bar edges for screens none of
+  its remaining setups and no connected screen holds. A profile left with no setup goes dormant and, if it was
   the count's default, loses the flag with nobody taking it. It
   returns `{"forgotten_from": ["Cowork"]}`.
-- It refuses the connected setup (`refused: "connected_setup"`) and
-  a setup no profile holds (`refused: "unknown_setup"`). Settings ▸
+- It refuses the connected setup (`reason: "connected_setup"`) and
+  a setup no profile holds (`reason: "unknown_setup"`). Settings ▸
   Profiles ▸ **Known screen setups** does the same.
 
 **Example:**

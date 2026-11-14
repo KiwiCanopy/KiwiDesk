@@ -82,7 +82,7 @@ struct MonitorSetForgetTests {
             args: fp("A", "C").map { .string($0) }
         )
         #expect(!reply.isSuccess)
-        #expect(field(reply.data, "refused") == .string("connected_setup"))
+        #expect(field(reply.data, "reason") == .string("connected_setup"))
     }
 
     @Test("an unknown setup is refused with its own code")
@@ -94,7 +94,7 @@ struct MonitorSetForgetTests {
             args: fp("A", "Z").map { .string($0) }
         )
         #expect(!reply.isSuccess)
-        #expect(field(reply.data, "refused") == .string("unknown_setup"))
+        #expect(field(reply.data, "reason") == .string("unknown_setup"))
         #expect(!core.execute("forget_monitor_set", args: []).isSuccess)
     }
 

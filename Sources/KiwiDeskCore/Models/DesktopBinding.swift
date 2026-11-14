@@ -230,3 +230,20 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         case screen
     }
 }
+
+extension Dictionary where Key == DesktopKey, Value == DesktopBinding {
+    /// Every entry scoped to `setup` unbound, a record left empty
+    /// removed (#3324); true when anything changed.
+    @discardableResult
+    public mutating func forgetSetup(_ setup: [String]) -> Bool {
+        var changed = false
+        for (key, binding) in self {
+            var edited = binding
+            let empty = edited.unbind(setup: setup)
+            guard edited != binding else { continue }
+            changed = true
+            self[key] = empty ? nil : edited
+        }
+        return changed
+    }
+}

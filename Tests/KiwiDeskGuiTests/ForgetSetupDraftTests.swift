@@ -89,6 +89,44 @@ struct ForgetSetupDraftTests {
         #expect(model.draftMonitorSets.map(\.monitors) == [Self.ac])
     }
 
+    @Test("a stored-profile draft of the holder follows too")
+    func storedTargetFollows() throws {
+        let (model, core) = try seeded()
+        try core.persistProfile(named: "Other", modes: nil)
+        _ = core.execute("load_profile", args: [.string("Other")])
+        model.target = .storedProfile("Desk")
+        model.reload()
+        #expect(!model.config.settings.spaceBarStyle.edgeOverride.isEmpty)
+        let reply = core.execute(
+            "forget_monitor_set",
+            args: Self.ab.map { .string($0) }
+        )
+        #expect(reply.isSuccess, "\(reply.error ?? "")")
+        for config in [model.config, model.cleanConfig] {
+            #expect(config.settings.spaceBarStyle.edgeOverride.isEmpty)
+            #expect(config.profileBindings[.number(1)] == nil)
+        }
+        #expect(!model.isDirty)
+    }
+
+    @Test("a draft of another profile keeps its edges")
+    func otherDraftKeepsEdges() throws {
+        let (model, core) = try seeded()
+        model.config.settings.appBarStyle.edgeOverride = [
+            "B:100x100": .left
+        ]
+        model.cleanConfig.settings.appBarStyle.edgeOverride = [
+            "B:100x100": .left
+        ]
+        model.adoptForgottenSetup(Self.ab, from: "Elsewhere")
+        #expect(
+            model.config.settings.appBarStyle.edgeOverride
+                == ["B:100x100": .left]
+        )
+        #expect(model.cleanConfig.profileBindings[.number(1)] == nil)
+        _ = core
+    }
+
     @Test("the confirm adds the dormant sentence only for a last setup")
     func confirmCopy() throws {
         LocalizationManager.shared.select("en")

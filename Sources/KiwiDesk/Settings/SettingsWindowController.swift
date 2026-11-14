@@ -84,9 +84,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.updater = updater
     }
 
-    /// A Keep or `save_profile` just wrote the live profile: move
-    /// the draft's saved baseline onto what it wrote without
-    /// discarding staged edits (#1179, #1790).
+    /// A Keep or `save_profile` wrote the live profile, or a forget
+    /// wrote profile `name` (#3324): move the draft's saved
+    /// baseline onto what was written without discarding staged
+    /// edits (#1179, #1790).
     func adoptCapturedWrite(_ write: CapturedWrite, of name: String) {
         if case .forgottenSetup(let monitors) = write {
             model.adoptForgottenSetup(monitors, from: name)

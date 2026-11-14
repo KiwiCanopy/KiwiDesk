@@ -48,49 +48,47 @@ extension SettingsModel {
         return parts.joined(separator: "\n\n")
     }
 
-    /// A setup's screens joined with "+", each sized where another
-    /// stored setup would read the same.
+    /// A setup's name as every other row on the page names it
+    /// (`setupLabels`), so one setup never reads two ways.
     func knownSetupLabel(_ setup: KnownMonitorSet) -> String {
-        let names = setup.monitors.map(Self.bareName)
-        let twin = knownSetups.contains {
-            $0.monitors != setup.monitors
-                && $0.monitors.map(Self.bareName).sorted() == names.sorted()
-        }
-        guard twin else {
-            return setup.monitors.map { fingerprint in
-                let connected = screenName(fingerprint)
-                return connected == fingerprint
-                    ? Self.bareName(fingerprint) : connected
-            }.joined(separator: " + ")
-        }
-        return setup.monitors.map {
-            let parts = Display.fingerprintParts($0)
-            return "\(parts.name) (\(parts.size))"
-        }.joined(separator: " + ")
+        setupLabels([setup.monitors])[0]
     }
 
-    private static func bareName(_ fingerprint: String) -> String {
-        Display.fingerprintParts(fingerprint).name
-    }
-
-    /// Runs the one verb, as the CLI does; the draft follows
-    /// through `adoptForgottenSetup`, which the write calls.
+    /// Forgets through Core's one forget, as the CLI's verb does,
+    /// and narrates a refusal from its case (core-boundaries.md);
+    /// the draft follows through `adoptForgottenSetup`, which the
+    /// write calls.
     func forgetSetup(_ setup: KnownMonitorSet) {
-        let reply = core.withUserMotion {
-            core.execute(
-                "forget_monitor_set",
-                args: setup.monitors.map { .string($0) }
-            )
-        }
-        if !reply.isSuccess, let error = reply.error {
+        do {
+            try core.withUserMotion {
+                try core.forgetMonitorSet(setup.monitors)
+            }
+        } catch let refusal as MonitorSetForgetError {
+            profileWarning = Self.forgetRefusal(refusal)
+        } catch {
             profileWarning = L(
                 "profiles.known.forget_failed",
                 "Forgetting the screen setup failed: %1$@",
-                error
+                NewerFormatText.detail(error)
             )
             core.onLog("screen setup forget failed: \(error)")
         }
         refreshProfiles()
+    }
+
+    static func forgetRefusal(_ refusal: MonitorSetForgetError) -> String {
+        switch refusal {
+        case .connected:
+            return L(
+                "profiles.known.connected.help",
+                "Disconnect these screens to forget this setup."
+            )
+        case .unknown:
+            return L(
+                "profiles.known.forget_unknown",
+                "No profile holds this screen setup any more."
+            )
+        }
     }
 
     /// Core forgot `monitors` from `name` (`CapturedWrite`): the

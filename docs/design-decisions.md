@@ -22274,10 +22274,11 @@ appears in many setups, and forgetting it would silently strip
 every combination that contains it. The forget runs through the
 same release a claim takes, so a set leaves its one holder the way
 it leaves a sibling on a claim, its pins with it. What only a
-forget can leave behind is cleared with it: every Desktop binding
-entry scoped to the set (a binding left empty goes), and the
-holder's per-screen bar edges for screens no remaining setup of
-its own and no connected screen holds. The connected setup is
+forget can leave behind is cleared with it: every stored Desktop
+binding entry scoped to the set (a binding left empty goes;
+`init.lua`'s own calls stay its own, as a rename leaves them), and
+the holder's per-screen bar edges for screens no remaining setup
+of its own and no connected screen holds. The connected setup is
 refused, since the next Save would write it straight back. A
 holder left with no set goes dormant, as it would after losing its
 last set to a claim, with one arm a claim never meets: **nobody
@@ -22287,7 +22288,14 @@ and handing it to some other profile of the count would be a
 choice the user did not make, so the count is left with no
 default until one is made. Recording when a setup was last seen
 was refused: nothing records it, and it would be a new stored
-value for a card that needs none.
+value for a card that needs none. A set two hand-edited files
+still share until the next settle leaves both of them, though the
+card's confirm names the row's holder alone: that state lasts only
+until a save or load settles it, and a forget that left a copy
+behind would leave the setup known. Rows name a setup the way the
+page's chips do, the list form of the locale, rather than the
+"+" the ruling sketched, so one setup never reads two ways on one
+page.
 :::
 
 **[Principle]**

@@ -22,11 +22,17 @@ struct KnownSetupsGroup: View {
             )
         ) {
             VStack(alignment: .leading, spacing: 8) {
+                // Drawn in both states, so a search hit on Forget
+                // lands once, here (#1250).
                 Text(caption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                ForEach(model.knownSetups, id: \.monitors) { setup in
+                    .searchAnchored(
+                        SettingsCatalog.profiles.knownSetups.children
+                            .forget
+                    )
+                ForEach(model.knownSetups, id: \.self) { setup in
                     row(setup)
                 }
             }
@@ -52,14 +58,50 @@ struct KnownSetupsGroup: View {
 
     private func row(_ setup: KnownMonitorSet) -> some View {
         let label = model.knownSetupLabel(setup)
-        return HStack(alignment: .center, spacing: 10) {
-            Image(
-                systemName: setup.monitors.count > 1
-                    ? "display.2" : "display"
-            )
-            .foregroundStyle(.secondary)
-            .frame(width: 26)
-            .accessibilityHidden(true)
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .center, spacing: 10) {
+                readout(setup, label: label)
+                Spacer()
+                forgetButton(setup, label: label)
+            }
+            // The greyed ✕'s reason, its own element outside the
+            // dim (gui.md ▸ a dim is not a sentence).
+            if setup.isConnected {
+                Text(Self.connectedReason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, Self.textIndent)
+            }
+        }
+        .contentShape(Rectangle())
+        // The connected row has nothing to do from the keyboard.
+        .focusable(!setup.isConnected)
+        .rowActions {
+            // A menu row: the style is the menu's.
+            Button(
+                SettingsCatalog.profiles.knownSetups.children.forget.text
+            ) {
+                model.confirmingSetupForget(setup)
+            }
+            .buttonStyle(.plain)
+            .disabled(setup.isConnected)
+        }
+    }
+
+    /// Glyph to text column: the glyph's frame and the row spacing.
+    private static let textIndent: CGFloat = 36
+
+    /// The glyph, name, detail and chip, spoken as one element; the
+    /// ✕ beside it stays its own (`DesktopsGroup+Setups`'s shape).
+    private func readout(
+        _ setup: KnownMonitorSet,
+        label: String
+    ) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "display")
+                .foregroundStyle(.secondary)
+                .frame(width: 26)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .lineLimit(1)
@@ -68,63 +110,43 @@ struct KnownSetupsGroup: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                // The greyed ✕'s reason, drawn outside the dim
-                // (gui.md ▸ a dim is not a sentence).
-                if setup.isConnected {
-                    Text(Self.connectedReason)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
             if setup.isConnected {
-                BadgeChip(
-                    label: L("profiles.known.connected", "connected")
-                )
+                BadgeChip(label: Self.connectedChip)
             }
-            Spacer()
-            forgetButton(setup, label: label)
         }
-        .contentShape(Rectangle())
-        .focusable()
-        .accessibilityElement(children: .combine)
-        .rowActions {
-            // A menu row: the style is the menu's.
-            Button(forgetTitle) {
-                model.confirmingSetupForget(setup)
-            }
-            .buttonStyle(.plain)
-            .disabled(setup.isConnected)
-        }
-        .searchAnchored(SettingsCatalog.profiles.knownSetups.children.forget)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            L("profiles.sets.chip.ax", "Screen setup: %1$@", label)
+        )
+        .accessibilityValue(
+            setup.isConnected
+                ? LocalizedList.join([detail(setup), Self.connectedChip])
+                : detail(setup)
+        )
     }
 
-    private var forgetTitle: String {
-        SettingsCatalog.profiles.knownSetups.children.forget.text
+    private static var connectedChip: String {
+        L("profiles.sets.connected", "connected")
     }
 
-    /// "2 screens · in “Cowork”" — the count leads, as the ruled
-    /// copy does, one form per count.
+    /// "2 screens · in “Cowork”": the page's own screen count
+    /// phrase, then the holder.
     private func detail(_ setup: KnownMonitorSet) -> String {
-        setup.monitors.count == 1
-            ? L(
-                "profiles.known.detail.one",
-                "1 screen · in “%1$@”",
-                setup.profile
-            )
-            : L(
-                "profiles.known.detail.many",
-                "%1$d screens · in “%2$@”",
-                setup.monitors.count,
-                setup.profile
-            )
+        L(
+            "profiles.known.detail",
+            "%1$@ · in “%2$@”",
+            screensPhrase(setup.monitors.count),
+            setup.profile
+        )
     }
 
     private func forgetButton(
         _ setup: KnownMonitorSet,
         label: String
     ) -> some View {
-        Button {
+        let name = L("profiles.known.forget.help", "Forget %1$@", label)
+        return Button {
             model.confirmingSetupForget(setup)
         } label: {
             Image(systemName: "xmark.circle.fill")
@@ -132,15 +154,10 @@ struct KnownSetupsGroup: View {
         }
         .buttonStyle(.borderless)
         .disabled(setup.isConnected)
-        .iconButtonAffordance(
-            setup.isConnected
-                ? Self.connectedReason
-                : L(
-                    "profiles.known.forget.help",
-                    "Forget %1$@",
-                    label
-                )
-        )
+        .iconHoverChip()
+        // Named by its act, connected or not; the reason is help.
+        .help(setup.isConnected ? Self.connectedReason : name)
+        .accessibilityLabel(name)
     }
 
     private static var connectedReason: String {

@@ -1095,13 +1095,11 @@ them, scope the binding to that one screen setup ([Lua
 reference](lua-reference.md#bind_profile_to_desktop)).
 
 :::unreleased
-`list_monitor_sets` prints every stored screen setup with its
-`screens`, `profile`, `connected` and `last_of_profile`, and
-`forget_monitor_set` takes every screen fingerprint of one of them
+`forget_monitor_set` takes every screen fingerprint of one stored
+screen setup, as `list_monitor_sets` prints them
 (`kiwidesk forget_monitor_set "Built-in Retina Display:1512x982"
-"BenQ GW2480:1920x1080"`) and removes that setup from its profile.
-It refuses the connected setup and an unknown one, answering
-`refused: "connected_setup"` or `refused: "unknown_setup"`
+"BenQ GW2480:1920x1080"`). A refusal prints its `reason` code,
+writes the reason to stderr and exits 1
 ([Lua reference](lua-reference.md#list_monitor_sets-forget_monitor_set)).
 :::
 

@@ -73,8 +73,9 @@ enum ProfilesRowInstance: Hashable {
     /// about (architect review, 2026-09-04). And by the SLOT
     /// (#1436): one Desktop draws a picker per count group.
     case binding(DesktopKey, BindingSlot)
-    /// A stored screen setup, by its sorted fingerprints (#3324).
-    case setup([String])
+    /// A stored screen setup by its holder and sorted fingerprints
+    /// — a hand-edited duplicate has two holders (#3324).
+    case setup(profile: String, [String])
 }
 
 /// Expands Profiles census keys into rendered instances (#678,
@@ -98,7 +99,7 @@ struct ProfilesFamilyRows {
     var resolutions: [DesktopBinding.Entry.Key: BindingResolution] = [:]
     /// Every stored setup in Core's order (`knownMonitorSets`), the
     /// Known screen setups card's rows (#3324).
-    var knownSetups: [[String]] = []
+    var knownSetups: [KnownMonitorSet] = []
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
         guard case .profiles(let family) = key else { return nil }
@@ -293,7 +294,9 @@ struct ProfilesFamilyRows {
                 }
             }
         case .profilesForgetSetup:
-            return knownSetups.map { .setup($0) }
+            return knownSetups.map {
+                .setup(profile: $0.profile, $0.monitors)
+            }
         case .isStarterSetup:
             return nil
         }

@@ -89,6 +89,14 @@ extension ScreenEdged {
     }
 }
 
+extension TilingSettings {
+    /// Both bars' per-screen edges kept to `scope` (#3324).
+    public mutating func keepScreenEdges(in scope: ScreenEdgeScope) {
+        spaceBarStyle.keepScreens(in: scope)
+        appBarStyle.keepScreens(in: scope)
+    }
+}
+
 extension KeyedEncodingContainer {
     /// Leaves an empty `[String: AppBarEdge]` out of the JSON
     /// (#1948). The scope is the TYPE, module-wide: any encode of
