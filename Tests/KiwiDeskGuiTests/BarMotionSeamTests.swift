@@ -31,6 +31,7 @@ struct BarMotionSeamTests {
         "BarMotion+Unfold.swift", "BarMotion+Spread.swift",
         "BarMotion+Slide.swift", "BarMotion+Morph.swift",
         "BarMotion+PocketRise.swift", "BarMotion+PocketLight.swift",
+        "BarMotion+Follow.swift",
     ]
 
     /// Ways to start AppKit or Core Animation motion. Type

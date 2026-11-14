@@ -102,9 +102,8 @@ extension KeybindingConflicts {
                 && parsed.modifiers.side(of: $0) == nil
         }
         let rivals = Array(rivals)
-        let arming = KeyboardTapArming(
-            rows: rivals.filter { !$0.0.isSequence }.map { ($0.1, $0.0) },
-            leaders: rivals.filter(\.0.isSequence).map { ($0.1, $0.0) },
+        let arming = tapArming(
+            over: rivals,
             distinguishingSides: distinguishingSides
         )
         let consumers = KeyboardTapConsumer.allCases.map {
@@ -191,7 +190,7 @@ extension KeybindingConflicts {
 
 extension KeyboardTapArming.Armed
 where Row == KeyBinding, Leader == KeyBinding {
-    fileprivate var binding: KeyBinding {
+    var binding: KeyBinding {
         switch self {
         case .row(let binding), .leader(_, let binding): binding
         }

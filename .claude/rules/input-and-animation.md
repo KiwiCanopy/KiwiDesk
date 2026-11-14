@@ -174,7 +174,8 @@ editing here:
     door, and the live consumers are read off its non-empty
     fields, so a new consumer adds a field there. Which row goes
     to which consumer is `KeyboardTapArming`'s, read by the
-    manager's arming and by `KeybindingConflicts.sideReach`; the
+    manager's arming and by the conflict readers through the one
+    `KeybindingConflicts.tapArming` (`sideReach`, `pressPath`); the
     reach asks each consumer's `rows(for:)` in
     `KeyboardTapConsumer`'s order, as the tap does, and the
     manager builds `.modifierTaps` from the same accessor; a
@@ -412,9 +413,16 @@ editing here:
   (`eventHotKeyExistsErr`) is intra-process only — and an
   enabled symbolic hotkey is then answered by macOS before the
   binding hears the press, with nothing said (#1126, measured
-  2026-09-03) — save `SystemShortcut.losesToKiwiDesk`'s members,
-  which KiwiDesk wins on either path ([gui.md](gui.md) ▸ the tier
-  bullet, #3239). The product ruling is
+  2026-09-03) — save what `SystemShortcut.losesToKiwiDesk(on:)`
+  answers for the row's press path, a leader, a step key and a
+  sided row being the keyboard tap's ([gui.md](gui.md) ▸ the tier
+  bullet, #3239, #3311). **Judge a row and a step key by that one
+  rule, through the path `KeybindingConflicts` stamps from
+  `KeyboardTapArming`, never a second verdict**, and move a case
+  only from a measurement on its path: a posted press reaches the tap
+  but never Carbon, so it proves nothing about a Carbon row, and a
+  chord a posted press cannot fire is unmeasured on both
+  (`PressPathConflictTests`). The product ruling is
   `docs/design-decisions.md` ▸ "Size is not a positional verb"
   (`SizeLayerSeedTests`).
 - **KiwiDesk's own windows are discriminated per WINDOW, never

@@ -234,7 +234,7 @@ public enum GlassTint {
         {
             parent.addSubview(backdrop, positioned: .below, relativeTo: glass)
         }
-        backdrop.frame = glass.frame
+        BarMotion.writeStill(backdrop, glass.frame)
         colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
     }
 

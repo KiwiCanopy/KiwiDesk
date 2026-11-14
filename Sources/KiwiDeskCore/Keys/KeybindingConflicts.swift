@@ -139,9 +139,14 @@ public enum KeybindingConflicts {
             }
         }
         if let system = SystemShortcuts.map[combo] {
+            let path = pressPath(
+                of: binding,
+                among: rivals,
+                distinguishingSides: distinguishingSides
+            )
             return Conflict(
                 binding: binding,
-                target: .systemShortcut(system)
+                target: .systemShortcut(system, path)
             )
         }
         return nil
@@ -162,7 +167,7 @@ public enum KeybindingConflicts {
             in: layers,
             distinguishingSides: distinguishingSides
         ).filter { conflict in
-            guard case .systemShortcut(let s) = conflict.target
+            guard case .systemShortcut(let s, _) = conflict.target
             else { return true }
             return !disabledSystemShortcuts.contains(s)
         }
@@ -175,7 +180,9 @@ public enum KeybindingConflicts {
 public struct Conflict: Equatable, Sendable {
     /// Conflict category and target details.
     public enum Target: Equatable, Sendable {
-        case systemShortcut(SystemShortcut)
+        /// A chord macOS holds, and the door the row's press comes
+        /// through, which decides who wins it (#3311).
+        case systemShortcut(SystemShortcut, PressPath)
         case otherBinding(KeyBinding)
         /// Two shortcuts that differ only in a modifier's side,
         /// read as one while sides are not told apart (#2601).

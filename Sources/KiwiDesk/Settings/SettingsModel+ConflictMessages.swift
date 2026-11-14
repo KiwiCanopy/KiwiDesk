@@ -138,7 +138,7 @@ extension SettingsModel {
                 name(conflict.binding),
                 name(who)
             )
-        case .systemShortcut(let shortcut):
+        case .systemShortcut(let shortcut, _):
             // A chord macOS answers first is DEAD, measured
             // (#1126, #1275).
             switch ConflictSeverity.of(
@@ -226,7 +226,7 @@ extension SettingsModel {
                 name(conflict.binding),
                 name(who)
             )
-        case .systemShortcut(let shortcut):
+        case .systemShortcut(let shortcut, _):
             switch ConflictSeverity.of(
                 conflict,
                 disabled: disabled

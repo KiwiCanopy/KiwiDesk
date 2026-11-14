@@ -74,12 +74,12 @@ extension SequenceNodeRow {
         )
     }
 
-    /// A step key on a chord macOS answers wins it while the
-    /// sequence is open (#3173): Core's own reading of the chord.
+    /// A step key on a chord macOS answers (#3173), read by the rule
+    /// every row takes (#3311): Core's own reading of the chord.
     private var systemReading: ConflictReading? {
-        guard let shortcut = model.core.sequenceStepTakes(node.combo)
+        guard let shortcut = model.core.sequenceStepShortcut(node.combo)
         else { return nil }
-        let severity = ConflictSeverity.takesFromMacOS(shortcut)
+        let severity = ConflictSeverity.ofStep(on: shortcut)
         return ConflictReading(
             severity: severity,
             sentence: ConflictText.sentence(

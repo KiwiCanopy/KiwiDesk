@@ -19,16 +19,21 @@ final class GlassBoxHost: NSView {
     override var isFlipped: Bool { true }
 
     /// The host writes its pair, never a rider, to every size it
-    /// takes: autoresizing left a hosted glass at the fused
-    /// plate's width when the host shrank (#2388, device).
+    /// takes (#2388, device), at once and without motion; where the
+    /// host itself glides, the glass is laid out at once and the
+    /// pair's layers follow the host's animation (#2878).
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        for view in subviews
-        where view.frame != bounds && !(view is GlassBoxRider) {
-            view.frame = bounds
+        let pair = subviews.filter { !($0 is GlassBoxRider) }
+        pair.forEach { BarMotion.writeStill($0, bounds) }
+        let gliding =
+            BarMotion.carriesResize(self)
+            ? pair.first(where: GlassPlate.isGlass) : nil
+        if let gliding { BarMotion.layoutStill(gliding) }
+        pair.forEach(GlassPlate.fitContent)
+        if let gliding {
+            BarMotion.followHostResize(self, glass: gliding, pair: pair)
         }
-        subviews.filter { !($0 is GlassBoxRider) }
-            .forEach(GlassPlate.fitContent)
     }
 
     /// Bumped by every glide `GlassBox.place` starts, so only the
@@ -155,8 +160,8 @@ enum GlassBox {
         }
         let travels = animated && host.frame != .zero
         move(host, frame, travels)
-        // Auto Layout can leave a growing glass at its old size
-        // through an animated host move; the landing writes it.
+        // A glide the follow could not carry (#2878) — or a host
+        // moved without a bounds animation — lands here.
         if travels {
             host.settleAfterGlide(
                 glass,
@@ -173,7 +178,7 @@ enum GlassBox {
     static func settle(_ glass: NSView) {
         guard let host = host(of: glass) else { return }
         if !GlassPlate.fills(glass.frame, host.bounds) {
-            glass.frame = host.bounds
+            BarMotion.writeStill(glass, host.bounds)
         }
         GlassPlate.fitContent(glass)
     }

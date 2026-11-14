@@ -54,8 +54,8 @@ enum GlassPlate {
             let glass = view as? NSGlassEffectView
         else { return }
         // Never travels: a gliding glass rides its `GlassBox` host
-        // (#2095), and an equal write would cancel its follow.
-        if glass.frame != frame { glass.frame = frame }
+        // (#2095, #2878).
+        BarMotion.writeStill(glass, frame)
         glass.cornerRadius = cornerRadius
         fitContent(glass)
     }
@@ -75,7 +75,7 @@ enum GlassPlate {
             return
         }
         backdrop.addSubview(content)
-        content.frame = backdrop.bounds
+        BarMotion.writeStill(content, backdrop.bounds)
     }
 
     /// Makes `backdrop` the glass's content, moving what the glass
@@ -89,7 +89,7 @@ enum GlassPlate {
         else { return }
         let content = release(glass)
         glass.contentView = backdrop
-        backdrop.frame = glass.bounds
+        BarMotion.writeStill(backdrop, glass.bounds)
         if let content { setContent(glass, content) }
     }
 
@@ -100,16 +100,26 @@ enum GlassPlate {
     /// box (#2425, device).
     @MainActor
     static func fitContent(_ view: NSView) {
+        guard let held = contentChain(view).first else { return }
+        if !fills(held.frame, view.bounds) {
+            BarMotion.writeStill(held, view.bounds)
+        }
+        for content in contentChain(view).dropFirst()
+        where !fills(content.frame, held.bounds) {
+            BarMotion.writeStill(content, held.bounds)
+        }
+    }
+
+    /// A glass's content view and, where that is its tint, the
+    /// content inside it: the views `fitContent` writes to the
+    /// glass's size. Empty for a view that is no glass.
+    @MainActor
+    static func contentChain(_ view: NSView) -> [NSView] {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView,
             let held = glass.contentView
-        else { return }
-        if !fills(held.frame, glass.bounds) { held.frame = glass.bounds }
-        guard held is GlassBackdrop else { return }
-        for content in held.subviews
-        where !fills(content.frame, held.bounds) {
-            content.frame = held.bounds
-        }
+        else { return [] }
+        return [held] + (held is GlassBackdrop ? held.subviews : [])
     }
 
     /// Whether `frame` already fills `bounds`: each edge within
@@ -143,6 +153,13 @@ enum GlassPlate {
         glass.contentView = nil
         held.translatesAutoresizingMaskIntoConstraints = true
         return held
+    }
+
+    /// Whether `view` is a Liquid Glass view.
+    @MainActor
+    static func isGlass(_ view: NSView) -> Bool {
+        guard #available(macOS 26, *) else { return false }
+        return view is NSGlassEffectView
     }
 
     /// Whether the glass hosts `content`, directly or inside its

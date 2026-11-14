@@ -47,7 +47,7 @@ struct KeybindingConflictFilterTests {
         #expect(filtered.count == 1)
         #expect(
             filtered.first?.target
-                == .systemShortcut(.spotlight)
+                == .systemShortcut(.spotlight, .carbon)
         )
     }
 
