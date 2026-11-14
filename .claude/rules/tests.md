@@ -298,8 +298,8 @@ bite large test PRs:
   core's `updateBars()` rewrites `BarMotion`'s lengths from its
   own settings, so a suite reading one pins it in its body
   (`pinRevealLength`, `pinShelfGlide`) rather than inheriting
-  what the last core left, and a test whose core leaves one off
-  its default restores it (#3307, `ReduceMotionFlagTests`,
+  what the last core left, since any core at Off or an instant
+  pace is a writer and none can be listed (#3307,
   `ShelfRevealStartTests`). Neither a `--filter` run nor a `guard-prover`
   mutation can reach this class: both observe the test on its
   own, which is the state it passes in. CI's full run on the PR

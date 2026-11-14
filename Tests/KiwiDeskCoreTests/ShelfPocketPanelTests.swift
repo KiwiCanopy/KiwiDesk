@@ -98,6 +98,7 @@ struct ShelfPocketPanelTests {
 
     @Test("a reveal plays on the pocket's content too")
     func revealReachesThePocket() throws {
+        pinRevealLength()
         let overlay = ShelfOverlay()
         overlay.slides = true
         overlay.afterCommit = { _ in }
@@ -112,6 +113,7 @@ struct ShelfPocketPanelTests {
 
     @Test("a grow or unfold reaches the pocket's slot")
     func revealPlateTakesThePocket() throws {
+        pinRevealLength()
         let overlay = ShelfOverlay()
         show(overlay, pocket: NSView())
         let plate = try #require(overlay.revealPlate?.frame)
@@ -173,6 +175,7 @@ struct ShelfPocketPanelTests {
 
     @Test("a retract plays on the pocket's content too")
     func retractReachesThePocket() {
+        pinRevealLength()
         let overlay = ShelfOverlay()
         overlay.slides = true
         overlay.afterCommit = { _ in }
