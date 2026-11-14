@@ -27,6 +27,7 @@ struct ShelfRevealSwapTests {
     func swapEndsOnTheArrivingBar() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         pinShelfGlide()
         let overlay = ShelfOverlay()
         defer { overlay.hide() }

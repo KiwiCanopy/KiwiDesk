@@ -58,6 +58,7 @@ struct ShelfPanelRoomMotionTests {
     func glideHoldsBothEnds() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         pinShelfGlide()
         let overlay = ShelfOverlay()
         defer { overlay.hide() }
@@ -79,6 +80,7 @@ struct ShelfPanelRoomMotionTests {
     func slideHoldsTheMargin() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = ShelfOverlay()
         defer { overlay.hide() }
         var landings: [() -> Void] = []
@@ -106,6 +108,7 @@ struct ShelfPanelRoomMotionTests {
     func cutRevealSettles() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         pinShelfGlide()
         let overlay = ShelfOverlay()
         defer { overlay.hide() }
@@ -133,6 +136,7 @@ struct ShelfPanelRoomMotionTests {
     func slideStartsOffTheEdge() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = ShelfOverlay()
         defer { overlay.hide() }
         overlay.afterReveal = { _, _ in }
