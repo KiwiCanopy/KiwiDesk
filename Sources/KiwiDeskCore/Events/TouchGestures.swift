@@ -132,9 +132,17 @@ public final class TouchGestures {
         didSet { sync() }
     }
 
+    /// A swipe's stream is claimed only while the reader runs that
+    /// fires it, and never on an axis `receive` would stand down.
     private var gestureEventChords: GestureEventSettings {
         guard started else { return GestureEventSettings() }
-        return GestureEventSettings(bindings: bindings)
+        guard reader != nil else {
+            return GestureEventSettings(bindings: bindings, swipes: false)
+        }
+        return GestureEventSettings(
+            bindings: bindings,
+            owned: readSystemGestures()
+        )
     }
 
     /// Whether a bound slot needs the touch reader: one the touch
@@ -147,7 +155,8 @@ public final class TouchGestures {
     }
 
     private func sync() {
-        onGestureEventChords?(gestureEventChords)
+        // After the reader step: the swipes' claim follows the reader.
+        defer { onGestureEventChords?(gestureEventChords) }
         guard started, needsReader else {
             reader?.stop()
             reader = nil

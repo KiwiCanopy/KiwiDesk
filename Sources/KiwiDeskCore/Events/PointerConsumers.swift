@@ -18,8 +18,9 @@ public final class PointerConsumers {
         /// The bound clicks and side buttons (#3281). It owns the
         /// press it took to its release.
         case buttons
-        /// The bound pinches and rotation (#1873). It owns the
-        /// magnification or rotation it took to its end.
+        /// The bound pinches, rotation and swipes (#1873). It owns
+        /// the magnification, rotation or Dock stream it took to its
+        /// end.
         case gestures
 
         /// The events this consumer needs — its one mask constant.

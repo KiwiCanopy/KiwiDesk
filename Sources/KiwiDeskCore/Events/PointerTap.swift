@@ -179,7 +179,12 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
         if type.rawValue == PointerConsumers.gestureEventType
             || type.rawValue == PointerConsumers.dockEventType
         {
-            return .gesture(gesture(event, dock: type.rawValue == 30))
+            return .gesture(
+                gesture(
+                    event,
+                    dock: type.rawValue == PointerConsumers.dockEventType
+                )
+            )
         }
         let other = PointerButton.other(
             Int(event.getIntegerValueField(.mouseEventButtonNumber))

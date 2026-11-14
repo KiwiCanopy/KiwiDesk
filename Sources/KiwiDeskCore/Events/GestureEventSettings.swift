@@ -21,34 +21,42 @@ struct GestureEventSettings: Equatable, Sendable {
         self.chords = chords.compactMapValues { keys in
             let held = keys.filter { !$0.isEmpty }
             return held.isEmpty ? nil : held
-        }.filter { GestureEventSettings.fired.contains($0.key) }
+        }.filter { $0.key.isGestureEvent && $0.key.isFired }
         self.swipeAxes = swipeAxes.compactMapValues { axes in
             let held = axes.filter { !$0.key.isEmpty && !$0.value.isEmpty }
             return held.isEmpty ? nil : held
         }
     }
 
-    /// The consumer's share of the touch front's bindings.
-    init(bindings: [GestureKey: GestureAction]) {
+    /// The consumer's share of the touch front's bindings: the
+    /// fired gesture events, and with `swipes` the touch reader's
+    /// swipes on every axis `owned` leaves to them.
+    init(
+        bindings: [GestureKey: GestureAction],
+        swipes: Bool = true,
+        owned: TrackpadSystemGestures = .unread
+    ) {
         var chords: [GestureInput: Set<ScrollChord>] = [:]
         var axes: [Int: [ScrollChord: Set<Int>]] = [:]
-        for (key, action) in bindings {
+        for (key, action) in bindings where key.input.isFired {
             if key.input.isGestureEvent {
                 chords[key.input, default: []].insert(key.chord)
-            } else if let fingers = key.input.fingers, fingers >= 3,
+            } else if swipes, let fingers = key.input.fingers,
+                TrackpadGestureRouter.fingerRange.contains(fingers),
                 !key.input.directions.isEmpty
             {
+                let free = Self.axes(of: action).filter {
+                    owned.swipes[fingers]?.contains(
+                        $0 == GestureEventSample.horizontal
+                            ? .horizontal : .vertical
+                    ) != true
+                }
                 axes[fingers, default: [:]][key.chord, default: []]
-                    .formUnion(Self.axes(of: action))
+                    .formUnion(free)
             }
         }
         self.init(chords, swipeAxes: axes)
     }
-
-    /// The inputs a gesture event fires; Force Click is unmeasured.
-    static let fired: Set<GestureInput> = [
-        .spread, .pinchTogether, .rotate, .spread4, .pinchTogether4,
-    ]
 
     var isOn: Bool { !chords.isEmpty || !swipeAxes.isEmpty }
 
@@ -104,7 +112,7 @@ struct GestureEventSettings: Equatable, Sendable {
         }
         return Set(
             directions.map {
-                $0 == .left || $0 == .right
+                $0.isHorizontal
                     ? GestureEventSample.horizontal
                     : GestureEventSample.vertical
             }

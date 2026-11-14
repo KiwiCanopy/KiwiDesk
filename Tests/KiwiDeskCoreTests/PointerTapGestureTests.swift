@@ -196,6 +196,36 @@ struct PointerTapGestureTests {
         #expect(r.route(dock(2, 0.6), now: 2.01).gestures.isEmpty)
     }
 
+    @Test("a gesture begun before the stream stays the app's")
+    func earlierBeginPasses() {
+        var r = router([.spread: [Self.keys]])
+        // The rotation began before any stream: the app has it.
+        #expect(r.route(g(Self.turn, 1, 1), now: 1) == .pass)
+        #expect(r.route(g(Self.zoom, 1), now: 1.01).swallow)
+        #expect(r.route(g(Self.turn, 2, 3), now: 1.02) == .pass)
+        #expect(r.route(g(Self.turn, 4), now: 1.03) == .pass)
+        #expect(r.route(g(Self.zoom, 2, 0.1), now: 1.04).swallow)
+    }
+
+    @Test("a Dock begin ends a stream whose end was lost")
+    func dockBeginRestarts() {
+        var r = router([.spread4: [Self.keys]])
+        _ = r.route(dock(1, 0.02), now: 1)
+        // No end arrived; a plain begin is the Dock's.
+        #expect(r.route(dock(1, 0.02, []), now: 2) == .pass)
+        #expect(r.route(dock(2, 0.5, []), now: 2.01) == .pass)
+    }
+
+    @Test("a still Dock stream outlives the gesture lapse")
+    func dockOutlivesTheLapse() {
+        var r = router([.spread4: [Self.keys]])
+        _ = r.route(dock(1, 0.02), now: 1)
+        let held = 1 + PointerTapRouter.streamLapse + 1
+        #expect(r.route(dock(2, 0.1, []), now: held).swallow)
+        let gone = held + PointerTapRouter.dockStreamLapse + 0.1
+        #expect(r.route(dock(2, 0.1, []), now: gone) == .pass)
+    }
+
     @Test("a four-finger spread fires on a growing progress")
     func dockSpreadFires() {
         var r = router([.spread4: [Self.keys]])

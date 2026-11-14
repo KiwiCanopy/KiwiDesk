@@ -57,6 +57,7 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             return true
         }
         guard claimed else { return nil }
+        TouchFingerCount.set(0)
         for device in list.devices {
             register(device, frameCallback)
             _ = start(device, 0)
@@ -116,7 +117,10 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
         } else {
             contacts = []
         }
-        TouchFingerCount.set(contacts.count)
+        // A frame in flight past `stop()` leaves the reset standing.
+        if Self.current.withLock({ $0 === self }) {
+            TouchFingerCount.set(contacts.count)
+        }
         let frame = TouchFrame(
             time: time,
             contacts: contacts,

@@ -207,7 +207,7 @@ extension KiwiCore {
             let forward =
                 family.stepsForward(direction) ?? direction.isBackward
             let step = forward ? 1 : -1
-            let horizontal = direction == .left || direction == .right
+            let horizontal = direction.isHorizontal
             _ = stepScrollPan(
                 space,
                 by: step,

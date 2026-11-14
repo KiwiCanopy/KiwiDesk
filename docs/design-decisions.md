@@ -13741,9 +13741,10 @@ different ground:
   and no fallback to write, the os-private-apis carve-out: the scroll
   gestures keep working through their public tap.
 - **The gesture-event consumer** on `PointerTap` serves spread,
-  pinch together and rotate. Its mask arms only for a user's own
-  binding, since #3199 dropped the spread and rotate seeds. The
-  mask is CG type 29 alone. A probe at `.cgSessionEventTap`
+  pinch together, rotate, the four-finger pinch and spread and the
+  swipes. Its mask arms only for a user's own binding, since #3199
+  dropped the spread and rotate seeds. The mask is CG types 29 and
+  30. A probe at `.cgSessionEventTap`
   (2026-11-14, macOS 27.2) asked tccd for `PostEvent` alone, the
   grab mask's signature, and swallowing ⌃⌥ magnifications and
   rotations there kept Preview from zooming and rotating while a
@@ -13759,14 +13760,14 @@ different ground:
   four-finger pinch and spread are Dock streams on their own axis
   (field 123 = 3), so `spread4` and `pinch_together4` claim them
   the same way: with ⌃⌥ held, Apps and Show Desktop stayed away.
-  A three- to five-finger swipe slot claims the Dock's stream on
-  its axis too, so the touch reader fires the swipe and macOS
-  shows nothing (owner ruling 2026-11-14). The finger count is the
-  touch reader's at the stream's begin, which matched the swipe in
-  all 47 fast-tap probe streams. The one miss, 6 of 7 in the
-  main-thread v1 probe, read three fingers for a four-finger swipe
-  because that tap lagged the frames, the slow-tap case the
-  off-main tap removes. With no reading the stream is
+  A swipe slot claims the Dock's stream on its axis too, while the
+  touch reader that fires it runs, so macOS shows nothing (owner
+  ruling 2026-11-14; three and four fingers measured, five not).
+  The finger count is the touch reader's at the stream's begin. It
+  matched the swipe in all 47 streams of the off-main probes; the
+  main-thread probe matched 6 of its 7, its one miss reading three
+  fingers for a four-finger swipe because that tap lagged the
+  frames. With no reading the stream is
   claimed for any bound count on that axis, so a ⌃⌥ four-finger
   swipe may be swallowed for a three-finger slot. That is the
   trade, accepted over asking a user to turn macOS's own gestures
@@ -13778,9 +13779,9 @@ gesture macOS owns and the tap cannot take does not fire: KiwiDesk
 reads the trackpad preferences, and a three-finger tap set to Look up,
 a swipe axis set to an app's swipe between pages, or any three-finger
 swipe under three-finger drag stands down; a preference it cannot read
-owns nothing, so the binding stays live. A swipe axis set to the
-Dock's gesture no longer stands down, since the tap takes its stream
-(*Amended 2026-11-14*). Every swipe, pinch, rotation and Force Click
+owns nothing, so the binding stays live (*amended 2026-11-14*: a
+swipe axis set to the Dock's gesture is the consumer's, above). Every
+swipe, pinch, rotation and Force Click
 needs a modifier, since macOS and apps own the unmodified ones; a tap
 may take none. Consuming never takes an unmodified gesture: a slot
 without keys is refused at the verb, the resolve and the recorder,

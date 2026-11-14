@@ -8,7 +8,7 @@ import Testing
 /// or rotation, no gesture mask; a bound one widens the tap by
 /// `gestureMask` alone; a delivered gesture reaches the touch
 /// front's one match; and the core wires both doors at bootstrap.
-@Suite("Pointer gesture wiring")
+@Suite("Pointer gesture wiring", .serialized)
 @MainActor
 struct PointerGestureWiringTests {
     private static let keys: ScrollChord = [.control, .option]
@@ -78,8 +78,19 @@ struct PointerGestureWiringTests {
     }
 
     @Test("the core wires the chords in and the gestures out")
-    func coreWiresBothDoors() {
-        let core = makeTestCore()
+    func coreWiresBothDoors() throws {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-gestures-\(UUID().uuidString)")
+        )
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
+        )
+        try "".write(to: core.configURL, atomically: true, encoding: .utf8)
+        core.loadConfig()
+        let lua = try #require(core.keys.lua)
         var masks: [CGEventMask] = []
         core.mouse.pointer.makeTap = { mask, _ in
             masks.append(mask)
@@ -87,7 +98,11 @@ struct PointerGestureWiringTests {
         }
         core.mouse.pointer.start()
         core.mouse.trackpad.resolve(
-            [GestureKey(.rotate, Self.keys): .run(LuaAction(lua: "x()"))],
+            [
+                GestureKey(.rotate, Self.keys): .run(
+                    LuaAction(lua: "kiwi_rotated = true")
+                )
+            ],
             natural: true
         )
         core.mouse.trackpad.start()
@@ -99,9 +114,48 @@ struct PointerGestureWiringTests {
             masks.last.map { $0 & PointerConsumers.gestureMask }
                 == PointerConsumers.gestureMask
         )
+        // Out: a gesture the tap recognized runs the bound action.
+        core.mouse.pointer.receive(
+            PointerTapDelivery(
+                grab: [],
+                gestures: [
+                    TrackpadGestureEvent(
+                        kind: .gesture(.rotate),
+                        fingers: 2,
+                        modifiers: Self.keys,
+                        time: 0
+                    )
+                ],
+                reenabled: false
+            )
+        )
+        #expect(lua.global("kiwi_rotated") == .bool(true))
         core.mouse.trackpad.stop()
         #expect(!core.mouse.pointer.gestureSettings.isOn)
         core.mouse.pointer.stop()
+    }
+
+    @Test("a Dock event carries the touch reader's finger count")
+    func dockReadsTheFingerCount() throws {
+        let event = try #require(CGEvent(source: nil))
+        let dock = unsafeBitCast(UInt32(30), to: CGEventType.self)
+        event.type = dock
+        defer { TouchFingerCount.set(0) }
+        TouchFingerCount.set(4)
+        guard case .gesture(let sample)? = PointerTap.kind(of: dock, event)
+        else {
+            Issue.record("no gesture sample")
+            return
+        }
+        #expect(sample.fingers == 4)
+        let gesture = unsafeBitCast(UInt32(29), to: CGEventType.self)
+        event.type = gesture
+        guard case .gesture(let pinch)? = PointerTap.kind(of: gesture, event)
+        else {
+            Issue.record("no gesture sample")
+            return
+        }
+        #expect(pinch.fingers == 0, "a type-29 sample reads no count")
     }
 
     @Test("a type-29 event reads as a gesture sample")

@@ -250,6 +250,26 @@ struct TouchGesturesTests {
         #expect(pushed.last == GestureEventSettings())
     }
 
+    @Test("a swipe is claimed only while its reader runs, on free axes")
+    func swipeClaimFollowsTheReader() {
+        let system = TrackpadSystemGestures(swipes: [3: [.vertical]])
+        let (gestures, _) = front(system: system)
+        var pushed: [GestureEventSettings] = []
+        gestures.onGestureEventChords = { pushed.append($0) }
+        gestures.resolve(
+            map([GestureKey(.swipe3, Self.hyper): .family(.space)]),
+            natural: true
+        )
+        gestures.start()
+        let h = GestureEventSample.horizontal
+        #expect(pushed.last?.swipeAxes == [3: [Self.hyper: [h]]])
+        // No reader, nothing fires the swipe: macOS keeps it.
+        gestures.stop()
+        gestures.makeReader = { _ in nil }
+        gestures.start()
+        #expect(pushed.last?.swipeAxes == [:])
+    }
+
     @Test("the preference read decides which gestures macOS owns")
     func systemPrefsParse() {
         let parsed = TrackpadSystemGestures.parse([

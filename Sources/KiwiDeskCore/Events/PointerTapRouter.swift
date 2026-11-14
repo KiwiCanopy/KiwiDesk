@@ -12,7 +12,8 @@ struct PointerSample: Equatable, Sendable {
         case buttonDown(PointerButton)
         case buttonDragged(PointerButton)
         case buttonUp(PointerButton)
-        /// A gesture event, CG type 29 (#1873).
+        /// A gesture event, CG type 29, or a Dock stream's, type 30
+        /// (#1873).
         case gesture(GestureEventSample)
     }
 

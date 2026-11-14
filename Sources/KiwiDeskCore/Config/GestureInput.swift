@@ -183,6 +183,9 @@ public enum GestureDirection: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// Left and right: a motion along the horizontal axis.
+    var isHorizontal: Bool { self == .left || self == .right }
+
     /// Up, left and back step toward the start of a list.
     var isBackward: Bool { self == .up || self == .left || self == .back }
 

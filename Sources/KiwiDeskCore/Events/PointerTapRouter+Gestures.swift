@@ -69,6 +69,10 @@ extension PointerTapRouter {
     static let dockPinchStep = 0.3
     /// An open stream with no event for this long lost its end.
     static let streamLapse: CFAbsoluteTime = 1
+    /// A Dock stream's lapse is longer: fingers held still may send
+    /// nothing, and a stream dropped mid-way hands the Dock a part.
+    /// A new begin ends a stream whose end was lost sooner.
+    static let dockStreamLapse: CFAbsoluteTime = 10
 
     mutating func routingGesture(
         _ g: GestureEventSample,
@@ -76,7 +80,8 @@ extension PointerTapRouter {
         now: CFAbsoluteTime
     ) -> Routed {
         if let stream = gestureStream,
-            now - stream.lastEvent > Self.streamLapse
+            now - stream.lastEvent
+                > (stream.dock ? Self.dockStreamLapse : Self.streamLapse)
         {
             gestureStream = nil
         }
@@ -106,7 +111,14 @@ extension PointerTapRouter {
             gestureStream = stream
             return Routed(swallow: chord == stream.chord, grab: [])
         }
-        if g.began { stream.open.insert(g.subtype) }
+        if g.began {
+            stream.open.insert(g.subtype)
+        } else if !stream.open.contains(g.subtype) {
+            // Begun before the stream: its begin reached the app, so
+            // the rest of it does too.
+            gestureStream = stream
+            return .pass
+        }
         var fires: [TrackpadGestureEvent] = []
         if g.subtype == GestureEventSample.magnify {
             stream.magnified += g.value
@@ -138,6 +150,8 @@ extension PointerTapRouter {
     ) -> Routed {
         // A Dock event inside a pinch or rotation is the Dock's.
         if gestureStream?.dock == false { return .pass }
+        // A begin while one runs: the old stream lost its end.
+        if g.dock, g.began { gestureStream = nil }
         guard var stream = gestureStream else {
             guard g.dock, g.began,
                 settings.claimsDock(g.axis, chord, fingers: g.fingers)
