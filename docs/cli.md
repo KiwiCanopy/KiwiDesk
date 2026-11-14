@@ -1094,6 +1094,17 @@ Screen fingerprints after the profile, as `list_monitors` prints
 them, scope the binding to that one screen setup ([Lua
 reference](lua-reference.md#bind_profile_to_desktop)).
 
+:::unreleased
+`list_monitor_sets` prints every stored screen setup with its
+`screens`, `profile`, `connected` and `last_of_profile`, and
+`forget_monitor_set` takes every screen fingerprint of one of them
+(`kiwidesk forget_monitor_set "Built-in Retina Display:1512x982"
+"BenQ GW2480:1920x1080"`) and removes that setup from its profile.
+It refuses the connected setup and an unknown one, answering
+`refused: "connected_setup"` or `refused: "unknown_setup"`
+([Lua reference](lua-reference.md#list_monitor_sets-forget_monitor_set)).
+:::
+
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
 `reset_layout_sizing` clears what `resize` accumulated on the

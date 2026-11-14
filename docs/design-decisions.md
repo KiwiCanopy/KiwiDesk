@@ -22260,6 +22260,36 @@ consequences:
   why.** A scripted save that changes another file must not do it
   silently.
 
+:::unreleased
+*Forgetting a setup is its own act (#3324, owner, 2026-11-14,
+amending the above).* The setup chips on a profile row stay
+claim-only: they carry no ×, and a chip never removes a set,
+because a chip answers "who holds this" and a removal there would
+read as handing it to nobody by accident. Forgetting is a
+page-level act instead, the **Known screen setups** card last on
+Profiles, modelled on Wi-Fi's Known Networks and reachable as
+`forget_monitor_set` from the CLI, Lua and MCP. Its unit is one
+exact combination of screens, never a single screen: a screen
+appears in many setups, and forgetting it would silently strip
+every combination that contains it. The forget runs through the
+same release a claim takes, so a set leaves its one holder the way
+it leaves a sibling on a claim, its pins with it. What only a
+forget can leave behind is cleared with it: every Desktop binding
+entry scoped to the set (a binding left empty goes), and the
+holder's per-screen bar edges for screens no remaining setup of
+its own and no connected screen holds. The connected setup is
+refused, since the next Save would write it straight back. A
+holder left with no set goes dormant, as it would after losing its
+last set to a claim, with one arm a claim never meets: **nobody
+takes the set, so a default left dormant simply loses its flag**.
+A claim hands the flag to the claimant; a forget has no claimant,
+and handing it to some other profile of the count would be a
+choice the user did not make, so the count is left with no
+default until one is made. Recording when a setup was last seen
+was refused: nothing records it, and it would be a new stored
+value for a card that needs none.
+:::
+
 **[Principle]**
 
 **A screen left with no space is healed, never refused

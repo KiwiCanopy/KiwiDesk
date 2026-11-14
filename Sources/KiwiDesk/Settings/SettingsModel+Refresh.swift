@@ -38,6 +38,7 @@ extension SettingsModel {
                     profile.layers?.overrideCount ?? 0
             )
         }
+        knownSetups = core.knownMonitorSets()
         brokenProfiles = core.profiles.brokenProfiles().map {
             BrokenProfile(name: $0.name, cause: $0.cause)
         }

@@ -115,6 +115,16 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         return entries.isEmpty
     }
 
+    /// Drops every entry scoped to `setup`, whatever its count —
+    /// a forgotten screen setup (#3324); true when the record is
+    /// now empty. An entry for all setups stays.
+    @discardableResult
+    public mutating func unbind(setup: [String]) -> Bool {
+        let scope = Entry.canonical(setup)
+        entries.removeAll { scope != nil && $0.setup == scope }
+        return entries.isEmpty
+    }
+
     /// A profile rename: the label of every entry naming `id`
     /// follows, and a pending entry naming `old` follows by name,
     /// as it would have before ids.

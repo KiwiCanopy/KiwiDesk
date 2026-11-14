@@ -87,7 +87,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// A Keep or `save_profile` just wrote the live profile: move
     /// the draft's saved baseline onto what it wrote without
     /// discarding staged edits (#1179, #1790).
-    func adoptKeptLayout(_ write: CapturedWrite) {
+    func adoptCapturedWrite(_ write: CapturedWrite, of name: String) {
+        if case .forgottenSetup(let monitors) = write {
+            model.adoptForgottenSetup(monitors, from: name)
+            return
+        }
         model.adoptKeptLayout()
         if write == .wholeLive { model.adoptCapturedSpaces() }
         // A whole-live capture may have stored a live row (#2262).

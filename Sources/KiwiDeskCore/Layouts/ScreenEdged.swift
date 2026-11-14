@@ -79,6 +79,14 @@ extension ScreenEdged {
     public mutating func setEdgeKeepingScreens(_ edge: AppBarEdge) {
         self.edge = edge
     }
+
+    /// Drops the entries of screens outside `scope` — a forgotten
+    /// setup's leftovers (#3324). No screen in scope moves.
+    public mutating func keepScreens(in scope: ScreenEdgeScope) {
+        edgeOverride = edgeOverride.filter {
+            scope.screens.contains($0.key)
+        }
+    }
 }
 
 extension KeyedEncodingContainer {

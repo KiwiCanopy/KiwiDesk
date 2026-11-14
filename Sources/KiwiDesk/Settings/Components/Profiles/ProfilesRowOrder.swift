@@ -15,10 +15,16 @@ enum ProfilesRowOrder {
         .profiles(.profileBindings)
     ]
 
+    /// The Known screen setups card's row, one per setup (#3324).
+    static let knownScreenSetups: [SettingKey] = [
+        .profiles(.profilesForgetSetup)
+    ]
+
     /// Rows grouped by settings container.
     static let byContainer: [SettingsContainer: [SettingKey]] = [
         .savedProfiles: savedProfiles,
         .profilesPerMacOSSpace: profilesPerMacOSSpace,
+        .knownScreenSetups: knownScreenSetups,
     ]
 
     /// Containers rendered with custom bespoke views expanding dynamic
@@ -26,5 +32,6 @@ enum ProfilesRowOrder {
     static let bespokeContainers: Set<SettingsContainer> = [
         .savedProfiles,
         .profilesPerMacOSSpace,
+        .knownScreenSetups,
     ]
 }

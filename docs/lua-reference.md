@@ -9127,6 +9127,41 @@ still loads by name, and it takes a set back on its next load. A
 dormant profile loses its default flag; the profile that took its
 set becomes the default unless the count already has another.
 
+:::unreleased
+#### list_monitor_sets, forget_monitor_set
+
+**Expects:**
+
+- `list_monitor_sets()` — nothing.
+- `forget_monitor_set(screen, …)` — every screen fingerprint of one
+  stored setup (`Name:WxH`, as `list_monitor_sets` and
+  `list_monitors` print them), in any order.
+
+**Does:**
+
+- `list_monitor_sets` returns every stored setup, the connected one
+  first: `{screens, profile, connected, last_of_profile}`, where
+  `last_of_profile` says the setup is its profile's only one.
+- `forget_monitor_set` removes that exact combination from the
+  profile holding it, with its pins; every other setup, including
+  ones sharing a screen, stays. Desktop bindings scoped to it lose
+  that entry, and the profile drops its per-screen bar edges for
+  screens none of its remaining setups and no connected screen
+  holds. A profile left with no setup goes dormant and, if it was
+  the count's default, loses the flag with nobody taking it. It
+  returns `{"forgotten_from": ["Cowork"]}`.
+- It refuses the connected setup (`refused: "connected_setup"`) and
+  a setup no profile holds (`refused: "unknown_setup"`). Settings ▸
+  Profiles ▸ **Known screen setups** does the same.
+
+**Example:**
+
+```lua
+KiwiDesk.forget_monitor_set("Built-in Retina Display:1512x982",
+    "BenQ GW2480:1920x1080")
+```
+:::
+
 ### Profile JSON Format
 
 Profiles live as JSON files in `~/.config/KiwiDesk/profiles/` and are

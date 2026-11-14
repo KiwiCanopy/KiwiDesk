@@ -73,6 +73,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case pocket
     case pinnedToDisconnectedScreens
     case profilesPerMacOSSpace
+    /// Profiles' Known screen setups card (#3324).
+    case knownScreenSetups
     case savedProfiles
     case scrolling
     /// "Shared look" on Looks & Animations (#1752).
@@ -123,7 +125,8 @@ enum SettingsContainer: CaseIterable, Hashable {
             .moveWindows, .macosDesktops, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides, .pocket,
             .pinnedToDisconnectedScreens,
-            .profilesPerMacOSSpace, .floatRules, .secondAccent,
+            .profilesPerMacOSSpace, .knownScreenSetups,
+            .floatRules, .secondAccent,
             .spaceRules, .automaticFloating,
             .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,
             .spaceList, .spacePlacement, .spaceSwitch, .stack,

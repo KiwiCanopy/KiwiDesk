@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -63,5 +64,23 @@ struct CLILiveValuesTests {
         let names = Self.names(.savedLooks, from: core)
         #expect(names == ["Mine"])
         #expect(Self.names(.looks, from: core).contains("Mine"))
+    }
+
+    @Test("forget_monitor_set offers the stored setups' screens")
+    func storedScreens() {
+        let core = makeTestCore()
+        for display in core.state.workspaces.allDisplays {
+            core.state.workspaces.removeDisplay(display.id)
+        }
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "Desk",
+                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+            )
+        )
+        let saved = core.execute("save_profile", args: [.string("Mine")])
+        #expect(saved.isSuccess, "\(saved.error ?? "")")
+        #expect(Self.names(.storedScreens, from: core) == ["Desk:100x100"])
     }
 }
