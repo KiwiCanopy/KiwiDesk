@@ -164,8 +164,8 @@ struct SettingsCatalogTests {
         // out — at rest, they take no anchor (#277). 209 with
         // #2655: the macOS Desktops section in for the Focus
         // card's Desktop drawer, net zero. Then #2654 to #3184, and
-        // #3199, #3183, #3218, #3236, #3238, #3280, #3294 (Presets).
-        #expect(allEntries.count == 227)
+        // #3199, #3183, #3218, #3236, #3238, #3280, #3294, #3324.
+        #expect(allEntries.count == 229)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

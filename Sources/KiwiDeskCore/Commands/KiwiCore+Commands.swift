@@ -241,6 +241,8 @@ extension KiwiCore {
             "delete_profile", "set_default_profile",
             "list_profiles", "get_profile_status":
             return profileCommand(command, args)
+        case "list_monitor_sets", "forget_monitor_set":
+            return monitorSetCommand(command, args)
         case Self.keepSettingsCommand:
             return keepSettings(args)
         case Self.revertSettingsCommand:

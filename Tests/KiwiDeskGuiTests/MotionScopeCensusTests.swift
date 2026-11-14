@@ -102,6 +102,7 @@ struct MotionScopeCensusTests {
         // Desktop's profile (#2324).
         "KiwiDesk/Settings/SettingsModel+Refresh.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ScreenSetups.swift": 1,
+        "KiwiDesk/Settings/SettingsModel+ForgetSetup.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Persistence.swift": 1,
         // A live row's ↺ and the pill's Revert, which apply stored
         // values live (#2411).

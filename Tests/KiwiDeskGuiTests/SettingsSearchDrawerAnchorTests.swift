@@ -100,6 +100,10 @@ struct SettingsSearchDrawerAnchorTests {
                 .shortcuts, "Shortcuts", .layers,
                 [SettingsCatalog.shortcuts.layersCard]
             ),
+            (
+                .profiles, "Profiles", .knownScreenSetups,
+                [SettingsCatalog.profiles.knownSetups]
+            ),
         ]
     }
 

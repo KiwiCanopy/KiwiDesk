@@ -13,6 +13,8 @@ struct CLILiveValues {
         case looks
         /// The looks a user saved, which alone may be deleted.
         case savedLooks
+        /// The screens of every stored setup (#3324).
+        case storedScreens
     }
 
     /// A text argument whose values are a live source's names,
@@ -22,6 +24,7 @@ struct CLILiveValues {
         "load_profile": ["name": .profiles],
         "save_profile": ["name": .profiles],
         "delete_profile": ["name": .profiles],
+        "forget_monitor_set": ["screen": .storedScreens],
         "set_default_profile": ["name": .profiles],
         "bind_profile_to_desktop": ["profile": .profiles],
         "look.apply": ["name": .looks],
@@ -51,6 +54,8 @@ struct CLILiveValues {
             return CommandRequest(command: "list_profiles")
         case .looks, .savedLooks:
             return CommandRequest(command: "look.list")
+        case .storedScreens:
+            return CommandRequest(command: "list_monitor_sets")
         }
     }
 
@@ -70,6 +75,15 @@ struct CLILiveValues {
             guard case .array(let rows)? = data["looks"] else { return [] }
             let saved = rows.filter { $0["bundled"] != .bool(true) }
             return field("name", of: .array(saved))
+        case .storedScreens:
+            guard case .array(let rows) = data else { return [] }
+            let screens = rows.flatMap { row -> [String] in
+                guard case .array(let names)? = row["screens"] else {
+                    return []
+                }
+                return names.compactMap(\.stringValue)
+            }
+            return Array(Set(screens)).sorted()
         }
     }
 

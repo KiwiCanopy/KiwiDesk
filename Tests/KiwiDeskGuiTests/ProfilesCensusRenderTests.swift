@@ -167,7 +167,15 @@ struct ProfilesCensusRenderTests {
             presentKeys: [.number(1), .number(2), .number(3)],
             desktopScreens: [:],
             bindings: [:],
-            connectedScreens: 1
+            connectedScreens: 1,
+            knownSetups: [
+                KnownMonitorSet(
+                    monitors: ["Desk:100x100"],
+                    profile: "Desk",
+                    isConnected: false,
+                    isProfilesLast: true
+                )
+            ]
         )
         let placed = SettingKey.allCases.filter {
             if case .profiles = $0 { return true }

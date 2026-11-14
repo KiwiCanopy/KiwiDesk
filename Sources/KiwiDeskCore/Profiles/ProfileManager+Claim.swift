@@ -24,11 +24,9 @@ extension ProfileManager {
         where other.name != name
             && other.monitorCount == monitors.count
         {
-            guard other.release(monitors) else { continue }
-            if other.isDormant, other.isDefault {
-                other.isDefault = false
-                orphanedDefault = true
-            }
+            guard let dropped = Self.strip(monitors, from: &other)
+            else { continue }
+            orphanedDefault = orphanedDefault || dropped
             try write(other)
             released.append(other.name)
         }
@@ -40,6 +38,20 @@ extension ProfileManager {
             try write(claimant)
         }
         return released.sorted()
+    }
+
+    /// The one release a claim and a forget share (#1530, #3324):
+    /// `profile` gives up `monitors`, and a default it leaves
+    /// dormant drops its flag. Nil when it holds no such set, else
+    /// whether a flag dropped. The caller writes `profile`.
+    static func strip(
+        _ monitors: [String],
+        from profile: inout Profile
+    ) -> Bool? {
+        guard profile.release(monitors) else { return nil }
+        guard profile.isDormant, profile.isDefault else { return false }
+        profile.isDefault = false
+        return true
     }
 
     /// Drops the flag from a dormant profile of `count` — a hand

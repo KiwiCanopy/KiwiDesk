@@ -115,6 +115,16 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         return entries.isEmpty
     }
 
+    /// Drops every entry scoped to `setup`, whatever its count —
+    /// a forgotten screen setup (#3324); true when the record is
+    /// now empty. An entry for all setups stays.
+    @discardableResult
+    public mutating func unbind(setup: [String]) -> Bool {
+        let scope = Entry.canonical(setup)
+        entries.removeAll { scope != nil && $0.setup == scope }
+        return entries.isEmpty
+    }
+
     /// A profile rename: the label of every entry naming `id`
     /// follows, and a pending entry naming `old` follows by name,
     /// as it would have before ids.
@@ -218,5 +228,22 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         case entries = "profiles"
         case desktop
         case screen
+    }
+}
+
+extension Dictionary where Key == DesktopKey, Value == DesktopBinding {
+    /// Every entry scoped to `setup` unbound, a record left empty
+    /// removed (#3324); true when anything changed.
+    @discardableResult
+    public mutating func forgetSetup(_ setup: [String]) -> Bool {
+        var changed = false
+        for (key, binding) in self {
+            var edited = binding
+            let empty = edited.unbind(setup: setup)
+            guard edited != binding else { continue }
+            changed = true
+            self[key] = empty ? nil : edited
+        }
+        return changed
     }
 }

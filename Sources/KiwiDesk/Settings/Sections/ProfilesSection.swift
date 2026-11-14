@@ -25,6 +25,7 @@ struct ProfilesSection: View {
                 whichProfileLoads
                 profileSection
                 DesktopsGroup(model: model)
+                KnownSetupsGroup(model: model)
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()

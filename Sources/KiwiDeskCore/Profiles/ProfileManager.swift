@@ -70,10 +70,11 @@ public final class ProfileManager {
     /// Invalid profile files reported while listing (#31).
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    /// Fired after a profile write from outside Settings lands —
-    /// Keep's layouts, or `save_profile`'s whole-live snapshot —
-    /// so an open Settings draft's baseline follows the file for
-    /// exactly what was written. On the WRITE rather than on
+    /// Fired after a profile write lands that an open Settings
+    /// draft did not make — Keep's layouts, `save_profile`'s
+    /// whole-live snapshot, or a forgotten setup, once per holder
+    /// and from any door — so the draft's baseline follows the
+    /// file for exactly what was written. On the WRITE rather than on
     /// either caller (#1179, #1790).
     public var onCapturedLive: @MainActor (String, CapturedWrite) -> Void =
         { _, _ in }

@@ -36,6 +36,7 @@
 (action) profiles.delete
 (action) profiles.load
 (action) profiles.rename
+(action) profiles.sets.forget
 (action) profiles.sets.move
 (action) shortcuts.import
 (action) shortcuts.restore_defaults

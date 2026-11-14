@@ -106,6 +106,10 @@ struct FocusedCommandPolicyTests {
         "delete_profile",
         "list_profiles",
         "get_profile_status",
+        // Read and forget a stored screen setup, touching no
+        // window (#3324).
+        "list_monitor_sets",
+        "forget_monitor_set",
         "bind_profile_to_desktop",
         "enable_wake_restore",
         // Acts on a Space's stored sizing, never the focused

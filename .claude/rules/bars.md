@@ -179,7 +179,9 @@ twice, was a question the user answered twice. The argument is
   judged over the one `KiwiCore.screenEdgeScope(monitorSets:)`
   handed the written profile's monitor sets, and
   `setEdgeKeepingScreens(_:)` for a look, which leaves the
-  entries exactly as they are — so a verb or Settings write of a
+  entries exactly as they are, and `keepScreens(in:)` for a
+  forgotten screen setup (#3324), which drops only the entries
+  of screens outside the scope and moves no screen in it — so a verb or Settings write of a
   screen's edge equal to its bar's stores nothing for that
   screen, an entry a look leaves equal stays a pin, every
   judgement reads the edges screens draw (`edge(on:)`)

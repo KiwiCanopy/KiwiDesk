@@ -257,6 +257,15 @@ extension APIReference {
         "get_profile_status": APIRecord(
             "Returns the active profile and whether it is dirty."
         ),
+        "list_monitor_sets": APIRecord(
+            "Lists every stored screen setup with its screens, its "
+                + "profile and whether it is connected."
+        ),
+        "forget_monitor_set": APIRecord(
+            "Forgets a stored screen setup, named by all its screen "
+                + "fingerprints; refuses the connected one.",
+            .text("screen")
+        ),
         "bind_profile_to_desktop": APIRecord(
             "Binds a profile to a main-screen Desktop; screen "
                 + "fingerprints after it scope it to that setup.",

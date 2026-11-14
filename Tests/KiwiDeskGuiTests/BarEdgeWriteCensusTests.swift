@@ -19,7 +19,7 @@ struct BarEdgeWriteCensusTests {
 
     /// File → (raw writes it holds, why).
     private static let allowed: [String: (Int, String)] = [
-        "ScreenEdged.swift": (4, "the doors themselves"),
+        "ScreenEdged.swift": (5, "the doors themselves"),
         "ShelfEdge.swift": (1, "`ShelfEdge`'s own field, no bar's"),
         "ShelfRevealer+Target.swift": (
             1, "`ShelfRevealer.Target`'s own field, no bar's (#761)"

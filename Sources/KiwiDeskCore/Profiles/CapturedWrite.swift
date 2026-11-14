@@ -8,4 +8,8 @@ public enum CapturedWrite: Sendable, Equatable {
     /// `save_profile`: the whole live setup — which Spaces exist,
     /// their order, pins and modes.
     case wholeLive
+    /// `forget_monitor_set` (#3324): the setup `monitors` left the
+    /// profile, its scoped Desktop bindings and its stray
+    /// per-screen bar edges with it.
+    case forgottenSetup(monitors: [String])
 }

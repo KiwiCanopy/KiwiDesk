@@ -8,6 +8,7 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case profilesAddScreenSetup = "(action) profiles.sets.move"
     case isDefault = "profile.isDefault"
     case isStarterSetup = "profile.isStarterSetup"
+    case profilesForgetSetup = "(action) profiles.sets.forget"
 }
 
 extension ProfilesKey {
@@ -26,6 +27,10 @@ extension ProfilesKey {
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault,
             .profilesAddScreenSetup:
             return .row(.profiles, .savedProfiles, .atRest)
+        case .profilesForgetSetup:
+            // One row per stored setup, behind a drawer shut by
+            // default (#3324).
+            return .row(.profiles, .knownScreenSetups, .showMore)
         case .isStarterSetup:
             return .luaOnly
         }
@@ -47,6 +52,8 @@ extension ProfilesKey {
             return .text("profiles.make_default.one")
         case .profilesAddScreenSetup:
             return .text("profiles.sets.move.help")
+        case .profilesForgetSetup:
+            return .text("profiles.known.forget")
         case .isStarterSetup:
             return .none
         }

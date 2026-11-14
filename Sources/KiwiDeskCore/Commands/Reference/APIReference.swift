@@ -144,6 +144,8 @@ public enum APIReference {
             ),
             ("list_profiles", "list_profiles"),
             ("get_profile_status", "get_profile_status"),
+            ("list_monitor_sets", "list_monitor_sets"),
+            ("forget_monitor_set", "forget_monitor_set"),
             (
                 "bind_profile_to_desktop",
                 "bind_profile_to_desktop"

@@ -18,6 +18,21 @@ struct ProfilesControls: Sendable {
         "desktops.title",
         "Profiles per macOS Desktop"
     )
+    /// The Known screen setups card (#3324), declared with its
+    /// child so a search hit on Forget opens it (#1250).
+    let knownSetups = SettingsDrawer(
+        "profiles.known.title",
+        "Known screen setups",
+        children: KnownSetupsControls()
+    )
+}
+
+/// Profiles ▸ Known screen setups rows, keyed on the census label.
+struct KnownSetupsControls: Sendable {
+    let forget = SettingsControl(
+        "profiles.known.forget",
+        "Forget Setup…"
+    )
 }
 
 struct AppRulesControls: Sendable {
