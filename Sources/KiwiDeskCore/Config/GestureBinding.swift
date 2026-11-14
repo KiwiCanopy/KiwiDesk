@@ -74,6 +74,12 @@ public struct LuaAction: Hashable, Sendable {
     public var kind: KeyBinding.Kind
     public var meta: KeyBindingMeta
 
+    /// Whether the Lua is blank, which runs nothing: the one
+    /// predicate a refusal and the Settings edits share (#3321).
+    public var isBlank: Bool {
+        lua.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     public init(
         lua: String,
         kind: KeyBinding.Kind = .custom,
@@ -179,8 +185,7 @@ extension GestureAction {
             return .grabOnlyOnDrag
         case .run(let action):
             if !input.directions.isEmpty { return .directionalNeedsFamily }
-            return action.lua.trimmingCharacters(in: .whitespaces).isEmpty
-                ? .emptyAction : nil
+            return action.isBlank ? .emptyAction : nil
         case .family(let family):
             return input.families.contains(family) ? nil : .familyNotOffered
         case .split(let arms):
@@ -188,9 +193,9 @@ extension GestureAction {
             if !arms.keys.allSatisfy(input.directions.contains) {
                 return .noDirections
             }
-            return arms.values.contains {
-                $0.lua.trimmingCharacters(in: .whitespaces).isEmpty
-            } ? .emptyAction : nil
+            // Only a split of blank arms alone runs nothing; a blank
+            // arm beside others is that direction left dead (#3321).
+            return arms.values.allSatisfy(\.isBlank) ? .emptyAction : nil
         }
     }
 }

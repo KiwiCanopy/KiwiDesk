@@ -192,7 +192,7 @@ enum GestureListEdits {
         on input: GestureInput
     ) -> GestureAction {
         var arms = arms(of: action, on: input) ?? [:]
-        arms[direction] = arm.lua.trimmed.isEmpty ? nil : arm
+        arms[direction] = arm.isBlank ? nil : arm
         if let saved = folded(arms, on: input) { return saved }
         return .split([direction: arm])
     }

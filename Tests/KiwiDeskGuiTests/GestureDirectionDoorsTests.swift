@@ -41,6 +41,14 @@ struct GestureDirectionDoorsTests {
         )
         #expect(row.contains("actionContainer"))
         #expect(!row.contains("SequenceActionMenu("))
+        // Every write of a direction goes through the one arm edit,
+        // which drops blank Lua and folds back into a family.
+        let pick = try Self.body(
+            "func pick(_ arm: LuaAction)",
+            in: Self.gestures + "GestureDirectionRows.swift"
+        )
+        #expect(pick.contains("GestureListEdits.arm("))
+        #expect(!pick.contains("arms[direction]"))
     }
 
     @Test("the picker resets the ink its trigger was handed")
