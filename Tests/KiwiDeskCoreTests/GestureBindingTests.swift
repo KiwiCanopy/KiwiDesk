@@ -91,6 +91,18 @@ struct GestureBindingTests {
         #expect(!resolved.keys.contains { $0.input == .hoverMove })
     }
 
+    /// A blank arm beside a live one leaves that direction dead and
+    /// keeps the rest (#3321): Lua's `{ left = "", right = "x()" }`.
+    @Test("a split with one blank arm still stands")
+    func mixedSplitStands() {
+        let split = GestureAction.split([
+            .left: LuaAction(lua: " "),
+            .right: LuaAction(lua: "x()"),
+        ])
+        let key = GestureKey(.swipe3, [.control, .option])
+        #expect(split.refusal(on: key) == nil)
+    }
+
     /// Whether each Lua seed is a catalogue row is the GUI target's
     /// (`TrackpadSeedCatalogueTests`), whose catalogue holds verbs no
     /// keyboard default binds.
@@ -171,6 +183,19 @@ struct GestureBindingTests {
             ),
             (GestureKey(.click), .run(LuaAction(lua: "x()")), .needsModifier),
             (GestureKey(.tap4), .run(LuaAction(lua: " ")), .emptyAction),
+            // A blank arm runs nothing either (#3321).
+            (
+                GestureKey(.swipe2, hyper),
+                .split([.up: LuaAction(lua: " ")]),
+                .emptyAction
+            ),
+            (
+                GestureKey(.swipe2, hyper),
+                .split([
+                    .up: LuaAction(lua: "\n"), .down: LuaAction(lua: ""),
+                ]),
+                .emptyAction
+            ),
         ]
     )
     func refusals(
