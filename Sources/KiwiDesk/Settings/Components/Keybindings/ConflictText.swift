@@ -14,9 +14,9 @@ struct ConflictReading: Equatable {
 /// Keybinding conflict tooltip and localized system shortcut names (#96).
 enum ConflictText {
     /// The row's reading of its conflict (#1126), or nil when
-    /// the row has none. `disabled` is the section's one live
-    /// read (`\.disabledSystemShortcuts`), and `sides` the Mac's
-    /// `modifier.sides` switch (#2601).
+    /// the row has none. `disabled` is the switched-off half of
+    /// the section's one live read (`\.systemShortcutState`), and
+    /// `sides` the Mac's `modifier.sides` switch (#2601).
     static func severity(
         for binding: KeyBinding,
         in bindings: [KeyBinding],
@@ -48,7 +48,7 @@ enum ConflictText {
         for binding: KeyBinding,
         in bindings: [KeyBinding],
         config: GuiConfig,
-        disabled: Set<SystemShortcut>,
+        system: SystemShortcutState,
         sides: Bool
     ) -> ConflictReading? {
         guard
@@ -58,12 +58,16 @@ enum ConflictText {
                     in: bindings,
                     sides: sides
                 ),
-                disabled: disabled
+                disabled: system.disabled
             )
         else { return nil }
         return ConflictReading(
             severity: severity,
-            sentence: sentence(for: severity, config: config)
+            sentence: sentence(
+                for: severity,
+                config: config,
+                system: system
+            )
         )
     }
 
@@ -75,25 +79,35 @@ enum ConflictText {
         for binding: KeyBinding,
         in bindings: [KeyBinding],
         config: GuiConfig,
-        disabled: Set<SystemShortcut>,
+        system: SystemShortcutState,
         sides: Bool
     ) -> String? {
         reading(
             for: binding,
             in: bindings,
             config: config,
-            disabled: disabled,
+            system: system,
             sides: sides
         )?.sentence
     }
 
     /// What each tier says. The argument for the tiers is
-    /// `docs/design-decisions.md` ▸ Shortcuts (#1126).
+    /// `docs/design-decisions.md` ▸ Shortcuts (#1126). `system` is
+    /// the section's live read, which the input-source caption
+    /// narrates (#3319).
     @MainActor
     static func sentence(
         for severity: ConflictSeverity,
-        config: GuiConfig
+        config: GuiConfig,
+        system: SystemShortcutState
     ) -> String {
+        if let taken = InputSourceTakenText.sentence(
+            for: severity,
+            config: config,
+            system: system
+        ) {
+            return taken
+        }
         switch severity {
         case .unrecognized:
             return L(

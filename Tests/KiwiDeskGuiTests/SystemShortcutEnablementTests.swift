@@ -193,10 +193,17 @@ struct ConflictAccessorRoutingTests {
             accessor.contains(
                 "funcdisabledSystemShortcuts()"
                     + "->Set<SystemShortcut>{"
-                    + "SystemShortcutEnablement.disabled("
+                    + "systemShortcutState().disabled}"
+            )
+        )
+        #expect(
+            accessor.contains(
+                "funcsystemShortcutState()->SystemShortcutState{"
+                    + "SystemShortcutState.live("
                     + "reading:readSymbolicHotkey)}"
             )
         )
+        var stateHits = 0
         var disabledHits = 0
         var liveReadHits = 0
         for url in try Self.guiSources() {
@@ -207,6 +214,10 @@ struct ConflictAccessorRoutingTests {
                 text.components(
                     separatedBy: "SystemShortcutEnablement.disabled("
                 ).count - 1
+            stateHits +=
+                text.components(
+                    separatedBy: "SystemShortcutState.live("
+                ).count - 1
             liveReadHits +=
                 text.components(
                     separatedBy: "SystemShortcutEnablement.liveRead"
@@ -214,6 +225,7 @@ struct ConflictAccessorRoutingTests {
         }
         #expect(disabledHits == 1)
         #expect(liveReadHits == 1)
+        #expect(stateHits == 1)
     }
 
     /// The production default is the LIVE read — a seam declared
@@ -230,7 +242,7 @@ struct ConflictAccessorRoutingTests {
         )
         #expect(
             model.contains(
-                "varreadSymbolicHotkey:(Int)->Bool?="
+                "varreadSymbolicHotkey:(Int)->SymbolicHotkeyEntry?="
                     + "SystemShortcutEnablement.liveRead"
             )
         )

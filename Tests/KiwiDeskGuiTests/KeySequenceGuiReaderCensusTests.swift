@@ -38,6 +38,8 @@ struct KeySequenceGuiReaderCensusTests {
             (3, "the board draws chords: a leader holds its key"),
         "Settings/Components/Keybindings/KeyboardHoverReading.swift":
             (1, "conflicts judge a leader's chord as a row's"),
+        "Settings/Components/Keybindings/SystemShortcutState.swift":
+            (1, "a leader holds its chord as a row does (#3319)"),
         "Settings/Components/Keybindings/Sequences/"
             + "SequenceNodeRow+Recorder.swift":
             (1, "the card's own rows: a leader judged by its chord"),

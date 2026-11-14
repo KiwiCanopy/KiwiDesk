@@ -170,7 +170,7 @@ extension AdvancedLuaGroup {
                 for: binding.wrappedValue,
                 in: bindings,
                 config: model.config,
-                disabled: disabledSystemShortcuts,
+                system: systemShortcutState,
                 sides: model.appWide.modifierSides
             ),
             narrowing: SideNarrowing.of(

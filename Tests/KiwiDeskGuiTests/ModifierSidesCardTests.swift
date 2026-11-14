@@ -102,7 +102,8 @@ struct ModifierSidesCardTests {
         #expect(severity?.isDead == false)
         let sentence = ConflictText.sentence(
             for: .sideCollapse(right),
-            config: GuiConfig()
+            config: GuiConfig(),
+            system: []
         )
         #expect(sentence.contains(ModifierSidesWords.title))
         let on = ConflictText.severity(

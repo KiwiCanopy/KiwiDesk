@@ -39,8 +39,8 @@ struct SimpleShortcutCards: View {
         .environment(\.keybindingLayerName, layer)
         // One live read per render (#1105), as the Shortcuts page.
         .environment(
-            \.disabledSystemShortcuts,
-            model.disabledSystemShortcuts()
+            \.systemShortcutState,
+            model.systemShortcutState()
         )
         .recorderKeys(model)
         .environmentObject(coordinator)

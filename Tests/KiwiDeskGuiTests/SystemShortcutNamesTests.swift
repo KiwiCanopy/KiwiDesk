@@ -122,7 +122,7 @@ struct SystemShortcutNamesTests {
                 for: bindings[0],
                 in: bindings,
                 config: GuiConfig(),
-                disabled: [],
+                system: [],
                 sides: false
             )
         else {
@@ -151,7 +151,7 @@ struct SystemShortcutNamesTests {
                 for: bindings[0],
                 in: bindings,
                 config: GuiConfig(),
-                disabled: [],
+                system: [],
                 sides: false
             ) == "Not a recognized shortcut."
         )

@@ -190,8 +190,8 @@ struct ShortcutsSection: View {
             // One live read per section render (#1105), so
             // every row narrates the same verdict (#1126).
             .environment(
-                \.disabledSystemShortcuts,
-                model.disabledSystemShortcuts()
+                \.systemShortcutState,
+                model.systemShortcutState()
             )
             .recorderKeys(model)
             .environmentObject(coordinator)

@@ -13,8 +13,8 @@ struct OrphanedShortcutsGroup: View {
     let layers: [String]
     @Environment(\.keybindingLayerName)
     private var layerName
-    @Environment(\.disabledSystemShortcuts)
-    private var disabledSystemShortcuts
+    @Environment(\.systemShortcutState)
+    private var systemShortcutState
 
     var body: some View {
         let commands = OrphanedShortcuts.commands(
@@ -40,7 +40,7 @@ struct OrphanedShortcutsGroup: View {
                             bindings: $bindings,
                             command: command,
                             layer: layerName,
-                            disabled: disabledSystemShortcuts
+                            system: systemShortcutState
                         )
                         .equatable()
                     }

@@ -12,8 +12,8 @@ struct KiwiVisionLensHeader: View {
     @State private var deleting: LensDeleteRequest?
     @Environment(\.keybindingLayerName)
     private var layerName
-    @Environment(\.disabledSystemShortcuts)
-    private var disabledSystemShortcuts
+    @Environment(\.systemShortcutState)
+    private var systemShortcutState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -43,7 +43,7 @@ struct KiwiVisionLensHeader: View {
                 bindings: defaultBindings,
                 command: KeybindingCatalog.toggleLens(lens),
                 layer: layerName,
-                disabled: disabledSystemShortcuts
+                system: systemShortcutState
             )
             .equatable()
             if let layer = otherLayer {

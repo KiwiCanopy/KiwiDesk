@@ -21,9 +21,14 @@ extension SettingsModel {
     /// surface narrating dormancy (#1126) is handed this —
     /// never the reader or `SystemShortcutEnablement` itself.
     func disabledSystemShortcuts() -> Set<SystemShortcut> {
-        SystemShortcutEnablement.disabled(
-            reading: readSymbolicHotkey
-        )
+        systemShortcutState().disabled
+    }
+
+    /// The whole live reading a row surface narrates from (#3319):
+    /// the switched-off set and the other input-source chord. A
+    /// section wires it once into `\.systemShortcutState`.
+    func systemShortcutState() -> SystemShortcutState {
+        SystemShortcutState.live(reading: readSymbolicHotkey)
     }
 
     /// Live derived banner text reflecting active conflicts

@@ -8,8 +8,8 @@ import SwiftUI
 struct PocketAppRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
-    @Environment(\.disabledSystemShortcuts)
-    var disabledSystemShortcuts
+    @Environment(\.systemShortcutState)
+    var systemShortcutState
     @Environment(\.keybindingLayerName)
     var layerName
     /// The app the last pick named that already has a key: WHICH
@@ -55,7 +55,7 @@ struct PocketAppRows: View {
                     for: current,
                     in: bindings,
                     config: model.config,
-                    disabled: disabledSystemShortcuts,
+                    system: systemShortcutState,
                     sides: model.appWide.modifierSides
                 ),
                 narrowing: SideNarrowing.of(

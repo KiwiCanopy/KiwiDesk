@@ -119,6 +119,15 @@ public enum SymbolicHotkeys {
         )
     }
 
+    /// macOS's other input-source shortcut, "Select the previous
+    /// input source" (#3319): its id and the chord it ships on. No
+    /// `SystemShortcut` names it; the takes-away caption of
+    /// `.inputSourceNext` reads it.
+    public static let previousInputSource = (
+        id: 60,
+        chord: KeyCombo(keyCode: 49, modifiers: .control)
+    )
+
     /// A hotkey's `parameters` — character, key code, modifier mask —
     /// as a chord; nil for a key code macOS writes for none (65535).
     static func chord(_ parameters: [Int]) -> KeyCombo? {

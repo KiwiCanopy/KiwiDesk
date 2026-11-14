@@ -11,8 +11,8 @@ struct AdvancedLuaGroup: View {
     @Binding var bindings: [KeyBinding]
     /// Runs after Add binding appends its row, which is last.
     let onAdd: () -> Void
-    @Environment(\.disabledSystemShortcuts)
-    var disabledSystemShortcuts
+    @Environment(\.systemShortcutState)
+    var systemShortcutState
     @Environment(\.keybindingLayerName)
     var layerName
     @State var editing: LuaEditRequest?

@@ -6,7 +6,7 @@ private struct KeybindingLayerNameKey: EnvironmentKey {
     static let defaultValue = KeyLayer.defaultName
 }
 
-/// The switched-off system shortcuts (#1105), read ONCE per
+/// The machine's macOS shortcut state (#1105, #3319), read ONCE per
 /// section render and handed down — never one read per row.
 ///
 /// The empty default is NOT the shipped reading: six chords ship
@@ -14,8 +14,8 @@ private struct KeybindingLayerNameKey: EnvironmentKey {
 /// over-report `.dead`. What keeps that unreachable is that
 /// every recorder mount descends from the one wiring site, which
 /// `ConflictRowTreatmentTests` pins (#1126).
-private struct DisabledSystemShortcutsKey: EnvironmentKey {
-    static let defaultValue: Set<SystemShortcut> = []
+private struct SystemShortcutStateKey: EnvironmentKey {
+    static let defaultValue: SystemShortcutState = []
 }
 
 /// Set on a card whose rows end in a trash: a trash-less row in
@@ -53,9 +53,9 @@ extension EnvironmentValues {
         set { self[HyperKeyIsOffKey.self] = newValue }
     }
 
-    var disabledSystemShortcuts: Set<SystemShortcut> {
-        get { self[DisabledSystemShortcutsKey.self] }
-        set { self[DisabledSystemShortcutsKey.self] = newValue }
+    var systemShortcutState: SystemShortcutState {
+        get { self[SystemShortcutStateKey.self] }
+        set { self[SystemShortcutStateKey.self] = newValue }
     }
 
     /// Whether a trash-less row holds the trash's width.

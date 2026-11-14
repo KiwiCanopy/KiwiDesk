@@ -67,7 +67,7 @@ struct KeybindingBannerLocaleTests {
             for: bindings[0],
             in: bindings,
             config: model.config,
-            disabled: [],
+            system: [],
             sides: false
         )
         // Pinned non-nil first: `?.contains != true` alone

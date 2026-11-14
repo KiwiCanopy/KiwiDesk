@@ -51,7 +51,7 @@ struct NavRow: View, Equatable {
         bindings: Binding<[KeyBinding]>,
         command: NavCommand,
         layer: String,
-        disabled: Set<SystemShortcut>
+        system: SystemShortcutState
     ) {
         self.model = model
         rows = Rows(binding: bindings)
@@ -93,7 +93,7 @@ struct NavRow: View, Equatable {
                 at: index,
                 in: rows,
                 model: model,
-                disabledSystemShortcuts: disabled
+                system: system
             ),
             narrowing: SideNarrowing.of(
                 binding,
@@ -208,14 +208,14 @@ struct NavRow: View, Equatable {
         at index: Int?,
         in bindings: [KeyBinding],
         model: SettingsModel,
-        disabledSystemShortcuts: Set<SystemShortcut>
+        system: SystemShortcutState
     ) -> ConflictReading? {
         guard let index else { return nil }
         return ConflictText.reading(
             for: bindings[index],
             in: bindings,
             config: model.config,
-            disabled: disabledSystemShortcuts,
+            system: system,
             sides: model.appWide.modifierSides
         )
     }

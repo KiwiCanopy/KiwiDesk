@@ -147,11 +147,11 @@ extension KeyboardPreviewPanel {
     /// sweep per cap the pointer crossed (code review, #798).
     ///
     /// The read is taken HERE because the panel is the section's
-    /// SIBLING: the `disabledSystemShortcuts` environment the
+    /// SIBLING: the `systemShortcutState` environment the
     /// section wires never reaches this column and would answer
     /// the empty DEFAULT, narrating a dormant chord as dead.
     private var reader: (UInt32) -> KeyboardHoverReading {
-        let disabled = model.disabledSystemShortcuts()
+        let system = model.systemShortcutState()
         let layers = shown
         let scope = liveScope
         let selection = selected
@@ -164,7 +164,7 @@ extension KeyboardPreviewPanel {
                 scope: scope,
                 selected: selection,
                 config: config,
-                disabled: disabled,
+                system: system,
                 sides: sides
             )
         }
