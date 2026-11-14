@@ -65,7 +65,9 @@ struct DesktopSwitchShortcutTests {
             #expect(!shortcut.isUniversalAccelerator)
             // The plist's own entry switches it on.
             let on = SystemShortcutEnablement.disabled(
-                reading: { $0 == entry.id ? true : nil }
+                reading: {
+                    $0 == entry.id ? SymbolicHotkeyEntry(enabled: true) : nil
+                }
             )
             #expect(!on.contains(shortcut))
         }

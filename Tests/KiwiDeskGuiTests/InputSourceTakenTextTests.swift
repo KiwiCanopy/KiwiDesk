@@ -130,6 +130,12 @@ struct InputSourceTakenTextTests {
                 : nil
         }
         #expect(cleared.previousInputSource == nil)
+        let spotlightCleared = SystemShortcutState.live {
+            $0 == SystemShortcut.spotlight.symbolicHotkey!.id
+                ? SymbolicHotkeyEntry(enabled: true, keyless: true)
+                : nil
+        }
+        #expect(spotlightCleared.disabled.contains(.spotlight))
         // Spotlight ships on and Invert Colors off, so each reading
         // below is the plist's, never the shipped default.
         let spotlight = SystemShortcut.spotlight.symbolicHotkey!.id

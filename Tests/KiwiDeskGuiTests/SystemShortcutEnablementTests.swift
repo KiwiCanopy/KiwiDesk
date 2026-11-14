@@ -41,13 +41,17 @@ struct SystemShortcutEnablementTests {
         let spot = SystemShortcut.spotlight.symbolicHotkey!.id
         // Invert Colors enabled by the user → not disabled.
         let withInvert = SystemShortcutEnablement.disabled(
-            reading: { id in id == invert ? true : nil }
+            reading: { id in
+                id == invert ? SymbolicHotkeyEntry(enabled: true) : nil
+            }
         )
         #expect(!withInvert.contains(.invertColors))
         #expect(withInvert.contains(.increaseContrast))
         // Spotlight switched off → joins the set.
         let noSpotlight = SystemShortcutEnablement.disabled(
-            reading: { id in id == spot ? false : nil }
+            reading: { id in
+                id == spot ? SymbolicHotkeyEntry(enabled: false) : nil
+            }
         )
         #expect(noSpotlight.contains(.spotlight))
     }
@@ -71,7 +75,7 @@ struct SystemShortcutEnablementTests {
             ) == hardWired
         )
         let all = SystemShortcutEnablement.disabled(
-            reading: { _ in false }
+            reading: { _ in SymbolicHotkeyEntry(enabled: false) }
         )
         for shortcut in hardWired {
             #expect(!all.contains(shortcut))

@@ -54,5 +54,17 @@ struct AnsweredChordTests {
         }
         #expect(!answered.contains { $0.shortcut == .spotlight })
         #expect(answered.contains { $0.shortcut == .appSwitcher })
+        let cleared = SymbolicHotkeyEntry(enabled: true, keyless: true)
+        #expect(!SystemShortcut.spotlight.isAnswered(cleared))
+        let chords = SequencePassChords.live {
+            $0 == spotlight ? cleared : nil
+        }
+        let spotlightChord = SystemShortcuts.chord(of: .spotlight)
+        #expect(spotlightChord != nil)
+        #expect(!chords.closes.contains { $0 == spotlightChord })
+        #expect(
+            SequencePassChords.live { _ in nil }.closes
+                .contains { $0 == spotlightChord }
+        )
     }
 }

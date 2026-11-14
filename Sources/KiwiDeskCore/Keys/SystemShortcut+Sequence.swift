@@ -46,12 +46,12 @@ extension SystemShortcut {
         }
     }
 
-    /// Whether macOS answers this shortcut, given its plist
-    /// `enabled` bit (nil for no entry): a symbolic hotkey by that
-    /// bit or its shipped state, any other always (#1105, #3173).
-    public func isAnswered(enabled: Bool?) -> Bool {
+    /// Whether macOS answers this shortcut, given its plist entry
+    /// (nil for none): a symbolic hotkey by `SymbolicHotkeys.isOn`,
+    /// any other always (#1105, #3173, #3319).
+    public func isAnswered(_ entry: SymbolicHotkeyEntry?) -> Bool {
         guard let hotkey = symbolicHotkey else { return true }
-        return enabled ?? hotkey.shipsEnabled
+        return SymbolicHotkeys.isOn(entry, shipsEnabled: hotkey.shipsEnabled)
     }
 
     /// What an open key sequence does with this shortcut (#3173 ▸
@@ -159,17 +159,25 @@ public enum SymbolicHotkeys {
         )
     }
 
-    /// The one answer to "what chord does macOS answer for this
-    /// entry": nil for one off or cleared, else the plist's chord,
-    /// else `chord` (#3173, #3319).
+    /// The one answer to "does macOS answer this entry": its
+    /// `enabled` bit, else `shipsEnabled`, and never once cleared
+    /// (#1105, #3319). `answered` and `isAnswered` both ask it.
+    public static func isOn(
+        _ entry: SymbolicHotkeyEntry?,
+        shipsEnabled: Bool
+    ) -> Bool {
+        entry?.keyless != true && (entry?.enabled ?? shipsEnabled)
+    }
+
+    /// The chord macOS answers for an entry: nil while `isOn` says
+    /// no, else the plist's chord, else `chord` (#3173, #3319).
     static func answered(
         _ entry: SymbolicHotkeyEntry?,
         shipsEnabled: Bool,
         chord: KeyCombo
     ) -> KeyCombo? {
-        guard entry?.enabled ?? shipsEnabled, entry?.keyless != true
-        else { return nil }
-        return entry?.combo ?? chord
+        isOn(entry, shipsEnabled: shipsEnabled)
+            ? entry?.combo ?? chord : nil
     }
 
     /// A hotkey's `parameters` — character, key code, modifier mask —

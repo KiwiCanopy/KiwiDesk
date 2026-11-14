@@ -21,9 +21,7 @@ struct SystemShortcutState: Equatable {
     /// shipped default.
     static func live(reading read: (Int) -> SymbolicHotkeyEntry?) -> Self {
         Self(
-            disabled: SystemShortcutEnablement.disabled(
-                reading: { read($0)?.enabled }
-            ),
+            disabled: SystemShortcutEnablement.disabled(reading: read),
             previousInputSource: SymbolicHotkeys.answeredChord(
                 of: SymbolicHotkeys.previousInputSource,
                 reading: read

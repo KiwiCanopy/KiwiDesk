@@ -14378,7 +14378,10 @@ is a row in any of the base layers; a Lua `bind` and a profile's own
 override row are not seen (`InputSourceTakenTextTests`). The other
 direction, a KiwiDesk row taking 60 itself, is not shipped: macOS's
 hotkey 60 has no `SystemShortcut` case yet, and its verdict needs a
-measurement first (#3331).
+measurement first (#3331). A shortcut cleared in System Settings, on
+with no key, now reads as switched off everywhere: the row is dormant,
+not dead, and an open sequence no longer lets its old chord through
+(`AnsweredChordTests`).
 :::
 
 **One recorder at a time.** Starting a recording snaps any

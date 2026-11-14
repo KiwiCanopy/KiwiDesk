@@ -20,14 +20,14 @@ enum SystemShortcutEnablement {
     /// what `KeybindingConflicts.actionable` drops. A chord with
     /// no symbolic-hotkey id (⌘Q, ⌘Tab, …) cannot be disabled.
     static func disabled(
-        reading read: (Int) -> Bool?
+        reading read: (Int) -> SymbolicHotkeyEntry?
     ) -> Set<SystemShortcut> {
         Set(
             SystemShortcut.allCases.filter { shortcut in
                 guard let entry = shortcut.symbolicHotkey else {
                     return false
                 }
-                return !shortcut.isAnswered(enabled: read(entry.id))
+                return !shortcut.isAnswered(read(entry.id))
             }
         )
     }
