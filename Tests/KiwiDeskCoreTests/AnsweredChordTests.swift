@@ -67,4 +67,21 @@ struct AnsweredChordTests {
                 .contains { $0 == spotlightChord }
         )
     }
+
+    @Test("a plist entry naming no key reads as cleared")
+    func parsesTheClearedEntry() {
+        let cleared = SymbolicHotkeys.entry(from: [
+            "enabled": true,
+            "value": ["parameters": [65535, 65535, 0]],
+        ])
+        #expect(cleared.keyless)
+        #expect(cleared.combo == nil)
+        let set = SymbolicHotkeys.entry(from: [
+            "enabled": true,
+            "value": ["parameters": [32, 49, 262144]],
+        ])
+        #expect(!set.keyless)
+        #expect(set.combo == KeyCombo.parse("ctrl+space"))
+        #expect(!SymbolicHotkeys.entry(from: ["enabled": false]).keyless)
+    }
 }

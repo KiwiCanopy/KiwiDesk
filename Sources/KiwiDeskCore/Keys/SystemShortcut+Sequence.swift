@@ -127,6 +127,12 @@ public enum SymbolicHotkeys {
             ) as? [String: Any],
             let entry = table["\(id)"] as? [String: Any]
         else { return nil }
+        return self.entry(from: entry)
+    }
+
+    /// One plist entry as KiwiDesk reads it; pure, so the parse is
+    /// testable apart from the host's preferences.
+    static func entry(from entry: [String: Any]) -> SymbolicHotkeyEntry {
         let value = entry["value"] as? [String: Any]
         let parameters = value?["parameters"] as? [Int]
         let combo = parameters.flatMap(chord)
