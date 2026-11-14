@@ -92,15 +92,15 @@ and never edits it. Settings stores its own configuration in
 saved profile.
 
 - Saving in Settings never rewrites `init.lua`.
-- Custom Lua that is not app rules, float rules, ignore rules,
-  keybindings or profile bindings lives alongside the visual
-  editor; a blue banner reads "Custom Lua detected".
+- Custom Lua that is not app rules, float rules, tile rules,
+  ignore rules, keybindings or profile bindings lives alongside
+  the visual editor; a blue banner reads "Custom Lua detected".
 - If `init.lua` declares managed vocabulary (`app_rules`,
-  `float_rules`, `ignore_rules`, `KiwiDesk.bind`, keybinding
-  definitions), Settings shows a raw Lua editor instead. **Adopt
-  into the GUI** imports them, comments the migrated settings out
-  as a backup, and keeps your custom Lua (event hooks such as the
-  sketchybar bridge) live.
+  `float_rules`, `tile_rules`, `ignore_rules`, `KiwiDesk.bind`,
+  keybinding definitions), Settings shows a raw Lua editor
+  instead. **Adopt into the GUI** imports them, comments the
+  migrated settings out as a backup, and keeps your custom Lua
+  (event hooks such as the sketchybar bridge) live.
 
 :::unreleased
 A `gesture.bind` or `gesture.unbind` line counts as a keybinding
@@ -115,8 +115,8 @@ changes; persist custom tiling as a profile.
 `gui.json` is seeded as long as `init.lua` declares no managed
 settings, so a file of event hooks boots GUI-managed. An
 `init.lua` that sets tiling itself (`KiwiDesk.set_*`, rules, or
-keybindings) stays Lua-owned, and **Adopt into the GUI** is
-offered instead.
+keybindings) gets no `gui.json`, and **Adopt into the GUI** is
+offered where it declares rules or keybindings.
 
 ## Start KiwiDesk
 

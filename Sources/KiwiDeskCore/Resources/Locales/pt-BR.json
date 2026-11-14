@@ -2237,7 +2237,7 @@
   "shortcuts.gestures.refusal.single_key": "Segure duas ou mais teclas: o macOS e os apps rolam com uma.",
   "shortcuts.gestures.refusal.taken": "Outra linha já usa estas teclas.",
   "shortcuts.gestures.remove": "Remover gesto",
-  "shortcuts.gestures.row_name": "%1$@ com %2$@",
+  "shortcuts.gestures.row_name": "%2$@ + %1$@",
   "shortcuts.gestures.rows": "Gestos",
   "shortcuts.gestures.scroll.hold": "Segure as teclas…",
   "shortcuts.gestures.scroll.long_swipes": "Deslizes longos percorrem mais janelas",
