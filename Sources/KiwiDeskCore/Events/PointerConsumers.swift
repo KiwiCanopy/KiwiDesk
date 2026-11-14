@@ -18,6 +18,9 @@ public final class PointerConsumers {
         /// The bound clicks and side buttons (#3281). It owns the
         /// press it took to its release.
         case buttons
+        /// The bound pinches and rotation (#1873). It owns the
+        /// magnification or rotation it took to its end.
+        case gestures
 
         /// The events this consumer needs — its one mask constant.
         /// The grab hears the left-button trio for "+ drag" and
@@ -26,6 +29,7 @@ public final class PointerConsumers {
             switch self {
             case .grab: return PointerConsumers.grabMask
             case .buttons: return PointerConsumers.buttonMask
+            case .gestures: return PointerConsumers.gestureMask
             }
         }
     }
@@ -47,9 +51,25 @@ public final class PointerConsumers {
         .otherMouseDown, .otherMouseDragged, .otherMouseUp,
     ].reduce(0) { $0 | CGEventMask(1) << $1.rawValue }
 
+    /// The gesture events' type, 29, and the Dock's streams', 30,
+    /// which no `CGEventType` case names (#1873).
+    nonisolated static let gestureEventType: UInt32 = 29
+    nonisolated static let dockEventType: UInt32 = 30
+
+    /// The gestures' mask: types 29 and 30. Probes at this tap's
+    /// location asked tccd for `PostEvent` alone, as the grab's
+    /// mask does; swallowing kept Preview from zooming and the Dock
+    /// from opening Apps or Show Desktop, and a Dock stream is
+    /// taken only whole (2026-11-14).
+    nonisolated static let gestureMask: CGEventMask =
+        CGEventMask(1) << gestureEventType
+        | CGEventMask(1) << dockEventType
+
     public typealias GrabHandler = @MainActor (ModifierGrabEvent) -> Void
     public typealias ButtonHandler =
         @MainActor (PointerButtonEvent) -> Void
+    public typealias GestureHandler =
+        @MainActor (TrackpadGestureEvent) -> Void
     typealias MakeTap =
         @MainActor (CGEventMask, @escaping PointerTap.Deliver)
         -> PointerTapHandle?
@@ -67,8 +87,12 @@ public final class PointerConsumers {
     public private(set) var buttonSettings = PointerButtonSettings(
         resolved: GestureSeeds.seeds
     )
+    /// The bound pinches, rotation and swipes as the tap reads them;
+    /// written through `TouchGestures.onGestureEventChords` alone.
+    private(set) var gestureSettings = GestureEventSettings()
     private var grabHandler: GrabHandler?
     private var buttonHandler: ButtonHandler?
+    private var gestureHandler: GestureHandler?
     /// The bound presses the main actor has heard and not yet seen
     /// released, as they were pressed: a torn-down tap ends them.
     public private(set) var buttonsHeld: [PointerButtonEvent] = []
@@ -100,6 +124,18 @@ public final class PointerConsumers {
     /// Wires the buttons' handler; once, at bootstrap.
     public func setButtonHandler(_ handler: @escaping ButtonHandler) {
         buttonHandler = handler
+        sync()
+    }
+
+    /// Wires the gestures' handler; once, at bootstrap.
+    public func setGestureHandler(_ handler: @escaping GestureHandler) {
+        gestureHandler = handler
+        sync()
+    }
+
+    /// Applies the bound pinches, rotation and swipes.
+    func configure(gestures settings: GestureEventSettings) {
+        gestureSettings = settings
         sync()
     }
 
@@ -174,6 +210,7 @@ public final class PointerConsumers {
             }
             buttonHandler?(event)
         }
+        for event in delivery.gestures { gestureHandler?(event) }
         for event in events {
             switch event.phase {
             case .began: grabInFlight = event
@@ -200,6 +237,8 @@ public final class PointerConsumers {
             switch consumer {
             case .grab: grabHandler != nil && grabSettings.isOn
             case .buttons: buttonHandler != nil && buttonSettings.isOn
+            case .gestures:
+                gestureHandler != nil && gestureSettings.isOn
             }
         }
     }
@@ -266,7 +305,8 @@ public final class PointerConsumers {
         tap?.setSnapshot(
             PointerTapSnapshot(
                 grab: live.contains(.grab) ? grabSettings : nil,
-                buttons: live.contains(.buttons) ? buttonSettings : nil
+                buttons: live.contains(.buttons) ? buttonSettings : nil,
+                gestures: live.contains(.gestures) ? gestureSettings : nil
             )
         )
     }

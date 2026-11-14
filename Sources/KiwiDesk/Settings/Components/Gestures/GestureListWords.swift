@@ -41,9 +41,19 @@ enum GestureListWords {
             L("shortcuts.gestures.input.swipe4", "Four-finger swipe")
         case .swipe5:
             L("shortcuts.gestures.input.swipe5", "Five-finger swipe")
-        // Never offered: no front fires them (#3199 ▸ Ruling).
-        case .spread, .pinchTogether, .rotate, .forceClick:
-            input.rawValue
+        case .spread: L("shortcuts.gestures.input.spread", "Spread")
+        case .pinchTogether:
+            L("shortcuts.gestures.input.pinch_together", "Pinch together")
+        case .rotate: L("shortcuts.gestures.input.rotate", "Rotate")
+        case .spread4:
+            L("shortcuts.gestures.input.spread4", "Four-finger spread")
+        case .pinchTogether4:
+            L(
+                "shortcuts.gestures.input.pinch_together4",
+                "Four-finger pinch together"
+            )
+        // Never offered: no front fires it (#1873, unmeasured).
+        case .forceClick: input.rawValue
         }
     }
 

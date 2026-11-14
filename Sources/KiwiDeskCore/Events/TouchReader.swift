@@ -9,9 +9,10 @@ protocol TouchReaderHandle: AnyObject {
 }
 
 /// The MultitouchSupport reader (#1873). It reads, never
-/// swallows: the framework hands every frame to every listener,
-/// so a gesture macOS also answers still reaches macOS — which is
-/// why the axes macOS owns are greyed rather than taken.
+/// swallows: the framework hands every frame to every listener, so
+/// a swipe macOS answers is kept from macOS by the pointer tap,
+/// which reads the finger count this reader publishes
+/// (`TouchFingerCount`).
 ///
 /// Frames arrive on the framework's own thread, one per device;
 /// each device has its own pure `TrackpadGestureRouter`, run there,
@@ -69,8 +70,9 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             slot = nil
             return true
         }
-        guard ours,
-            let unregister = MultitouchSupport.unregisterSymbol.function,
+        guard ours else { return }
+        TouchFingerCount.set(0)
+        guard let unregister = MultitouchSupport.unregisterSymbol.function,
             let stop = MultitouchSupport.stopSymbol.function
         else { return }
         for device in list.devices {
@@ -114,6 +116,7 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
         } else {
             contacts = []
         }
+        TouchFingerCount.set(contacts.count)
         let frame = TouchFrame(
             time: time,
             contacts: contacts,

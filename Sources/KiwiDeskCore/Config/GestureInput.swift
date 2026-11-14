@@ -29,10 +29,14 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     /// two-finger swipe the pan rides on (#3200).
     case swipe2
     case swipe3, swipe4, swipe5
-    // Stored, never fired until #2447 reads them.
+    // macOS's gesture events, read by the pointer tap (#1873).
     case spread
     case pinchTogether = "pinch_together"
     case rotate
+    /// Four fingers apart or together, the Dock's own gesture: taken
+    /// only with keys held (#1873 amendment, 2026-11-13).
+    case spread4
+    case pinchTogether4 = "pinch_together4"
     case forceClick = "force_click"
 
     public enum Device: Sendable { case mouse, trackpad }
@@ -121,23 +125,28 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// One of macOS's own gesture events, which only a tap with the
-    /// gesture-event mask can swallow (#2447's `PointerTap`); no
-    /// reader exists for these yet.
+    /// One of macOS's own gesture events, which the pointer tap's
+    /// gesture mask reads and swallows (#1873).
     public var isGestureEvent: Bool {
         switch self {
-        case .spread, .pinchTogether, .rotate, .forceClick: true
+        case .spread, .pinchTogether, .rotate, .spread4,
+            .pinchTogether4, .forceClick:
+            true
         default: false
         }
     }
 
     /// Whether a front fires this input today: the pointer tap
-    /// fires the drags, the clicks and the side buttons (#3281), the
-    /// scroll tap the wheels and the pan; a two-finger tap waits for
-    /// the touch router, the pinches and Force Click for #2447.
+    /// fires the drags, the clicks, the side buttons (#3281) and the
+    /// pinches and rotation (#1873), the scroll tap the wheels and
+    /// the pan; a two-finger tap waits for the touch router, and
+    /// Force Click is unmeasured.
     public var isFired: Bool {
         switch self {
         case .drag, .hoverMove, .wheel, .wheelX, .swipe2: true
+        case .spread, .pinchTogether, .rotate, .spread4,
+            .pinchTogether4:
+            true
         case _ where isButton: true
         case .tap2, .tap3, .tap4, .tap5, .swipe3, .swipe4, .swipe5:
             fingers.map(TrackpadGestureRouter.fingerRange.contains) ?? false

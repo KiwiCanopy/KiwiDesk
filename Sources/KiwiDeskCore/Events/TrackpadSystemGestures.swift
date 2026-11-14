@@ -3,8 +3,10 @@ import Foundation
 /// Which multi-finger gestures macOS itself answers, read from the
 /// trackpad preferences System Settings writes (#1873 ruling ▸
 /// Offered). A slot on a gesture macOS owns stays stored and does
-/// not fire, since the reader cannot keep macOS from answering it
-/// too; a failed read owns nothing, so the binding stays live.
+/// not fire, since nothing keeps macOS from answering it too; a
+/// failed read owns nothing, so the binding stays live. A swipe
+/// the Dock answers is not owned: the pointer tap takes its stream
+/// (owner ruling 2026-11-14).
 public struct TrackpadSystemGestures: Equatable, Sendable {
     public enum Axis: Sendable { case horizontal, vertical }
 
@@ -42,11 +44,12 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         }
     }
 
-    /// The preference keys. Any value but 0 counts as macOS's: a
-    /// swipe key's 1 and 2 are both gestures macOS answers (pages,
-    /// full-screen apps, Mission Control), and the tap key's value
-    /// table is unmeasured, so a reading is taken as owned rather
-    /// than shared (owner eyeball on #1873).
+    /// The preference keys. A swipe key's 2 is the Dock's (Spaces,
+    /// Mission Control, App Exposé), whose stream the pointer tap
+    /// takes, so it owns nothing; any other value but 0 counts as
+    /// macOS's, since 1 is an app's swipe between pages, which no
+    /// tap takes, and the tap key's value table is unmeasured, so a
+    /// reading is taken as owned rather than shared.
     static let swipeKeys: [(String, Int, Axis)] = [
         ("TrackpadThreeFingerHorizSwipeGesture", 3, .horizontal),
         ("TrackpadThreeFingerVertSwipeGesture", 3, .vertical),
@@ -54,6 +57,8 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         ("TrackpadFourFingerVertSwipeGesture", 4, .vertical),
     ]
     static let tapKey = "TrackpadThreeFingerTapGesture"
+    /// A swipe key's value for the Dock's own gesture.
+    static let dockValue = 2
     /// Three-finger drag zeroes the three-finger swipe keys while
     /// it drags with those fingers, so it owns both axes.
     static let dragKey = "TrackpadThreeFingerDrag"
@@ -64,7 +69,7 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         guard !prefs.isEmpty else { return .unread }
         var swipes: [Int: Set<Axis>] = [:]
         for (key, fingers, axis) in swipeKeys
-        where (prefs[key] ?? 0) != 0 {
+        where ![0, dockValue].contains(prefs[key] ?? 0) {
             swipes[fingers, default: []].insert(axis)
         }
         if (prefs[dragKey] ?? 0) != 0 {

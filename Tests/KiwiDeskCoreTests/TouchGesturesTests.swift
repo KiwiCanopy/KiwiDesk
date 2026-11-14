@@ -223,7 +223,7 @@ struct TouchGesturesTests {
     @Test("the gesture-event chords reach their door, empty when off")
     func gestureEventChordsReachTheDoor() {
         let (gestures, box) = front()
-        var pushed: [[GestureInput: Set<ScrollChord>]] = []
+        var pushed: [GestureEventSettings] = []
         gestures.onGestureEventChords = { pushed.append($0) }
         gestures.resolve(
             map([
@@ -234,28 +234,43 @@ struct TouchGesturesTests {
             ]),
             natural: true
         )
-        #expect(pushed.last == [:], "nothing before the start")
+        #expect(
+            pushed.last == GestureEventSettings(),
+            "nothing before the start"
+        )
         gestures.start()
-        #expect(pushed.last == [.rotate: [Self.hyper, [.option, .command]]])
+        #expect(
+            pushed.last?.chords
+                == [.rotate: [Self.hyper, [.option, .command]]]
+        )
         gestures.receive([event(.gesture(.rotate), 0, Self.hyper)])
         gestures.receive([event(.gesture(.tap3), 0)])
         #expect(box.fired.map(\.0) == [.rotate])
         gestures.stop()
-        #expect(pushed.last == [:])
+        #expect(pushed.last == GestureEventSettings())
     }
 
     @Test("the preference read decides which gestures macOS owns")
     func systemPrefsParse() {
         let parsed = TrackpadSystemGestures.parse([
-            "TrackpadThreeFingerHorizSwipeGesture": 2,
-            "TrackpadThreeFingerVertSwipeGesture": 1,
+            "TrackpadThreeFingerHorizSwipeGesture": 1,
+            "TrackpadThreeFingerVertSwipeGesture": 3,
             "TrackpadFourFingerHorizSwipeGesture": 0,
             "TrackpadFourFingerVertSwipeGesture": 2,
             "TrackpadThreeFingerTapGesture": 2,
         ])
         #expect(parsed.read)
+        // 1 is an app's page swipe and 3 unmeasured: both macOS's.
         #expect(parsed.swipes[3] == [.horizontal, .vertical])
-        #expect(parsed.swipes[4] == [.vertical])
+        // 2 is the Dock's, whose stream the pointer tap takes.
+        #expect(parsed.swipes[4] == nil)
+        let dock = TrackpadSystemGestures.parse([
+            "TrackpadThreeFingerHorizSwipeGesture": 2,
+            "TrackpadFourFingerHorizSwipeGesture": 2,
+        ])
+        #expect(dock.read)
+        #expect(!dock.owns(event(.swipe(.left), 3)))
+        #expect(!dock.owns(event(.swipe(.left), 4)))
         #expect(parsed.lookUpTap)
         let tapOne = TrackpadSystemGestures.parse([
             "TrackpadThreeFingerTapGesture": 1

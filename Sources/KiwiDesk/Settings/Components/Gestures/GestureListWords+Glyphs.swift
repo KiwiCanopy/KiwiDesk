@@ -22,6 +22,9 @@ extension GestureListWords {
         case .spread: "hand.raised.fingers.spread"
         case .pinchTogether: pinch.drawn
         case .rotate: "rotate.right"
+        case .spread4:
+            "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left"
+        case .pinchTogether4: "arrow.down.right.and.arrow.up.left"
         case .forceClick: forceClick.drawn
         }
     }
@@ -59,6 +62,10 @@ extension GestureListWords {
             (
                 L("shortcuts.gestures.group.swipe", "Swipe"),
                 { $0.fingers != nil && !$0.directions.isEmpty }
+            ),
+            (
+                L("shortcuts.gestures.group.pinch", "Pinch & Rotate"),
+                { $0.isGestureEvent }
             ),
         ]
         return groups.compactMap { title, holds in

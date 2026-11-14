@@ -48,10 +48,12 @@ extension Profile {
     /// 35 a binding may be a key sequence, with no step (#1871),
     /// 36 the gestures are one `gesture` map (#3199), 37 a 0
     /// reveal or expand duration is its toggle off (#3236), 38 its
-    /// own look carries no animation length (#3237).
+    /// own look carries no animation length (#3237), 39 the
+    /// `gesture` map may hold the four-finger pinch and spread
+    /// slots, with no step (#1873).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 38
+    public static let currentFormat = 39
 }

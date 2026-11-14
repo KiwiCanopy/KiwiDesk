@@ -12,6 +12,8 @@ struct PointerSample: Equatable, Sendable {
         case buttonDown(PointerButton)
         case buttonDragged(PointerButton)
         case buttonUp(PointerButton)
+        /// A gesture event, CG type 29 (#1873).
+        case gesture(GestureEventSample)
     }
 
     var kind: Kind
@@ -27,12 +29,19 @@ struct PointerTapSnapshot: Equatable, Sendable {
     var grab: ModifierDragSettings?
     /// The bound clicks and side buttons (#3281); nil while off.
     var buttons: PointerButtonSettings?
+    /// The bound pinches and rotation (#1873); nil while off.
+    var gestures: GestureEventSettings?
 
     static let off = PointerTapSnapshot(grab: nil)
 
-    init(grab: ModifierDragSettings?, buttons: PointerButtonSettings? = nil) {
+    init(
+        grab: ModifierDragSettings?,
+        buttons: PointerButtonSettings? = nil,
+        gestures: GestureEventSettings? = nil
+    ) {
         self.grab = grab
         self.buttons = buttons
+        self.gestures = gestures
     }
 }
 
@@ -65,6 +74,8 @@ struct PointerTapRouter {
         var swallow: Bool
         var grab: [ModifierGrabEvent]
         var buttons: [PointerButtonEvent] = []
+        /// Recognized pinches and rotations (#1873).
+        var gestures: [TrackpadGestureEvent] = []
 
         static let pass = Routed(swallow: false, grab: [])
     }
@@ -78,6 +89,9 @@ struct PointerTapRouter {
     /// fired: their drags and releases are the binding's too.
     /// Written by `PointerTapRouter+Buttons` alone.
     var heldButtons: [PointerButton: PointerButtonEvent] = [:]
+    /// The gesture stream the tap took, to its end. Written by
+    /// `PointerTapRouter+Gestures` alone.
+    var gestureStream: GestureEventStream?
 
     mutating func route(
         _ sample: PointerSample,
@@ -95,6 +109,10 @@ struct PointerTapRouter {
         _ sample: PointerSample,
         now: CFAbsoluteTime
     ) -> Routed {
+        // A gesture stream contests no button or grab stream.
+        if case .gesture(let gesture) = sample.kind {
+            return routingGesture(gesture, sample.chord, now: now)
+        }
         if let held = continuingButton(sample, now: now) { return held }
         switch sample.kind {
         case .buttonDown:
@@ -114,6 +132,7 @@ struct PointerTapRouter {
         }
         for consumer in PointerConsumers.Consumer.allCases {
             switch consumer {
+            case .gestures: continue
             case .grab:
                 guard let settings = snapshot.grab else { continue }
                 let routed = beginning(sample, settings, now: now)
@@ -133,6 +152,7 @@ struct PointerTapRouter {
     mutating func reseed(now: CFAbsoluteTime) -> Routed {
         var routed = endingGrab(now: now)
         routed.buttons = releasingButtons(now: now)
+        gestureStream = nil
         return routed
     }
 

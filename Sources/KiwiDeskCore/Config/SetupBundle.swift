@@ -114,7 +114,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#3246), in a bundle's `config`.
     /// 49 = an absent slide or fade in a bundle's `config` reads
     /// 4.2's 300 ms, written explicitly (#3254).
-    public static let currentFormat = 49
+    /// 50 = the `gesture` map may hold the four-finger pinch and
+    /// spread slots (#1873), in a bundle's `config` and its
+    /// `[Profile]` alike, with no step.
+    public static let currentFormat = 50
 
     public let format: Int
 
