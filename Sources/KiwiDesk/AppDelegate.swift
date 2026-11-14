@@ -217,8 +217,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboardIfCreated?.refreshProfiles()
         }
         configIssues.model.onRevealProfile = revealProfile
-        core.profiles.onCapturedLive = { [weak self] _, write in
-            self?.dashboardIfCreated?.adoptKeptLayout(write)
+        core.profiles.onCapturedLive = { [weak self] name, write in
+            self?.dashboardIfCreated?.adoptCapturedWrite(write, of: name)
         }
         core.onLiveProfileWritten = { [weak self] edit, persisted in
             self?.dashboardIfCreated?.adoptLiveWrite(

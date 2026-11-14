@@ -17,7 +17,7 @@ extension SettingsValueReadout {
                 new: new.profileBindings
             )
         case .profilesLoad, .profilesDelete, .profilesRename,
-            .profilesAddScreenSetup,
+            .profilesAddScreenSetup, .profilesForgetSetup,
             .isDefault, .isStarterSetup:
             // no model path — never booked by the diff
             return []

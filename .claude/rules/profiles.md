@@ -1904,6 +1904,13 @@ loaded with it. The obligations:
   format crossing and after a restore, which keeps each set with
   the profile `match` already loads for it
   (`MonitorSetSettleTests`); it never runs per boot.
+- **Remove a set from a profile only through
+  `ProfileManager.strip`** — a claim's release and
+  `forgetMonitorSet` (#3324) — never `Profile.release` beside it,
+  so a default left dormant drops its flag on every path; a
+  forget has no claimant, so the flag goes to nobody
+  (`MonitorSetForgetTests` ▸ `dormantDefaultClears`,
+  `MonitorSetDormantTests`).
 - **Treat a profile with no set as dormant, never as invalid.** It
   keeps its count in `monitor_count` and is never a count's
   default: a reader asking for a fallback takes
@@ -1931,7 +1938,9 @@ to are not the same verb. Keep them apart, in both directions:
   owes an open draft hangs off the WRITE, not the caller** —
   `ProfileManager.onCapturedLive`, told which `CapturedWrite` it
   was so the baseline moves for exactly what was written
-  (`SpaceChipLifecycleRowsTests` ▸ `keepKeepsLayouts`).
+  (`SpaceChipLifecycleRowsTests` ▸ `keepKeepsLayouts`). A forget
+  of a screen setup is the third such write, owed once per holder
+  whether or not it is live (`ForgetSetupDraftTests`).
 - **An AI app's keep keeps the leaves one session changed
   (#1685).** A layout write that keeps every declared Space takes
   `keepLayouts`; one that keeps the Spaces a change report named

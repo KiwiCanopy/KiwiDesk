@@ -20,6 +20,10 @@ extension APIReference {
         "delete_space",
         "close_window",
         "delete_profile",
+        // A stored screen setup leaves its profile, with its pins,
+        // its bound Desktops' entries and its screens' bar edges
+        // (#3324); nothing rebuilds them.
+        "forget_monitor_set",
         // Overwrites a saved profile of the same name.
         "save_profile",
         // Each replaces the live arrangement, dropping changes

@@ -70,6 +70,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`save_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile) | Saves the current configuration to a profile, which claims the connected screen setup. |
 | [`load_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile) | Loads a profile, claiming the connected screen setup where its screen count fits. |
 | [`delete_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile) | Deletes a saved profile. |
+| [`forget_monitor_set`](lua-reference.md#list_monitor_sets-forget_monitor_set) | Forgets a stored screen setup, named by all its screen fingerprints; refuses the connected one. |
 | [`exec`](lua-reference.md#kiwideskexec) | Runs a shell command in the background, calling back when it exits. |
 | [`switch_layer`](lua-reference.md#switch_layer) | Makes a defined keybinding layer the active one. |
 | [`open_settings`](lua-reference.md#open_settings) | Opens the Settings window and brings it to the front. |

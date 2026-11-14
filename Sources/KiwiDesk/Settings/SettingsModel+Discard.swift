@@ -12,6 +12,8 @@ struct PendingDiscard: Identifiable {
     enum Kind: Equatable {
         case discard
         case deleteProfile(name: String)
+        /// A stored screen setup, by its label (#3324).
+        case forgetSetup(label: String)
         /// Save / Discard / Cancel before a close or quit (#2049).
         case leave(DraftLeave.Intent)
     }
@@ -34,6 +36,12 @@ struct PendingDiscard: Identifiable {
                 "Delete “%1$@”?",
                 name
             )
+        case .forgetSetup(let label):
+            return L(
+                "profiles.known.forget.confirm.title",
+                "Forget “%1$@”?",
+                label
+            )
         case .leave(.close):
             return L(
                 "discard.leave.close.title",
@@ -52,7 +60,7 @@ struct PendingDiscard: Identifiable {
     @MainActor var cancelLabel: String {
         switch kind {
         case .discard, .leave: return L("discard.cancel", "Cancel")
-        case .deleteProfile:
+        case .deleteProfile, .forgetSetup:
             return L("profiles.delete.confirm.cancel", "Cancel")
         }
     }
@@ -61,8 +69,10 @@ struct PendingDiscard: Identifiable {
     /// keypress deletes nothing (#1619). A leave picks Save, or
     /// Cancel where Save is blocked (`DiscardConfirmation`).
     var cancelIsDefault: Bool {
-        if case .deleteProfile = kind { return true }
-        return false
+        switch kind {
+        case .deleteProfile, .forgetSetup: return true
+        case .discard, .leave: return false
+        }
     }
 
     var isLeave: Bool {

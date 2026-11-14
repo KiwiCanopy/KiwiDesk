@@ -137,6 +137,8 @@ final class SettingsModel: ObservableObject {
     /// Rich rows for saved profiles: screen setups, screen count, matches
     /// (#36).
     @Published var profileSummaries: [ProfileSummary] = []
+    /// Every stored screen setup, Core's order (#3324).
+    @Published var knownSetups: [KnownMonitorSet] = []
     /// Un-decodable profiles shown greyed with reveal and delete
     /// (#171, #246, #678).
     @Published var brokenProfiles: [BrokenProfile] = []
