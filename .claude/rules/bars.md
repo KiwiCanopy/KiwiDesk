@@ -1734,8 +1734,8 @@ Obligations:
   its host carries a bounds animation — a plain place, a glide
   that only moves the box and a host carrying another animation
   leave it to AppKit's own pass (`GlassBoxLayoutGateTests`); the
-  shape check gates the follow, never the layout, which it reads
-  (#2878 amendment 3). Judge the follow's cost per Space switch,
+  shape check reads the laid-out layers, so it gates the follow,
+  never the layout (#2878 amendment 3). Judge the follow's cost per Space switch,
   A-B-A on the device against the build before the change:
   neither the median main-thread busy nor the count of turns of
   100 ms or more rises, the trail stays 0 pt and no settle snap
@@ -1771,7 +1771,8 @@ Obligations:
   2026-11-14 named the `ShelfHandleView` hover and the
   `AppBarOverlay+GroupGlide` landing as possible ones, unmeasured)
   — and retire it only after a device sitting through those paths
-  shows it never changes a frame (owner, 2026-11-14).
+  shows it never changes a frame (owner, 2026-11-14); retiring it
+  re-runs the follow's per-switch cost measure above.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays
