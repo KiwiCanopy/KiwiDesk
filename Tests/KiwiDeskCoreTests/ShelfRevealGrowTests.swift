@@ -114,6 +114,7 @@ struct ShelfRevealGrowTests {
     func growPlaysBothChannels() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         overlay.revealIn()
@@ -162,6 +163,7 @@ struct ShelfRevealGrowTests {
     func growRoomHoldsStill() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         pinShelfGlide()
         let overlay = ShelfOverlay()
         defer { overlay.hide() }

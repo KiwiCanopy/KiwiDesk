@@ -293,7 +293,14 @@ bite large test PRs:
   `UserDefaults.register(defaults:)`, which writes the
   process-global registration domain whatever suite it is
   called on, so a test asserting the key absent beforehand
-  passed locally and red on CI (2026-08-03). Neither a `--filter` run nor a `guard-prover`
+  passed locally and red on CI (2026-08-03). A static that a
+  production refresh writes is the second shape: every test
+  core's `updateBars()` rewrites `BarMotion`'s lengths from its
+  own settings, so a suite reading one pins it in its body
+  (`pinRevealLength`, `pinShelfGlide`) rather than inheriting
+  what the last core left, and a test whose core leaves one off
+  its default restores it (#3307, `ReduceMotionFlagTests`,
+  `ShelfRevealStartTests`). Neither a `--filter` run nor a `guard-prover`
   mutation can reach this class: both observe the test on its
   own, which is the state it passes in. CI's full run on the PR
   is the full run this needs — a PR-gated change leaves it there

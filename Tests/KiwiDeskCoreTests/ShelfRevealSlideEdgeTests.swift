@@ -62,6 +62,7 @@ struct ShelfRevealSlideEdgeTests {
     func slidesTowardTheScreenSide(edge: AppBarEdge) throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay(on: edge)
         defer { overlay.hide() }
         #expect(overlay.retractOut())
@@ -108,6 +109,7 @@ struct ShelfRevealSlideEdgeTests {
     func takesTheShiftInFlight() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let view = NSView()
         view.wantsLayer = true
         let standing = CGPoint(x: 0, y: 12)

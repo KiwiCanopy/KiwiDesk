@@ -125,6 +125,7 @@ struct ShelfRevealUnfoldTests {
     func revealPlaysTwoStages() throws {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         overlay.revealIn()
@@ -151,6 +152,7 @@ struct ShelfRevealUnfoldTests {
     func retractCollapsesThroughTheStretch() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         overlay.panel?.orderFrontRegardless()

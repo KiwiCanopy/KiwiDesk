@@ -142,9 +142,9 @@ struct ReduceMotionFlagTests {
     }
 }
 
-/// The bars' process-global lengths, which the verb's Off writes as
-/// 0 through `updateBars()`; a core left Off leaked a 0 reveal into
-/// every later shelf suite (#3307).
+/// The bars' process-global lengths the verb's Off writes as 0
+/// through `updateBars()`, restored so no later suite inherits them
+/// (#3307).
 @MainActor
 private struct BarLengths {
     let reveal = BarMotion.revealLength
