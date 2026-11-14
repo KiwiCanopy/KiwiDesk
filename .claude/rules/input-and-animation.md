@@ -407,7 +407,9 @@ editing here:
   (`eventHotKeyExistsErr`) is intra-process only — and an
   enabled symbolic hotkey is then answered by macOS before the
   binding hears the press, with nothing said (#1126, measured
-  2026-09-03). The product ruling is
+  2026-09-03) — save `SystemShortcut.losesToKiwiDesk`'s members,
+  which KiwiDesk wins on either path ([gui.md](gui.md) ▸ the tier
+  bullet, #3239). The product ruling is
   `docs/design-decisions.md` ▸ "Size is not a positional verb"
   (`SizeLayerSeedTests`).
 - **KiwiDesk's own windows are discriminated per WINDOW, never
