@@ -159,6 +159,21 @@ struct EditTargetTests {
         #expect(!model.luaSource.isEmpty)
     }
 
+    /// Mouse & Trackpad greys through the page's one Lua-owned
+    /// gate, as the keyboard rows do (#3297).
+    @Test("a gesture.bind line forces the raw editor")
+    func gestureBindForcesLua() throws {
+        let model = makeModel()
+        try #"gesture.bind("tap5", "", "KiwiDesk.cycle_mode()")"#.write(
+            to: model.core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        model.reload()
+        #expect(model.forcedLuaEditor)
+        #expect(!model.guiManaged)
+    }
+
     @Test("a reload clears the conflict banner")
     func reloadClearsKeybindingWarning() {
         let model = makeModel()

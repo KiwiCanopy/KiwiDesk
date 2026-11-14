@@ -51,6 +51,7 @@ struct ShelfRevealStartTests {
     func orderingRevealWaitsForTheCommit() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         var commits: [() -> Void] = []
@@ -71,6 +72,7 @@ struct ShelfRevealStartTests {
     func retractSlidesOut() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         #expect(overlay.retractOut())
@@ -87,6 +89,7 @@ struct ShelfRevealStartTests {
     func reducedRevealSlides() throws {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         overlay.revealIn()
@@ -103,6 +106,7 @@ struct ShelfRevealStartTests {
     func fadeStyleFades() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay(.fade)
         defer { overlay.hide() }
         overlay.revealIn()
@@ -118,6 +122,7 @@ struct ShelfRevealStartTests {
     func shownRevealStartsAtOnce() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = overlay()
         defer { overlay.hide() }
         var commits = 0

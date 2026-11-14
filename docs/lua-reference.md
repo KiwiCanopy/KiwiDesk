@@ -78,7 +78,9 @@ the GUI** instead. Settings are:
   `KiwiDesk.bind_profile_to_desktop`.
 
 :::unreleased
-`KiwiDesk.define_sequence` counts as a keybinding too.
+`KiwiDesk.define_sequence` counts as a keybinding too, and so does a
+[`gesture.bind`](#gesturebind) or [`gesture.unbind`](#gestureunbind)
+call.
 :::
 
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
@@ -5536,8 +5538,10 @@ chosen profiles' overrides.
 
 The verbs below change the running base only: a profile's own
 value still wins, nothing reaches `gui.json`, and the value lasts
-until KiwiDesk next loads its config. In a Lua-owned setup
-`init.lua` is where it is kept, and **Adopt into the GUI** keeps
+until KiwiDesk next loads its config. In a Lua-owned setup —
+which a `gesture.bind` or `gesture.unbind` line makes
+([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt))
+— `init.lua` is where it is kept, and **Adopt into the GUI** keeps
 the base it set.
 :::
 
@@ -5558,7 +5562,11 @@ them, Lua on an input with directions, and a table on an input
 without them or naming a direction it lacks.
 `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
 `modifier_drag.set_move`, `modifier_drag.set_resize` and
-`trackpad_gesture.bind` are retired and fail, naming it.
+`trackpad_gesture.bind` are retired and fail, naming it. Their
+replacement in `init.lua` makes the setup Lua-owned
+([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt));
+to keep it in the Settings app, bind the gesture under
+**Shortcuts ▸ Mouse & Trackpad** instead.
 
 **Example:**
 
@@ -8284,7 +8292,9 @@ the leader's modifiers still held, `w` does not fire, and
 `ctrl+alt+w` is a different key. The leader wins its chord: a
 `KiwiDesk.bind` on the same chord in its layer is not registered
 and is flagged. A second `define_sequence` on one leader replaces
-the first. A leader works only through KiwiDesk's keyboard tap; if
+the first. A leader on `ctrl+alt+space`, as in the example below,
+takes that chord from macOS: the input source does not switch on it
+while the sequence is bound. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
 and is flagged. The CLI and an AI app build a sequence one key at a
 time with [`shortcut.set_sequence_key`](#shortcutset_sequence_key);

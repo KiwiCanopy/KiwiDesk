@@ -144,6 +144,7 @@ struct ShelfRevealMotionTests {
     func reducedMarkKeepsTime() throws {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let body = NSView()
         BarMotion.fadeMark(body, showing: true, reveal: .slide)
         let fade = try #require(
@@ -204,6 +205,7 @@ struct ShelfRevealMotionTests {
     func hoverGrowsThePlate() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let view = view()
         view.render(spec(hovered: false), animated: false)
         let resting = ShelfHandle.mark(
@@ -227,6 +229,7 @@ struct ShelfRevealMotionTests {
     func reducedHoverGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let view = view()
         view.render(spec(hovered: false), animated: false)
         view.render(spec(hovered: true), animated: true)
@@ -244,6 +247,7 @@ struct ShelfRevealMotionTests {
     func reducedLabelGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let label = ShelfHandleSpec.label(
             .text("1", tinted: true),
             font: NSFont.systemFont(ofSize: 8)

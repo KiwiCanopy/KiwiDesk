@@ -14314,6 +14314,26 @@ so fixing the conflict anywhere — clearing either row, deleting
 the holder — retires them without a dismiss. (#33/#34/#35, #68
 §3.6.2)
 
+:::unreleased
+*Amended (#3239, measured 2026-11-14): `⌃⌥space` is KiwiDesk's, not
+macOS's.* macOS answers its input-source hotkey (id 61) only when no
+KiwiDesk binding takes the press first. On macOS 27.2 a posted
+`⌃⌥space` switched the input source with nothing bound, while a
+sequence leader's keyboard tap swallowed it every time with no
+switch, and a Carbon hotkey on the chord fired on six presses by hand
+with no switch. So a row on that chord is no dead row, whichever way
+it is bound and whether macOS has the hotkey on or off: it fires, and
+it says macOS loses the input-source switch while it is bound, the
+way a menu chord says the apps lose theirs. A hotkey macOS has off
+still reads that way, not dormant: dormant's words promise the row
+dies when the hotkey comes back on, which here it does not, while the
+aggregate count still leaves a switched-off chord out. Read as dead,
+the row told the user a shortcut that works would not. Every other chord macOS
+answers first stays a dead row; a leader on one is unmeasured
+(`SystemShortcut.losesToKiwiDesk`, `ConflictSeverityTests` ▸
+`rowsTakeTheInputSourceChord`).
+:::
+
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
 
@@ -16860,6 +16880,19 @@ scrolling value is a pop-up over the recorder column, in the shared
 setting row: segments break the every-locale fit (#291) on the
 longest *Off*, and the row then lines up with the gesture rows
 under it.
+
+*Amended (#3297): a gesture binding in `init.lua`
+makes the file the owner.* `gesture.bind` and `gesture.unbind` are
+managed tokens beside `KiwiDesk.bind`, so bindings keep one home.
+Left out, a line in `init.lua` would be overwritten by `gui.json`'s
+base on every load, a fresh desk included, since nothing marks it a
+setting. Merging the Lua binding over that base was refused: two
+stores would each hold part of one list, and the Settings cards
+could not show where a row came from. The cost is the same as for
+`KiwiDesk.bind`: one gesture line hands the whole setup to
+`init.lua` until Adopt into the GUI, a setup that rewrites a retired
+gesture verb into `gesture.bind` hands itself over the same way, and
+an aliased receiver (`local g = gesture`) escapes the scan.
 :::
 
 **An entry is one drawn picture and one sentence, and the picture

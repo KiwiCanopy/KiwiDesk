@@ -87,6 +87,7 @@ struct ShelfRevealSpreadTests {
     func revealSpreadsByDistance() throws {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let run = Run()
         let overlay = overlay(.unfold, run: run)
         defer { overlay.hide() }
@@ -118,6 +119,7 @@ struct ShelfRevealSpreadTests {
     func retractGathersOuterFirst() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let run = Run()
         let overlay = overlay(.unfold, run: run)
         defer { overlay.hide() }
@@ -131,6 +133,7 @@ struct ShelfRevealSpreadTests {
     func landingClearsHiddenBoxes() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let run = Run()
         let overlay = overlay(.unfold, run: run)
         defer { overlay.hide() }
@@ -148,6 +151,7 @@ struct ShelfRevealSpreadTests {
     func boxedGrowSpreads() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let run = Run()
         let overlay = overlay(.grow, run: run)
         defer { overlay.hide() }
