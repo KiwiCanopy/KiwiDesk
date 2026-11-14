@@ -171,6 +171,12 @@ struct GestureBindingTests {
             ),
             (GestureKey(.click), .run(LuaAction(lua: "x()")), .needsModifier),
             (GestureKey(.tap4), .run(LuaAction(lua: " ")), .emptyAction),
+            // A blank arm runs nothing either (#3321).
+            (
+                GestureKey(.swipe2, hyper),
+                .split([.up: LuaAction(lua: " ")]),
+                .emptyAction
+            ),
         ]
     )
     func refusals(

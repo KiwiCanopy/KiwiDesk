@@ -143,14 +143,14 @@ struct GestureDirectionRow: View {
         )
     }
 
-    /// Edits one arm; arms that all match a family again fold back
-    /// into it, which keeps the pan.
+    /// Edits this direction's arm alone (`GestureListEdits.arm`).
     func pick(_ arm: LuaAction) {
-        var arms =
-            GestureListEdits.arms(of: action, on: key.input) ?? [:]
-        arms[direction] = arm
-        guard let saved = GestureListEdits.folded(arms, on: key.input)
-        else { return }
+        let saved = GestureListEdits.arm(
+            arm,
+            toward: direction,
+            of: action,
+            on: key.input
+        )
         GestureListEdits.set(saved, at: key, in: &model.config.gesture)
     }
 }

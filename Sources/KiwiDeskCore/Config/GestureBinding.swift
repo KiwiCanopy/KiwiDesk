@@ -185,8 +185,12 @@ extension GestureAction {
             return input.families.contains(family) ? nil : .familyNotOffered
         case .split(let arms):
             if input.directions.isEmpty { return .noDirections }
-            return arms.keys.allSatisfy(input.directions.contains)
-                ? nil : .noDirections
+            if !arms.keys.allSatisfy(input.directions.contains) {
+                return .noDirections
+            }
+            return arms.values.contains {
+                $0.lua.trimmingCharacters(in: .whitespaces).isEmpty
+            } ? .emptyAction : nil
         }
     }
 }

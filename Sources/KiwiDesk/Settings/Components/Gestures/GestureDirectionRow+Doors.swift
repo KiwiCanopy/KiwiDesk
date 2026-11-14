@@ -5,30 +5,22 @@ import SwiftUI
 /// with App… and Lua…, as a one-action row offers them, each
 /// writing this direction's arm alone.
 extension GestureDirectionRow {
-    @ViewBuilder var actionContainer: some View {
-        if choosingApp {
-            AppPickerButton(
-                placeholder: L("shortcuts.choose_app", "Choose app…"),
-                selection: nil,
-                onPick: pickApp,
-                escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
-                onEscape: {
-                    if let app = AppBundlePanel.pick() { pickApp(app) }
-                },
-                opensOnAppear: true,
-                onClose: { choosingApp = false }
-            )
-            .fixedSize()
-        } else {
+    var actionContainer: some View {
+        GestureActionDoors(
+            choosingApp: $choosingApp,
+            editingLua: $editingLua,
+            picking: $picking,
+            id: id,
+            current: arm,
+            subject: spokenLabel,
+            write: pick
+        ) {
             actionMenu
-                .popover(item: $editingLua) { _ in
-                    luaPopover.settingsPopoverChrome()
-                }
         }
     }
 
     /// While the row binds a family the trigger reads in secondary
-    /// ink; the picker it opens keeps its own (#3321).
+    /// ink (#3199 ▸ Ruling); the picker it opens keeps its own.
     private var actionMenu: some View {
         SequenceActionMenu(
             face: face,
@@ -58,82 +50,10 @@ extension GestureDirectionRow {
         GestureListEdits.arms(of: action, on: key.input)?[direction]
     }
 
-    /// Lua…: the arm turns into a Lua action, an existing one kept,
-    /// and its editor opens.
+    /// Lua…: the editor opens, and the arm turns into Lua only once
+    /// some is typed, so an empty editor leaves the arm, and a family
+    /// its pan, as they were.
     func startLua() {
-        if arm?.kind != .custom {
-            pick(LuaAction(lua: "", kind: .custom))
-        }
         editingLua = LuaEditRequest(id: id)
-    }
-
-    func pickApp(_ app: KeybindingCatalog.InstalledApp) {
-        pick(
-            LuaAction(
-                lua: KeybindingCatalog.appCommand(app.bundleID),
-                kind: .application,
-                meta: KeyBindingMeta(desc: app.name)
-            )
-        )
-    }
-
-    /// The arm's Lua, read and written through the arm.
-    private var luaText: Binding<String> {
-        Binding(
-            get: { arm?.kind == .custom ? arm?.lua ?? "" : "" },
-            set: { lua in
-                var next = LuaAction(lua: lua, kind: .custom)
-                if let arm, arm.kind == .custom { next.meta = arm.meta }
-                pick(next)
-            }
-        )
-    }
-
-    private var luaDesc: Binding<String> {
-        Binding(
-            get: { arm?.kind == .custom ? arm?.meta.desc ?? "" : "" },
-            set: { desc in
-                guard var next = arm, next.kind == .custom else { return }
-                next.meta.desc = desc
-                pick(next)
-            }
-        )
-    }
-
-    private var luaPopover: some View {
-        LuaBindingEditor(
-            title: L("shortcuts.lua.editor_title", "Lua binding"),
-            spokenName: L(
-                "shortcuts.lua.body_ax",
-                "Lua for %1$@",
-                spokenLabel
-            ),
-            placeholder: L(
-                "shortcuts.lua_placeholder",
-                "Lua, e.g. KiwiDesk.reload_config()"
-            ),
-            text: luaText,
-            changeAction: {
-                editingLua = nil
-                // The picker opens once this popover has gone.
-                DispatchQueue.main.async {
-                    picking = SequencePickRequest(id: id)
-                }
-            },
-            dismiss: { editingLua = nil }
-        ) {
-            TextField(
-                L("shortcuts.lua.desc_placeholder", "Description"),
-                text: luaDesc
-            )
-            .textFieldStyle(.roundedBorder)
-            .accessibilityLabel(
-                L(
-                    "shortcuts.lua.desc_ax",
-                    "Description for %1$@",
-                    spokenLabel
-                )
-            )
-        }
     }
 }
