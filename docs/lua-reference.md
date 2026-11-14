@@ -48,9 +48,8 @@ Whether the Settings app or `init.lua` owns your configuration
 depends on **what your `init.lua` declares**, not on whether the
 file exists.
 
-**Coexists — stays GUI-managed.** Anything that is not a setting
-runs alongside `gui.json`: on first launch KiwiDesk seeds the
-default profile, spaces and shortcuts, and your code runs too:
+**Coexists — stays GUI-managed.** Code that declares no rule
+table and no binding runs alongside `gui.json`:
 
 ```lua
 -- Event hooks, control flow, helpers, print, locals — all fine.
@@ -61,19 +60,13 @@ for _, event in ipairs({ "space_change", "focus_change" }) do
 end
 ```
 
-**Makes `init.lua` the owner — Lua-managed.** Declaring any
-*setting* hands ownership to the file: KiwiDesk does **not** seed
-a `gui.json` over it, and the Settings app offers **Adopt into
-the GUI** instead. Settings are:
+**Makes `init.lua` the owner — Lua-managed.** Declaring any of
+these hands ownership to the file: the Settings app shows a raw
+Lua editor and offers **Adopt into the GUI**, and a fresh desk
+gets no `gui.json` seeded over it:
 
-- Any `set_*` verb on the `KiwiDesk` table — `set_mode`,
-  `set_gap_global`, `set_min_window_size`, …
-- Any namespaced layout setter — `bsp.set_ratio_h`,
-  `stack.set_master_ratio`, `scroll.set_slot_size`,
-  `grid.set_type`, `monocle.*`, `track.*`, `drag.*`, `border.*`,
-  `app_bar.*`, `space_bar.*`, `animations.*`, `mouse.*`,
-  `quit.*` — plus `border.fit_gaps`.
-- Window-rule tables — `app_rules`, `float_rules`, `ignore_rules`.
+- Window-rule tables — `app_rules`, `float_rules`, `tile_rules`,
+  `ignore_rules`.
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_desktop`.
 
@@ -83,19 +76,27 @@ the GUI** instead. Settings are:
 call.
 :::
 
-A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
-
-A [`kiwihub.set_key`](#kiwihubset_key) call counts as a setting too.
-
 ```lua
 -- Any one of these makes init.lua the config owner:
-KiwiDesk.set_mode(1, "stack")
-bsp.set_ratio_h(0.6)
 float_rules = { "com.apple.systempreferences" }
+KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
 ```
 
-To keep the GUI in charge, put settings like these in the
-Settings app, or **Adopt** an existing file.
+**Stops the first-launch seed — a setting.** A setting leaves the
+owner as it is once `gui.json` exists. On a desk with no
+`gui.json` yet, declaring one keeps KiwiDesk from seeding the
+default. A setting is:
+
+- Any `set_*` verb on `KiwiDesk` or on a namespace table —
+  `KiwiDesk.set_mode`, `bsp.set_ratio_h`,
+  [`kiwishelf.set_thickness`](#kiwishelfset_thickness),
+  [`kiwihub.set_key`](#kiwihubset_key), … — plus
+  `border.fit_gaps`.
+
+[The user guide](user-guide.md#how-the-app-and-initlua-coexist)
+says how a setting in `init.lua` behaves beside a `gui.json`.
+To keep the GUI in charge, put settings and rules in the Settings
+app, or **Adopt** an existing file.
 
 ## Navigation & Movement
 
