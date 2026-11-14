@@ -27,8 +27,8 @@ public struct TrackpadGestureEvent: Equatable, Sendable {
 /// An episode runs from the first finger down to the last one
 /// up. A swipe fires when the fingers' centre has travelled
 /// `swipeDistance` along one axis since the finger count last
-/// changed; a flick fires at the release — the first finger to lift
-/// — as macOS takes a quick short swipe, when the centre travelled
+/// changed; a flick fires at a release — a finger lifting — as
+/// macOS takes a quick short swipe, when the centre travelled
 /// `flickDistance` and still moved at `flickSpeed` over the last
 /// `flickWindow`. A tap fires at the lift when no swipe fired, every
 /// finger stayed within `tapTravel` and the touch lasted at most
@@ -41,11 +41,12 @@ struct TrackpadGestureRouter {
     static let swipeDistance: Float = 0.12
     /// The swipe's own axis must lead the other by this factor.
     static let axisDominance: Float = 1.6
-    /// A flick's least travel, and the speed in pad widths per
-    /// second it must still have over the window before the
-    /// release. Measured 2026-11-14 on the owner's trackpad: slow
-    /// swipes ended at 0.03–0.16, quick flicks at 0.67–1.24 and
-    /// travelled 0.066–0.128. The travel stays above `tapTravel`, or
+    /// A flick's least travel, and the speed in normalized pad
+    /// lengths per second along its axis it must still have over the
+    /// window before the release, which must end within it.
+    /// Measured 2026-11-14 on the owner's trackpad: slow swipes
+    /// ended at 0.03–0.16, quick flicks at 0.67–1.24 and travelled
+    /// 0.066–0.128. The travel stays above `tapTravel`, or
     /// a tap rolling one way would swipe.
     static let flickDistance: Float = 0.05
     static let flickSpeed: Float = 0.4
@@ -127,7 +128,7 @@ struct TrackpadGestureRouter {
         _ frame: TouchFrame
     ) -> [TrackpadGestureEvent] {
         guard !episode.fired, fingerRange.contains(episode.count),
-            let direction = flick(of: episode)
+            let direction = flick(of: episode, at: frame.time)
         else { return [] }
         episode.fired = true
         return [swipeEvent(direction, episode.count, frame)]
@@ -179,11 +180,15 @@ struct TrackpadGestureRouter {
     /// The flick an episode's last window decides: `flickDistance`
     /// since the count changed, still moving that way at
     /// `flickSpeed`.
-    private static func flick(of episode: Episode) -> Direction? {
+    private static func flick(
+        of episode: Episode,
+        at now: Double
+    ) -> Direction? {
         guard let base = episode.baseline,
             let first = episode.recent.first,
             let last = episode.recent.last,
             last.time > first.time,
+            now - last.time <= flickWindow,
             let direction = swipe(
                 from: base,
                 to: last.centre,

@@ -17158,16 +17158,18 @@ the release (#1873).** macOS takes a quick, short swipe as a whole
 one, so a swipe that waits for 12% of the trackpad felt dead
 beside it — and with the chord held the pointer tap swallows
 macOS's own swipe, so the flick did nothing at all. While the
-fingers move only the 12% counts; at the release, the first finger
-to lift, the swipe fires when the centre travelled 5% and still
+fingers move only the 12% counts; at a release, a finger lifting,
+the swipe fires when the centre travelled 5% and still
 moved at 0.4 of the pad per second over the last 100 ms
 (`TrackpadGestureRouter.swipeDistance`, `flickDistance`,
 `flickSpeed`, `flickWindow`). A flick judged mid-motion fired
 early on a slow swipe, whose speed passes a distance-per-window
 test long before 12%; at the release the two separate by about
 four times on the owner's trackpad (slow swipes ending at
-0.03–0.16, flicks at 0.67–1.24). The window is read before the
-lift, so the roll of a lifting hand is no flick, and the flick
+0.03–0.16, flicks at 0.67–1.24), which also keeps a slow swipe's
+roll as the hand lifts out of it. The window is read before the
+finger count changes, so a lifting finger's jump of the centre is
+no flick, and the flick
 distance stays above the tap's 4%, so a tap rolling one way still
 taps. The values are fixed: no macOS preference scales touch
 travel, which is what earned *Travel per window* its field above.

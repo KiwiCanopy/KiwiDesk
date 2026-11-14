@@ -76,7 +76,13 @@ struct TrackpadGestureRouterTests {
                 contacts: fingers(n, x: 0.3 + dx * t, y: 0.5 + dy * t),
                 modifiers: modifiers
             )
-        } + [TouchFrame(time: duration + 0.1, contacts: [])]
+        } + [
+            TouchFrame(
+                time: duration + 0.01,
+                contacts: [],
+                modifiers: modifiers
+            )
+        ]
     }
 
     @Test("a swipe fires once, in its direction, and is no tap")
@@ -96,8 +102,7 @@ struct TrackpadGestureRouterTests {
     @Test("a short slow or diagonal slide decides nothing")
     func shortOrDiagonalSlide() {
         #expect(run(swipe(4, dx: 0.09, dy: 0, over: 1)).isEmpty)
-        // Just past the flick window: 0.06 spread over 0.3 s covers
-        // under 0.05 in any 0.2 s.
+        // Far enough for a flick at 0.2 pad/s, too slow for one.
         #expect(run(swipe(4, dx: 0.06, dy: 0, over: 0.3)).isEmpty)
         #expect(run(swipe(4, dx: 0.2, dy: 0.2)).isEmpty)
     }
@@ -106,18 +111,23 @@ struct TrackpadGestureRouterTests {
     func flickFires() {
         let events = run(swipe(3, dx: -0.06, dy: 0, over: 0.08))
         #expect(events.map(\.kind) == [.swipe(.left)])
+        #expect(events.first?.modifiers == Self.hyper)
         #expect(
             run(swipe(4, dx: 0, dy: 0.06, over: 0.08)).map(\.kind)
                 == [.swipe(.up)]
+        )
+        #expect(
+            run(swipe(3, dx: 0, dy: -0.06, over: 0.08)).map(\.kind)
+                == [.swipe(.down)]
         )
     }
 
     @Test("a slow swipe waits for its distance, never flicking early")
     func slowSwipeWaits() {
-        // 0.3 of the pad per second: past 5% early, never fast.
-        let events = run(swipe(3, dx: 0.3, dy: 0, over: 1))
+        // 0.5 pad/s, past flick speed: 5% at 0.1 s, 12% at 0.24 s.
+        let events = run(swipe(3, dx: 0.2, dy: 0, over: 0.4))
         #expect(events.map(\.kind) == [.swipe(.right)])
-        #expect((events.first?.time ?? 0) >= 0.39, "fired at 12%")
+        #expect((events.first?.time ?? 0) >= 0.23, "fired at 12%")
     }
 
     @Test("a flick that stops before the lift is no flick")
@@ -128,7 +138,7 @@ struct TrackpadGestureRouterTests {
         frames += (1...20).map {
             TouchFrame(time: 0.08 + Double($0) * 0.01, contacts: still)
         }
-        frames.append(TouchFrame(time: 0.4, contacts: []))
+        frames.append(TouchFrame(time: 0.29, contacts: []))
         #expect(run(frames).isEmpty)
     }
 
@@ -147,6 +157,7 @@ struct TrackpadGestureRouterTests {
         #expect(events.map(\.kind) == [.swipe(.left)])
         #expect(events.first?.fingers == 4)
         #expect(events.first?.time == 0.11)
+        #expect(events.first?.modifiers == Self.hyper)
     }
 
     @Test("a flick after a rest still fires")
@@ -169,23 +180,45 @@ struct TrackpadGestureRouterTests {
                 modifiers: Self.hyper
             )
         }
-        let lift = TouchFrame(time: 0.5, contacts: [])
+        let lift = TouchFrame(
+            time: 0.39,
+            contacts: [],
+            modifiers: Self.hyper
+        )
         let events = run(rest + flick + [lift])
         #expect(events.map(\.kind) == [.swipe(.right)])
     }
 
-    @Test("fingers landing one by one are no flick")
-    func landingIsNoFlick() {
-        // Each landing finger moves the centre 0.025 within a few
-        // milliseconds; the count change re-measures every time.
-        let frames =
-            (1...5).map { n in
-                TouchFrame(
-                    time: Double(n) * 0.005,
-                    contacts: fingers(n, x: 0.3, y: 0.5)
-                )
-            } + [TouchFrame(time: 0.1, contacts: [])]
-        #expect(run(frames).map(\.kind) == [.tap])
+    @Test("a landing finger's jump is no part of the flick")
+    func landingJumpIsNoFlick() {
+        // Three fingers rest; a fourth lands far right, jumping the
+        // centre 0.06; the four then flick left 0.06 and lift. Read
+        // across the landing, the flick would net almost nothing.
+        let rest = (0...4).map {
+            TouchFrame(
+                time: Double($0) * 0.005,
+                contacts: fingers(3, x: 0.3, y: 0.5),
+                modifiers: Self.hyper
+            )
+        }
+        let lone = TouchContact(id: 9, x: 0.6, y: 0.5)
+        let flick = (0...8).map { step in
+            let dx = -Float(step) * 0.0075
+            return TouchFrame(
+                time: 0.025 + Double(step) * 0.01,
+                contacts: fingers(3, x: 0.3 + dx, y: 0.5)
+                    + [TouchContact(id: 9, x: lone.x + dx, y: 0.5)],
+                modifiers: Self.hyper
+            )
+        }
+        let lift = TouchFrame(
+            time: 0.11,
+            contacts: [],
+            modifiers: Self.hyper
+        )
+        let events = run(rest + flick + [lift])
+        #expect(events.map(\.kind) == [.swipe(.left)])
+        #expect(events.first?.fingers == 4)
     }
 
     @Test("a quick tap that rolls within its travel still taps")
@@ -193,14 +226,14 @@ struct TrackpadGestureRouterTests {
         let frames =
             (0...5).map { step in
                 TouchFrame(
-                    time: Double(step) * 0.02,
+                    time: Double(step) * 0.01,
                     contacts: fingers(
                         3,
                         x: 0.4 + Float(step) * 0.007,
                         y: 0.5
                     )
                 )
-            } + [TouchFrame(time: 0.11, contacts: [])]
+            } + [TouchFrame(time: 0.06, contacts: [])]
         #expect(run(frames).map(\.kind) == [.tap])
         // The roll the tap allows never reaches a flick.
         #expect(
