@@ -13,6 +13,9 @@ enum CustomGlyph: Hashable {
     case swipes(Int)
     /// The window list walked: three windows in a row over an arrow.
     case walk
+    /// Fingers moving apart or together, as 2 or 4 arrows (#1873).
+    case spread(Int)
+    case pinch(Int)
 
     static let prefix = "kiwi."
 
@@ -25,6 +28,8 @@ enum CustomGlyph: Hashable {
         case .taps(let n): "kiwi.taps.\(n)"
         case .swipes(let n): "kiwi.swipes.\(n)"
         case .walk: "kiwi.walk"
+        case .spread(let n): "kiwi.spread.\(n)"
+        case .pinch(let n): "kiwi.pinch.\(n)"
         }
     }
 
@@ -32,6 +37,7 @@ enum CustomGlyph: Hashable {
         let all: [CustomGlyph] =
             [.click, .rightClick, .wheelClick, .sideButtons, .walk]
             + (2...5).flatMap { [CustomGlyph.taps($0), .swipes($0)] }
+            + [2, 4].flatMap { [CustomGlyph.spread($0), .pinch($0)] }
         guard let glyph = all.first(where: { $0.name == name }) else {
             return nil
         }
@@ -67,6 +73,8 @@ enum CustomGlyph: Hashable {
         case .taps(let n): Self.tapDots(n)
         case .swipes(let n): Self.swipeDots(n)
         case .walk: Self.windowRow()
+        case .spread(let n): Self.pinchArrows(n, outward: true)
+        case .pinch(let n): Self.pinchArrows(n, outward: false)
         }
     }
 
@@ -91,7 +99,7 @@ enum CustomGlyph: Hashable {
     }
 
     /// A line from `a` to `b` with an open head at `b`.
-    private static func arrow(_ a: NSPoint, _ b: NSPoint) {
+    static func arrow(_ a: NSPoint, _ b: NSPoint) {
         line(a, b, 1.5)
         let angle = atan2(b.y - a.y, b.x - a.x)
         let head = NSBezierPath()
