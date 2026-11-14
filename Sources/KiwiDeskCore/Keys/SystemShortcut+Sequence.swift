@@ -107,6 +107,14 @@ public struct SymbolicHotkeyEntry: Equatable, Sendable {
     }
 }
 
+/// A symbolic hotkey KiwiDesk knows by id alone: the state and chord
+/// macOS ships it with (#3319).
+public struct ShippedHotkey: Equatable, Sendable {
+    public let id: Int
+    public let shipsEnabled: Bool
+    public let chord: KeyCombo
+}
+
 /// The one reader of `com.apple.symbolichotkeys` (#1105, #3173). A
 /// cached reader sees external writes (measured 2026-09-01).
 public enum SymbolicHotkeys {
@@ -130,10 +138,9 @@ public enum SymbolicHotkeys {
     }
 
     /// macOS's other input-source shortcut, "Select the previous
-    /// input source" (#3319): its id, shipped state and chord. No
-    /// `SystemShortcut` names it; the takes-away caption of
-    /// `.inputSourceNext` reads it.
-    public static let previousInputSource = (
+    /// input source" (#3319). No `SystemShortcut` names it; the
+    /// takes-away caption of `.inputSourceNext` reads it.
+    public static let previousInputSource = ShippedHotkey(
         id: 60,
         shipsEnabled: true,
         chord: KeyCombo(keyCode: 49, modifiers: .control)
@@ -142,14 +149,27 @@ public enum SymbolicHotkeys {
     /// The chord macOS answers for `hotkey` now: nil while it is off
     /// or cleared, its shipped chord where the plist names none.
     public static func answeredChord(
-        of hotkey: (id: Int, shipsEnabled: Bool, chord: KeyCombo),
+        of hotkey: ShippedHotkey,
         reading read: (Int) -> SymbolicHotkeyEntry?
     ) -> KeyCombo? {
-        let entry = read(hotkey.id)
-        guard entry?.enabled ?? hotkey.shipsEnabled,
-            entry?.keyless != true
+        answered(
+            read(hotkey.id),
+            shipsEnabled: hotkey.shipsEnabled,
+            chord: hotkey.chord
+        )
+    }
+
+    /// The one answer to "what chord does macOS answer for this
+    /// entry": nil for one off or cleared, else the plist's chord,
+    /// else `chord` (#3173, #3319).
+    static func answered(
+        _ entry: SymbolicHotkeyEntry?,
+        shipsEnabled: Bool,
+        chord: KeyCombo
+    ) -> KeyCombo? {
+        guard entry?.enabled ?? shipsEnabled, entry?.keyless != true
         else { return nil }
-        return entry?.combo ?? hotkey.chord
+        return entry?.combo ?? chord
     }
 
     /// A hotkey's `parameters` — character, key code, modifier mask —
@@ -180,11 +200,14 @@ extension SystemShortcuts {
             ($0.key.comboString() ?? "") < ($1.key.comboString() ?? "")
         }
         .compactMap { combo, shortcut in
-            let entry = shortcut.symbolicHotkey.flatMap { read($0.id) }
-            guard shortcut.isAnswered(enabled: entry?.enabled) else {
-                return nil
+            guard let hotkey = shortcut.symbolicHotkey else {
+                return (combo, shortcut)
             }
-            return (entry?.combo ?? combo, shortcut)
+            return SymbolicHotkeys.answered(
+                read(hotkey.id),
+                shipsEnabled: hotkey.shipsEnabled,
+                chord: combo
+            ).map { ($0, shortcut) }
         }
     }
 }

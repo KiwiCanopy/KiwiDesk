@@ -31,7 +31,11 @@ struct AnsweredChordTests {
 
     @Test("a hotkey that ships off answers nothing with no entry")
     func shipsOff() {
-        let off = (id: other.id, shipsEnabled: false, chord: other.chord)
+        let off = ShippedHotkey(
+            id: other.id,
+            shipsEnabled: false,
+            chord: other.chord
+        )
         #expect(SymbolicHotkeys.answeredChord(of: off) { _ in nil } == nil)
     }
 
@@ -39,5 +43,16 @@ struct AnsweredChordTests {
     func shippedChord() {
         #expect(other.id == 60)
         #expect(other.chord == KeyCombo.parse("ctrl+space"))
+    }
+
+    @Test("a cleared map shortcut is not passed to an open sequence")
+    func clearedMapShortcutIsNotAnswered() {
+        let spotlight = SystemShortcut.spotlight.symbolicHotkey!.id
+        let answered = SystemShortcuts.answered {
+            $0 == spotlight
+                ? SymbolicHotkeyEntry(enabled: true, keyless: true) : nil
+        }
+        #expect(!answered.contains { $0.shortcut == .spotlight })
+        #expect(answered.contains { $0.shortcut == .appSwitcher })
     }
 }
