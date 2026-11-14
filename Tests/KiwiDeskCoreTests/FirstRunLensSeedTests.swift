@@ -69,6 +69,7 @@ struct FirstRunLensSeedTests {
                 apps = { "com.apple.Notes" },
                 fade_duration = 700,
             })
+            kiwivision.delete_lens "Old"
             """
         )
         try core.adoptConfigIntoGui { _ in }
