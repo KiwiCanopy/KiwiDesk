@@ -73,6 +73,50 @@ struct ConflictSeverityTests {
         }
     }
 
+    /// Measured 2026-11-14 (#3239): a posted ⌃⌥Space switched the
+    /// input source with nothing bound, and never once a leader's
+    /// tap swallowed it. A Carbon row and a leader on another
+    /// symbolic chord are unmeasured, so they stay dead.
+    @Test("a leader on the input-source chord takes it from macOS")
+    func leaderTakesTheInputSourceChord() throws {
+        let leader = KeyBinding(combo: "ctrl+alt+space", kind: .sequence)
+        let onLeader = try #require(
+            KeybindingConflicts.conflict(
+                for: leader,
+                in: [leader],
+                distinguishingSides: false
+            )
+        )
+        let severity = ConflictSeverity.of(onLeader, disabled: [])
+        #expect(severity == .leaderTakesFromMacOS(.inputSourceNext))
+        #expect(!severity.isDead)
+        #expect(
+            ConflictSeverity.of(onLeader, disabled: [.inputSourceNext])
+                == .dormant(.inputSourceNext)
+        )
+        let carbon = try #require(conflict("ctrl+alt+space"))
+        #expect(
+            ConflictSeverity.of(carbon, disabled: [])
+                == .dead(.inputSourceNext)
+        )
+        let spotlight = KeyBinding(combo: "command+space", kind: .sequence)
+        let onSpotlight = try #require(
+            KeybindingConflicts.conflict(
+                for: spotlight,
+                in: [spotlight],
+                distinguishingSides: false
+            )
+        )
+        #expect(
+            ConflictSeverity.of(onSpotlight, disabled: [])
+                == .dead(.spotlight)
+        )
+        #expect(
+            SystemShortcut.allCases.filter(\.yieldsToKeyboardTap)
+                == [.inputSourceNext]
+        )
+    }
+
     /// The population the static set was wrong for, both ways
     /// (#1105): the SAME conflict is dormant on a machine that
     /// has Invert Colors off and dead on one that has it on.

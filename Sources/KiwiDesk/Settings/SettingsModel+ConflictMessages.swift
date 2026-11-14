@@ -161,6 +161,14 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
+            case .leaderTakesFromMacOS:
+                return L(
+                    "keybinding.conflict.system_leader",
+                    "Shortcut for \"%1$@\" takes \"%2$@\" away "
+                        + "from macOS.",
+                    name(conflict.binding),
+                    shortcut.localizedName
+                )
             case .dormant, .duplicate, .sideCollapse, .sidesTaken,
                 .unrecognized, .takesFromMacOS:
                 break
@@ -235,6 +243,13 @@ extension SettingsModel {
                 return L(
                     "keybinding.conflict.bullet.system_shadows_apps",
                     "\"%1$@\" takes \"%2$@\" away from every app",
+                    name(conflict.binding),
+                    shortcut.localizedName
+                )
+            case .leaderTakesFromMacOS:
+                return L(
+                    "keybinding.conflict.bullet.system_leader",
+                    "\"%1$@\" takes \"%2$@\" away from macOS",
                     name(conflict.binding),
                     shortcut.localizedName
                 )

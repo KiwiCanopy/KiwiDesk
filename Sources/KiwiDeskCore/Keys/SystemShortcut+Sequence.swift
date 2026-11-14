@@ -54,6 +54,26 @@ extension SystemShortcut {
         return enabled ?? hotkey.shipsEnabled
     }
 
+    /// Whether a press KiwiDesk's keyboard tap swallows never reaches
+    /// macOS's own answer, so a sequence leader on the chord wins it
+    /// (#3239). Measured 2026-11-14, macOS 27.2, for the input-source
+    /// hotkey alone; every other case is unmeasured and stays macOS's.
+    public var yieldsToKeyboardTap: Bool {
+        switch self {
+        case .inputSourceNext: return true
+        case .spotlight, .appSwitcher, .quitApp, .closeWindow,
+            .minimize, .hideApp, .forceQuit, .missionControlSpaceLeft,
+            .missionControlSpaceRight, .missionControl, .appWindows,
+            .screenshot, .screenshotSelection, .screenshotTools,
+            .zoomToggle, .zoomIn, .zoomOut, .dockHiding, .finderSearch,
+            .invertColors, .increaseContrast, .decreaseContrast,
+            .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
+            .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
+            .switchToDesktop7, .switchToDesktop8, .switchToDesktop9:
+            return false
+        }
+    }
+
     /// What an open key sequence does with this shortcut (#3173 ▸
     /// Ruling). A `switch`, so a new case cannot ship without an
     /// answer.

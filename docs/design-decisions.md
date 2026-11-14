@@ -14286,6 +14286,19 @@ so fixing the conflict anywhere — clearing either row, deleting
 the holder — retires them without a dismiss. (#33/#34/#35, #68
 §3.6.2)
 
+:::unreleased
+*A leader takes the input-source chord from macOS (#3239).* macOS
+switches the input source on `⌃⌥space` only past the keyboard tap:
+a posted press switched it with nothing bound, and never once a
+sequence leader's tap swallowed it (measured 2026-11-14, macOS 27.2).
+So a leader there is no dead row: it fires, and the row says macOS
+loses the chord, the way a menu chord says the apps lose theirs. A
+Carbon row on the chord stays dead, since a posted press cannot fire
+Carbon and only a press by hand can measure it; every other symbolic
+hotkey stays macOS's for a leader too, unmeasured
+(`SystemShortcut.yieldsToKeyboardTap`).
+:::
+
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
 
