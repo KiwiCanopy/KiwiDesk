@@ -181,7 +181,7 @@ struct GlassBoxFollowTests {
         defer { rig.window.close() }
         let content = try #require(GlassPlate.contentChain(rig.glass).last)
         place(rig.glass, rig.tint, width: 107.7, animated: true)
-        #expect(content.frame == rig.glass.bounds)
+        #expect(GlassPlate.fills(content.frame, rig.glass.bounds))
     }
 
     private func isInTree(_ layer: CALayer, of root: CALayer?) -> Bool {

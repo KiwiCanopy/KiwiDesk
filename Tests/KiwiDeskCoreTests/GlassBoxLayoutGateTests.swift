@@ -5,13 +5,12 @@ import Testing
 
 /// A box's glass is laid out at once only while its host glides to a
 /// new size — carries a Core Animation bounds animation — since that
-/// layout is the follow's whole cost on a growing box (#2878 ruling
-/// amendment, 2026-11-14: 6.3 of 7.5 ms on device). A plain place, a
-/// glide that only moves the box, and a host carrying another
-/// animation leave the layout to AppKit's own pass. The shape check
-/// reads the laid-out layers, so the layout precedes it and its
-/// refusal cannot gate it. Main-actor spend: one small window and a
-/// few glass places per test.
+/// layout is most of the follow's cost on a growing box (#2878's
+/// cost-measure amendment). A plain place, a glide that only moves
+/// the box, and a host carrying another animation leave the layout
+/// to AppKit's own pass. The shape check gates the follow, never the
+/// layout it reads (#2878 amendment 3). Main-actor spend: one small
+/// window and a few glass places per test.
 @Suite("Glass box layout gate", .serialized)
 @MainActor
 struct GlassBoxLayoutGateTests {

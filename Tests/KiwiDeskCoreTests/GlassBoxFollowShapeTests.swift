@@ -161,6 +161,8 @@ struct GlassBoxFollowShapeTests {
         return animation
     }
 
+    /// A timing function's two control points; `==` on the
+    /// function itself does not compare curves.
     private func curve(_ function: CAMediaTimingFunction?) -> [Float] {
         guard let function else { return [] }
         var points: [Float] = []
