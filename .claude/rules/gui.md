@@ -1256,13 +1256,15 @@ must keep:
   preference copies and lets two lines of one banner disagree.
   And a surface narrating a system conflict picks its wording
   through `ConflictSeverity.of` rather than re-branching on
-  `Conflict.target`, because the tier is not in the target: an
-  enabled symbolic hotkey is DEAD (macOS answers the press
-  first — measured, `docs/design-decisions.md` ▸ Shortcuts), save
-  one KiwiDesk wins on either path, asked of the one
-  `SystemShortcut.losesToKiwiDesk` ahead of the plist bit and
-  held to the symbolic table by `ConflictSeverityTests` ▸
-  `classesArePartitioned` (#3239), a
+  `Conflict.target`, because the tier is not in the target alone:
+  an enabled symbolic hotkey is DEAD for a Carbon row (macOS
+  answers the press first — measured, `docs/design-decisions.md`
+  ▸ Shortcuts), save one KiwiDesk wins on the row's press path,
+  asked of the one `SystemShortcut.losesToKiwiDesk(on:)` with the
+  path the target carries, ahead of the plist bit — a step key
+  asks it through `ConflictSeverity.ofStep`, never a reading of
+  its own (#3239, #3311; `PressPathSeverityTests` ▸
+  `leaderAndStepAgree`), a
   disabled one merely dormant, and a chord every app's menus
   carry is won by KiwiDesk with the apps paying. The tier and
   its sentence reach a row as ONE `ConflictReading`, a `let`

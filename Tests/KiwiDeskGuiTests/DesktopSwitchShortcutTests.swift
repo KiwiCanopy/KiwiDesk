@@ -36,7 +36,7 @@ struct DesktopSwitchShortcutTests {
                     distinguishingSides: false
                 )
             )
-            #expect(conflict.target == .systemShortcut(shortcut))
+            #expect(conflict.target == .systemShortcut(shortcut, .carbon))
             // Off by default → a note, not a warning; on → dead.
             #expect(
                 ConflictSeverity.of(

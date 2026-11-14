@@ -412,9 +412,17 @@ editing here:
   (`eventHotKeyExistsErr`) is intra-process only — and an
   enabled symbolic hotkey is then answered by macOS before the
   binding hears the press, with nothing said (#1126, measured
-  2026-09-03) — save `SystemShortcut.losesToKiwiDesk`'s members,
-  which KiwiDesk wins on either path ([gui.md](gui.md) ▸ the tier
-  bullet, #3239). The product ruling is
+  2026-09-03) — save what `SystemShortcut.losesToKiwiDesk(on:)`
+  answers for the row's press path: a row the keyboard tap decides
+  (a leader, a step key, a sided row) wins every chord but ⌥⌘Esc,
+  and Carbon wins only ⌃⌥Space ([gui.md](gui.md) ▸ the tier
+  bullet, #3239, #3311). **Judge a row and a step key by that one
+  rule, through the path `KeybindingConflicts` stamps from
+  `KeyboardTapArming`, never a second verdict**, and widen it only
+  from a measurement on each path: a posted press reaches the tap
+  but never Carbon, so it proves nothing about a Carbon row, and a
+  chord a posted press cannot fire is unmeasured on both
+  (`PressPathConflictTests`). The product ruling is
   `docs/design-decisions.md` ▸ "Size is not a positional verb"
   (`SizeLayerSeedTests`).
 - **KiwiDesk's own windows are discriminated per WINDOW, never

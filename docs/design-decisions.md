@@ -14329,9 +14329,31 @@ still reads that way, not dormant: dormant's words promise the row
 dies when the hotkey comes back on, which here it does not, while the
 aggregate count still leaves a switched-off chord out. Read as dead,
 the row told the user a shortcut that works would not. Every other chord macOS
-answers first stays a dead row; a leader on one is unmeasured
-(`SystemShortcut.losesToKiwiDesk`, `ConflictSeverityTests` ▸
+answers first stays a dead row for a Carbon hotkey
+(`SystemShortcut.losesToKiwiDesk(on:)`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`).
+:::
+
+:::unreleased
+*Amended (#3311, measured 2026-11-14): a row the keyboard tap decides
+wins macOS's shortcut.* The tap swallows a press before macOS's own
+shortcuts read it. On macOS 27.2, with nothing bound, a posted press
+opened Spotlight, Finder search, Mission Control, App windows and the
+screenshot tools, switched a Space, ran ⌘Tab and toggled Dock hiding;
+with a sequence leader on each chord, the same press opened the
+sequence and macOS did nothing. So a leader, a step key and a sided
+row the tap answers read as the input-source chord does, the row
+working and macOS losing the shortcut, by the one rule
+`losesToKiwiDesk(on:)` that a conflict reads through the press path
+Core stamps on it and a step key through `ConflictSeverity.ofStep`.
+Read apart, a leader on ⌘Space said it was dead while a step key on
+the same chord said it took Spotlight, and one of the two was false
+for the same tap. ⌥⌘Esc is the exception: a posted press opens no
+Force Quit, so the measurement cannot decide it, and it stays a dead
+row on every path, as #1275 measured for Carbon. A Carbon hotkey
+still loses every other chord macOS answers (#1126); posted presses
+never fire Carbon, so this measurement says nothing about that path
+(`PressPathSeverityTests`, `PressPathConflictTests`).
 :::
 
 **One recorder at a time.** Starting a recording snaps any

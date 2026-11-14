@@ -56,7 +56,7 @@ struct HyperConflictTests {
                 for: spotlight,
                 in: [spotlight],
                 distinguishingSides: false
-            )?.target == .systemShortcut(.spotlight)
+            )?.target == .systemShortcut(.spotlight, .carbon)
         )
     }
 

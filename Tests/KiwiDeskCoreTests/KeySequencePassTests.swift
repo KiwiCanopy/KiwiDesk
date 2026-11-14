@@ -127,9 +127,11 @@ struct KeySequencePassTests {
     @MainActor
     func stepWarningMatchesRouter() {
         let core = makeTestCore()
-        #expect(core.sequenceStepTakes("cmd+shift+4") == .screenshotSelection)
-        #expect(core.sequenceStepTakes("cmd+q") == nil)
-        #expect(core.sequenceStepTakes("w") == nil)
+        #expect(
+            core.sequenceStepShortcut("cmd+shift+4") == .screenshotSelection
+        )
+        #expect(core.sequenceStepShortcut("cmd+q") == nil)
+        #expect(core.sequenceStepShortcut("w") == nil)
         let id = SystemShortcut.screenshotSelection.symbolicHotkey!.id
         let moved = SymbolicHotkeys.chord([52, kVK_ANSI_4, 0x14_0000])
         core.keys.readSymbolicHotkey = {
@@ -137,8 +139,10 @@ struct KeySequencePassTests {
         }
         // The read is taken once per arming.
         core.keys.answeredChords = nil
-        #expect(core.sequenceStepTakes("cmd+shift+4") == nil)
-        #expect(core.sequenceStepTakes("ctrl+cmd+4") == .screenshotSelection)
+        #expect(core.sequenceStepShortcut("cmd+shift+4") == nil)
+        #expect(
+            core.sequenceStepShortcut("ctrl+cmd+4") == .screenshotSelection
+        )
     }
 
     @Test("The tap swallows nothing it passed")
