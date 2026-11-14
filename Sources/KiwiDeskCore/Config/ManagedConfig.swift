@@ -60,11 +60,33 @@ public enum ManagedConfig {
         return false
     }
 
+    /// The lens verbs, which write the live `kiwivision.lenses`
+    /// group as a `set_*` verb does (#3317). Matched by name, so
+    /// the no-parenthesis call forms (`define_lens{…}`) count; no
+    /// receiver may run into the name, and an alias
+    /// (`local kv = kiwivision`) escapes, as `KiwiDesk.bind`'s does.
+    static let lensVerbs = [
+        "kiwivision.define_lens",
+        "kiwivision.delete_lens",
+    ]
+
     /// Single definition of setting-verb vocabulary across namespaces.
     static func lineHasSettingVerb(_ line: String) -> Bool {
         if line.contains("KiwiDesk.set_") { return true }
         // `border.fit_gaps` rewrites global gap from border width.
         if line.contains("border.fit_gaps") { return true }
+        // A lens is a setting, never a binding (#3317 ruling).
+        for verb in lensVerbs {
+            let name =
+                #"(?<![\w.])"#
+                + NSRegularExpression.escapedPattern(for: verb)
+                + #"(?!\w)"#
+            if line.range(of: name, options: .regularExpression)
+                != nil
+            {
+                return true
+            }
+        }
         for ns in APIReference.namespaces.keys
         where line.contains("\(ns).set_") {
             return true

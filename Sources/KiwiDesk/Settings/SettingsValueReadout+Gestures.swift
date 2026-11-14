@@ -43,17 +43,57 @@ extension SettingsValueReadout {
             rows.append(row)
         }
         for key in changed where !moved.contains(key) {
+            let words = words(of: key, before(key), after(key))
             var row = SettingsDiffRow.change(
                 .shortcuts(.gestureBindings),
                 instance: GestureRowInstance.key(key).spelling,
-                label: GestureListWords.rowName(key),
-                old: GestureListWords.value(before(key), on: key.input),
-                new: GestureListWords.value(after(key), on: key.input)
+                label: words.label,
+                old: words.old,
+                new: words.new
             )
             row.subject = subject(key)
             rows.append(row)
         }
         return rows
+    }
+
+    /// A key's row words: where one direction alone changed, that
+    /// direction and its two actions (#3321), so an arm edit never
+    /// reads "Per direction → Per direction"; else the row's two
+    /// values.
+    private static func words(
+        of key: GestureKey,
+        _ before: GestureAction?,
+        _ after: GestureAction?
+    ) -> (label: String, old: String, new: String) {
+        let input = key.input
+        let row = GestureListWords.rowName(key)
+        if let was = GestureListEdits.arms(of: before, on: input),
+            let now = GestureListEdits.arms(of: after, on: input)
+        {
+            let moved = input.directions.filter { was[$0] != now[$0] }
+            if moved.count == 1, let direction = moved.first {
+                return (
+                    L(
+                        "shortcuts.gestures.direction_action",
+                        "%1$@, %2$@",
+                        row,
+                        GestureListWords.direction(direction)
+                    ),
+                    armWords(was[direction]),
+                    armWords(now[direction])
+                )
+            }
+        }
+        return (
+            row,
+            GestureListWords.value(before, on: input),
+            GestureListWords.value(after, on: input)
+        )
+    }
+
+    private static func armWords(_ arm: LuaAction?) -> String {
+        GestureListWords.value(arm.map { .run($0) })
     }
 
     /// The reach subject a gesture row folds on (#3225): its key; a

@@ -158,14 +158,14 @@ struct ShortcutSymbolFloorTests {
     }
 
     /// The gesture cards' symbols (#3281): each input's and each
-    /// family's exists on the floor, or is one of the two stand-ins
+    /// family's exists on the floor, or is the stand-in
     /// `GestureListWords` declares.
     @Test("every gesture symbol exists on the floor or has a stand-in")
     func gestureSymbolsExistOnTheFloor() throws {
         let floor = try floorMajor()
         let since = try firstMacOS()
         #expect(since.count > 1000, "the availability table read empty")
-        let pairs = [GestureListWords.pinch, GestureListWords.forceClick]
+        let pairs = [GestureListWords.forceClick]
         let drawn = Set(
             GestureInput.allCases.map(GestureListWords.symbol)
                 + GestureFamily.allCases.map(

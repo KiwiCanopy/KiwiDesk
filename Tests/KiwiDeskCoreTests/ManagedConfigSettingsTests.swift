@@ -98,6 +98,41 @@ struct ManagedConfigSettingsTests {
         )
     }
 
+    /// A lens is a setting, never a binding (#3317 ruling): it
+    /// gates the seed and never makes `init.lua` the owner.
+    @Test("the lens verbs declare settings and are not foreign")
+    func lensVerbsDeclareSettings() {
+        for line in [
+            #"kiwivision.define_lens({ name = "W", apps = {} })"#,
+            #"kiwivision.define_lens ({ name = "W" })"#,
+            #"kiwivision.delete_lens("W")"#,
+            #"kiwivision.define_lens{ name = "W", apps = {} }"#,
+            #"kiwivision.delete_lens "W""#,
+        ] {
+            #expect(
+                ManagedConfig.declaresManagedSettings(line),
+                "\(line)"
+            )
+            #expect(!ManagedConfig.hasForeignCode(line), "\(line)")
+        }
+        for verb in ManagedConfig.lensVerbs {
+            #expect(!ManagedConfig.managedTokens.contains(verb))
+        }
+        // A receiver running into the name, or a longer verb, is
+        // another call.
+        for line in [
+            #"my_kiwivision.define_lens({ name = "W" })"#,
+            #"x.kiwivision.delete_lens("W")"#,
+            #"kiwivision.define_lens_x({})"#,
+            #"-- kiwivision.define_lens({ name = "W" })"#,
+        ] {
+            #expect(
+                !ManagedConfig.declaresManagedSettings(line),
+                "\(line)"
+            )
+        }
+    }
+
     @Test("a commented-out set_ verb declares nothing")
     func commentedSetIsInert() {
         #expect(

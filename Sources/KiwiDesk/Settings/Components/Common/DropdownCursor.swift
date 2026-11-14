@@ -82,10 +82,10 @@ enum DropdownRowStyle {
         onCursor ? SettingsTheme.accent : .clear
     }
 
-    static func ink(_ onCursor: Bool) -> AnyShapeStyle {
-        onCursor
-            ? AnyShapeStyle(SettingsTheme.accentInk)
-            : AnyShapeStyle(.primary)
+    /// A concrete ink, never `.primary`, so a foreground an
+    /// ancestor sets cannot grey the rows (#3321).
+    static func ink(_ onCursor: Bool) -> Color {
+        onCursor ? SettingsTheme.accentInk : SettingsTheme.ink
     }
 
     static func secondaryInk(_ onCursor: Bool) -> Color {

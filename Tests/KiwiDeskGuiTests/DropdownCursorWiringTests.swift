@@ -79,6 +79,10 @@ struct DropdownCursorWiringTests {
                 == SettingsTheme.accentInkSecondary
         )
         #expect(DropdownRowStyle.secondaryInk(false) == SettingsTheme.ink3)
+        // Concrete, so an ancestor's foreground cannot grey a row
+        // (#3321).
+        #expect(DropdownRowStyle.ink(true) == SettingsTheme.accentInk)
+        #expect(DropdownRowStyle.ink(false) == SettingsTheme.ink)
     }
 
     @Test("the pointer reaches the model through hover, and never scrolls")

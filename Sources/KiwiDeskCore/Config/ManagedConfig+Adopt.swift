@@ -6,7 +6,10 @@ import Foundation
 /// `set_*` verb left live is benign (`loadConfig` applies the
 /// owned settings wholesale AFTER init.lua runs), so the net must
 /// NOT widen to `declaresManagedSettings` — that would re-comment
-/// a live hook whose body legitimately calls `set_`. Two accepted
+/// a live hook whose body legitimately calls `set_`. A lens verb
+/// is the exception: left live it re-defines the stored lens as a
+/// session lens, so only the selective pass keeps it out
+/// (`FirstRunLensSeedTests`, #3317). Two accepted
 /// blind spots (a token split across lines, an aliased receiver)
 /// are `docs/design-decisions.md`'s.
 extension ManagedConfig {

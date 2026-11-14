@@ -118,6 +118,11 @@ settings, so a file of event hooks boots GUI-managed. An
 keybindings) gets no `gui.json`, and **Adopt into the GUI** is
 offered where it declares rules or keybindings.
 
+:::unreleased
+A `kiwivision.define_lens` or `delete_lens` line counts as a
+setting here.
+:::
+
 ## Start KiwiDesk
 
 **Start at login** (**General**) reads and writes the real macOS

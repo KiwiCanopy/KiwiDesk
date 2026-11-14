@@ -40,7 +40,8 @@ struct GestureDirectionRows: View {
 }
 
 /// One direction of a gesture row: its arrow, its name, and the
-/// action it runs, picked from the whole catalogue.
+/// action it runs, picked from the whole catalogue, an app or Lua
+/// (#3321).
 struct GestureDirectionRow: View {
     @ObservedObject var model: SettingsModel
     let key: GestureKey
@@ -48,10 +49,12 @@ struct GestureDirectionRow: View {
     let catalog: SequenceActionCatalog
     let nameWidth: CGFloat
 
-    @State private var picking: SequencePickRequest?
-    @State private var id = UUID()
+    @State var picking: SequencePickRequest?
+    @State var choosingApp = false
+    @State var editingLua: LuaEditRequest?
+    @State var id = UUID()
 
-    private var action: GestureAction? {
+    var action: GestureAction? {
         GestureListEdits.action(of: key, in: model.config.gesture)
     }
 
@@ -63,24 +66,7 @@ struct GestureDirectionRow: View {
                 .accessibilityHidden(true)
             Text(GestureListWords.direction(direction))
                 .frame(width: nameWidth, alignment: .leading)
-            SequenceActionMenu(
-                face: face,
-                catalog: catalog,
-                spokenLabel: spokenLabel,
-                pins: [],
-                onPick: { command in
-                    guard
-                        case .run(let arm) = GestureListEdits.action(
-                            picking: command
-                        )
-                    else { return }
-                    pick(arm)
-                },
-                request: $picking
-            )
-            .foregroundStyle(
-                inherited ? SettingsTheme.ink2 : SettingsTheme.ink
-            )
+            actionContainer
             Spacer(minLength: 0)
             heldKeys
             AppRuleDeleteButton.slot
@@ -102,7 +88,7 @@ struct GestureDirectionRow: View {
         }
     }
 
-    private var spokenLabel: String {
+    var spokenLabel: String {
         let input = GestureListWords.input(key.input)
         let way = GestureListWords.direction(direction)
         guard !key.chord.isEmpty else {
@@ -123,14 +109,14 @@ struct GestureDirectionRow: View {
     }
 
     /// Whether the arm is the family's, not one of its own.
-    private var inherited: Bool {
+    var inherited: Bool {
         if case .family = action { return true }
         return false
     }
 
     /// The arm's step; a family's reads its catalogue name, else
     /// the arm's own words.
-    private var face: SequencePickFace {
+    var face: SequencePickFace {
         let arm = GestureListEdits.arms(of: action, on: key.input)?[
             direction
         ]
@@ -157,14 +143,14 @@ struct GestureDirectionRow: View {
         )
     }
 
-    /// Edits one arm; arms that all match a family again fold back
-    /// into it, which keeps the pan.
-    private func pick(_ arm: LuaAction) {
-        var arms =
-            GestureListEdits.arms(of: action, on: key.input) ?? [:]
-        arms[direction] = arm
-        guard let saved = GestureListEdits.folded(arms, on: key.input)
-        else { return }
+    /// Edits this direction's arm alone (`GestureListEdits.arm`).
+    func pick(_ arm: LuaAction) {
+        let saved = GestureListEdits.arm(
+            arm,
+            toward: direction,
+            of: action,
+            on: key.input
+        )
         GestureListEdits.set(saved, at: key, in: &model.config.gesture)
     }
 }

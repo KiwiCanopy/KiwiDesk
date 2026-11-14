@@ -180,6 +180,23 @@ enum GestureListEdits {
         return .split(normalizing: arms)
     }
 
+    /// `action` with its arm toward `direction` set to `arm` (#3321):
+    /// arms that all match a family again fold back into it, which
+    /// keeps the pan, and blank Lua, which runs nothing, drops the
+    /// arm — unless it is the last, which stays for the row's caption
+    /// to refuse, as a one-action row's blank Lua does.
+    static func arm(
+        _ arm: LuaAction,
+        toward direction: GestureDirection,
+        of action: GestureAction?,
+        on input: GestureInput
+    ) -> GestureAction {
+        var arms = arms(of: action, on: input) ?? [:]
+        arms[direction] = arm.isBlank ? nil : arm
+        if let saved = folded(arms, on: input) { return saved }
+        return .split([direction: arm])
+    }
+
     /// Whether `device`'s seeded rows differ from the seeds.
     static func differsFromDefaults(
         on device: GestureInput.Device,
