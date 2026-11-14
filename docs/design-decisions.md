@@ -14296,8 +14296,11 @@ switch, and a Carbon hotkey on the chord fired on six presses by hand
 with no switch. So a row on that chord is no dead row, whichever way
 it is bound and whether macOS has the hotkey on or off: it fires, and
 it says macOS loses the input-source switch while it is bound, the
-way a menu chord says the apps lose theirs. Read as dead, the row told
-the user a shortcut that works would not. Every other chord macOS
+way a menu chord says the apps lose theirs. A hotkey macOS has off
+still reads that way, not dormant: dormant's words promise the row
+dies when the hotkey comes back on, which here it does not, while the
+aggregate count still leaves a switched-off chord out. Read as dead,
+the row told the user a shortcut that works would not. Every other chord macOS
 answers first stays a dead row; a leader on one is unmeasured
 (`SystemShortcut.losesToKiwiDesk`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`).
