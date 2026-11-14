@@ -535,10 +535,11 @@ def check_content(
     if unregistered:
         problems.append(
             f"{', '.join(unregistered)}: shipped but absent from "
-            "the guard registry — add the locale to `_STUB_TAGS` "
-            "(and to `SCRIPTS` if it writes in a non-Latin "
-            "script) in scripts/localization_guards.py, or its "
-            "stub and residue guards stay silently off"
+            "the guard registry — add the locale to `_STUB_TAGS`, "
+            "and declare its script in `SCRIPTS` (non-Latin) or "
+            "`LATIN_LOCALES` (Latin), in "
+            "scripts/localization_guards.py, or its stub and "
+            "residue guards stay silently off"
         )
 
     for locale, catalog in sorted(catalogs.items()):
