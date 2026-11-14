@@ -54,7 +54,11 @@ struct SequenceActionMenu: View {
             .accessibilityLabel(spokenLabel)
             .accessibilityValue(title)
             .popover(item: $request) { _ in
-                content.settingsPopoverChrome()
+                // A caller's ink dims its trigger, never the picker
+                // it opens (#3321).
+                content
+                    .foregroundStyle(SettingsTheme.ink)
+                    .settingsPopoverChrome()
             }
             // Every open starts with an empty search (#1357).
             .onChange(of: request) { _, open in
@@ -87,7 +91,7 @@ struct SequenceActionMenu: View {
             list(groups)
             if onApp != nil || onLua != nil { Divider() }
             if onApp != nil {
-                pinned(.app, Self.appLabel, symbol: "app")
+                pinned(.app, Self.appLabel, symbol: Self.appSymbol)
             }
             if onLua != nil {
                 pinned(.lua, Self.luaLabel, symbol: Self.luaSymbol)
@@ -300,6 +304,8 @@ struct SequenceActionMenu: View {
 
     /// Lua's mark: the "Lua…" entry's and a Lua key's (#3241).
     static let luaSymbol = "chevron.left.forwardslash.chevron.right"
+    /// App… before an app is chosen (#3321 ▸ Ruling, owner).
+    static let appSymbol = "plus.square.on.square"
 
     static var luaLabel: String {
         L("shortcuts.sequence.lua", "Lua…")
