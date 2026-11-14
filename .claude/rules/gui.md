@@ -1258,7 +1258,11 @@ must keep:
   through `ConflictSeverity.of` rather than re-branching on
   `Conflict.target`, because the tier is not in the target: an
   enabled symbolic hotkey is DEAD (macOS answers the press
-  first — measured, `docs/design-decisions.md` ▸ Shortcuts), a
+  first — measured, `docs/design-decisions.md` ▸ Shortcuts), save
+  one KiwiDesk wins on either path, asked of the one
+  `SystemShortcut.losesToKiwiDesk` ahead of the plist bit and
+  held to the symbolic table by `ConflictSeverityTests` ▸
+  `classesArePartitioned` (#3239), a
   disabled one merely dormant, and a chord every app's menus
   carry is won by KiwiDesk with the apps paying. The tier and
   its sentence reach a row as ONE `ConflictReading`, a `let`

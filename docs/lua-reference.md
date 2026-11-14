@@ -8266,7 +8266,9 @@ the leader's modifiers still held, `w` does not fire, and
 `ctrl+alt+w` is a different key. The leader wins its chord: a
 `KiwiDesk.bind` on the same chord in its layer is not registered
 and is flagged. A second `define_sequence` on one leader replaces
-the first. A leader works only through KiwiDesk's keyboard tap; if
+the first. A leader on `ctrl+alt+space`, as in the example below,
+takes that chord from macOS: the input source does not switch on it
+while the sequence is bound. A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
 and is flagged. The CLI and an AI app build a sequence one key at a
 time with [`shortcut.set_sequence_key`](#shortcutset_sequence_key);
