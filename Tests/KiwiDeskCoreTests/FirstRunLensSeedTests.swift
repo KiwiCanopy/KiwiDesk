@@ -51,7 +51,7 @@ struct FirstRunLensSeedTests {
     @Test("a delete_lens-only init.lua is not seeded over")
     func deleteLensOnlyIsNotSeeded() throws {
         let core = try load(
-            #"kiwivision.delete_lens("Writing")"# + "\n"
+            #"kiwivision.delete_lens "Writing""# + "\n"
         )
         #expect(!core.guiConfigStore.exists)
         #expect(!core.isGuiManaged)

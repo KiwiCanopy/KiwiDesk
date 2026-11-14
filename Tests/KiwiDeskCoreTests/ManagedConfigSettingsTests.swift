@@ -106,6 +106,8 @@ struct ManagedConfigSettingsTests {
             #"kiwivision.define_lens({ name = "W", apps = {} })"#,
             #"kiwivision.define_lens ({ name = "W" })"#,
             #"kiwivision.delete_lens("W")"#,
+            #"kiwivision.define_lens{ name = "W", apps = {} }"#,
+            #"kiwivision.delete_lens "W""#,
         ] {
             #expect(
                 ManagedConfig.declaresManagedSettings(line),
@@ -116,11 +118,19 @@ struct ManagedConfigSettingsTests {
         for verb in ManagedConfig.lensVerbs {
             #expect(!ManagedConfig.managedTokens.contains(verb))
         }
-        #expect(
-            !ManagedConfig.declaresManagedSettings(
-                #"-- kiwivision.define_lens({ name = "W" })"#
+        // A receiver running into the name, or a longer verb, is
+        // another call.
+        for line in [
+            #"my_kiwivision.define_lens({ name = "W" })"#,
+            #"x.kiwivision.delete_lens("W")"#,
+            #"kiwivision.define_lens_x({})"#,
+            #"-- kiwivision.define_lens({ name = "W" })"#,
+        ] {
+            #expect(
+                !ManagedConfig.declaresManagedSettings(line),
+                "\(line)"
             )
-        )
+        }
     }
 
     @Test("a commented-out set_ verb declares nothing")

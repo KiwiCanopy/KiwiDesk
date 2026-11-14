@@ -4868,7 +4868,8 @@ with Save, and `define_lens` never writes there.
 A `define_lens` or `delete_lens` line counts as a setting, as a
 `set_*` verb does: on first launch KiwiDesk writes no `gui.json`
 over an `init.lua` that has one, and moving the setup to Settings
-comments the line out and stores the lens in `gui.json`.
+comments the line out and stores the lens in `gui.json`, without
+the fade keys below.
 :::
 
 :::unreleased
