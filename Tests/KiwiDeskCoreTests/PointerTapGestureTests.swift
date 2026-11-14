@@ -239,6 +239,20 @@ struct PointerTapGestureTests {
         #expect(r.route(g(0, 0), now: 1 + lapse + 0.1) == .pass)
     }
 
+    @Test("a pinch begin ends a Dock stream quiet past the lapse")
+    func pinchEndsAQuietDockStream() {
+        var r = router([.spread4: [Self.keys], .spread: [Self.keys]])
+        _ = r.route(dock(1, 0.02), now: 1)
+        // Inside the gesture lapse the Dock stream still holds it.
+        let early = 1 + PointerTapRouter.streamLapse / 2
+        #expect(r.route(g(Self.zoom, 1), now: early).gestures.isEmpty)
+        // Past it, the pinch opens its own stream and fires.
+        let late = 1 + PointerTapRouter.streamLapse + 0.5
+        #expect(r.route(g(Self.zoom, 1), now: late).swallow)
+        let fired = r.route(g(Self.zoom, 2, 0.4), now: late + 0.01)
+        #expect(fired.gestures.map(\.kind) == [.gesture(.spread)])
+    }
+
     @Test("a four-finger spread fires on a growing progress")
     func dockSpreadFires() {
         var r = router([.spread4: [Self.keys]])

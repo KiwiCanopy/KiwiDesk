@@ -89,12 +89,19 @@ extension PointerTapRouter {
             gestureStream = nil
             return .pass
         }
-        if g.dock || gestureStream?.dock == true {
-            return routingDock(g, chord, settings, now: now)
-        }
         let owned =
             g.subtype == GestureEventSample.magnify
             || g.subtype == GestureEventSample.rotation
+        // A pinch or rotation beginning while a Dock stream has been
+        // quiet past the gesture lapse: that stream lost its end.
+        if let stream = gestureStream, stream.dock, !g.dock, owned,
+            g.began, now - stream.lastEvent > Self.streamLapse
+        {
+            gestureStream = nil
+        }
+        if g.dock || gestureStream?.dock == true {
+            return routingDock(g, chord, settings, now: now)
+        }
         guard var stream = gestureStream else {
             guard owned, g.began, settings.claims(g.subtype, chord)
             else { return .pass }

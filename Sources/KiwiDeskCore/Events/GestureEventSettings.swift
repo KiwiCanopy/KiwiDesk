@@ -33,7 +33,7 @@ struct GestureEventSettings: Equatable, Sendable {
     /// swipes.
     init(
         bindings: [GestureKey: GestureAction],
-        swipes: Bool = true
+        swipes: Bool
     ) {
         var chords: [GestureInput: Set<ScrollChord>] = [:]
         var axes: [Int: [ScrollChord: Set<Int>]] = [:]

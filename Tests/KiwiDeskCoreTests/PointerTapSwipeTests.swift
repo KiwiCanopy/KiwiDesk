@@ -20,7 +20,7 @@ struct PointerTapSwipeTests {
         var router = PointerTapRouter()
         router.snapshot = PointerTapSnapshot(
             grab: nil,
-            gestures: GestureEventSettings(bindings: bindings)
+            gestures: GestureEventSettings(bindings: bindings, swipes: true)
         )
         return router
     }
@@ -124,7 +124,7 @@ struct PointerTapSwipeTests {
             GestureKey(.spread): .run(LuaAction(lua: "a()")),
             GestureKey(.pinchTogether4): .run(LuaAction(lua: "b()")),
         ]
-        let settings = GestureEventSettings(bindings: bindings)
+        let settings = GestureEventSettings(bindings: bindings, swipes: true)
         #expect(!settings.isOn)
         #expect(settings.chords.isEmpty)
         #expect(settings.swipeAxes.isEmpty)
