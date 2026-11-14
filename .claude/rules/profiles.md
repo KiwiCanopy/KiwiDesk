@@ -712,7 +712,12 @@ holds the secondary-switch decision including its nil case.
   ownership scan (#3297).** A binding verb joins
   `ManagedConfig.managedTokens`, as `KiwiDesk.bind` and
   `gesture.bind` do; a setting verb is spelled `set_*`, which
-  `lineHasSettingVerb` reads. A verb neither sees is overwritten by
+  `lineHasSettingVerb` reads, or joins that one definition by
+  name, as `border.fit_gaps` and the lens verbs
+  `kiwivision.define_lens` / `delete_lens` do (#3317, a lens being
+  a setting, never an owner token; `ManagedConfigSettingsTests` ▸
+  `lensVerbsDeclareSettings`, `FirstRunLensSeedTests`). A verb
+  neither sees is overwritten by
   `gui.json`'s base at the load's tail and seeded over on a fresh
   desk, with nothing to red (`GestureLuaLoadTests`,
   `ManagedConfigTests` ▸ `gestureBindIsForeign`).

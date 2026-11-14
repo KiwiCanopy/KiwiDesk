@@ -4865,6 +4865,14 @@ KiwiVision; a lens made there is stored in `gui.json` and saved
 with Save, and `define_lens` never writes there.
 
 :::unreleased
+A `define_lens` or `delete_lens` line counts as a setting, as a
+`set_*` verb does: on first launch KiwiDesk writes no `gui.json`
+over an `init.lua` that has one, and moving the setup to Settings
+comments the line out and stores the lens in `gui.json`, without
+the fade keys below.
+:::
+
+:::unreleased
 A lens made in Settings sets no fade of its own: its **Dim and
 blur** card holds Dim and Blur alone, and the lens follows
 [`set_fade_duration`](#kiwivisionset_fade_duration) and
