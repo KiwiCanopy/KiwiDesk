@@ -54,8 +54,7 @@ enum GlassPlate {
             let glass = view as? NSGlassEffectView
         else { return }
         // Never travels: a gliding glass rides its `GlassBox` host
-        // (#2095, #2878); the writer skips an equal frame, which
-        // would cancel its follow.
+        // (#2095, #2878).
         BarMotion.writeStill(glass, frame)
         glass.cornerRadius = cornerRadius
         fitContent(glass)

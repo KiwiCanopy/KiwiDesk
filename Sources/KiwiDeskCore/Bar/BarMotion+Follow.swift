@@ -78,28 +78,28 @@ extension BarMotion {
     }
 
     /// The layers a follow animates — every layer under `pair` at
-    /// the host's size, within the half point the backing's
-    /// rounding moves one (#2388) — or nil where the box is not the
-    /// shape the follow was measured on (#2878): the glass's own
-    /// layer filling the host; every pair view, and the glass's
-    /// content chain, among the matched; one matched layer in the
-    /// glass's private tree that no view backs; and every matched
-    /// layer anchored at its origin and standing at the host's
-    /// bounds origin, so a bounds animation alone carries it.
+    /// the host's size, within the backing's rounding
+    /// (`GlassPlate.fills`, #2388) — or nil where the box is not
+    /// the shape the follow was measured on (#2878): every pair
+    /// view, the glass among them, and the glass's content chain
+    /// among the matched; one matched layer in the glass's private
+    /// tree that no view backs; and every matched layer anchored at
+    /// its origin and filling the host's bounds, so a bounds
+    /// animation alone carries it.
     @MainActor
     static func followTargets(
         host: CALayer,
         glass: NSView,
         pair: [NSView]
     ) -> [CALayer]? {
-        let size = host.bounds.size
+        let box = host.bounds
         let atSize = { (layer: CALayer) in
-            abs(layer.bounds.width - size.width) <= 0.5
-                && abs(layer.bounds.height - size.height) <= 0.5
+            GlassPlate.fills(
+                CGRect(origin: box.origin, size: layer.bounds.size),
+                box
+            )
         }
-        guard let glassLayer = glass.layer,
-            GlassPlate.fills(glassLayer.bounds, host.bounds)
-        else { return nil }
+        guard let glassLayer = glass.layer else { return nil }
         var matched: [CALayer] = []
         func walk(_ layer: CALayer) {
             if atSize(layer) { matched.append(layer) }
@@ -107,18 +107,15 @@ extension BarMotion {
         }
         pair.compactMap(\.layer).forEach(walk)
         let ids = Set(matched.map(ObjectIdentifier.init))
-        let required = (pair + GlassPlate.contentChain(glass))
+        let required = (pair + [glass] + GlassPlate.contentChain(glass))
             .map { $0.layer.map(ObjectIdentifier.init) }
-        let origin = host.bounds.origin
         guard
             required.allSatisfy({ $0.map(ids.contains) ?? false }),
             matched.contains(where: {
                 isInTree($0, of: glassLayer) && !($0.delegate is NSView)
             }),
             matched.allSatisfy({
-                $0.anchorPoint == .zero
-                    && abs($0.bounds.minX - origin.x) <= 0.5
-                    && abs($0.bounds.minY - origin.y) <= 0.5
+                $0.anchorPoint == .zero && GlassPlate.fills($0.bounds, box)
             })
         else { return nil }
         return matched

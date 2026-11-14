@@ -172,16 +172,16 @@ struct GlassBoxFollowTests {
         return points
     }
 
-    /// A rewrite of the glass's frame it already has leaves its
-    /// follow in place.
-    @Test("An equal frame write keeps the follow")
-    func equalWriteKeepsTheFollow() throws {
+    /// A glide whose forced layout moves the glass's content — the
+    /// lengths a Space chip glides between (#2425) — ends with the
+    /// content fitted to the laid-out glass.
+    @Test("A glide fits the content after the glass's layout")
+    func glideFitsAfterLayout() throws {
         guard let rig = try rig() else { return }
         defer { rig.window.close() }
-        place(rig.glass, rig.tint, width: 140.3, animated: true)
-        GlassPlate.update(rig.glass, frame: rig.glass.frame, cornerRadius: 8)
-        let glassLayer = try #require(rig.glass.layer)
-        #expect(glassLayer.animation(forKey: BarMotion.followKey) != nil)
+        let content = try #require(GlassPlate.contentChain(rig.glass).last)
+        place(rig.glass, rig.tint, width: 107.7, animated: true)
+        #expect(content.frame == rig.glass.bounds)
     }
 
     private func isInTree(_ layer: CALayer, of root: CALayer?) -> Bool {

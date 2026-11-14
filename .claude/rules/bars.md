@@ -1712,8 +1712,9 @@ Obligations:
   motion (`GlassPairMotionSeamTests`), so a call site cannot make
   either travel.
 - **Write every frame of a glass pair — in `GlassBox`,
-  `GlassPlate` and `GlassTint` — through the one no-motion writer, `BarMotion.writeStill`, and let a gliding
-  host's glass follow the host's own animation through
+  `GlassPlate` and `GlassTint` — through the one no-motion
+  writer, `BarMotion.writeStill`, and let a gliding host's glass
+  follow the host's own animation through
   `BarMotion.followHostResize`** (#2878 ruling amendment, owner
   2026-11-14). A plain glass write inside the host's animation
   group is stepped by AppKit on the main thread a frame behind
@@ -1732,7 +1733,9 @@ Obligations:
   `frameWritesAreStill`). Keep the follow within 4 ms of main
   thread per resizing box (owner budget; measured 3.5 ms in the
   2026-11-14 prototype), and re-measure it on the device when
-  the glass's tree or the follow changes.
+  the glass's tree or the follow changes. A frame write those
+  files need on a layer no view owns widens `writeStill` to take
+  the layer; it never goes in raw.
 - **Write a glass's content to the glass after every resize of
   the glass, through the one `GlassPlate.fitContent`** — called
   by `GlassPlate.update` and by `GlassBoxHost.setFrameSize`,
@@ -1755,10 +1758,11 @@ Obligations:
   `supersededLandingWritesNothing`; `GlassPairMotionSeamTests` ▸
   `settleStartsNoMotion`). Keep the settle as the follow's
   fallback (#2878) — for a glass off the measured shape, and for
-  a host moved without a bounds animation (the `ShelfHandleView`
-  hover, the `AppBarOverlay+GroupGlide` landing) — and retire it
-  only after a device sitting through those paths shows it never
-  changes a frame (owner, 2026-11-14).
+  a host moved without a bounds animation (the design round of
+  2026-11-14 named the `ShelfHandleView` hover and the
+  `AppBarOverlay+GroupGlide` landing as possible ones, unmeasured)
+  — and retire it only after a device sitting through those paths
+  shows it never changes a frame (owner, 2026-11-14).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays
