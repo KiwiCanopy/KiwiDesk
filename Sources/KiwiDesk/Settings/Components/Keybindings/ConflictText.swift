@@ -156,10 +156,13 @@ enum ConflictText {
                     + "bound here.",
                 shortcut.localizedName
             )
-        case .takesFromMacOS(.inputSourceNext),
-            .winsFromMacOS(.inputSourceNext):
+        case .takesFromMacOS(let shortcut)
+        where SystemShortcutState.inputSourceShortcuts.contains(shortcut),
+            .winsFromMacOS(let shortcut)
+        where SystemShortcutState.inputSourceShortcuts.contains(shortcut):
             return InputSourceTakenText.sentence(
                 for: severity,
+                taking: shortcut,
                 config: config,
                 system: system
             )

@@ -8305,6 +8305,10 @@ runs it rather than scrolling; Settings flags a step key on Zoom,
 Invert colours, contrast, Desktop switching or Force Quit as not
 working.
 
+The previous input source (**⌃Space** by default) is treated like
+the next one: it closes an open sequence, and a step key or a
+leader on its chord wins it.
+
 A step key matches its chord exactly, modifiers included: with
 the leader's modifiers still held, `w` does not fire, and
 `ctrl+alt+w` is a different key. The leader wins its chord: a
