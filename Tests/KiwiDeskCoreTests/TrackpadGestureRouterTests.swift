@@ -112,6 +112,43 @@ struct TrackpadGestureRouterTests {
         )
     }
 
+    @Test("a slow swipe waits for its distance, never flicking early")
+    func slowSwipeWaits() {
+        // 0.3 of the pad per second: past 5% early, never fast.
+        let events = run(swipe(3, dx: 0.3, dy: 0, over: 1))
+        #expect(events.map(\.kind) == [.swipe(.right)])
+        #expect((events.first?.time ?? 0) >= 0.39, "fired at 12%")
+    }
+
+    @Test("a flick that stops before the lift is no flick")
+    func heldFlickIsNoFlick() {
+        var frames = swipe(3, dx: 0.06, dy: 0, over: 0.08)
+        frames.removeLast()
+        let still = fingers(3, x: 0.36, y: 0.5)
+        frames += (1...20).map {
+            TouchFrame(time: 0.08 + Double($0) * 0.01, contacts: still)
+        }
+        frames.append(TouchFrame(time: 0.4, contacts: []))
+        #expect(run(frames).isEmpty)
+    }
+
+    @Test("the first finger to lift releases the flick")
+    func firstLiftReleases() {
+        var frames = swipe(4, dx: -0.07, dy: 0, over: 0.1)
+        frames.removeLast()
+        frames.append(
+            TouchFrame(
+                time: 0.11,
+                contacts: Array(fingers(4, x: 0.23, y: 0.5).prefix(3)),
+                modifiers: Self.hyper
+            )
+        )
+        let events = run(frames)
+        #expect(events.map(\.kind) == [.swipe(.left)])
+        #expect(events.first?.fingers == 4)
+        #expect(events.first?.time == 0.11)
+    }
+
     @Test("a flick after a rest still fires")
     func pauseThenFlick() {
         let rest = (0...30).map { step in
