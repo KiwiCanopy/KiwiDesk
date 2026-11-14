@@ -38,12 +38,12 @@ extension SystemShortcut {
     /// Minimize). KiwiDesk WINS it — measured on ⌘W and ⌘P
     /// (#1126, #1075) — so the cost is every app's, not the
     /// row's. False for a symbolic hotkey and for the two
-    /// system-level chords (⌘Tab, ⌥⌘Esc), which macOS answers
-    /// first (#1275). A `switch` for the parity idiom's reason;
-    /// that it never overlaps `symbolicHotkey` is held by
-    /// `ConflictSeverityTests` ▸ `classesArePartitioned`, since
-    /// `of` asks this first and an overlap would make a live
-    /// symbolic hotkey read `.shadowsApps`, as if it worked.
+    /// system-level chords (⌘Tab, ⌥⌘Esc). A `switch` for the
+    /// parity idiom's reason; that it never overlaps
+    /// `symbolicHotkey` is held by `ConflictSeverityTests` ▸
+    /// `classesArePartitioned`, since `of` asks this first and an
+    /// overlap would make a live symbolic hotkey read
+    /// `.shadowsApps`, as if it worked.
     var isUniversalAccelerator: Bool {
         switch self {
         case .closeWindow, .quitApp, .hideApp, .minimize:
@@ -58,28 +58,6 @@ extension SystemShortcut {
             .switchToDesktop3, .switchToDesktop4, .switchToDesktop5,
             .switchToDesktop6, .switchToDesktop7, .switchToDesktop8,
             .switchToDesktop9:
-            return false
-        }
-    }
-
-    /// A symbolic hotkey KiwiDesk wins whatever path binds it: a
-    /// Carbon hotkey and the keyboard tap both took `⌃⌥space`, and
-    /// macOS never switched the input source (#3239, measured
-    /// 2026-11-14, macOS 27.2). Every other case is unmeasured and
-    /// stays macOS's; `classesArePartitioned` holds it to the
-    /// symbolic table and apart from `isUniversalAccelerator`.
-    var losesToKiwiDesk: Bool {
-        switch self {
-        case .inputSourceNext: return true
-        case .spotlight, .appSwitcher, .quitApp, .closeWindow,
-            .minimize, .hideApp, .forceQuit, .missionControlSpaceLeft,
-            .missionControlSpaceRight, .missionControl, .appWindows,
-            .screenshot, .screenshotSelection, .screenshotTools,
-            .zoomToggle, .zoomIn, .zoomOut, .dockHiding, .finderSearch,
-            .invertColors, .increaseContrast, .decreaseContrast,
-            .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
-            .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
-            .switchToDesktop7, .switchToDesktop8, .switchToDesktop9:
             return false
         }
     }

@@ -16,11 +16,12 @@ extension KiwiCore {
         set { keys.onSequenceScroll = newValue }
     }
 
-    /// The macOS shortcut a step key on `combo` takes from macOS
-    /// while its sequence is open (#3173): one the router would
-    /// pass, read as the router reads it. Nil for none, and for an
-    /// app's menu chord, which an open sequence swallows anyway.
-    public func sequenceStepTakes(_ combo: String) -> SystemShortcut? {
+    /// The macOS shortcut a step key on `combo` meets while its
+    /// sequence is open (#3173): one the router would pass, read as
+    /// the router reads it. Nil for none, and for an app's menu
+    /// chord, which an open sequence swallows anyway. Whether the
+    /// step wins it is `losesToKiwiDesk(on: .keyboardTap)` (#3311).
+    public func sequenceStepShortcut(_ combo: String) -> SystemShortcut? {
         guard let key = KeyCombo.parse(combo),
             let shortcut = KeySequenceRouter.systemShortcut(
                 on: key,

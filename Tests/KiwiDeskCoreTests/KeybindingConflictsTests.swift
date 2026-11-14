@@ -101,7 +101,7 @@ struct KeybindingConflictsTests {
         #expect(list[0].binding.label == "Close")
         // The case, never its English name (#96): Core cannot
         // reach `L()`, so the GUI resolves the display string.
-        #expect(list[0].target == .systemShortcut(.closeWindow))
+        #expect(list[0].target == .systemShortcut(.closeWindow, .carbon))
     }
 
     @Test("conflicts(in:) names an intra-layer duplicate")

@@ -59,7 +59,8 @@ struct ConflictSeverityTests {
     }
 
     /// ⌘Tab and ⌥⌘Esc are system-level and outside the symbolic
-    /// table; the press test found macOS answers both (#1275).
+    /// table; the press test found macOS answers both ahead of a
+    /// Carbon row (#1275).
     @Test("a system-level chord outside the table is dead")
     func systemLevelChordIsDead() throws {
         for (chord, shortcut) in [
@@ -77,8 +78,7 @@ struct ConflictSeverityTests {
     /// switched the input source with nothing bound; a leader's tap
     /// swallowed it every time with no switch, and a Carbon hotkey
     /// fired on six presses by hand with no switch. So a row on it
-    /// works, on or off, whichever way it is bound. A leader on
-    /// another symbolic chord is unmeasured and stays dead.
+    /// works, on or off, whichever way it is bound.
     @Test("any row on the input-source chord takes it from macOS")
     func rowsTakeTheInputSourceChord() throws {
         let leader = KeyBinding(combo: "ctrl+alt+space", kind: .sequence)
@@ -97,21 +97,10 @@ struct ConflictSeverityTests {
                 #expect(!severity.isDead)
             }
         }
-        let spotlight = KeyBinding(combo: "command+space", kind: .sequence)
-        let onSpotlight = try #require(
-            KeybindingConflicts.conflict(
-                for: spotlight,
-                in: [spotlight],
-                distinguishingSides: false
-            )
-        )
         #expect(
-            ConflictSeverity.of(onSpotlight, disabled: [])
-                == .dead(.spotlight)
-        )
-        #expect(
-            SystemShortcut.allCases.filter(\.losesToKiwiDesk)
-                == [.inputSourceNext]
+            SystemShortcut.allCases.filter {
+                $0.losesToKiwiDesk(on: .carbon)
+            } == [.inputSourceNext]
         )
     }
 
@@ -189,13 +178,20 @@ struct ConflictSeverityTests {
                 $0.isUniversalAccelerator
             })
         )
-        // `of` asks `losesToKiwiDesk` first: a member off the
-        // symbolic table would win with no plist bit behind it.
+        // A Carbon row wins only a symbolic hotkey, which a plist
+        // bit names, and no path wins an app's menu chord, which
+        // `of` reads as the apps' first.
         #expect(
             SystemShortcut.allCases
-                .filter(\.losesToKiwiDesk)
+                .filter { $0.losesToKiwiDesk(on: .carbon) }
+                .allSatisfy { $0.symbolicHotkey != nil }
+        )
+        #expect(
+            SystemShortcut.allCases
+                .filter(\.isUniversalAccelerator)
                 .allSatisfy {
-                    $0.symbolicHotkey != nil && !$0.isUniversalAccelerator
+                    !$0.losesToKiwiDesk(on: .carbon)
+                        && !$0.losesToKiwiDesk(on: .keyboardTap)
                 }
         )
     }

@@ -14,8 +14,10 @@ import SwiftUI
 /// exactly one fires; a chord every app's menus carry (⌘W) is
 /// WON by KiwiDesk, so the app loses it. ⌘Tab and ⌥⌘Esc, outside
 /// the symbolic table, are macOS's too (#1275, 2026-10-10): dead,
-/// and no setting switches them off. `⌃⌥space` is KiwiDesk's
-/// whichever way it is bound, on or off (#3239, 2026-11-14).
+/// and no setting switches them off. A row the keyboard tap
+/// decides — a leader, a step key, a sided row — wins them, save
+/// ⌥⌘Esc, and `⌃⌥space` is KiwiDesk's on either path (#3239,
+/// #3311; `SystemShortcut.losesToKiwiDesk(on:)`).
 enum ConflictSeverity: Equatable {
     /// A chord macOS answers first — a symbolic hotkey it has
     /// switched on, or ⌘Tab / ⌥⌘Esc: the row never fires.
@@ -30,8 +32,9 @@ enum ConflictSeverity: Equatable {
     /// A sequence's step key on a chord macOS answers: the key wins
     /// it while the sequence is open, macOS loses it then (#3173).
     case takesFromMacOS(SystemShortcut)
-    /// A symbolic hotkey KiwiDesk wins (#3239): the row works and
-    /// macOS loses the chord while it is bound.
+    /// A macOS shortcut KiwiDesk wins on the row's path (#3239,
+    /// #3311): the row works and macOS loses the chord while it is
+    /// bound.
     case winsFromMacOS(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
@@ -66,11 +69,15 @@ enum ConflictSeverity: Equatable {
         disabled: Set<SystemShortcut>
     ) -> ConflictSeverity {
         switch conflict.target {
-        case .systemShortcut(let shortcut):
-            if shortcut.losesToKiwiDesk { return .winsFromMacOS(shortcut) }
-            if disabled.contains(shortcut) { return .dormant(shortcut) }
-            return shortcut.isUniversalAccelerator
-                ? .shadowsApps(shortcut) : .dead(shortcut)
+        case .systemShortcut(let shortcut, let path):
+            if shortcut.isUniversalAccelerator {
+                return .shadowsApps(shortcut)
+            }
+            if shortcut.losesToKiwiDesk(on: path) {
+                return .winsFromMacOS(shortcut)
+            }
+            return disabled.contains(shortcut)
+                ? .dormant(shortcut) : .dead(shortcut)
         case .otherBinding(let who):
             return .duplicate(who)
         case .sideCollapse(let who):
@@ -80,6 +87,16 @@ enum ConflictSeverity: Equatable {
         case .unrecognized:
             return .unrecognized
         }
+    }
+
+    /// The reading of a step key on a chord macOS answers while its
+    /// sequence is open (`KiwiCore.sequenceStepShortcut`), by the rule
+    /// a row takes: the keyboard tap decides a step key (#3311). Core
+    /// hands no app menu chord and no switched-off one, so neither
+    /// `.shadowsApps` nor `.dormant` is asked here.
+    static func ofStep(on shortcut: SystemShortcut) -> ConflictSeverity {
+        shortcut.losesToKiwiDesk(on: .keyboardTap)
+            ? .takesFromMacOS(shortcut) : .dead(shortcut)
     }
 
     /// Whether the row cannot fire as things stand — the reading
