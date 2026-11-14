@@ -55,7 +55,7 @@ struct ConflictRowTreatmentTests {
         // Every recorder mount mints that one value, and the
         // needle runs THROUGH the live set it is minted from:
         // stopping at the open paren left a mount free to pass
-        // `system: []`, which reads every dormant chord as
+        // `system: .unread`, which reads every dormant chord as
         // dead (guard-prover, 2026-09-03).
         "KeybindingNavRow.swift": [
             "returnConflictText.reading(for:bindings[index],"

@@ -68,7 +68,7 @@ struct NavRowEqualityTests {
             ),
             command: command ?? self.command,
             layer: layer,
-            system: []
+            system: .unread
         )
     }
 

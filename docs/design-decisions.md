@@ -14373,8 +14373,12 @@ input-source shortcut, "Select the previous input source" (hotkey
 60, ⌃Space by default). While macOS answers it on a chord no
 KiwiDesk row holds, the caption adds that its actual chord, read
 live, still switches, so the user knows the language is still in
-reach. When 60 is off or taken, the clause is absent
-(`InputSourceTakenTextTests`).
+reach. When 60 is off, cleared or taken, the clause is absent. "Taken"
+is a row in any of the base layers; a Lua `bind` and a profile's own
+override row are not seen (`InputSourceTakenTextTests`). The other
+direction, a KiwiDesk row taking 60 itself, is not shipped: macOS's
+hotkey 60 has no `SystemShortcut` case yet, and its verdict needs a
+measurement first (#3331).
 :::
 
 **One recorder at a time.** Starting a recording snaps any

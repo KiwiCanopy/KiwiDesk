@@ -9,13 +9,15 @@ private struct KeybindingLayerNameKey: EnvironmentKey {
 /// The machine's macOS shortcut state (#1105, #3319), read ONCE per
 /// section render and handed down — never one read per row.
 ///
-/// The empty default is NOT the shipped reading: six chords ship
-/// disabled, so a row rendered outside `ShortcutsSection` would
-/// over-report `.dead`. What keeps that unreachable is that
-/// every recorder mount descends from the one wiring site, which
+/// The `.unread` default is NOT the shipped reading: six chords ship
+/// disabled, so a row rendered outside a wiring site over-reports
+/// `.dead`, and the input-source caption drops its still-switches
+/// clause. What keeps that unreachable is that every recorder mount
+/// descends from a writer of this value — `ShortcutsSection`,
+/// `SimpleShortcutCards`, `KiwiVisionLensPage` — which
 /// `ConflictRowTreatmentTests` pins (#1126).
 private struct SystemShortcutStateKey: EnvironmentKey {
-    static let defaultValue: SystemShortcutState = []
+    static let defaultValue = SystemShortcutState.unread
 }
 
 /// Set on a card whose rows end in a trash: a trash-less row in

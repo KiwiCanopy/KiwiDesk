@@ -89,14 +89,21 @@ public enum SequencePassTier: Sendable, Equatable {
 
 /// What `com.apple.symbolichotkeys` holds for one hotkey id: whether
 /// it is on, and the chord it is bound to; each nil where the plist
-/// says nothing.
+/// says nothing. `keyless` marks parameters naming no key, which
+/// macOS writes for a shortcut cleared in System Settings (#3319).
 public struct SymbolicHotkeyEntry: Equatable, Sendable {
     public var enabled: Bool?
     public var combo: KeyCombo?
+    public var keyless: Bool
 
-    public init(enabled: Bool? = nil, combo: KeyCombo? = nil) {
+    public init(
+        enabled: Bool? = nil,
+        combo: KeyCombo? = nil,
+        keyless: Bool = false
+    ) {
         self.enabled = enabled
         self.combo = combo
+        self.keyless = keyless
     }
 }
 
@@ -113,20 +120,37 @@ public enum SymbolicHotkeys {
             let entry = table["\(id)"] as? [String: Any]
         else { return nil }
         let value = entry["value"] as? [String: Any]
+        let parameters = value?["parameters"] as? [Int]
+        let combo = parameters.flatMap(chord)
         return SymbolicHotkeyEntry(
             enabled: entry["enabled"] as? Bool,
-            combo: (value?["parameters"] as? [Int]).flatMap(chord)
+            combo: combo,
+            keyless: parameters != nil && combo == nil
         )
     }
 
     /// macOS's other input-source shortcut, "Select the previous
-    /// input source" (#3319): its id and the chord it ships on. No
+    /// input source" (#3319): its id, shipped state and chord. No
     /// `SystemShortcut` names it; the takes-away caption of
     /// `.inputSourceNext` reads it.
     public static let previousInputSource = (
         id: 60,
+        shipsEnabled: true,
         chord: KeyCombo(keyCode: 49, modifiers: .control)
     )
+
+    /// The chord macOS answers for `hotkey` now: nil while it is off
+    /// or cleared, its shipped chord where the plist names none.
+    public static func answeredChord(
+        of hotkey: (id: Int, shipsEnabled: Bool, chord: KeyCombo),
+        reading read: (Int) -> SymbolicHotkeyEntry?
+    ) -> KeyCombo? {
+        let entry = read(hotkey.id)
+        guard entry?.enabled ?? hotkey.shipsEnabled,
+            entry?.keyless != true
+        else { return nil }
+        return entry?.combo ?? hotkey.chord
+    }
 
     /// A hotkey's `parameters` — character, key code, modifier mask —
     /// as a chord; nil for a key code macOS writes for none (65535).

@@ -101,13 +101,6 @@ enum ConflictText {
         config: GuiConfig,
         system: SystemShortcutState
     ) -> String {
-        if let taken = InputSourceTakenText.sentence(
-            for: severity,
-            config: config,
-            system: system
-        ) {
-            return taken
-        }
         switch severity {
         case .unrecognized:
             return L(
@@ -162,6 +155,13 @@ enum ConflictText {
                 "Takes %1$@ away from every app while it is "
                     + "bound here.",
                 shortcut.localizedName
+            )
+        case .takesFromMacOS(.inputSourceNext),
+            .winsFromMacOS(.inputSourceNext):
+            return InputSourceTakenText.sentence(
+                for: severity,
+                config: config,
+                system: system
             )
         case .takesFromMacOS(let shortcut):
             return L(

@@ -5,25 +5,20 @@ import KiwiDeskCore
 /// plain words, then where it is changed in System Settings, with
 /// Apple's segment names; and, while macOS's other input-source
 /// shortcut answers on a chord KiwiDesk leaves free, that this
-/// chord still switches.
+/// chord still switches. `ConflictText.sentence` asks it for the two
+/// tiers that take `.inputSourceNext`.
 @MainActor
 enum InputSourceTakenText {
-    /// The sentence for `severity`, or nil where it is not a row
-    /// taking the input-source shortcut.
+    /// The sentence for a row taking the shortcut: a step key while
+    /// its sequence is open (`.takesFromMacOS`), any other row while
+    /// it is bound (`.winsFromMacOS`).
     static func sentence(
         for severity: ConflictSeverity,
         config: GuiConfig,
         system: SystemShortcutState
-    ) -> String? {
-        let whileOpen: Bool
-        switch severity {
-        case .winsFromMacOS(.inputSourceNext): whileOpen = false
-        case .takesFromMacOS(.inputSourceNext): whileOpen = true
-        default: return nil
-        }
-        let chord = drawn(
-            SystemShortcuts.map.first { $0.value == .inputSourceNext }?.key
-        )
+    ) -> String {
+        let whileOpen = severity == .takesFromMacOS(.inputSourceNext)
+        let chord = drawn(SystemShortcuts.chord(of: .inputSourceNext))
         let place = L(
             "keybinding.conflict.input_source.place",
             "Keyboard ▸ Keyboard Shortcuts ▸ Input Sources"

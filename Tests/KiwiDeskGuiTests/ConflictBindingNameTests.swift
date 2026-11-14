@@ -35,7 +35,7 @@ struct ConflictBindingNameTests {
             for: mine,
             in: [mine, rival],
             config: config,
-            system: [],
+            system: .unread,
             sides: false
         )?.sentence
         let named = KeybindingCatalog.localizedName(

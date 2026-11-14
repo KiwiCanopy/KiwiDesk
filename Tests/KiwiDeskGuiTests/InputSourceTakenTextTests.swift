@@ -32,10 +32,13 @@ struct InputSourceTakenTextTests {
     }
 
     @Test("a winning row names the meaning, the place, and the chord")
-    func winsNamesThePlace() {
+    func winsNamesThePlace() throws {
         LocalizationManager.shared.select("en")
         let text = sentence(.winsFromMacOS(.inputSourceNext), other: nil)
-        let chord = drawn(KeyCombo.parse("ctrl+alt+space")!)
+        let chord = drawn(
+            try #require(SystemShortcuts.chord(of: .inputSourceNext))
+        )
+        #expect(chord == drawn(KeyCombo.parse("ctrl+alt+space")!))
         #expect(
             text
                 == "Takes \(chord) away from macOS's shortcut for "
@@ -80,6 +83,24 @@ struct InputSourceTakenTextTests {
         #expect(text.contains("Input Sources"))
     }
 
+    @Test("a sequence leader on the other chord leaves the clause out")
+    func leaderOnOtherIsLeftOut() {
+        LocalizationManager.shared.select("en")
+        var config = GuiConfig()
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [KeyBinding(combo: "control+space", kind: .sequence)]
+            )
+        ]
+        let text = sentence(
+            .winsFromMacOS(.inputSourceNext),
+            other: ctrlSpace,
+            config: config
+        )
+        #expect(!text.contains("still switches"))
+    }
+
     @Test("another shortcut keeps its own caption")
     func otherShortcutsUnchanged() {
         LocalizationManager.shared.select("en")
@@ -103,11 +124,25 @@ struct InputSourceTakenTextTests {
                 : nil
         }
         #expect(moved.previousInputSource == ctrlShiftSpace)
-        let invert = SystemShortcut.invertColors.symbolicHotkey!.id
-        let disabled = SystemShortcutState.live {
-            $0 == invert ? SymbolicHotkeyEntry(enabled: false) : nil
+        let cleared = SystemShortcutState.live {
+            $0 == id
+                ? SymbolicHotkeyEntry(enabled: true, keyless: true)
+                : nil
         }
-        #expect(disabled.disabled.contains(.invertColors))
+        #expect(cleared.previousInputSource == nil)
+        // Spotlight ships on and Invert Colors off, so each reading
+        // below is the plist's, never the shipped default.
+        let spotlight = SystemShortcut.spotlight.symbolicHotkey!.id
+        let invert = SystemShortcut.invertColors.symbolicHotkey!.id
+        let flipped = SystemShortcutState.live {
+            switch $0 {
+            case spotlight: SymbolicHotkeyEntry(enabled: false)
+            case invert: SymbolicHotkeyEntry(enabled: true)
+            default: nil
+            }
+        }
+        #expect(flipped.disabled.contains(.spotlight))
+        #expect(!flipped.disabled.contains(.invertColors))
     }
 
     @Test("a row's reading carries the section's state to the caption")
