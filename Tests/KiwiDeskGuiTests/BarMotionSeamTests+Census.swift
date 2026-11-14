@@ -95,6 +95,15 @@ extension BarMotionSeamTests {
         "endMorph": [],
         "morphClip": ["span"],
         "morphFade": ["span"],
+        // The no-motion writer turns motion off (#2878); the follow
+        // copies only an animation the host already carries, which
+        // `setFrame`'s gate decided.
+        "writeStill": ["still {"],
+        "layoutStill": ["still {"],
+        "still": ["duration = 0", "setDisableActions(true)"],
+        "followHostResize": ["animation(forKey:", "followTargets("],
+        "followTargets": [],
+        "isInTree": [],
     ]
 
     /// Members whose motion Reduce Motion deliberately KEEPS, each

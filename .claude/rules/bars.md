@@ -1708,6 +1708,25 @@ Obligations:
   frame writers, `GlassPlate.update` and `GlassTint.apply`, take
   no motion input and start no motion (`GlassPairMotionSeamTests`),
   so a call site cannot make either travel.
+- **Write every frame in `GlassBox` and `GlassPlate` through the
+  one no-motion writer, `BarMotion.writeStill`, and let a gliding
+  host's glass follow the host's own animation through
+  `BarMotion.followHostResize`** (#2878 ruling amendment, owner
+  2026-11-14). A plain glass write inside the host's animation
+  group is stepped by AppKit on the main thread a frame behind
+  the host's render-server animation, whatever the glass's
+  `autoresizingMask` (device 2026-11-14: the glass trailed by up
+  to 60 pt and cost about 67 ms of main thread a glide). The
+  follow lays the glass out at once and copies the host's bounds
+  animation onto the layers at the glass's size, all or nothing
+  behind `BarMotion.followTargets`' shape check, since those
+  layers are the glass's private tree; where the check fails it
+  adds nothing and the landing settle below repairs the frame
+  (`GlassBoxFollowTests`; `GlassPairMotionSeamTests` ▸
+  `frameWritesAreStill`). Keep the follow within 4 ms of main
+  thread per resizing box (owner budget; measured 3.5 ms in the
+  2026-11-14 prototype), and re-measure it on the device when
+  the glass's tree or the follow changes.
 - **Write a glass's content to the glass after every resize of
   the glass, through the one `GlassPlate.fitContent`** — called
   by `GlassPlate.update` and by `GlassBoxHost.setFrameSize`,
@@ -1728,10 +1747,11 @@ Obligations:
   a superseded landing writes nothing mid-glide
   (`GlassBoxContentFitTests` ▸ `glideLandingSettles`,
   `supersededLandingWritesNothing`; `GlassPairMotionSeamTests` ▸
-  `settleStartsNoMotion`). This reconciles three writers of one
-  glass — `place`, the host's `setFrameSize` and the glass's own
-  layout — rather than removing them; that ownership is #2425's
-  open half.
+  `settleStartsNoMotion`). Since #2878 the settle is the
+  follow's fallback, for a glass off the measured shape and a
+  host moved without a bounds animation; retire it only after a
+  device sitting shows it never changes a frame (owner,
+  2026-11-14).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays
