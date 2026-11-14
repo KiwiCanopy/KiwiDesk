@@ -120,7 +120,8 @@ struct MonitorSetForgetTests {
         try twoSetups(core)
         var heard: [(String, CapturedWrite)] = []
         core.profiles.onCapturedLive = { heard.append(($0, $1)) }
-        try core.forgetMonitorSet(fp("A", "B"))
+        // Unsorted on purpose: the payload carries the canonical set.
+        try core.forgetMonitorSet(["B:100x100", "A:100x100"])
         #expect(heard.count == 1)
         #expect(heard.first?.0 == "Desk")
         #expect(heard.first?.1 == .forgottenSetup(monitors: fp("A", "B")))

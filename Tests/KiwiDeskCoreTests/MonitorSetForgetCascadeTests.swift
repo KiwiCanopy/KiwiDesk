@@ -50,6 +50,9 @@ struct MonitorSetForgetCascadeTests {
         core.tiler.settings.spaceBarStyle.edgeOverride = [
             "A:100x100": .left, "B:100x100": .right,
         ]
+        core.tiler.settings.appBarStyle.edgeOverride = [
+            "B:100x100": .top
+        ]
         connect(core, ["A", "B"])
         try core.persistProfile(named: "Desk", modes: nil)
         connect(core, ["A", "C"])
@@ -66,6 +69,7 @@ struct MonitorSetForgetCascadeTests {
             stored.settings.spaceBarStyle.edgeOverride
                 == ["A:100x100": .left]
         )
+        #expect(stored.settings.appBarStyle.edgeOverride.isEmpty)
         // The live copy too, or the next Save writes it back.
         #expect(
             core.tiler.settings.spaceBarStyle.edgeOverride

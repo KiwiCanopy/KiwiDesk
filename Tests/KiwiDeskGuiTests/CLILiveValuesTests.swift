@@ -82,5 +82,9 @@ struct CLILiveValuesTests {
         let saved = core.execute("save_profile", args: [.string("Mine")])
         #expect(saved.isSuccess, "\(saved.error ?? "")")
         #expect(Self.names(.storedScreens, from: core) == ["Desk:100x100"])
+        #expect(
+            CLILiveValues.textSources["forget_monitor_set"]?["screen"]
+                == .storedScreens
+        )
     }
 }

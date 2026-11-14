@@ -72,16 +72,29 @@ struct ForgetSetupDraftTests {
         let (model, core) = try seeded()
         #expect(model.cleanConfig.profileBindings[.number(1)] != nil)
         #expect(!model.config.settings.spaceBarStyle.edgeOverride.isEmpty)
-        // An unrelated edit stays the draft's own.
+        // An unrelated edit stays the draft's own, and a staged
+        // binding edit keeps the record the draft's, so only the
+        // draft's own prune can drop the setup's entry from it.
         model.config.settings.minWindowSizes = MinWindowSizes(all: 321)
+        model.config.profileBindings[.number(1)] = DesktopBinding(
+            entries: [
+                core.bindingEntry(named: "Desk", setup: Self.ab),
+                core.bindingEntry(named: "Desk"),
+            ],
+            desktop: 1
+        )
         #expect(model.isDirty)
         let reply = core.execute(
             "forget_monitor_set",
             args: Self.ab.map { .string($0) }
         )
         #expect(reply.isSuccess, "\(reply.error ?? "")")
+        #expect(
+            model.config.profileBindings[.number(1)]?.entries.map(\.setup)
+                == [nil]
+        )
+        #expect(model.cleanConfig.profileBindings[.number(1)] == nil)
         for config in [model.config, model.cleanConfig] {
-            #expect(config.profileBindings[.number(1)] == nil)
             #expect(config.settings.spaceBarStyle.edgeOverride.isEmpty)
         }
         #expect(model.isDirty)
@@ -181,16 +194,30 @@ struct ForgetSetupDraftTests {
                 "Sources/KiwiDesk/AppDelegate.swift"
             )
         )
-        #expect(app.contains("adoptCapturedWrite(write, of: name)"))
+        // The whole closure body, so a guard beside the call reds.
+        #expect(
+            Self.compact(app).contains(
+                "core.profiles.onCapturedLive={[weakself]name,writein"
+                    + "self?.dashboardIfCreated?.adoptCapturedWrite("
+                    + "write,of:name)}"
+            )
+        )
         let controller = try SourceScan.strippedSource(
             at: root.appendingPathComponent(
                 "Sources/KiwiDesk/Settings/SettingsWindowController.swift"
             )
         )
         #expect(
-            controller.contains(
-                "model.adoptForgottenSetup(monitors, from: name)"
+            Self.compact(controller).contains(
+                "funcadoptCapturedWrite(_write:CapturedWrite,ofname:String){"
+                    + "ifcase.forgottenSetup(letmonitors)=write{"
+                    + "model.adoptForgottenSetup(monitors,from:name)"
+                    + "return}"
             )
         )
+    }
+
+    private static func compact(_ source: String) -> String {
+        source.filter { !$0.isWhitespace }
     }
 }
