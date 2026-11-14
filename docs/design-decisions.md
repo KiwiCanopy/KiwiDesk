@@ -14376,12 +14376,31 @@ live, still switches, so the user knows the language is still in
 reach. When 60 is off, cleared or taken, the clause is absent. "Taken"
 is a row in any of the base layers; a Lua `bind` and a profile's own
 override row are not seen (`InputSourceTakenTextTests`). The other
-direction, a KiwiDesk row taking 60 itself, is not shipped: macOS's
-hotkey 60 has no `SystemShortcut` case yet, and its verdict needs a
-measurement first (#3331). A shortcut cleared in System Settings, on
+direction, a KiwiDesk row taking 60 itself, is the #3331 amendment
+below. A shortcut cleared in System Settings, on
 with no key, now reads as switched off everywhere: the row is dormant,
 not dead, and an open sequence no longer lets its old chord through
 (`AnsweredChordTests`).
+:::
+
+:::unreleased
+*Amended (#3331, measured 2026-11-14): ⌃Space is macOS's other
+input-source shortcut, and KiwiDesk reads it the way it reads
+⌃⌥Space.* "Select the previous input source" (hotkey 60) is a
+`SystemShortcut` on ⌃Space. On macOS 27.2 a posted ⌃Space switched
+the input source with nothing bound, while a sequence leader, a step
+key and a sided row on the chord each fired with no switch. So a row
+the keyboard tap answers reads as taking the shortcut from macOS, and
+its caption mirrors the next-source one: the plain meaning, the same
+Keyboard ▸ Keyboard Shortcuts ▸ Input Sources place, and hotkey 61's
+live chord as still switching while macOS answers it and no row holds
+it. A Carbon row was not measured, since posted presses never fire
+Carbon, so it stays a dead row while hotkey 60 is on. An open sequence
+now passes ⌃Space and closes, as it does ⌃⌥Space. No seed binds
+⌃Space, so an existing install gains no conflict on Home; a user's own
+row on the chord gains its caption, and the keyboard board marks
+Space as macOS's under a ⌃ layer (`InputSourcePreviousTextTests`,
+`InputSourcePreviousInstallTests`, `PressPathConflictTests`).
 :::
 
 **One recorder at a time.** Starting a recording snaps any

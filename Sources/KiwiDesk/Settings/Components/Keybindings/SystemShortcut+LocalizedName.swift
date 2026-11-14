@@ -92,6 +92,11 @@ extension SystemShortcut {
                 "system_shortcut.input_source_next",
                 "Select next source in Input menu"
             )
+        case .inputSourcePrevious:
+            return L(
+                "system_shortcut.input_source_previous",
+                "Select the previous input source"
+            )
         case .invertColors:
             return L(
                 "system_shortcut.invert_colors",

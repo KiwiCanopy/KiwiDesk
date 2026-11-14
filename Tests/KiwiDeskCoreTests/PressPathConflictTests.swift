@@ -70,6 +70,7 @@ struct PressPathConflictTests {
                 .screenshot, .screenshotSelection, .screenshotTools,
                 .missionControlSpaceLeft, .missionControlSpaceRight,
                 .appSwitcher, .dockHiding, .inputSourceNext,
+                .inputSourcePrevious,
             ]
         )
     }

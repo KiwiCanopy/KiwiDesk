@@ -2,23 +2,24 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The chord macOS answers for a symbolic hotkey KiwiDesk names
-/// outside `SystemShortcut` (#3319): the plist's bit and chord, else
-/// the shipped state and chord, and nothing for a cleared shortcut.
-@Suite("A symbolic hotkey's answered chord (#3319)")
+/// The chord macOS answers for a shortcut (#3319, #3331): the
+/// plist's bit and chord, else the shipped state and the map's
+/// chord, and nothing for a cleared shortcut.
+@Suite("A system shortcut's answered chord (#3319)")
 struct AnsweredChordTests {
-    private let other = SymbolicHotkeys.previousInputSource
+    private let other = SystemShortcut.inputSourcePrevious
+    private let ctrlSpace = KeyCombo.parse("ctrl+space")!
     private let moved = KeyCombo.parse("ctrl+shift+space")!
 
     private func chord(_ entry: SymbolicHotkeyEntry?) -> KeyCombo? {
-        SymbolicHotkeys.answeredChord(of: other) {
-            $0 == other.id ? entry : nil
+        other.answeredChord {
+            $0 == other.symbolicHotkey?.id ? entry : nil
         }
     }
 
     @Test("absent, off, cleared and moved read as macOS answers them")
     func readsThePlist() {
-        #expect(chord(nil) == other.chord)
+        #expect(chord(nil) == ctrlSpace)
         #expect(chord(SymbolicHotkeyEntry(enabled: false)) == nil)
         #expect(
             chord(SymbolicHotkeyEntry(enabled: true, keyless: true)) == nil
@@ -31,18 +32,24 @@ struct AnsweredChordTests {
 
     @Test("a hotkey that ships off answers nothing with no entry")
     func shipsOff() {
-        let off = ShippedHotkey(
-            id: other.id,
-            shipsEnabled: false,
-            chord: other.chord
-        )
-        #expect(SymbolicHotkeys.answeredChord(of: off) { _ in nil } == nil)
+        let zoom = SystemShortcut.zoomToggle
+        #expect(zoom.symbolicHotkey?.shipsEnabled == false)
+        #expect(zoom.answeredChord { _ in nil } == nil)
     }
 
-    @Test("the shipped chord is ⌃Space")
+    @Test("a shortcut with no hotkey id answers its map chord")
+    func acceleratorAlwaysAnswers() {
+        let tab = KeyCombo.parse("cmd+tab")
+        let off = SymbolicHotkeyEntry(enabled: false)
+        #expect(SystemShortcut.appSwitcher.answeredChord { _ in off } == tab)
+    }
+
+    @Test("hotkey 60 ships on, on ⌃Space")
     func shippedChord() {
-        #expect(other.id == 60)
-        #expect(other.chord == KeyCombo.parse("ctrl+space"))
+        #expect(other.symbolicHotkey?.id == 60)
+        #expect(other.symbolicHotkey?.shipsEnabled == true)
+        #expect(SystemShortcuts.chord(of: other) == ctrlSpace)
+        #expect(SystemShortcuts.map[ctrlSpace] == other)
     }
 
     @Test("a cleared map shortcut is not passed to an open sequence")

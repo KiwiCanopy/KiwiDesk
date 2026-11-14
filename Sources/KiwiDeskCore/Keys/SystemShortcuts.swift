@@ -37,6 +37,9 @@ public enum SystemShortcut: Sendable, CaseIterable {
     // fixture rather than trusting its green; a chord nothing
     // seeds is invisible to every guard.
     case inputSourceNext
+    // Its twin on ⌃Space, "Select the previous input source"
+    // (#3331).
+    case inputSourcePrevious
     // ⌃⌥⌘ trio (#1094 review): Accessibility-gated like the
     // Zoom trio — the shape a reputation-based list misses.
     // `⌃⌥⌘8` is a SEEDED row, so this makes an existing
@@ -103,6 +106,7 @@ public enum SystemShortcuts {
             ("option+command+d", .dockHiding),
             ("option+command+space", .finderSearch),
             ("control+option+space", .inputSourceNext),
+            ("control+space", .inputSourcePrevious),
             ("control+option+command+8", .invertColors),
             ("control+option+command+.", .increaseContrast),
             ("control+option+command+,", .decreaseContrast),

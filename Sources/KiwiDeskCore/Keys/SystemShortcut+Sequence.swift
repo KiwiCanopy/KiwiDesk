@@ -34,6 +34,7 @@ extension SystemShortcut {
         case .dockHiding: return (52, true)
         case .finderSearch: return (65, true)
         case .inputSourceNext: return (61, true)
+        case .inputSourcePrevious: return (60, true)
         case .invertColors: return (21, false)
         case .increaseContrast: return (25, false)
         case .decreaseContrast: return (26, false)
@@ -54,6 +55,23 @@ extension SystemShortcut {
         return SymbolicHotkeys.isOn(entry, shipsEnabled: hotkey.shipsEnabled)
     }
 
+    /// The chord macOS answers for this shortcut now: nil while it
+    /// is off or cleared, else the plist's chord, else the one
+    /// `SystemShortcuts.map` holds (#3319, #3331).
+    public func answeredChord(
+        reading read: (Int) -> SymbolicHotkeyEntry?
+    ) -> KeyCombo? {
+        guard let chord = SystemShortcuts.chord(of: self) else {
+            return nil
+        }
+        guard let hotkey = symbolicHotkey else { return chord }
+        return SymbolicHotkeys.answered(
+            read(hotkey.id),
+            shipsEnabled: hotkey.shipsEnabled,
+            chord: chord
+        )
+    }
+
     /// What an open key sequence does with this shortcut (#3173 ▸
     /// Ruling). A `switch`, so a new case cannot ship without an
     /// answer.
@@ -66,9 +84,10 @@ extension SystemShortcut {
         case .spotlight, .finderSearch, .appSwitcher, .forceQuit,
             .missionControl, .appWindows, .missionControlSpaceLeft,
             .missionControlSpaceRight, .inputSourceNext,
-            .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
-            .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
-            .switchToDesktop7, .switchToDesktop8, .switchToDesktop9:
+            .inputSourcePrevious, .switchToDesktop1, .switchToDesktop2,
+            .switchToDesktop3, .switchToDesktop4, .switchToDesktop5,
+            .switchToDesktop6, .switchToDesktop7, .switchToDesktop8,
+            .switchToDesktop9:
             return .closes
         case .quitApp, .closeWindow, .minimize, .hideApp:
             return .swallowed
@@ -107,14 +126,6 @@ public struct SymbolicHotkeyEntry: Equatable, Sendable {
     }
 }
 
-/// A symbolic hotkey KiwiDesk knows by id alone: the state and chord
-/// macOS ships it with (#3319).
-public struct ShippedHotkey: Equatable, Sendable {
-    public let id: Int
-    public let shipsEnabled: Bool
-    public let chord: KeyCombo
-}
-
 /// The one reader of `com.apple.symbolichotkeys` (#1105, #3173). A
 /// cached reader sees external writes (measured 2026-09-01).
 public enum SymbolicHotkeys {
@@ -140,28 +151,6 @@ public enum SymbolicHotkeys {
             enabled: entry["enabled"] as? Bool,
             combo: combo,
             keyless: parameters != nil && combo == nil
-        )
-    }
-
-    /// macOS's other input-source shortcut, "Select the previous
-    /// input source" (#3319). No `SystemShortcut` names it; the
-    /// takes-away caption of `.inputSourceNext` reads it.
-    public static let previousInputSource = ShippedHotkey(
-        id: 60,
-        shipsEnabled: true,
-        chord: KeyCombo(keyCode: 49, modifiers: .control)
-    )
-
-    /// The chord macOS answers for `hotkey` now: nil while it is off
-    /// or cleared, its shipped chord where the plist names none.
-    public static func answeredChord(
-        of hotkey: ShippedHotkey,
-        reading read: (Int) -> SymbolicHotkeyEntry?
-    ) -> KeyCombo? {
-        answered(
-            read(hotkey.id),
-            shipsEnabled: hotkey.shipsEnabled,
-            chord: hotkey.chord
         )
     }
 
@@ -213,15 +202,8 @@ extension SystemShortcuts {
         map.sorted {
             ($0.key.comboString() ?? "") < ($1.key.comboString() ?? "")
         }
-        .compactMap { combo, shortcut in
-            guard let hotkey = shortcut.symbolicHotkey else {
-                return (combo, shortcut)
-            }
-            return SymbolicHotkeys.answered(
-                read(hotkey.id),
-                shipsEnabled: hotkey.shipsEnabled,
-                chord: combo
-            ).map { ($0, shortcut) }
+        .compactMap { _, shortcut in
+            shortcut.answeredChord(reading: read).map { ($0, shortcut) }
         }
     }
 }

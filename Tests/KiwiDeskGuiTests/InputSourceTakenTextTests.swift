@@ -26,7 +26,8 @@ struct InputSourceTakenTextTests {
             config: config,
             system: SystemShortcutState(
                 disabled: [],
-                previousInputSource: other
+                inputSources: other.map { [.inputSourcePrevious: $0] }
+                    ?? [:]
             )
         )
     }
@@ -111,25 +112,27 @@ struct InputSourceTakenTextTests {
 
     @Test("the live state reads hotkey 60 as macOS answers it")
     func liveReadsTheOtherHotkey() {
-        let id = SymbolicHotkeys.previousInputSource.id
+        let id = SystemShortcut.inputSourcePrevious.symbolicHotkey!.id
         let absent = SystemShortcutState.live { _ in nil }
-        #expect(absent.previousInputSource == ctrlSpace)
+        #expect(absent.inputSources[.inputSourcePrevious] == ctrlSpace)
         let off = SystemShortcutState.live {
             $0 == id ? SymbolicHotkeyEntry(enabled: false) : nil
         }
-        #expect(off.previousInputSource == nil)
+        #expect(off.inputSources[.inputSourcePrevious] == nil)
         let moved = SystemShortcutState.live {
             $0 == id
                 ? SymbolicHotkeyEntry(enabled: true, combo: ctrlShiftSpace)
                 : nil
         }
-        #expect(moved.previousInputSource == ctrlShiftSpace)
+        #expect(
+            moved.inputSources[.inputSourcePrevious] == ctrlShiftSpace
+        )
         let cleared = SystemShortcutState.live {
             $0 == id
                 ? SymbolicHotkeyEntry(enabled: true, keyless: true)
                 : nil
         }
-        #expect(cleared.previousInputSource == nil)
+        #expect(cleared.inputSources[.inputSourcePrevious] == nil)
         let spotlightCleared = SystemShortcutState.live {
             $0 == SystemShortcut.spotlight.symbolicHotkey!.id
                 ? SymbolicHotkeyEntry(enabled: true, keyless: true)
@@ -162,7 +165,7 @@ struct InputSourceTakenTextTests {
                 config: GuiConfig(),
                 system: SystemShortcutState(
                     disabled: [],
-                    previousInputSource: ctrlSpace
+                    inputSources: [.inputSourcePrevious: ctrlSpace]
                 ),
                 sides: false
             )
