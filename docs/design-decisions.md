@@ -14341,16 +14341,20 @@ shortcuts read it. On macOS 27.2, with nothing bound, a posted press
 opened Spotlight, Finder search, Mission Control, App windows and the
 screenshot tools, switched a Space, ran ⌘Tab and toggled Dock hiding;
 with a sequence leader on each chord, the same press opened the
-sequence and macOS did nothing. So a leader, a step key and a sided
-row the tap answers read as the input-source chord does, the row
+sequence and macOS did nothing. ⌘⇧3 and ⌃← are read as their
+measured twins ⌘⇧4 (#3173) and ⌃→. A step key and a sided row are
+the same tap's swallow, so a leader, a step key and a sided row the tap
+answers read those chords as the input-source chord reads, the row
 working and macOS losing the shortcut, by the one rule
 `losesToKiwiDesk(on:)` that a conflict reads through the press path
 Core stamps on it and a step key through `ConflictSeverity.ofStep`.
 Read apart, a leader on ⌘Space said it was dead while a step key on
 the same chord said it took Spotlight, and one of the two was false
-for the same tap. ⌥⌘Esc is the exception: a posted press opens no
-Force Quit, so the measurement cannot decide it, and it stays a dead
-row on every path, as #1275 measured for Carbon. A Carbon hotkey
+for the same tap. A chord that was not measured stays macOS's on
+every path: a posted ⌥⌘Esc opens no Force Quit, so the measurement
+cannot decide it (#1275 measured it dead for Carbon), and Zoom,
+Invert colours, contrast and the Desktop switches ship off and were
+not turned on to measure. A Carbon hotkey
 still loses every other chord macOS answers (#1126); posted presses
 never fire Carbon, so this measurement says nothing about that path
 (`PressPathSeverityTests`, `PressPathConflictTests`).

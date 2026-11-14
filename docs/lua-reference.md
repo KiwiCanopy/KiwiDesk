@@ -8289,9 +8289,12 @@ screenshot, Zoom, Invert colours, contrast and Dock hiding leave the
 panel up; Spotlight, Finder search, the app switcher, Force Quit,
 Mission Control, Desktop switching and the next input source close
 the sequence first. **⌘Q**, **⌘W**, **⌘M** and **⌘H** stay with the
-sequence. A step key wins its chord over any of these but Force
-Quit's **⌥⌘Esc**, which macOS keeps, and an arrow or page key
-recorded as a step key runs it rather than scrolling.
+sequence. A step key wins its chord over a screenshot, Dock hiding,
+Spotlight, Finder search, the app switcher, Mission Control and the
+next input source, and an arrow or page key recorded as a step key
+runs it rather than scrolling; Settings flags a step key on Zoom,
+Invert colours, contrast, Desktop switching or Force Quit as not
+working.
 
 A step key matches its chord exactly, modifiers included: with
 the leader's modifiers still held, `w` does not fire, and
@@ -8299,9 +8302,11 @@ the leader's modifiers still held, `w` does not fire, and
 `KiwiDesk.bind` on the same chord in its layer is not registered
 and is flagged. A second `define_sequence` on one leader replaces
 the first. A leader on a macOS shortcut takes that chord from macOS
-while the sequence is bound, save **⌥⌘Esc**: on `ctrl+alt+space`, as
-in the example below, the input source does not switch, and on
-**⌘Space** Spotlight does not open. A leader works only through KiwiDesk's keyboard tap; if
+while the sequence is bound: on `ctrl+alt+space`, as in the example
+below, the input source does not switch, and on **⌘Space** Spotlight
+does not open. Settings flags a leader on the shortcuts a step key
+cannot win as not working, the same way.
+A leader works only through KiwiDesk's keyboard tap; if
 macOS refuses the tap (Accessibility not granted), it does nothing
 and is flagged. The CLI and an AI app build a sequence one key at a
 time with [`shortcut.set_sequence_key`](#shortcutset_sequence_key);

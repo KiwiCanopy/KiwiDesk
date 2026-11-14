@@ -59,20 +59,18 @@ struct PressPathConflictTests {
         #expect(path(of: plain, in: [plain], sides: true) == .carbon)
     }
 
-    @Test("the rule: the tap takes all but ⌥⌘Esc, Carbon only ⌃⌥Space")
+    @Test("the tap takes exactly the chords measured on it")
     func verdicts() {
         let tap = SystemShortcut.allCases.filter {
-            !$0.losesToKiwiDesk(on: .keyboardTap)
+            $0.losesToKiwiDesk(on: .keyboardTap)
         }
         #expect(
             Set(tap) == [
-                .forceQuit, .quitApp, .closeWindow, .minimize, .hideApp,
+                .spotlight, .finderSearch, .missionControl, .appWindows,
+                .screenshot, .screenshotSelection, .screenshotTools,
+                .missionControlSpaceLeft, .missionControlSpaceRight,
+                .appSwitcher, .dockHiding, .inputSourceNext,
             ]
-        )
-        #expect(
-            SystemShortcut.allCases.filter {
-                $0.losesToKiwiDesk(on: .carbon)
-            } == [.inputSourceNext]
         )
     }
 }

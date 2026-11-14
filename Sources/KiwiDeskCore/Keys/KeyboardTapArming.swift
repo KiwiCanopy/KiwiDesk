@@ -2,9 +2,10 @@ import Foundation
 
 /// Where each row of a layer goes when the layer is armed (#3278):
 /// the one home of which rows the keyboard tap's consumers answer.
-/// `KeybindingManager.activate` arms from it, and
-/// `KeybindingConflicts.sideReach` asks the same rows in the tap's
-/// consumer order, so the two cannot disagree. Pure: `Row` is
+/// `KeybindingManager.activate` arms from it, and the conflict
+/// readers (`KeybindingConflicts.sideReach`, `pressPath`) ask the
+/// same rows through the one `KeybindingConflicts.tapArming`, so
+/// none can disagree. Pure: `Row` is
 /// whatever names a press row (a Lua ref, a Settings binding) and
 /// `Leader` whatever names a sequence.
 struct KeyboardTapArming<Row, Leader> {

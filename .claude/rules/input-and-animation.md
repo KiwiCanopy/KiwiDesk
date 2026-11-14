@@ -174,7 +174,8 @@ editing here:
     door, and the live consumers are read off its non-empty
     fields, so a new consumer adds a field there. Which row goes
     to which consumer is `KeyboardTapArming`'s, read by the
-    manager's arming and by `KeybindingConflicts.sideReach`; the
+    manager's arming and by the conflict readers through the one
+    `KeybindingConflicts.tapArming` (`sideReach`, `pressPath`); the
     reach asks each consumer's `rows(for:)` in
     `KeyboardTapConsumer`'s order, as the tap does, and the
     manager builds `.modifierTaps` from the same accessor; a
@@ -413,13 +414,12 @@ editing here:
   enabled symbolic hotkey is then answered by macOS before the
   binding hears the press, with nothing said (#1126, measured
   2026-09-03) — save what `SystemShortcut.losesToKiwiDesk(on:)`
-  answers for the row's press path: a row the keyboard tap decides
-  (a leader, a step key, a sided row) wins every chord but ⌥⌘Esc,
-  and Carbon wins only ⌃⌥Space ([gui.md](gui.md) ▸ the tier
+  answers for the row's press path, a leader, a step key and a
+  sided row being the keyboard tap's ([gui.md](gui.md) ▸ the tier
   bullet, #3239, #3311). **Judge a row and a step key by that one
   rule, through the path `KeybindingConflicts` stamps from
-  `KeyboardTapArming`, never a second verdict**, and widen it only
-  from a measurement on each path: a posted press reaches the tap
+  `KeyboardTapArming`, never a second verdict**, and move a case
+  only from a measurement on its path: a posted press reaches the tap
   but never Carbon, so it proves nothing about a Carbon row, and a
   chord a posted press cannot fire is unmeasured on both
   (`PressPathConflictTests`). The product ruling is

@@ -91,7 +91,9 @@ enum ConflictSeverity: Equatable {
 
     /// The reading of a step key on a chord macOS answers while its
     /// sequence is open (`KiwiCore.sequenceStepShortcut`), by the rule
-    /// a row takes: the keyboard tap decides a step key (#3311).
+    /// a row takes: the keyboard tap decides a step key (#3311). Core
+    /// hands no app menu chord and no switched-off one, so neither
+    /// `.shadowsApps` nor `.dormant` is asked here.
     static func ofStep(on shortcut: SystemShortcut) -> ConflictSeverity {
         shortcut.losesToKiwiDesk(on: .keyboardTap)
             ? .takesFromMacOS(shortcut) : .dead(shortcut)
