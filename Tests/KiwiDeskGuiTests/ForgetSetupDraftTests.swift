@@ -109,22 +109,43 @@ struct ForgetSetupDraftTests {
         #expect(!model.isDirty)
     }
 
+    /// Z is on no setup and no connected screen, so only the
+    /// holder gate keeps its edge.
     @Test("a draft of another profile keeps its edges")
     func otherDraftKeepsEdges() throws {
         let (model, core) = try seeded()
         model.config.settings.appBarStyle.edgeOverride = [
-            "B:100x100": .left
+            "Z:100x100": .left
         ]
         model.cleanConfig.settings.appBarStyle.edgeOverride = [
-            "B:100x100": .left
+            "Z:100x100": .left
         ]
         model.adoptForgottenSetup(Self.ab, from: "Elsewhere")
         #expect(
             model.config.settings.appBarStyle.edgeOverride
-                == ["B:100x100": .left]
+                == ["Z:100x100": .left]
         )
         #expect(model.cleanConfig.profileBindings[.number(1)] == nil)
         _ = core
+    }
+
+    @Test("a refusal is narrated from its case, never Core's English")
+    func refusalIsLocalized() throws {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let (model, _) = try seeded()
+        let connected = try #require(
+            model.knownSetups.first { $0.isConnected }
+        )
+        model.forgetSetup(connected)
+        #expect(
+            model.profileWarning
+                == SettingsModel.forgetRefusal(.connected)
+        )
+        #expect(
+            model.profileWarning
+                != MonitorSetForgetError.connected.description
+        )
     }
 
     @Test("the confirm adds the dormant sentence only for a last setup")
