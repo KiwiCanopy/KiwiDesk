@@ -145,8 +145,9 @@ struct AppWidePaceCrossingTests {
         )
         let removed = spaced.components(separatedBy: "\n")
             .filter { !$0.isEmpty && !after.contains($0) }
-        // The four lengths, and the member before the last cut losing
-        // the comma that no longer separates anything.
+        // The four lengths, the member before the last cut losing
+        // the comma that no longer separates anything, and the format
+        // stamp a later bump lifts.
         #expect(
             removed.filter { $0.contains("duration\"") }.count == 4,
             "\(removed)"
@@ -154,6 +155,7 @@ struct AppWidePaceCrossingTests {
         #expect(
             removed.allSatisfy {
                 $0.contains("duration\"") || $0.contains("on_window_swap")
+                    || $0.contains("\"format\"")
             },
             "\(removed)"
         )

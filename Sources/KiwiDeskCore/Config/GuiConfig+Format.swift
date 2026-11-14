@@ -104,5 +104,9 @@ extension GuiConfig {
     /// **25 (#3254)**: a stored app-wide group's absent slide and
     /// fade read 4.2's 300 ms, written explicitly
     /// (`migratingAbsentSlideAndFade`).
-    public static let currentFormat = 25
+    ///
+    /// **26 (#1873)**: the `gesture` map may hold the four-finger
+    /// pinch and spread slots, which an older build cannot decode;
+    /// no step, the bump is the refusal.
+    public static let currentFormat = 26
 }

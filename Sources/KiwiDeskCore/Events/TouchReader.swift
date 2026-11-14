@@ -9,9 +9,10 @@ protocol TouchReaderHandle: AnyObject {
 }
 
 /// The MultitouchSupport reader (#1873). It reads, never
-/// swallows: the framework hands every frame to every listener,
-/// so a gesture macOS also answers still reaches macOS — which is
-/// why the axes macOS owns are greyed rather than taken.
+/// swallows: the framework hands every frame to every listener, so
+/// a swipe macOS answers is kept from macOS by the pointer tap,
+/// which reads the finger count this reader publishes
+/// (`TouchFingerCount`).
 ///
 /// Frames arrive on the framework's own thread, one per device;
 /// each device has its own pure `TrackpadGestureRouter`, run there,
@@ -56,6 +57,7 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             return true
         }
         guard claimed else { return nil }
+        TouchFingerCount.set(0)
         for device in list.devices {
             register(device, frameCallback)
             _ = start(device, 0)
@@ -64,13 +66,16 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     }
 
     func stop() {
+        // The count is reset under the slot's lock, which the frame
+        // write also holds, so no frame lands after the reset.
         let ours = Self.current.withLock { slot -> Bool in
             guard slot === self else { return false }
             slot = nil
+            TouchFingerCount.set(0)
             return true
         }
-        guard ours,
-            let unregister = MultitouchSupport.unregisterSymbol.function,
+        guard ours else { return }
+        guard let unregister = MultitouchSupport.unregisterSymbol.function,
             let stop = MultitouchSupport.stopSymbol.function
         else { return }
         for device in list.devices {
@@ -113,6 +118,10 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             )
         } else {
             contacts = []
+        }
+        // A frame in flight past `stop()` leaves the reset standing.
+        Self.current.withLock { slot in
+            if slot === self { TouchFingerCount.set(contacts.count) }
         }
         let frame = TouchFrame(
             time: time,

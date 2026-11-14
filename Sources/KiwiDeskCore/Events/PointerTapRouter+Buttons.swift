@@ -98,7 +98,7 @@ extension PointerSample.Kind {
         case .buttonDown(let button): (button, .down)
         case .buttonDragged(let button): (button, .dragged)
         case .buttonUp(let button): (button, .up)
-        case .mouseMoved, .flagsChanged: nil
+        case .mouseMoved, .flagsChanged, .gesture: nil
         }
     }
 }

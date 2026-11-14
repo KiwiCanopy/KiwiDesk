@@ -14,6 +14,8 @@ struct PointerTapDelivery: Sendable {
     var grab: [ModifierGrabEvent]
     /// The bound buttons' presses and releases (#3281).
     var buttons: [PointerButtonEvent] = []
+    /// The recognized pinches and rotations (#1873).
+    var gestures: [TrackpadGestureEvent] = []
     /// macOS disabled the tap and it was turned back on, which
     /// ended any stream a consumer owned.
     var reenabled: Bool
@@ -153,11 +155,14 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
                 ),
                 now: now
             )
-            if !routed.grab.isEmpty || !routed.buttons.isEmpty {
+            if !routed.grab.isEmpty || !routed.buttons.isEmpty
+                || !routed.gestures.isEmpty
+            {
                 deliver(
                     .init(
                         grab: routed.grab,
                         buttons: routed.buttons,
+                        gestures: routed.gestures,
                         reenabled: false
                     )
                 )
@@ -171,6 +176,16 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
         of type: CGEventType,
         _ event: CGEvent
     ) -> PointerSample.Kind? {
+        if type.rawValue == PointerConsumers.gestureEventType
+            || type.rawValue == PointerConsumers.dockEventType
+        {
+            return .gesture(
+                gesture(
+                    event,
+                    dock: type.rawValue == PointerConsumers.dockEventType
+                )
+            )
+        }
         let other = PointerButton.other(
             Int(event.getIntegerValueField(.mouseEventButtonNumber))
         )
@@ -188,5 +203,24 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
         case .otherMouseUp: return .buttonUp(other)
         default: return nil
         }
+    }
+
+    /// A gesture event's private fields (#1873,
+    /// `GestureEventSample`).
+    static func gesture(
+        _ event: CGEvent,
+        dock: Bool
+    ) -> GestureEventSample {
+        func field(_ raw: UInt32) -> CGEventField {
+            unsafeBitCast(raw, to: CGEventField.self)
+        }
+        return GestureEventSample(
+            subtype: Int(event.getIntegerValueField(field(110))),
+            phase: Int(event.getIntegerValueField(field(132))),
+            value: event.getDoubleValueField(field(dock ? 124 : 113)),
+            dock: dock,
+            axis: dock ? Int(event.getIntegerValueField(field(123))) : 0,
+            fingers: dock ? TouchFingerCount.now : 0
+        )
     }
 }

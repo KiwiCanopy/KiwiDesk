@@ -305,13 +305,18 @@ editing here:
     later (#2764's crossing, #1873's gestures) adds its case there
     and runs after the grab for a grab's stream
     (`PointerTapRouterTests` ▸ `ownsTheStream`).
-  - **The callback reads only the event and the snapshot.** The
-    main actor publishes each consumer's settings as a Sendable
-    `PointerTapSnapshot`; the pure `PointerTapRouter` decides from
-    the event's own location and flags, never a remembered
-    position, and the callback does no AX, no window lookup and no
-    main-actor hop. Window lookups and frame writes run on the
-    main actor after delivery, and an end no event placed carries
+  - **The callback reads only the event and the snapshot**, save
+    the touch reader's live finger count, `TouchFingerCount`, a
+    lock-guarded number the gesture consumer reads at a Dock
+    stream's begin (#1873). The main actor publishes each consumer's
+    settings as a Sendable `PointerTapSnapshot`; the pure
+    `PointerTapRouter` decides from the event's own location and
+    flags, never a remembered position, and the callback does no
+    AX, no window lookup and no main-actor hop
+    (`TouchReaderSeamTests` ▸ `fingerCountIsTheReaders` holds the
+    count's one writer and one reader). Window lookups and frame
+    writes run on the main actor after delivery, and an end no
+    event placed carries
     no location (`PointerTapRouterTests`, `ScrollTapSeamTests` ▸
     `installsOffMain`).
   - **One re-enable path.** `tapDisabledByTimeout` or
@@ -1160,21 +1165,43 @@ editing here:
     actor hears only a recognized tap or swipe, and a swipe is one
     discrete step per touch, never a pan (#1656;
     `TrackpadGestureRouterTests`).
-  - **A gesture macOS answers itself stands down**, read through
-    `TrackpadSystemGestures`; an unread preference owns nothing,
-    so the binding stays live (`TouchGesturesTests` ▸
-    `systemOwnedStandsDown`).
-  - **Consuming a pinch, spread, rotation or Force Click is a
-    gesture-event mask on #2447's pointer tap once it lands (the
-    ruling's `PointerTap`), never a tap of its own and never this
-    reader**, which cannot swallow. The tap takes the chords it
-    swallows through the one `TouchGestures.onGestureEventChords`,
-    which hands an empty map while no such input is bound or the
-    core is stopped, so no binding arms no mask; it decides on its
-    own thread from that pushed copy and hands each gesture back
-    through `TouchGestures.receive` as `.gesture(input)`, so the
+  - **A gesture macOS answers and the pointer tap cannot take
+    stands down**, read through `TrackpadSystemGestures`: the Look
+    up tap, an app's swipe between pages and three-finger drag. A
+    swipe axis set to the Dock's gesture owns nothing, since the
+    tap takes its stream (owner, 2026-11-14); an unread preference
+    owns nothing, so the binding stays live (`TouchGesturesTests` ▸
+    `systemOwnedStandsDown`, `systemPrefsParse`).
+  - **Consuming a pinch, spread, rotation or swipe is `PointerTap`'s
+    `.gestures` consumer, never a tap of its own and never this
+    reader**, which cannot swallow. Its mask is CG types 29 and 30,
+    measured at `PostEvent` like the grab's (#1873, 2026-11-14;
+    `PointerTapGestureTests` ▸ `maskIsGestureOnly`). **A swallow of
+    type 30, the Dock's stream, takes only a whole stream decided at
+    its phase-1 begin**, never part of one
+    (`PointerTapGestureTests` ▸ `dockStreamIsWhole`), and the
+    callback stays off the main actor and cheap. A swipe slot
+    claims its axis only while the reader that fires it runs, for
+    the finger count `TouchFingerCount` reads, or for any bound
+    count with no reading (`PointerTapSwipeTests`, `TouchGesturesTests` ▸
+    `swipeClaimFollowsTheReader`). **Consuming never takes an
+    unmodified gesture**: every consumed input `needsModifier`, and
+    `GestureEventSettings` drops an empty chord whatever a file
+    holds (`PointerTapSwipeTests` ▸ `emptyChordNeverClaims`).
+    It takes the chords it swallows through the one
+    `TouchGestures.onGestureEventChords`, wired once in
+    `wireGestures`, which hands empty settings while no such input
+    is bound or the core is stopped, so no binding arms no mask;
+    the pure `PointerTapRouter+Gestures` decides on the tap's
+    thread, swallowing a magnification or rotation from its begin
+    to its end, and hands each step back through
+    `TouchGestures.receive` as `.gesture(input)`, so the
     exact-modifier match and the handler stay one
-    (`TouchGesturesTests` ▸ `gestureEventChordsReachTheDoor`).
+    (`PointerGestureWiringTests`, `TouchGesturesTests` ▸
+    `gestureEventChordsReachTheDoor`). It reads the private event
+    fields `GestureEventSample` names, whose fallback is that
+    nothing matches and every gesture passes. Force Click is unmeasured
+    and stays out of the mask.
     Residue: the reader takes the devices connected when it is
     built, and is rebuilt only at a resolve that needs it and at
     the session's return (`rearm`); a trackpad paired mid-session

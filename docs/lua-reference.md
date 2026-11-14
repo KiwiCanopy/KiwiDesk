@@ -5244,9 +5244,10 @@ written to the base or a profile's own bindings
 | `swipe3`, `swipe4`, `swipe5` | Swipes three, four or five fingers on a trackpad | any family, or a table of the four directions |
 | `tap2`, `tap3`, `tap4`, `tap5` | Taps two, three, four or five fingers | Lua |
 | `spread`, `pinch_together`, `rotate`, `force_click` | Moves fingers apart, closes them, rotates them, presses a Force Click | Lua |
+| `spread4`, `pinch_together4` | Moves four fingers apart, or closes them | Lua |
 
-`tap2`, `spread`, `pinch_together`, `rotate` and `force_click`
-keep their bindings but do nothing yet. A scroll with no finger
+`tap2` and `force_click` keep their bindings but do nothing yet.
+A scroll with no finger
 phase reaches the `wheel` or the `wheel_x` binding of its keys by
 the axis its first movement takes most.
 
@@ -5261,6 +5262,23 @@ forward in no app, browsers included. Where a mouse's own app,
 such as Logi Options+, remaps a button, KiwiDesk sees what that
 app sends. A bound button, like a grab, needs only the
 Accessibility permission, never Input Monitoring.
+
+A `spread`, `pinch_together` or `rotate` begun with the keys of
+its binding goes to that binding alone, each input firing once per
+gesture: the app under the pointer gets none of it, so ⌃⌥ + pinch
+never zooms Preview while a slot holds ⌃⌥. A spread and a pinch
+together are one gesture until it ends, so with only one of them
+bound the other, with the same keys, reaches neither the binding
+nor the app. The same gesture with other keys, or none, reaches
+the app as it is.
+
+`spread4` and `pinch_together4` take the four-finger pinch and
+spread the same way, so macOS shows neither Apps nor the desktop.
+A `swipe3` or `swipe4` binding takes its swipe from macOS on the
+axes it binds, so its keys held keep Spaces and Mission Control
+still, while the touch reader runs. Where it has no finger count,
+a swipe with those keys is taken for any finger count bound on that
+axis. `swipe5` is taken alike, unmeasured.
 
 The keys are modifiers joined by `+` — `control` (`ctrl`),
 `option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
@@ -5335,9 +5353,9 @@ own keys, so `move` and `resize` may each be bound under several. A
 nothing.
 
 A trackpad gesture macOS answers itself, set in System Settings ▸
-Trackpad, does nothing here, since both would act on it: a
-three-finger tap set to Look up, a three- or four-finger swipe
-along an axis macOS uses, and any three-finger swipe while
+Trackpad, does nothing here where KiwiDesk cannot take it from
+macOS: a three-finger tap set to Look up, a swipe along an axis set
+to swipe between pages, and any three-finger swipe while
 three-finger drag is on. KiwiDesk reads those settings each time a
 gesture lands. Reading the trackpad's taps and multi-finger swipes
 needs no permission; where macOS no longer offers the private

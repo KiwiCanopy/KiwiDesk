@@ -74,6 +74,21 @@ struct TouchReaderSeamTests {
         #expect(closure.contains("mouse.trackpad.rearm()"))
     }
 
+    /// The tap callback's one input beside the event and the
+    /// snapshot (input-and-animation.md): the reader writes it, the
+    /// tap reads it, and no third site may.
+    @Test("the finger count has one writer and one reader")
+    func fingerCountIsTheReaders() throws {
+        #expect(
+            Set(try Self.files(of: "TouchFingerCount.set"))
+                == ["TouchReader.swift"]
+        )
+        #expect(
+            Set(try Self.files(of: "TouchFingerCount.now"))
+                == ["PointerTap.swift"]
+        )
+    }
+
     @Test("the framework's callables are the reader's alone")
     func callablesHaveOneCaller() throws {
         for symbol in [

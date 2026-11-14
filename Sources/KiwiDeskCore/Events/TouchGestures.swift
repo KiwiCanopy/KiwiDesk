@@ -123,23 +123,24 @@ public final class TouchGestures {
         }
     }
 
-    /// The chords the gesture-event consumer swallows, per input —
-    /// the one door #2447's tap takes them through, handed on every
-    /// change and empty while stopped, so no binding arms no mask.
-    /// Its gestures come back through `receive`.
-    var onGestureEventChords:
-        (@MainActor ([GestureInput: Set<ScrollChord>]) -> Void)?
+    /// The chords the pointer tap's gesture consumer swallows, per
+    /// input — its one door (#1873), handed on every change and
+    /// empty while stopped, so no binding arms no mask. Its
+    /// gestures come back through `receive`.
+    var onGestureEventChords: (@MainActor (GestureEventSettings) -> Void)?
     {
         didSet { sync() }
     }
 
-    private var gestureEventChords: [GestureInput: Set<ScrollChord>] {
-        guard started else { return [:] }
-        var out: [GestureInput: Set<ScrollChord>] = [:]
-        for key in bindings.keys where key.input.isGestureEvent {
-            out[key.input, default: []].insert(key.chord)
-        }
-        return out
+    /// A swipe's stream is claimed only while the reader runs that
+    /// fires it. An axis macOS keeps for an app's page swipe sends
+    /// no Dock stream, so `receive`'s stand-down alone judges it.
+    private var gestureEventChords: GestureEventSettings {
+        guard started else { return GestureEventSettings() }
+        return GestureEventSettings(
+            bindings: bindings,
+            swipes: reader != nil
+        )
     }
 
     /// Whether a bound slot needs the touch reader: one the touch
@@ -152,7 +153,8 @@ public final class TouchGestures {
     }
 
     private func sync() {
-        onGestureEventChords?(gestureEventChords)
+        // After the reader step: the swipes' claim follows the reader.
+        defer { onGestureEventChords?(gestureEventChords) }
         guard started, needsReader else {
             reader?.stop()
             reader = nil

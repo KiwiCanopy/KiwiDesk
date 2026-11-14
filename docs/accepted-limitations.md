@@ -499,9 +499,9 @@ until the swipe ends
 
 That is accepted for now: until Mission Control opens, the swipe
 gives KiwiDesk no signal but the raw finger contacts on the
-trackpad, which KiwiDesk does not read yet — the reader
-[#1873](https://github.com/KiwiCanopy/KiwiDesk/issues/1873)
-needs too.
+trackpad, which KiwiDesk reads only for its own gesture slots
+([#1873](https://github.com/KiwiCanopy/KiwiDesk/issues/1873)),
+never for the ring.
 
 With KiwiVision on, the window you move the focus away from stays clear for a split second — about 40–60 ms — after you click or switch, until KiwiDesk hears that the focus moved ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)). A floating window shows it most, since it sits on top. macOS reports a focus change through Accessibility only after the window has come forward.
 

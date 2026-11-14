@@ -39,6 +39,15 @@ extension KiwiCore {
         mouse.pointer.setButtonHandler { [weak self] event in
             self?.withUserMotion { self?.handleButtonGesture(event) }
         }
+        // The pinches and rotation: their chords reach the pointer
+        // tap, and its gestures come back through the touch front's
+        // one match (#1873).
+        mouse.trackpad.onGestureEventChords = { [weak self] chords in
+            self?.mouse.pointer.configure(gestures: chords)
+        }
+        mouse.pointer.setGestureHandler { [weak self] event in
+            self?.mouse.trackpad.receive([event])
+        }
     }
 
     func handleScrollBinding(
@@ -198,7 +207,7 @@ extension KiwiCore {
             let forward =
                 family.stepsForward(direction) ?? direction.isBackward
             let step = forward ? 1 : -1
-            let horizontal = direction == .left || direction == .right
+            let horizontal = direction.isHorizontal
             _ = stepScrollPan(
                 space,
                 by: step,
