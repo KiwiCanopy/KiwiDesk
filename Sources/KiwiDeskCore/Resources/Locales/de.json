@@ -2237,7 +2237,7 @@
   "shortcuts.gestures.refusal.single_key": "Halte zwei oder mehr Tasten: macOS und Apps scrollen mit einer.",
   "shortcuts.gestures.refusal.taken": "Diese Tasten belegt schon eine andere Zeile.",
   "shortcuts.gestures.remove": "Geste entfernen",
-  "shortcuts.gestures.row_name": "%1$@ mit %2$@",
+  "shortcuts.gestures.row_name": "%2$@ + %1$@",
   "shortcuts.gestures.rows": "Gesten",
   "shortcuts.gestures.scroll.hold": "Tasten halten…",
   "shortcuts.gestures.scroll.long_swipes": "Lange Wischbewegungen gehen über mehr Fenster",

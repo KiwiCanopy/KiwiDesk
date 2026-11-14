@@ -2237,7 +2237,7 @@
   "shortcuts.gestures.refusal.single_key": "Mantén pulsadas dos o más teclas: macOS y las apps se desplazan con una.",
   "shortcuts.gestures.refusal.taken": "Otra fila ya usa estas teclas.",
   "shortcuts.gestures.remove": "Eliminar gesto",
-  "shortcuts.gestures.row_name": "%1$@ con %2$@",
+  "shortcuts.gestures.row_name": "%2$@ + %1$@",
   "shortcuts.gestures.rows": "Gestos",
   "shortcuts.gestures.scroll.hold": "Mantén las teclas…",
   "shortcuts.gestures.scroll.long_swipes": "Los deslizamientos largos recorren más ventanas",
