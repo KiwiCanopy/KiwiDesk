@@ -161,9 +161,9 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .leaderTakesFromMacOS:
+            case .winsFromMacOS:
                 return L(
-                    "keybinding.conflict.system_leader",
+                    "keybinding.conflict.system_wins_macos",
                     "Shortcut for \"%1$@\" takes \"%2$@\" away "
                         + "from macOS.",
                     name(conflict.binding),
@@ -246,9 +246,9 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .leaderTakesFromMacOS:
+            case .winsFromMacOS:
                 return L(
-                    "keybinding.conflict.bullet.system_leader",
+                    "keybinding.conflict.bullet.system_wins_macos",
                     "\"%1$@\" takes \"%2$@\" away from macOS",
                     name(conflict.binding),
                     shortcut.localizedName

@@ -155,9 +155,9 @@ enum ConflictText {
                 "Takes %1$@ away from macOS while this sequence is open.",
                 shortcut.localizedName
             )
-        case .leaderTakesFromMacOS(let shortcut):
+        case .winsFromMacOS(let shortcut):
             return L(
-                "keybinding.conflict.tooltip.leader_system",
+                "keybinding.conflict.tooltip.wins_macos",
                 "Takes %1$@ away from macOS while it is bound here.",
                 shortcut.localizedName
             )

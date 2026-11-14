@@ -73,12 +73,14 @@ struct ConflictSeverityTests {
         }
     }
 
-    /// Measured 2026-11-14 (#3239): a posted ⌃⌥Space switched the
-    /// input source with nothing bound, and never once a leader's
-    /// tap swallowed it. A Carbon row and a leader on another
-    /// symbolic chord are unmeasured, so they stay dead.
-    @Test("a leader on the input-source chord takes it from macOS")
-    func leaderTakesTheInputSourceChord() throws {
+    /// Measured 2026-11-14 (#3239), macOS 27.2: a posted ⌃⌥Space
+    /// switched the input source with nothing bound; a leader's tap
+    /// swallowed it every time with no switch, and a Carbon hotkey
+    /// fired on six presses by hand with no switch. So a row on it
+    /// works, on or off, whichever way it is bound. A leader on
+    /// another symbolic chord is unmeasured and stays dead.
+    @Test("any row on the input-source chord takes it from macOS")
+    func rowsTakeTheInputSourceChord() throws {
         let leader = KeyBinding(combo: "ctrl+alt+space", kind: .sequence)
         let onLeader = try #require(
             KeybindingConflicts.conflict(
@@ -87,18 +89,14 @@ struct ConflictSeverityTests {
                 distinguishingSides: false
             )
         )
-        let severity = ConflictSeverity.of(onLeader, disabled: [])
-        #expect(severity == .leaderTakesFromMacOS(.inputSourceNext))
-        #expect(!severity.isDead)
-        #expect(
-            ConflictSeverity.of(onLeader, disabled: [.inputSourceNext])
-                == .dormant(.inputSourceNext)
-        )
         let carbon = try #require(conflict("ctrl+alt+space"))
-        #expect(
-            ConflictSeverity.of(carbon, disabled: [])
-                == .dead(.inputSourceNext)
-        )
+        for found in [onLeader, carbon] {
+            for disabled: Set<SystemShortcut> in [[], [.inputSourceNext]] {
+                let severity = ConflictSeverity.of(found, disabled: disabled)
+                #expect(severity == .winsFromMacOS(.inputSourceNext))
+                #expect(!severity.isDead)
+            }
+        }
         let spotlight = KeyBinding(combo: "command+space", kind: .sequence)
         let onSpotlight = try #require(
             KeybindingConflicts.conflict(
@@ -112,7 +110,7 @@ struct ConflictSeverityTests {
                 == .dead(.spotlight)
         )
         #expect(
-            SystemShortcut.allCases.filter(\.yieldsToKeyboardTap)
+            SystemShortcut.allCases.filter(\.losesToKiwiDesk)
                 == [.inputSourceNext]
         )
     }
@@ -190,6 +188,15 @@ struct ConflictSeverityTests {
             SystemShortcut.allCases.contains(where: {
                 $0.isUniversalAccelerator
             })
+        )
+        // `of` asks `losesToKiwiDesk` first: a member off the
+        // symbolic table would win with no plist bit behind it.
+        #expect(
+            SystemShortcut.allCases
+                .filter(\.losesToKiwiDesk)
+                .allSatisfy {
+                    $0.symbolicHotkey != nil && !$0.isUniversalAccelerator
+                }
         )
     }
 

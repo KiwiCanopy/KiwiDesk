@@ -14,9 +14,8 @@ import SwiftUI
 /// exactly one fires; a chord every app's menus carry (⌘W) is
 /// WON by KiwiDesk, so the app loses it. ⌘Tab and ⌥⌘Esc, outside
 /// the symbolic table, are macOS's too (#1275, 2026-10-10): dead,
-/// and no setting switches them off. A leader on the input-source
-/// chord wins it: macOS answers that one past the keyboard tap
-/// (#3239, 2026-11-14).
+/// and no setting switches them off. `⌃⌥space` is KiwiDesk's
+/// whichever way it is bound, on or off (#3239, 2026-11-14).
 enum ConflictSeverity: Equatable {
     /// A chord macOS answers first — a symbolic hotkey it has
     /// switched on, or ⌘Tab / ⌥⌘Esc: the row never fires.
@@ -31,10 +30,9 @@ enum ConflictSeverity: Equatable {
     /// A sequence's step key on a chord macOS answers: the key wins
     /// it while the sequence is open, macOS loses it then (#3173).
     case takesFromMacOS(SystemShortcut)
-    /// A sequence's leader on a chord macOS answers only past the
-    /// keyboard tap: the leader wins it, and macOS loses it while
-    /// it is bound (#3239).
-    case leaderTakesFromMacOS(SystemShortcut)
+    /// A symbolic hotkey KiwiDesk wins (#3239): the row works and
+    /// macOS loses the chord while it is bound.
+    case winsFromMacOS(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
     case duplicate(KeyBinding)
@@ -69,10 +67,8 @@ enum ConflictSeverity: Equatable {
     ) -> ConflictSeverity {
         switch conflict.target {
         case .systemShortcut(let shortcut):
+            if shortcut.losesToKiwiDesk { return .winsFromMacOS(shortcut) }
             if disabled.contains(shortcut) { return .dormant(shortcut) }
-            if conflict.binding.isSequence, shortcut.yieldsToKeyboardTap {
-                return .leaderTakesFromMacOS(shortcut)
-            }
             return shortcut.isUniversalAccelerator
                 ? .shadowsApps(shortcut) : .dead(shortcut)
         case .otherBinding(let who):
