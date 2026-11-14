@@ -19,6 +19,10 @@ public enum ManagedConfig {
         "KiwiDesk.define_layer(",
         "KiwiDesk.define_sequence(",
         "KiwiDesk.bind_profile_to_desktop(",
+        // A gesture binding is a binding (#3297): one home, as
+        // `KiwiDesk.bind` (`local g = gesture` escapes too).
+        "gesture.bind(",
+        "gesture.unbind(",
     ]
 
     /// True if code touches GUI-managed vocabulary (`gui.json` ownership).
@@ -127,7 +131,17 @@ public enum ManagedConfig {
                 with: "(",
                 options: .regularExpression
             )
-            return norm.contains(token)
+            // No receiver may run into the token: `scroll_gesture`
+            // and the retired `trackpad_gesture` end in it (#3297).
+            // Trade: a token reached through a table
+            // (`_G.gesture.bind(`) escapes, as an alias does.
+            let anchored =
+                #"(?<![\w.])"#
+                + NSRegularExpression.escapedPattern(for: token)
+            return norm.range(
+                of: anchored,
+                options: .regularExpression
+            ) != nil
         }
         let pat =
             #"\b"#

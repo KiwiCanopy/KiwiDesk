@@ -75,6 +75,31 @@ struct ManagedConfigTests {
         #expect(ManagedConfig.hasForeignCode(source))
     }
 
+    /// A gesture binding is a binding (#3297), the first token
+    /// outside `KiwiDesk.`. Residue: an aliased receiver
+    /// (`local g = gesture; g.bind(…)`) escapes the scan, as
+    /// `KiwiDesk.bind`'s does.
+    @Test("gesture.bind and gesture.unbind are foreign")
+    func gestureBindIsForeign() {
+        for line in [
+            #"gesture.bind("tap5", "", "KiwiDesk.cycle_mode()")"#,
+            #"gesture.unbind ("tap3", "")"#,
+        ] {
+            #expect(ManagedConfig.hasForeignCode(line), "\(line)")
+            #expect(ManagedConfig.declaresManagedSettings(line))
+        }
+        #expect(!ManagedConfig.hasForeignCode("local g = gesture"))
+        // A namespace ending in the token is another verb; one
+        // reached through a table escapes, as an alias does.
+        for line in [
+            #"trackpad_gesture.bind("tap3", "", "x()")"#,
+            #"scroll_gesture.bind("x")"#,
+            #"_G.gesture.bind("tap5", "", "x()")"#,
+        ] {
+            #expect(!ManagedConfig.hasForeignCode(line), "\(line)")
+        }
+    }
+
     @Test("tiling-only Lua is NOT foreign")
     func tilingOnlyIsNotForeign() {
         // set_gap_global, set_mode etc. are not foreign tokens
