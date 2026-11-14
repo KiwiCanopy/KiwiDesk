@@ -75,8 +75,7 @@ struct KnownSetupsGroup: View {
             }
         }
         .contentShape(Rectangle())
-        // The connected row has nothing to do from the keyboard.
-        .focusable(!setup.isConnected)
+        // The ✕ holds the row's focus, as a Space row's button does.
         .rowActions {
             // A menu row: the style is the menu's.
             Button(

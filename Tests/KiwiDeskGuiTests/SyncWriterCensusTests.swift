@@ -36,6 +36,7 @@ struct SyncWriterCensusTests {
         "KiwiCore+SharedLookWrite.swift": (2, .userAct),
         "KiwiCore+KeepLayouts.swift": (1, .userAct),
         "KiwiCore+MonitorSetClaim.swift": (1, .userAct),
+        "KiwiCore+MonitorSetForget.swift": (1, .userAct),
         "KiwiCore+ProfileEdit.swift": (2, .userAct),
         "KiwiCore+ProfileSpaces.swift": (1, .userAct),
         "KiwiCore+RuleReachSave.swift": (2, .userAct),
