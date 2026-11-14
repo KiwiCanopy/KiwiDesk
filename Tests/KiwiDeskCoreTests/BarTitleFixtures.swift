@@ -59,6 +59,17 @@ let barTitleDisplay = DisplayID(7)
 func pinShelfGlide() {
     BarMotion.shelfGlide = 0.05
 }
+
+/// Pins the reveal at its shipped length for a test that plays one,
+/// a PIN as `pinShelfGlide` is: every test core's `updateBars()`
+/// writes `BarMotion.revealLength` from its own pace, and one left
+/// at Off or an instant reveal plays no reveal at all (#3307).
+@MainActor
+func pinRevealLength() {
+    BarMotion.revealLength = AnimationSettings().revealSeconds(
+        at: AppWideSettings()
+    )
+}
 let barTitleStrip = CGRect(x: 0, y: 0, width: 1440, height: 28)
 
 func appBarItem(

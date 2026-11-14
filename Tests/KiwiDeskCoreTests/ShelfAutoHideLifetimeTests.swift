@@ -88,6 +88,7 @@ struct ShelfAutoHideLifetimeTests {
     func staleLandingKeepsTheNewerReveal() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
+        pinRevealLength()
         let overlay = ShelfOverlay()
         var landings: [() -> Void] = []
         overlay.afterReveal = { _, body in landings.append(body) }
