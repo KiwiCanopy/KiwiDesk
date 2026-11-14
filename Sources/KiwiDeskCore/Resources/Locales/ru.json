@@ -1990,7 +1990,7 @@
   "profiles.which_loads.placement_by_number": "Сейчас: %1$@ → раскладку по-прежнему задаёт твоя конфигурация Lua; KiwiDesk размещает пространства на экранах по их номерам.",
   "profiles.which_loads.placement_by_number_profile": "Сейчас: %1$@ → раскладку по-прежнему задаёт %2$@; KiwiDesk размещает пространства на экранах по их номерам.",
   "profiles.which_loads.rule": "KiwiDesk использует один профиль сразу для всех твоих экранов.",
-  "profiles.which_loads.standard": "Сейчас: %1$@ → встроенный %2$@ (нет подходящего сохранённого профиля).",
+  "profiles.which_loads.standard": "Сейчас: %1$@ → встроенная раскладка «%2$@» (нет подходящего сохранённого профиля).",
   "profiles.which_loads.title": "Какой профиль загружается",
   "pull_down.ax_hint": "Открывает меню.",
   "ratio.chips": "%1$@: готовые значения",
