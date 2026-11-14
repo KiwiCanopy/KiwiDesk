@@ -89,10 +89,12 @@ struct ManagedConfigTests {
             #expect(ManagedConfig.declaresManagedSettings(line))
         }
         #expect(!ManagedConfig.hasForeignCode("local g = gesture"))
-        // A namespace ending in the token is another verb.
+        // A namespace ending in the token is another verb; one
+        // reached through a table escapes, as an alias does.
         for line in [
             #"trackpad_gesture.bind("tap3", "", "x()")"#,
             #"scroll_gesture.bind("x")"#,
+            #"_G.gesture.bind("tap5", "", "x()")"#,
         ] {
             #expect(!ManagedConfig.hasForeignCode(line), "\(line)")
         }
