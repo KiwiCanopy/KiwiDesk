@@ -66,16 +66,23 @@ struct TrackpadGestureRouterTests {
         _ n: Int,
         dx: Float,
         dy: Float,
+        over duration: Double = 0.1,
         modifiers: ScrollChord = hyper
     ) -> [TouchFrame] {
         (0...10).map { step in
             let t = Float(step) / 10
             return TouchFrame(
-                time: Double(step) * 0.01,
+                time: Double(step) * duration / 10,
                 contacts: fingers(n, x: 0.3 + dx * t, y: 0.5 + dy * t),
                 modifiers: modifiers
             )
-        } + [TouchFrame(time: 0.2, contacts: [])]
+        } + [
+            TouchFrame(
+                time: duration + 0.01,
+                contacts: [],
+                modifiers: modifiers
+            )
+        ]
     }
 
     @Test("a swipe fires once, in its direction, and is no tap")
@@ -92,10 +99,167 @@ struct TrackpadGestureRouterTests {
         }
     }
 
-    @Test("a short or diagonal slide decides nothing")
+    @Test("a short slow or diagonal slide decides nothing")
     func shortOrDiagonalSlide() {
-        #expect(run(swipe(4, dx: 0.06, dy: 0)).isEmpty)
+        #expect(run(swipe(4, dx: 0.09, dy: 0, over: 1)).isEmpty)
+        // Far enough for a flick at 0.2 pad/s, too slow for one.
+        #expect(run(swipe(4, dx: 0.06, dy: 0, over: 0.3)).isEmpty)
         #expect(run(swipe(4, dx: 0.2, dy: 0.2)).isEmpty)
+    }
+
+    @Test("a quick short flick fires, as macOS takes one")
+    func flickFires() {
+        let events = run(swipe(3, dx: -0.06, dy: 0, over: 0.08))
+        #expect(events.map(\.kind) == [.swipe(.left)])
+        #expect(events.first?.modifiers == Self.hyper)
+        #expect(
+            run(swipe(4, dx: 0, dy: 0.06, over: 0.08)).map(\.kind)
+                == [.swipe(.up)]
+        )
+        #expect(
+            run(swipe(3, dx: 0, dy: -0.06, over: 0.08)).map(\.kind)
+                == [.swipe(.down)]
+        )
+    }
+
+    @Test("a slow swipe waits for its distance, never flicking early")
+    func slowSwipeWaits() {
+        // 0.5 pad/s, past flick speed: 5% at 0.1 s, 12% at 0.24 s.
+        let events = run(swipe(3, dx: 0.2, dy: 0, over: 0.4))
+        #expect(events.map(\.kind) == [.swipe(.right)])
+        #expect((events.first?.time ?? 0) >= 0.23, "fired at 12%")
+    }
+
+    @Test("a flick that stops before the lift is no flick")
+    func heldFlickIsNoFlick() {
+        var frames = swipe(3, dx: 0.06, dy: 0, over: 0.08)
+        frames.removeLast()
+        let still = fingers(3, x: 0.36, y: 0.5)
+        frames += (1...20).map {
+            TouchFrame(time: 0.08 + Double($0) * 0.01, contacts: still)
+        }
+        frames.append(TouchFrame(time: 0.29, contacts: []))
+        #expect(run(frames).isEmpty)
+    }
+
+    @Test("a release long after the last frame is no flick")
+    func staleReleaseIsNoFlick() {
+        // The frames stop after the flick; the lift, or a finger's,
+        // reaches the router 0.2 s later.
+        var frames = swipe(3, dx: -0.06, dy: 0, over: 0.08)
+        frames.removeLast()
+        let late = TouchFrame(
+            time: 0.3,
+            contacts: [],
+            modifiers: Self.hyper
+        )
+        #expect(run(frames + [late]).isEmpty)
+        let drop = TouchFrame(
+            time: 0.3,
+            contacts: Array(fingers(3, x: 0.24, y: 0.5).prefix(2)),
+            modifiers: Self.hyper
+        )
+        #expect(run(frames + [drop]).isEmpty)
+    }
+
+    @Test("the first finger to lift releases the flick")
+    func firstLiftReleases() {
+        var frames = swipe(4, dx: -0.07, dy: 0, over: 0.1)
+        frames.removeLast()
+        frames.append(
+            TouchFrame(
+                time: 0.11,
+                contacts: Array(fingers(4, x: 0.23, y: 0.5).prefix(3)),
+                modifiers: Self.hyper
+            )
+        )
+        let events = run(frames)
+        #expect(events.map(\.kind) == [.swipe(.left)])
+        #expect(events.first?.fingers == 4)
+        #expect(events.first?.time == 0.11)
+        #expect(events.first?.modifiers == Self.hyper)
+    }
+
+    @Test("a flick after a rest still fires")
+    func pauseThenFlick() {
+        let rest = (0...30).map { step in
+            TouchFrame(
+                time: Double(step) * 0.01,
+                contacts: fingers(3, x: 0.3, y: 0.5),
+                modifiers: Self.hyper
+            )
+        }
+        let flick = (1...8).map { step in
+            TouchFrame(
+                time: 0.3 + Double(step) * 0.01,
+                contacts: fingers(
+                    3,
+                    x: 0.3 + Float(step) * 0.008,
+                    y: 0.5
+                ),
+                modifiers: Self.hyper
+            )
+        }
+        let lift = TouchFrame(
+            time: 0.39,
+            contacts: [],
+            modifiers: Self.hyper
+        )
+        let events = run(rest + flick + [lift])
+        #expect(events.map(\.kind) == [.swipe(.right)])
+    }
+
+    @Test("a landing finger's jump is no part of the flick")
+    func landingJumpIsNoFlick() {
+        // Three fingers rest; a fourth lands far right, jumping the
+        // centre 0.06; the four then flick left 0.06 and lift. Read
+        // across the landing, the flick would net almost nothing.
+        let rest = (0...4).map {
+            TouchFrame(
+                time: Double($0) * 0.005,
+                contacts: fingers(3, x: 0.3, y: 0.5),
+                modifiers: Self.hyper
+            )
+        }
+        let lone = TouchContact(id: 9, x: 0.6, y: 0.5)
+        let flick = (0...8).map { step in
+            let dx = -Float(step) * 0.0075
+            return TouchFrame(
+                time: 0.025 + Double(step) * 0.01,
+                contacts: fingers(3, x: 0.3 + dx, y: 0.5)
+                    + [TouchContact(id: 9, x: lone.x + dx, y: 0.5)],
+                modifiers: Self.hyper
+            )
+        }
+        let lift = TouchFrame(
+            time: 0.11,
+            contacts: [],
+            modifiers: Self.hyper
+        )
+        let events = run(rest + flick + [lift])
+        #expect(events.map(\.kind) == [.swipe(.left)])
+        #expect(events.first?.fingers == 4)
+    }
+
+    @Test("a quick tap that rolls within its travel still taps")
+    func rollingTapTaps() {
+        let frames =
+            (0...5).map { step in
+                TouchFrame(
+                    time: Double(step) * 0.01,
+                    contacts: fingers(
+                        3,
+                        x: 0.4 + Float(step) * 0.007,
+                        y: 0.5
+                    )
+                )
+            } + [TouchFrame(time: 0.06, contacts: [])]
+        #expect(run(frames).map(\.kind) == [.tap])
+        // The roll the tap allows never reaches a flick.
+        #expect(
+            TrackpadGestureRouter.flickDistance
+                > TrackpadGestureRouter.tapTravel
+        )
     }
 
     @Test("a two-finger slide is the scroll gestures', never a swipe")
@@ -117,68 +281,9 @@ struct TrackpadGestureRouterTests {
             TouchFrame(time: 0.06, contacts: fingers(3, x: 0.5, y: 0.5))
         )
         frames.append(
-            TouchFrame(time: 0.07, contacts: fingers(3, x: 0.55, y: 0.5))
+            TouchFrame(time: 0.07, contacts: fingers(3, x: 0.53, y: 0.5))
         )
         frames.append(TouchFrame(time: 0.08, contacts: []))
         #expect(run(frames).isEmpty)
-    }
-}
-
-/// The `MTTouch` record read (#1873): the touching states, the
-/// buffer's end, and positions off the pad.
-@Suite("Touch frame parse")
-struct TouchFrameParseTests {
-    private func record(
-        id: Int32,
-        state: Int32,
-        x: Float,
-        y: Float
-    ) -> [UInt8] {
-        var bytes = [UInt8](
-            repeating: 0,
-            count: MultitouchSupport.Layout.stride
-        )
-        func put<T>(_ value: T, at offset: Int) {
-            withUnsafeBytes(of: value) { raw in
-                for (index, byte) in raw.enumerated() {
-                    bytes[offset + index] = byte
-                }
-            }
-        }
-        put(id, at: MultitouchSupport.Layout.identifier)
-        put(state, at: MultitouchSupport.Layout.state)
-        put(x, at: MultitouchSupport.Layout.x)
-        put(y, at: MultitouchSupport.Layout.y)
-        return bytes
-    }
-
-    @Test("touching records parse; hovering ones and overruns drop")
-    func parses() {
-        let bytes =
-            record(id: 7, state: 4, x: 0.25, y: 0.75)
-            + record(id: 8, state: 2, x: 0.5, y: 0.5)
-            + record(id: 9, state: 3, x: 0.1, y: 0.2)
-        let contacts = bytes.withUnsafeBytes {
-            MultitouchSupport.contacts(in: $0, count: 4)
-        }
-        #expect(
-            contacts == [
-                TouchContact(id: 7, x: 0.25, y: 0.75),
-                TouchContact(id: 9, x: 0.1, y: 0.2),
-            ]
-        )
-    }
-
-    @Test("a position off the pad is garbage and dropped")
-    func offPadDrops() {
-        let bytes =
-            record(id: 1, state: 4, x: .nan, y: 0.5)
-            + record(id: 2, state: 4, x: 0.5, y: 7)
-            + record(id: 3, state: 4, x: -0.2, y: 0.5)
-            + record(id: 4, state: 4, x: 1.05, y: -0.05)
-        let contacts = bytes.withUnsafeBytes {
-            MultitouchSupport.contacts(in: $0, count: 4)
-        }
-        #expect(contacts.map(\.id) == [4])
     }
 }

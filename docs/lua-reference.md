@@ -5280,6 +5280,11 @@ still, while the touch reader runs. Where it has no finger count,
 a swipe with those keys is taken for any finger count bound on that
 axis. `swipe5` is taken alike, unmeasured.
 
+A multi-finger swipe takes its step once the fingers travel 12% of
+the trackpad along its direction, or, as macOS takes a quick
+flick, at the release when they travelled 5% and were still moving
+at 40% of the pad per second.
+
 The keys are modifiers joined by `+` — `control` (`ctrl`),
 `option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
 holds none. A tap, `wheel_click` and `side_buttons` may hold

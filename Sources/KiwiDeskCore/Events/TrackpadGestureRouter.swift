@@ -27,7 +27,10 @@ public struct TrackpadGestureEvent: Equatable, Sendable {
 /// An episode runs from the first finger down to the last one
 /// up. A swipe fires when the fingers' centre has travelled
 /// `swipeDistance` along one axis since the finger count last
-/// changed; a tap fires at the lift when no swipe fired, every
+/// changed; a flick fires at a release — a finger lifting — as
+/// macOS takes a quick short swipe, when the centre travelled
+/// `flickDistance` and still moved at `flickSpeed` over the last
+/// `flickWindow`. A tap fires at the lift when no swipe fired, every
 /// finger stayed within `tapTravel` and the touch lasted at most
 /// `tapDuration`.
 struct TrackpadGestureRouter {
@@ -38,6 +41,16 @@ struct TrackpadGestureRouter {
     static let swipeDistance: Float = 0.12
     /// The swipe's own axis must lead the other by this factor.
     static let axisDominance: Float = 1.6
+    /// A flick's least travel, and the speed in normalized pad
+    /// lengths per second along its axis it must still have over the
+    /// window before the release, which must end within it.
+    /// Measured 2026-11-14 on the owner's trackpad: slow swipes
+    /// ended at 0.03–0.16, quick flicks at 0.67–1.24 and travelled
+    /// 0.066–0.128. The travel stays above `tapTravel`, or
+    /// a tap rolling one way would swipe.
+    static let flickDistance: Float = 0.05
+    static let flickSpeed: Float = 0.4
+    static let flickWindow = 0.1
     static let tapTravel: Float = 0.04
     static let tapDuration = 0.35
     static let fingerRange = 3...5
@@ -51,6 +64,11 @@ struct TrackpadGestureRouter {
         var travel: Float = 0
         /// The centre when the count last changed.
         var baseline: (Float, Float)?
+        /// The centres within `flickWindow`, oldest first, since
+        /// the count last changed: a landing or lifting finger
+        /// jumps the centre, so a release reads the window before
+        /// it.
+        var recent: [(time: Double, centre: (Float, Float))] = []
         var count = 0
     }
 
@@ -73,32 +91,67 @@ struct TrackpadGestureRouter {
             )
         }
         let centre = Self.centre(of: contacts)
+        var events: [TrackpadGestureEvent] = []
         if contacts.count != current.count {
+            if contacts.count < current.count {
+                events += Self.release(&current, frame)
+            }
             current.count = contacts.count
             current.baseline = centre
+            current.recent = []
         }
-        var events: [TrackpadGestureEvent] = []
+        current.recent.removeAll {
+            frame.time - $0.time > Self.flickWindow
+        }
+        current.recent.append((frame.time, centre))
         if !current.fired, Self.fingerRange.contains(contacts.count),
             let base = current.baseline,
-            let direction = Self.swipe(from: base, to: centre)
+            let direction = Self.swipe(
+                from: base,
+                to: centre,
+                over: Self.swipeDistance
+            )
         {
             current.fired = true
             events.append(
-                TrackpadGestureEvent(
-                    kind: .swipe(direction),
-                    fingers: contacts.count,
-                    modifiers: frame.modifiers,
-                    time: frame.time
-                )
+                Self.swipeEvent(direction, contacts.count, frame)
             )
         }
         episode = current
         return events
     }
 
+    /// The flick a release decides, if the fingers that held still
+    /// moved at `flickSpeed` before it.
+    private static func release(
+        _ episode: inout Episode,
+        _ frame: TouchFrame
+    ) -> [TrackpadGestureEvent] {
+        guard !episode.fired, fingerRange.contains(episode.count),
+            let direction = flick(of: episode, at: frame.time)
+        else { return [] }
+        episode.fired = true
+        return [swipeEvent(direction, episode.count, frame)]
+    }
+
+    private static func swipeEvent(
+        _ direction: Direction,
+        _ fingers: Int,
+        _ frame: TouchFrame
+    ) -> TrackpadGestureEvent {
+        TrackpadGestureEvent(
+            kind: .swipe(direction),
+            fingers: fingers,
+            modifiers: frame.modifiers,
+            time: frame.time
+        )
+    }
+
     private mutating func lift(_ frame: TouchFrame) -> [TrackpadGestureEvent] {
-        guard let ended = episode else { return [] }
+        guard var ended = episode else { return [] }
         episode = nil
+        let flicked = Self.release(&ended, frame)
+        guard flicked.isEmpty else { return flicked }
         guard !ended.fired,
             Self.fingerRange.contains(ended.maxFingers),
             ended.travel <= Self.tapTravel,
@@ -124,17 +177,48 @@ struct TrackpadGestureRouter {
         )
     }
 
-    /// The direction once the travel decides one; y grows up.
+    /// The flick an episode's last window decides: `flickDistance`
+    /// since the count changed, still moving that way at
+    /// `flickSpeed`.
+    private static func flick(
+        of episode: Episode,
+        at now: Double
+    ) -> Direction? {
+        guard let base = episode.baseline,
+            let first = episode.recent.first,
+            let last = episode.recent.last,
+            last.time > first.time,
+            now - last.time <= flickWindow,
+            let direction = swipe(
+                from: base,
+                to: last.centre,
+                over: flickDistance
+            )
+        else { return nil }
+        let moved: Float
+        switch direction {
+        case .left: moved = first.centre.0 - last.centre.0
+        case .right: moved = last.centre.0 - first.centre.0
+        case .down: moved = first.centre.1 - last.centre.1
+        case .up: moved = last.centre.1 - first.centre.1
+        }
+        let speed = moved / Float(last.time - first.time)
+        return speed >= flickSpeed ? direction : nil
+    }
+
+    /// The direction once `distance` of travel decides one; y grows
+    /// up.
     private static func swipe(
         from base: (Float, Float),
-        to centre: (Float, Float)
+        to centre: (Float, Float),
+        over distance: Float
     ) -> Direction? {
         let dx = centre.0 - base.0
         let dy = centre.1 - base.1
-        if abs(dx) >= swipeDistance, abs(dx) >= abs(dy) * axisDominance {
+        if abs(dx) >= distance, abs(dx) >= abs(dy) * axisDominance {
             return dx < 0 ? .left : .right
         }
-        if abs(dy) >= swipeDistance, abs(dy) >= abs(dx) * axisDominance {
+        if abs(dy) >= distance, abs(dy) >= abs(dx) * axisDominance {
             return dy < 0 ? .down : .up
         }
         return nil
