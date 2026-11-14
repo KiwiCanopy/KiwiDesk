@@ -26,6 +26,12 @@ struct BarMotionSwiftUISeamTests {
         "contentTransition",
     ]
 
+    /// Core Animation's read of a layer's animation, which
+    /// `.animation` would otherwise answer for (#2878's follow
+    /// reads its host's). Trade: none — SwiftUI's `.animation`
+    /// takes no `forKey:` label.
+    private static let layerRead = ".animation(forKey:"
+
     @Test("No SwiftUI starter ships unscanned in Core")
     func noSwiftUIStarterArrives() throws {
         var found: [String] = []
@@ -35,6 +41,7 @@ struct BarMotionSwiftUISeamTests {
         ) {
             scanned += 1
             let source = try SourceScan.strippedSource(at: file)
+                .replacingOccurrences(of: Self.layerRead, with: "")
             let text = Array(source)
             for spelling in Self.swiftUIStarters
             where source.contains(spelling)

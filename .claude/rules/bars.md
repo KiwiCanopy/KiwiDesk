@@ -1703,11 +1703,48 @@ Obligations:
   rounds it to the backing, and rewriting that rounding is what
   stranded it (`ShelfPlateGlassHostTests` ▸
   `hostResizeFillsThePair`, `roundedGlassIsNotRewritten`). The
-  host's writer joins the pair's writers below
-  (`GlassPairMotionSeamTests` ▸ `hostLayoutStartsNoMotion`). The pair's own
-  frame writers, `GlassPlate.update` and `GlassTint.apply`, take
-  no motion input and start no motion (`GlassPairMotionSeamTests`),
-  so a call site cannot make either travel.
+  host's writer joins the pair's writers below: it takes no motion
+  input and starts no motion of its own, only the follow it
+  copies from the host (`GlassPairMotionSeamTests` ▸
+  `hostLayoutOnlyCopiesTheFollow`). The pair's own frame writers,
+  `GlassPlate.update`, `GlassTint.apply` and
+  `GlassTint.applyBehind`, take no motion input and start no
+  motion (`GlassPairMotionSeamTests`), so a call site cannot make
+  either travel.
+- **Write every frame of a glass pair — in `GlassBox`,
+  `GlassPlate` and `GlassTint` — through the one no-motion
+  writer, `BarMotion.writeStill`, and let a gliding host's glass
+  follow the host's own animation through
+  `BarMotion.followHostResize`** (#2878 ruling amendment, owner
+  2026-11-14). A plain glass write inside the host's animation
+  group is stepped by AppKit on the main thread a frame behind
+  the host's render-server animation, whatever the glass's
+  `autoresizingMask` (device 2026-11-14: the glass trailed by up
+  to 60 pt and cost about 67 ms of main thread a glide). The
+  follow lays the glass out at once and copies the host's bounds
+  animation onto every pair layer at the host's size, all or
+  nothing behind `BarMotion.followTargets`' shape check, since
+  most of those layers are the glass's private tree: every pair
+  view and the glass's content among them, one with no view
+  backing it, and each anchored at its origin and standing at the
+  host's bounds origin. Where the check fails it adds nothing and
+  the landing settle below repairs the frame
+  (`GlassBoxFollowTests`; `GlassPairMotionSeamTests` ▸
+  `frameWritesAreStill`). Force the glass's layout only while
+  its host carries a bounds animation — a plain place, a glide
+  that only moves the box and a host carrying another animation
+  leave it to AppKit's own pass (`GlassBoxLayoutGateTests`); the
+  shape check reads the laid-out layers, so it gates the follow,
+  never the layout (#2878 amendment 3). Judge the follow's cost per Space switch,
+  A-B-A on the device against the build before the change:
+  neither the median main-thread busy nor the count of turns of
+  100 ms or more rises, the trail stays 0 pt and no settle snap
+  fires; re-run it when the glass's tree, the follow or the
+  settle changes (#2878's cost-measure amendment, owner
+  2026-11-14, which keeps that day's numbers). A frame write
+  `GlassBox`, `GlassPlate` or `GlassTint` needs on a layer no
+  view owns widens `writeStill` to take the layer; it never goes
+  in raw.
 - **Write a glass's content to the glass after every resize of
   the glass, through the one `GlassPlate.fitContent`** — called
   by `GlassPlate.update` and by `GlassBoxHost.setFrameSize`,
@@ -1728,10 +1765,14 @@ Obligations:
   a superseded landing writes nothing mid-glide
   (`GlassBoxContentFitTests` ▸ `glideLandingSettles`,
   `supersededLandingWritesNothing`; `GlassPairMotionSeamTests` ▸
-  `settleStartsNoMotion`). This reconciles three writers of one
-  glass — `place`, the host's `setFrameSize` and the glass's own
-  layout — rather than removing them; that ownership is #2425's
-  open half.
+  `settleStartsNoMotion`). Keep the settle as the follow's
+  fallback (#2878) — for a glass off the measured shape, and for
+  a host moved without a bounds animation (the design round of
+  2026-11-14 named the `ShelfHandleView` hover and the
+  `AppBarOverlay+GroupGlide` landing as possible ones, unmeasured)
+  — and retire it only after a device sitting through those paths
+  shows it never changes a frame (owner, 2026-11-14); retiring it
+  re-runs the follow's per-switch cost measure above.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

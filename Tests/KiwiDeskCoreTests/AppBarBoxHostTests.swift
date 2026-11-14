@@ -93,7 +93,8 @@ struct AppBarBoxHostTests {
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(GlassBox.host(of: glass))
             #expect(tint.isDescendant(of: glass))
-            #expect(glass.frame == host.bounds)
+            // Auto Layout rounds the glass to the backing (#2388).
+            #expect(GlassPlate.fills(glass.frame, host.bounds))
         }
     }
 
