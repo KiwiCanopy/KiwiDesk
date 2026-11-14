@@ -94,7 +94,7 @@ extension KeyboardHoverReading {
         scope: KeyboardCensus.Scope,
         selected: Set<KeyboardCensus.ModifierLayer>,
         config: GuiConfig,
-        disabled: Set<SystemShortcut>,
+        system: SystemShortcutState,
         sides: Bool
     ) -> KeyboardHoverReading {
         let all = layers.flatMap(\.bindings)
@@ -121,7 +121,7 @@ extension KeyboardHoverReading {
                         for: entry.binding,
                         in: all,
                         config: config,
-                        disabled: disabled,
+                        system: system,
                         sides: sides
                     )?.sentence
                     : nil

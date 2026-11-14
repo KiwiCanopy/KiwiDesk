@@ -52,7 +52,7 @@ extension SequenceNodeRow {
                 for: node,
                 in: editing.rows,
                 config: model.config,
-                disabled: disabledSystemShortcuts,
+                system: systemShortcutState,
                 sides: model.appWide.modifierSides
             )
         }
@@ -84,7 +84,8 @@ extension SequenceNodeRow {
             severity: severity,
             sentence: ConflictText.sentence(
                 for: severity,
-                config: model.config
+                config: model.config,
+                system: systemShortcutState
             )
         )
     }

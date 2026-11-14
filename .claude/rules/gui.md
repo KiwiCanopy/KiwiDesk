@@ -1250,9 +1250,10 @@ must keep:
   allow-list and pins the seam's live-default polarity.
 - **Since #1126 the row reads that same bit to pick its TIER,
   and two obligations fall out of it.** A row surface takes the
-  disabled set from the `\.disabledSystemShortcuts` environment
-  value, wired ONCE per section render — never
-  `model.disabledSystemShortcuts()` per row, which is N+1 live
+  machine's shortcut state — the disabled set and the other
+  input-source chord (#3319) — from the one `\.systemShortcutState`
+  environment value, wired ONCE per section render — never
+  `model.systemShortcutState()` per row, which is N+1 live
   preference copies and lets two lines of one banner disagree.
   And a surface narrating a system conflict picks its wording
   through `ConflictSeverity.of` rather than re-branching on

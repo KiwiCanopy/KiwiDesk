@@ -84,7 +84,7 @@ struct SideNarrowingCaptionTests {
                 for: either,
                 in: rows,
                 config: GuiConfig(),
-                disabled: [],
+                system: .unread,
                 sides: true
             )
         )

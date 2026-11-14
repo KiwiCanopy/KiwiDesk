@@ -75,6 +75,11 @@ public enum SystemShortcut: Sendable, CaseIterable {
 
 /// System shortcut conflict mappings (`KeybindingConflicts`).
 public enum SystemShortcuts {
+    /// The chord `shortcut` holds in `map`; nil for none.
+    public static func chord(of shortcut: SystemShortcut) -> KeyCombo? {
+        map.first { $0.value == shortcut }?.key
+    }
+
     /// Known system shortcuts keyed by parsed key combination.
     public static let map: [KeyCombo: SystemShortcut] = build(
         [

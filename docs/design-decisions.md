@@ -14360,6 +14360,30 @@ never fire Carbon, so this measurement says nothing about that path
 (`PressPathSeverityTests`, `PressPathConflictTests`).
 :::
 
+:::unreleased
+*Amended (#3319, owner, 2026-11-14): the input-source caption says
+what the shortcut does and where it is changed.* Apple's row name,
+"Select next source in Input menu", does not say on its own that it
+switches the keyboard language. So the caption gives the plain
+meaning first and then the place the shortcut is changed or turned
+off, System Settings' Keyboard ▸ Keyboard Shortcuts ▸ Input Sources,
+never the Text Input list of languages. Each catalog quotes those
+three segments from the OS's own loctables. macOS has a second
+input-source shortcut, "Select the previous input source" (hotkey
+60, ⌃Space by default). While macOS answers it on a chord no
+KiwiDesk row holds, the caption adds that its actual chord, read
+live, still switches, so the user knows the language is still in
+reach. When 60 is off, cleared or taken, the clause is absent. "Taken"
+is a row in any of the base layers; a Lua `bind` and a profile's own
+override row are not seen (`InputSourceTakenTextTests`). The other
+direction, a KiwiDesk row taking 60 itself, is not shipped: macOS's
+hotkey 60 has no `SystemShortcut` case yet, and its verdict needs a
+measurement first (#3331). A shortcut cleared in System Settings, on
+with no key, now reads as switched off everywhere: the row is dormant,
+not dead, and an open sequence no longer lets its old chord through
+(`AnsweredChordTests`).
+:::
+
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
 

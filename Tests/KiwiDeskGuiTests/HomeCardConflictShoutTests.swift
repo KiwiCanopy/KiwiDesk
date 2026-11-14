@@ -78,7 +78,7 @@ struct HomeCardConflictShoutTests {
         let invert = SystemShortcut.invertColors.symbolicHotkey!.id
         // The machine answers: Invert Colors is ON.
         model.readSymbolicHotkey = { id in
-            id == invert ? true : nil
+            id == invert ? SymbolicHotkeyEntry(enabled: true) : nil
         }
         #expect(
             HomeCardContent.conflictShout(

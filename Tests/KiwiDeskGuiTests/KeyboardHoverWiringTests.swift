@@ -51,7 +51,7 @@ struct KeyboardHoverWiringTests {
     }
 
     /// The blocker this feature would have shipped: the panel is
-    /// the section's SIBLING, so `\.disabledSystemShortcuts` —
+    /// the section's SIBLING, so `\.systemShortcutState` —
     /// wired inside `ShortcutsSection`'s own body — resolves to
     /// the key's EMPTY default here. Six chords ship disabled,
     /// and `⌃⌥⌘8` is both a seeded default and Invert Colors, so
@@ -77,13 +77,13 @@ struct KeyboardHoverWiringTests {
         // between the two is glue holding the needle contiguous,
         // not an assertion (tests.md).
         let carried =
-            "letdisabled=model.disabledSystemShortcuts()"
+            "letsystem=model.systemShortcutState()"
             + "letlayers=shownletscope=liveScope"
             + "letselection=selectedletconfig=model.config"
             + "letsides=model.appWide.modifierSides"
             + "return{codeinKeyboardHoverReading.of("
             + "code,in:layers,scope:scope,selected:selection,"
-            + "config:config,disabled:disabled,sides:sides)}"
+            + "config:config,system:system,sides:sides)}"
         #expect(
             panel.contains(carried),
             Comment(
@@ -111,7 +111,7 @@ struct KeyboardHoverWiringTests {
         #expect(panel.contains("conflictDetail:conflictDetail"))
         #expect(
             panel.occurrences(
-                of: "model.disabledSystemShortcuts()"
+                of: "model.systemShortcutState()"
             ) == 1,
             Comment(
                 rawValue: "one live read per panel render — a "

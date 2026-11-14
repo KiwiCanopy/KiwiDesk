@@ -4,30 +4,30 @@ import KiwiDeskCore
 /// The live half of a system-shortcut conflict verdict (#1105):
 /// whether macOS currently ANSWERS a chord `SystemShortcuts.map`
 /// records. Core owns the ids and the one plist reader (#3173);
-/// the GUI keeps its injected `enabled` read, reached only through
+/// the GUI keeps its injected entry read, reached only through
 /// `SettingsModel`'s accessors and `readSymbolicHotkey` seam.
 enum SystemShortcutEnablement {
-    /// Reads one hotkey id's `enabled` bit from
+    /// Reads one hotkey id's entry from
     /// `com.apple.symbolichotkeys`; nil = no plist entry, the
     /// shipped default applies. A cached reader sees external
     /// writes (measured 2026-09-01); the staleness ruling is
     /// `docs/design-decisions.md` ▸ `⌃⌥⌘8` (#1105).
-    static func liveRead(_ id: Int) -> Bool? {
-        SymbolicHotkeys.liveRead(id)?.enabled
+    static func liveRead(_ id: Int) -> SymbolicHotkeyEntry? {
+        SymbolicHotkeys.liveRead(id)
     }
 
     /// System shortcuts the machine currently has switched OFF —
     /// what `KeybindingConflicts.actionable` drops. A chord with
     /// no symbolic-hotkey id (⌘Q, ⌘Tab, …) cannot be disabled.
     static func disabled(
-        reading read: (Int) -> Bool?
+        reading read: (Int) -> SymbolicHotkeyEntry?
     ) -> Set<SystemShortcut> {
         Set(
             SystemShortcut.allCases.filter { shortcut in
                 guard let entry = shortcut.symbolicHotkey else {
                     return false
                 }
-                return !shortcut.isAnswered(enabled: read(entry.id))
+                return !shortcut.isAnswered(read(entry.id))
             }
         )
     }

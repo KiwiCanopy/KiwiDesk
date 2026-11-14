@@ -16,8 +16,8 @@ struct SequenceNodeRow: View {
     @Binding var collapsed: Set<UUID>
     /// The node just added, whose recorder arms on arrival.
     @Binding var fresh: UUID?
-    @Environment(\.disabledSystemShortcuts)
-    var disabledSystemShortcuts
+    @Environment(\.systemShortcutState)
+    var systemShortcutState
     @State private var confirmingDelete = false
     @State var editingLua: LuaEditRequest?
     @State var editingBranch: SequenceBranchRequest?

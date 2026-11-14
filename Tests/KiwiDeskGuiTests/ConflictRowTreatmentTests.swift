@@ -55,18 +55,18 @@ struct ConflictRowTreatmentTests {
         // Every recorder mount mints that one value, and the
         // needle runs THROUGH the live set it is minted from:
         // stopping at the open paren left a mount free to pass
-        // `disabled: []`, which reads every dormant chord as
+        // `system: .unread`, which reads every dormant chord as
         // dead (guard-prover, 2026-09-03).
         "KeybindingNavRow.swift": [
             "returnConflictText.reading(for:bindings[index],"
                 + "in:bindings,config:model.config,"
-                + "disabled:disabledSystemShortcuts,"
+                + "system:system,"
                 + "sides:model.appWide.modifierSides)"
         ],
         "KeybindingAppGroup+Row.swift": [
             "reading:ConflictText.reading(for:binding.wrappedValue,"
                 + "in:bindings,config:model.config,"
-                + "disabled:disabledSystemShortcuts,"
+                + "system:systemShortcutState,"
                 + "sides:model.appWide.modifierSides)"
         ],
     ]
@@ -111,7 +111,7 @@ struct ConflictRowTreatmentTests {
             source.contains(
                 "reading:ConflictText.reading(for:binding.wrappedValue,"
                     + "in:bindings,config:model.config,"
-                    + "disabled:disabledSystemShortcuts,"
+                    + "system:systemShortcutState,"
                     + "sides:model.appWide.modifierSides)"
             )
         )

@@ -30,8 +30,8 @@ struct KiwiVisionLensPage: View {
         .environment(\.keybindingLayerName, KeyLayer.defaultName)
         .recorderKeys(model)
         .environment(
-            \.disabledSystemShortcuts,
-            model.disabledSystemShortcuts()
+            \.systemShortcutState,
+            model.systemShortcutState()
         )
         .environmentObject(coordinator)
         .onAppear {

@@ -15,8 +15,8 @@ struct ApplicationsGroup: View {
     /// made there reaches all of them, as one made in Advanced does
     /// by default (#2777 ruling 12).
     var drawsReach = true
-    @Environment(\.disabledSystemShortcuts)
-    var disabledSystemShortcuts
+    @Environment(\.systemShortcutState)
+    var systemShortcutState
     @Environment(\.keybindingLayerName)
     var layerName
     /// The last pick that created nothing: WHICH app to ask
