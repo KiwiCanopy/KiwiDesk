@@ -16,6 +16,10 @@ enum CustomGlyph: Hashable {
     /// Fingers moving apart or together, as 2 or 4 arrows (#1873).
     case spread(Int)
     case pinch(Int)
+    /// A swipe's direction badge: `n` dots and one arrow (#1873).
+    case swipe(Int, GestureDirection)
+    /// `hand.pinch` under a two-way arc; macOS 15 and later.
+    case rotate
 
     static let prefix = "kiwi."
 
@@ -30,6 +34,8 @@ enum CustomGlyph: Hashable {
         case .walk: "kiwi.walk"
         case .spread(let n): "kiwi.spread.\(n)"
         case .pinch(let n): "kiwi.pinch.\(n)"
+        case .swipe(let n, let way): "kiwi.swipe.\(n).\(way.rawValue)"
+        case .rotate: "kiwi.rotate"
         }
     }
 
@@ -38,6 +44,10 @@ enum CustomGlyph: Hashable {
             [.click, .rightClick, .wheelClick, .sideButtons, .walk]
             + (2...5).flatMap { [CustomGlyph.taps($0), .swipes($0)] }
             + [2, 4].flatMap { [CustomGlyph.spread($0), .pinch($0)] }
+            + (2...4).flatMap { n in
+                CustomGlyph.badgeDirections.map { .swipe(n, $0) }
+            }
+            + [.rotate]
         guard let glyph = all.first(where: { $0.name == name }) else {
             return nil
         }
@@ -75,6 +85,8 @@ enum CustomGlyph: Hashable {
         case .walk: Self.windowRow()
         case .spread(let n): Self.pinchArrows(n, outward: true)
         case .pinch(let n): Self.pinchArrows(n, outward: false)
+        case .swipe(let n, let way): Self.swipeBadge(n, way)
+        case .rotate: Self.rotateHand()
         }
     }
 
