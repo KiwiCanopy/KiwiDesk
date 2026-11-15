@@ -3,7 +3,8 @@ import CoreGraphics
 /// Where each split layout's containers are for the ceiling pass
 /// (#3217): Stack's two columns and the windows in each, BSP's
 /// two sides per split, Grid's columns and rows. Each answers nil
-/// where it draws a run or a pile, which keeps its frames.
+/// where it draws a run or a pile, or where no span moves, which
+/// keeps its frames.
 extension SplitCeiling {
     /// Stack: the master and stack columns share across the
     /// split, then each column's windows along it.
@@ -15,40 +16,45 @@ extension SplitCeiling {
         guard var zones = StackLayout.zones(for: windows, in: context),
             laysFlat(zones, context)
         else { return nil }
+        var moved = false
         if zones.count == 2 {
             let horizontal = context.stack.stackPosition.splitsHorizontally
             let ordered = zones.sorted {
                 lead($0.region, horizontal) < lead($1.region, horizontal)
             }
-            let regions = relaid(
-                ordered.map(\.region),
-                spans: share(
-                    ordered.map { span($0.region, horizontal) },
-                    ceilings: ordered.map {
-                        ceiling(
-                            of: $0.members,
-                            horizontal: horizontal,
-                            context
-                        )
-                    }
-                ),
-                horizontal: horizontal
+            let spans = ordered.map { span($0.region, horizontal) }
+            let shared = share(
+                spans,
+                ceilings: ordered.map {
+                    zoneCeiling($0, horizontal: horizontal, context)
+                }
             )
-            zones = zip(ordered, regions).map { zone, region in
-                RunZone(
-                    members: zone.members,
-                    region: region,
-                    vertical: zone.vertical,
-                    ordinal: zone.ordinal
+            if shared != spans {
+                moved = true
+                let regions = relaid(
+                    ordered.map(\.region),
+                    spans: shared,
+                    horizontal: horizontal
                 )
+                zones = zip(ordered, regions).map { zone, region in
+                    RunZone(
+                        members: zone.members,
+                        region: region,
+                        vertical: zone.vertical,
+                        ordinal: zone.ordinal
+                    )
+                }
+                guard laysFlat(zones, context) else { return nil }
             }
-            guard laysFlat(zones, context) else { return nil }
         }
         var result = frames
         for zone in zones {
-            result.merge(column(zone, context)) { _, new in new }
+            if let laid = column(zone, moved: moved, context) {
+                moved = true
+                result.merge(laid) { _, new in new }
+            }
         }
-        return result
+        return moved ? result : nil
     }
 
     /// Whether every zone lays its members at their shares — no
@@ -62,26 +68,60 @@ extension SplitCeiling {
         }
     }
 
+    /// A Stack zone's ceiling across the split: its members'
+    /// ceilings and gaps summed where it lays them along that axis,
+    /// the widest where it stacks them across it.
+    private static func zoneCeiling(
+        _ zone: RunZone,
+        horizontal: Bool,
+        _ context: LayoutContext
+    ) -> CGFloat? {
+        guard zone.vertical != horizontal else {
+            return ceiling(of: zone.members, horizontal: horizontal, context)
+        }
+        var sum: CGFloat = 0
+        for member in zone.members {
+            guard
+                let ceiling = context.learnedCeiling(
+                    of: member,
+                    horizontal: horizontal
+                )
+            else { return nil }
+            sum += ceiling
+        }
+        let gap =
+            horizontal
+            ? context.gaps.inner.horizontal : context.gaps.inner.vertical
+        return sum + gap * CGFloat(max(0, zone.members.count - 1))
+    }
+
     /// One zone's frames with its windows sharing along it, each
-    /// window its own container.
+    /// window its own container; nil where nothing moves and the
+    /// zone's region is its slot's (`moved` false).
     private static func column(
         _ zone: RunZone,
+        moved: Bool,
         _ context: LayoutContext
-    ) -> [WindowID: CGRect] {
+    ) -> [WindowID: CGRect]? {
         let laid = zone.frames(in: context)
         let along = !zone.vertical
         let rows = zone.members
             .compactMap { id in laid[id].map { (id: id, frame: $0) } }
             .sorted { lead($0.frame, along) < lead($1.frame, along) }
-        guard rows.count > 1 else { return laid }
-        let spans = share(
-            rows.map { span($0.frame, along) },
+        let spans = rows.map { span($0.frame, along) }
+        let shared = share(
+            spans,
             ceilings: rows.map {
                 context.learnedCeiling(of: $0.id, horizontal: along)
             }
         )
+        guard shared != spans else { return moved ? laid : nil }
         var result = laid
-        let frames = relaid(rows.map(\.frame), spans: spans, horizontal: along)
+        let frames = relaid(
+            rows.map(\.frame),
+            spans: shared,
+            horizontal: along
+        )
         for (row, frame) in zip(rows, frames) { result[row.id] = frame }
         return result
     }
@@ -94,27 +134,19 @@ extension SplitCeiling {
         frames: [WindowID: CGRect],
         _ context: LayoutContext
     ) -> [WindowID: CGRect]? {
-        guard windows.count > 1,
-            BspLayout.plan(windows, in: context).zone == nil
-        else { return nil }
-        var across: [Bool] = []
-        var region = context.usable
-        for depth in 0..<(windows.count - 1) {
-            let side = BspLayout.sideBySide(region, depth: depth, context)
-            guard
-                let parts = BspLayout.divide(region, sideBySide: side, context)
-            else { return nil }
-            across.append(side)
-            region = parts.rest
-        }
+        let plan = BspLayout.plan(windows, in: context)
+        guard windows.count > 1, plan.zone == nil else { return nil }
+        let across = plan.splits
         var result = frames
-        region = context.usable
+        var moved = false
+        var region = context.usable
         for (depth, side) in across.enumerated() {
             guard
                 let parts = BspLayout.divide(region, sideBySide: side, context)
             else { return nil }
-            let spans = share(
-                [span(parts.first, side), span(parts.rest, side)],
+            let spans = [span(parts.first, side), span(parts.rest, side)]
+            let shared = share(
+                spans,
                 ceilings: [
                     context.learnedCeiling(
                         of: windows[depth],
@@ -129,16 +161,17 @@ extension SplitCeiling {
                     ),
                 ]
             )
+            moved = moved || shared != spans
             let sides = relaid(
                 [parts.first, parts.rest],
-                spans: spans,
+                spans: shared,
                 horizontal: side
             )
             result[windows[depth]] = sides[0]
             region = sides[1]
         }
         result[windows[windows.count - 1]] = region
-        return result
+        return moved ? result : nil
     }
 
     /// The ceiling of the BSP side holding `windows[depth...]`:
@@ -176,8 +209,8 @@ extension SplitCeiling {
     }
 
     /// Grid: the columns share their widths and the rows their
-    /// heights. A track a spanning cell crosses keeps its length,
-    /// and an empty one neither gives nor takes.
+    /// heights. A track a spanning cell crosses, and an empty one,
+    /// neither gives nor takes.
     static func grid(
         _ windows: [WindowID],
         frames: [WindowID: CGRect],
@@ -202,15 +235,16 @@ extension SplitCeiling {
                     let span = horizontal ? cell.columns : cell.rows
                     guard span.first <= track, track <= span.last
                     else { continue }
-                    guard span.first == span.last else { return nil }
+                    guard span.first == span.last else {
+                        return lengths[track]
+                    }
                     held.append(id)
                 }
                 guard !held.isEmpty else { return lengths[track] }
                 return ceiling(of: held, horizontal: horizontal, context)
             }
         }
-        let cells = GridLayout.cellFrames(
-            count: shape.cells,
+        let shared = (
             widths: share(
                 tracks.widths,
                 ceilings: ceilings(tracks.widths, true)
@@ -218,12 +252,16 @@ extension SplitCeiling {
             heights: share(
                 tracks.heights,
                 ceilings: ceilings(tracks.heights, false)
-            ),
-            in: context.usable,
-            gapH: context.gaps.inner.horizontal,
-            gapV: context.gaps.inner.vertical,
-            rowMajor: shape.rowMajor,
-            fillLast: shape.fillLast
+            )
+        )
+        guard
+            shared.widths != tracks.widths
+                || shared.heights != tracks.heights
+        else { return nil }
+        let cells = GridLayout.cells(
+            tracks: shared,
+            shape: shape,
+            in: context
         )
         var result = frames
         for (id, cell) in zip(members, cells) { result[id] = cell }

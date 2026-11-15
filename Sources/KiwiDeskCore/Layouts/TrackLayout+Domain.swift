@@ -140,20 +140,6 @@ extension TrackLayout {
         )
     }
 
-    /// `learnedFloor`'s mirror (#1488): one window's corroborated
-    /// learned MAXIMUM on the cross span, nil where none — no
-    /// configured ceiling stands in the way `min_window_size`
-    /// does for the floor.
-    public static func learnedCeiling(
-        of id: WindowID,
-        in context: LayoutContext
-    ) -> CGFloat? {
-        context.learnedCeiling(
-            of: id,
-            horizontal: context.track.axis == .vertical
-        )
-    }
-
     /// One TRACK's ceiling on the cross span (#1488): the widest
     /// of its members' learned ceilings, and nil where any member
     /// has none — that member draws the whole track. The one
@@ -162,13 +148,11 @@ extension TrackLayout {
         of members: ArraySlice<WindowID>,
         in context: LayoutContext
     ) -> CGFloat? {
-        var widest: CGFloat = 0
-        for member in members {
-            guard let ceiling = learnedCeiling(of: member, in: context)
-            else { return nil }
-            widest = max(widest, ceiling)
-        }
-        return members.isEmpty ? nil : widest
+        SplitCeiling.ceiling(
+            of: members,
+            horizontal: context.track.axis == .vertical,
+            context
+        )
     }
 
     /// In-track capacity for windows stacked in one track (#437).

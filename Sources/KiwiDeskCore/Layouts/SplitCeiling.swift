@@ -7,9 +7,11 @@ import CoreGraphics
 /// ceiling, to a neighbour that can still grow. It runs on the
 /// frames the retile ISSUES, never on the slots, so the stored
 /// ratios and track weights are never written and the slack
-/// returns the pass a ceiling is forgotten. A side with one
-/// member below no ceiling keeps its share; with no receiver the
+/// returns the pass a ceiling is forgotten. A side holding any
+/// window with no ceiling keeps its share; with no receiver the
 /// gap stays. A forced pass probes past every ceiling (#1055).
+/// Where no span moves, each arm answers nil and the slots stand,
+/// so the pass never redraws a layout it leaves alone.
 public enum SplitCeiling {
     /// `frames` with the ceiling slack shared out for `mode`:
     /// Stack, BSP and Grid; every other layout as it is.
@@ -26,7 +28,9 @@ public enum SplitCeiling {
             case .stack: stack(windows, frames: frames, context)
             case .bsp: bsp(windows, frames: frames, context)
             case .grid: grid(windows, frames: frames, context)
-            default: nil
+            // Track heals its weights to its ceilings (#1488);
+            // the others share no span between windows.
+            case .track, .scrolling, .monocle, .floating: nil
             }
         return shared ?? frames
     }
@@ -34,7 +38,7 @@ public enum SplitCeiling {
     /// One container's ceiling along an axis: the widest of its
     /// members' learned maxima, nil where any member has none —
     /// that member can still grow, so the container keeps its
-    /// share.
+    /// share. Track's `trackCeiling` reads it too (#1488).
     static func ceiling(
         of members: some Sequence<WindowID>,
         horizontal: Bool,

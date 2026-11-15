@@ -75,6 +75,31 @@ struct SplitCeilingTests {
         #expect(frames[w2]?.width == slots[w2]?.width)
     }
 
+    @Test("Side-by-side masters yield only past their summed ceiling")
+    func sideBySideMastersSum() throws {
+        // Two masters laid along the split (the default horizontal
+        // master orientation), each capped at 500: the column's
+        // ceiling is 500 + gap + 500, above its ~700 pt share, so
+        // nothing yields and neither master is squeezed.
+        var context = SplitCeilingFixture.context(
+            bounds: [
+                w1: SplitCeilingFixture.ceiling(width: 500),
+                w2: SplitCeilingFixture.ceiling(width: 500),
+            ]
+        )
+        context.stack.masterCount = 2
+        context.stack.masterOrientation = .horizontal
+        let windows = [w1, w2, w3]
+        let frames = SplitCeilingFixture.placed(.stack, windows, context)
+        let slots = LayoutEngine.calculate(
+            mode: .stack,
+            windows: windows,
+            context: context
+        )
+        #expect(frames == slots)
+        #expect(try #require(slots[w1]).width < 500)
+    }
+
     @Test("No stack window can grow: the gap stays")
     func noReceiverKeepsGap() {
         let context = SplitCeilingFixture.context(

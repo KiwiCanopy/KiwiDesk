@@ -5563,6 +5563,28 @@ draws. (`TrackCeilingHealTests`, `TrackResizeFoldTests`,
 
 **[Principle]**
 
+**A split's ceiling slack is shared at draw time and never
+written (#3217, owner ruling 2026-11-11).** A Stack column, BSP
+side or Grid track whose every window has a learned maximum below
+its share leaves empty screen beside a neighbour that could use
+it. The floor's answer — heal the stored ratio (#934/#1430) — is
+the wrong one here. A floor is a fact the user's own press runs
+into; a ceiling is often a passing state of one window, such as
+System Settings changing to a pane of another width, and writing
+it would resize the user's split for good after the window has
+gone or grown. So the slack is redistributed on the frames the
+retile issues, the ratio and the track weights stay as the user
+left them, and a forgotten ceiling hands the slack back on the
+next pass. A container yields only when EVERY member is capped,
+and only down to their combined ceiling: one window with no
+learned maximum can still use the share, and taking it away would
+squeeze a window that never refused. Where no neighbour can grow,
+the gap stays — a smaller cost than growing a window past what
+its app accepts. (`SplitCeilingTests`, `SplitCeilingLayoutTests`,
+`SplitCeilingShareTests`)
+
+**[Principle]**
+
 **A split store heals to a learned floor at retile, and the
 shared ratio may move for it (#934/#1430).** The split-layout
 row of the accepted limitations refused this on one argument:

@@ -25,7 +25,8 @@ extension LayoutContext {
     /// corroborated learned maximum along one axis, nil where
     /// none — no configured ceiling stands in the way
     /// `min_window_size` does for the floor. Track's heal and the
-    /// split layouts' ceiling pass both read it.
+    /// split layouts' ceiling pass both read it; a consumer stands
+    /// down on `probesBeyondBounds` itself (#1055).
     public func learnedCeiling(
         of id: WindowID,
         horizontal: Bool

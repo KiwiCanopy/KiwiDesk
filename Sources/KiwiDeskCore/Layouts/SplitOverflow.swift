@@ -7,16 +7,16 @@ import CoreGraphics
 /// where the frame already is, and a window that cannot fit
 /// overflows toward the screen's centre rather than past its
 /// edge. Scrolling re-packs and monocle centre on their own
-/// (#677), and grid keeps the slot. A ceiling's slack is
-/// `SplitCeiling`'s, shared out first (#3217).
+/// (#677), and grid keeps the slot's floor. A ceiling's slack
+/// in stack, bsp and grid is `SplitCeiling`'s, shared out first
+/// (#3217).
 /// It runs on the frames the retile ISSUES
 /// (`TilingEngine.placedFrames`), never on the slots — the two
 /// sets and who reads which are state-and-layout.md's (#934).
 public enum SplitOverflow {
     /// The frames a pass issues for `mode` over its tiled
     /// `windows`: the ceiling slack shared out, then bsp and
-    /// stack take the inward post-pass; every other layout keeps
-    /// its slots.
+    /// stack take the inward post-pass.
     public static func placed(
         mode: LayoutMode,
         windows: [WindowID],
