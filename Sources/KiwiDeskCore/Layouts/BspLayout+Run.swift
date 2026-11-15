@@ -20,6 +20,9 @@ extension BspLayout {
     struct Plan {
         var fixed: [WindowID: CGRect]
         var zone: RunZone?
+        /// Each split made, side by side when true, in depth order
+        /// — every split while no chain scrolls (#3217).
+        var splits: [Bool] = []
     }
 
     static func plan(
@@ -54,7 +57,7 @@ extension BspLayout {
             fixed[window] = parts.first
             region = parts.rest
         }
-        return Plan(fixed: fixed, zone: nil)
+        return Plan(fixed: fixed, zone: nil, splits: splits)
     }
 
     /// The run over the trailing chain once the split at

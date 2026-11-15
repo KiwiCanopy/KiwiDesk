@@ -112,6 +112,22 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+In **Stack, BSP and Grid**, a gap stays beside a window at its
+app's **maximum size** when no neighbour can grow into it. A Stack
+column, a window in a column, a BSP side, or a Grid column or row
+gives its leftover width or height to a neighbour only when every
+window in it has reached its maximum; while one window in it can
+still grow, it keeps its whole share. No sharing happens while a Stack
+column, a BSP chain or a Grid scrolls its overflow, and a Grid
+column or row crossed by a cell spanning several keeps its length.
+Your stored ratios and track sizes never change. The maximum is
+learned as described for minimums in the split-layout row above,
+so the first arrangement after a window arrives can show the gap.
+Give the app a `float_rules` entry to keep it out of the split
+([#3217](https://github.com/KiwiCanopy/KiwiDesk/issues/3217)).
+:::
+
+:::unreleased
 A window an app opens **in the background** (`open -g`, a login
 item, a helper) takes KiwiDesk's focus ring only when it lands in
 a Space with no focused window, so the ring and your keys can still

@@ -10,7 +10,8 @@ extension KiwiCore {
     /// Whether a resized event belongs to a mouse gesture:
     /// the button is still down, or it is the trailing AX
     /// event of a fast resize — released moments ago, with
-    /// the press having started near the window's slot edge
+    /// the press having started near the edge the window is
+    /// issued, which a ceiling's slack moves off its slot (#3217)
     /// (where resize drags begin; app-initiated resizes like
     /// a zoom button don't match). A DOUBLE-click released
     /// there is macOS's expand-to-the-edge, not a drag, and
@@ -28,13 +29,14 @@ extension KiwiCore {
             return true
         }
         guard let press = recentSinglePress,
-            let slot = tiler.calculatedFrames(
-                state: state
+            let frame = tiler.placedFrames(
+                state: state,
+                recording: false
             )[id]
         else { return false }
         return MouseResize.nearEdge(
             press.location,
-            of: slot
+            of: frame
         )
     }
 

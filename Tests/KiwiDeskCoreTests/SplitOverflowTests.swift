@@ -41,6 +41,7 @@ struct SplitOverflowTests {
     ) -> [WindowID: CGRect] {
         SplitOverflow.placed(
             mode: mode,
+            windows: windows,
             frames: LayoutEngine.calculate(
                 mode: mode,
                 windows: windows,

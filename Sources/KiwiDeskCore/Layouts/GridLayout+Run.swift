@@ -32,12 +32,26 @@ extension GridLayout {
         shape: Shape,
         in context: LayoutContext
     ) -> [CGRect] {
-        let tracks = trackLengths(
-            windows: windows,
+        cells(
+            tracks: trackLengths(
+                windows: windows,
+                shape: shape,
+                context: context
+            ),
             shape: shape,
-            context: context
+            in: context
         )
-        return cellFrames(
+    }
+
+    /// The cells `shape` draws over the given column widths and
+    /// row heights — the ceiling share redraws the render's cells
+    /// through this one door (#3217).
+    static func cells(
+        tracks: (widths: [CGFloat], heights: [CGFloat]),
+        shape: Shape,
+        in context: LayoutContext
+    ) -> [CGRect] {
+        cellFrames(
             count: shape.cells,
             widths: tracks.widths,
             heights: tracks.heights,

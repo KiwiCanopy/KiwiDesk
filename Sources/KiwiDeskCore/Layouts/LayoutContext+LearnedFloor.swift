@@ -19,3 +19,41 @@ extension LayoutContext {
         )
     }
 }
+
+extension LayoutContext {
+    /// `learnedFloor`'s mirror (#1488, #3217): one window's
+    /// corroborated learned maximum along one axis, nil where
+    /// none — no configured ceiling stands in the way
+    /// `min_window_size` does for the floor. Track's heal and the
+    /// split layouts' ceiling pass both read it; a consumer stands
+    /// down on `probesBeyondBounds` itself (#1055).
+    public func learnedCeiling(
+        of id: WindowID,
+        horizontal: Bool
+    ) -> CGFloat? {
+        let bound = sizeBounds[id]
+        return horizontal ? bound?.maxWidth : bound?.maxHeight
+    }
+
+    /// A container's ceiling along one axis (#1488, #3217): the
+    /// widest of its members' learned maxima, nil where any member
+    /// has none — that member can still grow — or where it has no
+    /// members. Track's tracks and the split layouts' ceiling pass
+    /// both read it.
+    public func learnedCeiling(
+        of members: some Sequence<WindowID>,
+        horizontal: Bool
+    ) -> CGFloat? {
+        var widest: CGFloat?
+        for member in members {
+            guard
+                let ceiling = learnedCeiling(
+                    of: member,
+                    horizontal: horizontal
+                )
+            else { return nil }
+            widest = max(widest ?? 0, ceiling)
+        }
+        return widest
+    }
+}

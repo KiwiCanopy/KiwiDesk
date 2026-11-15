@@ -2394,6 +2394,29 @@ editing here:
   `SplitFloorCueTests` the cue and the inward landing over a
   real core, `SplitFloorHealNeedleTests` the routing; the
   ruling is in `docs/design-decisions.md`.
+  **A learned CEILING's slack is shared on the same issued
+  frames, never in a store (#3217)**: `SplitCeiling`, called from
+  inside `SplitOverflow.placed` ahead of the inward pass, lets a
+  container whose every member is capped yield, down to its
+  members' combined ceiling, to a neighbour that can grow — a
+  Stack column and each window in it, a BSP split's two sides,
+  a Grid column and row. A member with no ceiling keeps the
+  container's share, a forced pass stands it down, and no ratio
+  or weight is written, so a forgotten ceiling hands the slack
+  back on the next pass; the ruling is in
+  `docs/design-decisions.md`. An arm answers nil, leaving the
+  slots, wherever a zone runs or piles and wherever no span
+  moves, so a new layout or container joins it there and
+  re-derives its structure from the layout's own doors, never a
+  copy of their walk. This is a second way the two frame sets
+  part: a receiver draws over part of the yielder's slot without
+  any overlap, so a reader that aims the pointer at a window or
+  hit-tests its drawn edge (the mouse warp, the resize-press
+  test) takes `placedFrames`, while a drop target keeps
+  classifying slots and a drop over that strip lands on the
+  yielder — the accepted residue (`SplitCeilingTests`,
+  `SplitCeilingLayoutTests`, `SplitCeilingShareTests` ▸
+  `wiredIntoIssuedFrames`, `FrameSetReaderCensusTests`).
   And the AUTOMATIC track count is
   derived from the members' corroborated floors on the cross
   axis, never from `min_window_size` alone (#1355): the one
@@ -2407,8 +2430,8 @@ editing here:
   only feasibility, so the heal's second pass re-shares the
   track weights until each track draws its floor and no wider
   than its members' corroborated ceiling, read through the one
-  `trackCeiling(of:in:)` over `learnedCeiling(of:in:)` — the
-  floor reading's mirror, and the pure twin of the clamps'
+  `trackCeiling(of:in:)` over `LayoutContext.learnedCeiling` —
+  the floor reading's mirror, and the pure twin of the clamps'
   `KiwiCore.effectiveMaxSize` the same way, two homes until a
   pure static both can route through
   (`TrackLayout.flooredWeights`, `TrackFloorHealTests`,

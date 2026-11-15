@@ -98,8 +98,10 @@ residue (re-pack / center) from the learned answer. A second ask,
 sent the moment the first entry confirms, corroborates the bound
 (#1439). BSP and Stack move their stored split ratio at retile to
 draw a corroborated floor; where the floors cannot share the span,
-the frame the retile issues lands inward of the slot (#934), and
-the slots readers classify against stay the layout's own.
+the frame the retile issues lands inward of the slot (#934). A
+side whose every window is at its learned maximum gives its slack
+to a neighbour on the issued frames too (#3217); the slots readers
+classify against stay the layout's own.
 
 **Tab reconciliation** (step 2):
 
