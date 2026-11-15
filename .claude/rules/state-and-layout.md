@@ -698,8 +698,13 @@ editing here:
   the bare one. A window whose title matched no titled rule there is
   recorded in `titledRulePending`, and only where the fold's rule
   gate was open, no follow was owed and the arrival's provenance
-  read `.created` (the stamp `handle` mirrors in), so a boot sweep,
-  a re-track or a heal records nothing. Its first matching title
+  read `.created` or `.awaitingCreate` (the stamp `handle` mirrors
+  in), so a boot
+  sweep, a re-track or a heal records nothing. A match found while
+  the arrival's create is still due waits for `settleArrival`,
+  which pays it on a created settle and ends the record on an
+  existing one; a host whose create route is not live records
+  nothing, every arrival reading `.unreported`. Its first matching title
   report files it through `payLateTitledRule`, which reads the press
   and the `CrossSessionMatch.titleSettle` bound against the arrival
   stamp mirrored in like `arrivalDisplay`, and stands down for the

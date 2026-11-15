@@ -112,5 +112,9 @@ struct SpaceRuleEditTests {
             pending: ""
         )
         #expect(typing.verdict(for: "News") == .otherRule("1"))
+        // A titled rule beats the bare one the app also has.
+        #expect(
+            typing.verdict(for: "x - Brave – Home") == .otherRule("2")
+        )
     }
 }

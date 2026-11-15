@@ -160,6 +160,38 @@ struct RuleReachGuiParityTests {
         }
     }
 
+    /// The app rule families: an AI keep's rules, which a dirty
+    /// draft takes per rule, and a reach row's ↺, which reverts per
+    /// app. Hand-listed: these two sites switch on the app rule
+    /// stores alone, so a new app rule store joins here (#3341).
+    private static let appRuleFamilies = [
+        "appRules", "titledAppRules", "floatRules",
+    ]
+
+    @Test("a kept rule and a reach row's revert name each app family")
+    func appRuleSitesNameEveryAppFamily() throws {
+        let found = try families()
+        let kept = try body(
+            "static func takeKeptRules(",
+            in: "SettingsModel+LiveWrite.swift"
+        )
+        let revert = try body(
+            "private func revertRuleReach(",
+            in: "SettingsModel+RowRevert.swift"
+        )
+        for family in Self.appRuleFamilies {
+            #expect(found.contains(family), "\(family) is no family")
+            #expect(
+                kept.contains("stored.\(family)."),
+                "takeKeptRules never takes \(family)"
+            )
+            #expect(
+                revert.contains("case .appRules(.\(family)):"),
+                "revertRuleReach never reverts \(family)"
+            )
+        }
+    }
+
     @Test("the encode memo keys on every family's field")
     func memoKeysEveryFamily() throws {
         let cache = try body(

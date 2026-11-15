@@ -69,8 +69,9 @@ extension KiwiCore {
         let provenance = arrivalProvenance(of: event)  // #2630
         let pocketClaim = claimPocketArrival(event, provenance: provenance)
         state.pocketClaimed = pocketClaim  // #2612
-        // Only a created window may take a late titled match (#3341).
-        state.arrivalStamp = provenance == .created ? wallClock() : nil
+        // A late titled match's gate (#3341).
+        let watched = provenance?.watchedCreate == true
+        state.arrivalStamp = watched ? wallClock() : nil
         let anchorBeforeFold =
             event.goneWindowID == nil ? nil : focusedWindowID  // #2888
         let effects = state.apply(event)

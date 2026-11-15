@@ -85,4 +85,19 @@ struct SpaceRuleMoveReachTests {
         }
         #expect(model.reachEdits == RuleReachEdits())
     }
+
+    /// The move crosses stores: the reach is carried into the bare
+    /// family's table, not left in the titled one.
+    @Test("a titled rule of one profile turned bare stays that profile's")
+    func ownStaysOwnAcrossStores() throws {
+        let model = try makeModel(base: [:], own: [work.key: "2"])
+        let bare = SpaceRuleRow(app: app, fragment: nil)
+        model.moveSpaceRule(from: work, to: bare) {
+            SpaceRuleEdit.makeBare(work, in: &$0)
+        }
+        let apps = model.encodedReach?.appRules
+        #expect(apps?.resolved(for: "Work") == [app: "2"])
+        #expect(apps?.resolved(for: "Home")[app] == nil)
+        #expect(resolved(model, "Work").isEmpty)
+    }
 }

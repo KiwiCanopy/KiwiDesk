@@ -121,6 +121,13 @@ extension KiwiCore {
         departing: Bool = false
     ) {
         let id = held.window.id
+        // An arrival that settles as existing owes no late titled
+        // match; a created one pays a match its wait held (#3341).
+        if !created {
+            state.titledRulePending[id] = nil
+        } else if !departing {
+            payHeldTitledRule(id)
+        }
         settlePocketClaim(id, created: created, departing: departing)
         // A late create sends a quiet open's window on (#3153).
         if !departing { settleQuietArrival(id, created: created) }

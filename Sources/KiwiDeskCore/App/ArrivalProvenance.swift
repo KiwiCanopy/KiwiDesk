@@ -26,6 +26,12 @@ enum ArrivalProvenance: Equatable {
         case .awaitingCreate: nil
         }
     }
+
+    /// Whether WindowServer reported, or may still report, the
+    /// window's create: a late titled match's gate (#3341).
+    var watchedCreate: Bool {
+        self == .created || self == .awaitingCreate
+    }
 }
 
 /// The one door every reader of "was this arrival created" goes

@@ -141,12 +141,54 @@ struct TitledRuleLateMatchTests {
         #expect(space(core) == SpaceID("2"))
     }
 
-    @Test("a window found, not created, owes no late match")
+    @Test("a window whose create never lands owes no late match")
     func foundWindowOwesNothing() {
         let core = makeCore()
         core.windowCreates.noteDestroyed(late)
         open(core, title: "")
+        let arrived = core.wallClock()
+        core.wallClock = {
+            arrived.addingTimeInterval(LaunchFollowIntent.lateCreateBound)
+        }
+        core.resolveExpiredArrivals()
         #expect(core.state.titledRulePending[late] == nil)
+        core.handle(.windowTitleChanged(late, "a – Work"))
+        #expect(space(core) == SpaceID("1"))
+    }
+
+    @Test("a host whose create route is not live records nothing")
+    func unreportedRecordsNothing() {
+        let core = makeCore()
+        core.windowCreates.isLive = false
+        open(core, title: "")
+        #expect(core.state.titledRulePending[late] == nil)
+    }
+
+    @Test("a create trailing the arrival pays the match its wait held")
+    func trailingCreatePaysTheHeldMatch() async {
+        let core = makeCore()
+        core.windowCreates.noteDestroyed(late)
+        open(core, title: "")
+        core.handle(.windowTitleChanged(late, "a – Work"))
+        // The create is still due, so the match waits for it.
+        #expect(space(core) == SpaceID("1"))
+        #expect(core.state.titledRulePending[late] != nil)
+        core.windowServerChanged(.created, id: late)
+        await core.deferred.task(for: .arrivalCreated)?.value
+        #expect(space(core) == ruled)
+        #expect(core.state.titledRulePending[late] == nil)
+    }
+
+    @Test("a create trailing the arrival lets a later title file it")
+    func trailingCreateThenTitleFiles() async {
+        let core = makeCore()
+        core.windowCreates.noteDestroyed(late)
+        open(core, title: "")
+        core.windowServerChanged(.created, id: late)
+        await core.deferred.task(for: .arrivalCreated)?.value
+        #expect(space(core) == SpaceID("1"))
+        core.handle(.windowTitleChanged(late, "a – Work"))
+        #expect(space(core) == ruled)
     }
 
     @Test("a match for a Space that is gone keeps the record")

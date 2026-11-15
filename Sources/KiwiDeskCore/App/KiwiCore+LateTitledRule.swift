@@ -14,8 +14,13 @@ extension KiwiCore {
     func payLateTitledRule(
         _ match: AppliedEffects.LateTitledRule
     ) -> Bool {
-        let age = wallClock().timeIntervalSince(match.arrivedAt)
         let window = match.window
+        // Its create may still land: the record waits for the settle.
+        if arrivals.waiting[window] != nil {
+            state.titledRulePending[window] = match.arrivedAt
+            return false
+        }
+        let age = wallClock().timeIntervalSince(match.arrivedAt)
         let from = state.workspaces.space(of: window)
         guard age <= CrossSessionMatch.titleSettle,
             !launchFollow.pressed(within: age),
@@ -40,5 +45,14 @@ extension KiwiCore {
         onLog("titled rule: w\(window.raw) filed in \(match.space.raw)")
         retile()
         return true
+    }
+
+    /// Pays the late match a title report found while the arrival's
+    /// create was still due, from the window's title now.
+    func payHeldTitledRule(_ id: WindowID) {
+        guard let title = state.windows[id]?.title,
+            let match = state.consumeTitledRule(id, title: title)
+        else { return }
+        payLateTitledRule(match)
     }
 }
