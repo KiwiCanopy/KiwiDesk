@@ -18,8 +18,7 @@ struct SimpleMacChecklist: View {
                 states: model.macChecklistStates,
                 ticks: model.macChecklistTicks
             )
-            + (model.screenShiftChecklistDone == false
-                ? [.parkCorners] : [])
+            + Self.openConditional(model)
         Group {
             if open.isEmpty {
                 allDone
@@ -34,6 +33,19 @@ struct SimpleMacChecklist: View {
             }
         }
         .id(Self.anchor)
+    }
+
+    /// The conditional essentials shown and still open (#2756).
+    @MainActor static func openConditional(
+        _ model: SettingsModel
+    ) -> [MacChecklistKey] {
+        guard model.screenShiftChecklistDone == false else { return [] }
+        return MacChecklistRowOrder.essentialSettings.compactMap {
+            guard MacChecklistRowOrder.conditionalRows.contains($0),
+                case .macChecklist(let key) = $0
+            else { return nil }
+            return key
+        }
     }
 
     /// The essentials macOS does not yet report set, in the

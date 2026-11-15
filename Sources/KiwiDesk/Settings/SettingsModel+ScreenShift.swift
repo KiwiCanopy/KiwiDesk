@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import KiwiDeskCore
 
@@ -164,7 +165,34 @@ extension SettingsModel {
             let screen = state.screens.first(where: {
                 $0.display == display.id
             })
-        else { return display.name }
+        else { return Self.displaysLabel(display, among: displays) }
         return state.name(of: screen.id)
+    }
+
+    /// The card's name before Core reads an arrangement, or where
+    /// it refuses one, from the connected screens alone.
+    static func displaysLabel(
+        _ display: Display,
+        among displays: [Display]
+    ) -> String {
+        let positions = ScreenShiftPlan.namePositions(
+            displays.map {
+                // AppKit frames grow up; the positions read y-down.
+                (
+                    key: $0.id,
+                    name: $0.name,
+                    frame: CGRect(
+                        x: $0.frame.minX,
+                        y: -$0.frame.maxY,
+                        width: $0.frame.width,
+                        height: $0.frame.height
+                    )
+                )
+            }
+        )
+        return ScreenShiftText.named(
+            display.name,
+            at: positions[display.id]
+        )
     }
 }

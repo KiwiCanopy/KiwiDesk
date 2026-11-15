@@ -156,6 +156,7 @@ extension ScreenShiftPlan {
             screens.filter { hasFreeCorner($0, in: screens) }.map(\.id)
         )
         let pairs = touchingPairs(screens)
+        let overlapping = overlappingPairs(screens)
         for step in 1...searchLimit {
             let delta = CGVector(
                 dx: unit.dx * CGFloat(step),
@@ -170,7 +171,7 @@ extension ScreenShiftPlan {
             guard pairs.isSubset(of: now) else { return nil }
             guard
                 now == pairs,
-                !overlaps(after),
+                overlappingPairs(after) == overlapping,
                 let moved = after.first(where: { $0.id == boxed.id }),
                 hasFreeCorner(moved, in: after),
                 after.allSatisfy({
@@ -185,13 +186,22 @@ extension ScreenShiftPlan {
     /// Whether any two screens share an area, which macOS would
     /// resolve by rearranging them itself.
     static func overlaps(_ screens: [ArrangedScreen]) -> Bool {
+        !overlappingPairs(screens).isEmpty
+    }
+
+    /// Every pair sharing an area. A step may keep one there
+    /// already, a mirror, but never makes a new one.
+    static func overlappingPairs(
+        _ screens: [ArrangedScreen]
+    ) -> Set<Set<String>> {
+        var pairs: Set<Set<String>> = []
         for (index, a) in screens.enumerated() {
             for b in screens.dropFirst(index + 1)
             where !a.frame.intersection(b.frame).isEmpty {
-                return true
+                pairs.insert([a.id, b.id])
             }
         }
-        return false
+        return pairs
     }
 
     /// Every pair of screens that touch, as two-element sets.

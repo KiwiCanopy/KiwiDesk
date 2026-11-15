@@ -189,33 +189,29 @@ struct ScreenShiftOfferTests {
     @Test("Shift writes the moves and files the yes")
     func shiftWritesAndFiles() throws {
         let model = makeTestModel()
-        let tiler = model.core.tiler
-        tiler.displayFrames = {
-            [
-                (
-                    DisplayID(3),
-                    CGRect(x: 1728, y: -159, width: 2560, height: 1440)
-                )
-            ]
-        }
-        tiler.readArrangement = { _ in
+        let core = model.core
+        let start = CGRect(x: 1728, y: -159, width: 2560, height: 1440)
+        var bounds = start
+        core.state.workspaces.displays[DisplayID(3)] = Display(
+            id: DisplayID(3),
+            name: "DELL U2720Q",
+            frame: start
+        )
+        core.tiler.displayFrames = { [(DisplayID(3), start)] }
+        core.tiler.readArrangement = { _ in
             [
                 DisplayReading(
                     id: DisplayID(3),
                     uuid: "dell",
-                    bounds: CGRect(
-                        x: 1728,
-                        y: -159,
-                        width: 2560,
-                        height: 1440
-                    ),
+                    bounds: bounds,
                     isMain: false
                 )
             ]
         }
         var written: [DisplayID: CGPoint] = [:]
-        tiler.writeArrangement = {
+        core.tiler.writeArrangement = {
             written = $0
+            if let origin = $0[DisplayID(3)] { bounds.origin = origin }
             return true
         }
         model.refreshScreenOffer(desk)
@@ -224,8 +220,10 @@ struct ScreenShiftOfferTests {
         model.applyScreenShift(offer)
         #expect(written == [DisplayID(3): CGPoint(x: 1728, y: -371)])
         #expect(model.screenShift.asking == nil)
+        // Filed under the arrangement the yes produced.
         #expect(
-            model.screenShift.answers.values.contains("shifted:dell")
+            model.screenShift.answers["dell@1728,-371,2560x1440"]
+                == "shifted:dell"
         )
     }
 

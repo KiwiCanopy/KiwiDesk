@@ -57,29 +57,84 @@ struct ScreenShiftEdgeTests {
         #expect(merged.allSatisfy { $0.crossings.isEmpty })
     }
 
-    @Test("A move never lays one screen over another")
-    func noOverlap() {
-        // Lowering the middle reaches the wide screen below it at
-        // once; the search gives that move up instead of passing
-        // through it.
-        let desk = [
-            screen("left", CGRect(x: -1000, y: 0, width: 1000, height: 1500)),
-            screen("middle", CGRect(x: 0, y: 0, width: 1000, height: 1000)),
-            screen("right", CGRect(x: 1000, y: 0, width: 1000, height: 1500)),
-            screen("below", CGRect(x: 0, y: 1000, width: 1000, height: 500)),
-        ]
-        #expect(
-            ScreenShiftPlan.shortest(
-                moving: "middle",
-                along: CGVector(dx: 0, dy: 1),
-                freeing: desk[1],
-                in: desk
-            ) == nil
+    @Test("A shared edge is reported once, with the relative move")
+    func edgeOnce() {
+        let a = screen("a", CGRect(x: 0, y: 0, width: 100, height: 100))
+        let b = screen("b", CGRect(x: 100, y: 0, width: 100, height: 100))
+        let merged = ScreenShiftPlan.merge(
+            [
+                ScreenShift(
+                    screen: "a",
+                    delta: CGVector(dx: 0, dy: -10),
+                    crossings: []
+                ),
+                ScreenShift(
+                    screen: "b",
+                    delta: CGVector(dx: 0, dy: -4),
+                    crossings: []
+                ),
+            ],
+            in: [a, b]
         )
+        #expect(merged.flatMap(\.crossings).count == 1)
+        #expect(
+            merged.first?.crossings
+                == [
+                    ScreenCrossing(screen: "b", delta: CGVector(dx: 0, dy: -6))
+                ]
+        )
+    }
+
+    @Test("A crossing keeps only the move along its edge")
+    func alongTheEdgeOnly() {
+        let a = screen("a", CGRect(x: 0, y: 0, width: 100, height: 100))
+        let b = screen("b", CGRect(x: 100, y: 0, width: 100, height: 100))
+        let merged = ScreenShiftPlan.merge(
+            [
+                ScreenShift(
+                    screen: "a",
+                    delta: CGVector(dx: -5, dy: -10),
+                    crossings: []
+                )
+            ],
+            in: [a, b]
+        )
+        #expect(
+            merged.first?.crossings
+                == [
+                    ScreenCrossing(
+                        screen: "b",
+                        delta: CGVector(dx: 0, dy: -10)
+                    )
+                ]
+        )
+    }
+
+    @Test("A move never lays one screen over another")
+    func noOverlap() throws {
+        // Sliding the wide screen right is the shorter way to clear
+        // the narrow screen's corner, but it runs into a screen it
+        // never touched while every original pair stays touching;
+        // the plan slides it left instead.
+        let desk = [
+            screen(
+                "narrow",
+                CGRect(x: 0, y: 0, width: 800, height: 1117),
+                main: true
+            ),
+            screen(
+                "wide",
+                CGRect(x: -600, y: 1117, width: 3440, height: 1440)
+            ),
+            screen(
+                "side",
+                CGRect(x: 2900, y: 1117, width: 1000, height: 1440)
+            ),
+        ]
+        let shift = try #require(ScreenShiftPlan.offer(desk)?.shifts.first)
+        #expect(shift.screen == "wide")
+        #expect(shift.delta == CGVector(dx: -2041, dy: 0))
         #expect(!ScreenShiftPlan.overlaps(desk))
-        var stacked = desk
-        stacked[1].frame.origin.y += 10
-        #expect(ScreenShiftPlan.overlaps(stacked))
     }
 
     @Test("A mirror is the screen itself, never a neighbour")
@@ -123,6 +178,11 @@ struct ScreenShiftEdgeTests {
     func doorsTakeTheSeams() {
         let core = makeTestCore()
         #expect(core.arrangedScreens().isEmpty)
+        core.state.workspaces.displays[DisplayID(7)] = Display(
+            id: DisplayID(7),
+            name: "Seven",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
         var written: [DisplayID: CGPoint]?
         core.tiler.displayFrames = {
             [(DisplayID(7), CGRect(x: 0, y: 0, width: 100, height: 100))]
@@ -141,6 +201,10 @@ struct ScreenShiftEdgeTests {
             written = $0
             return true
         }
+        #expect(
+            core.arrangedScreens().map(\.id) == ["seven"]
+        )
+        #expect(core.arrangedScreens().first?.name == "Seven")
         let landed = core.applyScreenShifts([
             ScreenShift(
                 screen: "seven",

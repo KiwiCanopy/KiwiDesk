@@ -28,8 +28,8 @@ enum MacChecklistRowOrder {
     ]
 
     /// Rows shown only while their condition holds: the boxed-in
-    /// offer's while one is open (#2756). Readers skip a row by
-    /// this set, never by naming it.
+    /// offer's while one is open (#2756). A reader that skips or
+    /// adds one goes by this set, never by naming the row.
     static let conditionalRows: Set<SettingKey> = [
         .macChecklist(.parkCorners)
     ]
@@ -142,10 +142,4 @@ enum MacChecklistProgress {
         }
     }
 
-    static func done(
-        states: [MacSetting: MacSettingState],
-        ticks: Set<MacSetting>
-    ) -> Int {
-        verdicts(states: states, ticks: ticks).filter(\.done).count
-    }
 }

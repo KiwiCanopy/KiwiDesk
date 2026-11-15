@@ -15,7 +15,11 @@ struct ScreenShiftAlert: ViewModifier {
             offer.map { ScreenShiftText.alertTitle($0, in: state) } ?? "",
             isPresented: Binding(
                 get: { model.screenShift.asking != nil },
-                set: { if !$0 { model.screenShift.asking = nil } }
+                set: {
+                    guard !$0 else { return }
+                    model.screenShift.asking = nil
+                    model.screenShift.askingKey = nil
+                }
             ),
             presenting: offer
         ) { offer in
