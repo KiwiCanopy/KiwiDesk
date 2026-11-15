@@ -5,17 +5,17 @@ import Foundation
 public enum ScrollGestureValue: Hashable, Sendable {
     case flag(Bool)
     case natural(NaturalScrolling)
-    case points(Double)
 }
 
 /// The scroll-gesture settings one at a time (#1656): the keys of
 /// the `RuleReachTable` a Settings row's checklist edits. One case
-/// per `ScrollGestureBase` field (`ScrollGestureConfigParityTests`).
+/// per `ScrollGestureBase` field a profile can override, which
+/// leaves out the global-only `stepLength`
+/// (`ScrollGestureConfigParityTests`).
 public enum ScrollGestureField: String, CaseIterable, Sendable {
     case naturalTrackpad = "natural_trackpad"
     case naturalMouse = "natural_mouse"
     case longSwipes = "long_swipes"
-    case stepDistance = "step_distance"
 
     /// This field's value in `base`.
     public func value(in base: ScrollGestureBase) -> ScrollGestureValue {
@@ -23,7 +23,6 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         case .naturalTrackpad: .natural(base.naturalTrackpad)
         case .naturalMouse: .natural(base.naturalMouse)
         case .longSwipes: .flag(base.longSwipes)
-        case .stepDistance: .points(base.stepDistance)
         }
     }
 
@@ -36,7 +35,6 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
             override.naturalTrackpad.map { .natural($0) }
         case .naturalMouse: override.naturalMouse.map { .natural($0) }
         case .longSwipes: override.longSwipes.map { .flag($0) }
-        case .stepDistance: override.stepDistance.map { .points($0) }
         }
     }
 
@@ -52,8 +50,6 @@ public enum ScrollGestureField: String, CaseIterable, Sendable {
         case (.naturalMouse, .natural(let value)):
             base.naturalMouse = value
         case (.longSwipes, .flag(let on)): base.longSwipes = on
-        case (.stepDistance, .points(let points)):
-            base.stepDistance = points
         default: break
         }
     }

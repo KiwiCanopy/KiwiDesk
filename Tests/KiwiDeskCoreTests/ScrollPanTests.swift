@@ -74,7 +74,9 @@ struct ScrollPanTests {
         core.applyScrollGestures(base: base, profile: nil)
     }
 
-    private var stride: Double { ScrollGestureBase.defaults.stepDistance }
+    private var stride: Double {
+        ScrollGestureBase.defaults.stepLength * ScrollStepMeter.pointsPerMM
+    }
 
     @Test("a swipe moves one window, against the fingers")
     func oneWindowPerSwipe() {

@@ -165,7 +165,7 @@ struct ScrollPanSwipeTests {
         let (core, session) = makeCore(focus: WindowID(1))
         var base = ScrollGestureBase.defaults
         base.longSwipes = true
-        base.stepDistance = 50
+        base.stepLength = 50 / ScrollStepMeter.pointsPerMM
         core.applyScrollGestures(base: base, profile: nil)
         gesture(core, session, [(30, 0), (4, 50), (-50, 6)])
         #expect(focused(core) == WindowID(3))
@@ -180,7 +180,7 @@ struct ScrollPanSwipeTests {
         )
         var base = ScrollGestureBase.defaults
         base.longSwipes = true
-        base.stepDistance = 50
+        base.stepLength = 50 / ScrollStepMeter.pointsPerMM
         core.applyScrollGestures(base: base, profile: nil)
         gesture(core, session, [(30, 0), (50, 4)])
         // 1 → 2, then wrapping back to 1 within the screen.

@@ -44,14 +44,18 @@ extension ConfigMigration {
     /// bundle, never a profile's override.
     static func withLongSwipesOn(_ node: Any) -> (Any, Bool) {
         guard var root = node as? [String: Any] else { return (node, false) }
-        if var config = root["config"] as? [String: Any] {
+        switch shape(of: root) {
+        case .bundle:
+            guard let config = root["config"] as? [String: Any] else {
+                return (node, false)
+            }
             let (group, changed) = flipped(config)
             guard changed else { return (node, false) }
-            config = group
-            root["config"] = config
+            root["config"] = group
             return (root, true)
+        case .gui: return flipped(root)
+        case .profile, .palettes, .looks: return (node, false)
         }
-        return flipped(root)
     }
 
     private static func flipped(
@@ -70,12 +74,14 @@ extension ConfigMigration {
     /// through `JSONKeyLexer` as a member of an object written under
     /// `scroll_gesture`; nil where there is not exactly one, which a
     /// bundle whose profiles carry the key may have, and the walk's
-    /// output stands in.
+    /// output stands in. Trade: the edit matches by key and the walk
+    /// by path, so such a bundle is re-serialized rather than edited;
+    /// the envelope's re-parse keeps either correct.
     static func longSwipesTextOn(_ text: String) -> Data? {
         let bytes = Array(text.utf8)
         let hits = JSONKeyLexer.entries(in: text).filter { entry in
             entry.key == longSwipesKey && entry.value == "false"
-                && isGroupObject(entry.object, in: bytes)
+                && isScrollGestureObject(entry.object, in: bytes)
         }
         guard hits.count == 1, let hit = hits.first else { return nil }
         var out = bytes
@@ -85,7 +91,10 @@ extension ConfigMigration {
 
     /// Whether the object opening at `open` is the value of a
     /// `"scroll_gesture"` member.
-    private static func isGroupObject(_ open: Int, in bytes: [UInt8]) -> Bool {
+    static func isScrollGestureObject(
+        _ open: Int,
+        in bytes: [UInt8]
+    ) -> Bool {
         let key = Array("\"\(longSwipesGroupKey)\"".utf8)
         let space: Set<UInt8> = Set(" \n\t\r".utf8)
         var index = open - 1

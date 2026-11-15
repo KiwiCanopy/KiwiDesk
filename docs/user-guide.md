@@ -1282,16 +1282,19 @@ A new layer also carries the `⌃⌥,` Open Settings row.
 ### Gestures
 
 Settings ▸ Shortcuts ▸ Mouse & Trackpad lists every gesture, and
-⌃⌥K lists them beside your shortcuts. A gesture KiwiDesk takes
+⌃⌥K lists them beside your shortcuts. Every gesture but a tap
 works only with its keys held; with no keys held, macOS and your
 apps keep the gesture.
 
-- **Two-finger swipes** step after a short travel and keep
-  stepping while your fingers move, with **Long swipes move more windows** on. Each
-  step goes the way your fingers lead, so right, right, down is one
-  movement. They follow macOS's Natural scrolling.
+- **Two-finger swipes** step after a short travel. A swipe that
+  moves focus keeps stepping while your fingers move, with
+  **Long swipes move more windows** on; each step goes the way
+  your fingers lead, so right, right, down is one movement.
 - **Three- to five-finger swipes** step after a longer travel, or
   on a quick flick, and take one step per touch.
+
+Every swipe follows macOS's Natural scrolling, save a direction
+given its own action.
 :::
 
 ## macOS Desktops (Mission Control)

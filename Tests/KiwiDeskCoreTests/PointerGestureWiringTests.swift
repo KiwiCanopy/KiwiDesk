@@ -120,7 +120,7 @@ struct PointerGestureWiringTests {
                 grab: [],
                 gestures: [
                     TrackpadGestureEvent(
-                        kind: .rotation(.clockwise),
+                        kind: .rotation(clockwise: true),
                         fingers: 2,
                         modifiers: Self.keys,
                         time: 0

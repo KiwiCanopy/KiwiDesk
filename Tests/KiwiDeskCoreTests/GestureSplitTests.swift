@@ -71,6 +71,8 @@ struct GestureSplitTests {
         #expect(
             GestureAction.family(.focus).step(toward: .up) == .family(.focus)
         )
+        // A whole family still steps nowhere on a press with no way.
+        #expect(GestureAction.family(.focus).step(toward: nil) == nil)
     }
 
     @Test("an axis family round-trips under split")
@@ -110,6 +112,12 @@ struct GestureSplitTests {
         #expect(throws: DecodingError.self) {
             try decode(#"{"split":{"up":{"family":"space"}}}"#)
         }
+        // An axis body carrying anything beside its family.
+        #expect(throws: DecodingError.self) {
+            try decode(
+                #"{"split":{"left_right":{"family":"space","lua":"a()"}}}"#
+            )
+        }
     }
 
     @Test("only a swipe takes an axis family")
@@ -141,9 +149,15 @@ struct GestureSplitTests {
                     )
                 )
         )
+        // Lua under an axis refuses the whole table, never drops the
+        // axis and keeps the rest.
         #expect(
-            KiwiCore.gestureAction(.object(["left_right": .string("x()")]))
-                == nil
+            KiwiCore.gestureAction(
+                .object([
+                    "left_right": .string("x()"),
+                    "up": .string("y()"),
+                ])
+            ) == nil
         )
     }
 

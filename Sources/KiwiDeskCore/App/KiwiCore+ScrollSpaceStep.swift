@@ -16,7 +16,7 @@ final class ScrollSpaceStepSession {
 
     /// One per swipe or notch: no long swipes (#1519 ruling).
     fileprivate static func makeMeter() -> ScrollStepMeter {
-        ScrollStepMeter(longSwipes: false, distance: 1)
+        ScrollStepMeter(longSwipes: false, length: 1)
     }
 
     init() {}

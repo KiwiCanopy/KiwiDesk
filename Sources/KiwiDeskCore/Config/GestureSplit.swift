@@ -62,9 +62,10 @@ extension GestureSplit: ExpressibleByDictionaryLiteral {
 }
 
 /// What one motion of a binding runs: a family's step, or a Lua
-/// action. The one resolver every consumer reads a direction
-/// through — the runners, the Natural flip and the axis claim —
-/// so none re-derives which axis holds a family.
+/// action. The one resolver of the stored shape the runners, the
+/// Natural flip (`resolvedStep`), the axis claim and the side
+/// buttons read a direction through; only the Settings editor, which
+/// writes the shape, reads `axes` and `arms` itself.
 public enum GestureStep: Hashable, Sendable {
     case family(GestureFamily)
     case lua(LuaAction)
@@ -109,5 +110,30 @@ extension GestureAction {
         }
         if split.axes.isEmpty, split.arms.isEmpty { return nil }
         return .split(split)
+    }
+}
+
+extension GestureDirection {
+    /// A motion Natural scrolling turns: a swipe's or a wheel's way,
+    /// never a side button's or a rotation's.
+    public var followsNatural: Bool {
+        self == .up || self == .down || self == .left || self == .right
+    }
+}
+
+extension GestureAction {
+    /// What a motion toward `hand` runs once Natural scrolling is
+    /// applied (#1873): a family, whole or an axis's, steps the way
+    /// Natural turns it, and an arm keeps the hand's way. The one
+    /// answer the touch front's flip and the shortcuts panel read.
+    public func resolvedStep(
+        toward hand: GestureDirection,
+        natural: Bool
+    ) -> (step: GestureStep, way: GestureDirection)? {
+        guard let step = step(toward: hand) else { return nil }
+        guard case .family = step, !natural, hand.followsNatural else {
+            return (step, hand)
+        }
+        return (step, hand.opposite)
     }
 }

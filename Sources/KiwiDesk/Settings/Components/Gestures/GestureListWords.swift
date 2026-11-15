@@ -104,7 +104,7 @@ enum GestureListWords {
         case .counterClockwise:
             L(
                 "shortcuts.gestures.direction.counter_clockwise",
-                "Counter-clockwise"
+                "Counterclockwise"
             )
         }
     }

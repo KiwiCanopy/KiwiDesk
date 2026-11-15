@@ -19,9 +19,10 @@ extension ShortcutsReferenceBuilder {
     static func withGestures(
         _ reference: ShortcutsReference,
         bindings: [GestureKey: GestureAction],
+        natural: (GestureInput) -> Bool = { _ in true },
         name: (LuaAction) -> String
     ) -> ShortcutsReference {
-        var open = reaches(bindings, name: name)
+        var open = reaches(bindings, natural: natural, name: name)
         var out = reference
         func attach(_ rows: inout [ShortcutRow]) {
             for index in rows.indices {
@@ -48,6 +49,7 @@ extension ShortcutsReferenceBuilder {
     /// Every motion of every binding, a family's per direction.
     static func reaches(
         _ bindings: [GestureKey: GestureAction],
+        natural: (GestureInput) -> Bool,
         name: (LuaAction) -> String
     ) -> [GestureReach] {
         bindings.keys.sorted().flatMap { key -> [GestureReach] in
@@ -74,14 +76,21 @@ extension ShortcutsReferenceBuilder {
             return key.input.directions.compactMap { direction in
                 let label: String
                 let lua: String
-                switch action.step(toward: direction) {
+                // The way the step runs, Natural applied, so a badge
+                // sits on the row that fires (`resolvedStep`).
+                guard
+                    let (step, way) = action.resolvedStep(
+                        toward: direction,
+                        natural: natural(key.input)
+                    )
+                else { return nil }
+                switch step {
                 case .family(let family):
-                    lua = family.lua(direction)
+                    lua = family.lua(way)
                     label = GestureListWords.family(family)
                 case .lua(let run):
                     lua = run.lua
                     label = name(run)
-                case nil: return nil
                 }
                 return GestureReach(
                     badge: ShortcutGestureBadge(

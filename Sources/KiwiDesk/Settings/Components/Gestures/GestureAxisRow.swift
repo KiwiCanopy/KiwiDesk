@@ -53,13 +53,7 @@ struct GestureAxisRow: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(SettingsTheme.ink2)
-        .accessibilityLabel(
-            L(
-                "shortcuts.gestures.axis_directions",
-                "Directions of %1$@",
-                GestureListWords.axis(axis)
-            )
-        )
+        .accessibilityLabel(GestureListWords.axisDirections(axis))
         .accessibilityValue(
             open
                 ? L("settings.disclosure.ax_expanded", "expanded")

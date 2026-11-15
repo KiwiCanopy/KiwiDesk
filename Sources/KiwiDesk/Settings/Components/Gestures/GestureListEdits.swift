@@ -166,8 +166,7 @@ enum GestureListEdits {
 
     /// Whether `input` takes a family per axis: a swipe, with both.
     static func splitsByAxis(_ input: GestureInput) -> Bool {
-        GestureAxis.allCases.flatMap(\.directions)
-            .allSatisfy(input.directions.contains)
+        input.takesAxisFamily
     }
 
     /// The directions `action` fires toward, in `input`'s order.
@@ -202,7 +201,8 @@ enum GestureListEdits {
     /// match, which keeps the pan, else — on a swipe — each axis
     /// whose two steps match a family as that family, and the rest
     /// one by one (#1873), so a family stays a family while its arms
-    /// match.
+    /// match. Settings' own lift, by ruling: Lua and the CLI store
+    /// arms as written, and Core's fold never lifts them.
     static func folded(
         _ arms: [GestureDirection: LuaAction],
         on input: GestureInput

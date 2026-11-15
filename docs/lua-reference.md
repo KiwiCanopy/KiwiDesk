@@ -5323,10 +5323,11 @@ written to the base or a profile's own bindings
 | `side_buttons` | Presses Back or Forward (buttons 3 and 4) | `focus` or `space`, or a table of `back` and `forward` |
 | `wheel` | Scrolls with no finger phase, up or down: a notched mouse wheel | `walk` or `space`, or a table of `up` and `down` |
 | `wheel_x` | Scrolls sideways with no finger phase: a tilt or thumb wheel | `walk` or `space`, or a table of `left` and `right` |
-| `swipe2` | Scrolls with a finger phase: a two-finger swipe on a trackpad or a Magic Mouse | any family, or a table of `up`, `down`, `left` and `right` |
-| `swipe3`, `swipe4`, `swipe5` | Swipes three, four or five fingers on a trackpad | any family, or a table of the four directions |
+| `swipe2` | Scrolls with a finger phase: a two-finger swipe on a trackpad or a Magic Mouse | any family but `layout`, or a table of `up`, `down`, `left` and `right` and of the axes `left_right` and `up_down` |
+| `swipe3`, `swipe4`, `swipe5` | Swipes three, four or five fingers on a trackpad | any family but `layout`, or a table of the four directions and the two axes |
 | `tap2`, `tap3`, `tap4`, `tap5` | Taps two, three, four or five fingers | Lua |
-| `spread`, `pinch_together`, `rotate`, `force_click` | Moves fingers apart, closes them, rotates them, presses a Force Click | Lua |
+| `rotate` | Rotates two fingers | `layout`, or a table of `clockwise` and `counter_clockwise` |
+| `spread`, `pinch_together`, `force_click` | Moves fingers apart, closes them, presses a Force Click | Lua |
 | `spread4`, `pinch_together4` | Moves four fingers apart, or closes them | Lua |
 
 `tap2` and `force_click` keep their bindings but do nothing yet.
@@ -5404,11 +5405,12 @@ A binding does one of four things:
   again only after the scroll pauses or turns; on a multi-finger
   swipe, once per swipe. On a swipe the table may also name an
   axis, `left_right` or `up_down`, with a family, which covers
-  that axis's two directions and follows Natural scrolling as a
-  whole family does:
+  that axis's two directions and runs as the whole family does,
+  Natural scrolling and long swipes included:
   `{ left_right = "space", up = "kiwihub.show(\"desktops\")" }`.
   A family name under a direction is Lua, and Lua under an axis is
-  refused.
+  refused. A direction's Lua stays Lua even where it spells a
+  family's step, so it never flips with Natural scrolling.
 
 The families:
 
@@ -5427,10 +5429,11 @@ act on the screen under the pointer; on a multi-finger swipe they
 act on the active Space, and `swap`, `display` and `track` act on
 the focused window everywhere. Each family takes one step per
 swipe or wheel notch, and its direction follows
-[Natural scrolling](#scroll_gestureset_natural_scrolling);
-[long swipes](#scroll_gestureset_long_swipes) add a step per
-[step distance](#scroll_gestureset_step_distance) to every
-`swipe2` family but `space`.
+[Natural scrolling](#scroll_gestureset_natural_scrolling), save
+`layout`'s, which follows the rotation alone. On `swipe2`,
+`focus` and `walk` also take a step per
+[step distance](#scroll_gestureset_step_distance) with
+[long swipes](#scroll_gestureset_long_swipes) on.
 
 `move` moves the window under the pointer, as a drag by its title
 bar does: a tiled window swaps with the one under the pointer at
@@ -5509,9 +5512,10 @@ way the fingers go, through the same step as [`focus`](#focus):
 fingers left focus the window on the left. A vertical wheel
 notch steps to the next or previous
 window in the Space's window order, floating windows included,
-wrapping at the ends. On every layout a swipe's first step fixes
-its axis until the fingers lift, so a diagonal swipe, and its
-long-swipe steps, move along one axis only. With
+wrapping at the ends. On every layout each step of a swipe goes
+along the axis its own travel leads, so with
+[long swipes](#scroll_gestureset_long_swipes) right, right, down
+is one movement. With
 [Natural scrolling](#scroll_gestureset_natural_scrolling) off for
 that input, every direction reverses, the Scrolling row's
 included.
@@ -5602,7 +5606,7 @@ direction holding a Lua binding and each axis (`left_right`,
 "gesture": {
   "tap3": null,
   "tap5": { "lua": "KiwiDesk.cycle_mode()", "kind": "custom" },
-  "swipe3:control+option": { "family": "focus" },
+  "swipe5:control+option": { "family": "focus" },
   "hover_move:control+command": { "grab": "move" },
   "swipe3:control+option": {
     "split": {
@@ -5669,15 +5673,17 @@ the base it set.
 **Expects:** an input; keys, spelled as in
 [Gesture inputs](#gesture-inputs), `""` for none; then an action:
 a family name, `"move"` or `"resize"`, a string of Lua, or a table
-mapping directions to Lua.
+mapping directions to Lua and, on a swipe, an axis (`left_right`,
+`up_down`) to a family name.
 
 **Does:** binds the input held with those keys, replacing what
 they held. It fails on an unknown input or modifier, a repeated
 modifier, no action, and every binding the input does not take:
 too few keys, `shift` on a wheel, a family the input does not
 offer, a grab off `drag` and `hover_move` or anything else on
-them, Lua on an input with directions, and a table on an input
-without them or naming a direction it lacks.
+them, Lua on an input with directions, a table on an input
+without them or naming a direction it lacks, and an axis on an
+input other than a swipe or holding anything but a family name.
 `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
 `modifier_drag.set_move`, `modifier_drag.set_resize` and
 `trackpad_gesture.bind` are retired and fail, naming it. Their
@@ -5819,11 +5825,10 @@ either way, as the section above qualifies. The Space step
 always steps one Space per swipe.
 
 :::unreleased
-Long swipes are on by default. Each step after the first goes
-along the axis its own travel leads, so right, right, down is one
-movement. Only `focus` and `walk` step more than once in a
-touch; every other family, and every three- to five-finger
-swipe, takes one step per touch.
+Long swipes are on by default. Only `focus` and `walk` step more
+than once in a touch, whole or on one axis of a table; every
+other family, and every three- to five-finger swipe, takes one
+step per touch.
 :::
 
 **Example:**
@@ -7642,6 +7647,16 @@ live glance at the active layer's bindings.
 - **↑** **↓** and **Page Up** / **Page Down** scroll the list;
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
+
+:::unreleased
+The panel also lists every bound [gesture](#gesture-actions), once
+each. A gesture whose action has a row is a badge on that row: the
+most specific first — a trackpad gesture before a mouse one, then
+the fewest keys, then a swipe before other gestures, then the
+fewest fingers — and the rest behind **+N**, which names them on
+hover. Every other gesture is a row under **Gestures**. Typing a
+gesture's name finds its row and brings that badge to the front.
+:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every

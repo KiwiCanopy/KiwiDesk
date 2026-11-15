@@ -118,7 +118,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// spread slots (#1873), in a bundle's `config` and its
     /// `[Profile]` alike, with no step.
     /// 51 = a stored `long_swipes: false` in a bundle's `config`
-    /// turns on (#1873); a profile's override keeps its own.
+    /// turns on (#1873); a profile's override keeps its own; and
+    /// every `scroll_gesture` group loses the point `step_distance`.
     public static let currentFormat = 51
 
     public let format: Int

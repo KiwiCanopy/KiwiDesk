@@ -37,7 +37,22 @@ extension SettingsValueReadout {
         // rows carry them (`layerDiffRows`, #2022).
         case .layersReach:
             return []
-        case .scrollLongSwipes, .scrollStepDistance,
+        // Lua-only (#1873 ▸ Ruling 2026-11-16), narrated where a
+        // restore or a reload moves the draft's value.
+        case .scrollStepLength:
+            return [
+                .change(
+                    census,
+                    label: ScrollGestureWords.stepLength,
+                    old: SettingsValueReadout.millimetres(
+                        old.scrollGesture.stepLength
+                    ),
+                    new: SettingsValueReadout.millimetres(
+                        new.scrollGesture.stepLength
+                    )
+                )
+            ]
+        case .scrollLongSwipes,
             .scrollNaturalTrackpad, .scrollNaturalMouse:
             return scrollGestureRows(key, old: old, new: new)
         case .gestureBindings:

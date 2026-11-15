@@ -94,7 +94,10 @@ struct ScrollGestureVerbTests {
     /// 2026-11-15): each step takes the axis its travel leads.
     @Test("a long swipe's later step takes the axis its travel leads")
     func familyStepRedecidesTheAxis() {
-        var meter = ScrollStepMeter(longSwipes: true, distance: 60)
+        var meter = ScrollStepMeter(
+            longSwipes: true,
+            length: 60 / ScrollStepMeter.pointsPerMM
+        )
         func event(
             _ kind: ScrollGestureEvent.Kind,
             dx: CGFloat = 0,
@@ -126,7 +129,10 @@ struct ScrollGestureVerbTests {
 
     @Test("a family steps along the axis the latch fired on")
     func familyStepNamesTheLatchedAxis() {
-        var meter = ScrollStepMeter(longSwipes: false, distance: 60)
+        var meter = ScrollStepMeter(
+            longSwipes: false,
+            length: 60 / ScrollStepMeter.pointsPerMM
+        )
         func event(dx: CGFloat, dy: CGFloat) -> ScrollGestureEvent {
             ScrollGestureEvent(
                 chord: [.control, .option],

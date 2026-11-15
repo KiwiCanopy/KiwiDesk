@@ -194,13 +194,13 @@ extension APIReference {
     static let scrollGestureRecords: [String: APIRecord] = [
         "set_long_swipes": APIRecord(
             "Lets a long trackpad swipe move one more window every "
-                + "step distance of travel.",
+                + "step length of finger travel.",
             .boolean("enabled")
         ),
-        "set_step_distance": APIRecord(
-            "Sets the travel, in points, per extra window of a long "
-                + "swipe.",
-            .number("points")
+        "set_step_length": APIRecord(
+            "Sets the finger travel, in mm, per extra window of a "
+                + "long swipe.",
+            .number("mm")
         ),
         "set_natural_scrolling": APIRecord(
             "Sets Natural scrolling for scroll gestures: on, off or "

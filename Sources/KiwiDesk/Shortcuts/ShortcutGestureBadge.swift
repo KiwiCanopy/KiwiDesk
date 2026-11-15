@@ -53,11 +53,19 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
     /// The badge as VoiceOver reads it: the keys, then the gesture.
     @MainActor var spoken: String {
         guard !key.chord.isEmpty else { return words }
+        guard let direction else {
+            return L(
+                "shortcuts.gestures.input_chord",
+                "%1$@, with %2$@",
+                GestureListWords.input(key.input),
+                chord
+            )
+        }
         return L(
             "shortcuts.gestures.direction_action_chord",
             "%1$@, %2$@, with %3$@",
             GestureListWords.input(key.input),
-            direction.map { GestureListWords.direction($0) } ?? "",
+            GestureListWords.direction(direction),
             chord
         )
     }

@@ -14,19 +14,12 @@ extension OnboardingView {
                 "These are ready on your trackpad. Hold the keys, then "
                     + "move your fingers."
             ),
-            footnote: OnboardingGestures.teachesScreens(rows)
-                ? L(
-                    "onboarding.gestures.steps_screens",
-                    "Focus keeps stepping while your fingers move. "
-                        + "Spaces and screens take one step per swipe."
-                )
-                : L(
-                    "onboarding.gestures.steps",
-                    "Focus keeps stepping while your fingers move. "
-                        + "Spaces take one step per swipe."
-                ),
+            footnote: OnboardingGestures.footnote(
+                rows,
+                longSwipes: model.longSwipes()
+            ),
             hint: L(
-                "onboarding.keys.hint",
+                "onboarding.gestures.hint",
                 "Try one now — nothing will break."
             ),
             back: model.back

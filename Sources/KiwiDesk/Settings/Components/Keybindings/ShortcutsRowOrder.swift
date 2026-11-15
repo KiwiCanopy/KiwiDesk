@@ -30,7 +30,6 @@ enum ShortcutsRowOrder {
         .behaviour(.mouseFollowsFocus),
         .behaviour(.mouseResize),
         .shortcuts(.scrollLongSwipes),
-        .shortcuts(.scrollStepDistance),
     ]
 
     /// Show & hide ▸ KiwiHub order: its sides in the order of their keys,

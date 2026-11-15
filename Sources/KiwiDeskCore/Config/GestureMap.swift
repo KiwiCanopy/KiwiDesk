@@ -89,7 +89,7 @@ public enum GestureSeeds {
         GestureKey(.swipe3, pan): .split(
             GestureSplit(
                 axes: [.leftRight: .space],
-                arms: [.up: step(KiwiHubSide.desktops.lua)]
+                arms: [.up: navigationStep(KiwiHubSide.desktops.lua)]
             )
         ),
         GestureKey(.swipe4, pan): .family(.display),
@@ -109,12 +109,12 @@ public enum GestureSeeds {
         ),
     ]
 
-    private static func step(_ lua: String) -> LuaAction {
+    private static func navigationStep(_ lua: String) -> LuaAction {
         LuaAction(lua: lua, kind: .navigation)
     }
 
     private static func navigation(_ lua: String) -> GestureAction {
-        .run(step(lua))
+        .run(navigationStep(lua))
     }
 
     /// The bound keys once `base` lies over the seeds and `profile`

@@ -11,8 +11,8 @@ public struct TrackpadGestureEvent: Equatable, Sendable {
         /// `fingers` is unread.
         case gesture(GestureInput)
         /// A rotation the pointer tap read, by its way (#1873 ▸ owner
-        /// ruling 2026-11-15); the rotate slot's input.
-        case rotation(GestureDirection)
+        /// ruling 2026-11-15): the rotate slot's one event spelling.
+        case rotation(clockwise: Bool)
     }
 
     public var kind: Kind

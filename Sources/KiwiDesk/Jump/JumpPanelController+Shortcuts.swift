@@ -112,6 +112,7 @@ extension JumpPanelController {
         let gestured = ShortcutsReferenceBuilder.withGestures(
             reference,
             bindings: core.mouse.gestures.resolved,
+            natural: { core.mouse.scroll.isNatural(for: $0) },
             name: { run in
                 named.first { $0.lua == run.lua }?.resolvedLabel
                     ?? GestureListWords.runName(run)

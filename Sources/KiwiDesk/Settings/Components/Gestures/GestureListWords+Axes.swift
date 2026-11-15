@@ -12,6 +12,23 @@ extension GestureListWords {
         }
     }
 
+    /// The axis row's disclosure, spoken: one sentence per axis, so
+    /// no locale bends the row's title into a frame.
+    static func axisDirections(_ axis: GestureAxis) -> String {
+        switch axis {
+        case .leftRight:
+            L(
+                "shortcuts.gestures.axis_directions.left_right",
+                "Directions left and right"
+            )
+        case .upDown:
+            L(
+                "shortcuts.gestures.axis_directions.up_down",
+                "Directions up and down"
+            )
+        }
+    }
+
     static func axis(symbol axis: GestureAxis) -> String {
         switch axis {
         case .leftRight: "arrow.left.and.right"
@@ -41,19 +58,22 @@ extension GestureListWords {
             return L(
                 "shortcuts.gestures.natural.fixed",
                 "Each direction keeps the way you set it, whatever "
-                    + "Natural scrolling says."
+                    + "%1$@ says.",
+                ScrollGestureWords.natural
             )
         }
         return follows == .leftRight
             ? L(
                 "shortcuts.gestures.natural.left_right",
-                "Left and right follow Natural scrolling. Up and down "
-                    + "keep the way you set them."
+                "Left and right follow %1$@. Up and down keep the way "
+                    + "you set them.",
+                ScrollGestureWords.natural
             )
             : L(
                 "shortcuts.gestures.natural.up_down",
-                "Up and down follow Natural scrolling. Left and right "
-                    + "keep the way you set them."
+                "Up and down follow %1$@. Left and right keep the way "
+                    + "you set them.",
+                ScrollGestureWords.natural
             )
     }
 }

@@ -16,7 +16,7 @@ final class ScrollPanSession {
     }
 
     fileprivate var space: SpaceID?
-    fileprivate var meter = ScrollStepMeter(longSwipes: false, distance: 1)
+    fileprivate var meter = ScrollStepMeter(longSwipes: false, length: 1)
 
     init() {}
 }
@@ -48,7 +48,11 @@ extension KiwiCore {
         if event.kind == .began {
             beginScrollPan(at: event.location, session: session)
         }
-        let steps = session.meter.feed(event)
+        // The finger travel the meter counts in from the latch, read
+        // through the one door; nil while no reader runs (#1873).
+        let reading =
+            event.input == .trackpad ? mouse.trackpad.travel : nil
+        let steps = session.meter.feed(event, reading: reading)
         if event.kind == .ended { session.space = nil }
         guard steps != 0, let id = session.space else { return }
         // The axis this step took, re-decided per step (#1873).
@@ -79,7 +83,7 @@ extension KiwiCore {
         let resolved = mouse.scroll.resolved
         session.meter = ScrollStepMeter(
             longSwipes: resolved.longSwipes,
-            distance: resolved.stepDistance
+            length: resolved.stepLength
         )
         guard let id = session.spaceAt(location, state),
             state.workspaces[id] != nil

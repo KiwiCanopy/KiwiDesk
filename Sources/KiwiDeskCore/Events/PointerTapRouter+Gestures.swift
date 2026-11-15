@@ -137,16 +137,14 @@ extension PointerTapRouter {
         } else {
             stream.rotated += g.value
             if abs(stream.rotated) >= Self.rotateStep {
-                // Positive degrees turn counter-clockwise, as
-                // NSEvent's rotation does (#1873; read on the device).
-                let way: GestureDirection =
-                    stream.rotated > 0 ? .counterClockwise : .clockwise
+                // Positive degrees are counter-clockwise, as
+                // NSEvent's rotation reads (device, 2026-11-15).
                 fires += firing(
                     .rotate,
                     &stream,
                     settings,
                     now,
-                    kind: .rotation(way)
+                    kind: .rotation(clockwise: stream.rotated < 0)
                 )
             }
         }

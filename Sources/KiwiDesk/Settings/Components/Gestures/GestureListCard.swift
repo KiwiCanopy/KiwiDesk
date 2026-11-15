@@ -239,9 +239,10 @@ struct GestureListCard: View {
                 "shortcuts.gestures.list.trackpad_help_ladder",
                 "Bind a tap, a swipe, a pinch or a rotation to an "
                     + "action; a tap may take no keys. Two fingers move "
-                    + "between windows, three between Spaces and their "
-                    + "overview, four between screens. A two-finger "
-                    + "swipe steps as far as you swipe; three to five "
+                    + "between windows, three between Spaces and the "
+                    + "Desktop overview, four between screens. A "
+                    + "two-finger swipe steps as far as you swipe; three "
+                    + "to five "
                     + "fingers take one step per swipe. Give one "
                     + "direction its own action and it acts once per "
                     + "swipe."

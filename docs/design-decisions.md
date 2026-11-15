@@ -11274,6 +11274,22 @@ user would never find, which leaves a Space's windows where they
 are and tiles them again on the next press (owner, 2026-11-13).
 :::
 
+:::unreleased
+**The Gestures step exists only on a Mac with a trackpad** (#1873,
+owner 2026-11-15). It comes after Keys and teaches the seeded
+trackpad ladder, so on a Mac with no trackpad it would teach
+gestures nobody there can make. Such a Mac gets no step and no
+pip, so the progress row never counts a page it skips. Whether a
+trackpad is there is read once, when the tour plans its steps,
+from the trackpad's own driver class (`TrackpadPresence`). A
+Magic Mouse is multitouch too, and it must not count. The step
+keeps the keys page's budget: at most five rows, in words rather
+than arrows, each read from the live bindings so a gesture the
+user unbound is not taught. The screen row needs two or more
+screens. ⌃⌥K closes the page, since it lists every gesture the
+page leaves out.
+:::
+
 ### The tour's look is written through, and the tour owns its undo
 
 **[Principle]**
@@ -13866,10 +13882,10 @@ The bound above, "a default install, and one that never records a
 side, sees no keystroke", is retired for one seed only: #1873's
 seeded gesture slots, which ship bound and on — a four-finger tap
 turns KiwiVision on or off and a three-finger tap goes to the
-last Space you were on (`focus_space_last`) (#1873 ▸ 2026-11-15,
-which moved the four-finger tap off KiwiHub: an accidental tap
-dims or clears the screen and the same tap undoes it, and KiwiHub
-keeps ⌃⌥K). It cannot be anything
+last Space you were on (`focus_space_last`). The four-finger tap
+is KiwiVision's, not KiwiHub's (owner, 2026-11-15): a stray tap
+dims or clears the screen, which the same tap undoes, while
+KiwiHub already has ⌃⌥K. It cannot be anything
 else: a pinch or a tap
 is a trackpad reader or nothing. And a seed nobody can find is no
 seed: putting it behind a switch first would make the tour teach a
@@ -13932,8 +13948,10 @@ different ground:
   swipes. A default install arms it (owner, 2026-11-15): the seeds
   bind ⌃⌥ rotate, spread, pinch together and four-finger pinch
   together, and the ⌃⌥ three- and four-finger swipes, so the mask
-  and the touch reader run without a binding of the user's own,
-  and unbinding every such slot stops both. The mask is CG types
+  arms without a binding of the user's own. Unbinding every such
+  slot disarms the mask; the touch reader stops only once the
+  seeded taps are unbound too, since they read touches as well.
+  The mask is CG types
   29 and 30. A probe at `.cgSessionEventTap`
   (2026-11-14, macOS 27.2) asked tccd for `PostEvent` alone, the
   grab mask's signature, and swallowing ⌃⌥ magnifications and
@@ -17270,18 +17288,18 @@ no reliable second, so a direction would strand half the windows.
 mouse drivers report precise deltas too, while the phase is what
 only fingers produce. Monocle keeps its flip — right or down is
 the next window, left or up the previous — and a Scrolling row
-steps along the row, as the paragraphs above rule. **The swipe's
-first step locks its axis until the fingers lift**, on every
-layout: a hand's diagonal drifts, and an axis read per event
-would turn a long swipe's later repeats onto the other axis, so
-`step_distance` repeats count the locked axis alone. The lock is
-read from the axis the meter's latch fired on, never a second
-reading of the travel, so the first step's sign and the locked
-axis cannot disagree. This changed no stored value, so it took
-no `ConfigMigration`. The three-finger `swipe3` `focus` binding
-stays an option, unbound by default: macOS's own "Swipe between
-full-screen apps" owns the three- and four-finger horizontal
-swipe on most Macs.
+steps along the row, as the paragraphs above rule. **Each step
+takes its axis from the meter, never from a reading beside it**,
+on every layout: the first from the axis the meter's latch fired
+on, and each long-swipe step from the axis its own travel since
+the last step leads, so a step's sign and its axis cannot
+disagree. An axis read per event would let a hand's drift turn a
+step; an axis held to the lift would refuse the turn a user means
+(the #1873 amendment under *One swipe moves one window by
+default* argues the per-step reading). This changed no stored
+value, so it took no `ConfigMigration`. `swipe3` and `swipe4` are
+seeded for Spaces and screens rather than focus — the ladder that
+amendment argues — and `focus` stays an option on them.
 
 **What moves on screen follows the fingers, and Natural
 scrolling is the one switch for it** (#3200 amendment, owner
@@ -17326,8 +17344,10 @@ left unbound under a bound chord reaches the window: taking it
 would do nothing with it, and a press that does nothing must say
 why (above). An input
 with directions binds a family, whose argument is the direction,
-or one action per direction; a single Lua for every direction is
-refused, since it would throw away the one thing the hand said.
+or one action per direction, and a swipe also a family per axis
+(*A swipe splits by axis*, below); a single Lua for every
+direction is refused, since it would throw away the one thing
+the hand said.
 
 **A family row's directions open pre-filled, and the row stays the
 family while they match** (#3183 ▸ Ruling: directions of a family
@@ -17336,14 +17356,24 @@ direction of a swipe or scroll row on a family shows that family's
 one-shot step — `focus` that way for `focus`, `focus_space_window`
 for `walk` — so opening the directions changes nothing. A family is
 more than its steps: it slides a Scrolling row with the fingers,
-adds a step per step distance on a long two-finger swipe, and
-follows Natural scrolling, and a direction's Lua does none of these.
-So arms that still match a family's steps save as that family, and
-only a row whose arms differ stores them, each acting once per
-motion, with a caption saying what the row gave up. Editing the
-arms back into a family's steps, or picking a family on the row,
-folds it back without asking. Empty directions were refused:
-editing one would have turned the other three off without a word.
+adds a step per step distance on a long two-finger swipe (focus
+and walk), and follows Natural scrolling, and a direction's Lua
+does none of these. So arms that still match a family's steps
+save as that family — the whole row's, or on a swipe an axis's
+whose two arms match — and only a row whose arms differ stores
+them, each acting once per motion, with a caption saying what the
+row gave up. Editing the arms back into a family's steps, or
+picking a family on the row, folds it back without asking. Empty
+directions were refused: editing one would have turned the other
+three off without a word.
+
+The lift is Settings' alone, and deliberate: a row pre-fills a
+family's steps, so a match there is the family the user never
+left. `gesture.bind` and the CLI store a table as written, arms
+that spell a family's steps included, because a script that wrote
+Lua under a direction chose a fixed action, one Natural scrolling
+never flips; lifting it would change what the script does
+without a word. A writer outside Settings never takes the lift.
 
 **The list layers like the shortcuts, the drag chords included.**
 The base sits in `gui.json` over the code's seeds and a profile's
@@ -17435,7 +17465,91 @@ a jump nobody aimed. A stored `long_swipes: false` turns on once
 stored false is almost always 4.x's default; no stored signal
 tells a deliberate off apart, so a user who chose off gets on
 once and turns it off again. A profile's override is sparse, so
-its false is a choice and stays.
+its false is a choice and stays. That is an exception to the
+rule that a whole-encoded default flip owes no re-default without
+a stored signal (`.claude/rules/profiles.md`, #1359), taken by
+owner ruling, at this one cost.
+:::
+
+:::unreleased
+**A swipe splits by axis, and a split has one stored spelling**
+(#1873, owner 2026-11-15; ui-designer and architect consulted). A
+swipe's four directions sit on two levels below the whole family:
+an axis takes a family, which runs as the whole family does, and
+a direction takes a fixed action, which runs once per motion and
+never flips. Mixed forms are one value. The seeded ⌃⌥
+three-finger swipe is the worked case: left and right are the
+Space pair, following Natural scrolling as macOS's own Desktop
+swipe does, while up opens the Desktop overview, which must not
+turn into down when Natural scrolling is off. Without the axis
+level that row is either a family whose up is a Space step or
+four arms whose left and right stop following Natural scrolling.
+The axis is the unit because a family's two directions on one
+axis are the next/previous pair Natural scrolling flips. An arm
+has no pair to flip against. The axes are named `left_right` and
+`up_down`, since `horizontal` and `vertical` already name a
+layout's orientation in Lua. Settings has no level control: the
+level follows from what the user picks. The axis rows sit at the
+single indent the direction rows use, and a caption appears only
+while Natural scrolling is on and the row holds a direction of
+its own.
+
+The fold is `GestureAction.split(normalizing:)` and no other: an
+arm under an axis that holds a family is dropped, both axes on
+one family with no arm are that family whole, and an empty split
+binds nothing. The decoder refuses a body the fold would change,
+so each behaviour has one spelling. Two spellings of one binding
+would read as a change in the save pill's diff and split one
+binding across the reach fold.
+
+On a two-finger swipe an axis's family runs through the same
+runner as the whole family — the pan, or the Space step — for
+that gesture, chosen once the travel names its axis, so an axis
+`focus` slides a row, repeats with long swipes and bumps exactly
+as a whole `focus` does. An arm keeps the once-per-motion latch.
+The scroll front's flip stays the only flip on that path. A
+runner of its own for an axis family would be a second pan with
+its own repeat and its own flip, and the first fix to one would
+miss the other.
+
+What a direction runs, once Natural scrolling has had its say, is
+answered by one Core resolver. The runner's flip, the ⌃⌥K panel's
+badges and the tour's rows all read it, because three readers
+each deciding the flip would draw a badge pointing one way while
+the swipe goes the other. `GestureAction.step(toward:)` stays the
+resolver of the stored shape beneath it.
+
+`rotate` takes the same shape on its own pair: `clockwise` and
+`counter_clockwise`, whole as the `layout` family (next and
+previous, as ⌃⌥C and ⌃⌥⇧C), or split into two arms through the
+same stored shape and sub-rows. No Natural flip reaches a
+rotation. None of this shipped before the change (`GestureMap` is
+not in 4.2.x), so it owes no `ConfigMigration`.
+:::
+
+:::unreleased
+**The shortcuts panel lists every gesture once: a badge where its
+action has a row, a row under Gestures where it has none** (#1873,
+owner 2026-11-15; ui-designer and architect consulted). A gesture
+is one more way to run an action the panel already lists. A
+gestures section of its own would list the focus rows twice and leave
+a reader comparing two lists. Badges alone would drop every
+gesture with no row to sit on: the grabs, the wheel walk, an
+app's opener, custom Lua, a lone direction's action and KiwiHub's
+own openers. So both, and each binding appears exactly once. The
+panel reads the live resolved bindings, never the seeds, so a
+user's own binding is listed and an unbound seed is not.
+
+A row wears one badge, so its width stays a chord's; the others
+wait behind **+N**, which names them on hover. The badge shown is
+the most specific: a trackpad gesture before a mouse one, then
+the fewest keys held, then a swipe before other gestures, then
+the fewest fingers. That order puts the ladder's gesture first,
+the one the tour teaches. A gesture that reaches one row by more
+than one way — two directions running the same action — wears one
+badge, drawn without a direction, since either arrow alone would
+be half the truth. A search that names a gesture brings its badge
+to the front, so a hit never matches a gesture the row hides.
 :::
 
 :::unreleased

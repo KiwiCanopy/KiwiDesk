@@ -6,18 +6,42 @@ import Testing
 /// `ScrollGestureOverride` mirrors `ScrollGestureBase` field for
 /// field (#1656, parity-tests.md): a field added to the base and
 /// not the override could never be overridden per profile, and one
-/// left out of `resolved`/`diff` would be dropped on a save.
+/// left out of `resolved`/`diff` would be dropped on a save. The one
+/// exemption is `globalOnly`: a field no profile may override, so the
+/// override, its `diff` and `ScrollGestureField` leave it out.
 @Suite("Scroll gesture override parity")
 struct ScrollGestureConfigParityTests {
+    /// The base's fields no profile overrides (#1873 ▸ Ruling
+    /// 2026-11-16: the step length is Lua-only).
+    private static let globalOnly: Set<String> = ["stepLength"]
+
     private func labels(_ value: Any) -> [String] {
         Mirror(reflecting: value).children.compactMap(\.label)
     }
 
-    @Test("the override names every field of the base, and only those")
+    private var overridable: [String] {
+        labels(ScrollGestureBase.defaults).filter {
+            !Self.globalOnly.contains($0)
+        }
+    }
+
+    @Test("the override names every overridable field, and only those")
     func fieldsMirror() {
         let base = labels(ScrollGestureBase.defaults)
-        #expect(!base.isEmpty)
-        #expect(base == labels(ScrollGestureOverride()))
+        #expect(Self.globalOnly.isSubset(of: base))
+        #expect(!overridable.isEmpty)
+        #expect(overridable == labels(ScrollGestureOverride()))
+    }
+
+    /// A resolve keeps a global-only field the base's, whatever the
+    /// override says.
+    @Test("a resolve keeps the global-only fields")
+    func resolveKeepsGlobalOnly() {
+        var base = ScrollGestureBase.defaults
+        base.stepLength = 25
+        let resolved = ScrollGestureOverride(longSwipes: false)
+            .resolved(onto: base)
+        #expect(resolved.stepLength == 25)
     }
 
     /// Every field differs from the base, so a resolve or a diff
@@ -29,7 +53,7 @@ struct ScrollGestureConfigParityTests {
             naturalTrackpad: .off,
             naturalMouse: .off,
             longSwipes: false,
-            stepDistance: 120
+            stepLength: base.stepLength
         )
         let over = ScrollGestureOverride.diff(base: base, edited: edited)
         #expect(
@@ -50,9 +74,9 @@ struct ScrollGestureConfigParityTests {
             naturalTrackpad: .off,
             naturalMouse: .off,
             longSwipes: false,
-            stepDistance: 120
+            stepLength: base.stepLength
         )
-        #expect(ScrollGestureField.allCases.count == labels(base).count)
+        #expect(ScrollGestureField.allCases.count == overridable.count)
         #expect(base.writing(edited.fields) == edited)
         let over = ScrollGestureOverride.diff(base: base, edited: edited)
         #expect(over?.fields == edited.fields)
@@ -67,7 +91,7 @@ struct ScrollGestureConfigParityTests {
             naturalTrackpad: .off,
             naturalMouse: .off,
             longSwipes: false,
-            stepDistance: 120
+            stepLength: 25
         )
         // Every field off its default, derived rather than
         // trusted: a new field left default here is one unwatched.

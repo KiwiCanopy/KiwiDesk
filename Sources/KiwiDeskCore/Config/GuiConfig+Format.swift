@@ -111,6 +111,7 @@ extension GuiConfig {
     ///
     /// **27 (#1873)**: a stored `long_swipes: false` in the
     /// scroll-gesture base turns on, the new default
-    /// (`migratingLongSwipesOn`).
+    /// (`migratingLongSwipesOn`); and the point `step_distance`
+    /// leaves for the mm `step_length` (`migratingStepDistanceOut`).
     public static let currentFormat = 27
 }

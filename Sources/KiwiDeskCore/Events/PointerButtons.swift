@@ -48,9 +48,9 @@ public struct PointerButtonSettings: Equatable, Sendable {
             switch action {
             case .run: directions = key.input.directions.isEmpty ? [nil] : []
             case .family: directions = key.input.directions
-            case .split(let split):
+            case .split:
                 directions = key.input.directions.filter {
-                    split.arms[$0] != nil
+                    action.step(toward: $0) != nil
                 }
             case .grab: directions = []
             }

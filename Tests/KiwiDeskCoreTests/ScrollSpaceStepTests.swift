@@ -126,7 +126,7 @@ struct ScrollSpaceStepTests {
         // turned on, a long swipe still steps one Space.
         var base = ScrollGestureBase.defaults
         base.longSwipes = true
-        base.stepDistance = 10
+        base.stepLength = ScrollGestureBase.stepLengthRange.lowerBound
         core.applyScrollGestures(base: base, profile: nil)
         // Fingers left: content left, the NEXT Space comes in.
         swipe(core, session, dx: -80, events: 6)

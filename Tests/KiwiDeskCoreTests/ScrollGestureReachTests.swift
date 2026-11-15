@@ -91,10 +91,10 @@ struct ScrollGestureReachTests {
     func storedPageRoundTrips() throws {
         let core = try makeCore()
         var work = try core.profiles.read(name: "Work")
-        work.scrollGesture = ScrollGestureOverride(stepDistance: 90)
+        work.scrollGesture = ScrollGestureOverride(naturalMouse: .on)
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.scrollGesture.stepDistance == 90)
+        #expect(page.scrollGesture.naturalMouse == .on)
         page.scrollGesture.naturalTrackpad = .off
         try core.overwriteProfile(
             named: "Work",
@@ -105,7 +105,7 @@ struct ScrollGestureReachTests {
             try core.profiles.read(name: "Work").scrollGesture
                 == ScrollGestureOverride(
                     naturalTrackpad: .off,
-                    stepDistance: 90
+                    naturalMouse: .on
                 )
         )
     }
@@ -114,10 +114,10 @@ struct ScrollGestureReachTests {
     func checklistSaveKeepsTheOverride() throws {
         let core = try makeCore()
         var work = try core.profiles.read(name: "Work")
-        work.scrollGesture = ScrollGestureOverride(stepDistance: 90)
+        work.scrollGesture = ScrollGestureOverride(naturalMouse: .on)
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        page.scrollGesture.stepDistance = 200
+        page.scrollGesture.naturalMouse = .off
         try core.overwriteProfile(
             named: "Work",
             with: page,
@@ -125,7 +125,7 @@ struct ScrollGestureReachTests {
         )
         #expect(
             try core.profiles.read(name: "Work").scrollGesture
-                == ScrollGestureOverride(stepDistance: 90)
+                == ScrollGestureOverride(naturalMouse: .on)
         )
     }
 

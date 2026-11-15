@@ -144,8 +144,8 @@ public enum GestureRefusal: Equatable, Sendable {
     /// An axis takes a family only on an input with both axes: a
     /// swipe (#1873).
     case axisNotOffered
-    /// A swipe, a wheel or the side buttons bind a family, or one
-    /// action per direction; never one action for all of them.
+    /// An input with directions binds a family, or one action per
+    /// direction; never one action for all of them.
     case directionalNeedsFamily
     /// A drag binds a grab alone; nothing else binds one.
     case grabOnlyOnDrag
@@ -192,10 +192,7 @@ extension GestureAction {
                 return .noDirections
             }
             if !split.axes.isEmpty {
-                let both = GestureAxis.allCases.flatMap(\.directions)
-                guard both.allSatisfy(input.directions.contains) else {
-                    return .axisNotOffered
-                }
+                guard input.takesAxisFamily else { return .axisNotOffered }
                 guard split.axes.values.allSatisfy(input.families.contains)
                 else { return .familyNotOffered }
                 return nil

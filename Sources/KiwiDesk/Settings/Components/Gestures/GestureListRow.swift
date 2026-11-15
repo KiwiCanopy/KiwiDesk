@@ -184,14 +184,17 @@ struct GestureListRow: View {
     /// on, and that a split no longer slides only where a two-finger
     /// focus could; a wheel keeps its once-per-scroll line.
     private func splitCaption(_ split: GestureSplit) -> String? {
+        // A rotation never slid and Natural scrolling never turns it.
+        guard key.input != .rotate else { return nil }
         guard GestureListEdits.splitsByAxis(key.input) else {
             return GestureListWords.mixedCaption(key.input)
         }
         let natural =
             naturalScrolling
             ? GestureListWords.naturalCaption(split) : nil
+        // A two-finger split steps once per touch, axis families too.
         let slides =
-            key.input.isPhasedScroll && !split.arms.isEmpty
+            key.input.isPhasedScroll
             ? GestureListWords.mixedCaption(key.input) : nil
         let lines = [natural, slides].compactMap { $0 }
         return lines.isEmpty ? nil : lines.joined(separator: " ")
@@ -200,8 +203,8 @@ struct GestureListRow: View {
     /// The trackpad's Natural scrolling as the draft sets it, macOS's
     /// own where it follows the system.
     private var naturalScrolling: Bool {
-        model.config.scrollGesture.naturalTrackpad.isNatural(
-            host: model.core.mouse.scroll.hostNatural
+        model.core.mouse.scroll.isNatural(
+            model.config.scrollGesture.naturalTrackpad
         )
     }
 

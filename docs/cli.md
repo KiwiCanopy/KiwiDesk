@@ -915,7 +915,7 @@ it, and the `stack_position` that `get_state` reports, are in the
 input held with keys — `drag`, `hover_move`, `wheel`, `swipe2`,
 `tap4` and the rest of the
 [Gesture inputs](lua-reference.md#gesture-inputs) — to a family
-(`focus|walk|swap|display|track|space`), `move|resize` or Lua, and
+(`focus|walk|swap|display|track|space|layout`), `move|resize` or Lua, and
 `gesture.unbind <input> <keys>` turns one off, a default included;
 `""` holds no keys
 ([`gesture.bind`](lua-reference.md#gesturebind)). The CLI passes

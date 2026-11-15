@@ -108,14 +108,46 @@ enum OnboardingGestures {
             )
         }
         rows = Array(rows.prefix(limit))
-        if let gateway = gateway(layer) { rows.append(gateway) }
+        // ⌃⌥K alone teaches no gesture: no step then.
+        if !rows.isEmpty, let gateway = gateway(layer) {
+            rows.append(gateway)
+        }
         return rows
     }
 
-    /// Whether any row teaches a screen: the sentence under the
-    /// body names screens only beside the row that does.
-    static func teachesScreens(_ rows: [OnboardingKeyFamily]) -> Bool {
-        rows.contains { $0.id == "display" }
+    /// The sentence under the body, from the rows it sits over: the
+    /// focus row repeats only with long swipes on, and screens are
+    /// named only beside the row that teaches one.
+    static func footnote(
+        _ rows: [OnboardingKeyFamily],
+        longSwipes: Bool
+    ) -> String? {
+        let ids = Set(rows.map(\.id))
+        var lines: [String] = []
+        if ids.contains("focus"), longSwipes {
+            lines.append(
+                L(
+                    "onboarding.gestures.steps_focus",
+                    "Focus keeps stepping while your fingers move."
+                )
+            )
+        }
+        if ids.contains("display") {
+            lines.append(
+                L(
+                    "onboarding.gestures.steps_screens",
+                    "Spaces and screens take one step per swipe."
+                )
+            )
+        } else if ids.contains("space") {
+            lines.append(
+                L(
+                    "onboarding.gestures.steps_spaces",
+                    "Spaces take one step per swipe."
+                )
+            )
+        }
+        return lines.isEmpty ? nil : lines.joined(separator: " ")
     }
 
     private static func row(
@@ -125,45 +157,65 @@ enum OnboardingGestures {
         _ motion: String
     ) -> OnboardingKeyFamily {
         let modifiers = HotkeyModifiers(key.chord)
+        let spoken =
+            key.chord.isEmpty
+            ? L("onboarding.gestures.spoken", "%1$@: %2$@", label, motion)
+            : L(
+                "onboarding.gestures.spoken_chord",
+                "%1$@: %2$@, %3$@",
+                label,
+                SidedChordWords.label(ScrollChordGlyphs.text(key.chord)),
+                motion
+            )
         return OnboardingKeyFamily(
             id: id,
             label: label,
             chord: .shared(modifiers, keys: motion),
-            spoken: L(
-                "onboarding.gestures.spoken",
-                "%1$@: %2$@",
-                label,
-                key.chord.isEmpty
-                    ? motion
-                    : SidedChordWords.label(
-                        ScrollChordGlyphs.text(key.chord)
-                    ) + ", " + motion
-            )
+            spoken: spoken
         )
     }
 
-    private static func count(_ key: GestureKey) -> Int {
-        key.input.fingers ?? 2
-    }
+    // One key per finger count and motion: the count is a closed set,
+    // so no frame asks a noun to agree with a number.
 
     private static func fingers(_ key: GestureKey) -> String {
-        L("onboarding.gestures.fingers", "%1$d fingers", count(key))
+        switch key.input.fingers {
+        case 3: L("onboarding.gestures.fingers.3", "3 fingers")
+        case 4: L("onboarding.gestures.fingers.4", "4 fingers")
+        case 5: L("onboarding.gestures.fingers.5", "5 fingers")
+        default: L("onboarding.gestures.fingers.2", "2 fingers")
+        }
     }
 
     private static func sideways(_ key: GestureKey) -> String {
-        L(
-            "onboarding.gestures.fingers_sideways",
-            "%1$d fingers left/right",
-            count(key)
-        )
+        switch key.input.fingers {
+        case 2:
+            L("onboarding.gestures.sideways.2", "2 fingers left/right")
+        case 4:
+            L("onboarding.gestures.sideways.4", "4 fingers left/right")
+        case 5:
+            L("onboarding.gestures.sideways.5", "5 fingers left/right")
+        default:
+            L("onboarding.gestures.sideways.3", "3 fingers left/right")
+        }
     }
 
     private static func upward(_ key: GestureKey) -> String {
-        L("onboarding.gestures.fingers_up", "%1$d fingers up", count(key))
+        switch key.input.fingers {
+        case 2: L("onboarding.gestures.up.2", "2 fingers up")
+        case 4: L("onboarding.gestures.up.4", "4 fingers up")
+        case 5: L("onboarding.gestures.up.5", "5 fingers up")
+        default: L("onboarding.gestures.up.3", "3 fingers up")
+        }
     }
 
     private static func tap(_ key: GestureKey) -> String {
-        L("onboarding.gestures.tap", "%1$d-finger tap", count(key))
+        switch key.input.fingers {
+        case 2: L("onboarding.gestures.tap.2", "2-finger tap")
+        case 3: L("onboarding.gestures.tap.3", "3-finger tap")
+        case 5: L("onboarding.gestures.tap.5", "5-finger tap")
+        default: L("onboarding.gestures.tap.4", "4-finger tap")
+        }
     }
 
     /// ⌃⌥K: every gesture, set apart as the keys step sets KiwiHub.

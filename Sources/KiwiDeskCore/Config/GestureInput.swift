@@ -64,6 +64,13 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// Whether the input has both axes, so an axis may take a family
+    /// of its own (#1873): the swipes.
+    public var takesAxisFamily: Bool {
+        GestureAxis.allCases.flatMap(\.directions)
+            .allSatisfy(directions.contains)
+    }
+
     /// A pointer motion holds the window while the keys are down,
     /// so it binds a grab alone (#3199 amendment).
     public var isDrag: Bool { self == .drag || self == .hoverMove }

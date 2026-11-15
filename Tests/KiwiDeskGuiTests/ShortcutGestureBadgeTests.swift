@@ -43,11 +43,13 @@ struct ShortcutGestureBadgeTests {
                 GestureKey(.swipe3, hyper): .split(
                     GestureSplit(axes: [.leftRight: .space], arms: [:])
                 ),
+                // Fewer keys, but a mouse: the trackpad still leads.
+                GestureKey(.wheelX, [.control]): .family(.space),
             ],
             rows: [ShortcutRow(id: next, label: "Go to next Space", combo: "")]
         )
         let row = try #require(built.controls.first?.rows.first)
-        #expect(row.gestures.count == 2)
+        #expect(row.gestures.count == 3)
         #expect(row.gestures.first?.key == GestureKey(.swipe3, hyper))
         #expect(row.gestures.first?.direction == .left)
     }

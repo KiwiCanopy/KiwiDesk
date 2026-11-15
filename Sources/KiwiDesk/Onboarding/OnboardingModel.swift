@@ -92,6 +92,8 @@ final class OnboardingModel {
     var hasTrackpad: () -> Bool = { false }
     /// The Gestures step's rows, from the live bindings.
     var gestureRows: () -> [OnboardingKeyFamily] = { [] }
+    /// Whether two-finger focus keeps stepping (long swipes).
+    var longSwipes: () -> Bool = { true }
     /// The rows this presentation teaches, read when it planned.
     private(set) var gestureFamilies: [OnboardingKeyFamily] = []
 

@@ -89,8 +89,22 @@ public final class ScrollGestures {
     var host = HostNaturalScrolling.live
     /// The cached host value a `.system` input follows: read at the
     /// first start and on each change notice, never per event.
-    public private(set) var hostNatural = true
+    private(set) var hostNatural = true
     private var followingHost = false
+
+    /// Whether `setting` keeps a motion's way on this Mac: macOS's
+    /// own answer for `.system`.
+    public func isNatural(_ setting: NaturalScrolling) -> Bool {
+        setting.isNatural(host: hostNatural)
+    }
+
+    /// The Natural verdict the fronts apply to `input`'s motion, by
+    /// its device (#1873): what the shortcuts panel reads a family's
+    /// way by.
+    public func isNatural(for input: GestureInput) -> Bool {
+        input.device == .mouse
+            ? settings.naturalMouse : settings.naturalTrackpad
+    }
     /// Re-runs the resolve; wired once at bootstrap.
     var onHostChange: @MainActor () -> Void = {}
 
@@ -101,7 +115,7 @@ public final class ScrollGestures {
     private(set) var base = ScrollGestureBase.defaults
     private(set) var profileOverride: ScrollGestureOverride?
     /// The two resolved: what a consumer reads for its stepping.
-    private(set) var resolved = ScrollGestureBase.defaults
+    public private(set) var resolved = ScrollGestureBase.defaults
     private var handler: Handler?
     /// Each chord's gesture in flight: the route it began with and
     /// its last event, so a change mid-gesture never hands a

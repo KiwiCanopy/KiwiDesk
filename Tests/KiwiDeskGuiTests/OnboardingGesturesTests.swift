@@ -51,8 +51,13 @@ struct OnboardingGesturesTests {
         )
         #expect(!one.contains { $0.id == "display" })
         #expect(two.contains { $0.id == "display" })
-        #expect(two.count <= OnboardingGestures.limit)
-        #expect(OnboardingGestures.teachesScreens(two))
+        #expect(
+            OnboardingGestures.footnote(two, longSwipes: true)?
+                .contains("screens") == true
+        )
+        // Focus repeats only with long swipes on.
+        let off = OnboardingGestures.footnote(one, longSwipes: false)
+        #expect(off?.contains("Focus") == false)
     }
 
     @Test("an unbound gesture is not taught")

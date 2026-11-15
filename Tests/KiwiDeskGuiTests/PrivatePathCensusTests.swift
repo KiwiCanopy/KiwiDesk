@@ -47,6 +47,7 @@ struct PrivatePathCensusTests {
         "_CFMachPortSetOptions", "SLSRegisterNotifyProc",
         "CGDisplayCreateUUIDFromDisplayID",
         "SLSGetAppearanceThemeLegacy", "MTDeviceCreateList",
+        "MTDeviceGetSensorSurfaceDimensions",
     ]
 
     /// The resolver spellings: the three named resolvers, a bare

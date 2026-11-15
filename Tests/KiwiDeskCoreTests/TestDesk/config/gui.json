@@ -359,7 +359,7 @@
       "mouse" : "system",
       "trackpad" : "system"
     },
-    "step_distance" : 60
+    "step_length" : 10
   },
   "shortcut_base" : "control+option",
   "space_history" : "per_screen",

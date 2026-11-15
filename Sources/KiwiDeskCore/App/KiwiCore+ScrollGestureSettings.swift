@@ -65,17 +65,17 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             base.longSwipes = enabled
-        case "scroll_gesture.set_step_distance":
-            let range = ScrollGestureBase.stepDistanceRange
-            guard let points = args.first?.numberValue,
-                range.contains(points)
+        case "scroll_gesture.set_step_length":
+            let range = ScrollGestureBase.stepLengthRange
+            guard let length = args.first?.numberValue,
+                range.contains(length)
             else {
                 return .fail(
-                    "expected points from \(Int(range.lowerBound)) "
+                    "expected mm from \(Int(range.lowerBound)) "
                         + "to \(Int(range.upperBound))"
                 )
             }
-            base.stepDistance = points
+            base.stepLength = length
         default:
             return .fail("unknown command: \(command)")
         }

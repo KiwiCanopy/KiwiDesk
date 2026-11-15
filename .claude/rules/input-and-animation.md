@@ -103,14 +103,26 @@ editing here:
     "not mine, fall through", and read as a wall it strands a
     floating focus the arrow keys would carry to the float tier
     (`ScrollGestureDeadEndTests` ▸ `floatFocusFollowsTheKeys`).
-    A swipe's axis is locked from the axis the meter's latch
-    fired on (`ScrollStepMeter.firedHorizontal`), never a second
-    reading of the travel beside it, and the projection onto it
-    lives in the consumer that steps by direction, never in the
-    shared meter, whose Space-step consumer hears raw events
-    (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel` holds the
-    travel's axis over the last event's; where the reading and
-    the projection live is review's).
+    A swipe step's axis is the meter's alone
+    (`ScrollStepMeter.firedHorizontal`): the latch's for the
+    first step, then the axis each long-swipe step's own travel
+    leads (#1873). A consumer reads it and never projects an event
+    onto an axis of its own, nor takes a second reading of the
+    travel (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel`,
+    `longSwipeTurns`; a projection returning is review's).
+  - **On the two-finger path a split's axis family runs through
+    the whole family's runner** — the pan or the Space step — for
+    that gesture, chosen once the travel names its axis, never a
+    runner of its own; an arm keeps the once-per-motion latch, and
+    the scroll front's flip stays the only flip there (#1873;
+    `docs/design-decisions.md` ▸ *A swipe splits by axis*).
+  - **What a direction runs once Natural scrolling has had its say
+    is the one Core resolver's**, which the runner's flip, the
+    ⌃⌥K panel and the tour read; `GestureAction.step(toward:)`
+    stays the stored-shape resolver beneath it and
+    `GestureAction.split(normalizing:)` the one fold, so a reader
+    never re-derives which axis holds a family or which way a
+    family turns (#1873).
     The #292 preflight in `execute` is skipped on purpose — the
     gesture acts on the Space under the pointer — which the
     pan's docstring states.
@@ -1211,7 +1223,10 @@ editing here:
     the pure `PointerTapRouter+Gestures` decides on the tap's
     thread, swallowing a magnification or rotation from its begin
     to its end, and hands each step back through
-    `TouchGestures.receive` as `.gesture(input)`, so the
+    `TouchGestures.receive` — a pinch or spread as
+    `.gesture(input)`, a rotation as
+    `TrackpadGestureEvent.Kind.rotation(clockwise:)`, never
+    `.gesture(.rotate)` — so the
     exact-modifier match and the handler stay one
     (`PointerGestureWiringTests`, `TouchGesturesTests` ▸
     `gestureEventChordsReachTheDoor`). It reads the private event

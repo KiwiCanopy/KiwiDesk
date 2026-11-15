@@ -13,7 +13,7 @@ struct LongSwipesMigrationTests {
     private var config: GuiConfig {
         var config = GuiConfig()
         config.scrollGesture.longSwipes = false
-        config.scrollGesture.stepDistance = 72.5
+        config.scrollGesture.stepLength = 7.25
         return config
     }
 
@@ -69,7 +69,7 @@ struct LongSwipesMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         let read = try JSONDecoder().decode(GuiConfig.self, from: out)
         #expect(read.scrollGesture.longSwipes)
-        #expect(read.scrollGesture.stepDistance == 72.5)
+        #expect(read.scrollGesture.stepLength == 7.25)
     }
 
     /// From 4.2.1's backup stamp (43) and from 50: the base turns on,
@@ -98,8 +98,14 @@ struct LongSwipesMigrationTests {
     /// The edit rewrites the one literal and leaves every other byte.
     @Test("the edit is surgical")
     func editIsSurgical() throws {
-        let data = try stamped(config, format: 26)
-        let text = String(decoding: data, as: UTF8.self)
+        // A spacing the walk's re-serialization would not keep, so
+        // the migration's answer tells the edit from the walk.
+        let text = String(
+            decoding: try stamped(config, format: 26),
+            as: UTF8.self
+        )
+        .replacingOccurrences(of: "\"format\" : ", with: "\"format\" :  ")
+        let data = Data(text.utf8)
         let edited = try #require(ConfigMigration.longSwipesTextOn(text))
         let out = String(decoding: edited, as: UTF8.self)
         #expect(out.contains("\"long_swipes\" : true"))

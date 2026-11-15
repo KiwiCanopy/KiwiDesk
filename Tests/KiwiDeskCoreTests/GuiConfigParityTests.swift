@@ -99,7 +99,7 @@ struct GuiConfigParityTests {
             naturalTrackpad: .off,
             naturalMouse: .off,
             longSwipes: true,
-            stepDistance: 120
+            stepLength: 25
         )
         config.gesture = GestureMap([
             GestureKey(.tap3): .unbound,

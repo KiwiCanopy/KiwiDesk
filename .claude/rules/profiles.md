@@ -805,7 +805,15 @@ holds the secondary-switch decision including its nil case.
   the meaning-change clause above requires, and the design entry
   states the cost to a user who chose the old value; #1931
   argued the bound (2.1.1's master-off write kept the `false`).
-  A flip with no such signal keeps #1359's answer.
+  A flip with no such signal keeps #1359's answer, save by an
+  owner ruling that names its cost in the design entry: the one
+  such exception is `scroll_gesture.long_swipes`, whose stored
+  `false` turns on once with no stored signal (#1873,
+  `migratingLongSwipesOn`, `LongSwipesMigrationTests`;
+  `docs/design-decisions.md` ▸ *Amended (#1873, owner
+  2026-11-15): long swipes are on by default*). It still reads
+  the format and spares a profile's sparse override. A further
+  exception is a ruling, never a precedent this one sets.
 - **A per-profile value moving app-wide crosses by ADOPTION, a
   ruled shape beside `ConfigMigration` (#1741).** N profile
   files → one value is an election, and a byte-level step cannot
