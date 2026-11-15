@@ -124,10 +124,13 @@ struct PointerButtonWiringTests {
         core.mouse.pointer.start()
         core.mouse.rest.moved(to: CGPoint(x: 10, y: 10))
         #expect(core.mouse.rest.isArmed)
-        press(core, key, .released, direction: .back)
-        #expect(core.mouse.rest.isArmed, "a release spends nothing")
         press(core, key, direction: .back)
         #expect(!core.mouse.rest.isArmed)
+        // A lone release is dropped before the handler; re-arm while
+        // the press is held so the release reaches it.
+        core.mouse.rest.moved(to: CGPoint(x: 60, y: 10))
+        press(core, key, .released, direction: .back)
+        #expect(core.mouse.rest.isArmed, "a release spends nothing")
     }
 
     @Test("Back is the previous one, Forward the next, whatever list")
