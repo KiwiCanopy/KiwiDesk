@@ -127,7 +127,8 @@ extension View {
 
     /// Washes one more part of a control another view anchors with
     /// `searchAnchored`, so a setting drawn in two places lights
-    /// both and scrolls to the first (#3301).
+    /// both and scrolls to the first (#3301). The anchored view
+    /// must render whenever the echo does, or a hit has no target.
     func searchFlashEcho(
         _ control: SettingsControl
     ) -> some View {

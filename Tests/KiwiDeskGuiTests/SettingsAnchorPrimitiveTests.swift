@@ -159,6 +159,35 @@ struct SettingsAnchorPrimitiveTests {
         }
     }
 
+    /// The wash-only echo (#3301) lights a control without
+    /// scrolling to it, so it is a reveal shape like the split
+    /// halves and earns their confinement: `allowed` is the one copy
+    /// of who may, each entry with its count and reason.
+    private let echoSites: [String: Int] = [
+        // The Trackpad card's bindings echo the Mouse card's.
+        "GestureListCard.swift": 1
+    ]
+
+    @Test("the wash-only echo stays at its ruled sites")
+    func echoIsConfined() throws {
+        let hits = try occurrences(
+            of: ".searchFlashEcho(",
+            excluding: ["SettingsReveal.swift"]
+        )
+        let found = Dictionary(
+            uniqueKeysWithValues: hits.map { ($0.name, $0.count) }
+        )
+        #expect(
+            found == echoSites,
+            Comment(
+                rawValue:
+                    ".searchFlashEcho(…) applied at "
+                    + describe(hits) + " — rule a new site into "
+                    + "echoSites with its reason"
+            )
+        )
+    }
+
     /// The whole-pair primitive must stay reached-for: at zero
     /// call sites the next self-anchoring control has nothing to
     /// copy and reaches for `.id()` instead. Counts SITES, not

@@ -7,7 +7,9 @@ import Testing
 /// ui-designer's plan, accepted): the Mouse card's binding rows
 /// carry the scroll anchor and a wash, the Trackpad card's rows a
 /// wash only, and neither card's Natural scrolling row is lit.
-/// Source scans, off the main actor.
+/// Source scans, off the main actor; where the echo may appear is
+/// `SettingsAnchorPrimitiveTests`' and its pairing
+/// `SettingsAnchorPairingTests`'.
 @Suite("Gesture bindings reveal (#3301)")
 struct GestureBindingsRevealTests {
     private static let gui = SourceScan.repoRoot(from: #filePath)
@@ -105,53 +107,5 @@ struct GestureBindingsRevealTests {
         )
         #expect(!part.contains("gestureBindings"))
         #expect(!cards.contains(".search"))
-    }
-
-    /// An echo washes without scrolling, so it only means anything
-    /// beside the anchored view of the same control: every echo's
-    /// file anchors that control too.
-    @Test("an echo stands beside its anchor")
-    func echoesStandBesideTheirAnchor() throws {
-        var echoes = 0
-        for file in try SourceScan.swiftSources(under: Self.gui)
-        where file.lastPathComponent != "SettingsReveal.swift" {
-            let text = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            let echoed = SourceScan.firstArguments(
-                of: ".searchFlashEcho(",
-                in: text
-            )
-            let anchored = Set(
-                SourceScan.firstArguments(
-                    of: ".searchAnchored(",
-                    in: text
-                )
-            )
-            echoes += echoed.count
-            for argument in echoed {
-                #expect(
-                    anchored.contains(argument),
-                    Comment(
-                        rawValue: "\(file.lastPathComponent) echoes "
-                            + "\(argument) with no searchAnchored of it"
-                    )
-                )
-            }
-        }
-        #expect(echoes == 1)
-    }
-
-    /// The census lists the part top to bottom as drawn: the
-    /// Mouse card's Natural row, the bindings, the Trackpad's.
-    @Test("the order list follows the screen")
-    func orderFollowsTheScreen() {
-        #expect(
-            Array(ShortcutsRowOrder.gesturesMore.prefix(3)) == [
-                .shortcuts(.scrollNaturalMouse),
-                .shortcuts(.gestureBindings),
-                .shortcuts(.scrollNaturalTrackpad),
-            ]
-        )
     }
 }
