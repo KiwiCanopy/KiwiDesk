@@ -92,7 +92,7 @@ struct KeyRecorderField: View {
         }
         // The drawn offer is the re-checked one: its holder and its
         // Steal follow the bindings, and nil ends it (#34).
-        .onChange(of: liveRejection.map(Offer.init)) { _, _ in
+        .onChange(of: liveRejection) { _, _ in
             rejection = liveRejection
         }
         .onChange(of: combo) { _, now in keepTapOnceNote(now) }

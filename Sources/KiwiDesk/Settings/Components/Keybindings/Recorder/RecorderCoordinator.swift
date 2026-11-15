@@ -87,6 +87,15 @@ struct RecorderRejection {
     var inStep = false
 }
 
+/// What an offer says, `steal` aside: a changed holder is a new
+/// offer (#3258). A new field the line draws joins the comparison.
+extension RecorderRejection: Equatable {
+    static func == (a: Self, b: Self) -> Bool {
+        a.combo == b.combo && a.holder == b.holder
+            && a.holderRowID == b.holderRowID && a.inStep == b.inStep
+    }
+}
+
 enum RecorderPreflight {
     /// Computes unique row identifier for scrolling.
     static func rowID(_ binding: KeyBinding) -> String {
