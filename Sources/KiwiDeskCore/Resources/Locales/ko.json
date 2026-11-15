@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@에 이미 ‘%2$@’에 대한 행이 있습니다.",
   "app_rules.space.scope.titled.value": "제목에 ‘%1$@’이(가) 포함된 윈도우",
   "app_rules.space.temporary_header": "임시 — 이 프로필에 없음",
-  "app_rules.space.titled.caption": "제목에 해당 패턴이 포함된 새 윈도우는 지정한 공간에서 열립니다.",
+  "app_rules.space.titled.caption": "제목에 해당 패턴이 포함된 새 윈도우는 이 행의 공간에서 열립니다.",
   "app_rules.space_list.caption": "앱의 새 윈도우는 해당 앱의 공간에서 열립니다.",
   "app_rules.space_list.help": "이 규칙은 앱의 새 윈도우마다 적용됩니다. 앱을 실행할 때, 다른 윈도우를 열 때, 닫은 윈도우를 다시 열 때, 최소화한 윈도우를 복원할 때가 해당합니다. 앱을 실행하거나 앱의 다른 윈도우를 열면 해당 앱의 공간으로도 이동합니다.",
   "app_rules.space_list.help.titles": "**%1$@**은(는) 윈도우 제목의 일부와 일치하는지 확인하므로, 앱의 윈도우를 서로 다른 공간에서 열 수 있습니다. 예를 들어 브라우저 프로필마다 공간을 하나씩 둘 수 있습니다. 처음 일치하는 행이 적용됩니다. 윈도우는 열릴 때 한 번만 배치되며, 나중에 제목이 바뀌어도 이동하지 않습니다.",

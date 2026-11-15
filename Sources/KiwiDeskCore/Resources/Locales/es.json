@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@ ya tiene una fila para «%2$@».",
   "app_rules.space.scope.titled.value": "Ventanas con «%1$@» en el título",
   "app_rules.space.temporary_header": "Temporales — no están en este perfil",
-  "app_rules.space.titled.caption": "Las ventanas nuevas cuyo título contenga el patrón se abren en el espacio asignado.",
+  "app_rules.space.titled.caption": "Las ventanas nuevas cuyo título contenga el patrón se abren en el espacio de esta fila.",
   "app_rules.space_list.caption": "Las ventanas nuevas de la app se abren en su espacio.",
   "app_rules.space_list.help": "La regla se aplica a cada ventana nueva de la app: cuando la abres, abres otra ventana, reabres una que cerraste o restauras una que minimizaste. Abrir la app, o abrir otra ventana suya, también te lleva a su espacio.",
   "app_rules.space_list.help.titles": "La opción **%1$@** busca un fragmento del título de una ventana, de modo que las ventanas de una app pueden abrirse en espacios distintos, por ejemplo un perfil del navegador por espacio. Decide la primera fila que coincida. Una ventana se coloca una sola vez, al abrirse; si su título cambia después, no se mueve.",

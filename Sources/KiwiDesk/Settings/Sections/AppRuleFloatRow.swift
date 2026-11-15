@@ -101,11 +101,11 @@ struct AppRuleFloatRow: View {
     }
 
     private var allLabel: String {
-        L("app_rules.float.scope.all", "All windows")
+        AppRuleScopeWords.all
     }
 
     private var titledLabel: String {
-        L("app_rules.float.scope.titled", "Windows titled…")
+        AppRuleScopeWords.titledItem
     }
 
     /// The resting VALUE drops the menu item's ellipsis, which

@@ -658,6 +658,12 @@ can name: the built-in tokens and the groups your shortcuts make
 and `app_rule.remove_float <app> [title]` change the app rules live
 ([App rule verbs](lua-reference.md#app-rule-verbs)).
 
+:::unreleased
+`app_rule.set_space` and `app_rule.remove_space` take an optional
+`[title]` last
+([`titled_app_rules`](lua-reference.md#titled_app_rules)).
+:::
+
 `explain_window [window]` says why a window floats or tiles and
 what would change it; `explain_app <bundle_id>` says what KiwiDesk
 knows of an app whose window it does not list

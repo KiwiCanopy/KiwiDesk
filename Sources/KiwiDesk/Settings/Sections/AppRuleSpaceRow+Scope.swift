@@ -53,7 +53,10 @@ extension AppRuleSpaceRow {
     private var scopeMenu: some View {
         Menu {
             Button(AppRuleScopeWords.all) {
-                SpaceRuleEdit.makeBare(row, in: &model.config)
+                let bare = SpaceRuleRow(app: row.app, fragment: nil)
+                model.moveSpaceRule(from: row, to: bare) {
+                    SpaceRuleEdit.makeBare(row, in: &$0)
+                }
             }
             .disabled(row.fragment != nil && hasBare)
             if row.fragment != nil, hasBare {
@@ -115,7 +118,10 @@ extension AppRuleSpaceRow {
                 config: &model.config
             )
         } else {
-            SpaceRuleEdit.setFragment(fragment, of: row, in: &model.config)
+            let moved = SpaceRuleRow(app: row.app, fragment: fragment)
+            model.moveSpaceRule(from: row, to: moved) {
+                SpaceRuleEdit.setFragment(fragment, of: row, in: &$0)
+            }
         }
         returningRow = SpaceRuleRow(app: row.app, fragment: fragment).key
     }

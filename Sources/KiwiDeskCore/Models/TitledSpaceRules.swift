@@ -71,6 +71,32 @@ public struct TitledSpaceRules: Sendable, Equatable {
         }
     }
 
+    /// Which rule files a window, the whole order in one place: a
+    /// titled rule first, else the app's bare rule in `bare`.
+    public enum Pick: Sendable, Equatable {
+        case titled(Rule)
+        case bare(SpaceID)
+
+        public var space: SpaceID {
+            switch self {
+            case .titled(let rule): rule.space
+            case .bare(let space): space
+            }
+        }
+    }
+
+    /// The rule that files a new window of `app` titled `title`,
+    /// over the bare rules `bare`; nil where none does.
+    public func pick(
+        app: String?,
+        title: String,
+        bare: [String: SpaceID]
+    ) -> Pick? {
+        guard let app = app.map(AppTitleRule.appKey) else { return nil }
+        if let rule = rule(app: app, title: title) { return .titled(rule) }
+        return bare[app].map(Pick.bare)
+    }
+
     /// Whether `app` holds any titled Space rule.
     public func hasRule(app: String?) -> Bool {
         guard let app = app.map(AppTitleRule.appKey) else { return false }

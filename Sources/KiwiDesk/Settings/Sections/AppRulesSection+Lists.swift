@@ -85,7 +85,10 @@ extension AppRulesSection {
     }
 
     private func deleteSpace(_ row: SpaceRuleRow, _ removal: RuleRemoval) {
-        let keys = spaceGroups.flatMap { $0 }.map(\.key)
+        // The stored rows alone: a new row being composed draws no
+        // control that could hold the focus.
+        let keys = SpaceRuleRows.groups(model.config, apps: spaceApps)
+            .flatMap { $0 }.map(\.key)
         let neighbour = DeletionFocus.neighbour(after: row.key, in: keys)
         if row.fragment == nil {
             model.recordRemoval(.space, row.app, removal)

@@ -50,8 +50,6 @@ extension KiwiCore {
             state.returningFocus = desktopMemory.returnFocus.owed()
             // How it may take the focus (#3122, #3152), likewise.
             state.arrivalFocus = arrivalFocus(of: window)
-            // When it arrived, for a titled rule's late match (#3341).
-            state.arrivalStamp = wallClock()
             claimCrossSessionArrival(window)  // #1385
         }
         // Read BEFORE the fold below overwrites/removes them —
@@ -71,6 +69,8 @@ extension KiwiCore {
         let provenance = arrivalProvenance(of: event)  // #2630
         let pocketClaim = claimPocketArrival(event, provenance: provenance)
         state.pocketClaimed = pocketClaim  // #2612
+        // Only a created window may take a late titled match (#3341).
+        state.arrivalStamp = provenance == .created ? wallClock() : nil
         let anchorBeforeFold =
             event.goneWindowID == nil ? nil : focusedWindowID  // #2888
         let effects = state.apply(event)

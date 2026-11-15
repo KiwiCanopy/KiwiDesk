@@ -13,8 +13,8 @@ struct SpaceRuleRow: Hashable, Identifiable {
 }
 
 /// The card's rows, grouped per app in the order the engine reads
-/// them: an app's titled rules in `TitledSpaceRules.order(of:)`,
-/// its bare rule last.
+/// them (`TitledSpaceRules.pick`): an app's titled rules in
+/// `TitledSpaceRules.order(of:)`, its bare rule last.
 enum SpaceRuleRows {
     /// Each app's rows, the apps in `apps`' order.
     static func groups(

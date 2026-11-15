@@ -697,15 +697,20 @@ editing here:
   the one `StateCoordinator.appRuleSpace(of:)` — a titled rule over
   the bare one. A window whose title matched no titled rule there is
   recorded in `titledRulePending`, and only where the fold's rule
-  gate was open and no follow was owed. Its first matching title
+  gate was open, no follow was owed and the arrival's provenance
+  read `.created` (the stamp `handle` mirrors in), so a boot sweep,
+  a re-track or a heal records nothing. Its first matching title
   report files it through `payLateTitledRule`, which reads the press
   and the `CrossSessionMatch.titleSettle` bound against the arrival
-  stamp mirrored in like `arrivalDisplay`. That filing takes
+  stamp mirrored in like `arrivalDisplay`, and stands down for the
+  focused window, which a move without a follow would strand. A late filing goes through
   `fileMembership(restoring: true)`, never `moveWindow`, and sets no
-  `placedByAppRule`. A user filing (`stampUserFiling`), a destroy and
-  the #634 reset end the record, and a rekey moves it. A new door
-  that files a window for a rule ends the record the same way
-  (`TitledRuleLateMatchTests`, `TitledSpaceRulesTests`).
+  `placedByAppRule`, so it owes no follow and stamps no user filing
+  (review's). A user filing (`stampUserFiling`), a destroy and the
+  #634 reset end the record, a rekey moves it
+  (`WindowRekeyParityTests`), and a new door that files a window for a
+  rule ends it the same way (`TitledRuleLateMatchTests`,
+  `TitledSpaceRulesTests`).
 - **An app's windows are walked through ONE ring (#637, #3131).**
   Open or Focus's repeat press and `focus_app_window` step it through
   the one `cycleAppWindow`, which builds it with `cycleRing`; a verb

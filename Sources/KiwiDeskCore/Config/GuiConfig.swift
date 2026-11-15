@@ -314,6 +314,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         // filter stays separate.
         removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
-        titledAppRules = titledAppRules.filter { !$0.value.raw.isEmpty }
+        // One key spelling for every reader, a fragment's case kept
+        // (#3341): a hand-written `Com.Brave.Browser:Work` is
+        // `com.brave.browser:Work`.
+        titledAppRules = AppRuleOverride.normalized(
+            titledAppRules.filter { !$0.value.raw.isEmpty },
+            normalizing: AppTitleRule.normalizedRule
+        )
     }
 }

@@ -132,6 +132,11 @@ extension SettingsModel {
         where old.appRules[app] != apps[app] {
             config.appRules[app] = apps[app]
         }
+        let titled = stored.titledAppRules.resolved(for: page)
+        for rule in Set(old.titledAppRules.keys).union(titled.keys)
+        where old.titledAppRules[rule] != titled[rule] {
+            config.titledAppRules[rule] = titled[rule]
+        }
         let was = Set(old.floatRules.map(AppTitleRule.normalizedRule))
         let now = Set(stored.floatRules.resolved(for: page).values.joined())
         let gone = was.subtracting(now)

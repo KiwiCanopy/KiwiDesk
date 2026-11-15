@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@ a déjà une ligne pour « %2$@ ».",
   "app_rules.space.scope.titled.value": "Fenêtres dont le titre contient « %1$@ »",
   "app_rules.space.temporary_header": "Temporaires — absents de ce profil",
-  "app_rules.space.titled.caption": "Les nouvelles fenêtres dont le titre contient le motif s'ouvrent dans l'espace attribué.",
+  "app_rules.space.titled.caption": "Les nouvelles fenêtres dont le titre contient le motif s'ouvrent dans l'espace de cette ligne.",
   "app_rules.space_list.caption": "Les nouvelles fenêtres de l'app s'ouvrent dans son espace.",
   "app_rules.space_list.help": "La règle s'applique à chaque nouvelle fenêtre de l'app : au lancement, à l'ouverture d'une autre fenêtre, à la réouverture d'une fenêtre fermée ou à la restauration d'une fenêtre réduite. Lancer l'app, ou ouvrir une autre de ses fenêtres, vous amène aussi dans son espace.",
   "app_rules.space_list.help.titles": "L'option **%1$@** recherche un fragment du titre d'une fenêtre, de sorte que les fenêtres d'une app peuvent s'ouvrir dans des espaces différents, par exemple un profil de navigateur par espace. La première ligne qui correspond l'emporte. Une fenêtre est placée une seule fois, à son ouverture ; un changement de titre ultérieur ne la déplace pas.",

@@ -29,10 +29,14 @@ struct TitledRuleLateMatchTests {
         let start = Date(timeIntervalSince1970: 1_000_000)
         core.wallClock = { start }
         core.state.workspaces.ensureSpace(ruled)
+        core.state.workspaces.ensureSpace(SpaceID("2"))
         core.state.titledAppRules = TitledSpaceRules([
             "\(brave):Work": ruled
         ])
         core.handle(.windowCreated(resident()))
+        // The WindowServer's create, which alone makes an arrival new.
+        core.windowCreates.isLive = true
+        core.windowCreates.noteCreated(late, at: start)
         return core
     }
 
@@ -88,7 +92,14 @@ struct TitledRuleLateMatchTests {
         open(core, title: "")
         core.handle(.windowTitleChanged(late, "a – Work"))
         #expect(space(core) == ruled)
-        core.fileMembership(late, into: SpaceID("1"), from: ruled)
+        // Back without stamping a user filing, so only the consumed
+        // record can keep the next match from filing it again.
+        core.fileMembership(
+            late,
+            into: SpaceID("1"),
+            from: ruled,
+            restoring: true
+        )
         core.handle(.windowTitleChanged(late, "b – Work"))
         #expect(space(core) == SpaceID("1"))
     }
@@ -117,12 +128,39 @@ struct TitledRuleLateMatchTests {
         #expect(space(core) == SpaceID("1"))
     }
 
-    @Test("a user filing ends the record")
+    @Test("a user's move ends the record")
     func userFilingEnds() {
         let core = makeCore()
         open(core, title: "")
-        core.state.stampUserFiling(late)
+        core.state.workspaces.focus(late, in: SpaceID("1"))
+        _ = core.execute("move_to_space", args: [.string("2")])
+        #expect(space(core) == SpaceID("2"))
         #expect(core.state.titledRulePending[late] == nil)
+        core.state.workspaces.focus(WindowID(900_100), in: SpaceID("1"))
+        core.handle(.windowTitleChanged(late, "a – Work"))
+        #expect(space(core) == SpaceID("2"))
+    }
+
+    @Test("a window found, not created, owes no late match")
+    func foundWindowOwesNothing() {
+        let core = makeCore()
+        core.windowCreates.noteDestroyed(late)
+        open(core, title: "")
+        #expect(core.state.titledRulePending[late] == nil)
+    }
+
+    @Test("a match for a Space that is gone keeps the record")
+    func goneSpaceKeepsTheRecord() {
+        let core = makeCore()
+        open(core, title: "")
+        core.state.titledAppRules = TitledSpaceRules([
+            "\(brave):Gone": SpaceID("9"),
+            "\(brave):Work": ruled,
+        ])
+        core.handle(.windowTitleChanged(late, "a – Gone"))
+        #expect(core.state.titledRulePending[late] != nil)
+        core.handle(.windowTitleChanged(late, "a – Work"))
+        #expect(space(core) == ruled)
     }
 
     @Test("a window matched at creation owes no late match")

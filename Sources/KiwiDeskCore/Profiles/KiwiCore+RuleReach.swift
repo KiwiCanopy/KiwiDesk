@@ -62,10 +62,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
 
     public init(
         appRules: RuleReachTable<SpaceID>,
-        titledAppRules: RuleReachTable<SpaceID> = .titledAppRules(
-            base: [:],
-            overrides: []
-        ),
+        titledAppRules: RuleReachTable<SpaceID>,
         floatRules: RuleReachTable<[String]>,
         keyLayers: RuleReachTable<String>,
         scrollGestures: RuleReachTable<ScrollGestureValue>,
@@ -94,7 +91,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedKeyOverrides: [String: KeyLayerOverride],
         keyTemplates: [String: KeyBinding],
         storedAppBase: [String: SpaceID],
-        storedTitledAppBase: [String: SpaceID] = [:],
+        storedTitledAppBase: [String: SpaceID],
         storedFloatBase: [String],
         storedFloatOverrides: [String: RuleListOverride],
         unreadable: [String],

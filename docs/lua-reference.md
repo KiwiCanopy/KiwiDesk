@@ -67,12 +67,12 @@ gets no `gui.json` seeded over it:
 
 - Window-rule tables — `app_rules`, `float_rules`, `tile_rules`,
   `ignore_rules`.
+- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
+  `KiwiDesk.bind_profile_to_desktop`.
 
 :::unreleased
 `titled_app_rules` counts as a window-rule table too.
 :::
-- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
-  `KiwiDesk.bind_profile_to_desktop`.
 
 :::unreleased
 `KiwiDesk.define_sequence` counts as a keybinding too, and so does a
@@ -6158,8 +6158,8 @@ rules the longest fragment wins, and between fragments of equal
 length the one first in alphabetical order.
 
 A window whose title arrives after it opens is filed by the first
-matching title once, within 30 seconds of opening and before you
-click or type. A rule never moves a window after that: a later
+matching title once, within 30 seconds of opening, while it does
+not have the focus and before you click or press a key. A rule never moves a window after that: a later
 title change, such as switching tabs, leaves the window where it
 is. Windows already open stay where they are when a rule is added
 or changed. Opening the app follows its window into the space, as
@@ -6201,6 +6201,11 @@ Space), `float_rules`, `tile_rules`, `ignore_rules`,
 `float_automatically`, the `owner` of the rules (`gui` or `lua`)
 and the live `profile`.
 
+:::unreleased
+It also returns the titled Space rules as `titled_app_rules`
+(rule → Space).
+:::
+
 #### app_rule.set_space / app_rule.remove_space
 
 **Expects:** a bundle identifier, and for `set_space` a Space that
@@ -6210,7 +6215,6 @@ exists.
 Both take an optional title fragment last, which sets or removes
 the app's [`titled_app_rules`](#titled_app_rules) entry for it.
 Without one they touch only the app's `app_rules` entry.
-`app_rule.list` returns the titled rules as `titled_app_rules`.
 :::
 
 :::unreleased
@@ -10131,6 +10135,11 @@ holds the app's Space rule (`space`), its float rules
 `float_automatically`. `space_id`, `mode` and `app_rule` are `nil`
 where the window has none. Any other id is refused, an away
 window's included; ask `explain_app` instead.
+
+:::unreleased
+`app_rule` also holds the app's titled Space rules
+(`titled_app_rules`, rule → Space).
+:::
 
 The answer also carries `title`, the window's title as `get_state`
 has it.

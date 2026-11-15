@@ -117,14 +117,18 @@ struct SpaceRuleMatchPreview: View {
             config.titledAppRules[staged.key] = space
             own = staged.key
         }
-        let titled = TitledSpaceRules(config.titledAppRules)
-        if let rule = titled.rule(app: row.app, title: title) {
-            return rule.key == own
-                ? .opensIn(rule.space) : .otherRule(rule.space)
+        let pick = TitledSpaceRules(config.titledAppRules).pick(
+            app: row.app,
+            title: title,
+            bare: config.appRules
+        )
+        switch pick {
+        case .titled(let rule) where rule.key == own:
+            return .opensIn(rule.space)
+        case .some(let pick):
+            return .otherRule(pick.space)
+        case nil:
+            return .noRule
         }
-        if let bare = config.appRules[row.app] {
-            return .otherRule(bare)
-        }
-        return .noRule
     }
 }

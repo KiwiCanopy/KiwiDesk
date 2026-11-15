@@ -125,6 +125,12 @@ struct TitledAppRuleStoreTests {
         let data = try JSONEncoder().encode(config)
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
         #expect(back.titledAppRules == [rule: "1"])
+        // A hand-written app spelling reads as the one key.
+        let typed = Data(
+            #"{"titled_app_rules": {"Com.Brave.Browser:Work": "2"}}"#.utf8
+        )
+        let hand = try JSONDecoder().decode(GuiConfig.self, from: typed)
+        #expect(hand.titledAppRules == ["com.brave.browser:Work": "2"])
     }
 
     @Test("renaming a Space renames the titled rules that name it")

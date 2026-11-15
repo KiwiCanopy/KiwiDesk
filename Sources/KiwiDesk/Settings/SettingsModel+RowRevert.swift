@@ -80,6 +80,8 @@ extension SettingsModel {
         switch key {
         case .appRules(.appRules):
             SettingsRevertRegister.revertSubject(self, .space, app)
+        case .appRules(.titledAppRules):
+            SettingsRevertRegister.revertSubject(self, .titledSpace, app)
         case .appRules(.floatRules):
             SettingsRevertRegister.revertSubject(self, .float, app)
         case .shortcuts(.layers):

@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@ ha già una riga per «%2$@».",
   "app_rules.space.scope.titled.value": "Finestre con «%1$@» nel titolo",
   "app_rules.space.temporary_header": "Temporanei — non in questo profilo",
-  "app_rules.space.titled.caption": "Le nuove finestre il cui titolo contiene il modello si aprono nello spazio assegnato.",
+  "app_rules.space.titled.caption": "Le nuove finestre il cui titolo contiene il modello si aprono nello spazio di questa riga.",
   "app_rules.space_list.caption": "Le nuove finestre dell'app si aprono nel suo spazio.",
   "app_rules.space_list.help": "La regola vale per ogni nuova finestra dell'app: quando la avvii, apri un'altra finestra, riapri una finestra che avevi chiuso o ne ripristini una che avevi ridotto a icona. Avviare l'app, o aprire un'altra sua finestra, ti porta anche nel suo spazio.",
   "app_rules.space_list.help.titles": "L'opzione **%1$@** cerca un frammento del titolo di una finestra, così le finestre di un'app possono aprirsi in spazi diversi, ad esempio un profilo del browser per spazio. Decide la prima riga corrispondente. Una finestra viene collocata una sola volta, all'apertura; se in seguito il titolo cambia, non viene spostata.",

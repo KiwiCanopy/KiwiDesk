@@ -23050,8 +23050,8 @@ rule #1810 left for when someone asked, and the "Float windows
 automatically" switch is its every-app form.
 
 **One list per rule, because the rules have different scopes.**
-A Space is title-blind — every new window of the app opens in
-it — while floating may match windows by title. Drawn as two
+A Space rule and a float rule scope windows differently, and each
+row carries its own scope. Drawn as two
 facets of one row, the title pattern's editor sat under the
 whole row and read as scoping the Space too — *only the titled
 window goes to that Space* (#1608). No wording fixes that,

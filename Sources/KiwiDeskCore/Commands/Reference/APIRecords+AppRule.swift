@@ -8,8 +8,8 @@ extension APIReference {
                 + "Spaces, float, tile and ignore rules."
         ),
         "set_space": APIRecord(
-            "Opens an app's new windows, or those whose title has "
-                + "the text, in a Space, live.",
+            "Opens an app's new windows, or those titled with the "
+                + "text, in a Space, live; a keep stores it.",
             .text("app"),
             .space("space"),
             .text("title", optional: true)

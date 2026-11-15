@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@には「%2$@」の行がすでにあります。",
   "app_rules.space.scope.titled.value": "タイトルに「%1$@」を含むウインドウ",
   "app_rules.space.temporary_header": "一時的 — このプロファイルにはありません",
-  "app_rules.space.titled.caption": "タイトルにパターンを含む新しいウインドウは、割り当てたスペースで開きます。",
+  "app_rules.space.titled.caption": "タイトルにパターンを含む新しいウインドウは、この行のスペースで開きます。",
   "app_rules.space_list.caption": "Appの新しいウインドウは、そのAppのスペースで開きます。",
   "app_rules.space_list.help": "このルールは、Appの新しいウインドウすべてに適用されます。Appを起動したとき、別のウインドウを開いたとき、閉じたウインドウを開き直したとき、最小化したウインドウを元に戻したときが対象です。Appを起動したり別のウインドウを開いたりすると、そのAppのスペースにも移動します。",
   "app_rules.space_list.help.titles": "**%1$@**はウインドウのタイトルの一部と照合するため、Appのウインドウを別々のスペースで開けます。たとえば、ブラウザのプロフィールごとにスペースを分けられます。最初に一致した行が適用されます。ウインドウが配置されるのは開いたときの一度だけで、あとからタイトルが変わっても移動しません。",

@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@ 已有針對「%2$@」的列。",
   "app_rules.space.scope.titled.value": "標題包含「%1$@」的視窗",
   "app_rules.space.temporary_header": "暫時 — 不在這個描述檔中",
-  "app_rules.space.titled.caption": "標題包含指定樣式的新視窗會在指定的空間中開啟。",
+  "app_rules.space.titled.caption": "標題包含指定樣式的新視窗會在這一列的空間中開啟。",
   "app_rules.space_list.caption": "App 的新視窗會在它的空間中開啟。",
   "app_rules.space_list.help": "規則適用於該 App 的每個新視窗：啟動它、開啟另一個視窗、重新開啟已關閉的視窗，或還原已最小化的視窗時都會生效。啟動該 App 或開啟它的另一個視窗時，也會切換到它的空間。",
   "app_rules.space_list.help.titles": "**%1$@** 會比對視窗標題的片段，因此一個 App 的視窗可以在不同的空間中開啟，例如每個空間一個瀏覽器設定檔。由第一個符合的列決定。視窗只會在開啟時放置一次；之後標題改變也不會移動它。",

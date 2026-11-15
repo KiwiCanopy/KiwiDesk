@@ -251,7 +251,7 @@ extension KiwiCore {
         )
     }
 
-    /// The one writer of `state.titledAppRules` (#3341).
+    /// Resolves `state.titledAppRules` over the base (#3341).
     func setResolvedTitledAppRules(
         base: [String: SpaceID],
         override: AppRuleOverride?

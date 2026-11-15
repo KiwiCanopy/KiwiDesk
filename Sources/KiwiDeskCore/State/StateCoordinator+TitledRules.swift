@@ -8,9 +8,11 @@ extension StateCoordinator {
     /// creation: the first titled rule its title matches, else the
     /// bare rule; nil where neither names one.
     func appRuleSpace(of window: ManagedWindow) -> SpaceID? {
-        guard let app = window.appRef.listKey else { return nil }
-        return titledAppRules.space(app: app, title: window.title)
-            ?? appRules[app]
+        titledAppRules.pick(
+            app: window.appRef.listKey,
+            title: window.title,
+            bare: appRules
+        )?.space
     }
 
     /// Records `window`, which arrived at `stamp`, for one late
@@ -36,14 +38,16 @@ extension StateCoordinator {
 
     /// The late match a title report owes, consuming the record: the
     /// first titled rule the new title matches. A report that
-    /// matches nothing leaves the record for the next one.
+    /// matches nothing, or a rule whose Space is gone, leaves the
+    /// record for the next one.
     mutating func consumeTitledRule(
         _ id: WindowID,
         title: String
     ) -> AppliedEffects.LateTitledRule? {
         guard let arrived = titledRulePending[id],
             let app = windows[id]?.appRef.listKey,
-            let space = titledAppRules.space(app: app, title: title)
+            let space = titledAppRules.space(app: app, title: title),
+            workspaces[space] != nil
         else { return nil }
         titledRulePending[id] = nil
         return .init(window: id, space: space, arrivedAt: arrived)

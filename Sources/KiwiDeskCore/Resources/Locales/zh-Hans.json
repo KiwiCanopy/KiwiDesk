@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@ 已有针对“%2$@”的行。",
   "app_rules.space.scope.titled.value": "标题包含“%1$@”的窗口",
   "app_rules.space.temporary_header": "临时 — 不在此描述文件中",
-  "app_rules.space.titled.caption": "标题包含该模式的新窗口会在指定的空间中打开。",
+  "app_rules.space.titled.caption": "标题包含该模式的新窗口会在此行的空间中打开。",
   "app_rules.space_list.caption": "App 的新窗口会在它的空间中打开。",
   "app_rules.space_list.help": "规则适用于该 App 的每个新窗口：启动它、打开另一个窗口、重新打开已关闭的窗口，或恢复已最小化的窗口时都会生效。启动该 App 或打开它的另一个窗口时，也会切换到它的空间。",
   "app_rules.space_list.help.titles": "**%1$@** 会匹配窗口标题的片段，因此一个 App 的窗口可以在不同的空间中打开，例如每个空间一个浏览器个人资料。由第一个匹配的行决定。窗口只在打开时放置一次；之后标题改变也不会移动它。",

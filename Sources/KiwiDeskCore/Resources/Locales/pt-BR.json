@@ -174,7 +174,7 @@
   "app_rules.space.scope.duplicate": "%1$@ já tem uma linha para “%2$@”.",
   "app_rules.space.scope.titled.value": "Janelas com “%1$@” no título",
   "app_rules.space.temporary_header": "Temporários — fora deste perfil",
-  "app_rules.space.titled.caption": "As novas janelas cujo título contém o padrão abrem no espaço atribuído.",
+  "app_rules.space.titled.caption": "As novas janelas cujo título contém o padrão abrem no espaço desta linha.",
   "app_rules.space_list.caption": "As novas janelas do app abrem no espaço dele.",
   "app_rules.space_list.help": "A regra vale para toda nova janela do app: quando você o abre, abre outra janela, reabre uma que fechou ou restaura uma que minimizou. Abrir o app, ou outra janela dele, também leva você ao espaço dele.",
   "app_rules.space_list.help.titles": "A opção **%1$@** procura um fragmento do título de uma janela, então as janelas de um app podem abrir em espaços diferentes, como um perfil do navegador por espaço. A primeira linha que corresponder decide. Uma janela é posicionada uma única vez, ao abrir; uma mudança posterior no título não a move.",
