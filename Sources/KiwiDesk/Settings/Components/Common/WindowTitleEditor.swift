@@ -15,7 +15,8 @@ struct WindowTitleEditor<Preview: View>: View {
     let caption: String
     /// What the patterns match, handed the pattern being typed.
     @ViewBuilder let preview: (String) -> Preview
-    @State private var draft = TitlePatternDraft()
+    /// The pending pattern; internal so a test can mount it open.
+    @State var draft = TitlePatternDraft()
     @FocusState private var fieldFocused: Bool
     @FocusState private var menuFocused: Bool
 
