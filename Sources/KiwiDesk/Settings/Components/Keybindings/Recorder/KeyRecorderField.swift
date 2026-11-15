@@ -26,6 +26,11 @@ struct KeyRecorderField: View {
     let onClear: () -> Void
     /// Arms on arrival while empty — a key sequence's new key (#1871).
     var armsOnAppear = false
+    #if DEBUG
+        /// A test's chord, committed on arrival as a recording is: a
+        /// posted key event reaches every recorder in the process.
+        var commitsOnAppear: String?
+    #endif
 
     @EnvironmentObject var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
@@ -44,7 +49,10 @@ struct KeyRecorderField: View {
     /// A single tap this field just recorded (#3257), until its next
     /// edit; local state, no timer.
     @State var tapOnceNote: KeyCombo?
-    @State private var rejection: RecorderRejection?
+    /// The refused chord where no `ShortcutKeyRow` hosts the field:
+    /// a standalone or test mount.
+    @State var ownRejection: RecorderRejection?
+    @Environment(\.recorderConflictSlot) var conflictSlot
     @State private var flashing = false
     @State var conflictPopoverShown = false
 
@@ -60,6 +68,7 @@ struct KeyRecorderField: View {
                 recordButton
                 clearButton
             }
+            .alignmentGuide(.shortcutLine) { $0[VerticalAlignment.center] }
             deadCaption
             narrowingCaption
             if recording, let pendingTap,
@@ -73,8 +82,11 @@ struct KeyRecorderField: View {
                     .foregroundStyle(SettingsTheme.ink2)
             }
             tapOnceCaption
-            if let rejection = liveRejection {
-                rejectionRow(rejection)
+            if conflictSlot == nil, let rejection = liveRejection {
+                KeyRecorderRejectionRow.wired(
+                    rejection,
+                    coordinator: coordinator
+                ) { self.rejection = nil }
             }
         }
         .onChange(of: coordinator.generation) { _, _ in
@@ -83,11 +95,18 @@ struct KeyRecorderField: View {
             recorder.stop()
             preview = ""
         }
-        .onChange(of: liveRejection == nil) { _, clear in
-            if clear { rejection = nil }
+        // The drawn offer is the re-checked one: its holder and its
+        // Steal follow the bindings, and nil ends it (#34).
+        .onChange(of: liveRejection) { _, _ in
+            rejection = liveRejection
         }
         .onChange(of: combo) { _, now in keepTapOnceNote(now) }
-        .onAppear { if armsOnAppear, combo.isEmpty { start() } }
+        .onAppear {
+            if armsOnAppear, combo.isEmpty { start() }
+            #if DEBUG
+                if let commitsOnAppear { commit(commitsOnAppear) }
+            #endif
+        }
         .onDisappear {
             stop()
             tapOnceNote = nil
@@ -196,32 +215,6 @@ struct KeyRecorderField: View {
 
     private var recordHelp: String {
         recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
-    }
-
-    // MARK: - Rejection UI (#34)
-
-    /// Live re-validation of pending rejection (#34).
-    private var liveRejection: RecorderRejection? {
-        guard let rejection, let preflight else { return nil }
-        return preflight(rejection.combo)
-    }
-
-    private func rejectionRow(
-        _ rejection: RecorderRejection
-    ) -> some View {
-        KeyRecorderRejectionRow(
-            rejection: rejection,
-            onSteal: {
-                self.rejection = nil
-                rejection.steal()
-            },
-            onGoTo: {
-                self.rejection = nil
-                coordinator.scrollTarget =
-                    rejection.holderRowID
-            },
-            onDismiss: { self.rejection = nil }
-        )
     }
 
     /// A Hyper chord while no Hyper key is set: it cannot fire.

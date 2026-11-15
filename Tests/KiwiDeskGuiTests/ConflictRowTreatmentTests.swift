@@ -44,7 +44,8 @@ struct ConflictRowTreatmentTests {
             // The chrome is handed the flag…
             "RecorderButtonChrome(recording:recording,dead:isDead,",
             // …the caption is mounted under the field…
-            "clearButton}deadCaption",
+            "clearButton}.alignmentGuide(.shortcutLine){"
+                + "$0[VerticalAlignment.center]}deadCaption",
             // …and the tier and its sentence arrive as ONE
             // value, declared `let` with no default so the
             // memberwise init REQUIRES it: widening this to a

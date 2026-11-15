@@ -8,7 +8,7 @@ extension ApplicationsGroup {
     func row(
         _ binding: Binding<KeyBinding>
     ) -> some View {
-        HStack {
+        ShortcutKeyRow {
             HStack(spacing: 6) {
                 identity(binding.wrappedValue)
                 actionMenu(binding)
