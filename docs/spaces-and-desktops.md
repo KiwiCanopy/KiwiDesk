@@ -339,10 +339,8 @@ it switches to that Desktop and gives the window the focus.
 :::unreleased
 KiwiDesk parks in whichever bottom corner of the window's own
 screen leaves less of its parked windows on the other screens,
-counting screens beside it, below it and past each corner: first
-under the strip every parked window hangs down from the corner,
-then under a window as wide as the screen. It parks bottom-right
-when both leave the same. Keep one bottom corner of each screen
+counting screens beside it, below it and past each corner, and in
+the bottom-right corner when both leave the same. Keep one bottom corner of each screen
 clear, with no screen beside, below or past it; when both are
 covered, its parked windows show on another screen.
 

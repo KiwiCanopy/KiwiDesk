@@ -9,11 +9,12 @@ private let screenA = CGRect(x: 0, y: 0, width: 1920, height: 1080)
 
 infix operator ~~ : ComparisonPrecedence
 
-/// Same edge flags; the park corner `detect` also scores is
-/// `ParkCornerScoringTests`' (#3335).
+/// Equal but for the park corner, which `ParkCornerScoringTests`
+/// holds (#3335).
 private func ~~ (lhs: ScreenNeighbors, rhs: ScreenNeighbors) -> Bool {
-    (lhs.left, lhs.right, lhs.top, lhs.bottom)
-        == (rhs.left, rhs.right, rhs.top, rhs.bottom)
+    var lhs = lhs
+    lhs.parkCorner = rhs.parkCorner
+    return lhs == rhs
 }
 
 /// The four-edge adjacency scan (#878) that decides which

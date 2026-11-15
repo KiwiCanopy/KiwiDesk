@@ -22,12 +22,7 @@ struct ParkCornerScoringTests {
         _ corner: TilingEngine.HideCorner,
         _ others: [CGRect]
     ) -> CGFloat {
-        TilingEngine.parkOverlap(
-            of: screen,
-            at: corner,
-            width: screen.width,
-            on: others
-        )
+        TilingEngine.parkOverlap(of: screen, at: corner, on: others)
     }
 
     @Test("A screen above another parks away from the lower one")
@@ -55,21 +50,17 @@ struct ParkCornerScoringTests {
         )
     }
 
-    @Test("A corner every window lands on loses to a diagonal one")
-    func everyWindowBeatsWideWindows() {
-        // A narrow screen right under the right corner takes
-        // every parked window's column; a diagonal one below-left
-        // only windows wider than ~1600 pt, though a screen-sized
-        // window covers more of it.
-        let screen = CGRect(x: 0, y: -1000, width: 2000, height: 1000)
-        let narrow = CGRect(x: 1999, y: 0, width: 301, height: 1000)
-        let diagonal = CGRect(x: -3600, y: 0, width: 2000, height: 1200)
+    @Test("A screen beside a corner outweighs a strip below the other")
+    func besideOutweighsBelow() {
+        // Two monitors side by side, a laptop left-aligned under
+        // the left one: a right park lays a 48 pt band along the
+        // right monitor's bottom, a left park a 1 pt column on the
+        // laptop.
+        let left = CGRect(x: 0, y: -1440, width: 2560, height: 1440)
+        let right = CGRect(x: 2560, y: -1440, width: 2560, height: 1440)
+        let laptop = CGRect(x: 0, y: 0, width: 1728, height: 1117)
         #expect(
-            overlap(screen, .bottomLeft, [diagonal])
-                > overlap(screen, .bottomRight, [narrow])
-        )
-        #expect(
-            corner(of: screen, among: [narrow, diagonal]) == .bottomLeft
+            corner(of: left, among: [left, right, laptop]) == .bottomLeft
         )
     }
 

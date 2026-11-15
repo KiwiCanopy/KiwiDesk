@@ -12,58 +12,46 @@ extension TilingEngine {
         case bottomRight
     }
 
-    /// Picks the bottom corner whose parked windows cover the
-    /// least of the other screens (#3335), beside, below or
-    /// diagonal. First by the column every parked window hangs
-    /// (`stashPeekX` wide), then by a screen-sized window, so a
-    /// corner every window lands on loses to one only wide
-    /// windows reach. Ties, a lone screen and a screen boxed in
-    /// alike park bottom-right, so a desk that parked clear under
-    /// the #410 flags keeps its corner. Pure geometry over AX
-    /// visible frames; a rect equal to `screen` is the screen
-    /// itself and is not scored.
+    /// Picks the bottom corner whose parked window covers the
+    /// least of the other screens (#3335): the area a screen-sized
+    /// window parked there by `stashFrame` overlaps on them,
+    /// beside, below or diagonal. Ties, a lone screen and a screen
+    /// boxed in alike park bottom-right, so a desk that parked
+    /// clear stays clear. Trade: area weighs a large screen a wide
+    /// window reaches above a narrow one every window lands on.
+    /// Pure geometry over AX visible frames; a rect overlapping
+    /// `screen` is the screen itself (or its mirror), not scored.
     nonisolated static func optimalHideCorner(
         for screen: CGRect,
         among others: [CGRect]
     ) -> HideCorner {
-        let others = others.filter { $0 != screen }
-        func score(_ corner: HideCorner) -> (CGFloat, CGFloat) {
-            (
-                parkOverlap(
-                    of: screen,
-                    at: corner,
-                    width: stashPeekX,
-                    on: others
-                ),
-                parkOverlap(
-                    of: screen,
-                    at: corner,
-                    width: screen.width,
-                    on: others
-                )
-            )
-        }
-        return score(.bottomLeft) < score(.bottomRight)
-            ? .bottomLeft : .bottomRight
+        let others = others.filter { area($0.intersection(screen)) == 0 }
+        let left = parkOverlap(of: screen, at: .bottomLeft, on: others)
+        let right = parkOverlap(
+            of: screen,
+            at: .bottomRight,
+            on: others
+        )
+        return left < right ? .bottomLeft : .bottomRight
     }
 
-    /// Area a window `width` wide and as tall as `screen`, parked
-    /// at `corner` by `stashFrame`, covers on `others`.
+    /// Area a screen-sized window parked at `corner` of `screen`
+    /// covers on `others`.
     nonisolated static func parkOverlap(
         of screen: CGRect,
         at corner: HideCorner,
-        width: CGFloat,
         on others: [CGRect]
     ) -> CGFloat {
         let parked = stashFrame(
-            CGRect(x: 0, y: 0, width: width, height: screen.height),
+            CGRect(origin: .zero, size: screen.size),
             in: screen,
             corner: corner
         )
-        return others.reduce(0) { sum, other in
-            let shared = parked.intersection(other)
-            return shared.isNull ? sum : sum + shared.width * shared.height
-        }
+        return others.reduce(0) { $0 + area(parked.intersection($1)) }
+    }
+
+    private nonisolated static func area(_ rect: CGRect) -> CGFloat {
+        rect.isNull ? 0 : rect.width * rect.height
     }
 
     /// The corner a layout's park takes (#881): the one
