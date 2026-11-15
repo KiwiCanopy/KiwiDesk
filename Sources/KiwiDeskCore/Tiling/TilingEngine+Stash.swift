@@ -161,8 +161,8 @@ extension TilingEngine {
 
     /// The screen bounds and corner `window` parks at: `screen`,
     /// else the screen it sits on, else `fallback`. `allVisible`
-    /// may hold the screen itself: the corner score skips a rect
-    /// equal to the bounds (#3335).
+    /// may hold the screen itself; the corner score counts it on
+    /// both corners alike (#3335).
     private func parkTarget(
         of window: ManagedWindow,
         on screen: NSScreen? = nil,

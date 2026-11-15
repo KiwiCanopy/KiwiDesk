@@ -19,13 +19,13 @@ extension TilingEngine {
     /// or diagonal. Ties, a lone screen and a screen boxed in on
     /// both corners alike park bottom-right, so a desk that
     /// parked clear under the #410 flags keeps its corner. Pure
-    /// geometry over AX visible frames; a rect equal to `screen`
-    /// is the screen itself (or its mirror) and is not scored.
+    /// geometry over AX visible frames; `others` may hold
+    /// `screen` itself, which adds its own 1 pt sliver to both
+    /// scores alike.
     nonisolated static func optimalHideCorner(
         for screen: CGRect,
         among others: [CGRect]
     ) -> HideCorner {
-        let others = others.filter { $0 != screen }
         let left = parkOverlap(of: screen, at: .bottomLeft, on: others)
         let right = parkOverlap(
             of: screen,

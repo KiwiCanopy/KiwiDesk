@@ -77,7 +77,8 @@ struct ParkCornerScoringTests {
     func loneScreen() {
         let screen = CGRect(x: 0, y: 0, width: 1440, height: 900)
         #expect(corner(of: screen, among: []) == .bottomRight)
-        // The screen's own rect in the list is not a neighbour.
+        // The engine's list holds the screen itself; it weighs
+        // both corners alike.
         #expect(corner(of: screen, among: [screen]) == .bottomRight)
     }
 
