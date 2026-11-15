@@ -252,10 +252,11 @@ struct MaximizeCard: View {
             "While a window is maximized, the bars and the Pocket "
                 + "do not cover it. With this on, moving the pointer "
                 + "to a bar's screen edge brings that bar in over the "
-                + "window, with the Pocket where it sits on that edge. "
-                + "It also applies to \u{201C}%1$@\u{201D} for %2$@. "
-                + "A bar's shortcut shows it either way. Anything set "
-                + "to %3$@ stays out of sight.",
+                + "window, and the Pocket too when it sits on that "
+                + "edge. It also applies to \u{201C}%1$@\u{201D} in "
+                + "%2$@. A bar's shortcut shows it either way. "
+                + "Anything set to \u{201C}%3$@\u{201D} stays out of "
+                + "sight.",
             LayoutHelp.monocleMaximizeWindowsLabel,
             L("layout.monocle.name", "Monocle"),
             L("bar.visibility.hidden", "Hidden")

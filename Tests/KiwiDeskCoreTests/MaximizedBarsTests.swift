@@ -58,6 +58,9 @@ struct MaximizedBarsTests {
         #expect(shown.revealActionLive(.space, in: .bsp))
     }
 
+    /// The two refusals' absence is this case's claim: the fixture
+    /// draws no target, and `FullscreenStandDownTests` ▸
+    /// `maximizePocketRides` drives a reveal on a real screen.
     @Test("The shortcut is not refused as a stand-down or as Always")
     func revealIsNotRefused() {
         let core = makeCore()

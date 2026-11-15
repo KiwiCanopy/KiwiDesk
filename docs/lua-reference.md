@@ -2588,8 +2588,8 @@ as Hidden in Monocle, so `space_bar.toggle_reveal()` and
 menu-bar item names the Space. The pocket shows no handle at rest
 there, only during a window drag or while a window goes in or out.
 The focus border and the marks step aside on the tiled windows.
-`toggle_maximized` is unchanged. Moving the pointer to a bar's screen
-edge brings it in as
+`toggle_maximized` works as on any layout. Moving the pointer to a
+bar's screen edge brings it in as
 [`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
 says.
 
@@ -3533,7 +3533,16 @@ with no count, except where KiwiShelf stands down for a native
 full-screen window or a presentation, and on a Monocle Space while
 [`monocle.set_maximize_windows`](#monocleset_maximize_windows) is on,
 where it shows only during a window drag or while a window goes in or
-out. Windows keep clear of the
+out.
+
+:::unreleased
+A maximized window keeps it off the screen at rest too; it comes in
+only as
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+says.
+:::
+
+Windows keep clear of the
 resting handle or pocket unless `reserve` is off for every bar on
 that edge, or on an edge no bar sits on, for both bars. A click on
 the pocket lists the windows inside by app; a row takes its window

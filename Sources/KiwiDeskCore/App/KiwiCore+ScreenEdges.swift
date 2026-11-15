@@ -30,8 +30,21 @@ extension KiwiCore {
     func shelfSettings(on display: DisplayID) -> TilingSettings {
         let shown = settings(on: display)
         return tilingOffHidesShelf(on: display)
-            || showsMaximized(on: display)
+            || screenMaximizes(on: display)
             ? shown.hidingEveryBar() : shown
+    }
+
+    /// Whether `display` shows a maximized window: a Maximize over
+    /// the shelf (`showsMaximized`, the command, a Height or Width
+    /// reaching a strip, KiwiVision's fill) or a Monocle that
+    /// maximizes its windows (#2976). The one "maximized here"
+    /// predicate the shelf, its bands and the overflow marks ask
+    /// (#3346).
+    func screenMaximizes(on display: DisplayID) -> Bool {
+        showsMaximized(on: display)
+            || settings(on: display).maximizesWindows(
+                in: shownMode(on: display)
+            )
     }
 
     /// The bars resting at their edge brings in over the window
@@ -58,12 +71,10 @@ extension KiwiCore {
     private func maximizedStored(
         on display: DisplayID
     ) -> (settings: TilingSettings, mode: LayoutMode)? {
-        guard !tilingOffHidesShelf(on: display) else { return nil }
-        let shown = settings(on: display)
-        let mode = shownMode(on: display)
-        guard showsMaximized(on: display) || shown.maximizesWindows(in: mode)
+        guard !tilingOffHidesShelf(on: display),
+            screenMaximizes(on: display)
         else { return nil }
-        return (shown, mode)
+        return (settings(on: display), shownMode(on: display))
     }
 
     /// The axis a Space switch's plates slide along on `display`:

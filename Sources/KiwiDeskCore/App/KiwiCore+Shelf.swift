@@ -98,9 +98,9 @@ extension KiwiCore {
             // `shownStrips` consistent with the float clamp.
             // A maximize is no stand-down: it reads the bars Hidden
             // through `shown` (#3346).
-            let down = overlaysStandDown(on: display.id)
+            let down = shelfStandsDown(on: display.id)
             if down { standingDown.insert(display.id) }
-            if down || showsMaximized(on: display.id) {
+            if down || screenMaximizes(on: display.id) {
                 marksStandingDown.insert(display.id)
             }
             let app =
@@ -210,7 +210,8 @@ extension KiwiCore {
         syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
-        // KiwiVision stands down on the covered half (#2103, #3061).
+        // KiwiVision stands down where the shelf does, never for a
+        // maximize (#2103, #3061, #3346).
         noteVisionStandDown(standingDown)
         // The overflow marks wear the shelf's look, so they repaint
         // with every shelf repaint, on this pass's verdict (#2235).

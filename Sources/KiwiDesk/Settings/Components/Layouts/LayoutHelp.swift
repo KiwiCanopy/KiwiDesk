@@ -104,8 +104,8 @@ enum LayoutHelp {
             "monocle.maximize_windows.help",
             "Every window fills the screen with no gaps, and the "
                 + "focus border and marks step aside. The bars do "
-                + "not cover the windows and appear as they do over "
-                + "any maximized window."
+                + "not cover the windows; they come in as they do "
+                + "over any maximized window."
         )
     }
 

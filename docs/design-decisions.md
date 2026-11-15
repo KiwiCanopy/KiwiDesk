@@ -6799,9 +6799,11 @@ Hidden through the one `KiwiCore.shelfSettings(on:)` door, as
 `TilingSettings.barVisibilities(in:)`. So nothing is drawn at rest,
 no Space dots and no line, and an Always sibling cannot keep a bar
 shown or refuse its shortcut. Auto adds only a band at the edge,
-the Dock's auto-hide: the one answer
-`TilingSettings.maximizedHoverBars(in:)` lists the bars it opens and
-the revealer reads it, never `layoutBounds`. Auto must never come
+the Dock's auto-hide: `TilingSettings.maximizedRevealLive` is the
+leaf's one reader, `maximizedHoverBars(in:)` lists the bars it opens
+over it, and the revealer reads that, never `layoutBounds`. Every
+reader asks whether a screen is maximized through the one
+`screenMaximizes(on:)`. Auto must never come
 out of the bar reading as `.auto`, because an `.auto` edge reserves
 its sliver and draws its handle, and a reveal would then retile the
 maximized window. The fill and `maximizedBounds` stay as they are,
@@ -6867,8 +6869,10 @@ gave a Hidden shelf:
 
 The menu-bar item names the Space while a maximize hides the Space
 Bar, as for any bar that draws nothing at rest. The focus ring and
-the marks still step aside through `screenFillers(of:)`, unchanged:
-the Hidden reading never reaches them. KiwiVision's plate keeps
+the on-window marks still step aside through `screenFillers(of:)`,
+unchanged: the Hidden reading never reaches them. The overflow marks,
+drawn on windows the maximize covers, stand down on the bar pass's
+own set for any screen `screenMaximizes(on:)` names. KiwiVision's plate keeps
 dimming under a maximize (#3061). A per-Space value waits for
 someone to ask.
 :::

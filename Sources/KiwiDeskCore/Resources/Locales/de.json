@@ -1452,7 +1452,7 @@
   "layout_defaults.maximize.other_shapes": "Andere Bildschirmformen",
   "layout_defaults.maximize.screen_shape": "Bildschirmform",
   "layout_defaults.maximize.show_bars": "Leisten an der Bildschirmkante zeigen",
-  "layout_defaults.maximize.show_bars.help": "Solange ein Fenster maximiert ist, verdecken die Leisten und die Pocket es nicht. Ist dies an, holt der Mauszeiger an der Bildschirmkante einer Leiste diese Leiste über das Fenster, mit der Pocket, wenn sie an dieser Kante sitzt. Das gilt auch für „%1$@“ bei %2$@. Das Tastenkürzel einer Leiste zeigt sie in jedem Fall. Was auf „%3$@“ steht, bleibt unsichtbar.",
+  "layout_defaults.maximize.show_bars.help": "Solange ein Fenster maximiert ist, verdecken die Leisten und die Pocket es nicht. Ist dies an, holt der Mauszeiger an der Bildschirmkante, an der eine Leiste sitzt, diese Leiste über das Fenster und die Pocket mit, wenn sie an dieser Kante sitzt. Das gilt auch für „%1$@“ bei %2$@. Das Tastenkürzel einer Leiste zeigt sie in jedem Fall. Was auf „%3$@“ steht, bleibt unsichtbar.",
   "layout_defaults.maximize.show_bars.nothing_shows": "Wirkt, wenn die Space Bar, eine App Bar oder die Pocket in %3$@ auf „%1$@“ oder „%2$@“ steht.",
   "layout_defaults.maximize.title": "Maximieren",
   "layout_defaults.maximize.width_share": "Höhe beim Maximieren der Breite",

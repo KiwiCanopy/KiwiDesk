@@ -135,14 +135,15 @@ struct BorderOrderCensusTests {
                 "restack:{[weakself]idinself?.visionWindowRestacked(id)}"
             )
         )
-        // The stand-down is the shelf's covered half, filed by the
-        // one bar refresh, never a read of the plate's own (#3061).
+        // The stand-down is the shelf's, which no maximize reaches,
+        // filed by the one bar refresh, never a read of the plate's
+        // own (#3061, #3346).
         let shelf = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
                 "Sources/KiwiDeskCore/App/KiwiCore+Shelf.swift"
             )
         )
-        #expect(shelf.contains("noteVisionStandDown(plateStandingDown)"))
+        #expect(shelf.contains("noteVisionStandDown(standingDown)"))
         let vision = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
                 "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"

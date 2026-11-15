@@ -63,7 +63,7 @@ struct MaximizedReaderCensusTests {
                 in: edges
             )
         )
-        #expect(door.contains("showsMaximized(on: display)"))
+        #expect(door.contains("screenMaximizes(on: display)"))
         let covering = try SourceScan.strippedSource(
             at: coreRoot.appendingPathComponent(
                 "App/KiwiCore+ScreenCovering.swift"
@@ -77,6 +77,7 @@ struct MaximizedReaderCensusTests {
         )
         #expect(standDown.contains("overlaysStandDown(on: display)"))
         #expect(!standDown.contains("showsMaximized("))
+        #expect(!standDown.contains("screenMaximizes("))
     }
 
     @Test("Only the allowlisted files spell the stored maximize")

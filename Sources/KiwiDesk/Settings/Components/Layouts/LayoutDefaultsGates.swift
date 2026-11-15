@@ -131,7 +131,8 @@ enum LayoutDefaultsGateHelp {
         L(
             "layout_defaults.maximize.show_bars.nothing_shows",
             "Works when the Space Bar, an App Bar or the Pocket is "
-                + "set to %1$@ or %2$@ in %3$@.",
+                + "set to \u{201C}%1$@\u{201D} or \u{201C}%2$@\u{201D} "
+                + "in %3$@.",
             L("bar.visibility.always", "Always"),
             L("bar.visibility.auto", "Auto"),
             CrossReferenceRow.linkSlot

@@ -240,7 +240,7 @@ extension LayoutCard {
                 linkTitle: L(
                     "monocle.maximize_windows.bars_link_title",
                     "%1$@ ▸ %2$@",
-                    SettingsCatalog.layoutDefaults.maximizeCard.text,
+                    SettingsDestination.layoutDefaults.title,
                     SettingsCatalog.layoutDefaults.maximizeShowBars.text
                 ),
                 destination: .layoutDefaults,
