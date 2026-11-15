@@ -101,10 +101,13 @@ public final class TouchGestures {
                 let action = bindings[GestureKey(input, event.modifiers)],
                 !system.owns(event)
             else { continue }
-            // Natural scrolling off reverses a family's swipe, the one
-            // flip; a direction table's arm keeps the fingers' way.
-            if !natural, case .family = action,
-                case .swipe(let direction) = event.kind
+            // Natural scrolling off reverses a family's swipe, whole
+            // or an axis's, the one flip; a direction's arm keeps the
+            // fingers' way.
+            if !natural, case .swipe(let direction) = event.kind,
+                case .family = action.step(
+                    toward: GestureDirection(rawValue: direction.rawValue)
+                )
             {
                 event.kind = .swipe(direction.opposite)
             }

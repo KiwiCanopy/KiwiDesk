@@ -27,7 +27,7 @@ public struct ScrollGestureBase: Equatable, Sendable {
     public static let defaults = ScrollGestureBase(
         naturalTrackpad: .system,
         naturalMouse: .system,
-        longSwipes: false,
+        longSwipes: true,
         stepDistance: 60
     )
 

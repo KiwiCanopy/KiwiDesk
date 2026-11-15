@@ -77,13 +77,14 @@ struct ScrollGestureReachTests {
         var snapshot = try #require(core.ruleReachSnapshot())
         snapshot.scrollGestures.apply(
             ScrollGestureField.longSwipes.rawValue,
-            value: .flag(true),
+            value: .flag(false),
             reach: .shared(joining: []),
             editing: "Home"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.scrollGesture.longSwipes == true)
-        #expect(core.mouse.scroll.resolved.longSwipes)
+        // Off: the default is on (#1873), so on would prove nothing.
+        #expect(core.guiConfigStore.load()?.scrollGesture.longSwipes == false)
+        #expect(!core.mouse.scroll.resolved.longSwipes)
     }
 
     @Test("a stored page resolves the override and diffs it back")

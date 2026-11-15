@@ -2303,6 +2303,7 @@
   "shortcuts.gestures.per_button": "Per button",
   "shortcuts.gestures.per_direction": "Per direction",
   "shortcuts.gestures.recorder_name": "%1$@, %2$@",
+  "shortcuts.gestures.refusal.axis": "Only a swipe takes an action per axis.",
   "shortcuts.gestures.refusal.directional": "A swipe or scroll takes one action for every direction, or one per direction.",
   "shortcuts.gestures.refusal.empty": "Choose an action.",
   "shortcuts.gestures.refusal.family": "This gesture offers other actions; choose one of those.",

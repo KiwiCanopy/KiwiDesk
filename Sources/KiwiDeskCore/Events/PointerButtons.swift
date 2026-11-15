@@ -48,8 +48,10 @@ public struct PointerButtonSettings: Equatable, Sendable {
             switch action {
             case .run: directions = key.input.directions.isEmpty ? [nil] : []
             case .family: directions = key.input.directions
-            case .split(let arms):
-                directions = key.input.directions.filter { arms[$0] != nil }
+            case .split(let split):
+                directions = key.input.directions.filter {
+                    split.arms[$0] != nil
+                }
             case .grab: directions = []
             }
             for direction in directions {

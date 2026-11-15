@@ -94,11 +94,11 @@ extension KiwiCore {
             handleScrollSpaceStep(event, session: session.step)
         case .family(let family):
             if event.kind == .began {
-                // A swipe steps once per `step_distance`, as the pan.
-                let resolved = mouse.scroll.resolved
+                // Only focus repeats within a touch (#1873 ▸ Ruling
+                // 2026-11-15): any other family steps once.
                 session.meter = ScrollStepMeter(
-                    longSwipes: resolved.longSwipes,
-                    distance: resolved.stepDistance
+                    longSwipes: false,
+                    distance: 1
                 )
             }
             guard
@@ -109,26 +109,33 @@ extension KiwiCore {
             else { return }
             let code = family.lua(direction)
             for _ in 0..<steps { runGestureLua(code, "scroll") }
-        case .split(let arms):
-            guard let direction = session.latch.feed(event),
-                let arm = arms[direction]
-            else { return }
-            runGestureLua(arm.lua, "scroll")
+        case .split:
+            guard let hand = session.latch.feed(event) else { return }
+            switch action.step(toward: hand) {
+            case .lua(let arm): runGestureLua(arm.lua, "scroll")
+            case .family(let family):
+                // An axis family follows Natural scrolling as a whole
+                // one does; an arm keeps the hand's way (#1873).
+                let way = event.reversed ? hand.opposite : hand
+                stepFamily(
+                    family,
+                    toward: way,
+                    key: GestureKey(.swipe2, event.chord)
+                )
+            case nil: return
+            }
         case .run, .grab:
             return
         }
     }
 
     /// How many steps a family takes for `event` and which way:
-    /// the event projected onto the axis the latch fired on, so a
-    /// long swipe's later steps keep its axis and its sign. Pure.
+    /// along the axis the meter's step took. Pure.
     static func familyStep(
         _ meter: inout ScrollStepMeter,
         _ event: ScrollGestureEvent
     ) -> (Int, GestureDirection)? {
-        let steps = meter.feed(
-            event.locked(horizontal: meter.firedHorizontal)
-        )
+        let steps = meter.feed(event)
         guard steps != 0 else { return nil }
         let way = Self.direction(
             of: event.delta,
@@ -171,16 +178,13 @@ extension KiwiCore {
         _ action: GestureAction,
         toward direction: GestureDirection?
     ) {
-        switch action {
-        case .run(let lua):
-            runGestureLua(lua.lua, key.spelling)
-        case .split(let arms):
-            guard let direction, let arm = arms[direction] else { return }
-            runGestureLua(arm.lua, key.spelling)
+        switch action.step(toward: direction) {
+        case .lua(let action):
+            runGestureLua(action.lua, key.spelling)
         case .family(let family):
             guard let direction else { return }
             stepFamily(family, toward: direction, key: key)
-        case .grab:
+        case nil:
             return
         }
     }

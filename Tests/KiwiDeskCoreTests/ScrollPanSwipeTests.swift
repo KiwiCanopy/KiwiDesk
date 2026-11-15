@@ -7,8 +7,8 @@ import Testing
 
 /// ⌃⌥ + a swipe (#3200, owner rulings 2026-11-11): a scroll with a
 /// finger phase moves focus the way the fingers go on every layout
-/// without a row, through the arrow keys' step, on the axis its
-/// first step locks until the fingers lift; a wheel notch keeps the
+/// without a row, through the arrow keys' step, each step on the
+/// axis its travel leads (#1873); a wheel notch keeps the
 /// list walk (`ScrollPanLayoutTests`). Deltas here are in the
 /// natural convention the router hands on: their sign is the
 /// fingers'.
@@ -142,14 +142,13 @@ struct ScrollPanSwipeTests {
         #expect(focused(core) == WindowID(3))
     }
 
-    /// The first step locks the horizontal axis; the larger
-    /// vertical travel after it is no step, nor a second axis.
-    @Test("the first step locks the axis until the lift")
-    func axisLocks() {
+    /// Without long swipes a touch is one step: the larger
+    /// vertical travel after it is no second step on either axis.
+    @Test("without long swipes a touch steps once")
+    func oneStepPerTouch() {
         let (core, session) = makeCore(focus: WindowID(1))
         var base = ScrollGestureBase.defaults
-        base.longSwipes = true
-        base.stepDistance = 10
+        base.longSwipes = false
         core.applyScrollGestures(base: base, profile: nil)
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
@@ -158,8 +157,22 @@ struct ScrollPanSwipeTests {
         #expect(bumps.isEmpty)
     }
 
-    /// Long swipes repeat along the locked axis.
-    @Test("a long swipe repeats along the locked axis")
+    /// Right, down, left in one movement (#1873 ▸ Ruling
+    /// 2026-11-15): each long-swipe step takes the axis its
+    /// travel leads.
+    @Test("a long swipe re-decides the axis at each step")
+    func longSwipeTurns() {
+        let (core, session) = makeCore(focus: WindowID(1))
+        var base = ScrollGestureBase.defaults
+        base.longSwipes = true
+        base.stepDistance = 50
+        core.applyScrollGestures(base: base, profile: nil)
+        gesture(core, session, [(30, 0), (4, 50), (-50, 6)])
+        #expect(focused(core) == WindowID(3))
+    }
+
+    /// Long swipes repeat along the axis their travel leads.
+    @Test("a long swipe repeats along its axis")
     func longSwipeRepeats() {
         let (core, session) = makeCore(
             focus: WindowID(1),
@@ -169,7 +182,7 @@ struct ScrollPanSwipeTests {
         base.longSwipes = true
         base.stepDistance = 50
         core.applyScrollGestures(base: base, profile: nil)
-        gesture(core, session, [(30, 0), (50, 400)])
+        gesture(core, session, [(30, 0), (50, 4)])
         // 1 → 2, then wrapping back to 1 within the screen.
         #expect(focused(core) == WindowID(1))
     }

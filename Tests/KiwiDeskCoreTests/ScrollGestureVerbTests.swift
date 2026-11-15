@@ -90,28 +90,10 @@ struct ScrollGestureVerbTests {
         )
     }
 
-    @Test("a locked swipe keeps its axis and its sign")
-    func lockedKeepsTheAxis() {
-        var event = ScrollGestureEvent(
-            chord: [.control, .option],
-            kind: .changed,
-            input: .trackpad,
-            delta: CGVector(dx: 2, dy: -9),
-            momentum: false,
-            location: .zero,
-            time: 0
-        )
-        #expect(event.locked(horizontal: nil).delta == event.delta)
-        #expect(event.locked(horizontal: true).delta == CGVector(dx: 2, dy: 0))
-        #expect(
-            event.locked(horizontal: false).delta == CGVector(dx: 0, dy: -9)
-        )
-        event.momentum = true
-        #expect(event.locked(horizontal: true).delta == event.delta)
-    }
-
-    @Test("a long family swipe's later steps keep the latched axis")
-    func familyStepKeepsTheAxis() {
+    /// Right, right, up in one movement (#1873 ▸ Ruling
+    /// 2026-11-15): each step takes the axis its travel leads.
+    @Test("a long swipe's later step takes the axis its travel leads")
+    func familyStepRedecidesTheAxis() {
         var meter = ScrollStepMeter(longSwipes: true, distance: 60)
         func event(
             _ kind: ScrollGestureEvent.Kind,
@@ -131,14 +113,15 @@ struct ScrollGestureVerbTests {
         #expect(KiwiCore.familyStep(&meter, event(.began)) == nil)
         let first = KiwiCore.familyStep(&meter, event(.changed, dx: 30))
         #expect(first?.0 == 1 && first?.1 == .right)
-        // A diagonal frame: its larger axis is the other one.
-        let diagonal = KiwiCore.familyStep(
+        let next = KiwiCore.familyStep(&meter, event(.changed, dx: 60))
+        #expect(next?.0 == 1 && next?.1 == .right)
+        // Mostly upward travel, a little sideways drift beside it.
+        let up = KiwiCore.familyStep(
             &meter,
             event(.changed, dx: 5, dy: -70)
         )
-        #expect(diagonal == nil)
-        let next = KiwiCore.familyStep(&meter, event(.changed, dx: 60))
-        #expect(next?.0 == 1 && next?.1 == .right)
+        #expect(up?.0 == 1 && up?.1 == .up)
+        #expect(meter.firedHorizontal == false)
     }
 
     @Test("a family steps along the axis the latch fired on")

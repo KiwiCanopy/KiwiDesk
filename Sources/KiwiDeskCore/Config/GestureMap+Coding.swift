@@ -4,6 +4,8 @@ import Foundation
 /// "swipe2:control+option": { "family": "focus" },
 /// "drag:control+command": { "grab": "move" },
 /// "wheel:control+option": { "split": { "up": { "lua": … } } },
+/// "swipe3:control+option": { "split": { "left_right":
+/// { "family": "space" }, "up": { "lua": … } } },
 /// "tap3": null }`. Lua sits under `lua`, the key a migration that
 /// rewrites stored Lua already matches in shortcut rows (#1511). A
 /// key the object leaves out inherits and `null` is the tombstone;
@@ -96,29 +98,7 @@ extension GestureAction: Codable {
             }
             self = .grab(action)
         } else if c.contains(.split) {
-            let arms = try c.decode(
-                [String: LuaAction].self,
-                forKey: .split
-            )
-            var split: [GestureDirection: LuaAction] = [:]
-            for (raw, action) in arms {
-                guard let direction = GestureDirection(rawValue: raw) else {
-                    throw DecodingError.dataCorruptedError(
-                        forKey: .split,
-                        in: c,
-                        debugDescription: "unknown direction \(raw)"
-                    )
-                }
-                split[direction] = action
-            }
-            guard let action = GestureAction.split(normalizing: split) else {
-                throw DecodingError.dataCorruptedError(
-                    forKey: .split,
-                    in: c,
-                    debugDescription: "an empty table binds nothing"
-                )
-            }
-            self = action
+            self = try Self.decodeSplit(c.superDecoder(forKey: .split))
         } else {
             self = .run(try LuaAction(from: decoder))
         }
@@ -134,13 +114,83 @@ extension GestureAction: Codable {
         case .grab(let grab):
             var c = encoder.container(keyedBy: Keys.self)
             try c.encode(grab.rawValue, forKey: .grab)
-        case .split(let arms):
+        case .split(let split):
             var c = encoder.container(keyedBy: Keys.self)
-            let byName = Dictionary(
-                uniqueKeysWithValues: arms.map { ($0.key.rawValue, $0.value) }
+            var body = c.nestedContainer(
+                keyedBy: GestureMap.Key.self,
+                forKey: .split
             )
-            try c.encode(byName, forKey: .split)
+            for (axis, family) in split.axes {
+                try body.encode(
+                    AxisBody(family: family),
+                    forKey: GestureMap.Key(stringValue: axis.rawValue)
+                )
+            }
+            for (direction, action) in split.arms {
+                try body.encode(
+                    action,
+                    forKey: GestureMap.Key(stringValue: direction.rawValue)
+                )
+            }
         }
+    }
+
+    /// An axis's body: its family alone, `{ "family": "space" }`.
+    private struct AxisBody: Codable {
+        let family: GestureFamily
+    }
+
+    /// A split's body (#1873): an axis key takes a family body, a
+    /// direction key a Lua body. A body the one fold would change —
+    /// an arm under an axis family, two axes on one family — is
+    /// refused, so each behaviour has one stored spelling.
+    private static func decodeSplit(_ decoder: Decoder) throws -> Self {
+        let c = try decoder.container(keyedBy: GestureMap.Key.self)
+        var split = GestureSplit(axes: [:], arms: [:])
+        for key in c.allKeys {
+            if let axis = GestureAxis(rawValue: key.stringValue) {
+                let body = try c.superDecoder(forKey: key)
+                let names = try body.container(keyedBy: GestureMap.Key.self)
+                    .allKeys.map(\.stringValue)
+                guard names == ["family"] else {
+                    throw corrupt(c, key, "an axis takes a family")
+                }
+                split.axes[axis] =
+                    try c.decode(AxisBody.self, forKey: key).family
+            } else if let direction = GestureDirection(
+                rawValue: key.stringValue
+            ) {
+                split.arms[direction] =
+                    try c.decode(LuaAction.self, forKey: key)
+            } else {
+                throw corrupt(c, key, "unknown direction \(key.stringValue)")
+            }
+        }
+        guard let action = GestureAction.split(normalizing: split) else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "an empty table binds nothing"
+                )
+            )
+        }
+        guard action == .split(split) else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "not the one spelling of this split"
+                )
+            )
+        }
+        return action
+    }
+
+    private static func corrupt(
+        _ c: KeyedDecodingContainer<GestureMap.Key>,
+        _ key: GestureMap.Key,
+        _ text: String
+    ) -> DecodingError {
+        .dataCorruptedError(forKey: key, in: c, debugDescription: text)
     }
 }
 
