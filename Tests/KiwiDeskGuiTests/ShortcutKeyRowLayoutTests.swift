@@ -36,13 +36,15 @@ struct ShortcutKeyRowLayoutTests {
         sentence: "Dead row"
     )
 
+    /// `commits` is a chord the field commits on arrival, as a
+    /// recording or a Sides pick would.
     private func field(
-        armed: Bool = false,
+        commits: String? = nil,
         reading: ConflictReading? = nil
     ) -> KeyRecorderField {
-        KeyRecorderField(
+        var field = KeyRecorderField(
             name: "Row B",
-            combo: armed ? "" : "lcmd+h",
+            combo: "lcmd+h",
             reading: reading,
             narrowing: nil,
             preflight: { combo in
@@ -55,9 +57,10 @@ struct ShortcutKeyRowLayoutTests {
                 )
             },
             onRecord: { _ in },
-            onClear: {},
-            armsOnAppear: armed
+            onClear: {}
         )
+        field.commitsOnAppear = commits
+        return field
     }
 
     private func host<V: View>(
@@ -215,8 +218,8 @@ struct ShortcutKeyRowLayoutTests {
         #expect(first.minY - line.maxY > 24)
     }
 
-    /// Right ⌘H pressed into the armed field: the field's own
-    /// refusal must reach the row's line (`recorderConflictSlot`).
+    /// The field's own refusal of Right ⌘H must reach the row's line
+    /// (`recorderConflictSlot`).
     @Test("the field's refusal lands on the row's line")
     func fieldWritesTheRow() throws {
         LocalizationManager.shared.select("en")
@@ -224,28 +227,10 @@ struct ShortcutKeyRowLayoutTests {
             ShortcutKeyRow {
                 Text(verbatim: "Row B title")
                 Spacer()
-                field(armed: true)
+                field(commits: "rcmd+h")
             }
         )
         defer { Self.close(window) }
-        let rightCommand = NSEvent.ModifierFlags(
-            rawValue: NSEvent.ModifierFlags.command.rawValue | 0x10
-        )
-        let press = try #require(
-            NSEvent.keyEvent(
-                with: .keyDown,
-                location: .zero,
-                modifierFlags: rightCommand,
-                timestamp: ProcessInfo.processInfo.systemUptime,
-                windowNumber: window.windowNumber,
-                context: nil,
-                characters: "h",
-                charactersIgnoringModifiers: "h",
-                isARepeat: false,
-                keyCode: 4
-            )
-        )
-        NSApp.sendEvent(press)
         spin()
         let line = try wellLine(in: host)
         let buttons = lineButtons(below: line, in: host)

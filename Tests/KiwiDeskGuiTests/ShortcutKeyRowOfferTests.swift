@@ -11,8 +11,8 @@ import Testing
 /// Steal takes it from the new holder, never the one named at the
 /// refusal.
 ///
-/// Main-actor spend: one hosted row in an offscreen window, one
-/// synthetic key press and short run-loop spins.
+/// Main-actor spend: one hosted row in an offscreen window and short
+/// run-loop spins.
 @Suite("Shortcut key row re-checked offer (#3258)", .serialized)
 @MainActor
 struct ShortcutKeyRowOfferTests {
@@ -29,31 +29,38 @@ struct ShortcutKeyRowOfferTests {
             ShortcutKeyRow {
                 Text(verbatim: "Row B title")
                 Spacer()
-                KeyRecorderField(
-                    name: "Row B",
-                    combo: "",
-                    // A new holder changes the row's reading, as
-                    // in a shortcut list, which re-renders the field.
-                    reading: ConflictReading(
-                        severity: .sidesTaken([]),
-                        sentence: "Taken by \(holder.name)"
-                    ),
-                    narrowing: nil,
-                    preflight: { [holder] combo in
-                        guard combo == "rcmd+h" else { return nil }
-                        let name = holder.name
-                        return RecorderRejection(
-                            combo: combo,
-                            holder: name,
-                            holderRowID: name,
-                            steal: { holder.stolenFrom.append(name) }
-                        )
-                    },
-                    onRecord: { _ in },
-                    onClear: {},
-                    armsOnAppear: true
-                )
+                refusing
             }
+        }
+
+        /// The field commits Right ⌘H on arrival, as a recording or a
+        /// Sides pick would, and is refused.
+        private var refusing: KeyRecorderField {
+            var field = KeyRecorderField(
+                name: "Row B",
+                combo: "lcmd+h",
+                // A new holder changes the row's reading, as
+                // in a shortcut list, which re-renders the field.
+                reading: ConflictReading(
+                    severity: .sidesTaken([]),
+                    sentence: "Taken by \(holder.name)"
+                ),
+                narrowing: nil,
+                preflight: { [holder] combo in
+                    guard combo == "rcmd+h" else { return nil }
+                    let name = holder.name
+                    return RecorderRejection(
+                        combo: combo,
+                        holder: name,
+                        holderRowID: name,
+                        steal: { holder.stolenFrom.append(name) }
+                    )
+                },
+                onRecord: { _ in },
+                onClear: {}
+            )
+            field.commitsOnAppear = "rcmd+h"
+            return field
         }
     }
 
@@ -109,24 +116,6 @@ struct ShortcutKeyRowOfferTests {
         window.contentView = host
         host.layoutSubtreeIfNeeded()
         spin()
-        let press = try #require(
-            NSEvent.keyEvent(
-                with: .keyDown,
-                location: .zero,
-                modifierFlags: NSEvent.ModifierFlags(
-                    rawValue: NSEvent.ModifierFlags.command.rawValue
-                        | 0x10
-                ),
-                timestamp: ProcessInfo.processInfo.systemUptime,
-                windowNumber: window.windowNumber,
-                context: nil,
-                characters: "h",
-                charactersIgnoringModifiers: "h",
-                isARepeat: false,
-                keyCode: 4
-            )
-        )
-        NSApp.sendEvent(press)
         spin()
         holder.name = "Row C"
         spin()

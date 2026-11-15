@@ -26,6 +26,11 @@ struct KeyRecorderField: View {
     let onClear: () -> Void
     /// Arms on arrival while empty — a key sequence's new key (#1871).
     var armsOnAppear = false
+    #if DEBUG
+        /// A test's chord, committed on arrival as a recording is: a
+        /// posted key event reaches every recorder in the process.
+        var commitsOnAppear: String?
+    #endif
 
     @EnvironmentObject var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
@@ -96,7 +101,12 @@ struct KeyRecorderField: View {
             rejection = liveRejection
         }
         .onChange(of: combo) { _, now in keepTapOnceNote(now) }
-        .onAppear { if armsOnAppear, combo.isEmpty { start() } }
+        .onAppear {
+            if armsOnAppear, combo.isEmpty { start() }
+            #if DEBUG
+                if let commitsOnAppear { commit(commitsOnAppear) }
+            #endif
+        }
         .onDisappear {
             stop()
             tapOnceNote = nil
