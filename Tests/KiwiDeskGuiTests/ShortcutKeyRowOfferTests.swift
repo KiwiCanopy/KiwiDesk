@@ -72,6 +72,20 @@ struct ShortcutKeyRowOfferTests {
         return out
     }
 
+    /// The record well's frame in the host.
+    private func ring(in view: NSView) -> CGRect? {
+        if String(describing: type(of: view)) == "_FocusRingView",
+            view.frame.width >= KeyRecorderField.labelMinWidth,
+            let host = view.window?.contentView
+        {
+            return view.convert(view.bounds, to: host)
+        }
+        for sub in view.subviews {
+            if let found = ring(in: sub) { return found }
+        }
+        return nil
+    }
+
     @Test("Steal takes the chord from its holder now")
     func stealFollowsTheHolder() throws {
         LocalizationManager.shared.select("en")
@@ -116,14 +130,15 @@ struct ShortcutKeyRowOfferTests {
         spin()
         holder.name = "Row C"
         spin()
-        // Steal is the line's leftmost action.
+        // Steal is the leftmost action on the line under the well.
+        let well = try #require(ring(in: host))
+        let frame = { (button: NSButton) in
+            button.convert(button.bounds, to: host)
+        }
         let steal = try #require(
             buttons(in: host)
-                .filter { $0.frame.minY > 0 }
-                .min {
-                    $0.convert($0.bounds, to: host).minX
-                        < $1.convert($1.bounds, to: host).minX
-                }
+                .filter { frame($0).minY >= well.maxY }
+                .min { frame($0).minX < frame($1).minX }
         )
         steal.performClick(nil)
         spin()

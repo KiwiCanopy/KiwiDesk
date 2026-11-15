@@ -100,7 +100,15 @@ struct ShortcutKeyRowLayoutTests {
 
     /// The record well's focus ring, the well's own frame.
     private func wellLine(in host: NSView) throws -> CGRect {
-        try #require(frames(of: "_FocusRingView", in: host).first)
+        // The badge carries a ring too; the well is the widest,
+        // at least `labelMinWidth`.
+        let well = frames(of: "_FocusRingView", in: host)
+            .max { $0.width < $1.width }
+        return try #require(
+            well.flatMap {
+                $0.width >= KeyRecorderField.labelMinWidth ? $0 : nil
+            }
+        )
     }
 
     /// The conflict line's buttons: Steal, Go to, dismiss.

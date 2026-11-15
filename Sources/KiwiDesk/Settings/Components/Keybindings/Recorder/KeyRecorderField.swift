@@ -100,7 +100,6 @@ struct KeyRecorderField: View {
         .onDisappear {
             stop()
             tapOnceNote = nil
-            if conflictSlot != nil { rejection = nil }
         }
     }
 
