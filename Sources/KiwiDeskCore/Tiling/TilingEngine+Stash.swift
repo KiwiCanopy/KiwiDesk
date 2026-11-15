@@ -27,51 +27,6 @@ extension TilingEngine {
     nonisolated static let stashPeekY: CGFloat =
         WindowServerFacts.visibilityFloor + 8
 
-    /// The bottom corner a stashed window parks in. Chosen per
-    /// monitor (`optimalHideCorner`) so the window's body — which
-    /// hangs ~its full width off the parked side — spills into
-    /// dead space, not onto a neighbor display (#410).
-    enum HideCorner {
-        case bottomLeft
-        case bottomRight
-    }
-
-    /// Picks the bottom corner whose horizontal overhang misses
-    /// every adjacent display (#410, AeroSpace's `OptimalHide
-    /// Corner` scan). A stashed window's body hangs off the
-    /// parked side; parking toward a neighbor monitor would show
-    /// that body on the neighbor. Prefer the side with no
-    /// adjacent display; default bottom-right when both or
-    /// neither side has one. The scan itself is
-    /// `ScreenNeighbors.detect` (#878 generalized it to all
-    /// four edges; this consumes the left/right pair) — one
-    /// adjacency predicate, not two drifting copies.
-    nonisolated static func optimalHideCorner(
-        for screen: CGRect,
-        among others: [CGRect]
-    ) -> HideCorner {
-        optimalHideCorner(
-            neighbors: ScreenNeighbors.detect(
-                around: screen,
-                among: others
-            )
-        )
-    }
-
-    /// The corner PREFERENCE, one copy: the stash resolves its
-    /// neighbors from screen rects above, while `MonocleLayout`'s
-    /// park (#881) arrives with the flags already threaded
-    /// through its context (#878) — both must answer alike for
-    /// one arrangement, so the choice lives here and not beside
-    /// either caller.
-    nonisolated static func optimalHideCorner(
-        neighbors: ScreenNeighbors
-    ) -> HideCorner {
-        if !neighbors.right { return .bottomRight }
-        if !neighbors.left { return .bottomLeft }
-        return .bottomRight
-    }
-
     /// Where a hidden window parks: a bottom corner of its
     /// screen, `stashPeekX × stashPeekY` remaining visible, the
     /// body spilling off the parked side and the bottom. Size
@@ -145,13 +100,13 @@ extension TilingEngine {
             shown: visible,
             forcing: forcesDepartures
         )
-        // The corner scan's screen list comes from the SAME
-        // topology seam the scrolling walls read (#878), so the
-        // two consumers of `ScreenNeighbors.detect` can never
-        // disagree about the arrangement, and a pinned fixture
-        // pins them together. The per-window screen PICK below
-        // legitimately stays on `ScreenList.all` — it needs
-        // screen objects, not rects.
+        // The corner score's screen list comes from the SAME
+        // topology seam `ScreenNeighbors.detect` scores the
+        // layouts' park over (#878, #3335), so the stash and a
+        // layout can never disagree about the arrangement, and a
+        // pinned fixture pins them together. The per-window
+        // screen PICK below legitimately stays on
+        // `ScreenList.all` — it needs screen objects, not rects.
         let allVisible = allScreenBounds()
         for space in state.workspaces.allSpaces
         where !visible.contains(space.id) {
@@ -205,10 +160,8 @@ extension TilingEngine {
     }
 
     /// The screen bounds and corner `window` parks at: `screen`,
-    /// else the screen it sits on, else `fallback`. No self-filter
-    /// in the corner scan: `detect` excludes the screen geometrically (a rect
-    /// cannot lie past its own edge), and a rect *equal* to the
-    /// bounds overlaps it entirely, so it qualifies on no side.
+    /// else the screen it sits on, else `fallback`. `allVisible`
+    /// may hold the screen itself, which the corner score skips.
     private func parkTarget(
         of window: ManagedWindow,
         on screen: NSScreen? = nil,

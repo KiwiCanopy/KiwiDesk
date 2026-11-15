@@ -74,11 +74,11 @@ struct MonocleParkLayoutTests {
         #expect(frames[w3] == parked)
     }
 
-    @Test("A right neighbor flips the park to the free left corner")
+    @Test("The scored left corner takes the park")
     func rightNeighborParksLeft() throws {
         var context = makeContext()
         context.focused = w1
-        context.screenNeighbors = ScreenNeighbors(right: true)
+        context.screenNeighbors.parkCorner = .bottomLeft
         let frames = layout.calculateGeometry(
             for: [w1, w2],
             in: context
@@ -105,7 +105,7 @@ struct MonocleParkLayoutTests {
         context.monocle.appBar.visibility = .hidden
         context.monocle.hideStyle = .park
         context.focused = w1
-        context.screenNeighbors = ScreenNeighbors(right: true)
+        context.screenNeighbors.parkCorner = .bottomLeft
         let parked = try #require(
             layout.calculateGeometry(for: [w1, w2], in: context)[w2]
         )
