@@ -142,6 +142,24 @@ struct ZOrderScrollingUnraisedLeaveTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
+    /// The device sequence: the second step lands inside the first
+    /// one's pan, so the first step's raise never ran. Echoes landed,
+    /// so 3, which stays where it is, takes the deferred raise.
+    @Test("Two steps inside one pan arm")
+    func chainedStepsArm() throws {
+        let core = try makeCore()
+        for (id, frame) in core.tiler.placedFrames(state: core.state) {
+            core.state.apply(.windowResized(id, frame))
+        }
+        try startDummyPan(core)
+        core.focusWindow(WindowID(3), warp: false)
+        #expect(core.pendingFocusRaise == WindowID(3))
+        #expect(!core.pendingZOrderRestore)
+        core.focusWindow(WindowID(2), warp: false)
+        #expect(core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
     /// Where `target` lands when the chain steps 4 → 3 → `target`,
     /// read off a probe core of the same shape.
     private func landing(of target: UInt32) throws -> CGRect {
