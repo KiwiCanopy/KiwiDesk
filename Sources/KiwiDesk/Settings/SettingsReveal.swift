@@ -125,6 +125,15 @@ extension View {
         searchFlash(control.id)
     }
 
+    /// Washes one more part of a control another view anchors with
+    /// `searchAnchored`, so a setting drawn in two places lights
+    /// both and scrolls to the first (#3301).
+    func searchFlashEcho(
+        _ control: SettingsControl
+    ) -> some View {
+        searchFlash(control.id)
+    }
+
     /// Anchors and flashes a row no catalog control names — a live
     /// Space's view-only row (#1790), which App Rules lands on.
     func liveSpaceAnchored(_ anchor: String) -> some View {

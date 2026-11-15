@@ -34,21 +34,7 @@ struct GestureListCard: View {
             VStack(alignment: .leading, spacing: 10) {
                 naturalRow
                 Divider()
-                ForEach($entries) { $entry in
-                    GestureListRow(
-                        model: model,
-                        entry: $entry,
-                        others: entries.filter { $0.id != entry.id }
-                            .map(\.key),
-                        offered: offered,
-                        catalog: catalog,
-                        open: $open,
-                        armsOnAppear: fresh == entry.id,
-                        onUnbound: { pending.insert(entry.id) },
-                        onRemove: { remove(entry) }
-                    )
-                }
-                footer
+                revealed(bindings)
             }
         }
         .onAppear(perform: snapshot)
@@ -68,6 +54,45 @@ struct GestureListCard: View {
                     GestureListEdits.action(of: $0.key, in: base) == nil
                 } ?? false
             }
+        }
+    }
+
+    /// The binding rows and their footer, one reveal target: the
+    /// footer keeps it laid out while a card has no rows.
+    private var bindings: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach($entries) { $entry in
+                GestureListRow(
+                    model: model,
+                    entry: $entry,
+                    others: entries.filter { $0.id != entry.id }
+                        .map(\.key),
+                    offered: offered,
+                    catalog: catalog,
+                    open: $open,
+                    armsOnAppear: fresh == entry.id,
+                    onUnbound: { pending.insert(entry.id) },
+                    onRemove: { remove(entry) }
+                )
+            }
+            footer
+        }
+    }
+
+    /// The bindings span both devices, so a hit washes both cards'
+    /// rows and scrolls to the Mouse card's (#3301 ▸ ruling).
+    @ViewBuilder private func revealed(
+        _ rows: some View
+    ) -> some View {
+        switch device {
+        case .mouse:
+            rows.searchAnchored(
+                SettingsCatalog.shortcuts.gestures.children.gestureBindings
+            )
+        case .trackpad:
+            rows.searchFlashEcho(
+                SettingsCatalog.shortcuts.gestures.children.gestureBindings
+            )
         }
     }
 
