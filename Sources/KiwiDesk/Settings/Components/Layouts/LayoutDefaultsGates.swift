@@ -12,6 +12,9 @@ struct LayoutDefaultsGates {
         case rigidGrid
         case autoSizedGrid
         case autoTracks
+        /// Every bar and the Pocket are Hidden, so the maximized
+        /// edge reveal brings nothing in (#3346 ▸ 9).
+        case nothingRevealsMaximized
     }
 
     /// Resolves inert reason for setting key (fail-open if unhandled).
@@ -26,6 +29,9 @@ struct LayoutDefaultsGates {
             return dimensionsAreInert ? .autoSizedGrid : nil
         case .layout(.trackLimit):
             return settings.track.autoTracks ? .autoTracks : nil
+        case .kiwishelf(.maximizedVisibility):
+            return settings.maximizedRevealsAnything
+                ? nil : .nothingRevealsMaximized
         default:
             assertionFailure(
                 "unhandled Layout Defaults gate: \(key.id)"
@@ -40,6 +46,7 @@ struct LayoutDefaultsGates {
         .layout(.gridColumns),
         .layout(.gridRows),
         .layout(.trackLimit),
+        .kiwishelf(.maximizedVisibility),
     ]
 
     /// Gated rows the area declares but resolves elsewhere. Empty
@@ -86,6 +93,7 @@ enum LayoutDefaultsGateHelp {
         case .rigidGrid: return rigidGrid
         case .autoSizedGrid: return autoSizedGrid
         case .autoTracks: return autoTracks
+        case .nothingRevealsMaximized: return nothingRevealsMaximized
         }
     }
 
@@ -114,6 +122,19 @@ enum LayoutDefaultsGateHelp {
             "scroll_grid.auto_size.dimensions_inert",
             "An auto-sized grid takes its columns and rows from "
                 + "the screen."
+        )
+    }
+
+    /// The maximized reveal's reason, its link to the bars' Show at
+    /// `CrossReferenceRow.linkSlot` (#3346 ▸ 9).
+    static var nothingRevealsMaximized: String {
+        L(
+            "layout_defaults.maximize.show_bars.nothing_shows",
+            "Works when the Space Bar, an App Bar or the Pocket is "
+                + "set to %1$@ or %2$@ in %3$@.",
+            L("bar.visibility.always", "Always"),
+            L("bar.visibility.auto", "Auto"),
+            CrossReferenceRow.linkSlot
         )
     }
 

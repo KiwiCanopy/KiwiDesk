@@ -97,13 +97,25 @@ enum LayoutHelp {
         L("monocle.maximize_windows", "Maximize windows")
     }
 
-    /// Monocle's "Maximize windows" help text, as ruled (#2976).
+    /// Monocle's "Maximize windows" help text, as ruled (#2976):
+    /// the bars read as for a maximized window (#3346).
     @MainActor static var monocleMaximizeWindows: String {
         L(
             "monocle.maximize_windows.help",
             "Every window fills the screen with no gaps, and the "
-                + "bars, focus border and marks step aside. A bar's "
-                + "shortcut still shows it over the window."
+                + "focus border and marks step aside. The bars do "
+                + "not cover the windows and appear as they do over "
+                + "any maximized window."
+        )
+    }
+
+    /// The line under Monocle's "Maximize windows" naming the row
+    /// that sets how its bars come in (#3346), its link at the slot.
+    @MainActor static var monocleMaximizeBarsProse: String {
+        L(
+            "monocle.maximize_windows.bars_link",
+            "How the bars come in is set in %1$@.",
+            CrossReferenceRow.linkSlot
         )
     }
 

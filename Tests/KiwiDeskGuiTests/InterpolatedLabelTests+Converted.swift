@@ -257,6 +257,8 @@ extension InterpolatedLabelTests {
         "kiwishelf.show.app_bar.beside_always": 1,
         "kiwishelf.show.pocket.beside_always": 2,  // #2978
         "kiwishelf.show.monocle.maximizes_link": 1,  // #2976
+        "layout_defaults.maximize.show_bars.help": 2,  // #3346
+        "layout_defaults.maximize.show_bars.nothing_shows": 2,
         "keybinding.toggle_app_bar.inert_link": 4,
         // 5. #1241, #1609. The ladder lives in the Which profile
         //    loads card's one `?`, where it names the card

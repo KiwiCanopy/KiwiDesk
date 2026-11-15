@@ -93,6 +93,13 @@ extension SettingsValueReadout {
                 n.pocketVisibility,
                 AppBarOptions.pocketVisibility
             )
+        case .maximizedVisibility:
+            // The row is a checkbox: Auto is on (#3346).
+            return spaceBarOnOffRow(
+                census,
+                o.maximizedVisibility == .auto,
+                n.maximizedVisibility == .auto
+            )
         case .revealStyle:
             return spaceBarChoiceRow(
                 census,

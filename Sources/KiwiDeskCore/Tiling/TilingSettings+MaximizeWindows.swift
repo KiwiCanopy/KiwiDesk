@@ -22,6 +22,41 @@ extension TilingSettings {
         return (.hidden, app.map { _ in .hidden })
     }
 
+    /// The bars a pointer resting at their edge brings in over a
+    /// maximized window in `mode` (#3346): none where
+    /// `maximized_visibility` is Hidden, else each bar whose stored
+    /// visibility shows unprompted, so a stored Hidden bar stays
+    /// Hidden. The one reader of the leaf; the revealer asks it,
+    /// never `layoutBounds`, since both bars still read Hidden.
+    public func maximizedHoverBars(in mode: LayoutMode) -> Set<ShelfBar> {
+        guard kiwishelf.maximizedVisibility == .auto else { return [] }
+        var bars: Set<ShelfBar> = []
+        if spaceBarStyle.visibility.showsUnprompted { bars.insert(.space) }
+        if appBarVisibility(in: mode)?.showsUnprompted == true {
+            bars.insert(.app)
+        }
+        return bars
+    }
+
+    /// Whether `maximized_visibility` could reveal anything (#3346 ▸
+    /// 9): the Space Bar, some layout's App Bar or the Pocket is
+    /// stored to show unprompted. What Settings asks to grey its row.
+    public var maximizedRevealsAnything: Bool {
+        spaceBarStyle.visibility.showsUnprompted
+            || kiwishelf.pocketVisibility.showsUnprompted
+            || LayoutMode.allCases.contains {
+                appBarVisibility(in: $0)?.showsUnprompted == true
+            }
+    }
+
+    /// Whether the Pocket comes in with a revealed bar over a
+    /// maximized window (#3346 ▸ 8): Auto, and its stored Show is not
+    /// Hidden. It never rests there.
+    public var maximizedPocketRides: Bool {
+        kiwishelf.maximizedVisibility == .auto
+            && kiwishelf.pocketVisibility.showsUnprompted
+    }
+
     /// These settings with every bar and the Pocket set to Hidden in
     /// every layout: what a tiling-off Space whose tick hides the
     /// bars draws (#3151).

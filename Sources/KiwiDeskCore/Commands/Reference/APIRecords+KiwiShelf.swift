@@ -175,6 +175,11 @@ extension APIReference {
                 + "or hidden.",
             .choice("visibility", ShelfVisibility.self)
         ),
+        "set_maximized_visibility": APIRecord(
+            "Sets whether a bar comes in at its screen edge over a "
+                + "maximized window: auto or hidden.",
+            .choice("visibility", KiwiShelf.MaximizedVisibility.self)
+        ),
         "set_pocket_position": APIRecord(
             "Sets where along its edge the pocket sits, 0–100 "
                 + "percent; a bar's edge takes the nearer end.",

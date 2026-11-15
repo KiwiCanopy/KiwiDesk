@@ -69,6 +69,9 @@ struct SettingsCodingTests {
         let shelf = try object(root["kiwishelf"])
         #expect(shelf["active_item_color"] as? String == "#8DB354")
         #expect(shelf["highlight_color"] as? String == "#8DB354")
+        // `kiwishelf.set_maximized_visibility` →
+        // `kiwishelf.maximized_visibility` (#3346), Auto by default.
+        #expect(shelf["maximized_visibility"] as? String == "auto")
         // `sticky.set_mark` → `sticky.mark` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.

@@ -226,12 +226,28 @@ extension LayoutCard {
         )
     }
 
-    /// Monocle's "Maximize windows" (#2976).
+    /// Monocle's "Maximize windows" (#2976), and the line naming
+    /// the Maximize card's row its bars read (#3346).
     var monocleMaximizeWindowsRow: some View {
-        ToggleRow(
-            label: LayoutHelp.monocleMaximizeWindowsLabel,
-            isOn: monocle.maximizeWindows,
-            help: LayoutHelp.monocleMaximizeWindows
-        )
+        VStack(alignment: .leading, spacing: 4) {
+            ToggleRow(
+                label: LayoutHelp.monocleMaximizeWindowsLabel,
+                isOn: monocle.maximizeWindows,
+                help: LayoutHelp.monocleMaximizeWindows
+            )
+            CrossReferenceRow(
+                prose: LayoutHelp.monocleMaximizeBarsProse,
+                linkTitle: L(
+                    "monocle.maximize_windows.bars_link_title",
+                    "%1$@ ▸ %2$@",
+                    SettingsCatalog.layoutDefaults.maximizeCard.text,
+                    SettingsCatalog.layoutDefaults.maximizeShowBars.text
+                ),
+                destination: .layoutDefaults,
+                row: SettingsCatalog.layoutDefaults.maximizeShowBars
+            )
+            .font(.caption)
+            .padding(.leading, ToggleRow.captionIndent)
+        }
     }
 }

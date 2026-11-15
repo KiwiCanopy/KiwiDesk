@@ -41,6 +41,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.kiwishelf.tintHubAndPlates),
         .kiwishelf(.revealStyle):
             .leaf(\.settings.kiwishelf.revealStyle),
+        .kiwishelf(.maximizedVisibility):
+            .leaf(\.settings.kiwishelf.maximizedVisibility),
         .kiwishelf(.fillColor): .leaf(\.settings.kiwishelf.fillColor),
         .kiwishelf(.borderColor): .leaf(\.settings.kiwishelf.borderColor),
         .kiwishelf(.itemColor): .leaf(\.settings.kiwishelf.itemColor),

@@ -268,7 +268,11 @@ twice, was a question the user answered twice. The argument is
   `ShelfMarkPlacement`**, every band its fixed length centred on
   its mark, the marks of an edge one row whose bands meet edge to
   edge, and never a band along the edge or the bar's drawn
-  length; a push counts only inside the band, a shown bar is held
+  length — save a maximized window's bars, which draw no mark and
+  take `ShelfMarkPlacement.maximizedBands` along the whole edge,
+  reaching only outward past the shelf's screen side through
+  `HidingShelves.maximizedBands`, never in over the window
+  (#3346, `MaximizedBandTests`); a push counts only inside the band, a shown bar is held
   over its own section and band, and a hidden bar whose edge
   sibling shows has no band, its mark standing aside
   (`ShelfRevealBandTests`, `ShelfRevealPairTests`; the argument is
@@ -425,16 +429,35 @@ twice, was a question the user answered twice. The argument is
   (`appBarFallback`) is the one exception: it runs before any
   display is published, with no display to ask about.
   KiwiVision's plate reads the verdict's covered half alone,
-  `overlaysStandDown`, so a Maximize stands the bars down and
-  keeps the plate (#3061); any other reader of that half joins
+  `overlaysStandDown` (#3061); any other reader of that half joins
   `ShelfStandDownSeamTests` ▸ `overlaysHalfHasTwoReaders`' map.
-  A Height or Width Maximize stands the whole shelf down only where
-  its issued frame covers a shown bar's strip, reserving or not,
-  through the one `KiwiCore.reachesShelf` inside `showsMaximized`;
-  never a second "does the fill reach a bar" read beside it
-  (#3062, `FullscreenStandDownTests` ▸ `directionalReachIsWired`).
-  The verdict stays per screen, not per edge: a fill reaching one
-  edge's strip stands down the bars on every edge.
+  **A maximize is no stand-down (#3346): read its bars and Pocket
+  Hidden through the one `KiwiCore.shelfSettings(on:)` door**,
+  which asks `showsMaximized` beside #3151's tiling-off tick, never
+  `showsMaximized` inside `shelfStandsDown`
+  (`MaximizedReaderCensusTests` ▸ `shelfAsksTheMaximize`,
+  `MaximizedBarsTests`). A Height or Width Maximize reads them so
+  only where its issued frame covers a shown bar's strip, reserving
+  or not, through the one `KiwiCore.reachesShelf` inside
+  `showsMaximized`; never a second "does the fill reach a bar" read
+  beside it (#3062, `FullscreenStandDownTests` ▸
+  `directionalReachIsWired`). The verdict stays per screen, not per
+  edge. The overflow marks still stand down under a maximize, on the
+  bar pass's own set (`OverflowMarkPanelSeamTests`). **Which bars a
+  pointer brings in over a maximized window is the one
+  `TilingSettings.maximizedHoverBars(in:)`, the only reader of
+  `kiwishelf.maximized_visibility`, read per screen through
+  `KiwiCore.maximizedHoverBars(on:)` and handed to the revealer's
+  filing alone** — never to `layoutBounds`, so a maximize never
+  comes out of the bar reading as `.auto`, whose sliver would
+  retile the window. A stored Hidden bar gets no band, and the
+  tiling-off tick wins over it (`MaximizedBarsTests`). The Pocket
+  rides a revealed bar on its edge there through the one
+  `KiwiCore.maximizedPocketRides(on:)`, filed by the bar pass as
+  `PocketPlateOverlay.riding`, which `pocketStands(on:)` reads beside
+  its rest — never a rest of its own over the window
+  (`FullscreenStandDownTests` ▸ `maximizePocketRides`,
+  `MaximizedBarsTests` ▸ `pocketRides`).
   **A maximizing Monocle (#2976) is no stand-down**: a bar's
   VISIBILITY answered for a mode is read through the one
   `TilingSettings.barVisibilities(in:)`, which reads both bars Hidden

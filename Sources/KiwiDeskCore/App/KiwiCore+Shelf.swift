@@ -64,6 +64,7 @@ extension KiwiCore {
             overflowMarks.standingDown = []
             updateOverflowMarks()
             pocketPlate.standingDown = []
+            pocketPlate.riding = []
             updatePocketPlate(slots: [:])
             return
         }
@@ -71,7 +72,11 @@ extension KiwiCore {
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
-        var plateStandingDown: Set<DisplayID> = []
+        // A maximize's Pocket rides a revealed bar (#3346 ▸ 8).
+        var riding: Set<DisplayID> = []
+        // The overflow marks sit on windows a maximize covers, so
+        // they stand down there too (#2448, #3346).
+        var marksStandingDown: Set<DisplayID> = []
         var hiding = HidingShelves(
             dotStarts: shelves.handles.dotStarts
         )
@@ -91,10 +96,13 @@ extension KiwiCore {
             // #1787) gates here, read once for both bars: nil
             // retires each overlay through its manager, keeping
             // `shownStrips` consistent with the float clamp.
-            let covered = overlaysStandDown(on: display.id)
-            if covered { plateStandingDown.insert(display.id) }
-            let down = shelfStandsDown(on: display.id, covered: covered)
+            // A maximize is no stand-down: it reads the bars Hidden
+            // through `shown` (#3346).
+            let down = overlaysStandDown(on: display.id)
             if down { standingDown.insert(display.id) }
+            if down || showsMaximized(on: display.id) {
+                marksStandingDown.insert(display.id)
+            }
             let app =
                 down
                 ? nil : appBarContent(on: display.id, settings: shown)
@@ -110,13 +118,14 @@ extension KiwiCore {
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
             let reveal = shelves.reveal
+            let rides = maximizedPocketRides(on: display.id)
             let planned = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: shown,
                 mode: shownMode(on: display.id),
                 spaceItems: items,
                 app: app,
-                pocket: pocketRests(on: display.id),
+                pocket: pocketRests(on: display.id) || rides,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(
@@ -126,6 +135,7 @@ extension KiwiCore {
                 items: items,
                 appWindows: app?.windowCount,
                 reveal: reveal,
+                hover: maximizedHoverBars(on: display.id),
                 gaps: state.workspaces.currentSpace(on: display.id)
                     .map(shown.gaps(for:)) ?? shown.gapsGlobal,
                 settings: shown
@@ -135,6 +145,7 @@ extension KiwiCore {
                 let slot = plan.arrangement.pocket
             {
                 pocketSlots[display.id] = plan.segment(slot)
+                if rides { riding.insert(display.id) }
             }
             pocketStrips[display.id] = Self.pocketStrip(
                 in: planned,
@@ -190,6 +201,7 @@ extension KiwiCore {
         // the shelf: synced first, so each shelf mounts this pass's
         // pocket (#2678).
         pocketPlate.standingDown = standingDown
+        pocketPlate.riding = riding
         pocketPlate.markBands = hiding.pocketBands
         pocketPlate.barStrips = pocketStrips
         updatePocketPlate(slots: pocketSlots)
@@ -199,10 +211,10 @@ extension KiwiCore {
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
         // KiwiVision stands down on the covered half (#2103, #3061).
-        noteVisionStandDown(plateStandingDown)
+        noteVisionStandDown(standingDown)
         // The overflow marks wear the shelf's look, so they repaint
         // with every shelf repaint, on this pass's verdict (#2235).
-        overflowMarks.standingDown = standingDown
+        overflowMarks.standingDown = marksStandingDown
         updateOverflowMarks()
     }
 

@@ -78,7 +78,7 @@ struct OverflowMarkPanelSeamTests {
             SourceScan.declarationBody(after: "func updateBars(", in: shelf)
         )
         let filed = try #require(
-            bars.range(of: "overflowMarks.standingDown = standingDown")
+            bars.range(of: "overflowMarks.standingDown = marksStandingDown")
         )
         let synced = try #require(
             bars.range(

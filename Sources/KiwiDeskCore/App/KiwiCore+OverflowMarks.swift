@@ -24,9 +24,9 @@ extension KiwiCore {
         let shelf = LiquidGlassGate.rendered(tiler.settings.kiwishelf)
         let shown = Set(state.workspaces.visibleSpaces)
         let carried = stickyReachCarried()
-        // A mark wears the shelf's look, so it stands down with the
-        // shelf — native fullscreen, a show or a maximized window in
-        // front (#1787, #2448) — on the verdict the bar pass took.
+        // A mark stands down where the shelf does — native
+        // fullscreen, a show — and under a maximized window (#1787,
+        // #2448, #3346), on the verdict the bar pass took.
         let down = overflowMarks.standingDown
         return tiler.runCovers.values
             .filter { cover in

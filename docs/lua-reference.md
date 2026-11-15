@@ -2588,7 +2588,10 @@ as Hidden in Monocle, so `space_bar.toggle_reveal()` and
 menu-bar item names the Space. The pocket shows no handle at rest
 there, only during a window drag or while a window goes in or out.
 The focus border and the marks step aside on the tiled windows.
-`toggle_maximized` is unchanged.
+`toggle_maximized` is unchanged. Moving the pointer to a bar's screen
+edge brings it in as
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+says.
 
 **Example:**
 
@@ -3570,6 +3573,43 @@ visibilities. A look never carries it.
 kiwishelf.set_pocket_visibility("auto")
 ```
 
+:::unreleased
+### kiwishelf.set_maximized_visibility
+
+**Expects:** `"auto"` or `"hidden"` (default `"auto"`).
+
+**Does:** sets, per profile, how the bars behave while a window is
+maximized: by [`toggle_maximized`](#toggle_maximized), a Height or
+Width maximize reaching a bar's strip,
+[`monocle.set_maximize_windows`](#monocleset_maximize_windows) or
+[`kiwivision.set_maximize`](#kiwivisionset_maximize). Under either
+value both bars and the pocket draw nothing at rest and reserve
+nothing, and a bar's shortcut shows it over the window.
+
+- `"auto"` also brings a bar in when you push the pointer against
+  its screen edge, or rest it in the bottom of the menu bar or the
+  top of the Dock where one stands between the bar and that edge.
+  A lone bar answers along the whole edge; two bars on one edge
+  split it. No handle is drawn.
+- `"hidden"` leaves only the shortcuts.
+
+A bar set to `"hidden"` stays hidden under `"auto"` as well, while a
+bar set to `"always"` comes in like an `"auto"` one. Under `"auto"` a
+bar brought in on the pocket's edge brings the pocket in with it,
+unless
+[`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
+is `"hidden"`; the pocket keys work under either value. Settings ▸
+Layout Defaults ▸ Maximize writes it as **Show bars at the screen
+edge**, greyed while the Space Bar, every App Bar and the pocket are
+`"hidden"`. A look never carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_maximized_visibility("hidden")
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
@@ -3806,6 +3846,10 @@ App Bar has nothing to show.
 
 It fails with a pill first while a maximized, full-screen or
 presenting window fills the screen, as the Space Bar's call does.
+
+:::unreleased
+A maximized window no longer refuses it, as for the Space Bar.
+:::
 
 **Example:**
 
@@ -4052,6 +4096,13 @@ dots runs it too.
 It fails with a pill first while a window fills the screen, whether
 maximized, full screen or a presentation, since the bars stay
 hidden there.
+
+:::unreleased
+A maximized window no longer refuses it: the bar comes in over the
+window, whichever value
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+holds. Only a full-screen window or a presentation refuses it.
+:::
 
 **Example:**
 
@@ -6557,6 +6608,16 @@ or KiwiDesk's own restart leaves it filling the screen. Bound to
 `⌃⌥M` by default.
 
 :::unreleased
+The bars are not stood down: both bars and the pocket read as
+`"hidden"` on that screen, so a bar's shortcut shows it over the
+window and the menu-bar item names the Space. By default, moving the
+pointer to a bar's screen edge brings it in too
+([`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)).
+A Height or Width maximize does the same only where the window
+reaches into a bar's strip.
+:::
+
+:::unreleased
 A floating window fills its screen the same way, on any layout,
 and a second call puts it back at the frame it had. Moving focus
 to a tiled window of the Space puts it back too, as does tiling it
@@ -7209,6 +7270,11 @@ window out, and Esc closes the list, as does any other key. An empty
 pocket shows how a window goes in. It refuses with a pill while
 KiwiShelf stands down for a window filling the screen. Bound to `⌃⌥⌘P`
 by default.
+
+:::unreleased
+A maximized window does not refuse it: the list opens over the
+window. Only a full-screen window or a presentation does.
+:::
 
 **Example:**
 

@@ -139,12 +139,53 @@ struct MaximizeCard: View {
             .searchAnchored(
                 SettingsCatalog.layoutDefaults.maximizeFollowFocus
             )
+        case .kiwishelf(.maximizedVisibility):
+            showBarsRow
         default:
             let _ = assertionFailure(
                 "unrendered Maximize row: \(key.id)"
             )
             EmptyView()
         }
+    }
+
+    /// The bars-at-the-edge row, greyed while every bar and the
+    /// Pocket are Hidden, its reason a live link to KiwiShelf drawn
+    /// outside the grey (#3346 ▸ 9).
+    @ViewBuilder private var showBarsRow: some View {
+        let reason = LayoutDefaultsGates(settings: model.config.settings)
+            .inertReason(for: .kiwishelf(.maximizedVisibility))
+        ToggleRow(
+            label: controls.maximizeShowBars.text,
+            isOn: showsBars,
+            help: Self.showBarsHelp,
+            disabled: reason != nil
+        )
+        .searchAnchored(SettingsCatalog.layoutDefaults.maximizeShowBars)
+        if let reason {
+            CrossReferenceRow(
+                prose: LayoutDefaultsGateHelp.sentence(for: reason),
+                linkTitle: SettingsDestination.bars.title,
+                destination: .bars,
+                row: SettingsCatalog.bars.kiwishelfCard
+            )
+            .font(.caption)
+            .padding(.leading, ToggleRow.captionIndent)
+        }
+    }
+
+    /// The bars-at-the-edge checkbox over the two-case leaf (#3346):
+    /// on is Auto.
+    private var showsBars: Binding<Bool> {
+        Binding(
+            get: {
+                model.config.settings.kiwishelf.maximizedVisibility == .auto
+            },
+            set: {
+                model.config.settings.kiwishelf.maximizedVisibility =
+                    $0 ? .auto : .hidden
+            }
+        )
     }
 
     /// A column's heading, the search anchor of its census key.
@@ -200,6 +241,24 @@ struct MaximizeCard: View {
                 + "a full Maximize on a Monocle Space, where it only "
                 + "brings the window forward. A change here applies "
                 + "from the next Maximize, not to one already on screen."
+        )
+    }
+
+    /// The bars-at-the-edge row's `?` (#3346): what Auto adds, what
+    /// it reaches, and what it leaves alone.
+    static var showBarsHelp: String {
+        L(
+            "layout_defaults.maximize.show_bars.help",
+            "While a window is maximized, the bars and the Pocket "
+                + "do not cover it. With this on, moving the pointer "
+                + "to a bar's screen edge brings that bar in over the "
+                + "window, with the Pocket where it sits on that edge. "
+                + "It also applies to \u{201C}%1$@\u{201D} for %2$@. "
+                + "A bar's shortcut shows it either way. Anything set "
+                + "to %3$@ stays out of sight.",
+            LayoutHelp.monocleMaximizeWindowsLabel,
+            L("layout.monocle.name", "Monocle"),
+            L("bar.visibility.hidden", "Hidden")
         )
     }
 

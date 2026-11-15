@@ -60,7 +60,7 @@ struct TilingOffBarsHiddenTests {
         #expect(shown.spaceBarStyle.visibility == .hidden)
         #expect(!shown.pocketRests(in: .scrolling))
         #expect(!core.pocketRests(on: display))
-        #expect(!core.shelfStandsDown(on: display, covered: false))
+        #expect(!core.shelfStandsDown(on: display))
         core.execute("tiling.set_off_hides_bars", args: [.bool(false)])
         #expect(
             core.shelfSettings(on: display).spaceBarStyle.visibility

@@ -20,10 +20,15 @@ enum LayoutDefaultsRowOrder {
     ]
 
     /// The whole Maximize card: its table's columns, then whether a
-    /// new Maximize follows focus (#3280). `MaximizeCard` walks the
-    /// entries after the columns below its table.
+    /// new Maximize follows focus (#3280) and whether the bars come
+    /// in at the screen edge over a maximized window (#3346).
+    /// `MaximizeCard` walks the entries after the columns below its
+    /// table.
     static let maximize: [SettingKey] =
-        maximizeColumns + [.behaviour(.maximizeFollowFocus)]
+        maximizeColumns + [
+            .behaviour(.maximizeFollowFocus),
+            .kiwishelf(.maximizedVisibility),
+        ]
 
     static let bsp: [SettingKey] = [
         .layout(.bspStrategy),
