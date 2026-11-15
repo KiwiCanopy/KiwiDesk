@@ -140,7 +140,7 @@ struct MaximizedBarsTests {
     }
 
     @Test("The leaf reads the stored bars, Hidden winning")
-    func settingsAnswer() {
+    func settingsAnswer() throws {
         var settings = TilingSettings()
         settings.spaceBarStyle.visibility = .always
         #expect(settings.kiwishelf.maximizedVisibility == .auto)
@@ -156,6 +156,13 @@ struct MaximizedBarsTests {
         settings.monocle.maximizeWindows = true
         #expect(settings.barVisibilities(in: .monocle).space == .hidden)
         #expect(settings.hidingEdges(in: .monocle, on: nil).isEmpty)
+        // A stored Hidden App Bar gets no band; Auto, the control,
+        // gets one.
+        let path = try #require(TilingSettings.appBarPath(for: .monocle))
+        settings[keyPath: path].visibility = .auto
+        #expect(settings.maximizedHoverBars(in: .monocle).contains(.app))
+        settings[keyPath: path].visibility = .hidden
+        #expect(!settings.maximizedHoverBars(in: .monocle).contains(.app))
     }
 
     @Test("The Pocket rides under Auto unless it is stored Hidden")

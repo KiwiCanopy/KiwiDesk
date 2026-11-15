@@ -152,8 +152,7 @@ extension InterpolatedLabelTests {
         // #1310: the unfocused row's link sentence names the row
         // and the Gaps & Borders switch — two by key; the third
         // slot is the link.
-        "colors.unfocused_off.xref": 2,
-        "colors.unfocused_off.help": 1,
+        "colors.unfocused_off.xref": 2, "colors.unfocused_off.help": 1,
         // #1679: the shelf border's switch by its key, the Bars
         // title by its destination, the KiwiShelf colors group by
         // its key; the xref's second slot is the link. The
@@ -257,8 +256,9 @@ extension InterpolatedLabelTests {
         "kiwishelf.show.app_bar.beside_always": 1,
         "kiwishelf.show.pocket.beside_always": 2,  // #2978
         "kiwishelf.show.monocle.maximizes_link": 1,  // #2976
-        "layout_defaults.maximize.show_bars.help": 2,  // #3346
+        "layout_defaults.maximize.show_bars.help": 2,
         "layout_defaults.maximize.show_bars.nothing_shows": 2,
+        "monocle.maximize_windows.bars_link_title": 1,  // #3346
         "keybinding.toggle_app_bar.inert_link": 4,
         // 5. #1241, #1609. The ladder lives in the Which profile
         //    loads card's one `?`, where it names the card

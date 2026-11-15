@@ -153,4 +153,21 @@ extension FullscreenStandDownTests {
         core.updateBars()
         #expect(!core.pocketPlate.riding.contains(display))
     }
+
+    /// The overflow marks sit on windows a maximize covers, so they
+    /// stand down on its screen though the shelf does not (#3346).
+    @Test("a Maximize stands the overflow marks down alone")
+    func maximizeStandsTheMarksDown() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, display) = try #require(
+            makeMaximizeCore(isUser: true)
+        )
+        // Control: unmaximized, nothing stands down.
+        core.updateBars()
+        #expect(!core.overflowMarks.standingDown.contains(display))
+        #expect(core.execute("toggle_maximized").isSuccess)
+        core.updateBars()
+        #expect(core.overflowMarks.standingDown.contains(display))
+        #expect(!core.shelfStandsDown(on: display))
+    }
 }
