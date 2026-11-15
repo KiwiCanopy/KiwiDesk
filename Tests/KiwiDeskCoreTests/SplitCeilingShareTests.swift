@@ -102,5 +102,9 @@ struct SplitCeilingShareTests {
         )
         #expect(abs(placed.width - 400) < 0.01)
         #expect(slot.width > 500)
+        // The mouse warp aims at the window where it draws, never
+        // at a slot centre sitting past its 400 pt edge.
+        let warp = try #require(core.warpFrame(of: w1))
+        #expect(abs(warp.width - 400) < 0.01)
     }
 }

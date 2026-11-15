@@ -156,6 +156,9 @@ struct SplitCeilingLayoutTests {
         #expect((slots[w5]?.width ?? 0) > (slots[w2]?.width ?? 0))
     }
 
+    /// A drift property: with no ceiling the issued set is the
+    /// slots, so a re-derivation drifting from a layout's render
+    /// reds here.
     @Test("Floors alone leave the ceiling pass a no-op in every mode")
     func floorsOnlyLeaveSlots() {
         let floor = EffectiveSizeBound(

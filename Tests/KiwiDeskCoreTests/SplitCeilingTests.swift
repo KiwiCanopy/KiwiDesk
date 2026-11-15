@@ -100,6 +100,31 @@ struct SplitCeilingTests {
         #expect(try #require(slots[w1]).width < 500)
     }
 
+    @Test("Side-by-side masters yield down to their summed ceiling")
+    func sideBySideMastersYieldToSum() throws {
+        var context = SplitCeilingFixture.context(
+            bounds: [
+                w1: SplitCeilingFixture.ceiling(width: 250),
+                w2: SplitCeilingFixture.ceiling(width: 250),
+            ]
+        )
+        context.stack.masterCount = 2
+        context.stack.masterOrientation = .horizontal
+        let frames = SplitCeilingFixture.placed(
+            .stack,
+            [w1, w2, w3],
+            context
+        )
+        let gap = context.gaps.inner.horizontal
+        let first = try #require(frames[w1])
+        let second = try #require(frames[w2])
+        let stack = try #require(frames[w3])
+        #expect(abs(first.width - 250) < 0.01)
+        #expect(abs(second.width - 250) < 0.01)
+        #expect(abs(stack.minX - (10 + 250 + gap + 250 + gap)) < 0.01)
+        #expect(abs(stack.maxX - 1190) < 0.01)
+    }
+
     @Test("No stack window can grow: the gap stays")
     func noReceiverKeepsGap() {
         let context = SplitCeilingFixture.context(

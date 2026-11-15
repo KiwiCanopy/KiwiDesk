@@ -75,9 +75,9 @@ struct FrameSetReaderCensusTests {
             .slots, "the drag's ratio translation classifies sides"
         ),
         "KiwiCore+MouseWarp.swift": (
-            .slots,
-            "the warp centres on the region, inside every "
-                + "issued frame by construction"
+            .issued,
+            "the warp centres on the window where it draws: a "
+                + "ceiling-capped one is narrower than its slot (#3217)"
         ),
         "KiwiCore+ZOrder.swift": (
             .slots, "the cascade raise order is a region order"
@@ -140,8 +140,6 @@ struct FrameSetReaderCensusTests {
             "a crossing is between screens, never a pile test",
         "KiwiCore+MouseResizeEnd.swift":
             "the dragged window's own side; a hidden one is not dragged",
-        "KiwiCore+MouseWarp.swift":
-            "the warp centres on the focus, which a run always shows",
         "KiwiCore+ZOrder.swift":
             "a whole-zone pile's cascade; a run takes its own restore",
         "KiwiCore+ScrollingRestore.swift": "Scrolling draws no run",

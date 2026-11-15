@@ -105,13 +105,14 @@ extension KiwiCore {
         pointerWarp?(frame)
     }
 
-    /// Where a warp onto `id` aims: its layout slot, else the frame
-    /// we last sent it (a take-out's held write, #2680), else its
-    /// live AX frame, nil for none of these.
+    /// Where a warp onto `id` aims: the frame the retile issues it —
+    /// a ceiling-capped window draws narrower than its slot, whose
+    /// centre can sit on the neighbour (#3217) — else the frame we
+    /// last sent it (a take-out's held write, #2680), else its live
+    /// AX frame, nil for none of these.
     func warpFrame(of id: WindowID) -> CGRect? {
-        if let slot = tiler.calculatedFrames(state: state)[id] {
-            return slot
-        }
+        let issued = tiler.placedFrames(state: state, recording: false)
+        if let frame = issued[id] { return frame }
         if let target = tiler.commandedFrame(of: id) {
             return target
         }
