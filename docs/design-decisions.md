@@ -23064,6 +23064,18 @@ engine is worse than no preview, because it is trusted — and the
 two details a re-implementation gets wrong are exactly the two
 the check exists to show.
 
+:::unreleased
+*A picked title is checked like a typed one (#3340, owner,
+2026-11-15).* Picking an open window's title opens the "Title
+contains…" field on it, selected, rather than storing it: a title
+that carries changing content — a browser's `<tab> - Brave -
+<Profile>` — matches that one tab and stops on the next switch,
+and storing it on the pick skipped the check this paragraph
+exists for. Return keeps it whole, so a window whose title never
+changes costs one keystroke more. The editor is shared, so Float
+rows and KiwiVision lens apps act the same way.
+:::
+
 This is a read of live window state from Settings, which is not
 the live-*apply* coupling #123 rejects: it reaches the snapshot
 the app already keeps, never the accessibility layer, so a
