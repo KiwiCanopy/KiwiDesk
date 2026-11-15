@@ -163,6 +163,17 @@ struct ScreensGateWiringTests {
                 // whole promise silently.
                 "ScreenArrangement.isApproximate(rows.displays)",
                 "rows.hasAmbiguousDisplays",
+                // The boxed-in offer (#2756), under the notes.
+                "ScreenShiftNote(model:model)",
+            ],
+            "Components/Screens/ScreenShiftNote.swift": [
+                // Its three branches: the offer with its button,
+                // the fallback where no move helps, and the line
+                // a yes leaves.
+                "ifletoffer=state.offer{",
+                "ifoffer.shifts.isEmpty{",
+                "model.askScreenShift(offer)",
+                "}elseifcase.shifted(letids)=state.answer{",
             ],
             "Components/Screens/ScreenCard.swift": [
                 // The `+n` itself, not merely the arithmetic

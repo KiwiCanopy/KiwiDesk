@@ -52,6 +52,7 @@
 (readonly) mac_checklist.habit.float
 (readonly) mac_checklist.habit.hide
 (readonly) mac_checklist.habit.keyboard
+(readonly) mac_checklist.park_corners
 (readonly) mac_checklist.rearrange_spaces
 (readonly) mac_checklist.stage_manager
 (readonly) mac_checklist.switch_on_activate

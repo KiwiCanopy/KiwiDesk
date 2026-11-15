@@ -129,12 +129,25 @@ struct SettingsView: View {
         // the Home card and the section count the same snapshot:
         // on appear, and whenever the window comes back forward
         // from System Settings (`HomeSurfacingTests`).
-        .onAppear { model.refreshMacChecklist() }
+        .onAppear {
+            model.refreshMacChecklist()
+            model.refreshScreenOffer()
+        }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: NSApplication.didBecomeActiveNotification
             )
-        ) { _ in model.refreshMacChecklist() }
+        ) { _ in
+            model.refreshMacChecklist()
+            model.refreshScreenOffer()
+        }
+        // The boxed-in offer reads the live arrangement (#2756).
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: NSApplication.didChangeScreenParametersNotification
+            )
+        ) { _ in model.refreshScreenOffer() }
+        .screenShiftAlert(model)
     }
 
     @ViewBuilder private func shell(

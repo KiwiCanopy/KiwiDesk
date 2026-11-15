@@ -84,6 +84,7 @@ struct ScreensSection: View {
             if rows.hasAmbiguousDisplays {
                 note(ambiguousNote)
             }
+            ScreenShiftNote(model: model)
             selectionReadout(rows: rows)
         }
     }
