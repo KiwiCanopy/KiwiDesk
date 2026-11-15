@@ -164,6 +164,47 @@ struct TitledRuleLateMatchTests {
         #expect(core.state.titledRulePending[late] == nil)
     }
 
+    @Test("a quiet open's window records nothing")
+    func quietOpenRecordsNothing() {
+        let core = makeCore()
+        core.launchFollow.noteQuietApps([brave], at: core.wallClock())
+        open(core, title: "")
+        #expect(core.state.titledRulePending[late] == nil)
+    }
+
+    @Test("a re-arrival while the create is due keeps its record")
+    func reArrivalKeepsTheRecord() async {
+        let core = makeCore()
+        core.windowCreates.noteDestroyed(late)
+        open(core, title: "")
+        open(core, title: "")
+        #expect(core.state.titledRulePending[late] != nil)
+        core.windowServerChanged(.created, id: late)
+        await core.deferred.task(for: .arrivalCreated)?.value
+        core.handle(.windowTitleChanged(late, "a – Work"))
+        #expect(space(core) == ruled)
+    }
+
+    @Test("a re-key while the create is due ends the record")
+    func rekeyWhileWaitingEnds() {
+        let core = makeCore()
+        core.windowCreates.noteDestroyed(late)
+        open(core, title: "")
+        let tab = WindowID(900_102)
+        core.handle(.windowRekeyed(late, tab))
+        #expect(core.state.titledRulePending[tab] == nil)
+        #expect(core.state.titledRulePending[late] == nil)
+    }
+
+    @Test("the app's exit ends the record")
+    func exitEnds() {
+        let core = makeCore()
+        open(core, title: "")
+        #expect(core.state.titledRulePending[late] != nil)
+        core.handle(.appTerminated(pid: 900_101))
+        #expect(core.state.titledRulePending[late] == nil)
+    }
+
     @Test("a create trailing the arrival pays the match its wait held")
     func trailingCreatePaysTheHeldMatch() async {
         let core = makeCore()

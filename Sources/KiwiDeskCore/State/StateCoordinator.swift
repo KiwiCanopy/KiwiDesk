@@ -209,6 +209,7 @@ public struct StateCoordinator: Sendable {
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
                 stickyReachOverrides[id] = nil
+                titledRulePending[id] = nil  // #3341
             }
             forgetFloatMemory(pid: pid)
             forgetRecency(of: pid)

@@ -160,35 +160,47 @@ struct RuleReachGuiParityTests {
         }
     }
 
-    /// The app rule families: an AI keep's rules, which a dirty
-    /// draft takes per rule, and a reach row's ↺, which reverts per
-    /// app. Hand-listed: these two sites switch on the app rule
-    /// stores alone, so a new app rule store joins here (#3341).
-    private static let appRuleFamilies = [
-        "appRules", "titledAppRules", "floatRules",
+    /// The app rule families: the reach families the App Rules
+    /// census names, so a new app rule store joins this guard by
+    /// joining both (#3341).
+    private func appRuleFamilies() throws -> [String] {
+        let census = Set(AppRulesKey.allCases.map { "\($0)" })
+        return try families().filter(census.contains)
+    }
+
+    /// Families a site skips by design, with the reason.
+    private static let appSiteSkips: [String: Set<String>] = [
+        // No keep root writes a Tile rule, so no keep reaches one.
+        "takeKeptRules": ["tileRules"],
+        // Only the Space and float stores draw a per-app reach row
+        // (`reachDiffRows`); the rest revert with their row.
+        "revertRuleReach": ["tileRules", "floatAutomatically"],
     ]
 
     @Test("a kept rule and a reach row's revert name each app family")
     func appRuleSitesNameEveryAppFamily() throws {
-        let found = try families()
-        let kept = try body(
-            "static func takeKeptRules(",
-            in: "SettingsModel+LiveWrite.swift"
-        )
-        let revert = try body(
-            "private func revertRuleReach(",
-            in: "SettingsModel+RowRevert.swift"
-        )
-        for family in Self.appRuleFamilies {
-            #expect(found.contains(family), "\(family) is no family")
-            #expect(
-                kept.contains("stored.\(family)."),
-                "takeKeptRules never takes \(family)"
-            )
-            #expect(
-                revert.contains("case .appRules(.\(family)):"),
-                "revertRuleReach never reverts \(family)"
-            )
+        let found = try appRuleFamilies()
+        #expect(found.count >= 4, "app families found: \(found)")
+        let sites: [(String, String, String, (String) -> String)] = [
+            (
+                "takeKeptRules", "static func takeKeptRules(",
+                "SettingsModel+LiveWrite.swift", { "stored.\($0)." }
+            ),
+            (
+                "revertRuleReach", "private func revertRuleReach(",
+                "SettingsModel+RowRevert.swift",
+                { "case .appRules(.\($0)):" }
+            ),
+        ]
+        for (name, declaration, file, needle) in sites {
+            let text = try body(declaration, in: file)
+            for family in found {
+                let skipped = Self.appSiteSkips[name]?.contains(family)
+                #expect(
+                    text.contains(needle(family)) != (skipped == true),
+                    "\(name) and \(family): named or skipped, not both"
+                )
+            }
         }
     }
 

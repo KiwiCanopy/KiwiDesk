@@ -27,10 +27,13 @@ enum ArrivalProvenance: Equatable {
         }
     }
 
-    /// Whether WindowServer reported, or may still report, the
-    /// window's create: a late titled match's gate (#3341).
+    /// Whether WindowServer reported the window's create, or may
+    /// still report it within the bound.
     var watchedCreate: Bool {
-        self == .created || self == .awaitingCreate
+        switch self {
+        case .created, .awaitingCreate: true
+        case .own, .unreported, .existing: false
+        }
     }
 }
 

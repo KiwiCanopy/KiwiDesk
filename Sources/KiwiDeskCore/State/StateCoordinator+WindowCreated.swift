@@ -85,10 +85,12 @@ extension StateCoordinator {
         if mayFollow, let ruled, ruled != active {
             effects.placedByAppRule = ruled
         }
+        // A Pocket key's candidate and a quiet open have arms of
+        // their own at the arrival's settle (#3341).
         noteTitledRulePending(
             window,
             arrivedAt: arrivedAt,
-            ruleGateOpen: held == nil && !popup && !claimed && named == nil,
+            ruleGateOpen: held == nil && !popup && !claimed && mayFollow,
             followed: effects.placedByAppRule != nil
         )
         // A popup the rule skipped may ride that follow (#3189).

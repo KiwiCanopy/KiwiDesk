@@ -109,9 +109,11 @@ extension KiwiCore {
         scheduleArrivalBound()
     }
 
-    /// Pays each consumer of a held arrival. Order: an arm that
-    /// changes state first (the #2612 pocket claim, which drops the
-    /// spawn slot it beats), then the owed event, so it reports
+    /// Pays each consumer of a held arrival. Order: the arms that
+    /// change state first (the #2612 pocket claim, which drops the
+    /// spawn slot it beats, then the #3341 late titled match, whose
+    /// record a claim or a quiet open never holds), then the owed
+    /// event, so it reports
     /// where the window landed, then the #2478 follow. `departing` — a
     /// destroy, re-key, exit or re-arrival — sends the report and
     /// every acting arm stands down.
@@ -121,14 +123,17 @@ extension KiwiCore {
         departing: Bool = false
     ) {
         let id = held.window.id
-        // An arrival that settles as existing owes no late titled
-        // match; a created one pays a match its wait held (#3341).
-        if !created {
-            state.titledRulePending[id] = nil
-        } else if !departing {
-            payHeldTitledRule(id)
-        }
         settlePocketClaim(id, created: created, departing: departing)
+        // A created arrival pays the late titled match its wait held;
+        // one past the bound owes none. A departure's own fold ends
+        // or moves the record (#3341).
+        if !departing {
+            if created {
+                payHeldTitledRule(id)
+            } else {
+                state.titledRulePending[id] = nil
+            }
+        }
         // A late create sends a quiet open's window on (#3153).
         if !departing { settleQuietArrival(id, created: created) }
         if held.eventOwed {
